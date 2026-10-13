@@ -6,7 +6,8 @@
     <legend>{{ t('User Playlists.Playlist Thumbnail') }}</legend>
     <FtRetryImage
       class="thumbnailPreview"
-      :src="modelValue || defaultThumbnail"
+      :src="thumbnailForDisplay"
+      :class="{ blur: store.getters.getBlurThumbnails }"
       alt=""
     />
     <input
@@ -36,14 +37,17 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, ref, useTemplateRef } from 'vue'
+import { computed, onBeforeUnmount, ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import FtButton from './FtButton/FtButton.vue'
 import FtFlexBox from './ft-flex-box/ft-flex-box.vue'
 import FtRetryImage from './FtRetryImage.vue'
 import { showToast } from '../helpers/utils'
+import { normalizePlaylistThumbnail } from '../helpers/playlist-thumbnails'
+import store from '../store/index'
+import thumbnailPlaceholder from '../assets/img/thumbnail_placeholder.svg'
 
-defineProps({
+const props = defineProps({
   modelValue: { type: String, required: true },
   defaultThumbnail: { type: String, required: true },
 })
@@ -52,6 +56,9 @@ const { t } = useI18n()
 const imageInput = useTemplateRef('imageInput')
 const loading = ref(false)
 let disposed = false
+const thumbnailForDisplay = computed(() => store.getters.getThumbnailPreference === 'hidden'
+  ? thumbnailPlaceholder
+  : props.modelValue || props.defaultThumbnail)
 
 onBeforeUnmount(() => { disposed = true })
 
@@ -62,20 +69,10 @@ async function selectImage(event) {
 
   loading.value = true
   emit('loading', true)
-  const url = URL.createObjectURL(file)
   try {
-    const image = new Image()
-    image.src = url
-    await image.decode()
+    const thumbnail = await normalizePlaylistThumbnail(file)
     if (disposed) return
-
-    // Store a portable, bounded image instead of a path to the original file.
-    const scale = Math.min(1, 1280 / image.naturalWidth, 720 / image.naturalHeight)
-    const canvas = document.createElement('canvas')
-    canvas.width = Math.max(1, Math.round(image.naturalWidth * scale))
-    canvas.height = Math.max(1, Math.round(image.naturalHeight * scale))
-    canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height)
-    emit('update:modelValue', canvas.toDataURL('image/webp', 0.9))
+    emit('update:modelValue', thumbnail)
   } catch (error) {
     if (disposed) return
     console.error('Failed to load playlist thumbnail:', error)
@@ -84,7 +81,6 @@ async function selectImage(event) {
       icon: ['fas', 'circle-exclamation'],
     })
   } finally {
-    URL.revokeObjectURL(url)
     loading.value = false
     if (!disposed) emit('loading', false)
   }
@@ -116,6 +112,11 @@ async function selectImage(event) {
   inline-size: 240px;
   max-inline-size: 100%;
   object-fit: cover;
+}
+
+.thumbnailPreview.blur {
+  clip-path: inset(0 round calc(8px * var(--ui-roundness)));
+  filter: blur(20px);
 }
 
 .imageInput {

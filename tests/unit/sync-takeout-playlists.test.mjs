@@ -85,6 +85,20 @@ test('server-generated playlist thumbnails remain automatic defaults without rep
   await context.syncPlaylists(adapter, store, snapshot)
 })
 
+test('a released HTTP-thumbnail baseline does not overwrite a remote-only custom cover', async () => {
+  const original = { id: 'legacy-cover', title: 'Legacy cover', description: '', thumbnail_url: 'https://i.ytimg.com/vi/abcdefghijk/maxresdefault.jpg' }
+  const image = 'data:image/webp;base64,Y292ZXI='
+  const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
+  await adapter.createPlaylist({ ...original, thumbnail_url: image })
+  adapter.updatePlaylist = async () => assert.fail('A remote-only cover change must not be overwritten')
+  const store = createStore([{ _id: original.id, playlistName: original.title, description: '', videos: [] }])
+  const snapshot = await context.syncPlaylists(adapter, store, {
+    [original.id]: { metadata: original, videos: [] },
+  })
+  assert.equal(store.state.playlists.playlists[0].customThumbnail, image)
+  assert.equal(snapshot[original.id].metadata.thumbnail_url, image)
+})
+
 test('syncs videos imported from a Takeout ZIP to a second device and repairs an empty remote playlist', async () => {
   const file = new Blob([zipSync({
     'Takeout/YouTube/playlists/Imported-videos.csv': strToU8(

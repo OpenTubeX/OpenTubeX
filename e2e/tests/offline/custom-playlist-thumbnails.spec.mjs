@@ -204,6 +204,47 @@ test('playlist imports restore thumbnails for existing and new playlists', async
   await expect(cardImage(page)).toHaveAttribute('src', custom)
 })
 
+test('playlist imports reject malformed and oversized data and resize oversized images', async ({ page }) => {
+  await openPlaylist(page)
+  await page.getByTitle('Edit Playlist Info').click()
+  const custom = await setImage(page)
+  await page.getByTitle('Save Changes').click()
+  const section = await goToSettingsSection(page, 'data')
+  async function importThumbnail(thumbnail) {
+    await page.evaluate(thumbnail => {
+      window.showOpenFilePicker = async () => [{
+        getFile: async () => new File([JSON.stringify({
+          _id: 'custom-thumbnail-playlist', playlistName: 'Weekend walks', videos: [], customThumbnail: thumbnail,
+        })], 'playlists.db', { type: 'application/x-freetube-db' }),
+      }]
+    }, thumbnail)
+    await section.getByRole('button', { name: /^Import playlists$/i }).click()
+  }
+  const savedThumbnail = () => page.evaluate(() => document.querySelector('#app').__vue_app__
+    .config.globalProperties.$store.getters.getPlaylist('custom-thumbnail-playlist').customThumbnail)
+  for (const invalid of ['data:image/webp;base64,AAAA', `data:image/png;base64,${'A'.repeat(2_000_000)}`]) {
+    await importThumbnail(invalid)
+    await expect(page.getByText('The selected image could not be loaded').first()).toBeVisible()
+    await expect.poll(savedThumbnail).toBe(custom)
+  }
+  const largeImage = await page.evaluate(() => {
+    const canvas = document.createElement('canvas')
+    canvas.width = 2560
+    canvas.height = 1440
+    canvas.getContext('2d').fillRect(0, 0, canvas.width, canvas.height)
+    return canvas.toDataURL('image/png')
+  })
+  await importThumbnail(largeImage)
+  await expect.poll(savedThumbnail).not.toBe(custom)
+  const dimensions = await page.evaluate(async () => {
+    const image = new Image()
+    image.src = document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPlaylist('custom-thumbnail-playlist').customThumbnail
+    await image.decode()
+    return [image.naturalWidth, image.naturalHeight]
+  })
+  expect(dimensions).toEqual([1280, 720])
+})
+
 test('empty playlists show custom thumbnails and honor hidden and blurred preferences', async ({ page }) => {
   await dispatch(page, 'removeAllVideos', playlistId)
   await openPlaylist(page)
@@ -242,6 +283,83 @@ test('empty playlists show custom thumbnails and honor hidden and blurred prefer
   await picker(page).getByRole('button', { name: 'Restore default thumbnail' }).click()
   await page.getByTitle('Save Changes').click()
   await expect(headerImage(page)).toHaveAttribute('src', /thumbnail_placeholder/)
+})
+
+test('Home recent playlist cards use custom covers for populated and empty playlists', async ({ page }, testInfo) => {
+  await openPlaylist(page)
+  await page.getByTitle('Edit Playlist Info').click()
+  const custom = await setImage(page)
+  await page.getByTitle('Save Changes').click()
+  await goTo(page, 'home')
+  const card = page.locator('[data-home-section="playlists"]').getByRole('link', { name: /Weekend walks/ })
+  const image = card.locator('img:not(.retryImagePlaceholder)')
+  await expect(image).toHaveAttribute('src', custom)
+  await dispatch(page, 'removeAllVideos', playlistId)
+  await expect(image).toHaveAttribute('src', custom)
+  await dispatch(page, 'updateThumbnailPreference', 'hidden')
+  await expect(image).toHaveAttribute('src', /thumbnail_placeholder/)
+  await dispatch(page, 'updateThumbnailPreference', 'start')
+  await dispatch(page, 'updateBlurThumbnails', true)
+  await expect(image).toHaveClass(/blur/)
+  await dispatch(page, 'updateBlurThumbnails', false)
+  for (const colorScheme of ['dark', 'light']) {
+    await page.emulateMedia({ colorScheme })
+    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+    await expectImagesLoaded(image)
+    await card.screenshot({ path: testInfo.outputPath(`home-playlist-cover-${colorScheme}.png`) })
+  }
+  await dispatch(page, 'updatePlaylist', { _id: playlistId, customThumbnail: '' })
+  await expect(image).toHaveAttribute('src', /thumbnail_placeholder/)
+})
+
+test('the single-video playlist menu uses custom covers for populated and empty playlists', async ({ page }, testInfo) => {
+  await openPlaylist(page)
+  await page.getByTitle('Edit Playlist Info').click()
+  const custom = await setImage(page)
+  await page.getByTitle('Save Changes').click()
+  await page.locator('.playlistItemsCard .ft-list-video').first().hover()
+  await page.locator('.playlistItemsCard .addToPlaylistIcon .iconButton').first().click()
+  const menu = page.locator('.addToPlaylistDropdown')
+  const image = menu.getByRole('option').filter({ hasText: 'Weekend walks' }).locator('img:not(.retryImagePlaceholder)')
+  await expect(image).toHaveAttribute('src', custom)
+  await dispatch(page, 'removeAllVideos', playlistId)
+  // Removing the card that owns the menu closes it; reopen from another playlist.
+  await dispatch(page, 'addPlaylist', {
+    _id: 'cover-menu-source',
+    playlistName: 'Video source',
+    description: '',
+    protected: false,
+    videos: [{ videoId: 'ddddddddddd', title: 'Another walk', author: 'Test channel', lengthSeconds: 120, type: 'video' }],
+  })
+  await goTo(page, 'userplaylists')
+  await page.getByRole('link', { name: 'Video source', exact: true }).click()
+  await page.locator('.playlistItemsCard .ft-list-video').first().hover()
+  await page.locator('.playlistItemsCard .addToPlaylistIcon .iconButton').first().click()
+  await expect(image).toHaveAttribute('src', custom)
+  await dispatch(page, 'updateThumbnailPreference', 'hidden')
+  await expect(image).toHaveAttribute('src', /thumbnail_placeholder/)
+  await dispatch(page, 'updateThumbnailPreference', 'start')
+  await dispatch(page, 'updateBlurThumbnails', true)
+  await expect(image).toHaveCSS('filter', 'blur(5px)')
+  await dispatch(page, 'updateBlurThumbnails', false)
+  for (const colorScheme of ['dark', 'light']) {
+    await page.emulateMedia({ colorScheme })
+    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+    await expectImagesLoaded(image)
+    await menu.screenshot({ path: testInfo.outputPath(`playlist-menu-cover-${colorScheme}.png`) })
+  }
+  await dispatch(page, 'updatePlaylist', { _id: playlistId, customThumbnail: '' })
+  await expect(image).toHaveAttribute('src', /thumbnail_placeholder/)
+})
+
+test('editing playlist details preserves hidden and blurred thumbnail preferences', async ({ page }) => {
+  await openPlaylist(page)
+  await dispatch(page, 'updateThumbnailPreference', 'hidden')
+  await page.getByTitle('Edit Playlist Info').click()
+  await expect(preview(page)).toHaveAttribute('src', /thumbnail_placeholder/)
+  await dispatch(page, 'updateThumbnailPreference', 'start')
+  await dispatch(page, 'updateBlurThumbnails', true)
+  await expect(preview(page)).toHaveCSS('filter', 'blur(20px)')
 })
 
 for (const uiScale of [100, 125]) {

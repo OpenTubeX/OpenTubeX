@@ -752,6 +752,8 @@ function videoThumbnail(video) {
 }
 
 function playlistThumbnail(playlist) {
+  if (thumbnailPreference.value === 'hidden') return thumbnailPlaceholder
+  if (playlist.customThumbnail) return playlist.customThumbnail
   return playlist.videos.length > 0
     ? videoThumbnail(playlist.videos[0])
     : thumbnailPlaceholder

@@ -659,8 +659,9 @@ function selectPlaylistMetadata(local, remote, previous) {
   const remoteMetadata = playlistMetadataFromRemote(remote)
   if (!previous) return localMetadata
 
-  const localChanged = !metadataEquals(localMetadata, previous)
-  const remoteChanged = !metadataEquals(remoteMetadata, previous)
+  const previousMetadata = playlistMetadataFromRemote(previous)
+  const localChanged = !metadataEquals(localMetadata, previousMetadata)
+  const remoteChanged = !metadataEquals(remoteMetadata, previousMetadata)
   return remoteChanged && !localChanged ? remoteMetadata : localMetadata
 }
 

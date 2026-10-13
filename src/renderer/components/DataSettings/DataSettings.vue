@@ -296,6 +296,7 @@ import {
   writeFileWithPicker,
 } from '../../helpers/utils'
 import { processToBeAddedPlaylistVideo } from '../../helpers/playlists'
+import { normalizePlaylistThumbnail } from '../../helpers/playlist-thumbnails'
 import {
   convertLibreTubeSubscriptions,
   convertLibreTubeWatchHistoryToOpenTubeX,
@@ -410,6 +411,7 @@ async function importUnifiedBackup() {
     if (selected.has('playlists')) {
       const currentPlaylists = new Map((await DBPlaylistHandlers.find()).map(playlist => [playlist._id, playlist]))
       for (const playlist of data.playlists) {
+        await normalizeImportedPlaylistThumbnail(playlist)
         const merged = mergeBackupPlaylist(currentPlaylists.get(playlist._id), playlist)
         if (await store.dispatch('updatePlaylist', merged) !== true) throw new Error('Could not restore playlist')
       }
@@ -1766,6 +1768,17 @@ async function importTakeoutPlaylist(playlist) {
   }
 }
 
+async function normalizeImportedPlaylistThumbnail(playlist) {
+  if (!isJsonObject(playlist) || !Object.hasOwn(playlist, 'customThumbnail') || playlist.customThumbnail === '') return
+  try {
+    playlist.customThumbnail = await normalizePlaylistThumbnail(playlist.customThumbnail)
+  } catch (error) {
+    delete playlist.customThumbnail
+    console.error('Unable to import playlist thumbnail:', error)
+    showToast({ message: t('Profile.The selected image could not be loaded'), icon: ['fas', 'circle-exclamation'] })
+  }
+}
+
 async function importPlaylists() {
   let response
   try {
@@ -1867,6 +1880,10 @@ async function importPlaylists() {
   const newPlaylists = []
   let importedCount = 0
 
+  for (const playlistData of playlists) {
+    await normalizeImportedPlaylistThumbnail(playlistData)
+  }
+
   playlists.forEach((playlistData) => {
     // We would technically already be done by the time the data is parsed,
     // however we want to limit the possibility of malicious data being sent
@@ -1906,11 +1923,6 @@ async function importPlaylists() {
 
         if (requiredKeys.includes(key)) {
           countRequiredKeysPresent++
-        }
-      } else if (key === 'customThumbnail') {
-        const thumbnail = playlistData[key]
-        if (typeof thumbnail === 'string' && (thumbnail === '' || /^data:image\/(?:webp|png|jpeg);base64,/.test(thumbnail))) {
-          playlistObject.customThumbnail = thumbnail
         }
       } else if (!ignoredKeys.includes(key)) {
         // Do nothing for keys to be ignored
