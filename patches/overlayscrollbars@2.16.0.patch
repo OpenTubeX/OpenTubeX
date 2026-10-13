@@ -1,11 +1,34 @@
 diff --git a/overlayscrollbars.cjs b/overlayscrollbars.cjs
-index ec871bc71397ef9f5586519c121a65b90907ad9d..04833655c9f22668a61ca7b8a5b6f5ba22765cfe 100644
+index ec871bc71397ef9f5586519c121a65b90907ad9d..29ac22e64eedcf1b26776bad938161dbce196813 100644
 --- a/overlayscrollbars.cjs
 +++ b/overlayscrollbars.cjs
-@@ -1316,6 +1316,19 @@ const createEventContentChange = (t, n, o) => {
+@@ -352,9 +352,11 @@ const getAttr = (t, n) => t && t.getAttribute(n);
+ const hasAttr = (t, n) => t && t.hasAttribute(n);
+ 
+ const setAttrs = (t, n, o) => {
++  const value = String(o || "");
+   each(getDomTokensArray(n), (n => {
+-    if (t) {
+-      t.setAttribute(n, String(o || ""));
++    // Even an unchanged attribute write invalidates styles before measurement.
++    if (t && getAttr(t, n) !== value) {
++      t.setAttribute(n, value);
+     }
+   }));
+ };
+@@ -1312,9 +1314,26 @@ const getEnvironment = () => {
+ 
+ const createEventContentChange = (t, n, o) => {
+   let s = false;
+-  const e = o ? new WeakMap : false;
++  const e = o ? new Map : false;
    const destroy = () => {
      s = true;
-   };
++    if (e) {
++      e.forEach((listeners => listeners.forEach((remove => remove()))));
++      e.clear();
++    }
++  };
 +  // Keep each listener outside the iteration scope, which holds the entire
 +  // matched element batch and would retain removed siblings through live ones.
 +  const addElementListener = (element, eventNames) => {
@@ -18,12 +41,15 @@ index ec871bc71397ef9f5586519c121a65b90907ad9d..04833655c9f22668a61ca7b8a5b6f5ba
 +      }
 +    }));
 +    return removeListener;
-+  };
+   };
    const updateElements = c => {
      if (e && o) {
-       const r = o.map((n => {
-@@ -1328,15 +1341,8 @@ const createEventContentChange = (t, n, o) => {
-         const i = e.get(c) || [];
+@@ -1325,20 +1344,16 @@ const createEventContentChange = (t, n, o) => {
+       }));
+       each(r, (o => each(o[0], (c => {
+         const r = o[1];
+-        const i = e.get(c) || [];
++        const i = e.get(c) || new Map;
          const l = t.contains(c);
          if (l && r) {
 -          const t = addEventListener(c, r, (o => {
@@ -35,12 +61,18 @@ index ec871bc71397ef9f5586519c121a65b90907ad9d..04833655c9f22668a61ca7b8a5b6f5ba
 -            }
 -          }));
 -          e.set(c, push(i, t));
-+          // Inlining would recreate the listener inside the batch scope.
-+          e.set(c, push(i, /* @__NOINLINE__ */ addElementListener(c, r)));
++          if (!i.has(r)) {
++            // Inlining would recreate the listener inside the batch scope.
++            i.set(r, /* @__NOINLINE__ */ addElementListener(c, r));
++            e.set(c, i);
++          }
          } else {
-           runEachAndClear(i);
+-          runEachAndClear(i);
++          i.forEach((remove => remove()));
            e.delete(c);
-@@ -1549,6 +1555,8 @@ const createObserversSetup = (t, n, o, s) => {
+         }
+       }))));
+@@ -1549,6 +1564,8 @@ const createObserversSetup = (t, n, o, s) => {
    let a;
    let u;
    let f;
@@ -49,7 +81,7 @@ index ec871bc71397ef9f5586519c121a65b90907ad9d..04833655c9f22668a61ca7b8a5b6f5ba
    const _ = `[${j}]`;
    const p = `[${F}]`;
    const v = [ "id", "class", "style", "open", "wrap", "cols", "rows" ];
-@@ -1673,6 +1681,22 @@ const createObserversSetup = (t, n, o, s) => {
+@@ -1673,6 +1690,22 @@ const createObserversSetup = (t, n, o, s) => {
      }
      return s;
    };
@@ -72,7 +104,7 @@ index ec871bc71397ef9f5586519c121a65b90907ad9d..04833655c9f22668a61ca7b8a5b6f5ba
    const onHostMutation = (t, n, o) => {
      const s = {
        Ht: n
-@@ -1715,6 +1739,7 @@ const createObserversSetup = (t, n, o, s) => {
+@@ -1715,6 +1748,7 @@ const createObserversSetup = (t, n, o, s) => {
        }, i);
      }));
      return () => {
@@ -80,7 +112,7 @@ index ec871bc71397ef9f5586519c121a65b90907ad9d..04833655c9f22668a61ca7b8a5b6f5ba
        if (V) {
          V.disconnect();
        }
-@@ -1733,6 +1758,8 @@ const createObserversSetup = (t, n, o, s) => {
+@@ -1733,6 +1767,8 @@ const createObserversSetup = (t, n, o, s) => {
    }, ({Dt: t, zt: n, It: o}) => {
      const s = {};
      const [u] = t("update.ignoreMutation");
@@ -89,7 +121,7 @@ index ec871bc71397ef9f5586519c121a65b90907ad9d..04833655c9f22668a61ca7b8a5b6f5ba
      const [f, d] = t("update.attributes");
      const [g, h] = t("update.elementEvents");
      const [y, m] = t("update.debounce");
-@@ -1746,7 +1773,7 @@ const createObserversSetup = (t, n, o, s) => {
+@@ -1746,7 +1782,7 @@ const createObserversSetup = (t, n, o, s) => {
        if (a) {
          a();
        }
@@ -98,14 +130,55 @@ index ec871bc71397ef9f5586519c121a65b90907ad9d..04833655c9f22668a61ca7b8a5b6f5ba
          et: concat(v, f || []),
          rt: g,
          it: _,
+@@ -2651,11 +2687,16 @@ const createOverflowUpdateSegment = (t, s) => {
+       y: getAxisOverflowStyle(n.y, t.y, n.x, t.x)
+     };
+   };
++  let appliedViewportOverflowStyle;
+   const setViewportOverflowStyle = t => {
++    const next = keys(t).map((n => createViewportOverflowStyleClassName(t[n], n === "x"))).join(" ");
++    // Repeated measurements must not remove and reapply unchanged overflow styles.
++    if (next === appliedViewportOverflowStyle) return;
++    appliedViewportOverflowStyle = next;
+     const createAllOverflowStyleClassNames = t => [ x, H, E ].map((n => createViewportOverflowStyleClassName(overflowCssValueToOverflowStyle(n), t)));
+     const n = createAllOverflowStyleClassNames(true).concat(createAllOverflowStyleClassNames()).join(" ");
+     p(n);
+-    p(keys(t).map((n => createViewportOverflowStyleClassName(t[n], n === "x"))).join(" "), true);
++    p(next, true);
+   };
+   const [O, C] = createCache(S, bind(getFractionalSize, a));
+   const [$, D] = createCache(S, bind(T, a));
 diff --git a/overlayscrollbars.cjs.js b/overlayscrollbars.cjs.js
-index ab9d930b11ea64af9a2d5b7315b554db88cd5bbd..f1c98c8db9eafb91ec6a47a1af312635c1d487b0 100644
+index ab9d930b11ea64af9a2d5b7315b554db88cd5bbd..ad97bdd9d5de9989d0f8a5633de55b1696eac238 100644
 --- a/overlayscrollbars.cjs.js
 +++ b/overlayscrollbars.cjs.js
-@@ -1316,6 +1316,19 @@ const createEventContentChange = (t, n, o) => {
+@@ -352,9 +352,11 @@ const getAttr = (t, n) => t && t.getAttribute(n);
+ const hasAttr = (t, n) => t && t.hasAttribute(n);
+ 
+ const setAttrs = (t, n, o) => {
++  const value = String(o || "");
+   each(getDomTokensArray(n), (n => {
+-    if (t) {
+-      t.setAttribute(n, String(o || ""));
++    // Even an unchanged attribute write invalidates styles before measurement.
++    if (t && getAttr(t, n) !== value) {
++      t.setAttribute(n, value);
+     }
+   }));
+ };
+@@ -1312,9 +1314,26 @@ const getEnvironment = () => {
+ 
+ const createEventContentChange = (t, n, o) => {
+   let s = false;
+-  const e = o ? new WeakMap : false;
++  const e = o ? new Map : false;
    const destroy = () => {
      s = true;
-   };
++    if (e) {
++      e.forEach((listeners => listeners.forEach((remove => remove()))));
++      e.clear();
++    }
++  };
 +  // Keep each listener outside the iteration scope, which holds the entire
 +  // matched element batch and would retain removed siblings through live ones.
 +  const addElementListener = (element, eventNames) => {
@@ -118,12 +191,15 @@ index ab9d930b11ea64af9a2d5b7315b554db88cd5bbd..f1c98c8db9eafb91ec6a47a1af312635
 +      }
 +    }));
 +    return removeListener;
-+  };
+   };
    const updateElements = c => {
      if (e && o) {
-       const r = o.map((n => {
-@@ -1328,15 +1341,8 @@ const createEventContentChange = (t, n, o) => {
-         const i = e.get(c) || [];
+@@ -1325,20 +1344,16 @@ const createEventContentChange = (t, n, o) => {
+       }));
+       each(r, (o => each(o[0], (c => {
+         const r = o[1];
+-        const i = e.get(c) || [];
++        const i = e.get(c) || new Map;
          const l = t.contains(c);
          if (l && r) {
 -          const t = addEventListener(c, r, (o => {
@@ -135,12 +211,18 @@ index ab9d930b11ea64af9a2d5b7315b554db88cd5bbd..f1c98c8db9eafb91ec6a47a1af312635
 -            }
 -          }));
 -          e.set(c, push(i, t));
-+          // Inlining would recreate the listener inside the batch scope.
-+          e.set(c, push(i, /* @__NOINLINE__ */ addElementListener(c, r)));
++          if (!i.has(r)) {
++            // Inlining would recreate the listener inside the batch scope.
++            i.set(r, /* @__NOINLINE__ */ addElementListener(c, r));
++            e.set(c, i);
++          }
          } else {
-           runEachAndClear(i);
+-          runEachAndClear(i);
++          i.forEach((remove => remove()));
            e.delete(c);
-@@ -1549,6 +1555,8 @@ const createObserversSetup = (t, n, o, s) => {
+         }
+       }))));
+@@ -1549,6 +1564,8 @@ const createObserversSetup = (t, n, o, s) => {
    let a;
    let u;
    let f;
@@ -149,7 +231,7 @@ index ab9d930b11ea64af9a2d5b7315b554db88cd5bbd..f1c98c8db9eafb91ec6a47a1af312635
    const _ = `[${j}]`;
    const p = `[${F}]`;
    const v = [ "id", "class", "style", "open", "wrap", "cols", "rows" ];
-@@ -1673,6 +1681,22 @@ const createObserversSetup = (t, n, o, s) => {
+@@ -1673,6 +1690,22 @@ const createObserversSetup = (t, n, o, s) => {
      }
      return s;
    };
@@ -172,7 +254,7 @@ index ab9d930b11ea64af9a2d5b7315b554db88cd5bbd..f1c98c8db9eafb91ec6a47a1af312635
    const onHostMutation = (t, n, o) => {
      const s = {
        Ht: n
-@@ -1715,6 +1739,7 @@ const createObserversSetup = (t, n, o, s) => {
+@@ -1715,6 +1748,7 @@ const createObserversSetup = (t, n, o, s) => {
        }, i);
      }));
      return () => {
@@ -180,7 +262,7 @@ index ab9d930b11ea64af9a2d5b7315b554db88cd5bbd..f1c98c8db9eafb91ec6a47a1af312635
        if (V) {
          V.disconnect();
        }
-@@ -1733,6 +1758,8 @@ const createObserversSetup = (t, n, o, s) => {
+@@ -1733,6 +1767,8 @@ const createObserversSetup = (t, n, o, s) => {
    }, ({Dt: t, zt: n, It: o}) => {
      const s = {};
      const [u] = t("update.ignoreMutation");
@@ -189,7 +271,7 @@ index ab9d930b11ea64af9a2d5b7315b554db88cd5bbd..f1c98c8db9eafb91ec6a47a1af312635
      const [f, d] = t("update.attributes");
      const [g, h] = t("update.elementEvents");
      const [y, m] = t("update.debounce");
-@@ -1746,7 +1773,7 @@ const createObserversSetup = (t, n, o, s) => {
+@@ -1746,7 +1782,7 @@ const createObserversSetup = (t, n, o, s) => {
        if (a) {
          a();
        }
@@ -198,14 +280,55 @@ index ab9d930b11ea64af9a2d5b7315b554db88cd5bbd..f1c98c8db9eafb91ec6a47a1af312635
          et: concat(v, f || []),
          rt: g,
          it: _,
+@@ -2651,11 +2687,16 @@ const createOverflowUpdateSegment = (t, s) => {
+       y: getAxisOverflowStyle(n.y, t.y, n.x, t.x)
+     };
+   };
++  let appliedViewportOverflowStyle;
+   const setViewportOverflowStyle = t => {
++    const next = keys(t).map((n => createViewportOverflowStyleClassName(t[n], n === "x"))).join(" ");
++    // Repeated measurements must not remove and reapply unchanged overflow styles.
++    if (next === appliedViewportOverflowStyle) return;
++    appliedViewportOverflowStyle = next;
+     const createAllOverflowStyleClassNames = t => [ x, H, E ].map((n => createViewportOverflowStyleClassName(overflowCssValueToOverflowStyle(n), t)));
+     const n = createAllOverflowStyleClassNames(true).concat(createAllOverflowStyleClassNames()).join(" ");
+     p(n);
+-    p(keys(t).map((n => createViewportOverflowStyleClassName(t[n], n === "x"))).join(" "), true);
++    p(next, true);
+   };
+   const [O, C] = createCache(S, bind(getFractionalSize, a));
+   const [$, D] = createCache(S, bind(T, a));
 diff --git a/overlayscrollbars.esm.js b/overlayscrollbars.esm.js
-index b05b8043eba78f20754a14e84daa09ff505e2fbc..0e54c6d99f591e6a842fb859d22d5d3139aab945 100644
+index b05b8043eba78f20754a14e84daa09ff505e2fbc..63314f3cbf3f73cd4c10cc2716ee548cc0b221c4 100644
 --- a/overlayscrollbars.esm.js
 +++ b/overlayscrollbars.esm.js
-@@ -1310,6 +1310,19 @@ const createEventContentChange = (t, n, o) => {
+@@ -346,9 +346,11 @@ const getAttr = (t, n) => t && t.getAttribute(n);
+ const hasAttr = (t, n) => t && t.hasAttribute(n);
+ 
+ const setAttrs = (t, n, o) => {
++  const value = String(o || "");
+   each(getDomTokensArray(n), (n => {
+-    if (t) {
+-      t.setAttribute(n, String(o || ""));
++    // Even an unchanged attribute write invalidates styles before measurement.
++    if (t && getAttr(t, n) !== value) {
++      t.setAttribute(n, value);
+     }
+   }));
+ };
+@@ -1306,9 +1308,26 @@ const getEnvironment = () => {
+ 
+ const createEventContentChange = (t, n, o) => {
+   let s = false;
+-  const e = o ? new WeakMap : false;
++  const e = o ? new Map : false;
    const destroy = () => {
      s = true;
-   };
++    if (e) {
++      e.forEach((listeners => listeners.forEach((remove => remove()))));
++      e.clear();
++    }
++  };
 +  // Keep each listener outside the iteration scope, which holds the entire
 +  // matched element batch and would retain removed siblings through live ones.
 +  const addElementListener = (element, eventNames) => {
@@ -218,12 +341,15 @@ index b05b8043eba78f20754a14e84daa09ff505e2fbc..0e54c6d99f591e6a842fb859d22d5d31
 +      }
 +    }));
 +    return removeListener;
-+  };
+   };
    const updateElements = c => {
      if (e && o) {
-       const r = o.map((n => {
-@@ -1322,15 +1335,8 @@ const createEventContentChange = (t, n, o) => {
-         const i = e.get(c) || [];
+@@ -1319,20 +1338,16 @@ const createEventContentChange = (t, n, o) => {
+       }));
+       each(r, (o => each(o[0], (c => {
+         const r = o[1];
+-        const i = e.get(c) || [];
++        const i = e.get(c) || new Map;
          const l = t.contains(c);
          if (l && r) {
 -          const t = addEventListener(c, r, (o => {
@@ -235,12 +361,18 @@ index b05b8043eba78f20754a14e84daa09ff505e2fbc..0e54c6d99f591e6a842fb859d22d5d31
 -            }
 -          }));
 -          e.set(c, push(i, t));
-+          // Inlining would recreate the listener inside the batch scope.
-+          e.set(c, push(i, /* @__NOINLINE__ */ addElementListener(c, r)));
++          if (!i.has(r)) {
++            // Inlining would recreate the listener inside the batch scope.
++            i.set(r, /* @__NOINLINE__ */ addElementListener(c, r));
++            e.set(c, i);
++          }
          } else {
-           runEachAndClear(i);
+-          runEachAndClear(i);
++          i.forEach((remove => remove()));
            e.delete(c);
-@@ -1543,6 +1549,8 @@ const createObserversSetup = (t, n, o, s) => {
+         }
+       }))));
+@@ -1543,6 +1558,8 @@ const createObserversSetup = (t, n, o, s) => {
    let a;
    let u;
    let f;
@@ -249,7 +381,7 @@ index b05b8043eba78f20754a14e84daa09ff505e2fbc..0e54c6d99f591e6a842fb859d22d5d31
    const _ = `[${B}]`;
    const p = `[${j}]`;
    const v = [ "id", "class", "style", "open", "wrap", "cols", "rows" ];
-@@ -1667,6 +1675,22 @@ const createObserversSetup = (t, n, o, s) => {
+@@ -1667,6 +1684,22 @@ const createObserversSetup = (t, n, o, s) => {
      }
      return s;
    };
@@ -272,7 +404,7 @@ index b05b8043eba78f20754a14e84daa09ff505e2fbc..0e54c6d99f591e6a842fb859d22d5d31
    const onHostMutation = (t, n, o) => {
      const s = {
        Ht: n
-@@ -1709,6 +1733,7 @@ const createObserversSetup = (t, n, o, s) => {
+@@ -1709,6 +1742,7 @@ const createObserversSetup = (t, n, o, s) => {
        }, i);
      }));
      return () => {
@@ -280,7 +412,7 @@ index b05b8043eba78f20754a14e84daa09ff505e2fbc..0e54c6d99f591e6a842fb859d22d5d31
        if (V) {
          V.disconnect();
        }
-@@ -1727,6 +1752,8 @@ const createObserversSetup = (t, n, o, s) => {
+@@ -1727,6 +1761,8 @@ const createObserversSetup = (t, n, o, s) => {
    }, ({Dt: t, zt: n, It: o}) => {
      const s = {};
      const [u] = t("update.ignoreMutation");
@@ -289,7 +421,7 @@ index b05b8043eba78f20754a14e84daa09ff505e2fbc..0e54c6d99f591e6a842fb859d22d5d31
      const [f, d] = t("update.attributes");
      const [g, h] = t("update.elementEvents");
      const [y, m] = t("update.debounce");
-@@ -1740,7 +1767,7 @@ const createObserversSetup = (t, n, o, s) => {
+@@ -1740,7 +1776,7 @@ const createObserversSetup = (t, n, o, s) => {
        if (a) {
          a();
        }
@@ -298,14 +430,55 @@ index b05b8043eba78f20754a14e84daa09ff505e2fbc..0e54c6d99f591e6a842fb859d22d5d31
          et: concat(v, f || []),
          rt: g,
          it: _,
+@@ -2645,11 +2681,16 @@ const createOverflowUpdateSegment = (t, s) => {
+       y: getAxisOverflowStyle(n.y, t.y, n.x, t.x)
+     };
+   };
++  let appliedViewportOverflowStyle;
+   const setViewportOverflowStyle = t => {
++    const next = keys(t).map((n => createViewportOverflowStyleClassName(t[n], n === "x"))).join(" ");
++    // Repeated measurements must not remove and reapply unchanged overflow styles.
++    if (next === appliedViewportOverflowStyle) return;
++    appliedViewportOverflowStyle = next;
+     const createAllOverflowStyleClassNames = t => [ x, H, E ].map((n => createViewportOverflowStyleClassName(overflowCssValueToOverflowStyle(n), t)));
+     const n = createAllOverflowStyleClassNames(true).concat(createAllOverflowStyleClassNames()).join(" ");
+     p(n);
+-    p(keys(t).map((n => createViewportOverflowStyleClassName(t[n], n === "x"))).join(" "), true);
++    p(next, true);
+   };
+   const [O, C] = createCache(S, bind(getFractionalSize, a));
+   const [$, D] = createCache(S, bind(T, a));
 diff --git a/overlayscrollbars.mjs b/overlayscrollbars.mjs
-index ae4c28abc9bbb5a972bdff8889bc552069bcf0fe..0c79a158cda3cb6b977940352cb1b4f2e9f71ebc 100644
+index ae4c28abc9bbb5a972bdff8889bc552069bcf0fe..143c43ba2870aef2b056fedc7f325660ea999dd2 100644
 --- a/overlayscrollbars.mjs
 +++ b/overlayscrollbars.mjs
-@@ -1310,6 +1310,19 @@ const createEventContentChange = (t, n, o) => {
+@@ -346,9 +346,11 @@ const getAttr = (t, n) => t && t.getAttribute(n);
+ const hasAttr = (t, n) => t && t.hasAttribute(n);
+ 
+ const setAttrs = (t, n, o) => {
++  const value = String(o || "");
+   each(getDomTokensArray(n), (n => {
+-    if (t) {
+-      t.setAttribute(n, String(o || ""));
++    // Even an unchanged attribute write invalidates styles before measurement.
++    if (t && getAttr(t, n) !== value) {
++      t.setAttribute(n, value);
+     }
+   }));
+ };
+@@ -1306,9 +1308,26 @@ const getEnvironment = () => {
+ 
+ const createEventContentChange = (t, n, o) => {
+   let s = false;
+-  const e = o ? new WeakMap : false;
++  const e = o ? new Map : false;
    const destroy = () => {
      s = true;
-   };
++    if (e) {
++      e.forEach((listeners => listeners.forEach((remove => remove()))));
++      e.clear();
++    }
++  };
 +  // Keep each listener outside the iteration scope, which holds the entire
 +  // matched element batch and would retain removed siblings through live ones.
 +  const addElementListener = (element, eventNames) => {
@@ -318,12 +491,15 @@ index ae4c28abc9bbb5a972bdff8889bc552069bcf0fe..0c79a158cda3cb6b977940352cb1b4f2
 +      }
 +    }));
 +    return removeListener;
-+  };
+   };
    const updateElements = c => {
      if (e && o) {
-       const r = o.map((n => {
-@@ -1322,15 +1335,8 @@ const createEventContentChange = (t, n, o) => {
-         const i = e.get(c) || [];
+@@ -1319,20 +1338,16 @@ const createEventContentChange = (t, n, o) => {
+       }));
+       each(r, (o => each(o[0], (c => {
+         const r = o[1];
+-        const i = e.get(c) || [];
++        const i = e.get(c) || new Map;
          const l = t.contains(c);
          if (l && r) {
 -          const t = addEventListener(c, r, (o => {
@@ -335,12 +511,18 @@ index ae4c28abc9bbb5a972bdff8889bc552069bcf0fe..0c79a158cda3cb6b977940352cb1b4f2
 -            }
 -          }));
 -          e.set(c, push(i, t));
-+          // Inlining would recreate the listener inside the batch scope.
-+          e.set(c, push(i, /* @__NOINLINE__ */ addElementListener(c, r)));
++          if (!i.has(r)) {
++            // Inlining would recreate the listener inside the batch scope.
++            i.set(r, /* @__NOINLINE__ */ addElementListener(c, r));
++            e.set(c, i);
++          }
          } else {
-           runEachAndClear(i);
+-          runEachAndClear(i);
++          i.forEach((remove => remove()));
            e.delete(c);
-@@ -1543,6 +1549,8 @@ const createObserversSetup = (t, n, o, s) => {
+         }
+       }))));
+@@ -1543,6 +1558,8 @@ const createObserversSetup = (t, n, o, s) => {
    let a;
    let u;
    let f;
@@ -349,7 +531,7 @@ index ae4c28abc9bbb5a972bdff8889bc552069bcf0fe..0c79a158cda3cb6b977940352cb1b4f2
    const _ = `[${B}]`;
    const p = `[${j}]`;
    const v = [ "id", "class", "style", "open", "wrap", "cols", "rows" ];
-@@ -1667,6 +1675,22 @@ const createObserversSetup = (t, n, o, s) => {
+@@ -1667,6 +1684,22 @@ const createObserversSetup = (t, n, o, s) => {
      }
      return s;
    };
@@ -372,7 +554,7 @@ index ae4c28abc9bbb5a972bdff8889bc552069bcf0fe..0c79a158cda3cb6b977940352cb1b4f2
    const onHostMutation = (t, n, o) => {
      const s = {
        Ht: n
-@@ -1709,6 +1733,7 @@ const createObserversSetup = (t, n, o, s) => {
+@@ -1709,6 +1742,7 @@ const createObserversSetup = (t, n, o, s) => {
        }, i);
      }));
      return () => {
@@ -380,7 +562,7 @@ index ae4c28abc9bbb5a972bdff8889bc552069bcf0fe..0c79a158cda3cb6b977940352cb1b4f2
        if (V) {
          V.disconnect();
        }
-@@ -1727,6 +1752,8 @@ const createObserversSetup = (t, n, o, s) => {
+@@ -1727,6 +1761,8 @@ const createObserversSetup = (t, n, o, s) => {
    }, ({Dt: t, zt: n, It: o}) => {
      const s = {};
      const [u] = t("update.ignoreMutation");
@@ -389,7 +571,7 @@ index ae4c28abc9bbb5a972bdff8889bc552069bcf0fe..0c79a158cda3cb6b977940352cb1b4f2
      const [f, d] = t("update.attributes");
      const [g, h] = t("update.elementEvents");
      const [y, m] = t("update.debounce");
-@@ -1740,7 +1767,7 @@ const createObserversSetup = (t, n, o, s) => {
+@@ -1740,7 +1776,7 @@ const createObserversSetup = (t, n, o, s) => {
        if (a) {
          a();
        }
@@ -398,6 +580,24 @@ index ae4c28abc9bbb5a972bdff8889bc552069bcf0fe..0c79a158cda3cb6b977940352cb1b4f2
          et: concat(v, f || []),
          rt: g,
          it: _,
+@@ -2645,11 +2681,16 @@ const createOverflowUpdateSegment = (t, s) => {
+       y: getAxisOverflowStyle(n.y, t.y, n.x, t.x)
+     };
+   };
++  let appliedViewportOverflowStyle;
+   const setViewportOverflowStyle = t => {
++    const next = keys(t).map((n => createViewportOverflowStyleClassName(t[n], n === "x"))).join(" ");
++    // Repeated measurements must not remove and reapply unchanged overflow styles.
++    if (next === appliedViewportOverflowStyle) return;
++    appliedViewportOverflowStyle = next;
+     const createAllOverflowStyleClassNames = t => [ x, H, E ].map((n => createViewportOverflowStyleClassName(overflowCssValueToOverflowStyle(n), t)));
+     const n = createAllOverflowStyleClassNames(true).concat(createAllOverflowStyleClassNames()).join(" ");
+     p(n);
+-    p(keys(t).map((n => createViewportOverflowStyleClassName(t[n], n === "x"))).join(" "), true);
++    p(next, true);
+   };
+   const [O, C] = createCache(S, bind(getFractionalSize, a));
+   const [$, D] = createCache(S, bind(T, a));
 diff --git a/types/overlayscrollbars.d.ts b/types/overlayscrollbars.d.ts
 index 54a8dfca0bb83b797115e340308d4702bec05fe2..73f28b0a0ac3c063682f4b1833540887812810c4 100644
 --- a/types/overlayscrollbars.d.ts
