@@ -1,9 +1,9 @@
-import { expect, goToSettingsSection, test } from '../../helpers/app.mjs'
+import { expect, goToSettingsSection, openNewWindowFromTabBar, test, waitForAppReady } from '../../helpers/app.mjs'
 import { readUnifiedBackup } from '../../../src/renderer/helpers/unifiedBackup.js'
 import { zipSync, strToU8 } from 'fflate'
 import { DBActions } from '../../../src/constants.js'
 
-test('restores a released null-name profile and saves customization without changing retained fields', async ({ page }, testInfo) => {
+test('restores a released null-name profile and saves customization without changing retained fields', async ({ app, page }, testInfo) => {
   const profile = { _id: 'legacy-null-name', name: null, bgColor: '#558B2F', textColor: '#FFFFFF', icon: { type: 'emoji', value: '🌈' }, subscriptions: [], futureMetadata: { keep: true } }
   const archive = Array.from(zipSync(Object.fromEntries(Object.entries({
     manifest: { format: 'opentubex-backup', version: 1 },
@@ -26,6 +26,8 @@ test('restores a released null-name profile and saves customization without chan
   const saved = () => page.evaluate(async ({ id, action }) => (await window.ftElectron.dbProfiles(action, {})).find(profile => profile._id === id), { id: profile._id, action: DBActions.GENERAL.FIND })
   await expect.poll(saved).toStrictEqual(profile)
   await page.locator('.settingsWindow').getByRole('button', { name: 'Close', exact: true }).click()
+  const otherWindow = await openNewWindowFromTabBar(app, page)
+  await waitForAppReady(otherWindow)
   await page.locator('.topNav .profileTrigger').click()
   await page.locator('.profileSummary').click()
   await page.locator('.profilePanelHeader button').last().click()
@@ -35,9 +37,16 @@ test('restores a released null-name profile and saves customization without chan
   await expect(editor.locator('.profileName input')).toHaveValue('')
   await editor.getByRole('button', { name: 'Use Initial', exact: true }).click()
   await expect(editor.locator('.profilePreviewIcon [data-icon="circle-user"]')).toBeVisible()
+  // Another window can update durable metadata while this editor retains its old form snapshot.
+  const concurrent = { ...profile, subscriptions: [{ id: 'concurrent-channel', name: 'Concurrent channel' }], futureMetadata: { keep: true, concurrent: true } }
+  await page.evaluate(({ action, profile }) => window.ftElectron.dbProfiles(action, profile), { action: DBActions.GENERAL.UPSERT, profile: concurrent })
   await editor.getByRole('button', { name: 'Update Profile', exact: true }).click()
   await expect(page.locator('.toast', { hasText: 'Your profile name cannot be empty' })).toHaveCount(0)
-  await expect.poll(saved).toStrictEqual({ ...profile, icon: { type: 'icon', value: 'circle-user' } })
+  const expected = { ...concurrent, icon: { type: 'icon', value: 'circle-user' } }
+  await expect.poll(saved).toStrictEqual(expected)
+  for (const windowPage of [page, otherWindow]) {
+    await expect.poll(() => windowPage.evaluate(id => document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.profiles.profileList.find(profile => profile._id === id), profile._id)).toStrictEqual(expected)
+  }
   const screenshot = testInfo.outputPath('legacy-null-name-profile.png')
   await page.screenshot({ path: screenshot, fullPage: true })
   await testInfo.attach('Legacy null-name profile retains its name and metadata after customization', { path: screenshot, contentType: 'image/png' })
