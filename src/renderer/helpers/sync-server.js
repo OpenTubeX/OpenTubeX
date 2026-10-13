@@ -1,6 +1,6 @@
 import { toRaw } from 'vue'
 import {
-  DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar,
+  DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo,
   mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote,
 } from './sync-history-merge.js'
 import { runBackgroundJob } from './background-jobs.js'
@@ -666,28 +666,6 @@ function isSameLocalPlaylist(playlist, metadata, videos) {
     playlist.videos.every((video, index) => metadataEquals(video, videos[index]))
 }
 
-// Repairs enrich missing metadata; populated values retain their existing
-// conflict behavior. Keep thumbnails and uploader verification on their side.
-function enrichPlaylistVideo(video, source) {
-  const result = { ...video, uploader: { ...video.uploader } }
-  const known = (value, placeholder) => typeof value === 'string' && value.trim() && value !== placeholder
-  if ((!video.uploader.id || video.uploader.id === UNKNOWN_SYNC_UPLOADER_ID) &&
-      known(source.uploader.id, UNKNOWN_SYNC_UPLOADER_ID)) {
-    result.uploader.id = source.uploader.id
-  }
-  if (!known(video.title, video.id) && known(source.title, source.id)) result.title = source.title
-  if (!known(video.uploader.name, video.uploader.id) &&
-      result.uploader.id === source.uploader.id && known(source.uploader.name, source.uploader.id)) {
-    result.uploader.name = source.uploader.name
-  }
-  for (const key of ['upload_date', 'duration']) {
-    if ((!Number.isFinite(video[key]) || video[key] <= 0) && Number.isFinite(source[key]) && source[key] > 0) {
-      result[key] = source[key]
-    }
-  }
-  return result
-}
-
 export async function syncSubscriptions(client, store, previousIds = [], options = {}) {
   const profiles = store.state.profiles.profileList
   const mainProfile = profiles.find(profile => profile._id === MAIN_PROFILE_ID) ?? profiles[0]
@@ -843,7 +821,7 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
       const payload = videoToRemote(video, options)
       if (!payload) continue
       const existing = localMetadataById.get(video.videoId)
-      localMetadataById.set(video.videoId, existing ? enrichPlaylistVideo(existing, payload) : payload)
+      localMetadataById.set(video.videoId, existing ? enrichSyncVideo(existing, payload) : payload)
     }
     const mergedVideoIds = mergeIds(
       localVideosById.keys(),
@@ -860,7 +838,7 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
       const localMetadata = localMetadataById.get(videoId)
       const existing = remoteVideosById.get(videoId)
       if (!localMetadata) continue
-      const enriched = existing ? enrichPlaylistVideo(existing, localMetadata) : localMetadata
+      const enriched = existing ? enrichSyncVideo(existing, localMetadata) : localMetadata
       if (!metadataEquals(existing, enriched)) remoteVideosToAdd.push(enriched)
       remoteVideosById.set(videoId, enriched)
     }
@@ -899,7 +877,7 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
         const identified = current.authorId || !uploader.authorId ? current : { ...current, authorId: uploader.authorId }
         const payload = videoToRemote(identified, options)
         if (!payload) return current
-        const enriched = enrichPlaylistVideo(payload, remoteVideo)
+        const enriched = enrichSyncVideo(payload, remoteVideo)
         const result = { ...identified }
         if (payload.title !== enriched.title) result.title = enriched.title
         if (payload.uploader.name !== enriched.uploader.name) result.author = enriched.uploader.name
@@ -952,6 +930,7 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
 
 export async function syncHistory(client, store, previous = {}, options = {}) {
   const historyChanged = new Error('Watch history changed during sync. Try again.')
+  const legacy = typeof client.applyWatchHistoryChanges !== 'function'
   const acknowledgedUpserts = new Map()
   const acknowledgedDeletions = new Set()
   const acknowledge = (upserts, deletions = []) => {
@@ -980,7 +959,7 @@ export async function syncHistory(client, store, previous = {}, options = {}) {
         localHistory,
         remoteHistory,
         previous,
-        options,
+        options: { ...options, deferRepairAcknowledgement: !legacy },
         acknowledged: { upserts: Array.from(acknowledgedUpserts), deletions: Array.from(acknowledgedDeletions) },
       })
       assertHistoryCurrent()
@@ -992,7 +971,6 @@ export async function syncHistory(client, store, previous = {}, options = {}) {
       throw error
     }
     const { next, historyToUpload, remoteDeletions, insertions, updates, deletions } = merged
-    const legacy = typeof client.applyWatchHistoryChanges !== 'function'
     let completed = false
     try {
       if (!legacy) {

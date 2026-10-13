@@ -29,6 +29,7 @@ test('fills public metadata without changing existing titles or adding history-o
   assert.equal(patch.description, undefined)
   assert.equal(patch.liveNow, undefined)
   assert.equal(patch.playlistItemId, undefined)
+  assert.equal(patch.pendingDurationRepair, undefined)
 })
 
 test('clears an existing liveNow flag once a playlist video becomes a recording', async () => {

@@ -206,6 +206,25 @@ async function clearUnsupportedWatchStats({ commit, dispatch, rootState }, snaps
   await dispatch('updateSyncServerSnapshot', JSON.stringify(snapshot), { root: true })
 }
 
+async function persistUploadedHistoryRepairs(entries, store) {
+  const durations = new Map(entries.map(entry => [entry.video.id, entry.video.duration]))
+  const acknowledgedRepairs = []
+  for (const record of store.state.history?.historyCacheSorted ?? []) {
+    if (record.pendingDurationRepair === true && Number.isFinite(record.lengthSeconds) &&
+        Math.round(record.lengthSeconds) === durations.get(record.videoId)) {
+      acknowledgedRepairs.push({
+        videoId: record.videoId,
+        lengthSeconds: record.lengthSeconds,
+        pendingDurationRepair: true,
+      })
+    }
+  }
+  if (acknowledgedRepairs.length) {
+    store.assertActive?.()
+    await store.dispatch('updateSubscriptionHistory', { acknowledgedRepairs })
+  }
+}
+
 function withSyncLock(callback) {
   if (typeof navigator !== 'undefined' && navigator.locks) {
     return navigator.locks.request('opentubex-sync-server', callback)
@@ -654,6 +673,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           if (revision > 0 &&
               await runBackgroundJob('equal', { first: data, second: encryptedCollections.original[collection] })) {
             if (collection === 'watchStats') await persistUploadedWatchStatsReset(data, store)
+            if (collection === 'history') await persistUploadedHistoryRepairs(data, store)
             continue
           }
           startProgress('upload')
@@ -680,6 +700,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
               await collectionCache.put(collection, saved.revision, data)
               assertSyncStillActive()
               if (collection === 'watchStats') await persistUploadedWatchStatsReset(data, store)
+              if (collection === 'history') await persistUploadedHistoryRepairs(data, store)
               break
             } catch (error) {
               if (error.status !== 409 || attempt === ENCRYPTED_SYNC_RETRIES - 1) throw error

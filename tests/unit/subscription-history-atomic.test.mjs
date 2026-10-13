@@ -159,12 +159,13 @@ for (const unseen of [false, true]) {
 test('metadata repair preserves watch state and does not recreate deleted history', async () => {
   const { db, History } = await fixture()
   const result = await History.updateSubscriptionState({ metadata: [
-    { videoId: 'video', lengthSeconds: 120, isLive: false, title: 'Recovered' },
+    { videoId: 'video', lengthSeconds: 120, isLive: false, title: 'Recovered', pendingDurationRepair: true },
     { videoId: 'deleted', lengthSeconds: 120 }
   ] })
   assert.equal(result.records.length, 1)
   const saved = await db.history.findOneAsync({ videoId: 'video' })
   assert.equal(saved.lengthSeconds, 120)
+  assert.equal(saved.pendingDurationRepair, true)
   assert.equal(saved.watchProgress, 12)
   assert.equal(saved.timeWatched, 1)
   assert.equal(saved.isWatched, false)
@@ -192,4 +193,53 @@ test('metadata repair returns partial success when an individual database write 
   assert.equal(result.failedCount, 1)
   assert.equal(errors.length, 1)
   assert.equal((await db.history.findOneAsync({ videoId: 'second' })).lengthSeconds, undefined)
+})
+
+for (const change of ['none', 'newer repair', 'deleted']) {
+  test(`uploaded repair acknowledgement preserves concurrent ${change}`, async () => {
+    const { db, History } = await fixture()
+    await History.updateSubscriptionState({ metadata: [{ videoId: 'video', lengthSeconds: 120, pendingDurationRepair: true }] })
+    await db.history.updateAsync({ videoId: 'video' }, { $set: { watchProgress: 99 } })
+    if (change === 'newer repair') {
+      await History.updateSubscriptionState({ metadata: [{ videoId: 'video', lengthSeconds: 130, pendingDurationRepair: true }] })
+    } else if (change === 'deleted') await db.history.removeAsync({ videoId: 'video' })
+    const result = await History.updateSubscriptionState({
+      acknowledgedRepairs: [{ videoId: 'video', lengthSeconds: 120, pendingDurationRepair: true }],
+    })
+    assert.equal(result.records.length, change === 'none' ? 1 : 0)
+    const saved = await db.history.findOneAsync({ videoId: 'video' })
+    if (change === 'deleted') assert.equal(saved, null)
+    else {
+      assert.equal(saved.watchProgress, 99)
+      assert.equal(saved.isWatched, false)
+      assert.equal(saved.pendingDurationRepair, change === 'none' ? undefined : true)
+      assert.equal(saved.lengthSeconds, change === 'none' ? 120 : 130)
+    }
+  })
+}
+
+test('failed repair acknowledgement leaves its marker for retry and clears the remaining repairs', async () => {
+  const { db, History, errors } = await fixture()
+  await db.history.insertAsync([{ videoId: 'second' }, { videoId: 'third' }])
+  const repairs = ['video', 'second', 'third'].map(videoId => ({ videoId, lengthSeconds: 120, pendingDurationRepair: true }))
+  await History.updateSubscriptionState({ metadata: repairs })
+  const update = db.history.updateAsync.bind(db.history)
+  db.history.updateAsync = async (query, ...args) => {
+    if (query.videoId === 'second') throw new Error('Acknowledgement write failed')
+    return update(query, ...args)
+  }
+  const result = await History.updateSubscriptionState({ acknowledgedRepairs: repairs })
+  assert.deepEqual(Array.from(result.records, record => record.videoId), ['video', 'third'])
+  assert.equal(result.failedCount, 1)
+  assert.equal(errors.length, 1)
+  assert.match(errors[0].message, /Acknowledgement write failed/)
+  for (const videoId of ['video', 'second', 'third']) {
+    const saved = await db.history.findOneAsync({ videoId })
+    assert.equal(saved.pendingDurationRepair, videoId === 'second' ? true : undefined)
+    assert.equal(saved.lengthSeconds, 120)
+  }
+  db.history.updateAsync = update
+  const retried = await History.updateSubscriptionState({ acknowledgedRepairs: repairs })
+  assert.deepEqual(Array.from(retried.records, record => record.videoId), ['second'])
+  assert.equal((await db.history.findOneAsync({ videoId: 'second' })).pendingDurationRepair, undefined)
 })
