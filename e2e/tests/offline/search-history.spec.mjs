@@ -69,6 +69,36 @@ test.describe('search history suggestions', () => {
     })
   })
 
+  for (const selection of ['click', 'keyboard', 'middle-click']) {
+    test(`selecting filtered history by ${selection} preserves the selected entry's filters`, async ({ page }) => {
+      const input = page.locator(sel.searchInput)
+      await input.fill('bak')
+      await expect(suggestions(page)).toHaveCount(1)
+      await expect(suggestions(page).first()).toContainText('baking bread')
+      if (selection === 'keyboard') {
+        await input.press('ArrowDown')
+        await input.press('Enter')
+      } else {
+        await suggestions(page).first().locator('.optionWrapper').click({ button: selection === 'middle-click' ? 'middle' : 'left' })
+        if (selection === 'middle-click') {
+          await expect(page.locator(sel.tabs)).toHaveCount(2)
+          await page.locator(sel.tabs).nth(1).click()
+        }
+      }
+      await expect(page).toHaveURL(/#\/search\/baking%20bread/)
+      await expect.poll(() => page.evaluate(() => {
+        const params = new URLSearchParams(location.hash.split('?')[1])
+        return {
+          prioritize: params.get('prioritize'),
+          time: params.get('time'),
+          type: params.get('type'),
+          duration: params.get('duration'),
+          features: params.getAll('features')
+        }
+      })).toEqual({ prioritize: 'relevance', time: '', type: 'all', duration: '', features: [] })
+    })
+  }
+
   test('middle-clicking a recent search opens its link in a background tab', async ({ page }) => {
     await page.locator(sel.searchInput).click()
     const link = suggestions(page).first().locator('.optionWrapper')

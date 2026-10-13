@@ -981,10 +981,10 @@ function cancelSearchSuggestions() {
   clearTimeout(suggestionTimeout)
   suggestionController?.abort()
   suggestionController = null
-  lastSuggestionQuery.value = ''
 }
 
 function handleSearchInputClear() {
+  lastSuggestionQuery.value = ''
   searchSuggestionsDataList.value = []
   currentSearchText = ''
   cancelSearchSuggestions()
@@ -995,6 +995,7 @@ function handleSearchInputClear() {
  */
 function updateSearchInputText(text) {
   cancelSearchSuggestions()
+  lastSuggestionQuery.value = ''
   currentSearchText = text
   searchInput.value?.setText(text)
 }
@@ -1004,7 +1005,7 @@ function updateSearchInputText(text) {
  */
 function getSearchSuggestionsDebounce(query) {
   currentSearchText = query
-  if (query === lastSuggestionQuery.value) return
+  if (query === lastSuggestionQuery.value && suggestionController != null) return
 
   cancelSearchSuggestions()
   lastSuggestionQuery.value = query
