@@ -2402,7 +2402,7 @@ test('portable backup can restore supported selected sections while retaining an
   const context = await functions(dataSettings, ['importUnifiedBackup'], {
     process: { env: { IS_ELECTRON: false } }, backupDisposed: false, backupImportGeneration: 0, backupWriteGeneration: null,
     backupBusy: ref(false), selectedBackupSections: ref(['profiles']), backupData: ref(data), mergeBackupProfile,
-    DBProfileHandlers: { find: async () => [], replaceIfUnchanged: async (_previous, record) => { saved.push(record); return { numAffected: 1 } } }, store: { dispatch: async () => {} },
+    DBProfileHandlers: { find: async () => [], replaceIfUnchanged: async (_previous, record) => { saved.push(record); return { numAffected: 1 } } }, store: { dispatch: async () => true },
     compactAllDatastores: async () => true, closeBackupImport() {}, t: key => key, showToast: toast => messages.push(toast),
   })
   await context.importUnifiedBackup()
@@ -2657,7 +2657,7 @@ for (const afterRead of [false, true]) {
     const Playlists = vm.runInNewContext(base.slice(base.indexOf('class Playlists {'), base.indexOf('class SearchHistory {')) + '\nPlaylists', { db, model })
     const concurrent = { videoId: 'concurrent' }
     const add = () => db.playlists.updateAsync({ _id: 'p' }, { $push: { videos: concurrent } })
-    if (afterRead && Playlists.replaceIfUnchanged) {
+    if (afterRead) {
       const replace = Playlists.replaceIfUnchanged.bind(Playlists)
       Playlists.replaceIfUnchanged = async (...args) => { await add(); return replace(...args) }
     }
@@ -2667,7 +2667,7 @@ for (const afterRead of [false, true]) {
       backupBusy: ref(false), selectedBackupSections: ref(['profiles', 'playlists']), backupData: ref({ profiles: [{ _id: 'profile', name: 'Profile', subscriptions: [] }], playlists: [incoming] }),
       DBPlaylistHandlers: Playlists, DBProfileHandlers: { find: async () => [], replaceIfUnchanged: async () => { if (!afterRead) await add(); return { numAffected: 1 } } },
       mergeBackupPlaylist, mergeBackupProfile: (_previous, profile) => profile,
-      store: { dispatch: async (method, value) => { if (method === 'updatePlaylist') { if (afterRead) await add(); await db.playlists.updateAsync({ _id: value._id }, value); return true } } },
+      store: { dispatch: async method => { assert.ok(['grabAllProfiles', 'grabAllPlaylists', 'scheduleSyncServer'].includes(method)); return true } },
       compactAllDatastores: async () => true, closeBackupImport() {}, t: key => key, showToast: toast => messages.push(toast),
     })
     await context.importUnifiedBackup()
@@ -2721,7 +2721,7 @@ for (const laterFailure of [false, true]) {
         if (laterFailure && record._id === 'second') throw new Error('later write failed')
         writes.push(record._id); return { numAffected: 1 }
       } }, mergeBackupPlaylist,
-      store: { dispatch: async method => { if (method === 'scheduleSyncServer') scheduled.push([...writes]) } },
+      store: { dispatch: async method => { if (method === 'scheduleSyncServer') scheduled.push([...writes]); return true } },
       compactAllDatastores: async () => true, closeBackupImport() {}, t: key => key, showToast: toast => messages.push(toast),
     })
     await context.importUnifiedBackup()
