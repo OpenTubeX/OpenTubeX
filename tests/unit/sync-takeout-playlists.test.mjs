@@ -39,6 +39,52 @@ function createStore(playlists = []) {
   }
 }
 
+test('custom playlist thumbnails sync between devices, including replacement and restoring defaults', async () => {
+  const original = 'data:image/webp;base64,b3JpZ2luYWw='
+  const replacement = 'data:image/png;base64,cmVwbGFjZW1lbnQ='
+  const first = createStore([{ _id: 'cover', playlistName: 'Custom cover', description: 'Keep this description', customThumbnail: original, videos: [] }])
+  const second = createStore()
+  const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
+  let writes = 0
+  const update = adapter.updatePlaylist.bind(adapter)
+  adapter.updatePlaylist = async (...args) => { writes++; return update(...args) }
+
+  let firstSnapshot = await context.syncPlaylists(adapter, first)
+  assert.equal((await adapter.getPlaylist('cover')).playlist.thumbnail_url, original)
+  let secondSnapshot = await context.syncPlaylists(adapter, second)
+  assert.equal(second.state.playlists.playlists[0].customThumbnail, original)
+
+  second.state.playlists.playlists[0].customThumbnail = replacement
+  secondSnapshot = await context.syncPlaylists(adapter, second, secondSnapshot)
+  firstSnapshot = await context.syncPlaylists(adapter, first, firstSnapshot)
+  assert.equal(first.state.playlists.playlists[0].customThumbnail, replacement)
+  assert.equal(first.state.playlists.playlists[0].description, 'Keep this description')
+  assert.equal(writes, 1)
+  firstSnapshot = await context.syncPlaylists(adapter, first, firstSnapshot)
+  secondSnapshot = await context.syncPlaylists(adapter, second, secondSnapshot)
+  assert.equal(writes, 1, 'unchanged images should not be uploaded again')
+
+  first.state.playlists.playlists[0].customThumbnail = ''
+  firstSnapshot = await context.syncPlaylists(adapter, first, firstSnapshot)
+  assert.equal((await adapter.getPlaylist('cover')).playlist.thumbnail_url, null)
+  secondSnapshot = await context.syncPlaylists(adapter, second, secondSnapshot)
+  assert.equal(second.state.playlists.playlists[0].customThumbnail, '')
+  await context.syncPlaylists(adapter, first, firstSnapshot)
+  await context.syncPlaylists(adapter, second, secondSnapshot)
+  assert.equal(writes, 2)
+})
+
+test('server-generated playlist thumbnails remain automatic defaults without repeated writes', async () => {
+  const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
+  await adapter.createPlaylist({ id: 'automatic', title: 'Automatic cover', description: '', thumbnail_url: 'https://i.ytimg.com/vi/abcdefghijk/maxresdefault.jpg' })
+  adapter.updatePlaylist = async () => assert.fail('An automatic cover should not trigger a metadata upload')
+  const store = createStore()
+  const snapshot = await context.syncPlaylists(adapter, store)
+  assert.equal(store.state.playlists.playlists[0].customThumbnail, '')
+  assert.equal(snapshot.automatic.metadata.thumbnail_url, null)
+  await context.syncPlaylists(adapter, store, snapshot)
+})
+
 test('syncs videos imported from a Takeout ZIP to a second device and repairs an empty remote playlist', async () => {
   const file = new Blob([zipSync({
     'Takeout/YouTube/playlists/Imported-videos.csv': strToU8(

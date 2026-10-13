@@ -214,6 +214,8 @@ User Playlists:
   AddVideoPrompt:
     Toast:
       Video(s) added to {playlistCount} playlists: Видео-снимци су додати на 1 листу за репродукцију | Видео-снимци су додати на {playlistCount} листе за репродукцију | Видео-снимци су додати на {playlistCount} листа за репродукцију
+  Playlist Thumbnail: "Сличица плејлисте"
+  Restore Default Thumbnail: "Врати подразумевану сличицу"
 History:
   Delete Old Compact: "Обриши старе"
   Repair Compact: "Поправи"

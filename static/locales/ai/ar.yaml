@@ -208,6 +208,8 @@ User Playlists:
     Retry: أعد المحاولة
     This playlist could not be loaded.: لا يمكن تحميل قائمة التشغيل هذه.
     More videos could not be loaded.: لا يمكن تحميل المزيد من مقاطع الفيديو.
+  Playlist Thumbnail: "صورة قائمة التشغيل"
+  Restore Default Thumbnail: "استعادة الصورة الافتراضية"
 History:
   Delete Old Compact: "حذف القديم"
   Repair Compact: "إصلاح"

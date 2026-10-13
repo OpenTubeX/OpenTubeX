@@ -208,6 +208,8 @@ User Playlists:
     Retry: Thử lại
     This playlist could not be loaded.: Không thể tải danh sách phát này.
     More videos could not be loaded.: Không thể tải thêm video.
+  Playlist Thumbnail: "Ảnh thu nhỏ của danh sách phát"
+  Restore Default Thumbnail: "Khôi phục ảnh thu nhỏ mặc định"
 History:
   Delete Old Compact: "Xóa mục cũ"
   Repair Compact: "Sửa chữa"

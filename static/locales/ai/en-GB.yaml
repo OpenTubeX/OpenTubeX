@@ -205,6 +205,8 @@ User Playlists:
     Retry: Retry
     This playlist could not be loaded.: This playlist could not be loaded.
     More videos could not be loaded.: More videos could not be loaded.
+  Playlist Thumbnail: "Playlist thumbnail"
+  Restore Default Thumbnail: "Restore default thumbnail"
 History:
   Delete Old Compact: "Delete old"
   Repair Compact: "Repair"

@@ -484,7 +484,9 @@ export class SyncServerClient {
   updatePlaylist(playlistId, playlist) {
     return this.apiRequest(`/playlists/${encodeURIComponent(playlistId)}`, {
       method: 'PATCH',
-      body: playlist,
+      // Existing servers skip nullable fields on update. An empty value clears
+      // a custom image while the app continues to derive its default locally.
+      body: { ...playlist, thumbnail_url: playlist.thumbnail_url ?? '' },
     })
   }
 
@@ -629,16 +631,19 @@ function playlistMetadataFromLocal(playlist) {
     id: playlist._id,
     title: playlist.playlistName,
     description: playlist.description || '',
-    thumbnail_url: null,
+    thumbnail_url: playlist.customThumbnail || null,
   }
 }
 
 function playlistMetadataFromRemote(playlist) {
+  // Servers can fill this field with a video's thumbnail. Only embedded images
+  // represent a custom thumbnail; other URLs keep the local automatic default.
+  const thumbnail = playlist.thumbnail_url
   return {
     id: playlist.id,
     title: playlist.title,
     description: playlist.description || '',
-    thumbnail_url: playlist.thumbnail_url ?? null,
+    thumbnail_url: typeof thumbnail === 'string' && /^data:image\/(?:webp|png|jpeg);base64,/.test(thumbnail) ? thumbnail : null,
   }
 }
 
@@ -662,6 +667,7 @@ function selectPlaylistMetadata(local, remote, previous) {
 function isSameLocalPlaylist(playlist, metadata, videos) {
   return playlist.playlistName === metadata.title &&
     (playlist.description || '') === metadata.description &&
+    (playlist.customThumbnail || null) === metadata.thumbnail_url &&
     playlist.videos.length === videos.length &&
     playlist.videos.every((video, index) => metadataEquals(video, videos[index]))
 }
@@ -900,6 +906,7 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
         _id: id,
         playlistName: metadata.title,
         description: metadata.description,
+        customThumbnail: metadata.thumbnail_url || '',
         protected: false,
         videos: mergedVideos,
       }
@@ -911,6 +918,7 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
           ...local,
           playlistName: metadata.title,
           description: metadata.description,
+          customThumbnail: metadata.thumbnail_url || '',
           videos: mergedVideos,
         },
       })

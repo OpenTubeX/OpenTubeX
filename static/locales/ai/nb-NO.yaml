@@ -204,6 +204,8 @@ User Playlists:
     Retry: Prøv igjen
     This playlist could not be loaded.: Denne spillelisten kunne ikke lastes inn.
     More videos could not be loaded.: Flere videoer kunne ikke lastes inn.
+  Playlist Thumbnail: "Spillelistens miniatyrbilde"
+  Restore Default Thumbnail: "Gjenopprett standard miniatyrbilde"
 History:
   Delete Old Compact: "Slett gamle"
   Repair Compact: "Reparer"

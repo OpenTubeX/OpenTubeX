@@ -208,6 +208,8 @@ User Playlists:
     Retry: Tentar de novo
     This playlist could not be loaded.: Non se puido cargar esta lista de reprodución.
     More videos could not be loaded.: Non se puideron cargar máis vídeos.
+  Playlist Thumbnail: "Miniatura da lista de reprodución"
+  Restore Default Thumbnail: "Restaurar a miniatura predeterminada"
 History:
   Delete Old Compact: "Borrar antigos"
   Repair Compact: "Reparar"

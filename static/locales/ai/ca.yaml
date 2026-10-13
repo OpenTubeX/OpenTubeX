@@ -333,6 +333,8 @@ User Playlists:
       There is already a playlist with this name. Please pick a different name.: Ja hi ha una llista de reproducció amb aquest nom. Trieu-ne un altre.
       Playlist {playlistName} has been successfully created.: S'ha creat correctament la llista de reproducció {playlistName}.
       There was an issue with creating the playlist.: Hi ha hagut un problema en crear la llista de reproducció.
+  Playlist Thumbnail: "Miniatura de la llista de reproducció"
+  Restore Default Thumbnail: "Restaura la miniatura predeterminada"
 History:
   Delete Old Compact: "Esborra antics"
   Repair Compact: "Repara"

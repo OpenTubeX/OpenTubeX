@@ -4,6 +4,7 @@
     :class="{ [theme]: true }"
   >
     <div
+      v-if="!editMode"
       class="playlistThumbnail"
     >
       <router-link
@@ -103,6 +104,12 @@
       :value="newDescription"
       @input="(input) => newDescription = input"
       @keydown.enter="savePlaylistInfo"
+    />
+    <FtPlaylistThumbnailPicker
+      v-if="editMode"
+      v-model="newCustomThumbnail"
+      :default-thumbnail="defaultThumbnail"
+      @loading="thumbnailLoading = $event"
     />
     <FtQuickBookmarkIconPicker
       v-if="editMode"
@@ -361,6 +368,7 @@ import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
+import FtPlaylistThumbnailPicker from '../FtPlaylistThumbnailPicker.vue'
 import FtQuickBookmarkIconPicker from '../FtQuickBookmarkIconPicker/FtQuickBookmarkIconPicker.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'
 import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
@@ -512,6 +520,8 @@ const showDownloadPrompt = ref(false)
 const newTitle = ref(props.title)
 const newDescription = ref(props.description)
 const newQuickBookmarkIcon = ref('bookmark')
+const newCustomThumbnail = ref('')
+const thumbnailLoading = ref(false)
 
 if (props.videoCount > 0) {
   query.value = props.searchQueryText
@@ -579,7 +589,12 @@ const parsedVideoCount = computed(() => formatNumber(props.videoCount))
 
 /** @type {import('vue').ComputedRef<string>} */
 const thumbnail = computed(() => {
-  if (thumbnailPreference.value === 'hidden' || !firstVideoIdExists.value) {
+  if (thumbnailPreference.value === 'hidden') return thumbnailPlaceholder
+  return (isUserPlaylist.value && selectedUserPlaylist.value?.customThumbnail) || defaultThumbnail.value
+})
+
+const defaultThumbnail = computed(() => {
+  if (!firstVideoIdExists.value) {
     return thumbnailPlaceholder
   }
 
@@ -671,7 +686,7 @@ const inputPlaylistWithNameExists = computed(() => {
 })
 
 const playlistPersistenceDisabled = computed(() => {
-  return inputPlaylistNameBlank.value || inputPlaylistWithNameExists.value
+  return inputPlaylistNameBlank.value || inputPlaylistWithNameExists.value || thumbnailLoading.value
 })
 
 watch(showDeletePlaylistPrompt, handlePromptToggle)
@@ -805,22 +820,22 @@ async function savePlaylistInfo() {
     protected: selectedUserPlaylist.value.protected,
     description: newDescription.value,
     quickBookmarkIcon: newQuickBookmarkIcon.value,
+    customThumbnail: newCustomThumbnail.value,
     _id: props.id,
   }
   try {
-    await store.dispatch('updatePlaylist', playlist)
+    if (!await store.dispatch('updatePlaylist', playlist)) throw new Error('Could not update playlist')
     showToast({
       message: t('User Playlists.SinglePlaylistView.Toast["Playlist has been updated."]'),
       icon: ['fas', 'check'],
     })
+    exitEditMode()
   } catch (e) {
     showToast({
       message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
       icon: ['fas', 'circle-exclamation'],
     })
     console.error(e)
-  } finally {
-    exitEditMode()
   }
 }
 
@@ -830,6 +845,8 @@ function enterEditMode() {
   newTitle.value = props.title
   newDescription.value = props.description
   newQuickBookmarkIcon.value = getQuickBookmarkIconValue(selectedUserPlaylist.value)
+  newCustomThumbnail.value = selectedUserPlaylist.value.customThumbnail || ''
+  thumbnailLoading.value = false
   editMode.value = true
 
   emit('enter-edit-mode')
@@ -995,6 +1012,7 @@ async function exportAsListOfUrls() {
 
 function exitEditMode() {
   editMode.value = false
+  thumbnailLoading.value = false
 
   emit('exit-edit-mode')
 }
@@ -1265,6 +1283,7 @@ onBeforeUnmount(() => {
 })
 
 watch(() => props.id, () => {
+  exitEditMode()
   deadVideoScanController?.abort()
   showRemoveDeadVideosPrompt.value = false
   deadVideoItemIds.value = new Set()

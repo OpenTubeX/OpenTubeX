@@ -17,6 +17,7 @@
         alt=""
         :src="thumbnail"
         class="thumbnailImage"
+        :class="{ blur: store.getters.getBlurThumbnails }"
       />
       <div
         class="videoCountContainer"
@@ -175,11 +176,13 @@ const videoPresenceCountInPlaylistTextVisible = computed(() => {
     videoPresenceCountInPlaylistText.value != null
 })
 
-const thumbnail = ref(thumbnailPlaceholder)
-
-if (props.playlist.videos.length > 0) {
-  thumbnail.value = getVideoThumbnailUrl(props.playlist.videos[0].videoId, backendPreference.value, currentInvidiousInstanceUrl.value)
-}
+const thumbnail = computed(() => {
+  if (store.getters.getThumbnailPreference === 'hidden') return thumbnailPlaceholder
+  if (props.playlist.customThumbnail) return props.playlist.customThumbnail
+  return props.playlist.videos.length > 0
+    ? getVideoThumbnailUrl(props.playlist.videos[0].videoId, backendPreference.value, currentInvidiousInstanceUrl.value)
+    : thumbnailPlaceholder
+})
 
 function toggleSelection() {
   if (!props.disabled) {

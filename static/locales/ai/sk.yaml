@@ -204,6 +204,8 @@ User Playlists:
     Retry: Skúsiť znova
     This playlist could not be loaded.: Tento zoznam videí sa nepodarilo načítať.
     More videos could not be loaded.: Ďalšie videá sa nepodarilo načítať.
+  Playlist Thumbnail: "Miniatúra playlistu"
+  Restore Default Thumbnail: "Obnoviť predvolenú miniatúru"
 History:
   Delete Old Compact: "Zmazať staré"
   Repair Compact: "Opraviť"

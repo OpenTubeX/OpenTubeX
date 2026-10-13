@@ -1,8 +1,8 @@
-import { readFile } from 'node:fs/promises'
+import { readFile, rm } from 'node:fs/promises'
 import { randomBytes, randomUUID } from 'node:crypto'
 import path from 'node:path'
 
-import { test, expect, goTo, goToSettingsSection, latestSettings } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, latestSettings, createUserDataDir, launchApp } from '../../helpers/app.mjs'
 import { DEFAULT_CUSTOM_THEME } from '../../../src/customTheme.js'
 
 const syncServerUrl = process.env.OPENTUBEX_SYNC_SERVER_URL
@@ -892,6 +892,136 @@ test.describe('OpenTubeX sync server', () => {
     })
     expect(cleanup.ok).toBe(true)
   })
+
+  for (const privacy of ['legacy', 'enhanced']) {
+    test(`syncs custom playlist thumbnails between two clients with ${privacy} privacy`, async ({ page }, testInfo) => {
+      const capabilities = await getSyncCapabilities()
+      test.skip(privacy === 'enhanced' && capabilities.encrypted_sync !== 1, 'Enhanced privacy server required')
+      const username = `opentubex-thumbnail-${randomUUID()}`
+      const password = 'local-test-password'
+      const otherUserData = await createUserDataDir({ settings: { syncServerEnabled: true } })
+      let other
+
+      async function configure(clientPage) {
+        await clientPage.evaluate(async () => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          await store.dispatch('updatePlaylistViewType', 'list')
+          await store.dispatch('updateSyncServerAutoSync', false)
+          for (const collection of ['Subscriptions', 'History', 'Profiles', 'Sessions', 'Settings', 'WatchStats', 'LiveReminders']) {
+            await store.dispatch(`updateSyncServerSync${collection}`, false)
+          }
+        })
+        await clientPage.route('**/account/**', route => route.continue({
+          headers: { ...route.request().headers(), 'X-Forwarded-For': rateLimitClient(testInfo) }
+        }))
+        if (privacy === 'legacy') {
+          await clientPage.route('**/health', route => route.fulfill({ json: { status: 'ok', capabilities: { ...capabilities, encrypted_sync: 0 } } }))
+        }
+      }
+
+      async function connect(clientPage, mode) {
+        const section = await goToSettingsSection(clientPage, 'sync')
+        await section.getByLabel('Sync server URL').fill(syncServerUrl)
+        await section.getByLabel('Username').fill(username)
+        await section.getByLabel('Password', { exact: true }).fill(password)
+        if (privacy === 'enhanced') await section.getByLabel(/Privacy passphrase/).fill('local-test-privacy-passphrase')
+        await section.getByRole('button', { name: mode === 'register' ? 'Register' : /^Log in$/i }).click()
+        await expect(section.getByText(`Connected as ${username}`)).toBeVisible()
+        await expect(section.getByText(/Last synced:/)).toBeVisible()
+        await expect(section.locator('.syncProgress')).toBeHidden()
+        await clientPage.locator('.settingsCloseButton').click()
+        await expect(clientPage.locator('.settingsWindow')).toHaveCount(0)
+      }
+
+      async function sync(clientPage) {
+        const section = await goToSettingsSection(clientPage, 'sync')
+        const previous = await clientPage.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getSyncServerLastSyncAt)
+        await section.getByRole('button', { name: 'Sync now' }).click()
+        await expect.poll(() => clientPage.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getSyncServerLastSyncAt)).toBeGreaterThan(previous)
+        await expect(section.locator('.syncProgress')).toBeHidden()
+        await clientPage.locator('.settingsCloseButton').click()
+        await expect(clientPage.locator('.settingsWindow')).toHaveCount(0)
+      }
+
+      async function editCover(clientPage, file) {
+        await goTo(clientPage, 'userplaylists')
+        await clientPage.getByRole('link', { name: 'Synced playlist', exact: true }).click()
+        await clientPage.getByTitle('Edit Playlist Info').click()
+        const picker = clientPage.locator('.playlistThumbnailPicker')
+        if (file) {
+          await picker.locator('input[type="file"]').setInputFiles(file)
+          await expect(picker).toHaveAttribute('aria-busy', 'false')
+          await expect(picker.locator('img:not(.retryImagePlaceholder)')).toHaveAttribute('src', /^data:image\/webp;base64,/)
+        } else {
+          await picker.getByRole('button', { name: 'Restore default thumbnail' }).click()
+        }
+        const value = file ? await picker.locator('img:not(.retryImagePlaceholder)').getAttribute('src') : ''
+        await clientPage.getByTitle('Save Changes').click()
+        await expect(picker).toHaveCount(0)
+        return value
+      }
+
+      async function expectCover(clientPage, value) {
+        await goTo(clientPage, 'userplaylists')
+        const card = clientPage.locator('.ft-list-video', { has: clientPage.getByRole('link', { name: 'Synced playlist', exact: true }) })
+        await expect(card.locator('img.thumbnailImage:not(.retryImagePlaceholder)')).toHaveAttribute('src', value || /thumbnail_placeholder/)
+      }
+
+      try {
+        other = await launchApp(otherUserData)
+        const tutorial = other.page.locator('.tutorialOverlay')
+        await expect(tutorial).toBeVisible()
+        await tutorial.locator('.tutorialActions').getByRole('button').last().click()
+        await configure(page)
+        await configure(other.page)
+        const original = await editCover(page, path.resolve('e2e/fixtures/images/opentubex-playlist.jpg'))
+        await connect(page, 'register')
+        if (privacy === 'enhanced') {
+          const token = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getSyncServerToken)
+          const response = await fetch(`${syncServerUrl}/v1/encrypted_sync/playlists`, { headers: { Authorization: token } })
+          expect(response.ok).toBe(true)
+          expect((await response.json()).payload).not.toContain(original)
+        }
+        await connect(other.page, 'login')
+        await expectCover(other.page, original)
+
+        const replacement = await editCover(other.page, path.resolve('e2e/fixtures/media/avatar.png'))
+        expect(replacement).not.toBe(original)
+        await sync(other.page)
+        await sync(page)
+        await expectCover(page, replacement)
+
+        const thumbnailWrites = []
+        page.on('request', request => {
+          const pathname = new URL(request.url()).pathname
+          if (['PUT', 'PATCH', 'POST'].includes(request.method()) && (
+            pathname.includes('/playlists/') || pathname.endsWith('/encrypted_sync/playlists')
+          )) thumbnailWrites.push(pathname)
+        })
+        await sync(page)
+        expect(thumbnailWrites).toEqual([])
+
+        await editCover(page, null)
+        await sync(page)
+        await sync(other.page)
+        await expectCover(other.page, '')
+        await sync(other.page)
+        await sync(page)
+        await expectCover(page, '')
+      } finally {
+        const token = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getSyncServerToken)
+        if (token) {
+          await fetch(`${syncServerUrl}/v1/account/delete`, {
+            method: 'DELETE',
+            headers: { Authorization: token, 'Content-Type': 'application/json', 'X-Forwarded-For': rateLimitClient(testInfo) },
+            body: JSON.stringify({ password })
+          })
+        }
+        await other?.electronApp.close()
+        await rm(otherUserData, { recursive: true, force: true })
+      }
+    })
+  }
 
   test('requires confirmation before an empty remote deletes local data', async ({ app, page }, testInfo) => {
     const username = `opentubex-reset-guard-${Date.now()}-${Math.random().toString(16).slice(2)}`

@@ -204,6 +204,8 @@ User Playlists:
     Retry: Coba Lagi
     This playlist could not be loaded.: Daftar putar ini tidak dapat dimuat.
     More videos could not be loaded.: Video lainnya tidak dapat dimuat.
+  Playlist Thumbnail: "Gambar mini playlist"
+  Restore Default Thumbnail: "Pulihkan gambar mini bawaan"
 History:
   Delete Old Compact: "Hapus lama"
   Repair Compact: "Perbaiki"

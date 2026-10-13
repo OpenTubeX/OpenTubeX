@@ -204,6 +204,8 @@ User Playlists:
     Retry: 重試
     This playlist could not be loaded.: 無法載入此播放清單。
     More videos could not be loaded.: 無法載入更多影片。
+  Playlist Thumbnail: "播放清單縮圖"
+  Restore Default Thumbnail: "還原預設縮圖"
 History:
   Delete Old Compact: "刪除舊紀錄"
   Repair Compact: "修復"

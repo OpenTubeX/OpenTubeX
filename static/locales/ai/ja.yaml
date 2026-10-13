@@ -204,6 +204,8 @@ User Playlists:
     Retry: 再試行
     This playlist could not be loaded.: このプレイリストを読み込めませんでした。
     More videos could not be loaded.: 動画をさらに読み込めませんでした。
+  Playlist Thumbnail: "再生リストのサムネイル"
+  Restore Default Thumbnail: "既定のサムネイルに戻す"
 History:
   Delete Old Compact: "古い履歴を削除"
   Repair Compact: "修復"

@@ -458,6 +458,8 @@ User Playlists:
       There is already a playlist with this name. Please pick a different name.: There is already a playlist with this name. Please pick a different name.
       Playlist {playlistName} has been successfully created.: Playlist {playlistName} has been successfully created.
       There was an issue with creating the playlist.: There was an issue with creating the playlist.
+  Playlist Thumbnail: "Playlist thumbnail"
+  Restore Default Thumbnail: "Restore default thumbnail"
 History:
   Repair Use Cookies: "Use configured yt-dlp cookies"
   Repair Cookies Hint: "More than 500 videos need checking. Configure cookies in yt-dlp settings and enable them here to reduce the risk of rate limiting."

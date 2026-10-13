@@ -1830,6 +1830,7 @@ async function importPlaylists() {
     '_id',
     'description',
     'createdAt',
+    'customThumbnail',
   ]
 
   const ignoredKeys = [
@@ -1905,6 +1906,11 @@ async function importPlaylists() {
 
         if (requiredKeys.includes(key)) {
           countRequiredKeysPresent++
+        }
+      } else if (key === 'customThumbnail') {
+        const thumbnail = playlistData[key]
+        if (typeof thumbnail === 'string' && (thumbnail === '' || /^data:image\/(?:webp|png|jpeg);base64,/.test(thumbnail))) {
+          playlistObject.customThumbnail = thumbnail
         }
       } else if (!ignoredKeys.includes(key)) {
         // Do nothing for keys to be ignored
@@ -1993,6 +1999,7 @@ async function importPlaylists() {
       // Only these attributes would be updated (besides videos)
       playlistName: playlistObject.playlistName,
       description: playlistObject.description,
+      ...(Object.hasOwn(playlistObject, 'customThumbnail') ? { customThumbnail: playlistObject.customThumbnail } : {}),
       videos: playlistVideos
     })
   })

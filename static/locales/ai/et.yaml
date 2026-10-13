@@ -204,6 +204,8 @@ User Playlists:
     Retry: Proovi uuesti
     This playlist could not be loaded.: Seda esitusloendit ei saanud laadida.
     More videos could not be loaded.: Rohkem videoid ei saanud laadida.
+  Playlist Thumbnail: "Esitusloendi pisipilt"
+  Restore Default Thumbnail: "Taasta vaikimisi pisipilt"
 History:
   Delete Old Compact: "Kustuta vanad"
   Repair Compact: "Paranda"

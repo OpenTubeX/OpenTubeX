@@ -213,6 +213,8 @@ User Playlists:
   AddVideoPrompt:
     Toast:
       Video(s) added to {playlistCount} playlists: Videoen blev føjet til 1 playliste | Videoerne blev føjet til {playlistCount} playlister
+  Playlist Thumbnail: "Afspilningslistens miniaturebillede"
+  Restore Default Thumbnail: "Gendan standardminiaturebillede"
 History:
   Delete Old Compact: "Slet gamle"
   Repair Compact: "Reparer"

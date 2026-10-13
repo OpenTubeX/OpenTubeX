@@ -271,8 +271,8 @@ const playlistTypeIcon = computed(() => {
 })
 const playlistMetadata = computed(() => {
   if (isUserPlaylist.value) {
-    let thumbnailUrl = thumbnailPlaceholder
-    if (props.data.videos.length > 0) {
+    let thumbnailUrl = props.data.customThumbnail || thumbnailPlaceholder
+    if (!props.data.customThumbnail && props.data.videos.length > 0) {
       const origin = backendPreference.value === 'invidious'
         ? currentInvidiousInstanceUrl.value
         : 'https://i.ytimg.com'

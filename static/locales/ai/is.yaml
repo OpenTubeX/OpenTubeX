@@ -206,6 +206,8 @@ User Playlists:
     Retry: Reyna aftur
     This playlist could not be loaded.: Ekki tókst að hlaða þessum spilunarlista.
     More videos could not be loaded.: Ekki tókst að hlaða fleiri myndböndum.
+  Playlist Thumbnail: "Smámynd spilunarlista"
+  Restore Default Thumbnail: "Endurheimta sjálfgefna smámynd"
 History:
   Delete Old Compact: "Eyða gömlu"
   Repair Compact: "Lagfæra"

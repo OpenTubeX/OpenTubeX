@@ -44,6 +44,17 @@ async function loadClient(env, version, requests, nativeRequest, browserRequest,
   return vm.runInContext(`new SyncServerClient(${JSON.stringify(serverUrl)})`, context)
 }
 
+test('legacy playlist updates explicitly clear a custom thumbnail', async () => {
+  const requests = []
+  const client = await loadClient({ IS_ELECTRON: true }, '0.36.0', requests)
+  await client.updatePlaylist('cover', { title: 'Cover', description: '', thumbnail_url: null })
+  assert.equal(requests.at(-1).method, 'PATCH')
+  assert.equal(JSON.parse(requests.at(-1).body).thumbnail_url, '')
+  const image = 'data:image/webp;base64,dGVzdA=='
+  await client.updatePlaylist('cover', { title: 'Cover', description: '', thumbnail_url: image })
+  assert.equal(JSON.parse(requests.at(-1).body).thumbnail_url, image)
+})
+
 for (const [operation, run] of [
   ['small collection upload', client => client.putEncryptedSyncCollection('settings', 1, 'encrypted')],
   ['manifest', client => client.getEncryptedSyncManifest()],

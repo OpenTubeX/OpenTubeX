@@ -204,6 +204,8 @@ User Playlists:
     Retry: Επανάληψη
     This playlist could not be loaded.: Δεν ήταν δυνατή η φόρτωση αυτής της λίστας αναπαραγωγής.
     More videos could not be loaded.: Δεν ήταν δυνατή η φόρτωση περισσότερων βίντεο.
+  Playlist Thumbnail: "Μικρογραφία λίστας αναπαραγωγής"
+  Restore Default Thumbnail: "Επαναφορά προεπιλεγμένης μικρογραφίας"
 History:
   Delete Old Compact: "Διαγραφή παλιών"
   Repair Compact: "Επιδιόρθωση"

@@ -325,6 +325,8 @@ User Playlists:
       There is already a playlist with this name. Please pick a different name.: Seznam predvajanja s tem imenom že obstaja. Izberite drugo ime.
       Playlist {playlistName} has been successfully created.: Seznam predvajanja {playlistName} je uspešno ustvarjen.
       There was an issue with creating the playlist.: Pri ustvarjanju seznama predvajanja je prišlo do težave.
+  Playlist Thumbnail: "Sličica seznama predvajanja"
+  Restore Default Thumbnail: "Obnovi privzeto sličico"
 History:
   Delete Old Compact: "Izbriši stare"
   Repair Compact: "Popravi"

@@ -232,6 +232,8 @@ User Playlists:
     Search in Playlists: Buscar en listas de reproducción
     Toast:
       Video(s) added to {playlistCount} playlists: Video(s) agregado(s) a 1 lista de reproducción | Video(s) agregado(s) a {playlistCount} listas de reproducción | Video(s) agregado(s) a {playlistCount} listas de reproducción
+  Playlist Thumbnail: "Miniatura de la lista de reproducción"
+  Restore Default Thumbnail: "Restaurar miniatura predeterminada"
 History:
   Delete Old Compact: "Borrar antiguos"
   Repair Compact: "Reparar"
