@@ -1096,7 +1096,7 @@ async function handleRemoveDeadVideosPromptAnswer(option) {
   showRemoveDeadVideosPrompt.value = false
   if (option !== 'delete') return
   const playlist = selectedUserPlaylist.value
-  const videos = playlist.videos.filter(video => !deadVideoItemIds.value.has(video.playlistItemId))
+  const videos = playlist.videos.filter(video => video?.playlistItemId == null || !deadVideoItemIds.value.has(video.playlistItemId))
   const removed = playlist.videos.length - videos.length
   if (removed === 0) return
   const saved = await store.dispatch('updatePlaylist', { ...playlist, videos })

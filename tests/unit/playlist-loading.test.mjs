@@ -613,3 +613,23 @@ for (const name of ['FtListPlaylist', 'FtPlaylistSelector', 'Home']) {
     }
   })
 }
+
+test('portable unavailable confirmation keeps unsupported members while removing only the selected identified member', async () => {
+  const preserved = [null, false, 42, 'retained', [], new Date(1), { unknown: true }, { videoId: 'unidentified', unknown: new Date(2) }, { videoId: 'kept', playlistItemId: 'kept', unknown: new Date(3) }]
+  const dead = { videoId: 'unavailable', playlistItemId: 'dead', unknown: new Date(4) }
+  const original = { _id: 'p', playlistName: 'Retained', videos: [...preserved, dead], unknown: new Date(5) }
+  const { db, dispatch } = await fixture([original])
+  const component = await readFile(new URL('../../src/renderer/components/PlaylistInfo/PlaylistInfo.vue', import.meta.url), 'utf8')
+  const script = parse(component).descriptor.scriptSetup.content
+  const node = babelParse(script, { sourceType: 'module' }).program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'handleRemoveDeadVideosPromptAnswer')
+  const selected = ref(new Set([undefined, 'dead']))
+  const action = vm.runInNewContext(`(${script.slice(node.start, node.end)})`, {
+    process: { env: { IS_ELECTRON: false } }, showRemoveDeadVideosPrompt: ref(true), selectedUserPlaylist: ref(structuredClone(original)), deadVideoItemIds: selected, props: { id: 'p' },
+    DBLibraryHandlers: { query: async () => db.playlists.findOneAsync({ _id: 'p' }) }, store: { dispatch }, showToast() {}, t: key => key,
+  })
+  await action('delete')
+  const saved = await db.playlists.findOneAsync({ _id: 'p' })
+  assert.deepEqual(saved, { ...original, videos: preserved, lastUpdatedAt: saved.lastUpdatedAt })
+  assert.equal(Number.isFinite(saved.lastUpdatedAt), true)
+  assert.equal(selected.value.size, 0)
+})
