@@ -17,50 +17,53 @@ async function expectEvenFocusBorder(app, page, field, outlineSelector) {
     return outline.getAnimations().length
   }, outlineSelector)).toBe(0)
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
-  const geometry = await field.evaluate((element, { outlineSelector, restingLabel }) => {
-    const bounds = element.getBoundingClientRect()
-    const outline = element.parentElement.querySelector(outlineSelector)
-    const color = getComputedStyle(outline).borderTopColor.match(/\d+/g).slice(0, 3).map(Number)
-    const legend = outline.querySelector('legend').getBoundingClientRect()
-    const label = outline.querySelector('label').getBoundingClientRect()
-    if (Math.abs(label.x - restingLabel.x) > 0.1 || Math.abs(label.y - restingLabel.y) > 0.1) {
-      throw new Error('The floating label moved when focusing the field')
-    }
-    return {
-      left: bounds.left,
-      right: bounds.right,
-      top: bounds.top,
-      bottom: bounds.bottom,
-      x: (legend.right + bounds.right) / 2,
-      radius: parseFloat(getComputedStyle(outline).borderTopLeftRadius),
-      color,
-      pixelRatio: devicePixelRatio
-    }
-  }, { outlineSelector, restingLabel })
-  // Playwright screenshots can use unzoomed coordinates in Electron. Sample
-  // the actual framebuffer and convert CSS coordinates to physical pixels.
-  const thicknesses = await app.electronApp.evaluate(async ({ BrowserWindow }, geometry) => {
-    const image = await BrowserWindow.getAllWindows()[0].webContents.capturePage()
-    const { width } = image.getSize()
-    const pixels = image.toBitmap()
-    const scale = geometry.pixelRatio
-    const matches = (x, y) => {
-      const offset = (Math.round(y) * width + Math.round(x)) * 4
-      return geometry.color.every((channel, index) => Math.abs(channel - pixels[offset + 2 - index]) < 40)
-    }
-    const vertical = edge => Array.from({ length: 13 }, (_, offset) => matches(geometry.x * scale, edge * scale + offset - 6)).filter(Boolean).length
-    const horizontal = (edge, y) => Array.from({ length: 13 }, (_, offset) => matches(edge * scale + offset - 6, y * scale)).filter(Boolean).length
-    // Native fieldsets reserve space above the painted border for the legend.
-    // Sample every row along both straight sides, excluding rounded corners.
-    const sides = []
-    for (let y = geometry.top + geometry.radius + 1; y < geometry.bottom - geometry.radius - 1; y += 1 / scale) {
-      sides.push(horizontal(geometry.left, y), horizontal(geometry.right, y))
-    }
-    return [vertical(geometry.top), vertical(geometry.bottom), ...sides]
-  }, geometry)
-  expect(Math.min(...thicknesses), JSON.stringify({ thicknesses, geometry })).toBeGreaterThanOrEqual(Math.floor(2 * geometry.pixelRatio))
-  expect(Math.max(...thicknesses), JSON.stringify(thicknesses)).toBeLessThanOrEqual(Math.ceil(2 * geometry.pixelRatio))
-  expect(Math.max(...thicknesses) - Math.min(...thicknesses), `top, bottom, side rows: ${thicknesses}`).toBeLessThanOrEqual(1)
+  // The framebuffer can lag behind DOM styles after focus, resize or an overlay transition.
+  await expect(async () => {
+    const geometry = await field.evaluate((element, { outlineSelector, restingLabel }) => {
+      const bounds = element.getBoundingClientRect()
+      const outline = element.parentElement.querySelector(outlineSelector)
+      const color = getComputedStyle(outline).borderTopColor.match(/\d+/g).slice(0, 3).map(Number)
+      const legend = outline.querySelector('legend').getBoundingClientRect()
+      const label = outline.querySelector('label').getBoundingClientRect()
+      if (Math.abs(label.x - restingLabel.x) > 0.1 || Math.abs(label.y - restingLabel.y) > 0.1) {
+        throw new Error('The floating label moved when focusing the field')
+      }
+      return {
+        left: bounds.left,
+        right: bounds.right,
+        top: bounds.top,
+        bottom: bounds.bottom,
+        x: (legend.right + bounds.right) / 2,
+        radius: parseFloat(getComputedStyle(outline).borderTopLeftRadius),
+        color,
+        pixelRatio: devicePixelRatio
+      }
+    }, { outlineSelector, restingLabel })
+    // Playwright screenshots can use unzoomed coordinates in Electron. Sample
+    // the actual framebuffer and convert CSS coordinates to physical pixels.
+    const thicknesses = await app.electronApp.evaluate(async ({ BrowserWindow }, geometry) => {
+      const image = await BrowserWindow.getAllWindows()[0].webContents.capturePage()
+      const { width } = image.getSize()
+      const pixels = image.toBitmap()
+      const scale = geometry.pixelRatio
+      const matches = (x, y) => {
+        const offset = (Math.round(y) * width + Math.round(x)) * 4
+        return geometry.color.every((channel, index) => Math.abs(channel - pixels[offset + 2 - index]) < 40)
+      }
+      const vertical = edge => Array.from({ length: 13 }, (_, offset) => matches(geometry.x * scale, edge * scale + offset - 6)).filter(Boolean).length
+      const horizontal = (edge, y) => Array.from({ length: 13 }, (_, offset) => matches(edge * scale + offset - 6, y * scale)).filter(Boolean).length
+      // Native fieldsets reserve space above the painted border for the legend.
+      // Sample every row along both straight sides, excluding rounded corners.
+      const sides = []
+      for (let y = geometry.top + geometry.radius + 1; y < geometry.bottom - geometry.radius - 1; y += 1 / scale) {
+        sides.push(horizontal(geometry.left, y), horizontal(geometry.right, y))
+      }
+      return [vertical(geometry.top), vertical(geometry.bottom), ...sides]
+    }, geometry)
+    expect(Math.min(...thicknesses), JSON.stringify({ thicknesses, geometry })).toBeGreaterThanOrEqual(Math.floor(2 * geometry.pixelRatio))
+    expect(Math.max(...thicknesses), JSON.stringify(thicknesses)).toBeLessThanOrEqual(Math.ceil(2 * geometry.pixelRatio))
+    expect(Math.max(...thicknesses) - Math.min(...thicknesses), `top, bottom, side rows: ${thicknesses}`).toBeLessThanOrEqual(1)
+  }).toPass({ timeout: 5000 })
 }
 
 for (const uiScale of [100, 95]) {

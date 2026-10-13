@@ -143,6 +143,7 @@
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
+  margin-inline-start: auto;
 }
 
 .headingActions > .btn {

@@ -3,7 +3,7 @@ import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 for (const zoom of [1, 1.25]) {
-  test(`playlist creation stays at the heading edge at ${zoom} scale`, async ({ app, page }) => {
+  test(`playlist creation stays at the heading edge at ${zoom} scale`, async ({ app, page, attachScreenshot }) => {
     await goTo(page, 'userplaylists')
     await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
     for (const width of [375, 850, 1280]) {
@@ -13,6 +13,7 @@ for (const zoom of [1, 1.25]) {
         const heading = element.closest('.heading').getBoundingClientRect()
         return Math.abs(heading.right - button.right)
       })).toBeLessThan(1)
+      if (width === 375) await attachScreenshot('playlist heading at 375px')
     }
     await page.getByRole('button', { name: /^Create new playlist$/i }).click()
     await expect(page.getByRole('dialog')).toBeVisible()
