@@ -1880,8 +1880,16 @@ test.describe('deleted first playing member', () => {
 
 test.describe('Watch playlist metadata repair', () => {
   const members = ['jNQXAC9IVRw', 'abcdefghijk', 'bcdefghijkl'].map((videoId, index) => ({
-    videoId, playlistItemId: `repair-${index}`, title: `Repair member ${index}`, author: 'Channel', authorId: 'channel', published: 1,
-    lengthSeconds: [50, 0, 100][index], isLive: false, isUpcoming: false, unknown: { retained: index },
+    videoId,
+    playlistItemId: `repair-${index}`,
+    title: `Repair member ${index}`,
+    author: 'Channel',
+    authorId: 'channel',
+    published: 1,
+    lengthSeconds: [50, 0, 100][index],
+    isLive: false,
+    isUpcoming: false,
+    unknown: { retained: index },
   }))
   const retained = { _id: 'repair-order', playlistName: 'Repair order', protected: false, createdAt: 1, lastUpdatedAt: 1, videos: members }
   test.use({ seed: { settings: { historyWatchedStatusMigrated: true, historyRetentionDays: 0, userPlaylistSortOrder: 'video_duration_ascending', uiScale: 95, videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true }, history: [], playlists: [retained], watchStats: [{ _id: 'history-watch-time-v1' }] } })
@@ -1921,9 +1929,10 @@ test.describe('retained full-record playlist counts', () => {
       store.state.playlists.libraryPaged = false
       store.state.playlists.playlists = [saved]
     }, saved)
-    await goTo(page, 'playlists')
-    await useFullRecord()
+    await goTo(page, 'userplaylists')
     const card = page.locator('.ft-list-item').filter({ has: page.locator('.h3Title', { hasText: saved.playlistName }) })
+    await expect(card).toBeVisible()
+    await useFullRecord()
     await expect(card.locator('.videoCountContainer')).toContainText('2')
     await card.screenshot({ path: testInfo.outputPath('retained-full-record-card-count-95.png') })
     await goTo(page, 'history')
