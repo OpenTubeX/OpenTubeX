@@ -2727,3 +2727,45 @@ test('Watch requests playable-only neighbors when moving its filtered desktop pl
   await context.moveVideo('A', undefined, 1, 'member')
   assert.deepEqual(calls, [{ method: 'movePlaylistMember', data: { id: 'p', memberId: 'member', direction: 1, revision: 2, playableOnly: true } }])
 })
+
+
+test('portable backup export completes its picked file after Data Settings closes', async () => {
+  const { createUnifiedBackup, readUnifiedBackup } = await import('../../src/renderer/helpers/unifiedBackup.js')
+  const db = new Datastore({ inMemoryOnly: true })
+  const playlist = { _id: 'p', playlistName: 'Retained', videos: [{ videoId: 'A', unknown: new Date(2) }], unknown: new Date(1) }
+  await db.insertAsync(playlist)
+  const pending = Promise.withResolvers()
+  let reading = false, written, opened = 0, closed = 0
+  const writer = await functions('src/renderer/helpers/utils.js', ['writeFileWithPicker'], {
+    process: { env: { IS_ELECTRON: false, IS_CAPACITOR: false } },
+    window: { showSaveFilePicker: async () => ({ createWritable: async () => {
+      opened++
+      return { write: async data => { written = data; if (data === null) throw new Error('Invalid export content') }, close: async () => { closed++ } }
+    } }) },
+  })
+  const toasts = []
+  const context = await functions(dataSettings, ['exportUnifiedBackup', 'closeBackupImport', 'disposeBackupImport'], {
+    process: { env: { IS_ELECTRON: false } },
+    backupDisposed: false, backupImportGeneration: 0, backupWriteGeneration: null,
+    backupBusy: ref(false), selectedExportSections: ref(['playlists']), showBackupExport: ref(true),
+    backupData: ref(null), showBackupImport: ref(false),
+    getTodayDateStrLocalTimezone: () => '2026-10-13', START_IN_DIRECTORY: 'downloads',
+    DBPlaylistHandlers: { find: async () => { reading = true; await pending.promise; return db.findAsync({}) } },
+    createUnifiedBackup, promptAndWriteToFile: writer.writeFileWithPicker,
+    t: key => key, showToast: toast => toasts.push(toast),
+  })
+  const exporting = context.exportUnifiedBackup()
+  await setImmediate()
+  assert.equal(reading, true)
+  context.disposeBackupImport()
+  assert.equal(context.backupBusy.value, true)
+  pending.resolve()
+  await exporting
+  assert.ok(written instanceof Blob, 'a picked destination must receive the complete backup, never null')
+  assert.deepEqual((await readUnifiedBackup(written)).data, { playlists: [playlist] })
+  assert.equal(opened, 1)
+  assert.equal(closed, 1)
+  assert.equal(context.backupBusy.value, false)
+  assert.deepEqual(toasts, [])
+  assert.deepEqual(await db.findAsync({}), [playlist])
+})

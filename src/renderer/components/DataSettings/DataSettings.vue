@@ -454,7 +454,6 @@ async function exportUnifiedBackup() {
           },
         }
         const entries = await Promise.all(selected.map(async section => [section, await readers[section]()]))
-        if (!requestIsCurrent()) return null
         return createUnifiedBackup(Object.fromEntries(entries))
       },
       t('Settings.Data Settings.Complete backup'), 'application/zip', '.zip',
