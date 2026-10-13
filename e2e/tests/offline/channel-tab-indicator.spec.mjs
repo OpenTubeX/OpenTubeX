@@ -56,9 +56,9 @@ async function expectAligned(page) {
   })).toBeLessThan(2)
 }
 
-test('vertically centers empty channel messages across tabs, widths, and UI scales', async ({ app, page }) => {
-  const card = page.locator('.channelContent:visible')
-  for (const [width, scale] of [[1600, 100], [375, 95], [812, 125]]) {
+for (const [width, scale] of [[1600, 100], [375, 95], [812, 125]]) {
+  test(`vertically centers empty channel messages at ${width}px and ${scale}% UI scale`, async ({ app, page }) => {
+    const card = page.locator('.channelContent:visible')
     await app.electronApp.evaluate(({ BrowserWindow }, width) => {
       BrowserWindow.getAllWindows()[0].setSize(width, 900)
     }, width)
@@ -78,8 +78,8 @@ test('vertically centers empty channel messages across tabs, widths, and UI scal
       expect.soft(layout.offset, `${tab} at ${width}px and ${scale}% scale`).toBeLessThanOrEqual(1)
       expect.soft(layout.fits, `${tab} text fits at ${width}px`).toBe(true)
     }
-  }
-})
+  })
+}
 
 async function expectTabScrollRange(tabs) {
   await expect.poll(() => tabs.evaluate(container => {
