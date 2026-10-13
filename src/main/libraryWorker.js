@@ -66,7 +66,7 @@ parentPort.on('message', request => {
           // fail promptly instead of blocking its next chunk behind a vacuum.
           if (exports.jobs.size) throw new Error('Finish or cancel the current library export before compacting storage')
           result = engine.compact()
-        } else if (method === 'checkpoint') { engine.database.exec('PRAGMA wal_checkpoint(PASSIVE)'); result = true } else if (['historyPage', 'playlistSummaries', 'playlistPage', 'videoState', 'historySummary', 'continuedHistoryPage', 'playlistSnapshot', 'playlistWindow', 'playlistStatistics', 'movePlaylistMember', 'cleanupPlaylist', 'reorderPlaylistMembers'].includes(method)) result = await engine[method](...args)
+        } else if (method === 'checkpoint') { engine.database.exec('PRAGMA wal_checkpoint(PASSIVE)'); result = true } else if (['historyChannels', 'historyPage', 'playlistSummaries', 'playlistPage', 'videoState', 'historySummary', 'continuedHistoryPage', 'playlistSnapshot', 'playlistWindow', 'playlistStatistics', 'movePlaylistMember', 'cleanupPlaylist', 'reorderPlaylistMembers'].includes(method)) result = await engine[method](...args)
         else throw new Error('Unknown library request')
       } else {
         result = await engine.transaction(async () => {
