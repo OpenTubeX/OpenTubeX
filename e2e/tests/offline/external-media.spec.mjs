@@ -55,14 +55,12 @@ for (const live of [false, true]) {
     const mediaUrl = live ? 'https://www.twitch.tv/example_streamer' : 'https://www.twitch.tv/videos/123456789'
     const creatorUrl = 'https://www.twitch.tv/example_streamer'
     const avatarUrl = 'https://static-cdn.jtvnw.net/profile_image-300x300.png'
-    await app.electronApp.evaluate(({ net }, { creatorUrl, avatarUrl }) => {
+    await app.electronApp.evaluate(({ net }, avatarUrl) => {
       const originalFetch = net.fetch.bind(net)
-      net.fetch = (url, options) => url === creatorUrl
-        ? Promise.resolve(new Response(`<meta property="og:image" content="${avatarUrl}">`, {
-            headers: { 'content-type': 'text/html' }
-          }))
+      net.fetch = (url, options) => url === 'https://gql.twitch.tv/gql' && JSON.parse(options.body).variables?.login === 'example_streamer'
+        ? Promise.resolve(Response.json({ data: { user: { profileImageURL: avatarUrl } } }))
         : originalFetch(url, options)
-    }, { creatorUrl, avatarUrl })
+    }, avatarUrl)
     await page.route(avatarUrl, route => fulfillVisualFixture(route, 'avatar'))
     await prepareTwitchYtDlp(app, page, mediaUrl, live, '', [], 30, {
       uploader: 'example_streamer',

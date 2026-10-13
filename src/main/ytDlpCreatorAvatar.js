@@ -1,3 +1,5 @@
+import { TWITCH_CHAT_CLIENT_ID } from '../twitchChatReplayRequest.js'
+
 /**
  * Resolve a creator image from yt-dlp metadata or a public creator profile.
  * Only known first-party endpoints are requested; arbitrary extractor URLs
@@ -54,14 +56,24 @@ export async function resolveYtDlpCreatorAvatarUrl(info, fetchPage) {
   if (!profileUrl) return null
 
   try {
-    const response = await fetchPage(profileUrl, {
+    const response = await fetchPage(source === 'twitch' ? 'https://gql.twitch.tv/gql' : profileUrl, {
       credentials: 'omit',
       redirect: 'manual',
-      signal: AbortSignal.timeout(3000)
+      signal: AbortSignal.timeout(3000),
+      ...(source === 'twitch'
+        ? {
+            method: 'POST',
+            headers: { 'Client-ID': TWITCH_CHAT_CLIENT_ID, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              query: 'query($login: String!) { user(login: $login) { profileImageURL(width: 300) } }',
+              variables: { login: new URL(profileUrl).pathname.slice(1) }
+            })
+          }
+        : {})
     })
     if (!response.ok || Number(response.headers.get('content-length')) > 1_000_000) return null
     const contentType = response.headers.get('content-type') ?? ''
-    if (!contentType.includes(source === 'dailymotion' ? 'application/json' : 'text/html')) return null
+    if (!contentType.includes(['dailymotion', 'twitch'].includes(source) ? 'application/json' : 'text/html')) return null
     if (!response.body) return null
     const reader = response.body.getReader()
     const decoder = new TextDecoder()
@@ -86,6 +98,9 @@ export async function resolveYtDlpCreatorAvatarUrl(info, fetchPage) {
     if (source === 'dailymotion') {
       return httpsUrl(JSON.parse(body).avatar_360_url)
     }
+    if (source === 'twitch') {
+      return httpsUrl(JSON.parse(body)?.data?.user?.profileImageURL)
+    }
     if (source === 'tiktok') {
       const script = body.match(/<script\b[^>]*\bid=["']__UNIVERSAL_DATA_FOR_REHYDRATION__["'][^>]*>([\s\S]*?)<\/script>/i)?.[1]
       const avatar = script?.match(/"avatarThumb":"((?:\\.|[^"\\])*)"/)?.[1]
@@ -96,7 +111,6 @@ export async function resolveYtDlpCreatorAvatarUrl(info, fetchPage) {
       /\b(?:property|name)=["']og:image["']/i.test(tag))?.[0]
     const imageUrl = httpsUrl(imageMeta?.match(/\bcontent=["']([^"']+)/i)?.[1]?.replaceAll('&amp;', '&'))
     if (source === 'soundcloud' && !imageUrl?.includes('/avatars-')) return null
-    if (source === 'twitch' && !imageUrl?.includes('profile_image')) return null
     return imageUrl
   } catch {
     return null
