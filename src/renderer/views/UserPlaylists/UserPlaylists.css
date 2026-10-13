@@ -34,6 +34,7 @@
 }
 
 .playlistList :deep(.ft-list-item.grid) {
+  min-block-size: 0;
   padding-block: 6px;
 }
 
