@@ -455,10 +455,10 @@ test('playlist renderer excludes pending undo memberships outside its reloaded f
   assert.ok(start >= 0 && end > start, 'playlist move source markers must exist in order')
   const move = vm.runInNewContext(source.slice(start, end) + '\nmoveUserVideo', {
     process: { env: { IS_ELECTRON: true } }, console,
-    playlistItems: ref(first.records), playlistId: ref('playlist'), userPageRevision: first.revision,
+    playlistItems: ref(first.records), playlistId: ref('playlist'), userPageRevision: first.revision, playlistReordering: ref(false), playlistOrderReady: ref(true), userPlaylistVisibleLimit: ref(100),
     toBeDeletedPlaylistItemIds: ref([pending._libraryMemberId]), selectedUserPlaylist: ref({ _id: 'playlist' }),
     DBLibraryHandlers: { query: (_method, options) => engine.movePlaylistMember(options) },
-    store: { dispatch: async () => {} }, parseUserPlaylist: async () => {},
+    store: { getters: { getPlaylist: () => ({ _id: 'playlist' }) }, dispatch: async () => {} }, parseUserPlaylist: async () => {},
   })
   const lastLoaded = first.records.at(-1)
   await move(lastLoaded.videoId, lastLoaded.playlistItemId, 1, lastLoaded._libraryMemberId)

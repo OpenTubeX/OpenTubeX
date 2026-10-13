@@ -204,7 +204,7 @@ for (const platform of ['browser', 'android', 'ios']) {
         'playlistItems', 'firstVideoId', 'firstVideoPlaylistItemId', 'playlistTitle', 'playlistDescription',
         'lastUpdatedDate', 'viewCount', 'channelName', 'channelThumbnail', 'channelId', 'infoSource',
         'userPlaylistPreloadIds', 'userPlaylistVisibleLimit', 'playlistError', 'nextPageError',
-        'playlistErrorRetryable', 'isLoading', 'isLoadingMore', 'playlistPage',
+        'playlistErrorRetryable', 'isLoading', 'isLoadingMore', 'playlistPage', 'playlistOrderReady',
       ].map(name => [name, ref(name === 'playlistItems' ? [] : null)]))
       const state = reactive({ history: { historyRevision: 0 } })
       const pending = []
