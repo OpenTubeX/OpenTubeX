@@ -194,6 +194,45 @@ for (const uiScale of [100, 125]) {
       }
     })
 
+    test('blurred playlist thumbnails stay inside their rounded frame', async ({ app, page }, testInfo) => {
+      await openPlaylist(page)
+      await updateSetting(page, 'updatePlaylistViewType', 'list')
+      await resize(app, page, 1440, uiScale)
+      const frame = page.locator('.playlistInfo .playlistThumbnail')
+      const image = frame.locator('img')
+      await expectImagesLoaded(image)
+      // Electron's screenshot clips use coordinates before its UI zoom is applied.
+      const screenshotScale = uiScale / 100
+      for (const roundness of [100, 0, 50, 200]) {
+        await updateSetting(page, 'updateUiRoundness', roundness)
+        await updateSetting(page, 'updateBlurThumbnails', false)
+        const box = await image.boundingBox()
+        const outsideFrame = {
+          x: (box.x + box.width + 2) * screenshotScale,
+          y: (box.y + box.height / 2) * screenshotScale,
+          width: 4 * screenshotScale,
+          height: 4 * screenshotScale
+        }
+        const background = await page.screenshot({ clip: outsideFrame, animations: 'disabled', scale: 'css' })
+        await updateSetting(page, 'updateBlurThumbnails', true)
+        await expect(image).toHaveCSS('filter', 'blur(20px)')
+        const blurredBackground = await page.screenshot({ clip: outsideFrame, animations: 'disabled', scale: 'css' })
+        expect(blurredBackground, `roundness ${roundness}: blur must not paint outside the frame`).toEqual(background)
+        await expect(frame).toHaveCSS('border-radius', `${8 * roundness / 100}px`, { timeout: 1000 })
+        const frameBox = await frame.boundingBox()
+        expect(frameBox.height).toBeCloseTo(box.height, 0)
+      }
+      for (const colorScheme of ['dark', 'light']) {
+        await page.emulateMedia({ colorScheme })
+        await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+        const box = await frame.boundingBox()
+        await page.screenshot({
+          path: testInfo.outputPath(`rounded-blurred-playlist-${colorScheme}.png`),
+          clip: { x: (box.x - 8) * screenshotScale, y: (box.y - 8) * screenshotScale, width: (box.width + 16) * screenshotScale, height: (box.height + 16) * screenshotScale }
+        })
+      }
+    })
+
     test('playlist count overlay follows thumbnail corners in search and saved playlists', async ({ app, page }, testInfo) => {
       await page.route('https://invidious.test/vi/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
       await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
