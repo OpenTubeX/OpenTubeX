@@ -12,6 +12,7 @@ const performanceTests = [
 
 export default defineConfig({
   testDir: './tests',
+  globalSetup: './global-setup.mjs',
   outputDir: './results',
   fullyParallel: true,
   timeout: 60_000,
