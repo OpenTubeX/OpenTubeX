@@ -187,6 +187,19 @@ test('retained subscription highlights stay aligned in the Watch minimize previe
     await navigation.evaluate(navigation => navigation.clearMinimizePreview())
     await expect(preview).not.toHaveClass(/watchPreviewing/)
   }
+  // A laid-out browsing page must clear its highlight if settings remove every
+  // feed, even while Watch still owns presentation.
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await Promise.all(['Videos', 'Shorts', 'Live', 'Community']
+      .map(feed => store.dispatch(`updateHideSubscriptions${feed}`, true)))
+  })
+  await navigation.evaluate(navigation => navigation.beginMinimizePreview())
+  await expect(preview).toHaveClass(/watchPreviewing/)
+  await expect(tabs.locator('[role="tab"]')).toHaveCount(0)
+  await expect(tabs.locator('.tabsIndicator, .tabsIndicatorOutgoing')).toHaveCount(0)
+  await expect(page).toHaveURL(new RegExp(`#/watch/${watchHistoryEntry.videoId}`))
+  await navigation.evaluate(navigation => navigation.clearMinimizePreview())
   await navigation.dispose()
 })
 

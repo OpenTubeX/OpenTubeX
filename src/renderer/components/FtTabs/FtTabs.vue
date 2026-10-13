@@ -68,7 +68,7 @@ function updateIndicator() {
     // Browsing pages behind Watch still have layout boxes: measure them so the
     // minimize preview reveals an aligned pill, without a selection crossfade.
     previousSelected = null
-    if (inactive || !selected?.getClientRects().length) return
+    if (inactive || !container?.getClientRects().length) return
   }
   if (!selected?.getClientRects().length) {
     hideIndicator()
