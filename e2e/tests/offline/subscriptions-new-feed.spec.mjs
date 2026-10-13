@@ -906,7 +906,12 @@ test.describe('new subscriptions feed', () => {
         SyncServerSyncSettings: false,
         SyncServerSyncSessions: false,
       }
-      for (const [setting, value] of Object.entries(settings)) store.commit(`set${setting}`, value)
+      // Persist the account before syncing: desktop acknowledgement guards read
+      // durable settings, just as they do for changes made through Settings.
+      for (const [setting, value] of Object.entries(settings)) {
+        if (setting !== 'SyncServerEnabled') await store.dispatch(`update${setting}`, value)
+      }
+      await store.dispatch('updateSyncServerEnabled', settings.SyncServerEnabled)
       const historyBefore = JSON.stringify(store.getters.getHistoryCacheSorted)
       await store.dispatch('syncWithSyncServer')
       return {
