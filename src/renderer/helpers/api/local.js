@@ -1,5 +1,6 @@
 import { normalizeCommentFetchResponse } from './local-comment-response'
 import { createLocalFeedParsers } from './local-feed-parsers'
+import { createOriginalChannelNameResolver } from './original-channel-name'
 import { runBackgroundJob } from '../background-jobs.js'
 import { ClientType, Constants, Innertube, Mixins, Parser, Platform, Player, Session, UniversalCache, Utils, YT, YTNodes } from 'youtubei.js'
 import Autolinker from 'autolinker'
@@ -59,6 +60,8 @@ export async function localApiFetch(input, init) {
 
   return await fetch(input, init)
 }
+
+export const getOriginalChannelName = createOriginalChannelNameResolver(localApiFetch)
 
 if (process.env.SUPPORTS_LOCAL_API) {
   Platform.shim.eval = evaluatePlayerScript

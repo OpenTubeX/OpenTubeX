@@ -86,7 +86,7 @@
 
 <script setup>
 import FtRetryImage from '../FtRetryImage.vue'
-import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 
 import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'
 import { vSaferHtml } from '../../directives/vSaferHtml'
@@ -94,6 +94,7 @@ import { vSaferHtml } from '../../directives/vSaferHtml'
 import store from '../../store/index'
 
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
+import { getOriginalChannelName } from '../../helpers/api/local'
 import { formatNumber } from '../../helpers/utils'
 
 const props = defineProps({
@@ -157,7 +158,7 @@ onBeforeUnmount(() => metadataResizeObserver?.disconnect())
 
 let id = ''
 let thumbnail = ''
-let name = ''
+const name = ref('')
 /** @type {number?} */
 let subscriberCount = null
 /** @type {number?} */
@@ -172,6 +173,22 @@ if (process.env.SUPPORTS_LOCAL_API && props.data.dataSource === 'local') {
 } else {
   parseInvidiousData()
 }
+
+watch([() => props.data, () => store.getters.getAvoidTranslation], ([data, preference], _, onCleanup) => {
+  if (!process.env.SUPPORTS_LOCAL_API || data.dataSource !== 'local') return
+  name.value = data.name
+  if (preference !== 'entire_app' || data.isGame) return
+
+  let active = true
+  onCleanup(() => { active = false })
+  getOriginalChannelName(data.id).then(originalName => {
+    if (!active || !originalName) return
+    name.value = originalName
+    if (store.getters.getSubscribedChannelIdSet.has(data.id)) {
+      store.dispatch('updateSubscriptionDetails', { channelId: data.id, channelName: originalName })
+    }
+  })
+}, { immediate: true })
 
 const formattedSubscriberCount = computed(() => {
   if (subscriberCount != null) {
@@ -191,7 +208,7 @@ const formattedVideoCount = computed(() => {
 
 function parseLocalData() {
   thumbnail = props.data.thumbnail
-  name = props.data.name
+  name.value = props.data.name
   id = props.data.id
 
   if (props.data.subscribers != null) {
@@ -217,7 +234,7 @@ function parseInvidiousData() {
 
   thumbnail = youtubeImageUrlToInvidious(thumbnailUrl, currentInvidiousInstanceUrl.value)
 
-  name = props.data.author
+  name.value = props.data.author
   id = props.data.authorId
   subscriberCount = props.data.subCount
 
