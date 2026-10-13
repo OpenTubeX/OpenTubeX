@@ -63,7 +63,13 @@ function hideIndicator() {
 function updateIndicator() {
   const container = root.value
   const selected = container?.querySelector('[role="tab"][aria-selected="true"]')
-  if (inactive || isTabPresented?.value === false || !selected?.getClientRects().length) {
+  if (inactive || isTabPresented?.value === false) {
+    // Retain the pill while its page is hidden so presenting it again does not
+    // recreate the element and replay the entrance. Reposition without a fade.
+    previousSelected = null
+    return
+  }
+  if (!selected?.getClientRects().length) {
     hideIndicator()
     return
   }
@@ -133,7 +139,7 @@ onDeactivated(() => {
   inactive = true
   resizeObserver?.disconnect()
   observedTabs = []
-  hideIndicator()
+  previousSelected = null
 })
 onBeforeUnmount(() => resizeObserver?.disconnect())
 </script>

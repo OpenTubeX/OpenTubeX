@@ -94,6 +94,60 @@ test('returning to a cached subscription feed does not replay its entrance', asy
   }
 })
 
+test('returning to subscription tabs preserves their highlight without replaying its entrance', async ({ app, page }) => {
+  await goTo(page, 'subscriptions')
+  const tabs = page.getByRole('tablist', { name: /^Subscriptions tabs$/i, includeHidden: true })
+  const indicator = tabs.locator('.tabsIndicator')
+  await expect(indicator).toBeVisible()
+  const retainedIndicator = await indicator.elementHandle()
+  await tabs.evaluate(element => {
+    window.__tabHighlightEntrances = []
+    new MutationObserver(records => {
+      for (const record of records) {
+        const elements = record.type === 'childList' ? [...record.addedNodes] : [record.target]
+        for (const node of elements) {
+          if (node instanceof Element && node.classList.contains('tabFade-enter-from')) {
+            window.__tabHighlightEntrances.push(node.className)
+          }
+        }
+      }
+    }).observe(element, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] })
+  })
+  await page.evaluate(() => window.ftElectron.tabs.create({ route: '/history', makeActive: true }))
+  await expect(page.locator(sel.tabs)).toHaveCount(2)
+
+  for (const [scale, width] of [[100, 1600], [95, 1000], [125, 600]]) {
+    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+    if (width !== 1600) await setWindowSize(app, page, { width, height: width === 1000 ? 800 : 780 })
+    for (let repeat = 0; repeat < 2; repeat++) {
+      await page.locator(sel.tabs).first().click()
+      await expect(indicator).toBeVisible()
+      await tabs.evaluate(async element => {
+        element.getAnimations({ subtree: true })
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+      })
+      expect(await page.evaluate(() => window.__tabHighlightEntrances)).toEqual([])
+      expect(await retainedIndicator.evaluate(element => element.isConnected)).toBe(true)
+      await expect(indicator).toHaveCSS('opacity', '1')
+      await expect(tabs.locator('.tabsIndicatorOutgoing')).toHaveCount(0)
+      await expect.poll(() => tabs.evaluate(element => {
+        const highlight = element.querySelector('.tabsIndicator').getBoundingClientRect()
+        const selected = element.querySelector('[aria-selected="true"]').getBoundingClientRect()
+        return Math.max(Math.abs(highlight.left - selected.left), Math.abs(highlight.right - selected.right), Math.abs(highlight.bottom - selected.bottom))
+      })).toBeLessThan(0.2)
+      await page.locator(sel.tabs).nth(1).click()
+      await expect(tabs).toBeHidden()
+    }
+  }
+
+  // Selecting a different feed still crossfades after presentation is restored.
+  await page.locator(sel.tabs).first().click()
+  await tabs.locator('[data-subscription-feed-tab="shorts"]').click()
+  await expect(tabs.locator('.tabsIndicatorOutgoing')).toHaveCount(1)
+  await expect.poll(() => indicator.evaluate(element => element.getAnimations().some(animation => animation.playState === 'running'))).toBe(true)
+  await expect(tabs.locator('.tabsIndicatorOutgoing')).toHaveCount(0)
+})
+
 test('switching application tabs snaps the active sidebar highlight', async ({ app, page }) => {
   await goTo(page, 'subscriptions')
   await page.evaluate(() => window.ftElectron.tabs.create({ route: '/history', makeActive: true }))
