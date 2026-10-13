@@ -2050,3 +2050,37 @@ test.describe('retained full-record playlist counts', () => {
     expect(await page.evaluate(() => window.ftElectron.libraryQuery('playlistSnapshot', { id: 'z-counted-empty' }))).toStrictEqual(empty)
   })
 })
+
+test.describe('retained null subscription members', () => {
+  const channelId = 'UCaaaaaaaaaaaaaaaaaaaaaa'
+  const entry = { videoId: 'abcdefghijk', title: 'Visible after retained null members', author: 'Example channel', authorId: channelId, type: 'video', lengthSeconds: 120, published: 1700000000000, viewCount: 1000 }
+  const cache = { _id: channelId, videos: [...Array(100).fill(null), entry], videosTimestamp: '2026-10-13T00:00:00.000Z', shorts: [], liveStreams: [], communityPosts: [], unknown: { retained: true } }
+  test.use({
+    seed: {
+      settings: { historyWatchedStatusMigrated: true, fetchSubscriptionsAutomatically: false, useRssFeeds: false, uiScale: 95, currentLocale: 'en_US', landingPage: 'history' },
+      history: [],
+      playlists: [],
+      watchStats: [{ _id: 'history-watch-time-v1' }],
+      profiles: [{ _id: 'allChannels', name: 'All Channels', subscriptions: [{ id: channelId, name: 'Example channel', thumbnail: '' }] }],
+      subscriptionCache: [cache],
+    }
+  })
+  test('loads a valid subscription after an opaque first page without rewriting retained members at 95% scale', async ({ app, page }, testInfo) => {
+    await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
+    await goTo(page, 'subscriptions')
+    await page.getByRole('tab', { name: 'Videos', exact: true }).click()
+    const content = page.locator('.tabContent[aria-hidden="false"]')
+    const card = content.getByText(entry.title, { exact: true })
+    const more = content.getByRole('button', { name: 'Load More Videos', exact: true })
+    await expect.poll(async () => await card.isVisible() || await more.isVisible()).toBe(true)
+    if (!await card.isVisible()) await more.click()
+    await expect(card).toBeVisible()
+    await expect(content.getByRole('button', { name: 'Retry', exact: true })).toHaveCount(0)
+    const file = path.join(app.userDataDir, 'subscription-cache.db')
+    const original = await readFile(file, 'utf8')
+    expect(original).toBe(JSON.stringify(cache) + '\n')
+    const records = (await readPersistedDatastore(file, 'utf8')).trim().split('\n').map(line => JSON.parse(line))
+    expect(records.find(record => record._id === channelId)).toStrictEqual(cache)
+    await content.screenshot({ path: testInfo.outputPath('retained-null-subscription-members-95.png') })
+  })
+})

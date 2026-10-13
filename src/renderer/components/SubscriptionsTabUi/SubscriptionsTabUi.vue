@@ -76,7 +76,7 @@
       />
     </FtFlexBox>
     <FtAutoLoadNextPageWrapper
-      v-if="activeVideoList.length > 0 && (isPaged ? pagedFeed.cursor.value !== null && !pagedFeed.failed.value : filteredVideoList.length > dataLimit)"
+      v-if="isPaged ? pagedFeed.cursor.value !== null && !pagedFeed.failed.value : activeVideoList.length > 0 && filteredVideoList.length > dataLimit"
       :key="isPaged ? pagedFeed.busy.value : null"
       :loading="isPaged && pagedFeed.busy.value"
       @load-next-page="increaseLimit"
@@ -207,7 +207,7 @@ const pagedFeed = computed(() => props.pagedFeed ?? ownFeed)
 const subscriptionEntryVersion = useSubscriptionEntryVersion()
 
 const activeVideoList = computed(() => {
-  if (isPaged) return pagedFeed.value.records.value.map(entry => reactive(entry))
+  if (isPaged) return pagedFeed.value.records.value.filter(entry => typeof entry?.videoId === 'string' || typeof entry?.postId === 'string').map(entry => reactive(entry))
   let activeEntries
   if (filteredVideoList.value.length < dataLimit.value) {
     activeEntries = filteredVideoList.value

@@ -3497,3 +3497,14 @@ test('hydrating a hot membership promotes it before bounded cache eviction', asy
   assert.ok(!Object.hasOwn(state.playlistMemberships, 'video-1'))
   assert.equal(Object.keys(state.playlistMemberships).length, 2000)
 })
+
+test('paged subscription cards omit opaque members without changing raw pagination or retained entries', async () => {
+  const source = await readFile(new URL('../../src/renderer/components/SubscriptionsTabUi/SubscriptionsTabUi.vue', import.meta.url), 'utf8')
+  const raw = [null, 'retained', false, 42, new Date(1), {}, { videoId: 42 }, { videoId: 'valid', type: 'video' }, { postId: 'post', type: 'community' }]
+  const original = structuredClone(raw)
+  const context = { computed, reactive, isPaged: true, pagedFeed: { value: { records: { value: raw } } } }
+  const select = source.slice(source.indexOf('const activeVideoList ='), source.indexOf('const activeProfileHasSubscriptions ='))
+  const cards = vm.runInNewContext(select + '\nactiveVideoList', context)
+  assert.deepEqual(cards.value.map(entry => ({ ...entry })), raw.slice(-2))
+  assert.deepEqual(raw, original)
+})
