@@ -1326,7 +1326,7 @@ test.describe('history date and channel browsing', () => {
     await scrollPageToEnd(page)
     await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      const record = store.getters.getHistoryCacheSorted.find(record => record.authorId === 'UC-walking')
+      const { records: [record] } = await window.ftElectron.libraryQuery('historyPage', { channel: 'id:UC-walking', limit: 1 })
       await store.dispatch('overwriteHistory', new Map([[record.videoId, record]]))
     })
     await expect(videos).toHaveCount(1)
