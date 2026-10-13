@@ -1875,7 +1875,7 @@ CommandPalette:
   Title: Палитра команд
   Open: Открыть палитру команд
   Search Label: Поиск команд
-  Search Placeholder: Поиск команд и настроек…
+  Search Placeholder: Поиск команд, настроек и локальных видео…
   Results: Команды
   No Results: Подходящих команд нет
   Result Count: Найдена 1 команда | Найдено {count} команды | Найдено {count} команд
@@ -1893,6 +1893,7 @@ CommandPalette:
     App: Приложение
     Navigation: Навигация
     Tabs: Вкладки
+    Local Videos: Локальные видео
   Unavailable:
     Current Page: Эта страница уже открыта
     No History: В истории нет страницы в этом направлении

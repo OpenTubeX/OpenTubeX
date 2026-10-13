@@ -1912,7 +1912,7 @@ CommandPalette:
   Title: கட்டளைத் தட்டு
   Open: கட்டளைத் தட்டைத் திற
   Search Label: கட்டளைகளைத் தேடு
-  Search Placeholder: கட்டளைகளையும் அமைப்புகளையும் தேடு…
+  Search Placeholder: கட்டளைகள், அமைப்புகள் மற்றும் உள்ளூர் காணொளிகளைத் தேடுங்கள்…
   Results: கட்டளைகள்
   No Results: பொருந்தும் கட்டளைகள் இல்லை
   Result Count: 1 கட்டளை கிடைத்தது | {count} கட்டளைகள் கிடைத்தன
@@ -1930,6 +1930,7 @@ CommandPalette:
     App: செயலி
     Navigation: வழிசெலுத்தல்
     Tabs: தாவல்கள்
+    Local Videos: உள்ளூர் காணொளிகள்
   Unavailable:
     Current Page: ஏற்கெனவே இந்தப் பக்கத்தில் உள்ளீர்கள்
     No History: இந்தத் திசையில் பக்கம் இல்லை

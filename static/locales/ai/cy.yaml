@@ -1883,7 +1883,7 @@ CommandPalette:
   Title: Palet gorchmynion
   Open: Agor y palet gorchmynion
   Search Label: Chwilio gorchmynion
-  Search Placeholder: Chwilio gorchmynion a gosodiadau…
+  Search Placeholder: Chwilio gorchmynion, gosodiadau a fideos lleol…
   Results: Gorchmynion
   No Results: Dim gorchmynion cyfatebol
   Result Count: 'Wedi canfod {count} o orchmynion | Wedi canfod 1 gorchymyn | Wedi canfod {count} orchymyn | Wedi canfod {count} gorchymyn | Wedi canfod {count} gorchymyn | Wedi canfod {count} o orchmynion'
@@ -1901,6 +1901,7 @@ CommandPalette:
     App: Ap
     Navigation: Llywio
     Tabs: Tabiau
+    Local Videos: Fideos lleol
   Unavailable:
     Current Page: Ar y dudalen hon eisoes
     No History: Dim tudalen i'r cyfeiriad hwn

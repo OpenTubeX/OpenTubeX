@@ -2294,7 +2294,7 @@ CommandPalette:
   Title: Paleta de comandos
   Open: Abrir paleta de comandos
   Search Label: Buscar comandos
-  Search Placeholder: Buscar comandos y ajustes…
+  Search Placeholder: Buscar comandos, ajustes y videos locales…
   Results: Comandos
   No Results: No hay comandos coincidentes
   Result Count: Se ha encontrado 1 comando | Se han encontrado {count} comandos | Se han encontrado {count} comandos
@@ -2312,6 +2312,7 @@ CommandPalette:
     App: Aplicación
     Navigation: Navegación
     Tabs: Pestañas
+    Local Videos: Videos locales
   Unavailable:
     Current Page: Ya estás en esta página
     No History: No hay ninguna página en esta dirección

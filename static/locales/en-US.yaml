@@ -3081,7 +3081,7 @@ CommandPalette:
   Title: Command palette
   Open: Open command palette
   Search Label: Search commands
-  Search Placeholder: Search commands and settings…
+  Search Placeholder: Search commands, settings, and local videos…
   Results: Commands
   No Results: No matching commands
   Result Count: 1 command found | {count} commands found
@@ -3099,6 +3099,7 @@ CommandPalette:
     App: App
     Navigation: Navigation
     Tabs: Tabs
+    Local Videos: Local videos
   Unavailable:
     Current Page: Already on this page
     No History: No page in this direction

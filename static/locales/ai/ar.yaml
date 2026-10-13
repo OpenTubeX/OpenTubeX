@@ -1883,7 +1883,7 @@ CommandPalette:
   Title: لوحة الأوامر
   Open: افتح لوحة الأوامر
   Search Label: أوامر البحث
-  Search Placeholder: أوامر البحث والإعدادات...
+  Search Placeholder: ابحث في الأوامر والإعدادات ومقاطع الفيديو المحلية…
   Results: الأوامر
   No Results: لا توجد أوامر مطابقة
   Result Count: 'لم يُعثر على أي أمر ({count}) | عُثر على أمر واحد | عُثر على أمرين ({count}) | عُثر على {count} أوامر | عُثر على {count} أمرًا | عُثر على {count} أمر'
@@ -1901,6 +1901,7 @@ CommandPalette:
     App: برنامج
     Navigation: ملاحة
     Tabs: علامات التبويب
+    Local Videos: مقاطع الفيديو المحلية
   Unavailable:
     Current Page: بالفعل على هذه الصفحة
     No History: لا توجد صفحة في هذا الاتجاه

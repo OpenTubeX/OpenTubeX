@@ -1854,7 +1854,7 @@ CommandPalette:
   Title: Tavolozza dei comandi
   Open: Apri tavolozza dei comandi
   Search Label: Cerca comandi
-  Search Placeholder: Cerca comandi e impostazioni…
+  Search Placeholder: Cerca comandi, impostazioni e video locali…
   Results: Comandi
   No Results: Nessun comando corrispondente
   Result Count: 1 comando trovato | {count} comandi trovati | {count} comandi trovati
@@ -1872,6 +1872,7 @@ CommandPalette:
     App: App
     Navigation: Navigazione
     Tabs: Schede
+    Local Videos: Video locali
   Unavailable:
     Current Page: Questa pagina è già aperta
     No History: Nessuna pagina in questa direzione

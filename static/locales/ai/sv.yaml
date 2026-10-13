@@ -1876,7 +1876,7 @@ CommandPalette:
   Title: Kommandopalett
   Open: Öppna kommandopaletten
   Search Label: Sök efter kommandon
-  Search Placeholder: Sök bland kommandon och inställningar…
+  Search Placeholder: Sök efter kommandon, inställningar och lokala videor…
   Results: Kommandon
   No Results: Inga matchande kommandon
   Result Count: 1 kommando hittades | {count} kommandon hittades
@@ -1894,6 +1894,7 @@ CommandPalette:
     App: App
     Navigation: Navigering
     Tabs: Flikar
+    Local Videos: Lokala videor
   Unavailable:
     Current Page: Du är redan på den här sidan
     No History: Det finns ingen sida i den riktningen

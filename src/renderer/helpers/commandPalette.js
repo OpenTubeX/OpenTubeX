@@ -1,4 +1,5 @@
 import { normalizeSearchText as normalizeCommandText, fuzzyTextScore, fuzzyWordScore, findSubsequenceIndexes } from './textSearch.js'
+import { runCooperatively, runSynchronously } from './cooperativeTask.js'
 
 export { normalizeCommandText }
 
@@ -14,21 +15,34 @@ export function shouldShowKeyboardShortcutCommand({ isCapacitor, hardwareKeyboar
   return !isCapacitor || hardwareKeyboardAttached
 }
 
-function scoreCommand(query, command, locale) {
+function scoreCommand(query, command, normalizeText, scoreText) {
   const fields = [
-    { value: normalizeCommandText(command.label, locale), weight: 0 },
+    { value: command.label, weight: 0 },
     ...(command.aliases ?? []).map(alias => ({
-      value: normalizeCommandText(alias, locale),
+      value: alias,
       weight: 3,
     })),
-    { value: normalizeCommandText(command.group, locale), weight: 6 },
+    { value: command.group, weight: 6 },
   ]
 
-  let score = Math.min(...fields.map(field => fuzzyTextScore(query, field.value) + field.weight))
+  const bestFieldScore = token => {
+    let best = Number.POSITIVE_INFINITY
+    for (const field of fields) {
+      // A field cannot beat its minimum weight; avoid fuzzy work once a
+      // better label match has already won.
+      if (field.weight < best) {
+        field.normalized ??= normalizeText(field.value)
+        best = Math.min(best, scoreText(token, field.normalized) + field.weight)
+      }
+    }
+    return best
+  }
+  let score = bestFieldScore(query)
   if (!Number.isFinite(score)) {
+    if (!query.includes(' ')) return score
     score = 24
     for (const token of query.split(' ')) {
-      const tokenScore = Math.min(...fields.map(field => fuzzyTextScore(token, field.value) + field.weight))
+      const tokenScore = bestFieldScore(token)
       if (!Number.isFinite(tokenScore)) return Number.POSITIVE_INFINITY
       score += tokenScore
     }
@@ -47,14 +61,84 @@ function scoreCommand(query, command, locale) {
  * @returns {Array<object>}
  */
 export function filterCommandPaletteCommands(commands, query, locale) {
-  const normalizedQuery = normalizeCommandText(query, locale)
-  if (normalizedQuery === '') return commands
+  return runSynchronously(filterCommandSteps(commands, query, locale))
+}
 
-  return commands
-    .map((command, index) => ({ command, index, score: scoreCommand(normalizedQuery, command, locale) }))
-    .filter(({ score }) => Number.isFinite(score))
-    .sort((first, second) => first.score - second.score || first.index - second.index)
+/** Match large libraries while allowing typing and rendering between batches. */
+export function filterCommandPaletteCommandsAsync(commands, query, locale, isCancelled) {
+  return runCooperatively(filterCommandSteps(commands, query, locale), isCancelled)
+}
+
+function * filterCommandSteps(commands, query, locale) {
+  const normalizedQuery = normalizeCommandText(query, locale)
+  if (normalizedQuery === '') return Array.isArray(commands) ? commands : Array.from(commands)
+
+  // Source, channel and group text repeat across large libraries. Bound these
+  // per-search caches so unique titles cannot retain the whole collection.
+  const normalizedText = new Map()
+  const scoresByQuery = new Map()
+  const wordScoresByQuery = new Map()
+  const normalizeText = text => {
+    let candidate = normalizedText.get(text)
+    if (candidate === undefined) {
+      candidate = normalizeCommandText(text, locale)
+      if (normalizedText.size < 1000) normalizedText.set(text, candidate)
+    }
+    return candidate
+  }
+  const scoreText = (token, candidate) => {
+    let scores = scoresByQuery.get(token)
+    if (!scores) {
+      scores = new Map()
+      scoresByQuery.set(token, scores)
+    }
+    if (scores.has(candidate)) return scores.get(candidate)
+    let wordScores = wordScoresByQuery.get(token)
+    if (!wordScores) {
+      wordScores = new Map()
+      wordScoresByQuery.set(token, wordScores)
+    }
+    const score = fuzzyTextScore(token, candidate, (query, word) => {
+      if (wordScores.has(word)) return wordScores.get(word)
+      const wordScore = fuzzyWordScore(query, word)
+      if (wordScores.size < 1000) wordScores.set(word, wordScore)
+      return wordScore
+    })
+    if (scores.size < 1000) scores.set(candidate, score)
+    return score
+  }
+
+  const scored = []
+  const videos = []
+  let index = 0
+  for (const command of commands) {
+    yield
+    const score = scoreCommand(normalizedQuery, command, normalizeText, scoreText)
+    const match = { command, index: index++, score }
+    if (!Number.isFinite(score)) continue
+    if (!command.localVideo) {
+      scored.push(match)
+    } else if (videos.length < 50 || compareMatches(match, videos.at(-1)) < 0) {
+      // Maintain only the best video matches during the scan. Sorting and
+      // discarding every match at the end would create one large CPU burst.
+      let start = 0
+      let end = videos.length
+      while (start < end) {
+        const middle = (start + end) >>> 1
+        if (compareMatches(match, videos[middle]) < 0) end = middle
+        else start = middle + 1
+      }
+      videos.splice(start, 0, match)
+      if (videos.length > 50) videos.pop()
+    }
+  }
+  return scored.concat(videos)
+    .sort(compareMatches)
     .map(({ command }) => command)
+}
+
+function compareMatches(first, second) {
+  return first.score - second.score || first.index - second.index
 }
 
 function normalizedCharacterMap(value, locale) {
@@ -105,8 +189,8 @@ function tokenHighlightIndexes(token, normalizedCharacters) {
  */
 export function highlightCommandText(value, query, locale) {
   const normalizedQuery = normalizeCommandText(query, locale)
-  const { characters, normalizedCharacters } = normalizedCharacterMap(value, locale)
   if (normalizedQuery === '') return [{ text: value, highlighted: false }]
+  const { characters, normalizedCharacters } = normalizedCharacterMap(value, locale)
 
   const highlightedIndexes = new Set()
   for (const token of normalizedQuery.split(' ')) {

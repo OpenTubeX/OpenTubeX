@@ -1879,7 +1879,7 @@ CommandPalette:
   Title: Kommandopalett
   Open: Åpne kommandopaletten
   Search Label: Søk etter kommandoer
-  Search Placeholder: Søk i kommandoer og innstillinger…
+  Search Placeholder: Søk etter kommandoer, innstillinger og lokale videoer…
   Results: Kommandoer
   No Results: Ingen samsvarende kommandoer
   Result Count: Fant 1 kommando | Fant {count} kommandoer
@@ -1897,6 +1897,7 @@ CommandPalette:
     App: App
     Navigation: Navigering
     Tabs: Faner
+    Local Videos: Lokale videoer
   Unavailable:
     Current Page: Allerede på denne siden
     No History: Ingen side i denne retningen

@@ -1916,7 +1916,7 @@ CommandPalette:
   Title: Opdrachtpalet
   Open: Opdrachtpalet openen
   Search Label: Opdrachten zoeken
-  Search Placeholder: Opdrachten en instellingen zoeken…
+  Search Placeholder: Zoek opdrachten, instellingen en lokale video’s…
   Results: Opdrachten
   No Results: Geen overeenkomende opdrachten
   Result Count: 1 opdracht gevonden | {count} opdrachten gevonden
@@ -1934,6 +1934,7 @@ CommandPalette:
     App: App
     Navigation: Navigatie
     Tabs: Tabbladen
+    Local Videos: Lokale video’s
   Unavailable:
     Current Page: Je bent al op deze pagina
     No History: Geen pagina in deze richting

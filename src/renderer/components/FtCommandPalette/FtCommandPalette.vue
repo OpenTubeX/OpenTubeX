@@ -66,6 +66,7 @@
             class="commandPaletteResultsContent"
             role="listbox"
             :aria-label="t('CommandPalette.Results')"
+            :aria-busy="searchPending"
           >
             <template v-if="displayedCommands.length > 0">
               <div
@@ -138,11 +139,16 @@
               </div>
             </template>
             <p
-              v-else
+              v-else-if="!searchPending"
               class="commandPaletteEmpty"
             >
               {{ t('CommandPalette.No Results') }}
             </p>
+            <FtLoader
+              v-if="searchPending"
+              :tab-loading-indicator="false"
+              aria-hidden="true"
+            />
           </div>
         </div>
 
@@ -170,19 +176,25 @@
 <script setup>
 import FtRetryImage from '../FtRetryImage.vue'
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, onBeforeMount, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeMount, onBeforeUnmount, onMounted, ref, toRaw, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import { filterCommandPaletteCommands, highlightCommandText } from '../../helpers/commandPalette'
+import { filterCommandPaletteCommands, filterCommandPaletteCommandsAsync, highlightCommandText } from '../../helpers/commandPalette'
+import { hasDownloadSearchChanged, isLocalVideoMutation, iterateLocalVideoCommands } from '../../helpers/commandPaletteVideos'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getLocalizedShortcut } from '../../helpers/utils'
 import store from '../../store/index'
 import FtProfileIcon from '../FtProfileIcon/FtProfileIcon.vue'
+import FtLoader from '../FtLoader/FtLoader.vue'
 import { lockBodyScroll, unlockBodyScroll } from '../FtPrompt/scrollLock'
 
 const props = defineProps({
   commands: {
     type: Array,
+    required: true
+  },
+  videoSources: {
+    type: Object,
     required: true
   },
   showShortcuts: {
@@ -206,9 +218,50 @@ const resultsContentRef = useTemplateRef('resultsContentRef')
 const failedIconUrls = ref(new Set())
 let lastActiveElement = null
 let resultsResizeObserver = null
+const videoMatches = ref([])
+const searchPending = ref(false)
+const videoRevision = ref(0)
+const downloadsById = new Map(Object.values(props.videoSources.downloads).map(download => [download.id, download]))
+const unsubscribeVideos = store.subscribe(mutation => {
+  if (mutation.type === 'upsertYtDlpDownload') {
+    const download = mutation.payload
+    const changed = hasDownloadSearchChanged(downloadsById.get(download.id), download)
+    downloadsById.set(download.id, download)
+    if (!changed) return
+  } else if (mutation.type === 'removeYtDlpDownload') {
+    downloadsById.delete(mutation.payload)
+  }
+  if (isLocalVideoMutation(mutation.type)) videoRevision.value++
+})
+
+watch([query, () => props.videoSources, locale, videoRevision], async ([search, sources, language], previous, onCleanup) => {
+  let cancelled = false
+  onCleanup(() => { cancelled = true })
+  videoMatches.value = []
+  searchPending.value = false
+  if (search.trim() === '') return
+  searchPending.value = true
+  // Store mutations provide invalidation; the scan needs no per-record Vue
+  // dependency tracking. Unwrap the collections without copying the library.
+  const rawSources = {
+    ...sources,
+    history: toRaw(sources.history),
+    playlists: toRaw(sources.playlists),
+    downloads: toRaw(sources.downloads),
+    queue: toRaw(sources.queue),
+  }
+  const matches = await filterCommandPaletteCommandsAsync(
+    iterateLocalVideoCommands(rawSources), search, language, () => cancelled
+  )
+  if (cancelled) return
+  videoMatches.value = matches
+  searchPending.value = false
+}, { immediate: true })
 
 const filteredCommands = computed(() => {
-  const matches = filterCommandPaletteCommands(props.commands, query.value, locale.value)
+  const matches = filterCommandPaletteCommands([
+    ...props.commands, ...videoMatches.value,
+  ], query.value, locale.value)
   return query.value.trim() === ''
     ? matches.filter(command => (
         !command.searchOnly && (!command.contextual || !command.disabledReason)
@@ -231,6 +284,15 @@ const groupedCommands = computed(() => {
 const displayedCommands = computed(() => (
   groupedCommands.value.flatMap(group => group.commands)
 ))
+const highlightedLabels = computed(() => {
+  const labels = new Map()
+  for (const command of displayedCommands.value) {
+    if (!labels.has(command.label)) {
+      labels.set(command.label, highlightCommandText(command.label, query.value, locale.value))
+    }
+  }
+  return labels
+})
 const selectedCommand = computed(() => displayedCommands.value[selectedIndex.value] ?? null)
 const activeOptionId = computed(() => selectedCommand.value ? optionId(selectedCommand.value) : undefined)
 const resultStatus = computed(() => t(
@@ -254,6 +316,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  unsubscribeVideos()
   resultsResizeObserver?.disconnect()
   store.commit('removeOpenPrompt', promptId)
   unlockBodyScroll()
@@ -262,7 +325,7 @@ onBeforeUnmount(() => {
   })
 })
 
-watch([query, () => props.commands], async () => {
+watch(filteredCommands, async () => {
   selectedIndex.value = 0
   await nextTick()
   if (resultsRef.value) restoreOverlayScrollTop(resultsRef.value, 0)
@@ -276,7 +339,7 @@ function optionId(command) {
 }
 
 function highlightedLabel(command) {
-  return highlightCommandText(command.label, query.value, locale.value)
+  return highlightedLabels.value.get(command.label)
 }
 
 function hasUsableIconUrl(command) {

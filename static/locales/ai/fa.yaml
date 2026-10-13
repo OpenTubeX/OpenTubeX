@@ -1946,7 +1946,7 @@ CommandPalette:
   Title: پالت فرمان
   Open: بازکردن پالت فرمان
   Search Label: جست‌وجوی فرمان‌ها
-  Search Placeholder: جست‌وجوی فرمان‌ها و تنظیمات…
+  Search Placeholder: جستجوی فرمان‌ها، تنظیمات و ویدیوهای محلی…
   Results: فرمان‌ها
   No Results: فرمان منطبقی نیست
   Result Count: 1 فرمان یافت شد | {count} فرمان یافت شد
@@ -1964,6 +1964,7 @@ CommandPalette:
     App: برنامه
     Navigation: پیمایش
     Tabs: زبانه‌ها
+    Local Videos: ویدیوهای محلی
   Unavailable:
     Current Page: از قبل در این صفحه هستید
     No History: در این جهت صفحه‌ای نیست

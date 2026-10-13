@@ -1,3 +1,5 @@
+const DEFAULT_CASE_LOCALES = new Set(['en-US', 'en-GB', 'de-DE'])
+
 /**
  * Normalizes search text without losing words written in non-Latin scripts.
  * @param {string} value
@@ -5,8 +7,10 @@
  * @returns {string}
  */
 export function normalizeSearchText(value, locale) {
-  return value
-    .toLocaleLowerCase(locale)
+  // English and German use default Unicode casing. Avoid repeatedly parsing
+  // their locale tags while retaining locale-specific casing for other locales.
+  const lowercase = DEFAULT_CASE_LOCALES.has(locale) ? value.toLowerCase() : value.toLocaleLowerCase(locale)
+  return lowercase
     .normalize('NFKD')
     .replaceAll(/\p{Mark}/gu, '')
     .replaceAll(/\s+/g, ' ')
@@ -87,7 +91,7 @@ export function fuzzyWordScore(query, candidate) {
   return subsequenceScore(query, candidate)
 }
 
-export function fuzzyTextScore(query, candidate) {
+export function fuzzyTextScore(query, candidate, scoreWord = fuzzyWordScore) {
   if (candidate === query) return 0
   if (candidate.startsWith(query)) return 1 + (candidate.length - query.length) / 100
 
@@ -101,7 +105,7 @@ export function fuzzyTextScore(query, candidate) {
   if (candidate.includes(query)) bestScore = Math.min(bestScore, 4 + candidate.indexOf(query) / 100)
 
   for (let index = 0; index < words.length; index++) {
-    bestScore = Math.min(bestScore, fuzzyWordScore(query, words[index]) + index / 100)
+    bestScore = Math.min(bestScore, scoreWord(query, words[index]) + index / 100)
   }
 
   const compactCandidate = candidate.replaceAll(' ', '')

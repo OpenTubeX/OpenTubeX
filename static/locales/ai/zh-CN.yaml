@@ -1854,7 +1854,7 @@ CommandPalette:
   Title: 命令面板
   Open: 打开命令面板
   Search Label: 搜索命令
-  Search Placeholder: 搜索命令和设置…
+  Search Placeholder: 搜索命令、设置和本地视频…
   Results: 命令
   No Results: 没有匹配的命令
   Result Count: '找到 {count} 个命令'
@@ -1872,6 +1872,7 @@ CommandPalette:
     App: 应用
     Navigation: 导航
     Tabs: 标签页
+    Local Videos: 本地视频
   Unavailable:
     Current Page: 已在此页面
     No History: 此方向没有可访问的页面

@@ -2248,7 +2248,7 @@ CommandPalette:
   Title: Kommandopalett
   Open: Opne kommandopaletten
   Search Label: Søk etter kommandoar
-  Search Placeholder: Søk i kommandoar og innstillingar…
+  Search Placeholder: Søk etter kommandoar, innstillingar og lokale videoar…
   Results: Kommandoar
   No Results: Ingen kommandoar samsvarar
   Result Count: 1 kommando funnen | {count} kommandoar funne
@@ -2266,6 +2266,7 @@ CommandPalette:
     App: Program
     Navigation: Navigasjon
     Tabs: Faner
+    Local Videos: Lokale videoar
   Unavailable:
     Current Page: Du er allereie på denne sida
     No History: Inga side i denne retninga

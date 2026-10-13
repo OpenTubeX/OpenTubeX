@@ -110,6 +110,7 @@
     <FtCommandPalette
       v-if="commandPaletteOpen"
       :commands="commandPaletteCommands"
+      :video-sources="commandPaletteVideoSources"
       :show-shortcuts="hardwareKeyboardAttached"
       @close="closeCommandPalette"
     />
@@ -3384,12 +3385,36 @@ watch(outlinesHidden, hidden => {
 }, { flush: 'sync', immediate: true })
 
 const phoneLayout = usePhoneLayout()
+const commandPaletteDownloads = computed(previous => {
+  const downloads = Object.values(store.getters.getYtDlpDownloads).map(({ id, title, status }) => ({ id, title, status }))
+  return previous?.length === downloads.length && downloads.every((download, index) => (
+    download.id === previous[index].id && download.title === previous[index].title && download.status === previous[index].status
+  ))
+    ? previous
+    : downloads
+})
+const commandPaletteVideoSources = computed(() => ({
+  history: store.getters.getHistoryCacheSorted,
+  playlists: store.getters.getAllPlaylists,
+  downloads: store.getters.getYtDlpDownloads,
+  queue: store.getters.getWatchQueue,
+  group: t('CommandPalette.Groups.Local Videos'),
+  sources: {
+    history: t('History.History'),
+    playlists: t('Playlists'),
+    downloads: t('Settings.Download Settings.Download Settings'),
+    queue: t('Video.Queue'),
+  },
+  navigate: navigateFromCommandPalette,
+  removeQueuedVideo: id => store.commit('removeVideoFromWatchQueue', id),
+}))
 const commandPaletteCommands = computed(() => createCommandPaletteRegistry({
   t,
   tm,
   locale: locale.value,
   routePath: route.path,
   store,
+  downloads: commandPaletteDownloads.value,
   isElectron,
   isCapacitor,
   phoneLayout: phoneLayout.value,

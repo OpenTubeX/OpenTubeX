@@ -1855,7 +1855,7 @@ CommandPalette:
   Title: Komut paleti
   Open: Komut paletini aç
   Search Label: Komutlarda ara
-  Search Placeholder: Komutlarda ve ayarlarda ara…
+  Search Placeholder: Komutları, ayarları ve yerel videoları ara…
   Results: Komutlar
   No Results: Eşleşen komut yok
   Result Count: 1 komut bulundu | {count} komut bulundu
@@ -1873,6 +1873,7 @@ CommandPalette:
     App: Uygulama
     Navigation: Gezinme
     Tabs: Sekmeler
+    Local Videos: Yerel videolar
   Unavailable:
     Current Page: Zaten bu sayfadasınız
     No History: Bu yönde sayfa yok

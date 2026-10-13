@@ -2510,7 +2510,7 @@ CommandPalette:
   Title: Paleta d'ordres
   Open: Obre la paleta d'ordres
   Search Label: Cerca ordres
-  Search Placeholder: Cerca ordres i configuració…
+  Search Placeholder: Cerca ordres, configuració i vídeos locals…
   Results: Ordres
   No Results: Cap ordre coincideix amb la cerca
   Result Count: S'ha trobat 1 ordre | S'han trobat {count} ordres | S'han trobat {count} ordres
@@ -2528,6 +2528,7 @@ CommandPalette:
     App: Aplicació
     Navigation: Navegació
     Tabs: Pestanyes
+    Local Videos: Vídeos locals
   Unavailable:
     Current Page: Ja sou en aquesta pàgina
     No History: No hi ha cap pàgina en aquesta direcció

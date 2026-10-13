@@ -1879,7 +1879,7 @@ CommandPalette:
   Title: Палитра с команди
   Open: Отваряне на палитрата с команди
   Search Label: Търсене на команди
-  Search Placeholder: Търсене в командите и настройките…
+  Search Placeholder: Търсене на команди, настройки и локални видеоклипове…
   Results: Команди
   No Results: Няма съответстващи команди
   Result Count: Намерена е 1 команда | Намерени са {count} команди
@@ -1897,6 +1897,7 @@ CommandPalette:
     App: Приложение
     Navigation: Навигация
     Tabs: Раздели
+    Local Videos: Локални видеоклипове
   Unavailable:
     Current Page: Вече сте на тази страница
     No History: Няма страница в тази посока

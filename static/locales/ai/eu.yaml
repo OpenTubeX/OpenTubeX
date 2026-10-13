@@ -1877,7 +1877,7 @@ CommandPalette:
   Title: Komando-paleta
   Open: Ireki komando-paleta
   Search Label: Bilatu komandoak
-  Search Placeholder: Bilatu komandoak eta ezarpenak…
+  Search Placeholder: Bilatu komandoak, ezarpenak eta tokiko bideoak…
   Results: Komandoak
   No Results: Ez dago bat datorren komandorik
   Result Count: Komando 1 aurkitu da | {count} komando aurkitu dira
@@ -1895,6 +1895,7 @@ CommandPalette:
     App: Aplikazioa
     Navigation: Nabigazioa
     Tabs: Fitxak
+    Local Videos: Tokiko bideoak
   Unavailable:
     Current Page: Orri honetan zaude dagoeneko
     No History: Ez dago orririk norabide honetan

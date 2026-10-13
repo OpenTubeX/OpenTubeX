@@ -2312,7 +2312,7 @@ CommandPalette:
   Title: 명령 팔레트
   Open: 명령 팔레트 열기
   Search Label: 명령 검색
-  Search Placeholder: 명령 및 설정 검색…
+  Search Placeholder: 명령, 설정 및 로컬 동영상 검색…
   Results: 명령
   No Results: 일치하는 명령 없음
   Result Count: '명령 {count}개 찾음'
@@ -2330,6 +2330,7 @@ CommandPalette:
     App: 앱
     Navigation: 탐색
     Tabs: 탭
+    Local Videos: 로컬 동영상
   Unavailable:
     Current Page: 이미 이 페이지에 있습니다
     No History: 이 방향에 이동할 페이지가 없습니다

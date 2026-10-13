@@ -1942,7 +1942,7 @@ CommandPalette:
   Title: Kommandopalet
   Open: Åbn kommandopalet
   Search Label: Søg i kommandoer
-  Search Placeholder: Søg i kommandoer og indstillinger…
+  Search Placeholder: Søg efter kommandoer, indstillinger og lokale videoer…
   Results: Kommandoer
   No Results: Ingen matchende kommandoer
   Result Count: 1 kommando fundet | {count} kommandoer fundet
@@ -1960,6 +1960,7 @@ CommandPalette:
     App: App
     Navigation: Navigation
     Tabs: Faner
+    Local Videos: Lokale videoer
   Unavailable:
     Current Page: Du er allerede på denne side
     No History: Der er ingen side i denne retning

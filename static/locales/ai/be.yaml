@@ -1955,7 +1955,7 @@ CommandPalette:
   Title: Палітра каманд
   Open: Адкрыць палітру каманд
   Search Label: Шукаць каманды
-  Search Placeholder: Шукаць каманды і налады…
+  Search Placeholder: Пошук каманд, налад і лакальных відэа…
   Results: Каманды
   No Results: Адпаведных каманд няма
   Result Count: Знойдзена 1 каманда | Знойдзены {count} каманды | Знойдзена {count} каманд
@@ -1973,6 +1973,7 @@ CommandPalette:
     App: Праграма
     Navigation: Навігацыя
     Tabs: Укладкі
+    Local Videos: Лакальныя відэа
   Unavailable:
     Current Page: Вы ўжо на гэтай старонцы
     No History: У гэтым кірунку няма старонкі

@@ -1883,7 +1883,7 @@ CommandPalette:
   Title: Paleta naredbi
   Open: Otvori paletu naredbi
   Search Label: Pretraži naredbe
-  Search Placeholder: Pretraži naredbe i postavke…
+  Search Placeholder: Pretraži naredbe, postavke i lokalne videozapise…
   Results: Naredbe
   No Results: Nema odgovarajućih naredbi
   Result Count: Pronađena je 1 naredba | Pronađene su {count} naredbe | Pronađeno je {count} naredbi
@@ -1901,6 +1901,7 @@ CommandPalette:
     App: Aplikacija
     Navigation: Navigacija
     Tabs: Kartice
+    Local Videos: Lokalni videozapisi
   Unavailable:
     Current Page: Već ste na ovoj stranici
     No History: Nema stranice u ovom smjeru

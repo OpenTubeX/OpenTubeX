@@ -1870,7 +1870,7 @@ CommandPalette:
   Title: Palet perintah
   Open: Buka palet perintah
   Search Label: Cari perintah
-  Search Placeholder: Cari perintah dan pengaturan…
+  Search Placeholder: Cari perintah, pengaturan, dan video lokal…
   Results: Perintah
   No Results: Tidak ada perintah yang cocok
   Result Count: '{count} perintah ditemukan'
@@ -1888,6 +1888,7 @@ CommandPalette:
     App: Aplikasi
     Navigation: Navigasi
     Tabs: Tab
+    Local Videos: Video lokal
   Unavailable:
     Current Page: Sudah berada di halaman ini
     No History: Tidak ada halaman ke arah ini

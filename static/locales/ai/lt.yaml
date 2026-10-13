@@ -2358,7 +2358,7 @@ CommandPalette:
   Title: Komandų paletė
   Open: Atverti komandų paletę
   Search Label: Ieškoti komandų
-  Search Placeholder: Ieškoti komandų ir nustatymų…
+  Search Placeholder: Ieškoti komandų, nustatymų ir vietinių vaizdo įrašų…
   Results: Komandos
   No Results: Atitinkančių komandų nėra
   Result Count: Rasta 1 komanda | Rastos {count} komandos | Rasta {count} komandų
@@ -2376,6 +2376,7 @@ CommandPalette:
     App: Programa
     Navigation: Naršymas
     Tabs: Kortelės
+    Local Videos: Vietiniai vaizdo įrašai
   Unavailable:
     Current Page: Šis puslapis jau atvertas
     No History: Šia kryptimi nėra puslapio

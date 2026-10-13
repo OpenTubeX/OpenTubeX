@@ -1853,7 +1853,7 @@ CommandPalette:
   Title: Palette de commandes
   Open: Ouvrir la palette de commandes
   Search Label: Rechercher des commandes
-  Search Placeholder: Rechercher des commandes et des paramètres…
+  Search Placeholder: Rechercher des commandes, des paramètres et des vidéos locales…
   Results: Commandes
   No Results: Aucune commande correspondante
   Result Count: 1 commande trouvée | {count} commandes trouvées | {count} commandes trouvées
@@ -1871,6 +1871,7 @@ CommandPalette:
     App: Application
     Navigation: Navigation
     Tabs: Onglets
+    Local Videos: Vidéos locales
   Unavailable:
     Current Page: Vous êtes déjà sur cette page
     No History: Aucune page dans cette direction

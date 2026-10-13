@@ -1933,7 +1933,7 @@ CommandPalette:
   Title: Палета команди
   Open: Отвори палету команди
   Search Label: Претражи команде
-  Search Placeholder: Претражи команде и подешавања…
+  Search Placeholder: Претражи команде, подешавања и локалне видео-снимке…
   Results: Команде
   No Results: Нема одговарајућих команди
   Result Count: Пронађена је 1 команда | Пронађене су {count} команде | Пронађено је {count} команди
@@ -1951,6 +1951,7 @@ CommandPalette:
     App: Апликација
     Navigation: Кретање
     Tabs: Картице
+    Local Videos: Локални видео-снимци
   Unavailable:
     Current Page: Већ сте на овој страници
     No History: Нема странице у овом смеру

@@ -1907,7 +1907,7 @@ CommandPalette:
   Title: לוח הפקודות
   Open: פתיחת לוח הפקודות
   Search Label: חיפוש פקודות
-  Search Placeholder: חיפוש פקודות והגדרות…
+  Search Placeholder: חיפוש פקודות, הגדרות וסרטונים מקומיים…
   Results: פקודות
   No Results: לא נמצאו פקודות תואמות
   Result Count: נמצאה פקודה אחת | נמצאו {count} פקודות | נמצאו {count} פקודות
@@ -1925,6 +1925,7 @@ CommandPalette:
     App: יישום
     Navigation: ניווט
     Tabs: לשוניות
+    Local Videos: סרטונים מקומיים
   Unavailable:
     Current Page: זהו כבר הדף הנוכחי
     No History: אין דף בכיוון זה

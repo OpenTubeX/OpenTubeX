@@ -1857,7 +1857,7 @@ CommandPalette:
   Title: Käsupalett
   Open: Ava käsupalett
   Search Label: Otsi käske
-  Search Placeholder: Otsi käske ja seadeid…
+  Search Placeholder: Otsi käske, seadeid ja kohalikke videoid…
   Results: Käsud
   No Results: Sobivaid käske ei leitud
   Result Count: Leiti 1 käsk | Leiti {count} käsku
@@ -1875,6 +1875,7 @@ CommandPalette:
     App: Rakendus
     Navigation: Navigeerimine
     Tabs: Vahelehed
+    Local Videos: Kohalikud videod
   Unavailable:
     Current Page: See leht on juba avatud
     No History: Selles suunas pole ühtegi lehte

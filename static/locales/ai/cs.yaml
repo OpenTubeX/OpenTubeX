@@ -1854,7 +1854,7 @@ CommandPalette:
   Title: Paleta příkazů
   Open: Otevřít paletu příkazů
   Search Label: Hledat příkazy
-  Search Placeholder: Hledat příkazy a nastavení…
+  Search Placeholder: Hledat příkazy, nastavení a místní videa…
   Results: Příkazy
   No Results: Žádné odpovídající příkazy
   Result Count: Nalezen 1 příkaz | Nalezeny {count} příkazy | Nalezeno {count} příkazů
@@ -1872,6 +1872,7 @@ CommandPalette:
     App: Aplikace
     Navigation: Navigace
     Tabs: Karty
+    Local Videos: Místní videa
   Unavailable:
     Current Page: Tato stránka je již otevřená
     No History: V tomto směru není v historii žádná stránka
