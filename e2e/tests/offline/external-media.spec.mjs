@@ -13,7 +13,7 @@ async function savedExternalPosition(page, mediaUrl) {
   return page.evaluate(url => JSON.parse(localStorage.getItem(`externalMediaPosition:${new URL(url).href}`) ?? 'null')?.seconds ?? null, mediaUrl)
 }
 
-async function prepareTwitchYtDlp(app, page, mediaUrl, live, description = '', chapters = [], duration = 30) {
+async function prepareTwitchYtDlp(app, page, mediaUrl, live, description = '', chapters = [], duration = 30, metadata = {}) {
   const executable = path.join(app.userDataDir, `twitch-${live ? 'live' : 'replay'}-yt-dlp.sh`)
   const response = JSON.stringify({
     title: live ? 'A Twitch livestream' : 'A Twitch broadcast',
@@ -22,6 +22,7 @@ async function prepareTwitchYtDlp(app, page, mediaUrl, live, description = '', c
     webpage_url: mediaUrl,
     live_status: live ? 'is_live' : 'was_live',
     ...(live ? {} : { duration }),
+    ...metadata,
     formats: [{
       format_id: 'webm-360',
       url: DEMO_MEDIA_URL,
@@ -46,6 +47,44 @@ async function prepareTwitchYtDlp(app, page, mediaUrl, live, description = '', c
     await store.dispatch('updateYtDlpSource', 'system')
     await store.dispatch('updateYtDlpPath', ytDlpPath)
   }, executable)
+}
+
+for (const live of [false, true]) {
+  test(`Twitch ${live ? 'streams' : 'VODs'} show a linked creator and loaded avatar`, async ({ app, page }, testInfo) => {
+    test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+    const mediaUrl = live ? 'https://www.twitch.tv/example_streamer' : 'https://www.twitch.tv/videos/123456789'
+    const creatorUrl = 'https://www.twitch.tv/example_streamer'
+    const avatarUrl = 'https://static-cdn.jtvnw.net/profile_image-300x300.png'
+    await app.electronApp.evaluate(({ net }, { creatorUrl, avatarUrl }) => {
+      const originalFetch = net.fetch.bind(net)
+      net.fetch = (url, options) => url === creatorUrl
+        ? Promise.resolve(new Response(`<meta property="og:image" content="${avatarUrl}">`, {
+            headers: { 'content-type': 'text/html' }
+          }))
+        : originalFetch(url, options)
+    }, { creatorUrl, avatarUrl })
+    await page.route(avatarUrl, route => fulfillVisualFixture(route, 'avatar'))
+    await prepareTwitchYtDlp(app, page, mediaUrl, live, '', [], 30, {
+      uploader: 'example_streamer',
+      uploader_id: 'example_streamer'
+    })
+    await page.locator(sel.searchInput).fill(mediaUrl)
+    await page.locator(sel.searchInput).press('Enter')
+    await waitForPlayback(page)
+    const creator = page.locator(`${activeTab} .externalMediaCreatorProfile`)
+    await expect(creator).toHaveText('example_streamer')
+    await expect(creator).toHaveAttribute('href', creatorUrl)
+    await expect(creator).toHaveAttribute('target', '_blank')
+    await expect(creator.locator('img')).toHaveAttribute('src', avatarUrl)
+    await expectImagesLoaded(creator.locator('img'))
+    for (const colorScheme of ['dark', 'light']) {
+      await page.emulateMedia({ colorScheme })
+      await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+      const screenshot = testInfo.outputPath(`twitch-creator-${colorScheme}.png`)
+      await page.locator(`${activeTab} .externalMediaDetails`).screenshot({ path: screenshot })
+      await testInfo.attach(`Twitch creator (${colorScheme})`, { path: screenshot, contentType: 'image/png' })
+    }
+  })
 }
 
 test('external media resumes its last playback position after reopening and restarting', async ({ app, page }) => {
