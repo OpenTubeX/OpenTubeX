@@ -261,7 +261,13 @@ const router = createRouter({
       return false
     }
 
-    if (savedPosition === null && window.history.state?.preserveScroll === true) {
+    const preserveScroll = window.history.state?.preserveScroll === true
+    if (preserveScroll) {
+      const state = { ...window.history.state }
+      delete state.preserveScroll
+      window.history.replaceState(state, '')
+    }
+    if (savedPosition === null && preserveScroll) {
       return false
     }
 

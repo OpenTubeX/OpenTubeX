@@ -1087,6 +1087,41 @@ test.describe('history date and channel browsing', () => {
     await page.getByRole('option', { name, exact: true }).click()
   }
 
+  test.describe('mixed history channel metadata', () => {
+    test.use({
+      seed: {
+        settings: { generalAutoLoadMorePaginatedItemsEnabled: false, uiScale: 125 },
+        history: [
+          dated('knownwalk01', 'Modern walk', 14, { author: 'Walking Channel', authorId: 'UC-walking' }),
+          dated('legacywalk1', 'Legacy walk', 12, { author: 'Walking Channel', authorId: '' }),
+          dated('sharedone01', 'First shared', 12, { author: 'Shared Channel', authorId: 'UC-first' }),
+          dated('sharedtwo01', 'Second shared', 12, { author: 'Shared Channel', authorId: 'UC-second' }),
+          dated('sharedold01', 'Legacy shared', 12, { author: 'Shared Channel', authorId: '' }),
+        ]
+      }
+    })
+
+    test('includes ID-less channel records without merging ambiguous names', async ({ page }) => {
+      await goTo(page, 'history')
+      await openHistoryFilters(page)
+      await page.getByLabel('To', { exact: true }).fill('2026-10-12')
+      await page.getByRole('combobox', { name: 'Channel', exact: true }).click()
+      await expect(page.getByRole('option', { name: 'Walking Channel', exact: true })).toHaveCount(1)
+      await page.getByRole('option', { name: 'Walking Channel', exact: true }).click()
+      const videos = page.locator('.tabContent[aria-hidden="false"] .autoGrid > *')
+      await expect(videos).toHaveCount(1)
+      await expect(videos.first()).toContainText('Legacy walk')
+      await page.getByRole('searchbox', { name: 'Search in History' }).fill('Legacy walk')
+      await expect(videos).toHaveCount(1)
+      await page.getByRole('searchbox', { name: 'Search in History' }).fill('')
+      for (const [channel, title] of [['Shared Channel (UC-first)', 'First shared'], ['Shared Channel (UC-second)', 'Second shared'], ['Shared Channel', 'Legacy shared']]) {
+        await chooseChannel(page, channel)
+        await expect(videos).toHaveCount(1)
+        await expect(videos.first()).toContainText(title)
+      }
+    })
+  })
+
   test('combines dates, channel and search across the complete history', async ({ page }) => {
     await goTo(page, 'history')
     await openHistoryFilters(page)

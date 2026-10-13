@@ -30,6 +30,39 @@ test('channels use IDs across name changes and fall back to names for imported e
   assert.deepEqual(filterHistoryByDateAndChannel(entries, { channel: 'id:removed' }), [])
 })
 
+test('ID-less records join an unambiguous channel across name changes', () => {
+  const records = [
+    { author: 'Current name', authorId: 'UC1', timeWatched: new Date(2026, 9, 14).getTime() },
+    { author: 'Current name', timeWatched: new Date(2026, 9, 12).getTime() },
+    { author: 'Old name', authorId: 'UC1', timeWatched: new Date(2026, 9, 12).getTime() },
+    { author: 'Old name', timeWatched: new Date(2026, 9, 11).getTime() },
+    { author: 'Imported channel' },
+  ]
+  assert.deepEqual(getHistoryChannels(records, 'en-US'), [
+    { value: 'id:UC1', name: 'Current name' },
+    { value: 'name:Imported channel', name: 'Imported channel' },
+  ])
+  assert.deepEqual(filterHistoryByDateAndChannel(records, { channel: 'id:UC1' }), records.slice(0, 4))
+  assert.deepEqual(filterHistoryByDateAndChannel(records, { channel: 'id:UC1', toDate: '2026-10-12' }), records.slice(1, 4))
+})
+
+test('ambiguous names never associate ID-less records with either known channel', () => {
+  const records = [
+    { author: 'Shared name', authorId: 'UC1' },
+    { author: 'Shared name', authorId: 'UC2' },
+    { author: 'Shared name' },
+    { author: 'Shared name', authorId: 'UC1' },
+  ]
+  assert.deepEqual(getHistoryChannels(records, 'en-US'), [
+    { value: 'name:Shared name', name: 'Shared name' },
+    { value: 'id:UC1', name: 'Shared name (UC1)' },
+    { value: 'id:UC2', name: 'Shared name (UC2)' },
+  ])
+  assert.deepEqual(filterHistoryByDateAndChannel(records, { channel: 'id:UC1' }), [records[0], records[3]])
+  assert.deepEqual(filterHistoryByDateAndChannel(records, { channel: 'id:UC2' }), [records[1]])
+  assert.deepEqual(filterHistoryByDateAndChannel(records, { channel: 'name:Shared name' }), [records[2]])
+})
+
 test('date, channel and existing text search compose', () => {
   const filtered = filterHistoryByDateAndChannel(entries, { fromDate: '2026-10-12', channel: 'id:UC1' })
   assert.deepEqual(filterVideosWithQuery(filtered, 'city walk'), [entries[2]])
