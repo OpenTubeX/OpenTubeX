@@ -64,32 +64,35 @@ for (const width of [1500, 480]) {
       const originalTitles = await recommendations.locator('.h3Title').allTextContents()
       expect(originalTitles.length).toBeGreaterThan(0)
       const watch = await watchViewHandle(page)
-      expect(await watch.evaluate(vm => vm.localFilePlayback)).toBe(false)
-      await page.evaluate(() => {
-        Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false })
-        window.dispatchEvent(new Event('offline'))
-      })
-      await expect(recommendations.getByRole('heading', { name: 'Available offline', exact: true })).toBeVisible()
-      await expect(recommendations.locator('.offlineDownloadTitle')).toHaveText(['Saved audio 3', 'Saved audio 2', 'Saved audio 1'])
-      await expect(recommendations.locator('.h3Title')).toHaveCount(0)
-      await expect(recommendations.getByRole('link', { name: 'Saved audio 2 Offline channel', exact: true }).locator('img')).toHaveAttribute('src', thumbnail)
-      expect(await watch.evaluate(vm => vm.fullscreenRecommendationsAvailable)).toBe(true)
-      await recommendations.scrollIntoViewIfNeeded()
-      await recommendations.screenshot({ path: testInfo.outputPath('available-offline.png') })
-      await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-        for (const id of [1, 2, 3]) store.commit('removeYtDlpDownload', id)
-      })
-      await expect(recommendations).toHaveCount(0)
-      expect(await watch.evaluate(vm => vm.fullscreenRecommendationsAvailable)).toBe(false)
-      await page.evaluate(() => {
-        Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => true })
-        window.dispatchEvent(new Event('online'))
-      })
-      await expect(recommendations.getByRole('heading', { name: 'Up Next', exact: true })).toBeVisible()
-      await expect(recommendations.locator('.h3Title')).toHaveText(originalTitles)
-      await expect(recommendations.locator('.offlineDownloadRecommendation')).toHaveCount(0)
-      await watch.dispose()
+      try {
+        expect(await watch.evaluate(vm => vm.localFilePlayback)).toBe(false)
+        await page.evaluate(() => {
+          Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false })
+          window.dispatchEvent(new Event('offline'))
+        })
+        await expect(recommendations.getByRole('heading', { name: 'Available offline', exact: true })).toBeVisible()
+        await expect(recommendations.locator('.offlineDownloadTitle')).toHaveText(['Saved audio 3', 'Saved audio 2', 'Saved audio 1'])
+        await expect(recommendations.locator('.h3Title')).toHaveCount(0)
+        await expect(recommendations.getByRole('link', { name: 'Saved audio 2 Offline channel', exact: true }).locator('img')).toHaveAttribute('src', thumbnail)
+        expect(await watch.evaluate(vm => vm.fullscreenRecommendationsAvailable)).toBe(true)
+        await recommendations.scrollIntoViewIfNeeded()
+        await recommendations.screenshot({ path: testInfo.outputPath('available-offline.png') })
+        await page.evaluate(() => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          for (const id of [1, 2, 3]) store.commit('removeYtDlpDownload', id)
+        })
+        await expect(recommendations).toHaveCount(0)
+        expect(await watch.evaluate(vm => vm.fullscreenRecommendationsAvailable)).toBe(false)
+        await page.evaluate(() => {
+          Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => true })
+          window.dispatchEvent(new Event('online'))
+        })
+        await expect(recommendations.getByRole('heading', { name: 'Up Next', exact: true })).toBeVisible()
+        await expect(recommendations.locator('.h3Title')).toHaveText(originalTitles)
+        await expect(recommendations.locator('.offlineDownloadRecommendation')).toHaveCount(0)
+      } finally {
+        await watch.dispose()
+      }
     })
   })
 }
@@ -145,7 +148,7 @@ for (const preference of ['hidden', 'blur']) {
         await expect(image).toHaveAttribute('src', /thumbnail_placeholder\.svg/)
       } else {
         await expect(image).toHaveAttribute('src', thumbnail)
-        await expect.poll(() => image.evaluate(element => getComputedStyle(element).filter)).toContain('blur(')
+        await expect.poll(() => image.evaluate(element => getComputedStyle(element).filter)).toMatch(/blur\(/)
       }
     })
   })

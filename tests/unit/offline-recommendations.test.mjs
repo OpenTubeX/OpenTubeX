@@ -46,3 +46,18 @@ for (const localFilePlayback of [false, true]) {
     assert.equal(watch.localFilePlayback, localFilePlayback)
   })
 }
+
+test('offline playlist entries do not reuse another video’s record thumbnail', () => {
+  const watch = {
+    videoId: 'current',
+    $store: { getters: { getYtDlpDownloads: {
+      1: { id: 1, status: 'completed', mode: 'video', videoId: 'first', thumbnail: 'data:image/png;base64,first', files: [
+        { videoId: 'first', path: '/first.mp4' },
+        { videoId: 'second', path: '/second.mp4' },
+      ] },
+    } } },
+  }
+  const suggestions = computed.offlineDownloadSuggestions.call(watch)
+  assert.equal(suggestions[0].thumbnail, 'data:image/png;base64,first')
+  assert.equal(suggestions[1].thumbnail, '')
+})

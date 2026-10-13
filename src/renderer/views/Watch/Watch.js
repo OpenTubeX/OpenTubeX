@@ -606,7 +606,7 @@ export default defineComponent({
           title: file.title || (download.videoId === file.videoId ? download.title : '') || file.videoId,
           author: file.author || download.author || '',
           authorId: file.authorId || download.authorId || '',
-          thumbnail: download.thumbnail,
+          thumbnail: download.videoId === file.videoId ? download.thumbnail : '',
           route: downloadWatchRoute(download, file.videoId)
         })))
         .filter(video => {
