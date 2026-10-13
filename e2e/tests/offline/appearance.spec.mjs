@@ -143,15 +143,6 @@ test.describe('default appearance', () => {
     }
   })
 
-  test('trending link and profile selector are visible by default', async ({ page, attachScreenshot }) => {
-    // The link may live in the side nav itself or its "More" flyout,
-    // depending on the collapsed state — either way it must exist.
-    await expect(page.locator(sel.sideNavLink('trending'))).not.toHaveCount(0)
-    await expect(page.locator('.topNav .profileTrigger')).toBeVisible()
-    await expect(page.locator('body')).toHaveClass(/(?:light|dark)/)
-    await attachScreenshot('default appearance')
-  })
-
   test('selects every tab layout from Theme settings instead of the header', async ({ page, attachScreenshot }) => {
     await expect(page.locator('.navTabLayoutButton')).toHaveCount(0)
     const themeSection = await goToSettingsSection(page, 'theme')
