@@ -68,10 +68,10 @@ test('shows metadata history after loading a video with a previously recorded ti
   await openMockedVideo(page)
 
   const historyButton = page.locator(`${activeTab} .infoArea`)
-    .getByRole('button', { name: 'Metadata history' })
+    .getByRole('button', { name: 'Metadata history', exact: true })
   await expect(historyButton).toBeVisible({ timeout: 25_000 })
   await historyButton.click()
-  await expect(page.getByRole('dialog', { name: 'Metadata history' }))
+  await expect(page.getByRole('dialog', { name: 'Metadata history', exact: true }))
     .toContainText('Previously recorded title')
 })
 
@@ -79,12 +79,15 @@ test('failed metadata revision reads retain their section and offer a lossless R
   await page.evaluate(() => window.ftElectron.videoMetadataCache.update({ videoId: 'jNQXAC9IVRw', title: 'Previously recorded title', description: '', thumbnailUrl: '' }))
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
-  await expect.poll(async () => (await page.evaluate(() => window.ftElectron.libraryQuery('metadataPage', { videoId: 'jNQXAC9IVRw', field: 'title' }))).records.length).toBe(1)
-  const original = await page.evaluate(() => window.ftElectron.libraryQuery('metadataPage', { videoId: 'jNQXAC9IVRw', field: 'title' }))
+  let original
+  await expect.poll(async () => {
+    original = await page.evaluate(() => window.ftElectron.libraryQuery('metadataPage', { videoId: 'jNQXAC9IVRw', field: 'title' }))
+    return original.records.length
+  }).toBe(1)
   await overrideLibraryQuery(app, { failMethod: 'metadataPage', failField: 'title', failOnce: true })
-  await page.locator(`${activeTab} .infoArea`).getByRole('button', { name: 'Metadata history' }).click()
-  const dialog = page.getByRole('dialog', { name: 'Metadata history' })
-  await expect(dialog.getByRole('heading', { name: 'Title History' })).toBeVisible()
+  await page.locator(`${activeTab} .infoArea`).getByRole('button', { name: 'Metadata history', exact: true }).click()
+  const dialog = page.getByRole('dialog', { name: 'Metadata history', exact: true })
+  await expect(dialog.getByRole('heading', { name: 'Title history', exact: true })).toBeVisible()
   const retry = dialog.getByRole('button', { name: 'Retry', exact: true })
   await expect(retry).toBeVisible()
   await dialog.screenshot({ path: testInfo.outputPath('metadata-history-read-retry.png') })
@@ -118,25 +121,30 @@ test.describe('metadata thumbnail read recovery', () => {
         expect(original.records.length).toBeGreaterThan(0)
         const expectedThumbnail = await page.evaluate(id => window.ftElectron.libraryQuery('metadataThumbnail', { id }), original.records[0].thumbnailRevisionId)
         const override = await overrideLibraryQuery(app, { failMethod: 'metadataThumbnail', removeThumbnailFallback: !fallback })
-        await page.locator(`${activeTab} .infoArea`).getByRole('button', { name: 'Metadata history' }).click()
-        const frame = page.getByRole('dialog', { name: 'Metadata history' }).locator('.metadataThumbnail').first()
+        await page.locator(`${activeTab} .infoArea`).getByRole('button', { name: 'Metadata history', exact: true }).click()
+        const dialog = page.getByRole('dialog', { name: 'Metadata history', exact: true })
+        const frame = dialog.locator('.thumbnailHistory').getByRole('listitem')
+          .filter({ has: page.getByText('Previous 1', { exact: true }) }).locator('.metadataThumbnail')
+        // Offline routing can hide a failed HTTP fallback; still check its
+        // assigned URL before restoring the saved embedded thumbnail.
+        const image = frame.getByRole('img', { name: 'Previous 1', exact: true, includeHidden: true })
         const retry = frame.getByRole('button', { name: 'Retry', exact: true })
         if (fallback) {
           await expect(retry).toHaveCount(0)
-          await expect(frame.locator('img:not([aria-hidden="true"])')).toHaveAttribute('src', original.records[0].thumbnailUrl)
+          await expect(image).toHaveAttribute('src', original.records[0].thumbnailUrl)
         } else {
           await expect(retry).toBeVisible()
-          await expect(frame.locator('img:not([aria-hidden="true"])')).toHaveCount(0)
+          await expect(image).toHaveCount(0)
         }
-        await page.getByRole('dialog', { name: 'Metadata history' }).screenshot({ path: testInfo.outputPath(`metadata-thumbnail-read-recovery-95-${fallback ? 'with-fallback' : 'without-fallback'}.png`) })
+        await page.getByRole('dialog', { name: 'Metadata history', exact: true }).screenshot({ path: testInfo.outputPath(`metadata-thumbnail-read-recovery-95-${fallback ? 'with-fallback' : 'without-fallback'}.png`) })
         await override.resumeReads()
         if (fallback) {
-          await page.getByRole('dialog', { name: 'Metadata history' }).press('Escape')
-          await expect(page.getByRole('dialog', { name: 'Metadata history' })).toBeHidden()
-          await page.locator(`${activeTab} .infoArea`).getByRole('button', { name: 'Metadata history' }).click()
+          await page.getByRole('dialog', { name: 'Metadata history', exact: true }).press('Escape')
+          await expect(page.getByRole('dialog', { name: 'Metadata history', exact: true })).toBeHidden()
+          await page.locator(`${activeTab} .infoArea`).getByRole('button', { name: 'Metadata history', exact: true }).click()
         } else await retry.click()
         await expect(retry).toHaveCount(0)
-        await expect(frame.locator('img:not([aria-hidden="true"])')).toHaveAttribute('src', expectedThumbnail)
+        await expect(image).toHaveAttribute('src', expectedThumbnail)
         await frame.screenshot({ path: testInfo.outputPath(`metadata-thumbnail-${fallback ? 'fallback' : 'retry'}.png`) })
         const restored = await page.evaluate(() => window.ftElectron.libraryQuery('metadataPage', { videoId: 'jNQXAC9IVRw', field: 'thumbnail' }))
         expect(restored).toStrictEqual(fallback ? original : { ...original, records: original.records.map(record => ({ ...record, thumbnailUrl: null })) })
@@ -325,20 +333,20 @@ test('stores and presents every previous metadata version', async ({ app, page }
 
     const override = await overrideLibraryQuery(app)
     const historyButton = page.locator(`${activeTab} .infoArea`)
-      .getByRole('button', { name: 'Metadata history' })
+      .getByRole('button', { name: 'Metadata history', exact: true })
     await expect(historyButton).toBeVisible()
     await historyButton.click()
 
-    const dialog = page.getByRole('dialog', { name: 'Metadata history' })
+    const dialog = page.getByRole('dialog', { name: 'Metadata history', exact: true })
     await expect(dialog).toBeVisible()
     // Geometry captured during the prompt's scale/translate entrance animation
     // can differ by fractional pixels even though the fixed header never moves.
     await dialog.evaluate(element => Promise.all(
       element.getAnimations({ subtree: false }).map(animation => animation.finished)
     ))
-    await expect(dialog.getByRole('heading', { name: 'Title history' })).toBeVisible()
-    await expect(dialog.getByRole('heading', { name: 'Thumbnail history' })).toBeVisible()
-    await expect(dialog.getByRole('heading', { name: 'Description history' })).toBeVisible()
+    await expect(dialog.getByRole('heading', { name: 'Title history', exact: true })).toBeVisible()
+    await expect(dialog.getByRole('heading', { name: 'Thumbnail history', exact: true })).toBeVisible()
+    await expect(dialog.getByRole('heading', { name: 'Description history', exact: true })).toBeVisible()
     await expect(dialog.locator('.historySection')).toHaveCount(3)
     await expect(dialog.locator('.historySection').first().locator('.historyEntry')).toHaveCount(5)
     await expect(dialog).not.toContainText('Current title')
@@ -378,7 +386,7 @@ test('stores and presents every previous metadata version', async ({ app, page }
     const retainedReads = await override.readCount(retainedRevision)
     expect(typeof retainedRevision).toBe('string')
     expect(retainedReads).toBeGreaterThan(0)
-    const heading = dialog.getByRole('heading', { name: 'Metadata history' })
+    const heading = dialog.getByRole('heading', { name: 'Metadata history', exact: true })
     const closeButton = dialog.getByRole('button', { name: 'Close' })
     const fixedPositionsBeforeScroll = await Promise.all([heading.boundingBox(), closeButton.boundingBox()])
     await scroller.evaluate(element => element.scrollTo(0, element.scrollHeight))
