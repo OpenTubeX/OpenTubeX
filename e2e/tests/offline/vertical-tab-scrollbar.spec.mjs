@@ -20,6 +20,13 @@ test('vertical tab scrollbars halve their idle thickness and keep their full hit
       Math.abs(parseFloat(getComputedStyle(element).width) - expected)
     ), thickness)).toBeLessThan(0.1)
   }
+  const expectWindowEdge = async position => {
+    await expect.poll(() => handle.evaluate((element, position) => {
+      const bounds = element.getBoundingClientRect()
+      const viewport = document.documentElement.getBoundingClientRect()
+      return Math.abs(position === 'left' ? bounds.left - viewport.left : viewport.right - bounds.right)
+    }, position)).toBeLessThan(0.1)
+  }
   for (const position of ['left', 'right']) {
     for (const scale of [1, 0.95, 1.25]) {
       await page.evaluate(({ position, scale }) => {
@@ -39,8 +46,10 @@ test('vertical tab scrollbars halve their idle thickness and keep their full hit
             const track = element.parentElement.getBoundingClientRect()
             return Math.abs(position === 'left' ? handle.left - track.left : handle.right - track.right)
           }, position)).toBeLessThan(0.1)
+          await expectWindowEdge(position)
           await handle.hover()
           await expectThickness(width)
+          await expectWindowEdge(position)
         }
       }
     }
