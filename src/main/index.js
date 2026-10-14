@@ -1993,11 +1993,15 @@ function runApp() {
       // AppImage cannot use Electron's relaunch on its FUSE mount.
       if (isQuitting && !process.env.APPIMAGE) {
         if (!relaunchRequested) {
-          relaunchRequested = true
-          app.relaunch({
-            args: commandLine.slice(1),
-            execPath: process.env.PORTABLE_EXECUTABLE_FILE || process.execPath
-          })
+          try {
+            app.relaunch({
+              args: commandLine.slice(1),
+              execPath: process.env.PORTABLE_EXECUTABLE_FILE || process.execPath
+            })
+            relaunchRequested = true
+          } catch (error) {
+            console.error('Failed to schedule app relaunch', error)
+          }
         }
         return
       }
