@@ -12907,10 +12907,14 @@ export default defineComponent({
     }
 
     function getSabrReloadState() {
+      // A failed initial load has not emitted playing yet. Preserve its pending
+      // autoplay through recovery unless the user canceled it.
+      const pendingAutoplay = video.value?.autoplay === true &&
+        video.value.played.length === 0 && !initialAutoplayCanceled
       const captionIndex = player?.getTextTracks().findIndex(caption => caption.active) ?? -1
 
       return {
-        wasPlaying: !video.value?.paused,
+        wasPlaying: !video.value?.paused || pendingAutoplay,
         captionIndex: captionIndex >= 0 ? captionIndex : null,
         captionTimingOffset,
         playbackRate: getCurrentPlaybackRate(),
