@@ -37,8 +37,16 @@ test('Takeout preview matches import names, empty playlists, deduplication, filt
   const searched = settings => ({ products: ['YouTube'], titleUrl: 'https://www.youtube.com/results?search_query=query', time: '2025-01-01T00:00:00Z', searchSettings: settings })
   const file = new Blob([zipSync({
     'Account/subscriptions/subscriptions.csv': strToU8('Channel Id,Channel Url,Channel Title\nold,url,Old\nnew,url,"New, channel"\nnew,url,Duplicate\n'),
-    'Account/history/watch-history.json': strToU8(JSON.stringify([watched('abcdefghijk'), watched('abcdefghijk'), watched('lmnopqrstuv'), { ...watched('adadadadada'), details: [{}] }, { products: ['YouTube'], title: 'Deleted' }])),
-    'Account/history/search-history.json': strToU8(JSON.stringify([searched(), searched(), searched({ type: 'video' }), { ...searched(), time: 'invalid' }])),
+    'Account/history/watch-history.json': strToU8(JSON.stringify([
+      watched('abcdefghijk'), watched('abcdefghijk'), watched('lmnopqrstuv'),
+      { ...watched('adadadadada'), details: [{}] }, { products: ['YouTube'], title: 'Deleted' },
+      { ...watched('otherproduct'), products: ['Google Search'] }, { ...watched('invalidtime'), time: 'invalid' },
+    ])),
+    'Account/history/search-history.json': strToU8(JSON.stringify([
+      searched(), searched(), searched({ type: 'video' }), { ...searched(), time: 'invalid' },
+      { ...searched(), details: [{}] }, { products: ['YouTube'], title: 'Removed search' },
+      { ...searched(), products: ['Google Search'] },
+    ])),
     'Account/playlists/List-videos.csv': strToU8('Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00Z\n'),
     'Another/playlists/List-videos.csv': strToU8('Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00Z\n'),
     'Account/playlists/playlists.csv': strToU8('Playlist ID,Playlist Title (Original)\nPLlist,List\nPLempty,Empty\nPLreserved,List (2)\n'),
@@ -50,7 +58,7 @@ test('Takeout preview matches import names, empty playlists, deduplication, filt
   const before = structuredClone(current)
   const rows = await previewTakeoutImport(file, entries, current)
   assert.deepEqual(counts(rows.find(row => row.category === 'subscriptions')), [1, 1, 0])
-  assert.deepEqual(counts(rows.find(row => row.category === 'history')), [1, 1, 2])
+  assert.deepEqual(counts(rows.find(row => row.category === 'history')), [1, 1, 1])
   assert.deepEqual(counts(rows.find(row => row.category === 'searchHistory')), [1, 1, 1])
   assert.equal(rows.find(row => row.category === 'searchHistory').failedFiles, 1)
   assert.deepEqual(counts(rows.find(row => row.category === 'playlists')), [3, 1, 0])

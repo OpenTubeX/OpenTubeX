@@ -68,7 +68,11 @@ test('Takeout preview shows matching and new records and remains usable when its
     'Takeout/YouTube/subscriptions/subscriptions.csv': strToU8('Channel Id,Channel Url,Channel Title\nUCpreview,url,Preview Channel\nUCpreview,url,Duplicate\n'),
     'Another/subscriptions/subscriptions.json': strToU8(JSON.stringify([{ snippet: { resourceId: { channelId: 'UCpreview' }, title: 'Preview Channel', thumbnails: { default: { url: '' } } } }])),
     'Another/subscriptions/subscriptions.opml': strToU8('<opml version="2.0"><body><outline title="Preview Channel" xmlUrl="https://www.youtube.com/feeds/videos.xml?channel_id=UCpreview" /></body></opml>'),
-    'Takeout/YouTube/history/watch-history.json': strToU8(JSON.stringify([{ products: ['YouTube'], title: 'Watched Example', titleUrl: 'https://www.youtube.com/watch?v=abcdefghijk', time: '2026-01-01T00:00:00Z' }, { products: ['YouTube'], title: 'Deleted video' }])),
+    'Takeout/YouTube/history/watch-history.json': strToU8(JSON.stringify([
+      { products: ['YouTube'], title: 'Watched Example', titleUrl: 'https://www.youtube.com/watch?v=abcdefghijk', time: '2026-01-01T00:00:00Z' },
+      { products: ['YouTube'], title: 'Deleted video' },
+      { products: ['YouTube'], title: 'Watched Example', titleUrl: 'https://www.youtube.com/watch?v=lmnopqrstuv', time: 'invalid' },
+    ])),
     'Takeout/YouTube/history/search-history.json': strToU8(JSON.stringify([{ products: ['YouTube'], titleUrl: 'https://www.youtube.com/results?search_query=preview', time: '2026-01-01T00:00:00Z' }])),
     'Takeout/YouTube/playlists/playlists.csv': strToU8('Playlist ID,Playlist Title (Original)\nPLfavorites,Favorites\nPLnew,New playlist\n'),
   })

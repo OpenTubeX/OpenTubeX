@@ -141,12 +141,12 @@ export async function previewTakeoutImport(file, entries, current) {
     } else if (entry.type === 'history') {
       const history = JSON.parse(entry.content)
       const parsed = parseTakeoutWatchHistory(history)
-      skipped.history += history.length - parsed.entries.length
+      skipped.history += parsed.skipped
       ids = parsed.entries.map(record => record.videoId)
     } else {
       const history = JSON.parse(entry.content)
       const parsed = parseTakeoutSearchHistory(history)
-      skipped.searchHistory += history.length - parsed.entries.length
+      skipped.searchHistory += parsed.skipped
       ids = parsed.entries.map(getSearchHistoryEntryKeyFromEntry)
     }
     for (const id of ids) incoming[entry.type].add(id)
