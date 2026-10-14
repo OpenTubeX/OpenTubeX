@@ -526,7 +526,9 @@ test('Shorts playback reads only selected Shorts and batches latest watched hist
       restrictedPlaybackConfigured: preferences.restrictedPlaybackConfigured,
       maxPerChannel: preferences.onlyShowLatestFromChannel ? preferences.onlyShowLatestFromChannelNumber : null,
     })
-    const start = Math.max(0, feed.findIndex(entry => entry.videoId === currentVideoId) - 20)
+    const currentIndex = feed.findIndex(entry => entry.videoId === currentVideoId)
+    assert.ok(currentIndex >= 0, 'the current Short must be present in the expected feed')
+    const start = Math.max(0, currentIndex - 20)
     assert.deepEqual(await subscriptionShortsWindow(engine, { subscriptions, preferences, currentVideoId }), feed.slice(start, start + 100))
     assert.equal(queries.filter(sql => sql.includes("collection = 'history'")).length, preferences.hideWatched ? 2 : 0, 'one legacy-timestamp probe and one batched indexed winner lookup')
     assert.ok(!queries.some(sql => /video_id = \?/.test(sql)), 'history lookups must not issue a query for every Short')
