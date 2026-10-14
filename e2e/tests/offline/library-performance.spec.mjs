@@ -80,6 +80,7 @@ test('large-library search, metadata edits and bulk operations work with a throt
     // navigation and the landing page's pending network/render work.
     await expect(page.locator('[aria-busy="true"]')).toHaveCount(0)
     await expect(page.locator('.ft-list-video').first()).toBeVisible()
+    const firstHistoryCard = await page.locator('.ft-list-video').first().elementHandle()
     const search = page.getByRole('searchbox', { name: 'Search in History' })
     await measure('20k fuzzy history search', async () => {
       await search.fill('troubleshootnig')
@@ -87,6 +88,8 @@ test('large-library search, metadata edits and bulk operations work with a throt
       await expect(page.locator('.ft-list-video').first()).toBeVisible()
       await expect(page.getByText('Practical troubleshooting techniques episode 0', { exact: true })).toBeVisible()
     }, 3000)
+    expect(await firstHistoryCard.evaluate(card => card.isConnected), 'An unchanged search result should keep its mounted card').toBe(true)
+    await firstHistoryCard.dispose()
     await measure('20k no-match history search', async () => {
       await search.fill('unrelatedzzzz')
       await expect(page.getByText('There are no videos in your history that match your search')).toBeVisible()
@@ -159,7 +162,17 @@ test('large-library search, metadata edits and bulk operations work with a throt
     // Exercise the renderer -> IPC -> worker paths, including history metadata
     // cleanup before playlist deletion and the incremental membership counts.
     await goTo(page, 'trending')
-    await measure('20k library bulk operations', () => page.evaluate(async ({ playlistItemIds, videoIds, records }) => {
+    // Prepare selection fixtures before timing application work. Sending this
+    // large payload through Playwright adds a separate CDP serialization stall.
+    // The application's store-to-IPC serialization remains inside the measure.
+    await page.evaluate(input => { window.largeLibraryBulkInput = input }, {
+      playlistItemIds: videos.slice(0, 10000).map(video => video.playlistItemId),
+      videoIds: videos.slice(0, 10000).map(video => video.videoId),
+      records: videos.slice(0, 1000).map(record => ({ ...record, isWatched: true })),
+    })
+    await measure('20k library bulk operations', () => page.evaluate(async () => {
+      const { playlistItemIds, videoIds, records } = window.largeLibraryBulkInput
+      delete window.largeLibraryBulkInput
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       await store.dispatch('removeVideos', {
         _id: 'large-library',
@@ -168,10 +181,6 @@ test('large-library search, metadata edits and bulk operations work with a throt
       })
       await store.dispatch('updateSubscriptionHistory', { records })
       await store.dispatch('removeHistoryOlderThan', 10000)
-    }, {
-      playlistItemIds: videos.slice(0, 10000).map(video => video.playlistItemId),
-      videoIds: videos.slice(0, 10000).map(video => video.videoId),
-      records: videos.slice(0, 1000).map(record => ({ ...record, isWatched: true })),
     }), 10000)
     expect(await page.evaluate(async findAction => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store

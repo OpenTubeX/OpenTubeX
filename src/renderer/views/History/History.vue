@@ -244,7 +244,7 @@
           role="progressbar"
           :aria-label="t('History.Search bar placeholder')"
         />
-        <template v-else>
+        <div v-show="!isSearching || (!showSearchFeedback && activeData.length > 0)">
           <FtFlexBox
             v-if="historyReadFailed"
           >
@@ -308,7 +308,7 @@
               />
             </div>
           </FtFlexBox>
-        </template>
+        </div>
       </div>
       <FtPrompt
         v-if="showRepairPrompt"
