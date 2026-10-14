@@ -3647,8 +3647,8 @@ for (const mode of ['premiere', 'stale', 'failure']) {
 }
 
 
-for (const desktop of [false, true]) {
-  test(`Takeout subscription imports preserve fresh primary metadata and opaque members, desktop: ${desktop}`, async t => {
+for (const desktop of [false, true]) for (const refresh of [true, false, null, 'reject']) {
+  test(`Takeout subscription imports preserve fresh primary metadata and opaque members, desktop: ${desktop}, refresh: ${refresh}`, async t => {
     const database = desktop ? new DatabaseSync(':memory:') : null
     if (database) database.exec(SCHEMA_SQL)
     const engine = database ? new LibraryEngine(database) : null
@@ -3663,7 +3663,7 @@ for (const desktop of [false, true]) {
       forEachTakeoutImportEntry: async (_file, _selected, _entries, apply) => apply({ type: 'subscriptions' }), parseTakeoutSubscriptions: () => [{ id: 'new' }, { id: 'old' }, { id: 'new' }],
       DBLibraryHandlers: { query: (method, data) => { assert.equal(method, 'importSubscriptionProfiles'); return operations.importSubscriptionProfiles(engine, data) } },
       DBProfileHandlers: { find: () => records.findAsync({}), replaceIfUnchanged: async (previous, next) => { assert.deepEqual(await records.findOneAsync({ _id: next._id }), previous); return records.updateAsync({ _id: next._id }, next) } },
-      store: { dispatch: async action => { dispatches.push(action); return true } }, closeTakeoutImport() {}, t: key => key, showToast: toast => toasts.push(toast),
+      store: { dispatch: async action => { dispatches.push(action); if (action === 'grabAllProfiles') { if (refresh === 'reject') throw new Error('Refresh failed'); return refresh } return true } }, closeTakeoutImport() {}, t: key => key, showToast: toast => toasts.push(toast),
     })
     await context.importSelectedTakeoutData()
     assert.deepEqual(await records.findOneAsync({ _id: stored._id }), { ...stored, subscriptions: [...stored.subscriptions, { id: 'new' }] })
@@ -3671,6 +3671,7 @@ for (const desktop of [false, true]) {
     assert.ok(dispatches.includes('grabAllProfiles'))
     assert.ok(dispatches.includes('scheduleSyncServer'))
     assert.equal(toasts.some(toast => toast.message.includes('Unable')), false)
+    assert.ok(toasts.some(toast => toast.message === 'Settings.Data Settings.All subscriptions have been successfully imported'))
   })
 }
 

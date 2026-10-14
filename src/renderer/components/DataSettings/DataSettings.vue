@@ -722,7 +722,6 @@ async function importSelectedTakeoutData() {
         const subscriptions = parseTakeoutSubscriptions(entry)
         if (process.env.IS_ELECTRON) {
           await DBLibraryHandlers.query('importSubscriptionProfiles', { profiles: [{ _id: MAIN_PROFILE_ID, name: null, subscriptions }] })
-          store.dispatch('scheduleSyncServer', 'profilesOrSubscriptions').catch(console.error)
         } else {
           const current = (await DBProfileHandlers.find({ preserveRetained: true })).find(profile => profile._id === MAIN_PROFILE_ID)
           if (!current) throw new Error('The primary subscription profile is missing')
@@ -730,8 +729,11 @@ async function importSelectedTakeoutData() {
           const { numAffected } = await DBProfileHandlers.replaceIfUnchanged(current, merged)
           if (!numAffected) throw new Error('The profile changed; retry the import')
         }
-        if (await store.dispatch('grabAllProfiles', { preserveRetained: true }) !== true) throw new Error('Imported subscriptions could not be refreshed')
-        if (!process.env.IS_ELECTRON) store.dispatch('scheduleSyncServer', 'profilesOrSubscriptions').catch(console.error)
+        store.dispatch('scheduleSyncServer', 'profilesOrSubscriptions').catch(console.error)
+        try {
+          const refreshed = await store.dispatch('grabAllProfiles', { preserveRetained: true })
+          if (refreshed !== true && refreshed !== false) throw new Error('Imported subscriptions could not be refreshed')
+        } catch (error) { console.error('Subscriptions applied; refresh failed', error) }
         showToast({ message: t('Settings.Data Settings.All subscriptions have been successfully imported'), icon: ['fas', 'rss'] })
       } else if (entry.type === 'history') {
         await importYouTubeWatchHistory(JSON.parse(entry.content))
