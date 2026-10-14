@@ -199,6 +199,8 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
   <img alt="Get it on Obtainium" src="docs/badges/obtainium.png" width="215" align="middle">
 </a>
 
+[![Packaging status](https://repology.org/badge/vertical-allrepos/opentubex.svg)](https://repology.org/project/opentubex/versions)
+<br />
 [![Copr build status](https://copr.fedorainfracloud.org/coprs/d3sox/opentubex/package/opentubex/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/d3sox/opentubex/package/opentubex/)
 
 #### Automated Builds (Nightly / Daily)
