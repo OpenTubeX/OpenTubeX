@@ -8,7 +8,7 @@ import { updateVideoMetadataCache, metadataPage, metadataThumbnail } from '../da
 import * as operations from '../datastores/sqlite/operations.js'
 import * as subscriptions from '../datastores/sqlite/subscriptions.js'
 
-const operationMethods = new Set(['commandPaletteVideos', 'playlistMember', 'importSubscriptionProfiles', 'rendererSettings', 'syncSnapshotRead', 'syncSnapshotSummary', 'syncSnapshotHistory', 'syncSnapshotSection', 'storageUsage', 'historyRepairPage', 'historyRepairRecord', 'markAllHistory', 'applySubscriptionUnseenHistory', 'playlistSelection', 'playlistImportCandidates', 'playlistVideoIds', 'addSelectedPlaylistVideos', 'removePlaylistMember', 'removePlaylistMembers', 'recommendationInputs', 'recommendationSubscriptionCandidates'])
+const operationMethods = new Set(['importPreviewState', 'commandPaletteVideos', 'playlistMember', 'importSubscriptionProfiles', 'rendererSettings', 'syncSnapshotRead', 'syncSnapshotSummary', 'syncSnapshotHistory', 'syncSnapshotSection', 'storageUsage', 'historyRepairPage', 'historyRepairRecord', 'markAllHistory', 'applySubscriptionUnseenHistory', 'playlistSelection', 'playlistImportCandidates', 'playlistVideoIds', 'addSelectedPlaylistVideos', 'removePlaylistMember', 'removePlaylistMembers', 'recommendationInputs', 'recommendationSubscriptionCandidates'])
 const subscriptionMethods = new Set(['subscriptionEntries', 'subscriptionRssVerdicts', 'subscriptionPremieres', 'updateSubscriptionPremieres', 'subscriptionShortsWindow', 'subscriptionSummaries', 'subscriptionPage', 'subscriptionEntry', 'markSubscriptionEntries'])
 
 let exports
@@ -59,6 +59,7 @@ parentPort.on('message', request => {
         else if (method === 'importStart') result = imports.start(...args)
         else if (method === 'importChunk') result = imports.chunk(...args)
         else if (method === 'importFinish') result = imports.finish(...args)
+        else if (method === 'importPreview') result = await engine.transaction(() => imports.preview(...args))
         else if (method === 'importApply') result = await imports.apply(args[0], handlers)
         else if (method === 'importCancel') result = imports.cancel(...args)
         else if (method === 'compact') {
