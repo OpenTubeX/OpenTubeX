@@ -375,13 +375,17 @@ test.describe('local video commands', () => {
 
     // Removing metadata while the palette is open must update its results.
     await input.fill('journey')
-    await page.evaluate(async () => {
+    await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      if (store.state.history.libraryPaged) await store.dispatch('removeAllHistory')
-      else store.commit('setHistoryCacheSorted', [])
-      store.commit('clearWatchQueue')
-      store.commit('removeYtDlpDownload', 42)
+      window.__paletteRemovalDone = false
+      const remove = store.state.history.libraryPaged ? store.dispatch('removeAllHistory') : Promise.resolve(store.commit('setHistoryCacheSorted', [])).then(() => true)
+      remove.then(success => {
+        store.commit('clearWatchQueue')
+        store.commit('removeYtDlpDownload', 42)
+        window.__paletteRemovalDone = success
+      })
     })
+    await expect.poll(() => page.evaluate(() => window.__paletteRemovalDone)).toBe(true)
     await expect(videos.getByRole('option')).toHaveCount(1)
     await input.fill('zzzzzz')
     await expect(page.getByRole('option')).toHaveCount(0)
@@ -481,12 +485,14 @@ test.describe('local video commands', () => {
     await writeFile(executable, "import { writeFileSync } from 'node:fs'\nwriteFileSync(process.argv[2], JSON.stringify(process.argv.slice(3)))\n")
     await page.evaluate(async ({ video, executable, capturedArguments, nodePath }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      store.commit('upsertToHistoryCache', {
+      const entry = {
         ...video,
         watchProgress: 12,
         lastViewedPlaylistId: 'PLsavedYouTubePlaylist',
         lastViewedPlaylistType: 'local',
-      })
+      }
+      if (store.state.history.libraryPaged) await store.dispatch('updateHistory', entry)
+      else store.commit('upsertToHistoryCache', entry)
       store.commit('setSaveVideoHistoryWithLastViewedPlaylist', true)
       await store.dispatch('updateExternalPlayer', 'mpv')
       await store.dispatch('updateDefaultViewingMode', 'external_player')
@@ -513,11 +519,11 @@ test.describe('local video commands', () => {
   for (const enabled of [true, false]) {
     test(`history results respect saved playlist context when the setting is ${enabled}`, async ({ app, page }) => {
       await mockPlayableWatchPage(app, page)
-      await page.evaluate(({ enabled, video, playlistId }) => {
+      await page.evaluate(async ({ enabled, video, playlistId }) => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-        store.commit('upsertToHistoryCache', {
-          ...video, lastViewedPlaylistId: playlistId, lastViewedPlaylistType: 'user', lastViewedPlaylistItemId: 'journey-item',
-        })
+        const entry = { ...video, lastViewedPlaylistId: playlistId, lastViewedPlaylistType: 'user', lastViewedPlaylistItemId: 'journey-item' }
+        if (store.state.history.libraryPaged) await store.dispatch('updateHistory', entry)
+        else store.commit('upsertToHistoryCache', entry)
         store.commit('setSaveVideoHistoryWithLastViewedPlaylist', enabled)
       }, { enabled, video, playlistId: playlist._id })
       await page.getByRole('combobox', { name: 'Search commands' }).fill('journey')
@@ -563,11 +569,14 @@ test.describe('local video commands', () => {
   })
 
   test('keeps local video scrolling valid when resizing at fractional scale', async ({ app, page }) => {
-    await page.evaluate(video => {
+    await page.evaluate(async video => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      store.commit('setHistoryCacheSorted', Array.from({ length: 30 }, (_, index) => ({
-        ...video, videoId: `resize${index}`, title: `${video.title} ${index}`,
-      })))
+      const records = Array.from({ length: 30 }, (_, index) => ({
+        ...video, _id: `resize${index}`, videoId: `resize${index}`, title: `${video.title} ${index}`,
+      }))
+      if (store.state.history.libraryPaged) {
+        if (!await store.dispatch('overwriteHistory', records)) throw new Error('History fixture was not persisted')
+      } else store.commit('setHistoryCacheSorted', records)
     }, video)
     const input = page.getByRole('combobox', { name: 'Search commands' })
     await input.fill('journey')
@@ -591,19 +600,25 @@ test.describe('local video commands', () => {
 
   for (const mutation of ['removeMultipleFromHistoryCache', 'setHistoryCacheSorted']) {
     test(`clamps local results after ${mutation} shortens the list at fractional scale`, async ({ page }) => {
-      await page.evaluate(video => {
+      await page.evaluate(async video => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-        store.commit('setHistoryCacheSorted', Array.from({ length: 30 }, (_, index) => ({
-          ...video, videoId: `shorten${index}`,
-        })))
+        const records = Array.from({ length: 30 }, (_, index) => ({
+          ...video, _id: `shorten${index}`, videoId: `shorten${index}`,
+        }))
+        if (store.state.history.libraryPaged) {
+          if (!await store.dispatch('overwriteHistory', records)) throw new Error('History fixture was not persisted')
+        } else store.commit('setHistoryCacheSorted', records)
       }, video)
       await page.getByRole('combobox', { name: 'Search commands' }).fill('journey')
       const videos = page.getByRole('group', { name: 'Local videos', exact: true })
       await expect(videos.getByRole('option')).toHaveCount(33)
       await scrollResultsToBottom(page)
-      await page.evaluate(mutation => {
+      await page.evaluate(async mutation => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-        store.commit(mutation, mutation === 'setHistoryCacheSorted' ? [] : Array.from({ length: 30 }, (_, index) => `shorten${index}`))
+        if (store.state.history.libraryPaged) {
+          if (mutation === 'setHistoryCacheSorted') await store.dispatch('removeAllHistory')
+          else for (let index = 0; index < 30; index++) await store.dispatch('removeFromHistory', `shorten${index}`)
+        } else store.commit(mutation, mutation === 'setHistoryCacheSorted' ? [] : Array.from({ length: 30 }, (_, index) => `shorten${index}`))
         store.commit('clearWatchQueue')
         store.commit('removeYtDlpDownload', 42)
       }, mutation)
@@ -630,12 +645,15 @@ test.describe('local video commands', () => {
   })
 
   test('cancels stale local matches when typing in a large library', async ({ page }) => {
-    await page.evaluate(video => {
+    await page.evaluate(async video => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      store.commit('setHistoryCacheSorted', [
-        ...Array.from({ length: 6000 }, (_, index) => ({ ...video, videoId: `video${index}`, title: `Mountain journey ${index}` })),
-        { ...video, videoId: 'uniquevideo', title: 'Unique destination' },
-      ])
+      const records = [
+        ...Array.from({ length: 6000 }, (_, index) => ({ ...video, _id: `video${index}`, videoId: `video${index}`, title: `Mountain journey ${index}` })),
+        { ...video, _id: 'uniquevideo', videoId: 'uniquevideo', title: 'Unique destination' },
+      ]
+      if (store.state.history.libraryPaged) {
+        if (!await store.dispatch('overwriteHistory', records)) throw new Error('History fixture was not persisted')
+      } else store.commit('setHistoryCacheSorted', records)
     }, video)
     const cdp = await page.context().newCDPSession(page)
     await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 })
@@ -686,12 +704,16 @@ test.describe('local video commands', () => {
     })
     expect(await page.evaluate(() => window.__paletteSearchRestarts)).toBe(0)
     await expect(input).toHaveAttribute('aria-activedescendant', selected)
-    await page.evaluate(() => {
+    await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      store.commit('upsertToHistoryCache', {
-        ...store.getters.getHistoryCacheById.jNQXAC9IVRw, title: 'Renamed expedition', author: 'Other Channel',
-      })
-      store.commit('upsertPlaylistToList', { _id: 'palette-local-videos', playlistName: 'Renamed travels' })
+      const history = { ...store.getters.getHistoryCacheById.jNQXAC9IVRw, title: 'Renamed expedition', author: 'Other Channel' }
+      if (store.state.history.libraryPaged) {
+        await store.dispatch('updateHistory', history)
+        await store.dispatch('updatePlaylist', { _id: 'palette-local-videos', playlistName: 'Renamed travels' })
+      } else {
+        store.commit('upsertToHistoryCache', history)
+        store.commit('upsertPlaylistToList', { _id: 'palette-local-videos', playlistName: 'Renamed travels' })
+      }
     })
     await expect(videos.getByRole('option')).toHaveCount(3)
     await expect(videos.locator('small', { hasText: 'Playlists: Renamed travels' })).toBeVisible()
