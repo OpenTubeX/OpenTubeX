@@ -209,6 +209,20 @@ test.describe('download settings', () => {
       }
       await scrollToBottom(options)
       await setWindowSize(app, page, { width: 1600, height: 1000 })
+      // Scroll anchoring can retain a position before the new end. Check that
+      // the offset and thumb fit the rendered range before scrolling again.
+      await expect.poll(() => options.evaluate(element => {
+        const viewport = element.getBoundingClientRect()
+        const first = element.querySelector('.optionSection').getBoundingClientRect()
+        const last = element.querySelector('.optionSection:last-of-type').getBoundingClientRect()
+        const track = element.querySelector('.os-scrollbar-vertical .os-scrollbar-track').getBoundingClientRect()
+        const handle = element.querySelector('.os-scrollbar-vertical .os-scrollbar-handle').getBoundingClientRect()
+        const expectedHandleHeight = track.height * viewport.height / (last.bottom - first.top)
+        return Math.max(-element.scrollTop, viewport.bottom - last.bottom,
+          Math.abs(handle.height - expectedHandleHeight)) * devicePixelRatio
+      })).toBeLessThanOrEqual(2)
+      await expect(options.locator('.os-scrollbar-vertical')).toHaveClass(/os-scrollbar-visible/)
+      await scrollToBottom(options)
       await expectScrollAtRenderedEnd(options)
     })
   }

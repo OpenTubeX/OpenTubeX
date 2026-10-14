@@ -74,7 +74,7 @@ export async function clickSearchCancel(input) {
 
 export async function expectScrollAtRenderedEnd(scroller) {
   await expect.poll(() => scroller.evaluate((element) => {
-    const content = element.querySelector(':scope > div:not(.os-scrollbar)')
+    const content = Array.from(element.children).findLast(child => !child.classList.contains('os-scrollbar'))
     const style = getComputedStyle(element)
     const contentEnd = content.getBoundingClientRect().bottom +
       Number.parseFloat(getComputedStyle(content).marginBottom) +
