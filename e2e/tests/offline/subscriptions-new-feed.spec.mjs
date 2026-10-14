@@ -105,6 +105,76 @@ const commonSettings = {
   useRssFeeds: false
 }
 
+async function holdSeenMarks(page) {
+  // Hold persistence pending, then run the real seen-mark action on release.
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const dispatch = store.dispatch
+    store.dispatch = async function (type, ...args) {
+      if (type === 'markSubscriptionEntriesAsSeen') {
+        store.dispatch = dispatch
+        await new Promise(resolve => { window.__finishSavingSeenMarks = resolve })
+      }
+      const result = await dispatch.call(this, type, ...args)
+      if (type === 'markSubscriptionEntriesAsSeen') window.__seenMarksSaved = true
+      return result
+    }
+  })
+}
+
+test.describe('New feed refresh while saving seen marks', () => {
+  test.use({
+    seed: {
+      settings: {
+        ...commonSettings,
+        useRssFeeds: true,
+        hideSubscriptionsShorts: true,
+        hideSubscriptionsLive: true,
+        hideSubscriptionsCommunity: true
+      },
+      profiles: [profile()],
+      subscriptionCache: [{
+        _id: CHANNEL_ID,
+        videos: [newVideo],
+        videosTimestamp: new Date(now).toISOString()
+      }]
+    }
+  })
+
+  test('keeps failed channels and the refresh shortcut while saving seen marks', async ({ page }, testInfo) => {
+    let feedRequests = 0
+    await page.route('**/feeds/videos.xml?*', route => {
+      feedRequests++
+      return route.fulfill({ status: 500, body: 'Failed' })
+    })
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await page.getByRole('button', { name: /Refresh New content/ }).click()
+    const errorHeading = page.getByRole('heading', { name: 'Channels with errors', exact: true })
+    await expect(errorHeading).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Mark all as seen' })).toBeEnabled()
+
+    await holdSeenMarks(page)
+    try {
+      await page.getByRole('button', { name: 'Mark all as seen' }).click()
+      await expect.poll(() => page.evaluate(() => !!window.__finishSavingSeenMarks)).toBe(true)
+      await expect(page.getByText('There is no new content.', { exact: true })).toBeVisible()
+      await expect.soft(errorHeading).toBeVisible({ timeout: 1000 })
+      await expect.soft(page.locator('.newFeed').getByRole('link', { name: 'Channel A', exact: true })).toBeVisible({ timeout: 1000 })
+      await page.locator('.card').filter({ has: page.locator('.newFeed') }).screenshot({
+        path: testInfo.outputPath('failed-channels-during-save.png')
+      })
+
+      const requestsBeforeShortcut = feedRequests
+      await page.keyboard.press('r')
+      await expect.poll(() => feedRequests).toBeGreaterThan(requestsBeforeShortcut)
+    } finally {
+      await page.evaluate(() => window.__finishSavingSeenMarks?.())
+    }
+    await expect(page.getByText('There is no new content.', { exact: true })).toBeVisible()
+  })
+})
+
 test.describe('Reactive subscription title filtering', () => {
   test.use({
     seed: {
@@ -1601,6 +1671,59 @@ test.describe('large new feed refresh', () => {
     await expect(page.getByRole('heading', { name: 'Refresh all subscription feeds?' })).toHaveCount(0)
     await expect(page.getByText('There is no new content.')).toBeVisible()
   })
+
+  for (const view of ['combined', 'tabbed']) {
+    test.describe(`confirmation while saving in ${view} view`, () => {
+      test.use({
+        seed: {
+          settings: { ...commonSettings, newSubscriptionFeedView: view },
+          profiles: [profile(subscriptions)],
+          subscriptionCache: [{
+            _id: subscriptions[0].id,
+            videos: [video('large-feed-new', 'New video in a large profile', now - HOUR, {
+              author: subscriptions[0].name,
+              authorId: subscriptions[0].id,
+              isNewInSubscriptionFeed: true
+            })],
+            videosTimestamp: new Date(now).toISOString()
+          }]
+        }
+      })
+
+      test('shows the refresh confirmation during saving and retains its focus afterward', async ({ page }, testInfo) => {
+        await goTo(page, 'subscriptions')
+        await page.locator('[data-subscription-feed-tab="all"]').click()
+        await expect(page.getByText('New video in a large profile', { exact: true })).toBeVisible()
+        await holdSeenMarks(page)
+        try {
+          await page.getByRole('button', { name: 'Mark all as seen' }).click()
+          await expect.poll(() => page.evaluate(() => !!window.__finishSavingSeenMarks)).toBe(true)
+          await expect(page.getByText('There is no new content.', { exact: true })).toBeVisible()
+          await expect(page.locator('#subscriptionsPanel.newFeed')).toHaveAttribute('role', 'tabpanel')
+          await page.keyboard.press('r')
+          const dialog = page.getByRole('dialog', { name: 'Refresh all subscription feeds?' })
+          await expect(dialog).toBeVisible({ timeout: 1000 })
+          await expect(dialog.getByText(/126 subscriptions can take a long time/)).toBeVisible()
+          await dialog.evaluate(element => { window.__refreshConfirmation = element })
+          const cancel = dialog.getByRole('button', { name: 'No', exact: true })
+          await cancel.focus()
+          await dialog.screenshot({ path: testInfo.outputPath('refresh-confirmation-during-save.png') })
+
+          await page.evaluate(() => window.__finishSavingSeenMarks())
+          await expect.poll(() => page.evaluate(() => window.__seenMarksSaved)).toBe(true)
+          await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+          await expect(page.locator('#subscriptionsPanel.newFeed')).toHaveAttribute('role', 'tabpanel')
+          expect(await dialog.evaluate(element => element === window.__refreshConfirmation)).toBe(true)
+          await expect(cancel).toBeFocused()
+          await cancel.click()
+          await expect(dialog).toHaveCount(0)
+          await expect(page.getByText('There is no new content.', { exact: true })).toBeVisible()
+        } finally {
+          await page.evaluate(() => window.__finishSavingSeenMarks?.())
+        }
+      })
+    })
+  }
 })
 
 test.describe('large combined new feed', () => {
@@ -1635,6 +1758,25 @@ test.describe('large combined new feed', () => {
   ]) {
     test.describe(`mark all seen: ${view}, ${scale}% scale, motion ${reducedMotion}`, () => {
       test.use({ seed: { ...seed, settings: { ...seed.settings, newSubscriptionFeedView: view, uiScale: scale, reducedMotion } } })
+      test('shows the empty message as soon as cards disappear while seen marks are saving', async ({ page }) => {
+        await goTo(page, 'subscriptions')
+        await page.locator('[data-subscription-feed-tab="all"]').click()
+        await expect(page.getByText('New video 0', { exact: true })).toBeVisible()
+
+        await holdSeenMarks(page)
+        try {
+          await page.getByRole('button', { name: 'Mark all as seen' }).click()
+          await expect.poll(() => page.evaluate(() => !!window.__finishSavingSeenMarks)).toBe(true)
+          await expect(page.locator('.newFeed [data-feed-item-key]')).toHaveCount(0)
+          await expect(page.getByText('There is no new content.', { exact: true })).toBeVisible({ timeout: 1000 })
+          await expect(page.getByRole('button', { name: 'Mark all as seen' })).toBeDisabled()
+        } finally {
+          await page.evaluate(() => window.__finishSavingSeenMarks?.())
+        }
+        await expect(page.getByRole('button', { name: 'Mark all as seen' })).toHaveCount(0)
+        await expect(page.getByText('There is no new content.', { exact: true })).toBeVisible()
+      })
+
       test('returns to the top and clears the New feed without per-card layout work', async ({ page }) => {
         await goTo(page, 'subscriptions')
         await page.locator('[data-subscription-feed-tab="all"]').click()

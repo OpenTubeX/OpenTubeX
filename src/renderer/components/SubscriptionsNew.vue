@@ -2,6 +2,7 @@
   <SubscriptionsTabUi
     v-if="!clearingVisibleContent"
     ref="feed"
+    v-bind="$attrs"
     class="newFeed"
     :is-loading="isLoading"
     :video-list="displayedEntries"
@@ -72,19 +73,24 @@
         />
       </section>
     </Transition>
-    <FtPrompt
-      v-if="showRefreshWarning"
-      :label="$t('Subscriptions.New Feed Refresh Warning Title')"
-      :extra-labels="[$t('Subscriptions.New Feed Refresh Warning', { count: activeSubscriptionIds.size }, activeSubscriptionIds.size)]"
-      :option-names="[$t('Yes'), $t('No')]"
-      :option-values="['refresh', 'cancel']"
-      autosize
-      @click="handleRefreshWarning"
-    />
   </SubscriptionsTabUi>
-  <div
+  <SubscriptionsTabUi
     v-else
+    v-bind="$attrs"
     class="newFeed"
+    :error-channels="errorChannels"
+    :only-show-new="true"
+    :track-global-refresh="false"
+    @refresh="refresh"
+  />
+  <FtPrompt
+    v-if="showRefreshWarning"
+    :label="$t('Subscriptions.New Feed Refresh Warning Title')"
+    :extra-labels="[$t('Subscriptions.New Feed Refresh Warning', { count: activeSubscriptionIds.size }, activeSubscriptionIds.size)]"
+    :option-names="[$t('Yes'), $t('No')]"
+    :option-values="['refresh', 'cancel']"
+    autosize
+    @click="handleRefreshWarning"
   />
 </template>
 
@@ -106,6 +112,8 @@ import { hasConfiguredRestrictedPlaybackAuthentication } from '../helpers/restri
 import { MAX_INCREMENTAL_SUBSCRIPTION_FEED_ENTRIES } from '../helpers/subscription-channels'
 import { applyAnimationSpeed } from '../helpers/animationSpeed'
 import { isReducedMotionEnabled } from '../helpers/reducedMotion'
+
+defineOptions({ inheritAttrs: false })
 
 const props = defineProps({
   activeCategory: {
