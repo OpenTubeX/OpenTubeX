@@ -689,6 +689,7 @@ import { translateWindowTitle } from './helpers/strings'
 import { formatTabTitle } from './tabs/tabTitle'
 import { normalizeScrollbarThumbWidth } from './constants/scrollbar'
 import { getAppFontFamily } from './helpers/appFont'
+import { canMarkHistoryEntryAsWatched } from './helpers/history'
 import { setupPhoneViewport } from './helpers/phoneViewport'
 import { createCapacitorUiScale } from './helpers/capacitorUiScale'
 import { usesCapacitorTabletLayout } from './helpers/capacitorLayout'
@@ -3407,7 +3408,7 @@ const commandPaletteVideoSources = computed(() => ({
     downloads: t('Settings.Download Settings.Download Settings'),
     queue: t('Video.Queue'),
   },
-  navigate: navigateFromCommandPalette,
+  playLibraryVideo: playLibraryVideoFromCommandPalette,
   playDownloadedVideo: playDownloadedVideoFromCommandPalette,
   playQueuedVideo: playQueuedVideoFromCommandPalette,
   removeQueuedVideo: id => store.commit('removeVideoFromWatchQueue', id),
@@ -3467,6 +3468,32 @@ function navigateFromCommandPalette(location) {
     return navigation.push(presentedTabId.value, location)
   }
   return router.push(location)
+}
+
+function playLibraryVideoFromCommandPalette(video, location) {
+  if (!isElectron || store.getters.getExternalPlayer === '' || store.getters.getDefaultViewingMode !== 'external_player') {
+    return navigateFromCommandPalette(location)
+  }
+  const history = store.getters.getHistoryCacheById[video.videoId]
+  const saveProgress = ['auto', 'semi-auto'].includes(store.getters.getWatchedProgressSavingMode)
+  tabMediaCoordinator.dispatchAction('pause', {}, presentedTabId.value)
+  window.ftElectron.openInExternalPlayer({
+    videoId: video.videoId,
+    // External players cannot resolve the app's local playlist IDs.
+    playlistId: location.query.playlistType === 'user' ? null : location.query.playlistId ?? null,
+    startTime: saveProgress ? history?.watchProgress ?? 0 : 0,
+    playbackRate: store.getters.getDefaultPlayback,
+  })
+  if (store.getters.getRememberHistory && canMarkHistoryEntryAsWatched(video)) {
+    store.dispatch('updateHistory', {
+      ...video,
+      ...history,
+      watchProgress: history?.watchProgress ?? 0,
+      isWatched: true,
+      timeWatched: history?.timeWatched ?? Date.now(),
+      type: 'video',
+    })
+  }
 }
 
 function playQueuedVideoFromCommandPalette(location) {

@@ -8,7 +8,7 @@ import { downloadFileTitle, isDownloadPlaybackSupported, isPlayableDownloadFile 
  * Yields actions one at a time so searching never builds the full registry.
  */
 export function * iterateLocalVideoCommands(context) {
-  const { history, playlists, downloads, queue, group, sources, navigate, playDownloadedVideo, playQueuedVideo, removeQueuedVideo } = context
+  const { history, playlists, downloads, queue, group, sources, playLibraryVideo, playDownloadedVideo, playQueuedVideo, removeQueuedVideo } = context
   let index = 0
   function entry(video, source, icon, run, identifier = video?.videoId) {
     if (!identifier) return null
@@ -27,7 +27,7 @@ export function * iterateLocalVideoCommands(context) {
   }
 
   for (const video of history) {
-    const command = entry(video, sources.history, ['fas', 'history'], () => navigate(videoRoute(video,
+    const command = entry(video, sources.history, ['fas', 'history'], () => playLibraryVideo(video, videoRoute(video,
       context.saveVideoHistoryWithLastViewedPlaylist && video.lastViewedPlaylistId
         ? {
             playlistId: video.lastViewedPlaylistId,
@@ -40,7 +40,7 @@ export function * iterateLocalVideoCommands(context) {
   }
   for (const playlist of playlists) {
     for (const video of playlist.videos) {
-      const command = entry(video, `${sources.playlists}: ${playlist.playlistName}`, ['fas', 'bookmark'], () => navigate(videoRoute(video, {
+      const command = entry(video, `${sources.playlists}: ${playlist.playlistName}`, ['fas', 'bookmark'], () => playLibraryVideo(video, videoRoute(video, {
         playlistId: playlist._id,
         playlistType: 'user',
         ...(video.playlistItemId ? { playlistItemId: video.playlistItemId } : {}),

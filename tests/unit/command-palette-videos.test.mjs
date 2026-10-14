@@ -15,7 +15,7 @@ function registry(overrides = {}) {
     queue: [],
     group: 'Local videos',
     sources: { history: 'History', playlists: 'Playlists', downloads: 'Downloads', queue: 'Queue' },
-    navigate: route => navigations.push(route),
+    playLibraryVideo: (video, route) => navigations.push(route),
     playDownloadedVideo: (id, file) => playedDownloads.push({ id, file }),
     playQueuedVideo: route => navigations.push(route),
     removeQueuedVideo: id => removedItems.push(id),

@@ -426,6 +426,39 @@ test.describe('local video commands', () => {
     })
   }
 
+  for (const source of ['History', 'Playlists: Road trips']) {
+    test(`honors external-player viewing mode for ${source} results`, async ({ app, page }) => {
+      await app.electronApp.evaluate(({ ipcMain }) => {
+        globalThis.__paletteExternalLaunches = []
+        ipcMain.removeAllListeners('open-in-external-player')
+        ipcMain.on('open-in-external-player', (event, payload) => {
+          globalThis.__paletteExternalLaunches.push(payload)
+        })
+      })
+      await page.evaluate(async video => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('upsertToHistoryCache', { ...video, watchProgress: 12 })
+        await store.dispatch('updateExternalPlayer', 'mpv')
+        await store.dispatch('updateDefaultViewingMode', 'external_player')
+        await store.dispatch('updateDefaultPlayback', 1.5)
+        await store.dispatch('updateWatchedProgressSavingMode', 'auto')
+      }, video)
+      const previousUrl = page.url()
+      const input = page.getByRole('combobox', { name: 'Search commands' })
+      await input.fill('journey')
+      const option = page.getByRole('group', { name: 'Local videos', exact: true }).getByRole('option')
+        .filter({ has: page.locator('small', { hasText: `${source} ·` }) })
+      await option.click()
+      await expect.poll(() => app.electronApp.evaluate(() => globalThis.__paletteExternalLaunches))
+        .toEqual([{ videoId: video.videoId, playlistId: null, startTime: 12, playbackRate: 1.5 }])
+      await expect(page.getByRole('dialog', { name: 'Command palette' })).toBeHidden()
+      expect(page.url()).toBe(previousUrl)
+      await expect.poll(() => page.evaluate(videoId => (
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById[videoId]?.isWatched
+      ), video.videoId)).toBe(true)
+    })
+  }
+
   for (const enabled of [true, false]) {
     test(`history results respect saved playlist context when the setting is ${enabled}`, async ({ app, page }) => {
       await mockPlayableWatchPage(app, page)

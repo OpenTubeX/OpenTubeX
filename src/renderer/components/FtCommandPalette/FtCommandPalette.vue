@@ -241,21 +241,23 @@ watch([query, () => props.videoSources, locale, videoRevision], async ([search, 
   searchPending.value = false
   if (search.trim() === '') return
   searchPending.value = true
-  // Store mutations provide invalidation; the scan needs no per-record Vue
-  // dependency tracking. Unwrap the collections without copying the library.
-  const rawSources = {
-    ...sources,
-    history: toRaw(sources.history),
-    playlists: toRaw(sources.playlists),
-    downloads: toRaw(sources.downloads),
-    queue: toRaw(sources.queue),
+  try {
+    // Store mutations provide invalidation; the scan needs no per-record Vue
+    // dependency tracking. Unwrap the collections without copying the library.
+    const rawSources = {
+      ...sources,
+      history: toRaw(sources.history),
+      playlists: toRaw(sources.playlists),
+      downloads: toRaw(sources.downloads),
+      queue: toRaw(sources.queue),
+    }
+    const matches = await filterCommandPaletteCommandsAsync(
+      iterateLocalVideoCommands(rawSources), search, language, () => cancelled
+    )
+    if (!cancelled) videoMatches.value = matches
+  } finally {
+    if (!cancelled) searchPending.value = false
   }
-  const matches = await filterCommandPaletteCommandsAsync(
-    iterateLocalVideoCommands(rawSources), search, language, () => cancelled
-  )
-  if (cancelled) return
-  videoMatches.value = matches
-  searchPending.value = false
 }, { immediate: true })
 
 const filteredCommands = computed(() => {
