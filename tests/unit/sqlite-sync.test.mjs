@@ -144,16 +144,17 @@ for (const commit of [false, true]) {
       if (!commit) throw new Error('abort owner')
     }).then(() => true, error => { assert.match(error.message, /abort owner/); return false })
     await entered.promise
-    let completed = false
-    const starting = Promise.resolve(sync.start({})).then(job => { completed = true; return job })
-    await setImmediate()
-    const early = completed
+    const ownerQueue = engine.pendingTransaction
+    const starting = sync.start({})
+    const queuedBehindOwner = engine.pendingTransaction !== ownerQueue
+    const jobsBeforeRelease = engine.prepare('SELECT count(*) AS count FROM sync_jobs').get().count
     resume.resolve()
     assert.equal(await owner, commit)
     const job = await starting
+    assert.equal(queuedBehindOwner, true, 'startup must join the queue behind the active owner')
+    assert.equal(jobsBeforeRelease, 0, 'startup must not create a job inside another request\'s transaction')
     await sync.chunk({ ...job, section: 'remote', records: [] })
     assert.equal((await sync.plan(job)).counts.historyToUpload, commit ? 1 : 0)
-    assert.equal(early, false, 'startup must not report success inside another request\'s transaction')
     await sync.cancel(job)
   })
 }
