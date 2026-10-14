@@ -31,7 +31,7 @@ export async function playDownloadedFile(downloadId, selectedFile, { refreshDown
     if (!await playNative(download.id, file.path).catch(() => false)) fileNotFound()
     return
   }
-  const route = downloadWatchRoute(download, file.videoId)
+  const route = downloadWatchRoute(download, file.videoId, file.path)
   if (typeof file.isShort === 'boolean') route.query.short = String(file.isShort)
   return navigate(route)
 }
@@ -46,7 +46,7 @@ export function downloadFileTitle(download, file) {
     file.path?.split(/[/\\]/).at(-1)?.replace(/\.[^.]+$/, '') || file.videoId
 }
 
-export function downloadWatchRoute(download, videoId) {
+export function downloadWatchRoute(download, videoId, filePath) {
   const query = { downloadId: String(download.id) }
   if (download.playlistId) {
     query.playlistId = download.playlistId
@@ -54,6 +54,7 @@ export function downloadWatchRoute(download, videoId) {
     query.playlistId = download.playlistKey
     query.playlistType = 'user'
   }
+  if (typeof filePath === 'string') query.downloadFilePath = filePath
 
   return { path: `/watch/${videoId}`, query }
 }
@@ -67,6 +68,6 @@ export function downloadQueueVideos(download) {
       author: file.author || download.author || '',
       authorId: file.authorId || download.authorId || '',
       thumbnail: download.thumbnail,
-      route: downloadWatchRoute(download, file.videoId)
+      route: downloadWatchRoute(download, file.videoId, file.path)
     }))
 }

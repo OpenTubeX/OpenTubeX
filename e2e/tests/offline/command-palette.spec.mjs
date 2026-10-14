@@ -1,9 +1,9 @@
-import { test, expect, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, goTo, setWindowSize } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchHistoryEntry } from '../../helpers/watch.mjs'
 import { DEMO_MEDIA_PATH } from '../../helpers/media.mjs'
-import { copyFile, rm } from 'node:fs/promises'
-import { randomUUID } from 'node:crypto'
+import { copyFile, mkdir, readFile, rm } from 'node:fs/promises'
+import { createHash, randomUUID } from 'node:crypto'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 
@@ -390,7 +390,7 @@ test.describe('local video commands', () => {
   for (const [source, query] of [
     ['History', {}],
     ['Playlists: Road trips', { playlistId: playlist._id, playlistType: 'user', playlistItemId: 'journey-item' }],
-    ['Downloads', { downloadId: '42' }],
+    ['Downloads', { downloadId: '42', downloadFilePath: DEMO_MEDIA_PATH }],
     ['Queue', { short: 'false' }],
   ]) {
     test(`opens the selected local video from ${source}`, async ({ app, page }) => {
@@ -646,6 +646,93 @@ test.describe('download availability recheck', () => {
     await page.keyboard.press('Control+k')
     await input.fill('vanishing palette download')
     await expect(videos).toHaveCount(0)
+  })
+})
+
+test.describe('download files sharing a video ID', () => {
+  const folder = path.join(tmpdir(), `opentubex-palette-files-${randomUUID()}`)
+  const firstPath = path.join(folder, 'First local take.webm')
+  const laterPath = path.join(folder, 'Later local take #2.webm')
+  const laterFixture = path.join(path.dirname(DEMO_MEDIA_PATH), 'aspect-ratio-demo.webm')
+  const digest = async file => createHash('sha256').update(await readFile(file)).digest('hex')
+  test.use({
+    seed: {
+      settings: { enableDownloads: true, autoplayVideos: false },
+      downloads: [{
+        id: 43,
+        title: 'Repeated playlist video',
+        status: 'completed',
+        mode: 'video',
+        destination: firstPath,
+        destinations: [firstPath, laterPath],
+        files: [
+          { videoId: 'dupevideo01', title: 'First local take', path: firstPath, extension: 'webm' },
+          { videoId: 'dupevideo01', title: 'Later local take', path: laterPath, extension: 'webm' },
+        ],
+      }],
+    }
+  })
+  test.beforeAll(async () => {
+    await mkdir(folder, { recursive: true })
+    await copyFile(DEMO_MEDIA_PATH, firstPath)
+    await copyFile(laterFixture, laterPath)
+  })
+  test.afterAll(() => rm(folder, { recursive: true, force: true }))
+
+  test.beforeEach(async ({ page }) => {
+    await page.context().route(/^https?:/, route => route.abort('internetdisconnected'))
+    const disconnect = () => {
+      Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false })
+      window.dispatchEvent(new Event('offline'))
+    }
+    await page.context().addInitScript(disconnect)
+    await page.evaluate(disconnect)
+  })
+
+  async function verifyFile(page, expectedPath) {
+    const video = page.locator('video').first()
+    await expect.poll(() => video.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2)
+    const expectedDigest = await digest(expectedPath)
+    await expect.poll(() => video.evaluate(async element => {
+      if (!element.currentSrc) return null
+      const bytes = await (await fetch(element.currentSrc)).arrayBuffer()
+      const hash = await crypto.subtle.digest('SHA-256', bytes)
+      return Array.from(new Uint8Array(hash), byte => byte.toString(16).padStart(2, '0')).join('')
+    })).toBe(expectedDigest)
+  }
+
+  test('plays the selected file, switches between duplicates, and preserves selection on reload', async ({ page }) => {
+    async function select(title) {
+      await page.keyboard.press('Control+k')
+      await page.getByRole('combobox', { name: 'Search commands' }).fill(title)
+      const results = page.getByRole('group', { name: 'Local videos', exact: true }).getByRole('option')
+        .filter({ has: page.locator('small', { hasText: /^Downloads/ }) })
+      await expect(results).toHaveCount(1)
+      await results.click()
+      await expect(page.locator('.commandPalette')).toBeHidden()
+      await verifyFile(page, title === 'Later local take' ? laterPath : firstPath)
+      await expect(page.locator('.videoTitle')).toHaveText(title)
+    }
+    await select('Later local take')
+    await select('First local take')
+    await select('Later local take')
+    await page.reload()
+    await verifyFile(page, laterPath)
+  })
+
+  test('a queued duplicate retains its file identity when selected in the palette', async ({ page }) => {
+    await goTo(page, 'downloads')
+    const row = page.locator('.downloadRow').filter({ has: page.getByRole('heading', { name: 'Repeated playlist video', exact: true }) })
+    await row.getByRole('button', { name: 'Add to Queue', exact: true }).click()
+    await page.getByRole('dialog', { name: 'Downloads', exact: true }).getByRole('button', { name: 'Close', exact: true }).click()
+    await page.keyboard.press('Control+k')
+    await page.getByRole('combobox', { name: 'Search commands' }).fill('Later local take')
+    const queued = page.getByRole('group', { name: 'Local videos', exact: true }).getByRole('option')
+      .filter({ has: page.locator('small', { hasText: /^Queue/ }) })
+    await expect(queued).toHaveCount(1)
+    await queued.click()
+    await verifyFile(page, laterPath)
+    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getWatchQueue.map(video => video.route.query.downloadFilePath))).toEqual([firstPath])
   })
 })
 

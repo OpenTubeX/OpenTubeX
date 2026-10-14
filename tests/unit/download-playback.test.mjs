@@ -11,7 +11,7 @@ test('queues a downloaded video with its saved-file route and metadata', () => {
   assert.deepEqual(video, {
     videoId: 'saved', title: 'Saved video', author: 'Channel', authorId: 'channel',
     thumbnail: 'data:image/png;base64,thumbnail',
-    route: { path: '/watch/saved', query: { downloadId: '42' } },
+    route: { path: '/watch/saved', query: { downloadId: '42', downloadFilePath: '/downloads/video.webm' } },
   })
 })
 
@@ -27,8 +27,8 @@ test('queues available playlist files in order and keeps their playlist context'
   })
   assert.deepEqual(videos.map(video => video.title), ['First track', 'Second track'])
   assert.deepEqual(videos.map(video => video.route), [
-    { path: '/watch/first', query: { downloadId: '7', playlistId: 'playlist' } },
-    { path: '/watch/second', query: { downloadId: '7', playlistId: 'playlist' } },
+    { path: '/watch/first', query: { downloadId: '7', playlistId: 'playlist', downloadFilePath: '/downloads/First.m4a' } },
+    { path: '/watch/second', query: { downloadId: '7', playlistId: 'playlist', downloadFilePath: '/downloads/Second track.m4a' } },
   ])
   assert.deepEqual(downloadQueueVideos({ id: 8 }), [])
   assert.deepEqual(downloadQueueVideos({ files: [{ videoId: 'missing', available: false }] }), [])
@@ -68,7 +68,7 @@ test('refreshes selected file availability and preserves its current playlist ro
     fileNotFound: () => { throw new Error('The selected file exists') },
   })
   assert.deepEqual(commits, [['upsertYtDlpDownload', 42]])
-  assert.deepEqual(navigations, [{ path: '/watch/second', query: { downloadId: '42', playlistId: 'current-playlist', playlistType: 'user', short: 'false' } }])
+  assert.deepEqual(navigations, [{ path: '/watch/second', query: { downloadId: '42', playlistId: 'current-playlist', playlistType: 'user', downloadFilePath: '/downloads/second.webm', short: 'false' } }])
 })
 
 test('rejects deleted or moved files without navigating to another file', async () => {
@@ -104,4 +104,20 @@ test('iOS opens the selected external file through the native player and reports
   }
   assert.deepEqual(nativeCalls, [[42, '/native.mp4'], [42, '/native.mp4']])
   assert.equal(missing, 1)
+})
+
+
+test('preserves the selected path when a download repeats a video ID', async () => {
+  const files = [
+    { videoId: 'dupevideo01', path: '/downloads/First.webm', available: true },
+    { videoId: 'dupevideo01', path: '/downloads/Later #2.webm', available: true },
+  ]
+  const download = { id: 43, status: 'completed', mode: 'video', files }
+  let route
+  await playDownloadedFile(43, files[1], {
+    refreshDownloads: async () => [download],
+    navigate: value => { route = value },
+    fileNotFound: () => assert.fail('The selected file exists'),
+  })
+  assert.equal(route.query.downloadFilePath, files[1].path)
 })

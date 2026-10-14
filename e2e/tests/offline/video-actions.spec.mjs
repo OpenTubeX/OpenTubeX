@@ -1072,6 +1072,7 @@ test.describe('video downloads', () => {
     await page.getByRole('button', { name: 'Change Media Formats' }).click()
     await formatPrompt.getByRole('button', { name: /Online video/ }).click()
     await expect(page).not.toHaveURL(/downloadId=/)
+    await expect(page).not.toHaveURL(/downloadFilePath=/)
     await page.getByRole('button', { name: 'Change Media Formats' }).click()
     await expect(formatPrompt.locator('.engineBadge')).not.toHaveText('Local file')
     await expect(formatPrompt.getByRole('button', { name: /Local video file/ })).toBeVisible()
@@ -1083,6 +1084,7 @@ test.describe('video downloads', () => {
     await expect(formatPrompt.getByRole('button', { name: /Local audio file/ })).toHaveAttribute('aria-pressed', 'true')
     await formatPrompt.getByRole('button', { name: /Online video/ }).click()
     await expect(page).not.toHaveURL(/downloadId=/)
+    await expect(page).not.toHaveURL(/downloadFilePath=/)
     expect(await page.evaluate(() => {
       const findWatchView = (vnode) => {
         if (vnode?.component?.type?.name === 'Watch') return vnode.component.proxy

@@ -3,6 +3,7 @@ import path from 'node:path'
 import { test, expect, goTo, repoRoot, setWindowSize, waitForAppReady } from '../../helpers/app.mjs'
 import { watchViewHandle } from '../../helpers/watch.mjs'
 
+const downloadSource = (id, videoId, filePath) => `downloadmedia://file/${id}/${videoId}?path=${encodeURIComponent(filePath)}`
 const mediaPath = path.join(repoRoot, 'e2e/fixtures/media/demo.webm')
 test.use({
   seed: {
@@ -111,12 +112,14 @@ for (const mobile of [false, true]) {
 
       await goTo(page, 'home')
       const homeQueue = page.locator('[data-home-section="watchQueue"]')
-      await expect(homeQueue.getByRole('link').filter({ hasText: 'Downloaded audio' })).toHaveAttribute('href', '#/watch/offline0002?downloadId=2')
+      const audioLink = homeQueue.getByRole('link').filter({ hasText: 'Downloaded audio' })
+      await expect(audioLink).toHaveAttribute('href', /^#\/watch\/offline0002\?downloadId=2&/)
+      expect(new URLSearchParams((await audioLink.getAttribute('href')).split('?')[1]).get('downloadFilePath')).toBe(audioPath)
       await homeQueue.getByRole('link').filter({ hasText: 'Downloaded audio' }).click()
       await expect(page).toHaveURL(/#\/watch\/offline0002\?downloadId=2/)
       const video = page.locator('video').first()
       await expect.poll(() => video.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2)
-      await expect(video).toHaveAttribute('src', 'downloadmedia://file/2/offline0002')
+      await expect(video).toHaveAttribute('src', downloadSource(2, 'offline0002', audioPath))
       await video.evaluate(element => element.pause())
 
       if (mobile) await page.getByRole('button', { name: 'Queue Playlist video one', exact: true }).click()
@@ -125,7 +128,7 @@ for (const mobile of [false, true]) {
       await video.evaluate(element => element.dispatchEvent(new Event('ended')))
       await expect(page).toHaveURL(/#\/watch\/offline0003\?downloadId=3/)
       await expect.poll(() => video.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2)
-      await expect(video).toHaveAttribute('src', 'downloadmedia://file/3/offline0003')
+      await expect(video).toHaveAttribute('src', downloadSource(3, 'offline0003', mediaPath))
       await expect.poll(() => video.evaluate(element => !element.paused && element.currentTime > 0.1)).toBe(true)
       await expect(video).not.toHaveAttribute('autoplay')
       await video.evaluate(element => element.pause())
@@ -133,7 +136,7 @@ for (const mobile of [false, true]) {
       await queue.getByRole('link').filter({ hasText: 'Playlist video two' }).click()
       await expect(page).toHaveURL(/#\/watch\/offline0004\?downloadId=3/)
       await expect.poll(() => video.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2)
-      await expect(video).toHaveAttribute('src', 'downloadmedia://file/3/offline0004')
+      await expect(video).toHaveAttribute('src', downloadSource(3, 'offline0004', mediaPath))
       await expect(queue).toBeHidden()
     })
 
@@ -155,7 +158,7 @@ for (const mobile of [false, true]) {
         await row(sameDownload ? 'Downloaded audio' : 'Second audio download').getByRole('button', { name: 'Add to Queue', exact: true }).click()
         await row('Downloaded audio').getByRole('button', { name: 'Play download', exact: true }).click()
         const video = page.locator('video').first()
-        await expect(video).toHaveAttribute('src', 'downloadmedia://file/2/offline0002')
+        await expect(video).toHaveAttribute('src', downloadSource(2, 'offline0002', audioPath))
         await expect.poll(() => video.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2)
         const originalVideo = await video.elementHandle()
         const ended = originalVideo.evaluate(element => new Promise(resolve => element.addEventListener('ended', resolve, { once: true })))
@@ -163,7 +166,7 @@ for (const mobile of [false, true]) {
         await ended
         const downloadId = sameDownload ? 2 : 6
         await expect(page).toHaveURL(new RegExp(`#/watch/offline0002\\?downloadId=${downloadId}`))
-        await expect(video).toHaveAttribute('src', `downloadmedia://file/${downloadId}/offline0002`)
+        await expect(video).toHaveAttribute('src', downloadSource(downloadId, 'offline0002', audioPath))
         await expect.poll(() => video.evaluate(element => !element.paused && element.currentTime > 0.1 && !element.ended)).toBe(true)
         await expect(video).not.toHaveAttribute('autoplay')
         expect(await originalVideo.evaluate(element => element === document.querySelector('video'))).toBe(true)

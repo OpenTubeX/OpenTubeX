@@ -23,7 +23,7 @@ test('offline recommendations retain saved thumbnails and exclude unavailable fi
   const suggestions = computed.offlineDownloadSuggestions.call(watch)
   assert.equal(suggestions.length, 1)
   assert.equal(suggestions[0].thumbnail, 'data:image/png;base64,saved')
-  assert.deepEqual(suggestions[0].route, { path: '/watch/saved', query: { downloadId: '1' } })
+  assert.deepEqual(suggestions[0].route, { path: '/watch/saved', query: { downloadId: '1', downloadFilePath: '/saved.mp3' } })
 })
 
 for (const localFilePlayback of [false, true]) {
