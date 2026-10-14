@@ -955,12 +955,14 @@ test('metadata digest comparisons preserve legacy bytes, URL fallback and stale 
 
 test('equal-time metadata observations preserve NeDB ID order, thumbnail inheritance and durable pagination', async t => {
   const directory = await mkdtemp(join(tmpdir(), 'opentubex-metadata-order-'))
-  t.after(() => rm(directory, { recursive: true, force: true }))
+  let db
+  t.after(async () => {
+    try { if (db?.isOpen) db.close() } finally { await rm(directory, { recursive: true, force: true }) }
+  })
   const path = join(directory, 'library.sqlite')
-  let db = new DatabaseSync(path)
+  db = new DatabaseSync(path)
   db.exec('PRAGMA foreign_keys=ON;' + SCHEMA_SQL)
   let engine = new LibraryEngine(db)
-  t.after(() => db.close())
   const collection = engine.collections.videoMetadataCache
   const insert = collection.insertAsync.bind(collection)
   const ids = ['a-first', 'b-second', 'c-third', 'd-rollback']
@@ -1052,9 +1054,12 @@ test('member removal, duplicate prevention and repair/mark-all include records o
 
 test('disk-full failures roll back a normalized feed transaction and checkpointed feeds reopen intact', async t => {
   const directory = await mkdtemp(join(tmpdir(), 'opentubex-cache-checkpoint-'))
-  t.after(() => rm(directory, { recursive: true, force: true }))
+  let db
+  t.after(async () => {
+    try { if (db?.isOpen) db.close() } finally { await rm(directory, { recursive: true, force: true }) }
+  })
   const path = join(directory, 'library.sqlite')
-  let db = new DatabaseSync(path)
+  db = new DatabaseSync(path)
   db.exec('PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL;' + SCHEMA_SQL)
   let engine = new LibraryEngine(db)
   const record = { _id: 'channel', videos: [video(1, { isNewInSubscriptionFeed: false })] }
