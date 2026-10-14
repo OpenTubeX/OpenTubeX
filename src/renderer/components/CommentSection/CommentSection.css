@@ -253,7 +253,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding-block: 8px;
+  padding-block: 16px;
 }
 
 /* The sort/reload actions normally give the card its height. Without them the
@@ -265,13 +265,13 @@
 .noCommentActions {
   display: flex;
   flex: 0 0 auto;
-  align-items: flex-start;
+  align-items: center;
   gap: 8px;
   margin-inline-start: auto;
 }
 
 .noCommentActions :deep(.select) {
-  margin-block-start: 20px;
+  margin-block-start: 0;
 }
 
 :global(.capacitorPhoneLayout .noComments) {
@@ -418,10 +418,6 @@
 
 .reloadCommentsAligned {
   margin-block-start: calc(30px + (var(--form-control-height) - 28px) / 2);
-}
-
-.noCommentActions .reloadCommentsAligned {
-  margin-block-start: calc(20px + (var(--form-control-height) - 28px) / 2);
 }
 
 .comment {

@@ -568,7 +568,6 @@
             :padding="8"
             :use-shadow="false"
             class="reloadComments"
-            :class="{ reloadCommentsAligned: showSortBy }"
             @click="reloadCommentData"
           />
           <FtSelect
