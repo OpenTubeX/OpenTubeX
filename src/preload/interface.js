@@ -77,8 +77,8 @@ ipcRenderer.on(IpcChannels.TABS_EXIT_FULLSCREEN, (_, targetTabId) => {
 
 export default {
   watchQueue: {
-    update: request => {
-      const snapshot = ipcRenderer.sendSync(IpcChannels.WATCH_QUEUE_UPDATE, JSON.parse(JSON.stringify(request)))
+    update: async request => {
+      const snapshot = await ipcRenderer.invoke(IpcChannels.WATCH_QUEUE_UPDATE, JSON.parse(JSON.stringify(request)))
       if (snapshot.error) throw new Error(snapshot.error)
       return snapshot
     },

@@ -15,8 +15,8 @@ function sharedWindows() {
   const listeners = []
   const snapshots = []
   const adapter = {
-    update(request) {
-      const snapshot = update(request)
+    async update(request) {
+      const snapshot = await update(request)
       if (request.type) snapshots.push(snapshot)
       return snapshot
     },
@@ -24,12 +24,13 @@ function sharedWindows() {
   }
   return {
     window: () => createStore({ modules: { watchQueue }, plugins: [store => persistWatchQueue(store, null, adapter)] }),
-    restored: () => createSharedWatchQueue(storage)({}).items.map(item => item.videoId),
+    restored: async () => (await createSharedWatchQueue(storage)({})).items.map(item => item.videoId),
     deliverUpdates: () => snapshots.splice(0).forEach(snapshot => listeners.forEach(listener => listener(structuredClone(snapshot)))),
   }
 }
 
 const addVideo = (store, videoId) => store.commit('addVideoToWatchQueue', { video: { videoId, title: videoId } })
+const settle = () => new Promise(setImmediate)
 
 test('an async failure rolls back only the failed edit while keeping newer pending edits', async () => {
   const requests = []
@@ -52,7 +53,7 @@ test('an async failure rolls back only the failed edit while keeping newer pendi
   assert.deepEqual(store.getters.getWatchQueue.map(item => item.videoId), ['saved', 'pending'])
 })
 
-test('a failed restore blocks writes and retries before applying the next change', () => {
+test('a failed restore blocks writes and retries before applying the next change', async () => {
   let unreadable = true
   let saved = [{ videoId: 'saved', title: 'Saved' }]
   let writes = 0
@@ -63,17 +64,17 @@ test('a failed restore blocks writes and retries before applying the next change
     },
     write(items) { saved = structuredClone(items); writes++ },
   })
-  assert.throws(() => update({}), /Temporary read failure/)
-  assert.throws(() => update({ type: 'clearWatchQueue' }), /Temporary read failure/)
+  await assert.rejects(update({}), /Temporary read failure/)
+  await assert.rejects(update({ type: 'clearWatchQueue' }), /Temporary read failure/)
   assert.equal(writes, 0)
   unreadable = false
-  const snapshot = update({ type: 'addVideoToWatchQueue', payload: { video: { videoId: 'new' } } })
+  const snapshot = await update({ type: 'addVideoToWatchQueue', payload: { video: { videoId: 'new' } } })
   assert.deepEqual(snapshot.items.map(item => item.videoId), ['saved', 'new'])
   assert.equal(snapshot.revision, 1)
   assert.deepEqual(saved, snapshot.items)
 })
 
-test('failed writes roll back every window to the durable queue with a newer revision', () => {
+test('failed writes roll back every window to the durable queue with a newer revision', async () => {
   let unwritable = false
   let saved = [{ videoId: 'saved', title: 'Saved' }]
   const update = createSharedWatchQueue({
@@ -85,8 +86,8 @@ test('failed writes roll back every window to the durable queue with a newer rev
   })
   const listeners = []
   const adapter = {
-    update(request) {
-      const snapshot = update(request)
+    async update(request) {
+      const snapshot = await update(request)
       listeners.forEach(handler => handler(snapshot))
       return snapshot
     },
@@ -95,19 +96,23 @@ test('failed writes roll back every window to the durable queue with a newer rev
   const window = () => createStore({ modules: { watchQueue }, plugins: [store => persistWatchQueue(store, null, adapter)] })
   const first = window()
   const second = window()
+  await settle()
   const initial = JSON.parse(JSON.stringify(first.getters.getWatchQueue))
   unwritable = true
   addVideo(first, 'unsaved')
+  await settle()
   for (const store of [first, second]) assert.deepEqual(store.getters.getWatchQueue, initial)
   first.commit('clearWatchQueue')
+  await settle()
   for (const store of [first, second]) assert.deepEqual(store.getters.getWatchQueue, initial)
-  assert.equal(update({}).revision, 2)
+  assert.equal((await update({})).revision, 2)
   unwritable = false
   addVideo(second, 'new')
+  await settle()
   assert.deepEqual(saved.map(item => item.videoId), ['saved', 'new'])
 })
 
-test('a restore error allows app startup and a later edit retries the shared queue', () => {
+test('a restore error allows app startup and a later edit retries the shared queue', async () => {
   let unavailable = true
   const update = createSharedWatchQueue({
     read: () => [{ videoId: 'saved' }],
@@ -124,6 +129,7 @@ test('a restore error allows app startup and a later edit retries the shared que
   assert.equal(store.getters.getWatchQueueLength, 0)
   unavailable = false
   addVideo(store, 'new')
+  await settle()
   assert.deepEqual(store.getters.getWatchQueue.map(item => item.videoId), ['saved', 'new'])
 })
 
@@ -131,42 +137,50 @@ const component = await readFile(new URL('../../src/renderer/components/WatchVid
 const moveSource = component.slice(component.indexOf('function move(queueItemId, offset)'), component.indexOf('\nfunction setQueueDragHandle('))
 
 for (const upwards of [true, false]) {
-  test(`a stale window's ${upwards ? 'upward' : 'downward'} drag keeps its target after another window removes an intervening item`, () => {
+  test(`a stale window's ${upwards ? 'upward' : 'downward'} drag keeps its target after another window removes an intervening item`, async () => {
     const windows = sharedWindows()
     const first = windows.window()
     for (const id of ['one', 'two', 'three', 'four']) addVideo(first, id)
     const second = windows.window()
+    await settle()
     second.commit('removeVideoFromWatchQueue', second.getters.getWatchQueue[1].queueItemId)
+    await settle()
     const movedItem = first.getters.getWatchQueue[upwards ? 3 : 0]
     const move = runInNewContext(`${moveSource}\nmove`, { store: first, items: { value: first.getters.getWatchQueue } })
     move(movedItem.queueItemId, upwards ? -3 : 3)
-    assert.deepEqual(windows.restored(), upwards ? ['four', 'one', 'three'] : ['three', 'four', 'one'])
+    await settle()
+    assert.deepEqual(await windows.restored(), upwards ? ['four', 'one', 'three'] : ['three', 'four', 'one'])
   })
 }
 
-test('a stale window cannot resurrect a cleared item when adding another video', () => {
+test('a stale window cannot resurrect a cleared item when adding another video', async () => {
   const windows = sharedWindows()
   const first = windows.window()
   addVideo(first, 'one')
   const second = windows.window()
+  await settle()
   first.commit('clearWatchQueue')
   addVideo(second, 'two')
-  assert.deepEqual(windows.restored(), ['two'])
+  await settle()
+  assert.deepEqual(await windows.restored(), ['two'])
   windows.deliverUpdates()
   for (const store of [first, second]) assert.deepEqual(store.getters.getWatchQueue.map(item => item.videoId), ['two'])
 })
 
-test('additions from two stale windows both persist and delayed events cannot roll back newer state', () => {
+test('additions from two stale windows both persist and delayed events cannot roll back newer state', async () => {
   const windows = sharedWindows()
   const first = windows.window()
   const second = windows.window()
+  await settle()
   addVideo(first, 'one')
   addVideo(second, 'two')
-  assert.deepEqual(windows.restored(), ['one', 'two'])
+  await settle()
+  assert.deepEqual(await windows.restored(), ['one', 'two'])
   windows.deliverUpdates()
   first.commit('removeVideoFromWatchQueue', first.getters.getWatchQueue[0].queueItemId)
   second.commit('removeVideoFromWatchQueue', second.getters.getWatchQueue[1].queueItemId)
-  assert.deepEqual(windows.restored(), [])
+  await settle()
+  assert.deepEqual(await windows.restored(), [])
   windows.deliverUpdates()
   for (const store of [first, second]) assert.equal(store.getters.getWatchQueueLength, 0)
 })
@@ -177,12 +191,24 @@ test('the desktop queue persists to disk before replying and restores download r
     const filename = join(directory, 'watch-queue.json')
     const update = createFileWatchQueue(filename)
     const video = { videoId: 'download', title: 'Saved video', route: { path: '/watch/download', query: { downloadId: '42' } } }
-    update({ type: 'addVideoToWatchQueue', payload: { video } })
-    const restored = createFileWatchQueue(filename)({})
+    await update({ type: 'addVideoToWatchQueue', payload: { video } })
+    const restored = await createFileWatchQueue(filename)({})
     assert.deepEqual(restored.items.map(({ queueItemId, ...item }) => item), [video])
-    update({ type: 'clearWatchQueue' })
-    assert.deepEqual(createFileWatchQueue(filename)({}).items, [])
+    await update({ type: 'clearWatchQueue' })
+    assert.deepEqual((await createFileWatchQueue(filename)({})).items, [])
   } finally {
     await rm(directory, { recursive: true, force: true })
   }
+})
+
+test('repeated download removals from every window write the queue once', async () => {
+  let writes = 0
+  const update = createSharedWatchQueue({
+    read: () => [{ videoId: 'download', route: { query: { downloadId: '42' } } }, { videoId: 'other' }],
+    write() { writes++ },
+  })
+  const snapshots = await Promise.all([1, 2, 3].map(() => update({ type: 'removeYtDlpDownload', payload: 42 })))
+  assert.deepEqual(snapshots.map(snapshot => snapshot.revision), [1, 1, 1])
+  assert.deepEqual(snapshots[2].items.map(item => item.videoId), ['other'])
+  assert.equal(writes, 1)
 })

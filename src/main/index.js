@@ -1727,15 +1727,15 @@ function runApp() {
   })
 
   const updateWatchQueue = createFileWatchQueue(path.join(app.getPath('userData'), 'watch-queue.json'))
-  ipcMain.on(IpcChannels.WATCH_QUEUE_UPDATE, (event, request) => {
+  let broadcastWatchQueueRevision = 0
+  ipcMain.handle(IpcChannels.WATCH_QUEUE_UPDATE, async (event, request) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      event.returnValue = { error: 'Invalid watch queue sender' }
-      return
+      return { error: 'Invalid watch queue sender' }
     }
     try {
-      const snapshot = updateWatchQueue(request)
-      event.returnValue = snapshot
-      if (request.type) {
+      const snapshot = await updateWatchQueue(request)
+      if (snapshot.revision > broadcastWatchQueueRevision) {
+        broadcastWatchQueueRevision = snapshot.revision
         for (const window of BrowserWindow.getAllWindows()) {
           try {
             if (window.isDestroyed() || window.webContents.isDestroyed() || !isOpenTubeXUrl(window.webContents.getURL())) continue
@@ -1745,8 +1745,9 @@ function runApp() {
           }
         }
       }
+      return snapshot
     } catch (error) {
-      event.returnValue = { error: error.message }
+      return { error: error.message }
     }
   })
 
