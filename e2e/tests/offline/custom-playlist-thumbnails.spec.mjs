@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises'
+import { readPersistedDatastore } from '../../helpers/datastore.mjs'
 import path from 'node:path'
 import { test, expect, goTo, goToSettingsSection } from '../../helpers/app.mjs'
 import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
@@ -79,7 +79,7 @@ test('selects, replaces and restores a thumbnail across restarts', async ({ app,
   await page.evaluate(() => {
     window.showSaveFilePicker = async () => ({
       createWritable: async () => ({
-        write: async data => { window.__exportedPlaylist = data },
+        write: async data => { window.__exportedPlaylist = (window.__exportedPlaylist ?? '') + data },
         close: async () => {},
       }),
     })
@@ -113,7 +113,7 @@ test('selects, replaces and restores a thumbnail across restarts', async ({ app,
   await routeThumbnails(page)
   await goTo(page, 'userplaylists')
   await expect(cardImage(page)).toHaveAttribute('src', /\/vi\/ccccccccccc\/maxresdefault.jpg/)
-  const records = (await readFile(path.join(app.userDataDir, 'playlists.db'), 'utf8')).trim().split('\n').map(JSON.parse)
+  const records = (await readPersistedDatastore(path.join(app.userDataDir, 'playlists.db'), 'utf8')).trim().split('\n').map(JSON.parse)
   expect(records.filter(record => record._id === playlistId).at(-1).customThumbnail).toBe('')
 })
 
