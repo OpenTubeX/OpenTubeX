@@ -11,6 +11,26 @@ import { isVideoHiddenByPreferences } from '../../renderer/helpers/subscription-
 import { syncSnapshotPreview } from '../../syncSnapshot.js'
 import { updateHistorySnapshot, updatePlaylistSnapshot } from '../../renderer/helpers/sync-history-merge.js'
 
+/** Read only identity fields needed to compare an import, never thumbnails or videos. */
+export async function importPreviewState(engine, { sections }) {
+  const supported = ['profiles', 'playlists', 'history', 'searchHistory', 'watchStats']
+  if (!Array.isArray(sections) || sections.length > supported.length || new Set(sections).size !== sections.length || sections.some(section => !supported.includes(section))) throw new TypeError('Invalid import preview sections')
+  const result = {}
+  for (const section of sections) {
+    if (section === 'profiles') {
+      const profiles = new Map(engine.prepare("SELECT id FROM records WHERE collection = 'profiles'").all().map(row => [row.id, { _id: row.id, subscriptions: [] }]))
+      for (const row of engine.prepare("SELECT r.id AS record_id, CASE WHEN member.type = 'object' THEN json_object('id', json(member.value -> '$.id')) ELSE '{}' END AS data FROM records r, json_each(CASE WHEN json_type(r.data, '$.subscriptions') = 'array' THEN r.data -> '$.subscriptions' ELSE '[]' END) member WHERE r.collection = 'profiles' ORDER BY r.id, member.key").iterate()) profiles.get(row.record_id)?.subscriptions.push(model.deserialize(row.data))
+      result.profiles = [...profiles.values()]
+    } else if (section === 'playlists') {
+      result.playlists = engine.prepare("SELECT id, data -> '$.playlistName' AS name FROM records WHERE collection = 'playlists'").all().map(row => ({ _id: row.id, playlistName: row.name ? model.deserialize(row.name) : undefined }))
+    } else {
+      const projection = { history: { videoId: 1, _id: 0 }, searchHistory: { _id: 1, query: 1, searchSettings: 1 }, watchStats: { date: 1, _id: 0 } }[section]
+      result[section] = await engine.collections[section].findAsync({}, projection)
+    }
+  }
+  return result
+}
+
 export async function rendererSettings(engine, _options, handlers) {
   const records = handlers ? await handlers.settings.find() : await engine.collections.settings.findAsync({})
   return records.map(record => record._id === 'syncServerSnapshot'

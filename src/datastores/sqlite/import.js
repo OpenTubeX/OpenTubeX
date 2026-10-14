@@ -6,6 +6,8 @@ import { Unzip, UnzipInflate } from 'fflate'
 import model from '@seald-io/nedb/lib/model.js'
 import { decodeBackupValue, BACKUP_SECTIONS, validateUnifiedBackup, mergeBackupHistoryRecord, mergeBackupPlaylist, mergeBackupProfile } from '../../renderer/helpers/unifiedBackup.js'
 import { migrateLegacyHistoryRecord } from '../../history.js'
+import { previewBackupImport } from '../../renderer/helpers/import-preview.js'
+import { importPreviewState } from './operations.js'
 import { mergeSearchHistoryEntries, getSearchHistoryEntryKeyFromEntry } from '../../search-history.js'
 
 const MAX_ARCHIVE = 1024 * 1024 * 1024
@@ -251,6 +253,32 @@ export class LibraryImports {
       job.ready = true
       return { id, sections, counts: Object.fromEntries(job.database.prepare('SELECT section, count(*) AS count FROM incoming GROUP BY section').all().map(row => [row.section, row.count])) }
     } catch (error) { this.cancel({ id }); throw error }
+  }
+
+  async preview({ id, settingKeys = [] }) {
+    const job = this.jobs.get(id)
+    if (!job?.ready || job.format !== 'backup') throw new Error('Unknown or incomplete backup preview')
+    if (!Array.isArray(settingKeys) || settingKeys.length > 1000 || settingKeys.some(key => typeof key !== 'string')) throw new TypeError('Invalid preview settings')
+    const data = {}
+    const fields = { profiles: ['_id', 'subscriptions'], playlists: ['_id'], history: ['videoId'], searchHistory: ['_id', 'query', 'searchSettings'] }
+    for (const section of job.sections) {
+      if (section === 'settings') data.settings = job.roots.get(section)
+      else if (section === 'watchStats') data.watchStats = job.roots.get(section)
+      else {
+        const projection = fields[section].map(field => `'${field}', json(data -> '$.${field}')`).join(', ')
+        const rows = job.database.prepare(`SELECT CASE WHEN json_type(data, '$.$$backupObject') = 'array' THEN data ELSE json_object(${projection}) END AS data FROM incoming WHERE section = ? ORDER BY ordinal`)
+        data[section] = []
+        for (const row of rows.iterate(section)) {
+          const record = job.decode(row.data)
+          const projected = Object.fromEntries(fields[section].map(field => [field, record[field]]))
+          if (section === 'profiles') projected.subscriptions = Array.isArray(record.subscriptions) ? record.subscriptions.map(channel => ({ id: channel?.id })) : []
+          data[section].push(projected)
+        }
+      }
+    }
+    const current = await importPreviewState(this.engine, { sections: job.sections.filter(section => section !== 'settings') })
+    current.settings = Object.fromEntries(settingKeys.map(key => [key, null]))
+    return previewBackupImport(data, current)
   }
 
   verifyChecksums(job) {

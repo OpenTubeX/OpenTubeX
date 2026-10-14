@@ -132,9 +132,10 @@ test('duplicate backup identities accumulate subscriptions and videos promised b
   const playlists = new Map()
   const context = vm.createContext({
     backupBusy: { value: false }, backupData: { value: data }, selectedBackupSections: { value: ['profiles', 'playlists'] },
-    DBProfileHandlers: { find: async () => [], upsert: async record => profiles.set(record._id, record) },
-    DBPlaylistHandlers: { find: async () => [] },
+    DBProfileHandlers: { find: async () => [...profiles.values()], replaceIfUnchanged: async (previous, record) => { assert.deepEqual(previous, profiles.get(record._id)); profiles.set(record._id, record); return { numAffected: 1 } } },
+    DBPlaylistHandlers: { find: async () => [...playlists.values()], replaceIfUnchanged: async (previous, record) => { assert.deepEqual(previous, playlists.get(record._id)); playlists.set(record._id, record); return { numAffected: 1 } } },
     mergeBackupProfile, mergeBackupPlaylist, normalizeImportedPlaylistThumbnail: async () => {},
+
     store: { dispatch: async (action, record) => { if (action === 'updatePlaylist') playlists.set(record._id, record); return true } },
     compactAllDatastores: async () => true, closeBackupImport() {}, showToast() {}, t: key => key,
   })
@@ -228,4 +229,14 @@ test('unreadable playlist video files are not restored as empty metadata-only pl
   const names = []
   await forEachTakeoutImportEntry(file, new Set(['playlists']), paths, entry => names.push(entry.playlist.playlistName), () => {})
   assert.deepEqual(names, ['Empty'])
+})
+
+
+test('backup preview tolerates retained opaque subscriptions without mutating them', () => {
+  const profiles = [undefined, null, false, 'retained', [null, false, { unknown: new Date(1) }, { id: 'channel' }]].map((subscriptions, index) => ({ _id: String(index), subscriptions }))
+  const before = structuredClone(profiles)
+  const rows = previewBackupImport({ profiles }, { profiles })
+  assert.deepEqual(counts(rows[0]), [0, profiles.length, 0])
+  assert.equal(rows[1].added, 0)
+  assert.deepEqual(profiles, before)
 })

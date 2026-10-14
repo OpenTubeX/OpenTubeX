@@ -31,7 +31,7 @@ export function previewBackupImport(data, current) {
     }
   }
   if (data.profiles) {
-    const memberships = profiles => profiles.flatMap(profile => profile.subscriptions.map(channel => ({ key: JSON.stringify([profile._id, channel.id]) })))
+    const memberships = profiles => profiles.flatMap(profile => (Array.isArray(profile.subscriptions) ? profile.subscriptions : []).map(channel => ({ key: JSON.stringify([profile._id, channel?.id]) })))
     rows.splice(rows.findIndex(row => row.category === 'profiles') + 1, 0, {
       category: 'profiles',
       unit: 'Subscriptions.Subscriptions',
