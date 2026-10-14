@@ -1168,7 +1168,6 @@ Tutorial:
   Skip: Salta
   Next: Avanti
   Finish: Fine
-  Got It: Ho capito
   Welcome:
     Title: Ti diamo il benvenuto in OpenTubeX
     Description: Ecco i controlli principali per iniziare.
@@ -1189,9 +1188,6 @@ Tutorial:
     Description: Puoi importare iscrizioni, cronologia, playlist, cronologia delle ricerche o impostazioni da un'altra app supportata o da un backup.
     Action: Importa dati
     Not Now: Non ora
-  Settings Moved:
-    Title: Le impostazioni sono state spostate
-    Description: Seleziona il profilo in alto a destra per accedere ai controlli rapidi. Fai clic destro per passare direttamente alla selezione del profilo. L'ingranaggio nel menu apre tutte le impostazioni; anche Informazioni e Download sono stati spostati qui.
 About:
   Commit: Commit
   Fluxer: Unisciti alla nostra comunità su Fluxer

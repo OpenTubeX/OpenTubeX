@@ -506,9 +506,6 @@ test('two independent devices settle after live sync and propagate a real edit o
         }
         return route.fulfill({ json: collections.get(collection) ?? { revision: 0, payload: null } })
       })
-      const tutorial = page.locator('.tutorialOverlay')
-      await expect(tutorial).toBeVisible()
-      await tutorial.locator('.tutorialActions').getByRole('button').last().click()
       const sync = await goToSettingsSection(page, 'sync')
       await sync.getByRole('checkbox', { name: 'Enable Sync', exact: true }).press('Space')
       await expect(sync.getByRole('checkbox', { name: 'Enable Sync', exact: true })).toBeChecked()

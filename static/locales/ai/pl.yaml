@@ -617,7 +617,6 @@ Tutorial:
   Skip: Pomiń
   Next: Dalej
   Finish: Zakończ
-  Got It: Rozumiem
   Welcome:
     Title: Witamy w OpenTubeX
     Description: Poznaj kilka elementów sterujących, które ułatwią rozpoczęcie pracy.
@@ -638,9 +637,6 @@ Tutorial:
     Description: Możesz zaimportować subskrypcje, historię, playlisty, historię wyszukiwania lub ustawienia z innej obsługiwanej aplikacji albo kopii zapasowej.
     Action: Importuj dane
     Not Now: Nie teraz
-  Settings Moved:
-    Title: Ustawienia zostały przeniesione
-    Description: Wybierz swój profil w prawym górnym rogu, aby otworzyć podręczne elementy sterujące. Kliknij go prawym przyciskiem, aby przejść bezpośrednio do wyboru profilu. Koło zębate w tym menu otwiera wszystkie ustawienia. Znajdziesz tam teraz również sekcje „O programie” i „Pobrane”.
 About:
   Commit: Commit
   Fluxer: Dołącz do naszej społeczności na Fluxerze

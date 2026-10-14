@@ -1168,7 +1168,6 @@ Tutorial:
   Skip: Přeskočit
   Next: Další
   Finish: Dokončit
-  Got It: Rozumím
   Welcome:
     Title: Vítejte v aplikaci OpenTubeX
     Description: Seznamte se se základními ovládacími prvky.
@@ -1189,9 +1188,6 @@ Tutorial:
     Description: Volitelně můžete importovat odběry, historii, playlisty, historii vyhledávání nebo nastavení z jiné podporované aplikace či zálohy.
     Action: Importovat data
     Not Now: Teď ne
-  Settings Moved:
-    Title: Nastavení bylo přesunuto
-    Description: Rychlé ovládací prvky otevřete výběrem profilu vpravo nahoře. Kliknutím pravým tlačítkem přejdete přímo k výběru profilu. Ozubené kolo v nabídce otevře všechna nastavení. Do této nabídky byly přesunuty také části O aplikaci a Stahování.
 About:
   Commit: Commit
   Fluxer: Připojit se k naší komunitě na Fluxeru

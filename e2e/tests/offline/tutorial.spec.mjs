@@ -68,15 +68,37 @@ async function clickAppMenuItem(app, menuLabel, itemLabel) {
   }, { menuLabel, itemLabel })
 }
 
-test('shows returning users only where settings moved', async ({ app, page }) => {
-  const tutorial = page.getByRole('dialog', { name: 'Settings have moved' })
+for (const [name, settings] of [
+  ['without saved tutorial state', {}],
+  ['with the retired notice pending', { tutorialAudience: 'existing' }],
+  ['with a saved app version', { lastUsedVersion: '0.34.0' }],
+  ['with a completed tutorial', { tutorialAudience: 'completed' }]
+]) {
+  test.describe(`returning users ${name}`, () => {
+    test.use({ seed: { settings } })
+
+    test('start without onboarding and can open settings immediately', async ({ app, page }) => {
+      await expect(page.locator('.tutorialOverlay')).toHaveCount(0)
+      await expect.poll(() => page.evaluate(() => localStorage.getItem('opentubex.lastUsedVersion')))
+        .toMatch(/^\d+\.\d+\.\d+(?:-|$)/)
+
+      const tabCount = await page.locator('.tabBar .tab').count()
+      await clickAppMenuItem(app, 'Tabs', 'New Tab')
+      await expect(page.locator('.tabBar .tab')).toHaveCount(tabCount + 1)
+      await clickAppMenuItem(app, 'File', 'Preferences')
+      await expect(page.locator('.settingsContent')).toBeVisible()
+      await page.reload()
+      await expect(page.locator('.tutorialOverlay')).toHaveCount(0)
+    })
+  })
+}
+
+test('blocks app shortcuts during the new-user tutorial and restores them after skipping', async ({ app, page }) => {
+  await page.evaluate(() => localStorage.setItem('opentubex.tutorial.audience', 'new'))
+  await page.reload()
+
+  const tutorial = page.getByRole('dialog', { name: 'Welcome to OpenTubeX' })
   await expect(tutorial).toBeVisible()
-  const lastUsedVersion = await page.evaluate(() => localStorage.getItem('opentubex.lastUsedVersion'))
-  expect(lastUsedVersion).toMatch(/^\d+\.\d+\.\d+(?:-|$)/)
-  await expect(tutorial).toContainText('Right-click it to go straight to profile selection.')
-  await expect(tutorial).toContainText('The cog in that menu opens all settings, and About and Downloads have moved to this menu too.')
-  await expect(tutorial.locator('.tutorialProgress')).toHaveCount(0)
-  await expectHighlightCenteredOn(page, '[data-tutorial="quick-settings"]')
 
   const tabCount = await page.locator('.tabBar .tab').count()
   await page.keyboard.press('Control+t')
@@ -118,12 +140,13 @@ test('shows returning users only where settings moved', async ({ app, page }) =>
     minimized: false
   })
 
-  const primaryAction = tutorial.getByRole('button', { name: 'Got it' })
+  const primaryAction = tutorial.getByRole('button', { name: 'Next' })
   await expect(primaryAction).toBeFocused()
   await page.keyboard.press('Tab')
-  await expect(primaryAction).toBeFocused()
+  const skipAction = tutorial.getByRole('button', { name: 'Skip', exact: true })
+  await expect(skipAction).toBeFocused()
 
-  await primaryAction.click()
+  await skipAction.click()
   await expect(tutorial).toBeHidden()
 
   await clickAppMenuItem(app, 'Tabs', 'New Tab')
@@ -134,12 +157,14 @@ test('shows returning users only where settings moved', async ({ app, page }) =>
 })
 
 test('keeps the tutorial actions reachable in a short window', async ({ app, page }) => {
+  await page.evaluate(() => localStorage.setItem('opentubex.tutorial.audience', 'new'))
+  await page.reload()
   await app.electronApp.evaluate(({ BrowserWindow }) => {
     BrowserWindow.getAllWindows()[0].setSize(800, 320)
   })
 
-  const tutorial = page.getByRole('dialog', { name: 'Settings have moved' })
-  await expect(tutorial.getByRole('button', { name: 'Got it' })).toBeVisible()
+  const tutorial = page.getByRole('dialog', { name: 'Welcome to OpenTubeX' })
+  await expect(tutorial.getByRole('button', { name: 'Next' })).toBeVisible()
   await expect.poll(() => tutorial.evaluate(element => {
     const bounds = element.getBoundingClientRect()
     return bounds.top >= 0 && bounds.bottom <= window.innerHeight
@@ -253,10 +278,13 @@ test('resets the managed content viewport after a shorter step replaces it', asy
 })
 
 test.describe('right-to-left layout', () => {
-  test.use({ seed: { settings: { currentLocale: 'ar' } } })
+  test.use({ seed: { settings: { currentLocale: 'ar', tutorialAudience: 'new' } } })
 
   test('keeps the spotlight centered on physical target coordinates', async ({ page }) => {
     await expect(page.locator('.app')).toHaveClass(/isLocaleRightToLeft/)
+    for (let step = 0; step < 4; step++) {
+      await page.locator('.tutorialActions').getByRole('button').last().click()
+    }
     await expectHighlightCenteredOn(page, '[data-tutorial="quick-settings"]')
   })
 })
@@ -414,7 +442,6 @@ test.describe('fresh profile relaunch', () => {
     const { page: relaunchedPage } = await app.relaunch()
 
     await expect(relaunchedPage.getByRole('dialog', { name: 'Welcome to OpenTubeX' })).toBeVisible()
-    await expect(relaunchedPage.getByRole('dialog', { name: 'Settings have moved' })).toHaveCount(0)
   })
 })
 

@@ -480,6 +480,7 @@ test.describe('overlay scrollbars', () => {
 
   test('dragging the page handle scrolls the document', async ({ page }) => {
     await addPageOverflow(page)
+    await page.mouse.move(800, 400)
 
     const handle = page.locator(`${PAGE_SCROLLBAR} .os-scrollbar-handle`)
     await handle.hover()
@@ -509,6 +510,7 @@ test.describe('overlay scrollbars', () => {
 
   test('keeps the page handle under the pointer when content loads during a drag', async ({ page }) => {
     await addPageOverflow(page)
+    await page.mouse.move(800, 400)
 
     const handle = page.locator(`${PAGE_SCROLLBAR} .os-scrollbar-handle`)
     await handle.hover()

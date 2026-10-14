@@ -1194,7 +1194,6 @@ Tutorial:
   Skip: Omitir
   Next: Seguinte
   Finish: Rematar
-  Got It: Entendido
   Welcome:
     Title: Dámosche a benvida a OpenTubeX
     Description: Estes controis básicos axudarante a familiarizarte coa aplicación.
@@ -1215,9 +1214,6 @@ Tutorial:
     Description: Se queres, importa as subscricións, o historial, as listas de reprodución, o historial de buscas ou a configuración desde outra aplicación compatible ou unha copia de seguranza.
     Action: Importar datos
     Not Now: Agora non
-  Settings Moved:
-    Title: A configuración cambiou de lugar
-    Description: Selecciona o perfil na parte superior dereita para acceder aos controis rápidos. Preme nel co botón dereito para ir directamente á selección de perfís. A roda dentada dese menú abre toda a configuración; «Sobre a aplicación» e «Descargas» tamén están agora nese menú.
 About:
   Commit: Commit
   Fluxer: Únete á nosa comunidade en Fluxer

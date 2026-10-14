@@ -1199,7 +1199,6 @@ Tutorial:
   Skip: Ohita
   Next: Seuraava
   Finish: Valmis
-  Got It: Selvä
   Welcome:
     Title: Tervetuloa OpenTubeX-sovellukseen
     Description: Näillä toiminnoilla pääset alkuun.
@@ -1220,9 +1219,6 @@ Tutorial:
     Description: Voit halutessasi tuoda tilaukset, historian, soittolistat, hakuhistorian tai asetukset toisesta tuetusta sovelluksesta tai varmuuskopiosta.
     Action: Tuo tiedot
     Not Now: Ei nyt
-  Settings Moved:
-    Title: Asetukset ovat siirtyneet
-    Description: Avaa pikavalinnat valitsemalla profiilisi oikeasta yläkulmasta. Siirry suoraan profiilin valintaan napsauttamalla sitä hiiren kakkospainikkeella. Valikon hammasrattaasta avautuvat kaikki asetukset. Myös Tietoja- ja Lataukset-kohdat ovat nyt tässä valikossa.
 About:
   Commit: Kommitti
   Fluxer: Liity Fluxer-yhteisöömme

@@ -1168,7 +1168,6 @@ Tutorial:
   Skip: 跳过
   Next: 下一步
   Finish: 完成
-  Got It: 知道了
   Welcome:
     Title: 欢迎使用 OpenTubeX
     Description: 下面介绍几个常用控件，帮助您快速上手。
@@ -1189,9 +1188,6 @@ Tutorial:
     Description: 您可以从其他受支持的应用或备份中导入订阅、历史记录、播放列表、搜索历史记录或设置。
     Action: 导入数据
     Not Now: 暂不
-  Settings Moved:
-    Title: 设置位置已更改
-    Description: 选择右上角的配置文件即可使用快捷控件。右键单击可直接进入配置文件选择界面。该菜单中的齿轮按钮可打开全部设置，“关于”和“下载”也已移至此菜单。
 About:
   Commit: 提交
   Fluxer: 加入我们的 Fluxer 社区

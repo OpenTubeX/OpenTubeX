@@ -1175,7 +1175,6 @@ Tutorial:
   Skip: Hopp over
   Next: Neste
   Finish: Fullfør
-  Got It: Skjønner
   Welcome:
     Title: Velkommen til OpenTubeX
     Description: Her er noen få funksjoner som hjelper deg i gang.
@@ -1196,9 +1195,6 @@ Tutorial:
     Description: Du kan importere abonnementer, historikk, spillelister, søkehistorikk eller innstillinger fra et annet støttet program eller en sikkerhetskopi.
     Action: Importer data
     Not Now: Ikke nå
-  Settings Moved:
-    Title: Innstillingene er flyttet
-    Description: Velg profilen din øverst til høyre for å åpne hurtiginnstillingene. Høyreklikk på den for å gå rett til profilvalg. Tannhjulet i denne menyen åpner alle innstillingene. Om og Nedlastinger er også flyttet hit.
 About:
   Commit: Revisjon
   Fluxer: Bli med i Fluxer-fellesskapet vårt

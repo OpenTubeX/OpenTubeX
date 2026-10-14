@@ -1171,7 +1171,6 @@ Tutorial:
   Skip: Ötür
   Next: Növbəti
   Finish: Bitir
-  Got It: Anladım
   Welcome:
     Title: OpenTubeX-ə xoş gəlmisiniz
     Description: Tətbiqdən rahat istifadə etməyinizə kömək edəcək bir neçə idarəetmə elementi ilə tanış olun.
@@ -1192,9 +1191,6 @@ Tutorial:
     Description: İstəsəniz, abunəlikləri, tarixçəni, pleylistləri, axtarış tarixçəsini və ya tənzimləmələri başqa dəstəklənən tətbiqdən və ya ehtiyat nüsxədən idxal edin.
     Action: Məlumatları idxal et
     Not Now: İndi yox
-  Settings Moved:
-    Title: Tənzimləmələrin yeri dəyişib
-    Description: Sürətli idarəetmələr üçün yuxarı sağdakı profilinizi seçin. Birbaşa profil seçiminə keçmək üçün ona sağ klikləyin. Həmin menyudakı dişli işarəsi bütün tənzimləmələri açır. Haqqında və Endirmələr bölmələri də bu menyuya köçürülüb.
 About:
   Commit: Kommit
   Fluxer: Fluxer icmamıza qoşulun

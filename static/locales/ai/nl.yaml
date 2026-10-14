@@ -1199,7 +1199,6 @@ Tutorial:
   Skip: Overslaan
   Next: Volgende
   Finish: Voltooien
-  Got It: Begrepen
   Welcome:
     Title: Welkom bij OpenTubeX
     Description: Dit zijn de belangrijkste bedieningselementen om snel aan de slag te gaan.
@@ -1220,9 +1219,6 @@ Tutorial:
     Description: Importeer desgewenst abonnementen, geschiedenis, afspeellijsten, zoekgeschiedenis of instellingen uit een andere ondersteunde app of back-up.
     Action: Gegevens importeren
     Not Now: Niet nu
-  Settings Moved:
-    Title: Instellingen zijn verplaatst
-    Description: Selecteer je profiel rechtsboven voor snelle bediening. Klik erop met de rechtermuisknop om rechtstreeks naar profielselectie te gaan. Het tandwiel in dat menu opent alle instellingen. Over en Downloads staan nu ook in dit menu.
 About:
   Commit: Commit
   Licensed under the {licenseLink}: Uitgebracht onder de {licenseLink}

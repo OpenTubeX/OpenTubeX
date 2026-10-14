@@ -1168,7 +1168,6 @@ Tutorial:
   Skip: 略過
   Next: 下一步
   Finish: 完成
-  Got It: 知道了
   Welcome:
     Title: 歡迎使用 OpenTubeX
     Description: 以下幾項控制功能能協助您快速熟悉操作。
@@ -1189,9 +1188,6 @@ Tutorial:
     Description: 您可以選擇從其他支援的應用程式或備份匯入訂閱內容、觀看紀錄、播放清單、搜尋紀錄或設定。
     Action: 匯入資料
     Not Now: 暫時不要
-  Settings Moved:
-    Title: 設定已移至新位置
-    Description: 選取右上角的個人檔案即可使用快速控制。按滑鼠右鍵可直接前往個人檔案選擇畫面。該選單中的齒輪按鈕會開啟所有設定，「關於」與「下載」也已移至此選單。
 About:
   Commit: 提交版本
   Fluxer: 加入我們的 Fluxer 社群

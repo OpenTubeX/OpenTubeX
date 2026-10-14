@@ -1201,7 +1201,6 @@ Tutorial:
   Skip: Ignorar
   Next: Seguinte
   Finish: Concluir
-  Got It: Percebi
   Welcome:
     Title: Bem-vindo ao OpenTubeX
     Description: Estes são os controlos essenciais para se familiarizar com a aplicação.
@@ -1222,9 +1221,6 @@ Tutorial:
     Description: Se desejar, importe subscrições, histórico, listas de reprodução, histórico de pesquisa ou definições de outra aplicação compatível ou de uma cópia de segurança.
     Action: Importar dados
     Not Now: Agora não
-  Settings Moved:
-    Title: As definições mudaram de lugar
-    Description: Selecione o seu perfil no canto superior direito para aceder aos controlos rápidos. Clique nele com o botão direito do rato para ir diretamente para a seleção de perfil. A roda dentada nesse menu abre todas as definições. As secções Acerca e Descargas também estão agora neste menu.
 About:
   Commit: Commit
   Fluxer: Junte-se à nossa comunidade no Fluxer

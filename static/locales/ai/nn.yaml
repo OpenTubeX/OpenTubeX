@@ -1343,7 +1343,6 @@ Tutorial:
   Skip: Hopp over
   Next: Neste
   Finish: Fullfør
-  Got It: Skjønar
   Welcome:
     Title: Velkomen til OpenTubeX
     Description: Her er nokre få kontrollar som hjelper deg i gang.
@@ -1364,9 +1363,6 @@ Tutorial:
     Description: Du kan importera abonnement, historikk, spelelister, søkjehistorikk eller innstillingar frå ein annan støtta app eller ei tryggleikskopi.
     Action: Importer data
     Not Now: Ikkje no
-  Settings Moved:
-    Title: Innstillingane er flytta
-    Description: Vel profilen din øvst til høgre for å sjå hurtigkontrollane. Høgreklikk på han for å gå rett til profilvalet. Tannhjulet i menyen opnar alle innstillingane. Om og Nedlastingar er òg flytta til denne menyen.
 About:
   Commit: Git-innsending
   Licensed under the {licenseLink}: Lisensiert under {licenseLink}

@@ -1188,7 +1188,6 @@ Tutorial:
   Skip: Omite
   Next: Înainte
   Finish: Finalizează
-  Got It: Am înțeles
   Welcome:
     Title: Bun venit la OpenTubeX
     Description: Iată câteva comenzi care vă vor ajuta să vă familiarizați cu aplicația.
@@ -1209,9 +1208,6 @@ Tutorial:
     Description: Opțional, importați abonamente, istoricul vizionărilor, playlisturi, istoricul căutărilor sau setări din altă aplicație acceptată ori dintr-o copie de rezervă.
     Action: Importă datele
     Not Now: Nu acum
-  Settings Moved:
-    Title: Setările au fost mutate
-    Description: Selectați profilul din dreapta sus pentru comenzile rapide. Faceți clic dreapta pe el pentru a ajunge direct la selectarea profilului. Roata dințată din acest meniu deschide toate setările, iar secțiunile Despre și Descărcări au fost mutate tot aici.
 About:
   Commit: Commit
   Licensed under the {licenseLink}: Licențiat conform {licenseLink}

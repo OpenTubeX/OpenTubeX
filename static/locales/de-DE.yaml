@@ -3199,7 +3199,6 @@ Tutorial:
   Skip: Überspringen
   Next: Weiter
   Finish: Abschließen
-  Got It: Verstanden
   Welcome:
     Title: Willkommen bei OpenTubeX
     Description: Hier sind einige Bedienelemente, mit denen du dich schnell zurechtfindest.
@@ -3222,12 +3221,6 @@ Tutorial:
     Description: Importiere bei Bedarf Abos, Verlauf, Playlists, Suchverlauf oder Einstellungen aus einer anderen unterstützten Anwendung oder Sicherung.
     Action: Daten importieren
     Not Now: Nicht jetzt
-  Settings Moved:
-    Title: Die Einstellungen wurden verschoben
-    Description: >-
-      Wähle oben rechts dein Profil aus, um die Schnelleinstellungen zu öffnen. Mit einem Rechtsklick gelangst du direkt
-      zur Profilauswahl. Das Zahnrad in diesem Menü öffnet alle Einstellungen. Auch „Über“ und „Downloads“ wurden in
-      dieses Menü verschoben.
 The playlist is at the beginning. Enable loop to continue playing: Die Wiedergabeliste ist am Anfang. Aktiviere die Wiederholung, um die Wiedergabe fortzusetzen
 Theme Discovery:
   Discover Themes: "Themes entdecken"

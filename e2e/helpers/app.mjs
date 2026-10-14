@@ -437,10 +437,10 @@ export const test = base.extend({
 
       appHandle = { electronApp, page, userDataDir, relaunch }
 
-      if (!showTutorial) {
+      if (!showTutorial && seed.freshProfile) {
         const tutorial = page.locator('.tutorialOverlay')
         await expect(tutorial).toBeVisible()
-        await tutorial.locator('.tutorialActions').getByRole('button').last().click()
+        await tutorial.getByRole('button', { name: 'Skip', exact: true }).click()
         await expect(tutorial).toBeHidden()
       }
 

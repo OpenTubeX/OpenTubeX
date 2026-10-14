@@ -1168,7 +1168,6 @@ Tutorial:
   Skip: Atla
   Next: İleri
   Finish: Bitir
-  Got It: Anladım
   Welcome:
     Title: OpenTubeX'e Hoş Geldiniz
     Description: Uygulamayı kullanmaya başlamanıza yardımcı olacak birkaç denetim burada.
@@ -1189,9 +1188,6 @@ Tutorial:
     Description: Abonelikleri, geçmişi, oynatma listelerini, arama geçmişini veya ayarları desteklenen başka bir uygulamadan ya da yedekten içe aktarabilirsiniz.
     Action: Verileri içe aktar
     Not Now: Şimdi değil
-  Settings Moved:
-    Title: Ayarların yeri değişti
-    Description: Hızlı denetimler için sağ üstten profilinizi seçin. Doğrudan profil seçimine gitmek için sağ tıklayın. Bu menüdeki dişli tüm ayarları açar. Hakkında ve İndirilenler de bu menüye taşındı.
 About:
   Commit: Commit
   Fluxer: Fluxer Topluluğumuza Katılın

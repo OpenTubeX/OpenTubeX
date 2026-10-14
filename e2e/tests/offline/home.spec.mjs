@@ -391,7 +391,6 @@ test.describe('fresh installation', () => {
     await expect(page).toHaveURL(/#\/home$/)
     await expect(page.getByRole('heading', { name: 'Home', exact: true })).toBeVisible()
     await expect(page.getByRole('dialog', { name: 'Welcome to OpenTubeX' })).toBeVisible()
-    await expect(page.getByRole('dialog', { name: 'Settings have moved' })).toHaveCount(0)
 
     await expect.poll(() => page.evaluate(async (findAction) => {
       const settings = await window.ftElectron.dbSettings(findAction)
