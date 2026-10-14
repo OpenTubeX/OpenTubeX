@@ -26,6 +26,7 @@ function measure({ previewOnly = false, alwaysExpanded = false, short = true, ta
     shownDescription: description,
     showFullDescription: { value: false },
     showControls: { value: false },
+    userWantsExpandedDescription: false,
     hasMeasured: false,
     descriptionContainer: { value: { $el: { clientHeight: 48, scrollHeight: short ? 48 : 240 } } },
     getComputedStyle: () => ({ lineHeight: '16px' }),

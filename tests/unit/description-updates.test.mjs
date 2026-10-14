@@ -130,8 +130,11 @@ for (const metadata of [{ tags: ['video tag'] }, { games: [{ title: 'Test game' 
     // Later metadata updates must preserve the user's explicit expansion.
     Object.assign(component.props, { tags: [], games: [], license: null, contentDisclosures: [] })
     await flushDescriptionUpdates()
+    assert.equal(component.controls(), false)
+    assert.equal(component.expanded(), true)
     Object.assign(component.props, structuredClone(metadata))
     await flushDescriptionUpdates()
+    assert.equal(component.controls(), true)
     assert.equal(component.expanded(), true)
   })
 }

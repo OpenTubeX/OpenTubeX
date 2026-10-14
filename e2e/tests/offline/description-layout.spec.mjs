@@ -52,8 +52,38 @@ for (const scale of [100, 125]) {
         await card.locator(':scope > .descriptionStatus').click()
         await expect(card).not.toHaveClass(/short/)
         await expect(card.locator(selector)).toHaveText(text)
+        // Removing expanded metadata must clear controls and the old scroll range.
+        await view.evaluate((component, metadata) => {
+          for (const [key, value] of Object.entries(metadata)) {
+            component[key] = typeof value === 'string'
+              ? value.repeat(100)
+              : Array.from({ length: 240 }, (_, index) => typeof value[0] === 'string' ? `tag-${index}` : value[0])
+          }
+        }, metadata)
+        const scroller = card.locator('.descriptionScroll')
+        await expect.poll(() => scroller.evaluate(element => element.scrollHeight - element.clientHeight)).toBeGreaterThan(0)
+        await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+        await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+        await view.evaluate(component => {
+          Object.assign(component, { videoTags: [], videoGames: [], license: null, contentDisclosures: [] })
+        })
+        await expect(card).not.toHaveClass(/short/)
+        await expect(card.locator('.descriptionStatus')).toHaveCount(0)
+        await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
+        await expect.poll(() => scroller.evaluate(element => element.scrollHeight - element.clientHeight)).toBeLessThanOrEqual(1)
+        await expect(scroller.locator('.os-scrollbar-vertical')).toHaveClass(/os-scrollbar-unusable/)
+        if (selector === '.videoTagLink' && scale === 100) {
+          await card.evaluate(element => element.scrollIntoView({ block: 'end' }))
+          await page.mouse.move(0, 0)
+          for (const theme of ['dark', 'light']) {
+            await page.emulateMedia({ colorScheme: theme })
+            await expect(page.locator('body')).toContainClass(theme)
+            await card.screenshot({ path: testInfo.outputPath(`expanded-metadata-removed-${theme}.png`) })
+          }
+        }
         await view.evaluate((component, metadata) => { Object.assign(component, metadata) }, structuredClone(metadata))
         await expect(card).not.toHaveClass(/short/)
+        await expect(card.locator('.descriptionScroll > .descriptionStatus')).toBeVisible()
         await card.locator('.descriptionScroll > .descriptionStatus').click()
         await expect(card).toHaveClass(/short/)
 
