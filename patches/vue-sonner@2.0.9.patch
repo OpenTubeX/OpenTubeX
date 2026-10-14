@@ -1,12 +1,33 @@
 diff --git a/lib/index.js b/lib/index.js
-index cd01bb1f1563571946c1470dfdea9d009655d9cd..22f0bff49fa39788c039f07d87653585c6cc7bf5 100644
+index cd01bb1f1563571946c1470dfdea9d009655d9cd..2ea8cf1d5fa885a7073a80adec85c06428732dca 100644
 --- a/lib/index.js
 +++ b/lib/index.js
-@@ -485,0 +486,3 @@ var Toast_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineCo
+@@ -305,12 +305,12 @@ const TIME_BEFORE_UNMOUNT = 200;
+ //#region src/packages/hooks.ts
+ function useIsDocumentHidden() {
+ 	const isDocumentHidden = ref(false);
+-	watchEffect(() => {
++	watchEffect((onInvalidate) => {
+ 		const callback = () => {
+ 			isDocumentHidden.value = document.hidden;
+ 		};
+ 		document.addEventListener("visibilitychange", callback);
+-		return () => window.removeEventListener("visibilitychange", callback);
++		onInvalidate(() => document.removeEventListener("visibilitychange", callback));
+ 	});
+ 	return { isDocumentHidden };
+ }
+@@ -482,6 +482,9 @@ var Toast_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineCo
+ 		const offset = computed(() => heightIndex.value * props.gap + toastsHeightBefore.value || 0);
+ 		const closeButton = computed(() => props.toast.closeButton ?? props.closeButton);
+ 		const duration = computed(() => props.toast.duration || props.duration || TOAST_LIFETIME);
 +		watch(duration, (value) => {
 +			remainingTime.value = value;
 +		}, { flush: "sync" });
-@@ -514,6 +514,7 @@ var Toast_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineCo
+ 		const closeTimerStartTimeRef = ref(0);
+ 		const lastCloseTimerStartTimeRef = ref(0);
+ 		const pointerStartRef = ref(null);
+@@ -514,6 +517,7 @@ var Toast_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ defineCo
  		function deleteToast() {
  			removed.value = true;
  			offsetBeforeRemove.value = offset.value;
@@ -14,3 +35,47 @@ index cd01bb1f1563571946c1470dfdea9d009655d9cd..22f0bff49fa39788c039f07d87653585
  			setTimeout(() => {
  				emit("removeToast", props.toast);
  			}, TIME_BEFORE_UNMOUNT);
+@@ -980,6 +984,9 @@ var Toaster_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ define
+ 		const hotkeyLabel = props.hotkey.join("+").replace(/Key/g, "").replace(/Digit/g, "");
+ 		function removeToast(toastToRemove) {
+ 			if (!toasts.value.find((toast$1) => toast$1.id === toastToRemove.id)?.delete) ToastState.dismiss(toastToRemove.id);
++			// OpenTubeX does not use notification history; release callbacks and data.
++			ToastState.toasts = ToastState.toasts.filter(({ id }) => id !== toastToRemove.id);
++			ToastState.dismissedToasts.delete(toastToRemove.id);
+ 			toasts.value = toasts.value.filter(({ id }) => id !== toastToRemove.id);
+ 			setTimeout(() => {
+ 				if (!toasts.value.find((t) => t.id === toastToRemove.id)) heights.value = heights.value.filter((h) => h.toastId !== toastToRemove.id);
+diff --git a/src/packages/Toaster.vue b/src/packages/Toaster.vue
+index 17b20dae0474c466515bd92bde01b26a814bd86f..fdcadae6373e1b46904d226ead8be1048d361849 100644
+--- a/src/packages/Toaster.vue
++++ b/src/packages/Toaster.vue
+@@ -249,6 +249,10 @@ function removeToast(toastToRemove: ToastT) {
+     ToastState.dismiss(toastToRemove.id)
+   }
+ 
++  // OpenTubeX does not use notification history; release callbacks and data.
++  ToastState.toasts = ToastState.toasts.filter(({ id }) => id !== toastToRemove.id)
++  ToastState.dismissedToasts.delete(toastToRemove.id)
++
+   // First remove toast
+   toasts.value = toasts.value.filter(({ id }) => id !== toastToRemove.id)
+ 
+diff --git a/src/packages/hooks.ts b/src/packages/hooks.ts
+index 9b618b688f339f76e73efca151b095b35d59e6ef..e8d21a26ef2c40b069f0238a09c8a48dd6db970d 100644
+--- a/src/packages/hooks.ts
++++ b/src/packages/hooks.ts
+@@ -6,12 +6,12 @@ import { MOBILE_VIEWPORT_OFFSET, VIEWPORT_OFFSET } from './constant'
+ export function useIsDocumentHidden() {
+   const isDocumentHidden = ref(false)
+ 
+-  watchEffect(() => {
++  watchEffect((onInvalidate) => {
+     const callback = () => {
+       isDocumentHidden.value = document.hidden
+     }
+     document.addEventListener('visibilitychange', callback)
+-    return () => window.removeEventListener('visibilitychange', callback)
++    onInvalidate(() => document.removeEventListener('visibilitychange', callback))
+   })
+ 
+   return {

@@ -17,8 +17,8 @@ patchedDependencies:
   '@capawesome/capacitor-app-shortcuts@8.0.2': 2581c86d60ce7892c0b3136523994591d24ee7313bbc5fc9b4ad1c710719c70a
   '@capawesome/capacitor-clipboard@0.1.2': 729c6071cbf0e196e2212b015677cdd162c287dca48137c24250c0d056c9fd5b
   overlayscrollbars@2.16.0: 5cf83e67b2d20d5556131f278ab8fdeece199eafcfcaf6b838b0e949366d2281
-  shaka-player@5.1.12: 50a1429c4275c33bd80a5b93aa319230d52928942415f08b226d41740c6bdded
-  vue-sonner@2.0.9: 1edf0a77b800d7b7f56694e3a77ff40dd2f7ba21658639d2ff90d5173eae26b4
+  shaka-player@5.1.12: cf2e5c9a138eec272ac8db5df51977f756e60fed28f24946e54c67fe0e465724
+  vue-sonner@2.0.9: 34b2065fecd4314653c24cdfc38ff5f2910def4942ed265ec374d66c0e5c0940
   youtubei.js@18.1.0: 4b2da53547fc17cef9f2b96e74da3c52bae54f24d1ba89bbddc9d31507f0195d
 
 importers:
@@ -162,7 +162,7 @@ importers:
         version: 1.6.1
       shaka-player:
         specifier: ^5.1.12
-        version: 5.1.12(patch_hash=50a1429c4275c33bd80a5b93aa319230d52928942415f08b226d41740c6bdded)
+        version: 5.1.12(patch_hash=cf2e5c9a138eec272ac8db5df51977f756e60fed28f24946e54c67fe0e465724)
       swiper:
         specifier: ^14.3.0
         version: 14.3.0
@@ -180,7 +180,7 @@ importers:
         version: 5.3.1(@vue/compiler-sfc@3.5.43)(vue@3.5.43)(webpack@5.111.1)
       vue-sonner:
         specifier: ^2.0.9
-        version: 2.0.9(patch_hash=1edf0a77b800d7b7f56694e3a77ff40dd2f7ba21658639d2ff90d5173eae26b4)
+        version: 2.0.9(patch_hash=34b2065fecd4314653c24cdfc38ff5f2910def4942ed265ec374d66c0e5c0940)
       vuex:
         specifier: ^4.1.0
         version: 4.1.0(vue@3.5.43)
@@ -10094,7 +10094,7 @@ snapshots:
 
   setprototypeof@1.2.0: {}
 
-  shaka-player@5.1.12(patch_hash=50a1429c4275c33bd80a5b93aa319230d52928942415f08b226d41740c6bdded): {}
+  shaka-player@5.1.12(patch_hash=cf2e5c9a138eec272ac8db5df51977f756e60fed28f24946e54c67fe0e465724): {}
 
   shallow-clone@3.0.1:
     dependencies:
@@ -10693,7 +10693,7 @@ snapshots:
       - unloader
       - webpack
 
-  vue-sonner@2.0.9(patch_hash=1edf0a77b800d7b7f56694e3a77ff40dd2f7ba21658639d2ff90d5173eae26b4): {}
+  vue-sonner@2.0.9(patch_hash=34b2065fecd4314653c24cdfc38ff5f2910def4942ed265ec374d66c0e5c0940): {}
 
   vue@3.5.43(typescript@6.0.3):
     dependencies:

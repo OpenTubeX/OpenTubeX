@@ -586,11 +586,13 @@ export async function invidiousGetCommentReplies({ id, replyToken }) {
 
 /**
  * @param {string} query
+ * @param {AbortSignal} [signal]
  * @returns {Promise<{ query: string, suggestions: string[]}>}
  */
-export async function getInvidiousSearchSuggestions(query) {
+export async function getInvidiousSearchSuggestions(query, signal) {
   return await invidiousAPICall({
     resource: 'search/suggestions',
+    signal,
     id: '',
     params: {
       q: query
