@@ -30,6 +30,66 @@ public class PredictiveBackTest {
     private int drawerOriginalOrientation;
 
     @Test
+    public void settingsBackDismissalNeverReappears() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            WebView view = ready(scenario);
+            evaluate(view, """
+                (() => {
+                    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
+                    const keys = ['UiScale', 'CapacitorLayoutMode', 'ReducedMotion'];
+                    window.__dismissSettings = Object.fromEntries(keys.map(key => [key, store.getters['get' + key]]));
+                    store.dispatch('updateReducedMotion', 'off');
+                    window.__dismissHistory = store.getters.getActiveTab.historyIndex;
+                })()
+                """);
+            try {
+                for (int scale : new int[] { 85, 100 }) {
+                    evaluate(view, STORE + ".commit('setUiScale', " + scale + ")");
+                    for (String layout : new String[] { "phone", "tablet" }) {
+                        evaluate(view, STORE + ".commit('setCapacitorLayoutMode', '" + layout + "')");
+                        for (boolean predictive : new boolean[] { false, true }) {
+                            if (predictive && Build.VERSION.SDK_INT < 34) continue;
+                            evaluate(view, STORE + ".dispatch('showSettingsWindow')");
+                            await(view, "!!document.querySelector('.settingsWindow')");
+                            evaluate(view, "document.querySelector('.settingsBackButton')?.click()");
+                            await(view, "!document.querySelector('.settingsWindow[data-android-back-nested]')");
+                            Thread.sleep(300);
+                            if (predictive) {
+                                start(scenario, BackEventCompat.EDGE_LEFT);
+                                progress(scenario, 0.65f, BackEventCompat.EDGE_LEFT);
+                                await(view, "document.querySelector('.settingsWindow').getAnimations().some(a => a.playState === 'paused')");
+                            }
+                            evaluate(view, """
+                                (() => {
+                                    const element = document.querySelector('.settingsWindow');
+                                    window.__dismissOpacities = [Number(getComputedStyle(element).opacity)];
+                                    const sample = () => {
+                                        if (!element.isConnected) return;
+                                        window.__dismissOpacities.push(Number(getComputedStyle(element).opacity));
+                                        requestAnimationFrame(sample);
+                                    };
+                                    requestAnimationFrame(sample);
+                                })()
+                                """);
+                            scenario.onActivity(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
+                            await(view, "!document.querySelector('.settingsWindow')");
+                            assertEquals("Settings must fade out without reappearing: " + layout + ", scale " + scale +
+                                ", predictive " + predictive + ", samples " + evaluate(view, "JSON.stringify(window.__dismissOpacities)"),
+                                "true", evaluate(view, "window.__dismissOpacities.every((opacity, i, values) => !i || opacity <= values[i - 1] + 0.03)"));
+                            assertEquals("Dismissal preserves page history", "true", evaluate(view,
+                                STORE + ".getters.getActiveTab.historyIndex === window.__dismissHistory"));
+                        }
+                    }
+                }
+            } finally {
+                evaluate(view, STORE + ".dispatch('hideSettingsWindow');" +
+                    "for (const [key, value] of Object.entries(window.__dismissSettings)) " + STORE + ".commit('set' + key, value);" +
+                    STORE + ".dispatch('updateReducedMotion', window.__dismissSettings.ReducedMotion); delete window.__dismissSettings");
+            }
+        }
+    }
+
+    @Test
     public void utilityWindowsAndPromptsFollowBackWithoutChangingPageHistory() throws Exception {
         assumeTrue(Build.VERSION.SDK_INT >= 34);
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {

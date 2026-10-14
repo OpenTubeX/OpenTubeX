@@ -11,7 +11,10 @@ const source = readFileSync(new URL('../../src/renderer/helpers/androidBackDialo
 function fixture({ reducedMotion = false, busy = false, closes = true, rejects = false, deferredFrames = false } = {}) {
   let available = true
   let backs = 0
-  const properties = new Map([['transition', ['opacity 100ms', '']]])
+  const properties = new Map([
+    ['transition', ['opacity 100ms', '']],
+    ['animation', ['dialog-enter 160ms ease', 'important']],
+  ])
   const animations = []
   const frames = []
   const element = {
@@ -44,6 +47,7 @@ function fixture({ reducedMotion = false, busy = false, closes = true, rejects =
     getComputedStyle: () => ({ transform: 'none', opacity: '1' }),
   })
   const preview = create(element, async () => {
+    assert.deepEqual(properties.get('animation'), ['none', 'important'], 'Back must not replay a CSS leave animation')
     backs++
     if (rejects) throw new Error('Back failed')
     if (closes) element.isConnected = false
@@ -66,6 +70,7 @@ test('commit keeps the finished effect until Vue applies its leave state across 
   await finished
   assert.equal(f.animations[0].playState, 'idle')
   assert.deepEqual(f.properties.get('transition'), ['opacity 100ms', ''])
+  assert.deepEqual(f.properties.get('animation'), ['dialog-enter 160ms ease', 'important'])
 })
 
 for (const progress of [0, 0.001]) {
@@ -79,6 +84,7 @@ for (const progress of [0, 0.001]) {
     assert.equal(f.animations[0].playState, 'idle')
     assert.equal(f.backs(), 0)
     assert.deepEqual(f.properties.get('transition'), ['opacity 100ms', ''])
+    assert.deepEqual(f.properties.get('animation'), ['dialog-enter 160ms ease', 'important'])
   })
 }
 
@@ -93,11 +99,13 @@ for (const commit of [false, true]) {
     assert.equal(f.backs(), 0)
     assert.equal(f.element.scrollTop, 150.5)
     assert.deepEqual(f.properties.get('transition'), ['none', 'important'])
+    assert.deepEqual(f.properties.get('animation'), ['dialog-enter 160ms ease', 'important'], 'Holding or cancelling Back must not restart an entrance animation')
     await f.preview.finish(commit)
     assert.equal(f.backs(), commit ? 1 : 0)
     assert.equal(f.element.isConnected, !commit)
     assert.equal(animation.playState, 'idle')
     assert.deepEqual(f.properties.get('transition'), ['opacity 100ms', ''])
+    assert.deepEqual(f.properties.get('animation'), ['dialog-enter 160ms ease', 'important'])
     assert.equal(f.element.scrollTop, 150.5)
   })
 }
@@ -109,6 +117,7 @@ test('nested Back restores the surviving dialog after changing its view', async 
   assert.equal(f.backs(), 1)
   assert.equal(f.element.isConnected, true)
   assert.equal(f.animations[0].playState, 'idle')
+  assert.deepEqual(f.properties.get('animation'), ['dialog-enter 160ms ease', 'important'])
   assert.equal(f.preview.begin(), true)
   f.preview.cancel()
 })
@@ -123,6 +132,7 @@ test('a replaced layer or cancelled preview cannot dismiss a different dialog', 
     assert.equal(f.backs(), 0)
     assert.equal(f.animations[0].playState, 'idle')
     assert.deepEqual(f.properties.get('transition'), ['opacity 100ms', ''])
+    assert.deepEqual(f.properties.get('animation'), ['dialog-enter 160ms ease', 'important'])
   }
 })
 
@@ -140,4 +150,5 @@ test('a failed Back action still restores the dialog animation and styles', asyn
   await assert.rejects(f.preview.finish(true), /Back failed/)
   assert.equal(f.animations[0].playState, 'idle')
   assert.deepEqual(f.properties.get('transition'), ['opacity 100ms', ''])
+  assert.deepEqual(f.properties.get('animation'), ['dialog-enter 160ms ease', 'important'])
 })
