@@ -8,6 +8,7 @@
       alwaysExpanded,
       descriptionPreview: previewOnly
     }"
+    @click="expandDescriptionWithClick"
   >
     <FtIconButton
       v-if="shownDescription.length > 0 && !previewOnly"
@@ -45,7 +46,6 @@
         :input-html="processedShownDescription"
         :link-tab-index="linkTabIndex"
         @timestamp-event="onTimestamp"
-        @click="expandDescriptionWithClick"
       />
       <div
         v-if="(contentDisclosures?.length ?? 0) > 0"
@@ -291,8 +291,8 @@ async function copyDescription() {
  @param {PointerEvent} e
  */
 function expandDescriptionWithClick(e) {
-  // Ignore link clicks
-  if (props.alwaysExpanded || e.target.tagName === 'A') { return }
+  // Links and controls handle their own clicks, including clicks on their children.
+  if (props.alwaysExpanded || isExpanded.value || e.target.closest('a, button, [role="button"]')) { return }
 
   expandDescription()
 }

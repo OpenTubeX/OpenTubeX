@@ -93,6 +93,12 @@ for (const scale of [100, 125]) {
         await expect(card.locator(selector)).toHaveText(text)
         await expect(card).toHaveClass(/short/)
         await expect(card.locator(':scope > .descriptionStatus')).toBeVisible()
+        // Empty space alongside metadata must expand the card just like description text.
+        const position = await card.evaluate(element => ({ x: element.clientWidth - 80, y: 30 }))
+        await card.click({ position })
+        await expect(card).not.toHaveClass(/short/)
+        await card.locator('.descriptionScroll > .descriptionStatus').click()
+        await expect(card).toHaveClass(/short/)
         if (selector === '.videoTagLink' && scale === 100) {
           await card.evaluate(element => element.scrollIntoView({ block: 'end' }))
           await page.mouse.move(0, 0)
@@ -103,6 +109,49 @@ for (const scale of [100, 125]) {
           }
         }
       }
+    })
+
+    test('keeps links and controls independent of card expansion', async ({ app, page }) => {
+      await mockUnplayableWatchPage(app, page)
+      await goTo(page, 'history')
+      await page.getByText(watchHistoryEntry.title, { exact: true }).click()
+      await expect(page.locator('.videoDescription').visible()).toBeVisible()
+      const view = await watchViewHandle(page)
+      await view.evaluate(component => {
+        component.videoDescription = 'A short description.'
+        component.videoDescriptionHtml = ''
+        component.videoTags = ['first tag']
+        component.videoGames = []
+        component.license = null
+        component.contentDisclosures = []
+      })
+      const card = page.locator('.videoDescription').visible()
+      await expect(card).toHaveClass(/short/)
+
+      // Keep the card mounted while exercising real link clicks and bubbling.
+      for (const selector of ['.videoTagLink', '.game']) {
+        await view.evaluate((component, selector) => {
+          component.videoTags = selector === '.videoTagLink' ? ['first tag'] : []
+          component.videoGames = selector === '.game' ? [{ title: 'Test game', channelId: 'UC-test-game' }] : []
+        }, selector)
+        const link = card.locator(selector)
+        await link.evaluate(element => element.addEventListener('click', event => event.preventDefault(), { once: true, capture: true }))
+        await (selector === '.game' ? link.locator('.gameTitle') : link).click()
+        await expect(card).toHaveClass(/short/)
+      }
+
+      await card.locator('.descriptionCopyButton button').click()
+      await expect(page.locator('.toast', { hasText: 'Description copied to clipboard' })).toBeVisible()
+      await expect(card).toHaveClass(/short/)
+
+      await card.locator(':scope > .descriptionStatus').focus()
+      await page.keyboard.press('Enter')
+      await expect(card).not.toHaveClass(/short/)
+      await card.locator('.descriptionScroll > .descriptionStatus').click()
+      await expect(card).toHaveClass(/short/)
+
+      await card.locator('.description').click({ position: { x: 10, y: 10 } })
+      await expect(card).not.toHaveClass(/short/)
     })
 
     test('short descriptions fit their content with centered text and copy control', async ({ app, page }, testInfo) => {
