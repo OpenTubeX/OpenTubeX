@@ -48,7 +48,7 @@
         @click="expandDescriptionWithClick"
       />
       <div
-        v-if="(contentDisclosures?.length ?? 0) > 0 && isExpanded"
+        v-if="(contentDisclosures?.length ?? 0) > 0"
         class="contentDisclosureSection"
       >
         <h3 class="contentDisclosureTitle">
@@ -227,6 +227,7 @@ const descriptionCopyButton = useTemplateRef('descriptionCopyButton')
 const expandDescriptionControl = useTemplateRef('expandDescriptionControl')
 const showFullDescription = ref(false)
 const showControls = ref(false)
+let userWantsExpandedDescription = false
 const descriptionFadeTop = ref(false)
 const copyButtonOverlapsExpandControl = ref(false)
 const isExpanded = computed(() => !props.previewOnly && (props.alwaysExpanded || showFullDescription.value))
@@ -301,6 +302,8 @@ function expandDescriptionWithClick(e) {
  */
 function expandDescription() {
   if (props.previewOnly) { emit('expand'); return }
+  if (isExpanded.value) { return }
+  userWantsExpandedDescription = true
   showFullDescription.value = true
 }
 
@@ -309,6 +312,7 @@ function expandDescription() {
  */
 function collapseDescription() {
   restoreOverlayScrollTop(descriptionScroll.value, 0)
+  userWantsExpandedDescription = false
   showFullDescription.value = false
 }
 
@@ -325,7 +329,7 @@ let hasMeasured = false
  * Useful for hiding description expansion/contraction controls
  */
 function isShortDescription() {
-  // These sections are hidden while collapsed, so text dimensions cannot account for them.
+  // Text dimensions cannot account for the metadata sections below the description.
   if (props.tags.length > 0 || props.games.length > 0 || props.license || (props.contentDisclosures?.length ?? 0) > 0) {
     return false
   }
@@ -359,8 +363,9 @@ function measureDescription() {
     return
   }
 
-  showFullDescription.value = isShortDescription()
-  showControls.value = !showFullDescription.value
+  const shortDescription = isShortDescription()
+  showFullDescription.value = shortDescription || userWantsExpandedDescription
+  showControls.value = !shortDescription
   hasMeasured = true
 
   nextTick(updateDescriptionLayout)
@@ -389,7 +394,7 @@ function updateExpandControlPosition() {
 }
 
 function updateDescriptionLayout() {
-  if (showControls.value && isExpanded.value && descriptionScroll.value && descriptionContentEnd.value) {
+  if (isExpanded.value && descriptionScroll.value && descriptionContentEnd.value) {
     clampOverlayScrollTop(descriptionScroll.value, descriptionContentEnd.value)
   }
   updateDescriptionFadeState()
@@ -421,15 +426,10 @@ onMounted(() => {
 onBeforeUnmount(() => descriptionResizeObserver?.disconnect())
 
 watch(isExpanded, () => nextTick(updateDescriptionLayout))
-watch(shownDescription, async () => {
-  // Metadata can arrive after offline playback has already mounted the card.
-  if (!showControls.value) hasMeasured = false
-  await nextTick()
-  observeDescriptionElements()
-  measureDescription()
-  updateDescriptionLayout()
-})
-watch([() => props.tags, () => props.games, () => props.license, () => props.contentDisclosures], async () => {
+watch([shownDescription, () => props.tags, () => props.games, () => props.license, () => props.contentDisclosures], async () => {
+  // Metadata can arrive or disappear after the card has mounted.
+  // Control visibility follows the content, independently of the user's expansion choice.
+  hasMeasured = false
   await nextTick()
   observeDescriptionElements()
   measureDescription()
