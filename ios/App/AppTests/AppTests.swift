@@ -436,6 +436,10 @@ final class AppTests: XCTestCase {
         try await verifyDlnaCastMenu(merged: true)
     }
 
+    func testDlnaCastFixtureWaitsForPreviousPlayerTeardown() async throws {
+        try await verifyDlnaCastMenu(merged: false, delayedTeardown: true)
+    }
+
     func testDlnaPrivateInstanceAndFallbackThroughTheCastMenu() async throws {
         try await verifyDlnaCastMenu(merged: true, privateInstance: true)
     }
@@ -477,7 +481,7 @@ final class AppTests: XCTestCase {
         return bytes
     }
 
-    private func verifyDlnaCastMenu(merged: Bool, privateInstance: Bool = false, startupFailure: Bool = false, keyframeRecovery: Bool = false) async throws {
+    private func verifyDlnaCastMenu(merged: Bool, privateInstance: Bool = false, startupFailure: Bool = false, keyframeRecovery: Bool = false, delayedTeardown: Bool = false) async throws {
         try await openApplication()
         let media = try Data(contentsOf: XCTUnwrap(Bundle(for: AppTests.self).url(forResource: "fixture", withExtension: "mp4")))
         let encodedAudio = try Data(contentsOf: XCTUnwrap(Bundle(for: Self.self).url(forResource: "post-live-audio.m4a", withExtension: "b64")))
@@ -607,7 +611,7 @@ final class AppTests: XCTestCase {
                     }
                     return dlnaOriginalNativePromise.call(this, plugin, method, options);
                 };
-                testRouter.push('/watch/DlnaTest001'); true;
+                true;
         """)
         let audioId = IOSNetwork.shared.prepareExternal(URLRequest(url: URL(string: "http://127.0.0.1:\(port)/audio.m4a")!))
         let videoId = keyframeRecovery ? IOSNetwork.shared.prepareExternal(URLRequest(url: URL(string: "http://127.0.0.1:\(port)/indexed.mp4")!)) : id
@@ -621,20 +625,42 @@ final class AppTests: XCTestCase {
             {url:videoSource, format_id:'299', protocol:'http', ext:'mp4', vcodec:'avc1.640028', acodec:'none', height:1080},
             {url:audioSource, format_id:'140', protocol:'http', ext:'m4a', vcodec:'none', acodec:'mp4a.40.2'}
         ] : [];
+        await testRouter.push('/watch/DlnaTest001');
         """, arguments: ["merged": merged, "startupFailure": startupFailure, "keyframeRecovery": keyframeRecovery, "videoSource": "capacitor://localhost/_opentubex_media/\(videoId)", "audioSource": "capacitor://localhost/_opentubex_media/\(audioId)"], in: nil, contentWorld: .page)
         // Navigation preserves cached Watch state. Discard the fixture source
         // too, so neither the cached page nor its cast control retains it.
         let cleanup = "document.querySelector('video')?.pause(); if (dlnaKeyframeRecovery && window.dlnaOriginalCurrentTime) watchFixture.$refs.player.getCurrentTime=dlnaOriginalCurrentTime; watchFixture.legacyFormats=[]; testStore.commit('setCurrentInvidiousInstance', originalInstance); await testRouter.push('/subscriptions'); await testStore.dispatch('updateShowDlnaCastButton', original); window.Capacitor.nativePromise=dlnaOriginalNativePromise"
         do {
-            try await wait("!!findWatch(document.querySelector('#app').__vue_app__._container._vnode)")
-            _ = try await webView.callAsyncJavaScript("""
+            // Cancelling metadata during teardown can retain a destroyed player.
+            let preparationReady = "(() => { const watch = findWatch(document.querySelector('#app').__vue_app__._container._vnode); return watch?.videoId === 'DlnaTest001' && watch.preparingVideoLoadGeneration === null && !watch.playerTeardownInProgress; })()"
+            try await wait(preparationReady)
+            let prepareSource = """
             window.watchFixture = findWatch(document.querySelector('#app').__vue_app__._container._vnode);
+            await watchFixture.$nextTick();
             watchFixture.videoLoadGeneration++;
             Object.assign(watchFixture, {isLoading:false, ytDlpStreamsPending:false, errorMessage:null,
                 isUpcoming:false, videoTitle:'Local DLNA MP4', videoLengthSeconds:2, activeFormat:'legacy',
                 legacyFormats:[{itag:18,url,mimeType:'video/mp4',height:dlnaMergedUi?360:1080,qualityLabel:'1080p'}]});
             await testStore.dispatch('updateShowDlnaCastButton', false);
-            """, arguments: ["url": "capacitor://localhost/_opentubex_media/\(id)"], in: nil, contentWorld: .page)
+            """
+            let sourceArguments = ["url": "capacitor://localhost/_opentubex_media/\(id)"]
+            if delayedTeardown {
+                _ = try await webView.callAsyncJavaScript(prepareSource, arguments: sourceArguments, in: nil, contentWorld: .page)
+                try await wait("!!document.querySelector('video') && watchFixture.$refs.player?.hasLoaded")
+                _ = try await webView.callAsyncJavaScript("""
+                const previousPlayer = watchFixture.$refs.player;
+                const destroy = previousPlayer.destroyPlayer;
+                previousPlayer.destroyPlayer = async (...args) => {
+                    const state = await destroy(...args);
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    return state;
+                };
+                void watchFixture.reloadView();
+                """, arguments: [:], in: nil, contentWorld: .page)
+                try await wait("watchFixture.playerTeardownInProgress")
+                try await wait(preparationReady)
+            }
+            _ = try await webView.callAsyncJavaScript(prepareSource, arguments: sourceArguments, in: nil, contentWorld: .page)
             try await wait("!!document.querySelector('video') && watchFixture.$refs.player?.hasLoaded")
             if keyframeRecovery {
                 _ = try await evaluate("window.dlnaOriginalCurrentTime=watchFixture.$refs.player.getCurrentTime; watchFixture.$refs.player.getCurrentTime=()=>65;true")
