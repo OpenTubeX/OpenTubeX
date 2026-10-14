@@ -19,7 +19,7 @@ import { LibraryExports } from '../../src/datastores/sqlite/export.js'
 import { filterHistoryByDateAndChannel, getHistoryChannels } from '../../src/renderer/helpers/historyBrowse.js'
 import { filterVideosWithQuery } from '../../src/renderer/helpers/historySearch.js'
 import { canMarkHistoryEntryAsWatched, migrateLegacyHistoryRecord } from '../../src/history.js'
-import { historyRepairRecord, markAllHistory, applySubscriptionUnseenHistory, recommendationInputs, importSubscriptionProfiles, removePlaylistMember, removePlaylistMembers, addSelectedPlaylistVideos, playlistVideoIds, playlistImportCandidates } from '../../src/datastores/sqlite/operations.js'
+import { historyRepairRecord, markAllHistory, applySubscriptionUnseenHistory, recommendationInputs, importSubscriptionProfiles, commandPaletteVideos, playlistMember, removePlaylistMember, removePlaylistMembers, addSelectedPlaylistVideos, playlistVideoIds, playlistImportCandidates } from '../../src/datastores/sqlite/operations.js'
 
 test('legacy subscription imports accept nullable custom profile names without discarding subscriptions', async t => {
   const engine = memory(t)
@@ -3045,3 +3045,34 @@ for (const oldest of [false, true]) {
     assert.deepEqual(await engine.collections.history.findAsync({}), before)
   })
 }
+
+test('local command search returns bounded metadata and distinct saved occurrences without changing records', async t => {
+  const engine = memory(t)
+  const history = Array.from({ length: 80 }, (_, index) => ({ _id: `h${index}`, videoId: `video-${index}`, title: 'Mountain journey', author: 'North Channel', timeWatched: index, thumbnail: 'data:image/png;base64,' + 'x'.repeat(10000), unknown: new Date(index) }))
+  const members = [null, { retained: new Date(1) }, ...Array.from({ length: 80 }, (_, index) => ({ videoId: 'duplicate', playlistItemId: 'same', title: `Hidden destination ${index}`, author: 'North Channel', unknown: new Date(index) }))]
+  await engine.collections.history.insertAsync(history)
+  await engine.collections.playlists.insertAsync({ _id: 'playlist', playlistName: 'Road trips', videos: members, unknown: new Date(0) })
+  const beforeHistory = await engine.collections.history.findAsync({}), beforePlaylist = await engine.playlistSnapshot({ id: 'playlist' })
+  const context = { locale: 'en-US', group: 'Local videos', sources: { history: 'History', playlists: 'Playlists' } }
+  const result = commandPaletteVideos(engine, { ...context, query: 'montain jorney' })
+  assert.equal(result.history.length, 50)
+  assert.equal(result.playlists.length, 0)
+  assert.equal(Object.hasOwn(result.history[0], 'thumbnail'), false)
+  assert.equal(Object.hasOwn(result.history[0], 'unknown'), false)
+  const saved = commandPaletteVideos(engine, { ...context, query: 'hidden destination road trips' })
+  assert.equal(saved.playlists[0].videos.length, 50)
+  assert.equal(new Set(saved.playlists[0].videos.map(video => video._libraryMemberId)).size, 50)
+  const selected = saved.playlists[0].videos.at(-1)
+  const full = playlistMember(engine, { id: 'playlist', memberId: selected._libraryMemberId })
+  assert.equal(full.title, selected.title)
+  assert.ok(full.unknown instanceof Date)
+  assert.deepEqual(full, members.find(member => member?.title === selected.title))
+  assert.equal(playlistMember(engine, { id: 'playlist', memberId: 'missing' }), null)
+  assert.deepEqual(await engine.collections.history.findAsync({}), beforeHistory)
+  assert.deepEqual(await engine.playlistSnapshot({ id: 'playlist' }), beforePlaylist)
+  const prepare = engine.prepare.bind(engine)
+  let reads = 0
+  t.mock.method(engine, 'prepare', sql => { reads++; return prepare(sql) })
+  assert.deepEqual(commandPaletteVideos(engine, { ...context, query: '\u0301' }), { history: [], playlists: [] })
+  assert.equal(reads, 0)
+})

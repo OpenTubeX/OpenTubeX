@@ -1,3 +1,5 @@
+import { filterCommandPaletteCommands } from '../../renderer/helpers/commandPalette.js'
+import { iterateLocalVideoCommands } from '../../renderer/helpers/commandPaletteVideos.js'
 import { mergeLegacySubscriptionChannels } from '../../renderer/helpers/unifiedBackup.js'
 import model from '@seald-io/nedb/lib/model.js'
 import { randomUUID } from 'node:crypto'
@@ -300,4 +302,57 @@ export function playlistVideoIds(engine, { id }) {
 export async function playlistImportCandidates(engine, { name }) {
   if (typeof name !== 'string') throw new TypeError('Invalid playlist name')
   return engine.collections.playlists.findAsync({ playlistName: name }, { _id: 1, playlistName: 1, protected: 1 })
+}
+
+export function commandPaletteVideos(engine, { query = '', locale = 'en-US', group, sources }) {
+  if (typeof query !== 'string' || typeof locale !== 'string' || typeof group !== 'string' ||
+      typeof sources?.history !== 'string' || typeof sources?.playlists !== 'string') throw new TypeError('Invalid local video search')
+  const fields = ['videoId', 'title', 'author', 'authorId', 'isShort', 'lengthSeconds', 'lastViewedPlaylistId', 'lastViewedPlaylistType', 'lastViewedPlaylistItemId']
+  const projection = fields.map(field => `'${field}', json(data -> '$.${field}')`).join(', ')
+  const context = { group, sources, history: [], playlists: [], downloads: {}, queue: [], playLibraryVideo() {} }
+  let index = 0
+  function * commands() {
+    const rows = engine.prepare(`SELECT json_object(${projection}) AS metadata FROM records WHERE collection = 'history' ORDER BY sort_time DESC, nedb_id_sort(id) DESC`)
+    for (const row of rows.iterate()) {
+      const video = engineRecord(row.metadata)
+      if (!video) continue
+      const command = iterateLocalVideoCommands({ ...context, history: [video] }).next().value
+      yield { ...command, id: `history:${index++}`, libraryVideo: video, librarySource: 'history' }
+    }
+    const members = engine.prepare(`SELECT m.record_id, m.membership_id, json_object(${fields.map(field => `'${field}', json(m.data -> '$.${field}')`).join(', ')}) AS metadata, r.data -> '$.playlistName' AS name FROM members m JOIN records r ON r.collection = m.collection AND r.id = m.record_id WHERE m.collection = 'playlists' AND m.field = 'videos' ORDER BY nedb_id_sort(m.record_id), m.position`)
+    for (const row of members.iterate()) {
+      const video = engineRecord(row.metadata)
+      if (!video) continue
+      video._libraryMemberId = row.membership_id
+      const name = row.name ? model.deserialize(row.name) : ''
+      const playlist = { _id: row.record_id, playlistName: typeof name === 'string' ? name : '', videos: [video] }
+      const command = iterateLocalVideoCommands({ ...context, playlists: [playlist] }).next().value
+      yield { ...command, id: `playlist:${index++}`, libraryVideo: video, libraryPlaylist: playlist, librarySource: 'playlists' }
+    }
+  }
+  function engineRecord(metadata) {
+    const video = model.deserialize(metadata)
+    if (typeof video.videoId !== 'string' || !video.videoId) return null
+    if (typeof video.title !== 'string') video.title = video.videoId
+    if (typeof video.author !== 'string') video.author = ''
+    return video
+  }
+  // The shared matcher retains only the best 50 commands during this scan.
+  // Return metadata for those matches, without reading arrays or thumbnails.
+  const history = []; const playlists = new Map()
+  for (const command of filterCommandPaletteCommands(commands(), query, locale)) {
+    if (command.librarySource === 'history') history.push(command.libraryVideo)
+    else {
+      const playlist = command.libraryPlaylist
+      if (!playlists.has(playlist._id)) playlists.set(playlist._id, { ...playlist, videos: [] })
+      playlists.get(playlist._id).videos.push(command.libraryVideo)
+    }
+  }
+  return { history, playlists: [...playlists.values()] }
+}
+
+export function playlistMember(engine, { id, memberId }) {
+  if (typeof id !== 'string' || typeof memberId !== 'string') throw new TypeError('Invalid playlist member')
+  const row = engine.prepare("SELECT data FROM members WHERE collection = 'playlists' AND record_id = ? AND field = 'videos' AND membership_id = ?").get(id, memberId)
+  return row ? model.deserialize(row.data) : null
 }
