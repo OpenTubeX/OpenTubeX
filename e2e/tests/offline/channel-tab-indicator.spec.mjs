@@ -549,6 +549,40 @@ test('clamps channel tab scrolling after resize and locale changes', async ({ ap
   }
 })
 
+test('channel search restores highlights immediately unless a tab is deliberately selected', async ({ page }) => {
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAnimationSpeed', 25))
+  const search = page.locator('.channelSearch input')
+  for (const scale of [100, 95, 125]) {
+    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+    for (const key of [null, 'Enter', ' ']) {
+      await search.fill('animation')
+      await search.press('Enter')
+      await expect(page.locator(indicatorSelector)).toHaveCount(0)
+      expect(await page.locator('.channelDetails:visible [role="tab"]').evaluateAll(tabs => tabs.some(tab =>
+        tab.getAnimations({ subtree: true }).some(animation => animation instanceof CSSTransition && animation.transitionProperty === 'opacity' && animation.effect.target === tab && animation.effect.pseudoElement === '::before')
+      ))).toBe(false)
+      expect(await selectTabWithHighlightAnimation(page.locator('#aboutTab'), key)).toEqual({ property: 'opacity', playbackRate: 0.25, duration: 140 })
+      await expectAligned(page)
+    }
+
+    await search.fill('animation')
+    await search.press('Enter')
+    await expect(page.locator(indicatorSelector)).toHaveCount(0)
+    const restored = await search.evaluate(async input => {
+      input.value = ''
+      input.dispatchEvent(new InputEvent('input', { bubbles: true }))
+      await new Promise(resolve => requestAnimationFrame(resolve))
+      const tab = [...document.querySelectorAll('.channelDetails [role="tab"][aria-selected="true"]')].find(tab => tab.getClientRects().length > 0)
+      return {
+        opacity: getComputedStyle(tab, '::before').opacity,
+        transitions: tab.getAnimations({ subtree: true }).filter(animation =>
+          animation instanceof CSSTransition && animation.transitionProperty === 'opacity').length
+      }
+    })
+    expect(restored).toEqual({ opacity: '1', transitions: 0 })
+  }
+})
+
 test('handles quick switches, search, background tabs, and reduced motion', async ({ page }) => {
   await page.evaluate(() => {
     document.getElementById('aboutTab').click()

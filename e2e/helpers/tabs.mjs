@@ -30,8 +30,8 @@ export function tabHighlightAnimations(tab) {
 }
 
 /** Capture the transition at selection time, even if the test driver is busy. */
-export async function selectTabWithHighlightAnimation(tab) {
-  return tab.evaluate(element => new Promise(resolve => {
+export async function selectTabWithHighlightAnimation(tab, key = null) {
+  return tab.evaluate((element, key) => new Promise(resolve => {
     const timeout = setTimeout(() => {
       element.removeEventListener('transitionrun', onTransition)
       resolve(null)
@@ -53,6 +53,7 @@ export async function selectTabWithHighlightAnimation(tab) {
       })
     }
     element.addEventListener('transitionrun', onTransition)
-    element.click()
-  }))
+    if (key === null) element.click()
+    else element.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }))
+  }), key)
 }
