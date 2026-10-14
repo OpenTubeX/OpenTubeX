@@ -223,7 +223,7 @@ for (const uiScale of [100, 125]) {
           await card.locator('.thumbnailImage:not(.retryImagePlaceholder):not(.thumbnailPreview)').scrollIntoViewIfNeeded()
           const bounds = await card.locator('.thumbnailImage:not(.retryImagePlaceholder):not(.thumbnailPreview)').boundingBox()
           await session.send('Input.dispatchTouchEvent', {
-            type: 'touchStart', touchPoints: [{ x: bounds.x + 8, y: bounds.y + 8 }]
+            type: 'touchStart', touchPoints: [{ x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }]
           })
           await expect(menu).toBeVisible({ timeout: 3000 })
           await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })

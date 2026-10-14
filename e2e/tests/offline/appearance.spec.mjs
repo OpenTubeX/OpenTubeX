@@ -711,12 +711,10 @@ test.describe('custom theme editor', () => {
     await page.getByRole('button', { name: 'Import from clipboard' }).click()
     await expect.poll(() => app.electronApp.evaluate(() =>
       typeof globalThis.resolveThemeClipboardRead)).toBe('function')
-    await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      store.commit('setSettingsWindowView', 'about')
-    })
+    await page.locator('.settingsBreadcrumbRoot').click()
+    await goToSettingsSection(page, 'data')
     await expect(page.locator('.customThemeEditor')).toHaveCount(0)
-    const background = await page.locator('body').evaluate(element => element.style.getPropertyValue('--bg-color'))
+    const background = await page.locator('body').evaluate(element => getComputedStyle(element).getPropertyValue('--bg-color'))
     await app.electronApp.evaluate((_, text) => globalThis.resolveThemeClipboardRead(text), JSON.stringify(theme))
     await page.evaluate(() => window.ftElectron.readClipboard())
     // Observe the completed IPC result before checking that no preview was applied.
@@ -1455,6 +1453,7 @@ test.describe('UI roundness', () => {
     await expect(page.getByRole('dialog')).toHaveCSS('border-radius', '0px')
     await attachScreenshot('square modal at 0% roundness')
 
+    await page.locator('.settingsBackButton').click()
     await page.getByRole('dialog').getByRole('button', { name: 'Close' }).click()
     await page.locator(sel.tabs).first().click({ button: 'right' })
     await expect(page.getByRole('menu', { name: 'Context menu' })).toHaveCSS('border-radius', '0px')

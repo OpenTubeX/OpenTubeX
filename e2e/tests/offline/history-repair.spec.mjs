@@ -44,7 +44,7 @@ test('repairs imported history metadata without changing watch state', async ({ 
   await startRepair(page)
   await expect(page.getByRole('status')).toContainText('Checked 1/1 · Repaired 1 · Failed 0')
   await expect(page.getByRole('heading', { name: 'Repair finished', exact: true })).toBeVisible()
-  await expect(page.getByText('Recovered channel', { exact: true })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Recovered channel', exact: true })).toBeVisible()
   const saved = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById.abcdefghijk)
   expect(saved).toMatchObject({
     isLive: false,
@@ -59,7 +59,7 @@ test('repairs imported history metadata without changing watch state', async ({ 
   await page.screenshot({ path: testInfo.outputPath('history-repair.png') })
   await page.reload()
   await goTo(page, 'history')
-  await expect(page.getByText('Recovered channel', { exact: true })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Recovered channel', exact: true })).toBeVisible()
 })
 
 test('failed history metadata requests leave imported entries intact', async ({ page }) => {
@@ -144,7 +144,7 @@ test.describe('Invidious history repair', () => {
       await goTo(page, 'history')
       await startRepair(page)
       await expect(page.getByRole('status')).toContainText('Checked 1/1 · Repaired 1 · Failed 0')
-      await expect(page.getByText('Invidious channel', { exact: true })).toBeVisible()
+      await expect(page.getByRole('link', { name: 'Invidious channel', exact: true })).toBeVisible()
       const saved = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById.abcdefghijk)
       expect(saved.isUpcoming).toBe(isUpcoming)
       expect(saved.isLive).toBe(false)

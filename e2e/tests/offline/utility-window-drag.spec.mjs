@@ -11,7 +11,7 @@ for (const uiScale of [100, 125]) {
         const dialog = page.locator('.settingsWindow')
         await expect(dialog).toBeVisible()
         await expect(dialog).not.toHaveClass(/settings-window-enter-active/)
-        const scroller = dialog.locator(view ? '.settingsSubpageScroll' : '.settingsContent')
+        const scroller = dialog.locator(view === 'about' ? '.settingsAboutPage' : view === 'downloads' ? '.settingsDownloadsPage' : '.settingsContent')
         await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
         const scrollTop = await scroller.evaluate(element => element.scrollTop)
         const before = await dialog.boundingBox()
