@@ -110,6 +110,9 @@ for (const metadata of [{ tags: ['video tag'] }, { games: [{ title: 'Test game' 
     await flushDescriptionUpdates()
     assert.equal(component.expanded(), true)
     assert.equal(component.controls(), false)
+    // Clicking already-visible text is not an explicit expansion request.
+    component.expand()
+    await flushDescriptionUpdates()
 
     Object.assign(component.props, metadata)
     await flushDescriptionUpdates()
@@ -121,6 +124,7 @@ for (const metadata of [{ tags: ['video tag'] }, { games: [{ title: 'Test game' 
     await flushDescriptionUpdates()
     assert.equal(component.controls(), false)
     assert.equal(component.expanded(), true)
+    component.expand()
     Object.assign(component.props, structuredClone(metadata))
     await flushDescriptionUpdates()
     assert.equal(component.controls(), true)

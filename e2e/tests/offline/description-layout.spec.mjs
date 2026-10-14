@@ -38,6 +38,7 @@ for (const scale of [100, 125]) {
         await expect(card.locator('.description')).toHaveText('A short description.')
         await expect(card).not.toHaveClass(/short/)
         await expect(card.locator('.descriptionStatus')).toHaveCount(0)
+        await card.locator('.description').click({ position: { x: 10, y: 10 } })
 
         await view.evaluate((component, metadata) => { Object.assign(component, metadata) }, metadata)
         await expect(card).toHaveClass(/short/)

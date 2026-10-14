@@ -302,6 +302,7 @@ function expandDescriptionWithClick(e) {
  */
 function expandDescription() {
   if (props.previewOnly) { emit('expand'); return }
+  if (isExpanded.value) { return }
   userWantsExpandedDescription = true
   showFullDescription.value = true
 }
