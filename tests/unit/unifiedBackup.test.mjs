@@ -238,20 +238,21 @@ test('portable backup restoration retains every identified history occurrence ac
   const thumbnailHelpers = parseJavaScript(script, { sourceType: 'module' }).program.body.filter(node => node.type === 'FunctionDeclaration' && ['isJsonObject', 'normalizeImportedPlaylistThumbnail'].includes(node.id.name)).map(node => script.slice(node.start, node.end)).join('\n')
   const restore = compileFunction(thumbnailHelpers + '\nreturn ' + script.slice(declaration.start, declaration.end), Object.keys(bindings))(...Object.values(bindings))
   const expected = [...original, ...incoming].toSorted((a, b) => model.compareThings(a._id, b._id))
+  const newest = async videoId => (await db.history.findAsync({ videoId }).sort({ timeWatched: -1, _id: -1 }))[0]
   for (let repeat = 0; repeat < 2; repeat++) {
     await restore()
     assert.deepEqual(await db.history.findAsync({}).sort({ _id: 1 }), expected)
     assert.equal(toRaw(store.state.history.historyCacheSorted).length, expected.length)
-    assert.deepEqual(toRaw(store.state.history.historyCacheById.same), (await History.find()).find(record => record.videoId === 'same'))
-    assert.deepEqual(toRaw(store.state.history.historyCacheById.equal), (await History.find()).find(record => record.videoId === 'equal'))
+    assert.deepEqual(toRaw(store.state.history.historyCacheById.same), await newest('same'))
+    assert.deepEqual(toRaw(store.state.history.historyCacheById.equal), await newest('equal'))
     await store.dispatch('grabHistory')
-    assert.deepEqual(toRaw(store.state.history.historyCacheById.same), (await History.find()).find(record => record.videoId === 'same'))
-    assert.deepEqual(toRaw(store.state.history.historyCacheById.equal), (await History.find()).find(record => record.videoId === 'equal'))
+    assert.deepEqual(toRaw(store.state.history.historyCacheById.same), await newest('same'))
+    assert.deepEqual(toRaw(store.state.history.historyCacheById.equal), await newest('equal'))
     assert.equal(messages.at(-1).message, 'Settings.Data Settings.Backup imported')
   }
   assert.equal(await store.dispatch('overwriteHistory', new Map([...original, ...incoming].map(record => [record._id, record]))), true)
-  assert.deepEqual(toRaw(store.state.history.historyCacheById.same), (await History.find()).find(record => record.videoId === 'same'))
-  assert.deepEqual(toRaw(store.state.history.historyCacheById.equal), (await History.find()).find(record => record.videoId === 'equal'))
+  assert.deepEqual(toRaw(store.state.history.historyCacheById.same), await newest('same'))
+  assert.deepEqual(toRaw(store.state.history.historyCacheById.equal), await newest('equal'))
   assert.deepEqual(decoded.history, incoming)
 })
 
