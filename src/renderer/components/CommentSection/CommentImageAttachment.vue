@@ -97,11 +97,11 @@ watch([width, height], drawPoster, { flush: 'post' })
 }
 
 .commentAttachmentReady > .commentAttachmentAnimation,
-.commentAttachmentReady:hover > .commentAttachmentPoster {
+:root:not([data-reduced-motion='reduce']) .commentAttachmentReady:hover > .commentAttachmentPoster {
   display: none;
 }
 
-.commentAttachmentReady:hover > .commentAttachmentAnimation {
+:root:not([data-reduced-motion='reduce']) .commentAttachmentReady:hover > .commentAttachmentAnimation {
   display: block;
 }
 </style>

@@ -102,6 +102,47 @@ test('shows the supplied unavailable message when an attachment has no usable im
   await expect(attachment.locator('img')).toHaveCount(0)
 })
 
+test('keeps hovered attachments still when reduced motion is enabled', async ({ app, page }, testInfo) => {
+  await mockPlayableWatchPage(app, page, { commentImages: attachments })
+  await page.route('https://i.ytimg.com/c_exp/**', async route => route.fulfill({
+    contentType: 'image/webp',
+    body: await readFile(new URL('../../fixtures/media/comment-animation.webp', import.meta.url))
+  }))
+  await openMockedVideo(page)
+  const attachment = page.locator('.commentImageAttachment').first()
+  await attachment.scrollIntoViewIfNeeded()
+  await expect(attachment).toHaveClass(/commentAttachmentReady/)
+  await attachment.hover()
+  const poster = attachment.locator('canvas')
+  const animation = attachment.locator('.commentAttachmentAnimation')
+
+  for (const [preference, system, reduce] of [
+    ['on', 'no-preference', true],
+    ['off', 'reduce', false],
+    ['system', 'reduce', true],
+    ['system', 'no-preference', false]
+  ]) {
+    await page.emulateMedia({ reducedMotion: system })
+    await page.evaluate(preference => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', preference), preference)
+    await expect(page.locator('html')).toHaveAttribute('data-reduced-motion', reduce ? 'reduce' : 'no-preference')
+    await attachment.hover()
+    if (reduce) {
+      await expect(poster).toBeVisible()
+      await expect(animation).toBeHidden()
+      const stillFrame = await poster.screenshot({ path: testInfo.outputPath('reduced-motion-preview.png') })
+      await page.waitForTimeout(250)
+      expect(await poster.screenshot()).toEqual(stillFrame)
+      await testInfo.attach('reduced motion preview', { body: stillFrame, contentType: 'image/png' })
+    } else {
+      await expect(poster).toBeHidden()
+      await expect(animation).toBeVisible()
+    }
+  }
+  await page.mouse.move(0, 0)
+  await expect(poster).toBeVisible()
+  await expect(animation).toBeHidden()
+})
+
 test('redraws the still frame when attachment dimensions change without a new URL', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page, { commentImages: attachments })
   await page.route('https://i.ytimg.com/c_exp/**', async route => route.fulfill({
