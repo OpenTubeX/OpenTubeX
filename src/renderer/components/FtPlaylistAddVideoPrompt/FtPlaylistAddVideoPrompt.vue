@@ -220,7 +220,7 @@ const cachedCollator = computed(() => new Intl.Collator([locale.value, 'en'], { 
 const allPlaylists = computed(() => {
   const collator = cachedCollator.value
 
-  return store.getters.getAllPlaylists.toSorted((a, b) => {
+  return store.getters.getAllPlaylists.filter(playlist => Array.isArray(playlist.videos)).toSorted((a, b) => {
     switch (sortBy.value) {
       case SORT_BY_VALUES.NameAscending:
         return collator.compare(a.playlistName, b.playlistName)

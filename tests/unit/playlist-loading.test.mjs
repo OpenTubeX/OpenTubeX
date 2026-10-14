@@ -720,3 +720,26 @@ test('PlaylistInfo statistics preserve scalar memberships through each stack sta
     assert.deepEqual(record, before)
   }
 })
+
+for (const paged of [false, true]) {
+  test(`bulk Add Videos excludes unwritable retained playlists without changing records, paged: ${paged}`, async () => {
+    const component = await readFile(new URL('../../src/renderer/components/FtPlaylistAddVideoPrompt/FtPlaylistAddVideoPrompt.vue', import.meta.url), 'utf8')
+    const script = parse(component).descriptor.scriptSetup.content
+    const nodes = babelParse(script, { sourceType: 'module' }).program.body
+    const declarations = nodes.flatMap(node => node.declarations ?? [])
+    const sort = declarations.find(node => node.id.name === 'SORT_BY_VALUES').init
+    const all = declarations.find(node => node.id.name === 'allPlaylists').init
+    const records = [
+      ...[undefined, null, false, 42, 'opaque', {}].map((videos, index) => ({ _id: `opaque-${index}`, playlistName: `Opaque ${index}`, unknown: new Date(index), ...(videos === undefined ? {} : { videos }) })),
+      { _id: 'array', playlistName: 'Array', videos: [null, { videoId: 'retained', unknown: new Date(1) }] },
+      { _id: 'empty', playlistName: 'Empty', videos: [] },
+      { _id: 'paged', playlistName: 'Paged', videos: [], videoCount: 20000, firstVideo: { videoId: 'off-page' } },
+    ]
+    const before = structuredClone(records)
+    const context = vm.createContext({ computed: getter => getter(), cachedCollator: ref(new Intl.Collator('en')), sortBy: ref('name_ascending'), store: { getters: { getAllPlaylists: records }, state: { playlists: { libraryPaged: paged } } } })
+    context.SORT_BY_VALUES = vm.runInContext('(' + script.slice(sort.start, sort.end) + ')', context)
+    const result = vm.runInContext(script.slice(all.start, all.end), context)
+    assert.deepEqual(Array.from(result, playlist => playlist._id), ['array', 'empty', 'paged'])
+    assert.deepEqual(records, before)
+  })
+}
