@@ -685,6 +685,7 @@ test.describe('local video commands', () => {
     await input.fill('journey')
     const videos = page.getByRole('group', { name: 'Local videos', exact: true })
     await expect(videos.getByRole('option')).toHaveCount(4)
+    await expect(page.getByRole('listbox')).toHaveAttribute('aria-busy', 'false')
     await input.press('End')
     const selected = await input.getAttribute('aria-activedescendant')
     await page.evaluate(async () => {
