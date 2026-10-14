@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { test, expect, goTo, repoRoot, setWindowSize } from '../../helpers/app.mjs'
+import { expectTabHighlightAligned } from '../../helpers/tabs.mjs'
 import { findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import {
@@ -431,13 +432,7 @@ test('fits synced-device tabs in the phone tab organizer', async ({ app, page })
     })
   expect(actionAlignment.openAllStartOffset).toBeLessThanOrEqual(1)
   expect(actionAlignment.deleteEndOffset).toBeLessThanOrEqual(1)
-  const activeIndicator = dialog.locator('.capacitorPhoneTabViewTabs .tabsIndicator')
-  await expect(activeIndicator).toBeVisible()
-  await expect.poll(() => activeIndicator.evaluate(element => {
-    const pill = element.getBoundingClientRect()
-    const tab = element.parentElement.querySelector('[aria-selected="true"]').getBoundingClientRect()
-    return Math.max(Math.abs(pill.top - tab.top), Math.abs(pill.bottom - tab.bottom))
-  })).toBeLessThan(0.2)
+  await expectTabHighlightAligned(dialog.locator('.capacitorPhoneTabViewTabs [aria-selected="true"]'))
 
   await setWindowSize(app, page, { width: 760, height: 375 })
   await expect.poll(() => dialog.evaluate(element => (

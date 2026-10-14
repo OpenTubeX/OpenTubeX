@@ -106,6 +106,21 @@ test('lets CSS run at its default speed without querying animations for each eve
   assert.equal(queries, 0)
 })
 
+test('applies speed to pseudo-element transitions without rescaling descendants', async () => {
+  const playbackRates = []
+  const target = new FakeElement()
+  const animations = [target, new FakeElement()].map(element => ({
+    effect: { target: element },
+    updatePlaybackRate: rate => playbackRates.push(rate),
+  }))
+  // Pseudo-elements are included only when requesting the element's subtree.
+  target.getAnimations = ({ subtree }) => subtree ? animations : []
+  setAnimationSpeed(25)
+  listeners.get('transitionrun')({ target, pseudoElement: '::before' })
+  await Promise.resolve()
+  assert.deepEqual(playbackRates, [0.25])
+})
+
 test('restores existing animations when returning to default speed', () => {
   const playbackRates = []
   activeAnimations.push({

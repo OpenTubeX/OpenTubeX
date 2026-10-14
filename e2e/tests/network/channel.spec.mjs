@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { sel } from '../../helpers/app.mjs'
+import { expectTabHighlightAligned, expectTabHighlightStyle } from '../../helpers/tabs.mjs'
 import { test, expect, fixtureKey } from '../../helpers/innertube.mjs'
 
 // The official Blender channel.
@@ -19,7 +20,7 @@ test.describe('channel page', () => {
     await expect(page.getByText('GLITCH').first()).toBeVisible({ timeout: 30_000 })
     await page.getByRole('tab', { name: 'Home' }).click()
     await expect(page.locator('#homePanel .ft-list-video').first()).toBeVisible({ timeout: 30_000 })
-    await expect(page.locator('.channelDetails .tabsIndicator')).toBeVisible()
+    await expectTabHighlightAligned(page.locator('.channelDetails [role="tab"][aria-selected="true"]'))
 
     for (const [width, height, scale] of [[500, 1000, 100], [375, 812, 95], [812, 375, 125], [1600, 900, 95]]) {
       await app.electronApp.evaluate(({ BrowserWindow }, { width, height }) => {
@@ -36,7 +37,7 @@ test.describe('channel page', () => {
     }
 
     await page.getByRole('tab', { name: 'Playlists' }).click()
-    await expect(page.locator('.channelDetails .tabsIndicator')).toHaveCSS('transition-property', 'opacity')
+    await expectTabHighlightStyle(page.locator('.channelDetails [role="tab"][aria-selected="true"]'), 'transitionProperty', 'opacity')
     await expect(page.locator('#playlistPanel .ft-list-video').first()).toBeVisible({ timeout: 30_000 })
     const show = page.locator('#playlistPanel .ft-list-video')
       .filter({ has: page.getByRole('heading', { name: 'Meta Runner', exact: true }) })
@@ -99,14 +100,8 @@ test.describe('channel page', () => {
       await page.evaluate(value => {
         document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
       }, roundness)
-      await expect.poll(() => page.locator('.channelDetails .tabsIndicator').evaluate(element => {
-        const style = getComputedStyle(element)
-        const [horizontal, vertical = horizontal] = style.borderTopLeftRadius.split(' ').map(Number.parseFloat)
-        return {
-          horizontal: Math.round(horizontal * new DOMMatrixReadOnly(style.transform).a * 100) / 100,
-          vertical
-        }
-      })).toEqual({ horizontal: Math.min(24 * roundness / 100, 20), vertical: Math.min(24 * roundness / 100, 20) })
+      await expectTabHighlightAligned(page.locator('.channelDetails [role="tab"][aria-selected="true"]'))
+      await expectTabHighlightStyle(page.locator('.channelDetails [role="tab"][aria-selected="true"]'), 'borderRadius', `${24 * roundness / 100}px`)
     }
 
     await page.locator('body').evaluate(element => {
@@ -120,18 +115,18 @@ test.describe('channel page', () => {
     expect((await aboutTab.boundingBox()).width).toBe(widthBeforeHover)
 
     const selectedTab = page.locator('.channelDetails .selectedTab')
-    const selectedIndicator = page.locator('.channelDetails .tabsIndicator')
-    const selectedIndicatorColor = await selectedIndicator.evaluate(element => getComputedStyle(element).backgroundColor)
-    const unselectedIndicatorColor = await aboutTab.evaluate(element => getComputedStyle(element, '::before').backgroundColor)
-    expect(selectedIndicatorColor).not.toBe(unselectedIndicatorColor)
+    const selectedIndicator = selectedTab
+    const selectedIndicatorColor = await selectedIndicator.evaluate(element => getComputedStyle(element, '::before').backgroundColor)
+    await expectTabHighlightStyle(selectedTab, 'opacity', '1')
+    await expectTabHighlightStyle(aboutTab, 'opacity', '0')
     await page.keyboard.press('Tab')
     await selectedTab.focus()
     await expect.poll(() => selectedTab.evaluate(element => element.matches(':focus-visible'))).toBe(true)
-    await expect(selectedIndicator).toHaveCSS('background-color', selectedIndicatorColor)
+    await expectTabHighlightStyle(selectedIndicator, 'backgroundColor', selectedIndicatorColor)
     await page.mouse.move(0, 0)
     await aboutTab.focus()
     await expect.poll(() => aboutTab.evaluate(element => element.matches(':focus-visible'))).toBe(true)
-    await expect.poll(() => aboutTab.evaluate(element => getComputedStyle(element, '::before').backgroundColor)).toBe(unselectedIndicatorColor)
+    await expectTabHighlightStyle(aboutTab, 'opacity', '0')
 
     // Channel tab changes must update the route and title without creating a
     // new history entry for every tab selection (796650405, 912e5ea6e).

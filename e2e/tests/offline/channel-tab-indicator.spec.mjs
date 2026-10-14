@@ -1,8 +1,9 @@
+import { expectTabHighlightAligned, expectTabHighlightStyle, selectTabWithHighlightAnimation, tabHighlightAnimations } from '../../helpers/tabs.mjs'
 import { captureAppFramebuffer } from '../../helpers/screenshots.mjs'
 import { test, expect, sel } from '../../helpers/app.mjs'
 
 const CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
-const indicatorSelector = '.channelDetails:visible .tabsIndicator'
+const indicatorSelector = '.channelDetails:visible [role="tab"][aria-selected="true"]'
 
 test.use({
   seed: {
@@ -45,15 +46,7 @@ test.beforeEach(async ({ page }) => {
 })
 
 async function expectAligned(page) {
-  await expect.poll(() => page.locator(indicatorSelector).evaluate(indicator => {
-    const line = indicator.getBoundingClientRect()
-    const tab = indicator.parentElement.querySelector('.selectedTab').getBoundingClientRect()
-    return Math.max(
-      Math.abs(line.left - tab.left),
-      Math.abs(line.width - tab.width),
-      Math.abs(line.bottom - tab.bottom)
-    )
-  })).toBeLessThan(2)
+  await expectTabHighlightAligned(page.locator(indicatorSelector))
 }
 
 for (const [width, scale] of [[1600, 100], [375, 95], [812, 125]]) {
@@ -375,19 +368,15 @@ test('separates the content card on every channel tab', async ({ app, page }, te
 test('crossfades the active channel line at the configured animation speed', async ({ page }) => {
   for (const [speed, tabId, duration] of [[100, 'aboutTab', 140], [200, 'videosTab', 70], [50, 'shortsTab', 280]]) {
     await page.evaluate(value => {
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setAnimationSpeed', value)
+      return document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAnimationSpeed', value)
     }, speed)
-    await expect(page.locator(indicatorSelector)).toHaveCSS('opacity', '1')
-    const elapsed = await page.locator(indicatorSelector).evaluate((indicator, tabId) => new Promise(resolve => {
-      indicator.addEventListener('transitionrun', () => {
-        resolve(Number.parseFloat(getComputedStyle(indicator).transitionDuration) * 1000)
-      }, { once: true })
-      document.getElementById(tabId).click()
-    }), tabId)
-    expect(elapsed).toBeCloseTo(duration, 0)
-    await expect(page.locator(indicatorSelector)).toHaveCSS('transition-property', 'opacity')
+    await expectTabHighlightStyle(page.locator(indicatorSelector), 'opacity', '1')
+    const animation = await selectTabWithHighlightAnimation(page.locator(`#${tabId}`))
+    expect(animation).not.toBeNull()
+    expect(animation.duration / animation.playbackRate).toBeCloseTo(duration, 0)
+    await expectTabHighlightStyle(page.locator(indicatorSelector), 'transitionProperty', 'opacity')
     await expectAligned(page)
-    await expect.poll(() => page.locator(indicatorSelector).evaluate(element => element.getAnimations().length)).toBe(0)
+    await expect.poll(() => page.locator(indicatorSelector).evaluate(tabHighlightAnimations)).toEqual([])
   }
 })
 
@@ -408,15 +397,8 @@ test('places the channel line immediately after layout changes without animating
     document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setAnimationSpeed', 25)
   })
   async function expectImmediateAlignment() {
-    await expect.poll(() => page.locator(indicatorSelector).evaluate(indicator => {
-      const line = indicator.getBoundingClientRect()
-      const tab = indicator.parentElement.querySelector('.selectedTab').getBoundingClientRect()
-      return {
-        aligned: Math.abs(line.left - tab.left) < 2 && Math.abs(line.width - tab.width) < 2,
-        animations: indicator.getAnimations().length,
-        transition: getComputedStyle(indicator).transitionProperty
-      }
-    }), { timeout: 1000 }).toEqual({ aligned: true, animations: 0, transition: 'none' })
+    await expectAligned(page)
+    expect(await page.locator(indicatorSelector).evaluate(tabHighlightAnimations)).toEqual([])
   }
   await app.electronApp.evaluate(({ BrowserWindow }) => {
     BrowserWindow.getAllWindows()[0].setSize(812, 900)
@@ -490,10 +472,8 @@ test('keeps every channel tab in one row across zoom, RTL, and changing labels',
       document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
     }, roundness)
     await expect.poll(() => page.locator(indicatorSelector).evaluate(element => {
-      const tab = element.parentElement.querySelector('[aria-selected="true"]')
-      const expectedRadius = Math.min(parseFloat(getComputedStyle(tab).borderBottomLeftRadius), tab.offsetHeight / 2, tab.offsetWidth / 2)
-      return Math.abs(parseFloat(element.style.borderRadius) - expectedRadius)
-    })).toBeLessThan(0.2)
+      return getComputedStyle(element, '::before').borderRadius === getComputedStyle(element).borderRadius
+    })).toBe(true)
   }
 })
 
@@ -595,15 +575,15 @@ test('handles quick switches, search, background tabs, and reduced motion', asyn
   })
   await page.locator(`.tab[data-tab-id="${channelTabId}"]`).click()
   await expectAligned(page)
-  expect(await page.locator(indicatorSelector).evaluate(element => element.getAnimations().length)).toBe(0)
+  expect(await page.locator(indicatorSelector).evaluate(tabHighlightAnimations)).toEqual([])
 
   await page.evaluate(async () => {
     await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'on')
   })
   await page.locator('#videosTab').click()
   await expectAligned(page)
-  await expect(page.locator(indicatorSelector)).toHaveCSS('transition-property', 'none')
-  expect(await page.locator(indicatorSelector).evaluate(element => element.getAnimations().length)).toBe(0)
+  await expectTabHighlightStyle(page.locator(indicatorSelector), 'transitionProperty', 'none')
+  expect(await page.locator(indicatorSelector).evaluate(tabHighlightAnimations)).toEqual([])
 })
 
 test('desktop channel tabs size to their content and show icons in both packs', async ({ app, page }, testInfo) => {
