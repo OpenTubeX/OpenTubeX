@@ -214,7 +214,7 @@ for (const { uiScale, iconPack, colorScheme } of [
         await expect(share).toBeVisible()
         await share.press('Escape')
         await expect(share).toHaveCount(0)
-        await actions.getByRole('button', { name: 'Add to playlist', exact: true }).click()
+        await actions.getByRole('button', { name: 'Add to Playlist', exact: true }).click()
         const playlist = page.getByRole('dialog', { name: 'Save to…', exact: true })
         await expect(playlist).toBeVisible()
         await playlist.press('Escape')
