@@ -1125,26 +1125,34 @@ final class AppTests: XCTestCase {
         let saved = try await webView.callAsyncJavaScript(
             "return testStore.state.settings.enableDownloads", arguments: [:], in: nil, contentWorld: .page) as? Bool
         let original = try XCTUnwrap(saved)
-        _ = try await webView.callAsyncJavaScript(
-            "await testStore.dispatch('updateEnableDownloads', false); await testRouter.push('/settings')",
-            arguments: [:], in: nil, contentWorld: .page)
-        try await wait("!!document.querySelector('.settingsMenu button[data-section=download]')")
-        _ = try await evaluate("document.querySelector('.settingsMenu button[data-section=download]').click(); true")
-        let toggle = ".section[data-section=download] [data-setting-key=enableDownloads] input"
-        try await wait("!!document.querySelector('\(toggle)')")
-        let initiallyEnabled = try await evaluate("document.querySelector('\(toggle)').checked") as? Bool
-        XCTAssertEqual(initiallyEnabled, false)
-        _ = try await evaluate("document.querySelector('\(toggle)').click(); true")
-        try await wait("document.querySelector('\(toggle)')?.checked === true")
-        try await wait("testStore.getters.getEnableDownloads === true")
-        _ = try await evaluate("document.querySelector('.settingsMenu button[data-section=appearance]').click(); true")
-        try await wait("!!document.querySelector('.section[data-section=appearance]')")
-        _ = try await evaluate("document.querySelector('.settingsMenu button[data-section=download]').click(); true")
-        try await wait("!!document.querySelector('\(toggle)')")
-        let retained = try await evaluate("document.querySelector('\(toggle)').checked") as? Bool
-        XCTAssertEqual(retained, true)
-        _ = try await webView.callAsyncJavaScript("await testStore.dispatch('updateEnableDownloads', original)",
-                                                arguments: ["original": original], in: nil, contentWorld: .page)
+        let cleanup = "await testStore.dispatch('updateEnableDownloads', original); await testStore.dispatch('hideSettingsWindow')"
+        func selectSection(_ section: String) async throws {
+            // The modal can rerender between separate readiness and click calls.
+            try await wait("(() => { const button = document.querySelector('.settingsMenu button[data-section=\(section)]'); if (!button) return false; button.click(); return true; })()")
+        }
+        do {
+            _ = try await webView.callAsyncJavaScript(
+                "await testStore.dispatch('updateEnableDownloads', false); await testStore.dispatch('showSettingsWindow')",
+                arguments: [:], in: nil, contentWorld: .page)
+            try await selectSection("download")
+            let toggle = ".section[data-section=download] [data-setting-key=enableDownloads] input"
+            try await wait("!!document.querySelector('\(toggle)')")
+            let initiallyEnabled = try await evaluate("document.querySelector('\(toggle)').checked") as? Bool
+            XCTAssertEqual(initiallyEnabled, false)
+            _ = try await evaluate("document.querySelector('\(toggle)').click(); true")
+            try await wait("document.querySelector('\(toggle)')?.checked === true")
+            try await wait("testStore.getters.getEnableDownloads === true")
+            try await selectSection("appearance")
+            try await wait("!!document.querySelector('.section[data-section=appearance]')")
+            try await selectSection("download")
+            try await wait("!!document.querySelector('\(toggle)')")
+            let retained = try await evaluate("document.querySelector('\(toggle)').checked") as? Bool
+            XCTAssertEqual(retained, true)
+        } catch {
+            _ = try? await webView.callAsyncJavaScript(cleanup, arguments: ["original": original], in: nil, contentWorld: .page)
+            throw error
+        }
+        _ = try await webView.callAsyncJavaScript(cleanup, arguments: ["original": original], in: nil, contentWorld: .page)
     }
 
     func testDownloadCancelUsesNeutralButtonText() async throws {
