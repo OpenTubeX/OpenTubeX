@@ -1718,6 +1718,7 @@ Chapters:
   Close Chapters: 关闭章节
   Copy Timestamp Link: 复制 {timestamp} 处的链接
 Comments:
+  Image unavailable: "图片不可用"
   Comment Count: '{count} 条评论'
   Show Comments: 显示评论
   Getting comment replies, please wait: 正在获取评论回复，请稍候

@@ -1743,6 +1743,7 @@ Chapters:
   Close Chapters: Loka köflum
   Copy Timestamp Link: Afrita tengil við {timestamp}
 Comments:
+  Image unavailable: "Myndin er ekki tiltæk"
   Comment Count: 1 athugasemd | {count} athugasemdir
   Show Comments: Sýna athugasemdir
   Getting comment replies, please wait: Sæki svör við athugasemd. Bíddu aðeins

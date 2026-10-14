@@ -41,10 +41,14 @@ function sanitizeImageAttachment(attachment) {
   if (attachment === null || typeof attachment !== 'object' || Array.isArray(attachment)) return null
 
   const sources = Array.isArray(attachment.image?.sources)
-    ? attachment.image.sources.filter(source => (
-        source !== null && typeof source === 'object' && !Array.isArray(source) && typeof source.url === 'string' &&
-        URL.canParse(source.url) && new URL(source.url).protocol === 'https:'
-      )).map(source => ({ url: source.url, ...sanitizeImageDimensions(source) }))
+    ? attachment.image.sources.filter(source => {
+        if (source === null || typeof source !== 'object' || Array.isArray(source) || typeof source.url !== 'string') return false
+        try {
+          return new URL(source.url).protocol === 'https:'
+        } catch {
+          return false
+        }
+      }).map(source => ({ url: source.url, ...sanitizeImageDimensions(source) }))
     : []
   if (sources.length === 0 && (typeof attachment.unavailableText !== 'string' || attachment.unavailableText === '')) return null
 

@@ -185,6 +185,25 @@ test('validates pinned attachment data and excludes unrelated payload fields', (
   }
 })
 
+test('saves and restores attachments without URL.canParse', t => {
+  const descriptor = Object.getOwnPropertyDescriptor(URL, 'canParse')
+  delete URL.canParse
+  t.after(() => Object.defineProperty(URL, 'canParse', descriptor))
+  const storage = createMemoryStorage()
+  const imageAttachment = { image: { sources: [
+    { url: 'https://' },
+    { url: 'http://images.test/insecure.webp' },
+    { url: 'https://images.test/animation.webp', width: 120, height: 240 }
+  ] } }
+  saveCommentPins('profile:video', {
+    commentIds: new Set(['pinned']),
+    commentSnapshots: [createCommentPinSnapshot({ id: 'pinned', author: 'Viewer', text: '', replies: [], imageAttachment })]
+  }, storage)
+  assert.deepEqual(loadCommentPins('profile:video', storage).commentSnapshots[0].imageAttachment.image.sources, [
+    { url: 'https://images.test/animation.webp', width: 120, height: 240 }
+  ])
+})
+
 test('removes empty pin groups and ignores malformed storage', () => {
   const contentKey = getCommentPinStorageKey('profile-a', 'video-a')
   const storage = createMemoryStorage('{not-json')

@@ -102,6 +102,72 @@ test('shows the supplied unavailable message when an attachment has no usable im
   await expect(attachment.locator('img')).toHaveCount(0)
 })
 
+test('redraws the still frame when attachment dimensions change without a new URL', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page, { commentImages: attachments })
+  await page.route('https://i.ytimg.com/c_exp/**', async route => route.fulfill({
+    contentType: 'image/webp',
+    body: await readFile(new URL('../../fixtures/media/comment-animation.webp', import.meta.url))
+  }))
+  await openMockedVideo(page)
+  await page.mouse.move(0, 0)
+  const attachment = page.locator('.commentImageAttachment').first()
+  await attachment.scrollIntoViewIfNeeded()
+  await expect(attachment).toHaveClass(/commentAttachmentReady/)
+  const canvas = attachment.locator('canvas')
+  // A drawn cross-origin image taints the canvas. Resizing clears both the
+  // bitmap and the taint, so successful pixel reads reveal a blank poster.
+  const hasDrawnImage = () => canvas.evaluate(element => {
+    try {
+      element.getContext('2d').getImageData(0, 0, 1, 1)
+      return false
+    } catch (error) {
+      if (error.name !== 'SecurityError') throw error
+      return true
+    }
+  })
+  expect(await hasDrawnImage()).toBe(true)
+  await page.evaluate(() => {
+    const findAttachment = vnode => {
+      if (vnode.component?.type.__name === 'CommentImageAttachment') return vnode.component
+      if (vnode.component) return findAttachment(vnode.component.subTree)
+      if (Array.isArray(vnode.children)) {
+        for (const child of vnode.children) {
+          const found = findAttachment(child)
+          if (found) return found
+        }
+      }
+    }
+    const component = findAttachment(document.querySelector('#app')._vnode)
+    const attachment = JSON.parse(JSON.stringify(component.props.attachment))
+    attachment.image.sources[0].width = 150
+    component.props.attachment = attachment
+  })
+  await expect(canvas).toHaveAttribute('width', '64')
+  expect(await hasDrawnImage()).toBe(true)
+  await expect(canvas).toBeVisible()
+  await attachment.hover()
+  await expect(attachment.locator('img:not(.retryImagePlaceholder)')).toBeVisible()
+  await expect(canvas).toBeHidden()
+  await page.mouse.move(0, 0)
+  await expect(canvas).toBeVisible()
+  expect(await hasDrawnImage()).toBe(true)
+})
+
+for (const unavailableText of [undefined, '']) {
+  test(`shows a localized fallback after an image fails without ${unavailableText === undefined ? 'supplied' : 'nonempty'} unavailable text`, async ({ app, page }, testInfo) => {
+    const attachmentData = { ...attachments[0], unavailableText }
+    await mockPlayableWatchPage(app, page, { commentImages: [attachmentData] })
+    await page.route('https://i.ytimg.com/c_exp/**', route => route.fulfill({ status: 404, body: '' }))
+    await openMockedVideo(page)
+    const attachment = page.locator('.commentImageAttachment').first()
+    await attachment.scrollIntoViewIfNeeded()
+    await expect(attachment).toHaveText('Image unavailable')
+    const screenshotPath = testInfo.outputPath('attachment-unavailable.png')
+    await attachment.screenshot({ path: screenshotPath })
+    await testInfo.attach('unavailable attachment', { path: screenshotPath, contentType: 'image/png' })
+  })
+}
+
 test('keeps pinned GIF comments and replies visible when a reload omits them', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page, { commentImages: attachments })
   await page.route('https://i.ytimg.com/c_exp/**', async route => route.fulfill({

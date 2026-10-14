@@ -1725,6 +1725,7 @@ Chapters:
   Close Chapters: 關閉章節
   Copy Timestamp Link: 複製從 {timestamp} 開始的連結
 Comments:
+  Image unavailable: "圖片無法使用"
   Comment Count: '{count} 則留言'
   Show Comments: 顯示留言
   Getting comment replies, please wait: 正在取得留言回覆，請稍候

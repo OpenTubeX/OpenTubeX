@@ -5,7 +5,7 @@
     :class="{ commentAttachmentReady: posterReady }"
   >
     <p v-if="failed || !source">
-      {{ attachment.unavailableText }}
+      {{ attachment.unavailableText || $t('Comments.Image unavailable') }}
     </p>
     <template v-else>
       <canvas
@@ -55,19 +55,29 @@ const ratio = computed(() => {
 })
 const width = computed(() => Math.round(128 * Math.min(ratio.value, 1)))
 const height = computed(() => Math.round(128 / Math.max(ratio.value, 1)))
+let loadedImage
 
 function capturePoster(event) {
+  loadedImage = event.target
+  drawPoster()
+}
+
+function drawPoster() {
   // Canvas draws an animated image's default frame, without requiring CORS.
   const context = poster.value?.getContext('2d')
-  if (!context) return
-  context.drawImage(event.target, 0, 0, width.value, height.value)
+  if (!context || !loadedImage) return
+  context.drawImage(loadedImage, 0, 0, width.value, height.value)
   posterReady.value = true
 }
 
 watch(() => source.value?.url, () => {
   failed.value = false
   posterReady.value = false
+  loadedImage = undefined
 })
+
+// Updating canvas dimensions clears its bitmap. Redraw after Vue resizes it.
+watch([width, height], drawPoster, { flush: 'post' })
 </script>
 
 <style scoped>

@@ -1744,6 +1744,7 @@ Chapters:
   Close Chapters: Cau penodau
   Copy Timestamp Link: Copïo'r ddolen ar {timestamp}
 Comments:
+  Image unavailable: "Delwedd ddim ar gael"
   Comment Count: '{count} o sylwadau | 1 sylw | {count} sylw | {count} sylw | {count} sylw | {count} o sylwadau'
   Show Comments: Dangos sylwadau
   Getting comment replies, please wait: Wrthi'n cyrchu ymatebion i sylwadau; arhoswch
