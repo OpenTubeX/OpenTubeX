@@ -44,6 +44,7 @@ updates:
       - dependency-name: "@jitl/quickjs-wasmfile-release-sync"
       - dependency-name: "@lezer/html"
       - dependency-name: "@lezer/markdown"
+      - dependency-name: "@material/material-color-utilities"
       - dependency-name: "@playwright/test"
       - dependency-name: "@vot.js/core"
       - dependency-name: "copy-webpack-plugin"

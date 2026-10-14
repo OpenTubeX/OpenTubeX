@@ -596,7 +596,8 @@ import { lockBodyScroll, unlockBodyScroll } from './components/FtPrompt/scrollLo
 import { vSaferHtml } from './directives/vSaferHtml.js'
 
 import store from './store/index'
-import { androidDynamicColors, getAndroidDynamicColors, onAndroidDynamicColorsChanged } from './helpers/dynamicColors'
+import { MATERIAL_THEME_VALUES, normalizeSystemAccentColor } from '../materialTheme.js'
+import { androidDynamicColors, desktopSystemAccentColor, getAndroidDynamicColors, onAndroidDynamicColorsChanged } from './helpers/dynamicColors'
 import {
   exitAndroidApp,
   getAndroidHardwareKeyboardState,
@@ -3108,7 +3109,10 @@ if (isCapacitor) {
   const receiveColors = (colors) => {
     if (disposed) return
     androidDynamicColors.value = colors
-    if (baseTheme.value === 'dynamic') updateTheme()
+    const theme = baseTheme.value === 'system'
+      ? (systemUsesDarkTheme.value ? store.getters.getSystemDarkTheme : store.getters.getSystemLightTheme)
+      : baseTheme.value
+    if (MATERIAL_THEME_VALUES.includes(theme)) updateTheme()
   }
   onMounted(async () => {
     try {
@@ -3128,7 +3132,29 @@ if (isCapacitor) {
   })
 }
 
+if (isElectron) {
+  let disposed = false
+  let receivedUpdate = false
+  const receiveAccent = color => {
+    if (disposed) return
+    desktopSystemAccentColor.value = normalizeSystemAccentColor(color)
+    if (baseTheme.value === 'dynamic') updateTheme()
+  }
+  const removeListener = window.ftElectron.handleSystemAccentColorUpdated(color => {
+    receivedUpdate = true
+    receiveAccent(color)
+  })
+  window.ftElectron.getSystemAccentColor().then(color => {
+    if (!receivedUpdate) receiveAccent(color)
+  }).catch(error => console.error('Failed to load system accent color:', error))
+  onBeforeUnmount(() => {
+    disposed = true
+    removeListener()
+  })
+}
+
 watch(baseTheme, updateTheme)
+watch(() => store.getters.getMaterialSeedColor, updateTheme)
 watch(appFont, updateAppFont)
 watch(() => store.getters.getSystemLightTheme, updateTheme)
 watch(() => store.getters.getSystemDarkTheme, updateTheme)
@@ -3179,7 +3205,7 @@ function updateTheme() {
   const customThemes = store.getters.getCustomThemes
   const customTheme = customThemes.find(theme => `custom:${theme.id}` === effectiveTheme) ??
     (effectiveTheme === 'custom' ? customThemes[0] : null) ?? null
-  applyThemeToDocument(effectiveTheme, mainColor.value, secColor.value, customTheme)
+  applyThemeToDocument(effectiveTheme, mainColor.value, secColor.value, customTheme, store.getters.getMaterialSeedColor)
   cacheCapacitorStartupAppearance()
   if (store.getters.getTrayIconPreset === 'theme') refreshTrayIcon()
   updateSystemBarsStyle()
@@ -3191,7 +3217,7 @@ function cacheCapacitorStartupAppearance() {
     const theme = baseTheme.value === 'system'
       ? (dark ? store.getters.getSystemDarkTheme : store.getters.getSystemLightTheme)
       : baseTheme.value
-    const background = getThemeBackground(theme, store.getters.getCustomThemes, dark)
+    const background = getThemeBackground(theme, store.getters.getCustomThemes, dark, store.getters.getMaterialSeedColor)
     return { background, dark: calculateColorLuminance(background) !== '#000000' }
   }
   cacheStartupAppearance({

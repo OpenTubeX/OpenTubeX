@@ -399,6 +399,7 @@ Settings:
     Invalid Engine: "Lakait un anv hag un URL enklask HTTP pe HTTPS talvoudek ennañ %s."
     Engine Limit: "Gallout a rit ouzhpennañ betek {count} keflusker enklask personelaet."
   Theme Settings:
+    Material Accent Color: "Liv pouez Material"
     Tab Loading Indicator:
       Tab Loading Indicator: Merker kargañ an ivinell
       Bar: Barrenn
@@ -471,6 +472,9 @@ Settings:
       System Fonts: Nodrezhoù ar reizhiad
     Always Show Scrollbars: "Diskouez ar barrennoù dibunañ bepred"
     Base Theme:
+      Material Light: "Material Sklaer"
+      Material Dark: "Material Teñval"
+      Material Black: "Material Du"
       Dynamic colors: Livioù dinamek
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm

@@ -399,6 +399,7 @@ Settings:
     Invalid Engine: Zadejte název a platnou adresu URL vyhledávání s protokolem HTTP nebo HTTPS, která obsahuje %s.
     Engine Limit: Můžete přidat až {count} vlastních vyhledávačů.
   Theme Settings:
+    Material Accent Color: "Barva zvýraznění Material"
     Tab Loading Indicator:
       Tab Loading Indicator: Indikátor načítání karty
       Bar: Pruh
@@ -471,6 +472,9 @@ Settings:
       System Fonts: Systémová písma
     Always Show Scrollbars: Vždy zobrazovat posuvníky
     Base Theme:
+      Material Light: "Material Světlý"
+      Material Dark: "Material Tmavý"
+      Material Black: "Material Černý"
       Dynamic colors: Dynamické barvy
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm

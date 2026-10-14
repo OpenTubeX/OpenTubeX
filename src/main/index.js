@@ -3,7 +3,7 @@ import { createFileWatchQueue } from './watchQueue.js'
 import {
   app, BrowserWindow, dialog, Menu, ipcMain,
   powerSaveBlocker, screen, session,
-  nativeTheme, net, protocol, clipboard,
+  nativeTheme, systemPreferences, net, protocol, clipboard,
   shell, Tray, Notification, ShareMenu, nativeImage
 } from 'electron'
 import './applicationDataBootstrap'
@@ -39,6 +39,7 @@ import {
   normalizeCustomTheme,
   normalizeCustomThemes,
 } from '../customTheme'
+import { MATERIAL_THEME_VALUES, materialColorScheme, materialSeedPalette, materialThemeMode, normalizeSystemAccentColor } from '../materialTheme.js'
 import { resolveSystemTheme, resolveSystemThemeSettings } from '../appearanceSettings'
 import { applySyncServerUserAgent } from '../syncServerUserAgent'
 import * as baseHandlers from '../datastores/handlers/base'
@@ -93,6 +94,14 @@ import {
 } from './kdeWaylandWindowState'
 import { createSubscriptionBackgroundService } from './subscriptionBackground'
 import { supportsNativeNotifications } from './nativeNotifications'
+
+function getSystemAccentColor() {
+  try {
+    return normalizeSystemAccentColor(systemPreferences.getAccentColor())
+  } catch {
+    return null
+  }
+}
 
 const castSenderPath = path.resolve(__dirname, process.env.NODE_ENV === 'development' ? '../../dist/opentubex-cast' : 'opentubex-cast') + (process.platform === 'win32' ? '.exe' : '')
 const chromecast = new ChromecastManager(castSenderPath.replace(/\.asar([\\/])/, '.asar.unpacked$1'), powerSaveBlocker)
@@ -2901,6 +2910,13 @@ function runApp() {
         return (await getSelectedCustomTheme(theme))?.colors.background ??
           (nativeTheme.shouldUseDarkColors ? '#0f0f0f' : '#f1f1f1')
       }
+      if (MATERIAL_THEME_VALUES.includes(theme)) {
+        const mode = materialThemeMode(theme, nativeTheme.shouldUseDarkColors)
+        if (mode === 'black') return '#000000'
+        const seed = await baseHandlers.settings._findOne('materialSeedColor')
+        const color = theme === 'dynamic' ? getSystemAccentColor() ?? seed?.value : seed?.value
+        return materialColorScheme(materialSeedPalette(color), mode === 'dark').surface
+      }
       return BASE_THEME_BACKGROUND_COLORS[theme] ??
         (nativeTheme.shouldUseDarkColors ? '#0f0f0f' : '#f1f1f1')
     }).catch((error) => {
@@ -2961,6 +2977,7 @@ function runApp() {
         additionalArguments: [
           `--startup-background=${windowBackground}`,
           `--startup-dark=${nativeTheme.shouldUseDarkColors}`,
+          `--system-accent-color=${getSystemAccentColor() ?? ''}`,
           `--hide-startup-splash=${hideStartupSplash}`
         ],
         preload: process.env.NODE_ENV === 'development'
@@ -4084,6 +4101,20 @@ function runApp() {
     })
   })
 
+  const publishSystemAccentColor = () => {
+    const color = getSystemAccentColor()
+    for (const window of BrowserWindow.getAllWindows()) {
+      if (!window.webContents.isDestroyed() && isOpenTubeXUrl(window.webContents.getURL())) {
+        window.webContents.send(IpcChannels.SYSTEM_ACCENT_COLOR_UPDATED, color)
+      }
+    }
+  }
+  systemPreferences.on('accent-color-changed', publishSystemAccentColor)
+  if (process.platform === 'darwin') {
+    const subscription = systemPreferences.subscribeNotification('AppleColorPreferencesChangedNotification', publishSystemAccentColor)
+    app.once('will-quit', () => systemPreferences.unsubscribeNotification(subscription))
+  }
+
   ipcMain.handle(IpcChannels.GENERATE_PO_TOKEN, (event, videoId, context, initialAttestationData, ytConfig) => {
     if (isOpenTubeXUrl(event.senderFrame.url)) {
       return generatePoToken(videoId, context, initialAttestationData, ytConfig, proxyUrl)
@@ -4160,6 +4191,11 @@ function runApp() {
       .filter(font => typeof font === 'string')
       .map(font => font.trim())
       .filter(Boolean))]
+  })
+
+  ipcMain.handle(IpcChannels.GET_SYSTEM_ACCENT_COLOR, (event) => {
+    if (isOpenTubeXUrl(event.senderFrame.url)) return getSystemAccentColor()
+    return null
   })
 
   ipcMain.handle(IpcChannels.IS_WAYLAND_PLATFORM, (event) => {

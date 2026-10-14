@@ -399,6 +399,7 @@ Settings:
     Invalid Engine: Idatzi izen bat eta %s duen baliozko HTTP edo HTTPS bilaketa-URL bat.
     Engine Limit: Gehienez {count} bilaketa-motor pertsonalizatu gehi ditzakezu.
   Theme Settings:
+    Material Accent Color: "Material azentu-kolorea"
     Tab Loading Indicator:
       Tab Loading Indicator: Fitxaren karga-adierazlea
       Bar: Barra
@@ -471,6 +472,9 @@ Settings:
       System Fonts: Sistemako letra-tipoak
     Always Show Scrollbars: Erakutsi beti korritze-barrak
     Base Theme:
+      Material Light: "Material Argia"
+      Material Dark: "Material Iluna"
+      Material Black: "Material Beltza"
       Dynamic colors: Kolore dinamikoak
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm

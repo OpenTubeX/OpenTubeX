@@ -83,6 +83,7 @@
         </template>
       </FtSelect>
       <FtSelect
+        v-if="!isMaterialThemeSelected"
         :placeholder="$t('Settings.Theme Settings.Main Color Theme.Main Color Theme')"
         :value="mainColor"
         setting-key="mainColor"
@@ -95,6 +96,7 @@
         @change="updateMainColor"
       />
       <FtSelect
+        v-if="!isMaterialThemeSelected"
         :placeholder="$t('Settings.Theme Settings.Secondary Color Theme')"
         :value="secColor"
         setting-key="secColor"
@@ -107,6 +109,11 @@
         @change="updateSecColor"
       />
     </FtFlexBox>
+    <MaterialColorSettings
+      v-if="showMaterialSeedColor"
+      :model-value="materialSeedColor"
+      @update:model-value="store.dispatch('updateMaterialSeedColor', $event)"
+    />
     <FtFlexBox class="customThemeActions">
       <FtButton
         :label="t('Theme Discovery.Discover Themes')"
@@ -453,6 +460,9 @@
 </template>
 
 <script setup>
+import MaterialColorSettings from './MaterialColorSettings.vue'
+import { MATERIAL_THEME_VALUES } from '../../materialTheme.js'
+import { androidDynamicColors } from '../helpers/dynamicColors.js'
 import AppIconSettings from './AppIconSettings.vue'
 import TrayIconSettings from './TrayIconSettings.vue'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
@@ -664,6 +674,15 @@ const iconPack = computed(() => store.getters.getIconPack)
 function updateIconPack(value) {
   store.dispatch('updateIconPack', value)
 }
+
+const isMaterialThemeSelected = computed(() => MATERIAL_THEME_VALUES.includes(baseTheme.value === 'system'
+  ? (systemUsesDarkTheme.value ? systemDarkTheme.value : systemLightTheme.value)
+  : baseTheme.value))
+
+const materialSeedColor = computed(() => store.getters.getMaterialSeedColor)
+const showMaterialSeedColor = computed(() => !androidDynamicColors.value.supported && !(usingElectron && baseTheme.value === 'dynamic') && (baseTheme.value === 'system'
+  ? [systemLightTheme.value, systemDarkTheme.value].some(theme => MATERIAL_THEME_VALUES.includes(theme))
+  : MATERIAL_THEME_VALUES.includes(baseTheme.value)))
 
 const areColorThemesEnabled = computed(() => baseTheme.value === 'system'
   ? !hasFixedThemeColors(systemUsesDarkTheme.value ? systemDarkTheme.value : systemLightTheme.value)

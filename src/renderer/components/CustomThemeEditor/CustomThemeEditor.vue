@@ -347,7 +347,8 @@ function closeEditor() {
     selectedTheme,
     store.getters.getMainColor,
     store.getters.getSecColor,
-    store.getters.getCustomThemes.find(({ id }) => id === customThemeIdFromValue(selectedTheme)) ?? null
+    store.getters.getCustomThemes.find(({ id }) => id === customThemeIdFromValue(selectedTheme)) ?? null,
+    store.getters.getMaterialSeedColor
   )
   emit('close')
 }
@@ -459,7 +460,9 @@ function copyThemeSources() {
   themeSourceColors.value = sourceColors
   draft.colors = { ...sourceColors }
   draft.blurs = Object.fromEntries(CUSTOM_THEME_BLURS.map(([key]) => [key, 0]))
-  draft.isDark = getThemeClassification(draft.basedOn) !== 'light'
+  draft.isDark = draft.basedOn === 'dynamic'
+    ? window.matchMedia('(prefers-color-scheme: dark)').matches
+    : getThemeClassification(draft.basedOn) !== 'light'
   previewing = true
   previewTheme()
 }
@@ -478,7 +481,7 @@ function copyThemeColors(keys) {
 
 function readThemeSourceColors() {
   previewing = false
-  applyThemeToDocument(draft.basedOn, draft.mainColor, draft.secondaryColor, null)
+  applyThemeToDocument(draft.basedOn, draft.mainColor, draft.secondaryColor, null, store.getters.getMaterialSeedColor)
 
   const probe = document.createElement('span')
   probe.hidden = true

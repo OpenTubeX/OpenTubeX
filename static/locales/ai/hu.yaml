@@ -399,6 +399,7 @@ Settings:
     Invalid Engine: Adjon meg egy nevet és egy érvényes, %s elemet tartalmazó HTTP vagy HTTPS keresési URL-t.
     Engine Limit: Legfeljebb {count} egyéni keresőmotort adhat hozzá.
   Theme Settings:
+    Material Accent Color: "Material kiemelőszín"
     Tab Loading Indicator:
       Tab Loading Indicator: Lapbetöltés jelzője
       Bar: Sáv
@@ -471,6 +472,9 @@ Settings:
       System Fonts: Rendszerbetűtípusok
     Always Show Scrollbars: Görgetősávok mindig láthatók
     Base Theme:
+      Material Light: "Material Világos"
+      Material Dark: "Material Sötét"
+      Material Black: "Material Fekete"
       Dynamic colors: Dinamikus színek
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm

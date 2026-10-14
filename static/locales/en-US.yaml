@@ -706,6 +706,7 @@ Settings:
     Invalid Engine: Enter a name and a valid HTTP or HTTPS search URL containing %s.
     Engine Limit: You can add up to {count} custom search engines.
   Theme Settings:
+    Material Accent Color: "Material accent color"
     Tab Loading Indicator:
       Tab Loading Indicator: Tab Loading Style
       Bar: Bar
@@ -770,6 +771,9 @@ Settings:
     Compact Settings Categories: Compact Settings Categories
     Hide OpenTubeX Header Logo: Hide OpenTubeX Header Logo
     Base Theme:
+      Material Light: "Material Light"
+      Material Dark: "Material Dark"
+      Material Black: "Material Black"
       Dynamic colors: Dynamic colors
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm

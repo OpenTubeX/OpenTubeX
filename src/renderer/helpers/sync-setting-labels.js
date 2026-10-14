@@ -34,6 +34,7 @@ export const SYNC_SETTING_LABELS = {
   backendPreference: 'Settings.General Settings.Preferred API Backend.Preferred API Backend',
   backendFallback: 'Settings.General Settings.Fallback to Non-Preferred Backend on Failure',
   barColor: 'Settings.Theme Settings.Match Top Bar with Main Color',
+  materialSeedColor: 'Settings.Theme Settings.Material Accent Color',
   baseTheme: 'Settings.Theme Settings.Base Theme.Base Theme',
   blurThumbnails: 'Settings.General Settings.Blur Thumbnails',
   capacitorLayoutMode: 'Settings.General Settings.Mobile Layout.Mobile Layout',
@@ -402,7 +403,6 @@ const privacy = 'Settings.Privacy Settings.'
 const baseThemes = {
   ...Object.fromEntries(BUILTIN_BASE_THEME_VALUES.map((value, index) =>
     [value, `${theme}Base Theme.${BUILTIN_BASE_THEME_TRANSLATION_KEYS[index]}`])),
-  dynamic: `${theme}Base Theme.Dynamic colors`,
 }
 
 // Match the choices shown in Settings so saved choice codes remain readable in activity.

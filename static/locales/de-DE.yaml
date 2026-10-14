@@ -505,6 +505,7 @@ Settings:
       Previous tab in tab order: "Vorheriger Tab in der Tab-Reihenfolge"
       Tab Close Focus: Nach dem Schließen des aktiven Tabs
   Theme Settings:
+    Material Accent Color: "Material-Akzentfarbe"
     Tab Loading Indicator:
       Tab Loading Indicator: Tab-Ladeanzeige
       Bar: Balken
@@ -514,6 +515,9 @@ Settings:
     Theme Settings: Farbschema
     Match Top Bar with Main Color: Obere Leiste an Hauptfarbe anpassen
     Base Theme:
+      Material Light: "Material Hell"
+      Material Dark: "Material Dunkel"
+      Material Black: "Material Schwarz"
       Dynamic colors: Dynamische Farben
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm

@@ -7,21 +7,24 @@
       :style="{ anchorName: popoverAnchor }"
       :aria-label="label"
       :aria-expanded="open"
+      :title="`${label}: ${modelValue}`"
       @click="togglePicker"
     >
-      <span
-        class="swatch checkerboard"
-        aria-hidden="true"
-      >
+      <slot name="trigger">
         <span
-          class="swatchColor"
-          :style="{ backgroundColor: modelValue }"
-        />
-      </span>
-      <span class="colorFieldLabel">
-        <slot name="label">{{ label }}</slot>
-      </span>
-      <code>{{ modelValue }}</code>
+          class="swatch checkerboard"
+          aria-hidden="true"
+        >
+          <span
+            class="swatchColor"
+            :style="{ backgroundColor: modelValue }"
+          />
+        </span>
+        <span class="colorFieldLabel">
+          <slot name="label">{{ label }}</slot>
+        </span>
+        <code>{{ modelValue }}</code>
+      </slot>
     </button>
 
     <Teleport

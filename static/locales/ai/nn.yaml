@@ -421,6 +421,7 @@ Settings:
     Invalid Engine: Skriv inn eit namn og ei gyldig HTTP- eller HTTPS-søkjeadresse som inneheld %s.
     Engine Limit: Du kan leggje til opptil {count} eigne søkjemotorar.
   Theme Settings:
+    Material Accent Color: "Material-aksentfarge"
     Tab Loading Indicator:
       Tab Loading Indicator: Indikator for fanelasting
       Bar: Linje
@@ -478,6 +479,9 @@ Settings:
       System Fonts: Systemskrifter
     Always Show Scrollbars: Vis alltid rullefelt
     Base Theme:
+      Material Light: "Material Lys"
+      Material Dark: "Material Mørk"
+      Material Black: "Material Svart"
       Dynamic colors: Dynamiske fargar
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm

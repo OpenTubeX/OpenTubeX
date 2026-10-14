@@ -403,6 +403,7 @@ Settings:
     Invalid Engine: Nhập tên và URL tìm kiếm HTTP hoặc HTTPS hợp lệ có chứa %s.
     Engine Limit: Bạn có thể thêm tối đa {count} công cụ tìm kiếm tùy chỉnh.
   Theme Settings:
+    Material Accent Color: "Màu nhấn Material"
     Tab Loading Indicator:
       Tab Loading Indicator: Chỉ báo tải thẻ
       Bar: Thanh
@@ -475,6 +476,9 @@ Settings:
       System Fonts: Phông chữ hệ thống
     Always Show Scrollbars: Luôn hiện thanh cuộn
     Base Theme:
+      Material Light: "Material Sáng"
+      Material Dark: "Material Tối"
+      Material Black: "Material Đen"
       Dynamic colors: Màu động
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm

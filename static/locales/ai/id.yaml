@@ -399,6 +399,7 @@ Settings:
     Invalid Engine: Masukkan nama dan URL pencarian HTTP atau HTTPS valid yang berisi %s.
     Engine Limit: Anda dapat menambahkan hingga {count} mesin pencari khusus.
   Theme Settings:
+    Material Accent Color: "Warna aksen Material"
     Tab Loading Indicator:
       Tab Loading Indicator: Indikator pemuatan tab
       Bar: Bilah
@@ -471,6 +472,9 @@ Settings:
       System Fonts: Font sistem
     Always Show Scrollbars: Selalu Tampilkan Bilah Gulir
     Base Theme:
+      Material Light: "Material Terang"
+      Material Dark: "Material Gelap"
+      Material Black: "Material Hitam"
       Dynamic colors: Warna dinamis
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm

@@ -401,6 +401,7 @@ Settings:
     Invalid Engine: Unesite naziv i valjani HTTP ili HTTPS URL za pretraživanje koji sadrži %s.
     Engine Limit: Možete dodati najviše {count} prilagođenih tražilica.
   Theme Settings:
+    Material Accent Color: "Material boja naglaska"
     Tab Loading Indicator:
       Tab Loading Indicator: Pokazatelj učitavanja kartice
       Bar: Traka
@@ -473,6 +474,9 @@ Settings:
       System Fonts: Fontovi sustava
     Always Show Scrollbars: Uvijek prikaži klizne trake
     Base Theme:
+      Material Light: "Material Svijetla"
+      Material Dark: "Material Tamna"
+      Material Black: "Material Crna"
       Dynamic colors: Dinamičke boje
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm

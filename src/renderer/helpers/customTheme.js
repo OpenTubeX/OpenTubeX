@@ -9,20 +9,19 @@ import {
 } from '../../customTheme.js'
 import { PALETTE_BASE_THEMES } from '../../constants.js'
 
-import { androidDynamicColors, applyDynamicColors, dynamicThemeColors } from './dynamicColors.js'
+import { MATERIAL_COLOR_ROLES, MATERIAL_THEME_VALUES, materialColorProperty, materialThemeMode } from '../../materialTheme.js'
+import { getMaterialPalette, applyDynamicColors, dynamicThemeColors } from './dynamicColors.js'
 
 const STORAGE_KEY = 'opentubex-custom-theme'
 let appliedBodyThemeClasses = []
 
 /** Read either system appearance without changing the app's active theme. */
-export function getThemeBackground(baseTheme, customThemes, dark) {
+export function getThemeBackground(baseTheme, customThemes, dark, seed) {
   const custom = customThemes.find(theme => `custom:${theme.id}` === baseTheme)
   if (custom) return custom.colors.background
-  if (baseTheme === 'dynamic') {
-    if (androidDynamicColors.value.supported) {
-      return dynamicThemeColors(androidDynamicColors.value.palette, dark).background
-    }
-    baseTheme = dark ? 'dark' : 'light'
+  if (MATERIAL_THEME_VALUES.includes(baseTheme)) {
+    const mode = materialThemeMode(baseTheme, dark)
+    return dynamicThemeColors(getMaterialPalette(seed, baseTheme), mode !== 'light', mode === 'black').background
   }
   const probe = document.createElement('span')
   probe.hidden = true
@@ -35,15 +34,17 @@ export function getThemeBackground(baseTheme, customThemes, dark) {
   }
 }
 
-export function applyThemeToDocument(baseTheme, mainColor, secColor, customTheme) {
-  const dynamic = baseTheme === 'dynamic'
+export function applyThemeToDocument(baseTheme, mainColor, secColor, customTheme, seed) {
+  const dynamic = MATERIAL_THEME_VALUES.includes(baseTheme)
+  const palette = dynamic ? getMaterialPalette(seed, baseTheme) : null
   const dark = window.matchMedia('(prefers-color-scheme: dark)').matches
-  if (dynamic) baseTheme = dark ? 'dark' : 'light'
+  const mode = materialThemeMode(baseTheme, dark)
+  if (dynamic) baseTheme = mode === 'black' ? 'black' : mode
   const themeClass = isCustomThemeValue(baseTheme) ? 'custom' : (baseTheme || 'system')
   const themeClasses = [themeClass]
   if (dynamic) themeClasses.push('dynamicColors')
   // Fixed palettes must not inherit selectable accent or destructive overrides.
-  if ((!dynamic || !androidDynamicColors.value.supported) && !PALETTE_BASE_THEMES.includes(themeClass)) {
+  if (!dynamic && !PALETTE_BASE_THEMES.includes(themeClass)) {
     themeClasses.push(`main${mainColor || 'Red'}`, `sec${secColor || 'Blue'}`)
   }
   document.body.classList.remove(...appliedBodyThemeClasses)
@@ -65,6 +66,7 @@ export function applyThemeToDocument(baseTheme, mainColor, secColor, customTheme
     document.body.style.removeProperty(property)
   }
   document.body.style.removeProperty('--accent-color-rgb')
+  for (const role of MATERIAL_COLOR_ROLES) document.body.style.removeProperty(materialColorProperty(role))
 
   if (isCustomThemeValue(baseTheme) && customTheme) {
     for (const [key, property] of CUSTOM_THEME_COLORS) {
@@ -81,8 +83,8 @@ export function applyThemeToDocument(baseTheme, mainColor, secColor, customTheme
       hexColorToRgbComponents(customTheme.colors.accent)
     )
   }
-  if (dynamic && androidDynamicColors.value.supported) {
-    applyDynamicColors(androidDynamicColors.value.palette, dark)
+  if (dynamic) {
+    applyDynamicColors(palette, mode !== 'light', mode === 'black')
   }
 }
 

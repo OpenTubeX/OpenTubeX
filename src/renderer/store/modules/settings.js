@@ -1,3 +1,4 @@
+import { DEFAULT_MATERIAL_SEED_COLOR, normalizeMaterialSeedColor } from '../../../materialTheme.js'
 import i18n, { loadLocale, setAITranslationCompletionsEnabled } from '../../i18n/index'
 import allLocales from '../../../../static/locales/activeLocales.json'
 import {
@@ -249,6 +250,7 @@ const state = {
   confirmUnloadMultipleTabs: true,
   appFont: DEFAULT_APP_FONT,
   baseTheme: 'system',
+  materialSeedColor: DEFAULT_MATERIAL_SEED_COLOR,
   systemLightTheme: 'light',
   systemDarkTheme: 'dark',
   iconPack: 'material',
@@ -1197,6 +1199,10 @@ const customActions = {
       console.error(error)
     }
   },
+
+  updateMaterialSeedColor: ({ commit, state }, value) => updateOrderedSetting(
+    commit, state, 'materialSeedColor', normalizeMaterialSeedColor(value)
+  ),
 
   updateBaseTheme: ({ commit, rootGetters, state }, value) => updateValidatedSetting(
     commit,

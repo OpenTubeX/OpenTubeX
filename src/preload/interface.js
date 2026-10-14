@@ -94,6 +94,7 @@ export default {
   startupAppearance: {
     background: process.argv.find(argument => argument.startsWith('--startup-background='))?.slice('--startup-background='.length),
     dark: process.argv.includes('--startup-dark=true'),
+    systemAccentColor: process.argv.find(argument => argument.startsWith('--system-accent-color='))?.slice('--system-accent-color='.length),
     hideSplash: process.argv.includes('--hide-startup-splash=true')
   },
   isFlatpak: process.env.FLATPAK_ID !== undefined,
@@ -138,6 +139,19 @@ export default {
    */
   getSystemFonts: () => {
     return ipcRenderer.invoke(IpcChannels.GET_SYSTEM_FONTS)
+  },
+
+  /** @returns {Promise<string | null>} */
+  getSystemAccentColor: () => ipcRenderer.invoke(IpcChannels.GET_SYSTEM_ACCENT_COLOR),
+
+  /**
+   * @param {(color: string | null) => void} handler
+   * @returns {() => void}
+   */
+  handleSystemAccentColorUpdated: (handler) => {
+    const listener = (_, color) => handler(color)
+    ipcRenderer.on(IpcChannels.SYSTEM_ACCENT_COLOR_UPDATED, listener)
+    return () => ipcRenderer.removeListener(IpcChannels.SYSTEM_ACCENT_COLOR_UPDATED, listener)
   },
 
   /**

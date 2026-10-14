@@ -5,6 +5,7 @@ import { readFile } from 'node:fs/promises'
 import vm from 'node:vm'
 import test from 'node:test'
 import { computed, nextTick, ref, watch } from 'vue'
+import { normalizeSystemAccentColor } from '../../src/materialTheme.js'
 
 async function helper(name, exports, ios = true) {
   const registrations = []
@@ -22,6 +23,7 @@ async function helper(name, exports, ios = true) {
       } })
     },
     ref: value => ({ value }),
+    normalizeSystemAccentColor,
     Capacitor: { getPlatform: () => ios ? 'ios' : 'android', isNativePlatform: () => true, isPluginAvailable: () => false },
     createSubscriptionRefreshStartController: () => ({}),
     Promise,
