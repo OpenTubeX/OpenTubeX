@@ -268,7 +268,8 @@ test('stores and presents every previous metadata version', async ({ app, page }
       await window.ftElectron.videoMetadataCache.update(redirectedMetadata)
       await window.ftElectron.videoMetadataCache.update({
         ...redirectedMetadata,
-        title: 'Redirect test changed'
+        title: 'Redirect test changed',
+        thumbnailUrl: `${thumbnailBaseUrl}/redirect.png?revision=1`,
       })
       const redirectedPage = await window.ftElectron.libraryQuery('metadataPage', { videoId: 'redirect001', field: 'thumbnail' })
       const privateRedirectRejected = (await Promise.all(redirectedPage.records.map(record =>
@@ -304,13 +305,14 @@ test('stores and presents every previous metadata version', async ({ app, page }
       view.videoMetadataHistory = history
       view.hasResolvedVideoTitle = true
       await view.$nextTick()
-      return { preservedTitleWasRejected, privateRedirectRejected }
+      return { preservedTitleWasRejected, privateRedirectRejected, redirectRevisionCount: redirectedPage.records.length }
     }, thumbnailBaseUrl)
     const observedVideoId = await watchView.evaluate(view => view.videoId)
     await watchView.dispose()
     expect(cacheChecks).toEqual({
       preservedTitleWasRejected: true,
-      privateRedirectRejected: true
+      privateRedirectRejected: true,
+      redirectRevisionCount: 1,
     })
 
     const cachePath = path.join(app.userDataDir, 'video-metadata-cache.db')
