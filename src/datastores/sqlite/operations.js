@@ -23,9 +23,12 @@ export async function importPreviewState(engine, { sections }) {
       result.profiles = [...profiles.values()]
     } else if (section === 'playlists') {
       result.playlists = engine.prepare("SELECT id, data -> '$.playlistName' AS name FROM records WHERE collection = 'playlists'").all().map(row => ({ _id: row.id, playlistName: row.name ? model.deserialize(row.name) : undefined }))
+    } else if (section === 'searchHistory') {
+      const settings = ['prioritize', 'time', 'type', 'duration', 'features'].map(field => `'${field}', json(data -> '$.searchSettings.${field}')`).join(', ')
+      result.searchHistory = engine.prepare(`SELECT json_object('_id', id, 'query', json(data -> '$.query'), 'searchSettings', json_object(${settings})) AS data FROM records WHERE collection = 'searchHistory' ORDER BY id`).all().map(row => model.deserialize(row.data))
     } else {
-      const projection = { history: { videoId: 1, _id: 0 }, searchHistory: { _id: 1, query: 1, searchSettings: 1 }, watchStats: { date: 1, _id: 0 } }[section]
-      result[section] = await engine.collections[section].findAsync({}, projection)
+      const field = section === 'history' ? 'videoId' : 'date'
+      result[section] = engine.prepare(`SELECT data -> '$.${field}' AS value FROM records WHERE collection = ? ORDER BY id`).all(section).map(row => row.value === null ? {} : { [field]: model.deserialize(row.value) })
     }
   }
   return result

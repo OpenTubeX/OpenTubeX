@@ -266,11 +266,12 @@ export class LibraryImports {
       else if (section === 'watchStats') data.watchStats = job.roots.get(section)
       else {
         const projection = fields[section].map(field => `'${field}', json(data -> '$.${field}')`).join(', ')
-        const rows = job.database.prepare(`SELECT CASE WHEN json_type(data, '$.$$backupObject') = 'array' THEN data ELSE json_object(${projection}) END AS data FROM incoming WHERE section = ? ORDER BY ordinal`)
+        const rows = job.database.prepare(`SELECT CASE WHEN json_type(data, '$.$$backupObject') = 'array' THEN data ELSE json_object(${projection}) END AS data, json_type(data, '$.$$backupObject') = 'array' AS wrapped, json_type(data, '$.videoId') IS NOT NULL AS has_video_id FROM incoming WHERE section = ? ORDER BY ordinal`)
         data[section] = []
         for (const row of rows.iterate(section)) {
           const record = job.decode(row.data)
           const projected = Object.fromEntries(fields[section].map(field => [field, record[field]]))
+          if (section === 'history' && !row.wrapped && !row.has_video_id) delete projected.videoId
           if (section === 'profiles') projected.subscriptions = Array.isArray(record.subscriptions) ? record.subscriptions.map(channel => ({ id: channel?.id })) : []
           data[section].push(projected)
         }
