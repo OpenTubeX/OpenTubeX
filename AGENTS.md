@@ -7,6 +7,14 @@ Requests such as "implement issue #X" authorize local changes, not a PR. Open a 
 - For every PR opened in this repository, copy the linked issue's milestone if it has one. Otherwise, automatically assign the currently open milestone with the lowest version in its title. Query open milestones with `gh api --paginate` at PR creation time and compare titles by numeric version order, not alphabetical order or milestone number. Use the exact title with `gh pr create --milestone` or `gh pr edit --milestone`. If the issue has no milestone and no version milestone is open, report that instead of creating one.
 - When creating a PR, adding a closing issue link, or assigning/changing its milestone, check every issue the PR closes. If the PR has a milestone and an issue has none, assign that issue the PR's milestone immediately, even while the PR is still open. Preserve existing issue milestones and verify the assignments on GitHub before considering the PR work complete.
 
+## Upstream merges
+
+- Use the `upstream-merge` skill with these overrides:
+  - Merge `upstream/development` from `FreeTubeApp/FreeTube` into OpenTubeX's `development`, unless the user specifies another destination. Start new worktrees from `origin/development`.
+  - Prefer OpenTubeX changes when resolving conflicts.
+  - Replace user-visible `FreeTube` branding with `OpenTubeX` in imported translations.
+  - The sync workflow is `.github/workflows/sync-upstream.yml`; its bot PR uses `upstream-sync` as its head and `development` as its base.
+
 ## Documentation
 
 - Create new documentation, feature writeups, implementation notes, plans, or task summaries only when requested; put change explanations and validation details in the PR description. Update existing documentation only when the change makes it inaccurate. Check user guides in `OpenTubeX/opentubex.github.io` when behavior changes could invalidate them. For a material inaccuracy, name the affected guide and passage, step, or screenshot, explain the mismatch, and obtain approval before changing the website or opening its separate PR unless already authorized. Limit approved updates to those inaccuracies and link the application and website PRs when both exist. New features and cosmetic differences alone do not require documentation updates or an approval request.
