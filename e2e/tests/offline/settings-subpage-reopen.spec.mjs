@@ -203,7 +203,7 @@ for (const uiScale of [100, 125]) {
           const appearance = await goToSettingsSection(page, 'appearance')
           if (overlay === 'tooltip') {
             trigger = appearance.locator('.tooltip .button').first()
-            popup = page.locator('body > [role="tooltip"]:visible')
+            popup = page.locator('body > [role="tooltip"]').visible()
           } else {
             await appearance.getByRole('button', { name: 'Create custom theme', exact: true }).click()
             const editor = page.locator('.customThemeEditor')
@@ -518,10 +518,16 @@ for (const uiScale of [100, 125]) {
             item: 'Alpha Channel',
             createdAt: Date.now()
           }])
-          store._actions.clearSyncServerActivity = [() => new Promise((resolve, reject) => {
-            window.finishOverlayActivityClear = resolve
-            window.failOverlayActivityClear = () => reject(new Error('Activity clear failed'))
-          })]
+          const dispatch = store.dispatch.bind(store)
+          store.dispatch = (action, ...args) => {
+            if (action === 'clearSyncServerActivity') {
+              return new Promise((resolve, reject) => {
+                window.finishOverlayActivityClear = resolve
+                window.failOverlayActivityClear = () => reject(new Error('Activity clear failed'))
+              })
+            }
+            return dispatch(action, ...args)
+          }
         })
         await sync.locator('.activityClear').click()
         const prompt = page.getByRole('dialog', { name: 'Clear on this device', exact: true })
@@ -562,12 +568,16 @@ for (const uiScale of [100, 125]) {
         store.commit('setSyncServerUrl', '')
         store.commit('setSyncServerToken', 'test-token')
         store.commit('setSyncServerEnabled', true)
-        store._actions.deleteSyncServerAccount = [password => {
-          window.accountDeletionPassword = password
-          return new Promise((resolve, reject) => {
-            window.failAccountDeletion = () => reject(new Error('Account deletion failed'))
-          })
-        }]
+        const dispatch = store.dispatch.bind(store)
+        store.dispatch = (action, ...args) => {
+          if (action === 'deleteSyncServerAccount') {
+            window.accountDeletionPassword = args[0]
+            return new Promise((resolve, reject) => {
+              window.failAccountDeletion = () => reject(new Error('Account deletion failed'))
+            })
+          }
+          return dispatch(action, ...args)
+        }
       })
       const openPrompt = sync.getByRole('button', { name: 'Delete sync account', exact: true })
       await openPrompt.click()
@@ -633,14 +643,17 @@ for (const uiScale of [100, 125]) {
         const sync = await goToSettingsSection(page, 'sync')
         await page.evaluate(() => {
           const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-          const syncAction = store._actions.syncWithSyncServer[0]
-          store._actions.syncWithSyncServer = [payload => new Promise((resolve, reject) => {
-            window.finishLateSettingsSync = () => {
-              const result = syncAction(payload)
-              result.then(resolve, reject)
-              return result.catch(error => { window.lateSettingsSyncError = { name: error.name, message: error.message } })
-            }
-          })]
+          const dispatch = store.dispatch.bind(store)
+          store.dispatch = (action, ...args) => {
+            if (action !== 'syncWithSyncServer') return dispatch(action, ...args)
+            return new Promise((resolve, reject) => {
+              window.finishLateSettingsSync = () => {
+                const result = dispatch(action, ...args)
+                result.then(resolve, reject)
+                return result.catch(error => { window.lateSettingsSyncError = { name: error.name, message: error.message } })
+              }
+            })
+          }
         })
         await sync.getByRole('button', { name: 'Sync now', exact: true }).click()
         await toggleSettingsFromPreferences(app)
