@@ -10,6 +10,63 @@ for (const scale of [100, 125]) {
       }
     })
 
+    test('keeps appended metadata visible and collapsible when it arrives after short text', async ({ app, page }, testInfo) => {
+      await mockUnplayableWatchPage(app, page)
+      await goTo(page, 'history')
+      await page.getByText(watchHistoryEntry.title, { exact: true }).click()
+      await expect(page.locator('.videoDescription:visible')).toBeVisible()
+      const view = await watchViewHandle(page)
+      const card = page.locator('.videoDescription:visible')
+      for (const { metadata, selector, text } of [
+        { metadata: { videoTags: ['first tag', 'second tag'] }, selector: '.videoTagLink', text: ['first tag', 'second tag'] },
+        { metadata: { videoGames: [{ title: 'Test game' }] }, selector: '.gameTitle', text: 'Test game' },
+        { metadata: { license: 'Creative Commons license' }, selector: '.license', text: 'Creative Commons license' },
+        { metadata: { contentDisclosures: [{ label: 'Auto-dubbed', description: 'Automatically generated audio tracks.' }] }, selector: '.contentDisclosureHeader', text: 'Auto-dubbed' },
+      ]) {
+        await view.evaluate(async component => {
+          component.isLoading = true
+          await component.$nextTick()
+          component.videoDescription = 'A short description.'
+          component.videoDescriptionHtml = ''
+          component.videoTags = []
+          component.videoGames = []
+          component.license = null
+          component.contentDisclosures = []
+          component.isLoading = false
+          await component.$nextTick()
+        })
+        await expect(card.locator('.description')).toHaveText('A short description.')
+        await expect(card).not.toHaveClass(/short/)
+        await expect(card.locator('.descriptionStatus')).toHaveCount(0)
+
+        await view.evaluate((component, metadata) => { Object.assign(component, metadata) }, metadata)
+        await expect(card).toHaveClass(/short/)
+        await expect(card.locator(selector)).toHaveText(text)
+        await card.locator(':scope > .descriptionStatus').click()
+        await expect(card).not.toHaveClass(/short/)
+        await expect(card.locator(selector)).toHaveText(text)
+        await view.evaluate((component, metadata) => { Object.assign(component, metadata) }, structuredClone(metadata))
+        await expect(card).not.toHaveClass(/short/)
+        await card.locator('.descriptionScroll > .descriptionStatus').click()
+        await expect(card).toHaveClass(/short/)
+
+        // Metadata must also render when it is the card's only content.
+        await view.evaluate(component => { component.videoDescription = '' })
+        await expect(card.locator(selector)).toHaveText(text)
+        await expect(card).toHaveClass(/short/)
+        await expect(card.locator(':scope > .descriptionStatus')).toBeVisible()
+        if (selector === '.videoTagLink' && scale === 100) {
+          await card.evaluate(element => element.scrollIntoView({ block: 'end' }))
+          await page.mouse.move(0, 0)
+          for (const theme of ['dark', 'light']) {
+            await page.emulateMedia({ colorScheme: theme })
+            await expect(page.locator('body')).toContainClass(theme)
+            await card.screenshot({ path: testInfo.outputPath(`collapsed-tags-${theme}.png`) })
+          }
+        }
+      }
+    })
+
     test('short descriptions fit their content with centered text and copy control', async ({ app, page }, testInfo) => {
       await mockUnplayableWatchPage(app, page)
       await goTo(page, 'history')
