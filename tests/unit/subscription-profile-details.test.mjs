@@ -6,7 +6,7 @@ import Datastore from '@seald-io/nedb'
 
 import { getProfileWithUpdatedSubscriptionDetails } from '../../src/renderer/helpers/subscription-profile-details.js'
 import { DEFAULT_PROFILE_ICON } from '../../src/renderer/helpers/profileIcons.js'
-import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getNextSubscriptionSettingsTimestamp, isValidSubscriptionSettingsTimestamp } from '../../src/renderer/helpers/subscription-channels.js'
+import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getNextSubscriptionSettingsTimestamp, isValidSubscriptionSettingsTimestamp, getValidSubscriptionChannels } from '../../src/renderer/helpers/subscription-channels.js'
 import { getSubscriptionSettingsForSync, mergeSubscriptionSettingsEntry } from '../../src/renderer/helpers/subscription-settings-sync.js'
 
 const profileSource = await readFile(new URL('../../src/renderer/store/modules/profiles.js', import.meta.url), 'utf8')
@@ -22,7 +22,7 @@ async function profileStore(subscriptions = [{ id: 'channel', name: 'Old name', 
   await db.profiles.insertAsync(profiles)
   const DBProfileHandlers = vm.runInNewContext(
     handlersSource.slice(handlersSource.indexOf('class Profiles {'), handlersSource.indexOf('class Playlists {')) + '\nProfiles',
-    { db, loadProfilesDatastore: async () => {}, copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getProfileWithUpdatedSubscriptionDetails, console }
+    { db, loadProfilesDatastore: async () => {}, copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getProfileWithUpdatedSubscriptionDetails, getValidSubscriptionChannels, console }
   )
   const stores = []
   function createStore() {
@@ -55,7 +55,7 @@ async function profileStore(subscriptions = [{ id: 'channel', name: 'Old name', 
     }
     const context = vm.createContext({
       MAIN_PROFILE_ID: 'allChannels', THEME_BG_COLOR: '#000000', THEME_TEXT_COLOR: '#ffffff',
-      DEFAULT_PROFILE_ICON, DBProfileHandlers: handlers, getProfileWithUpdatedSubscriptionDetails, copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getNextSubscriptionSettingsTimestamp, isValidSubscriptionSettingsTimestamp,
+      DEFAULT_PROFILE_ICON, DBProfileHandlers: handlers, getProfileWithUpdatedSubscriptionDetails, copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getNextSubscriptionSettingsTimestamp, isValidSubscriptionSettingsTimestamp, getValidSubscriptionChannels,
       deepCopy: value => JSON.parse(JSON.stringify(value)), console
     })
     vm.runInContext(profileSource

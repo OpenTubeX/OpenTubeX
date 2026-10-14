@@ -233,7 +233,8 @@ test('portable backup restoration retains every identified history occurrence ac
     backupBusy: { value: false }, selectedBackupSections: { value: ['history'] }, backupData: { value: decoded },
     compactAllDatastores: async () => true, closeBackupImport() {}, t: key => key, showToast: toast => messages.push(toast),
   }
-  const restore = compileFunction('return ' + script.slice(declaration.start, declaration.end), Object.keys(bindings))(...Object.values(bindings))
+  const thumbnailHelpers = parseJavaScript(script, { sourceType: 'module' }).program.body.filter(node => node.type === 'FunctionDeclaration' && ['isJsonObject', 'normalizeImportedPlaylistThumbnail'].includes(node.id.name)).map(node => script.slice(node.start, node.end)).join('\n')
+  const restore = compileFunction(thumbnailHelpers + '\nreturn ' + script.slice(declaration.start, declaration.end), Object.keys(bindings))(...Object.values(bindings))
   const expected = [...original, ...incoming].toSorted((a, b) => model.compareThings(a._id, b._id))
   for (let repeat = 0; repeat < 2; repeat++) {
     await restore()
@@ -422,7 +423,8 @@ test('portable restore accumulates repeated playlist records without dropping in
   const dependencies = { process: { env: { IS_ELECTRON: false } }, DBPlaylistHandlers: { ...bindings.DBPlaylistHandlers, upsert: () => assert.fail('Refresh must not rewrite records') }, ...await import('../../src/renderer/helpers/playlist-video-counts.js') }
   const playlists = compileFunction(moduleCode, Object.keys(dependencies))(...Object.values(dependencies))
   bindings.store = createStore({ modules: { playlists }, actions: { scheduleSyncServer() {} }, state: { settings: { quickBookmarkTargetPlaylistId: original._id } } })
-  const restore = compileFunction('return ' + script.slice(declaration.start, declaration.end), Object.keys(bindings))(...Object.values(bindings))
+  const thumbnailHelpers = parseJavaScript(script, { sourceType: 'module' }).program.body.filter(node => node.type === 'FunctionDeclaration' && ['isJsonObject', 'normalizeImportedPlaylistThumbnail'].includes(node.id.name)).map(node => script.slice(node.start, node.end)).join('\n')
+  const restore = compileFunction(thumbnailHelpers + '\nreturn ' + script.slice(declaration.start, declaration.end), Object.keys(bindings))(...Object.values(bindings))
   for (let repeat = 0; repeat < 2; repeat++) {
     await restore()
     const saved = await db.findOneAsync({ _id: original._id })
@@ -517,7 +519,8 @@ for (const conflict of ['adjustment', 'record']) {
       } },
       compactAllDatastores: async () => true, closeBackupImport() {}, t: key => key, showToast: toast => messages.push(toast),
     }
-    const restore = compileFunction('return ' + script.slice(declaration.start, declaration.end), Object.keys(bindings))(...Object.values(bindings))
+    const thumbnailHelpers = parseJavaScript(script, { sourceType: 'module' }).program.body.filter(node => node.type === 'FunctionDeclaration' && ['isJsonObject', 'normalizeImportedPlaylistThumbnail'].includes(node.id.name)).map(node => script.slice(node.start, node.end)).join('\n')
+    const restore = compileFunction(thumbnailHelpers + '\nreturn ' + script.slice(declaration.start, declaration.end), Object.keys(bindings))(...Object.values(bindings))
     await restore()
     assert.match(messages.at(-1).message, /Conflicting retained watch[- ]stat/)
     assert.deepEqual(writes, [])
