@@ -1294,7 +1294,7 @@ for (const backend of ['NeDB', 'SQLite']) {
       const ast = babelParse(content, { sourceType: 'module' })
       const node = ast.program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'importUnifiedBackup')
       const toasts = []
-      const restore = runInNewContext(`(${content.slice(node.start, node.end)})`, {
+      const restore = runInNewContext(importControllerSource(content, node), {
         process: { env: { IS_ELECTRON: false } }, Date, backupDisposed: false, backupImportGeneration: 0, backupWriteGeneration: null,
         backupBusy: { value: false }, selectedBackupSections: { value: ['profiles', 'watchStats'] }, backupData: { value: { profiles: [incoming], watchStats: { records: [], adjustment: null } } },
         DBProfileHandlers: Profiles, DBWatchStatsHandlers: { validateBackup: async () => { if (!afterRead) await change() }, mergeBackup: async () => {} },
@@ -1405,6 +1405,11 @@ for (const backend of ['NeDB', 'SQLite']) {
   })
 }
 
+function importControllerSource(content, node) {
+  const helpers = babelParse(content, { sourceType: 'module' }).program.body.filter(entry => entry.type === 'FunctionDeclaration' && ['isJsonObject', 'normalizeImportedPlaylistThumbnail'].includes(entry.id.name)).map(entry => content.slice(entry.start, entry.end)).join('\n')
+  return `${helpers}\n(${content.slice(node.start, node.end)})`
+}
+
 for (const section of ['profiles', 'playlists']) {
   test(`portable ${section} restore refreshes committed records after a later conflict`, async () => {
     const content = parse(await readFile(new URL('../../src/renderer/components/DataSettings/DataSettings.vue', import.meta.url), 'utf8')).descriptor.scriptSetup.content
@@ -1413,7 +1418,7 @@ for (const section of ['profiles', 'playlists']) {
     let written = 0
     const refreshed = [], toasts = []
     const handler = { find: async () => [], replaceIfUnchanged: async () => ({ numAffected: ++written === 1 ? 1 : 0 }) }
-    const apply = runInNewContext(`(${content.slice(node.start, node.end)})`, {
+    const apply = runInNewContext(importControllerSource(content, node), {
       process: { env: { IS_ELECTRON: false } }, Date, backupDisposed: false, backupImportGeneration: 0, backupWriteGeneration: null,
       backupBusy: { value: false }, selectedBackupSections: { value: [section] }, backupData: { value: { [section]: records } },
       DBProfileHandlers: handler, DBPlaylistHandlers: handler, mergeBackupProfile, mergeBackupPlaylist,
@@ -1471,7 +1476,7 @@ for (const section of ['profiles', 'playlists']) {
     let refreshes = 0
     const toasts = [], errors = []
     const handler = { find: async () => [], replaceIfUnchanged: async () => ({ numAffected: 1 }) }
-    const apply = runInNewContext(`(${content.slice(node.start, node.end)})`, {
+    const apply = runInNewContext(importControllerSource(content, node), {
       process: { env: { IS_ELECTRON: false } }, Date, backupDisposed: false, backupImportGeneration: 0, backupWriteGeneration: null,
       backupBusy: { value: false }, selectedBackupSections: { value: [section] }, backupData: { value: { [section]: records } },
       DBProfileHandlers: handler, DBPlaylistHandlers: handler, mergeBackupProfile, mergeBackupPlaylist,
