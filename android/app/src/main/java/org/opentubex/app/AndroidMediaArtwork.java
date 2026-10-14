@@ -33,6 +33,7 @@ final class AndroidMediaArtwork implements AutoCloseable {
     private final Executor delivery;
     private final OkHttpClient client = new OkHttpClient.Builder()
         .dns(publicDns(Dns.SYSTEM))
+        .proxyAuthenticator(AndroidProxy.proxyAuthenticator())
         .followRedirects(false).followSslRedirects(false)
         .connectTimeout(5, TimeUnit.SECONDS).readTimeout(5, TimeUnit.SECONDS)
         .callTimeout(10, TimeUnit.SECONDS).build();

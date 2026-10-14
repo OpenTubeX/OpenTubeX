@@ -6,6 +6,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.webkit.CookieManager;
+import android.webkit.HttpAuthHandler;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceResponse;
@@ -60,6 +61,9 @@ public final class YouTubeSessionActivity extends AppCompatActivity {
         CookieManager.getInstance().setAcceptCookie(true);
         CookieManager.getInstance().setAcceptThirdPartyCookies(browser, true);
         browser.setWebViewClient(new WebViewClient() {
+            @Override public void onReceivedHttpAuthRequest(WebView view, HttpAuthHandler handler, String host, String realm) {
+                if (!AndroidProxy.answerProxyChallenge(handler, host, realm)) super.onReceivedHttpAuthRequest(view, handler, host, realm);
+            }
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 boolean blocked = request.isForMainFrame() && !YouTubeSessionCookies.canNavigate(request.getUrl().toString());
                 if (blocked && saving) failSave();

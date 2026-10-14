@@ -14,6 +14,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -29,9 +31,16 @@ import javax.net.ssl.SSLSocketFactory;
 
 /** One HTTP proxy for Chromium, URLConnection and child processes.
  * Upstream connections never fall back to direct, including failed handshakes.
+ * Other apps can reach loopback ports, so every request needs this launch's secret.
  */
 final class AndroidProxyRelay implements AutoCloseable {
     private static final int TIMEOUT = 30_000;
+    static final String USER = "opentubex";
+    static final String REALM = "OpenTubeX";
+    private static final byte[] AUTHENTICATION_REQUIRED = ("HTTP/1.1 407 Proxy Authentication Required\r\n" +
+        "Proxy-Authenticate: Basic realm=\"" + REALM + "\"\r\nContent-Length: 0\r\n").getBytes(StandardCharsets.US_ASCII);
+    private final String password;
+    private final byte[] authorization;
     private final ServerSocket server;
     private final ExecutorService threads = Executors.newCachedThreadPool(runnable -> {
         Thread thread = new Thread(runnable, "opentubex-proxy");
@@ -54,12 +63,21 @@ final class AndroidProxyRelay implements AutoCloseable {
         this.resolver = resolver;
         this.configuration = configuration;
         this.systemSelector = systemSelector;
+        byte[] secret = new byte[32];
+        new SecureRandom().nextBytes(secret);
+        password = Base64.getUrlEncoder().withoutPadding().encodeToString(secret);
+        authorization = authorizationHeader().getBytes(StandardCharsets.US_ASCII);
         server = new ServerSocket(0, 64, InetAddress.getByName("127.0.0.1"));
         threads.execute(this::accept);
     }
 
     int port() { return server.getLocalPort(); }
     String url() { return "http://127.0.0.1:" + port(); }
+    String authenticatedUrl() { return "http://" + USER + ":" + password + "@127.0.0.1:" + port(); }
+    String password() { return password; }
+    String authorizationHeader() {
+        return "Basic " + Base64.getEncoder().encodeToString((USER + ":" + password).getBytes(StandardCharsets.US_ASCII));
+    }
 
     synchronized void configure(ProxyConfiguration value) {
         if (configuration.equals(value)) return;
@@ -98,7 +116,8 @@ final class AndroidProxyRelay implements AutoCloseable {
             synchronized (this) { policy = configuration; version = generation; }
             policy.validate();
             client.setSoTimeout(TIMEOUT);
-            String[] headers = readHeaders(client.getInputStream()).split("\r\n");
+            String[] headers = readAuthenticatedHeaders(client);
+            if (headers == null) return;
             String[] request = headers[0].split(" ", 3);
             if (request.length != 3) throw new IOException("Invalid proxy request");
             boolean tunnel = request[0].equals("CONNECT");
@@ -108,6 +127,9 @@ final class AndroidProxyRelay implements AutoCloseable {
             int port = target.getPort() == -1 ? (tunnel ? 443 : 80) : target.getPort();
             if (port < 1 || port > 65535) throw new IOException("Invalid destination port");
             String host = target.getHost().replace("[", "").replace("]", "");
+            // WebView only reports a challenge's host, so a local server must never be able to
+            // ask for this relay's credentials with a 401 from 127.0.0.1.
+            if (isLoopbackName(host)) throw new IOException("Loopback destinations are not proxied");
             ProxyConfiguration route = resolveSystemProxy(policy, target);
             boolean forwardHttp = !tunnel && route.enabled && Arrays.asList("http", "https").contains(route.protocol);
             transport = connectTransport(route.enabled ? route.hostname : host, route.enabled ? route.port : port, version, client);
@@ -154,6 +176,40 @@ final class AndroidProxyRelay implements AutoCloseable {
             closeSocket(upstream);
             synchronized (this) { sockets.remove(transport); }
         }
+    }
+
+    /** Clients answer the first 407 on the same connection, unless a request body follows it. */
+    private String[] readAuthenticatedHeaders(Socket client) throws IOException {
+        for (int attempt = 0; attempt < 3; attempt++) {
+            String[] headers = readHeaders(client.getInputStream()).split("\r\n");
+            boolean hasBody = false;
+            for (int i = 1; i < headers.length; i++) {
+                String[] header = headers[i].split(":", 2);
+                String name = header[0].trim().toLowerCase(Locale.ROOT);
+                String value = header.length == 2 ? header[1].trim() : "";
+                if (name.equals("proxy-authorization") &&
+                    MessageDigest.isEqual(authorization, value.getBytes(StandardCharsets.US_ASCII))) return headers;
+                if (name.equals("transfer-encoding") || (name.equals("content-length") && !value.equals("0"))) hasBody = true;
+            }
+            OutputStream output = client.getOutputStream();
+            output.write(AUTHENTICATION_REQUIRED);
+            output.write((hasBody ? "Connection: close\r\n\r\n" : "\r\n").getBytes(StandardCharsets.US_ASCII));
+            if (hasBody) return null;
+        }
+        return null;
+    }
+
+    static boolean isLoopbackName(String host) {
+        String name = host.toLowerCase(Locale.ROOT);
+        if (name.endsWith(".")) name = name.substring(0, name.length() - 1);
+        if (name.equals("localhost") || name.endsWith(".localhost")) return true;
+        // Only literals: resolving a hostname here would leak lookups past the upstream proxy.
+        if (!name.matches("[0-9a-f:.]+") || !(name.contains(":") || name.matches("[0-9.]+"))) return false;
+        try {
+            InetAddress address = InetAddress.getByName(name);
+            return address.isLoopbackAddress() || address.isAnyLocalAddress();
+        }
+        catch (IOException error) { return false; }
     }
 
     static void copyRequest(Socket client, Socket remote) {

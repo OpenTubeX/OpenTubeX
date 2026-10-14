@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.webkit.JavascriptInterface;
+import android.webkit.HttpAuthHandler;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
@@ -204,6 +205,11 @@ public class PoTokenPlugin extends Plugin {
     }
 
     private static class BotGuardWebViewClient extends WebViewClient {
+    @Override
+    public void onReceivedHttpAuthRequest(WebView view, HttpAuthHandler handler, String host, String realm) {
+        if (!AndroidProxy.answerProxyChallenge(handler, host, realm)) super.onReceivedHttpAuthRequest(view, handler, host, realm);
+    }
+
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
             Uri uri = request.getUrl();

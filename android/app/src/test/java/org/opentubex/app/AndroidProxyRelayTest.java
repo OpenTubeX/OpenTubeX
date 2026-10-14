@@ -31,10 +31,13 @@ public class AndroidProxyRelayTest {
         return socket;
     }
 
+    private static final AndroidProxyRelay.AddressResolver LOOPBACK = host -> new InetAddress[] { InetAddress.getByName("127.0.0.1") };
+
     private static Socket connect(AndroidProxyRelay relay, String target) throws Exception {
         Socket client = new Socket("127.0.0.1", relay.port());
         client.setSoTimeout(3000);
-        client.getOutputStream().write(("CONNECT " + target + " HTTP/1.1\r\nHost: " + target + "\r\n\r\n").getBytes(StandardCharsets.US_ASCII));
+        client.getOutputStream().write(("CONNECT " + target + " HTTP/1.1\r\nHost: " + target +
+            "\r\nProxy-Authorization: " + relay.authorizationHeader() + "\r\n\r\n").getBytes(StandardCharsets.US_ASCII));
         return client;
     }
 
@@ -185,7 +188,7 @@ public class AndroidProxyRelayTest {
             proxy.close();
             for (String protocol : new String[] {"http", "https", "socks4", "socks5", "invalid"}) {
                 try (AndroidProxyRelay relay = new AndroidProxyRelay(policy(protocol, closedPort, "", ""), null);
-                     Socket client = connect(relay, "127.0.0.1:" + destination.getLocalPort())) {
+                     Socket client = connect(relay, "destination.test:" + destination.getLocalPort())) {
                     assertTrue(AndroidProxyRelay.readHeaders(client.getInputStream()).startsWith("HTTP/1.1 502"));
                 }
             }
@@ -203,7 +206,7 @@ public class AndroidProxyRelayTest {
                     socket.getOutputStream().write("HTTP/1.1 407 Proxy Authentication Required\r\n\r\n".getBytes(StandardCharsets.US_ASCII));
                 } catch (Exception error) { throw new RuntimeException(error); }
             });
-            try (Socket client = connect(relay, "127.0.0.1:" + destination.getLocalPort())) {
+            try (Socket client = connect(relay, "destination.test:" + destination.getLocalPort())) {
                 assertTrue(AndroidProxyRelay.readHeaders(client.getInputStream()).startsWith("HTTP/1.1 502"));
             }
             upstream.get(5, TimeUnit.SECONDS);
@@ -214,8 +217,8 @@ public class AndroidProxyRelayTest {
 
     @Test public void changingProxyClosesExistingDirectTunnel() throws Exception {
         try (ServerSocket destination = server();
-             AndroidProxyRelay relay = new AndroidProxyRelay(new ProxyConfiguration(false, "", "", "", "", ""), null);
-             Socket client = connect(relay, "127.0.0.1:" + destination.getLocalPort());
+             AndroidProxyRelay relay = new AndroidProxyRelay(new ProxyConfiguration(false, "", "", "", "", ""), null, LOOPBACK);
+             Socket client = connect(relay, "destination.test:" + destination.getLocalPort());
              Socket remote = destination.accept()) {
             assertTrue(AndroidProxyRelay.readHeaders(client.getInputStream()).startsWith("HTTP/1.1 200"));
             relay.configure(policy("invalid", 1, "", ""));
@@ -227,8 +230,8 @@ public class AndroidProxyRelayTest {
 
     @Test public void activeDownloadSurvivesThirtySecondsWithoutClientWrites() throws Exception {
         try (ServerSocket destination = server();
-             AndroidProxyRelay relay = new AndroidProxyRelay(new ProxyConfiguration(false, "", "", "", "", ""), null);
-             Socket client = connect(relay, "127.0.0.1:" + destination.getLocalPort());
+             AndroidProxyRelay relay = new AndroidProxyRelay(new ProxyConfiguration(false, "", "", "", "", ""), null, LOOPBACK);
+             Socket client = connect(relay, "destination.test:" + destination.getLocalPort());
              Socket remote = destination.accept()) {
             assertTrue(AndroidProxyRelay.readHeaders(client.getInputStream()).startsWith("HTTP/1.1 200"));
             CompletableFuture<Void> download = CompletableFuture.runAsync(() -> {
@@ -248,8 +251,8 @@ public class AndroidProxyRelayTest {
 
     @Test public void reapplyingUnchangedSettingsKeepsBackgroundTunnelOpen() throws Exception {
         try (ServerSocket destination = server();
-             AndroidProxyRelay relay = new AndroidProxyRelay(new ProxyConfiguration(false, "http", "localhost", "8080", "", ""), null);
-             Socket client = connect(relay, "127.0.0.1:" + destination.getLocalPort());
+             AndroidProxyRelay relay = new AndroidProxyRelay(new ProxyConfiguration(false, "http", "localhost", "8080", "", ""), null, LOOPBACK);
+             Socket client = connect(relay, "destination.test:" + destination.getLocalPort());
              Socket remote = destination.accept()) {
             assertTrue(AndroidProxyRelay.readHeaders(client.getInputStream()).startsWith("HTTP/1.1 200"));
             relay.configure(new ProxyConfiguration(false, "http", "localhost", "8080", "", ""));
@@ -260,7 +263,7 @@ public class AndroidProxyRelayTest {
 
     @Test public void plainHttpStreamsRequestAndResponseWithoutLeakingProxyAuthorization() throws Exception {
         try (ServerSocket destination = server();
-             AndroidProxyRelay relay = new AndroidProxyRelay(new ProxyConfiguration(false, "", "", "", "", ""), null)) {
+             AndroidProxyRelay relay = new AndroidProxyRelay(new ProxyConfiguration(false, "", "", "", "", ""), null, LOOPBACK)) {
             CompletableFuture<Void> upstream = CompletableFuture.runAsync(() -> {
                 try (Socket socket = destination.accept()) {
                     String headers = AndroidProxyRelay.readHeaders(socket.getInputStream());
@@ -270,11 +273,11 @@ public class AndroidProxyRelayTest {
                     socket.getOutputStream().write("HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nok".getBytes(StandardCharsets.US_ASCII));
                 } catch (Exception error) { throw new RuntimeException(error); }
             });
-            HttpURLConnection connection = (HttpURLConnection) new URL("http://127.0.0.1:" + destination.getLocalPort() + "/test?q=1")
+            HttpURLConnection connection = (HttpURLConnection) new URL("http://destination.test:" + destination.getLocalPort() + "/test?q=1")
                 .openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", relay.port())));
             connection.setReadTimeout(3000);
             connection.setDoOutput(true);
-            connection.setRequestProperty("Proxy-Authorization", "Basic should-not-leak");
+            connection.setRequestProperty("Proxy-Authorization", relay.authorizationHeader());
             connection.getOutputStream().write("payload".getBytes(StandardCharsets.US_ASCII));
             assertEquals("ok", new String(connection.getInputStream().readAllBytes(), StandardCharsets.US_ASCII));
             connection.disconnect();
@@ -296,6 +299,7 @@ public class AndroidProxyRelayTest {
             HttpURLConnection connection = (HttpURLConnection) new URL("http://never-resolve.invalid/test?q=1")
                 .openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", relay.port())));
             connection.setReadTimeout(3000);
+            connection.setRequestProperty("Proxy-Authorization", relay.authorizationHeader());
             assertEquals("ok", new String(connection.getInputStream().readAllBytes(), StandardCharsets.US_ASCII));
             connection.disconnect();
             upstream.get(5, TimeUnit.SECONDS);
@@ -316,6 +320,41 @@ public class AndroidProxyRelayTest {
                 assertTrue(AndroidProxyRelay.readHeaders(client.getInputStream()).startsWith("HTTP/1.1 502"));
             }
             upstream.get(5, TimeUnit.SECONDS);
+        }
+    }
+
+    @Test public void unauthenticatedClientsCannotUseTheRelay() throws Exception {
+        try (ServerSocket destination = server();
+             AndroidProxyRelay relay = new AndroidProxyRelay(new ProxyConfiguration(false, "", "", "", "", ""), null, LOOPBACK);
+             Socket client = new Socket("127.0.0.1", relay.port())) {
+            client.setSoTimeout(3000);
+            String target = "destination.test:" + destination.getLocalPort();
+            OutputStream output = client.getOutputStream();
+            output.write(("CONNECT " + target + " HTTP/1.1\r\nProxy-Authorization: Basic b3BlbnR1YmV4Ondyb25n\r\n\r\n").getBytes(StandardCharsets.US_ASCII));
+            String challenge = AndroidProxyRelay.readHeaders(client.getInputStream());
+            assertTrue(challenge, challenge.startsWith("HTTP/1.1 407"));
+            assertTrue(challenge, challenge.contains("Proxy-Authenticate: Basic realm=\"OpenTubeX\"\r\n"));
+            destination.setSoTimeout(150);
+            assertThrows(SocketTimeoutException.class, destination::accept);
+            // Clients answer the challenge on the same connection.
+            output.write(("CONNECT " + target + " HTTP/1.1\r\nProxy-Authorization: " + relay.authorizationHeader() + "\r\n\r\n")
+                .getBytes(StandardCharsets.US_ASCII));
+            assertTrue(AndroidProxyRelay.readHeaders(client.getInputStream()).startsWith("HTTP/1.1 200"));
+        }
+    }
+
+    @Test public void loopbackDestinationsAreNeverProxied() throws Exception {
+        try (ServerSocket destination = server();
+             AndroidProxyRelay relay = new AndroidProxyRelay(new ProxyConfiguration(false, "", "", "", "", ""), null, LOOPBACK)) {
+            for (String host : new String[] {"127.0.0.1", "[::1]", "localhost", "app.localhost.", "0.0.0.0", "[::ffff:127.0.0.1]"}) {
+                try (Socket client = connect(relay, host + ":" + destination.getLocalPort())) {
+                    assertTrue(host, AndroidProxyRelay.readHeaders(client.getInputStream()).startsWith("HTTP/1.1 502"));
+                }
+            }
+            destination.setSoTimeout(150);
+            assertThrows(SocketTimeoutException.class, destination::accept);
+            assertFalse(AndroidProxyRelay.isLoopbackName("example.com"));
+            assertFalse(AndroidProxyRelay.isLoopbackName("cafe"));
         }
     }
 }

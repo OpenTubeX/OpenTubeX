@@ -19,6 +19,7 @@ final class ExternalStreamRedirects implements Interceptor {
     private static final OkHttpClient CLIENT = new OkHttpClient.Builder()
         .followRedirects(false)
         .followSslRedirects(false)
+        .proxyAuthenticator(AndroidProxy.proxyAuthenticator())
         .addInterceptor(new ExternalStreamRedirects())
         .build();
 

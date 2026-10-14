@@ -24,6 +24,7 @@ public class VoiceOverHttpPlugin extends Plugin {
     private static final int MAX_MESSAGE_BYTES = 1024 * 1024;
     private final OkHttpClient client = new OkHttpClient.Builder()
         .cookieJar(CookieJar.NO_COOKIES)
+        .proxyAuthenticator(AndroidProxy.proxyAuthenticator())
         .followRedirects(false)
         .followSslRedirects(false)
         .connectTimeout(15, TimeUnit.SECONDS)
