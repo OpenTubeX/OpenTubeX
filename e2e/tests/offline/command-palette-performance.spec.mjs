@@ -31,8 +31,8 @@ test('palette opening stays independent of library size on a throttled renderer'
     if (store.state.history.libraryPaged) {
       if (!await store.dispatch('overwriteHistory', new Map(history.map(video => [video.videoId, video])))) throw new Error('History fixture was not persisted')
       if (!await store.dispatch('updatePlaylist', playlist)) throw new Error('Playlist fixture was not persisted')
-      const persisted = await window.ftElectron.libraryQuery('playlistPage', { id: playlist._id, limit: 1 })
-      if (persisted.total !== history.length) throw new Error('Playlist fixture is incomplete')
+      const persisted = await window.ftElectron.libraryQuery('playlistSummaries')
+      if (persisted.find(entry => entry._id === playlist._id)?.videoCount !== history.length) throw new Error('Playlist fixture is incomplete')
     } else {
       store.commit('setHistoryCacheSorted', history)
       store.commit('setAllPlaylists', [playlist])
