@@ -11,10 +11,11 @@ export function bindNativeCaptionTiming(video, getOffset, clearDisplayedCues) {
   const originals = new WeakMap()
   /** @type {WeakMap<TextTrack, {offset: number, cues: TextTrackCue[]}>} */
   const tracks = new WeakMap()
+  let hasShiftedCues = false
 
   function update() {
     const offset = getOffset()
-    if (offset === null) return
+    if (offset === null || (offset === 0 && !hasShiftedCues)) return
     let cleared = false
     for (const track of video.textTracks) {
       if (track.mode === 'disabled' || !['captions', 'subtitles'].includes(track.kind)) continue
@@ -29,6 +30,7 @@ export function bindNativeCaptionTiming(video, getOffset, clearDisplayedCues) {
             return previous.cues[index] === cue && original?.appliedStart === cue.startTime &&
               original.appliedEnd === cue.endTime
           })) continue
+      hasShiftedCues ||= offset !== 0
       if (!cleared) {
         clearDisplayedCues()
         cleared = true

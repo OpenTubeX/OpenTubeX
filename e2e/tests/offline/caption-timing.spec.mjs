@@ -9,6 +9,12 @@ async function getVisibleBounds(locator) {
   return bounds
 }
 
+/** @param {string} locale */
+function setTestLocale(locale) {
+  const app = document.querySelector('#app').__vue_app__
+  app._context.provides[app.__VUE_I18N_SYMBOL__].global.locale.value = locale
+}
+
 /** @param {HTMLElement} element */
 function validTimingScroll(element) {
   const content = element.querySelector('.ft-caption-timing-content').getBoundingClientRect()
@@ -186,6 +192,8 @@ for (const usePlayerMenuGrid of [true, false]) {
         await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
         await app.electronApp.evaluate(({ BrowserWindow }, value) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(value), scale)
         await setWindowSize(app, page, { width, height })
+        // Wait for the compact controls to replace the desktop configuration.
+        await expect(player.locator('.shaka-controls-button-panel .full-window-button')).toHaveCount(0)
         await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
         // Responsive control rebuilds return an open menu to its main view.
         if (!await menu.isVisible()) {
@@ -254,16 +262,12 @@ for (const usePlayerMenuGrid of [true, false]) {
       await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
       await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
       await expect.poll(() => scroller.evaluate(validTimingScroll)).toBe(true)
-      await page.evaluate(() => {
-        document.querySelector('#app').__vue_app__.config.globalProperties.$i18n.locale = 'en-US'
-      })
+      await page.evaluate(setTestLocale, 'en-US')
       await expect(hint).not.toHaveText(longHint)
       await expect.poll(() => scroller.evaluate(validTimingScroll)).toBe(true)
 
       // Keep phone layout active at every height so the same controls stay open.
-      await page.evaluate(() => {
-        document.querySelector('#app').__vue_app__.config.globalProperties.$i18n.locale = 'de-DE'
-      })
+      await page.evaluate(setTestLocale, 'de-DE')
       await expect(hint).toHaveText(longHint)
       const expandedHeight = await scroller.evaluate(element => element.clientHeight)
       await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setBounds({ height: 400 }))

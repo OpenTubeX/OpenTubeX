@@ -5678,8 +5678,11 @@ export default defineComponent({
         return false
       }
 
-      this.setPlayerReloadState(this.$refs.player?.getSabrReloadState())
-      await this.reloadView({ preserveTitle: true })
+      const sameVideo = this.videoId === this.tabRoute.params.id
+      if (sameVideo) {
+        this.setPlayerReloadState(this.$refs.player?.getSabrReloadState())
+      }
+      await this.reloadView({ preserveTitle: sameVideo })
       return true
     },
 
