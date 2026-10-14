@@ -763,10 +763,10 @@ const desktopActions = {
     await DBPlaylistHandlers.upsert(playlist)
     commit('upsertPlaylistToList', playlist)
   },
-  async grabAllPlaylists({ rootState, commit, dispatch, state }) {
+  async grabAllPlaylists({ rootState, commit, dispatch, state }, { preserveRetained = false } = {}) {
     try {
       const payload = (await DBLibraryHandlers.query('playlistSummaries')).filter(entry => entry != null)
-      if (payload.length === 0) {
+      if (payload.length === 0 && !state.playlistsReady && !preserveRetained) {
         await Promise.all(state.defaultPlaylists.map(playlist => dispatch('addPlaylist', deepCopy(playlist))))
       } else {
         // if no quick bookmark is set, try to find another playlist

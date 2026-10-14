@@ -3715,3 +3715,19 @@ test('deferred datastore startup handles its rejected promise after the recovery
   await Promise.resolve()
   assert.deepEqual(errors, [failure])
 })
+
+for (const ready of [false, true]) for (const preserveRetained of [false, true]) {
+  test(`empty desktop library refresh creates defaults only on initial load: ready ${ready}, restore ${preserveRetained}`, async () => {
+    const writes = [], committed = new Map()
+    const defaults = [{ _id: 'favorites', videos: [] }, { _id: 'watchLater', videos: [] }]
+    const context = await functions('src/renderer/store/modules/playlists.js', ['grabAllPlaylists'], {
+      DBLibraryHandlers: { query: async () => [] }, deepCopy: structuredClone, console: { error: error => assert.fail(String(error)) },
+    })
+    await context.grabAllPlaylists({ state: { playlistsReady: ready, defaultPlaylists: defaults, playlistMemberships: {} }, rootState: { settings: {}, history: { activeVideoIds: {} } },
+      commit: (name, value) => committed.set(name, structuredClone(value)), dispatch: async (name, value) => { if (name === 'addPlaylist') writes.push(structuredClone(value)); return true },
+    }, { preserveRetained })
+    assert.deepEqual(writes, !ready && !preserveRetained ? defaults : [])
+    assert.equal(committed.get('setPlaylistsReady'), true)
+    if (ready || preserveRetained) assert.deepEqual(committed.get('setAllPlaylists'), [])
+  })
+}
