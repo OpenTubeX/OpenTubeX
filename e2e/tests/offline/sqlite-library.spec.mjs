@@ -689,13 +689,15 @@ test('library worker rejects internal helpers and inherited targets while retain
     }
     for (const data of [undefined, null, {}]) {
       canceled.push(await window.ftElectron.libraryQuery('importCancel', data))
-      try { await window.ftElectron.libraryQuery('importApply', data); denied.push('unexpected success') } catch (error) { denied.push(error.message) }
+      for (const method of ['importApply', 'importPreview']) {
+        try { await window.ftElectron.libraryQuery(method, data); denied.push('unexpected success') } catch (error) { denied.push(error.message) }
+      }
     }
     return { total: history.total, canceled, denied, startupDenied }
   })
   expect(renderer.total).toBe(history.length)
   expect(renderer.canceled).toStrictEqual([true, true, true])
-  expect(renderer.denied).toHaveLength(3)
+  expect(renderer.denied).toHaveLength(6)
   for (const error of renderer.denied) expect(error).toContain('does not belong to this window')
   expect(renderer.startupDenied).toHaveLength(3)
   for (const error of renderer.startupDenied) expect(error).toContain('Unknown library query')

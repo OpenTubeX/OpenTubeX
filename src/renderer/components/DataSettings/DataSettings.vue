@@ -701,7 +701,7 @@ async function previewSelectedTakeoutData() {
   const entries = takeoutEntries.value.filter(entry => selected.has(entry.type))
   try {
     const current = await readImportState([...selected].filter(type => type !== 'subscriptions'))
-    const preview = await previewTakeoutImport(file, entries, { ...current, subscriptions: primaryProfile.value.subscriptions })
+    const preview = await previewTakeoutImport(file, entries, { ...current, subscriptions: Array.isArray(primaryProfile.value.subscriptions) ? primaryProfile.value.subscriptions : [] })
     if (takeoutFile.value === file) takeoutPreview.value = preview
   } catch (error) {
     showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
@@ -720,13 +720,18 @@ async function importSelectedTakeoutData() {
     await forEachTakeoutImportEntry(takeoutFile.value, selected, takeoutEntries.value, async entry => {
       if (entry.type === 'subscriptions') {
         const subscriptions = parseTakeoutSubscriptions(entry)
-        const known = new Set(primaryProfile.value.subscriptions.map(channel => channel.id))
-        const additions = subscriptions.filter(channel => {
-          if (known.has(channel.id)) return false
-          known.add(channel.id)
-          return true
-        })
-        await store.dispatch('updateProfile', { ...deepCopy(primaryProfile.value), subscriptions: [...deepCopy(primaryProfile.value.subscriptions), ...additions] })
+        if (process.env.IS_ELECTRON) {
+          await DBLibraryHandlers.query('importSubscriptionProfiles', { profiles: [{ _id: MAIN_PROFILE_ID, name: null, subscriptions }] })
+          store.dispatch('scheduleSyncServer', 'profilesOrSubscriptions').catch(console.error)
+        } else {
+          const current = (await DBProfileHandlers.find({ preserveRetained: true })).find(profile => profile._id === MAIN_PROFILE_ID)
+          if (!current) throw new Error('The primary subscription profile is missing')
+          const merged = { ...current, subscriptions: mergeLegacySubscriptionChannels(current.subscriptions, subscriptions) }
+          const { numAffected } = await DBProfileHandlers.replaceIfUnchanged(current, merged)
+          if (!numAffected) throw new Error('The profile changed; retry the import')
+        }
+        if (await store.dispatch('grabAllProfiles', { preserveRetained: true }) !== true) throw new Error('Imported subscriptions could not be refreshed')
+        if (!process.env.IS_ELECTRON) store.dispatch('scheduleSyncServer', 'profilesOrSubscriptions').catch(console.error)
         showToast({ message: t('Settings.Data Settings.All subscriptions have been successfully imported'), icon: ['fas', 'rss'] })
       } else if (entry.type === 'history') {
         await importYouTubeWatchHistory(JSON.parse(entry.content))

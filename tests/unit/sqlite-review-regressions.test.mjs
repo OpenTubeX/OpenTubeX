@@ -3636,3 +3636,31 @@ for (const mode of ['premiere', 'stale', 'failure']) {
     assert.deepEqual(await engine.collections.history.findOneAsync({ _id: 'stored' }), record)
   })
 }
+
+
+for (const desktop of [false, true]) {
+  test(`Takeout subscription imports preserve fresh primary metadata and opaque members, desktop: ${desktop}`, async t => {
+    const database = desktop ? new DatabaseSync(':memory:') : null
+    if (database) database.exec(SCHEMA_SQL)
+    const engine = database ? new LibraryEngine(database) : null
+    if (database) t.after(() => database.close())
+    const records = desktop ? engine.collections.profiles : new Datastore({ inMemoryOnly: true })
+    const stored = { _id: 'allChannels', name: null, subscriptions: [null, false, { id: 'old', unknown: new Date(1) }, { id: 'old', duplicate: true }], unknown: { current: new Date(7) } }
+    await records.insertAsync(stored)
+    const toasts = [], dispatches = []
+    const context = await functions(dataSettings, ['importSelectedTakeoutData'], {
+      process: { env: { IS_ELECTRON: desktop } }, MAIN_PROFILE_ID: 'allChannels', takeoutBusy: ref(false), takeoutFile: ref({}), takeoutPreviewReady: ref(true), selectedTakeoutTypes: ref(['subscriptions']), takeoutEntries: ref([]),
+      primaryProfile: ref({ ...stored, unknown: { stale: new Date(0) } }), mergeLegacySubscriptionChannels: backupHelpers.mergeLegacySubscriptionChannels,
+      forEachTakeoutImportEntry: async (_file, _selected, _entries, apply) => apply({ type: 'subscriptions' }), parseTakeoutSubscriptions: () => [{ id: 'new' }, { id: 'old' }, { id: 'new' }],
+      DBLibraryHandlers: { query: (method, data) => { assert.equal(method, 'importSubscriptionProfiles'); return operations.importSubscriptionProfiles(engine, data) } },
+      DBProfileHandlers: { find: () => records.findAsync({}), replaceIfUnchanged: async (previous, next) => { assert.deepEqual(await records.findOneAsync({ _id: next._id }), previous); return records.updateAsync({ _id: next._id }, next) } },
+      store: { dispatch: async action => { dispatches.push(action); return true } }, closeTakeoutImport() {}, t: key => key, showToast: toast => toasts.push(toast),
+    })
+    await context.importSelectedTakeoutData()
+    assert.deepEqual(await records.findOneAsync({ _id: stored._id }), { ...stored, subscriptions: [...stored.subscriptions, { id: 'new' }] })
+    assert.equal(context.takeoutBusy.value, false)
+    assert.ok(dispatches.includes('grabAllProfiles'))
+    assert.ok(dispatches.includes('scheduleSyncServer'))
+    assert.equal(toasts.some(toast => toast.message.includes('Unable')), false)
+  })
+}
