@@ -709,6 +709,9 @@ jobs:
           - repository: rpm
             pattern: '[.](amd64|arm64)[.]rpm$'
             count: 2
+          - repository: aur
+            pattern: '_(amd64|arm64)[.]deb$'
+            count: 2
           - repository: fdroid
             pattern: '[.]apk$'
             count: 5
