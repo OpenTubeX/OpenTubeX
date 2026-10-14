@@ -121,6 +121,7 @@ for (const uiScale of [100, 125]) {
       await expect(overlay).toHaveCount(0)
       await openMockedVideo(page)
       await expect(overlay).toHaveCount(0)
+      const otherTabId = await page.locator(activeTab).getAttribute('data-tab-id')
       await firstTab.click()
       await expect(overlay).toBeVisible()
       await expectHoleMatchesPlayer()
@@ -132,8 +133,12 @@ for (const uiScale of [100, 125]) {
       await expect(overlay).toBeVisible()
       await player.hover()
       await player.locator('.shaka-overflow-menu-button').click()
+      await expect(player.locator('.lights-off-button')).toHaveAttribute('aria-pressed', 'true')
       await player.locator('.lights-off-button').click()
       await expect(overlay).toHaveCount(0)
+      expect(await page.evaluate(tabId => {
+        return document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getTabLightsOff(tabId)
+      }, otherTabId)).toBe(false)
 
       await player.locator('.lights-off-button').click()
       await expect(overlay).toBeVisible()
