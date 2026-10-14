@@ -70,7 +70,7 @@ export function * iterateLocalVideoCommands(context) {
 
 // Search metadata changes; playback progress and download byte counts do not.
 const LOCAL_VIDEO_MUTATIONS = new Set([
-  'setHistoryCacheSorted', 'upsertToHistoryCache', 'removeFromHistoryCacheById',
+  'setHistorySummary', 'setHistoryCacheSorted', 'upsertToHistoryCache', 'removeFromHistoryCacheById',
   'removeMultipleFromHistoryCache', 'applyHistorySyncChanges',
   'applyPlaylistMetadataRepairs', 'addPlaylist', 'addPlaylists', 'upsertPlaylistToList',
   'addVideo', 'addVideos', 'removeAllPlaylists', 'removeAllVideos', 'removeVideo',
