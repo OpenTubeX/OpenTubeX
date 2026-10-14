@@ -1,6 +1,7 @@
 import { parseTakeoutWatchHistory, parseTakeoutSearchHistory } from '../../src/renderer/helpers/import-preview.js'
 import * as backupHelpers from '../../src/renderer/helpers/unifiedBackup.js'
 import model from '@seald-io/nedb/lib/model.js'
+import * as seenVideos from '../../src/subscriptionSeenVideos.js'
 import assert from 'node:assert/strict'
 import { mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
@@ -2420,6 +2421,54 @@ test('repeated thumbnail visibility callbacks retain a loaded image and do not r
   await setImmediate()
   assert.equal(context.state.source.value, 'latest thumbnail')
 })
+
+for (const race of ['off-page watched mark', 'delayed reply', 'newer broadcast']) {
+  test(`paged seen-mark replies preserve complete worker history during ${race}`, async t => {
+    const database = new DatabaseSync(':memory:'); database.exec(SCHEMA_SQL); t.after(() => database.close())
+    const engine = new LibraryEngine(database)
+    await engine.collections.history.insertAsync([
+      { _id: 'off-page', videoId: 'watched', timeWatched: 1, isWatched: true, unknown: new Date(1) },
+      ...Array.from({ length: 100 }, (_, index) => ({ _id: `recent-${index}`, videoId: `recent-${index}`, timeWatched: index + 2, isWatched: false })),
+    ])
+    const originalHistory = await engine.collections.history.findAsync({}).sort({ _id: 1 })
+    const { script, ast } = await source('src/datastores/handlers/base.js')
+    const declaration = matching(ast, node => node.type === 'ClassDeclaration' && node.id?.name === 'Settings')[0]
+    const Settings = vm.runInNewContext(script.slice(declaration.start, declaration.end) + '\nSettings', { db: engine.collections, ...seenVideos })
+    await engine.collections.settings.insertAsync({ _id: 'subscriptionSeenVideos', value: JSON.stringify([{ videoId: 'watched', seenAt: 1 }]) })
+    const saved = await Settings.mergeSeenVideos([{ videoId: 'first', seenAt: 2 }])
+    const state = { subscriptionSeenVideos: race === 'off-page watched mark' ? '[{"videoId":"watched","seenAt":1}]' : await Settings.mergeSeenVideos([{ videoId: 'second', seenAt: 3 }]) }
+    const entered = Promise.withResolvers(), release = Promise.withResolvers()
+    let reads = 0
+    const context = await functions('src/renderer/store/modules/settings.js', ['applySubscriptionSeenVideos'], {
+      ...seenVideos,
+      DBSettingHandlers: { mergeSeenVideos: async incoming => {
+        reads++
+        const result = await Settings.mergeSeenVideos(incoming)
+        if (race === 'newer broadcast') { entered.resolve(); await release.promise }
+        return result
+      } },
+    })
+    const rootGetters = { getHistoryCacheById: Object.fromEntries((await engine.historyPage({ limit: 100 })).records.map(record => [record.videoId, record])) }
+    assert.equal(rootGetters.getHistoryCacheById.watched, undefined)
+    const pending = context.applySubscriptionSeenVideos({ state, rootState: { history: { libraryPaged: true } }, rootGetters, commit: (_type, value) => { state.subscriptionSeenVideos = value } }, saved)
+    if (race === 'newer broadcast') {
+      assert.equal(await Promise.race([
+        entered.promise.then(() => 'reconciling'),
+        Promise.resolve(pending).then(() => 'finished'),
+      ]), 'reconciling')
+      state.subscriptionSeenVideos = await Settings.mergeSeenVideos([{ videoId: 'third', seenAt: 4 }])
+      release.resolve()
+    }
+    await pending
+    const durable = (await engine.collections.settings.findOneAsync({ _id: 'subscriptionSeenVideos' })).value
+    assert.equal(state.subscriptionSeenVideos, durable)
+    assert.ok(!JSON.parse(state.subscriptionSeenVideos).some(entry => entry.videoId === 'watched'))
+    assert.equal(reads, 1, 'only conflicting renderer state needs authoritative reconciliation')
+    await context.applySubscriptionSeenVideos({ state, rootState: { history: { libraryPaged: true } }, rootGetters, commit: (_type, value) => { state.subscriptionSeenVideos = value } }, durable)
+    assert.equal(reads, 1, 'current worker replies need no extra IPC query')
+    assert.deepEqual(await engine.collections.history.findAsync({}).sort({ _id: 1 }), originalHistory)
+  })
+}
 
 for (const outcome of ['success', 'fallback', 'failure', 'unmounted']) {
   test(`thumbnail reads survive viewport changes and handle ${outcome}`, async () => {

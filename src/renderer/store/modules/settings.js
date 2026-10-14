@@ -1108,7 +1108,17 @@ const customActions = {
     const value = JSON.stringify(mergeSubscriptionSeenPosts(state.subscriptionSeenPosts, saved))
     if (value !== state.subscriptionSeenPosts) commit('setSubscriptionSeenPosts', value)
   },
-  applySubscriptionSeenVideos({ commit, state, rootGetters }, saved) {
+  async applySubscriptionSeenVideos({ commit, state, rootState, rootGetters }, saved) {
+    if (rootState?.history?.libraryPaged) {
+      const previous = state.subscriptionSeenVideos
+      // The renderer has only a history page. Reconcile conflicting marks at
+      // the owner, which checks all history and preserves newer window writes.
+      const combined = JSON.stringify(mergeSubscriptionSeenVideos(previous, saved))
+      const value = combined === saved ? saved : await DBSettingHandlers.mergeSeenVideos(saved)
+      if (state.subscriptionSeenVideos !== previous) return
+      if (value !== previous) commit('setSubscriptionSeenVideos', value)
+      return
+    }
     // Another window's newer update may arrive before this request's reply.
     const value = JSON.stringify(mergeSubscriptionSeenVideos(
       state.subscriptionSeenVideos, saved, rootGetters.getHistoryCacheById

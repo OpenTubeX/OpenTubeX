@@ -20,6 +20,43 @@ const THUMBNAILS = [
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
 
+async function overrideLibraryQuery(app, options = {}) {
+  await app.electronApp.evaluate(({ ipcMain }, { channel, options }) => {
+    const handler = ipcMain._invokeHandlers?.get(channel)
+    if (typeof handler !== 'function') throw new Error('Electron no longer exposes the installed library-query test handler')
+    if (globalThis.metadataLibraryQueryOverride) throw new Error('Library-query override already installed')
+    const state = { handler, channel, fail: true, reads: new Map() }
+    globalThis.metadataLibraryQueryOverride = state
+    ipcMain.removeHandler(channel)
+    ipcMain.handle(channel, async (event, request) => {
+      if (request.method === 'metadataThumbnail') state.reads.set(request.data.id, (state.reads.get(request.data.id) ?? 0) + 1)
+      if (state.fail && request.method === options.failMethod && (!options.failField || request.data.field === options.failField)) {
+        if (options.failOnce) state.fail = false
+        throw new Error('simulated metadata read failure')
+      }
+      const result = await handler(event, request)
+      if (options.removeThumbnailFallback && request.method === 'metadataPage' && request.data.field === 'thumbnail') {
+        return { ...result, records: result.records.map(record => ({ ...record, thumbnailUrl: null })) }
+      }
+      return result
+    })
+  }, { channel: IpcChannels.LIBRARY_QUERY, options })
+  return {
+    resumeReads: () => app.electronApp.evaluate(() => { globalThis.metadataLibraryQueryOverride.fail = false }),
+    readCount: id => app.electronApp.evaluate((_, id) => globalThis.metadataLibraryQueryOverride.reads.get(id) ?? 0, id),
+  }
+}
+
+test.afterEach(async ({ app }) => {
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    const state = globalThis.metadataLibraryQueryOverride
+    if (!state) return
+    ipcMain.removeHandler(state.channel)
+    ipcMain.handle(state.channel, state.handler)
+    delete globalThis.metadataLibraryQueryOverride
+  })
+})
+
 test('shows metadata history after loading a video with a previously recorded title', async ({ app, page }) => {
   await page.evaluate(() => window.ftElectron.videoMetadataCache.update({
     videoId: 'jNQXAC9IVRw',
@@ -44,15 +81,7 @@ test('failed metadata revision reads retain their section and offer a lossless R
   await openMockedVideo(page)
   await expect.poll(async () => (await page.evaluate(() => window.ftElectron.libraryQuery('metadataPage', { videoId: 'jNQXAC9IVRw', field: 'title' }))).records.length).toBe(1)
   const original = await page.evaluate(() => window.ftElectron.libraryQuery('metadataPage', { videoId: 'jNQXAC9IVRw', field: 'title' }))
-  await app.electronApp.evaluate(({ ipcMain }) => {
-    const handler = ipcMain._invokeHandlers.get('library-query')
-    let fail = true
-    ipcMain.removeHandler('library-query')
-    ipcMain.handle('library-query', (event, request) => {
-      if (request.method === 'metadataPage' && request.data.field === 'title' && fail) { fail = false; throw new Error('simulated metadata revision read failure') }
-      return handler(event, request)
-    })
-  })
+  await overrideLibraryQuery(app, { failMethod: 'metadataPage', failField: 'title', failOnce: true })
   await page.locator(`${activeTab} .infoArea`).getByRole('button', { name: 'Metadata history' }).click()
   const dialog = page.getByRole('dialog', { name: 'Metadata history' })
   await expect(dialog.getByRole('heading', { name: 'Title History' })).toBeVisible()
@@ -88,18 +117,7 @@ test.describe('metadata thumbnail read recovery', () => {
         const original = await page.evaluate(() => window.ftElectron.libraryQuery('metadataPage', { videoId: 'jNQXAC9IVRw', field: 'thumbnail' }))
         expect(original.records.length).toBeGreaterThan(0)
         const expectedThumbnail = await page.evaluate(id => window.ftElectron.libraryQuery('metadataThumbnail', { id }), original.records[0].thumbnailRevisionId)
-        await app.electronApp.evaluate(({ ipcMain }, fallback) => {
-          const handler = ipcMain._invokeHandlers.get('library-query')
-          let fail = true
-          globalThis.restoreThumbnailRead = () => { fail = false }
-          ipcMain.removeHandler('library-query')
-          ipcMain.handle('library-query', async (event, request) => {
-            if (request.method === 'metadataThumbnail' && fail) throw new Error('simulated metadata thumbnail read failure')
-            const result = await handler(event, request)
-            if (!fallback && request.method === 'metadataPage' && request.data.field === 'thumbnail') return { ...result, records: result.records.map(record => ({ ...record, thumbnailUrl: null })) }
-            return result
-          })
-        }, fallback)
+        const override = await overrideLibraryQuery(app, { failMethod: 'metadataThumbnail', removeThumbnailFallback: !fallback })
         await page.locator(`${activeTab} .infoArea`).getByRole('button', { name: 'Metadata history' }).click()
         const frame = page.getByRole('dialog', { name: 'Metadata history' }).locator('.metadataThumbnail').first()
         const retry = frame.getByRole('button', { name: 'Retry', exact: true })
@@ -111,9 +129,9 @@ test.describe('metadata thumbnail read recovery', () => {
           await expect(frame.locator('img:not([aria-hidden="true"])')).toHaveCount(0)
         }
         await page.getByRole('dialog', { name: 'Metadata history' }).screenshot({ path: testInfo.outputPath(`metadata-thumbnail-read-recovery-95-${fallback ? 'with-fallback' : 'without-fallback'}.png`) })
-        await app.electronApp.evaluate(() => globalThis.restoreThumbnailRead())
+        await override.resumeReads()
         if (fallback) {
-          await page.keyboard.press('Escape')
+          await page.getByRole('dialog', { name: 'Metadata history' }).press('Escape')
           await expect(page.getByRole('dialog', { name: 'Metadata history' })).toBeHidden()
           await page.locator(`${activeTab} .infoArea`).getByRole('button', { name: 'Metadata history' }).click()
         } else await retry.click()
@@ -303,18 +321,7 @@ test('stores and presents every previous metadata version', async ({ app, page }
     expect(cacheDocuments.every(document => document.thumbnail?.startsWith('data:image/png;base64,')))
       .toBe(true)
 
-    await app.electronApp.evaluate(({ ipcMain }) => {
-      const handler = ipcMain._invokeHandlers.get('library-query')
-      globalThis.metadataThumbnailReadCounts = new Map()
-      ipcMain.removeHandler('library-query')
-      ipcMain.handle('library-query', (event, request) => {
-        if (request.method === 'metadataThumbnail') {
-          const counts = globalThis.metadataThumbnailReadCounts
-          counts.set(request.data.id, (counts.get(request.data.id) ?? 0) + 1)
-        }
-        return handler(event, request)
-      })
-    })
+    const override = await overrideLibraryQuery(app)
     const historyButton = page.locator(`${activeTab} .infoArea`)
       .getByRole('button', { name: 'Metadata history' })
     await expect(historyButton).toBeVisible()
@@ -366,7 +373,7 @@ test('stores and presents every previous metadata version', async ({ app, page }
       const page = await window.ftElectron.libraryQuery('metadataPage', { videoId, field: 'thumbnail' })
       return page.records[0].thumbnailRevisionId
     }, observedVideoId)
-    const retainedReads = await app.electronApp.evaluate((_, id) => globalThis.metadataThumbnailReadCounts.get(id), retainedRevision)
+    const retainedReads = await override.readCount(retainedRevision)
     expect(typeof retainedRevision).toBe('string')
     expect(retainedReads).toBeGreaterThan(0)
     const heading = dialog.getByRole('heading', { name: 'Metadata history' })
@@ -385,7 +392,7 @@ test('stores and presents every previous metadata version', async ({ app, page }
     await expect(retainedImage).toHaveAttribute('src', retainedSource)
     await scroller.evaluate(element => element.scrollTo(0, 0))
     await expect(retainedImage).toHaveAttribute('src', retainedSource)
-    await expect.poll(() => app.electronApp.evaluate((_, id) => globalThis.metadataThumbnailReadCounts.get(id), retainedRevision)).toBe(retainedReads)
+    await expect.poll(() => override.readCount(retainedRevision)).toBe(retainedReads)
 
     await page.setViewportSize({ width: 480, height: 500 })
     const firstDescription = descriptions.first()
