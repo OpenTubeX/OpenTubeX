@@ -3490,6 +3490,7 @@ async function playLibraryVideoFromCommandPalette(video, location) {
       video = member
     }
   } catch (error) {
+    if (presentedTabId.value !== targetTabId) return false
     console.error(error)
     showToast({ message: t('Storage Startup Error.Title'), icon: ['fas', 'circle-exclamation'] })
     return false
