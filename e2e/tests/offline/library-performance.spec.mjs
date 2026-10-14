@@ -80,7 +80,11 @@ test('large-library search, metadata edits and bulk operations work with a throt
     // navigation and the landing page's pending network/render work.
     await expect(page.locator('[aria-busy="true"]')).toHaveCount(0)
     await expect(page.locator('.ft-list-video').first()).toBeVisible()
-    const firstHistoryCard = await page.locator('.ft-list-video').first().elementHandle()
+    const firstHistoryCard = page.locator('.ft-list-video').filter({
+      has: page.getByText('Practical troubleshooting techniques episode 0', { exact: true }),
+    })
+    // A locator also finds replacements. A DOM-only marker verifies reuse.
+    await firstHistoryCard.evaluate(card => { card.dataset.historyCardRetained = 'true' })
     const search = page.getByRole('searchbox', { name: 'Search in History' })
     await measure('20k fuzzy history search', async () => {
       await search.fill('troubleshootnig')
@@ -88,8 +92,7 @@ test('large-library search, metadata edits and bulk operations work with a throt
       await expect(page.locator('.ft-list-video').first()).toBeVisible()
       await expect(page.getByText('Practical troubleshooting techniques episode 0', { exact: true })).toBeVisible()
     }, 3000)
-    expect(await firstHistoryCard.evaluate(card => card.isConnected), 'An unchanged search result should keep its mounted card').toBe(true)
-    await firstHistoryCard.dispose()
+    await expect(firstHistoryCard, 'An unchanged search result should keep its mounted card').toHaveAttribute('data-history-card-retained', 'true')
     await measure('20k no-match history search', async () => {
       await search.fill('unrelatedzzzz')
       await expect(page.getByText('There are no videos in your history that match your search')).toBeVisible()
