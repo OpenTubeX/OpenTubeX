@@ -101,3 +101,43 @@ test('shows the supplied unavailable message when an attachment has no usable im
   await expect(attachment).toHaveText('GIF unavailable')
   await expect(attachment.locator('img')).toHaveCount(0)
 })
+
+test('keeps pinned GIF comments and replies visible when a reload omits them', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page, { commentImages: attachments })
+  await page.route('https://i.ytimg.com/c_exp/**', async route => route.fulfill({
+    contentType: 'image/webp',
+    body: await readFile(new URL(`../../fixtures/media/comment-animation${route.request().url().includes('animation-1') ? '-portrait' : ''}.webp`, import.meta.url))
+  }))
+  await openMockedVideo(page)
+  const thread = page.locator('.commentThread').first()
+  await thread.locator('.commentPinButton').first().click()
+  await thread.locator('.commentReplyRootToggle button').click()
+  const reply = thread.locator('.commentReplyContent').first()
+  await expect(reply.locator('.commentAttachmentReady')).toBeAttached()
+  await reply.locator('.commentPinButton').click()
+
+  const persistedPins = await page.evaluate(() => JSON.parse(localStorage.getItem('opentubex-comment-pins')))
+  const snapshots = Object.values(persistedPins).flatMap(state => state.commentSnapshots)
+  expect(snapshots[0].imageAttachment.image.sources[0].url).toBe(attachments[0].image.sources[0].url)
+  expect(snapshots[0].replies[0].imageAttachment.image.sources[0].url).toBe(attachments[0].image.sources[0].url)
+
+  await page.route('**/youtubei/v1/next*', (route, request) => {
+    if (!JSON.parse(request.postData() ?? '{}').continuation) return route.fallback()
+    return route.fulfill({
+      json: {
+        onResponseReceivedEndpoints: [
+          { reloadContinuationItemsCommand: { continuationItems: [{ commentsHeaderRenderer: {} }] } },
+          { reloadContinuationItemsCommand: { continuationItems: [] } }
+        ],
+        frameworkUpdates: { entityBatchUpdate: { mutations: [] } }
+      }
+    })
+  })
+  await page.locator('.reloadComments').click()
+  await expect(page.locator('.commentThread')).toHaveCount(1)
+  await expect(page.locator('.commentPersonalPin')).toHaveCount(2)
+  await expect(page.locator('.commentThread > .commentAttachmentReady')).toBeAttached()
+  await expect(page.locator('.commentReplyContent .commentAttachmentReady').first()).toBeAttached()
+  await expect(page.locator('.commentThread > .commentImageAttachment canvas')).toBeVisible()
+  await expect(page.locator('.commentThread > .commentImageAttachment .commentAttachmentAnimation')).toBeHidden()
+})

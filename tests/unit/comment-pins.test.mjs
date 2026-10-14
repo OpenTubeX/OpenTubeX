@@ -117,6 +117,74 @@ test('tracks pinned replies separately from their root comment', () => {
   assert.equal(hasPinnedCommentReply(commentIds, 'root/comment'), false)
 })
 
+test('restores image-only pinned comments and replies with their attachments', () => {
+  const imageAttachment = {
+    width: 120,
+    height: 240,
+    image: { sources: [{ url: 'https://images.test/animation.webp?rs=signed', width: 120, height: 240 }] },
+    unavailableText: 'GIF unavailable',
+    rendererContext: { accessibilityContext: { label: 'Comment image attachment' } }
+  }
+  for (const pinReply of [false, true]) {
+    const storage = createMemoryStorage()
+    const comment = { id: 'root', author: 'Viewer', text: '', replies: [] }
+    const target = pinReply
+      ? { id: 'reply', author: 'Reply viewer', text: '', replies: [], imageAttachment }
+      : { ...comment, imageAttachment }
+    if (pinReply) comment.replies.push(target)
+    const root = pinReply ? comment : target
+    const commentIds = new Set([target.id])
+    if (pinReply) commentIds.add(getCommentReplyPinMarker(root.id, target.id))
+
+    saveCommentPins('profile:video', {
+      commentIds,
+      commentSnapshots: [createCommentPinSnapshot(root)]
+    }, storage)
+    const restored = loadCommentPins('profile:video', storage)
+    const entries = mergePinnedCommentSnapshots([], restored.commentSnapshots)
+    const restoredTarget = pinReply ? entries[0].comment.replies[0] : entries[0].comment
+    assert.equal(entries[0].persisted, true)
+    assert.equal(restoredTarget.text, '')
+    assert.deepEqual(restoredTarget.imageAttachment, imageAttachment)
+  }
+})
+
+test('validates pinned attachment data and excludes unrelated payload fields', () => {
+  const imageAttachment = {
+    width: 120,
+    height: '240',
+    image: {
+      sources: [
+        null,
+        { url: 'javascript:alert(1)' },
+        { url: 'http://images.test/insecure.webp' },
+        { url: 'https://' },
+        { url: 'https://images.test/animation.webp', width: Infinity, height: -1, extra: 'omit' }
+      ]
+    },
+    unavailableText: 'GIF unavailable',
+    rendererContext: { accessibilityContext: { label: 'Comment image attachment' }, loggingContext: 'omit' },
+    extra: 'omit'
+  }
+  const storage = createMemoryStorage(JSON.stringify({
+    'profile:video': {
+      commentIds: ['pinned'],
+      commentSnapshots: [{ id: 'pinned', author: 'Viewer', text: '', replies: [], imageAttachment }]
+    }
+  }))
+  assert.deepEqual(loadCommentPins('profile:video', storage).commentSnapshots[0].imageAttachment, {
+    width: 120,
+    image: { sources: [{ url: 'https://images.test/animation.webp' }] },
+    unavailableText: 'GIF unavailable',
+    rendererContext: { accessibilityContext: { label: 'Comment image attachment' } }
+  })
+  for (const invalid of [null, [], 'invalid', {}, { unavailableText: true }, { image: { sources: [{ url: 'javascript:alert(1)' }] } }]) {
+    assert.equal(createCommentPinSnapshot({
+      id: 'pinned', author: 'Viewer', text: '', replies: [], imageAttachment: invalid
+    }).imageAttachment, undefined)
+  }
+})
+
 test('removes empty pin groups and ignores malformed storage', () => {
   const contentKey = getCommentPinStorageKey('profile-a', 'video-a')
   const storage = createMemoryStorage('{not-json')

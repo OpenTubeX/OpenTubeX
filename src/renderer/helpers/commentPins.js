@@ -30,6 +30,35 @@ function getReplyPinMarkerPrefix(rootCommentId) {
   return `${REPLY_PIN_MARKER_PREFIX}${encodeURIComponent(rootCommentId)}:`
 }
 
+function sanitizeImageDimensions(image) {
+  return Object.fromEntries(['width', 'height'].flatMap(field => {
+    const value = image[field]
+    return typeof value === 'number' && Number.isFinite(value) && value > 0 ? [[field, value]] : []
+  }))
+}
+
+function sanitizeImageAttachment(attachment) {
+  if (attachment === null || typeof attachment !== 'object' || Array.isArray(attachment)) return null
+
+  const sources = Array.isArray(attachment.image?.sources)
+    ? attachment.image.sources.filter(source => (
+        source !== null && typeof source === 'object' && !Array.isArray(source) && typeof source.url === 'string' &&
+        URL.canParse(source.url) && new URL(source.url).protocol === 'https:'
+      )).map(source => ({ url: source.url, ...sanitizeImageDimensions(source) }))
+    : []
+  if (sources.length === 0 && (typeof attachment.unavailableText !== 'string' || attachment.unavailableText === '')) return null
+
+  const snapshot = { ...sanitizeImageDimensions(attachment), image: { sources } }
+  if (typeof attachment.unavailableText === 'string') {
+    snapshot.unavailableText = attachment.unavailableText
+  }
+  const label = attachment.rendererContext?.accessibilityContext?.label
+  if (typeof label === 'string') {
+    snapshot.rendererContext = { accessibilityContext: { label } }
+  }
+  return snapshot
+}
+
 function sanitizeCommentSnapshot(comment) {
   if (comment === null || typeof comment !== 'object' || Array.isArray(comment) ||
     typeof comment.id !== 'string' || comment.id === '' ||
@@ -61,6 +90,9 @@ function sanitizeCommentSnapshot(comment) {
       snapshot[field] = comment[field]
     }
   }
+
+  const imageAttachment = sanitizeImageAttachment(comment.imageAttachment)
+  if (imageAttachment) snapshot.imageAttachment = imageAttachment
 
   snapshot.replies = comment.replies
     .map(sanitizeCommentSnapshot)

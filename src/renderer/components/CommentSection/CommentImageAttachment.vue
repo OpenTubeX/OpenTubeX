@@ -64,7 +64,7 @@ function capturePoster(event) {
   posterReady.value = true
 }
 
-watch(source, () => {
+watch(() => source.value?.url, () => {
   failed.value = false
   posterReady.value = false
 })
