@@ -115,7 +115,9 @@ async function holdSeenMarks(page) {
         store.dispatch = dispatch
         await new Promise(resolve => { window.__finishSavingSeenMarks = resolve })
       }
-      return dispatch.call(this, type, ...args)
+      const result = await dispatch.call(this, type, ...args)
+      if (type === 'markSubscriptionEntriesAsSeen') window.__seenMarksSaved = true
+      return result
     }
   })
 }
@@ -1669,6 +1671,59 @@ test.describe('large new feed refresh', () => {
     await expect(page.getByRole('heading', { name: 'Refresh all subscription feeds?' })).toHaveCount(0)
     await expect(page.getByText('There is no new content.')).toBeVisible()
   })
+
+  for (const view of ['combined', 'tabbed']) {
+    test.describe(`confirmation while saving in ${view} view`, () => {
+      test.use({
+        seed: {
+          settings: { ...commonSettings, newSubscriptionFeedView: view },
+          profiles: [profile(subscriptions)],
+          subscriptionCache: [{
+            _id: subscriptions[0].id,
+            videos: [video('large-feed-new', 'New video in a large profile', now - HOUR, {
+              author: subscriptions[0].name,
+              authorId: subscriptions[0].id,
+              isNewInSubscriptionFeed: true
+            })],
+            videosTimestamp: new Date(now).toISOString()
+          }]
+        }
+      })
+
+      test('shows the refresh confirmation during saving and retains its focus afterward', async ({ page }, testInfo) => {
+        await goTo(page, 'subscriptions')
+        await page.locator('[data-subscription-feed-tab="all"]').click()
+        await expect(page.getByText('New video in a large profile', { exact: true })).toBeVisible()
+        await holdSeenMarks(page)
+        try {
+          await page.getByRole('button', { name: 'Mark all as seen' }).click()
+          await expect.poll(() => page.evaluate(() => !!window.__finishSavingSeenMarks)).toBe(true)
+          await expect(page.getByText('There is no new content.', { exact: true })).toBeVisible()
+          await expect(page.locator('#subscriptionsPanel.newFeed')).toHaveAttribute('role', 'tabpanel')
+          await page.keyboard.press('r')
+          const dialog = page.getByRole('dialog', { name: 'Refresh all subscription feeds?' })
+          await expect(dialog).toBeVisible({ timeout: 1000 })
+          await expect(dialog.getByText(/126 subscriptions can take a long time/)).toBeVisible()
+          await dialog.evaluate(element => { window.__refreshConfirmation = element })
+          const cancel = dialog.getByRole('button', { name: 'No', exact: true })
+          await cancel.focus()
+          await dialog.screenshot({ path: testInfo.outputPath('refresh-confirmation-during-save.png') })
+
+          await page.evaluate(() => window.__finishSavingSeenMarks())
+          await expect.poll(() => page.evaluate(() => window.__seenMarksSaved)).toBe(true)
+          await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+          await expect(page.locator('#subscriptionsPanel.newFeed')).toHaveAttribute('role', 'tabpanel')
+          expect(await dialog.evaluate(element => element === window.__refreshConfirmation)).toBe(true)
+          await expect(cancel).toBeFocused()
+          await cancel.click()
+          await expect(dialog).toHaveCount(0)
+          await expect(page.getByText('There is no new content.', { exact: true })).toBeVisible()
+        } finally {
+          await page.evaluate(() => window.__finishSavingSeenMarks?.())
+        }
+      })
+    })
+  }
 })
 
 test.describe('large combined new feed', () => {
