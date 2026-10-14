@@ -350,7 +350,7 @@
         :video-ids="isUserPlaylist ? videos.map(video => video.videoId) : []"
         :is-playlist="true"
         :title="title"
-        :thumbnail="thumbnail"
+        :thumbnail="isUserPlaylist && thumbnailPreference !== 'hidden' ? defaultThumbnail : thumbnail"
         @close="showDownloadPrompt = false"
       />
     </div>
