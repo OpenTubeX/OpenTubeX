@@ -236,14 +236,20 @@
 
 /* Keep the scrollbar against the window edge, leaving tab content and the
    resize divider unobstructed on the content-facing side. */
+.tabBar.vertical .tabsContainer :deep(.os-scrollbar-vertical) {
+  --os-size: calc(var(--scrollbar-thumb-width) + var(--os-padding-perpendicular));
+}
+
 .tabBar.vertical.position-left .tabsContainer :deep(.os-scrollbar-vertical) {
   left: 0;
   right: auto;
+  padding-left: 0;
 }
 
 .tabBar.vertical.position-right .tabsContainer :deep(.os-scrollbar-vertical) {
   left: auto;
   right: 0;
+  padding-right: 0;
 }
 
 .tabBar.vertical.position-left :deep(.os-scrollbar-vertical .os-scrollbar-handle) {
