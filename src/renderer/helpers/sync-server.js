@@ -644,7 +644,7 @@ function playlistMetadataFromRemote(playlist) {
     id: playlist.id,
     title: playlist.title,
     description: playlist.description || '',
-    thumbnail_url: typeof thumbnail === 'string' && /^data:image\/(?:webp|png|jpeg);base64,/.test(thumbnail) ? thumbnail : null,
+    thumbnail_url: typeof thumbnail === 'string' && thumbnail.startsWith('data:') ? thumbnail : null,
   }
 }
 
@@ -809,11 +809,7 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
     const rawRemoteMetadata = remote ? playlistMetadataFromRemote({ ...remote.playlist, id }) : null
     const remoteMetadata = rawRemoteMetadata ? { ...rawRemoteMetadata } : null
     if (remoteMetadata?.thumbnail_url) {
-      try {
-        remoteMetadata.thumbnail_url = await normalizePlaylistThumbnail(remoteMetadata.thumbnail_url)
-      } catch {
-        remoteMetadata.thumbnail_url = null
-      }
+      remoteMetadata.thumbnail_url = await normalizePlaylistThumbnail(remoteMetadata.thumbnail_url)
     }
     const metadata = selectPlaylistMetadata(local, remoteMetadata, previous[id]?.metadata)
     let remoteId = remote?.remoteId ?? id

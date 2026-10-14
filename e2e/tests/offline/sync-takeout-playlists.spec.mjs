@@ -72,11 +72,32 @@ test.describe('playlist sync while another window edits the library', () => {
       await store.dispatch('syncWithSyncServer')
       return store.getters.getPlaylist('sync-race').customThumbnail || ''
     })
-    for (const invalid of ['data:image/png;base64,AAAA', `data:image/png;base64,${'A'.repeat(2_000_000)}`]) {
+    header.thumbnail_url = await page.evaluate(() => {
+      const canvas = document.createElement('canvas')
+      canvas.width = 16
+      canvas.height = 9
+      return canvas.toDataURL('image/png')
+    })
+    const savedCover = await sync()
+    const baseline = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.settings.syncServerSnapshot)
+    for (const invalid of ['data:image/png;base64,AAAA', 'data:image/gif;base64,AAAA', `data:image/png;base64,${'A'.repeat(2_000_000)}`]) {
       header.thumbnail_url = invalid
-      expect(await sync()).toBe('')
-      expect(header.thumbnail_url).toBe('')
+      await expect(sync()).rejects.toThrow()
+      const saved = await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        return {
+          thumbnail: store.getters.getPlaylist('sync-race').customThumbnail,
+          baseline: store.state.settings.syncServerSnapshot,
+          error: store.state.syncServer.syncServerError,
+        }
+      })
+      expect(saved.thumbnail).toBe(savedCover)
+      expect(saved.baseline).toBe(baseline)
+      expect(saved.error).toBeTruthy()
+      expect(header.thumbnail_url).toBe(invalid)
     }
+    header.thumbnail_url = ''
+    expect(await sync()).toBe('')
     for (const [width, height] of [[16, 9], [2560, 1440]]) {
       header.thumbnail_url = await page.evaluate(([width, height]) => {
         const canvas = document.createElement('canvas')

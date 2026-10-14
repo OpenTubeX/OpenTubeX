@@ -17,7 +17,7 @@ const context = vm.createContext({
   generateRandomUniqueId: randomUUID,
   deepCopy: value => JSON.parse(JSON.stringify(value)),
   normalizePlaylistThumbnail: async value => {
-    if (value === 'data:image/png;base64,AAAA') throw new Error('Invalid image')
+    if (['data:image/png;base64,AAAA', 'data:image/gif;base64,AAAA'].includes(value)) throw new Error('Invalid image')
     return value
   },
 })
@@ -73,10 +73,29 @@ test('invalid remote custom thumbnails are rejected before persistence', async (
   const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
   await adapter.createPlaylist({ id: 'invalid', title: 'Invalid cover', thumbnail_url: 'data:image/png;base64,AAAA' })
   const store = createStore()
-  const snapshot = await context.syncPlaylists(adapter, store)
+  await assert.rejects(context.syncPlaylists(adapter, store), /Invalid image/)
+  assert.equal(store.state.playlists.playlists.length, 0)
+  assert.equal((await adapter.getPlaylist('invalid')).playlist.thumbnail_url, 'data:image/png;base64,AAAA')
+})
+
+test('invalid remote images preserve a saved cover and baseline while explicit resets still apply', async () => {
+  const original = 'data:image/webp;base64,b3JpZ2luYWw='
+  const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
+  const store = createStore([{ _id: 'saved', playlistName: 'Saved cover', customThumbnail: original, videos: [] }])
+  const previous = await context.syncPlaylists(adapter, store)
+  const baseline = JSON.stringify(previous)
+  store.persistPlaylistSyncBaseline = async () => assert.fail('An invalid remote image must not update the baseline')
+  for (const invalid of ['data:image/png;base64,AAAA', 'data:image/gif;base64,AAAA']) {
+    await adapter.updatePlaylist('saved', { thumbnail_url: invalid })
+    await assert.rejects(context.syncPlaylists(adapter, store, previous), /Invalid image/)
+    assert.equal(store.state.playlists.playlists[0].customThumbnail, original)
+    assert.equal(JSON.stringify(previous), baseline)
+    assert.equal((await adapter.getPlaylist('saved')).playlist.thumbnail_url, invalid)
+  }
+  store.persistPlaylistSyncBaseline = async () => {}
+  await adapter.updatePlaylist('saved', { thumbnail_url: '' })
+  await context.syncPlaylists(adapter, store, previous)
   assert.equal(store.state.playlists.playlists[0].customThumbnail, '')
-  assert.equal(snapshot.invalid.metadata.thumbnail_url, null)
-  assert.equal((await adapter.getPlaylist('invalid')).playlist.thumbnail_url, null)
 })
 
 test('simultaneous changes to the same metadata field keep the local edit', async () => {
