@@ -1,5 +1,6 @@
 package org.opentubex.app;
 
+import android.webkit.HttpAuthHandler;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
@@ -36,6 +37,11 @@ public class OpenTubeXWebViewClient extends BridgeWebViewClient {
         externalStreams = ExternalStreamRequestRegistry.shared();
         externalStreamClient = ExternalStreamRedirects.client().newBuilder()
             .addInterceptor(new RumbleManifestTransport(bridge.getContext())).build();
+    }
+
+    @Override
+    public void onReceivedHttpAuthRequest(WebView view, HttpAuthHandler handler, String host, String realm) {
+        if (!AndroidProxy.answerProxyChallenge(handler, host, realm)) super.onReceivedHttpAuthRequest(view, handler, host, realm);
     }
 
     @Override

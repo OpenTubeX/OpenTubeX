@@ -83,9 +83,9 @@ final class YtDlpRuntime {
         builder.environment().put("TMPDIR", context.getCacheDir().getAbsolutePath());
         builder.environment().put("PATH", System.getenv("PATH") + ":" + context.getApplicationInfo().nativeLibraryDir);
         // Also covers FFmpeg and any HTTP clients spawned by yt-dlp.
-        builder.environment().put("http_proxy", AndroidProxy.url());
-        builder.environment().put("https_proxy", AndroidProxy.url());
-        builder.environment().put("all_proxy", AndroidProxy.url());
+        builder.environment().put("http_proxy", AndroidProxy.authenticatedUrl());
+        builder.environment().put("https_proxy", AndroidProxy.authenticatedUrl());
+        builder.environment().put("all_proxy", AndroidProxy.authenticatedUrl());
         builder.environment().put("no_proxy", "");
         builder.environment().put("NO_PROXY", "");
         return builder;
@@ -133,7 +133,7 @@ final class YtDlpRuntime {
             command.addAll(args);
             // Last option wins over custom arguments; --geo-verification-proxy must
             // follow the same policy instead of escaping through a second proxy.
-            command.addAll(asList("--proxy", AndroidProxy.url(), "--geo-verification-proxy", AndroidProxy.url()));
+            command.addAll(asList("--proxy", AndroidProxy.authenticatedUrl(), "--geo-verification-proxy", AndroidProxy.authenticatedUrl()));
             running = new RunningProcess(command(context, command).start());
             RunningProcess current = running;
             if (id != null) PROCESSES.put(id, current);

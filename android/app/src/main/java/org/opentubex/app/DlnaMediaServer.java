@@ -79,6 +79,7 @@ final class DlnaMediaServer implements AutoCloseable {
         this.media = media;
         this.address = address;
         client = new OkHttpClient.Builder().cookieJar(CookieJar.NO_COOKIES)
+            .proxyAuthenticator(AndroidProxy.proxyAuthenticator())
             .connectTimeout(10, TimeUnit.SECONDS).readTimeout(30, TimeUnit.SECONDS)
             .addNetworkInterceptor(chain -> {
                 Request.Builder request = chain.request().newBuilder();

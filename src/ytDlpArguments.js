@@ -32,7 +32,7 @@ export function playbackSubtitleArguments(isYouTubeVideo) {
 const SPONSORBLOCK_CATEGORIES = ['sponsor', 'intro', 'outro', 'selfpromo', 'interaction', 'music_offtopic', 'preview', 'filler']
 // Keeps local-playlist URLs comfortably below Windows' process command-line limit.
 export const MAX_LOCAL_PLAYLIST_VIDEOS = 500
-export const DENIED_CUSTOM_ARGS = [
+const DENIED_CUSTOM_ARGS = [
   '--alias',
   '--config-location',
   '--config-locations',
@@ -43,9 +43,17 @@ export const DENIED_CUSTOM_ARGS = [
   '--external-downloader',
   '--external-downloader-args',
   '--ffmpeg-location',
+  '--js-runtimes',
+  '--netrc-cmd',
   '--plugin-dirs',
-  '--remote-components'
+  '--remote-components',
+  '--use-postprocessor'
 ]
+/** yt-dlp accepts unambiguous prefixes of long options, so `--exec-befor` runs `--exec-before-download`. */
+export function isDeniedCustomArgument(argument) {
+  const option = argument.split('=')[0]
+  return option.startsWith('--') && option.length > 2 && DENIED_CUSTOM_ARGS.some(denied => denied.startsWith(option))
+}
 const TIME_REGEX = /^(?:\d+:)?[0-5]?\d:[0-5]\d(?:\.\d+)?$/
 export const AUTOMATIC_NUMBER_LIMITS = Object.freeze({
   minDurationSeconds: 31_536_000,
@@ -105,7 +113,7 @@ export function buildYtDlpDownloadArguments(payload, globalArguments = '') {
   const subtitleFormat = SUBTITLE_FORMATS.includes(payload.subtitleFormat) ? payload.subtitleFormat : ''
   const customArgs = splitArguments(payload.customArgs || '')
   const globalCustomArgs = splitArguments(globalArguments)
-  if ([...globalCustomArgs, ...customArgs].some(arg => DENIED_CUSTOM_ARGS.includes(arg.split('=')[0]))) throw new Error('unsupported-custom-argument')
+  if ([...globalCustomArgs, ...customArgs].some(isDeniedCustomArgument)) throw new Error('unsupported-custom-argument')
   const args = [...globalCustomArgs]
   if (!isRemotePlaylist) args.push('--no-playlist')
   let outputTemplate = typeof payload.filenameTemplate === 'string' && payload.filenameTemplate.trim() !== ''

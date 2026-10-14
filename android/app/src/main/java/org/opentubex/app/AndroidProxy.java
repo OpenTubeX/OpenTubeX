@@ -2,6 +2,7 @@ package org.opentubex.app;
 
 import android.content.Context;
 import android.util.AtomicFile;
+import android.webkit.HttpAuthHandler;
 import android.webkit.WebView;
 import com.getcapacitor.JSObject;
 
@@ -16,7 +17,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.Authenticator;
 import java.net.InetSocketAddress;
+import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.net.ProxySelector;
 import java.net.SocketAddress;
@@ -60,6 +63,19 @@ final class AndroidProxy {
             throw new IllegalStateException("Unable to start the app network proxy", error);
         }
         Proxy local = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", relay.port()));
+        // URLConnection answers the relay's 407; OkHttp clients use proxyAuthenticator().
+        Authenticator.setDefault(new Authenticator() {
+            @Override protected PasswordAuthentication getPasswordAuthentication() {
+                // Android may report the relay's host name as "localhost", so compare its address.
+                return getRequestorType() == RequestorType.PROXY && getRequestingSite() != null &&
+                    getRequestingSite().isLoopbackAddress() && getRequestingPort() == relay.port() &&
+                    AndroidProxyRelay.REALM.equals(getRequestingPrompt()) &&
+                    ("http".equals(getRequestingProtocol()) ||
+                        AndroidProxyRelay.isUrlConnectionTunnelChallenge(Thread.currentThread().getStackTrace()))
+                    ? new PasswordAuthentication(AndroidProxyRelay.USER, relay.password().toCharArray())
+                    : null;
+            }
+        });
         ProxySelector.setDefault(new ProxySelector() {
             @Override public List<Proxy> select(URI uri) {
                 if ("http".equalsIgnoreCase(uri.getScheme()) || "https".equalsIgnoreCase(uri.getScheme())) {
@@ -94,6 +110,24 @@ final class AndroidProxy {
     static String url() {
         if (relay == null) throw new IllegalStateException("Android proxy has not initialized");
         return relay.url();
+    }
+
+    /** For child processes, which send the credentials in the proxy URL. */
+    static String authenticatedUrl() {
+        if (relay == null) throw new IllegalStateException("Android proxy has not initialized");
+        return relay.authenticatedUrl();
+    }
+
+    /** Also answers CONNECT preemptively, so tunnels need no extra round trip. */
+    static okhttp3.Authenticator proxyAuthenticator() {
+        return (route, response) -> relay == null ? null : relay.okHttpAuthenticator().authenticate(route, response);
+    }
+
+    /** The relay refuses loopback destinations, so only it can challenge as 127.0.0.1. */
+    static boolean answerProxyChallenge(HttpAuthHandler handler, String host, String realm) {
+        if (relay == null || !"127.0.0.1".equals(host) || !AndroidProxyRelay.REALM.equals(realm)) return false;
+        handler.proceed(AndroidProxyRelay.USER, relay.password());
+        return true;
     }
 
     static synchronized void configure(JSONObject value) throws Exception {

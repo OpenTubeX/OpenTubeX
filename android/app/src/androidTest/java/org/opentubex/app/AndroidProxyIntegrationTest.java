@@ -308,6 +308,9 @@ public class AndroidProxyIntegrationTest {
                 AndroidProxy.protectWebView(web);
                 web.getSettings().setJavaScriptEnabled(true);
                 web.setWebViewClient(new WebViewClient() {
+                    @Override public void onReceivedHttpAuthRequest(WebView webView, android.webkit.HttpAuthHandler handler, String host, String realm) {
+                        if (!AndroidProxy.answerProxyChallenge(handler, host, realm)) handler.cancel();
+                    }
                     @Override public void onReceivedSslError(WebView webView, SslErrorHandler handler, SslError error) {
                         byte[] received = SslCertificate.saveState(error.getCertificate()).getByteArray("x509-certificate");
                         if (error.getUrl().startsWith(ForwardingProxy.BASE + "/") && Arrays.equals(certificate, received)) handler.proceed();
@@ -382,7 +385,7 @@ public class AndroidProxyIntegrationTest {
                 view.set(web);
                 AndroidProxy.protectWebView(web);
                 web.getSettings().setJavaScriptEnabled(true);
-                web.setWebViewClient(new WebViewClient());
+                web.setWebViewClient(proxyClient());
                 web.loadDataWithBaseURL("https://localhost", "<script>fetch('" + TARGET + "').catch(()=>{})</script>", "text/html", "UTF-8", null);
             });
             try { proxy.assertContacted(); }
@@ -398,6 +401,15 @@ public class AndroidProxyIntegrationTest {
                 "--proxy", "", "--skip-download", "--retries", "0", "--socket-timeout", "3", TARGET)));
             proxy.assertContacted();
         }
+    }
+
+    /** Like the app's WebView clients, which answer only the relay's own challenge. */
+    private static WebViewClient proxyClient() {
+        return new WebViewClient() {
+            @Override public void onReceivedHttpAuthRequest(WebView view, android.webkit.HttpAuthHandler handler, String host, String realm) {
+                if (!AndroidProxy.answerProxyChallenge(handler, host, realm)) handler.cancel();
+            }
+        };
     }
 
     @Test public void webViewDoesNotBypassProxyForLoopbackDestinations() throws Exception {
@@ -416,14 +428,14 @@ public class AndroidProxyIntegrationTest {
                 web.addJavascriptInterface(new Object() {
                     @android.webkit.JavascriptInterface public void complete() { finished.countDown(); }
                 }, "testResult");
-                web.setWebViewClient(new WebViewClient());
+                web.setWebViewClient(proxyClient());
                 web.loadDataWithBaseURL("https://localhost", "<script>fetch('" + target +
                     "').catch(()=>{}).finally(()=>testResult.complete())</script>", "text/html", "UTF-8", null);
             });
             try {
-                assertTrue("Loopback destination bypassed the proxy", proxy.contacted.await(10, TimeUnit.SECONDS));
-                assertTrue(proxy.request, proxy.request.startsWith("CONNECT 127.0.0.1:" + destination.getLocalPort() + " "));
+                // The relay refuses loopback targets, so a local server cannot challenge for its credentials.
                 assertTrue(finished.await(10, TimeUnit.SECONDS));
+                assertFalse("Relay forwarded a loopback destination", proxy.contacted.await(500, TimeUnit.MILLISECONDS));
                 destination.setSoTimeout(200);
                 assertThrows(SocketTimeoutException.class, destination::accept);
             } finally {

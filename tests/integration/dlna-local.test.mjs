@@ -25,6 +25,8 @@ async function close (server) {
   await new Promise(resolve => server.close(resolve))
 }
 
+const allowLoopback = async () => [{ address: '127.0.0.1', family: 4 }]
+
 test('discovers a local renderer and plays a ranged MP4 through the proxy', { timeout: 20_000 }, async t => {
   const actions = []
   const upstreamRanges = []
@@ -112,7 +114,7 @@ test('discovers a local renderer and plays a ranged MP4 through the proxy', { ti
     mediaUrl: `http://127.0.0.1:${upstreamPort}/video.mp4`,
     title: 'Local DLNA test',
     startSeconds: 5
-  })
+  }, {}, {}, allowLoopback)
   assert.ok(cast.castId, JSON.stringify(cast))
   t.after(() => stopDlnaCast())
 
@@ -124,7 +126,7 @@ test('discovers a local renderer and plays a ranged MP4 through the proxy', { ti
     deviceId: device.id,
     mediaUrl: `http://127.0.0.1:${upstreamPort}/video.mp4`,
     title: 'Another window'
-  })
+  }, {}, {}, allowLoopback)
   assert.match(secondCast.error ?? '', /already casting/i)
   assert.equal(await stopDlnaCast(42, cast.castId), true)
   assert.deepEqual(actions, ['SetAVTransportURI', 'Play', 'Seek', 'Stop'])
@@ -134,7 +136,7 @@ test('discovers a local renderer and plays a ranged MP4 through the proxy', { ti
     deviceId: device.id,
     mediaUrl: `http://127.0.0.1:${upstreamPort}/video.mp4`,
     title: 'Failed Play'
-  })
+  }, {}, {}, allowLoopback)
   assert.match(failedCast.error ?? '', /Play failed with HTTP 500/)
   assert.deepEqual(actions.slice(-3), ['SetAVTransportURI', 'Play', 'Stop'])
 })

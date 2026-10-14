@@ -40,7 +40,9 @@ test('streams a playable H.264/AAC merge before the source downloads finish', { 
   await listen(upstream)
   t.after(() => { for (const timer of timers) clearTimeout(timer); return close(upstream) })
   const base = `http://127.0.0.1:${upstream.address().port}`
-  const relay = await createMuxedMediaServer(`${base}/video`, `${base}/audio`, '127.0.0.1', 'secret', { ffmpegPath: ffmpeg })
+  const relay = await createMuxedMediaServer(`${base}/video`, `${base}/audio`, '127.0.0.1', 'secret', {
+    ffmpegPath: ffmpeg, resolveAddresses: async () => [{ address: '127.0.0.1', family: 4 }]
+  })
   await listen(relay)
   t.after(() => close(relay))
   const url = `http://127.0.0.1:${relay.address().port}/secret/video.mp4`
@@ -74,7 +76,9 @@ test('a merged stream that stalls after its first output reports failure and clo
   t.after(() => close(upstream))
   t.mock.timers.enable({ apis: ['setTimeout'] })
   const base = `http://127.0.0.1:${upstream.address().port}`
-  const relay = await createMuxedMediaServer(`${base}/video`, `${base}/audio`, '127.0.0.1', 'secret', { ffmpegPath: ffmpeg })
+  const relay = await createMuxedMediaServer(`${base}/video`, `${base}/audio`, '127.0.0.1', 'secret', {
+    ffmpegPath: ffmpeg, resolveAddresses: async () => [{ address: '127.0.0.1', family: 4 }]
+  })
   await listen(relay)
   t.after(() => close(relay))
   let resumeRenderer
