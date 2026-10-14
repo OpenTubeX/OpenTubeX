@@ -197,7 +197,7 @@ test('playlist card metadata tolerates retained scalar fields without changing t
   for (const videos of [undefined, null, false, 42, 'retained', {}, [null], [{ videoId: 42 }]]) {
     const data = { _id: 'legacy', playlistName: 'Retained', ...(videos === undefined ? {} : { videos }) }, before = structuredClone(data)
     const metadata = vm.runInNewContext(script.slice(initializer.start, initializer.end), {
-      computed: callback => callback(), isUserPlaylist: { value: true }, props: { data }, thumbnailPlaceholder: 'placeholder', store: { state: { playlists: { libraryPaged: false } } },
+      computed: callback => callback(), isUserPlaylist: { value: true }, props: { data }, thumbnailPreference: ref('default'), thumbnailPlaceholder: 'placeholder', store: { getters: { getThumbnailPreference: 'default' }, state: { playlists: { libraryPaged: false } } },
       backendPreference: { value: 'local' }, currentInvidiousInstanceUrl: { value: 'instance' },
     })
     assert.equal(metadata.thumbnailUrl, 'placeholder')
@@ -304,8 +304,8 @@ test('playlist selector thumbnails and counts tolerate every retained membership
   const declarations = ast.program.body.flatMap(node => node.declarations ?? [])
   for (const videos of [undefined, null, false, 42, 'opaque', [null], [{ videoId: 42 }], [{ videoId: 'A' }]]) {
     const playlist = { videos }, before = structuredClone(playlist)
-    const context = vm.createContext({ computed: getter => ({ get value() { return getter() } }), props: { playlist }, store: { state: { playlists: { libraryPaged: false } } },
-      thumbnailPlaceholder: 'placeholder', backendPreference: ref('local'), currentInvidiousInstanceUrl: ref('instance'), getVideoThumbnailUrl: () => 'valid',
+    const context = vm.createContext({ computed: getter => ({ get value() { return getter() } }), props: { playlist }, store: { getters: { getThumbnailPreference: 'default' }, state: { playlists: { libraryPaged: false } } },
+      thumbnailPreference: ref('default'), thumbnailPlaceholder: 'placeholder', backendPreference: ref('local'), currentInvidiousInstanceUrl: ref('instance'), getVideoThumbnailUrl: () => 'valid',
     })
     for (const name of ['videoCount', 'thumbnail']) {
       const init = declarations.find(node => node.id.name === name).init
@@ -324,7 +324,7 @@ test('portable Home and Save readers preserve opaque playlist records', async ()
   const homeAst = babelParse(home, { sourceType: 'module' })
   const homeInit = homeAst.program.body.flatMap(node => node.declarations ?? []).find(node => node.id.name === 'recentPlaylists').init
   const countInit = homeAst.program.body.flatMap(node => node.declarations ?? []).find(node => node.id.name === 'playlistVideoCount')?.init
-  const playlistVideoCount = countInit ? vm.runInNewContext(home.slice(countInit.start, countInit.end), { store: { state: { playlists: { libraryPaged: false } } } }) : null
+  const playlistVideoCount = countInit ? vm.runInNewContext(home.slice(countInit.start, countInit.end), { store: { getters: { getThumbnailPreference: 'default' }, state: { playlists: { libraryPaged: false } } } }) : null
   const recent = vm.runInNewContext(home.slice(homeInit.start, homeInit.end), { playlistVideoCount, computed: getter => getter(), store: { getters: { getAllPlaylists: playlists } } })
   assert.deepEqual(Array.from(recent, playlist => playlist._id), ['opaque', 'retained'])
   const prompt = parse(await readFile(new URL('../../src/renderer/components/FtPlaylistAddVideoPrompt/FtPlaylistAddVideoPrompt.vue', import.meta.url), 'utf8')).descriptor.scriptSetup.content
@@ -344,7 +344,7 @@ test('Home renders retained opaque memberships with counts and safe thumbnail pl
   assert.ok(count, 'the template and thumbnail helper share the retained membership count')
   assert.doesNotMatch(parsed.template.content, /playlist\.videos\.length/)
   const thumbnail = ast.program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'playlistThumbnail')
-  const context = vm.createContext({ thumbnailPlaceholder: 'placeholder', videoThumbnail: () => 'video', store: { state: { playlists: { libraryPaged: false } } } })
+  const context = vm.createContext({ thumbnailPreference: ref('default'), thumbnailPlaceholder: 'placeholder', videoThumbnail: () => 'video', store: { getters: { getThumbnailPreference: 'default' }, state: { playlists: { libraryPaged: false } } } })
   vm.runInContext(script.slice(count.start, count.end), context)
   vm.runInContext(script.slice(thumbnail.start, thumbnail.end), context)
   for (const videos of [undefined, null, false, 42, 'retained', [], [null], [{ videoId: 42 }]]) {
@@ -442,7 +442,7 @@ test('Save handles retained scalar and opaque memberships without changing recor
   const init = ast.program.body.flatMap(node => node.declarations ?? []).find(node => node.id.name === 'containedIds').init
   const playlists = [null, false, 42, 'retained', [null, false], [null, { videoId: 'A' }]].map((videos, index) => ({ _id: String(index), videos, unknown: new Date(index) }))
   const before = structuredClone(playlists)
-  const context = vm.createContext({ computed: getter => getter(), allPlaylists: ref(playlists), props: { videoData: { videoId: 'A' } }, store: { state: { playlists: { libraryPaged: false } } }, thumbnailPlaceholder: 'placeholder', getVideoThumbnailUrl: () => 'video' })
+  const context = vm.createContext({ computed: getter => getter(), allPlaylists: ref(playlists), props: { videoData: { videoId: 'A' } }, store: { getters: { getThumbnailPreference: 'default' }, state: { playlists: { libraryPaged: false } } }, thumbnailPreference: ref('default'), thumbnailPlaceholder: 'placeholder', getVideoThumbnailUrl: () => 'video' })
   const ids = vm.runInContext(script.slice(init.start, init.end), context)
   assert.deepEqual([...ids], ['5'])
   for (const name of ['playlistVideoCount', 'playlistThumbnail']) {
@@ -507,8 +507,8 @@ for (const paged of [false, true]) {
         const before = structuredClone(data), expectedCount = paged ? 20000 : Array.isArray(videos) ? videos.length : 0
         for (const { name, content, ast } of scripts) {
           const context = vm.createContext({ computed: callback => callback(), isUserPlaylist: { value: true }, props: { data, playlist: data },
-            store: { state: { playlists: { libraryPaged: paged } }, getters: { getBackendPreference: 'local', getCurrentInvidiousInstanceUrl: 'instance' } },
-            thumbnailPlaceholder: 'placeholder', getVideoThumbnailUrl: videoId => `thumbnail:${videoId}`, backendPreference: ref('local'), currentInvidiousInstanceUrl: ref('instance'),
+            store: { getters: { getThumbnailPreference: 'default' }, state: { playlists: { libraryPaged: paged } }, getters: { getBackendPreference: 'local', getCurrentInvidiousInstanceUrl: 'instance' } },
+            thumbnailPreference: ref('default'), thumbnailPlaceholder: 'placeholder', getVideoThumbnailUrl: videoId => `thumbnail:${videoId}`, backendPreference: ref('local'), currentInvidiousInstanceUrl: ref('instance'),
           })
           if (name === 'FtAddToPlaylistDropdown') {
             for (const method of ['playlistVideoCount', 'playlistThumbnail']) {
@@ -535,7 +535,7 @@ test('Save thumbnails use the backend membership source independently of retaine
   const content = parse(await readFile(new URL('../../src/renderer/components/FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue', import.meta.url), 'utf8')).descriptor.scriptSetup.content
   const ast = babelParse(content, { sourceType: 'module' })
   for (const paged of [false, true]) {
-    const context = vm.createContext({ store: { state: { playlists: { libraryPaged: paged } }, getters: {} }, thumbnailPlaceholder: 'placeholder', getVideoThumbnailUrl: id => `thumbnail:${id}` })
+    const context = vm.createContext({ store: { getters: { getThumbnailPreference: 'default' }, state: { playlists: { libraryPaged: paged } }, getters: {} }, thumbnailPreference: ref('default'), thumbnailPlaceholder: 'placeholder', getVideoThumbnailUrl: id => `thumbnail:${id}` })
     for (const name of ['playlistVideoCount', 'playlistThumbnail']) {
       const node = ast.program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === name)
       vm.runInContext(content.slice(node.start, node.end), context)
@@ -589,7 +589,7 @@ for (const name of ['FtListPlaylist', 'FtPlaylistSelector', 'Home']) {
         const data = { _id: 'p', playlistName: 'Retained', videoCount: 1, videos: [first], firstVideo: { videoId: 'retained-summary' }, unknown: new Date(1) }
         const before = structuredClone(data)
         const context = vm.createContext({ computed: getter => getter(), isUserPlaylist: ref(true), props: { data, playlist: data },
-          store: { state: { playlists: { libraryPaged: paged } } }, thumbnailPlaceholder: 'placeholder', backendPreference: ref('local'), currentInvidiousInstanceUrl: ref('instance'),
+          store: { getters: { getThumbnailPreference: 'default' }, state: { playlists: { libraryPaged: paged } } }, thumbnailPreference: ref('default'), thumbnailPlaceholder: 'placeholder', backendPreference: ref('local'), currentInvidiousInstanceUrl: ref('instance'),
           getVideoThumbnailUrl: id => `thumbnail:${id}`, videoThumbnail: video => `thumbnail:${video.videoId}`,
         })
         let actual
