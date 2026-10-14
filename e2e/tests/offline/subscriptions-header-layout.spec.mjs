@@ -1,4 +1,5 @@
 import { test, expect, goTo, setWindowSize } from '../../helpers/app.mjs'
+import { expectTabHighlightAligned } from '../../helpers/tabs.mjs'
 
 const now = Date.now()
 const CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
@@ -595,13 +596,13 @@ test.describe('subscriptions header layout', () => {
         const tabs = [...document.querySelectorAll('[data-subscription-feed-tab]')]
           .map(tab => tab.getBoundingClientRect())
         const label = document.querySelector('.tabs .selectedTab .tabLabel > span').getBoundingClientRect()
-        const indicator = document.querySelector('.tabs .tabsIndicator').getBoundingClientRect()
+        const selectedTab = document.querySelector('.tabs [aria-selected="true"]').getBoundingClientRect()
         const title = document.querySelector('.pageTitle').getBoundingClientRect()
         return {
           container,
           tabs,
           titleGap: label.top - title.bottom,
-          indicatorGap: indicator.bottom - 3 - label.bottom
+          indicatorGap: selectedTab.bottom - 3 - label.bottom
         }
       })
 
@@ -611,6 +612,7 @@ test.describe('subscriptions header layout', () => {
       expect(layout.tabs.every(tab => tab.height >= 44)).toBe(true)
       expect(layout.titleGap).toBeGreaterThanOrEqual(-1)
       expect(layout.titleGap).toBeLessThanOrEqual(24)
+      await expectTabHighlightAligned(page.locator('.tabs [aria-selected="true"]'))
       expect(layout.indicatorGap).toBeGreaterThanOrEqual(-1)
       expect(layout.indicatorGap).toBeLessThanOrEqual(12.5)
       await expect(page.locator('.subscriptionsHeader')).not.toHaveClass(/singleRow/)

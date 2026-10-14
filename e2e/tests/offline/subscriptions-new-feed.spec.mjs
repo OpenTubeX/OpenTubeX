@@ -1,4 +1,5 @@
 import { test, expect, goTo } from '../../helpers/app.mjs'
+import { expectTabHighlightAligned, expectTabHighlightStyle } from '../../helpers/tabs.mjs'
 import { captureAppFramebuffer } from '../../helpers/screenshots.mjs'
 import { encryptSyncDocument, decryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
 
@@ -417,15 +418,7 @@ test.describe('new subscriptions feed', () => {
       await expect(postsTab).toBeFocused()
       await expect(postsTab).toHaveAttribute('aria-selected', 'true')
       await expect(page.getByText('New community post', { exact: true })).toBeVisible()
-      await expect.poll(() => page.evaluate(() => {
-        const indicator = document.querySelector('.newFeedTabs .tabsIndicator').getBoundingClientRect()
-        const tab = document.querySelector('[data-new-feed-tab="posts"]').getBoundingClientRect()
-        return Math.max(
-          Math.abs(indicator.x - tab.x),
-          Math.abs(indicator.width - tab.width),
-          Math.abs(indicator.bottom - tab.bottom)
-        )
-      })).toBeLessThan(2)
+      await expectTabHighlightAligned(postsTab)
     })
   }
 
@@ -472,11 +465,7 @@ test.describe('new subscriptions feed', () => {
       const posts = tabs.locator('[data-new-feed-tab="posts"]')
       await expect(posts).toBeFocused()
       await expect(posts).toHaveAttribute('aria-selected', 'true')
-      await expect.poll(() => tabs.evaluate(element => {
-        const pill = element.querySelector('.tabsIndicator').getBoundingClientRect()
-        const selected = element.querySelector('[aria-selected="true"]').getBoundingClientRect()
-        return Math.max(Math.abs(pill.left - selected.left), Math.abs(pill.top - selected.top), Math.abs(pill.width - selected.width))
-      })).toBeLessThan(1)
+      await expectTabHighlightAligned(posts)
       if (scale === 95) {
         for (const colorScheme of ['dark', 'light']) {
           await page.emulateMedia({ colorScheme })
@@ -497,9 +486,9 @@ test.describe('new subscriptions feed', () => {
     await showTabbedView.click()
 
     const newContentTabs = page.getByRole('tablist', { name: 'New content tabs' })
-    const newContentTabsIndicator = newContentTabs.locator('.tabsIndicator')
+    const selectedTab = newContentTabs.locator('[aria-selected="true"]')
     await expect(newContentTabs).toBeVisible()
-    await expect(newContentTabsIndicator).toBeVisible()
+    await expectTabHighlightAligned(selectedTab)
     await expect(page.getByRole('button', { name: 'Show combined view' })).toHaveAttribute('aria-pressed', 'true')
     await expect(newContentTabs.locator('[data-new-feed-tab="videos"]')).toHaveAttribute('aria-selected', 'true')
     await expect(page.getByText('New video', { exact: true })).toBeVisible()
@@ -521,20 +510,11 @@ test.describe('new subscriptions feed', () => {
     const shortsTab = newContentTabs.locator('[data-new-feed-tab="shorts"]')
     await shortsTab.click()
     await expect(shortsTab).toHaveAttribute('aria-selected', 'true')
-    await expect(newContentTabsIndicator).toHaveCSS('transition-property', 'opacity')
+    await expectTabHighlightStyle(selectedTab, 'transitionProperty', 'opacity')
     await expect(page.getByText('New short', { exact: true })).toBeVisible()
     await expect(page.getByText('New video', { exact: true })).toHaveCount(0)
 
-    await expect.poll(() => page.evaluate(() => {
-      const indicator = document.querySelector('.newFeedTabs .tabsIndicator').getBoundingClientRect()
-      const tab = document.querySelector('[data-new-feed-tab="shorts"]').getBoundingClientRect()
-
-      return Math.max(
-        Math.abs(indicator.x - tab.x),
-        Math.abs(indicator.width - tab.width),
-        Math.abs(indicator.bottom - tab.bottom)
-      )
-    })).toBeLessThan(2)
+    await expectTabHighlightAligned(shortsTab)
 
     await shortsTab.focus()
     await shortsTab.press('ArrowRight')

@@ -1,4 +1,5 @@
 import { test, expect, goTo, sel } from '../../helpers/app.mjs'
+import { expectTabHighlightAligned, expectTabHighlightStyle } from '../../helpers/tabs.mjs'
 import { sampleColors } from '../../helpers/colors.mjs'
 
 const now = Date.now()
@@ -104,14 +105,9 @@ test.describe('subscriptions feed tab indicator', () => {
         await page.evaluate(value => {
           document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
         }, roundness)
-        for (const selector of ['.tabs > .tabsIndicator', '.newFeedTabs > .tabsIndicator']) {
-          await expect.poll(() => page.locator(selector).evaluate(element => {
-            const tab = element.parentElement.querySelector('[aria-selected="true"]').getBoundingClientRect()
-            const radius = Math.min(24 * Number.parseFloat(getComputedStyle(element).getPropertyValue('--ui-roundness')), tab.height / 2, tab.width / 2)
-            const bounds = element.getBoundingClientRect()
-            return Math.abs(Number.parseFloat(element.style.borderRadius) - radius) < 0.1 &&
-              Math.abs(bounds.height - tab.height) < 0.1 && Math.abs(bounds.width - tab.width) < 0.1
-          })).toBe(true)
+        for (const selector of ['.tabs [role="tab"][aria-selected="true"]', '.newFeedTabs [role="tab"][aria-selected="true"]']) {
+          await expectTabHighlightAligned(page.locator(selector))
+          await expectTabHighlightStyle(page.locator(selector), 'borderRadius', `${24 * roundness / 100}px`)
         }
       }
     }
@@ -151,19 +147,19 @@ test.describe('subscriptions feed tab indicator', () => {
   test('only animates opacity, so it runs on the compositor', async ({ page }) => {
     await goTo(page, 'subscriptions')
 
-    await expect(page.locator('.tabsIndicator')).toBeVisible()
+    await expectTabHighlightAligned(page.locator('.tabs [aria-selected="true"]'))
 
     // The initial placement is intentionally not animated
     await page.locator('[data-subscription-feed-tab="shorts"]').click()
 
-    await expect(page.locator('.tabsIndicator')).toHaveCSS('transition-property', 'opacity')
+    await expectTabHighlightStyle(page.locator('.tabs [aria-selected="true"]'), 'transitionProperty', 'opacity')
   })
 
   test('paints selection feedback before mounting the selected feed', async ({ page }) => {
     await goTo(page, 'subscriptions')
 
     await expect(page.getByText('video video 000')).toBeVisible()
-    await expect(page.locator('.tabsIndicator')).toBeVisible()
+    await expectTabHighlightAligned(page.locator('.tabs [aria-selected="true"]'))
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await expect(page.locator('#subscriptionsPanel.newFeed')).toBeVisible()
 
@@ -191,22 +187,21 @@ test.describe('subscriptions feed tab indicator', () => {
     await goTo(page, 'subscriptions')
 
     await expect(page.getByText('video video 000')).toBeVisible()
-    await expect(page.locator('.tabsIndicator')).toBeVisible()
+    await expectTabHighlightAligned(page.locator('.tabs [aria-selected="true"]'))
 
-    await expect(page.locator('.tabsIndicator')).toHaveCSS('opacity', '1')
+    await expectTabHighlightStyle(page.locator('.tabs [aria-selected="true"]'), 'opacity', '1')
     const animation = await page.getByRole('tablist', { name: 'Subscriptions tabs' }).evaluate(tablist => new Promise(resolve => {
-      // Crossfades replace the indicator. Observe the persistent tablist so
-      // either incoming or outgoing opacity transitions can report their run.
+      // Observe both incoming and outgoing pseudo-element opacity transitions.
       const timeout = setTimeout(() => {
         tablist.removeEventListener('transitionrun', onTransition)
         resolve(null)
       }, 2000)
       function onTransition(event) {
         if (event.propertyName !== 'opacity' || !(event.target instanceof Element) ||
-            !event.target.matches('.tabsIndicator, .tabsIndicatorOutgoing')) return
+            event.pseudoElement !== '::before' || !event.target.matches('[role="tab"]')) return
         clearTimeout(timeout)
         tablist.removeEventListener('transitionrun', onTransition)
-        resolve(Number.parseFloat(getComputedStyle(event.target).transitionDuration))
+        resolve(Number.parseFloat(getComputedStyle(event.target, '::before').transitionDuration))
       }
       tablist.addEventListener('transitionrun', onTransition)
       tablist.querySelector('[data-subscription-feed-tab="shorts"]').click()
@@ -312,23 +307,7 @@ test.describe('subscriptions feed tab indicator', () => {
     // Wait out the 140ms crossfade
     await page.waitForTimeout(400)
 
-    const { indicator, tab } = await page.evaluate(() => {
-      const toBox = (element) => {
-        const rect = element.getBoundingClientRect()
-        return { x: rect.x, width: rect.width, top: rect.top, bottom: rect.bottom }
-      }
-
-      return {
-        indicator: toBox(document.querySelector('.tabsIndicator')),
-        tab: toBox(document.querySelector('[data-subscription-feed-tab="shorts"]'))
-      }
-    })
-
-    // Electron's 95% zoom produces fractional CSS-pixel geometry while the
-    // offset measurements used by the indicator are integer layout values.
-    expect(Math.abs(indicator.x - tab.x)).toBeLessThan(2)
-    expect(Math.abs(indicator.width - tab.width)).toBeLessThan(2)
-    expect(Math.abs(indicator.bottom - tab.bottom)).toBeLessThan(2)
+    await expectTabHighlightAligned(page.locator('[data-subscription-feed-tab="shorts"]'))
     await attachScreenshot('indicator under the Shorts tab')
   })
 
@@ -348,16 +327,7 @@ test.describe('subscriptions feed tab indicator', () => {
     await expect(page.locator('.tab.selectedTab')).toHaveText(/Videos/)
     await expect(page.getByText('video video 000')).toBeVisible()
 
-    const { indicator, tab } = await page.evaluate(() => {
-      const toX = (element) => element.getBoundingClientRect().x
-
-      return {
-        indicator: toX(document.querySelector('.tabsIndicator')),
-        tab: toX(document.querySelector('[data-subscription-feed-tab="videos"]'))
-      }
-    })
-
-    expect(Math.abs(indicator - tab)).toBeLessThan(1)
+    await expectTabHighlightAligned(page.locator('[data-subscription-feed-tab="videos"]'))
   })
 
   test('keeps feed scroll positions across microtask-separated switches', async ({ page }) => {

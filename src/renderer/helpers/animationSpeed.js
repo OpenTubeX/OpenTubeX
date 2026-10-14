@@ -40,9 +40,12 @@ function updateTargetAnimations(event) {
     if (isAnimationSpeedManaged(event.target)) { return }
     if (!(event.target instanceof Element)) { return }
 
-    event.target.getAnimations({ subtree: false }).forEach(animation => {
-      applyAnimationSpeed(animation)
-    })
+    // Pseudo-element animations require subtree inclusion; leave children alone.
+    event.target.getAnimations({ subtree: Boolean(event.pseudoElement) })
+      .filter(animation => !event.pseudoElement || animation.effect?.target === event.target)
+      .forEach(animation => {
+        applyAnimationSpeed(animation)
+      })
   })
 }
 
