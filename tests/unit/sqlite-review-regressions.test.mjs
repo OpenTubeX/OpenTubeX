@@ -57,6 +57,8 @@ async function functions(file, names, bindings = {}) {
   const { script, ast } = await source(file)
   const context = vm.createContext({ process: { env: { IS_ELECTRON: true } }, console: { error() {} }, ...bindings })
   if (file === dataSettings) {
+    if (!names.includes('normalizeImportedPlaylistThumbnail')) names = [...names, 'normalizeImportedPlaylistThumbnail']
+    if (!names.includes('isJsonObject')) names = [...names, 'isJsonObject']
     context.backupPreview ??= ref([])
     context.transferableSettings ??= ref({})
     context.parseTakeoutWatchHistory ??= parseTakeoutWatchHistory

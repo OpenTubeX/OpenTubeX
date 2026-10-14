@@ -862,7 +862,7 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
     }
 
     if (store.state.playlists.libraryPaged) {
-      const expectedMetadata = local ? { playlistName: local.playlistName, description: local.description } : null
+      const expectedMetadata = local ? { playlistName: local.playlistName, description: local.description, customThumbnail: local.customThumbnail } : null
       const synced = await syncPlaylistMembers(client, store, { localId: id, remoteId, remoteVideos: remote.videos, previousVideos: previous[id]?.videos, metadata, expectedMetadata, options })
       if (synced !== null) nextSnapshot[id] = synced
       else if (Object.hasOwn(previous, id)) nextSnapshot[id] = previous[id]
