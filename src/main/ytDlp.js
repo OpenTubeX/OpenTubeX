@@ -85,12 +85,17 @@ export function getYtDlpExternalStreamHeaders(webContents, requestUrl) {
     externalStoryboardHeaders.get(webContents)?.get(requestUrl)
   if (exact) return exact
 
+  const scopes = externalManifestHeaders.get(webContents)
+  if (!scopes?.size) return null
+  // This runs for every media request, so match scopes (origin + directory) as strings.
   const request = new URL(requestUrl)
-  for (const [scope, headers] of [...(externalManifestHeaders.get(webContents) ?? [])].reverse()) {
-    const base = new URL(scope)
-    if (request.origin === base.origin && request.pathname.startsWith(base.pathname)) return headers
+  const location = request.origin + request.pathname
+  let match = null
+  for (const [scope, headers] of scopes) {
+    // The most recently registered scope wins.
+    if (location.startsWith(scope)) match = headers
   }
-  return null
+  return match
 }
 
 export function isYtDlpStoryboardUrl(webContents, requestUrl) {
