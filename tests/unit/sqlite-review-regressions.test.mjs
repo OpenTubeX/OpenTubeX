@@ -2369,10 +2369,11 @@ test('an in-place playlist window reload leaves its existing cards mounted', asy
 test('repeated thumbnail visibility callbacks retain a loaded image and do not reread its blob', async () => {
   const { script, ast } = await source('src/renderer/components/WatchVideoMetadataHistory/WatchMetadataThumbnail.vue')
   const program = ast.program.body.filter(node => node.type !== 'ImportDeclaration').map(node => script.slice(node.start, node.end)).join('\n')
-  let intersect, resolve, mounted, reads = 0
+  let intersect, resolve, mounted, invalidate, reads = 0
+  const props = { revisionId: 'revision', fallbackUrl: null }
   const context = vm.createContext({
-    defineProps: () => ({ revisionId: 'revision', fallbackUrl: null }), useTemplateRef: () => ref({}), ref,
-    watch() {}, onMounted: fn => { mounted = fn }, onBeforeUnmount() {}, console: { error() {} },
+    defineProps: () => props, useTemplateRef: () => ref({}), ref,
+    watch(_source, callback) { invalidate = callback }, onMounted: fn => { mounted = fn }, onBeforeUnmount() {}, console: { error() {} },
     IntersectionObserver: class { constructor(callback) { intersect = callback } observe() {} disconnect() {} },
     DBLibraryHandlers: { query: () => { reads++; return new Promise(done => { resolve = done }) } },
   })
@@ -2387,11 +2388,37 @@ test('repeated thumbnail visibility callbacks retain a loaded image and do not r
   assert.equal(context.state.source.value, 'thumbnail')
   assert.equal(reads, 1)
   intersect([{ isIntersecting: false }])
-  assert.equal(context.state.source.value, null)
+  assert.equal(context.state.source.value, 'thumbnail')
+  assert.equal(context.state.busy.value, false)
   intersect([{ isIntersecting: true }])
+  assert.equal(reads, 1)
+  assert.equal(context.state.busy.value, false)
+  props.revisionId = 'next'
+  invalidate()
+  assert.equal(context.state.source.value, null)
   assert.equal(reads, 2)
-  resolve('thumbnail')
+  intersect([{ isIntersecting: false }])
+  resolve('obsolete thumbnail')
   await setImmediate()
+  assert.equal(context.state.source.value, null)
+  props.revisionId = 'latest'
+  props.fallbackUrl = 'fallback.png'
+  invalidate()
+  assert.equal(reads, 2)
+  intersect([{ isIntersecting: true }])
+  assert.equal(reads, 3)
+  resolve(null)
+  await setImmediate()
+  assert.equal(context.state.source.value, 'fallback.png')
+  intersect([{ isIntersecting: false }])
+  intersect([{ isIntersecting: true }])
+  assert.equal(reads, 3)
+  props.fallbackUrl = 'updated.png'
+  invalidate()
+  assert.equal(reads, 4)
+  resolve('latest thumbnail')
+  await setImmediate()
+  assert.equal(context.state.source.value, 'latest thumbnail')
 })
 
 test('library IPC checks the sender before rejecting malformed query payloads', async () => {

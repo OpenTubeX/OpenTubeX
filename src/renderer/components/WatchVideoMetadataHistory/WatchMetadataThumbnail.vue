@@ -39,9 +39,9 @@ let generation = 0
 async function load() {
   const current = ++generation
   failed.value = false
-  busy.value = visible
-  source.value = null
-  if (!visible) return
+  busy.value = false
+  if (!visible || source.value) return
+  busy.value = true
   try {
     const data = props.revisionId ? await DBLibraryHandlers.query('metadataThumbnail', { id: props.revisionId }) : null
     if (current === generation) source.value = data || props.fallbackUrl
@@ -54,7 +54,10 @@ async function load() {
     if (current === generation) busy.value = false
   }
 }
-watch(() => [props.revisionId, props.fallbackUrl], load)
+watch(() => [props.revisionId, props.fallbackUrl], () => {
+  source.value = null
+  load()
+})
 onMounted(() => {
   observer = new IntersectionObserver(entries => {
     const next = entries.some(entry => entry.isIntersecting)

@@ -288,6 +288,7 @@ test('stores and presents every previous metadata version', async ({ app, page }
       await view.$nextTick()
       return { preservedTitleWasRejected, privateRedirectRejected }
     }, thumbnailBaseUrl)
+    const observedVideoId = await watchView.evaluate(view => view.videoId)
     await watchView.dispose()
     expect(cacheChecks).toEqual({
       preservedTitleWasRejected: true,
@@ -302,6 +303,18 @@ test('stores and presents every previous metadata version', async ({ app, page }
     expect(cacheDocuments.every(document => document.thumbnail?.startsWith('data:image/png;base64,')))
       .toBe(true)
 
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      const handler = ipcMain._invokeHandlers.get('library-query')
+      globalThis.metadataThumbnailReadCounts = new Map()
+      ipcMain.removeHandler('library-query')
+      ipcMain.handle('library-query', (event, request) => {
+        if (request.method === 'metadataThumbnail') {
+          const counts = globalThis.metadataThumbnailReadCounts
+          counts.set(request.data.id, (counts.get(request.data.id) ?? 0) + 1)
+        }
+        return handler(event, request)
+      })
+    })
     const historyButton = page.locator(`${activeTab} .infoArea`)
       .getByRole('button', { name: 'Metadata history' })
     await expect(historyButton).toBeVisible()
@@ -346,6 +359,17 @@ test('stores and presents every previous metadata version', async ({ app, page }
 
     const scroller = dialog.locator('.promptContentScroller')
     await expect(scroller).toHaveAttribute('data-overlayscrollbars-viewport')
+    const retainedFrame = dialog.locator('.metadataThumbnail').first()
+    const retainedImage = retainedFrame.locator('img:not([aria-hidden="true"])')
+    await expect(retainedImage).toHaveAttribute('src', /^data:image/)
+    const retainedSource = await retainedImage.getAttribute('src')
+    const retainedRevision = await page.evaluate(async videoId => {
+      const page = await window.ftElectron.libraryQuery('metadataPage', { videoId, field: 'thumbnail' })
+      return page.records[0].thumbnailRevisionId
+    }, observedVideoId)
+    const retainedReads = await app.electronApp.evaluate((_, id) => globalThis.metadataThumbnailReadCounts.get(id), retainedRevision)
+    expect(typeof retainedRevision).toBe('string')
+    expect(retainedReads).toBeGreaterThan(0)
     const heading = dialog.getByRole('heading', { name: 'Metadata history' })
     const closeButton = dialog.getByRole('button', { name: 'Close' })
     const fixedPositionsBeforeScroll = await Promise.all([heading.boundingBox(), closeButton.boundingBox()])
@@ -358,6 +382,11 @@ test('stores and presents every previous metadata version', async ({ app, page }
         expect(Math.abs(after[property] - before[property])).toBeLessThanOrEqual(1)
       }
     }
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+    await expect(retainedImage).toHaveAttribute('src', retainedSource)
+    await scroller.evaluate(element => element.scrollTo(0, 0))
+    await expect(retainedImage).toHaveAttribute('src', retainedSource)
+    await expect.poll(() => app.electronApp.evaluate((_, id) => globalThis.metadataThumbnailReadCounts.get(id), retainedRevision)).toBe(retainedReads)
 
     await page.setViewportSize({ width: 480, height: 500 })
     const firstDescription = descriptions.first()
