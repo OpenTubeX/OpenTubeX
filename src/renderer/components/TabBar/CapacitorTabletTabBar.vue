@@ -143,6 +143,7 @@
         @close="closeActionTab"
         @copy-youtube-link="copyActionTabYoutubeLink"
         @dismiss="closeTabActions"
+        @closed="releaseTabActions"
         @duplicate="duplicateActionTab"
         @reload="reloadActionTab"
         @toggle-loaded="toggleActionTabLoaded"
@@ -283,15 +284,21 @@ watch(activeTabId, async () => {
 
 watch(tabs, () => nextTick(clampTabsScroll), { flush: 'post' })
 
+let tabActionsLocked = false
 watch(() => actionTab.value !== null, (isOpen) => {
-  if (isOpen) {
+  if (isOpen && !tabActionsLocked) {
     lockBodyScroll()
     store.commit('addOpenPrompt', promptId)
-  } else {
-    store.commit('removeOpenPrompt', promptId)
-    unlockBodyScroll()
+    tabActionsLocked = true
   }
 })
+
+function releaseTabActions() {
+  if (actionTab.value || !tabActionsLocked) return
+  store.commit('removeOpenPrompt', promptId)
+  unlockBodyScroll()
+  tabActionsLocked = false
+}
 
 let tabsResizeObserver = null
 
@@ -309,10 +316,8 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   tabsResizeObserver?.disconnect()
-  if (!actionTab.value) return
-
-  store.commit('removeOpenPrompt', promptId)
-  unlockBodyScroll()
+  closeTabActions()
+  releaseTabActions()
 })
 </script>
 

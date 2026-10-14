@@ -1,5 +1,10 @@
 <template>
-  <Transition name="capacitor-tab-actions">
+  <Transition
+    :css="false"
+    @enter="enter"
+    @leave="leave"
+    @after-leave="emit('closed')"
+  >
     <div
       v-if="tab"
       class="capacitorTabActionsBackdrop"
@@ -9,10 +14,22 @@
       @keydown.esc.stop.prevent="activeMenu ? setMenu(null) : emit('dismiss')"
     >
       <section
+        ref="sheetRef"
         class="capacitorTabActions"
+        data-bottom-sheet
         role="menu"
         :aria-label="menuLabel"
+        tabindex="-1"
+        @pointerdown="startDrag"
+        @touchmove="moveTouch"
+        @scroll.capture="updateScrollAction"
+        @click.capture="filterClick"
+        @keydown.esc.stop.prevent="activeMenu ? setMenu(null) : emit('dismiss')"
       >
+        <div
+          class="bottomSheetHandle"
+          aria-hidden="true"
+        />
         <header class="capacitorTabActionHeader">
           <button
             v-if="activeMenu"
@@ -221,6 +238,7 @@ import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { useI18n } from 'vue-i18n'
 import { getTabDeviceMenuItem } from '../../helpers/tab-device-menu'
+import { useBottomSheetDismiss } from '../../composables/useBottomSheetDismiss'
 
 const props = defineProps({
   relatedTabIds: {
@@ -260,6 +278,7 @@ const emit = defineEmits([
   'close',
   'copy-youtube-link',
   'dismiss',
+  'closed',
   'duplicate',
   'reload',
   'history',
@@ -267,6 +286,8 @@ const emit = defineEmits([
   'toggle-pinned'
 ])
 const { t } = useI18n()
+const sheetRef = useTemplateRef('sheetRef')
+const { startDrag, moveTouch, updateScrollAction, filterClick, enter, leave } = useBottomSheetDismiss(sheetRef, () => emit('dismiss'))
 const activeMenu = ref(null)
 const deviceMenuItem = computed(() => getTabDeviceMenuItem(props.tab ? [props.tab] : [], t))
 const menuLabel = computed(() => activeMenu.value === 'close'
@@ -305,6 +326,7 @@ watch(() => props.tab?.id, async () => {
   mainScrollTop = 0
   await nextTick()
   if (actionList.value) restoreOverlayScrollTop(actionList.value, 0)
+  if (props.tab) sheetRef.value?.focus({ preventScroll: true })
 })
 
 watch(actionContent, (content, _previous, onCleanup) => {
@@ -313,6 +335,7 @@ watch(actionContent, (content, _previous, onCleanup) => {
     if (actionList.value) clampOverlayScrollTop(actionList.value, content)
   })
   observer.observe(content)
+  observer.observe(actionList.value)
   onCleanup(() => observer.disconnect())
 })
 </script>
