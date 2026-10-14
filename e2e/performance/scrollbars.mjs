@@ -12,7 +12,9 @@ async function collectSample(appRoot) {
     })
     const { page } = app
     const tutorial = page.locator('.tutorialOverlay')
-    await tutorial.locator('.tutorialActions').getByRole('button').last().click()
+    if (await tutorial.isVisible()) {
+      await tutorial.locator('.tutorialActions').getByRole('button').last().click()
+    }
     await expect(tutorial).toBeHidden()
     const session = await page.context().newCDPSession(page)
     await session.send('Emulation.setCPUThrottlingRate', { rate: 4 })
