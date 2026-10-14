@@ -1501,16 +1501,17 @@ final class AppTests: XCTestCase {
         try await webView.evaluateJavaScript(script)
     }
 
-    private func wait(_ script: String, timeout: TimeInterval = 60) async throws {
+    private func wait(_ script: String, in view: WKWebView? = nil, timeout: TimeInterval = 60) async throws {
+        let target = try view ?? webView
         let deadline = Date().addingTimeInterval(timeout)
         while Date() < deadline {
-            if (try? await evaluate(script)) as? Bool == true { return }
+            if (try? await target.evaluateJavaScript(script)) as? Bool == true { return }
             try await Task.sleep(nanoseconds: 500_000_000)
         }
-        let text = try? await evaluate("document.body.innerText")
-        let messages = try? await evaluate("JSON.stringify(window.iosTestMessages)")
-        let media = try? await evaluate("JSON.stringify(Array.from(document.querySelectorAll('video')).map(video => ({time: video.currentTime, paused: video.paused, seeking: video.seeking, ready: video.readyState, rate: video.playbackRate, buffered: Array.from({length: video.buffered.length}, (_, i) => [video.buffered.start(i), video.buffered.end(i)]), width: video.getBoundingClientRect().width, error: video.error?.message, held: video === window.iosSustainedPlayer})))")
-        if let screenshot = try? await webView.takeSnapshot(configuration: nil) {
+        let text = try? await target.evaluateJavaScript("document.body.innerText")
+        let messages = try? await target.evaluateJavaScript("JSON.stringify(window.iosTestMessages)")
+        let media = try? await target.evaluateJavaScript("JSON.stringify(Array.from(document.querySelectorAll('video')).map(video => ({time: video.currentTime, paused: video.paused, seeking: video.seeking, ready: video.readyState, rate: video.playbackRate, buffered: Array.from({length: video.buffered.length}, (_, i) => [video.buffered.start(i), video.buffered.end(i)]), width: video.getBoundingClientRect().width, error: video.error?.message, held: video === window.iosSustainedPlayer})))")
+        if let screenshot = try? await target.takeSnapshot(configuration: nil) {
             let attachment = XCTAttachment(image: screenshot)
             attachment.name = "iOS failure"
             attachment.lifetime = .keepAlways
@@ -1520,11 +1521,11 @@ final class AppTests: XCTestCase {
         throw URLError(.timedOut)
     }
 
-    private func waitForNative(_ condition: () -> Bool) async throws {
-        let deadline = Date().addingTimeInterval(60)
+    private func waitForNative(timeout: TimeInterval = 60, _ condition: () -> Bool) async throws {
+        let deadline = Date().addingTimeInterval(timeout)
         while !condition() {
             guard Date() < deadline else {
-                XCTFail("Native presentation did not reach the expected state")
+                XCTFail("Native state did not reach the expected state")
                 throw URLError(.timedOut)
             }
             try await Task.sleep(nanoseconds: 100_000_000)
@@ -1549,8 +1550,30 @@ final class AppTests: XCTestCase {
         try await super.tearDown()
     }
 
+    func testApplicationReadinessWaitsForNavigationBeforePollingVue() async throws {
+        let listener = try await loopbackServer { _, connection in
+            DispatchQueue.global().asyncAfter(deadline: .now() + 1) {
+                let html = "<div id='app'></div><script>document.querySelector('#app').__vue_app__ = {};</script>"
+                let body = Data(html.utf8)
+                let header = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: \(body.count)\r\nConnection: close\r\n\r\n"
+                connection.send(content: Data(header.utf8) + body,
+                                completion: .contentProcessed { _ in connection.cancel() })
+            }
+        }
+        defer { listener.cancel() }
+        let view = WKWebView()
+        view.load(URLRequest(url: try XCTUnwrap(URL(string: "http://127.0.0.1:\(try XCTUnwrap(listener.port).rawValue)/"))))
+        try await waitForApplication(in: view, timeout: 0.2)
+    }
+
+    private func waitForApplication(in view: WKWebView, timeout: TimeInterval = 60) async throws {
+        // Cold navigation must finish before the Vue readiness deadline starts.
+        try await waitForNative(timeout: 120) { !view.isLoading }
+        try await wait("!!document.querySelector('#app')?.__vue_app__", in: view, timeout: timeout)
+    }
+
     private func openApplication() async throws {
-        try await wait("!!document.querySelector('#app')?.__vue_app__")
+        try await waitForApplication(in: webView)
         _ = try await evaluate("window.testStore = document.querySelector('#app').__vue_app__.config.globalProperties.$store; window.testRouter = document.querySelector('#app').__vue_app__.config.globalProperties.$router; true")
         _ = try await evaluate("if (!window.iosTestMessages) { window.iosTestMessages = []; for (const level of ['warn', 'error']) { const original = console[level]; console[level] = (...args) => { iosTestMessages.push(args.map(value => { try { return value instanceof Error ? String(value.stack || value) : typeof value === 'string' ? value : JSON.stringify(value) } catch { return String(value) } }).join(' ')); original(...args); }; } } true")
         try await wait("!!document.querySelector('#app .app')")
