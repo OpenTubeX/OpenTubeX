@@ -1,3 +1,4 @@
+import { parseTakeoutWatchHistory, parseTakeoutSearchHistory } from '../../src/renderer/helpers/import-preview.js'
 import * as backupHelpers from '../../src/renderer/helpers/unifiedBackup.js'
 import model from '@seald-io/nedb/lib/model.js'
 import assert from 'node:assert/strict'
@@ -55,6 +56,12 @@ async function functions(file, names, bindings = {}) {
   if (file === playlistInfo && !names.includes('refreshPortablePlaylistAfterCleanup')) names = [...names, 'refreshPortablePlaylistAfterCleanup']
   const { script, ast } = await source(file)
   const context = vm.createContext({ process: { env: { IS_ELECTRON: true } }, console: { error() {} }, ...bindings })
+  if (file === dataSettings) {
+    context.backupPreview ??= ref([])
+    context.transferableSettings ??= ref({})
+    context.parseTakeoutWatchHistory ??= parseTakeoutWatchHistory
+    context.parseTakeoutSearchHistory ??= parseTakeoutSearchHistory
+  }
   if (file === 'src/renderer/components/FtPlaylistAddVideoPrompt/FtPlaylistAddVideoPrompt.vue') {
     context.selectionPending ??= ref(false)
     context.selectionError ??= ref(false)
@@ -415,10 +422,10 @@ for (const [phase, hook] of ['selected', 'staging', 'picker'].flatMap(phase => [
       showBackupImport: ref(phase === 'selected'), backupFilename: ref(''), selectedBackupSections: ref([]),
       BACKUP_SECTIONS: ['history'], IMPORT_DIRECTORY_ID: 'import', START_IN_DIRECTORY: 'downloads',
       pickFileWithPicker: () => picker, stageLibraryBackup: () => { stageCalls++; return staging },
-      DBLibraryHandlers: { query: async (method, data) => { assert.equal(method, 'importCancel'); canceled.push(data.id) } },
+      DBLibraryHandlers: { query: async (method, data) => { if (method === 'importPreview') return []; assert.equal(method, 'importCancel'); canceled.push(data.id) } },
       t: key => key, showToast() { assert.fail('disposed settings must not show a toast') },
     })
-    const teardown = ast.program.body.find(node => node.type === 'ExpressionStatement' && node.expression.callee?.name === hook)
+    const teardown = ast.program.body.find(node => node.type === 'ExpressionStatement' && node.expression.callee?.name === hook && script.slice(node.start, node.end).includes('disposeBackupImport'))
     let dispose = () => {}
     context[hook] = callback => { dispose = callback }
     if (teardown) vm.runInContext(script.slice(teardown.start, teardown.end), context)
@@ -449,7 +456,7 @@ for (const newerCompletesFirst of [false, true]) {
       BACKUP_SECTIONS: ['history'], IMPORT_DIRECTORY_ID: 'import', START_IN_DIRECTORY: 'downloads',
       pickFileWithPicker: async () => ({ name: `backup-${++selected}.zip` }),
       stageLibraryBackup: () => new Promise(resolve => finishes.push(resolve)),
-      DBLibraryHandlers: { query: async (method, data) => { assert.equal(method, 'importCancel'); canceled.push(data.id) } },
+      DBLibraryHandlers: { query: async (method, data) => { if (method === 'importPreview') return []; assert.equal(method, 'importCancel'); canceled.push(data.id) } },
       t: key => key, showToast() { assert.fail('abandoned stages must not show a toast') },
     })
     let activate
@@ -3664,3 +3671,17 @@ for (const desktop of [false, true]) {
     assert.equal(toasts.some(toast => toast.message.includes('Unable')), false)
   })
 }
+
+test('paged playlist navigation encodes retained video IDs without changing membership identity', async () => {
+  let requested
+  const currentRoute = ref({ fullPath: '/current' })
+  const context = await functions('src/renderer/components/WatchVideoPlaylist/WatchVideoPlaylist.vue', ['playUserPlaylistItem'], {
+    props: { videoId: 'current', playlistId: 'p', playlistType: 'user', libraryMemberId: 'current-member' },
+    userWindowReady: ref(true), userWindowOwner: ref('current'), userWindowKey: () => 'current', userWindowGeneration: 1,
+    userShuffleSeed: ref('seed'), userShuffleAnchor: null,
+    router: { currentRoute, push: async route => { requested = structuredClone(route); currentRoute.value.fullPath = route.path } },
+  })
+  assert.equal(await context.playUserPlaylistItem({ videoId: 'retained/?#日本語', _libraryMemberId: 'member', playlistItemId: 'item' }), true)
+  assert.equal(requested.path, '/watch/retained%2F%3F%23%E6%97%A5%E6%9C%AC%E8%AA%9E')
+  assert.deepEqual(requested.query, { playlistId: 'p', playlistType: 'user', playlistItemId: 'item', libraryMemberId: 'member' })
+})

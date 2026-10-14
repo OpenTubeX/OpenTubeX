@@ -4,6 +4,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import test from 'node:test'
 import vm, { compileFunction } from 'node:vm'
+import { babelParse } from 'vue/compiler-sfc'
 import { computed, ref } from 'vue'
 import { filterHistoryByDateAndChannel } from '../../src/renderer/helpers/historyBrowse.js'
 import { filterVideosWithQuery, filterVideosWithQueryAsync } from '../../src/renderer/helpers/historySearch.js'
@@ -121,4 +122,31 @@ test('portable history yields between search batches and ignores a superseded re
   assert.equal(obsoletePublished, false, 'a cancelled search must never replace the current results')
   assert.deepEqual(activeData.value, [original.at(-1)])
   assert.equal(isSearching.value, false)
+})
+
+test('deferred datastore startup handles its rejected promise after the recovery handler', async () => {
+  const ast = babelParse(main, { sourceType: 'module' })
+  const visit = node => {
+    if (!node || typeof node !== 'object') return null
+    if (node.type === 'CallExpression' && node.callee?.name === 'setImmediate' && main.slice(node.start, node.end).includes('baseHandlers.loadDeferredDatastores')) return node
+    for (const child of Object.values(node)) {
+      for (const item of Array.isArray(child) ? child : [child]) {
+        const found = visit(item)
+        if (found) return found
+      }
+    }
+    return null
+  }
+  const call = visit(ast)
+  assert.ok(call)
+  const failure = new Error('library unavailable'), errors = []
+  let completion
+  vm.runInNewContext(main.slice(call.start, call.end), {
+    setImmediate: callback => { completion = callback() },
+    baseHandlers: { loadDeferredDatastores: () => Promise.reject(failure) },
+    console: { error: error => errors.push(error) },
+  })
+  await completion
+  await Promise.resolve()
+  assert.deepEqual(errors, [failure])
 })

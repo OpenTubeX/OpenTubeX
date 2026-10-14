@@ -2978,7 +2978,7 @@ function runApp() {
       if (deferredDatastoresStarted) return
       deferredDatastoresStarted = true
       // Give the native splash its first frame before parsing the larger stores.
-      setImmediate(() => { baseHandlers.loadDeferredDatastores() })
+      setImmediate(() => { baseHandlers.loadDeferredDatastores().catch(console.error) })
     })
     const kdeWindowIdentity = monitorsKdeWaylandWindowState
       ? `\u2063${newWindow.id.toString(2).replaceAll('0', '\u200b').replaceAll('1', '\u200c')}`

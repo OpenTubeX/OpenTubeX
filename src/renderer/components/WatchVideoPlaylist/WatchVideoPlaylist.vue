@@ -1106,7 +1106,7 @@ function playNextVideo() {
   }
 
   const routerPushPayload = {
-    path: `/watch/${targetPlaylistItem.videoId}`,
+    path: `/watch/${encodeURIComponent(targetPlaylistItem.videoId)}`,
     query: {
       playlistId: props.playlistId,
       playlistType: props.playlistType,
@@ -1175,7 +1175,7 @@ function playPreviousVideo() {
 
   router.push(
     {
-      path: `/watch/${targetPlaylistItem.videoId}`,
+      path: `/watch/${encodeURIComponent(targetPlaylistItem.videoId)}`,
       query: {
         playlistId: props.playlistId,
         playlistType: props.playlistType,
@@ -1701,7 +1701,7 @@ async function playUserPlaylistItem(item, reshuffle = false) {
   }
   if (item.videoId !== props.videoId || item._libraryMemberId !== props.libraryMemberId || item.playlistItemId !== props.playlistItemId) userWindowReady.value = false
   try {
-    const failure = await router.push({ path: `/watch/${item.videoId}`, query: { playlistId: props.playlistId, playlistType: props.playlistType, playlistItemId: item.playlistItemId, libraryMemberId: item._libraryMemberId, ...(props.downloadId ? { downloadId: props.downloadId } : {}) } })
+    const failure = await router.push({ path: `/watch/${encodeURIComponent(item.videoId)}`, query: { playlistId: props.playlistId, playlistType: props.playlistType, playlistItemId: item.playlistItemId, libraryMemberId: item._libraryMemberId, ...(props.downloadId ? { downloadId: props.downloadId } : {}) } })
     // Logical-tab guards can stop navigation without returning a Vue Router
     // failure, so confirm that the route actually changed as well.
     if (failure || router.currentRoute.value.fullPath === routeBeforeNavigation) { restore(); return false }
