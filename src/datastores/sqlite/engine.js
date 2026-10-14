@@ -371,7 +371,7 @@ export class LibraryEngine {
     const record = deserialize(row.data)
     if (arrays) {
       for (const { field } of this.prepare('SELECT field FROM record_arrays WHERE collection = ? AND record_id = ?').all(collection, row.id)) {
-        record[field] = this.prepare('SELECT data FROM members WHERE collection = ? AND record_id = ? AND field = ? ORDER BY position').all(collection, row.id, field).map(entry => deserialize(entry.data))
+        record[field] = deserialize(this.prepare('SELECT json_group_array(json(data) ORDER BY position) AS data FROM members WHERE collection = ? AND record_id = ? AND field = ?').get(collection, row.id, field).data)
       }
     }
     if (blobs) {
@@ -385,8 +385,10 @@ export class LibraryEngine {
     return this.writeSerialized(collection, serialize(input), replace)
   }
 
-  writeSerialized(collection, serializedInput, replace = false, replayArrays = false) {
-    const record = deserialize(serializedInput)
+  writeSerialized(collection, serializedInput, replace = false, replayArrays = false, decodedInput) {
+    // Migration may supply its already decoded canonical source. Other callers
+    // keep the normal codec round-trip before any normalized fields are moved.
+    const record = decodedInput ?? deserialize(serializedInput)
     record._id ??= randomUUID()
     if (typeof record._id !== 'string' || !record._id) throw new TypeError('A record must have a nonempty string ID')
     if (!record._id.isWellFormed()) throw new TypeError('A record ID contains an unpaired UTF-16 surrogate and cannot be safely stored in SQLite')

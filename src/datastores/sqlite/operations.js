@@ -11,6 +11,24 @@ import { isVideoHiddenByPreferences } from '../../renderer/helpers/subscription-
 import { syncSnapshotPreview } from '../../syncSnapshot.js'
 import { updateHistorySnapshot, updatePlaylistSnapshot } from '../../renderer/helpers/sync-history-merge.js'
 
+const COMMAND_PALETTE_PROJECTION = `
+  'videoId', json(data -> '$.videoId'),
+  'title', json(data -> '$.title'),
+  'author', json(data -> '$.author'),
+  'authorId', json(data -> '$.authorId'),
+  'isShort', json(data -> '$.isShort'),
+  'lengthSeconds', json(data -> '$.lengthSeconds'),
+  'playlistItemId', json(data -> '$.playlistItemId'),
+  'channelName', json(data -> '$.channelName'),
+  'isLive', json(data -> '$.isLive'),
+  'isUpcoming', json(data -> '$.isUpcoming'),
+  'premiereTimestamp', json(data -> '$.premiereTimestamp'),
+  'lastViewedPlaylistId', json(data -> '$.lastViewedPlaylistId'),
+  'lastViewedPlaylistType', json(data -> '$.lastViewedPlaylistType'),
+  'lastViewedPlaylistItemId', json(data -> '$.lastViewedPlaylistItemId')
+`
+const COMMAND_PALETTE_MEMBER_PROJECTION = COMMAND_PALETTE_PROJECTION.replaceAll('json(data ->', 'json(m.data ->')
+
 /** Read only identity fields needed to compare an import, never thumbnails or videos. */
 export async function importPreviewState(engine, { sections }) {
   const supported = ['profiles', 'playlists', 'history', 'searchHistory', 'watchStats']
@@ -63,7 +81,11 @@ async function snapshotAccountMatches(engine, account) {
 export async function syncSnapshotHistory(engine, { account, changes }) {
   return engine.transaction(async () => {
     if (!await snapshotAccountMatches(engine, account)) return { updated: false }
-    const value = updateHistorySnapshot({ snapshot: await syncSnapshotRead(engine), ...changes })
+    const current = await syncSnapshotRead(engine)
+    let snapshot
+    try { snapshot = JSON.parse(current) } catch { snapshot = null }
+    const validSnapshot = snapshot !== null && typeof snapshot === 'object' && !Array.isArray(snapshot)
+    const value = updateHistorySnapshot({ snapshot: validSnapshot ? current : '{}', ...changes })
     await engine.collections.settings.updateAsync({ _id: 'syncServerSnapshot' }, { $set: { value } }, { upsert: true })
     return { updated: true, value: syncSnapshotPreview(value) }
   })
@@ -154,24 +176,26 @@ export function historyRepairRecord(engine, { id, videoId }) {
 }
 
 export async function markAllHistory(engine, options, handlers) {
-  engine.database.exec('CREATE TEMP TABLE IF NOT EXISTS marked_history (id TEXT PRIMARY KEY, video_id TEXT) WITHOUT ROWID; DELETE FROM marked_history; CREATE INDEX IF NOT EXISTS marked_history_video ON marked_history(video_id)')
-  engine.prepare("INSERT INTO marked_history SELECT id, video_id FROM records WHERE collection = 'history' AND unwatched_candidate = 1 AND watchable_after <= ?").run(Date.now())
-  let count = 0
-  for (const { id } of engine.prepare('SELECT id FROM marked_history ORDER BY id').iterate()) {
-    const row = engine.prepare("SELECT id, data FROM records WHERE collection = 'history' AND id = ?").get(id)
-    engine.update('history', row, { $set: { isWatched: true } })
-    count++
-  }
-  if (count) engine.touch('history')
-  const saved = await engine.collections.settings.findOneAsync({ _id: 'subscriptionSeenVideos' })
-  const videos = parseSubscriptionSeenVideos(saved?.value).filter(mark => {
-    if (!(mark.unseenAt >= mark.seenAt)) return false
-    const identity = mark.videoId.isWellFormed() ? '?' : "json_extract(?, '$')"
-    return engine.prepare(`SELECT 1 FROM marked_history WHERE video_id = ${identity} LIMIT 1`).get(mark.videoId.isWellFormed() ? mark.videoId : JSON.stringify(mark.videoId))
+  return engine.transaction(async () => {
+    engine.database.exec('CREATE TEMP TABLE IF NOT EXISTS marked_history (id TEXT PRIMARY KEY, video_id TEXT) WITHOUT ROWID; DELETE FROM marked_history; CREATE INDEX IF NOT EXISTS marked_history_video ON marked_history(video_id)')
+    engine.prepare("INSERT INTO marked_history SELECT id, video_id FROM records WHERE collection = 'history' AND unwatched_candidate = 1 AND watchable_after <= ?").run(Date.now())
+    let count = 0
+    for (const { id } of engine.prepare('SELECT id FROM marked_history ORDER BY id').iterate()) {
+      const row = engine.prepare("SELECT id, data FROM records WHERE collection = 'history' AND id = ?").get(id)
+      engine.update('history', row, { $set: { isWatched: true } })
+      count++
+    }
+    if (count) engine.touch('history')
+    const saved = await engine.collections.settings.findOneAsync({ _id: 'subscriptionSeenVideos' })
+    const videos = parseSubscriptionSeenVideos(saved?.value).filter(mark => {
+      if (!(mark.unseenAt >= mark.seenAt)) return false
+      const identity = mark.videoId.isWellFormed() ? '?' : "json_extract(?, '$')"
+      return engine.prepare(`SELECT 1 FROM marked_history WHERE video_id = ${identity} LIMIT 1`).get(mark.videoId.isWellFormed() ? mark.videoId : JSON.stringify(mark.videoId))
+    })
+    const seenVideos = videos.length ? await handlers.settings.mergeSeenVideos({ videos }) : null
+    engine.database.exec('DELETE FROM marked_history; CREATE INDEX IF NOT EXISTS marked_history_video ON marked_history(video_id)')
+    return { count, seenVideos }
   })
-  const seenVideos = videos.length ? await handlers.settings.mergeSeenVideos({ videos }) : null
-  engine.database.exec('DELETE FROM marked_history; CREATE INDEX IF NOT EXISTS marked_history_video ON marked_history(video_id)')
-  return { count, seenVideos }
 }
 
 export async function applySubscriptionUnseenHistory(engine) {
@@ -334,19 +358,17 @@ export async function playlistImportCandidates(engine, { name }) {
 export function commandPaletteVideos(engine, { query = '', locale = 'en-US', group, sources }) {
   if (typeof query !== 'string' || typeof locale !== 'string' || typeof group !== 'string' ||
       typeof sources?.history !== 'string' || typeof sources?.playlists !== 'string') throw new TypeError('Invalid local video search')
-  const fields = ['videoId', 'title', 'author', 'authorId', 'isShort', 'lengthSeconds', 'playlistItemId', 'channelName', 'isLive', 'isUpcoming', 'premiereTimestamp', 'lastViewedPlaylistId', 'lastViewedPlaylistType', 'lastViewedPlaylistItemId']
-  const projection = fields.map(field => `'${field}', json(data -> '$.${field}')`).join(', ')
   const context = { group, sources, history: [], playlists: [], downloads: {}, queue: [], playLibraryVideo() {} }
   let index = 0
   function * commands() {
-    const rows = engine.prepare(`SELECT json_object(${projection}) AS metadata FROM records WHERE collection = 'history' ORDER BY sort_time DESC, nedb_id_sort(id) DESC`)
+    const rows = engine.prepare(`SELECT json_object(${COMMAND_PALETTE_PROJECTION}) AS metadata FROM records WHERE collection = 'history' ORDER BY sort_time DESC, nedb_id_sort(id) DESC`)
     for (const row of rows.iterate()) {
       const video = engineRecord(row.metadata)
       if (!video) continue
       const command = iterateLocalVideoCommands({ ...context, history: [video] }).next().value
       yield { ...command, id: `history:${index++}`, libraryVideo: video, librarySource: 'history' }
     }
-    const members = engine.prepare(`SELECT m.record_id, m.membership_id, json_object(${fields.map(field => `'${field}', json(m.data -> '$.${field}')`).join(', ')}) AS metadata, r.data -> '$.playlistName' AS name FROM members m JOIN records r ON r.collection = m.collection AND r.id = m.record_id WHERE m.collection = 'playlists' AND m.field = 'videos' ORDER BY nedb_id_sort(m.record_id), m.position`)
+    const members = engine.prepare(`SELECT m.record_id, m.membership_id, json_object(${COMMAND_PALETTE_MEMBER_PROJECTION}) AS metadata, r.data -> '$.playlistName' AS name FROM members m JOIN records r ON r.collection = m.collection AND r.id = m.record_id WHERE m.collection = 'playlists' AND m.field = 'videos' ORDER BY nedb_id_sort(m.record_id), m.position`)
     for (const row of members.iterate()) {
       const video = engineRecord(row.metadata)
       if (!video) continue

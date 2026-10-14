@@ -21,7 +21,36 @@ import { LibraryExports } from '../../src/datastores/sqlite/export.js'
 import { filterHistoryByDateAndChannel, getHistoryChannels } from '../../src/renderer/helpers/historyBrowse.js'
 import { filterVideosWithQuery } from '../../src/renderer/helpers/historySearch.js'
 import { canMarkHistoryEntryAsWatched, migrateLegacyHistoryRecord } from '../../src/history.js'
-import { historyRepairRecord, markAllHistory, applySubscriptionUnseenHistory, recommendationInputs, importSubscriptionProfiles, commandPaletteVideos, playlistMember, removePlaylistMember, removePlaylistMembers, addSelectedPlaylistVideos, playlistVideoIds, playlistImportCandidates } from '../../src/datastores/sqlite/operations.js'
+import { historyRepairRecord, markAllHistory, applySubscriptionUnseenHistory, recommendationInputs, importSubscriptionProfiles, commandPaletteVideos, playlistMember, removePlaylistMember, removePlaylistMembers, addSelectedPlaylistVideos, playlistVideoIds, playlistImportCandidates, syncSnapshotHistory } from '../../src/datastores/sqlite/operations.js'
+
+test('standalone mark-all history rolls back partial writes and revisions after failure', async t => {
+  const engine = memory(t)
+  const records = ['a', 'b', 'c'].map(_id => ({ _id, videoId: _id, isWatched: false, timeWatched: 1, unknown: new Date(2) }))
+  await engine.collections.history.insertAsync(records)
+  const revision = engine.revision('history')
+  const update = engine.update.bind(engine)
+  let writes = 0
+  t.mock.method(engine, 'update', (...args) => {
+    if (++writes === 2) throw new Error('injected history write failure')
+    return update(...args)
+  })
+  await assert.rejects(markAllHistory(engine, {}, {}), /injected history write failure/)
+  assert.equal(writes, 2)
+  assert.deepEqual(await engine.collections.history.findAsync({}), records)
+  assert.equal(engine.revision('history'), revision)
+  assert.equal(engine.database.isTransaction, false)
+})
+
+for (const root of [null, false, 42, 'private', ['private'], { retained: { unknown: 'kept' } }]) {
+  test(`history snapshot updates normalize invalid roots and retain valid sections: ${JSON.stringify(root)}`, async t => {
+    const engine = memory(t)
+    await engine.collections.settings.insertAsync({ _id: 'syncServerSnapshot', value: JSON.stringify(root) })
+    const next = { video: { watched: true } }
+    assert.equal((await syncSnapshotHistory(engine, { account: ['', '', 'legacy', '', ''], changes: { next } })).updated, true)
+    const saved = await engine.collections.settings.findOneAsync({ _id: 'syncServerSnapshot' })
+    assert.deepEqual(JSON.parse(saved.value), { ...(root !== null && typeof root === 'object' && !Array.isArray(root) ? root : {}), history: next })
+  })
+}
 
 test('legacy subscription imports accept nullable custom profile names without discarding subscriptions', async t => {
   const engine = memory(t)
@@ -2427,20 +2456,28 @@ test('$pull closes the member read cursor before deletion and preserves every un
   const videos = Array.from({ length: 300 }, (_, i) => ({ videoId: String(i), group: i % 2 ? 'remove' : 'keep', unknown: new Date(i) }))
   await engine.collections.playlists.insertAsync({ _id: 'p', videos })
   const prepare = engine.prepare.bind(engine)
-  let reading = false
-  let observed = false
-  engine.prepare = sql => {
+  let readers = 0
+  let mutations = 0
+  t.mock.method(engine, 'prepare', sql => {
     const statement = prepare(sql)
-    if (sql === 'SELECT position, data FROM members WHERE collection = ? AND record_id = ? AND field = ?') return {
-      *iterate(...args) { observed = true; reading = true; try { yield * statement.iterate(...args) } finally { reading = false } }
-    }
-    if (sql === 'DELETE FROM members WHERE collection = ? AND record_id = ? AND field = ? AND position = ?') return {
-      run(...args) { assert.equal(reading, false, 'member mutation must not overlap its read cursor'); return statement.run(...args) }
-    }
-    return statement
-  }
+    return new Proxy(statement, {
+      get(target, key) {
+        if (key === 'iterate') return function * (...args) {
+          readers++
+          try { yield * target.iterate(...args) } finally { readers-- }
+        }
+        if (key === 'run') return (...args) => {
+          assert.equal(readers, 0, 'mutation must not overlap a live read cursor')
+          mutations++
+          return target.run(...args)
+        }
+        const value = Reflect.get(target, key)
+        return typeof value === 'function' ? value.bind(target) : value
+      },
+    })
+  })
   await engine.collections.playlists.updateAsync({ _id: 'p' }, { $pull: { videos: { group: 'remove' } } })
-  assert.equal(observed, true)
+  assert.ok(mutations >= 150, 'the real member deletion path must be observed')
   assert.deepEqual((await engine.playlistSnapshot({ id: 'p' })).videos, videos.filter(video => video.group === 'keep'))
 })
 
@@ -2656,6 +2693,38 @@ test('staging replay parses large nonempty arrays once and skips empty-array sou
   engine.writeSerialized('subscriptionCache', model.serialize({ ...record, videos: [] }), true, true)
   assert.equal(parsed, Buffer.byteLength(serialized))
   assert.equal(prepare('SELECT count(*) AS n FROM members').get().n, 0)
+})
+
+test('migration replay retains canonical and noncanonical member codecs and original bytes', async t => {
+  const path = await directory(t)
+  const members = [null, false, 3, '$$reserved', '\ud800', { videoId: '雪😀', unknown: new Date(0) }, JSON.parse('{"__proto__":{"kept":true},"constructor":"retained"}')]
+  const records = [
+    { _id: 'canonical', videos: members, shorts: [], unknown: new Date(3) },
+    { _id: 'spaced', videos: members, shorts: [], unknown: new Date(4) },
+  ]
+  const source = model.serialize(records[0]) + '\n' + JSON.stringify(JSON.parse(model.serialize(records[1])), null, 0).replaceAll(':', ': ') + '\n'
+  await writeFile(join(path, 'subscription-cache.db'), source)
+  const engine = await openLibrary(path)
+  try {
+    assert.deepEqual(await engine.collections.subscriptionCache.findAsync({}), records)
+    assert.equal(await readFile(join(path, 'subscription-cache.db'), 'utf8'), source)
+  } finally { engine.database.close() }
+})
+
+test('full member hydration retains order and values with bounded JavaScript decoding', t => {
+  const engine = memory(t)
+  const entries = Array.from({ length: 1000 }, (_, index) => index % 3 === 0
+    ? { videoId: String(index), unknown: new Date(index), text: '\ud800雪😀' }
+    : index % 3 === 1 ? null : '$$reserved')
+  const input = { _id: 'large', videos: entries, shorts: [] }
+  engine.write('subscriptionCache', input)
+  const row = engine.prepare('SELECT id, data FROM records WHERE collection = ? AND id = ?').get('subscriptionCache', input._id)
+  const parse = JSON.parse
+  let decodes = 0
+  t.mock.method(JSON, 'parse', (...args) => { decodes++; return parse(...args) })
+  const actual = engine.materialize('subscriptionCache', row)
+  assert.deepEqual(actual, input)
+  assert.ok(decodes <= 5, `Full hydration decoded JSON ${decodes} times`)
 })
 
 test('changed migration sources discard only their old index declarations', async t => {

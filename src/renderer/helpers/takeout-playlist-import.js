@@ -1,4 +1,4 @@
-import { processToBeAddedPlaylistVideo } from './playlists.js'
+import { generateRandomUniqueId, processToBeAddedPlaylistVideo } from './playlists.js'
 
 export async function importTakeoutPlaylist(incoming, storage) {
   const playlist = structuredClone(incoming)
@@ -9,7 +9,7 @@ export async function importTakeoutPlaylist(incoming, storage) {
   if (storage.importRecords) {
     // Assign membership IDs only after the importer matches retained members.
     playlist.videos.forEach(video => { video.type ??= 'video' })
-    playlist._id = existing?._id ?? crypto.randomUUID()
+    playlist._id = existing?._id ?? generateRandomUniqueId()
     await storage.importRecords('playlists', [playlist])
     return
   }

@@ -218,7 +218,10 @@ export async function openLibrary(directory, { onCheckpoint, onStartupReady, bat
                     // checkObject visits arrays twice; keep its date/key codec
                     // without that extra recursive traversal of large members.
                     const serialized = model.serialize(record)
-                    engine.writeSerialized(collection, serialized, true, true)
+                    // Reuse the decoded source only when serialization leaves
+                    // it canonical. Other inputs still round-trip the codec,
+                    // including JSON numbers that serialize from Infinity to null.
+                    engine.writeSerialized(collection, serialized, true, true, serialized === line.text ? record : undefined)
                     engine.prepare('INSERT INTO migration_expected VALUES (?, ?, ?) ON CONFLICT(collection, id) DO UPDATE SET data = excluded.data').run(collection, record._id, serialized)
                   }
                 } else if (record.$$indexCreated || record.$$indexRemoved) {
