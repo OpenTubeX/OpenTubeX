@@ -160,7 +160,7 @@ test('watch history with empty subtitles imports the record counted in the previ
   })
   vm.runInContext(componentSection('async function importYouTubeWatchHistory(', 'const showExportWatchHistoryPrompt'), context)
   await context.importYouTubeWatchHistory([record])
-  const saved = Array.isArray(imported) ? imported.find(record => record.videoId === 'abcdefghijk') : imported.get('abcdefghijk')
+  const saved = Array.isArray(imported) ? imported.find(record => record.videoId === 'abcdefghijk') : [...imported.values()].find(record => record.videoId === 'abcdefghijk')
   assert.equal(saved.isWatched, true)
   assert.equal(saved.author, '')
 })
