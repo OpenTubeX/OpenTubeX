@@ -1,3 +1,15 @@
+import { Parser, YTNodes } from 'youtubei.js'
+
+// youtubei.js handles voice attachments but currently drops image attachments.
+class CommentViewWithImageAttachment extends YTNodes.CommentView {
+  applyMutations(comment, toolbarState, toolbarSurface, commentSurface) {
+    super.applyMutations(comment, toolbarState, toolbarSurface, commentSurface)
+    this.image_attachment = commentSurface?.imageAttachmentViewModel?.commentImageAttachmentViewModel
+  }
+}
+
+Parser.addRuntimeParser('CommentView', CommentViewWithImageAttachment)
+
 /**
  * YouTube serves both flat and nested comment replies. youtubei.js expects
  * nested threads, including in continuation responses, for both variants.
