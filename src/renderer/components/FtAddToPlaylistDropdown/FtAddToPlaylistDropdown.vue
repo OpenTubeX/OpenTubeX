@@ -123,7 +123,7 @@ function playlistDisplayName(playlist) {
 const filteredPlaylists = computed(() => playlists.value.filter(playlist =>
   playlistDisplayName(playlist).toLocaleLowerCase().includes(search.value.trim().toLocaleLowerCase())))
 
-const allPlaylists = computed(() => store.getters.getAllPlaylists)
+const allPlaylists = computed(() => store.getters.getAllPlaylists.filter(playlist => Array.isArray(playlist.videos)))
 
 // Freeze the row order while the dropdown is open,
 // otherwise toggling a playlist bumps its lastUpdatedAt and makes the rows jump around
@@ -164,7 +164,7 @@ const containedIds = computed(() => {
 
   return new Set(
     allPlaylists.value
-      .filter((playlist) => playlist.videos.some((video) => video.videoId === videoId))
+      .filter((playlist) => playlist.videos.some((video) => video?.videoId === videoId))
       .map((playlist) => playlist._id)
   )
 })
@@ -175,11 +175,12 @@ const containedIds = computed(() => {
 function playlistThumbnail(playlist) {
   if (store.getters.getThumbnailPreference === 'hidden') return thumbnailPlaceholder
   if (playlist.customThumbnail) return playlist.customThumbnail
-  if (playlist.videos.length === 0) {
+  const first = playlist.videos?.[0]
+  if (first === null || typeof first !== 'object' || Array.isArray(first) || typeof first.videoId !== 'string' || first.videoId.length === 0) {
     return thumbnailPlaceholder
   }
 
-  return getVideoThumbnailUrl(playlist.videos[0].videoId, store.getters.getBackendPreference, store.getters.getCurrentInvidiousInstanceUrl)
+  return getVideoThumbnailUrl(first.videoId, store.getters.getBackendPreference, store.getters.getCurrentInvidiousInstanceUrl)
 }
 
 /**
