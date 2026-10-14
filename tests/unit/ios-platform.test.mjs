@@ -184,6 +184,7 @@ test('iOS rotation fullscreen stays off during PiP and background transitions', 
       pictureInPictureActive: pip,
       mobileAdjustmentsVisible: visible,
       computed, watch,
+      configurePlayerControls: configure => configure(),
       ui: { configure: options => { enabled = options.enableFullscreenOnRotation } },
     })
     vm.runInContext(declaration, context)
