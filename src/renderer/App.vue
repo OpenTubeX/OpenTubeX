@@ -3479,8 +3479,8 @@ function playLibraryVideoFromCommandPalette(video, location) {
   tabMediaCoordinator.dispatchAction('pause', {}, presentedTabId.value)
   window.ftElectron.openInExternalPlayer({
     videoId: video.videoId,
-    // External players cannot resolve the app's local playlist IDs.
-    playlistId: location.query.playlistType === 'user' ? null : location.query.playlistId ?? null,
+    // Palette results have no position within a remote playlist.
+    playlistId: null,
     startTime: saveProgress ? history?.watchProgress ?? 0 : 0,
     playbackRate: store.getters.getDefaultPlayback,
   })

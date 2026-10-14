@@ -2,7 +2,7 @@ import { test, expect, goTo, setWindowSize } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchHistoryEntry } from '../../helpers/watch.mjs'
 import { DEMO_MEDIA_PATH } from '../../helpers/media.mjs'
-import { copyFile, mkdir, readFile, rm } from 'node:fs/promises'
+import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { createHash, randomUUID } from 'node:crypto'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
@@ -458,6 +458,45 @@ test.describe('local video commands', () => {
       ), video.videoId)).toBe(true)
     })
   }
+
+  test('opens the selected history video externally when its saved playlist has no position', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ BrowserWindow }) => {
+      // Other workers share the display; isolate the handler's focus precondition.
+      BrowserWindow.getAllWindows()[0].webContents.isFocused = () => true
+    })
+    const executable = path.join(app.userDataDir, 'capture-player-arguments.mjs')
+    const capturedArguments = path.join(app.userDataDir, 'player-arguments.json')
+    await writeFile(executable, "import { writeFileSync } from 'node:fs'\nwriteFileSync(process.argv[2], JSON.stringify(process.argv.slice(3)))\n")
+    await page.evaluate(async ({ video, executable, capturedArguments, nodePath }) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('upsertToHistoryCache', {
+        ...video,
+        watchProgress: 12,
+        lastViewedPlaylistId: 'PLsavedYouTubePlaylist',
+        lastViewedPlaylistType: 'local',
+      })
+      store.commit('setSaveVideoHistoryWithLastViewedPlaylist', true)
+      await store.dispatch('updateExternalPlayer', 'mpv')
+      await store.dispatch('updateDefaultViewingMode', 'external_player')
+      await store.dispatch('updateDefaultPlayback', 1.5)
+      await store.dispatch('updateWatchedProgressSavingMode', 'auto')
+      await store.dispatch('updateExternalPlayerExecutable', nodePath)
+      await store.dispatch('updateExternalPlayerCustomArgs', JSON.stringify([executable, capturedArguments]))
+    }, { video, executable, capturedArguments, nodePath: process.execPath })
+    const previousUrl = page.url()
+    await page.getByRole('combobox', { name: 'Search commands' }).fill('journey')
+    await page.getByRole('group', { name: 'Local videos', exact: true }).getByRole('option')
+      .filter({ has: page.locator('small', { hasText: 'History ·' }) }).click()
+    await expect.poll(async () => {
+      try {
+        return JSON.parse(await readFile(capturedArguments, 'utf8'))
+      } catch (error) {
+        if (error.code === 'ENOENT') return null
+        throw error
+      }
+    }).toEqual(['--start=12', '--speed=1.5', `https://www.youtube.com/watch?v=${video.videoId}`])
+    expect(page.url()).toBe(previousUrl)
+  })
 
   for (const enabled of [true, false]) {
     test(`history results respect saved playlist context when the setting is ${enabled}`, async ({ app, page }) => {
