@@ -412,3 +412,22 @@ test('a completed playlist baseline forgets obsolete membership so a later remot
   }, store, store.readBaseline(), { allowDataLoss: true })
   assert.equal(store.state.playlists.playlists[0].videos[0].videoId, video.videoId)
 })
+
+test('an unchanged playlist baseline does not rewrite the saved sync snapshot', async () => {
+  const metadata = { id: playlist._id, title: playlist.playlistName, description: '', thumbnail_url: null }
+  const saved = { [playlist._id]: { remoteId: playlist._id, metadata, videos: [video.videoId] } }
+  let writes = 0
+  const persist = vm.runInNewContext(`({${baselineMethod}}).persistPlaylistSyncBaseline`, {
+    rootState: { settings: { syncServerSnapshot: JSON.stringify({ playlists: saved }) } },
+    encrypted: false,
+    historyAccount: Array(5).fill(undefined),
+    parseSnapshot: JSON.parse,
+    dispatch: async () => { writes++ },
+  })
+  // Every completed playlist reports its baseline. Rewriting an identical
+  // snapshot stores the whole sync state again for each playlist.
+  await persist(playlist._id, { remoteId: playlist._id, metadata, applied: true, videos: [video.videoId] })
+  assert.equal(writes, 0)
+  await persist(playlist._id, { remoteId: playlist._id, metadata: { ...metadata, title: 'Renamed' }, applied: true, videos: [video.videoId] })
+  assert.equal(writes, 1)
+})
