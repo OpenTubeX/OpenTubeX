@@ -1,7 +1,10 @@
-import { createServer } from 'node:http'
+import http, { createServer } from 'node:http'
+import https from 'node:https'
 import { Readable } from 'node:stream'
+import { fetchCastMedia } from './castMediaServer.js'
 
-export function createMediaServer(mediaUrl, deviceAddress, token, upstreamHeaders = {}) {
+/** `resolveAddresses` validates every hop, like the Cast relay, so redirects cannot reach private hosts. */
+export function createMediaServer(mediaUrl, deviceAddress, token, upstreamHeaders = {}, resolveAddresses = async () => null) {
   return createServer(async (request, response) => {
     if (
       request.url !== `/${token}/video.mp4` ||
@@ -21,11 +24,13 @@ export function createMediaServer(mediaUrl, deviceAddress, token, upstreamHeader
       let url = new URL(mediaUrl)
       try {
         for (let redirects = 0; ; redirects++) {
-          upstream = await fetch(url, {
+          const addresses = await resolveAddresses(url)
+          if (!addresses) throw new Error('Media address is not allowed')
+          upstream = await fetchCastMedia(url.protocol === 'https:' ? https : http, url, {
             method: request.method,
             headers,
             signal: controller.signal,
-            redirect: 'manual'
+            addresses
           })
           const location = upstream.headers.get('location')
           if (![301, 302, 303, 307, 308].includes(upstream.status) || !location) break

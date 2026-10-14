@@ -4675,6 +4675,44 @@ function runApp() {
   })
 
   ipcMain.on(IpcChannels.OPEN_IN_EXTERNAL_PLAYER, handleOpenInExternalPlayer)
+  /** Relays may reach a non-public address only for the user's Invidious instance, after native consent. */
+  const createMediaAddressResolver = async (sender, isDlna) => {
+    let privateInstance = null
+    try {
+      const configuredInstance = (await baseHandlers.settings._findOne('defaultInvidiousInstance'))?.value
+      if (typeof configuredInstance === 'string' && configuredInstance !== '') {
+        const instance = new URL(configuredInstance)
+        if (['http:', 'https:'].includes(instance.protocol)) {
+          privateInstance = instance.origin + instance.pathname
+        }
+      }
+    } catch { }
+    let privateApproval = null
+    const authorizePrivateUrl = async url => {
+      if (!privateInstance || !isInvidiousInstanceUrl(url.href, privateInstance) ||
+          /%(?:25)*(?:2e|2f|5c)/i.test(url.pathname) || sender.isDestroyed()) return false
+      // Settings can be written by the renderer. Only a native dialog grants
+      // access, for this session and this instance's origin and path.
+      privateApproval ??= (async () => {
+        const t = await createMainTranslator()
+        if (sender.isDestroyed()) return false
+        const { response } = await dialog.showMessageBox(BrowserWindow.fromWebContents(sender), {
+          type: 'question',
+          title: isDlna ? t('Video.Player.DLNA.Cast') : t('Video.Player.Google Cast.Cast'),
+          message: t('Video.Player.Google Cast.Allow Private Instance', { instance: privateInstance }),
+          buttons: [t('Cancel'), t('Yes')],
+          defaultId: 0,
+          cancelId: 0,
+          noLink: true
+        })
+        return response === 1
+      })()
+      return await privateApproval && !sender.isDestroyed()
+    }
+    const resolveAddresses = url => resolveCastMediaAddresses(url, authorizePrivateUrl,
+      hostname => session.defaultSession.resolveHost(hostname, { cacheUsage: 'disallowed' }))
+    return { privateInstance, resolveAddresses }
+  }
   ipcMain.handle(IpcChannels.DLNA_DISCOVER, event => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) return []
     return discoverDlnaDevices()
@@ -4709,7 +4747,15 @@ function runApp() {
         muxOptions = { ffmpegPath: await getDlnaFfmpegExecutable(), audioHeaders: sourceHeaders(payload.audioUrl) }
       } catch (error) { return { error: error.message, muxUnavailable: true } }
     }
-    const result = await startDlnaCast(event.sender.id, payload, sourceHeaders(payload?.mediaUrl), muxOptions)
+    const { privateInstance, resolveAddresses } = await createMediaAddressResolver(event.sender, true)
+    // Ask before the renderer requests media, so the dialog cannot outlast its timeout.
+    for (const sourceUrl of [payload?.mediaUrl, payload?.audioUrl]) {
+      if (privateInstance && isInvidiousInstanceUrl(sourceUrl, privateInstance) && !await resolveAddresses(new URL(sourceUrl))) {
+        return { error: 'Private media access was not approved' }
+      }
+    }
+    if (event.sender.isDestroyed()) return { error: 'Casting requires an active OpenTubeX window' }
+    const result = await startDlnaCast(event.sender.id, payload, sourceHeaders(payload?.mediaUrl), muxOptions, resolveAddresses)
     if (result.castId) {
       if (event.sender.isDestroyed()) {
         stopDlnaCast(event.sender.id).catch(console.error)
@@ -4807,40 +4853,7 @@ function runApp() {
       if (cookies !== null) headers.Cookie = cookies
       return headers
     }
-    let privateInstance = null
-    try {
-      const configuredInstance = (await baseHandlers.settings._findOne('defaultInvidiousInstance'))?.value
-      if (typeof configuredInstance === 'string' && configuredInstance !== '') {
-        const instance = new URL(configuredInstance)
-        if (['http:', 'https:'].includes(instance.protocol)) {
-          privateInstance = instance.origin + instance.pathname
-        }
-      }
-    } catch { }
-    let privateApproval = null
-    const authorizePrivateUrl = async url => {
-      if (!privateInstance || !isInvidiousInstanceUrl(url.href, privateInstance) ||
-          /%(?:25)*(?:2e|2f|5c)/i.test(url.pathname) || event.sender.isDestroyed()) return false
-      // Settings can be written by the renderer. Only a native dialog grants
-      // access, for this session and this instance's origin and path.
-      privateApproval ??= (async () => {
-        const t = await createMainTranslator()
-        if (event.sender.isDestroyed()) return false
-        const { response } = await dialog.showMessageBox(BrowserWindow.fromWebContents(event.sender), {
-          type: 'question',
-          title: t('Video.Player.Google Cast.Cast'),
-          message: t('Video.Player.Google Cast.Allow Private Instance', { instance: privateInstance }),
-          buttons: [t('Cancel'), t('Yes')],
-          defaultId: 0,
-          cancelId: 0,
-          noLink: true
-        })
-        return response === 1
-      })()
-      return await privateApproval && !event.sender.isDestroyed()
-    }
-    const resolveAddresses = url => resolveCastMediaAddresses(url, authorizePrivateUrl,
-      hostname => session.defaultSession.resolveHost(hostname, { cacheUsage: 'disallowed' }))
+    const { privateInstance, resolveAddresses } = await createMediaAddressResolver(event.sender, false)
     const fetchMedia = async (url, options) => fetchCastMedia(new URL(url).protocol === 'https:' ? https : http, url, {
       ...options, proxy: await session.defaultSession.resolveProxy(url)
     })

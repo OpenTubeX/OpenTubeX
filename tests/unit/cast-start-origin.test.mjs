@@ -52,6 +52,7 @@ async function fixture(defaultInstance = 'http://192.168.1.2:3000') {
       }
     }
   })
+  vm.runInContext(main.slice(main.indexOf('  const createMediaAddressResolver ='), main.indexOf('  ipcMain.handle(IpcChannels.DLNA_DISCOVER')), context)
   vm.runInContext(main.slice(main.indexOf('  const castOwners ='), main.indexOf('  ipcMain.handle(IpcChannels.CAST_STATUS')), context)
   const preload = (await readFile(new URL('../../src/preload/interface.js', import.meta.url), 'utf8'))
     .replace(/^import .*$/gm, '').replace('export default {', 'globalThis.preloadInterface = {')

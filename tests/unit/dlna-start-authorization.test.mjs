@@ -23,6 +23,7 @@ async function fixture() {
     getYtDlpExternalStreamHeaders: () => ({}),
     getYtDlpExternalStreamCookieHeader: () => null,
     getDlnaFfmpegExecutable: () => new Promise((_, reject) => { finishValidation = () => reject(new Error('FFmpeg unavailable')) }),
+    createMediaAddressResolver: async () => ({ privateInstance: null, resolveAddresses: async () => null }),
     startDlnaCast: async (_owner, payload) => { attempts.push(payload); return { castId: 'cast-1' } },
     stopDlnaCast: async () => {},
     console,

@@ -13,6 +13,8 @@ function close (server) {
   return new Promise(resolve => server.close(resolve))
 }
 
+const allowLoopback = async () => [{ address: '127.0.0.1', family: 4 }]
+
 test('reads an AVTransport endpoint from a MediaRenderer description', () => {
   const description = `<?xml version="1.0"?>
     <root><device><deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType>
@@ -119,7 +121,7 @@ test('serves MP4 byte ranges only to the selected device and token', async t => 
   const upstreamPort = await listen(upstream)
   t.after(() => close(upstream))
 
-  const proxy = createMediaServer(`http://127.0.0.1:${upstreamPort}/video`, '127.0.0.1', 'secret')
+  const proxy = createMediaServer(`http://127.0.0.1:${upstreamPort}/video`, '127.0.0.1', 'secret', {}, allowLoopback)
   const proxyPort = await listen(proxy)
   t.after(() => close(proxy))
 
@@ -155,7 +157,7 @@ test('follows media redirects without forwarding credentials to another origin',
   const proxy = createMediaServer(`http://127.0.0.1:${sourcePort}/video`, '127.0.0.1', 'secret', {
     Cookie: 'private=cookie',
     Authorization: 'Bearer private'
-  })
+  }, allowLoopback)
   const proxyPort = await listen(proxy)
   t.after(() => close(proxy))
 
@@ -169,6 +171,30 @@ test('follows media redirects without forwarding credentials to another origin',
   assert.equal(redirectedHeaders.authorization, undefined)
 })
 
+test('refuses media hosts and redirects the resolver does not allow', async t => {
+  let destinationRequests = 0
+  const destination = createServer((request, response) => {
+    destinationRequests++
+    response.writeHead(200).end('private')
+  })
+  const destinationPort = await listen(destination)
+  t.after(() => close(destination))
+  const source = createServer((request, response) => {
+    response.writeHead(302, { location: `http://localhost:${destinationPort}/admin` }).end()
+  })
+  const sourcePort = await listen(source)
+  t.after(() => close(source))
+
+  const unresolved = createMediaServer(`http://127.0.0.1:${destinationPort}/video`, '127.0.0.1', 'secret')
+  const redirected = createMediaServer(`http://127.0.0.1:${sourcePort}/video`, '127.0.0.1', 'secret', {},
+    async url => url.hostname === '127.0.0.1' ? [{ address: '127.0.0.1', family: 4 }] : null)
+  for (const proxy of [unresolved, redirected]) {
+    const proxyPort = await listen(proxy)
+    t.after(() => close(proxy))
+    assert.equal((await fetch(`http://127.0.0.1:${proxyPort}/secret/video.mp4`)).status, 502)
+  }
+  assert.equal(destinationRequests, 0)
+})
 
 test('reads the renderer SOAP playback position for cast recovery', async t => {
   const xml = '<response><RelTime>00:00:08</RelTime></response>'
