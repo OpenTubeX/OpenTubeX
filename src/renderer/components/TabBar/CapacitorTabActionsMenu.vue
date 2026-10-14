@@ -3,7 +3,7 @@
     :css="false"
     @enter="enter"
     @leave="leave"
-    @after-leave="emit('closed')"
+    @after-leave="finishClose"
   >
     <div
       v-if="tab"
@@ -299,6 +299,17 @@ const closeMenuTrigger = useTemplateRef('closeMenuTrigger')
 const deviceMenuTrigger = useTemplateRef('deviceMenuTrigger')
 const submenuBack = useTemplateRef('submenuBack')
 let mainScrollTop = 0
+let previousFocus = null
+
+function finishClose() {
+  emit('closed')
+  // Let the tablet parent release its inert state before focusing the opener.
+  nextTick(() => {
+    if (!props.tab && previousFocus?.isConnected && document.activeElement === document.body) {
+      previousFocus.focus({ preventScroll: true })
+    }
+  })
+}
 
 async function sendToDevice(device) {
   emit('dismiss')
@@ -321,7 +332,8 @@ async function setMenu(menu) {
   target?.focus({ preventScroll: true })
 }
 
-watch(() => props.tab?.id, async () => {
+watch(() => props.tab?.id, async (tabId, previousTabId) => {
+  if (tabId && !previousTabId) previousFocus = document.activeElement
   activeMenu.value = null
   mainScrollTop = 0
   await nextTick()

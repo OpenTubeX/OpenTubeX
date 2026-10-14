@@ -143,5 +143,44 @@ for (const mode of ['phone', 'tablet']) {
         await session.detach()
       }
     })
+
+    test(`${mode} tab sheet restores keyboard focus and keeps long-title actions reachable at ${scale}%`, async ({ app, page }) => {
+      await setWindowSize(app, page, { width: 375, height: 760 })
+      await page.evaluate(scale => window.ftElectron.setZoomFactor(scale / 100), scale)
+      await enableTabMenus(page, mode)
+      await page.locator('.capacitorPhoneTabSwitcherButton').click()
+      const target = page.locator('.capacitorPhoneTabTarget[aria-selected="true"]')
+      const menu = page.locator('.capacitorTabActions')
+      await target.focus()
+      await target.press('Shift+F10')
+      await enableTabMenus(page, mode)
+      await settled(menu)
+      await expect(menu).toBeFocused()
+      await page.keyboard.press('Escape')
+      await expect(menu).toHaveCount(0)
+      await expect(target).toBeFocused()
+
+      await setWindowSize(app, page, { width: 760, height: 375 })
+      const title = 'A very long video title '.repeat(100)
+      await page.evaluate(title => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setTabContentTitle', { tabId: store.getters.getActiveTabId, title })
+      }, title)
+      await target.focus()
+      await target.press('ContextMenu')
+      await enableTabMenus(page, mode)
+      await settled(menu)
+      await expect(menu.locator('strong')).toHaveText(title.trim())
+      const viewportWidth = await page.evaluate(() => innerWidth)
+      await expect.poll(() => menu.evaluate(element => element.getBoundingClientRect().width)).toBeCloseTo(viewportWidth, 0)
+      const list = menu.locator('.capacitorTabActionList')
+      await expect.poll(() => list.evaluate(element => element.getBoundingClientRect().height)).toBeGreaterThan(48)
+      await list.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect(menu.getByRole('menuitem', { name: 'Close Tab', exact: true })).toBeInViewport()
+      await expectScrollAtRenderedEnd(list)
+      await page.keyboard.press('Escape')
+      await expect(menu).toHaveCount(0)
+      await expect(target).toBeFocused()
+    })
   }
 }
