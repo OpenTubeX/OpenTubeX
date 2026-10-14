@@ -42,12 +42,12 @@ test.describe('playlist sync while another window edits the library', () => {
   })
 
   test('synced thumbnails reject invalid data and normalize oversized images before saving', async ({ page }) => {
-    let header = { id: 'sync-race', title: 'Imported', description: '', thumbnail_url: null }
+    let header = { id: 'sync-race', title: 'Imported', description: '', custom_thumbnail: null }
     let writes = 0
     await page.route('http://playlist-sync.test/**', async route => {
       const pathname = new URL(route.request().url()).pathname
       let json = []
-      if (pathname === '/health') json = { capabilities: { encrypted_sync: 0 } }
+      if (pathname === '/health') json = { capabilities: { encrypted_sync: 0, playlist_thumbnails: 1 } }
       else if (pathname === '/v1/playlists/') json = [header]
       else if (pathname === '/v1/playlists/sync-race') {
         if (route.request().method() === 'PATCH') {
@@ -72,7 +72,7 @@ test.describe('playlist sync while another window edits the library', () => {
       await store.dispatch('syncWithSyncServer')
       return store.getters.getPlaylist('sync-race').customThumbnail || ''
     })
-    header.thumbnail_url = await page.evaluate(() => {
+    header.custom_thumbnail = await page.evaluate(() => {
       const canvas = document.createElement('canvas')
       canvas.width = 16
       canvas.height = 9
@@ -81,7 +81,7 @@ test.describe('playlist sync while another window edits the library', () => {
     const savedCover = await sync()
     const baseline = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.settings.syncServerSnapshot)
     for (const invalid of ['data:image/png;base64,AAAA', 'data:image/gif;base64,AAAA', `data:image/png;base64,${'A'.repeat(2_000_000)}`]) {
-      header.thumbnail_url = invalid
+      header.custom_thumbnail = invalid
       await expect(sync()).rejects.toThrow()
       const saved = await page.evaluate(() => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -94,12 +94,19 @@ test.describe('playlist sync while another window edits the library', () => {
       expect(saved.thumbnail).toBe(savedCover)
       expect(saved.baseline).toBe(baseline)
       expect(saved.error).toBeTruthy()
-      expect(header.thumbnail_url).toBe(invalid)
+      expect(header.custom_thumbnail).toBe(invalid)
     }
-    header.thumbnail_url = ''
-    expect(await sync()).toBe('')
+    for (const replacement of ['', savedCover]) {
+      header.custom_thumbnail = 'data:image/png;base64,AAAA'
+      await page.evaluate(async customThumbnail => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        await store.dispatch('updatePlaylist', { _id: 'sync-race', customThumbnail })
+      }, replacement)
+      expect(await sync()).toBe(replacement)
+      expect(header.custom_thumbnail || '').toBe(replacement)
+    }
     for (const [width, height] of [[16, 9], [2560, 1440]]) {
-      header.thumbnail_url = await page.evaluate(([width, height]) => {
+      header.custom_thumbnail = await page.evaluate(([width, height]) => {
         const canvas = document.createElement('canvas')
         canvas.width = width
         canvas.height = height
@@ -107,7 +114,7 @@ test.describe('playlist sync while another window edits the library', () => {
         return canvas.toDataURL('image/png')
       }, [width, height])
       const thumbnail = await sync()
-      expect(thumbnail).toBe(header.thumbnail_url)
+      expect(thumbnail).toBe(header.custom_thumbnail)
       const dimensions = await page.evaluate(async thumbnail => {
         const image = new Image()
         image.src = thumbnail

@@ -71,11 +71,11 @@ test('concurrent edits merge each playlist metadata field independently', async 
 
 test('invalid remote custom thumbnails are rejected before persistence', async () => {
   const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
-  await adapter.createPlaylist({ id: 'invalid', title: 'Invalid cover', thumbnail_url: 'data:image/png;base64,AAAA' })
+  await adapter.createPlaylist({ id: 'invalid', title: 'Invalid cover', custom_thumbnail: 'data:image/png;base64,AAAA' })
   const store = createStore()
   await assert.rejects(context.syncPlaylists(adapter, store), /Invalid image/)
   assert.equal(store.state.playlists.playlists.length, 0)
-  assert.equal((await adapter.getPlaylist('invalid')).playlist.thumbnail_url, 'data:image/png;base64,AAAA')
+  assert.equal((await adapter.getPlaylist('invalid')).playlist.custom_thumbnail, 'data:image/png;base64,AAAA')
 })
 
 test('invalid remote images preserve a saved cover and baseline while explicit resets still apply', async () => {
@@ -86,14 +86,14 @@ test('invalid remote images preserve a saved cover and baseline while explicit r
   const baseline = JSON.stringify(previous)
   store.persistPlaylistSyncBaseline = async () => assert.fail('An invalid remote image must not update the baseline')
   for (const invalid of ['data:image/png;base64,AAAA', 'data:image/gif;base64,AAAA']) {
-    await adapter.updatePlaylist('saved', { thumbnail_url: invalid })
+    await adapter.updatePlaylist('saved', { custom_thumbnail: invalid })
     await assert.rejects(context.syncPlaylists(adapter, store, previous), /Invalid image/)
     assert.equal(store.state.playlists.playlists[0].customThumbnail, original)
     assert.equal(JSON.stringify(previous), baseline)
-    assert.equal((await adapter.getPlaylist('saved')).playlist.thumbnail_url, invalid)
+    assert.equal((await adapter.getPlaylist('saved')).playlist.custom_thumbnail, invalid)
   }
   store.persistPlaylistSyncBaseline = async () => {}
-  await adapter.updatePlaylist('saved', { thumbnail_url: '' })
+  await adapter.updatePlaylist('saved', { custom_thumbnail: '' })
   await context.syncPlaylists(adapter, store, previous)
   assert.equal(store.state.playlists.playlists[0].customThumbnail, '')
 })
@@ -109,6 +109,57 @@ test('simultaneous changes to the same metadata field keep the local edit', asyn
   assert.equal(store.state.playlists.playlists[0].description, 'Remote description')
 })
 
+test('local thumbnail replacements and resets repair invalid remote images', async () => {
+  for (const replacement of ['data:image/webp;base64,cmVwbGFjZW1lbnQ=', '']) {
+    const original = 'data:image/webp;base64,b3JpZ2luYWw='
+    const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
+    const store = createStore([{ _id: 'repair', playlistName: 'Repair cover', customThumbnail: original, videos: [] }])
+    const previous = await context.syncPlaylists(adapter, store)
+    await adapter.updatePlaylist('repair', { custom_thumbnail: 'data:image/png;base64,AAAA' })
+    store.state.playlists.playlists[0].customThumbnail = replacement
+    const snapshot = await context.syncPlaylists(adapter, store, previous)
+    assert.equal((await adapter.getPlaylist('repair')).playlist.custom_thumbnail, replacement || null)
+    assert.equal(store.state.playlists.playlists[0].customThumbnail, replacement)
+    assert.equal(snapshot.repair.metadata.custom_thumbnail, replacement || null)
+  }
+})
+
+test('released clients preserve covers through repeated syncs and title edits', async () => {
+  const image = 'data:image/webp;base64,b3JpZ2luYWw='
+  const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
+  const upgraded = createStore([{ _id: 'mixed', playlistName: 'Mixed versions', customThumbnail: image, videos: [] }])
+  let upgradedSnapshot = await context.syncPlaylists(adapter, upgraded)
+  const released = createStore()
+  let releasedSnapshot = await syncReleasedPlaylists(adapter, released)
+  releasedSnapshot = await syncReleasedPlaylists(adapter, released, releasedSnapshot)
+  assert.equal((await adapter.getPlaylist('mixed')).playlist.custom_thumbnail, image)
+  released.state.playlists.playlists[0].playlistName = 'Renamed by released client'
+  await syncReleasedPlaylists(adapter, released, releasedSnapshot)
+  upgradedSnapshot = await context.syncPlaylists(adapter, upgraded, upgradedSnapshot)
+  assert.equal(upgraded.state.playlists.playlists[0].customThumbnail, image)
+  assert.equal(upgraded.state.playlists.playlists[0].playlistName, 'Renamed by released client')
+  upgraded.state.playlists.playlists[0].customThumbnail = ''
+  await context.syncPlaylists(adapter, upgraded, upgradedSnapshot)
+  assert.equal((await adapter.getPlaylist('mixed')).playlist.custom_thumbnail, null)
+})
+
+test('servers without thumbnail support keep local covers out of synced metadata', async () => {
+  const image = 'data:image/webp;base64,b3JpZ2luYWw='
+  const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
+  adapter.supportsPlaylistThumbnails = async () => false
+  const store = createStore([{ _id: 'unsupported', playlistName: 'Unsupported server', customThumbnail: image, videos: [] }])
+  let previous = await context.syncPlaylists(adapter, store)
+  assert.ok(!Object.hasOwn((await adapter.getPlaylist('unsupported')).playlist, 'custom_thumbnail'))
+  assert.ok(!Object.hasOwn(previous.unsupported.metadata, 'custom_thumbnail'))
+  store.state.playlists.playlists[0].playlistName = 'Local rename'
+  previous = await context.syncPlaylists(adapter, store, previous)
+  await adapter.updatePlaylist('unsupported', { description: 'Remote description' })
+  await context.syncPlaylists(adapter, store, previous)
+  assert.equal(store.state.playlists.playlists[0].customThumbnail, image)
+  assert.equal(store.state.playlists.playlists[0].description, 'Remote description')
+  assert.ok(!Object.hasOwn((await adapter.getPlaylist('unsupported')).playlist, 'custom_thumbnail'))
+})
+
 test('custom playlist thumbnails sync between devices, including replacement and restoring defaults', async () => {
   const original = 'data:image/webp;base64,b3JpZ2luYWw='
   const replacement = 'data:image/png;base64,cmVwbGFjZW1lbnQ='
@@ -120,7 +171,7 @@ test('custom playlist thumbnails sync between devices, including replacement and
   adapter.updatePlaylist = async (...args) => { writes++; return update(...args) }
 
   let firstSnapshot = await context.syncPlaylists(adapter, first)
-  assert.equal((await adapter.getPlaylist('cover')).playlist.thumbnail_url, original)
+  assert.equal((await adapter.getPlaylist('cover')).playlist.custom_thumbnail, original)
   let secondSnapshot = await context.syncPlaylists(adapter, second)
   assert.equal(second.state.playlists.playlists[0].customThumbnail, original)
 
@@ -136,7 +187,7 @@ test('custom playlist thumbnails sync between devices, including replacement and
 
   first.state.playlists.playlists[0].customThumbnail = ''
   firstSnapshot = await context.syncPlaylists(adapter, first, firstSnapshot)
-  assert.equal((await adapter.getPlaylist('cover')).playlist.thumbnail_url, null)
+  assert.equal((await adapter.getPlaylist('cover')).playlist.custom_thumbnail, null)
   secondSnapshot = await context.syncPlaylists(adapter, second, secondSnapshot)
   assert.equal(second.state.playlists.playlists[0].customThumbnail, '')
   await context.syncPlaylists(adapter, first, firstSnapshot)
@@ -151,7 +202,7 @@ test('server-generated playlist thumbnails remain automatic defaults without rep
   const store = createStore()
   const snapshot = await context.syncPlaylists(adapter, store)
   assert.equal(store.state.playlists.playlists[0].customThumbnail, '')
-  assert.equal(snapshot.automatic.metadata.thumbnail_url, null)
+  assert.equal(snapshot.automatic.metadata.custom_thumbnail, null)
   await context.syncPlaylists(adapter, store, snapshot)
 })
 
@@ -159,14 +210,14 @@ test('a released HTTP-thumbnail baseline does not overwrite a remote-only custom
   const original = { id: 'legacy-cover', title: 'Legacy cover', description: '', thumbnail_url: 'https://i.ytimg.com/vi/abcdefghijk/maxresdefault.jpg' }
   const image = 'data:image/webp;base64,Y292ZXI='
   const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
-  await adapter.createPlaylist({ ...original, thumbnail_url: image })
+  await adapter.createPlaylist({ ...original, custom_thumbnail: image })
   adapter.updatePlaylist = async () => assert.fail('A remote-only cover change must not be overwritten')
   const store = createStore([{ _id: original.id, playlistName: original.title, description: '', videos: [] }])
   const snapshot = await context.syncPlaylists(adapter, store, {
     [original.id]: { metadata: original, videos: [] },
   })
   assert.equal(store.state.playlists.playlists[0].customThumbnail, image)
-  assert.equal(snapshot[original.id].metadata.thumbnail_url, image)
+  assert.equal(snapshot[original.id].metadata.custom_thumbnail, image)
 })
 
 test('syncs videos imported from a Takeout ZIP to a second device and repairs an empty remote playlist', async () => {

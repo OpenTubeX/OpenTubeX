@@ -222,6 +222,11 @@ export class SyncServerClient {
     return capabilities.bulk_sync === 1
   }
 
+  async supportsPlaylistThumbnails() {
+    const capabilities = await this.getCapabilities()
+    return capabilities.playlist_thumbnails === 1
+  }
+
   async supportsSeenVideosSync() {
     const capabilities = await this.getCapabilities()
     return capabilities.seen_videos === 1
@@ -485,9 +490,12 @@ export class SyncServerClient {
   updatePlaylist(playlistId, playlist) {
     return this.apiRequest(`/playlists/${encodeURIComponent(playlistId)}`, {
       method: 'PATCH',
-      // Existing servers skip nullable fields on update. An empty value clears
-      // a custom image while the app continues to derive its default locally.
-      body: { ...playlist, thumbnail_url: playlist.thumbnail_url ?? '' },
+      // Omitted custom thumbnails are left alone by released clients. An empty
+      // value explicitly restores the default without changing thumbnail_url.
+      body: {
+        ...playlist,
+        ...(Object.hasOwn(playlist, 'custom_thumbnail') ? { custom_thumbnail: playlist.custom_thumbnail ?? '' } : {}),
+      },
     })
   }
 
@@ -627,24 +635,23 @@ function videoToLocal(video, timeAdded = Date.now()) {
   }
 }
 
-function playlistMetadataFromLocal(playlist) {
+function playlistMetadataFromLocal(playlist, syncThumbnails) {
   return {
     id: playlist._id,
     title: playlist.playlistName,
     description: playlist.description || '',
-    thumbnail_url: playlist.customThumbnail || null,
+    thumbnail_url: null,
+    ...(syncThumbnails ? { custom_thumbnail: playlist.customThumbnail || null } : {}),
   }
 }
 
-function playlistMetadataFromRemote(playlist) {
-  // Servers can fill this field with a video's thumbnail. Only embedded images
-  // represent a custom thumbnail; other URLs keep the local automatic default.
-  const thumbnail = playlist.thumbnail_url
+function playlistMetadataFromRemote(playlist, syncThumbnails) {
   return {
     id: playlist.id,
     title: playlist.title,
     description: playlist.description || '',
-    thumbnail_url: typeof thumbnail === 'string' && thumbnail.startsWith('data:') ? thumbnail : null,
+    thumbnail_url: null,
+    ...(syncThumbnails ? { custom_thumbnail: playlist.custom_thumbnail || null } : {}),
   }
 }
 
@@ -652,17 +659,17 @@ function metadataEquals(first, second) {
   return JSON.stringify(first) === JSON.stringify(second)
 }
 
-function selectPlaylistMetadata(local, remote, previous) {
-  if (!local) return playlistMetadataFromRemote(remote)
-  if (!remote) return playlistMetadataFromLocal(local)
+function selectPlaylistMetadata(local, remote, previous, syncThumbnails) {
+  if (!local) return playlistMetadataFromRemote(remote, syncThumbnails)
+  if (!remote) return playlistMetadataFromLocal(local, syncThumbnails)
 
-  const localMetadata = playlistMetadataFromLocal(local)
-  const remoteMetadata = playlistMetadataFromRemote(remote)
+  const localMetadata = playlistMetadataFromLocal(local, syncThumbnails)
+  const remoteMetadata = playlistMetadataFromRemote(remote, syncThumbnails)
   if (!previous) return localMetadata
 
-  const previousMetadata = playlistMetadataFromRemote(previous)
+  const previousMetadata = playlistMetadataFromRemote(previous, syncThumbnails)
   const merged = { ...localMetadata }
-  for (const field of ['title', 'description', 'thumbnail_url']) {
+  for (const field of ['title', 'description', ...(syncThumbnails ? ['custom_thumbnail'] : [])]) {
     if (localMetadata[field] === previousMetadata[field]) {
       merged[field] = remoteMetadata[field]
     }
@@ -673,7 +680,7 @@ function selectPlaylistMetadata(local, remote, previous) {
 function isSameLocalPlaylist(playlist, metadata, videos) {
   return playlist.playlistName === metadata.title &&
     (playlist.description || '') === metadata.description &&
-    (playlist.customThumbnail || null) === metadata.thumbnail_url &&
+    (!Object.hasOwn(metadata, 'custom_thumbnail') || (playlist.customThumbnail || null) === metadata.custom_thumbnail) &&
     playlist.videos.length === videos.length &&
     playlist.videos.every((video, index) => metadataEquals(video, videos[index]))
 }
@@ -766,6 +773,7 @@ export async function syncPlaylistBookmarks(client, store, previousIds = [], opt
 }
 
 export async function syncPlaylists(client, store, previous = {}, options = {}) {
+  const syncThumbnails = typeof client.supportsPlaylistThumbnails === 'function' && await client.supportsPlaylistThumbnails()
   const localPlaylists = deepCopy(store.state.playlists.playlists)
   const localById = mapBy(localPlaylists, playlist => playlist._id)
   const remotePlaylistHeaders = await client.getPlaylists()
@@ -806,12 +814,11 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
   for (const id of mergedIds) {
     let local = localById.get(id)
     let remote = remoteById.get(id)
-    const rawRemoteMetadata = remote ? playlistMetadataFromRemote({ ...remote.playlist, id }) : null
-    const remoteMetadata = rawRemoteMetadata ? { ...rawRemoteMetadata } : null
-    if (remoteMetadata?.thumbnail_url) {
-      remoteMetadata.thumbnail_url = await normalizePlaylistThumbnail(remoteMetadata.thumbnail_url)
+    const rawRemoteMetadata = remote ? playlistMetadataFromRemote({ ...remote.playlist, id }, syncThumbnails) : null
+    const metadata = selectPlaylistMetadata(local, rawRemoteMetadata, previous[id]?.metadata, syncThumbnails)
+    if (metadata.custom_thumbnail) {
+      metadata.custom_thumbnail = await normalizePlaylistThumbnail(metadata.custom_thumbnail)
     }
-    const metadata = selectPlaylistMetadata(local, remoteMetadata, previous[id]?.metadata)
     let remoteId = remote?.remoteId ?? id
     assertCurrent(local, id)
 
@@ -916,7 +923,7 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
         _id: id,
         playlistName: metadata.title,
         description: metadata.description,
-        customThumbnail: metadata.thumbnail_url || '',
+        customThumbnail: metadata.custom_thumbnail || '',
         protected: false,
         videos: mergedVideos,
       }
@@ -928,7 +935,7 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
           ...local,
           playlistName: metadata.title,
           description: metadata.description,
-          customThumbnail: metadata.thumbnail_url || '',
+          ...(syncThumbnails ? { customThumbnail: metadata.custom_thumbnail || '' } : {}),
           videos: mergedVideos,
         },
       })

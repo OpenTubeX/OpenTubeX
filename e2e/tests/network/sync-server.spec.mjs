@@ -897,6 +897,7 @@ test.describe('OpenTubeX sync server', () => {
     test(`syncs custom playlist thumbnails between two clients with ${privacy} privacy`, async ({ page }, testInfo) => {
       const capabilities = await getSyncCapabilities()
       test.skip(privacy === 'enhanced' && capabilities.encrypted_sync !== 1, 'Enhanced privacy server required')
+      test.skip(privacy === 'legacy' && capabilities.playlist_thumbnails !== 1, 'Custom playlist thumbnail server required')
       const username = `opentubex-thumbnail-${randomUUID()}`
       const password = 'local-test-password'
       const otherUserData = await createUserDataDir({ settings: { syncServerEnabled: true } })
@@ -1000,6 +1001,24 @@ test.describe('OpenTubeX sync server', () => {
           expect(await clientPage.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
             .getters.getAllPlaylists.find(playlist => playlist.playlistName === 'Synced playlist').description))
             .toBe('Edited while the other device changed its cover')
+        }
+
+        if (privacy === 'legacy') {
+          const { token, id } = await page.evaluate(() => {
+            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            return { token: store.getters.getSyncServerToken, id: store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'Synced playlist')._id }
+          })
+          const updated = await fetch(`${syncServerUrl}/v1/playlists/${encodeURIComponent(id)}`, {
+            method: 'PATCH',
+            headers: { Authorization: token, 'Content-Type': 'application/json' },
+            // Released clients know only the automatic thumbnail field.
+            body: JSON.stringify({ title: 'Synced playlist', description: 'Edited by a released client', thumbnail_url: null }),
+          })
+          expect(updated.ok).toBe(true)
+          await sync(page)
+          await sync(other.page)
+          await expectCover(page, replacement)
+          await expectCover(other.page, replacement)
         }
 
         const thumbnailWrites = []
