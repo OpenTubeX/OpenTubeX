@@ -18,17 +18,18 @@
 }
 
 .capacitorTabActions {
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  min-inline-size: 0;
+  display: flex;
+  flex-direction: column;
   box-sizing: border-box;
-  max-block-size: 100%;
-  padding-block: 16px max(16px, var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+  max-block-size: min(100%, calc(var(--phone-viewport-height, 100dvh) - var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) - 24px));
+  gap: 4px;
+  padding-block: 0 max(16px, var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
   padding-inline: 16px;
   color: var(--primary-text-color);
   background-color: var(--card-bg-color);
-  border-start-start-radius: calc(20px * var(--ui-roundness));
-  border-start-end-radius: calc(20px * var(--ui-roundness));
-  box-shadow: 0 -8px 32px rgb(0 0 0 / 35%);
+  border-start-start-radius: calc(28px * var(--ui-roundness));
+  border-start-end-radius: calc(28px * var(--ui-roundness));
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
@@ -36,13 +37,13 @@
 .capacitorTabActionList {
   min-block-size: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .capacitorTabActions strong {
-  padding-block: 4px 12px;
-  padding-inline: 8px;
+  min-inline-size: 0;
+  padding: 8px;
   overflow: hidden;
-  font-size: 16px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -53,8 +54,7 @@
   align-items: center;
   gap: 16px;
   min-block-size: 48px;
-  padding-block: 8px;
-  padding-inline: 12px;
+  padding: 12px;
   color: inherit;
   background-color: transparent;
   border: 0;
@@ -80,21 +80,6 @@
   color: var(--error-color, #d84f4f);
 }
 
-.capacitor-tab-actions-enter-active,
-.capacitor-tab-actions-leave-active {
-  transition: opacity 160ms ease;
-}
-
-.capacitor-tab-actions-enter-from,
-.capacitor-tab-actions-leave-to {
-  opacity: 0;
-}
-
-:global(:root[data-reduced-motion='reduce']) .capacitor-tab-actions-enter-active,
-:global(:root[data-reduced-motion='reduce']) .capacitor-tab-actions-leave-active {
-  transition: none;
-}
-
 .capacitorTabActionContent {
   display: grid;
   gap: 4px;
@@ -102,12 +87,13 @@
 
 .capacitorTabActionHeader {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   gap: 8px;
   min-inline-size: 0;
 }
 
-.mode-phone .submenuBack {
+.submenuBack {
   inline-size: 100%;
 }
 
