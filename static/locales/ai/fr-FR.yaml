@@ -1168,7 +1168,6 @@ Tutorial:
   Skip: Ignorer
   Next: Suivant
   Finish: Terminer
-  Got It: Compris
   Welcome:
     Title: Bienvenue dans OpenTubeX
     Description: Voici quelques commandes qui vous aideront à prendre vos marques.
@@ -1189,9 +1188,6 @@ Tutorial:
     Description: Vous pouvez importer les abonnements, l’historique, les playlists, l’historique de recherche ou les paramètres depuis une autre application compatible ou une sauvegarde.
     Action: Importer des données
     Not Now: Pas maintenant
-  Settings Moved:
-    Title: Les paramètres ont été déplacés
-    Description: Sélectionnez votre profil en haut à droite pour accéder aux commandes rapides. Faites un clic droit dessus pour ouvrir directement la sélection des profils. La roue dentée de ce menu ouvre tous les paramètres. Les sections À propos et Téléchargements se trouvent également dans ce menu.
 About:
   Commit: Commit
   Fluxer: Rejoindre notre communauté Fluxer

@@ -1440,7 +1440,6 @@ Tutorial:
   Skip: Praleisti
   Next: Toliau
   Finish: Baigti
-  Got It: Supratau
   Welcome:
     Title: Sveiki prisijungę prie OpenTubeX
     Description: Susipažinkite su keliais valdikliais, kurie padės greitai apsiprasti.
@@ -1461,9 +1460,6 @@ Tutorial:
     Description: Jei norite, importuokite prenumeratas, istoriją, grojaraščius, paieškos istoriją arba nustatymus iš kitos palaikomos programėlės ar atsarginės kopijos.
     Action: Importuoti duomenis
     Not Now: Ne dabar
-  Settings Moved:
-    Title: Nustatymai perkelti
-    Description: Viršuje dešinėje pasirinkite profilį, kad pasiektumėte sparčiuosius valdiklius. Spustelėję jį dešiniuoju pelės mygtuku pateksite tiesiai į profilio pasirinkimą. Šio meniu krumpliaračiu atversite visus nustatymus; čia taip pat perkeltos skiltys „Apie“ ir „Atsisiuntimai“.
 About:
   Commit: Pataisa
   Licensed under the {licenseLink}: Platinama pagal {licenseLink} licenciją

@@ -1171,7 +1171,6 @@ Tutorial:
   Skip: Preskočiť
   Next: Ďalej
   Finish: Dokončiť
-  Got It: Rozumiem
   Welcome:
     Title: Víta vás OpenTubeX
     Description: Zoznámte sa so základnými ovládacími prvkami aplikácie.
@@ -1192,9 +1191,6 @@ Tutorial:
     Description: Voliteľne importujte odbery, históriu, zoznamy videí, históriu hľadania alebo nastavenia z inej podporovanej aplikácie či zálohy.
     Action: Importovať údaje
     Not Now: Teraz nie
-  Settings Moved:
-    Title: Nastavenia boli premiestnené
-    Description: Rýchle ovládacie prvky otvoríte výberom profilu vpravo hore. Kliknutím pravým tlačidlom prejdete priamo na výber profilu. Ozubené koliesko v ponuke otvorí všetky nastavenia. Do tejto ponuky boli presunuté aj časti O aplikácii a Sťahovanie.
 About:
   Commit: Revízia
   Fluxer: Pridať sa ku komunite na Fluxeri

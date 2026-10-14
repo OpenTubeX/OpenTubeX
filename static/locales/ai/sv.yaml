@@ -1174,7 +1174,6 @@ Tutorial:
   Skip: Hoppa över
   Next: Nästa
   Finish: Slutför
-  Got It: Jag förstår
   Welcome:
     Title: Välkommen till OpenTubeX
     Description: Här är några kontroller som hjälper dig att komma igång.
@@ -1195,9 +1194,6 @@ Tutorial:
     Description: Du kan importera prenumerationer, historik, spellistor, sökhistorik eller inställningar från en annan app eller säkerhetskopia som stöds.
     Action: Importera data
     Not Now: Inte nu
-  Settings Moved:
-    Title: Inställningarna har flyttats
-    Description: Välj din profil längst upp till höger för att öppna snabbkontrollerna. Högerklicka på den för att gå direkt till profilvalet. Kugghjulet i menyn öppnar alla inställningar, och Om och Nedladdningar finns nu också där.
 About:
   Commit: Incheckning
   Fluxer: Gå med i vår Fluxer-gemenskap

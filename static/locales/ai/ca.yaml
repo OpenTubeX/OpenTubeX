@@ -1526,7 +1526,6 @@ Tutorial:
   Skip: Omet
   Next: Següent
   Finish: Acaba
-  Got It: Entesos
   Welcome:
     Title: Us donem la benvinguda a l'OpenTubeX
     Description: Aquests són els controls bàsics per començar.
@@ -1547,9 +1546,6 @@ Tutorial:
     Description: Si voleu, importeu subscripcions, historial, llistes de reproducció, historial de cerques o configuració d'una altra aplicació admesa o d'una còpia de seguretat.
     Action: Importa dades
     Not Now: Ara no
-  Settings Moved:
-    Title: La configuració ha canviat de lloc
-    Description: Seleccioneu el perfil a la part superior dreta per accedir als controls ràpids. Feu-hi clic dret per anar directament a la selecció de perfils. La roda dentada d'aquest menú obre tota la configuració; Quant a i Baixades també s'hi han traslladat.
 About:
   Commit: Commit
   Licensed under the {licenseLink}: Amb llicència {licenseLink}

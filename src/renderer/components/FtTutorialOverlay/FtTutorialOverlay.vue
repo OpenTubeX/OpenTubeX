@@ -176,13 +176,6 @@ import FtCard from '../ft-card/ft-card.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import { lockBodyScroll, unlockBodyScroll } from '../FtPrompt/scrollLock'
 
-const props = defineProps({
-  newInstallation: {
-    type: Boolean,
-    required: true
-  }
-})
-
 const emit = defineEmits(['close'])
 
 const { t } = useI18n()
@@ -205,7 +198,7 @@ let observedTarget = null
 
 const RESOLUTION_VALUES = ['2160', '1440', '1080', '720', '480', '360', '240', '144']
 
-const newUserSteps = computed(() => [
+const steps = computed(() => [
   {
     icon: ['fas', 'play'],
     title: t('Tutorial.Welcome.Title'),
@@ -249,18 +242,9 @@ const newUserSteps = computed(() => [
   }
 ])
 
-const returningUserSteps = computed(() => [{
-  icon: ['fas', 'sliders-h'],
-  title: t('Tutorial.Settings Moved.Title'),
-  description: t('Tutorial.Settings Moved.Description'),
-  target: '[data-tutorial="quick-settings"]'
-}])
-
-const steps = computed(() => props.newInstallation ? newUserSteps.value : returningUserSteps.value)
 const step = computed(() => steps.value[stepIndex.value])
 const isLastStep = computed(() => stepIndex.value === steps.value.length - 1)
 const primaryButtonLabel = computed(() => {
-  if (!props.newInstallation) return t('Tutorial.Got It')
   return isLastStep.value ? t('Tutorial.Finish') : t('Tutorial.Next')
 })
 const tabBarPositionNames = computed(() => [

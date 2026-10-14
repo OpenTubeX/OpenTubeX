@@ -1168,7 +1168,6 @@ Tutorial:
   Skip: Kihagyás
   Next: Tovább
   Finish: Befejezés
-  Got It: Értem
   Welcome:
     Title: Üdvözli az OpenTubeX
     Description: Ezekkel az alapvető vezérlőkkel gyorsan kiismerheti az alkalmazást.
@@ -1189,9 +1188,6 @@ Tutorial:
     Description: Igény szerint importálhat feliratkozásokat, előzményeket, lejátszási listákat, keresési előzményeket vagy beállításokat egy másik támogatott alkalmazásból vagy biztonsági másolatból.
     Action: Adatok importálása
     Not Now: Most nem
-  Settings Moved:
-    Title: A beállítások elköltöztek
-    Description: A gyorsvezérlők eléréséhez válassza ki a profilját a jobb felső sarokban. A profilválasztás közvetlen megnyitásához kattintson rá jobb gombbal. A menü fogaskerékikonja megnyitja az összes beállítást, és a Névjegy, valamint a Letöltések is ebbe a menübe került.
 About:
   Commit: Commit
   Fluxer: Csatlakozás a Fluxer-közösségünkhöz

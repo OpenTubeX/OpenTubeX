@@ -1220,7 +1220,6 @@ Tutorial:
   Skip: Spring over
   Next: Næste
   Finish: Afslut
-  Got It: Forstået
   Welcome:
     Title: Velkommen til OpenTubeX
     Description: Her er de vigtigste funktioner, så du hurtigt kan komme i gang.
@@ -1241,9 +1240,6 @@ Tutorial:
     Description: Du kan vælge at importere abonnementer, historik, playlister, søgehistorik eller indstillinger fra en anden understøttet app eller sikkerhedskopi.
     Action: Importér data
     Not Now: Ikke nu
-  Settings Moved:
-    Title: Indstillinger er flyttet
-    Description: Vælg din profil øverst til højre for at åbne hurtigindstillinger. Højreklik for at gå direkte til profilvalg. Tandhjulet i menuen åbner alle indstillinger, og Om og Downloads er også flyttet hertil.
 About:
   Commit: Commit
   Licensed under the {licenseLink}: Licenseret under {licenseLink}

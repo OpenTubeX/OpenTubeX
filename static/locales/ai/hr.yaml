@@ -1177,7 +1177,6 @@ Tutorial:
   Skip: Preskoči
   Next: Dalje
   Finish: Završi
-  Got It: Razumijem
   Welcome:
     Title: Dobro došli u OpenTubeX
     Description: Ove će vam kontrole pomoći da se lakše snađete.
@@ -1198,9 +1197,6 @@ Tutorial:
     Description: Po želji uvezite pretplate, povijest, popise za reprodukciju, povijest pretraživanja ili postavke iz druge podržane aplikacije ili sigurnosne kopije.
     Action: Uvezi podatke
     Not Now: Ne sada
-  Settings Moved:
-    Title: Postavke su premještene
-    Description: Odaberite profil u gornjem desnom kutu za pristup brzim kontrolama. Kliknite ga desnom tipkom miša da biste izravno otvorili odabir profila. Zupčanik u tom izborniku otvara sve postavke, a u njega su premještene i stavke O aplikaciji i Preuzimanja.
 About:
   Commit: Commit
   Fluxer: Pridružite se našoj zajednici na Fluxeru

@@ -1494,7 +1494,6 @@ Tutorial:
   Skip: Preskoči
   Next: Naprej
   Finish: Dokončaj
-  Got It: Razumem
   Welcome:
     Title: Dobrodošli v aplikaciji OpenTubeX
     Description: Tu je nekaj kontrolnikov, s katerimi se boste hitreje znašli.
@@ -1515,9 +1514,6 @@ Tutorial:
     Description: Po želji uvozite naročnine, zgodovino, sezname predvajanja, zgodovino iskanja ali nastavitve iz druge podprte aplikacije ali varnostne kopije.
     Action: Uvozi podatke
     Not Now: Ne zdaj
-  Settings Moved:
-    Title: Nastavitve so bile premaknjene
-    Description: Za hitre kontrolnike izberite svoj profil zgoraj desno. Z desnim klikom nanj odprete izbiro profilov. Zobnik v tem meniju odpre vse nastavitve, vanj pa sta bila premaknjena tudi razdelka O programu in Prenosi.
 About:
   Commit: Revizija
   Licensed under the {licenseLink}: Izdano pod licenco {licenseLink}

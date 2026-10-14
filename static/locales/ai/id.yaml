@@ -1171,7 +1171,6 @@ Tutorial:
   Skip: Lewati
   Next: Berikutnya
   Finish: Selesai
-  Got It: Mengerti
   Welcome:
     Title: Selamat datang di OpenTubeX
     Description: Berikut beberapa kontrol dasar untuk mulai menggunakan aplikasi.
@@ -1192,9 +1191,6 @@ Tutorial:
     Description: Jika diinginkan, impor langganan, riwayat, daftar putar, riwayat pencarian, atau pengaturan dari aplikasi lain yang didukung atau dari cadangan.
     Action: Impor data
     Not Now: Jangan sekarang
-  Settings Moved:
-    Title: Pengaturan telah dipindahkan
-    Description: Pilih profil Anda di kanan atas untuk mengakses kontrol cepat. Klik kanan profil untuk langsung memilih profil. Ikon roda gigi dalam menu tersebut membuka semua pengaturan. Tentang dan Unduhan juga telah dipindahkan ke menu ini.
 About:
   Commit: Commit
   Fluxer: Bergabunglah dengan Komunitas Fluxer kami

@@ -1168,7 +1168,6 @@ Tutorial:
   Skip: Jäta vahele
   Next: Edasi
   Finish: Lõpeta
-  Got It: Sain aru
   Welcome:
     Title: Tere tulemast rakendusse OpenTubeX
     Description: Siin on mõned juhtnupud, mis aitavad teil rakendusega tutvuda.
@@ -1189,9 +1188,6 @@ Tutorial:
     Description: Soovi korral importige tellimused, ajalugu, esitusloendid, otsinguajalugu või seaded teisest toetatud rakendusest või varukoopiast.
     Action: Impordi andmed
     Not Now: Mitte praegu
-  Settings Moved:
-    Title: Seadete asukoht on muutunud
-    Description: Kiirjuhtnuppude avamiseks valige paremas ülanurgas oma profiil. Profiilivalikusse liikumiseks paremklõpsake seda. Selle menüü hammasrattaikoon avab kõik seaded. Sinna on viidud ka rakenduse teave ja allalaadimised.
 About:
   Commit: Commit
   Fluxer: Liitu meie Fluxeri kogukonnaga

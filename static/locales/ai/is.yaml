@@ -1176,7 +1176,6 @@ Tutorial:
   Skip: Sleppa
   Next: Næsta
   Finish: Ljúka
-  Got It: Allt í lagi
   Welcome:
     Title: Velkomin í OpenTubeX
     Description: Hér eru nokkrar stýringar sem hjálpa þér að komast fljótt af stað.
@@ -1197,9 +1196,6 @@ Tutorial:
     Description: Þú getur flutt inn áskriftir, áhorfsferil, spilunarlista, leitarferil eða stillingar úr öðru studdu forriti eða öryggisafriti.
     Action: Flytja inn gögn
     Not Now: Ekki núna
-  Settings Moved:
-    Title: Stillingarnar hafa verið færðar
-    Description: Veldu notandasniðið þitt efst til hægri til að opna flýtistýringar. Hægrismelltu á það til að fara beint í val notandasniðs. Tannhjólstáknið í valmyndinni opnar allar stillingar. Um forritið og Niðurhal eru nú einnig í þessari valmynd.
 About:
   Commit: Git-vistun
   Fluxer: Vertu með í Fluxer-samfélaginu okkar

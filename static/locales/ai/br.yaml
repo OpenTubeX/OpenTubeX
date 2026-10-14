@@ -1168,7 +1168,6 @@ Tutorial:
   Skip: "Lammat"
   Next: "War-lerc'h"
   Finish: "Echuiñ"
-  Got It: "Komprenet"
   Welcome:
     Title: "Degemer mat e OpenTubeX"
     Description: "Setu un nebeud reolerezhioù evit kregiñ gant an arload."
@@ -1189,9 +1188,6 @@ Tutorial:
     Description: "Gallout a rit enporzhiañ koumanantoù, istor, rolloù-videoioù, istor enklask pe arventennoù eus un arload skoret all pe un eiladenn-gwarediñ."
     Action: "Enporzhiañ roadennoù"
     Not Now: "Diwezhatoc'h"
-  Settings Moved:
-    Title: "Dilec'hiet eo bet an arventennoù"
-    Description: "Diuzit ho profil en nec'h a-zehou evit ar reolerezhioù prim. Klikit a-zehou warnañ evit mont war-eeun da zibab ar profil. Ar rod dantek el lañser-se a zigor an holl arventennoù; A-zivout ha Pellgargadennoù zo bet dilec'hiet d'al lañser-se ivez."
 About:
   Commit: "Engouestl"
   Fluxer: "Emezelañ ouzh hor c'humuniezh Fluxer"

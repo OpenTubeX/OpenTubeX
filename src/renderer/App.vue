@@ -104,7 +104,6 @@
     </Transition>
     <FtTutorialOverlay
       v-if="showTutorial"
-      :new-installation="tutorialIsNewInstallation"
       @close="completeTutorial"
     />
     <FtCommandPalette
@@ -1107,7 +1106,6 @@ const hideSubscriptionsPosts = computed(() => store.getters.getHideSubscriptions
 const dataReady = ref(false)
 const subscriptionCacheReady = computed(() => store.getters.getSubscriptionCacheReady)
 const showTutorial = ref(false)
-const tutorialIsNewInstallation = ref(false)
 const findbarVisible = ref(false)
 const findbarQuery = ref('')
 const findbarMatchIndex = ref(0)
@@ -1607,17 +1605,15 @@ function previewManagedExternalSoftwareUpdatePrompt(event) {
 
 async function initializeTutorial(hasExistingInstallation, lastUsedVersion, persistedAudience) {
   try {
-    let audience = getTutorialAudience(persistedAudience)
-    if (audience === 'completed') return false
-    if (audience !== 'new' && audience !== 'existing' && lastUsedVersion !== null) return false
+    const audience = getTutorialAudience(persistedAudience)
+    if (audience === 'completed' || audience === 'existing') return false
     if (hasExistingInstallation === null) return false
 
-    if (audience !== 'new' && audience !== 'existing') {
-      audience = hasExistingInstallation ? 'existing' : 'new'
-      await setTutorialAudience(audience)
+    if (audience !== 'new') {
+      if (hasExistingInstallation || lastUsedVersion !== null) return false
+      await setTutorialAudience('new')
     }
 
-    tutorialIsNewInstallation.value = audience === 'new'
     return true
   } catch (error) {
     console.error('Failed to initialize tutorial', error)

@@ -1192,7 +1192,6 @@ Tutorial:
   Skip: Bỏ qua
   Next: Tiếp
   Finish: Hoàn tất
-  Got It: Đã hiểu
   Welcome:
     Title: Chào mừng đến với OpenTubeX
     Description: Sau đây là một vài điều khiển giúp bạn làm quen với ứng dụng.
@@ -1213,9 +1212,6 @@ Tutorial:
     Description: Bạn có thể nhập kênh đăng ký, lịch sử, danh sách phát, lịch sử tìm kiếm hoặc cài đặt từ ứng dụng hay bản sao lưu được hỗ trợ khác.
     Action: Nhập dữ liệu
     Not Now: Để sau
-  Settings Moved:
-    Title: Cài đặt đã được chuyển
-    Description: Chọn hồ sơ ở góc trên bên phải để mở các điều khiển nhanh. Nhấp chuột phải để đi thẳng đến phần chọn hồ sơ. Biểu tượng bánh răng trong menu đó mở toàn bộ cài đặt; mục Giới thiệu và Tải xuống cũng đã được chuyển vào menu này.
 About:
   Commit: Bản commit
   Fluxer: Tham gia cộng đồng Fluxer

@@ -1172,7 +1172,6 @@ Tutorial:
   Skip: Hepgor
   Next: Nesaf
   Finish: Gorffen
-  Got It: Iawn
   Welcome:
     Title: Croeso i OpenTubeX
     Description: Dyma'r rheolyddion a fydd yn eich helpu i ddechrau arni.
@@ -1193,9 +1192,6 @@ Tutorial:
     Description: Gallwch fewnforio tanysgrifiadau, hanes, rhestrau chwarae, hanes chwilio neu osodiadau o ap arall a gynhelir neu o gopi wrth gefn.
     Action: Mewnforio data
     Not Now: Nid nawr
-  Settings Moved:
-    Title: Mae'r gosodiadau wedi symud
-    Description: Dewiswch eich proffil ar y brig ar y dde i weld rheolyddion cyflym. De-gliciwch ef i fynd yn syth at ddewis proffil. Mae'r olwyn gocos yn y ddewislen hon yn agor pob gosodiad, ac mae Ynghylch a Lawrlwythiadau wedi symud i'r ddewislen hon hefyd.
 About:
   Commit: Cyflwyniad
   Fluxer: Ymunwch â'n cymuned Fluxer

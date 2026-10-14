@@ -1171,7 +1171,6 @@ Tutorial:
   Skip: Saltatu
   Next: Hurrengoa
   Finish: Amaitu
-  Got It: Ulertuta
   Welcome:
     Title: Ongi etorri OpenTubeX aplikaziora
     Description: Kontrol hauek aplikazioa erabiltzen hasten lagunduko dizute.
@@ -1192,9 +1191,6 @@ Tutorial:
     Description: Nahi izanez gero, inportatu harpidetzak, historia, erreprodukzio-zerrendak, bilaketa-historia edo ezarpenak beste aplikazio bateragarri edo babeskopia batetik.
     Action: Inportatu datuak
     Not Now: Orain ez
-  Settings Moved:
-    Title: Ezarpenak lekuz aldatu dira
-    Description: Hautatu profila goian eskuinean kontrol azkarrak erabiltzeko. Egin eskuineko klik profilean profil-hautapenera zuzenean joateko. Menu horretako engranajeak ezarpen guztiak irekitzen ditu; Honi buruz eta Deskargak ere menu horretara eraman dira.
 About:
   Commit: Commit-a
   Fluxer: Egin bat gure Fluxer komunitatearekin

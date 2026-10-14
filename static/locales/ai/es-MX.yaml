@@ -1377,7 +1377,6 @@ Tutorial:
   Skip: Omitir
   Next: Siguiente
   Finish: Finalizar
-  Got It: Entendido
   Welcome:
     Title: Te damos la bienvenida a OpenTubeX
     Description: Estos son algunos controles que te ayudarán a familiarizarte con la aplicación.
@@ -1398,9 +1397,6 @@ Tutorial:
     Description: Si quieres, importa suscripciones, historial, listas de reproducción, historial de búsquedas o ajustes desde otra aplicación compatible o una copia de seguridad.
     Action: Importar datos
     Not Now: Ahora no
-  Settings Moved:
-    Title: Los ajustes han cambiado de sitio
-    Description: Selecciona tu perfil arriba a la derecha para acceder a los controles rápidos. Haz clic derecho para ir directamente a la selección de perfiles. El engranaje de ese menú abre todos los ajustes; Acerca de y Descargas también se han trasladado allí.
 About:
   Commit: Commit
   Licensed under the {licenseLink}: Licenciado bajo {licenseLink}
