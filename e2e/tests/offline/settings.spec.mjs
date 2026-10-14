@@ -6526,14 +6526,12 @@ for (const uiScale of [100, 125]) {
     })
 
     test('clears a horizontal offset when switching settings categories', async ({ page }) => {
-      await goToSettingsSection(page, 'subscription')
+      const section = await goToSettingsSection(page, 'subscription')
       const content = page.locator('.settingsContent')
       // Keep the previous overflow range alive until the category switch. This
       // reproduces Chromium retaining a horizontal offset after content changes.
-      await content.evaluate(element => {
-        element.firstElementChild.style.minWidth = '1500px'
-        element.scrollLeft = element.scrollWidth
-      })
+      await section.evaluate(element => { element.style.minWidth = '1500px' })
+      await content.evaluate(element => { element.scrollLeft = element.scrollWidth })
       await expect.poll(() => content.evaluate(element => element.scrollLeft)).toBeGreaterThan(0)
       await page.locator('.settingsMenu [data-section="privacy"]').click()
       await expect.poll(() => content.evaluate(element => element.scrollLeft)).toBe(0)
