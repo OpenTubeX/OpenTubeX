@@ -74,10 +74,16 @@ test('local playlists retain order and escape literal title placeholders', () =>
 test('invalid IDs and custom executable overrides cannot reach either runtime', () => {
   assert.throws(() => buildYtDlpDownloadArguments({ videoId: 'bad', mode: 'audio' }), /invalid-video-id/)
   assert.throws(() => buildYtDlpDownloadArguments({ videoIds: Array(501).fill(videoId), mode: 'video' }), /too-many-videos/)
-  for (const customArgs of ['--exec "touch /tmp/pwned"', '--ffmpeg-location=/tmp/ffmpeg', '--remote-components ejs:github']) {
+  for (const customArgs of ['--exec "touch /tmp/pwned"', '--ffmpeg-location=/tmp/ffmpeg', '--remote-components ejs:github',
+    "--exec-befor 'touch /tmp/pwned'", '--use-postprocessor Exec:exec_cmd=id', '--netrc-cmd id', '--js-runtimes=node:/tmp/node']) {
     assert.throws(() => buildYtDlpDownloadArguments({ videoId, mode: 'custom', customArgs }), /unsupported-custom-argument/)
     assert.throws(() => buildYtDlpDownloadArguments({ videoId, mode: 'video' }, customArgs), /unsupported-custom-argument/)
   }
+})
+
+test('custom arguments keep unrelated long options', () => {
+  const { args } = buildYtDlpDownloadArguments({ videoId, mode: 'custom', customArgs: '--no-exec --cookies-from-browser firefox' })
+  assert.ok(args.includes('--cookies-from-browser'))
 })
 
 test('playback mapping retains alternate audio and live stream timing', () => {

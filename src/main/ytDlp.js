@@ -1,7 +1,7 @@
 import { historyRepairYtDlpArguments, historyRepairYtDlpError } from '../historyRepair'
 import {
   buildYtDlpDownloadArguments, ID_REGEX, PLAYLIST_ID_REGEX, DOWNLOAD_TITLE_FILENAME_BYTE_LIMIT,
-  SUBTITLE_FORMATS, MAX_LOCAL_PLAYLIST_VIDEOS, DENIED_CUSTOM_ARGS, AUTOMATIC_NUMBER_LIMITS,
+  SUBTITLE_FORMATS, MAX_LOCAL_PLAYLIST_VIDEOS, isDeniedCustomArgument, AUTOMATIC_NUMBER_LIMITS,
   splitArguments, automaticNumber, playbackImpersonationArguments, playbackSubtitleArguments, isYtDlpMediaUrl,
 } from '../ytDlpArguments'
 import { EXTERNAL_PLAYBACK_FORMAT_SELECTOR, PLAYBACK_INFO_OUTPUT_TEMPLATE, PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE, parseYtDlpPlaybackInfo, toFiniteNumber, toNonEmptyString, mapPlaybackFormat, mapPlaybackCaptions, mapExternalPlaybackMetadata } from '../ytDlpMetadata'
@@ -2353,7 +2353,7 @@ async function startYtDlpDownload(
   const customArgs = typeof payload.customArgs === 'string' && payload.customArgs.trim() !== ''
     ? splitArguments(payload.customArgs)
     : []
-  if ([...globalCustomArgs, ...customArgs].some(argument => DENIED_CUSTOM_ARGS.includes(argument.split('=')[0]))) {
+  if ([...globalCustomArgs, ...customArgs].some(isDeniedCustomArgument)) {
     return { error: 'unsupported-custom-argument' }
   }
 
