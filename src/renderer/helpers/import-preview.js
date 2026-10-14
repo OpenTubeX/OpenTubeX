@@ -1,10 +1,11 @@
 import { getSearchHistoryEntryKeyFromEntry, DEFAULT_SEARCH_SETTINGS, normalizeSearchSettings } from '../../search-history.js'
 import { migrateLegacySettings } from './settings-migrations.js'
+import { encodeBackupValue } from './unifiedBackup.js'
 import { forEachTakeoutImportEntry, parseCsvRecords } from './youtube-takeout-zip.js'
 
 function countRecords(imported, current, key) {
-  const existing = new Set(current.map(key))
-  const incoming = new Set(imported.map(key))
+  const existing = new Set(current.map(record => encodeBackupValue(key(record))))
+  const incoming = new Set(imported.map(record => encodeBackupValue(key(record))))
   return {
     added: [...incoming].filter(id => !existing.has(id)).length,
     existing: [...incoming].filter(id => existing.has(id)).length,

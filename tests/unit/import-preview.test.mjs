@@ -4,7 +4,8 @@ import vm from 'node:vm'
 import { readFile } from 'node:fs/promises'
 import { strToU8, zipSync } from 'fflate'
 import { previewBackupImport, previewTakeoutImport, parseTakeoutWatchHistory } from '../../src/renderer/helpers/import-preview.js'
-import { mergeBackupProfile, mergeBackupPlaylist } from '../../src/renderer/helpers/unifiedBackup.js'
+import { mergeBackupProfile, mergeBackupPlaylist, mergeBackupHistory } from '../../src/renderer/helpers/unifiedBackup.js'
+import { importTakeoutPlaylist } from '../../src/renderer/helpers/takeout-playlist-import.js'
 import { forEachTakeoutImportEntry, listYouTubeTakeoutZipEntries } from '../../src/renderer/helpers/youtube-takeout-zip.js'
 
 const counts = row => [row.added, row.existing, row.skipped]
@@ -131,6 +132,7 @@ test('duplicate backup identities accumulate subscriptions and videos promised b
   const profiles = new Map()
   const playlists = new Map()
   const context = vm.createContext({
+    process: { env: { IS_ELECTRON: false } }, backupDisposed: false, backupImportGeneration: 0, backupWriteGeneration: null,
     backupBusy: { value: false }, backupData: { value: data }, selectedBackupSections: { value: ['profiles', 'playlists'] },
     DBProfileHandlers: { find: async () => [...profiles.values()], replaceIfUnchanged: async (previous, record) => { assert.deepEqual(previous, profiles.get(record._id)); profiles.set(record._id, record); return { numAffected: 1 } } },
     DBPlaylistHandlers: { find: async () => [...playlists.values()], replaceIfUnchanged: async (previous, record) => { assert.deepEqual(previous, playlists.get(record._id)); playlists.set(record._id, record); return { numAffected: 1 } } },
@@ -152,13 +154,15 @@ test('watch history with empty subtitles imports the record counted in the previ
   assert.equal(rows[0].added, 1)
   let imported
   const context = vm.createContext({
+    process: { env: { IS_ELECTRON: false } }, DBHistoryHandlers: { find: async () => [] }, mergeBackupHistory,
     parseTakeoutWatchHistory, historyCacheById: { value: {} }, deepCopy: structuredClone,
-    store: { dispatch: async (_action, records) => { imported = records } }, showToast() {}, t: key => key,
+    store: { dispatch: async (_action, records) => { imported = records; return true } }, showToast() {}, t: key => key,
   })
   vm.runInContext(componentSection('async function importYouTubeWatchHistory(', 'const showExportWatchHistoryPrompt'), context)
   await context.importYouTubeWatchHistory([record])
-  assert.equal(imported.get('abcdefghijk').isWatched, true)
-  assert.equal(imported.get('abcdefghijk').author, '')
+  const saved = Array.isArray(imported) ? imported.find(record => record.videoId === 'abcdefghijk') : imported.get('abcdefghijk')
+  assert.equal(saved.isWatched, true)
+  assert.equal(saved.author, '')
 })
 
 test('watch history parsing excludes malformed records from preview counts and preserves usable entries', () => {
@@ -179,19 +183,19 @@ test('preview reports existing generated playlist names as merge targets on repe
     { _id: 'first', playlistName: 'List', videos: [] },
     { _id: 'second', playlistName: 'List (2)', videos: [{ videoId: 'zzzzzzzzzzz', timeAdded: 10 }] },
   ] }
-  const context = vm.createContext({
-    allPlaylists: playlists, deepCopy: structuredClone, processToBeAddedPlaylistVideo() {},
-    store: { dispatch: async (action, playlist) => {
-      assert.equal(action, 'importPlaylist', 'Matching names must merge rather than create renamed duplicates')
+  const storage = {
+    find: async () => playlists.value,
+    create: async () => { assert.fail('Matching names must merge rather than create renamed duplicates') },
+    update: async playlist => {
       const index = playlists.value.findIndex(saved => saved._id === playlist._id)
+      assert.ok(index >= 0)
       playlists.value[index] = playlist
-    } },
-  })
-  vm.runInContext(componentSection('async function importTakeoutPlaylist(', 'async function importPlaylists()'), context)
+    },
+  }
   for (let attempt = 0; attempt < 2; attempt++) {
     const preview = await previewTakeoutImport(file, paths, { playlists: playlists.value })
     assert.deepEqual(counts(preview[0]), [0, 2, 0])
-    await forEachTakeoutImportEntry(file, new Set(['playlists']), paths, entry => context.importTakeoutPlaylist(entry.playlist), error => { throw error })
+    await forEachTakeoutImportEntry(file, new Set(['playlists']), paths, entry => importTakeoutPlaylist(entry.playlist, storage), error => { throw error })
     assert.equal(playlists.value.length, 2)
     assert.deepEqual(Array.from(playlists.value[1].videos, video => video.videoId), ['zzzzzzzzzzz', 'lmnopqrstuv'])
   }
@@ -239,4 +243,13 @@ test('backup preview tolerates retained opaque subscriptions without mutating th
   assert.deepEqual(counts(rows[0]), [0, profiles.length, 0])
   assert.equal(rows[1].added, 0)
   assert.deepEqual(profiles, before)
+})
+
+
+test('backup preview compares retained Date identities by value and keeps string IDs distinct', () => {
+  const data = { history: [{ videoId: new Date(1) }, { videoId: 1 }, { videoId: '1' }] }
+  const current = { history: [{ videoId: new Date(1) }, { videoId: '1' }] }
+  const before = structuredClone({ data, current })
+  assert.deepEqual(counts(previewBackupImport(data, current)[0]), [1, 2, 0])
+  assert.deepEqual({ data, current }, before)
 })
