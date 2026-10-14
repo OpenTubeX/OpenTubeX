@@ -6,7 +6,7 @@ test('palette opening stays independent of library size on a throttled renderer'
   await page.keyboard.press('Control+k')
   await expect(page.locator('.commandPalette')).toBeVisible()
   await page.keyboard.press('Escape')
-  await page.evaluate(() => {
+  await page.evaluate(async () => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     window.__paletteMetadataReads = 0
     const history = Array.from({ length: 20000 }, (_, index) => ({
@@ -27,8 +27,14 @@ test('palette opening stays independent of library size on a throttled renderer'
             : `Practical mountain photography techniques episode ${index}`
       },
     }))
-    store.commit('setHistoryCacheSorted', history)
-    store.commit('setAllPlaylists', [{ _id: 'large-palette-library', playlistName: 'Large library', videos: history }])
+    const playlist = { _id: 'large-palette-library', playlistName: 'Large library', videos: history }
+    if (store.state.history.libraryPaged) {
+      await store.dispatch('overwriteHistory', new Map(history.map(video => [video.videoId, video])))
+      await store.dispatch('upsertPlaylist', playlist)
+    } else {
+      store.commit('setHistoryCacheSorted', history)
+      store.commit('setAllPlaylists', [playlist])
+    }
   })
   const cdp = await page.context().newCDPSession(page)
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 })

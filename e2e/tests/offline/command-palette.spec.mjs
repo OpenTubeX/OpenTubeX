@@ -375,9 +375,10 @@ test.describe('local video commands', () => {
 
     // Removing metadata while the palette is open must update its results.
     await input.fill('journey')
-    await page.evaluate(() => {
+    await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      store.commit('setHistoryCacheSorted', [])
+      if (store.state.history.libraryPaged) await store.dispatch('removeAllHistory')
+      else store.commit('setHistoryCacheSorted', [])
       store.commit('clearWatchQueue')
       store.commit('removeYtDlpDownload', 42)
     })
@@ -395,6 +396,16 @@ test.describe('local video commands', () => {
   ]) {
     test(`opens the selected local video from ${source}`, async ({ app, page }) => {
       await mockPlayableWatchPage(app, page)
+      const expectedQuery = { ...query }
+      if (source === 'Playlists: Road trips') {
+        const memberId = await page.evaluate(async id => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          if (!store.state.history.libraryPaged) return null
+          const result = await window.ftElectron.libraryQuery('playlistPage', { id, limit: 1 })
+          return result.records[0]._libraryMemberId
+        }, playlist._id)
+        if (memberId) expectedQuery.libraryMemberId = memberId
+      }
       const input = page.getByRole('combobox', { name: 'Search commands' })
       await input.fill('journey')
       const videos = page.getByRole('group', { name: 'Local videos', exact: true })
@@ -412,8 +423,8 @@ test.describe('local video commands', () => {
         const [path, search = ''] = url.hash.slice(1).split('?')
         const params = new URLSearchParams(search)
         return path === `/watch/${video.videoId}` &&
-          params.size === Object.keys(query).length &&
-          Object.entries(query).every(([key, value]) => params.get(key) === value)
+          params.size === Object.keys(expectedQuery).length &&
+          Object.entries(expectedQuery).every(([key, value]) => params.get(key) === value)
       })
       if (source === 'Queue') {
         await expect.poll(() => page.evaluate(() => (
@@ -437,7 +448,8 @@ test.describe('local video commands', () => {
       })
       await page.evaluate(async video => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-        store.commit('upsertToHistoryCache', { ...video, watchProgress: 12 })
+        if (store.state.history.libraryPaged) await store.dispatch('updateHistory', { ...video, watchProgress: 12 })
+        else store.commit('upsertToHistoryCache', { ...video, watchProgress: 12 })
         await store.dispatch('updateExternalPlayer', 'mpv')
         await store.dispatch('updateDefaultViewingMode', 'external_player')
         await store.dispatch('updateDefaultPlayback', 1.5)
