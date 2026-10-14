@@ -2679,7 +2679,9 @@ final class AppTests: XCTestCase {
         _ = try await evaluate("window.dispatchEvent(Object.assign(new Event('opentubex:hardware-keyboard'), {attached: false})); true")
         _ = try await webView.callAsyncJavaScript("testStore.commit('setSettingsWindowSection', 'general'); await testStore.dispatch('showSettingsWindow')", arguments: [:], in: nil, contentWorld: .page)
         try await wait("!!document.querySelector('.settingsWindow .select-text')")
-        try await wait("document.activeElement?.matches('.settingsCloseButton') === true")
+        // Touch WebKit may keep non-text focus on the body. Check that opening
+        // settings avoids text-input focus after its initial focus requests.
+        _ = try await webView.callAsyncJavaScript("await new Promise(requestAnimationFrame)", arguments: [:], in: nil, contentWorld: .page)
         let searchFocused = try await evaluate("document.activeElement?.matches('input, textarea')") as? Bool
         XCTAssertEqual(searchFocused, false)
         // The label paints the custom switch; its native input stays invisible.
