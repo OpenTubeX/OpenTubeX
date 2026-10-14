@@ -570,7 +570,7 @@ export class LibraryEngine {
     const revision = this.revision('history')
     if (this.historyBrowseCache?.revision !== revision) {
       // Channel controls need only identities, never member arrays or thumbnails.
-      const records = this.prepare("SELECT id, json_object('author', json_extract(data, '$.author'), 'authorId', json_extract(data, '$.authorId'), 'timeWatched', json_extract(data, '$.timeWatched')) AS data FROM records WHERE collection = 'history' ORDER BY sort_time DESC, nedb_id_sort(id) DESC").all().map(row => ({ ...deserialize(row.data), _id: row.id }))
+      const records = this.prepare("SELECT id, json_object('author', json(data -> '$.author'), 'authorId', json(data -> '$.authorId'), 'timeWatched', json(data -> '$.timeWatched')) AS data FROM records WHERE collection = 'history' ORDER BY sort_time DESC, nedb_id_sort(id) DESC").all().map(row => ({ ...deserialize(row.data), _id: row.id }))
       if (records.some(record => !Number.isFinite(record.timeWatched))) records.sort((a, b) => -(model.compareThings(a.timeWatched, b.timeWatched) || model.compareThings(a._id, b._id)))
       const idsByName = new Map()
       for (const record of records) {

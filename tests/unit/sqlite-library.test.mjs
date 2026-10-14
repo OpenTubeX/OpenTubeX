@@ -3128,3 +3128,15 @@ for (const batch of [false, true]) for (const videoId of [undefined, null]) for 
     assert.deepEqual((await engine.playlistSnapshot({ id: 'p' })).videos, playlist.videos.slice(1))
   })
 }
+
+for (const field of ['author', 'authorId']) for (const value of ['\ud800', '\udc00']) {
+  test(`history channel projection retains exact UTF-16 ${field} identity ${value.charCodeAt(0)}`, async t => {
+    const engine = memory(t)
+    const rows = [{ _id: 'exact', videoId: 'exact', title: 'Retained', [field]: value, ...(field === 'authorId' ? { author: 'Channel' } : {}), timeWatched: 2, isWatched: false, unknown: new Date(1) }, { _id: 'replacement', videoId: 'replacement', [field]: '\uFFFD', ...(field === 'authorId' ? { author: 'Channel' } : {}), timeWatched: 1, isWatched: false }]
+    await engine.collections.history.insertAsync(rows)
+    const options = engine.historyChannels()
+    assert.deepEqual(options, getHistoryChannels(rows, 'en-US'))
+    for (const option of options) assert.deepEqual(engine.historyPage({ channel: option.value }).records, filterHistoryByDateAndChannel(rows, { channel: option.value }))
+    assert.deepEqual(await engine.collections.history.findAsync({}).sort({ timeWatched: -1 }), rows)
+  })
+}
