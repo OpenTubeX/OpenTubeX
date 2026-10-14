@@ -3478,6 +3478,7 @@ function navigateFromCommandPalette(location) {
 }
 
 async function playLibraryVideoFromCommandPalette(video, location) {
+  const targetTabId = presentedTabId.value
   if (!isElectron || store.getters.getExternalPlayer === '' || store.getters.getDefaultViewingMode !== 'external_player') {
     return navigateFromCommandPalette(location)
   }
@@ -3493,9 +3494,11 @@ async function playLibraryVideoFromCommandPalette(video, location) {
     showToast({ message: t('Storage Startup Error.Title'), icon: ['fas', 'circle-exclamation'] })
     return false
   }
+  if (presentedTabId.value !== targetTabId) return false
   const history = store.getters.getHistoryCacheById[video.videoId]
+  if (!location.query?.libraryMemberId && history) video = history
   const saveProgress = ['auto', 'semi-auto'].includes(store.getters.getWatchedProgressSavingMode)
-  tabMediaCoordinator.dispatchAction('pause', {}, presentedTabId.value)
+  tabMediaCoordinator.dispatchAction('pause', {}, targetTabId)
   window.ftElectron.openInExternalPlayer({
     videoId: video.videoId,
     // Palette results have no position within a remote playlist.
