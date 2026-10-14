@@ -3,7 +3,7 @@ import model from '@seald-io/nedb/lib/model.js'
 import { mergeHistory, mergeIds, enrichSyncVideo, enrichLocalPlaylistVideo, videoToRemote, uploaderToLocal } from '../../renderer/helpers/sync-history-merge.js'
 import { migrateLegacyHistoryRecord } from '../../history.js'
 
-const playlistMetadata = record => record ? { playlistName: record.playlistName, description: record.description } : null
+const playlistMetadata = record => record ? { playlistName: record.playlistName, description: record.description, customThumbnail: record.customThumbnail } : null
 
 /** Own local sync input and send only bounded transport/delta pages to windows. */
 export class LibrarySync {
@@ -20,7 +20,7 @@ export class LibrarySync {
     return this.engine.transaction(async () => {
       if (this.engine.prepare('SELECT count(*) AS count FROM sync_jobs').get().count >= 2) throw new Error('Finish or cancel the current library sync first')
       const id = randomUUID()
-      if (kind === 'playlist' && expectedMetadata === undefined) expectedMetadata = playlistMetadata(await this.engine.collections.playlists.findOneAsync({ _id: playlistId }, { playlistName: 1, description: 1 }))
+      if (kind === 'playlist' && expectedMetadata === undefined) expectedMetadata = playlistMetadata(await this.engine.collections.playlists.findOneAsync({ _id: playlistId }, { playlistName: 1, description: 1, customThumbnail: 1 }))
       this.engine.prepare('INSERT INTO sync_jobs VALUES (?, ?)').run(id, model.serialize({ options, previousIsArray, kind, playlistId, metadata, expectedMetadata, ready: false }))
       return { id }
     })
@@ -164,12 +164,13 @@ export class LibrarySync {
     if (job.revision !== this.engine.revision('playlists')) return false
     if (job.skipped) return true
     const { title, description } = job.metadata
-    if (!job.hadLocal) await this.engine.collections.playlists.insertAsync({ _id: job.playlistId, playlistName: title, description, protected: false, createdAt: Date.now(), lastUpdatedAt: Date.now(), videos: this.read(id, 'playlistMembers') })
+    if (!job.hadLocal) await this.engine.collections.playlists.insertAsync({ _id: job.playlistId, playlistName: title, description, ...(Object.hasOwn(job.metadata, 'custom_thumbnail') ? { customThumbnail: job.metadata.custom_thumbnail || '' } : {}), protected: false, createdAt: Date.now(), lastUpdatedAt: Date.now(), videos: this.read(id, 'playlistMembers') })
     else {
-      const existing = await this.engine.collections.playlists.findOneAsync({ _id: job.playlistId }, { playlistName: 1, description: 1 })
+      const existing = await this.engine.collections.playlists.findOneAsync({ _id: job.playlistId }, { playlistName: 1, description: 1, customThumbnail: 1 })
       const set = {}
       if (existing.playlistName !== title) set.playlistName = title
       if (existing.description !== description) set.description = description
+      if (Object.hasOwn(job.metadata, 'custom_thumbnail') && existing.customThumbnail !== (job.metadata.custom_thumbnail || '')) set.customThumbnail = job.metadata.custom_thumbnail || ''
       if (job.membersChanged) set.videos = this.read(id, 'playlistMembers')
       if (Object.keys(set).length) await this.engine.collections.playlists.updateAsync({ _id: job.playlistId }, { $set: { ...set, lastUpdatedAt: Date.now() } })
     }
