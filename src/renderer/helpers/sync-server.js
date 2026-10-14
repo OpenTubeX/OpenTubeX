@@ -655,6 +655,27 @@ function playlistMetadataFromRemote(playlist, syncThumbnails) {
   }
 }
 
+// Baselines only detect cover edits. A fingerprint avoids repeating every
+// image in each snapshot write.
+function thumbnailFingerprint(thumbnail) {
+  if (!thumbnail) return null
+  let first = 0xdeadbeef
+  let second = 0x41c6ce57
+  for (let index = 0; index < thumbnail.length; index++) {
+    const code = thumbnail.charCodeAt(index)
+    first = Math.imul(first ^ code, 2654435761)
+    second = Math.imul(second ^ code, 1597334677)
+  }
+  first = Math.imul(first ^ (first >>> 16), 2246822507) ^ Math.imul(second ^ (second >>> 13), 3266489909)
+  second = Math.imul(second ^ (second >>> 16), 2246822507) ^ Math.imul(first ^ (first >>> 13), 3266489909)
+  return `${thumbnail.length}:${(second >>> 0).toString(36)}${(first >>> 0).toString(36)}`
+}
+
+function playlistBaselineMetadata(metadata) {
+  if (!Object.hasOwn(metadata, 'custom_thumbnail')) return metadata
+  return { ...metadata, custom_thumbnail: thumbnailFingerprint(metadata.custom_thumbnail) }
+}
+
 function metadataEquals(first, second) {
   return JSON.stringify(first) === JSON.stringify(second)
 }
@@ -668,9 +689,10 @@ function selectPlaylistMetadata(local, remote, previous, syncThumbnails) {
   if (!previous) return localMetadata
 
   const previousMetadata = playlistMetadataFromRemote(previous, syncThumbnails)
+  const localBaseline = playlistBaselineMetadata(localMetadata)
   const merged = { ...localMetadata }
   for (const field of ['title', 'description', ...(syncThumbnails ? ['custom_thumbnail'] : [])]) {
-    if (localMetadata[field] === previousMetadata[field]) {
+    if (localBaseline[field] === previousMetadata[field]) {
       merged[field] = remoteMetadata[field]
     }
   }
@@ -836,7 +858,7 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
       remoteId = createdPlaylist?.id ?? id
       // Keep the generated ID even if a later stale-state guard aborts this
       // sync. A retry must recognize our copy instead of importing it as new.
-      await store.persistPlaylistSyncBaseline(id, { remoteId, metadata })
+      await store.persistPlaylistSyncBaseline(id, { remoteId, metadata: playlistBaselineMetadata(metadata) })
       remote = { playlist: { ...metadata, id: remoteId }, videos: [], remoteId }
     } else if (!metadataEquals(metadata, rawRemoteMetadata)) {
       await client.updatePlaylist(remoteId, metadata)
@@ -891,7 +913,7 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
     } finally {
       // Record completed writes once, including when a later removal fails.
       if (added.length > 0 || removed.length > 0) {
-        await store.persistPlaylistSyncBaseline(id, { remoteId, metadata, added, removed })
+        await store.persistPlaylistSyncBaseline(id, { remoteId, metadata: playlistBaselineMetadata(metadata), added, removed })
       }
     }
 
@@ -951,10 +973,10 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
       if (!saved) throw new Error('Playlist changed during sync. Try again.')
     }
 
-    await store.persistPlaylistSyncBaseline(id, { remoteId, metadata, applied: true, videos: Array.from(mergedVideoIds) })
+    await store.persistPlaylistSyncBaseline(id, { remoteId, metadata: playlistBaselineMetadata(metadata), applied: true, videos: Array.from(mergedVideoIds) })
     nextSnapshot[id] = {
       remoteId,
-      metadata,
+      metadata: playlistBaselineMetadata(metadata),
       videos: Array.from(mergedVideoIds),
     }
   }
