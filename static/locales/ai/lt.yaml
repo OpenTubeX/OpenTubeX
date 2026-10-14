@@ -1672,7 +1672,7 @@ Video:
     Caption Timing:
       Adjust Timing: Koreguoti laiką…
       Caption Timing: Subtitrų laikas
-      Offset: Poslinkis (sekundės)
+      Offset: Poslinkis (sekundėmis)
       Hint: Neigiamos reikšmės rodo subtitrus anksčiau, teigiamos – vėliau. Taikoma tik šiam vaizdo įrašui.
       Earlier: Anksčiau
       Later: Vėliau

@@ -7,9 +7,9 @@
  * @returns {{update: () => void, release: () => void}}
  */
 export function bindNativeCaptionTiming(video, getOffset, clearDisplayedCues) {
-  /** @type {WeakMap<TextTrackCue, {start: number, end: number}>} */
+  /** @type {WeakMap<TextTrackCue, {start: number, end: number, appliedStart: number, appliedEnd: number}>} */
   const originals = new WeakMap()
-  /** @type {WeakMap<TextTrack, {offset: number, length: number, first: TextTrackCue, last: TextTrackCue}>} */
+  /** @type {WeakMap<TextTrack, {offset: number, cues: TextTrackCue[]}>} */
   const tracks = new WeakMap()
 
   function update() {
@@ -20,24 +20,35 @@ export function bindNativeCaptionTiming(video, getOffset, clearDisplayedCues) {
       if (track.mode === 'disabled' || !['captions', 'subtitles'].includes(track.kind)) continue
       const cues = track.cues
       if (!cues?.length) continue
-      const first = cues[0]
-      const last = cues[cues.length - 1]
+      // Snapshot the live list before cue timing changes can reorder it.
+      const snapshot = Array.from(cues)
       const previous = tracks.get(track)
-      // Avoid scanning long caption tracks on every playback tick.
-      if (previous?.offset === offset && previous.length === cues.length &&
-          previous.first === first && previous.last === last) continue
+      if (previous?.offset === offset && previous.cues.length === snapshot.length &&
+          snapshot.every((cue, index) => {
+            const original = originals.get(cue)
+            return previous.cues[index] === cue && original?.appliedStart === cue.startTime &&
+              original.appliedEnd === cue.endTime
+          })) continue
       if (!cleared) {
         clearDisplayedCues()
         cleared = true
       }
-      // TextTrackCueList is live and reorders as start times change.
-      for (const cue of Array.from(cues)) {
-        if (!originals.has(cue)) originals.set(cue, { start: cue.startTime, end: cue.endTime })
-        const original = originals.get(cue)
-        cue.startTime = Math.max(0, original.start + offset)
-        cue.endTime = Math.max(0, original.end + offset)
+      for (const cue of snapshot) {
+        let original = originals.get(cue)
+        if (!original) {
+          original = { start: cue.startTime, end: cue.endTime, appliedStart: cue.startTime, appliedEnd: cue.endTime }
+          originals.set(cue, original)
+        } else {
+          // Preserve source retiming without applying our offset a second time.
+          if (cue.startTime !== original.appliedStart) original.start = cue.startTime
+          if (cue.endTime !== original.appliedEnd) original.end = cue.endTime
+        }
+        original.appliedStart = Math.max(0, original.start + offset)
+        original.appliedEnd = Math.max(0, original.end + offset)
+        cue.startTime = original.appliedStart
+        cue.endTime = original.appliedEnd
       }
-      tracks.set(track, { offset, length: cues.length, first: cues[0], last: cues[cues.length - 1] })
+      tracks.set(track, { offset, cues: Array.from(cues) })
       track.dispatchEvent(new Event('cuechange'))
     }
   }

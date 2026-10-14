@@ -4603,7 +4603,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 :deep(.ft-caption-timing-menu) {
   display: flex;
   flex-direction: column;
-  min-inline-size: 280px;
+  min-inline-size: min(280px, 100%);
   max-inline-size: 100%;
   block-size: 100%;
   max-block-size: min(50vh, 280px);
@@ -4655,6 +4655,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 :deep(.ft-caption-timing-offset) {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
@@ -4664,7 +4665,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 :deep(.ft-caption-timing-offset input) {
   box-sizing: border-box;
   inline-size: 90px;
-  min-block-size: 36px;
+  min-block-size: var(--caption-timing-target-size, 36px);
   padding: 6px;
   border: 1px solid rgb(255 255 255 / 40%);
   border-radius: calc(6px * var(--ui-roundness));
@@ -4698,7 +4699,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   inline-size: 100%;
   justify-content: center;
   gap: 8px;
-  min-block-size: 44px;
+  min-block-size: var(--caption-timing-target-size, 44px);
   border-radius: calc(6px * var(--ui-roundness));
   background: rgb(255 255 255 / 10%);
 }
@@ -4714,7 +4715,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   justify-content: flex-start;
   gap: 8px;
   inline-size: 100%;
-  min-block-size: 36px;
+  min-block-size: var(--caption-timing-target-size, 36px);
   padding: 4px 8px;
   border-block-start: 1px solid rgb(255 255 255 / 20%);
   margin-block-start: 4px;
@@ -6262,6 +6263,11 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   grid-auto-rows: 68px;
   gap: 3px;
   align-content: safe center;
+}
+
+/* Match the phone menu's touch targets while keeping the desktop row compact. */
+:deep(.phonePlayerOptions) {
+  --caption-timing-target-size: var(--phone-touch-target, 48px);
 }
 
 :deep(.phonePlayerOptions .shaka-sub-menu) {

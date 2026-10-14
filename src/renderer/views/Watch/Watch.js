@@ -5678,7 +5678,8 @@ export default defineComponent({
         return false
       }
 
-      await this.reloadView()
+      this.setPlayerReloadState(this.$refs.player?.getSabrReloadState())
+      await this.reloadView({ preserveTitle: true })
       return true
     },
 

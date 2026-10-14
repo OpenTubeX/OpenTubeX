@@ -1352,8 +1352,8 @@ Video:
   Premiere started: Прем’єра триває. Почалася {timeAgo}
   Player:
     Caption Timing:
-      Adjust Timing: Налаштувати час…
-      Caption Timing: Час субтитрів
+      Adjust Timing: Налаштувати синхронізацію…
+      Caption Timing: Синхронізація субтитрів
       Offset: Зсув (секунди)
       Hint: Від’ємні значення показують субтитри раніше, додатні — пізніше. Лише для цього відео.
       Earlier: Раніше

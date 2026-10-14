@@ -2,6 +2,13 @@ import { test, expect, setWindowSize } from '../../helpers/app.mjs'
 import { findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
+/** @param {import('@playwright/test').Locator} locator */
+async function getVisibleBounds(locator) {
+  const bounds = await locator.boundingBox()
+  expect(bounds, `Expected visible bounds for ${locator}`).not.toBeNull()
+  return bounds
+}
+
 /** @param {HTMLElement} element */
 function validTimingScroll(element) {
   const content = element.querySelector('.ft-caption-timing-content').getBoundingClientRect()
@@ -56,16 +63,16 @@ for (const usePlayerMenuGrid of [true, false]) {
       const languageMenu = player.locator('.shaka-text-languages')
       for (const iconPack of ['material', 'remix']) {
         await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', value), iconPack)
-        const menuBounds = await languageMenu.boundingBox()
-        const rowBounds = await timingRow.boundingBox()
+        const menuBounds = await getVisibleBounds(languageMenu)
+        const rowBounds = await getVisibleBounds(timingRow)
         expect(rowBounds.width).toBeGreaterThanOrEqual(menuBounds.width - 16)
         const choices = languageMenu.locator(':scope > button:not(.shaka-back-to-overflow-button, .ft-caption-options-button, .ft-caption-timing-button)')
         for (const choice of await choices.all()) {
-          const choiceBounds = await choice.boundingBox()
+          const choiceBounds = await getVisibleBounds(choice)
           expect(choiceBounds.y + choiceBounds.height).toBeLessThanOrEqual(rowBounds.y + 1)
         }
-        const iconBounds = await timingRow.locator('.ft-icon__glyph').boundingBox()
-        const labelBounds = await timingRow.locator(':scope > span:last-child').boundingBox()
+        const iconBounds = await getVisibleBounds(timingRow.locator('.ft-icon__glyph'))
+        const labelBounds = await getVisibleBounds(timingRow.locator(':scope > span:last-child'))
         expect(iconBounds.x + iconBounds.width).toBeLessThan(labelBounds.x)
         expect(Math.abs(iconBounds.y + iconBounds.height / 2 - labelBounds.y - labelBounds.height / 2)).toBeLessThanOrEqual(1)
         await languageMenu.screenshot({ path: testInfo.outputPath(`caption-timing-row-${iconPack}.png`) })
@@ -81,8 +88,8 @@ for (const usePlayerMenuGrid of [true, false]) {
       const header = menu.locator(':scope > .shaka-back-to-overflow-button')
       await expect(header.locator('.shaka-ui-icon')).toHaveCount(1)
       if (usePlayerMenuGrid) {
-        const headerBounds = await header.boundingBox()
-        const titleBounds = await header.locator(':scope > span').boundingBox()
+        const headerBounds = await getVisibleBounds(header)
+        const titleBounds = await getVisibleBounds(header.locator(':scope > span'))
         expect(Math.abs(titleBounds.x + titleBounds.width / 2 - headerBounds.x - headerBounds.width / 2)).toBeLessThanOrEqual(1)
       }
       await expect(scroller.locator(':scope > .os-scrollbar-vertical')).toHaveCount(1)
@@ -175,7 +182,7 @@ for (const usePlayerMenuGrid of [true, false]) {
         await expect(menu.locator('.ft-icon__glyph')).toHaveCount(3)
         await menu.screenshot({ path: testInfo.outputPath(`caption-timing-${iconPack}.png`) })
       }
-      for (const [scale, width, height] of [[1, 420, 450], [1.25, 430, 910]]) {
+      for (const [scale, width, height] of [[1, 420, 450], [1.25, 430, 910], [2, 440, 920]]) {
         await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
         await app.electronApp.evaluate(({ BrowserWindow }, value) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(value), scale)
         await setWindowSize(app, page, { width, height })
@@ -187,18 +194,27 @@ for (const usePlayerMenuGrid of [true, false]) {
             await player.getByRole('button', { name: 'More settings' }).click()
           }
           await player.locator('.shaka-overflow-menu > .shaka-caption-button').click()
+          // Fractional zoom can introduce tiny floating-point differences.
+          expect((await getVisibleBounds(timingRow)).height).toBeGreaterThanOrEqual(48 - 0.01)
           await timingRow.click()
         }
         await expect(input).toBeVisible()
-        const bounds = await menu.boundingBox()
+        expect((await getVisibleBounds(input)).height).toBeGreaterThanOrEqual(48 - 0.01)
+        for (const action of await menu.locator('.ft-caption-timing-controls button').all()) {
+          expect((await getVisibleBounds(action)).height).toBeGreaterThanOrEqual(48 - 0.01)
+        }
+        const bounds = await getVisibleBounds(menu)
         const viewportWidth = await page.evaluate(() => innerWidth)
         expect(bounds.x).toBeGreaterThanOrEqual(-1)
         expect(bounds.x + bounds.width).toBeLessThanOrEqual(viewportWidth + 1)
+        const inputBounds = await getVisibleBounds(input)
+        expect(inputBounds.x).toBeGreaterThanOrEqual(bounds.x - 1)
+        expect(inputBounds.x + inputBounds.width).toBeLessThanOrEqual(bounds.x + bounds.width + 1)
         await expect.poll(() => scroller.evaluate(validTimingScroll)).toBe(true)
         // The phone dialog lifts the submenu header above its own viewport.
-        const headerBounds = await menu.locator(':scope > .shaka-back-to-overflow-button')
-          .or(player.locator('.phonePlayerOptions[open] > .shaka-back-to-overflow-button')).boundingBox()
-        const scrollBounds = await scroller.boundingBox()
+        const headerBounds = await getVisibleBounds(menu.locator(':scope > .shaka-back-to-overflow-button')
+          .or(player.locator('.phonePlayerOptions[open] > .shaka-back-to-overflow-button')))
+        const scrollBounds = await getVisibleBounds(scroller)
         expect(scrollBounds.y).toBeGreaterThanOrEqual(headerBounds.y + headerBounds.height - 1)
         await menu.getByRole('button', { name: 'Later', exact: true }).click()
       }
@@ -209,7 +225,7 @@ for (const usePlayerMenuGrid of [true, false]) {
       await timingWatch.dispose()
     })
 
-    test('clamps rendered timing content after localization and viewport growth', async ({ app, page }) => {
+    test('clamps rendered timing content after localization and viewport growth', async ({ app, page }, testInfo) => {
       await mockPlayableWatchPage(app, page, { captionTranslations: true })
       const video = await openMockedVideo(page)
       await video.evaluate(element => element.pause())
@@ -226,6 +242,7 @@ for (const usePlayerMenuGrid of [true, false]) {
       const scroller = menu.locator('.ft-caption-timing-controls')
       const originalScroller = await scroller.elementHandle()
       const hint = menu.locator('.ft-caption-timing-content > p')
+      await menu.locator('.ft-caption-timing-content').screenshot({ path: testInfo.outputPath('caption-timing-phone-controls.png') })
       const longHint = 'A longer localized explanation of caption timing. '.repeat(80)
       await page.evaluate(text => {
         const app = document.querySelector('#app').__vue_app__
@@ -298,5 +315,32 @@ test.describe('native caption timing', () => {
     await expect(caption).toHaveCount(0)
     await video.evaluate(element => { element.currentTime = 8 })
     await expect(caption).toHaveText('Native timing caption')
+  })
+
+  test('preserves caption timing when built-in playback recovers from HTTP 403', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page, { captionVideoIds: ['jNQXAC9IVRw'] })
+    const video = await openMockedVideo(page)
+    await video.evaluate(element => element.pause())
+    const player = page.locator('.ftVideoPlayer')
+    await player.hover()
+    await player.getByRole('button', { name: 'More settings' }).click()
+    await player.locator('.shaka-overflow-menu > .shaka-caption-button').click()
+    await player.getByRole('button', { name: 'Adjust timing…', exact: true }).click()
+    await player.getByRole('spinbutton', { name: 'Offset (seconds)' }).fill('1.5')
+    const watch = await page.evaluateHandle(findWatchComponent)
+    const offset = () => watch.evaluate(component => component.proxy.$refs.player?.getSabrReloadState().captionTimingOffset)
+    await expect.poll(offset).toBe(1.5)
+    const oldVideo = await video.elementHandle()
+    try {
+      await watch.evaluate(component => component.proxy.handlePlayerError({
+        code: 1001, category: 1, severity: 2, data: ['https://media.test/expired-stream', 403]
+      }))
+      await expect.poll(() => oldVideo.evaluate(element => element.isConnected)).toBe(false)
+      await expect.poll(offset).toBe(1.5)
+      await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
+    } finally {
+      await oldVideo.dispose()
+      await watch.dispose()
+    }
   })
 })

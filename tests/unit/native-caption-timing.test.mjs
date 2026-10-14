@@ -78,3 +78,25 @@ for (const offset of [10, -2.5]) {
     assert.deepEqual(cues.map(cue => [cue.startTime, cue.endTime]), [[1, 2], [2, 3], [3, 4]])
   })
 }
+
+test('shifts replaced and retimed interior cues without changing the track boundaries', () => {
+  const f = fixture(null)
+  const first = { startTime: 2, endTime: 4 }
+  const middle = { startTime: 5, endTime: 7 }
+  const last = { startTime: 10, endTime: 12 }
+  f.track.cues = [first, middle, last]
+  f.setOffset(-2)
+  f.binding.update()
+  const replacement = { startTime: 6, endTime: 8 }
+  f.track.cues[1] = replacement
+  f.video.dispatchEvent(new Event('timeupdate'))
+  assert.deepEqual(replacement, { startTime: 4, endTime: 6 })
+  replacement.endTime = 9
+  f.video.dispatchEvent(new Event('timeupdate'))
+  assert.deepEqual(replacement, { startTime: 4, endTime: 7 })
+  replacement.startTime = 7
+  f.video.dispatchEvent(new Event('timeupdate'))
+  assert.deepEqual(replacement, { startTime: 5, endTime: 7 })
+  f.binding.release()
+  assert.deepEqual(replacement, { startTime: 7, endTime: 9 })
+})
