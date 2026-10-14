@@ -32,6 +32,72 @@ async function trayClick(app) {
   await app.electronApp.evaluate(() => globalThis.testTray.emit('click'))
 }
 
+async function captureTrayForIcons(app, page) {
+  const platform = await app.electronApp.evaluate(() => process.platform)
+  if (platform === 'darwin') {
+    // macOS constructs the menu on right click instead of attaching it to the tray.
+    await app.electronApp.evaluate(({ Tray }) => {
+      const setToolTip = Tray.prototype.setToolTip
+      Tray.prototype.setToolTip = function (text) {
+        globalThis.testTray = this
+        return setToolTip.call(this, text)
+      }
+      Tray.prototype.popUpContextMenu = function (menu) { globalThis.testTrayMenu = menu }
+    })
+    await setting(page, 'updateUseTrayIcon', false)
+    await setting(page, 'updateUseTrayIcon', true)
+    await expect.poll(() => app.electronApp.evaluate(() => !!globalThis.testTray)).toBe(true)
+  } else {
+    await captureTray(app, page)
+  }
+}
+
+test('tray menu icons render for both packs across native appearances', async ({ app, page }) => {
+  await captureTrayForIcons(app, page)
+  let materialIcons
+  const platform = await app.electronApp.evaluate(() => process.platform)
+  const icons = () => app.electronApp.evaluate(() => {
+    if (process.platform === 'darwin') globalThis.testTray.emit('right-click')
+    const result = []
+    const collect = menu => {
+      for (const item of menu.items) {
+        if (item.type !== 'separator') {
+          result.push({ label: item.label, size: item.icon?.getSize(), scales: item.icon?.getScaleFactors(), empty: item.icon?.isEmpty(), png: item.icon?.toDataURL(), template: item.icon?.isTemplateImage() })
+        }
+        if (item.submenu) collect(item.submenu)
+      }
+    }
+    collect(globalThis.testTrayMenu)
+    return result
+  })
+  for (const pack of ['material', 'remix']) {
+    await setting(page, 'updateIconPack', pack)
+    await app.electronApp.evaluate(({ nativeTheme }) => { nativeTheme.themeSource = 'light' })
+    await expect.poll(async () => (await icons()).every(icon => icon.empty === false && icon.size.width === 16 && icon.size.height === 16)).toBe(true)
+    const lightIcons = await icons()
+    expect(lightIcons.every(icon => icon.scales.includes(1) && icon.scales.includes(2))).toBe(true)
+    await app.electronApp.evaluate(({ nativeTheme }) => { nativeTheme.themeSource = 'dark' })
+    if (platform === 'darwin') expect((await icons()).every(icon => icon.template)).toBe(true)
+    expect((await icons())[0].png).toBe(lightIcons[0].png)
+    if (pack === 'material') {
+      materialIcons = lightIcons
+    } else {
+      expect(lightIcons[0].png).not.toBe(materialIcons[0].png)
+    }
+  }
+  const beforePause = (await icons()).find(icon => icon.label === 'Play').png
+  await page.evaluate(() => window.ftElectron.tabs.setMediaSessionState({ playbackState: 'playing', hasMetadata: true, actions: ['pause'] }))
+  await expect.poll(async () => (await icons()).find(icon => icon.label === 'Pause')?.png).not.toBeUndefined()
+  expect((await icons()).find(icon => icon.label === 'Pause').png).not.toBe(beforePause)
+  await trayClick(app)
+  await expect.poll(async () => (await icons()).some(icon => icon.label === 'Show')).toBe(true)
+  await trayClick(app)
+  ;({ page } = await app.relaunch())
+  await captureTrayForIcons(app, page)
+  await app.electronApp.evaluate(({ nativeTheme }) => { nativeTheme.themeSource = 'light' })
+  await expect.poll(async () => (await icons())[0].png).not.toBe(materialIcons[0].png)
+})
+
 test('tray settings default independently and background refresh forces the tray', async ({ app, page }) => {
   await captureTray(app, page)
   const general = await goToSettingsSection(page, 'general')
