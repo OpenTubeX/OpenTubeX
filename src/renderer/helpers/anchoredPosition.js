@@ -24,7 +24,6 @@ export function getAnchoredPosition(anchor, triggerRect, left, top, limits, plac
   const anchoredTop = `calc(anchor(top) + ${top - triggerRect.top}px)`
   return {
     positionAnchor: anchor,
-    translate: null,
     bottom: null,
     marginTop: null,
     marginBottom: null,

@@ -56,7 +56,7 @@ for (const uiScale of [100, 125]) {
     test('fits the comments dropdown on opening and keeps it inside the viewport when scrolling', async ({ app, page }) => {
       const select = await commentsSort({ app, page })
       const dropdown = page.locator('.selectDropdown')
-      for (const edge of ['bottom', 'top']) {
+      for (const edge of ['bottom', 'top', 'bottom', 'top']) {
         // Finish focus scrolling before placing the control at the opening edge.
         await select.focus()
         const targetTop = await select.evaluate(async (button, edge) => {
@@ -93,6 +93,16 @@ for (const uiScale of [100, 125]) {
           const chromeBottom = Math.max(...Array.from(document.querySelectorAll('.topNav, .tabBar.position-top')).map(element => element.getBoundingClientRect().bottom))
           return bounds.top >= chromeBottom + 3 && bounds.bottom <= innerHeight - 7 &&
             bounds.left >= 7 && bounds.right <= innerWidth - 7
+        })).toBe(true)
+
+        // Hover changes the active option and rerenders the popup. Its viewport
+        // correction must survive that render while the trigger is near an edge.
+        const option = await dropdown.locator('.selectOption:not(.active)').first().boundingBox()
+        await page.mouse.move(option.x + option.width / 2, option.y + option.height / 2)
+        await expect.poll(() => dropdown.evaluate(menu => {
+          const bounds = menu.getBoundingClientRect()
+          const chromeBottom = Math.max(...Array.from(document.querySelectorAll('.topNav, .tabBar.position-top')).map(element => element.getBoundingClientRect().bottom))
+          return bounds.top >= chromeBottom + 3 && bounds.bottom <= innerHeight - 7
         })).toBe(true)
 
         // Moving back releases the viewport correction and restores the anchor gap.

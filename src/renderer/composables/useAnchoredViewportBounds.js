@@ -16,6 +16,7 @@ export function useAnchoredViewportBounds(trigger, popup, enabled) {
     if (!open || !button || !menu) return
 
     let frame = null
+    let invalidated = false
     let correcting = false
     const ancestors = []
     for (let element = button; element; element = element.parentElement) ancestors.push(element)
@@ -24,11 +25,20 @@ export function useAnchoredViewportBounds(trigger, popup, enabled) {
 
     function schedule(event) {
       if (event?.type === 'scroll' && event.target instanceof Node && !event.target.contains(button)) return
-      if (frame !== null) return
+      if (frame !== null) {
+        invalidated = true
+        return
+      }
       // The compositor's anchor scroll shift is visible after the next frame.
       frame = requestAnimationFrame(() => {
         frame = requestAnimationFrame(() => {
           frame = null
+          // A later event may arrive after the first frame. Check again after
+          // its own anchor scroll shift instead of dropping that invalidation.
+          if (invalidated) {
+            invalidated = false
+            schedule()
+          }
           const minLeft = Number.parseFloat(menu.style.getPropertyValue('--anchor-min-left'))
           const maxLeft = Number.parseFloat(menu.style.getPropertyValue('--anchor-max-left'))
           const minTop = Number.parseFloat(menu.style.getPropertyValue('--anchor-min-top'))
