@@ -24,7 +24,10 @@
       <code>{{ modelValue }}</code>
     </button>
 
-    <Teleport to="body">
+    <Teleport
+      v-if="settingsOverlayActive"
+      to="body"
+    >
       <div
         v-if="open"
         ref="popoverRef"
@@ -218,6 +221,7 @@ import { useI18n } from 'vue-i18n'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getAnchoredPosition, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
 import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewportBounds'
+import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
 
 const props = defineProps({
   modelValue: {
@@ -251,6 +255,7 @@ const copyFromButtonRef = useTemplateRef('copyFromButtonRef')
 const colorSourceListRef = useTemplateRef('colorSourceListRef')
 const colorSourceContentRef = useTemplateRef('colorSourceContentRef')
 const open = ref(false)
+const settingsOverlayActive = useSettingsOverlay(() => closePicker(false, false))
 useAnchoredViewportBounds(triggerRef, popoverRef, open)
 const hue = ref(0)
 const saturation = ref(0)
@@ -300,7 +305,7 @@ watch(open, async value => {
   window.addEventListener('resize', positionPopover)
   if (!supportsAnchorPositioning) window.addEventListener('scroll', positionPopover, true)
   await nextTick()
-  if (!open.value || popoverRef.value === null) return
+  if (!settingsOverlayActive.value || !open.value || popoverRef.value === null) return
   popoverResizeObserver = new ResizeObserver(positionPopover)
   popoverResizeObserver.observe(popoverRef.value)
   positionPopover()
@@ -311,6 +316,7 @@ watch(showColorSources, async value => {
   if (!value) return
 
   await nextTick()
+  if (!settingsOverlayActive.value || !open.value || !showColorSources.value) return
   const bounds = copyFromButtonRef.value?.getBoundingClientRect()
   if (bounds !== undefined) {
     colorSourcesAbove.value = window.innerHeight - bounds.bottom < 230 && bounds.top > 230
@@ -334,6 +340,7 @@ function syncFromModel(color, force = false) {
 }
 
 function togglePicker() {
+  if (!settingsOverlayActive.value) return
   if (open.value) closePicker()
   else {
     colorWhenOpened.value = props.modelValue
@@ -349,7 +356,11 @@ function closePicker(apply = false, restoreFocus = true) {
   if (apply) emit('apply')
   else emit('cancel')
   open.value = false
-  if (restoreFocus) nextTick(() => triggerRef.value?.focus())
+  if (restoreFocus) {
+    nextTick(() => {
+      if (settingsOverlayActive.value) triggerRef.value?.focus()
+    })
+  }
 }
 
 function emitCurrentColor() {
@@ -367,6 +378,7 @@ function emitCurrentBlur() {
 }
 
 function startSaturationValue(event) {
+  if (!settingsOverlayActive.value || !open.value) return
   if (event.button !== 0) return
   if (saturationValuePointerId !== null && event.pointerId !== saturationValuePointerId) return
   // A fresh press can follow a release outside the window that was not delivered.
@@ -506,6 +518,7 @@ function copyFromColor(color) {
 }
 
 function toggleColorSources() {
+  if (!settingsOverlayActive.value || !open.value) return
   showColorSources.value = !showColorSources.value
 }
 

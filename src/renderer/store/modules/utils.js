@@ -88,6 +88,7 @@ const state = {
   settingsWindowReturnView: null,
   settingsWindowView: null,
   settingsWindowSection: null,
+  settingsWindowSectionRequest: null,
   customThemeEditorOpen: false,
   customThemes: [],
   showSearchFilters: false,
@@ -196,6 +197,9 @@ const getters = {
 
   getSettingsWindowSection(state) {
     return state.settingsWindowSection
+  },
+  getSettingsWindowSectionRequest(state) {
+    return state.settingsWindowSectionRequest
   },
 
   getCustomThemeEditorOpen(state) {
@@ -949,6 +953,9 @@ const mutations = {
   },
 
   setSettingsWindowSection (state, payload) {
+    state.settingsWindowSectionRequest = payload === null ? null : { section: payload }
+  },
+  rememberSettingsWindowSection (state, payload) {
     state.settingsWindowSection = payload
   },
 

@@ -49,7 +49,7 @@
       />
     </button>
     <template
-      v-if="dropdownShown"
+      v-if="dropdownShown && settingsOverlayActive"
     >
       <slot v-if="ownsPhoneSheet" />
       <FtPrompt
@@ -209,6 +209,7 @@ import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getAnchoredPosition, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
 import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewportBounds'
+import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
 
 const props = defineProps({
   mobileSheet: { type: Boolean, default: false },
@@ -310,6 +311,11 @@ const isKebabMenu = computed(() => (
 ))
 
 const dropdownShown = ref(false)
+const settingsOverlayActive = useSettingsOverlay(() => {
+  dropdownShown.value = false
+  clearLongPress()
+  clearLongPressClick()
+})
 const phoneLayout = usePhoneLayout()
 const ownsPhoneSheet = computed(() => props.mobileSheet && phoneLayout.value)
 const fullscreenDropdownTarget = ref(null)
@@ -381,6 +387,7 @@ onBeforeUnmount(() => {
  * @param {boolean} isRightOrLongClick
  */
 function handleIconClick(e, isRightOrLongClick = false) {
+  if (!settingsOverlayActive.value) return
   if (suppressLongPressClick(e)) {
     return
   }
@@ -405,6 +412,7 @@ function handleIconClick(e, isRightOrLongClick = false) {
       // wait until the dropdown is visible
       // then focus it so we can hide it automatically when it loses focus
       nextTick(() => {
+        if (!settingsOverlayActive.value || !dropdownShown.value) return
         dropdown.value?.focus()
         keepDropdownInViewport()
       })
@@ -418,7 +426,7 @@ function handleIconClick(e, isRightOrLongClick = false) {
  * @param {PointerEvent} event
  */
 function handleIconPointerDown(event) {
-  if (!props.openOnRightOrLongClick) {
+  if (!settingsOverlayActive.value || !props.openOnRightOrLongClick) {
     return
   }
 
@@ -432,6 +440,7 @@ function handleIconPointerDown(event) {
     window.addEventListener('pointercancel', finishLongPress, true)
     longPressTimer = setTimeout(() => {
       clearLongPress()
+      if (!settingsOverlayActive.value) return
       handleIconClick(null, true)
 
       // WebView can dispatch the release click after zero-delay timers.
@@ -628,10 +637,11 @@ provide('closeIconDropdown', handleDropdownEscape)
 
 function handleDropdownEscape() {
   dropdownShown.value = false
-  ftIconButton.value?.firstElementChild?.focus()
+  if (settingsOverlayActive.value) ftIconButton.value?.firstElementChild?.focus()
 }
 
 function handleDropdownClick(option, event) {
+  if (!settingsOverlayActive.value) return
   if (option.disabled) {
     if (useModal.value) {
       event?.stopPropagation()

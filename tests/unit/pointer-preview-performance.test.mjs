@@ -31,6 +31,8 @@ function colorPicker() {
   }
   const saturation = ref(0)
   const value = ref(0)
+  const open = ref(true)
+  const settingsOverlayActive = ref(true)
   const listeners = new Map()
   const window = {
     addEventListener(type, callback) { listeners.set(type, callback) },
@@ -40,7 +42,7 @@ function colorPicker() {
   const declarations = source.match(/^let saturationValue\w* = .*$/gm).join('\n')
   const methods = source.slice(source.indexOf('function startSaturationValue('), source.indexOf('function adjustSaturationValue('))
   const api = vm.runInNewContext(`${declarations}\n${methods}\n({ startSaturationValue, updateSaturationValue, stopSaturationValue, cancelSaturationValue })`, {
-    ...frames, saturation, value,
+    ...frames, saturation, value, open, settingsOverlayActive,
     saturationValueRef: { value: surface },
     clamp: (number, min, max) => Math.min(max, Math.max(min, number)),
     emitCurrentColor() { calls.colors++ },
@@ -50,7 +52,20 @@ function colorPicker() {
   const event = (clientX, clientY, pointerId = 7, type = 'pointermove') => ({ button: 0, clientX, clientY, pointerId, type, preventDefault() {} })
   api.startSaturationValue(event(10.5, 20.25))
   Object.assign(calls, { reads: 0, colors: 0, changes: 0 })
-  return { api, calls, frames, saturation, value, event, window, listeners }
+  return { api, calls, frames, saturation, value, open, settingsOverlayActive, event, window, listeners }
+}
+
+for (const state of ['closed', 'inactive']) {
+  test(`a ${state} color picker rejects delayed pointer presses without registering work`, () => {
+    const harness = colorPicker()
+    harness.api.cancelSaturationValue()
+    if (state === 'closed') harness.open.value = false
+    else harness.settingsOverlayActive.value = false
+    harness.api.startSaturationValue(harness.event(211, 120.5, 8, 'pointerdown'))
+    assert.deepEqual(harness.calls, { reads: 0, colors: 0, changes: 0 })
+    assert.equal(harness.listeners.size, 0)
+    assert.equal(harness.frames.frames.size, 0)
+  })
 }
 
 test('color picker coalesces pointer bursts into one geometry read and color update', async () => {

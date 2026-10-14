@@ -69,7 +69,7 @@
             />
             <span class="settingsBreadcrumbText">{{ t('Settings.Settings') }}</span>
           </span>
-          <template v-if="!isStandaloneViewOpen && currentSectionTitle">
+          <template v-if="unlocked && !isStandaloneViewOpen && currentSectionTitle">
             <FtIcon
               v-show="isInDesktopView"
               class="settingsBreadcrumbSeparator"
@@ -102,7 +102,7 @@
               <span class="settingsBreadcrumbText">{{ currentSectionTitle }}</span>
             </span>
           </template>
-          <template v-if="!isStandaloneViewOpen && subpageTitle">
+          <template v-if="unlocked && !isStandaloneViewOpen && subpageTitle">
             <FtIcon
               class="settingsBreadcrumbSeparator"
               :icon="['fas', 'angle-right']"
@@ -118,6 +118,7 @@
             </span>
           </template>
           <span
+            v-show="protectedSettingsVisible"
             :id="subpageBreadcrumbTargetId"
             class="settingsBreadcrumbAction"
           />
@@ -136,7 +137,7 @@
       />
       <div class="settingsHeaderActions">
         <button
-          v-if="showKeyboardShortcutAction && !isStandaloneViewOpen"
+          v-if="unlocked && showKeyboardShortcutAction && !isStandaloneViewOpen"
           type="button"
           class="settingsHeaderButton"
           :aria-label="t('KeyboardShortcutPrompt.Show Keyboard Shortcuts')"
@@ -225,9 +226,13 @@
           <Downloads />
         </div>
       </template>
-      <template v-else-if="unlocked">
-        <template v-if="isProfileManagerOpen">
+      <SettingsView
+        v-if="hasUnlockedSettings"
+        :active="canNavigateSettings && !isStandaloneViewOpen"
+      >
+        <template v-if="renderedProfileManagerOpen">
           <div
+            v-show="protectedSettingsVisible"
             ref="profileManagerScrollRef"
             v-overlay-scrollbars
             class="settingsSubpageScroll"
@@ -236,8 +241,9 @@
             <ProfileSettings />
           </div>
         </template>
-        <template v-else-if="isKeyboardShortcutPromptOpen">
+        <template v-else-if="renderedKeyboardShortcutPromptOpen">
           <div
+            v-show="protectedSettingsVisible"
             class="settingsSubpageScroll settingsKeyboardShortcutPage"
           >
             <FtKeyboardShortcutPrompt embedded />
@@ -245,7 +251,7 @@
         </template>
         <template v-else>
           <FtSettingsMenu
-            v-show="!subpageTitle && (isInDesktopView || (!activeSection && settingsSearchQuery === ''))"
+            v-show="protectedSettingsVisible && !subpageTitle && (isInDesktopView || (!activeSection && settingsSearchQuery === ''))"
             ref="menuRef"
             v-overlay-scrollbars
             :class="[
@@ -259,7 +265,7 @@
             @navigate-to-section="navigateToSection"
           />
           <div
-            v-show="!subpageTitle && (isInDesktopView || activeSection || settingsSearchQuery !== '')"
+            v-show="protectedSettingsVisible && !subpageTitle && (isInDesktopView || activeSection || settingsSearchQuery !== '')"
             class="settingsContentPane"
           >
             <div
@@ -330,7 +336,7 @@
             </div>
           </div>
           <div
-            v-show="subpageTitle"
+            v-show="protectedSettingsVisible && subpageTitle"
             :id="subpageTargetId"
             ref="settingsSubpageContentRef"
             v-overlay-scrollbars
@@ -338,9 +344,9 @@
             :class="{ settingsSubpageFlush: subpageFlush }"
           />
         </template>
-      </template>
+      </SettingsView>
       <div
-        v-else
+        v-if="!unlocked && !isStandaloneViewOpen"
         v-overlay-scrollbars
         class="settingsPassword"
       >
@@ -368,6 +374,8 @@ import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
 import {
   computed,
+  defineComponent,
+  inject,
   nextTick,
   onActivated,
   onBeforeUnmount,
@@ -520,8 +528,6 @@ const subpageTitle = ref('')
 const subpageIcon = ref(null)
 const subpageFlush = ref(false)
 let closeSubpage = null
-let subpagePersistsOnDeactivate = false
-let closeSubpageOnActivate = false
 let settingsResizeObserver = null
 let settingsSectionResizeObserver = null
 let profileManagerResizeObserver = null
@@ -739,23 +745,49 @@ const currentSectionIcon = computed(() => {
 const showBackButton = computed(() => {
   if (isDownloadsOpen.value) return canReturnFromDownloads.value
   if (isStandaloneViewOpen.value) return false
+  if (!unlocked.value) return false
 
   return isKeyboardShortcutPromptOpen.value || isProfileManagerOpen.value || subpageTitle.value !== '' ||
     (!isInDesktopView.value && activeSection.value !== null)
 })
 
 const unlocked = ref(store.getters.getSettingsPassword === '')
+// Mount pages after the first unlock, then hide them while settings is locked.
+const hasUnlockedSettings = ref(unlocked.value && !isStandaloneViewOpen.value)
+const canNavigateSettings = computed(() => unlocked.value && store.getters.getSettingsWindowOpen)
+const protectedSettingsVisible = computed(() => unlocked.value && !isStandaloneViewOpen.value)
+const renderedProfileManagerOpen = ref(isProfileManagerOpen.value)
+const renderedKeyboardShortcutPromptOpen = ref(isKeyboardShortcutPromptOpen.value)
+
+watch([unlocked, isStandaloneViewOpen, isProfileManagerOpen, isKeyboardShortcutPromptOpen], ([isUnlocked, standalone, profile, shortcuts]) => {
+  if (!isUnlocked || standalone) return
+  hasUnlockedSettings.value = true
+  renderedProfileManagerOpen.value = profile
+  renderedKeyboardShortcutPromptOpen.value = shortcuts
+})
+
+const SettingsView = defineComponent({
+  props: { active: Boolean },
+  setup(props, { slots }) {
+    const settingsWindow = inject(settingsSubpageKey)
+    provide(settingsSubpageKey, {
+      ...settingsWindow,
+      isActive: computed(() => props.active)
+    })
+    return () => slots.default?.()
+  }
+})
 
 provide(settingsSubpageKey, {
+  isActive: computed(() => store.getters.getSettingsWindowOpen && (unlocked.value || isStandaloneViewOpen.value)),
   targetId: subpageTargetId,
   breadcrumbTargetId: subpageBreadcrumbTargetId,
   contentHeaderTargetId,
-  open(title, close, persistOnDeactivate = false, icon = null, flush = false) {
+  open(title, close, icon = null, flush = false) {
     subpageTitle.value = title
     subpageIcon.value = icon
     subpageFlush.value = flush
     closeSubpage = close
-    subpagePersistsOnDeactivate = persistOnDeactivate
   },
   close(close) {
     if (closeSubpage === close) {
@@ -763,7 +795,6 @@ provide(settingsSubpageKey, {
       subpageIcon.value = null
       subpageFlush.value = false
       closeSubpage = null
-      subpagePersistsOnDeactivate = false
     }
   }
 })
@@ -773,27 +804,14 @@ onMounted(() => {
   systemColorScheme.addEventListener('change', updateSystemColorScheme)
 })
 onActivated(() => {
-  if (closeSubpageOnActivate) {
-    closeSubpageOnActivate = false
-    const deferredCloseSubpage = closeSubpage
-    deferredCloseSubpage?.()
-    if (closeSubpage === deferredCloseSubpage) {
-      subpageTitle.value = ''
-      subpageIcon.value = null
-      subpageFlush.value = false
-      closeSubpage = null
-      subpagePersistsOnDeactivate = false
-    }
-  }
   handleMounted()
-  nextTick(restorePreservedScrollPositions)
+  nextTick(() => {
+    if (unlocked.value || isStandaloneViewOpen.value) restorePreservedScrollPositions()
+  })
 })
 onDeactivated(() => {
   if (!settingsWindowMorphing.value) {
     preserveScrollPositions()
-    if (!subpagePersistsOnDeactivate) {
-      closeSubpageOnActivate = true
-    }
   }
   stopObserving()
   stopDragging()
@@ -822,42 +840,59 @@ watch(isProfileManagerOpen, (open) => {
     nextTick(observeProfileManager)
   }
 })
-watch(() => store.getters.getSettingsWindowView, async (view) => {
+watch(() => store.getters.getSettingsWindowView, async (view, previousView) => {
+  if (['about', 'downloads'].includes(view) && !['about', 'downloads'].includes(previousView)) {
+    preserveScrollPositions(false)
+  }
   stopObservingStandaloneContent()
   if (view === 'downloads' && canReturnFromDownloads.value) {
     downloadsReturnScrollTop = settingsContentRef.value?.scrollTop ?? 0
   }
-  if (!['about', 'downloads'].includes(view)) return
   await nextTick()
+  if (view !== store.getters.getSettingsWindowView) return
+  if (!['about', 'downloads'].includes(view)) {
+    if (unlocked.value) restorePreservedScrollPositions()
+    return
+  }
   const scrollViewport = standaloneScrollRef.value
   if (scrollViewport) restoreOverlayScrollTop(scrollViewport, 0)
   observeStandaloneContent()
 })
 watch(activeSection, (section) => {
   if (section !== null) {
-    store.commit('setSettingsWindowSection', section)
+    store.commit('rememberSettingsWindowSection', section)
   }
   nextTick(observeActiveSettingsSection)
 })
-watch(() => store.getters.getSettingsWindowSection, async (section) => {
+let handledSectionRequest = null
+watch([
+  () => store.getters.getSettingsWindowSectionRequest,
+  canNavigateSettings,
+  () => props.searchTarget
+], async ([request, canNavigate, searchTarget]) => {
+  if (!canNavigate || !request || request === handledSectionRequest || searchTarget) return
+  await nextTick()
+  if (!canNavigateSettings.value || request !== store.getters.getSettingsWindowSectionRequest || request === handledSectionRequest || props.searchTarget) return
+  handledSectionRequest = request
+  const { section } = request
   if (section === 'storage') activeDataStorageTab.value = 'storage'
   const normalizedSection = LEGACY_SETTINGS_SECTION_MAP[section] ?? section
-  if (
-    normalizedSection !== activeSection.value &&
-    settingsSectionComponents.value.some(candidate => candidate.type === normalizedSection)
-  ) {
+  if (settingsSectionComponents.value.some(candidate => candidate.type === normalizedSection)) {
     navigateToSection(normalizedSection)
   }
   if (section === 'storage') {
     await nextTick()
     await activeSettingsSectionRef.value?.activateTab('storage')
   }
-})
-watch(() => props.searchTarget, async (target) => {
-  if (!target) return
+}, { immediate: true })
+watch([() => props.searchTarget, canNavigateSettings], async ([target, canNavigate]) => {
+  if (!target || !canNavigate) return
   await nextTick()
-  await openSearchResult(target.section, target)
-  emit('search-target-opened', target)
+  if (!canNavigateSettings.value || target !== props.searchTarget) return
+  const opened = await openSearchResult(target.section, target)
+  if (opened && canNavigateSettings.value && target === props.searchTarget) {
+    emit('search-target-opened', target)
+  }
 }, { immediate: true })
 
 function handleMounted() {
@@ -903,7 +938,7 @@ function handleMounted() {
           })
           scheduleBoundsSave()
         }
-        if (settingsContentRef.value) {
+        if (protectedSettingsVisible.value && settingsContentRef.value) {
           clampOverlayScrollTop(
             settingsContentRef.value,
             getSettingsContentEnd(settingsContentRef.value)
@@ -980,6 +1015,7 @@ function observeActiveSettingsSection() {
   if (!content || !contentEnd) return
   let previousHeight = null
   settingsSectionResizeObserver = new ResizeObserver(([entry]) => {
+    if (!protectedSettingsVisible.value) return
     const height = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height
     const contentShrank = previousHeight !== null && height < previousHeight
     previousHeight = height
@@ -1031,7 +1067,10 @@ function getSettingsContentEnd(content) {
 
 function handleUnlock() {
   unlocked.value = true
-  nextTick(setInitialSection)
+  nextTick(() => {
+    setInitialSection()
+    restorePreservedScrollPositions()
+  })
 }
 
 function setInitialSection() {
@@ -1292,6 +1331,7 @@ function returnToCategory() {
 }
 
 function showKeyboardShortcutPrompt() {
+  if (!canNavigateSettings.value) return
   store.dispatch('showKeyboardShortcutPrompt')
 }
 
@@ -1322,20 +1362,35 @@ function minimizeSettings() {
   store.dispatch('minimizeSettingsWindow')
 }
 
-function preserveScrollPositions() {
-  const settingsWindow = settingsWindowRef.value
-  preservedScrollPositions = settingsWindow
-    ? [...settingsWindow.querySelectorAll('[data-overlayscrollbars-initialize]')]
-        .filter(element => element.scrollTop > 0)
-        .map(element => ({ element, scrollTop: element.scrollTop }))
-    : []
+function preserveScrollPositions(standalone = isStandaloneViewOpen.value) {
+  if (!unlocked.value && !standalone) return
+  const viewports = getCurrentScrollViewports(standalone)
+  preservedScrollPositions = [
+    ...preservedScrollPositions.filter(({ element }) => !viewports.has(element)),
+    ...[...viewports].filter(element => element.scrollTop > 0)
+      .map(element => ({ element, scrollTop: element.scrollTop }))
+  ]
+}
+
+function getCurrentScrollViewports(standalone = isStandaloneViewOpen.value) {
+  const content = standalone ? standaloneScrollRef.value : settingsPageRef.value
+  if (!content) return new Set()
+  const selector = '[data-overlayscrollbars-initialize]'
+  return new Set([
+    ...(content.matches(selector) ? [content] : []),
+    ...content.querySelectorAll(selector)
+  ])
 }
 
 function restorePreservedScrollPositions() {
+  const viewports = getCurrentScrollViewports()
+  const pending = []
   for (const { element, scrollTop } of preservedScrollPositions) {
-    if (element.isConnected) restoreOverlayScrollTop(element, scrollTop)
+    if (!element.isConnected) continue
+    if (viewports.has(element)) restoreOverlayScrollTop(element, scrollTop)
+    else pending.push({ element, scrollTop })
   }
-  preservedScrollPositions = []
+  preservedScrollPositions = pending
 }
 
 async function toggleMaximized() {

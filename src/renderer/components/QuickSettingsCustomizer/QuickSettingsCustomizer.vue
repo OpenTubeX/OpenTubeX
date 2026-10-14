@@ -221,6 +221,7 @@ import FullscreenActionsCustomizer from '../FullscreenActionsCustomizer/Fullscre
 import store from '../../store/index'
 import { moveItemByVisibleOffset } from '../../../orderedItems'
 import { useOrderedItemReorder } from '../../composables/useOrderedItemReorder'
+import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import {
   createQuickSettingCatalog,
@@ -238,6 +239,7 @@ const settingPickerAnchorRef = useTemplateRef('settingPickerAnchorRef')
 const settingPickerRef = useTemplateRef('settingPickerRef')
 const quickSettingsActionsRef = useTemplateRef('quickSettingsActionsRef')
 let quickSettingsResizeObserver = null
+const settingsOverlayActive = useSettingsOverlay(closeSettingPicker)
 
 const catalog = computed(() => createQuickSettingCatalog(t, process.env.IS_ELECTRON, process.env.IS_CAPACITOR, process.env.IS_IOS))
 const catalogById = computed(() => new Map(catalog.value.map(setting => [setting.id, setting])))
@@ -277,6 +279,7 @@ function close() {
 }
 
 async function toggleSettingPicker() {
+  if (!settingsOverlayActive.value) return
   if (settingPickerOpen.value) {
     closeSettingPicker()
     return
@@ -285,6 +288,7 @@ async function toggleSettingPicker() {
   settingPickerOpen.value = true
   settingSearchQuery.value = ''
   await nextTick()
+  if (!settingsOverlayActive.value || !settingPickerOpen.value) return
   settingPickerRef.value?.focus()
 }
 
@@ -292,7 +296,9 @@ function closeSettingPicker(restoreFocus = false) {
   settingPickerOpen.value = false
   settingSearchQuery.value = ''
   if (restoreFocus) {
-    nextTick(() => settingPickerAnchorRef.value?.querySelector('button')?.focus())
+    nextTick(() => {
+      if (settingsOverlayActive.value) settingPickerAnchorRef.value?.querySelector('button')?.focus()
+    })
   }
 }
 

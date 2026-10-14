@@ -123,7 +123,10 @@
       class="selectSearchHighlightFrame"
       aria-hidden="true"
     />
-    <Teleport :to="dropdownTarget">
+    <Teleport
+      v-if="settingsOverlayActive"
+      :to="dropdownTarget"
+    >
       <FtMobileSheet
         v-if="dropdownRendered"
         :enabled="phoneLayout"
@@ -236,6 +239,7 @@
 <script setup>
 import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
+import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
 
 import FtMobileSheet from '../FtMobileSheet/FtMobileSheet.vue'
 import FtInput from '../FtInput/FtInput.vue'
@@ -351,6 +355,10 @@ const filteredOptions = computed(() => props.selectNames
 const dropdownShown = ref(false)
 useAnchoredViewportBounds(selectButton, dropdown, computed(() => dropdownShown.value && !phoneLayout.value))
 const dropdownRendered = ref(false)
+const settingsOverlayActive = useSettingsOverlay(() => {
+  closeDropdown()
+  dropdownRendered.value = false
+})
 const activeIndex = ref(0)
 const dropdownStyle = ref({ zIndex: props.dropdownZIndex })
 const dropdownTarget = shallowRef(document.fullscreenElement ?? document.body)
@@ -420,7 +428,7 @@ function toggleDropdown() {
 }
 
 function openDropdown() {
-  if (props.disabled) return
+  if (props.disabled || !settingsOverlayActive.value) return
 
   search.value = ''
   emit('open')
@@ -432,6 +440,7 @@ function openDropdown() {
   dropdownShown.value = true
 
   nextTick(async () => {
+    if (!settingsOverlayActive.value || !dropdownShown.value) return
     await refreshDropdownLayout()
     scrollActiveOptionIntoView()
   })
@@ -535,6 +544,7 @@ function moveActiveIndex(offset) {
 
 function scrollActiveOptionIntoView() {
   nextTick(() => {
+    if (!settingsOverlayActive.value || !dropdownShown.value) return
     const visibleIndex = filteredOptions.value.findIndex(option => option.index === activeIndex.value)
     options.value?.[visibleIndex]?.scrollIntoView({ block: 'nearest' })
   })
@@ -544,6 +554,7 @@ function scrollActiveOptionIntoView() {
  * @param {KeyboardEvent} event
  */
 function handleButtonKeydown(event) {
+  if (!settingsOverlayActive.value) return
   // Alt+Arrow is the platform shortcut for opening/closing a select
   if ((event.key === 'ArrowDown' || event.key === 'ArrowUp') && event.altKey) {
     event.preventDefault()
@@ -652,6 +663,7 @@ function selectOffset(offset) {
 }
 
 function selectOption(index) {
+  if (!settingsOverlayActive.value) return
   if (props.disabled) {
     closeDropdown()
     return
@@ -662,7 +674,7 @@ function selectOption(index) {
     emit('change', selectedValue)
   }
   closeDropdown()
-  selectButton.value?.focus()
+  if (settingsOverlayActive.value) selectButton.value?.focus()
 }
 
 function handleOutsidePointerDown(event) {
@@ -727,6 +739,7 @@ function removeDropdownListeners() {
  * @param {Event} event
  */
 function change(event) {
+  if (!settingsOverlayActive.value) return
   const select = event.target
   emit('change', select.value)
   nextTick(() => {

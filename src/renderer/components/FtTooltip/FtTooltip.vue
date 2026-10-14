@@ -15,7 +15,7 @@
     </button>
     <Teleport :to="tooltipTarget">
       <p
-        v-show="visible"
+        v-show="visible && settingsOverlayActive"
         :id="id"
         ref="textRef"
         class="text"
@@ -37,12 +37,17 @@ import { FtIcon } from '@opentubex/icons'
 import { nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef } from 'vue'
 import { getAnchoredPosition, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
 import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewportBounds'
+import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
 
 const buttonRef = useTemplateRef('buttonRef')
 const textRef = useTemplateRef('textRef')
 const tooltipTarget = shallowRef(document.fullscreenElement ?? document.body)
 const tooltipStyle = ref({})
 const visible = ref(false)
+const settingsOverlayActive = useSettingsOverlay(() => {
+  setHovered(false)
+  setFocused(false)
+})
 useAnchoredViewportBounds(buttonRef, textRef, visible)
 const EDGE_MARGIN = 8
 const TOOLTIP_GAP = 16
@@ -57,6 +62,7 @@ let trackingPosition = false
  * @param {boolean} value
  */
 function setHovered(value) {
+  if (value && !settingsOverlayActive.value) return
   hovered = value
   updateVisibility()
 }
@@ -65,6 +71,7 @@ function setHovered(value) {
  * @param {boolean} value
  */
 function setFocused(value) {
+  if (value && !settingsOverlayActive.value) return
   focused = value
   updateVisibility()
 }
@@ -74,7 +81,7 @@ function updateVisibility() {
   if (visible.value) {
     tooltipTarget.value = document.fullscreenElement ?? document.body
     nextTick(() => {
-      if (!visible.value) return
+      if (!settingsOverlayActive.value || !visible.value) return
       positionTooltip()
       startTrackingPosition()
     })

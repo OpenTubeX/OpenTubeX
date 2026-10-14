@@ -1224,6 +1224,14 @@ function releaseMobileContextSheet() {
 const tabOrganizerOpen = ref(false)
 const showAndroidExitPrompt = ref(false)
 const settingsSearchTarget = ref(null)
+watch(() => store.getters.getSettingsWindowSectionRequest, request => {
+  if (request) settingsSearchTarget.value = null
+}, { flush: 'sync' })
+watch(isKeyboardShortcutPromptShown, shown => {
+  if (!shown) return
+  settingsSearchTarget.value = null
+  store.commit('setSettingsWindowSection', null)
+}, { flush: 'sync' })
 const subscriptionAutoRefreshTimers = {
   videos: null,
   shorts: null,
@@ -1261,9 +1269,10 @@ let utilityRoutePreloadId = null
 let utilityRoutePreloadUsesIdleCallback = false
 
 function isSyncSettingsVisible() {
-  return settingsWindowOpen.value && document.querySelector(
+  const section = document.querySelector(
     '.settingsWindow .settingsContent > [data-section="sync"]'
-  ) !== null
+  )
+  return settingsWindowOpen.value && section !== null && section.getClientRects().length > 0
 }
 
 watch([dataReady, () => store.getters.getSyncServerError], ([ready, error]) => {
@@ -3585,17 +3594,20 @@ function handleHardwareKeyboardChange(event) {
 }
 
 function openSettingsView(view) {
+  settingsSearchTarget.value = null
+  store.commit('setSettingsWindowSection', null)
   store.dispatch('showSettingsWindow', view)
 }
 
 function openSettingsSection(section) {
+  settingsSearchTarget.value = null
   store.commit('setSettingsWindowSection', section)
   store.dispatch('showSettingsWindow')
 }
 
 function openSettingsSearchResult(section, match) {
   settingsSearchTarget.value = { section, ...match }
-  store.commit('setSettingsWindowSection', section)
+  store.commit('setSettingsWindowSection', null)
   store.dispatch('showSettingsWindow')
 }
 

@@ -1606,8 +1606,7 @@ test.describe('customizable quick settings', () => {
     })).toContain('127.0.0.1:9050')
 
     await menu.getByRole('button', { name: 'All Settings' }).click()
-    const reopenedAppearance = await goToSettingsSection(page, 'appearance')
-    await reopenedAppearance.getByRole('button', { name: 'Customize quick settings' }).click()
+    await expect(page.locator('.settingsBreadcrumb')).toContainText('Customize quick settings')
     await page.getByRole('button', { name: 'Reset to defaults' }).click()
     await expect(page.locator('.selectedSetting')).toHaveCount(DEFAULT_QUICK_SETTINGS.length)
     await expect(page.locator('.selectedSettings')).toContainText(/Base theme/i)
@@ -1669,8 +1668,8 @@ test.describe('customizable quick settings', () => {
     ))).toEqual(contentFirst)
 
     await menu.getByRole('button', { name: 'All Settings' }).click()
-    const reopenedAppearance = await goToSettingsSection(page, 'appearance')
-    await reopenedAppearance.getByRole('button', { name: 'Customize quick settings' }).click()
+    await expect(page.locator('.settingsBreadcrumb')).toContainText('Customize quick settings')
+    await expect(selectedSettings).toBeVisible()
     await expect.poll(settingIds).toEqual(contentFirst)
   })
 })
