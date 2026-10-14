@@ -10,6 +10,7 @@ import FtSelect from '../FtSelect/FtSelect.vue'
 import SponsorBlockSegmentEditor from '../WatchVideoSponsorBlock/SponsorBlockSegmentEditor.vue'
 import shaka from 'shaka-player'
 import { registerPlugin } from '@capacitor/core'
+import { bindAndroidMediaErrors } from '../../helpers/player/androidMediaErrors'
 import { bindAndroidFullscreen } from '../../helpers/player/androidFullscreen'
 import { bindIosFullscreen } from '../../helpers/player/iosFullscreen'
 import { bindIosNativeCaptions } from '../../helpers/player/iosNativeCaptions'
@@ -11797,9 +11798,13 @@ export default defineComponent({
     // #endregion offline message
 
     // #region setup
+    let unbindAndroidMediaErrors = null
     let disableTwitchTsVideoGap = null
     onMounted(async () => {
       const videoElement = video.value
+      if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
+        unbindAndroidMediaErrors = bindAndroidMediaErrors(videoElement)
+      }
       if (process.env.IS_CAPACITOR) {
         // The Watch view survives video changes, so its fullscreen element can
         // remain mounted while the Shaka player is replaced.
@@ -12100,6 +12105,7 @@ export default defineComponent({
       })
     })
     onUnmounted(() => {
+      unbindAndroidMediaErrors?.()
       clearSabrBackoffTimer()
       clearPreRollTimer()
       clearTimeout(sponsorBlockHighlightLabelTimeout)

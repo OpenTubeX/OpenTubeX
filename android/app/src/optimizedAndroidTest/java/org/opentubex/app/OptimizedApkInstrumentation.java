@@ -245,6 +245,14 @@ public class OptimizedApkInstrumentation extends Instrumentation {
         evaluate(web, "window.optimizedOnlineDescriptor = Object.getOwnPropertyDescriptor(navigator, 'onLine'); " +
             "Object.defineProperty(navigator, 'onLine', {configurable: true, get: () => false}); " +
             "window.dispatchEvent(new Event('offline'))");
+        // Replay a WebView error delivered during loading without a MediaError.
+        // Shaka must still finish loading the new source.
+        evaluate(web, "window.optimizedStaleMediaError = false; " +
+            "window.optimizedLoadStart = event => { const video = event.target; " +
+            "if (!(video instanceof HTMLVideoElement) || !video.src.includes('optimized-apk-demo') || " +
+            "video.error !== null || window.optimizedStaleMediaError) return; " +
+            "window.optimizedStaleMediaError = true; video.dispatchEvent(new Event('error')); }; " +
+            "document.addEventListener('loadstart', window.optimizedLoadStart, true)");
         try {
             JSONObject file = new JSONObject().put("videoId", "optimized-apk-demo")
                 .put("path", fixture.getAbsolutePath()).put("extension", "webm")
@@ -257,6 +265,8 @@ public class OptimizedApkInstrumentation extends Instrumentation {
                 "app.config.globalProperties.$router.push({path: '/watch/optimized-apk-demo', " +
                 "query: {downloadId: '91218'}}); })()");
             await(web, "!!document.querySelector('.ftVideoPlayer .shaka-fullscreen-button')");
+            await(web, "window.optimizedStaleMediaError && " +
+                "document.querySelector('.ftVideoPlayer video')?.readyState >= 2");
             tapCss(web, ".ftVideoPlayer");
             await(web, "getComputedStyle(document.querySelector('.ftVideoPlayer .shaka-fullscreen-button')).visibility === 'visible'");
             String enterLabel = evaluate(web,
@@ -280,6 +290,8 @@ public class OptimizedApkInstrumentation extends Instrumentation {
                 evaluate(web, "document.querySelector('.mobileMiniBarDismiss:not(:disabled), .scrollMiniDismiss:not(:disabled)')?.click()");
                 await(web, "!document.querySelector('.ftVideoPlayer')");
             } finally {
+                evaluate(web, "document.removeEventListener('loadstart', window.optimizedLoadStart, true); " +
+                    "delete window.optimizedLoadStart; delete window.optimizedStaleMediaError");
                 evaluate(web, "if (window.optimizedOnlineDescriptor) { " +
                     "Object.defineProperty(navigator, 'onLine', window.optimizedOnlineDescriptor); " +
                     "} else { delete navigator.onLine; } delete window.optimizedOnlineDescriptor; " +
