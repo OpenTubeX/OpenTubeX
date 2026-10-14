@@ -82,9 +82,11 @@
       @click="handleRefreshWarning"
     />
   </SubscriptionsTabUi>
-  <div
+  <SubscriptionsTabUi
     v-else
     class="newFeed"
+    :only-show-new="true"
+    :track-global-refresh="false"
   />
 </template>
 

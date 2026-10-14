@@ -1635,6 +1635,37 @@ test.describe('large combined new feed', () => {
   ]) {
     test.describe(`mark all seen: ${view}, ${scale}% scale, motion ${reducedMotion}`, () => {
       test.use({ seed: { ...seed, settings: { ...seed.settings, newSubscriptionFeedView: view, uiScale: scale, reducedMotion } } })
+      test('shows the empty message as soon as cards disappear while seen marks are saving', async ({ page }) => {
+        await goTo(page, 'subscriptions')
+        await page.locator('[data-subscription-feed-tab="all"]').click()
+        await expect(page.getByText('New video 0', { exact: true })).toBeVisible()
+
+        // Hold persistence pending to make the gap after the leave animation
+        // deterministic, while still running the real seen-mark action afterward.
+        await page.evaluate(() => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const dispatch = store.dispatch
+          store.dispatch = async function (type, ...args) {
+            if (type === 'markSubscriptionEntriesAsSeen') {
+              store.dispatch = dispatch
+              await new Promise(resolve => { window.__finishSavingSeenMarks = resolve })
+            }
+            return dispatch.call(this, type, ...args)
+          }
+        })
+        try {
+          await page.getByRole('button', { name: 'Mark all as seen' }).click()
+          await expect.poll(() => page.evaluate(() => !!window.__finishSavingSeenMarks)).toBe(true)
+          await expect(page.locator('.newFeed [data-feed-item-key]')).toHaveCount(0)
+          await expect(page.getByText('There is no new content.', { exact: true })).toBeVisible({ timeout: 1000 })
+          await expect(page.getByRole('button', { name: 'Mark all as seen' })).toBeDisabled()
+        } finally {
+          await page.evaluate(() => window.__finishSavingSeenMarks?.())
+        }
+        await expect(page.getByRole('button', { name: 'Mark all as seen' })).toHaveCount(0)
+        await expect(page.getByText('There is no new content.', { exact: true })).toBeVisible()
+      })
+
       test('returns to the top and clears the New feed without per-card layout work', async ({ page }) => {
         await goTo(page, 'subscriptions')
         await page.locator('[data-subscription-feed-tab="all"]').click()
