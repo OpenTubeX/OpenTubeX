@@ -811,6 +811,7 @@ function runApp() {
   // window is restored on the next launch) or cleared (so a window that was
   // manually closed while the app keeps running is forgotten).
   let isQuitting = false
+  let relaunchRequested = false
   const closedWindows = new ClosedWindowHistory()
 
   async function reopenClosedWindow() {
@@ -1987,6 +1988,26 @@ function runApp() {
 
   if (process.env.NODE_ENV !== 'development') {
     app.on('second-instance', async (_, commandLine, __) => {
+      // Keep the profile locked until cleanup finishes. Opening a window now
+      // would lose the launch when the pending quit closes it again.
+      // AppImage cannot use Electron's relaunch on its FUSE mount.
+      if (isQuitting && !process.env.APPIMAGE) {
+        // Retry scheduling once; later launch requests can retry if both fail.
+        for (let attempt = 0; attempt < 2 && !relaunchRequested; attempt++) {
+          try {
+            const scheduled = app.relaunch({
+              args: commandLine.slice(1),
+              execPath: process.env.PORTABLE_EXECUTABLE_FILE || process.execPath
+            })
+            if (scheduled === false) throw new Error('Electron could not schedule the relaunch')
+            relaunchRequested = true
+          } catch (error) {
+            console.error('Failed to schedule app relaunch', error)
+          }
+        }
+        return
+      }
+
       // Someone tried to run a second instance
       if (typeof commandLine !== 'undefined') {
         const newStartupUrl = getLinkUrl(commandLine)
@@ -4032,10 +4053,11 @@ function runApp() {
       // If it's a Windows portable, PORTABLE_EXECUTABLE_FILE will
       // hold a value.
       // Otherwise, `process.execPath` should be used instead.
-      app.relaunch({
+      const scheduled = app.relaunch({
         args: process.argv.slice(1),
         execPath: PORTABLE_EXECUTABLE_FILE || process.execPath
       })
+      if (scheduled !== false) relaunchRequested = true
     } else {
       // If it's an AppImage, things must be done the "hard way"
       // `app.relaunch` doesn't work because of FUSE limitations
