@@ -16,6 +16,22 @@ const sourceDirUrl = new URL('../../src/', import.meta.url)
 
 const locale = loadYaml(await readFile(localeUrl, 'utf8'))
 
+test('palette result counts announce the actual number in every active locale', async () => {
+  const locales = JSON.parse(await readFile(new URL('../../static/locales/activeLocales.json', import.meta.url), 'utf8'))
+  const rules = createPluralRules(locales)
+  for (const language of locales) {
+    const human = loadYaml(await readFile(new URL(`../../static/locales/${language}.yaml`, import.meta.url), 'utf8'))
+    const overlay = ['en-US', 'de-DE'].includes(language) ? {} : loadYaml(await readFile(new URL(`../../static/locales/ai/${language}.yaml`, import.meta.url), 'utf8'))
+    const message = human.CommandPalette?.['Result Count'] || overlay.CommandPalette['Result Count']
+    const forms = message.split(' | ')
+    for (const count of [...Array.from({ length: 101 }, (_, index) => index), 1000000]) {
+      const choice = rules[language](count, forms.length, () => assert.fail(`Incomplete plural forms: ${language}`))
+      const rendered = forms[choice].replaceAll('{count}', String(count))
+      assert.equal(rendered.match(/\d+/g)?.at(-1), String(count), `${language}: ${count} (${rendered})`)
+    }
+  }
+})
+
 /**
  * Collects the paths of all messages that declare vue-i18n plural forms ("singular | plural").
  * @param {object} messages

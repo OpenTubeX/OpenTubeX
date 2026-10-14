@@ -1897,11 +1897,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Палітра команд
   Open: Відкрити палітру команд
-  Search Label: Пошук команд
-  Search Placeholder: Пошук команд і налаштувань…
-  Results: Команди
-  No Results: Відповідних команд немає
-  Result Count: Знайдено 1 команду | Знайдено {count} команди | Знайдено {count} команд
+  Search Label: "Пошук команд, налаштувань і локальних відео"
+  Search Placeholder: Пошук команд, налаштувань і локальних відео…
+  Results: "Результати"
+  No Results: "Відповідних результатів немає"
+  Result Count: "Результати: {count} | Результати: {count} | Результати: {count}"
   Move: Перемістити
   Run: Виконати
   Keys:
@@ -1916,6 +1916,7 @@ CommandPalette:
     App: Програма
     Navigation: Навігація
     Tabs: Вкладки
+    Local Videos: Локальні відео
   Unavailable:
     Current Page: Ви вже на цій сторінці
     No History: У цьому напрямку немає сторінки

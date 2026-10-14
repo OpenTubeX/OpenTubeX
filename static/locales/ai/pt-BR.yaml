@@ -1856,11 +1856,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Paleta de comandos
   Open: Abrir paleta de comandos
-  Search Label: Pesquisar comandos
-  Search Placeholder: Pesquisar comandos e configurações…
-  Results: Comandos
-  No Results: Nenhum comando correspondente
-  Result Count: 1 comando encontrado | {count} comandos encontrados | {count} comandos encontrados
+  Search Label: "Pesquisar comandos, configurações e vídeos locais"
+  Search Placeholder: Pesquisar comandos, configurações e vídeos locais…
+  Results: "Resultados"
+  No Results: "Nenhum resultado correspondente"
+  Result Count: "Resultados: {count} | Resultados: {count} | Resultados: {count}"
   Move: Mover
   Run: Executar
   Keys:
@@ -1875,6 +1875,7 @@ CommandPalette:
     App: Aplicativo
     Navigation: Navegação
     Tabs: Guias
+    Local Videos: Vídeos locais
   Unavailable:
     Current Page: Já se encontra nesta página
     No History: Não há nenhuma página nesta direção

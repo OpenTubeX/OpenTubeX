@@ -1861,11 +1861,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Paleta príkazov
   Open: Otvoriť paletu príkazov
-  Search Label: Hľadať príkazy
-  Search Placeholder: Hľadať príkazy a nastavenia…
-  Results: Príkazy
-  No Results: Žiadne zodpovedajúce príkazy
-  Result Count: Našiel sa 1 príkaz | Našli sa {count} príkazy | Našlo sa {count} príkazov
+  Search Label: "Hľadať príkazy, nastavenia a miestne videá"
+  Search Placeholder: Hľadať príkazy, nastavenia a miestne videá…
+  Results: "Výsledky"
+  No Results: "Žiadne zodpovedajúce výsledky"
+  Result Count: "Výsledky: {count} | Výsledky: {count} | Výsledky: {count}"
   Move: Presunúť
   Run: Spustiť
   Keys:
@@ -1880,6 +1880,7 @@ CommandPalette:
     App: Aplikácia
     Navigation: Navigácia
     Tabs: Karty
+    Local Videos: Miestne videá
   Unavailable:
     Current Page: Táto stránka je už otvorená
     No History: V tomto smere nie je žiadna stránka

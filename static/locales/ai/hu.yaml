@@ -1854,11 +1854,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Parancspaletta
   Open: Parancspaletta megnyitása
-  Search Label: Parancsok keresése
-  Search Placeholder: Keresés a parancsok és beállítások között…
-  Results: Parancsok
-  No Results: Nincs megfelelő parancs
-  Result Count: 1 parancs található | {count} parancs található
+  Search Label: "Parancsok, beállítások és helyi videók keresése"
+  Search Placeholder: Parancsok, beállítások és helyi videók keresése…
+  Results: "Találatok"
+  No Results: "Nincs megfelelő találat"
+  Result Count: "Találatok: {count} | Találatok: {count}"
   Move: Mozgatás
   Run: Futtatás
   Keys:
@@ -1873,6 +1873,7 @@ CommandPalette:
     App: Alkalmazás
     Navigation: Navigáció
     Tabs: Lapok
+    Local Videos: Helyi videók
   Unavailable:
     Current Page: Már ezen az oldalon van
     No History: Nincs oldal ebben az irányban

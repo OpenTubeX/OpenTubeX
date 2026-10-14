@@ -2357,11 +2357,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Komandų paletė
   Open: Atverti komandų paletę
-  Search Label: Ieškoti komandų
-  Search Placeholder: Ieškoti komandų ir nustatymų…
-  Results: Komandos
-  No Results: Atitinkančių komandų nėra
-  Result Count: Rasta 1 komanda | Rastos {count} komandos | Rasta {count} komandų
+  Search Label: "Ieškoti komandų, nustatymų ir vietinių vaizdo įrašų"
+  Search Placeholder: Ieškoti komandų, nustatymų ir vietinių vaizdo įrašų…
+  Results: "Rezultatai"
+  No Results: "Atitinkančių rezultatų nėra"
+  Result Count: "Rezultatai: {count} | Rezultatai: {count} | Rezultatai: {count}"
   Move: Judėti
   Run: Vykdyti
   Keys:
@@ -2376,6 +2376,7 @@ CommandPalette:
     App: Programa
     Navigation: Naršymas
     Tabs: Kortelės
+    Local Videos: Vietiniai vaizdo įrašai
   Unavailable:
     Current Page: Šis puslapis jau atvertas
     No History: Šia kryptimi nėra puslapio

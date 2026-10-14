@@ -1853,11 +1853,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Tavolozza dei comandi
   Open: Apri tavolozza dei comandi
-  Search Label: Cerca comandi
-  Search Placeholder: Cerca comandi e impostazioni…
-  Results: Comandi
-  No Results: Nessun comando corrispondente
-  Result Count: 1 comando trovato | {count} comandi trovati | {count} comandi trovati
+  Search Label: "Cerca comandi, impostazioni e video locali"
+  Search Placeholder: Cerca comandi, impostazioni e video locali…
+  Results: "Risultati"
+  No Results: "Nessun risultato corrispondente"
+  Result Count: "Risultati: {count} | Risultati: {count} | Risultati: {count}"
   Move: Sposta
   Run: Esegui
   Keys:
@@ -1872,6 +1872,7 @@ CommandPalette:
     App: App
     Navigation: Navigazione
     Tabs: Schede
+    Local Videos: Video locali
   Unavailable:
     Current Page: Questa pagina è già aperta
     No History: Nessuna pagina in questa direzione

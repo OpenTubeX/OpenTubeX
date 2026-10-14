@@ -1894,11 +1894,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Bảng lệnh
   Open: Mở bảng lệnh
-  Search Label: Tìm lệnh
-  Search Placeholder: Tìm lệnh và cài đặt…
-  Results: Lệnh
-  No Results: Không có lệnh phù hợp
-  Result Count: 'Tìm thấy {count} lệnh'
+  Search Label: "Tìm lệnh, cài đặt và video cục bộ"
+  Search Placeholder: Tìm lệnh, cài đặt và video cục bộ…
+  Results: "Kết quả"
+  No Results: "Không có kết quả phù hợp"
+  Result Count: "Kết quả: {count}"
   Move: Di chuyển
   Run: Chạy
   Keys:
@@ -1913,6 +1913,7 @@ CommandPalette:
     App: Ứng dụng
     Navigation: Điều hướng
     Tabs: Thẻ
+    Local Videos: Video cục bộ
   Unavailable:
     Current Page: Đã ở trang này
     No History: Không có trang theo hướng này

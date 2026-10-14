@@ -53,6 +53,7 @@ export function createCommandPaletteRegistry(context) {
     locale,
     routePath,
     store,
+    downloads,
     isElectron,
     isCapacitor,
     phoneLayout,
@@ -208,7 +209,7 @@ export function createCommandPaletteRegistry(context) {
   })
   addProfileCommands(commands, { t, locale, groups, store, navigate })
   addPlaylistCommands(commands, { t, groups, store, navigate })
-  addDownloadCommands(commands, { t, groups, store, isElectron })
+  addDownloadCommands(commands, { t, groups, downloads, isElectron })
   addPlaybackCommands(commands, {
     isCapacitor,
     t,
@@ -432,10 +433,10 @@ function addPlaylistCommands(commands, { t, groups, store, navigate }) {
   }
 }
 
-function addDownloadCommands(commands, { t, groups, store, isElectron }) {
+function addDownloadCommands(commands, { t, groups, downloads, isElectron }) {
   if (!isElectron && !process.env.IS_CAPACITOR) return
   const activeStatuses = new Set(['preparing', 'downloading', 'processing'])
-  for (const download of Object.values(store.getters.getYtDlpDownloads)) {
+  for (const download of downloads) {
     commands.push(command(`downloads.cancel.${download.id}`, t('CommandPalette.Cancel Download', {
       title: download.title || download.id
     }), groups.downloads, {

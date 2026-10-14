@@ -1882,11 +1882,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Παλέτα εντολών
   Open: Άνοιγμα παλέτας εντολών
-  Search Label: Αναζήτηση εντολών
-  Search Placeholder: Αναζήτηση εντολών και ρυθμίσεων…
-  Results: Εντολές
-  No Results: Δεν βρέθηκαν αντίστοιχες εντολές
-  Result Count: Βρέθηκε 1 εντολή | Βρέθηκαν {count} εντολές
+  Search Label: "Αναζήτηση εντολών, ρυθμίσεων και τοπικών βίντεο"
+  Search Placeholder: Αναζήτηση εντολών, ρυθμίσεων και τοπικών βίντεο…
+  Results: "Αποτελέσματα"
+  No Results: "Δεν βρέθηκαν αντίστοιχα αποτελέσματα"
+  Result Count: "Αποτελέσματα: {count} | Αποτελέσματα: {count}"
   Move: Μετακίνηση
   Run: Εκτέλεση
   Keys:
@@ -1901,6 +1901,7 @@ CommandPalette:
     App: Εφαρμογή
     Navigation: Πλοήγηση
     Tabs: Καρτέλες
+    Local Videos: Τοπικά βίντεο
   Unavailable:
     Current Page: Βρίσκεστε ήδη σε αυτήν τη σελίδα
     No History: Δεν υπάρχει σελίδα προς αυτήν την κατεύθυνση

@@ -1041,11 +1041,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Paleta poleceń
   Open: Otwórz paletę poleceń
-  Search Label: Wyszukaj polecenia
-  Search Placeholder: Wyszukaj polecenia i ustawienia…
-  Results: Polecenia
-  No Results: Brak pasujących poleceń
-  Result Count: 'Znaleziono 1 polecenie | Znaleziono {count} polecenia | Znaleziono {count} poleceń'
+  Search Label: "Szukaj poleceń, ustawień i lokalnych filmów"
+  Search Placeholder: Szukaj poleceń, ustawień i lokalnych filmów…
+  Results: "Wyniki"
+  No Results: "Brak pasujących wyników"
+  Result Count: "Znaleziono {count} wynik | Znaleziono {count} wyniki | Znaleziono {count} wyników"
   Move: Przenieś
   Run: Uruchom
   Keys:
@@ -1060,6 +1060,7 @@ CommandPalette:
     App: Aplikacja
     Navigation: Nawigacja
     Tabs: Karty
+    Local Videos: Lokalne filmy
   Unavailable:
     Current Page: Ta strona jest już otwarta
     No History: Brak strony w tym kierunku

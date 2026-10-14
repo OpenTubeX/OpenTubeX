@@ -1856,11 +1856,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Käsupalett
   Open: Ava käsupalett
-  Search Label: Otsi käske
-  Search Placeholder: Otsi käske ja seadeid…
-  Results: Käsud
-  No Results: Sobivaid käske ei leitud
-  Result Count: Leiti 1 käsk | Leiti {count} käsku
+  Search Label: "Otsi käske, seadeid ja kohalikke videoid"
+  Search Placeholder: Otsi käske, seadeid ja kohalikke videoid…
+  Results: "Tulemused"
+  No Results: "Sobivaid tulemusi ei leitud"
+  Result Count: "Tulemused: {count} | Tulemused: {count}"
   Move: Liigu
   Run: Käivita
   Keys:
@@ -1875,6 +1875,7 @@ CommandPalette:
     App: Rakendus
     Navigation: Navigeerimine
     Tabs: Vahelehed
+    Local Videos: Kohalikud videod
   Unavailable:
     Current Page: See leht on juba avatud
     No History: Selles suunas pole ühtegi lehte

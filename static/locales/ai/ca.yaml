@@ -2509,11 +2509,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Paleta d'ordres
   Open: Obre la paleta d'ordres
-  Search Label: Cerca ordres
-  Search Placeholder: Cerca ordres i configuració…
-  Results: Ordres
-  No Results: Cap ordre coincideix amb la cerca
-  Result Count: S'ha trobat 1 ordre | S'han trobat {count} ordres | S'han trobat {count} ordres
+  Search Label: "Cerca ordres, configuració i vídeos locals"
+  Search Placeholder: Cerca ordres, configuració i vídeos locals…
+  Results: "Resultats"
+  No Results: "Cap resultat coincideix amb la cerca"
+  Result Count: "Resultats: {count} | Resultats: {count} | Resultats: {count}"
   Move: Mou
   Run: Executa
   Keys:
@@ -2528,6 +2528,7 @@ CommandPalette:
     App: Aplicació
     Navigation: Navegació
     Tabs: Pestanyes
+    Local Videos: Vídeos locals
   Unavailable:
     Current Page: Ja sou en aquesta pàgina
     No History: No hi ha cap pàgina en aquesta direcció

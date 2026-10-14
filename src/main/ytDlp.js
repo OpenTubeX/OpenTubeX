@@ -3298,13 +3298,15 @@ function getDownloadFiles(record) {
  * through the custom protocol.
  * @param {number} id
  * @param {string} videoId
+ * @param {string | null} [filePath] an exact path from this download's recorded files
  */
-export async function getYtDlpDownloadFile(id, videoId) {
-  if (!Number.isInteger(id) || !ID_REGEX.test(videoId)) return null
+export async function getYtDlpDownloadFile(id, videoId, filePath = null) {
+  if (!Number.isInteger(id) || !ID_REGEX.test(videoId) || (filePath !== null && typeof filePath !== 'string')) return null
   await loadDownloadRecords()
   const record = downloadRecords.get(id)
   if (record?.status !== 'completed' || !['video', 'audio'].includes(record.mode)) return null
-  const file = getDownloadFiles(record).find(file => file.videoId === videoId && existsSync(file.path))
+  const file = getDownloadFiles(record).find(file => file.videoId === videoId &&
+    (filePath === null || file.path === filePath) && existsSync(file.path))
   return file === undefined ? null : { path: file.path, mode: record.mode }
 }
 

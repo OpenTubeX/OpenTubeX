@@ -1,7 +1,19 @@
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import test from 'node:test'
 
-import { findSubsequenceIndexes, fuzzyWordScore } from '../../src/renderer/helpers/textSearch.js'
+import { findSubsequenceIndexes, fuzzyWordScore, normalizeSearchText } from '../../src/renderer/helpers/textSearch.js'
+
+test('fast search normalization preserves Unicode casing in every active locale', () => {
+  const locales = JSON.parse(readFileSync(new URL('../../static/locales/activeLocales.json', import.meta.url), 'utf8'))
+  const samples = ['  Résumé  VIDÉO ', 'Straße ÜBER GROẞARTIG', 'ΟΣ ΟΣΟΣ ΣΑΣ', 'I İ ı i', 'I\u0301 J\u0300', 'K ﬃ ÅÄÖ', '日本語の字幕 😀']
+  for (const locale of locales) {
+    for (const text of samples) {
+      const expected = text.toLocaleLowerCase(locale).normalize('NFKD').replaceAll(/\p{Mark}/gu, '').replaceAll(/\s+/g, ' ').trim()
+      assert.equal(normalizeSearchText(text, locale), expected, `${locale}: ${text}`)
+    }
+  }
+})
 
 function referenceDistance (first, second) {
   const rows = Array.from({ length: first.length + 1 }, (_, row) => Array(second.length + 1).fill(row))

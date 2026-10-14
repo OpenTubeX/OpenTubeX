@@ -1860,11 +1860,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: 命令選擇區
   Open: 開啟命令選擇區
-  Search Label: 搜尋命令
-  Search Placeholder: 搜尋命令與設定…
-  Results: 命令
-  No Results: 沒有相符的命令
-  Result Count: '找到 {count} 個命令'
+  Search Label: "搜尋命令、設定和本機影片"
+  Search Placeholder: 搜尋命令、設定和本機影片…
+  Results: "搜尋結果"
+  No Results: "沒有相符的搜尋結果"
+  Result Count: "搜尋結果: {count}"
   Move: 移動
   Run: 執行
   Keys:
@@ -1879,6 +1879,7 @@ CommandPalette:
     App: 應用程式
     Navigation: 瀏覽
     Tabs: 分頁
+    Local Videos: 本機影片
   Unavailable:
     Current Page: 已在此頁面
     No History: 此方向沒有其他頁面

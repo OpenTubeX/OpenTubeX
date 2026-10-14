@@ -1904,11 +1904,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Paletă de comenzi
   Open: Deschide paleta de comenzi
-  Search Label: Caută comenzi
-  Search Placeholder: Caută comenzi și setări…
-  Results: Comenzi
-  No Results: Nicio comandă corespunzătoare
-  Result Count: 1 comandă găsită | {count} comenzi găsite | {count} de comenzi găsite
+  Search Label: "Caută comenzi, setări și videoclipuri locale"
+  Search Placeholder: Caută comenzi, setări și videoclipuri locale…
+  Results: "Rezultate"
+  No Results: "Niciun rezultat corespunzător"
+  Result Count: "Rezultate: {count} | Rezultate: {count} | Rezultate: {count}"
   Move: Mută
   Run: Rulează
   Keys:
@@ -1923,6 +1923,7 @@ CommandPalette:
     App: Aplicație
     Navigation: Navigare
     Tabs: File
+    Local Videos: Videoclipuri locale
   Unavailable:
     Current Page: Sunteți deja pe această pagină
     No History: Nicio pagină în această direcție

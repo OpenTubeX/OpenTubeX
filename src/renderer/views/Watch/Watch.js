@@ -404,6 +404,7 @@ export default defineComponent({
       onlinePlaybackSource: null,
       playbackSourceKey: 0,
       localPlaybackDownloadId: null,
+      localPlaybackFilePath: null,
       sabrPlaybackLoaded: false,
       /** @type {{
        *   manifestSrc: string | null,
@@ -609,7 +610,7 @@ export default defineComponent({
           thumbnail: download.videoId === file.videoId || (download.retryPayload?.externalUrl && download.files.length === 1)
             ? download.thumbnail
             : '',
-          route: downloadWatchRoute(download, file.videoId)
+          route: downloadWatchRoute(download, file.videoId, file.path)
         })))
         .filter(video => {
           if (!video.videoId || seen.has(video.videoId)) return false
@@ -1383,7 +1384,8 @@ export default defineComponent({
       ) {
         const downloadId = Number(this.tabRoute.query.downloadId)
         if (Number.isInteger(downloadId)) {
-          if (downloadId !== this.localPlaybackDownloadId &&
+          const filePath = this.tabRoute.query.downloadFilePath ?? null
+          if ((downloadId !== this.localPlaybackDownloadId || filePath !== this.localPlaybackFilePath) &&
             !this.applyDownloadedPlaybackSource(downloadId)) {
             await this.reloadView()
           }
@@ -2451,6 +2453,7 @@ export default defineComponent({
       this.activePlaybackEngineVersion = null
       this.onlinePlaybackSource = null
       this.localPlaybackDownloadId = null
+      this.localPlaybackFilePath = null
       this.sabrPlaybackLoaded = false
       this.builtInPlaybackSource = null
       this.ytDlpStreamsPending = false
@@ -2497,12 +2500,13 @@ export default defineComponent({
      * Keeps the normal online metadata while replacing its streaming formats
      * with a completed file selected from the Downloads page.
      */
-    applyDownloadedPlaybackSource: function (downloadId = Number(this.tabRoute.query.downloadId)) {
-      if (!Number.isInteger(downloadId)) return false
+    applyDownloadedPlaybackSource: function (downloadId = Number(this.tabRoute.query.downloadId), filePath = this.tabRoute.query.downloadFilePath ?? null) {
+      if (!Number.isInteger(downloadId) || (filePath !== null && typeof filePath !== 'string')) return false
 
       const download = this.$store.getters.getYtDlpDownloads[downloadId]
       const file = (download?.status === 'completed' || (process.env.IS_CAPACITOR && download?.status === 'failed')) && ['video', 'audio'].includes(download.mode)
-        ? download.files?.find(file => file.videoId === this.videoId && file.available !== false)
+        ? download.files?.find(file => file.videoId === this.videoId && file.available !== false &&
+            (filePath === null || file.path === filePath))
         : null
       if (!file) return false
 
@@ -2518,7 +2522,7 @@ export default defineComponent({
       this.sabrData = null
       const url = process.env.IS_CAPACITOR
         ? Capacitor.convertFileSrc(file.path)
-        : `downloadmedia://file/${downloadId}/${this.videoId}`
+        : `downloadmedia://file/${downloadId}/${this.videoId}${filePath === null ? '' : `?path=${encodeURIComponent(file.path)}`}`
       if (download.mode === 'audio') {
         this.manifestSrc = url
         this.manifestMimeType = mimeType
@@ -2547,10 +2551,17 @@ export default defineComponent({
         this.videoLengthSeconds = file.duration
       }
       this.thumbnail = download.thumbnail || this.thumbnail
-      if (this.errorMessage) {
+      const useFileMetadata = this.downloadedPlaybackWithoutMetadata && filePath !== null
+      if (this.errorMessage || useFileMetadata) {
         const fileName = file.path.split(/[/\\]/).at(-1)?.replace(/\.[^.]+$/, '') ?? this.videoId
         this.videoTitle = file.title || (download.videoId === this.videoId ? download.title : '') || fileName
         this.hasResolvedVideoTitle = true
+        if (useFileMetadata) {
+          this.channelId = file.authorId || this.channelId || this.historyEntry?.authorId || ''
+          this.channelName = file.author || this.channelName || this.historyEntry?.author || ''
+          this.initializePlaybackRate()
+          this.initializeVideoQuality()
+        }
         this.errorMessage = null
         this.isLoading = false
         this.updateTitle()
@@ -2560,6 +2571,7 @@ export default defineComponent({
       this.activePlaybackEngineVersion = null
       this.localFilePlayback = true
       this.localPlaybackDownloadId = downloadId
+      this.localPlaybackFilePath = filePath
       this.playbackSourceKey++
       return file
     },
@@ -2607,6 +2619,7 @@ export default defineComponent({
       this.activePlaybackEngineVersion = source.activePlaybackEngineVersion
       this.localFilePlayback = false
       this.localPlaybackDownloadId = null
+      this.localPlaybackFilePath = null
       this.playbackSourceKey++
       return true
     },
@@ -2614,6 +2627,7 @@ export default defineComponent({
     playbackSourceRouteBase: function (fullPath) {
       const url = new URL(fullPath, 'https://opentubex.invalid')
       url.searchParams.delete('downloadId')
+      url.searchParams.delete('downloadFilePath')
       return `${url.pathname}${url.search}${url.hash}`
     },
 
@@ -2625,6 +2639,7 @@ export default defineComponent({
 
     replacePlaybackSourceRoute: async function (downloadId = null) {
       const query = { ...this.tabRoute.query }
+      delete query.downloadFilePath
       if (downloadId === null) {
         delete query.downloadId
       } else {
@@ -5240,6 +5255,7 @@ export default defineComponent({
 
       const query = { ...this.tabRoute.query }
       delete query.downloadId
+      delete query.downloadFilePath
       if (playbackPosition > 0) query.oneTimeTimestamp = playbackPosition
       await this.tabRouter.replace({ path: this.tabRoute.path, query })
     },
@@ -5248,7 +5264,7 @@ export default defineComponent({
       if (!Number.isInteger(downloadId) ||
         !this.localPlaybackDownloads.some(download => download.id === downloadId)) return
 
-      if (!this.applyDownloadedPlaybackSource(downloadId)) return
+      if (!this.applyDownloadedPlaybackSource(downloadId, null)) return
 
       await this.replacePlaybackSourceRoute(downloadId)
     },

@@ -20,6 +20,7 @@ for (const supported of [false, true]) {
   test(`command palette tray minimize follows KWin capability: ${supported}`, () => {
     const commands = createRegistry({
       isElectron: true,
+      downloads: [],
       isCapacitor: false,
       isLinuxWayland: true,
       supportsAutoPictureInPictureMinimize: supported,

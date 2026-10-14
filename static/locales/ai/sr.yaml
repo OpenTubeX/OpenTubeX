@@ -1932,11 +1932,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Палета команди
   Open: Отвори палету команди
-  Search Label: Претражи команде
-  Search Placeholder: Претражи команде и подешавања…
-  Results: Команде
-  No Results: Нема одговарајућих команди
-  Result Count: Пронађена је 1 команда | Пронађене су {count} команде | Пронађено је {count} команди
+  Search Label: "Претражи команде, подешавања и локалне видео-снимке"
+  Search Placeholder: Претражи команде, подешавања и локалне видео-снимке…
+  Results: "Резултати"
+  No Results: "Нема одговарајућих резултата"
+  Result Count: "Резултати: {count} | Резултати: {count} | Резултати: {count}"
   Move: Премести
   Run: Покрени
   Keys:
@@ -1951,6 +1951,7 @@ CommandPalette:
     App: Апликација
     Navigation: Кретање
     Tabs: Картице
+    Local Videos: Локални видео-снимци
   Unavailable:
     Current Page: Већ сте на овој страници
     No History: Нема странице у овом смеру

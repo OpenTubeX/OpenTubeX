@@ -110,6 +110,7 @@
     <FtCommandPalette
       v-if="commandPaletteOpen"
       :commands="commandPaletteCommands"
+      :video-sources="commandPaletteVideoSources"
       :show-shortcuts="hardwareKeyboardAttached"
       @close="closeCommandPalette"
     />
@@ -557,6 +558,7 @@ import '@fontsource-variable/manrope'
 import '@fontsource-variable/plus-jakarta-sans'
 import FtRetryImage from './components/FtRetryImage.vue'
 import { initializeCapacitorYtDlp, ytDlp } from './helpers/ytDlp'
+import { playDownloadedFile, refreshDownloadRecords } from './helpers/downloadPlayback'
 import { supportsYtDlp } from './helpers/ytDlpCapabilities'
 import { parseAutomaticDownloadRules } from './helpers/automaticDownloadRules'
 import { isAppHidden, setAndroidAppActive, setAndroidAppVisible } from './helpers/appVisibility.js'
@@ -687,6 +689,7 @@ import { translateWindowTitle } from './helpers/strings'
 import { formatTabTitle } from './tabs/tabTitle'
 import { normalizeScrollbarThumbWidth } from './constants/scrollbar'
 import { getAppFontFamily } from './helpers/appFont'
+import { canMarkHistoryEntryAsWatched } from './helpers/history'
 import { setupPhoneViewport } from './helpers/phoneViewport'
 import { createCapacitorUiScale } from './helpers/capacitorUiScale'
 import { usesCapacitorTabletLayout } from './helpers/capacitorLayout'
@@ -3384,12 +3387,39 @@ watch(outlinesHidden, hidden => {
 }, { flush: 'sync', immediate: true })
 
 const phoneLayout = usePhoneLayout()
+const commandPaletteDownloads = computed(previous => {
+  const downloads = Object.values(store.getters.getYtDlpDownloads).map(({ id, title, status }) => ({ id, title, status }))
+  return previous?.length === downloads.length && downloads.every((download, index) => (
+    download.id === previous[index].id && download.title === previous[index].title && download.status === previous[index].status
+  ))
+    ? previous
+    : downloads
+})
+const commandPaletteVideoSources = computed(() => ({
+  history: store.getters.getHistoryCacheSorted,
+  saveVideoHistoryWithLastViewedPlaylist: store.getters.getSaveVideoHistoryWithLastViewedPlaylist,
+  playlists: store.getters.getAllPlaylists,
+  downloads: store.getters.getYtDlpDownloads,
+  queue: store.getters.getWatchQueue,
+  group: t('CommandPalette.Groups.Local Videos'),
+  sources: {
+    history: t('History.History'),
+    playlists: t('Playlists'),
+    downloads: t('Settings.Download Settings.Download Settings'),
+    queue: t('Video.Queue'),
+  },
+  playLibraryVideo: playLibraryVideoFromCommandPalette,
+  playDownloadedVideo: playDownloadedVideoFromCommandPalette,
+  playQueuedVideo: playQueuedVideoFromCommandPalette,
+  removeQueuedVideo: id => store.commit('removeVideoFromWatchQueue', id),
+}))
 const commandPaletteCommands = computed(() => createCommandPaletteRegistry({
   t,
   tm,
   locale: locale.value,
   routePath: route.path,
   store,
+  downloads: commandPaletteDownloads.value,
   isElectron,
   isCapacitor,
   phoneLayout: phoneLayout.value,
@@ -3438,6 +3468,57 @@ function navigateFromCommandPalette(location) {
     return navigation.push(presentedTabId.value, location)
   }
   return router.push(location)
+}
+
+function playLibraryVideoFromCommandPalette(video, location) {
+  if (!isElectron || store.getters.getExternalPlayer === '' || store.getters.getDefaultViewingMode !== 'external_player') {
+    return navigateFromCommandPalette(location)
+  }
+  const history = store.getters.getHistoryCacheById[video.videoId]
+  const saveProgress = ['auto', 'semi-auto'].includes(store.getters.getWatchedProgressSavingMode)
+  tabMediaCoordinator.dispatchAction('pause', {}, presentedTabId.value)
+  window.ftElectron.openInExternalPlayer({
+    videoId: video.videoId,
+    // Palette results have no position within a remote playlist.
+    playlistId: null,
+    startTime: saveProgress ? history?.watchProgress ?? 0 : 0,
+    playbackRate: store.getters.getDefaultPlayback,
+  })
+  if (store.getters.getRememberHistory && canMarkHistoryEntryAsWatched(video)) {
+    store.dispatch('updateHistory', {
+      ...video,
+      ...history,
+      watchProgress: history?.watchProgress ?? 0,
+      isWatched: true,
+      timeWatched: history?.timeWatched ?? Date.now(),
+      type: 'video',
+    })
+  }
+}
+
+function playQueuedVideoFromCommandPalette(location) {
+  const currentRoute = usesLogicalTabs ? store.getters.getTabById(presentedTabId.value)?.route : route
+  const withoutTimestamp = fullPath => {
+    const url = new URL(fullPath, 'https://opentubex.invalid')
+    url.searchParams.delete('timestamp')
+    return `${url.pathname}${url.search}${url.hash}`
+  }
+  if (currentRoute && withoutTimestamp(router.resolve(location).fullPath) === withoutTimestamp(currentRoute.fullPath)) {
+    const mediaTabId = usesLogicalTabs ? presentedTabId.value : 'web'
+    tabMediaCoordinator.dispatchAction('seekto', { seekTime: 0 }, mediaTabId)
+    tabMediaCoordinator.dispatchAction('play', {}, mediaTabId)
+    return
+  }
+  return navigateFromCommandPalette(location)
+}
+
+function playDownloadedVideoFromCommandPalette(id, file) {
+  return playDownloadedFile(id, file, {
+    refreshDownloads: () => refreshDownloadRecords(ytDlp, store),
+    playNative: (id, path) => ytDlp.ytDlpPlayDownload(id, path),
+    navigate: navigateFromCommandPalette,
+    fileNotFound: () => showToast({ message: t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] }),
+  })
 }
 
 function goHistoryFromCommandPalette(offset) {

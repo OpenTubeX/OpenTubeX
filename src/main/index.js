@@ -2380,7 +2380,7 @@ function runApp() {
         return new Response(null, { status: 400 })
       }
 
-      const file = await getYtDlpDownloadFile(Number(rawId), videoId ?? '')
+      const file = await getYtDlpDownloadFile(Number(rawId), videoId ?? '', url.searchParams.get('path'))
       if (file === null) return new Response(null, { status: 404 })
 
       let fileSize

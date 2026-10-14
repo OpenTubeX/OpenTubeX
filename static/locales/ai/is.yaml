@@ -1880,11 +1880,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Skipanaspjald
   Open: Opna skipanaspjald
-  Search Label: Leita að skipunum
-  Search Placeholder: Leita í skipunum og stillingum…
-  Results: Skipanir
-  No Results: Engar samsvarandi skipanir
-  Result Count: 1 skipun fannst | {count} skipanir fundust
+  Search Label: "Leita að skipunum, stillingum og staðbundnum myndskeiðum"
+  Search Placeholder: Leita að skipunum, stillingum og staðbundnum myndskeiðum…
+  Results: "Niðurstöður"
+  No Results: "Engar samsvarandi niðurstöður"
+  Result Count: "Niðurstöður: {count} | Niðurstöður: {count}"
   Move: Færa
   Run: Keyra
   Keys:
@@ -1899,6 +1899,7 @@ CommandPalette:
     App: Forrit
     Navigation: Flakk
     Tabs: Flipar
+    Local Videos: Staðbundin myndskeið
   Unavailable:
     Current Page: Þú ert þegar á þessari síðu
     No History: Engin síða í þessa átt

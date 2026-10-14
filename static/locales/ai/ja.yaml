@@ -1853,11 +1853,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: コマンドパレット
   Open: コマンドパレットを開く
-  Search Label: コマンドを検索
-  Search Placeholder: コマンドと設定を検索…
-  Results: コマンド
-  No Results: 一致するコマンドはありません
-  Result Count: '{count}件のコマンドが見つかりました'
+  Search Label: "コマンド、設定、ローカル動画を検索"
+  Search Placeholder: コマンド、設定、ローカル動画を検索…
+  Results: "検索結果"
+  No Results: "一致する検索結果はありません"
+  Result Count: "検索結果: {count}"
   Move: 移動
   Run: 実行
   Keys:
@@ -1872,6 +1872,7 @@ CommandPalette:
     App: アプリ
     Navigation: ナビゲーション
     Tabs: タブ
+    Local Videos: ローカル動画
   Unavailable:
     Current Page: 現在このページを表示しています
     No History: この方向にはページ履歴がありません

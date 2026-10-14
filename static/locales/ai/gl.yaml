@@ -1906,11 +1906,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Paleta de ordes
   Open: Abrir a paleta de ordes
-  Search Label: Buscar ordes
-  Search Placeholder: Buscar ordes e axustes…
-  Results: Ordes
-  No Results: Non hai ordes coincidentes
-  Result Count: Atopouse 1 orde | Atopáronse {count} ordes
+  Search Label: "Buscar ordes, axustes e vídeos locais"
+  Search Placeholder: "Buscar ordes, axustes e vídeos locais…"
+  Results: "Resultados"
+  No Results: "Non hai resultados coincidentes"
+  Result Count: "Resultados: {count} | Resultados: {count}"
   Move: Mover
   Run: Executar
   Keys:
@@ -1925,6 +1925,7 @@ CommandPalette:
     App: Aplicación
     Navigation: Navegación
     Tabs: Lapelas
+    Local Videos: Vídeos locais
   Unavailable:
     Current Page: Xa estás nesta páxina
     No History: Non hai ningunha páxina nesta dirección

@@ -1,6 +1,11 @@
-import { test, expect, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, goTo, setWindowSize } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
-import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
+import { mockPlayableWatchPage, watchHistoryEntry } from '../../helpers/watch.mjs'
+import { DEMO_MEDIA_PATH } from '../../helpers/media.mjs'
+import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
+import { createHash, randomUUID } from 'node:crypto'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
 
 const mainProfile = {
   _id: 'allChannels',
@@ -22,6 +27,27 @@ const secondProfile = {
   subscriptions: []
 }
 
+async function scrollResultsToBottom(page) {
+  const results = page.locator('.commandPaletteResults')
+  await results.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => results.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+}
+
+async function expectValidResultsScroll(page) {
+  const results = page.locator('.commandPaletteResults')
+  await expect.poll(() => results.evaluate(element => {
+    const content = element.querySelector('.commandPaletteResultsContent').getBoundingClientRect()
+    const viewport = element.getBoundingClientRect()
+    const overflow = element.scrollHeight > element.clientHeight + 1
+    const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+    return {
+      validOffset: element.scrollTop >= 0 && element.scrollTop <= Math.max(0, element.scrollHeight - element.clientHeight) + 1,
+      noEmptySpace: overflow ? content.bottom >= viewport.bottom - 1 : content.top >= viewport.top - 1 && content.bottom <= viewport.bottom + 1,
+      matchingScrollbar: scrollbar.classList.contains('os-scrollbar-unusable') === !overflow,
+    }
+  })).toEqual({ validOffset: true, noEmptySpace: true, matchingScrollbar: true })
+}
+
 test('opens with the configured shortcut and supports accessible fuzzy keyboard search', async ({ page }) => {
   await page.keyboard.press('Control+k')
 
@@ -29,7 +55,9 @@ test('opens with the configured shortcut and supports accessible fuzzy keyboard 
   const input = page.getByRole('combobox', { name: 'Search commands' })
   await expect(dialog).toBeVisible()
   await expect(input).toBeFocused()
-  await expect(input).toHaveAttribute('placeholder', 'Search commands and settings…')
+  await expect(input).toHaveAccessibleName('Search commands, settings, and local videos')
+  await expect(page.getByRole('listbox')).toHaveAccessibleName('Results')
+  await expect(input).toHaveAttribute('placeholder', 'Search commands, settings, and local videos…')
   await expect(dialog.locator('.textInputLabelText')).toHaveCount(0)
   await expect(dialog.locator('.commandPaletteTitle')).toHaveCount(0)
   const [searchBounds, closeBounds] = await Promise.all([
@@ -290,6 +318,503 @@ test.describe('playlist commands', () => {
   })
 })
 
+test.describe('local video commands', () => {
+  const video = { ...watchHistoryEntry, title: 'A journey through the mountains', author: 'North Channel' }
+  const playlist = {
+    _id: 'palette-local-videos',
+    playlistName: 'Road trips',
+    protected: false,
+    description: '',
+    createdAt: Date.now(),
+    lastUpdatedAt: Date.now(),
+    videos: [{ ...video, playlistItemId: 'journey-item' }]
+  }
+  test.use({
+    seed: {
+      settings: { enableDownloads: true, uiScale: 125, videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true },
+      history: [video],
+      playlists: [playlist],
+      downloads: [{
+        id: 42,
+        title: video.title,
+        status: 'completed',
+        mode: 'video',
+        destination: DEMO_MEDIA_PATH,
+        destinations: [DEMO_MEDIA_PATH],
+        files: [{ videoId: video.videoId, path: DEMO_MEDIA_PATH, title: video.title, author: video.author }]
+      }]
+    }
+  })
+
+  test.beforeEach(async ({ page }) => {
+    await page.evaluate(video => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('addVideoToWatchQueue', {
+        video: { ...video, route: { path: `/watch/${video.videoId}`, query: { short: 'false' } } }
+      })
+    }, video)
+    await page.keyboard.press('Control+k')
+  })
+
+  test('finds local titles, channels, and sources without submitting a YouTube search', async ({ page }) => {
+    const input = page.getByRole('combobox', { name: 'Search commands' })
+    const videos = page.getByRole('group', { name: 'Local videos', exact: true })
+    await expect(videos).toHaveCount(0)
+    await input.fill('jorney montains')
+    await expect(videos.getByRole('option')).toHaveCount(4)
+    await expect(videos.locator('small')).toHaveText([
+      'History · North Channel', 'Playlists: Road trips · North Channel',
+      'Downloads · North Channel', 'Queue · North Channel'
+    ])
+    await input.fill('north channel')
+    await expect(videos.getByRole('option')).toHaveCount(4)
+    await input.fill('journey road trips')
+    await expect(videos.getByRole('option')).toHaveCount(1)
+    await expect(videos.getByRole('option')).toContainText('Playlists: Road trips')
+    await expect(page).not.toHaveURL(/#\/search/)
+
+    // Removing metadata while the palette is open must update its results.
+    await input.fill('journey')
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setHistoryCacheSorted', [])
+      store.commit('clearWatchQueue')
+      store.commit('removeYtDlpDownload', 42)
+    })
+    await expect(videos.getByRole('option')).toHaveCount(1)
+    await input.fill('zzzzzz')
+    await expect(page.getByRole('option')).toHaveCount(0)
+    await expect(page.getByText('No matching results', { exact: true })).toBeVisible()
+  })
+
+  for (const [source, query] of [
+    ['History', {}],
+    ['Playlists: Road trips', { playlistId: playlist._id, playlistType: 'user', playlistItemId: 'journey-item' }],
+    ['Downloads', { downloadId: '42', downloadFilePath: DEMO_MEDIA_PATH }],
+    ['Queue', { short: 'false' }],
+  ]) {
+    test(`opens the selected local video from ${source}`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      const input = page.getByRole('combobox', { name: 'Search commands' })
+      await input.fill('journey')
+      const videos = page.getByRole('group', { name: 'Local videos', exact: true })
+      const option = videos.getByRole('option').filter({ has: page.locator('small', { hasText: `${source} ·` }) })
+      await expect(option).toBeVisible()
+      const optionId = await option.getAttribute('id')
+      for (let index = 0; index < 4; index++) {
+        if (await input.getAttribute('aria-activedescendant') === optionId) break
+        await input.press('ArrowDown')
+      }
+      await expect(input).toHaveAttribute('aria-activedescendant', optionId)
+      await input.press('Enter')
+      await expect(page.getByRole('dialog', { name: 'Command palette' })).toBeHidden()
+      await expect(page).toHaveURL(url => {
+        const [path, search = ''] = url.hash.slice(1).split('?')
+        const params = new URLSearchParams(search)
+        return path === `/watch/${video.videoId}` &&
+          params.size === Object.keys(query).length &&
+          Object.entries(query).every(([key, value]) => params.get(key) === value)
+      })
+      if (source === 'Queue') {
+        await expect.poll(() => page.evaluate(() => (
+          document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getWatchQueueLength
+        ))).toBe(0)
+      }
+      if (source === 'Downloads') {
+        await expect.poll(() => page.locator('video').first().evaluate(element => element.currentTime)).toBeGreaterThan(0)
+      }
+    })
+  }
+
+  for (const source of ['History', 'Playlists: Road trips']) {
+    test(`honors external-player viewing mode for ${source} results`, async ({ app, page }) => {
+      await app.electronApp.evaluate(({ ipcMain }) => {
+        globalThis.__paletteExternalLaunches = []
+        ipcMain.removeAllListeners('open-in-external-player')
+        ipcMain.on('open-in-external-player', (event, payload) => {
+          globalThis.__paletteExternalLaunches.push(payload)
+        })
+      })
+      await page.evaluate(async video => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('upsertToHistoryCache', { ...video, watchProgress: 12 })
+        await store.dispatch('updateExternalPlayer', 'mpv')
+        await store.dispatch('updateDefaultViewingMode', 'external_player')
+        await store.dispatch('updateDefaultPlayback', 1.5)
+        await store.dispatch('updateWatchedProgressSavingMode', 'auto')
+      }, video)
+      const previousUrl = page.url()
+      const input = page.getByRole('combobox', { name: 'Search commands' })
+      await input.fill('journey')
+      const option = page.getByRole('group', { name: 'Local videos', exact: true }).getByRole('option')
+        .filter({ has: page.locator('small', { hasText: `${source} ·` }) })
+      await option.click()
+      await expect.poll(() => app.electronApp.evaluate(() => globalThis.__paletteExternalLaunches))
+        .toEqual([{ videoId: video.videoId, playlistId: null, startTime: 12, playbackRate: 1.5 }])
+      await expect(page.getByRole('dialog', { name: 'Command palette' })).toBeHidden()
+      expect(page.url()).toBe(previousUrl)
+      await expect.poll(() => page.evaluate(videoId => (
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById[videoId]?.isWatched
+      ), video.videoId)).toBe(true)
+    })
+  }
+
+  test('opens the selected history video externally when its saved playlist has no position', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ BrowserWindow }) => {
+      // Other workers share the display; isolate the handler's focus precondition.
+      BrowserWindow.getAllWindows()[0].webContents.isFocused = () => true
+    })
+    const executable = path.join(app.userDataDir, 'capture-player-arguments.mjs')
+    const capturedArguments = path.join(app.userDataDir, 'player-arguments.json')
+    await writeFile(executable, "import { writeFileSync } from 'node:fs'\nwriteFileSync(process.argv[2], JSON.stringify(process.argv.slice(3)))\n")
+    await page.evaluate(async ({ video, executable, capturedArguments, nodePath }) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('upsertToHistoryCache', {
+        ...video,
+        watchProgress: 12,
+        lastViewedPlaylistId: 'PLsavedYouTubePlaylist',
+        lastViewedPlaylistType: 'local',
+      })
+      store.commit('setSaveVideoHistoryWithLastViewedPlaylist', true)
+      await store.dispatch('updateExternalPlayer', 'mpv')
+      await store.dispatch('updateDefaultViewingMode', 'external_player')
+      await store.dispatch('updateDefaultPlayback', 1.5)
+      await store.dispatch('updateWatchedProgressSavingMode', 'auto')
+      await store.dispatch('updateExternalPlayerExecutable', nodePath)
+      await store.dispatch('updateExternalPlayerCustomArgs', JSON.stringify([executable, capturedArguments]))
+    }, { video, executable, capturedArguments, nodePath: process.execPath })
+    const previousUrl = page.url()
+    await page.getByRole('combobox', { name: 'Search commands' }).fill('journey')
+    await page.getByRole('group', { name: 'Local videos', exact: true }).getByRole('option')
+      .filter({ has: page.locator('small', { hasText: 'History ·' }) }).click()
+    await expect.poll(async () => {
+      try {
+        return JSON.parse(await readFile(capturedArguments, 'utf8'))
+      } catch (error) {
+        if (error.code === 'ENOENT') return null
+        throw error
+      }
+    }).toEqual(['--start=12', '--speed=1.5', `https://www.youtube.com/watch?v=${video.videoId}`])
+    expect(page.url()).toBe(previousUrl)
+  })
+
+  for (const enabled of [true, false]) {
+    test(`history results respect saved playlist context when the setting is ${enabled}`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      await page.evaluate(({ enabled, video, playlistId }) => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('upsertToHistoryCache', {
+          ...video, lastViewedPlaylistId: playlistId, lastViewedPlaylistType: 'user', lastViewedPlaylistItemId: 'journey-item',
+        })
+        store.commit('setSaveVideoHistoryWithLastViewedPlaylist', enabled)
+      }, { enabled, video, playlistId: playlist._id })
+      await page.getByRole('combobox', { name: 'Search commands' }).fill('journey')
+      const videos = page.getByRole('group', { name: 'Local videos', exact: true })
+      await videos.getByRole('option').filter({ has: page.locator('small', { hasText: 'History ·' }) }).click()
+      await expect(page).toHaveURL(url => {
+        const [path, query = ''] = url.hash.slice(1).split('?')
+        const params = new URLSearchParams(query)
+        return path === `/watch/${video.videoId}` &&
+          params.get('playlistId') === (enabled ? playlist._id : null) &&
+          params.get('playlistType') === (enabled ? 'user' : null) &&
+          params.get('playlistItemId') === (enabled ? 'journey-item' : null)
+      })
+    })
+  }
+
+  test('restarts an already open queued video and removes only the selected duplicate', async ({ app, page }) => {
+    await page.getByRole('combobox', { name: 'Search commands' }).press('Escape')
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    const player = page.locator('video').first()
+    await expect.poll(() => player.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2)
+    await player.evaluate(element => { element.pause(); element.currentTime = 5 })
+    await expect.poll(() => player.evaluate(element => element.paused && element.currentTime >= 4)).toBe(true)
+    const firstId = await page.evaluate(video => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('clearWatchQueue')
+      const route = store.getters.getPresentedTab.route
+      const queued = { ...video, title: 'Current queued journey', route: { path: route.path, query: { ...route.query } } }
+      store.commit('addVideoToWatchQueue', { video: queued })
+      store.commit('addVideoToWatchQueue', { video: queued })
+      return store.getters.getWatchQueue[0].queueItemId
+    }, video)
+    await page.keyboard.press('Control+k')
+    await page.getByRole('combobox', { name: 'Search commands' }).fill('current queued journey')
+    const options = page.getByRole('group', { name: 'Local videos', exact: true }).getByRole('option')
+    await expect(options).toHaveCount(2)
+    await options.last().click()
+    await expect.poll(() => player.evaluate(element => !element.paused && element.currentTime < 3)).toBe(true)
+    await expect.poll(() => page.evaluate(() => (
+      document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getWatchQueue.map(video => video.queueItemId)
+    ))).toEqual([firstId])
+  })
+
+  test('keeps local video scrolling valid when resizing at fractional scale', async ({ app, page }) => {
+    await page.evaluate(video => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setHistoryCacheSorted', Array.from({ length: 30 }, (_, index) => ({
+        ...video, videoId: `resize${index}`, title: `${video.title} ${index}`,
+      })))
+    }, video)
+    const input = page.getByRole('combobox', { name: 'Search commands' })
+    await input.fill('journey')
+    await expect(page.getByRole('group', { name: 'Local videos', exact: true }).getByRole('option')).toHaveCount(33)
+    for (const size of [{ width: 520, height: 640 }, { width: 900, height: 520 }, { width: 1000, height: 900 }]) {
+      await scrollResultsToBottom(page)
+      await setWindowSize(app, page, size)
+      const dialog = page.locator('.commandPalette')
+      const [viewport, bounds] = await Promise.all([
+        page.evaluate(() => ({ width: innerWidth, height: innerHeight })), dialog.boundingBox()
+      ])
+      expect(bounds).not.toBeNull()
+      expect(bounds.x).toBeGreaterThanOrEqual(0)
+      expect(bounds.y).toBeGreaterThanOrEqual(0)
+      expect(bounds.x + bounds.width).toBeLessThanOrEqual(viewport.width)
+      expect(bounds.y + bounds.height).toBeLessThanOrEqual(viewport.height)
+      expect(await dialog.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true)
+      await expectValidResultsScroll(page)
+    }
+  })
+
+  for (const mutation of ['removeMultipleFromHistoryCache', 'setHistoryCacheSorted']) {
+    test(`clamps local results after ${mutation} shortens the list at fractional scale`, async ({ page }) => {
+      await page.evaluate(video => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setHistoryCacheSorted', Array.from({ length: 30 }, (_, index) => ({
+          ...video, videoId: `shorten${index}`,
+        })))
+      }, video)
+      await page.getByRole('combobox', { name: 'Search commands' }).fill('journey')
+      const videos = page.getByRole('group', { name: 'Local videos', exact: true })
+      await expect(videos.getByRole('option')).toHaveCount(33)
+      await scrollResultsToBottom(page)
+      await page.evaluate(mutation => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit(mutation, mutation === 'setHistoryCacheSorted' ? [] : Array.from({ length: 30 }, (_, index) => `shorten${index}`))
+        store.commit('clearWatchQueue')
+        store.commit('removeYtDlpDownload', 42)
+      }, mutation)
+      await expect(videos.getByRole('option')).toHaveCount(1)
+      await expectValidResultsScroll(page)
+      await expect(page.locator('.commandPaletteResults')).toHaveJSProperty('scrollTop', 0)
+    })
+  }
+
+  test('adds local download matches only after the download completes', async ({ page }) => {
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('upsertYtDlpDownload', { ...store.getters.getYtDlpDownloads[42], status: 'downloading' })
+    })
+    await page.getByRole('combobox', { name: 'Search commands' }).fill('journey')
+    const videos = page.getByRole('group', { name: 'Local videos', exact: true })
+    await expect(videos.getByRole('option')).toHaveCount(3)
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('upsertYtDlpDownload', { ...store.getters.getYtDlpDownloads[42], status: 'completed' })
+    })
+    await expect(videos.getByRole('option')).toHaveCount(4)
+    await expect(videos.locator('small', { hasText: 'Downloads · North Channel' })).toBeVisible()
+  })
+
+  test('cancels stale local matches when typing in a large library', async ({ page }) => {
+    await page.evaluate(video => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setHistoryCacheSorted', [
+        ...Array.from({ length: 6000 }, (_, index) => ({ ...video, videoId: `video${index}`, title: `Mountain journey ${index}` })),
+        { ...video, videoId: 'uniquevideo', title: 'Unique destination' },
+      ])
+    }, video)
+    const cdp = await page.context().newCDPSession(page)
+    await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 })
+    try {
+      const input = page.getByRole('combobox', { name: 'Search commands' })
+      const videos = page.getByRole('group', { name: 'Local videos', exact: true })
+      await input.fill('journey')
+      await expect(videos.getByRole('option')).toHaveCount(50)
+      const results = page.locator('.commandPaletteResults')
+      await results.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect.poll(() => results.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+      await input.fill('mountain')
+      await input.fill('unique destination')
+      await expect(videos.getByRole('option')).toHaveCount(1)
+      await expect(videos.getByRole('option')).toContainText('Unique destination')
+      await expect(page.getByRole('listbox')).toHaveAttribute('aria-busy', 'false')
+      await expect.poll(() => results.evaluate(element => element.scrollTop)).toBe(0)
+      await expect(results.locator(':scope > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-unusable/)
+      await input.fill('')
+      await expect(videos).toHaveCount(0)
+      await expect(page.getByRole('listbox')).toHaveAttribute('aria-busy', 'false')
+    } finally {
+      await cdp.detach()
+    }
+  })
+
+  test('refreshes in-place library edits without rebuilding for download progress', async ({ page }) => {
+    const input = page.getByRole('combobox', { name: 'Search commands' })
+    await input.fill('journey')
+    const videos = page.getByRole('group', { name: 'Local videos', exact: true })
+    await expect(videos.getByRole('option')).toHaveCount(4)
+    await input.press('End')
+    const selected = await input.getAttribute('aria-activedescendant')
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      window.__paletteSearchRestarts = 0
+      const list = document.querySelector('.commandPalette [role="listbox"]')
+      const observer = new MutationObserver(records => {
+        window.__paletteSearchRestarts += records.filter(record => record.attributeName === 'aria-busy').length
+      })
+      observer.observe(list, { attributes: true })
+      for (let progress = 1; progress <= 10; progress++) {
+        store.commit('upsertYtDlpDownload', { ...store.getters.getYtDlpDownloads[42], progress })
+        store.commit('updateRecordWatchProgressInHistoryCache', { videoId: 'jNQXAC9IVRw', watchProgress: progress })
+        await new Promise(resolve => setTimeout(resolve, 10))
+      }
+      observer.disconnect()
+    })
+    expect(await page.evaluate(() => window.__paletteSearchRestarts)).toBe(0)
+    await expect(input).toHaveAttribute('aria-activedescendant', selected)
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('upsertToHistoryCache', {
+        ...store.getters.getHistoryCacheById.jNQXAC9IVRw, title: 'Renamed expedition', author: 'Other Channel',
+      })
+      store.commit('upsertPlaylistToList', { _id: 'palette-local-videos', playlistName: 'Renamed travels' })
+    })
+    await expect(videos.getByRole('option')).toHaveCount(3)
+    await expect(videos.locator('small', { hasText: 'Playlists: Renamed travels' })).toBeVisible()
+    await input.fill('renamed expedition')
+    await expect(videos.getByRole('option')).toHaveCount(1)
+    await expect(videos.getByRole('option')).toContainText('Other Channel')
+  })
+})
+
+test.describe('download availability recheck', () => {
+  const filePath = path.join(tmpdir(), `opentubex-palette-${randomUUID()}.webm`)
+  test.use({
+    seed: {
+      settings: { enableDownloads: true },
+      downloads: [{
+        id: 42,
+        videoId: 'vanish00001',
+        title: 'Vanishing palette download',
+        status: 'completed',
+        mode: 'video',
+        destination: filePath,
+        destinations: [filePath],
+        files: [{ videoId: 'vanish00001', title: 'Vanishing palette download', path: filePath, extension: 'webm' }],
+      }],
+    }
+  })
+  test.beforeAll(() => copyFile(DEMO_MEDIA_PATH, filePath))
+  test.afterAll(() => rm(filePath, { force: true }))
+
+  test('rechecks a selected download after its file is deleted externally', async ({ page }) => {
+    await page.keyboard.press('Control+k')
+    const input = page.getByRole('combobox', { name: 'Search commands' })
+    await input.fill('vanishing palette download')
+    const videos = page.getByRole('group', { name: 'Local videos', exact: true })
+    await expect(videos.getByRole('option')).toHaveCount(1)
+    await rm(filePath)
+    await videos.getByRole('option').click()
+    await expect(page.getByText('The downloaded file could not be found.', { exact: true })).toBeVisible()
+    await expect(page).not.toHaveURL(/#\/watch\/vanish00001/)
+    await expect.poll(() => page.evaluate(() => (
+      document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getYtDlpDownloads[42].files[0].available
+    ))).toBe(false)
+    await page.keyboard.press('Control+k')
+    await input.fill('vanishing palette download')
+    await expect(videos).toHaveCount(0)
+  })
+})
+
+test.describe('download files sharing a video ID', () => {
+  const folder = path.join(tmpdir(), `opentubex-palette-files-${randomUUID()}`)
+  const firstPath = path.join(folder, 'First local take.webm')
+  const laterPath = path.join(folder, 'Later local take #2.webm')
+  const laterFixture = path.join(path.dirname(DEMO_MEDIA_PATH), 'aspect-ratio-demo.webm')
+  const digest = async file => createHash('sha256').update(await readFile(file)).digest('hex')
+  test.use({
+    seed: {
+      settings: { enableDownloads: true, autoplayVideos: false },
+      downloads: [{
+        id: 43,
+        title: 'Repeated playlist video',
+        status: 'completed',
+        mode: 'video',
+        destination: firstPath,
+        destinations: [firstPath, laterPath],
+        files: [
+          { videoId: 'dupevideo01', title: 'First local take', path: firstPath, extension: 'webm' },
+          { videoId: 'dupevideo01', title: 'Later local take', path: laterPath, extension: 'webm' },
+        ],
+      }],
+    }
+  })
+  test.beforeAll(async () => {
+    await mkdir(folder, { recursive: true })
+    await copyFile(DEMO_MEDIA_PATH, firstPath)
+    await copyFile(laterFixture, laterPath)
+  })
+  test.afterAll(() => rm(folder, { recursive: true, force: true }))
+
+  test.beforeEach(async ({ page }) => {
+    await page.context().route(/^https?:/, route => route.abort('internetdisconnected'))
+    const disconnect = () => {
+      Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false })
+      window.dispatchEvent(new Event('offline'))
+    }
+    await page.context().addInitScript(disconnect)
+    await page.evaluate(disconnect)
+  })
+
+  async function verifyFile(page, expectedPath) {
+    const video = page.locator('video').first()
+    await expect.poll(() => video.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2)
+    const expectedDigest = await digest(expectedPath)
+    await expect.poll(() => video.evaluate(async element => {
+      if (!element.currentSrc) return null
+      const bytes = await (await fetch(element.currentSrc)).arrayBuffer()
+      const hash = await crypto.subtle.digest('SHA-256', bytes)
+      return Array.from(new Uint8Array(hash), byte => byte.toString(16).padStart(2, '0')).join('')
+    })).toBe(expectedDigest)
+  }
+
+  test('plays the selected file, switches between duplicates, and preserves selection on reload', async ({ page }) => {
+    async function select(title) {
+      await page.keyboard.press('Control+k')
+      await page.getByRole('combobox', { name: 'Search commands' }).fill(title)
+      const results = page.getByRole('group', { name: 'Local videos', exact: true }).getByRole('option')
+        .filter({ has: page.locator('small', { hasText: /^Downloads/ }) })
+      await expect(results).toHaveCount(1)
+      await results.click()
+      await expect(page.locator('.commandPalette')).toBeHidden()
+      await verifyFile(page, title === 'Later local take' ? laterPath : firstPath)
+      await expect(page.locator('.videoTitle')).toHaveText(title)
+    }
+    await select('Later local take')
+    await select('First local take')
+    await select('Later local take')
+    await page.reload()
+    await verifyFile(page, laterPath)
+  })
+
+  test('a queued duplicate retains its file identity when selected in the palette', async ({ page }) => {
+    await goTo(page, 'downloads')
+    const row = page.locator('.downloadRow').filter({ has: page.getByRole('heading', { name: 'Repeated playlist video', exact: true }) })
+    await row.getByRole('button', { name: 'Add to Queue', exact: true }).click()
+    await page.getByRole('dialog', { name: 'Downloads', exact: true }).getByRole('button', { name: 'Close', exact: true }).click()
+    await page.keyboard.press('Control+k')
+    await page.getByRole('combobox', { name: 'Search commands' }).fill('Later local take')
+    const queued = page.getByRole('group', { name: 'Local videos', exact: true }).getByRole('option')
+      .filter({ has: page.locator('small', { hasText: /^Queue/ }) })
+    await expect(queued).toHaveCount(1)
+    await queued.click()
+    await verifyFile(page, laterPath)
+    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getWatchQueue.map(video => video.route.query.downloadFilePath))).toEqual([firstPath])
+  })
+})
+
 test.describe('profile commands', () => {
   test.use({ seed: { profiles: [mainProfile, secondProfile] } })
 
@@ -399,6 +924,7 @@ test.describe('responsive command palette', () => {
       page.evaluate(() => ({ width: innerWidth, height: innerHeight })),
       dialog.boundingBox()
     ])
+    expect(bounds).not.toBeNull()
     expect(bounds.x).toBeGreaterThanOrEqual(0)
     expect(bounds.y).toBeGreaterThanOrEqual(0)
     expect(bounds.x + bounds.width).toBeLessThanOrEqual(viewport.width)

@@ -1869,11 +1869,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Palet perintah
   Open: Buka palet perintah
-  Search Label: Cari perintah
-  Search Placeholder: Cari perintah dan pengaturan…
-  Results: Perintah
-  No Results: Tidak ada perintah yang cocok
-  Result Count: '{count} perintah ditemukan'
+  Search Label: "Cari perintah, pengaturan, dan video lokal"
+  Search Placeholder: Cari perintah, pengaturan, dan video lokal…
+  Results: "Hasil"
+  No Results: "Tidak ada hasil yang cocok"
+  Result Count: "Hasil: {count}"
   Move: Pindah
   Run: Jalankan
   Keys:
@@ -1888,6 +1888,7 @@ CommandPalette:
     App: Aplikasi
     Navigation: Navigasi
     Tabs: Tab
+    Local Videos: Video lokal
   Unavailable:
     Current Page: Sudah berada di halaman ini
     No History: Tidak ada halaman ke arah ini

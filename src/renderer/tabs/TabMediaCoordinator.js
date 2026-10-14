@@ -161,12 +161,12 @@ function applyPowerSaveState() {
 }
 
 export const tabMediaCoordinator = {
-  dispatchAction(action, details = {}) {
+  dispatchAction(action, details = {}, tabId = ownerTabId) {
     if (!MEDIA_SESSION_ACTIONS.includes(action)) {
       return
     }
 
-    const handler = getActionHandlers(mediaByTabId.get(ownerTabId))[action]
+    const handler = getActionHandlers(mediaByTabId.get(tabId))[action]
     if (typeof handler === 'function') {
       handler(details)
     }

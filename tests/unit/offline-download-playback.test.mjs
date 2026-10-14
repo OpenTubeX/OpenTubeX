@@ -139,3 +139,61 @@ for (const entry of ['applyDownloadedPlaybackSource', 'finishDownloadedPlaybackW
     }
   })
 }
+
+
+for (const android of [false, true]) {
+  test(`${android ? 'Android' : 'Electron'} selects the requested path among duplicate downloaded video IDs`, () => {
+    const methods = runInNewContext(`({ ${method('applyDownloadedPlaybackSource', 'cacheOnlinePlaybackSource')} })`, {
+      process: { env: { IS_CAPACITOR: android } },
+      Capacitor: { convertFileSrc: path => `native:${path}` },
+      DOWNLOADED_MEDIA_MIME_TYPES: { webm: 'video/webm' },
+    })
+    const files = [
+      { videoId: 'dupevideo01', path: '/downloads/First.webm', available: true, title: 'First local take', author: 'First Channel', authorId: 'first-channel' },
+      { videoId: 'dupevideo01', path: '/downloads/Later #2.webm', available: true, title: 'Later local take', author: 'Later Channel', authorId: 'later-channel' },
+    ]
+    const watch = {
+      ...methods, videoId: 'dupevideo01', tabRoute: { query: { downloadId: '43', downloadFilePath: files[1].path } },
+      $store: { getters: { getYtDlpDownloads: { 43: { status: 'completed', mode: 'video', files } } } },
+      downloadedPlaybackWithoutMetadata: true, videoTitle: files[0].title, channelName: files[0].author, channelId: files[0].authorId,
+      initializePlaybackRate() {}, initializeVideoQuality() {}, updateTitle() {},
+      cacheOnlinePlaybackSource() {}, playbackSourceKey: 0, t: key => key,
+    }
+    assert.equal(watch.applyDownloadedPlaybackSource(), files[1])
+    assert.equal(watch.legacyFormats[0].url, android
+      ? `native:${files[1].path}`
+      : `downloadmedia://file/43/dupevideo01?path=${encodeURIComponent(files[1].path)}`)
+    assert.equal(watch.videoTitle, files[1].title)
+    assert.equal(watch.channelName, files[1].author)
+    assert.equal(watch.channelId, files[1].authorId)
+    watch.tabRoute.query.downloadFilePath = files[0].path
+    assert.equal(watch.applyDownloadedPlaybackSource(), files[0])
+    assert.equal(watch.videoTitle, files[0].title)
+    assert.equal(watch.channelName, files[0].author)
+    watch.videoTitle = 'Logical video metadata'
+    watch.applyDownloadedPlaybackSource(43, null)
+    assert.equal(watch.videoTitle, 'Logical video metadata', 'Format controls preserve the video metadata')
+    watch.tabRoute.query.downloadFilePath = '/downloads/Missing.webm'
+    assert.equal(watch.applyDownloadedPlaybackSource(), false, 'An explicit missing path must not select a different copy')
+  })
+}
+
+test('Electron protocol lookup accepts only the requested file recorded in the download', async () => {
+  const mainSource = await readFile(new URL('../../src/main/ytDlp.js', import.meta.url), 'utf8')
+  const start = mainSource.indexOf('export async function getYtDlpDownloadFile(')
+  const files = [
+    { videoId: 'dupevideo01', path: '/downloads/First.webm' },
+    { videoId: 'dupevideo01', path: '/downloads/Later #2.webm' },
+  ]
+  const existing = new Set([...files.map(file => file.path), '/private/unrecorded.webm'])
+  const lookup = runInNewContext(`${mainSource.slice(start, mainSource.indexOf('\n/**', start)).replace('export ', '')}\ngetYtDlpDownloadFile`, {
+    ID_REGEX: /^[\w-]{11}$/, loadDownloadRecords: async () => {},
+    downloadRecords: new Map([[43, { status: 'completed', mode: 'video', files }]]),
+    getDownloadFiles: record => record.files, existsSync: path => existing.has(path),
+  })
+  assert.equal((await lookup(43, 'dupevideo01', files[1].path)).path, files[1].path)
+  assert.equal((await lookup(43, 'dupevideo01')).path, files[0].path, 'Existing routes keep their first-file behavior')
+  assert.equal(await lookup(43, 'dupevideo01', '/private/unrecorded.webm'), null)
+  existing.delete(files[1].path)
+  assert.equal(await lookup(43, 'dupevideo01', files[1].path), null, 'A deleted selected file must not fall back to the first copy')
+})

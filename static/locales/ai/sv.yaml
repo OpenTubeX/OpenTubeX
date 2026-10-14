@@ -1875,11 +1875,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Kommandopalett
   Open: Öppna kommandopaletten
-  Search Label: Sök efter kommandon
-  Search Placeholder: Sök bland kommandon och inställningar…
-  Results: Kommandon
-  No Results: Inga matchande kommandon
-  Result Count: 1 kommando hittades | {count} kommandon hittades
+  Search Label: "Sök efter kommandon, inställningar och lokala videor"
+  Search Placeholder: Sök efter kommandon, inställningar och lokala videor…
+  Results: "Resultat"
+  No Results: "Inga matchande resultat"
+  Result Count: "Resultat: {count} | Resultat: {count}"
   Move: Flytta
   Run: Kör
   Keys:
@@ -1894,6 +1894,7 @@ CommandPalette:
     App: App
     Navigation: Navigering
     Tabs: Flikar
+    Local Videos: Lokala videor
   Unavailable:
     Current Page: Du är redan på den här sidan
     No History: Det finns ingen sida i den riktningen

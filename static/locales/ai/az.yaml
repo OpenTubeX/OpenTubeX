@@ -1866,11 +1866,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Əmr palitrası
   Open: Əmr palitrasını aç
-  Search Label: Əmrləri axtar
-  Search Placeholder: Əmr və tənzimləmələri axtar…
-  Results: Əmrlər
-  No Results: Uyğun əmr yoxdur
-  Result Count: 1 əmr tapıldı | {count} əmr tapıldı
+  Search Label: "Əmrləri, parametrləri və yerli videoları axtarın"
+  Search Placeholder: Əmrləri, parametrləri və yerli videoları axtarın…
+  Results: "Nəticələr"
+  No Results: "Uyğun nəticə yoxdur"
+  Result Count: "Nəticələr: {count} | Nəticələr: {count}"
   Move: Köçür
   Run: İcra et
   Keys:
@@ -1885,6 +1885,7 @@ CommandPalette:
     App: Tətbiq
     Navigation: Naviqasiya
     Tabs: Vərəqlər
+    Local Videos: Yerli videolar
   Unavailable:
     Current Page: Artıq bu səhifədəsiniz
     No History: Bu istiqamətdə səhifə yoxdur
