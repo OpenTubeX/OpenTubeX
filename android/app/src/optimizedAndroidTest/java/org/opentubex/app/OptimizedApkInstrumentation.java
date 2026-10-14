@@ -253,7 +253,8 @@ public class OptimizedApkInstrumentation extends Instrumentation {
             "video.error !== null || window.optimizedStaleMediaError) return; " +
             "window.optimizedStaleMediaError = true; video.dispatchEvent(new Event('error')); }; " +
             "document.addEventListener('loadstart', window.optimizedLoadStart, true)");
-        try {
+        // Keep a player failure primary when cleanup also fails.
+        try (AutoCloseable cleanup = () -> cleanupPlayerFixture(web)) {
             JSONObject file = new JSONObject().put("videoId", "optimized-apk-demo")
                 .put("path", fixture.getAbsolutePath()).put("extension", "webm")
                 .put("available", true).put("width", 320).put("height", 240).put("duration", 30);
@@ -280,23 +281,25 @@ public class OptimizedApkInstrumentation extends Instrumentation {
             await(web, "getComputedStyle(document.querySelector('.ftVideoPlayer .shaka-fullscreen-button')).visibility === 'visible'");
             tapCss(web, ".ftVideoPlayer .shaka-fullscreen-button");
             await(web, "document.fullscreenElement === null");
+        }
+    }
+
+    private void cleanupPlayerFixture(WebView web) throws Exception {
+        try {
+            // Do not restore or reload the synthetic watch route next launch.
+            evaluate(web, "document.querySelector('#app').__vue_app__.config.globalProperties.$router.replace('/subscriptions')");
+            await(web, "location.hash === '#/subscriptions'");
+            await(web, "!document.querySelector('.ftVideoPlayer') || " +
+                "!!document.querySelector('.mobileMiniBarDismiss:not(:disabled), .scrollMiniDismiss:not(:disabled)')");
+            evaluate(web, "document.querySelector('.mobileMiniBarDismiss:not(:disabled), .scrollMiniDismiss:not(:disabled)')?.click()");
+            await(web, "!document.querySelector('.ftVideoPlayer')");
         } finally {
-            try {
-                // Do not restore or reload the synthetic watch route next launch.
-                evaluate(web, "document.querySelector('#app').__vue_app__.config.globalProperties.$router.replace('/subscriptions')");
-                await(web, "location.hash === '#/subscriptions'");
-                await(web, "!document.querySelector('.ftVideoPlayer') || " +
-                    "!!document.querySelector('.mobileMiniBarDismiss:not(:disabled), .scrollMiniDismiss:not(:disabled)')");
-                evaluate(web, "document.querySelector('.mobileMiniBarDismiss:not(:disabled), .scrollMiniDismiss:not(:disabled)')?.click()");
-                await(web, "!document.querySelector('.ftVideoPlayer')");
-            } finally {
-                evaluate(web, "document.removeEventListener('loadstart', window.optimizedLoadStart, true); " +
-                    "delete window.optimizedLoadStart; delete window.optimizedStaleMediaError");
-                evaluate(web, "if (window.optimizedOnlineDescriptor) { " +
-                    "Object.defineProperty(navigator, 'onLine', window.optimizedOnlineDescriptor); " +
-                    "} else { delete navigator.onLine; } delete window.optimizedOnlineDescriptor; " +
-                    "window.dispatchEvent(new Event(navigator.onLine ? 'online' : 'offline'))");
-            }
+            evaluate(web, "document.removeEventListener('loadstart', window.optimizedLoadStart, true); " +
+                "delete window.optimizedLoadStart; delete window.optimizedStaleMediaError");
+            evaluate(web, "if (window.optimizedOnlineDescriptor) { " +
+                "Object.defineProperty(navigator, 'onLine', window.optimizedOnlineDescriptor); " +
+                "} else { delete navigator.onLine; } delete window.optimizedOnlineDescriptor; " +
+                "window.dispatchEvent(new Event(navigator.onLine ? 'online' : 'offline'))");
         }
     }
 
