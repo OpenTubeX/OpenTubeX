@@ -117,10 +117,6 @@ for (const { encrypted, beforeFirstSync, failure, placeholderTitle } of [
         await page.evaluate(record => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateSubscriptionHistory', { records: [record] }), record)
       }
       receiver = await launchApp(receiverData)
-      const tutorial = receiver.page.locator('.tutorialOverlay')
-      await expect(tutorial).toBeVisible()
-      await tutorial.locator('.tutorialActions').getByRole('button').last().click()
-      await expect(tutorial).toBeHidden()
       await installServer(page)
       await installServer(receiver.page)
       await configureSync(page, settings, !beforeFirstSync)

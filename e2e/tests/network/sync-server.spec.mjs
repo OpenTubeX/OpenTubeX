@@ -970,9 +970,6 @@ test.describe('OpenTubeX sync server', () => {
 
       try {
         other = await launchApp(otherUserData)
-        const tutorial = other.page.locator('.tutorialOverlay')
-        await expect(tutorial).toBeVisible()
-        await tutorial.locator('.tutorialActions').getByRole('button').last().click()
         await configure(page)
         await configure(other.page)
         const original = await editCover(page, path.resolve('e2e/fixtures/images/opentubex-playlist.jpg'))
