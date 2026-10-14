@@ -240,7 +240,7 @@ test('cancelled streaming searches stop reading metadata before scanning the lib
 })
 
 test('metadata mutations refresh results while playback progress does not', () => {
-  for (const type of ['upsertToHistoryCache', 'applyPlaylistMetadataRepairs', 'upsertPlaylistToList', 'removeVideos', 'setAllPlaylists', 'addVideoToWatchQueue', 'removeYtDlpDownload']) {
+  for (const type of ['applyHistoryMetadata', 'upsertToHistoryCache', 'applyPlaylistMetadataRepairs', 'upsertPlaylistToList', 'removeVideos', 'setAllPlaylists', 'addVideoToWatchQueue', 'removeYtDlpDownload']) {
     assert.equal(isLocalVideoMutation(type), true, type)
   }
   for (const type of ['setHistorySummary', 'updateRecordWatchProgressInHistoryCache', 'updateRecordLastViewedPlaylistIdInHistoryCache', 'addOpenPrompt']) {
