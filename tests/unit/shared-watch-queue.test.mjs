@@ -212,3 +212,21 @@ test('repeated download removals from every window write the queue once', async 
   assert.deepEqual(snapshots[2].items.map(item => item.videoId), ['other'])
   assert.equal(writes, 1)
 })
+
+test('a restore request waits for pending queue writes so quitting can drain them', async () => {
+  let finishWrite
+  let saved = []
+  const update = createSharedWatchQueue({
+    read: () => saved,
+    write: items => new Promise(resolve => { finishWrite = () => { saved = items; resolve() } }),
+  })
+  await update({})
+  const write = update({ type: 'addVideoToWatchQueue', payload: { video: { videoId: 'last' } } })
+  let drained = false
+  const drain = update({}).then(() => { drained = true })
+  await settle()
+  assert.equal(drained, false)
+  finishWrite()
+  await Promise.all([write, drain])
+  assert.deepEqual(saved.map(item => item.videoId), ['last'])
+})

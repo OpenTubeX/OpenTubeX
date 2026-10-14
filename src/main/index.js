@@ -6075,6 +6075,8 @@ function runApp() {
 
     await Promise.allSettled([
       trayIconWrite,
+      // Queue requests run in order, so a read waits for pending queue writes
+      updateWatchQueue({}),
       baseHandlers.compactAllDatastores(),
       shutdownYtDlpDownloads(),
       session.defaultSession.clearCache(),

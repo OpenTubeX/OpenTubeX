@@ -315,6 +315,7 @@ test('quit waits for the queued tray icon cache write', async () => {
   const trayIconWrite = new Promise(resolve => { finishWrite = resolve })
   const context = vm.createContext({
     trayIconWrite,
+    updateWatchQueue: async () => {},
     baseHandlers: { compactAllDatastores: async () => {} },
     shutdownYtDlpDownloads: async () => {},
     session: { defaultSession: { clearCache: async () => {}, clearStorageData: async () => {} } },
@@ -329,5 +330,25 @@ test('quit waits for the queued tray icon cache write', async () => {
     finishWrite()
     await cleanup
   }
+  assert.equal(finished, true)
+})
+
+test('quit waits for pending watch queue writes', async () => {
+  let finishWrite
+  const queueWrite = new Promise(resolve => { finishWrite = resolve })
+  const context = vm.createContext({
+    trayIconWrite: Promise.resolve(),
+    updateWatchQueue: () => queueWrite,
+    baseHandlers: { compactAllDatastores: async () => {} },
+    shutdownYtDlpDownloads: async () => {},
+    session: { defaultSession: { clearCache: async () => {}, clearStorageData: async () => {} } },
+  })
+  vm.runInContext(`let resourcesCleanUpDone = false; ${source.slice(source.indexOf('  async function cleanUpResources()'), source.indexOf('  // MacOS event'))}`, context)
+  let finished = false
+  const cleanup = context.cleanUpResources().then(() => { finished = true })
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(finished, false)
+  finishWrite()
+  await cleanup
   assert.equal(finished, true)
 })
