@@ -39,10 +39,11 @@ export function * iterateLocalVideoCommands(context) {
     if (command) yield command
   }
   for (const playlist of playlists) {
-    for (const video of playlist.videos) {
+    for (const video of Array.isArray(playlist.videos) ? playlist.videos : []) {
       const command = entry(video, `${sources.playlists}: ${playlist.playlistName}`, ['fas', 'bookmark'], () => playLibraryVideo(video, videoRoute(video, {
         playlistId: playlist._id,
         playlistType: 'user',
+        ...(video._libraryMemberId ? { libraryMemberId: video._libraryMemberId } : {}),
         ...(video.playlistItemId ? { playlistItemId: video.playlistItemId } : {}),
       })))
       if (command) yield command

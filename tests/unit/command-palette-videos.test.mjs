@@ -1,3 +1,6 @@
+import { readFile } from 'node:fs/promises'
+import vm from 'node:vm'
+import { babelParse, parse } from 'vue/compiler-sfc'
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
@@ -258,3 +261,55 @@ test('download byte-count updates do not invalidate search, but file metadata ch
   assert.equal(hasDownloadSearchChanged(download, { ...progress, files: [] }), true)
   assert.equal(hasDownloadSearchChanged(undefined, download), true)
 })
+
+test('saved local video commands preserve occurrence identity and skip opaque memberships', () => {
+  const run = [], video = { videoId: 'same', title: 'Exact member', playlistItemId: 'legacy', _libraryMemberId: 'member-id' }
+  const context = { history: [], playlists: [{ _id: 'scalar', videos: null }, { _id: 'p', playlistName: 'Name', videos: [null, { retained: true }, video] }], downloads: {}, queue: [], group: 'Local videos', sources: { playlists: 'Playlists' }, playLibraryVideo: (...args) => run.push(args) }
+  const commands = [...iterateLocalVideoCommands(context)]
+  assert.equal(commands.length, 1)
+  commands[0].run()
+  assert.deepEqual(run[0][1], { path: '/watch/same', query: { playlistId: 'p', playlistType: 'user', libraryMemberId: 'member-id', playlistItemId: 'legacy' } })
+})
+
+async function paletteSearchController(bindings) {
+  const text = await readFile(new URL('../../src/renderer/components/FtCommandPalette/FtCommandPalette.vue', import.meta.url), 'utf8')
+  const script = parse(text).descriptor.scriptSetup.content
+  const ast = babelParse(script, { sourceType: 'module' })
+  const registration = ast.program.body.find(node => node.type === 'ExpressionStatement' && node.expression.callee?.name === 'watch' && node.expression.arguments[0]?.type === 'ArrayExpression')
+  const callback = registration.expression.arguments[1]
+  const context = vm.createContext({ videoMatches: { value: [] }, searchPending: { value: false }, toRaw: value => value,
+    iterateLocalVideoCommands, filterCommandPaletteCommandsAsync, setTimeout, console, ...bindings })
+  return { context, search: vm.runInContext(script.slice(callback.start, callback.end), context) }
+}
+
+const emptyVideoSources = { history: [], playlists: [], downloads: {}, queue: [], group: 'Local videos', sources: { history: 'History', playlists: 'Playlists' }, playLibraryVideo() {} }
+
+test('the palette searches bounded storage metadata instead of requiring full renderer caches', async () => {
+  const requests = [], video = { videoId: 'hidden', title: 'Hidden destination' }
+  const sources = { ...emptyVideoSources, loadLibrarySources: async (...args) => { requests.push(args); return { history: [video], playlists: [] } } }
+  const { context, search } = await paletteSearchController()
+  await search(['hidden', sources, 'en-US'], [], () => {})
+  assert.equal(requests.length, 1)
+  assert.deepEqual(requests[0], ['hidden', 'en-US', 'Local videos', sources.sources])
+  assert.equal(context.videoMatches.value.length, 1)
+  assert.equal(context.videoMatches.value[0].label, video.title)
+  assert.equal(context.searchPending.value, false)
+})
+
+for (const stale of [false, true]) {
+  test(`palette storage rejection ${stale ? 'cannot publish over a newer search' : 'clears the loader and reports the failure'}`, async () => {
+    const pending = Promise.withResolvers(), called = Promise.withResolvers(), errors = [], toasts = []
+    const { context, search } = await paletteSearchController({ console: { error: error => errors.push(error) }, t: key => key, showToast: toast => toasts.push(toast) })
+    const sources = { ...emptyVideoSources, loadLibrarySources: () => { called.resolve(); return pending.promise } }
+    let dispose
+    const loading = search(['hidden', sources, 'en-US'], [], callback => { dispose = callback })
+    await called.promise
+    if (stale) { dispose(); context.videoMatches.value = ['newer']; context.searchPending.value = true }
+    pending.reject(new Error('storage unavailable'))
+    await loading
+    assert.equal(context.searchPending.value, stale)
+    assert.deepEqual(Array.from(context.videoMatches.value), stale ? ['newer'] : [])
+    assert.equal(errors.length, stale ? 0 : 1)
+    assert.equal(toasts.length, stale ? 0 : 1)
+  })
+}

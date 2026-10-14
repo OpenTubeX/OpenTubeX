@@ -182,7 +182,7 @@ import { useI18n } from 'vue-i18n'
 import { filterCommandPaletteCommands, filterCommandPaletteCommandsAsync, highlightCommandText } from '../../helpers/commandPalette'
 import { hasDownloadSearchChanged, isLocalVideoMutation, iterateLocalVideoCommands } from '../../helpers/commandPaletteVideos'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
-import { getLocalizedShortcut } from '../../helpers/utils'
+import { getLocalizedShortcut, showToast } from '../../helpers/utils'
 import store from '../../store/index'
 import FtProfileIcon from '../FtProfileIcon/FtProfileIcon.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
@@ -244,10 +244,18 @@ watch([query, () => props.videoSources, locale, videoRevision], async ([search, 
   try {
     // Store mutations provide invalidation; the scan needs no per-record Vue
     // dependency tracking. Unwrap the collections without copying the library.
+    let library = null
+    if (sources.loadLibrarySources) {
+      // Coalesce typing before sending a scan to the storage owner.
+      await new Promise(resolve => setTimeout(resolve, 75))
+      if (cancelled) return
+      library = await sources.loadLibrarySources(search, language, sources.group, sources.sources)
+      if (cancelled) return
+    }
     const rawSources = {
       ...sources,
-      history: toRaw(sources.history),
-      playlists: toRaw(sources.playlists),
+      history: library?.history ?? toRaw(sources.history),
+      playlists: library?.playlists ?? toRaw(sources.playlists),
       downloads: toRaw(sources.downloads),
       queue: toRaw(sources.queue),
     }
@@ -255,6 +263,11 @@ watch([query, () => props.videoSources, locale, videoRevision], async ([search, 
       iterateLocalVideoCommands(rawSources), search, language, () => cancelled
     )
     if (!cancelled) videoMatches.value = matches
+  } catch (error) {
+    if (!cancelled) {
+      console.error(error)
+      showToast({ message: t('Storage Startup Error.Title'), icon: ['fas', 'circle-exclamation'] })
+    }
   } finally {
     if (!cancelled) searchPending.value = false
   }
