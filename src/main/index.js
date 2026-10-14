@@ -1992,12 +1992,14 @@ function runApp() {
       // would lose the launch when the pending quit closes it again.
       // AppImage cannot use Electron's relaunch on its FUSE mount.
       if (isQuitting && !process.env.APPIMAGE) {
-        if (!relaunchRequested) {
+        // Retry scheduling once; later launch requests can retry if both fail.
+        for (let attempt = 0; attempt < 2 && !relaunchRequested; attempt++) {
           try {
-            app.relaunch({
+            const scheduled = app.relaunch({
               args: commandLine.slice(1),
               execPath: process.env.PORTABLE_EXECUTABLE_FILE || process.execPath
             })
+            if (scheduled === false) throw new Error('Electron could not schedule the relaunch')
             relaunchRequested = true
           } catch (error) {
             console.error('Failed to schedule app relaunch', error)
