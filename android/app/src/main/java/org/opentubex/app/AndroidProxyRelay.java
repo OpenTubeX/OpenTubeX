@@ -79,6 +79,26 @@ final class AndroidProxyRelay implements AutoCloseable {
         return "Basic " + Base64.getEncoder().encodeToString((USER + ":" + password).getBytes(StandardCharsets.US_ASCII));
     }
 
+    /** An HTTPS origin can send its own 407 inside the tunnel, so only the CONNECT request
+     * and plain HTTP requests, whose header the relay reads and strips, carry the secret. */
+    okhttp3.Authenticator okHttpAuthenticator() {
+        return (route, response) -> {
+            okhttp3.Request request = response.request();
+            if (request.header("Proxy-Authorization") != null ||
+                (request.isHttps() && !request.method().equals("CONNECT"))) return null;
+            return request.newBuilder().header("Proxy-Authorization", authorizationHeader()).build();
+        };
+    }
+
+    /** URLConnection reports a 407 the same way whether it came from the relay or from an
+     * origin inside the tunnel. Only Android's tunnel setup asks on behalf of the relay. */
+    static boolean isUrlConnectionTunnelChallenge(StackTraceElement[] stack) {
+        for (StackTraceElement frame : stack) {
+            if (frame.getMethodName().equals("createTunnel") && frame.getClassName().endsWith(".RealConnection")) return true;
+        }
+        return false;
+    }
+
     synchronized void configure(ProxyConfiguration value) {
         if (configuration.equals(value)) return;
         configuration = value;

@@ -357,4 +357,24 @@ public class AndroidProxyRelayTest {
             assertFalse(AndroidProxyRelay.isLoopbackName("cafe"));
         }
     }
+
+    @Test public void httpsOriginsCannotObtainTheSecretWithTheirOwnChallenge() throws Exception {
+        try (AndroidProxyRelay relay = new AndroidProxyRelay(new ProxyConfiguration(false, "", "", "", "", ""), null, LOOPBACK)) {
+            okhttp3.Authenticator authenticator = relay.okHttpAuthenticator();
+            okhttp3.Request tunnel = new okhttp3.Request.Builder().url("https://origin.test/").method("CONNECT", null).build();
+            okhttp3.Request origin = new okhttp3.Request.Builder().url("https://origin.test/artwork").build();
+            okhttp3.Request plain = new okhttp3.Request.Builder().url("http://origin.test/artwork").build();
+            assertEquals(relay.authorizationHeader(), authenticator.authenticate(null, challenge(tunnel)).header("Proxy-Authorization"));
+            assertEquals(relay.authorizationHeader(), authenticator.authenticate(null, challenge(plain)).header("Proxy-Authorization"));
+            assertNull(authenticator.authenticate(null, challenge(origin)));
+        }
+        StackTraceElement tunnel = new StackTraceElement("com.android.okhttp.internal.io.RealConnection", "createTunnel", null, 1);
+        StackTraceElement request = new StackTraceElement("com.android.okhttp.internal.http.HttpEngine", "followUpRequest", null, 1);
+        assertTrue(AndroidProxyRelay.isUrlConnectionTunnelChallenge(new StackTraceElement[] {tunnel}));
+        assertFalse(AndroidProxyRelay.isUrlConnectionTunnelChallenge(new StackTraceElement[] {request}));
+    }
+
+    private static okhttp3.Response challenge(okhttp3.Request request) {
+        return new okhttp3.Response.Builder().request(request).protocol(okhttp3.Protocol.HTTP_1_1).code(407).message("Proxy Authentication Required").build();
+    }
 }

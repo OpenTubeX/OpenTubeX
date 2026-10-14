@@ -69,7 +69,9 @@ final class AndroidProxy {
                 // Android may report the relay's host name as "localhost", so compare its address.
                 return getRequestorType() == RequestorType.PROXY && getRequestingSite() != null &&
                     getRequestingSite().isLoopbackAddress() && getRequestingPort() == relay.port() &&
-                    AndroidProxyRelay.REALM.equals(getRequestingPrompt())
+                    AndroidProxyRelay.REALM.equals(getRequestingPrompt()) &&
+                    ("http".equals(getRequestingProtocol()) ||
+                        AndroidProxyRelay.isUrlConnectionTunnelChallenge(Thread.currentThread().getStackTrace()))
                     ? new PasswordAuthentication(AndroidProxyRelay.USER, relay.password().toCharArray())
                     : null;
             }
@@ -118,10 +120,7 @@ final class AndroidProxy {
 
     /** Also answers CONNECT preemptively, so tunnels need no extra round trip. */
     static okhttp3.Authenticator proxyAuthenticator() {
-        return (route, response) -> {
-            if (relay == null || response.request().header("Proxy-Authorization") != null) return null;
-            return response.request().newBuilder().header("Proxy-Authorization", relay.authorizationHeader()).build();
-        };
+        return (route, response) -> relay == null ? null : relay.okHttpAuthenticator().authenticate(route, response);
     }
 
     /** The relay refuses loopback destinations, so only it can challenge as 127.0.0.1. */
