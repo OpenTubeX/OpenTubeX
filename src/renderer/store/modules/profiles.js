@@ -117,8 +117,12 @@ const actions = {
     return true
   },
 
-  async batchUpdateSubscriptionDetails({ commit }, channels) {
+  async batchUpdateSubscriptionDetails({ commit, state }, channels) {
     if (channels.length === 0) { return true }
+    // Skip the main-process round trip when no synced profile would change
+    if (state.profileList.every(profile => getProfileWithUpdatedSubscriptionDetails(profile, channels) === null)) {
+      return true
+    }
 
     try {
       const { profileIds, success } = await DBProfileHandlers.updateSubscriptionDetails(channels)

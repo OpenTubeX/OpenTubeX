@@ -115,6 +115,13 @@ test('metadata saves report success for changed, unchanged, and empty updates', 
   assert.equal(await store.dispatch('batchUpdateSubscriptionDetails', [channel]), true)
 })
 
+test('unchanged subscription details skip the profile datastore', async t => {
+  const { db, store } = await profileStore()
+  const find = t.mock.method(db.profiles, 'findAsync')
+  assert.equal(await store.dispatch('batchUpdateSubscriptionDetails', [{ channelId: 'channel', channelName: 'Old name' }]), true)
+  assert.equal(find.mock.callCount(), 0)
+})
+
 test('bulk disables 939 subscriptions with one write per profile and synchronizes other windows', async t => {
   const subscriptions = Array.from({ length: 939 }, (_, index) => ({
     id: `channel-${index}`, name: `Channel ${index}`, thumbnail: '', showMembersOnly: true,
