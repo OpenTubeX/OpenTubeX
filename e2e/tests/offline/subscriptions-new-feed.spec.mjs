@@ -105,6 +105,74 @@ const commonSettings = {
   useRssFeeds: false
 }
 
+async function holdSeenMarks(page) {
+  // Hold persistence pending, then run the real seen-mark action on release.
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const dispatch = store.dispatch
+    store.dispatch = async function (type, ...args) {
+      if (type === 'markSubscriptionEntriesAsSeen') {
+        store.dispatch = dispatch
+        await new Promise(resolve => { window.__finishSavingSeenMarks = resolve })
+      }
+      return dispatch.call(this, type, ...args)
+    }
+  })
+}
+
+test.describe('New feed refresh while saving seen marks', () => {
+  test.use({
+    seed: {
+      settings: {
+        ...commonSettings,
+        useRssFeeds: true,
+        hideSubscriptionsShorts: true,
+        hideSubscriptionsLive: true,
+        hideSubscriptionsCommunity: true
+      },
+      profiles: [profile()],
+      subscriptionCache: [{
+        _id: CHANNEL_ID,
+        videos: [newVideo],
+        videosTimestamp: new Date(now).toISOString()
+      }]
+    }
+  })
+
+  test('keeps failed channels and the refresh shortcut while saving seen marks', async ({ page }, testInfo) => {
+    let feedRequests = 0
+    await page.route('**/feeds/videos.xml?*', route => {
+      feedRequests++
+      return route.fulfill({ status: 500, body: 'Failed' })
+    })
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await page.getByRole('button', { name: /Refresh New content/ }).click()
+    const errorHeading = page.getByRole('heading', { name: 'Channels with errors', exact: true })
+    await expect(errorHeading).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Mark all as seen' })).toBeEnabled()
+
+    await holdSeenMarks(page)
+    try {
+      await page.getByRole('button', { name: 'Mark all as seen' }).click()
+      await expect.poll(() => page.evaluate(() => !!window.__finishSavingSeenMarks)).toBe(true)
+      await expect(page.getByText('There is no new content.', { exact: true })).toBeVisible()
+      await expect.soft(errorHeading).toBeVisible({ timeout: 1000 })
+      await expect.soft(page.locator('.newFeed').getByRole('link', { name: 'Channel A', exact: true })).toBeVisible({ timeout: 1000 })
+      await page.locator('.card').filter({ has: page.locator('.newFeed') }).screenshot({
+        path: testInfo.outputPath('failed-channels-during-save.png')
+      })
+
+      const requestsBeforeShortcut = feedRequests
+      await page.keyboard.press('r')
+      await expect.poll(() => feedRequests).toBeGreaterThan(requestsBeforeShortcut)
+    } finally {
+      await page.evaluate(() => window.__finishSavingSeenMarks?.())
+    }
+    await expect(page.getByText('There is no new content.', { exact: true })).toBeVisible()
+  })
+})
+
 test.describe('Reactive subscription title filtering', () => {
   test.use({
     seed: {
@@ -1640,19 +1708,7 @@ test.describe('large combined new feed', () => {
         await page.locator('[data-subscription-feed-tab="all"]').click()
         await expect(page.getByText('New video 0', { exact: true })).toBeVisible()
 
-        // Hold persistence pending to make the gap after the leave animation
-        // deterministic, while still running the real seen-mark action afterward.
-        await page.evaluate(() => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-          const dispatch = store.dispatch
-          store.dispatch = async function (type, ...args) {
-            if (type === 'markSubscriptionEntriesAsSeen') {
-              store.dispatch = dispatch
-              await new Promise(resolve => { window.__finishSavingSeenMarks = resolve })
-            }
-            return dispatch.call(this, type, ...args)
-          }
-        })
+        await holdSeenMarks(page)
         try {
           await page.getByRole('button', { name: 'Mark all as seen' }).click()
           await expect.poll(() => page.evaluate(() => !!window.__finishSavingSeenMarks)).toBe(true)

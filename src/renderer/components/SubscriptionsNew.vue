@@ -85,8 +85,10 @@
   <SubscriptionsTabUi
     v-else
     class="newFeed"
+    :error-channels="errorChannels"
     :only-show-new="true"
     :track-global-refresh="false"
+    @refresh="refresh"
   />
 </template>
 
