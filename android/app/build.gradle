@@ -1,5 +1,8 @@
 apply plugin: 'com.android.application'
 
+def nativeNdkDirectory = androidComponents.sdkComponents.ndkDirectory
+def optimizedTestBuild = ['nightly', 'release'].contains(project.findProperty('testBuildType'))
+
 def releaseKeystorePath = System.getenv("ANDROID_RELEASE_KEYSTORE")
 def releaseStorePassword = System.getenv("ANDROID_RELEASE_STORE_PASSWORD")
 def releaseSigningConfigured = releaseKeystorePath?.trim() && releaseStorePassword?.trim()
@@ -43,7 +46,7 @@ def generateCastSender = tasks.register('generateCastSender', Exec) {
     outputs.dir(castSenderOutput)
     doFirst {
         commandLine 'node', '_scripts/androidCastSender.mjs', castSenderOutput.get().asFile.absolutePath,
-            android.ndkDirectory.absolutePath, inputs.properties.abis
+            nativeNdkDirectory.get().asFile.absolutePath, inputs.properties.abis
     }
 }
 tasks.named('preBuild').configure { dependsOn(generateCastSender) }
@@ -57,13 +60,16 @@ def generateRumbleHttp = tasks.register('generateRumbleHttp', Exec) {
     outputs.dir(rumbleHttpOutput)
     doFirst {
         commandLine 'node', '_scripts/androidYtDlpHttp.mjs', rumbleHttpOutput.get().asFile.absolutePath,
-            android.ndkDirectory.absolutePath, inputs.properties.abis
+            nativeNdkDirectory.get().asFile.absolutePath, inputs.properties.abis
     }
 }
 tasks.named('preBuild').configure { dependsOn(generateRumbleHttp) }
 
 android {
     namespace = "org.opentubex.app"
+    buildFeatures {
+        resValues = true
+    }
     compileSdk = rootProject.ext.compileSdkVersion
     ndkVersion '28.2.13676358'
     defaultConfig {
@@ -73,7 +79,7 @@ android {
         versionCode = (System.getenv("ANDROID_VERSION_CODE") ?: "1").toInteger()
         versionName = System.getenv("ANDROID_VERSION_NAME") ?: "0.33.0-dev"
         ndk { abiFilters.addAll((project.findProperty('testAbi') ?: 'arm64-v8a,armeabi-v7a,x86_64,x86').split(',')) }
-        testInstrumentationRunner(project.findProperty('testBuildType') == 'nightly'
+        testInstrumentationRunner(optimizedTestBuild
             ? "org.opentubex.app.OptimizedApkInstrumentation"
             : "androidx.test.runner.AndroidJUnitRunner")
         aaptOptions {
@@ -123,7 +129,7 @@ android {
         androidTest.assets.srcDirs += ['../../e2e/fixtures/media']
         androidTest.assets.srcDirs += ['../../e2e/fixtures/player-scripts']
     }
-    if (project.findProperty('testBuildType') == 'nightly') {
+    if (optimizedTestBuild) {
         sourceSets.androidTest {
             java.srcDirs = ['src/optimizedAndroidTest/java']
             manifest.srcFile 'src/optimizedAndroidTest/AndroidManifest.xml'
@@ -150,7 +156,7 @@ android {
             // resources. Avoid R8 optimizations and renaming in the keep rules.
             minifyEnabled true
             shrinkResources false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             if (releaseSigningConfigured) {
                 signingConfig signingConfigs.production
             }
@@ -196,7 +202,7 @@ dependencies {
     implementation "androidx.work:work-runtime:$androidxWorkVersion"
     implementation project(':capacitor-android')
     testImplementation "junit:junit:$junitVersion"
-    if (project.findProperty('testBuildType') != 'nightly') {
+    if (!optimizedTestBuild) {
         androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
         androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
         // Match the barcode plugin to control CameraX initialization in tests.

@@ -1,48 +1,52 @@
 // Run with: ./android/gradlew -p android -I ../tests/android/build-identity.init.gradle verifyBuildIdentity
 // Repeat with -PtestBuildType=nightly to check nightly instrumentation.
-gradle.projectsEvaluated {
-    def app = gradle.rootProject.project(':app')
-    def variants = app.android.applicationVariants
-
-    app.tasks.register('verifyBuildIdentity') {
-        doLast {
-            def production = variants.find { it.name == 'release' }
-            assert production.applicationId == 'org.opentubex.app'
-            for (entry in [
-                [
-                    variant: 'debug',
-                    suffix: 'dev',
-                    label: 'OpenTubeX Dev',
-                    resources: 'src/dev/res',
-                    generatedResources: 'android/dev/res'
-                ],
-                [
-                    variant: 'nightly',
-                    suffix: 'nightly',
-                    label: 'OpenTubeX Nightly',
-                    resources: 'src/debug/res',
-                    generatedResources: 'android/debug/res'
-                ]
-            ]) {
-                def variant = variants.find { it.name == entry.variant }
-                assert variant.applicationId == "org.opentubex.app.${entry.suffix}"
-                assert app.android.sourceSets[entry.variant].res.srcDirs == [
-                    app.file(entry.resources),
-                    app.rootProject.file("../build/generated/app-icons/${entry.generatedResources}")
-                ] as Set
-                for (name in ['app_name', 'title_activity_main']) {
-                    assert variant.buildType.resValues["string/${name}"]?.value == entry.label
+def variants = [:]
+gradle.beforeProject { app ->
+    if (app.path != ':app') return
+    app.pluginManager.withPlugin('com.android.application') {
+        app.androidComponents.onVariants(app.androidComponents.selector().all(), { variant ->
+            variants[variant.name] = variant
+        } as org.gradle.api.Action)
+        app.tasks.register('verifyBuildIdentity') {
+            doLast {
+                assert variants.release.applicationId.get() == 'org.opentubex.app'
+                for (entry in [
+                    [
+                        variant: 'debug',
+                        suffix: 'dev',
+                        label: 'OpenTubeX Dev',
+                        resources: 'src/dev/res',
+                        generatedResources: 'android/dev/res'
+                    ],
+                    [
+                        variant: 'nightly',
+                        suffix: 'nightly',
+                        label: 'OpenTubeX Nightly',
+                        resources: 'src/debug/res',
+                        generatedResources: 'android/debug/res'
+                    ]
+                ]) {
+                    def variant = variants[entry.variant]
+                    def buildType = app.android.buildTypes.getByName(entry.variant)
+                    assert variant.applicationId.get() == "org.opentubex.app.${entry.suffix}"
+                    assert app.android.sourceSets[entry.variant].res.srcDirs == [
+                        app.file(entry.resources),
+                        app.rootProject.file("../build/generated/app-icons/${entry.generatedResources}")
+                    ] as Set
+                    for (name in ['app_name', 'title_activity_main']) {
+                        assert variant.resValues.get()[variant.makeResValueKey('string', name)]?.value == entry.label
+                    }
+                    assert buildType.signingConfig.storeFile == app.rootProject.file('nightly.keystore')
+                    if (variant.name == app.android.testBuildType) {
+                        assert variant.androidTest.applicationId.get() == "${variant.applicationId.get()}.test"
+                    }
+                    println "Verified ${variant.applicationId.get()}: ${entry.label}, isolated from production"
                 }
-                assert variant.signingConfig.storeFile == app.rootProject.file('nightly.keystore')
-                if (variant.name == app.android.testBuildType) {
-                    assert variant.testVariant.applicationId == "${variant.applicationId}.test"
+                for (name in ['release', 'nightly']) {
+                    def buildType = app.android.buildTypes.getByName(name)
+                    assert buildType.minifyEnabled : "${name} must shrink unused bytecode"
+                    assert !buildType.shrinkResources : "${name} must preserve runtime-discovered resources"
                 }
-                println "Verified ${variant.applicationId}: ${entry.label}, isolated from production"
-            }
-            for (name in ['release', 'nightly']) {
-                def variant = variants.find { it.name == name }
-                assert variant.buildType.minifyEnabled : "${name} must shrink unused bytecode"
-                assert !variant.buildType.shrinkResources : "${name} must preserve runtime-discovered resources"
             }
         }
     }
