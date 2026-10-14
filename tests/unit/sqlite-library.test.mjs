@@ -3067,6 +3067,7 @@ test('local command search returns bounded metadata and distinct saved occurrenc
   assert.equal(saved.playlists[0].videos.length, 50)
   assert.equal(new Set(saved.playlists[0].videos.map(video => video._libraryMemberId)).size, 50)
   const selected = saved.playlists[0].videos.at(-1)
+  assert.equal(selected.playlistItemId, 'same')
   const full = playlistMember(engine, { id: 'playlist', memberId: selected._libraryMemberId })
   assert.equal(full.title, selected.title)
   assert.ok(full.unknown instanceof Date)
