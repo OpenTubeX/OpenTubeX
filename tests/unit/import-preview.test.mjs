@@ -81,6 +81,14 @@ test('Takeout preview reports unsupported playlist files while preserving usable
 
 const component = await readFile(new URL('../../src/renderer/components/DataSettings/DataSettings.vue', import.meta.url), 'utf8')
 
+function componentSection(startMarker, endMarker) {
+  const start = component.indexOf(startMarker)
+  const end = component.indexOf(endMarker)
+  assert.ok(start >= 0, `Missing component section start: ${startMarker}`)
+  assert.ok(end > start, `Missing or misplaced component section end: ${endMarker}`)
+  return component.slice(start, end)
+}
+
 test('duplicate backup identities accumulate subscriptions and videos promised by the preview', async () => {
   const data = {
     profiles: ['A', 'B'].map(id => ({ _id: 'same-profile', name: 'Profile', subscriptions: [{ id }] })),
@@ -98,7 +106,7 @@ test('duplicate backup identities accumulate subscriptions and videos promised b
     store: { dispatch: async (action, record) => { if (action === 'updatePlaylist') playlists.set(record._id, record); return true } },
     compactAllDatastores: async () => true, closeBackupImport() {}, showToast() {}, t: key => key,
   })
-  vm.runInContext(component.slice(component.indexOf('async function importUnifiedBackup()'), component.indexOf('const showTakeoutImport')), context)
+  vm.runInContext(componentSection('async function importUnifiedBackup()', 'const showTakeoutImport'), context)
   await context.importUnifiedBackup()
   assert.deepEqual(Array.from(profiles.get('same-profile').subscriptions, channel => channel.id), ['A', 'B'])
   assert.deepEqual(Array.from(playlists.get('same-playlist').videos, video => video.videoId), ['A', 'B'])
@@ -114,7 +122,7 @@ test('watch history with empty subtitles imports the record counted in the previ
     parseTakeoutWatchHistory, historyCacheById: { value: {} }, deepCopy: structuredClone,
     store: { dispatch: async (_action, records) => { imported = records } }, showToast() {}, t: key => key,
   })
-  vm.runInContext(component.slice(component.indexOf('async function importYouTubeWatchHistory('), component.indexOf('const showExportWatchHistoryPrompt')), context)
+  vm.runInContext(componentSection('async function importYouTubeWatchHistory(', 'const showExportWatchHistoryPrompt'), context)
   await context.importYouTubeWatchHistory([record])
   assert.equal(imported.get('abcdefghijk').isWatched, true)
   assert.equal(imported.get('abcdefghijk').author, '')
@@ -146,7 +154,7 @@ test('preview reports existing generated playlist names as merge targets on repe
       playlists.value[index] = playlist
     } },
   })
-  vm.runInContext(component.slice(component.indexOf('async function importTakeoutPlaylist('), component.indexOf('async function importPlaylists()')), context)
+  vm.runInContext(componentSection('async function importTakeoutPlaylist(', 'async function importPlaylists()'), context)
   for (let attempt = 0; attempt < 2; attempt++) {
     const preview = await previewTakeoutImport(file, paths, { playlists: playlists.value })
     assert.deepEqual(counts(preview[0]), [0, 2, 0])

@@ -39,8 +39,8 @@ test('previews backup counts and replacement effects, updates selection, and lea
   await expect(preview.locator('[data-category="settings"]')).toContainText('Existing: 1')
   await expect(preview.locator('[data-category="settings"]')).toContainText('Skipped: 2')
   await expect(preview.locator('[data-category="settings"]')).toContainText('Matching settings are replaced')
-  await expect(preview.locator('[data-category="profiles"]').first()).toContainText('Existing: 1')
-  await expect(preview.locator('[data-category="profiles"]').last()).toContainText('New: 1')
+  await expect(preview.locator('[data-category="profiles"]').filter({ has: page.getByRole('heading', { name: 'Profiles and subscriptions', exact: true }) })).toContainText('Existing: 1')
+  await expect(preview.locator('[data-category="profiles"]').filter({ has: page.getByRole('heading', { name: 'Subscriptions', exact: true }) })).toContainText('New: 1')
   expect(await savedData(page)).toEqual(before)
   await page.getByRole('checkbox', { name: 'History', exact: true }).locator('+ label').click()
   await expect(preview.locator('[data-category="history"]')).toHaveCount(0)
@@ -99,7 +99,7 @@ test('Takeout preview shows matching and new records and remains usable when its
     await page.locator('.takeoutSelectionCentered').screenshot({ path: testInfo.outputPath(`import-preview-${scheme}.png`) })
   }
   const choices = page.locator('.takeoutSelectionCentered')
-  const viewport = page.locator('.settingsSubpageScroll:visible')
+  const viewport = page.locator('.settingsSubpageScroll').visible()
   async function scrollToBottom() {
     await viewport.evaluate(element => { element.scrollTop = element.scrollHeight })
   }
@@ -128,6 +128,7 @@ test('Takeout preview shows matching and new records and remains usable when its
     await page.setViewportSize({ width: 375, height: 800 })
     await expect.poll(() => choices.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
     await scrollToBottom()
+    // Avoid pointer action auto-scrolling: shrink the content from the bottom position.
     await choices.getByRole('checkbox', { name: 'History', exact: true }).evaluate(element => element.nextElementSibling.click())
     await expect(preview.locator('[data-category="history"]')).toHaveCount(0)
     await validScroll()
