@@ -2,12 +2,31 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
 import test from 'node:test'
+import { createMemoryHistory, createRouter } from 'vue-router'
 
 const source = readFileSync(new URL('../../src/renderer/tabs/TabNavigationService.js', import.meta.url), 'utf8')
   .replace(/^import[\s\S]*?from ['"][^'"]+['"]\n/gm, '')
   .replace(/^export default .*$/gm, '')
   .replace(/^export /gm, '')
 const Service = vm.runInNewContext(`${source}; TabNavigationService`, { START_LOCATION: {} })
+
+for (const name of [null, 'retired-history-route']) {
+  test(`restored routes with name ${name} still project their saved path`, async () => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/', component: {} },
+        { path: '/history', name: 'history', component: {} }
+      ]
+    })
+    await router.push('/')
+    const navigation = new Service(router, {})
+    const route = { name, path: '/history', query: { video: 'abc' }, hash: '#resume', fullPath: '/history?video=abc#resume' }
+    await navigation.projectRoute(route)
+    assert.equal(router.currentRoute.value.fullPath, route.fullPath)
+    assert.equal(navigation.resolve(route).name, 'history')
+  })
+}
 
 test('route presentation markers follow the current projection and clear after failures', async () => {
   const pending = new Map()

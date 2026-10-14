@@ -85,7 +85,9 @@ public class OptimizedApkInstrumentation extends Instrumentation {
                 Files.copy(input, fixture.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
             }
             check(execute("qjs", "--eval", "print(1 + 1)").trim().equals("2"), "QuickJS executes without its static archive");
-            File script = new File(getTargetContext().getNoBackupFilesDir(), "youtubedl-android/yt-dlp/yt-dlp");
+            File installation = new File(getTargetContext().getNoBackupFilesDir(), "youtubedl-android");
+            File script = YtDlpCodeCache.prepare(new File(installation, "yt-dlp/yt-dlp"),
+                new File(installation, "yt-dlp-code"));
             check(execute("python", script.getPath(), "--enable-file-urls", "--dump-single-json", fixture.toURI().toString())
                 .contains("optimized-apk-demo"), "Python and yt-dlp extract local media");
             execute("ffmpeg", "-y", "-i", fixture.getPath(), converted.getPath());
@@ -216,6 +218,16 @@ public class OptimizedApkInstrumentation extends Instrumentation {
     }
 
     private void checkPlayerFullscreen(WebView web, File fixture) throws Exception {
+        long deadline = SystemClock.elapsedRealtime() + 15000;
+        AtomicReference<Boolean> focused = new AtomicReference<>(false);
+        do {
+            runOnMainSync(() -> focused.set(resumedActivity != null && resumedActivity.hasWindowFocus() &&
+                resumedActivity.getClass().getName().equals("org.opentubex.app.MainActivity")));
+            if (focused.get()) break;
+            Thread.sleep(100);
+        } while (SystemClock.elapsedRealtime() < deadline);
+        check(focused.get(), "Main activity regains focus after the scanner");
+        await(web, "!!document.querySelector('.app') && document.visibilityState === 'visible'");
         // A fresh install may show the tutorial over the real player controls.
         evaluate(web, "document.querySelector('.tutorialOverlay .tutorialActions button')?.click()");
         JSONObject file = new JSONObject().put("videoId", "optimized-apk-demo")
@@ -362,7 +374,8 @@ public class OptimizedApkInstrumentation extends Instrumentation {
             do {
                 AccessibilityNodeInfo root = automation.getRootInActiveWindow();
                 if (root != null) {
-                    for (String controller : new String[] { "com.android.permissioncontroller", "com.google.android.permissioncontroller" }) {
+                    for (String controller : new String[] { "com.android.permissioncontroller", "com.google.android.permissioncontroller",
+                            "com.android.packageinstaller", "com.google.android.packageinstaller" }) {
                         for (String id : new String[] { "permission_allow_button", "permission_allow_foreground_only_button" }) {
                             for (var button : root.findAccessibilityNodeInfosByViewId(controller + ":id/" + id)) {
                                 if (button.performAction(AccessibilityNodeInfo.ACTION_CLICK)) return;

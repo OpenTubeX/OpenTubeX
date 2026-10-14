@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 import Datastore from '@seald-io/nedb'
+import { toRaw } from 'vue'
 import * as seenSync from '../../src/renderer/helpers/subscription-seen-videos.js'
 import * as seenData from '../../src/subscriptionSeenVideos.js'
 import * as postData from '../../src/subscriptionSeenPosts.js'
@@ -184,6 +185,7 @@ function cacheFixture(applied = true, logger = console) {
   const recorded = []
   const context = vm.createContext({
     console: logger,
+    toRaw,
     ...seenVideos,
     ...feedState,
     DBSubscriptionCacheHandlers: {

@@ -43,10 +43,17 @@ test('opens background videos promptly from a large subscriptions feed', async (
   await expect(page.locator('.ft-list-video').first()).toBeVisible()
   // Load Watch's async bundle before sampling. Its one-time initialization
   // would otherwise measure module parsing alongside each tab's creation.
-  await page.locator('.ft-list-video .title').first().click({ button: 'middle' })
+  const warmLink = page.locator('.ft-list-video .title').first()
+  const warmVideoId = /\/watch\/([^?]+)/.exec(await warmLink.getAttribute('href'))[1]
+  await warmLink.click({ button: 'middle' })
   await expect(page.locator('.tabContent[aria-hidden="true"] .videoLayout')).toBeAttached()
   await expect(page.locator('.newTabThumbnailMorph')).toHaveCount(0)
   await expect(page.locator('.feed-enter-active, .feed-enter-from, .feed-move')).toHaveCount(0)
+  await expect.poll(() => page.evaluate(id => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    return JSON.parse(store.getters.getSubscriptionSeenVideos)
+      .some(entry => entry.videoId === id && entry.seenAt > (entry.unseenAt ?? 0))
+  }, warmVideoId)).toBe(true)
   const session = await page.context().newCDPSession(page)
   await session.send('Emulation.setCPUThrottlingRate', { rate: 4 })
   for (const reducedMotion of ['off', 'on']) {

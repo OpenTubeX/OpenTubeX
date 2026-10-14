@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import { compileFunction } from 'node:vm'
 import Datastore from '@seald-io/nedb'
+import { toRaw } from 'vue'
 import * as historyHelpers from '../../src/history.js'
 import * as seenHelpers from '../../src/subscriptionSeenVideos.js'
 
@@ -23,7 +24,7 @@ async function fixture(fail = false) {
   const History = compileFunction(baseSource.slice(baseSource.indexOf('class Settings {'), baseSource.indexOf('\nclass WatchStats {'))
     + '\nreturn History', Object.keys(baseDependencies))(...Object.values(baseDependencies))
   if (fail) History.updateSubscriptionState = async () => { throw new Error('history persistence failed') }
-  const dependencies = { ...historyHelpers, DBHistoryHandlers: History, console: { error() {} } }
+  const dependencies = { toRaw, ...historyHelpers, DBHistoryHandlers: History, console: { error() {} } }
   const module = compileFunction(source.replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
     .replace('export default', 'return'), Object.keys(dependencies))(...Object.values(dependencies))
   const appliedMarks = []

@@ -342,15 +342,15 @@ const actions = {
   async markSubscriptionVideoAsSeen({ commit, dispatch, state, rootGetters }, videoId) {
     const cacheConfigs = [
       {
-        cache: applySubscriptionSeenVideosToCache(state.videoCache, rootGetters?.getSubscriptionSeenVideos),
+        cache: state.videoCache,
         tab: 'videos'
       },
       {
-        cache: applySubscriptionSeenVideosToCache(state.shortsCache, rootGetters?.getSubscriptionSeenVideos),
+        cache: state.shortsCache,
         tab: 'shorts'
       },
       {
-        cache: applySubscriptionSeenVideosToCache(state.liveCache, rootGetters?.getSubscriptionSeenVideos),
+        cache: state.liveCache,
         tab: 'live'
       }
     ]
@@ -358,8 +358,10 @@ const actions = {
     const writes = []
     const seenVideos = []
     for (const { cache, tab } of cacheConfigs) {
-      for (const [channelId, cacheEntry] of Object.entries(cache)) {
-        const entry = cacheEntry?.videos?.find(video => video.videoId === videoId)
+      for (const [channelId, cacheEntry] of Object.entries(toRaw(cache))) {
+        if (!cacheEntry?.videos?.some(video => video.videoId === videoId)) continue
+        const effectiveCache = applySubscriptionSeenVideosToCache(cache, rootGetters?.getSubscriptionSeenVideos)
+        const entry = effectiveCache[channelId]?.videos?.find(video => video.videoId === videoId)
         if (entry?.isNewInSubscriptionFeed !== true) {
           continue
         }

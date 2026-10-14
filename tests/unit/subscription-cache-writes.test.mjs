@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 import Datastore from '@seald-io/nedb'
+import { toRaw } from 'vue'
 import { ensureSubscriptionFeedEntryState } from '../../src/renderer/helpers/subscription-entries.js'
 import * as seenData from '../../src/subscriptionSeenVideos.js'
 import * as feedState from '../../src/subscriptionFeedState.js'
@@ -50,7 +51,7 @@ for (const [tab, field, cacheKey, update, mark] of [
       ]
       await Cache[update]('channel', [old], new Date(1000))
       const context = vm.createContext({
-        console, ...seenData, ...feedState, applySubscriptionSeenVideosToCache, applySubscriptionSeenPostsToCache,
+        console, toRaw, ...seenData, ...feedState, applySubscriptionSeenVideosToCache, applySubscriptionSeenPostsToCache,
         DBSubscriptionCacheHandlers: Cache,
       })
       vm.runInContext(moduleSource, context)

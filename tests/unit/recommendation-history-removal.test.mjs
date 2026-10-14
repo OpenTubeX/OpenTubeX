@@ -4,6 +4,7 @@ import test from 'node:test'
 import { compileFunction } from 'node:vm'
 import Datastore from '@seald-io/nedb'
 import { createStore } from 'vuex'
+import { toRaw } from 'vue'
 import * as historyHelpers from '../../src/history.js'
 import * as seenHelpers from '../../src/subscriptionSeenVideos.js'
 import * as externalMediaPositions from '../../src/renderer/helpers/externalMediaPosition.js'
@@ -32,7 +33,7 @@ function evaluate (source, dependencies, exports = '') {
 function fixture () {
   const db = Object.fromEntries(['history', 'settings', 'recommendations'].map(name => [name, new Datastore({ inMemoryOnly: true })]))
   const handlers = evaluate(sources[0], { db, createRecommendationStore, createIdQuery, ...historyHelpers, ...seenHelpers }, 'return { history: History, recommendations }')
-  const history = evaluate(sources[1], { DBHistoryHandlers: handlers.history, ...historyHelpers, ...externalMediaPositions })
+  const history = evaluate(sources[1], { DBHistoryHandlers: handlers.history, toRaw, ...historyHelpers, ...externalMediaPositions })
   const recommendations = evaluate(sources[2], { DBRecommendationHandlers: handlers.recommendations })
   const otherModules = Object.fromEntries([...sources[3].matchAll(/^import (\w+) from '\.\/modules\//gm)].map(([, name]) => [name, {}]))
   const store = evaluate(sources[3], {

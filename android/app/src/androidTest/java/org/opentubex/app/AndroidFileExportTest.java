@@ -95,7 +95,7 @@ public class AndroidFileExportTest {
                     awaitValue(scenario, "window.secondPickerResult !== null", "true");
                     assertEquals("true", evaluate(scenario, "typeof window.secondPickerResult.error === 'string'"));
                     assertEquals("null", evaluate(scenario, "window.firstPickerResult"));
-                    InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand("input keyevent KEYCODE_BACK").close();
+                    cancelPicker();
                     awaitValue(scenario, "window.firstPickerResult !== null", "true");
                     assertEquals(first.equals("saveFile") ? "{\"saved\":false}" : "{}",
                         evaluate(scenario, "window.firstPickerResult"));
@@ -160,7 +160,7 @@ public class AndroidFileExportTest {
                 "{fileName:'cancel.txt',data:'dGVzdA==',mimeType:'text/plain'}).then(function(result){window.exportResult=result;}," +
                 "function(error){window.exportResult={error:error.message};});");
             awaitPicker();
-            InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand("input keyevent KEYCODE_BACK").close();
+            cancelPicker();
             awaitValue(scenario, "window.exportResult !== null", "true");
             assertEquals("false", evaluate(scenario, "window.exportResult.saved"));
         } finally {
@@ -195,6 +195,22 @@ public class AndroidFileExportTest {
             Thread.sleep(100);
         } while (System.nanoTime() < deadline);
         fail("Android's save dialog opens");
+    }
+
+    private static void cancelPicker() throws Exception {
+        var instrumentation = InstrumentationRegistry.getInstrumentation();
+        String appPackage = instrumentation.getTargetContext().getPackageName();
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+        do {
+            try (var output = new android.os.ParcelFileDescriptor.AutoCloseInputStream(
+                    instrumentation.getUiAutomation().executeShellCommand("input keyevent KEYCODE_BACK"))) {
+                while (output.read() != -1) { }
+            }
+            Thread.sleep(200);
+            var root = instrumentation.getUiAutomation().getRootInActiveWindow();
+            if (root != null && appPackage.contentEquals(root.getPackageName())) return;
+        } while (System.nanoTime() < deadline);
+        fail("Document picker returns to the app");
     }
 
     private static void grant(Context context, Uri uri) throws Exception {

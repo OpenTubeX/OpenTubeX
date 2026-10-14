@@ -36,6 +36,7 @@ export default defineConfig({
       // These tests exercise packed code, which Playwright's import-based
       // --only-changed selection cannot associate with application changes.
       name: 'performance',
+      workers: 1,
       testMatch: 'offline/**/*.spec.mjs',
       grep: performanceTests,
       // Single-run absolute budgets can pick up host scheduling noise. Keep

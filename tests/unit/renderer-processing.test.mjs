@@ -41,7 +41,7 @@ function syncContext(runBackgroundJob) {
 function historyStore(DBHistoryHandlers) {
   const history = vm.compileFunction(historySource
     .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
-    .replace('export default ', 'return '), ['DBHistoryHandlers', 'migrateLegacyHistoryRecord'])(DBHistoryHandlers, migrateLegacyHistoryRecord)
+    .replace('export default ', 'return '), ['DBHistoryHandlers', 'migrateLegacyHistoryRecord', 'toRaw'])(DBHistoryHandlers, migrateLegacyHistoryRecord, toRaw)
   return createStore({ modules: { history } })
 }
 

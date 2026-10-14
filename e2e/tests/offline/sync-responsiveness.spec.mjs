@@ -69,6 +69,12 @@ test('large encrypted history sync keeps renderer input responsive', async ({ pa
     return route.fulfill({ json: { revision: 0, payload: null } })
   })
   await goToSettingsSection(page, 'sync')
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setSyncServerEnabled', true)
+    // Configure the account before measuring the history operation.
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+  })
   const cdp = await page.context().newCDPSession(page)
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 })
   if (process.env.OPENTUBEX_SYNC_CPU_PROFILE) {
@@ -83,7 +89,6 @@ test('large encrypted history sync keeps renderer input responsive', async ({ pa
     observer.observe({ type: 'longtask' })
     const interval = setInterval(() => { inputTurns++ }, 10)
     try {
-      store.commit('setSyncServerEnabled', true)
       await store.dispatch('syncWithSyncServer')
       // Let the observer deliver the final task as well.
       await new Promise(resolve => setTimeout(resolve, 20))

@@ -431,6 +431,9 @@ export class TabNavigationService {
   }
 
   resolve(location, currentRoute = START_LOCATION) {
+    if (typeof location?.fullPath === 'string' && typeof location.path === 'string') {
+      return this.router.resolve({ path: location.path, query: location.query, hash: location.hash }, currentRoute)
+    }
     return this.router.resolve(location, currentRoute)
   }
 

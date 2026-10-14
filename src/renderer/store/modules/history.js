@@ -347,7 +347,7 @@ const mutations = {
     const upserts = [...insertions, ...updates]
     const deletedIds = new Set(deletions)
     const upsertsById = new Map(upserts.map(record => [record.videoId, record]))
-    const retained = state.historyCacheSorted
+    const retained = toRaw(state.historyCacheSorted)
       .filter(record => !deletedIds.has(record.videoId))
       .map(record => upsertsById.get(record.videoId) ?? record)
     const retainedIds = new Set(retained.map(record => record.videoId))
