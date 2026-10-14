@@ -1,6 +1,15 @@
 import { expect, goTo, openNewWindowFromTabBar, test, waitForAppReady } from '../../helpers/app.mjs'
 import { createTakeoutSyncServer, verifyTakeoutPlaylistSync } from '../../helpers/sync-takeout-playlists.mjs'
 
+async function savedPlaylist(page) {
+  return page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    return (store.state.playlists.libraryPaged
+      ? await window.ftElectron.libraryQuery('playlistSnapshot', { id: 'sync-race' })
+      : store.getters.getPlaylist('sync-race')) ?? undefined
+  })
+}
+
 test('encrypted sync uploads and restores Takeout playlist videos without uploader metadata', async ({ page }, testInfo) => {
   const server = await createTakeoutSyncServer()
   try {
@@ -179,14 +188,14 @@ test.describe('playlist sync while another window edits the library', () => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
         await store.dispatch('addVideo', { _id: 'sync-race', videoData: { videoId: 'bcdefghijkl', title: 'Added locally', authorId: 'UCchannel', author: 'Recovered channel', lengthSeconds: 50 } })
       })
-      await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPlaylist('sync-race').videos.length)).toBe(2)
+      await expect.poll(() => savedPlaylist(page).then(playlist => playlist.videos.length)).toBe(2)
       release()
-      expect(await syncing).toContain('Playlist changed during sync')
+      expect(await syncing).toMatch(/playlist changed during sync/i)
       await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer'))
       expect(header.title).toBe('Renamed elsewhere')
       expect(header.description).toBe('Changed elsewhere')
       const relaunched = await app.relaunch()
-      const saved = await relaunched.page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPlaylist('sync-race'))
+      const saved = await savedPlaylist(relaunched.page)
       expect(saved.playlistName).toBe('Renamed elsewhere')
       expect(saved.description).toBe('Changed elsewhere')
       expect(saved.videos.map(video => video.videoId)).toEqual(['abcdefghijk', 'bcdefghijkl'])
@@ -246,17 +255,14 @@ test.describe('playlist sync while another window edits the library', () => {
           if (edit === 'delete playlist') await store.dispatch('removePlaylist', 'sync-race')
           else await store.dispatch('removeVideo', { _id: 'sync-race', videoId: 'abcdefghijk', playlistItemId: 'one' })
         }, edit)
-        await expect.poll(() => page.evaluate(() => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-          return store.getters.getPlaylist('sync-race')?.videos.length ?? -1
-        })).toBe(edit === 'delete playlist' ? -1 : 0)
+        await expect.poll(() => savedPlaylist(page).then(playlist => playlist?.videos.length ?? -1)).toBe(edit === 'delete playlist' ? -1 : 0)
         release()
-        expect(await syncing).toContain('Playlist changed during sync')
-        const result = await page.evaluate(() => {
+        expect(await syncing).toMatch(/playlist changed during sync/i)
+        const result = await page.evaluate(async () => {
           const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-          return { playlist: store.getters.getPlaylist('sync-race'), error: store.state.syncServer.syncServerError }
+          return { playlist: (store.state.playlists.libraryPaged ? await window.ftElectron.libraryQuery('playlistSnapshot', { id: 'sync-race' }) : store.getters.getPlaylist('sync-race')) ?? undefined, error: store.state.syncServer.syncServerError }
         })
-        expect(result.error).toContain('Playlist changed during sync')
+        expect(result.error).toMatch(/playlist changed during sync/i)
         expect(removedRemoteCopy).toBe(false)
         if (edit === 'delete playlist') expect(result.playlist).toBeUndefined()
         else expect(result.playlist.videos).toEqual([])
@@ -274,9 +280,7 @@ test.describe('playlist sync while another window edits the library', () => {
           expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getAllPlaylists.length)).toBe(0)
         }
         const relaunched = await app.relaunch()
-        expect(await relaunched.page.evaluate(() => {
-          return document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPlaylist('sync-race')?.videos.length ?? -1
-        })).toBe(edit === 'delete playlist' ? -1 : 0)
+        expect((await savedPlaylist(relaunched.page))?.videos.length ?? -1).toBe(edit === 'delete playlist' ? -1 : 0)
       } finally {
         release()
         await syncing?.catch(() => {})
