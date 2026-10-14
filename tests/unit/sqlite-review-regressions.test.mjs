@@ -2016,7 +2016,7 @@ for (const trigger of ['edit', 'stale', 'new route']) {
       isUserPlaylistRequested: ref(true), userPlaylistsReady: ref(true), selectedUserPlaylist: ref({ _id: 'playlist' }),
       infoSource: ref(trigger === 'new route' ? 'local' : 'user'), playlistTitle: ref('Retained'),
       playlistItems: ref(Array.from({ length: 400 }, (_, index) => ({ videoId: `${index}` }))),
-      isLoading: ref(false), isLoadingMore: ref(false), playlistError: ref(''), nextPageError: ref(''), playlistErrorRetryable: ref(false), nextPageError: ref(''),
+      isLoading: ref(false), isLoadingMore: ref(false), playlistError: ref(''), nextPageError: ref(''), playlistErrorRetryable: ref(false),
       userPageCursor: ref('old cursor'), userPageGeneration: 1, playlistId: ref('playlist'),
       userPageOptions: cursor => ({ cursor }),
       DBLibraryHandlers: { query: async () => ({ stale: true }) },
@@ -2228,7 +2228,7 @@ for (const sort of ['date_added_descending', 'video_title_ascending']) {
     const requested = [], state = reactive({ history: { historyRevision: 0 } })
     const context = await functions('src/renderer/views/Playlist/Playlist.vue', ['parseUserPlaylist', 'refreshUserPlaylistStatistics'], {
       userStatisticsGeneration: 0, SORT_BY_VALUES: { VideoDurationAscending: 'video_duration_ascending', VideoDurationDescending: 'video_duration_descending' }, userPageGeneration: 0, userPageRevision: 0, playlistId: vueRef('playlist'),
-      userPlaylistPreloadIds: ref(null), SORT_BY_VALUES: { VideoDurationAscending: 'video_duration_ascending', VideoDurationDescending: 'video_duration_descending' },
+      userPlaylistPreloadIds: ref(null),
       sortOrder: vueRef(sort), processedVideoSearchQuery: vueRef(''), locale: vueRef('en-US'),
       selectedUserPlaylist: vueRef(playlist), isUserPlaylistRequested: vueRef(true), store: { state }, watch,
       userPageOptions: cursor => ({ id: 'playlist', sort, cursor }), userPageCursor: vueRef(null), userStatistics: vueRef({}),
@@ -2398,9 +2398,9 @@ test('repeated thumbnail visibility callbacks retain a loaded image and do not r
   assert.equal(context.state.source.value, null)
   assert.equal(reads, 2)
   intersect([{ isIntersecting: false }])
-  resolve('obsolete thumbnail')
+  resolve('offscreen thumbnail')
   await setImmediate()
-  assert.equal(context.state.source.value, null)
+  assert.equal(context.state.source.value, 'offscreen thumbnail')
   props.revisionId = 'latest'
   props.fallbackUrl = 'fallback.png'
   invalidate()
@@ -2420,6 +2420,40 @@ test('repeated thumbnail visibility callbacks retain a loaded image and do not r
   await setImmediate()
   assert.equal(context.state.source.value, 'latest thumbnail')
 })
+
+for (const outcome of ['success', 'fallback', 'failure', 'unmounted']) {
+  test(`thumbnail reads survive viewport changes and handle ${outcome}`, async () => {
+    const { script, ast } = await source('src/renderer/components/WatchVideoMetadataHistory/WatchMetadataThumbnail.vue')
+    const program = ast.program.body.filter(node => node.type !== 'ImportDeclaration').map(node => script.slice(node.start, node.end)).join('\n')
+    const pending = Promise.withResolvers()
+    let intersect, mounted, unmount, reads = 0
+    const context = vm.createContext({
+      defineProps: () => ({ revisionId: 'revision', fallbackUrl: outcome === 'fallback' ? 'fallback.png' : null }), useTemplateRef: () => ref({}), ref,
+      watch() {}, onMounted: fn => { mounted = fn }, onBeforeUnmount: fn => { unmount = fn }, console: { error() {} },
+      IntersectionObserver: class { constructor(callback) { intersect = callback } observe() {} disconnect() {} },
+      DBLibraryHandlers: { query: () => { reads++; return pending.promise } },
+    })
+    vm.runInContext(program + '\nglobalThis.state = { source, busy, failed }', context)
+    mounted()
+    intersect([{ isIntersecting: true }])
+    intersect([{ isIntersecting: false }])
+    intersect([{ isIntersecting: true }])
+    assert.equal(reads, 1, 're-entry must reuse the pending blob read')
+    assert.equal(context.state.busy.value, true)
+    intersect([{ isIntersecting: false }])
+    if (outcome === 'unmounted') unmount()
+    if (outcome === 'failure' || outcome === 'fallback') pending.reject(new Error('read failed'))
+    else pending.resolve('thumbnail')
+    await setImmediate()
+    assert.equal(context.state.source.value, outcome === 'success' ? 'thumbnail' : outcome === 'fallback' ? 'fallback.png' : null)
+    if (outcome === 'unmounted') return
+    assert.equal(context.state.busy.value, false)
+    assert.equal(context.state.failed.value, outcome === 'failure')
+    intersect([{ isIntersecting: true }])
+    assert.equal(reads, 1, 'a failed read must keep Retry available instead of silently restarting')
+    assert.equal(context.state.failed.value, outcome === 'failure')
+  })
+}
 
 test('library IPC checks the sender before rejecting malformed query payloads', async () => {
   const { script, ast } = await source('src/main/index.js')

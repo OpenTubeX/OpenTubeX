@@ -359,8 +359,7 @@ test('stores and presents every previous metadata version', async ({ app, page }
 
     const scroller = dialog.locator('.promptContentScroller')
     await expect(scroller).toHaveAttribute('data-overlayscrollbars-viewport')
-    const retainedFrame = dialog.locator('.metadataThumbnail').first()
-    const retainedImage = retainedFrame.locator('img:not([aria-hidden="true"])')
+    const retainedImage = dialog.getByRole('img', { name: 'Previous 1', exact: true })
     await expect(retainedImage).toHaveAttribute('src', /^data:image/)
     const retainedSource = await retainedImage.getAttribute('src')
     const retainedRevision = await page.evaluate(async videoId => {

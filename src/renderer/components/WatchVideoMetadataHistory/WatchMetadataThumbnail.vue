@@ -37,10 +37,9 @@ let observer
 let visible = false
 let generation = 0
 async function load() {
+  if (!visible || source.value || busy.value) return
   const current = ++generation
   failed.value = false
-  busy.value = false
-  if (!visible || source.value) return
   busy.value = true
   try {
     const data = props.revisionId ? await DBLibraryHandlers.query('metadataThumbnail', { id: props.revisionId }) : null
@@ -55,7 +54,10 @@ async function load() {
   }
 }
 watch(() => [props.revisionId, props.fallbackUrl], () => {
+  ++generation
   source.value = null
+  busy.value = false
+  failed.value = false
   load()
 })
 onMounted(() => {
@@ -63,7 +65,7 @@ onMounted(() => {
     const next = entries.some(entry => entry.isIntersecting)
     if (next === visible) return
     visible = next
-    load()
+    if (visible && !failed.value) load()
   }, { rootMargin: '200px' })
   observer.observe(frame.value)
 })
