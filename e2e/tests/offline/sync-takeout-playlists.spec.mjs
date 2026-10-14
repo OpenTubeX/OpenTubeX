@@ -41,6 +41,65 @@ test.describe('playlist sync while another window edits the library', () => {
     }
   })
 
+  test('synced thumbnails reject invalid data and normalize oversized images before saving', async ({ page }) => {
+    let header = { id: 'sync-race', title: 'Imported', description: '', thumbnail_url: null }
+    let writes = 0
+    await page.route('http://playlist-sync.test/**', async route => {
+      const pathname = new URL(route.request().url()).pathname
+      let json = []
+      if (pathname === '/health') json = { capabilities: { encrypted_sync: 0 } }
+      else if (pathname === '/v1/playlists/') json = [header]
+      else if (pathname === '/v1/playlists/sync-race') {
+        if (route.request().method() === 'PATCH') {
+          header = { ...header, ...route.request().postDataJSON() }
+          writes++
+        }
+        json = { playlist: header, videos: [] }
+      }
+      await route.fulfill({ json })
+    })
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('removeAllVideos', 'sync-race')
+      for (const collection of ['Subscriptions', 'History', 'Profiles', 'Sessions', 'Settings', 'WatchStats', 'LiveReminders']) {
+        await store.dispatch(`updateSyncServerSync${collection}`, false)
+      }
+      await store.dispatch('updateSyncServerEnabled', true)
+      await store.dispatch('syncWithSyncServer')
+    })
+    const sync = () => page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('syncWithSyncServer')
+      return store.getters.getPlaylist('sync-race').customThumbnail || ''
+    })
+    for (const invalid of ['data:image/png;base64,AAAA', `data:image/png;base64,${'A'.repeat(2_000_000)}`]) {
+      header.thumbnail_url = invalid
+      expect(await sync()).toBe('')
+      expect(header.thumbnail_url).toBe('')
+    }
+    for (const [width, height] of [[16, 9], [2560, 1440]]) {
+      header.thumbnail_url = await page.evaluate(([width, height]) => {
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        canvas.getContext('2d').fillRect(0, 0, width, height)
+        return canvas.toDataURL('image/png')
+      }, [width, height])
+      const thumbnail = await sync()
+      expect(thumbnail).toBe(header.thumbnail_url)
+      const dimensions = await page.evaluate(async thumbnail => {
+        const image = new Image()
+        image.src = thumbnail
+        await image.decode()
+        return [image.naturalWidth, image.naturalHeight]
+      }, thumbnail)
+      expect(dimensions).toEqual([Math.min(width, 1280), Math.min(height, 720)])
+      const previousWrites = writes
+      expect(await sync()).toBe(thumbnail)
+      expect(writes).toBe(previousWrites)
+    }
+  })
+
   test('retry preserves a remote rename after another window edits during repair upload', async ({ app, page }) => {
     let release
     const pending = new Promise(resolve => { release = resolve })

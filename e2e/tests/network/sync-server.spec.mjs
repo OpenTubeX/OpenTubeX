@@ -987,9 +987,20 @@ test.describe('OpenTubeX sync server', () => {
 
         const replacement = await editCover(other.page, path.resolve('e2e/fixtures/media/avatar.png'))
         expect(replacement).not.toBe(original)
+        await page.evaluate(async () => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const playlist = store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'Synced playlist')
+          await store.dispatch('updatePlaylist', { _id: playlist._id, description: 'Edited while the other device changed its cover' })
+        })
         await sync(other.page)
         await sync(page)
         await expectCover(page, replacement)
+        await sync(other.page)
+        for (const clientPage of [page, other.page]) {
+          expect(await clientPage.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            .getters.getAllPlaylists.find(playlist => playlist.playlistName === 'Synced playlist').description))
+            .toBe('Edited while the other device changed its cover')
+        }
 
         const thumbnailWrites = []
         page.on('request', request => {

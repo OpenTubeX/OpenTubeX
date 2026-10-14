@@ -16,6 +16,10 @@ const context = vm.createContext({
   DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeSyncIds, syncVideoToRemote,
   generateRandomUniqueId: randomUUID,
   deepCopy: value => JSON.parse(JSON.stringify(value)),
+  normalizePlaylistThumbnail: async value => {
+    if (value === 'data:image/png;base64,AAAA') throw new Error('Invalid image')
+    return value
+  },
 })
 vm.runInContext(source
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
@@ -38,6 +42,53 @@ function createStore(playlists = []) {
     },
   }
 }
+
+test('concurrent edits merge each playlist metadata field independently', async () => {
+  const original = { playlistName: 'Original title', description: 'Original description', customThumbnail: 'data:image/webp;base64,b3JpZ2luYWw=' }
+  const edits = { playlistName: 'Edited title', description: 'Edited description', customThumbnail: '' }
+  for (const localField of Object.keys(edits)) {
+    for (const remoteField of Object.keys(edits)) {
+      const first = createStore([{ _id: 'concurrent', ...original, videos: [] }])
+      const second = createStore()
+      const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
+      let firstSnapshot = await context.syncPlaylists(adapter, first)
+      let secondSnapshot = await context.syncPlaylists(adapter, second)
+      first.state.playlists.playlists[0][localField] = edits[localField]
+      second.state.playlists.playlists[0][remoteField] = edits[remoteField]
+      secondSnapshot = await context.syncPlaylists(adapter, second, secondSnapshot)
+      firstSnapshot = await context.syncPlaylists(adapter, first, firstSnapshot)
+      await context.syncPlaylists(adapter, second, secondSnapshot)
+      for (const store of [first, second]) {
+        for (const field of Object.keys(edits)) {
+          assert.equal(store.state.playlists.playlists[0][field], field === localField || field === remoteField ? edits[field] : original[field], `${localField} locally, ${remoteField} remotely: ${field}`)
+        }
+      }
+      adapter.updatePlaylist = async () => assert.fail('Merged metadata must remain stable')
+      await context.syncPlaylists(adapter, first, firstSnapshot)
+    }
+  }
+})
+
+test('invalid remote custom thumbnails are rejected before persistence', async () => {
+  const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
+  await adapter.createPlaylist({ id: 'invalid', title: 'Invalid cover', thumbnail_url: 'data:image/png;base64,AAAA' })
+  const store = createStore()
+  const snapshot = await context.syncPlaylists(adapter, store)
+  assert.equal(store.state.playlists.playlists[0].customThumbnail, '')
+  assert.equal(snapshot.invalid.metadata.thumbnail_url, null)
+  assert.equal((await adapter.getPlaylist('invalid')).playlist.thumbnail_url, null)
+})
+
+test('simultaneous changes to the same metadata field keep the local edit', async () => {
+  const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
+  const store = createStore([{ _id: 'conflict', playlistName: 'Original', videos: [] }])
+  const previous = await context.syncPlaylists(adapter, store)
+  store.state.playlists.playlists[0].playlistName = 'Local title'
+  await adapter.updatePlaylist('conflict', { title: 'Remote title', description: 'Remote description' })
+  await context.syncPlaylists(adapter, store, previous)
+  assert.equal(store.state.playlists.playlists[0].playlistName, 'Local title')
+  assert.equal(store.state.playlists.playlists[0].description, 'Remote description')
+})
 
 test('custom playlist thumbnails sync between devices, including replacement and restoring defaults', async () => {
   const original = 'data:image/webp;base64,b3JpZ2luYWw='

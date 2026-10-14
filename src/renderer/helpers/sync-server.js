@@ -29,6 +29,7 @@ import { deepCopy } from './utils'
 import { replaceCustomThemes } from './customTheme'
 import { repairSystemThemeSettings } from './customThemeSync'
 import { generateRandomUniqueId } from './playlists'
+import { normalizePlaylistThumbnail } from './playlist-thumbnails'
 import {
   getMergedProfileBackground,
   getMergedProfileTextColor,
@@ -660,9 +661,13 @@ function selectPlaylistMetadata(local, remote, previous) {
   if (!previous) return localMetadata
 
   const previousMetadata = playlistMetadataFromRemote(previous)
-  const localChanged = !metadataEquals(localMetadata, previousMetadata)
-  const remoteChanged = !metadataEquals(remoteMetadata, previousMetadata)
-  return remoteChanged && !localChanged ? remoteMetadata : localMetadata
+  const merged = { ...localMetadata }
+  for (const field of ['title', 'description', 'thumbnail_url']) {
+    if (localMetadata[field] === previousMetadata[field]) {
+      merged[field] = remoteMetadata[field]
+    }
+  }
+  return merged
 }
 
 function isSameLocalPlaylist(playlist, metadata, videos) {
@@ -801,7 +806,15 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
   for (const id of mergedIds) {
     let local = localById.get(id)
     let remote = remoteById.get(id)
-    const remoteMetadata = remote ? { ...remote.playlist, id } : null
+    const rawRemoteMetadata = remote ? playlistMetadataFromRemote({ ...remote.playlist, id }) : null
+    const remoteMetadata = rawRemoteMetadata ? { ...rawRemoteMetadata } : null
+    if (remoteMetadata?.thumbnail_url) {
+      try {
+        remoteMetadata.thumbnail_url = await normalizePlaylistThumbnail(remoteMetadata.thumbnail_url)
+      } catch {
+        remoteMetadata.thumbnail_url = null
+      }
+    }
     const metadata = selectPlaylistMetadata(local, remoteMetadata, previous[id]?.metadata)
     let remoteId = remote?.remoteId ?? id
     assertCurrent(local, id)
@@ -813,7 +826,7 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
       // sync. A retry must recognize our copy instead of importing it as new.
       await store.persistPlaylistSyncBaseline(id, { remoteId, metadata })
       remote = { playlist: { ...metadata, id: remoteId }, videos: [], remoteId }
-    } else if (!metadataEquals(metadata, playlistMetadataFromRemote(remoteMetadata))) {
+    } else if (!metadataEquals(metadata, rawRemoteMetadata)) {
       await client.updatePlaylist(remoteId, metadata)
     }
 
