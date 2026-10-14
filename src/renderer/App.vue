@@ -1227,6 +1227,11 @@ const settingsSearchTarget = ref(null)
 watch(() => store.getters.getSettingsWindowSectionRequest, request => {
   if (request) settingsSearchTarget.value = null
 }, { flush: 'sync' })
+watch(isKeyboardShortcutPromptShown, shown => {
+  if (!shown) return
+  settingsSearchTarget.value = null
+  store.commit('setSettingsWindowSection', null)
+}, { flush: 'sync' })
 const subscriptionAutoRefreshTimers = {
   videos: null,
   shorts: null,

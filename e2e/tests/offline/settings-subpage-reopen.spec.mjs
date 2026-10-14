@@ -302,6 +302,55 @@ for (const uiScale of [100, 125]) {
     }
 
     for (const opener of ['palette', 'keyboard', 'quick-settings']) {
+      test(`a shortcut request replaces a pending search target (${opener})`, async ({ app, page }) => {
+        await setWindowSize(app, page, { width: Math.round(1400 * uiScale / 100), height: Math.round(750 * uiScale / 100) })
+        await goTo(page, 'settings')
+        const passwordInput = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
+        await passwordInput.fill(password)
+        await passwordInput.press('Enter')
+        const privacy = await goToSettingsSection(page, 'privacy')
+        await page.locator('.settingsCloseButton').click()
+        await goTo(page, 'settings')
+        await expect(passwordInput).toBeFocused()
+        await page.keyboard.press('Control+k')
+        await page.getByRole('combobox', { name: 'Search commands' }).fill('thumbnail preference')
+        await page.getByRole('option', { name: /Thumbnail Preference/ }).click()
+        if (opener === 'palette') {
+          await page.keyboard.press('Control+k')
+          await page.getByRole('combobox', { name: 'Search commands' }).fill('keyboard shortcuts')
+          await page.locator('[role="option"][id$="-app-shortcuts"]').click()
+        } else if (opener === 'keyboard') {
+          await passwordInput.evaluate(input => input.blur())
+          await page.keyboard.press('Shift+?')
+        } else {
+          await page.locator('.profileTrigger').click()
+          await page.locator('.quickSettingsMenu').getByRole('button', { name: /^Keyboard shortcuts$/i }).click()
+        }
+        await passwordInput.fill(password)
+        await passwordInput.press('Enter')
+        await expect(page.locator('.settingsKeyboardShortcutPage')).toBeVisible()
+        await expect(page.locator('.settingsSearchTarget')).toHaveCount(0)
+        await page.locator('.settingsCloseButton').click()
+        await goTo(page, 'settings')
+        await passwordInput.fill(password)
+        await passwordInput.press('Enter')
+        await expect(privacy).toBeVisible()
+        await expect(page.locator('.settingsSearchTarget')).toHaveCount(0)
+
+        // A newer search must still replace the pending shortcut request.
+        await page.locator('.settingsCloseButton').click()
+        await goTo(page, 'settings')
+        await expect(passwordInput).toBeFocused()
+        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showKeyboardShortcutPrompt'))
+        await page.keyboard.press('Control+k')
+        await page.getByRole('combobox', { name: 'Search commands' }).fill('thumbnail preference')
+        await page.getByRole('option', { name: /Thumbnail Preference/ }).click()
+        await passwordInput.fill(password)
+        await passwordInput.press('Enter')
+        await expect(page.locator('.settingsKeyboardShortcutPage')).toHaveCount(0)
+        await expect(page.locator('.settingsSearchTarget')).toContainText('Thumbnail Preference')
+      })
+
       test(`defers shortcut navigation without discarding a locked draft (${opener})`, async ({ app, page }) => {
         await setWindowSize(app, page, { width: Math.round(1400 * uiScale / 100), height: Math.round(750 * uiScale / 100) })
         await goTo(page, 'settings')
@@ -363,6 +412,45 @@ for (const uiScale of [100, 125]) {
         await expect.poll(() => page.locator('body').evaluate(element => getComputedStyle(element).getPropertyValue('--primary-text-color'))).toBe(selectedTextColor)
       })
     }
+
+    test('a shortcut request replaces a pending category request', async ({ page }) => {
+      await goTo(page, 'settings')
+      const passwordInput = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
+      await passwordInput.fill(password)
+      await passwordInput.press('Enter')
+      const privacy = await goToSettingsSection(page, 'privacy')
+      await page.locator('.settingsCloseButton').click()
+      await goTo(page, 'settings')
+      await expect(passwordInput).toBeFocused()
+      await page.keyboard.press('Control+k')
+      await page.getByRole('combobox', { name: 'Search commands' }).fill('general settings')
+      await page.locator('[role="option"][id$="-settings-general"]').click()
+      await page.keyboard.press('Control+k')
+      await page.getByRole('combobox', { name: 'Search commands' }).fill('keyboard shortcuts')
+      await page.locator('[role="option"][id$="-app-shortcuts"]').click()
+      await passwordInput.fill(password)
+      await passwordInput.press('Enter')
+      await expect(page.locator('.settingsKeyboardShortcutPage')).toBeVisible()
+      await page.locator('.settingsCloseButton').click()
+      await goTo(page, 'settings')
+      await passwordInput.fill(password)
+      await passwordInput.press('Enter')
+      await expect(privacy).toBeVisible()
+
+      // A newer category request must still replace the pending shortcut request.
+      await page.locator('.settingsCloseButton').click()
+      await goTo(page, 'settings')
+      await expect(passwordInput).toBeFocused()
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showKeyboardShortcutPrompt'))
+      await page.keyboard.press('Control+k')
+      await page.getByRole('combobox', { name: 'Search commands' }).fill('general settings')
+      await page.locator('[role="option"][id$="-settings-general"]').click()
+      await passwordInput.fill(password)
+      await passwordInput.press('Enter')
+      await expect(page.locator('.section[data-section="general"]')).toBeVisible()
+      await expect(page.locator('.settingsKeyboardShortcutPage')).toHaveCount(0)
+      await expect(page.locator('.settingsSearchTarget')).toHaveCount(0)
+    })
 
     test('keeps keyboard shortcut navigation unavailable while Settings is locked', async ({ page }) => {
       await goTo(page, 'settings')
@@ -741,7 +829,7 @@ for (const uiScale of [100, 125]) {
       await appearance.getByRole('button', { name: 'Customize navigation', exact: true }).click()
       const subpage = page.locator('.selectedItem').first()
       await expect(subpage).toBeVisible()
-      const scroller = page.locator('.settingsSubpageScroll:visible')
+      const scroller = page.locator('.settingsSubpageScroll').visible()
       await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
       await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
       const scrollTop = await scroller.evaluate(element => element.scrollTop)

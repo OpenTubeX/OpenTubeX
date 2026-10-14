@@ -1669,6 +1669,7 @@ test.describe('customizable quick settings', () => {
 
     await menu.getByRole('button', { name: 'All Settings' }).click()
     await expect(page.locator('.settingsBreadcrumb')).toContainText('Customize quick settings')
+    await expect(selectedSettings).toBeVisible()
     await expect.poll(settingIds).toEqual(contentFirst)
   })
 })
