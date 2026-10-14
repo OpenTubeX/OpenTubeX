@@ -23,10 +23,11 @@ async function fixture() {
     getYtDlpExternalStreamHeaders: () => ({}),
     getYtDlpExternalStreamCookieHeader: () => null,
     getDlnaFfmpegExecutable: () => new Promise((_, reject) => { finishValidation = () => reject(new Error('FFmpeg unavailable')) }),
-    createMediaAddressResolver: async () => ({ privateInstance: null, resolveAddresses: async () => null }),
+    createMediaAddressResolver: async () => ({ privateInstance: null, resolveAddresses: async () => [{ address: '93.184.215.14', family: 4 }] }),
     startDlnaCast: async (_owner, payload) => { attempts.push(payload); return { castId: 'cast-1' } },
     stopDlnaCast: async () => {},
     console,
+    URL,
     navigator: { userActivation: { isActive: true } },
     ipcRenderer: { invoke: (channel, payload) => { invocations.push(payload); return handlers.get(channel)(event, payload) } }
   })
@@ -67,5 +68,13 @@ test('a fresh cast still requires both a user gesture and initial window focus',
   f.context.navigator.userActivation.isActive = true
   f.blur()
   assert.match((await f.dlna.start(payload)).error, /active OpenTubeX window/)
+  assert.equal(f.attempts.length, 0)
+})
+
+test('a source the relay would refuse does not start a cast', async () => {
+  const f = await fixture()
+  f.context.createMediaAddressResolver = async () => ({ resolveAddresses: async url => url.hostname === 'media.example' ? null : [] })
+  const { audioUrl, fallbackMediaUrl, ...single } = payload
+  assert.match((await f.dlna.start(single)).error, /not allowed/)
   assert.equal(f.attempts.length, 0)
 })

@@ -4747,12 +4747,13 @@ function runApp() {
         muxOptions = { ffmpegPath: await getDlnaFfmpegExecutable(), audioHeaders: sourceHeaders(payload.audioUrl) }
       } catch (error) { return { error: error.message, muxUnavailable: true } }
     }
-    const { privateInstance, resolveAddresses } = await createMediaAddressResolver(event.sender, true)
-    // Ask before the renderer requests media, so the dialog cannot outlast its timeout.
+    const { resolveAddresses } = await createMediaAddressResolver(event.sender, true)
+    // Validate before the renderer requests media, so a refused source cannot start a cast
+    // and a private instance's dialog cannot outlast the renderer's timeout.
     for (const sourceUrl of [payload?.mediaUrl, payload?.audioUrl]) {
-      if (privateInstance && isInvidiousInstanceUrl(sourceUrl, privateInstance) && !await resolveAddresses(new URL(sourceUrl))) {
-        return { error: 'Private media access was not approved' }
-      }
+      let url
+      try { url = new URL(sourceUrl) } catch { continue /* startDlnaCast reports an invalid URL. */ }
+      if (!await resolveAddresses(url)) return { error: 'Media address is not allowed' }
     }
     if (event.sender.isDestroyed()) return { error: 'Casting requires an active OpenTubeX window' }
     const result = await startDlnaCast(event.sender.id, payload, sourceHeaders(payload?.mediaUrl), muxOptions, resolveAddresses)
