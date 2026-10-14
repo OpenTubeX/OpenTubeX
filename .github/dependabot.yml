@@ -99,3 +99,12 @@ updates:
       "github/codeql-action":
         patterns:
           - "github/codeql-action/*"
+  - package-ecosystem: "gradle"
+    directory: "/android"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "PR: waiting for review"
+      - "PR: dependencies"
+  # Capacitor regenerates the Swift manifest from npm packages after installation.
+  # Its local node_modules dependencies cannot be resolved by Dependabot's Swift job.
