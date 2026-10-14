@@ -154,6 +154,8 @@ public class OptimizedApkInstrumentation extends Instrumentation {
             if (activity != null) {
                 Activity opened = activity;
                 runOnMainSync(opened::finish);
+                // Let activity teardown run before instrumentation ends the process.
+                waitForIdleSync();
             }
             fixture.delete();
             converted.delete();
@@ -230,30 +232,58 @@ public class OptimizedApkInstrumentation extends Instrumentation {
         await(web, "!!document.querySelector('.app') && document.visibilityState === 'visible'");
         // A fresh install may show the tutorial over the real player controls.
         evaluate(web, "document.querySelector('.tutorialOverlay .tutorialActions button')?.click()");
-        JSONObject file = new JSONObject().put("videoId", "optimized-apk-demo")
-            .put("path", fixture.getAbsolutePath()).put("extension", "webm")
-            .put("available", true).put("width", 320).put("height", 240).put("duration", 30);
-        JSONObject download = new JSONObject().put("id", 91218).put("status", "completed")
-            .put("mode", "video").put("videoId", "optimized-apk-demo")
-            .put("title", "Optimized APK demo").put("files", new JSONArray().put(file));
-        evaluate(web, "(() => { const app = document.querySelector('#app').__vue_app__; " +
-            "app.config.globalProperties.$store.commit('upsertYtDlpDownload', " + download + "); " +
-            "app.config.globalProperties.$router.push({path: '/watch/optimized-apk-demo', " +
-            "query: {downloadId: '91218'}}); })()");
-        await(web, "!!document.querySelector('.ftVideoPlayer .shaka-fullscreen-button')");
-        tapCss(web, ".ftVideoPlayer");
-        await(web, "getComputedStyle(document.querySelector('.ftVideoPlayer .shaka-fullscreen-button')).visibility === 'visible'");
-        String enterLabel = evaluate(web,
-            "document.querySelector('.ftVideoPlayer .shaka-fullscreen-button').getAttribute('aria-label')");
-        tapCss(web, ".ftVideoPlayer .shaka-fullscreen-button");
-        await(web, "document.fullscreenElement?.classList.contains('videoLayout') === true");
-        check(!enterLabel.equals(evaluate(web,
-            "document.querySelector('.ftVideoPlayer .shaka-fullscreen-button').getAttribute('aria-label')")),
-            "Shaka fullscreen control switches to exit mode");
-        tapCss(web, ".ftVideoPlayer");
-        await(web, "getComputedStyle(document.querySelector('.ftVideoPlayer .shaka-fullscreen-button')).visibility === 'visible'");
-        tapCss(web, ".ftVideoPlayer .shaka-fullscreen-button");
-        await(web, "document.fullscreenElement === null");
+        // Never persist this synthetic route for a later launch. Instrumentation
+        // can end the process before WebView flushes the cleanup navigation.
+        // Keep this narrow guard until the test process exits.
+        evaluate(web, "(() => { const setItem = Storage.prototype.setItem; " +
+            "Storage.prototype.setItem = function(key, value) { " +
+            "if (this === localStorage && key === 'opentubex-capacitor-tabs' && " +
+            "String(value).includes('/watch/optimized-apk-demo')) return; " +
+            "return setItem.call(this, key, value); }; })()");
+        // This fixture has no YouTube metadata. Exercise downloaded playback
+        // offline instead of parsing live player scripts on the WebView thread.
+        evaluate(web, "window.optimizedOnlineDescriptor = Object.getOwnPropertyDescriptor(navigator, 'onLine'); " +
+            "Object.defineProperty(navigator, 'onLine', {configurable: true, get: () => false}); " +
+            "window.dispatchEvent(new Event('offline'))");
+        try {
+            JSONObject file = new JSONObject().put("videoId", "optimized-apk-demo")
+                .put("path", fixture.getAbsolutePath()).put("extension", "webm")
+                .put("available", true).put("width", 320).put("height", 240).put("duration", 30);
+            JSONObject download = new JSONObject().put("id", 91218).put("status", "completed")
+                .put("mode", "video").put("videoId", "optimized-apk-demo")
+                .put("title", "Optimized APK demo").put("files", new JSONArray().put(file));
+            evaluate(web, "(() => { const app = document.querySelector('#app').__vue_app__; " +
+                "app.config.globalProperties.$store.commit('upsertYtDlpDownload', " + download + "); " +
+                "app.config.globalProperties.$router.push({path: '/watch/optimized-apk-demo', " +
+                "query: {downloadId: '91218'}}); })()");
+            await(web, "!!document.querySelector('.ftVideoPlayer .shaka-fullscreen-button')");
+            tapCss(web, ".ftVideoPlayer");
+            await(web, "getComputedStyle(document.querySelector('.ftVideoPlayer .shaka-fullscreen-button')).visibility === 'visible'");
+            String enterLabel = evaluate(web,
+                "document.querySelector('.ftVideoPlayer .shaka-fullscreen-button').getAttribute('aria-label')");
+            tapCss(web, ".ftVideoPlayer .shaka-fullscreen-button");
+            await(web, "document.fullscreenElement?.classList.contains('videoLayout') === true");
+            check(!enterLabel.equals(evaluate(web,
+                "document.querySelector('.ftVideoPlayer .shaka-fullscreen-button').getAttribute('aria-label')")),
+                "Shaka fullscreen control switches to exit mode");
+            tapCss(web, ".ftVideoPlayer");
+            await(web, "getComputedStyle(document.querySelector('.ftVideoPlayer .shaka-fullscreen-button')).visibility === 'visible'");
+            tapCss(web, ".ftVideoPlayer .shaka-fullscreen-button");
+            await(web, "document.fullscreenElement === null");
+        } finally {
+            try {
+                // Do not restore or reload the synthetic watch route next launch.
+                evaluate(web, "document.querySelector('#app').__vue_app__.config.globalProperties.$router.replace('/subscriptions')");
+                await(web, "location.hash === '#/subscriptions'");
+                evaluate(web, "document.querySelector('.mobileMiniBarDismiss, .scrollMiniDismiss')?.click()");
+                await(web, "!document.querySelector('.ftVideoPlayer')");
+            } finally {
+                evaluate(web, "if (window.optimizedOnlineDescriptor) { " +
+                    "Object.defineProperty(navigator, 'onLine', window.optimizedOnlineDescriptor); " +
+                    "} else { delete navigator.onLine; } delete window.optimizedOnlineDescriptor; " +
+                    "window.dispatchEvent(new Event(navigator.onLine ? 'online' : 'offline'))");
+            }
+        }
     }
 
     private void tapCss(WebView web, String selector) throws Exception {
