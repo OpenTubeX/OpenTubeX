@@ -14,9 +14,9 @@ for (const scale of [100, 125]) {
       await mockUnplayableWatchPage(app, page)
       await goTo(page, 'history')
       await page.getByText(watchHistoryEntry.title, { exact: true }).click()
-      await expect(page.locator('.videoDescription:visible')).toBeVisible()
+      await expect(page.locator('.videoDescription').visible()).toBeVisible()
       const view = await watchViewHandle(page)
-      const card = page.locator('.videoDescription:visible')
+      const card = page.locator('.videoDescription').visible()
       for (const { metadata, selector, text } of [
         { metadata: { videoTags: ['first tag', 'second tag'] }, selector: '.videoTagLink', text: ['first tag', 'second tag'] },
         { metadata: { videoGames: [{ title: 'Test game' }] }, selector: '.gameTitle', text: 'Test game' },
@@ -109,7 +109,7 @@ for (const scale of [100, 125]) {
       await mockUnplayableWatchPage(app, page)
       await goTo(page, 'history')
       await page.getByText(watchHistoryEntry.title, { exact: true }).click()
-      await expect(page.locator('.videoDescription:visible')).toBeVisible()
+      await expect(page.locator('.videoDescription').visible()).toBeVisible()
       const view = await watchViewHandle(page)
       await view.evaluate(async component => {
         component.isLoading = true
@@ -123,7 +123,7 @@ for (const scale of [100, 125]) {
         component.isLoading = false
         await component.$nextTick()
       })
-      const card = page.locator('.videoDescription:visible')
+      const card = page.locator('.videoDescription').visible()
       await expect(card.locator('.description')).toHaveText('A short description.')
       await expect(card.locator('.descriptionStatus')).toHaveCount(0)
 
