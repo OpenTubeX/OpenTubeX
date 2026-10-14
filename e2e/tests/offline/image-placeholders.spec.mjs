@@ -136,17 +136,31 @@ test.describe('playlist artwork loading', () => {
       await expect.poll(() => page.evaluate(() => innerWidth)).toBeCloseTo(width / zoom, 0)
       await expect(page.locator('.feed-enter-active, .feed-leave-active')).toHaveCount(0)
     }
+    const measure = element => {
+      const { x, y, width, height } = element.getBoundingClientRect()
+      const parentWidth = element.closest('.playlistThumbnail').getBoundingClientRect().width
+      return { x, y, width, height, parentWidth }
+    }
     const slots = []
     for (const viewport of viewports) {
       await resize(viewport)
       const visible = viewport[0] / viewport[1] > 800
       if (visible) await expect(placeholder).toBeVisible()
       else await expect(placeholder).toBeHidden()
-      const bounds = await placeholder.boundingBox()
+      let bounds = null
       if (visible) {
-        const parentBounds = await container.boundingBox()
-        expect(bounds.width).toBeCloseTo(parentBounds.width, 0)
-        expect(bounds.width / bounds.height).toBeCloseTo(16 / 9, 2)
+        let previous = null
+        // Resize and zoom can briefly collapse the artwork after visibility
+        // succeeds. Capture both boxes in one layout after it settles.
+        await expect.poll(async () => {
+          bounds = await placeholder.evaluate(measure)
+          const stable = previous !== null && Object.entries(bounds)
+            .every(([key, value]) => Math.abs(value - previous[key]) < 0.5)
+          previous = bounds
+          return stable && bounds.width > 0 && bounds.height > 0 &&
+            Math.abs(bounds.width - bounds.parentWidth) < 0.5 &&
+            Math.abs(bounds.width / bounds.height - 16 / 9) < 0.005
+        }).toBe(true)
       }
       slots.push(bounds)
     }
@@ -161,7 +175,7 @@ test.describe('playlist artwork loading', () => {
       else {
         await expect(image).toBeVisible()
         await expect.poll(async () => {
-          const bounds = await image.boundingBox()
+          const bounds = await image.evaluate(measure)
           return Object.entries(slot).every(([key, value]) => Math.abs(bounds[key] - value) < 0.5)
         }).toBe(true)
       }
