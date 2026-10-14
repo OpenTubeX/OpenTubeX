@@ -1315,6 +1315,14 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: La replica della chat dal vivo è abilitata. I messaggi appariranno qui durante la riproduzione del video.
   Premiere started: Première in corso. Iniziata {timeAgo}
   Player:
+    Caption Timing:
+      Adjust Timing: Regola la sincronizzazione…
+      Caption Timing: Sincronizzazione dei sottotitoli
+      Offset: Scostamento (secondi)
+      Hint: I valori negativi mostrano i sottotitoli prima; quelli positivi dopo. Solo per questo video.
+      Earlier: Prima
+      Later: Dopo
+      Reset: Ripristina
     Most Replayed: "Più riprodotto"
     Cast: "Trasmetti"
     Music Mode: "Modalità musica"

@@ -6990,6 +6990,7 @@ export default defineComponent({
         : this.currentPlaybackRate
       this.sabrReloadState = {
         captionIndex: Number.isInteger(payload?.captionIndex) ? payload.captionIndex : null,
+        captionTimingOffset: Number.isFinite(payload?.captionTimingOffset) ? payload.captionTimingOffset : 0,
         playbackRate: restoredPlaybackRate,
         videoQuality: this.normalizeVideoQuality(payload?.videoQuality) ||
           this.normalizeVideoQuality(this.currentVideoQuality) || null,

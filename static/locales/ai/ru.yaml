@@ -1326,6 +1326,14 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Повтор чата трансляции включён.  Сообщения чата будут появляться здесь по мере воспроизведения видео.
   Premiere started: Идёт премьера. Началась {timeAgo}
   Player:
+    Caption Timing:
+      Adjust Timing: Настроить время…
+      Caption Timing: Время субтитров
+      Offset: Смещение (секунды)
+      Hint: Отрицательные значения показывают субтитры раньше, положительные — позже. Только для этого видео.
+      Earlier: Раньше
+      Later: Позже
+      Reset: Сбросить
     Most Replayed: "Чаще всего пересматривают"
     Cast: "Транслировать"
     Music Mode: "Музыкальный режим"

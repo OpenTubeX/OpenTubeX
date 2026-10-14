@@ -1314,6 +1314,14 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: La rediffusion du chat en direct est activée.  Les messages du chat apparaîtront ici pendant la lecture de la vidéo.
   Premiere started: Première en cours. A commencé {timeAgo}
   Player:
+    Caption Timing:
+      Adjust Timing: Ajuster la synchronisation…
+      Caption Timing: Synchronisation des sous-titres
+      Offset: Décalage (secondes)
+      Hint: Les valeurs négatives affichent les sous-titres plus tôt ; les valeurs positives, plus tard. Uniquement pour cette vidéo.
+      Earlier: Plus tôt
+      Later: Plus tard
+      Reset: Réinitialiser
     Most Replayed: "Passage le plus revu"
     Cast: "Diffuser"
     Music Mode: "Mode musique"

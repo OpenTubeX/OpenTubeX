@@ -1349,6 +1349,14 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Reluarea chatului în direct este activată. Mesajele vor apărea aici pe măsură ce se redă videoclipul.
   Premiere started: Premiera este în curs. A început {timeAgo}
   Player:
+    Caption Timing:
+      Adjust Timing: Ajustează sincronizarea…
+      Caption Timing: Sincronizarea subtitrărilor
+      Offset: Decalaj (secunde)
+      Hint: Valorile negative afișează subtitrările mai devreme, iar cele pozitive mai târziu. Doar pentru acest videoclip.
+      Earlier: Mai devreme
+      Later: Mai târziu
+      Reset: Resetare
     Most Replayed: "Cel mai des revăzut"
     Cast: "Transmite"
     Music Mode: "Mod muzică"

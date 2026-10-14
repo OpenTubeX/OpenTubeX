@@ -1383,6 +1383,14 @@ Video:
   Sponsor Block category:
     hook: Introduktion/hilsen
   Player:
+    Caption Timing:
+      Adjust Timing: Juster timing…
+      Caption Timing: Underteksttiming
+      Offset: Forskydning (sekunder)
+      Hint: Negative værdier viser undertekster tidligere; positive værdier senere. Gælder kun denne video.
+      Earlier: Tidligere
+      Later: Senere
+      Reset: Nulstil
     Most Replayed: "Mest genafspillet"
     Cast: "Cast"
     Music Mode: "Musiktilstand"

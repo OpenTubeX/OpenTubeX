@@ -1336,6 +1336,14 @@ Video:
   Sponsor Block category short:
     filler: Digresije
   Player:
+    Caption Timing:
+      Adjust Timing: Prilagodi vrijeme…
+      Caption Timing: Vrijeme titlova
+      Offset: Pomak (sekunde)
+      Hint: Negativne vrijednosti prikazuju titlove ranije, a pozitivne kasnije. Samo za ovaj video.
+      Earlier: Ranije
+      Later: Kasnije
+      Reset: Poništi
     Most Replayed: "Najčešće ponovno reproducirano"
     Cast: "Emitiraj"
     Music Mode: "Glazbeni način"

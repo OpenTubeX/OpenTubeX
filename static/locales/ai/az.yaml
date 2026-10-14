@@ -1327,6 +1327,14 @@ Video:
     music offtopic: Musiqisiz hissə
     filler: Mövzudan kənar söhbətlər
   Player:
+    Caption Timing:
+      Adjust Timing: Vaxtı tənzimlə…
+      Caption Timing: Altyazı vaxtı
+      Offset: Sürüşmə (saniyə)
+      Hint: Mənfi dəyərlər altyazıları daha tez, müsbət dəyərlər daha gec göstərir. Yalnız bu videoya aiddir.
+      Earlier: Daha tez
+      Later: Daha gec
+      Reset: Sıfırla
     Most Replayed: "Ən çox təkrar izlənilən"
     Cast: "Yayımla"
     Music Mode: "Musiqi rejimi"

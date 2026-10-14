@@ -1364,6 +1364,14 @@ Video:
   Sponsor Block category short:
     filler: Uitweidingen
   Player:
+    Caption Timing:
+      Adjust Timing: Timing aanpassen…
+      Caption Timing: Ondertiteltiming
+      Offset: Verschuiving (seconden)
+      Hint: Negatieve waarden tonen ondertitels eerder; positieve waarden later. Geldt alleen voor deze video.
+      Earlier: Eerder
+      Later: Later
+      Reset: Herstellen
     Most Replayed: "Meest opnieuw afgespeeld"
     Cast: "Casten"
     Music Mode: "Muziekmodus"

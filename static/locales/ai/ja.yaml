@@ -1315,6 +1315,14 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: ライブチャットのリプレイが有効です。動画の再生に合わせてチャットメッセージがここに表示されます。
   Premiere started: プレミア公開中です。{timeAgo}に開始しました
   Player:
+    Caption Timing:
+      Adjust Timing: タイミングを調整…
+      Caption Timing: 字幕のタイミング
+      Offset: オフセット（秒）
+      Hint: 負の値で字幕を早く、正の値で遅く表示します。この動画にのみ適用されます。
+      Earlier: 早く
+      Later: 遅く
+      Reset: リセット
     Most Replayed: "最もリプレイされた部分"
     Cast: "キャスト"
     Music Mode: "音楽モード"

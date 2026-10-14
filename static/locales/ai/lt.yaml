@@ -1669,6 +1669,14 @@ Video:
     music offtopic: Ne muzika
     filler: Nukrypimai
   Player:
+    Caption Timing:
+      Adjust Timing: Koreguoti laiką…
+      Caption Timing: Subtitrų laikas
+      Offset: Poslinkis (sekundės)
+      Hint: Neigiamos reikšmės rodo subtitrus anksčiau, teigiamos – vėliau. Taikoma tik šiam vaizdo įrašui.
+      Earlier: Anksčiau
+      Later: Vėliau
+      Reset: Atkurti
     Most Replayed: "Dažniausiai pakartotinai žiūrėta"
     Cast: "Transliuoti"
     Music Mode: "Muzikos režimas"

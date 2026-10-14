@@ -1,6 +1,7 @@
 import shaka from 'shaka-player'
 
 import i18n from '../../../i18n/index'
+import { CaptionTiming } from './CaptionTiming'
 import {
   addOverlayScrollbars,
   removeOverlayScrollbars,
@@ -31,10 +32,11 @@ export class CaptionSelection extends shaka.ui.TextSelection {
    * @param {() => {id: string, url: string, label: string, translationName: string, language: string, mimeType: string}[]} getTranslations
    * @param {(caption: {id: string, url: string, label: string, language: string, mimeType: string}) => boolean} isTranslationSelected
    * @param {(caption: {url: string, label: string, language: string, mimeType: string}) => Promise<boolean>} selectTranslation
+   * @param {{getOffset: () => number, setOffset: (offset: number) => void}} timing
    * @param {!HTMLElement} parent
    * @param {!shaka.ui.Controls} controls
    */
-  constructor(events, getSettings, updateSetting, resetSettings, getTranslations, isTranslationSelected, selectTranslation, parent, controls) {
+  constructor(events, getSettings, updateSetting, resetSettings, getTranslations, isTranslationSelected, selectTranslation, timing, parent, controls) {
     super(parent, controls)
 
     if (this.isSubMenu) {
@@ -62,6 +64,7 @@ export class CaptionSelection extends shaka.ui.TextSelection {
     this.captionsOffButton_ = null
     this.openColorControl_ = null
     this.translationOverlayFrame_ = 0
+    this.timing_ = new CaptionTiming(events, timing, this.menu, parent, controls)
 
     this.optionsButton_ = document.createElement('button')
     this.optionsButton_.type = 'button'
@@ -201,6 +204,7 @@ export class CaptionSelection extends shaka.ui.TextSelection {
   }
 
   release() {
+    this.timing_.release()
     cancelAnimationFrame(this.translationOverlayFrame_)
     this.translationOverlayFrame_ = 0
     removeOverlayScrollbars(this.translationOptions_)
@@ -533,13 +537,15 @@ export class CaptionSelection extends shaka.ui.TextSelection {
     if (!this.menu.contains(this.optionsButton_)) {
       this.menu.querySelector('.shaka-back-to-overflow-button')?.after(this.optionsButton_)
     }
-
     if (this.getTranslations_().length > 0) {
       if (!this.menu.contains(this.autoTranslateButton_)) {
         this.menu.appendChild(this.autoTranslateButton_)
       }
     } else {
       this.autoTranslateButton_.remove()
+    }
+    if (this.menu.lastElementChild !== this.timing_.button) {
+      this.menu.appendChild(this.timing_.button)
     }
   }
 

@@ -1329,6 +1329,14 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Repris av livechatten är aktiverad. Chattmeddelanden visas här medan videon spelas upp.
   Premiere started: Premiären pågår. Startade {timeAgo}
   Player:
+    Caption Timing:
+      Adjust Timing: Justera timing…
+      Caption Timing: Undertexttiming
+      Offset: Förskjutning (sekunder)
+      Hint: Negativa värden visar undertexter tidigare; positiva värden senare. Gäller bara denna video.
+      Earlier: Tidigare
+      Later: Senare
+      Reset: Återställ
     Most Replayed: "Mest återspelat"
     Cast: "Casta"
     Music Mode: "Musikläge"

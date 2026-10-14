@@ -2272,6 +2272,14 @@ Video:
       shuffling playlists: shuffling playlists
       looping playlists: looping playlists
   Player:
+    Caption Timing:
+      Adjust Timing: Adjust timing…
+      Caption Timing: Caption timing
+      Offset: Offset (seconds)
+      Hint: Negative values show captions earlier; positive values show them later. Applies to this video only.
+      Earlier: Earlier
+      Later: Later
+      Reset: Reset
     Cast: "Cast"
     Most Replayed: Most replayed
     Music Mode: Music Mode

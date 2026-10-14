@@ -1321,6 +1321,14 @@ Video:
   Sponsor Block category:
     hook: 開場／問候
   Player:
+    Caption Timing:
+      Adjust Timing: 調整時間…
+      Caption Timing: 字幕時間
+      Offset: 偏移（秒）
+      Hint: 負值使字幕提前顯示，正值使字幕延後顯示。僅套用於目前影片。
+      Earlier: 提前
+      Later: 延後
+      Reset: 重設
     Most Replayed: "重播次數最多"
     Cast: "投放"
     Music Mode: "音樂模式"

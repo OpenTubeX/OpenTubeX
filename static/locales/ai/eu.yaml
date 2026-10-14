@@ -1334,6 +1334,14 @@ Video:
     music offtopic: Musikaz bestelakoa
     filler: Gaitik kanpokoak
   Player:
+    Caption Timing:
+      Adjust Timing: Doitu denboraketa…
+      Caption Timing: Azpitituluen denboraketa
+      Offset: Desplazamendua (segundoak)
+      Hint: Balio negatiboek azpitituluak lehenago erakusten dituzte; positiboek, geroago. Bideo honetarako soilik.
+      Earlier: Lehenago
+      Later: Geroago
+      Reset: Berrezarri
     Most Replayed: "Gehien errepikatua"
     Cast: "Igorri"
     Music Mode: "Musika modua"

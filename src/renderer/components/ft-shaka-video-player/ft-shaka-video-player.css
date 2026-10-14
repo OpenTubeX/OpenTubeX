@@ -1586,7 +1586,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 /* Keep the title centred in the header instead of after the back icon. */
-:deep(.shaka-sub-menu.ft-menu-grid > .shaka-back-to-overflow-button > .shaka-ui-icon) {
+:deep(.shaka-sub-menu.ft-menu-grid > .shaka-back-to-overflow-button > .shaka-ui-icon),
+:deep(.shaka-overflow-menu.ft-menu-grid .ft-caption-timing-menu .shaka-ui-icon) {
   position: absolute;
   inset-inline-start: 10px;
   padding-inline-end: 0;
@@ -1605,7 +1606,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 */
 :deep(.shaka-sub-menu.ft-menu-grid > button:not(
   .shaka-back-to-overflow-button,
-  .ft-caption-options-button
+  .ft-caption-options-button,
+  .ft-caption-timing-button
 )) {
   flex-wrap: wrap;
   place-content: center;
@@ -4596,6 +4598,142 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 :deep(.ft-caption-appearance-menu) {
   min-width: 280px;
+}
+
+:deep(.ft-caption-timing-menu) {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 280px;
+  max-inline-size: 100%;
+  block-size: 100%;
+  max-block-size: min(50vh, 280px);
+  overflow: hidden;
+}
+
+:deep(.shaka-overflow-menu:has(> .ft-caption-timing-menu:not(.shaka-hidden))) {
+  block-size: min(50vh, 280px);
+  overflow: hidden;
+}
+
+:deep(.shaka-overflow-menu:has(> .ft-caption-timing-menu:not(.shaka-hidden)) > .os-scrollbar) {
+  display: none;
+}
+
+:deep(.ft-caption-timing-menu > .shaka-back-to-overflow-button) {
+  flex: 0 0 auto;
+}
+
+:deep(.shaka-overflow-menu.ft-menu-grid .ft-caption-timing-menu > .shaka-back-to-overflow-button) {
+  position: relative;
+  box-sizing: border-box;
+  justify-content: center;
+  block-size: var(--ft-submenu-header-size);
+  padding-block: 0;
+  margin-block-end: 0;
+}
+
+:deep(.ft-caption-timing-controls) {
+  flex: 1 1 0;
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+:deep(.ft-caption-timing-controls > .os-scrollbar) {
+  --os-handle-bg: rgb(255 255 255 / 40%);
+  --os-handle-bg-hover: rgb(255 255 255 / 55%);
+  --os-handle-bg-active: rgb(255 255 255 / 70%);
+}
+
+:deep(.ft-caption-timing-content) {
+  display: grid;
+  gap: 8px;
+  padding: 8px;
+  color: #fff;
+  white-space: normal;
+}
+
+:deep(.ft-caption-timing-offset) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+}
+
+:deep(.ft-caption-timing-offset input) {
+  box-sizing: border-box;
+  inline-size: 90px;
+  min-block-size: 36px;
+  padding: 6px;
+  border: 1px solid rgb(255 255 255 / 40%);
+  border-radius: calc(6px * var(--ui-roundness));
+  background: rgb(0 0 0 / 20%);
+  color: inherit;
+  font: inherit;
+}
+
+:deep(.ft-caption-timing-offset input:focus-visible) {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+:deep(.ft-caption-timing-offset input[aria-invalid='true']) {
+  border-color: var(--primary-color);
+}
+
+:deep(.ft-caption-timing-controls p) {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+:deep(.ft-caption-timing-adjustments) {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+:deep(.ft-caption-timing-controls button) {
+  inline-size: 100%;
+  justify-content: center;
+  gap: 8px;
+  min-block-size: 44px;
+  border-radius: calc(6px * var(--ui-roundness));
+  background: rgb(255 255 255 / 10%);
+}
+
+:deep(.ft-caption-timing-controls button > span),
+:deep(.ft-caption-timing-button > span),
+:deep(.ft-caption-timing-menu > button > span) {
+  margin-inline-start: 0;
+}
+
+:deep(.ft-caption-timing-button) {
+  box-sizing: border-box;
+  justify-content: flex-start;
+  gap: 8px;
+  inline-size: 100%;
+  min-block-size: 36px;
+  padding: 4px 8px;
+  border-block-start: 1px solid rgb(255 255 255 / 20%);
+  margin-block-start: 4px;
+  font-size: 13px;
+  white-space: normal;
+}
+
+:deep(.shaka-sub-menu.ft-menu-grid > .ft-caption-timing-button) {
+  flex: 0 0 100%;
+}
+
+:deep(.shaka-sub-menu.ft-menu-grid > .ft-caption-timing-button > span) {
+  text-align: start;
+}
+
+/* Shaka's text-label margin also matches the nested icon wrapper. */
+:deep(.ft-caption-timing-button .ft-icon),
+:deep(.ft-caption-timing-controls .ft-icon) {
+  margin: 0;
 }
 
 :deep(.ft-caption-appearance-controls) {

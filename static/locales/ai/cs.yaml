@@ -1315,6 +1315,14 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Záznam živého chatu je zapnutý. Zprávy se zde budou zobrazovat během přehrávání videa.
   Premiere started: Probíhá premiéra. Začala {timeAgo}
   Player:
+    Caption Timing:
+      Adjust Timing: Upravit časování…
+      Caption Timing: Časování titulků
+      Offset: Posun (sekundy)
+      Hint: Záporné hodnoty zobrazují titulky dříve, kladné později. Platí pouze pro toto video.
+      Earlier: Dříve
+      Later: Později
+      Reset: Obnovit
     Most Replayed: "Nejčastěji přehrávané znovu"
     Cast: "Vysílat"
     Music Mode: "Hudební režim"

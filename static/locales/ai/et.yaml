@@ -1317,6 +1317,14 @@ Video:
   Sponsor Block category:
     hook: Sissejuhatus/tervitus
   Player:
+    Caption Timing:
+      Adjust Timing: Muuda ajastust…
+      Caption Timing: Subtiitrite ajastus
+      Offset: Nihe (sekundites)
+      Hint: Negatiivsed väärtused näitavad subtiitreid varem, positiivsed hiljem. Kehtib ainult selle video puhul.
+      Earlier: Varem
+      Later: Hiljem
+      Reset: Lähtesta
     Most Replayed: "Enim uuesti vaadatud"
     Cast: "Edasta"
     Music Mode: "Muusikarežiim"

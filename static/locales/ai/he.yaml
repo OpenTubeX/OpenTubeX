@@ -1358,6 +1358,14 @@ Video:
   Sponsor Block category:
     hook: פתיח/ברכות
   Player:
+    Caption Timing:
+      Adjust Timing: התאמת התזמון…
+      Caption Timing: תזמון כתוביות
+      Offset: היסט (שניות)
+      Hint: ערכים שליליים מציגים כתוביות מוקדם יותר, וחיוביים מאוחר יותר. חל על הסרטון הזה בלבד.
+      Earlier: מוקדם יותר
+      Later: מאוחר יותר
+      Reset: איפוס
     Most Replayed: "הקטע שנצפה שוב הכי הרבה"
     Cast: "שידור"
     Music Mode: "מצב מוזיקה"

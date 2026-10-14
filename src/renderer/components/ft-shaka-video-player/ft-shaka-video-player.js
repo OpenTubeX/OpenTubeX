@@ -13,6 +13,7 @@ import { registerPlugin } from '@capacitor/core'
 import { bindAndroidFullscreen } from '../../helpers/player/androidFullscreen'
 import { bindIosFullscreen } from '../../helpers/player/iosFullscreen'
 import { bindIosNativeCaptions } from '../../helpers/player/iosNativeCaptions'
+import { bindNativeCaptionTiming } from '../../helpers/player/nativeCaptionTiming'
 import { createIOSMediaTransport } from '../../helpers/player/iosMediaTransport'
 import { useI18n } from 'vue-i18n'
 import { createPopularityPath, isMostReplayed } from '../../helpers/player/videoPopularity'
@@ -806,6 +807,9 @@ export default defineComponent({
     let androidFullscreenCleanup = null
     let androidFullscreenEntering = false
     let iosCaptionsCleanup = null
+    let nativeCaptionTiming = null
+    /** @type {shaka.extern.TextDisplayer | null} */
+    let captionTextDisplayer = null
     let screenWakeBinding = null
 
     // Set when a UI reconfigure is requested while the player is not loaded, so
@@ -1715,6 +1719,26 @@ export default defineComponent({
     const captionSettings = computed(() => parseCaptionSettings(store.getters.getDefaultCaptionSettings))
     const captionCssVariables = computed(() => getCaptionCssVariables(captionSettings.value))
     const captionPositionArea = computed(() => CAPTION_POSITION_AREAS[captionSettings.value.anchor])
+    // Timing belongs to the current video, rather than the saved appearance settings.
+    let captionTimingOffset = props.sabrReloadState?.captionTimingOffset ?? 0
+
+    function updateCaptionTiming(offset) {
+      if (!Number.isFinite(offset)) return
+      captionTimingOffset = offset
+      applyCaptionTiming()
+      events.dispatchEvent(new Event('captionTimingChanged'))
+    }
+
+    function usesNativeCaptionTracks() {
+      return player?.getLoadMode() === shaka.Player.LoadMode.SRC_EQUALS
+    }
+
+    function applyCaptionTiming() {
+      player?.configure('textDisplayer.subtitleDelay', usesNativeCaptionTracks() ? 0 : captionTimingOffset)
+      nativeCaptionTiming?.update()
+    }
+
+    watch([() => props.videoId, () => props.externalUrl], () => updateCaptionTiming(0))
     const showCaptionAppearanceSample = ref(false)
     const captionAppearanceSampleBottom = ref('var(--caption-hidden-bottom-gap)')
     let captionAppearanceSampleTimeout = null
@@ -3806,6 +3830,7 @@ export default defineComponent({
         // example YouTube's occasional position:63% cues) before Shaka creates the cue DOM.
         textDisplayer: {
           positionArea: captionPositionArea.value,
+          subtitleDelay: usesNativeCaptionTracks() ? 0 : captionTimingOffset,
         },
 
         // Electron doesn't like YouTube's vp9 VR video streams and throws:
@@ -6084,9 +6109,9 @@ export default defineComponent({
         delete label.dataset.ftOverflowTitle
       }
 
-      // The caption appearance submenu has controls rather than options, so it
-      // keeps its own layout.
-      const submenus = menu.querySelectorAll(':scope > .shaka-sub-menu:not(.ft-caption-appearance-menu)')
+      // Caption appearance and timing have controls rather than options, so
+      // they keep their own layouts.
+      const submenus = menu.querySelectorAll(':scope > .shaka-sub-menu:not(.ft-caption-appearance-menu, .ft-caption-timing-menu)')
       for (const submenu of submenus) {
         const isTranslationMenu = submenu.classList.contains('ft-caption-translation-menu')
         submenu.classList.toggle('ft-menu-grid', usePlayerMenuGrid.value && !isTranslationMenu)
@@ -8597,6 +8622,7 @@ export default defineComponent({
             () => controls.getPlayer().isLive() ? [] : props.captionTranslations,
             caption => Boolean(findMatchingTextTrack(controls.getPlayer().getTextTracks(), caption)?.active),
             caption => selectCaptionTranslation(caption, controls.getPlayer()),
+            { getOffset: () => captionTimingOffset, setOffset: updateCaptionTiming },
             rootElement,
             controls
           )
@@ -11827,6 +11853,19 @@ export default defineComponent({
         })
       }
       player = controls.getPlayer()
+      const textDisplayFactory = player.getConfiguration().textDisplayFactory
+      player.configure({
+        textDisplayFactory: instance => {
+          captionTextDisplayer = textDisplayFactory(instance)
+          return captionTextDisplayer
+        },
+      })
+      nativeCaptionTiming = bindNativeCaptionTiming(
+        videoElement,
+        () => usesNativeCaptionTracks() ? captionTimingOffset : null,
+        () => captionTextDisplayer?.remove(0, Infinity)
+      )
+      player.addEventListener('loaded', applyCaptionTiming)
       wrapTextTrackSelection()
       player.addEventListener('textchanged', syncShortsCaptionsEnabled)
 
@@ -12576,6 +12615,10 @@ export default defineComponent({
       iosFullscreenCleanup = null
       iosCaptionsCleanup?.()
       iosCaptionsCleanup = null
+      nativeCaptionTiming?.release()
+      nativeCaptionTiming = null
+      captionTextDisplayer = null
+      player?.removeEventListener('loaded', applyCaptionTiming)
       clearTimeout(paidPromotionTimer)
       disableTwitchTsVideoGap?.()
       if (fullscreenDockLayoutFrame !== null) {
@@ -12847,6 +12890,7 @@ export default defineComponent({
       return {
         wasPlaying: !video.value?.paused,
         captionIndex: captionIndex >= 0 ? captionIndex : null,
+        captionTimingOffset,
         playbackRate: getCurrentPlaybackRate(),
         videoQuality: getActiveVariantQuality(),
         loopEnabled: video.value?.loop === true,
@@ -12897,6 +12941,10 @@ export default defineComponent({
       iosFullscreenCleanup = null
       iosCaptionsCleanup?.()
       iosCaptionsCleanup = null
+      nativeCaptionTiming?.release()
+      nativeCaptionTiming = null
+      captionTextDisplayer = null
+      player?.removeEventListener('loaded', applyCaptionTiming)
       ignoreErrors = true
       cancelPendingVolumeUserSet()
       cancelSponsorBlockSkipSchedule()

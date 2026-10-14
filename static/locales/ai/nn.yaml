@@ -1564,6 +1564,14 @@ Video:
   Sponsor Block category short:
     filler: Avsporingar
   Player:
+    Caption Timing:
+      Adjust Timing: Juster timing…
+      Caption Timing: Underteksttiming
+      Offset: Forskyving (sekund)
+      Hint: Negative verdiar viser undertekstar tidlegare; positive verdiar seinare. Gjeld berre denne videoen.
+      Earlier: Tidlegare
+      Later: Seinare
+      Reset: Nullstill
     Most Replayed: "Mest spela om att"
     Cast: "Strøym til ei eining"
     Music Mode: "Musikkmodus"
