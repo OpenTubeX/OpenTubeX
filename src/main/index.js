@@ -811,6 +811,7 @@ function runApp() {
   // window is restored on the next launch) or cleared (so a window that was
   // manually closed while the app keeps running is forgotten).
   let isQuitting = false
+  let relaunchRequested = false
   const closedWindows = new ClosedWindowHistory()
 
   async function reopenClosedWindow() {
@@ -1987,6 +1988,20 @@ function runApp() {
 
   if (process.env.NODE_ENV !== 'development') {
     app.on('second-instance', async (_, commandLine, __) => {
+      // Keep the profile locked until cleanup finishes. Opening a window now
+      // would lose the launch when the pending quit closes it again.
+      // AppImage cannot use Electron's relaunch on its FUSE mount.
+      if (isQuitting && !process.env.APPIMAGE) {
+        if (!relaunchRequested) {
+          relaunchRequested = true
+          app.relaunch({
+            args: commandLine.slice(1),
+            execPath: process.env.PORTABLE_EXECUTABLE_FILE || process.execPath
+          })
+        }
+        return
+      }
+
       // Someone tried to run a second instance
       if (typeof commandLine !== 'undefined') {
         const newStartupUrl = getLinkUrl(commandLine)
