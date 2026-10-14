@@ -1,5 +1,5 @@
 // Run with: ./android/gradlew -p android -I ../tests/android/build-identity.init.gradle verifyBuildIdentity
-// Repeat with -PtestBuildType=nightly to check nightly instrumentation.
+// Repeat with -PtestBuildType=nightly or release to check optimized instrumentation.
 def variants = [:]
 gradle.beforeProject { app ->
     if (app.path != ':app') return
@@ -37,11 +37,10 @@ gradle.beforeProject { app ->
                         assert variant.resValues.get()[variant.makeResValueKey('string', name)]?.value == entry.label
                     }
                     assert buildType.signingConfig.storeFile == app.rootProject.file('nightly.keystore')
-                    if (variant.name == app.android.testBuildType) {
-                        assert variant.androidTest.applicationId.get() == "${variant.applicationId.get()}.test"
-                    }
                     println "Verified ${variant.applicationId.get()}: ${entry.label}, isolated from production"
                 }
+                def testedVariant = variants[app.android.testBuildType]
+                assert testedVariant.androidTest.applicationId.get() == "${testedVariant.applicationId.get()}.test"
                 for (name in ['release', 'nightly']) {
                     def buildType = app.android.buildTypes.getByName(name)
                     assert buildType.minifyEnabled : "${name} must shrink unused bytecode"
