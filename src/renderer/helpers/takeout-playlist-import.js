@@ -4,7 +4,7 @@ export async function importTakeoutPlaylist(incoming, storage) {
   const playlist = structuredClone(incoming)
   // CSV has no saved playlist ID. Match only editable custom playlists;
   // namesakes must never replace a built-in or another protected list.
-  const existing = (await storage.find()).find(item => item.playlistName === playlist.playlistName && !item.protected && !['favorites', 'watchLater'].includes(item._id))
+  const existing = (await storage.find()).find(item => item.playlistName === playlist.playlistName && Array.isArray(item.videos) && !item.protected && !['favorites', 'watchLater'].includes(item._id))
 
   if (storage.importRecords) {
     // Assign membership IDs only after the importer matches retained members.
@@ -32,6 +32,6 @@ export async function importTakeoutPlaylist(incoming, storage) {
         videos.push(video)
       }
     }
-    await storage.update({ ...playlist, _id: existing._id, videos })
+    await storage.update({ ...existing, ...playlist, _id: existing._id, videos })
   }
 }

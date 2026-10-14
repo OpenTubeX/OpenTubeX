@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict'
+import Datastore from '@seald-io/nedb'
+import { processToBeAddedPlaylistVideo } from '../../src/renderer/helpers/playlists.js'
 import test from 'node:test'
 import vm from 'node:vm'
 import { readFile } from 'node:fs/promises'
@@ -9,6 +11,48 @@ import { importTakeoutPlaylist } from '../../src/renderer/helpers/takeout-playli
 import { forEachTakeoutImportEntry, listYouTubeTakeoutZipEntries } from '../../src/renderer/helpers/youtube-takeout-zip.js'
 
 const counts = row => [row.added, row.existing, row.skipped]
+
+
+for (const videos of [undefined, null, false, 42, 'opaque', {}]) {
+  test(`Takeout skips an incompatible namesake without changing it: ${JSON.stringify(videos)}`, async () => {
+    const db = new Datastore({ inMemoryOnly: true })
+    const original = { _id: 'retained', playlistName: 'Shared', protected: false, unknown: new Date(1), ...(videos === undefined ? {} : { videos }) }
+    await db.insertAsync(original)
+    const incoming = { playlistName: 'Shared', videos: [{ videoId: 'abcdefghijk', timeAdded: 1 }] }, before = structuredClone(incoming)
+    const storage = {
+      find: () => db.findAsync({}),
+      create: record => { record.videos.forEach(processToBeAddedPlaylistVideo); return db.insertAsync(record) },
+      update: record => db.updateAsync({ _id: record._id }, record),
+    }
+    await importTakeoutPlaylist(incoming, storage)
+    const imported = (await db.findAsync({})).find(record => record._id !== original._id)
+    assert.ok(imported)
+    assert.equal(imported.playlistName, incoming.playlistName)
+    assert.equal(imported.videos[0].videoId, incoming.videos[0].videoId)
+    assert.equal(typeof imported.videos[0].playlistItemId, 'string')
+    await importTakeoutPlaylist(incoming, storage)
+    assert.equal((await db.findAsync({})).length, 2)
+    assert.deepEqual(await db.findOneAsync({ _id: imported._id }), imported)
+    assert.deepEqual(await db.findOneAsync({ _id: original._id }), original)
+    assert.deepEqual(incoming, before)
+  })
+}
+
+test('portable Takeout merges retain creation time and metadata absent from the CSV', async () => {
+  const db = new Datastore({ inMemoryOnly: true })
+  const original = { _id: 'retained', playlistName: 'Shared', createdAt: new Date(1), protected: false, description: 'Original', customThumbnail: 'retained', unknown: { date: new Date(2) }, videos: [null, { videoId: 'existing', playlistItemId: 'keep', timeAdded: 1 }] }
+  await db.insertAsync(original)
+  const incoming = { playlistName: 'Shared', description: 'Imported description', videos: [{ videoId: 'abcdefghijk', timeAdded: 2 }] }, before = structuredClone(incoming)
+  const storage = { find: () => db.findAsync({}), update: record => db.updateAsync({ _id: record._id }, record) }
+  await importTakeoutPlaylist(incoming, storage)
+  const saved = await db.findOneAsync({ _id: original._id })
+  const added = saved.videos.at(-1)
+  assert.equal(typeof added.playlistItemId, 'string')
+  assert.deepEqual(saved, { ...original, description: incoming.description, videos: [...original.videos, { ...incoming.videos[0], playlistItemId: added.playlistItemId, type: 'video' }] })
+  await importTakeoutPlaylist(incoming, storage)
+  assert.deepEqual(await db.findOneAsync({ _id: original._id }), saved)
+  assert.deepEqual(incoming, before)
+})
 
 test('backup preview counts distinct identities and subscription memberships without changing data', () => {
   const data = {

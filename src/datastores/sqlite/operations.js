@@ -324,7 +324,11 @@ export function playlistVideoIds(engine, { id }) {
 
 export async function playlistImportCandidates(engine, { name }) {
   if (typeof name !== 'string') throw new TypeError('Invalid playlist name')
-  return engine.collections.playlists.findAsync({ playlistName: name }, { _id: 1, playlistName: 1, protected: 1 })
+  return engine.transaction(async () => {
+    const candidates = await engine.collections.playlists.findAsync({ playlistName: name }, { _id: 1, playlistName: 1, protected: 1 })
+    const array = engine.prepare("SELECT 1 FROM record_arrays WHERE collection = 'playlists' AND record_id = ? AND field = 'videos'")
+    return candidates.filter(playlist => array.get(playlist._id)).map(playlist => ({ ...playlist, videos: [] }))
+  })
 }
 
 export function commandPaletteVideos(engine, { query = '', locale = 'en-US', group, sources }) {
