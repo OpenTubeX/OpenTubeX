@@ -109,3 +109,15 @@ test('a failed protection repair does not hide loaded playlists', async () => {
   assert.deepEqual(Array.from(module.state.playlists, p => p._id).sort(), ['custom', 'watchLater'])
   assert.deepEqual(errors, [failure])
 })
+
+test('bulk playlist deletion removes every requested editable record and preserves other records exactly', async () => {
+  const first = playlist('first', 'First')
+  const second = playlist('second', 'Second')
+  const protectedPlaylist = { ...playlist('protected', 'Protected', true), unknown: { future: new Date(12) } }
+  const retained = { ...playlist('retained', 'Retained'), unknown: [false, new Date(34)] }
+  const { db, handlers } = await fixture([first, second, protectedPlaylist, retained])
+  assert.equal(await handlers.deleteMultiple(['first', 'second', 'protected', 'missing']), 2)
+  assert.deepEqual(await db.playlists.findAsync({}).sort({ _id: 1 }), [protectedPlaylist, retained])
+  assert.equal(await handlers.deleteMultiple(['first', 'second']), 0)
+  assert.deepEqual(await db.playlists.findAsync({}).sort({ _id: 1 }), [protectedPlaylist, retained])
+})

@@ -102,6 +102,9 @@ test('keeps dialog heading and actions visible at fractional zoom and small size
   await expect.poll(() => scroller.evaluate(el => el.scrollTop <= el.scrollHeight - el.clientHeight + 1)).toBe(true)
   await scroller.evaluate(el => { el.scrollTop = el.scrollHeight })
   await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('removePlaylists', Array.from({ length: 20 }, (_, i) => `long-${i}`)))
+  await expect.poll(() => page.evaluate(async action => (
+    (await window.ftElectron.dbPlaylists(action)).filter(playlist => playlist._id.startsWith('long-'))
+  ), DBActions.GENERAL.FIND)).toEqual([])
   await expect.poll(() => scroller.evaluate(el => ({
     scrollTop: el.scrollTop,
     visibleScrollbar: el.querySelector(':scope > .os-scrollbar-vertical')?.classList.contains('os-scrollbar-visible') ?? false

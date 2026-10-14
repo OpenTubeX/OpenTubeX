@@ -950,6 +950,32 @@ test.describe('quick system themes', () => {
 test.describe('additional quick settings', () => {
   test.use({ seed: { settings: { quickSettings: [], uiScale: 125 } } })
 
+  test('keeps the next picker search while the previous setting save completes', async ({ page }) => {
+    const appearance = await goToSettingsSection(page, 'appearance')
+    await appearance.getByRole('button', { name: 'Customize quick settings' }).click()
+    await page.getByRole('button', { name: 'Add setting' }).click()
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const dispatch = store.dispatch.bind(store)
+      let release
+      const gate = new Promise(resolve => { release = resolve })
+      window.releaseQuickSettingSave = () => { store.dispatch = dispatch; release() }
+      store.dispatch = async (type, payload, options) => {
+        const result = await dispatch(type, payload, options)
+        if (type === 'updateQuickSettings') await gate
+        return result
+      }
+    })
+    const search = page.getByLabel('Search settings')
+    await search.fill('Remember Watch History')
+    await page.locator('.settingPicker .optionWrapper').getByText('Remember Watch History', { exact: true }).click()
+    await search.fill('Use DeArrow Video Titles')
+    await page.evaluate(() => { window.releaseQuickSettingSave(); delete window.releaseQuickSettingSave })
+    await expect(search).toHaveValue('Use DeArrow Video Titles')
+    await page.locator('.settingPicker .optionWrapper').getByText(/^Use DeArrow Video Titles$/i).click()
+    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getQuickSettings)).toEqual(['rememberHistory', 'useDeArrowTitles'])
+  })
+
   test('adds all suggested controls, groups them, and persists changes across restart', async ({ app, page }, testInfo) => {
     test.setTimeout(120_000)
     const appearance = await goToSettingsSection(page, 'appearance')

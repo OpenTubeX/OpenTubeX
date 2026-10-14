@@ -334,11 +334,13 @@ async function addQuickSetting(_, { dataListIndex }) {
   const setting = availableSettings.value[dataListIndex]
   if (!setting) return
 
-  await store.dispatch('updateQuickSettings', [...quickSettings.value, setting.id])
+  const saved = store.dispatch('updateQuickSettings', [...quickSettings.value, setting.id])
+  // Reset this selection before persistence; a slow save must not clear the next search.
   settingSearchQuery.value = ''
-  await nextTick()
   settingPickerRef.value?.setText('')
+  await nextTick()
   settingPickerRef.value?.focus()
+  await saved
 }
 
 function removeQuickSetting(settingId) {

@@ -1,5 +1,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { readFile } from 'node:fs/promises'
+import { compileFunction } from 'node:vm'
+import { babelParse, parse } from 'vue/compiler-sfc'
 
 import { createOptimisticSettingUpdater, createSettingUpdateQueue } from '../../src/renderer/helpers/settingUpdateQueue.js'
 
@@ -157,4 +160,27 @@ test('continues with the latest setting write after an earlier write fails', asy
   await second
 
   assert.deepEqual(appliedValues, [8])
+})
+
+
+test('a delayed quick-setting save does not clear the next picker query', async () => {
+  const source = parse(await readFile(new URL('../../src/renderer/components/QuickSettingsCustomizer/QuickSettingsCustomizer.vue', import.meta.url), 'utf8')).descriptor.scriptSetup.content
+  const ast = babelParse(source, { sourceType: 'module' })
+  const handler = ast.program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'addQuickSetting')
+  const save = deferred()
+  const settingSearchQuery = { value: 'First setting' }
+  const input = { text: 'First setting', setText(value) { this.text = value }, focus() {} }
+  const dependencies = {
+    store: { dispatch: () => save.promise },
+    availableSettings: { value: [{ id: 'first' }] }, quickSettings: { value: [] },
+    settingSearchQuery, settingPickerRef: { value: input }, nextTick: async () => {},
+  }
+  const add = compileFunction(`${source.slice(handler.start, handler.end)}; return addQuickSetting`, Object.keys(dependencies))(...Object.values(dependencies))
+  const pending = add(undefined, { dataListIndex: 0 })
+  await Promise.resolve()
+  settingSearchQuery.value = input.text = 'Next setting'
+  save.resolve(true)
+  await pending
+  assert.equal(settingSearchQuery.value, 'Next setting')
+  assert.equal(input.text, 'Next setting')
 })

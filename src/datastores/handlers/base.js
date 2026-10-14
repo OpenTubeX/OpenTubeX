@@ -1000,7 +1000,7 @@ class Playlists {
   }
 
   static deleteMultiple(ids) {
-    return db.playlists.removeAsync({ _id: { $in: ids }, protected: { $ne: true } })
+    return db.playlists.removeAsync({ _id: { $in: ids }, protected: { $ne: true } }, { multi: true })
   }
 
   static deleteAll() {
