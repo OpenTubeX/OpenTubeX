@@ -378,14 +378,18 @@ test.describe('local video commands', () => {
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       window.__paletteRemovalDone = false
+      window.__paletteRemovalError = null
       const remove = store.state.history.libraryPaged ? store.dispatch('removeAllHistory') : Promise.resolve(store.commit('setHistoryCacheSorted', [])).then(() => true)
       remove.then(success => {
         store.commit('clearWatchQueue')
         store.commit('removeYtDlpDownload', 42)
         window.__paletteRemovalDone = success
-      })
+      }, error => { window.__paletteRemovalError = String(error) })
     })
-    await expect.poll(() => page.evaluate(() => window.__paletteRemovalDone)).toBe(true)
+    await expect.poll(() => page.evaluate(() => {
+      if (window.__paletteRemovalError) throw new Error(window.__paletteRemovalError)
+      return window.__paletteRemovalDone
+    })).toBe(true)
     await expect(videos.getByRole('option')).toHaveCount(1)
     await input.fill('zzzzzz')
     await expect(page.getByRole('option')).toHaveCount(0)
