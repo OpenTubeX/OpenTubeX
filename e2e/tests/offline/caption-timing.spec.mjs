@@ -158,18 +158,19 @@ for (const usePlayerMenuGrid of [true, false]) {
       await captionsMenu.getByRole('button', { name: 'English (auto-generated)', exact: true }).click()
       await expect.poll(offset).toBe(1.5)
       const watch = await page.evaluateHandle(findWatchComponent)
+      let oldVideo
       try {
         const state = await watch.evaluate(component => component.proxy.$refs.player.getSabrReloadState())
         expect(state.captionTimingOffset).toBe(1.5)
         await watch.evaluate((component, value) => component.proxy.setPlayerReloadState(value), state)
         expect(await watch.evaluate(component => component.proxy.sabrReloadState.captionTimingOffset)).toBe(1.5)
-        const oldVideo = await video.elementHandle()
+        oldVideo = await video.elementHandle()
         await watch.evaluate(component => { component.proxy.playerLoadGeneration++ })
         await expect.poll(() => oldVideo.evaluate(element => element.isConnected)).toBe(false)
         await expect.poll(offset).toBe(1.5)
         await expect.poll(() => video.evaluate(element => element.ui?.getControls()?.getPlayer()?.getTextTracks().length ?? 0)).toBeGreaterThan(0)
-        await oldVideo.dispose()
       } finally {
+        await oldVideo?.dispose()
         await watch.dispose()
       }
 
@@ -345,6 +346,44 @@ test.describe('native caption timing', () => {
     } finally {
       await oldVideo.dispose()
       await watch.dispose()
+    }
+  })
+
+  test('applies the offset when native captions finish loading while paused', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page, { captionVideoIds: ['jNQXAC9IVRw'] })
+    let releaseCaptions
+    const captionsReady = new Promise(resolve => { releaseCaptions = resolve })
+    await page.route('https://www.youtube.com/api/timedtext**', async route => {
+      await captionsReady
+      await route.fulfill({
+        status: 200,
+        contentType: 'text/vtt',
+        body: 'WEBVTT\n\n00:00:05.000 --> 00:00:07.000\nLate-loaded timing caption\n'
+      })
+    })
+    try {
+      const video = await openMockedVideo(page)
+      await video.evaluate(element => {
+        element.pause()
+        element.currentTime = 4
+      })
+      await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
+      await expect.poll(() => video.evaluate(element => Array.from(element.querySelectorAll('track'))
+        .some(track => track.readyState === HTMLTrackElement.LOADING))).toBe(true)
+      const player = page.locator('.ftVideoPlayer')
+      const caption = player.locator('.shaka-text-container [translate="no"]')
+      await expect(caption).toHaveCount(0)
+      await player.hover()
+      await player.getByRole('button', { name: 'More settings' }).click()
+      await player.locator('.shaka-overflow-menu > .shaka-caption-button').click()
+      await player.getByRole('button', { name: 'Adjust timing…', exact: true }).click()
+      await player.getByRole('spinbutton', { name: 'Offset (seconds)' }).fill('-2')
+      releaseCaptions()
+      await expect(caption).toHaveText('Late-loaded timing caption')
+      expect(await video.evaluate(element => element.paused)).toBe(true)
+      expect(await video.evaluate(element => element.currentTime)).toBe(4)
+    } finally {
+      releaseCaptions()
     }
   })
 })
