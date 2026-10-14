@@ -1,3 +1,5 @@
+import vm from 'node:vm'
+import { babelParse } from 'vue/compiler-sfc'
 import assert from 'node:assert/strict'
 import { mkdtemp, open, readFile, rm, writeFile, appendFile } from 'node:fs/promises'
 import fs from 'node:fs/promises'
@@ -3081,3 +3083,19 @@ test('local command search returns bounded metadata and distinct saved occurrenc
   assert.deepEqual(commandPaletteVideos(engine, { ...context, query: '\u0301' }), { history: [], playlists: [] })
   assert.equal(reads, 0)
 })
+
+for (const desktop of [false, true]) {
+  test(`history cache selects the canonical timestamp/ID occurrence on desktop: ${desktop}`, async () => {
+    const script = await readFile(new URL('../../src/renderer/store/modules/history.js', import.meta.url), 'utf8')
+    const actions = babelParse(script, { sourceType: 'module' }).program.body.flatMap(node => node.declarations ?? []).find(node => node.id.name === 'actions').init
+    const method = actions.properties.find(node => node.key.name === 'grabHistory')
+    const records = [{ _id: 'a', videoId: 'same', timeWatched: 100 }, { _id: 'b', videoId: 'same', timeWatched: 100 }]
+    const before = structuredClone(records), commits = new Map()
+    const context = vm.createContext({ process: { env: { IS_ELECTRON: desktop } }, model, getRetentionCutoff: () => null, DBHistoryHandlers: { find: async () => records }, console })
+    const grab = vm.runInContext(`(async function(${script.slice(method.params[0].start, method.params[0].end)})${script.slice(method.body.start, method.body.end)})`, context)
+    await grab({ rootGetters: {}, commit: (name, value) => commits.set(name, value) })
+    assert.equal(commits.get('setHistoryCacheById').same._id, desktop ? 'b' : 'a')
+    assert.deepEqual(commits.get('setHistoryCacheSorted'), before)
+    assert.deepEqual(records, before)
+  })
+}

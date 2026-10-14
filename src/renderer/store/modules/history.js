@@ -80,7 +80,9 @@ const actions = {
 
       const resultsById = {}
       results.forEach(video => {
-        if (typeof video.videoId === 'string' && !Object.hasOwn(resultsById, video.videoId)) resultsById[video.videoId] = video
+        if (typeof video.videoId !== 'string') return
+        const previous = resultsById[video.videoId]
+        if (!Object.hasOwn(resultsById, video.videoId) || (process.env.IS_ELECTRON && (model.compareThings(video.timeWatched, previous.timeWatched) || model.compareThings(video._id, previous._id)) > 0)) resultsById[video.videoId] = video
       })
 
       commit('setHistoryCacheSorted', results)
