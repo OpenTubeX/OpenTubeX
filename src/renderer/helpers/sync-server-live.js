@@ -28,7 +28,9 @@ export class SyncCollectionCache {
 
   markSynced(collections) {
     for (const collection of collections) {
-      this.syncedRevisions.set(collection, this.collections.get(collection).revision)
+      // The cache is cleared when the account, key, or token changes mid-sync.
+      const cached = this.collections.get(collection)
+      if (cached) this.syncedRevisions.set(collection, cached.revision)
     }
   }
 

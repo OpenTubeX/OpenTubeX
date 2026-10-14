@@ -33,6 +33,15 @@ test('changing accounts discards a collection copy that is still in flight', asy
   assert.equal(await cache.get('history', 1), null)
 })
 
+test('marking a sync finished after the cache was cleared skips the discarded collections', async () => {
+  const cache = new SyncCollectionCache()
+  cache.use('first-account')
+  await cache.put('history', 1, [])
+  cache.use('')
+  cache.markSynced(['history'])
+  assert.equal(cache.isSynced('history', 1), false)
+})
+
 test('activity describes only changed settings with stable keys and omits initial baselines and noisy collections', () => {
   const before = [{ key: 'baseTheme', value: 'dark', updatedAt: 1 }]
   assert.equal(createSyncActivity('settings', [], before, 'device', 'Laptop'), null)
