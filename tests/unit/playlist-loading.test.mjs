@@ -173,3 +173,37 @@ for (const name of [undefined, null, false, 42, { retained: true }]) {
     assert.deepEqual(await db.playlists.findOneAsync({ _id: original._id }), original)
   })
 }
+
+
+test('read-only restore keeps opaque membership fields while Save excludes unwritable records', async () => {
+  const records = [undefined, null, false, 42, 'retained', {}, [], [{ videoId: 'A' }]].map((videos, index) => ({ _id: String(index), playlistName: 'Retained', ...(videos === undefined ? {} : { videos }), unknown: new Date(index) }))
+  const { db, module, handlers, context, load } = await fixture(records)
+  context.rootState.settings.quickBookmarkTargetPlaylistId = '6'
+  for (const method of ['create', 'upsert', 'delete']) handlers[method] = () => assert.fail(`Unexpected ${method} during retained publication`)
+  assert.equal(await load({ preserveRetained: true }), true)
+  assert.deepEqual(structuredClone(module.state.playlists), records)
+  const component = parse(await readFile(new URL('../../src/renderer/components/FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue', import.meta.url), 'utf8')).descriptor.scriptSetup.content
+  const ast = babelParse(component, { sourceType: 'module' })
+  const init = ast.program.body.flatMap(node => node.declarations ?? []).find(node => node.id.name === 'allPlaylists').init
+  const eligible = vm.runInNewContext(component.slice(init.start, init.end), { computed: fn => fn(), store: { getters: { getAllPlaylists: module.state.playlists } } })
+  assert.deepEqual(Array.from(eligible, playlist => playlist._id), ['6', '7'])
+  assert.deepEqual(await db.playlists.findAsync({}), records)
+})
+
+test('PlaylistInfo tolerates retained scalar membership fields without normalizing records', async () => {
+  const component = parse(await readFile(new URL('../../src/renderer/components/PlaylistInfo/PlaylistInfo.vue', import.meta.url), 'utf8')).descriptor.scriptSetup.content
+  const ast = babelParse(component, { sourceType: 'module' })
+  const names = ['userPlaylistAnyVideoWatched', 'userPlaylistUniqueVideosCount', 'userPlaylistDuplicateItemCount', 'userPlaylistWatchedVideoCount']
+  const declarations = ast.program.body.filter(node => node.type === 'VariableDeclaration' && node.declarations.some(declaration => names.includes(declaration.id.name)))
+  for (const videos of [undefined, null, false, 42, 'retained', {}]) {
+    const record = { _id: 'retained', ...(videos === undefined ? {} : { videos }), unknown: new Date(1) }
+    const before = structuredClone(record)
+    const context = vm.createContext({ computed: fn => ({ get value() { return fn() } }), isUserPlaylist: { value: true }, selectedUserPlaylist: { value: record }, historyCacheById: { value: {} }, playlistStatistics: { value: { total: 0, uniqueCount: 0, watchedCount: 0 } }, isHistoryEntryWatched: () => false })
+    vm.runInContext(declarations.map(node => component.slice(node.start, node.end)).join('\n'), context)
+    assert.equal(vm.runInContext('userPlaylistAnyVideoWatched.value', context), false)
+    if (declarations.some(node => node.declarations.some(declaration => declaration.id.name === 'userPlaylistUniqueVideosCount'))) assert.equal(vm.runInContext('userPlaylistUniqueVideosCount.value', context), 0)
+    assert.equal(vm.runInContext('userPlaylistDuplicateItemCount.value', context), 0)
+    assert.equal(Boolean(vm.runInContext('userPlaylistWatchedVideoCount.value', context)), false)
+    assert.deepEqual(record, before)
+  }
+})
