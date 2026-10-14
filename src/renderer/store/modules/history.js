@@ -10,6 +10,16 @@ import {
 
 const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000
 
+function indexHistoryByVideoId(records) {
+  const byId = new Map()
+  for (const record of records) {
+    if (typeof record.videoId !== 'string') continue
+    const previous = byId.get(record.videoId)
+    if (!previous || (model.compareThings(record.timeWatched, previous.timeWatched) || model.compareThings(record._id, previous._id)) > 0) byId.set(record.videoId, record)
+  }
+  return Object.fromEntries(byId)
+}
+
 function getRetentionCutoff(days) {
   const parsedDays = Number(days)
   if (!Number.isInteger(parsedDays) || parsedDays < 1) {
@@ -112,15 +122,8 @@ const actions = {
 
       const results = await DBHistoryHandlers.find()
 
-      const resultsById = {}
-      results.forEach(video => {
-        if (typeof video.videoId !== 'string') return
-        const previous = resultsById[video.videoId]
-        if (!Object.hasOwn(resultsById, video.videoId) || (process.env.IS_ELECTRON && (model.compareThings(video.timeWatched, previous.timeWatched) || model.compareThings(video._id, previous._id)) > 0)) resultsById[video.videoId] = video
-      })
-
       commit('setHistoryCacheSorted', results)
-      commit('setHistoryCacheById', resultsById)
+      commit('setHistoryCacheById', indexHistoryByVideoId(results))
     } catch (errMessage) {
       console.error(errMessage)
     }
@@ -169,13 +172,13 @@ const actions = {
 
       // sort before sending saving to the database and passing to other windows
       // so that the other windows can use it as is, without having to sort the array themselves
-      sortedRecords.sort((a, b) => model.compareThings(b.timeWatched, a.timeWatched) || model.compareThings(b._id, a._id))
+      sortedRecords.sort((a, b) => model.compareThings(b.timeWatched, a.timeWatched) || model.compareThings(a._id, b._id))
 
       // The datastore assigns IDs to imported records. Cache its saved copies
       // directly so a failed reread cannot hide an already successful write.
       const savedRecords = await DBHistoryHandlers.overwrite(sortedRecords)
       commit('setHistoryCacheSorted', savedRecords)
-      commit('setHistoryCacheById', Object.fromEntries(savedRecords.toReversed().filter(record => typeof record.videoId === 'string').map(record => [record.videoId, record])))
+      commit('setHistoryCacheById', indexHistoryByVideoId(savedRecords))
       return true
     } catch (errMessage) {
       console.error(errMessage)

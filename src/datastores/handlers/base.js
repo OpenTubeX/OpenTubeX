@@ -192,7 +192,7 @@ class History {
 
   static async find() {
     await this.migrateWatchedStatus()
-    const records = await db.history.findAsync({}).sort({ timeWatched: -1, _id: -1 })
+    const records = await db.history.findAsync({}).sort({ timeWatched: -1 })
     // Prepare the index once the datastore is loaded, before playback and bulk
     // edits start writing by video ID. Seen-mark merging is not always enabled.
     await db.history.ensureIndexAsync({ fieldName: 'videoId' })
@@ -305,7 +305,7 @@ class History {
     await db.history.removeAsync({}, { multi: true })
 
     const savedRecords = await db.history.insertAsync(migratedRecords)
-    return savedRecords.toSorted((a, b) => model.compareThings(b.timeWatched, a.timeWatched) || model.compareThings(b._id, a._id))
+    return savedRecords.toSorted((a, b) => model.compareThings(b.timeWatched, a.timeWatched) || model.compareThings(a._id, b._id))
   }
 
   static async applySyncChanges({ insertions, updates, deletions }) {
