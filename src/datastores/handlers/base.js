@@ -169,7 +169,8 @@ class Settings {
           'backendPreference',
           'useTrayIcon',
           'hideToTrayOnClose',
-          'hideToTrayOnMinimize'
+          'hideToTrayOnMinimize',
+          'iconPack'
         ]
       }
     })

@@ -46,6 +46,7 @@ function fixture(platform = 'linux') {
   const context = vm.createContext({
     process: { platform, env: {} }, path: { join: () => '/icon.png' }, __dirname: '/',
     selectedTrayImage: { isEmpty: () => true },
+    getTrayMenuIcon: (name, pack) => `${pack}:${name}`,
     Tray, BrowserWindow: { getAllWindows: () => windows, getFocusedWindow: () => windows[0] },
     Menu: { buildFromTemplate: items => items },
     createWindow: () => new Window(), requestQuit: () => {},
@@ -65,6 +66,7 @@ function fixture(platform = 'linux') {
     const trayMaximizedWindows = {};
     const trayClosingWindowIds = new Set();
     const trayTranslate = key => key;
+    let trayMenuIconPack = 'material';
     const dockMediaLabels = { previous: 'Previous', play: 'Play', pause: 'Pause', next: 'Next', newWindow: 'New Window' };
     let isTrayOnMinimizeSupported = true;
     ${source.slice(source.indexOf('  function getTrayImage()'), source.indexOf('\n  asyncFs.rm(', source.indexOf('  function ensureBackgroundTray()')))}
@@ -186,6 +188,29 @@ test('tray media controls reflect supported actions and playback state', () => {
   assert.deepEqual(mediaActions, ['pause', 'nexttrack'])
   setMedia({ playbackState: 'paused', actions: new Set(['play']) })
   assert.equal(controls()[1].label, 'Play')
+})
+
+test('tray icons follow window visibility and playback state', () => {
+  const { context, Window, setMedia } = fixture()
+  const window = new Window()
+  let menu = context.defaultTrayMenu()
+  const assertIcons = items => {
+    for (const item of items) {
+      if (item.type === 'separator') assert.equal(item.icon, undefined)
+      else assert.ok(item.icon)
+      if (item.submenu) assertIcons(item.submenu)
+    }
+  }
+  assertIcons(menu)
+  assert.equal(menu[0].icon, 'material:display')
+  assert.equal(menu[0].submenu[0].icon, 'material:eye-slash')
+  assert.equal(menu.find(item => item.label === 'Play').icon, 'material:play')
+  context.hideWindowToTray(window)
+  setMedia({ playbackState: 'playing', actions: new Set(['pause']) })
+  menu = context.defaultTrayMenu()
+  assertIcons(menu)
+  assert.equal(menu[0].submenu[0].icon, 'material:eye')
+  assert.equal(menu.find(item => item.label === 'Pause').icon, 'material:pause')
 })
 
 test('macOS reserves left click for toggling and right click for the menu', () => {

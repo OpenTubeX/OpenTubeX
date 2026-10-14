@@ -94,6 +94,7 @@ import {
 } from './kdeWaylandWindowState'
 import { createSubscriptionBackgroundService } from './subscriptionBackground'
 import { supportsNativeNotifications } from './nativeNotifications'
+import { getTrayMenuIcon } from './trayMenuIcons'
 
 function getSystemAccentColor() {
   try {
@@ -1792,6 +1793,7 @@ function runApp() {
   let trayOnClose = false
   let trayOnMinimize = false
   let trayTranslate = key => key
+  let trayMenuIconPack = 'material'
   const trayClosingWindowIds = new Set()
   let trayWindows = []
   const trayMaximizedWindows = {}
@@ -2231,6 +2233,9 @@ function runApp() {
             break
           case 'hideToTrayOnMinimize':
             trayOnMinimize = doc.value
+            break
+          case 'iconPack':
+            trayMenuIconPack = doc.value
             break
         }
       })
@@ -2748,30 +2753,33 @@ function runApp() {
       const template = defaultTrayMenu()
       // Media position updates do not change menu items. Replacing an identical
       // menu interrupts the open StatusNotifier menu on Plasma.
-      const signature = JSON.stringify(template)
+      const signature = JSON.stringify([trayMenuIconPack, template])
       if (signature === trayMenuSignature) return
       tray.setContextMenu(Menu.buildFromTemplate(template))
       trayMenuSignature = signature
     }
   }
 
-  function createMediaMenuItems() {
+  function createMediaMenuItems(iconFor = () => undefined) {
     const session = getDockMediaSession()
     const actions = session?.actions ?? new Set()
     const toggleAction = session?.playbackState === 'playing' ? 'pause' : 'play'
     return [
       {
         label: dockMediaLabels.previous,
+        icon: iconFor('step-backward'),
         enabled: actions.has('previoustrack'),
         click: () => requestDockMediaAction('previoustrack')
       },
       {
         label: toggleAction === 'pause' ? dockMediaLabels.pause : dockMediaLabels.play,
+        icon: iconFor(toggleAction),
         enabled: actions.has(toggleAction),
         click: () => requestDockMediaAction(toggleAction)
       },
       {
         label: dockMediaLabels.next,
+        icon: iconFor('step-forward'),
         enabled: actions.has('nexttrack'),
         click: () => requestDockMediaAction('nexttrack')
       }
@@ -2780,18 +2788,22 @@ function runApp() {
 
   function defaultTrayMenu() {
     const windows = BrowserWindow.getAllWindows()
+    const iconFor = name => getTrayMenuIcon(name, trayMenuIconPack)
     const isShown = window => window.isVisible() && !window.isMinimized() && !trayWindows.includes(window)
     return [
       ...windows.map(window => ({
         id: `window-${window.id}`,
+        icon: iconFor('display'),
         label: window.getTitle().replace(/\u2063[\u200b\u200c]+$/, '').replace(/ - OpenTubeX$/, ''),
         submenu: [
           {
             label: trayTranslate(isShown(window) ? 'Video.Player.Hide' : 'Video.Player.Show'),
+            icon: iconFor(isShown(window) ? 'eye-slash' : 'eye'),
             click: () => isShown(window) ? hideWindowToTray(window) : trayClick(window)
           },
           {
             label: trayTranslate('Close'),
+            icon: iconFor('times'),
             click: () => {
               trayClick(window)
               trayClosingWindowIds.add(window.id)
@@ -2801,10 +2813,11 @@ function runApp() {
         ]
       })),
       { type: 'separator' },
-      ...createMediaMenuItems(),
+      ...createMediaMenuItems(iconFor),
       { type: 'separator' },
       {
         label: dockMediaLabels.newWindow,
+        icon: iconFor('clone'),
         click: () => createWindow({
           showWindowNow: true,
           replaceMainWindow: !mainWindow || mainWindow.isDestroyed() || trayWindows.includes(mainWindow)
@@ -2813,6 +2826,7 @@ function runApp() {
       ...(windows.some(window => !isShown(window))
         ? [{
             label: trayTranslate('Tray.Show All Windows'),
+            icon: iconFor('eye'),
             click: () => {
               for (const window of BrowserWindow.getAllWindows()) {
                 if (!isShown(window)) trayClick(window)
@@ -2823,6 +2837,7 @@ function runApp() {
       ...(windows.some(isShown)
         ? [{
             label: trayTranslate('Tray.Hide All Windows'),
+            icon: iconFor('eye-slash'),
             click: () => {
               for (const window of BrowserWindow.getAllWindows()) {
                 if (isShown(window)) hideWindowToTray(window)
@@ -2832,6 +2847,7 @@ function runApp() {
         : []),
       {
         label: trayTranslate('Quit'),
+        icon: iconFor('power-off'),
         click: () => requestQuit(BrowserWindow.getFocusedWindow() ?? mainWindow)
       }
     ]
@@ -5288,6 +5304,10 @@ function runApp() {
               break
             case 'hideToTrayOnMinimize':
               trayOnMinimize = data.value
+              break
+            case 'iconPack':
+              trayMenuIconPack = data.value
+              createTrayContextMenu()
               break
             case 'baseTheme':
               if (isCustomThemeValue(data.value)) {
