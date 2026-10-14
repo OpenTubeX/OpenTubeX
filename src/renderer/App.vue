@@ -625,6 +625,7 @@ import { createAndroidBackDialogPreview } from './helpers/androidBackDialog'
 import { applyAnimationSpeed } from './helpers/animationSpeed'
 import { isReducedMotionEnabled } from './helpers/reducedMotion'
 import { keyboardEventInitFromShortcut, OPEN_COMMAND_PALETTE_EVENT } from './helpers/commandPalette'
+import { DBLibraryHandlers } from '../datastores/handlers/index'
 import { createCommandPaletteRegistry } from './helpers/commandPaletteRegistry'
 import {
   resolveExternalLinkAction,
@@ -3400,6 +3401,8 @@ const commandPaletteDownloads = computed(previous => {
     : downloads
 })
 const commandPaletteVideoSources = computed(() => ({
+  loadLibrarySources: isElectron ? (query, locale, group, sources) => DBLibraryHandlers.query('commandPaletteVideos', { query, locale, group, sources }) : undefined,
+  libraryRevision: isElectron ? store.state.history.historyRevision : 0,
   history: store.getters.getHistoryCacheSorted,
   saveVideoHistoryWithLastViewedPlaylist: store.getters.getSaveVideoHistoryWithLastViewedPlaylist,
   playlists: store.getters.getAllPlaylists,
@@ -3474,9 +3477,21 @@ function navigateFromCommandPalette(location) {
   return router.push(location)
 }
 
-function playLibraryVideoFromCommandPalette(video, location) {
+async function playLibraryVideoFromCommandPalette(video, location) {
   if (!isElectron || store.getters.getExternalPlayer === '' || store.getters.getDefaultViewingMode !== 'external_player') {
     return navigateFromCommandPalette(location)
+  }
+  try {
+    await store.dispatch('hydrateVideoState', [video.videoId])
+    if (location.query?.libraryMemberId) {
+      const member = await DBLibraryHandlers.query('playlistMember', { id: location.query.playlistId, memberId: location.query.libraryMemberId })
+      if (member?.videoId !== video.videoId) throw new Error('The selected playlist member is no longer available')
+      video = member
+    }
+  } catch (error) {
+    console.error(error)
+    showToast({ message: t('Storage Startup Error.Title'), icon: ['fas', 'circle-exclamation'] })
+    return false
   }
   const history = store.getters.getHistoryCacheById[video.videoId]
   const saveProgress = ['auto', 'semi-auto'].includes(store.getters.getWatchedProgressSavingMode)
