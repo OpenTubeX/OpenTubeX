@@ -44,11 +44,36 @@ async function fixture(fail = false) {
   return { context, db, appliedMarks, savedMarks, handlers: History, module }
 }
 
-test('portable overwrite cache agrees with NeDB when duplicate timestamps are equal', async () => {
+test('portable overwrite cache retains the newest occurrence independently of display tie ordering', async () => {
   const f = await fixture()
   const records = [...await f.db.history.findAsync({}), { _id: 'z', videoId: 'equal', timeWatched: 400, isWatched: false }, { _id: 'a', videoId: 'equal', timeWatched: 400, isWatched: true }]
   assert.equal(await f.module.actions.overwriteHistory(f.context, new Map(records.map(record => [record._id, record]))), true)
-  assert.deepEqual(toRaw(f.context.state.historyCacheById.equal), (await f.handlers.find()).find(record => record.videoId === 'equal'))
+  const newest = (await f.db.history.findAsync({ videoId: 'equal' }).sort({ timeWatched: -1, _id: -1 }))[0]
+  assert.deepEqual(toRaw(f.context.state.historyCacheById.equal), newest)
+  f.context.rootGetters = { getHistoryRetentionDays: 0 }
+  await f.module.actions.grabHistory(f.context)
+  assert.deepEqual(toRaw(f.context.state.historyCacheById.equal), newest)
+})
+
+test('history display reads preserve legacy NeDB ordering for tied watched timestamps', async () => {
+  const f = await fixture()
+  await f.db.history.removeAsync({}, { multi: true })
+  await f.db.settings.updateAsync({ _id: 'historyWatchedStatusMigrated' }, { _id: 'historyWatchedStatusMigrated', value: true }, { upsert: true })
+  const records = [
+    { ...record('older219'), _id: 'older219', title: 'City walk 219', unknown: new Date(1) },
+    { ...record('older000'), _id: 'older000', title: 'City walk 0', unknown: { retained: true } },
+    { ...record('otherwalk'), _id: 'otherwalk', title: 'Other city walk' },
+    { ...record('recent'), _id: 'recent', title: 'Recent', timeWatched: 2 },
+  ]
+  await f.db.history.insertAsync(records)
+  const before = await f.db.history.findAsync({}).sort({ _id: 1 })
+  const expected = await f.db.history.findAsync({}).sort({ timeWatched: -1 })
+  assert.deepEqual(await f.handlers.find(), expected)
+  f.context.rootGetters = { getHistoryRetentionDays: 0 }
+  await f.module.actions.grabHistory(f.context)
+  assert.deepEqual(toRaw(f.context.state.historyCacheSorted), expected)
+  assert.deepEqual(expected.filter(record => record.title.startsWith('City walk')).toReversed().map(record => record.title), ['City walk 219', 'City walk 0'])
+  assert.deepEqual(await f.db.history.findAsync({}).sort({ _id: 1 }), before)
 })
 
 for (const bulk of [false, true]) {
@@ -370,11 +395,11 @@ test('NeDB desktop reads and overwrite broadcasts use the same occurrence tie or
   const older = { ...record('same'), _id: 'a', watchProgress: 12, isWatched: false, unknown: new Date(1) }
   const newest = { ...record('same'), _id: 'z', watchProgress: 88, isWatched: true, unknown: new Date(2) }
   await f.db.history.insertAsync([older, newest])
-  assert.deepEqual(await f.handlers.find(), [newest, older])
-  assert.deepEqual(await f.handlers.overwrite([older, newest]), [newest, older], 'broadcast data must already have the same ordering as a subsequent desktop load')
+  assert.deepEqual(await f.handlers.find(), [older, newest])
+  assert.deepEqual(await f.handlers.overwrite([older, newest]), [older, newest], 'broadcast data must already have the same legacy display ordering as a subsequent desktop load')
   const imported = [older, newest].map(({ _id, ...entry }) => entry)
   const saved = await f.handlers.overwrite(imported)
-  assert.deepEqual(saved, saved.toSorted((a, b) => model.compareThings(b.timeWatched, a.timeWatched) || model.compareThings(b._id, a._id)))
+  assert.deepEqual(saved, saved.toSorted((a, b) => model.compareThings(b.timeWatched, a.timeWatched) || model.compareThings(a._id, b._id)))
   assert.deepEqual(await f.handlers.find(), saved)
   assert.deepEqual(saved.map(({ _id, ...entry }) => entry).toSorted((a, b) => a.watchProgress - b.watchProgress), imported)
 })
