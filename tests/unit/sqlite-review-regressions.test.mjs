@@ -18,6 +18,7 @@ import { markSubscriptionEntries } from '../../src/datastores/sqlite/subscriptio
 import * as operations from '../../src/datastores/sqlite/operations.js'
 import { LibrarySync } from '../../src/datastores/sqlite/sync.js'
 import { LibraryImports } from '../../src/datastores/sqlite/import.js'
+import { canMarkHistoryEntryAsWatched } from '../../src/history.js'
 import { getSortedPlaylistItems, processToBeAddedPlaylistVideo } from '../../src/renderer/helpers/playlists.js'
 import { mergeIds, videoToRemote } from '../../src/renderer/helpers/sync-history-merge.js'
 import Datastore from '@seald-io/nedb'
@@ -3605,5 +3606,33 @@ for (const staleFailure of [false, true]) {
       assert.equal(calls.length, 3)
       assert.equal(context.userPreviewVideo.value.title, 'second')
     } finally { stop() }
+  })
+}
+
+for (const mode of ['premiere', 'stale', 'failure']) {
+  test(`external command hydration preserves durable history and current tab ownership: ${mode}`, async t => {
+    const database = new DatabaseSync(':memory:'); database.exec(SCHEMA_SQL); t.after(() => database.close())
+    const engine = new LibraryEngine(database)
+    const record = { _id: 'stored', videoId: 'video', title: 'Complete title', timeWatched: 1, watchProgress: 12, isWatched: false, isUpcoming: true, premiereTimestamp: Date.now() / 1000 + 86400, unknown: new Date(123) }
+    await engine.collections.history.insertAsync(record)
+    const pending = Promise.withResolvers(), launches = [], writes = [], toasts = [], pauses = []
+    const selectedTab = ref('selected')
+    const context = await functions('src/renderer/App.vue', ['playLibraryVideoFromCommandPalette'], {
+      isElectron: true, presentedTabId: selectedTab,
+      store: { getters: { getExternalPlayer: 'mpv', getDefaultViewingMode: 'external_player', getHistoryCacheById: { video: record }, getWatchedProgressSavingMode: 'auto', getDefaultPlayback: 1, getRememberHistory: true }, dispatch: (method, value) => { if (method === 'hydrateVideoState') return pending.promise; writes.push([method, value]) } },
+      canMarkHistoryEntryAsWatched, tabMediaCoordinator: { dispatchAction: (...args) => pauses.push(args) },
+      window: { ftElectron: { openInExternalPlayer: payload => launches.push(payload) } },
+      showToast: toast => toasts.push(toast), t: key => key,
+    })
+    const loading = context.playLibraryVideoFromCommandPalette({ videoId: 'video', title: 'Projected title' }, { path: '/watch/video', query: {} })
+    if (mode === 'stale') selectedTab.value = 'other'
+    if (mode === 'failure') pending.reject(new Error('history unavailable'))
+    else pending.resolve()
+    await loading
+    assert.equal(launches.length, mode === 'premiere' ? 1 : 0)
+    assert.equal(pauses.length, mode === 'premiere' ? 1 : 0)
+    assert.equal(writes.length, 0, 'a future premiere or failed/stale read must not overwrite saved history')
+    assert.equal(toasts.length, mode === 'failure' ? 1 : 0)
+    assert.deepEqual(await engine.collections.history.findOneAsync({ _id: 'stored' }), record)
   })
 }
