@@ -106,10 +106,5 @@ updates:
     labels:
       - "PR: waiting for review"
       - "PR: dependencies"
-  - package-ecosystem: "swift"
-    directory: "/ios/App/CapApp-SPM"
-    schedule:
-      interval: "weekly"
-    labels:
-      - "PR: waiting for review"
-      - "PR: dependencies"
+  # Capacitor regenerates the Swift manifest from npm packages after installation.
+  # Its local node_modules dependencies cannot be resolved by Dependabot's Swift job.
