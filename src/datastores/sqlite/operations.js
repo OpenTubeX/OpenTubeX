@@ -307,7 +307,7 @@ export async function playlistImportCandidates(engine, { name }) {
 export function commandPaletteVideos(engine, { query = '', locale = 'en-US', group, sources }) {
   if (typeof query !== 'string' || typeof locale !== 'string' || typeof group !== 'string' ||
       typeof sources?.history !== 'string' || typeof sources?.playlists !== 'string') throw new TypeError('Invalid local video search')
-  const fields = ['videoId', 'title', 'author', 'authorId', 'isShort', 'lengthSeconds', 'lastViewedPlaylistId', 'lastViewedPlaylistType', 'lastViewedPlaylistItemId']
+  const fields = ['videoId', 'title', 'author', 'authorId', 'isShort', 'lengthSeconds', 'isUpcoming', 'premiereTimestamp', 'lastViewedPlaylistId', 'lastViewedPlaylistType', 'lastViewedPlaylistItemId']
   const projection = fields.map(field => `'${field}', json(data -> '$.${field}')`).join(', ')
   const context = { group, sources, history: [], playlists: [], downloads: {}, queue: [], playLibraryVideo() {} }
   let index = 0

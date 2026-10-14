@@ -3049,6 +3049,8 @@ for (const oldest of [false, true]) {
 test('local command search returns bounded metadata and distinct saved occurrences without changing records', async t => {
   const engine = memory(t)
   const history = Array.from({ length: 80 }, (_, index) => ({ _id: `h${index}`, videoId: `video-${index}`, title: 'Mountain journey', author: 'North Channel', timeWatched: index, thumbnail: 'data:image/png;base64,' + 'x'.repeat(10000), unknown: new Date(index) }))
+  history[79].isUpcoming = true
+  history[79].premiereTimestamp = Date.now() / 1000 + 86400
   const members = [null, { retained: new Date(1) }, ...Array.from({ length: 80 }, (_, index) => ({ videoId: 'duplicate', playlistItemId: 'same', title: `Hidden destination ${index}`, author: 'North Channel', unknown: new Date(index) }))]
   await engine.collections.history.insertAsync(history)
   await engine.collections.playlists.insertAsync({ _id: 'playlist', playlistName: 'Road trips', videos: members, unknown: new Date(0) })
@@ -3056,6 +3058,8 @@ test('local command search returns bounded metadata and distinct saved occurrenc
   const context = { locale: 'en-US', group: 'Local videos', sources: { history: 'History', playlists: 'Playlists' } }
   const result = commandPaletteVideos(engine, { ...context, query: 'montain jorney' })
   assert.equal(result.history.length, 50)
+  assert.equal(result.history[0].isUpcoming, true)
+  assert.equal(result.history[0].premiereTimestamp, history[79].premiereTimestamp)
   assert.equal(result.playlists.length, 0)
   assert.equal(Object.hasOwn(result.history[0], 'thumbnail'), false)
   assert.equal(Object.hasOwn(result.history[0], 'unknown'), false)
