@@ -528,6 +528,7 @@ Settings:
     Invalid Engine: Vnesite ime in veljaven iskalni URL HTTP ali HTTPS, ki vsebuje %s.
     Engine Limit: Dodate lahko največ {count} iskalnikov po meri.
   Theme Settings:
+    Material Accent Color: "Poudarjena barva Material"
     Tab Loading Indicator:
       Tab Loading Indicator: Kazalnik nalaganja zavihka
       Bar: Vrstica
@@ -585,6 +586,9 @@ Settings:
       System Fonts: Sistemske pisave
     Always Show Scrollbars: Vedno prikaži drsne trakove
     Base Theme:
+      Material Light: "Material Svetla"
+      Material Dark: "Material Temna"
+      Material Black: "Material Črna"
       Dynamic colors: Dinamične barve
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm

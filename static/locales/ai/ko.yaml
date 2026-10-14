@@ -497,6 +497,7 @@ Settings:
     Invalid Engine: 이름과 %s을(를) 포함하는 올바른 HTTP 또는 HTTPS 검색 URL을 입력하세요.
     Engine Limit: 사용자 지정 검색 엔진은 최대 {count}개까지 추가할 수 있습니다.
   Theme Settings:
+    Material Accent Color: "Material 강조 색상"
     Tab Loading Indicator:
       Tab Loading Indicator: 탭 로딩 표시
       Bar: 막대
@@ -554,6 +555,9 @@ Settings:
       System Fonts: 시스템 글꼴
     Always Show Scrollbars: 스크롤바 항상 표시
     Base Theme:
+      Material Light: "Material 밝은 테마"
+      Material Dark: "Material 어두운 테마"
+      Material Black: "Material 검정"
       Dynamic colors: 동적 색상
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm

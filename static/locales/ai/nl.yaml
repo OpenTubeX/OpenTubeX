@@ -403,6 +403,7 @@ Settings:
     Invalid Engine: Voer een naam en een geldige HTTP- of HTTPS-zoek-URL met %s in.
     Engine Limit: Je kunt maximaal {count} aangepaste zoekmachines toevoegen.
   Theme Settings:
+    Material Accent Color: "Material-accentkleur"
     Tab Loading Indicator:
       Tab Loading Indicator: Laadindicator voor tabbladen
       Bar: Balk
@@ -475,6 +476,9 @@ Settings:
       System Fonts: Systeemlettertypen
     Always Show Scrollbars: Schuifbalken altijd tonen
     Base Theme:
+      Material Light: "Material Licht"
+      Material Dark: "Material Donker"
+      Material Black: "Material Zwart"
       Dynamic colors: Dynamische kleuren
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm

@@ -399,6 +399,7 @@ Settings:
     Invalid Engine: Introduceți un nume și o adresă URL de căutare HTTP sau HTTPS validă, care conține %s.
     Engine Limit: Puteți adăuga până la {count} motoare de căutare personalizate.
   Theme Settings:
+    Material Accent Color: "Culoare de accent Material"
     Tab Loading Indicator:
       Tab Loading Indicator: Indicator de încărcare a filei
       Bar: Bară
@@ -471,6 +472,9 @@ Settings:
       System Fonts: Fonturi de sistem
     Always Show Scrollbars: Afișează întotdeauna barele de derulare
     Base Theme:
+      Material Light: "Material Luminoasă"
+      Material Dark: "Material Întunecată"
+      Material Black: "Material Neagră"
       Dynamic colors: Culori dinamice
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm

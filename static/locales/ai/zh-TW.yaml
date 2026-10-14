@@ -399,6 +399,7 @@ Settings:
     Invalid Engine: 請輸入名稱，以及包含 %s 的有效 HTTP 或 HTTPS 搜尋 URL。
     Engine Limit: 最多可新增 {count} 個自訂搜尋引擎。
   Theme Settings:
+    Material Accent Color: "Material 強調色"
     Tab Loading Indicator:
       Tab Loading Indicator: 分頁載入指示器
       Bar: 進度條
@@ -471,6 +472,9 @@ Settings:
       System Fonts: 系統字型
     Always Show Scrollbars: 永遠顯示捲軸
     Base Theme:
+      Material Light: "Material 淺色"
+      Material Dark: "Material 深色"
+      Material Black: "Material 黑色"
       Dynamic colors: 動態色彩
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm

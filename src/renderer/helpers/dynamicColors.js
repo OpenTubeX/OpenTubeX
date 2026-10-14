@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 import { registerPlugin } from '@capacitor/core'
+import { MATERIAL_COLOR_ROLES, materialColorProperty, materialColorScheme, materialSeedPalette, materialStateColor, normalizeSystemAccentColor } from '../../materialTheme.js'
 import { CUSTOM_THEME_COLORS, hexColorToRgbComponents } from '../../customTheme.js'
 
 const AndroidDynamicColors = process.env.IS_CAPACITOR && !process.env.IS_IOS ? registerPlugin('AndroidDynamicColors') : null
@@ -13,6 +14,9 @@ export function onAndroidDynamicColorsChanged(listener) {
 }
 
 export const androidDynamicColors = ref({ supported: false })
+export const desktopSystemAccentColor = ref(normalizeSystemAccentColor(
+  typeof window === 'undefined' ? null : window.ftElectron?.startupAppearance.systemAccentColor
+))
 
 export async function initializeAndroidDynamicColors(request = getAndroidDynamicColors()) {
   let timeout
@@ -27,82 +31,86 @@ export async function initializeAndroidDynamicColors(request = getAndroidDynamic
   }
 }
 
+export function getMaterialPalette(seed, theme) {
+  return androidDynamicColors.value.supported
+    ? androidDynamicColors.value.palette
+    : materialSeedPalette(theme === 'dynamic' ? desktopSystemAccentColor.value ?? seed : seed)
+}
+
 /** Map Android's tonal palette to the existing theme roles. */
-export function dynamicThemeColors(palette, dark) {
-  const tone = (family, light, night) => palette[family]?.[dark ? night : light]
-  const primary = tone('accent1', 600, 200)
-  const onPrimary = tone('accent1', 0, 800)
-  const accent = tone('accent3', 600, 200)
-  const text = tone('neutral1', 900, 100)
-  const secondaryText = tone('neutral2', 700, 200)
-  const surface = tone('neutral1', 50, 900)
-  // Keep pure-black page backgrounds while giving cards subtle elevation.
-  const raised = dark && surface === '#000000' ? '#191919' : tone('neutral1', 100, 800)
-  const hover = tone('neutral2', 100, 800)
+export function dynamicThemeColors(palette, dark, black = false) {
+  const roles = materialColorScheme(palette, dark)
+  const hover = (base, onColor) => materialStateColor(base, onColor, 0.08)
+  const pressed = (base, onColor) => materialStateColor(base, onColor, 0.12)
+  // Preserve Android distributions that offer pure-black system surfaces.
+  const surface = black || (dark && palette.neutral1[900] === '#000000') ? '#000000' : roles.surface
   const colors = {
-    primaryText: text,
-    secondaryText,
-    tertiaryText: secondaryText,
-    title: text,
+    primaryText: roles.onSurface,
+    secondaryText: roles.onSurfaceVariant,
+    tertiaryText: roles.onSurfaceVariant,
+    title: roles.onSurface,
     background: surface,
-    cardBackground: raised,
-    secondaryCardBackground: surface,
+    cardBackground: roles.surfaceContainerLow,
+    secondaryCardBackground: roles.surfaceContainer,
     sideNav: surface,
-    searchBar: surface,
-    settingsSearchBar: surface,
-    instanceMenu: raised,
-    primaryInput: palette.neutral1[900],
-    border: tone('neutral2', 600, 300),
-    subtleSurface: hover,
-    primary,
-    primaryHover: tone('accent1', 700, 100),
-    primaryActive: tone('accent1', 800, 50),
-    textWithPrimary: onPrimary,
-    accent,
-    accentHover: tone('accent3', 700, 100),
-    accentActive: tone('accent3', 800, 50),
-    accentLight: tone('accent3', 700, 100),
-    accentVisited: tone('accent2', 600, 200),
-    textWithAccent: tone('accent3', 0, 800),
-    favoriteIcon: accent,
-    // Material's error roles remain red, independently of the wallpaper hue.
-    error: dark ? '#ffb4ab' : '#ba1a1a',
-    destructive: dark ? '#ffb4ab' : '#ba1a1a',
-    destructiveHover: dark ? '#ffdad6' : '#93000a',
-    destructiveActive: dark ? '#ffedea' : '#690005',
-    destructiveText: dark ? '#690005' : '#ffffff',
-    link: accent,
-    linkVisited: tone('accent2', 600, 200),
-    selectionBackground: primary,
-    selectionText: onPrimary,
-    logoPrimary: text,
-    logoSecondary: text,
-    logoTertiary: primary,
-    logoPressed: primary,
-    scrollbar: secondaryText,
-    scrollbarHover: primary,
-    scrollbarActive: primary,
-    scrollbarTextHover: onPrimary,
-    dropdownHover: hover,
-    dropdownHoverText: text,
-    sideNavHover: hover,
-    sideNavHoverText: text,
-    sideNavActive: hover,
-    sideNavActiveText: text,
-    headerHover: hover,
-    headerHoverText: text,
-    headerPressed: hover,
-    headerPressedText: text,
-    coloredHeaderHover: tone('accent1', 700, 100),
-    coloredHeaderHoverText: onPrimary,
-    coloredHeaderPressed: tone('accent1', 800, 50),
-    coloredHeaderPressedText: onPrimary,
+    searchBar: roles.surfaceContainerHighest,
+    settingsSearchBar: roles.surfaceContainerHighest,
+    instanceMenu: roles.surfaceContainerHigh,
+    primaryInput: materialColorScheme(palette, true).surfaceContainerLow,
+    border: roles.outline,
+    subtleSurface: roles.surfaceContainerHighest,
+    primary: roles.primary,
+    primaryHover: hover(roles.primary, roles.onPrimary),
+    primaryActive: pressed(roles.primary, roles.onPrimary),
+    textWithPrimary: roles.onPrimary,
+    accent: roles.secondary,
+    accentHover: hover(roles.secondary, roles.onSecondary),
+    accentActive: pressed(roles.secondary, roles.onSecondary),
+    accentLight: hover(roles.secondary, roles.onSecondary),
+    accentVisited: roles.tertiary,
+    textWithAccent: roles.onSecondary,
+    favoriteIcon: roles.tertiary,
+    error: roles.error,
+    destructive: roles.error,
+    destructiveHover: hover(roles.error, roles.onError),
+    destructiveActive: pressed(roles.error, roles.onError),
+    destructiveText: roles.onError,
+    link: roles.primary,
+    linkVisited: roles.tertiary,
+    selectionBackground: roles.primary,
+    selectionText: roles.onPrimary,
+    logoPrimary: roles.primary,
+    logoSecondary: roles.onSurface,
+    logoTertiary: roles.primary,
+    logoPressed: roles.primary,
+    scrollbar: roles.outline,
+    scrollbarHover: roles.primary,
+    scrollbarActive: roles.primary,
+    scrollbarTextHover: roles.onPrimary,
+    dropdownHover: roles.secondaryContainer,
+    dropdownHoverText: roles.onSurface,
+    sideNavHover: roles.secondaryContainer,
+    sideNavHoverText: roles.onSecondaryContainer,
+    sideNavActive: roles.secondaryContainer,
+    sideNavActiveText: roles.onSecondaryContainer,
+    headerHover: roles.secondaryContainer,
+    headerHoverText: roles.onSecondaryContainer,
+    headerPressed: pressed(roles.secondaryContainer, roles.onSecondaryContainer),
+    headerPressedText: roles.onSecondaryContainer,
+    coloredHeaderHover: hover(roles.primary, roles.onPrimary),
+    coloredHeaderHoverText: roles.onPrimary,
+    coloredHeaderPressed: pressed(roles.primary, roles.onPrimary),
+    coloredHeaderPressedText: roles.onPrimary,
   }
   return colors
 }
 
-export function applyDynamicColors(palette, dark) {
-  const colors = dynamicThemeColors(palette, dark)
+export function applyDynamicColors(palette, dark, black = false) {
+  const colors = dynamicThemeColors(palette, dark, black)
+  const roles = materialColorScheme(palette, dark)
+  for (const role of MATERIAL_COLOR_ROLES) {
+    document.body.style.setProperty(materialColorProperty(role), roles[role])
+  }
   for (const [key, property] of CUSTOM_THEME_COLORS) {
     if (colors[key]) document.body.style.setProperty(property, colors[key])
   }

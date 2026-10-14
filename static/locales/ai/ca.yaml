@@ -536,6 +536,7 @@ Settings:
     Invalid Engine: Introduïu un nom i un URL de cerca HTTP o HTTPS vàlid que contingui %s.
     Engine Limit: Podeu afegir fins a {count} motors de cerca personalitzats.
   Theme Settings:
+    Material Accent Color: "Color d’accent de Material"
     Tab Loading Indicator:
       Tab Loading Indicator: Indicador de càrrega de la pestanya
       Bar: Barra
@@ -594,6 +595,9 @@ Settings:
     Always Show Scrollbars: Mostra sempre les barres de desplaçament
     Hide OpenTubeX Header Logo: Oculta el logotip de l'OpenTubeX de la capçalera
     Base Theme:
+      Material Light: "Material Clar"
+      Material Dark: "Material Fosc"
+      Material Black: "Material Negre"
       Dynamic colors: Colors dinàmics
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm

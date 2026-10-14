@@ -401,6 +401,7 @@ Settings:
     Invalid Engine: Ad və %s ehtiva edən düzgün HTTP və ya HTTPS axtarış URL-si daxil edin.
     Engine Limit: Ən çox {count} fərdi axtarış sistemi əlavə edə bilərsiniz.
   Theme Settings:
+    Material Accent Color: "Material vurğu rəngi"
     Tab Loading Indicator:
       Tab Loading Indicator: Vərəqin yüklənmə göstəricisi
       Bar: Zolaq
@@ -458,6 +459,9 @@ Settings:
       System Fonts: Sistem şriftləri
     Always Show Scrollbars: Sürüşdürmə çubuqlarını həmişə göstər
     Base Theme:
+      Material Light: "Material İşıqlı"
+      Material Dark: "Material Qaranlıq"
+      Material Black: "Material Qara"
       Dynamic colors: Dinamik rənglər
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm

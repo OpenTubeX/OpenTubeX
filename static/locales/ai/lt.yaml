@@ -518,6 +518,7 @@ Settings:
     Invalid Engine: Įveskite pavadinimą ir tinkamą HTTP arba HTTPS paieškos URL su %s.
     Engine Limit: Galite pridėti iki {count} pasirinktinių paieškos sistemų.
   Theme Settings:
+    Material Accent Color: "Material akcento spalva"
     Tab Loading Indicator:
       Tab Loading Indicator: Kortelės įkėlimo indikatorius
       Bar: Juosta
@@ -575,6 +576,9 @@ Settings:
       System Fonts: Sistemos šriftai
     Always Show Scrollbars: Visada rodyti slankjuostes
     Base Theme:
+      Material Light: "Material Šviesi"
+      Material Dark: "Material Tamsi"
+      Material Black: "Material Juoda"
       Dynamic colors: Dinaminės spalvos
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm

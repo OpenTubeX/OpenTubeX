@@ -406,6 +406,7 @@ Settings:
     Invalid Engine: பெயரையும் %s உள்ள சரியான HTTP அல்லது HTTPS தேடல் URL-ஐயும் உள்ளிடவும்.
     Engine Limit: அதிகபட்சம் {count} தனிப்பயன் தேடுபொறிகளைச் சேர்க்கலாம்.
   Theme Settings:
+    Material Accent Color: "Material சிறப்பம்ச நிறம்"
     Tab Loading Indicator:
       Tab Loading Indicator: தாவல் ஏற்றுதல் குறிகாட்டி
       Bar: பட்டை
@@ -478,6 +479,9 @@ Settings:
       System Fonts: கணினி எழுத்துருக்கள்
     Always Show Scrollbars: உருள் பட்டைகளை எப்போதும் காட்டு
     Base Theme:
+      Material Light: "Material ஒளி"
+      Material Dark: "Material இருண்ட"
+      Material Black: "Material கருப்பு"
       Dynamic colors: மாறும் வண்ணங்கள்
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm

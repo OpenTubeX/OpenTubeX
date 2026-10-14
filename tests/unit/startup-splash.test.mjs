@@ -5,6 +5,7 @@ import vm from 'node:vm'
 import { computed, effectScope, nextTick, reactive, ref, watch } from 'vue'
 import { cacheStartupAppearance, curtainExtent, STARTUP_REVEAL_DURATION_MS } from '../../src/renderer/helpers/startupSplash.js'
 import { getThemeBackground } from '../../src/renderer/helpers/customTheme.js'
+import { materialSeedPalette } from '../../src/materialTheme.js'
 import { androidDynamicColors } from '../../src/renderer/helpers/dynamicColors.js'
 
 test('curtains cover the window initially and open from the rail before the hem', () => {
@@ -142,9 +143,12 @@ test('mobile splash follows a system color-scheme change while the app is closed
 test('startup caching resolves both dynamic palettes and selected custom themes', t => {
   const original = androidDynamicColors.value
   t.after(() => { androidDynamicColors.value = original })
-  androidDynamicColors.value = { supported: true, palette: { neutral1: { 50: '#fafafa', 900: '#151515' } } }
-  assert.equal(getThemeBackground('dynamic', [], false), '#fafafa')
-  assert.equal(getThemeBackground('dynamic', [], true), '#151515')
+  androidDynamicColors.value = { supported: true, palette: materialSeedPalette() }
+  assert.equal(getThemeBackground('dynamic', [], false), '#fdf8ff')
+  assert.equal(getThemeBackground('dynamic', [], true), '#141318')
+  assert.equal(getThemeBackground('materialLight', [], true), '#fdf8ff')
+  assert.equal(getThemeBackground('materialDark', [], false), '#141318')
+  assert.equal(getThemeBackground('materialBlack', [], false), '#000000')
   const themes = [{ id: 'paper', colors: { background: '#fff8ee' } }, { id: 'ink', colors: { background: '#102030' } }]
   assert.equal(getThemeBackground('custom:paper', themes, false), '#fff8ee')
   assert.equal(getThemeBackground('custom:ink', themes, true), '#102030')

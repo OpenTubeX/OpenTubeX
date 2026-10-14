@@ -399,6 +399,7 @@ Settings:
     Invalid Engine: Rhowch enw ac URL chwilio HTTP neu HTTPS dilys sy'n cynnwys %s.
     Engine Limit: Gallwch ychwanegu hyd at {count} o beiriannau chwilio personol.
   Theme Settings:
+    Material Accent Color: "Lliw acen Material"
     Tab Loading Indicator:
       Tab Loading Indicator: Dangosydd llwytho tab
       Bar: Bar
@@ -471,6 +472,9 @@ Settings:
       System Fonts: Ffontiau system
     Always Show Scrollbars: Dangos bariau sgrolio bob amser
     Base Theme:
+      Material Light: "Material Golau"
+      Material Dark: "Material Tywyll"
+      Material Black: "Material Du"
       Dynamic colors: Lliwiau deinamig
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm

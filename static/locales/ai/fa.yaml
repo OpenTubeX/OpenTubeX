@@ -418,6 +418,7 @@ Settings:
     Invalid Engine: نام و یک نشانی معتبر جست‌وجوی HTTP یا HTTPS حاوی %s وارد کنید.
     Engine Limit: می‌توانید حداکثر {count} موتور جست‌وجوی سفارشی بیفزایید.
   Theme Settings:
+    Material Accent Color: "رنگ تأکیدی Material"
     Tab Loading Indicator:
       Tab Loading Indicator: نشانگر بارگذاری زبانه
       Bar: نوار
@@ -475,6 +476,9 @@ Settings:
       System Fonts: قلم‌های سیستم
     Always Show Scrollbars: نمایش همیشگی نوارهای پیمایش
     Base Theme:
+      Material Light: "Material روشن"
+      Material Dark: "Material تاریک"
+      Material Black: "Material سیاه"
       Dynamic colors: رنگ‌های پویا
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm

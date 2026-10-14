@@ -399,6 +399,7 @@ Settings:
     Invalid Engine: 名前と、%sを含む有効なHTTPまたはHTTPSの検索URLを入力してください。
     Engine Limit: カスタム検索エンジンは{count}件まで追加できます。
   Theme Settings:
+    Material Accent Color: "Material のアクセントカラー"
     Tab Loading Indicator:
       Tab Loading Indicator: タブの読み込み表示
       Bar: バー
@@ -471,6 +472,9 @@ Settings:
       System Fonts: システムフォント
     Always Show Scrollbars: スクロールバーを常に表示
     Base Theme:
+      Material Light: "Material ライト"
+      Material Dark: "Material ダーク"
+      Material Black: "Material 黒"
       Dynamic colors: ダイナミックカラー
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm

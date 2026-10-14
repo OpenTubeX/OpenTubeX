@@ -403,6 +403,7 @@ Settings:
     Invalid Engine: Anna nimi ja kelvollinen HTTP- tai HTTPS-hakuosoite, joka sisältää merkkijonon %s.
     Engine Limit: Voit lisätä enintään {count} mukautettua hakukonetta.
   Theme Settings:
+    Material Accent Color: "Material-korostusväri"
     Tab Loading Indicator:
       Tab Loading Indicator: Välilehden latausilmaisin
       Bar: Palkki
@@ -475,6 +476,9 @@ Settings:
       System Fonts: Järjestelmän fontit
     Always Show Scrollbars: Näytä vierityspalkit aina
     Base Theme:
+      Material Light: "Material Vaalea"
+      Material Dark: "Material Tumma"
+      Material Black: "Material Musta"
       Dynamic colors: Dynaamiset värit
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm

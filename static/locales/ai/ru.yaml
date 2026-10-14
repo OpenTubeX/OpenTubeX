@@ -376,6 +376,7 @@ Settings:
     Invalid Engine: Введите название и корректный URL поиска с HTTP или HTTPS, содержащий %s.
     Engine Limit: Можно добавить не более {count} своих поисковых систем.
   Theme Settings:
+    Material Accent Color: "Акцентный цвет Material"
     Tab Loading Indicator:
       Tab Loading Indicator: Индикатор загрузки вкладки
       Bar: Полоса
@@ -448,6 +449,9 @@ Settings:
       System Fonts: Системные шрифты
     Always Show Scrollbars: Всегда показывать полосы прокрутки
     Base Theme:
+      Material Light: "Material Светлая"
+      Material Dark: "Material Тёмная"
+      Material Black: "Material Чёрная"
       Dynamic colors: Динамические цвета
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm

@@ -403,6 +403,7 @@ Settings:
     Invalid Engine: Введіть назву й дійсну URL-адресу пошуку HTTP або HTTPS, яка містить %s.
     Engine Limit: Можна додати до {count} власних пошукових систем.
   Theme Settings:
+    Material Accent Color: "Акцентний колір Material"
     Tab Loading Indicator:
       Tab Loading Indicator: Індикатор завантаження вкладки
       Bar: Смуга
@@ -475,6 +476,9 @@ Settings:
       System Fonts: Системні шрифти
     Always Show Scrollbars: Завжди показувати смуги прокручування
     Base Theme:
+      Material Light: "Material Світла"
+      Material Dark: "Material Темна"
+      Material Black: "Material Чорна"
       Dynamic colors: Динамічні кольори
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm

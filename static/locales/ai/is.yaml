@@ -401,6 +401,7 @@ Settings:
     Invalid Engine: Sláðu inn heiti og gilda HTTP- eða HTTPS-leitarslóð sem inniheldur %s.
     Engine Limit: Þú getur bætt við allt að {count} sérsniðnum leitarvélum.
   Theme Settings:
+    Material Accent Color: "Material-áherslulitur"
     Tab Loading Indicator:
       Tab Loading Indicator: Hleðsluvísir flipa
       Bar: Stika
@@ -473,6 +474,9 @@ Settings:
       System Fonts: Kerfisleturgerðir
     Always Show Scrollbars: Sýna alltaf skrunstikur
     Base Theme:
+      Material Light: "Material Ljóst"
+      Material Dark: "Material Dökkt"
+      Material Black: "Material Svart"
       Dynamic colors: Breytilegir litir
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm

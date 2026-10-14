@@ -165,6 +165,7 @@ Settings:
     Startup Behavior:
       Load landing page, keep other tabs unloaded: Wczytaj stronę startową, pozostaw inne karty niewczytane
   Theme Settings:
+    Material Accent Color: "Kolor akcentu Material"
     Tab Loading Indicator:
       Tab Loading Indicator: Wskaźnik ładowania karty
       Bar: Pasek
@@ -190,6 +191,9 @@ Settings:
       Catppuccin Macchiato Blue: "Catppuccin Macchiato Niebieski"
       Catppuccin Macchiato Lavender: "Catppuccin Macchiato Lawendowy"
     Base Theme:
+      Material Light: "Material Jasny"
+      Material Dark: "Material Ciemny"
+      Material Black: "Material Czarny"
       Dynamic colors: Dynamiczne kolory
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm

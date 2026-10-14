@@ -399,6 +399,7 @@ Settings:
     Invalid Engine: Εισαγάγετε ένα όνομα και ένα έγκυρο URL αναζήτησης HTTP ή HTTPS που περιέχει %s.
     Engine Limit: Μπορείτε να προσθέσετε έως {count} προσαρμοσμένες μηχανές αναζήτησης.
   Theme Settings:
+    Material Accent Color: "Χρώμα έμφασης Material"
     Tab Loading Indicator:
       Tab Loading Indicator: Ένδειξη φόρτωσης καρτέλας
       Bar: Γραμμή
@@ -471,6 +472,9 @@ Settings:
       System Fonts: Γραμματοσειρές συστήματος
     Always Show Scrollbars: Μόνιμη εμφάνιση γραμμών κύλισης
     Base Theme:
+      Material Light: "Material Φωτεινό"
+      Material Dark: "Material Σκοτεινό"
+      Material Black: "Material Μαύρο"
       Dynamic colors: Δυναμικά χρώματα
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm

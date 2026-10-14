@@ -399,6 +399,7 @@ Settings:
     Invalid Engine: Saisissez un nom et une URL de recherche HTTP ou HTTPS valide contenant %s.
     Engine Limit: Vous pouvez ajouter jusqu’à {count} moteurs de recherche personnalisés.
   Theme Settings:
+    Material Accent Color: "Couleur d’accent Material"
     Tab Loading Indicator:
       Tab Loading Indicator: Indicateur de chargement des onglets
       Bar: Barre
@@ -471,6 +472,9 @@ Settings:
       System Fonts: Polices système
     Always Show Scrollbars: Toujours afficher les barres de défilement
     Base Theme:
+      Material Light: "Material Clair"
+      Material Dark: "Material Sombre"
+      Material Black: "Material Noir"
       Dynamic colors: Couleurs dynamiques
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm
