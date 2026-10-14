@@ -3283,6 +3283,10 @@ body .os-scrollbar.app-scrollbar-idle:not(:hover) {
     color: #eee;
   }
 
+  .topNav.topNavBarColor .pinnedSearchTrigger:not(:hover, :focus-visible, :active) {
+    color: #eee;
+  }
+
   .ft-input-component .list {
     --scrollbar-color: var(--secondary-text-color);
   }

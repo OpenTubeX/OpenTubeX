@@ -472,9 +472,9 @@ Settings:
       System Fonts: 系统字体
     Always Show Scrollbars: 始终显示滚动条
     Base Theme:
-      Material Light: "Material 浅"
-      Material Dark: "Material 深"
-      Material Black: "Material 黑"
+      Material Light: "Material 浅色"
+      Material Dark: "Material 深色"
+      Material Black: "Material 黑色"
       Dynamic colors: 动态颜色
       Tokyo Night Night: Tokyo Night Night
       Tokyo Night Storm: Tokyo Night Storm

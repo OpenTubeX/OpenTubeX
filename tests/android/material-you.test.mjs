@@ -9,6 +9,7 @@ test('Android wallpaper colors support fixed Material variants with readable tex
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
   const page = browser.contexts()[0].pages()[0]
   await page.locator('.profileTrigger').waitFor()
+  const settingsWereOpen = await page.locator('.settingsWindow').isVisible()
   const saved = await page.evaluate(() => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     return { baseTheme: store.getters.getBaseTheme, currentLocale: store.getters.getCurrentLocale }
@@ -76,6 +77,10 @@ test('Android wallpaper colors support fixed Material variants with readable tex
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       for (const [key, value] of Object.entries(saved)) await store.dispatch(`update${key[0].toUpperCase()}${key.slice(1)}`, value)
     }, saved)
+    if (!settingsWereOpen && await page.locator('.settingsWindow').isVisible()) {
+      await page.locator('.settingsCloseButton').click()
+      await expect(page.locator('.settingsWindow')).toBeHidden()
+    }
     await browser.close()
   }
 })

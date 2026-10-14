@@ -6,6 +6,39 @@ const variants = [['materialLight', 'Material Light'], ['materialDark', 'Materia
 
 test.use({ seed: { settings: { currentLocale: 'en-US', baseTheme: 'materialLight', materialSeedColor: '#ffff00' } } })
 
+test('Material colored headers keep pinned and editable mobile search readable', async ({ app, page }, testInfo) => {
+  await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setMinimumSize(0, 0))
+  await setWindowSize(app, page, { width: 375, height: 812 })
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateBarColor', true)
+    await store.dispatch('updateAlwaysShowMobileSearchBar', true)
+  })
+  for (const [theme] of variants) {
+    await page.evaluate(theme => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateBaseTheme', theme), theme)
+    const pinned = page.locator('.pinnedSearchTrigger')
+    await expect(pinned).toBeVisible()
+    await page.mouse.move(0, 400)
+    await pinned.evaluate(element => element.blur())
+    const label = await colorsOf(pinned)
+    expect(contrast(label.foreground, label.background), `${theme}: pinned search`).toBeGreaterThanOrEqual(4.5)
+    await pinned.click()
+    const input = page.locator('.topNav .searchInput input.ft-input')
+    await expect(input).toBeVisible()
+    for (const pseudo of [null, '::placeholder']) {
+      const colors = await colorsOf(input, pseudo)
+      expect(contrast(colors.foreground, colors.background), `${theme}: editable search ${pseudo ?? 'text'}`).toBeGreaterThanOrEqual(4.5)
+    }
+    await input.press('Escape')
+    await expect(pinned).toBeVisible()
+    if (theme === 'materialDark') {
+      await page.mouse.move(0, 400)
+      await pinned.evaluate(element => element.blur())
+      await page.locator('.topNav').screenshot({ path: testInfo.outputPath('material-dark-mobile-header.png') })
+    }
+  }
+})
+
 test('Material swatches retain contrast when editing an inactive System theme', async ({ page }) => {
   const section = await goToSettingsSection(page, 'theme')
   await page.evaluate(async () => {
