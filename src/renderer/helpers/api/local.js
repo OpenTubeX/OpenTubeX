@@ -1990,6 +1990,7 @@ export function mapLocalLegacyFormat(format) {
  * @property {boolean} isMember
  * @property {string} text
  * @property {string} translationText
+ * @property {object} [imageAttachment]
  * @property {boolean} isHearted
  * @property {boolean} hasOwnerReplied
  * @property {boolean} hasReplyToken
@@ -2036,6 +2037,7 @@ export function parseLocalComment(comment, commentThread = undefined) {
     isMember: !!comment.is_member,
     text: Autolinker.link(parseLocalTextRuns(commentTextRuns, 16, { looseChannelNameDetection: true })),
     translationText: getCommentTranslationSource(commentTextRuns),
+    imageAttachment: comment.image_attachment,
     isHearted: !!comment.is_hearted,
     hasOwnerReplied,
     hasReplyToken,

@@ -1740,6 +1740,7 @@ Chapters:
   Close Chapters: Затваряне на главите
   Copy Timestamp Link: Копиране на връзката при {timestamp}
 Comments:
+  Image unavailable: "Изображението не е налично"
   Comment Count: 1 коментар | {count} коментара
   Show Comments: Показване на коментарите
   Getting comment replies, please wait: Получаване на отговорите към коментара, моля, изчакайте

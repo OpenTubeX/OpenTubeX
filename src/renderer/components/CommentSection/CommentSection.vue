@@ -371,6 +371,10 @@
             @translate-comment="toggleCommentTranslation"
             @translation-unavailable="restoreCommentTranslation"
           />
+          <CommentImageAttachment
+            v-if="comment.imageAttachment"
+            :attachment="comment.imageAttachment"
+          />
           <p class="commentLikeCount">
             <template
               v-if="!hideCommentLikes"
@@ -631,6 +635,7 @@ import FtRetryImage from '../FtRetryImage.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtSpinner from '../FtSpinner/FtSpinner.vue'
 import FtTimestampCatcher from '../FtTimestampCatcher.vue'
+import CommentImageAttachment from './CommentImageAttachment.vue'
 
 import store from '../../store/index'
 

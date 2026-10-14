@@ -1718,6 +1718,7 @@ Chapters:
   Close Chapters: チャプターを閉じる
   Copy Timestamp Link: '{timestamp}のリンクをコピー'
 Comments:
+  Image unavailable: "画像は利用できません"
   Comment Count: '{count}件のコメント'
   Show Comments: コメントを表示
   Getting comment replies, please wait: コメントへの返信を取得中です。しばらくお待ちください

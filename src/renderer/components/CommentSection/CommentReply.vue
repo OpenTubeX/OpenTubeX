@@ -153,6 +153,10 @@
         @translate-comment="emit('translate-comment', $event)"
         @translation-unavailable="emit('translation-unavailable', $event)"
       />
+      <CommentImageAttachment
+        v-if="reply.imageAttachment"
+        :attachment="reply.imageAttachment"
+      />
       <p class="commentLikeCount">
         <template v-if="!hideCommentLikes">
           <FtIcon :icon="['fas', 'thumbs-up']" />
@@ -275,6 +279,7 @@ import { useI18n } from 'vue-i18n'
 
 import FtTimestampCatcher from '../FtTimestampCatcher.vue'
 import CommentTranslationButton from './CommentTranslationButton.vue'
+import CommentImageAttachment from './CommentImageAttachment.vue'
 import FtRetryImage from '../FtRetryImage.vue'
 import FtSpinner from '../FtSpinner/FtSpinner.vue'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'

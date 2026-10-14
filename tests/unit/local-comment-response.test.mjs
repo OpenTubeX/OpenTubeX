@@ -85,3 +85,32 @@ test('loads inline flat replies without making another request', async () => {
   assert.deepEqual(thread.replies.map(reply => reply.comment.comment_id), ['inline'])
   assert.equal(thread.has_continuation, false)
 })
+
+test('preserves animated image attachments from comment surface mutations', () => {
+  const data = response([comment('gif-comment')])
+  data.onResponseReceivedEndpoints[0].appendContinuationItemsAction.continuationItems[0]
+    .commentViewModel.commentSurfaceKey = 'gif-surface'
+  const attachment = {
+    width: 120,
+    height: 240,
+    image: {
+      sources: [{ url: 'https://i.ytimg.com/c_exp/comment/animated.webp?rs=signed', width: 120, height: 240 }],
+      imageFormatHint: 'IMAGE_FORMAT_ANIMATED_WEBP'
+    },
+    unavailableText: 'GIF unavailable',
+    rendererContext: { accessibilityContext: { label: 'Comment image attachment' } }
+  }
+  data.frameworkUpdates.entityBatchUpdate.mutations.push({
+    payload: {
+      commentSurfaceEntityPayload: {
+        key: 'gif-surface',
+        imageAttachmentViewModel: { commentImageAttachmentViewModel: attachment }
+      }
+    }
+  })
+  normalizeCommentResponse(data)
+  const parsed = Parser.parseResponse(data)
+  const thread = parsed.on_response_received_endpoints[0].contents[0]
+  assert.deepEqual(thread.comment.image_attachment, attachment)
+  assert.equal(thread.comment.content.toString(), 'Reply text')
+})

@@ -1759,6 +1759,7 @@ Chapters:
   Close Chapters: إغلاق الفصول
   Copy Timestamp Link: انسخ الرابط على {timestamp}
 Comments:
+  Image unavailable: "الصورة غير متاحة"
   Comment Count: 'لا توجد تعليقات ({count}) | تعليق واحد | تعليقان ({count}) | {count} تعليقات | {count} تعليقًا | {count} تعليق'
   Show Comments: عرض التعليقات
   Getting comment replies, please wait: جارٍ الحصول على ردود التعليقات، يرجى الانتظار

@@ -114,6 +114,20 @@ function blankCommentLikeCount(body) {
   }, 'Unable to blank the comment like count in the fixture')
 }
 
+function addCommentImages(body, attachments) {
+  const response = JSON.parse(body)
+  const mutations = response.frameworkUpdates?.entityBatchUpdate?.mutations ?? []
+  const surfaces = mutations.map(mutation => mutation.payload?.commentSurfaceEntityPayload).filter(Boolean)
+  for (const [index, surface] of surfaces.slice(0, attachments.length).entries()) {
+    surface.imageAttachmentViewModel = { commentImageAttachmentViewModel: attachments[index] }
+  }
+  const firstComment = mutations.find(mutation => mutation.payload?.commentEntityPayload)?.payload.commentEntityPayload
+  if (surfaces.length && firstComment?.properties.replyLevel === 0) {
+    firstComment.properties.content = { content: '' }
+  }
+  return Buffer.from(JSON.stringify(response))
+}
+
 /**
  * Serves the watch page for `jNQXAC9IVRw` from the committed Innertube
  * fixtures, without any network access.
@@ -135,6 +149,7 @@ function blankCommentLikeCount(body) {
  * @param {boolean} [options.creatorReply] mark the first loaded reply as written by the video creator
  * @param {boolean} [options.commentTimestamp] add a timestamp to one top-level comment
  * @param {boolean} [options.blankCommentLikes] replace one comment's zero-like count with YouTube's whitespace representation
+ * @param {object[]} [options.commentImages] add image attachments to comments and replies
  * @param {number[]|null} [options.popularity] replace replay intensities, or remove popularity metadata
  * @param {{label: string, description: string, attribution: string}[]} [options.contentDisclosures] include structured content disclosures
  */
@@ -147,6 +162,7 @@ export async function mockWatchPage(app, page, {
   creatorReply = false,
   commentTimestamp = false,
   blankCommentLikes = false,
+  commentImages = [],
   popularity,
   contentDisclosures
 } = {}) {
@@ -306,6 +322,9 @@ export async function mockWatchPage(app, page, {
         }
         if (blankCommentLikes && body.includes("We're so honored")) {
           body = blankCommentLikeCount(body)
+        }
+        if (commentImages.length && body.includes('commentSurfaceEntityPayload')) {
+          body = addCommentImages(body, commentImages)
         }
         if (popularity !== undefined && url.includes('/next')) {
           const json = JSON.parse(body)

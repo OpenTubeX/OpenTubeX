@@ -1726,6 +1726,7 @@ Chapters:
   Close Chapters: Zavrieť kapitoly
   Copy Timestamp Link: Kopírovať odkaz na čas {timestamp}
 Comments:
+  Image unavailable: "Obrázok nie je dostupný"
   Comment Count: 1 komentár | {count} komentáre | {count} komentárov
   Show Comments: Zobraziť komentáre
   Getting comment replies, please wait: Získavajú sa odpovede na komentár, čakajte

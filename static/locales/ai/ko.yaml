@@ -2089,6 +2089,7 @@ Chapters:
   Close Chapters: 챕터 닫기
   Copy Timestamp Link: '{timestamp} 위치의 링크 복사'
 Comments:
+  Image unavailable: "이미지를 사용할 수 없습니다"
   Comment Count: '댓글 {count}개'
   Show Comments: 댓글 표시
   Getting comment replies, please wait: 댓글의 답글을 가져오는 중입니다. 잠시 기다려 주세요
