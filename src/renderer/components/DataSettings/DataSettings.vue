@@ -167,12 +167,14 @@
     </FtSettingsSubpage>
     <FtSettingsSubpage
       :open="showBackupImport"
+      grow-with-content
       :title="t('Settings.Data Settings.Import backup')"
       :icon="['fas', 'folder-open']"
       @close="closeBackupImport"
     >
       <div
-        class="takeoutSelection takeoutSelectionCentered"
+        ref="backupImportContent"
+        class="takeoutSelection takeoutSelectionCentered takeoutSelectionImport"
         :aria-busy="backupBusy"
       >
         <p>{{ backupFilename }}</p>
@@ -181,6 +183,11 @@
           v-model="selectedBackupSections"
           :labels="backupImportLabels"
           :values="backupImportSections"
+          :disabled="backupBusy"
+        />
+        <FtImportPreview
+          :rows="backupPreview.filter(row => selectedBackupSections.includes(row.category))"
+          :labels="Object.fromEntries(backupImportSections.map((value, index) => [value, backupImportLabels[index]]))"
         />
         <FtButton
           v-if="selectedBackupSections.length > 0"
@@ -193,12 +200,14 @@
     </FtSettingsSubpage>
     <FtSettingsSubpage
       :open="showTakeoutImport"
+      grow-with-content
       :title="t('Settings.Data Settings.Import YouTube Takeout ZIP')"
       :icon="['fas', 'folder-open']"
       @close="closeTakeoutImport"
     >
       <div
-        class="takeoutSelection takeoutSelectionCentered"
+        ref="takeoutImportContent"
+        class="takeoutSelection takeoutSelectionCentered takeoutSelectionImport"
         :aria-busy="takeoutBusy"
       >
         <p>{{ takeoutFilename }}</p>
@@ -207,9 +216,25 @@
           v-model="selectedTakeoutTypes"
           :labels="takeoutLabels"
           :values="takeoutTypes"
+          :disabled="takeoutBusy"
+        />
+        <FtImportPreview
+          :rows="takeoutPreview.filter(row => selectedTakeoutTypes.includes(row.category))"
+          :labels="Object.fromEntries(takeoutTypes.map((value, index) => [value, takeoutLabels[index]]))"
+        />
+        <FtLoader
+          v-if="takeoutBusy"
+          :tab-loading-indicator="false"
         />
         <FtButton
-          v-if="selectedTakeoutTypes.length > 0"
+          v-if="selectedTakeoutTypes.length > 0 && !takeoutPreviewReady"
+          :label="t('Settings.Data Settings.Import Preview.Title')"
+          :icon="['fas', 'eye']"
+          :disabled="takeoutBusy"
+          @click="previewSelectedTakeoutData"
+        />
+        <FtButton
+          v-if="takeoutPreviewReady"
           :label="t('Settings.Data Settings.Import selected data')"
           :icon="['fas', 'folder-open']"
           :disabled="takeoutBusy"
@@ -269,7 +294,7 @@
 </template>
 
 <script setup>
-import { computed, ref, shallowRef } from 'vue'
+import { computed, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
@@ -282,6 +307,7 @@ import FtTooltip from '../FtTooltip/FtTooltip.vue'
 import store from '../../store/index'
 import { defaultUpdaterId, NON_TRANSFERABLE_SETTINGS } from '../../store/modules/settings'
 import { migrateLegacySettings } from '../../helpers/settings-migrations'
+import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { startProgressBarOperation } from '../../helpers/progressBar'
 
 import { MAIN_PROFILE_ID } from '../../../constants'
@@ -305,11 +331,13 @@ import {
   isLibreTubeWatchHistoryBackup,
 } from '../../helpers/libretube'
 import { parseLineDelimitedJson } from '../../helpers/line-delimited-json'
+import { previewBackupImport, previewTakeoutImport, parseTakeoutSubscriptions, parseTakeoutWatchHistory, parseTakeoutSearchHistory } from '../../helpers/import-preview'
+import FtImportPreview from '../FtImportPreview/FtImportPreview.vue'
+import FtLoader from '../FtLoader/FtLoader.vue'
 import { BACKUP_SECTIONS, createUnifiedBackup, mergeBackupHistoryRecord, mergeBackupPlaylist, mergeBackupProfile, readUnifiedBackup } from '../../helpers/unifiedBackup'
 import { compactAllDatastores, DBHistoryHandlers, DBPlaylistHandlers, DBProfileHandlers, DBSearchHistoryHandlers, DBWatchStatsHandlers } from '../../../datastores/handlers/index'
-import { forEachSelectedTakeoutZipEntry, getTakeoutPlaylistName, isSupportedTakeoutEntry, listYouTubeTakeoutZipEntries, parseTakeoutPlaylistCsv, readTakeoutPlaylistMetadata } from '../../helpers/youtube-takeout-zip'
+import { forEachTakeoutImportEntry, listYouTubeTakeoutZipEntries, parseTakeoutPlaylistCsv } from '../../helpers/youtube-takeout-zip'
 import {
-  DEFAULT_SEARCH_SETTINGS,
   mergeSearchHistoryEntries,
   normalizeSearchHistoryEntry,
   normalizeSearchSettings,
@@ -318,12 +346,29 @@ import {
 const IMPORT_DIRECTORY_ID = 'data-settings-import'
 const START_IN_DIRECTORY = 'downloads'
 const { t } = useI18n()
+const backupImportContent = useTemplateRef('backupImportContent')
+const takeoutImportContent = useTemplateRef('takeoutImportContent')
+let importContentObserver
+watch([backupImportContent, takeoutImportContent], ([backup, takeout]) => {
+  importContentObserver?.disconnect()
+  const content = (backup ?? takeout)?.closest('.settingsSubpageContent')
+  const viewport = content?.closest('.settingsSubpageScroll')
+  if (!content || !viewport) return
+  const clampScroll = () => clampOverlayScrollTop(viewport, content)
+  importContentObserver = new ResizeObserver(clampScroll)
+  importContentObserver.observe(content)
+  importContentObserver.observe(viewport)
+  clampScroll()
+}, { flush: 'post' })
+onBeforeUnmount(() => importContentObserver?.disconnect())
+
 const backupBusy = ref(false)
 const showBackupImport = ref(false)
 const showBackupExport = ref(false)
 const selectedExportSections = ref([...BACKUP_SECTIONS])
 const backupFilename = ref('')
 const backupData = shallowRef(null)
+const backupPreview = shallowRef([])
 const selectedBackupSections = ref([...BACKUP_SECTIONS])
 const backupLabels = computed(() => [
   t('Settings.Settings'),
@@ -337,6 +382,18 @@ const backupLabels = computed(() => [
 const backupImportSections = computed(() => BACKUP_SECTIONS.filter(section => Object.hasOwn(backupData.value ?? {}, section)))
 const backupImportLabels = computed(() => backupImportSections.value.map(section => backupLabels.value[BACKUP_SECTIONS.indexOf(section)]))
 
+async function readImportState(sections) {
+  const readers = {
+    settings: () => deepCopy(transferableSettings.value),
+    profiles: () => DBProfileHandlers.find(),
+    playlists: () => DBPlaylistHandlers.find(),
+    history: () => DBHistoryHandlers.find(),
+    searchHistory: () => DBSearchHistoryHandlers.find(),
+    watchStats: () => DBWatchStatsHandlers.find(),
+  }
+  return Object.fromEntries(await Promise.all(sections.map(async section => [section, await readers[section]()])))
+}
+
 function openBackupExport() {
   selectedExportSections.value = [...BACKUP_SECTIONS]
   showBackupExport.value = true
@@ -345,6 +402,7 @@ function openBackupExport() {
 function closeBackupImport() {
   showBackupImport.value = false
   backupData.value = null
+  backupPreview.value = []
 }
 
 async function exportUnifiedBackup() {
@@ -379,11 +437,14 @@ async function exportUnifiedBackup() {
 }
 
 async function selectUnifiedBackup() {
+  if (backupBusy.value) return
   backupBusy.value = true
   try {
     const file = await pickFileWithPicker(t('Settings.Data Settings.Complete backup'), { 'application/zip': '.zip' }, IMPORT_DIRECTORY_ID, START_IN_DIRECTORY)
     if (file === null) return
     const { data } = await readUnifiedBackup(file)
+    const current = await readImportState(Object.keys(data))
+    backupPreview.value = previewBackupImport(data, current)
     backupFilename.value = file.name
     backupData.value = data
     selectedBackupSections.value = [...backupImportSections.value]
@@ -396,6 +457,7 @@ async function selectUnifiedBackup() {
 }
 
 async function importUnifiedBackup() {
+  if (backupBusy.value || !backupData.value) return
   backupBusy.value = true
   const selected = new Set(selectedBackupSections.value)
   const data = backupData.value
@@ -403,7 +465,9 @@ async function importUnifiedBackup() {
     if (selected.has('profiles')) {
       const currentProfiles = new Map((await DBProfileHandlers.find()).map(profile => [profile._id, profile]))
       for (const profile of data.profiles) {
-        await DBProfileHandlers.upsert(mergeBackupProfile(currentProfiles.get(profile._id), profile))
+        const merged = mergeBackupProfile(currentProfiles.get(profile._id), profile)
+        await DBProfileHandlers.upsert(merged)
+        currentProfiles.set(profile._id, merged)
       }
       await store.dispatch('grabAllProfiles')
     }
@@ -412,6 +476,7 @@ async function importUnifiedBackup() {
       for (const playlist of data.playlists) {
         const merged = mergeBackupPlaylist(currentPlaylists.get(playlist._id), playlist)
         if (await store.dispatch('updatePlaylist', merged) !== true) throw new Error('Could not restore playlist')
+        currentPlaylists.set(playlist._id, merged)
       }
     }
     if (selected.has('history')) {
@@ -448,7 +513,9 @@ const takeoutBusy = ref(false)
 const takeoutFilename = ref('')
 const takeoutFile = shallowRef(null)
 const takeoutEntries = shallowRef([])
+const takeoutPreview = shallowRef([])
 const selectedTakeoutTypes = ref([])
+const takeoutPreviewReady = computed(() => selectedTakeoutTypes.value.length > 0 && selectedTakeoutTypes.value.every(type => takeoutPreview.value.some(row => row.category === type)))
 const takeoutTypes = computed(() => [...new Set(takeoutEntries.value.map(entry => entry.type))])
 const takeoutLabels = computed(() => takeoutTypes.value.map(type => {
   return {
@@ -463,10 +530,12 @@ function closeTakeoutImport() {
   showTakeoutImport.value = false
   takeoutFile.value = null
   takeoutEntries.value = []
+  takeoutPreview.value = []
   selectedTakeoutTypes.value = []
 }
 
 async function selectTakeoutZip() {
+  if (takeoutBusy.value) return
   takeoutBusy.value = true
   try {
     const file = await pickFileWithPicker(
@@ -493,92 +562,55 @@ async function selectTakeoutZip() {
   }
 }
 
+/** Decode only the categories chosen after lightweight archive discovery. */
+async function previewSelectedTakeoutData() {
+  const file = takeoutFile.value
+  if (takeoutBusy.value || !file || selectedTakeoutTypes.value.length === 0) return
+  takeoutBusy.value = true
+  const selected = new Set(selectedTakeoutTypes.value)
+  const entries = takeoutEntries.value.filter(entry => selected.has(entry.type))
+  try {
+    const current = await readImportState([...selected].filter(type => type !== 'subscriptions'))
+    const preview = await previewTakeoutImport(file, entries, { ...current, subscriptions: primaryProfile.value.subscriptions })
+    if (takeoutFile.value === file) takeoutPreview.value = preview
+  } catch (error) {
+    showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
+  } finally {
+    takeoutBusy.value = false
+  }
+}
+
 async function importSelectedTakeoutData() {
+  if (takeoutBusy.value || !takeoutFile.value || !takeoutPreviewReady.value) return
   takeoutBusy.value = true
   const selected = new Set(selectedTakeoutTypes.value)
   let importedPlaylists = false
   let failedPlaylists = false
-  const playlistNameCounts = new Map()
-  const allocatedPlaylistNames = new Set()
   try {
-    let metadata = new Map()
-    if (selected.has('playlists')) {
-      function reportMetadataError(error) {
-        failedPlaylists = true
-        console.error('Unable to import Takeout playlist metadata', error)
-        showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
+    await forEachTakeoutImportEntry(takeoutFile.value, selected, takeoutEntries.value, async entry => {
+      if (entry.type === 'subscriptions') {
+        const subscriptions = parseTakeoutSubscriptions(entry)
+        const known = new Set(primaryProfile.value.subscriptions.map(channel => channel.id))
+        const additions = subscriptions.filter(channel => {
+          if (known.has(channel.id)) return false
+          known.add(channel.id)
+          return true
+        })
+        await store.dispatch('updateProfile', { ...deepCopy(primaryProfile.value), subscriptions: [...deepCopy(primaryProfile.value.subscriptions), ...additions] })
+        showToast({ message: t('Settings.Data Settings.All subscriptions have been successfully imported'), icon: ['fas', 'rss'] })
+      } else if (entry.type === 'history') {
+        await importYouTubeWatchHistory(JSON.parse(entry.content))
+      } else if (entry.type === 'searchHistory') {
+        await importYouTubeSearchHistory(JSON.parse(entry.content))
+      } else if (entry.type === 'playlists') {
+        await importTakeoutPlaylist(entry.playlist)
+        importedPlaylists = true
       }
-      try {
-        const result = await readTakeoutPlaylistMetadata(takeoutFile.value)
-        metadata = result.metadata
-        result.errors.forEach(reportMetadataError)
-      } catch (error) {
-        reportMetadataError(error)
-      }
-    }
-    const reservedPlaylistNames = new Set([
-      ...[...metadata.values()].map(playlist => playlist.playlistName.trim()),
-      ...takeoutEntries.value.filter(entry => entry.type === 'playlists')
-        .map(entry => (metadata.get(entry.path)?.playlistName ?? getTakeoutPlaylistName(entry.path.split('/').at(-1))).trim()),
-    ])
-    const importedPaths = new Set()
-    async function importPlaylist(playlist) {
-      const name = playlist.playlistName.trim()
-      const count = (playlistNameCounts.get(name) ?? 0) + 1
-      playlistNameCounts.set(name, count)
-      let playlistName = name
-      if (count > 1) {
-        let suffix = 2
-        while (reservedPlaylistNames.has(`${name} (${suffix})`) || allocatedPlaylistNames.has(`${name} (${suffix})`)) {
-          suffix++
-        }
-        playlistName = `${name} (${suffix})`
-      }
-      allocatedPlaylistNames.add(playlistName)
-      await importTakeoutPlaylist({ ...playlist, playlistName })
-      importedPlaylists = true
-    }
-    await forEachSelectedTakeoutZipEntry(takeoutFile.value, selected, async entry => {
-      if (entry.type === 'playlists') { importedPaths.add(entry.path) }
-      if (!isSupportedTakeoutEntry(entry)) {
-        if (entry.type === 'playlists') { failedPlaylists = true }
-        showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${entry.path}`, icon: ['fas', 'circle-exclamation'] })
-        return
-      }
-      try {
-        if (entry.type === 'subscriptions') {
-          if (entry.path.toLowerCase().endsWith('.csv')) {
-            await importCsvYouTubeSubscriptions(entry.content)
-          } else if (entry.path.toLowerCase().endsWith('.opml')) {
-            await importOpmlYouTubeSubscriptions(entry.content)
-          } else {
-            await importYouTubeSubscriptions(JSON.parse(entry.content))
-          }
-        } else if (entry.type === 'history') {
-          await importYouTubeWatchHistory(JSON.parse(entry.content))
-        } else if (entry.type === 'searchHistory') {
-          await importYouTubeSearchHistory(JSON.parse(entry.content))
-        } else if (entry.type === 'playlists') {
-          const playlist = parseTakeoutPlaylistCsv(entry.content, entry.path.split('/').at(-1), metadata.get(entry.path))
-          await importPlaylist(playlist)
-        }
-      } catch (error) {
-        if (entry.type === 'playlists') { failedPlaylists = true }
-        console.error('Unable to import Takeout entry', entry.path, error)
-        showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${entry.path}`, icon: ['fas', 'circle-exclamation'] })
-      }
+    }, (error, type, path) => {
+      if (type === 'playlists') failedPlaylists = true
+      console.error('Unable to import Takeout entry', path, error)
+      showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${path ?? error}`, icon: ['fas', 'circle-exclamation'] })
     })
-    for (const [path, playlist] of metadata) {
-      if (!importedPaths.has(path)) {
-        try {
-          await importPlaylist({ ...playlist, videos: [] })
-        } catch (error) {
-          failedPlaylists = true
-          console.error('Unable to import Takeout entry', path, error)
-          showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${path}`, icon: ['fas', 'circle-exclamation'] })
-        }
-      }
-    }
     if (importedPlaylists && !failedPlaylists) {
       showToast({ message: t('Settings.Data Settings.All playlists has been successfully imported'), icon: ['fas', 'bookmark'] })
     }
@@ -1573,95 +1605,15 @@ async function importLibreTubeWatchHistory(backupData) {
  * @param {any[]} historyData
  */
 async function importYouTubeWatchHistory(historyData) {
-  const filterPredicate = item =>
-    item.products.includes('YouTube') &&
-    item.titleUrl != null && // removed video doesnt contain url...
-    item.titleUrl.includes('www.youtube.com/watch?v') &&
-    item.details == null // dont import ads
-
-  const filteredHistoryData = historyData.filter(filterPredicate)
-
-  // remove 'Watched' and translated variants from start of title
-  // so we get the common string prefix for all the titles
-  const getCommonStart = (allTitles) => {
-    if (allTitles.length < 2) {
-      return ''
-    }
-
-    let commonStart = allTitles[0]
-    for (let i = 1; i < allTitles.length; i++) {
-      while (!allTitles[i].startsWith(commonStart)) {
-        commonStart = commonStart.slice(0, -1)
-        if (commonStart === '') {
-          return ''
-        }
-      }
-    }
-
-    return commonStart
+  const { entries, skipped, unknownKeys } = parseTakeoutWatchHistory(historyData)
+  for (const key of unknownKeys) {
+    showToast({ message: `Unknown data key: ${key}`, icon: ['fas', 'circle-exclamation'] })
   }
-
-  const commonStart = getCommonStart(filteredHistoryData.map(e => e.title))
-  // We would technically already be done by the time the data is parsed,
-  // however we want to limit the possibility of malicious data being sent
-  // to the app, so we'll only grab the data we need here.
-
-  const keyMapping = {
-    title: [{ importKey: 'title', predicate: item => item.slice(commonStart.length) }], // Removes the "Watched " term on the title
-    titleUrl: [{ importKey: 'videoId', predicate: item => item.replaceAll(/https:\/\/www\.youtube\.com\/watch\?v=/gi, '') }], // Extracts the video ID
-    time: [{ importKey: 'timeWatched', predicate: item => new Date(item).valueOf() }],
-    subtitles: [
-      { importKey: 'author', predicate: item => item[0].name ?? '' },
-      { importKey: 'authorId', predicate: item => item[0].url?.replaceAll(/https:\/\/www\.youtube\.com\/channel\//gi, '') ?? '' },
-    ],
+  if (skipped > 0) {
+    showToast({ message: t('Settings.Data Settings.History object has insufficient data, skipping item'), icon: ['fas', 'circle-exclamation'] })
   }
-
-  const knownKeys = [
-    'header',
-    'description',
-    'products',
-    'details',
-    'activityControls',
-  ].concat(Object.keys(keyMapping))
-
-  // deep copy so we don't get errors from Electron when we try to pass reactive objects through the IPC channels
   const historyItems = new Map(deepCopy(Object.entries(historyCacheById.value)))
-
-  filteredHistoryData.forEach(element => {
-    const historyObject = {}
-
-    Object.keys(element).forEach((key) => {
-      if (!knownKeys.includes(key)) {
-        showToast({ message: `Unknown data key: ${key}`, icon: ['fas', 'circle-exclamation'] })
-      } else {
-        const mapping = keyMapping[key]
-
-        if (mapping && Array.isArray(mapping)) {
-          mapping.forEach(item => {
-            historyObject[item.importKey] = item.predicate(element[key])
-          })
-        }
-      }
-    })
-
-    if (Object.keys(historyObject).length < keyMapping.length - 1) {
-      showToast({
-        message: t('Settings.Data Settings.History object has insufficient data, skipping item'),
-        icon: ['fas', 'circle-exclamation'],
-      })
-    } else {
-      // YouTube history export does not have this data, setting some defaults.
-      historyObject.type = 'video'
-      historyObject.published = historyObject.timeWatched ?? 1
-      historyObject.description = ''
-      historyObject.lengthSeconds = null
-      historyObject.watchProgress = 1
-      historyObject.isWatched = true
-      historyObject.isLive = false
-
-      historyItems.set(historyObject.videoId, historyObject)
-    }
-  })
+  for (const entry of entries) historyItems.set(entry.videoId, entry)
 
   await store.dispatch('overwriteHistory', historyItems)
 
@@ -2117,44 +2069,9 @@ async function importFreeTubeSearchHistory(searchHistoryRecords) {
 async function importYouTubeSearchHistory(historyData) {
   // deep copy so we don't get errors from Electron when we try to pass reactive objects through the IPC channels
   const currentEntries = deepCopy(searchHistoryEntries.value)
-  const importedEntries = []
-
-  for (const entry of historyData) {
-    if (
-      entry.products?.includes('YouTube') &&
-      entry.titleUrl?.includes('youtube.com/results?search_query') &&
-      entry.details == null // dont import ads
-    ) {
-      try {
-        const url = new URL(entry.titleUrl)
-        const query = url.searchParams.get('search_query')
-
-        const lastUpdatedAt = Date.parse(entry.time)
-
-        if (!query || typeof query !== 'string' || query.length === 0 || isNaN(lastUpdatedAt)) {
-          showToast({
-            message: t('Settings.Data Settings.History object has insufficient data, skipping item'),
-            icon: ['fas', 'circle-exclamation'],
-          })
-          console.error('Missing keys:', entry)
-        } else {
-          importedEntries.push({
-            _id: query,
-            query,
-            lastUpdatedAt,
-            searchSettings: isJsonObject(entry.searchSettings)
-              ? normalizeSearchSettings(entry.searchSettings)
-              : DEFAULT_SEARCH_SETTINGS,
-          })
-        }
-      } catch (error) {
-        console.error(error)
-        showToast({
-          message: t('Settings.Data Settings.History object has insufficient data, skipping item'),
-          icon: ['fas', 'circle-exclamation'],
-        })
-      }
-    }
+  const { entries: importedEntries, skipped } = parseTakeoutSearchHistory(historyData)
+  if (skipped > 0) {
+    showToast({ message: t('Settings.Data Settings.History object has insufficient data, skipping item'), icon: ['fas', 'circle-exclamation'] })
   }
 
   const newSearchHistoryEntries = mergeSearchHistoryEntries(currentEntries, importedEntries)

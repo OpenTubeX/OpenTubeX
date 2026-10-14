@@ -953,6 +953,17 @@ Settings:
     Add: Engadir
     Remove: Eliminar
   Data Settings:
+    Import Preview:
+      Title: Vista previa dos cambios
+      New: "Novos: {count}"
+      Existing: "Existentes: {count}"
+      Skipped: "Omitidos: {count}"
+      Unreadable files: "Ficheiros ilexibles: {count}"
+      Settings effect: Substitúense os axustes coincidentes. Omítense os axustes privados e descoñecidos.
+      Details effect: Consérvanse as subscricións ou os vídeos existentes. Os detalles importados de perfís ou listas de reprodución substitúen os actuais.
+      Merge effect: Consérvanse os datos existentes e combínanse cos rexistros coincidentes.
+      Subscriptions effect: Consérvanse as subscricións existentes. Só se engaden canles novas.
+      History replace effect: Substitúese o historial dos vídeos coincidentes. Consérvase o resto do historial.
     Select export data: "Selecciona os datos que queres exportar"
     Export selected data: "Exportar os datos seleccionados"
     Complete backup: "Copia de seguranza completa"

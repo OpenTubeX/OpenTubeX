@@ -953,6 +953,17 @@ Settings:
     Add: Thêm
     Remove: Xóa
   Data Settings:
+    Import Preview:
+      Title: Xem trước thay đổi
+      New: "Mới: {count}"
+      Existing: "Hiện có: {count}"
+      Skipped: "Bỏ qua: {count}"
+      Unreadable files: "Tệp không đọc được: {count}"
+      Settings effect: Các cài đặt trùng khớp được thay thế. Cài đặt riêng tư và không xác định được bỏ qua.
+      Details effect: Các đăng ký hoặc video hiện có được giữ lại. Chi tiết hồ sơ hoặc danh sách phát được nhập sẽ thay thế chi tiết hiện tại.
+      Merge effect: Dữ liệu hiện có được giữ lại và hợp nhất với các bản ghi trùng khớp.
+      Subscriptions effect: Các đăng ký hiện có được giữ lại. Chỉ thêm kênh mới.
+      History replace effect: Lịch sử xem của các video trùng khớp được thay thế. Lịch sử khác được giữ lại.
     Select export data: "Chọn dữ liệu để xuất"
     Export selected data: "Xuất dữ liệu đã chọn"
     Complete backup: "Bản sao lưu đầy đủ"

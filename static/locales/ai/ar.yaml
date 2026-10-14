@@ -953,6 +953,17 @@ Settings:
     Add: إضافة
     Remove: إزالة
   Data Settings:
+    Import Preview:
+      Title: معاينة التغييرات
+      New: "جديد: {count}"
+      Existing: "موجود: {count}"
+      Skipped: "تم تخطيه: {count}"
+      Unreadable files: "ملفات غير قابلة للقراءة: {count}"
+      Settings effect: تُستبدل الإعدادات المطابقة. تُتخطى الإعدادات الخاصة وغير المعروفة.
+      Details effect: تُحفظ الاشتراكات أو الفيديوهات الحالية. تستبدل التفاصيل المستوردة للملفات الشخصية أو قوائم التشغيل التفاصيل الحالية.
+      Merge effect: تُحفظ البيانات الحالية وتُدمج مع السجلات المطابقة.
+      Subscriptions effect: تُحفظ الاشتراكات الحالية. تُضاف القنوات الجديدة فقط.
+      History replace effect: يُستبدل سجل المشاهدة للفيديوهات المطابقة. يُحفظ السجل الآخر.
     Select export data: "اختر البيانات المراد تصديرها"
     Export selected data: "تصدير البيانات المحددة"
     Complete backup: "نسخة احتياطية كاملة"

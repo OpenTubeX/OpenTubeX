@@ -943,6 +943,17 @@ Settings:
     Show Bottom Right Actions Dock: Kuva all paremal toiminguriba
     Paused Interface Hide Delay: Liidese peitmise viivitus pausi ajal
   Data Settings:
+    Import Preview:
+      Title: Muudatuste eelvaade
+      New: "Uued: {count}"
+      Existing: "Olemasolevad: {count}"
+      Skipped: "Vahele jäetud: {count}"
+      Unreadable files: "Loetamatud failid: {count}"
+      Settings effect: Vastavad seaded asendatakse. Privaatsed ja tundmatud seaded jäetakse vahele.
+      Details effect: Olemasolevad tellimused või videod säilitatakse. Imporditud profiili või esitusloendi andmed asendavad praegused.
+      Merge effect: Olemasolevad andmed säilitatakse ja liidetakse vastavate kirjetega.
+      Subscriptions effect: Olemasolevad tellimused säilitatakse. Lisatakse ainult uued kanalid.
+      History replace effect: Vastavate videote vaatamisajalugu asendatakse. Muu ajalugu säilitatakse.
     Select export data: "Vali eksporditavad andmed"
     Export selected data: "Ekspordi valitud andmed"
     Complete backup: "Täielik varundamine"

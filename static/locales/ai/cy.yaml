@@ -943,6 +943,17 @@ Settings:
     Show Bottom Right Actions Dock: Dangos doc gweithredoedd y gwaelod ar y dde
     Paused Interface Hide Delay: Oedi cyn cuddio'r rhyngwyneb wrth oedi
   Data Settings:
+    Import Preview:
+      Title: Rhagolwg o’r newidiadau
+      New: "Newydd: {count}"
+      Existing: "Presennol: {count}"
+      Skipped: "Hepgorwyd: {count}"
+      Unreadable files: "Ffeiliau annarllenadwy: {count}"
+      Settings effect: Caiff gosodiadau cyfatebol eu disodli. Caiff gosodiadau preifat ac anhysbys eu hepgor.
+      Details effect: Cedwir tanysgrifiadau neu fideos presennol. Mae manylion proffiliau neu restrau chwarae a fewnforir yn disodli’r manylion cyfredol.
+      Merge effect: Cedwir data presennol a’u cyfuno â chofnodion cyfatebol.
+      Subscriptions effect: Cedwir tanysgrifiadau presennol. Ychwanegir sianeli newydd yn unig.
+      History replace effect: Caiff hanes gwylio fideos cyfatebol ei ddisodli. Cedwir hanes arall.
     Select export data: "Dewiswch y data i'w allforio"
     Export selected data: "Allforio’r data a ddewiswyd"
     Complete backup: "Copi wrth gefn cyflawn"

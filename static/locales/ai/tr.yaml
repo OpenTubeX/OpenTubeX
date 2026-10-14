@@ -943,6 +943,17 @@ Settings:
     Show Bottom Right Actions Dock: Sağ Alt İşlem Panelini Göster
     Paused Interface Hide Delay: Duraklatılmış Arayüzü Gizleme Gecikmesi
   Data Settings:
+    Import Preview:
+      Title: Değişiklikleri önizle
+      New: "Yeni: {count}"
+      Existing: "Mevcut: {count}"
+      Skipped: "Atlanan: {count}"
+      Unreadable files: "Okunamayan dosyalar: {count}"
+      Settings effect: Eşleşen ayarlar değiştirilir. Özel ve bilinmeyen ayarlar atlanır.
+      Details effect: Mevcut abonelikler veya videolar korunur. İçe aktarılan profil veya oynatma listesi ayrıntıları mevcut ayrıntıların yerini alır.
+      Merge effect: Mevcut veriler korunur ve eşleşen kayıtlarla birleştirilir.
+      Subscriptions effect: Mevcut abonelikler korunur. Yalnızca yeni kanallar eklenir.
+      History replace effect: Eşleşen videoların izleme geçmişi değiştirilir. Diğer geçmiş korunur.
     Select export data: "Dışa aktarılacak verileri seçin"
     Export selected data: "Seçili verileri dışa aktar"
     Complete backup: "Tam yedek"

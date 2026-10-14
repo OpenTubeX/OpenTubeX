@@ -958,6 +958,17 @@ Settings:
     Add: Lisää
     Remove: Poista
   Data Settings:
+    Import Preview:
+      Title: Esikatsele muutoksia
+      New: "Uudet: {count}"
+      Existing: "Olemassa olevat: {count}"
+      Skipped: "Ohitetut: {count}"
+      Unreadable files: "Lukukelvottomat tiedostot: {count}"
+      Settings effect: Vastaavat asetukset korvataan. Yksityiset ja tuntemattomat asetukset ohitetaan.
+      Details effect: Nykyiset tilaukset tai videot säilytetään. Tuodut profiilien tai soittolistojen tiedot korvaavat nykyiset tiedot.
+      Merge effect: Nykyiset tiedot säilytetään ja yhdistetään vastaaviin tietueisiin.
+      Subscriptions effect: Nykyiset tilaukset säilytetään. Vain uudet kanavat lisätään.
+      History replace effect: Vastaavien videoiden katseluhistoria korvataan. Muu historia säilytetään.
     Select export data: "Valitse vietävät tiedot"
     Export selected data: "Vie valitut tiedot"
     Complete backup: "Täydellinen varmuuskopiointi"

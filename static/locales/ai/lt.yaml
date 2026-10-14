@@ -1178,6 +1178,17 @@ Settings:
     Add: Pridėti
     Remove: Pašalinti
   Data Settings:
+    Import Preview:
+      Title: Pakeitimų peržiūra
+      New: "Nauji: {count}"
+      Existing: "Esami: {count}"
+      Skipped: "Praleisti: {count}"
+      Unreadable files: "Neperskaitomi failai: {count}"
+      Settings effect: Atitinkami nustatymai pakeičiami. Privatūs ir nežinomi nustatymai praleidžiami.
+      Details effect: Esamos prenumeratos ar vaizdo įrašai išsaugomi. Importuoti profilių ar grojaraščių duomenys pakeičia dabartinius.
+      Merge effect: Esami duomenys išsaugomi ir sujungiami su atitinkamais įrašais.
+      Subscriptions effect: Esamos prenumeratos išsaugomos. Pridedami tik nauji kanalai.
+      History replace effect: Atitinkamų vaizdo įrašų žiūrėjimo istorija pakeičiama. Kita istorija išsaugoma.
     Select export data: "Pasirinkite eksportuojamus duomenis"
     Export selected data: "Eksportuoti pasirinktus duomenis"
     Complete backup: "Pilna atsarginė kopija"

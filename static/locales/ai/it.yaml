@@ -943,6 +943,17 @@ Settings:
     Show Bottom Right Actions Dock: Mostra barra delle azioni in basso a destra
     Paused Interface Hide Delay: Ritardo prima di nascondere l'interfaccia in pausa
   Data Settings:
+    Import Preview:
+      Title: Anteprima delle modifiche
+      New: "Nuovi: {count}"
+      Existing: "Esistenti: {count}"
+      Skipped: "Ignorati: {count}"
+      Unreadable files: "File illeggibili: {count}"
+      Settings effect: Le impostazioni corrispondenti vengono sostituite. Le impostazioni private e sconosciute vengono ignorate.
+      Details effect: Le iscrizioni o i video esistenti vengono mantenuti. I dettagli importati dei profili o delle playlist sostituiscono quelli attuali.
+      Merge effect: I dati esistenti vengono mantenuti e uniti alle voci corrispondenti.
+      Subscriptions effect: Le iscrizioni esistenti vengono mantenute. Vengono aggiunti solo nuovi canali.
+      History replace effect: La cronologia dei video corrispondenti viene sostituita. Il resto della cronologia viene mantenuto.
     Select export data: "Seleziona i dati da esportare"
     Export selected data: "Esporta i dati selezionati"
     Complete backup: "Backup completo"

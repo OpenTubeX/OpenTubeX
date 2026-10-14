@@ -31,7 +31,7 @@ class SkipDeflate {
   }
 }
 
-async function streamTakeoutZip(file, selectedTypes, onFound, onContent) {
+async function streamTakeoutZip(file, selectedTypes, onFound, onContent, onEntryError) {
   const pending = []
   let failure
 
@@ -39,14 +39,18 @@ async function streamTakeoutZip(file, selectedTypes, onFound, onContent) {
     static compression = 8
 
     constructor(name, compressedSize, originalSize) {
-      this.decoder = selectedTypes.has(classifyTakeoutEntry(name))
+      this.decoder = selectedTypes.has(classifyTakeoutEntry(name)) && !(originalSize > MAX_ENTRY_SIZE)
         ? new UnzipInflate(name, compressedSize, originalSize)
         : new SkipDeflate()
       this.decoder.ondata = (error, data, final) => this.ondata(error, data, final)
     }
 
     push(chunk, final) {
-      this.decoder.push(chunk, final)
+      this.decoder?.push(chunk, final)
+    }
+
+    terminate() {
+      this.decoder = null
     }
   }
 
@@ -59,8 +63,18 @@ async function streamTakeoutZip(file, selectedTypes, onFound, onContent) {
       entry.start()
       return
     }
+    let failed = false
+    const reportError = error => {
+      if (failed) return
+      failed = true
+      entry.terminate()
+      if (onEntryError) onEntryError(error, { type, path: entry.name })
+      else failure = error
+    }
     if (entry.originalSize > MAX_ENTRY_SIZE) {
-      failure = new Error(`Takeout entry is too large: ${entry.name}`)
+      reportError(new Error(`Takeout entry is too large: ${entry.name}`))
+      entry.ondata = () => {}
+      entry.start()
       return
     }
 
@@ -68,13 +82,14 @@ async function streamTakeoutZip(file, selectedTypes, onFound, onContent) {
     let content = ''
     let size = 0
     entry.ondata = (error, chunk, final) => {
+      if (failed) return
       if (error) {
-        failure = error
+        reportError(error)
         return
       }
       size += chunk.length
       if (size > MAX_ENTRY_SIZE) {
-        failure = new Error(`Takeout entry is too large: ${entry.name}`)
+        reportError(new Error(`Takeout entry is too large: ${entry.name}`))
         return
       }
       content += decoder.decode(chunk, { stream: !final })
@@ -118,8 +133,8 @@ export async function listYouTubeTakeoutZipEntries(file) {
 }
 
 /** Import selected entries one at a time, bounding renderer memory. */
-export async function forEachSelectedTakeoutZipEntry(file, types, onEntry) {
-  await streamTakeoutZip(file, types, () => {}, onEntry)
+export async function forEachSelectedTakeoutZipEntry(file, types, onEntry, onEntryError) {
+  await streamTakeoutZip(file, types, () => {}, onEntry, onEntryError)
 }
 
 export function getTakeoutPlaylistName(filename) {
@@ -127,7 +142,7 @@ export function getTakeoutPlaylistName(filename) {
 }
 
 /** Parse CSV records, including quoted commas, escaped quotes and line breaks. */
-function parseCsvRecords(content) {
+export function parseCsvRecords(content) {
   const records = []
   let record = []
   let field = ''
@@ -232,6 +247,10 @@ export async function readTakeoutPlaylistMetadata(file) {
     if (playlists === null) {
       errors.push(new Error(`Invalid playlist metadata CSV: ${entry.path}`))
     }
+  }, (error, entry) => {
+    const directory = entry.path.slice(0, entry.path.lastIndexOf('/') + 1)
+    playlistsByDirectory.set(directory, null)
+    errors.push(error)
   })
   // Resolve paths after the scan so either filename form can follow the metadata.
   for (const [directory, playlists] of playlistsByDirectory) {
@@ -313,5 +332,68 @@ export function isSupportedTakeoutEntry(entry) {
     return Array.isArray(JSON.parse(entry.content))
   } catch {
     return false
+  }
+}
+
+/** Read supported data one entry at a time, using the same names for preview and import. */
+export async function forEachTakeoutImportEntry(file, selected, entries, onEntry, onError) {
+  const playlistNameCounts = new Map()
+  const allocatedPlaylistNames = new Set()
+  let metadata = new Map()
+  if (selected.has('playlists')) {
+    try {
+      const result = await readTakeoutPlaylistMetadata(file)
+      metadata = result.metadata
+      result.errors.forEach(error => onError(error, 'playlists'))
+    } catch (error) {
+      onError(error, 'playlists')
+    }
+  }
+  const reservedPlaylistNames = new Set([
+    ...[...metadata.values()].map(playlist => playlist.playlistName.trim()),
+    ...entries.filter(entry => entry.type === 'playlists')
+      .map(entry => (metadata.get(entry.path)?.playlistName ?? getTakeoutPlaylistName(entry.path.split('/').at(-1))).trim()),
+  ])
+  const importedPaths = new Set()
+  async function importPlaylist(playlist) {
+    const name = playlist.playlistName.trim()
+    const count = (playlistNameCounts.get(name) ?? 0) + 1
+    playlistNameCounts.set(name, count)
+    let playlistName = name
+    if (count > 1) {
+      let suffix = 2
+      while (reservedPlaylistNames.has(`${name} (${suffix})`) || allocatedPlaylistNames.has(`${name} (${suffix})`)) {
+        suffix++
+      }
+      playlistName = `${name} (${suffix})`
+    }
+    allocatedPlaylistNames.add(playlistName)
+    await onEntry({ type: 'playlists', playlist: { ...playlist, playlistName } })
+  }
+  await forEachSelectedTakeoutZipEntry(file, selected, async entry => {
+    if (entry.type === 'playlists') { importedPaths.add(entry.path) }
+    try {
+      if (!isSupportedTakeoutEntry(entry)) { throw new Error(`Invalid Takeout entry: ${entry.path}`) }
+      if (entry.type === 'playlists') {
+        const playlist = parseTakeoutPlaylistCsv(entry.content, entry.path.split('/').at(-1), metadata.get(entry.path))
+        await importPlaylist(playlist)
+      } else {
+        await onEntry(entry)
+      }
+    } catch (error) {
+      onError(error, entry.type, entry.path)
+    }
+  }, (error, entry) => {
+    if (entry.type === 'playlists') importedPaths.add(entry.path)
+    onError(error, entry.type, entry.path)
+  })
+  for (const [path, playlist] of metadata) {
+    if (!importedPaths.has(path)) {
+      try {
+        await importPlaylist({ ...playlist, videos: [] })
+      } catch (error) {
+        onError(error, 'playlists', path)
+      }
+    }
   }
 }
