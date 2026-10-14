@@ -4,7 +4,7 @@ import { DatabaseSync } from 'node:sqlite'
 import { mkdtemp, rm, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { setImmediate } from 'node:timers/promises'
+import { babelParse } from 'vue/compiler-sfc'
 import vm from 'node:vm'
 import * as subscriptionEntries from '../../src/renderer/helpers/subscription-entries.js'
 import * as subscriptionChannels from '../../src/renderer/helpers/subscription-channels.js'
@@ -203,14 +203,18 @@ for (const commit of [false, true]) {
       if (!commit) throw new Error('abort owner')
     }).then(() => true, error => { assert.match(error.message, /abort owner/); return false })
     await entered.promise
-    let completed = false
-    const read = metadataPage(engine, options).then(result => { completed = true; return result })
-    await setImmediate()
-    const early = completed
+    const ownerQueue = engine.pendingTransaction
+    const prepare = engine.prepare.bind(engine)
+    let statements = 0
+    t.mock.method(engine, 'prepare', (...args) => { statements++; return prepare(...args) })
+    const read = metadataPage(engine, options)
+    const queuedBehindOwner = engine.pendingTransaction !== ownerQueue
+    const statementsBeforeRelease = statements
     resume.resolve()
     assert.equal(await owner, commit)
     assert.deepEqual(await read, commit ? during : before)
-    assert.equal(early, false)
+    assert.equal(queuedBehindOwner, true)
+    assert.equal(statementsBeforeRelease, 0, 'metadata reads must not execute SQL before the owner releases')
   })
 }
 
@@ -394,15 +398,18 @@ for (const commit of [false, true]) {
         if (!commit) throw new Error('abort owner')
       }).then(() => true, error => { assert.match(error.message, /abort owner/); return false })
       await entered.promise
-      const completed = []
+      const ownerQueue = engine.pendingTransaction
+      const prepare = engine.prepare.bind(engine)
+      let statements = 0
+      t.mock.method(engine, 'prepare', (...args) => { statements++; return prepare(...args) })
       const reads = [
         subscriptionShortsWindow(engine, options),
         subscriptionPage(engine, options),
         subscriptionEntry(engine, { videoId: original.videoId }),
         engine.videoState({ ids: [original.videoId] }),
-      ].map((read, index) => Promise.resolve(read).then(value => { completed.push(index); return value }))
-      await setImmediate()
-      const early = [...completed]
+      ]
+      const queuedBehindOwner = engine.pendingTransaction !== ownerQueue
+      const statementsBeforeRelease = statements
       resume.resolve()
       assert.equal(await owner, commit)
       const [shorts, page, entry, state] = await Promise.all(reads)
@@ -412,7 +419,8 @@ for (const commit of [false, true]) {
       assert.equal(page.total, expected.length)
       assert.deepEqual(entry, commit ? changed : original)
       assert.deepEqual(state, { history: [{ ...history, isWatched: commit }], memberships: [] })
-      assert.deepEqual(early, [], 'independent custom reads must wait for the owner')
+      assert.equal(queuedBehindOwner, true)
+      assert.equal(statementsBeforeRelease, 0, 'independent custom reads must not execute SQL before the owner releases')
     })
   }
 }
@@ -1151,10 +1159,12 @@ for (const collection of ['watchStats', 'sessionsV2']) {
     })
     const history = syncSnapshotHistory(engine, { account, changes: { previous: snapshot.history, acknowledged: { upserts: [['new', { added_date: 2 }]], deletions: ['old'] } } })
     await entered.promise
+    const ownerQueue = engine.pendingTransaction
     const section = syncSnapshotSection(engine, { account, collection, value: [{ retained: true }] })
-    await setImmediate()
+    const queuedBehindOwner = engine.pendingTransaction !== ownerQueue
     resume.resolve()
     assert.deepEqual((await Promise.all([history, section])).map(result => result.updated), [true, true])
+    assert.equal(queuedBehindOwner, true)
     assert.deepEqual(JSON.parse(await syncSnapshotRead(engine)), { history: { new: { added_date: 2 } }, subscriptions: ['channel'], [collection]: [{ retained: true }] })
   })
 
@@ -1592,13 +1602,14 @@ for (const channelId of ['\ud800', '\udc00', 'embedded-\ud800-id']) {
 
 test('classic media feeds compute timestamp keys once and retain legacy stable ordering', async () => {
   const script = await readFile(new URL('../../src/datastores/sqlite/subscriptions.js', import.meta.url), 'utf8')
-  const start = script.indexOf('function classicSubscriptionEntries(')
+  const declaration = babelParse(script, { sourceType: 'module' }).program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'classicSubscriptionEntries')
+  assert.ok(declaration, 'classic feed helper must exist')
   let computations = 0
   const context = vm.createContext({
     ...subscriptionEntries, ...subscriptionChannels, isVideoHiddenByPreferences, isHistoryEntryWatched,
     getSubscriptionVideoSortTimestamp: (...args) => { computations++; return subscriptionEntries.getSubscriptionVideoSortTimestamp(...args) }
   })
-  vm.runInContext(script.slice(start, script.indexOf('export async function subscriptionPage(', start)), context)
+  vm.runInContext(script.slice(declaration.start, declaration.end), context)
   const records = Array.from({ length: 3000 }, (_, index) => video(index, { published: (index * 71) % 500 }))
   const before = structuredClone(records)
   const preferences = { showScheduledLiveStreamsFirst: true }
