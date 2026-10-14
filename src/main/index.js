@@ -4053,10 +4053,11 @@ function runApp() {
       // If it's a Windows portable, PORTABLE_EXECUTABLE_FILE will
       // hold a value.
       // Otherwise, `process.execPath` should be used instead.
-      app.relaunch({
+      const scheduled = app.relaunch({
         args: process.argv.slice(1),
         execPath: PORTABLE_EXECUTABLE_FILE || process.execPath
       })
+      if (scheduled !== false) relaunchRequested = true
     } else {
       // If it's an AppImage, things must be done the "hard way"
       // `app.relaunch` doesn't work because of FUSE limitations

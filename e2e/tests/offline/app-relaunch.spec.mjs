@@ -4,16 +4,21 @@ import path from 'node:path'
 
 import { test, expect, repoRoot } from '../../helpers/app.mjs'
 
-for (const { format, portableExecutable = null, failures = 0, rejectWithFalse = false } of [
+for (const { format, portableExecutable = null, failures = 0, rejectWithFalse = false, restartRequested = false } of [
   { format: 'ordinary executables' },
   { format: 'Windows portable executables', portableExecutable: 'C:\\Apps\\OpenTubeX Portable.exe' },
   { format: 'a transient scheduling exception', failures: 1 },
   { format: 'a transient scheduling rejection', failures: 1, rejectWithFalse: true },
-  { format: 'repeated scheduling rejections', failures: 2, rejectWithFalse: true }
+  { format: 'repeated scheduling rejections', failures: 2, rejectWithFalse: true },
+  { format: 'an already requested app restart', restartRequested: true },
+  { format: 'a rejected app restart', restartRequested: true, failures: 1, rejectWithFalse: true }
 ]) {
   test(`reopening during shutdown queues one relaunch for ${format}`, async ({ app }) => {
-    const executablePath = await app.electronApp.evaluate(() => process.execPath)
-    await app.electronApp.evaluate(({ app }, { portableExecutable, failures, rejectWithFalse }) => {
+    const { executablePath, startupArgs } = await app.electronApp.evaluate(() => ({
+      executablePath: process.execPath,
+      startupArgs: process.argv.slice(1)
+    }))
+    await app.electronApp.evaluate(({ app, ipcMain }, { portableExecutable, failures, rejectWithFalse, restartRequested }) => {
       if (portableExecutable) process.env.PORTABLE_EXECUTABLE_FILE = portableExecutable
       else delete process.env.PORTABLE_EXECUTABLE_FILE
       // Keep the real shutdown sequence alive after its windows close.
@@ -37,8 +42,9 @@ for (const { format, portableExecutable = null, failures = 0, rejectWithFalse = 
         globalThis.relaunchRequests.push(options)
         return true
       }
-      app.quit()
-    }, { portableExecutable, failures, rejectWithFalse })
+      if (restartRequested) ipcMain.emit('relaunch-request')
+      else app.quit()
+    }, { portableExecutable, failures, rejectWithFalse, restartRequested })
 
     try {
       await expect.poll(() => app.electronApp.evaluate(({ BrowserWindow }) => (
@@ -73,7 +79,7 @@ for (const { format, portableExecutable = null, failures = 0, rejectWithFalse = 
       expect(commandLines).toHaveLength(launchCount)
       // Electron may add switches; forward the received arguments exactly.
       expect(await app.electronApp.evaluate(() => globalThis.relaunchRequests[0])).toEqual({
-        args: commandLines[successfulLaunch].slice(1),
+        args: restartRequested && failures === 0 ? startupArgs : commandLines[successfulLaunch].slice(1),
         execPath: portableExecutable || executablePath
       })
       expect(await app.electronApp.evaluate(() => globalThis.relaunchAttemptsPerLaunch)).toEqual(
