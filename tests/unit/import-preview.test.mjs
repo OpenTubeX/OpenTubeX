@@ -89,6 +89,38 @@ function componentSection(startMarker, endMarker) {
   return component.slice(start, end)
 }
 
+test('Takeout selection opens before decoding and previews only selected categories', async () => {
+  const file = { name: 'large-history.zip' }
+  const entries = [{ type: 'history', path: 'history/watch-history.json' }, { type: 'subscriptions', path: 'subscriptions/subscriptions.csv' }]
+  const previewCalls = []
+  const reads = []
+  const errors = []
+  const context = vm.createContext({
+    ref: value => ({ value }), shallowRef: value => ({ value }), computed: getter => ({ get value() { return getter() } }),
+    pickFileWithPicker: async () => file, listYouTubeTakeoutZipEntries: async () => entries,
+    readImportState: async categories => { reads.push(categories); return {} },
+    primaryProfile: { value: { subscriptions: [] } }, IMPORT_DIRECTORY_ID: '', START_IN_DIRECTORY: '',
+    t: key => key, showToast: error => errors.push(error),
+    previewTakeoutImport: async (_file, selected) => {
+      previewCalls.push(selected)
+      return selected.map(entry => ({ category: entry.type, added: 1, existing: 0, skipped: 0 }))
+    },
+  })
+  vm.runInContext(componentSection('const showTakeoutImport =', 'async function importSelectedTakeoutData()'), context)
+  await context.selectTakeoutZip()
+  assert.equal(vm.runInContext('showTakeoutImport.value', context), true)
+  assert.equal(previewCalls.length, 0, 'Opening category selection must not parse history')
+  assert.equal(reads.length, 0, 'Opening category selection must not load current history')
+  vm.runInContext('selectedTakeoutTypes.value = ["subscriptions"]', context)
+  await context.previewSelectedTakeoutData()
+  assert.deepEqual(previewCalls, [[entries[1]]])
+  assert.deepEqual(Array.from(reads[0]), [])
+  assert.equal(vm.runInContext('takeoutPreviewReady.value', context), true)
+  vm.runInContext('selectedTakeoutTypes.value.push("history")', context)
+  assert.equal(vm.runInContext('takeoutPreviewReady.value', context), false, 'Newly selected categories need a preview before importing')
+  assert.deepEqual(errors, [])
+})
+
 test('duplicate backup identities accumulate subscriptions and videos promised by the preview', async () => {
   const data = {
     profiles: ['A', 'B'].map(id => ({ _id: 'same-profile', name: 'Profile', subscriptions: [{ id }] })),

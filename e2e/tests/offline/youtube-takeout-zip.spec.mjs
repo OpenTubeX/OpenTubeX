@@ -2,7 +2,7 @@ import { strToU8, zipSync } from 'fflate'
 
 import { expect, goToSettingsSection, test } from '../../helpers/app.mjs'
 
-test('imports selected data from a YouTube Takeout ZIP in one step', async ({ page }) => {
+test('previews and imports selected data from a YouTube Takeout ZIP', async ({ page }) => {
   const root = 'Takeout/YouTube and YouTube Music'
   const archive = zipSync({
     [`${root}/subscriptions/subscriptions.csv`]: strToU8('Channel Id,Channel Url,Channel Title\nUCtakeouttest,https://www.youtube.com/channel/UCtakeouttest,Takeout Channel\n'),
@@ -48,6 +48,7 @@ test('imports selected data from a YouTube Takeout ZIP in one step', async ({ pa
   })).toBeLessThanOrEqual(1)
   await selection.getByRole('checkbox', { name: 'Search history', exact: true }).locator('+ label').click()
   await expect(selection.getByRole('checkbox', { name: /Search history/i })).not.toBeChecked()
+  await selection.getByRole('button', { name: 'Preview changes', exact: true }).click()
   await selection.getByRole('button', { name: 'Import selected data' }).click()
 
   await expect.poll(() => page.evaluate(() => {
@@ -114,6 +115,7 @@ test('imports original titles, descriptions, timestamps and empty playlists from
     await dataSection.getByRole('button', { name: 'Import YouTube Takeout ZIP' }).click()
     const selection = page.locator('.takeoutSelectionCentered')
     await expect(selection.getByRole('checkbox')).toHaveCount(1)
+    await selection.getByRole('button', { name: 'Preview changes', exact: true }).click()
     await selection.getByRole('button', { name: 'Import selected data' }).click()
     await expect.poll(() => page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -167,6 +169,7 @@ for (const [name, metadata] of [
       })
     }, [...archive])
     await dataSection.getByRole('button', { name: 'Import YouTube Takeout ZIP' }).click()
+    await page.locator('.takeoutSelectionCentered').getByRole('button', { name: 'Preview changes', exact: true }).click()
     await page.locator('.takeoutSelectionCentered').getByRole('button', { name: 'Import selected data' }).click()
     await expect.poll(() => page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -224,6 +227,7 @@ for (const [kind, action, failedName] of [
       })
     }, { bytes: [...archive], action, failedName })
     await dataSection.getByRole('button', { name: 'Import YouTube Takeout ZIP' }).click()
+    await page.locator('.takeoutSelectionCentered').getByRole('button', { name: 'Preview changes', exact: true }).click()
     await page.locator('.takeoutSelectionCentered').getByRole('button', { name: 'Import selected data' }).click()
     await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getAllPlaylists.some(playlist => playlist.playlistName === 'Another empty list'))).toBe(true)
     await expect(page.locator('.takeoutSelectionCentered')).toBeHidden()

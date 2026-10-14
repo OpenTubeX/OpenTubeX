@@ -14,6 +14,7 @@ test('does not announce complete success after an empty playlist fails and a lat
   let closed = false
   const context = vm.createContext({
     takeoutBusy: busy,
+    takeoutPreviewReady: { value: true },
     selectedTakeoutTypes: { value: ['playlists'] },
     takeoutEntries: { value: [] },
     takeoutFile: { value: new Blob() },

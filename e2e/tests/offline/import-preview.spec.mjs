@@ -2,11 +2,14 @@ import { strToU8, zipSync } from 'fflate'
 import { expect, goToSettingsSection, test } from '../../helpers/app.mjs'
 import { createUnifiedBackup } from '../../../src/renderer/helpers/unifiedBackup.js'
 
-async function chooseArchive(page, dataSection, archive, action) {
+async function chooseArchive(page, dataSection, archive, action, previewSelected = true) {
   await page.evaluate(bytes => {
     window.showOpenFilePicker = async () => [{ getFile: async () => new File([new Uint8Array(bytes)], 'preview.zip', { type: 'application/zip' }) }]
   }, [...archive])
   await dataSection.getByRole('button', { name: action, exact: true }).click()
+  if (action === 'Import YouTube Takeout ZIP' && previewSelected) {
+    await page.getByRole('button', { name: 'Preview changes', exact: true }).click()
+  }
   return page.getByRole('region', { name: 'Preview changes', exact: true })
 }
 
@@ -167,4 +170,50 @@ test('offers smaller Takeout categories when history exceeds the import size lim
   await page.getByRole('checkbox', { name: 'History', exact: true }).locator('+ label').click()
   await page.getByRole('button', { name: 'Import selected data', exact: true }).click()
   await expect.poll(async () => (await savedData(page)).profiles[0].subscriptions.some(channel => channel.id === 'UCsmallpreview')).toBe(true)
+})
+
+test('chooses and previews subscriptions without parsing an unselected large Takeout history', async ({ page }, testInfo) => {
+  const dataSection = await goToSettingsSection(page, 'data')
+  const before = await savedData(page)
+  const archive = zipSync({
+    'Takeout/YouTube/history/watch-history.json': strToU8(JSON.stringify([{
+      products: ['YouTube'],
+      title: 'Watched Example',
+      titleUrl: 'https://www.youtube.com/watch?v=abcdefghijk',
+      time: '2026-01-01T00:00:00Z',
+      description: 'x'.repeat(2 * 1024 * 1024),
+    }])),
+    'Takeout/YouTube/subscriptions/subscriptions.csv': strToU8('Channel Id,Channel Url,Channel Title\nUCselectedpreview,url,Selected channel\n'),
+  })
+  await page.evaluate(() => {
+    window.largeHistoryParseCount = 0
+    const parse = JSON.parse
+    JSON.parse = (...args) => {
+      if (typeof args[0] === 'string' && args[0].length > 1024 * 1024) window.largeHistoryParseCount++
+      return parse(...args)
+    }
+  })
+  const preview = await chooseArchive(page, dataSection, archive, 'Import YouTube Takeout ZIP', false)
+  const choices = page.locator('.takeoutSelectionCentered')
+  await expect(choices.getByRole('checkbox')).toHaveCount(2)
+  await expect(preview).toBeHidden()
+  await expect(choices.getByRole('button', { name: 'Import selected data', exact: true })).toHaveCount(0)
+  expect(await page.evaluate(() => window.largeHistoryParseCount)).toBe(0)
+  for (const scheme of ['dark', 'light']) {
+    await page.emulateMedia({ colorScheme: scheme })
+    await expect(page.locator('body')).toHaveClass(new RegExp(scheme))
+    await choices.screenshot({ path: testInfo.outputPath(`takeout-selection-${scheme}.png`) })
+  }
+  await choices.getByRole('checkbox', { name: 'History', exact: true }).locator('+ label').click()
+  await choices.getByRole('button', { name: 'Preview changes', exact: true }).click()
+  await expect(preview.locator('[data-category="subscriptions"]')).toContainText('New: 1')
+  await expect(preview.locator('[data-category="history"]')).toHaveCount(0)
+  await choices.getByRole('checkbox', { name: 'History', exact: true }).locator('+ label').click()
+  await expect(choices.getByRole('button', { name: 'Import selected data', exact: true })).toHaveCount(0)
+  await expect(choices.getByRole('button', { name: 'Preview changes', exact: true })).toBeVisible()
+  await choices.getByRole('checkbox', { name: 'History', exact: true }).locator('+ label').click()
+  await choices.getByRole('button', { name: 'Import selected data', exact: true }).click()
+  await expect.poll(async () => (await savedData(page)).profiles[0].subscriptions.some(channel => channel.id === 'UCselectedpreview')).toBe(true)
+  expect(await page.evaluate(() => window.largeHistoryParseCount)).toBe(0)
+  expect((await savedData(page)).history).toEqual(before.history)
 })

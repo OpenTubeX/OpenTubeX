@@ -222,8 +222,19 @@
           :rows="takeoutPreview.filter(row => selectedTakeoutTypes.includes(row.category))"
           :labels="Object.fromEntries(takeoutTypes.map((value, index) => [value, takeoutLabels[index]]))"
         />
+        <FtLoader
+          v-if="takeoutBusy"
+          :tab-loading-indicator="false"
+        />
         <FtButton
-          v-if="selectedTakeoutTypes.length > 0"
+          v-if="selectedTakeoutTypes.length > 0 && !takeoutPreviewReady"
+          :label="t('Settings.Data Settings.Import Preview.Title')"
+          :icon="['fas', 'eye']"
+          :disabled="takeoutBusy"
+          @click="previewSelectedTakeoutData"
+        />
+        <FtButton
+          v-if="takeoutPreviewReady"
           :label="t('Settings.Data Settings.Import selected data')"
           :icon="['fas', 'folder-open']"
           :disabled="takeoutBusy"
@@ -322,6 +333,7 @@ import {
 import { parseLineDelimitedJson } from '../../helpers/line-delimited-json'
 import { previewBackupImport, previewTakeoutImport, parseTakeoutSubscriptions, parseTakeoutWatchHistory, parseTakeoutSearchHistory } from '../../helpers/import-preview'
 import FtImportPreview from '../FtImportPreview/FtImportPreview.vue'
+import FtLoader from '../FtLoader/FtLoader.vue'
 import { BACKUP_SECTIONS, createUnifiedBackup, mergeBackupHistoryRecord, mergeBackupPlaylist, mergeBackupProfile, readUnifiedBackup } from '../../helpers/unifiedBackup'
 import { compactAllDatastores, DBHistoryHandlers, DBPlaylistHandlers, DBProfileHandlers, DBSearchHistoryHandlers, DBWatchStatsHandlers } from '../../../datastores/handlers/index'
 import { forEachTakeoutImportEntry, listYouTubeTakeoutZipEntries, parseTakeoutPlaylistCsv } from '../../helpers/youtube-takeout-zip'
@@ -503,6 +515,7 @@ const takeoutFile = shallowRef(null)
 const takeoutEntries = shallowRef([])
 const takeoutPreview = shallowRef([])
 const selectedTakeoutTypes = ref([])
+const takeoutPreviewReady = computed(() => selectedTakeoutTypes.value.length > 0 && selectedTakeoutTypes.value.every(type => takeoutPreview.value.some(row => row.category === type)))
 const takeoutTypes = computed(() => [...new Set(takeoutEntries.value.map(entry => entry.type))])
 const takeoutLabels = computed(() => takeoutTypes.value.map(type => {
   return {
@@ -537,8 +550,6 @@ async function selectTakeoutZip() {
       showToast({ message: t('Settings.Data Settings.No supported Takeout data'), icon: ['fas', 'circle-exclamation'] })
       return
     }
-    const current = await readImportState(['profiles', 'playlists', 'history', 'searchHistory'])
-    takeoutPreview.value = await previewTakeoutImport(file, entries, { ...current, subscriptions: primaryProfile.value.subscriptions })
     takeoutFilename.value = file.name
     takeoutFile.value = file
     takeoutEntries.value = entries
@@ -551,8 +562,26 @@ async function selectTakeoutZip() {
   }
 }
 
+/** Decode only the categories chosen after lightweight archive discovery. */
+async function previewSelectedTakeoutData() {
+  const file = takeoutFile.value
+  if (takeoutBusy.value || !file || selectedTakeoutTypes.value.length === 0) return
+  takeoutBusy.value = true
+  const selected = new Set(selectedTakeoutTypes.value)
+  const entries = takeoutEntries.value.filter(entry => selected.has(entry.type))
+  try {
+    const current = await readImportState([...selected].filter(type => type !== 'subscriptions'))
+    const preview = await previewTakeoutImport(file, entries, { ...current, subscriptions: primaryProfile.value.subscriptions })
+    if (takeoutFile.value === file) takeoutPreview.value = preview
+  } catch (error) {
+    showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
+  } finally {
+    takeoutBusy.value = false
+  }
+}
+
 async function importSelectedTakeoutData() {
-  if (takeoutBusy.value || !takeoutFile.value) return
+  if (takeoutBusy.value || !takeoutFile.value || !takeoutPreviewReady.value) return
   takeoutBusy.value = true
   const selected = new Set(selectedTakeoutTypes.value)
   let importedPlaylists = false
