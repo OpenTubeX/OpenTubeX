@@ -3402,7 +3402,6 @@ const commandPaletteDownloads = computed(previous => {
 })
 const commandPaletteVideoSources = computed(() => ({
   loadLibrarySources: isElectron ? (query, locale, group, sources) => DBLibraryHandlers.query('commandPaletteVideos', { query, locale, group, sources }) : undefined,
-  libraryRevision: isElectron ? store.state.history.historyRevision : 0,
   history: store.getters.getHistoryCacheSorted,
   saveVideoHistoryWithLastViewedPlaylist: store.getters.getSaveVideoHistoryWithLastViewedPlaylist,
   playlists: store.getters.getAllPlaylists,
