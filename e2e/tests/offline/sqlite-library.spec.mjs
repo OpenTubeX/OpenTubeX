@@ -1,3 +1,5 @@
+import { strToU8, zipSync } from 'fflate'
+import { parseTakeoutSubscriptions } from '../../../src/renderer/helpers/import-preview.js'
 import { readFile } from 'node:fs/promises'
 import { readPersistedDatastore } from '../../helpers/datastore.mjs'
 import path from 'node:path'
@@ -1896,6 +1898,60 @@ test.describe('retained opaque playlist preview', () => {
     expect(saved).toStrictEqual({ ...opaquePlaylist, lastUpdatedAt: saved.lastUpdatedAt, videos: [...opaquePlaylist.videos, { ...incoming, playlistItemId, timeAdded }] })
     expect(await page.evaluate(id => window.ftElectron.libraryQuery('playlistSnapshot', { id }), opaqueMembership._id)).toStrictEqual(opaqueMembership)
     expect((await page.evaluate(() => window.ftElectron.libraryQuery('historyPage', { limit: 10 }))).records).toStrictEqual([history[0]])
+  })
+
+  test('Takeout imports a fresh writable playlist beside an incompatible namesake', async ({ page }) => {
+    const data = await goToSettingsSection(page, 'data')
+    const archive = zipSync({ [`Takeout/YouTube/playlists/${opaqueMembership.playlistName}.csv`]: strToU8('Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00Z\n') })
+    const snapshots = () => page.evaluate(async ({ action, name }) => {
+      const summaries = await window.ftElectron.dbPlaylists(action)
+      return Promise.all(summaries.filter(row => row.playlistName === name).map(row => window.ftElectron.libraryQuery('playlistSnapshot', { id: row._id })))
+    }, { action: DBActions.GENERAL.FIND, name: opaqueMembership.playlistName })
+    let imported
+    for (let repeat = 0; repeat < 2; repeat++) {
+      await page.evaluate(bytes => { window.showOpenFilePicker = async () => [{ getFile: async () => new File([new Uint8Array(bytes)], 'takeout.zip', { type: 'application/zip' }) }] }, [...archive])
+      await data.getByRole('button', { name: 'Import YouTube Takeout ZIP', exact: true }).click()
+      await page.getByRole('button', { name: 'Preview changes', exact: true }).click()
+      await page.getByRole('button', { name: 'Import selected data', exact: true }).click()
+      await expect.poll(async () => (await snapshots()).filter(row => Array.isArray(row.videos)).length).toBe(1)
+      await expect(page.locator('.takeoutSelectionCentered')).toHaveCount(0)
+      const rows = await snapshots()
+      expect(rows).toHaveLength(2)
+      expect(rows.find(row => row._id === opaqueMembership._id)).toStrictEqual(opaqueMembership)
+      const writable = rows.find(row => row._id !== opaqueMembership._id)
+      expect(writable.videos).toHaveLength(1)
+      expect(writable.videos[0].videoId).toBe('abcdefghijk')
+      if (repeat) {
+        expect(writable._id).toBe(imported._id)
+        expect(writable.videos).toStrictEqual(imported.videos)
+      }
+      imported = writable
+    }
+  })
+
+  test('committed Takeout subscriptions succeed when the profile refresh fails', async ({ page }) => {
+    const data = await goToSettingsSection(page, 'data')
+    const entry = { path: 'Takeout/YouTube/subscriptions/subscriptions.csv', content: 'Channel Id,Channel Url,Channel Title\nUCpostcommit,url,Imported channel\n' }
+    const before = await page.evaluate(action => window.ftElectron.dbProfiles(action, { preserveRetained: true }), DBActions.GENERAL.FIND)
+    const archive = zipSync({ [entry.path]: strToU8(entry.content) })
+    await page.evaluate(bytes => { window.showOpenFilePicker = async () => [{ getFile: async () => new File([new Uint8Array(bytes)], 'takeout.zip', { type: 'application/zip' }) }] }, [...archive])
+    await data.getByRole('button', { name: 'Import YouTube Takeout ZIP', exact: true }).click()
+    await page.getByRole('button', { name: 'Preview changes', exact: true }).click()
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const dispatch = store.dispatch.bind(store)
+      window.failNextProfileRefresh = true
+      store.dispatch = (action, payload) => {
+        if (action === 'grabAllProfiles' && payload?.preserveRetained === true && window.failNextProfileRefresh) { window.failNextProfileRefresh = false; return Promise.resolve(null) }
+        return dispatch(action, payload)
+      }
+    })
+    await page.getByRole('button', { name: 'Import selected data', exact: true }).click()
+    await expect(page.getByText('All subscriptions have been successfully imported', { exact: true })).toBeVisible()
+    expect(await page.evaluate(() => window.failNextProfileRefresh)).toBe(false)
+    const expected = before.map(profile => profile._id === 'allChannels' ? { ...profile, subscriptions: [...profile.subscriptions, ...parseTakeoutSubscriptions(entry)] } : profile)
+    expect(await page.evaluate(action => window.ftElectron.dbProfiles(action, { preserveRetained: true }), DBActions.GENERAL.FIND)).toStrictEqual(expected)
+    await expect(page.locator('.takeoutSelectionCentered')).toHaveCount(0)
   })
 })
 
