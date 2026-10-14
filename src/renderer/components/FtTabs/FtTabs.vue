@@ -14,7 +14,7 @@
 </template>
 
 <script setup>
-import { onMounted, onUpdated, useTemplateRef } from 'vue'
+import { onBeforeUnmount, onMounted, onUpdated, useTemplateRef } from 'vue'
 
 const props = defineProps({
   variant: {
@@ -26,20 +26,27 @@ const props = defineProps({
 
 const root = useTemplateRef('root')
 let previousSelected
-let userSelection = false
+let userSelection
+let selectionResetTimer
 
 function markUserSelection(event) {
-  if (!event.target.closest('[role="tab"]')) return
-  if (event.type === 'keydown' && !['Enter', ' ', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) return
-  userSelection = true
-  // Keep the flag through native event handlers and Vue's selection update.
-  setTimeout(() => { userSelection = false }, 0)
+  const tab = event.target instanceof Element ? event.target.closest('[role="tab"]') : null
+  const onTab = tab && root.value.contains(tab)
+  if (event.type === 'click' && !onTab) return
+  const keys = onTab ? ['Enter', ' ', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'] : ['ArrowLeft', 'ArrowRight']
+  if (event.type === 'keydown' && !keys.includes(event.key)) return
+  userSelection = event
+  // Keep the event through native handlers and Vue's selection update.
+  clearTimeout(selectionResetTimer)
+  selectionResetTimer = setTimeout(() => { userSelection = undefined }, 0)
 }
 
 function updateSelection() {
   const container = root.value
   const selected = container.querySelector('[role="tab"][aria-selected="true"]')
-  if (previousSelected !== undefined && selected !== previousSelected && !userSelection) {
+  // Panel/document navigation consumes arrow keys before changing selection.
+  const deliberateSelection = userSelection && (container.contains(userSelection.target) || userSelection.defaultPrevented)
+  if (previousSelected !== undefined && selected !== previousSelected && !deliberateSelection) {
     // Automatic changes snap both outgoing and incoming highlights.
     container.style.setProperty('--material-tab-highlight-transition', 'none')
     // Commit the opacity before restoring normal selection fades.
@@ -49,8 +56,15 @@ function updateSelection() {
   previousSelected = selected
 }
 
-onMounted(updateSelection)
+onMounted(() => {
+  updateSelection()
+  document.addEventListener('keydown', markUserSelection, true)
+})
 onUpdated(updateSelection)
+onBeforeUnmount(() => {
+  document.removeEventListener('keydown', markUserSelection, true)
+  clearTimeout(selectionResetTimer)
+})
 </script>
 
 <style scoped src="./FtTabs.css" />

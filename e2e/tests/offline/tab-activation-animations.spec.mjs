@@ -133,6 +133,39 @@ test('page navigation shows shared tab highlights immediately and only selection
   await expect.poll(() => page.evaluate(() => window.__tabHighlightTransitions.length)).toBe(2)
 })
 
+test('subscription panel and document keyboard navigation crossfade the selected highlight', async ({ page }) => {
+  await goTo(page, 'subscriptions')
+  const tabs = page.getByRole('tablist', { name: /^Subscriptions tabs$/i })
+  for (const scale of [100, 95, 125]) {
+    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+    for (const source of ['body', 'panel', 'appTab']) {
+      await tabs.locator('[data-subscription-feed-tab="videos"]').click()
+      await expectTabHighlightAligned(tabs.locator('[aria-selected="true"]'))
+      if (source === 'body') await page.evaluate(() => document.activeElement.blur())
+      else if (source === 'panel') await page.locator('#subscriptionsPanel:visible').evaluate(panel => { panel.tabIndex = -1; panel.focus() })
+      else await page.locator('.tab[data-tab-id].active').click()
+      expect(await page.evaluate(source => {
+        const focused = document.activeElement
+        if (source === 'body') return focused === document.body
+        return focused.matches(source === 'panel' ? '[role="tabpanel"]' : '.tab[data-tab-id]')
+      }, source)).toBe(true)
+      await tabs.evaluate(container => {
+        window.__panelTabTransitions = []
+        const capture = event => {
+          if (event.propertyName !== 'opacity' || event.pseudoElement !== '::before') return
+          window.__panelTabTransitions.push(event.propertyName)
+          container.removeEventListener('transitionrun', capture)
+        }
+        container.addEventListener('transitionrun', capture)
+      })
+      await page.keyboard.press('ArrowRight')
+      await expect(tabs.locator('[data-subscription-feed-tab="shorts"]')).toHaveAttribute('aria-selected', 'true')
+      await expect.poll(() => page.evaluate(() => window.__panelTabTransitions)).toContain('opacity')
+      await expectTabHighlightAligned(tabs.locator('[aria-selected="true"]'))
+    }
+  }
+})
+
 test('returning to subscription tabs preserves their highlight without replaying its entrance', async ({ app, page }) => {
   await goTo(page, 'subscriptions')
   const tabs = page.getByRole('tablist', { name: /^Subscriptions tabs$/i, includeHidden: true })

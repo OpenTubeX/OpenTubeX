@@ -29,7 +29,7 @@ test.beforeEach(async ({ page }) => {
           subCount: 0,
           totalViews: 0,
           joined: 0,
-          tabs: ['videos', 'shorts', 'streams', 'playlists', 'posts', 'releases', 'podcasts', 'courses'],
+          tabs: ['videos', 'shorts', 'streams', 'playlists', 'posts', 'releases', 'podcasts', 'courses', 'about'],
           relatedChannels: [],
           videos: [],
           latestVideos: [],
@@ -546,6 +546,41 @@ test('clamps channel tab scrolling after resize and locale changes', async ({ ap
     await expectAligned(page)
     await expectTabScrollRange(tabs)
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThan(2)
+  }
+})
+
+test('channel panel and document keyboard navigation crossfade the selected highlight', async ({ page }) => {
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAnimationSpeed', 25))
+  for (const scale of [100, 95, 125]) {
+    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+    for (const source of ['body', 'panel', 'appTab']) {
+      await page.locator('#videosTab').click()
+      await expectAligned(page)
+      if (source === 'body') await page.evaluate(() => document.activeElement.blur())
+      else if (source === 'panel') {
+        await page.locator('#aboutTab').click()
+        await expectAligned(page)
+        await page.locator('[role="tabpanel"][aria-labelledby="aboutTab"]').evaluate(panel => { panel.tabIndex = -1; panel.focus() })
+      } else await page.locator('.tab[data-tab-id].active').click()
+      expect(await page.evaluate(source => {
+        const focused = document.activeElement
+        if (source === 'body') return focused === document.body
+        return focused.matches(source === 'panel' ? '[role="tabpanel"]' : '.tab[data-tab-id]')
+      }, source)).toBe(true)
+      await page.locator('.channelDetails:visible .materialTabs').evaluate(container => {
+        window.__panelTabTransitions = []
+        const capture = event => {
+          if (event.propertyName !== 'opacity' || event.pseudoElement !== '::before') return
+          window.__panelTabTransitions.push(event.propertyName)
+          container.removeEventListener('transitionrun', capture)
+        }
+        container.addEventListener('transitionrun', capture)
+      })
+      await page.keyboard.press('ArrowRight')
+      await expect(page.locator(source === 'panel' ? '#videosTab' : '#shortsTab')).toHaveAttribute('aria-selected', 'true')
+      await expect.poll(() => page.evaluate(() => window.__panelTabTransitions)).toContain('opacity')
+      await expectAligned(page)
+    }
   }
 })
 
