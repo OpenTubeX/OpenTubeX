@@ -234,6 +234,7 @@ const PLAY_MORPH_PATH = 'M8 6 11.5 8.1 11.5 15.9 8 18ZM11.5 8.1 18 12 18 12 11.5
 // Restore a surviving player's factories when a tab releases its controls.
 // The process-global registries must not retain factories from disposed players.
 const liveCustomControlPlayers = new Set()
+let configuringCustomPlayerControls = false
 
 class DefaultCaptionSelectionFactory {
   create(rootElement, controls) {
@@ -1820,9 +1821,9 @@ export default defineComponent({
     })
 
     watch(defaultSkipInterval, (newValue) => {
-      ui.configure({
+      configurePlayerControls(() => ui.configure({
         tapSeekDistance: newValue
-      })
+      }))
     })
 
     watch(showPlaybackRateAdjustedTimestamp, () => {
@@ -1891,7 +1892,7 @@ export default defineComponent({
     })
 
     watch(fullscreenOnRotationEnabled, (newValue) => {
-      ui?.configure({ enableFullscreenOnRotation: newValue })
+      configurePlayerControls(() => ui.configure({ enableFullscreenOnRotation: newValue }))
     }, { flush: 'sync' })
 
     watch([rotateFullscreenToLandscape, fullscreenAspectRatio], () => {
@@ -2039,9 +2040,9 @@ export default defineComponent({
     })
 
     watch(playbackRates, (newValue) => {
-      ui.configure({
+      configurePlayerControls(() => ui.configure({
         playbackRates: newValue
-      })
+      }))
     })
 
     /** @type {import('vue').ComputedRef<boolean>} */
@@ -5116,6 +5117,31 @@ export default defineComponent({
      * @param {boolean} firstTime
      */
     function configureUI(firstTime = false) {
+      configurePlayerControls(() => applyUIConfiguration(firstTime))
+    }
+
+    /** @param {() => void} configure */
+    function configurePlayerControls(configure) {
+      if (!ui || !player) return
+      // Custom controls call Vue render(), which can flush another player's
+      // watchers during Shaka's rebuild. Keep registry restoration and the
+      // entire rebuild together so every control belongs to the right player.
+      if (configuringCustomPlayerControls) {
+        nextTick(() => {
+          configurePlayerControls(configure)
+        })
+        return
+      }
+      configuringCustomPlayerControls = true
+      try {
+        reRegisterOwnElements()
+        configure()
+      } finally {
+        configuringCustomPlayerControls = false
+      }
+    }
+
+    function applyUIConfiguration(firstTime) {
       // Shaka rebuilds every control element on configure, and several of them
       // dereference the attached player immediately (e.g. the playback rate
       // selection reads player.getPlaybackRate()). While the player is detached
@@ -5196,10 +5222,6 @@ export default defineComponent({
 
         ui.configure(firstTimeConfig)
       } else {
-        // Another player mounted after us may have overwritten our factories
-        // in shaka's shared element registries, which this configure call
-        // rebuilds every control element from.
-        reRegisterOwnElements()
         ui.configure(uiConfig.value)
       }
 
