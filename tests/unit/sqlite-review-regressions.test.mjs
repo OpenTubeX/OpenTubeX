@@ -3685,3 +3685,31 @@ test('paged playlist navigation encodes retained video IDs without changing memb
   assert.equal(requested.path, '/watch/retained%2F%3F%23%E6%97%A5%E6%9C%AC%E8%AA%9E')
   assert.deepEqual(requested.query, { playlistId: 'p', playlistType: 'user', playlistItemId: 'item', libraryMemberId: 'member' })
 })
+
+test('deferred datastore startup handles its rejected promise after the recovery handler', async () => {
+  const main = await readFile(new URL('../../src/main/index.js', import.meta.url), 'utf8')
+  const ast = babelParse(main, { sourceType: 'module' })
+  const visit = node => {
+    if (!node || typeof node !== 'object') return null
+    if (node.type === 'CallExpression' && node.callee?.name === 'setImmediate' && main.slice(node.start, node.end).includes('baseHandlers.loadDeferredDatastores')) return node
+    for (const child of Object.values(node)) {
+      for (const item of Array.isArray(child) ? child : [child]) {
+        const found = visit(item)
+        if (found) return found
+      }
+    }
+    return null
+  }
+  const call = visit(ast)
+  assert.ok(call)
+  const failure = new Error('library unavailable'), errors = []
+  let completion
+  vm.runInNewContext(main.slice(call.start, call.end), {
+    setImmediate: callback => { completion = callback() },
+    baseHandlers: { loadDeferredDatastores: () => Promise.reject(failure) },
+    console: { error: error => errors.push(error) },
+  })
+  await completion
+  await Promise.resolve()
+  assert.deepEqual(errors, [failure])
+})
