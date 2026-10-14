@@ -2013,7 +2013,7 @@ async function importPlaylists() {
   let importedCount = 0
 
   for (const playlistData of playlists) {
-    if (!process.env.IS_ELECTRON) await normalizeImportedPlaylistThumbnail(playlistData)
+    await normalizeImportedPlaylistThumbnail(playlistData)
     // We would technically already be done by the time the data is parsed,
     // however we want to limit the possibility of malicious data being sent
     // to the app, so we'll only grab the data we need here.
