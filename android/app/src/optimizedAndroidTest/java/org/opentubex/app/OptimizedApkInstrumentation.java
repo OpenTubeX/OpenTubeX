@@ -275,7 +275,9 @@ public class OptimizedApkInstrumentation extends Instrumentation {
                 // Do not restore or reload the synthetic watch route next launch.
                 evaluate(web, "document.querySelector('#app').__vue_app__.config.globalProperties.$router.replace('/subscriptions')");
                 await(web, "location.hash === '#/subscriptions'");
-                evaluate(web, "document.querySelector('.mobileMiniBarDismiss, .scrollMiniDismiss')?.click()");
+                await(web, "!document.querySelector('.ftVideoPlayer') || " +
+                    "!!document.querySelector('.mobileMiniBarDismiss:not(:disabled), .scrollMiniDismiss:not(:disabled)')");
+                evaluate(web, "document.querySelector('.mobileMiniBarDismiss:not(:disabled), .scrollMiniDismiss:not(:disabled)')?.click()");
                 await(web, "!document.querySelector('.ftVideoPlayer')");
             } finally {
                 evaluate(web, "if (window.optimizedOnlineDescriptor) { " +
@@ -288,29 +290,51 @@ public class OptimizedApkInstrumentation extends Instrumentation {
 
     private void tapCss(WebView web, String selector) throws Exception {
         String position = null;
+        String previous = null;
+        String lastResult = null;
+        int[] bounds = new int[5];
+        boolean[] ready = new boolean[1];
         long deadline = SystemClock.elapsedRealtime() + 30000;
         do {
-            String result = evaluate(web, "JSON.stringify((() => { const element = document.querySelector(" +
+            String result = evaluate(web, "(() => { const element = document.querySelector(" +
                 JSONObject.quote(selector) + "); if (!element) return null; const rect = element.getBoundingClientRect(); " +
                 "if (!rect.width || !rect.height) return null; return {x: rect.x + rect.width / 2, " +
-                "y: rect.y + rect.height / 2, viewportWidth: innerWidth}; })())");
-            if (result != null && !"null".equals(result)) {
-                position = new JSONArray("[" + result + "]").getString(0);
-                break;
+                "y: rect.y + rect.height / 2, viewportWidth: innerWidth, viewportHeight: innerHeight}; })()");
+            runOnMainSync(() -> {
+                web.getLocationOnScreen(bounds);
+                bounds[2] = web.getWidth();
+                bounds[3] = web.getHeight();
+                bounds[4] = web.getDisplay().getRotation();
+                ready[0] = web.isShown() && web.hasWindowFocus() && !web.isLayoutRequested();
+            });
+            lastResult = result;
+            String sample = null;
+            if (ready[0] && result != null && !"null".equals(result)) {
+                JSONObject point = new JSONObject(result);
+                double scale = bounds[2] / point.getDouble("viewportWidth");
+                double x = point.getDouble("x") * scale;
+                double y = point.getDouble("y") * scale;
+                // Fullscreen can resize the native view before Chromium's viewport.
+                // Allow CSS-pixel rounding, but never combine portrait DOM coordinates
+                // with landscape native bounds. Require an unchanged sample as well.
+                if (scale > 0 && Math.abs(bounds[3] - point.getDouble("viewportHeight") * scale) <= 2 * scale
+                        && x >= 0 && x < bounds[2] && y >= 0 && y < bounds[3]) {
+                    sample = result + Arrays.toString(bounds);
+                    if (sample.equals(previous)) {
+                        position = result;
+                        break;
+                    }
+                }
             }
+            previous = sample;
             Thread.sleep(100);
         } while (SystemClock.elapsedRealtime() < deadline);
-        check(position != null, "Timed out waiting to tap " + selector);
+        check(position != null, "Timed out waiting to tap " + selector + ": DOM=" + lastResult +
+            ", native=" + Arrays.toString(bounds) + ", ready=" + ready[0]);
         JSONObject point = new JSONObject(position);
-        int[] origin = new int[2];
-        int[] width = new int[1];
-        runOnMainSync(() -> {
-            web.getLocationOnScreen(origin);
-            width[0] = web.getWidth();
-        });
-        double scale = (double) width[0] / point.getDouble("viewportWidth");
-        tapScreen((float) (origin[0] + point.getDouble("x") * scale),
-            (float) (origin[1] + point.getDouble("y") * scale));
+        double scale = bounds[2] / point.getDouble("viewportWidth");
+        tapScreen((float) (bounds[0] + point.getDouble("x") * scale),
+            (float) (bounds[1] + point.getDouble("y") * scale));
     }
 
     private void tapScreen(float x, float y) {
