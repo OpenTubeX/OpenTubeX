@@ -23,6 +23,7 @@ patchedDependencies:
   '@capacitor/share@8.0.3': patches/@capacitor__share@8.0.3.patch
   '@capawesome/capacitor-app-shortcuts@8.0.2': patches/@capawesome__capacitor-app-shortcuts@8.0.2.patch
   '@capawesome/capacitor-clipboard@0.1.2': patches/@capawesome__capacitor-clipboard@0.1.2.patch
+  '@material/material-color-utilities@0.4.0': patches/@material__material-color-utilities@0.4.0.patch
   overlayscrollbars@2.16.0: patches/overlayscrollbars@2.16.0.patch
   shaka-player@5.1.12: patches/shaka-player@5.1.12.patch
   vue-sonner@2.0.9: patches/vue-sonner@2.0.9.patch

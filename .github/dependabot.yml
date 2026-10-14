@@ -99,3 +99,17 @@ updates:
       "github/codeql-action":
         patterns:
           - "github/codeql-action/*"
+  - package-ecosystem: "gradle"
+    directory: "/android"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "PR: waiting for review"
+      - "PR: dependencies"
+  - package-ecosystem: "swift"
+    directory: "/ios/App/CapApp-SPM"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "PR: waiting for review"
+      - "PR: dependencies"

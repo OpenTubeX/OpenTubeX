@@ -16,6 +16,7 @@ patchedDependencies:
   '@capacitor/share@8.0.3': 61a10a5a91f7c78b0670870fd26034ee015a175f24f79c0f9890ce03050a8adb
   '@capawesome/capacitor-app-shortcuts@8.0.2': 2581c86d60ce7892c0b3136523994591d24ee7313bbc5fc9b4ad1c710719c70a
   '@capawesome/capacitor-clipboard@0.1.2': 729c6071cbf0e196e2212b015677cdd162c287dca48137c24250c0d056c9fd5b
+  '@material/material-color-utilities@0.4.0': b1ce5dea9a31733ac3ddd4b236a80185e050df5f98e48bb7fd93f8ccf3f58378
   overlayscrollbars@2.16.0: 5cf83e67b2d20d5556131f278ab8fdeece199eafcfcaf6b838b0e949366d2281
   shaka-player@5.1.12: cf2e5c9a138eec272ac8db5df51977f756e60fed28f24946e54c67fe0e465724
   vue-sonner@2.0.9: 34b2065fecd4314653c24cdfc38ff5f2910def4942ed265ec374d66c0e5c0940
@@ -111,7 +112,7 @@ importers:
         version: 0.32.0
       '@material/material-color-utilities':
         specifier: ^0.4.0
-        version: 0.4.0
+        version: 0.4.0(patch_hash=b1ce5dea9a31733ac3ddd4b236a80185e050df5f98e48bb7fd93f8ccf3f58378)
       '@seald-io/nedb':
         specifier: ^4.1.2
         version: 4.1.2
@@ -6175,7 +6176,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@material/material-color-utilities@0.4.0': {}
+  '@material/material-color-utilities@0.4.0(patch_hash=b1ce5dea9a31733ac3ddd4b236a80185e050df5f98e48bb7fd93f8ccf3f58378)': {}
 
   '@napi-rs/wasm-runtime@1.1.6(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)':
     dependencies:
