@@ -243,7 +243,7 @@ test('metadata mutations refresh results while playback progress does not', () =
   for (const type of ['upsertToHistoryCache', 'applyPlaylistMetadataRepairs', 'upsertPlaylistToList', 'removeVideos', 'setAllPlaylists', 'addVideoToWatchQueue', 'removeYtDlpDownload']) {
     assert.equal(isLocalVideoMutation(type), true, type)
   }
-  for (const type of ['updateRecordWatchProgressInHistoryCache', 'updateRecordLastViewedPlaylistIdInHistoryCache', 'addOpenPrompt']) {
+  for (const type of ['setHistorySummary', 'updateRecordWatchProgressInHistoryCache', 'updateRecordLastViewedPlaylistIdInHistoryCache', 'addOpenPrompt']) {
     assert.equal(isLocalVideoMutation(type), false, type)
   }
 })
