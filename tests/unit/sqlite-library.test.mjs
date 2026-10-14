@@ -2539,8 +2539,10 @@ test('watched cleanup matches typed legacy identities using only their newest hi
   const expected = videos.filter(video => byId.get(video.videoId)?.isWatched !== true)
   await engine.collections.playlists.insertAsync({ _id: 'p', videos, unknown: new Date(123) })
   await engine.collections.history.insertAsync(history)
+  const updatedAt = 1700000000000
+  t.mock.method(Date, 'now', () => updatedAt)
   assert.equal(await engine.cleanupPlaylist({ id: 'p', mode: 'watched' }), videos.length - expected.length)
-  assert.deepEqual(await engine.playlistSnapshot({ id: 'p' }), { _id: 'p', videos: expected, unknown: new Date(123), lastUpdatedAt: (await engine.playlistSnapshot({ id: 'p' })).lastUpdatedAt })
+  assert.deepEqual(await engine.playlistSnapshot({ id: 'p' }), { _id: 'p', videos: expected, unknown: new Date(123), lastUpdatedAt: updatedAt })
   assert.deepEqual(await engine.collections.history.findAsync({}).sort({ _id: 1 }), await portable.findAsync({}).sort({ _id: 1 }))
 })
 
