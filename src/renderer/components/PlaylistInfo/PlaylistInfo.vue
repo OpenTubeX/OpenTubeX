@@ -623,7 +623,7 @@ const videoPlaylistType = computed(() => isUserPlaylist.value ? 'user' : '')
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const userPlaylistAnyVideoWatched = computed(() => {
-  if (!isUserPlaylist.value) { return false }
+  if (!isUserPlaylist.value || !Array.isArray(selectedUserPlaylist.value?.videos)) { return false }
 
   const historyCacheById_ = historyCacheById.value
   return selectedUserPlaylist.value.videos.some((video) => {
@@ -633,7 +633,8 @@ const userPlaylistAnyVideoWatched = computed(() => {
 
 /** @type {import('vue').ComputedRef<number>} */
 const userPlaylistUniqueVideosCount = computed(() => {
-  return selectedUserPlaylist.value?.videos.reduce((set, video) => {
+  if (!Array.isArray(selectedUserPlaylist.value?.videos)) return 0
+  return selectedUserPlaylist.value.videos.reduce((set, video) => {
     set.add(video?.videoId ?? Symbol('opaque member'))
     return set
   }, new Set()).size ?? 0

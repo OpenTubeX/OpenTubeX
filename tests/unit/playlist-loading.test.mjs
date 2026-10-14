@@ -700,3 +700,23 @@ test('full playlist download cards skip opaque members without rewriting members
   }
   assert.deepEqual(videos, before)
 })
+
+test('PlaylistInfo statistics preserve scalar memberships through each stack stage', async () => {
+  const { createPortableLibrary } = await import('../../src/datastores/handlers/library-web.js')
+  const { isHistoryEntryWatched } = await import('../../src/history.js')
+  const script = parse(await readFile(new URL('../../src/renderer/components/PlaylistInfo/PlaylistInfo.vue', import.meta.url), 'utf8')).descriptor.scriptSetup.content
+  const names = ['userPlaylistAnyVideoWatched', 'userPlaylistUniqueVideosCount', 'userPlaylistDuplicateItemCount', 'userPlaylistWatchedVideoCount']
+  const declarations = babelParse(script, { sourceType: 'module' }).program.body.filter(node => node.type === 'VariableDeclaration' && node.declarations.some(entry => names.includes(entry.id.name)))
+  for (const videos of [undefined, null, false, 42, 'opaque', {}]) {
+    const record = { _id: 'retained', videos, unknown: new Date(1) }, before = structuredClone(record)
+    const library = createPortableLibrary({ playlists: { find: async () => [record] }, history: { find: async () => [] } })
+    const statistics = await library.query('playlistStatistics', { id: record._id })
+    const context = vm.createContext({ computed: fn => ({ get value() { return fn() } }), isUserPlaylist: { value: true }, selectedUserPlaylist: { value: record }, historyCacheById: { value: {} }, isHistoryEntryWatched, playlistStatistics: { value: statistics } })
+    vm.runInContext(declarations.map(node => script.slice(node.start, node.end)).join('\n'), context)
+    assert.equal(vm.runInContext('userPlaylistAnyVideoWatched.value', context), false)
+    if (declarations.some(node => node.declarations.some(entry => entry.id.name === 'userPlaylistUniqueVideosCount'))) assert.equal(vm.runInContext('userPlaylistUniqueVideosCount.value', context), 0)
+    assert.equal(vm.runInContext('userPlaylistDuplicateItemCount.value', context), 0)
+    assert.equal(vm.runInContext('Number(userPlaylistWatchedVideoCount.value)', context), 0)
+    assert.deepEqual(record, before)
+  }
+})
