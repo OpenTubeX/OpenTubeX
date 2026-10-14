@@ -1372,6 +1372,14 @@ Video:
   Sponsor Block category short:
     filler: தொடர்பற்றவை
   Player:
+    Caption Timing:
+      Adjust Timing: நேரத்தைச் சரிசெய்…
+      Caption Timing: வசன நேரம்
+      Offset: நேர மாற்றம் (விநாடிகள்)
+      Hint: எதிர்மறை மதிப்புகள் வசனங்களை முன்னதாகவும், நேர்மறை மதிப்புகள் பின்னதாகவும் காட்டும். இந்தக் காணொளிக்கு மட்டுமே பொருந்தும்.
+      Earlier: முன்னதாக
+      Later: பின்னதாக
+      Reset: மீட்டமை
     Most Replayed: "அதிகம் மீண்டும் பார்க்கப்பட்டது"
     Cast: "ஒளிபரப்பு"
     Music Mode: "இசை முறை"

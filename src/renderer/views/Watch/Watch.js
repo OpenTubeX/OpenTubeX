@@ -5678,7 +5678,11 @@ export default defineComponent({
         return false
       }
 
-      await this.reloadView()
+      const sameVideo = this.videoId === this.tabRoute.params.id
+      if (sameVideo) {
+        this.setPlayerReloadState(this.$refs.player?.getSabrReloadState())
+      }
+      await this.reloadView({ preserveTitle: sameVideo })
       return true
     },
 
@@ -6990,6 +6994,7 @@ export default defineComponent({
         : this.currentPlaybackRate
       this.sabrReloadState = {
         captionIndex: Number.isInteger(payload?.captionIndex) ? payload.captionIndex : null,
+        captionTimingOffset: Number.isFinite(payload?.captionTimingOffset) ? payload.captionTimingOffset : 0,
         playbackRate: restoredPlaybackRate,
         videoQuality: this.normalizeVideoQuality(payload?.videoQuality) ||
           this.normalizeVideoQuality(this.currentVideoQuality) || null,

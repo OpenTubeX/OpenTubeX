@@ -1335,6 +1335,14 @@ Video:
     music offtopic: "N'eo ket sonerezh"
     filler: "Dihanadennoù"
   Player:
+    Caption Timing:
+      Adjust Timing: Kempenn an amzer…
+      Caption Timing: Amzer an istitloù
+      Offset: Dilecʼhiadur (eilennoù)
+      Hint: An talvoudoù negativel a ziskouez an istitloù abretocʼh, ar re bozitivel diwezhatocʼh. Evit ar video-mañ hepken.
+      Earlier: Abretocʼh
+      Later: Diwezhatocʼh
+      Reset: Adderaouekaat
     Most Replayed: "Adwelet ar muiañ"
     Cast: "Skignañ"
     Music Mode: "Mod sonerezh"

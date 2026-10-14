@@ -1960,6 +1960,14 @@ Video:
   Hide Channel: Kanal ausblenden
   More Options: Weitere Optionen
   Player:
+    Caption Timing:
+      Adjust Timing: Timing anpassen…
+      Caption Timing: Untertitel-Timing
+      Offset: Versatz (Sekunden)
+      Hint: Negative Werte zeigen Untertitel früher, positive Werte später. Gilt nur für dieses Video.
+      Earlier: Früher
+      Later: Später
+      Reset: Zurücksetzen
     Cast: "Übertragen"
     Most Replayed: Am häufigsten wiederholt
     Music Mode: Musikmodus

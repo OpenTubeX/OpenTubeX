@@ -1348,6 +1348,14 @@ Video:
     music offtopic: Ekki tónlist
     filler: Útúrdúrar
   Player:
+    Caption Timing:
+      Adjust Timing: Stilla tímasetningu…
+      Caption Timing: Tímasetning skjátexta
+      Offset: Hliðrun (sekúndur)
+      Hint: Neikvæð gildi sýna skjátexta fyrr; jákvæð gildi síðar. Gildir aðeins fyrir þetta myndband.
+      Earlier: Fyrr
+      Later: Síðar
+      Reset: Endurstilla
     Most Replayed: "Mest endurspilað"
     Cast: "Streyma"
     Music Mode: "Tónlistarhamur"

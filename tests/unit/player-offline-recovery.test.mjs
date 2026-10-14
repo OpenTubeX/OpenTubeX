@@ -70,3 +70,24 @@ test('offline errors do not suppress later failures from the retained player', (
   assert.equal(emitted.length, 1, 'later online failures must remain actionable')
   assert.equal(context.ignoreErrors, true)
 })
+
+for (const requestedVideoId of ['current-video', 'next-video']) {
+  test(`stream recovery preserves player state only for its own video: ${requestedVideoId}`, async () => {
+    const recoveryStart = watchSource.indexOf('    reloadAfterStreamErrorOnce: async function')
+    const recoveryEnd = watchSource.indexOf('\n    isAndroidTransientHttpRecoveryEnabled', recoveryStart)
+    const reload = vm.runInNewContext(`({${watchSource.slice(recoveryStart, recoveryEnd)}}).reloadAfterStreamErrorOnce`)
+    const saved = []
+    const reloads = []
+    const state = { captionTimingOffset: 1.5 }
+    const sameVideo = requestedVideoId === 'current-video'
+    await reload.call({
+      videoId: 'current-video', tabRoute: { params: { id: requestedVideoId } },
+      beginStreamErrorRecoveryOnce: () => true,
+      $refs: { player: { getSabrReloadState: () => state } },
+      setPlayerReloadState: payload => saved.push(payload),
+      reloadView: async options => reloads.push(options.preserveTitle)
+    }, '[PLAYER_ERROR: 403]')
+    assert.deepEqual(saved, sameVideo ? [state] : [])
+    assert.deepEqual(reloads, [sameVideo])
+  })
+}

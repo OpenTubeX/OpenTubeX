@@ -1756,6 +1756,14 @@ Video:
       shuffling playlists: naključno predvajanje seznamov predvajanja
       looping playlists: ponavljanje seznamov predvajanja
   Player:
+    Caption Timing:
+      Adjust Timing: Prilagodi čas…
+      Caption Timing: Čas podnapisov
+      Offset: Zamik (sekunde)
+      Hint: Negativne vrednosti prikažejo podnapise prej, pozitivne pozneje. Samo za ta video.
+      Earlier: Prej
+      Later: Pozneje
+      Reset: Ponastavi
     Most Replayed: "Najpogosteje ponovno predvajano"
     Cast: "Predvajaj v napravi"
     Music Mode: "Glasbeni način"

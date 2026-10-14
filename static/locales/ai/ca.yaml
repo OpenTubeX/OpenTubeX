@@ -1778,6 +1778,14 @@ Video:
       shuffling playlists: barrejar llistes de reproducció
       looping playlists: reproduir llistes de reproducció en bucle
   Player:
+    Caption Timing:
+      Adjust Timing: Ajusta el temps…
+      Caption Timing: Temps dels subtítols
+      Offset: Desplaçament (segons)
+      Hint: Els valors negatius mostren els subtítols abans; els positius, després. Només per a aquest vídeo.
+      Earlier: Abans
+      Later: Després
+      Reset: Restableix
     Most Replayed: "Més reproduït de nou"
     Cast: "Transmet"
     Music Mode: "Mode música"

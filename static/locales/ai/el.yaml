@@ -1345,6 +1345,14 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Η επανάληψη ζωντανής συνομιλίας είναι ενεργοποιημένη. Τα μηνύματα θα εμφανίζονται εδώ κατά την αναπαραγωγή του βίντεο.
   Premiere started: Η πρεμιέρα βρίσκεται σε εξέλιξη. Ξεκίνησε {timeAgo}
   Player:
+    Caption Timing:
+      Adjust Timing: Προσαρμογή χρονισμού…
+      Caption Timing: Χρονισμός υποτίτλων
+      Offset: Μετατόπιση (δευτερόλεπτα)
+      Hint: Οι αρνητικές τιμές εμφανίζουν τους υπότιτλους νωρίτερα και οι θετικές αργότερα. Μόνο για αυτό το βίντεο.
+      Earlier: Νωρίτερα
+      Later: Αργότερα
+      Reset: Επαναφορά
     Most Replayed: "Πιο συχνή επανάληψη"
     Cast: "Μετάδοση"
     Music Mode: "Λειτουργία μουσικής"

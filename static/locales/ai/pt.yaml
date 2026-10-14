@@ -1370,6 +1370,14 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: A repetição da conversa em direto está ativada. As mensagens aparecem aqui à medida que o vídeo é reproduzido.
   Premiere started: Estreia em curso. Começou {timeAgo}
   Player:
+    Caption Timing:
+      Adjust Timing: Ajustar sincronização…
+      Caption Timing: Sincronização das legendas
+      Offset: Desfasamento (segundos)
+      Hint: Valores negativos mostram as legendas mais cedo; positivos, mais tarde. Apenas para este vídeo.
+      Earlier: Mais cedo
+      Later: Mais tarde
+      Reset: Repor
     Most Replayed: "Mais repetido"
     Cast: "Transmitir"
     Music Mode: "Modo de música"

@@ -1407,6 +1407,14 @@ Video:
     music offtopic: Не музыка
     filler: Адступленні
   Player:
+    Caption Timing:
+      Adjust Timing: Наладзіць час…
+      Caption Timing: Час субцітраў
+      Offset: Зрух (секунды)
+      Hint: Адмоўныя значэнні паказваюць субцітры раней, дадатныя — пазней. Толькі для гэтага відэа.
+      Earlier: Раней
+      Later: Пазней
+      Reset: Скінуць
     Most Replayed: "Найчасцей паўторанае"
     Cast: "Трансляваць"
     Music Mode: "Музычны рэжым"

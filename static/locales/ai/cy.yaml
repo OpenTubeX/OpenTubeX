@@ -1347,6 +1347,14 @@ Video:
     music offtopic: Heb fod yn gerddoriaeth
     filler: Gwyriadau
   Player:
+    Caption Timing:
+      Adjust Timing: Addasu amseru…
+      Caption Timing: Amseru isdeitlau
+      Offset: Gwrthbwyso (eiliadau)
+      Hint: Mae gwerthoedd negatif yn dangos isdeitlau yn gynharach; gwerthoedd positif yn hwyrach. Ar gyfer y fideo hwn yn unig.
+      Earlier: Yn gynharach
+      Later: Yn hwyrach
+      Reset: Ailosod
     Most Replayed: "Ailchwaraewyd fwyaf"
     Cast: "Castio"
     Music Mode: "Modd cerddoriaeth"

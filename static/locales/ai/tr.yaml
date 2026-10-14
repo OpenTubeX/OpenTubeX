@@ -1326,6 +1326,14 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Canlı sohbet tekrarı etkin. Video oynatıldıkça sohbet mesajları burada görünecek.
   Premiere started: İlk gösterim sürüyor. {timeAgo} başladı
   Player:
+    Caption Timing:
+      Adjust Timing: Zamanlamayı ayarla…
+      Caption Timing: Altyazı zamanlaması
+      Offset: Kaydırma (saniye)
+      Hint: Negatif değerler altyazıları daha erken, pozitif değerler daha geç gösterir. Yalnızca bu video için geçerlidir.
+      Earlier: Daha erken
+      Later: Daha geç
+      Reset: Sıfırla
     Most Replayed: "En çok tekrar oynatılan"
     Cast: "Yayınla"
     Music Mode: "Müzik modu"

@@ -1326,6 +1326,14 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: 已启用实时聊天回放。视频播放时，聊天消息会显示在这里。
   Premiere started: 首映正在进行，开始时间：{timeAgo}
   Player:
+    Caption Timing:
+      Adjust Timing: 调整时间…
+      Caption Timing: 字幕时间
+      Offset: 偏移（秒）
+      Hint: 负值使字幕提前显示，正值使字幕延后显示。仅应用于当前视频。
+      Earlier: 提前
+      Later: 延后
+      Reset: 重置
     Most Replayed: "重播次数最多"
     Cast: "投屏"
     Music Mode: "音乐模式"

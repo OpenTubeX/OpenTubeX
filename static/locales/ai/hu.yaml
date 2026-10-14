@@ -1326,6 +1326,14 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Az élő csevegés visszajátszása be van kapcsolva.  A csevegés üzenetei a videó lejátszása közben itt jelennek meg.
   Premiere started: A premier folyamatban van, {timeAgo} kezdődött
   Player:
+    Caption Timing:
+      Adjust Timing: Időzítés módosítása…
+      Caption Timing: Feliratok időzítése
+      Offset: Eltolás (másodperc)
+      Hint: A negatív értékek korábban, a pozitív értékek később jelenítik meg a feliratokat. Csak erre a videóra vonatkozik.
+      Earlier: Korábban
+      Later: Később
+      Reset: Visszaállítás
     Most Replayed: "Legtöbbször újrajátszott"
     Cast: "Átküldés"
     Music Mode: "Zenei mód"

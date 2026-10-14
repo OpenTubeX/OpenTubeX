@@ -389,6 +389,7 @@ test('evicting an inactive Short does not close the current player panels', () =
   const context = {
     onBeforeUnmount: callback => callback(), sponsorBlockRequestGeneration: 0,
     screenWakeBinding: null, androidFullscreenCleanup: null, iosFullscreenCleanup: null, iosCaptionsCleanup: null,
+    nativeCaptionTiming: null, captionTextDisplayer: null, applyCaptionTiming() {}, player: null,
     clearTimeout() {}, paidPromotionTimer: null, disableTwitchTsVideoGap: null,
     fullscreenDockLayoutFrame: null, cancelFullscreenDockVideoAnimation() {},
     cancelPendingVolumeUserSet() {}, fullWindowAnimation: null,

@@ -1338,6 +1338,14 @@ Video:
   Sponsor Block category:
     hook: Pembuka/Sapaan
   Player:
+    Caption Timing:
+      Adjust Timing: Sesuaikan waktu…
+      Caption Timing: Waktu takarir
+      Offset: Pergeseran (detik)
+      Hint: Nilai negatif menampilkan takarir lebih awal; nilai positif lebih lambat. Hanya berlaku untuk video ini.
+      Earlier: Lebih awal
+      Later: Lebih lambat
+      Reset: Atur ulang
     Most Replayed: "Paling sering diputar ulang"
     Cast: "Transmisikan"
     Music Mode: "Mode Musik"

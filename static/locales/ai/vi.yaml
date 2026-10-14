@@ -1359,6 +1359,14 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Đã bật bản phát lại trò chuyện trực tiếp. Tin nhắn trò chuyện sẽ xuất hiện ở đây khi video phát.
   Premiere started: Đang công chiếu. Bắt đầu {timeAgo}
   Player:
+    Caption Timing:
+      Adjust Timing: Điều chỉnh thời gian…
+      Caption Timing: Thời gian phụ đề
+      Offset: Độ lệch (giây)
+      Hint: Giá trị âm hiển thị phụ đề sớm hơn; giá trị dương hiển thị muộn hơn. Chỉ áp dụng cho video này.
+      Earlier: Sớm hơn
+      Later: Muộn hơn
+      Reset: Đặt lại
     Most Replayed: "Được phát lại nhiều nhất"
     Cast: "Truyền phát"
     Music Mode: "Chế độ âm nhạc"

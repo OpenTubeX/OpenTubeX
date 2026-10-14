@@ -1401,6 +1401,14 @@ Video:
     interaction: یادآوری تعامل
     filler: حاشیه‌روی
   Player:
+    Caption Timing:
+      Adjust Timing: تنظیم زمان‌بندی…
+      Caption Timing: زمان‌بندی زیرنویس
+      Offset: جابه‌جایی (ثانیه)
+      Hint: مقادیر منفی زیرنویس‌ها را زودتر و مقادیر مثبت دیرتر نمایش می‌دهند. فقط برای این ویدیو اعمال می‌شود.
+      Earlier: زودتر
+      Later: دیرتر
+      Reset: بازنشانی
     Most Replayed: "بیشترین بازپخش"
     Cast: "پخش"
     Music Mode: "حالت موسیقی"

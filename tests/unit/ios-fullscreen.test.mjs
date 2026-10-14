@@ -36,6 +36,7 @@ test('iOS fullscreen and caption bindings are restored once during player teardo
   let captionRestores = 0
   const context = {
     foregroundLoadAbortController: null,
+    nativeCaptionTiming: null, captionTextDisplayer: null, player: null, applyCaptionTiming() {},
     androidFullscreenCleanup: null,
     iosFullscreenCleanup: () => { restores++ },
     iosCaptionsCleanup: () => { captionRestores++ },

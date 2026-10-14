@@ -1343,6 +1343,14 @@ Video:
   Sponsor Block category short:
     filler: Avsporinger
   Player:
+    Caption Timing:
+      Adjust Timing: Juster timing…
+      Caption Timing: Underteksttiming
+      Offset: Forskyvning (sekunder)
+      Hint: Negative verdier viser undertekster tidligere; positive verdier senere. Gjelder bare denne videoen.
+      Earlier: Tidligere
+      Later: Senere
+      Reset: Tilbakestill
     Most Replayed: "Mest spilt på nytt"
     Cast: "Cast"
     Music Mode: "Musikkmodus"
