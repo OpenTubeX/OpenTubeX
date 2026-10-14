@@ -338,7 +338,7 @@ import FtLoader from '../FtLoader/FtLoader.vue'
 import { BACKUP_SECTIONS, createUnifiedBackup, mergeBackupHistory, mergeBackupPlaylist, mergeBackupProfile, mergeLegacySubscriptionChannels, readUnifiedBackup } from '../../helpers/unifiedBackup'
 import { importLibraryRecords, stageLibraryBackup, writeLibraryBackup } from '../../helpers/libraryBackup'
 import { compactAllDatastores, DBLibraryHandlers, DBHistoryHandlers, DBPlaylistHandlers, DBProfileHandlers, DBSearchHistoryHandlers, DBWatchStatsHandlers } from '../../../datastores/handlers/index'
-import { forEachTakeoutImportEntry, forEachSelectedTakeoutZipEntry, getTakeoutPlaylistName, isSupportedTakeoutEntry, listYouTubeTakeoutZipEntries, parseTakeoutPlaylistCsv, readTakeoutPlaylistMetadata } from '../../helpers/youtube-takeout-zip'
+import { forEachTakeoutImportEntry, listYouTubeTakeoutZipEntries, parseTakeoutPlaylistCsv } from '../../helpers/youtube-takeout-zip'
 import { importTakeoutPlaylist as importTakeoutPlaylistWithStorage } from '../../helpers/takeout-playlist-import'
 import {
   mergeSearchHistoryEntries,
@@ -401,6 +401,7 @@ const backupImportSections = computed(() => process.env.IS_ELECTRON
 const backupImportLabels = computed(() => backupImportSections.value.map(section => backupLabels.value[BACKUP_SECTIONS.indexOf(section)]))
 
 async function readImportState(sections) {
+  if (process.env.IS_ELECTRON) return DBLibraryHandlers.query('importPreviewState', { sections })
   const readers = {
     settings: () => deepCopy(transferableSettings.value),
     profiles: () => DBProfileHandlers.find(),
@@ -476,19 +477,33 @@ async function selectUnifiedBackup() {
   const generation = ++backupImportGeneration
   const requestIsCurrent = () => !backupDisposed && generation === backupImportGeneration
   backupBusy.value = true
+  let stagedId = null
   try {
     const file = await pickFileWithPicker(t('Settings.Data Settings.Complete backup'), { 'application/zip': '.zip' }, IMPORT_DIRECTORY_ID, START_IN_DIRECTORY)
     if (file === null || !requestIsCurrent()) return
     const data = process.env.IS_ELECTRON ? await stageLibraryBackup(file) : (await readUnifiedBackup(file)).data
+    stagedId = process.env.IS_ELECTRON ? data.id : null
     if (!requestIsCurrent()) {
-      if (process.env.IS_ELECTRON) await DBLibraryHandlers.query('importCancel', { id: data.id })
+      if (stagedId) await DBLibraryHandlers.query('importCancel', { id: stagedId })
+      stagedId = null
       return
     }
+    const preview = process.env.IS_ELECTRON
+      ? await DBLibraryHandlers.query('importPreview', { id: data.id, settingKeys: Object.keys(transferableSettings.value) })
+      : previewBackupImport(data, await readImportState(Object.keys(data)))
+    if (!requestIsCurrent()) {
+      if (stagedId) await DBLibraryHandlers.query('importCancel', { id: stagedId })
+      stagedId = null
+      return
+    }
+    backupPreview.value = preview
     backupFilename.value = file.name
     backupData.value = data
+    stagedId = null
     selectedBackupSections.value = [...backupImportSections.value]
     showBackupImport.value = true
   } catch (error) {
+    if (stagedId) await DBLibraryHandlers.query('importCancel', { id: stagedId }).catch(console.error)
     if (!requestIsCurrent()) { console.error(error); return }
     showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
   } finally {
