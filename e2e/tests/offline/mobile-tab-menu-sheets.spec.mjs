@@ -38,7 +38,8 @@ for (const mode of ['phone', 'tablet']) {
       await page.locator('.capacitorPhoneTabSwitcherButton').click()
       // The shared tab menu is mounted after the switcher opens.
       await enableTabMenus(page, mode)
-      const target = page.locator('.capacitorPhoneTabTarget').first()
+      const target = page.locator('.capacitorPhoneTabTarget').filter({ hasText: 'Subscriptions' })
+      await expect(target).toHaveCount(1)
       const menu = page.locator('.capacitorTabActions')
       const open = async () => {
         await target.click({ button: 'right' })
@@ -57,8 +58,9 @@ for (const mode of ['phone', 'tablet']) {
       const session = await page.context().newCDPSession(page)
       await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
       try {
-        // A slow short pull settles without selecting the touched action.
-        await drag(session, menu.getByRole('menuitem', { name: 'Select Tab', exact: true }), 15)
+        // Hold beyond the flick interval so a pull above the flick-distance
+        // threshold settles without selecting the touched action.
+        await drag(session, menu.getByRole('menuitem', { name: 'Select Tab', exact: true }), 30)
         await page.waitForTimeout(180)
         await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
         await settled(menu)
@@ -67,7 +69,7 @@ for (const mode of ['phone', 'tablet']) {
         await expect(menu).toHaveCSS('transform', 'none')
 
         await drag(session, menu.getByRole('menuitem', { name: 'Select Tab', exact: true }), 110)
-        expect(await menu.evaluate(element => new DOMMatrixReadOnly(getComputedStyle(element).transform).m42)).toBeGreaterThan(80)
+        await expect.poll(() => menu.evaluate(element => new DOMMatrixReadOnly(getComputedStyle(element).transform).m42)).toBeGreaterThan(80)
         await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
         await expect(menu).toHaveCount(0)
         await expect(page.locator('.capacitorPhoneTabDialog')).toBeVisible()
