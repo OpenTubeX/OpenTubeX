@@ -195,6 +195,33 @@ test('hidden subscription tabs clear their highlight when every feed is removed'
   await expect(tabs.locator('[role="tab"]')).toHaveCount(0)
 })
 
+test('removing the selected feed shows its fallback highlight immediately', async ({ page }) => {
+  await goTo(page, 'subscriptions')
+  const tabs = page.getByRole('tablist', { name: /^Subscriptions tabs$/i })
+  for (const scale of [100, 95, 125]) {
+    await page.evaluate(async value => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateHideSubscriptionsVideos', false)
+      await store.dispatch('updateUiScale', value)
+    }, scale)
+    await tabs.locator('[data-subscription-feed-tab="videos"]').click()
+    await expectTabHighlightAligned(tabs.locator('[data-subscription-feed-tab="videos"]'))
+    const fallback = await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateHideSubscriptionsVideos', true)
+      await new Promise(resolve => requestAnimationFrame(resolve))
+      const tab = document.querySelector('[data-subscription-feed-tab="shorts"]')
+      return {
+        selected: tab.getAttribute('aria-selected'),
+        opacity: getComputedStyle(tab, '::before').opacity,
+        transitions: tab.getAnimations({ subtree: true }).filter(animation =>
+          animation instanceof CSSTransition && animation.transitionProperty === 'opacity').length
+      }
+    })
+    expect(fallback).toEqual({ selected: 'true', opacity: '1', transitions: 0 })
+  }
+})
+
 test('retained subscription highlights stay aligned in the Watch minimize preview after layout changes', async ({ app, page }) => {
   await mockWatchPage(app, page)
   await goTo(page, 'subscriptions')

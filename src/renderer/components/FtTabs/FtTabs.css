@@ -91,7 +91,7 @@
   z-index: -1;
   background: color-mix(in srgb, var(--primary-color) 20%, transparent);
   opacity: 0;
-  transition: opacity 140ms ease;
+  transition: var(--material-tab-highlight-transition, opacity 140ms ease);
 }
 
 .materialTabs[role='tablist'] :deep([role='tab'][aria-selected='true']::before) {
