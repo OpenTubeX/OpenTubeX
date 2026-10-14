@@ -117,35 +117,45 @@ test('selects, replaces and restores a thumbnail across restarts', async ({ app,
   expect(records.filter(record => record._id === playlistId).at(-1).customThumbnail).toBe('')
 })
 
-test('playlist downloads use automatic thumbnails while custom covers stay local', async ({ app, page }) => {
-  await dispatch(page, 'updateEnableDownloads', true)
-  await dispatch(page, 'updateThumbnailPreference', 'middle')
-  await openPlaylist(page)
-  await page.getByTitle('Edit Playlist Info').click()
-  const custom = await setImage(page)
-  expect(custom.length).toBeGreaterThan(2048)
-  await page.getByTitle('Save Changes').click()
-  await expect(headerImage(page)).toHaveAttribute('src', custom)
-  await app.electronApp.evaluate(({ ipcMain }) => {
-    globalThis.thumbnailDownloadPayloads = []
-    ipcMain.removeHandler('yt-dlp-download')
-    ipcMain.handle('yt-dlp-download', (_event, payload) => {
-      globalThis.thumbnailDownloadPayloads.push(payload)
-      return null
+for (const entry of ['playlist header', 'playlist card']) {
+  test(`playlist downloads use automatic thumbnails from ${entry} while custom covers stay local`, async ({ app, page }) => {
+    await dispatch(page, 'updateEnableDownloads', true)
+    await dispatch(page, 'updateThumbnailPreference', 'middle')
+    await openPlaylist(page)
+    await page.getByTitle('Edit Playlist Info').click()
+    const custom = await setImage(page)
+    expect(custom.length).toBeGreaterThan(2048)
+    await page.getByTitle('Save Changes').click()
+    await expect(headerImage(page)).toHaveAttribute('src', custom)
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      globalThis.thumbnailDownloadPayloads = []
+      ipcMain.removeHandler('yt-dlp-download')
+      ipcMain.handle('yt-dlp-download', (_event, payload) => {
+        globalThis.thumbnailDownloadPayloads.push(payload)
+        return null
+      })
     })
+    if (entry === 'playlist header') {
+      await page.getByTitle('Download Playlist').click()
+    } else {
+      await goTo(page, 'userplaylists')
+      await dispatch(page, 'updateShowVideoMenuButton', true)
+      const card = page.locator('.ft-list-item').filter({ has: page.getByRole('link', { name: 'Weekend walks', exact: true }) })
+      await card.getByRole('button', { name: /More options/i }).click()
+      await page.getByRole('menuitem', { name: 'Download Playlist', exact: true }).click()
+    }
+    const prompt = page.locator('.downloadPromptCard')
+    await prompt.getByRole('button', { name: 'Download', exact: true }).click()
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.thumbnailDownloadPayloads.length)).toBe(1)
+    const thumbnail = await app.electronApp.evaluate(() => globalThis.thumbnailDownloadPayloads[0].thumbnail)
+    expect(thumbnail.startsWith('data:')).toBe(false)
+    expect(thumbnail).toBe(`https://i.ytimg.com/vi/ccccccccccc/${entry === 'playlist header' ? 'mq2' : 'maxresdefault'}.jpg`)
+    await dispatch(page, 'updateThumbnailPreference', 'hidden')
+    await prompt.getByRole('button', { name: 'Download', exact: true }).click()
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.thumbnailDownloadPayloads.length)).toBe(2)
+    expect(await app.electronApp.evaluate(() => globalThis.thumbnailDownloadPayloads[1].thumbnail)).toContain('thumbnail_placeholder')
   })
-  await page.getByTitle('Download Playlist').click()
-  const prompt = page.locator('.downloadPromptCard')
-  await prompt.getByRole('button', { name: 'Download', exact: true }).click()
-  await expect.poll(() => app.electronApp.evaluate(() => globalThis.thumbnailDownloadPayloads.length)).toBe(1)
-  const thumbnail = await app.electronApp.evaluate(() => globalThis.thumbnailDownloadPayloads[0].thumbnail)
-  expect(thumbnail.startsWith('data:')).toBe(false)
-  expect(thumbnail).toBe('https://i.ytimg.com/vi/ccccccccccc/mq2.jpg')
-  await dispatch(page, 'updateThumbnailPreference', 'hidden')
-  await prompt.getByRole('button', { name: 'Download', exact: true }).click()
-  await expect.poll(() => app.electronApp.evaluate(() => globalThis.thumbnailDownloadPayloads.length)).toBe(2)
-  expect(await app.electronApp.evaluate(() => globalThis.thumbnailDownloadPayloads[1].thumbnail)).toContain('thumbnail_placeholder')
-})
+}
 
 test('cancelling edits and invalid images keep the saved thumbnail', async ({ page }) => {
   await openPlaylist(page)

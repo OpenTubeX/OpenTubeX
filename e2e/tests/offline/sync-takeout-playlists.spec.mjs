@@ -43,18 +43,22 @@ test.describe('playlist sync while another window edits the library', () => {
 
   test('synced thumbnails reject invalid data and normalize oversized images before saving', async ({ page }) => {
     let header = { id: 'sync-race', title: 'Imported', description: '', custom_thumbnail: null }
+    let laterHeader = { id: 'later-sync', title: 'Later playlist', description: '', custom_thumbnail: 'data:image/png;base64,AAAA' }
     let writes = 0
     await page.route('http://playlist-sync.test/**', async route => {
       const pathname = new URL(route.request().url()).pathname
       let json = []
       if (pathname === '/health') json = { capabilities: { encrypted_sync: 0, playlist_thumbnails: 1 } }
-      else if (pathname === '/v1/playlists/') json = [header]
+      else if (pathname === '/v1/playlists/') json = [header, laterHeader]
       else if (pathname === '/v1/playlists/sync-race') {
         if (route.request().method() === 'PATCH') {
           header = { ...header, ...route.request().postDataJSON() }
           writes++
         }
         json = { playlist: header, videos: [] }
+      } else if (pathname === '/v1/playlists/later-sync') {
+        if (route.request().method() === 'PATCH') laterHeader = { ...laterHeader, ...route.request().postDataJSON() }
+        json = { playlist: laterHeader, videos: [] }
       }
       await route.fulfill({ json })
     })
@@ -67,6 +71,7 @@ test.describe('playlist sync while another window edits the library', () => {
       await store.dispatch('updateSyncServerEnabled', true)
       await store.dispatch('syncWithSyncServer')
     })
+    expect(laterHeader.custom_thumbnail).toBe('')
     const sync = () => page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       await store.dispatch('syncWithSyncServer')
@@ -79,22 +84,23 @@ test.describe('playlist sync while another window edits the library', () => {
       return canvas.toDataURL('image/png')
     })
     const savedCover = await sync()
-    const baseline = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.settings.syncServerSnapshot)
+    let iteration = 0
     for (const invalid of ['data:image/png;base64,AAAA', 'data:image/gif;base64,AAAA', `data:image/png;base64,${'A'.repeat(2_000_000)}`]) {
       header.custom_thumbnail = invalid
-      await expect(sync()).rejects.toThrow()
+      laterHeader.title = `Later playlist ${++iteration}`
+      expect(await sync()).toBe(savedCover)
       const saved = await page.evaluate(() => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
         return {
           thumbnail: store.getters.getPlaylist('sync-race').customThumbnail,
-          baseline: store.state.settings.syncServerSnapshot,
+          laterTitle: store.getters.getPlaylist('later-sync').playlistName,
           error: store.state.syncServer.syncServerError,
         }
       })
       expect(saved.thumbnail).toBe(savedCover)
-      expect(saved.baseline).toBe(baseline)
-      expect(saved.error).toBeTruthy()
-      expect(header.custom_thumbnail).toBe(invalid)
+      expect(saved.laterTitle).toBe(laterHeader.title)
+      expect(saved.error).toBe('')
+      expect(header.custom_thumbnail).toBe(savedCover)
     }
     for (const replacement of ['', savedCover]) {
       header.custom_thumbnail = 'data:image/png;base64,AAAA'

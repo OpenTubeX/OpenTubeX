@@ -817,7 +817,16 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
     const rawRemoteMetadata = remote ? playlistMetadataFromRemote({ ...remote.playlist, id }, syncThumbnails) : null
     const metadata = selectPlaylistMetadata(local, rawRemoteMetadata, previous[id]?.metadata, syncThumbnails)
     if (metadata.custom_thumbnail) {
-      metadata.custom_thumbnail = await normalizePlaylistThumbnail(metadata.custom_thumbnail)
+      for (const candidate of new Set([metadata.custom_thumbnail, local?.customThumbnail])) {
+        if (!candidate) continue
+        try {
+          metadata.custom_thumbnail = await normalizePlaylistThumbnail(candidate)
+          break
+        } catch (error) {
+          console.warn('Could not load synced playlist thumbnail', id, error)
+          metadata.custom_thumbnail = null
+        }
+      }
     }
     let remoteId = remote?.remoteId ?? id
     assertCurrent(local, id)
