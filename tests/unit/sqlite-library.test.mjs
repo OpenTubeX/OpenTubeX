@@ -3099,3 +3099,32 @@ for (const desktop of [false, true]) {
     assert.deepEqual(records, before)
   })
 }
+
+for (const videoId of ['\ud800', '\udc00', 'ordinary']) {
+  test(`Save filters an existing exact UTF-16 identity without changing retained records: ${videoId.charCodeAt(0)}`, async t => {
+    const engine = memory(t)
+    const original = { _id: 'p', playlistName: 'Retained', videos: [{ videoId, unknown: new Date(1) }, { videoId: '\uFFFD', unknown: new Date(2) }], unknown: new Date(3) }
+    await engine.collections.playlists.insertAsync(original)
+    assert.deepEqual(await addSelectedPlaylistVideos(engine, { ids: ['p'], videos: [{ videoId, title: 'Save again' }, { videoId, title: 'Repeated selection' }], allowDuplicates: false }), { changedIds: [] })
+    assert.deepEqual(await engine.playlistSnapshot({ id: 'p' }), original)
+  })
+}
+
+for (const batch of [false, true]) for (const videoId of [undefined, null]) for (const survives of [false, true]) {
+  test(`post-only member removal clears only lost context, batch ${batch}, videoId ${videoId}, survives ${survives}`, async t => {
+    const engine = memory(t)
+    const member = { ...(videoId === undefined ? {} : { videoId }), postId: 'post', playlistItemId: 'legacy-slot', unknown: new Date(1) }
+    const playlist = { _id: 'p', videos: [member, ...(survives ? [{ ...member, unknown: new Date(2) }] : [])], unknown: new Date(3) }
+    const history = { _id: 'h', videoId: 'post', watchProgress: 42, lastViewedPlaylistId: 'p', lastViewedPlaylistType: 'user', lastViewedPlaylistItemId: 'legacy-slot', unknown: new Date(4) }
+    const unrelated = { ...history, _id: 'other', lastViewedPlaylistId: 'other' }
+    await engine.collections.playlists.insertAsync(playlist)
+    await engine.collections.history.insertAsync([history, unrelated])
+    const memberId = engine.playlistPage({ id: 'p' }).records[0]._libraryMemberId
+    if (batch) assert.equal(await removePlaylistMembers(engine, { id: 'p', memberIds: [memberId] }), 1)
+    else assert.equal(await removePlaylistMember(engine, { id: 'p', memberId }), true)
+    const { lastViewedPlaylistId, lastViewedPlaylistType, lastViewedPlaylistItemId, ...cleared } = history
+    assert.deepEqual(await engine.collections.history.findOneAsync({ _id: 'h' }), survives ? history : cleared)
+    assert.deepEqual(await engine.collections.history.findOneAsync({ _id: 'other' }), unrelated)
+    assert.deepEqual((await engine.playlistSnapshot({ id: 'p' })).videos, playlist.videos.slice(1))
+  })
+}

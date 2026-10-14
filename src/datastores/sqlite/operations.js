@@ -248,7 +248,7 @@ export async function addSelectedPlaylistVideos(engine, { ids, videos, allowDupl
   const changedIds = []
   for (const id of ids) {
     if (!await engine.collections.playlists.countAsync({ _id: id })) throw new Error('The playlist no longer exists')
-    const existing = allowDuplicates ? new Set() : new Set(engine.prepare("SELECT DISTINCT video_id FROM members WHERE collection = 'playlists' AND record_id = ? AND field = 'videos' AND video_id IN (SELECT value FROM json_each(?))").all(id, JSON.stringify(videos.map(video => video.videoId))).map(row => row.video_id))
+    const existing = allowDuplicates ? new Set() : new Set(engine.prepare("SELECT DISTINCT selected.key AS input_position FROM json_each(?) selected JOIN members m ON m.video_id = selected.value WHERE m.collection = 'playlists' AND m.record_id = ? AND m.field = 'videos'").all(JSON.stringify(videos.map(video => video.videoId)), id).map(row => videos[row.input_position].videoId))
     const added = videos.filter(video => {
       if (allowDuplicates) return true
       return !existing.has(video.videoId)
@@ -273,7 +273,7 @@ export async function removePlaylistMember(engine, { id, memberId, revision }) {
     engine.prepare("DELETE FROM members WHERE collection = 'playlists' AND record_id = ? AND field = 'videos' AND membership_id = ?").run(id, memberId)
     await engine.collections.playlists.updateAsync({ _id: id }, { $set: { lastUpdatedAt: Date.now() } })
     const video = model.deserialize(row.data)
-    engine.clearRemovedPlaylistContext(id, [video?.videoId])
+    engine.clearRemovedPlaylistContext(id, [video?.videoId ?? video?.postId])
     return true
   })
 }
@@ -281,7 +281,7 @@ export async function removePlaylistMember(engine, { id, memberId, revision }) {
 export async function removePlaylistMembers(engine, { id, memberIds }) {
   if (!Array.isArray(memberIds) || memberIds.some(member => typeof member !== 'string')) throw new TypeError('Invalid playlist members')
   return engine.transaction(async () => {
-    const removed = engine.prepare("DELETE FROM members WHERE collection = 'playlists' AND record_id = ? AND field = 'videos' AND membership_id IN (SELECT value FROM json_each(?)) RETURNING data -> '$.videoId' AS video_id").all(id, JSON.stringify(memberIds))
+    const removed = engine.prepare("DELETE FROM members WHERE collection = 'playlists' AND record_id = ? AND field = 'videos' AND membership_id IN (SELECT value FROM json_each(?)) RETURNING CASE WHEN json_type(data, '$.videoId') IS NULL OR json_type(data, '$.videoId') = 'null' THEN data -> '$.postId' ELSE data -> '$.videoId' END AS video_id").all(id, JSON.stringify(memberIds))
     if (!removed.length) return 0
     await engine.collections.playlists.updateAsync({ _id: id }, { $set: { lastUpdatedAt: Date.now() } })
     engine.clearRemovedPlaylistContext(id, removed.map(row => model.deserialize(row.video_id ?? 'null')))
