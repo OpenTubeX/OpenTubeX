@@ -3,6 +3,21 @@ import { expectTabHighlightAligned, selectTabWithHighlightAnimation, tabHighligh
 
 test.use({ seed: { settings: { reducedMotion: 'off', animationSpeed: 25 } } })
 
+test('highlight capture resolves when its transition is canceled', async ({ page }) => {
+  await goToSettingsSection(page, 'data')
+  const tab = page.getByRole('tab', { name: 'Storage', exact: true })
+  await tab.evaluate(element => {
+    function cancelHighlight(event) {
+      if (event.target !== element || event.propertyName !== 'opacity' || event.pseudoElement !== '::before') return
+      element.removeEventListener('transitionrun', cancelHighlight)
+      element.getAnimations({ subtree: true }).filter(animation => animation instanceof CSSTransition && animation.transitionProperty === 'opacity' && animation.effect.target === element && animation.effect.pseudoElement === '::before')
+        .forEach(animation => animation.cancel())
+    }
+    element.addEventListener('transitionrun', cancelHighlight)
+  })
+  expect(await selectTabWithHighlightAnimation(tab)).toBeNull()
+})
+
 test('shared tabs crossfade between selections and snap after layout changes', async ({ app, page }) => {
   await goToSettingsSection(page, 'data')
   const tabs = page.getByRole('tablist', { name: 'Data & Storage' })

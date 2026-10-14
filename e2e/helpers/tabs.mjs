@@ -37,14 +37,19 @@ export async function selectTabWithHighlightAnimation(tab) {
       resolve(null)
     }, 5000)
     function onTransition(event) {
-      if (event.propertyName !== 'opacity' || event.pseudoElement !== '::before') return
+      if (event.target !== element || event.propertyName !== 'opacity' || event.pseudoElement !== '::before') return
       clearTimeout(timeout)
       element.removeEventListener('transitionrun', onTransition)
       requestAnimationFrame(async () => {
         const animation = element.getAnimations({ subtree: true }).find(animation =>
-          animation instanceof CSSTransition && animation.transitionProperty === 'opacity')
-        await animation.ready
-        resolve({ property: animation.transitionProperty, playbackRate: animation.playbackRate, duration: animation.effect.getTiming().duration })
+          animation instanceof CSSTransition && animation.transitionProperty === 'opacity' && animation.effect.target === element && animation.effect.pseudoElement === '::before')
+        if (!animation) { resolve(null); return }
+        try {
+          await animation.ready
+          resolve({ property: animation.transitionProperty, playbackRate: animation.playbackRate, duration: animation.effect.getTiming().duration })
+        } catch {
+          resolve(null)
+        }
       })
     }
     element.addEventListener('transitionrun', onTransition)
