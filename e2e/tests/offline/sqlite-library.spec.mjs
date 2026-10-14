@@ -1867,7 +1867,36 @@ test.describe('retained opaque playlist preview', () => {
     expect((await page.evaluate(() => window.ftElectron.libraryQuery('historyPage', { limit: 10 }))).records).toStrictEqual([history[0]])
   })
 
-
+  test('bulk Add Videos ignores unwritable retained playlists at 95% scale', async ({ page }, testInfo) => {
+    await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
+    const incoming = history[1]
+    await page.evaluate(async video => {
+      await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showAddToPlaylistPromptForManyVideos', { videos: [video] })
+    }, incoming)
+    const prompt = page.getByRole('dialog')
+    await expect(prompt.locator('.ft-playlist-selector').filter({ hasText: opaqueMembership.playlistName })).toHaveCount(0)
+    const writable = prompt.locator('.ft-playlist-selector').filter({ hasText: opaquePlaylist.playlistName })
+    await expect(writable).toBeVisible()
+    await writable.click()
+    for (const scheme of ['dark', 'light']) {
+      await page.emulateMedia({ colorScheme: scheme })
+      await expect(page.locator('body')).toHaveClass(new RegExp(scheme))
+      await expectImagesLoaded(prompt.locator('img'))
+      const capture = testInfo.outputPath(`bulk-add-writable-${scheme}.png`)
+      await prompt.screenshot({ path: capture })
+      await testInfo.attach(`Bulk Add Videos ${scheme}`, { path: capture, contentType: 'image/png' })
+    }
+    await prompt.getByRole('button', { name: 'Save', exact: true }).click()
+    await expect(prompt).toHaveCount(0)
+    const saved = await page.evaluate(id => window.ftElectron.libraryQuery('playlistSnapshot', { id }), opaquePlaylist._id)
+    const { playlistItemId, timeAdded } = saved.videos.at(-1)
+    expect(typeof playlistItemId).toBe('string')
+    expect(playlistItemId.length).toBeGreaterThan(0)
+    expect(Number.isSafeInteger(timeAdded)).toBe(true)
+    expect(saved).toStrictEqual({ ...opaquePlaylist, lastUpdatedAt: saved.lastUpdatedAt, videos: [...opaquePlaylist.videos, { ...incoming, playlistItemId, timeAdded }] })
+    expect(await page.evaluate(id => window.ftElectron.libraryQuery('playlistSnapshot', { id }), opaqueMembership._id)).toStrictEqual(opaqueMembership)
+    expect((await page.evaluate(() => window.ftElectron.libraryQuery('historyPage', { limit: 10 }))).records).toStrictEqual([history[0]])
+  })
 })
 
 test.describe('saved to remote playlist ownership', () => {
