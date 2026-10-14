@@ -49,6 +49,7 @@
             <FtRetryImage
               alt=""
               class="playlistThumbnail"
+              :class="{ blur: store.getters.getBlurThumbnails }"
               :src="playlistThumbnail(playlist)"
             />
             <span class="playlistDetails">
@@ -169,6 +170,8 @@ const containedIds = computed(() => {
  * @param {object} playlist
  */
 function playlistThumbnail(playlist) {
+  if (store.getters.getThumbnailPreference === 'hidden') return thumbnailPlaceholder
+  if (playlist.customThumbnail) return playlist.customThumbnail
   if (playlist.videos.length === 0) {
     return thumbnailPlaceholder
   }

@@ -206,6 +206,8 @@ User Playlists:
     Retry: Pokušaj ponovno
     This playlist could not be loaded.: Ovaj popis za reprodukciju nije moguće učitati.
     More videos could not be loaded.: Dodatne videozapise nije moguće učitati.
+  Playlist Thumbnail: "Sličica popisa za reprodukciju"
+  Restore Default Thumbnail: "Vrati zadanu sličicu"
 History:
   From Date: 'Od'
   To Date: 'Do'

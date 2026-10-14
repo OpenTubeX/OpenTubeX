@@ -11,7 +11,12 @@
   }
 
   .thumbnail {
+    overflow: hidden;
     position: relative;
+
+    .thumbnailImage.blur {
+      filter: blur(20px);
+    }
 
     .videoCountContainer {
       position: absolute;

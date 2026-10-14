@@ -315,6 +315,8 @@ User Playlists:
       There is already a playlist with this name. Please pick a different name.: Grojaraštis tokiu pavadinimu jau yra. Pasirinkite kitą pavadinimą.
       Playlist {playlistName} has been successfully created.: Grojaraštis {playlistName} sėkmingai sukurtas.
       There was an issue with creating the playlist.: Kuriant grojaraštį kilo klaida.
+  Playlist Thumbnail: "Grojaraščio miniatiūra"
+  Restore Default Thumbnail: "Atkurti numatytąją miniatiūrą"
 History:
   From Date: 'Nuo'
   To Date: 'Iki'

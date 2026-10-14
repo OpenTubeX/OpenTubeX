@@ -214,6 +214,8 @@ User Playlists:
       There is already a playlist with this name. Please pick a different name.: Det finst allereie ei speleliste med dette namnet. Vel eit anna namn.
       Playlist {playlistName} has been successfully created.: Spelelista {playlistName} er oppretta.
       There was an issue with creating the playlist.: Det oppstod eit problem då spelelista skulle opprettast.
+  Playlist Thumbnail: "Miniatyrbilete for spelelista"
+  Restore Default Thumbnail: "Gjenopprett standard miniatyrbilete"
 History:
   From Date: 'Frå'
   To Date: 'Til'

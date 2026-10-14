@@ -204,6 +204,8 @@ User Playlists:
     Retry: 再試行
     This playlist could not be loaded.: このプレイリストを読み込めませんでした。
     More videos could not be loaded.: 動画をさらに読み込めませんでした。
+  Playlist Thumbnail: "再生リストのサムネイル"
+  Restore Default Thumbnail: "既定のサムネイルに戻す"
 History:
   From Date: '開始日'
   To Date: '終了日'

@@ -29,6 +29,7 @@ import { deepCopy } from './utils'
 import { replaceCustomThemes } from './customTheme'
 import { repairSystemThemeSettings } from './customThemeSync'
 import { generateRandomUniqueId } from './playlists'
+import { normalizePlaylistThumbnail } from './playlist-thumbnails'
 import {
   getMergedProfileBackground,
   getMergedProfileTextColor,
@@ -219,6 +220,11 @@ export class SyncServerClient {
   async supportsBulkSync() {
     const capabilities = await this.getCapabilities()
     return capabilities.bulk_sync === 1
+  }
+
+  async supportsPlaylistThumbnails() {
+    const capabilities = await this.getCapabilities()
+    return capabilities.playlist_thumbnails === 1
   }
 
   async supportsSeenVideosSync() {
@@ -484,7 +490,12 @@ export class SyncServerClient {
   updatePlaylist(playlistId, playlist) {
     return this.apiRequest(`/playlists/${encodeURIComponent(playlistId)}`, {
       method: 'PATCH',
-      body: playlist,
+      // Omitted custom thumbnails are left alone by released clients. An empty
+      // value explicitly restores the default without changing thumbnail_url.
+      body: {
+        ...playlist,
+        ...(Object.hasOwn(playlist, 'custom_thumbnail') ? { custom_thumbnail: playlist.custom_thumbnail ?? '' } : {}),
+      },
     })
   }
 
@@ -624,21 +635,23 @@ function videoToLocal(video, timeAdded = Date.now()) {
   }
 }
 
-function playlistMetadataFromLocal(playlist) {
+function playlistMetadataFromLocal(playlist, syncThumbnails) {
   return {
     id: playlist._id,
     title: playlist.playlistName,
     description: playlist.description || '',
     thumbnail_url: null,
+    ...(syncThumbnails ? { custom_thumbnail: playlist.customThumbnail || null } : {}),
   }
 }
 
-function playlistMetadataFromRemote(playlist) {
+function playlistMetadataFromRemote(playlist, syncThumbnails) {
   return {
     id: playlist.id,
     title: playlist.title,
     description: playlist.description || '',
-    thumbnail_url: playlist.thumbnail_url ?? null,
+    thumbnail_url: null,
+    ...(syncThumbnails ? { custom_thumbnail: playlist.custom_thumbnail || null } : {}),
   }
 }
 
@@ -646,22 +659,28 @@ function metadataEquals(first, second) {
   return JSON.stringify(first) === JSON.stringify(second)
 }
 
-function selectPlaylistMetadata(local, remote, previous) {
-  if (!local) return playlistMetadataFromRemote(remote)
-  if (!remote) return playlistMetadataFromLocal(local)
+function selectPlaylistMetadata(local, remote, previous, syncThumbnails) {
+  if (!local) return playlistMetadataFromRemote(remote, syncThumbnails)
+  if (!remote) return playlistMetadataFromLocal(local, syncThumbnails)
 
-  const localMetadata = playlistMetadataFromLocal(local)
-  const remoteMetadata = playlistMetadataFromRemote(remote)
+  const localMetadata = playlistMetadataFromLocal(local, syncThumbnails)
+  const remoteMetadata = playlistMetadataFromRemote(remote, syncThumbnails)
   if (!previous) return localMetadata
 
-  const localChanged = !metadataEquals(localMetadata, previous)
-  const remoteChanged = !metadataEquals(remoteMetadata, previous)
-  return remoteChanged && !localChanged ? remoteMetadata : localMetadata
+  const previousMetadata = playlistMetadataFromRemote(previous, syncThumbnails)
+  const merged = { ...localMetadata }
+  for (const field of ['title', 'description', ...(syncThumbnails ? ['custom_thumbnail'] : [])]) {
+    if (localMetadata[field] === previousMetadata[field]) {
+      merged[field] = remoteMetadata[field]
+    }
+  }
+  return merged
 }
 
 function isSameLocalPlaylist(playlist, metadata, videos) {
   return playlist.playlistName === metadata.title &&
     (playlist.description || '') === metadata.description &&
+    (!Object.hasOwn(metadata, 'custom_thumbnail') || (playlist.customThumbnail || null) === metadata.custom_thumbnail) &&
     playlist.videos.length === videos.length &&
     playlist.videos.every((video, index) => metadataEquals(video, videos[index]))
 }
@@ -754,6 +773,7 @@ export async function syncPlaylistBookmarks(client, store, previousIds = [], opt
 }
 
 export async function syncPlaylists(client, store, previous = {}, options = {}) {
+  const syncThumbnails = typeof client.supportsPlaylistThumbnails === 'function' && await client.supportsPlaylistThumbnails()
   const localPlaylists = deepCopy(store.state.playlists.playlists)
   const localById = mapBy(localPlaylists, playlist => playlist._id)
   const remotePlaylistHeaders = await client.getPlaylists()
@@ -794,8 +814,20 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
   for (const id of mergedIds) {
     let local = localById.get(id)
     let remote = remoteById.get(id)
-    const remoteMetadata = remote ? { ...remote.playlist, id } : null
-    const metadata = selectPlaylistMetadata(local, remoteMetadata, previous[id]?.metadata)
+    const rawRemoteMetadata = remote ? playlistMetadataFromRemote({ ...remote.playlist, id }, syncThumbnails) : null
+    const metadata = selectPlaylistMetadata(local, rawRemoteMetadata, previous[id]?.metadata, syncThumbnails)
+    if (metadata.custom_thumbnail) {
+      for (const candidate of new Set([metadata.custom_thumbnail, local?.customThumbnail])) {
+        if (!candidate) continue
+        try {
+          metadata.custom_thumbnail = await normalizePlaylistThumbnail(candidate)
+          break
+        } catch (error) {
+          console.warn('Could not load synced playlist thumbnail', id, error)
+          metadata.custom_thumbnail = null
+        }
+      }
+    }
     let remoteId = remote?.remoteId ?? id
     assertCurrent(local, id)
 
@@ -806,7 +838,7 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
       // sync. A retry must recognize our copy instead of importing it as new.
       await store.persistPlaylistSyncBaseline(id, { remoteId, metadata })
       remote = { playlist: { ...metadata, id: remoteId }, videos: [], remoteId }
-    } else if (!metadataEquals(metadata, playlistMetadataFromRemote(remoteMetadata))) {
+    } else if (!metadataEquals(metadata, rawRemoteMetadata)) {
       await client.updatePlaylist(remoteId, metadata)
     }
 
@@ -900,6 +932,7 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
         _id: id,
         playlistName: metadata.title,
         description: metadata.description,
+        customThumbnail: metadata.custom_thumbnail || '',
         protected: false,
         videos: mergedVideos,
       }
@@ -911,6 +944,7 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
           ...local,
           playlistName: metadata.title,
           description: metadata.description,
+          ...(syncThumbnails ? { customThumbnail: metadata.custom_thumbnail || '' } : {}),
           videos: mergedVideos,
         },
       })

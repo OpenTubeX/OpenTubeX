@@ -208,6 +208,8 @@ User Playlists:
     Retry: ניסיון חוזר
     This playlist could not be loaded.: לא ניתן לטעון את רשימת ההשמעה הזאת.
     More videos could not be loaded.: לא ניתן לטעון סרטונים נוספים.
+  Playlist Thumbnail: "תמונה ממוזערת של רשימת ההשמעה"
+  Restore Default Thumbnail: "החזרת התמונה הממוזערת לברירת המחדל"
 History:
   From Date: 'מתאריך'
   To Date: 'עד תאריך'

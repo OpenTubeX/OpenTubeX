@@ -44,6 +44,28 @@ async function loadClient(env, version, requests, nativeRequest, browserRequest,
   return vm.runInContext(`new SyncServerClient(${JSON.stringify(serverUrl)})`, context)
 }
 
+test('legacy playlist updates explicitly clear a custom thumbnail', async () => {
+  const requests = []
+  const client = await loadClient({ IS_ELECTRON: true }, '0.36.0', requests)
+  await client.updatePlaylist('cover', { title: 'Cover', description: '', thumbnail_url: null, custom_thumbnail: null })
+  assert.equal(requests.at(-1).method, 'PATCH')
+  assert.equal(JSON.parse(requests.at(-1).body).custom_thumbnail, '')
+  assert.equal(JSON.parse(requests.at(-1).body).thumbnail_url, null)
+  const image = 'data:image/webp;base64,dGVzdA=='
+  await client.updatePlaylist('cover', { title: 'Cover', description: '', custom_thumbnail: image })
+  assert.equal(JSON.parse(requests.at(-1).body).custom_thumbnail, image)
+  await client.updatePlaylist('cover', { title: 'Cover', description: '' })
+  assert.ok(!Object.hasOwn(JSON.parse(requests.at(-1).body), 'custom_thumbnail'))
+})
+
+test('standard thumbnail sync requires the advertised capability', async () => {
+  const client = await loadClient({ IS_ELECTRON: true }, '0.36.0', [])
+  for (const value of [undefined, 0, 1]) {
+    client.getServerInfo = async () => ({ capabilities: { playlist_thumbnails: value } })
+    assert.equal(await client.supportsPlaylistThumbnails(), value === 1)
+  }
+})
+
 for (const [operation, run] of [
   ['small collection upload', client => client.putEncryptedSyncCollection('settings', 1, 'encrypted')],
   ['manifest', client => client.getEncryptedSyncManifest()],

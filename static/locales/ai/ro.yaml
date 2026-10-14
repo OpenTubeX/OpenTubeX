@@ -204,6 +204,8 @@ User Playlists:
     Retry: Reîncearcă
     This playlist could not be loaded.: Acest playlist nu a putut fi încărcat.
     More videos could not be loaded.: Nu au putut fi încărcate mai multe videoclipuri.
+  Playlist Thumbnail: "Miniatura listei de redare"
+  Restore Default Thumbnail: "Restabilește miniatura implicită"
 History:
   From Date: 'De la'
   To Date: 'Până la'

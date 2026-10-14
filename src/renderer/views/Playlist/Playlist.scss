@@ -122,6 +122,13 @@
   --playlist-bottom-inset: var(--bottom-tab-bar-height);
 }
 
+.routerView.playlistInEditMode .playlistInfoContainer {
+  align-self: flex-start;
+  block-size: auto;
+  inset-block-start: 0;
+  position: relative;
+}
+
 .playlistItems {
   display: flex;
   flex-direction: column;

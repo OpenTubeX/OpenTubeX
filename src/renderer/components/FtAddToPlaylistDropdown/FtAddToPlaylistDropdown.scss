@@ -55,6 +55,11 @@
   flex-shrink: 0;
   inline-size: 48px;
   object-fit: cover;
+
+  &.blur {
+    clip-path: inset(0 round calc(3px * var(--ui-roundness)));
+    filter: blur(5px);
+  }
 }
 
 .playlistDetails {

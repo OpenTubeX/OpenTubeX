@@ -290,6 +290,8 @@ User Playlists:
       There is already a playlist with this name. Please pick a different name.: 같은 이름의 재생목록이 이미 있습니다. 다른 이름을 선택하세요.
       Playlist {playlistName} has been successfully created.: '{playlistName} 재생목록을 만들었습니다.'
       There was an issue with creating the playlist.: 재생목록을 만드는 중 문제가 발생했습니다.
+  Playlist Thumbnail: "재생목록 썸네일"
+  Restore Default Thumbnail: "기본 썸네일 복원"
 History:
   From Date: '시작일'
   To Date: '종료일'

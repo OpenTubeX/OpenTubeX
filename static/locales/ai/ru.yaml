@@ -181,6 +181,8 @@ User Playlists:
     Retry: Повторить
     This playlist could not be loaded.: Не удалось загрузить этот плейлист.
     More videos could not be loaded.: Не удалось загрузить другие видео.
+  Playlist Thumbnail: "Миниатюра плейлиста"
+  Restore Default Thumbnail: "Восстановить миниатюру по умолчанию"
 History:
   From Date: 'С'
   To Date: 'По'

@@ -322,6 +322,7 @@ import {
   writeFileWithPicker,
 } from '../../helpers/utils'
 import { processToBeAddedPlaylistVideo } from '../../helpers/playlists'
+import { normalizePlaylistThumbnail } from '../../helpers/playlist-thumbnails'
 import {
   convertLibreTubeSubscriptions,
   convertLibreTubeWatchHistoryToOpenTubeX,
@@ -474,6 +475,7 @@ async function importUnifiedBackup() {
     if (selected.has('playlists')) {
       const currentPlaylists = new Map((await DBPlaylistHandlers.find()).map(playlist => [playlist._id, playlist]))
       for (const playlist of data.playlists) {
+        await normalizeImportedPlaylistThumbnail(playlist)
         const merged = mergeBackupPlaylist(currentPlaylists.get(playlist._id), playlist)
         if (await store.dispatch('updatePlaylist', merged) !== true) throw new Error('Could not restore playlist')
         currentPlaylists.set(playlist._id, merged)
@@ -1718,6 +1720,17 @@ async function importTakeoutPlaylist(playlist) {
   }
 }
 
+async function normalizeImportedPlaylistThumbnail(playlist) {
+  if (!isJsonObject(playlist) || !Object.hasOwn(playlist, 'customThumbnail') || playlist.customThumbnail === '') return
+  try {
+    playlist.customThumbnail = await normalizePlaylistThumbnail(playlist.customThumbnail)
+  } catch (error) {
+    delete playlist.customThumbnail
+    console.error('Unable to import playlist thumbnail:', error)
+    showToast({ message: t('Profile.The selected image could not be loaded'), icon: ['fas', 'circle-exclamation'] })
+  }
+}
+
 async function importPlaylists() {
   let response
   try {
@@ -1782,6 +1795,7 @@ async function importPlaylists() {
     '_id',
     'description',
     'createdAt',
+    'customThumbnail',
   ]
 
   const ignoredKeys = [
@@ -1817,6 +1831,10 @@ async function importPlaylists() {
 
   const newPlaylists = []
   let importedCount = 0
+
+  for (const playlistData of playlists) {
+    await normalizeImportedPlaylistThumbnail(playlistData)
+  }
 
   playlists.forEach((playlistData) => {
     // We would technically already be done by the time the data is parsed,
@@ -1945,6 +1963,7 @@ async function importPlaylists() {
       // Only these attributes would be updated (besides videos)
       playlistName: playlistObject.playlistName,
       description: playlistObject.description,
+      ...(Object.hasOwn(playlistObject, 'customThumbnail') ? { customThumbnail: playlistObject.customThumbnail } : {}),
       videos: playlistVideos
     })
   })

@@ -41,6 +41,99 @@ test.describe('playlist sync while another window edits the library', () => {
     }
   })
 
+  test('synced thumbnails reject invalid data and normalize oversized images before saving', async ({ page }) => {
+    let header = { id: 'sync-race', title: 'Imported', description: '', custom_thumbnail: null }
+    let laterHeader = { id: 'later-sync', title: 'Later playlist', description: '', custom_thumbnail: 'data:image/png;base64,AAAA' }
+    let writes = 0
+    await page.route('http://playlist-sync.test/**', async route => {
+      const pathname = new URL(route.request().url()).pathname
+      let json = []
+      if (pathname === '/health') json = { capabilities: { encrypted_sync: 0, playlist_thumbnails: 1 } }
+      else if (pathname === '/v1/playlists/') json = [header, laterHeader]
+      else if (pathname === '/v1/playlists/sync-race') {
+        if (route.request().method() === 'PATCH') {
+          header = { ...header, ...route.request().postDataJSON() }
+          writes++
+        }
+        json = { playlist: header, videos: [] }
+      } else if (pathname === '/v1/playlists/later-sync') {
+        if (route.request().method() === 'PATCH') laterHeader = { ...laterHeader, ...route.request().postDataJSON() }
+        json = { playlist: laterHeader, videos: [] }
+      }
+      await route.fulfill({ json })
+    })
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('removeAllVideos', 'sync-race')
+      for (const collection of ['Subscriptions', 'History', 'Profiles', 'Sessions', 'Settings', 'WatchStats', 'LiveReminders']) {
+        await store.dispatch(`updateSyncServerSync${collection}`, false)
+      }
+      await store.dispatch('updateSyncServerEnabled', true)
+      await store.dispatch('syncWithSyncServer')
+    })
+    expect(laterHeader.custom_thumbnail).toBe('')
+    const sync = () => page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('syncWithSyncServer')
+      return store.getters.getPlaylist('sync-race').customThumbnail || ''
+    })
+    header.custom_thumbnail = await page.evaluate(() => {
+      const canvas = document.createElement('canvas')
+      canvas.width = 16
+      canvas.height = 9
+      return canvas.toDataURL('image/png')
+    })
+    const savedCover = await sync()
+    let iteration = 0
+    for (const invalid of ['data:image/png;base64,AAAA', 'data:image/gif;base64,AAAA', `data:image/png;base64,${'A'.repeat(2_000_000)}`]) {
+      header.custom_thumbnail = invalid
+      laterHeader.title = `Later playlist ${++iteration}`
+      expect(await sync()).toBe(savedCover)
+      const saved = await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        return {
+          thumbnail: store.getters.getPlaylist('sync-race').customThumbnail,
+          laterTitle: store.getters.getPlaylist('later-sync').playlistName,
+          error: store.state.syncServer.syncServerError,
+        }
+      })
+      expect(saved.thumbnail).toBe(savedCover)
+      expect(saved.laterTitle).toBe(laterHeader.title)
+      expect(saved.error).toBe('')
+      expect(header.custom_thumbnail).toBe(savedCover)
+    }
+    for (const replacement of ['', savedCover]) {
+      header.custom_thumbnail = 'data:image/png;base64,AAAA'
+      await page.evaluate(async customThumbnail => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        await store.dispatch('updatePlaylist', { _id: 'sync-race', customThumbnail })
+      }, replacement)
+      expect(await sync()).toBe(replacement)
+      expect(header.custom_thumbnail || '').toBe(replacement)
+    }
+    for (const [width, height] of [[16, 9], [2560, 1440]]) {
+      header.custom_thumbnail = await page.evaluate(([width, height]) => {
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        canvas.getContext('2d').fillRect(0, 0, width, height)
+        return canvas.toDataURL('image/png')
+      }, [width, height])
+      const thumbnail = await sync()
+      expect(thumbnail).toBe(header.custom_thumbnail)
+      const dimensions = await page.evaluate(async thumbnail => {
+        const image = new Image()
+        image.src = thumbnail
+        await image.decode()
+        return [image.naturalWidth, image.naturalHeight]
+      }, thumbnail)
+      expect(dimensions).toEqual([Math.min(width, 1280), Math.min(height, 720)])
+      const previousWrites = writes
+      expect(await sync()).toBe(thumbnail)
+      expect(writes).toBe(previousWrites)
+    }
+  })
+
   test('retry preserves a remote rename after another window edits during repair upload', async ({ app, page }) => {
     let release
     const pending = new Promise(resolve => { release = resolve })

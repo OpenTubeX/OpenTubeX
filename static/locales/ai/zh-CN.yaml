@@ -204,6 +204,8 @@ User Playlists:
     Retry: 重试
     This playlist could not be loaded.: 无法加载此播放列表。
     More videos could not be loaded.: 无法加载更多视频。
+  Playlist Thumbnail: "播放列表缩略图"
+  Restore Default Thumbnail: "恢复默认缩略图"
 History:
   From Date: '开始日期'
   To Date: '结束日期'

@@ -224,6 +224,8 @@ User Playlists:
   AddVideoPrompt:
     Toast:
       Video(s) added to {playlistCount} playlists: Video(s) agregado(s) a 1 lista de reproducción | Video(s) agregado(s) a {playlistCount} listas de reproducción | Video(s) agregado(s) a {playlistCount} listas de reproducción
+  Playlist Thumbnail: "Miniatura de la lista de reproducción"
+  Restore Default Thumbnail: "Restaurar miniatura predeterminada"
 History:
   From Date: 'Desde'
   To Date: 'Hasta'

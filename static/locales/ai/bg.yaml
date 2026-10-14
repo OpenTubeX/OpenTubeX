@@ -206,6 +206,8 @@ User Playlists:
     Retry: Опитай отново
     This playlist could not be loaded.: Този плейлист не можа да бъде зареден.
     More videos could not be loaded.: Не можаха да бъдат заредени още видеоклипове.
+  Playlist Thumbnail: "Миниатюра на плейлиста"
+  Restore Default Thumbnail: "Възстановяване на стандартната миниатюра"
 History:
   From Date: 'От'
   To Date: 'До'

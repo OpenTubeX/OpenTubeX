@@ -208,6 +208,8 @@ User Playlists:
     Retry: Повторити
     This playlist could not be loaded.: Не вдалося завантажити цей список відтворення.
     More videos could not be loaded.: Не вдалося завантажити інші відео.
+  Playlist Thumbnail: "Мініатюра списку відтворення"
+  Restore Default Thumbnail: "Відновити типову мініатюру"
 History:
   From Date: 'Від'
   To Date: 'До'

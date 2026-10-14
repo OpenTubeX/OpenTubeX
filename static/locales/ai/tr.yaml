@@ -204,6 +204,8 @@ User Playlists:
     Retry: Yeniden Dene
     This playlist could not be loaded.: Bu oynatma listesi yüklenemedi.
     More videos could not be loaded.: Daha fazla video yüklenemedi.
+  Playlist Thumbnail: "Oynatma listesi küçük resmi"
+  Restore Default Thumbnail: "Varsayılan küçük resmi geri yükle"
 History:
   From Date: 'Başlangıç'
   To Date: 'Bitiş'

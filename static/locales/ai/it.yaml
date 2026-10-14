@@ -204,6 +204,8 @@ User Playlists:
     Retry: Riprova
     This playlist could not be loaded.: Impossibile caricare questa playlist.
     More videos could not be loaded.: Impossibile caricare altri video.
+  Playlist Thumbnail: "Miniatura della playlist"
+  Restore Default Thumbnail: "Ripristina miniatura predefinita"
 History:
   From Date: 'Dal'
   To Date: 'Al'

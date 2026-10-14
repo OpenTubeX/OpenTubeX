@@ -204,6 +204,8 @@ User Playlists:
     Retry: Saiatu berriro
     This playlist could not be loaded.: Ezin izan da erreprodukzio-zerrenda hau kargatu.
     More videos could not be loaded.: Ezin izan dira bideo gehiago kargatu.
+  Playlist Thumbnail: "Erreprodukzio-zerrendaren miniatura"
+  Restore Default Thumbnail: "Leheneratu miniatura lehenetsia"
 History:
   From Date: 'Hasiera'
   To Date: 'Amaiera'

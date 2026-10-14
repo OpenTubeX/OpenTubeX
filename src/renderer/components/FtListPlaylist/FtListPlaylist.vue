@@ -101,7 +101,7 @@
       :video-ids="isUserPlaylist ? data.videos.map(video => video.videoId) : []"
       :is-playlist="true"
       :title="playlistMetadata.title"
-      :thumbnail="thumbnailForDisplay"
+      :thumbnail="isUserPlaylist && thumbnailPreference !== 'hidden' ? playlistMetadata.defaultThumbnailUrl : thumbnailForDisplay"
       @close="showDownloadPrompt = false"
     />
   </div>
@@ -282,7 +282,8 @@ const playlistMetadata = computed(() => {
     return {
       playlistId: props.data._id,
       title: props.data.playlistName,
-      thumbnailUrl,
+      thumbnailUrl: props.data.customThumbnail || thumbnailUrl,
+      defaultThumbnailUrl: thumbnailUrl,
       channelName: '',
       channelId: '',
       videoCount: props.data.videos.length,

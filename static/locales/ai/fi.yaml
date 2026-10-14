@@ -208,6 +208,8 @@ User Playlists:
     Retry: Yritä uudelleen
     This playlist could not be loaded.: Tätä soittolistaa ei voitu ladata.
     More videos could not be loaded.: Lisää videoita ei voitu ladata.
+  Playlist Thumbnail: "Soittolistan pikkukuva"
+  Restore Default Thumbnail: "Palauta oletuspikkukuva"
 History:
   From Date: 'Alkaen'
   To Date: 'Asti'

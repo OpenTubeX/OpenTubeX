@@ -208,6 +208,8 @@ User Playlists:
     Retry: Opnieuw proberen
     This playlist could not be loaded.: Deze afspeellijst kan niet worden geladen.
     More videos could not be loaded.: Er kunnen geen video's meer worden geladen.
+  Playlist Thumbnail: "Afspeellijstminiatuur"
+  Restore Default Thumbnail: "Standaardminiatuur herstellen"
 History:
   From Date: 'Van'
   To Date: 'Tot'
