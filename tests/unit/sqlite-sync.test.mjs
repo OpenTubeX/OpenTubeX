@@ -587,3 +587,29 @@ for (const malformed of ['{invalid', 'null', '[]', '42', '"retained"', { retaine
     })
   }
 }
+
+for (const custom of [undefined, null, 'data:image/png;base64,dGVzdA==']) {
+  test(`playlist sync retains unsupported covers and applies advertised thumbnail metadata: ${custom}`, async t => {
+    const { engine, sync } = fixture(t)
+    const original = { _id: 'cover', playlistName: 'Saved', description: '', customThumbnail: 'old-cover', videos: [], unknown: new Date(1) }
+    await engine.collections.playlists.insertAsync(original)
+    const metadata = { title: 'Saved', description: '', ...(custom === undefined ? {} : { custom_thumbnail: custom }) }
+    const job = await sync.start({ kind: 'playlist', playlistId: 'cover', metadata })
+    await sync.plan(job)
+    assert.equal(await sync.apply(job), true)
+    const saved = await engine.collections.playlists.findOneAsync({ _id: 'cover' })
+    const { lastUpdatedAt, ...record } = saved
+    assert.deepEqual(record, { ...original, customThumbnail: custom === undefined ? original.customThumbnail : custom || '' })
+    if (custom !== undefined) assert.equal(typeof lastUpdatedAt, 'number')
+  })
+}
+
+test('playlist sync rejects a changed custom cover before planning without overwriting it', async t => {
+  const { engine, sync } = fixture(t)
+  const original = { _id: 'cover', playlistName: 'Saved', description: '', customThumbnail: 'original', videos: [], unknown: new Date(1) }
+  await engine.collections.playlists.insertAsync(original)
+  const job = await sync.start({ kind: 'playlist', playlistId: 'cover', metadata: { title: 'Saved', description: '', custom_thumbnail: 'remote' } })
+  await engine.collections.playlists.updateAsync({ _id: 'cover' }, { $set: { customThumbnail: 'concurrent' } })
+  await assert.rejects(sync.plan(job), /changed during sync/)
+  assert.deepEqual(await engine.collections.playlists.findOneAsync({ _id: 'cover' }), { ...original, customThumbnail: 'concurrent' })
+})
