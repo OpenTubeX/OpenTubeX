@@ -63,6 +63,7 @@ async function profileStore(subscriptions = [{ id: 'channel', name: 'Old name', 
       .replace('export default {', 'globalThis.profileModule = {'), context)
     const module = context.profileModule
     module.state.profileList = structuredClone(profiles)
+    module.state.profilesLoaded = true
     const store = {
       state: module.state,
       commit: (mutation, payload) => module.mutations[mutation](module.state, payload),
@@ -120,6 +121,14 @@ test('unchanged subscription details skip the profile datastore', async t => {
   const find = t.mock.method(db.profiles, 'findAsync')
   assert.equal(await store.dispatch('batchUpdateSubscriptionDetails', [{ channelId: 'channel', channelName: 'Old name' }]), true)
   assert.equal(find.mock.callCount(), 0)
+})
+
+test('subscription details refreshed before profiles load still reach the datastore', async () => {
+  const { db, store } = await profileStore()
+  store.state.profilesLoaded = false
+  store.state.profileList = [{ _id: 'allChannels', subscriptions: [] }]
+  assert.equal(await store.dispatch('batchUpdateSubscriptionDetails', [{ channelId: 'channel', channelName: 'New name' }]), true)
+  for (const profile of await db.profiles.findAsync({})) assert.equal(profile.subscriptions[0].name, 'New name')
 })
 
 test('bulk disables 939 subscriptions with one write per profile and synchronizes other windows', async t => {
