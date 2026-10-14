@@ -14,8 +14,12 @@ const source = compileScript(descriptor, { id: 'palette-search-lifecycle-test' }
 
 function setup(searchVideos = palette.filterCommandPaletteCommandsAsync) {
   let searchWatcher
+  const errors = []
+  const toasts = []
   const component = runInNewContext(`${source}; component`, {
     ...Vue, ...palette, ...videos,
+    console: { error: error => errors.push(error) },
+    showToast: toast => toasts.push(toast),
     filterCommandPaletteCommandsAsync: searchVideos,
     FtRetryImage: {}, FtIcon: {}, FtProfileIcon: {}, FtLoader: {},
     useI18n: () => ({ locale: Vue.ref('en-US'), t: key => key }),
@@ -32,7 +36,7 @@ function setup(searchVideos = palette.filterCommandPaletteCommandsAsync) {
   const sources = { history: [], playlists: [], downloads: {}, queue: [] }
   const state = component.setup({ commands: [], videoSources: sources }, { expose() {}, emit() {} })
   return {
-    state, sources,
+    state, sources, errors, toasts,
     search(query) {
       let cleanup
       const result = searchWatcher([query, sources, 'en-US'], [], callback => { cleanup = callback })
@@ -43,11 +47,14 @@ function setup(searchVideos = palette.filterCommandPaletteCommandsAsync) {
 
 test('a failed local-video scan clears loading and a later search still works', async () => {
   const f = setup()
-  // A damaged playlist record makes the real local-video iterator reject.
-  f.sources.playlists = [{ videos: null }]
+  // A broken history source makes the real local-video iterator reject.
+  f.sources.history = null
   const failed = f.search('north')
   assert.equal(f.state.searchPending.value, true)
-  await assert.rejects(failed.result, /iterable/)
+  await failed.result
+  assert.equal(f.errors.length, 1)
+  assert.match(f.errors[0].message, /iterable/)
+  assert.equal(f.toasts[0].message, 'Storage Startup Error.Title')
   assert.equal(f.state.searchPending.value, false)
   assert.equal(f.state.videoMatches.value.length, 0)
 
@@ -65,7 +72,7 @@ for (const rejects of [false, true]) {
     const scans = []
     const f = setup(() => new Promise((resolve, reject) => scans.push({ resolve, reject })))
     const older = f.search('old')
-    const olderSettled = rejects ? assert.rejects(older.result, /scan failed/) : older.result
+    const olderSettled = older.result
     older.cancel()
     const newer = f.search('new')
     if (rejects) scans[0].reject(new Error('scan failed'))
@@ -73,6 +80,8 @@ for (const rejects of [false, true]) {
     await olderSettled
     assert.equal(f.state.searchPending.value, true)
     assert.equal(f.state.videoMatches.value.length, 0)
+    assert.equal(f.errors.length, 0)
+    assert.equal(f.toasts.length, 0)
     scans[1].resolve([{ label: 'Current result' }])
     await newer.result
     assert.equal(f.state.searchPending.value, false)
