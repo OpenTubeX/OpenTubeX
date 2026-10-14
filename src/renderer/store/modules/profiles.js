@@ -13,6 +13,7 @@ const state = {
     icon: { ...DEFAULT_PROFILE_ICON },
     subscriptions: []
   }],
+  profilesLoaded: false,
   activeProfile: MAIN_PROFILE_ID
 }
 
@@ -117,8 +118,13 @@ const actions = {
     return true
   },
 
-  async batchUpdateSubscriptionDetails({ commit }, channels) {
+  async batchUpdateSubscriptionDetails({ commit, state }, channels) {
     if (channels.length === 0) { return true }
+    // Skip the main-process round trip when no synced profile would change.
+    // Before profiles load, only the datastore knows the subscriptions.
+    if (state.profilesLoaded && state.profileList.every(profile => getProfileWithUpdatedSubscriptionDetails(profile, channels) === null)) {
+      return true
+    }
 
     try {
       const { profileIds, success } = await DBProfileHandlers.updateSubscriptionDetails(channels)
@@ -278,6 +284,7 @@ function withDefaultProfileIcon(profile) {
 const mutations = {
   setProfileList(state, profileList) {
     state.profileList = profileList.map(withDefaultProfileIcon)
+    state.profilesLoaded = true
   },
 
   setActiveProfile(state, activeProfile) {

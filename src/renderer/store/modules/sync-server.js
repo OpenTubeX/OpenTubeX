@@ -302,9 +302,13 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       const videos = new Set(applied ? syncedVideos : saved.playlists?.[id]?.videos ?? [])
       for (const videoId of added) videos.add(videoId)
       for (const videoId of removed) videos.delete(videoId)
+      const baseline = { remoteId, metadata: sharedMetadata, videos: [...videos] }
+      // Every completed playlist reports its baseline. Skip identical ones
+      // instead of saving the whole sync snapshot again for each playlist.
+      if (JSON.stringify(saved.playlists?.[id]) === JSON.stringify(baseline)) return
       await dispatch('updateSyncServerSnapshot', JSON.stringify({
         ...saved,
-        playlists: { ...saved.playlists, [id]: { remoteId, metadata: sharedMetadata, videos: [...videos] } },
+        playlists: { ...saved.playlists, [id]: baseline },
       }), { root: true })
     },
     async persistHistorySyncBaseline(changes) {

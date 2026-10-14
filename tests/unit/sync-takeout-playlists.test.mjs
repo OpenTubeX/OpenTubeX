@@ -90,7 +90,7 @@ test('invalid remote images preserve a valid saved cover and repair the remote r
     await adapter.updatePlaylist('saved', { custom_thumbnail: invalid })
     previous = await context.syncPlaylists(adapter, store, previous)
     assert.equal(store.state.playlists.playlists[0].customThumbnail, original)
-    assert.equal(previous.saved.metadata.custom_thumbnail, original)
+    assert.equal(previous.saved.metadata.custom_thumbnail, context.thumbnailFingerprint(original))
     assert.equal((await adapter.getPlaylist('saved')).playlist.custom_thumbnail, original)
   }
   await adapter.updatePlaylist('saved', { custom_thumbnail: '' })
@@ -131,7 +131,7 @@ test('local thumbnail replacements and resets repair invalid remote images', asy
     const snapshot = await context.syncPlaylists(adapter, store, previous)
     assert.equal((await adapter.getPlaylist('repair')).playlist.custom_thumbnail, replacement || null)
     assert.equal(store.state.playlists.playlists[0].customThumbnail, replacement)
-    assert.equal(snapshot.repair.metadata.custom_thumbnail, replacement || null)
+    assert.equal(snapshot.repair.metadata.custom_thumbnail, context.thumbnailFingerprint(replacement))
   }
 })
 
@@ -228,7 +228,7 @@ test('a released HTTP-thumbnail baseline does not overwrite a remote-only custom
     [original.id]: { metadata: original, videos: [] },
   })
   assert.equal(store.state.playlists.playlists[0].customThumbnail, image)
-  assert.equal(snapshot[original.id].metadata.custom_thumbnail, image)
+  assert.equal(snapshot[original.id].metadata.custom_thumbnail, context.thumbnailFingerprint(image))
 })
 
 test('syncs videos imported from a Takeout ZIP to a second device and repairs an empty remote playlist', async () => {
@@ -469,4 +469,18 @@ test('newer unknown remote history preserves locally known video metadata', () =
   assert.deepEqual(next.historyToUpload[0].video, syncVideoToRemote(local))
   const received = mergeHistory({ localHistory: [], remoteHistory: next.historyToUpload, options })
   assert.deepEqual(syncVideoToRemote(received.insertions[0]), syncVideoToRemote(local))
+})
+
+test('sync snapshots store cover fingerprints and still merge cover edits', async () => {
+  const original = 'data:image/webp;base64,b3JpZ2luYWw='
+  const remote = 'data:image/webp;base64,cmVtb3Rl'
+  const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
+  const store = createStore([{ _id: 'cover', playlistName: 'Cover', customThumbnail: original, videos: [] }])
+  const previous = await context.syncPlaylists(adapter, store)
+  // Repeating the image in every snapshot write bloats the settings database.
+  assert.ok(!JSON.stringify(previous).includes(original))
+  await adapter.updatePlaylist('cover', { custom_thumbnail: remote })
+  const next = await context.syncPlaylists(adapter, store, previous)
+  assert.equal(store.state.playlists.playlists[0].customThumbnail, remote)
+  assert.equal(next.cover.metadata.custom_thumbnail, context.thumbnailFingerprint(remote))
 })
