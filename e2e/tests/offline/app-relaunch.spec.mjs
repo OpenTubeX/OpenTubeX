@@ -45,20 +45,24 @@ for (const { format, portableExecutable = null, failures = 0, rejectWithFalse = 
         BrowserWindow.getAllWindows().length
       ))).toBe(0)
 
-      const args = [path.join(repoRoot, 'dist-e2e', 'main.js'), '--new-window', 'opentubex://https://www.youtube.com/watch?v=test']
+      const args = [path.join(repoRoot, 'dist-e2e', 'main.js'), '--new-window', 'opentubex://https://www.youtube.com/watch?v=test', '--ozone-platform=x11']
+      // Match Playwright's Linux launch setup on runners restricting the sandbox.
+      if (process.platform === 'linux') args.push('--no-sandbox')
       const successfulLaunch = failures === 2 ? 1 : 0
       const launchCount = successfulLaunch + 2
       for (let attempt = 0; attempt < launchCount; attempt++) {
         const env = { ...process.env, OPENTUBEX_E2E_USER_DATA_DIR: app.userDataDir }
         delete env.ELECTRON_RUN_AS_NODE
         delete env.WAYLAND_DISPLAY
-        const child = spawn(app.electronApp.process().spawnfile, [...args, '--ozone-platform=x11'], {
+        const child = spawn(app.electronApp.process().spawnfile, args, {
           env,
-          stdio: 'ignore'
+          stdio: ['ignore', 'ignore', 'pipe']
         })
+        let stderr = ''
+        child.stderr.setEncoding('utf8').on('data', chunk => { stderr += chunk })
         try {
-          const [exitCode] = await once(child, 'exit')
-          expect(exitCode).toBe(0)
+          const [exitCode, signal] = await once(child, 'exit')
+          expect(exitCode, `Secondary launch exited with ${signal}: ${stderr}`).toBe(0)
         } finally {
           if (child.exitCode === null) child.kill()
         }
