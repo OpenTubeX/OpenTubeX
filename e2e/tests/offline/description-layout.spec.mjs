@@ -42,6 +42,13 @@ for (const scale of [100, 125]) {
         await view.evaluate((component, metadata) => { Object.assign(component, metadata) }, metadata)
         await expect(card).toHaveClass(/short/)
         await expect(card.locator(selector)).toHaveText(text)
+        await view.evaluate(component => {
+          Object.assign(component, { videoTags: [], videoGames: [], license: null, contentDisclosures: [] })
+        })
+        await expect(card).not.toHaveClass(/short/)
+        await expect(card.locator('.descriptionStatus')).toHaveCount(0)
+        await view.evaluate((component, metadata) => { Object.assign(component, metadata) }, metadata)
+        await expect(card).toHaveClass(/short/)
         await card.locator(':scope > .descriptionStatus').click()
         await expect(card).not.toHaveClass(/short/)
         await expect(card.locator(selector)).toHaveText(text)

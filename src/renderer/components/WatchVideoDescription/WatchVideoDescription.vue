@@ -422,8 +422,9 @@ onBeforeUnmount(() => descriptionResizeObserver?.disconnect())
 
 watch(isExpanded, () => nextTick(updateDescriptionLayout))
 watch([shownDescription, () => props.tags, () => props.games, () => props.license, () => props.contentDisclosures], async () => {
-  // Metadata can arrive after offline playback has already mounted the card.
-  if (!showControls.value) hasMeasured = false
+  // Metadata can arrive or disappear after the card has mounted.
+  // Preserve expanded views with controls, and remeasure collapsed previews.
+  if (!showControls.value || !isExpanded.value) hasMeasured = false
   await nextTick()
   observeDescriptionElements()
   measureDescription()

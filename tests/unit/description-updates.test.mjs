@@ -116,6 +116,16 @@ for (const metadata of [{ tags: ['video tag'] }, { games: [{ title: 'Test game' 
     assert.equal(component.controls(), true)
     assert.equal(component.expanded(), false)
 
+    // Removing auto-collapsed metadata restores the original short-text card.
+    Object.assign(component.props, { tags: [], games: [], license: null, contentDisclosures: [] })
+    await flushDescriptionUpdates()
+    assert.equal(component.controls(), false)
+    assert.equal(component.expanded(), true)
+    Object.assign(component.props, structuredClone(metadata))
+    await flushDescriptionUpdates()
+    assert.equal(component.controls(), true)
+    assert.equal(component.expanded(), false)
+
     component.expand()
     // Later metadata updates must preserve the user's explicit expansion.
     Object.assign(component.props, { tags: [], games: [], license: null, contentDisclosures: [] })
