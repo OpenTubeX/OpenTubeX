@@ -11,7 +11,8 @@ async function setSetting(page, name, value) {
 }
 
 async function cachedIcon(app) {
-  return readFile(path.join(app.userDataDir, 'tray-icon.png')).then(bytes => bytes.toString('base64')).catch(() => null)
+  // writeFile empties the file before writing it, so an empty read is still in progress.
+  return readFile(path.join(app.userDataDir, 'tray-icon.png')).then(bytes => bytes.length ? bytes.toString('base64') : null).catch(() => null)
 }
 
 async function backgroundPixel(app) {
@@ -37,10 +38,10 @@ test('tray icon choices persist and follow the active app palette', async ({ app
   await setSetting(page, 'BaseTheme', 'light')
   await expect.poll(() => cachedIcon(app)).toBe(fixedIcon)
   await choices.locator('input[value="theme"]').check()
-  await expect.poll(() => cachedIcon(app)).not.toBe(fixedIcon)
+  await expect.poll(async () => [null, fixedIcon].includes(await cachedIcon(app))).toBe(false)
   const lightIcon = await cachedIcon(app)
   await setSetting(page, 'BaseTheme', 'dark')
-  await expect.poll(() => cachedIcon(app)).not.toBe(lightIcon)
+  await expect.poll(async () => [null, lightIcon].includes(await cachedIcon(app))).toBe(false)
   const darkIcon = await cachedIcon(app)
   ;({ page } = await app.relaunch())
   choices = page.getByRole('group', { name: 'Tray icon', exact: true })
