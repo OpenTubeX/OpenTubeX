@@ -8,7 +8,7 @@ import { goToSettingsSection } from './app.mjs'
 export async function verifySyncDeviceReconnection(page, { conflict = false, phone = false, intentionalDeletion = false, olderLogin = false, pendingRevocation = false, abandonRevocation = false } = {}) {
   await expect(page.locator('.topNav')).toBeVisible({ timeout: 30_000 })
   await expect.poll(() => page.evaluate(() => (
-    window.$store.getters.getTabs.length
+    document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getTabs.length
   )), { timeout: 30_000 }).toBeGreaterThan(0)
   const skip = page.getByRole('button', { name: 'Skip', exact: true })
   if (await skip.isVisible()) await skip.click()
@@ -16,12 +16,12 @@ export async function verifySyncDeviceReconnection(page, { conflict = false, pho
   const { key, salt } = await preparePrivacyKey(null, passphrase)
   const deviceId = Buffer.alloc(16, 9).toString('base64url')
   const saved = await page.evaluate(() => {
-    const store = window.$store
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     return JSON.parse(JSON.stringify({ settings: store.state.settings, sync: store.state.syncServer }))
   })
   const localSessions = await page.evaluate(async phone => {
     if (!phone) return window.ftElectron.tabs.getSyncSessions()
-    const tabs = window.$store.getters.getTabs
+    const tabs = document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getTabs
       .map(tab => ({ id: tab.id, url: new URL(tab.route.fullPath, location.origin).toString(), title: tab.title }))
     return [{ sessionId: 'mobile', updatedAt: 1, activeTabId: tabs[0].id, tabs }]
   }, phone)
@@ -57,7 +57,7 @@ export async function verifySyncDeviceReconnection(page, { conflict = false, pho
     try {
       const error = await page.evaluate(async () => {
         try {
-          await window.$store.dispatch('syncWithSyncServer')
+          await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer')
           return ''
         } catch (error) { return error.message }
       })
@@ -65,7 +65,7 @@ export async function verifySyncDeviceReconnection(page, { conflict = false, pho
       await expect(page.locator('.settingsContent > [data-section="sync"]').getByText(error, { exact: true })).toBeVisible()
       expect(sessionPuts).toBe(previousPuts)
       expect(document).toEqual(cleaned)
-      expect(await page.evaluate(() => window.$store.getters.getTabs.length)).toBeGreaterThan(0)
+      expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getTabs.length)).toBeGreaterThan(0)
     } finally {
       for (const extraPage of page.context().pages().filter(candidate => !originalPages.includes(candidate))) {
         await extraPage.close()
@@ -147,7 +147,7 @@ export async function verifySyncDeviceReconnection(page, { conflict = false, pho
   }
   try {
     await page.evaluate(({ key, salt, deviceId, previous }) => {
-      const store = window.$store
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const settings = {
         SyncServerEnabled: true,
         SyncServerAutoSync: false,
@@ -173,7 +173,7 @@ export async function verifySyncDeviceReconnection(page, { conflict = false, pho
     }, { key, salt, deviceId, previous })
     if (intentionalDeletion) {
       await page.evaluate(async ({ deviceId, sessionIds }) => {
-        const store = window.$store
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
         for (const sessionId of sessionIds) await store.dispatch('deleteSyncServerSession', { syncDeviceId: deviceId, sessionId })
         await store.dispatch('disconnectSyncServer')
       }, { deviceId, sessionIds })
@@ -194,7 +194,7 @@ export async function verifySyncDeviceReconnection(page, { conflict = false, pho
       await expect(prompt).toBeHidden()
       expect(revoked).toBe(true)
     }
-    await expect.poll(() => page.evaluate(() => window.$store.state.settings.syncServerToken)).toBe('')
+    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.settings.syncServerToken)).toBe('')
     expect(document.deletedSessions[deviceId]).toEqual(sessionIds)
     expect(document.deletedSessions[`revoked:${deviceId}`]).toEqual(intentionalDeletion ? undefined : sessionIds)
     expect(document.deletedSessions[`revoked-login:${deviceId}`]).toEqual(intentionalDeletion ? undefined : ['old-login'])
@@ -226,7 +226,7 @@ export async function verifySyncDeviceReconnection(page, { conflict = false, pho
       // Reproduce the persisted state of an older authenticated installation.
       // The updated app runs ordinary sync without calling its sign-in action.
       await page.evaluate(async ({ key, salt, deviceId, snapshot }) => {
-        const store = window.$store
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
         store.commit('setSyncServerUrl', 'https://device-reconnection.example')
         store.commit('setSyncServerDeviceId', deviceId)
         store.commit('setSyncServerPrivacyMode', 'enhanced')
@@ -237,13 +237,13 @@ export async function verifySyncDeviceReconnection(page, { conflict = false, pho
       }, { key, salt, deviceId, snapshot: document })
       error = await page.evaluate(async () => {
         try {
-          await window.$store.dispatch('syncWithSyncServer')
+          await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer')
           return ''
         } catch (error) { return error.message }
       })
     } else {
       error = await page.evaluate(async ({ deviceId, passphrase }) => {
-        const store = window.$store
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
         try {
           await store.dispatch('authenticateSyncServer', {
             mode: 'login',
@@ -262,7 +262,7 @@ export async function verifySyncDeviceReconnection(page, { conflict = false, pho
     if (!conflict && !intentionalDeletion) {
       expect(error).toBe('Fixture upload failure')
       expect(document.deletedSessions[`revoked-login:${deviceId}`]).toEqual(['old-login'])
-      await page.evaluate(() => window.$store.dispatch('syncWithSyncServer'))
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer'))
     } else expect(error).toBe('')
     expect(loginDeviceId).toBe(deviceId)
     expect(document.devices[deviceId].sessions.map(session => session.sessionId)).toEqual(intentionalDeletion ? [] : sessionIds)
@@ -272,11 +272,11 @@ export async function verifySyncDeviceReconnection(page, { conflict = false, pho
     expect(document.deletedSessions['other-phone']).toEqual(['mobile'])
     expect(document.devices.laptop.sessions).toHaveLength(conflict ? 2 : 1)
     expect(document.deletedSessions[`revoked-login:${deviceId}`]).toBeUndefined()
-    await page.evaluate(() => window.$store.dispatch('syncWithSyncServer'))
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer'))
     expect(document.devices[deviceId].sessions.flatMap(session => session.tabs.map(tab => tab.id))).toEqual(intentionalDeletion ? [] : tabIds)
   } finally {
     await page.evaluate(async saved => {
-      const store = window.$store
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       await store.dispatch('stopSyncServerAutoSync')
       store.commit('setSyncServerEnabled', false)
       for (const name of ['Url', 'Username', 'DeviceId', 'DeviceName', 'Snapshot', 'LastSyncAt', 'PrivacyMode', 'PrivacyKey', 'PrivacySalt', 'Token', 'ResumeAutoSync']) {

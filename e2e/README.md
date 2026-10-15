@@ -49,7 +49,7 @@ mobile layout and breaks selectors.
 - `performance` – tests in `*-performance.spec.mjs` files or tagged `@performance`.
 - `browser` and `network` – see above.
 
-Tag tests that assert geometry, scrolling, measurements, positioning, reflow or
+Tag offline tests that assert geometry, scrolling, measurements, positioning, reflow or
 animation boundaries with `@scale` instead of looping over UI scales. The
 `uiScale` fixture holds the project's scale; it is seeded as the `uiScale`
 setting unless the test seeds its own:
