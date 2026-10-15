@@ -2,8 +2,8 @@ import Datastore from '@seald-io/nedb'
 import Cursor from '@seald-io/nedb/lib/cursor.js'
 import model from '@seald-io/nedb/lib/model.js'
 import { uid } from '@seald-io/nedb/lib/customUtils.js'
+import { SCHEMA_VERSION } from './sqliteSchemaVersion.js'
 
-const SCHEMA_VERSION = 1
 const FIELD_NAME = /^[A-Za-z_][A-Za-z0-9_]*$/
 // Limits for each committed batch while importing a legacy datastore. They
 // keep bridge and worker messages bounded on mobile and web, and keep each
@@ -179,8 +179,9 @@ export class SqliteDatastore {
    * @param {'write' | 'read' | 'unopened'} [access]
    */
   _exclusive(operation, access = 'write') {
-    const open = access === 'write' || (access === 'read' && !this.dropped)
-    const result = this.pending.then(() => open ? this.loadDatabaseAsync() : undefined).then(operation)
+    // Decided when it runs, so an operation queued behind a drop sees it.
+    const open = () => access === 'write' || (access === 'read' && !this.dropped)
+    const result = this.pending.then(() => open() ? this.loadDatabaseAsync() : undefined).then(operation)
     this.pending = result.catch(() => {})
     return result
   }

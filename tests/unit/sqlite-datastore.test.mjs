@@ -260,6 +260,16 @@ test('dropping a store deletes it and its legacy file, without recreating it on 
   assert.deepEqual(await store.findAsync({ videoId: 'v' }), [{ _id: 'b', videoId: 'v' }])
 })
 
+test('operations queued behind a drop do not recreate the database', async (t) => {
+  const dir = await directory(t)
+  const store = open(t, dir, 'video-metadata-cache')
+  await store.insertAsync({ _id: 'a' })
+  const queued = [store.dropDatabaseAsync(), store.compactDatafileAsync(), store.findAsync({})]
+  const [, , found] = await Promise.all(queued)
+  assert.deepEqual(found, [])
+  assert.deepEqual(readdirSync(dir), [])
+})
+
 test('a newer library that cannot be opened can still be dropped', async (t) => {
   const dir = await directory(t)
   const db = new DatabaseSync(join(dir, 'video-metadata-cache.sqlite'))

@@ -1,6 +1,7 @@
 // Runs SQLite for the web build. OPFS synchronous access handles are only
 // available in dedicated workers.
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm'
+import { SCHEMA_VERSION } from './sqliteSchemaVersion.js'
 
 let lock = null
 let pool = null
@@ -51,16 +52,17 @@ async function openDatabase(name) {
   const { OpfsSAHPoolDb } = await getPool()
   const db = new OpfsSAHPoolDb(`/${name}.sqlite`)
   try {
-    // Persistent settings apply only to a database this version is creating,
-    // so a newer version's database stays untouched.
-    if (db.selectValue('PRAGMA user_version') === 0) {
+    // Settings that change the file apply only to a database this version can
+    // use, so a newer version's database stays untouched until it is refused.
+    const version = db.selectValue('PRAGMA user_version')
+    if (version === 0) {
       // Takes effect only before the first table exists, whose creation
       // commits and syncs the header, so skip this write's own sync.
       db.exec('PRAGMA synchronous = OFF')
       db.exec('PRAGMA auto_vacuum = INCREMENTAL')
     }
     // This VFS has no shared memory, so it cannot use a write-ahead log.
-    db.exec('PRAGMA journal_mode = TRUNCATE')
+    if (version <= SCHEMA_VERSION) db.exec('PRAGMA journal_mode = TRUNCATE')
     db.exec('PRAGMA synchronous = FULL')
   } catch (error) {
     db.close()
