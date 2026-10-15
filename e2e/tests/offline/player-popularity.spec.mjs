@@ -33,7 +33,7 @@ test('popularity exits above the seek bar without clipping the graph', async ({ 
     for (const width of [1300, 500]) {
       await app.electronApp.evaluate(({ BrowserWindow }, width) => BrowserWindow.getAllWindows()[0].setContentSize(width, 900), width)
       for (const frosted of [true, false]) {
-        await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+        await page.evaluate(value => window.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
         await bar.hover()
         await expect(graph).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)')
         const trackTop = await bar.evaluate(element => element.getBoundingClientRect().top +
@@ -98,7 +98,7 @@ test('popularity aligns with the seek bar across layouts, themes and UI scales',
     for (const width of [1300, 500]) {
       await resize(width, scale)
       for (const frosted of [true, false]) {
-        await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+        await page.evaluate(value => window.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
         await bar.hover()
         await expect(graph).toBeVisible()
         await expect(graph).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)')
@@ -116,7 +116,7 @@ test('popularity aligns with the seek bar across layouts, themes and UI scales',
 
   await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1))
   await resize(1300)
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', true))
+  await page.evaluate(() => window.$store.dispatch('updateUseFrostedGlassPlayerUi', true))
   await setPlayerFullscreen(page, true)
   await expect(graph).toBeHidden()
   const box = await bar.boundingBox()
@@ -129,7 +129,7 @@ test('popularity aligns with the seek bar across layouts, themes and UI scales',
   await page.mouse.move(box.x + box.width * 0.4, box.y + box.height / 2)
   await expect(tooltip).not.toContainText('Most replayed')
   // Remap the playback shortcut so ArrowRight operates the focused range.
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(
+  await page.evaluate(() => window.$store.dispatch(
     'updateKeyboardShortcuts', JSON.stringify({ VIDEO_PLAYER: { PLAYBACK: { SMALL_FAST_FORWARD: 'x' } } })
   ))
   // Seek normally so Shaka commits the starting position before focusing the range.
@@ -176,7 +176,7 @@ test('popularity aligns with the seek bar across layouts, themes and UI scales',
   await watch.evaluate(component => { component.proxy.videoPopularity = [] })
   await expect(graph).toHaveCount(0)
   await expect(bar).not.toHaveClass(/ft-has-popularity/)
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', false))
+  await page.evaluate(() => window.$store.dispatch('updateUseFrostedGlassPlayerUi', false))
   await expect(graph).toHaveCount(0)
 })
 
@@ -194,7 +194,7 @@ test('reduced motion reveals the popularity graph without a transition', async (
   await expect(graph).toBeHidden()
   await page.emulateMedia({ reducedMotion: 'no-preference' })
   await expect(graph).toHaveCSS('transition-duration', '0.18s, 0s')
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'on'))
+  await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'on'))
   await expect(graph).toHaveCSS('transition-duration', '0s')
   await page.locator('.shaka-seek-bar-container').hover()
   await expect(graph).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)')

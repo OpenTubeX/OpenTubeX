@@ -55,7 +55,7 @@ for (const [width, scale] of [[1600, 100], [375, 95], [812, 125]]) {
     await app.electronApp.evaluate(({ BrowserWindow }, width) => {
       BrowserWindow.getAllWindows()[0].setSize(width, 900)
     }, width)
-    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+    await page.evaluate(value => window.$store.dispatch('updateUiScale', value), scale)
     for (const tab of ['videos', 'shorts', 'live', 'podcasts', 'releases', 'courses', 'playlists', 'community']) {
       await page.locator(`#${tab}Tab`).click()
       await expect(card.locator('.message')).toBeVisible()
@@ -110,7 +110,7 @@ test('hides channel tab icons and preserves full labels when space is limited', 
     await app.electronApp.evaluate(({ BrowserWindow }, width) => {
       BrowserWindow.getAllWindows()[0].setSize(width, 900)
     }, width)
-    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+    await page.evaluate(value => window.$store.dispatch('updateUiScale', value), scale)
     if (width === 1600) await expect(page.locator('#videosTab .channelTabIcon')).toBeVisible()
     else await expect(page.locator('#videosTab .channelTabIcon')).toBeHidden()
     await expect.poll(() => page.locator('.channelDetails:visible .tabLabel > span').evaluateAll(labels =>
@@ -119,7 +119,7 @@ test('hides channel tab icons and preserves full labels when space is limited', 
     await expectAligned(page)
   }
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await Promise.all(['Community', 'Releases', 'Courses'].map(tab => store.dispatch(`updateHideChannel${tab}`, true)))
     await store.dispatch('updateUiScale', 100)
   })
@@ -137,7 +137,7 @@ test('hides channel icons when the gaps would otherwise make the row overflow', 
   await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1800, 900))
   const tabs = page.locator('.channelDetails:visible .tabs')
   for (const scale of [95, 125]) {
-    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+    await page.evaluate(value => window.$store.dispatch('updateUiScale', value), scale)
     await tabs.evaluate(container => { container.style.cssText = 'flex: none; inline-size: 1200px' })
     await expect(page.locator('#videosTab .channelTabIcon')).toBeVisible()
     const widthWithIcons = await tabs.evaluate(container => {
@@ -171,7 +171,7 @@ test('keeps channel header rows evenly spaced below the banner', async ({ app, p
       BrowserWindow.getAllWindows()[0].setSize(width, height)
     }, { width, height })
     await page.evaluate(value => {
-      return document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value)
+      return window.$store.dispatch('updateUiScale', value)
     }, scale)
     const searchToggle = page.getByRole('button', { name: 'Search Channel', exact: true })
     if (await searchToggle.isVisible() && await searchToggle.getAttribute('aria-expanded') === 'false') {
@@ -213,13 +213,13 @@ test('keeps channel header rows evenly spaced below the banner', async ({ app, p
   await app.electronApp.evaluate(({ BrowserWindow }) => {
     BrowserWindow.getAllWindows()[0].setSize(500, 1000)
   })
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', 100))
+  await page.evaluate(() => window.$store.dispatch('updateUiScale', 100))
   await testInfo.attach('even channel header spacing', {
     body: await page.locator('.channelDetails:visible').screenshot(),
     contentType: 'image/png'
   })
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateHideSharingActions', true)
     await store.dispatch('updateHideUnsubscribeButton', true)
   })
@@ -236,7 +236,7 @@ test('collapses channel search to an accessible icon at narrow widths', async ({
   const toggle = page.getByRole('button', { name: 'Search Channel', exact: true })
   for (const [width, scale] of [[500, 100], [375, 95], [812, 125], [1600, 95]]) {
     await app.electronApp.evaluate(({ BrowserWindow }, width) => BrowserWindow.getAllWindows()[0].setSize(width, 900), width)
-    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+    await page.evaluate(value => window.$store.dispatch('updateUiScale', value), scale)
     if (width * 100 / scale > 800) {
       await expect(toggle).toBeHidden()
       await expect(input).toBeVisible()
@@ -266,7 +266,7 @@ test('centers channel tab titles vertically at every layout size', async ({ app,
     await app.electronApp.evaluate(({ BrowserWindow }, { width, height }) => {
       BrowserWindow.getAllWindows()[0].setSize(width, height)
     }, { width, height })
-    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+    await page.evaluate(value => window.$store.dispatch('updateUiScale', value), scale)
     await expect.poll(() => page.locator('.channelDetails:visible [role="tab"]').evaluateAll(tabs => {
       return Math.max(...tabs.map(tab => {
         const bounds = tab.getBoundingClientRect()
@@ -306,7 +306,7 @@ test('separates the content card on every channel tab', async ({ app, page }, te
     await app.electronApp.evaluate(({ BrowserWindow }, { width, height }) => {
       BrowserWindow.getAllWindows()[0].setSize(width, height)
     }, { width, height })
-    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+    await page.evaluate(value => window.$store.dispatch('updateUiScale', value), scale)
     for (const [tabId, contentSelector] of [
       ['videosTab', '.select-container'],
       ['shortsTab', '.select-container'],
@@ -341,7 +341,7 @@ test('separates the content card on every channel tab', async ({ app, page }, te
   await page.locator('#videosTab').click()
   await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(500, 1000))
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateUiScale', 100)
     await store.dispatch('updateBaseTheme', 'system')
   })
@@ -368,7 +368,7 @@ test('separates the content card on every channel tab', async ({ app, page }, te
 test('crossfades the active channel line at the configured animation speed', async ({ page }) => {
   for (const [speed, tabId, duration] of [[100, 'aboutTab', 140], [200, 'videosTab', 70], [50, 'shortsTab', 280]]) {
     await page.evaluate(value => {
-      return document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAnimationSpeed', value)
+      return window.$store.dispatch('updateAnimationSpeed', value)
     }, speed)
     await expectTabHighlightStyle(page.locator(indicatorSelector), 'opacity', '1')
     const animation = await selectTabWithHighlightAnimation(page.locator(`#${tabId}`))
@@ -394,7 +394,7 @@ test('realigns the active channel line when the locale direction changes without
 
 test('places the channel line immediately after layout changes without animating', async ({ app, page }) => {
   await page.evaluate(() => {
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setAnimationSpeed', 25)
+    window.$store.commit('setAnimationSpeed', 25)
   })
   async function expectImmediateAlignment() {
     await expectAligned(page)
@@ -405,7 +405,7 @@ test('places the channel line immediately after layout changes without animating
   })
   await expectImmediateAlignment()
   await page.evaluate(() => {
-    return document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', 125)
+    return window.$store.dispatch('updateUiScale', 125)
   })
   await expectImmediateAlignment()
   await page.evaluate(() => {
@@ -414,7 +414,7 @@ test('places the channel line immediately after layout changes without animating
   await expect(page.locator('body')).toHaveAttribute('dir', 'rtl')
   await expectImmediateAlignment()
   await page.evaluate(() => {
-    return document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHideChannelShorts', true)
+    return window.$store.dispatch('updateHideChannelShorts', true)
   })
   await expect(page.locator('#shortsTab')).toHaveCount(0)
   await expectImmediateAlignment()
@@ -426,7 +426,7 @@ test('keeps every channel tab in one row across zoom, RTL, and changing labels',
       BrowserWindow.getAllWindows()[0].setSize(width, height)
     }, { width, height })
     await page.evaluate(value => {
-      return document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value)
+      return window.$store.dispatch('updateUiScale', value)
     }, scale)
     await expectAligned(page)
     await expect.poll(() => page.locator('.channelDetails:visible [role="tab"]').evaluateAll(tabs => {
@@ -469,7 +469,7 @@ test('keeps every channel tab in one row across zoom, RTL, and changing labels',
 
   for (const roundness of [0, 50, 100, 200]) {
     await page.evaluate(value => {
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
+      window.$store.commit('setUiRoundness', value)
     }, roundness)
     await expect.poll(() => page.locator(indicatorSelector).evaluate(element => {
       return getComputedStyle(element, '::before').borderRadius === getComputedStyle(element).borderRadius
@@ -518,7 +518,7 @@ test('scrolls full channel labels and clamps the range after labels or available
   await expect(page.locator('#videosTab .tabLabel > span')).toHaveCSS('text-overflow', 'clip')
   await tabs.evaluate(element => { element.scrollLeft = element.scrollWidth })
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await Promise.all(['Shorts', 'Playlists', 'Community', 'Releases', 'Podcasts', 'Courses']
       .map(tab => store.dispatch(`updateHideChannel${tab}`, true)))
   })
@@ -550,9 +550,9 @@ test('clamps channel tab scrolling after resize and locale changes', async ({ ap
 })
 
 test('channel panel and document keyboard navigation crossfade the selected highlight', async ({ page }) => {
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAnimationSpeed', 25))
+  await page.evaluate(() => window.$store.dispatch('updateAnimationSpeed', 25))
   for (const scale of [100, 95, 125]) {
-    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+    await page.evaluate(value => window.$store.dispatch('updateUiScale', value), scale)
     for (const source of ['body', 'panel', 'appTab']) {
       await page.locator('#videosTab').click()
       await expectAligned(page)
@@ -585,10 +585,10 @@ test('channel panel and document keyboard navigation crossfade the selected high
 })
 
 test('channel search restores highlights immediately unless a tab is deliberately selected', async ({ page }) => {
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAnimationSpeed', 25))
+  await page.evaluate(() => window.$store.dispatch('updateAnimationSpeed', 25))
   const search = page.locator('.channelSearch input')
   for (const scale of [100, 95, 125]) {
-    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+    await page.evaluate(value => window.$store.dispatch('updateUiScale', value), scale)
     for (const key of [null, 'Enter', ' ']) {
       await search.fill('animation')
       await search.press('Enter')
@@ -644,7 +644,7 @@ test('handles quick switches, search, background tabs, and reduced motion', asyn
   const channelTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
   await page.locator(sel.newTabButton).click()
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateHideChannelShorts', true)
   })
   await page.locator(`.tab[data-tab-id="${channelTabId}"]`).click()
@@ -652,7 +652,7 @@ test('handles quick switches, search, background tabs, and reduced motion', asyn
   expect(await page.locator(indicatorSelector).evaluate(tabHighlightAnimations)).toEqual([])
 
   await page.evaluate(async () => {
-    await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'on')
+    await window.$store.dispatch('updateReducedMotion', 'on')
   })
   await page.locator('#videosTab').click()
   await expectAligned(page)
@@ -662,7 +662,7 @@ test('handles quick switches, search, background tabs, and reduced motion', asyn
 
 test('desktop channel tabs size to their content and show icons in both packs', async ({ app, page }, testInfo) => {
   for (const pack of ['material', 'remix']) {
-    await page.evaluate(pack => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', pack), pack)
+    await page.evaluate(pack => window.$store.dispatch('updateIconPack', pack), pack)
     const tabs = page.locator('.channelDetails:visible [role="tab"]')
     for (const tab of await tabs.all()) {
       await expect(tab.locator('.ft-icon__glyph')).toBeVisible()

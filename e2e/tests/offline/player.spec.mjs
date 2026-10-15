@@ -293,7 +293,7 @@ test('uses one playing interface hide delay in portrait, landscape, fullscreen a
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
   const controls = player.locator('.shaka-controls-container')
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updatePlayingInterfaceHideDelay', 0.5)
   })
 
@@ -324,7 +324,7 @@ test('keeps the configured interface hide delay when playback resumes', async ({
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
   const controls = player.locator('.shaka-controls-container')
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updatePlayingInterfaceHideDelay', 10)
   })
   await setPlayerFullscreen(page, true)
@@ -777,7 +777,7 @@ test('smoothly transitions video zoom at fractional UI scale', async ({ app, pag
   await expect(video).toHaveCSS('transform', 'matrix(1.5, 0, 0, 1.5, 0, 0)')
 
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return store.dispatch('updateReducedMotion', 'on')
   })
   await page.locator('body').press('Shift+Z')
@@ -837,7 +837,7 @@ test('shift-dragging moves the visible part of a zoomed video', async ({ app, pa
 test('pinch zoom starts over the paused player controls without toggling playback', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return store.dispatch('updateDisplayVideoPlayButton', true)
   })
   const video = await openMockedVideo(page)
@@ -1029,7 +1029,7 @@ test('fullscreen pinch zoom arms the fill point only after moving toward it', as
 
   const tabId = await player.getAttribute('data-tab-id')
   const setZoom = (value) => page.evaluate(({ tabId, value }) => {
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    window.$store
       .commit('setTabVideoZoom', { tabId, value })
   }, { tabId, value })
   const nearScale = geometry.fill - 0.04
@@ -1080,7 +1080,7 @@ test('exiting fullscreen during a pinch does not restore fullscreen zoom inline'
 
   const tabId = await player.getAttribute('data-tab-id')
   await page.evaluate(({ tabId }) => {
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    window.$store
       .commit('setTabVideoZoom', { tabId, value: 4 })
   }, { tabId })
   await expect.poll(() => video.evaluate(element => new DOMMatrix(getComputedStyle(element).transform).a)).toBe(4)
@@ -1487,13 +1487,13 @@ test('scopes the mobile fullscreen swipe movement to the video in tablet layout'
   await expect(player).toHaveCSS('touch-action', 'none')
 
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateEnableVideoZoom', false)
   })
   await expect(player).toHaveCSS('touch-action', 'pan-x')
 
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateEnableMobileFullscreenSwipe', false)
   })
   await expect(player).not.toHaveClass(/mobileFullscreenSwipeEnabled/)
@@ -1591,7 +1591,7 @@ test('uses mobile surface taps for controls and keeps an on-video play button', 
     applyMobileClasses()
   })
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateRememberVolume', false)
     await store.dispatch('updateDefaultVolume', 0.25)
   })
@@ -1695,7 +1695,7 @@ test('uses mobile surface taps for controls and keeps an on-video play button', 
 test('caps the optional desktop center play button on wide players', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateDisplayVideoPlayButton', true)
   })
   await openMockedVideo(page)
@@ -2754,7 +2754,7 @@ test.describe('skip silence shortcut', () => {
 
     const popup = page.locator(`${activeTab} .valueChangePopup`)
     const skipSilence = () => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getTabSkipSilence(store.getters.getActiveTabId)
     })
 
@@ -2778,7 +2778,7 @@ test.describe('skip silence shortcut', () => {
     await openDemoVideo({ app, page })
 
     const readSkipSilenceState = () => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return {
         activeTabId: store.getters.getActiveTabId,
         values: { ...store.state.tabs.skipSilenceByTabId }
@@ -2801,7 +2801,7 @@ test.describe('skip silence shortcut', () => {
       values: { [firstTabId]: true }
     })
     expect(await page.evaluate((tabId) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getTabSkipSilence(tabId)
     }, secondTabId)).toBe(false)
 
@@ -2819,7 +2819,7 @@ test.describe('skip silence shortcut', () => {
     await openDemoVideo({ app, page })
 
     const readSkipSilenceState = () => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return {
         activeTabId: store.getters.getActiveTabId,
         values: { ...store.state.tabs.skipSilenceByTabId }
@@ -2828,7 +2828,7 @@ test.describe('skip silence shortcut', () => {
 
     const firstTabId = (await readSkipSilenceState()).activeTabId
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateShowSkipSilenceButton', true)
       await store.dispatch('updateEnableSkipSilenceByDefault', true)
     })
@@ -2867,7 +2867,7 @@ test.describe('skip silence shortcut', () => {
     await openDemoVideo({ app, page })
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateShowSkipSilenceButton', true)
     })
     await page.locator('body').press('h')
@@ -2875,12 +2875,12 @@ test.describe('skip silence shortcut', () => {
     await page.locator('.sideNav a[href="#/history"]').first().evaluate(link => link.click())
     await expect(page.locator(`${activeTab} .ftVideoPlayer`)).toHaveCount(0)
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateShowSkipSilenceButton', false)
     })
 
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getTabSkipSilence(store.getters.getActiveTabId)
     })).toBe(false)
   })
@@ -2901,7 +2901,7 @@ test.describe('skip silence default', () => {
     await openDemoVideo({ app, page })
 
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getTabSkipSilence(store.getters.getActiveTabId)
     })).toBe(true)
   })

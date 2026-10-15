@@ -35,6 +35,20 @@ export function abortUnmockedRequest(route) {
 }
 
 /**
+ * Exposes the renderer's Vuex store and router to `page.evaluate` callbacks as
+ * `window.$store` and `window.$router`. Helpers shared with the Android CDP
+ * tests in tests/android cannot rely on these accessors.
+ */
+function installRendererAccessors() {
+  for (const name of ['$store', '$router']) {
+    Object.defineProperty(window, name, {
+      configurable: true,
+      get: () => document.querySelector('#app').__vue_app__.config.globalProperties[name]
+    })
+  }
+}
+
+/**
  * Serializes documents in the newline-delimited JSON format used by nedb.
  *
  * @param {object[]} docs
@@ -213,6 +227,8 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
   // Tests control WAN reachability independently of the host running them.
   // Page routes can override these replies to exercise real offline recovery.
   await context.route(INTERNET_CHECK_URL, route => route.fulfill({ status: 204 }))
+  // Covers reloads and later windows. The first document may already exist.
+  await context.addInitScript(installRendererAccessors)
   await notifyPhase('electronConnected')
 
   let page
@@ -270,6 +286,7 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
 
   try {
     await waitForAppReady(page)
+    await page.evaluate(installRendererAccessors)
     await notifyPhase('interactive', page)
     expect(startupErrors, 'Renderer errors during startup').toEqual([])
   } catch (error) {
@@ -381,6 +398,7 @@ export async function setPlayerFullscreen(page, fullscreen) {
  *   test.use({ seed: { settings: { ... }, history: [ ... ] } })
  * Use `localeOverrides` to replace packaged locale messages without changing
  * the shared dist-e2e output.
+
  */
 export const test = base.extend({
   seed: [{}, { option: true }],

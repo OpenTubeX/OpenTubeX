@@ -21,7 +21,7 @@ async function openSponsorBlockPrompt(app, page, mobile = true) {
     contentType: 'application/json'
   }))
   await page.evaluate(mobile => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setUseSponsorBlock', true)
     store.commit('setSponsorBlockSponsor', { color: '#00d400', skip: 'promptToSkip' })
     if (mobile) {
@@ -86,7 +86,7 @@ for (const uiScale of [100, 95]) {
         }).toBeLessThan(1)
 
         await page.evaluate(() => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           store.commit('addVideoToWatchQueue', {
             video: { videoId: 'queued00000', title: 'Queued video', author: 'Queue channel' }
           })
@@ -100,7 +100,7 @@ for (const uiScale of [100, 95]) {
           return Math.abs(dockBox.y - noticeBox.y - noticeBox.height - 8)
         }).toBeLessThan(1)
         await player.locator('.fullscreenQueueOverlay.open').getByRole('button', { name: 'Close', exact: true }).click()
-        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('clearWatchQueue'))
+        await page.evaluate(() => window.$store.commit('clearWatchQueue'))
 
         // Hidden controls remove the dock offset even while a notice is showing.
         await player.locator('.shaka-controls-container').evaluate(element => element.removeAttribute('shown'))
@@ -154,7 +154,7 @@ for (const uiScale of [100, 125]) {
       test('keeps the notice and scrollable actions inside the player', async ({ app, page }) => {
         const player = await openSponsorBlockPrompt(app, page, mobile)
         await page.evaluate(() => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           store.commit('addVideoToWatchQueue', { video: { videoId: 'queued00000', title: 'Queue test' } })
           store.commit('setFullscreenActions', ['queue', 'sponsorBlock', 'comments', 'share', 'addToPlaylist', 'quickBookmark'])
         })
@@ -174,7 +174,7 @@ for (const uiScale of [100, 125]) {
         await notice.getByRole('button', { name: 'Skip (Enter)', exact: true }).click()
         await expect(notice.getByRole('button', { name: 'Unskip (Enter)', exact: true })).toBeVisible()
         await actions.evaluate(element => { element.scrollTop = element.scrollHeight })
-        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setSponsorBlockShowSkippedToast', false))
+        await page.evaluate(() => window.$store.commit('setSponsorBlockShowSkippedToast', false))
         await expect(notice).toHaveCount(0)
         await expect.poll(() => actions.evaluate(element => {
           const contentEnd = element.querySelector('.fullscreenActionsContent').getBoundingClientRect().bottom

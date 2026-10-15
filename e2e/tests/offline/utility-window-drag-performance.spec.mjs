@@ -8,7 +8,7 @@ test('moves utility windows without rerendering their controls on every pointer 
   await session.send('Emulation.setCPUThrottlingRate', { rate: 6 })
   await session.send('Performance.enable')
   for (const view of [null, 'about', 'downloads']) {
-    await page.evaluate(view => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow', view), view)
+    await page.evaluate(view => window.$store.dispatch('showSettingsWindow', view), view)
     const dialog = page.locator('.settingsWindow')
     await expect(dialog).toBeVisible()
     await expect(dialog).not.toHaveClass(/settings-window-enter-active/)

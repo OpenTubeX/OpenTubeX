@@ -204,7 +204,7 @@ for (const theme of ['dark', 'light', 'catppuccinMacchiato']) {
   test(`view-all uses subtle outlined-button feedback in ${theme}`, async ({ page }, testInfo) => {
     await page.emulateMedia({ colorScheme: theme === 'light' ? 'light' : 'dark' })
     if (theme === 'catppuccinMacchiato') {
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await page.evaluate(() => window.$store
         .dispatch('updateBaseTheme', 'catppuccinMacchiato'))
     }
     await expect(page.locator('body')).toHaveClass(new RegExp(theme))

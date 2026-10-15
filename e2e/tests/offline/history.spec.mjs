@@ -187,7 +187,7 @@ test.describe('watch history', () => {
   for (const preference of ['on', 'system']) {
     test(`watched thumbnail hover and focus stay instant with reduced motion ${preference}`, async ({ page }) => {
       await page.emulateMedia({ reducedMotion: preference === 'system' ? 'reduce' : 'no-preference' })
-      await page.evaluate(preference => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', preference), preference)
+      await page.evaluate(preference => window.$store.dispatch('updateReducedMotion', preference), preference)
       await goTo(page, 'history')
       const thumbnail = page.locator('.ft-list-video.watched .thumbnailLink').first()
       await expect(thumbnail).toBeVisible()
@@ -213,7 +213,7 @@ test.describe('watch history', () => {
 
   test('omits an unknown publication date after a failed video load', async ({ page }) => {
     await goTo(page, 'history')
-    await page.evaluate(record => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHistory', record),
+    await page.evaluate(record => window.$store.dispatch('updateHistory', record),
       historyEntry('missingdate1', 'Video with unavailable metadata', now, true, { published: 0 }))
 
     const video = page.locator('.ft-list-video').filter({ hasText: 'Video with unavailable metadata' })
@@ -303,7 +303,7 @@ test.describe('watch history', () => {
     await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1))
     await setWindowSize(app, page, { width: 1440, height: 950 })
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateBaseTheme', 'system')
       await store.dispatch('updateSystemDarkTheme', 'dark')
       await store.dispatch('updateSystemLightTheme', 'light')
@@ -336,7 +336,7 @@ test.describe('watch history', () => {
     }
     for (const [locale, labels] of Object.entries(compactLabels)) {
       await page.evaluate(locale => {
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale)
+        window.$store.dispatch('updateCurrentLocale', locale)
       }, locale)
       await expect(page.locator('html')).toHaveAttribute('lang', locale)
       for (const zoom of [1, 1.25]) {
@@ -377,7 +377,7 @@ test.describe('watch history', () => {
     const actions = page.locator('.headingActions')
     for (const locale of ['br', ...activeLocales.filter(locale => locale !== 'br')]) {
       await page.evaluate(locale => {
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale)
+        window.$store.dispatch('updateCurrentLocale', locale)
       }, locale)
       await expect(page.locator('html')).toHaveAttribute('lang', locale)
       for (const zoom of [1, 1.25]) {
@@ -415,7 +415,7 @@ test.describe('watch history', () => {
     for (const zoom of [1, 1.25]) {
       await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setTabBarPosition', 'left')
         store.commit('setVerticalTabBarWidth', 260)
       })
@@ -435,21 +435,21 @@ test.describe('watch history', () => {
       for (const trigger of ['resize', 'tab width', 'locale']) {
         if (trigger === 'locale') {
           await setWindowSize(app, page, { width: 440, height: 860 })
-          await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setVerticalTabBarWidth', 260))
+          await page.evaluate(() => window.$store.commit('setVerticalTabBarWidth', 260))
           await page.evaluate(() => {
-            document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', 'br')
+            window.$store.dispatch('updateCurrentLocale', 'br')
           })
           await page.waitForFunction(() => document.documentElement.lang === 'br')
         } else if (trigger === 'tab width') {
           await setWindowSize(app, page, { width: 340, height: 880 })
-          await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setVerticalTabBarWidth', 260))
+          await page.evaluate(() => window.$store.commit('setVerticalTabBarWidth', 260))
         }
         await actions.evaluate(element => { element.scrollLeft = element.scrollWidth })
         if (trigger === 'resize') await setWindowSize(app, page, { width: 732, height: 550 })
-        if (trigger === 'tab width') await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setVerticalTabBarWidth', 150))
+        if (trigger === 'tab width') await page.evaluate(() => window.$store.commit('setVerticalTabBarWidth', 150))
         if (trigger === 'locale') {
           await page.evaluate(() => {
-            document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', 'en-US')
+            window.$store.dispatch('updateCurrentLocale', 'en-US')
           })
           await page.waitForFunction(() => document.documentElement.lang === 'en-US')
         }
@@ -881,7 +881,7 @@ test.describe('watch history with an immediate watched threshold', () => {
     await expect(video).toBeVisible()
     await expect(video.locator('.watchedProgressBar')).toHaveCount(0)
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getHistoryCacheById.ddddddddddd
     })).toBeUndefined()
 
@@ -1054,7 +1054,7 @@ test.describe('history search locale changes', () => {
     await page.clock.install()
     await page.clock.pauseAt(new Date(Date.now() + 1000))
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateCurrentLocale', 'tr')
     })
     await expect(page.locator('.historySearchLoader')).toBeVisible()
@@ -1291,7 +1291,7 @@ test.describe('history date and channel browsing', () => {
     await page.getByLabel('From', { exact: true }).fill('2026-10-12')
     await expect(page.getByText('No videos in your history match these filters.')).toBeVisible()
     await page.getByLabel('From', { exact: true }).fill('')
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('removeFromHistory', 'imported001'))
+    await page.evaluate(() => window.$store.dispatch('removeFromHistory', 'imported001'))
     await expect(page.getByRole('combobox', { name: 'Channel', exact: true })).toContainText('Imported Channel')
     await expect(page.locator('.ft-list-video')).toHaveCount(0)
   })
@@ -1323,7 +1323,7 @@ test.describe('history date and channel browsing', () => {
     await expect(videos).toHaveCount(100)
     await scrollPageToEnd(page)
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const record = store.getters.getHistoryCacheSorted.find(record => record.authorId === 'UC-walking')
       await store.dispatch('overwriteHistory', new Map([[record.videoId, record]]))
     })
@@ -1331,7 +1331,7 @@ test.describe('history date and channel browsing', () => {
     await expectPageScrollWithinRenderedRange(page)
     await scrollPageToEnd(page)
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('removeFromHistory', store.getters.getHistoryCacheSorted[0].videoId)
     })
     await expect(videos).toHaveCount(0)
@@ -1397,7 +1397,7 @@ test.describe('history date and channel browsing', () => {
     await page.getByLabel('To', { exact: true }).fill('2026-10-13')
     await chooseChannel(page, 'Walking Channel')
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateBaseTheme', 'system')
       await store.dispatch('updateSystemDarkTheme', 'dark')
       await store.dispatch('updateSystemLightTheme', 'light')
@@ -1466,7 +1466,7 @@ test.describe('history date and channel browsing', () => {
     await goTo(page, 'history')
     await openHistoryFilters(page)
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateUiScale', 80)
     })
     await setWindowSize(app, page, { width: 375, height: 850 })

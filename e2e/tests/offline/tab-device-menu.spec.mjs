@@ -16,7 +16,7 @@ for (const layout of ['desktop', 'phone']) {
     if (layout === 'phone') await setWindowSize(app, page, { width: 375, height: 760 })
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await page.evaluate(async ({ key, salt, recipient, videoId, layout }) => {
-      const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+      const store = window.$store
       store.commit('setSyncServerEnabled', true)
       store.commit('setSyncServerAutoSync', false)
       store.commit('setSyncServerUrl', 'https://tab-sync.example')
@@ -49,7 +49,7 @@ for (const layout of ['desktop', 'phone']) {
     await attachScreenshot(`${layout} tab device picker`)
     if (layout === 'phone') {
       await page.evaluate(recipient => {
-        const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+        const store = window.$store
         const devices = { [recipient]: { name: 'Laptop', platform: 'linux' } }
         for (let i = 0; i < 20; i++) devices[`extra-${i}`] = { name: `Device ${i}`, platform: 'android' }
         store.commit('setSyncServerDevices', devices)
@@ -58,7 +58,7 @@ for (const layout of ['desktop', 'phone']) {
       await list.evaluate(element => { element.scrollTop = element.scrollHeight })
       await expect.poll(() => list.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
       await page.evaluate(recipient => {
-        document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+        window.$store
           .commit('setSyncServerDevices', { [recipient]: { name: 'Laptop', platform: 'linux' } })
       }, recipient)
       await expect.poll(() => list.evaluate(element => element.scrollTop)).toBe(0)
@@ -67,14 +67,14 @@ for (const layout of ['desktop', 'phone']) {
       await expect(openOnDevice).toBeFocused()
       await openOnDevice.click()
       await page.evaluate(() => {
-        document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+        window.$store
           .commit('setSyncServerDevices', {})
       })
       await menu.getByRole('menuitem', { name: 'Back', exact: true }).click()
       await expect(openOnDevice).toBeDisabled()
       await expect(menu.getByRole('menuitem', { name: 'Select Tab', exact: true })).toBeFocused()
       await page.evaluate(recipient => {
-        document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+        window.$store
           .commit('setSyncServerDevices', { [recipient]: { name: 'Laptop', platform: 'linux' } })
       }, recipient)
       await openOnDevice.click()

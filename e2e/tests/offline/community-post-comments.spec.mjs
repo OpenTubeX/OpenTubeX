@@ -34,7 +34,7 @@ test('Hide Comments controls post comments without hiding the post', async ({ pa
   expect(commentRequests).toBe(0)
 
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateHideComments', false)
   })
   await expect.poll(() => commentRequests).toBeGreaterThan(0)
@@ -42,7 +42,7 @@ test('Hide Comments controls post comments without hiding the post', async ({ pa
   await expect(page.locator('.noComments')).toBeVisible()
 
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateHideComments', true)
   })
   await expect(page.locator('.noComments')).toHaveCount(0)

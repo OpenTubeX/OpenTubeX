@@ -131,7 +131,7 @@ test.describe('Home subscription processing', () => {
     await page.setViewportSize({ width: 375, height: 812 })
     await goTo(page, 'userplaylists')
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       window.navigationCopies = 0
       window.navigationTimestampReads = 0
       for (const channel of Object.values(store.getters.getVideoCache)) {
@@ -157,13 +157,13 @@ test.describe('Home subscription processing', () => {
 
     // The shelf keeps the source entries reactive after skipping decoration.
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const channel = store.getters.getActiveProfile.subscriptions[0].id
       store.getters.getVideoCache[channel].videos[0].title = 'Updated Home video'
     })
     await expect(page.getByText('Updated Home video', { exact: true })).toBeVisible()
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const channel = store.getters.getActiveProfile.subscriptions[0].id
       store.getters.getVideoCache[channel].videos[0].isNewInSubscriptionFeed = false
     })
@@ -210,7 +210,7 @@ for (const limit of ['global', 'daily']) {
       await expect(cards).toHaveCount(1)
       await expect(cards).toContainText('Limited Short 0')
       await page.evaluate(thumbnailUrl => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         const channelId = store.getters.getActiveProfile.subscriptions[0].id
         const video = store.state.subscriptionCache.shortsCache[channelId].videos[0]
         store.commit('updateShortsCacheWithChannelPageShorts', {

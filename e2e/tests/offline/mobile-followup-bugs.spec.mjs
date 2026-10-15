@@ -32,7 +32,7 @@ test('synced channel tabs load an avatar without visiting the channel', async ({
     contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><rect width="40" height="40" fill="red"/></svg>'
   }))
   await page.evaluate(id => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setSyncServerEnabled', true)
     store.commit('setSyncServerToken', 'e2e-token')
     store.commit('setSyncServerPrivacyMode', 'enhanced')

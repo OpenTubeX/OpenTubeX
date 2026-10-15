@@ -13,7 +13,7 @@ for (const automatic of [true, false]) {
       status: 503, body: 'Offline restoration fixture'
     }))
     await page.evaluate(async automatic => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('stopSyncServerAutoSync')
       const settings = {
         SyncServerEnabled: true,
@@ -37,7 +37,7 @@ for (const automatic of [true, false]) {
       await expect.poll(() => page.evaluate(() => window.__themeAutoSyncAttempts)).toBe(automatic ? 1 : 0)
     } finally {
       await page.evaluate(async () => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         await store.dispatch('stopSyncServerAutoSync')
         window.__themeAutoSyncUnsubscribe()
         delete window.__themeAutoSyncUnsubscribe

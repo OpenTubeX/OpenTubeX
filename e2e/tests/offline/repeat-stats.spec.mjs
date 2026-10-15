@@ -186,7 +186,7 @@ for (const mode of ['scrolling', 'another tab']) {
         window.scrollTo(0, window.scrollY + element.getBoundingClientRect().bottom)
       })
     } else {
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await page.evaluate(() => window.$store
         .dispatch('updateScrollMiniPlayerOnAllTabs', true))
       await page.locator('.tabBar .newTabButton').click()
       await expect(page.locator('#cross-tab-mini-player-layer .ftVideoPlayer')).toBeVisible()

@@ -93,7 +93,7 @@ async function setWindowWidth(app, width) {
 
 function disableAutomaticPagination(page) {
   return page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', false)
   })
 }
@@ -252,7 +252,7 @@ test.describe('background watch tab', () => {
     const videoTab = page.locator(sel.tabs).first()
     await expect(videoTab).not.toHaveClass(/loading/)
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('activateTab', 'missing-tab')
     })
 
@@ -345,7 +345,7 @@ test.describe('watch page', () => {
       await route.continue()
     })
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', true)
     })
     const initialCommentCount = await commentCards.count()
@@ -653,7 +653,7 @@ test.describe('watch page', () => {
     const reloadComments = commentActions.locator('.reloadComments')
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setTabBarPosition', 'left')
       store.commit('setVerticalTabBarWidth', 180)
     })
@@ -697,7 +697,7 @@ test.describe('watch page', () => {
     await reloadComments.click({ trial: true })
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setTabBarPosition', 'top')
     })
     await expect(page.locator('.app')).not.toHaveClass(/verticalTabs/)
@@ -719,7 +719,7 @@ test.describe('watch page', () => {
     await setWindowWidth(app, 1600)
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', true)
     })
     await expect(page.getByRole('status', { name: 'Load More Comments' })).toHaveCount(0)
@@ -830,7 +830,7 @@ test.describe('watch page', () => {
       })
     })
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setUseSponsorBlock', true)
       await store.dispatch('updateSponsorBlockEnableSubmission', true)
     })
@@ -1181,7 +1181,7 @@ test.describe('watch page', () => {
     await expect(page.locator('.videoLayout')).toBeVisible()
 
     const scrollMetrics = await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateAlwaysShowScrollbars', true)
       await store.dispatch('updateUiScale', 95)
       const maxScrollTop = document.documentElement.scrollHeight - window.innerHeight
@@ -1469,7 +1469,7 @@ test.describe('custom Shorts player', () => {
   test('keeps a previous Short buffered when navigating back', async ({ page }) => {
     await page.route(/\/youtubei\/v1\/reel\/reel_item_watch/, route => route.fulfill({ json: {} }))
     await page.evaluate(() => {
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUseSponsorBlock', false)
+      window.$store.commit('setUseSponsorBlock', false)
     })
     await page.locator(sel.searchInput).fill('https://www.youtube.com/shorts/w1WKmSqwM8I')
     await page.locator(sel.searchInput).press('Enter')
@@ -1988,7 +1988,7 @@ test.describe('custom Shorts player', () => {
 
     // Scrubbing to the end must not count as completing the Short.
     await expect.poll(() => page.evaluate((expectedDuration) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const entry = store.getters.getHistoryCacheById.w1WKmSqwM8I
       return {
         nearEnd: document.querySelector('.ftVideoPlayer.shortsPlayer video').currentTime >= expectedDuration - 0.5,
@@ -2005,7 +2005,7 @@ test.describe('custom Shorts player', () => {
     }, duration - 2)
 
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const entry = store.getters.getHistoryCacheById.w1WKmSqwM8I
       return {
         watched: entry?.isWatched,
@@ -2021,7 +2021,7 @@ test.describe('custom Shorts player', () => {
       element.dispatchEvent(new Event('pause'))
     })
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const entry = store.getters.getHistoryCacheById.w1WKmSqwM8I
       return entry.watchProgress === entry.lengthSeconds
     })).toBe(true)

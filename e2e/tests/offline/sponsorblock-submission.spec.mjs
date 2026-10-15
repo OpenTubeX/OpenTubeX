@@ -53,7 +53,7 @@ for (const uiScale of [100, 95]) {
         element.currentTime = 7
       })
       await page.evaluate(async () => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         await store.dispatch('updateBaseTheme', 'system')
         await store.dispatch('updateSponsorBlockDraftSegmentsByVideoId', {
           jNQXAC9IVRw: [

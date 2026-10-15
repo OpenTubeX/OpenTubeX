@@ -86,7 +86,7 @@ test('compact bulk actions preserve the selection and mixed color state', async 
   const ids = await page.locator(sel.tabs).evaluateAll(tabs => tabs.map(tab => tab.dataset.tabId))
   const open = async () => {
     await page.evaluate(async ids => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('setTabSelection', ids)
     }, ids.slice(0, 2))
     await page.locator(`.tab[data-tab-id="${ids[0]}"]`).click({ button: 'right' })

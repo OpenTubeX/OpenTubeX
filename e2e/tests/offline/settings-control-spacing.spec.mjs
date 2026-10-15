@@ -39,7 +39,7 @@ for (const uiScale of [100, 95]) {
       const section = await goToSettingsSection(page, 'general')
       const grid = section.locator('.switchFlowGrid')
       for (const locale of ['en-US', 'de-DE']) {
-        await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)
+        await page.evaluate(locale => window.$store.dispatch('updateCurrentLocale', locale), locale)
         for (const viewportWidth of [480, 1600]) {
           await resize(app, page, viewportWidth, uiScale)
           for (const width of [400, 300, 650, 400]) {
@@ -69,7 +69,7 @@ for (const uiScale of [100, 95]) {
         }
       }
       await page.evaluate(async () => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         await store.dispatch('updateCurrentLocale', 'en-US')
         await store.dispatch('updateBaseTheme', 'system')
       })
@@ -86,7 +86,7 @@ for (const uiScale of [100, 95]) {
       const appearance = await goToSettingsSection(page, 'appearance')
       const grid = appearance.locator('.switchColumnGrid').first()
       for (const locale of ['en-US', 'de-DE']) {
-        await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)
+        await page.evaluate(locale => window.$store.dispatch('updateCurrentLocale', locale), locale)
         for (const width of [1000, 800, 650, 400, 1000]) {
           await resize(app, page, width === 400 ? 480 : 1600, uiScale)
           await appearance.evaluate((element, width) => { element.parentElement.style.inlineSize = `${width}px` }, width)
@@ -127,7 +127,7 @@ for (const uiScale of [100, 95]) {
       const row = appearance.locator('.tabSettingsRow')
       const content = page.locator('.settingsContent')
       for (const locale of ['en-US', 'de-DE']) {
-        await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)
+        await page.evaluate(locale => window.$store.dispatch('updateCurrentLocale', locale), locale)
         for (const width of [1000, 800, 650, 400, 1000]) {
           await content.evaluate(element => { element.scrollTop = element.scrollHeight })
           await resize(app, page, width === 400 ? 480 : 1600, uiScale)
@@ -234,7 +234,7 @@ for (const uiScale of [100, 95]) {
         await resize(app, page, viewportWidth, uiScale)
         await section.evaluate((element, width) => { element.parentElement.style.inlineSize = `${width}px` }, width)
         for (const highlightChangedSettings of [false, true]) {
-          await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHighlightChangedSettings', value), highlightChangedSettings)
+          await page.evaluate(value => window.$store.dispatch('updateHighlightChangedSettings', value), highlightChangedSettings)
           for (const direction of ['ltr', 'rtl']) {
             await page.evaluate(value => { document.body.dir = value }, direction)
             for (const name of ['SponsorBlock API URL', 'Private user ID (optional)']) {
@@ -319,13 +319,13 @@ for (const uiScale of [100, 95]) {
       const general = await goToSettingsSection(page, 'general')
       const content = page.locator('.settingsContent')
       for (const locale of ['en-US', 'de-DE']) {
-        await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)
+        await page.evaluate(locale => window.$store.dispatch('updateCurrentLocale', locale), locale)
         for (const width of [1000, 900, 801, 800, 650, 450, 800, 1000]) {
           await content.evaluate(element => { element.scrollTop = element.scrollHeight })
           await resize(app, page, width === 450 ? 480 : 1600, uiScale)
           await content.evaluate((element, width) => { element.style.inlineSize = `${width}px` }, width)
           for (const highlight of [false, true]) {
-            await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHighlightChangedSettings', value), highlight)
+            await page.evaluate(value => window.$store.dispatch('updateHighlightChangedSettings', value), highlight)
             for (const direction of ['ltr', 'rtl']) {
               await page.evaluate(value => { document.body.dir = value }, direction)
               const captions = await general.locator('.generalSelectGrid .select-placeholder').evaluateAll(elements => elements.map(element => {
@@ -403,7 +403,7 @@ for (const uiScale of [100, 95]) {
 
     test('channel settings searches span their subpage content at every width', async ({ app, page }, testInfo) => {
       await page.evaluate(() => {
-        const settings = document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.settings
+        const settings = window.$store.state.settings
         settings.channelPlaybackSpeeds = JSON.stringify(Object.fromEntries(Array.from({ length: 8 }, (_, index) => [`UC${String(index).padStart(22, '0')}`, 1.25])))
       })
       for (const [category, name, selector] of [
@@ -438,13 +438,13 @@ for (const uiScale of [100, 95]) {
 
     test('theme rows use two columns before stacking and keep a valid scroll range after reflow', async ({ app, page }, testInfo) => {
       const appearance = await goToSettingsSection(page, 'appearance')
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateBaseTheme', 'system'))
+      await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'system'))
       const theme = appearance.locator('.settingsSection').first()
       const rows = theme.locator('.themeSelectRow')
       await expect(rows).toHaveCount(3)
       const content = page.locator('.settingsContent')
       for (const locale of ['en-US', 'de-DE']) {
-        await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)
+        await page.evaluate(locale => window.$store.dispatch('updateCurrentLocale', locale), locale)
         for (const width of [900, 650, 400, 650, 900]) {
           await content.evaluate(element => { element.scrollTop = element.scrollHeight })
           await resize(app, page, width === 400 ? 480 : 1600, uiScale)

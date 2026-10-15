@@ -90,7 +90,7 @@ test('keeps a translated sync percentage together', async ({ page }) => {
   const section = await goToSettingsSection(page, 'sync')
   await section.locator('.switch-label').filter({ hasText: 'Enable Sync' }).click()
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setSyncServerStatus', 'syncing')
     store.commit('setSyncServerProgress', { stage: 'download', percentage: 100 })
   })

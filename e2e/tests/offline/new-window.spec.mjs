@@ -81,7 +81,7 @@ test.describe('multi-tab window close confirmation', () => {
     }, windowId)
     await closed
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getConfirmCloseWindowWithMultipleTabs
     })).toBe(false)
   })

@@ -33,7 +33,7 @@ for (const feed of ['videos', 'new', 'shorts']) {
       await cdp.send('Profiler.start')
     }
     const measureRefresh = () => page.evaluate(async (feed) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       // Replay fetched channel responses through the real cache IPC, persistence,
       // Vuex mutation and incremental-feed event, without network variability.
       const responses = Object.entries(store.getters.getVideoCache).slice(0, feed === 'shorts' ? 933 : 80)
@@ -149,7 +149,7 @@ test.describe('large cached feed with most entries hidden', () => {
     await expect(page.getByText('Video 0-0', { exact: true })).toBeVisible()
 
     const metrics = await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const responses = Object.entries(store.getters.getVideoCache).slice(0, 80)
         .map(([channelId, cache]) => ({
           channelId,
@@ -192,7 +192,7 @@ test('updates watched state in the New feed during a large refresh', async ({ pa
   await expect(page.getByText('Video 0-0', { exact: true })).toBeVisible()
 
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setSubscriptionFeedRefreshInProgress', true)
     store.commit('upsertToHistoryCache', {
       videoId: 'video-0-0',
@@ -212,7 +212,7 @@ test('updates New feed sort preference during a large refresh', async ({ page })
   await expect(firstEntry).toContainText('Video 0-0')
 
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setSubscriptionFeedRefreshInProgress', true)
     store.dispatch('updateNewSubscriptionFeedSortBy', 'oldest')
   })
@@ -224,7 +224,7 @@ test('rechecks premiere history after the clock advances and the Home feed recom
   const published = largeSubscriptionsSeed.subscriptionCache[0].videos[0].published
   await page.clock.setFixedTime(new Date(published))
   await page.evaluate(async timestamp => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const history = {
       ...store.getters.getHistoryCacheById,
       'video-0-0': {
@@ -242,7 +242,7 @@ test('rechecks premiere history after the clock advances and the Home feed recom
   // An unrelated settings change recomputes the selector, but does not mutate
   // this channel's entries or history record.
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateOnlyShowLatestFromChannel', true)
   })
   await expect(page.getByText('Video 0-0', { exact: true })).toHaveCount(0)
@@ -267,7 +267,7 @@ test.describe('consecutive refreshes with a changing cache size', () => {
 
     // Retain the pending promise while the large IPC payload triggers garbage collection.
     const refresh = await page.evaluateHandle(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const [channelId, cache] = Object.entries(store.getters.getVideoCache)[0]
       const videos = JSON.parse(JSON.stringify(cache.videos))
       store.commit('setSubscriptionFeedRefreshTab', 'videos')
@@ -295,7 +295,7 @@ test.describe('consecutive refreshes with a changing cache size', () => {
     await expect(page.getByText('Finished Videos snapshot', { exact: true })).toBeVisible()
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const [channelId, cache] = Object.entries(store.getters.getVideoCache)[0]
       const videos = JSON.parse(JSON.stringify(cache.videos))
       videos[0].title = 'Pending large-cache update'
@@ -308,7 +308,7 @@ test.describe('consecutive refreshes with a changing cache size', () => {
     await expect(page.getByText('Pending large-cache update', { exact: true })).toHaveCount(0)
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const [channelId, cache] = Object.entries(store.getters.getVideoCache)[0]
       await store.dispatch('updateSubscriptionVideosCacheByChannel', { channelId, videos: [cache.videos[0]] })
       store.commit('setSubscriptionFeedRefreshTab', 'live')
@@ -316,7 +316,7 @@ test.describe('consecutive refreshes with a changing cache size', () => {
     await expect(page.getByText('Pending large-cache update', { exact: true })).toBeVisible()
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const [channelId, cache] = Object.entries(store.getters.getVideoCache)[0]
       await store.dispatch('updateSubscriptionVideosCacheByChannel', {
         channelId, videos: [{ ...cache.videos[0], title: 'Incremental small-cache update' }]
@@ -325,7 +325,7 @@ test.describe('consecutive refreshes with a changing cache size', () => {
     })
     // Shrinking below the threshold restores coalesced incremental publication.
     await expect(page.getByText('Incremental small-cache update', { exact: true })).toBeVisible()
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await page.evaluate(() => window.$store
       .commit('setSubscriptionFeedRefreshInProgress', false))
     await expect(page.getByText('Incremental small-cache update', { exact: true })).toBeVisible()
   })

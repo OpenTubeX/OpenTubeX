@@ -31,12 +31,12 @@ test('vertical tab scrollbars halve their idle thickness and keep their full hit
     for (const scale of [1, 0.95, 1.25]) {
       await page.evaluate(({ position, scale }) => {
         window.ftElectron.setZoomFactor(scale)
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setTabBarPosition', position)
+        window.$store.commit('setTabBarPosition', position)
       }, { position, scale })
       for (const direction of ['ltr', 'rtl']) {
         await container.evaluate((element, direction) => { element.dir = direction }, direction)
         for (const width of [6, 10]) {
-          await page.evaluate(width => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setScrollbarThumbWidth', width), width)
+          await page.evaluate(width => window.$store.commit('setScrollbarThumbWidth', width), width)
           await page.mouse.move(500, 300)
           await expect(scrollbar).toHaveClass(/os-scrollbar-visible/)
           await expectThickness(width / 2)
@@ -56,7 +56,7 @@ test('vertical tab scrollbars halve their idle thickness and keep their full hit
   }
   await page.evaluate(() => {
     window.ftElectron.setZoomFactor(1)
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setTabBarPosition', 'left')
     store.commit('setScrollbarThumbWidth', 6)
   })
@@ -96,7 +96,7 @@ for (const position of ['left', 'right']) {
       await setWindowSize(app, page, { width: 800, height: 400 })
       await page.evaluate(async ({ position, scale }) => {
         window.ftElectron.setZoomFactor(scale)
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setTabBarPosition', position)
+        window.$store.commit('setTabBarPosition', position)
         for (let index = 0; index < 24; index++) {
           await window.ftElectron.tabs.create({
             route: '/history', title: `History ${index + 1}`, makeActive: false, lazyLoad: true

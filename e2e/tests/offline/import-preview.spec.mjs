@@ -15,7 +15,7 @@ async function chooseArchive(page, dataSection, archive, action, previewSelected
 
 async function savedData(page) {
   return page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return {
       profiles: store.getters.getProfileList,
       playlists: store.getters.getAllPlaylists,

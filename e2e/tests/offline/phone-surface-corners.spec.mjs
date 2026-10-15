@@ -148,7 +148,7 @@ for (const uiScale of [100, 125]) {
       await navigate(page, 'external-media?url=invalid')
       await expectFullWidth(page.locator('.externalMediaError:visible'))
       await expectSquare(page.locator('.externalMediaError:visible'))
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow'))
+      await page.evaluate(() => window.$store.dispatch('showSettingsWindow'))
       await expect(page.locator('.settingsWindow')).toBeVisible()
       await goToSettingsSection(page, 'theme')
       await expect(page.locator('.settingsWindow')).toHaveClass(/maximized/)
@@ -213,7 +213,7 @@ for (const uiScale of [100, 125]) {
     })
 
     test('removes the channel banner and metadata corner cutouts', async ({ page }, testInfo) => {
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateBackendPreference', 'invidious'))
+      await page.evaluate(() => window.$store.dispatch('updateBackendPreference', 'invidious'))
       await page.route('https://invidious.test/api/v1/channels/**', route => route.fulfill({
         json: {
           author: 'Documentary channel',
@@ -295,7 +295,7 @@ for (const uiScale of [100, 125]) {
       await chmod(executable, 0o755)
       await routeDemoMedia(page)
       await page.evaluate(async executable => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         await store.dispatch('updateYtDlpSource', 'system')
         await store.dispatch('updateYtDlpPath', executable)
       }, executable)
@@ -318,7 +318,7 @@ for (const uiScale of [100, 125]) {
       await openMockedVideo(page)
       await setWindowSize(app, page, { width: Math.round(650 * uiScale / 100), height: Math.round(812 * uiScale / 100) })
       await mockCapacitorPhoneLayout(page)
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('addVideoToWatchQueue', {
+      await page.evaluate(() => window.$store.commit('addVideoToWatchQueue', {
         video: { videoId: 'jNQXAC9IVRw', title: 'Me at the zoo', author: 'jawed' }
       }))
       const queue = page.locator('.watchVideoQueue:visible')

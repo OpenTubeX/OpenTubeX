@@ -2,7 +2,7 @@ import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
 
 async function setting(page, name, value) {
   await page.evaluate(async ({ name, value }) => {
-    await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(name, value)
+    await window.$store.dispatch(name, value)
   }, { name, value })
 }
 
@@ -140,13 +140,13 @@ test('left click toggles the window and disabling the tray restores it', async (
 test('close-to-tray preserves tabs and Quit exits hidden windows', async ({ app, page }) => {
   await captureTray(app, page)
   await setting(page, 'updateHideToTrayOnClose', true)
-  const tabs = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.tabs.tabs.map(tab => tab.id))
+  const tabs = await page.evaluate(() => window.$store.state.tabs.tabs.map(tab => tab.id))
   await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].close())
   await expect.poll(() => windowVisible(app)).toBe(false)
   expect(await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().length)).toBe(1)
   await trayClick(app)
   await expect.poll(() => windowVisible(app)).toBe(true)
-  expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.tabs.tabs.map(tab => tab.id))).toEqual(tabs)
+  expect(await page.evaluate(() => window.$store.state.tabs.tabs.map(tab => tab.id))).toEqual(tabs)
   await trayClick(app)
   const closed = app.electronApp.waitForEvent('close')
   await app.electronApp.evaluate(() => globalThis.testTrayMenu.items.find(item => item.label === 'Quit').click())
@@ -223,7 +223,7 @@ test('closing the final tab still exits with close-to-tray enabled', async ({ ap
   await setting(page, 'updateHideToTrayOnClose', true)
   const closed = app.electronApp.waitForEvent('close')
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     window.ftElectron.tabs.close(store.state.tabs.tabs[0].id)
   })
   await closed

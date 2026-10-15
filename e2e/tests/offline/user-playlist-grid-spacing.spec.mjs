@@ -64,12 +64,12 @@ test('playlist overview keeps valid scroll geometry when its content shrinks', a
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await goTo(page, 'userplaylists')
   const originalPlaylists = await page.evaluate(() => JSON.parse(JSON.stringify(
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.playlists.playlists
+    window.$store.state.playlists.playlists
   )))
   for (const trigger of ['thumbnail size', 'resize', 'search', 'remove', 'replace']) {
     await page.setViewportSize({ width: 393, height: 520 })
     await page.evaluate(async playlists => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setAllPlaylists', playlists)
       await store.dispatch('updateThumbnailSize', 110)
     }, originalPlaylists)
@@ -83,7 +83,7 @@ test('playlist overview keeps valid scroll geometry when its content shrinks', a
     else if (trigger === 'search') await updateInputWithoutScrolling(page.locator('.playlistSearch input'), 'Playlist 1')
     else {
       await page.evaluate(async trigger => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         if (trigger === 'thumbnail size') await store.dispatch('updateThumbnailSize', 60)
         else if (trigger === 'remove') store.commit('removePlaylists', store.state.playlists.playlists.slice(1).map(playlist => playlist._id))
         else store.commit('setAllPlaylists', store.state.playlists.playlists.slice(0, 1))

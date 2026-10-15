@@ -54,7 +54,7 @@ async function captureThemes(page, component, testInfo, name) {
     await page.emulateMedia({ colorScheme: scheme })
     await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${scheme}\\b`))
     await page.evaluate(async pack => {
-      await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', pack)
+      await window.$store.dispatch('updateIconPack', pack)
     }, scheme === 'dark' ? 'material' : 'remix')
     await component.screenshot({ path: testInfo.outputPath(`${name}-${scheme}.png`) })
   }
@@ -129,7 +129,7 @@ test('copies bounds into a new persisted draft and submits only after editing an
   expect(votes[0]).toEqual({ UUID: 'original-segment', videoID: 'jNQXAC9IVRw', userID: 'test-contributor', type: '0' })
   expect(submission).toBeNull()
   await expect.poll(() => page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return store.getters.getSponsorBlockDraftSegmentsByVideoId.jNQXAC9IVRw
   })).toEqual([expect.objectContaining({ startTime: 11, endTime: 12, category: 'sponsor', actionType: 'skip', previewed: false })])
 
@@ -206,7 +206,7 @@ test('stops muting when a category correction disables the last playback segment
   const { panel, video } = await openSegments(app, page, [{ ...timedSegment, actionType: 'mute' }])
   await page.route('**/api/voteOnSponsorTime?*', route => route.fulfill({ status: 200 }))
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setSponsorBlockIntro', { color: '#00ffff', skip: 'doNothing' })
   })
   await video.evaluate(element => {
@@ -313,7 +313,7 @@ for (const uiScale of [100, 95]) {
       })
       await panel.getByRole('button', { name: 'Close', exact: true }).click()
       await page.evaluate(() => {
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setSponsorBlockSkippedToastDuration', 1)
+        window.$store.commit('setSponsorBlockSkippedToastDuration', 1)
       })
       await video.evaluate(element => {
         element.currentTime = 11.2

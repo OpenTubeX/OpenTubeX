@@ -109,7 +109,7 @@ const commonSettings = {
 async function holdSeenMarks(page) {
   // Hold persistence pending, then run the real seen-mark action on release.
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const dispatch = store.dispatch
     store.dispatch = async function (type, ...args) {
       if (type === 'markSubscriptionEntriesAsSeen') {
@@ -206,7 +206,7 @@ test.describe('Reactive subscription title filtering', () => {
         await page.locator('[data-new-feed-tab="shorts"]').click()
         // Freeze the New selection as during an ongoing subscription refresh.
         await page.evaluate(() => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           store.commit('setSubscriptionFeedRefreshInProgress', true)
         })
       } else {
@@ -217,7 +217,7 @@ test.describe('Reactive subscription title filtering', () => {
       await expect(entries).toHaveCount(100)
       for (const title of ['Blocked updated short', 'Allowed updated short']) {
         await page.evaluate(({ channelId, title }) => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           const entry = store.state.subscriptionCache.shortsCache[channelId].videos[0]
           store.commit('updateShortsCacheWithChannelPageShorts', {
             channelId, entries: [{ ...entry, title }]
@@ -429,7 +429,7 @@ test.describe('new subscriptions feed', () => {
     const tabs = page.getByRole('tablist', { name: 'New content tabs' })
     for (const scale of [95, 125]) {
       await app.electronApp.evaluate(({ BrowserWindow }, scale) => BrowserWindow.getAllWindows()[0].setSize(Math.round(700 * scale / 100), 900), scale)
-      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+      await page.evaluate(value => window.$store.dispatch('updateUiScale', value), scale)
       await tabs.locator('.tabLabel').evaluateAll(labels => {
         const translations = ['Neue Videos', 'YouTube Shorts', 'Neue Livestreams', 'Neue Community-Beiträge der abonnierten Kanäle']
         labels.forEach((label, index) => {
@@ -560,7 +560,7 @@ test.describe('new subscriptions feed', () => {
     await page.getByRole('button', { name: 'Show tabbed view' }).click()
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       window.__markSeenMutations = []
       window.__unsubscribeMarkSeen = store.subscribe((mutation) => {
         if (mutation.type === 'markSubscriptionEntriesAsSeenInCache') {
@@ -706,7 +706,7 @@ test.describe('new subscriptions feed', () => {
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await expect(page.getByText('New video', { exact: true })).toBeVisible()
     await page.evaluate(channelId => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const video = store.state.subscriptionCache.videoCache[channelId].videos[0]
       video.title = 'Updated new video'
       video.viewCount = 42
@@ -717,7 +717,7 @@ test.describe('new subscriptions feed', () => {
     await page.locator('[data-subscription-feed-tab="shorts"]').click()
     await expect(page.getByText('New short', { exact: true })).toBeVisible()
     await page.evaluate(channelId => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.state.subscriptionCache.shortsCache[channelId].videos[0].title = 'Updated short'
     }, CHANNEL_ID)
     await expect(page.getByText('Updated short', { exact: true })).toBeVisible()
@@ -727,7 +727,7 @@ test.describe('new subscriptions feed', () => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateUiScale', 125)
       await store.dispatch('updateNewSubscriptionFeedView', 'tabbed')
     })
@@ -773,7 +773,7 @@ test.describe('new subscriptions feed', () => {
   test('marks watched and seen videos unseen without losing progress, including after restart', async ({ app, page, attachScreenshot }) => {
     await goTo(page, 'subscriptions')
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateWatchedPercentageThreshold', 0)
     })
     const alreadyNew = page.locator('.ft-list-video').filter({ has: page.getByText('New video', { exact: true }) })
@@ -790,7 +790,7 @@ test.describe('new subscriptions feed', () => {
     await expect(watched).not.toHaveClass(/watched/)
     await expect(watched.locator('.newContentDot')).toBeVisible()
     const readHistory = targetPage => targetPage.evaluate(() => (
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById['watched-new']
+      window.$store.getters.getHistoryCacheById['watched-new']
     ))
     await expect.poll(async () => (await readHistory(page)).isWatched).toBe(false)
     expect((await readHistory(page)).watchProgress).toBe(watchedVideo.lengthSeconds)
@@ -827,12 +827,12 @@ test.describe('new subscriptions feed', () => {
     await page.getByRole('menuitem', { name: 'Mark As Watched', exact: true }).click()
     await expect(card).toHaveClass(/watched/)
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const mark = JSON.parse(store.getters.getSubscriptionSeenVideos).find(entry => entry.videoId === 'watched-new')
       return mark?.seenAt > mark?.unseenAt
     })).toBe(true)
     const history = await page.evaluate(() => (
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById['watched-new']
+      window.$store.getters.getHistoryCacheById['watched-new']
     ))
     expect(history.watchProgress).toBe(watchedVideo.lengthSeconds)
     expect(history.timeWatched).toBe(now)
@@ -940,7 +940,7 @@ test.describe('new subscriptions feed', () => {
     await expect(postCard.locator('.newContentDot')).toBeVisible()
 
     const result = await page.evaluate(async ({ key, salt }) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const settings = {
         SyncServerEnabled: true,
         SyncServerUrl: 'https://seen-sync.example',
@@ -974,7 +974,7 @@ test.describe('new subscriptions feed', () => {
     await expect(page.getByText('New community post', { exact: true })).toHaveCount(0)
 
     await page.evaluate(async ({ channelId, posts }) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateSubscriptionPostsCacheByChannel', { channelId, posts, timestamp: new Date() })
     }, {
       channelId: CHANNEL_ID,
@@ -987,14 +987,14 @@ test.describe('new subscriptions feed', () => {
     await page.getByRole('option', { name: 'Mark As Seen', exact: true }).click()
     await expect(localPost).toHaveCount(0)
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('syncWithSyncServer')
     })
     expect((await decryptSyncDocument(remote.seenPosts, key)).map(entry => entry.postId).sort())
       .toEqual(['local-post', 'new-post-1', 'post-fetched-later'])
 
     await page.evaluate(async ({ channelId, videos }) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateSubscriptionVideosCacheByChannel', { channelId, videos, timestamp: new Date() })
     }, {
       channelId: CHANNEL_ID,
@@ -1018,7 +1018,7 @@ test.describe('new subscriptions feed', () => {
     await expect(relaunched.page.getByText('Fetched unseen video', { exact: true })).toBeVisible()
     await expect(relaunched.page.getByText('Fetched after sync', { exact: true })).toHaveCount(0)
     expect(await relaunched.page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return JSON.parse(store.getters.getSubscriptionSeenVideos).length
     })).toBe(10000)
   })
@@ -1180,7 +1180,7 @@ test.describe('new subscriptions feed sorting', () => {
     const sortSelect = page.locator('.headerSortSelect').getByRole('combobox')
     await expect(sortSelect).toHaveText('Newest first')
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setNewSubscriptionFeedSortBy', 'unsupported')
     })
     await expect(sortSelect).toHaveText('Newest first')
@@ -1193,7 +1193,7 @@ test.describe('new subscriptions feed sorting', () => {
     await expect.poll(() => videoTitles(page)).toEqual(['Oldest video', 'Newest video'])
     await expect.poll(() => postTexts(page)).toEqual(['Oldest post', 'Newest post'])
     await expect.poll(() => page.evaluate(() => {
-      return document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getNewSubscriptionFeedSortBy
+      return window.$store.getters.getNewSubscriptionFeedSortBy
     })).toBe('oldest')
 
     const relaunched = await app.relaunch()
@@ -1249,7 +1249,7 @@ test.describe('new feed settings and seen state', () => {
     const markAllAsSeen = page.getByRole('button', { name: 'Mark all as seen' })
     await expect(markAllAsSeen).toBeVisible()
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       window.__markSeenMutations = []
       window.__unsubscribeMarkSeen = store.subscribe((mutation) => {
         if (mutation.type === 'markSubscriptionEntriesAsSeenInCache') {
@@ -1768,7 +1768,7 @@ test.describe('large combined new feed', () => {
         await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 })
 
         await page.evaluate(() => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           window.__markAllSeenMetrics = { leaveReflows: 0, scrollAtCommit: null, animations: [] }
           const animate = Element.prototype.animate
           Element.prototype.animate = function (...args) {
@@ -1824,7 +1824,7 @@ test.describe('large combined new feed', () => {
         test('keeps entries arriving during the removal animation unseen', async ({ page, app }) => {
           await goTo(page, 'subscriptions')
           await page.evaluate(async channelId => {
-            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            const store = window.$store
             await store.dispatch('updateSubscriptionVideosCacheByChannel', {
               channelId,
               videos: store.getters.getVideoCache[channelId].videos.map(entry => entry.videoId === 'new-video-1'
@@ -1852,7 +1852,7 @@ test.describe('large combined new feed', () => {
           await expect.poll(() => page.evaluate(() => !!window.__markSeenAnimation)).toBe(true)
           // Apply the same cache writes as a refresh while removal is paused.
           await page.evaluate(async ({ channelId, incoming }) => {
-            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            const store = window.$store
             for (const [getter, action, field, entry] of [
               ['getVideoCache', 'updateSubscriptionVideosCacheByChannel', 'videos', incoming.video],
               ['getShortsCache', 'updateSubscriptionShortsCacheByChannel', 'videos', incoming.short],
@@ -1882,7 +1882,7 @@ test.describe('large combined new feed', () => {
           await expect(page.getByRole('button', { name: 'Mark all as seen' })).toBeEnabled()
           await expect(page.getByText('New video 0', { exact: true })).toHaveCount(0)
           expect(await page.evaluate(() => {
-            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            const store = window.$store
             return ['getVideoCache', 'getShortsCache', 'getLiveCache', 'getPostsCache'].map(getter => {
               const cache = store.getters[getter]
               const entry = Object.values(cache)[0]

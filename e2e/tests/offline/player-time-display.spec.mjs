@@ -25,9 +25,9 @@ test('autoplay keeps its original compact switch geometry at every UI roundness'
   await expect.soft(track).toHaveCSS('width', '36px', { timeout: 1000 })
   await expect.soft(track).toHaveCSS('height', '18px', { timeout: 1000 })
   for (const frosted of [true, false]) {
-    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+    await page.evaluate(value => window.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
     for (const roundness of [0, 50, 100, 200]) {
-      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), roundness)
+      await page.evaluate(value => window.$store.dispatch('updateUiRoundness', value), roundness)
       await expect(page.locator('body')).toHaveCSS('--ui-roundness', String(roundness / 100))
       await expect.soft(track).toHaveCSS('border-radius', '999px', { timeout: 1000 })
       for (const checked of [false, true]) {
@@ -49,7 +49,7 @@ test('autoplay track and thumb keep their synchronized transitions', async ({ ap
   await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
   const button = player.locator('.shaka-controls-button-panel > .autoplay-toggle')
   for (const frosted of [true, false]) {
-    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+    await page.evaluate(value => window.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
     await expect(player).toHaveClass(frosted ? /^(?!.*classicPlayerControls)/ : /classicPlayerControls/)
     const transitions = await button.evaluate(element => {
       const duration = (selector, property) => {
@@ -110,7 +110,7 @@ test('player controls, overlays, tooltips and captions follow the app font in bo
     }]
   }))
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setUseSponsorBlock', true)
     store.commit('setSponsorBlockHighlight', { color: '#ff1684', skip: 'promptToSkip' })
     store.commit('setEnableSubtitlesByDefault', true)
@@ -129,11 +129,11 @@ test('player controls, overlays, tooltips and captions follow the app font in bo
   await expect(player.locator('.ft-quick-playback-rate-button:not(.shaka-hidden)').first()).toBeVisible()
 
   for (const frosted of [true, false]) {
-    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+    await page.evaluate(value => window.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
     await expect(player).toHaveClass(frosted ? /^(?!.*classicPlayerControls)/ : /classicPlayerControls/)
     for (const scale of [1, 1.25]) {
       const font = scale === 1 ? 'Geist Variable' : 'Inter Variable'
-      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAppFont', value), font)
+      await page.evaluate(value => window.$store.dispatch('updateAppFont', value), font)
       const appFont = await page.locator('body').evaluate(element => getComputedStyle(element).fontFamily)
       expect(appFont).toContain(font)
       await app.electronApp.evaluate(({ BrowserWindow }, value) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(value), scale)
@@ -214,7 +214,7 @@ test('changing fonts remeasures paused controls and clipped menu labels without 
   const panel = player.locator('.shaka-controls-button-panel')
   const setFont = async font => {
     await page.evaluate(async value => {
-      await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAppFont', value)
+      await window.$store.dispatch('updateAppFont', value)
       // Force styles to resolve before waiting for the selected bundled font.
       document.querySelector('.ftVideoPlayer').getBoundingClientRect()
       await document.fonts.ready
@@ -293,7 +293,7 @@ test('portrait mobile controls keep captions and PiP in settings when the row is
     new MutationObserver(applyMobileClasses).observe(element, { attributeFilter: ['class'] })
     applyMobileClasses()
   })
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseQuickPlaybackSpeedBar', true))
+  await page.evaluate(() => window.$store.dispatch('updateUseQuickPlaybackSpeedBar', true))
   await mockPlayableWatchPage(app, page, { captionTranslations: true })
   const video = await openMockedVideo(page)
   await video.evaluate(element => element.pause())
@@ -368,7 +368,7 @@ test('Layout setting restores classic player controls and switches the active pl
   await expect(menu).toHaveCSS('backdrop-filter', 'none')
   await expect(menu).toHaveCSS('background-color', 'rgba(28, 28, 28, 0.9)')
 
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', true))
+  await page.evaluate(() => window.$store.dispatch('updateUseFrostedGlassPlayerUi', true))
   await expect(player).not.toHaveClass(/classicPlayerControls/)
   await expect(glass).toBeVisible()
   await expect(menu).toHaveCSS('backdrop-filter', /blur\(16px\)/)
@@ -383,7 +383,7 @@ test('play and pause icons morph in both player themes', async ({ app, page }) =
   const player = page.locator('.ftVideoPlayer')
 
   for (const frosted of [true, false]) {
-    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+    await page.evaluate(value => window.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
     await expect(player).toHaveClass(frosted ? /^(?!.*classicPlayerControls)/ : /classicPlayerControls/)
 
     for (const action of ['pause', 'play']) {
@@ -471,7 +471,7 @@ for (const shorterSeekRange of [false, true]) {
 }
 
 test('bottom control pills share the volume-to-timestamp spacing', async ({ app, page, attachScreenshot }) => {
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseQuickPlaybackSpeedBar', true))
+  await page.evaluate(() => window.$store.dispatch('updateUseQuickPlaybackSpeedBar', true))
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
   await video.evaluate(element => element.pause())
@@ -825,7 +825,7 @@ for (const scale of [1, 1.25]) {
     // Avoid landing on the fractional-pixel boundary found by the search.
     await setWidth(compactWidth - 4)
     await expect(panel).toHaveClass(/ft-controls-stack-times/)
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowPlaybackRateAdjustedTimestamp', false))
+    await page.evaluate(() => window.$store.dispatch('updateShowPlaybackRateAdjustedTimestamp', false))
     await expect(panel.locator('.ft-playback-adjusted-time')).toHaveClass(/shaka-hidden/)
     await expect(panel).not.toHaveClass(/ft-controls-stack-times/)
   })

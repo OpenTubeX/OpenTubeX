@@ -7,7 +7,7 @@ test('palette opening stays independent of library size on a throttled renderer'
   await expect(page.locator('.commandPalette')).toBeVisible()
   await page.keyboard.press('Escape')
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     window.__paletteMetadataReads = 0
     const history = Array.from({ length: 20000 }, (_, index) => ({
       videoId: `v${String(index).padStart(10, '0')}`,

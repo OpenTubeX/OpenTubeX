@@ -50,7 +50,7 @@ test.describe('search', () => {
     const preview = video.locator('.thumbnailPreview')
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateUiScale', 95)
     })
 
@@ -58,7 +58,7 @@ test.describe('search', () => {
     const videoId = /\/watch\/([^?]+)/.exec(href)?.[1]
     expect(videoId).toBeTruthy()
     await page.evaluate((videoId) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('upsertToHistoryCache', { videoId, isWatched: true })
     }, videoId)
     await expect(video).toHaveClass(/watched/)
@@ -121,7 +121,7 @@ test.describe('search', () => {
       .toBeGreaterThan(loaderCountAfterPlaceholder)
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setShowThumbnailPreviews', false)
     })
 
@@ -136,7 +136,7 @@ test.describe('search', () => {
     await expect(page.locator('.ft-list-video').first()).toBeVisible({ timeout: 30_000 })
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateUiScale', 95)
       store.commit('setTabBarPosition', 'left')
     })

@@ -64,7 +64,7 @@ for (const uiScale of [100, 125]) {
         const panel = page.locator('.playlistInfoContainer')
 
         for (const pack of ['material', 'remix']) {
-          await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', value), pack)
+          await page.evaluate(value => window.$store.dispatch('updateIconPack', value), pack)
           const video = page.locator('.playlistItemsCard .ft-list-video').filter({
             has: page.getByRole('link', { name: 'Playlist video 2', exact: true }),
           })
@@ -85,7 +85,7 @@ for (const uiScale of [100, 125]) {
           await infoLine.evaluate((element, previous) => { element.style.overflowX = previous }, previousOverflow)
           expect(actual.equals(unclipped), `${pack} avatar should look the same without metadata clipping`).toBe(true)
         }
-        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', 'material'))
+        await page.evaluate(() => window.$store.dispatch('updateIconPack', 'material'))
 
         for (const width of [1440, 700, 375]) {
           // Electron window sizes are physical pixels; preserve the intended CSS viewport at each zoom.
@@ -105,7 +105,7 @@ for (const uiScale of [100, 125]) {
             expect(fits, 'long author names should fit inside the grid action row').toBe(true)
           }
           for (const roundness of [100, 0, 200]) {
-            await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), roundness)
+            await page.evaluate(value => window.$store.dispatch('updateUiRoundness', value), roundness)
             await expect(panel).toHaveCSS('border-radius', `${12 * roundness / 100}px`, { timeout: 2000 })
             if (layout === 'grid') {
               await expect(panel).toHaveCSS('box-shadow', 'none')
@@ -127,7 +127,7 @@ for (const uiScale of [100, 125]) {
         }
 
         await page.setViewportSize({ width: Math.round(1440 * uiScale / 100), height: Math.round(900 * uiScale / 100) })
-        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', 100))
+        await page.evaluate(() => window.$store.dispatch('updateUiRoundness', 100))
         await expectImagesLoaded(page.locator('.playlistPage img:visible'))
         for (const theme of ['dark', 'light']) {
           await page.emulateMedia({ colorScheme: theme })
@@ -145,7 +145,7 @@ for (const uiScale of [100, 125]) {
 
         if (playlistViewType === 'grid') {
           await page.evaluate(async () => {
-            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            const store = window.$store
             await store.dispatch('addPlaylist', { playlistName: 'Local playlist layout', description: '', videos: [] })
           })
           await goTo(page, 'userplaylists')

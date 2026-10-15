@@ -362,7 +362,7 @@ test.describe('configured gamepad highlight roundness', () => {
     })
     const unfocusedSwitchPositions = await measureSwitchPositions()
     await page.evaluate(() => (
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showOutlines')
+      window.$store.dispatch('showOutlines')
     ))
     await switchInput.evaluate(element => element.focus({ focusVisible: true }))
     await expect(switchInput).toBeFocused()

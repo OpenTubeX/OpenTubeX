@@ -128,7 +128,7 @@ test.describe('skip silence session restore', () => {
     })
 
     await page.evaluate(async (tabId) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateTabSkipSilence', { tabId, value: false })
     }, SAVED_TAB_ID)
     await expect.poll(async () => {
@@ -329,7 +329,7 @@ test.describe('restored watch tab startup priority', () => {
       })
       try {
         await page.evaluate(async autoplay => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           await store.dispatch('updateBackendPreference', 'local')
           await store.dispatch('updateAutoplayVideos', autoplay)
         }, autoplay)
@@ -374,7 +374,7 @@ test.describe('restored watch tab startup priority', () => {
   test('releases queued tabs when the video is unavailable', async ({ app, page }) => {
     await mockUnplayableWatchPage(app, page)
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateBackendPreference', 'local')
     })
     await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
@@ -491,7 +491,7 @@ test.describe('subscriptions refresh with restored watch tabs', () => {
     await expect(page.locator(`.tabContent[data-tab-id="${watchTabIds[1]}"] .browsingBehindWatch`)).toHaveCount(0)
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setSubscriptionFeedRefreshTab', 'videos')
       store.commit('setSubscriptionFeedRefreshInProgress', true)
     })

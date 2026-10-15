@@ -34,8 +34,7 @@ async function setImage(page, file = imageFile) {
 }
 
 async function dispatch(page, action, payload) {
-  await page.evaluate(({ action, payload }) => document.querySelector('#app').__vue_app__
-    .config.globalProperties.$store.dispatch(action, payload), { action, payload })
+  await page.evaluate(({ action, payload }) => window.$store.dispatch(action, payload), { action, payload })
 }
 
 test.use({
@@ -200,7 +199,7 @@ test('a failed save keeps the selected image available for retry', async ({ page
   await page.getByTitle('Edit Playlist Info').click()
   const custom = await setImage(page)
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const dispatch = store.dispatch
     store.dispatch = (action, payload) => {
       if (action === 'updatePlaylist') {
@@ -226,7 +225,7 @@ test('playlist imports restore thumbnails for existing and new playlists', async
   const custom = await setImage(page)
   await page.getByTitle('Save Changes').click()
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const playlist = store.getters.getPlaylist('custom-thumbnail-playlist')
     window.__thumbnailImport = JSON.stringify(playlist) + '\n' + JSON.stringify({ ...playlist, _id: 'imported-thumbnail', playlistName: 'Imported thumbnail' })
     window.showOpenFilePicker = async () => [{
@@ -237,7 +236,7 @@ test('playlist imports restore thumbnails for existing and new playlists', async
   const dataSection = await goToSettingsSection(page, 'data')
   await dataSection.getByRole('button', { name: /^Import playlists$/i }).click()
   await expect.poll(() => page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return ['custom-thumbnail-playlist', 'imported-thumbnail'].map(id => store.getters.getPlaylist(id)?.customThumbnail)
   })).toEqual([custom, custom])
   await goTo(page, 'userplaylists')
@@ -260,8 +259,7 @@ test('playlist imports reject malformed and oversized data and resize oversized 
     }, thumbnail)
     await section.getByRole('button', { name: /^Import playlists$/i }).click()
   }
-  const savedThumbnail = () => page.evaluate(() => document.querySelector('#app').__vue_app__
-    .config.globalProperties.$store.getters.getPlaylist('custom-thumbnail-playlist').customThumbnail)
+  const savedThumbnail = () => page.evaluate(() => window.$store.getters.getPlaylist('custom-thumbnail-playlist').customThumbnail)
   for (const invalid of ['data:image/webp;base64,AAAA', `data:image/png;base64,${'A'.repeat(2_000_000)}`]) {
     await importThumbnail(invalid)
     await expect(page.getByText('The selected image could not be loaded').first()).toBeVisible()
@@ -278,7 +276,7 @@ test('playlist imports reject malformed and oversized data and resize oversized 
   await expect.poll(savedThumbnail).not.toBe(custom)
   const dimensions = await page.evaluate(async () => {
     const image = new Image()
-    image.src = document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPlaylist('custom-thumbnail-playlist').customThumbnail
+    image.src = window.$store.getters.getPlaylist('custom-thumbnail-playlist').customThumbnail
     await image.decode()
     return [image.naturalWidth, image.naturalHeight]
   })

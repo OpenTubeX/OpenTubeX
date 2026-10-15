@@ -51,7 +51,7 @@ test.describe('tab previews', () => {
     test(`slides one persistent tooltip between ${position} tabs`, async ({ page }) => {
       await page.evaluate(async position => {
         await window.ftElectron.setZoomFactor(0.95)
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setTabBarPosition', position)
         for (const title of ['First preview', 'Second preview']) {
           await window.ftElectron.tabs.create({ title, route: '/watch/preview', makeActive: false, lazyLoad: true })
@@ -134,7 +134,7 @@ test.describe('tab previews', () => {
   for (const position of ['left', 'top']) {
     test(`slides during the initial ${position} tooltip fade`, async ({ page }) => {
       await page.evaluate(async position => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setTabBarPosition', position)
         for (const title of ['First preview', 'Second preview']) {
           await window.ftElectron.tabs.create({ title, makeActive: false, lazyLoad: true })
@@ -220,7 +220,7 @@ test.describe('tab previews', () => {
 
   test('keeps the tooltip clear of the page scrollbar beside right vertical tabs', async ({ page, attachScreenshot }) => {
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setVerticalTabBarWidth', 220)
       store.commit('setTabBarPosition', 'right')
 
@@ -251,7 +251,7 @@ test.describe('tab previews', () => {
     await hoverTabForPreview(page, 0)
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateShowTabPreviews', false)
     })
 
@@ -309,7 +309,7 @@ test.describe('tab previews', () => {
     const activeTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
 
     await page.evaluate(async (tabId) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const capturePromise = window.ftElectron.tabs.capturePreview(tabId)
       window.ftElectron.tabs.setPreviewCapturePaused(true)
       await store.dispatch('updateShowTabPreviews', false)
@@ -325,7 +325,7 @@ test.describe('tab previews', () => {
     }).toBe(null)
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateShowTabPreviews', true)
       await new Promise(resolve => requestAnimationFrame(resolve))
       window.ftElectron.tabs.setPreviewCapturePaused(false)
@@ -438,7 +438,7 @@ test.describe('tab group previews', () => {
       // Install before tab and tooltip setup can start asynchronous preview work.
       await page.clock.install()
       await page.evaluate(showPreview => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setTabBarPosition', 'left')
         store.commit('setShowTabPreviews', showPreview)
       }, showPreview)
@@ -524,7 +524,7 @@ test.describe('tab group previews', () => {
       await page.setViewportSize({ width: 800, height: 450 })
       await page.evaluate(async position => {
         await window.ftElectron.setZoomFactor(0.95)
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setTabBarPosition', position)
       }, position)
       await createCollapsedPreviewGroup(page, 8)
@@ -579,13 +579,13 @@ test.describe('tab group previews', () => {
     await expect(item.locator('.tabTooltipGridTitleIcon')).toHaveAttribute('data-icon', 'circle-user')
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateShowTabIcons', false)
     })
     await expect(page.locator('.tabTooltipGridTitleIcon, .tabTooltipGridTitleAvatar')).toHaveCount(0)
     await expect(page.locator('.tabTooltipGridTitleText')).toHaveCount(5)
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateShowTabIcons', true)
     })
     await expect(page.locator('.tabTooltipGridTitleIcon')).toHaveCount(5)
@@ -596,7 +596,7 @@ test.describe('tab group previews', () => {
 
   test('keeps the custom title and count when previews are disabled', async ({ page, attachScreenshot }) => {
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateBaseTheme', 'dark')
     })
     await createCollapsedPreviewGroup(page)
@@ -605,7 +605,7 @@ test.describe('tab group previews', () => {
     const tooltip = page.locator('.tabGroupTooltip')
     await expect(tooltip.locator('.tabTooltipGridItem')).toHaveCount(4)
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateShowTabPreviews', false)
     })
     await expect(tooltip).toBeVisible()
@@ -615,7 +615,7 @@ test.describe('tab group previews', () => {
     expect((await tooltip.boundingBox()).width).toBeLessThan(200)
     await attachScreenshot('group tooltip without previews in dark theme')
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateShowTabPreviews', true)
     })
     await expect(tooltip.locator('.tabTooltipGridItem')).toHaveCount(4)

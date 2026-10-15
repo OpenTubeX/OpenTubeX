@@ -30,7 +30,7 @@ test.describe('Ctrl+Tab responsiveness', () => {
     try {
       await page.evaluate(() => {
         window.ftElectron.tabs.setPreviewCapturePaused(false)
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         window.__slowPreview = window.ftElectron.tabs.capturePreview(store.getters.getActiveTabId)
       })
       await expect.poll(() => app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.__delayedPreviewCapture.started)).toBe(true)
@@ -83,7 +83,7 @@ for (const uiScale of [100, 125]) {
         await page.route(/^https?:\/\//, abortUnmockedRequest)
         // A floating settings window makes forced document layout particularly
         // expensive. Keep it open while switching already-mounted pages.
-        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow'))
+        await page.evaluate(() => window.$store.dispatch('showSettingsWindow'))
         await expect(page.locator('.settingsWindow')).toBeVisible()
         const ids = []
         for (const route of ['/history', '/about']) {

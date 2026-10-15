@@ -12,7 +12,7 @@ for (const [uiScale, reducedMotion, compactNavigationLabels] of [
       await setWindowSize(app, page, { width: 400, height: 850 })
       await goTo(page, 'settings')
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setShowProgressBar', true)
         store.commit('setProgressBarPercentage', 50)
         document.querySelector('.app > .flexBox').style.minHeight = '3000px'
@@ -70,7 +70,7 @@ for (const [uiScale, reducedMotion, compactNavigationLabels] of [
       })
       const nav = page.locator('.sideNav')
       await expect(nav).toHaveClass(/scrollHidden/)
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAlwaysShowNavigationBar', true))
+      await page.evaluate(() => window.$store.dispatch('updateAlwaysShowNavigationBar', true))
       await expect(nav).not.toHaveClass(/scrollHidden/)
       for (const top of [400, 600, 500]) {
         await page.evaluate(top => window.scrollTo(0, top), top)
@@ -78,7 +78,7 @@ for (const [uiScale, reducedMotion, compactNavigationLabels] of [
         await expect(nav).not.toHaveClass(/scrollHidden/)
         await expect.poll(() => nav.evaluate(element => Math.abs(element.getBoundingClientRect().bottom - window.innerHeight))).toBeLessThan(1)
       }
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAlwaysShowNavigationBar', false))
+      await page.evaluate(() => window.$store.dispatch('updateAlwaysShowNavigationBar', false))
       await page.evaluate(() => window.scrollTo(0, 700))
       await expect(nav).toHaveClass(/scrollHidden/)
       await page.evaluate(() => window.scrollTo(0, 600))
@@ -91,7 +91,7 @@ for (const [uiScale, reducedMotion, compactNavigationLabels] of [
       await goTo(page, 'subscriptions')
       await page.evaluate(() => {
         document.querySelector('.app').classList.add('capacitorPhoneLayout')
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setShowProgressBar', true)
         store.commit('setProgressBarPercentage', 50)
         document.querySelector('.app > .flexBox').style.minHeight = '3000px'

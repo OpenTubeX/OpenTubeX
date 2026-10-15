@@ -194,7 +194,7 @@ test('full-window docks preserve zoom, stacked panel controls and rapid toggles'
     expect(await video.evaluate(element => element.style.transform)).toBe(zoomTransform)
 
     await page.evaluate(async () => {
-      await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'on')
+      await window.$store.dispatch('updateReducedMotion', 'on')
     })
     const reduced = await measureFullscreenDockToggle(watch, true)
     expect(reduced.animationKeyframes).toEqual([])

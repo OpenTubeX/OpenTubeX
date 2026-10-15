@@ -29,7 +29,7 @@ test.describe('fresh AI video summary default', () => {
     await summaryMode.scrollIntoViewIfNeeded()
     await page.screenshot({ path: testInfo.outputPath('summary-default-collapsed.png') })
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateConfirmCloseApp', false)
     })
 
@@ -311,7 +311,7 @@ test('flows Player switches across balanced rows when some are unavailable', asy
     }
   })
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return store.dispatch('updateUiScale', 95)
   })
 
@@ -970,7 +970,7 @@ test.describe('settings', () => {
     await expect(subtitleCookies).toBeDisabled()
 
     for (const highlightChangedSettings of [false, true]) {
-      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHighlightChangedSettings', value), highlightChangedSettings)
+      await page.evaluate(value => window.$store.dispatch('updateHighlightChangedSettings', value), highlightChangedSettings)
       for (const direction of ['ltr', 'rtl']) {
         await page.evaluate(value => { document.body.dir = value }, direction)
         const [sourceBox, browserBox, profileBox] = await Promise.all([
@@ -1157,7 +1157,7 @@ test.describe('settings', () => {
     await expect(slider).toBeEnabled()
     await slider.fill('7.5')
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return [store.getters.getPlayingInterfaceHideDelay, store.getters.getPausedInterfaceHideDelay]
     })).toEqual([7.5, 2.5])
     await goToSettingsSection(page, 'privacy')
@@ -1181,7 +1181,7 @@ test.describe('settings', () => {
     await disableAbRepeat.locator('..').locator('label.switch-label').click()
     await expect(disableAbRepeat).toBeChecked()
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getDisableAbRepeat
     })).toBe(true)
   })
@@ -1197,7 +1197,7 @@ test.describe('settings', () => {
     await page.getByRole('option', { name: 'Expanded', exact: true }).click()
     await expect(summaryMode).toHaveText('Expanded')
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getAiVideoSummaryMode
     })).toBe('expanded')
     const { page: relaunchedPage } = await app.relaunch()
@@ -1224,7 +1224,7 @@ test.describe('settings', () => {
     })
     await expect(ignoredLanguages).toContainText('German')
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getCommentTranslationIgnoredLanguages
     })).toEqual(['de'])
 
@@ -1324,7 +1324,7 @@ test.describe('settings', () => {
 
     await expectControlsInsideCategories()
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateUiScale', 95)
     })
     await expect.poll(() => page.evaluate(() => window.devicePixelRatio)).toBeCloseTo(0.95, 2)
@@ -1335,7 +1335,7 @@ test.describe('settings', () => {
     const addOns = await goToSettingsSection(page, 'add-ons')
     const channelId = 'UC0000000000000000000000'
     await page.evaluate(async id => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateUseSponsorBlock', true)
       await store.dispatch('updateSponsorBlockChannelWhitelist', [id])
     }, channelId)
@@ -1345,7 +1345,7 @@ test.describe('settings', () => {
     await channels.getByRole('button', { name: 'Remove' }).click()
     await expect(channels.locator('.name')).toHaveCount(0)
     expect(await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getSponsorBlockChannelWhitelist
     })).toEqual([])
   })
@@ -1358,7 +1358,7 @@ test.describe('settings', () => {
     }))
     await goTo(page, 'settings')
     await page.evaluate(async id => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateBackendPreference', 'invidious')
       await store.dispatch('updateUseSponsorBlock', true)
       await store.dispatch('updateSponsorBlockEnableSubmission', true)
@@ -1373,7 +1373,7 @@ test.describe('settings', () => {
     await expect.poll(() => avatarImage.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateUiScale', 95)
     })
 
@@ -1383,7 +1383,7 @@ test.describe('settings', () => {
     })
     expect(gap).toBeGreaterThanOrEqual(12)
     expect(await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getSponsorBlockChannelWhitelist
     })).toEqual([channelId])
   })
@@ -1397,7 +1397,7 @@ test.describe('settings', () => {
     })
     await goTo(page, 'settings')
     await page.evaluate(async id => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateBackendPreference', 'invidious')
       await store.dispatch('updateUseSponsorBlock', false)
       await store.dispatch('updateUseDeArrowTitles', false)
@@ -1412,7 +1412,7 @@ test.describe('settings', () => {
     expect(lookups).toBe(0)
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateUseSponsorBlock', true)
     })
     await expect(channels.locator('.name')).toHaveText('Example Channel')
@@ -1435,7 +1435,7 @@ test.describe('settings', () => {
     })
     await goTo(page, 'settings')
     await page.evaluate(async id => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateBackendPreference', 'invidious')
       await store.dispatch('updateUseSponsorBlock', true)
       await store.dispatch('updateSponsorBlockChannelWhitelist', [id])
@@ -1472,7 +1472,7 @@ test.describe('settings', () => {
     })
     await goTo(page, 'settings')
     await page.evaluate(async id => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateBackendPreference', 'invidious')
       await store.dispatch('updateUseSponsorBlock', true)
       await store.dispatch('updateSponsorBlockChannelWhitelist', [id])
@@ -1511,7 +1511,7 @@ test.describe('settings', () => {
     })
     await goTo(page, 'settings')
     await page.evaluate(async id => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateBackendPreference', 'invidious')
       await store.dispatch('updateBackendFallback', false)
       await store.dispatch('updateUseSponsorBlock', true)
@@ -1522,7 +1522,7 @@ test.describe('settings', () => {
     const channels = addOns.locator('.ft-input-tags-component').filter({ hasText: 'Excluded Channels' })
     await expect.poll(() => lookups).toBe(1)
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateBackendFallback', true)
     })
     finishFirstLookup()
@@ -1534,7 +1534,7 @@ test.describe('settings', () => {
     await setWindowSize(app, page, { width: 480, height: 800 })
     const addOns = await goToSettingsSection(page, 'add-ons')
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.dispatch('updateHighlightChangedSettings', true)
     })
 
@@ -1791,7 +1791,7 @@ test.describe('settings', () => {
 
     await expectControlsAligned()
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateUiScale', 125)
     })
     await expect.poll(() => page.evaluate(() => window.devicePixelRatio)).toBeCloseTo(1.25, 2)
@@ -1951,7 +1951,7 @@ test.describe('settings', () => {
 
   test('keeps the current compact view throughout the close animation at 95% UI scale', async ({ page }) => {
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({
         x: 40,
         y: 40,
@@ -2005,7 +2005,7 @@ test.describe('settings', () => {
     const handlerSource = appSource.match(/function handleHardwareKeyboardChange\(event\) \{[\s\S]*?\n\}/)?.[0]
     expect(handlerSource).toBeTruthy()
     const reportKeyboardState = attached => page.evaluate(`(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const hardwareKeyboardAttached = { value: ${!attached} }
       ${handlerSource}
       handleHardwareKeyboardChange({ attached: ${attached} })
@@ -2064,7 +2064,7 @@ test.describe('settings', () => {
 
   test('preserves category scroll when Settings is toggled but resets it when switching categories', async ({ app, page }) => {
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.dispatch('updateUiScale', 95)
     })
     await pressSettingsShortcut(app)
@@ -2112,7 +2112,7 @@ test.describe('settings', () => {
   test('minimizes utility windows into the header and restores their view', async ({ page }) => {
     for (const view of [null, 'about', 'downloads']) {
       await page.evaluate((windowView) => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         return store.dispatch('showSettingsWindow', windowView)
       }, view)
 
@@ -2191,7 +2191,7 @@ test.describe('settings', () => {
   })
 
   test('searches setting labels and opens their category', async ({ page }) => {
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', 'en-US'))
+    await page.evaluate(() => window.$store.dispatch('updateCurrentLocale', 'en-US'))
     await goTo(page, 'settings')
     const search = page.getByRole('searchbox', { name: 'Search settings' })
     await expect(search).toBeVisible()
@@ -2566,7 +2566,7 @@ test.describe('settings', () => {
         width: 400,
         height: 650
       }))
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       for (let index = 0; index < 8; index++) {
         store.commit('upsertYtDlpDownload', {
           id: index + 1,
@@ -2607,7 +2607,7 @@ test.describe('settings', () => {
         width: 400,
         height: 650
       }))
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       for (let index = 0; index < 8; index++) {
         store.commit('upsertYtDlpDownload', {
           id: index + 1,
@@ -2625,12 +2625,12 @@ test.describe('settings', () => {
     await expect.poll(() => downloadsScroll.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.dispatch('showSettingsWindow', 'about')
     })
     await expect(page.getByRole('dialog', { name: 'About', exact: true })).toBeVisible()
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.dispatch('showSettingsWindow', 'downloads')
     })
 
@@ -2887,7 +2887,7 @@ test.describe('settings', () => {
 
   test('keeps saved-channel controls in two columns without narrow wrapping', async ({ page, attachScreenshot }) => {
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return Promise.all([
         store.dispatch('updateChannelPlaybackSpeeds', JSON.stringify({
           channel1: 1,
@@ -2925,7 +2925,7 @@ test.describe('settings', () => {
         width: 500,
         height: 450
       }))
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return Promise.all([
         store.dispatch('updateChannelPlaybackSpeeds', JSON.stringify(Object.fromEntries(
           Array.from({ length: 8 }, (_, index) => [`channel${index}`, 1 + index / 10])
@@ -3029,7 +3029,7 @@ test.describe('settings', () => {
       // reduced motion back off would otherwise slide the settings unprompted.
       await expect(page.locator('.settingsContent')).not.toHaveClass(/settingsSectionSlide/)
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         return store.dispatch('updateReducedMotion', 'off')
       })
       await page.waitForTimeout(500)
@@ -3315,7 +3315,7 @@ test.describe('settings', () => {
     await goTo(page, 'settings')
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setScrollSpeed', 200)
       document.body.style.minBlockSize = '4000px'
       document.scrollingElement.scrollTop = 1000
@@ -3523,7 +3523,7 @@ test.describe('settings', () => {
   for (const scale of [1, 1.25]) {
     test(`keeps the settings scrollbar stationary while dragging animation speed at ${scale} scale`, async ({ page }) => {
       await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAnimationSpeed', 50))
+      await page.evaluate(() => window.$store.dispatch('updateAnimationSpeed', 50))
       await goTo(page, 'settings')
       await page.locator('.settingsMenu [data-section="appearance"]').click()
       const slider = page.getByRole('slider', { name: /Animation Speed/ })
@@ -3583,7 +3583,7 @@ test.describe('settings', () => {
 
     await slider.fill('200')
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getAnimationSpeed
     })).toBe(200)
 
@@ -3597,13 +3597,13 @@ test.describe('settings', () => {
     })).toBe(1)
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.dispatch('updateReducedMotion', 'on')
     })
     await expect(slider).toBeDisabled()
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.dispatch('updateReducedMotion', 'off')
     })
     await expect(slider).toBeEnabled()
@@ -3617,7 +3617,7 @@ test.describe('settings', () => {
     await expect(slider).toHaveValue('100')
     await slider.fill('200')
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getScrollSpeed
     })).toBe(200)
 
@@ -3629,7 +3629,7 @@ test.describe('settings', () => {
 
     await slider.fill('50')
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getScrollSpeed
     })).toBe(50)
     await content.evaluate(element => { element.scrollTop = 0 })
@@ -3699,9 +3699,9 @@ test.describe('settings', () => {
     await expect(syncSection.getByLabel(/Privacy passphrase/)).toBeHidden()
     await expect(syncSection.locator('.privacyHint')).toBeHidden()
     await expect(syncSection.getByText(/does not support enhanced privacy/)).toBeHidden()
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', 'de-DE'))
+    await page.evaluate(() => window.$store.dispatch('updateCurrentLocale', 'de-DE'))
     await expect(syncSection.locator('.error')).toHaveText('Aktualisiere diesen Server, um verschlüsselte Live-Synchronisierung zu unterstützen.')
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', 'en-US'))
+    await page.evaluate(() => window.$store.dispatch('updateCurrentLocale', 'en-US'))
     await expect(syncSection.locator('.error')).toHaveText('Update this server to support encrypted live sync.')
     await expect(syncSection.getByRole('button', { name: 'Log in' })).toBeDisabled()
     await syncSection.getByLabel('Sync server URL').fill('https://sync.libretube.dev')
@@ -3798,7 +3798,7 @@ test.describe('settings', () => {
     expect(JSON.stringify(createdSession)).not.toMatch(/privacy|passphrase|password|username|jwt/i)
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.dispatch('updateUiScale', 95)
     })
     await page.setViewportSize({ width: 600, height: 420 })
@@ -4029,7 +4029,7 @@ test.describe('settings', () => {
     await resetButton.click()
 
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return {
         blurThumbnails: store.getters.getBlurThumbnails,
         thumbnailPreference: store.getters.getThumbnailPreference
@@ -4054,7 +4054,7 @@ test.describe('settings', () => {
     expect(await getCenterOffset()).toBeLessThanOrEqual(1)
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateUiScale', 95)
     })
     await expect.poll(() => page.evaluate(() => window.devicePixelRatio)).toBeCloseTo(0.95, 2)
@@ -4066,7 +4066,7 @@ test.describe('settings', () => {
       .click()
     await expect(toggle).not.toBeChecked()
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getShowThumbnailPreviews
     })).toBe(false)
   })
@@ -4376,7 +4376,7 @@ test.describe('settings', () => {
       // base inset. Keep that desktop tab on the edge opposite the one under
       // test so it cannot affect the toast's horizontal alignment.
       await page.evaluate((tabBarPosition) => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setTabBarPosition', tabBarPosition)
       }, edge === 'bottom' ? 'right' : 'left')
       await expect(holder).not.toHaveClass(/horizontal-tabs/)
@@ -4465,7 +4465,7 @@ test.describe('settings', () => {
     await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
     await expect.poll(() => page.evaluate(() => window.devicePixelRatio)).toBeCloseTo(1.25, 2)
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setProgressBarMessage', 'Phone progress toast')
       store.commit('setProgressBarPercentage', 50)
       store.commit('setShowProgressBar', true)
@@ -5370,7 +5370,7 @@ test.describe('sync settings', () => {
     await expect(username).toHaveValue('')
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.dispatch('completeSyncServerPairing', {
         serverUrl: 'https://sync.example',
         username: 'paired-user',
@@ -5393,7 +5393,7 @@ test.describe('sync settings', () => {
 
   test('records concurrent setting edits without losing a sync timestamp', async ({ page }) => {
     const updatedAt = await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await Promise.all([
         store.dispatch('recordSyncSettingEdit', 'baseTheme'),
         store.dispatch('recordSyncSettingEdit', 'mainColor'),
@@ -5439,7 +5439,7 @@ test.describe('sync settings', () => {
     })
 
     const sync = () => page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('syncWithSyncServer').catch(() => {})
     })
 
@@ -5823,7 +5823,7 @@ test.describe('synced setting indicators', () => {
     await expect(enable).toBeVisible()
     await enable.click()
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.state.settings.syncServerSettingsExcluded
     })).not.toContain('subscriptionChannelSettings')
     await page.reload()
@@ -5871,13 +5871,13 @@ test.describe('synced setting indicators', () => {
     await navigation.getByRole('button', { name: 'Stop syncing this setting' }).click()
     await expect(navigation.getByRole('button', { name: 'Sync this setting' })).toBeVisible()
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.state.settings.syncServerSettingsExcluded
     })).toEqual(['quickSettings', 'navigationItems'])
 
     await quickSettings.getByRole('button', { name: 'Sync this setting' }).click()
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.state.settings.syncServerSettingsExcluded
     })).toEqual(['navigationItems'])
   })
@@ -5906,7 +5906,7 @@ test.describe('synced setting indicators', () => {
       await expect(sync).toHaveAttribute('aria-pressed', 'true')
       await expect(sync).toHaveAccessibleName('Stop syncing this setting')
       await expect.poll(() => page.evaluate(() => (
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        window.$store
           .state.settings.syncServerSettingsExcluded
       ))).toEqual([])
 
@@ -5914,7 +5914,7 @@ test.describe('synced setting indicators', () => {
       await expect(sync).toBeVisible()
       await sync.click()
       await expect.poll(() => page.evaluate(() => (
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        window.$store
           .state.settings.syncServerSettingsExcluded
       ))).toEqual([settingKey])
 
@@ -5943,14 +5943,14 @@ test.describe('synced setting indicators', () => {
     expect(await getStartupIconGap()).toBeGreaterThanOrEqual(7.95)
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateUiScale', 95)
     })
     await expect.poll(() => page.evaluate(() => window.devicePixelRatio)).toBeCloseTo(0.95, 2)
     expect(await getStartupIconGap()).toBeGreaterThanOrEqual(7.95)
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateUiScale', 100)
     })
     await expect.poll(() => page.evaluate(() => window.devicePixelRatio)).toBeCloseTo(1, 2)
@@ -6070,7 +6070,7 @@ test.describe('synced setting indicators', () => {
     expect(new Set(boxes.map(({ width }) => width)).size).toBe(1)
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateUiScale', 125)
     })
     await expect.poll(() => page.evaluate(() => window.devicePixelRatio)).toBeCloseTo(1.25, 2)
@@ -6409,13 +6409,13 @@ test.describe('tabs from other synced devices', () => {
     await expect(dialog).toHaveCount(0)
     await expect(toggle).toBeChecked()
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.state.settings.syncServerSharedTabs
     })).toBe(true)
     await toggleLabel.click()
     await expect(dialog).toHaveCount(0)
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.state.settings.syncServerSharedTabs
     })).toBe(false)
   })
@@ -6429,7 +6429,7 @@ test.describe('tabs from other synced devices', () => {
     const toggleLabel = section.locator('label.switch-label')
       .filter({ hasText: 'Use one shared tab set across devices' })
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setSyncServerSharedTabs', true)
       const dispatch = store.dispatch.bind(store)
       window.sharedTabUpdates = []
@@ -6470,7 +6470,7 @@ test.describe('tabs from other synced devices', () => {
     }))
     const section = await goToSettingsSection(page, 'sync')
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setSyncServerOtherDeviceSessions', [{
         sessionId: 'desktop-session',
         syncDeviceId: 'desktop-device',

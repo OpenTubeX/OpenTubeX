@@ -53,7 +53,7 @@ async function openVideo({ app, page }) {
 for (const dataSaver of [false, true]) {
   test(`reuses the startup poster and its resolution fallback with data saver ${dataSaver}`, async ({ app, page }) => {
     await page.evaluate(async dataSaver => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateAutoplayVideos', false)
       await store.dispatch('updateThumbnailDataSaver', dataSaver)
     }, dataSaver)

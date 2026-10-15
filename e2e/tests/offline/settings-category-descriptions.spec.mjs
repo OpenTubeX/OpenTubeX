@@ -209,7 +209,7 @@ for (const uiScale of [100, 125]) {
 
         // The control lives on another view in compact layouts. Change the same
         // preference directly to exercise shortening the currently visible menu.
-        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        await page.evaluate(() => window.$store
           .dispatch('updateHideSettingsCategoryDescriptions', true))
         await expect(menu.locator('.titleDescription')).toHaveCount(0)
         await expect(category).toHaveCSS('min-block-size', width === 480 ? '48px' : '36px')

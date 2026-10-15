@@ -91,7 +91,7 @@ for (const [name, destinationUrl] of [['website', WEBSITE_URL], ['membership', M
       }
 
       for (const policy of ['doNothing', '']) {
-        await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        await page.evaluate(value => window.$store
           .dispatch('updateExternalLinkHandling', value), policy)
         await link.click()
         if (policy === 'doNothing') {
@@ -103,7 +103,7 @@ for (const [name, destinationUrl] of [['website', WEBSITE_URL], ['membership', M
         }
         await expect(prompt).toBeHidden()
       }
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await page.evaluate(() => window.$store
         .dispatch('updateExternalLinkHandling', 'openLinkAfterPrompt'))
     }
   })

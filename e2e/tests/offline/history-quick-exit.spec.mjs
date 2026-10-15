@@ -135,7 +135,7 @@ for (const existing of [true, false]) {
     test(`starts at the latest seek to ${position} before the first media data loads with ${existing ? 'existing' : 'new'} history`, async ({ app, page }) => {
       await mockPlayableWatchPage(app, page)
       if (!existing) {
-        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('removeAllHistory'))
+        await page.evaluate(() => window.$store.dispatch('removeAllHistory'))
       }
       await page.evaluate(seconds => {
         document.addEventListener('loadedmetadata', event => {
@@ -159,7 +159,7 @@ for (const existing of [true, false]) {
   test(`saves a seek before the first media data loads with ${existing ? 'existing' : 'new'} history`, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     if (!existing) {
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('removeAllHistory'))
+      await page.evaluate(() => window.$store.dispatch('removeAllHistory'))
     }
     await page.locator(sel.sideNavLink('history')).first().evaluate(element => element.click())
     await expect(page).toHaveURL(/#\/history/)
@@ -177,7 +177,7 @@ for (const existing of [true, false]) {
     await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
     await page.locator(sel.searchInput).press('Enter')
     await expect.poll(() => savedProgress(app)).toBe(15)
-    const entry = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById.jNQXAC9IVRw)
+    const entry = await page.evaluate(() => window.$store.getters.getHistoryCacheById.jNQXAC9IVRw)
     expect(entry.title).toBeTruthy()
     expect(entry.lengthSeconds).toBeGreaterThan(0)
     await expect(page).toHaveURL(/#\/history/)

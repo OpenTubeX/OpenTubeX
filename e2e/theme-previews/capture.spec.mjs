@@ -21,7 +21,7 @@ test.use({
 test.afterEach(async ({ page }) => {
   // Preserve the default confirmation settings until all captures are done.
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateConfirmCloseApp', false)
     await store.dispatch('updateConfirmCloseWindowWithMultipleTabs', false)
   })
@@ -34,7 +34,7 @@ test('captures the submitted theme with the README feed and watch page', async (
 
   await sizeScreenshotWindow(app)
   await page.evaluate(async theme => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const themes = await window.ftElectron.saveCustomTheme(theme)
     store.commit('setCustomThemes', themes)
     await store.dispatch('updateBaseTheme', `custom:${theme.id}`)

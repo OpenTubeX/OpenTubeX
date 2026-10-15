@@ -9,7 +9,7 @@ const seededPremiereStart = Date.now() + 86_400_000
 
 async function dispatchStoreAction(page, action, payload) {
   await page.evaluate(async ({ action, payload }) => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch(action, payload)
   }, { action, payload })
 }
@@ -558,7 +558,7 @@ test.describe('playlist cleanup', () => {
     await dialog.getByRole('button', { name: 'Yes, Delete' }).click()
     await expect(page.getByText('live0000000')).toHaveCount(0)
     const state = await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return {
         ids: store.getters.getPlaylist('cleanup').videos.map(video => video.videoId),
         watched: store.getters.getHistoryCacheById.live0000000?.isWatched,
@@ -590,8 +590,7 @@ test.describe('playlist cleanup', () => {
     await expect(dialog).toContainText('Found: 2')
     await expect(dialog).toContainText('Could not check: 1')
     await dialog.getByRole('button', { name: 'Yes, Delete' }).click()
-    const ids = await page.evaluate(() => document.querySelector('#app').__vue_app__
-      .config.globalProperties.$store.getters.getPlaylist('cleanup').videos.map(video => video.videoId))
+    const ids = await page.evaluate(() => window.$store.getters.getPlaylist('cleanup').videos.map(video => video.videoId))
     expect(ids).toEqual(['live0000000', 'unknown00000'])
   })
 })
@@ -771,7 +770,7 @@ test.describe('custom playlist order', () => {
         await touch('touchEnd')
         await expect(page.locator('.pointerDragging, .draggedVideo')).toHaveCount(0)
         await expect.poll(() => page.evaluate(() => {
-          return document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          return window.$store
             .getters.getPlaylist('large-custom-playlist').videos[0].title
         })).toBe('Custom playlist video 2')
 
@@ -820,7 +819,7 @@ test.describe('custom playlist order', () => {
     await touch('touchMove', third)
     await touch('touchEnd')
     await expect(rows.nth(2).locator('.h3Title')).toHaveText('Custom playlist video 1')
-    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await expect.poll(() => page.evaluate(() => window.$store
       .getters.getPlaylist('large-custom-playlist').videos[2].title)).toBe('Custom playlist video 1')
   })
 
@@ -886,7 +885,7 @@ test.describe('custom playlist order', () => {
         await page.getByText('Large custom playlist').click()
         await page.evaluate(async ({ position, scale }) => {
           window.ftElectron.setZoomFactor(scale)
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           store.commit('setPlaylistViewType', 'list')
           store.commit('setTabBarPosition', position)
           store.commit('setScrollbarThumbWidth', 20)

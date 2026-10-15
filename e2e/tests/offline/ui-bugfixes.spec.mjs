@@ -73,7 +73,7 @@ for (const theme of ['light', 'dark']) {
   test(`phone organizer covers navigation and keeps themed safe areas in ${theme} mode`, async ({ app, page }) => {
     await setWindowSize(app, page, { width: 375, height: 760 })
     await page.evaluate(async baseTheme => {
-      const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateBaseTheme', baseTheme)
       document.documentElement.style.setProperty('--safe-area-inset-top', '28px')
       document.documentElement.style.setProperty('--safe-area-inset-bottom', '24px')
@@ -110,7 +110,7 @@ test('phone organizer clamps its grid after column and viewport changes', async 
   await setWindowSize(app, page, { width: 375, height: 400 })
   await page.evaluate(async () => {
     await window.ftElectron.setZoomFactor(0.95)
-    const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+    const store = window.$store
     for (let index = 0; index < 6; index++) {
       await store.dispatch('createTab', { route: '/subscriptions', makeActive: false })
     }
@@ -150,7 +150,7 @@ for (const zoom of [1, 0.95]) {
     await page.evaluate(async factor => {
       await window.ftElectron.setZoomFactor(factor)
       document.documentElement.style.setProperty('--safe-area-inset-bottom', '24px')
-      const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+      const store = window.$store
       store.commit('setShowProgressBarToast', false)
       store.commit('setShowProgressBar', false)
     }, zoom)
@@ -162,7 +162,7 @@ for (const zoom of [1, 0.95]) {
     })
     const originalHeight = await nav.evaluate(element => element.getBoundingClientRect().height)
     await page.evaluate(() => {
-      const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+      const store = window.$store
       store.commit('setProgressBarPercentage', 50)
       store.commit('setShowProgressBar', true)
     })
@@ -181,7 +181,7 @@ for (const zoom of [1, 0.95]) {
     expect(metrics.progressBottom).toBeCloseTo(metrics.navTop, 0)
     expect(metrics.pill).toEqual(originalPill)
     await page.evaluate(() => {
-      document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store.commit('setShowProgressBar', false)
+      window.$store.commit('setShowProgressBar', false)
     })
     await expect(page.locator('.progressBar')).toHaveCount(0)
     expect(await nav.evaluate(element => element.getBoundingClientRect().height)).toBeCloseTo(originalHeight, 0)
@@ -197,7 +197,7 @@ for (const theme of ['light', 'dark']) {
       contentType: 'image/svg+xml', body: thumbnail,
     }))
     await page.evaluate(async baseTheme => {
-      const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateBaseTheme', baseTheme)
       for (const [route, title] of [
         ['/watch/grid-video', 'A walk along the coast at sunset'],
@@ -262,7 +262,7 @@ for (const theme of ['light', 'dark']) {
       }
     }
     await page.evaluate(() => {
-      const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+      const store = window.$store
       store.commit('setThumbnailPreference', 'hidden')
     })
     await expect(cards.nth(1).locator('.capacitorTabThumbnail')).toHaveCount(0)
@@ -307,7 +307,7 @@ test('phone cards open actions while held and dismiss them when dragging', async
 test('phone dragged cards follow the pointer and slide neighbors into their new slots', async ({ app, page }) => {
   await setWindowSize(app, page, { width: 375, height: 760 })
   await page.evaluate(async () => {
-    const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+    const store = window.$store
     for (let index = 0; index < 3; index++) {
       await store.dispatch('createTab', { route: '/subscriptions', makeActive: false })
     }
@@ -345,7 +345,7 @@ test('phone card dragging keeps its finger offset while scrolling and stops at t
   await setWindowSize(app, page, { width: 375, height: 450 })
   await page.evaluate(async () => {
     window.ftElectron.setZoomFactor(0.95)
-    const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+    const store = window.$store
     for (let index = 0; index < 7; index++) {
       await store.dispatch('createTab', { route: '/subscriptions', makeActive: false })
     }
@@ -382,7 +382,7 @@ test('fits synced-device tabs in the phone tab organizer', async ({ app, page })
   await setWindowSize(app, page, { width: 375, height: 760 })
   await enablePhoneTabSwitcher(page)
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setSyncServerEnabled', true)
     store.commit('setSyncServerToken', 'e2e-token')
     store.commit('setSyncServerPrivacyMode', 'enhanced')
@@ -456,7 +456,7 @@ for (const iconPack of ['material', 'remix']) {
       return route.fulfill({ contentType: 'image/svg+xml', body: 'invalid image' })
     })
     await page.evaluate(async ({ pack, avatarUrl }) => {
-      const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateIconPack', pack)
       store.commit('setThumbnailPreference', 'hidden')
       store.commit('setSyncServerEnabled', true)
@@ -523,7 +523,7 @@ for (const layout of ['phone', 'desktop']) {
       await enablePhoneTabSwitcher(page)
     }
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setSyncServerEnabled', true)
       store.commit('setSyncServerToken', 'e2e-token')
       store.commit('setSyncServerPrivacyMode', 'enhanced')
@@ -560,7 +560,7 @@ for (const layout of ['phone', 'desktop']) {
     }
     const tabIdsBefore = await page.evaluate(() => window.ftElectron.tabs.getState().then(state => state.tabs.map(tab => tab.id)))
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const openSession = store._actions.openSyncServerSession[0]
       window.__syncOpen = { calls: 0 }
       store._actions.openSyncServerSession[0] = async session => {
@@ -626,7 +626,7 @@ test('shows remote tab sets as tabs and confirms deletion in the phone organizer
   await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
   await enablePhoneTabSwitcher(page)
   await page.evaluate(() => {
-    const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+    const store = window.$store
     store.commit('setSyncServerEnabled', true)
     store.commit('setSyncServerToken', 'e2e-token')
     store.commit('setSyncServerPrivacyMode', 'enhanced')
@@ -735,7 +735,7 @@ test('shows remote tab sets as tabs and confirms deletion in the phone organizer
     scrollbarUnusable: true,
   })
   await page.evaluate(() => {
-    const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+    const store = window.$store
     store.commit('setSyncServerOtherDeviceSessions', store.getters.getSyncServerOtherDeviceSessions.slice(0, 1))
   })
   await syncedSet.getByRole('button', { name: 'Delete: Desktop · 1 tab' }).click()
@@ -780,7 +780,7 @@ test('restores and clamps the real phone tab organizer viewports', async ({ app,
   await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
   await enablePhoneTabSwitcher(page)
   await page.evaluate(async ({ desktopDeviceId, privacyKey }) => {
-    const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+    const store = window.$store
     store.commit('setSyncServerEnabled', true)
     store.commit('setSyncServerToken', 'e2e-token')
     store.commit('setSyncServerPrivacyKey', privacyKey)
@@ -834,7 +834,7 @@ test('restores and clamps the real phone tab organizer viewports', async ({ app,
 
   await openPanel.evaluate(element => { element.scrollTop = element.scrollHeight })
   await page.evaluate(async () => {
-    const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+    const store = window.$store
     const ids = store.getters.getTabs.slice(0, -2).map(tab => tab.id)
     for (const id of ids) await store.dispatch('closeTab', id)
   })
@@ -850,7 +850,7 @@ test('restores and clamps the real phone tab organizer viewports', async ({ app,
     .toBeCloseTo(360, 0)
   await syncedPanel.evaluate(element => { element.scrollTop = element.scrollHeight })
   await page.evaluate(desktopDeviceId => {
-    const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+    const store = window.$store
     store.commit('setSyncServerDevices', { [desktopDeviceId]: { name: 'Desk PC', platform: 'linux' } })
   }, desktopDeviceId)
   await page.getByRole('tab', { name: 'Desk PC · 1 tab', exact: true }).click()
@@ -910,7 +910,7 @@ for (const pack of ['material', 'remix']) {
   test(`tablet tab glyphs align with their labels in ${pack}`, async ({ app, page }) => {
     await setWindowSize(app, page, { width: 1330, height: 870 })
     await page.evaluate(async pack => {
-      const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateIconPack', pack)
     }, pack)
     const homeIcon = page.locator(`.ft-icon[data-icon="house"][data-icon-pack="${pack}"]`).first()
@@ -1128,7 +1128,7 @@ test('keeps Android player notices and end cards clear of visible controls', asy
   await page.evaluate(async () => {
     document.documentElement.style.setProperty('--safe-area-inset-bottom', '24px')
     const app = document.querySelector('.app')
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateShowFullscreenActionsWhenPaused', true)
     app.classList.add('capacitorTabs')
   })
@@ -2374,7 +2374,7 @@ test('fetches an uncached synced channel avatar in the phone organizer', async (
     contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><rect width="24" height="24" fill="red"/></svg>'
   }))
   await page.evaluate(id => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setBackendPreference', 'invidious')
     store.commit('setCurrentInvidiousInstance', 'https://invidious.test')
     store.commit('setSyncServerEnabled', true)
@@ -2406,7 +2406,7 @@ test('fetches an uncached local channel avatar in the phone organizer', async ({
     contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><rect width="24" height="24" fill="red"/></svg>'
   }))
   await page.evaluate(async id => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     // Exercise the phone organizer's on-demand loader independently of Electron tab icons.
     store.commit('setShowTabIcons', false)
     store.commit('setBackendPreference', 'invidious')
@@ -2428,7 +2428,7 @@ for (const zoom of [1, 0.95]) {
     await setWindowSize(app, page, { width: 375, height: 760 })
     await page.evaluate(async factor => {
       await window.ftElectron.setZoomFactor(factor)
-      const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+      const store = window.$store
       for (let index = 0; index < 5; index++) {
         await store.dispatch('createTab', { route: '/subscriptions', makeActive: false })
       }
@@ -2545,7 +2545,7 @@ for (const theme of ['light', 'dark']) {
   test(`sync privacy status keeps readable text in ${theme} mode`, async ({ page }) => {
     await goTo(page, 'settings')
     await page.evaluate(async theme => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateBaseTheme', theme)
       store.commit('setSyncServerEnabled', true)
       store.commit('setSyncServerToken', 'accessibility-test-token')
@@ -2574,7 +2574,7 @@ for (const theme of ['light', 'dark']) {
   test(`Data Settings import help meets text contrast in ${theme} mode`, async ({ page }) => {
     await goTo(page, 'settings')
     await page.evaluate(async theme => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateBaseTheme', theme)
       await store.dispatch('updateSecColor', 'Blue')
       store.commit('setSettingsWindowSection', 'data')
@@ -2612,7 +2612,7 @@ for (const theme of ['light', 'dark']) {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
     await page.evaluate(async theme => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateBaseTheme', theme)
       await store.dispatch('updateSecColor', 'Blue')
     }, theme)
@@ -2659,7 +2659,7 @@ for (const theme of ['light', 'dark']) {
 test('Settings help buttons provide a 24 CSS pixel target at fractional scale', async ({ app, page }) => {
   await goTo(page, 'settings')
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateUiScale', 125)
     store.commit('setSettingsWindowSection', 'general')
   })

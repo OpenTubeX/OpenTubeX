@@ -76,7 +76,7 @@ setTimeout(sendResponse, ${responseDelay})
 `)
   await chmod(executable, 0o755)
   await app.page.evaluate(async ({ executable, mode }) => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
     await store.dispatch('updateYtDlpPath', executable)
     await store.dispatch('updateYtDlpPlaybackAuthMode', mode)
@@ -140,7 +140,7 @@ for (const responseType of ['empty', 'ads-only']) {
     await expect(page).toHaveURL(/\/search\/opentubex/)
     await expect(retry).toBeVisible()
     await expect(restrictionHint).toBeVisible()
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', 125))
+    await page.evaluate(() => window.$store.dispatch('updateUiScale', 125))
     await setWindowSize(app, page, { width: 390, height: 844 })
     await expect(retry).toBeVisible()
     await expect(restrictionHint).toBeVisible()
@@ -160,7 +160,7 @@ for (const responseType of ['empty', 'ads-only']) {
     const url = new URL(args.at(-1))
     expect(url.searchParams.get('search_query')).toBe('opentubex')
     expect(url.searchParams.get('sp')).toBe(decodeURIComponent(searchRequest.params))
-    const cache = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getSessionSearchHistory)
+    const cache = await page.evaluate(() => window.$store.getters.getSessionSearchHistory)
     expect(cache.flatMap(entry => entry.data)).toEqual([])
   })
 }
@@ -201,7 +201,7 @@ test('does not offer an empty-search cookie retry without cookies or with family
   await expect(page.getByRole('button', { name: 'Try with configured cookies' })).toHaveCount(0)
   await configureCookieSearch(app)
   await page.evaluate(async () => {
-    await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowFamilyFriendlyOnly', true)
+    await window.$store.dispatch('updateShowFamilyFriendlyOnly', true)
   })
   await page.locator(sel.searchInput).fill('empty family-friendly search')
   await page.locator(sel.searchInput).press('Enter')
@@ -246,7 +246,7 @@ test('cookie search loads video, playlist, and channel avatars and disposes empt
     await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
     await page.locator('.ft-list-channel').screenshot({ path: test.info().outputPath(`cookie-search-channel-${theme}.png`), animations: 'disabled' })
   }
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', 125))
+  await page.evaluate(() => window.$store.dispatch('updateUiScale', 125))
   await setWindowSize(app, page, { width: 390, height: 844 })
   await expectImagesLoaded(channelAvatar)
   await setWindowSize(app, page, { width: 1600, height: 900 })
@@ -273,7 +273,7 @@ test('cookie channel avatars use YouTube URLs with the Invidious backend selecte
   // Keep the age-gate notice while changing the preferred backend: the cookie
   // retry still gets its data from yt-dlp, not from the selected instance.
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setBackendPreference', 'invidious')
     store.commit('setDefaultInvidiousInstance', 'https://invidious.test')
   })
@@ -405,7 +405,7 @@ for (const mode of ['file', 'browser']) {
     const url = new URL(args.at(-1))
     expect(url.searchParams.get('search_query')).toBe(QUERY)
     expect(url.searchParams.get('sp')).toBe(decodeURIComponent(requests[0].params))
-    const cache = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getSessionSearchHistory)
+    const cache = await page.evaluate(() => window.$store.getters.getSessionSearchHistory)
     expect(cache.flatMap(entry => entry.data)).toEqual([])
   })
 }
@@ -424,7 +424,7 @@ test('preserves the restriction and allows another retry when cookies return no 
 test('does not offer an authenticated retry while family-friendly search is enabled', async ({ app, page }) => {
   await configureCookieSearch(app)
   await page.evaluate(async () => {
-    await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowFamilyFriendlyOnly', true)
+    await window.$store.dispatch('updateShowFamilyFriendlyOnly', true)
   })
   await searchForAgeGate(page)
   await expect(page.getByRole('button', { name: 'Try with configured cookies' })).toHaveCount(0)
@@ -447,7 +447,7 @@ for (const pendingRetry of [true, false]) {
       await expect(page.getByRole('button', { name: 'Fetch more results' })).toHaveCount(1)
     }
     await page.evaluate(async () => {
-      await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowFamilyFriendlyOnly', true)
+      await window.$store.dispatch('updateShowFamilyFriendlyOnly', true)
     })
     await page.waitForTimeout(500)
     await expect(page.getByRole('heading', { name: 'Confirm your age' })).toBeVisible()
@@ -490,7 +490,7 @@ for (const autoLoadMore of [true, false]) {
       await page.getByRole('button', { name: 'Try with configured cookies' }).click()
       await expect(page.getByRole('heading', { name: 'Authenticated video 0', exact: true })).toBeVisible()
       if (uiScale === 125) await setWindowSize(app, page, { width: 600, height: 844 })
-      await page.evaluate(scale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', scale), uiScale)
+      await page.evaluate(scale => window.$store.dispatch('updateUiScale', scale), uiScale)
       const colorScheme = autoLoadMore ? 'dark' : 'light'
       await page.emulateMedia({ colorScheme })
       await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
@@ -498,7 +498,7 @@ for (const autoLoadMore of [true, false]) {
       await writeFile(pendingResponse, '')
       const pagination = page.locator('.ft-auto-load-next-page-wrapper')
       try {
-        await page.evaluate(enabled => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateGeneralAutoLoadMorePaginatedItemsEnabled', enabled), autoLoadMore)
+        await page.evaluate(enabled => window.$store.dispatch('updateGeneralAutoLoadMorePaginatedItemsEnabled', enabled), autoLoadMore)
         if (autoLoadMore) {
           await pagination.evaluate(element => element.scrollIntoView({ block: 'end', behavior: 'instant' }))
         } else {

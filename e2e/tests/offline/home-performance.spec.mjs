@@ -21,7 +21,7 @@ async function settleSeededHistory(page) {
 
 async function seedLargeHistory(page) {
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const now = Date.now()
     const history = Array.from({ length: 45000 }, (_, index) => ({
       videoId: `history-${index}`,

@@ -70,7 +70,7 @@ test('large encrypted history sync keeps renderer input responsive', async ({ pa
   })
   await goToSettingsSection(page, 'sync')
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setSyncServerEnabled', true)
     // Configure the account before measuring the history operation.
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
@@ -82,7 +82,7 @@ test('large encrypted history sync keeps renderer input responsive', async ({ pa
     await cdp.send('Profiler.start')
   }
   const metrics = await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const durations = []
     let inputTurns = 0
     const observer = new PerformanceObserver(list => durations.push(...list.getEntries().map(entry => entry.duration)))

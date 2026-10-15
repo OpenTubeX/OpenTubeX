@@ -234,7 +234,7 @@ test.describe('download settings', () => {
     const globalArguments = page.getByRole('textbox', { name: 'Additional yt-dlp arguments' })
     await globalArguments.fill('--cookies-from-browser firefox')
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getYtDlpDownloadCustomArgs
     })).toBe('--cookies-from-browser firefox')
 
@@ -290,7 +290,7 @@ test.describe('download settings', () => {
     await page.getByRole('button', { name: 'Save Template' }).click()
 
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return JSON.parse(store.getters.getYtDlpDownloadTemplates)
     })).toEqual([
       expect.objectContaining({
@@ -304,7 +304,7 @@ test.describe('download settings', () => {
     await page.getByRole('button', { name: 'Save Template' }).click()
 
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return JSON.parse(store.getters.getYtDlpDownloadTemplates).map(template => template.name)
     })).toEqual(['Podcast', 'Podcast Copy'])
 
@@ -312,14 +312,14 @@ test.describe('download settings', () => {
     await page.getByRole('button', { name: 'Save Template' }).click()
     await expect(page.getByText('A download template named "Podcast" already exists.')).toBeVisible()
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return JSON.parse(store.getters.getYtDlpDownloadTemplates).map(template => template.name)
     })).toEqual(['Podcast', 'Podcast Copy'])
   })
 
   for (const uiScale of [100, 95]) {
     test(`automatic download descriptions and channel filters use shared spacing at ${uiScale}%`, async ({ app, page }, testInfo) => {
-      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), uiScale)
+      await page.evaluate(value => window.$store.dispatch('updateUiScale', value), uiScale)
       await goToSettingsSection(page, 'download')
       await page.getByRole('button', { name: 'Manage Automatic Downloads (0)' }).click()
       const manager = page.locator('.settingsSubpageContent')
@@ -369,14 +369,14 @@ test.describe('download settings', () => {
     })
 
     test(`automatic download types wrap translated labels across breakpoints at ${uiScale}%`, async ({ page }) => {
-      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), uiScale)
+      await page.evaluate(value => window.$store.dispatch('updateUiScale', value), uiScale)
       await goToSettingsSection(page, 'download')
       await page.getByRole('button', { name: 'Manage Automatic Downloads (0)' }).click()
       const manager = page.locator('.settingsSubpageContent')
       const channel = manager.locator('.channelRule').first()
       await channel.locator('.channelToggle .switch-label').click()
       await page.evaluate(async () => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         await store.dispatch('updateUseAITranslationCompletions', true)
         await store.dispatch('updateCurrentLocale', 'el')
       })
@@ -395,14 +395,14 @@ test.describe('download settings', () => {
     })
 
     test(`clamps the automatic download manager after dynamic content changes at ${uiScale}%`, async ({ app, page }) => {
-      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), uiScale)
+      await page.evaluate(value => window.$store.dispatch('updateUiScale', value), uiScale)
       await goToSettingsSection(page, 'download')
       await page.getByRole('button', { name: 'Manage Automatic Downloads (0)' }).click()
 
       const manager = page.locator('.settingsSubpageContent')
       for (const roundness of [0, 50, 100, 200, 100]) {
         await page.evaluate(value => {
-          document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
+          window.$store.commit('setUiRoundness', value)
         }, roundness)
         await expect(manager.locator('.channelRule').first()).toHaveCSS('border-radius', `${10 * roundness / 100}px`)
       }
@@ -420,7 +420,7 @@ test.describe('download settings', () => {
 
       await manager.getByText('Beta Channel', { exact: true }).click()
       await expect.poll(() => page.evaluate((channelId) => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         return JSON.parse(store.getters.getYtDlpAutomaticDownloadRules)[channelId]
       }, BETA_CHANNEL_ID)).toEqual(expect.objectContaining({
         template: 'video:best',
@@ -518,7 +518,7 @@ test.describe('automatic download authorization', () => {
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpPath', ytDlpPath)
     }, executable)
 
@@ -559,7 +559,7 @@ test.describe('automatic download authorization', () => {
     }
 
     const refreshOwnerTabId = await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const tabId = store.getters.getActiveTabId
       return await window.ftElectron.subscriptionAutoRefresh.acquire(tabId, 'videos') ? tabId : null
     })
@@ -596,12 +596,12 @@ test.describe('automatic download authorization', () => {
         .emit('click')
     })
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getSettingsWindowView
     })).toBe('downloads')
 
     const tabCount = await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getTabCount
     })
     await writeFile(releaseDownloadFile, '')
@@ -617,7 +617,7 @@ test.describe('automatic download authorization', () => {
         .emit('click')
     })
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return {
         tabCount: store.getters.getTabCount,
         route: store.getters.getActiveTab?.route.fullPath

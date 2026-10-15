@@ -114,10 +114,10 @@ test.describe('automatic sync efficiency', () => {
       await expect.poll(() => waiting.size).toBe(1)
       requests.length = 0
 
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(
+      await page.evaluate(() => window.$store.dispatch(
         'batchUpdateSubscriptionDetails', [{ channelId: 'UCaaaaaaaaaaaaaaaaaaaaaa', channelName: 'Refreshed channel' }]
       ))
-      await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await expect.poll(() => page.evaluate(() => window.$store
         .getters.getProfileList.find(profile => profile._id === 'allChannels').subscriptions[0].name)).toBe('Refreshed channel')
       // Observe beyond the 1.5-second scheduling debounce to catch unwanted work.
       await advanceDebounce()
@@ -125,7 +125,7 @@ test.describe('automatic sync efficiency', () => {
 
       holdUploads = true
       const syncing = page.evaluate(async () => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         await store.dispatch('updateBaseTheme', 'light')
         await store.dispatch('addChannelToProfiles', {
           channel: { id: 'UCbbbbbbbbbbbbbbbbbbbbbb', name: 'New channel', thumbnail: 'https://yt3.googleusercontent.com/new=s176' },
@@ -146,7 +146,7 @@ test.describe('automatic sync efficiency', () => {
       releaseUpload()
       await syncing
       await expect.poll(() => waiting.size).toBe(1)
-      await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getAutoplayVideos)).toBe(false)
+      await expect.poll(() => page.evaluate(() => window.$store.getters.getAutoplayVideos)).toBe(false)
       await expect.poll(() => ({
         uploads: requests.filter(request => request.method === 'PUT').length,
         manifests: requests.filter(request => request.path === '/v1/encrypted_sync').length,
@@ -233,7 +233,7 @@ for (const uiScale of [95, 125]) {
         return abortUnmockedRequest(route)
       })
       const syncing = page.evaluate(async () => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setSyncServerEnabled', true)
         await store.dispatch('syncWithSyncServer')
         return { status: store.getters.getSyncServerStatus, lastSync: store.state.settings.syncServerLastSyncAt }
@@ -241,18 +241,18 @@ for (const uiScale of [95, 125]) {
       try {
         await started
         await expect.poll(() => page.evaluate(() =>
-          document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getSyncServerStatus
+          window.$store.getters.getSyncServerStatus
         ), { timeout: 5000 }).toBe('success')
         const result = await syncing
         expect(result.lastSync).toBeGreaterThan(0)
         expect(eventRequests).toBe(1)
-        expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getSyncServerActivity.length)).toBe(0)
+        expect(await page.evaluate(() => window.$store.getters.getSyncServerActivity.length)).toBe(0)
       } finally {
         releaseActivity()
         await syncing
       }
       await expect.poll(() => page.evaluate(() =>
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getSyncServerActivity.length
+        window.$store.getters.getSyncServerActivity.length
       )).toBe(1)
     })
 
@@ -512,7 +512,7 @@ test('two independent devices settle after live sync and propagate a real edit o
       await expect.poll(() => waiting.has(name)).toBe(true)
     }
     await expect.poll(() => waiting.size).toBe(2)
-    const progress = client => client.page.evaluate(videoId => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById[videoId].watchProgress, videoId)
+    const progress = client => client.page.evaluate(videoId => window.$store.getters.getHistoryCacheById[videoId].watchProgress, videoId)
     await expect.poll(() => progress(clients[0])).toBe(169.743)
     await expect.poll(() => progress(clients[1])).toBe(169.743)
     const initialWrites = writes.length
@@ -521,13 +521,13 @@ test('two independent devices settle after live sync and propagate a real edit o
       await expect.poll(() => waiting.size).toBe(2)
     }
     expect(writes).toHaveLength(initialWrites)
-    await clients[0].page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateBaseTheme', 'light'))
-    await expect.poll(() => clients[1].page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getBaseTheme)).toBe('light')
+    await clients[0].page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'light'))
+    await expect.poll(() => clients[1].page.evaluate(() => window.$store.getters.getBaseTheme)).toBe('light')
     await expect.poll(() => waiting.size).toBe(2)
     // Allow the local-change debounce on both devices to finish as well.
     await clients[0].page.waitForTimeout(2000)
     expect(writes.slice(initialWrites)).toEqual([{ name: 'Desktop', collection: 'settings' }])
-    await clients[0].page.evaluate(videoId => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateWatchProgress', { videoId, watchProgress: 12 }), videoId)
+    await clients[0].page.evaluate(videoId => window.$store.dispatch('updateWatchProgress', { videoId, watchProgress: 12 }), videoId)
     expect(await progress(clients[0])).toBe(12)
     await clients[0].page.waitForTimeout(2000)
     expect(await progress(clients[1])).toBe(169.743)

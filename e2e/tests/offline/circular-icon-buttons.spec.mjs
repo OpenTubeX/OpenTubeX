@@ -36,7 +36,7 @@ for (const uiScale of [100, 95, 125]) {
     })
 
     test('keeps live chat hover backgrounds circular in both icon packs', async ({ app, page }, testInfo) => {
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateBaseTheme', 'dark'))
+      await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'dark'))
       await mockPlayableWatchPage(app, page)
       await openMockedVideo(page)
       const view = await watchViewHandle(page)
@@ -57,7 +57,7 @@ for (const uiScale of [100, 95, 125]) {
       const buttons = page.locator('.liveChatActions .liveChatActionButton')
       await expect(buttons).toHaveCount(3)
       for (const pack of ['material', 'remix']) {
-        await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', value), pack)
+        await page.evaluate(value => window.$store.dispatch('updateIconPack', value), pack)
         await expect(buttons.first().locator('.ft-icon')).toHaveAttribute('data-icon-pack', pack)
         for (const button of await buttons.all()) {
           await button.hover()
@@ -83,7 +83,7 @@ for (const uiScale of [100, 95, 125]) {
       await page.locator('.searchRadio', { hasText: 'Time' }).getByText('Today', { exact: true }).click()
       const button = page.locator('.clearFilterButton')
       for (const pack of ['material', 'remix']) {
-        await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', value), pack)
+        await page.evaluate(value => window.$store.dispatch('updateIconPack', value), pack)
         await expect(button.locator('.ft-icon')).toHaveAttribute('data-icon-pack', pack)
         await button.hover()
         await expectCircularButton(button)
@@ -96,7 +96,7 @@ for (const uiScale of [100, 95, 125]) {
 
     test('centers the DeArrow toggle inside a circular hover background', async ({ page }) => {
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('addVideoToDeArrowCache', { videoId: 'circle-video', title: 'Clear title', thumbnail: null })
         store.commit('addToSessionSearchHistory', {
           query: 'circle',
@@ -111,7 +111,7 @@ for (const uiScale of [100, 95, 125]) {
       await page.locator('.topNav input[type="search"]').press('Enter')
       const button = page.locator('.deArrowToggleButton').first()
       for (const pack of ['material', 'remix']) {
-        await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', value), pack)
+        await page.evaluate(value => window.$store.dispatch('updateIconPack', value), pack)
         await expect(button.locator('.ft-icon')).toHaveAttribute('data-icon-pack', pack)
         await button.hover()
         await expectCircularButton(button)

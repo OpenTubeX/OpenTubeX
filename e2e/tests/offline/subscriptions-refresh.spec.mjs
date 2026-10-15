@@ -71,7 +71,7 @@ function cachedChannel(index) {
 
 function cachedVideoTitle(page, index) {
   return page.evaluate(id => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return store.getters.getVideoCache[id]?.videos?.[0]?.title
   }, channelId(index))
 }
@@ -366,7 +366,7 @@ test.describe('subscription refresh performance with many tabs', { tag: '@perfor
     await expect(page.getByText('Video 0-0', { exact: true })).toBeVisible({ timeout: 30_000 })
 
     const profileUpdate = await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const channels = store.getters.getActiveProfile.subscriptions.map(channel => ({
         channelId: channel.id,
         channelName: channel.name
@@ -835,7 +835,7 @@ test.describe('cancelling an automatic subscription feed refresh', () => {
     expect(minimizedBounds.y).toBeGreaterThanOrEqual(tabBarBounds.y + tabBarBounds.height)
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setVerticalTabBarWidth', 220)
       store.commit('setTabBarPosition', 'left')
     })

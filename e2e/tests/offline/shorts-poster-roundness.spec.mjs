@@ -52,7 +52,7 @@ for (const uiScale of [100, 125]) {
         for (const width of [1100, 390]) {
           await setWindowSize(app, page, { width, height: width === 390 ? 800 : 850 })
           for (const roundness of [100, 0, 50, 200]) {
-            await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), roundness)
+            await page.evaluate(value => window.$store.dispatch('updateUiRoundness', value), roundness)
             await expect(page.locator('body')).toHaveCSS('--ui-roundness', String(roundness / 100))
             // Hit testing checks the actual painted crop, including descendants.
             const crop = await poster.evaluate(element => {

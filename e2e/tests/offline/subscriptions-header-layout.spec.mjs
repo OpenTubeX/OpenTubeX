@@ -205,7 +205,7 @@ test.describe('subscriptions header layout', () => {
     expect(Math.abs(initialRefreshLayout.textStart - initialRefreshLayout.contentStart)).toBeLessThanOrEqual(2)
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setSubscriptionFeedAutoRefreshInterval', String(60 * 60 * 1000))
       store.commit('setSubscriptionFeedNextAutoRefreshTimestamp', Date.now() + 60 * 60 * 1000)
     })
@@ -242,7 +242,7 @@ test.describe('subscriptions header layout', () => {
     await attachScreenshot('landscape mobile subscription refresh status')
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateBaseTheme', 'black')
     })
     await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(0, 0, 0)')
@@ -315,7 +315,7 @@ test.describe('subscriptions header layout', () => {
     await attachScreenshot('compact New feed header actions')
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateBaseTheme', 'system')
       await store.dispatch('updateSystemDarkTheme', 'dark')
       await store.dispatch('updateSystemLightTheme', 'light')

@@ -169,7 +169,7 @@ test('disabled playback-engine fallback keeps an IP-blocked watch page on built-
     body: '<html><body>Too many requests</body></html>'
   }))
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateVideoPlaybackEngine', 'built-in')
     await store.dispatch('updatePlaybackEngineFallback', false)
     await store.dispatch('updateBackendFallback', false)
@@ -226,7 +226,7 @@ test('an IP-blocked response retries a timed-out yt-dlp extraction and recovers 
     body: '#EXTM3U\n'
   }))
   await page.evaluate(async ytDlpPath => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
     await store.dispatch('updateYtDlpPath', ytDlpPath)
     await store.dispatch('updateVideoPlaybackEngine', 'yt-dlp')
@@ -298,7 +298,7 @@ for (const { name, firstManifest, secondManifest, firstFormats } of [
       ipcMain.handle('yt-dlp-get-playback-info', () => values[Math.min(calls++, values.length - 1)])
     }, responses)
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateVideoPlaybackEngine', 'yt-dlp')
     })
 
@@ -393,7 +393,7 @@ test('an unresolved generic Watch title falls back to the route placeholder', as
 
   const activeTab = page.locator('.tabBar .tab.active')
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const tab = store.getters.getActiveTab
     store.commit('setTabContentTitle', {
       tabId: tab.id,

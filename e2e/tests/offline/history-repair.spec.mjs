@@ -45,7 +45,7 @@ test('repairs imported history metadata without changing watch state', async ({ 
   await expect(page.getByRole('status')).toContainText('Checked 1/1 · Repaired 1 · Failed 0')
   await expect(page.getByRole('heading', { name: 'Repair finished', exact: true })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Recovered channel', exact: true })).toBeVisible()
-  const saved = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById.abcdefghijk)
+  const saved = await page.evaluate(() => window.$store.getters.getHistoryCacheById.abcdefghijk)
   expect(saved).toMatchObject({
     isLive: false,
     liveNow: false,
@@ -82,7 +82,7 @@ test('keeps Cancel available if history is cleared during a repair', async ({ pa
     await goTo(page, 'history')
     await startRepair(page)
     await expect(page.getByRole('button', { name: 'Cancel', exact: true })).toBeVisible()
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('removeAllHistory'))
+    await page.evaluate(() => window.$store.dispatch('removeAllHistory'))
     await expect(page.getByRole('button', { name: 'Cancel', exact: true })).toBeVisible()
     await page.getByRole('button', { name: 'Cancel', exact: true }).click()
     await expect(page.getByRole('button', { name: 'Cancel', exact: true })).toHaveCount(0)
@@ -145,7 +145,7 @@ test.describe('Invidious history repair', () => {
       await startRepair(page)
       await expect(page.getByRole('status')).toContainText('Checked 1/1 · Repaired 1 · Failed 0')
       await expect(page.getByRole('link', { name: 'Invidious channel', exact: true })).toBeVisible()
-      const saved = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById.abcdefghijk)
+      const saved = await page.evaluate(() => window.$store.getters.getHistoryCacheById.abcdefghijk)
       expect(saved.isUpcoming).toBe(isUpcoming)
       expect(saved.isLive).toBe(false)
       expect(saved.liveNow).toBe(false)
@@ -167,7 +167,7 @@ test.describe('Invidious history repair', () => {
     await goTo(page, 'history')
     await startRepair(page)
     await expect(page.getByRole('status')).toContainText('Checked 1/1 · Repaired 1 · Failed 0')
-    const saved = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById.abcdefghijk)
+    const saved = await page.evaluate(() => window.$store.getters.getHistoryCacheById.abcdefghijk)
     expect(saved.isLive).toBe(true)
     expect(saved.lengthSeconds).toBe(0)
   })
@@ -200,7 +200,7 @@ for (const failure of ['HTTP', 'network']) {
     await expect(page.getByRole('status')).toContainText('Checked 1/1 · Repaired 1 · Failed 0')
     await expect(page.getByRole('button', { name: 'Repair History', exact: true })).toBeEnabled()
     expect(requests).toBe(2)
-    const saved = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById.abcdefghijk)
+    const saved = await page.evaluate(() => window.$store.getters.getHistoryCacheById.abcdefghijk)
     expect(saved).toMatchObject({
       author: 'Recovered channel',
       lengthSeconds: 120,
@@ -276,7 +276,7 @@ for (const width of [1280, 375]) {
       await route.fulfill({ json: {} })
     })
     await page.setViewportSize({ width, height: 812 })
-    await page.evaluate(theme => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateBaseTheme', theme), width === 1280 ? 'dark' : 'light')
+    await page.evaluate(theme => window.$store.dispatch('updateBaseTheme', theme), width === 1280 ? 'dark' : 'light')
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await goTo(page, 'history')
     await page.getByRole('button', { name: 'Repair History', exact: true }).click()
@@ -389,7 +389,7 @@ for (const backend of ['local', 'invidious']) {
           await page.clock.fastForward(10000)
           expect(requests).toBe(1)
           await expect(page.getByRole('status')).toContainText('Checked 1/1 · Repaired 0 · Failed 1')
-          const saved = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById.abcdefghijk)
+          const saved = await page.evaluate(() => window.$store.getters.getHistoryCacheById.abcdefghijk)
           expect(saved).toMatchObject(original)
         }
       })
@@ -433,7 +433,7 @@ test.describe('history repair cookies', () => {
           await expect(hint).toBeVisible()
         }
         await page.evaluate(() => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           return store.dispatch('updateSubscriptionHistory', { metadata: [{ videoId: '00000000000', author: 'Channel', authorId: 'channel', published: 1, lengthSeconds: 120, isLive: false }] })
         })
         await expect(hint).toHaveCount(0)
@@ -456,7 +456,7 @@ test.describe('authenticated history metadata', () => {
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async executable => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpPath', executable)
     }, executable)
     await goTo(page, 'history')
@@ -466,7 +466,7 @@ test.describe('authenticated history metadata', () => {
     await page.screenshot({ path: testInfo.outputPath('history-repair-cookies.png') })
     await dialog.getByRole('button', { name: 'Start repair', exact: true }).click()
     await expect(page.getByRole('status')).toContainText('Checked 1/1 · Repaired 1 · Failed 0')
-    const saved = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById.abcdefghijk)
+    const saved = await page.evaluate(() => window.$store.getters.getHistoryCacheById.abcdefghijk)
     const args = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
     expect(args[args.indexOf('--cookies') + 1]).toBe('/tmp/history-cookies.txt')
     expect(args).toContain('--skip-download')
@@ -499,7 +499,7 @@ test.describe('cookie repair cancellation', () => {
       await app.electronApp.evaluate(() => globalThis.finishHistoryCookieRequest())
     }
     await expect(page.getByText('Late channel', { exact: true })).toHaveCount(0)
-    const saved = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById.abcdefghijk)
+    const saved = await page.evaluate(() => window.$store.getters.getHistoryCacheById.abcdefghijk)
     expect(saved.author).toBe('')
   })
 })
@@ -513,7 +513,7 @@ test.describe('native cookie repair cancellation', () => {
     await writeFile(executable, `#!/bin/sh\nprintf '%s' "$$" > '${pidFile}'\nexec sleep 30\n`)
     await chmod(executable, 0o755)
     await page.evaluate(async executable => {
-      await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateYtDlpPath', executable)
+      await window.$store.dispatch('updateYtDlpPath', executable)
     }, executable)
     await goTo(page, 'history')
     await page.getByRole('button', { name: 'Repair History', exact: true }).click()

@@ -3,7 +3,7 @@ import { captureAppFramebuffer } from '../../helpers/screenshots.mjs'
 
 async function seedActivity(page, count = 30, serverUrl = '') {
   await page.evaluate(({ count, serverUrl }) => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setSyncServerUrl', serverUrl)
     store.commit('setSyncServerToken', 'test-token')
     store.commit('setSyncServerActivity', Array.from({ length: count }, (_, index) => ({
@@ -81,7 +81,7 @@ test.describe('account activity labels', () => {
   test('shows named changes across synced collections and settings', async ({ page }) => {
     const sync = await goToSettingsSection(page, 'sync')
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setSyncServerToken', 'test-token')
       store.commit('setSyncServerActivity', [
         { id: '1', deviceName: 'Laptop', collection: 'subscriptions', action: 'added', item: 'Alpha', createdAt: Date.now() },
@@ -106,7 +106,7 @@ test.describe('account activity labels', () => {
   test('uses a readable label for a saved setting choice', async ({ page }) => {
     const sync = await goToSettingsSection(page, 'sync')
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setSyncServerToken', 'test-token')
       store.commit('setSyncServerActivity', [
         { id: 'focus', deviceName: 'Laptop', key: 'tabCloseFocus', value: 'nextTab', createdAt: Date.now() },
@@ -127,7 +127,7 @@ test.describe('account activity labels', () => {
   test('shows shortcut bindings as shortcuts and summarizes older JSON entries', async ({ page }) => {
     const sync = await goToSettingsSection(page, 'sync')
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setSyncServerToken', 'test-token')
       store.commit('setSyncServerActivity', [
         { id: 'shortcut', deviceName: 'Laptop', key: 'keyboardShortcuts', detail: 'TOGGLE_SKIP_SILENCE', value: 'h', createdAt: Date.now() },
@@ -147,7 +147,7 @@ test.describe('account activity labels', () => {
   test('uses the shortcut editor labels for action codes with nontrivial names', async ({ page }) => {
     const sync = await goToSettingsSection(page, 'sync')
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setSyncServerToken', 'test-token')
       store.commit('setSyncServerActivity', ['RESTORE_CLOSED_TAB', 'NAVIGATE_TO_SETTINGS', 'PICTURE_IN_PICTURE'].map((detail, index) => ({
         id: String(index), deviceName: 'Laptop', key: 'keyboardShortcuts', detail, value: 'ctrl+h', createdAt: Date.now() - index,
@@ -164,7 +164,7 @@ test.describe('account activity labels', () => {
   test('labels desktop-only shortcuts in cross-device activity', async ({ page }) => {
     const sync = await goToSettingsSection(page, 'sync')
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setSyncServerToken', 'test-token')
       store.commit('setSyncServerActivity', [
         { id: 'desktop-shortcut', deviceName: 'Desktop', key: 'keyboardShortcuts', detail: 'FULLWINDOW', value: 's', createdAt: Date.now() },
@@ -178,7 +178,7 @@ test.describe('account activity labels', () => {
   test('keeps malformed caption anchors readable', async ({ page }) => {
     const sync = await goToSettingsSection(page, 'sync')
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setSyncServerToken', 'test-token')
       store.commit('setSyncServerActivity', [
         { id: 'anchor', deviceName: 'Laptop', key: 'defaultCaptionSettings', detail: 'Anchor.Anchor', value: 'top-', createdAt: Date.now() },
@@ -194,7 +194,7 @@ test.describe('account activity labels', () => {
   test('names custom themes once and describes an empty subscription feed', async ({ page }) => {
     const sync = await goToSettingsSection(page, 'sync')
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setSyncServerToken', 'test-token')
       store.commit('setSyncServerActivity', [
         { id: 'theme', deviceName: 'Laptop', key: 'customThemes', action: 'added', item: 'Ocean', createdAt: Date.now() },
@@ -245,7 +245,7 @@ for (const uiScale of [100, 125]) {
       await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setMinimumSize(0, 0))
       await seedActivity(page, 3)
       const card = sync.locator('.syncActivity')
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await page.evaluate(() => window.$store
         .dispatch('updateUseAITranslationCompletions', true))
       for (const [locale, label] of [
         ['en-US', 'Clear on this device'],
@@ -256,11 +256,10 @@ for (const uiScale of [100, 125]) {
         // Wait for the setting and rendered label instead of returning a Vuex
         // promise that Chromium can collect while Playwright awaits it.
         await page.evaluate(locale => {
-          document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          window.$store
             .dispatch('updateCurrentLocale', locale)
         }, locale)
-        await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__
-          .config.globalProperties.$store.getters.getCurrentLocale)).toBe(locale)
+        await expect.poll(() => page.evaluate(() => window.$store.getters.getCurrentLocale)).toBe(locale)
         await expect(card.locator('.activityClear')).toHaveAccessibleName(label)
         for (const width of [800, 700, 600, 480, 375, 320]) {
           await setWindowSize(app, page, { width, height: 700 + width })
@@ -323,7 +322,7 @@ for (const uiScale of [100, 125]) {
       const reloadedCard = reloadedSync.locator('.syncActivity')
       await expect(reloadedCard).toContainText('No recent activity')
       await restartedPage.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setSyncServerActivity', [{
           id: 'new:0',
           deviceName: 'Laptop',
@@ -344,7 +343,7 @@ for (const uiScale of [100, 125]) {
       const sync = await goToSettingsSection(page, 'sync')
       await seedActivity(page, 3)
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store._actions.updateSyncServerActivityClearedThrough = [
           () => Promise.reject(new Error('Could not save activity preference')),
         ]
@@ -408,7 +407,7 @@ for (const uiScale of [100, 125]) {
       await disclosure.click()
       const scroller = card.locator('.activityScroller')
       await page.evaluate(() => {
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setScrollbarThumbWidth', 20)
+        window.$store.commit('setScrollbarThumbWidth', 20)
       })
       for (const [width, height] of [[480, 700], [1000, 1000], [1580, 1080]]) {
         await scrollActivityToBottom(scroller)
@@ -422,7 +421,7 @@ for (const uiScale of [100, 125]) {
       await expectActivityRange(scroller)
       await scrollActivityToBottom(scroller)
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setSyncServerActivity', store.getters.getSyncServerActivity.slice(0, 2))
       })
       await expectActivityRange(scroller)
@@ -436,7 +435,7 @@ for (const uiScale of [100, 125]) {
       await disclosure.click()
       await scrollActivityToBottom(scroller)
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         const dispatch = store.dispatch.bind(store)
         store.dispatch = (...args) => args[0] === 'refreshSyncServerEvents'
           ? new Promise(resolve => setTimeout(() => {
@@ -453,7 +452,7 @@ for (const uiScale of [100, 125]) {
     test('clamps after collapse and retains activity after a refresh error', async ({ page }) => {
       const sync = await goToSettingsSection(page, 'sync')
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setSyncServerToken', 'test-token')
         store.commit('setSyncServerActivity', Array.from({ length: 12 }, (_, index) => ({
           id: String(index), deviceName: 'Laptop', collection: 'subscriptions', createdAt: Date.now() - index * 60000,
@@ -488,7 +487,7 @@ for (const uiScale of [100, 125]) {
       })).toBe(true)
 
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         const dispatch = store.dispatch.bind(store)
         store.dispatch = (...args) => args[0] === 'refreshSyncServerEvents'
           ? Promise.reject(new Error('Activity refresh failed'))

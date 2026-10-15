@@ -94,7 +94,7 @@ test('phone watch players square screen-edge corners and retain centered landsca
     await metadataPending
     await route.fallback()
   })
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', 200))
+  await page.evaluate(() => window.$store.dispatch('updateUiRoundness', 200))
   await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
   await page.locator(sel.searchInput).press('Enter')
 
@@ -168,16 +168,16 @@ test('watch page skeletons follow UI roundness before playback loads', async ({ 
     await expect(comments).toHaveAttribute('aria-hidden', 'true')
 
     for (const roundness of [0, 100, 200]) {
-      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), roundness)
+      await page.evaluate(value => window.$store.dispatch('updateUiRoundness', value), roundness)
       await expect(skeleton).toHaveCSS('border-radius', `${12 * roundness / 100}px`)
       await expect(recommendations).toHaveCSS('border-radius', `${12 * roundness / 100}px`)
       await expect(comments).toHaveCSS('border-radius', `${12 * roundness / 100}px`)
     }
     await attachScreenshot('watch page skeletons at 200% roundness')
 
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHideComments', true))
+    await page.evaluate(() => window.$store.dispatch('updateHideComments', true))
     await expect(comments).toHaveCount(0)
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHideComments', false))
+    await page.evaluate(() => window.$store.dispatch('updateHideComments', false))
     await expect(comments).toBeVisible()
     await comments.scrollIntoViewIfNeeded()
     const waitForCommentsShimmer = () => expect.poll(() => comments.locator('.skeletonCommentAvatar').first()
@@ -304,7 +304,7 @@ for (const mode of ['combined', 'merged', 'fallback', 'late-failure', 'pending-e
 
     const castButton = page.getByRole('button', { name: 'Cast to a DLNA device' })
     await expect(castButton).toHaveCount(0)
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowDlnaCastButton', true))
+    await page.evaluate(() => window.$store.dispatch('updateShowDlnaCastButton', true))
     await expect(castButton).toBeVisible()
     await expect(page.locator('.videoOptions .dlnaCastControl')).toBeVisible()
     await expect(page.locator('.ftVideoPlayer .dlnaCastControl')).toHaveCount(0)
@@ -312,7 +312,7 @@ for (const mode of ['combined', 'merged', 'fallback', 'late-failure', 'pending-e
     const playerBottom = await page.locator('.ftVideoPlayer').evaluate(element => element.getBoundingClientRect().bottom)
     const castTop = await castButton.evaluate(element => element.getBoundingClientRect().top)
     expect(castTop).toBeGreaterThan(playerBottom)
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', 125))
+    await page.evaluate(() => window.$store.dispatch('updateUiScale', 125))
     await expect.poll(async () => {
       const videoBottom = await page.locator('.ftVideoPlayer').evaluate(element => element.getBoundingClientRect().bottom)
       const buttonTop = await castButton.evaluate(element => element.getBoundingClientRect().top)
@@ -376,7 +376,7 @@ test('hides the DLNA action while the playback source is pending', async ({ app,
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
   const view = await watchViewHandle(page)
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowDlnaCastButton', true))
+  await page.evaluate(() => window.$store.dispatch('updateShowDlnaCastButton', true))
   const castButton = page.getByRole('button', { name: 'Cast to a DLNA device' })
   await expect(castButton).toBeVisible()
 
@@ -491,7 +491,7 @@ test.describe('desktop quick playback speed bar', () => {
   test('keeps custom speeds outside the native playback range', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(
+    await page.evaluate(() => window.$store.dispatch(
       'updateQuickPlaybackSpeedBarOptions', JSON.stringify([0.05, 20, 1].map(speed => ({ speed })))
     ))
     const player = page.locator(`${activeTab} .ftVideoPlayer`)
@@ -627,7 +627,7 @@ test.describe('desktop quick playback speed bar', () => {
       await video.evaluate(element => element.pause())
       await setWindowSize(app, page, { width: 1050, height: 850 })
       await page.evaluate(async ({ scale, presets }) => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         await store.dispatch('updateQuickPlaybackSpeedBarOptions', JSON.stringify(presets))
         await store.dispatch('updateUiScale', scale)
         await store.dispatch('updateReducedMotion', 'off')
@@ -638,7 +638,7 @@ test.describe('desktop quick playback speed bar', () => {
       await expect.poll(() => bar.evaluate(element => element.scrollWidth - element.clientWidth)).toBeGreaterThan(240)
 
       for (const frosted of [true, false]) {
-        await page.evaluate(frosted => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', frosted), frosted)
+        await page.evaluate(frosted => window.$store.dispatch('updateUseFrostedGlassPlayerUi', frosted), frosted)
         for (const horizontal of [false, true]) {
           await bar.evaluate(element => { element.scrollLeft = 0 })
           const movement = await bar.evaluate(async (element, horizontal) => {
@@ -668,7 +668,7 @@ test.describe('desktop quick playback speed bar', () => {
         }
       }
 
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'on'))
+      await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'on'))
       expect(await bar.evaluate(element => {
         element.scrollLeft = 0
         element.dispatchEvent(new WheelEvent('wheel', { deltaY: 120, bubbles: true, cancelable: true }))
@@ -681,18 +681,18 @@ test.describe('desktop quick playback speed bar', () => {
       const video = await openMockedVideo(page)
       await video.evaluate(element => element.pause())
       await setWindowSize(app, page, { width: 1050, height: 850 })
-      await page.evaluate(scale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', scale), scale)
+      await page.evaluate(scale => window.$store.dispatch('updateUiScale', scale), scale)
       await page.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
       const bar = page.locator('.ft-quick-playback-rate-bar')
 
       for (const presets of [overflowingPresets, [{ speed: 1 }]]) {
-        await page.evaluate(presets => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(
+        await page.evaluate(presets => window.$store.dispatch(
           'updateQuickPlaybackSpeedBarOptions', JSON.stringify(presets)
         ), presets)
         await expect.poll(() => bar.evaluate(element => element.scrollWidth > element.clientWidth)).toBe(presets.length > 1)
 
         for (const scrollSpeed of [100, 200]) {
-          await page.evaluate(speed => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateScrollSpeed', speed), scrollSpeed)
+          await page.evaluate(speed => window.$store.dispatch('updateScrollSpeed', speed), scrollSpeed)
           for (const edge of ['start', 'end']) {
             await page.evaluate(() => window.scrollTo(0, 100))
             await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
@@ -719,7 +719,7 @@ test.describe('desktop quick playback speed bar', () => {
       await mockPlayableWatchPage(app, page)
       await openMockedVideo(page)
       await page.evaluate(async ({ scale, presets }) => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         await store.dispatch('updateQuickPlaybackSpeedBarOptions', JSON.stringify(presets))
         await store.dispatch('updateUiScale', scale)
       }, { scale, presets: overflowingPresets })
@@ -740,7 +740,7 @@ test.describe('desktop quick playback speed bar', () => {
       await mockPlayableWatchPage(app, page)
       const video = await openMockedVideo(page)
       await video.evaluate(element => element.pause())
-      await page.evaluate(scale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', scale), scale)
+      await page.evaluate(scale => window.$store.dispatch('updateUiScale', scale), scale)
       await page.locator('body').press('s')
       const bar = page.locator('.ft-quick-playback-rate-bar')
       const view = await watchViewHandle(page)
@@ -748,7 +748,7 @@ test.describe('desktop quick playback speed bar', () => {
       for (const [index, change] of ['resize', 'presets', 'labels', 'locale', 'save action', 'save label'].entries()) {
         await setWindowSize(app, page, { width: 1050 + index * 10, height: 850 + index * 10 })
         await page.evaluate(async presets => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           await store.dispatch('updateQuickPlaybackSpeedBarOptions', JSON.stringify(presets))
           await store.dispatch('updateRememberPlaybackSpeedPerChannel', true)
           await store.dispatch('updateAutoUpdateChannelPlaybackSpeeds', false)
@@ -768,7 +768,7 @@ test.describe('desktop quick playback speed bar', () => {
           await expect(bar.locator('.ft-quick-playback-rate-save')).toHaveAttribute('data-remove', 'true')
         } else {
           await page.evaluate(async ({ change, presets }) => {
-            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            const store = window.$store
             if (change === 'presets' || change === 'labels') {
               await store.dispatch('updateQuickPlaybackSpeedBarOptions', JSON.stringify(change === 'presets' ? presets.slice(0, 2) : presets))
             } else if (change === 'locale') {
@@ -798,7 +798,7 @@ test.describe('desktop quick playback speed bar', () => {
     await mockPlayableWatchPage(app, page)
     const video = await openMockedVideo(page)
     await video.evaluate(element => element.pause())
-    await page.evaluate(presets => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(
+    await page.evaluate(presets => window.$store.dispatch(
       'updateQuickPlaybackSpeedBarOptions', JSON.stringify(presets)
     ), overflowingPresets)
     await setWindowSize(app, page, { width: 1050, height: 850 })
@@ -808,7 +808,7 @@ test.describe('desktop quick playback speed bar', () => {
     await expect.poll(() => bar.evaluate(element => element.scrollWidth - element.clientWidth)).toBeGreaterThan(0)
     const before = await video.evaluate(element => ({ rate: element.playbackRate, volume: element.volume }))
     for (const frosted of [true, false]) {
-      await page.evaluate(frosted => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', frosted), frosted)
+      await page.evaluate(frosted => window.$store.dispatch('updateUseFrostedGlassPlayerUi', frosted), frosted)
       await bar.locator('[data-rate="1"]').hover()
       // Hover can scroll the preset into view after the previous theme's end test.
       await bar.evaluate(element => { element.scrollLeft = 0 })
@@ -1285,7 +1285,7 @@ test('keeps metadata errors visible in family-friendly-only mode', async ({ app,
     })
   })
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateShowFamilyFriendlyOnly', true)
   })
 
@@ -1466,7 +1466,7 @@ test('shows the audio-track player and custom visualizer for YouTube Music track
       return capturedStream
     }
 
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await Promise.all([
       store.dispatch('updateReducedMotion', 'off'),
       store.dispatch('updateUiScale', 125),
@@ -1587,7 +1587,7 @@ test('shows the audio-track player and custom visualizer for YouTube Music track
   })).toBe(false)
 
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateReducedMotion', 'on')
   })
   await video.evaluate(element => element.play())
@@ -1653,7 +1653,7 @@ test('detects Invidious audio tracks from artist topic channels', async ({ page 
     }
   }))
   await page.evaluate(async (url) => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await Promise.all([
       store.dispatch('updateBackendPreference', 'invidious'),
       store.dispatch('updateDefaultInvidiousInstance', url),
@@ -1673,7 +1673,7 @@ test('detects Invidious audio tracks from artist topic channels', async ({ page 
 test('updates boolean settings from the player options', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateShowSkipSilenceButton', true)
   })
   await openMockedVideo(page)
@@ -2171,7 +2171,7 @@ test.describe('fullscreen ambient mode', () => {
     const video = await openMockedVideo(page)
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateAmbientMode', true)
     })
 
@@ -2368,7 +2368,7 @@ test('shows the restricted playback setup hint and loads yt-dlp subtitles after 
   await expect(page.getByRole('button', { name: 'Try with configured cookies' })).toHaveCount(0)
 
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateYtDlpPlaybackAuthMode', 'browser')
     await store.dispatch('updateYtDlpPlaybackCookiesBrowser', 'firefox')
   })
@@ -2549,7 +2549,7 @@ test('uses configured cookies for every yt-dlp extraction when enabled', async (
   await openMockedVideo(page)
 
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateYtDlpPlaybackAuthMode', 'browser')
     await store.dispatch('updateYtDlpPlaybackCookiesBrowser', 'firefox')
     await store.dispatch('updateYtDlpPlaybackAlwaysUseCookies', true)
@@ -2719,7 +2719,7 @@ test.describe('Shorts transcript navigation', () => {
   test('keeps the current Short from expanding when YouTube-style Shorts are disabled', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateUiScale', 95)
     })
     await page.locator(sel.searchInput)
@@ -3195,7 +3195,7 @@ test('a background watch tab stays loading until its cached avatar is ready', as
 test('keeps background comment loading local to the loaded watch page', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', false)
   })
   await openMockedVideo(page)
@@ -3222,7 +3222,7 @@ test('keeps background comment loading local to the loaded watch page', async ({
     await page.locator(sel.newTabButton).click()
     await expect(watchContent).toHaveAttribute('aria-hidden', 'true')
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', true)
     })
     await expect.poll(() => commentRequestStarted).toBe(true)
@@ -3400,7 +3400,7 @@ async function mockTranslatedEndscreen(app, page) {
   })
 
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateAvoidTranslation', 'watch_only')
   })
 }
@@ -3424,7 +3424,7 @@ async function measureSponsorBlockSkipStartTime(app, page, { rendererLoad = fals
     contentType: 'application/json'
   }))
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setUseSponsorBlock', true)
   })
 
@@ -3649,7 +3649,7 @@ test.describe('watch page', () => {
       await view.$nextTick()
     })
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateCurrentLocale', 'de-DE')
     })
     await expect.poll(() => watchView.evaluate(view => view.currentLocale)).toBe('de-DE')
@@ -3661,7 +3661,7 @@ test.describe('watch page', () => {
       await view.$nextTick()
     })
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateCurrentLocale', 'en-US')
     })
     await expect.poll(() => watchView.evaluate(view => view.currentLocale)).toBe('en-US')
@@ -3709,7 +3709,7 @@ test.describe('watch page', () => {
     })
     const builtInManifest = await watchView.evaluate((view) => view.manifestSrc)
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateUiScale', 125)
     })
     await watchView.evaluate(async (view) => {
@@ -3756,7 +3756,7 @@ test.describe('watch page', () => {
     })
     await waitForPlayback(page)
     expect(await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getVideoPlaybackEngine
     })).toBe('built-in')
 
@@ -4031,7 +4031,7 @@ test.describe('watch page', () => {
       }))
       await openMockedVideo(page)
       await page.evaluate(async () => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         await store.dispatch('updateYtDlpPlaybackAuthMode', 'browser')
         await store.dispatch('updateYtDlpPlaybackCookiesBrowser', 'firefox')
         await store.dispatch('updateYtDlpPlaybackAlwaysUseCookies', true)
@@ -4082,7 +4082,7 @@ test.describe('watch page', () => {
       }))
       await openMockedVideo(page)
       await page.evaluate(async () => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         await store.dispatch('updateYtDlpPlaybackAuthMode', 'browser')
         await store.dispatch('updateYtDlpPlaybackCookiesBrowser', 'firefox')
         await store.dispatch('updateYtDlpPlaybackAlwaysUseCookies', true)
@@ -4323,7 +4323,7 @@ test.describe('watch page', () => {
       })
     }, { audio: POST_LIVE_AUDIO_URL, video: POST_LIVE_VIDEO_URL })
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateVideoPlaybackEngine', 'built-in')
     })
 
@@ -4520,7 +4520,7 @@ test.describe('watch page', () => {
 
     await expect(page.locator(`${activeTab} .liveChatSkeleton`)).toBeVisible()
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateExternalLinkHandling', '')
       window.__e2eOpenedExternalUrl = null
       window.open = (url) => {
@@ -5041,7 +5041,7 @@ test.describe('watch page', () => {
     await oembedRequested
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateAvoidTranslation', 'disabled')
     })
     const oembedResponse = page.waitForResponse(/\/oembed\?/)
@@ -5869,7 +5869,7 @@ test.describe('watch page', () => {
 
   test('toggles information from the Shorts title and matches the comments header', async ({ app, page }) => {
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateBaseTheme', 'light')
     })
     await expect(page.locator('body')).toHaveClass(/light/)
@@ -6233,7 +6233,7 @@ test.describe('watch page', () => {
       }])
     }))
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setUseSponsorBlock', true)
     })
     const video = await openMockedVideo(page)
@@ -6301,7 +6301,7 @@ test.describe('watch page', () => {
     })
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setUseSponsorBlock', true)
       store.commit('setSponsorBlockGeneratedUserId', 'test-contributor')
       await store.dispatch('updateSponsorBlockEnableSubmission', true)
@@ -6358,13 +6358,13 @@ test.describe('watch page', () => {
     await content.evaluate((element) => { element.scrollTop = element.scrollHeight })
     const enabledScrollTop = await content.evaluate(element => element.scrollTop)
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateSponsorBlockEnableSubmission', false)
     })
     await expect(stats).toHaveCount(0)
     await expectSponsorBlockContentClamp(content, enabledScrollTop)
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateSponsorBlockEnableSubmission', true)
     })
     await expect(stats).toBeVisible()
@@ -6396,12 +6396,12 @@ test.describe('watch page', () => {
   test('hides SponsorBlock contribution stats when submission is disabled', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setUseSponsorBlock', true)
       store.commit('setSponsorBlockGeneratedUserId', 'test-contributor')
     })
     await expect.poll(() => page.evaluate(() => {
-      return document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters
+      return window.$store.getters
         .getSponsorBlockEnableSubmission
     })).toBe(false)
     await openMockedVideo(page)
@@ -6419,7 +6419,7 @@ test.describe('watch page', () => {
       return route.abort()
     })
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setUseSponsorBlock', true)
       await store.dispatch('updateSponsorBlockEnableSubmission', true)
     })
@@ -6451,7 +6451,7 @@ test.describe('watch page', () => {
       contentType: 'application/json'
     }))
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setUseSponsorBlock', true)
       store.commit('setSponsorBlockSponsor', { color: '#123456', skip: 'promptToSkip' })
     })
@@ -6492,7 +6492,7 @@ test.describe('watch page', () => {
       contentType: 'application/json'
     }))
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setUseSponsorBlock', true)
     })
     await openMockedVideo(page)
@@ -6535,7 +6535,7 @@ test.describe('watch page', () => {
       contentType: 'application/json'
     }))
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setUseSponsorBlock', true)
     })
     await openMockedVideo(page)
@@ -6590,7 +6590,7 @@ test.describe('watch page', () => {
       })
     })
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setUseSponsorBlock', true)
       store.commit('setSponsorBlockGeneratedUserId', 'test-contributor')
       await store.dispatch('updateSponsorBlockEnableSubmission', true)
@@ -6692,7 +6692,7 @@ test.describe('watch page', () => {
       })
     })
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setUseSponsorBlock', true)
       await store.dispatch('updateSponsorBlockEnableSubmission', true)
     })
@@ -6888,7 +6888,7 @@ test.describe('fullscreen playlist dock', () => {
     await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
 
     await page.evaluate(async ({ playlistId, playlistItemIds, videoIds }) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('removeVideos', { _id: playlistId, playlistItemIds, videoIds })
     }, {
       playlistId: FULLSCREEN_PLAYLIST_ID,
@@ -7093,7 +7093,7 @@ test('treats an empty comments response as no comments', async ({ app, page }) =
 test('loads initial comments with the video when automatic pagination is enabled', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', true)
   })
   // Initial comments must not depend on the later-page sentinel being visible.
@@ -7120,7 +7120,7 @@ test('pauses automatic comment pagination while filtering', async ({ app, page }
   })
 
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', true)
   })
   await openMockedVideo(page)
@@ -7183,7 +7183,7 @@ test.describe('manual comment loading', () => {
     await mockPlayableWatchPage(app, page)
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateCurrentLocale', 'de-DE')
     })
 
@@ -7238,7 +7238,7 @@ test.describe('manual comment loading', () => {
     expect(translationRequestCount).toBe(1)
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateCurrentLocale', 'fr-FR')
     })
 
@@ -7248,7 +7248,7 @@ test.describe('manual comment loading', () => {
     expect(translationRequestCount).toBe(2)
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateCommentTranslationIgnoredLanguages', ['en'])
     })
 
@@ -7276,7 +7276,7 @@ test.describe('manual comment loading', () => {
     await mockPlayableWatchPage(app, page)
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await Promise.all([
         store.dispatch('updateCurrentLocale', 'de-DE'),
         store.dispatch('updateCommentTranslationIgnoredLanguages', ['en'])
@@ -7292,7 +7292,7 @@ test.describe('manual comment loading', () => {
     await expect(page.locator('.commentTranslationButton')).toHaveCount(0)
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateCommentTranslationIgnoredLanguages', [])
     })
     await expect(page.locator('.commentTranslationButton').first()).toBeVisible()
@@ -7302,7 +7302,7 @@ test.describe('manual comment loading', () => {
     await mockPlayableWatchPage(app, page)
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateCurrentLocale', 'de-DE')
     })
 
@@ -7316,13 +7316,13 @@ test.describe('manual comment loading', () => {
     await expect(translationButtons.first()).toBeVisible()
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateEnableCommentTranslations', false)
     })
     await expect(translationButtons).toHaveCount(0)
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateEnableCommentTranslations', true)
     })
     await expect(translationButtons.first()).toBeVisible()
@@ -7376,7 +7376,7 @@ test.describe('manual comment loading', () => {
       await mockPlayableWatchPage(app, page)
       await openMockedVideo(page)
       await page.evaluate(async scale => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         await store.dispatch('updateUiScale', scale)
         await store.dispatch('updateBaseTheme', scale === 100 ? 'dark' : 'light')
       }, scale)
@@ -7641,7 +7641,7 @@ test.describe('manual comment loading', () => {
 
     await expectLineToEndAtLastConnectorStart()
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.dispatch('updateUiScale', 125)
     })
     await expectLineToEndAtLastConnectorStart()
@@ -7808,7 +7808,7 @@ test.describe('manual comment loading', () => {
     await expect(commentLikes).toContainText(/4\.6\s?m/i)
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.dispatch('updateShortenViewCounts', false)
     })
     await expect(commentLikes).toContainText('4,600,000')
@@ -7898,15 +7898,15 @@ test.describe('manual comment loading', () => {
       }, { persistedCommentCount })
 
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         return store.dispatch('updateActiveProfile', 'commentPinsProfile')
       })
       await expect.poll(() => page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         return store.getters.getActiveProfile._id
       })).toBe('commentPinsProfile')
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         return store.dispatch('updateActiveProfile', 'allChannels')
       })
       await expect(page.locator('.commentThread')).toHaveCount(liveCommentCount + persistedCommentCount)
@@ -7923,7 +7923,7 @@ test.describe('manual comment loading', () => {
       const previousContentHeight = await commentsList.evaluate(element => element.offsetHeight)
 
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         return store.dispatch('updateActiveProfile', 'commentPinsProfile')
       })
       await expect(dock.locator('.commentThread')).toHaveCount(liveCommentCount)

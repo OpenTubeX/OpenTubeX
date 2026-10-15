@@ -143,7 +143,7 @@ test.describe('watch stats', () => {
     expect.soft(reversed.tab).toBeGreaterThan(4.5)
     expect.soft(reversed.sidebar).toBeGreaterThan(4.5)
     await setWindowSize(app, page, { width: 320, height: 800 })
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await page.evaluate(() => window.$store
       .dispatch('updateNavigationItems', ['stats', 'home', 'subscriptions', 'history', 'userplaylists', 'subscribedchannels']))
     await expect(page.locator('.sideNav .navOption.router-link-exact-active')).toBeVisible()
     await expect.poll(async () => (await contrast()).sidebar).toBeGreaterThan(4.5)
@@ -243,7 +243,7 @@ test.describe('synced watch stats', () => {
   test('the replace device action uses the reset position and fits its contents', async ({ app, page, attachScreenshot }) => {
     await goTo(page, 'stats')
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setSyncServerEnabled', true)
       store.commit('setSyncServerWatchStatsSupported', true)
       store.commit('setSyncedWatchStats', [
@@ -267,7 +267,7 @@ test.describe('synced watch stats', () => {
   test('device picker grows into available space and fades overflowing edges', async ({ app, page }, testInfo) => {
     await goTo(page, 'stats')
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setSyncServerEnabled', true)
       store.commit('setSyncServerWatchStatsSupported', true)
       store.commit('setSyncedWatchStats', [
@@ -314,8 +314,7 @@ test.describe('synced watch stats', () => {
     await expectSingleLineLabels()
     await picker.screenshot({ path: testInfo.outputPath('devices-wide.png') })
 
-    await page.evaluate(() => document.querySelector('#app').__vue_app__
-      .config.globalProperties.$store.dispatch('updateUiScale', 125))
+    await page.evaluate(() => window.$store.dispatch('updateUiScale', 125))
     await expectNoOverflow()
     await picker.getByRole('button', { name: 'Living room tablet', exact: true }).click()
     await expectIndicatorAligned()
@@ -330,15 +329,13 @@ test.describe('synced watch stats', () => {
     await expect(picker).toHaveClass(/fadeLeft/)
     await expect(picker).toHaveClass(/fadeRight/)
     // Electron's locator screenshot clipping uses unzoomed coordinates.
-    await page.evaluate(() => document.querySelector('#app').__vue_app__
-      .config.globalProperties.$store.dispatch('updateUiScale', 100))
+    await page.evaluate(() => window.$store.dispatch('updateUiScale', 100))
     await expect.poll(() => page.evaluate(() => window.innerWidth)).toBeGreaterThan(400)
     await picker.evaluate(element => { element.scrollLeft = (element.scrollWidth - element.clientWidth) / 2 })
     await expect(picker).toHaveClass(/fadeLeft/)
     await expect(picker).toHaveClass(/fadeRight/)
     await picker.screenshot({ path: testInfo.outputPath('devices-overflow.png') })
-    await page.evaluate(() => document.querySelector('#app').__vue_app__
-      .config.globalProperties.$store.dispatch('updateUiScale', 125))
+    await page.evaluate(() => window.$store.dispatch('updateUiScale', 125))
     // Wait for the zoomed viewport before choosing its scroll boundary.
     await expect.poll(() => page.evaluate(() => window.innerWidth)).toBeLessThan(400)
     await picker.evaluate(element => { element.scrollLeft = element.scrollWidth })
@@ -356,7 +353,7 @@ test.describe('synced watch stats', () => {
     for (const change of ['rename', 'remove']) {
       await page.emulateMedia({ reducedMotion: change === 'remove' ? 'reduce' : 'no-preference' })
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setSyncedWatchStats', store.getters.getSyncedWatchStats.map(device => ({
           ...device, deviceName: 'A device with a very long name that needs horizontal scrolling',
         })))
@@ -365,7 +362,7 @@ test.describe('synced watch stats', () => {
       await picker.evaluate(element => { element.scrollLeft = element.scrollWidth })
       await expect(picker).toHaveClass(/fadeLeft/)
       await page.evaluate(change => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setSyncedWatchStats', change === 'remove'
           ? []
           : store.getters.getSyncedWatchStats.map(device => ({ ...device, deviceName: 'Phone' })))
@@ -374,7 +371,7 @@ test.describe('synced watch stats', () => {
       await expectIndicatorAligned()
     }
 
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await page.evaluate(() => window.$store
       .commit('setSyncedWatchStats', [{ deviceId: 'tablet', deviceName: 'Living room Android tablet', days: {} }]))
     await expect(picker.getByRole('button')).toHaveCount(3)
     await expect.poll(() => picker.evaluate(element => element.getBoundingClientRect().width)).toBeGreaterThan(460)
@@ -410,7 +407,7 @@ test.describe('synced watch stats', () => {
       return route.fulfill({ status: 404 })
     })
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setSyncServerToken', '')
       store.commit('setSyncServerEnabled', true)
     })
@@ -460,7 +457,7 @@ test.describe('synced watch stats', () => {
       return route.fulfill({ status: 404 })
     })
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateSyncServerDeviceName', 'Pixel')
       await store.dispatch('updateSyncServerEnabled', true)
       await store.dispatch('syncWithSyncServer')
@@ -485,14 +482,14 @@ test.describe('synced watch stats', () => {
     await dialog.getByRole('radio', { name: /Keep larger daily total/ }).check()
     await dialog.screenshot({ path: testInfo.outputPath('device-repair-preview.png') })
     await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setContentSize(430, 750))
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', 125))
+    await page.evaluate(() => window.$store.dispatch('updateUiScale', 125))
     const scroller = dialog.locator('.promptContentScroller')
     await expect(scroller.locator(':scope > .os-scrollbar-vertical')).not.toHaveClass(/os-scrollbar-unusable/)
     await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
     await expectScrollAtRenderedEnd(scroller)
     await dialog.screenshot({ path: testInfo.outputPath('device-repair-mobile-125.png') })
     await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setContentSize(1600, 1000))
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', 100))
+    await page.evaluate(() => window.$store.dispatch('updateUiScale', 100))
     await expect(scroller.locator(':scope > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-unusable/)
     await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
     holdUpload = true
@@ -511,21 +508,21 @@ test.describe('synced watch stats', () => {
     await expect(total).toContainText('1 hr 30 min')
     expect(devices).toHaveLength(1)
     expect(devices[0].replacedDevices[0].deviceId).toBe(phone)
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer'))
+    await page.evaluate(() => window.$store.dispatch('syncWithSyncServer'))
     await picker.getByRole('button', { name: 'All devices' }).click()
     await expect(total).toContainText('1 hr 30 min')
     await picker.getByRole('button', { name: 'Pixel', exact: true }).click()
     await page.locator('.resetStatsButton').click()
     await page.getByRole('button', { name: 'Reset', exact: true }).click()
     await expect(total).toContainText('0 min')
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer'))
+    await page.evaluate(() => window.$store.dispatch('syncWithSyncServer'))
     await expect(total).toContainText('0 min')
     expect(devices).toHaveLength(1)
     expect(devices[0].reset.baselines[phone]).toEqual({ [today]: 1800, [yesterday]: 1800 })
     // Disconnect clears the remote cache, so the offline reset must be completed
     // from the encrypted repaired tree at the next connection.
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('recordWatchTime', { date: '2026-10-08', seconds: 120 })
       await store.dispatch('disconnectSyncServer')
       await store.dispatch('clearWatchStats')
@@ -534,7 +531,7 @@ test.describe('synced watch stats', () => {
     await expect(total).toContainText('1 min')
     failUpload = true
     await page.evaluate(async ({ key, salt, laptop }) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('completeSyncServerPairing', {
         serverUrl: 'https://sync.example',
         username: 'test',
@@ -546,16 +543,16 @@ test.describe('synced watch stats', () => {
       })
       try { await store.dispatch('syncWithSyncServer') } catch {}
     }, { key, salt, laptop })
-    expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    expect(await page.evaluate(() => window.$store
       .getters.getSyncServerWatchStatsReset.pending)).toBe(true)
     failUpload = false
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer'))
-    expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await page.evaluate(() => window.$store.dispatch('syncWithSyncServer'))
+    expect(await page.evaluate(() => window.$store
       .getters.getSyncServerWatchStatsReset.pending)).toBeUndefined()
     await expect(total).toContainText('1 min')
     expect(devices).toHaveLength(1)
     expect(devices[0].reset.baselines[phone]).toEqual({ [today]: 1800, [yesterday]: 1800 })
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer'))
+    await page.evaluate(() => window.$store.dispatch('syncWithSyncServer'))
     await expect(total).toContainText('1 min')
   })
 
@@ -631,8 +628,7 @@ test.describe('synced watch stats', () => {
     await selector.getByRole('button', { name: 'Phone' }).click()
     await expect(total).toContainText('30 min')
     await selectedSegmentIsAligned('Phone')
-    await page.evaluate(() => document.querySelector('#app').__vue_app__
-      .config.globalProperties.$store.dispatch('updateUiScale', 125))
+    await page.evaluate(() => window.$store.dispatch('updateUiScale', 125))
     await expect(selector).toBeVisible()
     await selectedSegmentIsAligned('Phone')
     await selector.getByRole('button', { name: 'Laptop' }).click()
@@ -648,17 +644,15 @@ test.describe('synced watch stats', () => {
     await selector.getByRole('button', { name: 'All devices' }).click()
     await expect(total).toContainText('30 min')
     await selectedSegmentIsAligned('All devices')
-    await page.evaluate(() => document.querySelector('#app').__vue_app__
-      .config.globalProperties.$store.commit('setHasHistoricalWatchTimeEstimate', true))
+    await page.evaluate(() => window.$store.commit('setHasHistoricalWatchTimeEstimate', true))
     await selector.getByRole('button', { name: 'Laptop' }).click()
     await expect(page.locator('.historicalAdjustment')).toBeVisible()
     await selector.getByRole('button', { name: 'Phone' }).evaluate(button => button.click())
     await expect(page.locator('.historicalAdjustment')).toBeHidden()
-    await page.evaluate(() => document.querySelector('#app').__vue_app__
-      .config.globalProperties.$store.commit('setHasHistoricalWatchTimeEstimate', false))
+    await page.evaluate(() => window.$store.commit('setHasHistoricalWatchTimeEstimate', false))
     await selector.getByRole('button', { name: 'All devices' }).click()
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setSyncedWatchStats', [
         ...store.getters.getSyncedWatchStats,
         ...Array.from({ length: 15 }, (_, index) => ({
@@ -692,7 +686,7 @@ test.describe('synced watch stats', () => {
       Math.abs(element.scrollLeft - (element.scrollWidth - element.clientWidth)))).toBeLessThanOrEqual(3)
     await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setSyncedWatchStats', store.getters.getSyncedWatchStats.slice(0, 2))
     })
     await expect(selector.getByRole('button')).toHaveCount(3)
@@ -720,7 +714,7 @@ test.describe('synced watch stats', () => {
       return title.bottom <= control.top && control.right <= header.getBoundingClientRect().right + 1
     })).toBe(true)
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setSyncedWatchStats', store.getters.getSyncedWatchStats.map(device => ({
         ...device,
         deviceName: 'Pixel 8 Pro',
@@ -746,23 +740,20 @@ test.describe('synced watch stats', () => {
     await goTo(page, 'stats')
     await expect(page.getByRole('group', { name: 'Devices' })).toBeHidden()
     await page.evaluate(async cached => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateSyncServerSyncWatchStats', false)
       await store.dispatch('updateSyncServerSnapshot', JSON.stringify({ watchStats: cached }))
     }, remote)
     await page.context().setOffline(false)
     await page.reload()
     await waitForAppReady(page)
-    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__
-      .config.globalProperties.$store.getters.getSyncServerWatchStatsSupported)).toBe(false)
-    await expect.poll(() => page.evaluate(() => JSON.parse(document.querySelector('#app').__vue_app__
-      .config.globalProperties.$store.state.settings.syncServerSnapshot).watchStats?.length)).toBe(1)
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getSyncServerWatchStatsSupported)).toBe(false)
+    await expect.poll(() => page.evaluate(() => JSON.parse(window.$store.state.settings.syncServerSnapshot).watchStats?.length)).toBe(1)
     await goTo(page, 'stats')
-    await page.evaluate(async () => document.querySelector('#app').__vue_app__
-      .config.globalProperties.$store.dispatch('updateSyncServerSyncWatchStats', true))
+    await page.evaluate(async () => window.$store.dispatch('updateSyncServerSyncWatchStats', true))
     await expect(page.getByRole('group', { name: 'Devices' })).toBeHidden()
     await page.evaluate(async cached => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setSyncedWatchStats', cached)
       store.commit('setSyncServerWatchStatsSupported', true)
       await store.dispatch('replaceSyncServerToken', 'replacement-token')

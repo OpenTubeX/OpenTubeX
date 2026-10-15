@@ -57,8 +57,7 @@ test('playlist types render in both icon packs and Invidious channel tabs', asyn
   await page.locator('#playlistsTab').click()
 
   for (const pack of ['material', 'remix']) {
-    await page.evaluate(value => document.querySelector('#app').__vue_app__
-      .config.globalProperties.$store.dispatch('updateIconPack', value), pack)
+    await page.evaluate(value => window.$store.dispatch('updateIconPack', value), pack)
     for (const width of [1440, 375]) {
       await page.setViewportSize({ width, height: 900 })
       for (const type of types) {

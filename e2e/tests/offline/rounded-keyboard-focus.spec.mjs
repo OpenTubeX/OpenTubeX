@@ -59,7 +59,7 @@ for (const uiScale of [100, 95, 125]) {
       // Profile tiles and subscription tiles exercise rounded rectangles as
       // well as the circular header and quick-settings controls.
       await page.evaluate(async () => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         await store.dispatch('updateProfile', {
           _id: 'allChannels',
           name: 'All Channels',
@@ -95,10 +95,10 @@ for (const uiScale of [100, 95, 125]) {
         await page.emulateMedia({ colorScheme })
         await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
         for (const roundness of [0, 100, 200]) {
-          await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), roundness)
+          await page.evaluate(value => window.$store.dispatch('updateUiRoundness', value), roundness)
           await expectStableKeyboardShape(page, channelTile)
         }
-        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', 100))
+        await page.evaluate(() => window.$store.dispatch('updateUiRoundness', 100))
         await expectStableKeyboardShape(page, channelTile)
         const screenshot = testInfo.outputPath(`channel-tile-keyboard-focus-${colorScheme}.png`)
         await channelTile.screenshot({ path: screenshot })
@@ -108,7 +108,7 @@ for (const uiScale of [100, 95, 125]) {
 
     test('preserves the rounded player controls during keyboard focus', async ({ app, page }) => {
       await mockPlayableWatchPage(app, page)
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateDisplayVideoPlayButton', true))
+      await page.evaluate(() => window.$store.dispatch('updateDisplayVideoPlayButton', true))
       await openMockedVideo(page)
       const player = page.locator('.ftVideoPlayer').first()
       await player.locator('video').evaluate(video => video.pause())

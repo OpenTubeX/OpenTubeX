@@ -30,7 +30,7 @@ async function completeFeedRefresh(page, tab = 'videos', trigger = 'completion e
         detail: { tab, profileId: 'allChannels', timestamp: Date.now() }
       }))
     } else {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setSubscriptionFeedLastRefreshTimestamp', Date.now())
     }
     for (let frame = 0; frame < 5; frame++) {
@@ -201,7 +201,7 @@ test('finishing a refresh keeps the position reached while scrolling the mobile 
   response.resolve()
   await expect(page.getByRole('button', { name: 'Cancel refresh' })).toHaveCount(0)
   await expect.poll(() => page.evaluate(channelId => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return store.getters.getVideoCache[channelId]?.videos?.[0]?.viewCount
   }, CHANNEL_ID)).toBe(2000)
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(600)
@@ -227,7 +227,7 @@ for (const uiScale of [100, 95]) {
       await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(1000)
       response.resolve()
       await expect.poll(() => page.evaluate(channelId => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         return store.getters.getVideoCache[channelId]?.videos?.length
       }, CHANNEL_ID)).toBe(remainingCount)
       await expect(page.getByRole('button', { name: 'Cancel refresh' })).toHaveCount(0)

@@ -61,7 +61,7 @@ test('Capacitor player controls share the taller glass height and options menu d
   })
   await expect(panel.locator('.ft-chapters-button > .ft-control-glass')).toHaveCSS('height', '40px')
   await expect(panel.locator('.ft-quick-playback-rate-bar')).toHaveCSS('height', '40px')
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', false))
+  await page.evaluate(() => window.$store.dispatch('updateUseFrostedGlassPlayerUi', false))
   await expect(player).toHaveClass(/classicPlayerControls/)
   await expect(panel.locator('.ft-time-display-group > .ft-control-glass')).toBeHidden()
   await expect(panel.locator('.ft-quick-playback-rate-bar')).toHaveCSS('height', '48px')

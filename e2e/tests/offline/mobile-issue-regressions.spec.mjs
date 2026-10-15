@@ -86,13 +86,13 @@ test('header sync indicator follows active sync stages, opens sync settings, and
   const indicator = page.locator('.topNav .syncIndicator')
   await expect(indicator).toHaveCount(0)
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setSyncServerStatus', 'syncing')
     store.commit('setSyncServerProgress', { stage: 'subscriptions' })
   })
   await expect(indicator).toHaveAttribute('type', 'button')
   await expect(indicator).toHaveAccessibleName('Sync: Syncing subscriptions…')
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setSyncServerProgress', { stage: 'history' }))
+  await page.evaluate(() => window.$store.commit('setSyncServerProgress', { stage: 'history' }))
   await expect(indicator).toHaveAccessibleName('Sync: Syncing watch history…')
   const focusSettings = await goToSettingsSection(page, 'focus')
   const hideIndicator = focusSettings.getByRole('checkbox', { name: 'Hide Header Sync Indicator' })
@@ -121,7 +121,7 @@ test('header sync indicator follows active sync stages, opens sync settings, and
   await indicator.press('Enter')
   await expect(page.locator('.settingsWindow')).toBeVisible()
   await expect(page.locator('.settingsContent > [data-section="sync"]')).toBeVisible()
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setSyncServerStatus', 'idle'))
+  await page.evaluate(() => window.$store.commit('setSyncServerStatus', 'idle'))
   await expect(indicator).toHaveCount(0)
 })
 
@@ -133,7 +133,7 @@ test.describe('translated download actions', () => {
       await setWindowSize(app, page, { width: 375, height: 850 })
       await page.evaluate(async scale => {
         window.ftElectron.setZoomFactor(scale)
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('upsertYtDlpDownload', {
           id: 999,
           title: 'Canceled download',

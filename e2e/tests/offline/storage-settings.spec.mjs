@@ -27,7 +27,7 @@ test.use({
 test('keeps retention label transparent and its indicators inside the card', async ({ app, page }, testInfo) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateBaseTheme', 'dark')
     store.commit('setSyncServerEnabled', true)
     store.commit('setSyncServerToken', 'e2e-token')
@@ -230,7 +230,7 @@ test('opens the Storage tab when legacy storage navigation changes while mounted
     .toHaveAttribute('aria-selected', 'true')
 
   await page.evaluate(() => {
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    window.$store
       .commit('setSettingsWindowSection', 'storage')
   })
 
@@ -316,17 +316,17 @@ test('moves storage controls into one searchable category', async ({ app, attach
   await expect(playbackCacheSize).toHaveValue('5')
   await playbackCacheSize.fill('4')
   await expect.poll(() => page.evaluate(() => (
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    window.$store
       .getters.getYtDlpPlaybackCacheMaxEntrySize
   ))).toBe(4)
   await playbackCacheSize.fill('0')
   await expect.poll(() => page.evaluate(() => (
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    window.$store
       .getters.getYtDlpPlaybackCacheMaxEntrySize
   ))).toBe(0)
   await playbackCacheSize.fill('5')
   await expect.poll(() => page.evaluate(() => (
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    window.$store
       .getters.getYtDlpPlaybackCacheMaxEntrySize
   ))).toBe(5)
   await expect(storage.getByLabel('Automatic History Retention (Days)')).toHaveValue('30')
@@ -413,7 +413,7 @@ test('moves storage controls into one searchable category', async ({ app, attach
 
 test('separates replaceable search results from saved search history', async ({ page }) => {
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('addToSessionSearchHistory', {
       query: 'temporary search',
       data: [{ videoId: 'aaaaaaaaaaa' }]
@@ -431,9 +431,9 @@ test('separates replaceable search results from saved search history', async ({ 
     .click()
 
   expect(await page.evaluate(() => ({
-    cached: document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    cached: window.$store
       .getters.getSessionSearchHistory.length,
-    saved: document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    saved: window.$store
       .getters.getSearchHistoryEntries.length
   }))).toEqual({ cached: 0, saved: 1 })
   await expect(storage.locator('.storageSettings')).toHaveAttribute('aria-busy', 'false')
@@ -446,7 +446,7 @@ test('separates replaceable search results from saved search history', async ({ 
     .getByRole('button', { name: 'Delete' })
     .click()
   await expect.poll(() => page.evaluate(
-    () => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    () => window.$store
       .getters.getSearchHistoryEntries.length
   )).toBe(0)
 })
@@ -522,7 +522,7 @@ test('reports cleanup rejection instead of success', async ({ app, page }) => {
 
 test('reports rejected store cleanup instead of success', async ({ page }) => {
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store._actions.removeAllSearchHistoryEntries = [() => Promise.resolve(false)]
   })
 
@@ -538,14 +538,14 @@ test('reports rejected store cleanup instead of success', async ({ page }) => {
   await expect(page.locator('.toast', { hasText: 'Cleanup failed' })).toBeVisible()
   await expect(page.locator('.toast', { hasText: 'Cleanup complete' })).toHaveCount(0)
   expect(await page.evaluate(() => (
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    window.$store
       .getters.getSearchHistoryEntries.length
   ))).toBe(1)
 })
 
 test('reports rejected profile cleanup instead of success', async ({ page }) => {
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store._actions.updateProfile = [() => Promise.resolve(false)]
   })
 
@@ -558,7 +558,7 @@ test('reports rejected profile cleanup instead of success', async ({ page }) => 
   await expect(page.locator('.toast', { hasText: 'Cleanup failed' })).toBeVisible()
   await expect(page.locator('.toast', { hasText: 'Cleanup complete' })).toHaveCount(0)
   expect(await page.evaluate(() => (
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    window.$store
       .getters.getProfileList[0].subscriptions.length
   ))).toBe(1)
 })
@@ -758,7 +758,7 @@ test('clears bounded disk caches without touching user data', async ({ app, page
   // Active tabs may immediately recreate their thumbnails after cleanup.
   await expect(tabCache.locator('.storageSize')).not.toHaveText('1 MiB')
   expect(await page.evaluate(() => (
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    window.$store
       .getters.getSearchHistoryEntries.length
   ))).toBe(1)
 })

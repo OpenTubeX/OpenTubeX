@@ -10,12 +10,12 @@ test('Material colored headers keep pinned and editable mobile search readable',
   await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setMinimumSize(0, 0))
   await setWindowSize(app, page, { width: 375, height: 812 })
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateBarColor', true)
     await store.dispatch('updateAlwaysShowMobileSearchBar', true)
   })
   for (const [theme] of variants) {
-    await page.evaluate(theme => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateBaseTheme', theme), theme)
+    await page.evaluate(theme => window.$store.dispatch('updateBaseTheme', theme), theme)
     const pinned = page.locator('.pinnedSearchTrigger')
     await expect(pinned).toBeVisible()
     await page.mouse.move(0, 400)
@@ -42,7 +42,7 @@ test('Material colored headers keep pinned and editable mobile search readable',
 test('Material swatches retain contrast when editing an inactive System theme', async ({ page }) => {
   const section = await goToSettingsSection(page, 'theme')
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateSystemLightTheme', 'materialLight')
     await store.dispatch('updateSystemDarkTheme', 'dark')
     await store.dispatch('updateBaseTheme', 'system')
@@ -51,7 +51,7 @@ test('Material swatches retain contrast when editing an inactive System theme', 
   await expect(page.locator('body')).not.toHaveClass(/dynamicColors/)
   await expect(section.locator('.materialColorSettings')).toBeVisible()
   for (const seed of ['#ffffff', '#000000', '#ffff00']) {
-    await page.evaluate(seed => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateMaterialSeedColor', seed), seed)
+    await page.evaluate(seed => window.$store.dispatch('updateMaterialSeedColor', seed), seed)
     const editIcon = await colorsOf(section.locator('.materialSwatchEdit'))
     expect(contrast(editIcon.foreground, editIcon.background), `${seed}: inactive Material edit icon`).toBeGreaterThanOrEqual(3)
     const boundary = await colorsOf(section.locator('.materialCustomColor'))
@@ -63,7 +63,7 @@ test('Material swatches retain contrast when editing an inactive System theme', 
 test('desktop Dynamic colors follows native accents and hides manual controls', async ({ app, page }, testInfo) => {
   await page.emulateMedia({ colorScheme: 'light' })
   const section = await goToSettingsSection(page, 'theme')
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateBaseTheme', 'dynamic'))
+  await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'dynamic'))
   await expect(section.locator('.materialColorSettings')).toHaveCount(0)
   await expect(section.getByRole('combobox', { name: /Main color theme/i })).toHaveCount(0)
   for (const [nativeColor, seed, dark] of [['#895AA2FF', '#895aa2', false], ['006A6AFF', '#006a6a', false], ['006A6AFF', '#006a6a', true]]) {
@@ -90,12 +90,12 @@ test('desktop Dynamic colors follows native accents and hides manual controls', 
   await page.locator('.settingsWindow').screenshot({ path })
   await testInfo.attach('Desktop Dynamic colors', { path, contentType: 'image/png' })
   for (const [theme, dark] of [['materialLight', false], ['materialDark', true], ['materialBlack', true]]) {
-    await page.evaluate(theme => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateBaseTheme', theme), theme)
+    await page.evaluate(theme => window.$store.dispatch('updateBaseTheme', theme), theme)
     await expect(section.locator('.materialColorSettings')).toBeVisible()
     await expect(section.locator('.materialColorHeader code')).toHaveText('#ffff00')
     await expect(page.locator('body')).toHaveCSS('--primary-color', materialColorScheme(materialSeedPalette('#ffff00'), dark).primary)
   }
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateBaseTheme', 'dynamic'))
+  await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'dynamic'))
   await app.electronApp.evaluate(({ systemPreferences }) => {
     systemPreferences.getAccentColor = () => ''
     systemPreferences.emit('accent-color-changed', {}, '')
@@ -105,7 +105,7 @@ test('desktop Dynamic colors follows native accents and hides manual controls', 
 })
 
 test('desktop system accents reach new windows, startup backgrounds and live renderers', async ({ app, page }) => {
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateBaseTheme', 'dynamic'))
+  await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'dynamic'))
   const dark = await app.electronApp.evaluate(({ systemPreferences, nativeTheme }) => {
     systemPreferences.getAccentColor = () => '#006A6AFF'
     systemPreferences.emit('accent-color-changed', {}, '#006A6AFF')
@@ -133,7 +133,7 @@ test('hiding system accent controls clamps settings at the bottom at every UI sc
   const scroller = page.locator('.settingsContent')
   for (const scale of [100, 125]) {
     await page.evaluate(async scale => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateUiScale', scale)
       await store.dispatch('updateBaseTheme', 'materialLight')
     }, scale)
@@ -141,7 +141,7 @@ test('hiding system accent controls clamps settings at the bottom at every UI sc
     await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
     await expectScrollAtRenderedEnd(scroller)
     const oldRange = await scroller.evaluate(element => element.scrollHeight - element.clientHeight)
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateBaseTheme', 'dynamic'))
+    await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'dynamic'))
     await expect(section.locator('.materialColorSettings')).toHaveCount(0)
     await expectScrollAtRenderedEnd(scroller)
     await expect.poll(() => scroller.evaluate(element => element.scrollHeight - element.clientHeight)).toBeLessThan(oldRange)
@@ -162,7 +162,7 @@ test('Material accent box has vertical padding and a clickable custom swatch', a
   const customSwatch = box.locator('.materialCustomSwatch .colorFieldTrigger')
   const picker = page.getByRole('dialog', { name: 'Material accent color' })
   for (const scale of [100, 125]) {
-    await page.evaluate(scale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', scale), scale)
+    await page.evaluate(scale => window.$store.dispatch('updateUiScale', scale), scale)
     const padding = await box.evaluate(element => {
       const bounds = element.getBoundingClientRect()
       const header = element.querySelector('.materialColorHeader').getBoundingClientRect()
@@ -229,7 +229,7 @@ for (const scale of [100, 125]) {
       await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'dark' })
       const section = await goToSettingsSection(page, 'theme')
       await page.evaluate(async ({ theme, scale }) => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         await store.dispatch('updateUiScale', scale)
         await store.dispatch('updateBaseTheme', theme)
       }, { theme, scale })
@@ -291,12 +291,12 @@ for (const scale of [100, 125]) {
       }
       if (theme === 'materialBlack') await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(0, 0, 0)')
       if (scale === 100) {
-        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateMaterialSeedColor', '#6750a4'))
+        await page.evaluate(() => window.$store.dispatch('updateMaterialSeedColor', '#6750a4'))
         await section.getByRole('combobox', { name: /^Base theme/i }).scrollIntoViewIfNeeded()
         const path = testInfo.outputPath(`${theme}.png`)
         await page.locator('.settingsWindow').screenshot({ path })
         await testInfo.attach(label, { path, contentType: 'image/png' })
-        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateMaterialSeedColor', '#ffff00'))
+        await page.evaluate(() => window.$store.dispatch('updateMaterialSeedColor', '#ffff00'))
       }
       const background = await page.locator('body').evaluate(el => getComputedStyle(el).backgroundColor)
       await page.emulateMedia({ colorScheme: 'light' })
@@ -309,7 +309,7 @@ for (const scale of [100, 125]) {
 test('a synced system seed follows desktop accents and survives a canceled custom edit', async ({ app, page }) => {
   await page.emulateMedia({ colorScheme: 'light' })
   const section = await goToSettingsSection(page, 'theme')
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateMaterialSeedColor', 'system'))
+  await page.evaluate(() => window.$store.dispatch('updateMaterialSeedColor', 'system'))
   for (const [nativeColor, seed] of [['#895AA2FF', '#895aa2'], ['006A6AFF', '#006a6a']]) {
     await app.electronApp.evaluate(({ systemPreferences }, color) => {
       systemPreferences.getAccentColor = () => color
@@ -326,7 +326,7 @@ test('a synced system seed follows desktop accents and survives a canceled custo
   await picker.getByRole('textbox', { name: /^Hex color/ }).press('Tab')
   await page.keyboard.press('Escape')
   await expect(picker).toBeHidden()
-  expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getMaterialSeedColor)).toBe('system')
+  expect(await page.evaluate(() => window.$store.getters.getMaterialSeedColor)).toBe('system')
   await expect(page.locator('body')).toHaveCSS('--primary-color', materialColorScheme(materialSeedPalette('#006a6a'), false).primary)
 })
 
@@ -344,7 +344,7 @@ test('seed picker persists colors, system preferences select Material variants, 
   await expect(section.locator('.materialColorHeader code')).toHaveText('#00aaff')
   const primary = await page.locator('body').evaluate(el => el.style.getPropertyValue('--primary-color'))
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateSystemLightTheme', 'materialLight')
     await store.dispatch('updateSystemDarkTheme', 'materialBlack')
     await store.dispatch('updateBaseTheme', 'system')
@@ -357,7 +357,7 @@ test('seed picker persists colors, system preferences select Material variants, 
   await page.reload()
   await goToSettingsSection(page, 'theme')
   await expect(section.locator('.materialColorHeader code')).toHaveText('#00aaff')
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateBaseTheme', 'dark'))
+  await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'dark'))
   await expect(page.locator('body')).not.toHaveClass(/dynamicColors/)
   await expect(section.getByRole('button', { name: 'Material accent color' })).toHaveCount(0)
   expect(await page.locator('body').evaluate(el => el.style.getPropertyValue('--primary-color'))).toBe('')
@@ -391,7 +391,7 @@ test('Material preset swatches preview palettes and persist the selected seed', 
     await preset.click()
     await expect(preset).toHaveAttribute('aria-pressed', 'true')
     await expect(section.locator('.materialSwatchCheck')).toHaveCount(1)
-    const colors = await preset.evaluate(el => ({ seed: document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getMaterialSeedColor, palette: getComputedStyle(el).getPropertyValue('--swatch-primary') }))
+    const colors = await preset.evaluate(el => ({ seed: window.$store.getters.getMaterialSeedColor, palette: getComputedStyle(el).getPropertyValue('--swatch-primary') }))
     expect(colors.seed).toMatch(/^#[a-f0-9]{6}$/)
     expect(colors.palette).toMatch(/^#[a-f0-9]{6}$/)
   }

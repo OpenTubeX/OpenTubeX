@@ -16,7 +16,7 @@ test.use({
 })
 
 test('mobile quick speeds stay no wider than their presets', async ({ app, page }) => {
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateQuickPlaybackSpeedBarOptions', JSON.stringify([1, 1.5, 2].map(speed => ({ speed })))))
+  await page.evaluate(() => window.$store.dispatch('updateQuickPlaybackSpeedBarOptions', JSON.stringify([1, 1.5, 2].map(speed => ({ speed })))))
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
   await video.evaluate(element => element.pause())
@@ -29,7 +29,7 @@ test('mobile quick speeds stay no wider than their presets', async ({ app, page 
   for (const scale of [1, 1.25]) {
     await app.electronApp.evaluate(({ BrowserWindow }, scale) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale), scale)
     for (const frosted of [true, false]) {
-      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+      await page.evaluate(value => window.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
       await expect.poll(() => bar.evaluate(element => {
         const style = getComputedStyle(element)
         const buttons = [...element.children].filter(child => getComputedStyle(child).display !== 'none')
@@ -105,7 +105,7 @@ test('chapters animate between title and icon in both player themes', async ({ a
   await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
 
   for (const frosted of [true, false]) {
-    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+    await page.evaluate(value => window.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
     await panel.evaluate(element => { element.style.width = '1300px' })
     await expect(panel).not.toHaveClass(/ft-controls-compact-chapters/)
     await button.locator('.ft-chapters-current-title').evaluate(element => { element.textContent = 'MacPacker: zips all the way down' })
@@ -135,7 +135,7 @@ test('chapters animate between title and icon in both player themes', async ({ a
   }
 
   await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'system'))
+  await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'system'))
   await panel.evaluate(element => { element.style.width = '700px' })
   await expect(panel).toHaveClass(/ft-controls-compact-chapters/)
   await expect(button).toHaveCSS('transition-property', 'none')
@@ -161,7 +161,7 @@ test('chapter pill indicates open state in both layouts and player themes', asyn
   for (const scale of [1, 1.25]) {
     await app.electronApp.evaluate(({ BrowserWindow }, scale) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale), scale)
     for (const frosted of [true, false]) {
-      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+      await page.evaluate(value => window.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
       for (const width of [1300, 500]) {
         await panel.evaluate((element, width) => { element.style.width = `${width}px` }, width)
         await expect(panel).toHaveClass(width === 500 ? /ft-controls-compact-chapters/ : /^(?!.*ft-controls-compact-chapters)/)
@@ -227,7 +227,7 @@ test('chapter chevron animates opening and closing unless motion is reduced', as
   await expect(panel).not.toHaveClass(/ft-controls-compact-chapters/)
 
   for (const frosted of [true, false]) {
-    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+    await page.evaluate(value => window.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
     for (const open of [true, false]) {
       const motion = await button.evaluate(async element => {
         const chevron = element.querySelector('.ft-chapters-chevron')
@@ -251,7 +251,7 @@ test('chapter chevron animates opening and closing unless motion is reduced', as
     }
   }
 
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'on'))
+  await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'on'))
   await expect(chevron).toHaveCSS('transition-property', 'none')
   await button.click()
   await expect(chevron).toHaveCSS('rotate', '90deg')
@@ -259,7 +259,7 @@ test('chapter chevron animates opening and closing unless motion is reduced', as
 })
 
 test('chapter animation keeps the right control glass aligned without quick speeds', async ({ app, page }) => {
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseQuickPlaybackSpeedBar', false))
+  await page.evaluate(() => window.$store.dispatch('updateUseQuickPlaybackSpeedBar', false))
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
   await video.evaluate(element => element.pause())

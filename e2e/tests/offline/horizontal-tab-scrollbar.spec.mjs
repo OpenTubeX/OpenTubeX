@@ -8,7 +8,7 @@ for (const position of ['top', 'bottom']) {
     await setWindowSize(app, page, { width: 1400, height: 700 })
     await page.evaluate(async ({ position, quickSettings }) => {
       window.ftElectron.setZoomFactor(0.95)
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setTabBarPosition', position)
       store.commit('setScrollbarThumbWidth', 20)
       store.commit('setQuickSettings', quickSettings)
@@ -32,7 +32,7 @@ for (const position of ['top', 'bottom']) {
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await page.evaluate(async position => {
       window.ftElectron.setZoomFactor(0.95)
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setTabBarPosition', position)
       store.commit('setToastPosition', `${position}-right`)
       store.commit('setScrollbarThumbWidth', 20)
@@ -57,7 +57,7 @@ for (const position of ['top', 'bottom']) {
     }, position)
     await expect.poll(() => gapFromTabs(notification)).toBeGreaterThanOrEqual(28)
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setShowProgressBarToast', true)
       store.commit('setProgressBarMessage', 'Reserved row progress')
       store.commit('setShowProgressBar', true)
@@ -76,7 +76,7 @@ test.describe('RTL horizontal scrolling', () => {
       await setWindowSize(app, page, { width: 800, height: 600 })
       const groupId = await page.evaluate(async position => {
         window.ftElectron.setZoomFactor(0.95)
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setTabBarPosition', position)
+        window.$store.commit('setTabBarPosition', position)
         const ids = []
         for (let index = 0; index < 18; index++) {
           const tab = await window.ftElectron.tabs.create({
@@ -124,7 +124,7 @@ for (const position of ['top', 'bottom']) {
       await setWindowSize(app, page, { width: 800, height: 600 })
       await page.evaluate(async ({ position, scale }) => {
         window.ftElectron.setZoomFactor(scale)
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setTabBarPosition', position)
         store.commit('setScrollbarThumbWidth', 20)
         for (let index = 0; index < 18; index++) {
@@ -174,7 +174,7 @@ test('horizontal tabs use the shared scrollbar and its appearance settings', asy
   await expect(scrollbar).toHaveClass(/os-scrollbar-visible/)
   await expectThickness(3)
   await page.evaluate(() => {
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateScrollbarThumbWidth', 10)
+    window.$store.dispatch('updateScrollbarThumbWidth', 10)
   })
   await expectThickness(5)
   await handle.hover()
@@ -198,26 +198,26 @@ test('horizontal tabs use the shared scrollbar and its appearance settings', asy
   await track.click({ position: { x: (await track.boundingBox()).width - 10, y: 5 } })
   await expect.poll(() => container.evaluate(element => element.scrollLeft)).toBeGreaterThan(100)
   await page.evaluate(() => {
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setAlwaysShowScrollbars', false)
+    window.$store.commit('setAlwaysShowScrollbars', false)
   })
   await page.mouse.move(500, 500)
   await expect(scrollbar).toHaveClass(/app-scrollbar-idle/)
   await container.hover()
   await expect(scrollbar).not.toHaveClass(/app-scrollbar-idle/)
   await page.evaluate(() => {
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setAlwaysShowScrollbars', true)
+    window.$store.commit('setAlwaysShowScrollbars', true)
   })
   await page.mouse.move(500, 500)
   await expect(scrollbar).not.toHaveClass(/app-scrollbar-idle/)
   await page.evaluate(() => {
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setScrollbarThumbWidth', 6)
+    window.$store.commit('setScrollbarThumbWidth', 6)
   })
   await expectThickness(3)
   for (const position of ['top', 'bottom']) {
     for (const scale of [1, 0.95, 1.25]) {
       await page.evaluate(({ position, scale }) => {
         window.ftElectron.setZoomFactor(scale)
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setTabBarPosition', position)
+        window.$store.commit('setTabBarPosition', position)
       }, { position, scale })
       await page.mouse.move(500, 500)
       await expectThickness(3)
@@ -229,7 +229,7 @@ test('horizontal tabs use the shared scrollbar and its appearance settings', asy
   }
   await page.evaluate(() => {
     window.ftElectron.setZoomFactor(1)
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setTabBarPosition', 'top')
+    window.$store.commit('setTabBarPosition', 'top')
   })
   await page.mouse.move(500, 500)
   for (const colorScheme of ['dark', 'light']) {
@@ -250,7 +250,7 @@ for (const position of ['top', 'bottom']) {
       await setWindowSize(app, page, { width: 800, height: 600 })
       const groupId = await page.evaluate(async ({ position, scale }) => {
         window.ftElectron.setZoomFactor(scale)
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setTabBarPosition', position)
         store.commit('setUseFixedTabWidth', true)
         store.commit('setFixedTabWidth', 200)
@@ -301,10 +301,10 @@ for (const position of ['top', 'bottom']) {
         })).toEqual({ inRange: true, noEmptySpace: true, overflowMatches: true, thumbMatches: true })
       }
       await scrollToEnd()
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setFixedTabWidth', 100))
+      await page.evaluate(() => window.$store.commit('setFixedTabWidth', 100))
       await expectValidEnd()
       await page.evaluate(async () => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setUseFixedTabWidth', false)
         const { tabs } = await window.ftElectron.tabs.getState()
         for (const tab of tabs) window.ftElectron.tabs.updateTitle('A long history tab title that fills its maximum width', tab.id)
@@ -319,7 +319,7 @@ for (const position of ['top', 'bottom']) {
       })
       await expect(container.locator('.tabTitleText')).toHaveText(Array(13).fill('History'))
       await expectValidEnd()
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUseFixedTabWidth', true))
+      await page.evaluate(() => window.$store.commit('setUseFixedTabWidth', true))
       await scrollToEnd()
       await page.evaluate(groupId => window.ftElectron.tabs.updateGroup(groupId, { isCollapsed: true }), groupId)
       await expectValidEnd()
@@ -333,7 +333,7 @@ for (const position of ['top', 'bottom']) {
       await expectValidEnd()
       await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setUseFixedTabWidth', true)
         store.commit('setFixedTabWidth', 200)
       })

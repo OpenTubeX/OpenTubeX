@@ -41,7 +41,7 @@ test.describe('Videos feed navigation', () => {
   test('uses cache updates and profile changes made while visiting Playlists', async ({ page }) => {
     await goTo(page, 'userplaylists')
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const channelId = store.getters.getActiveProfile.subscriptions[0].id
       store.commit('updateVideoCacheByChannel', {
         channelId,
@@ -58,7 +58,7 @@ test.describe('Videos feed navigation', () => {
 
     await goTo(page, 'userplaylists')
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('upsertProfileToList', { ...store.getters.getActiveProfile, subscriptions: [] })
     })
     await goTo(page, 'subscriptions')

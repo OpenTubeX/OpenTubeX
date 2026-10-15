@@ -49,7 +49,7 @@ async function search(page, query = 'example channel') {
 
 async function setPreference(page, value) {
   await page.evaluate(value => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return store.dispatch('updateAvoidTranslation', value)
   }, value)
 }
@@ -92,7 +92,7 @@ for (const avoidTranslation of ['entire_app', 'disabled', 'watch_only']) {
         }
         await card.getByRole('button', { name: 'Subscribe', exact: true }).click()
         await expect.poll(() => page.evaluate(() => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           return store.getters.getProfileList.find(profile => profile._id === 'allChannels')?.subscriptions
         })).toContainEqual(expect.objectContaining({ id: channelId, name: originalName }))
       }
@@ -165,7 +165,7 @@ test.describe('original names for existing subscriptions', () => {
       await route.fulfill({ contentType: 'application/atom+xml', body: rss })
     })
     const subscription = () => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getProfileList[0].subscriptions[0]
     })
     await search(page)

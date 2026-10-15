@@ -119,7 +119,7 @@ for (const category of types) {
     }
     const expectedTypes = types.filter(type => type !== category)
     await expect.poll(() => page.evaluate(channelId => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getProfileList.map(profile => profile.subscriptions.find(channel => channel.id === channelId).feedTypes)
     }, CHANNEL_A)).toEqual([expectedTypes, expectedTypes])
 
@@ -140,7 +140,7 @@ test('hides from a combined New feed section and reports failed writes', async (
   await goTo(page, 'subscriptions')
   await page.locator('[data-subscription-feed-tab="all"]').click()
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const original = store._actions.updateChannelSettings
     store._actions.updateChannelSettings = [() => {
       store._actions.updateChannelSettings = original
@@ -169,7 +169,7 @@ test('hides from a combined New feed section and reports failed writes', async (
 test('keeps both types hidden when another hide is queued during a save', async ({ page }) => {
   await goTo(page, 'subscriptions')
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const update = store._actions.updateChannelSettings[0]
     let first = true
     store._actions.updateChannelSettings = [async payload => {
@@ -187,7 +187,7 @@ test('keeps both types hidden when another hide is queued during a save', async 
   }
   await page.evaluate(() => window.releaseFirstFeedHide())
   await expect.poll(() => page.evaluate(channelId => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return store.getters.getSubscribedChannelsById.get(channelId).feedTypes
   }, CHANNEL_A)).toEqual(['live', 'posts'])
   await expect(card(page, 'shorts')).toHaveCount(0)
@@ -253,7 +253,7 @@ test('disables a video hide action while its settings are being saved', async ({
   await goTo(page, 'subscriptions')
   await page.locator('[data-subscription-feed-tab="videos"]').click()
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store._actions.updateChannelSettings = [() => new Promise(resolve => { window.finishSavingChannel = resolve })]
   })
   const video = card(page, 'videos')

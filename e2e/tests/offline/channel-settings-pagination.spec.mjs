@@ -60,7 +60,7 @@ for (const uiScale of [95, 125]) {
         await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
         for (const thumbWidth of [6, 18]) {
           await page.evaluate(async width => {
-            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            const store = window.$store
             await store.dispatch('updateScrollbarThumbWidth', width)
           }, thumbWidth)
           await expect.poll(() => scroller.evaluate(element => {

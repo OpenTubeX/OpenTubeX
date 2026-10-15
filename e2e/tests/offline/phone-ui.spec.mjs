@@ -83,7 +83,7 @@ for (const uiScale of [100, 95]) {
       await mockPlayableWatchPage(app, page)
       await openMockedVideo(page)
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         for (let i = 0; i < 12; i++) {
           store.commit('addVideoToWatchQueue', {
             video: { videoId: 'jNQXAC9IVRw', title: `Queue item ${i}`, author: 'Test channel' }
@@ -150,7 +150,7 @@ for (const uiScale of [100, 95]) {
     })
 
     test('aligns transcript language labels and keeps the checkmark at the row end', async ({ app, page }) => {
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updatePreferredCaptionLocale', 'de'))
+      await page.evaluate(() => window.$store.dispatch('updatePreferredCaptionLocale', 'de'))
       await mockPlayableWatchPage(app, page, { captionTranslations: true })
       await openMockedVideo(page)
       await setWindowSize(app, page, { width: 375, height: 760 })
@@ -297,7 +297,7 @@ for (const uiScale of [100, 95]) {
 
     test('keeps filter actions fixed without an active-filter summary', async ({ app, page }) => {
       await setWindowSize(app, page, { width: 360, height: 760 })
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSearchFilters'))
+      await page.evaluate(() => window.$store.dispatch('showSearchFilters'))
       const prompt = page.locator('.searchFiltersCard')
       await expect(prompt).toBeVisible()
       await prompt.getByText('Today', { exact: true }).click()

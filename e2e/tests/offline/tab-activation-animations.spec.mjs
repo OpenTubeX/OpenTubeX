@@ -86,7 +86,7 @@ test('returning to a cached subscription feed does not replay its entrance', asy
   })
 
   for (const scale of [100, 95, 125]) {
-    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+    await page.evaluate(value => window.$store.dispatch('updateUiScale', value), scale)
     await page.locator('[data-subscription-feed-tab="shorts"]').click()
     await expect(page.getByText('Cached subscription short', { exact: true })).toBeVisible()
     await page.locator('[data-subscription-feed-tab="videos"]').click()
@@ -116,7 +116,7 @@ test('page navigation shows shared tab highlights immediately and only selection
     })
   })
   for (const scale of [100, 95, 125]) {
-    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+    await page.evaluate(value => window.$store.dispatch('updateUiScale', value), scale)
     await goTo(page, 'history')
     await goTo(page, 'subscriptions')
     const tabs = page.getByRole('tablist', { name: /^Subscriptions tabs$/i })
@@ -137,7 +137,7 @@ test('subscription panel and document keyboard navigation crossfade the selected
   await goTo(page, 'subscriptions')
   const tabs = page.getByRole('tablist', { name: /^Subscriptions tabs$/i })
   for (const scale of [100, 95, 125]) {
-    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+    await page.evaluate(value => window.$store.dispatch('updateUiScale', value), scale)
     for (const source of ['body', 'panel', 'appTab']) {
       await tabs.locator('[data-subscription-feed-tab="videos"]').click()
       await expectTabHighlightAligned(tabs.locator('[aria-selected="true"]'))
@@ -184,7 +184,7 @@ test('returning to subscription tabs preserves their highlight without replaying
   await expect(page.locator(sel.tabs)).toHaveCount(2)
 
   for (const [scale, width] of [[100, 1600], [95, 1000], [125, 600]]) {
-    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+    await page.evaluate(value => window.$store.dispatch('updateUiScale', value), scale)
     if (width !== 1600) await setWindowSize(app, page, { width, height: width === 1000 ? 800 : 780 })
     for (let repeat = 0; repeat < 2; repeat++) {
       await page.locator(sel.tabs).first().click()
@@ -215,7 +215,7 @@ test('hidden subscription tabs clear their highlight when every feed is removed'
   await page.evaluate(() => window.ftElectron.tabs.create({ route: '/history', makeActive: true }))
   await expect(tabs).toBeHidden()
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateUiScale', 95)
     await Promise.all(['Videos', 'Shorts', 'Live', 'Community']
       .map(feed => store.dispatch(`updateHideSubscriptions${feed}`, true)))
@@ -233,14 +233,14 @@ test('removing the selected feed shows its fallback highlight immediately', asyn
   const tabs = page.getByRole('tablist', { name: /^Subscriptions tabs$/i })
   for (const scale of [100, 95, 125]) {
     await page.evaluate(async value => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateHideSubscriptionsVideos', false)
       await store.dispatch('updateUiScale', value)
     }, scale)
     await tabs.locator('[data-subscription-feed-tab="videos"]').click()
     await expectTabHighlightAligned(tabs.locator('[data-subscription-feed-tab="videos"]'))
     const fallback = await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateHideSubscriptionsVideos', true)
       await new Promise(resolve => requestAnimationFrame(resolve))
       const tab = document.querySelector('[data-subscription-feed-tab="shorts"]')
@@ -276,7 +276,7 @@ test('retained subscription highlights stay aligned in the Watch minimize previe
   await watch.dispose()
 
   for (const [scale, width, height] of [[95, 600, 800], [125, 900, 600]]) {
-    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+    await page.evaluate(value => window.$store.dispatch('updateUiScale', value), scale)
     await setWindowSize(app, page, { width, height })
     // Drive the same preview entry point as the downward minimize gesture.
     await navigation.evaluate(navigation => navigation.beginMinimizePreview())
@@ -292,7 +292,7 @@ test('retained subscription highlights stay aligned in the Watch minimize previe
   // A laid-out browsing page must clear its highlight if settings remove every
   // feed, even while Watch still owns presentation.
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await Promise.all(['Videos', 'Shorts', 'Live', 'Community']
       .map(feed => store.dispatch(`updateHideSubscriptions${feed}`, true)))
   })
@@ -322,7 +322,7 @@ test('switching application tabs snaps the active sidebar highlight', async ({ a
   })
 
   for (const [scale, width] of [[100, 1600], [95, 1000], [125, 600]]) {
-    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+    await page.evaluate(value => window.$store.dispatch('updateUiScale', value), scale)
     if (width !== 1600) await setWindowSize(app, page, { width, height: width === 1000 ? 800 : 780 })
     for (const index of [0, 1, 0]) {
       await page.locator(sel.tabs).nth(index).click()
@@ -361,7 +361,7 @@ test('sidebar navigation still animates the active highlight', async ({ page }) 
 
 test('switching application tabs snaps the mobile More highlight for overflow routes', async ({ app, page }) => {
   await setWindowSize(app, page, { width: 600, height: 800 })
-  await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), 95)
+  await page.evaluate(value => window.$store.dispatch('updateUiScale', value), 95)
   await page.evaluate(() => window.ftElectron.tabs.create({ route: '/subscribedchannels', makeActive: true }))
   const more = page.locator('.sideNav .moreOptionNav')
   await expect(more).toBeVisible()
@@ -388,7 +388,7 @@ test('switching application tabs snaps the mobile More highlight for overflow ro
 
 test('restores sidebar highlight transitions when the selected tab fails to mount', async ({ page }) => {
   await goTo(page, 'subscriptions')
-  const presentedTabId = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPresentedTabId)
+  const presentedTabId = await page.evaluate(() => window.$store.getters.getPresentedTabId)
   const failedTab = await page.evaluate(async () => {
     const app = document.querySelector('#app').__vue_app__
     // Hold route projection so the previous tab is still presented when the
@@ -409,12 +409,12 @@ test('restores sidebar highlight transitions when the selected tab fails to moun
   await expect.poll(() => history.evaluate(element => element.getAnimations({ subtree: true })
     .some(animation => animation instanceof CSSTransition && animation.transitionProperty === 'transform'))).toBe(true)
   await page.evaluate(id => {
-    const tab = document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getTabById(id)
+    const tab = window.$store.getters.getTabById(id)
     window.ftElectron.tabs.mountFailed(id, tab.mountRevision)
   }, failedTab.id)
-  await expect.poll(() => page.evaluate(id => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getTabById(id)?.loadState, failedTab.id)).toBe('unloaded')
+  await expect.poll(() => page.evaluate(id => window.$store.getters.getTabById(id)?.loadState, failedTab.id)).toBe('unloaded')
   expect(await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return { active: store.getters.getActiveTabId, presented: store.getters.getPresentedTabId }
   })).toEqual({ active: failedTab.id, presented: presentedTabId })
   await expect(page.locator('.sideNav')).not.toHaveClass(/highlightTransitionsDisabled/)
@@ -423,16 +423,16 @@ test('restores sidebar highlight transitions when the selected tab fails to moun
 
 test('restores sidebar highlight transitions when route projection is rejected', async ({ page }) => {
   await goTo(page, 'subscriptions')
-  const presentedTabId = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPresentedTabId)
+  const presentedTabId = await page.evaluate(() => window.$store.getters.getPresentedTabId)
   const failedTab = await page.evaluate(async () => {
-    document.querySelector('#app').__vue_app__.config.globalProperties.$router.beforeEach(to => {
+    window.$router.beforeEach(to => {
       if (to.path === '/history') throw new Error('Expected route projection failure')
     })
     return window.ftElectron.tabs.create({ route: '/history', makeActive: true })
   })
-  await expect.poll(() => page.evaluate(id => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getTabById(id)?.loadState, failedTab.id)).toBe('loaded')
+  await expect.poll(() => page.evaluate(id => window.$store.getters.getTabById(id)?.loadState, failedTab.id)).toBe('loaded')
   expect(await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return { active: store.getters.getActiveTabId, presented: store.getters.getPresentedTabId }
   })).toEqual({ active: failedTab.id, presented: presentedTabId })
   await expect(page.locator('.sideNav')).not.toHaveClass(/highlightTransitionsDisabled/, { timeout: 2000 })

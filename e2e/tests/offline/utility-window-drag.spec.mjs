@@ -7,7 +7,7 @@ for (const uiScale of [100, 125]) {
     test('follows the pointer, preserves scrolling, clamps, and saves its position', async ({ page }) => {
       await page.evaluate(() => localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({ x: 100, y: 60, width: 850, height: 520 })))
       for (const view of [null, 'about', 'downloads']) {
-        await page.evaluate(view => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow', view), view)
+        await page.evaluate(view => window.$store.dispatch('showSettingsWindow', view), view)
         const dialog = page.locator('.settingsWindow')
         await expect(dialog).toBeVisible()
         await expect(dialog).not.toHaveClass(/settings-window-enter-active/)
@@ -44,7 +44,7 @@ for (const uiScale of [100, 125]) {
 
         await dialog.getByRole('button', { name: 'Close', exact: true }).click()
         await expect(dialog).toHaveCount(0)
-        await page.evaluate(view => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow', view), view)
+        await page.evaluate(view => window.$store.dispatch('showSettingsWindow', view), view)
         await expect(dialog).toBeVisible()
         await expect(dialog).not.toHaveClass(/settings-window-enter-active/)
         const reopened = await dialog.boundingBox()
@@ -61,7 +61,7 @@ test('preserves the rendered drag position on viewport resize and cleans up on c
   await page.setViewportSize({ width: 1600, height: 900 })
   await page.evaluate(() => {
     localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({ x: 100, y: 60, width: 850, height: 520 }))
-    return document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow')
+    return window.$store.dispatch('showSettingsWindow')
   })
   const dialog = page.locator('.settingsWindow')
   await expect(dialog).toBeVisible()
@@ -86,7 +86,7 @@ test('preserves the rendered drag position on viewport resize and cleans up on c
 test('stops dragging when the viewport forces a maximized layout', async ({ page }) => {
   await page.evaluate(() => {
     localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({ x: 100, y: 60, width: 850, height: 520 }))
-    return document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow')
+    return window.$store.dispatch('showSettingsWindow')
   })
   const dialog = page.locator('.settingsWindow')
   await expect(dialog).toBeVisible()

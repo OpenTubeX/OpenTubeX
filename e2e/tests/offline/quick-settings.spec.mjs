@@ -76,7 +76,7 @@ for (const uiScale of [100, 125]) {
     })
 
     test('opens and closes immediately with reduced motion enabled', async ({ page }) => {
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'on'))
+      await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'on'))
       await expect(page.locator('html')).toHaveAttribute('data-reduced-motion', 'reduce')
       await page.locator('.profileTrigger').click()
       const menu = page.locator('.quickSettingsMenu')
@@ -89,7 +89,7 @@ for (const uiScale of [100, 125]) {
     })
 
     test('finishes closing at the slowest animation speed before removing the panel', async ({ page }) => {
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAnimationSpeed', 25))
+      await page.evaluate(() => window.$store.dispatch('updateAnimationSpeed', 25))
       await page.locator('.profileTrigger').click()
       const menu = page.locator('.quickSettingsMenu')
       await expect(menu).toHaveCSS('transform', 'none')
@@ -152,7 +152,7 @@ for (const uiScale of [100, 125]) {
     })
 
     test('cleans up when switching layouts during a close animation', async ({ page }) => {
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAnimationSpeed', 25))
+      await page.evaluate(() => window.$store.dispatch('updateAnimationSpeed', 25))
       const menu = page.locator('.quickSettingsMenu')
       for (const closingPhoneSheet of [false, true]) {
         await page.locator('.profileTrigger').click()
@@ -256,7 +256,7 @@ for (const uiScale of [100, 125]) {
     test('uses a full-screen sheet when wide vertical tabs make the header compact', async ({ app, page }) => {
       await resize(app, page, 800)
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setTabBarPosition', 'right')
         store.commit('setVerticalTabBarWidth', 400)
       })
@@ -705,7 +705,7 @@ for (const uiScale of [100, 95]) {
           BrowserWindow.getAllWindows()[0].setBounds({ x: 0, y: 0, width, height: 900 })
         }, Math.round(width * uiScale / 100))
         await page.evaluate(() => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           return store.dispatch('updateDefaultQuality', '1080')
         })
         await page.locator('.profileTrigger').click()
@@ -896,7 +896,7 @@ test.describe('quick system themes', () => {
       BrowserWindow.getAllWindows()[0].setBounds({ x: 0, y: 0, width: 1000, height: 600 })
     })
     await page.evaluate(async ids => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateQuickSettings', [...ids, 'systemLightTheme', 'systemDarkTheme'])
     }, DEFAULT_QUICK_SETTINGS)
     await page.locator('.profileTrigger').click()
@@ -910,7 +910,7 @@ test.describe('quick system themes', () => {
     const originalThumbHeight = await thumb.evaluate(element => element.getBoundingClientRect().height)
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateBaseTheme', 'dark')
     })
     await expect(menu.locator('[data-setting-id="systemLightTheme"]')).toHaveCount(0)
@@ -923,7 +923,7 @@ test.describe('quick system themes', () => {
 
   test('offers only matching built-in and custom themes', async ({ page }) => {
     await page.evaluate(async (defaultTheme) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setCustomThemes', [
         { ...defaultTheme, id: 'paper', name: 'Paper', isDark: false },
         { ...defaultTheme, id: 'midnight', name: 'Midnight', isDark: true },
@@ -955,7 +955,7 @@ test.describe('additional quick settings', () => {
     await appearance.getByRole('button', { name: 'Customize quick settings' }).click()
     await page.getByRole('button', { name: 'Add setting' }).click()
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const dispatch = store.dispatch.bind(store)
       let release
       const gate = new Promise(resolve => { release = resolve })
@@ -973,7 +973,7 @@ test.describe('additional quick settings', () => {
     await page.evaluate(() => { window.releaseQuickSettingSave(); delete window.releaseQuickSettingSave })
     await expect(search).toHaveValue('Use DeArrow Video Titles')
     await page.locator('.settingPicker .optionWrapper').getByText(/^Use DeArrow Video Titles$/i).click()
-    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getQuickSettings)).toEqual(['rememberHistory', 'useDeArrowTitles'])
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getQuickSettings)).toEqual(['rememberHistory', 'useDeArrowTitles'])
   })
 
   test('adds all suggested controls, groups them, and persists changes across restart', async ({ app, page }, testInfo) => {
@@ -1076,7 +1076,7 @@ test.describe('quick playback speed', () => {
     await expect(slider).toHaveValue('0.2')
     await slider.press('End')
     await expect.poll(() => page.evaluate(() => (
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getDefaultPlayback
+      window.$store.getters.getDefaultPlayback
     ))).toBe(5)
   })
 })
@@ -1276,7 +1276,7 @@ test.describe('quick settings menu', () => {
     })
     await expect.poll(() => page.evaluate(() => window.innerWidth)).toBe(375)
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateCurrentLocale', 'es')
       document.querySelector('.app').classList.add('capacitorTabs', 'capacitorPhoneLayout')
     })
@@ -1360,7 +1360,7 @@ test.describe('quick settings menu', () => {
 
     const baseTheme = appearance.getByRole('combobox', { name: 'Base Theme' })
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.dispatch('updateBaseTheme', 'hotPink')
     })
 
@@ -1493,7 +1493,7 @@ test.describe('customizable quick settings', () => {
       await expect(toggle).not.toBeChecked()
 
       await expect.poll(() => page.evaluate(() => {
-        const getters = document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters
+        const getters = window.$store.getters
         return [getters.getActiveChannelsHiddenNames.size, getters.getActiveForbiddenTitles.length]
       })).toEqual([0, 0])
 
@@ -1514,7 +1514,7 @@ test.describe('customizable quick settings', () => {
       await expect(reopenedToggle).not.toBeChecked()
       await page.getByRole('dialog', { name: 'Quick settings' }).locator('label.switch-label').filter({ hasText: 'Enable block lists' }).click()
       await expect.poll(() => page.evaluate(() => {
-        const getters = document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters
+        const getters = window.$store.getters
         return [getters.getActiveChannelsHiddenNames.size, getters.getActiveForbiddenTitles.length]
       })).toEqual([1, 1])
     })

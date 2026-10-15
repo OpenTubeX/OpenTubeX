@@ -63,7 +63,7 @@ for (const mode of ['fullscreen', 'fullwindow']) {
   test(`${mode} commenter avatar navigation retains the video in the mobile mini-player`, async ({ app, page }) => {
     const player = await openMobilePlayer(app, page)
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setKeepPlayingOnNavigation', true)
       store.commit('setHideCommentPhotos', true)
       store.commit('setReducedMotion', 'off')
@@ -162,7 +162,7 @@ for (const uiScale of [100, 125, 150]) {
     const player = await openMobilePlayer(app, page)
     await page.evaluate(scale => {
       window.ftElectron.setZoomFactor(scale / 100)
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setKeepPlayingOnNavigation', true)
+      window.$store.commit('setKeepPlayingOnNavigation', true)
     }, uiScale)
     await player.locator('video').evaluate(video => { video.loop = true; return video.play() })
     const watch = await watchViewHandle(page)
@@ -183,7 +183,7 @@ for (const uiScale of [100, 125, 150]) {
     }
     await setWindowSize(app, page, { width: 1250, height: 380 })
     for (const expanded of [true, false]) {
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('toggleSideNav'))
+      await page.evaluate(() => window.$store.commit('toggleSideNav'))
       await expect.poll(() => page.locator('.app > .sideNav').evaluate(element => element.getBoundingClientRect().width)).toBeCloseTo(expanded ? 200 : 104, 0)
       await expectClearOfSidebar()
     }
@@ -196,7 +196,7 @@ for (const uiScale of [100, 125, 150]) {
 test('mobile swipes suspend ambient sampling and hidden control layout in both directions', async ({ app, page }, testInfo) => {
   const player = await openMobilePlayer(app, page)
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateAmbientMode', true)
     await store.dispatch('updateReducedMotion', 'off')
   })
@@ -422,7 +422,7 @@ test.describe('browsing scroll during mobile minimize', () => {
       await setWindowSize(app, page, { width: 480, height: 850 })
       await page.evaluate(scale => {
         window.ftElectron.setZoomFactor(scale / 100)
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setReducedMotion', 'off')
+        window.$store.commit('setReducedMotion', 'off')
       }, uiScale)
       const history = page.locator('.tabContent > .routerView').first()
       await expect(history.locator('.ft-list-video').first()).toBeVisible()
@@ -491,7 +491,7 @@ test.describe('browsing scroll during mobile minimize', () => {
       await expect(page).toHaveURL(/#\/history/)
       await expect(player).not.toHaveAttribute('data-inline-mini-drag')
       const savedWatchScroll = await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         const tab = store.getters.getTabById(store.getters.getPresentedTabId)
         return tab.history[tab.historyIndex + 1].scroll.top
       })
@@ -513,7 +513,7 @@ test.describe('browsing scroll during mobile minimize', () => {
       await expect(history.locator('.ft-list-video').first()).toBeVisible()
       if (trigger === 'search locale change') {
         await page.evaluate(() => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           store.commit('setHistoryCacheSorted', store.getters.getHistoryCacheSorted.map((entry, index) => ({
             ...entry, title: index < 8 ? 'istanbul' : 'Istanbul', author: 'Channel'
           })))
@@ -528,7 +528,7 @@ test.describe('browsing scroll during mobile minimize', () => {
       expect(await page.evaluate(() => window.scrollY)).toBeCloseTo(savedScroll, 0)
       const video = await openMockedVideo(page)
       const savedHistoryScroll = await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         const tab = store.getters.getTabById(store.getters.getPresentedTabId)
         return tab.history[tab.historyIndex - 1].scroll.top
       })
@@ -537,12 +537,12 @@ test.describe('browsing scroll during mobile minimize', () => {
       await enableMobileTouch(app, page, true, false)
       if (trigger === 'remove' || trigger === 'replace') {
         await page.evaluate(trigger => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           store.commit('setHistoryCacheSorted', trigger === 'replace' ? [] : store.getters.getHistoryCacheSorted.slice(0, 8))
         }, trigger)
       } else if (trigger === 'search locale change') {
         await page.evaluate(async () => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           await store.dispatch('updateCurrentLocale', 'tr')
         })
         await expect(history.locator('.historySearchLoader')).toHaveCount(0)
@@ -601,7 +601,7 @@ test.describe('browsing scroll during mobile minimize', () => {
   test('minimize keeps the Popular sticky header at its browsing position', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await page.evaluate(entry => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setBackendPreference', 'invidious')
       store.commit('setPopularCache', Array.from({ length: 40 }, (_, index) => ({ ...entry, videoId: index ? `popular-${index}` : entry.videoId })))
     }, watchHistoryEntry)
@@ -614,7 +614,7 @@ test.describe('browsing scroll during mobile minimize', () => {
     await page.evaluate(() => window.scrollTo({ top: 600, behavior: 'instant' }))
     const header = browsing.locator('.pageHeader')
     const savedTop = await header.evaluate(element => element.getBoundingClientRect().top)
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setBackendPreference', 'local'))
+    await page.evaluate(() => window.$store.commit('setBackendPreference', 'local'))
     await browsing.locator(`a[href="#/watch/${watchHistoryEntry.videoId}"]`).first().evaluate(element => element.click())
     const video = await waitForPlayback(page)
     await video.evaluate(element => element.pause())
@@ -758,7 +758,7 @@ for (const uiScale of [100, 125]) {
     const player = await openMobilePlayer(app, page)
     await page.evaluate(async scale => {
       await window.ftElectron.setZoomFactor(scale / 100)
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setReducedMotion', 'off')
+      window.$store.commit('setReducedMotion', 'off')
       await new Promise(requestAnimationFrame)
     }, uiScale)
     const bounds = await player.boundingBox()
@@ -829,7 +829,7 @@ test('bottom bar can close a video retained after leaving Watch', async ({ app, 
 test('bottom bar disappears when its video is hidden on another tab', async ({ app, page }) => {
   const player = await openMobilePlayer(app, page)
   await player.locator('video').first().evaluate(element => element.play())
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+  await page.evaluate(() => window.$store
     .dispatch('updateScrollMiniPlayerOnAllTabs', true))
   await page.locator('.tabBar .newTabButton').click()
   await expect(player).toHaveClass(/scrollMiniPlayer/)
@@ -1312,7 +1312,7 @@ for (const state of ['waiting', 'ended before minimizing', 'ended in the mini pl
     const video = page.locator('.ftVideoPlayer > video.player')
     await video.evaluate(element => element.pause())
     await enableMobileTouch(app, page)
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setPlayNextVideo', false))
+    await page.evaluate(() => window.$store.commit('setPlayNextVideo', false))
     const endVideo = async () => {
       await video.evaluate(element => { element.currentTime = element.duration - 0.1; return element.play() })
       await expect.poll(() => video.evaluate(element => element.ended)).toBe(true)
@@ -1633,7 +1633,7 @@ for (const { uiScale, size } of [
     const player = await openMobilePlayer(app, page)
     await page.evaluate(scale => {
       window.ftElectron.setZoomFactor(scale / 100)
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setCompactMobileMiniPlayer', true)
       store.commit('setKeepPlayingOnNavigation', true)
       const spacer = document.createElement('div')
@@ -1643,7 +1643,7 @@ for (const { uiScale, size } of [
     const watch = await watchViewHandle(page)
     await setWindowSize(app, page, size)
     await page.evaluate(async width => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateIconPack', width === 375 ? 'material' : 'remix')
       await store.dispatch('updateReducedMotion', width === 375 ? 'off' : 'on')
     }, size.width)
@@ -1705,7 +1705,7 @@ for (const { uiScale, size } of [
     await player.locator('.mobileMiniBarExpand').click()
     await expect(controls.getByRole('button')).toHaveCount(1)
     await player.locator('.mobileMiniBarExpand').click()
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setCompactMobileMiniPlayer', false))
+    await page.evaluate(() => window.$store.commit('setCompactMobileMiniPlayer', false))
     await expect(player.locator('.mobileMiniBarExpand')).toHaveCount(0)
     await expect(player.locator('.mobileMiniBarUploader')).toBeVisible()
     await player.locator('.mobileMiniBarReturn').click({ position: { x: 60, y: 30 } })

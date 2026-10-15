@@ -15,7 +15,7 @@ for (const { width, height, uiScale } of [
       await session.send('Emulation.setCPUThrottlingRate', { rate: 6 })
 
       for (const view of [null, 'about', 'downloads']) {
-        await page.evaluate(view => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow', view), view)
+        await page.evaluate(view => window.$store.dispatch('showSettingsWindow', view), view)
         const dialog = page.locator('.settingsWindow')
         await expect(dialog).toBeVisible()
         await expect(dialog).not.toHaveClass(/settings-window-enter-active/)
@@ -55,7 +55,7 @@ for (const { width, height, uiScale } of [
         expect.soft(changes.transitionClasses.join(' ')).not.toMatch(/settings-window-leave-(from|to)/)
         expect(changes.closeAnimations).toBe(1)
         // Reopening selects the requested view even though the closed view stays cached.
-        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow'))
+        await page.evaluate(() => window.$store.dispatch('showSettingsWindow'))
         await expect(page.getByRole('dialog', { name: 'Settings', exact: true })).toBeVisible()
         await page.keyboard.press('Escape')
         await expect(dialog).toHaveCount(0)
@@ -66,12 +66,12 @@ for (const { width, height, uiScale } of [
 
 test('reopening a cached utility window cancels its close animation', async ({ page }) => {
   for (const view of [null, 'about', 'downloads']) {
-    await page.evaluate(view => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow', view), view)
+    await page.evaluate(view => window.$store.dispatch('showSettingsWindow', view), view)
     const dialog = page.locator('.settingsWindow')
     await expect(dialog).toBeVisible()
     await expect(dialog).not.toHaveClass(/settings-window-enter-active/)
     await page.evaluate(async view => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('hideSettingsWindow')
       await store.dispatch('showSettingsWindow', view)
     }, view)
@@ -84,11 +84,11 @@ test('reopening a cached utility window cancels its close animation', async ({ p
 })
 
 test('opens keyboard shortcuts after closing a cached About window', async ({ page }) => {
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow', 'about'))
+  await page.evaluate(() => window.$store.dispatch('showSettingsWindow', 'about'))
   await expect(page.getByRole('dialog', { name: 'About', exact: true })).toBeVisible()
   await page.locator('.settingsCloseButton').click()
   await expect(page.locator('.settingsWindow')).toHaveCount(0)
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showKeyboardShortcutPrompt'))
+  await page.evaluate(() => window.$store.dispatch('showKeyboardShortcutPrompt'))
   await expect(page.locator('.shortcutColumns')).toBeVisible()
 })
 
@@ -106,21 +106,21 @@ test('refreshes download history when reopening a cached Downloads window', asyn
     }])
   })
   const dialog = page.getByRole('dialog', { name: 'Downloads', exact: true })
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow', 'downloads'))
+  await page.evaluate(() => window.$store.dispatch('showSettingsWindow', 'downloads'))
   await expect(dialog).toContainText('Initial download history')
   await dialog.getByRole('button', { name: 'Close', exact: true }).click()
   await expect(dialog).toHaveCount(0)
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow', 'downloads'))
+  await page.evaluate(() => window.$store.dispatch('showSettingsWindow', 'downloads'))
   await expect(dialog).toContainText('Updated download history')
 })
 
 for (const prompt of ['Add download', 'Download options', 'Remove file']) {
   test(`closing cached Downloads also dismisses its ${prompt} prompt`, async ({ page }) => {
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow', 'downloads'))
+    await page.evaluate(() => window.$store.dispatch('showSettingsWindow', 'downloads'))
     const dialog = page.getByRole('dialog', { name: 'Downloads', exact: true })
     const originalOverflow = await page.evaluate(() => document.documentElement.style.overflow)
     if (prompt === 'Remove file') {
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('upsertYtDlpDownload', {
+      await page.evaluate(() => window.$store.commit('upsertYtDlpDownload', {
         id: 1,
         title: 'Completed fixture download',
         mode: 'video',
@@ -140,13 +140,13 @@ for (const prompt of ['Add download', 'Download options', 'Remove file']) {
       }
     }
     await expect(page.locator('.prompt')).toBeVisible()
-    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.isAnyPromptOpen)).toBe(true)
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('hideSettingsWindow'))
+    await expect.poll(() => page.evaluate(() => window.$store.getters.isAnyPromptOpen)).toBe(true)
+    await page.evaluate(() => window.$store.dispatch('hideSettingsWindow'))
     await expect(dialog).toHaveCount(0)
     await expect(page.locator('.prompt')).toHaveCount(0)
-    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.isAnyPromptOpen)).toBe(false)
+    await expect.poll(() => page.evaluate(() => window.$store.getters.isAnyPromptOpen)).toBe(false)
     expect(await page.evaluate(() => document.documentElement.style.overflow)).toBe(originalOverflow)
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow', 'downloads'))
+    await page.evaluate(() => window.$store.dispatch('showSettingsWindow', 'downloads'))
     await expect(dialog).toBeVisible()
     await expect(page.locator('.prompt')).toHaveCount(0)
   })
@@ -157,7 +157,7 @@ test.describe('with reduced motion', () => {
 
   test('dismisses utility windows without animating', async ({ page }) => {
     for (const view of [null, 'about', 'downloads']) {
-      await page.evaluate(view => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow', view), view)
+      await page.evaluate(view => window.$store.dispatch('showSettingsWindow', view), view)
       const dialog = page.locator('.settingsWindow')
       await expect(dialog).toBeVisible()
       const animationNames = await dialog.evaluate(async element => {

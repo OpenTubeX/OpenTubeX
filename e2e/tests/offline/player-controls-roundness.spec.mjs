@@ -62,7 +62,7 @@ for (const uiScale of [100, 95]) {
         await app.electronApp.evaluate(({ BrowserWindow }, width) => BrowserWindow.getAllWindows()[0].setBounds({ width, height: 900 }), width)
         await expect.poll(() => page.evaluate(() => window.innerWidth)).toBeCloseTo(width * 100 / uiScale, 0)
         for (const roundness of [0, 50, 100, 200]) {
-          await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), roundness)
+          await page.evaluate(value => window.$store.dispatch('updateUiRoundness', value), roundness)
           await expect(page.locator('body')).toHaveCSS('--ui-roundness', String(roundness / 100))
           const radii = await panel.locator('.ft-control-glass, .ft-right-control-glass').evaluateAll(elements => elements.map(element => Number.parseFloat(getComputedStyle(element).borderRadius)))
           expect(radii, `${width}px, roundness ${roundness}%`).toEqual(radii.map(() => 17 * roundness / 100))

@@ -262,11 +262,11 @@ test.describe('automatic sync recovery', () => {
     await sourceWindow.evaluate(window => window.hide())
     await expect.poll(() => sourceWindow.evaluate(window => window.isVisible())).toBe(false)
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('setSyncServerAutoSync', true)
     })
     const failure = await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       try {
         await store.dispatch('syncWithSyncServer')
         return null

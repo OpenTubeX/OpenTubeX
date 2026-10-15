@@ -5,8 +5,7 @@ test('outlined select labels stay transparent on different surfaces', async ({ a
   const select = section.getByRole('combobox', { name: 'Week Starts On', exact: true })
   const root = select.locator('..')
   for (const [width, uiScale] of [[1200, 100], [400, 100], [1200, 95], [400, 95]]) {
-    await page.evaluate(value => document.querySelector('#app').__vue_app__
-      .config.globalProperties.$store.dispatch('updateUiScale', value), uiScale)
+    await page.evaluate(value => window.$store.dispatch('updateUiScale', value), uiScale)
     await setWindowSize(app, page, { width, height: width === 1200 ? 880 : 920 })
     for (const direction of ['ltr', 'rtl']) {
       await page.evaluate(value => { document.body.dir = value }, direction)
@@ -25,8 +24,7 @@ test('outlined select labels stay transparent on different surfaces', async ({ a
     }
   }
   // Electron locator clipping uses unzoomed coordinates; capture at 100%.
-  await page.evaluate(() => document.querySelector('#app').__vue_app__
-    .config.globalProperties.$store.dispatch('updateUiScale', 100))
+  await page.evaluate(() => window.$store.dispatch('updateUiScale', 100))
   await expect.poll(() => page.evaluate(() => window.innerWidth)).toBe(400)
   await page.evaluate(() => { document.body.dir = 'ltr' })
   await root.evaluate(element => { element.style.removeProperty('background') })
@@ -56,7 +54,7 @@ for (const baseTheme of ['dark', 'light']) {
         for (const width of [1200, 400]) {
           await setWindowSize(app, page, { width, height: width === 1200 ? 800 : 900 })
           for (const roundness of [0, 50, 100, 200]) {
-            await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), roundness)
+            await page.evaluate(value => window.$store.dispatch('updateUiRoundness', value), roundness)
             for (const corner of ['top-left', 'top-right', 'bottom-left', 'bottom-right']) {
               await expect(outline).toHaveCSS(`border-${corner}-radius`, `${4 * roundness / 100}px`)
             }
@@ -70,7 +68,7 @@ for (const baseTheme of ['dark', 'light']) {
         await page.getByRole('option', { name: 'Monday', exact: true }).click()
         await expect(select).toHaveAccessibleDescription('Monday')
         await select.blur()
-        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', 100))
+        await page.evaluate(() => window.$store.dispatch('updateUiRoundness', 100))
         const narrowScreenshot = testInfo.outputPath('outlined-selects-narrow.png')
         await page.locator('.settingsWindow').screenshot({ path: narrowScreenshot })
         await testInfo.attach('outlined-selects-narrow', { path: narrowScreenshot, contentType: 'image/png' })
@@ -119,7 +117,7 @@ for (const baseTheme of ['dark', 'light']) {
             await expect(option).toHaveCSS('padding-inline-end', '12px')
           }
           for (const roundness of [0, 100, 200]) {
-            await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), roundness)
+            await page.evaluate(value => window.$store.dispatch('updateUiRoundness', value), roundness)
             await expect(menu).toHaveCSS('border-top-left-radius', `${4 * roundness / 100}px`)
           }
           await select.press('Escape')
@@ -163,7 +161,7 @@ for (const baseTheme of ['dark', 'light']) {
         await section.getByRole('combobox', { name: 'Tab Layout', exact: true }).click()
         const selected = page.getByRole('listbox').locator('[aria-selected="true"]')
         for (const color of ['Red', 'Blue']) {
-          await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateMainColor', value), color)
+          await page.evaluate(value => window.$store.dispatch('updateMainColor', value), color)
           await expect.poll(() => selected.evaluate((element, color) => {
             const canvas = document.createElement('canvas')
             canvas.width = canvas.height = 1
@@ -509,7 +507,7 @@ for (const scale of [100, 95]) {
           return element.getBoundingClientRect().width - parseFloat(style.paddingInlineStart) - parseFloat(style.paddingInlineEnd) - parseFloat(style.borderInlineStartWidth) - parseFloat(style.borderInlineEndWidth)
         })
         for (const highlight of [false, true]) {
-          await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHighlightChangedSettings', value), highlight)
+          await page.evaluate(value => window.$store.dispatch('updateHighlightChangedSettings', value), highlight)
           const bounds = await input.boundingBox()
           const action = await button.boundingBox()
           const stacked = action.y >= bounds.y + bounds.height
@@ -567,7 +565,7 @@ for (const scale of [100, 95]) {
       test('centers channel share and subscription buttons on the same row', async ({ app, page }, testInfo) => {
         await page.emulateMedia({ reducedMotion: 'reduce' })
         await page.evaluate(async () => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           await store.dispatch('updateBackendPreference', 'invidious')
           await store.dispatch('updateDefaultInvidiousInstance', 'https://invidious.test')
         })
@@ -638,7 +636,7 @@ for (const scale of [100, 95]) {
             ]) {
               await page.evaluate(async setting => {
                 document.body.dir = 'ltr'
-                const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+                const store = window.$store
                 await store.dispatch(setting, true)
               }, setting)
               await expect(row.locator(':scope > *')).toHaveCount(1)
@@ -649,13 +647,13 @@ for (const scale of [100, 95]) {
                   ? Math.abs(action.left + action.width / 2 - row.left - row.width / 2)
                   : Math.abs(action.left - row.left)
               }, remainingAction), { message: `${remainingAction} keeps its alignment when shown alone` }).toBeLessThanOrEqual(1)
-              await page.evaluate(setting => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(setting, false), setting)
+              await page.evaluate(setting => window.$store.dispatch(setting, false), setting)
             }
           }
           if (viewportWidth === 375 && scale === 100) {
             await setWindowSize(app, page, { width: 340, height: 700 })
             for (const [locale, label] of [['en-US', 'Unsubscribe'], ['de-DE', 'Deabonnieren']]) {
-              await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)
+              await page.evaluate(locale => window.$store.dispatch('updateCurrentLocale', locale), locale)
               await expect(subscribe).toHaveText(label)
               for (const zoom of [1.5, 2]) {
                 await app.electronApp.evaluate(({ BrowserWindow }, zoom) => {
@@ -813,7 +811,7 @@ for (const scale of [100, 95]) {
           }
         }
         await page.evaluate(() => { document.body.dir = 'ltr' })
-        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showDownloadsFromSettings'))
+        await page.evaluate(() => window.$store.dispatch('showDownloadsFromSettings'))
         await expect(page.getByRole('dialog', { name: 'Downloads', exact: true })).toBeVisible()
         await page.getByRole('button', { name: 'Add download', exact: true }).click()
         const url = page.getByRole('textbox', { name: 'Video or playlist URL', exact: true })
@@ -824,7 +822,7 @@ for (const scale of [100, 95]) {
         const urlLabel = url.locator('..').locator('.selectLabel')
         await expect(urlLabel.locator('.selectLabelIcon')).toHaveAttribute('data-icon', 'link')
         for (const pack of ['material', 'remix']) {
-          await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', value), pack)
+          await page.evaluate(value => window.$store.dispatch('updateIconPack', value), pack)
           await expect(urlLabel.locator('.selectLabelIcon')).toHaveAttribute('data-icon-pack', pack)
           await url.blur()
           await page.mouse.move(0, 0)
@@ -844,7 +842,7 @@ for (const scale of [100, 95]) {
 
       test('keeps default API URLs readable after entering a custom URL', async ({ page }, testInfo) => {
         await page.evaluate(async () => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           for (const setting of ['updateUseSponsorBlock', 'updateUseDeArrowThumbnails', 'updateUseReturnYouTubeDislikes']) {
             await store.dispatch(setting, true)
           }
@@ -1093,7 +1091,7 @@ for (const scale of [100, 95]) {
         await input.fill('/tmp/material-cookies.txt')
         // Enable the indicator UI using fixture state, without configuring a real server.
         await page.evaluate(() => Object.assign(
-          document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.settings,
+          window.$store.state.settings,
           { syncServerEnabled: true, syncServerToken: 'fixture-token', syncServerSyncSettings: true, hideComments: true }
         ))
         // Exercise the shared input's sync icon with a syncable key; cookie paths stay local.
@@ -1127,7 +1125,7 @@ for (const scale of [100, 95]) {
         await page.evaluate(() => { document.body.dir = 'ltr' })
         await updateControlProps(input, { settingKey: 'ytDlpPlaybackCookiesPath' })
         for (const pack of ['material', 'remix']) {
-          await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', value), pack)
+          await page.evaluate(value => window.$store.dispatch('updateIconPack', value), pack)
           await expect(input.locator('..').locator('.buttonIcon')).toHaveAttribute('data-icon-pack', pack)
           await expect(input.locator('..').locator('.selectLabelIcon')).toHaveAttribute('data-icon-pack', pack)
         }
@@ -1216,7 +1214,7 @@ for (const scale of [100, 95]) {
 
     test('centers modal text fields horizontally', async ({ app, page }, testInfo) => {
       await page.emulateMedia({ reducedMotion: 'reduce' })
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateEnableDownloads', true))
+      await page.evaluate(() => window.$store.dispatch('updateEnableDownloads', true))
       await goTo(page, 'downloads')
       for (const width of [1200, 400]) {
         await setWindowSize(app, page, { width, height: width === 1200 ? 800 : 900 })
@@ -1241,7 +1239,7 @@ for (const scale of [100, 95]) {
         }
       }
       await page.evaluate(() => { document.body.dir = 'ltr' })
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(
+      await page.evaluate(() => window.$store.dispatch(
         'showCreatePlaylistPrompt', { title: '', description: '', sourcePlaylistId: null }
       ))
       const playlist = page.locator('.playlistNameInput input')
@@ -1287,7 +1285,7 @@ for (const scale of [100, 95]) {
 
     test('Material buttons support variants and shape changes without shifting their bounds', async ({ page }, testInfo) => {
       await page.emulateMedia({ reducedMotion: 'reduce' })
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(
+      await page.evaluate(() => window.$store.dispatch(
         'showCreatePlaylistPrompt', { title: '', description: '', sourcePlaylistId: null }
       ))
       const button = page.locator('.promptCard .btn').first()
@@ -1356,7 +1354,7 @@ for (const scale of [100, 95]) {
       const section = await goToSettingsSection(page, 'appearance')
       const toggle = section.getByRole('checkbox', { name: 'Disable Smooth Scrolling', exact: true })
       for (const roundness of [0, 100, 200]) {
-        await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), roundness)
+        await page.evaluate(value => window.$store.dispatch('updateUiRoundness', value), roundness)
         await toggle.locator('+ label').click()
         const prompt = page.locator('.promptCard')
         const first = prompt.locator('.btn').first()
@@ -1674,7 +1672,7 @@ test('filled fields and slider progress retain their input behavior', async ({ p
   await expect(page.getByRole('listbox')).toHaveCount(0)
 
   await page.keyboard.press('Escape')
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(
+  await page.evaluate(() => window.$store.dispatch(
     'showCreatePlaylistPrompt', { title: '', description: '', sourcePlaylistId: null }
   ))
   const field = page.locator('.playlistNameInput input')
@@ -1696,7 +1694,7 @@ test('shared Material controls follow UI Roundness while switch focus keeps its 
   const select = section.locator('.privacyExternalLinkSelect .select-text')
   const switchLabel = section.locator('[data-setting-key="rememberHistory"] .switch-label')
   for (const roundness of [0, 50, 100, 200]) {
-    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), roundness)
+    await page.evaluate(value => window.$store.dispatch('updateUiRoundness', value), roundness)
     expect(await select.evaluate(element => parseFloat(getComputedStyle(element).borderTopLeftRadius))).toBeCloseTo(4 * roundness / 100, 1)
     expect(await switchLabel.evaluate(element => parseFloat(getComputedStyle(element.querySelector('.switch-label-text'), '::before').borderTopLeftRadius))).toBeCloseTo(12 * Math.max(100, roundness) / 100, 1)
     await switchLabel.locator('..').locator('.switch-input').press('Space')
@@ -1704,14 +1702,14 @@ test('shared Material controls follow UI Roundness while switch focus keeps its 
   }
 
   await page.keyboard.press('Escape')
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(
+  await page.evaluate(() => window.$store.dispatch(
     'showCreatePlaylistPrompt', { title: '', description: '', sourcePlaylistId: null }
   ))
   const card = page.locator('.promptCard')
   const field = page.locator('.playlistNameInput input')
   const button = card.locator('.btn').first()
   for (const roundness of [0, 50, 100, 200]) {
-    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), roundness)
+    await page.evaluate(value => window.$store.dispatch('updateUiRoundness', value), roundness)
     for (const [element, radius] of [[card, 12], [field, 4], [button, 20]]) {
       expect(await element.evaluate(element => parseFloat(getComputedStyle(element).borderTopLeftRadius))).toBeCloseTo(radius * roundness / 100, 1)
     }

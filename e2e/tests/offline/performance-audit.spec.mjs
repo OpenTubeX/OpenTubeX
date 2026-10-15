@@ -24,7 +24,7 @@ for (const zoom of [1, 0.95]) {
     await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
     await goTo(page, 'downloads')
     const setProgress = percent => page.evaluate(percent => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('upsertYtDlpDownload', { id: 42, videoId: 'jNQXAC9IVRw', title: 'Progress animation fixture', status: 'downloading', percent, mode: 'video' })
     }, percent)
     await setProgress(10)
@@ -133,7 +133,7 @@ for (const zoom of [1, 0.95]) {
   test(`select focus underline animates with transforms at ${zoom} UI scale`, async ({ page }) => {
     await page.evaluate(async zoom => {
       window.ftElectron.setZoomFactor(zoom)
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateReducedMotion', 'off')
     }, zoom)
     const appearance = await goToSettingsSection(page, 'appearance')
@@ -193,7 +193,7 @@ test.describe('large bookmark playlist', () => {
 
   test('visible history cards share the bookmark index', async ({ page }) => {
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       window.__bookmarkIdReads = 0
       for (const video of store.getters.getQuickBookmarkPlaylist.videos) {
         const id = video.videoId
@@ -221,7 +221,7 @@ test.describe('large bookmark playlist', () => {
 
   test('playlist overview does not deep-watch saved video titles', async ({ page }) => {
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       window.__playlistTitleReads = 0
       for (const video of store.getters.getQuickBookmarkPlaylist.videos) {
         const title = video.title
@@ -236,7 +236,7 @@ test.describe('large bookmark playlist', () => {
     await expect(page.getByRole('link', { name: 'Favorites', exact: true })).toBeVisible()
     expect(await page.evaluate(() => window.__playlistTitleReads)).toBe(0)
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.getters.getQuickBookmarkPlaylist.videos[0].timeAdded = 2
     })
     await page.waitForTimeout(100)
@@ -314,7 +314,7 @@ test('player visibility and playback changes avoid repeated layout work', async 
 
 test('default-speed button transitions do not query animations in JavaScript', async ({ page }) => {
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateReducedMotion', 'off')
   })
   const button = page.getByRole('button', { name: 'Expand side navigation', exact: true })

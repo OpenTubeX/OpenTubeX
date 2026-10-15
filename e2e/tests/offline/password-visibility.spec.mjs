@@ -31,7 +31,7 @@ for (const width of [1600, 480]) {
         await captureAppFramebuffer(app, testInfo, 'password-eye-hover')
 
         for (const pack of ['material', 'remix']) {
-          await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', value), pack)
+          await page.evaluate(value => window.$store.dispatch('updateIconPack', value), pack)
           for (const direction of ['ltr', 'rtl']) {
             await page.evaluate(value => { document.body.dir = value }, direction)
             await input.focus()
@@ -77,7 +77,7 @@ for (const width of [1600, 480]) {
         await expect(input).toHaveAttribute('type', 'password')
         await expect(toggle).toBeFocused()
         await expect(input).toHaveValue('example-password')
-        expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getSettingsPassword)).toBe('')
+        expect(await page.evaluate(() => window.$store.getters.getSettingsPassword)).toBe('')
       })
     })
   }

@@ -128,10 +128,10 @@ for (const iconPack of ['material', 'remix']) {
           expect((await colors())[index]).toEqual(active[index])
         }
         await attachScreenshot(`active mobile actions ${iconPack} ${viewport.width}`)
-        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setSecColor', 'Purple'))
+        await page.evaluate(() => window.$store.commit('setSecColor', 'Purple'))
         await expect(menu.getByRole('menuitemcheckbox').first()).toHaveCSS('color', 'rgb(156, 39, 176)')
         expect(await colors()).not.toEqual(active)
-        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setSecColor', 'Blue'))
+        await page.evaluate(() => window.$store.commit('setSecColor', 'Blue'))
         await openMenu(false)
         await expect(menu.getByRole('menuitemcheckbox').first()).toHaveAttribute('aria-checked', 'false')
         expect(await colors()).toEqual(inactive)
@@ -337,19 +337,19 @@ test('mobile video actions follow background updates and close with their source
   }
   await openMenu()
   await page.evaluate(videoId => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('upsertToHistoryCache', { ...store.getters.getHistoryCacheById[videoId], isWatched: true })
   }, VIDEO_ID)
   await expect(menu.getByRole('menuitem', { name: 'Unmark As Watched', exact: true })).toBeVisible()
   await menu.getByRole('menuitem', { name: 'Open Link', exact: true }).click()
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setBackendFallback', false))
+  await page.evaluate(() => window.$store.commit('setBackendFallback', false))
   await expect(menu.getByRole('menuitem', { name: 'Open in Invidious', exact: true })).toHaveCount(0)
   await expect(menu.getByRole('menuitem', { name: 'Open in YouTube', exact: true })).toBeVisible()
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$router.push('/playlists'))
+  await page.evaluate(() => window.$router.push('/playlists'))
   await expect(menu).toHaveCount(0)
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$router.push('/history'))
+  await page.evaluate(() => window.$router.push('/history'))
   await openMenu()
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setHistoryCacheSorted', []))
+  await page.evaluate(() => window.$store.commit('setHistoryCacheSorted', []))
   await expect(title).toHaveCount(0)
   await expect(menu).toHaveCount(0)
 })
@@ -381,7 +381,7 @@ test('replacing a long bottom menu resets its scroll range', async ({ page }) =>
 
 test('clamps a menu after actions disappear and resets it after resizing', async ({ page }) => {
   await goTo(page, 'history')
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setEnableDownloads', true))
+  await page.evaluate(() => window.$store.commit('setEnableDownloads', true))
   await page.setViewportSize({ width: 1000, height: 300 })
   const card = page.locator('.ft-list-video').first()
   await card.locator('.title').click({ button: 'right' })
@@ -393,7 +393,7 @@ test('clamps a menu after actions disappear and resets it after resizing', async
   await menu.getByRole('menuitem').filter({ visible: true }).last().scrollIntoViewIfNeeded()
   await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
   expect(await header.boundingBox()).toEqual(headerBounds)
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setEnableDownloads', false))
+  await page.evaluate(() => window.$store.commit('setEnableDownloads', false))
   await expect(menu.getByRole('menuitem', { name: 'Download Video', exact: true })).toHaveCount(0)
   await expect.poll(() => scroller.evaluate(element => {
     const content = element.querySelector('.menuContent')
@@ -434,7 +434,7 @@ for (const playlistType of ['youtube', 'user']) {
       await goTo(page, 'history')
       const card = page.locator('.ft-list-video').first()
       const menu = page.locator('.contextMenu')
-      const invidious = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getCurrentInvidiousInstanceUrl)
+      const invidious = await page.evaluate(() => window.$store.getters.getCurrentInvidiousInstanceUrl)
       for (const [service, url, separator] of [
         ['YouTube', `https://youtu.be/${VIDEO_ID}`, '?'],
         ['Invidious', `${invidious}/watch?v=${VIDEO_ID}`, '&']
@@ -496,11 +496,11 @@ test('channel names keep their channel context menu', async ({ page, app }) => {
     await expect(menu.getByRole('menuitem', { name, exact: true })).toHaveCount(0)
   }
   await menu.getByRole('menuitem', { name: /^Hide channel$/i }).click()
-  await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getChannelsHiddenParsed))
+  await expect.poll(() => page.evaluate(() => window.$store.getters.getChannelsHiddenParsed))
     .toEqual([{ name: 'UCaaaaaaaaaaaaaaaaaaaaaa', preferredName: 'Test Channel' }])
   await channel.locator('.channelNameText').click({ button: 'right' })
   await menu.getByRole('menuitem', { name: /^Show channel$/i }).click()
-  await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getChannelsHiddenParsed))
+  await expect.poll(() => page.evaluate(() => window.$store.getters.getChannelsHiddenParsed))
     .toEqual([])
   await channel.locator('.channelNameText').click({ button: 'right' })
   await menu.getByRole('menuitem', { name: 'Copy YouTube Link', exact: true }).click()
@@ -517,7 +517,7 @@ test('channel names keep their channel context menu', async ({ page, app }) => {
 
 test('channel handles store the channel name when hidden', async ({ page }) => {
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('addToSessionSearchHistory', {
       query: 'channel menu',
       data: [{
@@ -540,7 +540,7 @@ test('channel handles store the channel name when hidden', async ({ page }) => {
   await page.locator(sel.searchInput).press('Enter')
   await page.locator('.ft-list-channel .handle').click({ button: 'right' })
   await page.getByRole('menuitem', { name: /^Hide channel$/i }).click()
-  await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getChannelsHiddenParsed))
+  await expect.poll(() => page.evaluate(() => window.$store.getters.getChannelsHiddenParsed))
     .toEqual([{ name: 'UCbbbbbbbbbbbbbbbbbbbbbb', preferredName: 'Channel Menu Test' }])
 })
 
@@ -646,7 +646,7 @@ for (const uiScale of [100, 125]) {
         await button.click()
         await menu.getByRole('menuitem', { name: 'Mark As Watched', exact: true }).click()
         await expect(card).toHaveClass(/watched/)
-        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowVideoMenuButton', false))
+        await page.evaluate(() => window.$store.dispatch('updateShowVideoMenuButton', false))
         await expect(button).toHaveCount(0)
         await card.locator('.title').click({ button: 'right' })
         await expect(menu.getByRole('menuitem', { name: 'Unmark As Watched', exact: true })).toBeVisible()

@@ -11,7 +11,7 @@ for (const uiScale of [100, 125]) {
       }, uiScale / 100)
       await expect.poll(() => page.evaluate(() => window.innerWidth)).toBe(800)
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setEnableDownloads', true)
         store.commit('setMoveDownloadsToAppHeader', true)
         store.commit('setMoveSettingsToAppHeader', true)
@@ -22,7 +22,7 @@ for (const uiScale of [100, 125]) {
       await expect(header.locator('.searchContainer')).toBeVisible()
       for (const width of [4, 20, 4]) {
         await page.evaluate(width => {
-          document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setScrollbarThumbWidth', width)
+          window.$store.commit('setScrollbarThumbWidth', width)
         }, width)
         await expect.poll(() => header.evaluate(element => {
           const field = element.querySelector('.searchContainer').getBoundingClientRect()
@@ -38,7 +38,7 @@ for (const uiScale of [100, 125]) {
       page.on('pageerror', error => pageErrors.push(error.message))
       for (const [tabPosition, extraActions] of [['top', false], ['left', false], ['right', true]]) {
         await page.evaluate(({ tabPosition, extraActions }) => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           store.commit('setTabBarPosition', tabPosition)
           store.commit('setVerticalTabBarWidth', 220)
           store.commit('setEnableDownloads', extraActions)
@@ -124,7 +124,7 @@ for (const zoom of [1, 1.25]) {
   test(`phone logo uses available space at ${zoom} scale`, async ({ app, page }, testInfo) => {
     await enablePhoneHeader(page)
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setEnableDownloads', true)
       store.commit('setMoveDownloadsToAppHeader', true)
       store.commit('setMoveSettingsToAppHeader', true)
@@ -160,13 +160,13 @@ for (const zoom of [1, 1.25]) {
       window.setBounds({ ...window.getBounds(), width })
     }, 375 * zoom)
     await expect(header.locator('.logoText')).toBeHidden()
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setMoveDownloadsToAppHeader', false))
+    await page.evaluate(() => window.$store.commit('setMoveDownloadsToAppHeader', false))
     await expect(header.locator('.logoText')).toBeVisible()
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setMoveDownloadsToAppHeader', true))
+    await page.evaluate(() => window.$store.commit('setMoveDownloadsToAppHeader', true))
     await expect(header.locator('.logoText')).toBeHidden()
     if (zoom === 1.25) {
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setMoveDownloadsToAppHeader', false)
         store.commit('setMoveSettingsToAppHeader', false)
       })
@@ -190,7 +190,7 @@ for (const zoom of [1, 1.25]) {
   test(`phone header actions have equal spacing at ${zoom} scale`, async ({ app, page }) => {
     await enablePhoneHeader(page)
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setEnableDownloads', true)
       store.commit('setMoveDownloadsToAppHeader', true)
       store.commit('setMoveSettingsToAppHeader', true)
@@ -220,7 +220,7 @@ test('phone header honors settings and downloads placement', async ({ app, page 
   await setWindowSize(app, page, { width: 390, height: 850 })
   const header = page.locator('.topNav')
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setEnableDownloads', true)
     store.commit('setMoveDownloadsToAppHeader', true)
     store.commit('setMoveSettingsToAppHeader', true)
@@ -251,7 +251,7 @@ test('phone header honors settings and downloads placement', async ({ app, page 
   await expect(page.locator('.allSettingsShortcut')).toHaveCount(0)
   await page.keyboard.press('Escape')
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setMoveDownloadsToAppHeader', false)
     store.commit('setMoveSettingsToAppHeader', false)
   })
@@ -266,7 +266,7 @@ for (const zoom of [1, 1.25]) {
   test(`phone header reserves section gaps at the shortcut cutoff at ${zoom} scale`, async ({ app, page }) => {
     await setWindowSize(app, page, { width: 390, height: 850 })
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setEnableDownloads', true)
       store.commit('setMoveDownloadsToAppHeader', true)
       store.commit('setMoveSettingsToAppHeader', true)
@@ -298,7 +298,7 @@ for (const zoom of [1, 1.25]) {
 test('phone header retains visible logo text and shortcuts when search is hidden', async ({ app, page }) => {
   await setWindowSize(app, page, { width: 680, height: 850 })
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setHideSearchBar', true)
     store.commit('setEnableDownloads', true)
     store.commit('setMoveDownloadsToAppHeader', true)
@@ -332,7 +332,7 @@ for (const pinned of [false, true]) {
     await setWindowSize(app, page, { width: 375, height: 850 })
     await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1.25))
     await page.evaluate(pinned => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setEnableDownloads', true)
       store.commit('setMoveDownloadsToAppHeader', true)
       store.commit('setMoveSettingsToAppHeader', true)
@@ -373,7 +373,7 @@ for (const width of [375, 450, 480]) {
       await setWindowSize(app, page, { width, height: 850 })
       await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), width === 375 ? 1.25 : 1)
       await page.evaluate(pinned => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setAlwaysShowMobileSearchBar', pinned)
         store.commit('setMoveDownloadsToAppHeader', true)
         store.commit('setEnableDownloads', true)
@@ -458,7 +458,7 @@ for (const zoom of [1, 1.25]) {
     await enablePhoneHeader(page)
     await expect(page.locator('.pinnedSearchTrigger')).toHaveCount(0)
     await page.evaluate(async theme => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateBaseTheme', theme)
       await store.dispatch('updateAlwaysShowMobileSearchBar', true)
     }, zoom === 1 ? 'dark' : 'light')
@@ -488,11 +488,11 @@ for (const zoom of [1, 1.25]) {
     await expect(pill).toBeVisible()
     await page.reload()
     await expect(pill).toBeVisible()
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setHideSearchBar', true))
+    await page.evaluate(() => window.$store.commit('setHideSearchBar', true))
     await expect(pill).toHaveCount(0)
     await expect(page.locator('.navSearchButton')).toHaveCount(0)
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setHideSearchBar', false)
       return store.dispatch('updateAlwaysShowMobileSearchBar', false)
     })
@@ -538,7 +538,7 @@ test('phone tab overview exposes multi-step back and forward history without cha
   await goTo(page, 'subscriptions')
   await setWindowSize(app, page, { width: 390, height: 850 })
   await enablePhoneHeader(page)
-  const activeTabId = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPresentedTabId)
+  const activeTabId = await page.evaluate(() => window.$store.getters.getPresentedTabId)
   const openHistory = async () => {
     await page.locator('.capacitorPhoneTabSwitcherButton').click()
     await page.locator('.capacitorPhoneTabTarget[aria-selected="true"]').click({ button: 'right' })
@@ -587,9 +587,9 @@ test('phone tab overview exposes multi-step back and forward history without cha
   await openHistory()
   await page.locator('.capacitorPhoneTabHistoryEntry').filter({ hasText: /^Subscriptions/ }).last().click()
   await expect(page).toHaveURL(/#\/subscriptions/)
-  expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPresentedTabId)).toBe(activeTabId)
+  expect(await page.evaluate(() => window.$store.getters.getPresentedTabId)).toBe(activeTabId)
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setSyncServerEnabled', true)
     store.commit('setSyncServerToken', 'e2e-token')
     store.commit('setSyncServerPrivacyMode', 'enhanced')
@@ -610,7 +610,7 @@ test('phone tab history clamps its rendered scroll range after resize and fewer 
   await setWindowSize(app, page, { width: 390, height: 550 })
   await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(0.95))
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const tab = store.getters.getPresentedTab
     const entry = tab.history[tab.historyIndex]
     store.commit('setTabNavigation', {
@@ -642,7 +642,7 @@ test('phone tab history clamps its rendered scroll range after resize and fewer 
   await expect.poll(checkRange).toBe(true)
   await panel.evaluate(element => { element.scrollTop = element.scrollHeight })
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const tab = store.getters.getPresentedTab
     store.commit('setTabNavigation', { tabId: tab.id, route: tab.route, history: tab.history.slice(0, 2), historyIndex: 1 })
   })

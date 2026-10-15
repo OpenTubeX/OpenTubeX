@@ -86,7 +86,7 @@ test.describe('existing All Channels without an icon', () => {
     const personIcon = profileIconInitial(page).locator('[data-icon="circle-user"] svg')
     await expect(personIcon).toBeVisible()
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const profile = { ...store.getters.getActiveProfile }
       profile.icon = null
       store.commit('upsertProfileToList', profile)
@@ -272,7 +272,7 @@ test.describe('profile selector', () => {
     await expect(page.locator('.profileList .profileOption')).toHaveCount(2)
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('removeProfileFromList', 'missing-profile')
     })
 
@@ -282,7 +282,7 @@ test.describe('profile selector', () => {
 
   test('ignores channel updates for profiles removed in another window', async ({ page }) => {
     const profileIds = await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const payload = {
         channel: { id: 'channel', name: 'Channel', thumbnail: '' },
         profileIds: ['missing-profile']
@@ -416,7 +416,7 @@ for (const uiScale of [100, 125]) {
       await page.locator('.profilePanelHeader button').last().click()
       const profiles = page.locator('.profileSettingsContent > .card .profileList .bubblePadding')
       for (const theme of ['black', 'light']) {
-        await page.evaluate(theme => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateBaseTheme', theme), theme)
+        await page.evaluate(theme => window.$store.dispatch('updateBaseTheme', theme), theme)
         for (const profile of await profiles.all()) {
           await page.locator('.settingsBreadcrumb').hover()
           const name = profile.locator('.profileName')
@@ -954,17 +954,17 @@ test.describe('profile manager', () => {
 
     test('resolves the current theme color after the system theme changes', async ({ page }) => {
       await page.emulateMedia({ colorScheme: 'dark' })
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateSystemDarkTheme', 'hotPink'))
+      await page.evaluate(() => window.$store.dispatch('updateSystemDarkTheme', 'hotPink'))
       await openProfileList(page)
       await page.locator('.profilePanelHeader button').last().click()
       await page.locator('.card .profileList').getByText('All Channels').click()
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateSystemDarkTheme', 'dark'))
+      await page.evaluate(() => window.$store.dispatch('updateSystemDarkTheme', 'dark'))
       await page.locator('.themeColorOption').click()
       await expect(page.locator('.profilePreviewIcon')).toHaveCSS('background-color', 'rgb(76, 175, 80)')
       await expect(page.locator('.profileColorPicker code')).toHaveText('#4caf50', { timeout: 2000 })
       await expect(page.locator('.profileColorPicker .swatchColor')).toHaveCSS('background-color', 'rgb(76, 175, 80)')
 
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateSystemDarkTheme', 'hotPink'))
+      await page.evaluate(() => window.$store.dispatch('updateSystemDarkTheme', 'hotPink'))
       await expect(page.locator('.profileColorPicker code')).toHaveText('#000')
       await expect(page.locator('.profileColorPicker .swatchColor')).toHaveCSS('background-color', 'rgb(0, 0, 0)')
       await page.emulateMedia({ colorScheme: 'light' })
@@ -1015,7 +1015,7 @@ test.describe('profile manager', () => {
 
       await page.locator('.profileColorPicker .colorFieldTrigger').click()
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         return store.dispatch('updateMainColor', 'Orange')
       })
       await expect(preview).toHaveCSS('background-color', 'rgb(255, 152, 0)')

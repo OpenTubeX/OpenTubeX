@@ -126,7 +126,7 @@ for (const [theme, scale] of [['openTubeXLight', 100], ['openTubeXDark', 125]]) 
         }]
       }))
       await page.evaluate(() => {
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUseSponsorBlock', true)
+        window.$store.commit('setUseSponsorBlock', true)
       })
       await openMockedVideo(page)
       const player = page.locator('.ftVideoPlayer')

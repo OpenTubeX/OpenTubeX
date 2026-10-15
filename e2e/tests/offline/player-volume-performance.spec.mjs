@@ -24,7 +24,7 @@ test('volume slide supports narrow windows, keyboard input and reduced motion', 
   const slider = group.locator('.shaka-volume-bar')
   await group.locator('.shaka-mute-button').hover()
   await expect(group.locator('.shaka-volume-bar-container')).toHaveCSS('width', '50px')
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'on'))
+  await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'on'))
   await page.keyboard.press('Tab')
   await slider.focus()
   await page.mouse.move(1, 1)
@@ -56,7 +56,7 @@ test('volume hover keeps its slide without animating layout under CPU load in bo
     for (const scale of [1, 1.25]) {
       await app.electronApp.evaluate(({ BrowserWindow }, value) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(value), scale)
       for (const frosted of [true, false]) {
-        await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+        await page.evaluate(value => window.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
         await page.mouse.move(1, 1)
         await expect.poll(() => slider.evaluate(element => element.getBoundingClientRect().width)).toBeLessThan(1)
         const muteBounds = await group.locator('.shaka-mute-button').boundingBox()

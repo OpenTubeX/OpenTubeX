@@ -43,11 +43,11 @@ for (const uiScale of [95, 125]) {
       const sidebar = page.locator('.sideNav')
       const icon = sidebar.locator('.navOption .navIcon').first()
       for (const pack of ['material', 'remix']) {
-        await page.evaluate(pack => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', pack), pack)
+        await page.evaluate(pack => window.$store.dispatch('updateIconPack', pack), pack)
         await expect(icon).toHaveAttribute('data-icon-pack', pack)
         for (const mode of ['collapsed', 'icon-only', 'expanded', 'expanded-with-hidden-labels']) {
           await page.evaluate(mode => {
-            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            const store = window.$store
             store.commit('setHideLabelsSideBar', mode === 'icon-only' || mode === 'expanded-with-hidden-labels')
             if (store.getters.getIsSideNavOpen !== mode.startsWith('expanded')) store.commit('toggleSideNav')
           }, mode)
@@ -79,7 +79,7 @@ for (const uiScale of [95, 125]) {
         for (const position of ['top', 'left', 'right']) {
           for (const hideLabels of [false, true]) {
             await page.evaluate(async ({ locale, position, hideLabels }) => {
-              const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+              const store = window.$store
               await store.dispatch('updateCurrentLocale', locale)
               await store.dispatch('updateTabBarPosition', position)
               store.commit('setHideLabelsSideBar', hideLabels)
@@ -94,13 +94,13 @@ for (const uiScale of [95, 125]) {
       await page.emulateMedia({ reducedMotion: 'reduce' })
       await setWindowSize(app, page, { width: 1100, height: 700 })
       await goTo(page, 'history')
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('toggleSideNav'))
+      await page.evaluate(() => window.$store.commit('toggleSideNav'))
       const sidebar = page.locator('.sideNav.expanded')
       await expect(sidebar).toBeVisible()
       for (const locale of ['en-US', 'ar']) {
         for (const position of ['top', 'left', 'right']) {
           await page.evaluate(async ({ locale, position }) => {
-            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            const store = window.$store
             await store.dispatch('updateCurrentLocale', locale)
             await store.dispatch('updateTabBarPosition', position)
           }, { locale, position })
@@ -108,7 +108,7 @@ for (const uiScale of [95, 125]) {
         }
       }
       await page.evaluate(async () => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         await store.dispatch('updateCurrentLocale', 'en-US')
         await store.dispatch('updateTabBarPosition', 'left')
       })
@@ -133,7 +133,7 @@ for (const uiScale of [95, 125]) {
     test('matches the visible gaps in the watch sidebar overlay', async ({ app, page }) => {
       await page.emulateMedia({ reducedMotion: 'reduce' })
       await setWindowSize(app, page, { width: 1100, height: 700 })
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$router.push('/watch/jNQXAC9IVRw'))
+      await page.evaluate(() => window.$router.push('/watch/jNQXAC9IVRw'))
       await expect(page.locator('.app')).toContainClass('watchSideNavOverlay')
       await page.locator('.menuButton').click()
       const sidebar = page.locator('.sideNav.expanded.opened')
@@ -141,7 +141,7 @@ for (const uiScale of [95, 125]) {
       for (const locale of ['en-US', 'ar']) {
         for (const position of ['top', 'left', 'right']) {
           await page.evaluate(async ({ locale, position }) => {
-            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            const store = window.$store
             await store.dispatch('updateCurrentLocale', locale)
             await store.dispatch('updateTabBarPosition', position)
           }, { locale, position })

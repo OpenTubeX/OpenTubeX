@@ -116,7 +116,7 @@ for (const zoom of [1, 0.95]) {
     await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
     await page.setViewportSize({ width: 480, height: 800 })
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const playlist = store.getters.getPlaylist('layout-playlist')
       const [current, ...others] = playlist.videos
       await store.dispatch('updatePlaylist', { ...playlist, videos: [...others.slice(0, 8), current, ...others.slice(8)] })

@@ -2,7 +2,7 @@ import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
 
 test('keeps performance badges inline when the switch label has room', async ({ page }) => {
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return store.dispatch('updateShowPerformanceImpactIndicators', true)
   })
   const addOns = await goToSettingsSection(page, 'add-ons')
@@ -91,7 +91,7 @@ for (const currentLocale of ['en-US', 'de-DE']) {
         const widthWithoutBadge = (await text.boundingBox()).width
 
         await page.evaluate(() => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           return store.dispatch('updateShowPerformanceImpactIndicators', true)
         })
         await expect(toggle.locator('.performanceImpact')).toBeVisible()
@@ -109,7 +109,7 @@ for (const currentLocale of ['en-US', 'de-DE']) {
       test('wraps badges below slider labels without crowding the value or help', async ({ page }) => {
         await page.setViewportSize({ width: 375, height: 812 })
         await page.evaluate(() => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           return store.dispatch('updateShowPerformanceImpactIndicators', true)
         })
         const streaming = await goToSettingsSection(page, 'playback')

@@ -194,7 +194,7 @@ test('SponsorBlock markers preserve category hues across accent colors', async (
   const { player, track, markers, expectMarkerColors } = await prepareMarkers(app, page)
   await player.evaluate(element => { element.style.width = '1000px'; element.style.background = '#000' })
   for (const accent of ['Red', 'Blue', 'Green']) {
-    await page.evaluate(accent => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateMainColor', accent), accent)
+    await page.evaluate(accent => window.$store.dispatch('updateMainColor', accent), accent)
     await player.hover()
     // Theme/size changes rebuild Shaka's controls; wait for that layout before painting the color fixture.
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))

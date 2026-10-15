@@ -25,7 +25,7 @@ test.use({ seed })
 
 async function configureSync(page, settings, initialSync = true) {
   await page.evaluate(async ({ settings, initialSync }) => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     for (const [key, value] of Object.entries(settings)) {
       await store.dispatch(`update${key[0].toUpperCase()}${key.slice(1)}`, value)
     }
@@ -35,7 +35,7 @@ async function configureSync(page, settings, initialSync = true) {
 }
 
 async function sync(page) {
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer'))
+  await page.evaluate(() => window.$store.dispatch('syncWithSyncServer'))
 }
 
 for (const { encrypted, beforeFirstSync, failure, placeholderTitle } of [
@@ -114,7 +114,7 @@ for (const { encrypted, beforeFirstSync, failure, placeholderTitle } of [
     try {
       if (beforeFirstSync) {
         if (encrypted) await server.setHistory(entries)
-        await page.evaluate(record => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateSubscriptionHistory', { records: [record] }), record)
+        await page.evaluate(record => window.$store.dispatch('updateSubscriptionHistory', { records: [record] }), record)
       }
       receiver = await launchApp(receiverData)
       await installServer(page)
@@ -127,7 +127,7 @@ for (const { encrypted, beforeFirstSync, failure, placeholderTitle } of [
       if (failure) {
         if (failure === 'later collection') {
           await page.evaluate(async () => {
-            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            const store = window.$store
             await store.dispatch('updateSyncServerSyncProfiles', true)
             await store.dispatch('createProfile', { name: 'Pending profile', subscriptions: [] })
           })
@@ -146,9 +146,9 @@ for (const { encrypted, beforeFirstSync, failure, placeholderTitle } of [
             return route.fulfill({ status: 503, json: { message: 'Injected upload failure' } })
           }
           if (failure === 'newer repair' || failure === 'later collection') {
-            const current = await page.evaluate(id => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById[id], record.videoId)
+            const current = await page.evaluate(id => window.$store.getters.getHistoryCacheById[id], record.videoId)
             const patch = historyRepairPatch(current, { lengthSeconds: 130, isLive: false, isUpcoming: false })
-            await page.evaluate(patch => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateSubscriptionHistory', { metadata: [patch] }), patch)
+            await page.evaluate(patch => window.$store.dispatch('updateSubscriptionHistory', { metadata: [patch] }), patch)
             return route.continue()
           }
           const other = { ...record, videoId: 'bcdefghijkl', title: 'Another device added this video', lengthSeconds: 60 }
@@ -171,15 +171,15 @@ for (const { encrypted, beforeFirstSync, failure, placeholderTitle } of [
       }))
       await goTo(page, 'history')
       await page.clock.install()
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('setSyncServerAutoSync', true))
+      await page.evaluate(() => window.$store.dispatch('setSyncServerAutoSync', true))
       await page.getByRole('button', { name: 'Repair History', exact: true }).click()
       await page.getByRole('dialog', { name: 'Repair History' }).getByRole('button', { name: 'Start repair', exact: true }).click()
       await expect(page.getByRole('status')).toContainText('Checked 1/1 · Repaired 1 · Failed 0')
       await page.clock.fastForward(30000)
       if (failure === 'upload') {
-        await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.syncServer.syncServerStatus)).toBe('error')
+        await expect.poll(() => page.evaluate(() => window.$store.state.syncServer.syncServerStatus)).toBe('error')
         expect((await getRepairedEntry()).video.duration).toBe(100)
-        const pending = await page.evaluate(id => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById[id], record.videoId)
+        const pending = await page.evaluate(id => window.$store.getters.getHistoryCacheById[id], record.videoId)
         expect(pending).toMatchObject({ lengthSeconds: 120, pendingDurationRepair: true })
         await sync(page)
       }
@@ -188,14 +188,14 @@ for (const { encrypted, beforeFirstSync, failure, placeholderTitle } of [
       const hasNewerRepair = failure === 'newer repair' || failure === 'later collection'
       const finalDuration = hasNewerRepair ? 130 : 120
       if (hasNewerRepair) {
-        await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.syncServer.syncServerStatus)).toBe(failure === 'later collection' ? 'error' : 'success')
-        const pending = await page.evaluate(id => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById[id], record.videoId)
+        await expect.poll(() => page.evaluate(() => window.$store.state.syncServer.syncServerStatus)).toBe(failure === 'later collection' ? 'error' : 'success')
+        const pending = await page.evaluate(id => window.$store.getters.getHistoryCacheById[id], record.videoId)
         expect(pending).toMatchObject({ lengthSeconds: 130, pendingDurationRepair: true })
         await sync(page)
         await expect.poll(async () => (await getRepairedEntry()).video.duration).toBe(finalDuration)
       }
-      await expect.poll(() => page.evaluate(id => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById[id].pendingDurationRepair, record.videoId)).toBeUndefined()
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('setSyncServerAutoSync', false))
+      await expect.poll(() => page.evaluate(id => window.$store.getters.getHistoryCacheById[id].pendingDurationRepair, record.videoId)).toBeUndefined()
+      await page.evaluate(() => window.$store.dispatch('setSyncServerAutoSync', false))
       expect((await getRepairedEntry()).metadata).toEqual(originalState)
       expect((await getRepairedEntry()).video).toMatchObject({
         title: 'Recovered title',
@@ -204,7 +204,7 @@ for (const { encrypted, beforeFirstSync, failure, placeholderTitle } of [
         upload_date: Date.parse('2025-01-01'),
       })
       await sync(receiver.page)
-      const received = await receiver.page.evaluate(id => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById[id], original.videoId)
+      const received = await receiver.page.evaluate(id => window.$store.getters.getHistoryCacheById[id], original.videoId)
       expect(received).toMatchObject({
         title: 'Recovered title',
         author: 'Recovered channel',

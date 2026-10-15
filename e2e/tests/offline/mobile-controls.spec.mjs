@@ -47,7 +47,7 @@ test('phone picker marks selection with its radio without a row background', asy
 test('mobile select labels are readable and centered with both icon packs', async ({ page }) => {
   await goToSettingsSection(page, 'theme')
   for (const iconPack of ['material', 'remix']) {
-    await page.evaluate(iconPack => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setIconPack', iconPack), iconPack)
+    await page.evaluate(iconPack => window.$store.commit('setIconPack', iconPack), iconPack)
     const label = page.locator('.select-label').filter({ hasText: 'Base Theme' }).first()
     const geometry = await label.evaluate(element => {
       const icon = element.querySelector('.select-icon').getBoundingClientRect()

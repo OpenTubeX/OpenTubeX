@@ -22,7 +22,7 @@ async function switchShape(label) {
 }
 
 async function setRoundness(page, value) {
-  await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), value)
+  await page.evaluate(value => window.$store.dispatch('updateUiRoundness', value), value)
   await expect(page.locator('body')).toHaveCSS('--ui-roundness', String(value / 100))
 }
 
@@ -51,7 +51,7 @@ for (const uiScale of [100, 95]) {
       for (const width of [1600, 480]) {
         await resize(app, page, width, uiScale)
         for (const theme of ['oneDark', ...PALETTE_BASE_THEMES.filter(theme => theme !== 'oneDark'), 'catppuccinMacchiato', 'dark', 'light']) {
-          await page.evaluate(theme => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateBaseTheme', theme), theme)
+          await page.evaluate(theme => window.$store.dispatch('updateBaseTheme', theme), theme)
           await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
           for (const checked of [false, true]) {
             if (await toggle.isChecked() !== checked) await label.click()
@@ -103,7 +103,7 @@ for (const uiScale of [100, 95]) {
       await resize(app, page, 1600, uiScale)
       await setRoundness(page, 0)
       for (const pack of ['material', 'remix']) {
-        await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', value), pack)
+        await page.evaluate(value => window.$store.dispatch('updateIconPack', value), pack)
         for (const colorScheme of ['dark', 'light']) {
           await page.emulateMedia({ colorScheme })
           await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))

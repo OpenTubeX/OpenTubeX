@@ -34,7 +34,7 @@ async function openPaidPromotionVideo(app, page, { sponsorBlock = false } = {}) 
       }])
     }))
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setUseSponsorBlock', true)
       store.commit('setSponsorBlockSponsor', { color: '#00d400', skip: 'promptToSkip' })
       store.commit('setSponsorBlockSkippedToastDuration', 15)
@@ -89,7 +89,7 @@ test('paid promotion badge respects every external link opening policy', async (
   await expect(video).toHaveJSProperty('paused', true)
 
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateExternalLinkHandling', 'doNothing')
   })
   await badge.click()
@@ -98,7 +98,7 @@ test('paid promotion badge respects every external link opening policy', async (
   expect(await openedUrls()).toEqual([helpUrl])
 
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateExternalLinkHandling', '')
   })
   await badge.click()

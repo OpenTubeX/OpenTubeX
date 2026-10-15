@@ -68,7 +68,7 @@ for (const uiScale of [100, 125]) {
 
     test('keeps video search metadata as compact as desktop', async ({ page, app }) => {
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('addVideoToDeArrowCache', {
           videoId: 'touch-video', title: 'Clear title', thumbnail: null, thumbnailTimestamp: 10, videoDuration: 60
         })
@@ -87,7 +87,7 @@ for (const uiScale of [100, 125]) {
       const channel = page.locator('.ft-list-item a.channelName').first()
       await expect(title).toHaveText('Clear title')
       await expect(page.locator('.deArrowToggleButton')).toBeVisible()
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateListType', 'grid'))
+      await page.evaluate(() => window.$store.dispatch('updateListType', 'grid'))
       const desktopTextGap = await getVideoMetadataGap(title.locator('xpath=..'))
 
       const touchSession = await page.context().newCDPSession(page)
@@ -102,7 +102,7 @@ for (const uiScale of [100, 125]) {
       expect(mobileTextGap).toBeLessThanOrEqual(desktopTextGap + 1)
 
       for (const listType of ['grid', 'list']) {
-        await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateListType', value), listType)
+        await page.evaluate(value => window.$store.dispatch('updateListType', value), listType)
         await expect(page.locator('.ft-list-item').first()).toHaveClass(new RegExp(listType))
         if (listType === 'list') {
           await expect(page.locator('.autoGrid > .list').first()).toHaveCSS('min-block-size', '131px')
@@ -162,7 +162,7 @@ test.describe('mobile channel search metadata', () => {
 
   test('centers wrapped metadata and hides its leading separator', async ({ page }) => {
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('addToSessionSearchHistory', {
         query: 'channels',
         data: [{
@@ -203,7 +203,7 @@ test.describe('mobile channel search metadata', () => {
 
   test('keeps mixed grid rows aligned without reserved empty card height', async ({ page }) => {
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const playlist = index => ({
         type: 'playlist',
         title: `Playlist ${index}`,

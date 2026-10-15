@@ -32,7 +32,7 @@ for (const position of ['top', 'bottom']) {
       await setWindowSize(app, page, { width: 1400, height: 700 })
       await page.evaluate(async ({ position, scale }) => {
         window.ftElectron.setZoomFactor(scale)
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setTabBarPosition', position)
         store.commit('setScrollbarThumbWidth', 20)
         for (let index = 0; index < 18; index++) {

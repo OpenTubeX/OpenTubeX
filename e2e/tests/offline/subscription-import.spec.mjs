@@ -3,7 +3,7 @@ import { expect, goToSettingsSection, test } from '../../helpers/app.mjs'
 test('imports current OpenTubeX subscriptions without rejecting profile icons', async ({ page }) => {
   const dataSection = await goToSettingsSection(page, 'data')
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('createProfile', {
       _id: 'unrelated-test-profile',
       name: 'A Test',
@@ -97,7 +97,7 @@ test('imports current OpenTubeX subscriptions without rejecting profile icons', 
   })).toBeVisible()
   await expect(page.locator('.toast', { hasText: 'Unknown data key' })).toHaveCount(0)
   await expect.poll(() => page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const profiles = store.getters.getProfileList
     const profile = profiles[0]
     const unrelatedProfile = profiles.find(({ _id }) => _id === 'unrelated-test-profile')

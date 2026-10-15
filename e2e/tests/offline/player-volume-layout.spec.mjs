@@ -36,9 +36,9 @@ for (const uiScale of [100, 95, 125]) {
       for (const width of [1280, 450]) {
         await setWindowSize(app, page, { width, height: width === 450 ? 700 : 800 })
         for (const pack of ['material', 'remix']) {
-          await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', value), pack)
+          await page.evaluate(value => window.$store.dispatch('updateIconPack', value), pack)
           for (const frosted of [true, false]) {
-            await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+            await page.evaluate(value => window.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
             for (const expanded of [false, true]) {
               await button.blur()
               if (expanded) {

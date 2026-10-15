@@ -79,7 +79,7 @@ for (const width of [1500, 480]) {
         await recommendations.scrollIntoViewIfNeeded()
         await recommendations.screenshot({ path: testInfo.outputPath('available-offline.png') })
         await page.evaluate(() => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           for (const id of [1, 2, 3]) store.commit('removeYtDlpDownload', id)
         })
         await expect(recommendations).toHaveCount(0)
@@ -151,7 +151,7 @@ for (const preference of ['hidden', 'blur']) {
         await expect(image).toHaveAttribute('src', thumbnail)
         await expect.poll(() => image.evaluate(element => getComputedStyle(element).filter)).toMatch(/blur\(/)
         for (const scale of [100, 125]) {
-          await page.evaluate(scale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiScale', scale), scale)
+          await page.evaluate(scale => window.$store.commit('setUiScale', scale), scale)
           await image.scrollIntoViewIfNeeded()
           const bounds = await image.boundingBox()
           const gap = { x: bounds.x + bounds.width + 3, y: bounds.y + bounds.height / 2 - 4, width: 6, height: 8 }

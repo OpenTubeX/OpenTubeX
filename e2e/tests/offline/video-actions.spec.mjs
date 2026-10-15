@@ -103,7 +103,7 @@ test('marks progress fully seen from the menu and the configurable thumbnail act
   await page.locator('.settingsCloseButton').click()
 
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const entry = store.getters.getHistoryCacheById.eeeeeeeeeee
     await store.dispatch('updateHistory', { ...entry, watchProgress: 15, isWatched: false })
   })
@@ -265,7 +265,7 @@ test('uses the configured UTF-8 byte limit for persisted yt-dlp playback entries
   }
 
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return store.dispatch('updateYtDlpPlaybackCacheMaxEntrySize', 2)
   })
 
@@ -279,7 +279,7 @@ test('uses the configured UTF-8 byte limit for persisted yt-dlp playback entries
   }, source)).toBe(false)
 
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return store.dispatch('updateYtDlpPlaybackCacheMaxEntrySize', 4)
   })
 
@@ -309,7 +309,7 @@ test('a zero size limit disables and clears the persistent yt-dlp playback cache
   }, { expiryTime, source })).toBe(true)
 
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return store.dispatch('updateYtDlpPlaybackCacheMaxEntrySize', 0)
   })
 
@@ -439,7 +439,7 @@ test.describe('video downloads', () => {
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpPath', ytDlpPath)
     }, executable)
 
@@ -474,7 +474,7 @@ test.describe('video downloads', () => {
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpPath', ytDlpPath)
     }, executable)
 
@@ -507,7 +507,7 @@ test.describe('video downloads', () => {
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpPath', ytDlpPath)
     }, executable)
 
@@ -588,7 +588,7 @@ test.describe('video downloads', () => {
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpPath', ytDlpPath)
     }, executable)
 
@@ -620,7 +620,7 @@ test.describe('video downloads', () => {
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpPath', ytDlpPath)
       await store.dispatch('updateYtDlpPlaybackAuthMode', 'browser')
       await store.dispatch('updateYtDlpPlaybackCookiesBrowser', 'firefox')
@@ -643,7 +643,7 @@ test.describe('video downloads', () => {
     expect(passedArguments[cookiesIndex + 1]).toBe('firefox:/tmp/restricted-profile')
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpPlaybackAuthMode', 'file')
       await store.dispatch('updateYtDlpPlaybackCookiesPath', '/tmp/restricted-cookies.txt')
     })
@@ -657,7 +657,7 @@ test.describe('video downloads', () => {
 
   test('disables media download actions and rejects direct requests', async ({ page }) => {
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateExtraThumbnailAction', 'download')
     })
 
@@ -668,12 +668,12 @@ test.describe('video downloads', () => {
     await page.getByRole('menuitem', { name: 'Download Video' }).click()
     await expect(page.locator('.downloadPromptCard')).toBeVisible()
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateEnableDownloads', false)
     })
     await expect(page.locator('.downloadPromptCard')).toHaveCount(0)
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateEnableDownloads', true)
     })
     await expect(page.locator('.downloadPromptCard')).toHaveCount(0)
@@ -727,7 +727,7 @@ test.describe('video downloads', () => {
     await writeFile(executable, `#!/bin/sh\nprintf '%s\\n' "$@" > "${capturedArgs}"\n`)
     await chmod(executable, 0o755)
     await page.evaluate(async ({ ytDlpPath, globalArgs }) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpPath', ytDlpPath)
       await store.dispatch('updateYtDlpDownloadCustomArgs', globalArgs)
     }, {
@@ -760,7 +760,7 @@ test.describe('video downloads', () => {
     expect(formatIndexes[1]).toBeGreaterThan(formatIndexes[0])
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpDownloadCustomArgs', '--exec "echo unsafe"')
     })
     await page.bringToFront()
@@ -776,7 +776,7 @@ test.describe('video downloads', () => {
     await writeFile(executable, `#!/bin/sh\nprintf '%s\\n' "$@" > "${capturedArgs}"\n`)
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpPath', ytDlpPath)
     }, executable)
 
@@ -797,7 +797,7 @@ test.describe('video downloads', () => {
     await writeFile(executable, `#!/bin/sh\nprintf '%s\\n' "$@" > "${capturedArgs}"\n`)
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpPath', ytDlpPath)
     }, executable)
 
@@ -838,7 +838,7 @@ test.describe('video downloads', () => {
     await writeFile(executable, '#!/bin/sh\nsleep 0.2\n')
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpPath', ytDlpPath)
     }, executable)
 
@@ -869,7 +869,7 @@ test.describe('video downloads', () => {
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpPath', ytDlpPath)
     }, executable)
 
@@ -907,7 +907,7 @@ test.describe('video downloads', () => {
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpPath', ytDlpPath)
     }, executable)
 
@@ -949,7 +949,7 @@ test.describe('video downloads', () => {
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async ({ downloadFolder, ytDlpPath }) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpPath', ytDlpPath)
       await store.dispatch('updateYtDlpDownloadFolderPath', downloadFolder)
     }, { downloadFolder, ytDlpPath: executable })
@@ -1133,7 +1133,7 @@ test.describe('video downloads', () => {
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async ({ unavailableDownloadFolder, ytDlpPath }) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpPath', ytDlpPath)
       await store.dispatch('updateYtDlpDownloadFolderPath', unavailableDownloadFolder)
     }, { unavailableDownloadFolder, ytDlpPath: executable })
@@ -1167,7 +1167,7 @@ test.describe('video downloads', () => {
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpPath', ytDlpPath)
     }, executable)
 
@@ -1205,7 +1205,7 @@ test.describe('video downloads', () => {
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpPath', ytDlpPath)
     }, executable)
 
@@ -1245,7 +1245,7 @@ test.describe('video downloads', () => {
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpPath', ytDlpPath)
     }, executable)
 
@@ -1275,7 +1275,7 @@ test.describe('video downloads', () => {
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpPath', ytDlpPath)
     }, executable)
 
@@ -1313,7 +1313,7 @@ test.describe('video downloads', () => {
     await writeFile(executable, '#!/bin/sh\nprintf "[download] 10.0%% at 1MiB/s ETA 00:10\\n"\nexec sleep 30\n')
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpPath', ytDlpPath)
     }, executable)
 
@@ -1360,7 +1360,7 @@ test.describe('video downloads', () => {
     await writeFile(executable, '#!/bin/sh\nprintf "[download] 100.0%% at 1MiB/s ETA 00:00\\n"\nsleep 0.2\n')
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpPath', ytDlpPath)
     }, executable)
 
@@ -1392,7 +1392,7 @@ test.describe('video downloads', () => {
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpPath', ytDlpPath)
     }, executable)
 
@@ -1448,7 +1448,7 @@ test.describe('video downloads', () => {
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpPath', ytDlpPath)
     }, executable)
 
@@ -1487,7 +1487,7 @@ test.describe('video downloads', () => {
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpPath', ytDlpPath)
     }, executable)
 
@@ -1529,7 +1529,7 @@ test.describe('video downloads', () => {
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpPath', ytDlpPath)
     }, executable)
 
@@ -1566,7 +1566,7 @@ test.describe('video downloads', () => {
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpPath', ytDlpPath)
     }, executable)
 
@@ -1598,7 +1598,7 @@ test('exposes download progress to assistive technology', async ({ page }) => {
   await goTo(page, 'downloads')
 
   const upsertDownload = (status, percent) => page.evaluate(({ status, percent }) => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('upsertYtDlpDownload', {
       id: 42,
       title: 'Accessible download',
@@ -1654,7 +1654,7 @@ test('exposes download progress to assistive technology', async ({ page }) => {
 test('asks for confirmation before removing a downloaded file', async ({ page }) => {
   await goTo(page, 'downloads')
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('upsertYtDlpDownload', {
       id: 42,
       title: 'Finished download',
@@ -1688,7 +1688,7 @@ test.describe('list video actions', () => {
   test('does not attach to an unrelated active download with the same title', async ({ page }) => {
     await goTo(page, 'history')
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('upsertYtDlpDownload', {
         id: 41,
         videoId: 'differentId',
@@ -1711,7 +1711,7 @@ test.describe('list video actions', () => {
     await goTo(page, 'userplaylists')
     await page.getByText('Saved videos', { exact: true }).click()
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('upsertYtDlpDownload', {
         id: 43,
         playlistKey: 'different-playlist',
@@ -1731,7 +1731,7 @@ test.describe('list video actions', () => {
     await goTo(page, 'userplaylists')
     await page.getByText('Saved videos', { exact: true }).click()
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('upsertYtDlpDownload', {
         id: 44,
         playlistKey: 'saved-videos',
@@ -1887,7 +1887,7 @@ test.describe('list video actions', () => {
   test('the video context menu and playlist dropdown work with vertical tabs', async ({ page }) => {
     await goTo(page, 'history')
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setTabBarPosition', 'left')
     })
 

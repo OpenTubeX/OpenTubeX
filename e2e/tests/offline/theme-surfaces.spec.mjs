@@ -237,7 +237,7 @@ for (const [theme, scale] of [['openTubeXLight', 100], ['openTubeXDark', 125]]) 
 
     test('other feed headers and channel panels blend into their cards', async ({ app, page }, testInfo) => {
       await page.evaluate(async () => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         await store.dispatch('updateBackendPreference', 'invidious')
         await store.dispatch('updateDefaultInvidiousInstance', 'https://invidious.test')
       })

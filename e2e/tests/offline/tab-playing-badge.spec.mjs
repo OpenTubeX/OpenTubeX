@@ -54,7 +54,7 @@ for (const iconPack of ['material', 'remix']) {
       for (const scale of [100, 125]) {
         for (const position of ['top', 'bottom', 'left', 'right']) {
           await page.evaluate(async ({ scale, position }) => {
-            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            const store = window.$store
             await store.dispatch('updateUiScale', scale)
             await store.dispatch('updateTabBarPosition', position)
           }, { scale, position })
@@ -81,7 +81,7 @@ for (const iconPack of ['material', 'remix']) {
       }
 
       await page.evaluate(async () => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         await store.dispatch('updateTabBarPosition', 'top')
       })
       await tabs[1].hover()
@@ -113,7 +113,7 @@ for (const iconPack of ['material', 'remix']) {
         await expect(identities[index]).toBeVisible()
       }
       await page.evaluate(async ids => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         await store.dispatch('updateShowTabIcons', false)
         ids.forEach(id => window.ftElectron.tabs.setPlaybackState('playing', id))
       }, ids)

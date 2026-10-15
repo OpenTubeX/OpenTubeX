@@ -87,7 +87,7 @@ test.describe('standard pairing fields', () => {
 
     await page.getByRole('button', { name: 'Cancel', exact: true }).click()
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       for (const [key, value] of Object.entries({ SyncServerToken: 'local-fixture', SyncServerPrivacyMode: 'enhanced', SyncServerPrivacyKey: 'fixture', SyncServerPrivacySalt: 'fixture', SyncServerDeviceId: 'fixture' })) {
         await store.dispatch(`update${key}`, value)
       }
@@ -181,7 +181,7 @@ test('quick-settings picker hover follows UI roundness', async ({ page }) => {
   await option.hover()
   await expect(option).toHaveClass(/hover/)
   for (const roundness of [0, 150]) {
-    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), roundness)
+    await page.evaluate(value => window.$store.dispatch('updateUiRoundness', value), roundness)
     await expect(option).toHaveCSS('border-top-left-radius', `${5 * roundness / 100}px`)
   }
 })

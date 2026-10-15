@@ -28,7 +28,7 @@ test('custom playlists named Watch Later and Favorites survive adding playlists 
 
   // A renamed built-in playlist leaves its original name available for reuse.
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     for (const id of ['watchLater', 'favorites']) {
       await store.dispatch('updatePlaylist', { _id: id, playlistName: `Renamed ${id}` })
     }
@@ -43,7 +43,7 @@ test('custom playlists named Watch Later and Favorites survive adding playlists 
   }
 
   const readPlaylists = currentPage => currentPage.evaluate(() => {
-    return document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getAllPlaylists
+    return window.$store.getters.getAllPlaylists
   })
   const original = await readPlaylists(page)
   expect(original).toHaveLength(5)

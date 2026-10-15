@@ -142,7 +142,7 @@ test.describe('thumbnail size slider', () => {
           window.setContentSize(Math.round(width * uiScale / 100), 900)
         }, { width, uiScale })
         const setSize = size => page.evaluate(value => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           store.commit('setThumbnailSize', value)
         }, size)
         const scrollState = () => page.evaluate(() => {

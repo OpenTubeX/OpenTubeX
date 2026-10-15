@@ -68,7 +68,7 @@ for (const uiScale of [100, 125]) {
       await expectShorter(narrowHeight, narrowThumb)
       await resize(350)
       await page.evaluate(async () => {
-        await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', 'de-DE')
+        await window.$store.dispatch('updateCurrentLocale', 'de-DE')
       })
       await expect(page.locator('.fixedNavigationOptions')).toContainText('Navigationsleiste')
       // Use a verbose translated label so the language switch actually reduces
@@ -80,7 +80,7 @@ for (const uiScale of [100, 125]) {
       const germanHeight = await content.evaluate(element => element.getBoundingClientRect().height)
       const germanThumb = await thumb.evaluate(element => element.getBoundingClientRect().height)
       await page.evaluate(async () => {
-        await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', 'en-US')
+        await window.$store.dispatch('updateCurrentLocale', 'en-US')
       })
       await expectShorter(germanHeight, germanThumb)
     })
@@ -165,7 +165,7 @@ for (const uiScale of [100, 125]) {
           height: Math.round(viewport.height * uiScale / 100)
         })
         for (const count of [4, 5, 6, 5]) {
-          await page.evaluate(items => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setNavigationItems', items), items.slice(0, count))
+          await page.evaluate(items => window.$store.commit('setNavigationItems', items), items.slice(0, count))
           const primaryIds = count > 5 ? items.slice(0, 4) : items.slice(0, count)
           await expect.poll(() => nav.locator('.inner > .navOption:visible').evaluateAll(links =>
             links.map(link => link.getAttribute('href'))
@@ -223,7 +223,7 @@ for (const uiScale of [100, 125]) {
         await expect(more).toHaveClass(/router-link-active/)
         await expect(more.locator('.navLabel')).toBeHidden()
         await expect(primary.locator('.navLabel:visible')).toHaveCount(0)
-        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$router.push('/search/example'))
+        await page.evaluate(() => window.$router.push('/search/example'))
         await expect(page).toHaveURL(/#\/search\/example$/)
         await expect(nav.locator('.navLabel:visible')).toHaveCount(0)
       }
@@ -231,7 +231,7 @@ for (const uiScale of [100, 125]) {
       await expect(primary.locator('.navLabel:visible')).toHaveCount(4)
       await setWindowSize(app, page, { width: 400, height: 850 })
       await goTo(page, 'history')
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setHideLabelsSideBar', true))
+      await page.evaluate(() => window.$store.commit('setHideLabelsSideBar', true))
       await expect(nav.locator('.navLabel:visible')).toHaveCount(0)
     })
 
@@ -240,7 +240,7 @@ for (const uiScale of [100, 125]) {
       await goTo(page, 'history')
       await expect(page.getByRole('heading', { name: 'History', exact: true })).toBeVisible()
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setAlwaysShowNavigationBar', true)
         store.commit('setShowProgressBar', true)
         store.commit('setProgressBarPercentage', 50)
@@ -258,7 +258,7 @@ for (const uiScale of [100, 125]) {
         await page.evaluate(() => window.scrollTo(0, document.scrollingElement.scrollHeight))
         const previousHeight = await page.evaluate(() => document.scrollingElement.scrollHeight)
         await page.evaluate(async ({ compact, hideLabels }) => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           store.commit('setCompactNavigationLabels', compact)
           store.commit('setHideLabelsSideBar', hideLabels)
           // Restore the phone fixture after Vue updates the root class, before layout.
@@ -290,7 +290,7 @@ for (const uiScale of [100, 125]) {
       await setWindowSize(app, page, { width: 500, height: 850 })
       await goTo(page, 'history')
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setToastPosition', 'bottom-center')
         document.documentElement.style.setProperty('--safe-area-inset-bottom', '24px')
         document.querySelector('.app > .flexBox').style.minHeight = '3000px'
@@ -299,7 +299,7 @@ for (const uiScale of [100, 125]) {
       const toast = page.locator('.toast', { hasText: 'Navigation spacing test' })
       await expect(toast).toBeVisible()
       for (const compact of [false, true, false, true]) {
-        await page.evaluate(compact => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setCompactNavigationLabels', compact), compact)
+        await page.evaluate(compact => window.$store.commit('setCompactNavigationLabels', compact), compact)
         await expect.poll(async () => {
           const nav = await page.locator('.sideNav').boundingBox()
           const notification = await toast.boundingBox()
@@ -683,7 +683,7 @@ test.describe('navigation history titles', () => {
     await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
 
     await page.evaluate((backButtonSelector) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const tabId = store.getters.getActiveTabId
       store.commit('setTabContentTitle', {
         tabId,
@@ -702,7 +702,7 @@ test.describe('navigation history titles', () => {
     await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const tab = store.getters.getActiveTab
       tab.history[tab.historyIndex].titlePending = false
     })
@@ -712,7 +712,7 @@ test.describe('navigation history titles', () => {
     await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
 
     await page.evaluate((forwardButtonSelector) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const tab = store.getters.getActiveTab
       tab.history[tab.historyIndex].titlePending = true
       store.commit('setTabContentTitle', {
@@ -776,7 +776,7 @@ for (const uiScale of [100, 125]) {
       for (const width of [320, 390, 667]) {
         await setWindowSize(app, page, { width: Math.round(width * uiScale / 100), height: 1000 - width })
         for (const locale of ['en-US', 'de-DE']) {
-          await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)
+          await page.evaluate(locale => window.$store.dispatch('updateCurrentLocale', locale), locale)
           await expect.poll(() => nav.locator('.mobileNavItem:visible .navLabel').evaluateAll(labels => labels.every(label =>
             label.scrollWidth <= label.clientWidth && label.scrollHeight <= label.clientHeight
           )), { message: 'every navigation label fits without clipping' }).toBe(true)
@@ -791,10 +791,10 @@ for (const uiScale of [100, 125]) {
           }
         }
       }
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setHideLabelsSideBar', true))
+      await page.evaluate(() => window.$store.commit('setHideLabelsSideBar', true))
       await expect(nav).toHaveCSS('height', '60px')
       await expect(nav.locator('.navLabel:visible')).toHaveCount(0)
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setCompactNavigationLabels', true))
+      await page.evaluate(() => window.$store.commit('setCompactNavigationLabels', true))
       await expect(nav).toHaveCSS('height', '48px')
     })
 
@@ -886,10 +886,10 @@ for (const useAITranslationCompletions of [false, true]) {
           }
         }
         for (const order of [DEFAULT_NAVIGATION_ITEMS, [...DEFAULT_NAVIGATION_ITEMS.slice(4), ...DEFAULT_NAVIGATION_ITEMS.slice(0, 4)]]) {
-          await page.evaluate(order => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateNavigationItems', order), order)
+          await page.evaluate(order => window.$store.dispatch('updateNavigationItems', order), order)
           await expect(nav.locator('.mobileNavItem:visible')).toHaveCount(5)
           for (const locale of locales) {
-            await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)
+            await page.evaluate(locale => window.$store.dispatch('updateCurrentLocale', locale), locale)
             await expect.poll(() => nav.locator('.mobileNavItem:visible .navLabel > span:visible').evaluateAll(labels => {
               const sizes = labels.map(label => parseFloat(getComputedStyle(label).fontSize))
               return labels.length === 5 && labels.every(label => label.getBoundingClientRect().width <= label.parentElement.getBoundingClientRect().width) &&
@@ -898,7 +898,7 @@ for (const useAITranslationCompletions of [false, true]) {
           }
         }
         await page.evaluate(async order => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           await store.dispatch('updateNavigationItems', order)
           await store.dispatch('updateCurrentLocale', 'gl')
         }, DEFAULT_NAVIGATION_ITEMS)
@@ -917,7 +917,7 @@ for (const useAITranslationCompletions of [false, true]) {
         await expect(playlists.locator('.navLabel > span:visible')).toHaveText('Listaxes de reprodución')
         await setWindowSize(app, page, { width: Math.round(320 * uiScale / 100), height: 800 })
         await page.evaluate(async () => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           await store.dispatch('updateCurrentLocale', 'ta')
           await store.dispatch('updateNavigationItems', ['stats', 'home', 'subscriptions', 'history', 'userplaylists', 'subscribedchannels'])
         })
@@ -937,7 +937,7 @@ for (const useAITranslationCompletions of [false, true]) {
 test('keeps existing localized More labels with AI completions off', async ({ app, page }) => {
   await setWindowSize(app, page, { width: 390, height: 750 })
   for (const [locale, label] of [['fr-FR', 'Plus'], ['el', 'Περισσότερα'], ['de-DE', 'Mehr']]) {
-    await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)
+    await page.evaluate(locale => window.$store.dispatch('updateCurrentLocale', locale), locale)
     const more = page.locator('.sideNav .moreOptionNav')
     await expect(more).toHaveAttribute('aria-label', label)
     await expect(more.locator('.navLabel > span:visible')).toHaveText(label)
@@ -965,7 +965,7 @@ for (const uiScale of [95, 125]) {
     })
 
     test('header button hover respects reduced motion', async ({ page }) => {
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'off'))
+      await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'off'))
       await page.emulateMedia({ reducedMotion: 'reduce' })
       // Exercise the component's OS preference fallback without the global override.
       await page.evaluate(() => document.documentElement.removeAttribute('data-reduced-motion'))
@@ -977,7 +977,7 @@ for (const uiScale of [95, 125]) {
     test('animates the header button radius while pressing with a mouse', async ({ page }) => {
       await page.emulateMedia({ reducedMotion: 'no-preference' })
       await page.evaluate(async () => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         await store.dispatch('updateReducedMotion', 'off')
         await store.dispatch('updateAnimationSpeed', 25)
       })
@@ -995,7 +995,7 @@ for (const uiScale of [95, 125]) {
 
     test('shows complete desktop destination labels', async ({ page }) => {
       for (const locale of ['en-US', 'de-DE']) {
-        await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)
+        await page.evaluate(locale => window.$store.dispatch('updateCurrentLocale', locale), locale)
         await goTo(page, 'subscriptions')
         await expect.poll(() => page.locator('.sideNav .navOption .navLabel:visible').evaluateAll(labels => labels.every(label =>
           label.scrollWidth <= label.clientWidth && label.scrollHeight <= label.clientHeight
@@ -1011,7 +1011,7 @@ for (const uiScale of [95, 125]) {
         await page.locator('body').evaluate((body, direction) => { body.dir = direction }, direction)
         for (const mode of ['rail', 'icons', 'expanded', 'expanded-with-hidden-labels']) {
           await page.evaluate(mode => {
-            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            const store = window.$store
             const expanded = mode.startsWith('expanded')
             if (store.getters.getIsSideNavOpen !== expanded) store.commit('toggleSideNav')
             store.commit('setHideLabelsSideBar', mode === 'icons' || mode === 'expanded-with-hidden-labels')
@@ -1048,18 +1048,18 @@ for (const uiScale of [95, 125]) {
       const scroller = page.locator('.sideNav .inner')
       await setWindowSize(app, page, { width: 1100, height: 500 })
       const changes = [
-        async () => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('toggleSideNav')),
-        async () => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', 'de-DE')),
-        async () => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', 'en-US')),
+        async () => page.evaluate(() => window.$store.commit('toggleSideNav')),
+        async () => page.evaluate(() => window.$store.dispatch('updateCurrentLocale', 'de-DE')),
+        async () => page.evaluate(() => window.$store.dispatch('updateCurrentLocale', 'en-US')),
         async () => page.evaluate(() => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           store.commit('toggleSideNav')
           store.commit('setHideLabelsSideBar', true)
         }),
         async () => setWindowSize(app, page, { width: 1150, height: 800 }),
-        async () => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', 'de-DE')),
-        async () => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setNavigationItems', ['home', 'history'])),
-        async () => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setHideActiveSubscriptions', true))
+        async () => page.evaluate(() => window.$store.dispatch('updateCurrentLocale', 'de-DE')),
+        async () => page.evaluate(() => window.$store.commit('setNavigationItems', ['home', 'history'])),
+        async () => page.evaluate(() => window.$store.commit('setHideActiveSubscriptions', true))
       ]
       for (const [index, change] of changes.entries()) {
         const previousOffset = await scroller.evaluate(element => {

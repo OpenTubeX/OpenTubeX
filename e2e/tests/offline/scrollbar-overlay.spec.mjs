@@ -30,7 +30,7 @@ async function addPageOverflow(page) {
 async function recordCustomSpeedPageScroll(page) {
   await addPageOverflow(page)
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setScrollSpeed', 200)
     window.__scrollSpeedAnimationPositions = []
     document.addEventListener('scroll', () => {
@@ -139,7 +139,7 @@ test.describe('overlay scrollbars', () => {
   test('remeasures settled page overflow after bottom-row feed enter animations at fractional UI scale', async ({ page }) => {
     await expect(page.locator('.tutorialOverlay')).toHaveCount(0)
     await page.evaluate(() => {
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setReducedMotion', 'off')
+      window.$store.commit('setReducedMotion', 'off')
     })
     for (const zoomFactor of [1, 1.25]) {
       await page.evaluate(factor => window.ftElectron.setZoomFactor(factor), zoomFactor)
@@ -215,11 +215,11 @@ test.describe('overlay scrollbars', () => {
     const viewport = await addNestedCustomSpeedScroller(page, 'data-roundness-scrollbar', 0)
     for (const width of [4, 10]) {
       await page.evaluate(value => {
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setScrollbarThumbWidth', value)
+        window.$store.commit('setScrollbarThumbWidth', value)
       }, width)
       for (const roundness of [0, 50, 100, 200]) {
         await page.evaluate(value => {
-          document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
+          window.$store.commit('setUiRoundness', value)
         }, roundness)
         for (const scrollbar of [page.locator(PAGE_SCROLLBAR), viewport.locator(':scope > .os-scrollbar-vertical')]) {
           await expect(scrollbar.locator('.os-scrollbar-handle')).toHaveCSS('border-radius', `${width * roundness / 100}px`)
@@ -256,7 +256,7 @@ test.describe('overlay scrollbars', () => {
     })
     for (const alwaysShow of [true, false, true]) {
       await page.evaluate(enabled => {
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setAlwaysShowScrollbars', enabled)
+        window.$store.commit('setAlwaysShowScrollbars', enabled)
       }, alwaysShow)
       await expect.poll(() => page.evaluate(() =>
         document.querySelector('[data-retained-scrollbar] > .os-scrollbar-vertical') === window.__retainedScrollbar
@@ -309,7 +309,7 @@ test.describe('overlay scrollbars', () => {
   test('applies the configured wheel speed to page scrolling', async ({ page }) => {
     await addPageOverflow(page)
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setScrollSpeed', 200)
       window.ftElectron.setZoomFactor(1.25)
       document.addEventListener('wheel', (event) => {
@@ -339,7 +339,7 @@ test.describe('overlay scrollbars', () => {
   test('preserves a burst of wheel deltas while custom scrolling is animated', async ({ page }) => {
     await addPageOverflow(page)
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setScrollSpeed', 200)
 
       for (let index = 0; index < 3; index++) {
@@ -357,7 +357,7 @@ test.describe('overlay scrollbars', () => {
   test('reverses a pending custom-speed scroll at the current boundary', async ({ page }) => {
     await addPageOverflow(page)
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setScrollSpeed', 200)
 
       for (const deltaY of [120, -120]) {
@@ -376,7 +376,7 @@ test.describe('overlay scrollbars', () => {
   test('the page scrollbar stays on the content side of right vertical tabs', async ({ page }) => {
     await addPageOverflow(page)
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setVerticalTabBarWidth', 220)
       store.commit('setTabBarPosition', 'right')
     })
@@ -392,7 +392,7 @@ test.describe('overlay scrollbars', () => {
   test('the page scrollbar stays on the window edge with left vertical tabs', async ({ page }) => {
     await addPageOverflow(page)
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setVerticalTabBarWidth', 220)
       store.commit('setTabBarPosition', 'left')
     })
@@ -407,7 +407,7 @@ test.describe('overlay scrollbars', () => {
   test('keeps the quick settings avatar clear of a wide page scrollbar', async ({ page }) => {
     await addPageOverflow(page)
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setScrollbarThumbWidth', 20)
     })
 
@@ -639,14 +639,14 @@ test.describe('overlay scrollbars', () => {
       await viewport.hover()
       await expect(scrollbar).toHaveCSS('opacity', '1')
       await page.evaluate(() => {
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        window.$store
           .commit('setAlwaysShowScrollbars', true)
       })
       await page.mouse.move(800, 500)
       await page.waitForTimeout(1600)
       await expect(scrollbar).toHaveCSS('opacity', '1')
       await page.evaluate(() => {
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        window.$store
           .commit('setAlwaysShowScrollbars', false)
       })
       await expect(scrollbar).toHaveCSS('opacity', '0')

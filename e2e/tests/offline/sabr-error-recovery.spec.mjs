@@ -225,7 +225,7 @@ for (const fallbackEnabled of [false, true]) {
       ipcMain.handle('yt-dlp-get-playback-info', () => ({ error: 'Synthetic initial extraction failure' }))
     })
     await page.evaluate(async enabled => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updatePlaybackEngineFallback', enabled)
       await store.dispatch('updateVideoPlaybackEngine', 'yt-dlp')
     }, fallbackEnabled)
@@ -793,7 +793,7 @@ for (const zoom of [1, 1.25]) {
       }
       await page.evaluate(async zoom => {
         await window.ftElectron.setZoomFactor(zoom)
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         await store.dispatch('updateVideoPlaybackEngine', 'built-in')
       }, zoom)
       await openMockedVideo(page)

@@ -13,7 +13,7 @@ for (const zoom of [1, 0.95]) {
 
     for (const theme of ['light', 'dark']) {
       await page.evaluate(async baseTheme => {
-        const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+        const store = window.$store
         await store.dispatch('updateBaseTheme', baseTheme)
       }, theme)
 
@@ -500,7 +500,7 @@ for (const uiScale of [100, 95]) {
       for (const width of [1600, 480]) {
         await page.setViewportSize({ width, height: 800 })
         for (const roundness of [0, 50, 100, 200]) {
-          await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), roundness)
+          await page.evaluate(value => window.$store.dispatch('updateUiRoundness', value), roundness)
           await tutorial.getByRole('button', { name: 'Skip', exact: true }).focus()
           const unfocusedRadius = await next.evaluate(element => parseFloat(getComputedStyle(element).borderTopLeftRadius))
           expect(unfocusedRadius).toBeCloseTo((width <= 680 ? 24 : 20) * roundness / 100, 1)

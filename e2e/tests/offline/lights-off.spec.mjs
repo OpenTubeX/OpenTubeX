@@ -25,7 +25,7 @@ for (const uiScale of [100, 125]) {
       await expect(overlay).toHaveCount(0)
 
       const setAvailable = value => page.evaluate(value => {
-        return document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        return window.$store
           .dispatch('updateShowLightsOffToggle', value)
       }, value)
       await setAvailable(true)
@@ -42,7 +42,7 @@ for (const uiScale of [100, 125]) {
         ['remix', 'ri:moon-line'],
       ]) {
         await page.evaluate(pack => {
-          return document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          return window.$store
             .dispatch('updateIconPack', pack)
         }, pack)
         const bundle = JSON.parse(readFileSync(new URL(`../../../src/renderer/icons/iconifyBundles/${pack}.json`, import.meta.url), 'utf8'))
@@ -90,7 +90,7 @@ for (const uiScale of [100, 125]) {
       await expectHoleMatchesPlayer()
 
       await page.evaluate(async () => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         await store.dispatch('updateScrollMiniPlayerEnabled', false)
         window.scrollTo(0, 120)
       })
@@ -110,7 +110,7 @@ for (const uiScale of [100, 125]) {
         return rect.top === 0 && rect.height === 0
       })).toBe(true)
       await page.evaluate(async () => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         await store.dispatch('updateScrollMiniPlayerEnabled', true)
         window.scrollTo(0, 0)
       })
@@ -137,7 +137,7 @@ for (const uiScale of [100, 125]) {
       await player.locator('.lights-off-button').click()
       await expect(overlay).toHaveCount(0)
       expect(await page.evaluate(tabId => {
-        return document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getTabLightsOff(tabId)
+        return window.$store.getters.getTabLightsOff(tabId)
       }, otherTabId)).toBe(false)
 
       await player.locator('.lights-off-button').click()
@@ -146,7 +146,7 @@ for (const uiScale of [100, 125]) {
       await firstTab.click({ button: 'middle' })
       await expect(overlay).toHaveCount(0)
       await expect.poll(() => page.evaluate(tabId => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         return Object.hasOwn(store.state.tabs.lightsOffByTabId, tabId)
       }, closedTabId)).toBe(false)
     })
@@ -154,7 +154,7 @@ for (const uiScale of [100, 125]) {
       await mockPlayableWatchPage(app, page)
       const video = await openMockedVideo(page)
       await video.evaluate(element => element.pause())
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await page.evaluate(() => window.$store
         .dispatch('updateShowLightsOffToggle', true))
       const player = page.locator(`${activeTab} .ftVideoPlayer`)
       await player.hover()

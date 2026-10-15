@@ -163,7 +163,7 @@ for (const mode of ['phone', 'tablet']) {
       await setWindowSize(app, page, { width: 760, height: 375 })
       const title = 'A very long video title '.repeat(100)
       await page.evaluate(title => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setTabContentTitle', { tabId: store.getters.getActiveTabId, title })
       }, title)
       await target.focus()

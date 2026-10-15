@@ -62,7 +62,7 @@ test.describe('full-window connection banner', () => {
         await page.evaluate(direction => { document.documentElement.dir = direction }, direction)
         for (const position of ['left', 'right', 'top', 'bottom']) {
           await page.evaluate(position => {
-            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            const store = window.$store
             store.commit('setTabBarPosition', position)
             store.commit('setVerticalTabBarWidth', 280)
           }, position)
@@ -82,7 +82,7 @@ test.describe('full-window connection banner', () => {
       // Wrapped translations and resizing must resize the reserved area too.
       await toggleFullWindow()
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setShowProgressBarToast', false)
         store.commit('setShowProgressBar', true)
       })
@@ -93,7 +93,7 @@ test.describe('full-window connection banner', () => {
       }
       await page.evaluate(() => {
         document.documentElement.style.removeProperty('--safe-area-inset-bottom')
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setShowProgressBar', false)
+        window.$store.commit('setShowProgressBar', false)
       })
       await banner.evaluate(element => { element.style.fontSize = '28px' })
       await page.setViewportSize({ width: 480, height: 800 })
@@ -111,7 +111,7 @@ for (const scale of [1, 1.25]) {
   test(`connection banner reserves page and settings space at UI scale ${scale}`, async ({ page }) => {
     await page.evaluate(scale => window.ftElectron.setZoomFactor(scale), scale)
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setTabBarPosition', 'left')
       // Exercise range clamping independently of responsive scroll anchoring.
       document.documentElement.style.overflowAnchor = 'none'
@@ -178,7 +178,7 @@ for (const scale of [1, 1.25]) {
     await expectValidScrollEnd()
     // Restore the narrow header's full width and reveal its quick settings.
     await page.evaluate(() => {
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setTabBarPosition', 'top')
+      window.$store.commit('setTabBarPosition', 'top')
       window.scrollTo(0, 0)
     })
     await page.setViewportSize({ width: 480, height: 800 })
@@ -315,7 +315,7 @@ test('sync connection status does not reserve global banner space', async ({ pag
     status.textContent = 'Connected as test user'
     element.append(status)
     document.documentElement.style.setProperty('--safe-area-inset-bottom', '24px')
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setShowProgressBarToast', false)
     store.commit('setShowProgressBar', true)
   })
@@ -365,7 +365,7 @@ for (const scale of [1, 1.25]) {
       for (const position of ['left', 'right', 'top', 'bottom']) {
         for (const width of [220, 280]) {
           await page.evaluate(({ position, width }) => {
-            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            const store = window.$store
             store.commit('setTabBarPosition', position)
             store.commit('setVerticalTabBarWidth', width)
           }, { position, width })
@@ -380,7 +380,7 @@ for (const scale of [1, 1.25]) {
       }
     }
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setTabBarPosition', 'left')
       document.querySelector('.app').requestFullscreen()
     })
@@ -549,7 +549,7 @@ test('connection status shares space with progress and hides offline in fullscre
     document.querySelector('.app').classList.add('capacitorPhoneLayout')
     Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
     window.dispatchEvent(new Event('offline'))
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setProgressBarMessage', 'A separate operation in progress')
     store.commit('setProgressBarIcon', ['fas', 'download'])
     store.commit('setShowProgressBar', true)

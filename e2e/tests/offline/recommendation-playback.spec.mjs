@@ -20,13 +20,13 @@ test('learns actual playback on pause without watch statistics and stops when di
   const watch = await page.evaluateHandle(findWatchComponent)
   await expect.poll(() => watch.evaluate(component => component.proxy.recommendationWatchSession?.seconds ?? 0)).toBeGreaterThan(2)
   await video.evaluate(element => element.pause())
-  const learned = () => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+  const learned = () => page.evaluate(() => window.$store
     .getters.getRecommendationRecords.find(record => record.videoId === 'jNQXAC9IVRw'))
   await expect.poll(async () => (await learned())?.watchSeconds ?? 0).toBeGreaterThan(2)
   const before = await learned()
   expect(before.lengthSeconds).toBeGreaterThan(0)
   expect(before.authorId).toBeTruthy()
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateEnableHomeRecommendations', false))
+  await page.evaluate(() => window.$store.dispatch('updateEnableHomeRecommendations', false))
   const start = await video.evaluate(element => { element.play(); return element.currentTime })
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(start + 2)
   await video.evaluate(element => element.pause())

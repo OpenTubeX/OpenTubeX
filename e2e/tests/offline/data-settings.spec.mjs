@@ -34,7 +34,7 @@ test('shows icons on data actions and vertically centers export choices', async 
 test('exports and imports search history through the unified ZIP', async ({ page }) => {
   const dataSection = await goToSettingsSection(page, 'data')
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateSearchHistoryEntry', { _id: 'backup-query', query: 'backup query', lastUpdatedAt: Date.now() })
     await store.dispatch('recordWatchTime', { date: '2026-09-26', seconds: 42 })
     window.backupArchive = null
@@ -51,7 +51,7 @@ test('exports and imports search history through the unified ZIP', async ({ page
   await expect.poll(() => page.evaluate(() => window.backupArchive?.size ?? 0)).toBeGreaterThan(0)
 
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('removeSearchHistoryEntry', 'backup-query')
     await store.dispatch('clearWatchStats')
     window.showOpenFilePicker = async () => [{
@@ -71,11 +71,11 @@ test('exports and imports search history through the unified ZIP', async ({ page
   await subpage.getByRole('button', { name: 'Import selected data' }).click()
 
   await expect.poll(() => page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return store.getters.getSearchHistoryEntries.some(entry => entry.query === 'backup query')
   })).toBe(true)
   await expect.poll(() => page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return store.getters.getWatchSecondsByDate['2026-09-26']
   })).toBe(42)
   await expect(page.locator('.toast', { hasText: 'Backup imported successfully' })).toBeVisible()
@@ -85,7 +85,7 @@ test('exports only selected backup categories and offers only those categories o
   await page.emulateMedia({ colorScheme: 'dark' })
   const dataSection = await goToSettingsSection(page, 'data')
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateSearchHistoryEntry', { _id: 'selected-query', query: 'selected backup query', lastUpdatedAt: Date.now() })
     window.backupArchive = null
     window.showSaveFilePicker = async () => {
@@ -116,7 +116,7 @@ test('exports only selected backup categories and offers only those categories o
   expect(data.searchHistory.some(entry => entry.query === 'selected backup query')).toBe(true)
 
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('removeSearchHistoryEntry', 'selected-query')
     await store.dispatch('recordWatchTime', { date: '2026-09-26', seconds: 81 })
     window.showOpenFilePicker = async () => [{
@@ -128,7 +128,7 @@ test('exports only selected backup categories and offers only those categories o
   await expect(choices.getByRole('checkbox', { name: 'Search history', exact: true })).toBeChecked()
   await choices.getByRole('button', { name: 'Import selected data' }).click()
   await expect.poll(() => page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return store.getters.getSearchHistoryEntries.some(entry => entry.query === 'selected backup query') &&
       store.getters.getWatchSecondsByDate['2026-09-26'] === 81
   })).toBe(true)
@@ -244,7 +244,7 @@ test('imports the members-only flag from exported watch history', async ({ page 
   })).toBeVisible()
   await expect(page.locator('.toast', { hasText: 'Unknown data key' })).toHaveCount(0)
   await expect.poll(() => page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return store.getters.getHistoryCacheById.member00001?.isMembersOnly
   })).toBe(true)
 })

@@ -35,7 +35,7 @@ for (const uiScale of [100, 125]) {
       await goToSettingsSection(page, 'playback')
       const content = page.locator('.settingsContent')
       const update = values => page.evaluate(async values => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         for (const [action, value] of Object.entries(values)) await store.dispatch(action, value)
       }, values)
       const scrollToBottom = async () => {

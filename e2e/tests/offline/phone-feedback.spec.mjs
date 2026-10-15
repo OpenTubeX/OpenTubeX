@@ -15,7 +15,7 @@ test('keeps the selected font radio at the start of the row', async ({ app, page
 
 test('centers radio text on its control in phone search filters', async ({ app, page }) => {
   await setWindowSize(app, page, { width: 480, height: 800 })
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSearchFilters'))
+  await page.evaluate(() => window.$store.dispatch('showSearchFilters'))
   const offset = await page.locator('.searchRadio label').first().evaluate(label => {
     const range = document.createRange()
     range.selectNodeContents(label)
@@ -68,7 +68,7 @@ test('keeps watch panels below the video with one heading', async ({ app, page }
 
 test('keeps the profile editor at its real bottom while scrolling', async ({ app, page }) => {
   await setWindowSize(app, page, { width: 480, height: 800 })
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow', 'profile'))
+  await page.evaluate(() => window.$store.dispatch('showSettingsWindow', 'profile'))
   await page.getByRole('button', { name: 'Create New Profile', exact: true }).click()
   const scroller = page.locator('.settingsSubpageScroll')
   await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
@@ -139,7 +139,7 @@ test('keeps landscape player options within the player in list and grid modes', 
   await openMockedVideo(page)
   await setWindowSize(app, page, { width: 1000, height: 480 })
   for (const grid of [false, true]) {
-    await page.evaluate(grid => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUsePlayerMenuGrid', grid), grid)
+    await page.evaluate(grid => window.$store.dispatch('updateUsePlayerMenuGrid', grid), grid)
     await page.locator('.shaka-overflow-menu-button').click({ force: true })
     const dialog = page.locator('.phonePlayerOptions[open]')
     await expect(dialog).toBeVisible()
@@ -166,7 +166,7 @@ for (const landscape of [false, true]) {
     await openMockedVideo(page)
     await setWindowSize(app, page, landscape ? { width: 1000, height: 480 } : { width: 480, height: 800 })
     await page.evaluate(async () => {
-      await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateScrollMiniPlayerEnabled', true)
+      await window.$store.dispatch('updateScrollMiniPlayerEnabled', true)
       window.scrollTo(0, document.body.scrollHeight)
     })
     await expect(page.locator('.ftVideoPlayer')).toHaveClass(/(?:^|\s)scrollMiniPlayer(?:\s|$)/)
@@ -193,7 +193,7 @@ for (const zoom of [1, 0.95]) {
     await setWindowSize(app, page, { width: 480, height: 800 })
     await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
     await page.evaluate(async () => {
-      await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateScrollMiniPlayerEnabled', true)
+      await window.$store.dispatch('updateScrollMiniPlayerEnabled', true)
       window.scrollTo(0, document.body.scrollHeight)
     })
     const player = page.locator('.ftVideoPlayer')
@@ -274,7 +274,7 @@ test('dragging a sheet up pauses playback and settings stay above it', async ({ 
   await page.mouse.up()
   await expect.poll(async () => (await sheet.boundingBox()).y).toBeLessThan(2)
   await expect.poll(() => page.locator('video').evaluate(video => video.paused)).toBe(true)
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow', 'profile'))
+  await page.evaluate(() => window.$store.dispatch('showSettingsWindow', 'profile'))
   expect(await page.locator('.settingsSubpageScroll').evaluate(el => {
     const box = el.getBoundingClientRect()
     return el.contains(document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2))
@@ -342,7 +342,7 @@ test('autoplay glyph stays within its original compact switch in both states and
   await page.locator('.shaka-overflow-menu-button').click({ force: true })
   const toggle = page.locator('.phonePlayerOptions[open] .autoplay-toggle')
   for (const roundness of [0, 50, 100, 200]) {
-    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), roundness)
+    await page.evaluate(value => window.$store.dispatch('updateUiRoundness', value), roundness)
     await expect(toggle.locator('.ft-autoplay-switch')).toHaveCSS('border-radius', '999px')
   }
   for (const direction of ['ltr', 'rtl']) {
@@ -430,12 +430,12 @@ test('comments fill the card width and keep their scrollbar at the panel edge', 
 })
 
 test('phone player menus have a fixed close control and equal centered tiles', async ({ app, page }) => {
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowDlnaCastButton', true))
+  await page.evaluate(() => window.$store.dispatch('updateShowDlnaCastButton', true))
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
   await setWindowSize(app, page, { width: 1000, height: 480 })
   for (const grid of [true, false]) {
-    await page.evaluate(grid => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUsePlayerMenuGrid', grid), grid)
+    await page.evaluate(grid => window.$store.dispatch('updateUsePlayerMenuGrid', grid), grid)
     await page.locator('.shaka-overflow-menu-button').click({ force: true })
     const dialog = page.locator('.phonePlayerOptions[open]')
     const close = dialog.getByRole('button', { name: 'Close', exact: true })
@@ -546,7 +546,7 @@ test('phone list menu keeps its scrollbar visible without mouse movement', async
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
   await setWindowSize(app, page, { width: 480, height: 800 })
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUsePlayerMenuGrid', false))
+  await page.evaluate(() => window.$store.dispatch('updateUsePlayerMenuGrid', false))
   await page.locator('.shaka-overflow-menu-button').click({ force: true })
   const dialog = page.locator('.phonePlayerOptions[open]')
   await dialog.locator('.shaka-overflow-menu').evaluate(el => { el.scrollTop = el.scrollHeight })
@@ -559,7 +559,7 @@ test('touching another list option clears an old hover highlight', async ({ app,
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
   await setWindowSize(app, page, { width: 480, height: 800 })
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUsePlayerMenuGrid', false))
+  await page.evaluate(() => window.$store.dispatch('updateUsePlayerMenuGrid', false))
   await page.locator('.shaka-overflow-menu-button').click({ force: true })
   const dialog = page.locator('.phonePlayerOptions[open]')
   const first = dialog.locator('.shaka-overflow-menu > button:visible').first()

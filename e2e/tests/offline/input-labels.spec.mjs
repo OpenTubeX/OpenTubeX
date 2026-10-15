@@ -64,7 +64,7 @@ test('the main search keeps its familiar placeholder without a visible label', a
     }, width)
     await expect.poll(() => page.evaluate(({ width, zoom }) => Math.abs(innerWidth - width / zoom), { width, zoom })).toBeLessThanOrEqual(1)
     for (const [locale, placeholder] of [['en-US', 'Search / Go to URL'], ['de-DE', 'Suchen / URL öffnen']]) {
-      await page.evaluate(locale => { document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale) }, locale)
+      await page.evaluate(locale => { window.$store.dispatch('updateCurrentLocale', locale) }, locale)
       const field = page.locator('.topNav .searchInput')
       if (!await field.isVisible()) await page.locator('.navSearchButton').click()
       const input = field.locator('input')
@@ -83,7 +83,7 @@ test('settings header search uses the shared field with its original placeholder
   for (const width of [1500, 480]) {
     await app.electronApp.evaluate(({ BrowserWindow }, width) => BrowserWindow.getAllWindows()[0].setBounds({ width, height: 1000 }), width)
     for (const [locale, placeholder] of [['en-US', 'Search settings'], ['de-DE', 'Einstellungen durchsuchen']]) {
-      await page.evaluate(locale => { document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale) }, locale)
+      await page.evaluate(locale => { window.$store.dispatch('updateCurrentLocale', locale) }, locale)
       const search = page.locator('.settingsSearch')
       const input = search.locator('input')
       await expect(input).toHaveAttribute('placeholder', placeholder)
@@ -122,7 +122,7 @@ test('settings fields retain labels and compact search overlays retain their pla
 
 test('credentials and native theme fields offer hints while retaining their labels', async ({ page }) => {
   await page.evaluate(() => Object.assign(
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.settings,
+    window.$store.state.settings,
     { useProxy: true, proxyProtocol: 'http', syncServerEnabled: true, enableScreenshot: true }
   ))
   const advanced = await goToSettingsSection(page, 'advanced')

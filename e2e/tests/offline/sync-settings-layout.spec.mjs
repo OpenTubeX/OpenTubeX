@@ -29,7 +29,7 @@ for (const uiScale of [100, 125]) {
       await expect(page.locator('body')).toHaveClass(/dark/)
       const section = await goToSettingsSection(page, 'sync')
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setSyncServerWatchStatsSupported', true)
         store.commit('setSyncServerLiveRemindersSupported', true)
       })

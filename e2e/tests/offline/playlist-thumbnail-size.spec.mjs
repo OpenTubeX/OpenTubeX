@@ -50,7 +50,7 @@ for (const [thumbnailSize, playlistThumbnailSize] of [[150, undefined], [150, 80
       const expectedSize = playlistThumbnailSize ?? thumbnailSize ?? 100
       let appearance = await goToSettingsSection(page, 'appearance')
       await expect(appearance.getByRole('slider', { name: /^Playlist Thumbnail Size:/ })).toHaveValue(String(expectedSize))
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateThumbnailSize', 60))
+      await page.evaluate(() => window.$store.dispatch('updateThumbnailSize', 60))
       await expect.poll(async () => latestSettings(await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')).playlistThumbnailSize).toBe(expectedSize)
       const relaunched = await app.relaunch()
       appearance = await goToSettingsSection(relaunched.page, 'appearance')
@@ -114,7 +114,7 @@ for (const uiScale of [100, 95]) {
     for (const view of ['list', 'grid']) {
       test(`sizes ${view} thumbnails independently and saves the setting`, async ({ app, page }, testInfo) => {
         await openPlaylist(page)
-        await page.evaluate(view => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updatePlaylistViewType', view), view)
+        await page.evaluate(view => window.$store.dispatch('updatePlaylistViewType', view), view)
         await expect(page.locator('.playlistPage')).toHaveClass(new RegExp(`\\b${view}\\b`))
         const defaultWidth = await thumbnailWidth(page)
 
@@ -152,7 +152,7 @@ for (const uiScale of [100, 95]) {
     test('keeps the full playlist sizing range when phones force list view', async ({ app, page }) => {
       await openPlaylist(page)
       await page.evaluate(async () => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         await store.dispatch('updateListType', 'grid')
         await store.dispatch('updatePlaylistViewType', 'grid')
         await store.dispatch('updateThumbnailSize', 180)
@@ -187,7 +187,7 @@ for (const uiScale of [100, 95]) {
       await openPlaylist(page)
       await page.emulateMedia({ reducedMotion: 'reduce' })
       const update = changes => page.evaluate(async changes => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         for (const [key, value] of Object.entries(changes)) await store.dispatch(key, value)
       }, changes)
       const scrollToBottom = async () => {

@@ -211,7 +211,7 @@ test('More sheet clamps bottom scrolling after resize and removing navigation en
   await page.setViewportSize({ width: 375, height: 375 })
   await bottom()
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setNavigationItems', store.getters.getNavigationItems.filter(id => id !== 'stats'))
   })
   await clamped()
@@ -243,7 +243,7 @@ test('sheet dismissal uses the release position when the last touchmove is coale
 
 test('dragging during entry takes over from the current visual position', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 })
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAnimationSpeed', 25))
+  await page.evaluate(() => window.$store.dispatch('updateAnimationSpeed', 25))
   await page.locator('.moreOptionNav').click()
   const menu = page.locator('.moreOptionContainer')
   const movement = await menu.evaluate(element => {
@@ -275,7 +275,7 @@ test('More sheet closes and releases modal state when leaving mobile layout', as
   await expect(page.locator('.moreOptionNav')).toBeHidden()
   await expect(menu).toHaveCount(0)
   await expect.poll(() => page.evaluate(() => document.documentElement.style.overflow)).toBe(originalOverflow)
-  await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.isAnyPromptOpen)).toBe(false)
+  await expect.poll(() => page.evaluate(() => window.$store.getters.isAnyPromptOpen)).toBe(false)
   await expect(page.locator('.sideNav')).toHaveJSProperty('inert', false)
 })
 
@@ -495,7 +495,7 @@ test('More sheet ignores Tab during exit and restores focus trapping after reope
   await page.setViewportSize({ width: 375, height: 812 })
   // Slow the existing animation setting so real key input can reliably land
   // inside the retained exit interval even on a busy runner.
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAnimationSpeed', 25))
+  await page.evaluate(() => window.$store.dispatch('updateAnimationSpeed', 25))
   const trigger = page.locator('.moreOptionNav')
   const menu = page.locator('.moreOptionContainer')
   await trigger.click()

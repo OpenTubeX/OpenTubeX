@@ -91,7 +91,7 @@ for (const uiScale of [95, 125]) {
       await expect(toolbar).toContainText('2 selected')
       await page.locator('.bulkFeedTypeSettings').getByRole('checkbox', { name: 'Videos', exact: true }).click()
       await expect.poll(() => page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         return store.getters.getProfileList[0].subscriptions
           .filter(channel => channel.feedTypes && !channel.feedTypes.includes('videos'))
           .map(channel => channel.name)
@@ -139,7 +139,7 @@ for (const uiScale of [95, 125]) {
       await loadMore.click()
       await scrollToBottom()
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         const profile = store.state.profiles.profileList[0]
         profile.subscriptions = profile.subscriptions.filter(channel => channel.name === 'Channel 000')
       })

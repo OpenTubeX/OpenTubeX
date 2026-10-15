@@ -23,7 +23,7 @@ test('stops showing the auto-load spinner when search results are exhausted', as
   }
 
   await page.evaluate((settings) => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const result = {
       type: 'video',
       videoId: 'pagination-test',
@@ -65,7 +65,7 @@ test('stops showing the auto-load spinner when search results are exhausted', as
 
 test('explains when a search returns no results', async ({ page }) => {
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('addToSessionSearchHistory', {
       query: 'empty search',
       data: [],
@@ -150,7 +150,7 @@ for (const uiScale of [100, 95]) {
     await page.emulateMedia({ colorScheme })
     await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
     await page.evaluate(async scale => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateUiScale', scale)
     }, uiScale)
     const requests = await mockSearchPages(page)
@@ -174,7 +174,7 @@ test('waits for scrolling when a search continuation fills the viewport', async 
   await page.locator(sel.searchInput).press('Enter')
 
   await expect.poll(() => page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return store.getters.getSessionSearchHistory.find(search => search.query === 'search pagination regression')?.data.length
   })).toBe(31)
   const pagination = page.locator('.ft-auto-load-next-page-wrapper')
@@ -191,7 +191,7 @@ test('waits for scrolling when a search continuation fills the viewport', async 
 
 test('keeps pagination manual when automatic loading is disabled', async ({ page }) => {
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateGeneralAutoLoadMorePaginatedItemsEnabled', false)
   })
   const requests = await mockSearchPages(page)
@@ -216,7 +216,7 @@ test('keeps pagination manual when automatic loading is disabled', async ({ page
 for (const uiScale of [100, 95]) {
   test(`resumes pagination after an equally sized cached search replacement at ${uiScale}% UI scale`, async ({ page, attachScreenshot }) => {
     await page.evaluate(async scale => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateUiScale', scale)
     }, uiScale)
     const requests = await mockSearchPages(page)
@@ -239,7 +239,7 @@ for (const uiScale of [100, 95]) {
       await expect(page.getByText('Pagination result 1', { exact: true })).toBeVisible()
 
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         const history = store.getters.getSessionSearchHistory.find(search => search.query === 'search pagination regression')
         const continuation = JSON.parse(history.nextPageRef)
         continuation.payload.token = 'replacement-page-2'

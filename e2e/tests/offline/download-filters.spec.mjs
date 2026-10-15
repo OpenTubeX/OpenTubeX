@@ -75,12 +75,12 @@ test.describe('completed download filters', () => {
     await expect(filters).toBeVisible()
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       for (const id of [1, 2, 3]) store.commit('removeYtDlpDownload', id)
     })
     await expect(filters).toHaveCount(0)
     await page.evaluate(download => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('upsertYtDlpDownload', download)
     }, records[0])
     await expect(toggleFilters).toBeVisible()
@@ -91,7 +91,7 @@ test.describe('completed download filters', () => {
     await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
     await goTo(page, 'downloads')
     await page.evaluate((file) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       for (let id = 4; id < 34; id++) {
         store.commit('upsertYtDlpDownload', {
           id,
@@ -158,7 +158,7 @@ test.describe('completed download filters', () => {
 
     await scrollDown()
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       for (let id = 2; id < 34; id++) store.commit('removeYtDlpDownload', id)
     })
     await expectClamped()

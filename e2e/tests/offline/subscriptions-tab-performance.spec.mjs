@@ -50,7 +50,7 @@ test('opens background videos promptly from a large subscriptions feed', async (
   await expect(page.locator('.newTabThumbnailMorph')).toHaveCount(0)
   await expect(page.locator('.feed-enter-active, .feed-enter-from, .feed-move')).toHaveCount(0)
   await expect.poll(() => page.evaluate(id => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return JSON.parse(store.getters.getSubscriptionSeenVideos)
       .some(entry => entry.videoId === id && entry.seenAt > (entry.unseenAt ?? 0))
   }, warmVideoId)).toBe(true)
@@ -58,7 +58,7 @@ test('opens background videos promptly from a large subscriptions feed', async (
   await session.send('Emulation.setCPUThrottlingRate', { rate: 4 })
   for (const reducedMotion of ['off', 'on']) {
     await page.evaluate(async value => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateReducedMotion', value)
     }, reducedMotion)
     for (let index = 0; index < 3; index++) {
@@ -94,7 +94,7 @@ test('opens background videos promptly from a large subscriptions feed', async (
       expect.soft(metrics.longestFrame).toBeLessThan(250)
       await expect(page.locator('.newTabThumbnailMorph')).toHaveCount(0)
       await expect.poll(() => page.evaluate(id => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         return JSON.parse(store.getters.getSubscriptionSeenVideos)
           .some(entry => entry.videoId === id && entry.seenAt > (entry.unseenAt ?? 0))
       }, videoId)).toBe(true)

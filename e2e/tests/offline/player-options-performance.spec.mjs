@@ -78,7 +78,7 @@ for (const usePlayerMenuGrid of [true, false]) {
         for (const scale of [1, 1.25]) {
           await app.electronApp.evaluate(({ BrowserWindow }, value) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(value), scale)
           for (const frosted of [true, false]) {
-            await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+            await page.evaluate(value => window.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
             // Let track loading, font and theme updates settle before measuring.
             await page.waitForTimeout(1000)
             const rows = await menu.evaluateHandle(element => [...element.querySelectorAll('.audio-tracks > button, .shaka-text-languages > button')])

@@ -19,8 +19,7 @@ async function openPlaylist(page) {
 }
 
 async function updateSetting(page, action, value) {
-  await page.evaluate(({ action, value }) => document.querySelector('#app').__vue_app__
-    .config.globalProperties.$store.dispatch(action, value), { action, value })
+  await page.evaluate(({ action, value }) => window.$store.dispatch(action, value), { action, value })
 }
 
 async function resize(app, page, width, uiScale) {
@@ -160,7 +159,7 @@ for (const uiScale of [100, 125]) {
         await expect(page.locator('.playlistItemsCard')).toHaveCSS('padding-top', '3px', { timeout: 1000 })
       }
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setAllPlaylists', [{ ...store.getters.getPlaylist('rounded-playlist'), videos: [] }])
       })
       await expect(page.locator('.playlistItemsCard .message')).toContainText('This playlist currently has no videos.')

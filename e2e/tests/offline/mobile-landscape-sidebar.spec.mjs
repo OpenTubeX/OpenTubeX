@@ -55,7 +55,7 @@ for (const uiScale of [100, 125]) {
       await inner.evaluate(element => { element.scrollTop = element.scrollHeight })
       // Updating keyboard outlines also rerenders Vue-managed layout classes.
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setOutlinesHidden', !store.getters.getOutlinesHidden)
       })
       await app.electronApp.evaluate(({ BrowserWindow }, scale) => {

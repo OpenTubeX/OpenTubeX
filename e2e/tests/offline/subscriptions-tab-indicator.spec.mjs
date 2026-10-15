@@ -103,7 +103,7 @@ test.describe('subscriptions feed tab indicator', () => {
       }, width)
       for (const roundness of [0, 50, 100, 200]) {
         await page.evaluate(value => {
-          document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
+          window.$store.commit('setUiRoundness', value)
         }, roundness)
         for (const selector of ['.tabs [role="tab"][aria-selected="true"]', '.newFeedTabs [role="tab"][aria-selected="true"]']) {
           await expectTabHighlightAligned(page.locator(selector))
@@ -117,7 +117,7 @@ test.describe('subscriptions feed tab indicator', () => {
     await page.evaluate(async () => {
       localStorage.setItem('Subscriptions/currentTab', 'videos')
 
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateHideSubscriptionsVideos', true)
     })
 
@@ -274,7 +274,7 @@ test.describe('subscriptions feed tab indicator', () => {
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await expect(page.locator('#subscriptionsPanel.newFeed')).toBeVisible()
     await page.evaluate(channelId => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const replacement = {
         ...store.getters.getVideoCache[channelId].videos[0],
         videoId: 'background-update',
@@ -380,7 +380,7 @@ test.describe('subscriptions feed tab indicator', () => {
     await page.locator(sel.newTabButton).click()
     await goTo(page, 'settings')
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateHideSubscriptionsVideos', true)
     })
 
@@ -398,7 +398,7 @@ test.describe('subscriptions feed tab indicator', () => {
 
     await expect(page.getByText('video video 000')).toBeVisible()
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
 
       document.querySelector('[data-subscription-feed-tab="shorts"]').click()
       await Promise.all([

@@ -95,7 +95,7 @@ test('holding a subscription tab opens its mobile bottom menu without selecting 
     bubbles: true, cancelable: true, pointerType: 'touch'
   })))
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     window.__mobileFeedRefreshStarted = false
     store.watch(state => state.subscriptionCache.subscriptionFeedRefreshInProgress, refreshing => {
       if (refreshing) window.__mobileFeedRefreshStarted = true
@@ -112,7 +112,7 @@ test('a mobile Cancel Refresh action never reloads after the refresh finishes', 
   await goTo(page, 'subscriptions')
   await page.route(/^https?:\/\//, abortUnmockedRequest)
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setSubscriptionFeedRefreshInProgress', true)
   })
   await app.electronApp.evaluate(({ ipcMain }) => {
@@ -129,7 +129,7 @@ test('a mobile Cancel Refresh action never reloads after the refresh finishes', 
   const cancel = page.locator('.mobileLinkActions').getByRole('menuitem', { name: 'Cancel Refresh', exact: true })
   await expect(cancel).toBeVisible()
   await page.evaluate(() => {
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    window.$store
       .commit('setSubscriptionFeedRefreshInProgress', false)
   })
   await cancel.click()

@@ -16,7 +16,7 @@ async function toggleSettingsFromPreferences(app) {
 async function expectPromptResourcesReleased(page) {
   await expect.poll(() => page.evaluate(() => document.documentElement.style.overflow)).not.toBe('hidden')
   await expect.poll(() => page.evaluate(() => (
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.isAnyPromptOpen
+    window.$store.getters.isAnyPromptOpen
   ))).toBe(false)
 }
 
@@ -126,7 +126,7 @@ for (const uiScale of [100, 125]) {
       await passwordInput.press('Enter')
       await goToSettingsSection(page, 'sync')
       await page.evaluate(() => {
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setSyncServerError', 'Visible sync error')
+        window.$store.commit('setSyncServerError', 'Visible sync error')
       })
       await expect(page.locator('.toast', { hasText: 'Visible sync error' })).toHaveCount(0)
       await page.locator('.settingsCloseButton').click()
@@ -135,7 +135,7 @@ for (const uiScale of [100, 125]) {
       await expect(passwordInput).toBeFocused()
       await expect(page.locator('.section[data-section="sync"]')).toBeHidden()
       await page.evaluate(() => {
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setSyncServerError', 'Locked sync error')
+        window.$store.commit('setSyncServerError', 'Locked sync error')
       })
       await expect(page.locator('.toast', { hasText: 'Locked sync error' })).toBeVisible()
     })
@@ -191,7 +191,7 @@ for (const uiScale of [100, 125]) {
         let popup
         if (overlay === 'icon') {
           await page.evaluate(() => {
-            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            const store = window.$store
             store.commit('setChannelPlaybackSpeeds', JSON.stringify({ UCaaaaaaaaaaaaaaaaaaaaaa: 1.5 }))
             store.commit('setRememberVolumePerChannel', true)
           })
@@ -282,7 +282,7 @@ for (const uiScale of [100, 125]) {
         await expect(page.locator('.settingsWindow')).toBeHidden()
         if (opener === 'header') {
           await page.evaluate(() => {
-            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            const store = window.$store
             store.commit('setSyncServerStatus', 'syncing')
           })
           await page.locator('.topNav .syncIndicator').click()
@@ -341,7 +341,7 @@ for (const uiScale of [100, 125]) {
         await page.locator('.settingsCloseButton').click()
         await goTo(page, 'settings')
         await expect(passwordInput).toBeFocused()
-        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showKeyboardShortcutPrompt'))
+        await page.evaluate(() => window.$store.dispatch('showKeyboardShortcutPrompt'))
         await page.keyboard.press('Control+k')
         await page.getByRole('combobox', { name: 'Search commands' }).fill('thumbnail preference')
         await page.getByRole('option', { name: /Thumbnail Preference/ }).click()
@@ -382,7 +382,7 @@ for (const uiScale of [100, 125]) {
           await page.locator('.profileTrigger').click()
           await page.locator('.quickSettingsMenu').getByRole('button', { name: /^Keyboard shortcuts$/i }).click()
         }
-        await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getIsKeyboardShortcutPromptShown)).toBe(true)
+        await expect.poll(() => page.evaluate(() => window.$store.getters.getIsKeyboardShortcutPromptShown)).toBe(true)
         await expect(themeName).toHaveValue('Unfinished theme')
         await expect(themeName).toBeHidden()
         await expect(page.locator('.settingsKeyboardShortcutPage')).toHaveCount(0)
@@ -403,7 +403,7 @@ for (const uiScale of [100, 125]) {
         await expect(page.locator('.settingsWindow')).toBeHidden()
         await goTo(page, 'settings')
         await expect(passwordInput).toBeFocused()
-        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showKeyboardShortcutPrompt'))
+        await page.evaluate(() => window.$store.dispatch('showKeyboardShortcutPrompt'))
         await expect(themeName).toHaveValue('Unfinished theme')
         await passwordInput.fill(password)
         await passwordInput.press('Enter')
@@ -441,7 +441,7 @@ for (const uiScale of [100, 125]) {
       await page.locator('.settingsCloseButton').click()
       await goTo(page, 'settings')
       await expect(passwordInput).toBeFocused()
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showKeyboardShortcutPrompt'))
+      await page.evaluate(() => window.$store.dispatch('showKeyboardShortcutPrompt'))
       await page.keyboard.press('Control+k')
       await page.getByRole('combobox', { name: 'Search commands' }).fill('general settings')
       await page.locator('[role="option"][id$="-settings-general"]').click()
@@ -534,7 +534,7 @@ for (const uiScale of [100, 125]) {
 
     test('keeps standalone Downloads pickers available with a Settings password', async ({ page }) => {
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('upsertYtDlpDownload', {
           id: 1,
           title: 'Downloaded video',
@@ -593,7 +593,7 @@ for (const uiScale of [100, 125]) {
         await expect(page.locator('.settingsPassword')).toHaveCount(0)
         const sync = await goToSettingsSection(page, 'sync')
         await page.evaluate(() => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           store.commit('setSyncServerUrl', '')
           store.commit('setSyncServerToken', 'test-token')
           store.commit('setSyncServerLiveSupported', true)
@@ -652,7 +652,7 @@ for (const uiScale of [100, 125]) {
       await passwordInput.press('Enter')
       const sync = await goToSettingsSection(page, 'sync')
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setSyncServerUrl', '')
         store.commit('setSyncServerToken', 'test-token')
         store.commit('setSyncServerEnabled', true)
@@ -730,7 +730,7 @@ for (const uiScale of [100, 125]) {
         await passwordInput.press('Enter')
         const sync = await goToSettingsSection(page, 'sync')
         await page.evaluate(() => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           const dispatch = store.dispatch.bind(store)
           store.dispatch = (action, ...args) => {
             if (action !== 'syncWithSyncServer') return dispatch(action, ...args)
@@ -877,7 +877,7 @@ for (const uiScale of [100, 125]) {
             const scrollTop = await content.evaluate(element => element.scrollTop)
             if (view === 'downloads') await page.keyboard.press('Control+j')
             else {
-              await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow', 'about'))
+              await page.evaluate(() => window.$store.dispatch('showSettingsWindow', 'about'))
             }
             await expect(page.locator(view === 'downloads' ? '.settingsDownloadsPage' : '.settingsAboutPage')).toBeVisible()
             await expect(category).toBeHidden()

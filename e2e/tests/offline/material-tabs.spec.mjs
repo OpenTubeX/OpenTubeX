@@ -25,7 +25,7 @@ test('shared tabs crossfade between selections and snap after layout changes', a
   const aligned = () => expectTabHighlightAligned(selected)
   await aligned()
   for (const scale of [100, 95, 125]) {
-    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+    await page.evaluate(value => window.$store.dispatch('updateUiScale', value), scale)
     await aligned()
     for (const name of ['Storage', 'Data']) {
       expect(await selectTabWithHighlightAnimation(tabs.getByRole('tab', { name, exact: true }))).toEqual(
@@ -51,11 +51,11 @@ test('shared tabs crossfade between selections and snap after layout changes', a
   await aligned()
   await expect.poll(() => selected.evaluate(tabHighlightAnimations)).toEqual([])
   await page.emulateMedia({ reducedMotion: 'reduce' })
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'system'))
+  await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'system'))
   await tabs.getByRole('tab', { name: 'Data', exact: true }).click()
   await aligned()
   await expect.poll(() => selected.evaluate(tabHighlightAnimations)).toEqual([])
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'off'))
+  await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'off'))
   expect(await selectTabWithHighlightAnimation(tabs.getByRole('tab', { name: 'Storage', exact: true }))).not.toBeNull()
   await aligned()
 })
@@ -64,7 +64,7 @@ test('connected segments stay joined in compact, RTL, and fractional-scale layou
   await goToSettingsSection(page, 'data')
   const tabs = page.getByRole('tablist', { name: 'Data & Storage' })
   await expect(tabs).toHaveClass(/segmented/)
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', 95))
+  await page.evaluate(() => window.$store.dispatch('updateUiScale', 95))
   for (const size of [{ width: 1200, height: 800 }, { width: 375, height: 812 }]) {
     await setWindowSize(app, page, size)
     for (const direction of ['ltr', 'rtl']) {

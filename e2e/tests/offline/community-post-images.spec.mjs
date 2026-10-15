@@ -167,7 +167,7 @@ test.describe('community post images', () => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="posts"]').click()
     for (const listType of ['list', 'grid']) {
-      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setListType', value), listType)
+      await page.evaluate(value => window.$store.commit('setListType', value), listType)
       await page.mouse.move(0, 0)
       await page.evaluate(() => document.activeElement?.blur())
       const post = page.locator('.ft-list-post').first()
@@ -186,14 +186,14 @@ test.describe('community post images', () => {
 
     const post = page.locator('.ft-list-post').filter({ hasText: 'Multi image community post' })
     await expect(post).toBeVisible()
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(
+    await page.evaluate(() => window.$store.dispatch(
       'updateForbiddenTitles', JSON.stringify(['Channel B'])
     ))
     await expect(post).toHaveCount(0)
 
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateEnableBlockLists', false))
+    await page.evaluate(() => window.$store.dispatch('updateEnableBlockLists', false))
     await expect(post).toBeVisible()
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateEnableBlockLists', true))
+    await page.evaluate(() => window.$store.dispatch('updateEnableBlockLists', true))
     await expect(post).toHaveCount(0)
   })
 
@@ -204,7 +204,7 @@ test.describe('community post images', () => {
     await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
 
     await page.evaluate(async (posts) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateEnableBlockLists', false)
       await store.dispatch('updateForbiddenTitles', JSON.stringify(['Channel B']))
       await store.dispatch('updateSubscriptionPostsCacheByChannel', {
@@ -222,7 +222,7 @@ test.describe('community post images', () => {
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(100)
 
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateEnableBlockLists', true))
+    await page.evaluate(() => window.$store.dispatch('updateEnableBlockLists', true))
     await expect(page.locator('.ft-list-post')).toHaveCount(0)
     await expect.poll(() => page.evaluate(() => ({
       scrollY: window.scrollY,

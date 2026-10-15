@@ -440,7 +440,7 @@ test.describe('download opened without a connection', () => {
       }
     }))
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await Promise.all([
         store.dispatch('updateBackendPreference', 'invidious'),
         store.dispatch('updateDefaultInvidiousInstance', 'https://invidious.test'),
@@ -475,7 +475,7 @@ test.describe('download opened without a connection', () => {
       json: { error: 'Instance unavailable' }
     }))
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await Promise.all([
         store.dispatch('updateBackendPreference', 'invidious'),
         store.dispatch('updateDefaultInvidiousInstance', 'https://invidious.test'),

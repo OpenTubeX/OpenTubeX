@@ -30,7 +30,7 @@ for (const uiScale of [100, 125]) {
       await openSettings(page)
       const categories = page.locator('.sponsorBlockCategory')
       for (const locale of ['en-US', 'de-DE']) {
-        await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)
+        await page.evaluate(locale => window.$store.dispatch('updateCurrentLocale', locale), locale)
         for (const value of ['promptToSkip', 'showInSeekBar']) {
           await categories.locator('.nativeSelect').evaluateAll((selects, value) => {
             for (const select of selects.filter(select => Array.from(select.options).some(option => option.value === value))) {
