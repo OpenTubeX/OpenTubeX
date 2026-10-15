@@ -188,22 +188,24 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
   OpenTubeX supports [Keep Android Open](https://keepandroidopen.org/) and will never be available on the Google Play Store.
 * iOS / iPadOS (experimental): requires 17.4 or later. See the [installation and update instructions](https://opentubex.org/docs/installing/#ios--ipados-experimental).
 
-<a href="https://snapcraft.io/opentubex">
-  <picture>
-    <source media="(prefers-color-scheme: light)" srcset="https://snapcraft.io/en/light/install.svg">
-    <source media="(prefers-color-scheme: dark)" srcset="https://snapcraft.io/en/dark/install.svg">
-    <img alt="Get it from the Snap Store" src="https://snapcraft.io/en/dark/install.svg" width="188" height="56" align="middle">
-  </picture>
-</a>
-<a href="https://flatpark.org/apps/org.opentubex.OpenTubeX/">
-  <img alt="Get it on FlatPark" src="https://flatpark.org/badges/get-it-on-flatpark.svg" width="154" height="56" align="middle">
-</a>
-<a href="https://fdroid.opentubex.org/">
-  <img alt="Get it on F-Droid" src="docs/badges/fdroid.png" width="188" height="56" align="middle">
-</a>
-<a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/OpenTubeX/OpenTubeX">
-  <img alt="Get it on Obtainium" src="docs/badges/obtainium.png" width="188" height="56" align="middle">
-</a>
+<p>
+  <a href="https://snapcraft.io/opentubex">
+    <picture>
+      <source media="(prefers-color-scheme: light)" srcset="https://snapcraft.io/en/light/install.svg">
+      <source media="(prefers-color-scheme: dark)" srcset="https://snapcraft.io/en/dark/install.svg">
+      <img alt="Get it from the Snap Store" src="https://snapcraft.io/en/dark/install.svg" width="188" height="56">
+    </picture>
+  </a>
+  <a href="https://flatpark.org/apps/org.opentubex.OpenTubeX/">
+    <img alt="Get it on FlatPark" src="https://flatpark.org/badges/get-it-on-flatpark.svg" width="154" height="56">
+  </a>
+  <a href="https://fdroid.opentubex.org/">
+    <img alt="Get it on F-Droid" src="docs/badges/fdroid.png" width="188" height="56">
+  </a>
+  <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/OpenTubeX/OpenTubeX">
+    <img alt="Get it on Obtainium" src="docs/badges/obtainium.png" width="188" height="56">
+  </a>
+</p>
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/opentubex.svg)](https://repology.org/project/opentubex/versions)
 <br />
