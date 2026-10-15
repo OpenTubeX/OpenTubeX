@@ -61,7 +61,8 @@ public final class AndroidLocalNetworkPlugin extends Plugin {
         // proxy, so never resolve a destination that belongs to the proxy's DNS.
         boolean required = host == null;
         if (host != null) {
-            if (host.toLowerCase(Locale.ROOT).endsWith(".local")) required = true;
+            String normalizedHost = host.endsWith(".") ? host.substring(0, host.length() - 1) : host;
+            if (normalizedHost.toLowerCase(Locale.ROOT).endsWith(".local")) required = true;
             else try {
                 for (InetAddress address : InetAddress.getAllByName(host)) {
                     if (isLocalNetwork(address) || isOnLinkIpv6(address)) { required = true; break; }

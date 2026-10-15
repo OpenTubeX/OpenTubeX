@@ -72,7 +72,7 @@ public class AndroidLocalNetworkPluginTest {
         assumeTrue(ContextCompat.checkSelfPermission(InstrumentationRegistry.getInstrumentation().getTargetContext(),
             Manifest.permission.ACCESS_LOCAL_NETWORK) != PackageManager.PERMISSION_GRANTED);
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
-            for (String hostname : new String[]{"127.0.0.1", "NAS.LOCAL", "100.64.0.1", "2606:4700:4700::1111"}) {
+            for (String hostname : new String[]{"127.0.0.1", "NAS.LOCAL", "NAS.LOCAL.", "100.64.0.1", "2606:4700:4700::1111"}) {
                 CompletableFuture<JSObject> result = new CompletableFuture<>();
                 scenario.onActivity(activity -> {
                     Thread caller = Thread.currentThread();
