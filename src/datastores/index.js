@@ -22,8 +22,11 @@ let createDatastore
 
 if (process.env.IS_ELECTRON_MAIN) {
   const { app } = require('electron')
-  const { createDesktopDatastore, desktopDatastorePaths } = require('./sqliteNode.js')
+  const { join } = require('path')
+  const { createDesktopDatastore, createWorkerDrivers, desktopDatastorePaths } = require('./sqliteNode.js')
   const userDataPath = app.getPath('userData') // This is based on the user's OS
+  // Disk syncs run in a worker thread, so they never stall windows and menus.
+  const createDriver = createWorkerDrivers(join(__dirname, 'sqliteNodeWorker.js'))
   dbPath = (dbName) => desktopDatastorePaths(userDataPath, dbName).legacy
 
   // Each NeDB file is imported on first use and left in place for older versions.
@@ -33,6 +36,7 @@ if (process.env.IS_ELECTRON_MAIN) {
       ...options[name],
       // The notice about older versions' changes points to the profile folder.
       backupDirectory: userDataPath,
+      createDriver,
       onLegacyChanges: change => legacyChangeListeners.forEach(listener => listener({ name, ...change })),
     })
   }

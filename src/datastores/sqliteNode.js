@@ -1,77 +1,60 @@
 import { createHash } from 'node:crypto'
 import { createReadStream, existsSync, lstatSync, readlinkSync, realpathSync, rmSync, statSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
-import { DatabaseSync } from 'node:sqlite'
+import { Worker } from 'node:worker_threads'
 import Datastore from '@seald-io/nedb'
 import { SqliteDatastore } from './sqlite.js'
+import { createNodeSqliteDriver } from './sqliteNodeDriver.js'
+
+export { createNodeSqliteDriver }
 
 /**
- * Electron's built-in SQLite. Statements run synchronously in the main
- * process, so every batch is a single uninterrupted step.
- * @param {string} filename
- * @param {string} [backupDirectory] where backups go, beside the database by default
- * @returns {import('./sqlite.js').SqliteDriver}
+ * Runs every desktop database in one worker thread, so slow disk syncs never
+ * block the main process, which also handles windows and menus.
+ * @param {string | URL} workerPath the bundled sqliteNodeWorker.js
+ * @returns {(filename: string, backupDirectory?: string) => import('./sqlite.js').SqliteDriver}
  */
-export function createNodeSqliteDriver(filename, backupDirectory = dirname(filename)) {
-  let db = null
-  const statements = new Map()
+export function createWorkerDrivers(workerPath) {
+  let worker = null
+  let nextId = 0
+  const pending = new Map()
 
-  function open() {
-    if (db) return db
-    db = new DatabaseSync(filename)
-    db.exec('PRAGMA busy_timeout = 5000')
-    // Takes effect only before the first table exists. Compaction can then
-    // release free pages without rewriting the whole database. Each sync can
-    // stall the main process on a busy disk, so this header write skips its
-    // own: switching to the write-ahead log rewrites and syncs the header.
-    db.exec('PRAGMA synchronous = OFF')
-    db.exec('PRAGMA auto_vacuum = INCREMENTAL')
-    // Every committed write survives power loss.
-    db.exec('PRAGMA synchronous = FULL')
-    if (filename !== ':memory:') db.exec('PRAGMA journal_mode = WAL')
-    return db
+  function fail(error) {
+    worker = null
+    for (const request of pending.values()) request.reject(error)
+    pending.clear()
   }
 
-  function prepare(sql) {
-    let statement = statements.get(sql)
-    if (!statement) {
-      statement = open().prepare(sql)
-      // Row objects cost several times more to create than parsing their JSON.
-      statement.setReturnArrays(true)
-      statements.set(sql, statement)
+  function call(message) {
+    if (!worker) {
+      worker = new Worker(workerPath)
+      worker.on('message', ({ id, result, error }) => {
+        const request = pending.get(id)
+        pending.delete(id)
+        if (error === undefined) request.resolve(result)
+        else request.reject(Object.assign(new Error(error.message), { code: error.code }))
+      })
+      worker.on('error', fail)
+      worker.on('exit', code => fail(new Error(`Library worker exited with code ${code}`)))
+      // After the listeners, which would reference it again. Quitting waits
+      // for pending writes through each datastore's queue instead.
+      worker.unref()
     }
-    return statement
+    return new Promise((resolve, reject) => {
+      const id = nextId++
+      pending.set(id, { resolve, reject })
+      worker.postMessage({ id, ...message })
+    })
   }
 
-  function close() {
-    db?.close()
-    db = null
-    statements.clear()
-  }
-
-  return {
-    async execute(list, transaction = false) {
-      open()
-      if (transaction) db.exec('BEGIN IMMEDIATE')
-      try {
-        const results = list.map(([sql, params = []]) => prepare(sql).all(...params))
-        if (transaction) db.exec('COMMIT')
-        return results
-      } catch (error) {
-        if (transaction && db.isTransaction) db.exec('ROLLBACK')
-        throw error
-      }
-    },
-    async backup() {
-      const target = join(backupDirectory, `${basename(filename)}.backup-${Date.now()}`)
-      open().exec(`VACUUM INTO '${target.replaceAll('\'', '\'\'')}'`)
-      return target
-    },
-    async drop() {
-      close()
-      for (const suffix of ['', '-wal', '-shm', '-journal']) rmSync(filename + suffix, { force: true })
-    },
-    close,
+  return (filename, backupDirectory) => {
+    const target = { filename, backupDirectory }
+    return {
+      execute: (statements, transaction = false) => call({ ...target, method: 'execute', statements, transaction }),
+      backup: () => call({ ...target, method: 'backup' }),
+      drop: () => call({ ...target, method: 'drop' }),
+      close: () => call({ ...target, method: 'close' }),
+    }
   }
 }
 
@@ -127,11 +110,11 @@ export function desktopDatastorePaths(directory, name) {
 /**
  * @param {string} filename SQLite file
  * @param {string} legacyFilename NeDB file it replaces
- * @param {Omit<ConstructorParameters<typeof SqliteDatastore>[0], 'driver' | 'legacy'> & { backupDirectory?: string }} [options]
+ * @param {Omit<ConstructorParameters<typeof SqliteDatastore>[0], 'driver' | 'legacy'> & { backupDirectory?: string, createDriver?: ReturnType<typeof createWorkerDrivers> }} [options]
  */
-export function createDesktopDatastore(filename, legacyFilename, { backupDirectory, ...options } = {}) {
+export function createDesktopDatastore(filename, legacyFilename, { backupDirectory, createDriver = createNodeSqliteDriver, ...options } = {}) {
   return new SqliteDatastore({
-    driver: createNodeSqliteDriver(filename, backupDirectory),
+    driver: createDriver(filename, backupDirectory),
     legacy: legacyFilename ? createNedbFileSource(legacyFilename) : undefined,
     ...options,
   })

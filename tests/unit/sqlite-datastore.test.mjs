@@ -9,7 +9,7 @@ import test from 'node:test'
 import { promisify } from 'node:util'
 import Datastore from '@seald-io/nedb'
 import { SqliteDatastore } from '../../src/datastores/sqlite.js'
-import { createDesktopDatastore, createNedbFileSource, createNodeSqliteDriver, desktopDatastorePaths } from '../../src/datastores/sqliteNode.js'
+import { createDesktopDatastore, createNedbFileSource, createNodeSqliteDriver, createWorkerDrivers, desktopDatastorePaths } from '../../src/datastores/sqliteNode.js'
 
 const lines = docs => docs.map(doc => typeof doc === 'string' ? doc : JSON.stringify(doc)).join('\n') + '\n'
 const video = (videoId, playlistItemId = `item-${videoId}`) => ({ videoId, playlistItemId, title: `Title ${videoId}`, timeAdded: 1 })
@@ -415,6 +415,19 @@ test('indexed lookups find string and numeric IDs exactly like NeDB', async (t) 
   assert.deepEqual(await store.findAsync({ _id: { $in: ['5'] } }), [{ _id: '5', videoId: 'x' }])
   // An array field is not an indexed scalar, but NeDB matches its members.
   assert.deepEqual((await store.findAsync({ videoId: 'x' })).map(doc => doc._id).sort(), ['5', 'z'])
+})
+
+test('desktop databases run in a worker thread', async (t) => {
+  const dir = await directory(t)
+  await writeFile(join(dir, 'playlists.db'), lines([{ _id: 'p', playlistName: 'Legacy', videos: [video('a')] }]))
+  const createDriver = createWorkerDrivers(new URL('../../src/datastores/sqliteNodeWorker.js', import.meta.url))
+  const store = createDesktopDatastore(join(dir, 'playlists.sqlite'), join(dir, 'playlists.db'), { childField: 'videos', createDriver })
+  t.after(() => store.driver.close())
+  await store.updateAsync({ _id: 'p' }, { $push: { videos: video('b') } })
+  assert.deepEqual(await store.findOneAsync({ _id: 'p' }), { _id: 'p', playlistName: 'Legacy', videos: [video('a'), video('b')] })
+  await assert.rejects(store.driver.execute([['SELECT * FROM missing']]), /no such table/)
+  await store.dropDatabaseAsync()
+  assert.equal(existsSync(join(dir, 'playlists.sqlite')), false)
 })
 
 test('existing NeDB handler tests pass against SQLite', async () => {
