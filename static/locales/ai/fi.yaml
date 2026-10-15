@@ -2165,3 +2165,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Luo työpöydälle pikakuvake
+Older Version Changes:
+  Title: "Muutokset vanhemmasta versiosta"
+  Message: "OpenTubeX:n vanhemmassa versiossa tekemäsi muutokset lisättiin kirjastoosi."
+  Detail: "Jos kohdetta muutettiin molemmissa versioissa, vanhemman version muutos säilytettiin. Varmuuskopio aiemmasta kirjastostasi on profiilikansiossasi."

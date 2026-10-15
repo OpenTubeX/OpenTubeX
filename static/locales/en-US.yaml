@@ -47,6 +47,10 @@ Close Confirmation:
   Hide Window: Hide Window
   Quit: Quit
   Never Ask Again: Never ask again
+Older Version Changes:
+  Title: Changes from an older version
+  Message: Changes you made in an older version of OpenTubeX were added to your library.
+  Detail: If an item was changed in both versions, the change from the older version was kept. A backup of your library from before is in your profile folder.
 Close Window Confirmation:
   Title: Close window?
   Message: This window contains {count} tabs. Are you sure you want to close it?

@@ -1,7 +1,4 @@
-import { readFile } from 'node:fs/promises'
-import path from 'node:path'
-
-import { sel } from '../../helpers/app.mjs'
+import { sel, readDatastore } from '../../helpers/app.mjs'
 import { expectTabHighlightAligned, expectTabHighlightStyle } from '../../helpers/tabs.mjs'
 import { test, expect, fixtureKey } from '../../helpers/innertube.mjs'
 
@@ -302,8 +299,8 @@ test.describe('channel page', () => {
     await expect(page.getByText('Blender').first()).toBeVisible({ timeout: 30_000 })
 
     const readSubscriptions = async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
-      const records = contents.trim().split('\n').map((line) => JSON.parse(line))
+      const contents = readDatastore(app.userDataDir, 'profiles')
+      const records = contents.trim().split('\n').filter(Boolean).map((line) => JSON.parse(line))
       const main = records.filter((record) => record._id === 'allChannels').at(-1)
       return main?.subscriptions?.map((channel) => channel.id) ?? []
     }

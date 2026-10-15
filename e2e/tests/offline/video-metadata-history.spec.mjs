@@ -1,11 +1,9 @@
 import { once } from 'node:events'
 import { createServer } from 'node:http'
-import { readFile } from 'node:fs/promises'
-import path from 'node:path'
 
 import { DBActions, IpcChannels } from '../../../src/constants.js'
 import { activeTab, openMockedVideo } from '../../helpers/player.mjs'
-import { expect, goToSettingsSection, test } from '../../helpers/app.mjs'
+import { expect, goToSettingsSection, test, readDatastore } from '../../helpers/app.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 const WATCH_PAGE_SEED = {
@@ -196,8 +194,7 @@ test('stores and presents every previous metadata version', async ({ app, page }
       privateRedirectRejected: true
     })
 
-    const cachePath = path.join(app.userDataDir, 'video-metadata-cache.db')
-    const cacheDocuments = (await readFile(cachePath, 'utf8')).trim().split('\n')
+    const cacheDocuments = readDatastore(app.userDataDir, 'video-metadata-cache').trim().split('\n')
       .map(line => JSON.parse(line))
       .filter(document => document._id && !document.$$deleted)
     expect(cacheDocuments).toHaveLength(6)

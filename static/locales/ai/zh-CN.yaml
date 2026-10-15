@@ -2113,3 +2113,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: 创建桌面快捷方式
+Older Version Changes:
+  Title: "来自旧版本的更改"
+  Message: "你在旧版本 OpenTubeX 中所做的更改已添加到你的媒体库。"
+  Detail: "如果某个项目在两个版本中都被更改，则保留了旧版本中的更改。之前媒体库的备份位于你的配置文件文件夹中。"

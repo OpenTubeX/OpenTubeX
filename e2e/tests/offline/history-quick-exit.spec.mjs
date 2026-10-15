@@ -1,6 +1,4 @@
-import { readFile } from 'node:fs/promises'
-import path from 'node:path'
-import { test, expect, sel } from '../../helpers/app.mjs'
+import { test, expect, sel, readDatastore } from '../../helpers/app.mjs'
 import { findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
 import { DEMO_MEDIA_URL } from '../../helpers/media.mjs'
 import { mockPlayableWatchPage, watchHistoryEntry } from '../../helpers/watch.mjs'
@@ -21,8 +19,8 @@ test.use({
 })
 
 async function savedProgress(app) {
-  const contents = await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')
-  return contents.trim().split('\n').map(line => JSON.parse(line))
+  const contents = readDatastore(app.userDataDir, 'history')
+  return contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
     .filter(record => record.videoId === 'jNQXAC9IVRw').at(-1)?.watchProgress
 }
 

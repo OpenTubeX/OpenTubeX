@@ -1,6 +1,3 @@
-import { readFile } from 'node:fs/promises'
-import path from 'node:path'
-
 import {
   test,
   expect,
@@ -8,7 +5,8 @@ import {
   goToSettingsSection,
   latestSettings,
   sel,
-  setWindowSize
+  setWindowSize,
+  readDatastore,
 } from '../../helpers/app.mjs'
 
 async function expectCompactCustomThemeEditor(page) {
@@ -940,7 +938,7 @@ test.describe('settings', () => {
     await page.locator('label.switch-label').filter({ hasText: 'Check for Updates' }).click()
     await expect(toggle).toBeChecked()
     await expect.poll(async () => latestSettings(
-      await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+      readDatastore(app.userDataDir, 'settings')
     ).checkForUpdates).toBe(true)
 
     ;({ page } = await app.relaunch())
@@ -981,7 +979,7 @@ test.describe('invalid icon pack', () => {
     await expect(page.locator('[data-icon-pack="material"]').first()).toBeVisible()
     await expect.poll(async () => {
       return latestSettings(
-        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+        readDatastore(app.userDataDir, 'settings')
       ).iconPack
     }).toBe('material')
   })

@@ -1,7 +1,4 @@
-import { readFile } from 'node:fs/promises'
-import path from 'node:path'
-
-import { test, expect, goToSettingsSection, latestSettings } from '../../helpers/app.mjs'
+import { test, expect, goToSettingsSection, latestSettings, readDatastore } from '../../helpers/app.mjs'
 
 const label = 'Automatically switch stream extraction methods'
 
@@ -22,7 +19,7 @@ test('playback-engine fallback defaults on and persists independently of API fal
   await expect(toggle).not.toBeChecked()
   await expect(apiFallback).toBeChecked()
   await expect.poll(async () => latestSettings(
-    await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+    readDatastore(app.userDataDir, 'settings')
   ).playbackEngineFallback).toBe(false)
 
   const relaunched = await app.relaunch()
@@ -33,6 +30,6 @@ test('playback-engine fallback defaults on and persists independently of API fal
   await toggle.press('Space')
   await expect(toggle).toBeChecked()
   await expect.poll(async () => latestSettings(
-    await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+    readDatastore(app.userDataDir, 'settings')
   ).playbackEngineFallback).toBe(true)
 })

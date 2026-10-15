@@ -2113,3 +2113,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: デスクトップにショートカットを作成
+Older Version Changes:
+  Title: "以前のバージョンでの変更"
+  Message: "以前のバージョンの OpenTubeX で行った変更をライブラリに追加しました。"
+  Detail: "両方のバージョンで変更された項目は、以前のバージョンの変更を保持しました。変更前のライブラリのバックアップはプロファイル フォルダーにあります。"

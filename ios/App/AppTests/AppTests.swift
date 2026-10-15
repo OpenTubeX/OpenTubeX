@@ -1585,6 +1585,38 @@ final class AppTests: XCTestCase {
         _ = try await evaluate("Array.from(document.querySelectorAll('button')).find(b => /^(Skip|Überspringen)$/.test(b.innerText.trim()))?.click(); true")
     }
 
+    func testLibraryDatabaseStoresTypedValuesLargeRowsAndRollsBack() async throws {
+        try await openApplication()
+        let result = try await webView.callAsyncJavaScript("""
+            const name = 'apptests'
+            const library = Capacitor.Plugins.LibraryDatabase
+            const run = (statements, transaction = false) => library.execute({ name, statements, transaction }).then(result => result.results)
+            await library.drop({ name })
+            await run([['CREATE TABLE docs (id PRIMARY KEY NOT NULL, data TEXT NOT NULL) WITHOUT ROWID']], true)
+            // Large rows such as sync snapshots, and the non-NUL prefix of non-scalar IDs.
+            const large = JSON.stringify({ value: 'x'.repeat(5 * 1024 * 1024) })
+            await run([
+                ['INSERT INTO docs VALUES (?, ?)', ['text', large]],
+                ['INSERT INTO docs VALUES (?, ?)', [5, '{"n":1.5}']],
+                ['INSERT INTO docs VALUES (?, ?)', [1700000000000, '{}']],
+                ['INSERT INTO docs VALUES (?, ?)', ['\\u0001{"id":null}', '{}']],
+            ], true)
+            let rolledBack = false
+            try {
+                await run([['INSERT INTO docs VALUES (?, ?)', ['added', '{}']], ['INSERT INTO docs VALUES (?, ?)', [5, 'duplicate']]], true)
+            } catch {
+                rolledBack = true
+            }
+            const [summary, [[text]]] = await run([
+                ["SELECT id, json_extract(data, '$.n') FROM docs ORDER BY typeof(id), id"],
+                ['SELECT data FROM docs WHERE id = ?', ['text']],
+            ])
+            await library.drop({ name })
+            return JSON.stringify({ rolledBack, summary, largeRow: text === large })
+            """, arguments: [:], in: nil, contentWorld: .page) as? String
+        XCTAssertEqual(result, #"{"rolledBack":true,"summary":[[5,1.5],[1700000000000,null],["\u0001{\"id\":null}",null],["text",null]],"largeRow":true}"#)
+    }
+
     func testApplicationOffline() async throws {
         try await openApplication()
         let ytDlpAvailable = try await webView.callAsyncJavaScript("return (await Capacitor.Plugins.YtDlp.info()).ytDlp.available", arguments: [:], in: nil, contentWorld: .page) as? Bool

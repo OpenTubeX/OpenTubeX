@@ -4,7 +4,7 @@ import { join } from 'node:path'
 
 import { videoMetadataCache } from '../datastores'
 
-const CACHE_FILE_NAME = 'video-metadata-cache.db'
+const CACHE_FILE_NAMES = ['video-metadata-cache.sqlite', 'video-metadata-cache.sqlite-wal']
 const MAX_TITLE_LENGTH = 10_000
 const MAX_DESCRIPTION_LENGTH = 1_000_000
 const MAX_THUMBNAIL_DATA_URL_LENGTH = 8_000_000
@@ -167,17 +167,19 @@ export function updateVideoMetadataCache(input) {
 }
 
 export async function getVideoMetadataCacheSize() {
-  try {
-    return (await stat(join(app.getPath('userData'), CACHE_FILE_NAME))).size
-  } catch (error) {
-    if (error?.code === 'ENOENT') return 0
-    throw error
-  }
+  const sizes = await Promise.all(CACHE_FILE_NAMES.map(async name => {
+    try {
+      return (await stat(join(app.getPath('userData'), name))).size
+    } catch (error) {
+      if (error?.code === 'ENOENT') return 0
+      throw error
+    }
+  }))
+  return sizes.reduce((total, size) => total + size, 0)
 }
 
 export function clearVideoMetadataCache() {
   return enqueue(async () => {
-    await videoMetadataCache.removeAsync({}, { multi: true })
-    await videoMetadataCache.compactDatafileAsync()
+    await videoMetadataCache.dropDatabaseAsync()
   })
 }

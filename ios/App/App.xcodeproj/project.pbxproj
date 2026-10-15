@@ -21,6 +21,7 @@ D1A000000000000000000007 /* post-live-audio.m4a.b64 in Resources */ = {isa = PBX
 		742C997910E5852D79525ECA /* PoTokenPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19303607D33FE53213C0CEA2 /* PoTokenPlugin.swift */; };
 		0873A0054DE9E10F6B8C085D /* IOSMediaSessionPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53CB956AC6BC8F43DC1864E /* IOSMediaSessionPlugin.swift */; };
 		5B13C50093778C69ADEF041E /* IOSStoragePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFFEF58AE86EE85681F8C5CC /* IOSStoragePlugin.swift */; };
+		86CAC63FB8F3B0E430D1D052 /* LibraryDatabasePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17E8A803B8BDE00E40D550C8 /* LibraryDatabasePlugin.swift */; };
 		B0C0DE000000000000000001 /* IOSYtDlpPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C0DE000000000000000002 /* IOSYtDlpPlugin.swift */; };
 		B0C0DE000000000000000003 /* Python.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = B0C0DE000000000000000004 /* Python.xcframework */; };
 		B0C0DE000000000000000005 /* Python.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B0C0DE000000000000000004 /* Python.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -63,6 +64,7 @@ D1A000000000000000000008 /* post-live-audio.m4a.b64 */ = {isa = PBXFileReference
 		19303607D33FE53213C0CEA2 /* PoTokenPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PoTokenPlugin.swift; sourceTree = "<group>"; };
 		A53CB956AC6BC8F43DC1864E /* IOSMediaSessionPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOSMediaSessionPlugin.swift; sourceTree = "<group>"; };
 		EFFEF58AE86EE85681F8C5CC /* IOSStoragePlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOSStoragePlugin.swift; sourceTree = "<group>"; };
+		17E8A803B8BDE00E40D550C8 /* LibraryDatabasePlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryDatabasePlugin.swift; sourceTree = "<group>"; };
 		B0C0DE000000000000000002 /* IOSYtDlpPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOSYtDlpPlugin.swift; sourceTree = "<group>"; };
 		B0C0DE000000000000000004 /* Python.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Python.xcframework; sourceTree = "<group>"; };
 A12790000000000000000002 /* AppTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTests.swift; sourceTree = "<group>"; };
@@ -115,6 +117,7 @@ A12790000000000000000008 = {isa = PBXFrameworksBuildPhase; buildActionMask = 214
 			children = (
 				9582B6822FE993A50072D4E8 /* SceneDelegate.swift */,
 				EFFEF58AE86EE85681F8C5CC /* IOSStoragePlugin.swift */,
+				17E8A803B8BDE00E40D550C8 /* LibraryDatabasePlugin.swift */,
 				B0C0DE000000000000000002 /* IOSYtDlpPlugin.swift */,
 				A53CB956AC6BC8F43DC1864E /* IOSMediaSessionPlugin.swift */,
 				19303607D33FE53213C0CEA2 /* PoTokenPlugin.swift */,
@@ -303,6 +306,7 @@ D1A000000000000000000001 /* DlnaPlugin.swift in Sources */,
 D1A000000000000000000005 /* DlnaMux.swift in Sources */,
 				9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */,
 				5B13C50093778C69ADEF041E /* IOSStoragePlugin.swift in Sources */,
+				86CAC63FB8F3B0E430D1D052 /* LibraryDatabasePlugin.swift in Sources */,
 				B0C0DE000000000000000001 /* IOSYtDlpPlugin.swift in Sources */,
 				0873A0054DE9E10F6B8C085D /* IOSMediaSessionPlugin.swift in Sources */,
 				742C997910E5852D79525ECA /* PoTokenPlugin.swift in Sources */,

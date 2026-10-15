@@ -1,8 +1,5 @@
-import { readFile } from 'node:fs/promises'
-import path from 'node:path'
-
 import { DBActions, IpcChannels } from '../../../src/constants.js'
-import { test, expect, goTo, goToSettingsSection, latestSettings, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, latestSettings, setWindowSize, readDatastore } from '../../helpers/app.mjs'
 import { captureAppFramebuffer } from '../../helpers/screenshots.mjs'
 
 const LABEL = 'Compact Settings Categories'
@@ -75,7 +72,7 @@ for (const initialValue of [false, true]) {
         await expect(toggle).toBeEnabled()
         await expect(toggle).toBeChecked({ checked: initialValue })
         await expect(page.locator('.settingsMenu .titleDescription')).toHaveCount(initialValue ? 0 : 11)
-        expect(latestSettings(await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8'))
+        expect(latestSettings(readDatastore(app.userDataDir, 'settings'))
           .hideSettingsCategoryDescriptions).toBe(initialValue)
       } finally {
         await app.electronApp.evaluate(() => globalThis.__restoreCompactCategoryHandler())
@@ -85,7 +82,7 @@ for (const initialValue of [false, true]) {
       await expect(toggle).toBeChecked({ checked: !initialValue })
       await expect(page.locator('.settingsMenu .titleDescription')).toHaveCount(initialValue ? 11 : 0)
       await expect.poll(async () => latestSettings(
-        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+        readDatastore(app.userDataDir, 'settings')
       ).hideSettingsCategoryDescriptions).toBe(!initialValue)
     })
 
@@ -121,7 +118,7 @@ for (const initialValue of [false, true]) {
       await expect(toggle).toBeChecked({ checked: !initialValue })
       await expect(page.locator('.settingsMenu .titleDescription')).toHaveCount(initialValue ? 11 : 0)
       await expect.poll(async () => latestSettings(
-        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+        readDatastore(app.userDataDir, 'settings')
       ).hideSettingsCategoryDescriptions).toBe(!initialValue)
       const savedScreenshot = testInfo.outputPath('compact-categories-saved.png')
       await page.locator('[data-setting-key="hideSettingsCategoryDescriptions"]').screenshot({ path: savedScreenshot })
@@ -142,7 +139,7 @@ test('hides settings category descriptions immediately and persists across resta
   await expect(page.locator('.settingsMenu .titleDescription')).toHaveCount(0)
   await expect(page.locator('.settingsMenu .titleText')).toHaveCount(11)
   await expect.poll(async () => latestSettings(
-    await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+    readDatastore(app.userDataDir, 'settings')
   ).hideSettingsCategoryDescriptions).toBe(true)
   ;({ page } = await app.relaunch())
   await goToSettingsSection(page, 'appearance')

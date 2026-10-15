@@ -1,4 +1,4 @@
-import { test, expect, goTo, setWindowSize, expectScrollAtRenderedEnd } from '../../helpers/app.mjs'
+import { test, expect, goTo, setWindowSize, expectScrollAtRenderedEnd, readDatastore } from '../../helpers/app.mjs'
 import { DEMO_MEDIA_URL, DEMO_MEDIA_MIME_TYPE } from '../../helpers/media.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
@@ -822,7 +822,7 @@ test('navigation persists the receiver position without a manual save', async ({
   await expect(page).toHaveURL(/#\/history/)
   await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.stops)).toEqual(['session-id'])
   await expect.poll(async () => {
-    const contents = await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')
+    const contents = readDatastore(app.userDataDir, 'history')
     return contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
       .filter(record => record.videoId === 'jNQXAC9IVRw').at(-1)?.watchProgress
   }).toBe(18)

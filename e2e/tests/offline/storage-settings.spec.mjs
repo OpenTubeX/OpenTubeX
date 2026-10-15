@@ -330,7 +330,7 @@ test('moves storage controls into one searchable category', async ({ app, attach
   await expect(storage.locator('.storageKind')).toHaveCount(0)
   await expect(storage.locator('.storageLocation').filter({ hasText: 'downloads.json' })
     .locator('[data-icon="file-lines"]')).toBeVisible()
-  await expect(storage.locator('.storageLocation').filter({ hasText: 'subscription-cache.db' })
+  await expect(storage.locator('.storageLocation').filter({ hasText: 'subscription-cache.sqlite' })
     .locator('[data-icon="file-lines"]')).toBeVisible()
   await expect(storage.locator('.storageLocation').filter({ hasText: 'tab-previews/' })
     .locator('[data-icon="folder-open"]')).toBeVisible()

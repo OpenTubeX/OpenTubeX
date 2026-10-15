@@ -2113,3 +2113,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Vytvořit zástupce na ploše
+Older Version Changes:
+  Title: "Změny ze starší verze"
+  Message: "Změny, které jste provedli ve starší verzi OpenTubeX, byly přidány do vaší knihovny."
+  Detail: "Pokud byla položka změněna v obou verzích, byla zachována změna ze starší verze. Záloha vaší předchozí knihovny je ve složce profilu."

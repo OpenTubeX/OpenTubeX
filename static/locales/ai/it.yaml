@@ -2113,3 +2113,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Crea un collegamento sul desktop
+Older Version Changes:
+  Title: "Modifiche da una versione precedente"
+  Message: "Le modifiche apportate in una versione precedente di OpenTubeX sono state aggiunte alla tua libreria."
+  Detail: "Se un elemento è stato modificato in entrambe le versioni, è stata mantenuta la modifica della versione precedente. Un backup della libreria precedente si trova nella cartella del profilo."

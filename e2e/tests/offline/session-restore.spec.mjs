@@ -1,8 +1,6 @@
-import { readFile } from 'node:fs/promises'
 import { createServer } from 'node:http'
-import path from 'node:path'
 
-import { test, expect, sel, goTo } from '../../helpers/app.mjs'
+import { test, expect, sel, goTo, readDatastore } from '../../helpers/app.mjs'
 import { mockPlayableWatchPage, mockUnplayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 const SUBSCRIPTIONS_TAB_ID = 'e2e-subscriptions-tab'
@@ -68,7 +66,7 @@ test.use({
 })
 
 async function readSavedSession(userDataDir) {
-  const contents = await readFile(path.join(userDataDir, 'tab-session.db'), 'utf8')
+  const contents = readDatastore(userDataDir, 'tab-session')
   const records = contents
     .trim()
     .split('\n')

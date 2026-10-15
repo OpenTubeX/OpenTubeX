@@ -43,7 +43,7 @@ import { MATERIAL_SYSTEM_SEED, MATERIAL_THEME_VALUES, materialColorScheme, mater
 import { resolveSystemTheme, resolveSystemThemeSettings } from '../appearanceSettings'
 import { applySyncServerUserAgent } from '../syncServerUserAgent'
 import * as baseHandlers from '../datastores/handlers/base'
-import { liveReminders } from '../datastores'
+import { liveReminders, onLegacyDatastoreChanges } from '../datastores'
 import { extractExpiryTimestamp, ImageCache } from './ImageCache'
 import { constants as fsConstants, existsSync } from 'fs'
 import { createReadStream } from 'node:fs'
@@ -136,6 +136,30 @@ Options:
 
 function runApp() {
   let deferredDatastoresStarted = false
+
+  // Registered synchronously, before any datastore loading started above can finish.
+  let olderVersionNotice = null
+  onLegacyDatastoreChanges(change => {
+    console.warn('Applied library changes made by an older version', change)
+    // Datastores open one after another; show one notice for all of them.
+    olderVersionNotice ??= app.whenReady()
+      .then(() => new Promise(resolve => setTimeout(resolve, 2000)))
+      .then(async () => {
+        olderVersionNotice = null
+        const t = await createMainTranslator()
+        const window = BrowserWindow.getFocusedWindow() ?? BrowserWindow.getAllWindows()[0]
+        const options = {
+          type: 'info',
+          title: t('Older Version Changes.Title'),
+          message: t('Older Version Changes.Message'),
+          detail: t('Older Version Changes.Detail'),
+          buttons: [t('Ok')],
+          noLink: true
+        }
+        await (window ? dialog.showMessageBox(window, options) : dialog.showMessageBox(options))
+      })
+      .catch(error => console.error(error))
+  })
   /** @type {Set<string>} */
   const ALLOWED_RENDERER_FILES = process.env.NODE_ENV === 'production'
     // __FREETUBE_ALLOWED_PATHS__ is replaced by the injectAllowedPaths.mjs script

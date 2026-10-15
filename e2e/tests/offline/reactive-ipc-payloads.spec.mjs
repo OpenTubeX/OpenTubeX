@@ -1,7 +1,4 @@
-import { readFile } from 'node:fs/promises'
-import path from 'node:path'
-
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { test, expect, goTo, readDatastore } from '../../helpers/app.mjs'
 
 // Vuex state objects are Vue 3 reactive Proxies, which Electron IPC cannot
 // structured-clone. Datastore writes must strip reactivity at the IPC
@@ -25,7 +22,7 @@ test('a reactive store object can be persisted over IPC', async ({ app, page }) 
   expect(result).toBe('ok')
 
   await expect(async () => {
-    const db = await readFile(path.join(app.userDataDir, 'playlists.db'), 'utf8')
+    const db = readDatastore(app.userDataDir, 'playlists')
     expect(db).toContain('"description":"reactive roundtrip"')
   }).toPass({ timeout: 10_000 })
 })

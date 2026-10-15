@@ -2167,3 +2167,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Crear un atallo no escritorio
+Older Version Changes:
+  Title: "Cambios dunha versión anterior"
+  Message: "Os cambios que fixeches nunha versión anterior de OpenTubeX engadíronse á túa biblioteca."
+  Detail: "Se un elemento se cambiou en ambas as versións, conservouse o cambio da versión anterior. Hai unha copia de seguranza da túa biblioteca anterior no cartafol do perfil."

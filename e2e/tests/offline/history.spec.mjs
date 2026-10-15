@@ -1,7 +1,6 @@
 import { readFile } from 'node:fs/promises'
-import path from 'node:path'
 
-import { test, expect, goTo, setWindowSize, updateInputWithoutScrolling, sel } from '../../helpers/app.mjs'
+import { test, expect, goTo, setWindowSize, updateInputWithoutScrolling, sel, readDatastore } from '../../helpers/app.mjs'
 import { mockCapacitorPhoneLayout } from '../../helpers/mobile.mjs'
 import { fulfillVisualFixture, expectImagesLoaded } from '../../helpers/visual-fixtures.mjs'
 
@@ -592,8 +591,8 @@ test.describe('watch history', () => {
     await expect(markAllButton).toBeDisabled()
 
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')
-      const records = contents.trim().split('\n').map((line) => JSON.parse(line))
+      const contents = readDatastore(app.userDataDir, 'history')
+      const records = contents.trim().split('\n').filter(Boolean).map((line) => JSON.parse(line))
       const latestRecords = Object.values(Object.fromEntries(
         records.filter(record => record.videoId).map(record => [record.videoId, record])
       ))
@@ -847,10 +846,10 @@ test.describe('watch history with an immediate watched threshold', () => {
     await expect(video).toHaveCount(0)
     await expect(page.getByText('Your history list is currently empty.')).toBeVisible()
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')
+      const contents = readDatastore(app.userDataDir, 'history')
       const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
-      return records.filter(record => record._id === 'ddddddddddd').at(-1)?.$$deleted
-    }).toBe(true)
+      return records.some(record => record._id === 'ddddddddddd')
+    }).toBe(false)
   })
 
   test('removes and cleanly re-adds a history entry from the subscriptions feed', async ({ app, page }) => {
@@ -875,7 +874,7 @@ test.describe('watch history with an immediate watched threshold', () => {
     await page.getByRole('menuitem', { name: 'Mark As Watched' }).click()
 
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')
+      const contents = readDatastore(app.userDataDir, 'history')
       const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
       return records.filter(record => record.videoId === 'ddddddddddd').at(-1)?.watchProgress
     }).toBe(0)
@@ -906,10 +905,10 @@ test.describe('history cleanup', () => {
     await expect(page.getByText('Recent video')).toBeVisible()
 
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')
-      const records = contents.trim().split('\n').map((line) => JSON.parse(line))
-      return records.filter((record) => record._id === 'ooooooooooo').at(-1)?.$$deleted
-    }).toBe(true)
+      const contents = readDatastore(app.userDataDir, 'history')
+      const records = contents.trim().split('\n').filter(Boolean).map((line) => JSON.parse(line))
+      return records.some(record => record._id === 'ooooooooooo')
+    }).toBe(false)
   })
 
   test('selects a history cutoff from the modal dropdown', async ({ page }) => {
@@ -960,8 +959,8 @@ test.describe('legacy watch history', () => {
     await expect(page.getByText('Legacy imported video')).toBeVisible()
 
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')
-      const records = contents.trim().split('\n').map((line) => JSON.parse(line))
+      const contents = readDatastore(app.userDataDir, 'history')
+      const records = contents.trim().split('\n').filter(Boolean).map((line) => JSON.parse(line))
       return records.find((record) => record._id === 'legacyvideo')
     }).toMatchObject({ watchProgress: 95, isWatched: true, isLive: false })
   })

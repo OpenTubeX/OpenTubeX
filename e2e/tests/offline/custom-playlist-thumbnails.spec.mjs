@@ -1,6 +1,5 @@
-import { readFile } from 'node:fs/promises'
 import path from 'node:path'
-import { test, expect, goTo, goToSettingsSection } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, readDatastore } from '../../helpers/app.mjs'
 import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 
 const playlistId = 'custom-thumbnail-playlist'
@@ -112,7 +111,7 @@ test('selects, replaces and restores a thumbnail across restarts', async ({ app,
   await routeThumbnails(page)
   await goTo(page, 'userplaylists')
   await expect(cardImage(page)).toHaveAttribute('src', /\/vi\/ccccccccccc\/maxresdefault.jpg/)
-  const records = (await readFile(path.join(app.userDataDir, 'playlists.db'), 'utf8')).trim().split('\n').map(JSON.parse)
+  const records = (readDatastore(app.userDataDir, 'playlists')).trim().split('\n').filter(Boolean).map(JSON.parse)
   expect(records.filter(record => record._id === playlistId).at(-1).customThumbnail).toBe('')
 })
 

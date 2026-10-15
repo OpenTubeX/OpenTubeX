@@ -1,6 +1,4 @@
-import { readFile } from 'node:fs/promises'
-import path from 'node:path'
-import { test, expect, goToSettingsSection, latestSettings, openNewWindowFromTabBar, setWindowSize, waitForAppReady } from '../../helpers/app.mjs'
+import { test, expect, goToSettingsSection, latestSettings, openNewWindowFromTabBar, setWindowSize, waitForAppReady, readDatastore } from '../../helpers/app.mjs'
 
 async function reconnect(page) {
   await page.evaluate(() => {
@@ -209,7 +207,7 @@ test.describe('destructive sync', () => {
 
     await warning.getByRole('button', { name: 'Delete and continue' }).click()
     await expect(warning).toBeHidden()
-    await expect.poll(async () => latestSettings(await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')).syncServerSnapshot)
+    await expect.poll(async () => latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerSnapshot)
       .toBe(JSON.stringify({ profiles: {} }))
   })
 })
@@ -305,8 +303,7 @@ test.describe('automatic sync recovery', () => {
     await expect(notification).toBeVisible()
     await notification.screenshot({ path: testInfo.outputPath('sync-notification.png') })
 
-    const settingsFile = path.join(app.userDataDir, 'settings.db')
-    await expect.poll(async () => latestSettings(await readFile(settingsFile, 'utf8')).syncServerResumeAutoSync).toBe(true)
+    await expect.poll(async () => latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerResumeAutoSync).toBe(true)
     await app.relaunch()
     const restarted = app.page
     await mockServer(restarted)
@@ -324,6 +321,6 @@ test.describe('automatic sync recovery', () => {
     await restartedSync.getByRole('button', { name: 'Sync now', exact: true }).click()
     await warning.getByRole('button', { name: 'Delete and continue' }).click()
     await expect(autoSync).toBeChecked()
-    await expect.poll(async () => latestSettings(await readFile(settingsFile, 'utf8')).syncServerResumeAutoSync).toBe(false)
+    await expect.poll(async () => latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerResumeAutoSync).toBe(false)
   })
 })

@@ -1,7 +1,4 @@
-import { readFile } from 'node:fs/promises'
-import path from 'node:path'
-
-import { test, expect, goTo, goToSettingsSection, latestSettings } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, latestSettings, readDatastore } from '../../helpers/app.mjs'
 import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 
 const videos = Array.from({ length: 30 }, (_, index) => ({
@@ -51,7 +48,7 @@ for (const [thumbnailSize, playlistThumbnailSize] of [[150, undefined], [150, 80
       let appearance = await goToSettingsSection(page, 'appearance')
       await expect(appearance.getByRole('slider', { name: /^Playlist Thumbnail Size:/ })).toHaveValue(String(expectedSize))
       await page.evaluate(() => window.$store.dispatch('updateThumbnailSize', 60))
-      await expect.poll(async () => latestSettings(await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')).playlistThumbnailSize).toBe(expectedSize)
+      await expect.poll(async () => latestSettings(readDatastore(app.userDataDir, 'settings')).playlistThumbnailSize).toBe(expectedSize)
       const relaunched = await app.relaunch()
       appearance = await goToSettingsSection(relaunched.page, 'appearance')
       await expect(appearance.getByRole('slider', { name: /^Thumbnail Size:/ })).toHaveValue('60')
@@ -136,7 +133,7 @@ test.describe('playlist thumbnail sizing', { tag: '@scale' }, () => {
       }
       await page.locator('.profileTrigger').click()
 
-      await expect.poll(async () => latestSettings(await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')).playlistThumbnailSize).toBe(180)
+      await expect.poll(async () => latestSettings(readDatastore(app.userDataDir, 'settings')).playlistThumbnailSize).toBe(180)
       const appearance = await goToSettingsSection(page, 'appearance')
       const setting = appearance.locator('.pure-material-slider').filter({ has: page.getByRole('slider', { name: /^Playlist Thumbnail Size:/ }) })
       await expect(setting.getByRole('slider')).toHaveValue('180')

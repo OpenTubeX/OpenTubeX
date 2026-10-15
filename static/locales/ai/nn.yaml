@@ -2507,3 +2507,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Opprett ein snarveg på skrivebordet
+Older Version Changes:
+  Title: "Endringar frå ein eldre versjon"
+  Message: "Endringar du gjorde i ein eldre versjon av OpenTubeX, er lagde til i biblioteket ditt."
+  Detail: "Viss eit element vart endra i begge versjonane, vart endringa frå den eldre versjonen behalden. Ein tryggleikskopi av det tidlegare biblioteket ditt ligg i profilmappa di."

@@ -2,7 +2,7 @@ import { readFile, rm } from 'node:fs/promises'
 import { randomBytes, randomUUID } from 'node:crypto'
 import path from 'node:path'
 
-import { test, expect, goTo, goToSettingsSection, latestSettings, createUserDataDir, launchApp } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, latestSettings, createUserDataDir, launchApp, readDatastore } from '../../helpers/app.mjs'
 import { DEFAULT_CUSTOM_THEME } from '../../../src/customTheme.js'
 
 const syncServerUrl = process.env.OPENTUBEX_SYNC_SERVER_URL
@@ -149,13 +149,12 @@ test.describe('OpenTubeX sync server', () => {
     }
     await expect(serverUrlInput).toHaveValue(syncServerUrl.replace(/\/$/, ''))
 
-    const settingsPath = path.join(app.userDataDir, 'settings.db')
     await expect.poll(async () => {
-      const settings = latestSettings(await readFile(settingsPath, 'utf8'))
+      const settings = latestSettings(readDatastore(app.userDataDir, 'settings'))
       return settings.syncServerToken
     }).not.toBe('')
 
-    const settings = latestSettings(await readFile(settingsPath, 'utf8'))
+    const settings = latestSettings(readDatastore(app.userDataDir, 'settings'))
     expect(settings.syncServerUrl).toBe(syncServerUrl.replace(/\/$/, ''))
     expect(settings.syncServerPrivacyMode).toBe(enhancedPrivacy ? 'enhanced' : 'legacy')
     expect(Boolean(settings.syncServerPrivacyKey)).toBe(enhancedPrivacy)
@@ -361,10 +360,10 @@ test.describe('OpenTubeX sync server', () => {
         await expect(currentCard).toBeVisible()
         accountPassword = 'new-local-test-password'
         await expect.poll(async () => {
-          return latestSettings(await readFile(settingsPath, 'utf8')).syncServerToken
+          return latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerToken
         }).not.toBe(headers.Authorization)
         headers.Authorization = latestSettings(
-          await readFile(settingsPath, 'utf8')
+          readDatastore(app.userDataDir, 'settings')
         ).syncServerToken
         await page.evaluate(() => {
           const store = window.$store
@@ -408,8 +407,8 @@ test.describe('OpenTubeX sync server', () => {
     await syncSection.getByRole('button', { name: 'Sync now' }).click()
     if (!enhancedPrivacy) {
       await expect.poll(async () => {
-        const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
-        const records = contents.trim().split('\n').map(line => JSON.parse(line))
+        const contents = readDatastore(app.userDataDir, 'profiles')
+        const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
         return records
           .filter(record => record._id === 'allChannels' && !record.$$deleted)
           .at(-1)
@@ -420,7 +419,7 @@ test.describe('OpenTubeX sync server', () => {
         thumbnail: null
       }))
       await expect.poll(async () => {
-        const syncedSettings = latestSettings(await readFile(settingsPath, 'utf8'))
+        const syncedSettings = latestSettings(readDatastore(app.userDataDir, 'settings'))
         return JSON.parse(syncedSettings.channelPlaybackSpeeds || '{}')
       }).toEqual({
         [channelId]: 1.5
@@ -475,9 +474,9 @@ test.describe('OpenTubeX sync server', () => {
     })
     expect(deletedAccountLoginResponse.ok).toBe(false)
 
-    expect(await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')).toContain(channelId)
-    expect(await readFile(path.join(app.userDataDir, 'playlists.db'), 'utf8')).toContain('sync-playlist')
-    expect(await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')).toContain('dQw4w9WgXcQ')
+    expect(readDatastore(app.userDataDir, 'profiles')).toContain(channelId)
+    expect(readDatastore(app.userDataDir, 'playlists')).toContain('sync-playlist')
+    expect(readDatastore(app.userDataDir, 'history')).toContain('dQw4w9WgXcQ')
     expect(playbackSpeedWrites).toEqual([])
   })
 
@@ -542,7 +541,6 @@ test.describe('OpenTubeX sync server', () => {
       },
     }
     const themePath = path.join(app.userDataDir, 'themes', `${theme.id}.json`)
-    const settingsPath = path.join(app.userDataDir, 'settings.db')
 
     await page.evaluate(async customTheme => {
       const store = window.$store
@@ -561,15 +559,15 @@ test.describe('OpenTubeX sync server', () => {
     await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
     await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
     await expect.poll(async () => {
-      const settings = latestSettings(await readFile(settingsPath, 'utf8'))
+      const settings = latestSettings(readDatastore(app.userDataDir, 'settings'))
       return JSON.parse(settings.syncServerSnapshot).settings.customThemes.value
     }).toEqual([theme])
 
     async function syncNow() {
-      const previousSyncAt = latestSettings(await readFile(settingsPath, 'utf8')).syncServerLastSyncAt
+      const previousSyncAt = latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerLastSyncAt
       await syncSection.getByRole('button', { name: 'Sync now' }).click()
       await expect.poll(async () => (
-        latestSettings(await readFile(settingsPath, 'utf8')).syncServerLastSyncAt
+        latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerLastSyncAt
       )).not.toBe(previousSyncAt)
     }
 
@@ -583,7 +581,7 @@ test.describe('OpenTubeX sync server', () => {
     })
     await syncNow()
     await expect.poll(async () => {
-      const settings = latestSettings(await readFile(settingsPath, 'utf8'))
+      const settings = latestSettings(readDatastore(app.userDataDir, 'settings'))
       return JSON.parse(settings.syncServerSnapshot).settings.customThemes.value
     }).toEqual([theme])
     await expect.poll(async () => JSON.parse(await readFile(themePath, 'utf8'))).toMatchObject({
@@ -621,16 +619,16 @@ test.describe('OpenTubeX sync server', () => {
       error => error.code !== 'ENOENT'
     )).toBe(false)
     await expect.poll(async () => (
-      latestSettings(await readFile(settingsPath, 'utf8')).baseTheme
+      latestSettings(readDatastore(app.userDataDir, 'settings')).baseTheme
     )).toBe(theme.basedOn)
     await expect.poll(async () => {
-      const settings = latestSettings(await readFile(settingsPath, 'utf8'))
+      const settings = latestSettings(readDatastore(app.userDataDir, 'settings'))
       const snapshot = JSON.parse(settings.syncServerSnapshot).settings
       return [settings.systemDarkTheme, snapshot.baseTheme.value, snapshot.systemDarkTheme.value]
     }).toEqual(['dark', theme.basedOn, 'dark'])
     await syncNow()
     await expect.poll(async () => {
-      const settings = latestSettings(await readFile(settingsPath, 'utf8'))
+      const settings = latestSettings(readDatastore(app.userDataDir, 'settings'))
       return [settings.baseTheme, settings.systemDarkTheme]
     }).toEqual([theme.basedOn, 'dark'])
   })
@@ -694,8 +692,8 @@ test.describe('OpenTubeX sync server', () => {
     await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
     await expect(syncSection.getByText(/Enhanced privacy is enabled/)).toBeVisible()
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
-      const records = contents.trim().split('\n').map(line => JSON.parse(line))
+      const contents = readDatastore(app.userDataDir, 'profiles')
+      const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
       return records
         .filter(record => record._id === 'allChannels' && !record.$$deleted)
         .at(-1)
@@ -706,7 +704,7 @@ test.describe('OpenTubeX sync server', () => {
     await expect(syncSection.locator('.syncProgress')).toBeHidden()
 
     const settings = latestSettings(
-      await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+      readDatastore(app.userDataDir, 'settings')
     )
     const migratedHeaders = { Authorization: settings.syncServerToken }
     const encryptedResponse = await fetch(`${syncServerUrl}/v1/encrypted_sync`, {
@@ -793,23 +791,19 @@ test.describe('OpenTubeX sync server', () => {
     ]))
     expect(historyPageSizes).toContain('1000')
 
-    const historyPath = path.join(app.userDataDir, 'history.db')
-    const settingsPath = path.join(app.userDataDir, 'settings.db')
-    const historyLinesAfterFirstSync = (await readFile(historyPath, 'utf8')).trim().split('\n').length
-    const firstSyncAt = latestSettings(await readFile(settingsPath, 'utf8')).syncServerLastSyncAt
+    const historyAfterFirstSync = readDatastore(app.userDataDir, 'history')
+    const firstSyncAt = latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerLastSyncAt
     bulkRequests.length = 0
 
     await syncSection.getByRole('button', { name: 'Sync now' }).click()
     await expect.poll(async () => {
-      return latestSettings(await readFile(settingsPath, 'utf8')).syncServerLastSyncAt
+      return latestSettings(readDatastore(app.userDataDir, 'settings')).syncServerLastSyncAt
     }).toBeGreaterThan(firstSyncAt)
 
     expect(bulkRequests).not.toContain('/v1/watch_history/bulk')
-    expect((await readFile(historyPath, 'utf8')).trim().split('\n')).toHaveLength(
-      historyLinesAfterFirstSync
-    )
+    expect(readDatastore(app.userDataDir, 'history')).toBe(historyAfterFirstSync)
 
-    const settings = latestSettings(await readFile(settingsPath, 'utf8'))
+    const settings = latestSettings(readDatastore(app.userDataDir, 'settings'))
     const cleanupResponse = await fetch(`${syncServerUrl}/v1/account/delete`, {
       method: 'DELETE',
       headers: {
@@ -848,7 +842,7 @@ test.describe('OpenTubeX sync server', () => {
     await syncSection.getByRole('button', { name: 'Register' }).click()
     await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
     await expect(syncSection.locator('.syncProgress')).toBeHidden()
-    const settings = latestSettings(await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8'))
+    const settings = latestSettings(readDatastore(app.userDataDir, 'settings'))
     const headers = { Authorization: settings.syncServerToken, 'Content-Type': 'application/json' }
     const playlistHeaders = await (await fetch(`${syncServerUrl}/v1/playlists/`, { headers })).json()
     const remoteId = playlistHeaders.find(playlist => playlist.title === 'Synced playlist').id
@@ -1079,14 +1073,14 @@ test.describe('OpenTubeX sync server', () => {
     await expect(warning).toBeVisible()
     await expect(warning).toContainText('2 of 2 previously synced subscriptions')
 
-    const profiles = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+    const profiles = readDatastore(app.userDataDir, 'profiles')
     expect(profiles).toContain(channelId)
     expect(profiles).toContain(secondChannelId)
     await warning.getByRole('button', { name: 'Cancel' }).click()
 
     await expect.poll(async () => {
       const currentSettings = latestSettings(
-        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+        readDatastore(app.userDataDir, 'settings')
       )
       return currentSettings.syncServerAutoSync
     }).toBe(false)
@@ -1095,8 +1089,8 @@ test.describe('OpenTubeX sync server', () => {
     await expect(warning).toBeVisible()
     await warning.getByRole('button', { name: 'Delete and continue' }).click()
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
-      const records = contents.trim().split('\n').map(line => JSON.parse(line))
+      const contents = readDatastore(app.userDataDir, 'profiles')
+      const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
       return records
         .filter(record => record._id === 'allChannels' && !record.$$deleted)
         .at(-1)
@@ -1104,7 +1098,7 @@ test.describe('OpenTubeX sync server', () => {
     }).toBe(0)
 
     const settings = latestSettings(
-      await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+      readDatastore(app.userDataDir, 'settings')
     )
     const cleanupResponse = await fetch(`${syncServerUrl}/v1/account/delete`, {
       method: 'DELETE',
@@ -1170,7 +1164,7 @@ test.describe('OpenTubeX sync server', () => {
     await serverUrlInput.press('Tab')
     await expect(serverUrlInput).toHaveValue(syncServerUrl)
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+      const contents = readDatastore(app.userDataDir, 'settings')
       return latestSettings(contents).syncServerUrl
     }).toBe(syncServerUrl)
     await expect(syncSection.getByLabel(/Privacy passphrase/)).toBeHidden()

@@ -1,7 +1,4 @@
-import { readFile } from 'node:fs/promises'
-import path from 'node:path'
-
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { test, expect, goTo, readDatastore } from '../../helpers/app.mjs'
 
 test('default playlists are created on a fresh profile', async ({ app, page }) => {
   await goTo(page, 'userplaylists')
@@ -9,10 +6,10 @@ test('default playlists are created on a fresh profile', async ({ app, page }) =
   await expect(page.getByRole('link', { name: 'Favorites' })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Watch Later' })).toBeVisible()
 
-  const db = await readFile(path.join(app.userDataDir, 'playlists.db'), 'utf8')
+  const db = readDatastore(app.userDataDir, 'playlists')
   expect(db).toContain('"_id":"favorites"')
   expect(db).toContain('"_id":"watchLater"')
-  const playlists = db.trim().split('\n').map(line => JSON.parse(line))
+  const playlists = db.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
   const watchLater = playlists.find(({ _id }) => _id === 'watchLater')
   expect(watchLater).toMatchObject({ quickBookmarkIcon: 'clock' })
 

@@ -43,6 +43,12 @@ const config = {
   module: {
     rules: [
       {
+        // Only the OPFS pool VFS is used. Do not bundle the library's
+        // optional worker API, which it starts with `new Worker()`.
+        test: /node_modules[\\/]@sqlite\.org[\\/]sqlite-wasm[\\/]/,
+        parser: { worker: false },
+      },
+      {
         test: /\.vue$/,
         loader: 'vue-loader',
         options: {

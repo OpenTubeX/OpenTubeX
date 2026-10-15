@@ -2614,3 +2614,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Sukurti darbalaukio nuorodą
+Older Version Changes:
+  Title: "Pakeitimai iš senesnės versijos"
+  Message: "Senesnėje OpenTubeX versijoje atlikti pakeitimai pridėti prie jūsų bibliotekos."
+  Detail: "Jei elementas buvo pakeistas abiejose versijose, išsaugotas senesnės versijos pakeitimas. Ankstesnės bibliotekos atsarginė kopija yra jūsų profilio aplanke."

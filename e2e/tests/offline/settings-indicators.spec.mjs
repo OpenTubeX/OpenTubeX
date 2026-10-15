@@ -1,7 +1,4 @@
-import { readFile } from 'node:fs/promises'
-import path from 'node:path'
-
-import { test, expect, goTo, goToSettingsSection, latestSettings, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, latestSettings, setWindowSize, readDatastore } from '../../helpers/app.mjs'
 
 test.describe('settings', () => {
   test('highlights changed settings and resets them to defaults', async ({ page, attachScreenshot }) => {
@@ -692,7 +689,7 @@ test.describe('performance impact indicators', () => {
 
     await expect.poll(async () => {
       const settings = latestSettings(
-        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+        readDatastore(app.userDataDir, 'settings')
       )
       return settings.showPerformanceImpactIndicators
     }).toBe(true)

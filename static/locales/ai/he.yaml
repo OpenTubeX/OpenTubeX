@@ -2167,3 +2167,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: יצירת קיצור דרך בשולחן העבודה
+Older Version Changes:
+  Title: "שינויים מגרסה ישנה יותר"
+  Message: "שינויים שביצעת בגרסה ישנה יותר של OpenTubeX נוספו לספרייה שלך."
+  Detail: "אם פריט שונה בשתי הגרסאות, נשמר השינוי מהגרסה הישנה. גיבוי של הספרייה הקודמת שלך נמצא בתיקיית הפרופיל."

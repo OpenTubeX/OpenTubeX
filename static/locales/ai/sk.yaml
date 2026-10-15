@@ -2113,3 +2113,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Vytvoriť odkaz na pracovnej ploche
+Older Version Changes:
+  Title: "Zmeny zo staršej verzie"
+  Message: "Zmeny, ktoré ste urobili v staršej verzii OpenTubeX, boli pridané do vašej knižnice."
+  Detail: "Ak bola položka zmenená v oboch verziách, zachovala sa zmena zo staršej verzie. Záloha vašej predchádzajúcej knižnice je v priečinku profilu."

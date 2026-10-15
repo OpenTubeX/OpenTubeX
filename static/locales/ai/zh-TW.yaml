@@ -2116,3 +2116,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: 建立桌面捷徑
+Older Version Changes:
+  Title: "來自舊版本的變更"
+  Message: "你在舊版 OpenTubeX 中所做的變更已加入你的媒體庫。"
+  Detail: "如果某個項目在兩個版本中都有變更，則保留了舊版本的變更。先前媒體庫的備份位於你的設定檔資料夾中。"
