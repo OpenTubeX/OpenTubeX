@@ -13,7 +13,7 @@ async function getPool() {
   })).catch(error => {
     pool = null
     // The pool keeps each file open, so a second tab cannot use it.
-    throw new Error(`Unable to open the library. Close OpenTubeX in other tabs and try again. (${error.message})`)
+    throw new Error(`Unable to open the library. If OpenTubeX is open in another tab, close it and try again. (${error.message})`, { cause: error })
   })
   return pool
 }

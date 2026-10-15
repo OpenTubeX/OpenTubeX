@@ -66,7 +66,14 @@ final class LibraryDatabase {
                 guard let statement = entry as? [Any], let sql = statement.first as? String else {
                     throw LibraryDatabaseError(errorDescription: "Invalid library statement")
                 }
-                results.append(try run(sql, params: statement.count > 1 ? statement[1] as? [Any] ?? [] : []))
+                var params: [Any] = []
+                if statement.count > 1 {
+                    guard let values = statement[1] as? [Any] else {
+                        throw LibraryDatabaseError(errorDescription: "Invalid library statement parameters")
+                    }
+                    params = values
+                }
+                results.append(try run(sql, params: params))
             }
             if transaction { try exec("COMMIT") }
             return results
@@ -138,8 +145,11 @@ final class LibraryDatabase {
     func drop() throws {
         close()
         for suffix in ["", "-wal", "-shm", "-journal"] {
-            let file = URL(fileURLWithPath: url.path + suffix)
-            if FileManager.default.fileExists(atPath: file.path) { try FileManager.default.removeItem(at: file) }
+            do {
+                try FileManager.default.removeItem(at: URL(fileURLWithPath: url.path + suffix))
+            } catch CocoaError.fileNoSuchFile {
+                // Already absent.
+            }
         }
     }
 

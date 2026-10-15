@@ -72,7 +72,9 @@ final class LibraryDatabase implements AutoCloseable {
             JSONArray results = new JSONArray();
             for (int index = 0; index < list.length(); index++) {
                 JSONArray entry = list.getJSONArray(index);
-                results.put(run(entry.getString(0), entry.optJSONArray(1)));
+                // A missing parameter list is allowed; any other value is a malformed call.
+                JSONArray params = entry.length() > 1 ? entry.getJSONArray(1) : null;
+                results.put(run(entry.getString(0), params));
             }
             if (transaction) exec("COMMIT");
             return results;
