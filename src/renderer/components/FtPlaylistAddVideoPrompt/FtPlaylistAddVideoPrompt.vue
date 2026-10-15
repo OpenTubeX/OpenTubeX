@@ -423,7 +423,7 @@ async function addSelectedToPlaylists() {
     for (const selectedPlaylistId of [...selectedPlaylistIdList.value]) {
       const playlist = allPlaylists_.find((list) => list._id === selectedPlaylistId)
       if (playlist == null) {
-        failedPlaylistNames.push(selectedPlaylistId)
+        failedPlaylistNames.push(null)
         continue
       }
 
@@ -460,8 +460,9 @@ async function addSelectedToPlaylists() {
       })
     }
     for (const playlistName of failedPlaylistNames) {
+      const message = t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]')
       showToast({
-        message: `${playlistName}: ${t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]')}`,
+        message: playlistName == null ? message : `${playlistName}: ${message}`,
         icon: ['fas', 'circle-exclamation'],
       })
     }

@@ -52,6 +52,7 @@ test('saves a per-playlist top insertion preference across restarts, preserves b
   await page.getByText(label, { exact: true }).click()
   await attachScreenshot('playlist-top-insertion-setting')
   const bounds = await page.locator('.playlistInfo').boundingBox()
+  expect(bounds, 'Playlist editor must be visible before taking its screenshot').not.toBeNull()
   await page.screenshot({
     path: testInfo.outputPath('playlist-insertion-setting.png'),
     animations: 'disabled',
@@ -62,13 +63,13 @@ test('saves a per-playlist top insertion preference across restarts, preserves b
 
   await add(page, 'addVideo', [video('ccccccccccc', 'Newly saved video')])
   await add(page, 'addVideos', [video('ddddddddddd', 'First copied video'), video('eeeeeeeeeee', 'Second copied video')])
-  await expect(page.locator('.playlistItems .h3Title:visible')).toHaveText(['First copied video', 'Second copied video', 'Newly saved video', 'First saved video', 'Second saved video'])
+  await expect(page.locator('.playlistItems .h3Title').filter({ visible: true })).toHaveText(['First copied video', 'Second copied video', 'Newly saved video', 'First saved video', 'Second saved video'])
   await add(page, 'addVideo', [video('ccccccccccc', 'Newly saved video')])
   expect(await videoIds(page)).toEqual(['ddddddddddd', 'eeeeeeeeeee', 'ccccccccccc', 'aaaaaaaaaaa', 'bbbbbbbbbbb'])
 
   await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
     .dispatch('updateUserPlaylistSortOrder', 'video_title_ascending'))
-  await expect(page.locator('.playlistItems .h3Title:visible')).toHaveText(['First copied video', 'First saved video', 'Newly saved video', 'Second copied video', 'Second saved video'])
+  await expect(page.locator('.playlistItems .h3Title').filter({ visible: true })).toHaveText(['First copied video', 'First saved video', 'Newly saved video', 'Second copied video', 'Second saved video'])
   await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
     .dispatch('updateUserPlaylistSortOrder', 'custom'))
 
@@ -80,7 +81,7 @@ test('saves a per-playlist top insertion preference across restarts, preserves b
   const relaunched = await app.relaunch()
   page = relaunched.page
   await openPlaylist(page)
-  await expect(page.locator('.playlistItems .h3Title:visible')).toHaveText(['First copied video', 'Second copied video', 'Newly saved video', 'First saved video', 'Second saved video'])
+  await expect(page.locator('.playlistItems .h3Title').filter({ visible: true })).toHaveText(['First copied video', 'Second copied video', 'Newly saved video', 'First saved video', 'Second saved video'])
   await page.getByTitle('Edit Playlist Info', { exact: true }).click()
   await expect(page.getByRole('checkbox', { name: label, exact: true })).toBeChecked()
   await page.getByText(label, { exact: true }).click()
@@ -104,6 +105,7 @@ test('keeps the insertion setting readable at narrow widths and enlarged UI scal
     const text = page.locator('.switch-label-text', { hasText: label })
     await expect(text).toBeVisible()
     const bounds = await text.boundingBox()
+    expect(bounds, 'Insertion setting must be visible before measuring its bounds').not.toBeNull()
     expect(bounds.x).toBeGreaterThanOrEqual(0)
     expect(bounds.x + bounds.width).toBeLessThanOrEqual(await page.evaluate(() => innerWidth))
     await page.getByText(label, { exact: true }).click()
@@ -195,6 +197,28 @@ test('bulk save reports a playlist removed during the write without announcing s
   await expect(page.getByText(/Video\(s\) added to|Videos? added to/)).toHaveCount(0)
   await expect(dialog).toBeHidden()
   expect(await page.evaluate(id => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPlaylist(id), playlistId)).toBeUndefined()
+})
+
+test('a playlist removed immediately before Save uses a generic error without exposing its ID', async ({ page }) => {
+  await goTo(page, 'userplaylists')
+  await page.evaluate(videos => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    .dispatch('showAddToPlaylistPromptForManyVideos', {
+      videos,
+      newPlaylistDefaultProperties: {},
+    }), [video('ccccccccccc', 'First new video'), video('ddddddddddd', 'Second new video')])
+  const dialog = page.getByRole('dialog')
+  await dialog.locator('.ft-playlist-selector', { hasText: 'Weekend watching' }).click()
+  await dialog.getByRole('button', { name: 'Save', exact: true }).evaluate((button, id) => {
+    // Apply the other window's removal and click in the same task, before the
+    // prompt's watcher can prune the now-missing selection.
+    document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('removePlaylist', id)
+    button.click()
+  }, playlistId)
+  await expect(page.getByText('There was an issue with updating this playlist.', { exact: true })).toBeVisible()
+  await expect(page.getByText(`${playlistId}: There was an issue with updating this playlist.`, { exact: true })).toHaveCount(0)
+  await expect(page.getByText(/Video\(s\) added to|Videos? added to/)).toHaveCount(0)
+  await expect(dialog).toBeHidden()
+  await page.screenshot({ path: test.info().outputPath('missing-playlist-error.png'), animations: 'disabled' })
 })
 
 test('playlist import restores the saved insertion preference for existing and new playlists', async ({ page }) => {

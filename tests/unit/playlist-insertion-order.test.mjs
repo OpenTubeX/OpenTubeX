@@ -228,6 +228,25 @@ test('the bulk prompt waits for writes and reports failure without a success toa
   assert.ok(toasts[0].message.startsWith('Weekend watching: '))
 })
 
+test('a playlist missing before save gets a generic error without exposing its ID', async () => {
+  const toasts = []
+  const errorMessage = 'There was an issue with updating this playlist.'
+  const save = vm.runInNewContext(promptSaveSource + '\naddSelectedToPlaylists', {
+    saving: { value: false },
+    selectedPlaylistIdList: { value: ['missing-playlist-id'] },
+    allPlaylists: { value: [] },
+    toBeAddedToPlaylistVideoList: { value: [{ videoId: 'new' }, { videoId: 'other' }] },
+    addingDuplicateVideosEnabled: { value: false },
+    store: { dispatch: () => assert.fail('A missing playlist must not be written') },
+    showToast: toast => toasts.push(toast),
+    t: () => errorMessage,
+    hide: () => {},
+  })
+  await save()
+  assert.equal(toasts.length, 1)
+  assert.equal(toasts[0].message, errorMessage)
+})
+
 test('renderer insertion uses the committed direction when the preference changes before the reply', async () => {
   const { db, Playlists, state } = await fixture(true)
   const actions = storeActions({
