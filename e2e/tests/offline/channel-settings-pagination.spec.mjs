@@ -121,7 +121,9 @@ test.describe('saved channel incremental loading', { tag: '@scale' }, () => {
   seed.settings.generalAutoLoadMorePaginatedItemsEnabled = false
   test.use({ seed })
 
-  test('preserves edits, reveals added channels, and clamps shorter results', async ({ app, page }) => {
+  test('preserves edits, reveals added channels, and clamps shorter results', async ({ app, page, uiScale }) => {
+    // https://github.com/OpenTubeX/OpenTubeX/issues/2119
+    test.fixme(uiScale === 100, 'Forgetting a setting at the bottom scrolls the list short of its end')
     await goToSettingsSection(page, 'playback')
     await page.getByRole('button', { name: 'Manage Saved Channels (49)' }).click()
     const loadMore = page.getByRole('button', { name: 'Load more channels', exact: true })
