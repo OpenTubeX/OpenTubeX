@@ -110,6 +110,10 @@
 }
 
 .base {
+  .inputElement {
+    margin-inline: auto;
+  }
+
   .playlistInfoSeparator {
     margin-block: 16px;
   }

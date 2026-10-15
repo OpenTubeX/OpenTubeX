@@ -217,6 +217,7 @@ Feed:
   Next Auto Refresh: 'Kitas automatinis atnaujinimas: {date}'
   Refresh Feed: Atnaujinti {subscriptionName}
 User Playlists:
+  Add new videos to the top (custom order): "Pridėti naujus vaizdo įrašus viršuje (pasirinktinė tvarka)"
   Repair Playlists: Taisyti grojaraščius
   Repair Description: Atkurkite trūkstamus vaizdo įrašų duomenis importavę YouTube Takeout ZIP. Grojaraščių tvarka nesikeičia.
   Remove Unavailable Videos: "Pašalinti nepasiekiamus vaizdo įrašus"

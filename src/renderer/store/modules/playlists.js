@@ -586,7 +586,11 @@ const mutations = {
   addVideo(state, payload) {
     const playlist = state.playlists.find(playlist => playlist._id === payload._id)
     if (playlist) {
-      playlist.videos.push(payload.videoData)
+      if (playlist.addVideosToTop === true) {
+        playlist.videos.unshift(payload.videoData)
+      } else {
+        playlist.videos.push(payload.videoData)
+      }
       playlist.lastUpdatedAt = payload.lastUpdatedAt
       incrementPlaylistVideoCounts(state.playlistVideoCounts, [payload.videoData])
     }
@@ -595,7 +599,9 @@ const mutations = {
   addVideos(state, payload) {
     const playlist = state.playlists.find(playlist => playlist._id === payload._id)
     if (playlist) {
-      playlist.videos = [].concat(playlist.videos, payload.videos)
+      playlist.videos = playlist.addVideosToTop === true
+        ? payload.videos.concat(playlist.videos)
+        : playlist.videos.concat(payload.videos)
       playlist.lastUpdatedAt = payload.lastUpdatedAt
       incrementPlaylistVideoCounts(state.playlistVideoCounts, payload.videos)
     }

@@ -188,6 +188,7 @@ Feed:
   Cancel Refresh: Avbryt uppdatering
   Next Auto Refresh: 'Nästa automatiska uppdatering: {date}'
 User Playlists:
+  Add new videos to the top (custom order): "Lägg till nya videor överst (anpassad ordning)"
   Repair Playlists: Reparera spellistor
   Repair Description: Återställ saknade videouppgifter efter import av en YouTube Takeout-ZIP. Spellistornas ordning ändras inte.
   Remove Unavailable Videos: "Ta bort otillgängliga videor"

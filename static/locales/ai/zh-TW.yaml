@@ -186,6 +186,7 @@ Feed:
   Cancel Refresh: 取消重新整理
   Next Auto Refresh: '下次自動重新整理：{date}'
 User Playlists:
+  Add new videos to the top (custom order): "將新影片加入頂端（自訂順序）"
   Repair Playlists: 修復播放清單
   Repair Description: 匯入 YouTube Takeout ZIP 後還原缺少的影片資訊。播放清單順序保持不變。
   Remove Unavailable Videos: "刪除不可用的影片"

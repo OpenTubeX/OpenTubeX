@@ -188,6 +188,7 @@ Feed:
   Cancel Refresh: ביטול הרענון
   Next Auto Refresh: 'הרענון האוטומטי הבא: {date}'
 User Playlists:
+  Add new videos to the top (custom order): "הוספת סרטונים חדשים לראש הרשימה (סדר מותאם אישית)"
   Repair Playlists: תיקון רשימות השמעה
   Repair Description: שחזור פרטי סרטונים חסרים לאחר ייבוא ZIP של YouTube Takeout. סדר רשימות ההשמעה נשאר ללא שינוי.
   Remove Unavailable Videos: "הסר סרטונים לא זמינים"

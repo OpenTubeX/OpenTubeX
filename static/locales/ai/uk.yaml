@@ -188,6 +188,7 @@ Feed:
   Cancel Refresh: Скасувати оновлення
   Next Auto Refresh: 'Наступне автоматичне оновлення: {date}'
 User Playlists:
+  Add new videos to the top (custom order): "Додавати нові відео на початок (власний порядок)"
   Repair Playlists: Відновити списки відтворення
   Repair Description: Відновіть відсутні відомості про відео після імпорту ZIP-архіву YouTube Takeout. Порядок у списках не зміниться.
   Remove Unavailable Videos: "Видалити недоступні відео"

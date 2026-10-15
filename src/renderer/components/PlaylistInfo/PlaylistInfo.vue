@@ -105,6 +105,12 @@
       @input="(input) => newDescription = input"
       @keydown.enter="savePlaylistInfo"
     />
+    <FtToggleSwitch
+      v-if="editMode"
+      :label="$t('User Playlists.Add new videos to the top (custom order)')"
+      :default-value="newAddVideosToTop"
+      @change="newAddVideosToTop = $event"
+    />
     <FtPlaylistThumbnailPicker
       v-if="editMode"
       v-model="newCustomThumbnail"
@@ -368,6 +374,7 @@ import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
+import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import FtPlaylistThumbnailPicker from '../FtPlaylistThumbnailPicker.vue'
 import FtQuickBookmarkIconPicker from '../FtQuickBookmarkIconPicker/FtQuickBookmarkIconPicker.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'
@@ -519,6 +526,7 @@ const showExportPrompt = ref(false)
 const showDownloadPrompt = ref(false)
 const newTitle = ref(props.title)
 const newDescription = ref(props.description)
+const newAddVideosToTop = ref(false)
 const newQuickBookmarkIcon = ref('bookmark')
 const newCustomThumbnail = ref('')
 const thumbnailLoading = ref(false)
@@ -785,14 +793,19 @@ async function addMissingVideos() {
     const playlist = store.getters.getPlaylist(id)
     if (!playlist) throw new Error('Playlist was deleted')
     const present = new Set(playlist.videos.map(video => video.videoId))
-    for (const video of snapshot.videos) {
+    const missingVideos = snapshot.videos.filter(video => {
+      if (present.has(video.videoId)) return false
+      present.add(video.videoId)
+      return true
+    })
+    // Prepending one at a time needs the opposite traversal to keep source order.
+    if (playlist.addVideosToTop === true) missingVideos.reverse()
+    for (const video of missingVideos) {
       snapshotController.signal.throwIfAborted()
-      if (present.has(video.videoId)) continue
       // The single-video action also checks the database, protecting edits in
       // other windows and avoiding duplicate entries during simultaneous refreshes.
       const saved = await store.dispatch('addVideo', { _id: id, videoData: { ...video } })
       if (!saved) throw new Error('Could not append a source playlist video')
-      present.add(video.videoId)
     }
     showToast({
       message: t('User Playlists.SinglePlaylistView.Toast["Playlist has been updated."]'),
@@ -819,6 +832,7 @@ async function savePlaylistInfo() {
     playlistName: newTitle.value,
     protected: selectedUserPlaylist.value.protected,
     description: newDescription.value,
+    addVideosToTop: newAddVideosToTop.value,
     quickBookmarkIcon: newQuickBookmarkIcon.value,
     customThumbnail: newCustomThumbnail.value,
     _id: props.id,
@@ -844,6 +858,7 @@ const playlistTitleInput = useTemplateRef('playlistTitleInput')
 function enterEditMode() {
   newTitle.value = props.title
   newDescription.value = props.description
+  newAddVideosToTop.value = selectedUserPlaylist.value.addVideosToTop === true
   newQuickBookmarkIcon.value = getQuickBookmarkIconValue(selectedUserPlaylist.value)
   newCustomThumbnail.value = selectedUserPlaylist.value.customThumbnail || ''
   thumbnailLoading.value = false

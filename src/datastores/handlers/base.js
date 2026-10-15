@@ -912,44 +912,43 @@ class Playlists {
    *
    * @returns {Promise<'added' | 'already-present' | 'playlist-missing'>}
    */
-  static async upsertVideoByPlaylistId(_id, lastUpdatedAt, videoData) {
-    const { numAffected } = await db.playlists.updateAsync(
-      // Not `{ 'videos.videoId': { $ne: videoData.videoId } }`: against an array
-      // that matches whenever any other entry differs, so it lets duplicates
-      // through, and it rejects the first video as an empty array matches nothing
-      { _id, $not: { videos: { $elemMatch: { videoId: videoData.videoId } } } },
-      {
-        $push: { videos: videoData },
-        $set: { lastUpdatedAt }
-      },
-      // Must not upsert: the selector deliberately misses when the video is
-      // already there, which would otherwise insert a malformed playlist
-      { upsert: false }
-    )
-
-    if (numAffected > 0) {
-      return PlaylistVideoAddResult.ADDED
-    }
-
-    // Nothing was written, which means the video is already in the playlist, or
-    // the playlist is gone (another window may have deleted it). Only the former
-    // leaves the caller with what it asked for, so the two must be told apart.
-    const playlist = await db.playlists.findOneAsync({ _id })
-
-    return playlist == null
-      ? PlaylistVideoAddResult.PLAYLIST_MISSING
-      : PlaylistVideoAddResult.ALREADY_PRESENT
+  static upsertVideoByPlaylistId(_id, lastUpdatedAt, videoData) {
+    return this.insertVideos(_id, lastUpdatedAt, [videoData], true)
   }
 
   static upsertVideosByPlaylistId(_id, lastUpdatedAt, videos) {
-    return db.playlists.updateAsync(
-      { _id },
-      {
-        $push: { videos: { $each: videos } },
-        $set: { lastUpdatedAt }
-      },
-      { upsert: true }
-    )
+    return this.insertVideos(_id, lastUpdatedAt, videos)
+  }
+
+  static async insertVideos(_id, lastUpdatedAt, videos, deduplicate = false) {
+    // NeDB cannot prepend atomically. Retry if another window changes the
+    // videos or insertion preference between reading and saving them.
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const playlist = await db.playlists.findOneAsync({ _id })
+      if (!playlist) return PlaylistVideoAddResult.PLAYLIST_MISSING
+      if (deduplicate && playlist.videos.some(video => video.videoId === videos[0].videoId)) {
+        return PlaylistVideoAddResult.ALREADY_PRESENT
+      }
+
+      const snapshot = JSON.stringify(playlist.videos)
+      const addVideosToTop = playlist.addVideosToTop === true
+      const { numAffected } = await db.playlists.updateAsync(
+        {
+          _id,
+          $where() {
+            return JSON.stringify(this.videos) === snapshot && (this.addVideosToTop === true) === addVideosToTop
+          }
+        },
+        {
+          $set: {
+            videos: addVideosToTop ? videos.concat(playlist.videos) : playlist.videos.concat(videos),
+            lastUpdatedAt
+          }
+        }
+      )
+      if (numAffected > 0) return PlaylistVideoAddResult.ADDED
+    }
+    throw new Error(`Unable to add videos to playlist ${_id}: repeated concurrent changes`)
   }
 
   static delete(_id) {

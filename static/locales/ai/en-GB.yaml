@@ -187,6 +187,7 @@ Feed:
   Cancel Refresh: Cancel refresh
   Next Auto Refresh: 'Next auto refresh: {date}'
 User Playlists:
+  Add new videos to the top (custom order): "Add new videos to the top (custom order)"
   Repair Playlists: Repair Playlists
   Repair Description: Restore missing video details after importing a YouTube Takeout ZIP. Playlist order stays unchanged.
   Remove Unavailable Videos: "Remove unavailable videos"

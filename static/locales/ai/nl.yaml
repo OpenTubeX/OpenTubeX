@@ -188,6 +188,7 @@ Feed:
   Cancel Refresh: Vernieuwen annuleren
   Next Auto Refresh: 'Volgende automatische vernieuwing: {date}'
 User Playlists:
+  Add new videos to the top (custom order): "Nieuwe video’s bovenaan toevoegen (aangepaste volgorde)"
   Repair Playlists: Afspeellijsten herstellen
   Repair Description: Herstel ontbrekende videogegevens na het importeren van een YouTube Takeout-ZIP. De volgorde van video's in afspeellijsten blijft gelijk.
   Remove Unavailable Videos: "Verwijder niet-beschikbare video's"

@@ -186,6 +186,7 @@ Feed:
   Cancel Refresh: Avbryt oppdateringa
   Next Auto Refresh: 'Neste automatiske oppdatering: {date}'
 User Playlists:
+  Add new videos to the top (custom order): "Legg til nye videoar øvst (eigendefinert rekkjefølgje)"
   Repair Playlists: Reparer spelelister
   Repair Description: Gjenopprett manglande videodetaljar etter import av ein YouTube Takeout-ZIP. Rekkjefølgja i spelelistene vert ikkje endra.
   Remove Unavailable Videos: "Fjern utilgjengelege videoar"
