@@ -210,7 +210,8 @@ export class SqliteDatastore {
     // A new database gets its tables in the import's first transaction.
     if (tables === 0 || await this._meta('state') !== 'ready') {
       await this._import(tables === 0)
-    } else if (this.legacy?.fingerprint) {
+    } else if (this.legacy?.fingerprint && this.legacy.hash) {
+      // Detecting changes needs both: the fingerprint to notice them, the hash to find them.
       try {
         await this._applyLegacyChanges()
       } catch (error) {
