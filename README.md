@@ -195,8 +195,14 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
     <img alt="Get it from the Snap Store" src="https://snapcraft.io/en/dark/install.svg" width="188" height="56" align="middle">
   </picture>
 </a>
+<a href="https://flatpark.org/apps/org.opentubex.OpenTubeX/">
+  <img alt="Get it on FlatPark" src="https://flatpark.org/badges/get-it-on-flatpark.svg" width="154" height="56" align="middle">
+</a>
+<a href="https://fdroid.opentubex.org/">
+  <img alt="Get it on F-Droid" src="docs/badges/fdroid.png" width="188" height="56" align="middle">
+</a>
 <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/OpenTubeX/OpenTubeX">
-  <img alt="Get it on Obtainium" src="docs/badges/obtainium.png" width="215" align="middle">
+  <img alt="Get it on Obtainium" src="docs/badges/obtainium.png" width="188" height="56" align="middle">
 </a>
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/opentubex.svg)](https://repology.org/project/opentubex/versions)
