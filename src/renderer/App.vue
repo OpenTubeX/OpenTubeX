@@ -496,6 +496,8 @@
               v-if="getUsableTabSwitcherPreviewUrl(tab)"
               :src="tabSwitcherPreviewUrls[tab.id]"
               :alt="`${formatTabTitle(tab.title)} preview`"
+              loading="lazy"
+              decoding="async"
               draggable="false"
               @error="handleTabSwitcherPreviewError(tab)"
             />
@@ -505,6 +507,8 @@
               :src="getUsableTabSwitcherAvatarUrl(tab)"
               :alt="`${formatTabTitle(tab.title)} preview`"
               class="tabSwitcherPreviewAvatar"
+              loading="lazy"
+              decoding="async"
               draggable="false"
               @error="handleTabSwitcherAvatarError(tab)"
             />
@@ -526,6 +530,8 @@
               :src="getUsableTabSwitcherAvatarUrl(tab)"
               class="tabSwitcherTitleAvatar"
               alt=""
+              loading="lazy"
+              decoding="async"
               draggable="false"
               @error="handleTabSwitcherAvatarError(tab)"
             />
@@ -1322,6 +1328,9 @@ const pendingSubscriptionAutoRefreshKeys = new Set()
 const cancelledSubscriptionAutoRefreshKeys = new Set()
 let processingSubscriptionAutoRefreshes = false
 let tabSwitcherPreviewRequestId = 0
+let tabSwitcherOpenTimer = null
+let tabSwitcherScrollPending = false
+const TAB_SWITCHER_HOLD_DELAY_MS = 150
 let findbarMatches = []
 const findbarStateByTabId = new Map()
 
@@ -1930,6 +1939,7 @@ onBeforeUnmount(() => {
   removeGamepadNavigation()
   removeCustomThemeListener()
   cancelUtilityRoutePreload()
+  cancelTabSwitcher()
   systemColorScheme.removeEventListener('change', handleSystemColorSchemeChange)
   if (isElectron) {
     window.ftElectron.tabs.setPreviewCapturePaused(false)
@@ -3846,7 +3856,7 @@ function handleKeyboardShortcuts(event) {
     return
   }
 
-  if (tabSwitcherVisible.value && event.key === 'Escape') {
+  if (event.key === 'Escape' && isTabSwitcherActive()) {
     event.preventDefault()
     cancelTabSwitcher()
     return
@@ -4202,7 +4212,7 @@ function isHiddenTextNode(node) {
  * @param {KeyboardEvent} event
  */
 function handleKeyboardShortcutKeyup(event) {
-  if (!tabSwitcherVisible.value) {
+  if (!isTabSwitcherActive()) {
     return
   }
 
@@ -4221,17 +4231,20 @@ function cycleTabSwitcher(direction) {
     return
   }
 
-  if (!tabSwitcherVisible.value) {
+  if (!isTabSwitcherActive()) {
     const activeIndex = Math.max(0, tabs.findIndex(tab => tab.id === store.getters.getActiveTabId))
     tabSwitcherSelectedIndex.value = wrapTabSwitcherIndex(activeIndex + direction, tabs.length)
-    tabSwitcherPreviewUrls.value = {}
-    tabSwitcherPointerActive.value = false
-    if (showTabPreviews.value) {
-      window.ftElectron.tabs.setPreviewCapturePaused(true)
-    }
-    tabSwitcherVisible.value = true
-    scrollTabSwitcherSelectionIntoView()
-    loadTabSwitcherPreviews()
+    // A quick release commits the selection without mounting the menu,
+    // measuring its scrollbar, or requesting/decoding previews.
+    tabSwitcherOpenTimer = setTimeout(() => {
+      tabSwitcherOpenTimer = null
+      if (showTabPreviews.value) {
+        window.ftElectron.tabs.setPreviewCapturePaused(true)
+      }
+      tabSwitcherVisible.value = true
+      scrollTabSwitcherSelectionIntoView()
+      loadTabSwitcherPreviews()
+    }, TAB_SWITCHER_HOLD_DELAY_MS)
     return
   }
 
@@ -4249,6 +4262,10 @@ function cycleTabSwitcher(direction) {
  */
 function wrapTabSwitcherIndex(index, length) {
   return (index + length) % length
+}
+
+function isTabSwitcherActive() {
+  return tabSwitcherOpenTimer != null || tabSwitcherVisible.value
 }
 
 function loadTabSwitcherPreviews() {
@@ -4346,7 +4363,11 @@ function handleTabSwitcherWheel(event) {
 }
 
 function scrollTabSwitcherSelectionIntoView() {
+  if (!tabSwitcherVisible.value || tabSwitcherScrollPending) return
+  tabSwitcherScrollPending = true
   nextTick(() => {
+    tabSwitcherScrollPending = false
+    if (!tabSwitcherVisible.value) return
     const selectedTabId = tabSwitcherSelectedTabId.value
     if (selectedTabId == null) {
       return
@@ -4376,12 +4397,14 @@ function commitTabSwitcherSelection(index) {
 }
 
 function cancelTabSwitcher() {
+  clearTimeout(tabSwitcherOpenTimer)
+  tabSwitcherOpenTimer = null
+  tabSwitcherSelectedIndex.value = -1
   if (!tabSwitcherVisible.value) {
     return
   }
 
   tabSwitcherVisible.value = false
-  tabSwitcherSelectedIndex.value = -1
   tabSwitcherPreviewUrls.value = {}
   tabSwitcherPreviewPending.value = {}
   tabSwitcherFailedAvatarUrls.value = {}
