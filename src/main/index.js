@@ -1868,13 +1868,38 @@ function runApp() {
     await trayIconWrite
   })
 
+  const MAC_TRAY_ICON_HEIGHT = 18
+
+  /**
+   * macOS status items draw an image at its point size, so the full-size app
+   * logo would fill the menu bar. Supply 1x and 2x representations at the
+   * standard menu bar height instead.
+   * @param {Electron.NativeImage} image
+   * @returns {Electron.NativeImage}
+   */
+  function createMacTrayImage(image) {
+    const resized = nativeImage.createEmpty()
+    resized.addRepresentation({
+      scaleFactor: 1,
+      buffer: image.resize({ height: MAC_TRAY_ICON_HEIGHT }).toPNG()
+    })
+    resized.addRepresentation({
+      scaleFactor: 2,
+      buffer: image.resize({ height: MAC_TRAY_ICON_HEIGHT * 2 }).toPNG()
+    })
+    return resized
+  }
+
   function getTrayImage() {
     if (!selectedTrayImage.isEmpty()) {
-      return process.platform === 'darwin' ? selectedTrayImage.resize({ height: 18 }) : selectedTrayImage
+      return process.platform === 'darwin' ? createMacTrayImage(selectedTrayImage) : selectedTrayImage
     }
-    return process.env.NODE_ENV === 'development'
+    const defaultTrayIconPath = process.env.NODE_ENV === 'development'
       ? path.join(__dirname, '..', '..', '_icons', 'iconColor.png')
       : path.join(__dirname, '..', '_icons', 'iconColor.png')
+    return process.platform === 'darwin'
+      ? createMacTrayImage(nativeImage.createFromPath(defaultTrayIconPath))
+      : defaultTrayIconPath
   }
 
   function ensureBackgroundTray() {
