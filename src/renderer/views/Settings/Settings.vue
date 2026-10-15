@@ -137,7 +137,7 @@
       />
       <div class="settingsHeaderActions">
         <button
-          v-if="unlocked && showKeyboardShortcutAction && !isStandaloneViewOpen"
+          v-if="unlocked && showKeyboardShortcutAction && !isStandaloneViewOpen && !isKeyboardShortcutPromptOpen"
           type="button"
           class="settingsHeaderButton"
           :aria-label="t('KeyboardShortcutPrompt.Show Keyboard Shortcuts')"
@@ -147,7 +147,7 @@
           <FtIcon :icon="['fas', 'keyboard']" />
         </button>
         <button
-          v-if="!isStandaloneViewOpen"
+          v-if="!isStandaloneViewOpen && !isKeyboardShortcutPromptOpen"
           type="button"
           class="settingsHeaderButton"
           :class="{ active: highlightChangedSettings }"
@@ -159,7 +159,7 @@
           <FtIcon :icon="['fas', 'pen']" />
         </button>
         <button
-          v-if="!isStandaloneViewOpen"
+          v-if="!isStandaloneViewOpen && !isKeyboardShortcutPromptOpen"
           type="button"
           class="settingsHeaderButton"
           :class="{ active: showPerformanceImpactIndicators }"
