@@ -250,6 +250,10 @@ test('refuses a database written by a newer schema instead of altering it', asyn
   db.close()
   const store = open(t, dir, 'settings')
   await assert.rejects(store.findAsync({}), /newer version/)
+  store.driver.close()
+  const reopened = new DatabaseSync(join(dir, 'settings.sqlite'), { readOnly: true })
+  assert.deepEqual(reopened.prepare('SELECT name FROM sqlite_master').all(), [], 'no tables are created')
+  reopened.close()
 })
 
 test('playlist edits write only the rows they change', async (t) => {

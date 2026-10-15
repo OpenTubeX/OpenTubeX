@@ -189,11 +189,12 @@ export class SqliteDatastore {
 
   async _open() {
     this.dropped = false
-    await this._execute(SCHEMA.map(sql => [sql]), true)
+    // Check before any schema statement, so a newer version's database stays untouched.
     const [[[version]]] = await this.driver.execute([['PRAGMA user_version']])
     if (version > SCHEMA_VERSION) {
       throw new Error(`This library was created by a newer version of OpenTubeX (schema ${version})`)
     }
+    await this._execute(SCHEMA.map(sql => [sql]), true)
     if (await this._meta('state') !== 'ready') {
       await this._import()
     } else if (this.legacy?.fingerprint) {
