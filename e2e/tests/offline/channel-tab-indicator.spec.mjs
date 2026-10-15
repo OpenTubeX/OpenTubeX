@@ -252,11 +252,7 @@ test('collapses channel search to an accessible icon at narrow widths', async ({
     await expect(page).toHaveURL(/searchQueryText=animation/)
     await input.clear()
     await expect(page).not.toHaveURL(/searchQueryText=/)
-    // Clearing the search reloads the channel videos, and a re-render can swallow a click that lands mid-update.
-    await expect(async () => {
-      if (await toggle.getAttribute('aria-expanded') === 'true') await toggle.click()
-      await expect(toggle).toHaveAttribute('aria-expanded', 'false', { timeout: 1000 })
-    }).toPass()
+    await toggle.click()
     await expect(input).toBeHidden()
     await toggle.press('Control+f')
     await expect(input).toBeFocused()
@@ -594,16 +590,13 @@ test('channel search restores highlights immediately unless a tab is deliberatel
   for (const scale of [100, 95, 125]) {
     await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
     for (const key of [null, 'Enter', ' ']) {
-      // A channel reload that lands mid-selection cancels the highlight transition, so retry the whole step.
-      await expect(async () => {
-        await search.fill('animation')
-        await search.press('Enter')
-        await expect(page.locator(indicatorSelector)).toHaveCount(0)
-        expect(await page.locator('.channelDetails:visible [role="tab"]').evaluateAll(tabs => tabs.some(tab =>
-          tab.getAnimations({ subtree: true }).some(animation => animation instanceof CSSTransition && animation.transitionProperty === 'opacity' && animation.effect.target === tab && animation.effect.pseudoElement === '::before')
-        ))).toBe(false)
-        expect(await selectTabWithHighlightAnimation(page.locator('#aboutTab'), key)).toEqual({ property: 'opacity', playbackRate: 0.25, duration: 140 })
-      }).toPass({ timeout: 30000 })
+      await search.fill('animation')
+      await search.press('Enter')
+      await expect(page.locator(indicatorSelector)).toHaveCount(0)
+      expect(await page.locator('.channelDetails:visible [role="tab"]').evaluateAll(tabs => tabs.some(tab =>
+        tab.getAnimations({ subtree: true }).some(animation => animation instanceof CSSTransition && animation.transitionProperty === 'opacity' && animation.effect.target === tab && animation.effect.pseudoElement === '::before')
+      ))).toBe(false)
+      expect(await selectTabWithHighlightAnimation(page.locator('#aboutTab'), key)).toEqual({ property: 'opacity', playbackRate: 0.25, duration: 140 })
       await expectAligned(page)
     }
 
