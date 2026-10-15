@@ -97,8 +97,13 @@ async function refreshDevices() {
   try {
     const results = await dlnaCast.discover()
     if (!disposed) devices.value = results
-  } catch {
-    if (!disposed) showToast({ message: t('Video.Player.DLNA.Error'), icon: ['fas', 'cast'] })
+  } catch (error) {
+    if (!disposed) {
+      showToast({
+        message: error?.code === 'LOCAL_ACCESS_DENIED' ? error.message : t('Video.Player.DLNA.Error'),
+        icon: ['fas', 'cast']
+      })
+    }
   } finally {
     loading.value = false
   }

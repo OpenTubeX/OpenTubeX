@@ -2126,6 +2126,7 @@ Storage Startup Error:
   Message: "Oslobodite prostor na uređaju i pokušajte ponovno. Sinkronizacija je pauzirana dok se vaši podaci ne učitaju."
   Retry: "Pokušaj ponovno"
 Native Permissions:
+  Local Network Denied: "Dopuštenje za uređaje u blizini je odbijeno."
   Local Network: "Pronađite uređaje na lokalnoj mreži i emitirajte videozapise na njih te sinkronizirajte postavke i podatke između uređaja."
 
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.

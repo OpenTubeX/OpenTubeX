@@ -2106,6 +2106,7 @@ Search Bar:
   Use Suggestion: Təklifi istifadə et
 
 Native Permissions:
+  Local Network Denied: "Yaxınlıqdakı cihazlara giriş icazəsi rədd edildi."
   Local Network: "Yerli şəbəkənizdə cihazları tapın və videoları onlara yayımlayın, cihazlar arasında parametrləri və məlumatları sinxronlaşdırın."
 
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.

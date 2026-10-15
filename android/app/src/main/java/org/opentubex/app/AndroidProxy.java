@@ -112,6 +112,10 @@ final class AndroidProxy {
         return relay.url();
     }
 
+    static String connectionHost(URI target) {
+        return relay.connectionHost(target);
+    }
+
     /** For child processes, which send the credentials in the proxy URL. */
     static String authenticatedUrl() {
         if (relay == null) throw new IllegalStateException("Android proxy has not initialized");

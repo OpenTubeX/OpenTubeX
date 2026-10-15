@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises'
 import vm from 'node:vm'
 
 import { createAbortError } from '../../src/renderer/helpers/api/requestErrors.js'
+import { waitForRequest } from '../../src/renderer/helpers/api/requestWait.js'
 import { classifyRequestFailure } from '../../src/renderer/helpers/api/requestDiagnostics.js'
 import { createNetworkRecovery } from '../../src/renderer/helpers/networkRecovery.js'
 import { createSubscriptionNetworkRecovery, SubscriptionNetworkError } from '../../src/renderer/helpers/subscriptionNetworkRecovery.js'
@@ -301,19 +302,108 @@ test('rejects invalid native avatar responses', async () => {
   }
 })
 
-async function loadNativeHttp(request, ios = null, entryPoint = 'capacitorHttpFetch') {
+async function loadNativeHttp(request, ios = null, entryPoint = 'capacitorHttpFetch', preflight) {
   const source = (await readFile(new URL('../../src/renderer/helpers/api/capacitor-http.js', import.meta.url), 'utf8'))
     .replace(/^import .* from .*\n/gm, '')
     .replace(/^export /gm, '')
   const context = vm.createContext({
     CapacitorHttp: { request },
-    process: { env: { IS_IOS: ios !== null } },
+    process: { env: { IS_IOS: ios !== null, IS_CAPACITOR: !!preflight } },
+    ensureAndroidLocalNetworkAccess: preflight,
     registerPlugin: () => ios, crypto: globalThis.crypto,
     withNetworkRecovery: (input, init, task) => task(init?.signal ?? (input instanceof Request ? input.signal : undefined)),
-    createAbortError, Request, Response, Headers, URL, URLSearchParams, setTimeout, clearTimeout,
+    createAbortError, waitForRequest, Request, Response, Headers, URL, URLSearchParams, setTimeout, clearTimeout,
   })
   vm.runInContext(`${source}\nglobalThis.fetchNative = ${entryPoint}`, context)
   return context.fetchNative
+}
+
+test('Android checks redirect destinations before a denied LAN connection', async () => {
+  const checked = []
+  const requested = []
+  const fetchNative = await loadNativeHttp(async options => {
+    requested.push(options.url)
+    return { status: 302, data: '', headers: { Location: 'https://nas.local/health' }, url: options.url }
+  }, null, 'capacitorHttpFetch', async ({ url }) => {
+    checked.push(url)
+    if (url.includes('nas.local')) throw Object.assign(new Error('Denied'), { code: 'LOCAL_ACCESS_DENIED' })
+  })
+  await assert.rejects(fetchNative('https://sync.example/health'), { code: 'LOCAL_ACCESS_DENIED' })
+  assert.deepEqual(checked, ['https://sync.example/health', 'https://nas.local/health'])
+  assert.deepEqual(requested, ['https://sync.example/health'])
+})
+
+test('Android waits for redirect consent, preserves 307 bodies and strips credentials across origins', async () => {
+  const requests = []
+  let allow
+  const consent = new Promise(resolve => { allow = resolve })
+  const fetchNative = await loadNativeHttp(async options => {
+    requests.push(structuredClone(options))
+    return requests.length === 1
+      ? { status: 307, data: '', headers: { location: 'https://nas.local/health' }, url: options.url }
+      : { status: 200, data: 'ok', headers: {}, url: options.url }
+  }, null, 'capacitorHttpFetch', async ({ url }) => { if (url.includes('nas.local')) await consent })
+  const pending = fetchNative('https://sync.example/health', {
+    method: 'POST', body: 'payload', headers: { Authorization: 'secret', Cookie: 'session=secret', 'Content-Type': 'text/plain' },
+  })
+  await new Promise(resolve => setImmediate(resolve))
+  try { assert.equal(requests.length, 1) } finally { allow() }
+  const response = await pending
+  assert.equal(await response.text(), 'ok')
+  assert.equal(response.url, 'https://nas.local/health')
+  assert.equal(response.redirected, true)
+  assert.equal(requests[1].method, 'POST')
+  assert.equal(requests[1].data, 'payload')
+  assert.equal(requests[1].headers['content-type'], 'text/plain')
+  assert.equal(requests[1].headers.authorization, undefined)
+  assert.equal(requests[1].headers.cookie, undefined)
+  assert.ok(requests.every(options => options.disableRedirects))
+})
+
+for (const status of [301, 302, 303]) {
+  test(`Android follows relative ${status} redirects with GET after POST`, async () => {
+    const requests = []
+    const fetchNative = await loadNativeHttp(async options => {
+      requests.push(structuredClone(options))
+      return requests.length === 1
+        ? { status, data: '', headers: { location: '../done' }, url: options.url }
+        : { status: 200, data: 'ok', headers: {}, url: options.url }
+    }, null, 'capacitorHttpFetch', async () => {})
+    await fetchNative('https://sync.example/api/submit', { method: 'POST', body: 'payload', headers: { 'content-type': 'text/plain', authorization: 'same-origin' } })
+    assert.equal(requests[1].url, 'https://sync.example/done')
+    assert.equal(requests[1].method, 'GET')
+    assert.equal(requests[1].data, undefined)
+    assert.equal(requests[1].headers['content-type'], undefined)
+    assert.equal(requests[1].headers.authorization, 'same-origin')
+  })
+}
+
+test('Android bounds redirect loops and respects manual/error redirect modes', async () => {
+  let requests = 0
+  const fetchNative = await loadNativeHttp(async options => {
+    requests++
+    return { status: 302, data: '', headers: { location: '/loop' }, url: options.url }
+  }, null, 'capacitorHttpFetch', async () => {})
+  await assert.rejects(fetchNative('https://sync.example/loop'), /Too many redirects/)
+  assert.equal(requests, 21)
+  requests = 0
+  assert.equal((await fetchNative('https://sync.example/loop', { redirect: 'manual' })).status, 302)
+  await assert.rejects(fetchNative('https://sync.example/loop', { redirect: 'error' }), /Redirects are not allowed/)
+  assert.equal(requests, 2)
+})
+
+for (const location of ['http://nas.local/health', 'file:///private', 'https://user:secret@nas.local/health']) {
+  test(`Android rejects an unsafe redirect destination: ${location}`, async () => {
+    let requests = 0
+    const checked = []
+    const fetchNative = await loadNativeHttp(async options => {
+      requests++
+      return { status: 302, data: '', headers: { location }, url: options.url }
+    }, null, 'capacitorHttpFetch', async ({ url }) => { checked.push(url) })
+    await assert.rejects(fetchNative('https://sync.example/health'), { name: 'TypeError' })
+    assert.equal(requests, 1)
+    assert.deepEqual(checked, ['https://sync.example/health'])
+  })
 }
 
 test('bounds native connection and stalled reads while retaining JavaScript cancellation', async () => {

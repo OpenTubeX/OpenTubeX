@@ -10,8 +10,9 @@ import { applySyncServerUserAgent } from '../../src/syncServerUserAgent.js'
 import { createSyncServerRequestHeaders } from '../../src/renderer/helpers/sync-server-request.js'
 import * as errors from '../../src/renderer/helpers/sync-server-errors.js'
 import { createAbortError } from '../../src/renderer/helpers/api/requestErrors.js'
+import { waitForRequest } from '../../src/renderer/helpers/api/requestWait.js'
 
-async function loadClient(env, version, requests, nativeRequest, browserRequest, serverUrl = 'https://sync.example') {
+async function loadClient(env, version, requests, nativeRequest, browserRequest, serverUrl = 'https://sync.example', localNetworkAccess = async () => {}) {
   const context = vm.createContext({
     runBackgroundJob,
     ...errors,
@@ -20,7 +21,8 @@ async function loadClient(env, version, requests, nativeRequest, browserRequest,
     packageDetails: { version },
     createSyncServerRequestHeaders,
     applySyncServerUserAgent,
-    createAbortError,
+    createAbortError, waitForRequest,
+    ensureAndroidLocalNetworkAccess: localNetworkAccess,
     URL, URLSearchParams, Request, Response, Headers, AbortController, setTimeout, clearTimeout,
     CapacitorHttp: {
       request: async options => {
@@ -285,4 +287,35 @@ test('Capacitor sync can use an explicitly configured HTTP local server', async 
   await client.health()
   assert.equal(requests.length, 1)
   assert.equal(requests[0].url, 'http://127.0.0.1:18879/health')
+})
+
+test('Android sync cannot contact a LAN server after permission is denied', async () => {
+  const requests = []
+  const client = await loadClient({ IS_CAPACITOR: true }, '0.36.1', requests, undefined, undefined,
+    'http://192.168.1.2:8080', async ({ url }) => {
+      assert.equal(url, 'http://192.168.1.2:8080/health')
+      throw new Error('Nearby devices permission was denied')
+    })
+  await assert.rejects(client.health(), /Nearby devices permission was denied/)
+  assert.equal(requests.length, 0)
+})
+
+test('cancelling Android sync while permission is pending prevents the native request', async () => {
+  const requests = []
+  let allow
+  const permission = new Promise(resolve => { allow = resolve })
+  const client = await loadClient({ IS_CAPACITOR: true }, '0.36.1', requests, undefined, undefined,
+    'http://192.168.1.2:8080', () => permission)
+  const pending = client.health()
+  await nextEventLoopTurn()
+  client.cancel()
+  let timeout
+  try {
+    await Promise.race([
+      assert.rejects(pending, errors.SyncServerCancelledError),
+      new Promise((resolve, reject) => { timeout = setTimeout(() => reject(new Error('Cancellation waited for the permission prompt')), 1000) })
+    ])
+  } finally { clearTimeout(timeout); allow() }
+  await nextEventLoopTurn()
+  assert.equal(requests.length, 0)
 })

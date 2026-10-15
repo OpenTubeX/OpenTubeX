@@ -15,6 +15,7 @@ import {
 import { DBProfileHandlers, DBSettingHandlers } from '../../../datastores/handlers/index'
 import { hashPassword } from '../../helpers/passwords'
 import { ANDROID_PROXY_SETTING_KEYS, configureAndroidProxy, readAndroidProxySettings } from '../../helpers/androidProxy'
+import { ensureAndroidLocalNetworkAccess } from '../../helpers/androidLocalNetwork'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { getSystemLocale, showToast } from '../../helpers/utils'
 import { DEFAULT_THUMBNAIL_SIZE } from '../../constants/thumbnailSize'
@@ -1080,9 +1081,14 @@ const customActions = {
         // database cannot save its copy of the settings.
         commit(defaultMutationId(settingId), value)
         await DBSettingHandlers.upsert(settingId, value)
-      }).catch(() => {
+        if (state.useProxy) {
+          await ensureAndroidLocalNetworkAccess({ hostname: state.proxyHostname, direct: true })
+        }
+      }).catch(error => {
         showToast({
-          message: i18n.global.t('Settings.Proxy Settings["Error getting network information. Is your proxy configured properly?"]'),
+          message: error?.code === 'LOCAL_ACCESS_DENIED'
+            ? error.message
+            : i18n.global.t('Settings.Proxy Settings["Error getting network information. Is your proxy configured properly?"]'),
           icon: ['fas', 'circle-exclamation'],
         })
       })

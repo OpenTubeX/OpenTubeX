@@ -2103,6 +2103,7 @@ Search Bar:
   Use Suggestion: Usar sugerencia
 
 Native Permissions:
+  Local Network Denied: "Se ha denegado el permiso para dispositivos cercanos."
   Local Network: "Descubrir dispositivos en tu red local y enviarles vídeos, y sincronizar la configuración y los datos entre dispositivos."
 
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.

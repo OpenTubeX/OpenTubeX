@@ -2119,6 +2119,7 @@ Storage Startup Error:
   Message: "Frigör lagringsutrymme på enheten och försök igen. Synkroniseringen är pausad tills dina data har lästs in."
   Retry: "Försök igen"
 Native Permissions:
+  Local Network Denied: "Behörighet för enheter i närheten nekades."
   Local Network: "Hitta enheter i ditt lokala nätverk och casta videor till dem, och synkronisera inställningar och data mellan enheter."
 
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.

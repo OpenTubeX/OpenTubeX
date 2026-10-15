@@ -2095,6 +2095,7 @@ Search Bar:
   Use Suggestion: Utiliser la suggestion
 
 Native Permissions:
+  Local Network Denied: "L’autorisation d’accès aux appareils à proximité a été refusée."
   Local Network: "Détecter les appareils sur votre réseau local et y diffuser des vidéos, et synchroniser les paramètres et les données entre appareils."
 
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.

@@ -2122,6 +2122,7 @@ Storage Startup Error:
   Message: "Frigjør lagringsplass på enheten og prøv igjen. Synkronisering er satt på pause til dataene dine er lastet."
   Retry: "Prøv igjen"
 Native Permissions:
+  Local Network Denied: "Tillatelse til enheter i nærheten ble avslått."
   Local Network: "Finn enheter på det lokale nettverket og cast videoer til dem, og synkroniser innstillinger og data mellom enheter."
 
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.

@@ -9,13 +9,14 @@ import { createQuickSettingCatalog } from '../../src/renderer/helpers/quickSetti
 
 const source = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
 
-function fixture(configure, { failWrite = false, persisted = null } = {}) {
+function fixture(configure, { failWrite = false, persisted = null, permission = async () => {} } = {}) {
   const writes = []
   const errors = []
   const context = vm.createContext({
     process: { env: { IS_CAPACITOR: true } },
     ANDROID_PROXY_SETTING_KEYS,
     configureAndroidProxy: configure,
+    ensureAndroidLocalNetworkAccess: permission,
     readAndroidProxySettings: async () => persisted,
     defaultUpdaterId: key => key,
     defaultMutationId: key => key,
@@ -71,6 +72,22 @@ test('a failed renderer database write cannot hide an enabled native proxy', asy
   await settings.update('useProxy', true)
   assert.equal(settings.state.useProxy, true)
   assert.equal(settings.errors.length, 1)
+})
+
+test('denied LAN access keeps proxy edits visible and subsequent edits use the saved host', async () => {
+  const applied = []
+  const settings = fixture(async value => { applied.push(value) }, {
+    permission: async () => { throw Object.assign(new Error('Translated permission denial'), { code: 'LOCAL_ACCESS_DENIED' }) },
+  })
+  await settings.update('useProxy', true)
+  await settings.update('proxyHostname', '192.168.1.2')
+  await settings.update('proxyPort', '1080')
+  assert.equal(settings.errors.length, 3)
+  assert.ok(settings.errors.every(error => error.message === 'Translated permission denial'))
+  assert.equal(settings.state.useProxy, true)
+  assert.equal(settings.state.proxyHostname, '192.168.1.2')
+  assert.equal(applied[2].proxyHostname, '192.168.1.2')
+  assert.deepEqual(settings.writes, [['useProxy', true], ['proxyHostname', '192.168.1.2'], ['proxyPort', '1080']])
 })
 
 test('startup reads the native persisted proxy instead of applying stale renderer settings', async () => {

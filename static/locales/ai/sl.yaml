@@ -2693,6 +2693,7 @@ Storage Startup Error:
   Message: "Sprostite prostor v napravi in poskusite znova. Sinhronizacija je začasno ustavljena, dokler se podatki ne naložijo."
   Retry: "Poskusi znova"
 Native Permissions:
+  Local Network Denied: "Dovoljenje za naprave v bližini je bilo zavrnjeno."
   Local Network: "Poiščite naprave v lokalnem omrežju in vanje predvajajte videoposnetke ter sinhronizirajte nastavitve in podatke med napravami."
 
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.

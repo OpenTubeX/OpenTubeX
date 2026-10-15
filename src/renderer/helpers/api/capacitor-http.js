@@ -2,6 +2,8 @@ import { CapacitorHttp, registerPlugin } from '@capacitor/core'
 
 import { withNetworkRecovery } from '../networkRecovery.js'
 import { createAbortError } from './requestErrors.js'
+import { waitForRequest } from './requestWait.js'
+import { ensureAndroidLocalNetworkAccess } from '../androidLocalNetwork.js'
 
 export const DESKTOP_USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36'
 const YOUTUBE_AVATAR_HOSTS = new Set([
@@ -23,34 +25,6 @@ const DNS_RETRY_DELAYS_MS = [150, 500]
 const DEFAULT_NATIVE_TIMEOUT_MS = 30_000
 const IOSHttp = process.env.IS_IOS ? registerPlugin('IOSHttp') : null
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308])
-
-/**
- * @param {Promise<import('@capacitor/core').HttpResponse>} request
- * @param {AbortSignal | undefined} signal
- * @param {(() => void) | undefined} abortNative
- */
-function waitForRequest(request, signal, abortNative) {
-  if (!signal) return request
-  return new Promise((resolve, reject) => {
-    const onAbort = () => {
-      abortNative?.()
-      reject(createAbortError())
-    }
-    if (signal.aborted) onAbort()
-    else signal.addEventListener('abort', onAbort, { once: true })
-
-    request.then(
-      (response) => {
-        signal.removeEventListener('abort', onAbort)
-        resolve(response)
-      },
-      (error) => {
-        signal.removeEventListener('abort', onAbort)
-        reject(error)
-      }
-    )
-  })
-}
 
 function waitForRetry(delay, signal) {
   if (!signal) return new Promise(resolve => setTimeout(resolve, delay))
@@ -128,7 +102,7 @@ async function nativeHttpFetch(input, init) {
   const signal = init?.signal ?? inputRequest?.signal
   if (signal?.aborted) throw createAbortError()
 
-  const url = new URL(inputRequest?.url ?? input.toString())
+  let url = new URL(inputRequest?.url ?? input.toString())
 
   if (url.protocol !== 'https:' && !(init?.allowHttp && url.protocol === 'http:')) {
     throw new TypeError('Capacitor local API requests require HTTPS')
@@ -141,20 +115,48 @@ async function nativeHttpFetch(input, init) {
   }
 
   const redirect = init?.redirect ?? inputRequest?.redirect ?? 'follow'
-
-  const nativeResponse = await requestWithDnsRetry({
+  const isAndroid = process.env.IS_CAPACITOR && !process.env.IS_IOS
+  const options = {
     url: url.toString(),
     method: init?.method ?? inputRequest?.method ?? 'GET',
     headers: Object.fromEntries(headers),
     data: await getRequestBody(input, init),
     responseType: init?.responseType ?? 'text',
-    disableRedirects: redirect !== 'follow',
+    disableRedirects: isAndroid || redirect !== 'follow',
     connectTimeout: init?.nativeTimeoutMs ?? DEFAULT_NATIVE_TIMEOUT_MS,
     readTimeout: init?.nativeTimeoutMs ?? DEFAULT_NATIVE_TIMEOUT_MS,
-  }, signal)
-
-  if (redirect === 'error' && REDIRECT_STATUSES.has(nativeResponse.status)) {
-    throw new TypeError('Redirects are not allowed for this request')
+  }
+  let nativeResponse
+  let redirects = 0
+  for (;;) {
+    if (isAndroid) {
+      // Native automatic redirects would bypass permission checks on later hops.
+      await waitForRequest(ensureAndroidLocalNetworkAccess({ url: url.toString() }), signal)
+      if (signal?.aborted) throw createAbortError()
+    }
+    nativeResponse = await requestWithDnsRetry({ ...options, url: url.toString(), headers: Object.fromEntries(headers) }, signal)
+    if (!REDIRECT_STATUSES.has(nativeResponse.status)) break
+    if (redirect === 'error') throw new TypeError('Redirects are not allowed for this request')
+    if (!isAndroid || redirect !== 'follow') break
+    const location = new Headers(nativeResponse.headers).get('location')
+    if (location === null) break
+    if (redirects++ >= 20) throw new TypeError('Too many redirects')
+    const target = new URL(location, url)
+    if (target.protocol !== 'https:' && !(init?.allowHttp && target.protocol === 'http:')) {
+      throw new TypeError('Capacitor local API requests require HTTPS')
+    }
+    if (target.username || target.password) throw new TypeError('Redirect URLs must not contain credentials')
+    const method = options.method.toUpperCase()
+    if (([301, 302].includes(nativeResponse.status) && method === 'POST') ||
+        (nativeResponse.status === 303 && method !== 'GET' && method !== 'HEAD')) {
+      options.method = 'GET'
+      options.data = undefined
+      for (const name of ['content-encoding', 'content-language', 'content-location', 'content-type', 'content-length']) headers.delete(name)
+    }
+    if (target.origin !== url.origin) {
+      for (const name of ['authorization', 'proxy-authorization', 'cookie', 'cookie2', 'host']) headers.delete(name)
+    }
+    url = target
   }
 
   const responseBody = nativeResponse.status === 204 || nativeResponse.status === 205 || nativeResponse.status === 304
@@ -171,6 +173,7 @@ async function nativeHttpFetch(input, init) {
   })
 
   Object.defineProperty(response, 'url', { value: nativeResponse.url })
+  if (isAndroid) Object.defineProperty(response, 'redirected', { value: redirects > 0 })
   return response
 }
 

@@ -2150,6 +2150,7 @@ Storage Startup Error:
   Message: "יש לפנות שטח אחסון במכשיר ולנסות שוב. הסנכרון מושהה עד לטעינת הנתונים שלך."
   Retry: "ניסיון חוזר"
 Native Permissions:
+  Local Network Denied: "ההרשאה למכשירים בקרבת מקום נדחתה."
   Local Network: "איתור מכשירים ברשת המקומית והעברת סרטונים אליהם, וסנכרון הגדרות ונתונים בין מכשירים."
 
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.

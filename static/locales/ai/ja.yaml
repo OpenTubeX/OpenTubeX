@@ -2096,6 +2096,7 @@ Search Bar:
   Use Suggestion: 候補を入力
 
 Native Permissions:
+  Local Network Denied: "付近のデバイスへのアクセス権限が拒否されました。"
   Local Network: "ローカルネットワーク上のデバイスを検出して動画をキャストし、デバイス間で設定とデータを同期します。"
 
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.

@@ -2097,6 +2097,7 @@ Search Bar:
   Use Suggestion: Öneriyi kullan
 
 Native Permissions:
+  Local Network Denied: "Yakındaki cihazlar izni reddedildi."
   Local Network: "Yerel ağınızdaki cihazları keşfedin ve onlara video yayınlayın, cihazlar arasında ayarları ve verileri eşitleyin."
 
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.
