@@ -43,9 +43,14 @@ function fixture(platform = 'linux') {
     destroy() { this.destroyed = true }
     isDestroyed() { return this.destroyed }
   }
+  const nativeImage = {
+    createEmpty: () => ({ representations: [], addRepresentation(options) { this.representations.push(options) } }),
+    createFromPath: () => ({ resize: ({ height }) => ({ height, toPNG: () => ({ height }) }) }),
+  }
   const context = vm.createContext({
     process: { platform, env: {} }, path: { join: () => '/icon.png' }, __dirname: '/',
     selectedTrayImage: { isEmpty: () => true },
+    nativeImage,
     getTrayMenuIcon: (name, pack) => `${pack}:${name}`,
     Tray, BrowserWindow: { getAllWindows: () => windows, getFocusedWindow: () => windows[0] },
     Menu: { buildFromTemplate: items => items },
@@ -69,7 +74,7 @@ function fixture(platform = 'linux') {
     let trayMenuIconPack = 'material';
     const dockMediaLabels = { previous: 'Previous', play: 'Play', pause: 'Pause', next: 'Next', newWindow: 'New Window' };
     let isTrayOnMinimizeSupported = true;
-    ${source.slice(source.indexOf('  function getTrayImage()'), source.indexOf('\n  asyncFs.rm(', source.indexOf('  function ensureBackgroundTray()')))}
+    ${source.slice(source.indexOf('  const MAC_TRAY_ICON_HEIGHT = 18'), source.indexOf('\n  asyncFs.rm(', source.indexOf('  function ensureBackgroundTray()')))}
     ${source.slice(source.indexOf('  function isTrayEnabled()'), source.indexOf('  /**\n   * @param {string} extension'))}
     function configure(values) {
       if ('enabled' in values) useTrayIcon = values.enabled;
@@ -301,12 +306,16 @@ test('a recreated tray receives a menu even when its contents are unchanged', ()
 for (const platform of ['linux', 'win32', 'darwin']) {
   test(`selected tray artwork survives tray recreation on ${platform}`, () => {
     const { context, trays } = fixture(platform)
-    const image = { isEmpty: () => false, resize: ({ height }) => ({ height }) }
+    const image = { isEmpty: () => false, resize: ({ height }) => ({ height, toPNG: () => ({ height }) }) }
     context.selectedTrayImage = image
     context.configure({ enabled: false })
     context.configure({ enabled: true })
-    if (platform === 'darwin') assert.equal(trays.at(-1).image.height, 18)
-    else assert.equal(trays.at(-1).image, image)
+    if (platform === 'darwin') {
+      const representations = trays.at(-1).image.representations.map(({ scaleFactor, buffer }) => [scaleFactor, buffer.height])
+      assert.deepEqual(representations, [[1, 18], [2, 36]])
+    } else {
+      assert.equal(trays.at(-1).image, image)
+    }
   })
 }
 
