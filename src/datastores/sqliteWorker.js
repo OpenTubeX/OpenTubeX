@@ -108,8 +108,9 @@ const methods = {
     db?.statements.forEach(statement => statement.finalize())
     db?.close()
     databases.delete(name)
-    const { unlink } = await getPool()
-    for (const suffix of ['', '-journal']) unlink(`/${name}.sqlite${suffix}`)
+    // unlink() needs the pool as its receiver.
+    const poolUtil = await getPool()
+    for (const suffix of ['', '-journal']) poolUtil.unlink(`/${name}.sqlite${suffix}`)
   },
 }
 
