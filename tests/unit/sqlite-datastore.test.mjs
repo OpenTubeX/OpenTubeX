@@ -135,6 +135,19 @@ test('starts empty without a legacy file and persists across reopening', async (
   assert.deepEqual(await reopened.findAsync({}), [{ _id: 'q', query: 'q', lastUpdatedAt: 5 }])
 })
 
+test('reports an import only for an existing legacy file, once', async (t) => {
+  const dir = await directory(t)
+  const imported = []
+  const options = { onLegacyImported: result => imported.push(result) }
+  await writeFile(join(dir, 'settings.db'), lines([{ _id: 'a', value: 1 }, { _id: 'b', value: 2 }]))
+  const store = open(t, dir, 'settings', options)
+  await store.findAsync({})
+  store.driver.close()
+  await open(t, dir, 'settings', options).findAsync({})
+  await open(t, dir, 'history', options).findAsync({})
+  assert.deepEqual(imported, [{ documents: 2 }])
+})
+
 test('an unchanged legacy file is neither imported again nor applied', async (t) => {
   const dir = await directory(t)
   await writeFile(join(dir, 'settings.db'), lines([{ _id: 'x', value: 1 }]))

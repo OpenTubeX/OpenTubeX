@@ -1,9 +1,9 @@
 import { existsSync, readdirSync } from 'node:fs'
-import { readFile } from 'node:fs/promises'
+import { readFile, rm } from 'node:fs/promises'
 import path from 'node:path'
 import Datastore from '@seald-io/nedb'
 
-import { test, expect, readDatastore } from '../../helpers/app.mjs'
+import { test, expect, readDatastore, createUserDataDir, launchApp } from '../../helpers/app.mjs'
 
 const videos = Array.from({ length: 300 }, (_, index) => ({
   videoId: `video${String(index % 100).padStart(6, '0')}`,
@@ -82,4 +82,35 @@ test('imports legacy NeDB files, leaves them for older versions and applies thei
     videos: videos.map(video => video.playlistItemId),
   })
   expect(readdirSync(app.userDataDir).filter(name => name.startsWith('playlists.sqlite.backup-'))).toHaveLength(1)
+})
+
+test('tells users once that their library moved to a new format', async () => {
+  // Record the startup notice instead of showing a native dialog.
+  const recordNotices = (phase, _page, electronApp) => phase === 'electronConnected' && electronApp.evaluate(({ dialog }) => {
+    globalThis.__libraryNotices = []
+    dialog.showMessageBox = async (...args) => {
+      globalThis.__libraryNotices.push(args.at(-1).message)
+      return { response: 0 }
+    }
+  })
+  async function launchAndCollect(userDataDir) {
+    const { electronApp, page } = await launchApp(userDataDir, [], { onPhase: recordNotices })
+    try {
+      // The notice waits two seconds after startup; wait past it either way.
+      await page.waitForTimeout(3500)
+      return await electronApp.evaluate(() => globalThis.__libraryNotices)
+    } finally {
+      await electronApp.close()
+    }
+  }
+  const migrated = await createUserDataDir({ playlists: [playlist] })
+  const fresh = await createUserDataDir({ freshProfile: true })
+  try {
+    expect(await launchAndCollect(migrated)).toEqual(['Your library now uses a new storage format.'])
+    expect(await launchAndCollect(migrated), 'only after the import').toEqual([])
+    expect(await launchAndCollect(fresh), 'a new installation has nothing to migrate').toEqual([])
+  } finally {
+    await rm(migrated, { recursive: true, force: true })
+    await rm(fresh, { recursive: true, force: true })
+  }
 })

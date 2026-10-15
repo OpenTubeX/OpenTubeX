@@ -2169,3 +2169,7 @@ Older Version Changes:
   Title: "Muutokset vanhemmasta versiosta"
   Message: "OpenTubeX:n vanhemmassa versiossa tekemäsi muutokset otettiin käyttöön kirjastossasi."
   Detail: "Jos kohdetta muutettiin molemmissa versioissa, vanhemman version muutos säilytettiin. Varmuuskopio aiemmasta kirjastostasi on profiilikansiossasi."
+Library Format Changed:
+  Title: "Kirjasto siirrettiin uuteen muotoon"
+  Message: "Kirjastosi käyttää nyt uutta tallennusmuotoa."
+  Detail: "OpenTubeX:n vanhemmat versiot voivat yhä avata kirjastosi, mutta ne näyttävät sen sellaisena kuin se oli ennen tätä päivitystä. Vanhemmassa versiossa tekemäsi muutokset lisätään, kun palaat tähän versioon."

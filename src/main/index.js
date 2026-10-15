@@ -43,7 +43,7 @@ import { MATERIAL_SYSTEM_SEED, MATERIAL_THEME_VALUES, materialColorScheme, mater
 import { resolveSystemTheme, resolveSystemThemeSettings } from '../appearanceSettings'
 import { applySyncServerUserAgent } from '../syncServerUserAgent'
 import * as baseHandlers from '../datastores/handlers/base'
-import { liveReminders, onLegacyDatastoreChanges } from '../datastores'
+import { liveReminders, onLegacyDatastoreChanges, onLegacyDatastoreImported } from '../datastores'
 import { extractExpiryTimestamp, ImageCache } from './ImageCache'
 import { constants as fsConstants, existsSync } from 'fs'
 import { createReadStream } from 'node:fs'
@@ -137,28 +137,45 @@ Options:
 function runApp() {
   let deferredDatastoresStarted = false
 
-  // Registered synchronously, before any datastore loading started above can finish.
-  let olderVersionNotice = null
-  onLegacyDatastoreChanges(change => {
-    console.warn('Applied library changes made by an older version', change)
-    // Datastores open one after another; show one notice per start for all of them.
-    olderVersionNotice ??= app.whenReady()
+  const libraryNotices = new Map()
+  /**
+   * Datastores open one after another, so each notice shows once per start
+   * for all of them, after the first window had a moment to appear.
+   * @param {string} key
+   * @param {(t: Awaited<ReturnType<typeof createMainTranslator>>) => { title: string, message: string, detail: string }} text
+   */
+  function showLibraryNotice(key, text) {
+    if (libraryNotices.has(key)) return
+    libraryNotices.set(key, app.whenReady()
       .then(() => new Promise(resolve => setTimeout(resolve, 2000)))
       .then(async () => {
         const t = await createMainTranslator()
         const window = BrowserWindow.getFocusedWindow() ?? BrowserWindow.getAllWindows()[0]
         const options = {
           type: 'info',
-          title: t('Older Version Changes.Title'),
-          message: t('Older Version Changes.Message'),
-          detail: t('Older Version Changes.Detail'),
+          ...text(t),
           buttons: [t('Ok')],
           noLink: true
         }
         await (window ? dialog.showMessageBox(window, options) : dialog.showMessageBox(options))
       })
-      .catch(error => console.error(error))
+      .catch(error => console.error(error)))
+  }
+
+  // Registered synchronously, before any datastore loading started above can finish.
+  onLegacyDatastoreChanges(change => {
+    console.warn('Applied library changes made by an older version', change)
+    showLibraryNotice('olderVersionChanges', t => ({
+      title: t('Older Version Changes.Title'),
+      message: t('Older Version Changes.Message'),
+      detail: t('Older Version Changes.Detail'),
+    }))
   })
+  onLegacyDatastoreImported(() => showLibraryNotice('libraryFormatChanged', t => ({
+    title: t('Library Format Changed.Title'),
+    message: t('Library Format Changed.Message'),
+    detail: t('Library Format Changed.Detail'),
+  })))
   /** @type {Set<string>} */
   const ALLOWED_RENDERER_FILES = process.env.NODE_ENV === 'production'
     // __FREETUBE_ALLOWED_PATHS__ is replaced by the injectAllowedPaths.mjs script

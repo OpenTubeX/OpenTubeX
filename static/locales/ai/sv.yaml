@@ -2140,3 +2140,7 @@ Older Version Changes:
   Title: "Ändringar från en äldre version"
   Message: "Ändringar som du gjorde i en äldre version av OpenTubeX har tillämpats på ditt bibliotek."
   Detail: "Om ett objekt ändrades i båda versionerna behölls ändringen från den äldre versionen. En säkerhetskopia av ditt tidigare bibliotek finns i din profilmapp."
+Library Format Changed:
+  Title: "Biblioteket har flyttats till ett nytt format"
+  Message: "Ditt bibliotek använder nu ett nytt lagringsformat."
+  Detail: "Äldre versioner av OpenTubeX kan fortfarande öppna ditt bibliotek, men de visar det som det var före den här uppdateringen. Ändringar som du gör i en äldre version läggs till när du återgår till den här versionen."

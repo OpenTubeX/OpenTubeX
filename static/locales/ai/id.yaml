@@ -2133,3 +2133,7 @@ Older Version Changes:
   Title: "Perubahan dari versi lama"
   Message: "Perubahan yang Anda buat di versi lama OpenTubeX telah diterapkan ke pustaka Anda."
   Detail: "Jika suatu item diubah di kedua versi, perubahan dari versi lama akan dipertahankan. Cadangan pustaka Anda sebelumnya ada di folder profil Anda."
+Library Format Changed:
+  Title: "Pustaka dipindahkan ke format baru"
+  Message: "Pustaka Anda kini menggunakan format penyimpanan baru."
+  Detail: "Versi lama OpenTubeX masih dapat membuka pustaka Anda, tetapi menampilkannya seperti sebelum pembaruan ini. Perubahan yang Anda buat di versi lama akan ditambahkan saat Anda kembali ke versi ini."

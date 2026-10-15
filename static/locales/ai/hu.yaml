@@ -2118,3 +2118,7 @@ Older Version Changes:
   Title: "Módosítások egy régebbi verzióból"
   Message: "Az OpenTubeX egy régebbi verziójában végzett módosításaid érvénybe léptek a könyvtáradban."
   Detail: "Ha egy elem mindkét verzióban módosult, a régebbi verzió módosítása maradt meg. A korábbi könyvtárad biztonsági másolata a profilmappádban található."
+Library Format Changed:
+  Title: "A könyvtár új formátumba került"
+  Message: "A könyvtárad mostantól új tárolási formátumot használ."
+  Detail: "Az OpenTubeX régebbi verziói továbbra is meg tudják nyitni a könyvtáradat, de a frissítés előtti állapotában mutatják. A régebbi verzióban végzett módosítások bekerülnek, amikor visszatérsz ehhez a verzióhoz."

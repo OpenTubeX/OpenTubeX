@@ -2117,3 +2117,7 @@ Older Version Changes:
   Title: "Zmeny zo staršej verzie"
   Message: "Zmeny, ktoré ste urobili v staršej verzii OpenTubeX, boli použité vo vašej knižnici."
   Detail: "Ak bola položka zmenená v oboch verziách, zachovala sa zmena zo staršej verzie. Záloha vašej predchádzajúcej knižnice je v priečinku profilu."
+Library Format Changed:
+  Title: "Knižnica bola presunutá do nového formátu"
+  Message: "Vaša knižnica teraz používa nový formát ukladania."
+  Detail: "Staršie verzie OpenTubeX môžu vašu knižnicu stále otvoriť, ale zobrazia ju v stave pred touto aktualizáciou. Zmeny vykonané v staršej verzii sa pridajú, keď sa vrátite k tejto verzii."

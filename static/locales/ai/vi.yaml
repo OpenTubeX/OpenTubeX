@@ -2159,3 +2159,7 @@ Older Version Changes:
   Title: "Thay đổi từ phiên bản cũ hơn"
   Message: "Các thay đổi bạn đã thực hiện trong phiên bản cũ hơn của OpenTubeX đã được áp dụng cho thư viện của bạn."
   Detail: "Nếu một mục đã được thay đổi ở cả hai phiên bản, thay đổi từ phiên bản cũ hơn được giữ lại. Bản sao lưu thư viện trước đó của bạn nằm trong thư mục hồ sơ."
+Library Format Changed:
+  Title: "Thư viện đã được chuyển sang định dạng mới"
+  Message: "Thư viện của bạn hiện dùng định dạng lưu trữ mới."
+  Detail: "Các phiên bản cũ hơn của OpenTubeX vẫn có thể mở thư viện của bạn, nhưng hiển thị nó như trước bản cập nhật này. Các thay đổi bạn thực hiện trong phiên bản cũ hơn sẽ được thêm lại khi bạn quay lại phiên bản này."

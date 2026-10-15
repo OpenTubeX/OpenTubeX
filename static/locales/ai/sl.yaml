@@ -2714,3 +2714,7 @@ Older Version Changes:
   Title: "Spremembe iz starejše različice"
   Message: "Spremembe, ki ste jih naredili v starejši različici OpenTubeX, so bile uveljavljene v vaši knjižnici."
   Detail: "Če je bil element spremenjen v obeh različicah, je bila ohranjena sprememba iz starejše različice. Varnostna kopija prejšnje knjižnice je v mapi profila."
+Library Format Changed:
+  Title: "Knjižnica je bila premaknjena v nov format"
+  Message: "Vaša knjižnica zdaj uporablja nov format shranjevanja."
+  Detail: "Starejše različice OpenTubeX lahko še vedno odprejo vašo knjižnico, vendar jo prikažejo takšno, kot je bila pred to posodobitvijo. Spremembe, ki jih naredite v starejši različici, se dodajo, ko se vrnete na to različico."

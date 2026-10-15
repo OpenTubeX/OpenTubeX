@@ -186,7 +186,7 @@ export async function createUserDataDir(seed = {}) {
  * @param {object} [options]
  * @param {string} [options.appRoot] repository root containing dist-e2e
  * @param {string} [options.executablePath] Electron executable to launch
- * @param {(phase: 'electronConnected'|'windowCreated'|'routeCommitted'|'interactive', page?: import('@playwright/test').Page) => void|Promise<void>} [options.onPhase]
+ * @param {(phase: 'electronConnected'|'windowCreated'|'routeCommitted'|'interactive', page?: import('@playwright/test').Page, electronApp?: import('@playwright/test').ElectronApplication) => void|Promise<void>} [options.onPhase]
  * @param {number} [windowRetry] internal first-window retry count
  */
 export async function launchApp(userDataDir, extraArgs = [], options = {}, windowRetry = 0) {
@@ -251,7 +251,7 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
 
   const notifyPhase = async (phase, page) => {
     try {
-      await options.onPhase?.(phase, page)
+      await options.onPhase?.(phase, page, electronApp)
     } catch (error) {
       await electronApp.close().catch(() => {})
       throw error

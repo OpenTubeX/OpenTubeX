@@ -2764,3 +2764,7 @@ Older Version Changes:
   Title: "Canvis d'una versió anterior"
   Message: "Els canvis que vau fer en una versió anterior d'OpenTubeX s'han aplicat a la vostra biblioteca."
   Detail: "Si un element s'havia canviat en totes dues versions, s'ha conservat el canvi de la versió anterior. Hi ha una còpia de seguretat de la biblioteca anterior a la carpeta del perfil."
+Library Format Changed:
+  Title: "La biblioteca s'ha traslladat a un format nou"
+  Message: "La vostra biblioteca ara fa servir un format d'emmagatzematge nou."
+  Detail: "Les versions anteriors d'OpenTubeX encara poden obrir la biblioteca, però la mostren tal com era abans d'aquesta actualització. Els canvis que feu en una versió anterior s'afegeixen quan torneu a aquesta versió."

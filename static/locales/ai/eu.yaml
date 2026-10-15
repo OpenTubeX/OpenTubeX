@@ -2140,3 +2140,7 @@ Older Version Changes:
   Title: "Bertsio zaharrago bateko aldaketak"
   Message: "OpenTubeX-en bertsio zaharrago batean egindako aldaketak zure liburutegian aplikatu dira."
   Detail: "Elementu bat bi bertsioetan aldatu bada, bertsio zaharragoko aldaketa gorde da. Zure aurreko liburutegiaren babeskopia profileko karpetan dago."
+Library Format Changed:
+  Title: "Liburutegia formatu berri batera eraman da"
+  Message: "Zure liburutegiak biltegiratze formatu berria erabiltzen du orain."
+  Detail: "OpenTubeX-en bertsio zaharragoek zure liburutegia ireki dezakete oraindik, baina eguneratze honen aurretik zegoen bezala erakusten dute. Bertsio zaharrago batean egiten dituzun aldaketak bertsio honetara itzultzen zarenean gehitzen dira."

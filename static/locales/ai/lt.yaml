@@ -2618,3 +2618,7 @@ Older Version Changes:
   Title: "Pakeitimai iš senesnės versijos"
   Message: "Senesnėje OpenTubeX versijoje atlikti pakeitimai pritaikyti jūsų bibliotekai."
   Detail: "Jei elementas buvo pakeistas abiejose versijose, išsaugotas senesnės versijos pakeitimas. Ankstesnės bibliotekos atsarginė kopija yra jūsų profilio aplanke."
+Library Format Changed:
+  Title: "Biblioteka perkelta į naują formatą"
+  Message: "Jūsų biblioteka dabar naudoja naują saugojimo formatą."
+  Detail: "Senesnės OpenTubeX versijos vis dar gali atidaryti jūsų biblioteką, tačiau rodo ją tokią, kokia ji buvo prieš šį atnaujinimą. Senesnėje versijoje atlikti pakeitimai pridedami, kai grįžtate į šią versiją."

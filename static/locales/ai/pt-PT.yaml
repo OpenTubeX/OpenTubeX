@@ -2158,3 +2158,7 @@ Older Version Changes:
   Title: "Alterações de uma versão anterior"
   Message: "As alterações que fez numa versão anterior do OpenTubeX foram aplicadas à sua biblioteca."
   Detail: "Se um item foi alterado nas duas versões, foi mantida a alteração da versão anterior. Existe uma cópia de segurança da sua biblioteca anterior na pasta do perfil."
+Library Format Changed:
+  Title: "Biblioteca transferida para um novo formato"
+  Message: "A sua biblioteca usa agora um novo formato de armazenamento."
+  Detail: "As versões anteriores do OpenTubeX ainda podem abrir a sua biblioteca, mas mostram-na como estava antes desta atualização. As alterações que fizer numa versão anterior são adicionadas quando voltar a esta versão."

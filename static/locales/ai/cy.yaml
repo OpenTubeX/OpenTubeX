@@ -2145,3 +2145,7 @@ Older Version Changes:
   Title: "Newidiadau o fersiwn hŷn"
   Message: "Mae'r newidiadau a wnaethoch mewn fersiwn hŷn o OpenTubeX wedi'u rhoi ar waith yn eich llyfrgell."
   Detail: "Os cafodd eitem ei newid yn y ddwy fersiwn, cadwyd y newid o'r fersiwn hŷn. Mae copi wrth gefn o'ch llyfrgell flaenorol yn ffolder eich proffil."
+Library Format Changed:
+  Title: "Symudwyd y llyfrgell i fformat newydd"
+  Message: "Mae eich llyfrgell bellach yn defnyddio fformat storio newydd."
+  Detail: "Gall fersiynau hŷn o OpenTubeX agor eich llyfrgell o hyd, ond maen nhw'n ei dangos fel yr oedd cyn y diweddariad hwn. Mae newidiadau a wnewch mewn fersiwn hŷn yn cael eu hychwanegu pan fyddwch yn dychwelyd i'r fersiwn hon."

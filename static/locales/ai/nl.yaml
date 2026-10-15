@@ -2180,3 +2180,7 @@ Older Version Changes:
   Title: "Wijzigingen uit een oudere versie"
   Message: "Wijzigingen die je in een oudere versie van OpenTubeX hebt gemaakt, zijn in je bibliotheek doorgevoerd."
   Detail: "Als een item in beide versies is gewijzigd, is de wijziging uit de oudere versie behouden. Een back-up van je eerdere bibliotheek staat in je profielmap."
+Library Format Changed:
+  Title: "Bibliotheek omgezet naar een nieuwe indeling"
+  Message: "Je bibliotheek gebruikt nu een nieuwe opslagindeling."
+  Detail: "Oudere versies van OpenTubeX kunnen je bibliotheek nog openen, maar tonen die zoals die was vóór deze update. Wijzigingen die je in een oudere versie maakt, worden toegevoegd wanneer je terugkeert naar deze versie."

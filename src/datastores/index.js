@@ -17,6 +17,16 @@ export function onLegacyDatastoreChanges(listener) {
   legacyChangeListeners.add(listener)
 }
 
+const legacyImportListeners = new Set()
+
+/**
+ * Called after an existing legacy datastore was imported, once per datastore.
+ * @param {(imported: { name: string, documents: number }) => void} listener
+ */
+export function onLegacyDatastoreImported(listener) {
+  legacyImportListeners.add(listener)
+}
+
 let dbPath = null
 let createDatastore
 
@@ -41,6 +51,7 @@ if (process.env.IS_ELECTRON_MAIN) {
       backupDirectory: userDataPath,
       createDriver,
       onLegacyChanges: change => legacyChangeListeners.forEach(listener => listener({ name, ...change })),
+      onLegacyImported: imported => legacyImportListeners.forEach(listener => listener({ name, ...imported })),
     })
   }
 } else {

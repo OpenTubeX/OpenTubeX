@@ -2107,3 +2107,7 @@ Older Version Changes:
   Title: "Changes from an older version"
   Message: "Changes you made in an older version of OpenTubeX were applied to your library."
   Detail: "If an item was changed in both versions, the change from the older version was kept. A backup of your library from before is in your profile folder."
+Library Format Changed:
+  Title: "Library moved to a new format"
+  Message: "Your library now uses a new storage format."
+  Detail: "Older versions of OpenTubeX can still open your library, but they show it as it was before this update. Changes you make in an older version are added back when you return to this version."

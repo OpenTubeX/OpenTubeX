@@ -146,13 +146,15 @@ export class SqliteDatastore {
    * @param {string} [options.childField]
    * @param {string[]} [options.indexes] scalar fields used for indexed equality lookups
    * @param {(result: { changed: number, deleted: number, backup?: string }) => void} [options.onLegacyChanges]
+   * @param {(result: { documents: number }) => void} [options.onLegacyImported] after importing an existing legacy file
    */
-  constructor({ driver, legacy, childField, indexes = [], onLegacyChanges }) {
+  constructor({ driver, legacy, childField, indexes = [], onLegacyChanges, onLegacyImported }) {
     this.driver = driver
     this.legacy = legacy
     this.childField = childField
     this.indexes = new Set(indexes)
     this.onLegacyChanges = onLegacyChanges
+    this.onLegacyImported = onLegacyImported
     this.openPromise = null
     this.pending = Promise.resolve()
     // After dropDatabaseAsync, reads find nothing without recreating the database.
@@ -292,6 +294,9 @@ export class SqliteDatastore {
       ])
       throw new Error(`Library import stored ${storedDocs}/${docs.length} documents and ${storedChildren}/${childCount} members`)
     }
+    // Only sources that can tell an older version's later writes apart report
+    // this; their legacy file existed when it was imported.
+    if (fingerprint !== null) this.onLegacyImported?.({ documents: docs.length })
   }
 
   /**

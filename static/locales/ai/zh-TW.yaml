@@ -2120,3 +2120,7 @@ Older Version Changes:
   Title: "來自舊版本的變更"
   Message: "你在舊版 OpenTubeX 中所做的變更已套用到你的媒體庫。"
   Detail: "如果某個項目在兩個版本中都有變更，則保留了舊版本的變更。先前媒體庫的備份位於你的設定檔資料夾中。"
+Library Format Changed:
+  Title: "媒體庫已移轉至新格式"
+  Message: "你的媒體庫現在使用新的儲存格式。"
+  Detail: "舊版 OpenTubeX 仍可開啟你的媒體庫，但會顯示此次更新之前的狀態。你在舊版中所做的變更會在你回到此版本時加回來。"
