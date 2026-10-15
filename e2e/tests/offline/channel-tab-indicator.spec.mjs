@@ -684,3 +684,24 @@ test('desktop channel tabs size to their content and show icons in both packs', 
     await captureAppFramebuffer(app, testInfo, `channel-tab-icons-${pack}`)
   }
 })
+
+test('clearing the channel search right after searching does not reload the channel', async ({ page }) => {
+  const reloads = []
+  page.on('request', request => {
+    const url = new URL(request.url())
+    if (url.pathname.startsWith('/api/v1/channels/') && !url.pathname.endsWith('/search')) reloads.push(url.pathname)
+  })
+  const search = page.locator('.channelSearch input')
+  for (let attempt = 0; attempt < 10; attempt++) {
+    await search.fill('animation')
+    // Clear before the search's route replacement settles, so both replacements overlap.
+    await search.evaluate(input => {
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+      input.value = ''
+      input.dispatchEvent(new InputEvent('input', { bubbles: true }))
+    })
+    await expect(page).not.toHaveURL(/searchQueryText=/)
+    await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 300)))
+  }
+  expect(reloads).toEqual([])
+})
