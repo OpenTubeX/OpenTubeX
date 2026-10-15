@@ -22,16 +22,18 @@ let createDatastore
 
 if (process.env.IS_ELECTRON_MAIN) {
   const { app } = require('electron')
-  const { join } = require('path')
-  const { createDesktopDatastore } = require('./sqliteNode.js')
+  const { createDesktopDatastore, desktopDatastorePaths } = require('./sqliteNode.js')
   const userDataPath = app.getPath('userData') // This is based on the user's OS
-  dbPath = (dbName) => join(userDataPath, `${dbName}.db`)
+  dbPath = (dbName) => desktopDatastorePaths(userDataPath, dbName).legacy
 
   // Each NeDB file is imported on first use and left in place for older versions.
-  createDatastore = (name) => createDesktopDatastore(join(userDataPath, `${name}.sqlite`), dbPath(name), {
-    ...options[name],
-    onLegacyChanges: change => legacyChangeListeners.forEach(listener => listener({ name, ...change })),
-  })
+  createDatastore = (name) => {
+    const { filename, legacy } = desktopDatastorePaths(userDataPath, name)
+    return createDesktopDatastore(filename, legacy, {
+      ...options[name],
+      onLegacyChanges: change => legacyChangeListeners.forEach(listener => listener({ name, ...change })),
+    })
+  }
 } else {
   const { createBrowserDatastore } = require('./sqliteBrowser.js')
   dbPath = (dbName) => `${dbName}.db`

@@ -153,7 +153,7 @@ export class SqliteDatastore {
     this.pending = Promise.resolve()
     // After dropDatabaseAsync, reads find nothing without recreating the database.
     this.dropped = false
-    this.executor = { pushAsync: operation => this._exclusive(operation, true) }
+    this.executor = { pushAsync: operation => this._exclusive(operation, 'read') }
   }
 
   get autoloadPromise() {
@@ -168,9 +168,15 @@ export class SqliteDatastore {
     return this.openPromise
   }
 
-  /** Runs operations one at a time, so each sees the previous one's result. */
-  _exclusive(operation, read = false) {
-    const result = this.pending.then(() => (read && this.dropped) ? undefined : this.loadDatabaseAsync()).then(operation)
+  /**
+   * Runs operations one at a time, so each sees the previous one's result.
+   * Writes open the database first; reads do too unless it was dropped.
+   * @param {() => unknown} operation
+   * @param {'write' | 'read' | 'unopened'} [access]
+   */
+  _exclusive(operation, access = 'write') {
+    const open = access === 'write' || (access === 'read' && !this.dropped)
+    const result = this.pending.then(() => open ? this.loadDatabaseAsync() : undefined).then(operation)
     this.pending = result.catch(() => {})
     return result
   }
@@ -321,7 +327,8 @@ export class SqliteDatastore {
     let backup
     if (changed || deleted) {
       try {
-        backup = await this.driver.backup?.()
+        // A driver without backups fails here too.
+        backup = await this.driver.backup()
       } catch (error) {
         // Never apply them without a backup. The database stays as it is and
         // the next start tries again.
@@ -539,19 +546,21 @@ export class SqliteDatastore {
     return this._exclusive(async () => {
       if (this.dropped) return
       await this._execute([['PRAGMA incremental_vacuum'], ['PRAGMA wal_checkpoint(TRUNCATE)']])
-    }, true)
+    }, 'read')
   }
 
   /**
    * Deletes the database together with its legacy datastore, which would
    * otherwise be imported again. The next write starts an empty database.
+   * It never opens the database, so even one that cannot be opened is removed.
    */
   dropDatabaseAsync() {
     return this._exclusive(async () => {
+      await this.openPromise?.catch(() => {})
       await this.driver.drop()
       await this.legacy?.remove?.()
       this.dropped = true
       this.openPromise = null
-    }, true)
+    }, 'unopened')
   }
 }

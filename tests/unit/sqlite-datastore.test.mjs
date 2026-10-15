@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { execFile } from 'node:child_process'
-import { existsSync, readdirSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, symlinkSync } from 'node:fs'
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -9,7 +9,7 @@ import test from 'node:test'
 import { promisify } from 'node:util'
 import Datastore from '@seald-io/nedb'
 import { SqliteDatastore } from '../../src/datastores/sqlite.js'
-import { createDesktopDatastore, createNedbFileSource, createNodeSqliteDriver } from '../../src/datastores/sqliteNode.js'
+import { createDesktopDatastore, createNedbFileSource, createNodeSqliteDriver, desktopDatastorePaths } from '../../src/datastores/sqliteNode.js'
 
 const lines = docs => docs.map(doc => typeof doc === 'string' ? doc : JSON.stringify(doc)).join('\n') + '\n'
 const video = (videoId, playlistItemId = `item-${videoId}`) => ({ videoId, playlistItemId, title: `Title ${videoId}`, timeAdded: 1 })
@@ -257,6 +257,47 @@ test('dropping a store deletes it and its legacy file, without recreating it on 
   assert.deepEqual(readdirSync(dir), [], 'reading or compacting does not recreate the file')
   await store.insertAsync({ _id: 'b', videoId: 'v' })
   assert.deepEqual(await store.findAsync({ videoId: 'v' }), [{ _id: 'b', videoId: 'v' }])
+})
+
+test('a newer library that cannot be opened can still be dropped', async (t) => {
+  const dir = await directory(t)
+  const db = new DatabaseSync(join(dir, 'video-metadata-cache.sqlite'))
+  db.exec('PRAGMA user_version = 99')
+  db.close()
+  const store = open(t, dir, 'video-metadata-cache')
+  await store.dropDatabaseAsync()
+  assert.deepEqual(readdirSync(dir), [])
+})
+
+test('changes from an older version are not applied when the driver cannot back up', async (t) => {
+  const dir = await directory(t)
+  const legacyFile = join(dir, 'settings.db')
+  await writeFile(legacyFile, lines([{ _id: 'theme', value: 'dark' }]))
+  const store = open(t, dir, 'settings')
+  await store.findAsync({})
+  store.driver.close()
+  await editAsOlderVersion(legacyFile, older => older.updateAsync({ _id: 'theme' }, { $set: { value: 'older' } }))
+
+  const reopened = open(t, dir, 'settings')
+  delete reopened.driver.backup
+  t.mock.method(console, 'error', () => {})
+  assert.deepEqual(await reopened.findAsync({}), [{ _id: 'theme', value: 'dark' }])
+})
+
+test('a symlinked legacy file keeps the library beside its target', async (t) => {
+  const dir = await directory(t)
+  const profile = join(dir, 'profile')
+  const external = join(dir, 'external')
+  mkdirSync(profile)
+  mkdirSync(external)
+  await writeFile(join(external, 'history.db'), lines([{ _id: 'a', videoId: 'v' }]))
+  symlinkSync(join(external, 'history.db'), join(profile, 'history.db'))
+  assert.deepEqual(desktopDatastorePaths(profile, 'history'), {
+    legacy: join(external, 'history.db'), filename: join(external, 'history.sqlite')
+  })
+  assert.deepEqual(desktopDatastorePaths(profile, 'settings'), {
+    legacy: join(profile, 'settings.db'), filename: join(profile, 'settings.sqlite')
+  })
 })
 
 test('refuses a database written by a newer schema instead of altering it', async (t) => {
