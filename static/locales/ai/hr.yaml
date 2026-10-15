@@ -402,6 +402,7 @@ Settings:
     Engine Limit: Možete dodati najviše {count} prilagođenih tražilica.
   Theme Settings:
     Material Accent Color: "Material boja naglaska"
+    Material Wallpaper Colors: "Boje pozadinske slike"
     Tab Loading Indicator:
       Tab Loading Indicator: Pokazatelj učitavanja kartice
       Bar: Traka

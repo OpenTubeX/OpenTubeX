@@ -419,6 +419,7 @@ Settings:
     Engine Limit: Можна дадаць не больш за {count} уласных пошукавых сістэм.
   Theme Settings:
     Material Accent Color: "Акцэнтны колер Material"
+    Material Wallpaper Colors: "Колеры шпалер"
     Tab Loading Indicator:
       Tab Loading Indicator: Індыкатар загрузкі ўкладкі
       Bar: Паласа

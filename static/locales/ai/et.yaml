@@ -400,6 +400,7 @@ Settings:
     Engine Limit: Saate lisada kuni {count} kohandatud otsingumootorit.
   Theme Settings:
     Material Accent Color: "Materiali aktsentvärv"
+    Material Wallpaper Colors: "Taustapildi värvid"
     Tab Loading Indicator:
       Tab Loading Indicator: Vahekaardi laadimisnäidik
       Bar: Riba

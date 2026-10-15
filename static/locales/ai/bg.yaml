@@ -402,6 +402,7 @@ Settings:
     Engine Limit: Можете да добавите до {count} персонализирани търсачки.
   Theme Settings:
     Material Accent Color: "Акцентен цвят на Material"
+    Material Wallpaper Colors: "Цветове от тапета"
     Tab Loading Indicator:
       Tab Loading Indicator: Индикатор за зареждане на раздел
       Bar: Лента

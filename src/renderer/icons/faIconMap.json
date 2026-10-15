@@ -673,6 +673,10 @@
     "ri": "volume-mute-line",
     "material": "volume-off-rounded"
   },
+  "wallpaper": {
+    "ri": "landscape-line",
+    "material": "wallpaper-rounded"
+  },
   "wifi": {
     "ri": "wifi-line",
     "material": "wifi-rounded"

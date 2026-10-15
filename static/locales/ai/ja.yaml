@@ -400,6 +400,7 @@ Settings:
     Engine Limit: カスタム検索エンジンは{count}件まで追加できます。
   Theme Settings:
     Material Accent Color: "Material のアクセントカラー"
+    Material Wallpaper Colors: "壁紙の色"
     Tab Loading Indicator:
       Tab Loading Indicator: タブの読み込み表示
       Bar: バー

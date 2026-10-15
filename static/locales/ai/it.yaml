@@ -400,6 +400,7 @@ Settings:
     Engine Limit: Puoi aggiungere fino a {count} motori di ricerca personalizzati.
   Theme Settings:
     Material Accent Color: "Colore di accento Material"
+    Material Wallpaper Colors: "Colori dello sfondo"
     Tab Loading Indicator:
       Tab Loading Indicator: Indicatore di caricamento scheda
       Bar: Barra

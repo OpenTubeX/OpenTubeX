@@ -377,6 +377,7 @@ Settings:
     Engine Limit: Можно добавить не более {count} своих поисковых систем.
   Theme Settings:
     Material Accent Color: "Акцентный цвет Material"
+    Material Wallpaper Colors: "Цвета обоев"
     Tab Loading Indicator:
       Tab Loading Indicator: Индикатор загрузки вкладки
       Bar: Полоса

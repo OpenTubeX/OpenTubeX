@@ -498,6 +498,7 @@ Settings:
     Engine Limit: 사용자 지정 검색 엔진은 최대 {count}개까지 추가할 수 있습니다.
   Theme Settings:
     Material Accent Color: "Material 강조 색상"
+    Material Wallpaper Colors: "배경화면 색상"
     Tab Loading Indicator:
       Tab Loading Indicator: 탭 로딩 표시
       Bar: 막대

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { dynamicThemeColors, applyDynamicColors, initializeAndroidDynamicColors, androidDynamicColors, desktopSystemAccentColor, getMaterialPalette } from '../../src/renderer/helpers/dynamicColors.js'
-import { DEFAULT_MATERIAL_SEED_COLOR, MATERIAL_THEME_VALUES, MATERIAL_SEED_PRESETS, materialColorScheme, materialStateColor, materialSeedPalette, materialThemeMode, normalizeMaterialSeedColor, normalizeSystemAccentColor } from '../../src/materialTheme.js'
+import { DEFAULT_MATERIAL_SEED_COLOR, MATERIAL_SYSTEM_SEED, MATERIAL_THEME_VALUES, MATERIAL_SEED_PRESETS, materialColorScheme, materialStateColor, materialSeedPalette, materialThemeMode, normalizeMaterialSeedColor, normalizeSystemAccentColor } from '../../src/materialTheme.js'
 import { hasFixedThemeColors, resolveBaseTheme, resolveSystemTheme } from '../../src/appearanceSettings.js'
 
 function palette() {
@@ -18,7 +18,7 @@ test('native accent colors accept Windows, macOS and Linux hexadecimal formats',
   }
 })
 
-test('only desktop Dynamic colors uses the system accent, with a saved-seed fallback', t => {
+test('only Dynamic colors uses system colors, with a saved-seed fallback', t => {
   t.after(() => {
     desktopSystemAccentColor.value = null
     androidDynamicColors.value = { supported: false }
@@ -33,10 +33,18 @@ test('only desktop Dynamic colors uses the system accent, with a saved-seed fall
   assert.deepEqual(getMaterialPalette(manual, 'dynamic'), materialSeedPalette('#006a6a'))
   desktopSystemAccentColor.value = null
   assert.deepEqual(getMaterialPalette(manual, 'dynamic'), materialSeedPalette(manual))
-  const androidPalette = palette()
+  const androidPalette = materialSeedPalette('#386a20')
   androidDynamicColors.value = { supported: true, palette: androidPalette }
   desktopSystemAccentColor.value = '#006a6a'
-  for (const theme of MATERIAL_THEME_VALUES) assert.deepEqual(getMaterialPalette(manual, theme), androidPalette)
+  assert.deepEqual(getMaterialPalette(manual, 'dynamic'), androidPalette)
+  for (const theme of ['materialLight', 'materialDark', 'materialBlack']) {
+    assert.deepEqual(getMaterialPalette(manual, theme), materialSeedPalette(manual))
+    assert.deepEqual(getMaterialPalette(MATERIAL_SYSTEM_SEED, theme), androidPalette)
+  }
+  androidDynamicColors.value = { supported: false }
+  desktopSystemAccentColor.value = null
+  assert.deepEqual(getMaterialPalette(MATERIAL_SYSTEM_SEED, 'materialDark'), materialSeedPalette(DEFAULT_MATERIAL_SEED_COLOR))
+  assert.equal(normalizeMaterialSeedColor(MATERIAL_SYSTEM_SEED), MATERIAL_SYSTEM_SEED)
 })
 
 test('dynamic themes survive settings repair and do not expose manual accents', () => {

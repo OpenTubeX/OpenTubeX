@@ -388,6 +388,7 @@ Settings:
     Engine Limit: You can add up to {count} custom search engines.
   Theme Settings:
     Material Accent Color: "Material accent colour"
+    Material Wallpaper Colors: "Wallpaper colours"
     Tab Loading Indicator:
       Tab Loading Indicator: Tab Loading Style
       Bar: Bar

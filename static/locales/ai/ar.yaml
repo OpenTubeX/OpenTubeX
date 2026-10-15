@@ -404,6 +404,7 @@ Settings:
     Engine Limit: يمكنك إضافة ما يصل إلى {count} محرك بحث مخصص.
   Theme Settings:
     Material Accent Color: "لون تمييز Material"
+    Material Wallpaper Colors: "ألوان الخلفية"
     Tab Loading Indicator:
       Tab Loading Indicator: مؤشر تحميل علامة التبويب
       Bar: شريط

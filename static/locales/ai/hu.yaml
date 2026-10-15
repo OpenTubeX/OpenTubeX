@@ -400,6 +400,7 @@ Settings:
     Engine Limit: Legfeljebb {count} egyéni keresőmotort adhat hozzá.
   Theme Settings:
     Material Accent Color: "Material kiemelőszín"
+    Material Wallpaper Colors: "Háttérkép színei"
     Tab Loading Indicator:
       Tab Loading Indicator: Lapbetöltés jelzője
       Bar: Sáv

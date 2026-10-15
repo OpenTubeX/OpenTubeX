@@ -412,6 +412,7 @@ Settings:
     Engine Limit: Du kan tilføje op til {count} brugerdefinerede søgemaskiner.
   Theme Settings:
     Material Accent Color: "Material-accentfarve"
+    Material Wallpaper Colors: "Farver fra baggrundsbilledet"
     Tab Loading Indicator:
       Tab Loading Indicator: Indikator for faneindlæsning
       Bar: Bjælke

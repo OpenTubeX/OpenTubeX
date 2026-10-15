@@ -506,6 +506,7 @@ Settings:
       Tab Close Focus: Nach dem Schließen des aktiven Tabs
   Theme Settings:
     Material Accent Color: "Material-Akzentfarbe"
+    Material Wallpaper Colors: "Farben des Hintergrundbilds"
     Tab Loading Indicator:
       Tab Loading Indicator: Tab-Ladeanzeige
       Bar: Balken

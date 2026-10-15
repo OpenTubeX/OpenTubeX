@@ -402,6 +402,7 @@ Settings:
     Engine Limit: Du kan lägga till högst {count} egna sökmotorer.
   Theme Settings:
     Material Accent Color: "Material-accentfärg"
+    Material Wallpaper Colors: "Bakgrundsbildens färger"
     Tab Loading Indicator:
       Tab Loading Indicator: Indikator för flikinläsning
       Bar: Stapel

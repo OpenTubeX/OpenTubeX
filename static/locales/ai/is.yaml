@@ -402,6 +402,7 @@ Settings:
     Engine Limit: Þú getur bætt við allt að {count} sérsniðnum leitarvélum.
   Theme Settings:
     Material Accent Color: "Material-áherslulitur"
+    Material Wallpaper Colors: "Litir veggfóðurs"
     Tab Loading Indicator:
       Tab Loading Indicator: Hleðsluvísir flipa
       Bar: Stika

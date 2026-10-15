@@ -39,7 +39,7 @@ import {
   normalizeCustomTheme,
   normalizeCustomThemes,
 } from '../customTheme'
-import { MATERIAL_THEME_VALUES, materialColorScheme, materialSeedPalette, materialThemeMode, normalizeSystemAccentColor } from '../materialTheme.js'
+import { MATERIAL_SYSTEM_SEED, MATERIAL_THEME_VALUES, materialColorScheme, materialSeedPalette, materialThemeMode, normalizeSystemAccentColor } from '../materialTheme.js'
 import { resolveSystemTheme, resolveSystemThemeSettings } from '../appearanceSettings'
 import { applySyncServerUserAgent } from '../syncServerUserAgent'
 import * as baseHandlers from '../datastores/handlers/base'
@@ -2931,7 +2931,7 @@ function runApp() {
         const mode = materialThemeMode(theme, nativeTheme.shouldUseDarkColors)
         if (mode === 'black') return '#000000'
         const seed = await baseHandlers.settings._findOne('materialSeedColor')
-        const color = theme === 'dynamic' ? getSystemAccentColor() ?? seed?.value : seed?.value
+        const color = theme === 'dynamic' || seed?.value === MATERIAL_SYSTEM_SEED ? getSystemAccentColor() ?? seed?.value : seed?.value
         return materialColorScheme(materialSeedPalette(color), mode === 'dark').surface
       }
       return BASE_THEME_BACKGROUND_COLORS[theme] ??

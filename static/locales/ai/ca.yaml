@@ -537,6 +537,7 @@ Settings:
     Engine Limit: Podeu afegir fins a {count} motors de cerca personalitzats.
   Theme Settings:
     Material Accent Color: "Color d’accent de Material"
+    Material Wallpaper Colors: "Colors del fons de pantalla"
     Tab Loading Indicator:
       Tab Loading Indicator: Indicador de càrrega de la pestanya
       Bar: Barra

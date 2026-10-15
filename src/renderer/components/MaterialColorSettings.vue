@@ -6,9 +6,30 @@
   >
     <div class="materialColorHeader">
       <span>{{ t('Settings.Theme Settings.Material Accent Color') }}</span>
-      <code>{{ modelValue }}</code>
+      <code>{{ systemSelected ? t('Settings.Theme Settings.Material Wallpaper Colors') : modelValue }}</code>
     </div>
     <div class="materialColorSwatches">
+      <button
+        v-if="systemScheme"
+        type="button"
+        class="materialColorSwatch"
+        :aria-label="t('Settings.Theme Settings.Material Wallpaper Colors')"
+        :title="t('Settings.Theme Settings.Material Wallpaper Colors')"
+        :aria-pressed="systemSelected"
+        :style="swatchStyle(systemScheme)"
+        @click="emit('update:modelValue', MATERIAL_SYSTEM_SEED)"
+      >
+        <span
+          class="materialSwatchPalette"
+          aria-hidden="true"
+        >
+          <FtIcon
+            :icon="['fas', 'wallpaper']"
+            class="materialSwatchCheck"
+            aria-hidden="true"
+          />
+        </span>
+      </button>
       <button
         v-for="preset in presets"
         :key="preset.color"
@@ -17,13 +38,7 @@
         :aria-label="colorNames[preset.name] ?? preset.name"
         :title="colorNames[preset.name] ?? preset.name"
         :aria-pressed="modelValue.toLowerCase() === preset.color"
-        :style="{
-          '--swatch-primary': preset.scheme.primary,
-          '--swatch-on-primary': preset.scheme.onPrimary,
-          '--swatch-primary-container': preset.scheme.primaryContainer,
-          '--swatch-secondary-container': preset.scheme.secondaryContainer,
-          '--swatch-tertiary-container': preset.scheme.tertiaryContainer,
-        }"
+        :style="swatchStyle(preset.scheme)"
         @click="emit('update:modelValue', preset.color)"
       >
         <span
@@ -41,15 +56,17 @@
       <FtColorPicker
         class="materialCustomSwatch"
         data-setting-key="materialSeedColor"
-        :model-value="modelValue"
+        :model-value="customColor"
         :label="t('Settings.Theme Settings.Material Accent Color')"
         :allow-alpha="false"
-        @update:model-value="emit('update:modelValue', $event)"
+        @update:model-value="updateCustomColor"
+        @apply="seedBeforeEdit = null"
+        @cancel="cancelCustomColor"
       >
         <template #trigger>
           <span
             class="materialCustomColor"
-            :style="{ backgroundColor: modelValue }"
+            :style="{ backgroundColor: customColor }"
             aria-hidden="true"
           >
             <FtIcon
@@ -69,7 +86,8 @@ import { useI18n } from 'vue-i18n'
 import { computed } from 'vue'
 import FtColorPicker from './FtColorPicker/FtColorPicker.vue'
 import FtIcon from './FtIcon/FtIcon.vue'
-import { MATERIAL_SEED_PRESETS, materialColorScheme, materialSeedPalette } from '../../materialTheme.js'
+import { MATERIAL_SEED_PRESETS, MATERIAL_SYSTEM_SEED, materialColorScheme, materialSeedPalette } from '../../materialTheme.js'
+import { androidDynamicColors, getMaterialPalette } from '../helpers/dynamicColors.js'
 
 const { t, tm } = useI18n()
 const colorNames = computed(() => tm('Settings.Theme Settings.Main Color Theme'))
@@ -78,8 +96,37 @@ const presets = MATERIAL_SEED_PRESETS.map(preset => ({
   scheme: materialColorScheme(materialSeedPalette(preset.color), false),
 }))
 
-defineProps({ modelValue: { type: String, required: true } })
+const props = defineProps({ modelValue: { type: String, required: true } })
 const emit = defineEmits(['update:modelValue'])
+
+const systemScheme = computed(() => androidDynamicColors.value.supported
+  ? materialColorScheme(androidDynamicColors.value.palette, false)
+  : null)
+const systemSelected = computed(() => props.modelValue === MATERIAL_SYSTEM_SEED)
+const customColor = computed(() => systemSelected.value
+  ? materialColorScheme(getMaterialPalette(MATERIAL_SYSTEM_SEED), false).primary
+  : props.modelValue)
+
+// Canceling an edit that started from the system palette must keep following it.
+let seedBeforeEdit = null
+function updateCustomColor(color) {
+  seedBeforeEdit ??= props.modelValue
+  emit('update:modelValue', color)
+}
+function cancelCustomColor() {
+  if (seedBeforeEdit === MATERIAL_SYSTEM_SEED) emit('update:modelValue', MATERIAL_SYSTEM_SEED)
+  seedBeforeEdit = null
+}
+
+function swatchStyle(scheme) {
+  return {
+    '--swatch-primary': scheme.primary,
+    '--swatch-on-primary': scheme.onPrimary,
+    '--swatch-primary-container': scheme.primaryContainer,
+    '--swatch-secondary-container': scheme.secondaryContainer,
+    '--swatch-tertiary-container': scheme.tertiaryContainer,
+  }
+}
 </script>
 
 <style scoped>

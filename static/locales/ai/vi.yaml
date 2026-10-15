@@ -404,6 +404,7 @@ Settings:
     Engine Limit: Bạn có thể thêm tối đa {count} công cụ tìm kiếm tùy chỉnh.
   Theme Settings:
     Material Accent Color: "Màu nhấn Material"
+    Material Wallpaper Colors: "Màu hình nền"
     Tab Loading Indicator:
       Tab Loading Indicator: Chỉ báo tải thẻ
       Bar: Thanh

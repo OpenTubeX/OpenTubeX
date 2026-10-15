@@ -400,6 +400,7 @@ Settings:
     Engine Limit: Puteți adăuga până la {count} motoare de căutare personalizate.
   Theme Settings:
     Material Accent Color: "Culoare de accent Material"
+    Material Wallpaper Colors: "Culorile imaginii de fundal"
     Tab Loading Indicator:
       Tab Loading Indicator: Indicator de încărcare a filei
       Bar: Bară

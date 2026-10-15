@@ -422,6 +422,7 @@ Settings:
     Engine Limit: Du kan leggje til opptil {count} eigne søkjemotorar.
   Theme Settings:
     Material Accent Color: "Material-aksentfarge"
+    Material Wallpaper Colors: "Fargar frå bakgrunnsbiletet"
     Tab Loading Indicator:
       Tab Loading Indicator: Indikator for fanelasting
       Bar: Linje

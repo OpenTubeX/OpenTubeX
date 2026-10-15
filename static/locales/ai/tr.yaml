@@ -400,6 +400,7 @@ Settings:
     Engine Limit: En fazla {count} özel arama motoru ekleyebilirsiniz.
   Theme Settings:
     Material Accent Color: "Material vurgu rengi"
+    Material Wallpaper Colors: "Duvar kağıdı renkleri"
     Tab Loading Indicator:
       Tab Loading Indicator: Sekme yükleme göstergesi
       Bar: Çubuk
