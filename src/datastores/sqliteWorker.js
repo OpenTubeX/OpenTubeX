@@ -2,11 +2,30 @@
 // available in dedicated workers.
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm'
 
+let lock = null
 let pool = null
 const databases = new Map()
 
+/**
+ * Holds an exclusive lock for this worker's lifetime. The pool opens every
+ * file exclusively, so only one tab can use it; a reload waits briefly for the
+ * previous worker to end instead of failing.
+ */
+function acquireLibraryLock() {
+  return new Promise((resolve, reject) => {
+    navigator.locks.request('opentubex-library', { signal: AbortSignal.timeout(5000) }, () => {
+      resolve()
+      return new Promise(() => {})
+    }).catch(reject)
+  })
+}
+
 async function getPool() {
-  pool ??= sqlite3InitModule().then(sqlite3 => sqlite3.installOpfsSAHPoolVfs({
+  lock ??= acquireLibraryLock().catch(error => {
+    lock = null
+    throw error
+  })
+  pool ??= lock.then(() => sqlite3InitModule()).then(sqlite3 => sqlite3.installOpfsSAHPoolVfs({
     name: 'opentubex-library',
     directory: '/opentubex-library',
     initialCapacity: 32,
