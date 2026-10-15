@@ -39,7 +39,7 @@ test('Android fixed Material variants use the selectable accent with readable te
       await wallpaper.click()
       await expect(wallpaper).toHaveAttribute('aria-pressed', 'true')
       const systemPrimary = await page.evaluate(() => getComputedStyle(document.body).getPropertyValue('--md-sys-color-primary').trim())
-      assert.ok(!seeded.includes(await page.evaluate(() => getComputedStyle(document.body).getPropertyValue('--primary-color').trim())), `${theme}: wallpaper swatch replaces the seed`)
+      assert.equal(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getMaterialSeedColor), 'system')
       // The swatch previews the light scheme.
       if (theme === 'materialLight') assert.equal(systemPrimary, await wallpaper.evaluate(el => el.style.getPropertyValue('--swatch-primary')))
       const roles = await page.evaluate(() => {

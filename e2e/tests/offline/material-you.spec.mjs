@@ -306,6 +306,30 @@ for (const scale of [100, 125]) {
   }
 }
 
+test('a synced system seed follows desktop accents and survives a canceled custom edit', async ({ app, page }) => {
+  await page.emulateMedia({ colorScheme: 'light' })
+  const section = await goToSettingsSection(page, 'theme')
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateMaterialSeedColor', 'system'))
+  for (const [nativeColor, seed] of [['#895AA2FF', '#895aa2'], ['006A6AFF', '#006a6a']]) {
+    await app.electronApp.evaluate(({ systemPreferences }, color) => {
+      systemPreferences.getAccentColor = () => color
+      systemPreferences.emit('accent-color-changed', {}, color)
+    }, nativeColor)
+    const primary = materialColorScheme(materialSeedPalette(seed), false).primary
+    await expect(page.locator('body')).toHaveCSS('--primary-color', primary)
+    await expect(section.locator('.materialCustomColor')).toHaveCSS('background-color', `rgb(${primary.slice(1).match(/../g).map(value => parseInt(value, 16)).join(', ')})`)
+  }
+  const customSwatch = section.locator('.materialCustomSwatch .colorFieldTrigger')
+  await customSwatch.click()
+  const picker = page.getByRole('dialog', { name: 'Material accent color' })
+  await picker.getByRole('textbox', { name: /^Hex color/ }).fill('#00aaff')
+  await picker.getByRole('textbox', { name: /^Hex color/ }).press('Tab')
+  await page.keyboard.press('Escape')
+  await expect(picker).toBeHidden()
+  expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getMaterialSeedColor)).toBe('system')
+  await expect(page.locator('body')).toHaveCSS('--primary-color', materialColorScheme(materialSeedPalette('#006a6a'), false).primary)
+})
+
 test('seed picker persists colors, system preferences select Material variants, and ordinary themes clear the palette', async ({ page }) => {
   const section = await goToSettingsSection(page, 'theme')
   await section.getByRole('button', { name: 'Material accent color' }).click()

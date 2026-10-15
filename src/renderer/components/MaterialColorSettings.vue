@@ -59,7 +59,9 @@
         :model-value="customColor"
         :label="t('Settings.Theme Settings.Material Accent Color')"
         :allow-alpha="false"
-        @update:model-value="emit('update:modelValue', $event)"
+        @update:model-value="updateCustomColor"
+        @apply="seedBeforeEdit = null"
+        @cancel="cancelCustomColor"
       >
         <template #trigger>
           <span
@@ -84,8 +86,8 @@ import { useI18n } from 'vue-i18n'
 import { computed } from 'vue'
 import FtColorPicker from './FtColorPicker/FtColorPicker.vue'
 import FtIcon from './FtIcon/FtIcon.vue'
-import { DEFAULT_MATERIAL_SEED_COLOR, MATERIAL_SEED_PRESETS, MATERIAL_SYSTEM_SEED, materialColorScheme, materialSeedPalette } from '../../materialTheme.js'
-import { androidDynamicColors } from '../helpers/dynamicColors.js'
+import { MATERIAL_SEED_PRESETS, MATERIAL_SYSTEM_SEED, materialColorScheme, materialSeedPalette } from '../../materialTheme.js'
+import { androidDynamicColors, getMaterialPalette } from '../helpers/dynamicColors.js'
 
 const { t, tm } = useI18n()
 const colorNames = computed(() => tm('Settings.Theme Settings.Main Color Theme'))
@@ -102,8 +104,19 @@ const systemScheme = computed(() => androidDynamicColors.value.supported
   : null)
 const systemSelected = computed(() => props.modelValue === MATERIAL_SYSTEM_SEED)
 const customColor = computed(() => systemSelected.value
-  ? systemScheme.value?.primary ?? DEFAULT_MATERIAL_SEED_COLOR
+  ? materialColorScheme(getMaterialPalette(MATERIAL_SYSTEM_SEED), false).primary
   : props.modelValue)
+
+// Canceling an edit that started from the system palette must keep following it.
+let seedBeforeEdit = null
+function updateCustomColor(color) {
+  seedBeforeEdit ??= props.modelValue
+  emit('update:modelValue', color)
+}
+function cancelCustomColor() {
+  if (seedBeforeEdit === MATERIAL_SYSTEM_SEED) emit('update:modelValue', MATERIAL_SYSTEM_SEED)
+  seedBeforeEdit = null
+}
 
 function swatchStyle(scheme) {
   return {

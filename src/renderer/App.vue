@@ -595,7 +595,7 @@ import { lockBodyScroll, unlockBodyScroll } from './components/FtPrompt/scrollLo
 import { vSaferHtml } from './directives/vSaferHtml.js'
 
 import store from './store/index'
-import { MATERIAL_THEME_VALUES, normalizeSystemAccentColor } from '../materialTheme.js'
+import { MATERIAL_SYSTEM_SEED, MATERIAL_THEME_VALUES, normalizeSystemAccentColor } from '../materialTheme.js'
 import { androidDynamicColors, desktopSystemAccentColor, getAndroidDynamicColors, onAndroidDynamicColorsChanged } from './helpers/dynamicColors'
 import {
   exitAndroidApp,
@@ -3134,7 +3134,7 @@ if (isElectron) {
   const receiveAccent = color => {
     if (disposed) return
     desktopSystemAccentColor.value = normalizeSystemAccentColor(color)
-    if (baseTheme.value === 'dynamic') updateTheme()
+    if (baseTheme.value === 'dynamic' || store.getters.getMaterialSeedColor === MATERIAL_SYSTEM_SEED) updateTheme()
   }
   const removeListener = window.ftElectron.handleSystemAccentColorUpdated(color => {
     receivedUpdate = true
