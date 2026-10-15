@@ -1,5 +1,6 @@
 import { test, expect } from '../../helpers/app.mjs'
 import { findWatchComponent, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
+import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 const settings = {
@@ -289,6 +290,9 @@ test('keeps many unloaded tabs lightweight after repeated player reloads', { tag
   test.fixme(true, 'Intermittent listener-count failure after player unloading')
   test.setTimeout(180_000)
   await mockPlayableWatchPage(app, page)
+  // Failing avatars make every tab retry and fall back to its page icon for
+  // several seconds, which shifts the counters between samples.
+  await page.route('https://yt3.ggpht.com/**', route => fulfillVisualFixture(route, 'avatar'))
   await openMockedVideo(page)
   await rememberVideo(page)
   await navigateAway(page)
