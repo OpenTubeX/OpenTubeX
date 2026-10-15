@@ -627,7 +627,8 @@ const currentTabViewAllRoute = computed(() => {
 })
 
 watch(route, () => {
-  const ownRouteIndex = ownRouteFullPaths.indexOf(route.fullPath)
+  // Search from the end so a batched watcher run consumes every replacement up to the latest copy of this path.
+  const ownRouteIndex = ownRouteFullPaths.lastIndexOf(route.fullPath)
   if (ownRouteIndex !== -1) {
     // Earlier replacements were superseded by this one.
     ownRouteFullPaths.splice(0, ownRouteIndex + 1)
