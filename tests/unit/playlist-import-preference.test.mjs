@@ -5,6 +5,7 @@ import vm from 'node:vm'
 
 const source = await readFile(new URL('../../src/renderer/components/DataSettings/DataSettings.vue', import.meta.url), 'utf8')
 const importSource = source.slice(source.indexOf('async function importPlaylists()'), source.indexOf('async function exportPlaylists()'))
+const takeoutSource = source.slice(source.indexOf('async function importTakeoutPlaylist('), source.indexOf('async function normalizeImportedPlaylistThumbnail('))
 
 for (const preference of [undefined, false, true]) {
   for (const existing of [false, true]) {
@@ -36,4 +37,25 @@ for (const preference of [undefined, false, true]) {
       assert.deepEqual(Array.from(playlist.videos, video => video.videoId), expected)
     })
   }
+}
+
+for (const addVideosToTop of [false, true]) {
+  test(`Takeout merges retain existing duplicates and insert only new entries with top insertion ${addVideosToTop}`, async () => {
+    const current = {
+      _id: 'custom', playlistName: 'My playlist', addVideosToTop,
+      videos: [{ videoId: 'existing', timeAdded: 1, playlistItemId: 'first' }, { videoId: 'existing', timeAdded: 1, playlistItemId: 'duplicate' }],
+    }
+    let saved
+    const run = vm.runInNewContext(takeoutSource + '\nimportTakeoutPlaylist', {
+      allPlaylists: { value: [current] },
+      deepCopy: structuredClone,
+      processToBeAddedPlaylistVideo: () => {},
+      store: { dispatch: async (action, payload) => { assert.equal(action, 'importPlaylist'); saved = payload } },
+    })
+    await run({ playlistName: 'My playlist', videos: [{ videoId: 'existing', timeAdded: 1 }, { videoId: 'new-a', timeAdded: 2 }, { videoId: 'new-b', timeAdded: 3 }, { videoId: 'new-a', timeAdded: 2 }] })
+    const expected = addVideosToTop ? ['new-a', 'new-b', 'existing', 'existing'] : ['existing', 'existing', 'new-a', 'new-b']
+    assert.deepEqual(Array.from(saved.videos, video => video.videoId), expected)
+    assert.deepEqual(Array.from(saved.videos.filter(video => video.videoId === 'existing'), video => video.playlistItemId), ['first', 'duplicate'])
+    assert.deepEqual(current.videos.map(video => video.playlistItemId), ['first', 'duplicate'])
+  })
 }

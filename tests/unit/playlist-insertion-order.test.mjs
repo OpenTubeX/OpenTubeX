@@ -207,7 +207,7 @@ test('the bulk prompt waits for writes and reports failure without a success toa
   const save = vm.runInNewContext(promptSaveSource + '\naddSelectedToPlaylists', {
     saving,
     selectedPlaylistIdList: { value: ['custom'] },
-    allPlaylists: { value: [{ _id: 'custom', videos: [] }] },
+    allPlaylists: { value: [{ _id: 'custom', playlistName: 'Weekend watching', videos: [] }] },
     toBeAddedToPlaylistVideoList: { value: [{ videoId: 'new' }, { videoId: 'other' }] },
     addingDuplicateVideosEnabled: { value: false },
     store: { dispatch: () => { writes++; return pendingWrite } },
@@ -225,6 +225,7 @@ test('the bulk prompt waits for writes and reports failure without a success toa
   assert.equal(saving.value, false)
   assert.equal(toasts.length, 1)
   assert.ok(toasts[0].message.includes('There was an issue with updating this playlist.'))
+  assert.ok(toasts[0].message.startsWith('Weekend watching: '))
 })
 
 test('renderer insertion uses the committed direction when the preference changes before the reply', async () => {
@@ -238,6 +239,67 @@ test('renderer insertion uses the committed direction when the preference change
   })
   await actions.addVideo({ commit: (name, payload) => mutations[name](state, payload) }, { _id: 'custom', videoData: { videoId: 'new' } })
   assert.deepEqual(Array.from(state.playlists[0].videos, video => video.videoId), Array.from((await db.playlists.findOneAsync({ _id: 'custom' })).videos, video => video.videoId))
+})
+
+test('partial bulk failure names the failed playlist and counts only the successful target', async () => {
+  const toasts = []
+  const save = vm.runInNewContext(promptSaveSource + '\naddSelectedToPlaylists', {
+    saving: { value: false },
+    selectedPlaylistIdList: { value: ['saved', 'failed'] },
+    allPlaylists: { value: [{ _id: 'saved', playlistName: 'Saved playlist', videos: [] }, { _id: 'failed', playlistName: 'Failed playlist', videos: [] }] },
+    toBeAddedToPlaylistVideoList: { value: [{ videoId: 'new' }, { videoId: 'other' }] },
+    addingDuplicateVideosEnabled: { value: false },
+    store: { dispatch: async (_action, payload) => payload._id === 'saved' },
+    showToast: toast => toasts.push(toast),
+    t: (key, params) => params ? `Saved to ${params.playlistCount}` : key,
+    hide: () => {},
+  })
+  await save()
+  assert.equal(toasts.length, 2)
+  assert.equal(toasts[0].message, 'Saved to 1')
+  assert.ok(toasts[1].message.startsWith('Failed playlist: '))
+})
+
+for (const allowDuplicates of [false, true]) {
+  test(`bulk saves keep duplicate policy ${allowDuplicates} after it changes while saving`, async () => {
+    const toggle = { value: allowDuplicates }
+    const writes = []
+    const toasts = []
+    const save = vm.runInNewContext(promptSaveSource + '\naddSelectedToPlaylists', {
+      saving: { value: false },
+      selectedPlaylistIdList: { value: ['first', 'second'] },
+      allPlaylists: { value: ['first', 'second'].map(_id => ({ _id, videos: [{ videoId: 'existing' }] })) },
+      toBeAddedToPlaylistVideoList: { value: [{ videoId: 'existing' }, { videoId: 'new' }] },
+      addingDuplicateVideosEnabled: toggle,
+      store: { dispatch: async (_action, payload) => { writes.push(payload); toggle.value = !allowDuplicates; return true } },
+      showToast: toast => toasts.push(toast),
+      t: (_key, params) => `Saved to ${params.playlistCount}`,
+      hide: () => {},
+    })
+    await save()
+    assert.equal(writes.length, 2)
+    for (const payload of writes) {
+      assert.deepEqual(Array.from(payload.videos, video => video.videoId), allowDuplicates ? ['existing', 'new'] : ['new'])
+    }
+    assert.equal(toasts[0].message, 'Saved to 2')
+  })
+}
+
+test('a bulk save skips empty filtered batches without reporting an addition', async () => {
+  const toasts = []
+  const save = vm.runInNewContext(promptSaveSource + '\naddSelectedToPlaylists', {
+    saving: { value: false },
+    selectedPlaylistIdList: { value: ['custom'] },
+    allPlaylists: { value: [{ _id: 'custom', videos: [{ videoId: 'existing' }] }] },
+    toBeAddedToPlaylistVideoList: { value: [{ videoId: 'existing' }, { videoId: 'existing' }] },
+    addingDuplicateVideosEnabled: { value: false },
+    store: { dispatch: () => assert.fail('An empty batch must not be written') },
+    showToast: toast => toasts.push(toast),
+    t: key => key,
+    hide: () => {},
+  })
+  await save()
+  assert.deepEqual(toasts, [])
 })
 
 test('an insertion retry does not overwrite a newer playlist timestamp', async () => {

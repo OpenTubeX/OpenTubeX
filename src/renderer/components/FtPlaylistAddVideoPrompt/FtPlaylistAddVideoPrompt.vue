@@ -417,18 +417,19 @@ async function addSelectedToPlaylists() {
   try {
     const allPlaylists_ = allPlaylists.value
     const toBeAddedToPlaylistVideoList_ = toBeAddedToPlaylistVideoList.value
-    let failed = false
+    const allowDuplicates = addingDuplicateVideosEnabled.value
+    const failedPlaylistNames = []
 
     for (const selectedPlaylistId of [...selectedPlaylistIdList.value]) {
       const playlist = allPlaylists_.find((list) => list._id === selectedPlaylistId)
       if (playlist == null) {
-        failed = true
+        failedPlaylistNames.push(selectedPlaylistId)
         continue
       }
 
       let videosToBeAdded
 
-      if (!addingDuplicateVideosEnabled.value) {
+      if (!allowDuplicates) {
         const playlistVideoIds = playlist.videos.map((v) => v.videoId)
         videosToBeAdded = toBeAddedToPlaylistVideoList_.filter((v) => !playlistVideoIds.includes(v.videoId))
       } else {
@@ -436,12 +437,14 @@ async function addSelectedToPlaylists() {
         videosToBeAdded = toBeAddedToPlaylistVideoList_.slice()
       }
 
+      if (videosToBeAdded.length === 0) continue
+
       const saved = await store.dispatch('addVideos', {
         _id: playlist._id,
         videos: videosToBeAdded,
       })
       if (saved) addedPlaylistIds.add(playlist._id)
-      else failed = true
+      else failedPlaylistNames.push(playlist.playlistName)
     }
 
     if (addedPlaylistIds.size > 0) {
@@ -456,9 +459,9 @@ async function addSelectedToPlaylists() {
         icon: ['fac', 'playlist-check'],
       })
     }
-    if (failed) {
+    for (const playlistName of failedPlaylistNames) {
       showToast({
-        message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
+        message: `${playlistName}: ${t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]')}`,
         icon: ['fas', 'circle-exclamation'],
       })
     }
