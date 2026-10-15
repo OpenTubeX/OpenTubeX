@@ -3,6 +3,43 @@ import { test, expect, sel, abortUnmockedRequest } from '../../helpers/app.mjs'
 test.describe('Ctrl+Tab responsiveness', () => {
   test.use({ seed: { settings: { uiScale: 125, showTabPreviews: true, fetchSubscriptionsAutomatically: false } } })
 
+  test('quick forward and backward switches never mount the menu under CPU throttling', async ({ page }) => {
+    await page.route(/^https?:\/\//, abortUnmockedRequest)
+    await page.evaluate(async () => {
+      await window.ftElectron.tabs.create({ route: '/history', makeActive: false, lazyLoad: true })
+      await window.ftElectron.tabs.create({ route: '/about', makeActive: false, lazyLoad: true })
+      window.__switcherMounts = 0
+      new MutationObserver(records => {
+        for (const record of records) {
+          for (const node of record.addedNodes) {
+            if (node instanceof Element && node.matches('.tabSwitcherOverlay')) window.__switcherMounts++
+          }
+        }
+      }).observe(document.querySelector('#app'), { childList: true, subtree: true })
+    })
+    await expect(page.locator(sel.tabs)).toHaveCount(3)
+    const ids = await page.locator(sel.tabs).evaluateAll(tabs => tabs.map(tab => tab.dataset.tabId))
+    const session = await page.context().newCDPSession(page)
+    await session.send('Emulation.setCPUThrottlingRate', { rate: 6 })
+    // Freeze the hold threshold so IPC/test-driver latency on busy machines
+    // cannot accidentally turn a quick tap into an intentional hold.
+    await page.clock.install()
+    await page.clock.pauseAt(new Date(Date.now() + 1000))
+    try {
+      for (const [shortcut, target] of [['Control+Tab', ids[1]], ['Control+Shift+Tab', ids[0]], ['Control+Shift+Tab', ids[2]]]) {
+        await page.keyboard.press(shortcut)
+        await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', target)
+        expect(await page.evaluate(() => window.__switcherMounts)).toBe(0)
+      }
+      await page.clock.runFor(500)
+      await expect(page.locator('.tabSwitcherOverlay')).toHaveCount(0)
+      expect(await page.evaluate(() => window.__switcherMounts)).toBe(0)
+    } finally {
+      await page.clock.resume()
+      await session.detach()
+    }
+  })
+
   test('shows the switcher before a slow background capture finishes', async ({ page, app }) => {
     await page.route(/^https?:\/\//, abortUnmockedRequest)
     await page.evaluate(async () => {
