@@ -152,21 +152,22 @@ for (const preference of ['hidden', 'blur']) {
         await expect(image).toHaveAttribute('src', thumbnail)
         await expect.poll(() => image.evaluate(element => getComputedStyle(element).filter)).toMatch(/blur\(/)
         await image.scrollIntoViewIfNeeded()
-        const bounds = await image.boundingBox()
-        const gap = { x: bounds.x + bounds.width + 3, y: bounds.y + bounds.height / 2 - 4, width: 6, height: 8 }
-        const blurred = await page.screenshot({ clip: gap })
-        const visibility = await image.evaluate(element => {
-          const original = element.style.visibility
-          element.style.visibility = 'hidden'
-          return original
-        })
-        let withoutImage
-        try {
-          withoutImage = await page.screenshot({ clip: gap })
-        } finally {
-          await image.evaluate((element, visibility) => { element.style.visibility = visibility }, visibility)
-        }
-        expect(blurred.equals(withoutImage), `Blur must stay out of the thumbnail/text gap at ${uiScale}%`).toBe(true)
+        // Resample until transient paint settles. A real bleed never matches.
+        await expect.poll(async () => {
+          const bounds = await image.boundingBox()
+          const gap = { x: bounds.x + bounds.width + 3, y: bounds.y + bounds.height / 2 - 4, width: 6, height: 8 }
+          const blurred = await page.screenshot({ clip: gap })
+          const visibility = await image.evaluate(element => {
+            const original = element.style.visibility
+            element.style.visibility = 'hidden'
+            return original
+          })
+          try {
+            return blurred.equals(await page.screenshot({ clip: gap }))
+          } finally {
+            await image.evaluate((element, visibility) => { element.style.visibility = visibility }, visibility)
+          }
+        }, { message: `Blur must stay out of the thumbnail/text gap at ${uiScale}%` }).toBe(true)
         await page.locator('.watchVideoRecommendations').screenshot({ path: testInfo.outputPath('blurred-offline.png') })
       }
     })
