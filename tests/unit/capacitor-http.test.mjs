@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises'
 import vm from 'node:vm'
 
 import { createAbortError } from '../../src/renderer/helpers/api/requestErrors.js'
+import { waitForRequest } from '../../src/renderer/helpers/api/requestWait.js'
 import { classifyRequestFailure } from '../../src/renderer/helpers/api/requestDiagnostics.js'
 import { createNetworkRecovery } from '../../src/renderer/helpers/networkRecovery.js'
 import { createSubscriptionNetworkRecovery, SubscriptionNetworkError } from '../../src/renderer/helpers/subscriptionNetworkRecovery.js'
@@ -310,7 +311,7 @@ async function loadNativeHttp(request, ios = null, entryPoint = 'capacitorHttpFe
     process: { env: { IS_IOS: ios !== null } },
     registerPlugin: () => ios, crypto: globalThis.crypto,
     withNetworkRecovery: (input, init, task) => task(init?.signal ?? (input instanceof Request ? input.signal : undefined)),
-    createAbortError, Request, Response, Headers, URL, URLSearchParams, setTimeout, clearTimeout,
+    createAbortError, waitForRequest, Request, Response, Headers, URL, URLSearchParams, setTimeout, clearTimeout,
   })
   vm.runInContext(`${source}\nglobalThis.fetchNative = ${entryPoint}`, context)
   return context.fetchNative

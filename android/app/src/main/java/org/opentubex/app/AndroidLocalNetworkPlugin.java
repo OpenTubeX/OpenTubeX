@@ -13,14 +13,18 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import okhttp3.HttpUrl;
 
 @CapacitorPlugin(name = "AndroidLocalNetwork", permissions = {
     @Permission(alias = "localNetwork", strings = { Manifest.permission.ACCESS_LOCAL_NETWORK })
 })
 public final class AndroidLocalNetworkPlugin extends Plugin {
-    private final ExecutorService worker = Executors.newFixedThreadPool(2);
+    private final ExecutorService worker = new ThreadPoolExecutor(2, 2, 0L, TimeUnit.MILLISECONDS,
+        new ArrayBlockingQueue<>(64));
 
     @Override protected void handleOnDestroy() { worker.shutdownNow(); }
 
@@ -29,10 +33,14 @@ public final class AndroidLocalNetworkPlugin extends Plugin {
             call.resolve(new JSObject().put("required", false));
             return;
         }
-        worker.execute(() -> {
-            try { checkAccessOnWorker(call); }
-            catch (Exception error) { call.reject("Unable to check local access", error); }
-        });
+        try {
+            worker.execute(() -> {
+                try { checkAccessOnWorker(call); }
+                catch (Exception error) { call.reject("Unable to check local access", error); }
+            });
+        } catch (RejectedExecutionException error) {
+            call.reject("Too many pending local access checks");
+        }
     }
 
     private void checkAccessOnWorker(PluginCall call) {

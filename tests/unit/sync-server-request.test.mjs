@@ -10,6 +10,7 @@ import { applySyncServerUserAgent } from '../../src/syncServerUserAgent.js'
 import { createSyncServerRequestHeaders } from '../../src/renderer/helpers/sync-server-request.js'
 import * as errors from '../../src/renderer/helpers/sync-server-errors.js'
 import { createAbortError } from '../../src/renderer/helpers/api/requestErrors.js'
+import { waitForRequest } from '../../src/renderer/helpers/api/requestWait.js'
 
 async function loadClient(env, version, requests, nativeRequest, browserRequest, serverUrl = 'https://sync.example', localNetworkAccess = async () => {}) {
   const context = vm.createContext({
@@ -20,7 +21,7 @@ async function loadClient(env, version, requests, nativeRequest, browserRequest,
     packageDetails: { version },
     createSyncServerRequestHeaders,
     applySyncServerUserAgent,
-    createAbortError,
+    createAbortError, waitForRequest,
     ensureAndroidLocalNetworkAccess: localNetworkAccess,
     URL, URLSearchParams, Request, Response, Headers, AbortController, setTimeout, clearTimeout,
     CapacitorHttp: {

@@ -54,9 +54,9 @@ test('Android 17 denies LAN sync until consent and retries successfully after a 
     const url = `http://10.0.2.2:${server.address().port}`
     browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
     page = browser.contexts()[0].pages()[0]
+    await page.locator('.profileTrigger').waitFor()
     const permission = await page.evaluate(() => window.Capacitor.nativePromise('AndroidLocalNetwork', 'checkPermissions', {}))
     assert.notEqual(permission.localNetwork, 'granted', 'Revoke ACCESS_LOCAL_NETWORK and clear its flags outside the app, then restart and forward its WebView before this test')
-    await page.locator('.profileTrigger').waitFor()
     saved = await page.evaluate(url => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {

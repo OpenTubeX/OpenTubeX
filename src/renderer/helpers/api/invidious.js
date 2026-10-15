@@ -10,6 +10,9 @@ import { classifyInvidiousMusicMediaType } from '../player/musicMediaType'
 import { getCompatibleAdaptiveFormats } from '../player/compatibleAdaptiveFormats'
 import autolinker from 'autolinker'
 import { FormatUtils, Misc, Player } from 'youtubei.js'
+import { ensureAndroidLocalNetworkAccess } from '../androidLocalNetwork.js'
+import { createAbortError } from './requestErrors.js'
+import { waitForRequest } from './requestWait.js'
 
 const {
   normalizeInvidiousSubscriptionFeed,
@@ -49,11 +52,16 @@ export function getProxyUrl(uri) {
  * @param {string | URL} url
  * @param {AbortSignal} [signal]
  */
-export function invidiousFetch(url, signal) {
+export async function invidiousFetch(url, signal) {
   const authorization = store.getters.getCurrentInvidiousInstanceAuthorization
+  const requestUrl = String(url)
+  if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
+    if (signal?.aborted) throw createAbortError()
+    await waitForRequest(ensureAndroidLocalNetworkAccess({ url: requestUrl }), signal)
+  }
 
   if (authorization) {
-    return fetch(url, {
+    return fetch(requestUrl, {
       signal,
       // Electron's response-header hook runs too late to control the HTTP cache.
       cache: 'no-store',
@@ -62,7 +70,7 @@ export function invidiousFetch(url, signal) {
       }
     })
   } else {
-    return fetch(url, { signal })
+    return fetch(requestUrl, { signal })
   }
 }
 

@@ -2,6 +2,7 @@ import { CapacitorHttp, registerPlugin } from '@capacitor/core'
 
 import { withNetworkRecovery } from '../networkRecovery.js'
 import { createAbortError } from './requestErrors.js'
+import { waitForRequest } from './requestWait.js'
 import { ensureAndroidLocalNetworkAccess } from '../androidLocalNetwork.js'
 
 export const DESKTOP_USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36'
@@ -24,34 +25,6 @@ const DNS_RETRY_DELAYS_MS = [150, 500]
 const DEFAULT_NATIVE_TIMEOUT_MS = 30_000
 const IOSHttp = process.env.IS_IOS ? registerPlugin('IOSHttp') : null
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308])
-
-/**
- * @param {Promise<import('@capacitor/core').HttpResponse>} request
- * @param {AbortSignal | undefined} signal
- * @param {(() => void) | undefined} abortNative
- */
-function waitForRequest(request, signal, abortNative) {
-  if (!signal) return request
-  return new Promise((resolve, reject) => {
-    const onAbort = () => {
-      abortNative?.()
-      reject(createAbortError())
-    }
-    if (signal.aborted) onAbort()
-    else signal.addEventListener('abort', onAbort, { once: true })
-
-    request.then(
-      (response) => {
-        signal.removeEventListener('abort', onAbort)
-        resolve(response)
-      },
-      (error) => {
-        signal.removeEventListener('abort', onAbort)
-        reject(error)
-      }
-    )
-  })
-}
 
 function waitForRetry(delay, signal) {
   if (!signal) return new Promise(resolve => setTimeout(resolve, delay))

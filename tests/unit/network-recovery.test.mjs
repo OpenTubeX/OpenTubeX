@@ -102,12 +102,13 @@ async function loadAppNetwork(t, fetch, nativeRequest, options = {}) {
   const { default: vm } = await import('node:vm')
   const { classifyRequestFailure } = await import('../../src/renderer/helpers/api/requestDiagnostics.js')
   const { createAbortError } = await import('../../src/renderer/helpers/api/requestErrors.js')
+  const { waitForRequest } = await import('../../src/renderer/helpers/api/requestWait.js')
   const window = new EventTarget()
   window.fetch = fetch
   const context = vm.createContext({
     createInternetConnectivity, createInternetProbe, options, window, navigator: { onLine: true }, location: { href: 'https://localhost/', origin: 'https://localhost' },
     process: { env: { IS_IOS: false } },
-    classifyRequestFailure, createAbortError, CapacitorHttp: { request: nativeRequest },
+    classifyRequestFailure, createAbortError, waitForRequest, CapacitorHttp: { request: nativeRequest },
     AbortController, AbortSignal, DOMException, EventTarget, CustomEvent, Request, Response, Headers, URL, URLSearchParams, setTimeout, clearTimeout,
   })
   for (const file of ['networkRecovery.js', 'api/capacitor-http.js']) {
