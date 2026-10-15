@@ -45,6 +45,34 @@ test('searches shortcut actions, sections and bindings while preserving editing'
   await expect(page.getByRole('button', { name: 'Show performance impact indicators', exact: true })).toBeVisible()
 })
 
+test('finds stored key names as well as their displayed labels', async ({ page }) => {
+  const search = page.locator('.shortcutToolbar').getByRole('searchbox')
+  const rewind = page.locator('[data-shortcut-path="VIDEO_PLAYER.PLAYBACK.SMALL_REWIND"]')
+  const displayedBinding = await rewind.textContent()
+
+  await search.fill('arrowleft')
+  await expect(rewind).toBeVisible()
+  await search.fill(displayedBinding.trim())
+  await expect(rewind).toBeVisible()
+})
+
+test('normalizes shortcut searches using the selected app language', async ({ page }) => {
+  await page.evaluate(() => window.$store.dispatch('updateCurrentLocale', 'tr'))
+  const search = page.locator('.shortcutToolbar').getByRole('searchbox')
+  const fastForward = page.locator('.labelAndShortcut').filter({ hasText: 'Hızlı İleri Sarma' })
+  await expect(fastForward).toBeVisible()
+
+  for (const query of ['ileri sarma', 'İLERİ SARMA']) {
+    await search.fill(query)
+    await expect(fastForward).toBeVisible()
+  }
+
+  // Turkish dotless I must follow the app locale, even on an English host.
+  const speed = page.locator('[data-shortcut-path="VIDEO_PLAYER.PLAYBACK.DECREASE_VIDEO_SPEED"]')
+  await search.fill('HIZINI')
+  await expect(speed).toBeVisible()
+})
+
 test('keeps shortcut search above results and clamps filtering and resizing @scale', async ({ page, app }) => {
   const search = page.locator('.shortcutToolbar').getByRole('searchbox')
   const reset = page.getByRole('button', { name: 'Reset to defaults', exact: true })

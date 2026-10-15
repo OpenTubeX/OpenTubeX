@@ -169,11 +169,12 @@ import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import store from '../../store/index'
 import { useI18n } from 'vue-i18n'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { normalizeSearchText } from '../../helpers/textSearch'
 import FtInput from '../FtInput/FtInput.vue'
 import FtButton from '../FtButton/FtButton.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { embedded } = defineProps({
   embedded: {
     type: Boolean,
@@ -368,16 +369,17 @@ const shortcutColumns = computed(() => [
   ]
 ])
 const filteredShortcutColumns = computed(() => {
-  const query = searchQuery.value.trim().toLocaleLowerCase()
+  const normalize = text => normalizeSearchText(text, locale.value)
+  const query = normalize(searchQuery.value)
   if (!query) return shortcutColumns.value
 
   return shortcutColumns.value.map(column => column.map(section => ({
     ...section,
     shortcutDictionary: section.shortcutDictionary.filter(shortcut =>
-      [section.title, shortcut.label, ...shortcut.bindings.map(binding => binding.shortcut
-        ? getLocalizedShortcut(binding.shortcut)
-        : t('KeyboardShortcutPrompt.Unassigned'))]
-        .some(text => text.toLocaleLowerCase().includes(query))
+      [section.title, shortcut.label, ...shortcut.bindings.flatMap(binding => binding.shortcut
+        ? [binding.shortcut, getLocalizedShortcut(binding.shortcut)]
+        : [t('KeyboardShortcutPrompt.Unassigned')])]
+        .some(text => normalize(text).includes(query))
     )
   })).filter(section => section.shortcutDictionary.length > 0))
     .filter(column => column.length > 0)
