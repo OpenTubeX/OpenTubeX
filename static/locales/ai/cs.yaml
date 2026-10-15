@@ -2095,6 +2095,7 @@ Search Bar:
   Use Suggestion: Použít návrh
 
 Native Permissions:
+  Local Network Denied: "Oprávnění k zařízením v okolí bylo zamítnuto."
   Local Network: "Vyhledávat zařízení v místní síti a přenášet do nich videa a synchronizovat nastavení a data mezi zařízeními."
 
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.

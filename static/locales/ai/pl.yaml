@@ -1320,6 +1320,7 @@ Search Bar:
   Use Suggestion: Użyj sugestii
 
 Native Permissions:
+  Local Network Denied: "Odmówiono uprawnienia do urządzeń w pobliżu."
   Local Network: "Wykrywanie urządzeń w sieci lokalnej i przesyłanie do nich filmów oraz synchronizowanie ustawień i danych między urządzeniami."
 
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.

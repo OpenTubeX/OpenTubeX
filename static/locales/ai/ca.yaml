@@ -2742,6 +2742,7 @@ Storage Startup Error:
   Message: "Allibereu espai al dispositiu i torneu-ho a provar. La sincronització està en pausa fins que es carreguin les dades."
   Retry: "Torna-ho a provar"
 Native Permissions:
+  Local Network Denied: "S’ha denegat el permís per als dispositius propers."
   Local Network: "Descobrir dispositius a la xarxa local i enviar-hi vídeos, i sincronitzar la configuració i les dades entre dispositius."
 
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.

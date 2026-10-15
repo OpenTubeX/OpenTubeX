@@ -1,4 +1,5 @@
 import { registerPlugin } from '@capacitor/core'
+import { ensureAndroidLocalNetworkAccess } from '../androidLocalNetwork.js'
 import { ChromecastSession } from '../../../chromecastSession.js'
 import { rewriteCastDash, rewriteCastHls, MIN_RESOURCE_GRACE_MS, hlsResourceGrace, dashResourceGrace } from '../../../castManifestRewrite.js'
 import { playbackScreenWake } from '../playbackScreenWake.js'
@@ -206,7 +207,10 @@ export function createMobileChromecast(native, screenWake = playbackScreenWake) 
   }
   const blockers = new Map()
   const manager = new ChromecastSession({
-    discover: async () => (await native.discover()).devices,
+    discover: async () => {
+      await ensureAndroidLocalNetworkAccess()
+      return (await native.discover()).devices
+    },
     createSender: device => new Sender(device),
     createMedia,
     randomId: () => crypto.randomUUID(),

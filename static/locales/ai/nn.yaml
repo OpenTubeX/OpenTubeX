@@ -2489,6 +2489,7 @@ Search Bar:
   Use Suggestion: Bruk framlegg
 
 Native Permissions:
+  Local Network Denied: "Løyve til einingar i nærleiken vart avvist."
   Local Network: "Finn einingar på det lokale nettverket og cast videoar til dei, og synkroniser innstillingar og data mellom einingar."
 
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.

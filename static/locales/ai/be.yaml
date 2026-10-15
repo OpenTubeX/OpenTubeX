@@ -2193,6 +2193,7 @@ Storage Startup Error:
   Message: "Вызваліце месца на прыладзе і паспрабуйце яшчэ раз. Сінхранізацыя прыпынена, пакуль вашы даныя не загрузяцца."
   Retry: "Паспрабаваць яшчэ раз"
 Native Permissions:
+  Local Network Denied: "У дазволе на доступ да прылад паблізу адмоўлена."
   Local Network: "Знаходзіць прылады ў лакальнай сетцы і трансляваць на іх відэа, а таксама сінхранізаваць налады і даныя паміж прыладамі."
 
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.

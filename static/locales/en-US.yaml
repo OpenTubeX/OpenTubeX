@@ -3313,6 +3313,7 @@ Storage Startup Error:
   Message: "Free up device storage and try again. Sync is paused until your data is loaded."
   Retry: "Retry"
 Native Permissions:
+  Local Network Denied: "Nearby devices permission was denied."
   Local Network: "Discover and cast videos to devices on your local network, and sync settings and data across devices."
 
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.

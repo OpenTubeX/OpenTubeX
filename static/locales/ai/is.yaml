@@ -2122,6 +2122,7 @@ Search Bar:
   Use Suggestion: Nota tillögu
 
 Native Permissions:
+  Local Network Denied: "Leyfi fyrir nálæg tæki var hafnað."
   Local Network: "Finna tæki á staðarnetinu og senda myndskeið í þau, og samstilla stillingar og gögn milli tækja."
 
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.

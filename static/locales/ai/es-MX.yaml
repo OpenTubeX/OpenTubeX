@@ -2532,6 +2532,7 @@ Storage Startup Error:
   Message: "Libera espacio en el dispositivo e inténtalo de nuevo. La sincronización está pausada hasta que se carguen tus datos."
   Retry: "Reintentar"
 Native Permissions:
+  Local Network Denied: "Se denegó el permiso para dispositivos cercanos."
   Local Network: "Detectar dispositivos en tu red local y transmitirles videos, y sincronizar la configuración y los datos entre dispositivos."
 
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.

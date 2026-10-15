@@ -2158,6 +2158,7 @@ Storage Startup Error:
   Message: "Maak opslagruimte vrij op het apparaat en probeer het opnieuw. Synchronisatie is gepauzeerd totdat je gegevens zijn geladen."
   Retry: "Opnieuw proberen"
 Native Permissions:
+  Local Network Denied: "Toestemming voor apparaten in de buurt is geweigerd."
   Local Network: "Apparaten op je lokale netwerk vinden en er video's naartoe casten, en instellingen en gegevens tussen apparaten synchroniseren."
 
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.

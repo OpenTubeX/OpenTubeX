@@ -2104,6 +2104,7 @@ Search Bar:
   Use Suggestion: Implij ar c’hinnig
 
 Native Permissions:
+  Local Network Denied: "Nac’het eo bet an aotre evit an trevnadoù tost."
   Local Network: "Kavout trevnadoù war ho rouedad lec'hel ha skignañ videoioù warno, ha goubredañ an arventennoù hag ar roadennoù etre trevnadoù."
 
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.

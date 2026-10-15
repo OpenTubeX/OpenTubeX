@@ -2095,6 +2095,7 @@ Search Bar:
   Use Suggestion: 使用建议
 
 Native Permissions:
+  Local Network Denied: "附近设备权限已被拒绝。"
   Local Network: "发现本地网络中的设备并向其投放视频，同时在设备之间同步设置和数据。"
 
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.

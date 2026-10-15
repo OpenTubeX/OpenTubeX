@@ -3293,6 +3293,7 @@ Storage Startup Error:
   Message: "Gib Speicherplatz auf dem Gerät frei und versuche es erneut. Die Synchronisierung bleibt pausiert, bis deine Daten geladen sind."
   Retry: "Erneut versuchen"
 Native Permissions:
+  Local Network Denied: "Die Berechtigung für Geräte in der Nähe wurde verweigert."
   Local Network: "Geräte im lokalen Netzwerk finden, Videos auf diese Geräte übertragen und Einstellungen und Daten geräteübergreifend synchronisieren."
 
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.

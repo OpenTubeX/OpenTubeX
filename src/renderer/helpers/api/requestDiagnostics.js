@@ -44,6 +44,7 @@ export function classifyRequestFailure(error) {
   const signature = `${name} ${code} ${message}`.toLowerCase()
 
   if (name === 'AbortError' || /cancel|aborted|err_canceled/.test(signature)) return 'cancellation'
+  if (code === 'LOCAL_ACCESS_DENIED') return 'api'
   if (
     /foregroundservicestartnotallowed|backgroundservicestartnotallowed|(?:foreground|background) service.*(?:not allowed|restrict)|background execution.*(?:not allowed|restrict)/.test(signature)
   ) return 'background restriction'

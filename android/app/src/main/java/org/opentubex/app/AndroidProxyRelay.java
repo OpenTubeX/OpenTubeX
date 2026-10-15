@@ -244,6 +244,11 @@ final class AndroidProxyRelay implements AutoCloseable {
         } catch (IOException ignored) { closeSocket(remote); }
     }
 
+    synchronized String connectionHost(URI target) {
+        ProxyConfiguration route = resolveSystemProxy(configuration, target);
+        return route.enabled ? route.hostname : target.getHost();
+    }
+
     private ProxyConfiguration resolveSystemProxy(ProxyConfiguration policy, URI target) {
         if (!policy.enabled && systemSelector != null) {
             // Preserve Android's Wi-Fi proxy when the app proxy is disabled.

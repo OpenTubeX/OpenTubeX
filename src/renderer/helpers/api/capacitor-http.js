@@ -2,6 +2,7 @@ import { CapacitorHttp, registerPlugin } from '@capacitor/core'
 
 import { withNetworkRecovery } from '../networkRecovery.js'
 import { createAbortError } from './requestErrors.js'
+import { ensureAndroidLocalNetworkAccess } from '../androidLocalNetwork.js'
 
 export const DESKTOP_USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36'
 const YOUTUBE_AVATAR_HOSTS = new Set([
@@ -132,6 +133,11 @@ async function nativeHttpFetch(input, init) {
 
   if (url.protocol !== 'https:' && !(init?.allowHttp && url.protocol === 'http:')) {
     throw new TypeError('Capacitor local API requests require HTTPS')
+  }
+
+  if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
+    await ensureAndroidLocalNetworkAccess({ url: url.toString() })
+    if (signal?.aborted) throw createAbortError()
   }
 
   const headers = new Headers(inputRequest?.headers)

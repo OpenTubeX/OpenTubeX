@@ -2125,6 +2125,7 @@ Storage Startup Error:
   Message: "حرّر مساحة تخزين على الجهاز وحاول مجددًا. المزامنة متوقفة مؤقتًا حتى يتم تحميل بياناتك."
   Retry: "إعادة المحاولة"
 Native Permissions:
+  Local Network Denied: "تم رفض إذن الوصول إلى الأجهزة القريبة."
   Local Network: "اكتشاف الأجهزة على شبكتك المحلية وبث الفيديوهات إليها، ومزامنة الإعدادات والبيانات بين الأجهزة."
 
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.

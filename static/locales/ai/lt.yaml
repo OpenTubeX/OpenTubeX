@@ -2596,6 +2596,7 @@ Storage Startup Error:
   Message: "Atlaisvinkite vietos įrenginyje ir bandykite dar kartą. Sinchronizavimas pristabdytas, kol bus įkelti jūsų duomenys."
   Retry: "Bandyti dar kartą"
 Native Permissions:
+  Local Network Denied: "Leidimas pasiekti netoliese esančius įrenginius atmestas."
   Local Network: "Aptikti įrenginius vietiniame tinkle ir perduoti į juos vaizdo įrašus bei sinchronizuoti nustatymus ir duomenis tarp įrenginių."
 
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.

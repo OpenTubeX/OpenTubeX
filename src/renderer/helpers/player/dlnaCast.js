@@ -2,6 +2,7 @@ import { registerPlugin } from '@capacitor/core'
 import { onBeforeUnmount, watch } from 'vue'
 import { isDlnaSourceUrl } from './dlnaSource.js'
 import { playbackScreenWake } from '../playbackScreenWake.js'
+import { ensureAndroidLocalNetworkAccess } from '../androidLocalNetwork.js'
 import { createAvTransportBody, createDlnaMetadata, formatDlnaTime, parseDlnaPosition, parseDlnaDevice, parseSsdpLocation } from '../../../dlnaProtocol.js'
 
 function scopedAuthorization(payload) {
@@ -45,6 +46,7 @@ export function createMobileDlnaCast(native, screenWake = playbackScreenWake) {
 
   const cast = {
     async discover() {
+      await ensureAndroidLocalNetworkAccess()
       const { responses } = await native.discover()
       const locations = new Map()
       for (const { message, address } of responses) {

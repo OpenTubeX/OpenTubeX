@@ -21,6 +21,23 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public class AndroidProxyRelayTest {
+    @Test public void permissionPreflightUsesTheSameSystemProxyRouteWithoutResolvingTheDestination() throws Exception {
+        java.net.ProxySelector selector = new java.net.ProxySelector() {
+            @Override public java.util.List<Proxy> select(java.net.URI uri) {
+                return java.util.List.of(uri.getHost().equals("bypass.invalid") ? Proxy.NO_PROXY :
+                    new Proxy(Proxy.Type.HTTP, InetSocketAddress.createUnresolved("192.168.1.2", 8080)));
+            }
+            @Override public void connectFailed(java.net.URI uri, java.net.SocketAddress address, IOException error) {}
+        };
+        try (AndroidProxyRelay relay = new AndroidProxyRelay(new ProxyConfiguration(false, "", "", "", "", ""), selector,
+            host -> { throw new AssertionError("Preflight must not resolve the destination: " + host); })) {
+            assertEquals("192.168.1.2", relay.connectionHost(new java.net.URI("https://public.invalid")));
+            assertEquals("bypass.invalid", relay.connectionHost(new java.net.URI("https://bypass.invalid")));
+            relay.configure(new ProxyConfiguration(true, "socks5", "127.0.0.1", "9050", "", ""));
+            assertEquals("127.0.0.1", relay.connectionHost(new java.net.URI("https://public.invalid")));
+        }
+    }
+
     private static ProxyConfiguration policy(String protocol, int port, String user, String password) {
         return new ProxyConfiguration(true, protocol, "127.0.0.1", Integer.toString(port), user, password);
     }

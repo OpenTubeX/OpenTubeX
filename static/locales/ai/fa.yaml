@@ -2184,6 +2184,7 @@ Storage Startup Error:
   Message: "فضای ذخیره‌سازی دستگاه را آزاد کنید و دوباره تلاش کنید. همگام‌سازی تا بارگیری داده‌های شما متوقف است."
   Retry: "تلاش دوباره"
 Native Permissions:
+  Local Network Denied: "مجوز دستگاه‌های اطراف رد شد."
   Local Network: "دستگاه‌های شبکهٔ محلی را پیدا کنید و ویدیوها را به آن‌ها بفرستید و تنظیمات و داده‌ها را بین دستگاه‌ها همگام‌سازی کنید."
 
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.

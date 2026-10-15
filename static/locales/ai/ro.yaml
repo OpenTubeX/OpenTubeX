@@ -2145,6 +2145,7 @@ Storage Startup Error:
   Message: "Eliberează spațiu pe dispozitiv și încearcă din nou. Sincronizarea este suspendată până la încărcarea datelor."
   Retry: "Încearcă din nou"
 Native Permissions:
+  Local Network Denied: "Permisiunea pentru dispozitivele din apropiere a fost refuzată."
   Local Network: "Descoperă dispozitive din rețeaua locală și transmite videoclipuri către ele, și sincronizează setările și datele între dispozitive."
 
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.

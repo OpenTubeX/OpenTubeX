@@ -2118,6 +2118,7 @@ Search Bar:
   Use Suggestion: Erabili iradokizuna
 
 Native Permissions:
+  Local Network Denied: "Inguruko gailuetarako baimena ukatu da."
   Local Network: "Sare lokaleko gailuak aurkitu eta bideoak haietara igorri, eta ezarpenak eta datuak gailuen artean sinkronizatu."
 
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.
