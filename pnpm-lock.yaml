@@ -11,6 +11,7 @@ overrides:
   yauzl: '>=3.3.1'
 
 patchedDependencies:
+  '@capacitor-community/screen-brightness@8.0.0': 92c0cd00ac50c22d0829cec4df0b63151dcb5e718a194e4ae8f015d271570ea8
   '@capacitor/android@8.5.2': 9e4c0a7009f928aa7b8ad13bf587aed559c205aa799b4a8bd69d782fbe9dc33b
   '@capacitor/barcode-scanner@3.1.2': b4c45d0161b7a4f0e708d232e3d2067f01a39f1ffb5497b5c3c7f4df318c50f3
   '@capacitor/share@8.0.3': 61a10a5a91f7c78b0670870fd26034ee015a175f24f79c0f9890ce03050a8adb
@@ -31,7 +32,7 @@ importers:
         version: 8.0.1(@capacitor/core@8.5.3)
       '@capacitor-community/screen-brightness':
         specifier: ^8.0.0
-        version: 8.0.0(@capacitor/core@8.5.3)
+        version: 8.0.0(patch_hash=92c0cd00ac50c22d0829cec4df0b63151dcb5e718a194e4ae8f015d271570ea8)(@capacitor/core@8.5.3)
       '@capacitor/android':
         specifier: ^8.5.2
         version: 8.5.2(patch_hash=9e4c0a7009f928aa7b8ad13bf587aed559c205aa799b4a8bd69d782fbe9dc33b)(@capacitor/core@8.5.3)
@@ -5436,7 +5437,7 @@ snapshots:
     dependencies:
       '@capacitor/core': 8.5.3
 
-  '@capacitor-community/screen-brightness@8.0.0(@capacitor/core@8.5.3)':
+  '@capacitor-community/screen-brightness@8.0.0(patch_hash=92c0cd00ac50c22d0829cec4df0b63151dcb5e718a194e4ae8f015d271570ea8)(@capacitor/core@8.5.3)':
     dependencies:
       '@capacitor/core': 8.5.3
 

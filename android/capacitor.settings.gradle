@@ -6,7 +6,7 @@ include ':capacitor-community-keep-awake'
 project(':capacitor-community-keep-awake').projectDir = new File('../node_modules/.pnpm/@capacitor-community+keep-awake@8.0.1_@capacitor+core@8.5.3/node_modules/@capacitor-community/keep-awake/android')
 
 include ':capacitor-community-screen-brightness'
-project(':capacitor-community-screen-brightness').projectDir = new File('../node_modules/.pnpm/@capacitor-community+screen-brightness@8.0.0_@capacitor+core@8.5.3/node_modules/@capacitor-community/screen-brightness/android')
+project(':capacitor-community-screen-brightness').projectDir = new File('../node_modules/.pnpm/@capacitor-community+screen-brightness@8.0.0_patch_hash=92c0cd00ac50c22d0829cec4df0b631_03678b0005418d29c699146e6e8122fa/node_modules/@capacitor-community/screen-brightness/android')
 
 include ':capacitor-app'
 project(':capacitor-app').projectDir = new File('../node_modules/.pnpm/@capacitor+app@8.1.2_@capacitor+core@8.5.3/node_modules/@capacitor/app/android')

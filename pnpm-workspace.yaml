@@ -18,6 +18,7 @@ minimumReleaseAgeExclude:
   - electron@43.7.6
 
 patchedDependencies:
+  '@capacitor-community/screen-brightness@8.0.0': patches/@capacitor-community__screen-brightness@8.0.0.patch
   '@capacitor/android@8.5.2': patches/@capacitor__android@8.5.2.patch
   '@capacitor/barcode-scanner@3.1.2': patches/@capacitor__barcode-scanner@3.1.2.patch
   '@capacitor/share@8.0.3': patches/@capacitor__share@8.0.3.patch
