@@ -188,6 +188,7 @@ Feed:
   Cancel Refresh: Yeniləməni ləğv et
   Next Auto Refresh: 'Növbəti avtomatik yeniləmə: {date}'
 User Playlists:
+  Add new videos to the top (custom order): "Yeni videoları yuxarıya əlavə et (fərdi sıra)"
   Repair Playlists: Pleylistləri düzəlt
   Repair Description: YouTube Takeout ZIP faylını idxal etdikdən sonra çatışmayan video məlumatlarını bərpa edin. Pleylist sırası dəyişmir.
   Remove Unavailable Videos: "Əlçatan olmayan videoları silin"

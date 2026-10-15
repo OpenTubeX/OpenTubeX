@@ -5763,7 +5763,9 @@ function runApp() {
 
           // Nothing was written when the video is already in the playlist or the
           // playlist is gone, so the other windows have nothing to apply
-          if (result === PlaylistVideoAddResult.ADDED) {
+          if (result.status === PlaylistVideoAddResult.ADDED) {
+            data.addVideosToTop = result.addVideosToTop
+            data.lastUpdatedAt = result.lastUpdatedAt
             syncOtherWindows(
               IpcChannels.SYNC_PLAYLISTS,
               event,
@@ -5774,14 +5776,20 @@ function runApp() {
           return result
         }
 
-        case DBActions.PLAYLISTS.UPSERT_VIDEOS:
-          await baseHandlers.playlists.upsertVideosByPlaylistId(data._id, data.lastUpdatedAt, data.videos)
-          syncOtherWindows(
-            IpcChannels.SYNC_PLAYLISTS,
-            event,
-            { event: SyncEvents.PLAYLISTS.UPSERT_VIDEOS, data }
-          )
-          return null
+        case DBActions.PLAYLISTS.UPSERT_VIDEOS: {
+          const result = await baseHandlers.playlists.upsertVideosByPlaylistId(data._id, data.lastUpdatedAt, data.videos, data.deduplicate)
+          if (result.status === PlaylistVideoAddResult.ADDED) {
+            data.videos = result.videos
+            data.addVideosToTop = result.addVideosToTop
+            data.lastUpdatedAt = result.lastUpdatedAt
+            syncOtherWindows(
+              IpcChannels.SYNC_PLAYLISTS,
+              event,
+              { event: SyncEvents.PLAYLISTS.UPSERT_VIDEOS, data }
+            )
+          }
+          return result
+        }
 
         case DBActions.GENERAL.DELETE:
           await baseHandlers.playlists.delete(data)

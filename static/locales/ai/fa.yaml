@@ -200,6 +200,7 @@ Feed:
   Cancel Refresh: لغو تازه‌سازی
   Next Auto Refresh: 'تازه‌سازی خودکار بعدی: {date}'
 User Playlists:
+  Add new videos to the top (custom order): "افزودن ویدیوهای جدید به ابتدای فهرست (ترتیب سفارشی)"
   Repair Playlists: ترمیم فهرست‌های پخش
   Repair Description: جزئیات گم‌شدهٔ ویدیوها را پس از وارد کردن فایل ZIP از YouTube Takeout بازیابی کنید. ترتیب ویدیوها در فهرست‌های پخش تغییر نمی‌کند.
   Remove Unavailable Videos: "ویدیوهای غیرقابل دسترس را حذف کنید"

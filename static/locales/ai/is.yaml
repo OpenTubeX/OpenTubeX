@@ -188,6 +188,7 @@ Feed:
   Cancel Refresh: Hætta við endurnýjun
   Next Auto Refresh: 'Næsta sjálfvirka endurnýjun: {date}'
 User Playlists:
+  Add new videos to the top (custom order): "Bæta nýjum myndskeiðum efst (sérsniðin röð)"
   Repair Playlists: Lagfæra spilunarlista
   Repair Description: Endurheimtu upplýsingar sem vantar um myndskeið eftir innflutning á YouTube Takeout ZIP-skrá. Röð spilunarlista helst óbreytt.
   Remove Unavailable Videos: "Fjarlægðu ótiltæk myndbönd"

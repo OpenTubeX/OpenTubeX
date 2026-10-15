@@ -102,6 +102,7 @@
           <FtButton
             :label="t('User Playlists.AddVideoPrompt.Save')"
             :icon="['fas', 'floppy-disk']"
+            :disabled="saving"
             @click="addSelectedToPlaylists"
           />
           <FtButton
@@ -398,7 +399,10 @@ function countSelected(playlistId) {
   }
 }
 
-function addSelectedToPlaylists() {
+const saving = ref(false)
+
+async function addSelectedToPlaylists() {
+  if (saving.value) return
   const addedPlaylistIds = new Set()
 
   if (selectedPlaylistIdList.value.length === 0) {
@@ -409,43 +413,64 @@ function addSelectedToPlaylists() {
     return
   }
 
-  const allPlaylists_ = allPlaylists.value
-  const toBeAddedToPlaylistVideoList_ = toBeAddedToPlaylistVideoList.value
+  saving.value = true
+  try {
+    const allPlaylists_ = allPlaylists.value
+    const toBeAddedToPlaylistVideoList_ = toBeAddedToPlaylistVideoList.value
+    const allowDuplicates = addingDuplicateVideosEnabled.value
+    const failedPlaylistNames = []
 
-  selectedPlaylistIdList.value.forEach((selectedPlaylistId) => {
-    const playlist = allPlaylists_.find((list) => list._id === selectedPlaylistId)
-    if (playlist == null) { return }
+    for (const selectedPlaylistId of [...selectedPlaylistIdList.value]) {
+      const playlist = allPlaylists_.find((list) => list._id === selectedPlaylistId)
+      if (playlist == null) {
+        failedPlaylistNames.push(null)
+        continue
+      }
 
-    let videosToBeAdded
+      let videosToBeAdded
 
-    if (!addingDuplicateVideosEnabled.value) {
-      const playlistVideoIds = playlist.videos.map((v) => v.videoId)
-      videosToBeAdded = toBeAddedToPlaylistVideoList_.filter((v) => !playlistVideoIds.includes(v.videoId))
-    } else {
-      // Use slice() to avoid `do not mutate vuex store state outside mutation handlers`
-      videosToBeAdded = toBeAddedToPlaylistVideoList_.slice()
+      if (!allowDuplicates) {
+        const playlistVideoIds = playlist.videos.map((v) => v.videoId)
+        videosToBeAdded = toBeAddedToPlaylistVideoList_.filter((v) => !playlistVideoIds.includes(v.videoId))
+      } else {
+        // Use slice() to avoid `do not mutate vuex store state outside mutation handlers`
+        videosToBeAdded = toBeAddedToPlaylistVideoList_.slice()
+      }
+
+      if (videosToBeAdded.length === 0) continue
+
+      const saved = await store.dispatch('addVideos', {
+        _id: playlist._id,
+        videos: videosToBeAdded,
+      })
+      if (saved) addedPlaylistIds.add(playlist._id)
+      else failedPlaylistNames.push(playlist.playlistName)
     }
 
-    store.dispatch('addVideos', {
-      _id: playlist._id,
-      videos: videosToBeAdded,
-    })
+    if (addedPlaylistIds.size > 0) {
+      showToast({
+        message: t('User Playlists.AddVideoPrompt.Toast.Video(s) added to {playlistCount} playlists', {
+          playlistCount: addedPlaylistIds.size,
+        }, addedPlaylistIds.size),
+        // Show the thumbnail when a single video was added
+        image: toBeAddedToPlaylistVideoList_.length === 1
+          ? getVideoThumbnailUrl(toBeAddedToPlaylistVideoList_[0].videoId, backendPreference.value, currentInvidiousInstanceUrl.value, thumbnailPreference.value)
+          : null,
+        icon: ['fac', 'playlist-check'],
+      })
+    }
+    for (const playlistName of failedPlaylistNames) {
+      const message = t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]')
+      showToast({
+        message: playlistName == null ? message : `${playlistName}: ${message}`,
+        icon: ['fas', 'circle-exclamation'],
+      })
+    }
 
-    addedPlaylistIds.add(playlist._id)
-  })
-
-  showToast({
-    message: t('User Playlists.AddVideoPrompt.Toast.Video(s) added to {playlistCount} playlists', {
-      playlistCount: addedPlaylistIds.size,
-    }, addedPlaylistIds.size),
-    // Show the thumbnail when a single video was added
-    image: toBeAddedToPlaylistVideoList_.length === 1
-      ? getVideoThumbnailUrl(toBeAddedToPlaylistVideoList_[0].videoId, backendPreference.value, currentInvidiousInstanceUrl.value, thumbnailPreference.value)
-      : null,
-    icon: ['fac', 'playlist-check'],
-  })
-
-  hide()
+    hide()
+  } finally {
+    saving.value = false
+  }
 }
 
 /** @type {import('vue').ComputedRef<object>} */

@@ -919,7 +919,7 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
 
     // Preserve each local occurrence and its identity/order when metadata alone
     // changes. The membership map intentionally deduplicates only remote IDs.
-    const mergedVideos = localVideos
+    const retainedVideos = localVideos
       .filter(video => videoToRemote(video, options) === null || mergedVideoIds.has(video.videoId))
       .map(video => {
         const current = video.authorId === UNKNOWN_SYNC_UPLOADER_ID
@@ -944,9 +944,12 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
         }
         return result
       })
-      .concat(Array.from(mergedVideoIds)
-        .filter(videoId => !localVideosById.has(videoId))
-        .map(videoId => videoToLocal(remoteVideosById.get(videoId))))
+    const addedVideos = Array.from(mergedVideoIds)
+      .filter(videoId => !localVideosById.has(videoId))
+      .map(videoId => videoToLocal(remoteVideosById.get(videoId)))
+    const mergedVideos = local?.addVideosToTop === true
+      ? addedVideos.concat(retainedVideos)
+      : retainedVideos.concat(addedVideos)
 
     assertCurrent(local, id)
     if (!local) {

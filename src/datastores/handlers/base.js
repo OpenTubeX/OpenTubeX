@@ -812,6 +812,9 @@ class Profiles {
 }
 
 class Playlists {
+  // Keep insertions from exhausting each other's concurrent-edit retries.
+  static pendingVideoInsertions = new Map()
+
   static create(playlists) {
     return db.playlists.insertAsync(playlists)
   }
@@ -910,46 +913,62 @@ class Playlists {
    * that can order two of them adding the same video at the same time.
    * `upsertVideosByPlaylistId` is the bulk path and still allows duplicates.
    *
-   * @returns {Promise<'added' | 'already-present' | 'playlist-missing'>}
+   * @returns {Promise<{status: 'added' | 'already-present' | 'playlist-missing', videos?: object[], addVideosToTop?: boolean, lastUpdatedAt?: number}>}
    */
-  static async upsertVideoByPlaylistId(_id, lastUpdatedAt, videoData) {
-    const { numAffected } = await db.playlists.updateAsync(
-      // Not `{ 'videos.videoId': { $ne: videoData.videoId } }`: against an array
-      // that matches whenever any other entry differs, so it lets duplicates
-      // through, and it rejects the first video as an empty array matches nothing
-      { _id, $not: { videos: { $elemMatch: { videoId: videoData.videoId } } } },
-      {
-        $push: { videos: videoData },
-        $set: { lastUpdatedAt }
-      },
-      // Must not upsert: the selector deliberately misses when the video is
-      // already there, which would otherwise insert a malformed playlist
-      { upsert: false }
-    )
-
-    if (numAffected > 0) {
-      return PlaylistVideoAddResult.ADDED
-    }
-
-    // Nothing was written, which means the video is already in the playlist, or
-    // the playlist is gone (another window may have deleted it). Only the former
-    // leaves the caller with what it asked for, so the two must be told apart.
-    const playlist = await db.playlists.findOneAsync({ _id })
-
-    return playlist == null
-      ? PlaylistVideoAddResult.PLAYLIST_MISSING
-      : PlaylistVideoAddResult.ALREADY_PRESENT
+  static upsertVideoByPlaylistId(_id, lastUpdatedAt, videoData) {
+    return this.insertVideos(_id, lastUpdatedAt, [videoData], true)
   }
 
-  static upsertVideosByPlaylistId(_id, lastUpdatedAt, videos) {
-    return db.playlists.updateAsync(
-      { _id },
-      {
-        $push: { videos: { $each: videos } },
-        $set: { lastUpdatedAt }
-      },
-      { upsert: true }
-    )
+  static upsertVideosByPlaylistId(_id, lastUpdatedAt, videos, deduplicate = false) {
+    return this.insertVideos(_id, lastUpdatedAt, videos, deduplicate)
+  }
+
+  static insertVideos(_id, lastUpdatedAt, videos, deduplicate = false) {
+    const previous = this.pendingVideoInsertions.get(_id) ?? Promise.resolve()
+    const operation = previous.catch(() => {}).then(() => this._insertVideos(_id, lastUpdatedAt, videos, deduplicate))
+    this.pendingVideoInsertions.set(_id, operation)
+    return operation.finally(() => {
+      if (this.pendingVideoInsertions.get(_id) === operation) this.pendingVideoInsertions.delete(_id)
+    })
+  }
+
+  static async _insertVideos(_id, lastUpdatedAt, videos, deduplicate) {
+    // NeDB cannot prepend atomically. Retry if another window changes the
+    // videos or insertion preference between reading and saving them.
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const playlist = await db.playlists.findOneAsync({ _id })
+      if (!playlist) return { status: PlaylistVideoAddResult.PLAYLIST_MISSING }
+      let inserted = videos
+      if (deduplicate) {
+        const present = new Set(playlist.videos.map(video => video.videoId))
+        inserted = videos.filter(video => {
+          if (present.has(video.videoId)) return false
+          present.add(video.videoId)
+          return true
+        })
+        if (inserted.length === 0) return { status: PlaylistVideoAddResult.ALREADY_PRESENT }
+      }
+
+      const snapshot = JSON.stringify(playlist.videos)
+      const addVideosToTop = playlist.addVideosToTop === true
+      const updatedAt = Math.max(playlist.lastUpdatedAt || 0, lastUpdatedAt)
+      const { numAffected } = await db.playlists.updateAsync(
+        {
+          _id,
+          $where() {
+            return JSON.stringify(this.videos) === snapshot && (this.addVideosToTop === true) === addVideosToTop && this.lastUpdatedAt === playlist.lastUpdatedAt
+          }
+        },
+        {
+          $set: {
+            videos: addVideosToTop ? inserted.concat(playlist.videos) : playlist.videos.concat(inserted),
+            lastUpdatedAt: updatedAt
+          }
+        }
+      )
+      if (numAffected > 0) return { status: PlaylistVideoAddResult.ADDED, videos: inserted, addVideosToTop, lastUpdatedAt: updatedAt }
+    }
+    throw new Error(`Unable to add videos to playlist ${_id}: repeated concurrent changes`)
   }
 
   static delete(_id) {

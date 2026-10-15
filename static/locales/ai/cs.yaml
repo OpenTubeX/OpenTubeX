@@ -186,6 +186,7 @@ Feed:
   Cancel Refresh: Zrušit obnovení
   Next Auto Refresh: 'Další automatické obnovení: {date}'
 User Playlists:
+  Add new videos to the top (custom order): "Přidávat nová videa na začátek (vlastní pořadí)"
   Repair Playlists: Opravit playlisty
   Repair Description: Obnovte chybějící údaje o videích po importu ZIP archivu YouTube Takeout. Pořadí v playlistech se nezmění.
   Remove Unavailable Videos: "Odstraňte nedostupná videa"

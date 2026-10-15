@@ -186,6 +186,7 @@ Feed:
   Cancel Refresh: 更新をキャンセル
   Next Auto Refresh: '次回の自動更新: {date}'
 User Playlists:
+  Add new videos to the top (custom order): "新しい動画を先頭に追加（カスタム順）"
   Repair Playlists: プレイリストを修復
   Repair Description: YouTube TakeoutのZIPをインポートした後、欠けている動画情報を復元します。プレイリストの順序は変わりません。
   Remove Unavailable Videos: "利用できない動画を削除する"

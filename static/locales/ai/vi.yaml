@@ -188,6 +188,7 @@ Feed:
   Cancel Refresh: Hủy làm mới
   Next Auto Refresh: 'Lần tự động làm mới tiếp theo: {date}'
 User Playlists:
+  Add new videos to the top (custom order): "Thêm video mới lên đầu (thứ tự tùy chỉnh)"
   Repair Playlists: Sửa danh sách phát
   Repair Description: Khôi phục thông tin video bị thiếu sau khi nhập ZIP YouTube Takeout. Thứ tự danh sách phát không thay đổi.
   Remove Unavailable Videos: "Xóa video không có sẵn"

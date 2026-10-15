@@ -282,8 +282,9 @@ const actions = {
 
         const result = await DBPlaylistHandlers.upsertVideoByPlaylistId(_id, lastUpdatedAt, videoData)
 
-        if (result === PlaylistVideoAddResult.ADDED) {
-          payload.lastUpdatedAt = lastUpdatedAt
+        if (result.status === PlaylistVideoAddResult.ADDED) {
+          payload.lastUpdatedAt = result.lastUpdatedAt
+          payload.addVideosToTop = result.addVideosToTop
           commit('addVideo', payload)
         }
 
@@ -291,7 +292,7 @@ const actions = {
         // in the playlist and its sync event brings it into our state. Committing
         // as well would show it twice. PLAYLIST_MISSING is a genuine failure:
         // the playlist is gone, so the caller must not report a saved video.
-        return result !== PlaylistVideoAddResult.PLAYLIST_MISSING
+        return result.status !== PlaylistVideoAddResult.PLAYLIST_MISSING
       } catch (errMessage) {
         console.error(errMessage)
 
@@ -310,7 +311,7 @@ const actions = {
     // Assumes videos are added NOT from export
     // Since this action will ensure uniqueness of `playlistItemId` of added video entries
     try {
-      const { _id, videos } = payload
+      const { _id, videos, deduplicate = false } = payload
 
       const currentTime = Date.now()
 
@@ -332,10 +333,14 @@ const actions = {
 
       const lastUpdatedAt = Date.now()
 
-      await DBPlaylistHandlers.upsertVideosByPlaylistId(_id, lastUpdatedAt, newVideoObjects)
-      commit('addVideos', { _id, lastUpdatedAt, videos: newVideoObjects })
+      const result = await DBPlaylistHandlers.upsertVideosByPlaylistId(_id, lastUpdatedAt, newVideoObjects, deduplicate)
+      if (result.status === PlaylistVideoAddResult.ADDED) {
+        commit('addVideos', { _id, lastUpdatedAt: result.lastUpdatedAt, addVideosToTop: result.addVideosToTop, videos: result.videos })
+      }
+      return result.status !== PlaylistVideoAddResult.PLAYLIST_MISSING
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 
@@ -586,7 +591,11 @@ const mutations = {
   addVideo(state, payload) {
     const playlist = state.playlists.find(playlist => playlist._id === payload._id)
     if (playlist) {
-      playlist.videos.push(payload.videoData)
+      if (payload.addVideosToTop === true) {
+        playlist.videos.unshift(payload.videoData)
+      } else {
+        playlist.videos.push(payload.videoData)
+      }
       playlist.lastUpdatedAt = payload.lastUpdatedAt
       incrementPlaylistVideoCounts(state.playlistVideoCounts, [payload.videoData])
     }
@@ -595,7 +604,9 @@ const mutations = {
   addVideos(state, payload) {
     const playlist = state.playlists.find(playlist => playlist._id === payload._id)
     if (playlist) {
-      playlist.videos = [].concat(playlist.videos, payload.videos)
+      playlist.videos = payload.addVideosToTop === true
+        ? payload.videos.concat(playlist.videos)
+        : playlist.videos.concat(payload.videos)
       playlist.lastUpdatedAt = payload.lastUpdatedAt
       incrementPlaylistVideoCounts(state.playlistVideoCounts, payload.videos)
     }
