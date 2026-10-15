@@ -46,13 +46,18 @@ final class LibraryDatabase implements AutoCloseable {
             connection = new BundledSQLiteDriver().open(file.getPath());
             try {
                 exec("PRAGMA busy_timeout = 5000");
-                // Takes effect only before the first table exists. Switching to the
-                // write-ahead log rewrites and syncs this header, so skip its own sync.
-                exec("PRAGMA synchronous = OFF");
-                exec("PRAGMA auto_vacuum = INCREMENTAL");
+                // Persistent settings apply only to a database this version is
+                // creating, so a newer version's database stays untouched.
+                if (userVersion() == 0) {
+                    // Takes effect only before the first table exists. Switching to the
+                    // write-ahead log rewrites and syncs this header, so skip its own sync.
+                    exec("PRAGMA synchronous = OFF");
+                    exec("PRAGMA auto_vacuum = INCREMENTAL");
+                    exec("PRAGMA synchronous = FULL");
+                    exec("PRAGMA journal_mode = WAL");
+                }
                 // Every committed write survives power loss.
                 exec("PRAGMA synchronous = FULL");
-                exec("PRAGMA journal_mode = WAL");
             } catch (RuntimeException error) {
                 // Never keep a connection without its durability settings.
                 close();
@@ -60,6 +65,12 @@ final class LibraryDatabase implements AutoCloseable {
             }
         }
         return connection;
+    }
+
+    private long userVersion() {
+        try (SQLiteStatement statement = connection.prepare("PRAGMA user_version")) {
+            return statement.step() ? statement.getLong(0) : 0;
+        }
     }
 
     private void exec(String sql) {

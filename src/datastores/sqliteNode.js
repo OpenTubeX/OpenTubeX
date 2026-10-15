@@ -15,35 +15,39 @@ export { createNodeSqliteDriver }
  * @returns {(filename: string, backupDirectory?: string) => import('./sqlite.js').SqliteDriver}
  */
 export function createWorkerDrivers(workerPath) {
-  let worker = null
+  let current = null
   let nextId = 0
-  const pending = new Map()
 
-  function fail(error) {
-    worker = null
-    for (const request of pending.values()) request.reject(error)
-    pending.clear()
+  function start() {
+    const instance = { worker: new Worker(workerPath), pending: new Map() }
+    // A failed worker only fails its own requests, even when its exit event
+    // arrives after a replacement started.
+    const fail = error => {
+      if (current === instance) current = null
+      for (const request of instance.pending.values()) request.reject(error)
+      instance.pending.clear()
+    }
+    instance.worker.on('message', ({ id, result, error }) => {
+      const request = instance.pending.get(id)
+      instance.pending.delete(id)
+      if (error === undefined) request.resolve(result)
+      else request.reject(Object.assign(new Error(error.message), { code: error.code }))
+    })
+    instance.worker.on('error', fail)
+    instance.worker.on('exit', code => fail(new Error(`Library worker exited with code ${code}`)))
+    // After the listeners, which would reference it again. Quitting waits
+    // for pending writes through each datastore's queue instead.
+    instance.worker.unref()
+    return instance
   }
 
   function call(message) {
-    if (!worker) {
-      worker = new Worker(workerPath)
-      worker.on('message', ({ id, result, error }) => {
-        const request = pending.get(id)
-        pending.delete(id)
-        if (error === undefined) request.resolve(result)
-        else request.reject(Object.assign(new Error(error.message), { code: error.code }))
-      })
-      worker.on('error', fail)
-      worker.on('exit', code => fail(new Error(`Library worker exited with code ${code}`)))
-      // After the listeners, which would reference it again. Quitting waits
-      // for pending writes through each datastore's queue instead.
-      worker.unref()
-    }
+    current ??= start()
+    const instance = current
     return new Promise((resolve, reject) => {
       const id = nextId++
-      pending.set(id, { resolve, reject })
-      worker.postMessage({ id, ...message })
+      instance.pending.set(id, { resolve, reject })
+      instance.worker.postMessage({ id, ...message })
     })
   }
 

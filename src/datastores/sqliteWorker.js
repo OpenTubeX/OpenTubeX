@@ -51,10 +51,14 @@ async function openDatabase(name) {
   const { OpfsSAHPoolDb } = await getPool()
   const db = new OpfsSAHPoolDb(`/${name}.sqlite`)
   try {
-    // Takes effect only before the first table exists, whose creation
-    // commits and syncs the header, so skip this write's own sync.
-    db.exec('PRAGMA synchronous = OFF')
-    db.exec('PRAGMA auto_vacuum = INCREMENTAL')
+    // Persistent settings apply only to a database this version is creating,
+    // so a newer version's database stays untouched.
+    if (db.selectValue('PRAGMA user_version') === 0) {
+      // Takes effect only before the first table exists, whose creation
+      // commits and syncs the header, so skip this write's own sync.
+      db.exec('PRAGMA synchronous = OFF')
+      db.exec('PRAGMA auto_vacuum = INCREMENTAL')
+    }
     // This VFS has no shared memory, so it cannot use a write-ahead log.
     db.exec('PRAGMA journal_mode = TRUNCATE')
     db.exec('PRAGMA synchronous = FULL')

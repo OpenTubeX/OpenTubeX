@@ -348,6 +348,7 @@ test('refuses a database written by a newer schema instead of altering it', asyn
   store.driver.close()
   const reopened = new DatabaseSync(join(dir, 'settings.sqlite'), { readOnly: true })
   assert.deepEqual(reopened.prepare('SELECT name FROM sqlite_master').all(), [], 'no tables are created')
+  assert.deepEqual({ ...reopened.prepare('PRAGMA journal_mode').get() }, { journal_mode: 'delete' }, 'its journal mode is unchanged')
   reopened.close()
 })
 
