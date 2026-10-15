@@ -606,8 +606,13 @@ test('channel search restores highlights immediately unless a tab is deliberatel
     const restored = await search.evaluate(async input => {
       input.value = ''
       input.dispatchEvent(new InputEvent('input', { bubbles: true }))
-      await new Promise(resolve => requestAnimationFrame(resolve))
-      const tab = [...document.querySelectorAll('.channelDetails [role="tab"][aria-selected="true"]')].find(tab => tab.getClientRects().length > 0)
+      // Measure on the first frame that renders the tabs again; slow runners can need more than one.
+      let tab
+      for (let frame = 0; frame < 60 && !tab; frame++) {
+        await new Promise(resolve => requestAnimationFrame(resolve))
+        tab = [...document.querySelectorAll('.channelDetails [role="tab"][aria-selected="true"]')].find(tab => tab.getClientRects().length > 0)
+      }
+      if (!tab) return 'selected tab was not restored'
       return {
         opacity: getComputedStyle(tab, '::before').opacity,
         transitions: tab.getAnimations({ subtree: true }).filter(animation =>
