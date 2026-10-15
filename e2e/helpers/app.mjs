@@ -233,7 +233,14 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
   // Page routes can override these replies to exercise real offline recovery.
   await context.route(INTERNET_CHECK_URL, route => route.fulfill({ status: 204 }))
   // Covers reloads and later windows. The first document may already exist.
+  // Init scripts can miss a reloaded document on CI, so the main process also
+  // installs the accessors whenever a document is ready.
   await context.addInitScript(installRendererAccessors)
+  await electronApp.evaluate(({ app, BrowserWindow }, source) => {
+    const install = contents => contents.on('dom-ready', () => contents.executeJavaScript(source).catch(() => {}))
+    app.on('web-contents-created', (_, contents) => install(contents))
+    for (const browserWindow of BrowserWindow.getAllWindows()) install(browserWindow.webContents)
+  }, `(${installRendererAccessors})()`)
   await notifyPhase('electronConnected')
 
   let page
