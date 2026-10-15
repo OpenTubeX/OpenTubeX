@@ -250,8 +250,16 @@ have your help.  Send a pull request and someone will review your code.
 <a id="localization"></a>
 ## 🌍 Localization
 <a href="https://weblate.opentubex.org/engage/opentubex/">
-<img src="https://weblate.opentubex.org/widgets/opentubex/-/287x66-grey.png" alt="Translation status" />
-<img src="https://weblate.opentubex.org/widget/opentubex/application/matrix-auto.svg" alt="Translation matrix" />
+  <picture>
+    <source media="(prefers-color-scheme: light)" srcset="https://weblate.opentubex.org/widgets/opentubex/-/287x66-grey.png">
+    <source media="(prefers-color-scheme: dark)" srcset="https://weblate.opentubex.org/widgets/opentubex/-/287x66-black.png">
+    <img src="https://weblate.opentubex.org/widgets/opentubex/-/287x66-grey.png" alt="Translation status" />
+  </picture>
+  <picture>
+    <source media="(prefers-color-scheme: light)" srcset="https://weblate.opentubex.org/widget/opentubex/application/matrix-auto.svg">
+    <source media="(prefers-color-scheme: dark)" srcset="https://weblate.opentubex.org/widget/opentubex/application/matrix-dark.svg">
+    <img src="https://weblate.opentubex.org/widget/opentubex/application/matrix-auto.svg" alt="Translation matrix" />
+  </picture>
 </a>
 
 We are actively looking for translations! We use [Weblate](https://weblate.opentubex.org/engage/opentubex/) to make it easy for translators to get involved. Click on one of the graphics above to learn how to get involved.
