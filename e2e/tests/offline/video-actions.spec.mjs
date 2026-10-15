@@ -2063,8 +2063,8 @@ test.describe('list video actions', () => {
     ])
 
     // Exactly one of them wrote, and the other was told the video was already there
-    expect(written.filter((result) => result === PlaylistVideoAddResult.ADDED)).toHaveLength(1)
-    expect(written.filter((result) => result === PlaylistVideoAddResult.ALREADY_PRESENT)).toHaveLength(1)
+    expect(written.filter((result) => result.status === PlaylistVideoAddResult.ADDED)).toHaveLength(1)
+    expect(written.filter((result) => result.status === PlaylistVideoAddResult.ALREADY_PRESENT)).toHaveLength(1)
 
     const favorites = await readPlaylist(app, 'favorites')
     expect(favorites.videos.map((entry) => entry.videoId)).toEqual(['eeeeeeeeeee'])
@@ -2091,7 +2091,7 @@ test.describe('list video actions', () => {
       }
     }), DBActions.PLAYLISTS.UPSERT_VIDEO)
 
-    expect(result).toBe(PlaylistVideoAddResult.PLAYLIST_MISSING)
+    expect(result).toEqual({ status: PlaylistVideoAddResult.PLAYLIST_MISSING })
   })
 
   test('creating a playlist from the dropdown puts the video in it', async ({ app, page }) => {
