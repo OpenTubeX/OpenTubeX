@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { execFile } from 'node:child_process'
-import { existsSync, mkdirSync, readdirSync, symlinkSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, realpathSync, symlinkSync } from 'node:fs'
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -15,7 +15,8 @@ const lines = docs => docs.map(doc => typeof doc === 'string' ? doc : JSON.strin
 const video = (videoId, playlistItemId = `item-${videoId}`) => ({ videoId, playlistItemId, title: `Title ${videoId}`, timeAdded: 1 })
 
 async function directory (t) {
-  const path = await mkdtemp(join(tmpdir(), 'opentubex-sqlite-'))
+  // Resolved, as macOS keeps the temporary directory behind a symbolic link.
+  const path = realpathSync(await mkdtemp(join(tmpdir(), 'opentubex-sqlite-')))
   t.after(() => rm(path, { recursive: true, force: true }))
   return path
 }

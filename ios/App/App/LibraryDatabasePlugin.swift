@@ -42,14 +42,20 @@ final class LibraryDatabase {
             throw LibraryDatabaseError(errorDescription: message)
         }
         db = handle
-        try exec("PRAGMA busy_timeout = 5000")
-        // Takes effect only before the first table exists. Switching to the
-        // write-ahead log rewrites and syncs this header, so skip its own sync.
-        try exec("PRAGMA synchronous = OFF")
-        try exec("PRAGMA auto_vacuum = INCREMENTAL")
-        // Every committed write survives power loss.
-        try exec("PRAGMA synchronous = FULL")
-        try exec("PRAGMA journal_mode = WAL")
+        do {
+            try exec("PRAGMA busy_timeout = 5000")
+            // Takes effect only before the first table exists. Switching to the
+            // write-ahead log rewrites and syncs this header, so skip its own sync.
+            try exec("PRAGMA synchronous = OFF")
+            try exec("PRAGMA auto_vacuum = INCREMENTAL")
+            // Every committed write survives power loss.
+            try exec("PRAGMA synchronous = FULL")
+            try exec("PRAGMA journal_mode = WAL")
+        } catch {
+            // Never keep a connection without its durability settings.
+            close()
+            throw error
+        }
     }
 
     private func exec(_ sql: String) throws {

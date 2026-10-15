@@ -18,11 +18,20 @@ async function getPool() {
   return pool
 }
 
-async function open(name) {
-  let db = databases.get(name)
-  if (!db) {
-    const { OpfsSAHPoolDb } = await getPool()
-    db = new OpfsSAHPoolDb(`/${name}.sqlite`)
+// One opening per library, so concurrent first calls share a connection.
+function open(name) {
+  if (!databases.has(name)) {
+    const opening = openDatabase(name)
+    opening.catch(() => databases.delete(name))
+    databases.set(name, opening)
+  }
+  return databases.get(name)
+}
+
+async function openDatabase(name) {
+  const { OpfsSAHPoolDb } = await getPool()
+  const db = new OpfsSAHPoolDb(`/${name}.sqlite`)
+  try {
     // Takes effect only before the first table exists, whose creation
     // commits and syncs the header, so skip this write's own sync.
     db.exec('PRAGMA synchronous = OFF')
@@ -30,9 +39,11 @@ async function open(name) {
     // This VFS has no shared memory, so it cannot use a write-ahead log.
     db.exec('PRAGMA journal_mode = TRUNCATE')
     db.exec('PRAGMA synchronous = FULL')
-    db.statements = new Map()
-    databases.set(name, db)
+  } catch (error) {
+    db.close()
+    throw error
   }
+  db.statements = new Map()
   return db
 }
 
@@ -68,7 +79,7 @@ const methods = {
     }
   },
   async drop({ name }) {
-    const db = databases.get(name)
+    const db = await databases.get(name)?.catch(() => null)
     db?.statements.forEach(statement => statement.finalize())
     db?.close()
     databases.delete(name)

@@ -44,14 +44,20 @@ final class LibraryDatabase implements AutoCloseable {
                 throw new IllegalStateException("Unable to create the library directory");
             }
             connection = new BundledSQLiteDriver().open(file.getPath());
-            exec("PRAGMA busy_timeout = 5000");
-            // Takes effect only before the first table exists. Switching to the
-            // write-ahead log rewrites and syncs this header, so skip its own sync.
-            exec("PRAGMA synchronous = OFF");
-            exec("PRAGMA auto_vacuum = INCREMENTAL");
-            // Every committed write survives power loss.
-            exec("PRAGMA synchronous = FULL");
-            exec("PRAGMA journal_mode = WAL");
+            try {
+                exec("PRAGMA busy_timeout = 5000");
+                // Takes effect only before the first table exists. Switching to the
+                // write-ahead log rewrites and syncs this header, so skip its own sync.
+                exec("PRAGMA synchronous = OFF");
+                exec("PRAGMA auto_vacuum = INCREMENTAL");
+                // Every committed write survives power loss.
+                exec("PRAGMA synchronous = FULL");
+                exec("PRAGMA journal_mode = WAL");
+            } catch (RuntimeException error) {
+                // Never keep a connection without its durability settings.
+                close();
+                throw error;
+            }
         }
         return connection;
     }
