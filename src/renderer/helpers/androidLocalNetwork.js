@@ -10,9 +10,11 @@ export async function ensureAndroidLocalNetworkAccess(options = {}) {
   const { required } = await AndroidLocalNetwork.checkAccess(options)
   if (!required) return
   // Concurrent sync and discovery requests share the same system prompt.
-  pendingPermission ??= AndroidLocalNetwork.requestPermissions()
-    .finally(() => { pendingPermission = undefined })
-  const { localNetwork } = await pendingPermission
+  if (options.requestPermission !== false) {
+    pendingPermission ??= AndroidLocalNetwork.requestPermissions()
+      .finally(() => { pendingPermission = undefined })
+  }
+  const { localNetwork } = pendingPermission ? await pendingPermission : { localNetwork: 'denied' }
   if (localNetwork !== 'granted') {
     const { default: i18n } = await import('../i18n/index.js')
     throw Object.assign(new Error(i18n.global.t('Native Permissions.Local Network Denied')), { code: 'LOCAL_ACCESS_DENIED' })

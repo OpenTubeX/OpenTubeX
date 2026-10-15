@@ -97,7 +97,7 @@ test('non-idempotent operations wait offline but are never automatically replaye
   assert.equal(states.includes('restored'), true, 'the online event restores the device status independently of a failed write')
 })
 
-async function loadAppNetwork(t, fetch, nativeRequest, options = {}) {
+async function loadAppNetwork(t, fetch, nativeRequest, options = {}, localNetworkAccess) {
   const { readFile } = await import('node:fs/promises')
   const { default: vm } = await import('node:vm')
   const { classifyRequestFailure } = await import('../../src/renderer/helpers/api/requestDiagnostics.js')
@@ -106,8 +106,9 @@ async function loadAppNetwork(t, fetch, nativeRequest, options = {}) {
   const window = new EventTarget()
   window.fetch = fetch
   const context = vm.createContext({
-    createInternetConnectivity, createInternetProbe, options, window, navigator: { onLine: true }, location: { href: 'https://localhost/', origin: 'https://localhost' },
-    process: { env: { IS_IOS: false } },
+    createInternetConnectivity, createInternetProbe, INTERNET_CHECK_URL, options, window, navigator: { onLine: true }, location: { href: 'https://localhost/', origin: 'https://localhost' },
+    process: { env: { IS_IOS: false, IS_CAPACITOR: !!localNetworkAccess } },
+    ensureAndroidLocalNetworkAccess: localNetworkAccess,
     classifyRequestFailure, createAbortError, waitForRequest, CapacitorHttp: { request: nativeRequest },
     AbortController, AbortSignal, DOMException, EventTarget, CustomEvent, Request, Response, Headers, URL, URLSearchParams, setTimeout, clearTimeout,
   })
@@ -422,4 +423,53 @@ test('a saved opt-out sends no startup probes and remains cancellable when later
   t.mock.timers.tick(3600000)
   await flush()
   assert.equal(probes, count)
+})
+
+test('Android startup waits for LAN proxy consent before its first connectivity probe', async t => {
+  let allow
+  let probes = 0
+  const permission = new Promise(resolve => { allow = resolve })
+  const app = await loadAppNetwork(t, async input => {
+    if (input === INTERNET_CHECK_URL) { probes++; return new Response(null, { status: 204 }) }
+    return new Response('startup')
+  }, undefined, { checkInternet: true }, async ({ url }) => {
+    assert.equal(url, INTERNET_CHECK_URL)
+    await permission
+  })
+  const pending = app.window.fetch('https://service.example/startup')
+  await flush()
+  try { assert.equal(probes, 0) } finally { allow() }
+  assert.equal(await (await pending).text(), 'startup')
+  assert.equal(probes, 1)
+})
+
+test('denied startup proxy access blocks the probe and can recover after consent', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  let granted = false
+  let probes = 0
+  const permissionRequests = []
+  const app = await loadAppNetwork(t, async () => {
+    probes++
+    return new Response(null, { status: 204 })
+  }, undefined, { checkInternet: true }, async ({ requestPermission }) => {
+    permissionRequests.push(requestPermission)
+    if (!granted) throw Object.assign(new Error('Permission denied'), { code: 'LOCAL_ACCESS_DENIED' })
+  })
+  await flush()
+  assert.equal(probes, 0)
+  assert.equal(app.recovery.state, 'offline')
+  t.mock.timers.tick(5000)
+  await flush()
+  assert.deepEqual(permissionRequests, [true, false], 'Background retries must not prompt again after denial')
+  granted = true
+  assert.equal(await app.recovery.checkConnection(), true)
+  assert.equal(probes, 1)
+})
+
+test('disabled Android connectivity checks send neither probes nor permission checks', async t => {
+  const unexpected = () => assert.fail('Saved opt-out must be honored before preflight')
+  const app = await loadAppNetwork(t, unexpected, undefined,
+    { checkInternet: true, internetChecksEnabled: false }, unexpected)
+  await flush()
+  assert.equal(app.recovery.state, 'online')
 })

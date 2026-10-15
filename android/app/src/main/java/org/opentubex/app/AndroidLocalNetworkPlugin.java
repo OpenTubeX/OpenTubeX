@@ -2,6 +2,10 @@ package org.opentubex.app;
 
 import android.Manifest;
 import android.os.Build;
+import android.net.IpPrefix;
+import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
+import android.net.RouteInfo;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.PermissionState;
 import com.getcapacitor.Plugin;
@@ -10,6 +14,7 @@ import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 import com.getcapacitor.annotation.Permission;
 import java.net.InetAddress;
+import java.net.Inet6Address;
 import java.net.UnknownHostException;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
@@ -59,7 +64,7 @@ public final class AndroidLocalNetworkPlugin extends Plugin {
             if (host.toLowerCase(Locale.ROOT).endsWith(".local")) required = true;
             else try {
                 for (InetAddress address : InetAddress.getAllByName(host)) {
-                    if (isLocalNetwork(address)) { required = true; break; }
+                    if (isLocalNetwork(address) || isOnLinkIpv6(address)) { required = true; break; }
                 }
             } catch (UnknownHostException ignored) {
                 // Preserve the HTTP client's existing DNS errors and retry policy.
@@ -76,5 +81,29 @@ public final class AndroidLocalNetworkPlugin extends Plugin {
             (bytes.length == 4 && bytes[0] == 100 && (bytes[1] & 0xc0) == 0x40) ||
             (bytes.length == 4 && bytes[0] == -1 && bytes[1] == -1 && bytes[2] == -1 && bytes[3] == -1) ||
             (bytes.length == 16 && (bytes[0] & 0xfe) == 0xfc);
+    }
+
+    static boolean isOnLinkIpv6(InetAddress address, IpPrefix destination, boolean hasGateway) {
+        return address instanceof Inet6Address && !address.isLoopbackAddress() && !address.isAnyLocalAddress() &&
+            !hasGateway && destination.getPrefixLength() > 0 && destination.contains(address);
+    }
+
+    private boolean isOnLinkIpv6(InetAddress address) {
+        if (!(address instanceof Inet6Address) || address.isLoopbackAddress() || address.isAnyLocalAddress()) return false;
+        ConnectivityManager manager = getContext().getSystemService(ConnectivityManager.class);
+        if (manager == null) return false;
+        var network = manager.getActiveNetwork();
+        if (network == null) return false;
+        var capabilities = manager.getNetworkCapabilities(network);
+        if (capabilities == null || capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN) ||
+            !(capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET))) return false;
+        var properties = manager.getLinkProperties(network);
+        if (properties == null) return false;
+        for (RouteInfo route : properties.getRoutes()) {
+            if (route.getType() == RouteInfo.RTN_UNICAST &&
+                isOnLinkIpv6(address, route.getDestination(), route.hasGateway())) return true;
+        }
+        return false;
     }
 }

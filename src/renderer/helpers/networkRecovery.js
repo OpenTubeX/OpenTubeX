@@ -1,7 +1,9 @@
 import { isAppHidden } from './appVisibility.js'
-import { createInternetConnectivity, createInternetProbe } from './internetConnectivity.js'
+import { createInternetConnectivity, createInternetProbe, INTERNET_CHECK_URL } from './internetConnectivity.js'
 import { classifyRequestFailure } from './api/requestDiagnostics.js'
 import { createAbortError } from './api/requestErrors.js'
+import { waitForRequest } from './api/requestWait.js'
+import { ensureAndroidLocalNetworkAccess } from './androidLocalNetwork.js'
 
 const nonNetworkErrors = new WeakSet()
 export function isRecoverableNetworkError(error) {
@@ -216,7 +218,24 @@ export function withNetworkRecovery(input, init, task, options = {}) {
 
 export function installNetworkFetch({ corsDisabled = false, checkInternet = false, internetChecksEnabled = true } = {}) {
   const fetch = window.fetch.bind(window)
-  initializeNetworkRecovery({ checkInternet: checkInternet ? createInternetProbe(fetch) : undefined, internetChecksEnabled })
+  const probe = createInternetProbe(fetch)
+  let requestLocalPermission = true
+  initializeNetworkRecovery({
+    checkInternet: checkInternet
+      ? async signal => {
+        if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
+          try {
+            await waitForRequest(ensureAndroidLocalNetworkAccess({ url: INTERNET_CHECK_URL, requestPermission: requestLocalPermission }), signal)
+          } catch (error) {
+            if (error?.code === 'LOCAL_ACCESS_DENIED') requestLocalPermission = false
+            throw error
+          }
+        }
+        return probe(signal)
+      }
+      : undefined,
+    internetChecksEnabled
+  })
   window.fetch = async (input, init) => withNetworkRecovery(input, init, async signal => {
     // A fetch can stall while the OS still reports online. Bound the wait for
     // response headers; media response bodies keep their streaming behavior.

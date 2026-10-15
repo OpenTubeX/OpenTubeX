@@ -2,11 +2,14 @@ package org.opentubex.app;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assume.assumeTrue;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.net.IpPrefix;
+import java.net.InetAddress;
 import androidx.core.content.ContextCompat;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -19,6 +22,17 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 
 public class AndroidLocalNetworkPluginTest {
+    @Test public void directlyConnectedIpv6PeersNeedAccessButDefaultAndGatewayRoutesDoNot() throws Exception {
+        assumeTrue(Build.VERSION.SDK_INT >= 37);
+        InetAddress peer = InetAddress.getByName("2001:db8:1234::2");
+        IpPrefix prefix = new IpPrefix(InetAddress.getByName("2001:db8:1234::"), 64);
+        assertTrue(AndroidLocalNetworkPlugin.isOnLinkIpv6(peer, prefix, false));
+        assertFalse(AndroidLocalNetworkPlugin.isOnLinkIpv6(peer, prefix, true));
+        assertFalse(AndroidLocalNetworkPlugin.isOnLinkIpv6(peer, new IpPrefix(InetAddress.getByName("::"), 0), false));
+        assertFalse(AndroidLocalNetworkPlugin.isOnLinkIpv6(InetAddress.getByName("2001:db8:5678::2"), prefix, false));
+        assertFalse(AndroidLocalNetworkPlugin.isOnLinkIpv6(InetAddress.getByName("::1"), new IpPrefix(InetAddress.getByName("::1"), 128), false));
+    }
+
     @Test public void excessPreflightWorkRejectsInsteadOfAccumulating() throws Exception {
         assumeTrue(Build.VERSION.SDK_INT >= 37);
         assumeTrue(ContextCompat.checkSelfPermission(InstrumentationRegistry.getInstrumentation().getTargetContext(),
@@ -58,7 +72,7 @@ public class AndroidLocalNetworkPluginTest {
         assumeTrue(ContextCompat.checkSelfPermission(InstrumentationRegistry.getInstrumentation().getTargetContext(),
             Manifest.permission.ACCESS_LOCAL_NETWORK) != PackageManager.PERMISSION_GRANTED);
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
-            for (String hostname : new String[]{"127.0.0.1", "NAS.LOCAL", "100.64.0.1"}) {
+            for (String hostname : new String[]{"127.0.0.1", "NAS.LOCAL", "100.64.0.1", "2606:4700:4700::1111"}) {
                 CompletableFuture<JSObject> result = new CompletableFuture<>();
                 scenario.onActivity(activity -> {
                     Thread caller = Thread.currentThread();
@@ -74,7 +88,8 @@ public class AndroidLocalNetworkPluginTest {
                         @Override public void reject(String message) { result.completeExceptionally(new AssertionError(message)); }
                     });
                 });
-                assertEquals(hostname, !hostname.equals("127.0.0.1"), result.get(10, TimeUnit.SECONDS).getBoolean("required", false));
+                boolean expected = !hostname.equals("127.0.0.1") && !hostname.equals("2606:4700:4700::1111");
+                assertEquals(hostname, expected, result.get(10, TimeUnit.SECONDS).getBoolean("required", false));
             }
         }
     }

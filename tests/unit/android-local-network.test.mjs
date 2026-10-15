@@ -22,7 +22,7 @@ test('LAN requests share a permission prompt and resume only after a grant', asy
     requestPermissions: () => { prompts++; return permission },
   })
   let completed = false
-  const requests = Promise.all([access(), access({ url: 'http://192.168.1.2' })])
+  const requests = Promise.all([access(), access({ url: 'http://192.168.1.2' }), access({ requestPermission: false })])
     .then(() => { completed = true })
   await new Promise(resolve => setImmediate(resolve))
   assert.equal(prompts, 1)
@@ -68,6 +68,14 @@ test('public networking and older Android versions skip the permission prompt', 
   })
   await access({ url: 'https://www.youtube.com' })
   assert.equal(received.url, 'https://www.youtube.com')
+})
+
+test('background permission checks do not open another system prompt after denial', async () => {
+  const access = fixture({
+    checkAccess: async () => ({ required: true }),
+    requestPermissions: () => assert.fail('Background retries must not request consent again'),
+  })
+  await assert.rejects(access({ requestPermission: false }), { code: 'LOCAL_ACCESS_DENIED' })
 })
 
 test('desktop and iOS do not call the Android permission bridge', async () => {
