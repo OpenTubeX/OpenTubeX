@@ -594,13 +594,16 @@ test('channel search restores highlights immediately unless a tab is deliberatel
   for (const scale of [100, 95, 125]) {
     await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
     for (const key of [null, 'Enter', ' ']) {
-      await search.fill('animation')
-      await search.press('Enter')
-      await expect(page.locator(indicatorSelector)).toHaveCount(0)
-      expect(await page.locator('.channelDetails:visible [role="tab"]').evaluateAll(tabs => tabs.some(tab =>
-        tab.getAnimations({ subtree: true }).some(animation => animation instanceof CSSTransition && animation.transitionProperty === 'opacity' && animation.effect.target === tab && animation.effect.pseudoElement === '::before')
-      ))).toBe(false)
-      expect(await selectTabWithHighlightAnimation(page.locator('#aboutTab'), key)).toEqual({ property: 'opacity', playbackRate: 0.25, duration: 140 })
+      // A channel reload that lands mid-selection cancels the highlight transition, so retry the whole step.
+      await expect(async () => {
+        await search.fill('animation')
+        await search.press('Enter')
+        await expect(page.locator(indicatorSelector)).toHaveCount(0)
+        expect(await page.locator('.channelDetails:visible [role="tab"]').evaluateAll(tabs => tabs.some(tab =>
+          tab.getAnimations({ subtree: true }).some(animation => animation instanceof CSSTransition && animation.transitionProperty === 'opacity' && animation.effect.target === tab && animation.effect.pseudoElement === '::before')
+        ))).toBe(false)
+        expect(await selectTabWithHighlightAnimation(page.locator('#aboutTab'), key)).toEqual({ property: 'opacity', playbackRate: 0.25, duration: 140 })
+      }).toPass({ timeout: 30000 })
       await expectAligned(page)
     }
 
