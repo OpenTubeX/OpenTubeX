@@ -373,7 +373,9 @@ const setTabTitle = useTabTitle()
 const setTabAvatar = useTabAvatar()
 const { isTabPresented } = useTabContext()
 
-let skipRouteChangeWatcherOnce = false
+// Full paths of routes this view is replacing itself, so the route watcher doesn't reload the channel for them.
+// A single flag cleared after `router.replace` settles breaks when replacements overlap, e.g. clearing a search right after submitting it.
+const ownRouteFullPaths = []
 let pendingTabRoute = null
 let isReplacingTabRoute = false
 let channelRouteGeneration = 0
@@ -625,10 +627,14 @@ const currentTabViewAllRoute = computed(() => {
 })
 
 watch(route, () => {
-  if (skipRouteChangeWatcherOnce) {
-    skipRouteChangeWatcherOnce = false
+  // Search from the end so a batched watcher run consumes every replacement up to the latest copy of this path.
+  const ownRouteIndex = ownRouteFullPaths.lastIndexOf(route.fullPath)
+  if (ownRouteIndex !== -1) {
+    // Earlier replacements were superseded by this one.
+    ownRouteFullPaths.splice(0, ownRouteIndex + 1)
     return
   }
+  ownRouteFullPaths.length = 0
   channelRouteGeneration += 1
   isLoading.value = true
 
@@ -2459,8 +2465,6 @@ function clearSearch() {
 }
 
 async function saveStateInRouter(query) {
-  skipRouteChangeWatcherOnce = true
-
   let location
 
   if (query === '') {
@@ -2482,7 +2486,7 @@ async function saveStateInRouter(query) {
   }
 
   try {
-    await router.replace(location)
+    await replaceOwnRoute(location)
   } catch (failure) {
     if (isNavigationFailure(failure, NavigationFailureType.duplicated)) {
       return
@@ -2490,8 +2494,26 @@ async function saveStateInRouter(query) {
 
     throw failure
   }
+}
 
-  skipRouteChangeWatcherOnce = false
+/**
+ * Replaces the route without letting the route watcher reload the channel.
+ * @param {import('vue-router').RouteLocationRaw} location
+ */
+async function replaceOwnRoute(location) {
+  const fullPath = router.resolve(location).fullPath
+  ownRouteFullPaths.push(fullPath)
+  const forget = () => {
+    const index = ownRouteFullPaths.indexOf(fullPath)
+    if (index !== -1) ownRouteFullPaths.splice(index, 1)
+  }
+  try {
+    // A failed navigation leaves the route unchanged, so the watcher won't consume the path.
+    if (await router.replace(location)) forget()
+  } catch (failure) {
+    forget()
+    throw failure
+  }
 }
 
 /**
@@ -2648,10 +2670,8 @@ async function replaceTabRoute(tab) {
       pendingTabRoute = null
 
       // We already have the data and only need to switch the visible tab.
-      skipRouteChangeWatcherOnce = true
-
       try {
-        await router.replace({
+        await replaceOwnRoute({
           path: `/channel/${id.value}/${nextTab}`,
           state: { skipTabRouteLoading: true }
         })
@@ -2659,8 +2679,6 @@ async function replaceTabRoute(tab) {
         if (!isNavigationFailure(failure, NavigationFailureType.duplicated)) {
           throw failure
         }
-      } finally {
-        skipRouteChangeWatcherOnce = false
       }
     }
   } finally {
