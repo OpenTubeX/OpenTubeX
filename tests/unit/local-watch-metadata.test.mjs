@@ -74,11 +74,25 @@ async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
   })
   await load.call(watch)
   assert.deepEqual(errors, options.expectedErrors ?? [])
-  assert.equal(watch.errorMessage, undefined)
+  assert.equal(watch.errorMessage, options.expectedErrorMessage)
   assert.equal(watch.isLoading, false)
   assert.equal(completed, true)
-  assert.equal(watch.manifestSrc, 'manifest')
+  assert.equal(watch.manifestSrc, options.expectedErrorMessage ? undefined : 'manifest')
   return watch
+}
+
+for (const status of ['UNPLAYABLE', 'LOGIN_REQUIRED']) {
+  for (const subreason of [undefined, null, {}, { text: '' }, { text: 'More details' }]) {
+    test(`formats ${status} errors with subreason ${JSON.stringify(subreason)}`, async () => {
+      await loadMetadata({
+        playability_status: { status, reason: 'Video unavailable', error_screen: { subreason } },
+        basic_info: { title: 'Unavailable video', duration: 42 }, page: [],
+      }, 'disabled', {
+        watch: { isYtDlpPlaybackRequested: () => false },
+        expectedErrorMessage: `[${status}] Video unavailable${subreason?.text ? ': More details' : ''}`,
+      })
+    })
+  }
 }
 
 test('removes the skeleton before community chapters finish loading', async () => {
