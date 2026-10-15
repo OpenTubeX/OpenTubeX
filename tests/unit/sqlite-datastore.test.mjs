@@ -300,6 +300,16 @@ test('a symlinked legacy file keeps the library beside its target', async (t) =>
   })
 })
 
+test('new databases use the write-ahead log and incremental vacuum', async (t) => {
+  const dir = await directory(t)
+  const store = open(t, dir, 'settings')
+  await store.insertAsync({ _id: 'a' })
+  store.driver.close()
+  const db = new DatabaseSync(join(dir, 'settings.sqlite'), { readOnly: true })
+  assert.deepEqual([{ ...db.prepare('PRAGMA journal_mode').get() }, { ...db.prepare('PRAGMA auto_vacuum').get() }], [{ journal_mode: 'wal' }, { auto_vacuum: 2 }])
+  db.close()
+})
+
 test('refuses a database written by a newer schema instead of altering it', async (t) => {
   const dir = await directory(t)
   const db = new DatabaseSync(join(dir, 'settings.sqlite'))

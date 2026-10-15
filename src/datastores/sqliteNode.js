@@ -20,11 +20,14 @@ export function createNodeSqliteDriver(filename) {
     db = new DatabaseSync(filename)
     db.exec('PRAGMA busy_timeout = 5000')
     // Takes effect only before the first table exists. Compaction can then
-    // release free pages without rewriting the whole database.
+    // release free pages without rewriting the whole database. Each sync can
+    // stall the main process on a busy disk, so this header write skips its
+    // own: switching to the write-ahead log rewrites and syncs the header.
+    db.exec('PRAGMA synchronous = OFF')
     db.exec('PRAGMA auto_vacuum = INCREMENTAL')
-    if (filename !== ':memory:') db.exec('PRAGMA journal_mode = WAL')
     // Every committed write survives power loss.
     db.exec('PRAGMA synchronous = FULL')
+    if (filename !== ':memory:') db.exec('PRAGMA journal_mode = WAL')
     return db
   }
 

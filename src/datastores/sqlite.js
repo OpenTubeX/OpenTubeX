@@ -5,9 +5,13 @@ import { uid } from '@seald-io/nedb/lib/customUtils.js'
 
 const SCHEMA_VERSION = 1
 const FIELD_NAME = /^[A-Za-z_][A-Za-z0-9_]*$/
-// Statements per committed batch while importing a legacy datastore. Keeps
-// each bridge or worker message bounded on mobile and web.
+// Limits for each committed batch while importing a legacy datastore. They
+// keep bridge and worker messages bounded on mobile and web, and keep each
+// synchronous step short on desktop, where the main process also draws frames.
 const MIGRATION_BATCH_SIZE = 2000
+const MIGRATION_BATCH_BYTES = 1024 * 1024
+
+const nextTask = () => new Promise(resolve => setTimeout(resolve, 0))
 
 const SCHEMA = [
   'CREATE TABLE IF NOT EXISTS docs (id PRIMARY KEY NOT NULL, data TEXT NOT NULL, has_children INTEGER NOT NULL DEFAULT 0) WITHOUT ROWID',
@@ -251,6 +255,7 @@ export class SqliteDatastore {
       ? SCHEMA.map(sql => [sql])
       : [['DELETE FROM docs'], ['DELETE FROM children'], ['DELETE FROM meta'], ['DELETE FROM legacy_base']]
     let childCount = 0
+    let batchBytes = 0
     for (const doc of docs) {
       const key = keyOf(doc._id)
       const statements = this._insertStatements(key, doc)
@@ -260,9 +265,12 @@ export class SqliteDatastore {
       // state marker commits.
       for (const statement of statements) {
         batch.push(statement)
-        if (batch.length >= MIGRATION_BATCH_SIZE) {
+        batchBytes += statement[1]?.reduce((total, value) => total + (typeof value === 'string' ? value.length : 8), 0) ?? 0
+        if (batch.length >= MIGRATION_BATCH_SIZE || batchBytes >= MIGRATION_BATCH_BYTES) {
           await this._execute(batch, true)
           batch = []
+          batchBytes = 0
+          await nextTask()
         }
       }
     }
@@ -271,6 +279,8 @@ export class SqliteDatastore {
       [SQL.setMeta, ['importedAt', Date.now()]],
       [`PRAGMA user_version = ${SCHEMA_VERSION}`],
       ["INSERT INTO meta (key, value) SELECT 'state', 'ready' WHERE (SELECT count(*) FROM docs) = ? AND (SELECT count(*) FROM children) = ?", [docs.length, childCount]],
+      // In the same commit, as each commit waits for the disk.
+      ...[...this.indexes].flatMap(field => this._indexStatements(field)),
     )
     await this._execute(batch, true)
 

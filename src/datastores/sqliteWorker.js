@@ -23,6 +23,9 @@ async function open(name) {
   if (!db) {
     const { OpfsSAHPoolDb } = await getPool()
     db = new OpfsSAHPoolDb(`/${name}.sqlite`)
+    // Takes effect only before the first table exists, whose creation
+    // commits and syncs the header, so skip this write's own sync.
+    db.exec('PRAGMA synchronous = OFF')
     db.exec('PRAGMA auto_vacuum = INCREMENTAL')
     // This VFS has no shared memory, so it cannot use a write-ahead log.
     db.exec('PRAGMA journal_mode = TRUNCATE')
