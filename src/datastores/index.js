@@ -22,11 +22,14 @@ let createDatastore
 
 if (process.env.IS_ELECTRON_MAIN) {
   const { app } = require('electron')
-  const { join } = require('path')
+  const { join, resolve } = require('path')
   const { createDesktopDatastore, createWorkerDrivers, desktopDatastorePaths } = require('./sqliteNode.js')
   const userDataPath = app.getPath('userData') // This is based on the user's OS
   // Disk syncs run in a worker thread, so they never stall windows and menus.
-  const createDriver = createWorkerDrivers(join(__dirname, 'sqliteNodeWorker.js'))
+  // Development builds set __dirname to this source directory and emit to dist.
+  const createDriver = createWorkerDrivers(process.env.NODE_ENV === 'development'
+    ? resolve(__dirname, '../../dist/sqliteNodeWorker.js')
+    : join(__dirname, 'sqliteNodeWorker.js'))
   dbPath = (dbName) => desktopDatastorePaths(userDataPath, dbName).legacy
 
   // Each NeDB file is imported on first use and left in place for older versions.
