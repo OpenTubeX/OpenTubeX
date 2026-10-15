@@ -252,7 +252,11 @@ test('collapses channel search to an accessible icon at narrow widths', async ({
     await expect(page).toHaveURL(/searchQueryText=animation/)
     await input.clear()
     await expect(page).not.toHaveURL(/searchQueryText=/)
-    await toggle.click()
+    // Clearing the search reloads the channel videos, and a re-render can swallow a click that lands mid-update.
+    await expect(async () => {
+      if (await toggle.getAttribute('aria-expanded') === 'true') await toggle.click()
+      await expect(toggle).toHaveAttribute('aria-expanded', 'false', { timeout: 1000 })
+    }).toPass()
     await expect(input).toBeHidden()
     await toggle.press('Control+f')
     await expect(input).toBeFocused()
