@@ -400,6 +400,7 @@ Settings:
     Engine Limit: Μπορείτε να προσθέσετε έως {count} προσαρμοσμένες μηχανές αναζήτησης.
   Theme Settings:
     Material Accent Color: "Χρώμα έμφασης Material"
+    Material Wallpaper Colors: "Χρώματα ταπετσαρίας"
     Tab Loading Indicator:
       Tab Loading Indicator: Ένδειξη φόρτωσης καρτέλας
       Bar: Γραμμή

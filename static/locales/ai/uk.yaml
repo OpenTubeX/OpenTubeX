@@ -404,6 +404,7 @@ Settings:
     Engine Limit: Можна додати до {count} власних пошукових систем.
   Theme Settings:
     Material Accent Color: "Акцентний колір Material"
+    Material Wallpaper Colors: "Кольори шпалер"
     Tab Loading Indicator:
       Tab Loading Indicator: Індикатор завантаження вкладки
       Bar: Смуга

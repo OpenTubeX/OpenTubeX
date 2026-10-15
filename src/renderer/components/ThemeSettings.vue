@@ -680,9 +680,11 @@ const isMaterialThemeSelected = computed(() => MATERIAL_THEME_VALUES.includes(ba
   : baseTheme.value))
 
 const materialSeedColor = computed(() => store.getters.getMaterialSeedColor)
-const showMaterialSeedColor = computed(() => !androidDynamicColors.value.supported && !(usingElectron && baseTheme.value === 'dynamic') && (baseTheme.value === 'system'
-  ? [systemLightTheme.value, systemDarkTheme.value].some(theme => MATERIAL_THEME_VALUES.includes(theme))
-  : MATERIAL_THEME_VALUES.includes(baseTheme.value)))
+const usesMaterialSeedColor = theme => MATERIAL_THEME_VALUES.includes(theme) &&
+  !(theme === 'dynamic' && (usingElectron || androidDynamicColors.value.supported))
+const showMaterialSeedColor = computed(() => baseTheme.value === 'system'
+  ? [systemLightTheme.value, systemDarkTheme.value].some(usesMaterialSeedColor)
+  : usesMaterialSeedColor(baseTheme.value))
 
 const areColorThemesEnabled = computed(() => baseTheme.value === 'system'
   ? !hasFixedThemeColors(systemUsesDarkTheme.value ? systemDarkTheme.value : systemLightTheme.value)

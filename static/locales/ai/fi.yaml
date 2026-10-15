@@ -404,6 +404,7 @@ Settings:
     Engine Limit: Voit lisätä enintään {count} mukautettua hakukonetta.
   Theme Settings:
     Material Accent Color: "Material-korostusväri"
+    Material Wallpaper Colors: "Taustakuvan värit"
     Tab Loading Indicator:
       Tab Loading Indicator: Välilehden latausilmaisin
       Bar: Palkki

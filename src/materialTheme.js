@@ -2,6 +2,8 @@ import { DynamicScheme, Hct, SchemeTonalSpot, TonalPalette, argbFromHex, argbFro
 
 export const DEFAULT_MATERIAL_SEED_COLOR = '#6750a4'
 export const MATERIAL_THEME_VALUES = ['dynamic', 'materialLight', 'materialDark', 'materialBlack']
+/** Seed value that makes the fixed Material variants follow the system palette. */
+export const MATERIAL_SYSTEM_SEED = 'system'
 
 export function normalizeSystemAccentColor(value) {
   if (typeof value !== 'string') return null
@@ -10,10 +12,14 @@ export function normalizeSystemAccentColor(value) {
   return `#${hex.slice(0, 6).toLowerCase()}`
 }
 
-export function normalizeMaterialSeedColor(value) {
+function normalizeMaterialSeedHex(value) {
   return typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value)
     ? value.toLowerCase()
     : DEFAULT_MATERIAL_SEED_COLOR
+}
+
+export function normalizeMaterialSeedColor(value) {
+  return value === MATERIAL_SYSTEM_SEED ? value : normalizeMaterialSeedHex(value)
 }
 
 export function materialThemeMode(theme, systemDark) {
@@ -26,7 +32,7 @@ export function materialThemeMode(theme, systemDark) {
 
 /** Android resource shade numbers run in the opposite direction to HCT tones. */
 export function materialSeedPalette(seed) {
-  const scheme = new SchemeTonalSpot(Hct.fromInt(argbFromHex(normalizeMaterialSeedColor(seed))), false, 0)
+  const scheme = new SchemeTonalSpot(Hct.fromInt(argbFromHex(normalizeMaterialSeedHex(seed))), false, 0)
   return Object.fromEntries([
     ['accent1', scheme.primaryPalette], ['accent2', scheme.secondaryPalette], ['accent3', scheme.tertiaryPalette],
     ['neutral1', scheme.neutralPalette], ['neutral2', scheme.neutralVariantPalette],

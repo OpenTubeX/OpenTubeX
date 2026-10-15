@@ -404,6 +404,7 @@ Settings:
     Engine Limit: Je kunt maximaal {count} aangepaste zoekmachines toevoegen.
   Theme Settings:
     Material Accent Color: "Material-accentkleur"
+    Material Wallpaper Colors: "Achtergrondkleuren"
     Tab Loading Indicator:
       Tab Loading Indicator: Laadindicator voor tabbladen
       Bar: Balk

@@ -3,7 +3,7 @@ import { test } from 'node:test'
 import { chromium, expect } from '@playwright/test'
 import { goToSettingsSection } from '../../e2e/helpers/app.mjs'
 
-test('Android wallpaper colors support fixed Material variants with readable text', {
+test('Android fixed Material variants use the selectable accent with readable text', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
@@ -12,7 +12,7 @@ test('Android wallpaper colors support fixed Material variants with readable tex
   const settingsWereOpen = await page.locator('.settingsWindow').isVisible()
   const saved = await page.evaluate(() => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-    return { baseTheme: store.getters.getBaseTheme, currentLocale: store.getters.getCurrentLocale }
+    return { baseTheme: store.getters.getBaseTheme, currentLocale: store.getters.getCurrentLocale, materialSeedColor: store.getters.getMaterialSeedColor }
   })
   try {
     await page.evaluate(async () => {
@@ -27,8 +27,21 @@ test('Android wallpaper colors support fixed Material variants with readable tex
     for (const [theme, label] of [['materialLight', 'Material Light'], ['materialDark', 'Material Dark'], ['materialBlack', 'Material Black']]) {
       await page.evaluate(theme => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateBaseTheme', theme), theme)
       await expect(section.getByRole('combobox', { name: /^Base theme/i })).toHaveText(label)
-      await expect(section.getByRole('button', { name: 'Material accent color' })).toHaveCount(0)
+      await expect(section.getByRole('button', { name: 'Material accent color' })).toBeVisible()
       await expect(page.locator('body')).toHaveClass(/dynamicColors/)
+      const primaryFor = seed => page.evaluate(async seed => {
+        await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateMaterialSeedColor', seed)
+        return getComputedStyle(document.body).getPropertyValue('--primary-color').trim()
+      }, seed)
+      const seeded = [await primaryFor('#006a6a'), await primaryFor('#b3261e')]
+      assert.notEqual(seeded[0], seeded[1], `${theme}: accent follows the seed`)
+      const wallpaper = section.getByRole('button', { name: 'Wallpaper colors' })
+      await wallpaper.click()
+      await expect(wallpaper).toHaveAttribute('aria-pressed', 'true')
+      const systemPrimary = await page.evaluate(() => getComputedStyle(document.body).getPropertyValue('--md-sys-color-primary').trim())
+      assert.ok(!seeded.includes(await page.evaluate(() => getComputedStyle(document.body).getPropertyValue('--primary-color').trim())), `${theme}: wallpaper swatch replaces the seed`)
+      // The swatch previews the light scheme.
+      if (theme === 'materialLight') assert.equal(systemPrimary, await wallpaper.evaluate(el => el.style.getPropertyValue('--swatch-primary')))
       const roles = await page.evaluate(() => {
         const probe = document.createElement('span')
         document.body.append(probe)
@@ -71,6 +84,8 @@ test('Android wallpaper colors support fixed Material variants with readable tex
         await expect(page.locator('body')).toHaveCSS('background-color', background)
       }
     }
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateBaseTheme', 'dynamic'))
+    await expect(section.getByRole('button', { name: 'Material accent color' })).toHaveCount(0)
   } finally {
     await page.emulateMedia({ colorScheme: null })
     await page.evaluate(async saved => {

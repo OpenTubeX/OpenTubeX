@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { registerPlugin } from '@capacitor/core'
-import { MATERIAL_COLOR_ROLES, materialColorProperty, materialColorScheme, materialSeedPalette, materialStateColor, normalizeSystemAccentColor } from '../../materialTheme.js'
+import { MATERIAL_COLOR_ROLES, MATERIAL_SYSTEM_SEED, materialColorProperty, materialColorScheme, materialSeedPalette, materialStateColor, normalizeSystemAccentColor } from '../../materialTheme.js'
 import { CUSTOM_THEME_COLORS, hexColorToRgbComponents } from '../../customTheme.js'
 
 const AndroidDynamicColors = process.env.IS_CAPACITOR && !process.env.IS_IOS ? registerPlugin('AndroidDynamicColors') : null
@@ -31,10 +31,12 @@ export async function initializeAndroidDynamicColors(request = getAndroidDynamic
   }
 }
 
+/** Dynamic colors, or a fixed Material variant seeded with the system palette, follows the system. */
 export function getMaterialPalette(seed, theme) {
+  if (theme !== 'dynamic' && seed !== MATERIAL_SYSTEM_SEED) return materialSeedPalette(seed)
   return androidDynamicColors.value.supported
     ? androidDynamicColors.value.palette
-    : materialSeedPalette(theme === 'dynamic' ? desktopSystemAccentColor.value ?? seed : seed)
+    : materialSeedPalette(desktopSystemAccentColor.value ?? seed)
 }
 
 /** Map Android's tonal palette to the existing theme roles. */

@@ -400,6 +400,7 @@ Settings:
     Engine Limit: Můžete přidat až {count} vlastních vyhledávačů.
   Theme Settings:
     Material Accent Color: "Barva zvýraznění Material"
+    Material Wallpaper Colors: "Barvy tapety"
     Tab Loading Indicator:
       Tab Loading Indicator: Indikátor načítání karty
       Bar: Pruh

@@ -529,6 +529,7 @@ Settings:
     Engine Limit: Dodate lahko največ {count} iskalnikov po meri.
   Theme Settings:
     Material Accent Color: "Poudarjena barva Material"
+    Material Wallpaper Colors: "Barve ozadja"
     Tab Loading Indicator:
       Tab Loading Indicator: Kazalnik nalaganja zavihka
       Bar: Vrstica

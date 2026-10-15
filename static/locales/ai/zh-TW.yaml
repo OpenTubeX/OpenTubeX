@@ -400,6 +400,7 @@ Settings:
     Engine Limit: 最多可新增 {count} 個自訂搜尋引擎。
   Theme Settings:
     Material Accent Color: "Material 強調色"
+    Material Wallpaper Colors: "桌布顏色"
     Tab Loading Indicator:
       Tab Loading Indicator: 分頁載入指示器
       Bar: 進度條

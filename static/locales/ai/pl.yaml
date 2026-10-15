@@ -166,6 +166,7 @@ Settings:
       Load landing page, keep other tabs unloaded: Wczytaj stronę startową, pozostaw inne karty niewczytane
   Theme Settings:
     Material Accent Color: "Kolor akcentu Material"
+    Material Wallpaper Colors: "Kolory tapety"
     Tab Loading Indicator:
       Tab Loading Indicator: Wskaźnik ładowania karty
       Bar: Pasek
