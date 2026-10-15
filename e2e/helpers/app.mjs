@@ -22,8 +22,6 @@ const BASE_SETTINGS = {
   confirmCloseApp: false,
   confirmCloseWindowWithMultipleTabs: false,
   useAITranslationCompletions: false,
-  // The system locale would follow the host. CI's bare "en" resolves to en-GB.
-  currentLocale: 'en-GB',
   // Desktop-sized window so the responsive layout doesn't collapse into
   // its mobile variant (which hides the search bar, among other things).
   bounds: { x: 0, y: 0, width: 1600, height: 900, maximized: false }
@@ -170,7 +168,12 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
   const env = {
     ...process.env,
     OPENTUBEX_E2E_USER_DATA_DIR: userDataDir,
-    ELECTRON_OZONE_PLATFORM_HINT: 'x11'
+    ELECTRON_OZONE_PLATFORM_HINT: 'x11',
+    // Tests expect en-GB strings, which CI's bare "en" system locale resolves
+    // to. Pin it so the default locale setting does not follow the host.
+    LANG: 'en_GB.UTF-8',
+    LANGUAGE: 'en_GB',
+    LC_ALL: 'en_GB.UTF-8'
   }
   delete env.WAYLAND_DISPLAY
   // Cursor/agent shells may set this, which makes Electron act as Node and
