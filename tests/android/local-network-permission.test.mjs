@@ -28,10 +28,8 @@ test('Android 17 denies LAN sync until consent and retries successfully after a 
     response.writeHead(200, { 'content-type': 'application/json' })
     response.end(JSON.stringify({ capabilities: { encrypted_sync: 1, live_sync: 1 } }))
   })
-  await new Promise(resolve => server.listen(0, '0.0.0.0', resolve))
-  const url = `http://10.0.2.2:${server.address().port}`
-  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = browser.contexts()[0].pages()[0]
+  let browser
+  let page
   let saved
   async function answerPermission (button) {
     let bounds
@@ -52,6 +50,12 @@ test('Android 17 denies LAN sync until consent and retries successfully after a 
       String((Number(bounds[2]) + Number(bounds[4])) / 2))
   }
   try {
+    await new Promise((resolve, reject) => server.once('error', reject).listen(0, '0.0.0.0', resolve))
+    const url = `http://10.0.2.2:${server.address().port}`
+    browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
+    page = browser.contexts()[0].pages()[0]
+    const permission = await page.evaluate(() => window.Capacitor.nativePromise('AndroidLocalNetwork', 'checkPermissions', {}))
+    assert.notEqual(permission.localNetwork, 'granted', 'Revoke ACCESS_LOCAL_NETWORK and clear its flags outside the app, then restart and forward its WebView before this test')
     await page.locator('.profileTrigger').waitFor()
     saved = await page.evaluate(url => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -87,15 +91,23 @@ test('Android 17 denies LAN sync until consent and retries successfully after a 
     assert.ok(requests.includes('/retry/health'), 'Granted LAN sync must use the real native HTTP transport')
     await expect(content.getByRole('alert')).toHaveCount(0)
   } finally {
-    if (saved) {
-      await page.evaluate(saved => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-        for (const [key, value] of Object.entries(saved)) store.commit('set' + key, value)
-      }, saved)
+    try {
+      if (saved) {
+        await page.evaluate(saved => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          for (const [key, value] of Object.entries(saved)) store.commit('set' + key, value)
+        }, saved)
+      }
+    } finally {
+      server.closeAllConnections()
+      const cleanup = await Promise.allSettled([
+        adb('shell', 'rm', '-f', '/sdcard/opentubex-permission.xml'),
+        browser?.close(),
+        new Promise(resolve => server.close(resolve)),
+      ])
+      for (const result of cleanup) {
+        if (result.status === 'rejected') console.error('Permission test cleanup failed', result.reason)
+      }
     }
-    await adb('shell', 'rm', '-f', '/sdcard/opentubex-permission.xml')
-    await browser.close()
-    server.closeAllConnections()
-    await new Promise(resolve => server.close(resolve))
   }
 })

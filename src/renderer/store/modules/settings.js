@@ -1084,9 +1084,11 @@ const customActions = {
         if (state.useProxy) {
           await ensureAndroidLocalNetworkAccess({ hostname: state.proxyHostname, direct: true })
         }
-      }).catch(() => {
+      }).catch(error => {
         showToast({
-          message: i18n.global.t('Settings.Proxy Settings["Error getting network information. Is your proxy configured properly?"]'),
+          message: error?.code === 'LOCAL_ACCESS_DENIED'
+            ? error.message
+            : i18n.global.t('Settings.Proxy Settings["Error getting network information. Is your proxy configured properly?"]'),
           icon: ['fas', 'circle-exclamation'],
         })
       })

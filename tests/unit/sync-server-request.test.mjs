@@ -308,7 +308,13 @@ test('cancelling Android sync while permission is pending prevents the native re
   const pending = client.health()
   await nextEventLoopTurn()
   client.cancel()
-  allow()
-  await assert.rejects(pending, errors.SyncServerCancelledError)
+  let timeout
+  try {
+    await Promise.race([
+      assert.rejects(pending, errors.SyncServerCancelledError),
+      new Promise((resolve, reject) => { timeout = setTimeout(() => reject(new Error('Cancellation waited for the permission prompt')), 1000) })
+    ])
+  } finally { clearTimeout(timeout); allow() }
+  await nextEventLoopTurn()
   assert.equal(requests.length, 0)
 })

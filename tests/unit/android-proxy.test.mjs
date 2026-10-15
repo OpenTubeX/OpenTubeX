@@ -77,12 +77,13 @@ test('a failed renderer database write cannot hide an enabled native proxy', asy
 test('denied LAN access keeps proxy edits visible and subsequent edits use the saved host', async () => {
   const applied = []
   const settings = fixture(async value => { applied.push(value) }, {
-    permission: async () => { throw new Error('Permission denied') },
+    permission: async () => { throw Object.assign(new Error('Translated permission denial'), { code: 'LOCAL_ACCESS_DENIED' }) },
   })
   await settings.update('useProxy', true)
   await settings.update('proxyHostname', '192.168.1.2')
   await settings.update('proxyPort', '1080')
   assert.equal(settings.errors.length, 3)
+  assert.ok(settings.errors.every(error => error.message === 'Translated permission denial'))
   assert.equal(settings.state.useProxy, true)
   assert.equal(settings.state.proxyHostname, '192.168.1.2')
   assert.equal(applied[2].proxyHostname, '192.168.1.2')

@@ -136,7 +136,7 @@ async function nativeHttpFetch(input, init) {
   }
 
   if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
-    await ensureAndroidLocalNetworkAccess({ url: url.toString() })
+    await waitForRequest(ensureAndroidLocalNetworkAccess({ url: url.toString() }), signal)
     if (signal?.aborted) throw createAbortError()
   }
 

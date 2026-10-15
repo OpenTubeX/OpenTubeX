@@ -124,25 +124,31 @@ test('Android 17 fullscreen and playback survive large-screen resizing at fracti
       controls: [...document.querySelectorAll('.shaka-fullscreen-button')].map(button => ({ disabled: button.disabled, text: button.textContent })),
       players: [...document.querySelectorAll('.ftVideoPlayer')].map(player => ({ classes: player.className, bounds: player.getBoundingClientRect().toJSON() })),
       settings: !!document.querySelector('.settingsWindow'),
-    })))
+    })).catch(diagnosticError => ({ diagnosticError: diagnosticError.message })))
     throw error
   } finally {
-    await page.evaluate(async saved => {
-      if (document.fullscreenElement) await document.exitFullscreen()
-      document.querySelector('video')?.pause()
-      if (saved) {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-        for (const [key, value] of Object.entries(saved.settings)) store.commit('set' + key, value)
-        location.hash = saved.route
+    try {
+      await page.evaluate(async saved => {
+        if (document.fullscreenElement) await document.exitFullscreen()
+        document.querySelector('video')?.pause()
+        if (saved) {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          for (const [key, value] of Object.entries(saved.settings)) store.commit('set' + key, value)
+          location.hash = saved.route
+        }
+        if (window.__largeScreenFetch) window.fetch = window.__largeScreenFetch
+        delete window.__largeScreenFetch
+        document.querySelector('#large-screen-test-style')?.remove()
+      }, saved)
+    } finally {
+      try {
+        await adb('shell', 'wm', 'size', originalSize ?? 'reset')
+          .finally(() => adb('shell', 'wm', 'density', originalDensity ?? 'reset'))
+      } finally {
+        await watch?.dispose().catch(() => {})
+        await session.detach().catch(() => {})
+        await browser.close()
       }
-      if (window.__largeScreenFetch) window.fetch = window.__largeScreenFetch
-      delete window.__largeScreenFetch
-      document.querySelector('#large-screen-test-style')?.remove()
-    }, saved)
-    await adb('shell', 'wm', 'size', originalSize ?? 'reset')
-    await adb('shell', 'wm', 'density', originalDensity ?? 'reset')
-    await watch?.dispose()
-    await session.detach()
-    await browser.close()
+    }
   }
 })
