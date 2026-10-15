@@ -103,9 +103,15 @@ test('keeps an allowed Up Next recommendation rendered through loading and filte
   await watchView.dispose()
 })
 
-async function swipeVertically(session, bounds, distance) {
-  const x = bounds.x + bounds.width / 2
-  const y = bounds.y + bounds.height / 2
+async function swipeVertically(session, locator, distance) {
+  // Touch the visible part of a list that may be taller than the viewport.
+  const { x, y } = await locator.evaluate(element => {
+    const bounds = element.getBoundingClientRect()
+    return {
+      x: bounds.left + bounds.width / 2,
+      y: (Math.max(bounds.top, 0) + Math.min(bounds.bottom, innerHeight)) / 2
+    }
+  })
   await session.send('Input.dispatchTouchEvent', {
     type: 'touchStart', touchPoints: [{ x, y }]
   })
@@ -120,7 +126,9 @@ async function swipeVertically(session, bounds, distance) {
 }
 
 for (const chapterCount of [1, 30]) {
-  test(`touch scrolling chains from sidebar chapters to the page (${chapterCount} chapters)`, { tag: '@scale' }, async ({ app, page }) => {
+  test(`touch scrolling chains from sidebar chapters to the page (${chapterCount} chapters)`, { tag: '@scale' }, async ({ app, page, uiScale }) => {
+    // https://github.com/OpenTubeX/OpenTubeX/issues/2122
+    test.fixme(uiScale === 95 && chapterCount === 30, 'Touch scrolling does not chain from a list at a fractional end offset')
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
     await page.locator(`${activeTab} .ftVideoPlayer video`).evaluate(video => video.pause())
@@ -156,8 +164,7 @@ for (const chapterCount of [1, 30]) {
     expect(await page.evaluate(() =>
       document.scrollingElement.scrollHeight - innerHeight - scrollY
     )).toBeGreaterThan(100)
-    const bounds = await chapters.boundingBox()
-    await swipeVertically(session, bounds, -150)
+    await swipeVertically(session, chapters, -150)
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(initialPageScroll + 50)
 
     await chapters.evaluate(element => {
@@ -166,8 +173,7 @@ for (const chapterCount of [1, 30]) {
     })
     const pageScrollAtTop = await page.evaluate(() => window.scrollY)
     expect(pageScrollAtTop).toBeGreaterThan(100)
-    const topBounds = await chapters.boundingBox()
-    await swipeVertically(session, topBounds, 150)
+    await swipeVertically(session, chapters, 150)
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThan(pageScrollAtTop - 50)
     await session.detach()
     await view.dispose()

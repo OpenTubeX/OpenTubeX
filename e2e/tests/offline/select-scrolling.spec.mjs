@@ -45,6 +45,8 @@ test.describe('select scroll positioning', { tag: '@scale' }, () => {
   })
 
   test('keeps the dropdown attached while its quick settings scroller moves', async ({ page }) => {
+    // At 95% the full-height menu nearly fits and leaves no room to scroll.
+    await page.setViewportSize({ width: 1600, height: 760 })
     await page.locator('.profileTrigger').click()
     const select = page.getByRole('dialog', { name: 'Quick settings' }).getByRole('combobox', { name: 'Base Theme' })
     await select.click()
