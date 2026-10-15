@@ -189,6 +189,28 @@ test('applies what an older version changed after a downgrade and keeps newer ed
   assert.equal(changes.length, 1, 'the same legacy changes are applied once')
 })
 
+test('changes from an older version wait for the next start when the backup fails', async (t) => {
+  const dir = await directory(t)
+  const legacyFile = join(dir, 'settings.db')
+  await writeFile(legacyFile, lines([{ _id: 'theme', value: 'dark' }]))
+  const store = open(t, dir, 'settings')
+  await store.updateAsync({ _id: 'theme' }, { $set: { value: 'light' } })
+  store.driver.close()
+  await editAsOlderVersion(legacyFile, older => older.updateAsync({ _id: 'theme' }, { $set: { value: 'older' } }))
+
+  const changes = []
+  const failing = open(t, dir, 'settings', { onLegacyChanges: change => changes.push(change) })
+  failing.driver.backup = async () => { throw new Error('disk full') }
+  t.mock.method(console, 'error', () => {})
+  assert.deepEqual(await failing.findAsync({}), [{ _id: 'theme', value: 'light' }], 'the library still opens unchanged')
+  assert.deepEqual(changes, [])
+  failing.driver.close()
+
+  const retried = open(t, dir, 'settings', { onLegacyChanges: change => changes.push(change) })
+  assert.deepEqual(await retried.findAsync({}), [{ _id: 'theme', value: 'older' }])
+  assert.equal(changes.length, 1)
+})
+
 test('a downgrade on a fresh installation adds only documents that do not exist yet', async (t) => {
   const dir = await directory(t)
   const store = open(t, dir, 'profiles')

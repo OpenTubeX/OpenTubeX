@@ -4,7 +4,7 @@ import { join } from 'node:path'
 
 import { videoMetadataCache } from '../datastores'
 
-const CACHE_FILE_NAMES = ['video-metadata-cache.sqlite', 'video-metadata-cache.sqlite-wal']
+const CACHE_FILE_NAMES = ['video-metadata-cache.sqlite', 'video-metadata-cache.sqlite-wal', 'video-metadata-cache.sqlite-shm']
 const MAX_TITLE_LENGTH = 10_000
 const MAX_DESCRIPTION_LENGTH = 1_000_000
 const MAX_THUMBNAIL_DATA_URL_LENGTH = 8_000_000

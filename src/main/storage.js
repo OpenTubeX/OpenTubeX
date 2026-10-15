@@ -7,7 +7,7 @@ import { TabManager } from './tabs/TabManager'
 import { tabPreviewStorage } from './tabs/TabPreviewStorage'
 import { clearYtDlpPlaybackCache } from './ytDlpPlaybackCache'
 
-const sqliteFiles = name => [`${name}.sqlite`, `${name}.sqlite-wal`]
+const sqliteFiles = name => [`${name}.sqlite`, `${name}.sqlite-wal`, `${name}.sqlite-shm`]
 
 const USER_DATA_FILES = {
   downloadRecords: 'downloads.json',

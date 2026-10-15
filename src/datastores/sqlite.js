@@ -302,7 +302,17 @@ export class SqliteDatastore {
         statements.push([SQL.remove, [key]], [SQL.removeChildren, [key]], [SQL.removeBase, [key]])
       }
     }
-    const backup = changed || deleted ? await this.driver.backup?.() : undefined
+    let backup
+    if (changed || deleted) {
+      try {
+        backup = await this.driver.backup?.()
+      } catch (error) {
+        // Never apply them without a backup. The database stays as it is and
+        // the next start tries again.
+        console.error('Unable to back up the library before applying changes from an older version', error)
+        return
+      }
+    }
     statements.push([SQL.setMeta, ['legacyFingerprint', fingerprint]])
     await this._execute(statements, true)
     if (changed || deleted) this.onLegacyChanges?.({ changed, deleted, backup })
