@@ -2122,5 +2122,5 @@ Installer:
   Create Desktop Shortcut: Crear un acceso directo en el escritorio
 Older Version Changes:
   Title: "Cambios de una versión anterior"
-  Message: "Los cambios que hiciste en una versión anterior de OpenTubeX se han añadido a tu biblioteca."
+  Message: "Los cambios que hiciste en una versión anterior de OpenTubeX se han aplicado a tu biblioteca."
   Detail: "Si un elemento se cambió en ambas versiones, se ha conservado el cambio de la versión anterior. Hay una copia de seguridad de tu biblioteca anterior en la carpeta de tu perfil."

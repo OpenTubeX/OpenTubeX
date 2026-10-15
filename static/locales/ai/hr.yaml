@@ -2145,5 +2145,5 @@ Installer:
   Create Desktop Shortcut: Stvori prečac na radnoj površini
 Older Version Changes:
   Title: "Promjene iz starije verzije"
-  Message: "Promjene koje ste napravili u starijoj verziji OpenTubeXa dodane su u vašu biblioteku."
+  Message: "Promjene koje ste napravili u starijoj verziji OpenTubeXa primijenjene su na vašu biblioteku."
   Detail: "Ako je stavka promijenjena u obje verzije, zadržana je promjena iz starije verzije. Sigurnosna kopija vaše prethodne biblioteke nalazi se u mapi profila."

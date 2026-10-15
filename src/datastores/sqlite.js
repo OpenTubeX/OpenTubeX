@@ -237,11 +237,15 @@ export class SqliteDatastore {
       const key = keyOf(doc._id)
       const statements = this._insertStatements(key, doc)
       childCount += statements.length - 1
-      batch.push(...statements)
-      if (this.legacy.hash) batch.push([SQL.setBase, [key, this.legacy.hash(model.serialize(doc))]])
-      if (batch.length >= MIGRATION_BATCH_SIZE) {
-        await this._execute(batch, true)
-        batch = []
+      if (this.legacy.hash) statements.push([SQL.setBase, [key, this.legacy.hash(model.serialize(doc))]])
+      // A large playlist can span batches; the import only counts once the
+      // state marker commits.
+      for (const statement of statements) {
+        batch.push(statement)
+        if (batch.length >= MIGRATION_BATCH_SIZE) {
+          await this._execute(batch, true)
+          batch = []
+        }
       }
     }
     await this._execute(batch, true)

@@ -2131,5 +2131,5 @@ Installer:
   Create Desktop Shortcut: Buat pintasan desktop
 Older Version Changes:
   Title: "Perubahan dari versi lama"
-  Message: "Perubahan yang Anda buat di versi lama OpenTubeX telah ditambahkan ke pustaka Anda."
-  Detail: "Jika suatu item diubah di kedua versi, perubahan dari versi lama yang dipertahankan. Cadangan pustaka Anda sebelumnya ada di folder profil Anda."
+  Message: "Perubahan yang Anda buat di versi lama OpenTubeX telah diterapkan ke pustaka Anda."
+  Detail: "Jika suatu item diubah di kedua versi, perubahan dari versi lama akan dipertahankan. Cadangan pustaka Anda sebelumnya ada di folder profil Anda."

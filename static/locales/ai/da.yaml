@@ -2204,5 +2204,5 @@ Installer:
   Create Desktop Shortcut: Opret en genvej på skrivebordet
 Older Version Changes:
   Title: "Ændringer fra en ældre version"
-  Message: "Ændringer, du har foretaget i en ældre version af OpenTubeX, er føjet til dit bibliotek."
+  Message: "Ændringer, du har foretaget i en ældre version af OpenTubeX, er overført til dit bibliotek."
   Detail: "Hvis et element blev ændret i begge versioner, er ændringen fra den ældre version bevaret. En sikkerhedskopi af dit tidligere bibliotek ligger i din profilmappe."

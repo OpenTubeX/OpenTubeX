@@ -2172,5 +2172,5 @@ Installer:
   Create Desktop Shortcut: Criar um atalho no ambiente de trabalho
 Older Version Changes:
   Title: "Alterações de uma versão anterior"
-  Message: "As alterações que fez numa versão anterior do OpenTubeX foram adicionadas à sua biblioteca."
+  Message: "As alterações que fez numa versão anterior do OpenTubeX foram aplicadas à sua biblioteca."
   Detail: "Se um item foi alterado nas duas versões, foi mantida a alteração da versão anterior. Existe uma cópia de segurança da sua biblioteca anterior na pasta do perfil."

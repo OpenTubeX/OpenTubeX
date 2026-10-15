@@ -1340,5 +1340,5 @@ Installer:
   Create Desktop Shortcut: Utwórz skrót na pulpicie
 Older Version Changes:
   Title: "Zmiany ze starszej wersji"
-  Message: "Zmiany wprowadzone w starszej wersji OpenTubeX zostały dodane do Twojej biblioteki."
+  Message: "Zmiany wprowadzone w starszej wersji OpenTubeX zostały zastosowane w Twojej bibliotece."
   Detail: "Jeśli element został zmieniony w obu wersjach, zachowano zmianę ze starszej wersji. Kopia zapasowa poprzedniej biblioteki znajduje się w folderze profilu."

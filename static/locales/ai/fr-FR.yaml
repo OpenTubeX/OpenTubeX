@@ -2114,5 +2114,5 @@ Installer:
   Create Desktop Shortcut: Créer un raccourci sur le bureau
 Older Version Changes:
   Title: "Modifications d'une version antérieure"
-  Message: "Les modifications effectuées dans une version antérieure d'OpenTubeX ont été ajoutées à votre bibliothèque."
+  Message: "Les modifications effectuées dans une version antérieure d'OpenTubeX ont été appliquées à votre bibliothèque."
   Detail: "Si un élément a été modifié dans les deux versions, la modification de la version antérieure a été conservée. Une sauvegarde de votre bibliothèque précédente se trouve dans votre dossier de profil."

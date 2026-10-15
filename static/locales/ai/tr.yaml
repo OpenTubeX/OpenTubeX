@@ -2116,5 +2116,5 @@ Installer:
   Create Desktop Shortcut: Masaüstü kısayolu oluştur
 Older Version Changes:
   Title: "Eski bir sürümdeki değişiklikler"
-  Message: "OpenTubeX'in eski bir sürümünde yaptığınız değişiklikler kitaplığınıza eklendi."
+  Message: "OpenTubeX'in eski bir sürümünde yaptığınız değişiklikler kitaplığınıza uygulandı."
   Detail: "Bir öğe her iki sürümde de değiştirildiyse eski sürümdeki değişiklik korundu. Önceki kitaplığınızın yedeği profil klasörünüzde."

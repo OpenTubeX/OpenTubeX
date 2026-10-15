@@ -2116,5 +2116,5 @@ Installer:
   Create Desktop Shortcut: Asztali parancsikon létrehozása
 Older Version Changes:
   Title: "Módosítások egy régebbi verzióból"
-  Message: "Az OpenTubeX egy régebbi verziójában végzett módosításaid bekerültek a könyvtáradba."
+  Message: "Az OpenTubeX egy régebbi verziójában végzett módosításaid érvénybe léptek a könyvtáradban."
   Detail: "Ha egy elem mindkét verzióban módosult, a régebbi verzió módosítása maradt meg. A korábbi könyvtárad biztonsági másolata a profilmappádban található."

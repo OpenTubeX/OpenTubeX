@@ -2570,5 +2570,5 @@ Installer:
   Create Desktop Shortcut: 바탕 화면 바로 가기 만들기
 Older Version Changes:
   Title: "이전 버전의 변경 사항"
-  Message: "이전 버전의 OpenTubeX에서 변경한 내용이 라이브러리에 추가되었습니다."
+  Message: "이전 버전의 OpenTubeX에서 변경한 내용이 라이브러리에 적용되었습니다."
   Detail: "두 버전 모두에서 변경된 항목은 이전 버전의 변경 사항이 유지되었습니다. 이전 라이브러리의 백업은 프로필 폴더에 있습니다."

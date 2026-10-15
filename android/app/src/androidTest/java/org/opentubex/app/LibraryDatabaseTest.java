@@ -43,7 +43,9 @@ public class LibraryDatabaseTest {
                     statement("INSERT INTO docs VALUES (?, ?)", 5, "duplicate")
                 ), true);
                 fail("A duplicate key must fail the transaction");
-            } catch (RuntimeException expected) { }
+            } catch (RuntimeException expected) {
+                assertTrue(expected.getMessage(), expected.getMessage().contains("UNIQUE constraint failed"));
+            }
 
             JSONArray rows = database.execute(list(
                 statement("SELECT id, length(data), json_extract(data, '$.n') FROM docs ORDER BY typeof(id), id"),

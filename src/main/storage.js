@@ -11,7 +11,8 @@ const sqliteFiles = name => [`${name}.sqlite`, `${name}.sqlite-wal`, `${name}.sq
 
 const USER_DATA_FILES = {
   downloadRecords: 'downloads.json',
-  videoMetadata: sqliteFiles('video-metadata-cache'),
+  // Clearing it also removes its legacy NeDB file.
+  videoMetadata: [...sqliteFiles('video-metadata-cache'), 'video-metadata-cache.db'],
   subscriptionCache: sqliteFiles('subscription-cache'),
   searchHistory: sqliteFiles('search-history'),
   history: sqliteFiles('history'),

@@ -2762,5 +2762,5 @@ Installer:
   Create Desktop Shortcut: Crea una drecera a l’escriptori
 Older Version Changes:
   Title: "Canvis d'una versió anterior"
-  Message: "Els canvis que vau fer en una versió anterior d'OpenTubeX s'han afegit a la vostra biblioteca."
+  Message: "Els canvis que vau fer en una versió anterior d'OpenTubeX s'han aplicat a la vostra biblioteca."
   Detail: "Si un element s'havia canviat en totes dues versions, s'ha conservat el canvi de la versió anterior. Hi ha una còpia de seguretat de la biblioteca anterior a la carpeta del perfil."

@@ -2157,5 +2157,5 @@ Installer:
   Create Desktop Shortcut: Tạo lối tắt trên màn hình nền
 Older Version Changes:
   Title: "Thay đổi từ phiên bản cũ hơn"
-  Message: "Các thay đổi bạn đã thực hiện trong phiên bản cũ hơn của OpenTubeX đã được thêm vào thư viện của bạn."
+  Message: "Các thay đổi bạn đã thực hiện trong phiên bản cũ hơn của OpenTubeX đã được áp dụng cho thư viện của bạn."
   Detail: "Nếu một mục đã được thay đổi ở cả hai phiên bản, thay đổi từ phiên bản cũ hơn được giữ lại. Bản sao lưu thư viện trước đó của bạn nằm trong thư mục hồ sơ."

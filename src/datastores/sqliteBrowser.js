@@ -14,6 +14,16 @@ function workerDrivers() {
         if (error === undefined) request.resolve(result)
         else request.reject(new Error(error))
       }
+      // A worker that fails to load or crashes never answers. Fail its
+      // requests, and start a new worker for the next one.
+      worker.onerror = worker.onmessageerror = event => {
+        event.preventDefault?.()
+        worker.terminate()
+        worker = null
+        const error = new Error(`Library worker failed: ${event.message ?? event.type}`)
+        for (const request of pending.values()) request.reject(error)
+        pending.clear()
+      }
     }
     return new Promise((resolve, reject) => {
       const id = nextId++

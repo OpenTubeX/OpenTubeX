@@ -116,12 +116,8 @@ final class LibraryDatabase {
         case is NSNull:
             result = sqlite3_bind_null(statement, index)
         case let text as String:
-            let bytes = Array(text.utf8)
-            result = bytes.withUnsafeBufferPointer { buffer in
-                buffer.baseAddress!.withMemoryRebound(to: CChar.self, capacity: max(buffer.count, 1)) {
-                    sqlite3_bind_text(statement, index, $0, Int32(buffer.count), transient)
-                }
-            }
+            // An explicit byte length keeps empty strings and embedded NULs intact.
+            result = text.withCString { sqlite3_bind_text(statement, index, $0, Int32(text.utf8.count), transient) }
         case let number as NSNumber:
             if CFGetTypeID(number) == CFBooleanGetTypeID() {
                 result = sqlite3_bind_int64(statement, index, number.boolValue ? 1 : 0)
@@ -177,10 +173,11 @@ public class LibraryDatabasePlugin: CAPPlugin, CAPBridgedPlugin {
 
     @objc func execute(_ call: CAPPluginCall) {
         let name = call.getString("name")
-        let statements: [Any] = call.getArray("statements") ?? []
+        let statements: [Any]? = call.getArray("statements")
         let transaction = call.getBool("transaction") ?? false
         queue.async {
             do {
+                guard let statements else { throw LibraryDatabaseError(errorDescription: "Missing statements") }
                 let results = try self.database(name).execute(statements, transaction: transaction)
                 call.resolve(["results": results])
             } catch {

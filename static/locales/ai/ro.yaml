@@ -2165,5 +2165,5 @@ Installer:
   Create Desktop Shortcut: Creează o scurtătură pe desktop
 Older Version Changes:
   Title: "Modificări dintr-o versiune mai veche"
-  Message: "Modificările făcute într-o versiune mai veche a OpenTubeX au fost adăugate în biblioteca ta."
+  Message: "Modificările făcute într-o versiune mai veche a OpenTubeX au fost aplicate în biblioteca ta."
   Detail: "Dacă un element a fost modificat în ambele versiuni, a fost păstrată modificarea din versiunea mai veche. O copie de rezervă a bibliotecii anterioare se află în dosarul profilului."

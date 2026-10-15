@@ -228,7 +228,7 @@
         :title="t('Settings.Privacy Settings.Cache Video Metadata')"
         :size="sizeText('videoMetadata')"
         :description="t('Settings.Storage Settings.Video Metadata Description')"
-        location="video-metadata-cache.db"
+        location="video-metadata-cache.sqlite"
       >
         <FtToggleSwitch
           :label="t('Settings.Privacy Settings.Cache Video Metadata')"

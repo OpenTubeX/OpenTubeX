@@ -141,11 +141,10 @@ function runApp() {
   let olderVersionNotice = null
   onLegacyDatastoreChanges(change => {
     console.warn('Applied library changes made by an older version', change)
-    // Datastores open one after another; show one notice for all of them.
+    // Datastores open one after another; show one notice per start for all of them.
     olderVersionNotice ??= app.whenReady()
       .then(() => new Promise(resolve => setTimeout(resolve, 2000)))
       .then(async () => {
-        olderVersionNotice = null
         const t = await createMainTranslator()
         const window = BrowserWindow.getFocusedWindow() ?? BrowserWindow.getAllWindows()[0]
         const options = {
