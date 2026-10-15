@@ -13,28 +13,28 @@ endorsed by, maintained by, or supported by the FreeTube project.
 
 <p align="center">
   <a href="https://github.com/OpenTubeX/OpenTubeX/releases/latest">
-    <img alt="Latest release" src="https://img.shields.io/github/v/release/OpenTubeX/OpenTubeX?filter=%21%2A-nightly-%2A&amp;style=for-the-badge&amp;logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI%2BPHBhdGggZD0iTTMgM2g4bDEwIDEwLTggOEwzIDExWiIvPjxjaXJjbGUgY3g9IjciIGN5PSI3IiByPSIxIi8%2BPC9zdmc%2B&amp;labelColor=0B3D3E&amp;color=147A70" />
+    <img alt="Latest release" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/release.svg" />
   </a>
   <a href="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/build.yml">
-    <img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/OpenTubeX/OpenTubeX/build.yml?branch=development&amp;label=Build&amp;style=for-the-badge&amp;logo=githubactions&amp;logoColor=white&amp;labelColor=0B3D3E" />
+    <img alt="Build status" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/build.svg" />
   </a>
   <a href="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/e2e.yml">
-    <img alt="E2E tests" src="https://img.shields.io/github/actions/workflow/status/OpenTubeX/OpenTubeX/e2e.yml?branch=development&amp;label=E2E%20tests&amp;style=for-the-badge&amp;logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI%2BPHJlY3QgeD0iMyIgeT0iMyIgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4IiByeD0iMiIvPjxwYXRoIGQ9Ik0zIDloMThtLTEyIDYgMiAyIDQtNCIvPjwvc3ZnPg%3D%3D&amp;labelColor=0B3D3E" />
+    <img alt="E2E tests" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/e2e.svg" />
   </a>
   <a href="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/codeql.yml">
-    <img alt="CodeQL" src="https://img.shields.io/github/actions/workflow/status/OpenTubeX/OpenTubeX/codeql.yml?branch=development&amp;label=CodeQL&amp;style=for-the-badge&amp;logo=github&amp;logoColor=white&amp;labelColor=0B3D3E" />
+    <img alt="CodeQL" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/codeql.svg" />
   </a>
   <a href="https://weblate.opentubex.org/engage/opentubex/">
-    <img alt="Translation status" src="https://img.shields.io/weblate/progress/opentubex?server=https%3A%2F%2Fweblate.opentubex.org&amp;style=for-the-badge&amp;logo=weblate&amp;logoColor=white&amp;cacheSeconds=3600&amp;labelColor=0B3D3E&amp;color=147A70" />
+    <img alt="Translation status" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/translations.svg" />
   </a>
 </p>
 
 <p align="center">
   <a href="https://fluxer.opentubex.org">
-    <img alt="Fluxer members" src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.fluxer.app%2Finvites%2FPHdJoM1G&amp;query=%24.member_count&amp;label=Fluxer&amp;suffix=%20members&amp;color=147A70&amp;logo=fluxer&amp;logoColor=white&amp;style=for-the-badge&amp;labelColor=0B3D3E" />
+    <img alt="Fluxer members" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/fluxer.svg" />
   </a>
   <a href="https://matrix.opentubex.org">
-    <img alt="Matrix" src="https://img.shields.io/badge/Matrix-%23opentubex-black?logo=matrix&amp;logoColor=white&amp;style=for-the-badge&amp;labelColor=0B3D3E&amp;color=147A70" />
+    <img alt="Matrix" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/matrix.svg" />
   </a>
 </p>
 
@@ -165,7 +165,7 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
 
 <p>
   <a href="https://github.com/OpenTubeX/OpenTubeX/releases">
-    <img alt="GitHub downloads" src="https://img.shields.io/github/downloads/OpenTubeX/OpenTubeX/total?label=GitHub%20downloads&amp;style=for-the-badge&amp;logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI%2BPHBhdGggZD0iTTEyIDN2MTJtLTUtNSA1IDUgNS01TTUgMTV2NmgxNHYtNiIvPjwvc3ZnPg%3D%3D&amp;cacheSeconds=3600&amp;labelColor=0B3D3E&amp;color=147A70" />
+    <img alt="GitHub downloads" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/downloads.svg" />
   </a>
 </p>
 
@@ -177,7 +177,7 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
 
 * [GitHub Releases](https://github.com/OpenTubeX/OpenTubeX/releases)
 * [OpenTubeX Website](https://opentubex.org/downloads/)
-* Windows: [WinGet](https://github.com/microsoft/winget-pkgs/tree/master/manifests/o/OpenTubeX/OpenTubeX) (`winget install OpenTubeX.OpenTubeX`) <a href="https://github.com/microsoft/winget-pkgs/tree/master/manifests/o/OpenTubeX/OpenTubeX"><img src="https://img.shields.io/winget/v/OpenTubeX.OpenTubeX?label=WinGet&style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI%2BPHBhdGggZD0iTTExIDIxLjczYTIgMiAwIDAgMCAyIDBsNy00QTIgMiAwIDAgMCAyMSAxNlY4YTIgMiAwIDAgMC0xLTEuNzNsLTctNGEyIDIgMCAwIDAtMiAwbC03IDRBMiAyIDAgMCAwIDMgOHY4YTIgMiAwIDAgMCAxIDEuNzN6Ii8%2BPHBhdGggZD0iTTEyIDIyVjEyIi8%2BPHBvbHlsaW5lIHBvaW50cz0iMy4yOSA3IDEyIDEyIDIwLjcxIDciLz48cGF0aCBkPSJtNy41IDQuMjcgOSA1LjE1Ii8%2BPC9zdmc%2B&labelColor=0B3D3E&color=147A70" alt="WinGet version" align="absmiddle"></a>
+* Windows: [WinGet](https://github.com/microsoft/winget-pkgs/tree/master/manifests/o/OpenTubeX/OpenTubeX) (`winget install OpenTubeX.OpenTubeX`) <a href="https://github.com/microsoft/winget-pkgs/tree/master/manifests/o/OpenTubeX/OpenTubeX"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/winget.svg" alt="WinGet version" align="absmiddle"></a>
 * macOS: [Homebrew tap](https://github.com/OpenTubeX/homebrew-tap) (`brew install --cask opentubex/tap/opentubex`), with [installation and update instructions](https://opentubex.org/downloads/#install-homebrew).
   * To update a Homebrew installation, run `brew update` followed by `brew upgrade --cask opentubex`. Both Apple Silicon and Intel Macs are supported. If macOS blocks the first launch, allow OpenTubeX in **System Settings → Privacy & Security**.
 * Debian / Ubuntu: [APT repository](https://apt.opentubex.org/)
@@ -186,7 +186,7 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
 * Flatpak: [OpenTubeX remote](https://flatpak.opentubex.org/), [Flatpark](https://flatpark.org/apps/org.opentubex.OpenTubeX/), and [source code](https://github.com/OpenTubeX/flatpak)
 * Snap: [Snap Store](https://snapcraft.io/opentubex) (`sudo snap install opentubex --beta`), [installation instructions](https://snap.opentubex.org/), and [source code](https://github.com/OpenTubeX/snap)
 * Nix / NixOS / macOS: [Official Nix flake](https://github.com/OpenTubeX/nix) (`nix profile install github:OpenTubeX/nix`, with flakes enabled), supporting x86_64 and ARM64. See the [installation instructions](https://opentubex.org/downloads/#install-nix).
-* Arch User Repository (AUR): [opentubex](https://aur.archlinux.org/packages/opentubex/) and [opentubex-bin](https://aur.archlinux.org/packages/opentubex-bin/) <a href="https://aur.archlinux.org/packages/opentubex-bin/"><img src="https://img.shields.io/aur/version/opentubex-bin?label=AUR&style=for-the-badge&logo=archlinux&logoColor=white&labelColor=0B3D3E&color=147A70" alt="AUR version" align="absmiddle"></a>
+* Arch User Repository (AUR): [opentubex](https://aur.archlinux.org/packages/opentubex/) and [opentubex-bin](https://aur.archlinux.org/packages/opentubex-bin/) <a href="https://aur.archlinux.org/packages/opentubex-bin/"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/aur.svg" alt="AUR version" align="absmiddle"></a>
 * Android: requires Android 8.0 or newer (API 26). Current APKs target Android 16 (API 36) and compile against Android 17 (API 37). Install and update through the [OpenTubeX F-Droid repository](https://fdroid.opentubex.org/) or [Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/OpenTubeX/OpenTubeX).
   OpenTubeX supports [Keep Android Open](https://keepandroidopen.org/) and will never be available on the Google Play Store.
 * iOS / iPadOS (experimental): requires 17.4 or later. See the [installation and update instructions](https://opentubex.org/docs/installing/#ios--ipados-experimental).
