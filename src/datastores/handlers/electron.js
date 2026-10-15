@@ -223,10 +223,10 @@ class Playlists {
     )
   }
 
-  static upsertVideosByPlaylistId(_id, lastUpdatedAt, videos) {
+  static upsertVideosByPlaylistId(_id, lastUpdatedAt, videos, deduplicate = false) {
     return dbPlaylists(
       DBActions.PLAYLISTS.UPSERT_VIDEOS,
-      { _id, lastUpdatedAt, videos }
+      { _id, lastUpdatedAt, videos, deduplicate }
     )
   }
 

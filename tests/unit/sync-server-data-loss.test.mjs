@@ -158,6 +158,41 @@ test('playlist sync enriches existing remote metadata without losing duplicates 
   assert.equal(fresh.state.playlists.playlists[0].videos[0].lengthSeconds, 120)
 })
 
+for (const addVideosToTop of [undefined, false, true]) {
+  test(`playlist sync places remote-only videos using local insertion preference ${addVideosToTop}`, async () => {
+    const local = {
+      _id: 'insertion-order', playlistName: 'Ordered', addVideosToTop,
+      videos: [
+        { videoId: 'existing', title: 'Existing', authorId: 'UCchannel', playlistItemId: 'first' },
+        { videoId: 'existing', title: 'Existing', authorId: 'UCchannel', playlistItemId: 'duplicate' },
+      ],
+    }
+    const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
+    await adapter.createPlaylist({ id: local._id, title: local.playlistName, description: '' })
+    await adapter.addPlaylistVideos(local._id, ['existing', 'remote-a', 'remote-b'].map(id => ({
+      id, title: id, uploader: { id: 'UCchannel', name: 'Channel' }, duration: 60,
+    })))
+    const store = {
+      ...playlistBaseline(),
+      state: { playlists: { playlists: [local] } },
+      dispatch: async (action, payload) => {
+        assert.equal(action, 'updatePlaylistFromSync')
+        store.state.playlists.playlists = [payload.playlist]
+        return true
+      },
+    }
+    const previous = await context.syncPlaylists(adapter, store)
+    const expected = addVideosToTop ? ['remote-a', 'remote-b', 'existing', 'existing'] : ['existing', 'existing', 'remote-a', 'remote-b']
+    assert.deepEqual(Array.from(store.state.playlists.playlists[0].videos, video => video.videoId), expected)
+    const next = await context.syncPlaylists(adapter, store, previous)
+    assert.deepEqual(Array.from(store.state.playlists.playlists[0].videos, video => video.videoId), expected)
+    assert.deepEqual(Array.from(store.state.playlists.playlists[0].videos.filter(video => video.videoId === 'existing'), video => video.playlistItemId), ['first', 'duplicate'])
+    await adapter.removePlaylistVideo(local._id, 'remote-a')
+    await context.syncPlaylists(adapter, store, next, { allowDataLoss: true })
+    assert.deepEqual(Array.from(store.state.playlists.playlists[0].videos, video => video.videoId), expected.filter(id => id !== 'remote-a'))
+  })
+}
+
 test('playlist metadata enrichment preserves populated conflicting values on each side', async () => {
   const local = { ...playlist, videos: [{ ...video, title: 'Local title', author: 'Local channel', published: 100, lengthSeconds: 120, playlistItemId: 'keep' }] }
   const remote = syncVideoToRemote({ ...local.videos[0], title: 'Remote title', author: 'Remote channel', published: 200, lengthSeconds: 240 })

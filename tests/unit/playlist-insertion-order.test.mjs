@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 import Datastore from '@seald-io/nedb'
-import { PlaylistVideoAddResult } from '../../src/constants.js'
+import { DBActions, IpcChannels, PlaylistVideoAddResult, SyncEvents } from '../../src/constants.js'
 import { incrementPlaylistVideoCounts } from '../../src/renderer/helpers/playlist-video-counts.js'
 
 const source = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
@@ -11,6 +11,23 @@ const storeSource = await readFile(new URL('../../src/renderer/store/modules/pla
 const mutations = vm.runInNewContext(storeSource.slice(storeSource.indexOf('const mutations ='), storeSource.indexOf('\nexport default')) + '\nmutations', { incrementPlaylistVideoCounts })
 const componentSource = await readFile(new URL('../../src/renderer/components/PlaylistInfo/PlaylistInfo.vue', import.meta.url), 'utf8')
 const refreshSource = componentSource.slice(componentSource.indexOf('async function addMissingVideos()'), componentSource.indexOf('async function savePlaylistInfo()'))
+const mainSource = await readFile(new URL('../../src/main/index.js', import.meta.url), 'utf8')
+const bulkIpcSource = mainSource.slice(mainSource.indexOf('        case DBActions.PLAYLISTS.UPSERT_VIDEOS:'), mainSource.indexOf('        case DBActions.GENERAL.DELETE:', mainSource.indexOf('        case DBActions.PLAYLISTS.UPSERT_VIDEOS:')))
+const bulkActionSource = storeSource.slice(storeSource.indexOf('  async addVideos({ commit }'), storeSource.indexOf('  async grabAllPlaylists('))
+const singleActionSource = storeSource.slice(storeSource.indexOf('  addVideo({ commit }'), storeSource.indexOf('  async addVideos({ commit }'))
+const promptSource = await readFile(new URL('../../src/renderer/components/FtPlaylistAddVideoPrompt/FtPlaylistAddVideoPrompt.vue', import.meta.url), 'utf8')
+const promptSaveSource = promptSource.slice(promptSource.search(/(?:async )?function addSelectedToPlaylists\(/), promptSource.indexOf("/** @type {import('vue').ComputedRef<object>} */\nconst newPlaylistDefaultProperties"))
+
+function storeActions(handlers) {
+  return vm.runInNewContext(`({ ${singleActionSource} ${bulkActionSource} })`, {
+    DBPlaylistHandlers: handlers, PlaylistVideoAddResult,
+    pendingVideoAdds: new Map(),
+    generateRandomUniqueId: () => crypto.randomUUID(),
+    processToBeAddedPlaylistVideo: () => {},
+    removeUndesiredVideoAttributes: () => {},
+    console,
+  })
+}
 
 async function fixture(addVideosToTop) {
   const db = { playlists: new Datastore({ inMemoryOnly: true }) }
@@ -24,15 +41,16 @@ for (const preference of [undefined, false, true]) {
   test(`single and bulk additions respect per-playlist insertion preference ${preference}`, async () => {
     const { db, Playlists, state } = await fixture(preference)
     const videoData = { videoId: 'single' }
-    assert.equal(await Playlists.upsertVideoByPlaylistId('custom', 10, videoData), PlaylistVideoAddResult.ADDED)
-    mutations.addVideo(state, { _id: 'custom', lastUpdatedAt: 10, videoData })
+    const single = await Playlists.upsertVideoByPlaylistId('custom', 10, videoData)
+    assert.equal(single.status, PlaylistVideoAddResult.ADDED)
+    mutations.addVideo(state, { _id: 'custom', ...single, videoData })
     const expected = preference ? ['single', 'first', 'second'] : ['first', 'second', 'single']
     assert.deepEqual(Array.from((await db.playlists.findOneAsync({ _id: 'custom' })).videos, v => v.videoId), expected)
     assert.deepEqual(Array.from(state.playlists[0].videos, v => v.videoId), expected)
 
     const videos = [{ videoId: 'batch-a' }, { videoId: 'batch-b' }]
-    await Playlists.upsertVideosByPlaylistId('custom', 20, videos)
-    mutations.addVideos(state, { _id: 'custom', lastUpdatedAt: 20, videos })
+    const bulk = await Playlists.upsertVideosByPlaylistId('custom', 20, videos)
+    mutations.addVideos(state, { _id: 'custom', ...bulk })
     const all = preference ? ['batch-a', 'batch-b', ...expected] : [...expected, 'batch-a', 'batch-b']
     const saved = await db.playlists.findOneAsync({ _id: 'custom' })
     assert.deepEqual(Array.from(saved.videos, v => v.videoId), all)
@@ -47,11 +65,11 @@ for (const preference of [undefined, false, true]) {
 test('top insertion still deduplicates simultaneous single-video adds and never recreates a deleted playlist', async () => {
   const { db, Playlists } = await fixture(true)
   const results = await Promise.all(Array.from({ length: 3 }, () => Playlists.upsertVideoByPlaylistId('custom', 10, { videoId: 'new' })))
-  assert.equal(results.filter(result => result === PlaylistVideoAddResult.ADDED).length, 1)
-  assert.equal(results.filter(result => result === PlaylistVideoAddResult.ALREADY_PRESENT).length, 2)
+  assert.equal(results.filter(result => result.status === PlaylistVideoAddResult.ADDED).length, 1)
+  assert.equal(results.filter(result => result.status === PlaylistVideoAddResult.ALREADY_PRESENT).length, 2)
   assert.deepEqual(Array.from((await db.playlists.findOneAsync({ _id: 'custom' })).videos, v => v.videoId), ['new', 'first', 'second'])
   await db.playlists.removeAsync({ _id: 'custom' })
-  assert.equal(await Playlists.upsertVideoByPlaylistId('custom', 20, { videoId: 'missing' }), PlaylistVideoAddResult.PLAYLIST_MISSING)
+  assert.equal((await Playlists.upsertVideoByPlaylistId('custom', 20, { videoId: 'missing' })).status, PlaylistVideoAddResult.PLAYLIST_MISSING)
   assert.equal(await db.playlists.findOneAsync({ _id: 'custom' }), null)
 })
 
@@ -91,6 +109,8 @@ for (const preference of [false, true]) {
     const { db, Playlists, state } = await fixture(preference)
     const playlist = state.playlists[0]
     const sourceVideos = [{ videoId: 'first' }, { videoId: 'source-a' }, { videoId: 'source-b' }, { videoId: 'source-a' }]
+    const actions = storeActions(Playlists)
+    let firstSave = true
     const refresh = vm.runInNewContext(refreshSource + '\naddMissingVideos', {
       props: { id: 'custom' },
       selectedUserPlaylist: { value: { sourcePlaylistId: 'source' } },
@@ -99,10 +119,14 @@ for (const preference of [false, true]) {
       loadSnapshot: async () => ({ videos: sourceVideos }),
       store: {
         getters: { getPlaylist: () => playlist },
-        dispatch: async (_action, payload) => {
-          const result = await Playlists.upsertVideoByPlaylistId(payload._id, 30, payload.videoData)
-          if (result === PlaylistVideoAddResult.ADDED) mutations.addVideo(state, { ...payload, lastUpdatedAt: 30 })
-          return result !== PlaylistVideoAddResult.PLAYLIST_MISSING
+        dispatch: async (action, payload) => {
+          const saved = await actions[action]({ commit: (name, data) => mutations[name](state, data) }, payload)
+          if (preference && firstSave) {
+            firstSave = false
+            await db.playlists.updateAsync({ _id: 'custom' }, { $set: { addVideosToTop: false } })
+            playlist.addVideosToTop = false
+          }
+          return saved
         },
       },
       t: value => value,
@@ -116,3 +140,117 @@ for (const preference of [false, true]) {
     assert.deepEqual(sourceVideos.map(video => video.videoId), ['first', 'source-a', 'source-b', 'source-a'])
   })
 }
+
+test('more than five simultaneous additions all persist without losing entries', async () => {
+  const { db, Playlists } = await fixture(true)
+  const results = await Promise.allSettled(Array.from({ length: 12 }, (_, index) =>
+    Playlists.upsertVideoByPlaylistId('custom', 30, { videoId: `concurrent-${index}` })))
+  assert.equal(results.filter(result => result.status === 'rejected').length, 0)
+  assert.ok(results.every(result => result.value.status === PlaylistVideoAddResult.ADDED))
+  assert.equal((await db.playlists.findOneAsync({ _id: 'custom' })).videos.length, 14)
+})
+
+test('bulk IPC reports a missing playlist without broadcasting unpersisted additions', async () => {
+  const { db, Playlists } = await fixture(true)
+  const broadcasts = []
+  const handle = vm.runInNewContext(`(async (data) => { switch (${DBActions.PLAYLISTS.UPSERT_VIDEOS}) { ${bulkIpcSource} } })`, {
+    DBActions, IpcChannels, SyncEvents, PlaylistVideoAddResult,
+    baseHandlers: { playlists: Playlists },
+    syncOtherWindows: (...args) => broadcasts.push(args),
+    event: {},
+  })
+  await db.playlists.removeAsync({ _id: 'custom' })
+  assert.equal((await handle({ _id: 'custom', lastUpdatedAt: 30, videos: [{ videoId: 'missing' }] })).status, PlaylistVideoAddResult.PLAYLIST_MISSING)
+  assert.equal(broadcasts.length, 0)
+})
+
+test('bulk IPC broadcasts the committed direction and only the entries actually inserted', async () => {
+  const { db, Playlists, state } = await fixture(true)
+  const broadcasts = []
+  const handle = vm.runInNewContext(`(async (data) => { switch (${DBActions.PLAYLISTS.UPSERT_VIDEOS}) { ${bulkIpcSource} } })`, {
+    DBActions, IpcChannels, SyncEvents, PlaylistVideoAddResult,
+    baseHandlers: { playlists: Playlists },
+    syncOtherWindows: (...args) => broadcasts.push(args),
+    event: {},
+  })
+  await handle({ _id: 'custom', lastUpdatedAt: 30, deduplicate: true, videos: [{ videoId: 'first' }, { videoId: 'new' }, { videoId: 'new' }] })
+  assert.equal(broadcasts.length, 1)
+  const payload = broadcasts[0][2].data
+  assert.equal(payload.addVideosToTop, true)
+  assert.deepEqual(Array.from(payload.videos, video => video.videoId), ['new'])
+  state.playlists[0].addVideosToTop = false
+  mutations.addVideos(state, payload)
+  assert.deepEqual(Array.from(state.playlists[0].videos, video => video.videoId), Array.from((await db.playlists.findOneAsync({ _id: 'custom' })).videos, video => video.videoId))
+})
+
+test('bulk store action never commits additions rejected by the datastore', async () => {
+  const { db, Playlists } = await fixture(true)
+  await db.playlists.removeAsync({ _id: 'custom' })
+  const commits = []
+  const action = vm.runInNewContext(`({ ${bulkActionSource} }).addVideos`, {
+    DBPlaylistHandlers: Playlists, PlaylistVideoAddResult,
+    generateRandomUniqueId: () => 'new-item',
+    removeUndesiredVideoAttributes: () => {},
+    console,
+  })
+  const saved = await action({ commit: (...args) => commits.push(args) }, { _id: 'custom', videos: [{ videoId: 'missing' }] })
+  assert.equal(saved, false)
+  assert.equal(commits.length, 0)
+})
+
+test('the bulk prompt waits for writes and reports failure without a success toast', async () => {
+  let finishWrite
+  const pendingWrite = new Promise(resolve => { finishWrite = resolve })
+  const toasts = []
+  const saving = { value: false }
+  let writes = 0
+  const save = vm.runInNewContext(promptSaveSource + '\naddSelectedToPlaylists', {
+    saving,
+    selectedPlaylistIdList: { value: ['custom'] },
+    allPlaylists: { value: [{ _id: 'custom', videos: [] }] },
+    toBeAddedToPlaylistVideoList: { value: [{ videoId: 'new' }, { videoId: 'other' }] },
+    addingDuplicateVideosEnabled: { value: false },
+    store: { dispatch: () => { writes++; return pendingWrite } },
+    showToast: toast => toasts.push(toast),
+    t: value => value,
+    hide: () => {},
+  })
+  const pending = save()
+  assert.equal(toasts.length, 0)
+  assert.equal(saving.value, true)
+  await save()
+  assert.equal(writes, 1, 'repeated Save activation must not duplicate an in-flight batch')
+  finishWrite(false)
+  await pending
+  assert.equal(saving.value, false)
+  assert.equal(toasts.length, 1)
+  assert.ok(toasts[0].message.includes('There was an issue with updating this playlist.'))
+})
+
+test('renderer insertion uses the committed direction when the preference changes before the reply', async () => {
+  const { db, Playlists, state } = await fixture(true)
+  const actions = storeActions({
+    upsertVideoByPlaylistId: async (...args) => {
+      const result = await Playlists.upsertVideoByPlaylistId(...args)
+      state.playlists[0].addVideosToTop = false
+      return result
+    },
+  })
+  await actions.addVideo({ commit: (name, payload) => mutations[name](state, payload) }, { _id: 'custom', videoData: { videoId: 'new' } })
+  assert.deepEqual(Array.from(state.playlists[0].videos, video => video.videoId), Array.from((await db.playlists.findOneAsync({ _id: 'custom' })).videos, video => video.videoId))
+})
+
+test('an insertion retry does not overwrite a newer playlist timestamp', async () => {
+  const { db, Playlists } = await fixture(true)
+  const update = db.playlists.updateAsync.bind(db.playlists)
+  let intercepted = false
+  db.playlists.updateAsync = async (query, changes, options) => {
+    if (!intercepted && query.$where) {
+      intercepted = true
+      await update({ _id: 'custom' }, { $set: { lastUpdatedAt: 100 } })
+    }
+    return update(query, changes, options)
+  }
+  await Playlists.upsertVideoByPlaylistId('custom', 30, { videoId: 'new' })
+  assert.equal((await db.playlists.findOneAsync({ _id: 'custom' })).lastUpdatedAt, 100)
+})

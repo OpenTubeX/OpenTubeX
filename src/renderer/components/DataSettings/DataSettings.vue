@@ -1716,7 +1716,10 @@ async function importTakeoutPlaylist(playlist) {
         known.add(key)
       }
     }
-    await store.dispatch('importPlaylist', { createdAt: existing.createdAt, lastUpdatedAt: Date.now(), ...playlist, _id: existing._id, videos })
+    const orderedVideos = existing.addVideosToTop === true
+      ? videos.slice(existing.videos.length).concat(videos.slice(0, existing.videos.length))
+      : videos
+    await store.dispatch('importPlaylist', { createdAt: existing.createdAt, lastUpdatedAt: Date.now(), ...playlist, _id: existing._id, videos: orderedVideos })
   }
 }
 
@@ -1796,6 +1799,7 @@ async function importPlaylists() {
     'description',
     'createdAt',
     'customThumbnail',
+    'addVideosToTop',
   ]
 
   const ignoredKeys = [
@@ -1878,7 +1882,7 @@ async function importPlaylists() {
         }
       } else if (!ignoredKeys.includes(key)) {
         // Do nothing for keys to be ignored
-        playlistObject[key] = playlistData[key]
+        playlistObject[key] = key === 'addVideosToTop' ? playlistData[key] === true : playlistData[key]
 
         if (requiredKeys.includes(key)) {
           countRequiredKeysPresent++
@@ -1957,6 +1961,12 @@ async function importPlaylists() {
         playlistVideos.push(video)
       }
     })
+    const addVideosToTop = Object.hasOwn(playlistObject, 'addVideosToTop')
+      ? playlistObject.addVideosToTop
+      : existingPlaylist.addVideosToTop === true
+    const orderedVideos = addVideosToTop
+      ? playlistVideos.slice(existingPlaylist.videos.length).concat(playlistVideos.slice(0, existingPlaylist.videos.length))
+      : playlistVideos
     // Update playlist's `lastUpdatedAt` & other attributes
     store.dispatch('updatePlaylist', {
       _id: existingPlaylist._id,
@@ -1964,7 +1974,8 @@ async function importPlaylists() {
       playlistName: playlistObject.playlistName,
       description: playlistObject.description,
       ...(Object.hasOwn(playlistObject, 'customThumbnail') ? { customThumbnail: playlistObject.customThumbnail } : {}),
-      videos: playlistVideos
+      ...(Object.hasOwn(playlistObject, 'addVideosToTop') ? { addVideosToTop: playlistObject.addVideosToTop } : {}),
+      videos: orderedVideos
     })
   })
 

@@ -1,4 +1,4 @@
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection } from '../../helpers/app.mjs'
 
 const playlistId = 'insertion-order'
 const label = 'Add new videos to the top (custom order)'
@@ -147,4 +147,70 @@ test('source refresh prepends missing videos in source order without adding dupl
   await refresh.click()
   await expect(refresh).toBeEnabled()
   expect(await videoIds(page)).toEqual(['ccccccccccc', 'ddddddddddd', 'aaaaaaaaaaa', 'bbbbbbbbbbb'])
+})
+
+test('simultaneous additions all persist across restart', async ({ app, page }) => {
+  await openPlaylist(page)
+  const saved = await page.evaluate(async id => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updatePlaylist', { _id: id, addVideosToTop: true })
+    return Promise.all(Array.from({ length: 12 }, (_, index) => store.dispatch('addVideo', {
+      _id: id,
+      videoData: { videoId: `concurrent${index}`, title: `Concurrent video ${index}`, author: 'Test channel', lengthSeconds: 60 },
+    })))
+  }, playlistId)
+  expect(saved).toEqual(Array(12).fill(true))
+  const ids = await videoIds(page)
+  expect(ids).toHaveLength(14)
+  expect(new Set(ids).size).toBe(14)
+  ;({ page } = await app.relaunch())
+  await openPlaylist(page)
+  expect(await videoIds(page)).toEqual(ids)
+})
+
+test('bulk save reports a playlist removed during the write without announcing success', async ({ page }) => {
+  await goTo(page, 'userplaylists')
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('showAddToPlaylistPromptForManyVideos', {
+      videos: [{ videoId: 'ccccccccccc', title: 'First new video', lengthSeconds: 60 }, { videoId: 'ddddddddddd', title: 'Second new video', lengthSeconds: 60 }],
+      newPlaylistDefaultProperties: {},
+    })
+    const dispatch = store.dispatch.bind(store)
+    // Delete after the prompt has selected its target, immediately before the
+    // real bulk action reaches IPC. This deterministically models another window.
+    store.dispatch = async (action, payload, options) => {
+      if (action === 'addVideos') {
+        store.dispatch = dispatch
+        await dispatch('removePlaylist', payload._id)
+      }
+      return dispatch(action, payload, options)
+    }
+  })
+  const dialog = page.getByRole('dialog')
+  await dialog.locator('.ft-playlist-selector', { hasText: 'Weekend watching' }).click()
+  await dialog.getByRole('button', { name: 'Save', exact: true }).click()
+  await expect(page.getByText('There was an issue with updating this playlist.', { exact: true })).toBeVisible()
+  await expect(page.getByText(/Video\(s\) added to|Videos? added to/)).toHaveCount(0)
+  await expect(dialog).toBeHidden()
+  expect(await page.evaluate(id => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPlaylist(id), playlistId)).toBeUndefined()
+})
+
+test('playlist import restores the saved insertion preference for existing and new playlists', async ({ page }) => {
+  await openPlaylist(page)
+  await page.evaluate(async id => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updatePlaylist', { _id: id, addVideosToTop: true })
+    const playlist = store.getters.getPlaylist(id)
+    const contents = JSON.stringify(playlist) + '\n' + JSON.stringify({ ...playlist, _id: 'imported-insertion-order', playlistName: 'Imported order' })
+    window.showOpenFilePicker = async () => [{ getFile: async () => new File([contents], 'playlists.db', { type: 'application/x-freetube-db' }) }]
+    await store.dispatch('updatePlaylist', { _id: id, addVideosToTop: false })
+  }, playlistId)
+  const section = await goToSettingsSection(page, 'data')
+  await section.getByRole('button', { name: /^Import playlists$/i }).click()
+  await expect.poll(() => page.evaluate(id => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    return [id, 'imported-insertion-order'].map(id => store.getters.getPlaylist(id)?.addVideosToTop)
+  }, playlistId)).toEqual([true, true])
+  await expect(page.getByText('Unknown data key: addVideosToTop', { exact: true })).toHaveCount(0)
 })

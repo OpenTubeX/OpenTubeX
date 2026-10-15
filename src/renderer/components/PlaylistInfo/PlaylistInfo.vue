@@ -790,23 +790,11 @@ async function addMissingVideos() {
 
   snapshotPending.value = true
   try {
-    const playlist = store.getters.getPlaylist(id)
-    if (!playlist) throw new Error('Playlist was deleted')
-    const present = new Set(playlist.videos.map(video => video.videoId))
-    const missingVideos = snapshot.videos.filter(video => {
-      if (present.has(video.videoId)) return false
-      present.add(video.videoId)
-      return true
-    })
-    // Prepending one at a time needs the opposite traversal to keep source order.
-    if (playlist.addVideosToTop === true) missingVideos.reverse()
-    for (const video of missingVideos) {
-      snapshotController.signal.throwIfAborted()
-      // The single-video action also checks the database, protecting edits in
-      // other windows and avoiding duplicate entries during simultaneous refreshes.
-      const saved = await store.dispatch('addVideo', { _id: id, videoData: { ...video } })
-      if (!saved) throw new Error('Could not append a source playlist video')
-    }
+    snapshotController.signal.throwIfAborted()
+    // Insert the snapshot as one ordered, deduplicated batch so a concurrent
+    // preference change cannot split the refresh between the two ends.
+    const saved = await store.dispatch('addVideos', { _id: id, videos: snapshot.videos, deduplicate: true })
+    if (!saved) throw new Error('Could not add source playlist videos')
     showToast({
       message: t('User Playlists.SinglePlaylistView.Toast["Playlist has been updated."]'),
       icon: ['fas', 'check'],
