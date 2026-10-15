@@ -9,7 +9,12 @@ It originated as a fork of [FreeTube](https://github.com/FreeTubeApp/FreeTube)
 and is independently developed and supported. It is not affiliated with,
 endorsed by, maintained by, or supported by the FreeTube project.
 
-<br><p align="center"><a href="https://opentubex.org/downloads/">⬇️ Download OpenTubeX</a></p>
+<br>
+<p align="center">
+  <a href="https://opentubex.org/downloads/">
+    <img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/download.svg" width="220" alt="Download">
+  </a>
+</p>
 
 <p align="center">
   <a href="https://github.com/OpenTubeX/OpenTubeX/releases/latest">
