@@ -4,55 +4,52 @@ import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 test.use({ seed: { settings: { animationSpeed: 0, videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
 
-for (const zoom of [1, 0.95]) {
-  test(`phone sheet header controls preserve taps and allow touch drags at ${zoom} UI scale`, async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    await openMockedVideo(page)
-    await setWindowSize(app, page, { width: 480, height: 800 })
-    await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
-    const watch = await watchViewHandle(page)
-    const sheet = page.locator('.dockedSheet[open]')
-    const hide = sheet.locator('.mobileSheetHeader').getByRole('button', { name: 'Hide Comments', exact: true })
-    const session = await page.context().newCDPSession(page)
-    await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
-    async function gesture(target, distance = 0) {
-      await expect(sheet).toHaveCSS('transform', 'none')
-      const bounds = await target.boundingBox()
-      const point = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }
-      await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] })
-      if (distance) {
-        for (let step = 1; step <= 5; step++) {
-          await page.waitForTimeout(50)
-          await session.send('Input.dispatchTouchEvent', {
-            type: 'touchMove', touchPoints: [{ ...point, y: point.y + distance * step / 5 }]
-          })
-        }
+test('phone sheet header controls preserve taps and allow touch drags', { tag: '@scale' }, async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await setWindowSize(app, page, { width: 480, height: 800 })
+  const watch = await watchViewHandle(page)
+  const sheet = page.locator('.dockedSheet[open]')
+  const hide = sheet.locator('.mobileSheetHeader').getByRole('button', { name: 'Hide Comments', exact: true })
+  const session = await page.context().newCDPSession(page)
+  await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+  async function gesture(target, distance = 0) {
+    await expect(sheet).toHaveCSS('transform', 'none')
+    const bounds = await target.boundingBox()
+    const point = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }
+    await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] })
+    if (distance) {
+      for (let step = 1; step <= 5; step++) {
+        await page.waitForTimeout(50)
+        await session.send('Input.dispatchTouchEvent', {
+          type: 'touchMove', touchPoints: [{ ...point, y: point.y + distance * step / 5 }]
+        })
       }
-      await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
     }
+    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  }
+  await watch.evaluate(vm => vm.openPhonePanel('comments'))
+  await expect(sheet.locator('.comment').first()).toBeVisible()
+  await gesture(hide, 2)
+  await expect(sheet.getByText('Click to View Comments', { exact: true })).toBeVisible()
+  await gesture(sheet.getByText('Click to View Comments', { exact: true }))
+  await expect(sheet.locator('.comment').first()).toBeVisible()
+
+  const top = (await sheet.boundingBox()).y
+  await gesture(hide, 30)
+  await expect(sheet.locator('.comment').first()).toBeVisible()
+  await expect.poll(async () => (await sheet.boundingBox()).y).toBeCloseTo(top, 0)
+
+  for (const target of [sheet.locator('.mobileSheetHeader h3'), hide, sheet.locator('.mobileSheetHeader > button').last()]) {
+    await gesture(target, 110)
+    await expect(sheet).toHaveCount(0)
     await watch.evaluate(vm => vm.openPhonePanel('comments'))
     await expect(sheet.locator('.comment').first()).toBeVisible()
-    await gesture(hide, 2)
-    await expect(sheet.getByText('Click to View Comments', { exact: true })).toBeVisible()
-    await gesture(sheet.getByText('Click to View Comments', { exact: true }))
-    await expect(sheet.locator('.comment').first()).toBeVisible()
-
-    const top = (await sheet.boundingBox()).y
-    await gesture(hide, 30)
-    await expect(sheet.locator('.comment').first()).toBeVisible()
-    await expect.poll(async () => (await sheet.boundingBox()).y).toBeCloseTo(top, 0)
-
-    for (const target of [sheet.locator('.mobileSheetHeader h3'), hide, sheet.locator('.mobileSheetHeader > button').last()]) {
-      await gesture(target, 110)
-      await expect(sheet).toHaveCount(0)
-      await watch.evaluate(vm => vm.openPhonePanel('comments'))
-      await expect(sheet.locator('.comment').first()).toBeVisible()
-    }
-    await gesture(sheet.locator('.mobileSheetHeader > button').last())
-    await expect(sheet).toHaveCount(0)
-    await session.detach()
-  })
-}
+  }
+  await gesture(sheet.locator('.mobileSheetHeader > button').last())
+  await expect(sheet).toHaveCount(0)
+  await session.detach()
+})
 
 test('portrait Shorts actions open phone sheets instead of side panels', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page, { captionVideoIds: ['jNQXAC9IVRw'] })
@@ -135,63 +132,60 @@ test('portrait Shorts actions open phone sheets instead of side panels', async (
   await expect(page.locator('.fullscreenMetadataOverlay.open')).toHaveCount(0)
 })
 
-for (const zoom of [1, 0.95]) {
-  for (const mode of ['browser', 'pip']) {
-    test(`phone panel survives ${mode} and clamps shorter content at ${zoom} UI scale`, async ({ app, page }) => {
-      await mockPlayableWatchPage(app, page)
-      await openMockedVideo(page)
-      await setWindowSize(app, page, { width: 480, height: 800 })
-      await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
-      if (mode === 'browser') await page.setViewportSize({ width: Math.round(480 / zoom), height: Math.round(800 / zoom) })
-      const watch = await watchViewHandle(page)
-      await watch.evaluate(vm => {
-        vm.videoDescription = 'Description line\n'.repeat(100)
-        vm.videoDescriptionHtml = ''
-        vm.openPhonePanel('description')
-      })
-      const sheet = page.locator('.dockedSheet[open]')
-      await expect(sheet).toBeVisible()
-      await expect(sheet).toHaveCSS('transform', 'none')
-      const description = await sheet.locator('.description').elementHandle()
-      await description.evaluate(el => { el.textContent = 'Description line\n'.repeat(100) })
-      const viewport = sheet.locator('.phonePanelScroller')
-      await expect.poll(() => viewport.evaluate(el => el.scrollHeight - el.clientHeight)).toBeGreaterThan(100)
-      await viewport.evaluate(el => { el.scrollTop = el.scrollHeight })
-      const position = await viewport.evaluate(el => el.scrollTop)
-      const player = page.locator('.ftVideoPlayer')
-      for (const shorten of [false, true]) {
-        await player.evaluate((el, mode) => {
-          if (mode === 'browser') return el.requestFullscreen()
-          else document.body.classList.add('androidPictureInPicture')
-        }, mode)
-        await expect(sheet).toHaveCount(0)
-        if (mode === 'pip') await setWindowSize(app, page, { width: 450, height: 270 })
-        if (shorten) await description.evaluate(el => { el.textContent = 'Short description' })
-        if (mode === 'pip') await setWindowSize(app, page, { width: 480, height: 800 })
-        await player.evaluate((el, mode) => {
-          if (mode === 'browser') return document.exitFullscreen()
-          else document.body.classList.remove('androidPictureInPicture')
-        }, mode)
-        await expect(sheet).toBeVisible()
-        await expect.poll(async () => {
-          const panel = await sheet.boundingBox()
-          const video = await player.boundingBox()
-          return Math.abs(panel.y - video.y - video.height)
-        }).toBeLessThan(2)
-        if (!shorten) {
-          // At fractional zoom the restored boundary can round by one device pixel.
-          await expect.poll(() => viewport.evaluate((el, position) => (
-            Math.abs(el.scrollTop - position) * devicePixelRatio
-          ), position)).toBeLessThanOrEqual(1.01)
-          await expect(viewport.locator('.os-scrollbar-vertical')).not.toHaveClass(/os-scrollbar-unusable/)
-        } else {
-          await expect.poll(() => viewport.evaluate(el => el.scrollTop)).toBe(0)
-          await expect(viewport.locator('.os-scrollbar-vertical')).toHaveClass(/os-scrollbar-unusable/)
-          await expect.poll(() => viewport.evaluate(el => el.scrollHeight - el.clientHeight)).toBeLessThanOrEqual(1)
-        }
-      }
+for (const mode of ['browser', 'pip']) {
+  test(`phone panel survives ${mode} and clamps shorter content`, { tag: '@scale' }, async ({ app, page, uiScale }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await setWindowSize(app, page, { width: 480, height: 800 })
+    if (mode === 'browser') await page.setViewportSize({ width: Math.round(480 * 100 / uiScale), height: Math.round(800 * 100 / uiScale) })
+    const watch = await watchViewHandle(page)
+    await watch.evaluate(vm => {
+      vm.videoDescription = 'Description line\n'.repeat(100)
+      vm.videoDescriptionHtml = ''
+      vm.openPhonePanel('description')
     })
-  }
+    const sheet = page.locator('.dockedSheet[open]')
+    await expect(sheet).toBeVisible()
+    await expect(sheet).toHaveCSS('transform', 'none')
+    const description = await sheet.locator('.description').elementHandle()
+    await description.evaluate(el => { el.textContent = 'Description line\n'.repeat(100) })
+    const viewport = sheet.locator('.phonePanelScroller')
+    await expect.poll(() => viewport.evaluate(el => el.scrollHeight - el.clientHeight)).toBeGreaterThan(100)
+    await viewport.evaluate(el => { el.scrollTop = el.scrollHeight })
+    const position = await viewport.evaluate(el => el.scrollTop)
+    const player = page.locator('.ftVideoPlayer')
+    for (const shorten of [false, true]) {
+      await player.evaluate((el, mode) => {
+        if (mode === 'browser') return el.requestFullscreen()
+        else document.body.classList.add('androidPictureInPicture')
+      }, mode)
+      await expect(sheet).toHaveCount(0)
+      if (mode === 'pip') await setWindowSize(app, page, { width: 450, height: 270 })
+      if (shorten) await description.evaluate(el => { el.textContent = 'Short description' })
+      if (mode === 'pip') await setWindowSize(app, page, { width: 480, height: 800 })
+      await player.evaluate((el, mode) => {
+        if (mode === 'browser') return document.exitFullscreen()
+        else document.body.classList.remove('androidPictureInPicture')
+      }, mode)
+      await expect(sheet).toBeVisible()
+      await expect.poll(async () => {
+        const panel = await sheet.boundingBox()
+        const video = await player.boundingBox()
+        return Math.abs(panel.y - video.y - video.height)
+      }).toBeLessThan(2)
+      if (!shorten) {
+        // At fractional zoom the restored boundary can round by one device pixel.
+        await expect.poll(() => viewport.evaluate((el, position) => (
+          Math.abs(el.scrollTop - position) * devicePixelRatio
+        ), position)).toBeLessThanOrEqual(1.01)
+        await expect(viewport.locator('.os-scrollbar-vertical')).not.toHaveClass(/os-scrollbar-unusable/)
+      } else {
+        await expect.poll(() => viewport.evaluate(el => el.scrollTop)).toBe(0)
+        await expect(viewport.locator('.os-scrollbar-vertical')).toHaveClass(/os-scrollbar-unusable/)
+        await expect.poll(() => viewport.evaluate(el => el.scrollHeight - el.clientHeight)).toBeLessThanOrEqual(1)
+      }
+    }
+  })
 }
 
 test('comments retain their inner scroll position through fullscreen rotation and clamp on PiP return', async ({ app, page }) => {

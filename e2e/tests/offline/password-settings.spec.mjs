@@ -9,7 +9,7 @@ test('keeps both password entries after a failed save and allows retrying', asyn
   const confirmation = privacy.getByLabel('Confirm password', { exact: true })
   const save = privacy.getByRole('button', { name: /^Set password$/i })
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const action = store._actions.updateSettingsPassword
     store._actions.updateSettingsPassword = [() => new Promise(resolve => {
       window.finishFailedPasswordSave = () => resolve(false)
@@ -41,7 +41,7 @@ test('requires matching password confirmation before protecting settings', async
   const confirmation = privacy.getByLabel('Confirm password', { exact: true })
   const save = privacy.getByRole('button', { name: /^Set password$/i })
   const storedPassword = () => page.evaluate(() => {
-    return document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getSettingsPassword
+    return window.$store.getters.getSettingsPassword
   })
 
   await password.fill('test-settings-password')

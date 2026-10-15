@@ -63,7 +63,7 @@ test.describe('playlist sync while another window edits the library', () => {
       await route.fulfill({ json })
     })
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('removeAllVideos', 'sync-race')
       for (const collection of ['Subscriptions', 'History', 'Profiles', 'Sessions', 'Settings', 'WatchStats', 'LiveReminders']) {
         await store.dispatch(`updateSyncServerSync${collection}`, false)
@@ -73,7 +73,7 @@ test.describe('playlist sync while another window edits the library', () => {
     })
     expect(laterHeader.custom_thumbnail).toBe('')
     const sync = () => page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('syncWithSyncServer')
       return store.getters.getPlaylist('sync-race').customThumbnail || ''
     })
@@ -90,7 +90,7 @@ test.describe('playlist sync while another window edits the library', () => {
       laterHeader.title = `Later playlist ${++iteration}`
       expect(await sync()).toBe(savedCover)
       const saved = await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         return {
           thumbnail: store.getters.getPlaylist('sync-race').customThumbnail,
           laterTitle: store.getters.getPlaylist('later-sync').playlistName,
@@ -105,7 +105,7 @@ test.describe('playlist sync while another window edits the library', () => {
     for (const replacement of ['', savedCover]) {
       header.custom_thumbnail = 'data:image/png;base64,AAAA'
       await page.evaluate(async customThumbnail => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         await store.dispatch('updatePlaylist', { _id: 'sync-race', customThumbnail })
       }, replacement)
       expect(await sync()).toBe(replacement)
@@ -162,7 +162,7 @@ test.describe('playlist sync while another window edits the library', () => {
       const otherWindow = await openNewWindowFromTabBar(app, page)
       await waitForAppReady(otherWindow)
       syncing = page.evaluate(async () => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         await store.dispatch('updateSyncServerSnapshot', JSON.stringify({
           playlists: {
             'sync-race': {
@@ -176,17 +176,17 @@ test.describe('playlist sync while another window edits the library', () => {
       })
       await expect.poll(() => uploading).toBe(true)
       await otherWindow.evaluate(async () => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         await store.dispatch('addVideo', { _id: 'sync-race', videoData: { videoId: 'bcdefghijkl', title: 'Added locally', authorId: 'UCchannel', author: 'Recovered channel', lengthSeconds: 50 } })
       })
-      await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPlaylist('sync-race').videos.length)).toBe(2)
+      await expect.poll(() => page.evaluate(() => window.$store.getters.getPlaylist('sync-race').videos.length)).toBe(2)
       release()
       expect(await syncing).toContain('Playlist changed during sync')
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer'))
+      await page.evaluate(() => window.$store.dispatch('syncWithSyncServer'))
       expect(header.title).toBe('Renamed elsewhere')
       expect(header.description).toBe('Changed elsewhere')
       const relaunched = await app.relaunch()
-      const saved = await relaunched.page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPlaylist('sync-race'))
+      const saved = await relaunched.page.evaluate(() => window.$store.getters.getPlaylist('sync-race'))
       expect(saved.playlistName).toBe('Renamed elsewhere')
       expect(saved.description).toBe('Changed elsewhere')
       expect(saved.videos.map(video => video.videoId)).toEqual(['abcdefghijk', 'bcdefghijkl'])
@@ -231,7 +231,7 @@ test.describe('playlist sync while another window edits the library', () => {
         const otherWindow = await openNewWindowFromTabBar(app, page)
         await waitForAppReady(otherWindow)
         syncing = page.evaluate(async () => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           await store.dispatch('updateSyncServerEnabled', true)
           try {
             await store.dispatch('syncWithSyncServer')
@@ -242,18 +242,18 @@ test.describe('playlist sync while another window edits the library', () => {
         })
         await expect.poll(() => uploading).toBe(true)
         await otherWindow.evaluate(async edit => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           if (edit === 'delete playlist') await store.dispatch('removePlaylist', 'sync-race')
           else await store.dispatch('removeVideo', { _id: 'sync-race', videoId: 'abcdefghijk', playlistItemId: 'one' })
         }, edit)
         await expect.poll(() => page.evaluate(() => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           return store.getters.getPlaylist('sync-race')?.videos.length ?? -1
         })).toBe(edit === 'delete playlist' ? -1 : 0)
         release()
         expect(await syncing).toContain('Playlist changed during sync')
         const result = await page.evaluate(() => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           return { playlist: store.getters.getPlaylist('sync-race'), error: store.state.syncServer.syncServerError }
         })
         expect(result.error).toContain('Playlist changed during sync')
@@ -262,20 +262,20 @@ test.describe('playlist sync while another window edits the library', () => {
         else expect(result.playlist.videos).toEqual([])
         if (firstUpload) {
           const nextError = await page.evaluate(async () => {
-            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            const store = window.$store
             try { await store.dispatch('syncWithSyncServer', { notifyDataLoss: false }) } catch (error) { return error.message }
             return null
           })
           expect(nextError).toContain('would delete')
           expect(remoteExists).toBe(true)
-          expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getAllPlaylists.length)).toBe(0)
-          await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer', { allowDataLoss: true }))
+          expect(await page.evaluate(() => window.$store.getters.getAllPlaylists.length)).toBe(0)
+          await page.evaluate(() => window.$store.dispatch('syncWithSyncServer', { allowDataLoss: true }))
           expect(remoteExists).toBe(false)
-          expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getAllPlaylists.length)).toBe(0)
+          expect(await page.evaluate(() => window.$store.getters.getAllPlaylists.length)).toBe(0)
         }
         const relaunched = await app.relaunch()
         expect(await relaunched.page.evaluate(() => {
-          return document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPlaylist('sync-race')?.videos.length ?? -1
+          return window.$store.getters.getPlaylist('sync-race')?.videos.length ?? -1
         })).toBe(edit === 'delete playlist' ? -1 : 0)
       } finally {
         release()

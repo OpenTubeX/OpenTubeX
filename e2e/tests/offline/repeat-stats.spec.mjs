@@ -52,6 +52,7 @@ test('repeat stats count native loops and retain totals across pauses and toggle
   await video.evaluate(element => { element.currentTime = 12 })
   await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
   await video.evaluate(element => { element.currentTime = 0 })
+  // A paused video must not add time or repeats after seeking back.
   await page.waitForTimeout(1200)
   await expect(stats.locator('.repeatStatsTime')).toHaveText(spent)
   await expect(stats.locator('.repeatStatsCount')).toHaveText('1')
@@ -186,7 +187,7 @@ for (const mode of ['scrolling', 'another tab']) {
         window.scrollTo(0, window.scrollY + element.getBoundingClientRect().bottom)
       })
     } else {
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await page.evaluate(() => window.$store
         .dispatch('updateScrollMiniPlayerOnAllTabs', true))
       await page.locator('.tabBar .newTabButton').click()
       await expect(page.locator('#cross-tab-mini-player-layer .ftVideoPlayer')).toBeVisible()

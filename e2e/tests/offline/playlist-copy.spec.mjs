@@ -39,7 +39,7 @@ async function openPlaylist(page, route = '/playlist/fork-source') {
 
 async function getCopy(page) {
   return page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'My copy')
   })
 }
@@ -85,7 +85,7 @@ test('forks a complete saved playlist and refreshes its editable local snapshot 
   await expect(page.getByRole('link', { name: 'Source playlist', exact: true })).toBeVisible()
   // Exercise the normal local editing actions, preserving a custom order and an added video.
   await page.evaluate(async id => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const playlist = store.getters.getPlaylist(id)
     await store.dispatch('removeVideo', { _id: id, playlistItemId: playlist.videos[101].playlistItemId })
     await store.dispatch('updatePlaylist', { _id: id, videos: [...store.getters.getPlaylist(id).videos].reverse() })

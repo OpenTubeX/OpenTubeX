@@ -76,7 +76,7 @@ setTimeout(sendResponse, ${responseDelay})
 `)
   await chmod(executable, 0o755)
   await app.page.evaluate(async ({ executable, mode }) => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateYtDlpSource', 'system')
     await store.dispatch('updateYtDlpPath', executable)
     await store.dispatch('updateYtDlpPlaybackAuthMode', mode)
@@ -140,7 +140,7 @@ for (const responseType of ['empty', 'ads-only']) {
     await expect(page).toHaveURL(/\/search\/opentubex/)
     await expect(retry).toBeVisible()
     await expect(restrictionHint).toBeVisible()
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', 125))
+    await page.evaluate(() => window.$store.dispatch('updateUiScale', 125))
     await setWindowSize(app, page, { width: 390, height: 844 })
     await expect(retry).toBeVisible()
     await expect(restrictionHint).toBeVisible()
@@ -160,7 +160,7 @@ for (const responseType of ['empty', 'ads-only']) {
     const url = new URL(args.at(-1))
     expect(url.searchParams.get('search_query')).toBe('opentubex')
     expect(url.searchParams.get('sp')).toBe(decodeURIComponent(searchRequest.params))
-    const cache = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getSessionSearchHistory)
+    const cache = await page.evaluate(() => window.$store.getters.getSessionSearchHistory)
     expect(cache.flatMap(entry => entry.data)).toEqual([])
   })
 }
@@ -201,7 +201,7 @@ test('does not offer an empty-search cookie retry without cookies or with family
   await expect(page.getByRole('button', { name: 'Try with configured cookies' })).toHaveCount(0)
   await configureCookieSearch(app)
   await page.evaluate(async () => {
-    await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowFamilyFriendlyOnly', true)
+    await window.$store.dispatch('updateShowFamilyFriendlyOnly', true)
   })
   await page.locator(sel.searchInput).fill('empty family-friendly search')
   await page.locator(sel.searchInput).press('Enter')
@@ -246,7 +246,7 @@ test('cookie search loads video, playlist, and channel avatars and disposes empt
     await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
     await page.locator('.ft-list-channel').screenshot({ path: test.info().outputPath(`cookie-search-channel-${theme}.png`), animations: 'disabled' })
   }
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', 125))
+  await page.evaluate(() => window.$store.dispatch('updateUiScale', 125))
   await setWindowSize(app, page, { width: 390, height: 844 })
   await expectImagesLoaded(channelAvatar)
   await setWindowSize(app, page, { width: 1600, height: 900 })
@@ -273,7 +273,7 @@ test('cookie channel avatars use YouTube URLs with the Invidious backend selecte
   // Keep the age-gate notice while changing the preferred backend: the cookie
   // retry still gets its data from yt-dlp, not from the selected instance.
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setBackendPreference', 'invidious')
     store.commit('setDefaultInvidiousInstance', 'https://invidious.test')
   })
@@ -405,7 +405,7 @@ for (const mode of ['file', 'browser']) {
     const url = new URL(args.at(-1))
     expect(url.searchParams.get('search_query')).toBe(QUERY)
     expect(url.searchParams.get('sp')).toBe(decodeURIComponent(requests[0].params))
-    const cache = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getSessionSearchHistory)
+    const cache = await page.evaluate(() => window.$store.getters.getSessionSearchHistory)
     expect(cache.flatMap(entry => entry.data)).toEqual([])
   })
 }
@@ -424,7 +424,7 @@ test('preserves the restriction and allows another retry when cookies return no 
 test('does not offer an authenticated retry while family-friendly search is enabled', async ({ app, page }) => {
   await configureCookieSearch(app)
   await page.evaluate(async () => {
-    await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowFamilyFriendlyOnly', true)
+    await window.$store.dispatch('updateShowFamilyFriendlyOnly', true)
   })
   await searchForAgeGate(page)
   await expect(page.getByRole('button', { name: 'Try with configured cookies' })).toHaveCount(0)
@@ -447,8 +447,9 @@ for (const pendingRetry of [true, false]) {
       await expect(page.getByRole('button', { name: 'Fetch more results' })).toHaveCount(1)
     }
     await page.evaluate(async () => {
-      await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowFamilyFriendlyOnly', true)
+      await window.$store.dispatch('updateShowFamilyFriendlyOnly', true)
     })
+    // Give the discarded cookie results time to (wrongly) reappear.
     await page.waitForTimeout(500)
     await expect(page.getByRole('heading', { name: 'Confirm your age' })).toBeVisible()
     await expect(page.getByText('Restricted result', { exact: false })).toHaveCount(0)
@@ -477,57 +478,51 @@ test('paginates authenticated results and stops at an empty final page', async (
 })
 
 for (const autoLoadMore of [true, false]) {
-  for (const uiScale of [100, 125]) {
-    test(`shows only the pagination spinner for cookie searches with ${autoLoadMore ? 'automatic' : 'manual'} loading at ${uiScale}% UI scale`, async ({ app, page }) => {
-      const { log, response, pendingResponse } = await configureCookieSearch(app)
-      await searchForAgeGate(page)
-      await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
-      await writeFile(response, JSON.stringify({
-        entries: Array.from({ length: 20 }, (_, index) => ({
-          id: String(index).padStart(11, '0'), title: `Authenticated video ${index}`, channel: 'Creator', duration: 120
-        }))
+  test(`shows only the pagination spinner for cookie searches with ${autoLoadMore ? 'automatic' : 'manual'} loading`, async ({ app, page }) => {
+    const { log, response, pendingResponse } = await configureCookieSearch(app)
+    await searchForAgeGate(page)
+    await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
+    await writeFile(response, JSON.stringify({
+      entries: Array.from({ length: 20 }, (_, index) => ({
+        id: String(index).padStart(11, '0'), title: `Authenticated video ${index}`, channel: 'Creator', duration: 120
       }))
-      await page.getByRole('button', { name: 'Try with configured cookies' }).click()
-      await expect(page.getByRole('heading', { name: 'Authenticated video 0', exact: true })).toBeVisible()
-      if (uiScale === 125) await setWindowSize(app, page, { width: 600, height: 844 })
-      await page.evaluate(scale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', scale), uiScale)
-      const colorScheme = autoLoadMore ? 'dark' : 'light'
-      await page.emulateMedia({ colorScheme })
-      await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
-      await writeFile(response, JSON.stringify({ entries: [] }))
-      await writeFile(pendingResponse, '')
-      const pagination = page.locator('.ft-auto-load-next-page-wrapper')
-      try {
-        await page.evaluate(enabled => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateGeneralAutoLoadMorePaginatedItemsEnabled', enabled), autoLoadMore)
-        if (autoLoadMore) {
-          await pagination.evaluate(element => element.scrollIntoView({ block: 'end', behavior: 'instant' }))
-        } else {
-          await page.getByRole('button', { name: 'Fetch more results' }).click()
-        }
-        await expect.poll(async () => {
-          const args = JSON.parse(await readFile(log, 'utf8'))
-          return args[args.indexOf('--playlist-start') + 1]
-        }).toBe('21')
-        await expect(page.getByRole('status', { name: 'Loading more', exact: true })).toBeVisible()
-        await expect(page.locator('.double-bounce1')).toHaveCount(0, { timeout: 500 })
-        await expect(page.locator('.spinner')).toHaveCount(1)
-        await expectImagesLoaded(page.locator('.ft-list-item img'))
-        if (uiScale === 100) {
-          const box = await pagination.boundingBox()
-          const width = Math.min(600, box.width)
-          await page.screenshot({
-            path: test.info().outputPath(`cookie-search-pagination-${colorScheme}.png`),
-            clip: { x: box.x + (box.width - width) / 2, y: box.y - 150, width, height: box.height + 150 }
-          })
-        }
-      } finally {
-        await unlink(pendingResponse)
+    }))
+    await page.getByRole('button', { name: 'Try with configured cookies' }).click()
+    await expect(page.getByRole('heading', { name: 'Authenticated video 0', exact: true })).toBeVisible()
+    const colorScheme = autoLoadMore ? 'dark' : 'light'
+    await page.emulateMedia({ colorScheme })
+    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+    await writeFile(response, JSON.stringify({ entries: [] }))
+    await writeFile(pendingResponse, '')
+    const pagination = page.locator('.ft-auto-load-next-page-wrapper')
+    try {
+      await page.evaluate(enabled => window.$store.dispatch('updateGeneralAutoLoadMorePaginatedItemsEnabled', enabled), autoLoadMore)
+      if (autoLoadMore) {
+        await pagination.evaluate(element => element.scrollIntoView({ block: 'end', behavior: 'instant' }))
+      } else {
+        await page.getByRole('button', { name: 'Fetch more results' }).click()
       }
-      await expect(page.getByText('There are no more results for this search')).toBeVisible()
-      await expect(pagination).toHaveCount(0)
-      await expect(page.locator('.spinner')).toHaveCount(0)
-    })
-  }
+      await expect.poll(async () => {
+        const args = JSON.parse(await readFile(log, 'utf8'))
+        return args[args.indexOf('--playlist-start') + 1]
+      }).toBe('21')
+      await expect(page.getByRole('status', { name: 'Loading more', exact: true })).toBeVisible()
+      await expect(page.locator('.double-bounce1')).toHaveCount(0, { timeout: 500 })
+      await expect(page.locator('.spinner')).toHaveCount(1)
+      await expectImagesLoaded(page.locator('.ft-list-item img'))
+      const box = await pagination.boundingBox()
+      const width = Math.min(600, box.width)
+      await page.screenshot({
+        path: test.info().outputPath(`cookie-search-pagination-${colorScheme}.png`),
+        clip: { x: box.x + (box.width - width) / 2, y: box.y - 150, width, height: box.height + 150 }
+      })
+    } finally {
+      await unlink(pendingResponse)
+    }
+    await expect(page.getByText('There are no more results for this search')).toBeVisible()
+    await expect(pagination).toHaveCount(0)
+    await expect(page.locator('.spinner')).toHaveCount(0)
+  })
 }
 
 test('keeps loaded results and retries the same page after a pagination error', async ({ app, page }) => {
@@ -563,6 +558,7 @@ test('ignores an authenticated retry that finishes after changing the search', a
   await page.locator(sel.searchInput).press('Enter')
   await expect(page).toHaveURL(/new%20search/)
   await expect(page.getByRole('heading', { name: 'Confirm your age' })).toBeVisible()
+  // Give the stale retry time to (wrongly) render.
   await page.waitForTimeout(500)
   await expect(page.getByText('Stale authenticated result', { exact: true })).toHaveCount(0)
 })
@@ -578,6 +574,7 @@ test('ignores an authenticated retry after navigating to an oversized search', a
   await page.locator(sel.searchInput).press('Enter')
   await expect(page).toHaveURL(new RegExp(`/search/${oversizedQuery}(\\?|$)`))
   await expect(page.getByRole('button', { name: oversizedQuery, exact: true })).toBeVisible()
+  // Give the stale retry time to (wrongly) render.
   await page.waitForTimeout(500)
   await expect(page.getByText('Stale authenticated result', { exact: true })).toHaveCount(0)
 })
@@ -610,6 +607,7 @@ test('clears prior results and loading after replacing a pending search with an 
   await page.locator(sel.searchInput).press('Enter')
   await expect(page).toHaveURL(new RegExp(`/search/${oversizedQuery}(\\?|$)`))
   finishRequest()
+  // Give the replaced request time to (wrongly) apply its response.
   await page.waitForTimeout(500)
   await expect(page.getByRole('heading', { name: 'Search results', exact: true })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Confirm your age' })).toHaveCount(0)

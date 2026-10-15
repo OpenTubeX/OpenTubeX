@@ -1,7 +1,7 @@
 import { test, expect } from '../../helpers/app.mjs'
 
 for (const dismissal of ['dismissed', 'expired']) {
-  test(`${dismissal} notifications release document listeners and toast elements`, async ({ page }) => {
+  test(`${dismissal} notifications release document listeners and toast elements`, { tag: '@performance' }, async ({ page }) => {
     await expect(page.locator('[data-sonner-toast]')).toHaveCount(0)
     const session = await page.context().newCDPSession(page)
     const listenerCount = async () => {
@@ -45,17 +45,14 @@ for (const dismissal of ['dismissed', 'expired']) {
         }
         await expect(toast).toHaveCount(0)
       }
-      await page.waitForTimeout(500)
-      for (let index = 0; index < 3; index++) await session.send('HeapProfiler.collectGarbage')
-      const retained = await page.evaluate(() => window.__dismissedToasts.filter(ref => ref.deref()).length)
-      const retainedStates = await page.evaluate(() => window.__dismissedToastStates.filter(ref => ref.deref()).length)
-      const listeners = await listenerCount()
-      console.log('Dismissed notification resources:', { dismissal, retained, retainedStates, listeners, baseline })
-      expect.soft(listeners).toBe(baseline)
-      expect.soft(retained).toBe(0)
       // Sonner's lazy toastsByPosition computed caches the last nonempty group
       // until another notification renders. Earlier notification state must collect.
-      expect(retainedStates).toBeLessThanOrEqual(1)
+      await expect.poll(async () => {
+        for (let index = 0; index < 3; index++) await session.send('HeapProfiler.collectGarbage')
+        const retained = await page.evaluate(() => window.__dismissedToasts.filter(ref => ref.deref()).length)
+        const retainedStates = await page.evaluate(() => window.__dismissedToastStates.filter(ref => ref.deref()).length)
+        return { retained, statesCollected: retainedStates <= 1, listeners: await listenerCount() }
+      }).toEqual({ retained: 0, statesCollected: true, listeners: baseline })
     } finally {
       await session.detach()
     }

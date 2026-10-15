@@ -109,6 +109,7 @@ test('restores user-opened Picture-in-Picture across a video reload', async ({ a
   )).toBe(true)
 
   await setMinimized(app, false)
+  // Restoring must not exit Picture-in-Picture; give a stale exit time to land.
   await page.waitForTimeout(1000)
   expect(await pictureInPictureActive(page)).toBe(true)
 })

@@ -18,7 +18,7 @@ test.use({
 })
 
 for (const offline of [false, true]) {
-  test(`matches ${offline ? 'Available Offline' : 'Up Next'} heading spacing to the item gap`, async ({ app, page }, testInfo) => {
+  test(`matches ${offline ? 'Available Offline' : 'Up Next'} heading spacing to the item gap`, { tag: '@scale' }, async ({ app, page }, testInfo) => {
     await mockPlayableWatchPage(app, page)
     await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
     await openMockedVideo(page)
@@ -45,20 +45,16 @@ for (const offline of [false, true]) {
       const card = page.locator(`${activeTab} .watchVideoRecommendations`)
       const rows = card.locator(offline ? '.offlineDownloadRecommendation' : '.ft-list-item')
       await expect(rows).toHaveCount(3)
-      for (const scale of [100, 125]) {
-        await watch.evaluate((component, scale) => component.proxy.$store.dispatch('updateUiScale', scale), scale)
-        await expect.poll(() => card.evaluate(element => {
-          const heading = element.querySelector('h3').getBoundingClientRect()
-          const thumbnails = element.querySelectorAll('.offlineDownloadThumbnail, .thumbnailImage')
-          const first = thumbnails[0].getBoundingClientRect()
-          const second = thumbnails[1].getBoundingClientRect()
-          const headingGap = first.top - heading.bottom
-          const itemGap = second.top - first.bottom
-          const topGap = heading.top - element.getBoundingClientRect().top
-          return Math.max(Math.abs(headingGap - itemGap), Math.abs(topGap - itemGap))
-        })).toBeLessThanOrEqual(0.1)
-      }
-      await watch.evaluate(component => component.proxy.$store.dispatch('updateUiScale', 100))
+      await expect.poll(() => card.evaluate(element => {
+        const heading = element.querySelector('h3').getBoundingClientRect()
+        const thumbnails = element.querySelectorAll('.offlineDownloadThumbnail, .thumbnailImage')
+        const first = thumbnails[0].getBoundingClientRect()
+        const second = thumbnails[1].getBoundingClientRect()
+        const headingGap = first.top - heading.bottom
+        const itemGap = second.top - first.bottom
+        const topGap = heading.top - element.getBoundingClientRect().top
+        return Math.max(Math.abs(headingGap - itemGap), Math.abs(topGap - itemGap))
+      })).toBeLessThanOrEqual(0.1)
       await expectImagesLoaded(card.locator('img'))
       for (const colorScheme of ['dark', 'light']) {
         await page.emulateMedia({ colorScheme })

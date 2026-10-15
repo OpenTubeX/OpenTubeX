@@ -5,7 +5,7 @@ import { test, expect, goToSettingsSection, latestSettings, setWindowSize } from
 
 async function setSetting(page, name, value) {
   await page.evaluate(async ({ name, value }) => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch(`update${name}`, value)
   }, { name, value })
 }
@@ -136,7 +136,7 @@ test('starting another renderer preserves the saved tray icon while settings loa
   })
   await page.reload()
   await expect(page.locator('.topNav')).toBeVisible()
-  await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getTrayIconPreset)).toBe('dracula')
+  await expect.poll(() => page.evaluate(() => window.$store.getters.getTrayIconPreset)).toBe('dracula')
   expect(await app.electronApp.evaluate(() => globalThis.trayDefaultResets)).toBe(0)
 })
 

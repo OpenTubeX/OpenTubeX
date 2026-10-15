@@ -109,7 +109,7 @@ function readSkipAvailability(page) {
   })
 }
 
-test('playlist counter stays below the title when expanded and collapsed', async ({ page, attachScreenshot }) => {
+test('playlist counter stays below the title when expanded and collapsed', { tag: '@scale' }, async ({ page, attachScreenshot }) => {
   await page.route(/^https?:\/\//, (route) => route.fulfill({ status: 404, body: '' }))
   await goTo(page, 'userplaylists')
   await page.getByText('Skip button playlist').click()
@@ -127,23 +127,20 @@ test('playlist counter stays below the title when expanded and collapsed', async
     })).toBeGreaterThanOrEqual(0)
   }
 
-  for (const scale of [1, 0.95, 1.25]) {
-    await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
-    for (const width of ['240px', '']) {
-      await playlist.evaluate((element, value) => {
-        element.style.inlineSize = value
-      }, width)
-      await expectCounterBelowTitle()
-      await playlist.getByRole('button', { name: 'Collapse Playlist', exact: true }).click()
-      await expect(playlist.locator('.playlistItemsWrapper')).toBeHidden()
-      await expectCounterBelowTitle()
-      await playlist.getByRole('button', { name: 'Expand Playlist', exact: true }).click()
-      await expect(playlist.locator('.playlistItemsWrapper')).toBeVisible()
-      await expectCounterBelowTitle()
-    }
+  for (const width of ['240px', '']) {
+    await playlist.evaluate((element, value) => {
+      element.style.inlineSize = value
+    }, width)
+    await expectCounterBelowTitle()
+    await playlist.getByRole('button', { name: 'Collapse Playlist', exact: true }).click()
+    await expect(playlist.locator('.playlistItemsWrapper')).toBeHidden()
+    await expectCounterBelowTitle()
+    await playlist.getByRole('button', { name: 'Expand Playlist', exact: true }).click()
+    await expect(playlist.locator('.playlistItemsWrapper')).toBeVisible()
+    await expectCounterBelowTitle()
   }
   await playlist.scrollIntoViewIfNeeded()
-  await attachScreenshot('playlist counter below title at 125% UI scale')
+  await attachScreenshot('playlist counter below title')
 })
 
 test('only offers skipping to playlist videos that exist', async ({ page, attachScreenshot }) => {

@@ -156,8 +156,8 @@ jobs:
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
-        # Playwright needs the base branch history to identify tests changed by a PR.
-        fetch-depth: 0
+        # Playwright needs the base branch history to identify network tests changed by a PR.
+        fetch-depth: ${{ github.event_name == 'pull_request' && matrix.project == 'network' && '0' || '1' }}
         persist-credentials: false
         ref: ${{ inputs.checkoutRef }}
 
@@ -223,7 +223,7 @@ jobs:
     # Playwright or the unit-test glob. Run them explicitly on every PR.
     - name: Test mobile storage and list performance
       if: ${{ matrix.project == 'browser' }}
-      run: node --test tests/android/mobile-performance.test.mjs
+      run: pnpm run test:mobile-performance
       shell: bash
 
     - name: Start sync server
@@ -233,14 +233,20 @@ jobs:
 
     # The network project talks to the real YouTube servers on the first
     # attempt and automatically falls back to recorded fixtures on retry.
+    # PRs run every packed-app test, but only changed network tests.
     - name: Run E2E tests
+      env:
+        PROJECTS: ${{ matrix.projects }}
       run: |
         test_args=("--shard=${{ matrix.shard }}/${{ matrix.shardTotal }}")
-        if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ matrix.project }}" != "performance" ]; then
+        for project in $PROJECTS; do
+          test_args+=("--project=$project")
+        done
+        if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ matrix.project }}" = "network" ]; then
           test_args+=("--only-changed=origin/${GITHUB_BASE_REF}" "--pass-with-no-tests")
         fi
 
-        xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' pnpm exec playwright test -c e2e/playwright.config.mjs --project=${{ matrix.project }} "${test_args[@]}"
+        xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' pnpm exec playwright test -c e2e/playwright.config.mjs "${test_args[@]}"
       shell: bash
 
     - name: Stop sync server

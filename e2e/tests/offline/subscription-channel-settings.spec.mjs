@@ -21,37 +21,35 @@ const subscriptions = Array.from({ length: 18 }, (_, index) => ({
   ...(index === 1 ? { dailyVideoLimit: 1, showMembersOnly: true } : {})
 }))
 
-test.use({
-  seed: {
-    settings: {
-      currentLocale: 'en-US',
-      uiScale: 125,
-      fetchSubscriptionsAutomatically: false,
-      ytDlpPlaybackAuthMode: 'browser',
-      ytDlpPlaybackCookiesBrowser: 'firefox'
-    },
-    profiles: [
-      {
-        _id: 'allChannels',
-        name: 'All Channels',
-        bgColor: '#000000',
-        textColor: '#FFFFFF',
-        subscriptions
-      },
-      {
-        _id: 'profile-1',
-        name: 'Profile 1',
-        bgColor: '#000000',
-        textColor: '#FFFFFF',
-        subscriptions: [subscriptions[0]]
-      }
-    ]
+const baseSettings = {
+  currentLocale: 'en-US',
+  fetchSubscriptionsAutomatically: false,
+  ytDlpPlaybackAuthMode: 'browser',
+  ytDlpPlaybackCookiesBrowser: 'firefox'
+}
+const profiles = [
+  {
+    _id: 'allChannels',
+    name: 'All Channels',
+    bgColor: '#000000',
+    textColor: '#FFFFFF',
+    subscriptions
+  },
+  {
+    _id: 'profile-1',
+    name: 'Profile 1',
+    bgColor: '#000000',
+    textColor: '#FFFFFF',
+    subscriptions: [subscriptions[0]]
   }
-})
+]
 
-for (const uiScale of [100, 95, 125]) {
-  test(`subscription cards keep equal spacing and readable feed buttons at ${uiScale}%`, async ({ app, page }, testInfo) => {
-    await page.evaluate(value => window.ftElectron.setZoomFactor(value / 100), uiScale)
+test.use({ seed: { settings: { ...baseSettings, uiScale: 125 }, profiles } })
+
+test.describe('subscription settings layout', { tag: '@scale' }, () => {
+  test.use({ seed: { settings: baseSettings, profiles } })
+
+  test('subscription cards keep equal spacing and readable feed buttons', async ({ app, page, uiScale }, testInfo) => {
     await page.evaluate(() => localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({ x: 40, y: 40, width: 1400, height: 900 })))
     const settings = await goToSettingsSection(page, 'subscription')
     await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
@@ -76,12 +74,9 @@ for (const uiScale of [100, 95, 125]) {
       await card.screenshot({ path: testInfo.outputPath(`subscription-card-${width}.png`) })
     }
   })
-}
 
-for (const uiScale of [100, 95]) {
-  test(`keeps subscription popover controls compact at ${uiScale}%`, async ({ app, page }, testInfo) => {
+  test('keeps subscription popover controls compact', async ({ app, page }, testInfo) => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
-    await page.evaluate(value => window.ftElectron.setZoomFactor(value / 100), uiScale)
     await goTo(page, 'subscribedchannels')
     const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
     await alpha.getByRole('button', { name: 'Subscription settings' }).click()
@@ -106,20 +101,18 @@ for (const uiScale of [100, 95]) {
       await page.evaluate(() => { document.body.dir = 'ltr' })
       await popover.screenshot({ path: testInfo.outputPath(`subscription-popover-${width}.png`) })
     }
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateYtDlpPlaybackAuthMode', 'none'))
+    await page.evaluate(() => window.$store.dispatch('updateYtDlpPlaybackAuthMode', 'none'))
     await expect(popover.getByRole('checkbox', { name: 'Members only' })).toHaveCount(0)
     await expect(popover.getByRole('combobox', { name: 'Videos per day' })).toBeVisible()
+    // Fractional UI scales round this 5px gap (4.8 CSS px at 125%).
     expect(await popover.evaluate(element => {
       const label = element.querySelector('.dailyVideoLimitSelect .select-label').getBoundingClientRect()
       return label.top - element.querySelector('.secondaryPreferences').getBoundingClientRect().top
-    })).toBeGreaterThanOrEqual(5)
+    })).toBeGreaterThanOrEqual(4.5)
   })
-}
 
-for (const uiScale of [100, 95, 125]) {
-  test(`keeps the selection toolbar fixed with equal search and list gaps at ${uiScale}%`, async ({ app, page }, testInfo) => {
-    await page.evaluate(value => window.ftElectron.setZoomFactor(value / 100), uiScale)
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateBaseTheme', 'dark'))
+  test('keeps the selection toolbar fixed with equal search and list gaps', async ({ app, page, uiScale }, testInfo) => {
+    await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'dark'))
     const settings = await goToSettingsSection(page, 'subscription')
     await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
     const toolbar = page.locator('.channelSelectionToolbar')
@@ -170,7 +163,7 @@ for (const uiScale of [100, 95, 125]) {
     await expectScrollAtRenderedEnd(scroller)
     await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
   })
-}
+})
 
 test('keeps the popover and Subscription Settings manager in sync', async ({ app, page }) => {
   const subscriptionSettings = await goToSettingsSection(page, 'subscription')
@@ -417,7 +410,7 @@ test('only offers members-only controls when yt-dlp playback cookies are configu
   await expect(page.getByRole('checkbox', { name: 'Members only' })).toHaveCount(subscriptions.length + 1)
 
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateYtDlpPlaybackAuthMode', 'none')
   })
 
@@ -440,7 +433,7 @@ test('reports subscription setting write failures from the channel popover', asy
   await expect(shorts).toHaveAttribute('aria-checked', 'false')
 
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store._actions.updateChannelSettings = [() => Promise.resolve(false)]
   })
   await shorts.click()
@@ -458,7 +451,7 @@ test('does not carry a failed popover edit into a later update', async ({ app, p
   const popover = page.locator('.profileDropdown')
 
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const updateChannelSettings = store._actions.updateChannelSettings[0]
     let updateCount = 0
     store._actions.updateChannelSettings = [payload => {
@@ -504,7 +497,7 @@ test('reports subscription setting write failures from the settings manager', as
   await expect(shorts).toHaveAttribute('aria-checked', 'false')
 
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store._actions.updateChannelSettings = [() => Promise.resolve(false)]
   })
   await shorts.click()
@@ -520,7 +513,7 @@ for (const future of [false, true]) {
     const futureTimestamp = future ? Date.now() + 86400000 : 0
     if (future) {
       await page.evaluate(async updatedAt => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         const channel = store.getters.getProfileList[0].subscriptions[0]
         const saved = await store.dispatch('updateChannelSettings', {
           channelId: channel.id, settings: { showMembersOnly: channel.showMembersOnly }, fromSync: true, updatedAt
@@ -532,7 +525,7 @@ for (const future of [false, true]) {
     await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
     await page.locator('.channelSelectionToolbar').getByRole('button', { name: 'Select All' }).click()
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       window.subscriptionSettingsSaves = 0
       store.subscribeAction(({ type }) => {
         if (type === 'updateChannelSettings' || type === 'batchUpdateChannelSettings') {
@@ -548,7 +541,7 @@ for (const future of [false, true]) {
     await expect(members.getByRole('checkbox')).not.toBeChecked()
     await page.locator('.settingsWindow').getByRole('button', { name: 'Close', exact: true }).click()
     await expect.poll(() => page.evaluate(({ timestamp, channelId }) => (
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      window.$store
         .getters.getProfileList.every(profile => profile.subscriptions.every(channel => (
           channel.showMembersOnly === false && (channel.id === channelId
             ? channel.subscriptionSettingsUpdatedAt > timestamp
@@ -558,7 +551,7 @@ for (const future of [false, true]) {
     expect(await page.evaluate(() => window.subscriptionSettingsSaves)).toBe(2)
     ;({ page } = await app.relaunch())
     expect(await page.evaluate(() => (
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      window.$store
         .getters.getProfileList.every(profile => profile.subscriptions.every(channel => channel.showMembersOnly === false))
     ))).toBe(true)
   })
@@ -571,7 +564,7 @@ test('keeps queued bulk changes for remaining channels after another window unsu
   await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
   await page.locator('.channelSelectionToolbar').getByRole('button', { name: 'Select All' }).click()
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const save = store._actions.batchUpdateChannelSettings[0]
     let first = true
     store._actions.batchUpdateChannelSettings = [async updates => {
@@ -588,24 +581,24 @@ test('keeps queued bulk changes for remaining channels after another window unsu
   await members.locator('.switch-label').click()
   await expect(members.getByRole('checkbox')).not.toBeChecked()
   await other.evaluate(channelId => (
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('removeChannelFromProfiles', {
+    window.$store.dispatch('removeChannelFromProfiles', {
       channelId, profileIds: ['allChannels', 'profile-1']
     })
   ), CHANNEL_ID)
   await expect.poll(() => page.evaluate(() => (
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getActiveProfile.subscriptions.length
+    window.$store.getters.getActiveProfile.subscriptions.length
   ))).toBe(subscriptions.length - 1)
   await page.evaluate(() => window.releaseBulkSave())
   for (const window of [page, other]) {
     await expect.poll(() => window.evaluate(() => (
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getProfileList
+      window.$store.getters.getProfileList
         .every(profile => profile.subscriptions.every(channel => channel.showMembersOnly === false))
     ))).toBe(true)
   }
   await expect(page.locator('.toast', { hasText: 'Failed to save channel settings' })).toHaveCount(1)
   ;({ page } = await app.relaunch())
   expect(await page.evaluate(() => {
-    const channels = document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getActiveProfile.subscriptions
+    const channels = window.$store.getters.getActiveProfile.subscriptions
     return { count: channels.length, allDisabled: channels.every(channel => channel.showMembersOnly === false) }
   })).toEqual({ count: subscriptions.length - 1, allDisabled: true })
 })
@@ -632,28 +625,28 @@ for (const overlapping of [false, true]) {
     await page.locator('.bulkMembersOnlySetting .switch-label').click()
     await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.releaseBulkSettingsSave)).toBe('function')
     expect(await other.evaluate(({ channelId, overlapping }) => (
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateChannelSettings', {
+      window.$store.dispatch('updateChannelSettings', {
         channelId, settings: { dailyVideoLimit: 7, ...(overlapping ? { showMembersOnly: false } : {}) }
       })
     ), { channelId: CHANNEL_ID, overlapping })).toBe(true)
     await app.electronApp.evaluate(() => globalThis.releaseBulkSettingsSave())
     for (const window of [page, other]) {
       await expect.poll(() => window.evaluate(({ channelId, overlapping }) => (
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getProfileList
+        window.$store.getters.getProfileList
           .every(profile => profile.subscriptions.every(channel => channel.showMembersOnly === !(overlapping && channel.id === channelId)) &&
             profile.subscriptions.find(channel => channel.id === channelId)?.dailyVideoLimit === 7)
       ), { channelId: CHANNEL_ID, overlapping })).toBe(true)
     }
     // A reset must survive the real renderer-to-main IPC boundary.
     expect(await page.evaluate(channelId => (
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('batchUpdateChannelSettings', [
+      window.$store.dispatch('batchUpdateChannelSettings', [
         { channelId, settings: { dailyVideoLimit: undefined } },
         { channelId: 'UC0000000000000000000001', settings: { dailyVideoLimit: null } }
       ])
     ), CHANNEL_ID)).toBe(true)
     ;({ page } = await app.relaunch())
     expect(await page.evaluate(({ channelId, overlapping }) => (
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getProfileList
+      window.$store.getters.getProfileList
         .every(profile => {
           const channel = profile.subscriptions.find(channel => channel.id === channelId)
           return !Object.hasOwn(channel, 'dailyVideoLimit') && channel.showMembersOnly === !overlapping &&
@@ -661,7 +654,7 @@ for (const overlapping of [false, true]) {
         })
     ), { channelId: CHANNEL_ID, overlapping })).toBe(true)
     expect(await page.evaluate(() => (
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getProfileList[0]
+      window.$store.getters.getProfileList[0]
         .subscriptions[1].dailyVideoLimit
     ))).toBe(null)
   })
@@ -672,7 +665,7 @@ test('reports one failure toast for a failed batch update', async ({ page }) => 
   await subscriptionSettings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
 
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     let updateCount = 0
     store._actions.batchUpdateChannelSettings = [() => {
       updateCount += 1
@@ -698,7 +691,7 @@ test('preserves the mixed members-only switch after a failed bulk save', async (
   const settings = await goToSettingsSection(page, 'subscription')
   await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
   await page.evaluate(() => {
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store._actions.batchUpdateChannelSettings = [() => Promise.resolve(false)]
+    window.$store._actions.batchUpdateChannelSettings = [() => Promise.resolve(false)]
   })
   await page.locator('.channelSelectionToolbar').getByRole('button', { name: 'Select All' }).click()
   const members = page.locator('.bulkFeedTypeSettings').getByRole('checkbox', { name: 'Members only' })
@@ -713,7 +706,7 @@ test('preserves the mixed members-only switch after a failed bulk save', async (
 
 test('reports a partial write when a requested profile no longer exists', async ({ page }) => {
   const result = await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.state.profiles.profileList.push({
       _id: 'removed-profile',
       name: 'Removed profile',
@@ -771,7 +764,7 @@ test('clamps the channel list after searching', async ({ page }) => {
 
 test('records edit times per channel and does not retimestamp received settings', async ({ page }) => {
   const result = await page.evaluate(async (channelId) => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const secondChannelId = store.state.profiles.profileList[0].subscriptions[1].id
     const timestamps = () => Object.fromEntries(store.state.profiles.profileList[0].subscriptions.map(channel => [channel.id, channel.subscriptionSettingsUpdatedAt]))
     await store.dispatch('updateChannelSettings', { channelId, settings: { dailyVideoLimit: 2 } })

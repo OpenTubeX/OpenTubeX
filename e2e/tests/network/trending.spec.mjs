@@ -72,7 +72,7 @@ async function controlTrendingRequests(page) {
 
 async function trendingCache(page) {
   return await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return Object.fromEntries(Object.entries(store.getters.getTrendingCache).map(([category, videos]) => [
       category,
       videos?.map(video => video.videoId) ?? null
@@ -82,7 +82,7 @@ async function trendingCache(page) {
 
 async function trendingTimestamps(page) {
   return await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return Object.fromEntries(Object.entries(store.getters.getLastTrendingRefreshTimestamp)
       .map(([category, timestamp]) => [category, timestamp ? new Date(timestamp).getTime() : null]))
   })
@@ -96,7 +96,7 @@ test.describe('trending page', () => {
 
     for (const roundness of [0, 50, 100, 200]) {
       await page.evaluate(value => {
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
+        window.$store.commit('setUiRoundness', value)
       }, roundness)
       await expect.poll(() => page.locator('.trendingInfoTabs .selectedTab').evaluate(element =>
         getComputedStyle(element).borderBottomLeftRadius)).toBe(`${24 * roundness / 100}px`)
@@ -231,7 +231,7 @@ test.describe('trending page', () => {
       const controlled = await controlTrendingRequests(page)
 
       await page.locator('a[href="#/trending"]').evaluate(link => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setBackendFallback', false)
         link.click()
       })

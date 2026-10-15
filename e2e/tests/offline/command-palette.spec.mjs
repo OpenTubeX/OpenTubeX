@@ -348,7 +348,7 @@ test.describe('local video commands', () => {
 
   test.beforeEach(async ({ page }) => {
     await page.evaluate(video => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('addVideoToWatchQueue', {
         video: { ...video, route: { path: `/watch/${video.videoId}`, query: { short: 'false' } } }
       })
@@ -376,7 +376,7 @@ test.describe('local video commands', () => {
     // Removing metadata while the palette is open must update its results.
     await input.fill('journey')
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setHistoryCacheSorted', [])
       store.commit('clearWatchQueue')
       store.commit('removeYtDlpDownload', 42)
@@ -417,7 +417,7 @@ test.describe('local video commands', () => {
       })
       if (source === 'Queue') {
         await expect.poll(() => page.evaluate(() => (
-          document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getWatchQueueLength
+          window.$store.getters.getWatchQueueLength
         ))).toBe(0)
       }
       if (source === 'Downloads') {
@@ -436,7 +436,7 @@ test.describe('local video commands', () => {
         })
       })
       await page.evaluate(async video => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('upsertToHistoryCache', { ...video, watchProgress: 12 })
         await store.dispatch('updateExternalPlayer', 'mpv')
         await store.dispatch('updateDefaultViewingMode', 'external_player')
@@ -454,7 +454,7 @@ test.describe('local video commands', () => {
       await expect(page.getByRole('dialog', { name: 'Command palette' })).toBeHidden()
       expect(page.url()).toBe(previousUrl)
       await expect.poll(() => page.evaluate(videoId => (
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById[videoId]?.isWatched
+        window.$store.getters.getHistoryCacheById[videoId]?.isWatched
       ), video.videoId)).toBe(true)
     })
   }
@@ -468,7 +468,7 @@ test.describe('local video commands', () => {
     const capturedArguments = path.join(app.userDataDir, 'player-arguments.json')
     await writeFile(executable, "import { writeFileSync } from 'node:fs'\nwriteFileSync(process.argv[2], JSON.stringify(process.argv.slice(3)))\n")
     await page.evaluate(async ({ video, executable, capturedArguments, nodePath }) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('upsertToHistoryCache', {
         ...video,
         watchProgress: 12,
@@ -502,7 +502,7 @@ test.describe('local video commands', () => {
     test(`history results respect saved playlist context when the setting is ${enabled}`, async ({ app, page }) => {
       await mockPlayableWatchPage(app, page)
       await page.evaluate(({ enabled, video, playlistId }) => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('upsertToHistoryCache', {
           ...video, lastViewedPlaylistId: playlistId, lastViewedPlaylistType: 'user', lastViewedPlaylistItemId: 'journey-item',
         })
@@ -531,7 +531,7 @@ test.describe('local video commands', () => {
     await player.evaluate(element => { element.pause(); element.currentTime = 5 })
     await expect.poll(() => player.evaluate(element => element.paused && element.currentTime >= 4)).toBe(true)
     const firstId = await page.evaluate(video => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('clearWatchQueue')
       const route = store.getters.getPresentedTab.route
       const queued = { ...video, title: 'Current queued journey', route: { path: route.path, query: { ...route.query } } }
@@ -546,13 +546,13 @@ test.describe('local video commands', () => {
     await options.last().click()
     await expect.poll(() => player.evaluate(element => !element.paused && element.currentTime < 3)).toBe(true)
     await expect.poll(() => page.evaluate(() => (
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getWatchQueue.map(video => video.queueItemId)
+      window.$store.getters.getWatchQueue.map(video => video.queueItemId)
     ))).toEqual([firstId])
   })
 
   test('keeps local video scrolling valid when resizing at fractional scale', async ({ app, page }) => {
     await page.evaluate(video => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setHistoryCacheSorted', Array.from({ length: 30 }, (_, index) => ({
         ...video, videoId: `resize${index}`, title: `${video.title} ${index}`,
       })))
@@ -580,7 +580,7 @@ test.describe('local video commands', () => {
   for (const mutation of ['removeMultipleFromHistoryCache', 'setHistoryCacheSorted']) {
     test(`clamps local results after ${mutation} shortens the list at fractional scale`, async ({ page }) => {
       await page.evaluate(video => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setHistoryCacheSorted', Array.from({ length: 30 }, (_, index) => ({
           ...video, videoId: `shorten${index}`,
         })))
@@ -590,7 +590,7 @@ test.describe('local video commands', () => {
       await expect(videos.getByRole('option')).toHaveCount(33)
       await scrollResultsToBottom(page)
       await page.evaluate(mutation => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit(mutation, mutation === 'setHistoryCacheSorted' ? [] : Array.from({ length: 30 }, (_, index) => `shorten${index}`))
         store.commit('clearWatchQueue')
         store.commit('removeYtDlpDownload', 42)
@@ -603,14 +603,14 @@ test.describe('local video commands', () => {
 
   test('adds local download matches only after the download completes', async ({ page }) => {
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('upsertYtDlpDownload', { ...store.getters.getYtDlpDownloads[42], status: 'downloading' })
     })
     await page.getByRole('combobox', { name: 'Search commands' }).fill('journey')
     const videos = page.getByRole('group', { name: 'Local videos', exact: true })
     await expect(videos.getByRole('option')).toHaveCount(3)
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('upsertYtDlpDownload', { ...store.getters.getYtDlpDownloads[42], status: 'completed' })
     })
     await expect(videos.getByRole('option')).toHaveCount(4)
@@ -619,7 +619,7 @@ test.describe('local video commands', () => {
 
   test('cancels stale local matches when typing in a large library', async ({ page }) => {
     await page.evaluate(video => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setHistoryCacheSorted', [
         ...Array.from({ length: 6000 }, (_, index) => ({ ...video, videoId: `video${index}`, title: `Mountain journey ${index}` })),
         { ...video, videoId: 'uniquevideo', title: 'Unique destination' },
@@ -658,7 +658,7 @@ test.describe('local video commands', () => {
     await input.press('End')
     const selected = await input.getAttribute('aria-activedescendant')
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       window.__paletteSearchRestarts = 0
       const list = document.querySelector('.commandPalette [role="listbox"]')
       const observer = new MutationObserver(records => {
@@ -675,7 +675,7 @@ test.describe('local video commands', () => {
     expect(await page.evaluate(() => window.__paletteSearchRestarts)).toBe(0)
     await expect(input).toHaveAttribute('aria-activedescendant', selected)
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('upsertToHistoryCache', {
         ...store.getters.getHistoryCacheById.jNQXAC9IVRw, title: 'Renamed expedition', author: 'Other Channel',
       })
@@ -720,7 +720,7 @@ test.describe('download availability recheck', () => {
     await expect(page.getByText('The downloaded file could not be found.', { exact: true })).toBeVisible()
     await expect(page).not.toHaveURL(/#\/watch\/vanish00001/)
     await expect.poll(() => page.evaluate(() => (
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getYtDlpDownloads[42].files[0].available
+      window.$store.getters.getYtDlpDownloads[42].files[0].available
     ))).toBe(false)
     await page.keyboard.press('Control+k')
     await input.fill('vanishing palette download')
@@ -811,7 +811,7 @@ test.describe('download files sharing a video ID', () => {
     await expect(queued).toHaveCount(1)
     await queued.click()
     await verifyFile(page, laterPath)
-    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getWatchQueue.map(video => video.route.query.downloadFilePath))).toEqual([firstPath])
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getWatchQueue.map(video => video.route.query.downloadFilePath))).toEqual([firstPath])
   })
 })
 

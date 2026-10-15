@@ -79,7 +79,7 @@ for (const width of [1500, 480]) {
         await recommendations.scrollIntoViewIfNeeded()
         await recommendations.screenshot({ path: testInfo.outputPath('available-offline.png') })
         await page.evaluate(() => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           for (const id of [1, 2, 3]) store.commit('removeYtDlpDownload', id)
         })
         await expect(recommendations).toHaveCount(0)
@@ -136,7 +136,8 @@ for (const preference of ['hidden', 'blur']) {
         downloads,
       }
     })
-    test('preserves thumbnail privacy preferences after disconnecting', async ({ app, page }, testInfo) => {
+    // Only the blurred thumbnail geometry depends on the UI scale.
+    test('preserves thumbnail privacy preferences after disconnecting', { tag: preference === 'blur' ? '@scale' : [] }, async ({ app, page, uiScale }, testInfo) => {
       await mockPlayableWatchPage(app, page)
       await openMockedVideo(page)
       await page.evaluate(() => {
@@ -150,9 +151,9 @@ for (const preference of ['hidden', 'blur']) {
       } else {
         await expect(image).toHaveAttribute('src', thumbnail)
         await expect.poll(() => image.evaluate(element => getComputedStyle(element).filter)).toMatch(/blur\(/)
-        for (const scale of [100, 125]) {
-          await page.evaluate(scale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiScale', scale), scale)
-          await image.scrollIntoViewIfNeeded()
+        await image.scrollIntoViewIfNeeded()
+        // Resample until transient paint settles. A real bleed never matches.
+        await expect.poll(async () => {
           const bounds = await image.boundingBox()
           const gap = { x: bounds.x + bounds.width + 3, y: bounds.y + bounds.height / 2 - 4, width: 6, height: 8 }
           const blurred = await page.screenshot({ clip: gap })
@@ -161,14 +162,12 @@ for (const preference of ['hidden', 'blur']) {
             element.style.visibility = 'hidden'
             return original
           })
-          let withoutImage
           try {
-            withoutImage = await page.screenshot({ clip: gap })
+            return blurred.equals(await page.screenshot({ clip: gap }))
           } finally {
             await image.evaluate((element, visibility) => { element.style.visibility = visibility }, visibility)
           }
-          expect(blurred.equals(withoutImage), `Blur must stay out of the thumbnail/text gap at ${scale}%`).toBe(true)
-        }
+        }, { message: `Blur must stay out of the thumbnail/text gap at ${uiScale}%` }).toBe(true)
         await page.locator('.watchVideoRecommendations').screenshot({ path: testInfo.outputPath('blurred-offline.png') })
       }
     })

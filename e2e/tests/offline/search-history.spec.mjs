@@ -182,7 +182,7 @@ test.describe('search history suggestions', () => {
     await expect(page.getByRole('heading', { name: 'Search results' })).toBeVisible()
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const tabId = store.getters.getPresentedTabId ?? 'web'
       store.commit('setSearchTime', { tabId, value: 'week' })
     })
@@ -221,7 +221,7 @@ test.describe('search history suggestions', () => {
 
   test('an early search reuses a matching legacy database entry', async ({ app, page }) => {
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const tabId = store.getters.getPresentedTabId ?? 'web'
       store.commit('setSearchHistoryEntries', [])
       store.commit('setSearchPrioritize', { tabId, value: 'popularity' })
@@ -255,7 +255,7 @@ test.describe('search history suggestions', () => {
     const dataSection = await goToSettingsSection(page, 'data')
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setSearchHistoryEntries', [
         {
           _id: 'round-trip-today',
@@ -305,7 +305,7 @@ test.describe('search history suggestions', () => {
     ])
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('removeAllSearchHistoryEntries')
       Object.defineProperty(window, 'showOpenFilePicker', {
         configurable: true,
@@ -322,7 +322,7 @@ test.describe('search history suggestions', () => {
     await dataSection.getByRole('button', { name: 'Import search history', exact: true }).click()
 
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getSearchHistoryEntries
         .filter(({ query }) => query === 'round trip')
         .map(({ searchSettings }) => ({
@@ -338,7 +338,7 @@ test.describe('search history suggestions', () => {
 
   test('session cache lookup and removal ignore feature order', async ({ page }) => {
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const tabId = store.getters.getPresentedTabId ?? 'web'
       store.commit('addToSessionSearchHistory', {
         query: 'feature order',
@@ -372,7 +372,7 @@ test.describe('search history suggestions', () => {
     await expect(page.getByText('Cached feature-order result')).toBeVisible()
 
     expect(await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('removeFromSessionSearchHistory', {
         query: 'feature order',
         searchSettings: {
@@ -463,7 +463,7 @@ test.describe('search suggestion remove button layout', () => {
 
     // Narrow the middle column further to trigger the compact header.
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setTabBarPosition', 'left')
       store.commit('setVerticalTabBarWidth', 300)
     })

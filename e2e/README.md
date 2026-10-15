@@ -29,6 +29,9 @@ mobile layout and breaks selectors.
 - `helpers/app.mjs` – launches the app with a fresh temp userData dir per test.
   Seed settings/datastores per file via `test.use({ seed: { ... } })`.
   The main process honours `OPENTUBEX_E2E_USER_DATA_DIR` for isolation.
+  Inside `page.evaluate`, `window.$store` and `window.$router` reach the
+  renderer's Vuex store and router in every window, including after reloads.
+  Helpers shared with the Android CDP tests in `tests/android` cannot use them.
 - `helpers/innertube.mjs` – record/replay for Innertube requests (see below).
 - `helpers/media.mjs` – the offline demo video and the fake player response
   that serves it (see below).
@@ -38,6 +41,38 @@ mobile layout and breaks selectors.
 - `tests/network/` – requires YouTube. Runs nightly and via workflow dispatch.
 - `fixtures/innertube/` – gzipped recorded Innertube responses, committed to git.
 - `fixtures/media/demo.webm` – 30s VP9/Opus clip with a burnt-in timecode.
+
+## Projects
+
+- `offline` – every Electron test in `tests/offline/` except performance checks, at 100% UI scale.
+- `offline-95` and `offline-125` – tests tagged `@scale`, again at 95% and 125%.
+- `performance` – tests in `*-performance.spec.mjs` files or tagged `@performance`.
+- `browser` and `network` – see above.
+
+Tag offline tests that assert geometry, scrolling, measurements, positioning, reflow or
+animation boundaries with `@scale` instead of looping over UI scales. The
+`uiScale` fixture holds the project's scale; it is seeded as the `uiScale`
+setting unless the test seeds its own:
+
+```js
+test('keeps the header above the scroller', { tag: '@scale' }, async ({ page, uiScale }) => {
+  // ...
+})
+```
+
+Window sizes and wheel deltas are device pixels, so scale them by
+`uiScale / 100` when a test needs a fixed CSS width. Sample pixels with
+`webContents.capturePage()` rather than `page.screenshot()`, which Electron
+crops to CSS-pixel dimensions at non-100% scales.
+
+Include the scaled projects when running such a test by itself:
+`--project=offline --project=offline-95 --project=offline-125`.
+
+Performance checks measure work (layout, style and render counts), resource
+retention or responsiveness under CPU throttling. Prefer deterministic counts
+over single-run wall-clock budgets: shared runners make those noisy, and the
+paired comparison below already gates the main timings. The project runs with
+one worker, without tracing and without retries.
 
 ## Playing a video without YouTube
 
@@ -114,34 +149,32 @@ E2E_USE_FIXTURES=1 pnpm run test:e2e:network
 
 `.github/workflows/e2e.yml`:
 
-- **Pull requests** → the full performance project, plus changed test files and tests importing changed helpers in the other projects.
+- **Pull requests** → every offline, scaled, performance and browser test, plus changed network tests.
 - **Nightly** → full offline, performance, browser, and network suites.
 - **Manual dispatch** → all suites by default, or an individual suite.
 
-The Electron projects use up to 16 CI shards each, with one Playwright worker
-and a private X server per shard to avoid interference between windows.
+The offline and scaled projects share up to 16 CI shards, and the performance
+project has its own shards. Each shard uses one Playwright worker and a private
+X server to avoid interference between windows.
 Isolated Chromium checks run in one separate job, so only that runner installs
 Chromium. The offline command and dispatch selection include offline and
 performance Electron tests and browser checks.
 
-Performance tests exercise the packed application, which Playwright's import-based
-`--only-changed` selection cannot associate with source or CSS changes. They always
-run on PRs, including layout/work-count suites and tests tagged `@performance`
-within mixed functional files. Tag new performance checks in such files so they
-run without depending on test-file changes. Run the project locally with
+Packed-app tests always run in full on PRs: Playwright's import-based
+`--only-changed` selection cannot associate them with source or CSS changes.
+Only the network project, which talks to YouTube, is limited to changed tests
+and passes without running any when none are affected. Network tests use the
+fixture fallback on retry. Run the performance project locally with
 `pnpm exec playwright test -c e2e/playwright.config.mjs --project=performance`.
-Other projects pass without running tests when no tests are changed or affected.
-Network tests use the fixture fallback on retry.
 
-The browser job also runs `tests/android/mobile-performance.test.mjs` explicitly
-on every PR. These source-level storage and list checks use `node:test` with
+The browser job also runs `tests/android/mobile-performance.test.mjs`
+(`pnpm run test:mobile-performance`) on every PR. These source-level storage and list checks use `node:test` with
 headless Chromium and are not discovered by the normal unit-test glob or
 Playwright. They do not replace native Android emulator testing.
 
 The Playwright HTML report and functional-test traces are uploaded as artifacts.
-The performance project disables tracing to avoid distorting measurements. Its
-absolute-budget checks retry once for host scheduling noise; recovered failures
-remain marked flaky in the uploaded report. The paired comparison does not retry.
+The performance project disables tracing to avoid distorting measurements.
+Neither the performance project nor the paired comparison retries.
 
 ## Performance comparison
 

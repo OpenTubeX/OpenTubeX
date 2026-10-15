@@ -109,7 +109,7 @@ const commonSettings = {
 async function holdSeenMarks(page) {
   // Hold persistence pending, then run the real seen-mark action on release.
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const dispatch = store.dispatch
     store.dispatch = async function (type, ...args) {
       if (type === 'markSubscriptionEntriesAsSeen') {
@@ -206,7 +206,7 @@ test.describe('Reactive subscription title filtering', () => {
         await page.locator('[data-new-feed-tab="shorts"]').click()
         // Freeze the New selection as during an ongoing subscription refresh.
         await page.evaluate(() => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           store.commit('setSubscriptionFeedRefreshInProgress', true)
         })
       } else {
@@ -217,7 +217,7 @@ test.describe('Reactive subscription title filtering', () => {
       await expect(entries).toHaveCount(100)
       for (const title of ['Blocked updated short', 'Allowed updated short']) {
         await page.evaluate(({ channelId, title }) => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           const entry = store.state.subscriptionCache.shortsCache[channelId].videos[0]
           store.commit('updateShortsCacheWithChannelPageShorts', {
             channelId, entries: [{ ...entry, title }]
@@ -328,99 +328,103 @@ test.describe('new subscriptions feed', () => {
     await expect(page.locator('.headerRefreshWidget .lastRefreshTimestamp')).toHaveCount(0)
   })
 
-  for (const uiScale of [100, 95, 200]) {
-    test(`keeps New feed tabs on one compact row at phone widths and ${uiScale}% scale`, async ({ app, page }, testInfo) => {
-      await app.electronApp.evaluate(({ BrowserWindow }, scale) => {
-        BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale / 100)
-      }, uiScale)
-      await goTo(page, 'subscriptions')
-      await page.locator('[data-subscription-feed-tab="all"]').click()
-      await page.getByRole('button', { name: 'Show tabbed view' }).click()
+  async function expectCompactNewFeedTabs(app, page, testInfo, uiScale) {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await page.getByRole('button', { name: 'Show tabbed view' }).click()
 
-      const tabs = page.locator('[data-new-feed-tab]')
-      await expect(tabs).toHaveCount(4)
+    const tabs = page.locator('[data-new-feed-tab]')
+    await expect(tabs).toHaveCount(4)
 
-      for (const width of [640, 500, 375, 340, 640]) {
-        await app.electronApp.evaluate(({ BrowserWindow }, width) => {
-          BrowserWindow.getAllWindows()[0].setBounds({ width, height: 900 })
-        }, width)
-        await page.waitForFunction(({ width, uiScale }) => {
-          return Math.abs(window.innerWidth - width * 100 / uiScale) <= 2
-        }, { width, uiScale })
+    for (const width of [640, 500, 375, 340, 640]) {
+      await app.electronApp.evaluate(({ BrowserWindow }, width) => {
+        BrowserWindow.getAllWindows()[0].setBounds({ width, height: 900 })
+      }, width)
+      await page.waitForFunction(({ width, uiScale }) => {
+        return Math.abs(window.innerWidth - width * 100 / uiScale) <= 2
+      }, { width, uiScale })
 
-        await expect.poll(() => tabs.evaluateAll(elements => {
-          const tops = elements.map(element => element.getBoundingClientRect().top)
-          return Math.max(...tops) - Math.min(...tops)
-        })).toBeLessThan(1)
+      await expect.poll(() => tabs.evaluateAll(elements => {
+        const tops = elements.map(element => element.getBoundingClientRect().top)
+        return Math.max(...tops) - Math.min(...tops)
+      })).toBeLessThan(1)
 
-        const layout = await page.locator('.newFeedTabs').evaluate(element => ({
-          container: element.getBoundingClientRect(),
-          viewportWidth: document.documentElement.clientWidth,
-          tabs: [...element.querySelectorAll('[data-new-feed-tab]')]
-            .map(tab => tab.getBoundingClientRect())
-        }))
-        // Electron's fractional zoom can round a 44px button just below 44.
-        expect(Math.min(...layout.tabs.map(tab => tab.height))).toBeGreaterThan(43.5)
-        expect(layout.tabs.every(tab => tab.width >= 24)).toBe(true)
-        expect(layout.tabs.every(tab => tab.left >= layout.container.left - 1 && tab.right <= layout.container.right + 1)).toBe(true)
-        expect(layout.container.left).toBeGreaterThanOrEqual(-1)
-        expect(layout.container.right).toBeLessThanOrEqual(layout.viewportWidth + 1)
+      const layout = await page.locator('.newFeedTabs').evaluate(element => ({
+        container: element.getBoundingClientRect(),
+        viewportWidth: document.documentElement.clientWidth,
+        tabs: [...element.querySelectorAll('[data-new-feed-tab]')]
+          .map(tab => tab.getBoundingClientRect())
+      }))
+      // Electron's fractional zoom can round a 44px button just below 44.
+      expect(Math.min(...layout.tabs.map(tab => tab.height))).toBeGreaterThan(43.5)
+      expect(layout.tabs.every(tab => tab.width >= 24)).toBe(true)
+      expect(layout.tabs.every(tab => tab.left >= layout.container.left - 1 && tab.right <= layout.container.right + 1)).toBe(true)
+      expect(layout.container.left).toBeGreaterThanOrEqual(-1)
+      expect(layout.container.right).toBeLessThanOrEqual(layout.viewportWidth + 1)
 
-        // Both rows keep their icons in roomy layouts and restore them when
-        // growing back from a narrow phone layout. At 200% zoom these bounds
-        // still produce a narrow CSS viewport.
-        const hasRoomForIcons = uiScale !== 200 && width >= 500
-        for (const row of ['.tabs', '.newFeedTabs']) {
-          for (const icon of await page.locator(`${row} .subscriptionIcon`).all()) {
-            if (hasRoomForIcons) {
-              await expect(icon).toBeVisible()
-            } else {
-              await expect(icon).toBeHidden()
-            }
-          }
+      // Both rows keep their icons in roomy layouts and restore them when
+      // growing back from a narrow phone layout. Icons hide at CSS widths
+      // of 480px and below.
+      const hasRoomForIcons = width * 100 / uiScale > 480
+      for (const row of ['.tabs', '.newFeedTabs']) {
+        for (const icon of await page.locator(`${row} .subscriptionIcon`).all()) {
           if (hasRoomForIcons) {
-            const labelsFit = await page.locator(`${row} .tabLabel > span`).evaluateAll(labels => {
-              return labels.every(label => label.scrollWidth <= label.clientWidth + 1)
-            })
-            expect(labelsFit).toBe(true)
+            await expect(icon).toBeVisible()
+          } else {
+            await expect(icon).toBeHidden()
           }
         }
-
-        if (width === 375) {
-          const path = testInfo.outputPath('compact-new-feed-tabs.png')
-          await page.locator('.subscriptionsHeader').screenshot({ path })
-          await testInfo.attach('compact New feed tabs', { path, contentType: 'image/png' })
+        if (hasRoomForIcons) {
+          const labelsFit = await page.locator(`${row} .tabLabel > span`).evaluateAll(labels => {
+            return labels.every(label => label.scrollWidth <= label.clientWidth + 1)
+          })
+          expect(labelsFit).toBe(true)
         }
       }
 
-      // Exercise the long German label from the reported layout without
-      // depending on translation-service responses.
-      const postsTab = page.locator('[data-new-feed-tab="posts"]')
-      const label = postsTab.locator('.tabLabel')
-      await label.evaluate(element => {
-        element.dataset.label = 'Sehr lange übersetzte Beiträge'
-        element.querySelector('span').textContent = element.dataset.label
-      })
-      const labelLayout = await label.evaluate(element => {
-        const text = element.querySelector('span')
-        return {
-          right: element.getBoundingClientRect().right,
-          tabRight: element.closest('[data-new-feed-tab]').getBoundingClientRect().right,
-          width: text.clientWidth,
-          fullWidth: text.scrollWidth
-        }
-      })
-      expect(labelLayout.right).toBeLessThanOrEqual(labelLayout.tabRight)
-      expect(labelLayout.fullWidth).toBeGreaterThan(labelLayout.width)
+      if (width === 375) {
+        const path = testInfo.outputPath('compact-new-feed-tabs.png')
+        await page.locator('.subscriptionsHeader').screenshot({ path })
+        await testInfo.attach('compact New feed tabs', { path, contentType: 'image/png' })
+      }
+    }
 
-      await page.locator('[data-new-feed-tab="videos"]').focus()
-      await page.locator('[data-new-feed-tab="videos"]').press('End')
-      await expect(postsTab).toBeFocused()
-      await expect(postsTab).toHaveAttribute('aria-selected', 'true')
-      await expect(page.getByText('New community post', { exact: true })).toBeVisible()
-      await expectTabHighlightAligned(postsTab)
+    // Exercise the long German label from the reported layout without
+    // depending on translation-service responses.
+    const postsTab = page.locator('[data-new-feed-tab="posts"]')
+    const label = postsTab.locator('.tabLabel')
+    await label.evaluate(element => {
+      element.dataset.label = 'Sehr lange übersetzte Beiträge'
+      element.querySelector('span').textContent = element.dataset.label
     })
+    const labelLayout = await label.evaluate(element => {
+      const text = element.querySelector('span')
+      return {
+        right: element.getBoundingClientRect().right,
+        tabRight: element.closest('[data-new-feed-tab]').getBoundingClientRect().right,
+        width: text.clientWidth,
+        fullWidth: text.scrollWidth
+      }
+    })
+    expect(labelLayout.right).toBeLessThanOrEqual(labelLayout.tabRight)
+    expect(labelLayout.fullWidth).toBeGreaterThan(labelLayout.width)
+
+    await page.locator('[data-new-feed-tab="videos"]').focus()
+    await page.locator('[data-new-feed-tab="videos"]').press('End')
+    await expect(postsTab).toBeFocused()
+    await expect(postsTab).toHaveAttribute('aria-selected', 'true')
+    await expect(page.getByText('New community post', { exact: true })).toBeVisible()
+    await expectTabHighlightAligned(postsTab)
   }
+
+  test('keeps New feed tabs on one compact row at phone widths', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
+    await expectCompactNewFeedTabs(app, page, testInfo, uiScale)
+  })
+
+  test('keeps New feed tabs on one compact row at phone widths and 200% scale', async ({ app, page }, testInfo) => {
+    await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(2))
+    await expectCompactNewFeedTabs(app, page, testInfo, 200)
+  })
 
   test('wraps long New feed category labels without clipping desktop tabs', async ({ app, page }, testInfo) => {
     await goTo(page, 'subscriptions')
@@ -429,7 +433,7 @@ test.describe('new subscriptions feed', () => {
     const tabs = page.getByRole('tablist', { name: 'New content tabs' })
     for (const scale of [95, 125]) {
       await app.electronApp.evaluate(({ BrowserWindow }, scale) => BrowserWindow.getAllWindows()[0].setSize(Math.round(700 * scale / 100), 900), scale)
-      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+      await page.evaluate(value => window.$store.dispatch('updateUiScale', value), scale)
       await tabs.locator('.tabLabel').evaluateAll(labels => {
         const translations = ['Neue Videos', 'YouTube Shorts', 'Neue Livestreams', 'Neue Community-Beiträge der abonnierten Kanäle']
         labels.forEach((label, index) => {
@@ -560,7 +564,7 @@ test.describe('new subscriptions feed', () => {
     await page.getByRole('button', { name: 'Show tabbed view' }).click()
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       window.__markSeenMutations = []
       window.__unsubscribeMarkSeen = store.subscribe((mutation) => {
         if (mutation.type === 'markSubscriptionEntriesAsSeenInCache') {
@@ -706,7 +710,7 @@ test.describe('new subscriptions feed', () => {
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await expect(page.getByText('New video', { exact: true })).toBeVisible()
     await page.evaluate(channelId => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const video = store.state.subscriptionCache.videoCache[channelId].videos[0]
       video.title = 'Updated new video'
       video.viewCount = 42
@@ -717,7 +721,7 @@ test.describe('new subscriptions feed', () => {
     await page.locator('[data-subscription-feed-tab="shorts"]').click()
     await expect(page.getByText('New short', { exact: true })).toBeVisible()
     await page.evaluate(channelId => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.state.subscriptionCache.shortsCache[channelId].videos[0].title = 'Updated short'
     }, CHANNEL_ID)
     await expect(page.getByText('Updated short', { exact: true })).toBeVisible()
@@ -727,7 +731,7 @@ test.describe('new subscriptions feed', () => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateUiScale', 125)
       await store.dispatch('updateNewSubscriptionFeedView', 'tabbed')
     })
@@ -773,7 +777,7 @@ test.describe('new subscriptions feed', () => {
   test('marks watched and seen videos unseen without losing progress, including after restart', async ({ app, page, attachScreenshot }) => {
     await goTo(page, 'subscriptions')
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateWatchedPercentageThreshold', 0)
     })
     const alreadyNew = page.locator('.ft-list-video').filter({ has: page.getByText('New video', { exact: true }) })
@@ -790,7 +794,7 @@ test.describe('new subscriptions feed', () => {
     await expect(watched).not.toHaveClass(/watched/)
     await expect(watched.locator('.newContentDot')).toBeVisible()
     const readHistory = targetPage => targetPage.evaluate(() => (
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById['watched-new']
+      window.$store.getters.getHistoryCacheById['watched-new']
     ))
     await expect.poll(async () => (await readHistory(page)).isWatched).toBe(false)
     expect((await readHistory(page)).watchProgress).toBe(watchedVideo.lengthSeconds)
@@ -827,12 +831,12 @@ test.describe('new subscriptions feed', () => {
     await page.getByRole('menuitem', { name: 'Mark As Watched', exact: true }).click()
     await expect(card).toHaveClass(/watched/)
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const mark = JSON.parse(store.getters.getSubscriptionSeenVideos).find(entry => entry.videoId === 'watched-new')
       return mark?.seenAt > mark?.unseenAt
     })).toBe(true)
     const history = await page.evaluate(() => (
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById['watched-new']
+      window.$store.getters.getHistoryCacheById['watched-new']
     ))
     expect(history.watchProgress).toBe(watchedVideo.lengthSeconds)
     expect(history.timeWatched).toBe(now)
@@ -940,7 +944,7 @@ test.describe('new subscriptions feed', () => {
     await expect(postCard.locator('.newContentDot')).toBeVisible()
 
     const result = await page.evaluate(async ({ key, salt }) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const settings = {
         SyncServerEnabled: true,
         SyncServerUrl: 'https://seen-sync.example',
@@ -974,7 +978,7 @@ test.describe('new subscriptions feed', () => {
     await expect(page.getByText('New community post', { exact: true })).toHaveCount(0)
 
     await page.evaluate(async ({ channelId, posts }) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateSubscriptionPostsCacheByChannel', { channelId, posts, timestamp: new Date() })
     }, {
       channelId: CHANNEL_ID,
@@ -987,14 +991,14 @@ test.describe('new subscriptions feed', () => {
     await page.getByRole('option', { name: 'Mark As Seen', exact: true }).click()
     await expect(localPost).toHaveCount(0)
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('syncWithSyncServer')
     })
     expect((await decryptSyncDocument(remote.seenPosts, key)).map(entry => entry.postId).sort())
       .toEqual(['local-post', 'new-post-1', 'post-fetched-later'])
 
     await page.evaluate(async ({ channelId, videos }) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateSubscriptionVideosCacheByChannel', { channelId, videos, timestamp: new Date() })
     }, {
       channelId: CHANNEL_ID,
@@ -1018,87 +1022,79 @@ test.describe('new subscriptions feed', () => {
     await expect(relaunched.page.getByText('Fetched unseen video', { exact: true })).toBeVisible()
     await expect(relaunched.page.getByText('Fetched after sync', { exact: true })).toHaveCount(0)
     expect(await relaunched.page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return JSON.parse(store.getters.getSubscriptionSeenVideos).length
     })).toBe(10000)
   })
 })
 
-for (const uiScale of [100, 125]) {
-  test.describe(`community post author at ${uiScale}% UI scale`, () => {
-    test.use({
-      seed: {
-        settings: {
-          ...commonSettings,
-          uiScale
-        },
-        profiles: [profile()],
-        subscriptionCache: populatedCache
+test.describe('community post author', { tag: '@scale' }, () => {
+  test.use({
+    seed: {
+      settings: commonSettings,
+      profiles: [profile()],
+      subscriptionCache: populatedCache
+    }
+  })
+
+  test('centers the channel name and relative time on the avatar', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="posts"]').click()
+
+    const post = page.locator('.ft-list-post').filter({ hasText: 'New community post' })
+    await expect(post).toBeVisible()
+
+    const centers = await post.evaluate(element => {
+      const verticalCenter = selector => {
+        const rect = element.querySelector(selector).getBoundingClientRect()
+        return (rect.top + rect.bottom) / 2
+      }
+
+      return {
+        avatar: verticalCenter('.communityThumbnail'),
+        author: verticalCenter('.authorName'),
+        published: verticalCenter('.publishedText')
       }
     })
 
-    test('centers the channel name and relative time on the avatar', async ({ page }) => {
-      await goTo(page, 'subscriptions')
-      await page.locator('[data-subscription-feed-tab="posts"]').click()
+    expect(Math.abs(centers.author - centers.avatar)).toBeLessThanOrEqual(1)
+    expect(Math.abs(centers.published - centers.avatar)).toBeLessThanOrEqual(1)
+  })
+})
 
-      const post = page.locator('.ft-list-post').filter({ hasText: 'New community post' })
-      await expect(post).toBeVisible()
-
-      const centers = await post.evaluate(element => {
-        const verticalCenter = selector => {
-          const rect = element.querySelector(selector).getBoundingClientRect()
-          return (rect.top + rect.bottom) / 2
-        }
-
-        return {
-          avatar: verticalCenter('.communityThumbnail'),
-          author: verticalCenter('.authorName'),
-          published: verticalCenter('.publishedText')
-        }
-      })
-
-      expect(Math.abs(centers.author - centers.avatar)).toBeLessThanOrEqual(1)
-      expect(Math.abs(centers.published - centers.avatar)).toBeLessThanOrEqual(1)
-    })
+test.describe('new subscriptions feed empty state', { tag: '@scale' }, () => {
+  test.use({
+    seed: {
+      settings: commonSettings,
+      profiles: [profile()],
+      subscriptionCache: cacheWithoutNewContent
+    }
   })
 
-  test.describe(`new subscriptions feed empty state at ${uiScale}% UI scale`, () => {
-    test.use({
-      seed: {
-        settings: {
-          ...commonSettings,
-          uiScale
-        },
-        profiles: [profile()],
-        subscriptionCache: cacheWithoutNewContent
+  test('uses matching space above and below the message', async ({ page, attachScreenshot, uiScale }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+
+    const message = page.getByText('There is no new content.', { exact: true })
+    await expect(message).toBeVisible()
+
+    const spacing = await message.evaluate(element => {
+      const card = element.closest('.card').getBoundingClientRect()
+      const header = element.closest('.card').querySelector('.subscriptionsHeader').getBoundingClientRect()
+      const message = element.getBoundingClientRect()
+
+      return {
+        top: message.top - header.bottom,
+        bottom: card.bottom - message.bottom
       }
     })
 
-    test('uses matching space above and below the message', async ({ page, attachScreenshot }) => {
-      await goTo(page, 'subscriptions')
-      await page.locator('[data-subscription-feed-tab="all"]').click()
-
-      const message = page.getByText('There is no new content.', { exact: true })
-      await expect(message).toBeVisible()
-
-      const spacing = await message.evaluate(element => {
-        const card = element.closest('.card').getBoundingClientRect()
-        const header = element.closest('.card').querySelector('.subscriptionsHeader').getBoundingClientRect()
-        const message = element.getBoundingClientRect()
-
-        return {
-          top: message.top - header.bottom,
-          bottom: card.bottom - message.bottom
-        }
-      })
-
-      expect(spacing.top).toBeGreaterThanOrEqual(15)
-      expect(spacing.top).toBeLessThanOrEqual(17)
-      expect(Math.abs(spacing.top - spacing.bottom)).toBeLessThanOrEqual(1)
-      await attachScreenshot(`empty New feed at ${uiScale}% UI scale`)
-    })
+    expect(spacing.top).toBeGreaterThanOrEqual(15)
+    expect(spacing.top).toBeLessThanOrEqual(17)
+    expect(Math.abs(spacing.top - spacing.bottom)).toBeLessThanOrEqual(1)
+    await attachScreenshot(`empty New feed at ${uiScale}% UI scale`)
   })
-}
+})
 
 test.describe('per-channel subscription feed filters', () => {
   test.use({
@@ -1180,7 +1176,7 @@ test.describe('new subscriptions feed sorting', () => {
     const sortSelect = page.locator('.headerSortSelect').getByRole('combobox')
     await expect(sortSelect).toHaveText('Newest first')
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setNewSubscriptionFeedSortBy', 'unsupported')
     })
     await expect(sortSelect).toHaveText('Newest first')
@@ -1193,7 +1189,7 @@ test.describe('new subscriptions feed sorting', () => {
     await expect.poll(() => videoTitles(page)).toEqual(['Oldest video', 'Newest video'])
     await expect.poll(() => postTexts(page)).toEqual(['Oldest post', 'Newest post'])
     await expect.poll(() => page.evaluate(() => {
-      return document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getNewSubscriptionFeedSortBy
+      return window.$store.getters.getNewSubscriptionFeedSortBy
     })).toBe('oldest')
 
     const relaunched = await app.relaunch()
@@ -1249,7 +1245,7 @@ test.describe('new feed settings and seen state', () => {
     const markAllAsSeen = page.getByRole('button', { name: 'Mark all as seen' })
     await expect(markAllAsSeen).toBeVisible()
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       window.__markSeenMutations = []
       window.__unsubscribeMarkSeen = store.subscribe((mutation) => {
         if (mutation.type === 'markSubscriptionEntriesAsSeenInCache') {
@@ -1452,7 +1448,8 @@ test.describe('classic Shorts watch layout', () => {
 
     await page.getByText('New short', { exact: true }).click()
     await expect(page).toHaveURL(/#\/watch\/new-short-1\?short=true&shortSource=subscriptions/)
-    await page.waitForTimeout(350)
+    await expect.poll(() => page.evaluate(() => window.__watchMorphClasses.some(value => value.includes('viewTransitionMorphActive')))).toBe(true)
+    await expect(page.locator('html')).not.toHaveClass(/viewTransitionMorphActive/)
 
     const morphClasses = await page.evaluate(() => window.__watchMorphClasses)
     expect(morphClasses.some(value => value.includes('viewTransitionMorphActive'))).toBe(true)
@@ -1768,7 +1765,7 @@ test.describe('large combined new feed', () => {
         await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 })
 
         await page.evaluate(() => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           window.__markAllSeenMetrics = { leaveReflows: 0, scrollAtCommit: null, animations: [] }
           const animate = Element.prototype.animate
           Element.prototype.animate = function (...args) {
@@ -1824,7 +1821,7 @@ test.describe('large combined new feed', () => {
         test('keeps entries arriving during the removal animation unseen', async ({ page, app }) => {
           await goTo(page, 'subscriptions')
           await page.evaluate(async channelId => {
-            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            const store = window.$store
             await store.dispatch('updateSubscriptionVideosCacheByChannel', {
               channelId,
               videos: store.getters.getVideoCache[channelId].videos.map(entry => entry.videoId === 'new-video-1'
@@ -1852,7 +1849,7 @@ test.describe('large combined new feed', () => {
           await expect.poll(() => page.evaluate(() => !!window.__markSeenAnimation)).toBe(true)
           // Apply the same cache writes as a refresh while removal is paused.
           await page.evaluate(async ({ channelId, incoming }) => {
-            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            const store = window.$store
             for (const [getter, action, field, entry] of [
               ['getVideoCache', 'updateSubscriptionVideosCacheByChannel', 'videos', incoming.video],
               ['getShortsCache', 'updateSubscriptionShortsCacheByChannel', 'videos', incoming.short],
@@ -1882,7 +1879,7 @@ test.describe('large combined new feed', () => {
           await expect(page.getByRole('button', { name: 'Mark all as seen' })).toBeEnabled()
           await expect(page.getByText('New video 0', { exact: true })).toHaveCount(0)
           expect(await page.evaluate(() => {
-            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            const store = window.$store
             return ['getVideoCache', 'getShortsCache', 'getLiveCache', 'getPostsCache'].map(getter => {
               const cache = store.getters[getter]
               const entry = Object.values(cache)[0]

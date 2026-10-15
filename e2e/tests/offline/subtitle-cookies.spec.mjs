@@ -35,7 +35,7 @@ test('downloads only opted-in YouTube subtitles with the selected cookie source'
   ].join('\n'))
   await chmod(executable, 0o755)
   await page.evaluate(async (executable) => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateYtDlpPath', executable)
     await store.dispatch('updateYtDlpPlaybackAuthMode', 'browser')
     await store.dispatch('updateYtDlpPlaybackCookiesBrowser', 'firefox')
@@ -45,7 +45,7 @@ test('downloads only opted-in YouTube subtitles with the selected cookie source'
   await expect(readFile(capturedArgs)).rejects.toThrow()
 
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateYtDlpSubtitleUseCookies', true)
   })
   expect(await page.evaluate(url => window.ftElectron.ytDlpGetSubtitle(url), subtitleUrl)).toBe(vtt)
@@ -57,7 +57,7 @@ test('downloads only opted-in YouTube subtitles with the selected cookie source'
   await expect(readdir(path.dirname(args[args.indexOf('--load-info-json') + 1]))).rejects.toThrow()
 
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateYtDlpSubtitleUseCookies', false)
     await store.dispatch('updateYtDlpPlaybackAlwaysUseCookies', true)
     await store.dispatch('updateYtDlpPlaybackAuthMode', 'file')
@@ -90,7 +90,7 @@ for (const setting of ['updateYtDlpSubtitleUseCookies', 'updateYtDlpPlaybackAlwa
       })
     }, { vtt, srt })
     await page.evaluate(async setting => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch(setting, true)
     }, setting)
     await openMockedVideo(page)

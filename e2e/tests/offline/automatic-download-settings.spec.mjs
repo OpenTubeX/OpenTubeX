@@ -36,46 +36,43 @@ test.use({
   }
 })
 
-for (const uiScale of [100, 95, 125]) {
-  test(`shows channel options before saving and preserves rapid edits at ${uiScale}%`, async ({ app, page }) => {
-    await page.evaluate(value => window.ftElectron.setZoomFactor(value / 100), uiScale)
-    await goToSettingsSection(page, 'download')
-    await page.getByRole('button', { name: 'Manage Automatic Downloads (0)' }).click()
-    await delayNextRuleWrite(app)
+test('shows channel options before saving and preserves rapid edits', async ({ app, page }) => {
+  await goToSettingsSection(page, 'download')
+  await page.getByRole('button', { name: 'Manage Automatic Downloads (0)' }).click()
+  await delayNextRuleWrite(app)
 
-    const alpha = page.locator('.channelRule', { has: page.getByRole('checkbox', { name: 'Alpha Channel', exact: true }) })
-    const beta = page.locator('.channelRule', { has: page.getByRole('checkbox', { name: 'Beta Channel', exact: true }) })
-    await alpha.getByText('Alpha Channel', { exact: true }).click()
-    try {
-      await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.releaseAutomaticDownloadWrite)).toBe('function')
-      await expect(alpha.getByRole('checkbox', { name: 'Alpha Channel', exact: true })).toBeChecked()
-      await expect(alpha.locator('.channelRuleOptions')).toBeVisible({ timeout: 1000 })
-      expect(await page.evaluate(() => JSON.parse(document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getYtDlpAutomaticDownloadRules))).toEqual({})
-      await beta.getByText('Beta Channel', { exact: true }).click()
-      await expect(beta.locator('.channelRuleOptions')).toBeVisible({ timeout: 1000 })
-      expect(await page.evaluate(() => JSON.parse(document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getYtDlpAutomaticDownloadRules))).toEqual({})
-      await alpha.getByText('Shorts', { exact: true }).click()
-      await alpha.getByRole('textbox', { name: 'Title includes', exact: true }).fill('Keep this edit')
-      await beta.getByText('Beta Channel', { exact: true }).click()
-      await expect(beta.locator('.channelRuleOptions')).toHaveCount(0)
-      await beta.getByText('Beta Channel', { exact: true }).click()
-      await expect(beta.locator('.channelRuleOptions')).toBeVisible({ timeout: 1000 })
-    } finally {
-      await app.electronApp.evaluate(() => globalThis.releaseAutomaticDownloadWrite?.())
-      await expect(alpha.locator('.channelRuleOptions')).toBeVisible()
-    }
+  const alpha = page.locator('.channelRule', { has: page.getByRole('checkbox', { name: 'Alpha Channel', exact: true }) })
+  const beta = page.locator('.channelRule', { has: page.getByRole('checkbox', { name: 'Beta Channel', exact: true }) })
+  await alpha.getByText('Alpha Channel', { exact: true }).click()
+  try {
+    await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.releaseAutomaticDownloadWrite)).toBe('function')
+    await expect(alpha.getByRole('checkbox', { name: 'Alpha Channel', exact: true })).toBeChecked()
+    await expect(alpha.locator('.channelRuleOptions')).toBeVisible({ timeout: 1000 })
+    expect(await page.evaluate(() => JSON.parse(window.$store.getters.getYtDlpAutomaticDownloadRules))).toEqual({})
+    await beta.getByText('Beta Channel', { exact: true }).click()
+    await expect(beta.locator('.channelRuleOptions')).toBeVisible({ timeout: 1000 })
+    expect(await page.evaluate(() => JSON.parse(window.$store.getters.getYtDlpAutomaticDownloadRules))).toEqual({})
+    await alpha.getByText('Shorts', { exact: true }).click()
+    await alpha.getByRole('textbox', { name: 'Title includes', exact: true }).fill('Keep this edit')
+    await beta.getByText('Beta Channel', { exact: true }).click()
+    await expect(beta.locator('.channelRuleOptions')).toHaveCount(0)
+    await beta.getByText('Beta Channel', { exact: true }).click()
+    await expect(beta.locator('.channelRuleOptions')).toBeVisible({ timeout: 1000 })
+  } finally {
+    await app.electronApp.evaluate(() => globalThis.releaseAutomaticDownloadWrite?.())
+    await expect(alpha.locator('.channelRuleOptions')).toBeVisible()
+  }
 
-    await expect.poll(() => page.evaluate(async () => {
-      const settings = await window.ftElectron.dbSettings(1)
-      return JSON.parse(settings.find(setting => setting._id === 'ytDlpAutomaticDownloadRules').value)
-    })).toEqual({
-      [ALPHA_CHANNEL_ID]: expect.objectContaining({ includeShorts: true, titleIncludes: 'Keep this edit' }),
-      [BETA_CHANNEL_ID]: expect.objectContaining({ includeVideos: true })
-    })
-    await expect(alpha.getByRole('checkbox', { name: 'Shorts', exact: true })).toBeChecked()
-    await expect(alpha.getByRole('textbox', { name: 'Title includes', exact: true })).toHaveValue('Keep this edit')
+  await expect.poll(() => page.evaluate(async () => {
+    const settings = await window.ftElectron.dbSettings(1)
+    return JSON.parse(settings.find(setting => setting._id === 'ytDlpAutomaticDownloadRules').value)
+  })).toEqual({
+    [ALPHA_CHANNEL_ID]: expect.objectContaining({ includeShorts: true, titleIncludes: 'Keep this edit' }),
+    [BETA_CHANNEL_ID]: expect.objectContaining({ includeVideos: true })
   })
-}
+  await expect(alpha.getByRole('checkbox', { name: 'Shorts', exact: true })).toBeChecked()
+  await expect(alpha.getByRole('textbox', { name: 'Title includes', exact: true })).toHaveValue('Keep this edit')
+})
 
 test('persists queued edits after the user activation window expires', async ({ app, page }) => {
   await goToSettingsSection(page, 'download')
@@ -88,8 +85,13 @@ test('persists queued edits after the user activation window expires', async ({ 
   await beta.getByText('Beta Channel', { exact: true }).click()
   const active = await app.electronApp.evaluate(async ({ BrowserWindow }) => {
     // Renderer evaluation can itself activate the page; wait and sample from main.
-    await new Promise(resolve => setTimeout(resolve, 6500))
-    const active = await BrowserWindow.getAllWindows()[0].webContents.executeJavaScript('navigator.userActivation.isActive', false)
+    const webContents = BrowserWindow.getAllWindows()[0].webContents
+    const deadline = Date.now() + 15_000
+    let active = true
+    while (active && Date.now() < deadline) {
+      await new Promise(resolve => setTimeout(resolve, 100))
+      active = await webContents.executeJavaScript('navigator.userActivation.isActive', false)
+    }
     globalThis.releaseAutomaticDownloadWrite()
     return active
   })
@@ -97,7 +99,7 @@ test('persists queued edits after the user activation window expires', async ({ 
   await expect.poll(() => app.electronApp.evaluate(() => globalThis.automaticRuleWriteCount)).toBe(2)
   const afterDeniedWrite = await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.executeJavaScript(`
     (async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpAutomaticDownloadRules', '{}')
       return { active: navigator.userActivation.isActive, rules: JSON.parse(store.getters.getYtDlpAutomaticDownloadRules) }
     })()
@@ -123,7 +125,7 @@ test('honors a newer rules update from another settings writer', async ({ app, p
     await beta.getByText('Beta Channel', { exact: true }).click()
     await expect(beta.locator('.channelRuleOptions')).toBeVisible({ timeout: 1000 })
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       window.externalRuleUpdate = store.dispatch('updateYtDlpAutomaticDownloadRules', '{}')
     })
   } finally {
@@ -140,7 +142,7 @@ test('honors a newer rules update from another settings writer', async ({ app, p
 
 test('preserves an intervening unsubscribe cleanup when the editor changes again', async ({ app, page }) => {
   await page.evaluate(async ({ alphaId, betaId }) => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateYtDlpAutomaticDownloadRules', JSON.stringify({
       [alphaId]: { includeVideos: true },
       [betaId]: { includeVideos: true }
@@ -155,7 +157,7 @@ test('preserves an intervening unsubscribe cleanup when the editor changes again
   try {
     await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.releaseAutomaticDownloadWrite)).toBe('function')
     await page.evaluate(betaId => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       window.cleanupRuleUpdate = store.dispatch('removeChannelFromProfiles', { channelId: betaId, profileIds: ['allChannels'] })
     }, BETA_CHANNEL_ID)
     await expect(beta).toHaveCount(0)
@@ -181,7 +183,7 @@ test('does not re-enable a removed rule through a later field edit', async ({ ap
   try {
     await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.releaseAutomaticDownloadWrite)).toBe('function')
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       window.externalRuleUpdate = store.dispatch('updateYtDlpAutomaticDownloadRules', '{}')
     })
     await alpha.getByRole('textbox', { name: 'Title includes', exact: true }).fill('Later edit')
@@ -198,7 +200,7 @@ test('does not re-enable a removed rule through a later field edit', async ({ ap
 
 test('preserves template cleanups between pending editor changes', async ({ app, page }) => {
   await page.evaluate(async alphaId => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateYtDlpDownloadTemplates', JSON.stringify([{ name: 'Research', options: { mode: 'video' } }]))
     await store.dispatch('updateYtDlpAutomaticDownloadRules', JSON.stringify({ [alphaId]: { template: 'template:Research' } }))
   }, ALPHA_CHANNEL_ID)
@@ -210,7 +212,7 @@ test('preserves template cleanups between pending editor changes', async ({ app,
   try {
     await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.releaseAutomaticDownloadWrite)).toBe('function')
     await page.evaluate(alphaId => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       window.cleanupRuleUpdate = store.dispatch('updateYtDlpAutomaticDownloadRules', value => {
         const rules = JSON.parse(value)
         rules[alphaId].template = 'video:best'

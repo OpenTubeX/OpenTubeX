@@ -21,7 +21,7 @@ for (const format of ['dash', 'audio']) {
         }
       })
 
-      test('releases quality choices after track and submenu updates', async ({ app, page }) => {
+      test('releases quality choices after track and submenu updates', { tag: '@performance' }, async ({ app, page }) => {
         test.setTimeout(120_000)
         await mockPlayableWatchPage(app, page)
         await routePostLiveMedia(page)

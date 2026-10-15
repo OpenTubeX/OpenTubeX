@@ -1,5 +1,5 @@
 import { test, expect, goTo, sel } from '../../helpers/app.mjs'
-import { expectTabHighlightAligned, expectTabHighlightStyle } from '../../helpers/tabs.mjs'
+import { expectTabHighlightAligned, expectTabHighlightStyle, tabHighlightAnimations } from '../../helpers/tabs.mjs'
 import { sampleColors } from '../../helpers/colors.mjs'
 
 const now = Date.now()
@@ -103,7 +103,7 @@ test.describe('subscriptions feed tab indicator', () => {
       }, width)
       for (const roundness of [0, 50, 100, 200]) {
         await page.evaluate(value => {
-          document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
+          window.$store.commit('setUiRoundness', value)
         }, roundness)
         for (const selector of ['.tabs [role="tab"][aria-selected="true"]', '.newFeedTabs [role="tab"][aria-selected="true"]']) {
           await expectTabHighlightAligned(page.locator(selector))
@@ -117,7 +117,7 @@ test.describe('subscriptions feed tab indicator', () => {
     await page.evaluate(async () => {
       localStorage.setItem('Subscriptions/currentTab', 'videos')
 
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateHideSubscriptionsVideos', true)
     })
 
@@ -274,7 +274,7 @@ test.describe('subscriptions feed tab indicator', () => {
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await expect(page.locator('#subscriptionsPanel.newFeed')).toBeVisible()
     await page.evaluate(channelId => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const replacement = {
         ...store.getters.getVideoCache[channelId].videos[0],
         videoId: 'background-update',
@@ -291,6 +291,7 @@ test.describe('subscriptions feed tab indicator', () => {
       }))
     }, CHANNEL_ID)
 
+    // Give a background refresh time to (wrongly) reach the retained panel.
     await page.waitForTimeout(600)
     expect(await retainedPanel.textContent()).not.toContain('Background update')
 
@@ -304,10 +305,9 @@ test.describe('subscriptions feed tab indicator', () => {
     await page.locator('[data-subscription-feed-tab="shorts"]').click()
     await expect(page.locator('.tab.selectedTab')).toHaveText(/Shorts/)
 
-    // Wait out the 140ms crossfade
-    await page.waitForTimeout(400)
-
-    await expectTabHighlightAligned(page.locator('[data-subscription-feed-tab="shorts"]'))
+    const shorts = page.locator('[data-subscription-feed-tab="shorts"]')
+    await expect.poll(() => shorts.evaluate(tabHighlightAnimations)).toEqual([])
+    await expectTabHighlightAligned(shorts)
     await attachScreenshot('indicator under the Shorts tab')
   })
 
@@ -322,6 +322,7 @@ test.describe('subscriptions feed tab indicator', () => {
       document.querySelector('[data-subscription-feed-tab="videos"]').click()
     })
 
+    // Let a stale Shorts activation land if it would.
     await page.waitForTimeout(400)
 
     await expect(page.locator('.tab.selectedTab')).toHaveText(/Videos/)
@@ -380,7 +381,7 @@ test.describe('subscriptions feed tab indicator', () => {
     await page.locator(sel.newTabButton).click()
     await goTo(page, 'settings')
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateHideSubscriptionsVideos', true)
     })
 
@@ -398,7 +399,7 @@ test.describe('subscriptions feed tab indicator', () => {
 
     await expect(page.getByText('video video 000')).toBeVisible()
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
 
       document.querySelector('[data-subscription-feed-tab="shorts"]').click()
       await Promise.all([

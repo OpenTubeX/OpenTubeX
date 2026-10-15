@@ -62,7 +62,7 @@ for (const windowAction of ['destroy', 'hide']) {
     } else {
       await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].show())
     }
-    await expect.poll(() => nextPage.evaluate(id => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getVideoCache[id]?.videos[0]?.title, channelId)).toBe('Fetched with the window closed')
+    await expect.poll(() => nextPage.evaluate(id => window.$store.getters.getVideoCache[id]?.videos[0]?.title, channelId)).toBe('Fetched with the window closed')
     await expect.poll(() => nextPage.evaluate(() => window.ftElectron.subscriptionAutoRefresh.nextBackgroundResult())).toBeNull()
     const quit = app.electronApp.waitForEvent('close')
     await app.electronApp.evaluate(({ app }) => { app.quit() })
@@ -72,7 +72,7 @@ for (const windowAction of ['destroy', 'hide']) {
 
 test('turning off background refresh makes closing the last window quit', async ({ app, page }) => {
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateEnableClosedAppSubscriptionRefresh', false)
   })
   // Wait for the settings watcher and its native configuration handshake.

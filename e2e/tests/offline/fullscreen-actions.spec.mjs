@@ -57,13 +57,13 @@ for (const { uiScale, width, height, colorScheme } of [
       await expect(player.locator('.fullscreenCommentsOverlay.open')).toHaveCount(0)
       await dock.screenshot({ path: testInfo.outputPath(`actions-${colorScheme}.png`) })
       await page.evaluate(async () => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         await store.dispatch('updateFullscreenActions', ['liveChat'])
       })
       await expect(dock).toHaveCount(0)
       await expect(player).toHaveAttribute('data-action-dock-visible', 'false')
       await page.evaluate(async () => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         await store.dispatch('updateFullscreenActions', [])
       })
       await expect(dock).toHaveCount(0)

@@ -65,7 +65,7 @@ test('keeps the saved avatar visible while switching channel content tabs', asyn
   }, tab.id)
 
   for (const scale of [100, 125]) {
-    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+    await page.evaluate(value => window.$store.dispatch('updateUiScale', value), scale)
     for (const name of ['about', 'shorts', 'live', 'videos']) {
       const contentTab = page.locator(`.channelDetails:visible #${name}Tab`)
       await contentTab.click()

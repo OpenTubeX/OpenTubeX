@@ -130,7 +130,7 @@ test('only offers subscription options while subscribed', async ({ page }) => {
   })
 
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateUnsubscriptionPopupStatus', false)
     await store.dispatch('createProfile', {
       _id: 'empty-profile',

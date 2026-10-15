@@ -115,44 +115,45 @@ test.describe('subscriptions header layout', () => {
     }
   })
 
-  for (const uiScale of [100, 95]) {
-    test(`keeps Mark all as seen beside the desktop feed tabs at ${uiScale}% scale`, async ({ app, page, attachScreenshot }) => {
-      await app.electronApp.evaluate(({ BrowserWindow }, scale) => {
-        BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale / 100)
-      }, uiScale)
-      await goTo(page, 'subscriptions')
+  test('keeps Mark all as seen beside the desktop feed tabs', { tag: '@scale' }, async ({ app, page, attachScreenshot, uiScale }) => {
+    // The file seeds 95%, so apply the project scale directly.
+    await app.electronApp.evaluate(({ BrowserWindow }, scale) => {
+      BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale / 100)
+    }, uiScale)
+    await goTo(page, 'subscriptions')
+    // Keep the 1600 CSS-pixel desktop width at every scale.
+    if (uiScale !== 100) await setWindowWidth(app, page, Math.round(1600 * uiScale / 100))
 
-      for (const tab of ['videos', 'all', 'tabbed', 'videos']) {
-        if (tab === 'tabbed') {
-          await page.getByRole('button', { name: 'Show tabbed view' }).click()
-        } else {
-          await page.locator(`[data-subscription-feed-tab="${tab}"]`).click()
-        }
-        await expect(page.locator('.subscriptionsHeader')).toHaveClass(/singleRow/)
-        await expect(page.locator('.markAllSeenButton')).toBeVisible()
-
-        await expect.poll(() => page.evaluate(() => {
-          const tabs = document.querySelector('.tabs').getBoundingClientRect()
-          const mark = document.querySelector('.markAllSeenButton').getBoundingClientRect()
-          return mark.left - tabs.right
-        })).toBeLessThanOrEqual(9)
-        const layout = await page.evaluate(() => {
-          const tabs = document.querySelector('.tabs').getBoundingClientRect()
-          const mark = document.querySelector('.markAllSeenButton').getBoundingClientRect()
-          const nextControl = document.querySelector('.headerViewToggle, .headerRefreshWidget').getBoundingClientRect()
-          return {
-            gap: mark.left - tabs.right,
-            centerOffset: Math.abs((mark.top + mark.bottom - tabs.top - tabs.bottom) / 2),
-            controlsGap: nextControl.left - mark.right
-          }
-        })
-        expect(layout.gap).toBeGreaterThanOrEqual(0)
-        expect(layout.centerOffset).toBeLessThanOrEqual(2)
-        expect(layout.controlsGap).toBeGreaterThanOrEqual(0)
-        await attachScreenshot(`desktop ${tab} feed action at ${uiScale}%`)
+    for (const tab of ['videos', 'all', 'tabbed', 'videos']) {
+      if (tab === 'tabbed') {
+        await page.getByRole('button', { name: 'Show tabbed view' }).click()
+      } else {
+        await page.locator(`[data-subscription-feed-tab="${tab}"]`).click()
       }
-    })
-  }
+      await expect(page.locator('.subscriptionsHeader')).toHaveClass(/singleRow/)
+      await expect(page.locator('.markAllSeenButton')).toBeVisible()
+
+      await expect.poll(() => page.evaluate(() => {
+        const tabs = document.querySelector('.tabs').getBoundingClientRect()
+        const mark = document.querySelector('.markAllSeenButton').getBoundingClientRect()
+        return mark.left - tabs.right
+      })).toBeLessThanOrEqual(9)
+      const layout = await page.evaluate(() => {
+        const tabs = document.querySelector('.tabs').getBoundingClientRect()
+        const mark = document.querySelector('.markAllSeenButton').getBoundingClientRect()
+        const nextControl = document.querySelector('.headerViewToggle, .headerRefreshWidget').getBoundingClientRect()
+        return {
+          gap: mark.left - tabs.right,
+          centerOffset: Math.abs((mark.top + mark.bottom - tabs.top - tabs.bottom) / 2),
+          controlsGap: nextControl.left - mark.right
+        }
+      })
+      expect(layout.gap).toBeGreaterThanOrEqual(0)
+      expect(layout.centerOffset).toBeLessThanOrEqual(2)
+      expect(layout.controlsGap).toBeGreaterThanOrEqual(0)
+      await attachScreenshot(`desktop ${tab} feed action`)
+    }
+  })
 
   test('shows the New feed action and regular feed refresh status on mobile', async ({ app, page, attachScreenshot }) => {
     await goTo(page, 'subscriptions')
@@ -205,7 +206,7 @@ test.describe('subscriptions header layout', () => {
     expect(Math.abs(initialRefreshLayout.textStart - initialRefreshLayout.contentStart)).toBeLessThanOrEqual(2)
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setSubscriptionFeedAutoRefreshInterval', String(60 * 60 * 1000))
       store.commit('setSubscriptionFeedNextAutoRefreshTimestamp', Date.now() + 60 * 60 * 1000)
     })
@@ -242,7 +243,7 @@ test.describe('subscriptions header layout', () => {
     await attachScreenshot('landscape mobile subscription refresh status')
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateBaseTheme', 'black')
     })
     await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(0, 0, 0)')
@@ -315,7 +316,7 @@ test.describe('subscriptions header layout', () => {
     await attachScreenshot('compact New feed header actions')
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateBaseTheme', 'system')
       await store.dispatch('updateSystemDarkTheme', 'dark')
       await store.dispatch('updateSystemLightTheme', 'light')
@@ -476,39 +477,37 @@ test.describe('subscriptions header layout', () => {
     expect(refreshWidget.top).toBeLessThan(tabs.bottom)
   })
 
-  for (const uiScale of [100, 95]) {
-    test(`centers the refresh status and button on the tabs when they share a tablet row at ${uiScale}% scale`, async ({ app, page }) => {
-      await app.electronApp.evaluate(({ BrowserWindow }, scale) => {
-        BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale / 100)
-      }, uiScale)
-      await goTo(page, 'subscriptions')
-      await setWindowWidth(app, page, 1200)
-      await expect(page.locator('.subscriptionsHeader')).not.toHaveClass(/singleRow/)
+  test('centers the refresh status and button on the tabs when they share a tablet row', { tag: '@scale' }, async ({ app, page, uiScale }) => {
+    await app.electronApp.evaluate(({ BrowserWindow }, scale) => {
+      BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale / 100)
+    }, uiScale)
+    await goTo(page, 'subscriptions')
+    await setWindowWidth(app, page, Math.round(1200 * uiScale / 100))
+    await expect(page.locator('.subscriptionsHeader')).not.toHaveClass(/singleRow/)
 
-      const layout = await page.evaluate(() => {
-        const center = selector => {
-          const rect = document.querySelector(selector).getBoundingClientRect()
-          return (rect.top + rect.bottom) / 2
-        }
-        const timestamp = document.querySelector('.headerRefreshWidget > .lastRefreshTimestamp')
-        const text = document.createRange()
-        text.selectNodeContents(timestamp)
-        return {
-          tabs: center('.tabs'),
-          timestamp: center('.headerRefreshWidget > .lastRefreshTimestamp'),
-          refresh: center('.headerRefreshWidget .refreshButton'),
-          timestampLines: text.getClientRects().length,
-          tabsBottom: document.querySelector('.tabs').getBoundingClientRect().bottom,
-          timestampTop: timestamp.getBoundingClientRect().top
-        }
-      })
-
-      expect(layout.timestampLines).toBe(1)
-      expect(layout.timestampTop).toBeLessThan(layout.tabsBottom)
-      expect(Math.abs(layout.timestamp - layout.tabs)).toBeLessThanOrEqual(2)
-      expect(Math.abs(layout.refresh - layout.tabs)).toBeLessThanOrEqual(2)
+    const layout = await page.evaluate(() => {
+      const center = selector => {
+        const rect = document.querySelector(selector).getBoundingClientRect()
+        return (rect.top + rect.bottom) / 2
+      }
+      const timestamp = document.querySelector('.headerRefreshWidget > .lastRefreshTimestamp')
+      const text = document.createRange()
+      text.selectNodeContents(timestamp)
+      return {
+        tabs: center('.tabs'),
+        timestamp: center('.headerRefreshWidget > .lastRefreshTimestamp'),
+        refresh: center('.headerRefreshWidget .refreshButton'),
+        timestampLines: text.getClientRects().length,
+        tabsBottom: document.querySelector('.tabs').getBoundingClientRect().bottom,
+        timestampTop: timestamp.getBoundingClientRect().top
+      }
     })
-  }
+
+    expect(layout.timestampLines).toBe(1)
+    expect(layout.timestampTop).toBeLessThan(layout.tabsBottom)
+    expect(Math.abs(layout.timestamp - layout.tabs)).toBeLessThanOrEqual(2)
+    expect(Math.abs(layout.refresh - layout.tabs)).toBeLessThanOrEqual(2)
+  })
 
   test('moves the controls below the tabs before the tabs wrap', async ({ app, page, attachScreenshot }) => {
     await goTo(page, 'subscriptions')

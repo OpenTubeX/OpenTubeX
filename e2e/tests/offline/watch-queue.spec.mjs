@@ -142,7 +142,7 @@ test('manages the queue from video menus and the watch sidebar', async ({ page }
   ])
 
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     for (let index = 0; index < 20; index++) {
       store.commit('addVideoToWatchQueue', {
         video: {
@@ -158,7 +158,7 @@ test('manages the queue from video menus and the watch sidebar', async ({ page }
   await queueScroller.evaluate(element => { element.scrollTop = element.scrollHeight })
   await expect.poll(() => queueScroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const queueItemIds = store.getters.getWatchQueue.slice(4).map(item => item.queueItemId)
     for (const queueItemId of queueItemIds) {
       store.commit('removeVideoFromWatchQueue', queueItemId)
@@ -206,7 +206,7 @@ test('restores the remaining queue in order after restarting and keeps clearing 
 
   ;({ page } = await app.relaunch())
   await expect(page.locator('.watchQueue')).toBeHidden()
-  expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getWatchQueueLength)).toBe(0)
+  expect(await page.evaluate(() => window.$store.getters.getWatchQueueLength)).toBe(0)
 })
 
 test('shares queue changes across windows without restoring cleared items', async ({ app, page }) => {
@@ -216,7 +216,7 @@ test('shares queue changes across windows without restoring cleared items', asyn
   const second = await openNewWindowFromTabBar(app, page)
   await waitForAppReady(second)
   await goTo(second, 'history')
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('clearWatchQueue'))
+  await page.evaluate(() => window.$store.commit('clearWatchQueue'))
   await chooseVideoOption(second, 'Queue video two', 'Add to Queue')
   await page.locator('a.title').filter({ hasText: /Current video/ }).click()
   await second.locator('a.title').filter({ hasText: /Current video/ }).click()
@@ -225,7 +225,7 @@ test('shares queue changes across windows without restoring cleared items', asyn
   }
   // Updates issued together by different renderers must both be saved.
   await Promise.all([page, second].map((window, index) => window.evaluate(videoId => {
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('addVideoToWatchQueue', { video: { videoId, title: videoId } })
+    window.$store.commit('addVideoToWatchQueue', { video: { videoId, title: videoId } })
   }, `concurrent-${index}`)))
   for (const window of [page, second]) await expect(window.locator('.queueItem')).toHaveCount(3)
   await second.close()

@@ -65,7 +65,7 @@ test('mobile video bar follows hidden navigation and stays above the connection 
   await expect(player).toHaveClass(/scrollMiniPlayer/)
   // Updating keyboard outlines also rerenders Vue-managed layout classes.
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setOutlinesHidden', !store.getters.getOutlinesHidden)
   })
   await setWindowSize(app, page, { width: 900, height: 1100 })

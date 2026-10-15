@@ -46,7 +46,7 @@ for (const backend of ['local', 'invidious']) {
       window.setContentSize(515, 1000)
     })
     await page.evaluate(async backend => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateBackendPreference', backend)
       await store.dispatch('updateDefaultInvidiousInstance', 'https://invidious.test')
     }, backend)

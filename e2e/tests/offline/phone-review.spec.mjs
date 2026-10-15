@@ -11,7 +11,7 @@ test('Escape closes a foreground prompt above a docked phone panel', async ({ ap
   const watch = await watchViewHandle(page)
   await watch.evaluate(vm => vm.openPhonePanel('description'))
   await expect(page.locator('.dockedSheet[open]')).toBeVisible()
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSearchFilters'))
+  await page.evaluate(() => window.$store.dispatch('showSearchFilters'))
   const prompt = page.locator('.searchFiltersCard')
   await expect(prompt).toBeVisible()
   await prompt.press('Escape')
@@ -21,13 +21,13 @@ test('Escape closes a foreground prompt above a docked phone panel', async ({ ap
 
 test('Escape closes only the latest of multiple prompts', async ({ page }) => {
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return store.dispatch('showSearchFilters')
   })
   const searchFilters = page.locator('.searchFiltersCard')
   await expect(searchFilters).toBeVisible()
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return store.dispatch('showCreatePlaylistPrompt', { title: '', description: '', sourcePlaylistId: null })
   })
   const createPlaylist = page.locator('.playlistNameInput')
@@ -38,7 +38,7 @@ test('Escape closes only the latest of multiple prompts', async ({ page }) => {
 })
 
 test('playlist prompts preserve their desktop sizing and heading alignment', async ({ page }) => {
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(
+  await page.evaluate(() => window.$store.dispatch(
     'showCreatePlaylistPrompt', { title: '', description: '', sourcePlaylistId: null }
   ))
   const nameInput = page.locator('.playlistNameInput')
@@ -46,7 +46,7 @@ test('playlist prompts preserve their desktop sizing and heading alignment', asy
   expect((await nameInput.boundingBox()).width).toBeGreaterThan(500)
   await page.keyboard.press('Escape')
 
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(
+  await page.evaluate(() => window.$store.dispatch(
     'showAddToPlaylistPromptForManyVideos', {
       videos: [{ videoId: 'test', title: 'Test', lengthSeconds: 10 }]
     }
@@ -289,7 +289,7 @@ test('fullscreen dropdowns close when browser fullscreen ends', async ({ app, pa
 })
 
 test('Settings consumes Escape after closing', async ({ page }) => {
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('toggleSettingsWindow'))
+  await page.evaluate(() => window.$store.dispatch('toggleSettingsWindow'))
   const settings = page.locator('.settingsWindow')
   await expect(settings).toBeVisible()
   expect(await settings.evaluate(el => !el.dispatchEvent(new KeyboardEvent('keydown', {
@@ -369,7 +369,7 @@ test('player options stop updating their scrollbars when idle', async ({ app, pa
   await expect(page.locator('.phonePlayerOptionsClose')).toBeFocused()
   const menu = page.locator('.phonePlayerOptions[open] .shaka-overflow-menu')
   await expect(menu).toBeVisible()
-  await page.waitForTimeout(400)
+  await page.locator('.phonePlayerOptions[open]').evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
   const mutations = await menu.evaluate(el => new Promise(resolve => {
     let count = 0
     const targets = {}

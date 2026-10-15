@@ -44,7 +44,7 @@ test('jumps to the end of silence without changing playback rate', async ({ page
 
   await page.locator(`${activeTab} .ftVideoPlayer`).press('h')
   await expect.poll(() => page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return store.getters.getTabSkipSilence(store.getters.getActiveTabId)
   })).toBe(true)
 

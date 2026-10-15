@@ -162,68 +162,66 @@ test('hides settings category descriptions immediately and persists across resta
   await expect(page.locator('.settingsMenu .titleDescription')).toHaveCount(11)
 })
 
-for (const uiScale of [100, 125]) {
-  for (const reveal of ['back', 'resize']) {
-    test.describe(`hidden settings menu at ${uiScale}% revealed by ${reveal}`, () => {
-      test.use({ seed: { settings: { currentLocale: 'en-US', uiScale } } })
+for (const reveal of ['back', 'resize']) {
+  test.describe(`hidden settings menu revealed by ${reveal}`, { tag: '@scale' }, () => {
+    test.use({ seed: { settings: { currentLocale: 'en-US' } } })
 
-      test('clamps the shortened category menu when it becomes visible', async ({ app, page }) => {
-        await setWindowSize(app, page, { width: 1500, height: 550 })
-        const appearance = await goToSettingsSection(page, 'appearance')
-        const menu = page.locator('.settingsMenu')
-        await menu.evaluate(element => { element.scrollTop = element.scrollHeight })
-        await expect.poll(() => menu.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
-        await resizeWindowWidth(app, page, 480)
-        await expect(menu).toBeHidden()
-        await appearance.locator('label.switch-label').filter({ hasText: LABEL }).click()
-        await expect(appearance.getByRole('checkbox', { name: LABEL })).toBeChecked()
-        await expect(menu.locator('.titleDescription')).toHaveCount(0)
-        if (reveal === 'back') {
-          await page.locator('.settingsBackButton').click()
-        } else {
-          await resizeWindowWidth(app, page, 1500)
-        }
-        await expect(menu).toBeVisible()
-        await expectValidCategoryScrollbars(menu)
-      })
+    test('clamps the shortened category menu when it becomes visible', async ({ app, page }) => {
+      await setWindowSize(app, page, { width: 1500, height: 550 })
+      const appearance = await goToSettingsSection(page, 'appearance')
+      const menu = page.locator('.settingsMenu')
+      await menu.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect.poll(() => menu.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+      await resizeWindowWidth(app, page, 480)
+      await expect(menu).toBeHidden()
+      await appearance.locator('label.switch-label').filter({ hasText: LABEL }).click()
+      await expect(appearance.getByRole('checkbox', { name: LABEL })).toBeChecked()
+      await expect(menu.locator('.titleDescription')).toHaveCount(0)
+      if (reveal === 'back') {
+        await page.locator('.settingsBackButton').click()
+      } else {
+        await resizeWindowWidth(app, page, 1500)
+      }
+      await expect(menu).toBeVisible()
+      await expectValidCategoryScrollbars(menu)
     })
-  }
+  })
+}
 
-  for (const width of [480, 1500]) {
-    test.describe(`settings category descriptions at ${width}px and ${uiScale}%`, () => {
-      test.use({ seed: { settings: { currentLocale: 'en-US', uiScale } } })
+for (const width of [480, 1500]) {
+  test.describe(`settings category descriptions at ${width}px`, { tag: '@scale' }, () => {
+    test.use({ seed: { settings: { currentLocale: 'en-US' } } })
 
-      test('preserves category navigation and valid scrollbars after hiding descriptions at the bottom', async ({ app, page }) => {
-        await setWindowSize(app, page, { width, height: 650 })
-        // Slow the opening transition to exercise measurement during animation.
-        await page.addStyleTag({ content: '.settingsWindow.settings-window-enter-active { transition-duration: 2s !important; }' })
-        await goTo(page, 'settings')
-        const menu = page.locator('.settingsMenu')
-        await expect(menu).toBeVisible()
-        await expect(menu.locator('.titleDescription')).toHaveCount(11)
-        await expect(page.locator('.settingsWindow')).toHaveCSS('transform', 'none')
-        const category = menu.locator('.titleItem').first()
-        const expandedHeight = await category.evaluate(element => element.getBoundingClientRect().height)
-        await menu.evaluate(element => { element.scrollTop = element.scrollHeight })
-        await expect.poll(() => menu.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    test('preserves category navigation and valid scrollbars after hiding descriptions at the bottom', async ({ app, page }) => {
+      await setWindowSize(app, page, { width, height: 650 })
+      // Slow the opening transition to exercise measurement during animation.
+      await page.addStyleTag({ content: '.settingsWindow.settings-window-enter-active { transition-duration: 2s !important; }' })
+      await goTo(page, 'settings')
+      const menu = page.locator('.settingsMenu')
+      await expect(menu).toBeVisible()
+      await expect(menu.locator('.titleDescription')).toHaveCount(11)
+      await expect(page.locator('.settingsWindow')).toHaveCSS('transform', 'none')
+      const category = menu.locator('.titleItem').first()
+      const expandedHeight = await category.evaluate(element => element.getBoundingClientRect().height)
+      await menu.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect.poll(() => menu.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
 
-        // The control lives on another view in compact layouts. Change the same
-        // preference directly to exercise shortening the currently visible menu.
-        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
-          .dispatch('updateHideSettingsCategoryDescriptions', true))
-        await expect(menu.locator('.titleDescription')).toHaveCount(0)
-        await expect(category).toHaveCSS('min-block-size', width === 480 ? '48px' : '36px')
-        expect(await category.evaluate(element => element.getBoundingClientRect().height)).toBeLessThan(expandedHeight - 10)
-        await expectValidCategoryScrollbars(menu)
+      // The control lives on another view in compact layouts. Change the same
+      // preference directly to exercise shortening the currently visible menu.
+      await page.evaluate(() => window.$store
+        .dispatch('updateHideSettingsCategoryDescriptions', true))
+      await expect(menu.locator('.titleDescription')).toHaveCount(0)
+      await expect(category).toHaveCSS('min-block-size', width === 480 ? '48px' : '36px')
+      expect(await category.evaluate(element => element.getBoundingClientRect().height)).toBeLessThan(expandedHeight - 10)
+      await expectValidCategoryScrollbars(menu)
 
-        await goToSettingsSection(page, 'appearance')
-        await expect(page.getByRole('checkbox', { name: LABEL })).toBeChecked()
-        await page.locator('label.switch-label').filter({ hasText: LABEL }).click()
-        if (width === 480) await page.locator('.settingsBackButton').click()
-        await expect(menu).toBeVisible()
-        await expect(menu.locator('.titleDescription')).toHaveCount(11)
-        await expect.poll(() => category.evaluate(element => element.getBoundingClientRect().height)).toBeCloseTo(expandedHeight, 0)
-      })
+      await goToSettingsSection(page, 'appearance')
+      await expect(page.getByRole('checkbox', { name: LABEL })).toBeChecked()
+      await page.locator('label.switch-label').filter({ hasText: LABEL }).click()
+      if (width === 480) await page.locator('.settingsBackButton').click()
+      await expect(menu).toBeVisible()
+      await expect(menu.locator('.titleDescription')).toHaveCount(11)
+      await expect.poll(() => category.evaluate(element => element.getBoundingClientRect().height)).toBeCloseTo(expandedHeight, 0)
     })
-  }
+  })
 }

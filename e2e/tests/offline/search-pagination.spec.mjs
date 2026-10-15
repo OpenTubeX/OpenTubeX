@@ -23,7 +23,7 @@ test('stops showing the auto-load spinner when search results are exhausted', as
   }
 
   await page.evaluate((settings) => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const result = {
       type: 'video',
       videoId: 'pagination-test',
@@ -65,7 +65,7 @@ test('stops showing the auto-load spinner when search results are exhausted', as
 
 test('explains when a search returns no results', async ({ page }) => {
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('addToSessionSearchHistory', {
       query: 'empty search',
       data: [],
@@ -144,29 +144,23 @@ async function mockSearchPages(page, continuationResultCount = 1) {
   return requests
 }
 
-for (const uiScale of [100, 95]) {
-  test(`keeps loading short search pages until exhausted at ${uiScale}% UI scale`, async ({ page, attachScreenshot }) => {
-    const colorScheme = uiScale === 100 ? 'dark' : 'light'
-    await page.emulateMedia({ colorScheme })
-    await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
-    await page.evaluate(async scale => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      await store.dispatch('updateUiScale', scale)
-    }, uiScale)
-    const requests = await mockSearchPages(page)
-    await page.locator(sel.searchInput).fill('search pagination regression')
-    await page.locator(sel.searchInput).press('Enter')
+test('keeps loading short search pages until exhausted', { tag: '@scale' }, async ({ page, attachScreenshot, uiScale }) => {
+  const colorScheme = uiScale === 100 ? 'dark' : 'light'
+  await page.emulateMedia({ colorScheme })
+  await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
+  const requests = await mockSearchPages(page)
+  await page.locator(sel.searchInput).fill('search pagination regression')
+  await page.locator(sel.searchInput).press('Enter')
 
-    await expect(page.getByText('Pagination result 2', { exact: true })).toBeVisible()
-    await expect(page.locator('.ft-auto-load-next-page-wrapper')).toHaveCount(0)
-    await expect(page.getByText('There are no more results for this search')).toBeVisible()
-    expect(requests.map(request => request.continuation ?? request.query)).toEqual([
-      'search pagination regression', 'page-2', 'page-3'
-    ])
-    await expect(page.locator('.feed-enter-active')).toHaveCount(0)
-    await attachScreenshot('completed search pagination')
-  })
-}
+  await expect(page.getByText('Pagination result 2', { exact: true })).toBeVisible()
+  await expect(page.locator('.ft-auto-load-next-page-wrapper')).toHaveCount(0)
+  await expect(page.getByText('There are no more results for this search')).toBeVisible()
+  expect(requests.map(request => request.continuation ?? request.query)).toEqual([
+    'search pagination regression', 'page-2', 'page-3'
+  ])
+  await expect(page.locator('.feed-enter-active')).toHaveCount(0)
+  await attachScreenshot('completed search pagination')
+})
 
 test('waits for scrolling when a search continuation fills the viewport', async ({ page }) => {
   const requests = await mockSearchPages(page, 30)
@@ -174,7 +168,7 @@ test('waits for scrolling when a search continuation fills the viewport', async 
   await page.locator(sel.searchInput).press('Enter')
 
   await expect.poll(() => page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return store.getters.getSessionSearchHistory.find(search => search.query === 'search pagination regression')?.data.length
   })).toBe(31)
   const pagination = page.locator('.ft-auto-load-next-page-wrapper')
@@ -191,7 +185,7 @@ test('waits for scrolling when a search continuation fills the viewport', async 
 
 test('keeps pagination manual when automatic loading is disabled', async ({ page }) => {
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateGeneralAutoLoadMorePaginatedItemsEnabled', false)
   })
   const requests = await mockSearchPages(page)
@@ -213,57 +207,51 @@ test('keeps pagination manual when automatic loading is disabled', async ({ page
   expect(requests).toHaveLength(3)
 })
 
-for (const uiScale of [100, 95]) {
-  test(`resumes pagination after an equally sized cached search replacement at ${uiScale}% UI scale`, async ({ page, attachScreenshot }) => {
-    await page.evaluate(async scale => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      await store.dispatch('updateUiScale', scale)
-    }, uiScale)
-    const requests = await mockSearchPages(page)
-    let firstContinuationRequested = false
-    let finishPendingRequest
-    const pendingRequest = new Promise(resolve => { finishPendingRequest = resolve })
-    await page.route('https://www.youtube.com/youtubei/v1/search**', async route => {
-      if (route.request().postDataJSON().continuation === 'page-2') {
-        firstContinuationRequested = true
-        await pendingRequest
-        return route.abort()
-      }
-      return route.fallback()
+test('resumes pagination after an equally sized cached search replacement', { tag: '@scale' }, async ({ page, attachScreenshot }) => {
+  const requests = await mockSearchPages(page)
+  let firstContinuationRequested = false
+  let finishPendingRequest
+  const pendingRequest = new Promise(resolve => { finishPendingRequest = resolve })
+  await page.route('https://www.youtube.com/youtubei/v1/search**', async route => {
+    if (route.request().postDataJSON().continuation === 'page-2') {
+      firstContinuationRequested = true
+      await pendingRequest
+      return route.abort()
+    }
+    return route.fallback()
+  })
+
+  try {
+    await page.locator(sel.searchInput).fill('search pagination regression')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect.poll(() => firstContinuationRequested).toBe(true)
+    await expect(page.getByText('Pagination result 1', { exact: true })).toBeVisible()
+
+    await page.evaluate(() => {
+      const store = window.$store
+      const history = store.getters.getSessionSearchHistory.find(search => search.query === 'search pagination regression')
+      const continuation = JSON.parse(history.nextPageRef)
+      continuation.payload.token = 'replacement-page-2'
+      store.commit('addToSessionSearchHistory', {
+        ...history,
+        query: 'cached pagination replacement',
+        data: history.data.map(result => ({ ...result, title: 'Cached replacement result' })),
+        nextPageRef: JSON.stringify(continuation)
+      })
     })
 
-    try {
-      await page.locator(sel.searchInput).fill('search pagination regression')
-      await page.locator(sel.searchInput).press('Enter')
-      await expect.poll(() => firstContinuationRequested).toBe(true)
-      await expect(page.getByText('Pagination result 1', { exact: true })).toBeVisible()
-
-      await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-        const history = store.getters.getSessionSearchHistory.find(search => search.query === 'search pagination regression')
-        const continuation = JSON.parse(history.nextPageRef)
-        continuation.payload.token = 'replacement-page-2'
-        store.commit('addToSessionSearchHistory', {
-          ...history,
-          query: 'cached pagination replacement',
-          data: history.data.map(result => ({ ...result, title: 'Cached replacement result' })),
-          nextPageRef: JSON.stringify(continuation)
-        })
-      })
-
-      await page.locator(sel.searchInput).fill('cached pagination replacement')
-      await page.locator(sel.searchInput).press('Enter')
-      await expect(page.getByText('Cached replacement result', { exact: true })).toBeVisible()
-      await expect(page.getByText('Pagination result 2', { exact: true })).toBeVisible()
-      await expect(page.locator('.ft-auto-load-next-page-wrapper')).toHaveCount(0)
-      await expect(page.getByText('There are no more results for this search')).toBeVisible()
-      expect(requests.map(request => request.continuation ?? request.query)).toEqual([
-        'search pagination regression', 'replacement-page-2', 'page-3'
-      ])
-      await expect(page.locator('.feed-enter-active')).toHaveCount(0)
-      await attachScreenshot('completed cached search replacement')
-    } finally {
-      finishPendingRequest()
-    }
-  })
-}
+    await page.locator(sel.searchInput).fill('cached pagination replacement')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page.getByText('Cached replacement result', { exact: true })).toBeVisible()
+    await expect(page.getByText('Pagination result 2', { exact: true })).toBeVisible()
+    await expect(page.locator('.ft-auto-load-next-page-wrapper')).toHaveCount(0)
+    await expect(page.getByText('There are no more results for this search')).toBeVisible()
+    expect(requests.map(request => request.continuation ?? request.query)).toEqual([
+      'search pagination regression', 'replacement-page-2', 'page-3'
+    ])
+    await expect(page.locator('.feed-enter-active')).toHaveCount(0)
+    await attachScreenshot('completed cached search replacement')
+  } finally {
+    finishPendingRequest()
+  }
+})

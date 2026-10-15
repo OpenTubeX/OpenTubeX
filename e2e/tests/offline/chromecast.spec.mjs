@@ -200,7 +200,7 @@ test('Cast loading feedback fits fractional scale and respects reduced motion', 
 test('both casting protocols share one button with Google Cast and DLNA tabs', async ({ app, page }) => {
   await openCastVideo(app, page)
   await mockDlna(app)
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowDlnaCastButton', true))
+  await page.evaluate(() => window.$store.dispatch('updateShowDlnaCastButton', true))
   const castButtons = page.locator('.videoOptions .chromecastControl > button, .videoOptions .dlnaCastControl > button')
   await expect(castButtons).toHaveCount(1)
   await castButtons.click()
@@ -213,12 +213,12 @@ test('both casting protocols share one button with Google Cast and DLNA tabs', a
   await page.getByRole('tab', { name: 'DLNA', exact: true }).press('ArrowLeft')
   await expect(page.getByRole('tab', { name: 'Google Cast', exact: true })).toBeFocused()
   await expect(page.getByRole('option', { name: 'Test TV', exact: true })).toBeVisible()
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowChromecastButton', false))
+  await page.evaluate(() => window.$store.dispatch('updateShowChromecastButton', false))
   await expect(castButtons).toHaveCount(1)
   await castButtons.click()
   await expect(page.getByRole('tab', { name: /Google Cast|DLNA/ })).toHaveCount(0)
   await expect(page.getByRole('option', { name: 'DLNA TV', exact: true })).toBeVisible()
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowDlnaCastButton', false))
+  await page.evaluate(() => window.$store.dispatch('updateShowDlnaCastButton', false))
   await expect(castButtons).toHaveCount(0)
 })
 
@@ -236,7 +236,7 @@ test('reopening the casting menu refreshes each receiver list once per opening',
       })
     }
   })
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowDlnaCastButton', true))
+  await page.evaluate(() => window.$store.dispatch('updateShowDlnaCastButton', true))
   for (const round of [1, 2]) {
     await app.electronApp.evaluate((_, value) => { globalThis.discoveryRound = value }, round)
     await page.locator('.castControl > button').click()
@@ -255,7 +255,7 @@ for (const uiScale of [80, 125]) {
     await openCastVideo(app, page)
     await mockDlna(app)
     await page.evaluate(async scale => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateUiScale', scale)
       await store.dispatch('updateShowDlnaCastButton', true)
     }, uiScale)
@@ -283,59 +283,55 @@ for (const uiScale of [80, 125]) {
   })
 }
 
-for (const zoom of [1, 1.25]) {
-  test(`casting tabs restore and clamp themed scrolling at ${zoom * 100}% UI scale`, async ({ app, page }) => {
-    const watch = await openCastVideo(app, page)
-    await mockDlna(app)
-    await app.electronApp.evaluate(({ ipcMain }) => {
-      globalThis.castDevices = Array.from({ length: 40 }, (_, index) => ({ id: `tv-${index}`, name: `Google TV ${index}` }))
-      ipcMain.removeHandler('cast-discover')
-      ipcMain.handle('cast-discover', () => globalThis.castDevices)
-    })
-    const browserWindow = await app.electronApp.browserWindow(page)
-    await browserWindow.evaluate((window, zoom) => window.webContents.setZoomFactor(zoom), zoom)
-    await setWindowSize(app, page, { width: 800, height: 650 })
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowDlnaCastButton', true))
-    await page.locator('.castControl > button').click()
-    const scroller = page.locator('.castControl .iconDropdownContent')
-    const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
-    await expect(page.getByRole('option', { name: 'Google TV 39', exact: true })).toHaveCount(1)
-    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
-    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
-    await expectScrollAtRenderedEnd(scroller)
-    const offset = await scroller.evaluate(element => element.scrollTop)
-    await page.getByRole('tab', { name: 'DLNA', exact: true }).click()
-    await expect(page.getByRole('option', { name: 'DLNA TV', exact: true })).toBeVisible()
-    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
-    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
-    await page.getByRole('tab', { name: 'Google Cast', exact: true }).click()
-    await expect(page.getByRole('option', { name: 'Google TV 39', exact: true })).toHaveCount(1)
-    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeCloseTo(offset, 0)
-    await expectScrollAtRenderedEnd(scroller)
-    await setWindowSize(app, page, { width: 1200, height: 950 })
-    await expectScrollAtRenderedEnd(scroller)
-    // Returning from touch-sized rows to compact rows reduces the scroll range.
-    const session = await page.context().newCDPSession(page)
-    await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
-    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
-    await session.send('Emulation.setTouchEmulationEnabled', { enabled: false })
-    await expectScrollAtRenderedEnd(scroller)
-    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
-    await session.detach()
-    await setWindowSize(app, page, { width: 375, height: 850 })
-    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
-    await setWindowSize(app, page, { width: 1200, height: 950 })
-    await expectScrollAtRenderedEnd(scroller)
-    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
-    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
-    await app.electronApp.evaluate(() => { globalThis.castDevices = [{ id: 'test-tv', name: 'Test TV' }] })
-    // Rediscovery replaces the long list while the menu is still open.
-    await watch.evaluate(vm => vm.$refs.chromecast.$refs.googleCast.refreshDevices())
-    await expect(page.getByRole('option', { name: 'Test TV', exact: true })).toBeVisible()
-    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
-    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+test('casting tabs restore and clamp themed scrolling', { tag: '@scale' }, async ({ app, page }) => {
+  const watch = await openCastVideo(app, page)
+  await mockDlna(app)
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    globalThis.castDevices = Array.from({ length: 40 }, (_, index) => ({ id: `tv-${index}`, name: `Google TV ${index}` }))
+    ipcMain.removeHandler('cast-discover')
+    ipcMain.handle('cast-discover', () => globalThis.castDevices)
   })
-}
+  await setWindowSize(app, page, { width: 800, height: 650 })
+  await page.evaluate(() => window.$store.dispatch('updateShowDlnaCastButton', true))
+  await page.locator('.castControl > button').click()
+  const scroller = page.locator('.castControl .iconDropdownContent')
+  const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
+  await expect(page.getByRole('option', { name: 'Google TV 39', exact: true })).toHaveCount(1)
+  await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expectScrollAtRenderedEnd(scroller)
+  const offset = await scroller.evaluate(element => element.scrollTop)
+  await page.getByRole('tab', { name: 'DLNA', exact: true }).click()
+  await expect(page.getByRole('option', { name: 'DLNA TV', exact: true })).toBeVisible()
+  await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
+  await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+  await page.getByRole('tab', { name: 'Google Cast', exact: true }).click()
+  await expect(page.getByRole('option', { name: 'Google TV 39', exact: true })).toHaveCount(1)
+  await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeCloseTo(offset, 0)
+  await expectScrollAtRenderedEnd(scroller)
+  await setWindowSize(app, page, { width: 1200, height: 950 })
+  await expectScrollAtRenderedEnd(scroller)
+  // Returning from touch-sized rows to compact rows reduces the scroll range.
+  const session = await page.context().newCDPSession(page)
+  await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await session.send('Emulation.setTouchEmulationEnabled', { enabled: false })
+  await expectScrollAtRenderedEnd(scroller)
+  await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+  await session.detach()
+  await setWindowSize(app, page, { width: 375, height: 850 })
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await setWindowSize(app, page, { width: 1200, height: 950 })
+  await expectScrollAtRenderedEnd(scroller)
+  await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await app.electronApp.evaluate(() => { globalThis.castDevices = [{ id: 'test-tv', name: 'Test TV' }] })
+  // Rediscovery replaces the long list while the menu is still open.
+  await watch.evaluate(vm => vm.$refs.chromecast.$refs.googleCast.refreshDevices())
+  await expect(page.getByRole('option', { name: 'Test TV', exact: true })).toBeVisible()
+  await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
+  await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+})
 
 test('casts the current video, controls the receiver and returns to its remote position', async ({ app, page }) => {
   const watch = await openCastVideo(app, page)
@@ -483,7 +479,7 @@ test('casts from the current Invidious instance without a saved default', async 
     }
   }))
   const defaultInstance = await page.evaluate(async url => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     // Keep an in-flight startup list refresh inside this fixture's instance set.
     store.subscribe(({ type, payload }) => {
       if (type === 'setInvidiousInstancesList' && (payload.length !== 1 || payload[0] !== url)) {
@@ -520,7 +516,7 @@ test('DLNA and Google Cast cannot start overlapping sessions', async ({ app, pag
     globalThis.dlnaTest.holdStop = true
     globalThis.castTest.startDelayMs = 1200
   })
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowDlnaCastButton', true))
+  await page.evaluate(() => window.$store.dispatch('updateShowDlnaCastButton', true))
   await watch.evaluate(vm => vm.$refs.player.play())
   await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
   const castButton = page.locator('.castControl > button')
@@ -783,7 +779,7 @@ test('packaged sender discovers and plays on the selected authenticated Cast rec
     })
     await new Promise(resolve => upstream.listen(0, '127.0.0.1', resolve))
     const instanceUrl = `http://127.0.0.1:${upstream.address().port}/inv`
-    await page.evaluate(url => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateDefaultInvidiousInstance', url), instanceUrl)
+    await page.evaluate(url => window.$store.dispatch('updateDefaultInvidiousInstance', url), instanceUrl)
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
     await page.evaluate(url => window.ftElectron.setInvidiousAuthorization('Bearer cast-test', url), instanceUrl)
@@ -848,6 +844,7 @@ for (const failStop of [false, true]) {
     await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.stops)).toEqual(['session-id'])
     await expect.poll(() => watch.evaluate(vm => vm.chromecastActive)).toBe(false)
     await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(true)
+    // Polling must stay stopped past the next status interval.
     await page.waitForTimeout(2100)
     expect(await app.electronApp.evaluate(() => globalThis.castTest.statusCalls)).toBe(successfulCalls + 1)
     await app.electronApp.evaluate(() => { globalThis.castTest.failStatus = false; globalThis.castTest.failStop = false })
@@ -935,7 +932,7 @@ for (const setting of ['YtDlpSubtitleUseCookies', 'YtDlpPlaybackAlwaysUseCookies
         return text
       })
     }, text)
-    await page.evaluate(setting => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(`update${setting}`, true), setting)
+    await page.evaluate(setting => window.$store.dispatch(`update${setting}`, true), setting)
     await watch.evaluate((vm, url) => { vm.captions = [{ url, label: 'English', language: 'en', mimeType: 'text/vtt' }] }, url)
     await selectLocalEnglishCaption(page, watch)
     await choice(page, 'Test TV')
@@ -959,7 +956,7 @@ for (const selected of [false, true]) {
         return new Promise(() => {})
       })
     })
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateYtDlpSubtitleUseCookies', true))
+    await page.evaluate(() => window.$store.dispatch('updateYtDlpSubtitleUseCookies', true))
     await watch.evaluate((vm, selected) => {
       vm.captions = Array.from({ length: 40 }, (_, index) => ({
         url: `https://www.youtube.com/api/timedtext?v=jNQXAC9IVRw&lang=optional-${index}&fmt=vtt`,
@@ -1000,7 +997,7 @@ test('Cast prepares selected authenticated captions and retains public optional 
       return new URL(url).searchParams.get('lang') === 'de' ? { error: 'Optional caption unavailable' } : text
     })
   }, text)
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateYtDlpSubtitleUseCookies', true))
+  await page.evaluate(() => window.$store.dispatch('updateYtDlpSubtitleUseCookies', true))
   await watch.evaluate(vm => {
     vm.captions = [['de', 'German'], ['en', 'English'], ['ja', 'Japanese']].map(([language, label]) => ({
       url: language === 'ja' ? 'https://cast-media.test/ja.vtt' : `https://www.youtube.com/api/timedtext?v=jNQXAC9IVRw&lang=${language}&fmt=vtt`, language, label, mimeType: 'text/vtt'
@@ -1038,7 +1035,7 @@ test('Cast starts without captions when all failed tracks were unselected', asyn
     ipcMain.removeHandler('yt-dlp-get-subtitle')
     ipcMain.handle('yt-dlp-get-subtitle', () => ({ error: 'Optional caption unavailable' }))
   })
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateYtDlpSubtitleUseCookies', true))
+  await page.evaluate(() => window.$store.dispatch('updateYtDlpSubtitleUseCookies', true))
   await watch.evaluate(vm => {
     vm.captions = [{ url: 'https://www.youtube.com/api/timedtext?v=jNQXAC9IVRw&lang=en&fmt=vtt', label: 'English', language: 'en', mimeType: 'text/vtt' }]
     vm.currentSubtitlesState = false
@@ -1059,7 +1056,7 @@ test('an active authenticated Cast caption failure leaves local playback running
     ipcMain.removeHandler('yt-dlp-get-subtitle')
     ipcMain.handle('yt-dlp-get-subtitle', () => ({ error: 'Unable to load subtitle with configured cookies' }))
   })
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateYtDlpSubtitleUseCookies', true))
+  await page.evaluate(() => window.$store.dispatch('updateYtDlpSubtitleUseCookies', true))
   await watch.evaluate(vm => {
     vm.captions = [{ url: 'https://www.youtube.com/api/timedtext?v=jNQXAC9IVRw&lang=en&fmt=vtt', label: 'English', language: 'en', mimeType: 'text/vtt' }]
     vm.currentSubtitlesState = true
@@ -1089,7 +1086,7 @@ for (const loseFocus of [false, true]) {
       ipcMain.removeHandler('yt-dlp-get-subtitle')
       ipcMain.handle('yt-dlp-get-subtitle', () => new Promise(resolve => { globalThis.finishCastSubtitle = resolve }))
     })
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateYtDlpSubtitleUseCookies', true))
+    await page.evaluate(() => window.$store.dispatch('updateYtDlpSubtitleUseCookies', true))
     await watch.evaluate((vm, url) => {
       vm.captions = [{ url, label: 'English', language: 'en', mimeType: 'text/vtt' }]
       vm.$refs.player.play()

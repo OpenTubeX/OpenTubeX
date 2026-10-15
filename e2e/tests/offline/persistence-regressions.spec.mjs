@@ -45,7 +45,7 @@ test('encrypted subscription retries retain concurrent remote edits', async ({ p
   })
 
   await page.evaluate(async ({ key, salt }) => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateProfile', {
       _id: 'allChannels',
       name: 'All Channels',
@@ -78,7 +78,7 @@ test('encrypted subscription retries retain concurrent remote edits', async ({ p
   expect(conflicts).toBe(1)
   expect(remote.map(entry => entry.id).sort()).toEqual(['added-locally', 'added-remotely', 'base'])
   expect(await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return store.state.profiles.profileList.find(profile => profile._id === 'allChannels')
       .subscriptions.map(entry => entry.id).sort()
   })).toEqual(['added-locally', 'added-remotely', 'base'])
@@ -115,7 +115,7 @@ for (const [feed, action, cache, entriesKey, storedKey, idKey] of [
 ]) {
   test(`${feed} cache rejects stale results including overlapping writes`, async ({ app, page }) => {
     const result = await page.evaluate(async ({ action, cache, entriesKey, idKey }) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const save = (time, ids) => store.dispatch(action, {
         channelId: 'audit-channel',
         timestamp: new Date(time),
@@ -139,7 +139,7 @@ for (const [feed, action, cache, entriesKey, storedKey, idKey] of [
 
 test('Shorts metadata enrichment cannot replace a concurrent feed refresh', async ({ app, page }) => {
   const result = await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const save = (timestamp, videos) => store.dispatch('updateSubscriptionShortsCacheByChannel', {
       channelId: 'audit-channel', timestamp: new Date(timestamp), videos,
     })
@@ -184,7 +184,7 @@ test('persistent playback cache preserves thumbnails and duration after restart'
 
 test('stale refresh completion cannot rewind feed refresh timing', async ({ page }) => {
   const result = await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const latest = Math.max(Date.now(), store.getters.getSubscriptionFeedLastRefreshTimestamp) + 1000
     for (const timestamp of [latest, latest - 1000]) {
       window.dispatchEvent(new CustomEvent('opentubex-subscription-refresh-completed', {
@@ -199,7 +199,7 @@ test('stale refresh completion cannot rewind feed refresh timing', async ({ page
 for (const mode of ['all', 'video', 'post']) {
   test(`marking ${mode} seen survives a newer refresh without dismissing newly arrived entries`, async ({ app, page }) => {
     const result = await page.evaluate(async mode => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const isPost = mode === 'post'
       const key = isPost ? 'posts' : 'videos'
       const idKey = isPost ? 'postId' : 'videoId'
@@ -227,7 +227,7 @@ for (const mode of ['all', 'video', 'post']) {
 
 test('failed Home re-addition redirects when removal was already persisted', async ({ app, page }) => {
   await page.locator('.sideNav .navOption[title="Home"]').click()
-  await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getActiveTab.route.path)).toBe('/home')
+  await expect.poll(() => page.evaluate(() => window.$store.getters.getActiveTab.route.path)).toBe('/home')
   const appearance = await goToSettingsSection(page, 'appearance')
   await appearance.getByRole('button', { name: 'Customize navigation' }).click()
   await app.electronApp.evaluate(({ ipcMain }) => {
@@ -248,13 +248,13 @@ test('failed Home re-addition redirects when removal was already persisted', asy
   await page.getByRole('menuitem', { name: 'Home', exact: true }).click()
   await expect(page.locator('[data-navigation-item-id="home"]')).toHaveCount(1)
   await app.electronApp.evaluate(() => globalThis.releaseNavigationWrite())
-  await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getNavigationItems.includes('home'))).toBe(false)
-  await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$route.path)).not.toBe('/home')
+  await expect.poll(() => page.evaluate(() => window.$store.getters.getNavigationItems.includes('home'))).toBe(false)
+  await expect.poll(() => page.evaluate(() => window.$router.currentRoute.value.path)).not.toBe('/home')
 })
 
 test('queued bulk seen writes and their final mutation retain the original snapshot', async ({ app, page }) => {
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     for (let i = 0; i < 9; i++) {
       await store.dispatch('updateSubscriptionVideosCacheByChannel', {
         channelId: `audit-bulk-${i}`,
@@ -280,13 +280,13 @@ test('queued bulk seen writes and their final mutation retain the original snaps
     })
   })
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     window.bulkSeenWrite = store.dispatch('markSubscriptionEntriesAsSeen', {
       tab: 'videos', channelIds: Array.from({ length: 9 }, (_, i) => `audit-bulk-${i}`),
     })
   })
   await expect.poll(() => app.electronApp.evaluate(() => globalThis.blockedSeenWrites.length)).toBe(8)
-  const refresh = id => page.evaluate(id => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateSubscriptionVideosCacheByChannel', {
+  const refresh = id => page.evaluate(id => window.$store.dispatch('updateSubscriptionVideosCacheByChannel', {
     channelId: `audit-bulk-${id}`,
     timestamp: new Date(2000),
     videos: [{ videoId: 'new', isNewInSubscriptionFeed: true }],
@@ -304,6 +304,6 @@ test('queued bulk seen writes and their final mutation retain the original snaps
   for (const id of [0, 8]) {
     const expected = [{ videoId: 'new', isNewInSubscriptionFeed: true }]
     expect(records.filter(record => record._id === `audit-bulk-${id}`).at(-1).videos).toEqual(expected)
-    expect(await page.evaluate(id => document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.subscriptionCache.videoCache[`audit-bulk-${id}`].videos, id)).toEqual(expected)
+    expect(await page.evaluate(id => window.$store.state.subscriptionCache.videoCache[`audit-bulk-${id}`].videos, id)).toEqual(expected)
   }
 })

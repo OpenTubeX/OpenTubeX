@@ -30,7 +30,7 @@ async function addPageOverflow(page) {
 async function recordCustomSpeedPageScroll(page) {
   await addPageOverflow(page)
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setScrollSpeed', 200)
     window.__scrollSpeedAnimationPositions = []
     document.addEventListener('scroll', () => {
@@ -68,7 +68,7 @@ async function addNestedCustomSpeedScroller(page, attribute, scrollTop) {
 }
 
 test.describe('overlay scrollbars', () => {
-  test('coalesces page overflow measurements as individual feed enter animations finish', async ({ page }) => {
+  test('coalesces page overflow measurements as individual feed enter animations finish', { tag: '@performance' }, async ({ page }) => {
     await expect(page.locator('.tutorialOverlay')).toHaveCount(0)
     await addPageOverflow(page)
     const scrollReads = await page.evaluate(async () => {
@@ -107,7 +107,7 @@ test.describe('overlay scrollbars', () => {
     expect(scrollReads).toBeLessThan(10)
   })
 
-  test('avoids full page scrollbar updates for content changes with stable dimensions', async ({ page }) => {
+  test('avoids full page scrollbar updates for content changes with stable dimensions', { tag: '@performance' }, async ({ page }) => {
     await expect(page.locator('.tutorialOverlay')).toHaveCount(0)
     await addPageOverflow(page)
     const viewportReads = await page.evaluate(async () => {
@@ -136,58 +136,50 @@ test.describe('overlay scrollbars', () => {
     expect(viewportReads).toBeLessThan(10)
   })
 
-  test('remeasures settled page overflow after bottom-row feed enter animations at fractional UI scale', async ({ page }) => {
+  test('remeasures settled page overflow after bottom-row feed enter animations', { tag: '@scale' }, async ({ page }) => {
     await expect(page.locator('.tutorialOverlay')).toHaveCount(0)
     await page.evaluate(() => {
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setReducedMotion', 'off')
+      window.$store.commit('setReducedMotion', 'off')
     })
-    for (const zoomFactor of [1, 1.25]) {
-      await page.evaluate(factor => window.ftElectron.setZoomFactor(factor), zoomFactor)
-      await page.evaluate(() => {
-        const style = document.createElement('style')
-        style.dataset.enterOverflowStyle = ''
-        style.textContent = `
-          body { padding-bottom: 0 !important; }
-          [data-enter-overflow] .feed-enter-active { transition: transform 200ms linear; }
-          [data-enter-overflow] .feed-enter-from { transform: translateY(10px); }
-        `
-        document.head.append(style)
-        const grid = document.createElement('div')
-        grid.className = 'autoGrid'
-        grid.dataset.enterOverflow = ''
-        const card = document.createElement('div')
-        card.style.height = '1500px'
-        card.className = 'feed-enter-from'
-        grid.append(card)
-        document.body.append(grid)
-        window.scrollTo(0, document.documentElement.scrollHeight)
-      })
-      await expect.poll(() => pageScrollbarRangeError(page)).toBeLessThanOrEqual(2)
-      const initialTransform = await page.evaluate(async () => {
-        const card = document.querySelector('[data-enter-overflow] > div')
-        card.classList.add('feed-enter-active')
-        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
-        card.classList.remove('feed-enter-from')
-        card.classList.add('feed-enter-to')
-        return new DOMMatrixReadOnly(getComputedStyle(card).transform).m42
-      })
-      expect(initialTransform).toBeGreaterThan(0)
-      const card = page.locator('[data-enter-overflow] > div')
-      await expect(card).toHaveCSS('transform', 'none')
-      await card.evaluate(element => {
-        element.classList.remove('feed-enter-active', 'feed-enter-to')
-      })
-      await expect.poll(() => pageScrollbarRangeError(page)).toBeLessThanOrEqual(2)
-      await expect.poll(() => page.evaluate(() => {
-        const root = document.documentElement
-        const contentEnd = document.body.getBoundingClientRect().bottom + window.scrollY
-        return Math.abs(root.scrollHeight - Math.max(root.clientHeight, contentEnd)) * devicePixelRatio
-      })).toBeLessThanOrEqual(2)
-      await page.evaluate(() => {
-        document.querySelector('[data-enter-overflow]').remove()
-        document.querySelector('[data-enter-overflow-style]').remove()
-      })
-    }
+    await page.evaluate(() => {
+      const style = document.createElement('style')
+      style.textContent = `
+        body { padding-bottom: 0 !important; }
+        [data-enter-overflow] .feed-enter-active { transition: transform 200ms linear; }
+        [data-enter-overflow] .feed-enter-from { transform: translateY(10px); }
+      `
+      document.head.append(style)
+      const grid = document.createElement('div')
+      grid.className = 'autoGrid'
+      grid.dataset.enterOverflow = ''
+      const card = document.createElement('div')
+      card.style.height = '1500px'
+      card.className = 'feed-enter-from'
+      grid.append(card)
+      document.body.append(grid)
+      window.scrollTo(0, document.documentElement.scrollHeight)
+    })
+    await expect.poll(() => pageScrollbarRangeError(page)).toBeLessThanOrEqual(2)
+    const initialTransform = await page.evaluate(async () => {
+      const card = document.querySelector('[data-enter-overflow] > div')
+      card.classList.add('feed-enter-active')
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+      card.classList.remove('feed-enter-from')
+      card.classList.add('feed-enter-to')
+      return new DOMMatrixReadOnly(getComputedStyle(card).transform).m42
+    })
+    expect(initialTransform).toBeGreaterThan(0)
+    const card = page.locator('[data-enter-overflow] > div')
+    await expect(card).toHaveCSS('transform', 'none')
+    await card.evaluate(element => {
+      element.classList.remove('feed-enter-active', 'feed-enter-to')
+    })
+    await expect.poll(() => pageScrollbarRangeError(page)).toBeLessThanOrEqual(2)
+    await expect.poll(() => page.evaluate(() => {
+      const root = document.documentElement
+      const contentEnd = document.body.getBoundingClientRect().bottom + window.scrollY
+      return Math.abs(root.scrollHeight - Math.max(root.clientHeight, contentEnd)) * devicePixelRatio
+    })).toBeLessThanOrEqual(2)
   })
 
   test('updates page overflow when loaded image dimensions grow', async ({ page }) => {
@@ -215,11 +207,11 @@ test.describe('overlay scrollbars', () => {
     const viewport = await addNestedCustomSpeedScroller(page, 'data-roundness-scrollbar', 0)
     for (const width of [4, 10]) {
       await page.evaluate(value => {
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setScrollbarThumbWidth', value)
+        window.$store.commit('setScrollbarThumbWidth', value)
       }, width)
       for (const roundness of [0, 50, 100, 200]) {
         await page.evaluate(value => {
-          document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
+          window.$store.commit('setUiRoundness', value)
         }, roundness)
         for (const scrollbar of [page.locator(PAGE_SCROLLBAR), viewport.locator(':scope > .os-scrollbar-vertical')]) {
           await expect(scrollbar.locator('.os-scrollbar-handle')).toHaveCSS('border-radius', `${width * roundness / 100}px`)
@@ -256,7 +248,7 @@ test.describe('overlay scrollbars', () => {
     })
     for (const alwaysShow of [true, false, true]) {
       await page.evaluate(enabled => {
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setAlwaysShowScrollbars', enabled)
+        window.$store.commit('setAlwaysShowScrollbars', enabled)
       }, alwaysShow)
       await expect.poll(() => page.evaluate(() =>
         document.querySelector('[data-retained-scrollbar] > .os-scrollbar-vertical') === window.__retainedScrollbar
@@ -265,7 +257,7 @@ test.describe('overlay scrollbars', () => {
     }
   })
 
-  test('does not rewrite visible scrollbar classes on every scroll frame', async ({ page }) => {
+  test('does not rewrite visible scrollbar classes on every scroll frame', { tag: '@performance' }, async ({ page }) => {
     await addPageOverflow(page)
     for (const zoomFactor of [1, 1.25]) {
       await page.evaluate((factor) => window.ftElectron.setZoomFactor(factor), zoomFactor)
@@ -309,7 +301,7 @@ test.describe('overlay scrollbars', () => {
   test('applies the configured wheel speed to page scrolling', async ({ page }) => {
     await addPageOverflow(page)
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setScrollSpeed', 200)
       window.ftElectron.setZoomFactor(1.25)
       document.addEventListener('wheel', (event) => {
@@ -339,7 +331,7 @@ test.describe('overlay scrollbars', () => {
   test('preserves a burst of wheel deltas while custom scrolling is animated', async ({ page }) => {
     await addPageOverflow(page)
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setScrollSpeed', 200)
 
       for (let index = 0; index < 3; index++) {
@@ -357,7 +349,7 @@ test.describe('overlay scrollbars', () => {
   test('reverses a pending custom-speed scroll at the current boundary', async ({ page }) => {
     await addPageOverflow(page)
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setScrollSpeed', 200)
 
       for (const deltaY of [120, -120]) {
@@ -369,6 +361,7 @@ test.describe('overlay scrollbars', () => {
       }
     })
 
+    // The reversed scroll must not move the page while it settles.
     await page.waitForTimeout(300)
     expect(await page.evaluate(() => window.scrollY)).toBe(0)
   })
@@ -376,7 +369,7 @@ test.describe('overlay scrollbars', () => {
   test('the page scrollbar stays on the content side of right vertical tabs', async ({ page }) => {
     await addPageOverflow(page)
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setVerticalTabBarWidth', 220)
       store.commit('setTabBarPosition', 'right')
     })
@@ -392,7 +385,7 @@ test.describe('overlay scrollbars', () => {
   test('the page scrollbar stays on the window edge with left vertical tabs', async ({ page }) => {
     await addPageOverflow(page)
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setVerticalTabBarWidth', 220)
       store.commit('setTabBarPosition', 'left')
     })
@@ -404,31 +397,27 @@ test.describe('overlay scrollbars', () => {
     expect(Math.abs(scrollbarBox.x + scrollbarBox.width - innerWidth)).toBeLessThanOrEqual(1)
   })
 
-  test('keeps the quick settings avatar clear of a wide page scrollbar', async ({ page }) => {
+  test('keeps the quick settings avatar clear of a wide page scrollbar', { tag: '@scale' }, async ({ page }) => {
     await addPageOverflow(page)
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setScrollbarThumbWidth', 20)
     })
 
-    for (const zoomFactor of [1, 1.25]) {
-      await page.evaluate((factor) => window.ftElectron.setZoomFactor(factor), zoomFactor)
-      await expect.poll(async () => {
-        const [avatarBox, scrollbarBox] = await Promise.all([
-          page.locator('.topNav .profileTrigger').boundingBox(),
-          page.locator(PAGE_SCROLLBAR).boundingBox()
-        ])
-        return scrollbarBox.x - (avatarBox.x + avatarBox.width)
-      }).toBeGreaterThanOrEqual(5)
-    }
+    await expect.poll(async () => {
+      const [avatarBox, scrollbarBox] = await Promise.all([
+        page.locator('.topNav .profileTrigger').boundingBox(),
+        page.locator(PAGE_SCROLLBAR).boundingBox()
+      ])
+      return scrollbarBox.x - (avatarBox.x + avatarBox.width)
+    }).toBeGreaterThanOrEqual(5)
 
-    await page.evaluate(() => window.ftElectron.setZoomFactor(1))
     await page.setViewportSize({ width: 400, height: 720 })
     await page.locator('.topNav .profileTrigger').click()
     const menuBox = await page.locator('.quickSettingsMenu').boundingBox()
 
     expect(menuBox.x).toBeGreaterThanOrEqual(0)
-    expect(menuBox.x + menuBox.width).toBeLessThanOrEqual(400)
+    expect(menuBox.x + menuBox.width).toBeLessThanOrEqual(await page.evaluate(() => window.visualViewport.width))
   })
 
   test('the scrollbar hides once the pointer rests and follows it back', async ({ page }) => {
@@ -502,6 +491,7 @@ test.describe('overlay scrollbars', () => {
     await page.mouse.move(handleBox.x + handleBox.width / 2, handleBox.y + handleBox.height / 2)
     await page.mouse.down()
     await page.mouse.move(800, 500)
+    // Outlast the 1300ms auto hide delay while the handle is held.
     await page.waitForTimeout(1600)
     await expect(scrollbar).toHaveCSS('opacity', '1')
     await page.mouse.up()
@@ -605,7 +595,7 @@ test.describe('overlay scrollbars', () => {
       expect(measurements.scrollTop).toBe(120)
     })
 
-    test('keeps hovered bars visible and avoids repeated visibility writes while scrolling', async ({ page }) => {
+    test('avoids repeated visibility writes while scrolling', { tag: '@performance' }, async ({ page }) => {
       const viewport = await addNestedCustomSpeedScroller(page, 'data-idle-scrollbar-test', 0)
       const scrollbar = viewport.locator(':scope > .os-scrollbar-vertical')
       await viewport.hover()
@@ -626,7 +616,15 @@ test.describe('overlay scrollbars', () => {
         return mutations
       })
       expect(classMutations).toBe(0)
+    })
+
+    test('keeps hovered bars visible', async ({ page }) => {
+      const viewport = await addNestedCustomSpeedScroller(page, 'data-idle-scrollbar-test', 0)
+      const scrollbar = viewport.locator(':scope > .os-scrollbar-vertical')
+      await viewport.hover()
+      await expect(scrollbar).toHaveCSS('opacity', '1')
       await scrollbar.locator('.os-scrollbar-handle').hover()
+      // Outlast the 1300ms auto hide delay while hovering.
       await page.waitForTimeout(1600)
       await expect(scrollbar).toHaveCSS('opacity', '1')
       await page.mouse.move(800, 500)
@@ -639,14 +637,15 @@ test.describe('overlay scrollbars', () => {
       await viewport.hover()
       await expect(scrollbar).toHaveCSS('opacity', '1')
       await page.evaluate(() => {
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        window.$store
           .commit('setAlwaysShowScrollbars', true)
       })
       await page.mouse.move(800, 500)
+      // Outlast the 1300ms auto hide delay with an idle pointer.
       await page.waitForTimeout(1600)
       await expect(scrollbar).toHaveCSS('opacity', '1')
       await page.evaluate(() => {
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        window.$store
           .commit('setAlwaysShowScrollbars', false)
       })
       await expect(scrollbar).toHaveCSS('opacity', '0')
@@ -887,6 +886,7 @@ test.describe('overlay scrollbars', () => {
     // The switch takes effect on the scrollbars that already exist, and
     // rebuilding them mustn't lose where the page was scrolled to.
     await page.mouse.move(400, 700)
+    // Idle well past the 1300ms auto hide delay.
     await page.waitForTimeout(2500)
 
     await expect(scrollbar).toBeVisible()

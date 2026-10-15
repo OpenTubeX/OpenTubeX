@@ -72,7 +72,7 @@ async function openThreeTabsAndActivate(page, activeIndex) {
 }
 
 test.describe('tab bar', () => {
-  test('keeps auto-sized tab geometry stable when selection changes', async ({ app, page }, testInfo) => {
+  test('keeps auto-sized tab geometry stable when selection changes', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
     await page.evaluate(async () => {
       for (let index = 0; index < 4; index++) {
         await window.ftElectron.tabs.create({ route: '/history', makeActive: true })
@@ -96,26 +96,22 @@ test.describe('tab bar', () => {
       })
     }
 
-    for (const zoom of [1, 0.95, 1.25]) {
-      await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
-      await app.electronApp.evaluate(({ BrowserWindow }, zoom) => BrowserWindow.getAllWindows()[0].setSize(Math.round(550 * zoom), 800), zoom)
-      await expect(page.locator('.tabsContainer > .os-scrollbar-horizontal')).toHaveClass(/os-scrollbar-visible/)
-      const before = await geometry()
-      expect(before.tabs[0].width).toBeGreaterThan(100)
-      expect(before.tabs[0].width).toBeLessThan(200)
-      for (const tab of await tabs.all()) {
-        await page.evaluate(id => window.ftElectron.tabs.activate(id), await tab.getAttribute('data-tab-id'))
-        await expect(tab).toHaveClass(/active/)
-        await expect.poll(async () => {
-          const after = await geometry()
-          return Math.abs(after.range - before.range) <= 1 && after.tabs.every((box, index) =>
-            ['width', 'start', 'close'].every(key => Math.abs(box[key] - before.tabs[index][key]) <= 0.1)
-          )
-        }, { message: `selection keeps tab widths, close buttons and scroll range stable at ${zoom} zoom` }).toBe(true)
-      }
+    await app.electronApp.evaluate(({ BrowserWindow }, width) => BrowserWindow.getAllWindows()[0].setSize(width, 800), Math.round(550 * uiScale / 100))
+    await expect(page.locator('.tabsContainer > .os-scrollbar-horizontal')).toHaveClass(/os-scrollbar-visible/)
+    const before = await geometry()
+    expect(before.tabs[0].width).toBeGreaterThan(100)
+    expect(before.tabs[0].width).toBeLessThan(200)
+    for (const tab of await tabs.all()) {
+      await page.evaluate(id => window.ftElectron.tabs.activate(id), await tab.getAttribute('data-tab-id'))
+      await expect(tab).toHaveClass(/active/)
+      await expect.poll(async () => {
+        const after = await geometry()
+        return Math.abs(after.range - before.range) <= 1 && after.tabs.every((box, index) =>
+          ['width', 'start', 'close'].every(key => Math.abs(box[key] - before.tabs[index][key]) <= 0.1)
+        )
+      }, { message: 'selection keeps tab widths, close buttons and scroll range stable' }).toBe(true)
     }
 
-    await page.evaluate(() => window.ftElectron.setZoomFactor(1))
     await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1100, 800))
     for (const colorScheme of ['dark', 'light']) {
       await page.emulateMedia({ colorScheme })
@@ -130,7 +126,7 @@ test.describe('tab bar', () => {
     }
   })
 
-  test('centers horizontal tabs beside their reserved scrollbar row', async ({ page }) => {
+  test('centers horizontal tabs beside their reserved scrollbar row', { tag: '@scale' }, async ({ page }) => {
     for (const overflowing of [false, true]) {
       if (overflowing) {
         await page.evaluate(async () => {
@@ -140,34 +136,31 @@ test.describe('tab bar', () => {
         })
         await expect(page.locator('.tabsContainer > .os-scrollbar-horizontal')).toHaveClass(/os-scrollbar-visible/)
       }
-      for (const zoom of [1, 0.95, 1.25]) {
-        await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
-        for (const position of ['top', 'bottom']) {
-          await page.evaluate(position => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setTabBarPosition', position), position)
-          await expect.poll(() => page.locator('.tab').first().evaluate(tab => {
-            const bar = tab.closest('.tabBar').getBoundingClientRect()
-            const box = tab.getBoundingClientRect()
-            const scrollbar = tab.closest('.tabBar').querySelector('.os-scrollbar-horizontal')
-            const scrollbarSpace = scrollbar.classList.contains('os-scrollbar-visible') ? scrollbar.getBoundingClientRect().height : 0
-            const position = tab.closest('.tabBar').classList.contains('position-bottom') ? 'bottom' : 'top'
-            const top = box.top - bar.top - (position === 'bottom' ? scrollbarSpace : 0)
-            const bottom = bar.bottom - box.bottom - (position === 'top' ? scrollbarSpace : 0)
-            const style = getComputedStyle(tab)
-            return top >= 0.5 && bottom >= 0.5 && Math.abs(top - bottom) <= 0.6 && style.borderTopWidth === style.borderBottomWidth
-          }), { message: `balanced tab gaps at ${position}, ${zoom} scale, overflow ${overflowing}` }).toBe(true)
-        }
+      for (const position of ['top', 'bottom']) {
+        await page.evaluate(position => window.$store.commit('setTabBarPosition', position), position)
+        await expect.poll(() => page.locator('.tab').first().evaluate(tab => {
+          const bar = tab.closest('.tabBar').getBoundingClientRect()
+          const box = tab.getBoundingClientRect()
+          const scrollbar = tab.closest('.tabBar').querySelector('.os-scrollbar-horizontal')
+          const scrollbarSpace = scrollbar.classList.contains('os-scrollbar-visible') ? scrollbar.getBoundingClientRect().height : 0
+          const position = tab.closest('.tabBar').classList.contains('position-bottom') ? 'bottom' : 'top'
+          const top = box.top - bar.top - (position === 'bottom' ? scrollbarSpace : 0)
+          const bottom = bar.bottom - box.bottom - (position === 'top' ? scrollbarSpace : 0)
+          const style = getComputedStyle(tab)
+          return top >= 0.5 && bottom >= 0.5 && Math.abs(top - bottom) <= 0.6 && style.borderTopWidth === style.borderBottomWidth
+        }), { message: `balanced tab gaps at ${position}, overflow ${overflowing}` }).toBe(true)
       }
     }
   })
 
   test('the mobile tabs preference leaves desktop tabs available', async ({ page }) => {
     await page.evaluate(() => {
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setEnableMobileTabs', false)
+      window.$store.commit('setEnableMobileTabs', false)
     })
     await goToSettingsSection(page, 'general')
     await expect(page.locator('[data-setting-key="enableMobileTabs"]')).toHaveCount(0)
     await page.evaluate(() => {
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('hideSettingsWindow')
+      window.$store.dispatch('hideSettingsWindow')
     })
     await page.locator(sel.newTabButton).click()
     await expect(page.locator(sel.tabs)).toHaveCount(2)
@@ -198,7 +191,7 @@ test.describe('tab bar', () => {
       window.__syncRetainedTabNodes = retainedTabIds.map(tabId => (
         document.querySelector(`.tabContent[data-tab-id="${tabId}"]`)
       ))
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('prepareTabReloadRoute', {
         tabId: retainedTabIds[0],
         route: '/about'
@@ -275,11 +268,11 @@ test.describe('tab bar', () => {
     await expect(page.locator('.tab[data-tab-id="remote-new-tab"]')).toHaveCount(1)
     await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', secondRetainedTab.id)
     await expect.poll(() => page.evaluate(tabId => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getTabById(tabId).route.fullPath
     }, retainedTabId)).toBe('/playlists')
     expect(await page.evaluate(tabId => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const tab = store.getters.getTabById(tabId)
       return {
         retainedNodesConnected: window.__syncRetainedTabNodes.map(node => node?.isConnected === true),
@@ -535,7 +528,7 @@ test.describe('tab bar', () => {
       await expect(tab).not.toHaveClass(/unloaded|loading/)
       await page.evaluate(id => window.ftElectron.tabs.setLoading(true, id), subscriptionsTab.id)
       await expect.poll(() => page.evaluate(id => (
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getTabById(id).isLoading
+        window.$store.getters.getTabById(id).isLoading
       ), subscriptionsTab.id)).toBe(true)
       await expect(tab.locator('.tabLoadingLine')).toHaveCount(0)
       await expect(tab.locator('.tabTitleText')).toHaveCSS('opacity', '1')
@@ -549,7 +542,7 @@ test.describe('tab bar', () => {
     }))
     const tab = page.locator(`.tab[data-tab-id="${loadingTab.id}"]`)
     await page.evaluate(id => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setUiRoundness', 100)
       store.commit('setReducedMotion', 'off')
       window.ftElectron.tabs.setLoading(true, id)
@@ -582,7 +575,7 @@ test.describe('tab bar', () => {
     }))
     const tab = page.locator(`.tab[data-tab-id="${loadingTab.id}"]`)
     await page.evaluate(id => {
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setReducedMotion', 'off')
+      window.$store.commit('setReducedMotion', 'off')
       window.ftElectron.tabs.setLoading(true, id)
     }, loadingTab.id)
     const line = tab.locator('.tabLoadingLine')
@@ -605,7 +598,7 @@ test.describe('tab bar', () => {
     )))).toBeLessThanOrEqual(2)
   })
 
-  test('keeps the loading line at the tab bottom with icons and reduced motion', async ({ page }) => {
+  test('keeps the loading line at the tab bottom with icons and reduced motion', { tag: '@scale' }, async ({ page }) => {
     const watchTab = await page.evaluate(() => window.ftElectron.tabs.create({
       route: '/watch/loading-line',
       makeActive: false,
@@ -618,19 +611,16 @@ test.describe('tab bar', () => {
     await expect(tab.locator('.tabPageIcon')).toBeVisible()
     await expect(tab.locator('.tabTitleText')).toHaveCSS('opacity', '0.8')
 
-    for (const zoom of [1, 0.95, 1.25]) {
-      await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
-      for (const position of ['top', 'bottom', 'left', 'right']) {
-        await page.evaluate(position => {
-          document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setTabBarPosition', position)
-        }, position)
-        await expect.poll(() => line.evaluate(element => {
-          const tab = element.closest('.tab').getBoundingClientRect()
-          const line = element.getBoundingClientRect()
-          return line.left >= tab.left && line.right <= tab.right &&
-            Math.abs(line.bottom - tab.bottom) < 2
-        })).toBe(true)
-      }
+    for (const position of ['top', 'bottom', 'left', 'right']) {
+      await page.evaluate(position => {
+        window.$store.commit('setTabBarPosition', position)
+      }, position)
+      await expect.poll(() => line.evaluate(element => {
+        const tab = element.closest('.tab').getBoundingClientRect()
+        const line = element.getBoundingClientRect()
+        return line.left >= tab.left && line.right <= tab.right &&
+          Math.abs(line.bottom - tab.bottom) < 2
+      })).toBe(true)
     }
 
     await page.evaluate(id => window.ftElectron.tabs.setPinned(id, true), watchTab.id)
@@ -643,12 +633,12 @@ test.describe('tab bar', () => {
     await expect.poll(animationName).not.toBe('none')
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await expect.poll(animationName).toBe('none')
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'off'))
+    await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'off'))
     await expect.poll(animationName).not.toBe('none')
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'system'))
+    await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'system'))
     await expect.poll(animationName).toBe('none')
     await page.emulateMedia({ reducedMotion: 'no-preference' })
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'on'))
+    await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'on'))
     await expect.poll(animationName).toBe('none')
     await page.evaluate(id => window.ftElectron.tabs.setLoading(false, id), watchTab.id)
     await expect(line).toHaveCount(0)
@@ -656,7 +646,7 @@ test.describe('tab bar', () => {
     await expect(tab.locator('.tabTitleText')).toHaveCSS('opacity', '1')
   })
 
-  test('restores the loading dot from Appearance settings and remembers the choice', async ({ app, page }) => {
+  test('restores the loading dot from Appearance settings and remembers the choice', { tag: '@scale' }, async ({ app, page }) => {
     await goToSettingsSection(page, 'appearance')
     const indicator = page.getByRole('combobox', { name: 'Tab Loading Style', exact: true })
     await expect(indicator).toHaveText('Bar')
@@ -669,18 +659,15 @@ test.describe('tab bar', () => {
     await goToSettingsSection(page, 'appearance')
     const savedIndicator = page.getByRole('combobox', { name: 'Tab Loading Style', exact: true })
     await expect(savedIndicator).toHaveText('Dot (classic)')
-    for (const zoom of [1, 1.25]) {
-      await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
-      for (const width of [1600, 732, 520]) {
-        await app.electronApp.evaluate(({ BrowserWindow }, width) => {
-          const window = BrowserWindow.getAllWindows()[0]
-          window.setBounds({ ...window.getBounds(), width, height: 800 })
-        }, width)
-        await savedIndicator.scrollIntoViewIfNeeded()
-        await expect(savedIndicator).toBeVisible()
-        await expect.poll(() => savedIndicator.locator('..').locator('.select-label-text')
-          .evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
-      }
+    for (const width of [1600, 732, 520]) {
+      await app.electronApp.evaluate(({ BrowserWindow }, width) => {
+        const window = BrowserWindow.getAllWindows()[0]
+        window.setBounds({ ...window.getBounds(), width, height: 800 })
+      }, width)
+      await savedIndicator.scrollIntoViewIfNeeded()
+      await expect(savedIndicator).toBeVisible()
+      await expect.poll(() => savedIndicator.locator('..').locator('.select-label-text')
+        .evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
     }
     await app.electronApp.evaluate(({ BrowserWindow }) => {
       const window = BrowserWindow.getAllWindows()[0]
@@ -699,28 +686,25 @@ test.describe('tab bar', () => {
     await expect(dot).toBeVisible()
     await expect(tab.locator('.tabLoadingLine')).toHaveCount(0)
     await expect(tab.locator('.tabPageIcon')).toHaveCount(0)
-    for (const zoom of [1, 1.25]) {
-      await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
-      for (const position of ['top', 'bottom', 'left', 'right']) {
-        await page.evaluate(position => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setTabBarPosition', position), position)
-        await expect(dot).toBeVisible()
-        expect(await dot.evaluate(element => {
-          const tab = element.closest('.tab').getBoundingClientRect()
-          const dot = element.getBoundingClientRect()
-          return dot.left >= tab.left && dot.right <= tab.right && dot.top >= tab.top && dot.bottom <= tab.bottom
-        })).toBe(true)
-      }
+    for (const position of ['top', 'bottom', 'left', 'right']) {
+      await page.evaluate(position => window.$store.commit('setTabBarPosition', position), position)
+      await expect(dot).toBeVisible()
+      expect(await dot.evaluate(element => {
+        const tab = element.closest('.tab').getBoundingClientRect()
+        const dot = element.getBoundingClientRect()
+        return dot.left >= tab.left && dot.right <= tab.right && dot.top >= tab.top && dot.bottom <= tab.bottom
+      })).toBe(true)
     }
     const animationName = () => dot.evaluate(element => getComputedStyle(element).animationName)
     await expect.poll(animationName).not.toBe('none')
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await expect.poll(animationName).toBe('none')
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'off'))
+    await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'off'))
     await expect.poll(animationName).not.toBe('none')
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'system'))
+    await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'system'))
     await expect.poll(animationName).toBe('none')
     await page.emulateMedia({ reducedMotion: 'no-preference' })
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'on'))
+    await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'on'))
     await expect.poll(animationName).toBe('none')
     await page.evaluate(id => window.ftElectron.tabs.setLoading(false, id), watchTab.id)
     await expect(dot).toHaveCount(0)
@@ -732,7 +716,7 @@ test.describe('tab bar', () => {
     await page.route(/^https:\/\/yt3\.(?:ggpht|googleusercontent)\.com\//, route => fulfillVisualFixture(route, 'avatar'))
     const videoId = 'jNQXAC9IVRw'
     await page.evaluate(({ videoId }) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       // Keep autoplay from replacing the avatar with the playback icon.
       store.commit('setAutoplayVideos', false)
       store.commit('setVideoAvatar', {
@@ -921,7 +905,7 @@ test.describe('tab bar', () => {
     await prompt.getByRole('button', { name: 'Never ask again', exact: true }).click()
     await expect(tabs).toHaveCount(1)
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getConfirmCloseMultipleTabs
     })).toBe(false)
   })
@@ -1482,6 +1466,7 @@ test.describe('tab bar', () => {
       drag(tabs[2], tabs[4])
     })
 
+    // The reorder IPC is delayed by 1 s; the dragged order must hold meanwhile.
     await page.waitForTimeout(600)
     const visualOrderWhileWaiting = await tabs.evaluateAll(elements => {
       return elements
@@ -1559,7 +1544,7 @@ test.describe('tab bar', () => {
       return elements.map(element => element.dataset.tabId)
     })).toEqual(authoritativeOrder)
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.state.tabs.pendingTabOrder
     })).toBeNull()
   })
@@ -1611,7 +1596,7 @@ test.describe('tab bar', () => {
     })
 
     await page.evaluate((tabIds) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.dispatch('setTabSelection', tabIds)
     }, [firstTabId, secondTabId])
     await page.locator(`.tab[data-tab-id="${secondTabId}"]`).click({ button: 'right' })
@@ -1630,7 +1615,7 @@ test.describe('tab bar', () => {
     }, groupId)).toEqual([firstTabId, secondTabId])
 
     await page.evaluate((tabId) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.dispatch('setTabSelection', [tabId])
     }, firstTabId)
     await page.locator(`.tab[data-tab-id="${firstTabId}"]`).click({ button: 'right' })
@@ -1828,7 +1813,7 @@ test.describe('tab bar', () => {
       })
       await window.ftElectron.tabs.setGroup(tabIds.slice(2), group.id)
       await window.ftElectron.tabs.updateGroup(group.id, { isCollapsed: true })
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setTabBarPosition', 'left')
       return group.id
     })
@@ -1911,13 +1896,13 @@ test.describe('tab bar', () => {
     test(`keeps the vertical tab resize line above navigation at ${zoomFactor * 100}% UI scale in ${baseTheme} theme`, async ({ page, attachScreenshot }) => {
       await page.evaluate(async ({ zoomFactor, baseTheme }) => {
         await window.ftElectron.setZoomFactor(zoomFactor)
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setBaseTheme', baseTheme)
       }, { zoomFactor, baseTheme })
 
       for (const position of ['left', 'right']) {
         await page.evaluate(position => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           store.commit('setTabBarPosition', position)
         }, position)
 
@@ -1975,7 +1960,7 @@ test.describe('tab bar', () => {
 
     for (const position of ['left', 'right']) {
       await page.evaluate(position => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setTabBarPosition', position)
       }, position)
 
@@ -2801,7 +2786,7 @@ test.describe('tab organizer', () => {
     })
 
     await page.evaluate(({ desktopDeviceId, phoneDeviceId, privacyKey }) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setSyncServerEnabled', true)
       store.commit('setSyncServerToken', 'e2e-token')
       store.commit('setSyncServerPrivacyKey', privacyKey)
@@ -2931,17 +2916,17 @@ test.describe('tab organizer', () => {
     await tokenReplacementResponseStarted
     await expect.poll(() => accountSessionRequests).toBe(4)
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('replaceSyncServerToken', 'replacement-token')
     })
     releaseTokenReplacementResponse()
     await expect.poll(() => page.evaluate(() => window.__deviceNameRefreshCompletions)).toBe(4)
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.state.syncServer.syncServerDevices
     })).toEqual({})
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getSyncServerToken
     })).toBe('replacement-token')
   })
@@ -2949,7 +2934,7 @@ test.describe('tab organizer', () => {
   for (const iconPack of ['material', 'remix']) {
     test(`opens synced mobile and desktop routes with ${iconPack} device icons`, async ({ page }, testInfo) => {
       await page.evaluate(async (pack) => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         await store.dispatch('updateIconPack', pack)
         store.commit('setSyncServerEnabled', true)
         store.commit('setSyncServerToken', 'e2e-token')
@@ -3021,9 +3006,9 @@ test.describe('tab organizer', () => {
     })
   }
 
-  test('keeps synced-device tab geometry stable when selection changes', async ({ app, page }, testInfo) => {
+  test('keeps synced-device tab geometry stable when selection changes', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setSyncServerEnabled', true)
       store.commit('setSyncServerToken', 'e2e-token')
       store.commit('setSyncServerPrivacyMode', 'enhanced')
@@ -3052,22 +3037,18 @@ test.describe('tab organizer', () => {
       })
     }
 
-    for (const zoom of [1, 0.95, 1.25]) {
-      await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
-      await app.electronApp.evaluate(({ BrowserWindow }, zoom) => BrowserWindow.getAllWindows()[0].setSize(Math.round(900 * zoom), 800), zoom)
-      await boundingBoxWhenSettled(row)
-      const before = await geometry()
-      expect(new Set(before.map(box => box.y)).size, 'device tabs wrap onto multiple rows').toBeGreaterThan(1)
-      for (const tab of await tabs.all()) {
-        await tab.click()
-        await expect(tab).toHaveAttribute('aria-selected', 'true')
-        await expect.poll(async () => (await geometry()).every((box, index) =>
-          ['width', 'x', 'y'].every(key => Math.abs(box[key] - before[index][key]) <= 0.2)
-        ), { message: `device selection keeps target widths and wrapping stable at ${zoom} zoom` }).toBe(true)
-      }
+    await app.electronApp.evaluate(({ BrowserWindow }, width) => BrowserWindow.getAllWindows()[0].setSize(width, 800), Math.round(900 * uiScale / 100))
+    await boundingBoxWhenSettled(row)
+    const before = await geometry()
+    expect(new Set(before.map(box => box.y)).size, 'device tabs wrap onto multiple rows').toBeGreaterThan(1)
+    for (const tab of await tabs.all()) {
+      await tab.click()
+      await expect(tab).toHaveAttribute('aria-selected', 'true')
+      await expect.poll(async () => (await geometry()).every((box, index) =>
+        ['width', 'x', 'y'].every(key => Math.abs(box[key] - before[index][key]) <= 0.2)
+      ), { message: 'device selection keeps target widths and wrapping stable' }).toBe(true)
     }
 
-    await page.evaluate(() => window.ftElectron.setZoomFactor(1))
     await boundingBoxWhenSettled(row)
     for (const colorScheme of ['dark', 'light']) {
       await page.emulateMedia({ colorScheme })
@@ -3087,7 +3068,7 @@ test.describe('tab organizer', () => {
     await page.setViewportSize({ width: 1280, height: 800 })
     await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setSyncServerEnabled', true)
       store.commit('setSyncServerToken', 'e2e-token')
       store.commit('setSyncServerPrivacyMode', 'enhanced')
@@ -3502,7 +3483,7 @@ test.describe('tab organizer', () => {
 
   test('lays out vertical tab actions and organizer tab metadata', async ({ page }) => {
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setTabBarPosition', 'left')
       await window.ftElectron.setZoomFactor(0.95)
       const tab = await window.ftElectron.tabs.create({
@@ -3671,7 +3652,7 @@ test('selects whole tab groups and changes their icons', async ({ page }) => {
   await expect(group.locator('.groupIconButton [data-icon="flask"]')).toHaveAttribute('data-icon-pack', 'material')
   await group.locator('.groupIconButton').click()
   await page.screenshot({ path: test.info().outputPath('tab-group-icons-material.png') })
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', 'remix'))
+  await page.evaluate(() => window.$store.dispatch('updateIconPack', 'remix'))
   await expect(group.locator('.groupIconButton [data-icon="flask"]')).toHaveAttribute('data-icon-pack', 'remix')
   await page.screenshot({ path: test.info().outputPath('tab-group-icons-remix.png') })
   await group.getByRole('button', { name: 'Music', exact: true }).click()

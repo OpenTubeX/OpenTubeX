@@ -80,60 +80,57 @@ test.describe('download editor spacing', () => {
     }
   })
 
-  for (const uiScale of [100, 95]) {
-    test(`download editors keep compact rows without divider lines at ${uiScale}%`, async ({ app, page }, testInfo) => {
-      await page.emulateMedia({ reducedMotion: 'reduce' })
-      await page.evaluate(value => window.ftElectron.setZoomFactor(value / 100), uiScale)
-      await goToSettingsSection(page, 'download')
-      await page.getByRole('button', { name: 'Manage Download Templates (1)' }).click()
-      const templates = page.locator('.settingsSubpageContent')
-      await expectTimeCharacters(templates)
-      await templates.locator('.templateOptions').evaluate(element => { element.scrollTop = 0 })
-      await expectCompactEditor(templates)
-      const headerSpace = await templates.evaluate(element => {
-        const header = element.querySelector('.templateManagerHeader')
-        const field = header.querySelector('.select-text').getBoundingClientRect()
-        return field.top - header.getBoundingClientRect().top
-      })
-      expect(headerSpace).toBeLessThanOrEqual(24)
-      if (uiScale === 100) await templates.screenshot({ path: testInfo.outputPath('compact-download-templates.png') })
-      await page.locator('.settingsCloseButton').click()
-      await goTo(page, 'userplaylists')
-      await page.getByRole('link', { name: 'Download editor spacing', exact: true }).click()
-      await page.getByTitle('Download Playlist').click()
-      const prompt = page.locator('.downloadPromptCard')
-      await prompt.getByRole('combobox', { name: 'Template', exact: true }).click()
-      await page.getByRole('option', { name: 'Layout template', exact: true }).click()
-      await prompt.locator('.advancedDownloadOptions').evaluate(element => { element.open = true })
-      await expectTimeCharacters(prompt)
-      await prompt.locator('.downloadOptions').evaluate(element => { element.scrollTop = 0 })
-      for (const colorScheme of ['dark', 'light']) {
-        await page.emulateMedia({ colorScheme })
-        await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
-        for (const width of [1400, 480]) {
-          await setWindowSize(app, page, { width, height: width === 1400 ? 901 : 902 })
-          await prompt.locator('.advancedDownloadOptions').evaluate(element => { element.open = true })
-          await expectCompactEditor(prompt)
-          if (width === 1400) {
-            const removeButton = prompt.getByRole('button', { name: 'Delete Template', exact: true })
-            await expect(removeButton).toHaveAttribute('title', 'Delete Template')
-            await expect(removeButton).toHaveText('')
-            const [select, remove] = await Promise.all([
-              prompt.getByRole('combobox', { name: 'Template', exact: true }).boundingBox(),
-              prompt.getByRole('button', { name: 'Delete Template', exact: true }).boundingBox()
-            ])
-            expect.soft(remove.x, 'delete template is after the selector').toBeGreaterThanOrEqual(select.x + select.width)
-            expect.soft(Math.abs(remove.y + remove.height / 2 - select.y - select.height / 2), 'template action is centered').toBeLessThanOrEqual(1)
-          }
-          if (uiScale === 100 && width === 1400) await prompt.screenshot({ path: testInfo.outputPath(`compact-download-editor-${colorScheme}-top.png`) })
-          await prompt.locator('.downloadOptions').evaluate(element => { element.scrollTop = element.scrollHeight })
-          await expectScrollAtRenderedEnd(prompt.locator('.downloadOptions'))
-          expect(await prompt.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
-          if (uiScale === 100 && width === 1400) await prompt.screenshot({ path: testInfo.outputPath(`compact-download-editor-${colorScheme}.png`) })
-        }
-      }
+  test('download editors keep compact rows without divider lines', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await goToSettingsSection(page, 'download')
+    await page.getByRole('button', { name: 'Manage Download Templates (1)' }).click()
+    const templates = page.locator('.settingsSubpageContent')
+    await expectTimeCharacters(templates)
+    await templates.locator('.templateOptions').evaluate(element => { element.scrollTop = 0 })
+    await expectCompactEditor(templates)
+    const headerSpace = await templates.evaluate(element => {
+      const header = element.querySelector('.templateManagerHeader')
+      const field = header.querySelector('.select-text').getBoundingClientRect()
+      return field.top - header.getBoundingClientRect().top
     })
-  }
+    expect(headerSpace).toBeLessThanOrEqual(24)
+    if (uiScale === 100) await templates.screenshot({ path: testInfo.outputPath('compact-download-templates.png') })
+    await page.locator('.settingsCloseButton').click()
+    await goTo(page, 'userplaylists')
+    await page.getByRole('link', { name: 'Download editor spacing', exact: true }).click()
+    await page.getByTitle('Download Playlist').click()
+    const prompt = page.locator('.downloadPromptCard')
+    await prompt.getByRole('combobox', { name: 'Template', exact: true }).click()
+    await page.getByRole('option', { name: 'Layout template', exact: true }).click()
+    await prompt.locator('.advancedDownloadOptions').evaluate(element => { element.open = true })
+    await expectTimeCharacters(prompt)
+    await prompt.locator('.downloadOptions').evaluate(element => { element.scrollTop = 0 })
+    for (const colorScheme of ['dark', 'light']) {
+      await page.emulateMedia({ colorScheme })
+      await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+      for (const width of [1400, 480]) {
+        await setWindowSize(app, page, { width, height: width === 1400 ? 901 : 902 })
+        await prompt.locator('.advancedDownloadOptions').evaluate(element => { element.open = true })
+        await expectCompactEditor(prompt)
+        if (width === 1400) {
+          const removeButton = prompt.getByRole('button', { name: 'Delete Template', exact: true })
+          await expect(removeButton).toHaveAttribute('title', 'Delete Template')
+          await expect(removeButton).toHaveText('')
+          const [select, remove] = await Promise.all([
+            prompt.getByRole('combobox', { name: 'Template', exact: true }).boundingBox(),
+            prompt.getByRole('button', { name: 'Delete Template', exact: true }).boundingBox()
+          ])
+          expect.soft(remove.x, 'delete template is after the selector').toBeGreaterThanOrEqual(select.x + select.width)
+          expect.soft(Math.abs(remove.y + remove.height / 2 - select.y - select.height / 2), 'template action is centered').toBeLessThanOrEqual(1)
+        }
+        if (uiScale === 100 && width === 1400) await prompt.screenshot({ path: testInfo.outputPath(`compact-download-editor-${colorScheme}-top.png`) })
+        await prompt.locator('.downloadOptions').evaluate(element => { element.scrollTop = element.scrollHeight })
+        await expectScrollAtRenderedEnd(prompt.locator('.downloadOptions'))
+        expect(await prompt.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+        if (uiScale === 100 && width === 1400) await prompt.screenshot({ path: testInfo.outputPath(`compact-download-editor-${colorScheme}.png`) })
+      }
+    }
+  })
 })
 
 async function expectTimeCharacters(editor) {
@@ -181,51 +178,48 @@ async function expectCompactEditor(editor) {
 }
 
 test.describe('download settings', () => {
-  for (const uiScale of [100, 95]) {
-    test(`template controls keep desktop columns and helpers inside narrow windows at ${uiScale}%`, async ({ app, page }) => {
-      await page.emulateMedia({ reducedMotion: 'reduce' })
-      await page.evaluate(value => window.ftElectron.setZoomFactor(value / 100), uiScale)
-      await goToSettingsSection(page, 'download')
-      await page.getByRole('button', { name: 'Manage Download Templates (0)' }).click()
-      const options = page.locator('.templateOptions')
-      expect.soft(await options.locator('.optionGrid').first().evaluate(element => getComputedStyle(element).display)).toBe('grid')
-      const grids = options.locator('.optionGrid')
-      for (const grid of await grids.all()) {
-        const boxes = await grid.locator(':scope > *').evaluateAll(elements => elements.slice(0, 2).map(element => element.getBoundingClientRect().top))
-        expect.soft(Math.abs(boxes[0] - boxes[1])).toBeLessThanOrEqual(1)
-      }
-      await setWindowSize(app, page, { width: 400, height: 901 })
-      for (const direction of ['ltr', 'rtl']) {
-        await page.evaluate(value => { document.body.dir = value }, direction)
-        expect.soft(await options.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
-        const outside = await options.evaluate(element => {
-          const viewport = element.getBoundingClientRect()
-          return Array.from(element.querySelectorAll('.inputIndicators')).filter(indicators => {
-            const bounds = indicators.getBoundingClientRect()
-            return bounds.width > 0 && (bounds.left < viewport.left - 1 || bounds.right > viewport.right + 1)
-          }).map(indicators => indicators.className)
-        })
-        expect.soft(outside, direction).toEqual([])
-      }
-      await scrollToBottom(options)
-      await setWindowSize(app, page, { width: 1600, height: 1000 })
-      // Scroll anchoring can retain a position before the new end. Check that
-      // the offset and thumb fit the rendered range before scrolling again.
-      await expect.poll(() => options.evaluate(element => {
+  test('template controls keep desktop columns and helpers inside narrow windows', { tag: '@scale' }, async ({ app, page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await goToSettingsSection(page, 'download')
+    await page.getByRole('button', { name: 'Manage Download Templates (0)' }).click()
+    const options = page.locator('.templateOptions')
+    expect.soft(await options.locator('.optionGrid').first().evaluate(element => getComputedStyle(element).display)).toBe('grid')
+    const grids = options.locator('.optionGrid')
+    for (const grid of await grids.all()) {
+      const boxes = await grid.locator(':scope > *').evaluateAll(elements => elements.slice(0, 2).map(element => element.getBoundingClientRect().top))
+      expect.soft(Math.abs(boxes[0] - boxes[1])).toBeLessThanOrEqual(1)
+    }
+    await setWindowSize(app, page, { width: 400, height: 901 })
+    for (const direction of ['ltr', 'rtl']) {
+      await page.evaluate(value => { document.body.dir = value }, direction)
+      expect.soft(await options.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+      const outside = await options.evaluate(element => {
         const viewport = element.getBoundingClientRect()
-        const first = element.querySelector('.optionSection').getBoundingClientRect()
-        const last = element.querySelector('.optionSection:last-of-type').getBoundingClientRect()
-        const track = element.querySelector('.os-scrollbar-vertical .os-scrollbar-track').getBoundingClientRect()
-        const handle = element.querySelector('.os-scrollbar-vertical .os-scrollbar-handle').getBoundingClientRect()
-        const expectedHandleHeight = track.height * viewport.height / (last.bottom - first.top)
-        return Math.max(-element.scrollTop, viewport.bottom - last.bottom,
-          Math.abs(handle.height - expectedHandleHeight)) * devicePixelRatio
-      })).toBeLessThanOrEqual(2)
-      await expect(options.locator('.os-scrollbar-vertical')).toHaveClass(/os-scrollbar-visible/)
-      await scrollToBottom(options)
-      await expectScrollAtRenderedEnd(options)
-    })
-  }
+        return Array.from(element.querySelectorAll('.inputIndicators')).filter(indicators => {
+          const bounds = indicators.getBoundingClientRect()
+          return bounds.width > 0 && (bounds.left < viewport.left - 1 || bounds.right > viewport.right + 1)
+        }).map(indicators => indicators.className)
+      })
+      expect.soft(outside, direction).toEqual([])
+    }
+    await scrollToBottom(options)
+    await setWindowSize(app, page, { width: 1600, height: 1000 })
+    // Scroll anchoring can retain a position before the new end. Check that
+    // the offset and thumb fit the rendered range before scrolling again.
+    await expect.poll(() => options.evaluate(element => {
+      const viewport = element.getBoundingClientRect()
+      const first = element.querySelector('.optionSection').getBoundingClientRect()
+      const last = element.querySelector('.optionSection:last-of-type').getBoundingClientRect()
+      const track = element.querySelector('.os-scrollbar-vertical .os-scrollbar-track').getBoundingClientRect()
+      const handle = element.querySelector('.os-scrollbar-vertical .os-scrollbar-handle').getBoundingClientRect()
+      const expectedHandleHeight = track.height * viewport.height / (last.bottom - first.top)
+      return Math.max(-element.scrollTop, viewport.bottom - last.bottom,
+        Math.abs(handle.height - expectedHandleHeight)) * devicePixelRatio
+    })).toBeLessThanOrEqual(2)
+    await expect(options.locator('.os-scrollbar-vertical')).toHaveClass(/os-scrollbar-visible/)
+    await scrollToBottom(options)
+    await expectScrollAtRenderedEnd(options)
+  })
 
   test('stores global yt-dlp arguments and centers wrapped download actions', async ({ app, page }) => {
     await goToSettingsSection(page, 'download')
@@ -234,7 +228,7 @@ test.describe('download settings', () => {
     const globalArguments = page.getByRole('textbox', { name: 'Additional yt-dlp arguments' })
     await globalArguments.fill('--cookies-from-browser firefox')
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getYtDlpDownloadCustomArgs
     })).toBe('--cookies-from-browser firefox')
 
@@ -290,7 +284,7 @@ test.describe('download settings', () => {
     await page.getByRole('button', { name: 'Save Template' }).click()
 
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return JSON.parse(store.getters.getYtDlpDownloadTemplates)
     })).toEqual([
       expect.objectContaining({
@@ -304,7 +298,7 @@ test.describe('download settings', () => {
     await page.getByRole('button', { name: 'Save Template' }).click()
 
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return JSON.parse(store.getters.getYtDlpDownloadTemplates).map(template => template.name)
     })).toEqual(['Podcast', 'Podcast Copy'])
 
@@ -312,166 +306,161 @@ test.describe('download settings', () => {
     await page.getByRole('button', { name: 'Save Template' }).click()
     await expect(page.getByText('A download template named "Podcast" already exists.')).toBeVisible()
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return JSON.parse(store.getters.getYtDlpDownloadTemplates).map(template => template.name)
     })).toEqual(['Podcast', 'Podcast Copy'])
   })
 
-  for (const uiScale of [100, 95]) {
-    test(`automatic download descriptions and channel filters use shared spacing at ${uiScale}%`, async ({ app, page }, testInfo) => {
-      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), uiScale)
-      await goToSettingsSection(page, 'download')
-      await page.getByRole('button', { name: 'Manage Automatic Downloads (0)' }).click()
-      const manager = page.locator('.settingsSubpageContent')
-      const headerGaps = await manager.evaluate(element => {
-        const header = element.querySelector('.automaticDownloadsHeader')
-        const description = header.querySelector('p').getBoundingClientRect()
-        const hint = header.querySelector('.automaticDownloadsHint').getBoundingClientRect()
-        const search = header.querySelector('input').getBoundingClientRect()
-        return [description.top - element.closest('.settingsSubpageScroll').getBoundingClientRect().top, search.top - hint.bottom]
+  test('automatic download descriptions and channel filters use shared spacing', { tag: '@scale' }, async ({ app, page }, testInfo) => {
+    await goToSettingsSection(page, 'download')
+    await page.getByRole('button', { name: 'Manage Automatic Downloads (0)' }).click()
+    const manager = page.locator('.settingsSubpageContent')
+    const headerGaps = await manager.evaluate(element => {
+      const header = element.querySelector('.automaticDownloadsHeader')
+      const description = header.querySelector('p').getBoundingClientRect()
+      const hint = header.querySelector('.automaticDownloadsHint').getBoundingClientRect()
+      const search = header.querySelector('input').getBoundingClientRect()
+      return [description.top - element.closest('.settingsSubpageScroll').getBoundingClientRect().top, search.top - hint.bottom]
+    })
+    for (const gap of headerGaps) expect.soft(gap).toBeCloseTo(20, 0)
+    const channel = manager.locator('.channelRule').first()
+    await channel.locator('.channelToggle .switch-label').click()
+    for (const width of [1100, 650, 360]) {
+      await manager.evaluate((element, width) => { element.style.inlineSize = `${width}px` }, width)
+      const gaps = await channel.evaluate(element => {
+        const controls = [...element.querySelectorAll('.channelRuleHeader, .select-text, .templateAndTypes .switch-label, .ft-input, .filterHint')]
+        const rows = []
+        for (const bounds of controls.map(control => control.getBoundingClientRect()).sort((a, b) => a.top - b.top)) {
+          const row = rows.find(row => Math.abs(row.top - bounds.top) < 1)
+          if (row) row.bottom = Math.max(row.bottom, bounds.bottom)
+          else rows.push({ top: bounds.top, bottom: bounds.bottom })
+        }
+        return rows.slice(1).map((row, index) => row.top - rows[index].bottom)
       })
-      for (const gap of headerGaps) expect.soft(gap).toBeCloseTo(20, 0)
-      const channel = manager.locator('.channelRule').first()
-      await channel.locator('.channelToggle .switch-label').click()
-      for (const width of [1100, 650, 360]) {
-        await manager.evaluate((element, width) => { element.style.inlineSize = `${width}px` }, width)
-        const gaps = await channel.evaluate(element => {
-          const controls = [...element.querySelectorAll('.channelRuleHeader, .select-text, .templateAndTypes .switch-label, .ft-input, .filterHint')]
-          const rows = []
-          for (const bounds of controls.map(control => control.getBoundingClientRect()).sort((a, b) => a.top - b.top)) {
-            const row = rows.find(row => Math.abs(row.top - bounds.top) < 1)
-            if (row) row.bottom = Math.max(row.bottom, bounds.bottom)
-            else rows.push({ top: bounds.top, bottom: bounds.bottom })
-          }
-          return rows.slice(1).map((row, index) => row.top - rows[index].bottom)
+      for (const gap of gaps) expect.soft(gap, `${width}px vertical spacing`).toBeCloseTo(20, 0)
+      if (width === 1100) {
+        const switchGaps = await channel.locator('.templateAndTypes').evaluate(element => {
+          const switches = [...element.querySelectorAll('.switch-label')].map(toggle => toggle.getBoundingClientRect())
+          return switches.slice(1).map((toggle, index) => toggle.left - switches[index].right)
         })
-        for (const gap of gaps) expect.soft(gap, `${width}px vertical spacing`).toBeCloseTo(20, 0)
-        if (width === 1100) {
-          const switchGaps = await channel.locator('.templateAndTypes').evaluate(element => {
-            const switches = [...element.querySelectorAll('.switch-label')].map(toggle => toggle.getBoundingClientRect())
-            return switches.slice(1).map((toggle, index) => toggle.left - switches[index].right)
+        for (const gap of switchGaps) expect.soft(gap).toBeLessThanOrEqual(24)
+      }
+      if (width > 600) {
+        for (const grid of ['.filterGrid', '.titleFilters']) {
+          const columnGap = await channel.locator(grid).evaluate(element => {
+            const inputs = [...element.querySelectorAll('.ft-input')].map(input => input.getBoundingClientRect())
+            return inputs[1].left - inputs[0].right
           })
-          for (const gap of switchGaps) expect.soft(gap).toBeLessThanOrEqual(24)
+          expect.soft(columnGap, `${width}px ${grid} column spacing`).toBeCloseTo(20, 0)
         }
-        if (width > 600) {
-          for (const grid of ['.filterGrid', '.titleFilters']) {
-            const columnGap = await channel.locator(grid).evaluate(element => {
-              const inputs = [...element.querySelectorAll('.ft-input')].map(input => input.getBoundingClientRect())
-              return inputs[1].left - inputs[0].right
-            })
-            expect.soft(columnGap, `${width}px ${grid} column spacing`).toBeCloseTo(20, 0)
-          }
-        }
-        expect(await channel.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
-        await channel.scrollIntoViewIfNeeded()
-        await channel.screenshot({ path: testInfo.outputPath(`automatic-download-spacing-${width}.png`) })
       }
-    })
+      expect(await channel.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+      await channel.scrollIntoViewIfNeeded()
+      await channel.screenshot({ path: testInfo.outputPath(`automatic-download-spacing-${width}.png`) })
+    }
+  })
 
-    test(`automatic download types wrap translated labels across breakpoints at ${uiScale}%`, async ({ page }) => {
-      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), uiScale)
-      await goToSettingsSection(page, 'download')
-      await page.getByRole('button', { name: 'Manage Automatic Downloads (0)' }).click()
-      const manager = page.locator('.settingsSubpageContent')
-      const channel = manager.locator('.channelRule').first()
-      await channel.locator('.channelToggle .switch-label').click()
-      await page.evaluate(async () => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-        await store.dispatch('updateUseAITranslationCompletions', true)
-        await store.dispatch('updateCurrentLocale', 'el')
+  test('automatic download types wrap translated labels across breakpoints', { tag: '@scale' }, async ({ page }) => {
+    await goToSettingsSection(page, 'download')
+    await page.getByRole('button', { name: 'Manage Automatic Downloads (0)' }).click()
+    const manager = page.locator('.settingsSubpageContent')
+    const channel = manager.locator('.channelRule').first()
+    await channel.locator('.channelToggle .switch-label').click()
+    await page.evaluate(async () => {
+      const store = window.$store
+      await store.dispatch('updateUseAITranslationCompletions', true)
+      await store.dispatch('updateCurrentLocale', 'el')
+    })
+    await expect(channel.locator('.templateAndTypes')).toContainText('Ζωντανές μεταδόσεις')
+    for (const width of [1100, 800, 761, 760, 650, 610, 601, 600]) {
+      await manager.evaluate((element, width) => { element.style.inlineSize = `${width}px` }, width)
+      const overflow = await channel.evaluate(element => {
+        const card = element.getBoundingClientRect()
+        const parent = element.parentElement.getBoundingClientRect()
+        const labels = [...element.querySelectorAll('.templateAndTypes .switch-label-text')]
+        return Math.max(card.right - parent.right, parent.left - card.left,
+          ...labels.map(label => label.scrollWidth - label.clientWidth))
       })
-      await expect(channel.locator('.templateAndTypes')).toContainText('Ζωντανές μεταδόσεις')
-      for (const width of [1100, 800, 761, 760, 650, 610, 601, 600]) {
-        await manager.evaluate((element, width) => { element.style.inlineSize = `${width}px` }, width)
-        const overflow = await channel.evaluate(element => {
-          const card = element.getBoundingClientRect()
-          const parent = element.parentElement.getBoundingClientRect()
-          const labels = [...element.querySelectorAll('.templateAndTypes .switch-label-text')]
-          return Math.max(card.right - parent.right, parent.left - card.left,
-            ...labels.map(label => label.scrollWidth - label.clientWidth))
-        })
-        expect(overflow, `${width}px translated controls`).toBeLessThanOrEqual(1)
+      expect(overflow, `${width}px translated controls`).toBeLessThanOrEqual(1)
+    }
+  })
+
+  test('clamps the automatic download manager after dynamic content changes', { tag: '@scale' }, async ({ app, page }) => {
+    await goToSettingsSection(page, 'download')
+    await page.getByRole('button', { name: 'Manage Automatic Downloads (0)' }).click()
+
+    const manager = page.locator('.settingsSubpageContent')
+    for (const roundness of [0, 50, 100, 200, 100]) {
+      await page.evaluate(value => {
+        window.$store.commit('setUiRoundness', value)
+      }, roundness)
+      await expect(manager.locator('.channelRule').first()).toHaveCSS('border-radius', `${10 * roundness / 100}px`)
+    }
+    const search = manager.getByRole('searchbox', { name: 'Search channels' })
+    const scroller = manager.locator('.automaticDownloadsScroller')
+    const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
+    await scrollToBottom(scroller)
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+
+    await search.fill('beta')
+    await expect(manager.getByText('Beta Channel', { exact: true })).toBeVisible()
+    await expect(manager.getByText('Alpha Channel', { exact: true })).toHaveCount(0)
+    await expectScrollAtRenderedEnd(scroller)
+    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+
+    await manager.getByText('Beta Channel', { exact: true }).click()
+    await expect.poll(() => page.evaluate((channelId) => {
+      const store = window.$store
+      return JSON.parse(store.getters.getYtDlpAutomaticDownloadRules)[channelId]
+    }, BETA_CHANNEL_ID)).toEqual(expect.objectContaining({
+      template: 'video:best',
+      includeVideos: true,
+      includeShorts: false,
+      includeLivestreams: false,
+      enabledAt: expect.any(Number)
+    }))
+
+    const options = manager.locator('.templateAndTypes')
+    const geometry = await options.evaluate((row) => {
+      const controls = [
+        row.querySelector('.select-text'),
+        ...row.querySelectorAll('.switch-label')
+      ].map(element => element.getBoundingClientRect())
+      return {
+        centers: controls.map(box => box.y + box.height / 2),
+        widths: controls.map(box => box.width)
       }
     })
+    for (const center of geometry.centers.slice(1)) {
+      expect(center).toBeCloseTo(geometry.centers[0], 0)
+    }
+    expect(geometry.widths[0]).toBeGreaterThan(geometry.widths[1])
 
-    test(`clamps the automatic download manager after dynamic content changes at ${uiScale}%`, async ({ app, page }) => {
-      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), uiScale)
-      await goToSettingsSection(page, 'download')
-      await page.getByRole('button', { name: 'Manage Automatic Downloads (0)' }).click()
+    await page.getByRole('button', { name: 'Maximize' }).click()
+    await setWindowSize(app, page, { width: 560, height: 800 })
+    await expect.poll(() => manager.evaluate(element => element.clientWidth)).toBeLessThanOrEqual(600)
+    await scrollToBottom(scroller)
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
 
-      const manager = page.locator('.settingsSubpageContent')
-      for (const roundness of [0, 50, 100, 200, 100]) {
-        await page.evaluate(value => {
-          document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
-        }, roundness)
-        await expect(manager.locator('.channelRule').first()).toHaveCSS('border-radius', `${10 * roundness / 100}px`)
-      }
-      const search = manager.getByRole('searchbox', { name: 'Search channels' })
-      const scroller = manager.locator('.automaticDownloadsScroller')
-      const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
-      await scrollToBottom(scroller)
-      await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+    await manager.getByText('Beta Channel', { exact: true }).click()
+    await expect(options).toHaveCount(0)
+    await expectScrollAtRenderedEnd(scroller)
+    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
 
-      await search.fill('beta')
-      await expect(manager.getByText('Beta Channel', { exact: true })).toBeVisible()
-      await expect(manager.getByText('Alpha Channel', { exact: true })).toHaveCount(0)
-      await expectScrollAtRenderedEnd(scroller)
-      await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+    await manager.getByText('Beta Channel', { exact: true }).click()
+    await expect(options).toBeVisible()
+    await scrollToBottom(scroller)
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
 
-      await manager.getByText('Beta Channel', { exact: true }).click()
-      await expect.poll(() => page.evaluate((channelId) => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-        return JSON.parse(store.getters.getYtDlpAutomaticDownloadRules)[channelId]
-      }, BETA_CHANNEL_ID)).toEqual(expect.objectContaining({
-        template: 'video:best',
-        includeVideos: true,
-        includeShorts: false,
-        includeLivestreams: false,
-        enabledAt: expect.any(Number)
-      }))
+    await setWindowSize(app, page, { width: 1200, height: 900 })
+    await expect.poll(() => manager.evaluate(element => element.clientWidth)).toBeGreaterThan(760)
+    await expectScrollAtRenderedEnd(scroller)
+    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
 
-      const options = manager.locator('.templateAndTypes')
-      const geometry = await options.evaluate((row) => {
-        const controls = [
-          row.querySelector('.select-text'),
-          ...row.querySelectorAll('.switch-label')
-        ].map(element => element.getBoundingClientRect())
-        return {
-          centers: controls.map(box => box.y + box.height / 2),
-          widths: controls.map(box => box.width)
-        }
-      })
-      for (const center of geometry.centers.slice(1)) {
-        expect(center).toBeCloseTo(geometry.centers[0], 0)
-      }
-      expect(geometry.widths[0]).toBeGreaterThan(geometry.widths[1])
-
-      await page.getByRole('button', { name: 'Maximize' }).click()
-      await setWindowSize(app, page, { width: 560, height: 800 })
-      await expect.poll(() => manager.evaluate(element => element.clientWidth)).toBeLessThanOrEqual(600)
-      await scrollToBottom(scroller)
-      await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
-
-      await manager.getByText('Beta Channel', { exact: true }).click()
-      await expect(options).toHaveCount(0)
-      await expectScrollAtRenderedEnd(scroller)
-      await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
-
-      await manager.getByText('Beta Channel', { exact: true }).click()
-      await expect(options).toBeVisible()
-      await scrollToBottom(scroller)
-      await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
-
-      await setWindowSize(app, page, { width: 1200, height: 900 })
-      await expect.poll(() => manager.evaluate(element => element.clientWidth)).toBeGreaterThan(760)
-      await expectScrollAtRenderedEnd(scroller)
-      await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
-
-      const { page: relaunchedPage } = await app.relaunch()
-      await goToSettingsSection(relaunchedPage, 'download')
-      await expect(relaunchedPage.getByRole('button', { name: 'Manage Automatic Downloads (1)' })).toBeVisible()
-    })
-  }
+    const { page: relaunchedPage } = await app.relaunch()
+    await goToSettingsSection(relaunchedPage, 'download')
+    await expect(relaunchedPage.getByRole('button', { name: 'Manage Automatic Downloads (1)' })).toBeVisible()
+  })
 })
 
 test.describe('automatic download authorization', () => {
@@ -518,7 +507,7 @@ test.describe('automatic download authorization', () => {
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpPath', ytDlpPath)
     }, executable)
 
@@ -559,7 +548,7 @@ test.describe('automatic download authorization', () => {
     }
 
     const refreshOwnerTabId = await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const tabId = store.getters.getActiveTabId
       return await window.ftElectron.subscriptionAutoRefresh.acquire(tabId, 'videos') ? tabId : null
     })
@@ -596,12 +585,12 @@ test.describe('automatic download authorization', () => {
         .emit('click')
     })
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getSettingsWindowView
     })).toBe('downloads')
 
     const tabCount = await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getTabCount
     })
     await writeFile(releaseDownloadFile, '')
@@ -617,7 +606,7 @@ test.describe('automatic download authorization', () => {
         .emit('click')
     })
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return {
         tabCount: store.getters.getTabCount,
         route: store.getters.getActiveTab?.route.fullPath

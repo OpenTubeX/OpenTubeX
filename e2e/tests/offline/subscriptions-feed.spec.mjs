@@ -128,14 +128,14 @@ test.describe('subscriptions feed from cache', () => {
     await bulkToggle.locator('.switch-label').click()
     await expect(checkbox).toBeChecked()
     await expect.poll(() => page.evaluate(() => (
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      window.$store
         .getters.getActiveProfile.subscriptions.map(channel => channel.showMembersOnly)
     ))).toEqual([true, true])
 
     // A subscription refresh can publish new names/avatars while the bulk
     // settings writes are still in flight. Exercise that overlap on each save.
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const dispatch = store.dispatch.bind(store)
       window.subscriptionDetailsUpdates = []
       store.dispatch = (action, payload) => {
@@ -160,7 +160,7 @@ test.describe('subscriptions feed from cache', () => {
     await page.locator('.settingsWindow').getByRole('button', { name: 'Close', exact: true }).click()
     await expect(membersVideo).toHaveCount(0)
     await expect.poll(() => page.evaluate(() => (
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      window.$store
         .getters.getActiveProfile.subscriptions.map(channel => channel.showMembersOnly)
     ))).toEqual([false, false])
     await expect(page.getByText('Video A older')).toBeVisible()
@@ -186,17 +186,17 @@ test.describe('subscriptions feed from cache', () => {
     }
 
     await Promise.all([
-      page.evaluate(channelId => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(
+      page.evaluate(channelId => window.$store.dispatch(
         'updateChannelSettings', { channelId, settings: { showMembersOnly: false } }
       ), CHANNEL_A),
-      other.evaluate(channelId => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(
+      other.evaluate(channelId => window.$store.dispatch(
         'batchUpdateSubscriptionDetails', [{ channelId, channelName: 'Refreshed Channel A' }]
       ), CHANNEL_A)
     ])
     for (const window of [page, other]) {
       await expect(window.getByText('Video A newer')).toHaveCount(0)
       await expect.poll(() => window.evaluate(channelId => {
-        const channel = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const channel = window.$store
           .getters.getActiveProfile.subscriptions.find(channel => channel.id === channelId)
         return { name: channel.name, showMembersOnly: channel.showMembersOnly }
       }, CHANNEL_A)).toEqual({ name: 'Refreshed Channel A', showMembersOnly: false })
@@ -231,6 +231,7 @@ test.describe('subscriptions feed from cache', () => {
 
     await goTo(page, 'subscriptions')
     await expect(page.getByText('Video A older')).toBeVisible()
+    // Leave time for a move transition that must not start.
     await page.waitForTimeout(350)
 
     const moveClasses = await page.evaluate(() => window.__subscriptionFeedMoveClasses)
@@ -269,7 +270,7 @@ test.describe('subscriptions feed from cache', () => {
     await expect(badge).toHaveCSS('white-space', 'nowrap')
 
     await page.evaluate(async (channelId) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateChannelSettings', {
         channelId,
         settings: { showMembersOnly: false }
@@ -278,7 +279,7 @@ test.describe('subscriptions feed from cache', () => {
     await expect(video).toHaveCount(0)
 
     await page.evaluate(async (channelId) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateChannelSettings', {
         channelId,
         settings: { showMembersOnly: true }
@@ -288,7 +289,7 @@ test.describe('subscriptions feed from cache', () => {
     await expect(video).toBeVisible()
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateYtDlpPlaybackAuthMode', 'none')
     })
     await expect(video).toHaveCount(0)
@@ -329,7 +330,7 @@ test.describe('subscriptions feed from cache', () => {
   test('rechecks a cached premiere after the clock moves backward', async ({ page }) => {
     await goTo(page, 'userplaylists')
     await page.evaluate(({ channelId, start }) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const entries = store.getters.getVideoCache[channelId].videos.map(entry => (
         entry.videoId === 'aaaaaaaaaa3' ? { ...entry, premiereDate: new Date(start).toISOString() } : entry
       ))
@@ -346,7 +347,7 @@ test.describe('subscriptions feed from cache', () => {
     await page.clock.setFixedTime(now)
     await goTo(page, 'subscriptions')
     expect(await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getSubscriptionVideosFeed.videos.some(entry => entry.videoId === 'aaaaaaaaaa3')
     })).toBe(false)
     await expect(page.getByText('Upcoming premiere video')).toHaveCount(0)
@@ -598,7 +599,7 @@ test.describe('subscriptions feed with upcoming premieres shown', () => {
   test('updates seen state in a cached legacy premiere after visiting Playlists', async ({ page }) => {
     await goTo(page, 'userplaylists')
     await page.evaluate(channelId => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setShowNewSubscriptionFeedIndicators', true)
       const entries = store.getters.getVideoCache[channelId].videos.map(entry => (
         entry.videoId === 'aaaaaaaaaa3' ? { ...entry, videoId: 'premiere-seen-test', isNewInSubscriptionFeed: true } : entry
@@ -610,7 +611,7 @@ test.describe('subscriptions feed with upcoming premieres shown', () => {
     await expect(premiere.locator('.newContentDot')).toBeVisible()
     await goTo(page, 'userplaylists')
     await page.evaluate(channelId => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('markSubscriptionEntriesAsSeenInCache', [{
         tab: 'videos', channelId, entries: [{ videoId: 'premiere-seen-test', isNewInSubscriptionFeed: false }]
       }])

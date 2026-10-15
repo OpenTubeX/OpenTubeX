@@ -26,7 +26,7 @@ test.describe('channel page', () => {
       await app.electronApp.evaluate(({ BrowserWindow }, { width, height }) => {
         BrowserWindow.getAllWindows()[0].setSize(width, height)
       }, { width, height })
-      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+      await page.evaluate(value => window.$store.dispatch('updateUiScale', value), scale)
       await expect.poll(() => page.locator('#homePanel .shelfTitle').first().evaluate(title => {
         return Math.round(title.getBoundingClientRect().top - document.querySelector('.channelDetails .tabs').getBoundingClientRect().bottom)
       }), { message: `46px gap to Home content at ${width}px and ${scale}% UI scale` }).toBe(46)
@@ -98,7 +98,7 @@ test.describe('channel page', () => {
     await expect(page.locator('.channelDetails .infoContainer')).toHaveCSS('border-bottom-right-radius', '16px')
     for (const roundness of [0, 50, 100, 200]) {
       await page.evaluate(value => {
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
+        window.$store.commit('setUiRoundness', value)
       }, roundness)
       await expectTabHighlightAligned(page.locator('.channelDetails [role="tab"][aria-selected="true"]'))
       await expectTabHighlightStyle(page.locator('.channelDetails [role="tab"][aria-selected="true"]'), 'borderRadius', `${24 * roundness / 100}px`)
@@ -362,7 +362,7 @@ test.describe('channel route changes', () => {
       json: { pageType: 'WEB_PAGE_TYPE_CHANNEL', ucid: CHANNEL_ID }
     }))
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setCurrentInvidiousInstance', 'https://invidious.test')
       store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', false)
     })
@@ -411,7 +411,7 @@ test.describe('channel route changes', () => {
       json: { pageType: 'WEB_PAGE_TYPE_CHANNEL', ucid: CHANNEL_ID }
     }))
     await page.evaluate((videos) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setCurrentInvidiousInstance', 'https://invidious.test')
 
       // Resolve video fetches in the renderer so the two completions can be
@@ -493,7 +493,7 @@ test.describe('channel route changes', () => {
       }))
 
       await page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         store.commit('setCurrentInvidiousInstance', 'https://invidious.test')
       })
 

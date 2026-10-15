@@ -19,7 +19,7 @@ test.use({
 })
 
 for (const usePlayerMenuGrid of [true, false]) {
-  test.describe(`caption resources in ${usePlayerMenuGrid ? 'grid' : 'list'} menus`, () => {
+  test.describe(`caption resources in ${usePlayerMenuGrid ? 'grid' : 'list'} menus`, { tag: '@performance' }, () => {
     test.use({ seed: { settings: { ...settings, usePlayerMenuGrid } } })
 
     test('collects replaced caption and translation choices during playback', async ({ app, page }) => {
@@ -141,6 +141,7 @@ async function rememberVideo(page) {
 }
 
 async function sampleResources(app, page, session, label) {
+  // Let deferred teardown finish; it has no single observable completion.
   await page.waitForTimeout(300)
   for (let index = 0; index < 3; index++) {
     await session.send('HeapProfiler.collectGarbage')
@@ -158,7 +159,7 @@ async function sampleResources(app, page, session, label) {
   return sample
 }
 
-test('releases playback resources after repeated videos and tab unloading', async ({ app, page }, testInfo) => {
+test('releases playback resources after repeated videos and tab unloading', { tag: '@performance' }, async ({ app, page }, testInfo) => {
   test.setTimeout(180_000)
   await mockPlayableWatchPage(app, page)
   const session = await page.context().newCDPSession(page)
@@ -218,7 +219,7 @@ test('releases playback resources after repeated videos and tab unloading', asyn
   }
 })
 
-test('collects removed scrollbar images and updates overflow when surviving images load', async ({ page }) => {
+test('collects removed scrollbar images and updates overflow when surviving images load', { tag: '@performance' }, async ({ page }) => {
   const session = await page.context().newCDPSession(page)
   try {
     for (const zoomFactor of [1, 1.25]) {
@@ -283,7 +284,7 @@ test('collects removed scrollbar images and updates overflow when surviving imag
   }
 })
 
-test('keeps many unloaded tabs lightweight after repeated player reloads', async ({ app, page }, testInfo) => {
+test('keeps many unloaded tabs lightweight after repeated player reloads', { tag: '@performance' }, async ({ app, page }, testInfo) => {
   test.setTimeout(180_000)
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)

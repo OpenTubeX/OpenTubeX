@@ -15,7 +15,7 @@ test.use({
   }
 })
 
-test('keeps short-video thumbnails centered on the cursor at different UI scales and widths', async ({ app, page, attachScreenshot }) => {
+test('keeps short-video thumbnails centered on the cursor at different widths', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
   await mockPlayableWatchPage(app, page)
   await routeDemoMedia(page, await readFile(new URL('../../fixtures/media/short-demo.webm', import.meta.url)))
   await page.route('https://images.test/seek-thumbnail.svg', route => fulfillVisualFixture(route, 'video-thumbnail'))
@@ -38,35 +38,30 @@ test('keeps short-video thumbnails centered on the cursor at different UI scales
   const preview = player.locator('.shaka-player-ui-thumbnail-container')
   const image = preview.locator('img')
 
-  for (const scale of [1, 1.25]) {
-    await app.electronApp.evaluate(({ BrowserWindow }, scale) => {
-      BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale)
-    }, scale)
-    for (const width of [420, 1000]) {
-      await player.evaluate((element, width) => { element.style.width = `${width}px` }, width)
-      await expect.poll(() => player.evaluate(element => element.getBoundingClientRect().width)).toBeCloseTo(width, 0)
-      await player.hover()
-      await bar.scrollIntoViewIfNeeded()
-      const bounds = await bar.boundingBox()
-      for (const fraction of [0.25, 0.37, 0.53, 0.69]) {
-        const cursorX = bounds.x + 6 + fraction * (bounds.width - 12)
-        await page.mouse.move(cursorX, bounds.y + bounds.height / 2)
-        await expect(preview).toHaveCSS('visibility', 'visible')
-        await expect(image).toBeVisible()
-        await expect.poll(async () => {
-          const box = await preview.boundingBox()
-          return Math.abs(box.x + box.width / 2 - cursorX)
-        }).toBeLessThan(1.5)
-        await expect.poll(() => image.evaluate(element => element.complete && element.naturalWidth > 0)).toBe(true)
-      }
-
-      // Edges still clamp the preview to the track instead of letting it overflow.
-      for (const fraction of [0, 1]) {
-        await page.mouse.move(bounds.x + 6 + fraction * (bounds.width - 12), bounds.y + bounds.height / 2)
+  for (const width of [420, 1000]) {
+    await player.evaluate((element, width) => { element.style.width = `${width}px` }, width)
+    await expect.poll(() => player.evaluate(element => element.getBoundingClientRect().width)).toBeCloseTo(width, 0)
+    await player.hover()
+    await bar.scrollIntoViewIfNeeded()
+    const bounds = await bar.boundingBox()
+    for (const fraction of [0.25, 0.37, 0.53, 0.69]) {
+      const cursorX = bounds.x + 6 + fraction * (bounds.width - 12)
+      await page.mouse.move(cursorX, bounds.y + bounds.height / 2)
+      await expect(preview).toHaveCSS('visibility', 'visible')
+      await expect(image).toBeVisible()
+      await expect.poll(async () => {
         const box = await preview.boundingBox()
-        expect(box.x).toBeGreaterThanOrEqual(bounds.x - 1.5)
-        expect(box.x + box.width).toBeLessThanOrEqual(bounds.x + bounds.width + 1.5)
-      }
+        return Math.abs(box.x + box.width / 2 - cursorX)
+      }).toBeLessThan(1.5)
+      await expect.poll(() => image.evaluate(element => element.complete && element.naturalWidth > 0)).toBe(true)
+    }
+
+    // Edges still clamp the preview to the track instead of letting it overflow.
+    for (const fraction of [0, 1]) {
+      await page.mouse.move(bounds.x + 6 + fraction * (bounds.width - 12), bounds.y + bounds.height / 2)
+      const box = await preview.boundingBox()
+      expect(box.x).toBeGreaterThanOrEqual(bounds.x - 1.5)
+      expect(box.x + box.width).toBeLessThanOrEqual(bounds.x + bounds.width + 1.5)
     }
   }
   const bounds = await bar.boundingBox()

@@ -167,7 +167,7 @@ test.describe('community post images', () => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="posts"]').click()
     for (const listType of ['list', 'grid']) {
-      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setListType', value), listType)
+      await page.evaluate(value => window.$store.commit('setListType', value), listType)
       await page.mouse.move(0, 0)
       await page.evaluate(() => document.activeElement?.blur())
       const post = page.locator('.ft-list-post').first()
@@ -186,14 +186,14 @@ test.describe('community post images', () => {
 
     const post = page.locator('.ft-list-post').filter({ hasText: 'Multi image community post' })
     await expect(post).toBeVisible()
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(
+    await page.evaluate(() => window.$store.dispatch(
       'updateForbiddenTitles', JSON.stringify(['Channel B'])
     ))
     await expect(post).toHaveCount(0)
 
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateEnableBlockLists', false))
+    await page.evaluate(() => window.$store.dispatch('updateEnableBlockLists', false))
     await expect(post).toBeVisible()
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateEnableBlockLists', true))
+    await page.evaluate(() => window.$store.dispatch('updateEnableBlockLists', true))
     await expect(post).toHaveCount(0)
   })
 
@@ -204,7 +204,7 @@ test.describe('community post images', () => {
     await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
 
     await page.evaluate(async (posts) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateEnableBlockLists', false)
       await store.dispatch('updateForbiddenTitles', JSON.stringify(['Channel B']))
       await store.dispatch('updateSubscriptionPostsCacheByChannel', {
@@ -222,7 +222,7 @@ test.describe('community post images', () => {
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(100)
 
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateEnableBlockLists', true))
+    await page.evaluate(() => window.$store.dispatch('updateEnableBlockLists', true))
     await expect(page.locator('.ft-list-post')).toHaveCount(0)
     await expect.poll(() => page.evaluate(() => ({
       scrollY: window.scrollY,
@@ -295,29 +295,25 @@ test.describe('community post images', () => {
     }
   })
 
-  test('separates post images from the like and comment row at different UI scales', async ({ page, attachScreenshot }) => {
+  test('separates post images from the like and comment row', { tag: '@scale' }, async ({ page, attachScreenshot }) => {
     await stubPostImages(page)
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="posts"]').click()
 
-    for (const scale of [1, 0.95, 1.25]) {
-      await page.evaluate((factor) => window.ftElectron.setZoomFactor(factor), scale)
+    for (const title of ['Single image community post', 'Multi image community post']) {
+      const post = page.locator('.ft-list-post').filter({ hasText: title })
+      const image = post.locator('img.communityImage').first()
+      await expect.poll(() => image.evaluate((element) => element.naturalWidth)).toBeGreaterThan(0)
+      await post.locator('.bottomSection').scrollIntoViewIfNeeded()
 
-      for (const title of ['Single image community post', 'Multi image community post']) {
-        const post = page.locator('.ft-list-post').filter({ hasText: title })
-        const image = post.locator('img.communityImage').first()
-        await expect.poll(() => image.evaluate((element) => element.naturalWidth)).toBeGreaterThan(0)
-        await post.locator('.bottomSection').scrollIntoViewIfNeeded()
-
-        await expect.poll(() => post.evaluate((element) => {
-          const imageBottom = element.querySelector('img.communityImage').getBoundingClientRect().bottom
-          const actionsTop = element.querySelector('.bottomSection').getBoundingClientRect().top
-          return actionsTop - imageBottom
-        }), { message: `${title} needs space above its actions at ${scale * 100}% UI scale` }).toBeGreaterThanOrEqual(8)
-      }
-
-      await attachScreenshot(`post image spacing at ${scale * 100}% UI scale`)
+      await expect.poll(() => post.evaluate((element) => {
+        const imageBottom = element.querySelector('img.communityImage').getBoundingClientRect().bottom
+        const actionsTop = element.querySelector('.bottomSection').getBoundingClientRect().top
+        return actionsTop - imageBottom
+      }), { message: `${title} needs space above its actions` }).toBeGreaterThanOrEqual(8)
     }
+
+    await attachScreenshot('post image spacing')
   })
 
   test('restores carousel navigation after returning to the Posts tab', async ({ page }) => {

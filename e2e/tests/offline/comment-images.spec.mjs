@@ -123,7 +123,7 @@ test('keeps hovered attachments still when reduced motion is enabled', async ({ 
     ['system', 'no-preference', false]
   ]) {
     await page.emulateMedia({ reducedMotion: system })
-    await page.evaluate(preference => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', preference), preference)
+    await page.evaluate(preference => window.$store.dispatch('updateReducedMotion', preference), preference)
     await expect(page.locator('html')).toHaveAttribute('data-reduced-motion', reduce ? 'reduce' : 'no-preference')
     await attachment.hover()
     if (reduce) {

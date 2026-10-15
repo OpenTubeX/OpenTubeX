@@ -43,6 +43,7 @@ for (const backendPreference of ['local', 'invidious']) {
       await input.press('Enter')
       await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
       await expect.poll(async () => (await requests()).every(request => request.aborted)).toBe(true)
+      // No further request may start after navigation.
       await page.waitForTimeout(300)
       expect((await requests()).length).toBe(5)
     })
@@ -77,6 +78,7 @@ for (const backendPreference of ['local', 'invidious']) {
       const options = page.locator('.topNav .options .list bdi')
       await expect(options).toHaveText(['new current suggestion'])
       await page.evaluate(() => window.__pendingSuggestions.get('old')('old stale suggestion'))
+      // These waits prove that nothing changes or refetches.
       await page.waitForTimeout(300)
       await expect(options).toHaveText(['new current suggestion'])
       // Same-query events and refocusing can reuse completed results.

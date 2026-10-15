@@ -49,7 +49,7 @@ for (const cached of [false, true]) {
     await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
     if (cached) {
       await page.evaluate(({ videoId, title, thumbnail }) => {
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('addVideoToDeArrowCache', {
+        window.$store.commit('addVideoToDeArrowCache', {
           videoId, title, thumbnail, thumbnailTimestamp: 10, videoDuration: 60,
         })
       }, { videoId: VIDEO_ID, title: REPLACEMENT_TITLE, thumbnail: THUMBNAIL_URL })
@@ -113,7 +113,7 @@ test('preserves portrait DeArrow thumbnails in grid and list layouts', async ({ 
     body: '<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1080"><rect width="100%" height="100%" fill="#336699"/></svg>'
   }))
   await page.evaluate(async ({ videoId, thumbnail }) => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('addVideoToDeArrowCache', { videoId, thumbnail, thumbnailTimestamp: 10, videoDuration: 60 })
     await store.dispatch('updateUseDeArrowThumbnails', true)
   }, { videoId: VIDEO_ID, thumbnail: THUMBNAIL_URL })
@@ -121,7 +121,7 @@ test('preserves portrait DeArrow thumbnails in grid and list layouts', async ({ 
   const image = page.locator('.ft-list-video .thumbnailImage').first()
   await expectImagesLoaded(image)
   for (const layout of ['grid', 'list']) {
-    await page.evaluate(layout => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateListType', layout), layout)
+    await page.evaluate(layout => window.$store.dispatch('updateListType', layout), layout)
     await expect(image).toHaveCSS('object-fit', 'contain')
     await expect.poll(() => image.evaluate(element => element.naturalHeight)).toBe(1080)
   }
@@ -166,7 +166,7 @@ for (const pending of ['metadata', 'thumbnail']) {
     await expect(card.locator('.title')).toHaveText(ORIGINAL_TITLE)
     const originalCard = await card.elementHandle()
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateUseDeArrowTitles', true)
       await store.dispatch('updateUseDeArrowThumbnails', true)
     })
@@ -197,7 +197,7 @@ for (const pending of ['metadata', 'thumbnail']) {
       await fulfillVisualFixture(heldRoute, 'video-thumbnail')
     }
     await expect.poll(() => page.evaluate(videoId => {
-      const cache = document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getDeArrowCache
+      const cache = window.$store.getters.getDeArrowCache
       return cache[videoId]?.thumbnail
     }, VIDEO_ID)).toBe(pending === 'thumbnail' ? THUMBNAIL_URL : null)
     await expect(card.locator('.title')).toHaveText(nextTitle)

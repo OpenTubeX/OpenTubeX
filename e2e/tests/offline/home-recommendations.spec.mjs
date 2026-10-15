@@ -212,14 +212,14 @@ async function setEnabled(page, enabled) {
     await expect(enableButton).toBeVisible()
   }
   await expect.poll(() => page.evaluate(() => {
-    return document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    return window.$store
       .getters.getEnableHomeRecommendations
   })).toBe(enabled)
 }
 
 async function clearHistory(page) {
   expect(await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return await store.dispatch('removeAllHistory')
   })).toBe(true)
 }
@@ -367,7 +367,7 @@ test('keeps the open recommendation feed unchanged when watch history updates un
   backend.searchVideos = []
 
   for (let update = 1; update <= 3; update++) {
-    await page.evaluate(record => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await page.evaluate(record => window.$store
       .dispatch('updateHistory', record), { ...historyEntry(), timeWatched: now + update * 1000 })
     await renderTurn(page)
     await expect(titles).toHaveText(originalTitles)
@@ -435,7 +435,7 @@ test('preserves the loaded Home tab across background learning updates and cache
   await expect(page).toHaveURL(/#\/history$/)
   backend.channelVideos = [video('recfresh001', 'Linux desktop fresh results')]
   backend.searchVideos = []
-  await page.evaluate(record => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+  await page.evaluate(record => window.$store
     .dispatch('updateHistory', record), historyEntry('rechist0002'))
   // Cache expiry may affect a newly opened Home page, but not a tab's existing feed.
   const restoreClock = await page.evaluateHandle(() => {
@@ -467,7 +467,7 @@ test('keeps existing suggestions through new watches and learning updates', asyn
   backend.channelVideos = [video('recfresh001', 'Linux desktop fresh results')]
   backend.searchVideos = []
   await page.evaluate(async record => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateHistory', record)
     await store.dispatch('recordRecommendationEvent', { type: 'positive', video: record })
     await store.dispatch('removeFromHistory', 'recseen0001')
@@ -484,7 +484,7 @@ for (const change of ['backend setting', 'learning reset']) {
   test(`restarts an interrupted initial feed but preserves a completed feed after ${change}`, async ({ page }) => {
     const backend = await mockCandidates(page)
     const changeContext = () => page.evaluate(async change => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       if (change === 'learning reset') await store.dispatch('resetRecommendations')
       else await store.dispatch('updateShowFamilyFriendlyOnly', !store.getters.getShowFamilyFriendlyOnly)
     }, change)
@@ -589,7 +589,7 @@ test('hiding through Customize invalidates pending results and stops requests un
 
     const requestCount = backend.requests.length
     await page.evaluate(async entry => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateHistory', entry)
     }, historyEntry('rechist0002'))
     await renderTurn(page)
@@ -670,13 +670,13 @@ test.describe('watch-page recommendations hidden', () => {
     await setEnabled(page, true)
     await backend.settled()
     await expect(section.locator('a.title').filter({ hasText: /Linux desktop shortcuts/ })).toBeVisible()
-    const watchRecommendationsHidden = () => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHideRecommendedVideos)
+    const watchRecommendationsHidden = () => page.evaluate(() => window.$store.getters.getHideRecommendedVideos)
     expect(await watchRecommendationsHidden()).toBe(true)
 
     await setEnabled(page, false)
     await expect(section.locator('.recommendationFeed')).toHaveCount(0)
     expect(await watchRecommendationsHidden()).toBe(true)
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHideRecommendedVideos', false))
+    await page.evaluate(() => window.$store.dispatch('updateHideRecommendedVideos', false))
     await expect(section.getByRole('button', { name: 'Enable recommendations', exact: true })).toBeVisible()
     await expect(section.locator('.recommendationFeed')).toHaveCount(0)
   })
@@ -754,7 +754,7 @@ test.describe('without watch history', () => {
 
   test('loads saved positive feedback before checking for recommendation seeds after restart', async ({ app, page }) => {
     await page.evaluate(async record => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateEnableHomeRecommendations', true)
       await store.dispatch('recordRecommendationEvent', { type: 'positive', video: record })
     }, historyEntry())
@@ -767,7 +767,7 @@ test.describe('without watch history', () => {
 
   test('keeps the feed when disliking its last positive seed until refresh', async ({ page }) => {
     await page.evaluate(async record => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateEnableHomeRecommendations', true)
       await store.dispatch('recordRecommendationEvent', { type: 'positive', video: record })
     }, channelCandidate)
@@ -793,7 +793,7 @@ test.describe('without watch history', () => {
 
   test('restores the no-history state after hiding the last positive seed channel', async ({ page }) => {
     await page.evaluate(async record => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateEnableHomeRecommendations', true)
       await store.dispatch('recordRecommendationEvent', { type: 'positive', video: record })
     }, channelCandidate)
@@ -875,7 +875,7 @@ for (const change of ['clearing history', 'disabling recommendations']) {
       try {
         if (change === 'clearing history') {
           await page.evaluate(async entry => {
-            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            const store = window.$store
             await store.dispatch('updateHistory', entry)
           }, historyEntry('rechist0002'))
         } else {
@@ -920,7 +920,7 @@ test('learns from feedback across restarts and lets the user reset recommendatio
   await expect(section.locator('a.title').filter({ hasText: /Linux desktop shortcuts/ })).toBeVisible()
   await section.getByRole('button', { name: 'Not interested: Linux desktop shortcuts', exact: true }).click()
   await expect(section.locator('a.title').filter({ hasText: /Linux desktop shortcuts/ })).toBeVisible()
-  await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+  await expect.poll(() => page.evaluate(() => window.$store
     .getters.getRecommendationRecords.find(record => record.videoId === 'recchan0001')?.feedback)).toBe('dismiss')
 
   const relaunched = await app.relaunch()
@@ -934,7 +934,7 @@ test('learns from feedback across restarts and lets the user reset recommendatio
   await expect(recommendations(page).locator('a.title').filter({ hasText: /Linux desktop shortcuts/ })).toBeVisible()
   await clearHistory(page)
   await expectNoHistory(page)
-  await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getRecommendationRecords.length)).toBe(0)
+  await expect.poll(() => page.evaluate(() => window.$store.getters.getRecommendationRecords.length)).toBe(0)
 })
 
 test('records real grid impressions once per feed and supports positive and channel feedback', async ({ page }) => {
@@ -943,7 +943,7 @@ test('records real grid impressions once per feed and supports positive and chan
   await setEnabled(page, true)
   const section = recommendations(page)
   await section.scrollIntoViewIfNeeded()
-  const getRecord = id => page.evaluate(id => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+  const getRecord = id => page.evaluate(id => window.$store
     .getters.getRecommendationRecords.find(record => record.videoId === id), id)
   await expect.poll(async () => (await getRecord('recchan0001'))?.impressions?.length).toBe(1)
   const positive = section.getByRole('button', { name: 'More like this: Linux desktop shortcuts', exact: true })
@@ -1082,7 +1082,7 @@ test.describe('saved-video cold start', () => {
     await recommendations(page).locator('.recommendationOptions .iconButton').click()
     await page.getByRole('radio', { name: 'Explore', exact: true }).check()
     await page.keyboard.press('Escape')
-    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getRecommendationExploration)).toBe(0.5)
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getRecommendationExploration)).toBe(0.5)
   })
 })
 
@@ -1095,7 +1095,7 @@ test('syncs feedback and resets across windows even before the second window loa
   await mockCandidates(second)
   await recommendations(page).getByRole('button', { name: 'Not interested: Linux desktop shortcuts', exact: true }).click()
   const state = target => target.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return { epoch: store.getters.getRecommendationEpoch, feedback: store.getters.getRecommendationRecords.find(record => record.videoId === 'recchan0001')?.feedback ?? null }
   })
   await expect.poll(async () => (await state(second)).feedback).toBe('dismiss')
@@ -1134,7 +1134,7 @@ const gridTitles = ['Kernel internals', 'Desktop shortcuts', 'Terminal commands'
 const gridVideos = gridTitles.map((title, i) => video(`recgrid${String(i).padStart(4, '0')}`, `Linux ${title}`, `UC${String(i).padStart(22, '0')}`))
 
 async function changeLayoutSetting(page, action, value) {
-  await page.evaluate(([action, value]) => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(action, value), [action, value])
+  await page.evaluate(([action, value]) => window.$store.dispatch(action, value), [action, value])
 }
 
 async function expectRecommendationScrollRange(page) {
@@ -1263,7 +1263,7 @@ for (const linkType of ['title', 'thumbnailLink']) {
     const card = recommendations(page).locator('.ft-list-video').filter({ hasText: 'Linux desktop shortcuts' })
     await card.locator(`a.${linkType}`).click()
     await expect(page).toHaveURL(/#\/watch\/recchan0001/)
-    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getRecommendationRecords
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getRecommendationRecords
       .find(record => record.videoId === 'recchan0001')?.clickedAt ?? 0)).toBeGreaterThan(0)
   })
 }
@@ -1336,7 +1336,7 @@ test('provides a custom discovery selector and separate actions with keyboard na
   await expect(explore).toBeFocused()
   await expect(explore).toBeChecked()
   await expect(description).toHaveText('Give more space to new channels related to your interests.')
-  await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getRecommendationExploration)).toBe(0.5)
+  await expect.poll(() => page.evaluate(() => window.$store.getters.getRecommendationExploration)).toBe(0.5)
   // Changing Discovery keeps the control open, so it can be adjusted again.
   await expect(panel).toBeVisible()
   await page.keyboard.press('Tab')
@@ -1402,14 +1402,14 @@ test('keeps the discovery heading fixed while its constrained menu scrolls and s
 
 test('broadcasts expired learning removals when another window reloads its snapshot', async ({ app, page }) => {
   await page.evaluate(async record => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateEnableHomeRecommendations', true)
     await store.dispatch('recordRecommendationEvent', { type: 'dismiss', video: record })
   }, channelCandidate)
   const second = await openNewWindowFromTabBar(app, page)
   await waitForAppReady(second)
-  await second.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('loadRecommendations'))
-  const feedback = target => target.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+  await second.evaluate(() => window.$store.dispatch('loadRecommendations'))
+  const feedback = target => target.evaluate(() => window.$store
     .getters.getRecommendationRecords.find(record => record.videoId === 'recchan0001')?.feedback ?? null)
   await expect.poll(() => feedback(second)).toBe('dismiss')
   const restoreClock = await app.electronApp.evaluateHandle(() => {
@@ -1418,7 +1418,7 @@ test('broadcasts expired learning removals when another window reloads its snaps
     return () => { Date.now = original }
   })
   try {
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('loadRecommendations'))
+    await page.evaluate(() => window.$store.dispatch('loadRecommendations'))
     await expect.poll(() => feedback(page)).toBe(null)
     await expect.poll(() => feedback(second)).toBe(null)
   } finally {
@@ -1431,7 +1431,7 @@ for (const subscriptions of [{ invalid: true }, [null, { id: CHANNEL_ID }]]) {
   test(`discovers videos with malformed profile subscriptions ${JSON.stringify(subscriptions)}`, async ({ page }) => {
     await mockCandidates(page)
     await page.evaluate(subscriptions => {
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getActiveProfile.subscriptions = subscriptions
+      window.$store.getters.getActiveProfile.subscriptions = subscriptions
     }, subscriptions)
     await goTo(page, 'home')
     await setEnabled(page, true)

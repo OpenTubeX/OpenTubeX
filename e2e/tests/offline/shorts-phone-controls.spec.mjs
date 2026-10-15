@@ -40,47 +40,44 @@ async function showShortPoster(page, watch) {
   await watch.evaluate(component => { component.proxy.$refs.player.$.setupState.showPoster = true })
 }
 
-for (const zoom of [1, 1.25]) {
-  test(`Shorts posters match the video crop across presentation modes at ${zoom * 100}% UI scale`, async ({ app, page }) => {
-    await openShort({ app, page })
-    await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
-    const poster = 'https://provider.test/landscape-short-poster.jpg'
-    await page.route(poster, route => route.fulfill({
-      contentType: 'image/svg+xml',
-      body: '<svg xmlns="http://www.w3.org/2000/svg" width="720" height="405"/>'
-    }))
-    const watch = await page.evaluateHandle(findWatchComponent)
-    await watch.evaluate((component, poster) => {
-      component.proxy.thumbnail = poster
-    }, poster)
-    await showShortPoster(page, watch)
-    const player = page.locator('.ftVideoPlayer.shortsPlayer')
-    const image = player.locator('.countdownPoster img:not(.retryImagePlaceholder)')
-    const video = player.locator('video')
-    await expect(image).toBeVisible()
-    await expect.poll(() => image.evaluate(image => image.naturalWidth)).toBe(720)
-    const expectCrop = async crop => {
-      await expect(video).toHaveCSS('object-fit', crop)
-      await expect(image).toHaveCSS('object-fit', crop)
-    }
-    await expectCrop('cover')
-    await page.locator('body').press('s')
-    await expect(player).toHaveClass(/fullWindow/)
-    await expectCrop('contain')
-    await page.locator('body').press('s')
-    await expectCrop('cover')
-    await player.evaluate(player => player.requestFullscreen())
-    await expectCrop('contain')
-    await page.evaluate(() => document.exitFullscreen())
-    await expectCrop('cover')
-    await page.evaluate(() => document.querySelector('.app').classList.add('capacitorTabs'))
-    await page.setViewportSize({ width: 1026, height: 461 })
-    await expectCrop('contain')
-    await page.setViewportSize({ width: 390, height: 800 })
-    await expectCrop('cover')
-    await watch.dispose()
-  })
-}
+test('Shorts posters match the video crop across presentation modes', { tag: '@scale' }, async ({ app, page }) => {
+  await openShort({ app, page })
+  const poster = 'https://provider.test/landscape-short-poster.jpg'
+  await page.route(poster, route => route.fulfill({
+    contentType: 'image/svg+xml',
+    body: '<svg xmlns="http://www.w3.org/2000/svg" width="720" height="405"/>'
+  }))
+  const watch = await page.evaluateHandle(findWatchComponent)
+  await watch.evaluate((component, poster) => {
+    component.proxy.thumbnail = poster
+  }, poster)
+  await showShortPoster(page, watch)
+  const player = page.locator('.ftVideoPlayer.shortsPlayer')
+  const image = player.locator('.countdownPoster img:not(.retryImagePlaceholder)')
+  const video = player.locator('video')
+  await expect(image).toBeVisible()
+  await expect.poll(() => image.evaluate(image => image.naturalWidth)).toBe(720)
+  const expectCrop = async crop => {
+    await expect(video).toHaveCSS('object-fit', crop)
+    await expect(image).toHaveCSS('object-fit', crop)
+  }
+  await expectCrop('cover')
+  await page.locator('body').press('s')
+  await expect(player).toHaveClass(/fullWindow/)
+  await expectCrop('contain')
+  await page.locator('body').press('s')
+  await expectCrop('cover')
+  await player.evaluate(player => player.requestFullscreen())
+  await expectCrop('contain')
+  await page.evaluate(() => document.exitFullscreen())
+  await expectCrop('cover')
+  await page.evaluate(() => document.querySelector('.app').classList.add('capacitorTabs'))
+  await page.setViewportSize({ width: 1026, height: 461 })
+  await expectCrop('contain')
+  await page.setViewportSize({ width: 390, height: 800 })
+  await expectCrop('cover')
+  await watch.dispose()
+})
 
 test('data saver updates the poster of an already-open Short', async ({ app, page }) => {
   await openShort({ app, page })
@@ -181,7 +178,7 @@ test('landscape Shorts options use the space beside the narrow player', async ({
   expect(resumedBounds.x).toBeGreaterThanOrEqual(playerBounds.x + playerBounds.width + 8)
   await player.dispatchEvent('mouseleave')
   await expect(player.locator('.shaka-controls-container')).not.toHaveAttribute('shown')
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseQuickPlaybackSpeedBar', false))
+  await page.evaluate(() => window.$store.dispatch('updateUseQuickPlaybackSpeedBar', false))
   await expect(dialog.locator('.shaka-overflow-menu')).toBeVisible()
 
   await page.setViewportSize({ width: 980, height: 600 })
@@ -253,10 +250,10 @@ test('landscape Shorts options stay usable when playback finishes loading', asyn
     const [playerBounds, dialogBounds] = await Promise.all([player.boundingBox(), dialog.boundingBox()])
     expect(dialogBounds.width).toBeGreaterThanOrEqual(250)
     expect(dialogBounds.x).toBeGreaterThanOrEqual(playerBounds.x + playerBounds.width + 8)
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUsePlayerMenuGrid', false))
+    await page.evaluate(() => window.$store.dispatch('updateUsePlayerMenuGrid', false))
     await expect(dialog.locator('.shaka-overflow-menu')).toBeVisible()
     await expect(player.locator('.shaka-overflow-menu')).toHaveCount(1)
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUsePlayerMenuGrid', true))
+    await page.evaluate(() => window.$store.dispatch('updateUsePlayerMenuGrid', true))
     await expect(dialog.locator('.shaka-overflow-menu')).toBeVisible()
     await expect(player.locator('.shaka-overflow-menu')).toHaveCount(1)
     await dialog.locator('.phonePlayerOptionsClose').click()

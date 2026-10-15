@@ -62,12 +62,11 @@ async function dragSlider(page, values) {
 }
 
 test.describe('thumbnail size slider', () => {
-  for (const [width, uiScale] of [[375, 100], [412, 100], [375, 125], [412, 125]]) {
-    test(`fits thumbnails to a ${width}px window at ${uiScale}% UI scale`, async ({ app, page }) => {
+  for (const width of [375, 412]) {
+    test(`fits thumbnails to a ${width}px window`, { tag: '@scale' }, async ({ app, page, uiScale }) => {
       await app.electronApp.evaluate(({ BrowserWindow }, { width, uiScale }) => {
         const window = BrowserWindow.getAllWindows()[0]
         window.setMinimumSize(0, 0)
-        window.webContents.setZoomFactor(uiScale / 100)
         window.setContentSize(Math.round(width * uiScale / 100), 900)
       }, { width, uiScale })
       await goTo(page, 'subscriptions')
@@ -132,73 +131,70 @@ test.describe('thumbnail size slider', () => {
     })
   }
 
-  for (const uiScale of [100, 125]) {
-    for (const trigger of [100, 60, 'wider viewport']) {
-      test(`clamps the bottom after changing to ${trigger} at ${uiScale}% UI scale`, async ({ app, page }) => {
-        const resize = width => app.electronApp.evaluate(({ BrowserWindow }, { width, uiScale }) => {
-          const window = BrowserWindow.getAllWindows()[0]
-          window.setMinimumSize(0, 0)
-          window.webContents.setZoomFactor(uiScale / 100)
-          window.setContentSize(Math.round(width * uiScale / 100), 900)
-        }, { width, uiScale })
-        const setSize = size => page.evaluate(value => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-          store.commit('setThumbnailSize', value)
-        }, size)
-        const scrollState = () => page.evaluate(() => {
-          const root = document.documentElement
-          const scrollbar = document.querySelector('body > .os-scrollbar-vertical')
-          const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
-          const handleElement = scrollbar.querySelector('.os-scrollbar-handle')
-          const handle = handleElement.getBoundingClientRect()
-          const minHandleHeight = Number.parseFloat(getComputedStyle(handleElement).minHeight) || 0
-          const card = document.querySelector('.subscriptionsPage .card')
-          const route = document.querySelector('.app > .routerView')
-          const contentBottom = card.getBoundingClientRect().bottom
-          const bottomMargin = Number.parseFloat(getComputedStyle(card).marginBottom) +
-            Math.max(0, Number.parseFloat(getComputedStyle(route).marginBottom))
-          return {
-            height: root.scrollHeight,
-            offset: window.scrollY,
-            // Integer layout heights and a fractional scroll offset can differ
-            // by up to two physical pixels after rounding at non-100% zoom.
-            bottomDistance: (root.scrollHeight - root.clientHeight - window.scrollY) * devicePixelRatio,
-            contentBottomError: Math.abs(root.clientHeight - contentBottom - bottomMargin),
-            thumbBottomDistance: track.bottom - handle.bottom,
-            thumbHeightError: Math.abs(handle.height - Math.max(minHandleHeight, track.height * root.clientHeight / root.scrollHeight)),
-            scrollbarVisible: scrollbar.classList.contains('os-scrollbar-visible')
-          }
-        })
-
-        await resize(412)
-        await goTo(page, 'subscriptions')
-        await expect(page.getByText('Feed video 00')).toBeVisible()
-        await page.evaluate(() => document.fonts.ready)
-        await setSize(110)
-        await expect.poll(() => page.locator('.autoGrid').evaluate(element => getComputedStyle(element).gridTemplateColumns.split(' ').length)).toBe(1)
-        await expect.poll(async () => {
-          await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
-          return Math.abs((await scrollState()).bottomDistance)
-        }).toBeLessThanOrEqual(2)
-        const before = await scrollState()
-        expect(before.offset).toBeGreaterThan(0)
-
-        if (trigger === 'wider viewport') {
-          await resize(1000)
-        } else {
-          await setSize(trigger)
+  for (const trigger of [100, 60, 'wider viewport']) {
+    test(`clamps the bottom after changing to ${trigger}`, { tag: '@scale' }, async ({ app, page, uiScale }) => {
+      const resize = width => app.electronApp.evaluate(({ BrowserWindow }, { width, uiScale }) => {
+        const window = BrowserWindow.getAllWindows()[0]
+        window.setMinimumSize(0, 0)
+        window.setContentSize(Math.round(width * uiScale / 100), 900)
+      }, { width, uiScale })
+      const setSize = size => page.evaluate(value => {
+        const store = window.$store
+        store.commit('setThumbnailSize', value)
+      }, size)
+      const scrollState = () => page.evaluate(() => {
+        const root = document.documentElement
+        const scrollbar = document.querySelector('body > .os-scrollbar-vertical')
+        const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
+        const handleElement = scrollbar.querySelector('.os-scrollbar-handle')
+        const handle = handleElement.getBoundingClientRect()
+        const minHandleHeight = Number.parseFloat(getComputedStyle(handleElement).minHeight) || 0
+        const card = document.querySelector('.subscriptionsPage .card')
+        const route = document.querySelector('.app > .routerView')
+        const contentBottom = card.getBoundingClientRect().bottom
+        const bottomMargin = Number.parseFloat(getComputedStyle(card).marginBottom) +
+          Math.max(0, Number.parseFloat(getComputedStyle(route).marginBottom))
+        return {
+          height: root.scrollHeight,
+          offset: window.scrollY,
+          // Integer layout heights and a fractional scroll offset can differ
+          // by up to two physical pixels after rounding at non-100% zoom.
+          bottomDistance: (root.scrollHeight - root.clientHeight - window.scrollY) * devicePixelRatio,
+          contentBottomError: Math.abs(root.clientHeight - contentBottom - bottomMargin),
+          thumbBottomDistance: track.bottom - handle.bottom,
+          thumbHeightError: Math.abs(handle.height - Math.max(minHandleHeight, track.height * root.clientHeight / root.scrollHeight)),
+          scrollbarVisible: scrollbar.classList.contains('os-scrollbar-visible')
         }
-
-        await expect.poll(async () => (await scrollState()).height).toBeLessThan(before.height)
-        await expect.poll(async () => Math.abs((await scrollState()).bottomDistance)).toBeLessThanOrEqual(2)
-        // Include the desktop route's bottom margin as well as the card's;
-        // the phone route has a negative margin and adds no bottom space.
-        await expect.poll(async () => (await scrollState()).contentBottomError).toBeLessThanOrEqual(1)
-        await expect.poll(async () => Math.abs((await scrollState()).thumbBottomDistance)).toBeLessThanOrEqual(1)
-        await expect.poll(async () => (await scrollState()).thumbHeightError).toBeLessThanOrEqual(1)
-        expect((await scrollState()).scrollbarVisible).toBe(true)
       })
-    }
+
+      await resize(412)
+      await goTo(page, 'subscriptions')
+      await expect(page.getByText('Feed video 00')).toBeVisible()
+      await page.evaluate(() => document.fonts.ready)
+      await setSize(110)
+      await expect.poll(() => page.locator('.autoGrid').evaluate(element => getComputedStyle(element).gridTemplateColumns.split(' ').length)).toBe(1)
+      await expect.poll(async () => {
+        await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+        return Math.abs((await scrollState()).bottomDistance)
+      }).toBeLessThanOrEqual(2)
+      const before = await scrollState()
+      expect(before.offset).toBeGreaterThan(0)
+
+      if (trigger === 'wider viewport') {
+        await resize(1000)
+      } else {
+        await setSize(trigger)
+      }
+
+      await expect.poll(async () => (await scrollState()).height).toBeLessThan(before.height)
+      await expect.poll(async () => Math.abs((await scrollState()).bottomDistance)).toBeLessThanOrEqual(2)
+      // Include the desktop route's bottom margin as well as the card's;
+      // the phone route has a negative margin and adds no bottom space.
+      await expect.poll(async () => (await scrollState()).contentBottomError).toBeLessThanOrEqual(1)
+      await expect.poll(async () => Math.abs((await scrollState()).thumbBottomDistance)).toBeLessThanOrEqual(1)
+      await expect.poll(async () => (await scrollState()).thumbHeightError).toBeLessThanOrEqual(1)
+      expect((await scrollState()).scrollbarVisible).toBe(true)
+    })
   }
 
   test('resizes the feed without re-measuring every card', async ({ page, attachScreenshot }) => {

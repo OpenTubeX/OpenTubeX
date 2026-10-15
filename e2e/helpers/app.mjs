@@ -35,6 +35,20 @@ export function abortUnmockedRequest(route) {
 }
 
 /**
+ * Exposes the renderer's Vuex store and router to `page.evaluate` callbacks as
+ * `window.$store` and `window.$router`. Helpers shared with the Android CDP
+ * tests in tests/android cannot rely on these accessors.
+ */
+function installRendererAccessors() {
+  for (const name of ['$store', '$router']) {
+    Object.defineProperty(window, name, {
+      configurable: true,
+      get: () => document.querySelector('#app').__vue_app__.config.globalProperties[name]
+    })
+  }
+}
+
+/**
  * Serializes documents in the newline-delimited JSON format used by nedb.
  *
  * @param {object[]} docs
@@ -154,7 +168,12 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
   const env = {
     ...process.env,
     OPENTUBEX_E2E_USER_DATA_DIR: userDataDir,
-    ELECTRON_OZONE_PLATFORM_HINT: 'x11'
+    ELECTRON_OZONE_PLATFORM_HINT: 'x11',
+    // Tests expect en-GB strings, which CI's bare "en" system locale resolves
+    // to. Pin it so the default locale setting does not follow the host.
+    LANG: 'en_GB.UTF-8',
+    LANGUAGE: 'en_GB',
+    LC_ALL: 'en_GB.UTF-8'
   }
   delete env.WAYLAND_DISPLAY
   // Cursor/agent shells may set this, which makes Electron act as Node and
@@ -213,6 +232,8 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
   // Tests control WAN reachability independently of the host running them.
   // Page routes can override these replies to exercise real offline recovery.
   await context.route(INTERNET_CHECK_URL, route => route.fulfill({ status: 204 }))
+  // Covers reloads and later windows. The first document may already exist.
+  await context.addInitScript(installRendererAccessors)
   await notifyPhase('electronConnected')
 
   let page
@@ -270,6 +291,15 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
 
   try {
     await waitForAppReady(page)
+    await page.evaluate(installRendererAccessors)
+    // Init scripts can miss a reloaded document on CI, so the main process
+    // also installs the accessors whenever a document is ready. This is only
+    // a fallback, so it must not fail the launch.
+    await electronApp.evaluate(({ app, BrowserWindow }, source) => {
+      const install = contents => contents.on('dom-ready', () => contents.executeJavaScript(source).catch(() => {}))
+      app.on('web-contents-created', (_, contents) => install(contents))
+      for (const browserWindow of BrowserWindow.getAllWindows()) install(browserWindow.webContents)
+    }, `(${installRendererAccessors})()`).catch(() => {})
     await notifyPhase('interactive', page)
     expect(startupErrors, 'Renderer errors during startup').toEqual([])
   } catch (error) {
@@ -381,15 +411,21 @@ export async function setPlayerFullscreen(page, fullscreen) {
  *   test.use({ seed: { settings: { ... }, history: [ ... ] } })
  * Use `localeOverrides` to replace packaged locale messages without changing
  * the shared dist-e2e output.
+ *
+ * `uiScale` is set per project: tests tagged `@scale` also run at 95% and
+ * 125%. Read the fixture instead of seeding `settings.uiScale` in those tests.
  */
 export const test = base.extend({
   seed: [{}, { option: true }],
+  uiScale: [100, { option: true }],
   launchArgs: [[], { option: true }],
   showTutorial: [false, { option: true }],
   localeOverrides: [{}, { option: true }],
 
-  app: async ({ seed, launchArgs, showTutorial, localeOverrides }, use, testInfo) => {
-    const userDataDir = await createUserDataDir(seed)
+  app: async ({ seed, uiScale, launchArgs, showTutorial, localeOverrides }, use, testInfo) => {
+    const userDataDir = await createUserDataDir(uiScale === 100
+      ? seed
+      : { ...seed, settings: { uiScale, ...seed.settings } })
     const hasLocaleOverrides = Object.keys(localeOverrides).length > 0
     let appRoot
     let appHandle

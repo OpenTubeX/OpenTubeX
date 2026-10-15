@@ -40,13 +40,13 @@ test.describe('subscribed channels', () => {
     await beta.locator('.thumbnailContainer').click({ button: 'right' })
     const menu = page.getByRole('menu', { name: 'Context menu', exact: true })
     await menu.getByRole('menuitem', { name: /^Hide channel$/i }).click()
-    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getChannelsHiddenParsed))
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getChannelsHiddenParsed))
       .toContainEqual({ name: 'UCbbbbbbbbbbbbbbbbbbbbbb', preferredName: 'Beta Channel' })
 
     const alpha = page.locator('.navChannel[title="Alpha Channel"]')
     await alpha.click({ button: 'right' })
     await menu.getByRole('menuitem', { name: /^Hide channel$/i }).click()
-    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getChannelsHiddenParsed))
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getChannelsHiddenParsed))
       .toContainEqual({ name: 'UCaaaaaaaaaaaaaaaaaaaaaa', preferredName: 'Alpha Channel' })
   })
 
@@ -67,7 +67,7 @@ test.describe('subscribed channels', () => {
 
     const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.dispatch('updateSubscriptionDetails', {
         channelId: 'UCaaaaaaaaaaaaaaaaaaaaaa',
         channelName: 'Alpha Channel',
@@ -246,7 +246,7 @@ test.describe('subscribed channels', () => {
     await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       for (const profileId of ['profile-1', 'profile-2', 'profile-3', 'profile-4', 'profile-5']) {
         store.commit('removeProfileFromList', profileId)
       }
@@ -381,7 +381,7 @@ test.describe('large subscribed channel lists', () => {
     await expect(page.locator('.navChannel')).toHaveCount(100)
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('removeChannelFromProfiles', {
         channelId: 'UC0000000000000000000000',
         profileIds: ['allChannels']

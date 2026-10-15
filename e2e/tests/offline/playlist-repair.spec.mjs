@@ -14,7 +14,7 @@ async function openRepair(page) {
   return page.getByRole('dialog', { name: 'Repair Playlists' })
 }
 async function savedPlaylists(page) {
-  return page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getAllPlaylists)
+  return page.evaluate(() => window.$store.getters.getAllPlaylists)
 }
 function playerResponse() {
   return { videoDetails: { videoId: video.videoId, title: 'Fetched title', author: 'Recovered channel', channelId: 'UCabcdefghijklmnopqrstuv', lengthSeconds: '120', isLiveContent: true }, microformat: { playerMicroformatRenderer: { publishDate: '2025-01-01' } } }
@@ -83,7 +83,7 @@ test('cancels without saving late metadata', async ({ page }) => {
 
 test('keeps dialog heading and actions visible at fractional zoom and small sizes', async ({ page, app }, testInfo) => {
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('addPlaylists', Array.from({ length: 20 }, (_, i) => ({ _id: `long-${i}`, playlistName: `Imported playlist ${i} with a long title`, videos: [] })))
   })
   await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1.25))
@@ -101,7 +101,7 @@ test('keeps dialog heading and actions visible at fractional zoom and small size
   await setWindowSize(app, page, { width: 1100, height: 1100 })
   await expect.poll(() => scroller.evaluate(el => el.scrollTop <= el.scrollHeight - el.clientHeight + 1)).toBe(true)
   await scroller.evaluate(el => { el.scrollTop = el.scrollHeight })
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('removePlaylists', Array.from({ length: 20 }, (_, i) => `long-${i}`)))
+  await page.evaluate(() => window.$store.dispatch('removePlaylists', Array.from({ length: 20 }, (_, i) => `long-${i}`)))
   await expect.poll(() => page.evaluate(async action => (
     (await window.ftElectron.dbPlaylists(action)).filter(playlist => playlist._id.startsWith('long-'))
   ), DBActions.GENERAL.FIND)).toEqual([])
@@ -181,7 +181,7 @@ for (const edit of ['delete', 'add', 'rename']) {
       await dialog.getByRole('button', { name: 'Start repair', exact: true }).click()
       await expect.poll(() => app.electronApp.evaluate(() => globalThis.playlistRepairSaved)).toBe(true)
       await other.evaluate(async edit => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         if (edit === 'delete') await store.dispatch('removePlaylist', 'takeout')
         else if (edit === 'add') await store.dispatch('addVideo', { _id: 'takeout', videoData: { videoId: 'cdefghijklm', title: 'Added later', author: 'New channel', lengthSeconds: 50 } })
         else await store.dispatch('updatePlaylist', { ...JSON.parse(JSON.stringify(store.getters.getPlaylist('takeout'))), playlistName: 'Renamed later' })
@@ -213,7 +213,7 @@ test.describe('shared repair busy state', () => {
       await goTo(page, 'history')
       await page.getByRole('button', { name: 'Repair History', exact: true }).click()
       const historyDialog = page.getByRole('dialog', { name: 'Repair History' })
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('createTab', { route: '/userplaylists', title: 'Playlists', makeActive: true }))
+      await page.evaluate(() => window.$store.dispatch('createTab', { route: '/userplaylists', title: 'Playlists', makeActive: true }))
       // The history prompt remains mounted over the new tab; open the new tab's
       // prompt directly to exercise this already-open-prompt race.
       await page.getByRole('button', { name: 'Repair Playlists', exact: true }).dispatchEvent('click')

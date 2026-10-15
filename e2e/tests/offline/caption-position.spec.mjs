@@ -23,7 +23,7 @@ test('applies UI roundness to the player and caption backgrounds', async ({ app,
 
   for (const roundness of [0, 100, 200]) {
     await page.evaluate(value => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.dispatch('updateUiRoundness', value)
     }, roundness)
     await expect(player).toHaveCSS('border-radius', `${12 * roundness / 100}px`)
@@ -55,7 +55,7 @@ test('applies UI roundness to the caption settings preview background', async ({
 
   for (const roundness of [0, 100, 200]) {
     await page.evaluate(value => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.dispatch('updateUiRoundness', value)
     }, roundness)
     await expect(caption).toHaveCSS('border-radius', `${4 * roundness / 100}px`)

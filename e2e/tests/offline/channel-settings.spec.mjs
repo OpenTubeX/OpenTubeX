@@ -58,7 +58,7 @@ test.describe('channel settings', () => {
       json: { status: 'ok', capabilities: { encrypted_sync: 1, live_sync: 1 } }
     }))
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('setSyncServerEnabled', true)
     })
   })
@@ -90,7 +90,7 @@ test.describe('channel settings', () => {
       'channelVolumes'
     ]
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.state.settings.syncServerSettingsExcluded
     })).toEqual(expect.arrayContaining(channelSettingKeys))
 
@@ -99,7 +99,7 @@ test.describe('channel settings', () => {
     })
     await enableSync.click()
     await expect.poll(() => page.evaluate(channelSettingKeys => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.state.settings.syncServerSettingsExcluded.filter(
         settingKey => channelSettingKeys.includes(settingKey)
       )
@@ -159,7 +159,7 @@ test.describe('channel settings', () => {
     await expect(newChannel.locator('.channelPreference')).toHaveCount(2)
 
     await expect.poll(() => page.evaluate(channelId => {
-      const settings = document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.settings
+      const settings = window.$store.state.settings
       return {
         playbackSpeed: JSON.parse(settings.channelPlaybackSpeeds)[channelId],
         volume: JSON.parse(settings.channelVolumes)[channelId]
@@ -178,7 +178,7 @@ test.describe('channel settings', () => {
     await page.getByRole('button', { name: 'Add subscribed channel' }).click()
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       window.updateChannelVolumes = store._actions.updateChannelVolumes[0]
       store._actions.updateChannelVolumes = [() => Promise.reject(new Error('write failed'))]
     })
@@ -193,7 +193,7 @@ test.describe('channel settings', () => {
     })).toBeVisible()
     await expect(channel).toBeEnabled()
     await expect.poll(() => page.evaluate(channelId => {
-      const settings = document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.settings
+      const settings = window.$store.state.settings
       return {
         playbackSpeed: JSON.parse(settings.channelPlaybackSpeeds)[channelId],
         volume: JSON.parse(settings.channelVolumes)[channelId]
@@ -201,7 +201,7 @@ test.describe('channel settings', () => {
     }, NEW_CHANNEL_ID)).toEqual({ playbackSpeed: undefined, volume: undefined })
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store._actions.updateChannelVolumes = [window.updateChannelVolumes]
     })
     await channel.click()
@@ -215,7 +215,7 @@ test.describe('channel settings', () => {
     await page.getByRole('button', { name: 'Add subscribed channel' }).click()
 
     await page.evaluate(channelId => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const updatePlaybackSpeeds = store._actions.updateChannelPlaybackSpeeds[0]
       store._actions.updateChannelPlaybackSpeeds = [value => {
         const playbackSpeeds = JSON.parse(value)
@@ -246,7 +246,7 @@ test.describe('channel settings', () => {
     await page.getByRole('button', { name: 'Add subscribed channel' }).click()
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store._actions.updateChannelVolumes = [() => new Promise((_resolve, reject) => {
         window.rejectChannelVolumeUpdate = reject
       })]
@@ -263,17 +263,17 @@ test.describe('channel settings', () => {
     const playbackSpeed = newChannel.getByRole('slider', { name: /Playback Speed/ })
     await playbackSpeed.fill('1.5')
     await expect.poll(() => page.evaluate(channelId => {
-      const settings = document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.settings
+      const settings = window.$store.state.settings
       return JSON.parse(settings.channelPlaybackSpeeds)[channelId]
     }, NEW_CHANNEL_ID)).toBe(1.5)
     await playbackSpeed.fill('1.25')
     await expect.poll(() => page.evaluate(channelId => {
-      const settings = document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.settings
+      const settings = window.$store.state.settings
       return JSON.parse(settings.channelPlaybackSpeeds)[channelId]
     }, NEW_CHANNEL_ID)).toBe(1.25)
 
     await page.evaluate(async ({ channelId }) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const playbackSpeeds = JSON.parse(store.state.settings.channelPlaybackSpeeds)
       playbackSpeeds[channelId] = 1.75
       await store.dispatch('updateChannelPlaybackSpeeds', JSON.stringify(playbackSpeeds))
@@ -284,7 +284,7 @@ test.describe('channel settings', () => {
       hasText: 'Failed to save channel settings'
     })).toBeVisible()
     await expect.poll(() => page.evaluate(({ channelId, newChannelId }) => {
-      const settings = document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.settings
+      const settings = window.$store.state.settings
       const playbackSpeeds = JSON.parse(settings.channelPlaybackSpeeds)
       return {
         existingChannel: playbackSpeeds[channelId],
@@ -298,7 +298,7 @@ test.describe('channel settings', () => {
 
   test('points to Playback settings when channel settings are disabled', async ({ page }) => {
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await Promise.all([
         store.dispatch('updateRememberPlaybackSpeedPerChannel', false),
         store.dispatch('updateRememberVideoQualityPerChannel', false),
@@ -328,7 +328,7 @@ test.describe('channel settings', () => {
 
   test('saved channels are not links when channel links are disabled', async ({ page }) => {
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateDisableChannelLinks', true)
     })
 

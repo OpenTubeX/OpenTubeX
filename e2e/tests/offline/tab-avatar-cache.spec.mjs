@@ -66,7 +66,7 @@ for (const pageType of ['watch', 'channel']) {
     }), pageType)
     const tab = page.locator(`.tabBar .tab[data-tab-id="${background.id}"]`)
     await page.evaluate(pageType => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       if (pageType === 'watch') {
         store.commit('setVideoAvatar', { videoId: 'migrating-avatar', avatar: 'https://images.test/migrating-avatar.png' })
       } else {
@@ -95,7 +95,7 @@ for (const pageType of ['watch', 'channel']) {
 
     await page.locator('.tabBar .tab').first().click()
     for (const scale of [100, 125]) {
-      await page.evaluate(scale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', scale), scale)
+      await page.evaluate(scale => window.$store.dispatch('updateUiScale', scale), scale)
       const source = page.locator(`.tabBar .tab[data-tab-id="${existing.id}"]`)
       await source.click()
       const sourceBox = await source.boundingBox()
@@ -129,7 +129,7 @@ test('does not restore a cached avatar when navigating away during decoding', as
     route: '/watch/old-avatar', makeActive: false, lazyLoad: true
   }))
   await page.evaluate(() => {
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setVideoAvatar', {
+    window.$store.commit('setVideoAvatar', {
       videoId: 'old-avatar', avatar: 'https://images.test/old-avatar.png'
     })
   })
@@ -150,7 +150,7 @@ test('does not restore a cached avatar when navigating away during decoding', as
   await expect(avatar).toBeVisible()
   await page.evaluate(tabId => {
     const route = { path: '/history', fullPath: '/history' }
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setTabNavigation', { tabId, route, history: [{ route }], historyIndex: 0 })
     window.ftElectron.tabs.updateRoute({ tabId, route })
   }, background.id)
@@ -171,7 +171,7 @@ for (const surface of ['organizer', 'tooltip', 'switcher']) {
       route: '/watch/surface-avatar', title: 'Avatar handoff', makeActive: false, lazyLoad: true
     }))
     await page.evaluate(() => {
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setVideoAvatar', {
+      window.$store.commit('setVideoAvatar', {
         videoId: 'surface-avatar', avatar: 'https://images.test/surface-avatar.png'
       })
     })
@@ -232,7 +232,7 @@ test('uses the normal fallback when a loaded avatar gets an invalid embedded rep
     route: '/watch/invalid-cached-avatar', makeActive: false, lazyLoad: true
   }))
   const setAvatar = avatar => page.evaluate(avatar => {
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setVideoAvatar', {
+    window.$store.commit('setVideoAvatar', {
       videoId: 'invalid-cached-avatar', avatar
     })
   }, avatar)
@@ -268,7 +268,7 @@ for (const indicator of ['loading', 'playing']) {
     await setIndicator(true)
     await expect(statusIcon).toBeVisible()
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setVideoAvatar', { videoId: 'cached-avatar', avatar: 'https://images.test/watch-avatar.png' })
     })
     await expect.poll(() => avatarRequest != null, { timeout: 2000 }).toBe(true)

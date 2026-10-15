@@ -28,7 +28,7 @@ test.use({
 
 async function savedValues(page) {
   return page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return ['ChannelPlaybackSpeeds', 'ChannelVideoQualities', 'ChannelSubtitlesStates', 'ChannelVolumes']
       .map(key => JSON.parse(store.getters[`get${key}`]))
   })

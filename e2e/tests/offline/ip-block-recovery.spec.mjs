@@ -250,12 +250,12 @@ test('subscription refresh waits for an active IP block recovery', async ({ app,
   }
 
   await page.evaluate(async (recoveryScriptPath) => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateVideoIpBlockScriptPath', recoveryScriptPath)
   }, scriptPath)
 
   const result = await page.evaluate(async (recoveryScriptPath) => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const tabId = store.getters.getActiveTabId
     const started = await window.ftElectron.startIpBlockRecoveryScript(recoveryScriptPath)
     const startedAt = performance.now()

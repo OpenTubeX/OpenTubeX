@@ -89,7 +89,7 @@ test('line-delimited settings keep valid rows around a malformed row', async ({ 
   await dataSection.getByRole('button', { name: 'Import Settings', exact: true }).click()
   await expectRowError(page)
   await expect.poll(() => page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return [store.getters.getUiScale, store.getters.getRememberHistory]
   })).toEqual([125, false])
   expect(pageErrors).toEqual([])
@@ -100,7 +100,7 @@ test('a one-row settings database applies the saved setting', async ({ page }) =
   await mockImportFile(page, 'settings.db', JSON.stringify({ _id: 'uiScale', value: 125 }))
   await dataSection.getByRole('button', { name: 'Import Settings', exact: true }).click()
   await expect.poll(() => page.evaluate(() => (
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getUiScale
+    window.$store.getters.getUiScale
   ))).toBe(125)
   await expect(page.locator('.toast', { hasText: 'All settings have been successfully imported' })).toBeVisible()
 })
@@ -132,7 +132,7 @@ test('line-delimited subscriptions keep valid rows around a malformed row', asyn
     hasText: 'All subscriptions and profiles have been successfully imported'
   })).toBeVisible()
   await expect.poll(() => page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const primaryProfile = store.getters.getProfileList[0]
     return primaryProfile.subscriptions
       .map(({ id }) => id)
@@ -158,7 +158,7 @@ test('line-delimited watch history keeps valid rows around a malformed row', asy
     hasText: 'All watched history has been successfully imported'
   })).toBeVisible()
   await expect.poll(() => page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return Object.keys(store.getters.getHistoryCacheById)
       .filter(videoId => videoId.startsWith('issue866'))
       .sort()
@@ -195,7 +195,7 @@ test('line-delimited playlists keep valid rows around a malformed row', async ({
     hasText: 'All playlists has been successfully imported'
   })).toBeVisible()
   await expect.poll(() => page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const playlists = store.getters.getAllPlaylists
       .filter(({ _id }) => _id.startsWith('issue866-playlist-'))
     const mixedPlaylist = playlists.find(({ _id }) => _id === 'issue866-playlist-mixed-videos')
@@ -230,7 +230,7 @@ test('line-delimited search history keeps valid rows around a malformed row', as
     hasText: 'All search history has been successfully imported'
   })).toBeVisible()
   await expect.poll(() => page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return store.getters.getSearchHistoryEntries
       .map(({ query }) => query)
       .filter(query => query.startsWith('issue866-search-'))

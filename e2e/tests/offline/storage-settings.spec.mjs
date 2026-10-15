@@ -24,10 +24,10 @@ test.use({
   }
 })
 
-test('keeps retention label transparent and its indicators inside the card', async ({ app, page }, testInfo) => {
+test('keeps retention label transparent and its indicators inside the card', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateBaseTheme', 'dark')
     store.commit('setSyncServerEnabled', true)
     store.commit('setSyncServerToken', 'e2e-token')
@@ -38,136 +38,132 @@ test('keeps retention label transparent and its indicators inside the card', asy
   const input = storage.getByRole('spinbutton', { name: 'Automatic History Retention (Days)', exact: true })
   const root = input.locator('../..')
   await expect(root.locator('.syncedSettingIndicator')).toBeVisible()
-  for (const uiScale of [100, 95]) {
-    await page.evaluate(scale => window.ftElectron.setZoomFactor(scale / 100), uiScale)
-    for (const width of [1600, 1000, 375]) {
-      await app.electronApp.evaluate(({ BrowserWindow }, { width, uiScale }) => {
-        BrowserWindow.getAllWindows()[0].setContentSize(Math.round(width * uiScale / 100), Math.round(900 * uiScale / 100))
-      }, { width, uiScale })
-      await expect.poll(() => page.evaluate(width => Math.abs(innerWidth - width), width)).toBeLessThanOrEqual(1)
-      for (const direction of ['ltr', 'rtl']) {
-        await page.evaluate(direction => { document.body.dir = direction }, direction)
-        await input.scrollIntoViewIfNeeded()
-        const geometry = await root.evaluate(element => {
-          const card = element.closest('.storageItem')
-          const bounds = card.getBoundingClientRect()
-          const style = getComputedStyle(card)
-          const label = element.querySelector('.selectLabel').getBoundingClientRect()
-          const control = element.querySelector('input').getBoundingClientRect()
-          const outline = element.querySelector('.inputOutline').getBoundingClientRect()
-          const action = element.querySelector('.inputAction').getBoundingClientRect()
-          const indicators = [...element.querySelectorAll('.inputIndicators button')].map(button => {
-            const rect = button.getBoundingClientRect()
-            return { left: rect.left, right: rect.right }
-          })
-          return {
-            left: bounds.left + parseFloat(style.paddingLeft),
-            right: bounds.right - parseFloat(style.paddingRight),
-            indicators,
-            labelBackground: getComputedStyle(element.querySelector('.selectLabel')).backgroundColor,
-            labelCenter: label.top + label.height / 2,
-            inputTop: control.top,
-            outlineLeft: outline.left,
-            outlineRight: outline.right,
-            controlLeft: control.left,
-            controlRight: control.right,
-            actionLeft: action.left,
-            actionRight: action.right
-          }
+  for (const width of [1600, 1000, 375]) {
+    await app.electronApp.evaluate(({ BrowserWindow }, { width, uiScale }) => {
+      BrowserWindow.getAllWindows()[0].setContentSize(Math.round(width * uiScale / 100), Math.round(900 * uiScale / 100))
+    }, { width, uiScale })
+    await expect.poll(() => page.evaluate(width => Math.abs(innerWidth - width), width)).toBeLessThanOrEqual(1)
+    for (const direction of ['ltr', 'rtl']) {
+      await page.evaluate(direction => { document.body.dir = direction }, direction)
+      await input.scrollIntoViewIfNeeded()
+      const geometry = await root.evaluate(element => {
+        const card = element.closest('.storageItem')
+        const bounds = card.getBoundingClientRect()
+        const style = getComputedStyle(card)
+        const label = element.querySelector('.selectLabel').getBoundingClientRect()
+        const control = element.querySelector('input').getBoundingClientRect()
+        const outline = element.querySelector('.inputOutline').getBoundingClientRect()
+        const action = element.querySelector('.inputAction').getBoundingClientRect()
+        const indicators = [...element.querySelectorAll('.inputIndicators button')].map(button => {
+          const rect = button.getBoundingClientRect()
+          return { left: rect.left, right: rect.right }
         })
-        expect.soft(geometry.labelBackground, 'label reveals the card surface').toBe('rgba(0, 0, 0, 0)')
-        expect.soft(Math.abs(geometry.labelCenter - geometry.inputTop), `${width}px ${uiScale}%: label centered in outline notch`).toBeLessThanOrEqual(1)
-        expect.soft(Math.abs(geometry.outlineLeft - geometry.controlLeft), 'outline starts at input').toBeLessThanOrEqual(1)
-        expect.soft(Math.abs(geometry.outlineRight - geometry.controlRight), 'outline excludes external indicators').toBeLessThanOrEqual(1)
-        expect.soft(geometry.actionLeft, 'save action inside input').toBeGreaterThanOrEqual(geometry.controlLeft)
-        expect.soft(geometry.actionRight, 'save action inside input').toBeLessThanOrEqual(geometry.controlRight)
-        for (const bounds of geometry.indicators) {
-          expect.soft(bounds.left, `${width}px ${uiScale}% ${direction}: indicator left`).toBeGreaterThanOrEqual(geometry.left - 1)
-          expect.soft(bounds.right, `${width}px ${uiScale}% ${direction}: indicator right`).toBeLessThanOrEqual(geometry.right + 1)
+        return {
+          left: bounds.left + parseFloat(style.paddingLeft),
+          right: bounds.right - parseFloat(style.paddingRight),
+          indicators,
+          labelBackground: getComputedStyle(element.querySelector('.selectLabel')).backgroundColor,
+          labelCenter: label.top + label.height / 2,
+          inputTop: control.top,
+          outlineLeft: outline.left,
+          outlineRight: outline.right,
+          controlLeft: control.left,
+          controlRight: control.right,
+          actionLeft: action.left,
+          actionRight: action.right
         }
-        await root.locator('.selectLabel').click()
-        await expect(input).toBeFocused()
-        expect(await input.evaluate(element => getComputedStyle(element).borderTopColor), 'focus does not paint across the notch').toBe('rgba(0, 0, 0, 0)')
-        await input.evaluate(element => element.blur())
-        await input.hover()
-        expect(await input.evaluate(element => getComputedStyle(element).borderTopColor), 'hover does not paint across the notch').toBe('rgba(0, 0, 0, 0)')
+      })
+      expect.soft(geometry.labelBackground, 'label reveals the card surface').toBe('rgba(0, 0, 0, 0)')
+      expect.soft(Math.abs(geometry.labelCenter - geometry.inputTop), `${width}px ${uiScale}%: label centered in outline notch`).toBeLessThanOrEqual(1)
+      expect.soft(Math.abs(geometry.outlineLeft - geometry.controlLeft), 'outline starts at input').toBeLessThanOrEqual(1)
+      expect.soft(Math.abs(geometry.outlineRight - geometry.controlRight), 'outline excludes external indicators').toBeLessThanOrEqual(1)
+      expect.soft(geometry.actionLeft, 'save action inside input').toBeGreaterThanOrEqual(geometry.controlLeft)
+      expect.soft(geometry.actionRight, 'save action inside input').toBeLessThanOrEqual(geometry.controlRight)
+      for (const bounds of geometry.indicators) {
+        expect.soft(bounds.left, `${width}px ${uiScale}% ${direction}: indicator left`).toBeGreaterThanOrEqual(geometry.left - 1)
+        expect.soft(bounds.right, `${width}px ${uiScale}% ${direction}: indicator right`).toBeLessThanOrEqual(geometry.right + 1)
       }
-      if (width === 1600 && uiScale === 100) {
-        await page.evaluate(() => { document.body.dir = 'ltr' })
-        await input.locator('xpath=ancestor::article').screenshot({ path: testInfo.outputPath('retention-card.png') })
-      }
+      await root.locator('.selectLabel').click()
+      await expect(input).toBeFocused()
+      expect(await input.evaluate(element => getComputedStyle(element).borderTopColor), 'focus does not paint across the notch').toBe('rgba(0, 0, 0, 0)')
+      await input.evaluate(element => element.blur())
+      await input.hover()
+      expect(await input.evaluate(element => getComputedStyle(element).borderTopColor), 'hover does not paint across the notch').toBe('rgba(0, 0, 0, 0)')
+    }
+    if (width === 1600 && uiScale === 100) {
+      await page.evaluate(() => { document.body.dir = 'ltr' })
+      await input.locator('xpath=ancestor::article').screenshot({ path: testInfo.outputPath('retention-card.png') })
     }
   }
 })
 
-for (const uiScale of [100, 95]) {
-  test.describe(`native number arrows at ${uiScale}%`, () => {
-    test.use({ seed: { settings: { currentLocale: 'en-US', uiScale, baseTheme: uiScale === 100 ? 'dark' : 'light', historyRetentionDays: '30' } } })
-    test(`number input arrows highlight independently and retain native stepping at ${uiScale}%`, async ({ app, page }, testInfo) => {
-      await page.emulateMedia({ reducedMotion: 'reduce' })
-      const section = await goToSettingsSection(page, 'storage')
-      const input = section.getByRole('spinbutton', { name: 'Automatic History Retention (Days)' })
-      for (const direction of ['ltr', 'rtl']) {
-        await page.evaluate(direction => { document.body.dir = direction }, direction)
-        await input.scrollIntoViewIfNeeded()
-        await input.fill('30')
-        await input.evaluate(element => element.scrollIntoView({ block: 'center' }))
-        const bounds = await input.boundingBox()
-        const padding = await input.evaluate(element => parseFloat(getComputedStyle(element)[document.body.dir === 'rtl' ? 'paddingLeft' : 'paddingRight']))
-        const x = direction === 'rtl' ? padding + 4 : bounds.width - padding - 4
-        const upper = { x, y: bounds.height / 2 - 7 }
-        const lower = { x, y: bounds.height / 2 + 7 }
-        const primary = await input.evaluate(element => {
-          const probe = document.createElement('span')
-          probe.style.color = 'var(--primary-color)'
-          element.parentElement.append(probe)
-          const color = getComputedStyle(probe).color.match(/\d+/g).slice(0, 3).map(Number)
-          probe.remove()
-          return color
-        })
-        // capturePage preserves the hovered pointer; Playwright's screenshot
-        // capture can move Electron's pointer back to the X server position.
-        const highlightedPixels = async (name) => {
-          const box = await input.boundingBox()
-          const result = await app.electronApp.evaluate(async ({ BrowserWindow }, { box, primary, start, end }) => {
-            const webContents = BrowserWindow.getAllWindows()[0].webContents
-            const zoom = webContents.getZoomFactor()
-            const image = await webContents.capturePage({ x: Math.round(box.x * zoom), y: Math.round(box.y * zoom), width: Math.round(box.width * zoom), height: Math.round(box.height * zoom) })
-            const { width, height } = image.getSize()
-            const pixels = image.toBitmap()
-            const counts = [0, 0]
-            for (let y = 5; y < height - 5; y++) {
-              for (let x = Math.floor(start * width); x < Math.ceil(end * width); x++) {
-                const i = (y * width + x) * 4
-                if (pixels[i + 2] === primary[0] && pixels[i + 1] === primary[1] && pixels[i] === primary[2]) counts[y < height / 2 ? 0 : 1]++
-              }
+test.describe('native number arrows', { tag: '@scale' }, () => {
+  test.use({ seed: { settings: { currentLocale: 'en-US', historyRetentionDays: '30' } } })
+  test('number input arrows highlight independently and retain native stepping', async ({ app, page, uiScale }, testInfo) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await page.evaluate(theme => window.$store.dispatch('updateBaseTheme', theme), uiScale === 100 ? 'dark' : 'light')
+    const section = await goToSettingsSection(page, 'storage')
+    const input = section.getByRole('spinbutton', { name: 'Automatic History Retention (Days)' })
+    for (const direction of ['ltr', 'rtl']) {
+      await page.evaluate(direction => { document.body.dir = direction }, direction)
+      await input.scrollIntoViewIfNeeded()
+      await input.fill('30')
+      await input.evaluate(element => element.scrollIntoView({ block: 'center' }))
+      const bounds = await input.boundingBox()
+      const padding = await input.evaluate(element => parseFloat(getComputedStyle(element)[document.body.dir === 'rtl' ? 'paddingLeft' : 'paddingRight']))
+      const x = direction === 'rtl' ? padding + 4 : bounds.width - padding - 4
+      const upper = { x, y: bounds.height / 2 - 7 }
+      const lower = { x, y: bounds.height / 2 + 7 }
+      const primary = await input.evaluate(element => {
+        const probe = document.createElement('span')
+        probe.style.color = 'var(--primary-color)'
+        element.parentElement.append(probe)
+        const color = getComputedStyle(probe).color.match(/\d+/g).slice(0, 3).map(Number)
+        probe.remove()
+        return color
+      })
+      // capturePage preserves the hovered pointer; Playwright's screenshot
+      // capture can move Electron's pointer back to the X server position.
+      const highlightedPixels = async (name) => {
+        const box = await input.boundingBox()
+        const result = await app.electronApp.evaluate(async ({ BrowserWindow }, { box, primary, start, end }) => {
+          const webContents = BrowserWindow.getAllWindows()[0].webContents
+          const zoom = webContents.getZoomFactor()
+          const image = await webContents.capturePage({ x: Math.round(box.x * zoom), y: Math.round(box.y * zoom), width: Math.round(box.width * zoom), height: Math.round(box.height * zoom) })
+          const { width, height } = image.getSize()
+          const pixels = image.toBitmap()
+          const counts = [0, 0]
+          for (let y = 5; y < height - 5; y++) {
+            for (let x = Math.floor(start * width); x < Math.ceil(end * width); x++) {
+              const i = (y * width + x) * 4
+              if (pixels[i + 2] === primary[0] && pixels[i + 1] === primary[1] && pixels[i] === primary[2]) counts[y < height / 2 ? 0 : 1]++
             }
-            return { counts, png: image.toPNG().toString('base64') }
-          }, { box, primary, start: (x - 9) / bounds.width, end: (x + 9) / bounds.width })
-          if (name) await writeFile(testInfo.outputPath(name), Buffer.from(result.png, 'base64'))
-          return result.counts
-        }
-        for (const [position, selected] of [[upper, 0], [lower, 1]]) {
-          await input.hover({ position })
-          const counts = await highlightedPixels(`number-arrow-${direction}-${selected}.png`)
-          expect.soft(counts[selected], 'hovered arrow uses the theme highlight').toBeGreaterThan(5)
-          expect.soft(counts[1 - selected], 'other arrow keeps its normal color').toBe(0)
-        }
-        await input.hover({ position: { x: bounds.width / 2, y: bounds.height / 2 } })
-        expect(await highlightedPixels()).toEqual([0, 0])
-        await input.hover({ position: upper })
-        await page.locator('.settingsBreadcrumb').hover()
-        expect(await highlightedPixels()).toEqual([0, 0])
-        await input.click({ position: upper })
-        await expect(input).toHaveValue('31')
-        await input.click({ position: lower })
-        await expect(input).toHaveValue('30')
-        await input.press('ArrowUp')
-        await expect(input).toHaveValue('31')
+          }
+          return { counts, png: image.toPNG().toString('base64') }
+        }, { box, primary, start: (x - 9) / bounds.width, end: (x + 9) / bounds.width })
+        if (name) await writeFile(testInfo.outputPath(name), Buffer.from(result.png, 'base64'))
+        return result.counts
       }
-    })
+      for (const [position, selected] of [[upper, 0], [lower, 1]]) {
+        await input.hover({ position })
+        const counts = await highlightedPixels(`number-arrow-${direction}-${selected}.png`)
+        expect.soft(counts[selected], 'hovered arrow uses the theme highlight').toBeGreaterThan(5)
+        expect.soft(counts[1 - selected], 'other arrow keeps its normal color').toBe(0)
+      }
+      await input.hover({ position: { x: bounds.width / 2, y: bounds.height / 2 } })
+      expect(await highlightedPixels()).toEqual([0, 0])
+      await input.hover({ position: upper })
+      await page.locator('.settingsBreadcrumb').hover()
+      expect(await highlightedPixels()).toEqual([0, 0])
+      await input.click({ position: upper })
+      await expect(input).toHaveValue('31')
+      await input.click({ position: lower })
+      await expect(input).toHaveValue('30')
+      await input.press('ArrowUp')
+      await expect(input).toHaveValue('31')
+    }
   })
-}
+})
 
 test('number arrow pressed paint reaches controls inside dialog overlays', async ({ page }) => {
   const section = await goToSettingsSection(page, 'storage')
@@ -230,7 +226,7 @@ test('opens the Storage tab when legacy storage navigation changes while mounted
     .toHaveAttribute('aria-selected', 'true')
 
   await page.evaluate(() => {
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    window.$store
       .commit('setSettingsWindowSection', 'storage')
   })
 
@@ -316,17 +312,17 @@ test('moves storage controls into one searchable category', async ({ app, attach
   await expect(playbackCacheSize).toHaveValue('5')
   await playbackCacheSize.fill('4')
   await expect.poll(() => page.evaluate(() => (
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    window.$store
       .getters.getYtDlpPlaybackCacheMaxEntrySize
   ))).toBe(4)
   await playbackCacheSize.fill('0')
   await expect.poll(() => page.evaluate(() => (
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    window.$store
       .getters.getYtDlpPlaybackCacheMaxEntrySize
   ))).toBe(0)
   await playbackCacheSize.fill('5')
   await expect.poll(() => page.evaluate(() => (
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    window.$store
       .getters.getYtDlpPlaybackCacheMaxEntrySize
   ))).toBe(5)
   await expect(storage.getByLabel('Automatic History Retention (Days)')).toHaveValue('30')
@@ -413,7 +409,7 @@ test('moves storage controls into one searchable category', async ({ app, attach
 
 test('separates replaceable search results from saved search history', async ({ page }) => {
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('addToSessionSearchHistory', {
       query: 'temporary search',
       data: [{ videoId: 'aaaaaaaaaaa' }]
@@ -431,9 +427,9 @@ test('separates replaceable search results from saved search history', async ({ 
     .click()
 
   expect(await page.evaluate(() => ({
-    cached: document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    cached: window.$store
       .getters.getSessionSearchHistory.length,
-    saved: document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    saved: window.$store
       .getters.getSearchHistoryEntries.length
   }))).toEqual({ cached: 0, saved: 1 })
   await expect(storage.locator('.storageSettings')).toHaveAttribute('aria-busy', 'false')
@@ -446,7 +442,7 @@ test('separates replaceable search results from saved search history', async ({ 
     .getByRole('button', { name: 'Delete' })
     .click()
   await expect.poll(() => page.evaluate(
-    () => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    () => window.$store
       .getters.getSearchHistoryEntries.length
   )).toBe(0)
 })
@@ -522,7 +518,7 @@ test('reports cleanup rejection instead of success', async ({ app, page }) => {
 
 test('reports rejected store cleanup instead of success', async ({ page }) => {
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store._actions.removeAllSearchHistoryEntries = [() => Promise.resolve(false)]
   })
 
@@ -538,14 +534,14 @@ test('reports rejected store cleanup instead of success', async ({ page }) => {
   await expect(page.locator('.toast', { hasText: 'Cleanup failed' })).toBeVisible()
   await expect(page.locator('.toast', { hasText: 'Cleanup complete' })).toHaveCount(0)
   expect(await page.evaluate(() => (
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    window.$store
       .getters.getSearchHistoryEntries.length
   ))).toBe(1)
 })
 
 test('reports rejected profile cleanup instead of success', async ({ page }) => {
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store._actions.updateProfile = [() => Promise.resolve(false)]
   })
 
@@ -558,7 +554,7 @@ test('reports rejected profile cleanup instead of success', async ({ page }) => 
   await expect(page.locator('.toast', { hasText: 'Cleanup failed' })).toBeVisible()
   await expect(page.locator('.toast', { hasText: 'Cleanup complete' })).toHaveCount(0)
   expect(await page.evaluate(() => (
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    window.$store
       .getters.getProfileList[0].subscriptions.length
   ))).toBe(1)
 })
@@ -758,7 +754,7 @@ test('clears bounded disk caches without touching user data', async ({ app, page
   // Active tabs may immediately recreate their thumbnails after cleanup.
   await expect(tabCache.locator('.storageSize')).not.toHaveText('1 MiB')
   expect(await page.evaluate(() => (
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    window.$store
       .getters.getSearchHistoryEntries.length
   ))).toBe(1)
 })

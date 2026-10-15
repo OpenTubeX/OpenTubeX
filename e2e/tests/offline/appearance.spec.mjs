@@ -30,7 +30,7 @@ async function setWindowWidth (app, width) {
 
 async function enableVerticalTabBar (page, width) {
   await page.evaluate((tabBarWidth) => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setTabBarPosition', 'left')
     store.commit('setVerticalTabBarWidth', tabBarWidth)
   }, width)
@@ -127,7 +127,7 @@ test.describe('default appearance', () => {
     for (const theme of ['light', 'dark']) {
       for (const position of ['left', 'right']) {
         await page.evaluate(({ theme, position }) => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           store.commit('setBaseTheme', theme)
           store.commit('setTabBarPosition', position)
         }, { theme, position })
@@ -296,7 +296,7 @@ test.describe('default appearance', () => {
 
     for (const openWindow of [page, secondWindow]) {
       await expect.poll(() => openWindow.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         return store.getters.getSystemLightTheme
       })).toBe('light')
       await expect(openWindow.locator('body')).toHaveClass(/light/)
@@ -662,7 +662,7 @@ test.describe('custom theme editor', () => {
 
     await page.emulateMedia({ colorScheme: 'dark' })
     await page.evaluate(async (themeId) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateSystemDarkTheme', `custom:${themeId}`)
       await store.dispatch('updateBaseTheme', 'system')
     }, saved[0].id)
@@ -675,7 +675,7 @@ test.describe('custom theme editor', () => {
     expect(importedAgain).toContainEqual(saved[0])
     const importedId = importedAgain.find(({ id }) => id !== saved[0].id).id
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getBaseTheme
     })).toBe(`custom:${importedId}`)
   })
@@ -909,7 +909,7 @@ test.describe('custom theme editor', () => {
     await page.getByRole('button', { name: 'Create custom theme' }).click()
     await page.getByRole('button', { name: 'Save and apply' }).click()
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getBaseTheme
     })).toMatch(/^custom:/)
   })
@@ -957,7 +957,7 @@ test.describe('custom theme editor', () => {
     })
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateCurrentLocale', 'de-DE')
     })
     await page.getByRole('button', { name: 'Design teilen', exact: true }).click()
@@ -1060,7 +1060,7 @@ test.describe('custom theme editor', () => {
     await expect(editor.locator('.ftColorPicker').filter({ hasText: 'Logo text' }).locator('code'))
       .toHaveText('#654321')
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setBarColor', true)
     })
     await expect(page.locator('.topNav')).toHaveClass(/topNavBarColor/)
@@ -1321,7 +1321,7 @@ test.describe('custom theme editor', () => {
       .toEqual(['Paper'])
     await expect(page.locator('body')).toHaveClass(/dark/)
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getBaseTheme
     })).toBe('dark')
   })
@@ -1342,7 +1342,7 @@ test.describe('invalid appearance values', () => {
 
   test('falls back to defaults', async ({ page }) => {
     await expect.poll(() => page.evaluate(() => {
-      const getters = document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters
+      const getters = window.$store.getters
       return [
         getters.getBaseTheme,
         getters.getSystemLightTheme,
@@ -1367,7 +1367,7 @@ test.describe('black theme surfaces', () => {
 test.describe('global progress presentation', () => {
   test('uses a persistent notification or the global bar based on the theme setting', async ({ page }) => {
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setProgressBarMessage', 'Downloading yt-dlp and ffmpeg')
       store.commit('setProgressBarIcon', ['fas', 'download'])
       store.commit('setProgressBarPercentage', 42)
@@ -1388,7 +1388,7 @@ test.describe('global progress presentation', () => {
     await expect(page.locator('.app > .progressBar')).toHaveCount(0)
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setShowProgressBarToast', false)
     })
 
@@ -1396,7 +1396,7 @@ test.describe('global progress presentation', () => {
     await expect(page.locator('.app > .progressBar')).toHaveCount(1)
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       store.commit('setShowProgressBarToast', true)
     })
     await expect(progressToast).toBeVisible()
@@ -1427,7 +1427,7 @@ test.describe('UI roundness', () => {
     const background = page.getByRole('dialog', { name: 'Page background' }).locator('.alphaSliderBackground')
     for (const roundness of [0, 50, 100, 200]) {
       await page.evaluate(value => {
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
+        window.$store.commit('setUiRoundness', value)
       }, roundness)
       await expect(background).toHaveCSS('border-radius', `${999 * roundness / 100}px`)
     }
@@ -1668,7 +1668,7 @@ test.describe('Ocean themes', () => {
       }
       await expect(page.locator('.sectionBody').first()).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
       for (const scale of [100, 125]) {
-        await page.evaluate(scale => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        await page.evaluate(scale => window.$store
           .dispatch('updateUiScale', scale), scale)
         await expect.poll(() => app.electronApp.evaluate(({ BrowserWindow }) =>
           BrowserWindow.getAllWindows()[0].webContents.getZoomFactor())).toBe(scale / 100)
@@ -1678,7 +1678,7 @@ test.describe('Ocean themes', () => {
         expect(await settingsBackgroundVariation(page)).toBe(variation)
         await page.locator('.settingsContent').evaluate(element => { element.scrollTop = 0 })
       }
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await page.evaluate(() => window.$store
         .dispatch('updateUiScale', 100))
       await attachScreenshot(`Ocean ${mode} settings`)
     }

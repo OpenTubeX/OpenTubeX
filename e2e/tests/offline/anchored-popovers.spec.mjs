@@ -83,17 +83,11 @@ async function waitForPopupLayout(popup) {
   }).toBe(true)
 }
 
-for (const { uiScale, anchors } of [
-  { uiScale: 100, anchors: true },
-  { uiScale: 95, anchors: true },
-  { uiScale: 125, anchors: true },
-  { uiScale: 100, anchors: false }
-]) {
+for (const anchors of [true, false]) {
   for (const surface of surfaces) {
     if (anchors) {
-      test(`${surface.name} recovers its preferred alignment after opening at an edge at ${uiScale}%`, async ({ page }) => {
+      test(`${surface.name} recovers its preferred alignment after opening at an edge`, { tag: '@scale' }, async ({ page }) => {
         await page.emulateMedia({ reducedMotion: 'reduce' })
-        await page.evaluate(value => window.ftElectron.setZoomFactor(value / 100), uiScale)
         await surface.open(page, trigger => trigger.evaluate((element, alignment) => {
           const rect = element.getBoundingClientRect()
           const targetLeft = alignment === 'start' ? innerWidth - 40 : 20
@@ -119,7 +113,7 @@ for (const { uiScale, anchors } of [
         }, { triggerSelector: surface.trigger, alignment: surface.alignment })).toBeLessThanOrEqual(1)
       })
     }
-    test(`${surface.name} follows its trigger at ${uiScale}% with anchors ${anchors}`, async ({ page }, testInfo) => {
+    test(`${surface.name} follows its trigger with anchors ${anchors}`, { tag: anchors ? ['@scale'] : [] }, async ({ page, uiScale }, testInfo) => {
       if (!anchors) {
         await page.addInitScript(() => {
           const supports = CSS.supports.bind(CSS)
@@ -129,7 +123,6 @@ for (const { uiScale, anchors } of [
         await waitForAppReady(page)
       }
       await page.emulateMedia({ reducedMotion: 'reduce' })
-      await page.evaluate(value => window.ftElectron.setZoomFactor(value / 100), uiScale)
       await surface.open(page)
       const popup = page.locator(surface.popup).filter({ visible: true })
       await expect(popup).toBeVisible()
@@ -213,111 +206,106 @@ for (const { uiScale, anchors } of [
   }
 }
 
-for (const scale of [100, 95, 125]) {
-  test(`color picker updates viewport bounds when its status row grows at ${scale}%`, async ({ page }, testInfo) => {
-    await page.emulateMedia({ reducedMotion: 'reduce' })
-    await page.evaluate(value => window.ftElectron.setZoomFactor(value / 100), scale)
-    const surface = surfaces.find(surface => surface.name === 'color picker')
-    await surface.open(page)
-    const popup = page.locator(surface.popup)
-    await waitForPopupLayout(popup)
-    const initialHeight = await popup.evaluate(element => element.getBoundingClientRect().height)
-    await popup.locator('.hexInputControl input').press('Escape')
-    const trigger = page.locator(surface.trigger).first()
-    await trigger.evaluate((element, height) => {
-      const rect = element.getBoundingClientRect()
-      element.style.translate = `0px ${innerHeight - height - rect.height - 20 - rect.top}px`
-      element.click()
-    }, initialHeight)
-    await waitForPopupLayout(popup)
-    await expect.poll(() => popup.evaluate(element => Math.abs(element.getBoundingClientRect().bottom - innerHeight + 12))).toBeLessThanOrEqual(1)
-    const input = popup.locator('.hexInputControl input')
-    await input.fill('invalid')
-    await input.press('Enter')
-    await expect(popup.locator('[role="status"]')).toBeVisible()
-    await expect.poll(() => popup.evaluate(element => element.getBoundingClientRect().height)).toBeGreaterThan(initialHeight)
-    await expect.poll(() => popup.evaluate(element => element.getBoundingClientRect().bottom <= innerHeight - 11), { timeout: 1000 }).toBe(true)
-    await expect(popup.locator('[role="status"]')).toBeVisible()
-    if (scale === 100) {
-      await page.screenshot({
-        path: testInfo.outputPath('color-picker-status.png'),
-        clip: await popup.evaluate(element => {
-          const { x, y, width, height } = element.getBoundingClientRect()
-          return { x, y, width, height }
-        })
+test('color picker updates viewport bounds when its status row grows', { tag: '@scale' }, async ({ page, uiScale }, testInfo) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  const surface = surfaces.find(surface => surface.name === 'color picker')
+  await surface.open(page)
+  const popup = page.locator(surface.popup)
+  await waitForPopupLayout(popup)
+  const initialHeight = await popup.evaluate(element => element.getBoundingClientRect().height)
+  await popup.locator('.hexInputControl input').press('Escape')
+  const trigger = page.locator(surface.trigger).first()
+  await trigger.evaluate((element, height) => {
+    const rect = element.getBoundingClientRect()
+    element.style.translate = `0px ${innerHeight - height - rect.height - 20 - rect.top}px`
+    element.click()
+  }, initialHeight)
+  await waitForPopupLayout(popup)
+  await expect.poll(() => popup.evaluate(element => Math.abs(element.getBoundingClientRect().bottom - innerHeight + 12))).toBeLessThanOrEqual(1)
+  const input = popup.locator('.hexInputControl input')
+  await input.fill('invalid')
+  await input.press('Enter')
+  await expect(popup.locator('[role="status"]')).toBeVisible()
+  await expect.poll(() => popup.evaluate(element => element.getBoundingClientRect().height)).toBeGreaterThan(initialHeight)
+  await expect.poll(() => popup.evaluate(element => element.getBoundingClientRect().bottom <= innerHeight - 11), { timeout: 1000 }).toBe(true)
+  await expect(popup.locator('[role="status"]')).toBeVisible()
+  if (uiScale === 100) {
+    await page.screenshot({
+      path: testInfo.outputPath('color-picker-status.png'),
+      clip: await popup.evaluate(element => {
+        const { x, y, width, height } = element.getBoundingClientRect()
+        return { x, y, width, height }
       })
-    }
-  })
-  test(`portaled icon menu stays within viewport bounds during real page scrolling at ${scale}%`, async ({ app, page }) => {
-    await page.emulateMedia({ reducedMotion: 'reduce' })
-    await page.evaluate(value => window.ftElectron.setZoomFactor(value / 100), scale)
-    await setWindowSize(app, page, { width: 1200, height: 600 })
-    await surfaces.find(surface => surface.name === 'portaled icon menu').open(page)
-    const popup = page.locator('.recommendationOptionsPopover')
-    await waitForPopupLayout(popup)
-    await page.locator('.homePage').evaluate(element => { element.style.minBlockSize = `${innerHeight * 3}px` })
-    await page.evaluate(() => window.scrollTo(0, document.scrollingElement.scrollHeight))
-    await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(0)
-    await expect.poll(() => popup.evaluate(element => {
-      const rect = element.getBoundingClientRect()
-      const chrome = Math.max(...['.topNav', '.tabBar.position-top'].map(selector => (
-        document.querySelector(selector)?.getBoundingClientRect().bottom ?? 0
-      )))
-      return rect.top >= chrome + 3 && rect.bottom <= innerHeight - 7
-    })).toBe(true)
-    await page.evaluate(() => window.scrollTo(0, 0))
-    await expect.poll(() => popup.evaluate(element => {
-      const button = document.querySelector('.recommendationOptions .iconButton').getBoundingClientRect()
-      const rect = element.getBoundingClientRect()
-      return Math.abs(rect.right - button.right)
-    })).toBeLessThanOrEqual(1)
-  })
-  test(`help tooltip stays within viewport bounds during real nested scrolling at ${scale}%`, async ({ app, page }) => {
-    await page.emulateMedia({ reducedMotion: 'reduce' })
-    await page.evaluate(value => window.ftElectron.setZoomFactor(value / 100), scale)
-    await setWindowSize(app, page, { width: 1200, height: 500 })
-    await goToSettingsSection(page, 'appearance')
-    const trigger = page.locator('.settingsContent .selectTooltip .button').first()
-    await trigger.focus()
-    const popup = page.locator('body > [role="tooltip"]').filter({ visible: true })
-    await expect(popup).toBeVisible()
-    await waitForPopupLayout(popup)
-    await trigger.evaluate(element => {
-      const original = element.getBoundingClientRect
-      window.tooltipTriggerReads = 0
-      element.getBoundingClientRect = function () { window.tooltipTriggerReads++; return original.call(this) }
     })
-    const scroller = page.locator('.settingsContent')
-    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
-    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
-    await expect.poll(() => popup.evaluate(element => {
+  }
+})
+test('portaled icon menu stays within viewport bounds during real page scrolling', { tag: '@scale' }, async ({ app, page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await setWindowSize(app, page, { width: 1200, height: 600 })
+  await surfaces.find(surface => surface.name === 'portaled icon menu').open(page)
+  const popup = page.locator('.recommendationOptionsPopover')
+  await waitForPopupLayout(popup)
+  await page.locator('.homePage').evaluate(element => { element.style.minBlockSize = `${innerHeight * 3}px` })
+  await page.evaluate(() => window.scrollTo(0, document.scrollingElement.scrollHeight))
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(0)
+  await expect.poll(() => popup.evaluate(element => {
+    const rect = element.getBoundingClientRect()
+    const chrome = Math.max(...['.topNav', '.tabBar.position-top'].map(selector => (
+      document.querySelector(selector)?.getBoundingClientRect().bottom ?? 0
+    )))
+    return rect.top >= chrome + 3 && rect.bottom <= innerHeight - 7
+  })).toBe(true)
+  await page.evaluate(() => window.scrollTo(0, 0))
+  await expect.poll(() => popup.evaluate(element => {
+    const button = document.querySelector('.recommendationOptions .iconButton').getBoundingClientRect()
+    const rect = element.getBoundingClientRect()
+    return Math.abs(rect.right - button.right)
+  })).toBeLessThanOrEqual(1)
+})
+test('help tooltip stays within viewport bounds during real nested scrolling', { tag: '@scale' }, async ({ app, page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await setWindowSize(app, page, { width: 1200, height: 500 })
+  await goToSettingsSection(page, 'appearance')
+  const trigger = page.locator('.settingsContent .selectTooltip .button').first()
+  await trigger.focus()
+  const popup = page.locator('body > [role="tooltip"]').filter({ visible: true })
+  await expect(popup).toBeVisible()
+  await waitForPopupLayout(popup)
+  await trigger.evaluate(element => {
+    const original = element.getBoundingClientRect
+    window.tooltipTriggerReads = 0
+    element.getBoundingClientRect = function () { window.tooltipTriggerReads++; return original.call(this) }
+  })
+  const scroller = page.locator('.settingsContent')
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  await expect.poll(() => popup.evaluate(element => {
+    const bounds = element.getBoundingClientRect()
+    return bounds.top >= 7 && bounds.bottom <= innerHeight - 7
+  })).toBe(true)
+  expect(await page.evaluate(() => window.tooltipTriggerReads)).toBe(0)
+  const overflowBetweenFrames = await popup.evaluate(async element => {
+    const overflow = []
+    window.dispatchEvent(new Event('scroll'))
+    for (let i = 0; i < 3; i++) {
+      await new Promise(requestAnimationFrame)
       const bounds = element.getBoundingClientRect()
-      return bounds.top >= 7 && bounds.bottom <= innerHeight - 7
-    })).toBe(true)
-    expect(await page.evaluate(() => window.tooltipTriggerReads)).toBe(0)
-    const overflowBetweenFrames = await popup.evaluate(async element => {
-      const overflow = []
-      window.dispatchEvent(new Event('scroll'))
-      for (let i = 0; i < 3; i++) {
-        await new Promise(requestAnimationFrame)
-        const bounds = element.getBoundingClientRect()
-        overflow.push(Math.max(0, 7 - bounds.top, bounds.bottom - innerHeight + 7))
-      }
-      return Math.max(...overflow)
-    })
-    expect(overflowBetweenFrames, 'an active viewport correction persists between scroll frames').toBeLessThanOrEqual(1)
-    await scroller.evaluate(element => { element.scrollTop = 0 })
-    await expect.poll(() => popup.evaluate(element => {
-      const trigger = document.querySelector('.settingsContent .selectTooltip .button')
-      const button = Element.prototype.getBoundingClientRect.call(trigger)
-      const menu = element.getBoundingClientRect()
-      const preferredLeft = element.classList.contains('bottom-left')
-        ? button.right - menu.width
-        : button.left + (button.width - menu.width) / 2
-      const left = Math.max(8, Math.min(preferredLeft, innerWidth - menu.width - 8))
-      const top = Math.max(8, Math.min(button.bottom + 16, innerHeight - menu.height - 8))
-      return Math.max(Math.abs(menu.left - left), Math.abs(menu.top - top))
-    })).toBeLessThanOrEqual(1)
-    expect(await page.evaluate(() => window.tooltipTriggerReads)).toBe(0)
+      overflow.push(Math.max(0, 7 - bounds.top, bounds.bottom - innerHeight + 7))
+    }
+    return Math.max(...overflow)
   })
-}
+  expect(overflowBetweenFrames, 'an active viewport correction persists between scroll frames').toBeLessThanOrEqual(1)
+  await scroller.evaluate(element => { element.scrollTop = 0 })
+  await expect.poll(() => popup.evaluate(element => {
+    const trigger = document.querySelector('.settingsContent .selectTooltip .button')
+    const button = Element.prototype.getBoundingClientRect.call(trigger)
+    const menu = element.getBoundingClientRect()
+    const preferredLeft = element.classList.contains('bottom-left')
+      ? button.right - menu.width
+      : button.left + (button.width - menu.width) / 2
+    const left = Math.max(8, Math.min(preferredLeft, innerWidth - menu.width - 8))
+    const top = Math.max(8, Math.min(button.bottom + 16, innerHeight - menu.height - 8))
+    return Math.max(Math.abs(menu.left - left), Math.abs(menu.top - top))
+  })).toBeLessThanOrEqual(1)
+  expect(await page.evaluate(() => window.tooltipTriggerReads)).toBe(0)
+})

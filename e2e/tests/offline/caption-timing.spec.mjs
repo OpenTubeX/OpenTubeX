@@ -68,7 +68,7 @@ for (const usePlayerMenuGrid of [true, false]) {
       const timingRow = player.getByRole('button', { name: 'Adjust timing…', exact: true })
       const languageMenu = player.locator('.shaka-text-languages')
       for (const iconPack of ['material', 'remix']) {
-        await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', value), iconPack)
+        await page.evaluate(value => window.$store.dispatch('updateIconPack', value), iconPack)
         const menuBounds = await getVisibleBounds(languageMenu)
         const rowBounds = await getVisibleBounds(timingRow)
         expect(rowBounds.width).toBeGreaterThanOrEqual(menuBounds.width - 16)
@@ -185,7 +185,7 @@ for (const usePlayerMenuGrid of [true, false]) {
       await timingRow.click()
       await expect(input).toHaveValue('1.5')
       for (const iconPack of ['material', 'remix']) {
-        await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', value), iconPack)
+        await page.evaluate(value => window.$store.dispatch('updateIconPack', value), iconPack)
         await expect(menu.locator('.ft-icon__glyph')).toHaveCount(3)
         await menu.screenshot({ path: testInfo.outputPath(`caption-timing-${iconPack}.png`) })
       }

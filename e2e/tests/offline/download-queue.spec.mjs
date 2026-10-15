@@ -5,7 +5,7 @@ import { test, expect, goTo } from '../../helpers/app.mjs'
 
 async function configureQueue(page, values) {
   await page.evaluate(async (settings) => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     for (const [key, value] of Object.entries(settings)) {
       await store.dispatch(`update${key[0].toUpperCase()}${key.slice(1)}`, value)
     }
@@ -52,7 +52,7 @@ test('opens downloads with the default shortcut', async ({ page }) => {
 
 test('separates canceled downloads without offering retry-all', async ({ page }) => {
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('upsertYtDlpDownload', {
       id: 999,
       title: 'Canceled queue download',
@@ -452,12 +452,12 @@ test('honors the download cookie preference and Always override', async ({ app, 
   await expect.poll(async () => (await readFile(argumentsFile, 'utf8')).includes('https://example.org/video.mp4')).toBe(true)
   expect((await readFile(argumentsFile, 'utf8')).trim().split('\n')).not.toContain('--cookies-from-browser')
   await configureQueue(page, { ytDlpPlaybackAuthMode: 'file', ytDlpDownloadUseCookies: false, ytDlpPlaybackAlwaysUseCookies: true })
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow', 'settings'))
+  await page.evaluate(() => window.$store.dispatch('showSettingsWindow', 'settings'))
   await page.locator('.settingsMenu [data-section="advanced"]').click()
   const downloadCookies = page.getByRole('checkbox', { name: /^Use cookies for downloads/ })
   await expect(downloadCookies).toBeChecked()
   await expect(downloadCookies).toBeDisabled()
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateYtDlpPlaybackAlwaysUseCookies', false))
+  await page.evaluate(() => window.$store.dispatch('updateYtDlpPlaybackAlwaysUseCookies', false))
   await expect(downloadCookies).not.toBeChecked()
   await expect(downloadCookies).toBeEnabled()
 })

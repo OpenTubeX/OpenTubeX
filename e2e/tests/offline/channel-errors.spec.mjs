@@ -31,36 +31,33 @@ async function openChannelTab(page, channelId) {
   await page.locator(`.tab[data-tab-id="${tab.id}"]`).click()
 }
 
-for (const scale of [1, 0.95]) {
-  test(`spaces and vertically centers the channel error card at ${scale * 100}% UI scale`, async ({ page }) => {
-    const error = 'This channel was removed because it violated our Community Guidelines.'
-    await page.route('https://invidious.test/api/v1/channels/**', route => route.fulfill({
-      json: { error }
-    }))
-    await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
-    await openChannelTab(page, UNKNOWN_CHANNEL_ID)
+test('spaces and vertically centers the channel error card', { tag: '@scale' }, async ({ page }) => {
+  const error = 'This channel was removed because it violated our Community Guidelines.'
+  await page.route('https://invidious.test/api/v1/channels/**', route => route.fulfill({
+    json: { error }
+  }))
+  await openChannelTab(page, UNKNOWN_CHANNEL_ID)
 
-    const errorCard = page.locator('.channelDetails:visible + .ft-card')
-    await expect(errorCard).toContainText(error)
-    for (const width of [1600, 375, 812]) {
-      await page.setViewportSize({ width, height: 900 })
-      const layout = await errorCard.evaluate(element => {
-        const card = element.getBoundingClientRect()
-        const header = element.previousElementSibling.getBoundingClientRect()
-        const text = element.querySelector('p').getBoundingClientRect()
-        return {
-          gap: card.top - header.bottom,
-          centeringOffset: Math.abs((text.top + text.bottom - card.top - card.bottom) / 2),
-          textFits: text.left >= card.left && text.right <= card.right &&
-            text.top >= card.top && text.bottom <= card.bottom
-        }
-      })
-      expect.soft(layout.gap, `header gap at ${width}px`).toBeCloseTo(10, 1)
-      expect.soft(layout.centeringOffset, `vertical centering at ${width}px`).toBeLessThanOrEqual(1)
-      expect.soft(layout.textFits, `text fits at ${width}px`).toBe(true)
-    }
-  })
-}
+  const errorCard = page.locator('.channelDetails:visible + .ft-card')
+  await expect(errorCard).toContainText(error)
+  for (const width of [1600, 375, 812]) {
+    await page.setViewportSize({ width, height: 900 })
+    const layout = await errorCard.evaluate(element => {
+      const card = element.getBoundingClientRect()
+      const header = element.previousElementSibling.getBoundingClientRect()
+      const text = element.querySelector('p').getBoundingClientRect()
+      return {
+        gap: card.top - header.bottom,
+        centeringOffset: Math.abs((text.top + text.bottom - card.top - card.bottom) / 2),
+        textFits: text.left >= card.left && text.right <= card.right &&
+          text.top >= card.top && text.bottom <= card.bottom
+      }
+    })
+    expect.soft(layout.gap, `header gap at ${width}px`).toBeCloseTo(10, 1)
+    expect.soft(layout.centeringOffset, `vertical centering at ${width}px`).toBeLessThanOrEqual(1)
+    expect.soft(layout.textFits, `text fits at ${width}px`).toBe(true)
+  }
+})
 
 test('keeps subscription options inside the channel page viewport without horizontal overflow', async ({ page }) => {
   await page.route('https://invidious.test/api/v1/channels/**', route => route.fulfill({
@@ -204,7 +201,7 @@ for (const theme of ['dark', 'light', 'catppuccinMacchiato']) {
   test(`view-all uses subtle outlined-button feedback in ${theme}`, async ({ page }, testInfo) => {
     await page.emulateMedia({ colorScheme: theme === 'light' ? 'light' : 'dark' })
     if (theme === 'catppuccinMacchiato') {
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await page.evaluate(() => window.$store
         .dispatch('updateBaseTheme', 'catppuccinMacchiato'))
     }
     await expect(page.locator('body')).toHaveClass(new RegExp(theme))

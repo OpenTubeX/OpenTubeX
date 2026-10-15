@@ -23,7 +23,7 @@ const TIMESTAMP = 3 * 3600 + 41 * 60 + 58
 export async function openScreenshotSubscriptions(page) {
   // Call after capturing Settings with all app defaults intact.
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateFetchSubscriptionsAutomatically', false)
     await store.dispatch('updateVideoPlaybackEngine', 'yt-dlp')
   })

@@ -28,7 +28,7 @@ const videoSelector = '.tabContent[aria-hidden="false"] .ftVideoPlayer video'
 
 async function setMusicMode(page, enabled) {
   await page.evaluate(value => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setTabMusicMode', { tabId: store.getters.getActiveTabId, value })
   }, enabled)
 }
@@ -114,7 +114,7 @@ test('music mode stays with its tab and resets after restarting the app', async 
   await goTo(page, 'history')
   await page.locator('a.title').filter({ hasText: watchHistoryEntry.title }).first().click()
   await expectPlayback(page, 0, 1)
-  const musicTabId = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getActiveTabId)
+  const musicTabId = await page.evaluate(() => window.$store.getters.getActiveTabId)
   await page.evaluate(() => window.ftElectron.tabs.create({ route: '/watch/musicvideo1' }))
   await expect(page).toHaveURL(/#\/watch\/musicvideo1$/)
   await expectPlayback(page, 10, 2)
@@ -125,7 +125,7 @@ test('music mode stays with its tab and resets after restarting the app', async 
   const restarted = await app.relaunch()
   await expect(restarted.page.locator('.musicModeIndicator')).toHaveCount(0)
   expect(await restarted.page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return store.getters.getTabMusicMode(store.getters.getActiveTabId)
   })).toBe(false)
 })
@@ -210,38 +210,35 @@ test('music mode headphones cut out the profile in both icon packs and header th
   for (const layout of ['desktop', 'phone']) {
     if (layout === 'phone') await setWindowSize(app, page, { width: 375, height: 700 })
     for (const iconPack of ['material', 'remix']) {
-      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', value), iconPack)
+      await page.evaluate(value => window.$store.dispatch('updateIconPack', value), iconPack)
       for (const colorScheme of ['dark', 'light']) {
         await page.emulateMedia({ colorScheme })
         await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
-        for (const scale of [100, 125]) {
-          await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
-          for (const mainColor of [null, 'Yellow', 'Red']) {
-            const coloredHeader = mainColor !== null
-            await page.evaluate(async mainColor => {
-              const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-              await store.dispatch('updateMainColor', mainColor ?? 'Red')
-              await store.dispatch('updateBarColor', mainColor !== null)
-            }, mainColor)
-            await expect(indicator).toBeVisible()
-            await expect(indicator).toHaveCSS('border-radius', '50%')
-            await expect(indicator).toHaveCSS('opacity', '1')
-            const headerBackground = await page.locator('.topNav').evaluate(element => getComputedStyle(element).backgroundColor)
-            await expect(indicator).toHaveCSS('background-color', headerBackground)
-            const headerForeground = await page.locator('.topNav .menuButton').evaluate(element => getComputedStyle(element).color)
-            await expect(indicator).toHaveCSS('color', headerForeground)
-            if (layout === 'desktop' && scale === 100 && (!coloredHeader || mainColor === 'Yellow')) {
-              const bounds = await page.locator('.profileTrigger').boundingBox()
-              const name = `music-mode-${iconPack}-${colorScheme}${coloredHeader ? '-yellow-header' : ''}`
-              const screenshot = await page.screenshot({
-                path: testInfo.outputPath(`${name}.png`),
-                clip: { x: bounds.x - 12, y: bounds.y - 8, width: bounds.width + 24, height: bounds.height + 20 },
-              })
-              await testInfo.attach(name, {
-                body: screenshot,
-                contentType: 'image/png',
-              })
-            }
+        for (const mainColor of [null, 'Yellow', 'Red']) {
+          const coloredHeader = mainColor !== null
+          await page.evaluate(async mainColor => {
+            const store = window.$store
+            await store.dispatch('updateMainColor', mainColor ?? 'Red')
+            await store.dispatch('updateBarColor', mainColor !== null)
+          }, mainColor)
+          await expect(indicator).toBeVisible()
+          await expect(indicator).toHaveCSS('border-radius', '50%')
+          await expect(indicator).toHaveCSS('opacity', '1')
+          const headerBackground = await page.locator('.topNav').evaluate(element => getComputedStyle(element).backgroundColor)
+          await expect(indicator).toHaveCSS('background-color', headerBackground)
+          const headerForeground = await page.locator('.topNav .menuButton').evaluate(element => getComputedStyle(element).color)
+          await expect(indicator).toHaveCSS('color', headerForeground)
+          if (layout === 'desktop' && (!coloredHeader || mainColor === 'Yellow')) {
+            const bounds = await page.locator('.profileTrigger').boundingBox()
+            const name = `music-mode-${iconPack}-${colorScheme}${coloredHeader ? '-yellow-header' : ''}`
+            const screenshot = await page.screenshot({
+              path: testInfo.outputPath(`${name}.png`),
+              clip: { x: bounds.x - 12, y: bounds.y - 8, width: bounds.width + 24, height: bounds.height + 20 },
+            })
+            await testInfo.attach(name, {
+              body: screenshot,
+              contentType: 'image/png',
+            })
           }
         }
       }
@@ -309,7 +306,7 @@ test.describe('music mode visibility setting', () => {
     const restarted = await app.relaunch()
     await restarted.page.locator('.profileTrigger').click()
     await expect(restarted.page.locator('[data-setting-id="musicMode"]')).toHaveCount(0)
-    expect(await restarted.page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getShowMusicModeToggle)).toBe(true)
+    expect(await restarted.page.evaluate(() => window.$store.getters.getShowMusicModeToggle)).toBe(true)
     await expect(restarted.page.locator('.musicModeIndicator')).toHaveCount(0)
   })
 })

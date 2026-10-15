@@ -56,7 +56,7 @@ async function expectStableImageSlot(app, page, container, pending, layouts = ['
     await expect(page.locator('.feed-enter-active, .feed-leave-active')).toHaveCount(0)
   }
   const setLayout = async layout => {
-    await page.evaluate(layout => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setListType', layout), layout)
+    await page.evaluate(layout => window.$store.commit('setListType', layout), layout)
     await expect.poll(() => container.evaluate((element, layout) => element.closest('.ft-list-channel')?.classList.contains(layout) ?? true, layout)).toBe(true)
     await expect(page.locator('.feed-enter-active, .feed-leave-active')).toHaveCount(0)
   }
@@ -195,7 +195,7 @@ test('preserves channel search avatar slots in grid and list layouts', async ({ 
       : []
   }))
   await page.evaluate(() => {
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setBackendPreference', 'invidious')
+    window.$store.commit('setBackendPreference', 'invidious')
     return window.ftElectron.tabs.create({ route: '/search/avatar-slots' })
   })
   await expectStableImageSlot(app, page, page.locator('.ft-list-channel .channelThumbnailLink'), pending, ['grid', 'list'])
@@ -205,7 +205,7 @@ test('uses channel avatar skeletons in dark and light themes', async ({ page }, 
   const pending = []
   await page.route('https://slot-images.test/**', route => { pending.push(route) })
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('addToSessionSearchHistory', {
       query: 'avatar-color',
       data: [{ type: 'channel', dataSource: 'local', name: 'Channel avatar', id: 'avatar-color', thumbnail: 'https://slot-images.test/avatar-color' }],
@@ -221,7 +221,7 @@ test('uses channel avatar skeletons in dark and light themes', async ({ page }, 
   await expect(placeholder).toBeVisible()
   await expect.poll(() => pending.length).toBeGreaterThan(0)
   for (const iconPack of ['material', 'remix']) {
-    await page.evaluate(pack => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', pack), iconPack)
+    await page.evaluate(pack => window.$store.dispatch('updateIconPack', pack), iconPack)
     await expect(placeholder).toHaveAttribute('data-icon-pack', iconPack)
     for (const theme of ['dark', 'light']) {
       await page.emulateMedia({ colorScheme: theme })
@@ -263,7 +263,7 @@ test('preserves game cover placeholder slots in grid and list layouts', async ({
   const pending = []
   await page.route('https://slot-images.test/**', route => { pending.push(route) })
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('addToSessionSearchHistory', {
       query: 'game-slots',
       data: [{ type: 'channel', dataSource: 'local', isGame: true, name: 'Game cover slot', id: 'game-slot', thumbnail: 'https://slot-images.test/game' }],
@@ -297,7 +297,7 @@ test('preserves playlist channel avatar slots while loading and retrying', async
     }
   }))
   await page.evaluate(() => {
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setBackendPreference', 'invidious')
+    window.$store.commit('setBackendPreference', 'invidious')
     return window.ftElectron.tabs.create({ route: '/playlist/avatar-slots' })
   })
   await expectStableImageSlot(app, page, page.locator('.playlistInfo .playlistChannel'), pending)
@@ -336,7 +336,7 @@ test('renders member comments and replies with missing, empty, and broken badge 
     })
   })
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setBackendPreference', 'invidious')
     return window.ftElectron.tabs.create({ route: '/post/member-post', query: { authorId: 'UCaaaaaaaaaaaaaaaaaaaaaa' } })
   })
@@ -426,7 +426,7 @@ test('renders live chat members with empty badge thumbnails without image setup 
 
 for (const iconPack of ['material', 'remix']) {
   test(`keeps ${iconPack} avatar placeholders visible during loading and retries`, async ({ app, page }, testInfo) => {
-    await page.evaluate(pack => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', pack), iconPack)
+    await page.evaluate(pack => window.$store.dispatch('updateIconPack', pack), iconPack)
     await goTo(page, 'subscribedchannels')
 
     const channel = page.locator('.channel', { hasText: 'Placeholder channel' })
@@ -435,7 +435,7 @@ for (const iconPack of ['material', 'remix']) {
     const pending = []
     await page.route('https://yt3.ggpht.com/placeholder-avatar**', route => { pending.push(route) })
     const setSource = source => page.evaluate(({ channelId, source }) => {
-      return document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateSubscriptionDetails', {
+      return window.$store.dispatch('updateSubscriptionDetails', {
         channelId,
         channelName: 'Placeholder channel',
         channelThumbnailUrl: source
@@ -582,7 +582,7 @@ test('uses the thumbnail placeholder until a video image loads and after retries
 
 test('shows the default profile icon for an undecodable custom image', async ({ page }, testInfo) => {
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setProfileList', [{
       ...store.getters.getActiveProfile,
       icon: { type: 'image', value: 'data:image/png;base64,AAAA' }
@@ -599,7 +599,7 @@ test('shows an image icon for an undecodable quick bookmark image', async ({ pag
   await page.getByText('Favorites', { exact: true }).click()
   const bookmark = page.getByTitle('Quick Bookmark Enabled')
   for (const pack of ['material', 'remix']) {
-    await page.evaluate(pack => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', pack), pack)
+    await page.evaluate(pack => window.$store.dispatch('updateIconPack', pack), pack)
     await expect(bookmark.locator('img')).toBeHidden()
     await expect(bookmark.locator('.customImagePlaceholder')).toBeVisible()
     await expect(bookmark.locator('.customImagePlaceholder')).not.toHaveClass(/ft-shimmer/)
@@ -625,7 +625,7 @@ test('reveals cached custom bookmark images before the next painted frame', asyn
   })
   for (const pack of ['material', 'remix']) {
     const painted = await bookmark.evaluate(async (button, { src, pack }) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateIconPack', pack)
       const playlist = store.getters.getPlaylist('favorites')
       playlist.quickBookmarkIcon = 'bookmark'
@@ -662,7 +662,7 @@ test('keeps inline post emoji images hidden until loaded and after failure', asy
     }
   }))
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setBackendPreference', 'invidious')
     store.commit('setHideComments', true)
     return window.ftElectron.tabs.create({ route: '/post/placeholder-post', query: { authorId: 'UCaaaaaaaaaaaaaaaaaaaaaa' } })
@@ -711,7 +711,7 @@ test('lazy inline post emojis wait offscreen before their loading deadline', asy
   }))
   await page.addStyleTag({ content: '.postText { margin-block-start: 10000px !important; }' })
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setBackendPreference', 'invidious')
     store.commit('setHideComments', true)
     return window.ftElectron.tabs.create({ route: '/post/lazy-placeholder-post', query: { authorId: 'UCaaaaaaaaaaaaaaaaaaaaaa' } })
@@ -825,7 +825,7 @@ test('keeps poll image slots stable while loading and after failure', async ({ p
     }
   }))
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setBackendPreference', 'invidious')
     store.commit('setHideComments', true)
     return window.ftElectron.tabs.create({ route: '/post/placeholder-poll', query: { authorId: 'UCaaaaaaaaaaaaaaaaaaaaaa' } })
@@ -875,7 +875,7 @@ test('shows search icons while search engine favicons load and after failure', a
     ipcMain.handle(channel, () => 'https://favicons.test/search')
   }, IpcChannels.RESOLVE_FAVICON)
   await page.evaluate(() => {
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setContextMenuSearchEngines', JSON.stringify([
+    window.$store.commit('setContextMenuSearchEngines', JSON.stringify([
       { id: 'duckduckgo', name: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=%s', enabled: true }
     ]))
   })
@@ -955,7 +955,7 @@ test('stalled playlist thumbnails stop shimmering and can still finish loading',
   const pending = []
   await page.route('https://stalled-images.test/**', route => { pending.push(route) })
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('addToSessionSearchHistory', {
       query: 'stalled-playlist',
       data: [{ type: 'playlist', dataSource: 'local', playlistId: 'empty-remote', title: 'Unavailable playlist thumbnail', thumbnail: 'https://stalled-images.test/playlist.jpg', channelName: 'Example channel', channelId: '', videoCount: 0 }],
@@ -992,7 +992,7 @@ test('slow missing-resolution thumbnails give the smaller source a full loading 
   const pending = []
   await page.route('https://i.ytimg.com/vi/deadline/**', route => { pending.push(route) })
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('addToSessionSearchHistory', {
       query: 'resolution-deadline',
       data: [{ type: 'playlist', dataSource: 'local', playlistId: 'resolution-deadline', title: 'Resolution fallback', thumbnail: 'https://i.ytimg.com/vi/deadline/maxresdefault.jpg', channelName: 'Example channel', channelId: '', videoCount: 1 }],
@@ -1114,7 +1114,7 @@ test('offscreen lazy Home thumbnails keep their skeleton until visible, then tim
   const pending = []
   await page.route('https://lazy-images.test/**', route => { pending.push(route) })
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateHistory', {
       ...store.getters.getHistoryCacheById.placeholder,
       watchProgress: 30,
@@ -1168,7 +1168,7 @@ test('playlist cards with missing thumbnails use static fallbacks', async ({ pag
   const rendererErrors = []
   page.on('pageerror', error => rendererErrors.push(error.message))
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('addToSessionSearchHistory', {
       query: 'missing-playlist-images',
       data: [null, undefined, '', '   '].map((thumbnail, index) => ({ type: 'playlist', dataSource: 'local', playlistId: `missing-${index}`, title: `Empty playlist ${index}`, thumbnail, channelName: '', channelId: '', videoCount: 0 })),

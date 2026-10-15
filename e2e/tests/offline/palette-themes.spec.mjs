@@ -154,7 +154,7 @@ for (const [index, theme] of [...PALETTE_BASE_THEMES, 'catppuccinMacchiato'].ent
       await expect(button).toBeFocused()
       // Settings handles Tab locally. Enable the app's keyboard outlines so
       // this checks the painted outline, not the color of a hidden outline.
-      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showOutlines'))
+      await page.evaluate(() => window.$store.dispatch('showOutlines'))
       await expect(button).toHaveCSS('outline-style', 'solid')
       const focus = await button.evaluate(element => {
         const style = getComputedStyle(element)
@@ -206,7 +206,7 @@ for (const [index, theme] of [...PALETTE_BASE_THEMES, 'catppuccinMacchiato'].ent
       await page.locator('.settingsCloseButton').click()
       for (const colored of [false, true]) {
         await page.evaluate(async colored => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           await store.dispatch('updateBarColor', colored)
         }, colored)
         await expectElementContrast(page.locator('.topNav .menuButton'), 3)

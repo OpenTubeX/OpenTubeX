@@ -56,7 +56,7 @@ test('large-library search, metadata edits and bulk operations work with a throt
     await goTo(page, 'userplaylists')
     await page.getByRole('link', { name: 'Large library', exact: true }).click()
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       window.__performancePlaylistVideos = store.getters.getPlaylist('large-library').videos
     })
     await page.getByTitle('Edit Playlist Info').click()
@@ -64,7 +64,7 @@ test('large-library search, metadata edits and bulk operations work with a throt
     await page.getByTitle('Save Changes').click()
     await expect(page.locator('.playlistTitle')).toHaveText('Renamed large library')
     expect(await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getPlaylist('large-library').videos === window.__performancePlaylistVideos
     })).toBe(true)
 
@@ -72,7 +72,7 @@ test('large-library search, metadata edits and bulk operations work with a throt
     // cleanup before playlist deletion and the incremental membership counts.
     await goTo(page, 'trending')
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const removed = store.getters.getPlaylist('large-library').videos.slice(0, 10000)
       await store.dispatch('removeVideos', {
         _id: 'large-library',
@@ -84,7 +84,7 @@ test('large-library search, metadata edits and bulk operations work with a throt
       await store.dispatch('removeHistoryOlderThan', 10000)
     })
     expect(await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return {
         playlistVideos: store.getters.getPlaylist('large-library').videos.length,
         savedVideos: store.getters.getPlaylistVideoCounts.size,
@@ -95,7 +95,7 @@ test('large-library search, metadata edits and bulk operations work with a throt
 
     ;({ page } = await app.relaunch())
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return [store.getters.getPlaylist('large-library')?.videos.length, store.getters.getHistoryCacheSorted.length]
     })).toEqual([10000, 10000])
   } finally {

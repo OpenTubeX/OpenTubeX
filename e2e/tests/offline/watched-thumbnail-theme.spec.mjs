@@ -108,7 +108,7 @@ for (const scheme of ['dark', 'light']) {
     // The same thumbnail styling applies in list mode, at fractional UI scale,
     // and in the narrow responsive layout.
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateListType', 'list')
       await window.ftElectron.setZoomFactor(1.25)
     })
@@ -137,7 +137,7 @@ for (const scheme of ['dark', 'light']) {
     await expect(watched.locator('.videoWatched')).toBeVisible()
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateBaseTheme', 'system')
     })
     expect(await page.locator('body').evaluate(element => element.style.getPropertyValue('--watched-thumbnail-overlay-color'))).toBe('')

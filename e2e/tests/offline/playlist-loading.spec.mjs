@@ -354,7 +354,7 @@ test('refreshes saved playlist metadata after opening the playlist again', async
     .toHaveAttribute('src', updatedThumbnailUrl)
   await expect(persistedPlaylistCard.locator('.videoCountContainer')).toHaveText('5')
   await expect(page.evaluate(id => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return store.getters.getPlaylistBookmark(id)
   }, playlistId)).resolves.toMatchObject({
     playlist: {

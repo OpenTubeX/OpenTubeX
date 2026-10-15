@@ -192,7 +192,7 @@ test('discovers, installs, persists and updates themes without overwriting local
   const initialHash = (await savedThemes(app)).find(theme => theme.id === 'discussion-1197').discussionThemeHash
 
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const theme = (await window.ftElectron.loadCustomTheme()).find(theme => theme.id === 'discussion-1197')
     theme.colors.background = '#abcdef'
     const themes = await window.ftElectron.saveCustomTheme(theme)
@@ -230,7 +230,7 @@ test('preserves local edits to older community themes and detects customized ove
   delete theme.colors.watchedThumbnailOverlay
   theme.colors.primaryText = '#aabbcc'
   await page.evaluate(async theme => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const themes = await window.ftElectron.saveCustomTheme(theme)
     await store.dispatch('updateCustomThemes', themes)
   }, theme)
@@ -301,7 +301,7 @@ for (const scale of [85, 110]) {
     await mockScreenshots(page)
     await page.route(feedUrl, route => route.fulfill({ contentType: 'application/atom+xml', body: feed(new URL(route.request().url()).searchParams.get('page') === '1' ? Array.from({ length: count }, (_, i) => entry(i + 1)) : []) }))
     await page.evaluate(async value => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateUiScale', value)
     }, scale)
     const gallery = await openDiscovery(page)
@@ -356,7 +356,7 @@ test('automatically loads more at the bottom with a spinner and stops retrying o
     })
   })
   await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     await store.dispatch('updateGeneralAutoLoadMorePaginatedItemsEnabled', true)
   })
   const gallery = await openDiscovery(page)
@@ -496,7 +496,9 @@ test('pinches theme screenshots to zoom and resets zoom when switching screensho
     await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [{ x: x - 85, y, id: 1 }] })
     await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
     await expect.poll(() => image.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).a)).toBeGreaterThan(1.5)
-    await page.waitForTimeout(350) // Finish the pinch transition before starting a separate drag.
+    // Finish the pinch transition before starting a separate drag.
+    await expect.poll(() => page.locator('.screenshotZoom').evaluate(element =>
+      element.getAnimations({ subtree: true }).filter(animation => animation instanceof CSSTransition).length)).toBe(0)
     const wrapper = page.locator('.screenshotZoom .swiper-zoom-container')
     const initialX = await wrapper.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).e)
     await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y, id: 1 }] })

@@ -52,7 +52,7 @@ test('previews and imports selected data from a YouTube Takeout ZIP', async ({ p
   await selection.getByRole('button', { name: 'Import selected data' }).click()
 
   await expect.poll(() => page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return {
       subscribed: store.getters.getProfileList[0].subscriptions.some(channel => channel.id === 'UCtakeouttest'),
       watched: Boolean(store.getters.getHistoryCacheById.abcdefghijk),
@@ -84,7 +84,7 @@ test('imports a Takeout playlist CSV through Import Playlists', async ({ page })
 
   await dataSection.getByRole('button', { name: 'Import Playlists' }).click()
   await expect.poll(() => page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'Takeout favorites')?.videos.map(video => video.videoId)
   })).toEqual(['abcdefghijk', '-abcdefghij'])
 })
@@ -118,7 +118,7 @@ test('imports original titles, descriptions, timestamps and empty playlists from
     await selection.getByRole('button', { name: 'Preview changes', exact: true }).click()
     await selection.getByRole('button', { name: 'Import selected data' }).click()
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return ['Sets (Techno/Trance)-videos', 'Empty', 'Favorites', "It's music", 'Case list', 'Case list-videos'].map(name => {
         const playlist = store.getters.getAllPlaylists.find(item => item.playlistName === name)
         return playlist && {
@@ -137,7 +137,7 @@ test('imports original titles, descriptions, timestamps and empty playlists from
       { playlistName: 'Case list', description: 'First overlapping title', createdAt, lastUpdatedAt, videoIds: ['abcdefghijk'] },
       { playlistName: 'Case list-videos', description: 'Second overlapping title', createdAt, lastUpdatedAt, videoIds: ['lmnopqrstuv'] },
     ])
-    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getAllPlaylists.length)).toBe(7)
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getAllPlaylists.length)).toBe(7)
   }
 })
 
@@ -172,7 +172,7 @@ for (const [name, metadata] of [
     await page.locator('.takeoutSelectionCentered').getByRole('button', { name: 'Preview changes', exact: true }).click()
     await page.locator('.takeoutSelectionCentered').getByRole('button', { name: 'Import selected data' }).click()
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const goodPlaylist = store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'Good/List')
       return {
         subscribed: store.getters.getProfileList[0].subscriptions.some(channel => channel.id === 'UCmetadatafailure'),
@@ -213,7 +213,7 @@ for (const [kind, action, failedName] of [
     })
     const dataSection = await goToSettingsSection(page, 'data')
     await page.evaluate(({ bytes, action, failedName }) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const dispatch = store.dispatch.bind(store)
       store.dispatch = (type, payload, options) => {
         if (type === action && payload.playlistName === failedName) {
@@ -229,7 +229,7 @@ for (const [kind, action, failedName] of [
     await dataSection.getByRole('button', { name: 'Import YouTube Takeout ZIP' }).click()
     await page.locator('.takeoutSelectionCentered').getByRole('button', { name: 'Preview changes', exact: true }).click()
     await page.locator('.takeoutSelectionCentered').getByRole('button', { name: 'Import selected data' }).click()
-    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getAllPlaylists.some(playlist => playlist.playlistName === 'Another empty list'))).toBe(true)
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getAllPlaylists.some(playlist => playlist.playlistName === 'Another empty list'))).toBe(true)
     await expect(page.locator('.takeoutSelectionCentered')).toBeHidden()
     await expect(page.locator('.toast', { hasText: `Unable to read file: Takeout/YouTube/playlists/${failedName}-videos.csv` })).toBeVisible()
     await expect(page.locator('.toast', { hasText: 'All playlists has been successfully imported' })).toHaveCount(0)

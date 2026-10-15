@@ -19,7 +19,8 @@ test.use({
 })
 
 async function sample(page, session, label) {
-  // Let notification expiry and transition cleanup finish before collecting.
+  // Let notification expiry, transition cleanup and other timed releases run.
+  // Not all of them have an observable completion signal.
   await page.waitForTimeout(5500)
   for (let i = 0; i < 3; i++) {
     await session.send('HeapProfiler.collectGarbage')
@@ -29,6 +30,7 @@ async function sample(page, session, label) {
   const heap = await session.send('Runtime.getHeapUsage')
   const metrics = () => session.send('Performance.getMetrics').then(result => Object.fromEntries(result.metrics.map(m => [m.name, m.value])))
   const before = await metrics()
+  // Fixed window for the diagnostic idle task time.
   await page.waitForTimeout(1000)
   const after = await metrics()
   const result = { label, ...dom, heapMiB: heap.usedSize / 1024 ** 2, backingMiB: heap.backingStorageSize / 1024 ** 2, idleTaskMs: 1000 * (after.TaskDuration - before.TaskDuration) }

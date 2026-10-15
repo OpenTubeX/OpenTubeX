@@ -11,7 +11,7 @@ test('a reactive store object can be persisted over IPC', async ({ app, page }) 
   await expect(page.getByRole('link', { name: 'Favorites' })).toBeVisible()
 
   const result = await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     // A reactive Proxy straight out of Vuex state, passed as the payload
     const playlist = store.state.playlists.playlists.find((p) => p._id === 'favorites')
     playlist.description = 'reactive roundtrip'

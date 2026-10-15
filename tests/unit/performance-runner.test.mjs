@@ -81,23 +81,29 @@ test('packed code size includes chunks in subdirectories and excludes maps and m
   }
 })
 
-test('PR shard commands always run packed-app performance coverage', async () => {
+test('PR shard commands run packed-app projects in full and only changed network tests', async () => {
   const workflow = loadYaml(await readFile('.github/workflows/e2e.yml', 'utf8'))
-  const run = workflow.jobs['e2e-shard'].steps.find(step => step.name === 'Run E2E tests').run
-  for (const project of ['offline', 'performance', 'browser', 'network']) {
+  const step = workflow.jobs['e2e-shard'].steps.find(step => step.name === 'Run E2E tests')
+  for (const [project, projects] of [
+    ['offline', 'offline offline-95 offline-125'],
+    ['performance', 'performance'],
+    ['browser', 'browser'],
+    ['network', 'network']
+  ]) {
     /* eslint-disable no-template-curly-in-string -- GitHub Actions placeholders are literal fixture data. */
-    const script = run
+    const script = step.run
       .replaceAll('${{ matrix.shard }}', '1')
       .replaceAll('${{ matrix.shardTotal }}', '2')
       .replaceAll('${{ matrix.project }}', project)
       .replaceAll('${{ github.event_name }}', 'pull_request')
     /* eslint-enable no-template-curly-in-string */
+    assert.equal(step.env.PROJECTS, '${{ matrix.projects }}') // eslint-disable-line no-template-curly-in-string
     const args = execFileSync('bash', ['-c', `function xvfb-run() { printf '%s\\n' "$@"; }\n${script}`], {
-      encoding: 'utf8', env: { ...process.env, GITHUB_BASE_REF: 'development' }
+      encoding: 'utf8', env: { ...process.env, GITHUB_BASE_REF: 'development', PROJECTS: projects }
     }).trim().split('\n')
-    assert.ok(args.includes(`--project=${project}`))
+    for (const name of projects.split(' ')) assert.ok(args.includes(`--project=${name}`))
     assert.ok(args.includes('--shard=1/2'))
-    assert.equal(args.includes('--only-changed=origin/development'), project !== 'performance')
-    assert.equal(args.includes('--pass-with-no-tests'), project !== 'performance')
+    assert.equal(args.includes('--only-changed=origin/development'), project === 'network')
+    assert.equal(args.includes('--pass-with-no-tests'), project === 'network')
   }
 })

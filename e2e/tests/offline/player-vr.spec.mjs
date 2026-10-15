@@ -51,7 +51,7 @@ for (const rejectedHls of [false, true]) {
     await mockPlayableWatchPage(app, page)
     await page.route('https://vr.example.test/master.m3u8', route => route.fulfill({ status: 403, body: 'Unavailable' }))
     await mockVrYtDlpInfo(app, true, rejectedHls)
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await page.evaluate(() => window.$store
       .dispatch('updateVideoPlaybackEngine', 'yt-dlp'))
     await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
     await page.locator(sel.searchInput).press('Enter')
@@ -82,7 +82,7 @@ test('yt-dlp retries panoramic extraction when backend projection metadata is ab
     }
     return route.fulfill({ contentType: 'application/x-mpegURL', body: '#EXTM3U\n' })
   })
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+  await page.evaluate(() => window.$store
     .dispatch('updateVideoPlaybackEngine', 'yt-dlp'))
   await mockVrYtDlpInfo(app, false)
   await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
@@ -142,7 +142,7 @@ for (const suppliedHls of ['valid', 'missing', 'rejected', 'failed-child']) {
       }
       return route.fulfill({ json: response })
     })
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await page.evaluate(() => window.$store
       .dispatch('updatePlaybackEngineFallback', false))
     await app.electronApp.evaluate(({ ipcMain }) => {
       globalThis.__builtinVrExtractions = 0
@@ -202,7 +202,7 @@ test('disabled playback-engine fallback keeps a YouTube mesh video on built-in p
     response.streamingData.formats[0].projectionType = 'MESH'
     return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(response) })
   })
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+  await page.evaluate(() => window.$store
     .dispatch('updatePlaybackEngineFallback', false))
   await app.electronApp.evaluate(({ ipcMain }) => {
     globalThis.__disabledVrExtractions = 0
@@ -426,7 +426,7 @@ for (const mode of ['yt-dlp', 'built-in', 'proxy', 'failed-child']) {
     }))
     await mockVrYtDlpInfo(app)
     await page.evaluate(async mode => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await Promise.all([
         store.dispatch('updateBackendPreference', 'invidious'),
         store.dispatch('updateDefaultInvidiousInstance', 'https://invidious.test'),

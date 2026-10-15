@@ -19,7 +19,7 @@ test('playlist actions use the context menu and respect the menu icon setting', 
   await expect(menu.getByRole('menuitem', { name: /Quick bookmark enabled/i })).toBeDisabled()
   await expect(menu.getByRole('menuitem', { name: 'Download Playlist', exact: true })).toBeEnabled()
   await page.keyboard.press('Escape')
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowVideoMenuButton', true))
+  await page.evaluate(() => window.$store.dispatch('updateShowVideoMenuButton', true))
   await card.getByRole('button', { name: /More options/i }).click()
   await expect(menu).toBeVisible()
   await page.keyboard.press('Escape')

@@ -13,12 +13,24 @@ test.beforeEach(async ({ page }) => {
 })
 
 test('switches a production-profile-sized cached feed without repeating expensive work', async ({ page }) => {
-  const metrics = await runLargeSubscriptionsBenchmark(page)
-
-  expect(metrics.firstSwitchLongestFrameMs).toBeLessThan(200)
-  expect(metrics.firstSwitchElapsedMs).toBeLessThan(250)
-  expect(metrics.repeatedSwitchLongestFrameMs).toBeLessThan(100)
-  expect(metrics.repeatedSwitchElapsedMs).toBeLessThan(150)
+  await page.evaluate(() => {
+    window.__switchOriginalSort = Array.prototype.sort
+    window.__switchFeedSorts = 0
+    // eslint-disable-next-line no-extend-native
+    Array.prototype.sort = function (...args) {
+      if (this.length >= 30_000) window.__switchFeedSorts++
+      return window.__switchOriginalSort.apply(this, args)
+    }
+  })
+  try {
+    // The paired performance comparison gates the switch timings.
+    await runLargeSubscriptionsBenchmark(page)
+    // Repeating the switch must not sort the whole feed again.
+    expect(await page.evaluate(() => window.__switchFeedSorts)).toBeLessThanOrEqual(1)
+  } finally {
+    // eslint-disable-next-line no-extend-native
+    await page.evaluate(() => { Array.prototype.sort = window.__switchOriginalSort })
+  }
 })
 
 test('defers the browsing feed beneath a background watch tab until it is presented', async ({ page }) => {
@@ -50,21 +62,31 @@ test('opens background videos promptly from a large subscriptions feed', async (
   await expect(page.locator('.newTabThumbnailMorph')).toHaveCount(0)
   await expect(page.locator('.feed-enter-active, .feed-enter-from, .feed-move')).toHaveCount(0)
   await expect.poll(() => page.evaluate(id => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return JSON.parse(store.getters.getSubscriptionSeenVideos)
       .some(entry => entry.videoId === id && entry.seenAt > (entry.unseenAt ?? 0))
   }, warmVideoId)).toBe(true)
   const session = await page.context().newCDPSession(page)
   await session.send('Emulation.setCPUThrottlingRate', { rate: 4 })
+  await page.evaluate(() => {
+    window.__backgroundDocumentSnapshots = 0
+    const startViewTransition = document.startViewTransition.bind(document)
+    document.startViewTransition = (...args) => {
+      window.__backgroundDocumentSnapshots++
+      return startViewTransition(...args)
+    }
+  })
   for (const reducedMotion of ['off', 'on']) {
     await page.evaluate(async value => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateReducedMotion', value)
     }, reducedMotion)
     for (let index = 0; index < 3; index++) {
       const link = page.locator('#subscriptionsPanel .ft-list-video .title')
         .nth(index + (reducedMotion === 'on' ? 3 : 0) + 1)
       const videoId = /\/watch\/([^?]+)/.exec(await link.getAttribute('href'))[1]
+      const cards = await page.evaluateHandle(() => [...document.querySelectorAll('#subscriptionsPanel .ft-list-video')])
+      expect(await cards.evaluate(elements => elements.length)).toBeGreaterThan(0)
       await page.evaluate(() => {
         const initialTabs = document.querySelectorAll('.tabBar .tab').length
         window.__backgroundTabTiming = new Promise(resolve => {
@@ -90,11 +112,13 @@ test('opens background videos promptly from a large subscriptions feed', async (
       const metrics = await page.evaluate(() => window.__backgroundTabTiming)
       console.log('Background tab opening:', { reducedMotion, ...metrics })
       await expect(page.locator(sel.tabs).first()).toHaveClass(/active/)
-      expect.soft(metrics.elapsed).toBeLessThan(400)
-      expect.soft(metrics.longestFrame).toBeLessThan(250)
+      // Opening the tab must neither rebuild the feed nor snapshot the document.
+      expect(await cards.evaluate(elements => elements.every(element => element.isConnected))).toBe(true)
+      await cards.dispose()
+      expect(await page.evaluate(() => window.__backgroundDocumentSnapshots)).toBe(0)
       await expect(page.locator('.newTabThumbnailMorph')).toHaveCount(0)
       await expect.poll(() => page.evaluate(id => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         return JSON.parse(store.getters.getSubscriptionSeenVideos)
           .some(entry => entry.videoId === id && entry.seenAt > (entry.unseenAt ?? 0))
       }, videoId)).toBe(true)

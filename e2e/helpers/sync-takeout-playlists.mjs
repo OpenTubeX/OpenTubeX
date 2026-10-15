@@ -85,11 +85,11 @@ export async function verifyTakeoutPlaylistSync(page, server, onDownloaded = asy
   }
   const historyId = playlist.videos[0].videoId
   const originalHistory = await page.evaluate(id => {
-    const record = document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById[id]
+    const record = window.$store.getters.getHistoryCacheById[id]
     return record ? JSON.parse(JSON.stringify(record)) : null
   }, historyId)
   const original = await page.evaluate(async settings => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const original = Object.fromEntries(Object.keys(settings).map(key => [key, store.state.settings[key]]))
     await store.dispatch('updateSyncServerAutoSync', false)
     await store.dispatch('updateSyncServerEnabled', false)
@@ -100,7 +100,7 @@ export async function verifyTakeoutPlaylistSync(page, server, onDownloaded = asy
   }, settings)
   try {
     const originalVideos = await page.evaluate(async playlist => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('importPlaylist', playlist)
       const videos = JSON.parse(JSON.stringify(store.getters.getPlaylist(playlist._id).videos))
       await store.dispatch('updateSyncServerEnabled', true)
@@ -108,29 +108,29 @@ export async function verifyTakeoutPlaylistSync(page, server, onDownloaded = asy
       return videos
     }, playlist)
     expect(await page.evaluate(id => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getPlaylist(id).videos
     }, playlist._id)).toEqual(originalVideos)
     const expected = [...new Set(playlist.videos.map(video => video.videoId))]
     expect((await server.playlists()).find(entry => entry.playlist.id === playlist._id).videos.map(video => video.id)).toEqual(expected)
     // Reset this installation's playlist and baseline to emulate a fresh receiver.
     await page.evaluate(async id => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('removePlaylist', id)
       await store.dispatch('updateSyncServerSnapshot', '{}')
       await store.dispatch('syncWithSyncServer')
     }, playlist._id)
     await expect.poll(() => page.evaluate(id => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getPlaylist(id)?.videos.map(video => video.videoId)
     }, playlist._id)).toEqual(expected)
     expect(await page.evaluate(id => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getPlaylist(id).videos.every(video => video.author == null && video.authorId == null)
     }, playlist._id)).toBe(true)
     await onDownloaded()
     await page.evaluate(async ({ id, historyId }) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const video = store.getters.getPlaylist(id).videos.find(video => video.videoId === historyId)
       await store.dispatch('removeFromHistory', historyId)
       await store.dispatch('updateHistory', { ...video, timeWatched: 100, isWatched: true })
@@ -150,7 +150,7 @@ export async function verifyTakeoutPlaylistSync(page, server, onDownloaded = asy
       uploader: { ...entry.video.uploader, id: 'known-channel', name: 'Known channel', avatar: 'https://example.com/channel.jpg' },
     }
     const syncHistory = async () => page.evaluate(() => {
-      return document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer')
+      return window.$store.dispatch('syncWithSyncServer')
     })
     await server.setHistory(history.map(item => item === entry
       ? { ...entry, video: knownVideo, metadata: { ...entry.metadata, added_date: 50 } }
@@ -163,20 +163,20 @@ export async function verifyTakeoutPlaylistSync(page, server, onDownloaded = asy
       : item))
     await syncHistory()
     expect(await page.evaluate(id => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const record = store.getters.getHistoryCacheById[id]
       return { title: record.title, authorId: record.authorId, watchProgress: record.watchProgress, timeWatched: record.timeWatched }
     }, historyId)).toEqual({ title: knownVideo.title, authorId: knownVideo.uploader.id, watchProgress: 42, timeWatched: 200 })
     await page.evaluate(async id => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateHistory', { ...store.getters.getHistoryCacheById[id], timeWatched: 300, isWatched: true })
     }, historyId)
     await syncHistory()
     expect((await server.history()).find(entry => entry.video.id === historyId).video).toEqual(knownVideo)
-    expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.syncServer.syncServerStatus)).toBe('success')
+    expect(await page.evaluate(() => window.$store.state.syncServer.syncServerStatus)).toBe('success')
   } finally {
     await page.evaluate(async ({ original, id, historyId, originalHistory }) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateSyncServerEnabled', false)
       await store.dispatch('removePlaylist', id)
       await store.dispatch('removeFromHistory', historyId)

@@ -22,7 +22,7 @@ test.afterEach(async ({ page }, testInfo) => {
     // Keep the default confirmation settings in the images, but allow the
     // test fixture to close its isolated app without a confirmation prompt.
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateConfirmCloseApp', false)
       await store.dispatch('updateConfirmCloseWindowWithMultipleTabs', false)
     })

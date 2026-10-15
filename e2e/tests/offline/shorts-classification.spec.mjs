@@ -33,7 +33,7 @@ test.use({
 test('keeps a normal square search result in the standard player', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await page.evaluate(({ video, searchSettings }) => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('addToSessionSearchHistory', {
       query: 'square music upload',
       data: [video],

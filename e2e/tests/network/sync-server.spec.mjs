@@ -367,7 +367,7 @@ test.describe('OpenTubeX sync server', () => {
           await readFile(settingsPath, 'utf8')
         ).syncServerToken
         await page.evaluate(() => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           store.commit('setSyncServerDevices', { 'new-account': { name: 'New account', platform: 'linux' } })
         })
       } finally {
@@ -375,7 +375,7 @@ test.describe('OpenTubeX sync server', () => {
       }
       await staleSessionRequestCompleted
       await expect.poll(() => page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const store = window.$store
         return store.state.syncServer.syncServerDevices
       })).toEqual({ 'new-account': { name: 'New account', platform: 'linux' } })
       await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
@@ -545,7 +545,7 @@ test.describe('OpenTubeX sync server', () => {
     const settingsPath = path.join(app.userDataDir, 'settings.db')
 
     await page.evaluate(async customTheme => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateSyncServerSyncSessions', false)
       const themes = await window.ftElectron.saveCustomTheme(customTheme)
       store.commit('setCustomThemes', themes)
@@ -574,7 +574,7 @@ test.describe('OpenTubeX sync server', () => {
     }
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('setSyncServerAutoSync', false)
       const themes = await window.ftElectron.replaceCustomThemes([])
       store.commit('setCustomThemes', themes)
@@ -592,12 +592,12 @@ test.describe('OpenTubeX sync server', () => {
       colors: { background: '#123456' },
     })
     await expect.poll(() => page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getSystemDarkTheme
     })).toBe('custom:synced-theme')
 
     await page.evaluate(async () => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('updateBaseTheme', 'custom:synced-theme')
       const themes = await window.ftElectron.replaceCustomThemes([])
       await store.dispatch('updateCustomThemes', themes)
@@ -605,7 +605,7 @@ test.describe('OpenTubeX sync server', () => {
     await syncNow()
 
     await page.evaluate(async customTheme => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       const themes = await window.ftElectron.replaceCustomThemes([customTheme])
       store.commit('setCustomThemes', themes)
       const snapshot = JSON.parse(store.state.settings.syncServerSnapshot)
@@ -832,7 +832,7 @@ test.describe('OpenTubeX sync server', () => {
       }
     }))
     await page.evaluate(async ({ videoId, channelId }) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       await store.dispatch('addVideos', {
         _id: 'sync-playlist',
         videos: [
@@ -873,7 +873,7 @@ test.describe('OpenTubeX sync server', () => {
     await dialog.getByText('Synced playlist', { exact: true }).click()
     await dialog.getByRole('button', { name: 'Start repair', exact: true }).click()
     await expect(page.locator('.repairStatus').getByRole('status')).toContainText('Repaired 1 · Failed 0')
-    const repairedIds = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getAllPlaylists.find(playlist => playlist._id === 'sync-playlist').videos.map(video => video.playlistItemId))
+    const repairedIds = await page.evaluate(() => window.$store.getters.getAllPlaylists.find(playlist => playlist._id === 'sync-playlist').videos.map(video => video.playlistItemId))
     expect(new Set(repairedIds).size).toBe(2)
     const section = await goToSettingsSection(page, 'sync')
     await section.getByRole('button', { name: 'Sync now' }).click()
@@ -884,7 +884,7 @@ test.describe('OpenTubeX sync server', () => {
       upload_date: Date.parse('2025-01-01'),
       uploader: expect.objectContaining({ id: repairChannelId, name: 'Recovered channel' })
     })])
-    expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getAllPlaylists.find(playlist => playlist._id === 'sync-playlist').videos.map(video => video.playlistItemId))).toEqual(repairedIds)
+    expect(await page.evaluate(() => window.$store.getters.getAllPlaylists.find(playlist => playlist._id === 'sync-playlist').videos.map(video => video.playlistItemId))).toEqual(repairedIds)
     const cleanup = await fetch(`${syncServerUrl}/v1/account/delete`, {
       method: 'DELETE',
       headers: { ...headers, 'X-Forwarded-For': rateLimitClient(testInfo) },
@@ -905,7 +905,7 @@ test.describe('OpenTubeX sync server', () => {
 
       async function configure(clientPage) {
         await clientPage.evaluate(async () => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           await store.dispatch('updatePlaylistViewType', 'list')
           await store.dispatch('updateSyncServerAutoSync', false)
           for (const collection of ['Subscriptions', 'History', 'Profiles', 'Sessions', 'Settings', 'WatchStats', 'LiveReminders']) {
@@ -936,9 +936,9 @@ test.describe('OpenTubeX sync server', () => {
 
       async function sync(clientPage) {
         const section = await goToSettingsSection(clientPage, 'sync')
-        const previous = await clientPage.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getSyncServerLastSyncAt)
+        const previous = await clientPage.evaluate(() => window.$store.getters.getSyncServerLastSyncAt)
         await section.getByRole('button', { name: 'Sync now' }).click()
-        await expect.poll(() => clientPage.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getSyncServerLastSyncAt)).toBeGreaterThan(previous)
+        await expect.poll(() => clientPage.evaluate(() => window.$store.getters.getSyncServerLastSyncAt)).toBeGreaterThan(previous)
         await expect(section.locator('.syncProgress')).toBeHidden()
         await clientPage.locator('.settingsCloseButton').click()
         await expect(clientPage.locator('.settingsWindow')).toHaveCount(0)
@@ -975,7 +975,7 @@ test.describe('OpenTubeX sync server', () => {
         const original = await editCover(page, path.resolve('e2e/fixtures/images/opentubex-playlist.jpg'))
         await connect(page, 'register')
         if (privacy === 'enhanced') {
-          const token = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getSyncServerToken)
+          const token = await page.evaluate(() => window.$store.getters.getSyncServerToken)
           const response = await fetch(`${syncServerUrl}/v1/encrypted_sync/playlists`, { headers: { Authorization: token } })
           expect(response.ok).toBe(true)
           expect((await response.json()).payload).not.toContain(original)
@@ -986,7 +986,7 @@ test.describe('OpenTubeX sync server', () => {
         const replacement = await editCover(other.page, path.resolve('e2e/fixtures/media/avatar.png'))
         expect(replacement).not.toBe(original)
         await page.evaluate(async () => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const store = window.$store
           const playlist = store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'Synced playlist')
           await store.dispatch('updatePlaylist', { _id: playlist._id, description: 'Edited while the other device changed its cover' })
         })
@@ -995,14 +995,14 @@ test.describe('OpenTubeX sync server', () => {
         await expectCover(page, replacement)
         await sync(other.page)
         for (const clientPage of [page, other.page]) {
-          expect(await clientPage.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          expect(await clientPage.evaluate(() => window.$store
             .getters.getAllPlaylists.find(playlist => playlist.playlistName === 'Synced playlist').description))
             .toBe('Edited while the other device changed its cover')
         }
 
         if (privacy === 'legacy') {
           const { token, id } = await page.evaluate(() => {
-            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            const store = window.$store
             return { token: store.getters.getSyncServerToken, id: store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'Synced playlist')._id }
           })
           const updated = await fetch(`${syncServerUrl}/v1/playlists/${encodeURIComponent(id)}`, {
@@ -1036,7 +1036,7 @@ test.describe('OpenTubeX sync server', () => {
         await sync(page)
         await expectCover(page, '')
       } finally {
-        const token = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getSyncServerToken)
+        const token = await page.evaluate(() => window.$store.getters.getSyncServerToken)
         if (token) {
           await fetch(`${syncServerUrl}/v1/account/delete`, {
             method: 'DELETE',

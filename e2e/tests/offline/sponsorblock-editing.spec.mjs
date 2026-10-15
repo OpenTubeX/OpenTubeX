@@ -54,7 +54,7 @@ async function captureThemes(page, component, testInfo, name) {
     await page.emulateMedia({ colorScheme: scheme })
     await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${scheme}\\b`))
     await page.evaluate(async pack => {
-      await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', pack)
+      await window.$store.dispatch('updateIconPack', pack)
     }, scheme === 'dark' ? 'material' : 'remix')
     await component.screenshot({ path: testInfo.outputPath(`${name}-${scheme}.png`) })
   }
@@ -129,7 +129,7 @@ test('copies bounds into a new persisted draft and submits only after editing an
   expect(votes[0]).toEqual({ UUID: 'original-segment', videoID: 'jNQXAC9IVRw', userID: 'test-contributor', type: '0' })
   expect(submission).toBeNull()
   await expect.poll(() => page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return store.getters.getSponsorBlockDraftSegmentsByVideoId.jNQXAC9IVRw
   })).toEqual([expect.objectContaining({ startTime: 11, endTime: 12, category: 'sponsor', actionType: 'skip', previewed: false })])
 
@@ -206,7 +206,7 @@ test('stops muting when a category correction disables the last playback segment
   const { panel, video } = await openSegments(app, page, [{ ...timedSegment, actionType: 'mute' }])
   await page.route('**/api/voteOnSponsorTime?*', route => route.fulfill({ status: 200 }))
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     store.commit('setSponsorBlockIntro', { color: '#00ffff', skip: 'doNothing' })
   })
   await video.evaluate(element => {
@@ -226,197 +226,198 @@ test('stops muting when a category correction disables the last playback segment
   await expect(page.locator('.sponsorBlockMarker')).toHaveCount(0)
 })
 
-for (const uiScale of [100, 95]) {
-  test.describe(`segment editor layout at ${uiScale}% UI scale`, () => {
-    test.use({
-      seed: {
-        settings: {
-          videoPlaybackEngine: 'built-in',
-          ytDlpPlaybackEngineDefaultMigration: true,
-          useSponsorBlock: true,
-          sponsorBlockEnableSubmission: true,
-          sponsorBlockGeneratedUserId: 'test-contributor',
-          uiScale,
-          alwaysShowScrollbars: true,
-          baseTheme: 'system',
-          systemDarkTheme: 'dark',
-          systemLightTheme: 'light',
-          mainColor: 'Red',
-          secColor: 'Blue'
-        }
+test.describe('segment editor layout', { tag: '@scale' }, () => {
+  test.use({
+    seed: {
+      settings: {
+        videoPlaybackEngine: 'built-in',
+        ytDlpPlaybackEngineDefaultMigration: true,
+        useSponsorBlock: true,
+        sponsorBlockEnableSubmission: true,
+        sponsorBlockGeneratedUserId: 'test-contributor',
+        alwaysShowScrollbars: true,
+        baseTheme: 'system',
+        systemDarkTheme: 'dark',
+        systemLightTheme: 'light',
+        mainColor: 'Red',
+        secColor: 'Blue'
       }
-    })
-
-    test('keeps category edits inside the panel and clamps after collapsing, cancellation, and resize', async ({ app, page }) => {
-      await setWindowSize(app, page, { width: 1440, height: 960 })
-      const { panel } = await openSegments(app, page, Array.from({ length: 9 }, (_, index) => ({
-        ...timedSegment, UUID: `segment-${index}`, segment: [index, index + 0.5]
-      })))
-      const content = panel.locator('.sponsorBlockContent')
-      const lastSegment = panel.locator('.sponsorBlockSegmentSummary').last()
-      await lastSegment.click()
-      await panel.getByRole('button', { name: 'Edit', exact: true }).click()
-      await panel.getByRole('button', { name: 'Change category', exact: true }).click()
-      const scrollToBottom = () => content.evaluate(element => { element.scrollTop = element.scrollHeight })
-      const expectValidScroll = () => expect.poll(() => content.evaluate(element => {
-        const viewport = element.getBoundingClientRect()
-        const end = element.querySelector('.sponsorBlockFooter').getBoundingClientRect().bottom
-        const maximum = Math.max(0, element.scrollTop + end - viewport.bottom)
-        const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
-        return element.scrollTop <= maximum + 2 &&
-          scrollbar.classList.contains('os-scrollbar-visible') === (maximum > 1)
-      })).toBe(true)
-      await scrollToBottom()
-      await panel.getByRole('button', { name: 'Cancel', exact: true }).click()
-      await expectValidScroll()
-      await panel.getByRole('button', { name: 'Change category', exact: true }).click()
-      await scrollToBottom()
-      await panel.getByRole('button', { name: 'Edit', exact: true }).click()
-      await expectValidScroll()
-      await panel.getByRole('button', { name: 'Edit', exact: true }).click()
-      await panel.getByRole('button', { name: 'Change category', exact: true }).click()
-      await scrollToBottom()
-      await lastSegment.click()
-      await expectValidScroll()
-      await lastSegment.click()
-      await panel.getByRole('button', { name: 'Edit', exact: true }).click()
-      await panel.getByRole('button', { name: 'Change category', exact: true }).click()
-      await scrollToBottom()
-      await setWindowSize(app, page, { width: 430, height: 820 })
-      await expectValidScroll()
-      await expect.poll(() => panel.evaluate(element => element.scrollWidth <= element.clientWidth + 1)).toBe(true)
-      await scrollToBottom()
-      await setWindowSize(app, page, { width: 1400, height: 940 })
-      await expectValidScroll()
-
-      await page.route('**/api/voteOnSponsorTime?*', route => route.fulfill({ status: 200 }))
-      await setPlayerFullscreen(page, true)
-      await page.locator('.fullscreenSponsorBlockToggle').click({ force: true })
-      const fullscreenPanel = page.locator('.fullscreenSponsorBlockOverlay.open')
-      await expect(fullscreenPanel).toBeVisible()
-      if (await fullscreenPanel.getByRole('button', { name: 'Copy & downvote', exact: true }).count() === 0) {
-        if (await fullscreenPanel.getByRole('button', { name: 'Edit', exact: true }).count() === 0) {
-          await fullscreenPanel.locator('.sponsorBlockSegmentSummary').last().click()
-        }
-        await fullscreenPanel.getByRole('button', { name: 'Edit', exact: true }).click()
-      }
-      await fullscreenPanel.getByRole('button', { name: 'Copy & downvote', exact: true }).click()
-      await expect(page.locator('.sponsorBlockSubmissionMenu')).toBeVisible()
-    })
-
-    test('edits directly from a skipped toast and keeps its editor inside the player', async ({ app, page }, testInfo) => {
-      const { panel, video } = await openSegments(app, page)
-      const votes = []
-      await page.route('**/api/voteOnSponsorTime?*', route => {
-        votes.push(Object.fromEntries(new URL(route.request().url()).searchParams))
-        return route.fulfill({ status: 200 })
-      })
-      await panel.getByRole('button', { name: 'Close', exact: true }).click()
-      await page.evaluate(() => {
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setSponsorBlockSkippedToastDuration', 1)
-      })
-      await video.evaluate(element => {
-        element.currentTime = 11.2
-        element.dispatchEvent(new Event('timeupdate'))
-      })
-      const player = page.locator('.ftVideoPlayer')
-      const toast = player.locator('.skippedSegment')
-      await expect(toast).toBeVisible()
-      await toast.hover({ position: { x: 2, y: 2 } })
-      for (const name of ['Close', 'Edit']) {
-        const button = toast.getByRole('button', { name, exact: true })
-        await expect(button.locator('.ft-icon')).toHaveAttribute('aria-hidden', 'true')
-        await expect.soft(button).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)', { timeout: 1000 })
-        const bounds = await button.boundingBox()
-        expect(bounds, `${name} button should have visible bounds`).not.toBeNull()
-        expect.soft(bounds.height).toBeCloseTo(24, 0)
-      }
-      const toastBounds = await toast.boundingBox()
-      expect(toastBounds, 'Skipped notice should have visible bounds').not.toBeNull()
-      expect.soft(toastBounds.height).toBeCloseTo(88, 0)
-      if (uiScale === 100) await captureThemes(page, toast, testInfo, 'sponsorblock-toast-compact')
-      await expect(toast.getByRole('button', { name: 'Change category', exact: true })).toHaveCount(0)
-      await toast.getByRole('button', { name: 'Edit', exact: true }).click()
-      await expect(toast.getByRole('button', { name: 'Copy & downvote', exact: true })).toBeVisible()
-      await expect(toast.locator('.btn')).toHaveCount(2)
-      await toast.getByRole('button', { name: 'Change category', exact: true }).click()
-      await expect.soft(toast.locator('.select-label')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)', { timeout: 1000 })
-      await toast.locator('select').selectOption('intro')
-      await toast.getByRole('button', { name: 'Submit category vote', exact: true }).click()
-      await expect(toast.locator('.skippedSegmentText')).toContainText('Intermission')
-      expect(votes[0].category).toBe('intro')
-      expect(votes[0]).not.toHaveProperty('type')
-      await page.mouse.move(0, 0)
-      await page.waitForTimeout(1100)
-      await expect(toast).toBeVisible()
-      const expectCenteredCancel = () => expect.poll(() => toast.getByRole('button', { name: 'Cancel', exact: true }).evaluate(element => {
-        const button = element.getBoundingClientRect()
-        const actions = element.closest('.sponsorBlockEditActions').getBoundingClientRect()
-        return Math.abs(button.left + button.width / 2 - actions.left - actions.width / 2)
-      })).toBeLessThan(1)
-      await expectCenteredCancel()
-      if (uiScale === 100) await captureThemes(page, toast, testInfo, 'sponsorblock-toast-editor')
-
-      // Shorter translations fit on one row, where Cancel should stay on the right.
-      const originalLabels = await page.evaluate(() => {
-        const app = document.querySelector('#app').__vue_app__
-        const i18n = app._context.provides[app.__VUE_I18N_SYMBOL__].global
-        const { SubmitCategoryVote, CopyAndDownvote } = i18n.getLocaleMessage('en-US').Video.Player.SponsorBlock
-        i18n.mergeLocaleMessage('en-US', {
-          Video: { Player: { SponsorBlock: { SubmitCategoryVote: 'Vote', CopyAndDownvote: 'Copy' } } }
-        })
-        return { SubmitCategoryVote, CopyAndDownvote }
-      })
-      const cancel = toast.locator('.sponsorBlockCancelButton')
-      await expect(toast.getByRole('button', { name: 'Copy', exact: true })).toBeVisible()
-      await expect.poll(() => cancel.evaluate(element => {
-        const button = element.getBoundingClientRect()
-        const primary = element.parentElement.querySelector('.sponsorBlockPrimaryActions').getBoundingClientRect()
-        const actions = element.parentElement.getBoundingClientRect()
-        const padding = parseFloat(getComputedStyle(element.parentElement).paddingRight)
-        return Math.max(Math.abs(button.top - primary.top), Math.abs(actions.right - padding - button.right))
-      })).toBeLessThan(1)
-      await page.evaluate(labels => {
-        const app = document.querySelector('#app').__vue_app__
-        app._context.provides[app.__VUE_I18N_SYMBOL__].global.mergeLocaleMessage('en-US', {
-          Video: { Player: { SponsorBlock: labels } }
-        })
-      }, originalLabels)
-      await expect(toast.getByRole('button', { name: 'Copy & downvote', exact: true })).toBeVisible()
-      await expectCenteredCancel()
-
-      const scroller = toast.locator('.sponsorBlockToastEditor')
-      await expect(scroller).toHaveAttribute('data-overlayscrollbars-viewport')
-      const scrollToBottom = () => scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
-      const expectValidScroll = () => expect.poll(() => scroller.evaluate(element => {
-        const end = element.querySelector('.sponsorBlockEditActions').getBoundingClientRect().bottom
-        const maximum = Math.max(0, element.scrollTop + end - element.getBoundingClientRect().bottom)
-        const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
-        return element.scrollTop <= maximum + 2 && scrollbar.classList.contains('os-scrollbar-visible') === (maximum > 1)
-      })).toBe(true)
-      await scrollToBottom()
-      await setWindowSize(app, page, { width: 430, height: 820 })
-      await expectValidScroll()
-      await expectCenteredCancel()
-      await expect.poll(() => toast.evaluate(element => {
-        const player = element.closest('.ftVideoPlayer').getBoundingClientRect()
-        const notice = element.getBoundingClientRect()
-        return notice.top >= player.top - 1 && notice.left >= player.left - 1 && notice.right <= player.right + 1
-      })).toBe(true)
-      await scrollToBottom()
-      await toast.getByRole('button', { name: 'Cancel', exact: true }).click()
-      await expectValidScroll()
-      await toast.getByRole('button', { name: 'Change category', exact: true }).click()
-      await scrollToBottom()
-      await setWindowSize(app, page, { width: 1360, height: 940 })
-      await expectValidScroll()
-      await toast.getByRole('button', { name: 'Edit', exact: true }).click()
-      await expect(toast.getByRole('button', { name: 'Copy & downvote', exact: true })).toHaveCount(0)
-      await toast.getByRole('button', { name: 'Edit', exact: true }).click()
-      await toast.getByRole('button', { name: 'Copy & downvote', exact: true }).click()
-      await expect(page.locator('.sponsorBlockSubmissionMenu')).toBeVisible()
-      await expect(toast).toHaveCount(0)
-      expect(votes.at(-1).type).toBe('0')
-    })
+    }
   })
-}
+
+  test('keeps category edits inside the panel and clamps after collapsing, cancellation, and resize', async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 1440, height: 960 })
+    const { panel } = await openSegments(app, page, Array.from({ length: 9 }, (_, index) => ({
+      ...timedSegment, UUID: `segment-${index}`, segment: [index, index + 0.5]
+    })))
+    const content = panel.locator('.sponsorBlockContent')
+    const lastSegment = panel.locator('.sponsorBlockSegmentSummary').last()
+    await lastSegment.click()
+    await panel.getByRole('button', { name: 'Edit', exact: true }).click()
+    await panel.getByRole('button', { name: 'Change category', exact: true }).click()
+    const scrollToBottom = () => content.evaluate(element => { element.scrollTop = element.scrollHeight })
+    const expectValidScroll = () => expect.poll(() => content.evaluate(element => {
+      const viewport = element.getBoundingClientRect()
+      const end = element.querySelector('.sponsorBlockFooter').getBoundingClientRect().bottom
+      const maximum = Math.max(0, element.scrollTop + end - viewport.bottom)
+      const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+      return element.scrollTop <= maximum + 2 &&
+        scrollbar.classList.contains('os-scrollbar-visible') === (maximum > 1)
+    })).toBe(true)
+    await scrollToBottom()
+    await panel.getByRole('button', { name: 'Cancel', exact: true }).click()
+    await expectValidScroll()
+    await panel.getByRole('button', { name: 'Change category', exact: true }).click()
+    await scrollToBottom()
+    await panel.getByRole('button', { name: 'Edit', exact: true }).click()
+    await expectValidScroll()
+    await panel.getByRole('button', { name: 'Edit', exact: true }).click()
+    await panel.getByRole('button', { name: 'Change category', exact: true }).click()
+    await scrollToBottom()
+    await lastSegment.click()
+    await expectValidScroll()
+    await lastSegment.click()
+    await panel.getByRole('button', { name: 'Edit', exact: true }).click()
+    await panel.getByRole('button', { name: 'Change category', exact: true }).click()
+    await scrollToBottom()
+    await setWindowSize(app, page, { width: 430, height: 820 })
+    await expectValidScroll()
+    await expect.poll(() => panel.evaluate(element => element.scrollWidth <= element.clientWidth + 1)).toBe(true)
+    await scrollToBottom()
+    await setWindowSize(app, page, { width: 1400, height: 940 })
+    await expectValidScroll()
+
+    await page.route('**/api/voteOnSponsorTime?*', route => route.fulfill({ status: 200 }))
+    await setPlayerFullscreen(page, true)
+    await page.locator('.fullscreenSponsorBlockToggle').click({ force: true })
+    const fullscreenPanel = page.locator('.fullscreenSponsorBlockOverlay.open')
+    await expect(fullscreenPanel).toBeVisible()
+    if (await fullscreenPanel.getByRole('button', { name: 'Copy & downvote', exact: true }).count() === 0) {
+      if (await fullscreenPanel.getByRole('button', { name: 'Edit', exact: true }).count() === 0) {
+        await fullscreenPanel.locator('.sponsorBlockSegmentSummary').last().click()
+      }
+      await fullscreenPanel.getByRole('button', { name: 'Edit', exact: true }).click()
+    }
+    await fullscreenPanel.getByRole('button', { name: 'Copy & downvote', exact: true }).click()
+    await expect(page.locator('.sponsorBlockSubmissionMenu')).toBeVisible()
+  })
+
+  test('edits directly from a skipped toast and keeps its editor inside the player', async ({ app, page, uiScale }, testInfo) => {
+    const { panel, video } = await openSegments(app, page)
+    const votes = []
+    await page.route('**/api/voteOnSponsorTime?*', route => {
+      votes.push(Object.fromEntries(new URL(route.request().url()).searchParams))
+      return route.fulfill({ status: 200 })
+    })
+    await panel.getByRole('button', { name: 'Close', exact: true }).click()
+    await page.evaluate(() => {
+      window.$store.commit('setSponsorBlockSkippedToastDuration', 1)
+    })
+    await video.evaluate(element => {
+      element.currentTime = 11.2
+      element.dispatchEvent(new Event('timeupdate'))
+    })
+    const player = page.locator('.ftVideoPlayer')
+    const toast = player.locator('.skippedSegment')
+    await expect(toast).toBeVisible()
+    // The shorter viewport at larger scales leaves the page scrolled with the
+    // toast beneath the fixed header. Hover clear of its rounded corner.
+    await page.evaluate(() => window.scrollTo(0, 0))
+    await toast.hover({ position: { x: 12, y: 12 } })
+    for (const name of ['Close', 'Edit']) {
+      const button = toast.getByRole('button', { name, exact: true })
+      await expect(button.locator('.ft-icon')).toHaveAttribute('aria-hidden', 'true')
+      await expect.soft(button).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)', { timeout: 1000 })
+      const bounds = await button.boundingBox()
+      expect(bounds, `${name} button should have visible bounds`).not.toBeNull()
+      expect.soft(bounds.height).toBeCloseTo(24, 0)
+    }
+    const toastBounds = await toast.boundingBox()
+    expect(toastBounds, 'Skipped notice should have visible bounds').not.toBeNull()
+    expect.soft(toastBounds.height).toBeCloseTo(88, 0)
+    if (uiScale === 100) await captureThemes(page, toast, testInfo, 'sponsorblock-toast-compact')
+    await expect(toast.getByRole('button', { name: 'Change category', exact: true })).toHaveCount(0)
+    await toast.getByRole('button', { name: 'Edit', exact: true }).click()
+    await expect(toast.getByRole('button', { name: 'Copy & downvote', exact: true })).toBeVisible()
+    await expect(toast.locator('.btn')).toHaveCount(2)
+    await toast.getByRole('button', { name: 'Change category', exact: true }).click()
+    await expect.soft(toast.locator('.select-label')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)', { timeout: 1000 })
+    await toast.locator('select').selectOption('intro')
+    await toast.getByRole('button', { name: 'Submit category vote', exact: true }).click()
+    await expect(toast.locator('.skippedSegmentText')).toContainText('Intermission')
+    expect(votes[0].category).toBe('intro')
+    expect(votes[0]).not.toHaveProperty('type')
+    await page.mouse.move(0, 0)
+    // Outlast the 1 s toast duration: an open editor must keep the toast.
+    await page.waitForTimeout(1100)
+    await expect(toast).toBeVisible()
+    const expectCenteredCancel = () => expect.poll(() => toast.getByRole('button', { name: 'Cancel', exact: true }).evaluate(element => {
+      const button = element.getBoundingClientRect()
+      const actions = element.closest('.sponsorBlockEditActions').getBoundingClientRect()
+      return Math.abs(button.left + button.width / 2 - actions.left - actions.width / 2)
+    })).toBeLessThan(1)
+    await expectCenteredCancel()
+    if (uiScale === 100) await captureThemes(page, toast, testInfo, 'sponsorblock-toast-editor')
+
+    // Shorter translations fit on one row, where Cancel should stay on the right.
+    const originalLabels = await page.evaluate(() => {
+      const app = document.querySelector('#app').__vue_app__
+      const i18n = app._context.provides[app.__VUE_I18N_SYMBOL__].global
+      const { SubmitCategoryVote, CopyAndDownvote } = i18n.getLocaleMessage('en-US').Video.Player.SponsorBlock
+      i18n.mergeLocaleMessage('en-US', {
+        Video: { Player: { SponsorBlock: { SubmitCategoryVote: 'Vote', CopyAndDownvote: 'Copy' } } }
+      })
+      return { SubmitCategoryVote, CopyAndDownvote }
+    })
+    const cancel = toast.locator('.sponsorBlockCancelButton')
+    await expect(toast.getByRole('button', { name: 'Copy', exact: true })).toBeVisible()
+    await expect.poll(() => cancel.evaluate(element => {
+      const button = element.getBoundingClientRect()
+      const primary = element.parentElement.querySelector('.sponsorBlockPrimaryActions').getBoundingClientRect()
+      const actions = element.parentElement.getBoundingClientRect()
+      const padding = parseFloat(getComputedStyle(element.parentElement).paddingRight)
+      return Math.max(Math.abs(button.top - primary.top), Math.abs(actions.right - padding - button.right))
+    })).toBeLessThan(1)
+    await page.evaluate(labels => {
+      const app = document.querySelector('#app').__vue_app__
+      app._context.provides[app.__VUE_I18N_SYMBOL__].global.mergeLocaleMessage('en-US', {
+        Video: { Player: { SponsorBlock: labels } }
+      })
+    }, originalLabels)
+    await expect(toast.getByRole('button', { name: 'Copy & downvote', exact: true })).toBeVisible()
+    await expectCenteredCancel()
+
+    const scroller = toast.locator('.sponsorBlockToastEditor')
+    await expect(scroller).toHaveAttribute('data-overlayscrollbars-viewport')
+    const scrollToBottom = () => scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    const expectValidScroll = () => expect.poll(() => scroller.evaluate(element => {
+      const end = element.querySelector('.sponsorBlockEditActions').getBoundingClientRect().bottom
+      const maximum = Math.max(0, element.scrollTop + end - element.getBoundingClientRect().bottom)
+      const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+      return element.scrollTop <= maximum + 2 && scrollbar.classList.contains('os-scrollbar-visible') === (maximum > 1)
+    })).toBe(true)
+    await scrollToBottom()
+    await setWindowSize(app, page, { width: 430, height: 820 })
+    await expectValidScroll()
+    await expectCenteredCancel()
+    await expect.poll(() => toast.evaluate(element => {
+      const player = element.closest('.ftVideoPlayer').getBoundingClientRect()
+      const notice = element.getBoundingClientRect()
+      return notice.top >= player.top - 1 && notice.left >= player.left - 1 && notice.right <= player.right + 1
+    })).toBe(true)
+    await scrollToBottom()
+    await toast.getByRole('button', { name: 'Cancel', exact: true }).click()
+    await expectValidScroll()
+    await toast.getByRole('button', { name: 'Change category', exact: true }).click()
+    await scrollToBottom()
+    await setWindowSize(app, page, { width: 1360, height: 940 })
+    await expectValidScroll()
+    await toast.getByRole('button', { name: 'Edit', exact: true }).click()
+    await expect(toast.getByRole('button', { name: 'Copy & downvote', exact: true })).toHaveCount(0)
+    await toast.getByRole('button', { name: 'Edit', exact: true }).click()
+    await toast.getByRole('button', { name: 'Copy & downvote', exact: true }).click()
+    await expect(page.locator('.sponsorBlockSubmissionMenu')).toBeVisible()
+    await expect(toast).toHaveCount(0)
+    expect(votes.at(-1).type).toBe('0')
+  })
+})

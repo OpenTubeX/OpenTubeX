@@ -41,7 +41,7 @@ test('context-dependent shortcuts are shown as non-editable', async ({ page }) =
   expect(resetBounds.y).toBeLessThan(firstSectionBounds.y)
 
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     return store.dispatch('updateKeyboardShortcuts', JSON.stringify({
       APP: { GENERAL: { FOCUS_SEARCH: 'Ctrl+Shift+K' } }
     }))
@@ -115,7 +115,7 @@ test('closing cached shortcuts dismisses conflicts and releases the page scroll 
   await page.keyboard.press('Shift+?')
   await expect(dialog).toHaveCount(0)
   await expect(page.locator('.prompt')).toHaveCount(0)
-  expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.isAnyPromptOpen)).toBe(false)
+  expect(await page.evaluate(() => window.$store.getters.isAnyPromptOpen)).toBe(false)
   expect(await page.evaluate(() => document.documentElement.style.overflow)).toBe(originalOverflow)
   await page.keyboard.press('Shift+?')
   await expect(page.locator('.keyboardShortcutPromptEmbedded')).toBeVisible()

@@ -74,7 +74,7 @@ for (const [uiScale, currentLocale] of [[100, 'en-US'], [95, 'en-US'], [125, 'en
         await expect(track).toHaveCSS('background-image', regularStyle.background)
         await expect(slider).toHaveValue('40')
         for (const pack of ['material', 'remix']) {
-          await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', value), pack)
+          await page.evaluate(value => window.$store.dispatch('updateIconPack', value), pack)
           await button.focus()
           await expectWidth(96)
           await group.screenshot({ path: testInfo.outputPath(`volume-${width}-${pack}.png`) })

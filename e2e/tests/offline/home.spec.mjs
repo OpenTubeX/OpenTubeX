@@ -305,7 +305,7 @@ test('activates an existing video tab from Continue watching', async ({ page }) 
 test('shows recent active and completed downloads', async ({ page }) => {
   await goTo(page, 'home')
   await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const store = window.$store
     const downloads = [
       {
         id: 3,
@@ -429,7 +429,7 @@ test.describe('hidden Home page', () => {
     await expect(page).toHaveURL(/#\/subscriptions$/)
     await expect(otherWindow).toHaveURL(/#\/subscriptions$/)
     await expect.poll(() => page.evaluate((tabId) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const store = window.$store
       return store.getters.getTabById(tabId)?.route.fullPath
     }, backgroundHomeTab.id)).toBe('/subscriptions')
 
