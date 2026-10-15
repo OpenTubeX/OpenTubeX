@@ -21,6 +21,12 @@ public class OfflineAudioPlaybackTest {
     @Test public void downloadedMp3KeepsItsAudioContextAcrossActivityTransitions() throws Exception {
         var instrumentation = InstrumentationRegistry.getInstrumentation();
         var context = instrumentation.getTargetContext();
+        if (android.os.Build.VERSION.SDK_INT >= 33) {
+            // Startup subscription refresh may request notifications. Settle that
+            // permission before checking the activity's background lifecycle.
+            instrumentation.getUiAutomation().grantRuntimePermission(context.getPackageName(),
+                android.Manifest.permission.POST_NOTIFICATIONS);
+        }
         File media = new File(context.getCacheDir(), "offline-audio-regression.mp3");
         String videoId = "audio" + java.util.UUID.randomUUID().toString().substring(0, 6);
         try (var input = instrumentation.getContext().getAssets().open("demo-audio.mp3")) {
