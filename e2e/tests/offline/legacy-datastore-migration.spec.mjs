@@ -93,12 +93,17 @@ test('tells users once that their library moved to a new format', async () => {
       return { response: 0 }
     }
   })
-  async function launchAndCollect(userDataDir) {
+  async function launchAndCollect(userDataDir, expected) {
     const { electronApp, page } = await launchApp(userDataDir, [], { onPhase: recordNotices })
     try {
-      // The notice waits two seconds after startup; wait past it either way.
-      await page.waitForTimeout(3500)
-      return await electronApp.evaluate(() => globalThis.__libraryNotices)
+      const notices = () => electronApp.evaluate(() => globalThis.__libraryNotices)
+      if (expected.length) {
+        await expect.poll(notices).toEqual(expected)
+      } else {
+        // Absence has no event to wait for: give the two-second notice delay time to pass.
+        await page.waitForTimeout(3500)
+        expect(await notices()).toEqual(expected)
+      }
     } finally {
       await electronApp.close()
     }
@@ -106,9 +111,10 @@ test('tells users once that their library moved to a new format', async () => {
   const migrated = await createUserDataDir({ playlists: [playlist] })
   const fresh = await createUserDataDir({ freshProfile: true })
   try {
-    expect(await launchAndCollect(migrated)).toEqual(['Your library now uses a new storage format.'])
-    expect(await launchAndCollect(migrated), 'only after the import').toEqual([])
-    expect(await launchAndCollect(fresh), 'a new installation has nothing to migrate').toEqual([])
+    await launchAndCollect(migrated, ['Your library now uses a new storage format.'])
+    // Not again, and not for a new installation, which has nothing to migrate.
+    await launchAndCollect(migrated, [])
+    await launchAndCollect(fresh, [])
   } finally {
     await rm(migrated, { recursive: true, force: true })
     await rm(fresh, { recursive: true, force: true })
