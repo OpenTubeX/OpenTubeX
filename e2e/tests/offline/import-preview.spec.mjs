@@ -64,7 +64,7 @@ test('previews backup counts and replacement effects, updates selection, and lea
   expect(after.uiScale).toEqual(before.uiScale)
 })
 
-test('Takeout preview shows matching and new records and remains usable when its scroll range shrinks', async ({ page }, testInfo) => {
+test('Takeout preview shows matching and new records and remains usable when its scroll range shrinks', { tag: '@scale' }, async ({ page }, testInfo) => {
   const dataSection = await goToSettingsSection(page, 'data')
   const before = await savedData(page)
   const archive = zipSync({
@@ -119,32 +119,28 @@ test('Takeout preview shows matching and new records and remains usable when its
       return validOffset && !scrollbar.classList.contains('os-scrollbar-unusable') && Math.abs(thumb.height / track.height - element.clientHeight / element.scrollHeight) < 0.02
     })).toBe(true)
   }
-  for (const zoom of [1, 1.25]) {
-    await page.evaluate(value => window.ftElectron.setZoomFactor(value), zoom)
-    await page.setViewportSize({ width: 375, height: 800 })
-    await scrollToBottom()
-    await page.setViewportSize({ width: 900, height: 600 })
-    await validScroll()
-    await scrollToBottom()
-    await page.setViewportSize({ width: 1600, height: 900 })
-    await validScroll()
-    await page.setViewportSize({ width: 375, height: 800 })
-    await expect.poll(() => choices.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
-    await scrollToBottom()
-    // Avoid pointer action auto-scrolling: shrink the content from the bottom position.
-    await choices.getByRole('checkbox', { name: 'History', exact: true }).evaluate(element => element.nextElementSibling.click())
-    await expect(preview.locator('[data-category="history"]')).toHaveCount(0)
-    await validScroll()
-    await choices.getByRole('checkbox', { name: 'History', exact: true }).evaluate(element => element.nextElementSibling.click())
-    await scrollToBottom()
-    for (const checkbox of await choices.getByRole('checkbox').all()) await checkbox.evaluate(element => element.nextElementSibling.click())
-    await expect(preview).toBeHidden()
-    await expect(page.getByRole('button', { name: 'Import selected data', exact: true })).toHaveCount(0)
-    await validScroll()
-    for (const checkbox of await choices.getByRole('checkbox').all()) await checkbox.evaluate(element => element.nextElementSibling.click())
-  }
+  await page.setViewportSize({ width: 375, height: 800 })
+  await scrollToBottom()
+  await page.setViewportSize({ width: 900, height: 600 })
+  await validScroll()
+  await scrollToBottom()
   await page.setViewportSize({ width: 1600, height: 900 })
-  await page.evaluate(() => window.ftElectron.setZoomFactor(1))
+  await validScroll()
+  await page.setViewportSize({ width: 375, height: 800 })
+  await expect.poll(() => choices.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+  await scrollToBottom()
+  // Avoid pointer action auto-scrolling: shrink the content from the bottom position.
+  await choices.getByRole('checkbox', { name: 'History', exact: true }).evaluate(element => element.nextElementSibling.click())
+  await expect(preview.locator('[data-category="history"]')).toHaveCount(0)
+  await validScroll()
+  await choices.getByRole('checkbox', { name: 'History', exact: true }).evaluate(element => element.nextElementSibling.click())
+  await scrollToBottom()
+  for (const checkbox of await choices.getByRole('checkbox').all()) await checkbox.evaluate(element => element.nextElementSibling.click())
+  await expect(preview).toBeHidden()
+  await expect(page.getByRole('button', { name: 'Import selected data', exact: true })).toHaveCount(0)
+  await validScroll()
+  for (const checkbox of await choices.getByRole('checkbox').all()) await checkbox.evaluate(element => element.nextElementSibling.click())
+  await page.setViewportSize({ width: 1600, height: 900 })
   await page.getByRole('button', { name: 'Import selected data', exact: true }).click()
   await expect.poll(async () => (await savedData(page)).playlists.some(list => list.playlistName === 'New playlist')).toBe(true)
   const again = await chooseArchive(page, dataSection, archive, 'Import YouTube Takeout ZIP')

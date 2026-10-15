@@ -48,65 +48,62 @@ for (const layout of ['desktop', 'phone', 'fullWindow', 'fullscreen']) {
       element.querySelector('video').style.opacity = '0'
     })
 
-    for (const zoom of [1, 1.25]) {
-      await app.electronApp.evaluate(({ BrowserWindow }, zoom) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(zoom), zoom)
-      const controls = player.locator('.shaka-controls-container')
-      const row = player.locator('.shortsTopControls')
-      await controls.evaluate(element => element.setAttribute('shown', 'true'))
-      await expect(row).toBeVisible()
-      await row.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
+    const controls = player.locator('.shaka-controls-container')
+    const row = player.locator('.shortsTopControls')
+    await controls.evaluate(element => element.setAttribute('shown', 'true'))
+    await expect(row).toBeVisible()
+    await row.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
 
-      for (const shown of [false, true]) {
-        const sample = await controls.evaluate(async (element, shown) => {
-          const row = element.closest('.ftVideoPlayer').querySelector('.shortsTopControls')
-          const setShown = value => value ? element.setAttribute('shown', 'true') : element.removeAttribute('shown')
-          // Shaka's own auto-hide can already be in the target state, so settle in the opposite state first.
-          setShown(!shown)
-          row.getBoundingClientRect()
+    for (const shown of [false, true]) {
+      const sample = await controls.evaluate(async (element, shown) => {
+        const row = element.closest('.ftVideoPlayer').querySelector('.shortsTopControls')
+        const setShown = value => value ? element.setAttribute('shown', 'true') : element.removeAttribute('shown')
+        // Shaka's own auto-hide can already be in the target state, so settle in the opposite state first.
+        setShown(!shown)
+        row.getBoundingClientRect()
+        await new Promise(requestAnimationFrame)
+        await Promise.all(row.getAnimations().map(animation => animation.finished))
+        setShown(shown)
+        row.getBoundingClientRect()
+        let animation
+        for (let frame = 0; frame < 10 && !animation; frame++) {
           await new Promise(requestAnimationFrame)
-          await Promise.all(row.getAnimations().map(animation => animation.finished))
-          setShown(shown)
-          row.getBoundingClientRect()
-          let animation
-          for (let frame = 0; frame < 10 && !animation; frame++) {
-            await new Promise(requestAnimationFrame)
-            animation = row.getAnimations().find(animation => ['opacity', '--ft-controls-fade'].includes(animation.transitionProperty))
-          }
-          if (!animation) throw new Error('Expected the Shorts controls to fade')
-          animation.pause()
-          animation.currentTime = Number(animation.effect.getTiming().duration) / 2
-          const surfaces = Array.from(row.querySelectorAll('.shortsTopControlsGroup > .shortsTopControl, .shortsVolumeControl')).map(control => {
-            const pseudo = getComputedStyle(control, '::before')
-            const glass = pseudo.content === 'none' ? getComputedStyle(control) : pseudo
-            return {
-              parentOpacity: Number(getComputedStyle(control).opacity),
-              opacity: Number(glass.opacity),
-              blur: glass.backdropFilter,
-            }
-          })
-          return {
-            rowOpacity: Number(getComputedStyle(row).opacity),
-            iconFade: getComputedStyle(row.querySelector('.shortsTopControl > *')).filter,
-            surfaces,
-          }
-        }, shown)
-        const screenshotPath = testInfo.outputPath(`${layout}-${zoom}-${shown ? 'fade-in' : 'fade-out'}.png`)
-        await player.screenshot({ path: screenshotPath, animations: 'allow' })
-        await testInfo.attach('Shorts controls mid-fade', { path: screenshotPath, contentType: 'image/png' })
-        // An opacity below 1 on the row cuts the video off from descendant backdrop filters.
-        expect(sample.rowOpacity).toBe(1)
-        expect(sample.iconFade).toMatch(/opacity\(0\.[0-9]+\)/)
-        for (const surface of sample.surfaces) {
-          expect(surface.parentOpacity).toBe(1)
-          expect(surface.opacity).toBeGreaterThan(0)
-          expect(surface.opacity).toBeLessThan(1)
-          expect(surface.blur).toContain('blur(10px)')
+          animation = row.getAnimations().find(animation => ['opacity', '--ft-controls-fade'].includes(animation.transitionProperty))
         }
-        await row.evaluate(element => {
-          for (const animation of element.getAnimations()) animation.finish()
+        if (!animation) throw new Error('Expected the Shorts controls to fade')
+        animation.pause()
+        animation.currentTime = Number(animation.effect.getTiming().duration) / 2
+        const surfaces = Array.from(row.querySelectorAll('.shortsTopControlsGroup > .shortsTopControl, .shortsVolumeControl')).map(control => {
+          const pseudo = getComputedStyle(control, '::before')
+          const glass = pseudo.content === 'none' ? getComputedStyle(control) : pseudo
+          return {
+            parentOpacity: Number(getComputedStyle(control).opacity),
+            opacity: Number(glass.opacity),
+            blur: glass.backdropFilter,
+          }
         })
-        await expect(row).toHaveCSS('visibility', shown ? 'visible' : 'hidden')
+        return {
+          rowOpacity: Number(getComputedStyle(row).opacity),
+          iconFade: getComputedStyle(row.querySelector('.shortsTopControl > *')).filter,
+          surfaces,
+        }
+      }, shown)
+      const screenshotPath = testInfo.outputPath(`${layout}-${shown ? 'fade-in' : 'fade-out'}.png`)
+      await player.screenshot({ path: screenshotPath, animations: 'allow' })
+      await testInfo.attach('Shorts controls mid-fade', { path: screenshotPath, contentType: 'image/png' })
+      // An opacity below 1 on the row cuts the video off from descendant backdrop filters.
+      expect(sample.rowOpacity).toBe(1)
+      expect(sample.iconFade).toMatch(/opacity\(0\.[0-9]+\)/)
+      for (const surface of sample.surfaces) {
+        expect(surface.parentOpacity).toBe(1)
+        expect(surface.opacity).toBeGreaterThan(0)
+        expect(surface.opacity).toBeLessThan(1)
+        expect(surface.blur).toContain('blur(10px)')
       }
+      await row.evaluate(element => {
+        for (const animation of element.getAnimations()) animation.finish()
+      })
+      await expect(row).toHaveCSS('visibility', shown ? 'visible' : 'hidden')
     }
   })
 }

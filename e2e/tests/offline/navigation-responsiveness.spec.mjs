@@ -9,7 +9,7 @@ test.describe('Videos feed navigation', () => {
     await expect(page.locator('#subscriptionsPanel .ft-list-video').first()).toBeVisible()
   })
 
-  test('reuses the unchanged feed when returning from Playlists', async ({ page }) => {
+  test('reuses the unchanged feed when returning from Playlists', { tag: '@performance' }, async ({ page }) => {
     for (const viewport of [{ width: 375, height: 700 }, { width: 700, height: 375 }]) {
       await page.setViewportSize(viewport)
       await goTo(page, 'userplaylists')
@@ -78,7 +78,7 @@ test.describe('Home navigation', () => {
     }
   })
 
-  test('mounts only the visible Home shelf cards when navigating from Playlists', async ({ page }) => {
+  test('mounts only the visible Home shelf cards when navigating from Playlists', { tag: '@performance' }, async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 700 })
     await goTo(page, 'userplaylists')
     await page.evaluate(() => {

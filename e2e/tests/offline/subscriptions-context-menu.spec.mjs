@@ -146,6 +146,7 @@ test('moving or cancelling a touch on feed tabs does not open a menu', async ({ 
     await shorts.dispatchEvent(event, {
       pointerType: 'touch', isPrimary: true, clientX: 120, clientY: 100
     })
+    // Outlast the long-press delay to prove the cancelled touch opens nothing.
     await page.waitForTimeout(600)
     await expect(page.locator('.mobileLinkActions')).toHaveCount(0)
   }

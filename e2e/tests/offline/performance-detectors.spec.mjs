@@ -9,7 +9,7 @@ test.use({
   launchArgs: ['--js-flags=--expose-gc', '--enable-precise-memory-info']
 })
 
-test('unmocked performance services do not put later playback into network backoff', async ({ page }) => {
+test('unmocked performance services do not put later playback into network backoff', { tag: '@performance' }, async ({ page }) => {
   await mockPerformanceServices(page)
   // A transport failure marks the entire YouTube origin unavailable. A later
   // watch fixture would then wait behind the shared five-second retry queue.
@@ -45,7 +45,11 @@ async function prepareScrollableScene(page) {
     content.style.height = '5000px'
     document.body.append(content)
   })
-  await page.waitForTimeout(1000)
+  // Let entry transitions finish so they do not compete with the samples.
+  await page.evaluate(() => Promise.all(document.getAnimations()
+    .filter(animation => animation.playState === 'running' &&
+        animation.timeline === document.timeline && Number.isFinite(animation.effect?.getComputedTiming().endTime))
+    .map(animation => animation.finished.catch(() => {}))))
 }
 
 async function collectScrollSamples(page, injectFault) {
@@ -66,7 +70,7 @@ async function collectScrollSamples(page, injectFault) {
   return { samples, measurements }
 }
 
-test('detects extra scroll CPU work that still fits within animation frames', async ({ page }, testInfo) => {
+test('detects extra scroll CPU work that still fits within animation frames', { tag: '@performance' }, async ({ page }, testInfo) => {
   test.setTimeout(90_000)
   await prepareScrollableScene(page)
   const { samples, measurements } = await collectScrollSamples(page, inject => {
@@ -87,7 +91,7 @@ test('detects extra scroll CPU work that still fits within animation frames', as
   expect(comparison.metrics.find(metric => metric.key === 'largeFeedScrollLongestFrameMs').passed).toBe(true)
 })
 
-test('detects sustained slower frame delivery below the longest-frame noise floor', async ({ page }, testInfo) => {
+test('detects sustained slower frame delivery below the longest-frame noise floor', { tag: '@performance' }, async ({ page }, testInfo) => {
   test.setTimeout(90_000)
   await prepareScrollableScene(page)
   const { samples } = await collectScrollSamples(page, inject => {
@@ -110,7 +114,7 @@ test('detects sustained slower frame delivery below the longest-frame noise floo
   expect(comparison.metrics.find(metric => metric.key === 'largeFeedScrollLongestFrameMs').passed).toBe(true)
 })
 
-test('collects disposed players when application data grows during heap sampling', async ({ app, page }) => {
+test('collects disposed players when application data grows during heap sampling', { tag: '@performance' }, async ({ app, page }) => {
   test.setTimeout(120_000)
   await mockPlayableWatchPage(app, page)
   await page.evaluate(() => {
@@ -131,7 +135,7 @@ test('collects disposed players when application data grows during heap sampling
   expect(retained).toBe(0)
 })
 
-test('detects retained players across complete playback and tab disposal cycles', async ({ app, page }, testInfo) => {
+test('detects retained players across complete playback and tab disposal cycles', { tag: '@performance' }, async ({ app, page }, testInfo) => {
   test.setTimeout(120_000)
   await mockPlayableWatchPage(app, page)
   const base = await measurePlaybackHeapGrowth(page)

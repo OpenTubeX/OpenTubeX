@@ -15,7 +15,7 @@ test.use({
   }
 })
 
-test('mobile quick speeds stay no wider than their presets', async ({ app, page }) => {
+test('mobile quick speeds stay no wider than their presets', { tag: '@scale' }, async ({ app, page }) => {
   await page.evaluate(() => window.$store.dispatch('updateQuickPlaybackSpeedBarOptions', JSON.stringify([1, 1.5, 2].map(speed => ({ speed })))))
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
@@ -26,73 +26,67 @@ test('mobile quick speeds stay no wider than their presets', async ({ app, page 
   await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
   const bar = player.locator('.shaka-controls-button-panel > .ft-quick-playback-rate-bar')
 
-  for (const scale of [1, 1.25]) {
-    await app.electronApp.evaluate(({ BrowserWindow }, scale) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale), scale)
-    for (const frosted of [true, false]) {
-      await page.evaluate(value => window.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
-      await expect.poll(() => bar.evaluate(element => {
-        const style = getComputedStyle(element)
-        const buttons = [...element.children].filter(child => getComputedStyle(child).display !== 'none')
-        const contentWidth = buttons.reduce((width, child) => width + child.getBoundingClientRect().width, 0) +
-          Math.max(0, buttons.length - 1) * Number.parseFloat(style.columnGap) +
-          Number.parseFloat(style.paddingLeft) + Number.parseFloat(style.paddingRight)
-        return element.getBoundingClientRect().width - contentWidth
-      })).toBeLessThan(1)
-    }
+  for (const frosted of [true, false]) {
+    await page.evaluate(value => window.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+    await expect.poll(() => bar.evaluate(element => {
+      const style = getComputedStyle(element)
+      const buttons = [...element.children].filter(child => getComputedStyle(child).display !== 'none')
+      const contentWidth = buttons.reduce((width, child) => width + child.getBoundingClientRect().width, 0) +
+        Math.max(0, buttons.length - 1) * Number.parseFloat(style.columnGap) +
+        Number.parseFloat(style.paddingLeft) + Number.parseFloat(style.paddingRight)
+      return element.getBoundingClientRect().width - contentWidth
+    })).toBeLessThan(1)
   }
 })
 
-for (const scale of [1, 1.25]) {
-  test(`chapter controls narrow quick speeds first during playback at ${scale * 100}% scale`, async ({ app, page }, testInfo) => {
-    await mockPlayableWatchPage(app, page)
-    const video = await openMockedVideo(page)
-    await setWindowSize(app, page, { width: 1800, height: 1000 })
-    await setPlayerFullscreen(page, true)
-    await app.electronApp.evaluate(({ BrowserWindow }, scale) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale), scale)
-    const player = page.locator('.ftVideoPlayer')
-    const panel = player.locator('.shaka-controls-button-panel')
-    const title = panel.locator('.ft-chapters-current-title')
-    const bar = panel.locator('.ft-quick-playback-rate-bar')
-    await panel.evaluate(element => { element.style.width = '1300px' })
-    await title.evaluate(element => { element.textContent = 'MacPacker: zips all the way down' })
-    await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+test('chapter controls narrow quick speeds first during playback', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await setWindowSize(app, page, { width: 1800, height: 1000 })
+  await setPlayerFullscreen(page, true)
+  const player = page.locator('.ftVideoPlayer')
+  const panel = player.locator('.shaka-controls-button-panel')
+  const title = panel.locator('.ft-chapters-current-title')
+  const bar = panel.locator('.ft-quick-playback-rate-bar')
+  await panel.evaluate(element => { element.style.width = '1300px' })
+  await title.evaluate(element => { element.textContent = 'MacPacker: zips all the way down' })
+  await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
 
-    await video.evaluate(element => element.pause())
+  await video.evaluate(element => element.pause())
+  await panel.locator('.shaka-mute-button').hover()
+  await expect.poll(() => panel.locator('.shaka-volume-bar-container').evaluate(element => element.getBoundingClientRect().width)).toBeGreaterThan(90)
+  await expect(panel).not.toHaveClass(/ft-controls-compact-chapters/)
+  // Leave enough room for a usable speed strip, but not all presets.
+  await panel.evaluate(element => {
+    const controls = [...element.children].filter(child => {
+      const style = getComputedStyle(child)
+      return style.display !== 'none' && style.position !== 'absolute' && !child.classList.contains('shaka-spacer')
+    })
+    const fullWidth = controls.reduce((width, child) => {
+      const style = getComputedStyle(child)
+      return width + child.getBoundingClientRect().width + (Number.parseFloat(style.marginLeft) || 0) + (Number.parseFloat(style.marginRight) || 0)
+    }, 0)
+    element.style.width = `${fullWidth - element.querySelector('.ft-quick-playback-rate-bar').getBoundingClientRect().width + 200}px`
+  })
+
+  for (const paused of [true, false]) {
+    await video.evaluate((element, paused) => paused ? element.pause() : element.play(), paused)
     await panel.locator('.shaka-mute-button').hover()
     await expect.poll(() => panel.locator('.shaka-volume-bar-container').evaluate(element => element.getBoundingClientRect().width)).toBeGreaterThan(90)
     await expect(panel).not.toHaveClass(/ft-controls-compact-chapters/)
-    // Leave enough room for a usable speed strip, but not all presets.
-    await panel.evaluate(element => {
-      const controls = [...element.children].filter(child => {
-        const style = getComputedStyle(child)
-        return style.display !== 'none' && style.position !== 'absolute' && !child.classList.contains('shaka-spacer')
-      })
-      const fullWidth = controls.reduce((width, child) => {
-        const style = getComputedStyle(child)
-        return width + child.getBoundingClientRect().width + (Number.parseFloat(style.marginLeft) || 0) + (Number.parseFloat(style.marginRight) || 0)
-      }, 0)
-      element.style.width = `${fullWidth - element.querySelector('.ft-quick-playback-rate-bar').getBoundingClientRect().width + 200}px`
-    })
+    await expect(title).toBeVisible()
+    await expect.poll(() => bar.evaluate(element => element.scrollWidth - element.clientWidth)).toBeGreaterThan(20)
+  }
 
-    for (const paused of [true, false]) {
-      await video.evaluate((element, paused) => paused ? element.pause() : element.play(), paused)
-      await panel.locator('.shaka-mute-button').hover()
-      await expect.poll(() => panel.locator('.shaka-volume-bar-container').evaluate(element => element.getBoundingClientRect().width)).toBeGreaterThan(90)
-      await expect(panel).not.toHaveClass(/ft-controls-compact-chapters/)
-      await expect(title).toBeVisible()
-      await expect.poll(() => bar.evaluate(element => element.scrollWidth - element.clientWidth)).toBeGreaterThan(20)
-    }
+  if (uiScale === 100) {
+    await panel.screenshot({ path: testInfo.outputPath('playing-with-chapter-title.png') })
+  }
 
-    if (scale === 1) {
-      await panel.screenshot({ path: testInfo.outputPath('playing-with-chapter-title.png') })
-    }
-
-    await panel.evaluate(element => { element.style.width = '700px' })
-    await expect(panel).toHaveClass(/ft-controls-compact-chapters/)
-    await expect(panel.locator('.ft-chapters-icon')).toBeVisible()
-    await expect.poll(() => panel.locator('.ft-chapters-button').evaluate(element => element.getBoundingClientRect().width)).toBeCloseTo(48, 0)
-  })
-}
+  await panel.evaluate(element => { element.style.width = '700px' })
+  await expect(panel).toHaveClass(/ft-controls-compact-chapters/)
+  await expect(panel.locator('.ft-chapters-icon')).toBeVisible()
+  await expect.poll(() => panel.locator('.ft-chapters-button').evaluate(element => element.getBoundingClientRect().width)).toBeCloseTo(48, 0)
+})
 
 test('chapters animate between title and icon in both player themes', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
@@ -122,7 +116,9 @@ test('chapters animate between title and icon in both player themes', async ({ a
         button.classList.toggle('open')
         await new Promise(resolve => setTimeout(resolve, 60))
         const middle = measure()
-        await new Promise(resolve => setTimeout(resolve, 400))
+        while (button.getAnimations({ subtree: true }).length) {
+          await Promise.all(button.getAnimations({ subtree: true }).map(animation => animation.finished.catch(() => {})))
+        }
         return { initial, middle, final: measure() }
       }, width)
       expect(animation.middle.width).toBeGreaterThan(Math.min(animation.initial.width, animation.final.width) + 1)
@@ -141,7 +137,7 @@ test('chapters animate between title and icon in both player themes', async ({ a
   await expect(button).toHaveCSS('transition-property', 'none')
 })
 
-test('chapter pill indicates open state in both layouts and player themes', async ({ app, page }, testInfo) => {
+test('chapter pill indicates open state in both layouts and player themes', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
   await video.evaluate(element => element.pause())
@@ -158,57 +154,54 @@ test('chapter pill indicates open state in both layouts and player themes', asyn
   })
   await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
 
-  for (const scale of [1, 1.25]) {
-    await app.electronApp.evaluate(({ BrowserWindow }, scale) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale), scale)
-    for (const frosted of [true, false]) {
-      await page.evaluate(value => window.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
-      for (const width of [1300, 500]) {
-        await panel.evaluate((element, width) => { element.style.width = `${width}px` }, width)
-        await expect(panel).toHaveClass(width === 500 ? /ft-controls-compact-chapters/ : /^(?!.*ft-controls-compact-chapters)/)
-        await expect.poll(() => button.evaluate(element => element.getAnimations().length)).toBe(0)
-        await page.mouse.move(0, 0)
-        await expect(button).toHaveAttribute('aria-expanded', 'false')
-        if (!frosted) {
-          expect(await button.evaluate(element => {
-            const style = getComputedStyle(element, '::before')
-            return { content: style.content, position: style.position }
-          })).toEqual({ content: '""', position: 'absolute' })
-        }
-        const closedAppearance = await surfaceAppearance()
-        const closedBounds = await button.boundingBox()
-        const title = await button.locator('.ft-chapters-current-title').textContent()
-        if (scale === 1 && frosted && width === 1300) {
-          await panel.screenshot({ path: testInfo.outputPath('chapters-closed.png') })
-        }
-
-        await button.click()
-        await expect(button).toHaveAttribute('aria-expanded', 'true')
-        await expect(player.locator('.chapterOverlay')).toBeVisible()
-        await expect(chevron).toHaveCSS('rotate', '90deg')
-        await expect.poll(surfaceAppearance).not.toEqual(closedAppearance)
-        await page.mouse.move(0, 0)
-        const openAppearance = await surfaceAppearance()
-        expect(openAppearance.background).not.toBe(closedAppearance.background)
-        expect(openAppearance.border).not.toBe(closedAppearance.border)
-        await expect(button.locator('.ft-chapters-current-title')).toHaveText(title)
-        const openBounds = await button.boundingBox()
-        expect(openBounds.width).toBeCloseTo(closedBounds.width, 0)
-        expect(openBounds.height).toBeCloseTo(closedBounds.height, 0)
-        if (scale === 1 && frosted && width === 1300) {
-          await panel.screenshot({ path: testInfo.outputPath('chapters-open.png') })
-        }
-        if (scale === 1 && !frosted && width === 500) {
-          await button.screenshot({ path: testInfo.outputPath('chapters-compact-classic-open.png') })
-        }
-
-        await button.hover()
-        expect((await surfaceAppearance()).border).toBe(openAppearance.border)
-        await player.locator('.chapterOverlay .chapterOverlayClose').click()
-        await page.mouse.move(0, 0)
-        await expect(button).toHaveAttribute('aria-expanded', 'false')
-        await expect(chevron).toHaveCSS('rotate', 'none')
-        await expect.poll(surfaceAppearance).toEqual(closedAppearance)
+  for (const frosted of [true, false]) {
+    await page.evaluate(value => window.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+    for (const width of [1300, 500]) {
+      await panel.evaluate((element, width) => { element.style.width = `${width}px` }, width)
+      await expect(panel).toHaveClass(width === 500 ? /ft-controls-compact-chapters/ : /^(?!.*ft-controls-compact-chapters)/)
+      await expect.poll(() => button.evaluate(element => element.getAnimations().length)).toBe(0)
+      await page.mouse.move(0, 0)
+      await expect(button).toHaveAttribute('aria-expanded', 'false')
+      if (!frosted) {
+        expect(await button.evaluate(element => {
+          const style = getComputedStyle(element, '::before')
+          return { content: style.content, position: style.position }
+        })).toEqual({ content: '""', position: 'absolute' })
       }
+      const closedAppearance = await surfaceAppearance()
+      const closedBounds = await button.boundingBox()
+      const title = await button.locator('.ft-chapters-current-title').textContent()
+      if (uiScale === 100 && frosted && width === 1300) {
+        await panel.screenshot({ path: testInfo.outputPath('chapters-closed.png') })
+      }
+
+      await button.click()
+      await expect(button).toHaveAttribute('aria-expanded', 'true')
+      await expect(player.locator('.chapterOverlay')).toBeVisible()
+      await expect(chevron).toHaveCSS('rotate', '90deg')
+      await expect.poll(surfaceAppearance).not.toEqual(closedAppearance)
+      await page.mouse.move(0, 0)
+      const openAppearance = await surfaceAppearance()
+      expect(openAppearance.background).not.toBe(closedAppearance.background)
+      expect(openAppearance.border).not.toBe(closedAppearance.border)
+      await expect(button.locator('.ft-chapters-current-title')).toHaveText(title)
+      const openBounds = await button.boundingBox()
+      expect(openBounds.width).toBeCloseTo(closedBounds.width, 0)
+      expect(openBounds.height).toBeCloseTo(closedBounds.height, 0)
+      if (uiScale === 100 && frosted && width === 1300) {
+        await panel.screenshot({ path: testInfo.outputPath('chapters-open.png') })
+      }
+      if (uiScale === 100 && !frosted && width === 500) {
+        await button.screenshot({ path: testInfo.outputPath('chapters-compact-classic-open.png') })
+      }
+
+      await button.hover()
+      expect((await surfaceAppearance()).border).toBe(openAppearance.border)
+      await player.locator('.chapterOverlay .chapterOverlayClose').click()
+      await page.mouse.move(0, 0)
+      await expect(button).toHaveAttribute('aria-expanded', 'false')
+      await expect(chevron).toHaveCSS('rotate', 'none')
+      await expect.poll(surfaceAppearance).toEqual(closedAppearance)
     }
   }
 })
@@ -258,7 +251,7 @@ test('chapter chevron animates opening and closing unless motion is reduced', as
   expect(await chevron.evaluate(element => element.getAnimations().length)).toBe(0)
 })
 
-test('chapter animation keeps the right control glass aligned without quick speeds', async ({ app, page }) => {
+test('chapter animation keeps the right control glass aligned without quick speeds', { tag: '@scale' }, async ({ app, page }) => {
   await page.evaluate(() => window.$store.dispatch('updateUseQuickPlaybackSpeedBar', false))
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
@@ -270,20 +263,17 @@ test('chapter animation keeps the right control glass aligned without quick spee
   await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
   await button.locator('.ft-chapters-current-title').evaluate(element => { element.textContent = 'MacPacker: zips all the way down' })
 
-  for (const scale of [1, 1.25]) {
-    await app.electronApp.evaluate(({ BrowserWindow }, scale) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale), scale)
-    for (const width of [1300, 500, 1300]) {
-      await panel.evaluate((element, width) => { element.style.width = `${width}px` }, width)
-      await expect(panel).toHaveClass(width === 500 ? /ft-controls-compact-chapters/ : /^(?!.*ft-controls-compact-chapters)/)
-      await expect.poll(() => button.evaluate(element => element.getAnimations().length)).toBe(0)
-      await expect.poll(() => panel.evaluate(element => {
-        const glass = element.querySelector('.ft-right-control-glass').getBoundingClientRect()
-        const buttons = [...element.querySelectorAll(':scope > .shaka-spacer ~ button:not(.shaka-hidden)')].filter(button => button.getClientRects().length > 0)
-        return Math.max(
-          Math.abs(glass.left - buttons[0].getBoundingClientRect().left),
-          Math.abs(glass.right - buttons.at(-1).getBoundingClientRect().right)
-        )
-      })).toBeLessThan(1)
-    }
+  for (const width of [1300, 500, 1300]) {
+    await panel.evaluate((element, width) => { element.style.width = `${width}px` }, width)
+    await expect(panel).toHaveClass(width === 500 ? /ft-controls-compact-chapters/ : /^(?!.*ft-controls-compact-chapters)/)
+    await expect.poll(() => button.evaluate(element => element.getAnimations().length)).toBe(0)
+    await expect.poll(() => panel.evaluate(element => {
+      const glass = element.querySelector('.ft-right-control-glass').getBoundingClientRect()
+      const buttons = [...element.querySelectorAll(':scope > .shaka-spacer ~ button:not(.shaka-hidden)')].filter(button => button.getClientRects().length > 0)
+      return Math.max(
+        Math.abs(glass.left - buttons[0].getBoundingClientRect().left),
+        Math.abs(glass.right - buttons.at(-1).getBoundingClientRect().right)
+      )
+    })).toBeLessThan(1)
   }
 })

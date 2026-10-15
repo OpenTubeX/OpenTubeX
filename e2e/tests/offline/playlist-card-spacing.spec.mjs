@@ -35,51 +35,47 @@ test.use({
   }
 })
 
-test('playlist cards have space between rows and compact mobile padding', async ({ app, page, attachScreenshot }) => {
+test('playlist cards have space between rows and compact mobile padding', { tag: '@scale' }, async ({ page, uiScale, attachScreenshot }) => {
   await goTo(page, 'userplaylists')
   await page.getByRole('link', { name: 'Playlist card spacing', exact: true }).click()
   const cards = page.locator('.playlistItems .ft-list-video')
   await expect(cards).toHaveCount(3)
   await expect(page.locator('.playlistItems .ft-list-video.watched')).toHaveCount(2)
 
-  for (const scale of [1, 1.25]) {
-    await app.electronApp.evaluate(({ BrowserWindow }, scale) => {
-      BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale)
-    }, scale)
-    for (const viewport of [{ width: 1440, height: 900 }, { width: 375, height: 812 }, { width: 461, height: 1026 }, { width: 812, height: 375 }]) {
-      await page.setViewportSize(viewport)
-      const padding = viewport.width > 850 ? 6 : 4
-      for (const card of await cards.all()) {
-        await expect(card).toHaveCSS('padding-block', `${padding}px`)
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 375, height: 812 }, { width: 461, height: 1026 }, { width: 812, height: 375 }]) {
+    await page.setViewportSize(viewport)
+    // The breakpoint applies to CSS pixels, which differ from the viewport at non-100% UI scales.
+    const padding = await page.evaluate(() => innerWidth) > 850 ? 6 : 4
+    for (const card of await cards.all()) {
+      await expect(card).toHaveCSS('padding-block', `${padding}px`)
+    }
+    const layout = await cards.evaluateAll(elements => elements.map(element => {
+      const bounds = element.getBoundingClientRect()
+      const style = getComputedStyle(element)
+      const info = element.querySelector('.info').getBoundingClientRect()
+      const contentBottom = Math.max(...[...element.querySelectorAll('.videoThumbnail, .title, .infoLine')]
+        .map(content => content.getBoundingClientRect().bottom))
+      return {
+        top: bounds.top,
+        bottom: bounds.bottom,
+        paddingTop: parseFloat(style.paddingTop),
+        paddingBottom: parseFloat(style.paddingBottom),
+        contentFits: info.top >= bounds.top && info.bottom <= bounds.bottom + 1,
+        bottomInset: bounds.bottom - contentBottom,
       }
-      const layout = await cards.evaluateAll(elements => elements.map(element => {
-        const bounds = element.getBoundingClientRect()
-        const style = getComputedStyle(element)
-        const info = element.querySelector('.info').getBoundingClientRect()
-        const contentBottom = Math.max(...[...element.querySelectorAll('.videoThumbnail, .title, .infoLine')]
-          .map(content => content.getBoundingClientRect().bottom))
-        return {
-          top: bounds.top,
-          bottom: bounds.bottom,
-          paddingTop: parseFloat(style.paddingTop),
-          paddingBottom: parseFloat(style.paddingBottom),
-          contentFits: info.top >= bounds.top && info.bottom <= bounds.bottom + 1,
-          bottomInset: bounds.bottom - contentBottom,
-        }
-      }))
-      for (const [index, card] of layout.entries()) {
-        expect(card.paddingTop).toBeLessThanOrEqual(padding)
-        expect(card.paddingBottom).toBeLessThanOrEqual(padding)
-        expect(card.contentFits).toBe(true)
-        expect(card.bottomInset).toBeLessThanOrEqual(padding + 1)
-        if (index > 0) {
-          expect(card.top - layout[index - 1].bottom).toBeGreaterThanOrEqual(7.5)
-        }
+    }))
+    for (const [index, card] of layout.entries()) {
+      expect(card.paddingTop).toBeLessThanOrEqual(padding)
+      expect(card.paddingBottom).toBeLessThanOrEqual(padding)
+      expect(card.contentFits).toBe(true)
+      expect(card.bottomInset).toBeLessThanOrEqual(padding + 1)
+      if (index > 0) {
+        expect(card.top - layout[index - 1].bottom).toBeGreaterThanOrEqual(7.5)
       }
-      if (scale === 1 && viewport.width === 461) {
-        await page.locator('.playlistItems').evaluate(element => element.scrollIntoView({ block: 'start' }))
-        await attachScreenshot('mobile playlist card spacing')
-      }
+    }
+    if (uiScale === 100 && viewport.width === 461) {
+      await page.locator('.playlistItems').evaluate(element => element.scrollIntoView({ block: 'start' }))
+      await attachScreenshot('mobile playlist card spacing')
     }
   }
 })

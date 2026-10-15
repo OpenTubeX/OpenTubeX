@@ -21,7 +21,7 @@ for (const { layout, width, height, uiScale, cpuThrottle = 1 } of [
       }
     })
 
-    test('fullscreen docks animate without laying out the player every frame', async ({ app, page }, testInfo) => {
+    test('fullscreen docks animate without laying out the player every frame', { tag: '@performance' }, async ({ app, page }, testInfo) => {
       const errors = []
       page.on('pageerror', error => errors.push(error.message))
       await mockPlayableWatchPage(app, page)
@@ -78,12 +78,12 @@ for (const { layout, width, height, uiScale, cpuThrottle = 1 } of [
 test.use({
   seed: {
     settings: {
-      videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true, uiScale: 125,
+      videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true,
     }
   }
 })
 
-test('full-window docks preserve zoom, stacked panel controls and rapid toggles', async ({ app, page }) => {
+test('full-window docks preserve zoom, stacked panel controls and rapid toggles', { tag: '@scale' }, async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
   const player = page.locator('.ftVideoPlayer')

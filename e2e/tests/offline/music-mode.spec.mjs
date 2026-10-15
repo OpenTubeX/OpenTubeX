@@ -214,34 +214,31 @@ test('music mode headphones cut out the profile in both icon packs and header th
       for (const colorScheme of ['dark', 'light']) {
         await page.emulateMedia({ colorScheme })
         await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
-        for (const scale of [100, 125]) {
-          await page.evaluate(value => window.$store.dispatch('updateUiScale', value), scale)
-          for (const mainColor of [null, 'Yellow', 'Red']) {
-            const coloredHeader = mainColor !== null
-            await page.evaluate(async mainColor => {
-              const store = window.$store
-              await store.dispatch('updateMainColor', mainColor ?? 'Red')
-              await store.dispatch('updateBarColor', mainColor !== null)
-            }, mainColor)
-            await expect(indicator).toBeVisible()
-            await expect(indicator).toHaveCSS('border-radius', '50%')
-            await expect(indicator).toHaveCSS('opacity', '1')
-            const headerBackground = await page.locator('.topNav').evaluate(element => getComputedStyle(element).backgroundColor)
-            await expect(indicator).toHaveCSS('background-color', headerBackground)
-            const headerForeground = await page.locator('.topNav .menuButton').evaluate(element => getComputedStyle(element).color)
-            await expect(indicator).toHaveCSS('color', headerForeground)
-            if (layout === 'desktop' && scale === 100 && (!coloredHeader || mainColor === 'Yellow')) {
-              const bounds = await page.locator('.profileTrigger').boundingBox()
-              const name = `music-mode-${iconPack}-${colorScheme}${coloredHeader ? '-yellow-header' : ''}`
-              const screenshot = await page.screenshot({
-                path: testInfo.outputPath(`${name}.png`),
-                clip: { x: bounds.x - 12, y: bounds.y - 8, width: bounds.width + 24, height: bounds.height + 20 },
-              })
-              await testInfo.attach(name, {
-                body: screenshot,
-                contentType: 'image/png',
-              })
-            }
+        for (const mainColor of [null, 'Yellow', 'Red']) {
+          const coloredHeader = mainColor !== null
+          await page.evaluate(async mainColor => {
+            const store = window.$store
+            await store.dispatch('updateMainColor', mainColor ?? 'Red')
+            await store.dispatch('updateBarColor', mainColor !== null)
+          }, mainColor)
+          await expect(indicator).toBeVisible()
+          await expect(indicator).toHaveCSS('border-radius', '50%')
+          await expect(indicator).toHaveCSS('opacity', '1')
+          const headerBackground = await page.locator('.topNav').evaluate(element => getComputedStyle(element).backgroundColor)
+          await expect(indicator).toHaveCSS('background-color', headerBackground)
+          const headerForeground = await page.locator('.topNav .menuButton').evaluate(element => getComputedStyle(element).color)
+          await expect(indicator).toHaveCSS('color', headerForeground)
+          if (layout === 'desktop' && (!coloredHeader || mainColor === 'Yellow')) {
+            const bounds = await page.locator('.profileTrigger').boundingBox()
+            const name = `music-mode-${iconPack}-${colorScheme}${coloredHeader ? '-yellow-header' : ''}`
+            const screenshot = await page.screenshot({
+              path: testInfo.outputPath(`${name}.png`),
+              clip: { x: bounds.x - 12, y: bounds.y - 8, width: bounds.width + 24, height: bounds.height + 20 },
+            })
+            await testInfo.attach(name, {
+              body: screenshot,
+              contentType: 'image/png',
+            })
           }
         }
       }

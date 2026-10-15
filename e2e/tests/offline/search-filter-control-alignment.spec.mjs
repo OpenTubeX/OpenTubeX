@@ -161,6 +161,12 @@ async function analyzeControl (page, unchecked, checked) {
   })
 }
 
+async function waitForFiniteAnimations (page) {
+  await expect.poll(() => page.evaluate(() => document.getAnimations()
+    .filter(animation => animation.timeline === document.timeline && animation.playState === 'running' &&
+      Number.isFinite(animation.effect?.getComputedTiming().endTime)).length)).toBe(0)
+}
+
 async function expectCenteredControl (page, label, testInfo, name) {
   const unchecked = await captureControl(page, label)
 
@@ -171,7 +177,7 @@ async function expectCenteredControl (page, label, testInfo, name) {
     }
   })
   await page.mouse.move(0, 0)
-  await page.waitForTimeout(450)
+  await waitForFiniteAnimations(page)
 
   const checked = await captureControl(page, label)
   await testInfo.attach(`${name}-unchecked`, { body: unchecked.image, contentType: 'image/png' })
@@ -191,7 +197,7 @@ async function expectCenteredControl (page, label, testInfo, name) {
 test('radio dots and checkbox marks stay centered at 95% UI scale', async ({ page }, testInfo) => {
   await page.locator('.navFilterButton').click()
   await expect(page.getByRole('heading', { name: 'Search Filters' })).toBeVisible()
-  await page.waitForTimeout(450)
+  await waitForFiniteAnimations(page)
 
   const videos = page.locator('.searchRadio', { hasText: 'Type' })
     .locator('label', { hasText: 'Videos' })

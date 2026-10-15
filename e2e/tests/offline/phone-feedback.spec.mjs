@@ -72,6 +72,7 @@ test('keeps the profile editor at its real bottom while scrolling', async ({ app
   await page.getByRole('button', { name: 'Create New Profile', exact: true }).click()
   const scroller = page.locator('.settingsSubpageScroll')
   await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  // Late layout must not pull the editor away from its bottom.
   await page.waitForTimeout(400)
   const gap = await scroller.evaluate(element => element.scrollHeight - element.clientHeight - element.scrollTop)
   expect(gap).toBeLessThan(2)
@@ -186,29 +187,26 @@ for (const landscape of [false, true]) {
   })
 }
 
-for (const zoom of [1, 0.95]) {
-  test(`opens comments from a mini player at the inline video position at ${zoom} UI scale`, async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    await openMockedVideo(page)
-    await setWindowSize(app, page, { width: 480, height: 800 })
-    await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
-    await page.evaluate(async () => {
-      await window.$store.dispatch('updateScrollMiniPlayerEnabled', true)
-      window.scrollTo(0, document.body.scrollHeight)
-    })
-    const player = page.locator('.ftVideoPlayer')
-    await expect(player).toHaveClass(/(?:^|\s)scrollMiniPlayer(?:\s|$)/)
-    await page.locator('.phoneCommentsOpen').evaluate(button => button.click())
-    const sheet = page.locator('.dockedSheet[open]')
-    await expect(sheet).toBeVisible()
-    await expect(player).toHaveClass(/(?:^|\s)scrollMiniPlayer(?:\s|$)/)
-    await expect.poll(async () => {
-      const inlinePlayer = await page.locator('.scrollMiniPlaceholder').boundingBox()
-      const panel = await sheet.boundingBox()
-      return Math.abs(panel.y - Math.max(0, inlinePlayer.y + inlinePlayer.height))
-    }).toBeLessThan(2)
+test('opens comments from a mini player at the inline video position', { tag: '@scale' }, async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await setWindowSize(app, page, { width: 480, height: 800 })
+  await page.evaluate(async () => {
+    await window.$store.dispatch('updateScrollMiniPlayerEnabled', true)
+    window.scrollTo(0, document.body.scrollHeight)
   })
-}
+  const player = page.locator('.ftVideoPlayer')
+  await expect(player).toHaveClass(/(?:^|\s)scrollMiniPlayer(?:\s|$)/)
+  await page.locator('.phoneCommentsOpen').evaluate(button => button.click())
+  const sheet = page.locator('.dockedSheet[open]')
+  await expect(sheet).toBeVisible()
+  await expect(player).toHaveClass(/(?:^|\s)scrollMiniPlayer(?:\s|$)/)
+  await expect.poll(async () => {
+    const inlinePlayer = await page.locator('.scrollMiniPlaceholder').boundingBox()
+    const panel = await sheet.boundingBox()
+    return Math.abs(panel.y - Math.max(0, inlinePlayer.y + inlinePlayer.height))
+  }).toBeLessThan(2)
+})
 
 test('phone options keep the page scrollable and omit the extra header', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
@@ -551,6 +549,7 @@ test('phone list menu keeps its scrollbar visible without mouse movement', async
   const dialog = page.locator('.phonePlayerOptions[open]')
   await dialog.locator('.shaka-overflow-menu').evaluate(el => { el.scrollTop = el.scrollHeight })
   await expect(dialog.locator('.os-scrollbar-vertical')).toBeVisible()
+  // Outlast the scrollbar's auto-hide delay.
   await page.waitForTimeout(1500)
   await expect(dialog.locator('.os-scrollbar-vertical')).toHaveCSS('opacity', '1')
 })

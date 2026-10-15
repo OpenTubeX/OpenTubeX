@@ -21,37 +21,35 @@ const subscriptions = Array.from({ length: 18 }, (_, index) => ({
   ...(index === 1 ? { dailyVideoLimit: 1, showMembersOnly: true } : {})
 }))
 
-test.use({
-  seed: {
-    settings: {
-      currentLocale: 'en-US',
-      uiScale: 125,
-      fetchSubscriptionsAutomatically: false,
-      ytDlpPlaybackAuthMode: 'browser',
-      ytDlpPlaybackCookiesBrowser: 'firefox'
-    },
-    profiles: [
-      {
-        _id: 'allChannels',
-        name: 'All Channels',
-        bgColor: '#000000',
-        textColor: '#FFFFFF',
-        subscriptions
-      },
-      {
-        _id: 'profile-1',
-        name: 'Profile 1',
-        bgColor: '#000000',
-        textColor: '#FFFFFF',
-        subscriptions: [subscriptions[0]]
-      }
-    ]
+const baseSettings = {
+  currentLocale: 'en-US',
+  fetchSubscriptionsAutomatically: false,
+  ytDlpPlaybackAuthMode: 'browser',
+  ytDlpPlaybackCookiesBrowser: 'firefox'
+}
+const profiles = [
+  {
+    _id: 'allChannels',
+    name: 'All Channels',
+    bgColor: '#000000',
+    textColor: '#FFFFFF',
+    subscriptions
+  },
+  {
+    _id: 'profile-1',
+    name: 'Profile 1',
+    bgColor: '#000000',
+    textColor: '#FFFFFF',
+    subscriptions: [subscriptions[0]]
   }
-})
+]
 
-for (const uiScale of [100, 95, 125]) {
-  test(`subscription cards keep equal spacing and readable feed buttons at ${uiScale}%`, async ({ app, page }, testInfo) => {
-    await page.evaluate(value => window.ftElectron.setZoomFactor(value / 100), uiScale)
+test.use({ seed: { settings: { ...baseSettings, uiScale: 125 }, profiles } })
+
+test.describe('subscription settings layout', { tag: '@scale' }, () => {
+  test.use({ seed: { settings: baseSettings, profiles } })
+
+  test('subscription cards keep equal spacing and readable feed buttons', async ({ app, page, uiScale }, testInfo) => {
     await page.evaluate(() => localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({ x: 40, y: 40, width: 1400, height: 900 })))
     const settings = await goToSettingsSection(page, 'subscription')
     await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
@@ -76,12 +74,9 @@ for (const uiScale of [100, 95, 125]) {
       await card.screenshot({ path: testInfo.outputPath(`subscription-card-${width}.png`) })
     }
   })
-}
 
-for (const uiScale of [100, 95]) {
-  test(`keeps subscription popover controls compact at ${uiScale}%`, async ({ app, page }, testInfo) => {
+  test('keeps subscription popover controls compact', async ({ app, page }, testInfo) => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
-    await page.evaluate(value => window.ftElectron.setZoomFactor(value / 100), uiScale)
     await goTo(page, 'subscribedchannels')
     const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
     await alpha.getByRole('button', { name: 'Subscription settings' }).click()
@@ -109,16 +104,14 @@ for (const uiScale of [100, 95]) {
     await page.evaluate(() => window.$store.dispatch('updateYtDlpPlaybackAuthMode', 'none'))
     await expect(popover.getByRole('checkbox', { name: 'Members only' })).toHaveCount(0)
     await expect(popover.getByRole('combobox', { name: 'Videos per day' })).toBeVisible()
+    // Fractional UI scales round this 5px gap (4.8 CSS px at 125%).
     expect(await popover.evaluate(element => {
       const label = element.querySelector('.dailyVideoLimitSelect .select-label').getBoundingClientRect()
       return label.top - element.querySelector('.secondaryPreferences').getBoundingClientRect().top
-    })).toBeGreaterThanOrEqual(5)
+    })).toBeGreaterThanOrEqual(4.5)
   })
-}
 
-for (const uiScale of [100, 95, 125]) {
-  test(`keeps the selection toolbar fixed with equal search and list gaps at ${uiScale}%`, async ({ app, page }, testInfo) => {
-    await page.evaluate(value => window.ftElectron.setZoomFactor(value / 100), uiScale)
+  test('keeps the selection toolbar fixed with equal search and list gaps', async ({ app, page, uiScale }, testInfo) => {
     await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'dark'))
     const settings = await goToSettingsSection(page, 'subscription')
     await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
@@ -170,7 +163,7 @@ for (const uiScale of [100, 95, 125]) {
     await expectScrollAtRenderedEnd(scroller)
     await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
   })
-}
+})
 
 test('keeps the popover and Subscription Settings manager in sync', async ({ app, page }) => {
   const subscriptionSettings = await goToSettingsSection(page, 'subscription')

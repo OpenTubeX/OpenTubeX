@@ -166,15 +166,14 @@ test.describe('automatic sync efficiency', () => {
   })
 })
 
-for (const uiScale of [95, 125]) {
-  test.describe(`live sync at ${uiScale}%`, () => {
+for (const iconPack of ['material', 'remix']) {
+  test.describe(`live sync with ${iconPack} icons`, () => {
     test.use({
       seed: {
         settings: {
-          uiScale,
           rememberPlaybackSpeedPerChannel: true,
           rememberVideoQualityPerChannel: true,
-          iconPack: uiScale === 95 ? 'material' : 'remix',
+          iconPack,
           syncServerEnabled: false,
           syncServerAutoSync: false,
           syncServerUrl: 'https://sync.example',
@@ -529,11 +528,13 @@ test('two independent devices settle after live sync and propagate a real edit o
     expect(writes.slice(initialWrites)).toEqual([{ name: 'Desktop', collection: 'settings' }])
     await clients[0].page.evaluate(videoId => window.$store.dispatch('updateWatchProgress', { videoId, watchProgress: 12 }), videoId)
     expect(await progress(clients[0])).toBe(12)
+    // The debounced history upload must not reach the peer within this period.
     await clients[0].page.waitForTimeout(2000)
     expect(await progress(clients[1])).toBe(169.743)
     expect(writes.slice(initialWrites)).toEqual([{ name: 'Desktop', collection: 'settings' }])
     await expect.poll(() => progress(clients[1]), { timeout: 40000 }).toBe(12)
     await expect.poll(() => waiting.size).toBe(2)
+    // Prove that receiving the edit does not trigger further writes.
     await clients[0].page.waitForTimeout(2000)
     expect(writes.slice(initialWrites)).toEqual([
       { name: 'Desktop', collection: 'settings' },

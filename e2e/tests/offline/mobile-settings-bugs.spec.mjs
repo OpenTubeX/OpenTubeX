@@ -21,69 +21,67 @@ const getMidWordLineBreaks = locator => locator.evaluateAll(elements => elements
   })
 }))
 
-for (const uiScale of [100, 125]) {
-  test.describe(`mobile settings regressions at ${uiScale}%`, () => {
-    test.use({ seed: { settings: { uiScale, useQuickPlaybackSpeedBar: true, defaultViewingMode: 'theater' } } })
+test.describe('mobile settings regressions', { tag: '@scale' }, () => {
+  test.use({ seed: { settings: { useQuickPlaybackSpeedBar: true, defaultViewingMode: 'theater' } } })
 
-    test('keeps speed name and delete beside the drag handle', async ({ page }) => {
-      await page.setViewportSize({ width: 375, height: 812 })
-      const section = await goToSettingsSection(page, 'playback')
-      await section.getByRole('button', { name: 'Customize Quick Playback Speed Bar' }).click()
-      const row = page.locator('.quickPlaybackSpeedEntry').first()
-      const center = selector => row.locator(selector).evaluate(el => {
-        const rect = el.getBoundingClientRect()
-        return rect.top + rect.height / 2
-      })
-      expect(Math.abs(await center('.quickPlaybackSpeedDragHandle') - await center('.quickPlaybackSpeedNameRow'))).toBeLessThan(2)
-      expect(Math.abs(await center('.quickPlaybackSpeedDragHandle') - await center('.delete'))).toBeLessThan(2)
+  test('keeps speed name and delete beside the drag handle', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 })
+    const section = await goToSettingsSection(page, 'playback')
+    await section.getByRole('button', { name: 'Customize Quick Playback Speed Bar' }).click()
+    const row = page.locator('.quickPlaybackSpeedEntry').first()
+    const center = selector => row.locator(selector).evaluate(el => {
+      const rect = el.getBoundingClientRect()
+      return rect.top + rect.height / 2
     })
-
-    for (const sectionName of ['playback', 'subscription']) {
-      test(`leaves room between ${sectionName} selects and their help icons`, async ({ page }) => {
-        await page.setViewportSize({ width: 375, height: 812 })
-        const section = await goToSettingsSection(page, sectionName)
-        const selects = section.locator('.select.containsTooltip')
-        await expect(selects.first()).toBeVisible()
-        expect(await selects.evaluateAll(elements => elements.every(el => {
-          const help = el.querySelector('.selectTooltip').getBoundingClientRect()
-          const select = el.querySelector('.select-text').getBoundingClientRect()
-          const style = getComputedStyle(el)
-          const indicators = el.querySelector('.selectIndicators').getBoundingClientRect()
-          const contentRight = el.getBoundingClientRect().right - parseFloat(style.paddingRight)
-          return help.left - select.right >= 7.75 && help.left - select.right <= 9 &&
-            indicators.right <= contentRight + 1
-        }))).toBe(true)
-      })
-    }
-
-    test('keeps caption help beside a multiline switch label', async ({ page }) => {
-      await page.setViewportSize({ width: 375, height: 812 })
-      const captions = await goToSettingsSection(page, 'playback')
-      const label = captions.locator('.captionControls .switch-label').filter({ has: page.locator('.tooltip') }).first()
-      await label.locator('.switch-label-text').evaluate(el => { el.textContent = 'A long translated switch label that takes several lines' })
-      expect(await label.evaluate(el => {
-        const text = el.querySelector('.switch-label-text').getBoundingClientRect()
-        const help = el.querySelector('.tooltip').getBoundingClientRect()
-        return Math.abs(help.top + help.height / 2 - text.top - text.height / 2)
-      })).toBeLessThanOrEqual(1)
-    })
-
-    test('wraps long storage size descriptions while loading and after loading', async ({ page }) => {
-      await page.setViewportSize({ width: 375, height: 812 })
-      const section = await goToSettingsSection(page, 'storage')
-      const sizes = section.locator('.storageSize')
-      await expect(sizes.first()).toBeVisible()
-      for (const text of ['Speichernutzung wird berechnet…', 'In den oben angezeigten Anwendungsdaten enthalten']) {
-        await sizes.evaluateAll((elements, text) => elements.forEach(el => { el.textContent = text }), text)
-        expect(await sizes.evaluateAll(elements => elements.every(el => {
-          const item = el.closest('.storageItem').getBoundingClientRect()
-          const size = el.getBoundingClientRect()
-          return size.right <= item.right && el.scrollWidth <= el.clientWidth + 1
-        }))).toBe(true)
-      }
-    })
+    expect(Math.abs(await center('.quickPlaybackSpeedDragHandle') - await center('.quickPlaybackSpeedNameRow'))).toBeLessThan(2)
+    expect(Math.abs(await center('.quickPlaybackSpeedDragHandle') - await center('.delete'))).toBeLessThan(2)
   })
-}
+
+  for (const sectionName of ['playback', 'subscription']) {
+    test(`leaves room between ${sectionName} selects and their help icons`, async ({ page }) => {
+      await page.setViewportSize({ width: 375, height: 812 })
+      const section = await goToSettingsSection(page, sectionName)
+      const selects = section.locator('.select.containsTooltip')
+      await expect(selects.first()).toBeVisible()
+      expect(await selects.evaluateAll(elements => elements.every(el => {
+        const help = el.querySelector('.selectTooltip').getBoundingClientRect()
+        const select = el.querySelector('.select-text').getBoundingClientRect()
+        const style = getComputedStyle(el)
+        const indicators = el.querySelector('.selectIndicators').getBoundingClientRect()
+        const contentRight = el.getBoundingClientRect().right - parseFloat(style.paddingRight)
+        return help.left - select.right >= 7.75 && help.left - select.right <= 9 &&
+          indicators.right <= contentRight + 1
+      }))).toBe(true)
+    })
+  }
+
+  test('keeps caption help beside a multiline switch label', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 })
+    const captions = await goToSettingsSection(page, 'playback')
+    const label = captions.locator('.captionControls .switch-label').filter({ has: page.locator('.tooltip') }).first()
+    await label.locator('.switch-label-text').evaluate(el => { el.textContent = 'A long translated switch label that takes several lines' })
+    expect(await label.evaluate(el => {
+      const text = el.querySelector('.switch-label-text').getBoundingClientRect()
+      const help = el.querySelector('.tooltip').getBoundingClientRect()
+      return Math.abs(help.top + help.height / 2 - text.top - text.height / 2)
+    })).toBeLessThanOrEqual(1)
+  })
+
+  test('wraps long storage size descriptions while loading and after loading', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 })
+    const section = await goToSettingsSection(page, 'storage')
+    const sizes = section.locator('.storageSize')
+    await expect(sizes.first()).toBeVisible()
+    for (const text of ['Speichernutzung wird berechnet…', 'In den oben angezeigten Anwendungsdaten enthalten']) {
+      await sizes.evaluateAll((elements, text) => elements.forEach(el => { el.textContent = text }), text)
+      expect(await sizes.evaluateAll(elements => elements.every(el => {
+        const item = el.closest('.storageItem').getBoundingClientRect()
+        const size = el.getBoundingClientRect()
+        return size.right <= item.right && el.scrollWidth <= el.clientWidth + 1
+      }))).toBe(true)
+    }
+  })
+})
 
 test('keeps a translated sync percentage together', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 812 })

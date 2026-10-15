@@ -72,7 +72,7 @@ async function openThreeTabsAndActivate(page, activeIndex) {
 }
 
 test.describe('tab bar', () => {
-  test('keeps auto-sized tab geometry stable when selection changes', async ({ app, page }, testInfo) => {
+  test('keeps auto-sized tab geometry stable when selection changes', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
     await page.evaluate(async () => {
       for (let index = 0; index < 4; index++) {
         await window.ftElectron.tabs.create({ route: '/history', makeActive: true })
@@ -96,26 +96,22 @@ test.describe('tab bar', () => {
       })
     }
 
-    for (const zoom of [1, 0.95, 1.25]) {
-      await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
-      await app.electronApp.evaluate(({ BrowserWindow }, zoom) => BrowserWindow.getAllWindows()[0].setSize(Math.round(550 * zoom), 800), zoom)
-      await expect(page.locator('.tabsContainer > .os-scrollbar-horizontal')).toHaveClass(/os-scrollbar-visible/)
-      const before = await geometry()
-      expect(before.tabs[0].width).toBeGreaterThan(100)
-      expect(before.tabs[0].width).toBeLessThan(200)
-      for (const tab of await tabs.all()) {
-        await page.evaluate(id => window.ftElectron.tabs.activate(id), await tab.getAttribute('data-tab-id'))
-        await expect(tab).toHaveClass(/active/)
-        await expect.poll(async () => {
-          const after = await geometry()
-          return Math.abs(after.range - before.range) <= 1 && after.tabs.every((box, index) =>
-            ['width', 'start', 'close'].every(key => Math.abs(box[key] - before.tabs[index][key]) <= 0.1)
-          )
-        }, { message: `selection keeps tab widths, close buttons and scroll range stable at ${zoom} zoom` }).toBe(true)
-      }
+    await app.electronApp.evaluate(({ BrowserWindow }, width) => BrowserWindow.getAllWindows()[0].setSize(width, 800), Math.round(550 * uiScale / 100))
+    await expect(page.locator('.tabsContainer > .os-scrollbar-horizontal')).toHaveClass(/os-scrollbar-visible/)
+    const before = await geometry()
+    expect(before.tabs[0].width).toBeGreaterThan(100)
+    expect(before.tabs[0].width).toBeLessThan(200)
+    for (const tab of await tabs.all()) {
+      await page.evaluate(id => window.ftElectron.tabs.activate(id), await tab.getAttribute('data-tab-id'))
+      await expect(tab).toHaveClass(/active/)
+      await expect.poll(async () => {
+        const after = await geometry()
+        return Math.abs(after.range - before.range) <= 1 && after.tabs.every((box, index) =>
+          ['width', 'start', 'close'].every(key => Math.abs(box[key] - before.tabs[index][key]) <= 0.1)
+        )
+      }, { message: 'selection keeps tab widths, close buttons and scroll range stable' }).toBe(true)
     }
 
-    await page.evaluate(() => window.ftElectron.setZoomFactor(1))
     await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1100, 800))
     for (const colorScheme of ['dark', 'light']) {
       await page.emulateMedia({ colorScheme })
@@ -130,7 +126,7 @@ test.describe('tab bar', () => {
     }
   })
 
-  test('centers horizontal tabs beside their reserved scrollbar row', async ({ page }) => {
+  test('centers horizontal tabs beside their reserved scrollbar row', { tag: '@scale' }, async ({ page }) => {
     for (const overflowing of [false, true]) {
       if (overflowing) {
         await page.evaluate(async () => {
@@ -140,22 +136,19 @@ test.describe('tab bar', () => {
         })
         await expect(page.locator('.tabsContainer > .os-scrollbar-horizontal')).toHaveClass(/os-scrollbar-visible/)
       }
-      for (const zoom of [1, 0.95, 1.25]) {
-        await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
-        for (const position of ['top', 'bottom']) {
-          await page.evaluate(position => window.$store.commit('setTabBarPosition', position), position)
-          await expect.poll(() => page.locator('.tab').first().evaluate(tab => {
-            const bar = tab.closest('.tabBar').getBoundingClientRect()
-            const box = tab.getBoundingClientRect()
-            const scrollbar = tab.closest('.tabBar').querySelector('.os-scrollbar-horizontal')
-            const scrollbarSpace = scrollbar.classList.contains('os-scrollbar-visible') ? scrollbar.getBoundingClientRect().height : 0
-            const position = tab.closest('.tabBar').classList.contains('position-bottom') ? 'bottom' : 'top'
-            const top = box.top - bar.top - (position === 'bottom' ? scrollbarSpace : 0)
-            const bottom = bar.bottom - box.bottom - (position === 'top' ? scrollbarSpace : 0)
-            const style = getComputedStyle(tab)
-            return top >= 0.5 && bottom >= 0.5 && Math.abs(top - bottom) <= 0.6 && style.borderTopWidth === style.borderBottomWidth
-          }), { message: `balanced tab gaps at ${position}, ${zoom} scale, overflow ${overflowing}` }).toBe(true)
-        }
+      for (const position of ['top', 'bottom']) {
+        await page.evaluate(position => window.$store.commit('setTabBarPosition', position), position)
+        await expect.poll(() => page.locator('.tab').first().evaluate(tab => {
+          const bar = tab.closest('.tabBar').getBoundingClientRect()
+          const box = tab.getBoundingClientRect()
+          const scrollbar = tab.closest('.tabBar').querySelector('.os-scrollbar-horizontal')
+          const scrollbarSpace = scrollbar.classList.contains('os-scrollbar-visible') ? scrollbar.getBoundingClientRect().height : 0
+          const position = tab.closest('.tabBar').classList.contains('position-bottom') ? 'bottom' : 'top'
+          const top = box.top - bar.top - (position === 'bottom' ? scrollbarSpace : 0)
+          const bottom = bar.bottom - box.bottom - (position === 'top' ? scrollbarSpace : 0)
+          const style = getComputedStyle(tab)
+          return top >= 0.5 && bottom >= 0.5 && Math.abs(top - bottom) <= 0.6 && style.borderTopWidth === style.borderBottomWidth
+        }), { message: `balanced tab gaps at ${position}, overflow ${overflowing}` }).toBe(true)
       }
     }
   })
@@ -605,7 +598,7 @@ test.describe('tab bar', () => {
     )))).toBeLessThanOrEqual(2)
   })
 
-  test('keeps the loading line at the tab bottom with icons and reduced motion', async ({ page }) => {
+  test('keeps the loading line at the tab bottom with icons and reduced motion', { tag: '@scale' }, async ({ page }) => {
     const watchTab = await page.evaluate(() => window.ftElectron.tabs.create({
       route: '/watch/loading-line',
       makeActive: false,
@@ -618,19 +611,16 @@ test.describe('tab bar', () => {
     await expect(tab.locator('.tabPageIcon')).toBeVisible()
     await expect(tab.locator('.tabTitleText')).toHaveCSS('opacity', '0.8')
 
-    for (const zoom of [1, 0.95, 1.25]) {
-      await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
-      for (const position of ['top', 'bottom', 'left', 'right']) {
-        await page.evaluate(position => {
-          window.$store.commit('setTabBarPosition', position)
-        }, position)
-        await expect.poll(() => line.evaluate(element => {
-          const tab = element.closest('.tab').getBoundingClientRect()
-          const line = element.getBoundingClientRect()
-          return line.left >= tab.left && line.right <= tab.right &&
-            Math.abs(line.bottom - tab.bottom) < 2
-        })).toBe(true)
-      }
+    for (const position of ['top', 'bottom', 'left', 'right']) {
+      await page.evaluate(position => {
+        window.$store.commit('setTabBarPosition', position)
+      }, position)
+      await expect.poll(() => line.evaluate(element => {
+        const tab = element.closest('.tab').getBoundingClientRect()
+        const line = element.getBoundingClientRect()
+        return line.left >= tab.left && line.right <= tab.right &&
+          Math.abs(line.bottom - tab.bottom) < 2
+      })).toBe(true)
     }
 
     await page.evaluate(id => window.ftElectron.tabs.setPinned(id, true), watchTab.id)
@@ -656,7 +646,7 @@ test.describe('tab bar', () => {
     await expect(tab.locator('.tabTitleText')).toHaveCSS('opacity', '1')
   })
 
-  test('restores the loading dot from Appearance settings and remembers the choice', async ({ app, page }) => {
+  test('restores the loading dot from Appearance settings and remembers the choice', { tag: '@scale' }, async ({ app, page }) => {
     await goToSettingsSection(page, 'appearance')
     const indicator = page.getByRole('combobox', { name: 'Tab Loading Style', exact: true })
     await expect(indicator).toHaveText('Bar')
@@ -669,18 +659,15 @@ test.describe('tab bar', () => {
     await goToSettingsSection(page, 'appearance')
     const savedIndicator = page.getByRole('combobox', { name: 'Tab Loading Style', exact: true })
     await expect(savedIndicator).toHaveText('Dot (classic)')
-    for (const zoom of [1, 1.25]) {
-      await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
-      for (const width of [1600, 732, 520]) {
-        await app.electronApp.evaluate(({ BrowserWindow }, width) => {
-          const window = BrowserWindow.getAllWindows()[0]
-          window.setBounds({ ...window.getBounds(), width, height: 800 })
-        }, width)
-        await savedIndicator.scrollIntoViewIfNeeded()
-        await expect(savedIndicator).toBeVisible()
-        await expect.poll(() => savedIndicator.locator('..').locator('.select-label-text')
-          .evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
-      }
+    for (const width of [1600, 732, 520]) {
+      await app.electronApp.evaluate(({ BrowserWindow }, width) => {
+        const window = BrowserWindow.getAllWindows()[0]
+        window.setBounds({ ...window.getBounds(), width, height: 800 })
+      }, width)
+      await savedIndicator.scrollIntoViewIfNeeded()
+      await expect(savedIndicator).toBeVisible()
+      await expect.poll(() => savedIndicator.locator('..').locator('.select-label-text')
+        .evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
     }
     await app.electronApp.evaluate(({ BrowserWindow }) => {
       const window = BrowserWindow.getAllWindows()[0]
@@ -699,17 +686,14 @@ test.describe('tab bar', () => {
     await expect(dot).toBeVisible()
     await expect(tab.locator('.tabLoadingLine')).toHaveCount(0)
     await expect(tab.locator('.tabPageIcon')).toHaveCount(0)
-    for (const zoom of [1, 1.25]) {
-      await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
-      for (const position of ['top', 'bottom', 'left', 'right']) {
-        await page.evaluate(position => window.$store.commit('setTabBarPosition', position), position)
-        await expect(dot).toBeVisible()
-        expect(await dot.evaluate(element => {
-          const tab = element.closest('.tab').getBoundingClientRect()
-          const dot = element.getBoundingClientRect()
-          return dot.left >= tab.left && dot.right <= tab.right && dot.top >= tab.top && dot.bottom <= tab.bottom
-        })).toBe(true)
-      }
+    for (const position of ['top', 'bottom', 'left', 'right']) {
+      await page.evaluate(position => window.$store.commit('setTabBarPosition', position), position)
+      await expect(dot).toBeVisible()
+      expect(await dot.evaluate(element => {
+        const tab = element.closest('.tab').getBoundingClientRect()
+        const dot = element.getBoundingClientRect()
+        return dot.left >= tab.left && dot.right <= tab.right && dot.top >= tab.top && dot.bottom <= tab.bottom
+      })).toBe(true)
     }
     const animationName = () => dot.evaluate(element => getComputedStyle(element).animationName)
     await expect.poll(animationName).not.toBe('none')
@@ -1482,6 +1466,7 @@ test.describe('tab bar', () => {
       drag(tabs[2], tabs[4])
     })
 
+    // The reorder IPC is delayed by 1 s; the dragged order must hold meanwhile.
     await page.waitForTimeout(600)
     const visualOrderWhileWaiting = await tabs.evaluateAll(elements => {
       return elements
@@ -3021,7 +3006,7 @@ test.describe('tab organizer', () => {
     })
   }
 
-  test('keeps synced-device tab geometry stable when selection changes', async ({ app, page }, testInfo) => {
+  test('keeps synced-device tab geometry stable when selection changes', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
     await page.evaluate(() => {
       const store = window.$store
       store.commit('setSyncServerEnabled', true)
@@ -3052,22 +3037,18 @@ test.describe('tab organizer', () => {
       })
     }
 
-    for (const zoom of [1, 0.95, 1.25]) {
-      await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
-      await app.electronApp.evaluate(({ BrowserWindow }, zoom) => BrowserWindow.getAllWindows()[0].setSize(Math.round(900 * zoom), 800), zoom)
-      await boundingBoxWhenSettled(row)
-      const before = await geometry()
-      expect(new Set(before.map(box => box.y)).size, 'device tabs wrap onto multiple rows').toBeGreaterThan(1)
-      for (const tab of await tabs.all()) {
-        await tab.click()
-        await expect(tab).toHaveAttribute('aria-selected', 'true')
-        await expect.poll(async () => (await geometry()).every((box, index) =>
-          ['width', 'x', 'y'].every(key => Math.abs(box[key] - before[index][key]) <= 0.2)
-        ), { message: `device selection keeps target widths and wrapping stable at ${zoom} zoom` }).toBe(true)
-      }
+    await app.electronApp.evaluate(({ BrowserWindow }, width) => BrowserWindow.getAllWindows()[0].setSize(width, 800), Math.round(900 * uiScale / 100))
+    await boundingBoxWhenSettled(row)
+    const before = await geometry()
+    expect(new Set(before.map(box => box.y)).size, 'device tabs wrap onto multiple rows').toBeGreaterThan(1)
+    for (const tab of await tabs.all()) {
+      await tab.click()
+      await expect(tab).toHaveAttribute('aria-selected', 'true')
+      await expect.poll(async () => (await geometry()).every((box, index) =>
+        ['width', 'x', 'y'].every(key => Math.abs(box[key] - before[index][key]) <= 0.2)
+      ), { message: 'device selection keeps target widths and wrapping stable' }).toBe(true)
     }
 
-    await page.evaluate(() => window.ftElectron.setZoomFactor(1))
     await boundingBoxWhenSettled(row)
     for (const colorScheme of ['dark', 'light']) {
       await page.emulateMedia({ colorScheme })

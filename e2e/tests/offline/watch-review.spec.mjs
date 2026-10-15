@@ -234,40 +234,37 @@ test('an older metadata request cannot clear the next video loading flag', async
   await expect.poll(() => watch.evaluate(vm => vm.downloadedMetadataLoading)).toBe(false)
 })
 
-test('description text updates clamp scrolling after content shrinks at fractional UI scales', async ({ app, page }) => {
+test('description text updates clamp scrolling after content shrinks', { tag: '@scale' }, async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
   const watch = await watchViewHandle(page)
   const card = page.locator('.videoDescription:not(.phoneDescriptionPreview)')
   const scroller = card.locator('.descriptionScroll')
-  for (const scale of [1, 0.95, 1.25]) {
-    await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
-    await watch.evaluate(async vm => {
-      vm.videoDescriptionHtml = ''
-      vm.videoTags = []
-      vm.videoGames = []
-      vm.license = null
-      vm.videoDescription = Array.from({ length: 100 }, (_, index) => `Description line ${index}`).join('\n')
-      await vm.$nextTick()
-    })
-    await expect(card.locator('.description')).toContainText('Description line 99')
-    if (await card.locator(':scope > .descriptionStatus').isVisible()) {
-      await card.locator(':scope > .descriptionStatus').click()
-    }
-    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
-    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
-    await watch.evaluate(async vm => {
-      vm.videoDescription = 'Short replacement description'
-      await vm.$nextTick()
-    })
-    await expect(card.locator('.description')).toHaveText('Short replacement description')
-    await expect.poll(() => scroller.evaluate(element => ({
-      scrollTop: element.scrollTop,
-      overflow: element.scrollHeight > element.clientHeight + 1,
-      scrollbarVisible: element.querySelector('.os-scrollbar-vertical')?.classList.contains('os-scrollbar-visible') &&
-        !element.querySelector('.os-scrollbar-vertical')?.classList.contains('os-scrollbar-unusable'),
-    }))).toEqual({ scrollTop: 0, overflow: false, scrollbarVisible: false })
+  await watch.evaluate(async vm => {
+    vm.videoDescriptionHtml = ''
+    vm.videoTags = []
+    vm.videoGames = []
+    vm.license = null
+    vm.videoDescription = Array.from({ length: 100 }, (_, index) => `Description line ${index}`).join('\n')
+    await vm.$nextTick()
+  })
+  await expect(card.locator('.description')).toContainText('Description line 99')
+  if (await card.locator(':scope > .descriptionStatus').isVisible()) {
+    await card.locator(':scope > .descriptionStatus').click()
   }
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  await watch.evaluate(async vm => {
+    vm.videoDescription = 'Short replacement description'
+    await vm.$nextTick()
+  })
+  await expect(card.locator('.description')).toHaveText('Short replacement description')
+  await expect.poll(() => scroller.evaluate(element => ({
+    scrollTop: element.scrollTop,
+    overflow: element.scrollHeight > element.clientHeight + 1,
+    scrollbarVisible: element.querySelector('.os-scrollbar-vertical')?.classList.contains('os-scrollbar-visible') &&
+      !element.querySelector('.os-scrollbar-vertical')?.classList.contains('os-scrollbar-unusable'),
+  }))).toEqual({ scrollTop: 0, overflow: false, scrollbarVisible: false })
 })
 
 test('HTML description text extraction stays inert when metadata arrives', async ({ app, page }) => {

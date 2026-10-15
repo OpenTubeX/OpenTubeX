@@ -19,58 +19,83 @@ test.use({
   },
 })
 
-for (const zoom of [1, 0.95]) {
-  test(`download progress animates without changing layout width at ${zoom} UI scale`, async ({ page }) => {
-    await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
-    await goTo(page, 'downloads')
-    const setProgress = percent => page.evaluate(percent => {
-      const store = window.$store
-      store.commit('upsertYtDlpDownload', { id: 42, videoId: 'jNQXAC9IVRw', title: 'Progress animation fixture', status: 'downloading', percent, mode: 'video' })
-    }, percent)
-    await setProgress(10)
-    const row = page.locator('.downloadRow').filter({ hasText: 'Progress animation fixture' })
-    const fill = row.locator('.progressFill')
-    const track = row.locator('.progressTrack')
-    const layoutWidth = await track.evaluate(element => element.clientWidth)
-    await expect.poll(() => fill.evaluate(element => element.clientWidth)).toBe(layoutWidth)
-    for (const direction of ['ltr', 'rtl']) {
-      await row.evaluate((element, direction) => { element.dir = direction }, direction)
-      await setProgress(90)
-      await expect.poll(() => fill.evaluate(element => element.getBoundingClientRect().width /
-        element.parentElement.getBoundingClientRect().width)).toBeCloseTo(0.9, 2)
-      expect(await fill.evaluate(element => element.clientWidth)).toBe(layoutWidth)
-      const bounds = await fill.boundingBox()
-      const parent = await track.boundingBox()
-      expect(direction === 'rtl' ? parent.x + parent.width - bounds.x - bounds.width : bounds.x - parent.x).toBeCloseTo(0, 0)
-      await setProgress(0)
-      await expect.poll(() => fill.evaluate(element => element.getBoundingClientRect().width)).toBe(0)
-    }
-    await page.getByRole('dialog', { name: 'Downloads', exact: true }).press('Escape')
-    await goTo(page, 'history')
-    const video = page.locator('.ft-list-video').first()
-    await video.hover()
-    await video.locator('.title').click({ button: 'right' })
-    await page.getByRole('menuitem', { name: 'Download Video', exact: true }).click()
-    const prompt = page.locator('.activeDownloadCard')
-    const promptFill = prompt.locator('.downloadProgressBarFill')
-    const promptTrack = prompt.locator('.downloadProgressBarTrack')
-    const promptLayoutWidth = await promptTrack.evaluate(element => element.clientWidth)
-    for (const direction of ['ltr', 'rtl']) {
-      await prompt.evaluate((element, direction) => { element.dir = direction }, direction)
-      await setProgress(50)
-      await expect.poll(() => promptFill.evaluate(element => element.getBoundingClientRect().width /
-        element.parentElement.getBoundingClientRect().width)).toBeCloseTo(0.5, 2)
-      expect(await promptFill.evaluate(element => element.clientWidth)).toBe(promptLayoutWidth)
-      const bounds = await promptFill.boundingBox()
-      const parent = await promptTrack.boundingBox()
-      expect(direction === 'rtl' ? parent.x + parent.width - bounds.x - bounds.width : bounds.x - parent.x).toBeCloseTo(0, 0)
-      await setProgress(142)
-      await expect.poll(() => promptFill.evaluate(element => element.getBoundingClientRect().width /
-        element.parentElement.getBoundingClientRect().width)).toBeCloseTo(1, 2)
-    }
-  })
+test('download progress animates without changing layout width', { tag: '@scale' }, async ({ page }) => {
+  await goTo(page, 'downloads')
+  const setProgress = percent => page.evaluate(percent => {
+    const store = window.$store
+    store.commit('upsertYtDlpDownload', { id: 42, videoId: 'jNQXAC9IVRw', title: 'Progress animation fixture', status: 'downloading', percent, mode: 'video' })
+  }, percent)
+  await setProgress(10)
+  const row = page.locator('.downloadRow').filter({ hasText: 'Progress animation fixture' })
+  const fill = row.locator('.progressFill')
+  const track = row.locator('.progressTrack')
+  const layoutWidth = await track.evaluate(element => element.clientWidth)
+  await expect.poll(() => fill.evaluate(element => element.clientWidth)).toBe(layoutWidth)
+  for (const direction of ['ltr', 'rtl']) {
+    await row.evaluate((element, direction) => { element.dir = direction }, direction)
+    await setProgress(90)
+    await expect.poll(() => fill.evaluate(element => element.getBoundingClientRect().width /
+      element.parentElement.getBoundingClientRect().width)).toBeCloseTo(0.9, 2)
+    expect(await fill.evaluate(element => element.clientWidth)).toBe(layoutWidth)
+    const bounds = await fill.boundingBox()
+    const parent = await track.boundingBox()
+    expect(direction === 'rtl' ? parent.x + parent.width - bounds.x - bounds.width : bounds.x - parent.x).toBeCloseTo(0, 0)
+    await setProgress(0)
+    await expect.poll(() => fill.evaluate(element => element.getBoundingClientRect().width)).toBe(0)
+  }
+  await page.getByRole('dialog', { name: 'Downloads', exact: true }).press('Escape')
+  await goTo(page, 'history')
+  const video = page.locator('.ft-list-video').first()
+  await video.hover()
+  await video.locator('.title').click({ button: 'right' })
+  await page.getByRole('menuitem', { name: 'Download Video', exact: true }).click()
+  const prompt = page.locator('.activeDownloadCard')
+  const promptFill = prompt.locator('.downloadProgressBarFill')
+  const promptTrack = prompt.locator('.downloadProgressBarTrack')
+  const promptLayoutWidth = await promptTrack.evaluate(element => element.clientWidth)
+  for (const direction of ['ltr', 'rtl']) {
+    await prompt.evaluate((element, direction) => { element.dir = direction }, direction)
+    await setProgress(50)
+    await expect.poll(() => promptFill.evaluate(element => element.getBoundingClientRect().width /
+      element.parentElement.getBoundingClientRect().width)).toBeCloseTo(0.5, 2)
+    expect(await promptFill.evaluate(element => element.clientWidth)).toBe(promptLayoutWidth)
+    const bounds = await promptFill.boundingBox()
+    const parent = await promptTrack.boundingBox()
+    expect(direction === 'rtl' ? parent.x + parent.width - bounds.x - bounds.width : bounds.x - parent.x).toBeCloseTo(0, 0)
+    await setProgress(142)
+    await expect.poll(() => promptFill.evaluate(element => element.getBoundingClientRect().width /
+      element.parentElement.getBoundingClientRect().width)).toBeCloseTo(1, 2)
+  }
+})
 
-  test(`color picker batches theme previews and preserves release position at ${zoom} UI scale`, async ({ page }) => {
+test('select focus underline animates with transforms', async ({ page }) => {
+  await page.evaluate(async () => {
+    const store = window.$store
+    await store.dispatch('updateReducedMotion', 'off')
+  })
+  const appearance = await goToSettingsSection(page, 'appearance')
+  const select = appearance.locator('.select').first()
+  // Exercise the supported filled variant, including its focus underline.
+  await select.evaluate(element => { element.classList.remove('outlined') })
+  const button = select.locator('.select-text')
+  await button.focus()
+  const result = await select.locator('.select-bar').evaluate(element => {
+    const before = getComputedStyle(element, '::before')
+    const after = getComputedStyle(element, '::after')
+    return { before: before.transitionProperty, after: after.transitionProperty }
+  })
+  expect(result).toEqual({ before: 'transform', after: 'transform' })
+  await expect.poll(() => select.locator('.select-bar').evaluate(element => (
+    getComputedStyle(element, '::before').transform
+  ))).toBe('matrix(1, 0, 0, 1, 0, 0)')
+  await button.evaluate(element => element.blur())
+  await expect.poll(() => select.locator('.select-bar').evaluate(element => (
+    getComputedStyle(element, '::before').transform
+  ))).toBe('matrix(0, 0, 0, 1, 0, 0)')
+})
+
+for (const zoom of [1, 0.95]) {
+  test(`color picker batches theme previews and preserves release position at ${zoom} UI scale`, { tag: '@performance' }, async ({ page }) => {
     await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
     const appearance = await goToSettingsSection(page, 'appearance')
     await appearance.getByRole('button', { name: 'Create custom theme' }).click()
@@ -129,36 +154,9 @@ for (const zoom of [1, 0.95]) {
     await page.locator('.colorPickerPopover').getByRole('button', { name: 'Apply', exact: true }).click()
     await expect(surface).toHaveCount(0)
   })
-
-  test(`select focus underline animates with transforms at ${zoom} UI scale`, async ({ page }) => {
-    await page.evaluate(async zoom => {
-      window.ftElectron.setZoomFactor(zoom)
-      const store = window.$store
-      await store.dispatch('updateReducedMotion', 'off')
-    }, zoom)
-    const appearance = await goToSettingsSection(page, 'appearance')
-    const select = appearance.locator('.select').first()
-    // Exercise the supported filled variant, including its focus underline.
-    await select.evaluate(element => { element.classList.remove('outlined') })
-    const button = select.locator('.select-text')
-    await button.focus()
-    const result = await select.locator('.select-bar').evaluate(element => {
-      const before = getComputedStyle(element, '::before')
-      const after = getComputedStyle(element, '::after')
-      return { before: before.transitionProperty, after: after.transitionProperty }
-    })
-    expect(result).toEqual({ before: 'transform', after: 'transform' })
-    await expect.poll(() => select.locator('.select-bar').evaluate(element => (
-      getComputedStyle(element, '::before').transform
-    ))).toBe('matrix(1, 0, 0, 1, 0, 0)')
-    await button.evaluate(element => element.blur())
-    await expect.poll(() => select.locator('.select-bar').evaluate(element => (
-      getComputedStyle(element, '::before').transform
-    ))).toBe('matrix(0, 0, 0, 1, 0, 0)')
-  })
 }
 
-test.describe('large bookmark playlist', () => {
+test.describe('large bookmark playlist', { tag: '@performance' }, () => {
   test.use({
     seed: {
       settings: { quickBookmarkTargetPlaylistId: 'favorites' },
@@ -244,13 +242,21 @@ test.describe('large bookmark playlist', () => {
   })
 })
 
-test('player visibility and playback changes avoid repeated layout work', async ({ app, page }, testInfo) => {
+/** Wait for finite animations, such as control fades, to finish. */
+async function settleAnimations(locator) {
+  await locator.evaluate(element => Promise.all(element.getAnimations({ subtree: true })
+    .filter(animation => animation.playState === 'running' &&
+        animation.timeline === document.timeline && Number.isFinite(animation.effect?.getComputedTiming().endTime))
+    .map(animation => animation.finished.catch(() => {}))))
+}
+
+test('player visibility and playback changes avoid repeated layout work', { tag: '@performance' }, async ({ app, page }, testInfo) => {
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
   await video.evaluate(element => element.pause())
   const controls = page.locator('.ftVideoPlayer .shaka-controls-container')
   await controls.evaluate(element => element.setAttribute('shown', 'true'))
-  await page.waitForTimeout(1000)
+  await settleAnimations(page.locator('.ftVideoPlayer'))
 
   const session = await page.context().newCDPSession(page)
   await session.send('Performance.enable')
@@ -275,7 +281,7 @@ test('player visibility and playback changes avoid repeated layout work', async 
     fadeTransitions.push(...await controls.evaluate(element => (
       element.querySelector('.shaka-controls-button-panel').getAnimations().map(animation => animation.transitionProperty)
     )))
-    await page.waitForTimeout(750)
+    await settleAnimations(controls)
   }
   const after = await metrics()
   const visibility = {
@@ -294,6 +300,7 @@ test('player visibility and playback changes avoid repeated layout work', async 
       const wasPaused = video.paused
       button.click()
       toggles.push(video.paused !== wasPaused)
+      // Count any layout reads the toggle schedules during this window.
       await new Promise(resolve => setTimeout(resolve, 300))
     }
     return { paused: video.paused, layoutReads: window.__playerLayoutReads, toggles }
@@ -312,7 +319,7 @@ test('player visibility and playback changes avoid repeated layout work', async 
   expect(playback.layoutReads).toBe(0)
 })
 
-test('default-speed button transitions do not query animations in JavaScript', async ({ page }) => {
+test('default-speed button transitions do not query animations in JavaScript', { tag: '@performance' }, async ({ page }) => {
   await page.evaluate(async () => {
     const store = window.$store
     await store.dispatch('updateReducedMotion', 'off')
@@ -335,11 +342,11 @@ test('default-speed button transitions do not query animations in JavaScript', a
   expect(metrics.queries).toBe(0)
 })
 
-test('hidden player menus do not measure labels after playback option changes', async ({ app, page }) => {
+test('hidden player menus do not measure labels after playback option changes', { tag: '@performance' }, async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
   await video.evaluate(element => element.pause())
-  await page.waitForTimeout(1000)
+  await settleAnimations(page.locator('.ftVideoPlayer'))
   const measurements = await page.evaluate(async () => {
     const menu = document.querySelector('.ftVideoPlayer .shaka-overflow-menu')
     const descriptor = Object.getOwnPropertyDescriptor(Element.prototype, 'clientWidth')
@@ -354,6 +361,7 @@ test('hidden player menus do not measure labels after playback option changes', 
     try {
       const video = document.querySelector('.ftVideoPlayer video')
       video.loop = !video.loop
+      // Count any measurements the change schedules during this window.
       await new Promise(resolve => setTimeout(resolve, 300))
       return reads
     } finally {
@@ -364,7 +372,7 @@ test('hidden player menus do not measure labels after playback option changes', 
   expect(measurements).toBe(0)
 })
 
-test.describe('history progress direction', () => {
+test.describe('history progress direction', { tag: '@performance' }, () => {
   test.use({
     seed: {
       settings: { uiScale: 95, uiRoundness: 200 },
@@ -431,7 +439,7 @@ test.describe('history progress direction', () => {
   })
 })
 
-test('loop controls update on changes without polling an idle player', async ({ app, page }, testInfo) => {
+test('loop controls update on changes without polling an idle player', { tag: '@performance' }, async ({ app, page }, testInfo) => {
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
   await video.evaluate(element => element.pause())
@@ -455,6 +463,7 @@ test('loop controls update on changes without polling an idle player', async ({ 
       return original.apply(this, args)
     }
     try {
+      // An idle player must not check visibility during this period.
       await new Promise(resolve => setTimeout(resolve, 1100))
       return { buttons: buttons.length, visibilityChecks }
     } finally {
@@ -468,7 +477,7 @@ test('loop controls update on changes without polling an idle player', async ({ 
   expect(metrics.visibilityChecks).toBe(0)
 })
 
-test('video clock updates retain positions without rebuilding media controls', async ({ app, page }) => {
+test('video clock updates retain positions without rebuilding media controls', { tag: '@performance' }, async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
   await video.evaluate(element => element.pause())

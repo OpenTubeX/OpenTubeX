@@ -787,49 +787,46 @@ test('reduced motion hides control glass without a fade', async ({ app, page }) 
   expect(hidden).toEqual({ transition: 'none', visibility: 'hidden', glassOpacity: '0' })
 })
 
-for (const scale of [1, 1.25]) {
-  test(`hiding a shorter stacked timestamp restores the full layout at ${scale * 100}% UI scale`, async ({ app, page }) => {
-    await page.emulateMedia({ reducedMotion: 'reduce' })
-    await mockPlayableWatchPage(app, page)
-    const video = await openMockedVideo(page)
-    await video.evaluate(element => {
-      element.pause()
-      element.playbackRate = 10
-    })
-    await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
-    const panel = page.locator('.shaka-controls-button-panel')
-    await panel.evaluate(element => {
-      // Model a long video whose regular timestamp is wider than its
-      // speed-adjusted timestamp, without depending on the fixture duration.
-      const regular = element.querySelector('.shaka-current-time:not(.ft-playback-adjusted-time)')
-      const adjusted = element.querySelector('.ft-playback-adjusted-time')
-      regular.style.inlineSize = '240px'
-      adjusted.style.inlineSize = '120px'
-    })
-
-    const setWidth = width => panel.evaluate(async (element, width) => {
-      element.style.width = `${width}px`
-      // Let resize observation and the scheduled layout finish even under load.
-      for (let frame = 0; frame < 3; frame++) {
-        await new Promise(resolve => requestAnimationFrame(resolve))
-      }
-      return element.classList.contains('ft-controls-stack-times')
-    }, width)
-    let compactWidth = 100
-    let fullWidth = 2000
-    for (let index = 0; index < 12; index++) {
-      const width = (compactWidth + fullWidth) / 2
-      if (await setWidth(width)) compactWidth = width
-      else fullWidth = width
-    }
-    // Avoid landing on the fractional-pixel boundary found by the search.
-    await setWidth(compactWidth - 4)
-    await expect(panel).toHaveClass(/ft-controls-stack-times/)
-    await page.evaluate(() => window.$store.dispatch('updateShowPlaybackRateAdjustedTimestamp', false))
-    await expect(panel.locator('.ft-playback-adjusted-time')).toHaveClass(/shaka-hidden/)
-    await expect(panel).not.toHaveClass(/ft-controls-stack-times/)
+test('hiding a shorter stacked timestamp restores the full layout', { tag: '@scale' }, async ({ app, page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => {
+    element.pause()
+    element.playbackRate = 10
   })
-}
+  const panel = page.locator('.shaka-controls-button-panel')
+  await panel.evaluate(element => {
+    // Model a long video whose regular timestamp is wider than its
+    // speed-adjusted timestamp, without depending on the fixture duration.
+    const regular = element.querySelector('.shaka-current-time:not(.ft-playback-adjusted-time)')
+    const adjusted = element.querySelector('.ft-playback-adjusted-time')
+    regular.style.inlineSize = '240px'
+    adjusted.style.inlineSize = '120px'
+  })
+
+  const setWidth = width => panel.evaluate(async (element, width) => {
+    element.style.width = `${width}px`
+    // Let resize observation and the scheduled layout finish even under load.
+    for (let frame = 0; frame < 3; frame++) {
+      await new Promise(resolve => requestAnimationFrame(resolve))
+    }
+    return element.classList.contains('ft-controls-stack-times')
+  }, width)
+  let compactWidth = 100
+  let fullWidth = 2000
+  for (let index = 0; index < 12; index++) {
+    const width = (compactWidth + fullWidth) / 2
+    if (await setWidth(width)) compactWidth = width
+    else fullWidth = width
+  }
+  // Avoid landing on the fractional-pixel boundary found by the search.
+  await setWidth(compactWidth - 4)
+  await expect(panel).toHaveClass(/ft-controls-stack-times/)
+  await page.evaluate(() => window.$store.dispatch('updateShowPlaybackRateAdjustedTimestamp', false))
+  await expect(panel.locator('.ft-playback-adjusted-time')).toHaveClass(/shaka-hidden/)
+  await expect(panel).not.toHaveClass(/ft-controls-stack-times/)
+})
 
 test('volume pill collapses after dragging its slider and leaving', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)

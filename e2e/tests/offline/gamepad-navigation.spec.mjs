@@ -312,6 +312,7 @@ test.describe('quick settings changed-setting controls', () => {
     })
     await reset.focus()
     await pressGamepadButton(page, 'primary')
+    // Give a stray close a chance to happen before checking that the menu stays open.
     await page.waitForTimeout(300)
 
     await expect(reset).toHaveCount(0)

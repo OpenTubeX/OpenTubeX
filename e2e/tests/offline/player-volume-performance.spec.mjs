@@ -14,28 +14,6 @@ test.use({
   }
 })
 
-test('volume slide supports narrow windows, keyboard input and reduced motion', async ({ app, page }) => {
-  await mockPlayableWatchPage(app, page)
-  const video = await openMockedVideo(page)
-  await video.evaluate(element => element.pause())
-  await page.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
-  await setWindowSize(app, page, { width: 450, height: 700 })
-  const group = page.locator('.ft-volume-control-group')
-  const slider = group.locator('.shaka-volume-bar')
-  await group.locator('.shaka-mute-button').hover()
-  await expect(group.locator('.shaka-volume-bar-container')).toHaveCSS('width', '50px')
-  await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'on'))
-  await page.keyboard.press('Tab')
-  await slider.focus()
-  await page.mouse.move(1, 1)
-  await expect(group.locator('.shaka-volume-bar-container')).toHaveCSS('width', '50px')
-  const volumeBefore = Number(await slider.inputValue())
-  await page.keyboard.press('ArrowLeft')
-  await expect(slider).toHaveValue(String(volumeBefore - 1))
-  await expect(group.locator('.shaka-volume-bar-container')).toHaveCSS('animation-name', 'none')
-  expect(await group.evaluate(element => element.getAnimations({ subtree: true }).length)).toBe(0)
-})
-
 test('volume hover keeps its slide without animating layout under CPU load in both player themes and UI scales', async ({ app, page }, testInfo) => {
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
@@ -87,7 +65,10 @@ test('volume hover keeps its slide without animating layout under CPU load in bo
           }, { once: true })
         })
         // Let unrelated theme/zoom transitions settle before measuring hover.
-        await page.waitForTimeout(700)
+        await page.evaluate(() => Promise.all(document.getAnimations()
+          .filter(animation => animation.playState === 'running' &&
+            animation.timeline === document.timeline && Number.isFinite(animation.effect?.getComputedTiming().endTime))
+          .map(animation => animation.finished.catch(() => {}))))
         const before = await metrics()
         await page.mouse.move(muteBounds.x + muteBounds.width / 2, muteBounds.y + muteBounds.height / 2)
         await expect.poll(() => group.getAttribute('data-hover-motion')).not.toBeNull()

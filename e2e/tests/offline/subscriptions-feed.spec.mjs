@@ -231,6 +231,7 @@ test.describe('subscriptions feed from cache', () => {
 
     await goTo(page, 'subscriptions')
     await expect(page.getByText('Video A older')).toBeVisible()
+    // Leave time for a move transition that must not start.
     await page.waitForTimeout(350)
 
     const moveClasses = await page.evaluate(() => window.__subscriptionFeedMoveClasses)

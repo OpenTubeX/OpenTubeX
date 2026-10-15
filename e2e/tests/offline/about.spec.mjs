@@ -1,6 +1,6 @@
 import { test, expect } from '../../helpers/app.mjs'
 
-test('about header keeps its spacing without desktop runtime details', async ({ page }) => {
+test('about header keeps its spacing without desktop runtime details', { tag: '@scale' }, async ({ page, uiScale }) => {
   await page.locator('.profileTrigger').click()
   await page.getByRole('dialog', { name: 'Quick settings' }).getByRole('button', { name: 'About' }).click()
   const aboutWindow = page.getByRole('dialog', { name: 'About' })
@@ -21,18 +21,15 @@ test('about header keeps its spacing without desktop runtime details', async ({ 
       })
     }
 
-    for (const scale of [1, 1.25]) {
-      await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
-      for (const viewport of [{ width: 375, height: 800 }, { width: 800, height: 375 }]) {
-        await page.setViewportSize(viewport)
-        await expect.poll(() => aboutWindow.evaluate(element => {
-          const brand = element.querySelector('.brand')
-          const details = brand.lastElementChild.getBoundingClientRect()
-          const cards = element.querySelector('.about-chunks').getBoundingClientRect()
-          const expectedGap = Number.parseFloat(getComputedStyle(brand).fontSize) * 2
-          return Math.abs(cards.top - details.bottom - expectedGap)
-        }), { message: `${build}, ${viewport.width}px, ${scale * 100}% scale` }).toBeLessThanOrEqual(1)
-      }
+    for (const viewport of [{ width: 375, height: 800 }, { width: 800, height: 375 }]) {
+      await page.setViewportSize(viewport)
+      await expect.poll(() => aboutWindow.evaluate(element => {
+        const brand = element.querySelector('.brand')
+        const details = brand.lastElementChild.getBoundingClientRect()
+        const cards = element.querySelector('.about-chunks').getBoundingClientRect()
+        const expectedGap = Number.parseFloat(getComputedStyle(brand).fontSize) * 2
+        return Math.abs(cards.top - details.bottom - expectedGap)
+      }), { message: `${build}, ${viewport.width}px, ${uiScale}% scale` }).toBeLessThanOrEqual(1)
     }
   }
 })

@@ -400,50 +400,47 @@ test('editing playlist details preserves hidden and blurred thumbnail preference
   await expect(preview(page)).toHaveCSS('filter', 'blur(20px)')
 })
 
-for (const uiScale of [100, 125]) {
-  test(`thumbnail controls fit list and grid layouts at ${uiScale}% scale`, async ({ app, page }, testInfo) => {
-    await dispatch(page, 'updateUiScale', uiScale)
-    await openPlaylist(page)
-    await page.getByTitle('Edit Playlist Info').click()
-    await setImage(page)
-    for (const view of ['list', 'grid']) {
-      await dispatch(page, 'updatePlaylistViewType', view)
-      for (const width of [1440, 700, 375]) {
-        await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
-        await app.electronApp.evaluate(({ BrowserWindow }, { width, uiScale }) => {
-          const window = BrowserWindow.getAllWindows()[0]
-          window.setMinimumSize(0, 0)
-          window.setContentSize(Math.round(width * uiScale / 100), Math.round(900 * uiScale / 100))
-        }, { width, uiScale })
-        await expect.poll(() => page.evaluate(width => Math.abs(innerWidth - width), width)).toBeLessThanOrEqual(1)
-        await expect(preview(page)).toBeVisible()
-        await picker(page).getByRole('button', { name: 'Restore default thumbnail' }).scrollIntoViewIfNeeded()
-        const overflow = await picker(page).evaluate(element => {
-          const bounds = element.getBoundingClientRect()
-          return { left: bounds.left, right: bounds.right, width: innerWidth, overflow: element.scrollWidth - element.clientWidth }
-        })
-        expect(overflow.left).toBeGreaterThanOrEqual(0)
-        expect(overflow.right).toBeLessThanOrEqual(overflow.width)
-        expect(overflow.overflow).toBeLessThanOrEqual(1)
-        await page.getByTitle('Save Changes').scrollIntoViewIfNeeded()
-        await expect(page.getByTitle('Save Changes')).toBeInViewport()
-      }
+test('thumbnail controls fit list and grid layouts', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
+  await openPlaylist(page)
+  await page.getByTitle('Edit Playlist Info').click()
+  await setImage(page)
+  for (const view of ['list', 'grid']) {
+    await dispatch(page, 'updatePlaylistViewType', view)
+    for (const width of [1440, 700, 375]) {
+      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+      await app.electronApp.evaluate(({ BrowserWindow }, { width, uiScale }) => {
+        const window = BrowserWindow.getAllWindows()[0]
+        window.setMinimumSize(0, 0)
+        window.setContentSize(Math.round(width * uiScale / 100), Math.round(900 * uiScale / 100))
+      }, { width, uiScale })
+      await expect.poll(() => page.evaluate(width => Math.abs(innerWidth - width), width)).toBeLessThanOrEqual(1)
+      await expect(preview(page)).toBeVisible()
+      await picker(page).getByRole('button', { name: 'Restore default thumbnail' }).scrollIntoViewIfNeeded()
+      const overflow = await picker(page).evaluate(element => {
+        const bounds = element.getBoundingClientRect()
+        return { left: bounds.left, right: bounds.right, width: innerWidth, overflow: element.scrollWidth - element.clientWidth }
+      })
+      expect(overflow.left).toBeGreaterThanOrEqual(0)
+      expect(overflow.right).toBeLessThanOrEqual(overflow.width)
+      expect(overflow.overflow).toBeLessThanOrEqual(1)
+      await page.getByTitle('Save Changes').scrollIntoViewIfNeeded()
+      await expect(page.getByTitle('Save Changes')).toBeInViewport()
     }
-    if (uiScale === 100) {
-      for (const colorScheme of ['dark', 'light']) {
-        await page.emulateMedia({ colorScheme })
-        await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
-        await expectImagesLoaded(preview(page))
-        await picker(page).screenshot({ path: testInfo.outputPath(`playlist-thumbnail-${colorScheme}.png`) })
-      }
+  }
+  if (uiScale === 100) {
+    for (const colorScheme of ['dark', 'light']) {
+      await page.emulateMedia({ colorScheme })
+      await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+      await expectImagesLoaded(preview(page))
+      await picker(page).screenshot({ path: testInfo.outputPath(`playlist-thumbnail-${colorScheme}.png`) })
     }
-    await page.getByTitle('Save Changes').click()
-    await expect(picker(page)).toHaveCount(0)
-    await expect.poll(() => page.evaluate(() => {
-      const root = document.documentElement
-      return root.scrollHeight - root.clientHeight
-    })).toBeLessThanOrEqual(1)
-    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
-    await expect(page.locator('body > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-unusable/)
-  })
-}
+  }
+  await page.getByTitle('Save Changes').click()
+  await expect(picker(page)).toHaveCount(0)
+  await expect.poll(() => page.evaluate(() => {
+    const root = document.documentElement
+    return root.scrollHeight - root.clientHeight
+  })).toBeLessThanOrEqual(1)
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
+  await expect(page.locator('body > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-unusable/)
+})

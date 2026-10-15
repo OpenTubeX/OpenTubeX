@@ -53,7 +53,6 @@ const seed = {
     hideSubscriptionsCommunity: false,
     showNewSubscriptionFeed: true,
     useRssFeeds: false,
-    uiScale: 125,
     thumbnailSize: 180
   },
   profiles: [
@@ -72,7 +71,7 @@ const seed = {
   }))
 }
 
-test.use({ seed })
+test.use({ seed: { ...seed, settings: { ...seed.settings, uiScale: 125 } } })
 
 function card(page, category, channelId = CHANNEL_A, index = 0) {
   return page.locator(category === 'posts' ? '.ft-list-post' : '.ft-list-video')
@@ -198,54 +197,51 @@ test('keeps both types hidden when another hide is queued during a save', async 
 for (const locale of ['en-US', 'de-DE']) {
   test.describe(`${locale} menu labels`, () => {
     test.use({ seed: { ...seed, settings: { ...seed.settings, currentLocale: locale } } })
-    for (const uiScale of [100, 125]) {
-      test(`shows readable hide action labels at ${uiScale}% UI scale`, async ({ app, page }) => {
-        await page.evaluate(scale => window.ftElectron.setZoomFactor(scale / 100), uiScale)
-        await goTo(page, 'subscriptions')
-        for (const width of [1600, 375]) {
-          await app.electronApp.evaluate(({ BrowserWindow }, width) => {
-            BrowserWindow.getAllWindows()[0].setContentSize(width, 900)
-          }, width)
-          for (const category of ['videos', 'posts']) {
-            await page.locator(`[data-subscription-feed-tab="${category}"]`).click()
-            const menuButton = category === 'posts'
-              ? card(page, category).getByRole('button', { name: locale === 'en-US' ? 'More Options' : 'Weitere Optionen', exact: true })
-              : card(page, category).locator('.title')
-            await menuButton.click({ button: category === 'posts' ? 'left' : 'right' })
-            const type = locale === 'de-DE' && category === 'posts' ? 'Beiträge' : labels[category]
-            const label = page.getByRole(category === 'posts' ? 'option' : 'menuitem', {
-              name: locale === 'en-US'
-                ? `Never show ${type} from this channel in feeds again`
-                : `Nie wieder ${type} von diesem Kanal in Feeds anzeigen`,
-              exact: true
-            }).locator(':scope > span').last()
-            await expect(label).toBeVisible()
-            await expect.poll(() => label.evaluate(element => (
-              element.scrollWidth <= element.clientWidth && element.scrollHeight <= element.clientHeight
-            ))).toBe(true)
-            // Wrapping must preserve whole words, not squeeze the label into a
-            // character-wide column that still passes the overflow check above.
-            const splitWords = await label.evaluate(element => {
-              const text = element.firstChild
-              return [...text.textContent.matchAll(/\S+/g)].filter(match => {
-                const range = document.createRange()
-                range.setStart(text, match.index)
-                range.setEnd(text, match.index + match[0].length)
-                return range.getClientRects().length > 1
-              }).map(match => match[0])
-            })
-            expect(splitWords).toEqual([])
-            if (category === 'posts' && width === 1600) {
-              const buttonBounds = await menuButton.boundingBox()
-              const menuBounds = await page.locator('.iconDropdown').boundingBox()
-              expect(menuBounds.x).toBeGreaterThanOrEqual(buttonBounds.x - 1)
-              expect(menuBounds.x).toBeLessThanOrEqual(buttonBounds.x + buttonBounds.width + 1)
-            }
-            await page.keyboard.press('Escape')
+    test('shows readable hide action labels', { tag: '@scale' }, async ({ app, page }) => {
+      await goTo(page, 'subscriptions')
+      for (const width of [1600, 375]) {
+        await app.electronApp.evaluate(({ BrowserWindow }, width) => {
+          BrowserWindow.getAllWindows()[0].setContentSize(width, 900)
+        }, width)
+        for (const category of ['videos', 'posts']) {
+          await page.locator(`[data-subscription-feed-tab="${category}"]`).click()
+          const menuButton = category === 'posts'
+            ? card(page, category).getByRole('button', { name: locale === 'en-US' ? 'More Options' : 'Weitere Optionen', exact: true })
+            : card(page, category).locator('.title')
+          await menuButton.click({ button: category === 'posts' ? 'left' : 'right' })
+          const type = locale === 'de-DE' && category === 'posts' ? 'Beiträge' : labels[category]
+          const label = page.getByRole(category === 'posts' ? 'option' : 'menuitem', {
+            name: locale === 'en-US'
+              ? `Never show ${type} from this channel in feeds again`
+              : `Nie wieder ${type} von diesem Kanal in Feeds anzeigen`,
+            exact: true
+          }).locator(':scope > span').last()
+          await expect(label).toBeVisible()
+          await expect.poll(() => label.evaluate(element => (
+            element.scrollWidth <= element.clientWidth && element.scrollHeight <= element.clientHeight
+          ))).toBe(true)
+          // Wrapping must preserve whole words, not squeeze the label into a
+          // character-wide column that still passes the overflow check above.
+          const splitWords = await label.evaluate(element => {
+            const text = element.firstChild
+            return [...text.textContent.matchAll(/\S+/g)].filter(match => {
+              const range = document.createRange()
+              range.setStart(text, match.index)
+              range.setEnd(text, match.index + match[0].length)
+              return range.getClientRects().length > 1
+            }).map(match => match[0])
+          })
+          expect(splitWords).toEqual([])
+          if (category === 'posts' && width === 1600) {
+            const buttonBounds = await menuButton.boundingBox()
+            const menuBounds = await page.locator('.iconDropdown').boundingBox()
+            expect(menuBounds.x).toBeGreaterThanOrEqual(buttonBounds.x - 1)
+            expect(menuBounds.x).toBeLessThanOrEqual(buttonBounds.x + buttonBounds.width + 1)
           }
+          await page.keyboard.press('Escape')
         }
-      })
-    }
+      }
+    })
   })
 }
 

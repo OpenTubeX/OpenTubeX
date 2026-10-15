@@ -496,7 +496,9 @@ test('pinches theme screenshots to zoom and resets zoom when switching screensho
     await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [{ x: x - 85, y, id: 1 }] })
     await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
     await expect.poll(() => image.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).a)).toBeGreaterThan(1.5)
-    await page.waitForTimeout(350) // Finish the pinch transition before starting a separate drag.
+    // Finish the pinch transition before starting a separate drag.
+    await expect.poll(() => page.locator('.screenshotZoom').evaluate(element =>
+      element.getAnimations({ subtree: true }).filter(animation => animation instanceof CSSTransition).length)).toBe(0)
     const wrapper = page.locator('.screenshotZoom .swiper-zoom-container')
     const initialX = await wrapper.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).e)
     await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y, id: 1 }] })

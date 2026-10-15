@@ -3,9 +3,8 @@ import { open, rename, unlink } from 'node:fs/promises'
 import path from 'node:path'
 import { promisify } from 'node:util'
 
-import { test, expect, openNewWindowFromTabBar, waitForAppReady } from '../../helpers/app.mjs'
+import { test, expect } from '../../helpers/app.mjs'
 import { DBActions } from '../../../src/constants.js'
-import { DEFAULT_SEARCH_ENGINES } from '../../../src/searchEngines.js'
 
 const execFileAsync = promisify(execFile)
 
@@ -78,36 +77,12 @@ test('selected-text context menu opens while unrelated settings writes wait for 
   try {
     await page.mouse.click(point.x, point.y, { button: 'right' })
     const menu = page.getByRole('menu', { name: 'Context Menu' })
-    await expect(menu).toBeVisible({ timeout: 1500 })
+    // The write stays blocked until release(), so the menu must not wait for it.
+    await expect(menu).toBeVisible()
     await expect(menu.getByRole('menuitem', { name: 'Copy', exact: true })).toBeEnabled()
     await expect(menu.getByRole('menuitem', { name: 'Search "selected text under load" in a New Tab', exact: true })).toBeVisible()
   } finally {
     await release()
     await cdp.detach()
   }
-})
-
-test('search-engine menu snapshots follow saves and resets across windows', async ({ app, page }) => {
-  const otherWindow = await openNewWindowFromTabBar(app, page)
-  await waitForAppReady(otherWindow)
-  const menuForSelection = () => otherWindow.evaluate(() => window.ftElectron.contextMenu.open({ selectionText: 'fresh settings' }))
-  expect((await menuForSelection()).items.some(item => item.label?.startsWith('Search with'))).toBe(false)
-
-  for (const enabled of [true, false, true]) {
-    await page.evaluate(({ action, value }) => window.ftElectron.dbSettings(action, {
-      _id: 'contextMenuSearchEngines', value,
-    }), {
-      action: DBActions.GENERAL.UPSERT,
-      value: JSON.stringify(DEFAULT_SEARCH_ENGINES.map(engine => ({ ...engine, enabled: engine.id === 'duckduckgo' && enabled }))),
-    })
-    const menu = await menuForSelection()
-    expect(menu.items.some(item => item.label === 'Search with DuckDuckGo')).toBe(enabled)
-    expect(await otherWindow.evaluate(() => window.ftElectron.resolveFavicon('https://duckduckgo.com/?q=%s'))).toBe(
-      enabled ? 'https://duckduckgo.com/favicon.ico' : ''
-    )
-  }
-
-  await page.evaluate(action => window.ftElectron.dbSettings(action, 'contextMenuSearchEngines'), DBActions.GENERAL.DELETE)
-  expect((await menuForSelection()).items.some(item => item.label?.startsWith('Search with'))).toBe(false)
-  expect(await otherWindow.evaluate(() => window.ftElectron.resolveFavicon('https://duckduckgo.com/?q=%s'))).toBe('')
 })

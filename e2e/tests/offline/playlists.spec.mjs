@@ -739,64 +739,60 @@ test.describe('custom playlist order', () => {
   })
 
   for (const layout of ['list', 'grid']) {
-    for (const scale of [100, 95]) {
-      test(`touch reorders ${layout} playlists without hiding the row at ${scale}% scale`, async ({ app, page }) => {
-        await page.setViewportSize({ width: layout === 'grid' ? 900 : 430, height: 1000 })
-        await app.electronApp.evaluate(({ BrowserWindow }, scale) => {
-          BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale / 100)
-        }, scale)
-        await dispatchStoreAction(page, 'updatePlaylistViewType', layout)
-        const session = await page.context().newCDPSession(page)
-        await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
-        await goTo(page, 'userplaylists')
-        await page.getByText('Large custom playlist').click()
+    test(`touch reorders ${layout} playlists without hiding the row`, { tag: '@scale' }, async ({ page, uiScale }) => {
+      await page.setViewportSize({ width: layout === 'grid' ? 900 : 430, height: 1000 })
+      await dispatchStoreAction(page, 'updatePlaylistViewType', layout)
+      const session = await page.context().newCDPSession(page)
+      await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+      await goTo(page, 'userplaylists')
+      await page.getByText('Large custom playlist').click()
 
-        const rows = page.locator('.playlistItemsCard [data-playlist-drag-item]')
-        const grip = rows.first().locator('.grabBar')
-        await expect(grip).toBeVisible()
-        const from = await grip.boundingBox()
-        const to = await rows.nth(1).boundingBox()
-        const touch = (type, x, y) => session.send('Input.dispatchTouchEvent', {
-          type,
-          touchPoints: x == null ? [] : [{ x, y, id: 0 }]
-        })
-        await touch('touchStart', from.x + from.width / 2, from.y + from.height / 2)
-        await expect(rows.first()).toHaveClass(/pointerDragging/)
-        await expect(rows.first()).toHaveCSS('opacity', '0.6')
-        await page.waitForTimeout(600)
-        await expect(page.locator('.mobileLinkActionsBackdrop')).toHaveCount(0)
-        await touch('touchMove', to.x + to.width / 2, to.y + to.height / 2)
-        await expect(rows.first().locator('.h3Title')).toHaveText('Custom playlist video 2')
-        await touch('touchEnd')
-        await expect(page.locator('.pointerDragging, .draggedVideo')).toHaveCount(0)
-        await expect.poll(() => page.evaluate(() => {
-          return window.$store
-            .getters.getPlaylist('large-custom-playlist').videos[0].title
-        })).toBe('Custom playlist video 2')
+      const rows = page.locator('.playlistItemsCard [data-playlist-drag-item]')
+      const grip = rows.first().locator('.grabBar')
+      await expect(grip).toBeVisible()
+      const from = await grip.boundingBox()
+      const to = await rows.nth(1).boundingBox()
+      const touch = (type, x, y) => session.send('Input.dispatchTouchEvent', {
+        type,
+        touchPoints: x == null ? [] : [{ x, y, id: 0 }]
+      })
+      await touch('touchStart', from.x + from.width / 2, from.y + from.height / 2)
+      await expect(rows.first()).toHaveClass(/pointerDragging/)
+      await expect(rows.first()).toHaveCSS('opacity', '0.6')
+      // Outlast the long-press delay to prove the drag does not open the link actions sheet.
+      await page.waitForTimeout(600)
+      await expect(page.locator('.mobileLinkActionsBackdrop')).toHaveCount(0)
+      await touch('touchMove', to.x + to.width / 2, to.y + to.height / 2)
+      await expect(rows.first().locator('.h3Title')).toHaveText('Custom playlist video 2')
+      await touch('touchEnd')
+      await expect(page.locator('.pointerDragging, .draggedVideo')).toHaveCount(0)
+      await expect.poll(() => page.evaluate(() => {
+        return window.$store
+          .getters.getPlaylist('large-custom-playlist').videos[0].title
+      })).toBe('Custom playlist video 2')
 
-        // Cancelling a subsequent gesture releases capture and leaves reordering usable.
-        const next = await rows.first().locator('.grabBar').boundingBox()
-        await touch('touchStart', next.x + next.width / 2, next.y + next.height / 2)
+      // Cancelling a subsequent gesture releases capture and leaves reordering usable.
+      const next = await rows.first().locator('.grabBar').boundingBox()
+      await touch('touchStart', next.x + next.width / 2, next.y + next.height / 2)
+      await touch('touchCancel')
+      await expect(page.locator('.pointerDragging, .draggedVideo, .hotZone')).toHaveCount(0)
+      await goTo(page, 'userplaylists')
+      await page.getByText('Large custom playlist').click()
+      await expect(rows.first().locator('.h3Title')).toHaveText('Custom playlist video 2')
+      if (layout === 'list' && uiScale === 100) {
+        const handle = await rows.first().locator('.grabBar').boundingBox()
+        const initialScroll = await page.evaluate(() => window.scrollY)
+        await touch('touchStart', handle.x + handle.width / 2, handle.y + handle.height / 2)
+        await touch('touchMove', handle.x + handle.width / 2, 990)
+        await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(initialScroll + 100)
+        await expect.poll(() => rows.evaluateAll(elements => elements.findIndex(element => element.classList.contains('pointerDragging')))).toBeGreaterThan(2)
         await touch('touchCancel')
         await expect(page.locator('.pointerDragging, .draggedVideo, .hotZone')).toHaveCount(0)
-        await goTo(page, 'userplaylists')
-        await page.getByText('Large custom playlist').click()
-        await expect(rows.first().locator('.h3Title')).toHaveText('Custom playlist video 2')
-        if (layout === 'list' && scale === 100) {
-          const handle = await rows.first().locator('.grabBar').boundingBox()
-          const initialScroll = await page.evaluate(() => window.scrollY)
-          await touch('touchStart', handle.x + handle.width / 2, handle.y + handle.height / 2)
-          await touch('touchMove', handle.x + handle.width / 2, 990)
-          await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(initialScroll + 100)
-          await expect.poll(() => rows.evaluateAll(elements => elements.findIndex(element => element.classList.contains('pointerDragging')))).toBeGreaterThan(2)
-          await touch('touchCancel')
-          await expect(page.locator('.pointerDragging, .draggedVideo, .hotZone')).toHaveCount(0)
-          const stoppedScroll = await page.evaluate(() => window.scrollY)
-          await page.waitForTimeout(150)
-          expect(await page.evaluate(() => window.scrollY)).toBe(stoppedScroll)
-        }
-      })
-    }
+        const stoppedScroll = await page.evaluate(() => window.scrollY)
+        await page.waitForTimeout(150)
+        expect(await page.evaluate(() => window.scrollY)).toBe(stoppedScroll)
+      }
+    })
   }
 
   test('touch honors a fast final destination before release', async ({ page }) => {
@@ -878,35 +874,32 @@ test.describe('custom playlist order', () => {
   })
 
   for (const position of ['top', 'bottom']) {
-    for (const scale of [0.95, 1.25]) {
-      test(`list playlist header clears overflowing ${position} tabs at ${scale} scale`, async ({ app, page }) => {
-        await setWindowSize(app, page, { width: 1350, height: 750 })
-        await goTo(page, 'userplaylists')
-        await page.getByText('Large custom playlist').click()
-        await page.evaluate(async ({ position, scale }) => {
-          window.ftElectron.setZoomFactor(scale)
-          const store = window.$store
-          store.commit('setPlaylistViewType', 'list')
-          store.commit('setTabBarPosition', position)
-          store.commit('setScrollbarThumbWidth', 20)
-          for (let index = 0; index < 18; index++) {
-            await window.ftElectron.tabs.create({ route: '/history', makeActive: false, lazyLoad: true })
-          }
-        }, { position, scale })
-        await expect(page.locator('.tabsContainer > .os-scrollbar-horizontal')).toHaveClass(/os-scrollbar-visible/)
-        await page.evaluate(() => window.scrollTo(0, Number.MAX_SAFE_INTEGER))
-        const header = page.locator('.playlistInfoContainer')
-        await expect.poll(() => header.evaluate((element, position) => {
-          const box = element.getBoundingClientRect()
-          const navigation = document.querySelector('.topNav').getBoundingClientRect()
-          const boundary = position === 'bottom' ? document.querySelector('.tabBar').getBoundingClientRect().top : innerHeight
-          return {
-            belowNavigation: box.top >= navigation.bottom - 1,
-            clearOfBottom: box.bottom <= boundary - 35
-          }
-        }, position)).toEqual({ belowNavigation: true, clearOfBottom: true })
-      })
-    }
+    test(`list playlist header clears overflowing ${position} tabs`, { tag: '@scale' }, async ({ app, page }) => {
+      await setWindowSize(app, page, { width: 1350, height: 750 })
+      await goTo(page, 'userplaylists')
+      await page.getByText('Large custom playlist').click()
+      await page.evaluate(async (position) => {
+        const store = window.$store
+        store.commit('setPlaylistViewType', 'list')
+        store.commit('setTabBarPosition', position)
+        store.commit('setScrollbarThumbWidth', 20)
+        for (let index = 0; index < 18; index++) {
+          await window.ftElectron.tabs.create({ route: '/history', makeActive: false, lazyLoad: true })
+        }
+      }, position)
+      await expect(page.locator('.tabsContainer > .os-scrollbar-horizontal')).toHaveClass(/os-scrollbar-visible/)
+      await page.evaluate(() => window.scrollTo(0, Number.MAX_SAFE_INTEGER))
+      const header = page.locator('.playlistInfoContainer')
+      await expect.poll(() => header.evaluate((element, position) => {
+        const box = element.getBoundingClientRect()
+        const navigation = document.querySelector('.topNav').getBoundingClientRect()
+        const boundary = position === 'bottom' ? document.querySelector('.tabBar').getBoundingClientRect().top : innerHeight
+        return {
+          belowNavigation: box.top >= navigation.bottom - 1,
+          clearOfBottom: box.bottom <= boundary - 35
+        }
+      }, position)).toEqual({ belowNavigation: true, clearOfBottom: true })
+    })
   }
 
   test('moves a video to the top from its options menu', async ({ page }) => {

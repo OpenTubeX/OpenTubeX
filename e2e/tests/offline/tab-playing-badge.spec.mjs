@@ -16,7 +16,7 @@ for (const iconPack of ['material', 'remix']) {
       }
     })
 
-    test('keeps tab identities visible with corner playback badges', async ({ page }, testInfo) => {
+    test('keeps tab identities visible with corner playback badges', { tag: '@scale' }, async ({ page }, testInfo) => {
       const avatar = await readFile(new URL('../../fixtures/media/avatar.png', import.meta.url))
       const ids = await page.evaluate(async avatarDataUrl => {
         const tabs = []
@@ -51,32 +51,26 @@ for (const iconPack of ['material', 'remix']) {
         await window.ftElectron.tabs.setGroup([id], group.id)
       }, ids[0])
       await expect(tabs[0].locator('.groupBadge')).toBeVisible()
-      for (const scale of [100, 125]) {
-        for (const position of ['top', 'bottom', 'left', 'right']) {
-          await page.evaluate(async ({ scale, position }) => {
-            const store = window.$store
-            await store.dispatch('updateUiScale', scale)
-            await store.dispatch('updateTabBarPosition', position)
-          }, { scale, position })
-          await tabs[0].hover()
-          await expect(tabs[0].locator('.closeButton')).toHaveCSS('opacity', '1')
-          for (const [index, tab] of tabs.entries()) {
-            await expect(identities[index]).toBeVisible()
-            await expect.poll(() => tab.evaluate(element => {
-              const bounds = element.getBoundingClientRect()
-              const icon = element.querySelector('.tabIconContainer').getBoundingClientRect()
-              const badge = element.querySelector('.playingBadge').getBoundingClientRect()
-              const title = element.querySelector('.tabTitleText').getBoundingClientRect()
-              const close = element.querySelector('.closeButton').getBoundingClientRect()
-              const corner = element.classList.contains('pinned')
-                ? badge.left < icon.left && badge.right > icon.left && badge.right < icon.right
-                : badge.left > icon.left && badge.left < icon.right && badge.right > icon.right
-              return corner &&
-                badge.top > icon.top && badge.top < icon.bottom && badge.bottom > icon.bottom &&
-                badge.left >= bounds.left && badge.right <= title.left && badge.bottom <= bounds.bottom &&
-                badge.right <= close.left
-            })).toBe(true)
-          }
+      for (const position of ['top', 'bottom', 'left', 'right']) {
+        await page.evaluate(position => window.$store.dispatch('updateTabBarPosition', position), position)
+        await tabs[0].hover()
+        await expect(tabs[0].locator('.closeButton')).toHaveCSS('opacity', '1')
+        for (const [index, tab] of tabs.entries()) {
+          await expect(identities[index]).toBeVisible()
+          await expect.poll(() => tab.evaluate(element => {
+            const bounds = element.getBoundingClientRect()
+            const icon = element.querySelector('.tabIconContainer').getBoundingClientRect()
+            const badge = element.querySelector('.playingBadge').getBoundingClientRect()
+            const title = element.querySelector('.tabTitleText').getBoundingClientRect()
+            const close = element.querySelector('.closeButton').getBoundingClientRect()
+            const corner = element.classList.contains('pinned')
+              ? badge.left < icon.left && badge.right > icon.left && badge.right < icon.right
+              : badge.left > icon.left && badge.left < icon.right && badge.right > icon.right
+            return corner &&
+              badge.top > icon.top && badge.top < icon.bottom && badge.bottom > icon.bottom &&
+              badge.left >= bounds.left && badge.right <= title.left && badge.bottom <= bounds.bottom &&
+              badge.right <= close.left
+          })).toBe(true)
         }
       }
 

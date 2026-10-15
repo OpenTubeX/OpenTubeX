@@ -79,50 +79,52 @@ async function expectBadgeBelowLabel(control, textSelector) {
 }
 
 for (const currentLocale of ['en-US', 'de-DE']) {
-  for (const uiScale of [100, 125]) {
-    test.describe(`performance indicator layout in ${currentLocale} at ${uiScale}%`, () => {
-      test.use({ seed: { settings: { currentLocale, uiScale } } })
+  test.describe(`performance indicator layout in ${currentLocale}`, { tag: '@scale' }, () => {
+    test.use({ seed: { settings: { currentLocale } } })
 
-      test('wraps badges below switch labels without squeezing the text', async ({ page }) => {
-        await page.setViewportSize({ width: 375, height: 812 })
-        const general = await goToSettingsSection(page, 'general')
-        const toggle = general.locator('[data-setting-key="updateRelativeTimestamps"]')
-        const text = toggle.locator('.switch-label-text')
-        const widthWithoutBadge = (await text.boundingBox()).width
+    test('wraps badges below switch labels without squeezing the text', async ({ page, uiScale }) => {
+      // Keep the same CSS-pixel widths at every UI scale.
+      const setWidth = width => page.setViewportSize({ width: Math.round(width * uiScale / 100), height: 812 })
+      await setWidth(375)
+      const general = await goToSettingsSection(page, 'general')
+      const toggle = general.locator('[data-setting-key="updateRelativeTimestamps"]')
+      const text = toggle.locator('.switch-label-text')
+      const widthWithoutBadge = (await text.boundingBox()).width
 
-        await page.evaluate(() => {
-          const store = window.$store
-          return store.dispatch('updateShowPerformanceImpactIndicators', true)
-        })
-        await expect(toggle.locator('.performanceImpact')).toBeVisible()
-        expect((await text.boundingBox()).width).toBeGreaterThanOrEqual(widthWithoutBadge - 1)
-
-        for (const width of [375, 320]) {
-          await page.setViewportSize({ width, height: 812 })
-          for (const direction of ['ltr', 'rtl']) {
-            await page.evaluate(value => { document.documentElement.dir = value }, direction)
-            await expectBadgeBelowLabel(toggle, '.switch-label-text')
-          }
-        }
+      await page.evaluate(() => {
+        const store = window.$store
+        return store.dispatch('updateShowPerformanceImpactIndicators', true)
       })
+      await expect(toggle.locator('.performanceImpact')).toBeVisible()
+      expect((await text.boundingBox()).width).toBeGreaterThanOrEqual(widthWithoutBadge - 1)
 
-      test('wraps badges below slider labels without crowding the value or help', async ({ page }) => {
-        await page.setViewportSize({ width: 375, height: 812 })
-        await page.evaluate(() => {
-          const store = window.$store
-          return store.dispatch('updateShowPerformanceImpactIndicators', true)
-        })
-        const streaming = await goToSettingsSection(page, 'playback')
-        const slider = streaming.locator('.pure-material-slider').filter({ has: page.locator('.performanceImpact') })
-        await expect(slider.locator('.performanceImpact')).toBeVisible()
-        for (const width of [375, 320]) {
-          await page.setViewportSize({ width, height: 812 })
-          for (const direction of ['ltr', 'rtl']) {
-            await page.evaluate(value => { document.documentElement.dir = value }, direction)
-            await expectBadgeBelowLabel(slider, '.label')
-          }
+      for (const width of [375, 320]) {
+        await setWidth(width)
+        for (const direction of ['ltr', 'rtl']) {
+          await page.evaluate(value => { document.documentElement.dir = value }, direction)
+          await expectBadgeBelowLabel(toggle, '.switch-label-text')
         }
-      })
+      }
     })
-  }
+
+    test('wraps badges below slider labels without crowding the value or help', async ({ page, uiScale }) => {
+      // Keep the same CSS-pixel widths at every UI scale.
+      const setWidth = width => page.setViewportSize({ width: Math.round(width * uiScale / 100), height: 812 })
+      await setWidth(375)
+      await page.evaluate(() => {
+        const store = window.$store
+        return store.dispatch('updateShowPerformanceImpactIndicators', true)
+      })
+      const streaming = await goToSettingsSection(page, 'playback')
+      const slider = streaming.locator('.pure-material-slider').filter({ has: page.locator('.performanceImpact') })
+      await expect(slider.locator('.performanceImpact')).toBeVisible()
+      for (const width of [375, 320]) {
+        await setWidth(width)
+        for (const direction of ['ltr', 'rtl']) {
+          await page.evaluate(value => { document.documentElement.dir = value }, direction)
+          await expectBadgeBelowLabel(slider, '.label')
+        }
+      }
+    })
+  })
 }

@@ -7,12 +7,18 @@ test('moves utility windows without rerendering their controls on every pointer 
   const session = await page.context().newCDPSession(page)
   await session.send('Emulation.setCPUThrottlingRate', { rate: 6 })
   await session.send('Performance.enable')
+  const layoutCount = async () => (await session.send('Performance.getMetrics')).metrics.find(metric => metric.name === 'LayoutCount').value
   for (const view of [null, 'about', 'downloads']) {
     await page.evaluate(view => window.$store.dispatch('showSettingsWindow', view), view)
     const dialog = page.locator('.settingsWindow')
     await expect(dialog).toBeVisible()
     await expect(dialog).not.toHaveClass(/settings-window-enter-active/)
-    await page.waitForTimeout(300)
+    // Let post-open layout work settle before sampling.
+    await expect.poll(async () => {
+      const layouts = await layoutCount()
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+      return await layoutCount() - layouts
+    }).toBe(0)
     const before = await session.send('Performance.getMetrics')
     const timing = await page.evaluate(async () => {
       const dialog = document.querySelector('.settingsWindow')

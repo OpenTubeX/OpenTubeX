@@ -64,43 +64,40 @@ async function expectPlacement(popup, side) {
   }, side)).toBeGreaterThanOrEqual(7)
 }
 
-for (const scale of [100, 95, 125]) {
-  for (const initialSide of ['below', 'above']) {
-    test(`color picker flips from ${initialSide} after real ancestor scrolling at ${scale}%`, async ({ app, page }) => {
-      await page.emulateMedia({ reducedMotion: 'reduce' })
-      await page.evaluate(value => window.ftElectron.setZoomFactor(value / 100), scale)
-      await setWindowSize(app, page, { width: 1500, height: 1400 })
-      const appearance = await goToSettingsSection(page, 'appearance')
-      await appearance.getByRole('button', { name: 'Create custom theme' }).click()
-      const settingsWindow = page.locator('.settingsWindow')
-      await settingsWindow.getByRole('button', { name: 'Maximize', exact: true }).click()
-      await expect(settingsWindow).toHaveClass(/maximized/)
-      // Leave real scroll room on both sides without changing trigger geometry.
-      await page.locator('.customThemeEditor .colorGrid').evaluate(element => {
-        const spacer = document.createElement('div')
-        spacer.style.gridColumn = '1 / -1'
-        spacer.style.blockSize = `${innerHeight * 2}px`
-        element.prepend(spacer)
-        element.append(spacer.cloneNode())
-      })
-      const trigger = page.locator('.customThemeEditor .colorFieldTrigger').first()
-      await moveTriggerToEdge(trigger, initialSide === 'below' ? 'top' : 'bottom')
-      await trigger.evaluate(button => button.click())
-      const popup = page.locator('.colorPickerPopover')
-      await expect(popup).toBeVisible()
-      await expectPlacement(popup, initialSide)
-      const scroller = page.locator('.customThemeEditor .colorGrid')
-      const initialScrollTop = await scroller.evaluate(element => element.scrollTop)
-
-      await moveTriggerToEdge(trigger, initialSide === 'below' ? 'bottom' : 'top')
-      expect(Math.abs(await scroller.evaluate(element => element.scrollTop) - initialScrollTop)).toBeGreaterThan(100)
-      // The trigger stays visible, with enough space for the entire popup on
-      // the opposite side. Clamping across the trigger is not a placement flip.
-      await expectPlacement(popup, initialSide === 'below' ? 'above' : 'below')
-      await expect.poll(() => popup.evaluate(element => {
-        const rect = element.getBoundingClientRect()
-        return rect.top >= 11 && rect.bottom <= innerHeight - 11
-      })).toBe(true)
+for (const initialSide of ['below', 'above']) {
+  test(`color picker flips from ${initialSide} after real ancestor scrolling`, { tag: '@scale' }, async ({ app, page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await setWindowSize(app, page, { width: 1500, height: 1400 })
+    const appearance = await goToSettingsSection(page, 'appearance')
+    await appearance.getByRole('button', { name: 'Create custom theme' }).click()
+    const settingsWindow = page.locator('.settingsWindow')
+    await settingsWindow.getByRole('button', { name: 'Maximize', exact: true }).click()
+    await expect(settingsWindow).toHaveClass(/maximized/)
+    // Leave real scroll room on both sides without changing trigger geometry.
+    await page.locator('.customThemeEditor .colorGrid').evaluate(element => {
+      const spacer = document.createElement('div')
+      spacer.style.gridColumn = '1 / -1'
+      spacer.style.blockSize = `${innerHeight * 2}px`
+      element.prepend(spacer)
+      element.append(spacer.cloneNode())
     })
-  }
+    const trigger = page.locator('.customThemeEditor .colorFieldTrigger').first()
+    await moveTriggerToEdge(trigger, initialSide === 'below' ? 'top' : 'bottom')
+    await trigger.evaluate(button => button.click())
+    const popup = page.locator('.colorPickerPopover')
+    await expect(popup).toBeVisible()
+    await expectPlacement(popup, initialSide)
+    const scroller = page.locator('.customThemeEditor .colorGrid')
+    const initialScrollTop = await scroller.evaluate(element => element.scrollTop)
+
+    await moveTriggerToEdge(trigger, initialSide === 'below' ? 'bottom' : 'top')
+    expect(Math.abs(await scroller.evaluate(element => element.scrollTop) - initialScrollTop)).toBeGreaterThan(100)
+    // The trigger stays visible, with enough space for the entire popup on
+    // the opposite side. Clamping across the trigger is not a placement flip.
+    await expectPlacement(popup, initialSide === 'below' ? 'above' : 'below')
+    await expect.poll(() => popup.evaluate(element => {
+      const rect = element.getBoundingClientRect()
+      return rect.top >= 11 && rect.bottom <= innerHeight - 11
+    })).toBe(true)
+  })
 }

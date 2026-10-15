@@ -1,5 +1,5 @@
 import { test, expect, goTo, sel } from '../../helpers/app.mjs'
-import { expectTabHighlightAligned, expectTabHighlightStyle } from '../../helpers/tabs.mjs'
+import { expectTabHighlightAligned, expectTabHighlightStyle, tabHighlightAnimations } from '../../helpers/tabs.mjs'
 import { sampleColors } from '../../helpers/colors.mjs'
 
 const now = Date.now()
@@ -291,6 +291,7 @@ test.describe('subscriptions feed tab indicator', () => {
       }))
     }, CHANNEL_ID)
 
+    // Give a background refresh time to (wrongly) reach the retained panel.
     await page.waitForTimeout(600)
     expect(await retainedPanel.textContent()).not.toContain('Background update')
 
@@ -304,10 +305,9 @@ test.describe('subscriptions feed tab indicator', () => {
     await page.locator('[data-subscription-feed-tab="shorts"]').click()
     await expect(page.locator('.tab.selectedTab')).toHaveText(/Shorts/)
 
-    // Wait out the 140ms crossfade
-    await page.waitForTimeout(400)
-
-    await expectTabHighlightAligned(page.locator('[data-subscription-feed-tab="shorts"]'))
+    const shorts = page.locator('[data-subscription-feed-tab="shorts"]')
+    await expect.poll(() => shorts.evaluate(tabHighlightAnimations)).toEqual([])
+    await expectTabHighlightAligned(shorts)
     await attachScreenshot('indicator under the Shorts tab')
   })
 
@@ -322,6 +322,7 @@ test.describe('subscriptions feed tab indicator', () => {
       document.querySelector('[data-subscription-feed-tab="videos"]').click()
     })
 
+    // Let a stale Shorts activation land if it would.
     await page.waitForTimeout(400)
 
     await expect(page.locator('.tab.selectedTab')).toHaveText(/Videos/)

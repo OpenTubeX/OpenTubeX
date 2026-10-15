@@ -5,16 +5,13 @@ import { test, expect, sel } from '../../helpers/app.mjs'
 const CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
 const indicatorSelector = '.channelDetails:visible [role="tab"][aria-selected="true"]'
 
-test.use({
-  seed: {
-    settings: {
-      backendPreference: 'invidious',
-      defaultInvidiousInstance: 'https://invidious.test',
-      reducedMotion: 'off',
-      uiScale: 95
-    }
-  }
-})
+const settings = {
+  backendPreference: 'invidious',
+  defaultInvidiousInstance: 'https://invidious.test',
+  reducedMotion: 'off'
+}
+
+test.use({ seed: { settings: { ...settings, uiScale: 95 } } })
 
 test.beforeEach(async ({ page }) => {
   await page.route('https://invidious.test/api/v1/channels/**', route => route.fulfill({
@@ -131,38 +128,6 @@ test('hides channel tab icons and preserves full labels when space is limited', 
   )).toBe(true)
   await expectTabScrollRange(page.locator('.channelDetails:visible .tabs'))
   await captureAppFramebuffer(app, testInfo, 'channel-tabs-full-labels-without-icons')
-})
-
-test('hides channel icons when the gaps would otherwise make the row overflow', async ({ app, page }, testInfo) => {
-  await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1800, 900))
-  const tabs = page.locator('.channelDetails:visible .tabs')
-  for (const scale of [95, 125]) {
-    await page.evaluate(value => window.$store.dispatch('updateUiScale', value), scale)
-    await tabs.evaluate(container => { container.style.cssText = 'flex: none; inline-size: 1200px' })
-    await expect(page.locator('#videosTab .channelTabIcon')).toBeVisible()
-    const widthWithIcons = await tabs.evaluate(container => {
-      const content = container.querySelector('.tabsContent')
-      const buttons = [...content.querySelectorAll('.tab')]
-      const width = buttons.reduce((sum, tab) => sum + tab.getBoundingClientRect().width, 0)
-      const gaps = (buttons.length - 1) * parseFloat(getComputedStyle(content).columnGap)
-      container.style.flex = 'none'
-      container.style.inlineSize = `${width + gaps / 2}px`
-      return width + gaps
-    })
-    await expect(page.locator('#videosTab .channelTabIcon')).toBeHidden()
-    await expect.poll(() => tabs.evaluate(container => container.scrollWidth - container.clientWidth)).toBeLessThanOrEqual(1)
-    await expectAligned(page)
-    if (scale === 95) {
-      for (const colorScheme of ['dark', 'light']) {
-        await page.emulateMedia({ colorScheme })
-        await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
-        await captureAppFramebuffer(app, testInfo, `channel-tabs-fit-${colorScheme}`)
-      }
-    }
-    await tabs.evaluate((container, width) => { container.style.inlineSize = `${width + 2}px` }, widthWithIcons)
-    await expect(page.locator('#videosTab .channelTabIcon')).toBeVisible()
-    await expect.poll(() => tabs.evaluate(container => container.scrollWidth - container.clientWidth)).toBeLessThanOrEqual(1)
-  }
 })
 
 test('keeps channel header rows evenly spaced below the banner', async ({ app, page }, testInfo) => {
@@ -549,80 +514,6 @@ test('clamps channel tab scrolling after resize and locale changes', async ({ ap
   }
 })
 
-test('channel panel and document keyboard navigation crossfade the selected highlight', async ({ page }) => {
-  await page.evaluate(() => window.$store.dispatch('updateAnimationSpeed', 25))
-  for (const scale of [100, 95, 125]) {
-    await page.evaluate(value => window.$store.dispatch('updateUiScale', value), scale)
-    for (const source of ['body', 'panel', 'appTab']) {
-      await page.locator('#videosTab').click()
-      await expectAligned(page)
-      if (source === 'body') await page.evaluate(() => document.activeElement.blur())
-      else if (source === 'panel') {
-        await page.locator('#aboutTab').click()
-        await expectAligned(page)
-        await page.locator('[role="tabpanel"][aria-labelledby="aboutTab"]').evaluate(panel => { panel.tabIndex = -1; panel.focus() })
-      } else await page.locator('.tab[data-tab-id].active').click()
-      expect(await page.evaluate(source => {
-        const focused = document.activeElement
-        if (source === 'body') return focused === document.body
-        return focused.matches(source === 'panel' ? '[role="tabpanel"]' : '.tab[data-tab-id]')
-      }, source)).toBe(true)
-      await page.locator('.channelDetails:visible .materialTabs').evaluate(container => {
-        window.__panelTabTransitions = []
-        const capture = event => {
-          if (event.propertyName !== 'opacity' || event.pseudoElement !== '::before') return
-          window.__panelTabTransitions.push(event.propertyName)
-          container.removeEventListener('transitionrun', capture)
-        }
-        container.addEventListener('transitionrun', capture)
-      })
-      await page.keyboard.press('ArrowRight')
-      await expect(page.locator(source === 'panel' ? '#videosTab' : '#shortsTab')).toHaveAttribute('aria-selected', 'true')
-      await expect.poll(() => page.evaluate(() => window.__panelTabTransitions)).toContain('opacity')
-      await expectAligned(page)
-    }
-  }
-})
-
-test('channel search restores highlights immediately unless a tab is deliberately selected', async ({ page }) => {
-  await page.evaluate(() => window.$store.dispatch('updateAnimationSpeed', 25))
-  const search = page.locator('.channelSearch input')
-  for (const scale of [100, 95, 125]) {
-    await page.evaluate(value => window.$store.dispatch('updateUiScale', value), scale)
-    for (const key of [null, 'Enter', ' ']) {
-      await search.fill('animation')
-      await search.press('Enter')
-      await expect(page.locator(indicatorSelector)).toHaveCount(0)
-      expect(await page.locator('.channelDetails:visible [role="tab"]').evaluateAll(tabs => tabs.some(tab =>
-        tab.getAnimations({ subtree: true }).some(animation => animation instanceof CSSTransition && animation.transitionProperty === 'opacity' && animation.effect.target === tab && animation.effect.pseudoElement === '::before')
-      ))).toBe(false)
-      expect(await selectTabWithHighlightAnimation(page.locator('#aboutTab'), key)).toEqual({ property: 'opacity', playbackRate: 0.25, duration: 140 })
-      await expectAligned(page)
-    }
-
-    await search.fill('animation')
-    await search.press('Enter')
-    await expect(page.locator(indicatorSelector)).toHaveCount(0)
-    const restored = await search.evaluate(async input => {
-      input.value = ''
-      input.dispatchEvent(new InputEvent('input', { bubbles: true }))
-      // Measure on the first frame that renders the tabs again; slow runners can need more than one.
-      let tab
-      for (let frame = 0; frame < 60 && !tab; frame++) {
-        await new Promise(resolve => requestAnimationFrame(resolve))
-        tab = [...document.querySelectorAll('.channelDetails [role="tab"][aria-selected="true"]')].find(tab => tab.getClientRects().length > 0)
-      }
-      if (!tab) return 'selected tab was not restored'
-      return {
-        opacity: getComputedStyle(tab, '::before').opacity,
-        transitions: tab.getAnimations({ subtree: true }).filter(animation =>
-          animation instanceof CSSTransition && animation.transitionProperty === 'opacity').length
-      }
-    })
-    expect(restored).toEqual({ opacity: '1', transitions: 0 })
-  }
-})
-
 test('handles quick switches, search, background tabs, and reduced motion', async ({ page }) => {
   await page.evaluate(() => {
     document.getElementById('aboutTab').click()
@@ -676,6 +567,107 @@ test('desktop channel tabs size to their content and show icons in both packs', 
     await expectAligned(page)
     await captureAppFramebuffer(app, testInfo, `channel-tab-icons-${pack}`)
   }
+})
+
+test.describe(() => {
+  test.use({ seed: { settings } })
+
+  test('hides channel icons when the gaps would otherwise make the row overflow', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
+    await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1800, 900))
+    const tabs = page.locator('.channelDetails:visible .tabs')
+    await tabs.evaluate(container => { container.style.cssText = 'flex: none; inline-size: 1200px' })
+    await expect(page.locator('#videosTab .channelTabIcon')).toBeVisible()
+    const widthWithIcons = await tabs.evaluate(container => {
+      const content = container.querySelector('.tabsContent')
+      const buttons = [...content.querySelectorAll('.tab')]
+      const width = buttons.reduce((sum, tab) => sum + tab.getBoundingClientRect().width, 0)
+      const gaps = (buttons.length - 1) * parseFloat(getComputedStyle(content).columnGap)
+      container.style.flex = 'none'
+      container.style.inlineSize = `${width + gaps / 2}px`
+      return width + gaps
+    })
+    await expect(page.locator('#videosTab .channelTabIcon')).toBeHidden()
+    await expect.poll(() => tabs.evaluate(container => container.scrollWidth - container.clientWidth)).toBeLessThanOrEqual(1)
+    await expectAligned(page)
+    if (uiScale === 100) {
+      for (const colorScheme of ['dark', 'light']) {
+        await page.emulateMedia({ colorScheme })
+        await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+        await captureAppFramebuffer(app, testInfo, `channel-tabs-fit-${colorScheme}`)
+      }
+    }
+    await tabs.evaluate((container, width) => { container.style.inlineSize = `${width + 2}px` }, widthWithIcons)
+    await expect(page.locator('#videosTab .channelTabIcon')).toBeVisible()
+    await expect.poll(() => tabs.evaluate(container => container.scrollWidth - container.clientWidth)).toBeLessThanOrEqual(1)
+  })
+
+  test('channel panel and document keyboard navigation crossfade the selected highlight', { tag: '@scale' }, async ({ page }) => {
+    await page.evaluate(() => window.$store.dispatch('updateAnimationSpeed', 25))
+    for (const source of ['body', 'panel', 'appTab']) {
+      await page.locator('#videosTab').click()
+      await expectAligned(page)
+      if (source === 'body') await page.evaluate(() => document.activeElement.blur())
+      else if (source === 'panel') {
+        await page.locator('#aboutTab').click()
+        await expectAligned(page)
+        await page.locator('[role="tabpanel"][aria-labelledby="aboutTab"]').evaluate(panel => { panel.tabIndex = -1; panel.focus() })
+      } else await page.locator('.tab[data-tab-id].active').click()
+      expect(await page.evaluate(source => {
+        const focused = document.activeElement
+        if (source === 'body') return focused === document.body
+        return focused.matches(source === 'panel' ? '[role="tabpanel"]' : '.tab[data-tab-id]')
+      }, source)).toBe(true)
+      await page.locator('.channelDetails:visible .materialTabs').evaluate(container => {
+        window.__panelTabTransitions = []
+        const capture = event => {
+          if (event.propertyName !== 'opacity' || event.pseudoElement !== '::before') return
+          window.__panelTabTransitions.push(event.propertyName)
+          container.removeEventListener('transitionrun', capture)
+        }
+        container.addEventListener('transitionrun', capture)
+      })
+      await page.keyboard.press('ArrowRight')
+      await expect(page.locator(source === 'panel' ? '#videosTab' : '#shortsTab')).toHaveAttribute('aria-selected', 'true')
+      await expect.poll(() => page.evaluate(() => window.__panelTabTransitions)).toContain('opacity')
+      await expectAligned(page)
+    }
+  })
+
+  test('channel search restores highlights immediately unless a tab is deliberately selected', { tag: '@scale' }, async ({ page }) => {
+    await page.evaluate(() => window.$store.dispatch('updateAnimationSpeed', 25))
+    const search = page.locator('.channelSearch input')
+    for (const key of [null, 'Enter', ' ']) {
+      await search.fill('animation')
+      await search.press('Enter')
+      await expect(page.locator(indicatorSelector)).toHaveCount(0)
+      expect(await page.locator('.channelDetails:visible [role="tab"]').evaluateAll(tabs => tabs.some(tab =>
+        tab.getAnimations({ subtree: true }).some(animation => animation instanceof CSSTransition && animation.transitionProperty === 'opacity' && animation.effect.target === tab && animation.effect.pseudoElement === '::before')
+      ))).toBe(false)
+      expect(await selectTabWithHighlightAnimation(page.locator('#aboutTab'), key)).toEqual({ property: 'opacity', playbackRate: 0.25, duration: 140 })
+      await expectAligned(page)
+    }
+
+    await search.fill('animation')
+    await search.press('Enter')
+    await expect(page.locator(indicatorSelector)).toHaveCount(0)
+    const restored = await search.evaluate(async input => {
+      input.value = ''
+      input.dispatchEvent(new InputEvent('input', { bubbles: true }))
+      // Measure on the first frame that renders the tabs again; slow runners can need more than one.
+      let tab
+      for (let frame = 0; frame < 60 && !tab; frame++) {
+        await new Promise(resolve => requestAnimationFrame(resolve))
+        tab = [...document.querySelectorAll('.channelDetails [role="tab"][aria-selected="true"]')].find(tab => tab.getClientRects().length > 0)
+      }
+      if (!tab) return 'selected tab was not restored'
+      return {
+        opacity: getComputedStyle(tab, '::before').opacity,
+        transitions: tab.getAnimations({ subtree: true }).filter(animation =>
+          animation instanceof CSSTransition && animation.transitionProperty === 'opacity').length
+      }
+    })
+    expect(restored).toEqual({ opacity: '1', transitions: 0 })
+  })
 })
 
 test('clearing the channel search right after searching does not reload the channel', async ({ page }) => {

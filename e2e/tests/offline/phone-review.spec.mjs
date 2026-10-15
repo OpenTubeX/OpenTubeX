@@ -369,7 +369,7 @@ test('player options stop updating their scrollbars when idle', async ({ app, pa
   await expect(page.locator('.phonePlayerOptionsClose')).toBeFocused()
   const menu = page.locator('.phonePlayerOptions[open] .shaka-overflow-menu')
   await expect(menu).toBeVisible()
-  await page.waitForTimeout(400)
+  await page.locator('.phonePlayerOptions[open]').evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
   const mutations = await menu.evaluate(el => new Promise(resolve => {
     let count = 0
     const targets = {}

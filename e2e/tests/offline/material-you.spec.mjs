@@ -128,60 +128,50 @@ test('desktop system accents reach new windows, startup backgrounds and live ren
   }
 })
 
-test('hiding system accent controls clamps settings at the bottom at every UI scale', async ({ page }) => {
+test('hiding system accent controls clamps settings at the bottom', { tag: '@scale' }, async ({ page }) => {
   const section = await goToSettingsSection(page, 'theme')
   const scroller = page.locator('.settingsContent')
-  for (const scale of [100, 125]) {
-    await page.evaluate(async scale => {
-      const store = window.$store
-      await store.dispatch('updateUiScale', scale)
-      await store.dispatch('updateBaseTheme', 'materialLight')
-    }, scale)
-    await expect(section.locator('.materialColorSettings')).toBeVisible()
-    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
-    await expectScrollAtRenderedEnd(scroller)
-    const oldRange = await scroller.evaluate(element => element.scrollHeight - element.clientHeight)
-    await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'dynamic'))
-    await expect(section.locator('.materialColorSettings')).toHaveCount(0)
-    await expectScrollAtRenderedEnd(scroller)
-    await expect.poll(() => scroller.evaluate(element => element.scrollHeight - element.clientHeight)).toBeLessThan(oldRange)
-    await expect.poll(() => scroller.evaluate(element => {
-      const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
-      const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
-      const thumb = scrollbar.querySelector('.os-scrollbar-handle').getBoundingClientRect()
-      return !scrollbar.classList.contains('os-scrollbar-unusable') &&
-        Math.abs(thumb.bottom - track.bottom) * devicePixelRatio <= 2 &&
-        Math.abs(thumb.height / track.height - element.clientHeight / element.scrollHeight) < 0.02
-    })).toBe(true)
-  }
+  await expect(section.locator('.materialColorSettings')).toBeVisible()
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expectScrollAtRenderedEnd(scroller)
+  const oldRange = await scroller.evaluate(element => element.scrollHeight - element.clientHeight)
+  await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'dynamic'))
+  await expect(section.locator('.materialColorSettings')).toHaveCount(0)
+  await expectScrollAtRenderedEnd(scroller)
+  await expect.poll(() => scroller.evaluate(element => element.scrollHeight - element.clientHeight)).toBeLessThan(oldRange)
+  await expect.poll(() => scroller.evaluate(element => {
+    const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+    const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
+    const thumb = scrollbar.querySelector('.os-scrollbar-handle').getBoundingClientRect()
+    return !scrollbar.classList.contains('os-scrollbar-unusable') &&
+      Math.abs(thumb.bottom - track.bottom) * devicePixelRatio <= 2 &&
+      Math.abs(thumb.height / track.height - element.clientHeight / element.scrollHeight) < 0.02
+  })).toBe(true)
 })
 
-test('Material accent box has vertical padding and a clickable custom swatch', async ({ page }) => {
+test('Material accent box has vertical padding and a clickable custom swatch', { tag: '@scale' }, async ({ page }) => {
   const section = await goToSettingsSection(page, 'theme')
   const box = section.locator('.materialColorSettings')
   const customSwatch = box.locator('.materialCustomSwatch .colorFieldTrigger')
   const picker = page.getByRole('dialog', { name: 'Material accent color' })
-  for (const scale of [100, 125]) {
-    await page.evaluate(scale => window.$store.dispatch('updateUiScale', scale), scale)
-    const padding = await box.evaluate(element => {
-      const bounds = element.getBoundingClientRect()
-      const header = element.querySelector('.materialColorHeader').getBoundingClientRect()
-      const swatches = element.querySelector('.materialColorSwatches').getBoundingClientRect()
-      return [header.top - bounds.top, bounds.bottom - swatches.bottom]
-    })
-    for (const value of padding) expect(value).toBeGreaterThanOrEqual(23.5)
-    await expect(customSwatch).toBeVisible()
-    await expect(customSwatch.locator('.materialCustomColor')).toHaveCSS('background-color', 'rgb(255, 255, 0)')
-    await customSwatch.click()
-    await expect(picker).toBeVisible()
-    await expect(customSwatch).toHaveAttribute('aria-expanded', 'true')
-    await page.keyboard.press('Escape')
-    await expect(customSwatch).toBeFocused()
-    await expect(customSwatch).toHaveAttribute('aria-expanded', 'false')
-    await customSwatch.press('Enter')
-    await expect(picker).toBeVisible()
-    await page.keyboard.press('Escape')
-  }
+  const padding = await box.evaluate(element => {
+    const bounds = element.getBoundingClientRect()
+    const header = element.querySelector('.materialColorHeader').getBoundingClientRect()
+    const swatches = element.querySelector('.materialColorSwatches').getBoundingClientRect()
+    return [header.top - bounds.top, bounds.bottom - swatches.bottom]
+  })
+  for (const value of padding) expect(value).toBeGreaterThanOrEqual(23.5)
+  await expect(customSwatch).toBeVisible()
+  await expect(customSwatch.locator('.materialCustomColor')).toHaveCSS('background-color', 'rgb(255, 255, 0)')
+  await customSwatch.click()
+  await expect(picker).toBeVisible()
+  await expect(customSwatch).toHaveAttribute('aria-expanded', 'true')
+  await page.keyboard.press('Escape')
+  await expect(customSwatch).toBeFocused()
+  await expect(customSwatch).toHaveAttribute('aria-expanded', 'false')
+  await customSwatch.press('Enter')
+  await expect(picker).toBeVisible()
+  await page.keyboard.press('Escape')
 })
 
 function contrast(first, second) {
@@ -223,87 +213,81 @@ async function fieldBoundaryContrast(app, control) {
   return Math.max(...edge.map(color => contrast(color, surface)))
 }
 
-for (const scale of [100, 125]) {
-  for (const [theme, label] of variants) {
-    test(`${label} retains rendered text and control contrast at ${scale}%`, async ({ app, page }, testInfo) => {
-      await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'dark' })
-      const section = await goToSettingsSection(page, 'theme')
-      await page.evaluate(async ({ theme, scale }) => {
-        const store = window.$store
-        await store.dispatch('updateUiScale', scale)
-        await store.dispatch('updateBaseTheme', theme)
-      }, { theme, scale })
-      await expect(page.locator('body')).toHaveClass(/dynamicColors/)
-      await expect(section.getByRole('combobox', { name: /^Base theme/i })).toHaveText(label)
-      await expect(section.getByRole('combobox', { name: /Main color theme/i })).toHaveCount(0)
-      await expect(section.getByRole('button', { name: 'Material accent color' })).toBeVisible()
-      for (const element of [
-        page.locator('.settingsMenu .title.active .titleText'),
-        page.locator('.settingsMenu .title.active .titleDescription'),
-        section.getByRole('combobox', { name: /^Base theme/i }),
-        page.locator('.settingsSearch input'),
-        section.locator('.materialColorHeader'),
-        section.locator('.materialColorHeader code'),
-      ]) {
-        const { foreground, background } = await colorsOf(element)
-        expect(contrast(foreground, background), `${theme}: ${element}`).toBeGreaterThanOrEqual(4.5)
-      }
-      const placeholder = await colorsOf(page.locator('.settingsSearch input'), '::placeholder')
-      expect(contrast(placeholder.foreground, placeholder.background), `${theme}: search placeholder`).toBeGreaterThanOrEqual(4.5)
-      const customBorder = await colorsOf(section.locator('.materialCustomColor'))
-      const accentBox = await colorsOf(section.locator('.materialColorSettings'))
-      expect(contrast(customBorder.border, accentBox.background), `${theme}: custom swatch boundary`).toBeGreaterThanOrEqual(3)
-      const editIcon = await colorsOf(section.locator('.materialSwatchEdit'))
-      expect(contrast(editIcon.foreground, editIcon.background), `${theme}: custom swatch edit icon`).toBeGreaterThanOrEqual(3)
-      for (const field of [section.getByRole('combobox', { name: /^Base theme/i }), page.locator('.settingsSearch input')]) {
-        expect(await fieldBoundaryContrast(app, field), `${theme}: field boundary`).toBeGreaterThanOrEqual(3)
-      }
-      const toggle = section.getByRole('checkbox', { name: /^Always Show Scrollbars/ })
-      for (const checked of [true, false]) {
-        if (await toggle.isChecked() !== checked) await toggle.locator('..').locator('.switch-label').click()
-        await expect(toggle).toBeChecked({ checked })
-        const rendered = await toggle.locator('..').locator('.switch-label').evaluate(element => {
-          const rgb = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)
-          return {
-            track: rgb(getComputedStyle(element.querySelector('.switch-label-text'), '::before').backgroundColor),
-            border: rgb(getComputedStyle(element.querySelector('.switch-label-text'), '::before').borderColor),
-            thumb: rgb(getComputedStyle(element.querySelector('.switch-thumb')).backgroundColor),
-            outline: rgb(getComputedStyle(element.querySelector('.switch-thumb')).outlineColor),
-            surface: rgb(getComputedStyle(document.body).backgroundColor),
-          }
-        })
-        expect(Math.max(contrast(rendered.track, rendered.surface), contrast(rendered.border, rendered.surface)), `${theme}: toggle boundary`).toBeGreaterThanOrEqual(3)
-        expect(Math.max(contrast(rendered.thumb, rendered.track), contrast(rendered.outline, rendered.track)), `${theme}: toggle thumb boundary`).toBeGreaterThanOrEqual(3)
-      }
-      const button = section.getByRole('button', { name: 'Test toast', exact: true })
-      for (const state of ['normal', 'hover', 'focus', 'pressed']) {
-        await button.scrollIntoViewIfNeeded()
-        if (state === 'hover') await button.hover()
-        if (state === 'focus') await button.focus()
-        if (state === 'pressed') {
-          await button.hover()
-          await page.mouse.down()
+for (const [theme, label] of variants) {
+  test(`${label} retains rendered text and control contrast`, { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
+    await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'dark' })
+    const section = await goToSettingsSection(page, 'theme')
+    await page.evaluate(theme => window.$store.dispatch('updateBaseTheme', theme), theme)
+    await expect(page.locator('body')).toHaveClass(/dynamicColors/)
+    await expect(section.getByRole('combobox', { name: /^Base theme/i })).toHaveText(label)
+    await expect(section.getByRole('combobox', { name: /Main color theme/i })).toHaveCount(0)
+    await expect(section.getByRole('button', { name: 'Material accent color' })).toBeVisible()
+    for (const element of [
+      page.locator('.settingsMenu .title.active .titleText'),
+      page.locator('.settingsMenu .title.active .titleDescription'),
+      section.getByRole('combobox', { name: /^Base theme/i }),
+      page.locator('.settingsSearch input'),
+      section.locator('.materialColorHeader'),
+      section.locator('.materialColorHeader code'),
+    ]) {
+      const { foreground, background } = await colorsOf(element)
+      expect(contrast(foreground, background), `${theme}: ${element}`).toBeGreaterThanOrEqual(4.5)
+    }
+    const placeholder = await colorsOf(page.locator('.settingsSearch input'), '::placeholder')
+    expect(contrast(placeholder.foreground, placeholder.background), `${theme}: search placeholder`).toBeGreaterThanOrEqual(4.5)
+    const customBorder = await colorsOf(section.locator('.materialCustomColor'))
+    const accentBox = await colorsOf(section.locator('.materialColorSettings'))
+    expect(contrast(customBorder.border, accentBox.background), `${theme}: custom swatch boundary`).toBeGreaterThanOrEqual(3)
+    const editIcon = await colorsOf(section.locator('.materialSwatchEdit'))
+    expect(contrast(editIcon.foreground, editIcon.background), `${theme}: custom swatch edit icon`).toBeGreaterThanOrEqual(3)
+    for (const field of [section.getByRole('combobox', { name: /^Base theme/i }), page.locator('.settingsSearch input')]) {
+      expect(await fieldBoundaryContrast(app, field), `${theme}: field boundary`).toBeGreaterThanOrEqual(3)
+    }
+    const toggle = section.getByRole('checkbox', { name: /^Always Show Scrollbars/ })
+    for (const checked of [true, false]) {
+      if (await toggle.isChecked() !== checked) await toggle.locator('..').locator('.switch-label').click()
+      await expect(toggle).toBeChecked({ checked })
+      const rendered = await toggle.locator('..').locator('.switch-label').evaluate(element => {
+        const rgb = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)
+        return {
+          track: rgb(getComputedStyle(element.querySelector('.switch-label-text'), '::before').backgroundColor),
+          border: rgb(getComputedStyle(element.querySelector('.switch-label-text'), '::before').borderColor),
+          thumb: rgb(getComputedStyle(element.querySelector('.switch-thumb')).backgroundColor),
+          outline: rgb(getComputedStyle(element.querySelector('.switch-thumb')).outlineColor),
+          surface: rgb(getComputedStyle(document.body).backgroundColor),
         }
-        const { foreground, background } = await colorsOf(button)
-        expect(contrast(foreground, background), `${theme}: ${state} button text`).toBeGreaterThanOrEqual(4.5)
-        await page.mouse.move(0, 0)
-        if (state === 'pressed') await page.mouse.up()
+      })
+      expect(Math.max(contrast(rendered.track, rendered.surface), contrast(rendered.border, rendered.surface)), `${theme}: toggle boundary`).toBeGreaterThanOrEqual(3)
+      expect(Math.max(contrast(rendered.thumb, rendered.track), contrast(rendered.outline, rendered.track)), `${theme}: toggle thumb boundary`).toBeGreaterThanOrEqual(3)
+    }
+    const button = section.getByRole('button', { name: 'Test toast', exact: true })
+    for (const state of ['normal', 'hover', 'focus', 'pressed']) {
+      await button.scrollIntoViewIfNeeded()
+      if (state === 'hover') await button.hover()
+      if (state === 'focus') await button.focus()
+      if (state === 'pressed') {
+        await button.hover()
+        await page.mouse.down()
       }
-      if (theme === 'materialBlack') await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(0, 0, 0)')
-      if (scale === 100) {
-        await page.evaluate(() => window.$store.dispatch('updateMaterialSeedColor', '#6750a4'))
-        await section.getByRole('combobox', { name: /^Base theme/i }).scrollIntoViewIfNeeded()
-        const path = testInfo.outputPath(`${theme}.png`)
-        await page.locator('.settingsWindow').screenshot({ path })
-        await testInfo.attach(label, { path, contentType: 'image/png' })
-        await page.evaluate(() => window.$store.dispatch('updateMaterialSeedColor', '#ffff00'))
-      }
-      const background = await page.locator('body').evaluate(el => getComputedStyle(el).backgroundColor)
-      await page.emulateMedia({ colorScheme: 'light' })
-      await expect(page.locator('body')).toHaveCSS('background-color', background)
-      await page.emulateMedia({ colorScheme: 'dark' })
-    })
-  }
+      const { foreground, background } = await colorsOf(button)
+      expect(contrast(foreground, background), `${theme}: ${state} button text`).toBeGreaterThanOrEqual(4.5)
+      await page.mouse.move(0, 0)
+      if (state === 'pressed') await page.mouse.up()
+    }
+    if (theme === 'materialBlack') await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(0, 0, 0)')
+    if (uiScale === 100) {
+      await page.evaluate(() => window.$store.dispatch('updateMaterialSeedColor', '#6750a4'))
+      await section.getByRole('combobox', { name: /^Base theme/i }).scrollIntoViewIfNeeded()
+      const path = testInfo.outputPath(`${theme}.png`)
+      await page.locator('.settingsWindow').screenshot({ path })
+      await testInfo.attach(label, { path, contentType: 'image/png' })
+      await page.evaluate(() => window.$store.dispatch('updateMaterialSeedColor', '#ffff00'))
+    }
+    const background = await page.locator('body').evaluate(el => getComputedStyle(el).backgroundColor)
+    await page.emulateMedia({ colorScheme: 'light' })
+    await expect(page.locator('body')).toHaveCSS('background-color', background)
+    await page.emulateMedia({ colorScheme: 'dark' })
+  })
 }
 
 test('a synced system seed follows desktop accents and survives a canceled custom edit', async ({ app, page }) => {

@@ -67,53 +67,51 @@ async function scrollSettingsToBottom(content) {
   await expectCurrentScrollRange(content)
 }
 
-for (const uiScale of [100, 125]) {
-  test.describe(`phone settings scroll ranges at ${uiScale}% UI scale`, () => {
-    test.use({ seed: { settings: { uiScale, enableDownloads: true, reducedMotion: 'on', alwaysShowScrollbars: true } } })
+test.describe('phone settings scroll ranges', { tag: '@scale' }, () => {
+  test.use({ seed: { settings: { enableDownloads: true, reducedMotion: 'on', alwaysShowScrollbars: true } } })
 
-    test('reconciles collapsed controls and wider phone layouts from the bottom', async ({ page }) => {
-      await page.setViewportSize({ width: 375, height: 640 })
-      const section = await goToSettingsSection(page, 'download')
-      const content = page.locator('.settingsContent')
-      await scrollSettingsToBottom(content)
-      const previousHeight = await content.evaluate(element => element.scrollHeight)
-      // Toggle without Playwright scrolling the control into view first.
-      await section.getByRole('checkbox', { name: 'Enable Downloads' }).evaluate(element => element.click())
-      await expect(section.locator('.downloadPathInputs')).toHaveCount(0)
-      await expectCurrentScrollRange(content)
-      expect(await content.evaluate(element => element.scrollHeight)).toBeLessThan(previousHeight)
+  test('reconciles collapsed controls and wider phone layouts from the bottom', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 640 })
+    const section = await goToSettingsSection(page, 'download')
+    const content = page.locator('.settingsContent')
+    await scrollSettingsToBottom(content)
+    const previousHeight = await content.evaluate(element => element.scrollHeight)
+    // Toggle without Playwright scrolling the control into view first.
+    await section.getByRole('checkbox', { name: 'Enable Downloads' }).evaluate(element => element.click())
+    await expect(section.locator('.downloadPathInputs')).toHaveCount(0)
+    await expectCurrentScrollRange(content)
+    expect(await content.evaluate(element => element.scrollHeight)).toBeLessThan(previousHeight)
 
-      await page.locator('.settingsBackButton').click()
-      await goToSettingsSection(page, 'playback')
-      await scrollSettingsToBottom(content)
-      await page.setViewportSize({ width: 640, height: 640 })
-      await expectCurrentScrollRange(content)
-    })
-
-    test('resets category replacements and shortened search results from the bottom', async ({ page }) => {
-      await page.setViewportSize({ width: 375, height: 640 })
-      await goToSettingsSection(page, 'playback')
-      const content = page.locator('.settingsContent')
-      await scrollSettingsToBottom(content)
-      await page.locator('.settingsBackButton').click()
-      await goToSettingsSection(page, 'privacy')
-      await expect(content).toHaveJSProperty('scrollTop', 0)
-      await expectCurrentScrollRange(content)
-
-      const search = page.getByRole('searchbox', { name: 'Search settings' })
-      await search.fill('a')
-      await scrollSettingsToBottom(content)
-      await search.fill('Default Volume')
-      await expect(content).toHaveJSProperty('scrollTop', 0)
-      await expectCurrentScrollRange(content)
-      await expect(content.locator(':scope > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-unusable/)
-      await page.getByRole('button', { name: /^Default Volume$/i }).click()
-      await expect(content.locator(':scope > [data-section="playback"]')).toBeVisible()
-      await expect(content.getByRole('slider', { name: /Default Volume/i })).toBeInViewport()
-      await expectCurrentScrollRange(content)
-    })
+    await page.locator('.settingsBackButton').click()
+    await goToSettingsSection(page, 'playback')
+    await scrollSettingsToBottom(content)
+    await page.setViewportSize({ width: 640, height: 640 })
+    await expectCurrentScrollRange(content)
   })
-}
+
+  test('resets category replacements and shortened search results from the bottom', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 640 })
+    await goToSettingsSection(page, 'playback')
+    const content = page.locator('.settingsContent')
+    await scrollSettingsToBottom(content)
+    await page.locator('.settingsBackButton').click()
+    await goToSettingsSection(page, 'privacy')
+    await expect(content).toHaveJSProperty('scrollTop', 0)
+    await expectCurrentScrollRange(content)
+
+    const search = page.getByRole('searchbox', { name: 'Search settings' })
+    await search.fill('a')
+    await scrollSettingsToBottom(content)
+    await search.fill('Default Volume')
+    await expect(content).toHaveJSProperty('scrollTop', 0)
+    await expectCurrentScrollRange(content)
+    await expect(content.locator(':scope > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-unusable/)
+    await page.getByRole('button', { name: /^Default Volume$/i }).click()
+    await expect(content.locator(':scope > [data-section="playback"]')).toBeVisible()
+    await expect(content.getByRole('slider', { name: /Default Volume/i })).toBeInViewport()
+    await expectCurrentScrollRange(content)
+  })
+})
 
 test.describe('Home subscription processing', () => {
   test.use({

@@ -59,82 +59,80 @@ async function waitForAnimation(menu) {
   await menu.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
 }
 
-for (const uiScale of [100, 125]) {
-  test(`mobile menu sheets drag from rows and animate dismissal at ${uiScale}%`, async ({ app, page }, testInfo) => {
-    await app.electronApp.evaluate(({ BrowserWindow }, scale) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale / 100), uiScale)
-    await page.setViewportSize({ width: 375, height: 812 })
-    await goTo(page, 'history')
-    const session = await page.context().newCDPSession(page)
-    await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
-    try {
-      for (const kind of ['more', 'context']) {
-        const menu = page.locator(kind === 'more' ? '.moreOptionContainer' : '.mobileLinkActions')
-        const open = async () => {
-          if (kind === 'more') await page.locator('.moreOptionNav').click()
-          else await openContext(page, session)
-          await expect(menu).toBeVisible()
-          await waitForAnimation(menu)
-        }
-        await open()
-        await expect(menu.locator('.bottomSheetHandle')).toBeVisible()
-        await expect(menu).toHaveCSS('touch-action', 'none')
-        await expect(menu.locator('.bottomSheetHandle')).toHaveCSS('touch-action', 'none')
-        await expect(menu.locator(kind === 'more' ? '.moreOptionScroll' : '.mobileLinkActionsScroll')).toHaveCSS('touch-action', 'pan-down')
-        if (kind === 'more') {
-          const bounds = await visibleBounds(menu)
-          expect(bounds.width).toBeCloseTo(await page.evaluate(() => innerWidth), 0)
-          expect(bounds.y + bounds.height).toBeCloseTo(await page.evaluate(() => innerHeight), 0)
-          const rows = menu.locator('.navOption')
-          expect(await rows.first().evaluate(element => element.getBoundingClientRect().height)).toBeGreaterThanOrEqual(48)
-          await expect(menu.locator('.navLabel').first()).toBeVisible()
-        }
-        const row = menu.locator(kind === 'more' ? '.navOption' : '[role="menuitem"]').first()
-        const before = await visibleBounds(menu)
-        await touchDrag(session, row, 100)
-        expect((await visibleBounds(menu)).y).toBeGreaterThan(before.y + 80)
-        await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-        await expect(menu).toHaveCount(0)
-        await expect(page).toHaveURL(/#\/history/)
-
-        await open()
-        // A short pull settles back and must not activate the row.
-        await touchDrag(session, row, 16)
-        await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+test('mobile menu sheets drag from rows and animate dismissal', { tag: '@scale' }, async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await goTo(page, 'history')
+  const session = await page.context().newCDPSession(page)
+  await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+  try {
+    for (const kind of ['more', 'context']) {
+      const menu = page.locator(kind === 'more' ? '.moreOptionContainer' : '.mobileLinkActions')
+      const open = async () => {
+        if (kind === 'more') await page.locator('.moreOptionNav').click()
+        else await openContext(page, session)
         await expect(menu).toBeVisible()
-        await expect.poll(() => menu.evaluate(element => getComputedStyle(element).transform)).toBe('none')
-        await expect(page).toHaveURL(/#\/history/)
-
-        // Outside dismissal retains the sheet until its fast exit completes.
-        const leaving = await menu.evaluate(element => {
-          const backdrop = element.parentElement
-          backdrop.click()
-          return new Promise(resolve => requestAnimationFrame(() => resolve({
-            connected: element.isConnected,
-            animations: element.getAnimations().map(animation => animation.effect.getKeyframes())
-          })))
-        })
-        expect(leaving.connected).toBe(true)
-        expect(leaving.animations.some(frames => frames.at(-1).transform === 'translateY(100%)')).toBe(true)
-        await expect(menu).toHaveCount(0)
-
-        for (const colorScheme of ['dark', 'light']) {
-          await page.emulateMedia({ colorScheme })
-          await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
-          await open()
-          const screenshot = testInfo.outputPath(`${kind}-${colorScheme}-${uiScale}.png`)
-          await expectImagesLoaded(page.locator('.ft-list-video .thumbnailImage:not(.retryImagePlaceholder):not(.thumbnailPreview)'))
-          await page.mouse.move(0, 0)
-          await menu.screenshot({ path: screenshot })
-          await testInfo.attach(`${kind} sheet ${colorScheme} ${uiScale}`, { path: screenshot, contentType: 'image/png' })
-          await page.keyboard.press('Escape')
-          await expect(menu).toHaveCount(0)
-        }
+        await waitForAnimation(menu)
       }
-    } finally {
-      await session.detach()
+      await open()
+      await expect(menu.locator('.bottomSheetHandle')).toBeVisible()
+      await expect(menu).toHaveCSS('touch-action', 'none')
+      await expect(menu.locator('.bottomSheetHandle')).toHaveCSS('touch-action', 'none')
+      await expect(menu.locator(kind === 'more' ? '.moreOptionScroll' : '.mobileLinkActionsScroll')).toHaveCSS('touch-action', 'pan-down')
+      if (kind === 'more') {
+        const bounds = await visibleBounds(menu)
+        // innerWidth and innerHeight round fractional zoomed viewports.
+        expect(Math.abs(bounds.width - await page.evaluate(() => innerWidth))).toBeLessThan(1)
+        expect(Math.abs(bounds.y + bounds.height - await page.evaluate(() => innerHeight))).toBeLessThan(1)
+        const rows = menu.locator('.navOption')
+        expect(await rows.first().evaluate(element => element.getBoundingClientRect().height)).toBeGreaterThanOrEqual(48)
+        await expect(menu.locator('.navLabel').first()).toBeVisible()
+      }
+      const row = menu.locator(kind === 'more' ? '.navOption' : '[role="menuitem"]').first()
+      const before = await visibleBounds(menu)
+      await touchDrag(session, row, 100)
+      expect((await visibleBounds(menu)).y).toBeGreaterThan(before.y + 80)
+      await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+      await expect(menu).toHaveCount(0)
+      await expect(page).toHaveURL(/#\/history/)
+
+      await open()
+      // A short pull settles back and must not activate the row.
+      await touchDrag(session, row, 16)
+      await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+      await expect(menu).toBeVisible()
+      await expect.poll(() => menu.evaluate(element => getComputedStyle(element).transform)).toBe('none')
+      await expect(page).toHaveURL(/#\/history/)
+
+      // Outside dismissal retains the sheet until its fast exit completes.
+      const leaving = await menu.evaluate(element => {
+        const backdrop = element.parentElement
+        backdrop.click()
+        return new Promise(resolve => requestAnimationFrame(() => resolve({
+          connected: element.isConnected,
+          animations: element.getAnimations().map(animation => animation.effect.getKeyframes())
+        })))
+      })
+      expect(leaving.connected).toBe(true)
+      expect(leaving.animations.some(frames => frames.at(-1).transform === 'translateY(100%)')).toBe(true)
+      await expect(menu).toHaveCount(0)
+
+      for (const colorScheme of ['dark', 'light']) {
+        await page.emulateMedia({ colorScheme })
+        await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
+        await open()
+        const screenshot = testInfo.outputPath(`${kind}-${colorScheme}.png`)
+        await expectImagesLoaded(page.locator('.ft-list-video .thumbnailImage:not(.retryImagePlaceholder):not(.thumbnailPreview)'))
+        await page.mouse.move(0, 0)
+        await menu.screenshot({ path: screenshot })
+        await testInfo.attach(`${kind} sheet ${colorScheme}`, { path: screenshot, contentType: 'image/png' })
+        await page.keyboard.press('Escape')
+        await expect(menu).toHaveCount(0)
+      }
     }
-  })
-}
+  } finally {
+    await session.detach()
+  }
+})
 
 test('mobile context sheet preserves scrolling and dismisses from its handle in submenus', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 420 })
@@ -347,34 +345,31 @@ for (const pointerType of ['mouse', 'touch']) {
   }
 }
 
-for (const uiScale of [100, 125]) {
-  test(`tall mobile context sheet keeps its handle below the top safe area at ${uiScale}%`, async ({ app, page }) => {
-    await app.electronApp.evaluate(({ BrowserWindow }, scale) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale / 100), uiScale)
-    await page.setViewportSize({ width: 375, height: 420 })
-    await goTo(page, 'history')
-    await page.evaluate(() => document.documentElement.style.setProperty('--safe-area-inset-top', '32px'))
-    const session = await page.context().newCDPSession(page)
-    await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
-    try {
-      await openContext(page, session)
-      const menu = page.locator('.mobileLinkActions')
-      await waitForAnimation(menu)
-      const bounds = await visibleBounds(menu)
-      expect(bounds.y).toBeGreaterThanOrEqual(32)
-      expect(bounds.y + bounds.height).toBeCloseTo(await page.evaluate(() => innerHeight), 0)
-      const scroller = menu.locator('.mobileLinkActionsScroll')
-      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
-      await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
-      const handle = menu.locator('.bottomSheetHandle')
-      expect((await visibleBounds(handle)).y).toBeGreaterThanOrEqual(32)
-      await touchDrag(session, handle, 100)
-      await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-      await expect(menu).toHaveCount(0)
-    } finally {
-      await session.detach()
-    }
-  })
-}
+test('tall mobile context sheet keeps its handle below the top safe area', { tag: '@scale' }, async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 420 })
+  await goTo(page, 'history')
+  await page.evaluate(() => document.documentElement.style.setProperty('--safe-area-inset-top', '32px'))
+  const session = await page.context().newCDPSession(page)
+  await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+  try {
+    await openContext(page, session)
+    const menu = page.locator('.mobileLinkActions')
+    await waitForAnimation(menu)
+    const bounds = await visibleBounds(menu)
+    expect(bounds.y).toBeGreaterThanOrEqual(32)
+    expect(bounds.y + bounds.height).toBeCloseTo(await page.evaluate(() => innerHeight), 0)
+    const scroller = menu.locator('.mobileLinkActionsScroll')
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    const handle = menu.locator('.bottomSheetHandle')
+    expect((await visibleBounds(handle)).y).toBeGreaterThanOrEqual(32)
+    await touchDrag(session, handle, 100)
+    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+    await expect(menu).toHaveCount(0)
+  } finally {
+    await session.detach()
+  }
+})
 
 for (const kind of ['more', 'context']) {
   for (const remainingFinger of [true, false]) {

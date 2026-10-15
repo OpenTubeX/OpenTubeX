@@ -60,117 +60,111 @@ async function showUpdatePrompt(page, releases) {
   await expect(page.locator('.changeLogTitle')).toBeVisible()
 }
 
-test('update notification buttons are centered when they wrap below the text', async ({ app, page }, testInfo) => {
+test('update notification buttons are centered when they wrap below the text', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
   const notification = await showUpdateNotification(page, [
     release(`OpenTubeX ${newestUpdateVersion}`, `v${newestUpdateVersion}-beta`, NEWEST_NOTES)
   ])
 
-  for (const scale of [1, 0.95, 1.25]) {
-    await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
-    for (const size of [
-      { width: 1600, height: 900 },
-      { width: 800, height: 600 },
-      { width: 480, height: 800 },
-      { width: 375, height: 700 }
-    ]) {
-      // The initial window already has the desktop dimensions.
-      if (scale !== 1 || size.width !== 1600) await setWindowSize(app, page, size)
-      await expect.poll(() => notification.evaluate(element => {
-        const toast = element.getBoundingClientRect()
-        const message = element.querySelector('.toastMessage').getBoundingClientRect()
-        const actions = element.querySelector('.toastActions').getBoundingClientRect()
-        const wrapped = actions.top >= message.bottom
-        return {
-          wrapped,
-          aligned: wrapped
-            ? Math.abs(actions.left + actions.width / 2 - toast.left - toast.width / 2) <= 1
-            : actions.left >= message.right,
-          fits: element.scrollWidth <= element.clientWidth
-        }
-      }), { message: `${size.width}px at ${scale * 100}% UI scale` }).toEqual({
-        wrapped: size.width <= 480,
-        aligned: true,
-        fits: true
-      })
+  for (const size of [
+    { width: 1600, height: 900 },
+    { width: 800, height: 600 },
+    { width: 480, height: 800 },
+    { width: 375, height: 700 }
+  ]) {
+    // The initial window already has the desktop dimensions.
+    if (size.width !== 1600) await setWindowSize(app, page, size)
+    await expect.poll(() => notification.evaluate(element => {
+      const toast = element.getBoundingClientRect()
+      const message = element.querySelector('.toastMessage').getBoundingClientRect()
+      const actions = element.querySelector('.toastActions').getBoundingClientRect()
+      const wrapped = actions.top >= message.bottom
+      return {
+        wrapped,
+        aligned: wrapped
+          ? Math.abs(actions.left + actions.width / 2 - toast.left - toast.width / 2) <= 1
+          : actions.left >= message.right,
+        fits: element.scrollWidth <= element.clientWidth
+      }
+    }), { message: `${size.width}px at ${uiScale}% UI scale` }).toEqual({
+      wrapped: size.width <= 480,
+      aligned: true,
+      fits: true
+    })
 
-      if (scale === 1 && size.width === 375) {
-        for (const colorScheme of ['dark', 'light']) {
-          await page.emulateMedia({ colorScheme })
-          await expect(page.locator('body')).toContainClass(colorScheme)
-          const path = testInfo.outputPath(`centered-update-buttons-${colorScheme}.png`)
-          await notification.screenshot({ path, animations: 'disabled' })
-          await testInfo.attach(`centered update buttons (${colorScheme})`, { path, contentType: 'image/png' })
-        }
+    if (uiScale === 100 && size.width === 375) {
+      for (const colorScheme of ['dark', 'light']) {
+        await page.emulateMedia({ colorScheme })
+        await expect(page.locator('body')).toContainClass(colorScheme)
+        const path = testInfo.outputPath(`centered-update-buttons-${colorScheme}.png`)
+        await notification.screenshot({ path, animations: 'disabled' })
+        await testInfo.attach(`centered update buttons (${colorScheme})`, { path, contentType: 'image/png' })
       }
     }
   }
 })
 
-for (const uiScale of [100, 95]) {
-  test(`release-note scrollbar stays anchored during touch scrolling without scroll callbacks at ${uiScale}%`, async ({ app, page }) => {
-    await showUpdatePrompt(page, [
-      release(`OpenTubeX ${newestUpdateVersion}`, `v${newestUpdateVersion}-beta`,
-        `<details open><summary>Show changes</summary>\n\n${Array.from({ length: 60 }, (_, index) => `- Release note ${index + 1}: scrolling through the latest improvements and fixes on a phone.`).join('\n')}\n\n</details>`)
-    ])
-    await page.evaluate(scale => window.ftElectron.setZoomFactor(scale / 100), uiScale)
-    await setWindowSize(app, page, { width: 480, height: 800 })
-    const scroller = page.locator('.changeLogText')
-    const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
-    await expect(scrollbar).toBeAttached()
-    // Touch scrolling can advance on the compositor before JS scroll listeners
-    // run. Suppress those callbacks to check the scrollbar in that exact state.
-    const resumeScrollEvents = await scroller.evaluateHandle(element => {
-      const suppressScroll = event => {
-        if (event.target === element) event.stopImmediatePropagation()
-      }
-      document.addEventListener('scroll', suppressScroll, { capture: true })
-      return () => document.removeEventListener('scroll', suppressScroll, { capture: true })
-    })
-    // The dialog itself can still move during its opening animation. Compare
-    // the track with its viewport in the same frame, not with the screen.
-    const trackOffset = () => scroller.evaluate(element => {
-      const track = element.querySelector(':scope > .os-scrollbar-vertical')
-      return track.getBoundingClientRect().top - element.getBoundingClientRect().top
-    })
-    const initialOffset = await trackOffset()
-    const box = await scroller.boundingBox()
-    const session = await page.context().newCDPSession(page)
-    await session.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 })
-    const point = { x: box.x + box.width / 2, y: box.y + box.height - 30 }
-    await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] })
-    for (const distance of [30, 60, 90, 120, 150, 180]) {
-      await session.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ ...point, y: point.y - distance }] })
-      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)))
+test('release-note scrollbar stays anchored during touch scrolling without scroll callbacks', { tag: '@scale' }, async ({ app, page }) => {
+  await showUpdatePrompt(page, [
+    release(`OpenTubeX ${newestUpdateVersion}`, `v${newestUpdateVersion}-beta`,
+      `<details open><summary>Show changes</summary>\n\n${Array.from({ length: 60 }, (_, index) => `- Release note ${index + 1}: scrolling through the latest improvements and fixes on a phone.`).join('\n')}\n\n</details>`)
+  ])
+  await setWindowSize(app, page, { width: 480, height: 800 })
+  const scroller = page.locator('.changeLogText')
+  const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
+  await expect(scrollbar).toBeAttached()
+  // Touch scrolling can advance on the compositor before JS scroll listeners
+  // run. Suppress those callbacks to check the scrollbar in that exact state.
+  const resumeScrollEvents = await scroller.evaluateHandle(element => {
+    const suppressScroll = event => {
+      if (event.target === element) event.stopImmediatePropagation()
     }
-    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(50)
-    await expect.poll(async () => Math.abs(await trackOffset() - initialOffset)).toBeLessThanOrEqual(1)
-    await resumeScrollEvents.evaluate(resume => resume())
-    await resumeScrollEvents.dispose()
-    await session.detach()
-
-    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
-    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(50)
-    for (const size of [{ width: 481, height: 1000 }, { width: 1000, height: 900 }]) {
-      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
-      await setWindowSize(app, page, size)
-      await expectScrollAtRenderedEnd(scroller)
-      await expect.poll(() => scrollbar.evaluate(element => {
-        const track = element.querySelector('.os-scrollbar-track').getBoundingClientRect()
-        const handle = element.querySelector('.os-scrollbar-handle').getBoundingClientRect()
-        return Math.abs(handle.bottom - track.bottom)
-      })).toBeLessThanOrEqual(1)
-    }
-
-    await scroller.locator('summary').evaluate(element => element.click())
-    await expect.poll(() => scroller.evaluate(element => ({
-      scrollTop: element.scrollTop,
-      hasScrollbar: !element.querySelector('.os-scrollbar-vertical').classList.contains('os-scrollbar-unusable'),
-      overflows: element.scrollHeight > element.clientHeight + 1,
-      trackAnimations: element.querySelector('.os-scrollbar-vertical').getAnimations().length,
-    }))).toEqual({ scrollTop: 0, hasScrollbar: false, overflows: false, trackAnimations: 0 })
+    document.addEventListener('scroll', suppressScroll, { capture: true })
+    return () => document.removeEventListener('scroll', suppressScroll, { capture: true })
   })
-}
+  // The dialog itself can still move during its opening animation. Compare
+  // the track with its viewport in the same frame, not with the screen.
+  const trackOffset = () => scroller.evaluate(element => {
+    const track = element.querySelector(':scope > .os-scrollbar-vertical')
+    return track.getBoundingClientRect().top - element.getBoundingClientRect().top
+  })
+  const initialOffset = await trackOffset()
+  const box = await scroller.boundingBox()
+  const session = await page.context().newCDPSession(page)
+  await session.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 })
+  const point = { x: box.x + box.width / 2, y: box.y + box.height - 30 }
+  await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] })
+  for (const distance of [30, 60, 90, 120, 150, 180]) {
+    await session.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ ...point, y: point.y - distance }] })
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)))
+  }
+  await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(50)
+  await expect.poll(async () => Math.abs(await trackOffset() - initialOffset)).toBeLessThanOrEqual(1)
+  await resumeScrollEvents.evaluate(resume => resume())
+  await resumeScrollEvents.dispose()
+  await session.detach()
+
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(50)
+  for (const size of [{ width: 481, height: 1000 }, { width: 1000, height: 900 }]) {
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await setWindowSize(app, page, size)
+    await expectScrollAtRenderedEnd(scroller)
+    await expect.poll(() => scrollbar.evaluate(element => {
+      const track = element.querySelector('.os-scrollbar-track').getBoundingClientRect()
+      const handle = element.querySelector('.os-scrollbar-handle').getBoundingClientRect()
+      return Math.abs(handle.bottom - track.bottom)
+    })).toBeLessThanOrEqual(1)
+  }
+
+  await scroller.locator('summary').evaluate(element => element.click())
+  await expect.poll(() => scroller.evaluate(element => ({
+    scrollTop: element.scrollTop,
+    hasScrollbar: !element.querySelector('.os-scrollbar-vertical').classList.contains('os-scrollbar-unusable'),
+    overflows: element.scrollHeight > element.clientHeight + 1,
+    trackAnimations: element.querySelector('.os-scrollbar-vertical').getAnimations().length,
+  }))).toEqual({ scrollTop: 0, hasScrollbar: false, overflows: false, trackAnimations: 0 })
+})
 
 test('the update notification stays dismissed for the current app session', async ({ page }) => {
   const notification = await showUpdateNotification(page, [
@@ -287,7 +281,7 @@ test('skipped updates keep a heading per release', async ({ page, attachScreensh
   await attachScreenshot('update prompt with skipped releases')
 })
 
-test('changelog images preserve their aspect ratio at phone and desktop widths', async ({ page }) => {
+test('changelog images preserve their aspect ratio at phone and desktop widths', { tag: '@scale' }, async ({ page, uiScale }) => {
   const imageUrl = 'https://example.com/release-screenshot.svg'
   await page.route(imageUrl, route => route.fulfill({
     contentType: 'image/svg+xml',
@@ -307,27 +301,24 @@ test('changelog images preserve their aspect ratio at phone and desktop widths',
   await expect(images).toHaveCount(4)
   await images.evaluateAll(elements => Promise.all(elements.map(image => image.decode())))
 
-  for (const scale of [1, 1.25]) {
-    await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
-    for (const viewport of [{ width: 375, height: 800 }, { width: 800, height: 375 }, { width: 1280, height: 900 }]) {
-      await page.setViewportSize(viewport)
-      for (const image of await images.all()) {
-        const dimensions = await image.evaluate(element => {
-          const { width, height } = element.getBoundingClientRect()
-          const container = element.closest('.changeLogText')
-          const style = getComputedStyle(container)
-          return {
-            width,
-            height,
-            expectedHeight: width * element.naturalHeight / element.naturalWidth,
-            availableWidth: container.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight)
-          }
-        })
-        const context = `${await image.getAttribute('alt')}, ${viewport.width}px, ${scale * 100}% scale`
-        expect(dimensions.width, context).toBeGreaterThan(0)
-        expect(dimensions.width, context).toBeLessThanOrEqual(dimensions.availableWidth + 1)
-        expect.soft(Math.abs(dimensions.height - dimensions.expectedHeight), context).toBeLessThanOrEqual(1)
-      }
+  for (const viewport of [{ width: 375, height: 800 }, { width: 800, height: 375 }, { width: 1280, height: 900 }]) {
+    await page.setViewportSize(viewport)
+    for (const image of await images.all()) {
+      const dimensions = await image.evaluate(element => {
+        const { width, height } = element.getBoundingClientRect()
+        const container = element.closest('.changeLogText')
+        const style = getComputedStyle(container)
+        return {
+          width,
+          height,
+          expectedHeight: width * element.naturalHeight / element.naturalWidth,
+          availableWidth: container.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight)
+        }
+      })
+      const context = `${await image.getAttribute('alt')}, ${viewport.width}px, ${uiScale}% scale`
+      expect(dimensions.width, context).toBeGreaterThan(0)
+      expect(dimensions.width, context).toBeLessThanOrEqual(dimensions.availableWidth + 1)
+      expect.soft(Math.abs(dimensions.height - dimensions.expectedHeight), context).toBeLessThanOrEqual(1)
     }
   }
 })

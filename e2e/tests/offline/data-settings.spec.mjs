@@ -134,25 +134,22 @@ test('exports only selected backup categories and offers only those categories o
   })).toBe(true)
 })
 
-test('keeps backup export choices usable at narrow widths and fractional UI scales', async ({ page }) => {
+test('keeps backup export choices usable at narrow widths', { tag: '@scale' }, async ({ page }) => {
   const dataSection = await goToSettingsSection(page, 'data')
   await dataSection.getByRole('button', { name: 'Export backup' }).click()
   const choices = page.locator('.settingsSubpageContent')
-  for (const zoom of [1, 1.25]) {
-    await page.evaluate(value => window.ftElectron.setZoomFactor(value), zoom)
-    for (const width of [1600, 390]) {
-      await page.setViewportSize({ width, height: 800 })
-      await expect(choices.getByRole('checkbox')).toHaveCount(6)
-      const button = choices.getByRole('button', { name: 'Export selected data' })
-      await expect(button).toBeVisible()
-      await expect.poll(() => choices.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
-      const bounds = await button.boundingBox()
-      const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }))
-      expect(bounds.x).toBeGreaterThanOrEqual(0)
-      expect(bounds.x + bounds.width).toBeLessThanOrEqual(viewport.width)
-      expect(bounds.y).toBeGreaterThanOrEqual(0)
-      expect(bounds.y + bounds.height).toBeLessThanOrEqual(viewport.height)
-    }
+  for (const width of [1600, 390]) {
+    await page.setViewportSize({ width, height: 800 })
+    await expect(choices.getByRole('checkbox')).toHaveCount(6)
+    const button = choices.getByRole('button', { name: 'Export selected data' })
+    await expect(button).toBeVisible()
+    await expect.poll(() => choices.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+    const bounds = await button.boundingBox()
+    const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }))
+    expect(bounds.x).toBeGreaterThanOrEqual(0)
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(viewport.width)
+    expect(bounds.y).toBeGreaterThanOrEqual(0)
+    expect(bounds.y + bounds.height).toBeLessThanOrEqual(viewport.height)
   }
 })
 

@@ -218,98 +218,96 @@ for (const [theme, scale] of [['openTubeXLight', 100], ['openTubeXDark', 125]]) 
   })
 }
 
-for (const scale of [100, 125]) {
-  test.describe(`hotPink contrast at ${scale}%`, () => {
-    test.use({ seed: { settings: { baseTheme: 'hotPink', currentLocale: 'en-US', uiScale: scale } } })
+test.describe('hotPink contrast', () => {
+  test.use({ seed: { settings: { baseTheme: 'hotPink', currentLocale: 'en-US' } } })
 
-    test('toggle thumbs remain distinct in both states', async ({ app, page }) => {
-      await goToSettingsSection(page, 'general')
-      const toggle = page.getByRole('checkbox', { name: 'Keep relative timestamps updated' })
-      const tracks = []
-      const thumbs = []
-      for (const checked of [true, false]) {
-        if (await toggle.isChecked() !== checked) await toggle.locator('..').locator('.switch-label').click()
-        await expect(toggle).toBeChecked({ checked })
-        const contrast = await switchContrast(app, toggle.locator('..').locator('.switch-label'), checked)
-        tracks.push(contrast.track)
-        thumbs.push(contrast.thumb)
-        const label = toggle.locator('..').locator('.switch-label')
-        // The outline separates the white thumb from the light off track.
-        // Locate its rendered edge, including fractional geometry at UI zoom.
-        const points = await label.evaluate((element, checked) => {
-          const rect = element.getBoundingClientRect()
-          const thumb = element.querySelector('.switch-thumb').getBoundingClientRect()
-          const x = (checked ? thumb.left : thumb.right) - rect.left
-          const y = thumb.top - rect.top + thumb.height / 2
-          return [-1.5, -0.5, 0.5, 1.5].map(offset => [x + offset, y])
-        }, checked)
-        const edge = await sampleColors(app, label, points)
-        const thumbRatio = Math.max(contrast.thumbRatio, ...edge.map(color => contrastRatio(color, contrast.track)))
-        expect.soft(contrast.trackRatio, `track and background ${JSON.stringify(contrast)}`).toBeGreaterThanOrEqual(3)
-        expect.soft(thumbRatio, `thumb boundary and track ${JSON.stringify({ contrast, edge })}`).toBeGreaterThanOrEqual(3)
-        expect.soft(contrast.thumbSurfaceRatio, `thumb and background ${JSON.stringify(contrast)}`).toBeGreaterThanOrEqual(3)
-      }
-      expect(contrastRatio(...tracks), 'on and off tracks').toBeGreaterThanOrEqual(3)
-      expect(thumbs[0], 'thumb color stays consistent').toEqual(thumbs[1])
-    })
-
-    test('settings category titles and descriptions remain readable in every state', async ({ page }) => {
-      await goToSettingsSection(page, 'theme')
-      const pageColors = await page.locator('body').evaluate(element => {
-        const style = getComputedStyle(element)
-        const rgb = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)
-        return { foreground: rgb(style.color), background: rgb(style.backgroundColor) }
-      })
-      expect.soft(contrastRatio(pageColors.foreground, pageColors.background), 'page text').toBeGreaterThanOrEqual(4.5)
-      const category = page.locator('.settingsMenu .title[data-section="playback"]')
-      const selected = page.locator('.settingsMenu .title.active')
-      for (const state of ['normal', 'selected', 'hover', 'focus']) {
-        const button = state === 'selected' ? selected : category
-        if (state === 'hover') await button.hover()
-        if (state === 'focus') {
-          await page.mouse.move(0, 0)
-          await page.keyboard.press('Tab')
-          await button.focus()
-        }
-        const colors = await button.evaluate(element => {
-          const rgb = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)
-          const style = getComputedStyle(element)
-          const background = style.backgroundColor === 'rgba(0, 0, 0, 0)'
-            ? getComputedStyle(element.closest('.settingsMenu')).backgroundColor
-            : style.backgroundColor
-          return {
-            background: rgb(background),
-            title: rgb(getComputedStyle(element.querySelector('.titleText')).color),
-            description: rgb(getComputedStyle(element.querySelector('.titleDescription')).color)
-          }
-        })
-        for (const part of ['title', 'description']) {
-          expect.soft(contrastRatio(colors[part], colors.background), `${state} ${part} ${JSON.stringify(colors)}`).toBeGreaterThanOrEqual(4.5)
-        }
-      }
-    })
-
-    test('slider tracks and hovered header controls remain visible', async ({ app, page }) => {
-      await goToSettingsSection(page, 'theme')
-      const input = page.getByRole('slider', { name: /UI Roundness/ })
-      const slider = await controlContrast(app, input, 'slider')
-      expect.soft(slider.ratio, `slider ${JSON.stringify(slider)}`).toBeGreaterThanOrEqual(3)
-      const points = await input.evaluate(element => {
+  test('toggle thumbs remain distinct in both states', { tag: '@scale' }, async ({ app, page }) => {
+    await goToSettingsSection(page, 'general')
+    const toggle = page.getByRole('checkbox', { name: 'Keep relative timestamps updated' })
+    const tracks = []
+    const thumbs = []
+    for (const checked of [true, false]) {
+      if (await toggle.isChecked() !== checked) await toggle.locator('..').locator('.switch-label').click()
+      await expect(toggle).toBeChecked({ checked })
+      const contrast = await switchContrast(app, toggle.locator('..').locator('.switch-label'), checked)
+      tracks.push(contrast.track)
+      thumbs.push(contrast.thumb)
+      const label = toggle.locator('..').locator('.switch-label')
+      // The outline separates the white thumb from the light off track.
+      // Locate its rendered edge, including fractional geometry at UI zoom.
+      const points = await label.evaluate((element, checked) => {
         const rect = element.getBoundingClientRect()
-        const fraction = (Number(element.value) - Number(element.min)) / (Number(element.max) - Number(element.min))
-        return [[1 + fraction * (rect.width - 2), rect.height / 2], [rect.width * 0.85, rect.height / 2]]
-      })
-      const [thumb, track] = await sampleColors(app, input, points)
-      expect.soft(contrastRatio(thumb, track), `slider thumb ${JSON.stringify({ thumb, track })}`).toBeGreaterThanOrEqual(3)
-      const button = page.getByRole('button', { name: 'Show performance impact indicators', exact: true })
-      if (await button.getAttribute('aria-pressed') === 'true') await button.click()
-      await button.hover()
-      const colors = await button.evaluate(element => {
-        const style = getComputedStyle(element)
-        const rgb = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)
-        return { foreground: rgb(style.color), background: rgb(style.backgroundColor) }
-      })
-      expect.soft(contrastRatio(colors.foreground, colors.background), `header hover ${JSON.stringify(colors)}`).toBeGreaterThanOrEqual(3)
-    })
+        const thumb = element.querySelector('.switch-thumb').getBoundingClientRect()
+        const x = (checked ? thumb.left : thumb.right) - rect.left
+        const y = thumb.top - rect.top + thumb.height / 2
+        return [-1.5, -0.5, 0.5, 1.5].map(offset => [x + offset, y])
+      }, checked)
+      const edge = await sampleColors(app, label, points)
+      const thumbRatio = Math.max(contrast.thumbRatio, ...edge.map(color => contrastRatio(color, contrast.track)))
+      expect.soft(contrast.trackRatio, `track and background ${JSON.stringify(contrast)}`).toBeGreaterThanOrEqual(3)
+      expect.soft(thumbRatio, `thumb boundary and track ${JSON.stringify({ contrast, edge })}`).toBeGreaterThanOrEqual(3)
+      expect.soft(contrast.thumbSurfaceRatio, `thumb and background ${JSON.stringify(contrast)}`).toBeGreaterThanOrEqual(3)
+    }
+    expect(contrastRatio(...tracks), 'on and off tracks').toBeGreaterThanOrEqual(3)
+    expect(thumbs[0], 'thumb color stays consistent').toEqual(thumbs[1])
   })
-}
+
+  test('settings category titles and descriptions remain readable in every state', async ({ page }) => {
+    await goToSettingsSection(page, 'theme')
+    const pageColors = await page.locator('body').evaluate(element => {
+      const style = getComputedStyle(element)
+      const rgb = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)
+      return { foreground: rgb(style.color), background: rgb(style.backgroundColor) }
+    })
+    expect.soft(contrastRatio(pageColors.foreground, pageColors.background), 'page text').toBeGreaterThanOrEqual(4.5)
+    const category = page.locator('.settingsMenu .title[data-section="playback"]')
+    const selected = page.locator('.settingsMenu .title.active')
+    for (const state of ['normal', 'selected', 'hover', 'focus']) {
+      const button = state === 'selected' ? selected : category
+      if (state === 'hover') await button.hover()
+      if (state === 'focus') {
+        await page.mouse.move(0, 0)
+        await page.keyboard.press('Tab')
+        await button.focus()
+      }
+      const colors = await button.evaluate(element => {
+        const rgb = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)
+        const style = getComputedStyle(element)
+        const background = style.backgroundColor === 'rgba(0, 0, 0, 0)'
+          ? getComputedStyle(element.closest('.settingsMenu')).backgroundColor
+          : style.backgroundColor
+        return {
+          background: rgb(background),
+          title: rgb(getComputedStyle(element.querySelector('.titleText')).color),
+          description: rgb(getComputedStyle(element.querySelector('.titleDescription')).color)
+        }
+      })
+      for (const part of ['title', 'description']) {
+        expect.soft(contrastRatio(colors[part], colors.background), `${state} ${part} ${JSON.stringify(colors)}`).toBeGreaterThanOrEqual(4.5)
+      }
+    }
+  })
+
+  test('slider tracks and hovered header controls remain visible', { tag: '@scale' }, async ({ app, page }) => {
+    await goToSettingsSection(page, 'theme')
+    const input = page.getByRole('slider', { name: /UI Roundness/ })
+    const slider = await controlContrast(app, input, 'slider')
+    expect.soft(slider.ratio, `slider ${JSON.stringify(slider)}`).toBeGreaterThanOrEqual(3)
+    const points = await input.evaluate(element => {
+      const rect = element.getBoundingClientRect()
+      const fraction = (Number(element.value) - Number(element.min)) / (Number(element.max) - Number(element.min))
+      return [[1 + fraction * (rect.width - 2), rect.height / 2], [rect.width * 0.85, rect.height / 2]]
+    })
+    const [thumb, track] = await sampleColors(app, input, points)
+    expect.soft(contrastRatio(thumb, track), `slider thumb ${JSON.stringify({ thumb, track })}`).toBeGreaterThanOrEqual(3)
+    const button = page.getByRole('button', { name: 'Show performance impact indicators', exact: true })
+    if (await button.getAttribute('aria-pressed') === 'true') await button.click()
+    await button.hover()
+    const colors = await button.evaluate(element => {
+      const style = getComputedStyle(element)
+      const rgb = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)
+      return { foreground: rgb(style.color), background: rgb(style.backgroundColor) }
+    })
+    expect.soft(contrastRatio(colors.foreground, colors.background), `header hover ${JSON.stringify(colors)}`).toBeGreaterThanOrEqual(3)
+  })
+})

@@ -144,49 +144,46 @@ test('phone organizer clamps its grid after column and viewport changes', async 
   })
 })
 
-for (const zoom of [1, 0.95]) {
-  test(`mobile progress sits above the navigation without moving its active indicator at ${zoom} scale`, async ({ app, page }) => {
-    await setWindowSize(app, page, { width: 375, height: 760 })
-    await page.evaluate(async factor => {
-      await window.ftElectron.setZoomFactor(factor)
-      document.documentElement.style.setProperty('--safe-area-inset-bottom', '24px')
-      const store = window.$store
-      store.commit('setShowProgressBarToast', false)
-      store.commit('setShowProgressBar', false)
-    }, zoom)
-    const nav = page.locator('.sideNav')
-    const activeOption = nav.locator('.navOption.router-link-active:visible')
-    const originalPill = await activeOption.evaluate(element => {
-      const pill = getComputedStyle(element, '::before')
-      return { top: pill.top, height: pill.height }
-    })
-    const originalHeight = await nav.evaluate(element => element.getBoundingClientRect().height)
-    await page.evaluate(() => {
-      const store = window.$store
-      store.commit('setProgressBarPercentage', 50)
-      store.commit('setShowProgressBar', true)
-    })
-    await expect(page.locator('.progressBar')).toBeVisible()
-    const metrics = await nav.evaluate(element => {
-      const pill = getComputedStyle(element.querySelector('.navOption.router-link-active'), '::before')
-      const progress = document.querySelector('.progressBar').getBoundingClientRect()
-      return {
-        height: element.getBoundingClientRect().height,
-        progressBottom: progress.bottom,
-        navTop: element.getBoundingClientRect().top,
-        pill: { top: pill.top, height: pill.height },
-      }
-    })
-    expect(metrics.height).toBeCloseTo(originalHeight, 0)
-    expect(metrics.progressBottom).toBeCloseTo(metrics.navTop, 0)
-    expect(metrics.pill).toEqual(originalPill)
-    await page.evaluate(() => {
-      window.$store.commit('setShowProgressBar', false)
-    })
-    await expect(page.locator('.progressBar')).toHaveCount(0)
-    expect(await nav.evaluate(element => element.getBoundingClientRect().height)).toBeCloseTo(originalHeight, 0)
+test('mobile progress sits above the navigation without moving its active indicator', { tag: '@scale' }, async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 375, height: 760 })
+  await page.evaluate(async () => {
+    document.documentElement.style.setProperty('--safe-area-inset-bottom', '24px')
+    const store = window.$store
+    store.commit('setShowProgressBarToast', false)
+    store.commit('setShowProgressBar', false)
   })
-}
+  const nav = page.locator('.sideNav')
+  const activeOption = nav.locator('.navOption.router-link-active:visible')
+  const originalPill = await activeOption.evaluate(element => {
+    const pill = getComputedStyle(element, '::before')
+    return { top: pill.top, height: pill.height }
+  })
+  const originalHeight = await nav.evaluate(element => element.getBoundingClientRect().height)
+  await page.evaluate(() => {
+    const store = window.$store
+    store.commit('setProgressBarPercentage', 50)
+    store.commit('setShowProgressBar', true)
+  })
+  await expect(page.locator('.progressBar')).toBeVisible()
+  const metrics = await nav.evaluate(element => {
+    const pill = getComputedStyle(element.querySelector('.navOption.router-link-active'), '::before')
+    const progress = document.querySelector('.progressBar').getBoundingClientRect()
+    return {
+      height: element.getBoundingClientRect().height,
+      progressBottom: progress.bottom,
+      navTop: element.getBoundingClientRect().top,
+      pill: { top: pill.top, height: pill.height },
+    }
+  })
+  expect(metrics.height).toBeCloseTo(originalHeight, 0)
+  expect(metrics.progressBottom).toBeCloseTo(metrics.navTop, 0)
+  expect(metrics.pill).toEqual(originalPill)
+  await page.evaluate(() => {
+    window.$store.commit('setShowProgressBar', false)
+  })
+  await expect(page.locator('.progressBar')).toHaveCount(0)
+  expect(await nav.evaluate(element => element.getBoundingClientRect().height)).toBeCloseTo(originalHeight, 0)
+})
 
 for (const theme of ['light', 'dark']) {
   test(`phone organizer shows a responsive thumbnail grid in ${theme} mode`, async ({ app, page }, testInfo) => {
@@ -1753,72 +1750,69 @@ test.describe('autosized prompts', () => {
   })
 })
 
-for (const scale of [1, 1.25]) {
-  test(`isolates the owning video surface while Android Picture-in-Picture is active at ${scale * 100}% UI scale`, async ({ page }) => {
-    await goTo(page, 'home')
-    await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
-    const source = { x: 18.5, y: 24.25, width: 480.5, height: 270.25 }
-    await page.emulateMedia({ colorScheme: 'light' })
-    await expect(page.locator('body')).toHaveAttribute('data-system-theme', 'light')
-    await page.evaluate(bounds => {
-      document.querySelector('.app').classList.add('capacitorTabs')
-      // Native PiP crops the live viewport around the saved source geometry.
-      // Supply the same bounds that Android entry normally records.
-      for (const [name, value] of Object.entries({ left: bounds.x, top: bounds.y, width: bounds.width, height: bounds.height })) {
-        document.documentElement.style.setProperty(`--android-pip-source-${name}`, `${value}px`)
-      }
-      for (const target of [false, true]) {
-        const player = document.createElement('div')
-        player.className = 'ftVideoPlayer shaka-video-container'
-        if (target) player.setAttribute('data-android-picture-in-picture-target', '')
-        const video = document.createElement('video')
-        video.className = 'player'
-        player.append(video)
-        const canvas = document.createElement('canvas')
-        canvas.className = 'vrCanvas'
-        player.append(canvas)
-        document.querySelector('.app > .routerView').append(player)
-      }
-      document.body.classList.add('androidPictureInPicture')
-    }, source)
-
-    await expect(page.locator('.topNav')).toHaveCSS('visibility', 'hidden')
-    await expect(page.locator('.app > .routerView')).toHaveCSS('container-type', 'normal')
-    await expect(page.locator('.ftVideoPlayer').first()).toHaveCSS('visibility', 'hidden')
-    const target = page.locator('[data-android-picture-in-picture-target]')
-    await expect(target).toHaveCSS('visibility', 'visible')
-    await expect(target.locator('> .player')).toHaveCSS('visibility', 'visible')
-    await expect(target.locator('> .player')).toHaveCSS('transition-property', 'none')
-    await expect(target.locator('> .vrCanvas')).toHaveCSS('transition-property', 'none')
-    const expectSourceBounds = async () => {
-      await expect.poll(() => target.evaluate((element, bounds) => {
-        return [element, element.querySelector(':scope > .player'), element.querySelector(':scope > .vrCanvas')]
-          .every(surface => {
-            const rect = surface.getBoundingClientRect()
-            return ['x', 'y', 'width', 'height'].every(dimension => Math.abs(rect[dimension] - bounds[dimension]) <= 1)
-          })
-      }, source)).toBe(true)
+test('isolates the owning video surface while Android Picture-in-Picture is active', { tag: '@scale' }, async ({ page }) => {
+  await goTo(page, 'home')
+  const source = { x: 18.5, y: 24.25, width: 480.5, height: 270.25 }
+  await page.emulateMedia({ colorScheme: 'light' })
+  await expect(page.locator('body')).toHaveAttribute('data-system-theme', 'light')
+  await page.evaluate(bounds => {
+    document.querySelector('.app').classList.add('capacitorTabs')
+    // Native PiP crops the live viewport around the saved source geometry.
+    // Supply the same bounds that Android entry normally records.
+    for (const [name, value] of Object.entries({ left: bounds.x, top: bounds.y, width: bounds.width, height: bounds.height })) {
+      document.documentElement.style.setProperty(`--android-pip-source-${name}`, `${value}px`)
     }
-    await expectSourceBounds()
+    for (const target of [false, true]) {
+      const player = document.createElement('div')
+      player.className = 'ftVideoPlayer shaka-video-container'
+      if (target) player.setAttribute('data-android-picture-in-picture-target', '')
+      const video = document.createElement('video')
+      video.className = 'player'
+      player.append(video)
+      const canvas = document.createElement('canvas')
+      canvas.className = 'vrCanvas'
+      player.append(canvas)
+      document.querySelector('.app > .routerView').append(player)
+    }
+    document.body.classList.add('androidPictureInPicture')
+  }, source)
 
-    // Vue replaces the class attribute when the player changes into its
-    // cross-tab mini-player layout. PiP ownership must survive that update.
-    await target.evaluate(element => {
-      element.className = 'ftVideoPlayer shaka-video-container scrollMiniPlayer'
-    })
-    await expect(target).toHaveAttribute('data-android-picture-in-picture-target', '')
-    await expect(target.locator('> .player')).toHaveCSS('visibility', 'visible')
-    await expectSourceBounds()
+  await expect(page.locator('.topNav')).toHaveCSS('visibility', 'hidden')
+  await expect(page.locator('.app > .routerView')).toHaveCSS('container-type', 'normal')
+  await expect(page.locator('.ftVideoPlayer').first()).toHaveCSS('visibility', 'hidden')
+  const target = page.locator('[data-android-picture-in-picture-target]')
+  await expect(target).toHaveCSS('visibility', 'visible')
+  await expect(target.locator('> .player')).toHaveCSS('visibility', 'visible')
+  await expect(target.locator('> .player')).toHaveCSS('transition-property', 'none')
+  await expect(target.locator('> .vrCanvas')).toHaveCSS('transition-property', 'none')
+  const expectSourceBounds = async () => {
+    await expect.poll(() => target.evaluate((element, bounds) => {
+      return [element, element.querySelector(':scope > .player'), element.querySelector(':scope > .vrCanvas')]
+        .every(surface => {
+          const rect = surface.getBoundingClientRect()
+          return ['x', 'y', 'width', 'height'].every(dimension => Math.abs(rect[dimension] - bounds[dimension]) <= 1)
+        })
+    }, source)).toBe(true)
+  }
+  await expectSourceBounds()
 
-    // Entering Android PiP can change the reported system color scheme. Theme
-    // updates must not discard the transient class that isolates the video.
-    await page.emulateMedia({ colorScheme: 'dark' })
-    await expect(page.locator('body')).toHaveAttribute('data-system-theme', 'dark')
-    await expect(page.locator('body')).toHaveClass(/androidPictureInPicture/)
-    await expect(target).toHaveCSS('visibility', 'visible')
-    await expectSourceBounds()
+  // Vue replaces the class attribute when the player changes into its
+  // cross-tab mini-player layout. PiP ownership must survive that update.
+  await target.evaluate(element => {
+    element.className = 'ftVideoPlayer shaka-video-container scrollMiniPlayer'
   })
-}
+  await expect(target).toHaveAttribute('data-android-picture-in-picture-target', '')
+  await expect(target.locator('> .player')).toHaveCSS('visibility', 'visible')
+  await expectSourceBounds()
+
+  // Entering Android PiP can change the reported system color scheme. Theme
+  // updates must not discard the transient class that isolates the video.
+  await page.emulateMedia({ colorScheme: 'dark' })
+  await expect(page.locator('body')).toHaveAttribute('data-system-theme', 'dark')
+  await expect(page.locator('body')).toHaveClass(/androidPictureInPicture/)
+  await expect(target).toHaveCSS('visibility', 'visible')
+  await expectSourceBounds()
+})
 
 test.describe('thumbnail watched progress', () => {
   test.use({
@@ -2286,80 +2280,77 @@ test('a save channel setting dropdown clears the fullscreen dock content', async
   })).toEqual({ insideDock: true, onTop: true })
 })
 
-for (const scale of [1, 1.25]) {
-  test(`tablet tab touch highlight covers the close-button area at scale ${scale}`, async ({ app, page }) => {
-    await setWindowSize(app, page, { width: 1200, height: 850 })
-    await page.evaluate(scale => window.ftElectron.setZoomFactor(scale), scale)
-    await page.addStyleTag({ path: path.join(repoRoot, 'src/renderer/components/TabBar/CapacitorTabletTabBar.css') })
-    await page.evaluate(() => {
-      const bar = document.createElement('div')
-      bar.className = 'capacitorTabletTabBar'
-      bar.style.cssText = 'position:fixed;z-index:10000;top:120px;left:0;--side-nav-hover-color:rgb(50,60,70);--card-bg-color:rgb(20,25,30)'
-      const tab = document.createElement('div')
-      tab.className = 'capacitorTabletTab'
-      const target = document.createElement('button')
-      target.className = 'capacitorTabletTabTarget'
-      target.textContent = 'Subscriptions'
-      const close = document.createElement('button')
-      close.className = 'capacitorTabletTabClose'
-      close.textContent = '×'
-      tab.append(target, close)
-      bar.append(tab)
-      document.body.append(bar)
-    })
-    const cdp = await page.context().newCDPSession(page)
-    const tab = page.locator('.capacitorTabletTab')
-    const target = tab.locator('.capacitorTabletTabTarget')
-    try {
-      for (const roundness of [0, 1, 2]) {
-        await tab.evaluate((element, value) => element.style.setProperty('--ui-roundness', value), String(roundness))
-        await expect(tab).toHaveCSS('border-top-left-radius', `${24 * roundness}px`)
-        await expect(tab).toHaveCSS('border-top-right-radius', `${24 * roundness}px`)
-        await expect(tab).toHaveCSS('border-bottom-left-radius', `${24 * roundness}px`)
-        await expect(tab.locator('.capacitorTabletTabClose')).toHaveCSS('border-top-left-radius', `${24 * roundness}px`)
-      }
-      for (const selected of [false, true]) {
-        await tab.evaluate((element, selected) => element.classList.toggle('active', selected), selected)
-        const bounds = await target.boundingBox()
-        expect(await target.evaluate(element => {
-          const r = element.getBoundingClientRect()
-          return element.contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2))
-        })).toBe(true)
-        await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }] })
-        await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-        expect(await target.evaluate(element => element.matches(':hover, :active'))).toBe(true)
-        await expect(tab).toHaveCSS('background-color', 'rgb(50, 60, 70)', { timeout: 1500 })
-        await expect(target).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
-        await expect(tab.locator('.capacitorTabletTabClose')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
-        await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 700, y: 400 }] })
-        await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-        await expect(tab).toHaveCSS('background-color', selected ? 'rgb(20, 25, 30)' : 'rgba(0, 0, 0, 0)')
-        const close = tab.locator('.capacitorTabletTabClose')
-        const closeBounds = await close.boundingBox()
-        await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: closeBounds.x + closeBounds.width / 2, y: closeBounds.y + closeBounds.height / 2 }] })
-        await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-        const colors = await close.evaluate(element => {
-          const style = getComputedStyle(element)
-          const probe = document.createElement('span')
-          probe.style.backgroundColor = 'color-mix(in srgb, var(--destructive-color) 25%, transparent)'
-          probe.style.color = style.getPropertyValue('--destructive-color')
-          element.append(probe)
-          const colors = { background: getComputedStyle(probe).backgroundColor, text: getComputedStyle(probe).color }
-          probe.remove()
-          return colors
-        })
-        await expect(close).toHaveCSS('background-color', colors.background)
-        await expect(close).toHaveCSS('color', colors.text)
-        await expect(tab).toHaveCSS('background-color', selected ? 'rgb(20, 25, 30)' : 'rgba(0, 0, 0, 0)')
-        await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 700, y: 400 }] })
-        await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-        await expect(close).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
-      }
-    } finally {
-      await cdp.detach()
-    }
+test('tablet tab touch highlight covers the close-button area', { tag: '@scale' }, async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 1200, height: 850 })
+  await page.addStyleTag({ path: path.join(repoRoot, 'src/renderer/components/TabBar/CapacitorTabletTabBar.css') })
+  await page.evaluate(() => {
+    const bar = document.createElement('div')
+    bar.className = 'capacitorTabletTabBar'
+    bar.style.cssText = 'position:fixed;z-index:10000;top:120px;left:0;--side-nav-hover-color:rgb(50,60,70);--card-bg-color:rgb(20,25,30)'
+    const tab = document.createElement('div')
+    tab.className = 'capacitorTabletTab'
+    const target = document.createElement('button')
+    target.className = 'capacitorTabletTabTarget'
+    target.textContent = 'Subscriptions'
+    const close = document.createElement('button')
+    close.className = 'capacitorTabletTabClose'
+    close.textContent = '×'
+    tab.append(target, close)
+    bar.append(tab)
+    document.body.append(bar)
   })
-}
+  const cdp = await page.context().newCDPSession(page)
+  const tab = page.locator('.capacitorTabletTab')
+  const target = tab.locator('.capacitorTabletTabTarget')
+  try {
+    for (const roundness of [0, 1, 2]) {
+      await tab.evaluate((element, value) => element.style.setProperty('--ui-roundness', value), String(roundness))
+      await expect(tab).toHaveCSS('border-top-left-radius', `${24 * roundness}px`)
+      await expect(tab).toHaveCSS('border-top-right-radius', `${24 * roundness}px`)
+      await expect(tab).toHaveCSS('border-bottom-left-radius', `${24 * roundness}px`)
+      await expect(tab.locator('.capacitorTabletTabClose')).toHaveCSS('border-top-left-radius', `${24 * roundness}px`)
+    }
+    for (const selected of [false, true]) {
+      await tab.evaluate((element, selected) => element.classList.toggle('active', selected), selected)
+      const bounds = await target.boundingBox()
+      expect(await target.evaluate(element => {
+        const r = element.getBoundingClientRect()
+        return element.contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2))
+      })).toBe(true)
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }] })
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+      expect(await target.evaluate(element => element.matches(':hover, :active'))).toBe(true)
+      await expect(tab).toHaveCSS('background-color', 'rgb(50, 60, 70)', { timeout: 1500 })
+      await expect(target).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+      await expect(tab.locator('.capacitorTabletTabClose')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 700, y: 400 }] })
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+      await expect(tab).toHaveCSS('background-color', selected ? 'rgb(20, 25, 30)' : 'rgba(0, 0, 0, 0)')
+      const close = tab.locator('.capacitorTabletTabClose')
+      const closeBounds = await close.boundingBox()
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: closeBounds.x + closeBounds.width / 2, y: closeBounds.y + closeBounds.height / 2 }] })
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+      const colors = await close.evaluate(element => {
+        const style = getComputedStyle(element)
+        const probe = document.createElement('span')
+        probe.style.backgroundColor = 'color-mix(in srgb, var(--destructive-color) 25%, transparent)'
+        probe.style.color = style.getPropertyValue('--destructive-color')
+        element.append(probe)
+        const colors = { background: getComputedStyle(probe).backgroundColor, text: getComputedStyle(probe).color }
+        probe.remove()
+        return colors
+      })
+      await expect(close).toHaveCSS('background-color', colors.background)
+      await expect(close).toHaveCSS('color', colors.text)
+      await expect(tab).toHaveCSS('background-color', selected ? 'rgb(20, 25, 30)' : 'rgba(0, 0, 0, 0)')
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 700, y: 400 }] })
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+      await expect(close).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    }
+  } finally {
+    await cdp.detach()
+  }
+})
 
 test('fetches an uncached synced channel avatar in the phone organizer', async ({ app, page }) => {
   await setWindowSize(app, page, { width: 375, height: 760 })
@@ -2423,69 +2414,66 @@ test('fetches an uncached local channel avatar in the phone organizer', async ({
   expect(page.url()).toBe(activeUrl)
 })
 
-for (const zoom of [1, 0.95]) {
-  test(`mobile tab selection uses checkboxes and cancels without activating at ${zoom} scale`, async ({ app, page }) => {
-    await setWindowSize(app, page, { width: 375, height: 760 })
-    await page.evaluate(async factor => {
-      await window.ftElectron.setZoomFactor(factor)
-      const store = window.$store
-      for (let index = 0; index < 5; index++) {
-        await store.dispatch('createTab', { route: '/subscriptions', makeActive: false })
-      }
-    }, zoom)
-    await enablePhoneTabSwitcher(page)
-    await page.locator('.capacitorPhoneTabSwitcherButton').click()
-    const cards = page.locator('.capacitorPhoneTabRow')
-    const target = cards.first().locator('.capacitorPhoneTabTarget')
-    const bounds = await target.boundingBox()
-    await page.mouse.move(bounds.x + 24, bounds.y + 24)
-    await page.mouse.down()
-    await expect(page.locator('.capacitorTabActions')).toBeVisible()
-    await page.mouse.up()
-    await page.getByRole('menuitem', { name: 'Close Tabs', exact: true }).click()
-    await expect(page.getByRole('menuitem', { name: 'Close Tabs Before', exact: true })).toBeDisabled()
-    await expect(page.getByRole('menuitem', { name: 'Close Tabs After', exact: true })).toBeEnabled()
-    await expect(page.getByRole('menuitem', { name: 'Close Other Tabs', exact: true })).toBeEnabled()
-    await page.getByRole('menuitem', { name: 'Back', exact: true }).click()
-    await page.getByRole('menuitem', { name: 'Select Tab', exact: true }).click()
-    await expect(cards.first().getByRole('checkbox')).toBeChecked()
-    await expect(target).toBeFocused()
-    await expect(cards.getByRole('checkbox')).toHaveCount(6)
-    await expect(page.locator('.capacitorPhoneTabFab')).toBeHidden()
-    await cards.nth(1).getByRole('checkbox').check()
-    await expect(page.getByRole('button', { name: 'Close 2 Tabs', exact: true })).toBeVisible()
-    await cards.nth(2).locator('.capacitorPhoneTabTarget').click()
-    await expect(cards.nth(2).getByRole('checkbox')).toBeChecked()
-    await expect(page.locator('.capacitorPhoneTabDialog')).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Close 3 Tabs', exact: true })).toBeVisible()
-    const panel = page.locator('#capacitor-phone-open-tabs-panel')
-    await panel.evaluate(element => { element.scrollTop = element.scrollHeight })
-    await page.getByRole('button', { name: 'Cancel', exact: true }).click()
-    await expect(cards.getByRole('checkbox')).toHaveCount(0)
-    await expect(page.locator('.capacitorPhoneTabFab')).toBeVisible()
-    await expect.poll(async () => {
-      const state = await phoneTabScrollState(page, '.capacitorPhoneOpenTabs')
-      return state.scrollTop <= state.maximum + 1
-    }).toBe(true)
-    await setWindowSize(app, page, { width: 760, height: 375 })
-    await cards.first().locator('.capacitorPhoneTabTarget').click({ button: 'right' })
-    const menuScroll = page.locator('.capacitorTabActionList')
-    await menuScroll.evaluate(element => { element.scrollTop = element.scrollHeight })
-    await expect.poll(() => menuScroll.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
-    await page.getByRole('menuitem', { name: 'Close Tabs', exact: true }).click()
-    await expect(page.getByRole('menuitem', { name: 'Select Tab', exact: true })).toHaveCount(0)
-    await expect.poll(() => menuScroll.evaluate(element => ({
-      offset: element.scrollTop,
-      unusable: element.querySelector('.os-scrollbar-vertical').classList.contains('os-scrollbar-unusable'),
-    }))).toEqual({ offset: 0, unusable: true })
-    await page.keyboard.press('Escape')
-    await expect(page.getByRole('menuitem', { name: 'Close Tabs', exact: true })).toBeFocused()
-    await expect.poll(() => menuScroll.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
-    await page.getByRole('menuitem', { name: 'Select Tab', exact: true }).click()
-    await expect(page.getByRole('button', { name: 'Cancel', exact: true })).toBeVisible()
-    await expect(cards.first().getByRole('checkbox')).toBeChecked()
+test('mobile tab selection uses checkboxes and cancels without activating', { tag: '@scale' }, async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 375, height: 760 })
+  await page.evaluate(async () => {
+    const store = window.$store
+    for (let index = 0; index < 5; index++) {
+      await store.dispatch('createTab', { route: '/subscriptions', makeActive: false })
+    }
   })
-}
+  await enablePhoneTabSwitcher(page)
+  await page.locator('.capacitorPhoneTabSwitcherButton').click()
+  const cards = page.locator('.capacitorPhoneTabRow')
+  const target = cards.first().locator('.capacitorPhoneTabTarget')
+  const bounds = await target.boundingBox()
+  await page.mouse.move(bounds.x + 24, bounds.y + 24)
+  await page.mouse.down()
+  await expect(page.locator('.capacitorTabActions')).toBeVisible()
+  await page.mouse.up()
+  await page.getByRole('menuitem', { name: 'Close Tabs', exact: true }).click()
+  await expect(page.getByRole('menuitem', { name: 'Close Tabs Before', exact: true })).toBeDisabled()
+  await expect(page.getByRole('menuitem', { name: 'Close Tabs After', exact: true })).toBeEnabled()
+  await expect(page.getByRole('menuitem', { name: 'Close Other Tabs', exact: true })).toBeEnabled()
+  await page.getByRole('menuitem', { name: 'Back', exact: true }).click()
+  await page.getByRole('menuitem', { name: 'Select Tab', exact: true }).click()
+  await expect(cards.first().getByRole('checkbox')).toBeChecked()
+  await expect(target).toBeFocused()
+  await expect(cards.getByRole('checkbox')).toHaveCount(6)
+  await expect(page.locator('.capacitorPhoneTabFab')).toBeHidden()
+  await cards.nth(1).getByRole('checkbox').check()
+  await expect(page.getByRole('button', { name: 'Close 2 Tabs', exact: true })).toBeVisible()
+  await cards.nth(2).locator('.capacitorPhoneTabTarget').click()
+  await expect(cards.nth(2).getByRole('checkbox')).toBeChecked()
+  await expect(page.locator('.capacitorPhoneTabDialog')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Close 3 Tabs', exact: true })).toBeVisible()
+  const panel = page.locator('#capacitor-phone-open-tabs-panel')
+  await panel.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click()
+  await expect(cards.getByRole('checkbox')).toHaveCount(0)
+  await expect(page.locator('.capacitorPhoneTabFab')).toBeVisible()
+  await expect.poll(async () => {
+    const state = await phoneTabScrollState(page, '.capacitorPhoneOpenTabs')
+    return state.scrollTop <= state.maximum + 1
+  }).toBe(true)
+  await setWindowSize(app, page, { width: 760, height: 375 })
+  await cards.first().locator('.capacitorPhoneTabTarget').click({ button: 'right' })
+  const menuScroll = page.locator('.capacitorTabActionList')
+  await menuScroll.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => menuScroll.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  await page.getByRole('menuitem', { name: 'Close Tabs', exact: true }).click()
+  await expect(page.getByRole('menuitem', { name: 'Select Tab', exact: true })).toHaveCount(0)
+  await expect.poll(() => menuScroll.evaluate(element => ({
+    offset: element.scrollTop,
+    unusable: element.querySelector('.os-scrollbar-vertical').classList.contains('os-scrollbar-unusable'),
+  }))).toEqual({ offset: 0, unusable: true })
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('menuitem', { name: 'Close Tabs', exact: true })).toBeFocused()
+  await expect.poll(() => menuScroll.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  await page.getByRole('menuitem', { name: 'Select Tab', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Cancel', exact: true })).toBeVisible()
+  await expect(cards.first().getByRole('checkbox')).toBeChecked()
+})
 
 test('mobile close submenu keeps Back focused when every action is disabled', async ({ app, page }) => {
   await setWindowSize(app, page, { width: 375, height: 760 })
@@ -2502,30 +2490,27 @@ test('mobile close submenu keeps Back focused when every action is disabled', as
   await expect(page.locator('.capacitorPhoneTabDialog')).toBeVisible()
 })
 
-for (const zoom of [1, 0.95]) {
-  test(`phone close-tabs submenu header is a full-width back target at ${zoom} scale`, async ({ app, page }) => {
-    await setWindowSize(app, page, { width: 375, height: 760 })
-    await page.evaluate(factor => window.ftElectron.setZoomFactor(factor), zoom)
-    await enablePhoneTabSwitcher(page)
-    await page.locator('.capacitorPhoneTabSwitcherButton').click()
-    await page.locator('.capacitorPhoneTabTarget').click({ button: 'right' })
-    await page.getByRole('menuitem', { name: 'Close Tabs', exact: true }).click()
+test('phone close-tabs submenu header is a full-width back target', { tag: '@scale' }, async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 375, height: 760 })
+  await enablePhoneTabSwitcher(page)
+  await page.locator('.capacitorPhoneTabSwitcherButton').click()
+  await page.locator('.capacitorPhoneTabTarget').click({ button: 'right' })
+  await page.getByRole('menuitem', { name: 'Close Tabs', exact: true }).click()
 
-    const menu = page.locator('.capacitorTabActions')
-    const header = menu.locator('.capacitorTabActionHeader')
-    const back = header.getByRole('menuitem', { name: 'Back', exact: true })
-    const [menuBounds, headerBounds, backBounds] = await Promise.all([
-      menu.boundingBox(), header.boundingBox(), back.boundingBox(),
-    ])
-    expect(headerBounds.width).toBeGreaterThanOrEqual(menuBounds.width - 33)
-    expect(backBounds.width).toBeGreaterThanOrEqual(headerBounds.width - 1)
-    expect(backBounds.x).toBeCloseTo(headerBounds.x, 0)
-    await expect(back).toContainText('Back')
-    await expect(header).not.toContainText('Close Tabs')
-    await page.mouse.click(backBounds.x + backBounds.width - 12, backBounds.y + backBounds.height / 2)
-    await expect(menu.getByRole('menuitem', { name: 'Close Tabs', exact: true })).toBeVisible()
-  })
-}
+  const menu = page.locator('.capacitorTabActions')
+  const header = menu.locator('.capacitorTabActionHeader')
+  const back = header.getByRole('menuitem', { name: 'Back', exact: true })
+  const [menuBounds, headerBounds, backBounds] = await Promise.all([
+    menu.boundingBox(), header.boundingBox(), back.boundingBox(),
+  ])
+  expect(headerBounds.width).toBeGreaterThanOrEqual(menuBounds.width - 33)
+  expect(backBounds.width).toBeGreaterThanOrEqual(headerBounds.width - 1)
+  expect(backBounds.x).toBeCloseTo(headerBounds.x, 0)
+  await expect(back).toContainText('Back')
+  await expect(header).not.toContainText('Close Tabs')
+  await page.mouse.click(backBounds.x + backBounds.width - 12, backBounds.y + backBounds.height / 2)
+  await expect(menu.getByRole('menuitem', { name: 'Close Tabs', exact: true })).toBeVisible()
+})
 
 test('Watch image links have accessible names and unused ad controls stay hidden', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)

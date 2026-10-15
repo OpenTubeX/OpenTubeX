@@ -9,7 +9,7 @@ for (const { width, height, uiScale } of [
   test.describe(`utility window dismissal at ${width}×${height}, ${uiScale}% UI scale`, () => {
     test.use({ seed: { settings: { currentLocale: 'en-US', reducedMotion: 'off', uiScale } } })
 
-    test('closes without rebuilding hidden content or staging transition styles', async ({ page }) => {
+    test('closes without rebuilding hidden content or staging transition styles', { tag: '@performance' }, async ({ page }) => {
       await page.setViewportSize({ width, height })
       const session = await page.context().newCDPSession(page)
       await session.send('Emulation.setCPUThrottlingRate', { rate: 6 })
