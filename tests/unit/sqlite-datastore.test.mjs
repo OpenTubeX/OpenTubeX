@@ -300,6 +300,22 @@ test('a symlinked legacy file keeps the library beside its target', async (t) =>
   })
 })
 
+test('a dangling legacy link resolves without throwing and has nothing to import', async (t) => {
+  const dir = await directory(t)
+  const profile = join(dir, 'profile')
+  const external = join(dir, 'external')
+  mkdirSync(profile)
+  mkdirSync(external)
+  symlinkSync(join(external, 'video-metadata-cache.db'), join(profile, 'video-metadata-cache.db'))
+  const paths = desktopDatastorePaths(profile, 'video-metadata-cache')
+  assert.deepEqual(paths, {
+    legacy: join(external, 'video-metadata-cache.db'), filename: join(external, 'video-metadata-cache.sqlite')
+  })
+  const store = createDesktopDatastore(paths.filename, paths.legacy)
+  t.after(() => store.driver.close())
+  assert.deepEqual(await store.findAsync({}), [])
+})
+
 test('new databases use the write-ahead log and incremental vacuum', async (t) => {
   const dir = await directory(t)
   const store = open(t, dir, 'settings')

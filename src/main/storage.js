@@ -7,12 +7,12 @@ import { TabManager } from './tabs/TabManager'
 import { tabPreviewStorage } from './tabs/TabPreviewStorage'
 import { clearYtDlpPlaybackCache } from './ytDlpPlaybackCache'
 
-const sqliteFiles = name => [`${name}.sqlite`, `${name}.sqlite-wal`, `${name}.sqlite-shm`]
+// Includes the legacy NeDB file, which stays for older versions.
+const sqliteFiles = name => [`${name}.sqlite`, `${name}.sqlite-wal`, `${name}.sqlite-shm`, `${name}.db`]
 
 const USER_DATA_FILES = {
   downloadRecords: 'downloads.json',
-  // Clearing it also removes its legacy NeDB file.
-  videoMetadata: [...sqliteFiles('video-metadata-cache'), 'video-metadata-cache.db'],
+  videoMetadata: sqliteFiles('video-metadata-cache'),
   subscriptionCache: sqliteFiles('subscription-cache'),
   searchHistory: sqliteFiles('search-history'),
   history: sqliteFiles('history'),

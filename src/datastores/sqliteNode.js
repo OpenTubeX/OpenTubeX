@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
-import { createReadStream, existsSync, lstatSync, realpathSync, rmSync, statSync } from 'node:fs'
-import { basename, dirname, join } from 'node:path'
+import { createReadStream, existsSync, lstatSync, readlinkSync, realpathSync, rmSync, statSync } from 'node:fs'
+import { basename, dirname, join, resolve } from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
 import Datastore from '@seald-io/nedb'
 import { SqliteDatastore } from './sqlite.js'
@@ -115,7 +115,9 @@ export function createNedbFileSource(filename) {
 export function desktopDatastorePaths(directory, name) {
   let legacy = join(directory, `${name}.db`)
   if (lstatSync(legacy, { throwIfNoEntry: false })?.isSymbolicLink()) {
-    legacy = realpathSync(legacy)
+    // A dangling link, for example after clearing a linked cache, points to
+    // where its target was; that location simply has nothing to import.
+    legacy = existsSync(legacy) ? realpathSync(legacy) : resolve(dirname(legacy), readlinkSync(legacy))
     return { legacy, filename: join(dirname(legacy), `${basename(legacy, '.db')}.sqlite`) }
   }
   return { legacy, filename: join(directory, `${name}.sqlite`) }
