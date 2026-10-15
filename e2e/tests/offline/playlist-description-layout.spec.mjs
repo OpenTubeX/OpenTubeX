@@ -53,8 +53,11 @@ for (const uiScale of [100, 125]) {
           expect(geometry.scrollTop).toBeLessThanOrEqual(geometry.range + 1)
           expect(geometry.scrollbarHidden).toBe(false)
         }).toPass({ timeout: 15_000 })
-        await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
-        await expect.poll(() => scroller.evaluate(element => Math.abs(element.scrollHeight - element.clientHeight - element.scrollTop))).toBeLessThanOrEqual(1)
+        // Scroll again on each attempt because late reflow can still grow the range.
+        await expect.poll(() => scroller.evaluate(element => {
+          element.scrollTop = element.scrollHeight
+          return Math.abs(element.scrollHeight - element.clientHeight - element.scrollTop)
+        })).toBeLessThanOrEqual(1)
       }
 
       await scroller.evaluate(element => { element.scrollTop = 0 })
