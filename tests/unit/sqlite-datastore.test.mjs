@@ -211,6 +211,22 @@ test('changes from an older version wait for the next start when the backup fail
   assert.equal(changes.length, 1)
 })
 
+test('an unreadable legacy file does not lock an imported library', async (t) => {
+  const dir = await directory(t)
+  const legacyFile = join(dir, 'settings.db')
+  await writeFile(legacyFile, lines([{ _id: 'theme', value: 'dark' }]))
+  const store = open(t, dir, 'settings')
+  await store.updateAsync({ _id: 'theme' }, { $set: { value: 'light' } })
+  store.driver.close()
+  await editAsOlderVersion(legacyFile, older => older.updateAsync({ _id: 'theme' }, { $set: { value: 'older' } }))
+
+  const reopened = open(t, dir, 'settings')
+  reopened.legacy.read = async () => { throw new Error('EIO: i/o error') }
+  t.mock.method(console, 'error', () => {})
+  assert.deepEqual(await reopened.findAsync({}), [{ _id: 'theme', value: 'light' }])
+  assert.equal(console.error.mock.callCount(), 1)
+})
+
 test('a downgrade on a fresh installation adds only documents that do not exist yet', async (t) => {
   const dir = await directory(t)
   const store = open(t, dir, 'profiles')

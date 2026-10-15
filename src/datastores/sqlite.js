@@ -190,17 +190,25 @@ export class SqliteDatastore {
   async _open() {
     this.dropped = false
     // Check before any schema statement, so a newer version's database stays untouched.
-    const [[[version]]] = await this.driver.execute([['PRAGMA user_version']])
+    const [[[version]], [[tables]]] = await this.driver.execute([
+      ['PRAGMA user_version'], ["SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name = 'meta'"]
+    ])
     if (version > SCHEMA_VERSION) {
       throw new Error(`This library was created by a newer version of OpenTubeX (schema ${version})`)
     }
-    await this._execute(SCHEMA.map(sql => [sql]), true)
-    if (await this._meta('state') !== 'ready') {
-      await this._import()
+    // A new database gets its tables in the import's first transaction.
+    if (tables === 0 || await this._meta('state') !== 'ready') {
+      await this._import(tables === 0)
     } else if (this.legacy?.fingerprint) {
-      await this._applyLegacyChanges()
+      try {
+        await this._applyLegacyChanges()
+      } catch (error) {
+        // Applying them is optional. An unreadable legacy file must not lock
+        // the library; the unchanged fingerprint makes the next start retry.
+        console.error('Unable to apply library changes from an older version', error)
+      }
     }
-    await this._execute([...this.indexes].flatMap(field => this._indexStatements(field)))
+    await this._execute([...this.indexes].flatMap(field => this._indexStatements(field)), true)
   }
 
   async _readLegacy() {
@@ -224,15 +232,18 @@ export class SqliteDatastore {
   }
 
   /**
-   * Imports the legacy datastore. Batches commit separately, so an
-   * interrupted import is discarded and repeated on the next start; the state
-   * marker commits last, after every document.
+   * Imports the legacy datastore. A large import commits in several batches,
+   * so an interrupted one is discarded and repeated on the next start. The
+   * state marker commits with the last batch, and only when every document
+   * and member was stored. Each commit waits for the disk, so a small
+   * datastore takes a single one.
    */
-  async _import() {
-    await this._execute([['DELETE FROM docs'], ['DELETE FROM children'], ['DELETE FROM meta'], ['DELETE FROM legacy_base']], true)
+  async _import(fresh) {
     const fingerprint = await this.legacy?.fingerprint?.() ?? null
     const docs = this.legacy ? await this._readLegacy() : []
-    let batch = []
+    let batch = fresh
+      ? SCHEMA.map(sql => [sql])
+      : [['DELETE FROM docs'], ['DELETE FROM children'], ['DELETE FROM meta'], ['DELETE FROM legacy_base']]
     let childCount = 0
     for (const doc of docs) {
       const key = keyOf(doc._id)
@@ -249,20 +260,20 @@ export class SqliteDatastore {
         }
       }
     }
-    await this._execute(batch, true)
-
-    const [[[storedDocs]], [[storedChildren]]] = await this.driver.execute([
-      ['SELECT count(*) FROM docs'], ['SELECT count(*) FROM children']
-    ])
-    if (storedDocs !== docs.length || storedChildren !== childCount) {
-      throw new Error(`Library import stored ${storedDocs}/${docs.length} documents and ${storedChildren}/${childCount} members`)
-    }
-    await this._execute([
+    batch.push(
       [SQL.setMeta, ['legacyFingerprint', fingerprint]],
       [SQL.setMeta, ['importedAt', Date.now()]],
       [`PRAGMA user_version = ${SCHEMA_VERSION}`],
-      [SQL.setMeta, ['state', 'ready']],
-    ], true)
+      ["INSERT INTO meta (key, value) SELECT 'state', 'ready' WHERE (SELECT count(*) FROM docs) = ? AND (SELECT count(*) FROM children) = ?", [docs.length, childCount]],
+    )
+    await this._execute(batch, true)
+
+    if (await this._meta('state') !== 'ready') {
+      const [[[storedDocs]], [[storedChildren]]] = await this.driver.execute([
+        ['SELECT count(*) FROM docs'], ['SELECT count(*) FROM children']
+      ])
+      throw new Error(`Library import stored ${storedDocs}/${docs.length} documents and ${storedChildren}/${childCount} members`)
+    }
   }
 
   /**
