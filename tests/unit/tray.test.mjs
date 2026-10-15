@@ -6,6 +6,18 @@ import vm from 'node:vm'
 
 const source = await readFile(new URL('../../src/main/index.js', import.meta.url), 'utf8')
 
+// Minimal stand-in for Electron's nativeImage, covering only the surface the
+// macOS tray image code uses. resize() records the requested height and toPNG()
+// returns it as the encoded-buffer stand-in, so the Darwin assertions check the
+// sizes the code asks for without a real PNG encoder (Electron's nativeImage is
+// unavailable in this vm fixture).
+const fakeImage = (height, extra = {}) => ({
+  height,
+  ...extra,
+  resize: ({ height: resized }) => fakeImage(resized),
+  toPNG: () => fakeImage(height),
+})
+
 function fixture(platform = 'linux') {
   const windows = []
   const trays = []
@@ -45,7 +57,7 @@ function fixture(platform = 'linux') {
   }
   const nativeImage = {
     createEmpty: () => ({ representations: [], addRepresentation(options) { this.representations.push(options) } }),
-    createFromPath: () => ({ resize: ({ height }) => ({ height, toPNG: () => ({ height }) }) }),
+    createFromPath: () => fakeImage(512),
   }
   const context = vm.createContext({
     process: { platform, env: {} }, path: { join: () => '/icon.png' }, __dirname: '/',
@@ -306,7 +318,7 @@ test('a recreated tray receives a menu even when its contents are unchanged', ()
 for (const platform of ['linux', 'win32', 'darwin']) {
   test(`selected tray artwork survives tray recreation on ${platform}`, () => {
     const { context, trays } = fixture(platform)
-    const image = { isEmpty: () => false, resize: ({ height }) => ({ height, toPNG: () => ({ height }) }) }
+    const image = fakeImage(64, { isEmpty: () => false })
     context.selectedTrayImage = image
     context.configure({ enabled: false })
     context.configure({ enabled: true })
