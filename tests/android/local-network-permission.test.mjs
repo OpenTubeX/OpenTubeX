@@ -76,7 +76,7 @@ test('Android 17 denies LAN sync until consent and retries successfully after a 
       while (await back.isVisible()) await back.click()
       const skip = tutorial.getByRole('button', { name: 'Skip', exact: true })
       if (await skip.isVisible()) await skip.click()
-      else await tutorial.locator('.tutorialActions').getByRole('button').last().click()
+      else await tutorial.getByRole('button', { name: 'Finish', exact: true }).click()
       await expect(tutorial).toBeHidden()
     }
     const content = await goToSettingsSection(page, 'sync')
