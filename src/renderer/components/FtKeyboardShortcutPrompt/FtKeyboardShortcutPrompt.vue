@@ -36,78 +36,101 @@
         :disabled="!hasModifiedKeyboardShortcuts"
         @click="resetKeyboardShortcuts"
       />
+      <FtInput
+        class="shortcutSearch"
+        input-type="search"
+        :value="searchQuery"
+        :label="$t('Search Bar.Search')"
+        :icon="['fas', 'search']"
+        :placeholder="$t('Form Inputs.Search Text Hint')"
+        :show-action-button="false"
+        @input="searchQuery = $event"
+      />
     </div>
 
     <div
+      ref="shortcutScroller"
       v-overlay-scrollbars="embedded"
       class="shortcutColumns"
     >
       <div
-        v-for="(shortcutColumn, index) of shortcutColumns"
-        :key="index"
-        class="shortcutColumn"
+        ref="shortcutContent"
+        class="shortcutColumnsContent"
       >
-        <div
-          v-for="shortcutSection in shortcutColumn"
-          :key="shortcutSection.title"
-          class="shortcutSection"
-          :style="{ order: shortcutSection.order }"
+        <p
+          v-if="filteredShortcutColumns.length === 0"
+          class="shortcutNoResults"
+          role="status"
         >
-          <h3 class="center">
-            {{ shortcutSection.title }}
-          </h3>
-          <div class="labelsAndShortcuts">
-            <div
-              v-for="shortcut in shortcutSection.shortcutDictionary"
-              :key="shortcut.label"
-              class="labelAndShortcut"
-            >
-              <p
-                class="label"
+          {{ $t('CommandPalette.No Results') }}
+        </p>
+        <div
+          v-for="(shortcutColumn, index) of filteredShortcutColumns"
+          :key="index"
+          class="shortcutColumn"
+        >
+          <div
+            v-for="shortcutSection in shortcutColumn"
+            :key="shortcutSection.title"
+            class="shortcutSection"
+            :style="{ order: shortcutSection.order }"
+          >
+            <h3 class="center">
+              {{ shortcutSection.title }}
+            </h3>
+            <div class="labelsAndShortcuts">
+              <div
+                v-for="shortcut in shortcutSection.shortcutDictionary"
+                :key="shortcut.label"
+                class="labelAndShortcut"
               >
-                {{ shortcut.label }}
-              </p>
-              <div class="shortcut">
-                <template
-                  v-for="binding in shortcut.bindings"
-                  :key="binding.path"
+                <p
+                  class="label"
                 >
-                  <span class="shortcutBinding">
-                    <button
-                      v-if="binding.editable"
-                      type="button"
-                      class="shortcutButton"
-                      :class="{
-                        modified: binding.modified,
-                        recording: recordingShortcutPath === binding.path
-                      }"
-                      :data-shortcut-path="binding.path"
-                      :aria-label="$t('KeyboardShortcutPrompt.Change Shortcut', { action: shortcut.label })"
-                      @click.stop="beginShortcutRecording(binding)"
-                      @keydown="handleShortcutKeydown($event, binding)"
-                      @blur="stopShortcutRecording(binding)"
-                    >
-                      {{ getShortcutButtonLabel(binding) }}
-                    </button>
-                    <span
-                      v-else
-                      class="shortcutValue"
-                    >
-                      {{ getShortcutButtonLabel(binding) }}
+                  {{ shortcut.label }}
+                </p>
+                <div class="shortcut">
+                  <template
+                    v-for="binding in shortcut.bindings"
+                    :key="binding.path"
+                  >
+                    <span class="shortcutBinding">
+                      <button
+                        v-if="binding.editable"
+                        type="button"
+                        class="shortcutButton"
+                        :class="{
+                          modified: binding.modified,
+                          recording: recordingShortcutPath === binding.path
+                        }"
+                        :data-shortcut-path="binding.path"
+                        :aria-label="$t('KeyboardShortcutPrompt.Change Shortcut', { action: shortcut.label })"
+                        @click.stop="beginShortcutRecording(binding)"
+                        @keydown="handleShortcutKeydown($event, binding)"
+                        @blur="stopShortcutRecording(binding)"
+                      >
+                        {{ getShortcutButtonLabel(binding) }}
+                      </button>
+                      <span
+                        v-else
+                        class="shortcutValue"
+                      >
+                        {{ getShortcutButtonLabel(binding) }}
+                      </span>
+                      <FtIconButton
+                        v-if="binding.modified"
+                        class="resetShortcutButton"
+                        :title="$t('KeyboardShortcutPrompt.Reset Shortcut', { action: shortcut.label })"
+                        :icon="['fas', 'undo']"
+                        :padding="6"
+                        :size="14"
+                        :use-shadow="false"
+                        theme="base-no-default"
+                        @click="resetKeyboardShortcut(binding)"
+                      />
                     </span>
-                    <FtIconButton
-                      v-if="binding.modified"
-                      class="resetShortcutButton"
-                      :title="$t('KeyboardShortcutPrompt.Reset Shortcut', { action: shortcut.label })"
-                      :icon="['fas', 'undo']"
-                      :padding="6"
-                      :size="14"
-                      :use-shadow="false"
-                      theme="base-no-default"
-                      @click="resetKeyboardShortcut(binding)"
-                    />
-                  </span>
-                </template>
+                  </template>
+                </div>
               </div>
             </div>
           </div>
@@ -130,7 +153,7 @@
 
 <script setup>
 
-import { computed, nextTick, onDeactivated, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onDeactivated, onMounted, ref, useTemplateRef } from 'vue'
 import {
   DefaultKeyboardShortcuts,
   getConfiguredKeyboardShortcuts,
@@ -145,6 +168,8 @@ import {
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import store from '../../store/index'
 import { useI18n } from 'vue-i18n'
+import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import FtInput from '../FtInput/FtInput.vue'
 import FtButton from '../FtButton/FtButton.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 
@@ -158,6 +183,23 @@ const { embedded } = defineProps({
 const isMac = process.platform === 'darwin'
 const recordingShortcutPath = ref('')
 const pendingShortcutConflict = ref(null)
+const searchQuery = ref('')
+const shortcutScroller = useTemplateRef('shortcutScroller')
+const shortcutContent = useTemplateRef('shortcutContent')
+let contentResizeObserver = null
+
+onMounted(() => {
+  if (!embedded) return
+  contentResizeObserver = new ResizeObserver(() => {
+    if (shortcutScroller.value?.clientHeight > 0) {
+      clampOverlayScrollTop(shortcutScroller.value, shortcutContent.value)
+    }
+  })
+  contentResizeObserver.observe(shortcutScroller.value)
+  contentResizeObserver.observe(shortcutContent.value)
+})
+
+onBeforeUnmount(() => contentResizeObserver?.disconnect())
 
 onDeactivated(() => {
   if (store.getters.getSettingsWindowMinimized) return
@@ -325,6 +367,22 @@ const shortcutColumns = computed(() => [
     }
   ]
 ])
+const filteredShortcutColumns = computed(() => {
+  const query = searchQuery.value.trim().toLocaleLowerCase()
+  if (!query) return shortcutColumns.value
+
+  return shortcutColumns.value.map(column => column.map(section => ({
+    ...section,
+    shortcutDictionary: section.shortcutDictionary.filter(shortcut =>
+      [section.title, shortcut.label, ...shortcut.bindings.map(binding => binding.shortcut
+        ? getLocalizedShortcut(binding.shortcut)
+        : t('KeyboardShortcutPrompt.Unassigned'))]
+        .some(text => text.toLocaleLowerCase().includes(query))
+    )
+  })).filter(section => section.shortcutDictionary.length > 0))
+    .filter(column => column.length > 0)
+})
+
 const hasModifiedKeyboardShortcuts = computed(() => shortcutColumns.value.some(column =>
   column.some(section => section.shortcutDictionary.some(shortcut =>
     shortcut.bindings.some(binding => binding.modified)

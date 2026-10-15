@@ -57,13 +57,27 @@ h3 {
   margin: 0;
 }
 
-.shortcutColumns,
+.shortcutSearch {
+  --input-bottom-spacing: 0;
+  --form-control-height: 36px;
+
+  flex: 0 1 240px;
+  min-inline-size: 0;
+}
+
+.shortcutNoResults {
+  inline-size: 100%;
+  text-align: center;
+  color: var(--secondary-text-color);
+}
+
+.shortcutColumnsContent,
 .shortcutColumn {
   display: flex;
   gap: 30px;
 }
 
-.shortcutColumns {
+.shortcutColumnsContent {
   align-items: flex-start;
   flex-flow: row wrap;
   justify-content: space-evenly;
@@ -190,9 +204,23 @@ h3 {
     flex-direction: column;
   }
 
+  .shortcutSearch {
+    flex-basis: auto;
+  }
+
   .label {
-    min-inline-size: 200px;
-    inline-size: 200px;
+    min-inline-size: 0;
+    inline-size: auto;
+    padding-inline-end: 1em;
+    overflow-wrap: anywhere;
+  }
+
+  .labelsAndShortcuts {
+    inline-size: 100%;
+  }
+
+  .shortcut {
+    overflow-wrap: anywhere;
   }
 
   .shortcutColumn {
