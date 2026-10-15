@@ -31,6 +31,8 @@ if (process.env.IS_ELECTRON_MAIN) {
     const { filename, legacy } = desktopDatastorePaths(userDataPath, name)
     return createDesktopDatastore(filename, legacy, {
       ...options[name],
+      // The notice about older versions' changes points to the profile folder.
+      backupDirectory: userDataPath,
       onLegacyChanges: change => legacyChangeListeners.forEach(listener => listener({ name, ...change })),
     })
   }

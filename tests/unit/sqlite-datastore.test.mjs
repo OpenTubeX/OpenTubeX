@@ -3,7 +3,7 @@ import { execFile } from 'node:child_process'
 import { existsSync, mkdirSync, readdirSync, realpathSync, symlinkSync } from 'node:fs'
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
 import test from 'node:test'
 import { promisify } from 'node:util'
@@ -315,6 +315,17 @@ test('a dangling legacy link resolves without throwing and has nothing to import
   const store = createDesktopDatastore(paths.filename, paths.legacy)
   t.after(() => store.driver.close())
   assert.deepEqual(await store.findAsync({}), [])
+})
+
+test('backups go to the given directory', async (t) => {
+  const dir = await directory(t)
+  const driver = createNodeSqliteDriver(join(dir, 'library', 'history.sqlite'), dir)
+  mkdirSync(join(dir, 'library'))
+  t.after(() => driver.close())
+  await driver.execute([['CREATE TABLE a (b)']])
+  const backup = await driver.backup()
+  assert.equal(dirname(backup), dir)
+  assert.ok(existsSync(backup))
 })
 
 test('new databases use the write-ahead log and incremental vacuum', async (t) => {

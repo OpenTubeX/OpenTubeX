@@ -9,9 +9,10 @@ import { SqliteDatastore } from './sqlite.js'
  * Electron's built-in SQLite. Statements run synchronously in the main
  * process, so every batch is a single uninterrupted step.
  * @param {string} filename
+ * @param {string} [backupDirectory] where backups go, beside the database by default
  * @returns {import('./sqlite.js').SqliteDriver}
  */
-export function createNodeSqliteDriver(filename) {
+export function createNodeSqliteDriver(filename, backupDirectory = dirname(filename)) {
   let db = null
   const statements = new Map()
 
@@ -62,7 +63,7 @@ export function createNodeSqliteDriver(filename) {
       }
     },
     async backup() {
-      const target = `${filename}.backup-${Date.now()}`
+      const target = join(backupDirectory, `${basename(filename)}.backup-${Date.now()}`)
       open().exec(`VACUUM INTO '${target.replaceAll('\'', '\'\'')}'`)
       return target
     },
@@ -126,11 +127,11 @@ export function desktopDatastorePaths(directory, name) {
 /**
  * @param {string} filename SQLite file
  * @param {string} legacyFilename NeDB file it replaces
- * @param {Omit<ConstructorParameters<typeof SqliteDatastore>[0], 'driver' | 'legacy'>} [options]
+ * @param {Omit<ConstructorParameters<typeof SqliteDatastore>[0], 'driver' | 'legacy'> & { backupDirectory?: string }} [options]
  */
-export function createDesktopDatastore(filename, legacyFilename, options = {}) {
+export function createDesktopDatastore(filename, legacyFilename, { backupDirectory, ...options } = {}) {
   return new SqliteDatastore({
-    driver: createNodeSqliteDriver(filename),
+    driver: createNodeSqliteDriver(filename, backupDirectory),
     legacy: legacyFilename ? createNedbFileSource(legacyFilename) : undefined,
     ...options,
   })
