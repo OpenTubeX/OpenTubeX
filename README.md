@@ -172,6 +172,9 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
 > [!NOTE]
 > OpenTubeX supports Windows 10 and later, macOS 12 and above, various Linux distributions, Android 8.0 and later, and experimental iOS/iPadOS 17.4 and later. Features differ between platforms.
 
+> [!CAUTION]
+> Only download OpenTubeX from the official sources listed here. Third-party download sites repackage our builds and often host outdated versions. One of them, YasDL, is on [FMHY's unsafe sites list](https://fmhy.net/unsafe) for uploading software with malware. To check a file from GitHub Releases, compare its SHA-256 checksum with the digest GitHub shows next to it on the release page.
+
 * [GitHub Releases](https://github.com/OpenTubeX/OpenTubeX/releases)
 * [OpenTubeX Website](https://opentubex.org/downloads/)
 * Windows: [WinGet](https://github.com/microsoft/winget-pkgs/tree/master/manifests/o/OpenTubeX/OpenTubeX) (`winget install OpenTubeX.OpenTubeX`) <a href="https://github.com/microsoft/winget-pkgs/tree/master/manifests/o/OpenTubeX/OpenTubeX"><img src="https://img.shields.io/winget/v/OpenTubeX.OpenTubeX?label=WinGet&style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI%2BPHBhdGggZD0iTTExIDIxLjczYTIgMiAwIDAgMCAyIDBsNy00QTIgMiAwIDAgMCAyMSAxNlY4YTIgMiAwIDAgMC0xLTEuNzNsLTctNGEyIDIgMCAwIDAtMiAwbC03IDRBMiAyIDAgMCAwIDMgOHY4YTIgMiAwIDAgMCAxIDEuNzN6Ii8%2BPHBhdGggZD0iTTEyIDIyVjEyIi8%2BPHBvbHlsaW5lIHBvaW50cz0iMy4yOSA3IDEyIDEyIDIwLjcxIDciLz48cGF0aCBkPSJtNy41IDQuMjcgOSA1LjE1Ii8%2BPC9zdmc%2B" alt="WinGet version" align="absmiddle"></a>
