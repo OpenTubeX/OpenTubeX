@@ -59,11 +59,19 @@ for (const layout of ['desktop', 'phone', 'fullWindow', 'fullscreen']) {
       for (const shown of [false, true]) {
         const sample = await controls.evaluate(async (element, shown) => {
           const row = element.closest('.ftVideoPlayer').querySelector('.shortsTopControls')
-          if (shown) element.setAttribute('shown', 'true')
-          else element.removeAttribute('shown')
+          const setShown = value => value ? element.setAttribute('shown', 'true') : element.removeAttribute('shown')
+          // Shaka's own auto-hide can already be in the target state, so settle in the opposite state first.
+          setShown(!shown)
           row.getBoundingClientRect()
           await new Promise(requestAnimationFrame)
-          const animation = row.getAnimations().find(animation => ['opacity', '--ft-controls-fade'].includes(animation.transitionProperty))
+          await Promise.all(row.getAnimations().map(animation => animation.finished))
+          setShown(shown)
+          row.getBoundingClientRect()
+          let animation
+          for (let frame = 0; frame < 10 && !animation; frame++) {
+            await new Promise(requestAnimationFrame)
+            animation = row.getAnimations().find(animation => ['opacity', '--ft-controls-fade'].includes(animation.transitionProperty))
+          }
           if (!animation) throw new Error('Expected the Shorts controls to fade')
           animation.pause()
           animation.currentTime = Number(animation.effect.getTiming().duration) / 2
