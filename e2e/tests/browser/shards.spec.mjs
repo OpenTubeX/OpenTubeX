@@ -14,28 +14,29 @@ function report(counts) {
   }
 }
 
-const full = report({ offline: 3366, performance: 204, browser: 25, network: 70 })
-
-test('PR shards use changed counts while retaining all performance and mobile storage checks', () => {
-  expect(createShardMatrix(full, report({ offline: 3 }))).toEqual({
-    include: [
-      { project: 'offline', shard: 1, shardTotal: 1 },
-      { project: 'performance', shard: 1, shardTotal: 5 },
-      { project: 'performance', shard: 2, shardTotal: 5 },
-      { project: 'performance', shard: 3, shardTotal: 5 },
-      { project: 'performance', shard: 4, shardTotal: 5 },
-      { project: 'performance', shard: 5, shardTotal: 5 },
-      { project: 'browser', shard: 1, shardTotal: 1 }
-    ]
-  })
+const full = report({
+  offline: 3000,
+  'offline-95': 400,
+  'offline-125': 400,
+  performance: 120,
+  browser: 25,
+  network: 70
 })
 
-test('full runs retain every project and cap large suites at 16 shards', () => {
-  const { include } = createShardMatrix(full)
-  expect(include.filter(shard => shard.project === 'offline')).toHaveLength(16)
-  expect(include.filter(shard => shard.project === 'performance')).toHaveLength(5)
-  expect(include.filter(shard => shard.project === 'browser')).toHaveLength(1)
-  expect(include.filter(shard => shard.project === 'network')).toHaveLength(1)
+function shardCounts(include) {
+  return Object.fromEntries(include.map(shard => [shard.project, shard.shardTotal]))
+}
+
+test('PR shards run every packed-app test but only changed network tests', () => {
+  const { include } = createShardMatrix(full, report({ offline: 3, network: 2 }))
+  expect(shardCounts(include)).toEqual({ offline: 16, performance: 3, browser: 1, network: 1 })
+  expect(createShardMatrix(full, report({ offline: 3 })).include.some(shard => shard.project === 'network')).toBe(false)
+})
+
+test('offline shards also run the scaled projects', () => {
+  const offline = createShardMatrix(full).include.filter(shard => shard.project === 'offline')
+  expect(offline).toHaveLength(16)
+  expect(offline[0]).toEqual({ project: 'offline', projects: 'offline offline-95 offline-125', shard: 1, shardTotal: 16 })
 })
 
 test('offline dispatch includes performance and browser but excludes network tests', () => {
@@ -43,22 +44,30 @@ test('offline dispatch includes performance and browser but excludes network tes
   expect([...new Set(include.map(shard => shard.project))]).toEqual(['offline', 'performance', 'browser'])
   expect(createShardMatrix(full, full, 'network')).toEqual({
     include: [
-      { project: 'network', shard: 1, shardTotal: 1 }
+      { project: 'network', projects: 'network', shard: 1, shardTotal: 1 }
     ]
   })
 })
 
 test('missing projects fail planning instead of silently losing test coverage', () => {
-  expect(() => createShardMatrix(report({ offline: 1 }))).toThrow('No tests found for project performance')
+  expect(() => createShardMatrix(report({ offline: 1 }))).toThrow('No tests found for project offline-95')
 })
 
-test('packed-app functional regressions retain always-run performance coverage', () => {
+test('performance runs only tagged checks and *-performance files', () => {
   const performance = config.projects.find(project => project.name === 'performance')
-  for (const file of [
-    'channel-settings-pagination', 'fullscreen-docks', 'inline-mini-player-drag',
-    'scrollbar-overlay', 'utility-window-close', 'performance-indicator-layout'
+  const offline = config.projects.find(project => project.name === 'offline')
+  const selected = title => performance.grep.some(pattern => pattern.test(title))
+  for (const title of [
+    'offline/home-performance.spec.mjs > Home paints',
+    'offline/tabs.spec.mjs > batches tab drag rendering @performance'
   ]) {
-    const title = `offline/${file}.spec.mjs > functional regression`
-    expect(performance.grep.some(pattern => pattern.test(title)), file).toBe(true)
+    expect(selected(title), title).toBe(true)
+    expect(offline.grepInvert.some(pattern => pattern.test(title)), title).toBe(true)
+  }
+  for (const title of [
+    'offline/performance-indicator-layout.spec.mjs > wraps badges',
+    'offline/inline-mini-player-drag.spec.mjs > tablet swipe docks toward the bottom bar'
+  ]) {
+    expect(selected(title), title).toBe(false)
   }
 })

@@ -398,16 +398,21 @@ export async function setPlayerFullscreen(page, fullscreen) {
  *   test.use({ seed: { settings: { ... }, history: [ ... ] } })
  * Use `localeOverrides` to replace packaged locale messages without changing
  * the shared dist-e2e output.
-
+ *
+ * `uiScale` is set per project: tests tagged `@scale` also run at 95% and
+ * 125%. Read the fixture instead of seeding `settings.uiScale` in those tests.
  */
 export const test = base.extend({
   seed: [{}, { option: true }],
+  uiScale: [100, { option: true }],
   launchArgs: [[], { option: true }],
   showTutorial: [false, { option: true }],
   localeOverrides: [{}, { option: true }],
 
-  app: async ({ seed, launchArgs, showTutorial, localeOverrides }, use, testInfo) => {
-    const userDataDir = await createUserDataDir(seed)
+  app: async ({ seed, uiScale, launchArgs, showTutorial, localeOverrides }, use, testInfo) => {
+    const userDataDir = await createUserDataDir(uiScale === 100
+      ? seed
+      : { ...seed, settings: { uiScale, ...seed.settings } })
     const hasLocaleOverrides = Object.keys(localeOverrides).length > 0
     let appRoot
     let appHandle
