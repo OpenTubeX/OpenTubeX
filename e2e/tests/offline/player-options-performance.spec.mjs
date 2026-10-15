@@ -4,17 +4,6 @@ import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 test.use({ trace: 'off' })
 
-/** Wait for fonts and finite player animations, such as theme fades, to finish. */
-async function settlePlayer(page) {
-  await page.locator('.ftVideoPlayer').evaluate(async element => {
-    await document.fonts.ready
-    await Promise.all(element.getAnimations({ subtree: true })
-      .filter(animation => animation.playState === 'running' &&
-        animation.timeline === document.timeline && Number.isFinite(animation.effect?.getComputedTiming().endTime))
-      .map(animation => animation.finished.catch(() => {})))
-  })
-}
-
 for (const usePlayerMenuGrid of [true, false]) {
   test.describe(`player options ${usePlayerMenuGrid ? 'grid' : 'list'}`, () => {
     test.use({
@@ -32,7 +21,8 @@ for (const usePlayerMenuGrid of [true, false]) {
       const video = await openMockedVideo(page)
       await video.evaluate(element => element.pause())
       await expect.poll(() => video.evaluate(element => element.ui.getControls().getPlayer().getTextTracks().length)).toBeGreaterThan(0)
-      await settlePlayer(page)
+      // Late track loading rebuilds the menu rows without an observable signal.
+      await page.waitForTimeout(1000)
       const player = page.locator('.ftVideoPlayer')
       await player.hover()
       await page.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
@@ -90,8 +80,8 @@ for (const usePlayerMenuGrid of [true, false]) {
           await app.electronApp.evaluate(({ BrowserWindow }, value) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(value), scale)
           for (const frosted of [true, false]) {
             await page.evaluate(value => window.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
-            // Let font and theme updates settle before measuring.
-            await settlePlayer(page)
+            // Let track loading, font and theme updates settle before measuring.
+            await page.waitForTimeout(1000)
             const rows = await menu.evaluateHandle(element => [...element.querySelectorAll('.audio-tracks > button, .shaka-text-languages > button')])
             expect(await rows.evaluate(elements => elements.length)).toBeGreaterThan(2)
             await cdp.send('Emulation.setCPUThrottlingRate', { rate: 6 })
