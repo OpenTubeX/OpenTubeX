@@ -127,6 +127,9 @@ function parseArguments(argv) {
   return options
 }
 
+// Large pull requests return diffs beyond execFileSync's output buffer.
+const commitFields = '{ sha, parents: [.parents[] | { sha }] }'
+
 async function main() {
   const options = parseArguments(process.argv.slice(2))
   let comment
@@ -138,13 +141,13 @@ async function main() {
     if (!options.headSha) {
       assertCommit(options.candidateSha, 'Workflow candidate')
       const workflowCandidate = JSON.parse(execFileSync('gh', [
-        'api', `repos/${options.repository}/commits/${options.candidateSha}`
+        'api', `repos/${options.repository}/commits/${options.candidateSha}`, '--jq', commitFields
       ], { encoding: 'utf8' }))
       options.headSha = workflowCandidate.parents?.[1]?.sha
     }
     assertCommit(result.candidate?.commit, 'Candidate')
     const candidateCommit = JSON.parse(execFileSync('gh', [
-      'api', `repos/${options.repository}/commits/${result.candidate.commit}`
+      'api', `repos/${options.repository}/commits/${result.candidate.commit}`, '--jq', commitFields
     ], { encoding: 'utf8' }))
     comment = renderPerformanceComment(result, { ...options, candidateCommit })
   } catch (error) {
