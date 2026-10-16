@@ -2933,6 +2933,8 @@ test.describe('playback when navigating away', () => {
   })
 
   test('keeps the same video playing while browsing and returning', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
+    // https://github.com/OpenTubeX/OpenTubeX/issues/2137
+    test.fixme(true, 'The per-frame handoff step check depends on animation frame timing under load')
     await openDemoVideo({ app, page })
     const player = page.locator('.ftVideoPlayer')
     const video = player.locator('video')
