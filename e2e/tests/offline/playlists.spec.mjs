@@ -748,6 +748,14 @@ test.describe('custom playlists overview order', () => {
       await expect(titles).toHaveText(['Overview C', 'Overview B', 'Overview A'])
       await page.keyboard.press('ArrowUp')
       await expect(titles).toHaveText(['Overview C', 'Overview B', 'Overview A'])
+      // Repeated keys build on the unsaved order instead of repeating the first move.
+      await page.keyboard.press('ArrowDown')
+      await page.keyboard.press('ArrowDown')
+      await expect(titles).toHaveText(['Overview B', 'Overview A', 'Overview C'])
+      await expect.poll(() => page.evaluate(() => window.$store.getters.getUserPlaylistsCustomOrder))
+        .toEqual(['custom-overview-b', 'custom-overview-a', 'custom-overview-c'])
+      await page.keyboard.press('Home')
+      await expect(titles).toHaveText(['Overview C', 'Overview B', 'Overview A'])
 
       await handleOf('A').dragTo(handleOf('C'))
       await expect(titles).toHaveText(['Overview A', 'Overview C', 'Overview B'])
@@ -879,7 +887,10 @@ test.describe('custom playlist order', () => {
       await expect(titles.first()).toHaveText('Custom playlist video 1')
       await expect(page.locator('[data-playlist-drag-item]:focus-within .h3Title')).toHaveText('Custom playlist video 1')
 
-      await page.getByRole('button', { name: 'Drag or use the arrow keys to reorder' }).nth(2).focus()
+      await page.locator('.playlistItemsCard [data-playlist-drag-item]')
+        .filter({ has: page.getByText('Custom playlist video 3', { exact: true }) })
+        .getByRole('button', { name: 'Drag or use the arrow keys to reorder' })
+        .focus()
       await page.keyboard.press('Home')
       await expect(titles.first()).toHaveText('Custom playlist video 3')
       await expect(page.locator('[data-playlist-drag-item]:focus-within .h3Title')).toHaveText('Custom playlist video 3')

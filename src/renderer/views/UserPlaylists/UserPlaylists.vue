@@ -445,7 +445,7 @@ const canReorder = computed(() => sortBy.value === SORT_BY_OPTIONS.Custom && que
  * @param {string} id
  * @param {(index: number, lastIndex: number) => number} getTargetIndex
  */
-function movePlaylist(id, getTargetIndex) {
+async function movePlaylist(id, getTargetIndex) {
   const ids = allPlaylists.value.map(playlistKey)
   const index = ids.indexOf(id)
   const targetIndex = getTargetIndex(index, ids.length - 1)
@@ -453,7 +453,10 @@ function movePlaylist(id, getTargetIndex) {
 
   ids.splice(index, 1)
   ids.splice(targetIndex, 0, id)
-  return store.dispatch('updateUserPlaylistsCustomOrder', ids)
+  // Show the move before the setting is saved, so repeated keys build on it.
+  tempCustomOrder.value = ids
+  await store.dispatch('updateUserPlaylistsCustomOrder', ids)
+  if (tempCustomOrder.value === ids) tempCustomOrder.value = null
 }
 
 /**
@@ -461,6 +464,7 @@ function movePlaylist(id, getTargetIndex) {
  * @param {import('../../helpers/dragAndDrop').VideoData} source
  */
 function moveDraggedPlaylistTemporarily(target, source) {
+  pendingNativeDragMove = null
   const ids = tempCustomOrder.value?.slice() ?? allPlaylists.value.map(playlistKey)
   const targetIndex = ids.indexOf(target.videoId)
   const sourceIndex = ids.indexOf(source.videoId)
@@ -471,6 +475,9 @@ function moveDraggedPlaylistTemporarily(target, source) {
   tempCustomOrder.value = ids
 }
 
+/** @type {Parameters<typeof moveDraggedPlaylistTemporarily> | null} Latest native target skipped by the throttle */
+let pendingNativeDragMove = null
+
 // Native drags fire repeatedly while cards animate, so wait between moves.
 const moveDraggedPlaylistTemporarilyThrottled = throttle(moveDraggedPlaylistTemporarily, 100)
 
@@ -480,11 +487,16 @@ const moveDraggedPlaylistTemporarilyThrottled = throttle(moveDraggedPlaylistTemp
  */
 function onMoveDraggedPlaylist(target, source) {
   // Pointer drags already wait for transitions and flush their final target.
-  if (source.pointerDragging) moveDraggedPlaylistTemporarily(target, source)
-  else moveDraggedPlaylistTemporarilyThrottled(target, source)
+  if (source.pointerDragging) {
+    moveDraggedPlaylistTemporarily(target, source)
+  } else {
+    pendingNativeDragMove = [target, source]
+    moveDraggedPlaylistTemporarilyThrottled(target, source)
+  }
 }
 
 async function onDragPlaylistEnd() {
+  if (pendingNativeDragMove != null) moveDraggedPlaylistTemporarily(...pendingNativeDragMove)
   if (tempCustomOrder.value != null) {
     await store.dispatch('updateUserPlaylistsCustomOrder', tempCustomOrder.value)
   }

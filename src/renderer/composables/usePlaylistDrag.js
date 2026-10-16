@@ -134,7 +134,8 @@ export function usePlaylistDrag(emit) {
     const observer = new MutationObserver(() => {
       if (!handle.isConnected) return
       observer.disconnect()
-      if (document.activeElement !== handle) handle.focus()
+      // Leave focus alone if the user already moved it elsewhere.
+      if (document.activeElement === document.body || document.activeElement === null) handle.focus()
     })
     observer.observe(event.currentTarget.parentElement, { childList: true })
     setTimeout(() => observer.disconnect(), 1000)
