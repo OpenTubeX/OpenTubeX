@@ -2602,9 +2602,10 @@ function runApp() {
               const data = Buffer.concat(chunks)
               const mimeType = response.headers['content-type']
 
-              // Only successful responses are images worth keeping; caching an
-              // error page would serve it for the fallback lifetime.
-              if (response.statusCode >= 200 && response.statusCode < 300) {
+              // Only a complete 200 response is an image worth keeping; an error
+              // page or a partial 206 answer would be served to every later
+              // request for the URL as if it were the whole image.
+              if (response.statusCode === 200) {
                 imageCache.add(url, mimeType, data, extractExpiryTimestamp(response.headers))
               }
 
