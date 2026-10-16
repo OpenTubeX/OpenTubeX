@@ -88,8 +88,12 @@ test('tells users once that their library moved to a new format', async () => {
   // Record the startup notice instead of showing a native dialog.
   const recordNotices = (phase, _page, electronApp) => phase === 'electronConnected' && electronApp.evaluate(({ dialog }) => {
     globalThis.__libraryNotices = []
+    globalThis.__openNotices = 0
     dialog.showMessageBox = async (...args) => {
-      globalThis.__libraryNotices.push(args.at(-1).message)
+      // Overlapping dialogs would record more than one open notice.
+      globalThis.__libraryNotices.push(`${args.at(-1).message} (${++globalThis.__openNotices} open)`)
+      await new Promise(resolve => setTimeout(resolve, 300))
+      globalThis.__openNotices--
       return { response: 0 }
     }
   })
@@ -101,7 +105,8 @@ test('tells users once that their library moved to a new format', async () => {
     try {
       const notices = () => electronApp.evaluate(() => globalThis.__libraryNotices)
       if (expected.length) {
-        await expect.poll(notices).toEqual(expected)
+        // Stores open in no fixed order, so neither do their notices.
+        await expect.poll(async () => (await notices()).toSorted()).toEqual(expected.toSorted())
       } else {
         // Absence has no event to wait for: give the two-second notice delay time to pass.
         await page.waitForTimeout(3500)
@@ -111,13 +116,25 @@ test('tells users once that their library moved to a new format', async () => {
       await electronApp.close()
     }
   }
-  const migrated = await createUserDataDir({ playlists: [playlist] })
+  const migrated = await createUserDataDir({ playlists: [playlist], history })
   const fresh = await createUserDataDir({ freshProfile: true })
+  const formatNotice = 'Your library now uses a new storage format. (1 open)'
   try {
-    await launchAndCollect(migrated, ['Your library now uses a new storage format.'])
+    await launchAndCollect(migrated, [formatNotice])
     // Not again, and not for a new installation, which has nothing to migrate.
     await launchAndCollect(migrated, [])
     await launchAndCollect(fresh, [])
+
+    // One store imports again while another applies older-version changes:
+    // both notices show, one after the other.
+    for (const suffix of ['', '-wal', '-shm']) {
+      await rm(path.join(migrated, `history.sqlite${suffix}`), { force: true })
+    }
+    const older = new Datastore({ filename: path.join(migrated, 'playlists.db') })
+    await older.loadDatabaseAsync()
+    await older.updateAsync({ _id: 'migrated' }, { $set: { playlistName: 'Renamed in older version' } })
+    await older.compactDatafileAsync()
+    await launchAndCollect(migrated, [formatNotice, 'Changes you made in an older version of OpenTubeX were applied to your library. (1 open)'])
   } finally {
     await rm(migrated, { recursive: true, force: true })
     await rm(fresh, { recursive: true, force: true })

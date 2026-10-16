@@ -137,10 +137,12 @@ Options:
 function runApp() {
   let deferredDatastoresStarted = false
 
-  const libraryNotices = new Map()
+  const libraryNotices = new Set()
+  let libraryNoticeQueue = null
   /**
    * Datastores open one after another, so each notice shows once per start
-   * for all of them, after the first window had a moment to appear.
+   * for all of them, after the first window had a moment to appear. Notices
+   * show one after another.
    * @param {string} key
    * @param {(t: Awaited<ReturnType<typeof createMainTranslator>>) => { title: string, message: string, detail: string }} text
    */
@@ -149,8 +151,9 @@ function runApp() {
     // them. Only tests that opt in see these notices.
     if (process.env.OPENTUBEX_E2E_USER_DATA_DIR && process.env.OPENTUBEX_E2E_LIBRARY_NOTICES !== 'true') return
     if (libraryNotices.has(key)) return
-    libraryNotices.set(key, app.whenReady()
-      .then(() => new Promise(resolve => setTimeout(resolve, 2000)))
+    libraryNotices.add(key)
+    libraryNoticeQueue ??= app.whenReady().then(() => new Promise(resolve => setTimeout(resolve, 2000)))
+    libraryNoticeQueue = libraryNoticeQueue
       .then(async () => {
         const t = await createMainTranslator()
         const window = BrowserWindow.getFocusedWindow() ?? BrowserWindow.getAllWindows()[0]
@@ -162,7 +165,7 @@ function runApp() {
         }
         await (window ? dialog.showMessageBox(window, options) : dialog.showMessageBox(options))
       })
-      .catch(error => console.error(error)))
+      .catch(error => console.error(error))
   }
 
   // Registered synchronously, before any datastore loading started above can finish.
