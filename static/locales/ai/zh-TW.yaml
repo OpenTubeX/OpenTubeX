@@ -1237,8 +1237,6 @@ Channel:
   Channel Name Unavailable: 無法取得頻道名稱
   Search Result Types: 搜尋結果類型
   All Results: 全部
-  Videos:
-    This channel has videos but none could be displayed, try fetching more: "此頻道有影片，但無法顯示任何影片，請嘗試載入更多"
 Video:
   External DRM Protected: "受 DRM 保護的影片無法在 OpenTubeX 上播放，因為它們需要專屬的封閉原始碼元件。"
   Invalid Media URL: "無效的媒體網址"
@@ -1318,7 +1316,6 @@ Video:
   Notification unavailable: 無法使用系統通知
   Scheduled video starting: 排定的影片即將開始
   Live notification body: '{videoTitle} 現在開始'
-  AI: AI
   AI-generated content: AI 產生的內容
   Collaborators: 協作者
   Live Chat Replay: 即時聊天重播
@@ -1558,7 +1555,6 @@ Video:
       subscriber_only: "僅限訂閱者"
       needs_auth: "需要登入"
       unlisted: "未公開"
-  How this was made: 這是如何製作的
 Playlist:
   Playlist Already Preloaded: "播放清單中的所有影片均已預載"
   Playlist Preload Progress: "正在預載影片：{completed}/{requested}"

@@ -551,7 +551,7 @@
   /* stylelint-disable-next-line liberty/use-logical-spec */
   margin-left: -10px;
   margin-inline-start: 70px;
-  overflow-wrap: break-word;
+  overflow-wrap: anywhere;
 }
 
 .commentTranslation {
