@@ -2608,10 +2608,14 @@ function runApp() {
                 imageCache.add(url, mimeType, data, extractExpiryTimestamp(response.headers))
               }
 
-              // Response() throws when a body accompanies a status that forbids one.
-              const bodyAllowed = ![101, 204, 205, 304].includes(response.statusCode)
+              // Response() only accepts 200-599 and throws when a body accompanies
+              // a status that forbids one.
+              const status = response.statusCode >= 200 && response.statusCode <= 599
+                ? response.statusCode
+                : 502
+              const bodyAllowed = ![204, 205, 304].includes(status)
               resolve(new Response(bodyAllowed ? data : null, {
-                status: response.statusCode,
+                status,
                 headers: { 'content-type': mimeType }
               }))
             })
