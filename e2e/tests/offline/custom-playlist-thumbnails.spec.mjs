@@ -224,7 +224,7 @@ test('playlist imports restore thumbnails for existing and new playlists', async
   const custom = await setImage(page)
   await page.getByTitle('Save Changes').click()
   // The export below must contain the saved thumbnail.
-  await expect(headerImage(page)).toHaveAttribute('src', custom)
+  await expect.poll(() => page.evaluate(id => window.$store.getters.getPlaylist(id).customThumbnail, playlistId)).toBe(custom)
   await page.evaluate(() => {
     const store = window.$store
     const playlist = store.getters.getPlaylist('custom-thumbnail-playlist')
