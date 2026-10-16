@@ -780,8 +780,18 @@ function currentOrFirstTab(currentTab) {
 }
 
 async function ensureChannelInstance() {
-  if (!channelInstance) {
-    channelInstance = await getLocalChannel(id.value)
+  if (channelInstance) {
+    return
+  }
+
+  const expectedId = id.value
+  const expectedRouteGeneration = channelRouteGeneration
+  const instance = await getLocalChannel(expectedId)
+
+  // The route watcher clears the instance when the channel changes. A slow
+  // response for the previous channel must not become the current one.
+  if (expectedId === id.value && expectedRouteGeneration === channelRouteGeneration) {
+    channelInstance = instance
   }
 }
 
@@ -789,13 +799,14 @@ async function getChannelLocal() {
   apiUsed = 'local'
   isLoading.value = true
   const expectedId = id.value
+  const expectedRouteGeneration = channelRouteGeneration
 
   try {
     await ensureChannelInstance()
 
     // Bail out if the channel changed while we were resolving this instance, so a
     // delayed response can't update the tab title (including the age-gate branch).
-    if (expectedId !== id.value) {
+    if (expectedId !== id.value || expectedRouteGeneration !== channelRouteGeneration) {
       return
     }
 
@@ -1063,7 +1074,7 @@ function getChannelHomeLocal() {
     for (const shelf of homeData_) {
       for (const item of shelf.content) {
         if (item.type === 'channel' && !knownChannelIds.has(item.id)) {
-          knownChannelIds.add(item)
+          knownChannelIds.add(item.id)
           relatedChannels_.push({
             name: item.name,
             id: item.id,
@@ -2322,9 +2333,11 @@ const availableChannelSearchFilters = computed(() => {
 
 async function searchChannelLocal() {
   const isNewSearch = searchContinuationData.value === null
+  const isCurrentRequest = currentElementListRequest('search')
 
   try {
     await ensureChannelInstance()
+    if (!isCurrentRequest()) return
 
     let result
     let contents
@@ -2345,6 +2358,7 @@ async function searchChannelLocal() {
       result = await searchContinuationData.value.getContinuation()
       contents = result.contents.contents
     }
+    if (!isCurrentRequest()) return
 
     const results = contents
       .filter(node => node.type === 'ItemSection')
@@ -2375,25 +2389,27 @@ async function searchChannelLocal() {
     searchContinuationData.value = result.has_continuation ? result : null
     isSearchTabLoading.value = false
   } catch (err) {
+    if (!isCurrentRequest()) return
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
 
     showApiErrorToast(errorMessage, err)
 
-    if (isNewSearch) {
-      if (backendPreference.value === 'local' && backendFallback.value) {
-        showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
-        searchChannelInvidious()
-      } else {
-        isLoading.value = false
-      }
+    if (isNewSearch && backendPreference.value === 'local' && backendFallback.value) {
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+      searchChannelInvidious()
+    } else {
+      isSearchTabLoading.value = false
     }
   }
 }
 
 async function searchChannelInvidious() {
+  const isCurrentRequest = currentElementListRequest('search')
+
   try {
     const response = await searchInvidiousChannel(id.value, lastSearchQuery.value, searchPage)
+    if (!isCurrentRequest()) return
     const typedResponse = response.map(item => ({
       ...item,
       channelSearchResultType: getInvidiousChannelSearchResultType(item),
@@ -2408,6 +2424,7 @@ async function searchChannelInvidious() {
     isSearchTabLoading.value = false
     searchPage++
   } catch (err) {
+    if (!isCurrentRequest()) return
     console.error(err)
 
     const errorMessage = t('Invidious API Error (Click to copy)')
@@ -2417,7 +2434,7 @@ async function searchChannelInvidious() {
       showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
       searchChannelLocal()
     } else {
-      isLoading.value = false
+      isSearchTabLoading.value = false
     }
   }
 }
@@ -2436,6 +2453,8 @@ function newSearch(query) {
   isSearchTabLoading.value = true
   searchPage = 1
   searchResults.value = []
+  // Supersede any search still in flight so its results cannot land in this one.
+  startElementListRequest('search')
   channelSearchFilter.value = CHANNEL_SEARCH_FILTERS.ALL
   changeTab('search')
 
@@ -2460,6 +2479,7 @@ function clearSearch() {
   isSearchTabLoading.value = false
   searchPage = 1
   searchResults.value = []
+  startElementListRequest('search')
   channelSearchFilter.value = CHANNEL_SEARCH_FILTERS.ALL
   changeTab(currentOrFirstTab(undefined))
 }
