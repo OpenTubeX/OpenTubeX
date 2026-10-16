@@ -559,7 +559,7 @@ export default defineComponent({
       pendingWatchTimeByDate: {},
       historyLastTouchedAt: 0,
       /** @type {string|null} video whose watched mark is still being written */
-      watchedMarkPendingVideoId: null,
+      watchedMarkPendingVideoIds: new Set(),
     }
   },
   computed: {
@@ -4769,7 +4769,7 @@ export default defineComponent({
         // The cache only reflects the watched state once the datastore write
         // completes; this runs on every time update, so do not queue the same
         // write again while the first one is still in flight.
-        this.watchedMarkPendingVideoId === this.videoId
+        this.watchedMarkPendingVideoIds.has(this.videoId)
       ) {
         return
       }
@@ -4788,11 +4788,9 @@ export default defineComponent({
           : (this.historyEntry?.watchProgress ?? 0)
 
         const videoId = this.videoId
-        this.watchedMarkPendingVideoId = videoId
+        this.watchedMarkPendingVideoIds.add(videoId)
         this.addToHistory(watchProgress, true).finally(() => {
-          if (this.watchedMarkPendingVideoId === videoId) {
-            this.watchedMarkPendingVideoId = null
-          }
+          this.watchedMarkPendingVideoIds.delete(videoId)
         })
       }
     },
