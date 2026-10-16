@@ -243,6 +243,9 @@ for (const [layout, size] of [
   ['landscape', { width: 844, height: 390 }]
 ]) {
   test(`mobile header waits until its space leaves the viewport in ${layout}`, { tag: '@scale' }, async ({ app, page }) => {
+    // Quarantined: the landscape scroll offset intermittently misses by about 200 px.
+    // https://github.com/OpenTubeX/OpenTubeX/issues/2142
+    test.fixme(layout === 'landscape')
     await setWindowSize(app, page, size)
     await expect(page.getByText('Feed video 00')).toBeVisible()
     await page.emulateMedia({ reducedMotion: 'reduce' })
