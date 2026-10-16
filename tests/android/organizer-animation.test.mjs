@@ -5,10 +5,12 @@ import { chromium, expect } from '@playwright/test'
 // Run against a current debug APK on an exclusively locked emulator.
 test('Android organizer keeps the live crop aligned when page content changes during a pull', {
   skip: !process.env.ANDROID_CDP_URL,
-}, async () => {
+}, async t => {
   // CDP can temporarily have no referenced Node handles while Android processes input.
   const keepAlive = setTimeout(() => {}, 120_000)
+  t.after(() => clearTimeout(keepAlive))
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
+  t.after(() => browser.close())
   const page = browser.contexts()[0].pages()[0]
   const session = await browser.contexts()[0].newCDPSession(page)
   const touch = (type, point) => session.send('Input.dispatchTouchEvent', { type, touchPoints: point ? [point] : [] })
@@ -77,18 +79,17 @@ test('Android organizer keeps the live crop aligned when page content changes du
       for (const [key, value] of Object.entries(saved.settings)) await store.dispatch('update' + key, value)
       window.scrollTo(0, saved.scroll)
     }, saved)
-    await session.detach()
-    await browser.close()
-    clearTimeout(keepAlive)
   }
 })
 
 test('Android organizer button morphs into the active card and remains interactive during settlement', {
   skip: !process.env.ANDROID_CDP_URL,
-}, async () => {
+}, async t => {
   // CDP can temporarily have no referenced Node handles while Android processes input.
   const keepAlive = setTimeout(() => {}, 120_000)
+  t.after(() => clearTimeout(keepAlive))
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
+  t.after(() => browser.close())
   const page = browser.contexts()[0].pages()[0]
   const session = await browser.contexts()[0].newCDPSession(page)
   const touch = (type, point) => session.send('Input.dispatchTouchEvent', { type, touchPoints: point ? [point] : [] })
@@ -160,8 +161,5 @@ test('Android organizer button morphs into the active card and remains interacti
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       for (const [key, value] of Object.entries(saved)) await store.dispatch('update' + key, value)
     }, saved)
-    await session.detach()
-    await browser.close()
-    clearTimeout(keepAlive)
   }
 })
