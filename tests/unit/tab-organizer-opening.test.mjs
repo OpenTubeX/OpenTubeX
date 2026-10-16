@@ -13,6 +13,7 @@ function createOrganizer () {
   const timers = new Map()
   const tab = { id: 'active', route: { fullPath: '/home' }, loadState: 'loaded' }
   const open = { value: false }
+  const animations = []
   let captures = 0
   let finishCapture
   const frame = new Promise(resolve => { finishCapture = resolve })
@@ -39,7 +40,15 @@ function createOrganizer () {
     openTabsScrollRef: { value: null },
     presentedTabId: { value: tab.id },
     CSS: { escape: value => value },
-    createOrganizerSwipeAnimation: () => ({ update () {}, dispose () {} }),
+    createOrganizerSwipeAnimation: () => {
+      const animation = { progress: null, committed: null,
+        update (value) { this.progress = value },
+        async finish (commit) { this.committed = commit }, dispose () {} }
+      animations.push(animation)
+      return animation
+    },
+    shouldOpenSwipedOrganizer: () => false,
+    focusActiveTab () {},
     organizerSwipeProgress: () => 0,
     console,
   })
@@ -54,6 +63,7 @@ function createOrganizer () {
     ...api,
     open,
     timers,
+    animations,
     get captures () { return captures },
     finishCapture: () => finishCapture({ dataUrl: 'cached-page' }),
     async runBackgroundCapture () {
@@ -89,3 +99,13 @@ for (const method of ['button', 'swipe']) {
     })
   }
 }
+
+test('button opening animates the live page from its full size into the active card', async () => {
+  const organizer = createOrganizer()
+  organizer.openSwitcher()
+  await flush()
+  assert.equal(organizer.animations.length, 1, 'button and swipe must share the live-page morph')
+  assert.equal(organizer.animations[0].progress, 0, 'a button starts from the full-size page')
+  assert.equal(organizer.animations[0].committed, true, 'a button always opens, even without drag distance')
+  assert.equal(organizer.open.value, true)
+})

@@ -8,16 +8,18 @@ const source = readFileSync(new URL('../../src/renderer/components/TabBar/Capaci
 const controller = source.slice(source.indexOf('let organizerTransition ='), source.indexOf('defineExpose({ organizerSwipe })'))
 const openWatcher = source.slice(source.indexOf('watch(open, async'), source.indexOf('watch(() => open.value && !organizerGesture.value'))
 
-for (const ending of ['short', 'reverse', 'pointercancel', 'resize', 'commit', 'select while settling']) {
+for (const ending of ['short', 'reverse', 'pointercancel', 'resize', 'commit', 'select while settling', 'resize while settling', 'focus while settling']) {
   test(`organizer preserves the saved viewport after ${ending}`, async t => {
     const open = ref(false)
     const scroll = { scrollTop: 0, getBoundingClientRect: () => ({ top: 0, bottom: 500 }) }
     const saved = { open: 123.5 }
+    const listeners = new Map()
+    let focused = null
     let finishAnimation
     const context = vm.createContext({
       props: { enabled: true }, open, disposed: false,
       document: { querySelector: () => ({}) },
-      window: { innerHeight: 800, addEventListener() {}, removeEventListener() {} },
+      window: { innerHeight: 800, addEventListener(name, listener) { listeners.set(name, listener) }, removeEventListener(name) { listeners.delete(name) } },
       organizerGesture: ref(false), skipDialogTransition: ref(false), activeView: ref('open'),
       prepareForTabOrganizer: () => {}, nextTick, presentedTabId: ref('tab'), CSS: { escape: value => value },
       dialogRef: { value: {
@@ -26,10 +28,10 @@ for (const ending of ['short', 'reverse', 'pointercancel', 'resize', 'commit', '
       } },
       openTabsScrollRef: ref(scroll), organizerSwipeProgress: distance => distance / 320,
       restoreOverlayScrollTop: (element, top) => { element.scrollTop = top },
-      createOrganizerSwipeAnimation: () => ({ update() {}, dispose() {}, finish: () => ending === 'select while settling'
+      createOrganizerSwipeAnimation: () => ({ update() {}, dispose() {}, finish: () => ending.endsWith('while settling')
         ? new Promise(resolve => { finishAnimation = resolve }) : Promise.resolve() }),
       shouldOpenSwipedOrganizer: distance => distance >= 100,
-      focusActiveTab() {}, activeScrollRef: () => scroll, viewScrollTop: saved,
+      focusActiveTab() { focused = 'tab' }, activeScrollRef: () => scroll, viewScrollTop: saved,
       observeActiveContent() {}, stopObservingContent() {},
       watch: (...args) => { const stop = watch(...args); t.after(stop) },
     })
@@ -37,19 +39,25 @@ for (const ending of ['short', 'reverse', 'pointercancel', 'resize', 'commit', '
     assert.equal(gesture.begin(), true)
     await new Promise(setImmediate)
     assert.equal(scroll.scrollTop, 523.5, 'the pull temporarily brings the active card into view')
-    const committed = ending === 'commit' || ending === 'select while settling'
-    if (ending === 'resize') gesture.cancel()
+    const committed = ending === 'commit' || ending.endsWith('while settling')
+    if (ending === 'resize') listeners.get('resize')()
     else {
       if (ending === 'reverse') gesture.update(160)
       gesture.update(committed ? 160 : ending === 'reverse' ? 5 : 40)
       const finish = gesture.finish(1000, ending === 'pointercancel')
       if (committed) assert.equal(context.organizerGesture.value, false, 'a ready organizer must accept the next touch synchronously on release')
-      if (ending === 'select while settling') {
+      if (ending.endsWith('while settling')) {
         await new Promise(setImmediate)
-        gesture.cancel()
+        if (ending === 'select while settling') gesture.cancel()
+        if (ending === 'resize while settling') {
+          listeners.get('resize')()
+          assert.equal(open.value, true, 'resizing must not dismiss an accepted organizer')
+        }
+        if (ending === 'focus while settling') focused = 'menu'
         finishAnimation()
       }
       await finish
+      if (ending === 'focus while settling') assert.equal(focused, 'menu', 'settlement must not steal focus from a newer interaction')
     }
     if (committed) open.value = false
     await nextTick()

@@ -101,10 +101,10 @@ for (const zoom of [1, 1.25]) {
       transition.update(progress)
       assert.equal(previewClasses.size, 0, 'the cached image must cover the card throughout a short-page morph')
     }
-    const clip = animations[0][1].clipPath.match(/inset\(([-\d.]+)px 0 ([-\d.]+)px/)
+    const clip = animations[0][1].clipPath.match(/inset\(([-\d.]+)px 0 calc\(100% - ([-\d.]+)px\)/)
     assert.equal(animations[0][0].opacity, 1)
     assert.equal(animations[0][1].opacity, 0, 'the live page must fade out before disposal to avoid a scale jump')
-    assert.equal(Number(clip[2]), 24.5 * zoom, 'content behind bottom controls must stay clipped at settlement')
+    assert.equal(from.height - Number(clip[2]), 24.5 * zoom, 'content behind bottom controls must stay clipped at settlement')
     transition.dispose()
     assert.equal(previewClasses.size, 0)
   })
@@ -133,11 +133,11 @@ for (const zoom of [1, 1.25]) {
     const [start, end] = animations[0]
     const visibleTop = headerBottom - from.top
     assert.ok(start.clipPath.startsWith(`inset(${visibleTop}px `), 'content hidden above the header must stay clipped from the first frame')
-    const clip = end.clipPath.match(/inset\(([-\d.]+)px 0 ([-\d.]+)px/)
+    const clip = end.clipPath.match(/inset\(([-\d.]+)px 0 calc\(100% - ([-\d.]+)px\)/)
     assert.ok(clip)
     const transform = end.transform.match(/translate\(([-\d.]+)px, ([-\d.]+)px\) scale\(([-\d.]+)\)/)
     assert.ok(transform)
-    const top = Number(clip[1]), bottom = Number(clip[2]), scale = Number(transform[3])
+    const top = Number(clip[1]), bottom = from.height - Number(clip[2]), scale = Number(transform[3])
     assert.ok(Math.abs(from.top + Number(transform[2]) + top * scale - to.top) < 0.001)
     assert.ok(Math.abs((from.height - top - bottom) * scale - to.height) < 0.001)
     assert.equal(top, visibleTop, 'the final card must show the same page region as the initial frame')

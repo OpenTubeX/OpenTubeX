@@ -19,7 +19,8 @@ export function createOrganizerSwipeAnimation(page, preview, overlay) {
   const region = getCapacitorTabPreviewRegion()
   const top = Math.max(0, Math.min(from.height, region.top - from.top))
   const bottom = Math.max(0, from.top + from.height - region.bottom)
-  const crop = Math.max(bottom, from.height - top - to.height / scale)
+  const visibleBottom = from.height - bottom
+  const cropBottom = Math.min(visibleBottom, top + to.height / scale)
   const fillsPreview = (from.height - top - bottom) * scale >= to.height
   const radius = Number.parseFloat(getComputedStyle(preview).borderTopLeftRadius) || 0
   const reduced = document.documentElement.dataset.reducedMotion === 'reduce' ||
@@ -33,8 +34,10 @@ export function createOrganizerSwipeAnimation(page, preview, overlay) {
       preview.classList.add('organizerSwipePreview')
     }
     animations.push(page.animate([
-      { transform: 'translate(0, 0) scale(1)', clipPath: `inset(${top}px 0 ${bottom}px round 0px)`, opacity: 1 },
-      { transform: `translate(${to.left - from.left}px, ${to.top - from.top - top * scale}px) scale(${scale})`, clipPath: `inset(${top}px 0 ${crop}px round ${radius / scale}px ${radius / scale}px 0 0)`, opacity: fillsPreview ? 1 : 0 }
+      // Anchor the crop to the captured region, not the page's old height:
+      // feed rows can load or disappear while the finger is still down.
+      { transform: 'translate(0, 0) scale(1)', clipPath: `inset(${top}px 0 calc(100% - ${visibleBottom}px) round 0px)`, opacity: 1 },
+      { transform: `translate(${to.left - from.left}px, ${to.top - from.top - top * scale}px) scale(${scale})`, clipPath: `inset(${top}px 0 calc(100% - ${cropBottom}px) round ${radius / scale}px ${radius / scale}px 0 0)`, opacity: fillsPreview ? 1 : 0 }
     ], { duration: 1000, fill: 'both' }))
   }
   // Reveal the organizer early so its header never remains superimposed on
