@@ -621,7 +621,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { inject, computed, nextTick, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { inject, computed, nextTick, onBeforeUnmount, ref, shallowRef, toRaw, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtCard from '../ft-card/ft-card.vue'
@@ -807,9 +807,22 @@ function resetCommentsScroll() {
 
 const COMMENT_TIMESTAMP_PATTERN = /(?:(?:\d+):)?\d+:\d+/
 
+// Filtering re-parses every loaded comment on each keystroke; keep the plain
+// text per comment object until its HTML changes.
+const commentPlainTextCache = new WeakMap()
+
 function getCommentPlainText(comment) {
-  const document = new DOMParser().parseFromString(comment.text ?? '', 'text/html')
-  return document.body.textContent ?? ''
+  const text = comment.text ?? ''
+  const cacheKey = toRaw(comment)
+  const cached = commentPlainTextCache.get(cacheKey)
+  if (cached !== undefined && cached.text === text) {
+    return cached.plainText
+  }
+
+  const document = new DOMParser().parseFromString(text, 'text/html')
+  const plainText = document.body.textContent ?? ''
+  commentPlainTextCache.set(cacheKey, { text, plainText })
+  return plainText
 }
 
 function getCommentSearchText(comment) {
