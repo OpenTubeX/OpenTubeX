@@ -2889,7 +2889,8 @@ test('plays both streams when an external clip has separate audio and codec-free
   await expect(video).toHaveJSProperty('paused', false)
   await video.evaluate(element => element.pause())
   await audio.evaluate(element => { element.play = () => Promise.reject(new DOMException('Autoplay blocked', 'NotAllowedError')) })
-  await video.evaluate(element => element.play())
+  // The blocked audio makes the player pause again, which may interrupt this play request.
+  await video.evaluate(element => { element.play().catch(() => {}) })
   await expect.poll(() => video.evaluate(element => element.paused), { timeout: 1000 }).toBe(true)
 })
 
