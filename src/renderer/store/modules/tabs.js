@@ -518,7 +518,7 @@ function reconcileTab(previous, incoming) {
     route = currentEntry.route
   }
 
-  return reuseEqualSnapshot(previous, {
+  const next = {
     ...previous,
     ...incoming,
     route,
@@ -527,7 +527,13 @@ function reconcileTab(previous, incoming) {
     pendingReloadRoute,
     contentTitle,
     refreshKey: incoming.refreshKey ?? previous.refreshKey ?? 0
-  })
+  }
+  // Main leaves the avatar out of updates that did not change it; null clears it.
+  if (incoming.avatarUrl === undefined && previous.avatarUrl !== undefined) {
+    next.avatarUrl = previous.avatarUrl
+  }
+
+  return reuseEqualSnapshot(previous, next)
 }
 
 function createRuntimeTab(incoming, route) {

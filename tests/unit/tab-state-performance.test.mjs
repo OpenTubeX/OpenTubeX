@@ -103,3 +103,22 @@ test('stable snapshots retain local navigation and acknowledge optimistic reorde
   store.commit('setTabsState', remote)
   assert.equal(store.getters.getTabById('tab-0').route.path, '/history')
 })
+
+test('state updates without an avatar keep the one the tab already has', () => {
+  const store = createTabStore()
+  const payload = snapshot(2)
+  payload.tabs[0].avatarUrl = 'data:image/jpeg;base64,QUJD'
+  store.commit('setTabsState', payload)
+  assert.equal(store.getters.getTabById('tab-0').avatarUrl, 'data:image/jpeg;base64,QUJD')
+
+  const next = structuredClone(payload)
+  delete next.tabs[0].avatarUrl
+  next.tabs[0].isLoading = true
+  store.commit('setTabsState', next)
+  assert.equal(store.getters.getTabById('tab-0').avatarUrl, 'data:image/jpeg;base64,QUJD',
+    'an omitted avatar means unchanged')
+
+  next.tabs[0].avatarUrl = null
+  store.commit('setTabsState', structuredClone(next))
+  assert.equal(store.getters.getTabById('tab-0').avatarUrl, null, 'null clears the avatar')
+})
