@@ -24,6 +24,7 @@ function setup(t, isReplay = true, ready = true) {
     liveChatInstance: ready ? instance : null,
     pendingReplaySeekSeconds: null,
     pendingReadbackTrimRestore: null,
+    isUnmounted: false,
     superChatComments: [],
     showSuperChat: { value: false },
     pendingReplayComments: [{ offsetMs: 12_000, comment: 'next message' }],
