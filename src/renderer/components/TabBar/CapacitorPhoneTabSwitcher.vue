@@ -657,9 +657,9 @@ const organizerSwipe = {
     const page = document.querySelector('.app > .routerView')
     if (!page) return false
     prepareForTabOrganizer()
-    const state = { distance: 0, height: window.innerHeight, animation: null, ready: null, restoreScroll: null }
+    const state = { distance: 0, height: window.innerHeight, animation: null, ready: null, restoreScroll: null, committed: false }
     organizerTransition = state
-    window.addEventListener('resize', organizerSwipe.cancel)
+    window.addEventListener('resize', organizerSwipe.resize)
     organizerGesture.value = true
     skipDialogTransition.value = true
     activeView.value = 'open'
@@ -706,8 +706,14 @@ const organizerSwipe = {
     // The next touch belongs to the organizer, even while the page is still
     // settling into its card. Selecting a tab cancels the remaining animation.
     if (commit) {
+      state.committed = true
       state.restoreScroll = null
       organizerGesture.value = false
+      await nextTick()
+      if (organizerTransition !== state) return
+      // Focus before accepting further interaction, not after the animation:
+      // a menu opened during settlement must retain its own focus.
+      focusActiveTab()
     }
     await state.animation?.finish(commit)
     if (organizerTransition !== state) return
@@ -721,14 +727,23 @@ const organizerSwipe = {
     await nextTick()
     state.animation?.dispose()
     organizerTransition = null
-    window.removeEventListener('resize', organizerSwipe.cancel)
-    if (commit) {
-      skipDialogTransition.value = false
-      focusActiveTab()
+    window.removeEventListener('resize', organizerSwipe.resize)
+    if (commit) skipDialogTransition.value = false
+  },
+  resize() {
+    if (!organizerTransition?.committed) {
+      organizerSwipe.cancel()
+      return
     }
+    // The old card geometry is no longer valid, but opening was accepted.
+    // End the morph and let the open organizer reflow at the new size.
+    organizerTransition.animation?.dispose()
+    organizerTransition = null
+    skipDialogTransition.value = false
+    window.removeEventListener('resize', organizerSwipe.resize)
   },
   cancel() {
-    window.removeEventListener('resize', organizerSwipe.cancel)
+    window.removeEventListener('resize', organizerSwipe.resize)
     if (!organizerTransition) return
     organizerTransition.animation?.dispose()
     organizerTransition.restoreScroll?.()
