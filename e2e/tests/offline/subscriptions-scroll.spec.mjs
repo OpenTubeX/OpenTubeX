@@ -255,6 +255,10 @@ for (const [layout, size] of [
       if (feed === 'new') {
         await page.locator('[data-subscription-feed-tab="all"]').click()
         await page.getByRole('button', { name: 'Show tabbed view' }).click()
+        // The taller tabbed header renders after the view setting is saved,
+        // and the view switch then resets the feed scroll in the next frame.
+        await expect(header).toHaveClass(/tabbedNewFeed/)
+        await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
       }
       await page.evaluate(() => document.activeElement.blur())
       await scrollFeedTo(page, 0)
