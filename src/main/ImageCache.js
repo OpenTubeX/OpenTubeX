@@ -8,7 +8,7 @@ export class ImageCache {
   constructor() {
     this._cache = new Map()
 
-    setInterval(this._cleanup.bind(this), CLEANUP_INTERVAL)
+    setInterval(this._cleanup.bind(this), CLEANUP_INTERVAL).unref()
   }
 
   add(url, mimeType, data, expiry) {
@@ -38,7 +38,7 @@ export class ImageCache {
     const now = Math.trunc(Date.now() / 1000)
 
     for (const [key, entry] of this._cache.entries()) {
-      if (entry.expiry <= now) {
+      if (!(entry.expiry > now)) {
         this._cache.delete(key)
       }
     }
@@ -63,11 +63,17 @@ export function extractExpiryTimestamp(headers) {
 
     // we don't need millisecond precision, so we can store it as seconds to use less memory
     return Math.trunc(Date.now() / 1000) + maxAge
-  } else if (headers.expires) {
-    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires
-
-    return Math.trunc(Date.parse(headers.expires) / 1000)
-  } else {
-    return Math.trunc(Date.now() / 1000) + FALLBACK_MAX_AGE
   }
+
+  if (headers.expires) {
+    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires
+    // Invalid dates such as "-1" or "0" mean "already expired"; treat them
+    // like a missing header instead of producing a NaN that never expires.
+    const expires = Date.parse(headers.expires)
+    if (Number.isFinite(expires) && expires > Date.now()) {
+      return Math.trunc(expires / 1000)
+    }
+  }
+
+  return Math.trunc(Date.now() / 1000) + FALLBACK_MAX_AGE
 }

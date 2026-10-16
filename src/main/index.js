@@ -2600,13 +2600,16 @@ function runApp() {
 
             response.on('end', () => {
               const data = Buffer.concat(chunks)
-
-              const expiryTimestamp = extractExpiryTimestamp(response.headers)
               const mimeType = response.headers['content-type']
 
-              imageCache.add(url, mimeType, data, expiryTimestamp)
+              // Only successful responses are images worth keeping; caching an
+              // error page would serve it for the fallback lifetime.
+              if (response.statusCode >= 200 && response.statusCode < 300) {
+                imageCache.add(url, mimeType, data, extractExpiryTimestamp(response.headers))
+              }
 
               resolve(new Response(data, {
+                status: response.statusCode,
                 headers: { 'content-type': mimeType }
               }))
             })
