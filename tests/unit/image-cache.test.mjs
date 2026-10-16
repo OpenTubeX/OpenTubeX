@@ -5,7 +5,9 @@ import { extractExpiryTimestamp, ImageCache } from '../../src/main/ImageCache.js
 
 const now = Math.trunc(Date.now() / 1000)
 
-test('an unparsable Expires header falls back to the default lifetime instead of never expiring', () => {
+test('an unparsable Expires header falls back to the default lifetime instead of never expiring', (t) => {
+  // Freeze the clock so a second boundary cannot pass between `now` and the call.
+  t.mock.timers.enable({ apis: ['Date'], now: now * 1000 })
   for (const expires of ['never', '']) {
     const expiry = extractExpiryTimestamp({ expires })
     assert.ok(Number.isFinite(expiry), `Expires: ${JSON.stringify(expires)} produced ${expiry}`)
