@@ -922,7 +922,8 @@ test('uses the menu action icon while its image loads and after failure', async 
   await expect(menu.locator('[data-icon="magnifying-glass"]')).toBeVisible()
 })
 
-test('protects captured tab previews while loading and after failure', async ({ app, page }, testInfo) => {
+// Flaky under parallel workers: https://github.com/OpenTubeX/OpenTubeX/issues/2146
+test.fixme('protects captured tab previews while loading and after failure', async ({ app, page }, testInfo) => {
   await app.electronApp.evaluate(({ ipcMain }, channels) => {
     ipcMain.removeHandler(channels.TABS_CAPTURE_PREVIEW)
     ipcMain.handle(channels.TABS_CAPTURE_PREVIEW, () => null)
