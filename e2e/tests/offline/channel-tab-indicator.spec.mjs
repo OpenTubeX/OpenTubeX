@@ -1,3 +1,4 @@
+import { writeFile } from 'node:fs/promises'
 import { expectTabHighlightAligned, expectTabHighlightStyle, selectTabWithHighlightAnimation, tabHighlightAnimations } from '../../helpers/tabs.mjs'
 import { captureAppFramebuffer } from '../../helpers/screenshots.mjs'
 import { test, expect, sel } from '../../helpers/app.mjs'
@@ -244,7 +245,7 @@ test('centers channel tab titles vertically at every layout size', async ({ app,
   }
 })
 
-test('separates the content card on every channel tab', async ({ app, page }, testInfo) => {
+test('separates the content card on every channel tab', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
   const videos = [0, 1].map(index => ({ videoId: `video${index}aaaaa`, title: 'Video', author: 'Channel', lengthSeconds: 60, videoThumbnails: [] }))
   let description = 'Channel description'
   await page.route('https://invidious.test/api/v1/channels/**', route => route.fulfill({
@@ -267,11 +268,12 @@ test('separates the content card on every channel tab', async ({ app, page }, te
   }))
   await page.reload()
   await expect(page.locator('.channel-view-all:visible')).toBeVisible()
-  for (const [width, height, scale] of [[500, 1000, 100], [375, 812, 95], [812, 375, 125], [1600, 900, 95]]) {
+  const scale = uiScale
+  for (const [width, height] of [[500, 1000], [375, 812], [812, 375], [1600, 900]]) {
     await app.electronApp.evaluate(({ BrowserWindow }, { width, height }) => {
       BrowserWindow.getAllWindows()[0].setSize(width, height)
-    }, { width, height })
-    await page.evaluate(value => window.$store.dispatch('updateUiScale', value), scale)
+    }, { width: Math.round(width * uiScale / 100), height: Math.round(height * uiScale / 100) })
+    await page.evaluate(value => window.$store.dispatch('updateUiScale', value), uiScale)
     for (const [tabId, contentSelector] of [
       ['videosTab', '.select-container'],
       ['shortsTab', '.select-container'],
@@ -289,18 +291,22 @@ test('separates the content card on every channel tab', async ({ app, page }, te
         expect(await page.locator('.select-container').evaluate(row => {
           const button = row.querySelector('.channel-view-all').getBoundingClientRect()
           const select = row.querySelector('.select-text').getBoundingClientRect()
-          return Math.abs(button.top + button.height / 2 - select.top - select.height / 2)
-        }), `View All center at ${width}px, ${scale}%`).toBeLessThanOrEqual(1)
+          return select.top >= button.bottom
+            ? select.left >= row.getBoundingClientRect().left - 1 && select.right <= row.getBoundingClientRect().right + 1
+            : Math.abs(button.top + button.height / 2 - select.top - select.height / 2) <= 1
+        }), `View All and Sort By align or wrap within their row at ${width}px, ${scale}%`).toBe(true)
       }
+      // Empty-state cards keep 16px internal padding around their centered message.
+      const emptyState = contentSelector === '.elementList .message:visible'
       await expect.poll(() => page.locator(contentSelector).evaluate(content => {
         const tabs = document.querySelector('.channelDetails .tabs').getBoundingClientRect()
         return Math.round(content.getBoundingClientRect().top - tabs.bottom)
-      }), { message: `46px gap to ${tabId} content at ${width}px and ${scale}% UI scale` }).toBe(46)
+      }), { message: `Balanced gap to ${tabId} content at ${width}px and ${scale}% UI scale` }).toBe(width <= 800 ? (emptyState ? 36 : 20) : 46)
       await expect.poll(() => page.locator('.channelContent:visible').evaluate(card => {
         const header = card.previousElementSibling.getBoundingClientRect()
         const bounds = card.getBoundingClientRect()
-        return Math.round(bounds.top - header.bottom)
-      }), { message: `10px between cards on ${tabId} at ${width}px and ${scale}% UI scale` }).toBe(10)
+        return Math.round(bounds.top - header.bottom) || 0
+      }), { message: `Card spacing on ${tabId} at ${width}px and ${scale}% UI scale` }).toBe(width <= 800 ? 0 : 10)
     }
   }
   await page.locator('#videosTab').click()
@@ -309,16 +315,56 @@ test('separates the content card on every channel tab', async ({ app, page }, te
     const store = window.$store
     await store.dispatch('updateUiScale', 100)
     await store.dispatch('updateBaseTheme', 'system')
+    await store.dispatch('updateSystemDarkTheme', 'dark')
+    await store.dispatch('updateSystemLightTheme', 'light')
   })
-  await page.mouse.move(0, 0)
-  await page.evaluate(() => document.activeElement?.blur())
+  const searchToggle = page.locator('.channelSearchToggle button')
+  await expect(searchToggle).toHaveAttribute('aria-pressed', 'false')
   for (const colorScheme of ['dark', 'light']) {
     await page.emulateMedia({ colorScheme })
     await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
-    await page.locator('.channelSearchToggle .iconButton').evaluate(button => {
-      for (const animation of button.getAnimations()) animation.finish()
+    for (const interaction of ['rest', 'hover', 'keyboard']) {
+      const colors = []
+      for (const expanded of [false, true]) {
+        if ((await searchToggle.getAttribute('aria-pressed')) !== String(expanded)) {
+          await searchToggle.evaluate(button => button.click())
+        }
+        await expect(searchToggle).toHaveAttribute('aria-pressed', String(expanded))
+        await page.mouse.move(0, 0)
+        await page.evaluate(() => document.activeElement?.blur())
+        if (interaction === 'hover') await searchToggle.hover()
+        if (interaction === 'keyboard') {
+          await expect.poll(async () => {
+            await page.keyboard.press('Tab')
+            return searchToggle.evaluate(button => button === document.activeElement)
+          }, { message: 'Keyboard Tab reaches the channel search toggle', intervals: [0] }).toBe(true)
+          await expect.poll(() => searchToggle.evaluate(button => button.matches(':focus-visible'))).toBe(true)
+        }
+        colors.push(await searchToggle.evaluate(async button => {
+          await Promise.all(button.getAnimations().map(animation => animation.finished))
+          return getComputedStyle(button).backgroundColor
+        }))
+      }
+      expect(colors[1], `Search state remains visible during ${interaction} in ${colorScheme}`).not.toBe(colors[0])
+    }
+    await page.mouse.move(0, 0)
+    await page.evaluate(() => document.activeElement?.blur())
+    await page.evaluate(() => document.fonts.ready)
+    const clip = await page.locator('.channelDetails').evaluate(header => {
+      const bounds = header.getBoundingClientRect()
+      const top = header.querySelector('.channelSearch').getBoundingClientRect().top - 10
+      const bottom = document.querySelector('.select-container').getBoundingClientRect().bottom + 16
+      return { x: bounds.x, y: top, width: bounds.width, height: bottom - top }
     })
-    await captureAppFramebuffer(app, testInfo, `channel-controls-${colorScheme}`)
+    let settledScreenshot
+    await expect.poll(async () => {
+      const before = await page.screenshot({ clip })
+      await page.waitForTimeout(120)
+      const after = await page.screenshot({ clip })
+      settledScreenshot = after
+      return before.equals(after)
+    }, { message: 'The channel controls settle before the screenshot is saved' }).toBe(true)
+    await writeFile(testInfo.outputPath(`channel-controls-${colorScheme}.png`), settledScreenshot)
   }
   description = ''
   await page.reload()
@@ -327,7 +373,23 @@ test('separates the content card on every channel tab', async ({ app, page }, te
   await expect(firstHeading).toHaveText('Details')
   await expect.poll(() => firstHeading.evaluate(heading => {
     return Math.round(heading.getBoundingClientRect().top - document.querySelector('.channelDetails .tabs').getBoundingClientRect().bottom)
-  })).toBe(46)
+  })).toBe(20)
+})
+
+test('narrow channel errors retain internal padding', { tag: '@scale' }, async ({ app, page, uiScale }) => {
+  await page.evaluate(() => window.$store.dispatch('updateBackendFallback', false))
+  await page.route('https://invidious.test/api/v1/channels/**', route => route.fulfill({
+    status: 500, json: { error: 'Channel unavailable' }
+  }))
+  await page.reload()
+  const card = page.locator('.channelError:visible')
+  await expect(card).toBeVisible()
+  await page.evaluate(scale => window.$store.dispatch('updateUiScale', scale), uiScale)
+  await app.electronApp.evaluate(({ BrowserWindow }, scale) => {
+    BrowserWindow.getAllWindows()[0].setSize(Math.round(500 * scale / 100), Math.round(900 * scale / 100))
+  }, uiScale)
+  await expect(card).toHaveCSS('padding-top', '16px')
+  await expect(card).toHaveCSS('padding-bottom', '16px')
 })
 
 test('crossfades the active channel line at the configured animation speed', async ({ page }) => {

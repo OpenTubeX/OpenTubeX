@@ -351,6 +351,8 @@
           :title="$t('Channel.Search Channel')"
           :icon="['fas', 'search']"
           :aria-expanded="searchExpanded"
+          :aria-pressed="searchExpanded"
+          :theme="searchExpanded ? 'secondary' : 'base'"
           :use-shadow="false"
           @click="toggleSearch"
         />

@@ -59,6 +59,15 @@
 }
 
 @media (width <= 800px) {
+  .channelContent {
+    margin-block-start: 0;
+    padding-block-start: 0;
+  }
+
+  .channelContent:has(.elementList .message) {
+    padding-block-start: 16px;
+  }
+
   .select-container > :deep(.select) {
     flex: 1 1 200px;
     min-inline-size: 0;

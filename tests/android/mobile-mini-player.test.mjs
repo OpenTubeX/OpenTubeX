@@ -44,6 +44,11 @@ test('mobile mini-player progress line seeks with touch and expands while held',
   skip: !process.env.ANDROID_CDP_URL,
 }, t => testMobileMiniPlayer(t, false, { seekingOnly: true }))
 
+
+test('audio fullscreen swipes give feedback and mini-player transitions suspend visualizer painting', {
+  skip: !process.env.ANDROID_CDP_URL,
+}, t => testMobileMiniPlayer(t, false, { audioOnly: true, feedbackOnly: true }))
+
 // Runs in the WebView for both browser screenshots and native PiP captures.
 async function sampleAudioArtwork({ png, cropToSurface }) {
   const bytes = Uint8Array.from(atob(png), character => character.charCodeAt(0))
@@ -87,7 +92,7 @@ test('mobile music artwork placeholder fills the thumbnail and restores its inli
   skip: !process.env.ANDROID_CDP_URL,
 }, t => testMobileMiniPlayer(t, false, { audioOnly: true, geometryOnly: true, artworkUnavailable: true }))
 
-async function testMobileMiniPlayer(t, navigationOnly, { dismissalOnly = false, animationOnly = false, historyScrollOnly = false, audioOnly = false, posterOnly = false, geometryOnly = false, landscape = false, artworkUnavailable = false, compactOnly = false, seekingOnly = false } = {}) {
+async function testMobileMiniPlayer(t, navigationOnly, { dismissalOnly = false, animationOnly = false, historyScrollOnly = false, audioOnly = false, posterOnly = false, geometryOnly = false, landscape = false, artworkUnavailable = false, compactOnly = false, seekingOnly = false, feedbackOnly = false } = {}) {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
   const context = browser.contexts()[0]
   const page = context.pages()[0]
@@ -110,7 +115,7 @@ async function testMobileMiniPlayer(t, navigationOnly, { dismissalOnly = false, 
         UiScale: dismissalOnly ? 125 : 100, ReducedMotion: 'off', AnimationSpeed: 100, EnableMobileFullscreenSwipe: false, RotateFullscreenToLandscape: false,
         EnterFullscreenOnDisplayRotate: false, PlayingInterfaceHideDelay: 5,
         MobileLeftSwipeAction: 'disabled', MobileRightSwipeAction: 'disabled',
-        AmbientMode: true, AlwaysShowNavigationBar: false, CompactMobileMiniPlayer: false, IconPack: 'material',
+        MusicVisualizer: true, AmbientMode: true, AlwaysShowNavigationBar: false, CompactMobileMiniPlayer: false, IconPack: 'material',
       }
       const saved = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
@@ -178,6 +183,91 @@ async function testMobileMiniPlayer(t, navigationOnly, { dismissalOnly = false, 
     const touch = (type, point) => session.send('Input.dispatchTouchEvent', {
       type, touchPoints: point ? [point] : [],
     })
+    if (feedbackOnly) {
+      const thumbnail = (await readFile(new URL('../../e2e/fixtures/media/video-thumbnail.svg', import.meta.url))).toString('base64')
+      await watch.evaluate((component, thumbnail) => {
+        component.proxy.videoTitle = 'Audio player gesture preview'
+        component.proxy.thumbnail = `data:image/svg+xml;base64,${thumbnail}`
+      }, thumbnail)
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setEnableMobileFullscreenSwipe', true)
+      })
+      const artwork = player.locator('.musicAudioSurface')
+      for (const fullscreen of [false, true]) {
+        if (fullscreen) {
+          await player.locator('.shaka-fullscreen-button').evaluate(button => button.click())
+          await expect.poll(() => page.evaluate(() => document.fullscreenElement !== null)).toBe(true)
+        }
+        const before = await artwork.boundingBox()
+        const bounds = await player.boundingBox()
+        assert.ok(before, 'Audio artwork must be visible before the fullscreen swipe')
+        assert.ok(bounds, 'The player must be visible before the fullscreen swipe')
+        const point = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height * 0.3 }
+        await touch('touchStart', point)
+        await touch('touchMove', { ...point, y: point.y + (fullscreen ? 40 : -40) })
+        await expect(player).toHaveClass(/mobileFullscreenSwiping/)
+        await expect.poll(async () => {
+          const after = await artwork.boundingBox()
+          assert.ok(after, 'Audio artwork must stay visible during the fullscreen swipe')
+          return fullscreen ? after.y - before.y : before.y - after.y
+        }).toBeGreaterThan(8)
+        if (process.env.ANDROID_ARTIFACT_DIR) {
+          await page.screenshot({ path: `${process.env.ANDROID_ARTIFACT_DIR}/audio-swipe-${fullscreen ? 'down' : 'up'}.png` })
+        }
+        await touch('touchCancel')
+        await expect(player).not.toHaveClass(/mobileFullscreenSwiping|mobileFullscreenSwipeSettling/)
+      }
+      await page.evaluate(() => document.exitFullscreen())
+      await page.evaluate(() => {
+        window.musicMorphPaints = { inline: 0, morph: 0 }
+        const fill = CanvasRenderingContext2D.prototype.fill
+        CanvasRenderingContext2D.prototype.fill = function (...args) {
+          if (this.canvas.matches('.musicVisualizerCanvas')) {
+            window.musicMorphPaints[this.canvas.closest('.ftVideoPlayer').hasAttribute('data-mobile-mini-morph') ? 'morph' : 'inline']++
+          }
+          return fill.apply(this, args)
+        }
+        window.musicMorphStarts = 0
+        const observer = new MutationObserver(records => {
+          window.musicMorphStarts += records.filter(record => record.oldValue === null).length
+        })
+        observer.observe(document.querySelector('.ftVideoPlayer'), {
+          attributes: true, attributeFilter: ['data-mobile-mini-morph'], attributeOldValue: true
+        })
+        window.restoreMusicMorphProbe = () => {
+          observer.disconnect()
+          CanvasRenderingContext2D.prototype.fill = fill
+        }
+        const spacer = document.createElement('div')
+        spacer.id = 'mini-player-test-spacer'
+        spacer.style.height = '2000px'
+        document.body.append(spacer)
+      })
+      try {
+        await expect.poll(() => page.evaluate(() => window.musicMorphPaints.inline)).toBeGreaterThan(0)
+        for (let cycle = 0; cycle < 2; cycle++) {
+          const starts = await page.evaluate(() => window.musicMorphStarts)
+          await page.evaluate(() => window.scrollTo(0, 1000))
+          await expect.poll(() => page.evaluate(() => window.musicMorphStarts)).toBe(starts + 1)
+          await expect(player).toHaveClass(/scrollMiniPlayer/)
+          await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+          await page.evaluate(() => window.scrollTo(0, 0))
+          await expect.poll(() => page.evaluate(() => window.musicMorphStarts)).toBe(starts + 2)
+          await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+          await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+        }
+        console.log('Android audio transition paints:', await page.evaluate(() => window.musicMorphPaints))
+        assert.equal(await page.evaluate(() => window.musicMorphPaints.morph), 0)
+      } finally {
+        await page.evaluate(() => {
+          window.restoreMusicMorphProbe()
+          document.querySelector('#mini-player-test-spacer')?.remove()
+        })
+      }
+      await originalVideo.dispose()
+      return
+    }
     if (historyScrollOnly) {
       savedHistory = await page.evaluate(entry => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store

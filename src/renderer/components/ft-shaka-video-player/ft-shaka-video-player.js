@@ -7798,6 +7798,8 @@ export default defineComponent({
       return musicVisualizerEnabled.value &&
         isActiveTab.value &&
         !scrollMiniPlayerActive.value &&
+        !scrollMiniPlayerAnimating.value &&
+        !scrollMiniPlayerDragStyle.value &&
         !playerPaused.value
     })
 
