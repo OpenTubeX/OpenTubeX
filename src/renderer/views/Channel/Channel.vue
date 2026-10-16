@@ -955,6 +955,11 @@ async function getChannelLocal() {
 
     isLoading.value = false
   } catch (err) {
+    // A failure for a channel we already left must not show its error or start
+    // the Invidious fallback for the channel that replaced it.
+    if (expectedId !== id.value || expectedRouteGeneration !== channelRouteGeneration) {
+      return
+    }
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
