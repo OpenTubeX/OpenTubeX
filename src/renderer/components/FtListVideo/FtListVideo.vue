@@ -190,7 +190,7 @@
           <FtIconButton
             v-if="inUserPlaylist && canMoveVideoUp"
             :title="t('User Playlists.Move Video Up')"
-            :icon="effectiveListTypeIsList ? ['fas', 'arrow-up'] : ['fas', 'arrow-left']"
+            :icon="verticalMoveControls ? ['fas', 'arrow-up'] : ['fas', 'arrow-left']"
             class="upArrowIcon"
             :padding="playlistIconPadding"
             :size="playlistIconSize"
@@ -199,7 +199,7 @@
           <FtIconButton
             v-if="inUserPlaylist && canMoveVideoDown"
             :title="t('User Playlists.Move Video Down')"
-            :icon="effectiveListTypeIsList ? ['fas', 'arrow-down'] : ['fas', 'arrow-right']"
+            :icon="verticalMoveControls ? ['fas', 'arrow-down'] : ['fas', 'arrow-right']"
             class="downArrowIcon"
             :padding="playlistIconPadding"
             :size="playlistIconSize"
@@ -500,6 +500,7 @@ import {
 } from '../../helpers/viewTransitions.js'
 import { setCollaboratorsLoading } from './collaboratorsLoading.js'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock.js'
+import { thumbnailSizeSettingKey, VIEW_TYPE_SETTINGS } from '../../composables/useThumbnailSizeSlider'
 import { useHideSubscriptionFeedType } from '../../composables/useHideSubscriptionFeedType'
 import { useResultChannelAvatar } from '../../composables/useResultChannelAvatar.js'
 import { formatDate, formatDateTime } from '../../helpers/dateFormat.js'
@@ -740,12 +741,19 @@ const watchProgress = computed(() => {
   return historyEntry.value.watchProgress
 })
 
-/** @type {import('vue').ComputedRef<'grid' | 'list'>} */
+/** @type {import('vue').ComputedRef<'grid' | 'fullWidth' | 'list'>} */
 const listType = computed(() => store.getters.getListType)
 
 const effectiveListTypeIsList = computed(() => {
   return (listType.value === 'list' || props.forceListType === 'list') &&
     props.forceListType !== 'grid'
+})
+
+const thumbnailSizeSetting = inject(thumbnailSizeSettingKey, 'thumbnailSize')
+// Full width grid cards form a single column, so moving them goes up and down.
+const verticalMoveControls = computed(() => {
+  return effectiveListTypeIsList.value ||
+    store.state.settings[VIEW_TYPE_SETTINGS[thumbnailSizeSetting]] === 'fullWidth'
 })
 
 /** @type {import('vue').ComputedRef<'' | 'start' | 'middle' | 'end' | 'hidden' | 'blur'>} */
@@ -1373,14 +1381,14 @@ const mobileThumbnailActions = computed(() => {
   if (inUserPlaylist.value && props.canMoveVideoUp) {
     actions.push({
       label: t('User Playlists.Move Video Up'),
-      icon: effectiveListTypeIsList.value ? ['fas', 'arrow-up'] : ['fas', 'arrow-left'],
+      icon: verticalMoveControls.value ? ['fas', 'arrow-up'] : ['fas', 'arrow-left'],
       run: moveVideoUp
     })
   }
   if (inUserPlaylist.value && props.canMoveVideoDown) {
     actions.push({
       label: t('User Playlists.Move Video Down'),
-      icon: effectiveListTypeIsList.value ? ['fas', 'arrow-down'] : ['fas', 'arrow-right'],
+      icon: verticalMoveControls.value ? ['fas', 'arrow-down'] : ['fas', 'arrow-right'],
       run: moveVideoDown
     })
   }

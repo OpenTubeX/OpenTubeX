@@ -193,6 +193,14 @@ test.describe('playlist thumbnail sizing', { tag: '@scale' }, () => {
     await resize(app, page, 1440, uiScale)
     await expect(page.locator('.playlistPage')).toHaveClass(/\bgrid\b/)
     await expect(grid.locator('.ft-list-video.grid').first()).toBeVisible()
+    // Moving videos requires the custom sort order.
+    await page.evaluate(() => window.$store.dispatch('updateUserPlaylistSortOrder', 'custom'))
+    const moveDownIcon = page.locator('.playlistItemsCard .downArrowIcon [data-icon]').first()
+    await expect(moveDownIcon).toHaveAttribute('data-icon', 'arrow-right')
+    // A single column moves videos up and down.
+    await page.evaluate(() => window.$store.dispatch('updatePlaylistViewType', 'fullWidth'))
+    await expect.poll(columns).toBe(1)
+    await expect(moveDownIcon).toHaveAttribute('data-icon', 'arrow-down')
   })
 
   test('keeps scroll offsets and scrollbar geometry valid when the content shrinks', async ({ app, page, uiScale }) => {
