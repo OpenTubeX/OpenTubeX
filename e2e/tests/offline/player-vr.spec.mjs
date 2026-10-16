@@ -155,7 +155,7 @@ for (const suppliedHls of ['valid', 'missing', 'rejected', 'failed-child']) {
     await page.locator('.videoLayout').waitFor()
     const watch = await watchViewHandle(page)
     try {
-      await expect.poll(() => watch.evaluate(view => ({ loading: view.isLoading, pending: view.vrStreamsPending })), { timeout: 3000 })
+      await expect.poll(() => watch.evaluate(view => ({ loading: view.isLoading, pending: view.vrStreamsPending })))
         .toEqual({ loading: false, pending: true })
       await expect(page.locator('.streamPlaceholder')).toBeVisible()
       await expect(page.locator('.ftVideoPlayer')).toHaveCount(0)
@@ -166,7 +166,7 @@ for (const suppliedHls of ['valid', 'missing', 'rejected', 'failed-child']) {
       releaseLookup()
     }
     try {
-      await expect.poll(() => manifestRequests, { timeout: 3000 }).toBe(1)
+      await expect.poll(() => manifestRequests).toBe(1)
       await expect.poll(() => watch.evaluate(view => ({ loading: view.isLoading, pending: view.vrStreamsPending })))
         .toEqual({ loading: false, pending: true })
     } finally {
