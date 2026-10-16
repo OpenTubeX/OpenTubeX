@@ -281,6 +281,8 @@ function updateThumbnail(channel) {
       console.error('Failed to refresh the channel thumbnail', channel.id, error)
     } finally {
       pendingThumbnailChannelIds.delete(channel.id)
+      // Space out the next burst from zero instead of growing the delay forever.
+      if (pendingThumbnailChannelIds.size === 0) errorCount = 0
     }
   }, errorCount * 500)
   thumbnailRetryTimers.add(timer)
