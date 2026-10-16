@@ -147,6 +147,23 @@ test('Android sends live tab progress and receives it ahead of stale history', {
     const nextVideo = await decryptSyncDocument(sent.payload, key)
     assert.equal(nextVideo.videoId, 'aqz-KE-bpKQ')
     assert.equal(nextVideo.position, 0)
+    await organizer.getByRole('button', { name: 'Close', exact: true }).click()
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.state.settings.rememberHistory = true
+      store.commit('upsertToHistoryCache', { videoId: 'aqz-KE-bpKQ', watchProgress: 30 })
+      location.hash = '#/watch/aqz-KE-bpKQ?timestamp=0'
+    })
+    const restarted = await preparePlayer()
+    await expect.poll(() => restarted.evaluate(element => element.currentTime)).toBe(0)
+    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getActiveTab.route.query.timestamp)).toBeUndefined()
+    const restartedWatch = await page.evaluateHandle(findWatchComponent)
+    try {
+      await expect.poll(() => restartedWatch.evaluate(component => component.proxy.historyEntry.watchProgress)).toBe(0)
+      assert.equal(await restartedWatch.evaluate(component => component.proxy.startTimeSeconds), null)
+    } finally {
+      await restartedWatch.dispose()
+    }
   } finally {
     if (saved) {
       const organizer = page.locator('#capacitor-phone-tab-dialog')

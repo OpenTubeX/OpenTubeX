@@ -2042,8 +2042,8 @@ for (const initiallyEmpty of [false, true]) {
   })
 }
 
-for (const position of [0, 125.75]) {
-  test(`received video resumes at the transferred position ${position} instead of stale history`, async () => {
+for (const rememberHistory of [false, true]) for (const position of [0, 125.75]) {
+  test(`received video resumes at the transferred position ${position} instead of stale history (remember history: ${rememberHistory})`, async () => {
     const recipient = 'test-device'
     const opened = []
     let payload
@@ -2086,14 +2086,20 @@ for (const position of [0, 125.75]) {
       watchSource.indexOf('    handleVideoLoaded: async function (mediaMetadata) {') + '    handleVideoLoaded: '.length,
       watchSource.indexOf('\n\n    checkIfPlaylist:')
     ).trim().replace(/,$/, '')})`, { process: { env: { IS_CAPACITOR: true, IS_ELECTRON: false } } })
+    const savedPositions = []
     Object.assign(watch, {
-      preparingVideoLoadGeneration: null, localFilePlayback: true, rememberHistory: false,
+      preparingVideoLoadGeneration: null, localFilePlayback: true, rememberHistory,
+      addToHistory(value) { savedPositions.push(value); this.historyEntry.watchProgress = value },
+      handlePlaylistPersisting() {},
       updateLocalPlaylistLastPlayedAtSometimes() {},
       consumeTimestamp: () => consumeTimestamp.call(watch),
       tabRouter: { async replace(route) { watch.tabRoute = route } },
     })
     await loaded.call(watch)
     assert.equal(watch.tabRoute.query.timestamp, undefined, 'Android consumes the handoff timestamp after loading')
+    assert.deepEqual(savedPositions, rememberHistory ? [Math.floor(position)] : [])
+    if (rememberHistory) assert.equal(startTime.call(watch), Math.floor(position) || null, 'a later source load cannot resurrect stale history')
+    watch.historyEntry.watchProgress = 30
     checkTimestamp.call(watch)
     assert.equal(startTime.call(watch), 30, 'reopening the saved route uses newer watch history')
   })

@@ -5134,7 +5134,7 @@ export default defineComponent({
         this.videoPlayerLoaded = true
 
         if (this.rememberHistory) {
-          if (this.timestamp) {
+          if (this.timestamp !== null) {
             this.addToHistory(this.timestamp)
           } else if (this.historyEntryExists) {
             this.addToHistory(this.historyEntry.watchProgress)
