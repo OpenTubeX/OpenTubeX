@@ -2837,6 +2837,14 @@ Close Confirmation:
   Hide Window: Fenster ausblenden
   Quit: Beenden
   Never Ask Again: Nicht erneut fragen
+Older Version Changes:
+  Title: Änderungen aus einer älteren Version
+  Message: Änderungen, die du in einer älteren Version von OpenTubeX vorgenommen hast, wurden in deine Bibliothek übernommen.
+  Detail: Wurde ein Eintrag in beiden Versionen geändert, wurde die Änderung aus der älteren Version übernommen. Eine Sicherung deiner vorherigen Bibliothek befindet sich in deinem Profilordner.
+Library Format Changed:
+  Title: Bibliothek in neues Format übertragen
+  Message: Deine Bibliothek verwendet jetzt ein neues Speicherformat.
+  Detail: Ältere Versionen von OpenTubeX können deine Bibliothek weiterhin öffnen, zeigen sie aber so, wie sie vor diesem Update war. Änderungen, die du in einer älteren Version vornimmst, werden übernommen, sobald du zu dieser Version zurückkehrst.
 Find in page: Auf Seite suchen
 Previous match: Vorheriger Treffer
 Next match: Nächster Treffer

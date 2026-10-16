@@ -1,0 +1,16 @@
+diff --git a/dist/index.mjs b/dist/index.mjs
+index 5e6e43ba2a02c3c7a9d71aabb8134a929ffc94ca..2dce0836fb10eb42b25069ef065295935853d28f 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -16950,7 +16950,10 @@ async function sqlite3InitModule$1(moduleArg = {}) {
+ 						thePool.log("VFS initialized.");
+ 						return poolUtil;
+ 					}).catch(async (e) => {
+-						await thePool.removeVfs().catch(() => {});
++						// OpenTubeX: a failed start must never delete the pool's databases.
++						// Release what was acquired and leave every file in place.
++						try { capi.sqlite3_vfs_unregister(thePool.vfsName); } catch {}
++						thePool.releaseAccessHandles();
+ 						throw e;
+ 					});
+ 				}).catch((err) => {

@@ -14,6 +14,7 @@ const config = {
   entry: {
     main: path.join(__dirname, '../src/main/index.js'),
     subscriptionBackgroundWorker: path.join(__dirname, '../src/main/subscriptionBackgroundWorker.js'),
+    sqliteNodeWorker: path.join(__dirname, '../src/datastores/sqliteNodeWorker.js'),
   },
   module: {
     rules: [

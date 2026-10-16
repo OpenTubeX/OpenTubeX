@@ -1,6 +1,8 @@
+import { existsSync, readFileSync } from 'node:fs'
 import { cp, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
+import { DatabaseSync } from 'node:sqlite'
 import { fileURLToPath } from 'node:url'
 import { brotliCompressSync } from 'node:zlib'
 
@@ -49,6 +51,32 @@ function installRendererAccessors() {
 }
 
 /**
+ * Reads a desktop datastore as NeDB's line format, one document per line.
+ * Before the app opens a store, this is its seeded legacy file.
+ * @param {string} userDataDir
+ * @param {string} name e.g. 'settings' or 'search-history'
+ */
+export function readDatastore(userDataDir, name) {
+  const file = path.join(userDataDir, `${name}.sqlite`)
+  if (!existsSync(file)) {
+    const legacyFile = path.join(userDataDir, `${name}.db`)
+    return existsSync(legacyFile) ? readFileSync(legacyFile, 'utf8') : ''
+  }
+  const db = new DatabaseSync(file, { readOnly: true })
+  try {
+    const members = db.prepare('SELECT data FROM children WHERE parent = ? ORDER BY pos')
+    return db.prepare('SELECT id, data, has_children FROM docs').all().map(row => {
+      if (row.has_children !== 1) return `${row.data}\n`
+      const doc = JSON.parse(row.data)
+      doc.videos = members.all(row.id).map(member => JSON.parse(member.data))
+      return `${JSON.stringify(doc)}\n`
+    }).join('')
+  } finally {
+    db.close()
+  }
+}
+
+/**
  * Serializes documents in the newline-delimited JSON format used by nedb.
  *
  * @param {object[]} docs
@@ -58,7 +86,7 @@ function toNedbFile(docs) {
 }
 
 export function latestSettings(contents) {
-  return Object.fromEntries(contents.trim().split('\n')
+  return Object.fromEntries(contents.trim().split('\n').filter(Boolean)
     .map(line => JSON.parse(line))
     .filter(record => record._id && !record.$$deleted)
     .map(record => [record._id, record.value]))
@@ -158,7 +186,8 @@ export async function createUserDataDir(seed = {}) {
  * @param {object} [options]
  * @param {string} [options.appRoot] repository root containing dist-e2e
  * @param {string} [options.executablePath] Electron executable to launch
- * @param {(phase: 'electronConnected'|'windowCreated'|'routeCommitted'|'interactive', page?: import('@playwright/test').Page) => void|Promise<void>} [options.onPhase]
+ * @param {Record<string, string>} [options.env] additional environment variables
+ * @param {(phase: 'electronConnected'|'windowCreated'|'routeCommitted'|'interactive', page?: import('@playwright/test').Page, electronApp?: import('@playwright/test').ElectronApplication) => void|Promise<void>} [options.onPhase]
  * @param {number} [windowRetry] internal first-window retry count
  */
 export async function launchApp(userDataDir, extraArgs = [], options = {}, windowRetry = 0) {
@@ -173,7 +202,8 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
     // to. Pin it so the default locale setting does not follow the host.
     LANG: 'en_GB.UTF-8',
     LANGUAGE: 'en_GB',
-    LC_ALL: 'en_GB.UTF-8'
+    LC_ALL: 'en_GB.UTF-8',
+    ...options.env,
   }
   delete env.WAYLAND_DISPLAY
   // Cursor/agent shells may set this, which makes Electron act as Node and
@@ -223,7 +253,7 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
 
   const notifyPhase = async (phase, page) => {
     try {
-      await options.onPhase?.(phase, page)
+      await options.onPhase?.(phase, page, electronApp)
     } catch (error) {
       await electronApp.close().catch(() => {})
       throw error

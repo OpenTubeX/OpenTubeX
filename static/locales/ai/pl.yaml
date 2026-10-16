@@ -1338,3 +1338,11 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Utwórz skrót na pulpicie
+Older Version Changes:
+  Title: "Zmiany ze starszej wersji"
+  Message: "Zmiany wprowadzone w starszej wersji OpenTubeX zostały zastosowane w Twojej bibliotece."
+  Detail: "Jeśli element został zmieniony w obu wersjach, zachowano zmianę ze starszej wersji. Kopia zapasowa poprzedniej biblioteki znajduje się w folderze profilu."
+Library Format Changed:
+  Title: "Biblioteka przeniesiona do nowego formatu"
+  Message: "Twoja biblioteka używa teraz nowego formatu zapisu."
+  Detail: "Starsze wersje OpenTubeX nadal mogą otworzyć Twoją bibliotekę, ale pokazują ją w stanie sprzed tej aktualizacji. Zmiany wprowadzone w starszej wersji zostaną dodane po powrocie do tej wersji."

@@ -70,6 +70,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(ScreenshotPlugin.class);
         registerPlugin(PullToRefreshPlugin.class);
         registerPlugin(AndroidStoragePlugin.class);
+        registerPlugin(LibraryDatabasePlugin.class);
         registerPlugin(AndroidMediaSessionPlugin.class);
         registerPlugin(SubscriptionRefreshPlugin.class);
         registerPlugin(SabrHttpPlugin.class);

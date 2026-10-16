@@ -1,6 +1,3 @@
-import { readFile } from 'node:fs/promises'
-import path from 'node:path'
-
 import {
   test,
   expect,
@@ -9,7 +6,8 @@ import {
   goToSettingsSection,
   openNewWindowFromTabBar,
   waitForAppReady,
-  setWindowSize
+  setWindowSize,
+  readDatastore,
 } from '../../helpers/app.mjs'
 
 const CHANNEL_ID = `UC${'0'.repeat(22)}`
@@ -195,8 +193,8 @@ test('keeps the popover and Subscription Settings manager in sync', async ({ app
   await page.getByRole('option', { name: '2', exact: true }).click()
 
   await expect.poll(async () => {
-    const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
-    const records = contents.trim().split('\n').map(line => JSON.parse(line))
+    const contents = readDatastore(app.userDataDir, 'profiles')
+    const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
     const latestProfiles = new Map(records.map(record => [record._id, record]))
     return ['allChannels', 'profile-1'].map(profileId => {
       const channel = latestProfiles.get(profileId).subscriptions
@@ -259,8 +257,8 @@ test('keeps the popover and Subscription Settings manager in sync', async ({ app
   await popoverLimit.click()
   await page.getByRole('option', { name: 'Unlimited' }).click()
   await expect.poll(async () => {
-    const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
-    const records = contents.trim().split('\n').map(line => JSON.parse(line))
+    const contents = readDatastore(app.userDataDir, 'profiles')
+    const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
     const channel = records.filter(record => record._id === 'allChannels').at(-1).subscriptions
       .find(subscription => subscription.id === CHANNEL_ID)
     return {
@@ -352,8 +350,8 @@ test('changes subscription settings for selected channels', async ({ app, attach
   await expect(page.getByRole('listbox', { name: 'Videos per day', exact: true })).toHaveCount(0)
 
   await expect.poll(async () => {
-    const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
-    const records = contents.trim().split('\n').map(line => JSON.parse(line))
+    const contents = readDatastore(app.userDataDir, 'profiles')
+    const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
     const latestProfiles = new Map(records.map(record => [record._id, record]))
     return ['allChannels', 'profile-1'].map(profileId => (
       latestProfiles.get(profileId).subscriptions
@@ -475,8 +473,8 @@ test('does not carry a failed popover edit into a later update', async ({ app, p
   await page.evaluate(() => window.resolveFirstChannelSettingsWrite())
 
   await expect.poll(async () => {
-    const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
-    const records = contents.trim().split('\n').map(line => JSON.parse(line))
+    const contents = readDatastore(app.userDataDir, 'profiles')
+    const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
     const channel = records.filter(record => record._id === 'allChannels').at(-1).subscriptions
       .find(subscription => subscription.id === CHANNEL_ID)
     return {

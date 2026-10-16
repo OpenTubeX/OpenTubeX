@@ -1,25 +1,19 @@
-import { execFile } from 'node:child_process'
-import { open, rename, unlink } from 'node:fs/promises'
 import path from 'node:path'
-import { promisify } from 'node:util'
+import { DatabaseSync } from 'node:sqlite'
 
 import { test, expect } from '../../helpers/app.mjs'
 import { DBActions } from '../../../src/constants.js'
 
-const execFileAsync = promisify(execFile)
-
-/** Hold a real settings write at the filesystem boundary in the isolated profile. */
+/**
+ * Hold a real settings write with a competing SQLite transaction in the
+ * isolated profile. The app's write waits for the lock, within SQLite's busy
+ * timeout, and a later read queues behind it.
+ */
 async function holdSettingsWrite(app, page) {
-  const settingsPath = path.join(app.userDataDir, 'settings.db')
-  const savedPath = `${settingsPath}.context-menu-test`
   await page.evaluate(action => window.ftElectron.dbSettings(action), DBActions.GENERAL.FIND)
-  await rename(settingsPath, savedPath)
-  try {
-    await execFileAsync('mkfifo', [settingsPath])
-  } catch (error) {
-    await rename(savedPath, settingsPath)
-    throw error
-  }
+  const db = new DatabaseSync(path.join(app.userDataDir, 'settings.sqlite'))
+  db.exec('PRAGMA busy_timeout = 5000')
+  db.exec('BEGIN EXCLUSIVE')
 
   await page.evaluate(action => {
     window.__contextMenuSettingsWrite = window.ftElectron.dbSettings(action, {
@@ -29,17 +23,12 @@ async function holdSettingsWrite(app, page) {
   const queuedRead = page.evaluate(action => window.ftElectron.dbSettings(action), DBActions.GENERAL.FIND)
 
   const release = async () => {
-    // Opening both ends releases a writer blocked by slow storage without
-    // relying on a timing-sensitive mock of the datastore implementation.
-    const pipe = await open(settingsPath, 'r+')
-    try {
-      await page.evaluate(() => window.__contextMenuSettingsWrite)
-      await queuedRead
-    } finally {
-      await pipe.close()
-      await unlink(settingsPath)
-      await rename(savedPath, settingsPath)
-    }
+    db.exec('ROLLBACK')
+    db.close()
+    await page.evaluate(() => window.__contextMenuSettingsWrite)
+    const settings = await queuedRead
+    expect(settings.some(setting => setting._id === 'contextMenuPerformanceProbe' && setting.value === true),
+      'the delayed write still succeeds').toBe(true)
   }
 
   try {
@@ -56,7 +45,6 @@ async function holdSettingsWrite(app, page) {
 }
 
 test('selected-text context menu opens while unrelated settings writes wait for storage', async ({ app, page }) => {
-  test.skip(process.platform !== 'linux', 'uses a Linux FIFO to hold real datastore I/O')
   await page.evaluate(() => window.ftElectron.contextMenu.open({ selectionText: 'warm up' }))
   const cdp = await page.context().newCDPSession(page)
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 })
@@ -78,7 +66,7 @@ test('selected-text context menu opens while unrelated settings writes wait for 
     await page.mouse.click(point.x, point.y, { button: 'right' })
     const menu = page.getByRole('menu', { name: 'Context Menu' })
     // The write stays blocked until release(), so the menu must not wait for it.
-    await expect(menu).toBeVisible()
+    await expect(menu).toBeVisible({ timeout: 2000 })
     await expect(menu.getByRole('menuitem', { name: 'Copy', exact: true })).toBeEnabled()
     await expect(menu.getByRole('menuitem', { name: 'Search "selected text under load" in a New Tab', exact: true })).toBeVisible()
   } finally {

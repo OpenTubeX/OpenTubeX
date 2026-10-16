@@ -2,7 +2,7 @@ import { chmod, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { IpcChannels } from '../../../src/constants.js'
-import { test, expect, sel, goTo, goToSettingsSection, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, sel, goTo, goToSettingsSection, setWindowSize, readDatastore } from '../../helpers/app.mjs'
 import { DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
 
 const seededPremiereStart = Date.now() + 86_400_000
@@ -462,10 +462,10 @@ test.describe('seeded playlists', () => {
     await expect(page.getByText('Renamed seeded playlist')).toHaveCount(0)
 
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'playlists.db'), 'utf8')
-      const records = contents.trim().split('\n').map((line) => JSON.parse(line))
-      return records.filter((record) => record._id === 'e2eseeded').at(-1)?.$$deleted
-    }).toBe(true)
+      const contents = readDatastore(app.userDataDir, 'playlists')
+      const records = contents.trim().split('\n').filter(Boolean).map((line) => JSON.parse(line))
+      return records.some(record => record._id === 'e2eseeded')
+    }).toBe(false)
   })
 
   test('a custom quick bookmark emoji persists across restarts', async ({ app, page }) => {

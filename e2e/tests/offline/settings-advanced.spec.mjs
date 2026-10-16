@@ -1,8 +1,5 @@
-import { readFile } from 'node:fs/promises'
-import path from 'node:path'
-
 import { DBActions } from '../../../src/constants.js'
-import { test, expect, goTo, goToSettingsSection, latestSettings } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, latestSettings, readDatastore } from '../../helpers/app.mjs'
 
 async function expectDownloadQueueSettingsAlignment(page) {
   const downloads = await goToSettingsSection(page, 'download')
@@ -323,7 +320,7 @@ test.describe('settings', () => {
 
     await expect.poll(async () => {
       const settings = latestSettings(
-        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+        readDatastore(app.userDataDir, 'settings')
       )
       return {
         mode: settings.ytDlpPlaybackAuthMode,
@@ -389,7 +386,7 @@ test.describe('managed external software update controls', () => {
     await expect(updateMode).toHaveValue('manual')
     await expect.poll(async () => {
       return latestSettings(
-        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+        readDatastore(app.userDataDir, 'settings')
       ).externalSoftwareUpdateMode
     }).toBe('manual')
   })

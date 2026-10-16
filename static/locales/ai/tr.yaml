@@ -2114,3 +2114,11 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Masaüstü kısayolu oluştur
+Older Version Changes:
+  Title: "Eski bir sürümdeki değişiklikler"
+  Message: "OpenTubeX'in eski bir sürümünde yaptığınız değişiklikler kitaplığınıza uygulandı."
+  Detail: "Bir öğe her iki sürümde de değiştirildiyse eski sürümdeki değişiklik korundu. Önceki kitaplığınızın yedeği profil klasörünüzde."
+Library Format Changed:
+  Title: "Kitaplık yeni bir biçime taşındı"
+  Message: "Kitaplığınız artık yeni bir depolama biçimi kullanıyor."
+  Detail: "OpenTubeX'in eski sürümleri kitaplığınızı hâlâ açabilir, ancak onu bu güncellemeden önceki hâliyle gösterir. Eski bir sürümde yaptığınız değişiklikler bu sürüme döndüğünüzde eklenir."

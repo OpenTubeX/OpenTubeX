@@ -1,7 +1,4 @@
-import { readFile } from 'node:fs/promises'
-import path from 'node:path'
-
-import { test, expect, goToSettingsSection, latestSettings } from '../../helpers/app.mjs'
+import { test, expect, goToSettingsSection, latestSettings, readDatastore } from '../../helpers/app.mjs'
 import { decryptSyncDocument, encryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
 
 test('encrypted subscription retries retain concurrent remote edits', async ({ page }) => {
@@ -100,10 +97,10 @@ for (const [setting, launcher, attribute] of [
       elements[0].querySelector('button[aria-label^="Remove "]').click()
       elements[1].querySelector('button[aria-label^="Remove "]').click()
     })
-    await expect.poll(async () => latestSettings(await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8'))[setting]).toEqual(initial.slice(2))
+    await expect.poll(async () => latestSettings(readDatastore(app.userDataDir, 'settings'))[setting]).toEqual(initial.slice(2))
     await expect(rows).toHaveCount(initial.length - 2)
     await app.relaunch()
-    expect(latestSettings(await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8'))[setting]).toEqual(initial.slice(2))
+    expect(latestSettings(readDatastore(app.userDataDir, 'settings'))[setting]).toEqual(initial.slice(2))
   })
 }
 
@@ -129,8 +126,8 @@ for (const [feed, action, cache, entriesKey, storedKey, idKey] of [
     }, { action, cache, entriesKey, idKey })
     expect(result.afterStale).toEqual(['old', 'new'])
     expect(result.final[entriesKey].map(entry => entry[idKey])).toEqual(['newest'])
-    const records = (await readFile(path.join(app.userDataDir, 'subscription-cache.db'), 'utf8'))
-      .trim().split('\n').map(line => JSON.parse(line))
+    const records = (readDatastore(app.userDataDir, 'subscription-cache'))
+      .trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
     const persisted = records.filter(record => record._id === 'audit-channel').at(-1)
     expect(persisted[storedKey].map(entry => entry[idKey])).toEqual(['newest'])
     expect(new Date(persisted[`${storedKey}Timestamp`]).getTime()).toBe(4000)
@@ -153,8 +150,8 @@ test('Shorts metadata enrichment cannot replace a concurrent feed refresh', asyn
     return store.state.subscriptionCache.shortsCache['audit-channel'].videos
   })
   expect(result.map(video => video.videoId)).toEqual(['new'])
-  const records = (await readFile(path.join(app.userDataDir, 'subscription-cache.db'), 'utf8'))
-    .trim().split('\n').map(line => JSON.parse(line))
+  const records = (readDatastore(app.userDataDir, 'subscription-cache'))
+    .trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
   const persisted = records.filter(record => record._id === 'audit-channel').at(-1)
   expect(persisted.shorts.map(video => video.videoId)).toEqual(['new'])
   expect(new Date(persisted.shortsTimestamp).getTime()).toBe(2000)
@@ -218,8 +215,8 @@ for (const mode of ['all', 'video', 'post']) {
       return store.state.subscriptionCache[isPost ? 'postsCache' : 'videoCache']['audit-seen'][key]
     }, mode)
     expect(result.map(entry => entry.isNewInSubscriptionFeed)).toEqual([false, true])
-    const records = (await readFile(path.join(app.userDataDir, 'subscription-cache.db'), 'utf8'))
-      .trim().split('\n').map(line => JSON.parse(line))
+    const records = (readDatastore(app.userDataDir, 'subscription-cache'))
+      .trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
     const persisted = records.filter(record => record._id === 'audit-seen').at(-1)
     expect(persisted[mode === 'post' ? 'communityPosts' : 'videos']).toEqual(result)
   })
@@ -299,8 +296,8 @@ test('queued bulk seen writes and their final mutation retain the original snaps
   await refresh(0)
   await app.electronApp.evaluate(() => globalThis.blockedSeenWrites.splice(0).forEach(resolve => resolve()))
   await page.evaluate(() => window.bulkSeenWrite)
-  const records = (await readFile(path.join(app.userDataDir, 'subscription-cache.db'), 'utf8'))
-    .trim().split('\n').map(line => JSON.parse(line))
+  const records = (readDatastore(app.userDataDir, 'subscription-cache'))
+    .trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
   for (const id of [0, 8]) {
     const expected = [{ videoId: 'new', isNewInSubscriptionFeed: true }]
     expect(records.filter(record => record._id === `audit-bulk-${id}`).at(-1).videos).toEqual(expected)

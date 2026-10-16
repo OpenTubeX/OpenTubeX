@@ -1,7 +1,4 @@
-import { readFile } from 'node:fs/promises'
-import path from 'node:path'
-
-import { test, expect, goTo, goToSettingsSection, sel } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, sel, readDatastore } from '../../helpers/app.mjs'
 
 const now = Date.now()
 
@@ -189,8 +186,8 @@ test.describe('search history suggestions', () => {
     await page.locator(sel.searchInput).press('Enter')
 
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'search-history.db'), 'utf8')
-      const records = contents.trim().split('\n').map((line) => JSON.parse(line))
+      const contents = readDatastore(app.userDataDir, 'search-history')
+      const records = contents.trim().split('\n').filter(Boolean).map((line) => JSON.parse(line))
       return records
         .filter((entry) => entry.query === 'daily news' && !entry.$$deleted)
         .map((entry) => entry.searchSettings.time)
@@ -235,8 +232,8 @@ test.describe('search history suggestions', () => {
     await page.locator(sel.searchInput).press('Enter')
 
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'search-history.db'), 'utf8')
-      const records = contents.trim().split('\n').map((line) => JSON.parse(line))
+      const contents = readDatastore(app.userDataDir, 'search-history')
+      const records = contents.trim().split('\n').filter(Boolean).map((line) => JSON.parse(line))
       return [...new Set(records
         .filter(entry => !entry.$$deleted && (
           entry._id === 'android tutorial' || entry.query === 'android tutorial'
@@ -245,8 +242,8 @@ test.describe('search history suggestions', () => {
     }).toEqual(['android tutorial'])
 
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'search-history.db'), 'utf8')
-      const records = contents.trim().split('\n').map((line) => JSON.parse(line))
+      const contents = readDatastore(app.userDataDir, 'search-history')
+      const records = contents.trim().split('\n').filter(Boolean).map((line) => JSON.parse(line))
       return records.filter(entry => entry._id === 'android tutorial').at(-1)?.query
     }).toBe('android tutorial')
   })
@@ -399,10 +396,10 @@ test.describe('search history suggestions', () => {
     await expect(suggestions(page).first()).toContainText('baking bread')
 
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'search-history.db'), 'utf8')
-      const records = contents.trim().split('\n').map((line) => JSON.parse(line))
-      return records.filter((record) => record._id === 'android tutorial').at(-1)?.$$deleted
-    }).toBe(true)
+      const contents = readDatastore(app.userDataDir, 'search-history')
+      const records = contents.trim().split('\n').filter(Boolean).map((line) => JSON.parse(line))
+      return records.some(record => record._id === 'android tutorial')
+    }).toBe(false)
 
     ;({ page } = await app.relaunch())
     await page.locator(sel.searchInput).click()

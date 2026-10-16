@@ -2122,3 +2122,11 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Krouiñ ur verradenn war ar burev
+Older Version Changes:
+  Title: "Kemmoù eus ur stumm koshoc'h"
+  Message: "Ar c'hemmoù graet ganeoc'h en ur stumm koshoc'h eus OpenTubeX a zo bet lakaet en ho levraoueg."
+  Detail: "Ma oa bet kemmet un elfenn en daou stumm, eo bet miret ar c'hemm eus ar stumm koshañ. Un eilenn gwarez eus ho levraoueg a-raok a zo en teuliad ar profil."
+Library Format Changed:
+  Title: "Dilec'hiet eo al levraoueg d'ur stumm nevez"
+  Message: "Ul lakadur stokañ nevez a vez implijet gant ho levraoueg bremañ."
+  Detail: "Gallout a ra stummoù koshoc'h OpenTubeX digeriñ ho levraoueg c'hoazh, met diskouez a reont anezhi evel ma oa a-raok an hizivadenn-mañ. Ar c'hemmoù a rit en ur stumm koshoc'h a vez ouzhpennet pa zistroit d'ar stumm-mañ."

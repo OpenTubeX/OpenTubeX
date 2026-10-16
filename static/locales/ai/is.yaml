@@ -2140,3 +2140,11 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Búa til flýtileið á skjáborði
+Older Version Changes:
+  Title: "Breytingar úr eldri útgáfu"
+  Message: "Breytingar sem þú gerðir í eldri útgáfu af OpenTubeX hafa verið færðar inn í safnið þitt."
+  Detail: "Ef atriði var breytt í báðum útgáfum var breytingin úr eldri útgáfunni varðveitt. Öryggisafrit af fyrra safni þínu er í notandamöppunni þinni."
+Library Format Changed:
+  Title: "Safnið var flutt yfir á nýtt snið"
+  Message: "Safnið þitt notar nú nýtt geymslusnið."
+  Detail: "Eldri útgáfur af OpenTubeX geta enn opnað safnið þitt, en þær sýna það eins og það var fyrir þessa uppfærslu. Breytingum sem þú gerir í eldri útgáfu er bætt við þegar þú snýrð aftur í þessa útgáfu."

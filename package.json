@@ -101,6 +101,7 @@
     "@jitl/quickjs-wasmfile-release-sync": "^0.32.0",
     "@material/material-color-utilities": "^0.4.0",
     "@seald-io/nedb": "^4.1.2",
+    "@sqlite.org/sqlite-wasm": "^3.53.4-build2",
     "@vot.js/core": "^3.1.5",
     "autolinker": "^4.1.5",
     "bgutils-js": "^4.0.3",

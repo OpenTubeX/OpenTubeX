@@ -1,7 +1,4 @@
-import { readFile } from 'node:fs/promises'
-import path from 'node:path'
-
-import { test, expect, goTo, goToSettingsSection, latestSettings, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, latestSettings, setWindowSize, readDatastore } from '../../helpers/app.mjs'
 
 test.describe('fresh AI video summary default', () => {
   test.use({ seed: { freshProfile: true }, showTutorial: true })
@@ -513,7 +510,7 @@ test.describe('settings', () => {
       .toHaveCSS('color', 'rgb(18, 52, 86)')
     await expect.poll(async () => {
       const settings = latestSettings(
-        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+        readDatastore(app.userDataDir, 'settings')
       )
       return settings.sponsorBlockSponsor
     }).toEqual({ color: '#123456', skip: 'autoSkip' })
@@ -765,7 +762,7 @@ test.describe('preferred caption language migration', () => {
   test('persists the equivalent YouTube language code for existing users', async ({ app, page }) => {
     await expect.poll(async () => {
       const settings = latestSettings(
-        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+        readDatastore(app.userDataDir, 'settings')
       )
       return settings.preferredCaptionLocale
     }).toBe('zh-Hant')
@@ -792,7 +789,7 @@ test.describe('live chat replay visibility migration', () => {
   test('preserves the old live chat visibility choice for replays', async ({ app }) => {
     await expect.poll(async () => {
       const settings = latestSettings(
-        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+        readDatastore(app.userDataDir, 'settings')
       )
       return {
         liveChat: settings.hideLiveChat,
@@ -835,7 +832,7 @@ test.describe('SponsorBlock highlight settings', () => {
 
     await expect.poll(async () => {
       const settings = latestSettings(
-        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+        readDatastore(app.userDataDir, 'settings')
       )
       return settings.sponsorBlockHighlight
     }).toEqual({

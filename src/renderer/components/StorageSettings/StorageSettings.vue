@@ -125,7 +125,7 @@
         :title="t('Settings.Storage Settings.Subscription Feed Cache')"
         :size="storedDataSizeText('subscriptionCache')"
         :description="t('Settings.Storage Settings.Subscription Feed Cache Description')"
-        :location="storedDataLocation('subscription-cache.db')"
+        :location="storedDataLocation('subscription-cache.sqlite')"
       >
         <FtButton
           :label="t('Settings.Storage Settings.Clear Subscription Feed Cache')"
@@ -228,7 +228,7 @@
         :title="t('Settings.Privacy Settings.Cache Video Metadata')"
         :size="sizeText('videoMetadata')"
         :description="t('Settings.Storage Settings.Video Metadata Description')"
-        location="video-metadata-cache.db"
+        location="video-metadata-cache.sqlite"
       >
         <FtToggleSwitch
           :label="t('Settings.Privacy Settings.Cache Video Metadata')"
@@ -250,7 +250,7 @@
         :title="t('Settings.Storage Settings.Watch History')"
         :size="storedDataSizeText('history', 'watchStats')"
         :description="t('Settings.Storage Settings.Watch History Description')"
-        :location="storedDataLocation('history.db, watch-stats.db')"
+        :location="storedDataLocation('history.sqlite, watch-stats.sqlite')"
       >
         <FtInput
           :placeholder="t('Settings.Privacy Settings.Automatic History Retention Placeholder')"
@@ -284,7 +284,7 @@
         :title="t('Settings.Storage Settings.Search History')"
         :size="storedDataSizeText('searchHistory')"
         :description="t('Settings.Storage Settings.Search History Description')"
-        :location="storedDataLocation('search-history.db')"
+        :location="storedDataLocation('search-history.sqlite')"
       >
         <FtButton
           :label="t('Settings.Storage Settings.Delete Search History')"
@@ -300,7 +300,7 @@
         :title="t('Settings.Storage Settings.Subscriptions And Profiles')"
         :size="storedDataSizeText('profiles')"
         :description="t('Settings.Storage Settings.Subscriptions And Profiles Description')"
-        :location="storedDataLocation('profiles.db')"
+        :location="storedDataLocation('profiles.sqlite')"
       >
         <FtButton
           :label="t('Settings.Privacy Settings.Remove All Subscriptions / Profiles')"
@@ -313,7 +313,7 @@
         :title="t('Playlists')"
         :size="storedDataSizeText('playlists')"
         :description="t('Settings.Storage Settings.Playlists Description')"
-        :location="storedDataLocation('playlists.db')"
+        :location="storedDataLocation('playlists.sqlite')"
       >
         <FtButton
           :label="t('Settings.Privacy Settings.Remove All Playlists')"
@@ -326,7 +326,7 @@
         :title="t('Settings.Storage Settings.Settings And Sessions')"
         :size="storedDataSizeText('settings', 'tabSessions', 'liveReminders')"
         :description="t('Settings.Storage Settings.Settings And Sessions Description')"
-        :location="storedDataLocation('settings.db, tab-session.db, live-reminders.db')"
+        :location="storedDataLocation('settings.sqlite, tab-session.sqlite, live-reminders.sqlite')"
       >
         <FtButton
           v-if="USING_ELECTRON"

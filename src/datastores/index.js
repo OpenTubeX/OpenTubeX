@@ -1,59 +1,63 @@
 import Datastore from '@seald-io/nedb'
 
+const options = {
+  history: { indexes: ['videoId'] },
+  playlists: { childField: 'videos' },
+  'watch-stats': { indexes: ['date'] },
+  'video-metadata-cache': { indexes: ['videoId'] },
+}
+
+const legacyChangeListeners = new Set()
+
+/**
+ * Called after an older version's writes to a legacy datastore were applied.
+ * @param {(change: { name: string, changed: number, deleted: number, backup?: string }) => void} listener
+ */
+export function onLegacyDatastoreChanges(listener) {
+  legacyChangeListeners.add(listener)
+}
+
+const legacyImportListeners = new Set()
+
+/**
+ * Called after an existing legacy datastore was imported, once per datastore.
+ * @param {(imported: { name: string, documents: number }) => void} listener
+ */
+export function onLegacyDatastoreImported(listener) {
+  legacyImportListeners.add(listener)
+}
+
 let dbPath = null
+let createDatastore
 
 if (process.env.IS_ELECTRON_MAIN) {
   const { app } = require('electron')
-  const { join } = require('path')
-  // this code only runs in the electron main process, so hopefully using sync fs code here should be fine 😬
-  const { statSync, realpathSync } = require('fs')
+  const { join, resolve } = require('path')
+  const { createDesktopDatastore, createWorkerDrivers, desktopDatastorePaths } = require('./sqliteNode.js')
   const userDataPath = app.getPath('userData') // This is based on the user's OS
-  dbPath = (dbName) => {
-    let path = join(userDataPath, `${dbName}.db`)
+  // Disk syncs run in a worker thread, so they never stall windows and menus.
+  // Development builds set __dirname to this source directory and emit to dist.
+  const createDriver = createWorkerDrivers(process.env.NODE_ENV === 'development'
+    ? resolve(__dirname, '../../dist/sqliteNodeWorker.js')
+    : join(__dirname, 'sqliteNodeWorker.js'))
+  dbPath = (dbName) => desktopDatastorePaths(userDataPath, dbName).legacy
 
-    // returns undefined if the path doesn't exist
-    if (statSync(path, { throwIfNoEntry: false })?.isSymbolicLink) {
-      path = realpathSync(path)
-    }
-
-    return path
+  // Each NeDB file is imported on first use and left in place for older versions.
+  createDatastore = (name) => {
+    const { filename, legacy } = desktopDatastorePaths(userDataPath, name)
+    return createDesktopDatastore(filename, legacy, {
+      ...options[name],
+      // The notice about older versions' changes points to the profile folder.
+      backupDirectory: userDataPath,
+      createDriver,
+      onLegacyChanges: change => legacyChangeListeners.forEach(listener => listener({ name, ...change })),
+      onLegacyImported: imported => legacyImportListeners.forEach(listener => listener({ name, ...imported })),
+    })
   }
 } else {
+  const { createBrowserDatastore } = require('./sqliteBrowser.js')
   dbPath = (dbName) => `${dbName}.db`
-}
-
-/**
- * @param {string} name
- */
-function createDatastore(name) {
-  const datastore = new Datastore({
-    filename: dbPath(name),
-    autoload: !process.env.IS_ELECTRON_MAIN,
-    // Android's startup gate presents a recoverable error instead of an
-    // unhandled autoload rejection or an apparently empty installation.
-    onload: process.env.IS_CAPACITOR && !process.env.IS_IOS
-      ? error => { if (error) console.error('Unable to load app datastore:', name, error) }
-      : undefined,
-    // Automatically clean up corrupted data, instead of crashing
-    corruptAlertThreshold: 1
-  })
-
-  // Background refreshes append whole channel records. Compact during long
-  // sessions so an interrupted shutdown cannot leave gigabytes to replay.
-  if (process.env.IS_ELECTRON_MAIN && name === 'subscription-cache') {
-    let compactionInProgress = false
-    setInterval(() => {
-      if (compactionInProgress) return
-      compactionInProgress = true
-      datastore.compactDatafileAsync().catch(error => {
-        console.error('Failed to compact subscription cache:', error)
-      }).finally(() => {
-        compactionInProgress = false
-      })
-    }, 5 * 60 * 1000).unref()
-  }
-
-  return datastore
+  createDatastore = (name) => createBrowserDatastore(name, options[name])
 }
 
 export const settings = createDatastore('settings')
@@ -67,8 +71,9 @@ export const searchHistory = createDatastore('search-history')
 // when importing an existing installation, not on every application startup.
 export const subscriptionCache = process.env.IS_ELECTRON_MAIN ? createDatastore('subscription-cache') : null
 
+// The legacy browser cache stays in NeDB's own storage, read only to import it.
 export function loadLegacySubscriptionCache() {
-  return createDatastore('subscription-cache').findAsync({})
+  return new Datastore({ filename: dbPath('subscription-cache'), autoload: true, corruptAlertThreshold: 1 }).findAsync({})
 }
 
 export function removeLegacySubscriptionCache() {

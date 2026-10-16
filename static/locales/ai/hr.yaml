@@ -2143,3 +2143,11 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Stvori prečac na radnoj površini
+Older Version Changes:
+  Title: "Promjene iz starije verzije"
+  Message: "Promjene koje ste napravili u starijoj verziji OpenTubeXa primijenjene su na vašu biblioteku."
+  Detail: "Ako je stavka promijenjena u obje verzije, zadržana je promjena iz starije verzije. Sigurnosna kopija vaše prethodne biblioteke nalazi se u mapi profila."
+Library Format Changed:
+  Title: "Biblioteka je premještena u novi format"
+  Message: "Vaša biblioteka sada koristi novi format pohrane."
+  Detail: "Starije verzije OpenTubeXa i dalje mogu otvoriti vašu biblioteku, ali je prikazuju onakvom kakva je bila prije ovog ažuriranja. Promjene koje napravite u starijoj verziji dodaju se kada se vratite na ovu verziju."

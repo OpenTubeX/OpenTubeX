@@ -2123,3 +2123,11 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: İş masasında qısayol yarat
+Older Version Changes:
+  Title: "Köhnə versiyadan dəyişikliklər"
+  Message: "OpenTubeX-in köhnə versiyasında etdiyiniz dəyişikliklər kitabxananıza tətbiq edildi."
+  Detail: "Element hər iki versiyada dəyişdirilibsə, köhnə versiyadakı dəyişiklik saxlanıldı. Əvvəlki kitabxananızın ehtiyat nüsxəsi profil qovluğunuzdadır."
+Library Format Changed:
+  Title: "Kitabxana yeni formata köçürüldü"
+  Message: "Kitabxananız artıq yeni saxlama formatından istifadə edir."
+  Detail: "OpenTubeX-in köhnə versiyaları kitabxananızı hələ də aça bilər, lakin onu bu yeniləmədən əvvəlki kimi göstərir. Köhnə versiyada etdiyiniz dəyişikliklər bu versiyaya qayıtdığınız zaman əlavə edilir."

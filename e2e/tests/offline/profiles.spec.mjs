@@ -1,7 +1,6 @@
 import { readFile } from 'node:fs/promises'
-import path from 'node:path'
 
-import { test, expect, goToSettingsSection, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, goToSettingsSection, setWindowSize, readDatastore } from '../../helpers/app.mjs'
 import { expectImagesLoaded } from '../../helpers/visual-fixtures.mjs'
 
 // Fractional UI scales round innerWidth, so try neighbouring device widths
@@ -56,8 +55,8 @@ async function openProfileList(page) {
 test('creates All Channels with the default person icon', async ({ app, page }) => {
   await expect(profileIconInitial(page).locator('[data-icon="circle-user"] svg')).toBeVisible()
   await expect.poll(async () => {
-    const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
-    const records = contents.trim().split('\n').map(line => JSON.parse(line))
+    const contents = readDatastore(app.userDataDir, 'profiles')
+    const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
     return records.findLast(record => record._id === 'allChannels' && !record.$$deleted)?.icon
   }).toEqual({ type: 'icon', value: 'circle-user' })
 })
@@ -76,8 +75,8 @@ test.describe('All Channels with a previously saved color', () => {
     await expect(profileIconInitial(page).locator('[data-icon="circle-user"] svg')).toBeVisible()
     await expect(profileIconInitial(page)).toHaveCSS('background-color', 'rgb(85, 139, 47)')
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
-      const records = contents.trim().split('\n').map(line => JSON.parse(line))
+      const contents = readDatastore(app.userDataDir, 'profiles')
+      const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
       return records.findLast(record => record._id === 'allChannels' && !record.$$deleted)
     }).toEqual({ ...mainProfile, bgColor: '#558B2F', icon: { type: 'icon', value: 'circle-user' } })
     await openProfileList(page)
@@ -92,8 +91,8 @@ test.describe('existing All Channels without an icon', () => {
   test('uses the person icon and keeps other profiles on their initials', async ({ app, page }) => {
     await expect(profileIconInitial(page).locator('[data-icon="circle-user"] svg')).toBeVisible()
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
-      const records = contents.trim().split('\n').map(line => JSON.parse(line))
+      const contents = readDatastore(app.userDataDir, 'profiles')
+      const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
       return records.findLast(record => record._id === 'allChannels' && !record.$$deleted)
     }).toEqual({ ...mainProfile, icon: { type: 'icon', value: 'circle-user' } })
     await openProfileList(page)
@@ -154,7 +153,7 @@ for (const iconPack of ['material', 'remix']) {
       await expect(preview).toHaveCount(0)
       await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeLessThanOrEqual(1)
       await expect(scroller.locator(':scope > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-unusable/)
-      const records = (await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')).trim().split('\n').map(line => JSON.parse(line))
+      const records = (readDatastore(app.userDataDir, 'profiles')).trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
       expect(records.some(record => record.name === 'Discarded draft')).toBe(false)
       await setWindowSize(app, page, { width: 1600, height: 900 })
       await page.getByRole('button', { name: 'Create New Profile' }).click()
@@ -209,8 +208,8 @@ for (const iconPack of ['material', 'remix']) {
       await page.getByRole('button', { name: 'Create Profile', exact: true }).click()
       await expect(page.locator('.card .profileList').getByText('Helen')).toBeVisible()
       await expect.poll(async () => {
-        const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
-        return contents.trim().split('\n').map(line => JSON.parse(line)).findLast(record => record.name === 'Helen' && !record.$$deleted)?.icon
+        const contents = readDatastore(app.userDataDir, 'profiles')
+        return contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line)).findLast(record => record.name === 'Helen' && !record.$$deleted)?.icon
       }).toEqual({ type: 'icon', value: 'gamepad' })
     })
 
@@ -259,8 +258,8 @@ for (const iconPack of ['material', 'remix']) {
       await page.getByRole('button', { name: 'Update Profile' }).click()
       await expect(profileIconInitial(page).locator('[data-icon="gamepad"] svg')).toBeVisible()
       await expect.poll(async () => {
-        const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
-        const records = contents.trim().split('\n').map(line => JSON.parse(line))
+        const contents = readDatastore(app.userDataDir, 'profiles')
+        const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
         return records.findLast(record => record._id === 'allChannels' && !record.$$deleted)?.icon
       }).toEqual({ type: 'icon', value: 'gamepad' })
 
@@ -273,8 +272,8 @@ for (const iconPack of ['material', 'remix']) {
       await expect(preview).toHaveText('A')
       await page.getByRole('button', { name: 'Update Profile' }).click()
       await expect.poll(async () => {
-        const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
-        const records = contents.trim().split('\n').map(line => JSON.parse(line))
+        const contents = readDatastore(app.userDataDir, 'profiles')
+        const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
         return records.findLast(record => record._id === 'allChannels' && !record.$$deleted)?.icon
       }).toEqual({ type: 'initial' })
       await page.reload()
@@ -926,8 +925,8 @@ test.describe('profile manager', () => {
     await expect(heading).toHaveCount(0)
 
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
-      const records = contents.trim().split('\n').map((line) => JSON.parse(line))
+      const contents = readDatastore(app.userDataDir, 'profiles')
+      const records = contents.trim().split('\n').filter(Boolean).map((line) => JSON.parse(line))
       return records.some((record) => record.name === 'Created via UI')
     }).toBe(true)
 
@@ -973,8 +972,8 @@ test.describe('profile manager', () => {
 
       await page.getByRole('button', { name: 'Update Profile' }).click()
       await expect.poll(async () => {
-        const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
-        const records = contents.trim().split('\n').map(line => JSON.parse(line))
+        const contents = readDatastore(app.userDataDir, 'profiles')
+        const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
         const profile = records.findLast(record => record._id === 'allChannels' && !record.$$deleted)
         return profile?.bgColor
       }).toBe('#d50000')
@@ -1014,8 +1013,8 @@ test.describe('profile manager', () => {
       await page.getByRole('button', { name: 'Update Profile' }).click()
 
       await expect.poll(async () => {
-        const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
-        const records = contents.trim().split('\n').map(line => JSON.parse(line))
+        const contents = readDatastore(app.userDataDir, 'profiles')
+        const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
         const profile = records.findLast(record => record._id === 'allChannels' && !record.$$deleted)
         return profile?.bgColor
       }).toBe('var(--primary-color)')
@@ -1058,8 +1057,8 @@ test.describe('profile manager', () => {
       await page.getByRole('button', { name: 'Update Profile' }).click()
 
       await expect.poll(async () => {
-        const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
-        const records = contents.trim().split('\n').map(line => JSON.parse(line))
+        const contents = readDatastore(app.userDataDir, 'profiles')
+        const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
         const profile = records.findLast(record => record._id === 'allChannels' && !record.$$deleted)
         return profile?.bgColor
       }).toBe('var(--primary-color)')
@@ -1087,8 +1086,8 @@ test.describe('profile manager', () => {
 
     await page.getByRole('button', { name: 'Update Profile' }).click()
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
-      const records = contents.trim().split('\n').map(line => JSON.parse(line))
+      const contents = readDatastore(app.userDataDir, 'profiles')
+      const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
       return records.findLast(record => record._id === 'allChannels' && !record.$$deleted)?.bgColor
     }).toBe('#000000')
   })
@@ -1141,8 +1140,8 @@ test.describe('profile manager', () => {
     await page.getByRole('button', { name: 'Update Profile' }).click()
 
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
-      const records = contents.trim().split('\n').map(line => JSON.parse(line))
+      const contents = readDatastore(app.userDataDir, 'profiles')
+      const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
       const profile = records.findLast(record => record._id === 'allChannels' && !record.$$deleted)
       return profile?.icon?.type === 'image' && profile.bgColor === 'transparent'
     }).toBe(true)
@@ -1171,8 +1170,8 @@ test.describe('profile manager', () => {
     await page.getByRole('button', { name: 'Update Profile' }).click()
 
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
-      const records = contents.trim().split('\n').map(line => JSON.parse(line))
+      const contents = readDatastore(app.userDataDir, 'profiles')
+      const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
       const profile = records.findLast(record => record._id === 'allChannels' && !record.$$deleted)
       return profile?.icon?.value === '🌍' && profile.bgColor !== 'transparent'
     }).toBe(true)

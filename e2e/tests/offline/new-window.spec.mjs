@@ -1,7 +1,4 @@
-import { readFile } from 'node:fs/promises'
-import path from 'node:path'
-
-import { openNewWindowFromTabBar, test, expect, waitForAppReady } from '../../helpers/app.mjs'
+import { openNewWindowFromTabBar, test, expect, waitForAppReady, readDatastore } from '../../helpers/app.mjs'
 
 test('new windows move from the app header to the tab bar context menu', async ({ app, page }) => {
   await expect(page.locator('.topNav .navNewWindowButton')).toHaveCount(0)
@@ -128,9 +125,9 @@ test.describe('multi-tab window close confirmation', () => {
       await secondaryClosed
 
       await expect.poll(async () => {
-        const contents = await readFile(path.join(app.userDataDir, 'tab-session.db'), 'utf8')
+        const contents = readDatastore(app.userDataDir, 'tab-session')
         const sessions = new Map()
-        for (const record of contents.trim().split('\n').map(line => JSON.parse(line))) {
+        for (const record of contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))) {
           if (record.$$deleted) sessions.delete(record._id)
           else if (record.value) sessions.set(record._id, record.value)
         }

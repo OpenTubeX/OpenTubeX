@@ -1,10 +1,8 @@
 import { app } from 'electron'
 import { stat } from 'node:fs/promises'
-import { join } from 'node:path'
 
 import { videoMetadataCache } from '../datastores'
-
-const CACHE_FILE_NAME = 'video-metadata-cache.db'
+import { desktopDatastorePaths } from '../datastores/sqliteNode'
 const MAX_TITLE_LENGTH = 10_000
 const MAX_DESCRIPTION_LENGTH = 1_000_000
 const MAX_THUMBNAIL_DATA_URL_LENGTH = 8_000_000
@@ -167,17 +165,22 @@ export function updateVideoMetadataCache(input) {
 }
 
 export async function getVideoMetadataCacheSize() {
-  try {
-    return (await stat(join(app.getPath('userData'), CACHE_FILE_NAME))).size
-  } catch (error) {
-    if (error?.code === 'ENOENT') return 0
-    throw error
-  }
+  // A linked legacy file keeps the cache beside its target. The legacy file
+  // itself stays until the cache is cleared.
+  const { filename, legacy } = desktopDatastorePaths(app.getPath('userData'), 'video-metadata-cache')
+  const sizes = await Promise.all([filename, `${filename}-wal`, `${filename}-shm`, legacy].map(async path => {
+    try {
+      return (await stat(path)).size
+    } catch (error) {
+      if (error?.code === 'ENOENT') return 0
+      throw error
+    }
+  }))
+  return sizes.reduce((total, size) => total + size, 0)
 }
 
 export function clearVideoMetadataCache() {
   return enqueue(async () => {
-    await videoMetadataCache.removeAsync({}, { multi: true })
-    await videoMetadataCache.compactDatafileAsync()
+    await videoMetadataCache.dropDatabaseAsync()
   })
 }

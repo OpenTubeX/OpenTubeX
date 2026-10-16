@@ -7,19 +7,22 @@ import { TabManager } from './tabs/TabManager'
 import { tabPreviewStorage } from './tabs/TabPreviewStorage'
 import { clearYtDlpPlaybackCache } from './ytDlpPlaybackCache'
 
+// Includes the legacy NeDB file, which stays for older versions.
+const sqliteFiles = name => [`${name}.sqlite`, `${name}.sqlite-wal`, `${name}.sqlite-shm`, `${name}.db`]
+
 const USER_DATA_FILES = {
   downloadRecords: 'downloads.json',
-  videoMetadata: 'video-metadata-cache.db',
-  subscriptionCache: 'subscription-cache.db',
-  searchHistory: 'search-history.db',
-  history: 'history.db',
-  watchStats: 'watch-stats.db',
-  recommendations: 'recommendations.db',
-  playlists: 'playlists.db',
-  profiles: 'profiles.db',
-  settings: 'settings.db',
-  tabSessions: 'tab-session.db',
-  liveReminders: 'live-reminders.db',
+  videoMetadata: sqliteFiles('video-metadata-cache'),
+  subscriptionCache: sqliteFiles('subscription-cache'),
+  searchHistory: sqliteFiles('search-history'),
+  history: sqliteFiles('history'),
+  watchStats: sqliteFiles('watch-stats'),
+  recommendations: sqliteFiles('recommendations'),
+  playlists: sqliteFiles('playlists'),
+  profiles: sqliteFiles('profiles'),
+  settings: sqliteFiles('settings'),
+  tabSessions: sqliteFiles('tab-session'),
+  liveReminders: sqliteFiles('live-reminders'),
   ytDlpPlayback: 'yt-dlp-playback-cache.json'
 }
 
@@ -163,8 +166,8 @@ export async function directorySize(directoryPath) {
 export async function getStorageUsage() {
   const userDataPath = app.getPath('userData')
   const entrySizes = await readSize(() => profileEntrySizes(userDataPath), 'profile directory')
-  const fileEntries = Object.entries(USER_DATA_FILES).map(([key, fileName]) => (
-    [key, sumEntries(entrySizes, [fileName])]
+  const fileEntries = Object.entries(USER_DATA_FILES).map(([key, fileNames]) => (
+    [key, sumEntries(entrySizes, [fileNames].flat())]
   ))
   const categorizedUsage = {
     ...Object.fromEntries(fileEntries),

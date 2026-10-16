@@ -2112,3 +2112,11 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Créer un raccourci sur le bureau
+Older Version Changes:
+  Title: "Modifications d'une version antérieure"
+  Message: "Les modifications effectuées dans une version antérieure d'OpenTubeX ont été appliquées à votre bibliothèque."
+  Detail: "Si un élément a été modifié dans les deux versions, la modification de la version antérieure a été conservée. Une sauvegarde de votre bibliothèque précédente se trouve dans votre dossier de profil."
+Library Format Changed:
+  Title: "Bibliothèque convertie dans un nouveau format"
+  Message: "Votre bibliothèque utilise désormais un nouveau format de stockage."
+  Detail: "Les versions antérieures d'OpenTubeX peuvent toujours ouvrir votre bibliothèque, mais l'affichent telle qu'elle était avant cette mise à jour. Les modifications effectuées dans une version antérieure sont ajoutées lorsque vous revenez à cette version."

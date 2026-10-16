@@ -1,11 +1,13 @@
 import { once } from 'node:events'
+import { existsSync } from 'node:fs'
+import { mkdtemp, rm, symlink, writeFile } from 'node:fs/promises'
 import { createServer } from 'node:http'
-import { readFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
 import path from 'node:path'
 
 import { DBActions, IpcChannels } from '../../../src/constants.js'
 import { activeTab, openMockedVideo } from '../../helpers/player.mjs'
-import { expect, goToSettingsSection, test } from '../../helpers/app.mjs'
+import { expect, goToSettingsSection, test, readDatastore, createUserDataDir, launchApp } from '../../helpers/app.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 const WATCH_PAGE_SEED = {
@@ -196,8 +198,7 @@ test('stores and presents every previous metadata version', async ({ app, page }
       privateRedirectRejected: true
     })
 
-    const cachePath = path.join(app.userDataDir, 'video-metadata-cache.db')
-    const cacheDocuments = (await readFile(cachePath, 'utf8')).trim().split('\n')
+    const cacheDocuments = readDatastore(app.userDataDir, 'video-metadata-cache').trim().split('\n')
       .map(line => JSON.parse(line))
       .filter(document => document._id && !document.$$deleted)
     expect(cacheDocuments).toHaveLength(6)
@@ -301,5 +302,33 @@ test('stores and presents every previous metadata version', async ({ app, page }
   } finally {
     thumbnailServer.close()
     await once(thumbnailServer, 'close')
+  }
+})
+
+test('measures a linked cache after clearing and refilling it', async () => {
+  const external = await mkdtemp(path.join(tmpdir(), 'opentubex-linked-cache-'))
+  const userDataDir = await createUserDataDir({ settings: WATCH_PAGE_SEED })
+  let electronApp
+  try {
+    await writeFile(path.join(external, 'video-metadata-cache.db'), '')
+    await symlink(path.join(external, 'video-metadata-cache.db'), path.join(userDataDir, 'video-metadata-cache.db'))
+    const launched = await launchApp(userDataDir)
+    electronApp = launched.electronApp
+    const size = await launched.page.evaluate(async () => {
+      const cache = window.ftElectron.videoMetadataCache
+      const metadata = { videoId: 'linked00001', title: 'Linked', description: 'Linked cache', thumbnailUrl: '', observedAt: Date.now() }
+      await cache.update(metadata)
+      // Clearing removes the link's target; the refilled cache stays beside it.
+      await cache.clear()
+      await cache.update(metadata)
+      return cache.getSize()
+    })
+    expect(existsSync(path.join(external, 'video-metadata-cache.sqlite'))).toBe(true)
+    expect(existsSync(path.join(userDataDir, 'video-metadata-cache.sqlite'))).toBe(false)
+    expect(size).toBeGreaterThan(0)
+  } finally {
+    await electronApp?.close()
+    await rm(userDataDir, { recursive: true, force: true })
+    await rm(external, { recursive: true, force: true })
   }
 })

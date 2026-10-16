@@ -10,6 +10,7 @@ import {
   openNewWindowFromTabBar,
   sel,
   waitForAppReady,
+  readDatastore,
 } from '../../helpers/app.mjs'
 
 async function readSavedThemes (userDataDir) {
@@ -1570,7 +1571,7 @@ test.describe('tab layout shortcut', () => {
     })
 
     await expect.poll(async () => {
-      const contents = await readFile(path.join(appHandle.userDataDir, 'settings.db'), 'utf8')
+      const contents = readDatastore(appHandle.userDataDir, 'settings')
       return Object.fromEntries(contents.trim().split('\n')
         .map(line => JSON.parse(line))
         .map(record => [record._id, record.value]))

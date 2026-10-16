@@ -46,6 +46,7 @@ updates:
       - dependency-name: "@lezer/markdown"
       - dependency-name: "@material/material-color-utilities"
       - dependency-name: "@playwright/test"
+      - dependency-name: "@sqlite.org/sqlite-wasm"
       - dependency-name: "@vot.js/core"
       - dependency-name: "copy-webpack-plugin"
       - dependency-name: "dbus-native"

@@ -1,7 +1,4 @@
-import { readFile } from 'node:fs/promises'
-import path from 'node:path'
-
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { test, expect, goTo, readDatastore } from '../../helpers/app.mjs'
 
 test.use({
   seed: {
@@ -289,8 +286,8 @@ test.describe('subscribed channels', () => {
     await dropdown.getByRole('checkbox', { name: 'Profile 1', exact: true }).click()
 
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
-      const records = contents.trim().split('\n').map((line) => JSON.parse(line))
+      const contents = readDatastore(app.userDataDir, 'profiles')
+      const records = contents.trim().split('\n').filter(Boolean).map((line) => JSON.parse(line))
       const latestProfiles = new Map(records.map(record => [record._id, record]))
       return ['allChannels', 'profile-0', 'profile-1'].map(profileId => {
         const subscription = latestProfiles.get(profileId).subscriptions
@@ -332,8 +329,8 @@ test.describe('subscribed channels', () => {
     await expect(page.getByText('1 channel(s) found.')).toBeVisible()
 
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
-      const records = contents.trim().split('\n').map((line) => JSON.parse(line))
+      const contents = readDatastore(app.userDataDir, 'profiles')
+      const records = contents.trim().split('\n').filter(Boolean).map((line) => JSON.parse(line))
       const main = records.filter((record) => record._id === 'allChannels').at(-1)
       return main.subscriptions.map((channel) => channel.name)
     }).toEqual(['Beta Channel'])

@@ -43,7 +43,7 @@ import { MATERIAL_SYSTEM_SEED, MATERIAL_THEME_VALUES, materialColorScheme, mater
 import { resolveSystemTheme, resolveSystemThemeSettings } from '../appearanceSettings'
 import { applySyncServerUserAgent } from '../syncServerUserAgent'
 import * as baseHandlers from '../datastores/handlers/base'
-import { liveReminders } from '../datastores'
+import { liveReminders, onLegacyDatastoreChanges, onLegacyDatastoreImported } from '../datastores'
 import { extractExpiryTimestamp, ImageCache } from './ImageCache'
 import { constants as fsConstants, existsSync } from 'fs'
 import { createReadStream } from 'node:fs'
@@ -136,6 +136,52 @@ Options:
 
 function runApp() {
   let deferredDatastoresStarted = false
+
+  const libraryNotices = new Set()
+  let libraryNoticeQueue = null
+  /**
+   * Datastores open one after another, so each notice shows once per start
+   * for all of them, after the first window had a moment to appear. Notices
+   * show one after another.
+   * @param {string} key
+   * @param {(t: Awaited<ReturnType<typeof createMainTranslator>>) => { title: string, message: string, detail: string }} text
+   */
+  function showLibraryNotice(key, text) {
+    // E2E profiles start from seeded NeDB files, so every test would import
+    // them. Only tests that opt in see these notices.
+    if (process.env.OPENTUBEX_E2E_USER_DATA_DIR && process.env.OPENTUBEX_E2E_LIBRARY_NOTICES !== 'true') return
+    if (libraryNotices.has(key)) return
+    libraryNotices.add(key)
+    libraryNoticeQueue ??= app.whenReady().then(() => new Promise(resolve => setTimeout(resolve, 2000)))
+    libraryNoticeQueue = libraryNoticeQueue
+      .then(async () => {
+        const t = await createMainTranslator()
+        const window = BrowserWindow.getFocusedWindow() ?? BrowserWindow.getAllWindows()[0]
+        const options = {
+          type: 'info',
+          ...text(t),
+          buttons: [t('Ok')],
+          noLink: true
+        }
+        await (window ? dialog.showMessageBox(window, options) : dialog.showMessageBox(options))
+      })
+      .catch(error => console.error(error))
+  }
+
+  // Registered synchronously, before any datastore loading started above can finish.
+  onLegacyDatastoreChanges(change => {
+    console.warn('Applied library changes made by an older version', change)
+    showLibraryNotice('olderVersionChanges', t => ({
+      title: t('Older Version Changes.Title'),
+      message: t('Older Version Changes.Message'),
+      detail: t('Older Version Changes.Detail'),
+    }))
+  })
+  onLegacyDatastoreImported(() => showLibraryNotice('libraryFormatChanged', t => ({
+    title: t('Library Format Changed.Title'),
+    message: t('Library Format Changed.Message'),
+    detail: t('Library Format Changed.Detail'),
+  })))
   /** @type {Set<string>} */
   const ALLOWED_RENDERER_FILES = process.env.NODE_ENV === 'production'
     // __FREETUBE_ALLOWED_PATHS__ is replaced by the injectAllowedPaths.mjs script

@@ -192,6 +192,7 @@ dependencies {
     implementation "io.github.junkfood02.youtubedl-android:library:0.18.1"
     implementation "io.github.junkfood02.youtubedl-android:ffmpeg:0.18.1"
     implementation "androidx.documentfile:documentfile:1.1.0"
+    implementation "androidx.sqlite:sqlite-bundled:2.7.1"
     testImplementation "org.json:json:20260814"
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"

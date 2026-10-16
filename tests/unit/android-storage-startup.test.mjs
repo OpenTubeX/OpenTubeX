@@ -1,28 +1,18 @@
 import assert from 'node:assert/strict'
-import { registerHooks } from 'node:module'
 import test from 'node:test'
 
 const pending = new Map()
 globalThis.__androidStoragePending = pending
-const hooks = registerHooks({
-  resolve(specifier, context, nextResolve) {
-    if (specifier === '@seald-io/nedb' && context.parentURL?.endsWith('/datastores/index.js')) {
-      return {
-        shortCircuit: true,
-        url: `data:text/javascript,${encodeURIComponent(`export default class {
-          constructor({ filename }) {
-            this.autoloadPromise = new Promise((resolve, reject) => {
-              globalThis.__androidStoragePending.set(filename, { resolve, reject })
-            })
-          }
-        }`)}`,
-      }
-    }
-    return nextResolve(specifier, context)
-  },
+// index.js loads the platform's datastore factory with require().
+globalThis.require = () => ({
+  createBrowserDatastore: name => ({
+    autoloadPromise: new Promise((resolve, reject) => {
+      pending.set(`${name}.db`, { resolve, reject })
+    })
+  })
 })
 const { waitForDatastores } = await import('../../src/datastores/index.js')
-hooks.deregister()
+delete globalThis.require
 
 test('Android startup waits for every datastore and blocks startup after a migration failure', async () => {
   const failure = new Error('Device storage full')

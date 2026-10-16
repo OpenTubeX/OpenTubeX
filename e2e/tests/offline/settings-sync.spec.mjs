@@ -1,6 +1,4 @@
 import { createHash } from 'node:crypto'
-import { readFile } from 'node:fs/promises'
-import path from 'node:path'
 
 import {
   test,
@@ -9,7 +7,8 @@ import {
   goToSettingsSection,
   latestSettings,
   openNewWindowFromTabBar,
-  waitForAppReady
+  waitForAppReady,
+  readDatastore,
 } from '../../helpers/app.mjs'
 
 test.describe('settings', () => {
@@ -644,7 +643,7 @@ test.describe('sync settings', () => {
     await expect(syncSection.getByLabel('Enable Sync')).not.toBeChecked()
     await expect.poll(async () => {
       const settings = latestSettings(
-        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+        readDatastore(app.userDataDir, 'settings')
       )
       return settings.syncServerToken
     }).toBe('')
@@ -753,7 +752,7 @@ test.describe('sync settings', () => {
     try {
       await postLoginSyncRequested
       const settings = latestSettings(
-        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+        readDatastore(app.userDataDir, 'settings')
       )
       expect(settings.syncServerSnapshot).toBe('{"subscriptions":[]}')
       expect(settings.syncServerLastSyncAt).toBe(1234)

@@ -2116,3 +2116,11 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Loo töölauale otsetee
+Older Version Changes:
+  Title: "Muudatused vanemast versioonist"
+  Message: "OpenTubeXi vanemas versioonis tehtud muudatused rakendati sinu kogule."
+  Detail: "Kui üksust muudeti mõlemas versioonis, säilitati vanema versiooni muudatus. Sinu varasema kogu varukoopia on sinu profiilikaustas."
+Library Format Changed:
+  Title: "Kogu viidi uude vormingusse"
+  Message: "Sinu kogu kasutab nüüd uut salvestusvormingut."
+  Detail: "OpenTubeXi vanemad versioonid saavad sinu kogu endiselt avada, kuid näitavad seda sellisena, nagu see oli enne seda uuendust. Vanemas versioonis tehtud muudatused lisatakse, kui naased selle versiooni juurde."

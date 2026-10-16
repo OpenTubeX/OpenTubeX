@@ -1,6 +1,5 @@
-import { readFile, rm } from 'node:fs/promises'
-import path from 'node:path'
-import { test, expect, createUserDataDir, launchApp, abortUnmockedRequest, goTo, goToSettingsSection, latestSettings, openNewWindowFromTabBar, waitForAppReady } from '../../helpers/app.mjs'
+import { rm } from 'node:fs/promises'
+import { test, expect, createUserDataDir, launchApp, abortUnmockedRequest, goTo, goToSettingsSection, latestSettings, openNewWindowFromTabBar, waitForAppReady, readDatastore } from '../../helpers/app.mjs'
 import { encryptSyncDocument, decryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
 import { encryptSyncServerDeviceInfo } from '../../../src/renderer/helpers/sync-server-sessions.js'
 
@@ -352,7 +351,7 @@ for (const iconPack of ['material', 'remix']) {
         payload: await encryptSyncDocument({ version: 1, type: 'activity', deviceName: 'Phone', changes: [{ key: 'baseTheme', value: 'light' }, { key: 'autoUpdateChannelPlaybackSpeeds', value: true }, { key: 'subscriptionChannelSettings', value: null }] }, key, salt)
       })
       wake()
-      await expect.poll(async () => latestSettings(await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')).baseTheme).toBe('light')
+      await expect.poll(async () => latestSettings(readDatastore(app.userDataDir, 'settings')).baseTheme).toBe('light')
       await expect(sync.locator('.activityList')).toContainText(/Phone changed Base theme to light/i)
       await expect.poll(() => waiting.size).toBeGreaterThan(0)
       expect(downloads.slice(baselineDownloads)).toEqual(['settings'])
