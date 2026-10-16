@@ -6,6 +6,7 @@ import { chromium, expect } from '@playwright/test'
 test('Android organizer keeps the live crop aligned when page content changes during a pull', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
+  // CDP can temporarily have no referenced Node handles while Android processes input.
   const keepAlive = setTimeout(() => {}, 120_000)
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
   const page = browser.contexts()[0].pages()[0]
@@ -30,7 +31,10 @@ test('Android organizer keeps the live crop aligned when page content changes du
         document.querySelector('.app > .routerView').prepend(fixture)
         window.scrollTo(0, 400)
       }, scale)
-      await page.waitForTimeout(300)
+      await expect.poll(() => page.evaluate(scale => {
+        const expectedWidth = Math.round(window.outerWidth * 100 / scale)
+        return Math.abs(window.innerWidth - expectedWidth)
+      }, scale), { message: `wait for the ${scale}% layout viewport before starting the pull` }).toBeLessThanOrEqual(1)
       const box = await page.locator('.capacitorPhoneTabSwitcherButton').boundingBox()
       const point = { x: box.x + box.width / 2, y: box.y + box.height / 2 }
       await touch('touchStart', point)
@@ -81,6 +85,7 @@ test('Android organizer keeps the live crop aligned when page content changes du
 test('Android organizer button morphs into the active card and remains interactive during settlement', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
+  // CDP can temporarily have no referenced Node handles while Android processes input.
   const keepAlive = setTimeout(() => {}, 120_000)
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
   const page = browser.contexts()[0].pages()[0]
@@ -89,6 +94,7 @@ test('Android organizer button morphs into the active card and remains interacti
   const tap = async selector => {
     const box = await page.locator(selector).boundingBox()
     await touch('touchStart', { x: box.x + box.width / 2, y: box.y + box.height / 2 })
+    // Model a real finger press; this is input duration, not a readiness wait.
     await page.waitForTimeout(60)
     await touch('touchEnd')
   }
