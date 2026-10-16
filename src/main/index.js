@@ -138,50 +138,48 @@ function runApp() {
   let deferredDatastoresStarted = false
 
   const libraryNotices = new Set()
-  let libraryNoticeQueue = null
+  /** @type {string[]} */
+  let pendingLibraryNotices = []
+  function sendLibraryNoticesChanged() {
+    for (const window of BrowserWindow.getAllWindows()) {
+      TabManager.getForWindow(window.id)?.bridge.send(IpcChannels.LIBRARY_NOTICES_CHANGED)
+    }
+  }
   /**
    * Datastores open one after another, so each notice shows once per start
-   * for all of them, after the first window had a moment to appear. Notices
-   * show one after another.
-   * @param {string} key
-   * @param {(t: Awaited<ReturnType<typeof createMainTranslator>>) => { title: string, message: string, detail: string }} text
+   * for all of them. Every window shows it in an app dialog until one of
+   * them dismisses it, so a reloaded or closed window doesn't lose it.
+   * @param {'olderVersionChanges' | 'libraryFormatChanged'} key
    */
-  function showLibraryNotice(key, text) {
+  function showLibraryNotice(key) {
     // E2E profiles start from seeded NeDB files, so every test would import
     // them. Only tests that opt in see these notices.
     if (process.env.OPENTUBEX_E2E_USER_DATA_DIR && process.env.OPENTUBEX_E2E_LIBRARY_NOTICES !== 'true') return
     if (libraryNotices.has(key)) return
     libraryNotices.add(key)
-    libraryNoticeQueue ??= app.whenReady().then(() => new Promise(resolve => setTimeout(resolve, 2000)))
-    libraryNoticeQueue = libraryNoticeQueue
-      .then(async () => {
-        const t = await createMainTranslator()
-        const window = BrowserWindow.getFocusedWindow() ?? BrowserWindow.getAllWindows()[0]
-        const options = {
-          type: 'info',
-          ...text(t),
-          buttons: [t('Ok')],
-          noLink: true
-        }
-        await (window ? dialog.showMessageBox(window, options) : dialog.showMessageBox(options))
-      })
-      .catch(error => console.error(error))
+    pendingLibraryNotices.push(key)
+    // Windows that haven't loaded yet get the notices once they mount.
+    sendLibraryNoticesChanged()
   }
+
+  ipcMain.handle(IpcChannels.GET_LIBRARY_NOTICES, event => {
+    if (!isOpenTubeXUrl(event.senderFrame.url) || !TabManager.getFromWebContents(event.sender)) return []
+    return pendingLibraryNotices
+  })
+
+  ipcMain.on(IpcChannels.DISMISS_LIBRARY_NOTICE, (event, key) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url) || !TabManager.getFromWebContents(event.sender)) return
+    if (!pendingLibraryNotices.includes(key)) return
+    pendingLibraryNotices = pendingLibraryNotices.filter(notice => notice !== key)
+    sendLibraryNoticesChanged()
+  })
 
   // Registered synchronously, before any datastore loading started above can finish.
   onLegacyDatastoreChanges(change => {
     console.warn('Applied library changes made by an older version', change)
-    showLibraryNotice('olderVersionChanges', t => ({
-      title: t('Older Version Changes.Title'),
-      message: t('Older Version Changes.Message'),
-      detail: t('Older Version Changes.Detail'),
-    }))
+    showLibraryNotice('olderVersionChanges')
   })
-  onLegacyDatastoreImported(() => showLibraryNotice('libraryFormatChanged', t => ({
-    title: t('Library Format Changed.Title'),
-    message: t('Library Format Changed.Message'),
-    detail: t('Library Format Changed.Detail'),
-  })))
+  onLegacyDatastoreImported(() => showLibraryNotice('libraryFormatChanged'))
   /** @type {Set<string>} */
   const ALLOWED_RENDERER_FILES = process.env.NODE_ENV === 'production'
     // __FREETUBE_ALLOWED_PATHS__ is replaced by the injectAllowedPaths.mjs script

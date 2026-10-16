@@ -88,6 +88,26 @@ export default {
       return () => ipcRenderer.removeListener(IpcChannels.WATCH_QUEUE_UPDATED, listener)
     }
   },
+  libraryNotices: {
+    /**
+     * Gets the library notices no window has dismissed yet.
+     * @returns {Promise<Array<'olderVersionChanges' | 'libraryFormatChanged'>>}
+     */
+    get: () => ipcRenderer.invoke(IpcChannels.GET_LIBRARY_NOTICES),
+    /**
+     * @param {'olderVersionChanges' | 'libraryFormatChanged'} key
+     */
+    dismiss: key => ipcRenderer.send(IpcChannels.DISMISS_LIBRARY_NOTICE, key),
+    /**
+     * @param {() => void} handler
+     * @returns {() => void}
+     */
+    onChanged: handler => {
+      const listener = () => handler()
+      ipcRenderer.on(IpcChannels.LIBRARY_NOTICES_CHANGED, listener)
+      return () => ipcRenderer.removeListener(IpcChannels.LIBRARY_NOTICES_CHANGED, listener)
+    }
+  },
   setTrayIcon: image => ipcRenderer.invoke(IpcChannels.SET_TRAY_ICON, image),
   shareLink: url => ipcRenderer.invoke(IpcChannels.SHARE_LINK, url),
   startupSplashReady: () => ipcRenderer.send(IpcChannels.STARTUP_SPLASH_READY),

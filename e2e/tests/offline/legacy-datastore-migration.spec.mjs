@@ -85,42 +85,43 @@ test('imports legacy NeDB files, leaves them for older versions and applies thei
 })
 
 test('tells users once that their library moved to a new format', async () => {
-  // Record the startup notice instead of showing a native dialog.
-  const recordNotices = (phase, _page, electronApp) => phase === 'electronConnected' && electronApp.evaluate(({ dialog }) => {
-    globalThis.__libraryNotices = []
-    globalThis.__openNotices = 0
-    dialog.showMessageBox = async (...args) => {
-      // Overlapping dialogs would record more than one open notice.
-      globalThis.__libraryNotices.push(`${args.at(-1).message} (${++globalThis.__openNotices} open)`)
-      await new Promise(resolve => setTimeout(resolve, 300))
-      globalThis.__openNotices--
-      return { response: 0 }
-    }
+  // A fresh profile confirms quitting in a native dialog: answer it with Quit.
+  const answerQuitConfirmation = (phase, _page, electronApp) => phase === 'electronConnected' && electronApp.evaluate(({ dialog }) => {
+    dialog.showMessageBox = async () => ({ response: 0 })
   })
-  async function launchAndCollect(userDataDir, expected) {
+  async function launchAndCollect(userDataDir, expected, { reloadFirst = false } = {}) {
     const { electronApp, page } = await launchApp(userDataDir, [], {
-      onPhase: recordNotices,
+      onPhase: answerQuitConfirmation,
       env: { OPENTUBEX_E2E_LIBRARY_NOTICES: 'true' },
     })
     try {
-      const notices = () => electronApp.evaluate(() => globalThis.__libraryNotices)
-      if (expected.length) {
-        // Stores open in no fixed order, so neither do their notices.
-        await expect.poll(async () => (await notices()).toSorted()).toEqual(expected.toSorted())
-      } else {
-        // Absence has no event to wait for: give the two-second notice delay time to pass.
-        await page.waitForTimeout(3500)
-        expect(await notices()).toEqual(expected)
+      const notices = page.getByRole('dialog').filter({ has: page.getByRole('button', { name: 'Ok', exact: true }) })
+      if (reloadFirst) {
+        // A notice that was never dismissed shows again after a reload.
+        await expect(notices).toHaveCount(1)
+        await page.reload()
       }
+      const seen = []
+      for (let index = 0; index < expected.length; index++) {
+        // Notices show one after the other, never stacked.
+        await expect(notices).toHaveCount(1)
+        seen.push(await notices.getByRole('heading').textContent())
+        await notices.getByRole('button', { name: 'Ok', exact: true }).click()
+      }
+      // Stores open in no fixed order, so neither do their notices.
+      expect(seen.toSorted()).toEqual(expected.toSorted())
+      // Absence has no event to wait for: give the remaining stores time to open.
+      await page.waitForTimeout(3000)
+      await expect(notices).toHaveCount(0)
     } finally {
       await electronApp.close()
     }
   }
   const migrated = await createUserDataDir({ playlists: [playlist], history })
   const fresh = await createUserDataDir({ freshProfile: true })
-  const formatNotice = 'Your library now uses a new storage format. (1 open)'
+  const formatNotice = 'Library moved to a new format'
   try {
-    await launchAndCollect(migrated, [formatNotice])
+    await launchAndCollect(migrated, [formatNotice], { reloadFirst: true })
     // Not again, and not for a new installation, which has nothing to migrate.
     await launchAndCollect(migrated, [])
     await launchAndCollect(fresh, [])
@@ -134,7 +135,7 @@ test('tells users once that their library moved to a new format', async () => {
     await older.loadDatabaseAsync()
     await older.updateAsync({ _id: 'migrated' }, { $set: { playlistName: 'Renamed in older version' } })
     await older.compactDatafileAsync()
-    await launchAndCollect(migrated, [formatNotice, 'Changes you made in an older version of OpenTubeX were applied to your library. (1 open)'])
+    await launchAndCollect(migrated, [formatNotice, 'Changes from an older version'])
   } finally {
     await rm(migrated, { recursive: true, force: true })
     await rm(fresh, { recursive: true, force: true })
