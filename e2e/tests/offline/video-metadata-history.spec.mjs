@@ -1,4 +1,5 @@
 import { once } from 'node:events'
+import { existsSync } from 'node:fs'
 import { mkdtemp, rm, symlink, writeFile } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import { tmpdir } from 'node:os'
@@ -307,11 +308,13 @@ test('stores and presents every previous metadata version', async ({ app, page }
 test('measures a linked cache after clearing and refilling it', async () => {
   const external = await mkdtemp(path.join(tmpdir(), 'opentubex-linked-cache-'))
   const userDataDir = await createUserDataDir({ settings: WATCH_PAGE_SEED })
-  await writeFile(path.join(external, 'video-metadata-cache.db'), '')
-  await symlink(path.join(external, 'video-metadata-cache.db'), path.join(userDataDir, 'video-metadata-cache.db'))
-  const { electronApp, page } = await launchApp(userDataDir)
+  let electronApp
   try {
-    const size = await page.evaluate(async () => {
+    await writeFile(path.join(external, 'video-metadata-cache.db'), '')
+    await symlink(path.join(external, 'video-metadata-cache.db'), path.join(userDataDir, 'video-metadata-cache.db'))
+    const launched = await launchApp(userDataDir)
+    electronApp = launched.electronApp
+    const size = await launched.page.evaluate(async () => {
       const cache = window.ftElectron.videoMetadataCache
       const metadata = { videoId: 'linked00001', title: 'Linked', description: 'Linked cache', thumbnailUrl: '', observedAt: Date.now() }
       await cache.update(metadata)
@@ -320,9 +323,11 @@ test('measures a linked cache after clearing and refilling it', async () => {
       await cache.update(metadata)
       return cache.getSize()
     })
+    expect(existsSync(path.join(external, 'video-metadata-cache.sqlite'))).toBe(true)
+    expect(existsSync(path.join(userDataDir, 'video-metadata-cache.sqlite'))).toBe(false)
     expect(size).toBeGreaterThan(0)
   } finally {
-    await electronApp.close()
+    await electronApp?.close()
     await rm(userDataDir, { recursive: true, force: true })
     await rm(external, { recursive: true, force: true })
   }
