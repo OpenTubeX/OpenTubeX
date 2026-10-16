@@ -18,6 +18,7 @@ function createLoad () {
     getAudioTracks: () => [],
     getTextTracks: () => { calls.push('getTextTracks'); return [] },
   }
+  const releases = []
   const context = vm.createContext({
     shortsPaused: ref(false),
     video: ref({ paused: true, duration: 30, videoWidth: 0, videoHeight: 0 }),
@@ -31,13 +32,14 @@ function createLoad () {
     suppressInitialAutoplay: false,
     props: { shortsPlayer: false, format: 'dash', captions: [{ url: 'https://example.com/en.vtt' }], chapters: [], storyboardSrc: null },
     player,
+    loadGeneration: 0,
     process: { env: { SUPPORTS_LOCAL_API: false } },
     deduplicateAudioTracks: tracks => new Set(tracks),
     nextTick,
     emit() {},
     restorePendingPlaybackRate() {},
     rememberInlinePlayerLayoutHeight() {},
-    addCaptionTrack: () => new Promise(resolve => { releaseCaption = resolve }),
+    addCaptionTrack: () => new Promise(resolve => { releaseCaption = resolve; releases.push(resolve) }),
     handleError() {},
     loadChapterThumbnails() { calls.push('loadChapterThumbnails') },
     syncShortsCaptionsEnabled() {},
@@ -45,7 +47,7 @@ function createLoad () {
     applyPendingPresentationModes() {},
   })
   const handleLoaded = vm.runInContext(`${handleLoadedSource}\nhandleLoaded`, context)
-  return { context, player, calls, start: () => handleLoaded(), releaseCaption: () => releaseCaption() }
+  return { context, player, calls, start: () => handleLoaded(), releaseCaption: () => releaseCaption(), releases }
 }
 
 test('finishes player setup once the caption tracks are in', async () => {
@@ -74,4 +76,16 @@ test('stops player setup when the player was replaced while caption tracks were 
   load.releaseCaption()
   await loading
   assert.deepEqual(load.calls, [], 'a newer player instance owns its own loaded handling')
+})
+
+test('only the latest load on the same player finishes setup', async () => {
+  const load = createLoad()
+  const first = load.start()
+  const second = load.start()
+  load.releases[0]()
+  await first
+  assert.deepEqual(load.calls, [], 'the superseded load must not restore captions or emit state')
+  load.releases[1]()
+  await second
+  assert.deepEqual(load.calls, ['loadChapterThumbnails', 'getTextTracks'])
 })

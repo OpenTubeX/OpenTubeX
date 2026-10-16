@@ -12255,8 +12255,13 @@ export default defineComponent({
      * Adds the captions and thumbnail tracks, also restores the previously selected captions track,
      * if this was triggered by a format change and the user had the captions enabled.
      */
+    // Shaka can emit loaded again on the same player (format switch) while an
+    // earlier handleLoaded still waits for its caption tracks.
+    let loadGeneration = 0
+
     async function handleLoaded() {
       const loadedPlayer = player
+      const generation = ++loadGeneration
       hasLoaded.value = true
       // Ideally we would set this in the `streaming` event handler, but for HLS this is only set to true after the loaded event fires.
       isLive.value = player.isLive()
@@ -12362,7 +12367,7 @@ export default defineComponent({
         // the player down; the rejected track promises are swallowed above.
         // destroyPlayer() clears hasLoaded before its own awaits, so this also
         // catches a teardown that has not nulled the player yet.
-        if (player !== loadedPlayer || !hasLoaded.value) {
+        if (player !== loadedPlayer || !hasLoaded.value || generation !== loadGeneration) {
           return
         }
       }
