@@ -178,6 +178,27 @@
       @click="handleMultipleTabsActionPromptAnswer"
     />
     <FtPrompt
+      v-if="libraryNotice"
+      :key="libraryNotices[0]"
+      autosize
+      :label="libraryNotice.title"
+      @click="dismissLibraryNotice"
+    >
+      <p class="libraryNoticeText">
+        <strong>{{ libraryNotice.message }}</strong>
+      </p>
+      <p class="libraryNoticeText">
+        {{ libraryNotice.detail }}
+      </p>
+      <FtFlexBox>
+        <FtButton
+          :label="t('Ok')"
+          :icon="['fas', 'check']"
+          @click="dismissLibraryNotice"
+        />
+      </FtFlexBox>
+    </FtPrompt>
+    <FtPrompt
       v-if="showAndroidExitPrompt"
       autosize
       is-first-option-destructive
@@ -1262,6 +1283,7 @@ let removeBackgroundResultsAvailableListener = null
 let removeTabsStateListener = null
 let removeReloadRequestListener = null
 let removeConfirmMultipleTabsActionListener = null
+let removeLibraryNoticesListener = null
 let removeOpenUrlListener = null
 let removeCapacitorIntegrationListeners = null
 let removeAndroidIncomingShare = null
@@ -1796,6 +1818,14 @@ onMounted(async () => {
 
     dataReady.value = true
 
+    if (process.env.IS_ELECTRON) {
+      // Prompts teleport into .app, which renders once data is ready.
+      nextTick(() => {
+        removeLibraryNoticesListener = window.ftElectron.libraryNotices.onAvailable(takeLibraryNotices)
+        takeLibraryNotices()
+      })
+    }
+
     if (isCapacitor) {
       removeAndroidSubscriptionRefreshCancelledListener =
         await addAndroidSubscriptionRefreshCancelledListener(requestSubscriptionRefreshCancellation)
@@ -1983,6 +2013,7 @@ onBeforeUnmount(() => {
   removeTabsStateListener?.()
   removeReloadRequestListener?.()
   removeConfirmMultipleTabsActionListener?.()
+  removeLibraryNoticesListener?.()
   removeOpenUrlListener?.()
   removeCapacitorIntegrationListeners?.()
   removeAndroidIncomingShare?.()
@@ -4451,6 +4482,39 @@ function getShortcutTabIds() {
 
 const multipleTabsActionPrompt = ref(null)
 const multipleTabsActionPromptCount = ref(0)
+/** @type {import('vue').Ref<Array<'olderVersionChanges' | 'libraryFormatChanged'>>} */
+const libraryNotices = ref([])
+const libraryNotice = computed(() => {
+  switch (libraryNotices.value[0]) {
+    case 'olderVersionChanges':
+      return {
+        title: t('Older Version Changes.Title'),
+        message: t('Older Version Changes.Message'),
+        detail: t('Older Version Changes.Detail'),
+      }
+    case 'libraryFormatChanged':
+      return {
+        title: t('Library Format Changed.Title'),
+        message: t('Library Format Changed.Message'),
+        detail: t('Library Format Changed.Detail'),
+      }
+    default:
+      return null
+  }
+})
+
+async function takeLibraryNotices() {
+  try {
+    libraryNotices.value.push(...await window.ftElectron.libraryNotices.take())
+  } catch (error) {
+    console.error('Failed to load library notices', error)
+  }
+}
+
+function dismissLibraryNotice() {
+  libraryNotices.value.shift()
+}
+
 const MULTIPLE_TABS_ACTION_PROMPT_VALUES = ['confirm', 'cancel', 'neverAskAgain']
 
 /** @type {((confirmed: boolean) => void) | null} */

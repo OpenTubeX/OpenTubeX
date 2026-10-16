@@ -1098,3 +1098,7 @@
   background: var(--bg-color);
   will-change: transform, clip-path;
 }
+
+.libraryNoticeText {
+  text-align: center;
+}

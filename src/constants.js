@@ -117,6 +117,8 @@ const IpcChannels = {
   TABS_OPEN_ORGANIZER: 'tabs-open-organizer',
   TABS_CONFIRM_MULTIPLE_ACTION: 'tabs-confirm-multiple-action',
   TABS_CONFIRM_MULTIPLE_ACTION_RESPONSE: 'tabs-confirm-multiple-action-response',
+  LIBRARY_NOTICES_AVAILABLE: 'library-notices-available',
+  TAKE_LIBRARY_NOTICES: 'take-library-notices',
   CONTEXT_MENU_OPEN: 'context-menu-open',
   CONTEXT_MENU_EXECUTE: 'context-menu-execute',
   RESOLVE_FAVICON: 'resolve-favicon',
