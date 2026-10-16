@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 import zipfile
 
 spec = importlib.util.spec_from_file_location(
@@ -82,6 +83,36 @@ class ApkPackagingTest(unittest.TestCase):
     def test_enforces_download_size_budget(self):
         with self.assertRaisesRegex(ValueError, "size budget"):
             apks.prepare(self.source, self.output, max_abi_mib=0.001)
+        self.assertFalse(self.output.exists())
+
+    def test_accepts_universal_apk_with_bundled_sqlite(self):
+        inspect = apks.inspect_apk
+
+        def inspect_with_sqlite(path, abi):
+            sizes = inspect(path, abi)
+            if abi == "universal":
+                # Size observed in the first nightly with bundled SQLite.
+                sizes["native"] += round(217.61 * apks.MIB) - sum(sizes.values())
+            return sizes
+
+        with patch.object(apks, "inspect_apk", side_effect=inspect_with_sqlite):
+            report = apks.prepare(self.source, self.output)
+
+        self.assertIn("217.61", report)
+        self.assertEqual(len(list(self.output.glob("*.apk"))), 5)
+
+    def test_enforces_universal_download_size_budget(self):
+        inspect = apks.inspect_apk
+
+        def inspect_oversized_universal(path, abi):
+            sizes = inspect(path, abi)
+            if abi == "universal":
+                sizes["native"] += round(220.01 * apks.MIB) - sum(sizes.values())
+            return sizes
+
+        with patch.object(apks, "inspect_apk", side_effect=inspect_oversized_universal):
+            with self.assertRaisesRegex(ValueError, "220.01 MiB exceeds the 220 MiB size budget"):
+                apks.prepare(self.source, self.output)
         self.assertFalse(self.output.exists())
 
     def test_rejects_nightly_package_in_release_upload(self):
