@@ -36,6 +36,7 @@ test('Android organizer keeps the live crop aligned when page content changes du
         return Math.abs(window.innerWidth - expectedWidth)
       }, scale), { message: `wait for the ${scale}% layout viewport before starting the pull` }).toBeLessThanOrEqual(1)
       const box = await page.locator('.capacitorPhoneTabSwitcherButton').boundingBox()
+      assert.ok(box, 'the tab organizer button must be visible before pulling')
       const point = { x: box.x + box.width / 2, y: box.y + box.height / 2 }
       await touch('touchStart', point)
       await touch('touchMove', { ...point, y: point.y + 80 })
@@ -93,6 +94,7 @@ test('Android organizer button morphs into the active card and remains interacti
   const touch = (type, point) => session.send('Input.dispatchTouchEvent', { type, touchPoints: point ? [point] : [] })
   const tap = async selector => {
     const box = await page.locator(selector).boundingBox()
+    assert.ok(box, `${selector} must be visible before tapping`)
     await touch('touchStart', { x: box.x + box.width / 2, y: box.y + box.height / 2 })
     // Model a real finger press; this is input duration, not a readiness wait.
     await page.waitForTimeout(60)
