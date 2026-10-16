@@ -1,9 +1,12 @@
 import { once } from 'node:events'
+import { mkdtemp, rm, symlink, writeFile } from 'node:fs/promises'
 import { createServer } from 'node:http'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
 
 import { DBActions, IpcChannels } from '../../../src/constants.js'
 import { activeTab, openMockedVideo } from '../../helpers/player.mjs'
-import { expect, goToSettingsSection, test, readDatastore } from '../../helpers/app.mjs'
+import { expect, goToSettingsSection, test, readDatastore, createUserDataDir, launchApp } from '../../helpers/app.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 const WATCH_PAGE_SEED = {
@@ -298,5 +301,29 @@ test('stores and presents every previous metadata version', async ({ app, page }
   } finally {
     thumbnailServer.close()
     await once(thumbnailServer, 'close')
+  }
+})
+
+test('measures a linked cache after clearing and refilling it', async () => {
+  const external = await mkdtemp(path.join(tmpdir(), 'opentubex-linked-cache-'))
+  const userDataDir = await createUserDataDir({ settings: WATCH_PAGE_SEED })
+  await writeFile(path.join(external, 'video-metadata-cache.db'), '')
+  await symlink(path.join(external, 'video-metadata-cache.db'), path.join(userDataDir, 'video-metadata-cache.db'))
+  const { electronApp, page } = await launchApp(userDataDir)
+  try {
+    const size = await page.evaluate(async () => {
+      const cache = window.ftElectron.videoMetadataCache
+      const metadata = { videoId: 'linked00001', title: 'Linked', description: 'Linked cache', thumbnailUrl: '', observedAt: Date.now() }
+      await cache.update(metadata)
+      // Clearing removes the link's target; the refilled cache stays beside it.
+      await cache.clear()
+      await cache.update(metadata)
+      return cache.getSize()
+    })
+    expect(size).toBeGreaterThan(0)
+  } finally {
+    await electronApp.close()
+    await rm(userDataDir, { recursive: true, force: true })
+    await rm(external, { recursive: true, force: true })
   }
 })

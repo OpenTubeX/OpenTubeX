@@ -1,11 +1,8 @@
 import { app } from 'electron'
 import { stat } from 'node:fs/promises'
-import { join } from 'node:path'
 
 import { videoMetadataCache } from '../datastores'
-
-// The legacy NeDB file stays until the cache is cleared.
-const CACHE_FILE_NAMES = ['video-metadata-cache.sqlite', 'video-metadata-cache.sqlite-wal', 'video-metadata-cache.sqlite-shm', 'video-metadata-cache.db']
+import { desktopDatastorePaths } from '../datastores/sqliteNode'
 const MAX_TITLE_LENGTH = 10_000
 const MAX_DESCRIPTION_LENGTH = 1_000_000
 const MAX_THUMBNAIL_DATA_URL_LENGTH = 8_000_000
@@ -168,9 +165,12 @@ export function updateVideoMetadataCache(input) {
 }
 
 export async function getVideoMetadataCacheSize() {
-  const sizes = await Promise.all(CACHE_FILE_NAMES.map(async name => {
+  // A linked legacy file keeps the cache beside its target. The legacy file
+  // itself stays until the cache is cleared.
+  const { filename, legacy } = desktopDatastorePaths(app.getPath('userData'), 'video-metadata-cache')
+  const sizes = await Promise.all([filename, `${filename}-wal`, `${filename}-shm`, legacy].map(async path => {
     try {
-      return (await stat(join(app.getPath('userData'), name))).size
+      return (await stat(path)).size
     } catch (error) {
       if (error?.code === 'ENOENT') return 0
       throw error
