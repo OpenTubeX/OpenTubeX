@@ -145,6 +145,9 @@ function runApp() {
    * @param {(t: Awaited<ReturnType<typeof createMainTranslator>>) => { title: string, message: string, detail: string }} text
    */
   function showLibraryNotice(key, text) {
+    // E2E profiles start from seeded NeDB files, so every test would import
+    // them. Only tests that opt in see these notices.
+    if (process.env.OPENTUBEX_E2E_USER_DATA_DIR && process.env.OPENTUBEX_E2E_LIBRARY_NOTICES !== 'true') return
     if (libraryNotices.has(key)) return
     libraryNotices.set(key, app.whenReady()
       .then(() => new Promise(resolve => setTimeout(resolve, 2000)))

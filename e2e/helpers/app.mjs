@@ -186,6 +186,7 @@ export async function createUserDataDir(seed = {}) {
  * @param {object} [options]
  * @param {string} [options.appRoot] repository root containing dist-e2e
  * @param {string} [options.executablePath] Electron executable to launch
+ * @param {Record<string, string>} [options.env] additional environment variables
  * @param {(phase: 'electronConnected'|'windowCreated'|'routeCommitted'|'interactive', page?: import('@playwright/test').Page, electronApp?: import('@playwright/test').ElectronApplication) => void|Promise<void>} [options.onPhase]
  * @param {number} [windowRetry] internal first-window retry count
  */
@@ -201,7 +202,8 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
     // to. Pin it so the default locale setting does not follow the host.
     LANG: 'en_GB.UTF-8',
     LANGUAGE: 'en_GB',
-    LC_ALL: 'en_GB.UTF-8'
+    LC_ALL: 'en_GB.UTF-8',
+    ...options.env,
   }
   delete env.WAYLAND_DISPLAY
   // Cursor/agent shells may set this, which makes Electron act as Node and

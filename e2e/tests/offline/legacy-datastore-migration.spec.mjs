@@ -94,7 +94,10 @@ test('tells users once that their library moved to a new format', async () => {
     }
   })
   async function launchAndCollect(userDataDir, expected) {
-    const { electronApp, page } = await launchApp(userDataDir, [], { onPhase: recordNotices })
+    const { electronApp, page } = await launchApp(userDataDir, [], {
+      onPhase: recordNotices,
+      env: { OPENTUBEX_E2E_LIBRARY_NOTICES: 'true' },
+    })
     try {
       const notices = () => electronApp.evaluate(() => globalThis.__libraryNotices)
       if (expected.length) {
