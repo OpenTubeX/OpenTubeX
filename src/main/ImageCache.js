@@ -12,6 +12,8 @@ export class ImageCache {
   }
 
   add(url, mimeType, data, expiry) {
+    // An image the origin already marked stale is not worth keeping.
+    if (!(expiry > Math.trunc(Date.now() / 1000))) return
     this._cache.set(url, { mimeType, data, expiry })
   }
 
@@ -67,10 +69,11 @@ export function extractExpiryTimestamp(headers) {
 
   if (headers.expires) {
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expires
-    // Invalid dates such as "-1" or "0" mean "already expired"; treat them
-    // like a missing header instead of producing a NaN that never expires.
+    // Unparsable dates must not produce a NaN that never expires. A date in
+    // the past (including "-1" and "0", which V8 parses as years 2001 and
+    // 2000) is returned as is so the cache skips the already stale image.
     const expires = Date.parse(headers.expires)
-    if (Number.isFinite(expires) && expires > Date.now()) {
+    if (Number.isFinite(expires)) {
       return Math.trunc(expires / 1000)
     }
   }
