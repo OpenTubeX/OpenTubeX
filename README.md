@@ -54,8 +54,21 @@ endorsed by, maintained by, or supported by the FreeTube project.
 </p>
 
 <hr>
-<p align="center"><a href="#screenshots">Screenshots</a> &bull; <a href="#features">Features</a> &bull; <a href="#how-does-it-work">How does it work?</a> &bull; <a href="#download-links">Download Links</a> &bull; <a href="#contributing">Contributing</a> &bull; <a href="#localization">Localization</a> &bull; <a href="#contact">Contact</a> &bull; <a href="#license">License</a></p>
-<p align="center"><a href="https://opentubex.org/">Website</a> &bull; <a href="https://opentubex.org/privacy/">Privacy</a> &bull; <a href="https://github.com/OpenTubeX/OpenTubeX/discussions">Discussions</a></p>
+<p align="center">
+  <a href="#screenshots"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/screenshots.svg" alt="Screenshots"></a>
+  <a href="#features"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/features.svg" alt="Features"></a>
+  <a href="#how-does-it-work"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/how-it-works.svg" alt="How does it work?"></a>
+  <a href="#download-links"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/download-links.svg" alt="Download Links"></a>
+  <a href="#contributing"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/contributing.svg" alt="Contributing"></a>
+  <a href="#localization"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/localization.svg" alt="Localization"></a>
+  <a href="#contact"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/contact.svg" alt="Contact"></a>
+  <a href="#license"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/license-link.svg" alt="License"></a>
+</p>
+<p align="center">
+  <a href="https://opentubex.org/"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/website.svg" alt="Website"></a>
+  <a href="https://opentubex.org/privacy/"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/privacy.svg" alt="Privacy"></a>
+  <a href="https://github.com/OpenTubeX/OpenTubeX/discussions"><img src="https://opentubex-badges.withered-flower-f0f2.workers.dev/discussions.svg" alt="Discussions"></a>
+</p>
 
 <hr>
 
