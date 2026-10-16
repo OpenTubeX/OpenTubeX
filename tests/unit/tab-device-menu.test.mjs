@@ -6,12 +6,12 @@ import vm from 'node:vm'
 const source = (await readFile(new URL('../../src/renderer/helpers/tab-device-menu.js', import.meta.url), 'utf8'))
   .replace(/^import .*\n/gm, '').replace('export function', 'function')
 
-function setup({ enabled = true, live = true, devices = [{ id: 'laptop', name: 'Laptop', platform: 'linux' }], error = null, errorVideoId = null } = {}) {
+function setup({ enabled = true, live = true, devices = [{ id: 'laptop', name: 'Laptop', platform: 'linux' }], error = null, errorVideoId = null, timestamps = {} } = {}) {
   const calls = []
   const toasts = []
   const context = vm.createContext({
     store: {
-      getters: { getSyncServerEnabled: enabled, getSyncServerLiveSupported: live, getSyncServerDevices: devices },
+      getters: { getSyncServerEnabled: enabled, getSyncServerLiveSupported: live, getSyncServerDevices: devices, getWatchTimestamp: id => timestamps[id] ?? null },
       async dispatch(action, request) {
         calls.push({ action, ...request })
         if (error && (!errorVideoId || request.videoId === errorVideoId)) throw new Error(error)
@@ -50,8 +50,8 @@ test('device menu sends every selected video with its title to the chosen device
   assert.deepEqual([...item.submenu[0].icon], ['fas', 'display'])
   await item.submenu[0].run()
   assert.deepEqual(calls, [
-    { action: 'sendSyncServerVideo', recipient: 'laptop', videoId: 'jNQXAC9IVRw', title: 'Video title' },
-    { action: 'sendSyncServerVideo', recipient: 'laptop', videoId: 'aqz-KE-bpKQ', title: 'Second video' },
+    { action: 'sendSyncServerVideo', recipient: 'laptop', videoId: 'jNQXAC9IVRw', title: 'Video title', position: 0 },
+    { action: 'sendSyncServerVideo', recipient: 'laptop', videoId: 'aqz-KE-bpKQ', title: 'Second video', position: 0 },
   ])
   assert.equal(toasts.length, 1)
   assert.ok(toasts[0].message.startsWith('Settings.Sync Settings.Video Sent'))
@@ -80,4 +80,13 @@ test('a partial bulk send reports which videos succeeded and failed and continue
   assert.ok(toasts[1].message.includes('Video title'))
   assert.ok(toasts[1].message.includes('Third video'))
   assert.ok(!toasts[1].message.includes('Second video'))
+})
+
+test('device handoff reads each tab playback position when sending, independently of synced history', async () => {
+  const timestamps = { first: 30, second: 0 }
+  const { menu, calls } = setup({ timestamps })
+  const item = menu([{ ...video, id: 'first' }, { ...video, id: 'second' }])
+  timestamps.first = 125.75
+  await item.submenu[0].run()
+  assert.deepEqual(calls.map(call => call.position), [125.75, 0])
 })

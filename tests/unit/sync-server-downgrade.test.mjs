@@ -1841,7 +1841,7 @@ test('a new live device message is delivered after an older activity response fi
     while (opened.length === 0 && Date.now() < deliveryDeadline) {
       await new Promise(resolve => setTimeout(resolve, 10))
     }
-    assert.deepEqual(opened, ['/watch/jNQXAC9IVRw?t=12'])
+    assert.deepEqual(opened, ['/watch/jNQXAC9IVRw?timestamp=12'])
     assert.equal(downloads, 2)
   } finally {
     releaseOldResponse()
@@ -2039,5 +2039,44 @@ for (const initiallyEmpty of [false, true]) {
     targetActive = false
     await f.actions.syncWithSyncServer(f.context)
     assert.equal(remote.deletedSessions[`revoked-login:${deviceId}`], undefined)
+  })
+}
+
+for (const position of [0, 125.75]) {
+  test(`received video resumes at the transferred position ${position} instead of stale history`, async () => {
+    const recipient = 'test-device'
+    const opened = []
+    let payload
+    const f = fixture({ syncServerDeviceId: recipient }, {
+      encrypted: true,
+      desktopTabs: { async create({ route }) { opened.push(route); return true } },
+      respond: url => new URL(url).pathname === '/v1/encrypted_sync/events'
+        ? [{ id: 'handoff', recipient, payload, created_at: Date.now(), expires_at: Date.now() + 60000 }]
+        : undefined,
+    })
+    payload = await privacy.encryptSyncDocument({
+      version: 1, type: 'openVideo', recipient, videoId: 'jNQXAC9IVRw', title: 'Video', position,
+      expiresAt: Date.now() + 60000,
+    }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt)
+    await f.actions.refreshSyncServerEvents(f.context)
+    assert.equal(opened.length, 1)
+
+    const watchSource = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
+    const checkTimestamp = vm.runInNewContext(`(${watchSource.slice(
+      watchSource.indexOf('    checkIfTimestamp: function () {') + '    checkIfTimestamp: '.length,
+      watchSource.indexOf('\n\n    consumeTimestamp:')
+    ).trim().replace(/,$/, '')})`)
+    const startTime = vm.runInNewContext(`(${watchSource.slice(
+      watchSource.indexOf('    startTimeSeconds: function () {') + '    startTimeSeconds: '.length,
+      watchSource.indexOf('\n\n    /**', watchSource.indexOf('    startTimeSeconds: function () {'))
+    ).trim().replace(/,$/, '')})`)
+    const watch = {
+      tabRoute: { query: Object.fromEntries(new URL(opened[0], 'https://localhost').searchParams) },
+      isLoading: false, isLive: false, musicMode: false, customShortsPlayerActive: false,
+      videoLengthSeconds: 300, watchedProgressSavingEnabled: true,
+      historyEntryExists: true, historyEntry: { watchProgress: 30 },
+    }
+    checkTimestamp.call(watch)
+    assert.equal(startTime.call(watch), Math.floor(position))
   })
 }
