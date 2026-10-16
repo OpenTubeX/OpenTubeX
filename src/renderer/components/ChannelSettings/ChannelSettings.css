@@ -124,6 +124,10 @@
   min-block-size: 0;
   overflow-y: auto;
 
+  /* Scroll anchoring can move the list away from its end when a preference
+     row is removed. clampOverlayScrollTop keeps the offset valid instead. */
+  overflow-anchor: none;
+
   /* Keep the cards' focus outlines clear of the scroll container's edges */
   padding: 2px;
 
