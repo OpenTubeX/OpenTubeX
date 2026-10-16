@@ -303,7 +303,7 @@ test('separates the content card on every channel tab', { tag: '@scale' }, async
       await expect.poll(() => page.locator('.channelContent:visible').evaluate(card => {
         const header = card.previousElementSibling.getBoundingClientRect()
         const bounds = card.getBoundingClientRect()
-        return Math.round(Math.abs(bounds.top - header.bottom))
+        return Math.round(bounds.top - header.bottom) || 0
       }), { message: `Card spacing on ${tabId} at ${width}px and ${scale}% UI scale` }).toBe(width <= 800 ? 0 : 10)
     }
   }
@@ -332,8 +332,10 @@ test('separates the content card on every channel tab', { tag: '@scale' }, async
         await page.evaluate(() => document.activeElement?.blur())
         if (interaction === 'hover') await searchToggle.hover()
         if (interaction === 'keyboard') {
-          await page.keyboard.press('Tab')
-          await searchToggle.focus()
+          await expect.poll(async () => {
+            await page.keyboard.press('Tab')
+            return searchToggle.evaluate(button => button === document.activeElement)
+          }, { message: 'Keyboard Tab reaches the channel search toggle', intervals: [0] }).toBe(true)
           await expect.poll(() => searchToggle.evaluate(button => button.matches(':focus-visible'))).toBe(true)
         }
         colors.push(await searchToggle.evaluate(async button => {
@@ -370,6 +372,22 @@ test('separates the content card on every channel tab', { tag: '@scale' }, async
   await expect.poll(() => firstHeading.evaluate(heading => {
     return Math.round(heading.getBoundingClientRect().top - document.querySelector('.channelDetails .tabs').getBoundingClientRect().bottom)
   })).toBe(20)
+})
+
+test('narrow channel errors retain internal padding', { tag: '@scale' }, async ({ app, page, uiScale }) => {
+  await page.evaluate(() => window.$store.dispatch('updateBackendFallback', false))
+  await page.route('https://invidious.test/api/v1/channels/**', route => route.fulfill({
+    status: 500, json: { error: 'Channel unavailable' }
+  }))
+  await page.reload()
+  const card = page.locator('.channelError:visible')
+  await expect(card).toBeVisible()
+  await page.evaluate(scale => window.$store.dispatch('updateUiScale', scale), uiScale)
+  await app.electronApp.evaluate(({ BrowserWindow }, scale) => {
+    BrowserWindow.getAllWindows()[0].setSize(Math.round(500 * scale / 100), Math.round(900 * scale / 100))
+  }, uiScale)
+  await expect(card).toHaveCSS('padding-top', '16px')
+  await expect(card).toHaveCSS('padding-bottom', '16px')
 })
 
 test('crossfades the active channel line at the configured animation speed', async ({ page }) => {

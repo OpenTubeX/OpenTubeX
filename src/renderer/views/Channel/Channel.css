@@ -59,8 +59,7 @@
 }
 
 @media (width <= 800px) {
-  .channelContent,
-  .channelError {
+  .channelContent {
     margin-block-start: 0;
     padding-block-start: 0;
   }

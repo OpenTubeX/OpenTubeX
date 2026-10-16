@@ -201,12 +201,15 @@ async function testMobileMiniPlayer(t, navigationOnly, { dismissalOnly = false, 
         }
         const before = await artwork.boundingBox()
         const bounds = await player.boundingBox()
+        assert.ok(before, 'Audio artwork must be visible before the fullscreen swipe')
+        assert.ok(bounds, 'The player must be visible before the fullscreen swipe')
         const point = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height * 0.3 }
         await touch('touchStart', point)
         await touch('touchMove', { ...point, y: point.y + (fullscreen ? 40 : -40) })
         await expect(player).toHaveClass(/mobileFullscreenSwiping/)
         await expect.poll(async () => {
           const after = await artwork.boundingBox()
+          assert.ok(after, 'Audio artwork must stay visible during the fullscreen swipe')
           return fullscreen ? after.y - before.y : before.y - after.y
         }).toBeGreaterThan(8)
         if (process.env.ANDROID_ARTIFACT_DIR) {

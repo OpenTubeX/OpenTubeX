@@ -1734,6 +1734,7 @@ test('audio mini-player morphs suspend visualizer painting', { tag: '@performanc
     await player.locator('video').evaluate(video => { video.loop = true; return video.play() })
     await expect.poll(() => page.evaluate(() => window.musicMorphPaints.inline)).toBeGreaterThan(0)
     const bounds = await player.boundingBox()
+    expect(bounds, 'The audio player is visible before the drag').not.toBeNull()
     const start = { x: bounds.x + bounds.width / 2, y: bounds.y + 100 }
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [start] })
     await cdp.send('Input.dispatchTouchEvent', {
