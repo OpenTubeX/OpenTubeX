@@ -87,6 +87,7 @@ const eventSyncTimers = new Map()
 let lifecycleSyncStarted = false
 let reminderSyncListenerStarted = false
 let deviceRefreshId = 0
+let syncServerEnabledChange = Promise.resolve()
 
 function isSyncServerOffline() {
   return getConnectionState() === 'offline' ||
@@ -1779,11 +1780,17 @@ const actions = {
   },
 
   async setSyncServerEnabled({ commit, dispatch }, enabled) {
-    if (!enabled) {
-      commit('setSyncServerEnabled', false, { root: true })
-      await dispatch('applySyncServerEnabled', false)
-    }
-    await dispatch('updateSyncServerEnabled', enabled, { root: true })
+    // Turning sync off and on quickly must save the last choice. The disable
+    // cleanup saves its value later than a following enable would.
+    const change = syncServerEnabledChange.then(async () => {
+      if (!enabled) {
+        commit('setSyncServerEnabled', false, { root: true })
+        await dispatch('applySyncServerEnabled', false)
+      }
+      await dispatch('updateSyncServerEnabled', enabled, { root: true })
+    })
+    syncServerEnabledChange = change.catch(() => {})
+    await change
     if (enabled) {
       await dispatch('applySyncServerEnabled', true)
     }

@@ -771,6 +771,16 @@ test('disabling sync clears recovery before a later manual sync succeeds', async
   assert.equal(f.settings.syncServerAutoSync, false)
 })
 
+test('turning sync off and on quickly keeps it enabled', async () => {
+  const f = fixture({ syncServerPrivacyMode: 'legacy', syncServerPrivacyKey: '', syncServerAutoSync: false })
+  await Promise.all([
+    f.actions.setSyncServerEnabled(f.context, false),
+    f.actions.setSyncServerEnabled(f.context, true),
+  ])
+  assert.equal(f.settings.syncServerEnabled, true)
+  assert.ok(f.requests.some(request => request.url.endsWith('/health')), 'enabling sync must contact the server')
+})
+
 for (const offline of [{ connectionState: 'offline' }, { online: false }]) {
   test(`sync skips requests while offline: ${JSON.stringify(offline)}`, async () => {
     const f = fixture({}, { encrypted: true, ...offline })
