@@ -24,7 +24,8 @@ test('an unparsable Expires header falls back to the default lifetime instead of
 
 test('cleanup drops entries whose expiry is not a number', () => {
   const cache = new ImageCache()
-  cache.add('https://example.com/a', 'image/png', Buffer.alloc(1), NaN)
+  // add() refuses such entries now; seed one directly to exercise the sweep.
+  cache._cache.set('https://example.com/a', { mimeType: 'image/png', data: Buffer.alloc(1), expiry: NaN })
   cache.add('https://example.com/b', 'image/png', Buffer.alloc(1), now + 1000)
   cache._cleanup()
   assert.equal(cache.has('https://example.com/a'), false)

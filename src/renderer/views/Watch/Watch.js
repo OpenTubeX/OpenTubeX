@@ -558,7 +558,7 @@ export default defineComponent({
       /** @type {Record<string, number>} */
       pendingWatchTimeByDate: {},
       historyLastTouchedAt: 0,
-      /** @type {string|null} video whose watched mark is still being written */
+      /** @type {Set<string>} videos whose watched mark is still being written */
       watchedMarkPendingVideoIds: new Set(),
     }
   },
