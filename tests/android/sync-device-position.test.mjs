@@ -132,6 +132,21 @@ test('Android sends live tab progress and receives it ahead of stale history', {
     const resumed = await preparePlayer()
     await expect.poll(() => resumed.evaluate(element => Math.floor(element.currentTime))).toBe(4)
     await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getActiveTab.route.query.timestamp)).toBeUndefined()
+    // Reuse this tab for a new video whose player has not loaded yet.
+    const previousPayload = sent.payload
+    await page.evaluate(() => { location.hash = '#/watch/aqz-KE-bpKQ' })
+    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getActiveTab.route.path)).toBe('/watch/aqz-KE-bpKQ')
+    await page.evaluate(() => {
+      document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.settings.syncServerDeviceId = 'phone'
+    })
+    await page.getByRole('button', { name: /^Tab Organizer:/ }).click()
+    await page.getByRole('tablist', { name: 'Tab Organizer', exact: true }).getByRole('tab', { selected: true }).click({ button: 'right' })
+    await page.getByRole('menuitem', { name: 'Open on another device', exact: true }).click()
+    await page.getByRole('menuitem', { name: 'Test laptop', exact: true }).click()
+    await expect.poll(() => sent.payload !== previousPayload).toBe(true)
+    const nextVideo = await decryptSyncDocument(sent.payload, key)
+    assert.equal(nextVideo.videoId, 'aqz-KE-bpKQ')
+    assert.equal(nextVideo.position, 0)
   } finally {
     if (saved) {
       const organizer = page.locator('#capacitor-phone-tab-dialog')

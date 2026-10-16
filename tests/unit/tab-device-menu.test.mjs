@@ -90,3 +90,55 @@ test('device handoff reads each tab playback position when sending, independentl
   await item.submenu[0].run()
   assert.deepEqual(calls.map(call => call.position), [125.75, 0])
 })
+
+for (const sameVideo of [false, true]) {
+  test(`sending during ${sameVideo ? 'a reload keeps its position' : 'same-tab navigation drops the previous video position'}`, async () => {
+    const watchSource = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
+    const start = watchSource.indexOf('    async reloadView(')
+    const end = watchSource.indexOf('\n    getPendingVideoTitle:', start)
+    const reload = vm.runInNewContext(`({ ${watchSource.slice(start, end)} }).reloadView`)
+    const timestamps = { first: 125 }
+    const { menu, calls } = setup({ timestamps })
+    const nextId = sameVideo ? 'jNQXAC9IVRw' : 'aqz-KE-bpKQ'
+    let release
+    const routeChange = new Promise(resolve => { release = resolve })
+    const watch = {
+      tabId: 'first', videoId: 'jNQXAC9IVRw', videoLoadGeneration: 0,
+      tabRoute: { params: { id: nextId } },
+      saveShortsPlaybackPosition() {}, handleRouteChange: () => routeChange,
+      isCurrentVideoLoad: () => false,
+      $store: { commit(action, { tabId, value }) {
+        assert.equal(action, 'setCurrentWatchTimestamp')
+        timestamps[tabId] = value
+      } },
+    }
+    const loading = reload.call(watch)
+    try {
+      await menu([{ id: 'first', route: { fullPath: `/watch/${nextId}` } }]).submenu[0].run()
+      assert.equal(calls[0].position, sameVideo ? 125 : 0)
+    } finally {
+      release()
+      await loading
+    }
+  })
+}
+
+test('late time updates from the outgoing video cannot restore its handoff position', async () => {
+  const watchSource = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
+  const start = watchSource.indexOf('    handleTimeUpdate: function (')
+  const end = watchSource.indexOf('\n    addToHistory:', start)
+  const update = vm.runInNewContext(`({ ${watchSource.slice(start, end)} }).handleTimeUpdate`, {
+    getShortsCompletionState: () => ({}),
+  })
+  const timestamps = {}
+  const { menu, calls } = setup({ timestamps })
+  const watch = {
+    tabId: 'first', videoId: 'jNQXAC9IVRw', tabRoute: { params: { id: 'aqz-KE-bpKQ' } },
+    sabrErrorRecoveryLastSeconds: null, currentTime: 125, rememberHistory: false,
+    updateCurrentTime() {}, updateCurrentChapter() {},
+    $store: { commit(_action, { tabId, value }) { timestamps[tabId] = value } },
+  }
+  update.call(watch, 126)
+  await menu([{ id: 'first', route: { fullPath: '/watch/aqz-KE-bpKQ' } }]).submenu[0].run()
+  assert.equal(calls[0].position, 0)
+})
