@@ -319,3 +319,17 @@ test('cancelling Android sync while permission is pending prevents the native re
   await nextEventLoopTurn()
   assert.equal(requests.length, 0)
 })
+
+test('watch history paging terminates when the advertised page size is unusable', async () => {
+  const requests = []
+  const pages = [[{ video: { id: 'a' } }, { video: { id: 'b' } }], []]
+  const client = await loadClient({ IS_ELECTRON: true }, '0.36.0', requests, null, async () => {
+    if (requests.length > 10) throw new Error('watch history paging never terminated')
+    return new Response(JSON.stringify(pages.shift() ?? []))
+  })
+  client.getServerInfo = async () => ({ capabilities: { history_page_size: 0 } })
+  const history = await client.getWatchHistory()
+  assert.equal(history.length, 2)
+  assert.ok(!requests.some(request => request.url.includes('page_size=0')))
+  assert.ok(requests.length <= 2, `expected at most two pages, sent ${requests.length}`)
+})

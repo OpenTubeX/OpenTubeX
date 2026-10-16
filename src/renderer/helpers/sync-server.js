@@ -520,10 +520,10 @@ export class SyncServerClient {
   async getWatchHistory() {
     const history = []
     const capabilities = await this.getCapabilities()
-    const pageSize = Number.isInteger(capabilities.history_page_size)
-      ? capabilities.history_page_size
-      : LEGACY_HISTORY_PAGE_SIZE
-    const pageSizeQuery = capabilities.history_page_size ? `&page_size=${pageSize}` : ''
+    const advertisedPageSize = capabilities.history_page_size
+    const hasUsablePageSize = Number.isInteger(advertisedPageSize) && advertisedPageSize > 0
+    const pageSize = hasUsablePageSize ? advertisedPageSize : LEGACY_HISTORY_PAGE_SIZE
+    const pageSizeQuery = hasUsablePageSize ? `&page_size=${pageSize}` : ''
 
     for (let page = 1; ; page++) {
       let entries
@@ -536,7 +536,9 @@ export class SyncServerClient {
         throw error
       }
       history.push(...entries)
-      if (entries.length < pageSize) {
+      // An empty page ends paging even if the server ignored the requested
+      // size, so a misreported capability cannot keep this loop running.
+      if (entries.length === 0 || entries.length < pageSize) {
         return history
       }
     }
