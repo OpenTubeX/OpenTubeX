@@ -4915,6 +4915,8 @@ export default defineComponent({
         addSeekBar: seekingIsPossible.value,
         controlPanelElements: controlPanelElements,
         bigButtons: getBigButtons(displayVideoPlayButton.value, mobile),
+        // Mobile audio artwork uses the same tap-to-toggle controls as video.
+        showUIAlwaysOnAudioOnly: !mobile,
         topControlPanelElements: [],
         overflowMenuButtons: [],
         contextMenuElements: contextMenuElements.value,
