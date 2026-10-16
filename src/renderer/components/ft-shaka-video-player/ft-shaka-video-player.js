@@ -12256,6 +12256,7 @@ export default defineComponent({
      * if this was triggered by a format change and the user had the captions enabled.
      */
     async function handleLoaded() {
+      const loadedPlayer = player
       hasLoaded.value = true
       // Ideally we would set this in the `streaming` event handler, but for HLS this is only set to true after the loaded event fires.
       isLive.value = player.isLive()
@@ -12357,9 +12358,11 @@ export default defineComponent({
 
         await Promise.all(promises)
 
-        // Switching videos while caption tracks were still downloading
-        // destroys the player; the rejected track promises are swallowed above.
-        if (!player) {
+        // Switching videos while caption tracks were still downloading tears
+        // the player down; the rejected track promises are swallowed above.
+        // destroyPlayer() clears hasLoaded before its own awaits, so this also
+        // catches a teardown that has not nulled the player yet.
+        if (player !== loadedPlayer || !hasLoaded.value) {
           return
         }
       }
