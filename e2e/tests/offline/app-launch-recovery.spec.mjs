@@ -1,6 +1,7 @@
 import { rm } from 'node:fs/promises'
-import { test, expect, _electron as electron } from '@playwright/test'
-import { createUserDataDir, launchApp } from '../../helpers/app.mjs'
+import { _electron as electron } from '@playwright/test'
+// The shared test starts the worker's private display before these raw launches.
+import { createUserDataDir, expect, launchApp, test } from '../../helpers/app.mjs'
 
 for (const [persistent, terminatedBySignal] of [[false, false], [true, false], [false, true]]) {
   test(terminatedBySignal ? 'recovers after a timed-out process is terminated by a signal' : persistent ? 'fails after bounded first-window retries and closes every process' : 'recovers from a first-window timeout and closes the abandoned process', async () => {
