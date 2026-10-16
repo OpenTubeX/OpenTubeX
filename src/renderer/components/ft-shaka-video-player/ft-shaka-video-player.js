@@ -12356,6 +12356,12 @@ export default defineComponent({
         }
 
         await Promise.all(promises)
+
+        // Switching videos while caption tracks were still downloading
+        // destroys the player; the rejected track promises are swallowed above.
+        if (!player) {
+          return
+        }
       }
 
       loadChapterThumbnails()
