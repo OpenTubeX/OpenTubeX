@@ -15,7 +15,7 @@ overrides:
 
 minimumReleaseAgeExclude:
   - "youtubei.js"
-  - electron@43.7.6
+  - electron@43.8.0
 
 patchedDependencies:
   '@capacitor-community/screen-brightness@8.0.0': patches/@capacitor-community__screen-brightness@8.0.0.patch
