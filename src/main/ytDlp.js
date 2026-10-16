@@ -731,7 +731,9 @@ const ytDlpVersionCache = new Map()
  */
 async function getExecutableFileKey(executable) {
   const isBareName = !executable.includes('/') && !executable.includes('\\')
-  const extensions = process.platform === 'win32' ? (process.env.PATHEXT ?? '.EXE').split(';') : ['']
+  // execFile without a shell tries the exact name and, on Windows, .com/.exe;
+  // it does not consult PATHEXT.
+  const extensions = process.platform === 'win32' ? ['', '.com', '.exe'] : ['']
   const candidates = isBareName
     ? (process.env.PATH ?? '').split(delimiter).filter(Boolean)
         .flatMap(directory => extensions.map(extension => join(directory, executable + extension)))

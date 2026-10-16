@@ -19,7 +19,7 @@ function createProbe () {
     },
     execFileAsync: async (executable, args) => {
       calls.push([executable, ...args])
-      const info = files.get(executable) ?? files.get(`/usr/bin/${executable}`)
+      const info = files.get(executable) ?? files.get(`/usr/bin/${executable}`) ?? files.get(`/usr/bin/${executable}.exe`)
       if (info?.broken) throw new Error('spawn failed')
       return { stdout: `${info?.version ?? 'path-version'}\n` }
     },
@@ -66,4 +66,16 @@ test('resolves a bare executable name through PATH so the system binary is cache
   assert.equal(await getYtDlpVersion('yt-dlp'), '2026.03.03')
   assert.equal(await getYtDlpVersion('yt-dlp'), '2026.03.03')
   assert.equal(calls.length, 1, 'the PATH-resolved binary keys the cache')
+})
+
+test('finds an already suffixed Windows executable name before appending extensions', async () => {
+  const { calls, context, files, getYtDlpVersion } = createProbe()
+  context.process.platform = 'win32'
+  context.process.env.PATH = '/usr/bin'
+  files.set('/usr/bin/yt-dlp.exe', { mtimeMs: 1, size: 100, version: '2026.04.04' })
+
+  assert.equal(await getYtDlpVersion('yt-dlp.exe'), '2026.04.04')
+  assert.equal(await getYtDlpVersion('yt-dlp.exe'), '2026.04.04')
+  assert.equal(await getYtDlpVersion('yt-dlp'), '2026.04.04', 'a bare name still resolves to the .exe')
+  assert.equal(calls.length, 2, 'both spellings are cached after their first probe')
 })
