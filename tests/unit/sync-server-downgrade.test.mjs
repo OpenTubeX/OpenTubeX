@@ -2078,5 +2078,23 @@ for (const position of [0, 125.75]) {
     }
     checkTimestamp.call(watch)
     assert.equal(startTime.call(watch), Math.floor(position))
+    const consumeTimestamp = vm.runInNewContext(`(${watchSource.slice(
+      watchSource.indexOf('    consumeTimestamp: async function () {') + '    consumeTimestamp: '.length,
+      watchSource.indexOf('\n\n    handleFormatChange:')
+    ).trim().replace(/,$/, '')})`)
+    const loaded = vm.runInNewContext(`(${watchSource.slice(
+      watchSource.indexOf('    handleVideoLoaded: async function (mediaMetadata) {') + '    handleVideoLoaded: '.length,
+      watchSource.indexOf('\n\n    checkIfPlaylist:')
+    ).trim().replace(/,$/, '')})`, { process: { env: { IS_CAPACITOR: true, IS_ELECTRON: false } } })
+    Object.assign(watch, {
+      preparingVideoLoadGeneration: null, localFilePlayback: true, rememberHistory: false,
+      updateLocalPlaylistLastPlayedAtSometimes() {},
+      consumeTimestamp: () => consumeTimestamp.call(watch),
+      tabRouter: { async replace(route) { watch.tabRoute = route } },
+    })
+    await loaded.call(watch)
+    assert.equal(watch.tabRoute.query.timestamp, undefined, 'Android consumes the handoff timestamp after loading')
+    checkTimestamp.call(watch)
+    assert.equal(startTime.call(watch), 30, 'reopening the saved route uses newer watch history')
   })
 }

@@ -5145,7 +5145,7 @@ export default defineComponent({
 
         this.updateLocalPlaylistLastPlayedAtSometimes()
 
-        if (process.env.IS_ELECTRON && this.timestamp !== null) {
+        if ((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && this.timestamp !== null) {
           await this.consumeTimestamp()
         }
       }

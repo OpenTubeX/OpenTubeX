@@ -36,7 +36,7 @@ test('Android sends live tab progress and receives it ahead of stale history', {
   let sent
   let saved
   try {
-    await page.locator('.profileTrigger').waitFor()
+    await page.getByRole('button', { name: 'Quick settings', exact: true }).waitFor()
     const organizer = page.locator('#capacitor-phone-tab-dialog')
     if (await organizer.isVisible()) await organizer.getByRole('button', { name: 'Close', exact: true }).click()
     const skip = page.getByRole('button', { name: 'Skip', exact: true })
@@ -111,8 +111,8 @@ test('Android sends live tab progress and receives it ahead of stale history', {
     const video = await preparePlayer()
     await video.evaluate(element => { element.pause(); element.currentTime = 4.75 })
     await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getCurrentWatchTimestamp)).toBe(4.75)
-    await page.locator('.capacitorPhoneTabSwitcherButton').click()
-    await page.locator('.capacitorPhoneTabRow.active').dispatchEvent('contextmenu')
+    await page.getByRole('button', { name: /^Tab Organizer:/ }).click()
+    await page.getByRole('tablist', { name: 'Tab Organizer', exact: true }).getByRole('tab', { selected: true }).click({ button: 'right' })
     await page.getByRole('menuitem', { name: 'Open on another device', exact: true }).click()
     await page.getByRole('menuitem', { name: 'Test laptop', exact: true }).click()
     await expect.poll(() => !!sent).toBe(true)
@@ -131,10 +131,11 @@ test('Android sends live tab progress and receives it ahead of stale history', {
     await page.locator(`.capacitorPhoneTabTarget[data-tab-id="${received.id}"]`).click()
     const resumed = await preparePlayer()
     await expect.poll(() => resumed.evaluate(element => Math.floor(element.currentTime))).toBe(4)
+    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getActiveTab.route.query.timestamp)).toBeUndefined()
   } finally {
     if (saved) {
       const organizer = page.locator('#capacitor-phone-tab-dialog')
-      if (!await organizer.isVisible()) await page.locator('.capacitorPhoneTabSwitcherButton').click()
+      if (!await organizer.isVisible()) await page.getByRole('button', { name: /^Tab Organizer:/ }).click()
       const addedIds = await page.evaluate(ids => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getTabs
         .filter(tab => !ids.includes(tab.id)).map(tab => tab.id), saved.tabIds)
       for (const id of addedIds) {
