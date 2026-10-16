@@ -374,6 +374,11 @@ test('external media honors the hide sidebar on watch pages setting', { tag: '@s
   await expect(sideNav).not.toBeInViewport()
   await page.locator('.menuButton').click()
   await expect(sideNav).toBeInViewport()
+  // An open prompt keeps focus out of the backdrop too.
+  await page.evaluate(() => window.$store.commit('addOpenPrompt', 'backdrop-test'))
+  await expect(page.locator('.sideNavBackdrop')).toHaveAttribute('inert')
+  await page.evaluate(() => window.$store.commit('removeOpenPrompt', 'backdrop-test'))
+  await expect(page.locator('.sideNavBackdrop')).not.toHaveAttribute('inert')
   await page.locator('.sideNavBackdrop').click()
   await expect(sideNav).not.toBeInViewport()
 

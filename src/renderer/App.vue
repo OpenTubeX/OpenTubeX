@@ -49,6 +49,7 @@
         v-if="useWatchSideNavOverlay && isSideNavOpen"
         type="button"
         class="sideNavBackdrop"
+        :inert="isAnyPromptOpen"
         :aria-label="t('Close')"
         @click="closeSideNav"
       />
