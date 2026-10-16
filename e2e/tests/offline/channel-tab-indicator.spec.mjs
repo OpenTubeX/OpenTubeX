@@ -296,10 +296,12 @@ test('separates the content card on every channel tab', { tag: '@scale' }, async
             : Math.abs(button.top + button.height / 2 - select.top - select.height / 2) <= 1
         }), `View All and Sort By align or wrap within their row at ${width}px, ${scale}%`).toBe(true)
       }
+      // Empty-state cards keep 16px internal padding around their centered message.
+      const emptyState = contentSelector === '.elementList .message:visible'
       await expect.poll(() => page.locator(contentSelector).evaluate(content => {
         const tabs = document.querySelector('.channelDetails .tabs').getBoundingClientRect()
         return Math.round(content.getBoundingClientRect().top - tabs.bottom)
-      }), { message: `Balanced gap to ${tabId} content at ${width}px and ${scale}% UI scale` }).toBe(width <= 800 ? 20 : 46)
+      }), { message: `Balanced gap to ${tabId} content at ${width}px and ${scale}% UI scale` }).toBe(width <= 800 ? (emptyState ? 36 : 20) : 46)
       await expect.poll(() => page.locator('.channelContent:visible').evaluate(card => {
         const header = card.previousElementSibling.getBoundingClientRect()
         const bounds = card.getBoundingClientRect()
