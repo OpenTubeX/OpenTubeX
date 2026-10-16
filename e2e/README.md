@@ -21,6 +21,7 @@ so they work (and stay production-mode) even while `pnpm dev` is running.
 
 On a headless machine (or to avoid windows popping up) prefix with
 `xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24'`.
+Set `E2E_XVFB=1` as well to give each parallel worker its own display.
 The screen size matters: xvfb's default 640x480 puts the app into its
 mobile layout and breaks selectors.
 
@@ -154,8 +155,10 @@ E2E_USE_FIXTURES=1 pnpm run test:e2e:network
 - **Manual dispatch** → all suites by default, or an individual suite.
 
 The offline and scaled projects share up to 16 CI shards, and the performance
-project has its own shards. Each shard uses one Playwright worker and a private
-X server to avoid interference between windows.
+project has its own shards. The cap keeps a full run within GitHub's 20
+concurrent jobs. `E2E_XVFB=1` gives each Playwright worker a private Xvfb
+display, so windows cannot move each other's cursor or steal focus. With it,
+offline shards run two workers; the performance and network projects keep one.
 Isolated Chromium checks run in one separate job, so only that runner installs
 Chromium. The offline command and dispatch selection include offline and
 performance Electron tests and browser checks.
