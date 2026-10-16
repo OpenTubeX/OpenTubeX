@@ -176,19 +176,20 @@ const emit = defineEmits([
   'drag-video-end'
 ])
 
-/** @type {import('vue').ComputedRef<'grid' | 'list'>} */
+/** @type {import('vue').ComputedRef<'grid' | 'fullWidth' | 'list'>} */
 const listType = computed(() => {
   return store.getters.getListType
 })
 
-/** @type {import('vue').ComputedRef<'grid' | 'list'>} */
+/** @type {import('vue').ComputedRef<'grid' | 'fullWidth' | 'list'>} */
 const displayValue = computed(() => {
   return props.display === '' ? listType.value : props.display
 })
 
+// Full width is a single-column grid, so its items render as grid cards.
 /** @type {import('vue').ComputedRef<'grid' | 'list'>} */
 const effectiveDisplayValue = computed(() => {
-  return props.youtubeStyleShorts ? 'grid' : displayValue.value
+  return props.youtubeStyleShorts || displayValue.value !== 'list' ? 'grid' : 'list'
 })
 
 function getResultKey(result, index) {

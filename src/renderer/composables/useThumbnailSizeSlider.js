@@ -9,6 +9,12 @@ import {
 
 export const thumbnailSizeSettingKey = Symbol('thumbnailSizeSetting')
 
+/** The view type setting that pairs with each thumbnail size setting. */
+export const VIEW_TYPE_SETTINGS = {
+  thumbnailSize: 'listType',
+  playlistThumbnailSize: 'playlistViewType'
+}
+
 const visibleGrids = shallowReactive(new Map())
 
 // Some views, including YouTube-style Shorts, force a grid even when the
@@ -26,14 +32,15 @@ export function useThumbnailSizeSlider(settingKey = 'thumbnailSize') {
   onBeforeUnmount(() => query.removeEventListener('change', updatePhoneWidth))
 
   const maxThumbnailSize = computed(() => {
-    const prefersGrid = settingKey === 'thumbnailSize' && store.getters.getListType === 'grid'
+    const prefersGrid = settingKey === 'thumbnailSize' && store.getters.getListType !== 'list'
     const hasVisibleGrid = [...visibleGrids.values()].includes(settingKey)
     return phoneWidth.value && (prefersGrid || hasVisibleGrid)
       ? PHONE_THUMBNAIL_MAX_SIZE
       : MAX_THUMBNAIL_SIZE
   })
-  // A size chosen in a wider window already renders full-width on a phone.
-  // Display that endpoint without overwriting the saved desktop preference.
+  // Larger cards cannot fit two per row on a phone; the full width view type
+  // covers that layout. Display a size chosen in a wider window at the phone
+  // endpoint without overwriting the saved desktop preference.
   const thumbnailSize = computed(() => Math.min(store.state.settings[settingKey], maxThumbnailSize.value))
 
   return { thumbnailSize, maxThumbnailSize }

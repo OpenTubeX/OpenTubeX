@@ -398,6 +398,8 @@ Settings:
       Automatic: 'Аутоматски'
       Phone: 'Телефон'
       Tablet: 'Таблет'
+    Video View Type:
+      Full Width: Пуна ширина
   Context Menu Search Settings:
     Context Menu Search Settings: Претрага из контекстног менија
     Description: Изаберите претраживаче који се приказују када кликнете десним тастером на изабрани текст. Претраге се отварају у подразумеваном прегледачу.

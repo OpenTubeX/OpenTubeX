@@ -395,6 +395,8 @@ Settings:
       Automatic: 'தானியங்கி'
       Phone: 'தொலைபேசி'
       Tablet: 'கைக்கணினி'
+    Video View Type:
+      Full Width: முழு அகலம்
   Context Menu Search Settings:
     Context Menu Search Settings: சூழல் மெனுத் தேடல்
     Description: தேர்ந்தெடுத்த உரையை வலது கிளிக் செய்யும்போது தோன்ற வேண்டிய தேடுபொறிகளைத் தேர்ந்தெடுக்கவும். தேடல்கள் உங்கள் இயல்புநிலை உலாவியில் திறக்கும்.

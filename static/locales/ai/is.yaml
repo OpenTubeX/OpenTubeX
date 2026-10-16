@@ -390,6 +390,8 @@ Settings:
       Automatic: 'Sjálfvirkt'
       Phone: 'Sími'
       Tablet: 'Spjaldtölva'
+    Video View Type:
+      Full Width: Full breidd
   Context Menu Search Settings:
     Context Menu Search Settings: Leit í samhengisvalmynd
     Description: Veldu hvaða leitarvélar birtast þegar þú hægrismellir á valinn texta. Leitin opnast í sjálfgefna vafranum þínum.

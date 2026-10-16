@@ -415,6 +415,8 @@ Settings:
       Automatic: 'Automático'
       Phone: 'Celular'
       Tablet: 'Tablet'
+    Video View Type:
+      Full Width: Ancho completo
   Context Menu Search Settings:
     Context Menu Search Settings: Búsqueda del menú contextual
     Description: Elige los motores de búsqueda que aparecerán al hacer clic derecho en el texto seleccionado. Las búsquedas se abren en el navegador predeterminado.

@@ -388,6 +388,8 @@ Settings:
       Automatic: 'Automatikoa'
       Phone: 'Telefonoa'
       Tablet: 'Tableta'
+    Video View Type:
+      Full Width: Zabalera osoa
   Context Menu Search Settings:
     Context Menu Search Settings: Laster-menuko bilaketa
     Description: Aukeratu hautatutako testuan eskuineko klik egitean agertuko diren bilaketa-motorrak. Bilaketak arakatzaile lehenetsian irekiko dira.

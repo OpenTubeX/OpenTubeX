@@ -315,6 +315,10 @@
     "ri": "draggable",
     "material": "drag-indicator"
   },
+  "grip-lines": {
+    "ri": "layout-row-line",
+    "material": "view-agenda-outline-rounded"
+  },
   "hashtag": {
     "ri": "hashtag",
     "material": "tag"

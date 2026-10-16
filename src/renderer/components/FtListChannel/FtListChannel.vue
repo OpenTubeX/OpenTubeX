@@ -3,7 +3,7 @@
     class="ft-list-channel ft-list-item"
     :class="{
       list: listType === 'list',
-      grid: listType === 'grid',
+      grid: listType !== 'list',
       [appearance]: true
     }"
   >
@@ -67,7 +67,7 @@
           </span>
         </div>
         <p
-          v-if="listType !== 'grid'"
+          v-if="listType === 'list'"
           v-safer-html="description"
           class="description"
           dir="auto"

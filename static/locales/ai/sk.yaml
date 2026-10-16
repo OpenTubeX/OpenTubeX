@@ -388,6 +388,8 @@ Settings:
       Automatic: 'Automaticky'
       Phone: 'Telefón'
       Tablet: 'Tablet'
+    Video View Type:
+      Full Width: Celá šírka
   Context Menu Search Settings:
     Context Menu Search Settings: Hľadanie v kontextovej ponuke
     Description: Vyberte vyhľadávače, ktoré sa zobrazia po kliknutí pravým tlačidlom na označený text. Výsledky hľadania sa otvoria v predvolenom prehliadači.

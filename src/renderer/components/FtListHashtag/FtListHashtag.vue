@@ -3,7 +3,7 @@
     class="ft-list-hashtag ft-list-item"
     :class="{
       list: listType === 'list',
-      grid: listType === 'grid',
+      grid: listType !== 'list',
       [appearance]: true
     }"
   >

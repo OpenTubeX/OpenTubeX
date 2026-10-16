@@ -392,6 +392,8 @@ Settings:
       Automatic: 'Automaattinen'
       Phone: 'Puhelin'
       Tablet: 'Tabletti'
+    Video View Type:
+      Full Width: Koko leveys
   Context Menu Search Settings:
     Context Menu Search Settings: Pikavalikon haku
     Description: Valitse hakukoneet, jotka näkyvät, kun napsautat valittua tekstiä hiiren kakkospainikkeella. Haut avautuvat oletusselaimessasi.

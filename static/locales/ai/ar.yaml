@@ -392,6 +392,8 @@ Settings:
       Automatic: 'تلقائي'
       Phone: 'هاتف'
       Tablet: 'جهاز لوحي'
+    Video View Type:
+      Full Width: عرض كامل
   Context Menu Search Settings:
     Context Menu Search Settings: البحث في قائمة السياق
     Description: اختر محركات البحث التي تظهر عند النقر بزر الماوس الأيمن فوق النص المحدد. عمليات البحث مفتوحة في المتصفح الافتراضي الخاص بك.

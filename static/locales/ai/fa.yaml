@@ -407,6 +407,8 @@ Settings:
       Automatic: 'خودکار'
       Phone: 'تلفن'
       Tablet: 'تبلت'
+    Video View Type:
+      Full Width: تمام‌عرض
   Context Menu Search Settings:
     Context Menu Search Settings: جست‌وجوی منوی زمینه
     Description: موتورهای جست‌وجویی را انتخاب کنید که با کلیک راست روی متن انتخاب‌شده نمایش داده می‌شوند. جست‌وجوها در مرورگر پیش‌فرض شما باز می‌شوند.

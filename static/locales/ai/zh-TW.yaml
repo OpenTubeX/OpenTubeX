@@ -388,6 +388,8 @@ Settings:
       Automatic: '自動'
       Phone: '手機'
       Tablet: '平板電腦'
+    Video View Type:
+      Full Width: 全寬
   Context Menu Search Settings:
     Context Menu Search Settings: 內容選單搜尋
     Description: 選擇在已選取文字上按一下滑鼠右鍵時顯示的搜尋引擎。搜尋結果會在預設瀏覽器中開啟。

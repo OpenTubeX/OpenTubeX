@@ -388,6 +388,8 @@ Settings:
       Automatic: '自动'
       Phone: '手机'
       Tablet: '平板电脑'
+    Video View Type:
+      Full Width: 全宽
   Context Menu Search Settings:
     Context Menu Search Settings: 右键菜单搜索
     Description: 选择右键单击所选文本时显示的搜索引擎。搜索结果会在默认浏览器中打开。

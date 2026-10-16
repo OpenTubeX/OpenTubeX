@@ -388,6 +388,8 @@ Settings:
       Automatic: 'Automatikus'
       Phone: 'Telefon'
       Tablet: 'Táblagép'
+    Video View Type:
+      Full Width: Teljes szélesség
   Context Menu Search Settings:
     Context Menu Search Settings: Keresés a helyi menüből
     Description: Válassza ki, mely keresőmotorok jelenjenek meg a kijelölt szövegre jobb gombbal kattintva. A keresések az alapértelmezett böngészőben nyílnak meg.

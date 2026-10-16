@@ -410,6 +410,8 @@ Settings:
       Automatic: 'Automatisk'
       Phone: 'Telefon'
       Tablet: 'Nettbrett'
+    Video View Type:
+      Full Width: Full breidd
   Context Menu Search Settings:
     Context Menu Search Settings: Søk i høgreklikkmenyen
     Description: Vel kva søkjemotorar som skal visast når du høgreklikkar på merkt tekst. Søka blir opna i standardnettlesaren din.

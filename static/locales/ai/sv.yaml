@@ -390,6 +390,8 @@ Settings:
       Automatic: 'Automatiskt'
       Phone: 'Telefon'
       Tablet: 'Surfplatta'
+    Video View Type:
+      Full Width: Full bredd
   Context Menu Search Settings:
     Context Menu Search Settings: Sökning från snabbmenyn
     Description: Välj vilka sökmotorer som visas när du högerklickar på markerad text. Sökningar öppnas i din standardwebbläsare.

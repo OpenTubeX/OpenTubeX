@@ -388,6 +388,8 @@ Settings:
       Automatic: 'Otomatik'
       Phone: 'Telefon'
       Tablet: 'Tablet'
+    Video View Type:
+      Full Width: Tam genişlik
   Context Menu Search Settings:
     Context Menu Search Settings: Bağlam Menüsü Araması
     Description: Seçili metne sağ tıkladığınızda görünecek arama motorlarını seçin. Aramalar varsayılan tarayıcınızda açılır.

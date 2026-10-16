@@ -517,6 +517,8 @@ Settings:
       Automatic: 'Samodejno'
       Phone: 'Telefon'
       Tablet: 'Tablični računalnik'
+    Video View Type:
+      Full Width: Polna širina
   Context Menu Search Settings:
     Context Menu Search Settings: Iskanje v kontekstnem meniju
     Description: Izberite iskalnike, ki se prikažejo, ko z desno tipko miške kliknete izbrano besedilo. Iskanja se odprejo v privzetem brskalniku.

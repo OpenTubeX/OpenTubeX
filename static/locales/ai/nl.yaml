@@ -392,6 +392,8 @@ Settings:
       Automatic: 'Automatisch'
       Phone: 'Telefoon'
       Tablet: 'Tablet'
+    Video View Type:
+      Full Width: Volledige breedte
   Context Menu Search Settings:
     Context Menu Search Settings: Zoeken via contextmenu
     Description: Kies welke zoekmachines verschijnen wanneer je met de rechtermuisknop op geselecteerde tekst klikt. Zoekopdrachten worden in je standaardbrowser geopend.

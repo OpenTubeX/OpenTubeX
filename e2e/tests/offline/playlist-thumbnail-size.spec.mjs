@@ -144,7 +144,7 @@ test.describe('playlist thumbnail sizing', { tag: '@scale' }, () => {
     })
   }
 
-  test('keeps the full playlist sizing range when phones force list view', async ({ app, page, uiScale }) => {
+  test('honors every playlist view type on phones', async ({ app, page, uiScale }) => {
     await openPlaylist(page)
     await page.evaluate(async () => {
       const store = window.$store
@@ -154,12 +154,32 @@ test.describe('playlist thumbnail sizing', { tag: '@scale' }, () => {
       await store.dispatch('updatePlaylistThumbnailSize', 180)
     })
     await resize(app, page, 375, uiScale)
+    // Phones stack the playlist info above the items instead of pinning a bar.
     await expect(page.locator('.playlistPage')).toHaveClass(/\blist\b/)
+    const grid = page.locator('.playlistItemsCard .autoGrid.grid')
+    await expect(grid.locator('.ft-list-video.grid').first()).toBeVisible()
+    await expect(page.locator('.playlistItemsCard .playlistItem')).toHaveCount(0)
+    const columns = () => grid.evaluate(element => getComputedStyle(element).gridTemplateColumns.split(' ').length)
+    await expect.poll(columns).toBe(2)
+
     await page.locator('.profileTrigger').click()
     const globalSlider = page.locator('.thumbnailSizeSlider input')
     const playlistSlider = page.locator('.playlistThumbnailSizeSlider input')
-    await expect(globalSlider).toHaveAttribute('max', '110')
-    await expect(globalSlider).toHaveValue('110')
+    // Two cards per row is the largest size a phone grid can show.
+    await expect(globalSlider).toHaveAttribute('max', '100')
+    await expect(globalSlider).toHaveValue('100')
+    await expect(playlistSlider).toHaveAttribute('max', '100')
+    await expect(playlistSlider).toHaveValue('100')
+    await page.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()
+
+    await page.evaluate(() => window.$store.dispatch('updatePlaylistViewType', 'fullWidth'))
+    await expect.poll(columns).toBe(1)
+    const gridWidth = await grid.evaluate(element => element.getBoundingClientRect().width)
+    await expect.poll(() => grid.locator(':scope > *').first().evaluate(element => element.getBoundingClientRect().width)).toBeCloseTo(gridWidth, 0)
+
+    await page.evaluate(() => window.$store.dispatch('updatePlaylistViewType', 'list'))
+    await expect(page.locator('.playlistItemsCard .playlistItem').first()).toBeVisible()
+    await page.locator('.profileTrigger').click()
     await expect(playlistSlider).toHaveAttribute('max', '180')
     await expect(playlistSlider).toHaveValue('180')
     const largeWidth = await thumbnailWidth(page)
@@ -167,15 +187,12 @@ test.describe('playlist thumbnail sizing', { tag: '@scale' }, () => {
     expect(await thumbnailWidth(page)).toBeCloseTo(largeWidth, 1)
     await playlistSlider.press('Home')
     await expect.poll(() => thumbnailWidth(page)).toBeLessThan(largeWidth)
-    await expect(globalSlider).toHaveValue('60')
-    await playlistSlider.press('End')
-    await expect.poll(() => thumbnailWidth(page)).toBeCloseTo(largeWidth, 1)
     await page.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()
+
+    await page.evaluate(() => window.$store.dispatch('updatePlaylistViewType', 'grid'))
     await resize(app, page, 1440, uiScale)
     await expect(page.locator('.playlistPage')).toHaveClass(/\bgrid\b/)
-    await page.locator('.profileTrigger').click()
-    await expect(playlistSlider).toHaveValue('180')
-    await expect(globalSlider).toHaveValue('60')
+    await expect(grid.locator('.ft-list-video.grid').first()).toBeVisible()
   })
 
   test('keeps scroll offsets and scrollbar geometry valid when the content shrinks', async ({ app, page, uiScale }) => {

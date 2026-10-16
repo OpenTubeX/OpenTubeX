@@ -2,7 +2,7 @@ export const DEFAULT_THUMBNAIL_SIZE = 100
 export const MIN_THUMBNAIL_SIZE = 60
 export const MAX_THUMBNAIL_SIZE = 180
 export const THUMBNAIL_SIZE_STEP = 10
-export const PHONE_THUMBNAIL_MAX_SIZE = 110
+export const PHONE_THUMBNAIL_MAX_SIZE = DEFAULT_THUMBNAIL_SIZE
 export const PHONE_THUMBNAIL_VIEWPORT_WIDTH = 680
 
 const DEFAULT_GRID_ITEM_SIZE = 262
@@ -30,16 +30,19 @@ function getDefaultGridColumnCount(gridWidth, viewportWidth) {
  * @param {number} [gridWidth] the stable measured width
  * @param {number} [viewportWidth]
  * @param {number} [renderedWidth] the grid's current content width
+ * @param {boolean} [fullWidth] Show one card per row. Shorts keep their sized
+ * grid in wider windows, where a full-width portrait card would not fit.
  */
-export function getThumbnailGridStyles(thumbnailSize, gridWidth = 0, viewportWidth = gridWidth, renderedWidth = gridWidth) {
-  const scale = thumbnailSize / DEFAULT_THUMBNAIL_SIZE
-  const fullWidth = gridWidth > 0 && viewportWidth <= PHONE_THUMBNAIL_VIEWPORT_WIDTH &&
-    thumbnailSize > DEFAULT_THUMBNAIL_SIZE
+export function getThumbnailGridStyles(thumbnailSize, gridWidth = 0, viewportWidth = gridWidth, renderedWidth = gridWidth, fullWidth = false) {
+  // Larger cards cannot fit two per row on a phone, so a size saved in a wider
+  // window shows at the phone slider's endpoint.
+  const phone = gridWidth > 0 && viewportWidth <= PHONE_THUMBNAIL_VIEWPORT_WIDTH
+  const scale = (phone ? Math.min(thumbnailSize, PHONE_THUMBNAIL_MAX_SIZE) : thumbnailSize) / DEFAULT_THUMBNAIL_SIZE
   const widthAdjustment = renderedWidth - gridWidth
   let size = DEFAULT_GRID_ITEM_SIZE * scale
   let stretch = '0px'
 
-  if (fullWidth) {
+  if (fullWidth && gridWidth > 0) {
     size = gridWidth
     stretch = `calc(100% - ${widthAdjustment}px)`
   } else if (gridWidth > 0) {
@@ -52,7 +55,7 @@ export function getThumbnailGridStyles(thumbnailSize, gridWidth = 0, viewportWid
   return {
     '--thumbnail-grid-size': `${size}px`,
     '--thumbnail-grid-stretch': stretch,
-    '--shorts-thumbnail-grid-min-size': `${fullWidth ? gridWidth : DEFAULT_SHORTS_GRID_ITEM_MIN_SIZE * scale}px`
+    '--shorts-thumbnail-grid-min-size': `${DEFAULT_SHORTS_GRID_ITEM_MIN_SIZE * scale}px`
   }
 }
 

@@ -400,6 +400,8 @@ Settings:
       Automatic: 'Automatisk'
       Phone: 'Telefon'
       Tablet: 'Tablet'
+    Video View Type:
+      Full Width: Fuld bredde
   Context Menu Search Settings:
     Context Menu Search Settings: Søgning i genvejsmenuen
     Description: Vælg, hvilke søgemaskiner der vises, når du højreklikker på markeret tekst. Søgninger åbnes i din standardbrowser.

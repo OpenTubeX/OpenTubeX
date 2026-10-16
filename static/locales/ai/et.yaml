@@ -388,6 +388,8 @@ Settings:
       Automatic: 'Automaatne'
       Phone: 'Telefon'
       Tablet: 'Tahvelarvuti'
+    Video View Type:
+      Full Width: Täislaius
   Context Menu Search Settings:
     Context Menu Search Settings: Kontekstimenüü otsing
     Description: Valige otsingumootorid, mis kuvatakse valitud tekstil paremklõpsamisel. Otsingud avanevad vaikebrauseris.

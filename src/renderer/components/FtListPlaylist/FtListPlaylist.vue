@@ -4,7 +4,7 @@
     :class="{
       [appearance]: true,
       list: listType === 'list',
-      grid: listType === 'grid'
+      grid: listType !== 'list'
     }"
     @contextmenu="openPlaylistContextMenu"
     @keydown="handleContextMenuKeydown"

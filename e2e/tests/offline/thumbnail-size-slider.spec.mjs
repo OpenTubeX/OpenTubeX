@@ -95,7 +95,8 @@ test.describe('thumbnail size slider', () => {
 
       await page.locator('.profileTrigger').click()
       await expect(page.locator('.thumbnailSizeSlider')).toBeVisible()
-      await expect(page.locator('.thumbnailSizeSlider .input')).toHaveAttribute('max', '110')
+      // Larger cards cannot fit two per row, so Full width covers that layout.
+      await expect(page.locator('.thumbnailSizeSlider .input')).toHaveAttribute('max', '100')
       let previousWidth = 0
       for (let size = 60; size <= 100; size += 10) {
         await dragSlider(page, [size])
@@ -105,12 +106,12 @@ test.describe('thumbnail size slider', () => {
         previousWidth = currentWidth
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
       }
-      await dragSlider(page, [110])
+      await page.evaluate(() => window.$store.dispatch('updateListType', 'fullWidth'))
       await expect.poll(columns).toBe(1)
       const gridWidth = await grid.evaluate(element => element.getBoundingClientRect().width)
       await expect.poll(cardWidth).toBeCloseTo(gridWidth, 0)
 
-      await dragSlider(page, [100])
+      await page.evaluate(() => window.$store.dispatch('updateListType', 'grid'))
       await expect.poll(columns).toBe(2)
       const cards = await grid.locator(':scope > *').evaluateAll(elements => elements.slice(0, 2).map(element => {
         const { x, y, width } = element.getBoundingClientRect()
@@ -130,9 +131,9 @@ test.describe('thumbnail size slider', () => {
         await expect(slider).toHaveAttribute('max', '180')
         await dragSlider(page, [180])
         await resize(412)
-        await expect(slider).toHaveAttribute('max', '110')
-        await expect(slider).toHaveValue('110')
-        await expect.poll(cardWidth).toBeCloseTo(gridWidth, 0)
+        await expect(slider).toHaveAttribute('max', '100')
+        await expect(slider).toHaveValue('100')
+        await expect.poll(columns).toBe(2)
         await resize(1000)
         await expect(page.locator('.profileTrigger')).toHaveAttribute('aria-expanded', 'false')
         await page.locator('.profileTrigger').click()
@@ -141,13 +142,13 @@ test.describe('thumbnail size slider', () => {
         await page.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()
 
         await goToSettingsSection(page, 'theme')
-        await expect(page.getByRole('slider', { name: /^Thumbnail Size:/ })).toHaveAttribute('max', '110')
-        await expect(page.getByRole('slider', { name: /^Thumbnail Size:/ })).toHaveValue('110')
+        await expect(page.getByRole('slider', { name: /^Thumbnail Size:/ })).toHaveAttribute('max', '100')
+        await expect(page.getByRole('slider', { name: /^Thumbnail Size:/ })).toHaveValue('100')
       }
     })
   }
 
-  for (const trigger of [100, 60, 'wider viewport']) {
+  for (const trigger of ['grid view', 60, 'wider viewport']) {
     test(`clamps the bottom after changing to ${trigger}`, { tag: '@scale' }, async ({ app, page, uiScale }) => {
       const resize = width => app.electronApp.evaluate(({ BrowserWindow }, { width, uiScale }) => {
         const window = BrowserWindow.getAllWindows()[0]
@@ -187,14 +188,17 @@ test.describe('thumbnail size slider', () => {
       await goTo(page, 'subscriptions')
       await expect(page.getByText('Feed video 00')).toBeVisible()
       await page.evaluate(() => document.fonts.ready)
-      await setSize(110)
-      await expect.poll(() => page.locator('.autoGrid').evaluate(element => getComputedStyle(element).gridTemplateColumns.split(' ').length)).toBe(1)
+      if (trigger === 'grid view') await page.evaluate(() => window.$store.commit('setListType', 'fullWidth'))
+      await expect.poll(() => page.locator('.autoGrid').evaluate(element => getComputedStyle(element).gridTemplateColumns.split(' ').length))
+        .toBe(trigger === 'grid view' ? 1 : 2)
       await scrollToSettledBottom(page)
       const before = await scrollState()
       expect(before.offset).toBeGreaterThan(0)
 
       if (trigger === 'wider viewport') {
         await resize(1000)
+      } else if (trigger === 'grid view') {
+        await page.evaluate(() => window.$store.commit('setListType', 'grid'))
       } else {
         await setSize(trigger)
       }
@@ -249,6 +253,25 @@ test.describe('thumbnail size slider', () => {
       expect(Math.abs(await bottomDistance())).toBeLessThanOrEqual(2)
     })
   }
+
+  test('shows one card per row with the full width view type', { tag: '@scale' }, async ({ page, attachScreenshot }) => {
+    const appearance = await goToSettingsSection(page, 'appearance')
+    const viewType = appearance.getByRole('combobox', { name: 'Video View Type' })
+    await viewType.click()
+    await page.getByRole('option', { name: 'Full Width', exact: true }).click()
+    await expect(viewType).toHaveText('Full Width')
+    await page.locator('.settingsCloseButton').click()
+
+    await goTo(page, 'subscriptions')
+    await expect(page.getByText('Feed video 00')).toBeVisible()
+    const grid = page.locator('.autoGrid')
+    await expect.poll(() => grid.evaluate(element => getComputedStyle(element).gridTemplateColumns.split(' ').length)).toBe(1)
+    const gridWidth = await grid.evaluate(element => element.getBoundingClientRect().width)
+    const card = grid.locator(':scope > *').first()
+    await expect.poll(() => card.evaluate(element => element.getBoundingClientRect().width)).toBeCloseTo(gridWidth, 0)
+    await expect(card.locator('.ft-list-video')).toHaveClass(/\bgrid\b/)
+    await attachScreenshot('feed in full width view')
+  })
 
   test('resizes the feed without re-measuring every card', async ({ page, attachScreenshot }) => {
     await goTo(page, 'subscriptions')

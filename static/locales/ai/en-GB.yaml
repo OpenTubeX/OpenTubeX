@@ -376,6 +376,8 @@ Settings:
       Automatic: 'Automatic'
       Phone: 'Phone'
       Tablet: 'Tablet'
+    Video View Type:
+      Full Width: Full Width
   Context Menu Search Settings:
     Context Menu Search Settings: Context Menu Search
     Description: Choose which search engines appear when you right-click selected text. Searches open in your default browser.

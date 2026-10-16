@@ -166,6 +166,8 @@ Settings:
       Tablet: 'Tablet'
     Startup Behavior:
       Load landing page, keep other tabs unloaded: Wczytaj stronę startową, pozostaw inne karty niewczytane
+    Video View Type:
+      Full Width: Pełna szerokość
   Theme Settings:
     Material Accent Color: "Kolor akcentu Material"
     Material Wallpaper Colors: "Kolory tapety"

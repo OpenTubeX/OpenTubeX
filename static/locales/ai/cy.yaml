@@ -388,6 +388,8 @@ Settings:
       Automatic: 'Awtomatig'
       Phone: 'Ffôn'
       Tablet: 'Tabled'
+    Video View Type:
+      Full Width: Lled llawn
   Context Menu Search Settings:
     Context Menu Search Settings: Chwilio o'r ddewislen cyd-destun
     Description: Dewiswch pa beiriannau chwilio sy'n ymddangos pan fyddwch yn de-glicio testun a ddewiswyd. Mae chwiliadau'n agor yn eich porwr rhagosodedig.

@@ -388,6 +388,8 @@ Settings:
       Automatic: 'Automat'
       Phone: 'Telefon'
       Tablet: 'Tabletă'
+    Video View Type:
+      Full Width: Lățime completă
   Context Menu Search Settings:
     Context Menu Search Settings: Căutare din meniul contextual
     Description: Alegeți motoarele de căutare care apar când faceți clic dreapta pe textul selectat. Căutările se deschid în browserul implicit.
