@@ -72,7 +72,7 @@ test('loads a playlist with one author thumbnail', async ({ page }) => {
 
   await expect(page).toHaveURL(new RegExp(`#/playlist/${PLAYLIST_ID}`))
   await expect(page.locator('.playlistTitle')).toHaveText('Small thumbnail playlist')
-  await expect(page.locator('.playlistChannel .channelThumbnail'))
+  await expect(page.locator('.playlistChannel img.channelThumbnail'))
     .toHaveAttribute('src', PROXIED_AUTHOR_THUMBNAIL)
 })
 
