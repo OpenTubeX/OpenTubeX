@@ -262,11 +262,12 @@ function scrollToCurrentChapter(remainingAttempts = 5) {
     return
   }
 
-  const top = getCenteredChapterScrollTop(
+  const maxScrollTop = container.scrollHeight - container.clientHeight
+  let top = getCenteredChapterScrollTop(
     container.scrollTop + (currentItemRect.top - containerRect.top),
     currentItemRect.height,
     containerRect.height,
-    container.scrollHeight - container.clientHeight
+    maxScrollTop
   )
 
   if (top == null) {
@@ -276,6 +277,10 @@ function scrollToCurrentChapter(remainingAttempts = 5) {
     return
   }
 
+  // At fractional UI scales the real end can lie past the rounded maximum.
+  // Stopping short of it lets the next touch swipe latch onto the list
+  // instead of chaining to the page, so let the browser clamp to its end.
+  if (top >= maxScrollTop) top = container.scrollHeight
   restoreOverlayScrollTop(container, container.scrollTop)
   container.scrollTo({ top, behavior: 'smooth' })
 }

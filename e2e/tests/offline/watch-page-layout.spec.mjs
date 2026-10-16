@@ -104,13 +104,22 @@ test('keeps an allowed Up Next recommendation rendered through loading and filte
 })
 
 async function swipeVertically(session, locator, distance) {
-  // Touch the visible part of a list that may be taller than the viewport.
+  // The mini player appears once the page scrolls the player out of view and
+  // can cover the list. Touch a visible point of the list once it settles.
+  await locator.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+  await expect(locator.page().locator(`${activeTab} .ftVideoPlayer`)).not.toHaveClass(/scrollMiniPlayerAnimating/)
   const { x, y } = await locator.evaluate(element => {
     const bounds = element.getBoundingClientRect()
-    return {
-      x: bounds.left + bounds.width / 2,
-      y: (Math.max(bounds.top, 0) + Math.min(bounds.bottom, innerHeight)) / 2
+    const x = bounds.left + bounds.width / 2
+    const top = Math.max(bounds.top, 0)
+    const bottom = Math.min(bounds.bottom, innerHeight)
+    const center = (top + bottom) / 2
+    for (let offset = 0; offset < (bottom - top) / 2; offset++) {
+      for (const y of [center - offset, center + offset]) {
+        if (element.contains(document.elementFromPoint(x, y))) return { x, y }
+      }
     }
+    throw new Error('The list is covered')
   })
   await session.send('Input.dispatchTouchEvent', {
     type: 'touchStart', touchPoints: [{ x, y }]
@@ -126,9 +135,7 @@ async function swipeVertically(session, locator, distance) {
 }
 
 for (const chapterCount of [1, 30]) {
-  test(`touch scrolling chains from sidebar chapters to the page (${chapterCount} chapters)`, { tag: '@scale' }, async ({ app, page, uiScale }) => {
-    // https://github.com/OpenTubeX/OpenTubeX/issues/2122
-    test.fixme(uiScale === 95 && chapterCount === 30, 'Touch scrolling does not chain from a list at a fractional end offset')
+  test(`touch scrolling chains from sidebar chapters to the page (${chapterCount} chapters)`, { tag: '@scale' }, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
     await page.locator(`${activeTab} .ftVideoPlayer video`).evaluate(video => video.pause())
