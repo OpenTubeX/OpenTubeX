@@ -190,6 +190,7 @@ Feed:
   Cancel Refresh: Annuller opdatering
   Next Auto Refresh: 'Næste automatiske opdatering: {date}'
 User Playlists:
+  Reorder Hint: Træk eller brug piletasterne for at ændre rækkefølgen
   Add new videos to the top (custom order): "Tilføj nye videoer øverst (brugerdefineret rækkefølge)"
   Repair Playlists: Reparer afspilningslister
   Repair Description: Gendan manglende videooplysninger efter import af en YouTube Takeout-ZIP. Rækkefølgen i afspilningslisterne ændres ikke.

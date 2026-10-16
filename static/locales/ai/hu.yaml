@@ -186,6 +186,7 @@ Feed:
   Cancel Refresh: Frissítés megszakítása
   Next Auto Refresh: 'Következő automatikus frissítés: {date}'
 User Playlists:
+  Reorder Hint: Húzza el, vagy használja a nyílbillentyűket az átrendezéshez
   Add new videos to the top (custom order): "Új videók hozzáadása felülre (egyéni sorrend)"
   Repair Playlists: Lejátszási listák javítása
   Repair Description: Állítsa vissza a hiányzó videóadatokat egy YouTube Takeout ZIP importálása után. A listák sorrendje nem változik.

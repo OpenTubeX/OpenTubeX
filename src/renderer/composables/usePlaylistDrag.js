@@ -2,6 +2,13 @@ import { onBeforeUnmount, ref } from 'vue'
 import { handleDragAndDrop } from '../helpers/dragAndDrop'
 
 const ROW_SELECTOR = '[data-playlist-drag-item]'
+const HANDLE_SELECTOR = '.grabBar:not(.grabBarDisabled), .videoIndexArea'
+const KEYBOARD_MOVES = {
+  ArrowUp: 'move-video-up',
+  ArrowDown: 'move-video-down',
+  Home: 'move-video-to-the-top',
+  End: 'move-video-to-the-bottom'
+}
 
 /** Share touch reordering between grid cards and numbered playlist rows. */
 export function usePlaylistDrag(emit) {
@@ -13,7 +20,7 @@ export function usePlaylistDrag(emit) {
 
   function startPointerDrag(event, video) {
     if (event.pointerType === 'mouse' || !event.isPrimary || event.button !== 0 || session ||
-      !event.target.closest('.grabBar:not(.grabBarDisabled), .videoIndexArea')) return
+      !event.target.closest(HANDLE_SELECTOR)) return
 
     // Capture on the stable list, since reordering moves the source row in the DOM.
     const list = event.currentTarget.parentElement
@@ -116,6 +123,24 @@ export function usePlaylistDrag(emit) {
     nativeDrag.dragVideo(event, video)
   }
 
+  function moveWithKeyboard(event, video) {
+    const action = KEYBOARD_MOVES[event.key]
+    const handle = event.target.closest(HANDLE_SELECTOR)
+    if (!action || !handle || session || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
+    event.preventDefault()
+    event.stopPropagation()
+    // Reordering can reinsert the focused row, which drops focus. Restore it
+    // after the list patch; focusing also scrolls a moved row into view.
+    const observer = new MutationObserver(() => {
+      if (!handle.isConnected) return
+      observer.disconnect()
+      if (document.activeElement !== handle) handle.focus()
+    })
+    observer.observe(event.currentTarget.parentElement, { childList: true })
+    setTimeout(() => observer.disconnect(), 1000)
+    emit(action, video.videoId, video.playlistItemId)
+  }
+
   onBeforeUnmount(stopPointerDrag)
-  return { ...nativeDrag, dragVideo, pointerDragging, startPointerDrag }
+  return { ...nativeDrag, dragVideo, pointerDragging, startPointerDrag, moveWithKeyboard }
 }

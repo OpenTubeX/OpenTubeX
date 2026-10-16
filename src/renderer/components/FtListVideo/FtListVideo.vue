@@ -51,6 +51,11 @@
         :class="{
           grabBarDisabled: !grabBarEnabled,
         }"
+        :role="grabBarEnabled ? 'button' : null"
+        :tabindex="grabBarEnabled ? 0 : null"
+        :aria-label="grabBarEnabled ? t('User Playlists.Reorder Hint') : null"
+        :title="grabBarEnabled ? t('User Playlists.Reorder Hint') : null"
+        :aria-keyshortcuts="grabBarEnabled ? 'ArrowUp ArrowDown Home End' : null"
       >
         <FtIcon
           :icon="['fas', 'bars']"

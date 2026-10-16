@@ -186,6 +186,7 @@ Feed:
   Cancel Refresh: Utzi freskatzeari
   Next Auto Refresh: 'Hurrengo freskatze automatikoa: {date}'
 User Playlists:
+  Reorder Hint: Arrastatu edo erabili gezi-teklak berrordenatzeko
   Add new videos to the top (custom order): "Gehitu bideo berriak hasieran (ordena pertsonalizatua)"
   Repair Playlists: Konpondu erreprodukzio-zerrendak
   Repair Description: Berreskuratu falta diren bideo-datuak YouTube Takeout ZIP bat inportatu ondoren. Zerrenden ordena ez da aldatzen.

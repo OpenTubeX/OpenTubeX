@@ -145,9 +145,23 @@
         class="playlistList"
         :data="activeData"
         data-type="playlist"
+        stable-item-keys
         :search-query-text="doSearchPlaylistsWithMatchingVideos ? lowerCaseQuery : ''"
         :use-channels-hidden-preference="false"
         :hide-forbidden-titles="false"
+        :video-dragging-possible="canReorder"
+        :can-move-video-up="canReorder"
+        :can-move-video-down="canReorder"
+        :playlist-items-length="activeData.length"
+        :dragged-video="draggedPlaylist"
+        :is-video-dragging="draggedPlaylist.videoId != null"
+        @drag-video="draggedPlaylist = $event"
+        @move-dragged-video="onMoveDraggedPlaylist"
+        @drag-video-end="onDragPlaylistEnd"
+        @move-video-up="id => movePlaylist(id, index => index - 1)"
+        @move-video-down="id => movePlaylist(id, index => index + 1)"
+        @move-video-to-the-top="id => movePlaylist(id, () => 0)"
+        @move-video-to-the-bottom="id => movePlaylist(id, (index, lastIndex) => lastIndex)"
       />
       <FtAutoLoadNextPageWrapper
         v-if="showLoadMoreButton"
@@ -261,7 +275,7 @@ import { playlistRepairRecords } from '../../../playlistRepair'
 import { metadataRepairBusy, repairCookiesConfigured } from '../../helpers/historyRepair'
 import { playlistRepairState, startPlaylistRepair, cancelPlaylistRepair } from '../../helpers/playlistRepair'
 
-import { ctrlFHandler, debounce, getIconForSortPreference } from '../../helpers/utils'
+import { ctrlFHandler, debounce, getIconForSortPreference, throttle } from '../../helpers/utils'
 import { isValidPlaylistBookmark, playlistBookmarkToListData } from '../../helpers/playlist-bookmarks'
 import { useTabContext } from '../../tabs/TabContext'
 
@@ -290,6 +304,8 @@ const SORT_BY_OPTIONS = {
 
   LatestPlayedFirst: 'latest_played_first',
   EarliestPlayedFirst: 'earliest_played_first',
+
+  Custom: 'custom',
 }
 
 const SORT_BY_VALUES = Object.values(SORT_BY_OPTIONS)
@@ -313,6 +329,8 @@ const sortByNames = computed(() => {
         return t('User Playlists.Sort By.LatestPlayedFirst')
       case SORT_BY_OPTIONS.EarliestPlayedFirst:
         return t('User Playlists.Sort By.EarliestPlayedFirst')
+      case SORT_BY_OPTIONS.Custom:
+        return t('Playlist.Sort By.Custom')
       default:
         console.error(`Unknown sortBy: ${k}`)
         return k
@@ -320,7 +338,7 @@ const sortByNames = computed(() => {
   })
 })
 
-/** @type {import('vue').ComputedRef<'name_ascending' | 'name_descending' | 'latest_created_first' | 'earliest_created_first' | 'latest_updated_first' | 'earliest_updated_first' | 'latest_played_first' | 'earliest_played_first'>} */
+/** @type {import('vue').ComputedRef<'name_ascending' | 'name_descending' | 'latest_created_first' | 'earliest_created_first' | 'latest_updated_first' | 'earliest_updated_first' | 'latest_played_first' | 'earliest_played_first' | 'custom'>} */
 const sortBy = computed(() => store.getters.getUserPlaylistsSortBy)
 
 const sortByIcon = computed(() => getIconForSortPreference(sortBy.value))
@@ -342,6 +360,15 @@ const allPlaylists = computed(() => {
   if (!SORT_BY_VALUES.includes(sortBy_)) {
     console.error(`Unknown sortBy: ${sortBy_}`)
     return playlists
+  }
+
+  if (sortBy_ === SORT_BY_OPTIONS.Custom) {
+    const order = tempCustomOrder.value ?? store.getters.getUserPlaylistsCustomOrder
+    const positions = new Map(order.map((id, index) => [id, index]))
+    // Playlists missing from the saved order, such as new ones, come first.
+    return playlists.toSorted((a, b) => {
+      return (positions.get(playlistKey(a)) ?? -1) - (positions.get(playlistKey(b)) ?? -1) || b.createdAt - a.createdAt
+    })
   }
 
   const collator = cachedCollator.value
@@ -403,6 +430,67 @@ const allPlaylists = computed(() => {
     }
   })
 })
+
+/** @param {{ _id?: string, playlistId?: string }} playlist */
+function playlistKey(playlist) {
+  return playlist._id ?? playlist.playlistId
+}
+
+/** @type {import('vue').Ref<string[] | null>} Order shown while dragging, saved on drop */
+const tempCustomOrder = ref(null)
+const draggedPlaylist = ref({ videoId: null, playlistItemId: null })
+const canReorder = computed(() => sortBy.value === SORT_BY_OPTIONS.Custom && query.value === '')
+
+/**
+ * @param {string} id
+ * @param {(index: number, lastIndex: number) => number} getTargetIndex
+ */
+function movePlaylist(id, getTargetIndex) {
+  const ids = allPlaylists.value.map(playlistKey)
+  const index = ids.indexOf(id)
+  const targetIndex = getTargetIndex(index, ids.length - 1)
+  if (index === -1 || targetIndex === index || targetIndex < 0 || targetIndex >= ids.length) return
+
+  ids.splice(index, 1)
+  ids.splice(targetIndex, 0, id)
+  return store.dispatch('updateUserPlaylistsCustomOrder', ids)
+}
+
+/**
+ * @param {import('../../helpers/dragAndDrop').VideoData} target
+ * @param {import('../../helpers/dragAndDrop').VideoData} source
+ */
+function moveDraggedPlaylistTemporarily(target, source) {
+  const ids = tempCustomOrder.value?.slice() ?? allPlaylists.value.map(playlistKey)
+  const targetIndex = ids.indexOf(target.videoId)
+  const sourceIndex = ids.indexOf(source.videoId)
+  if (targetIndex === -1 || sourceIndex === -1) return
+
+  ids.splice(sourceIndex, 1)
+  ids.splice(targetIndex, 0, source.videoId)
+  tempCustomOrder.value = ids
+}
+
+// Native drags fire repeatedly while cards animate, so wait between moves.
+const moveDraggedPlaylistTemporarilyThrottled = throttle(moveDraggedPlaylistTemporarily, 100)
+
+/**
+ * @param {import('../../helpers/dragAndDrop').VideoData} target
+ * @param {import('../../helpers/dragAndDrop').VideoData} source
+ */
+function onMoveDraggedPlaylist(target, source) {
+  // Pointer drags already wait for transitions and flush their final target.
+  if (source.pointerDragging) moveDraggedPlaylistTemporarily(target, source)
+  else moveDraggedPlaylistTemporarilyThrottled(target, source)
+}
+
+async function onDragPlaylistEnd() {
+  if (tempCustomOrder.value != null) {
+    await store.dispatch('updateUserPlaylistsCustomOrder', tempCustomOrder.value)
+  }
+  tempCustomOrder.value = null
+  draggedPlaylist.value = { videoId: null, playlistItemId: null }
+}
 
 const showRepairPrompt = ref(false)
 const repairOptions = ref([])

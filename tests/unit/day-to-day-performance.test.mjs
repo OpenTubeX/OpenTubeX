@@ -45,6 +45,7 @@ function overview(store) {
     sessionStorage: { getItem: () => null, setItem() {} },
     document: { removeEventListener() {} },
     getIconForSortPreference() {},
+    throttle: callback => callback,
     isValidPlaylistBookmark: () => true, playlistBookmarkToListData: value => value,
     debounce(callback) {
       const wrapped = () => pending.add(callback)

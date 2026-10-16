@@ -186,6 +186,7 @@ Feed:
   Cancel Refresh: Zrušiť obnovenie
   Next Auto Refresh: 'Ďalšie automatické obnovenie: {date}'
 User Playlists:
+  Reorder Hint: Presuňte alebo použite klávesy so šípkami na zmenu poradia
   Add new videos to the top (custom order): "Pridávať nové videá na začiatok (vlastné poradie)"
   Repair Playlists: Opraviť playlisty
   Repair Description: Obnovte chýbajúce údaje o videách po importe ZIP archívu YouTube Takeout. Poradie v playlistoch sa nezmení.

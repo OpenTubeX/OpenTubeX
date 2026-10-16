@@ -1,7 +1,5 @@
 @use '../../scss-partials/ft-list-item';
 
-$grab-bar-padding: 1em;
-
 .thumbnailLink:hover {
   outline: 3px solid var(--side-nav-hover-color);
 }
@@ -9,35 +7,6 @@ $grab-bar-padding: 1em;
 .infoLine > .viewCount,
 .infoLine > .uploadedTime {
   vertical-align: middle;
-}
-
-.grabBar {
-  color: var(--tertiary-text-color);
-  cursor: grab;
-  text-align: center;
-  user-select: none;
-  touch-action: none;
-  -webkit-touch-callout: none;
-
-  // Space a bit from the thumbnail.
-  padding-block: $grab-bar-padding;
-
-  svg {
-    // Make icon appears more centered from default `-0.125em` from FA style
-    vertical-align: -0.15em;
-  }
-}
-
-.ft-list-video:has(.grabBar) {
-  // Only grid mode has `.grabBar`
-  // Make top & bottom padding look consistent
-  /* stylelint-disable-next-line declaration-property-value-no-unknown */
-  padding-block: 0 $grab-bar-padding;
-}
-
-.grabBar.grabBarDisabled {
-  cursor: not-allowed;
-  opacity: 0.3;
 }
 
 .draggable:not(.draggable:only-child):focus .grabBar,

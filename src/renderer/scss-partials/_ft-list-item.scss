@@ -1,6 +1,7 @@
 /* stylelint-disable no-descending-specificity */
 $thumbnail-overlay-opacity: 0.85;
 $watched-transition-duration: 0.5s;
+$grab-bar-padding: 1em;
 
 @mixin is-result {
   @at-root {
@@ -63,6 +64,28 @@ $watched-transition-duration: 0.5s;
 .channelNameText {
   min-inline-size: 0;
   overflow-wrap: anywhere;
+}
+
+.grabBar {
+  color: var(--tertiary-text-color);
+  cursor: grab;
+  text-align: center;
+  user-select: none;
+  touch-action: none;
+  -webkit-touch-callout: none;
+
+  // Space a bit from the thumbnail.
+  padding-block: $grab-bar-padding;
+
+  svg {
+    // Make icon appears more centered from default `-0.125em` from FA style
+    vertical-align: -0.15em;
+  }
+
+  &.grabBarDisabled {
+    cursor: not-allowed;
+    opacity: 0.3;
+  }
 }
 
 .ft-list-item {
@@ -459,6 +482,9 @@ $watched-transition-duration: 0.5s;
 
     .grabBar {
       grid-area: grabBar;
+      align-self: center;
+      padding-block: 0;
+      padding-inline: 4px 12px;
     }
 
     .videoThumbnail {
@@ -493,6 +519,12 @@ $watched-transition-duration: 0.5s;
     padding-block-end: 20px;
     box-sizing: border-box;
     block-size: 100%;
+
+    &:has(> .grabBar) {
+      // Make top & bottom padding look consistent
+      /* stylelint-disable-next-line declaration-property-value-no-unknown */
+      padding-block: 0 $grab-bar-padding;
+    }
 
     .info {
       grid-template-columns: minmax(0, 1fr) auto;

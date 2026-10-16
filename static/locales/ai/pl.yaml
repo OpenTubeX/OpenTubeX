@@ -68,6 +68,7 @@ Trending:
   Unsupported Backend: Popularne treści wymagają lokalnego API. Wybierz lokalne API lub włącz zapasowy backend.
 Most Popular Feed Empty: Kanał „Najpopularniejsze” tej instancji Invidious jest pusty.
 User Playlists:
+  Reorder Hint: Przeciągnij lub użyj klawiszy strzałek, aby zmienić kolejność
   Add new videos to the top (custom order): "Dodawaj nowe filmy na początku (kolejność niestandardowa)"
   Repair Playlists: Napraw playlisty
   Repair Description: Przywróć brakujące dane filmów po zaimportowaniu archiwum ZIP z YouTube Takeout. Kolejność na playlistach pozostaje bez zmian.

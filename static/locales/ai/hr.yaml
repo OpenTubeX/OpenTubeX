@@ -188,6 +188,7 @@ Feed:
   Cancel Refresh: Otkaži osvježavanje
   Next Auto Refresh: 'Sljedeće automatsko osvježavanje: {date}'
 User Playlists:
+  Reorder Hint: Povucite ili koristite tipke sa strelicama za promjenu redoslijeda
   Add new videos to the top (custom order): "Dodaj nove videozapise na vrh (prilagođeni redoslijed)"
   Repair Playlists: Popravi popise za reprodukciju
   Repair Description: Vrati nedostajuće podatke o videozapisima nakon uvoza ZIP datoteke iz usluge YouTube Takeout. Redoslijed u popisima ostaje isti.

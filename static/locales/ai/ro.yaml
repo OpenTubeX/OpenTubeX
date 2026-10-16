@@ -186,6 +186,7 @@ Feed:
   Cancel Refresh: Anulează reîmprospătarea
   Next Auto Refresh: 'Următoarea reîmprospătare automată: {date}'
 User Playlists:
+  Reorder Hint: Trageți sau folosiți tastele săgeți pentru a reordona
   Add new videos to the top (custom order): "Adaugă videoclipurile noi la început (ordine personalizată)"
   Repair Playlists: Repară listele de redare
   Repair Description: Restabilește detaliile video lipsă după importarea unui ZIP YouTube Takeout. Ordinea listelor de redare rămâne neschimbată.

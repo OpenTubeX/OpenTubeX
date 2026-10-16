@@ -403,6 +403,7 @@ User Playlists:
 
   TotalTimePlaylist: "Total time: {duration}"
 
+  Reorder Hint: Drag or use the arrow keys to reorder
   Sort By:
     NameAscending: 'A-Z'
     NameDescending: 'Z-A'

@@ -11,13 +11,14 @@
       list: layout === 'list',
       draggable: isDraggable,
       pointerDragging,
-      draggedVideo: isVideoDragging && draggedVideo.videoId === data.videoId && draggedVideo.playlistItemId === data.playlistItemId,
+      draggedVideo: isVideoDragging && draggedVideo.videoId === videoData.videoId && draggedVideo.playlistItemId === videoData.playlistItemId,
     }"
     :draggable="isDraggable && !pointerDragging"
     :data-playlist-drag-item="isDraggable ? '' : null"
-    :data-video-id="data.videoId"
-    :data-playlist-item-id="playlistItemId"
+    :data-video-id="videoData.videoId"
+    :data-playlist-item-id="videoData.playlistItemId"
     @pointerdown.capture="isDraggable && startPointerDrag($event, videoData)"
+    @keydown="isDraggable && moveWithKeyboard($event, videoData)"
     v-on="isDraggable ? draggableEventHandlers : {}"
   >
     <template
@@ -56,6 +57,7 @@
         :appearance="appearance"
         :data="displayedData"
         :search-query-text="searchQueryText"
+        :show-grab-bar="isDraggable"
       />
       <FtCommunityPost
         v-else-if="finalDataType === 'community'"
@@ -197,9 +199,11 @@ const emit = defineEmits([
 ])
 
 const inUserPlaylist = props.playlistType === 'user'
-const showGrabBar = computed(() => inUserPlaylist && props.videoDraggingPossible)
+// Playlist cards reorder with the same events, keyed by their playlist ID.
+const isPlaylistCard = (props.data.type ?? props.dataType) === 'playlist'
+const showGrabBar = computed(() => (inUserPlaylist || isPlaylistCard) && props.videoDraggingPossible)
 const isDraggable = computed(() => showGrabBar.value && (props.canMoveVideoUp || props.canMoveVideoDown))
-const { dragVideo, moveDraggedVideo, afterDrag, pointerDragging, startPointerDrag } = usePlaylistDrag(emit)
+const { dragVideo, moveDraggedVideo, afterDrag, pointerDragging, startPointerDrag, moveWithKeyboard } = usePlaylistDrag(emit)
 const draggableEventHandlers = {
   dragstart: onDragVideo,
   dragover: event => event.preventDefault(),
@@ -415,10 +419,9 @@ function onDragVideo(event) {
 /** @import { VideoData } from '../../helpers/dragAndDrop' */
 
 /** @type {VideoData} */
-const videoData = {
-  videoId: props.data.videoId,
-  playlistItemId: props.playlistItemId,
-}
+const videoData = isPlaylistCard
+  ? { videoId: props.data._id ?? props.data.playlistId, playlistItemId: props.data._id ?? props.data.playlistId }
+  : { videoId: props.data.videoId, playlistItemId: props.playlistItemId }
 
 </script>
 
