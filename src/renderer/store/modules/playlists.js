@@ -357,6 +357,7 @@ const actions = {
         const dateNow = Date.now()
         const currentTime = Date.now()
 
+        const repairs = []
         payload.forEach((playlist) => {
           let anythingUpdated = false
           // Assign generated playlist ID in case DB data corrupted
@@ -415,9 +416,13 @@ const actions = {
           })
           // Save updated playlist object
           if (anythingUpdated) {
-            DBPlaylistHandlers.upsert(playlist)
+            repairs.push(DBPlaylistHandlers.upsert(playlist))
           }
         })
+        // A failed repair write must be logged, not left as an unhandled rejection.
+        for (const result of await Promise.allSettled(repairs)) {
+          if (result.status === 'rejected') console.error(result.reason)
+        }
 
         // Names are editable and non-unique. Only the stable ID identifies a
         // built-in playlist; replacing a namesake can delete user data.
