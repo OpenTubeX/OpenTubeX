@@ -59,6 +59,12 @@
 }
 
 @media (width <= 800px) {
+  .channelContent,
+  .channelError {
+    margin-block-start: 0;
+    padding-block-start: 0;
+  }
+
   .select-container > :deep(.select) {
     flex: 1 1 200px;
     min-inline-size: 0;

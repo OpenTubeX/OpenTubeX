@@ -259,7 +259,16 @@
 }
 
 .historySearchOptions > .toggleOptions {
+  flex: 1 1 100px;
   min-inline-size: 0;
+}
+
+.historySearchOptions .toggleOptions :deep(.switch-ctn) {
+  inline-size: auto;
+}
+
+.historySearchOptions .toggleOptions :deep(.switch-label) {
+  inline-size: auto;
 }
 
 .historyFilterToggle {

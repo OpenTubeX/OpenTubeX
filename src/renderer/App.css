@@ -361,13 +361,6 @@
   margin-inline: 0;
 }
 
-/* Menu sheets may be teleported outside the app, including into the player. */
-:global(body:has(.app.capacitorPhoneLayout) .moreOptionContainer),
-:global(body:has(.app.capacitorPhoneLayout) .mobileLinkActions),
-.app.capacitorPhoneLayout :deep(.mobileSheet.dockedSheet) {
-  border-radius: 0;
-}
-
 @media (width <= 680px) {
   /* Match the phone layout's removal of the screen and header gaps. Inset
      sidebar cards and wider layouts retain their configured rounding. */
@@ -432,17 +425,17 @@
   touch-action: none;
 }
 
-.app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwiping > :is(.player, .countdownPoster)),
-.app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwipeSettling > :is(.player, .countdownPoster)) {
+.app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwiping > :is(.player, .countdownPoster, .musicAudioSurface)),
+.app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwipeSettling > :is(.player, .countdownPoster, .musicAudioSurface)) {
   translate: 0 var(--mobile-fullscreen-swipe-offset, 0);
   will-change: translate;
 }
 
-.app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwiping > :is(.player, .countdownPoster)) {
+.app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwiping > :is(.player, .countdownPoster, .musicAudioSurface)) {
   transition: none;
 }
 
-.app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwipeSettling > :is(.player, .countdownPoster)) {
+.app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwipeSettling > :is(.player, .countdownPoster, .musicAudioSurface)) {
   transition: translate 140ms cubic-bezier(0.2, 0, 0, 1);
 }
 

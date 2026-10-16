@@ -1697,3 +1697,43 @@ for (const { uiScale, size } of [
     await watch.dispose()
   })
 }
+
+test('audio mini-player morphs suspend visualizer painting', { tag: '@performance' }, async ({ app, page }) => {
+  const player = await openMobilePlayer(app, page)
+  const watch = await watchViewHandle(page)
+  await watch.evaluate(view => { view.musicMediaType = 'audioTrack' })
+  await page.evaluate(async () => {
+    await window.$store.dispatch('updateReducedMotion', 'off')
+    await window.$store.dispatch('updateMusicVisualizer', true)
+    const original = CanvasRenderingContext2D.prototype.fill
+    window.musicMorphPaints = { inline: 0, morph: 0 }
+    CanvasRenderingContext2D.prototype.fill = function (...args) {
+      if (this.canvas.matches('.musicVisualizerCanvas')) {
+        const player = this.canvas.closest('.ftVideoPlayer')
+        window.musicMorphPaints[player.hasAttribute('data-mobile-mini-morph') ? 'morph' : 'inline']++
+      }
+      return original.apply(this, args)
+    }
+    window.restoreMusicMorphProbe = () => { CanvasRenderingContext2D.prototype.fill = original }
+    const spacer = document.createElement('div')
+    spacer.style.height = '2000px'
+    document.body.append(spacer)
+  })
+  try {
+    await player.locator('video').evaluate(video => { video.loop = true; return video.play() })
+    await expect.poll(() => page.evaluate(() => window.musicMorphPaints.inline)).toBeGreaterThan(0)
+    for (let cycle = 0; cycle < 2; cycle++) {
+      await page.evaluate(() => window.scrollTo(0, 1200))
+      await expect(player).toHaveClass(/scrollMiniPlayer/)
+      await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+      await page.evaluate(() => window.scrollTo(0, 0))
+      await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+      await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+    }
+    console.log('Audio morph canvas paints:', await page.evaluate(() => window.musicMorphPaints))
+    expect(await page.evaluate(() => window.musicMorphPaints.morph)).toBe(0)
+  } finally {
+    await page.evaluate(() => window.restoreMusicMorphProbe())
+    await watch.dispose()
+  }
+})

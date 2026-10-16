@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { test, expect, goTo, setWindowSize, updateInputWithoutScrolling, sel } from '../../helpers/app.mjs'
+import { mockCapacitorPhoneLayout } from '../../helpers/mobile.mjs'
 import { fulfillVisualFixture, expectImagesLoaded } from '../../helpers/visual-fixtures.mjs'
 
 const now = Date.now()
@@ -1369,6 +1370,24 @@ test.describe('history date and channel browsing', () => {
     await expect(page.getByRole('checkbox', { name: 'Case Sensitive Search' })).toBeChecked()
     await expect(page.getByRole('combobox', { name: 'Sort By' })).toContainText('Date Watched (Oldest)')
     await expect(videos).toHaveCount(100)
+  })
+
+  test('keeps the case-sensitive switch beside filters on phones', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {
+    await goTo(page, 'history')
+    await page.evaluate(scale => window.$store.dispatch('updateUiScale', scale), uiScale)
+    await mockCapacitorPhoneLayout(page)
+    for (const width of [360, 375, 430]) {
+      await app.electronApp.evaluate(({ BrowserWindow }, size) => BrowserWindow.getAllWindows()[0].setSize(...size), [Math.round(width * uiScale / 100), Math.round(850 * uiScale / 100)])
+      await expect.poll(() => page.locator('.historySearchOptions').evaluate(element => {
+        const button = element.querySelector('.historyFilterToggle').getBoundingClientRect()
+        const toggle = element.querySelector('.toggleOptions').getBoundingClientRect()
+        return toggle.left >= button.right && Math.abs((toggle.top + toggle.bottom - button.top - button.bottom) / 2) < 1
+      })).toBe(true)
+      await expect(page.locator('.historySearchOptions')).toBeVisible()
+    }
+    await page.locator('.historySearchOptions .switch-label').click()
+    await expect(page.getByRole('checkbox', { name: 'Case Sensitive Search' })).toBeChecked()
+    await page.locator('.card').screenshot({ path: testInfo.outputPath('history-mobile.png'), animations: 'disabled' })
   })
 
   test('keeps filters usable at narrow widths in both themes', { tag: '@scale' }, async ({ app, page, uiScale }, testInfo) => {

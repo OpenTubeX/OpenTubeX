@@ -164,7 +164,7 @@ test.describe('phone surface corners', { tag: '@scale' }, () => {
     }
   })
 
-  test('keeps full-width More and context sheets square at the screen edges', async ({ page, uiScale }, testInfo) => {
+  test('rounds exposed top corners of full-width More and context sheets', async ({ page, uiScale }, testInfo) => {
     await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
     await page.setViewportSize({ width: Math.round(375 * uiScale / 100), height: Math.round(812 * uiScale / 100) })
     await mockCapacitorPhoneLayout(page)
@@ -193,7 +193,8 @@ test.describe('phone surface corners', { tag: '@scale' }, () => {
           await expect(menu).toBeVisible()
           await menu.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
           await expectFullWidth(menu)
-          await expectSquare(menu)
+          await expect(menu).toHaveCSS('border-top-left-radius', '28px')
+          await expect(menu).toHaveCSS('border-top-right-radius', '28px')
           if (width === 375 && uiScale === 100) {
             for (const theme of ['dark', 'light']) {
               await page.emulateMedia({ colorScheme: theme })
@@ -328,7 +329,7 @@ test.describe('phone surface corners', { tag: '@scale' }, () => {
     await expectInsetRounded(page.locator('.ftVideoPlayer:visible'))
   })
 
-  test('keeps full-width watch cards square while preserving inset action panels', async ({ app, page, uiScale }) => {
+  test('keeps full-width watch cards square while preserving inset action panels', async ({ app, page, uiScale }, testInfo) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
     await setWindowSize(app, page, { width: Math.round(375 * uiScale / 100), height: Math.round(812 * uiScale / 100) })
@@ -352,7 +353,9 @@ test.describe('phone surface corners', { tag: '@scale' }, () => {
     await comments.click()
     const sheet = page.locator('.mobileSheet.dockedSheet[open]')
     await expectFullWidth(sheet)
-    await expectSquare(sheet)
+    await expect(sheet).toHaveCSS('border-top-left-radius', '16px')
+    await expect(sheet).toHaveCSS('border-top-right-radius', '16px')
+    await page.screenshot({ path: testInfo.outputPath('rounded-mobile-panel.png'), animations: 'disabled' })
     await sheet.getByRole('button', { name: 'Close', exact: true }).click()
     await expect(sheet).toHaveCount(0)
 
