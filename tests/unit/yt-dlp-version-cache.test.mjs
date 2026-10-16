@@ -19,13 +19,16 @@ function createProbe () {
     },
     execFileAsync: async (executable, args) => {
       calls.push([executable, ...args])
-      const info = files.get(executable)
+      const info = files.get(executable) ?? files.get(`/usr/bin/${executable}`)
       if (info?.broken) throw new Error('spawn failed')
       return { stdout: `${info?.version ?? 'path-version'}\n` }
-    }
+    },
+    process: { platform: 'linux', env: { PATH: '' } },
+    delimiter: ':',
+    join: (...parts) => parts.join('/')
   })
   vm.runInContext(`${source.slice(start, end)}\nglobalThis.getYtDlpVersion = getYtDlpVersion`, context)
-  return { calls, files, getYtDlpVersion: context.getYtDlpVersion }
+  return { calls, files, context, getYtDlpVersion: context.getYtDlpVersion }
 }
 
 test('reuses the yt-dlp version while the binary file is unchanged', async () => {
@@ -52,5 +55,15 @@ test('does not cache failures or executables that cannot be stat-ed', async () =
   assert.equal(await getYtDlpVersion('yt-dlp'), 'path-version')
   assert.equal(await getYtDlpVersion('yt-dlp'), 'path-version')
   assert.equal(calls.filter(([executable]) => executable === 'yt-dlp').length, 2,
-    'a PATH lookup has no file identity, so it is probed each time')
+    'a bare name that PATH cannot resolve has no file identity, so it is probed each time')
+})
+
+test('resolves a bare executable name through PATH so the system binary is cached too', async () => {
+  const { calls, context, files, getYtDlpVersion } = createProbe()
+  context.process.env.PATH = '/opt/none:/usr/bin'
+  files.set('/usr/bin/yt-dlp', { mtimeMs: 1, size: 100, version: '2026.03.03' })
+
+  assert.equal(await getYtDlpVersion('yt-dlp'), '2026.03.03')
+  assert.equal(await getYtDlpVersion('yt-dlp'), '2026.03.03')
+  assert.equal(calls.length, 1, 'the PATH-resolved binary keys the cache')
 })
