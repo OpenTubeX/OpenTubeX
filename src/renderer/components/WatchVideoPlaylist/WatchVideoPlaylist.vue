@@ -651,7 +651,12 @@ watch(() => props.playlistId, () => {
   resetUnavailableSkipChain()
   reversePlaylist.value = storedReversePlaylist.value
 
-  if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
+  // A reused watch view must also use the playlist cached by the page that opened it.
+  const cachedPlaylist = store.getters.getCachedPlaylist(playlistCacheTabId)
+
+  if (cachedPlaylist?.id === props.playlistId) {
+    loadCachedPlaylistInformation(cachedPlaylist)
+  } else if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
     getPlaylistInformationInvidious()
   } else {
     getPlaylistInformationLocal()
