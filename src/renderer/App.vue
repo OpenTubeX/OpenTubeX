@@ -1821,8 +1821,8 @@ onMounted(async () => {
     if (process.env.IS_ELECTRON) {
       // Prompts teleport into .app, which renders once data is ready.
       nextTick(() => {
-        removeLibraryNoticesListener = window.ftElectron.libraryNotices.onAvailable(takeLibraryNotices)
-        takeLibraryNotices()
+        removeLibraryNoticesListener = window.ftElectron.libraryNotices.onChanged(loadLibraryNotices)
+        loadLibraryNotices()
       })
     }
 
@@ -4503,16 +4503,17 @@ const libraryNotice = computed(() => {
   }
 })
 
-async function takeLibraryNotices() {
+async function loadLibraryNotices() {
   try {
-    libraryNotices.value.push(...await window.ftElectron.libraryNotices.take())
+    libraryNotices.value = await window.ftElectron.libraryNotices.get()
   } catch (error) {
     console.error('Failed to load library notices', error)
   }
 }
 
 function dismissLibraryNotice() {
-  libraryNotices.value.shift()
+  const notice = libraryNotices.value.shift()
+  if (notice) window.ftElectron.libraryNotices.dismiss(notice)
 }
 
 const MULTIPLE_TABS_ACTION_PROMPT_VALUES = ['confirm', 'cancel', 'neverAskAgain']

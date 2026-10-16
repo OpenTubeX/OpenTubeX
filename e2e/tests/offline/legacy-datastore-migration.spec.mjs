@@ -89,13 +89,18 @@ test('tells users once that their library moved to a new format', async () => {
   const answerQuitConfirmation = (phase, _page, electronApp) => phase === 'electronConnected' && electronApp.evaluate(({ dialog }) => {
     dialog.showMessageBox = async () => ({ response: 0 })
   })
-  async function launchAndCollect(userDataDir, expected) {
+  async function launchAndCollect(userDataDir, expected, { reloadFirst = false } = {}) {
     const { electronApp, page } = await launchApp(userDataDir, [], {
       onPhase: answerQuitConfirmation,
       env: { OPENTUBEX_E2E_LIBRARY_NOTICES: 'true' },
     })
     try {
       const notices = page.getByRole('dialog').filter({ has: page.getByRole('button', { name: 'Ok', exact: true }) })
+      if (reloadFirst) {
+        // A notice that was never dismissed shows again after a reload.
+        await expect(notices).toHaveCount(1)
+        await page.reload()
+      }
       const seen = []
       for (let index = 0; index < expected.length; index++) {
         // Notices show one after the other, never stacked.
@@ -116,7 +121,7 @@ test('tells users once that their library moved to a new format', async () => {
   const fresh = await createUserDataDir({ freshProfile: true })
   const formatNotice = 'Library moved to a new format'
   try {
-    await launchAndCollect(migrated, [formatNotice])
+    await launchAndCollect(migrated, [formatNotice], { reloadFirst: true })
     // Not again, and not for a new installation, which has nothing to migrate.
     await launchAndCollect(migrated, [])
     await launchAndCollect(fresh, [])

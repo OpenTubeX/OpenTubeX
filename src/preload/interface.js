@@ -90,18 +90,22 @@ export default {
   },
   libraryNotices: {
     /**
-     * Takes the library notices no window has shown yet.
+     * Gets the library notices no window has dismissed yet.
      * @returns {Promise<Array<'olderVersionChanges' | 'libraryFormatChanged'>>}
      */
-    take: () => ipcRenderer.invoke(IpcChannels.TAKE_LIBRARY_NOTICES),
+    get: () => ipcRenderer.invoke(IpcChannels.GET_LIBRARY_NOTICES),
+    /**
+     * @param {'olderVersionChanges' | 'libraryFormatChanged'} key
+     */
+    dismiss: key => ipcRenderer.send(IpcChannels.DISMISS_LIBRARY_NOTICE, key),
     /**
      * @param {() => void} handler
      * @returns {() => void}
      */
-    onAvailable: handler => {
+    onChanged: handler => {
       const listener = () => handler()
-      ipcRenderer.on(IpcChannels.LIBRARY_NOTICES_AVAILABLE, listener)
-      return () => ipcRenderer.removeListener(IpcChannels.LIBRARY_NOTICES_AVAILABLE, listener)
+      ipcRenderer.on(IpcChannels.LIBRARY_NOTICES_CHANGED, listener)
+      return () => ipcRenderer.removeListener(IpcChannels.LIBRARY_NOTICES_CHANGED, listener)
     }
   },
   setTrayIcon: image => ipcRenderer.invoke(IpcChannels.SET_TRAY_ICON, image),

@@ -140,9 +140,15 @@ function runApp() {
   const libraryNotices = new Set()
   /** @type {string[]} */
   let pendingLibraryNotices = []
+  function sendLibraryNoticesChanged() {
+    for (const window of BrowserWindow.getAllWindows()) {
+      TabManager.getForWindow(window.id)?.bridge.send(IpcChannels.LIBRARY_NOTICES_CHANGED)
+    }
+  }
   /**
    * Datastores open one after another, so each notice shows once per start
-   * for all of them. The first window to ask shows it in an app dialog.
+   * for all of them. Every window shows it in an app dialog until one of
+   * them dismisses it, so a reloaded or closed window doesn't lose it.
    * @param {'olderVersionChanges' | 'libraryFormatChanged'} key
    */
   function showLibraryNotice(key) {
@@ -152,17 +158,20 @@ function runApp() {
     if (libraryNotices.has(key)) return
     libraryNotices.add(key)
     pendingLibraryNotices.push(key)
-    // Windows that haven't loaded yet take the notices once they mount.
-    for (const window of BrowserWindow.getAllWindows()) {
-      TabManager.getForWindow(window.id)?.bridge.send(IpcChannels.LIBRARY_NOTICES_AVAILABLE)
-    }
+    // Windows that haven't loaded yet get the notices once they mount.
+    sendLibraryNoticesChanged()
   }
 
-  ipcMain.handle(IpcChannels.TAKE_LIBRARY_NOTICES, event => {
+  ipcMain.handle(IpcChannels.GET_LIBRARY_NOTICES, event => {
     if (!isOpenTubeXUrl(event.senderFrame.url) || !TabManager.getFromWebContents(event.sender)) return []
-    const notices = pendingLibraryNotices
-    pendingLibraryNotices = []
-    return notices
+    return pendingLibraryNotices
+  })
+
+  ipcMain.on(IpcChannels.DISMISS_LIBRARY_NOTICE, (event, key) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url) || !TabManager.getFromWebContents(event.sender)) return
+    if (!pendingLibraryNotices.includes(key)) return
+    pendingLibraryNotices = pendingLibraryNotices.filter(notice => notice !== key)
+    sendLibraryNoticesChanged()
   })
 
   // Registered synchronously, before any datastore loading started above can finish.
