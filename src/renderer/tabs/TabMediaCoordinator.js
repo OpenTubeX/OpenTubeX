@@ -16,13 +16,19 @@ let miniPlayerTabId = null
 let playSequence = 0
 let powerSaveBlocked = false
 
-function getEntry(tabId) {
+/**
+ * @param {string | null | undefined} tabId
+ * @param {boolean} [create] whether an unknown tab gets an entry. Calls that
+ *   only clear state pass false, so a tab torn down by the tab shell cannot be
+ *   re-registered by its own children unmounting afterwards.
+ */
+function getEntry(tabId, create = true) {
   if (!tabId) {
     return null
   }
 
   let entry = mediaByTabId.get(tabId)
-  if (!entry) {
+  if (!entry && create) {
     entry = {
       playbackState: 'none',
       lastPlayedAt: 0,
@@ -208,7 +214,7 @@ export const tabMediaCoordinator = {
   },
 
   setPlaybackState(tabId, playbackState) {
-    const entry = getEntry(tabId)
+    const entry = getEntry(tabId, playbackState !== 'none')
     if (!entry) {
       return
     }
@@ -224,12 +230,12 @@ export const tabMediaCoordinator = {
   },
 
   setMetadata(tabId, metadata) {
-    if (!presentedTabId) {
-      presentedTabId = tabId
-    }
-    const entry = getEntry(tabId)
+    const entry = getEntry(tabId, metadata != null)
     if (!entry) {
       return
+    }
+    if (!presentedTabId && metadata != null) {
+      presentedTabId = tabId
     }
 
     entry.metadata = metadata
@@ -237,7 +243,7 @@ export const tabMediaCoordinator = {
   },
 
   setPositionState(tabId, positionState, playbackState = null) {
-    const entry = getEntry(tabId)
+    const entry = getEntry(tabId, positionState != null || (playbackState != null && playbackState !== 'none'))
     if (!entry) {
       return
     }
@@ -261,14 +267,14 @@ export const tabMediaCoordinator = {
   },
 
   setActionHandlers(tabId, source, actionHandlers) {
-    const entry = getEntry(tabId)
-    if (!entry) {
-      return
-    }
-
     if (actionHandlers == null && source && typeof source === 'object') {
       actionHandlers = source
       source = 'default'
+    }
+
+    const entry = getEntry(tabId, actionHandlers != null && Object.keys(actionHandlers).length > 0)
+    if (!entry) {
+      return
     }
 
     if (typeof source !== 'string' || source.length === 0) {
@@ -281,6 +287,10 @@ export const tabMediaCoordinator = {
       entry.actionHandlerSources.delete(source)
     }
     applyOwner()
+  },
+
+  isRegistered(tabId) {
+    return mediaByTabId.has(tabId)
   },
 
   unregister(tabId) {
