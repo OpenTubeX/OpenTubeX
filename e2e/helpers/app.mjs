@@ -464,9 +464,16 @@ export const test = base.extend({
       once(xvfb, 'exit').then(([code]) => { throw new Error(`Xvfb exited with code ${code}`) })
     ])
     process.env.DISPLAY = `:${String(display).trim()}`
-    await use(process.env.DISPLAY)
-    xvfb.kill()
-    await once(xvfb, 'exit')
+    try {
+      await use(process.env.DISPLAY)
+    } finally {
+      // The startup race may already have consumed an early exit event.
+      if (xvfb.exitCode === null && xvfb.signalCode === null) {
+        const exited = once(xvfb, 'exit')
+        xvfb.kill()
+        await exited
+      }
+    }
   }, { scope: 'worker', auto: true }],
   seed: [{}, { option: true }],
   uiScale: [100, { option: true }],
