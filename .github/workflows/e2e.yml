@@ -237,6 +237,7 @@ jobs:
     - name: Run E2E tests
       env:
         PROJECTS: ${{ matrix.projects }}
+        E2E_XVFB: '1'
       run: |
         test_args=("--shard=${{ matrix.shard }}/${{ matrix.shardTotal }}")
         for project in $PROJECTS; do

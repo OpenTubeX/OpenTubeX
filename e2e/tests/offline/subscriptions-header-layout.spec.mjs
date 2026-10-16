@@ -392,9 +392,13 @@ test.describe('subscriptions header layout', () => {
       if (await page.getByRole('button', { name: 'Show combined view' }).isVisible()) {
         await page.getByRole('button', { name: 'Show combined view' }).click()
       }
+      // The view preference is saved before the header switches layouts.
+      const header = page.locator('.subscriptionsHeader')
+      await expect(header).not.toHaveClass(/\btabbedNewFeed\b/)
       const combinedTopMargin = await combinedSeparatorTopMargin()
 
       await page.getByRole('button', { name: 'Show tabbed view' }).click()
+      await expect(header).toHaveClass(/\btabbedNewFeed\b/)
       const layout = await separatorLayout()
 
       expect(layout.headerShadow).toBe('none')

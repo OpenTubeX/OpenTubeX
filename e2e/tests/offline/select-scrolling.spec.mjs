@@ -34,7 +34,9 @@ async function expectScrollTether(select, scroll) {
 }
 
 test.describe('select scroll positioning', { tag: '@scale' }, () => {
-  test.use({ seed: { settings: { alwaysShowScrollbars: true, videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
+  // Scrolling the player away animates the scroll mini player across the
+  // comments sort control, where it can intercept the click.
+  test.use({ seed: { settings: { alwaysShowScrollbars: true, scrollMiniPlayerEnabled: false, videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
 
   test('keeps the comments sort dropdown attached without scroll handler updates', async ({ app, page }) => {
     const select = await commentsSort({ app, page })

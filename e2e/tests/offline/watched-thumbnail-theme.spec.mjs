@@ -140,7 +140,7 @@ for (const scheme of ['dark', 'light']) {
       const store = window.$store
       await store.dispatch('updateBaseTheme', 'system')
     })
-    expect(await page.locator('body').evaluate(element => element.style.getPropertyValue('--watched-thumbnail-overlay-color'))).toBe('')
+    await expect.poll(() => page.locator('body').evaluate(element => element.style.getPropertyValue('--watched-thumbnail-overlay-color'))).toBe('')
     await expectOverlay(link, baseColor)
   })
 }

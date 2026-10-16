@@ -2889,8 +2889,10 @@ test('plays both streams when an external clip has separate audio and codec-free
   await expect(video).toHaveJSProperty('paused', false)
   await video.evaluate(element => element.pause())
   await audio.evaluate(element => { element.play = () => Promise.reject(new DOMException('Autoplay blocked', 'NotAllowedError')) })
-  await video.evaluate(element => element.play())
+  // The blocked audio makes the player pause again, which may interrupt this play request.
+  await video.evaluate(element => { element.playResult = element.play().then(() => null, error => error.name) })
   await expect.poll(() => video.evaluate(element => element.paused), { timeout: 1000 }).toBe(true)
+  expect([null, 'AbortError']).toContain(await video.evaluate(element => element.playResult))
 })
 
 test('uses companion audio only for a selected video-only legacy format', async ({ app, page }) => {

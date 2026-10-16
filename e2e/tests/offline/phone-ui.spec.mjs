@@ -256,6 +256,9 @@ test.describe('phone UI', () => {
     })
     const scroller = chat.locator('.liveChatComments')
     await expect(scroller.locator('.chatMessage')).toHaveCount(45)
+    // Until the enter animations finish, the scroll range still changes. A position set
+    // earlier can count as the live edge, which intentionally resumes following it.
+    await expect(scroller.locator('.live-chat-message-enter-active')).toHaveCount(0)
     await scroller.dispatchEvent('wheel', { deltaY: -100 })
     await scroller.evaluate(element => { element.scrollTop = 180 })
     await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeCloseTo(180, 0)

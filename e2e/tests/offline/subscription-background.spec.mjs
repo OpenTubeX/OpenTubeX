@@ -14,6 +14,17 @@ test.use({
   }
 })
 
+/** Keeps the app's own settings watcher from replacing the test configuration. */
+async function configureBackground(app, page, configuration) {
+  await app.electronApp.evaluate(({ ipcMain }, expected) => {
+    const original = ipcMain._invokeHandlers.get('subscription-background')
+    ipcMain.removeHandler('subscription-background')
+    ipcMain.handle('subscription-background', (event, method, value) =>
+      method === 'configure' && JSON.stringify(value) !== expected ? undefined : original(event, method, value))
+  }, JSON.stringify(configuration))
+  await page.evaluate(value => window.ftElectron.subscriptionAutoRefresh.configureBackground(value), configuration)
+}
+
 for (const windowAction of ['destroy', 'hide']) {
   const windowState = windowAction === 'destroy' ? 'have no renderers' : 'hide'
   test(`refreshes while windows ${windowState}, imports on return, and quits fully`, async ({ app, page }) => {
@@ -31,7 +42,7 @@ for (const windowAction of ['destroy', 'hide']) {
       profiles: [{ id: 'allChannels', channels: { videos: [channelId] } }],
       requests: createBackgroundSubscriptionRequests({ backend: 'local', useRss: true, fallback: false })
     }
-    await page.evaluate(value => window.ftElectron.subscriptionAutoRefresh.configureBackground(value), configuration)
+    await configureBackground(app, page, configuration)
     await expect.poll(() => app.electronApp.evaluate(({ app }) => app.getAppMetrics().some(process => process.name === 'Subscription refresh'))).toBe(true)
     await app.electronApp.evaluate(({ BrowserWindow }, action) => { for (const window of BrowserWindow.getAllWindows()) window[action]() }, windowAction)
     await expect.poll(() => app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().filter(window => window.isVisible()).length)).toBe(0)
@@ -95,7 +106,7 @@ test('normalizes Local API responses with every renderer closed', async ({ app, 
       ? Promise.resolve(new Response(body, { status: 200 }))
       : originalFetch(url, options)
   }, response)
-  await page.evaluate(configuration => window.ftElectron.subscriptionAutoRefresh.configureBackground(configuration), {
+  await configureBackground(app, page, {
     enabled: true,
     intervals: { videos: 1 },
     profiles: [{ id: 'allChannels', channels: { videos: [channelId] } }],

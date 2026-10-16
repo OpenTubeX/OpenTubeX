@@ -1,3 +1,5 @@
+import { spawn } from 'node:child_process'
+import { once } from 'node:events'
 import { existsSync, readFileSync } from 'node:fs'
 import { cp, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
@@ -446,6 +448,33 @@ export async function setPlayerFullscreen(page, fullscreen) {
  * 125%. Read the fixture instead of seeding `settings.uiScale` in those tests.
  */
 export const test = base.extend({
+  // With E2E_XVFB set, each worker gets its own X server, so parallel tests
+  // cannot move each other's cursor or steal focus. Xvfb picks a free display.
+  // eslint-disable-next-line no-empty-pattern -- Playwright requires a fixture object
+  xvfbDisplay: [async ({}, use) => {
+    if (!process.env.E2E_XVFB) {
+      await use(process.env.DISPLAY)
+      return
+    }
+    const xvfb = spawn('Xvfb', ['-displayfd', '3', '-screen', '0', '1920x1080x24', '-nolisten', 'tcp'], {
+      stdio: ['ignore', 'ignore', 'ignore', 'pipe']
+    })
+    const [display] = await Promise.race([
+      once(xvfb.stdio[3], 'data'),
+      once(xvfb, 'exit').then(([code]) => { throw new Error(`Xvfb exited with code ${code}`) })
+    ])
+    process.env.DISPLAY = `:${String(display).trim()}`
+    try {
+      await use(process.env.DISPLAY)
+    } finally {
+      // The startup race may already have consumed an early exit event.
+      if (xvfb.exitCode === null && xvfb.signalCode === null) {
+        const exited = once(xvfb, 'exit')
+        xvfb.kill()
+        await exited
+      }
+    }
+  }, { scope: 'worker', auto: true }],
   seed: [{}, { option: true }],
   uiScale: [100, { option: true }],
   launchArgs: [[], { option: true }],
