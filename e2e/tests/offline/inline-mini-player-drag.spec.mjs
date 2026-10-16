@@ -1714,25 +1714,54 @@ test('audio mini-player morphs suspend visualizer painting', { tag: '@performanc
       }
       return original.apply(this, args)
     }
-    window.restoreMusicMorphProbe = () => { CanvasRenderingContext2D.prototype.fill = original }
+    window.musicMorphStarts = 0
+    const observer = new MutationObserver(records => {
+      window.musicMorphStarts += records.filter(record => record.oldValue === null).length
+    })
+    observer.observe(document.querySelector('.ftVideoPlayer'), {
+      attributes: true, attributeFilter: ['data-mobile-mini-morph'], attributeOldValue: true
+    })
+    window.restoreMusicMorphProbe = () => {
+      observer.disconnect()
+      CanvasRenderingContext2D.prototype.fill = original
+    }
     const spacer = document.createElement('div')
     spacer.style.height = '2000px'
     document.body.append(spacer)
   })
+  const cdp = await page.context().newCDPSession(page)
   try {
     await player.locator('video').evaluate(video => { video.loop = true; return video.play() })
     await expect.poll(() => page.evaluate(() => window.musicMorphPaints.inline)).toBeGreaterThan(0)
+    const bounds = await player.boundingBox()
+    const start = { x: bounds.x + bounds.width / 2, y: bounds.y + 100 }
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [start] })
+    await cdp.send('Input.dispatchTouchEvent', {
+      type: 'touchMove', touchPoints: [{ ...start, y: start.y + 100 }]
+    })
+    await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchCancel', touchPoints: [] })
+    await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+    await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+    await page.evaluate(() => { window.musicMorphPaints.inline = 0 })
+    await expect.poll(() => page.evaluate(() => window.musicMorphPaints.inline)).toBeGreaterThan(0)
     for (let cycle = 0; cycle < 2; cycle++) {
+      const starts = await page.evaluate(() => window.musicMorphStarts)
       await page.evaluate(() => window.scrollTo(0, 1200))
+      await expect.poll(() => page.evaluate(() => window.musicMorphStarts)).toBe(starts + 1)
       await expect(player).toHaveClass(/scrollMiniPlayer/)
       await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
       await page.evaluate(() => window.scrollTo(0, 0))
+      await expect.poll(() => page.evaluate(() => window.musicMorphStarts)).toBe(starts + 2)
       await expect(player).not.toHaveClass(/scrollMiniPlayer/)
       await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+      await page.evaluate(() => { window.musicMorphPaints.inline = 0 })
+      await expect.poll(() => page.evaluate(() => window.musicMorphPaints.inline)).toBeGreaterThan(0)
     }
-    console.log('Audio morph canvas paints:', await page.evaluate(() => window.musicMorphPaints))
     expect(await page.evaluate(() => window.musicMorphPaints.morph)).toBe(0)
   } finally {
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }).catch(() => {})
+    await cdp.detach()
     await page.evaluate(() => window.restoreMusicMorphProbe())
     await watch.dispose()
   }

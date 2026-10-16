@@ -1,3 +1,4 @@
+import { writeFile } from 'node:fs/promises'
 import { expectTabHighlightAligned, expectTabHighlightStyle, selectTabWithHighlightAnimation, tabHighlightAnimations } from '../../helpers/tabs.mjs'
 import { captureAppFramebuffer } from '../../helpers/screenshots.mjs'
 import { test, expect, sel } from '../../helpers/app.mjs'
@@ -351,12 +352,15 @@ test('separates the content card on every channel tab', { tag: '@scale' }, async
       const bottom = document.querySelector('.select-container').getBoundingClientRect().bottom + 16
       return { x: bounds.x, y: top, width: bounds.width, height: bottom - top }
     })
+    let settledScreenshot
     await expect.poll(async () => {
       const before = await page.screenshot({ clip })
       await page.waitForTimeout(120)
-      const after = await page.screenshot({ clip, path: testInfo.outputPath(`channel-controls-${colorScheme}.png`) })
+      const after = await page.screenshot({ clip })
+      settledScreenshot = after
       return before.equals(after)
     }, { message: 'The channel controls settle before the screenshot is saved' }).toBe(true)
+    await writeFile(testInfo.outputPath(`channel-controls-${colorScheme}.png`), settledScreenshot)
   }
   description = ''
   await page.reload()

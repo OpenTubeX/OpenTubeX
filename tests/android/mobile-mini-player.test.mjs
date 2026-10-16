@@ -225,7 +225,17 @@ async function testMobileMiniPlayer(t, navigationOnly, { dismissalOnly = false, 
           }
           return fill.apply(this, args)
         }
-        window.restoreMusicMorphProbe = () => { CanvasRenderingContext2D.prototype.fill = fill }
+        window.musicMorphStarts = 0
+        const observer = new MutationObserver(records => {
+          window.musicMorphStarts += records.filter(record => record.oldValue === null).length
+        })
+        observer.observe(document.querySelector('.ftVideoPlayer'), {
+          attributes: true, attributeFilter: ['data-mobile-mini-morph'], attributeOldValue: true
+        })
+        window.restoreMusicMorphProbe = () => {
+          observer.disconnect()
+          CanvasRenderingContext2D.prototype.fill = fill
+        }
         const spacer = document.createElement('div')
         spacer.id = 'mini-player-test-spacer'
         spacer.style.height = '2000px'
@@ -234,10 +244,13 @@ async function testMobileMiniPlayer(t, navigationOnly, { dismissalOnly = false, 
       try {
         await expect.poll(() => page.evaluate(() => window.musicMorphPaints.inline)).toBeGreaterThan(0)
         for (let cycle = 0; cycle < 2; cycle++) {
+          const starts = await page.evaluate(() => window.musicMorphStarts)
           await page.evaluate(() => window.scrollTo(0, 1000))
+          await expect.poll(() => page.evaluate(() => window.musicMorphStarts)).toBe(starts + 1)
           await expect(player).toHaveClass(/scrollMiniPlayer/)
           await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
           await page.evaluate(() => window.scrollTo(0, 0))
+          await expect.poll(() => page.evaluate(() => window.musicMorphStarts)).toBe(starts + 2)
           await expect(player).not.toHaveClass(/scrollMiniPlayer/)
           await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
         }
