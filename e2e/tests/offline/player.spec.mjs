@@ -2933,8 +2933,6 @@ test.describe('playback when navigating away', () => {
   })
 
   test('keeps the same video playing while browsing and returning', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
-    // https://github.com/OpenTubeX/OpenTubeX/issues/2137
-    test.fixme(true, 'The per-frame handoff step check depends on animation frame timing under load')
     await openDemoVideo({ app, page })
     const player = page.locator('.ftVideoPlayer')
     const video = player.locator('video')
@@ -2955,16 +2953,20 @@ test.describe('playback when navigating away', () => {
     })
     await attachScreenshot('video continues while browsing subscriptions')
     await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+    // Slow the 300 ms restore down, so that a loaded machine still renders
+    // enough of its frames to sample.
+    await page.evaluate(() => window.$store.dispatch('updateAnimationSpeed', 25))
     await player.evaluate(element => {
       document.documentElement.dataset.reducedMotion = 'no-preference'
       window.oversizedMiniControls = []
       window.miniRestoreFrames = 0
       window.miniRestoreGeometry = []
-      const sample = () => {
+      const sample = time => {
         if (!element.isConnected) return
         const bounds = element.getBoundingClientRect()
         const center = document.elementFromPoint(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2)
         window.miniRestoreGeometry.push({
+          time: time ?? performance.now(),
           left: bounds.left,
           top: bounds.top,
           width: bounds.width,
@@ -2999,11 +3001,18 @@ test.describe('playback when navigating away', () => {
     expect(expanding.length, 'the video visibly expands from the mini player').toBeGreaterThan(2)
     expect(expanding.filter(frame => !frame.visible), 'the moving video stays above the Watch preview').toEqual([])
     const distance = Math.hypot(end.left - start.left, end.top - start.top, end.width - start.width, end.height - start.height)
-    const steps = samples.geometry.slice(1).map((frame, index) => {
+    // The slowed restore eases out over 1200 ms, so it moves at most
+    // 3 * distance / 1200 ms. A sample can show the frame before its timestamp,
+    // so allow the previous interval too. Frames skipped under load then widen
+    // the bound instead of looking like a jump.
+    const maximumSpeed = 3 * distance / 1200
+    const jumps = samples.geometry.slice(1).flatMap((frame, index) => {
       const previous = samples.geometry[index]
-      return Math.hypot(frame.left - previous.left, frame.top - previous.top, frame.width - previous.width, frame.height - previous.height)
+      const step = Math.hypot(frame.left - previous.left, frame.top - previous.top, frame.width - previous.width, frame.height - previous.height)
+      const elapsed = frame.time - (samples.geometry[index - 1] ?? previous).time
+      return step < Math.max(distance / 2, maximumSpeed * elapsed) ? [] : [{ step, elapsed }]
     })
-    expect(Math.max(...steps), 'the player must not jump at the preview handoff').toBeLessThan(distance / 2)
+    expect(jumps, 'the player must not jump at the preview handoff').toEqual([])
     expect(await video.evaluate((element, original) => element === original, originalVideo)).toBe(true)
     await expect(page.locator('.tabBar .tab')).toHaveText(title)
   })
