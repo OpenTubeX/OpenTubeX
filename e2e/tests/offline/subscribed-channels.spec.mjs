@@ -290,11 +290,12 @@ test.describe('subscribed channels', () => {
       const records = contents.trim().split('\n').filter(Boolean).map((line) => JSON.parse(line))
       const latestProfiles = new Map(records.map(record => [record._id, record]))
       return ['allChannels', 'profile-0', 'profile-1'].map(profileId => {
-        const subscription = latestProfiles.get(profileId).subscriptions
+        // Keep polling until the channel is saved to the newly selected profile.
+        const subscription = latestProfiles.get(profileId)?.subscriptions
           .find(channel => channel.id === 'UCaaaaaaaaaaaaaaaaaaaaaa')
         return {
-          dailyVideoLimit: subscription.dailyVideoLimit,
-          feedTypes: subscription.feedTypes
+          dailyVideoLimit: subscription?.dailyVideoLimit,
+          feedTypes: subscription?.feedTypes
         }
       })
     }).toEqual([
