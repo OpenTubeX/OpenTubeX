@@ -14,7 +14,8 @@ function createParser () {
   class DOMParser {
     parseFromString (html) {
       parses++
-      return { body: { textContent: html.replaceAll(/<[^>]+>/g, '') } }
+      // The cache only needs to see that the parser ran; mark its output.
+      return { body: { textContent: `parsed:${html}` } }
     }
   }
   const getCommentPlainText = vm.runInNewContext(`${component.slice(start, end)}\ngetCommentPlainText`, { DOMParser, toRaw })
@@ -23,12 +24,12 @@ function createParser () {
 
 test('parses each comment once while its text is unchanged', () => {
   const { getCommentPlainText, parses } = createParser()
-  const comments = reactive([{ text: 'see <b>1:23</b>' }, { text: 'plain' }])
+  const comments = reactive([{ text: 'see 1:23' }, { text: 'plain' }])
 
-  assert.equal(getCommentPlainText(comments[0]), 'see 1:23')
-  assert.equal(getCommentPlainText(comments[1]), 'plain')
-  assert.equal(getCommentPlainText(comments[0]), 'see 1:23')
-  assert.equal(getCommentPlainText(toRaw(comments)[0]), 'see 1:23', 'raw and reactive views share one entry')
+  assert.equal(getCommentPlainText(comments[0]), 'parsed:see 1:23')
+  assert.equal(getCommentPlainText(comments[1]), 'parsed:plain')
+  assert.equal(getCommentPlainText(comments[0]), 'parsed:see 1:23')
+  assert.equal(getCommentPlainText(toRaw(comments)[0]), 'parsed:see 1:23', 'raw and reactive views share one entry')
   assert.equal(parses(), 2)
 })
 
@@ -36,10 +37,10 @@ test('re-parses a comment when its text changes and tolerates missing text', () 
   const { getCommentPlainText, parses } = createParser()
   const comment = reactive({ text: 'before' })
 
-  assert.equal(getCommentPlainText(comment), 'before')
-  comment.text = 'after <i>edit</i>'
-  assert.equal(getCommentPlainText(comment), 'after edit')
+  assert.equal(getCommentPlainText(comment), 'parsed:before')
+  comment.text = 'after'
+  assert.equal(getCommentPlainText(comment), 'parsed:after')
   assert.equal(parses(), 2)
 
-  assert.equal(getCommentPlainText(reactive({})), '')
+  assert.equal(getCommentPlainText(reactive({})), 'parsed:')
 })
