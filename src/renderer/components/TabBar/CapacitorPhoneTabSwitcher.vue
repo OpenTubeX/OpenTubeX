@@ -645,11 +645,7 @@ const {
 
 let disposed = false
 function openSwitcher() {
-  if (open.value || organizerTransition || disposed || !props.enabled) return
-  prepareForTabOrganizer()
-  activeView.value = 'open'
-  skipDialogTransition.value = false
-  open.value = true
+  if (organizerSwipe.begin()) organizerSwipe.finish(0, false, true)
 }
 
 // The header owns pointer capture and direction locking. This component owns
@@ -696,7 +692,7 @@ const organizerSwipe = {
     state.distance = Math.max(0, distance)
     state.animation?.update(organizerSwipeProgress(state.distance, state.height))
   },
-  async finish(elapsed, cancelled) {
+  async finish(elapsed, cancelled, forceOpen = false) {
     const state = organizerTransition
     if (!state) return
     if (cancelled) {
@@ -706,7 +702,7 @@ const organizerSwipe = {
     // A ready organizer must accept a new touch immediately on release.
     if (!state.animation) await state.ready
     if (organizerTransition !== state) return
-    const commit = shouldOpenSwipedOrganizer(state.distance, state.height, elapsed)
+    const commit = forceOpen || shouldOpenSwipedOrganizer(state.distance, state.height, elapsed)
     // The next touch belongs to the organizer, even while the page is still
     // settling into its card. Selecting a tab cancels the remaining animation.
     if (commit) {

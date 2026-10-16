@@ -133,10 +133,10 @@ test('Android organizer pull follows the finger, settles into its card and prese
           const bounds = element.getBoundingClientRect()
           const style = getComputedStyle(element)
           const top = Number.parseFloat(style.clipPath.slice(6))
-          const bottom = Number.parseFloat(style.clipPath.split(' ')[2])
+          const visibleBottom = Number(style.clipPath.match(/calc\(100% - ([-\d.]+)px\)/)[1])
           const scale = new DOMMatrixReadOnly(style.transform).a
           return { left: bounds.left, top: bounds.top + top * scale, width: bounds.width,
-            height: bounds.height - (top + bottom) * scale }
+            height: (visibleBottom - top) * scale }
         })
         const preview = await thumbnail.boundingBox()
         assert.ok(Math.abs(geometry.left - preview.x) < 1 && Math.abs(geometry.top - preview.y) < 1 &&
