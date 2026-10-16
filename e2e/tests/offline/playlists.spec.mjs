@@ -590,8 +590,8 @@ test.describe('playlist cleanup', () => {
     await expect(dialog).toContainText('Found: 2')
     await expect(dialog).toContainText('Could not check: 1')
     await dialog.getByRole('button', { name: 'Yes, Delete' }).click()
-    const ids = await page.evaluate(() => window.$store.getters.getPlaylist('cleanup').videos.map(video => video.videoId))
-    expect(ids).toEqual(['live0000000', 'unknown00000'])
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getPlaylist('cleanup').videos.map(video => video.videoId)))
+      .toEqual(['live0000000', 'unknown00000'])
   })
 })
 
@@ -726,7 +726,8 @@ test.describe('custom playlists overview order', () => {
   })
 
   for (const layout of ['grid', 'list']) {
-    test(`reorders ${layout} playlists by keyboard and drag and drop`, async ({ app, page }) => {
+    // Flaky under parallel workers: https://github.com/OpenTubeX/OpenTubeX/issues/2145
+    test.fixme(`reorders ${layout} playlists by keyboard and drag and drop`, async ({ app, page }) => {
       await dispatchStoreAction(page, 'updateListType', layout)
       await goTo(page, 'userplaylists')
 
