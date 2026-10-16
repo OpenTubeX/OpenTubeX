@@ -186,6 +186,7 @@ Feed:
   Cancel Refresh: Batalkan pembaruan
   Next Auto Refresh: 'Pembaruan otomatis berikutnya: {date}'
 User Playlists:
+  Reorder Hint: Seret atau gunakan tombol panah untuk mengurutkan ulang
   Add new videos to the top (custom order): "Tambahkan video baru di bagian atas (urutan khusus)"
   Repair Playlists: Perbaiki playlist
   Repair Description: Pulihkan detail video yang hilang setelah mengimpor ZIP YouTube Takeout. Urutan playlist tetap sama.

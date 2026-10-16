@@ -161,6 +161,7 @@ Feed:
   Cancel Refresh: Отменить обновление
   Next Auto Refresh: 'Следующее автоматическое обновление: {date}'
 User Playlists:
+  Reorder Hint: Перетащите или используйте клавиши со стрелками, чтобы изменить порядок
   Add new videos to the top (custom order): "Добавлять новые видео в начало (свой порядок)"
   Repair Playlists: Восстановить плейлисты
   Repair Description: Восстановите недостающие сведения о видео после импорта ZIP-архива YouTube Takeout. Порядок в плейлистах не изменится.

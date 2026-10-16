@@ -198,6 +198,7 @@ Feed:
   Cancel Refresh: Cancelar actualización
   Next Auto Refresh: 'Próxima actualización automática: {date}'
 User Playlists:
+  Reorder Hint: Arrastrá o usá las teclas de flecha para reordenar
   Add new videos to the top (custom order): "Agregar videos nuevos al principio (orden personalizado)"
   Repair Playlists: Reparar listas de reproducción
   Repair Description: Restaura los datos de vídeo que faltan tras importar un ZIP de YouTube Takeout. El orden de las listas se mantiene.

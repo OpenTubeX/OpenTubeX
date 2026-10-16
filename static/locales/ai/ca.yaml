@@ -235,6 +235,7 @@ Feed:
   Next Auto Refresh: 'Propera actualització automàtica: {date}'
   Refresh Feed: Actualitza {subscriptionName}
 User Playlists:
+  Reorder Hint: Arrossegueu o utilitzeu les tecles de fletxa per reordenar
   Add new videos to the top (custom order): "Afegeix els vídeos nous al principi (ordre personalitzat)"
   Repair Playlists: Repara les llistes
   Repair Description: Restaura les dades que falten dels vídeos després d’importar un ZIP de YouTube Takeout. L’ordre dels vídeos a les llistes de reproducció es manté.

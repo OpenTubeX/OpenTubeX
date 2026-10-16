@@ -707,6 +707,75 @@ test.describe('playlist view type', () => {
   })
 })
 
+test.describe('custom playlists overview order', () => {
+  const seededPlaylist = (name, ageDays) => ({
+    _id: `custom-overview-${name.toLowerCase()}`,
+    playlistName: `Overview ${name}`,
+    protected: false,
+    description: '',
+    videos: [],
+    createdAt: Date.now() - ageDays * 86_400_000,
+    lastUpdatedAt: Date.now()
+  })
+
+  test.use({
+    seed: {
+      settings: { userPlaylistsSortBy: 'custom' },
+      playlists: [seededPlaylist('A', 3), seededPlaylist('B', 2), seededPlaylist('C', 1)]
+    }
+  })
+
+  for (const layout of ['grid', 'list']) {
+    test(`reorders ${layout} playlists by keyboard and drag and drop`, async ({ app, page }) => {
+      await dispatchStoreAction(page, 'updateListType', layout)
+      await goTo(page, 'userplaylists')
+
+      const titles = page.locator('.playlistList [data-playlist-drag-item] .h3Title')
+      const handleOf = name => page.locator('.playlistList [data-playlist-drag-item]')
+        .filter({ hasText: `Overview ${name}` })
+        .getByRole('button', { name: 'Drag or use the arrow keys to reorder' })
+      // Playlists without a saved position start newest first.
+      await expect(titles).toHaveText(['Overview C', 'Overview B', 'Overview A'])
+
+      await handleOf('C').focus()
+      await page.keyboard.press('ArrowDown')
+      await expect(titles).toHaveText(['Overview B', 'Overview C', 'Overview A'])
+      await expect(handleOf('C')).toBeFocused()
+      await page.keyboard.press('End')
+      await expect(titles).toHaveText(['Overview B', 'Overview A', 'Overview C'])
+      await expect(handleOf('C')).toBeFocused()
+      await page.keyboard.press('Home')
+      await expect(titles).toHaveText(['Overview C', 'Overview B', 'Overview A'])
+      await page.keyboard.press('ArrowUp')
+      await expect(titles).toHaveText(['Overview C', 'Overview B', 'Overview A'])
+      // Repeated keys build on the unsaved order instead of repeating the first move.
+      await page.keyboard.press('ArrowDown')
+      await page.keyboard.press('ArrowDown')
+      await expect(titles).toHaveText(['Overview B', 'Overview A', 'Overview C'])
+      await expect.poll(() => page.evaluate(() => window.$store.getters.getUserPlaylistsCustomOrder))
+        .toEqual(['custom-overview-b', 'custom-overview-a', 'custom-overview-c'])
+      await page.keyboard.press('Home')
+      await expect(titles).toHaveText(['Overview C', 'Overview B', 'Overview A'])
+
+      await handleOf('A').dragTo(handleOf('C'))
+      await expect(titles).toHaveText(['Overview A', 'Overview C', 'Overview B'])
+      await expect.poll(() => page.evaluate(() => window.$store.getters.getUserPlaylistsCustomOrder))
+        .toEqual(['custom-overview-a', 'custom-overview-c', 'custom-overview-b'])
+
+      // Reordering is unavailable while the list is filtered.
+      await page.locator('.playlistSearch input').fill('Overview')
+      await expect(page.locator('.playlistList .grabBar')).toHaveCount(0)
+      await page.locator('.playlistSearch input').fill('')
+      await expect(page.locator('.playlistList .grabBar')).toHaveCount(3)
+
+      ;({ page } = await app.relaunch())
+      await goTo(page, 'userplaylists')
+      await expect(page.locator('.playlistList [data-playlist-drag-item] .h3Title'))
+        .toHaveText(['Overview A', 'Overview C', 'Overview B'])
+    })
+  }
+})
+
 test.describe('custom playlist order', () => {
   test.use({
     seed: {
@@ -792,6 +861,43 @@ test.describe('custom playlist order', () => {
         await page.waitForTimeout(150)
         expect(await page.evaluate(() => window.scrollY)).toBe(stoppedScroll)
       }
+    })
+  }
+
+  for (const layout of ['list', 'grid']) {
+    test(`keyboard reorders ${layout} playlists and keeps the handle focused`, async ({ page }) => {
+      await dispatchStoreAction(page, 'updatePlaylistViewType', layout)
+      await goTo(page, 'userplaylists')
+      await page.getByText('Large custom playlist').click()
+
+      const titles = page.locator('.playlistItemsCard [data-playlist-drag-item] .h3Title')
+      const handle = page.getByRole('button', { name: 'Drag or use the arrow keys to reorder' }).first()
+      const storedTitle = index => page.evaluate(index => {
+        return window.$store.getters.getPlaylist('large-custom-playlist').videos.at(index).title
+      }, index)
+      await handle.focus()
+
+      await page.keyboard.press('ArrowDown')
+      await expect(titles.first()).toHaveText('Custom playlist video 2')
+      await expect.poll(() => storedTitle(1)).toBe('Custom playlist video 1')
+      await expect(page.locator(':focus')).toHaveAccessibleName('Drag or use the arrow keys to reorder')
+      await expect(page.locator('[data-playlist-drag-item]:focus-within .h3Title')).toHaveText('Custom playlist video 1')
+
+      await page.keyboard.press('ArrowUp')
+      await expect(titles.first()).toHaveText('Custom playlist video 1')
+      await expect(page.locator('[data-playlist-drag-item]:focus-within .h3Title')).toHaveText('Custom playlist video 1')
+
+      await page.locator('.playlistItemsCard [data-playlist-drag-item]')
+        .filter({ has: page.getByText('Custom playlist video 3', { exact: true }) })
+        .getByRole('button', { name: 'Drag or use the arrow keys to reorder' })
+        .focus()
+      await page.keyboard.press('Home')
+      await expect(titles.first()).toHaveText('Custom playlist video 3')
+      await expect(page.locator('[data-playlist-drag-item]:focus-within .h3Title')).toHaveText('Custom playlist video 3')
+
+      // The bottom is beyond the first page, so only the saved order is observable.
+      await page.keyboard.press('End')
+      await expect.poll(() => storedTitle(-1)).toBe('Custom playlist video 3')
     })
   }
 

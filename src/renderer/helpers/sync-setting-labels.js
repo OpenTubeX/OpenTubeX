@@ -365,6 +365,10 @@ export const SYNC_SETTING_LABELS = {
     'Playlists',
     'Global.Sort By'
   ],
+  userPlaylistsCustomOrder: [
+    'Playlists',
+    'Playlist.Sort By.Custom'
+  ],
   videoIpBlockScriptPath: 'Settings.Proxy Settings.IP Block Recovery Script Path',
   videoPlaybackEngine: 'Settings.General Settings.Stream Extraction Method.Stream Extraction Method',
   videoPlaybackRateInterval: 'Settings.Player Settings.Video Playback Rate Interval',
@@ -483,6 +487,7 @@ export const SYNC_SETTING_VALUE_LABELS = {
     earliest_updated_first: 'User Playlists.Sort By.EarliestUpdatedFirst',
     latest_played_first: 'User Playlists.Sort By.LatestPlayedFirst',
     earliest_played_first: 'User Playlists.Sort By.EarliestPlayedFirst',
+    custom: 'Playlist.Sort By.Custom',
   },
   userPlaylistSortOrder: {
     date_added_descending: 'Playlist.Sort By.DateAddedNewest',

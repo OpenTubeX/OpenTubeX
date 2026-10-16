@@ -186,6 +186,7 @@ Feed:
   Cancel Refresh: Canslo'r adnewyddiad
   Next Auto Refresh: 'Adnewyddiad awtomatig nesaf: {date}'
 User Playlists:
+  Reorder Hint: Llusgwch neu defnyddiwch y bysellau saeth i aildrefnu
   Add new videos to the top (custom order): "Ychwanegu fideos newydd ar y brig (trefn bersonol)"
   Repair Playlists: Atgyweirio rhestrau chwarae
   Repair Description: Adfer manylion fideo coll ar ôl mewnforio ZIP YouTube Takeout. Mae trefn y rhestrau chwarae yn aros yr un fath.

@@ -197,6 +197,7 @@ Feed:
   Cancel Refresh: 새로 고침 취소
   Next Auto Refresh: '다음 자동 새로 고침: {date}'
 User Playlists:
+  Reorder Hint: 드래그하거나 화살표 키를 사용해 순서 변경
   Add new videos to the top (custom order): "새 동영상을 맨 위에 추가 (사용자 지정 순서)"
   Repair Playlists: 재생목록 복구
   Repair Description: YouTube Takeout ZIP을 가져온 후 누락된 동영상 정보를 복원합니다. 재생목록 순서는 변경되지 않습니다.

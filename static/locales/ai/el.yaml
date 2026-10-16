@@ -186,6 +186,7 @@ Feed:
   Cancel Refresh: Ακύρωση ανανέωσης
   Next Auto Refresh: 'Επόμενη αυτόματη ανανέωση: {date}'
 User Playlists:
+  Reorder Hint: Σύρετε ή χρησιμοποιήστε τα πλήκτρα βέλους για αναδιάταξη
   Add new videos to the top (custom order): "Προσθήκη νέων βίντεο στην κορυφή (προσαρμοσμένη σειρά)"
   Repair Playlists: Επιδιόρθωση λιστών αναπαραγωγής
   Repair Description: Επαναφέρετε τα στοιχεία βίντεο που λείπουν μετά την εισαγωγή ZIP από το YouTube Takeout. Η σειρά στις λίστες παραμένει ίδια.

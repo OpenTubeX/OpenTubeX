@@ -14,6 +14,7 @@
     :data-video-id="data.videoId"
     :data-playlist-item-id="playlistItemId"
     @pointerdown.capture="canBecomeDraggable && startPointerDrag($event, videoData)"
+    @keydown="canBecomeDraggable && moveWithKeyboard($event, videoData)"
     v-on="canBecomeDraggable ? draggableEventHandlers : {}"
   >
     <template
@@ -21,6 +22,11 @@
     >
       <p
         class="videoIndexArea"
+        :role="canBecomeDraggable ? 'button' : null"
+        :tabindex="canBecomeDraggable ? 0 : null"
+        :aria-label="canBecomeDraggable ? t('User Playlists.Reorder Hint') : null"
+        :title="canBecomeDraggable ? t('User Playlists.Reorder Hint') : null"
+        :aria-keyshortcuts="canBecomeDraggable ? 'ArrowUp ArrowDown Home End' : null"
       >
         <FtIcon
           v-if="isCurrentVideo"
@@ -196,7 +202,7 @@ const downloadAvailable = computed(() => {
 
 const inUserPlaylist = props.playlistType === 'user'
 const canBecomeDraggable = computed(() => inUserPlaylist && props.isSortOrderCustom && (props.canMoveVideoUp || props.canMoveVideoDown))
-const { dragVideo, moveDraggedVideo, afterDrag, pointerDragging, startPointerDrag } = usePlaylistDrag(emit)
+const { dragVideo, moveDraggedVideo, afterDrag, pointerDragging, startPointerDrag, moveWithKeyboard } = usePlaylistDrag(emit)
 const draggableEventHandlers = {
   dragstart: onDragVideo,
   dragover: event => event.preventDefault(),

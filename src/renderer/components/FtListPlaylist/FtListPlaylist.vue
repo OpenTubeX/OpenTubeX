@@ -14,6 +14,17 @@
     @pointercancel="cancelMenuHold"
   >
     <div
+      v-if="showGrabBar"
+      class="grabBar"
+      role="button"
+      tabindex="0"
+      :aria-label="t('User Playlists.Reorder Hint')"
+      :title="t('User Playlists.Reorder Hint')"
+      aria-keyshortcuts="ArrowUp ArrowDown Home End"
+    >
+      <FtIcon :icon="['fas', 'bars']" />
+    </div>
+    <div
       class="videoThumbnail"
     >
       <RouterLink
@@ -138,6 +149,10 @@ const props = defineProps({
   searchQueryText: {
     type: String,
     default: ''
+  },
+  showGrabBar: {
+    type: Boolean,
+    default: false
   },
 })
 

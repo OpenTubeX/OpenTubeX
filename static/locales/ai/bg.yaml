@@ -188,6 +188,7 @@ Feed:
   Cancel Refresh: Отмени обновяването
   Next Auto Refresh: 'Следващо автоматично обновяване: {date}'
 User Playlists:
+  Reorder Hint: Плъзнете или използвайте клавишите със стрелки, за да пренаредите
   Add new videos to the top (custom order): "Добавяне на нови видеоклипове най-отгоре (персонализиран ред)"
   Repair Playlists: Поправка на плейлистите
   Repair Description: Възстановете липсващите данни за видеоклиповете след импортиране на ZIP от YouTube Takeout. Редът в плейлистите остава непроменен.

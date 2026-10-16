@@ -196,6 +196,7 @@ Feed:
   Cancel Refresh: Скасаваць абнаўленне
   Next Auto Refresh: 'Наступнае аўтаабнаўленне: {date}'
 User Playlists:
+  Reorder Hint: Перацягніце або выкарыстоўвайце клавішы са стрэлкамі, каб змяніць парадак
   Add new videos to the top (custom order): "Дадаваць новыя відэа ў пачатак (уласны парадак)"
   Repair Playlists: Аднавіць плэйлісты
   Repair Description: Аднавіце адсутныя звесткі пра відэа пасля імпарту ZIP-архіва YouTube Takeout. Парадак плэйлістаў застаецца нязменным.

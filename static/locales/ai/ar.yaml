@@ -188,6 +188,7 @@ Feed:
   Cancel Refresh: إلغاء التحديث
   Next Auto Refresh: 'التحديث التلقائي التالي: {date}'
 User Playlists:
+  Reorder Hint: اسحب أو استخدم مفاتيح الأسهم لإعادة الترتيب
   Add new videos to the top (custom order): "إضافة الفيديوهات الجديدة في الأعلى (ترتيب مخصص)"
   Repair Playlists: إصلاح قوائم التشغيل
   Repair Description: استعد تفاصيل الفيديو المفقودة بعد استيراد ملف ZIP من YouTube Takeout. يبقى ترتيب قوائم التشغيل دون تغيير.

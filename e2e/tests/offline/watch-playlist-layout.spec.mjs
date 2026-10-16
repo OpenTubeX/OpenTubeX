@@ -241,6 +241,25 @@ test('portrait playlist opens below the video and clamps after resize and remova
   await expect(page.locator('.watchVideoPlaylist .playlistProgressBarContainer')).toBeVisible()
 })
 
+test('keyboard moves watch playlist videos to the top and bottom', async ({ app, page }) => {
+  const watch = await openPlaylist(app, page)
+  const titles = page.locator('.watchVideoPlaylist .playlistItem .h3Title')
+  const handleOf = title => page.locator('.watchVideoPlaylist .playlistItem')
+    .filter({ has: page.getByText(title, { exact: true }) })
+    .getByRole('button', { name: 'Drag or use the arrow keys to reorder' })
+
+  await handleOf('Playlist video 3').focus()
+  await page.keyboard.press('End')
+  await expect(titles.last()).toHaveText('Playlist video 3')
+  await expect(handleOf('Playlist video 3')).toBeFocused()
+  await page.keyboard.press('Home')
+  await expect(titles.first()).toHaveText('Playlist video 3')
+  await expect(handleOf('Playlist video 3')).toBeFocused()
+  await expect.poll(() => page.evaluate(() => window.$store.getters.getPlaylist('layout-playlist').videos[0].title))
+    .toBe('Playlist video 3')
+  await watch.dispose()
+})
+
 test('playlist channel separator follows the counter', { tag: '@scale' }, async ({ app, page, uiScale }) => {
   const watch = await openPlaylist(app, page)
   await watch.evaluate(async (vm, items) => {

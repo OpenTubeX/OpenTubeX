@@ -246,6 +246,8 @@
             @move-dragged-video="onMoveDraggedVideo"
             @move-video-up="moveVideoUp"
             @move-video-down="moveVideoDown"
+            @move-video-to-the-top="(videoId, playlistItemId) => moveVideo(videoId, playlistItemId, () => 0)"
+            @move-video-to-the-bottom="(videoId, playlistItemId) => moveVideo(videoId, playlistItemId, (index, lastIndex) => lastIndex)"
             @remove-from-playlist="removeVideoFromPlaylist"
             @pause-player="pausePlayer"
           />
@@ -833,28 +835,28 @@ async function persistPlaylistOrder(items) {
 /**
  * @param {string} videoId
  * @param {string} playlistItemId
- * @param {-1 | 1} offset
+ * @param {(index: number, lastIndex: number) => number} getTargetIndex
  */
-function moveVideo(videoId, playlistItemId, offset) {
+function moveVideo(videoId, playlistItemId, getTargetIndex) {
   const items = playlistItems.value.slice()
   const index = items.findIndex((video) => {
     return video.videoId === videoId && video.playlistItemId === playlistItemId
   })
-  const targetIndex = index + offset
+  const targetIndex = getTargetIndex(index, items.length - 1)
 
-  if (index === -1 || targetIndex < 0 || targetIndex >= items.length) { return }
+  if (index === -1 || targetIndex === index || targetIndex < 0 || targetIndex >= items.length) { return }
 
-  [items[index], items[targetIndex]] = [items[targetIndex], items[index]]
+  items.splice(targetIndex, 0, ...items.splice(index, 1))
   playlistItems.value = items
   persistPlaylistOrder(items)
 }
 
 function moveVideoUp(videoId, playlistItemId) {
-  moveVideo(videoId, playlistItemId, -1)
+  moveVideo(videoId, playlistItemId, index => index - 1)
 }
 
 function moveVideoDown(videoId, playlistItemId) {
-  moveVideo(videoId, playlistItemId, 1)
+  moveVideo(videoId, playlistItemId, index => index + 1)
 }
 
 /**
