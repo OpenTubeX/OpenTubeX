@@ -95,13 +95,13 @@ test('tells users once that their library moved to a new format', async () => {
       env: { OPENTUBEX_E2E_LIBRARY_NOTICES: 'true' },
     })
     try {
-      const notices = page.getByRole('dialog').filter({ has: page.getByRole('button', { name: 'Ok' }) })
+      const notices = page.getByRole('dialog').filter({ has: page.getByRole('button', { name: 'Ok', exact: true }) })
       const seen = []
       for (let index = 0; index < expected.length; index++) {
         // Notices show one after the other, never stacked.
         await expect(notices).toHaveCount(1)
         seen.push(await notices.getByRole('heading').textContent())
-        await notices.getByRole('button', { name: 'Ok' }).click()
+        await notices.getByRole('button', { name: 'Ok', exact: true }).click()
       }
       // Stores open in no fixed order, so neither do their notices.
       expect(seen.toSorted()).toEqual(expected.toSorted())
