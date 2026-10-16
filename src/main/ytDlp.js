@@ -720,12 +720,23 @@ async function pushProxyArgument(args) {
   }
 }
 
+/** @type {Map<string, { fileKey: string, version: string }>} */
+const ytDlpVersionCache = new Map()
+
 /**
  * @param {string} executable
  * @param {AbortSignal} [signal] aborts a superseded ytDlpGetInfo probe
  * @returns {Promise<string | null>} the version, or null if the executable doesn't work
  */
 async function getYtDlpVersion(executable, signal) {
+  // Playback asks for the version on every request and PyInstaller builds take
+  // a moment to answer, so reuse the answer until the binary file changes.
+  const fileKey = await stat(executable).then(info => `${info.mtimeMs}:${info.size}`, () => null)
+  const cached = fileKey === null ? undefined : ytDlpVersionCache.get(executable)
+  if (cached !== undefined && cached.fileKey === fileKey) {
+    return cached.version
+  }
+
   try {
     // PyInstaller onefile builds extract on first launch; allow time for that on slow disks/VMs
     const { stdout } = await execFileAsync(executable, ['--version'], {
@@ -733,7 +744,11 @@ async function getYtDlpVersion(executable, signal) {
       windowsHide: true,
       signal
     })
-    return stdout.trim()
+    const version = stdout.trim()
+    if (fileKey !== null) {
+      ytDlpVersionCache.set(executable, { fileKey, version })
+    }
+    return version
   } catch {
     return null
   }
