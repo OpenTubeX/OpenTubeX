@@ -9,11 +9,8 @@ Requests such as "implement issue #X" authorize local changes, not a PR. Open a 
 
 ## Upstream merges
 
-- Use the `upstream-merge` skill with these overrides:
-  - Merge `upstream/development` from `FreeTubeApp/FreeTube` into OpenTubeX's `development`, unless the user specifies another destination. Start new worktrees from `origin/development`.
-  - Prefer OpenTubeX changes when resolving conflicts.
-  - Replace user-visible `FreeTube` branding with `OpenTubeX` in imported translations.
-  - The sync workflow is `.github/workflows/sync-upstream.yml`; its bot PR uses `upstream-sync` as its head and `development` as its base.
+Merge `upstream/development`. Prefer OpenTubeX changes when resolving conflicts,
+and replace "FreeTube" with "OpenTubeX" in new translations.
 
 ## Documentation
 
