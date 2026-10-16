@@ -51,11 +51,6 @@ function installRendererAccessors() {
 }
 
 /**
- * Serializes documents in the newline-delimited JSON format used by nedb.
- *
- * @param {object[]} docs
- */
-/**
  * Reads a desktop datastore as NeDB's line format, one document per line.
  * Before the app opens a store, this is its seeded legacy file.
  * @param {string} userDataDir
@@ -81,6 +76,11 @@ export function readDatastore(userDataDir, name) {
   }
 }
 
+/**
+ * Serializes documents in the newline-delimited JSON format used by nedb.
+ *
+ * @param {object[]} docs
+ */
 function toNedbFile(docs) {
   return docs.map((doc) => JSON.stringify(doc)).join('\n') + '\n'
 }
