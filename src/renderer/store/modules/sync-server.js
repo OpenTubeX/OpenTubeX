@@ -981,7 +981,7 @@ const actions = {
           try { receipts = JSON.parse(localStorage.getItem(receiptKey) ?? '[]') } catch {}
           if (!Array.isArray(receipts)) receipts = []
           if (!receipts.includes(event.id) && validateDeviceRequest(value, settings.syncServerDeviceId)) {
-            const route = `/watch/${value.videoId}?t=${Math.floor(value.position)}`
+            const route = `/watch/${value.videoId}?timestamp=${Math.floor(value.position)}`
             let opened
             if (process.env.IS_CAPACITOR) {
               const { getCapacitorTabService } = await import('../../tabs/CapacitorTabService')

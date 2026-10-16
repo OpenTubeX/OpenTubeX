@@ -2272,6 +2272,9 @@ export default defineComponent({
       const loadGeneration = ++this.videoLoadGeneration
       this.preparingVideoLoadGeneration = loadGeneration
       const requestedVideoId = this.tabRoute.params.id
+      if (requestedVideoId !== this.videoId) {
+        this.$store.commit('setCurrentWatchTimestamp', { tabId: this.tabId, value: null })
+      }
       if (this.queuedPlaybackVideoId !== requestedVideoId) this.queuedPlaybackVideoId = null
       this.loadingTheatreMode = this.useTheatreMode
       preserveTitle ||= this.preserveTitleOnNextReload
@@ -4636,6 +4639,7 @@ export default defineComponent({
     },
 
     handleTimeUpdate: function (currentSeconds, fromChromecast = false) {
+      if (this.videoId !== this.tabRoute.params.id) return
       if (this.chromecastActive && !fromChromecast) return
       // Once the refreshed stream has actually played a stretch of content it
       // has proven itself, so refill the budget: a later, unrelated SABR
@@ -5130,7 +5134,7 @@ export default defineComponent({
         this.videoPlayerLoaded = true
 
         if (this.rememberHistory) {
-          if (this.timestamp) {
+          if (this.timestamp !== null) {
             this.addToHistory(this.timestamp)
           } else if (this.historyEntryExists) {
             this.addToHistory(this.historyEntry.watchProgress)
@@ -5145,7 +5149,7 @@ export default defineComponent({
 
         this.updateLocalPlaylistLastPlayedAtSometimes()
 
-        if (process.env.IS_ELECTRON && this.timestamp !== null) {
+        if ((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && this.timestamp !== null) {
           await this.consumeTimestamp()
         }
       }

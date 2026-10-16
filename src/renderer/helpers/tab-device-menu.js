@@ -6,6 +6,7 @@ import { showToast } from './utils'
 export function getTabDeviceMenuItem(tabs, t) {
   if (!store.getters.getSyncServerEnabled || !store.getters.getSyncServerLiveSupported || tabs.length === 0) return null
   const videos = tabs.map(tab => ({
+    tabId: tab.id,
     videoId: tab.route?.fullPath?.match(/^\/watch\/([A-Za-z0-9_-]{11})(?:[?#]|$)/)?.[1],
     title: formatTabTitle(tab.contentTitle || tab.title || tab.route?.fullPath || ''),
   }))
@@ -22,9 +23,10 @@ export function getTabDeviceMenuItem(tabs, t) {
       enabled: true,
       async run() {
         const sentTitles = []
-        for (const video of videos) {
+        for (const { tabId, ...video } of videos) {
           try {
-            await store.dispatch('sendSyncServerVideo', { recipient: device.id, ...video })
+            const position = store.getters.getWatchTimestamp(tabId) ?? 0
+            await store.dispatch('sendSyncServerVideo', { recipient: device.id, ...video, position })
             sentTitles.push(video.title)
           } catch (error) {
             showToast({
