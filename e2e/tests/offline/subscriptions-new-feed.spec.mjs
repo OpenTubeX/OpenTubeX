@@ -1792,6 +1792,8 @@ test.describe('large combined new feed', () => {
         await page.getByRole('button', { name: 'Mark all as seen' }).click()
         await expect(page.getByText('There is no new content.')).toBeVisible()
         await expect(page.locator('.newFeed [data-feed-item-key]')).toHaveCount(0)
+        // The empty message appears before the seen marks are saved and committed.
+        await expect.poll(() => page.evaluate(() => window.__markAllSeenMetrics.scrollAtCommit)).not.toBeNull()
         const metrics = await page.evaluate(() => {
           delete document.body.offsetHeight
           window.__unsubscribeMarkAllSeen()
