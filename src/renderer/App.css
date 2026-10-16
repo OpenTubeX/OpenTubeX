@@ -751,6 +751,9 @@
   cursor: pointer;
   text-align: start;
   transition: border-color 0.12s ease, background-color 0.12s ease, transform 0.12s ease;
+
+  /* Keep room for the selected lift when scrolling before its transition ends. */
+  scroll-margin-block-start: 2px;
 }
 
 .tabSwitcher.noPreviews {
