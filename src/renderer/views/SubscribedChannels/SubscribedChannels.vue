@@ -131,6 +131,10 @@ const ytBaseURL = 'https://yt3.ggpht.com'
 const thumbnailSize = 176
 const channelsPerPage = 50
 let errorCount = 0
+/** @type {Set<ReturnType<typeof setTimeout>>} */
+const thumbnailRetryTimers = new Set()
+/** @type {Set<string>} */
+const pendingThumbnailChannelIds = new Set()
 
 const query = ref('')
 const subscribedChannels = ref([])
@@ -249,31 +253,39 @@ function handleThumbnailError(channel) {
 }
 
 function updateThumbnail(channel) {
+  // Re-rendering the list (filtering, profile switch) fires the image error
+  // again; one refresh per channel is enough.
+  if (pendingThumbnailChannelIds.has(channel.id)) return
+  pendingThumbnailChannelIds.add(channel.id)
+
   errorCount += 1
-  if (backendPreference.value === 'local') {
-    // avoid too many concurrent requests
-    setTimeout(() => {
-      getLocalChannel(channel.id).then(response => {
-        if (!response.alert) {
-          store.dispatch('updateSubscriptionDetails', {
-            channelThumbnailUrl: thumbnailURL(parseLocalChannelHeader(response).thumbnailUrl),
-            channelName: channel.name,
-            channelId: channel.id
-          })
-        }
+  // avoid too many concurrent requests
+  const timer = setTimeout(async () => {
+    thumbnailRetryTimers.delete(timer)
+    try {
+      let channelThumbnailUrl
+      if (backendPreference.value === 'local') {
+        const response = await getLocalChannel(channel.id)
+        if (response.alert) return
+        channelThumbnailUrl = thumbnailURL(parseLocalChannelHeader(response).thumbnailUrl)
+      } else {
+        const response = await invidiousGetChannelInfo(channel.id)
+        channelThumbnailUrl = thumbnailURL(response.authorThumbnails[0].url)
+      }
+      store.dispatch('updateSubscriptionDetails', {
+        channelThumbnailUrl,
+        channelName: channel.name,
+        channelId: channel.id
       })
-    }, errorCount * 500)
-  } else {
-    setTimeout(() => {
-      invidiousGetChannelInfo(channel.id).then(response => {
-        store.dispatch('updateSubscriptionDetails', {
-          channelThumbnailUrl: thumbnailURL(response.authorThumbnails[0].url),
-          channelName: channel.name,
-          channelId: channel.id
-        })
-      })
-    }, errorCount * 500)
-  }
+    } catch (error) {
+      console.error('Failed to refresh the channel thumbnail', channel.id, error)
+    } finally {
+      pendingThumbnailChannelIds.delete(channel.id)
+      // Space out the next burst from zero instead of growing the delay forever.
+      if (pendingThumbnailChannelIds.size === 0) errorCount = 0
+    }
+  }, errorCount * 500)
+  thumbnailRetryTimers.add(timer)
 }
 
 function handleQueryChange(val) {
@@ -339,6 +351,10 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   document.removeEventListener('keydown', keyboardShortcutHandler)
+  // Pending refreshes would otherwise keep fetching channel pages after leaving.
+  for (const timer of thumbnailRetryTimers) clearTimeout(timer)
+  thumbnailRetryTimers.clear()
+  pendingThumbnailChannelIds.clear()
 })
 
 const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)

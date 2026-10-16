@@ -9,7 +9,7 @@ import { getTwitchCreatorUrl, resolveYtDlpCreatorAvatarUrl } from './ytDlpCreato
 import { execFile, spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { chmod, mkdir, mkdtemp, readFile, rename, rm, stat, statfs, writeFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
+import { delimiter, dirname, join } from 'node:path'
 import { promisify } from 'node:util'
 import { inflateRawSync } from 'node:zlib'
 import { app, BrowserWindow, net, Notification, shell } from 'electron'
@@ -720,12 +720,48 @@ async function pushProxyArgument(args) {
   }
 }
 
+/** @type {Map<string, { fileKey: string, version: string }>} */
+const ytDlpVersionCache = new Map()
+
+/**
+ * Identifies the file execFile would run so the version cache can tell when
+ * the binary changed. A bare name is looked up through PATH like execFile does.
+ * @param {string} executable
+ * @returns {Promise<string | null>}
+ */
+async function getExecutableFileKey(executable) {
+  const isBareName = !executable.includes('/') && !executable.includes('\\')
+  // execFile without a shell tries the exact name and, on Windows, .com/.exe;
+  // it does not consult PATHEXT.
+  const extensions = process.platform === 'win32' ? ['', '.com', '.exe'] : ['']
+  const candidates = isBareName
+    ? (process.env.PATH ?? '').split(delimiter).filter(Boolean)
+        .flatMap(directory => extensions.map(extension => join(directory, executable + extension)))
+    : [executable]
+
+  for (const candidate of candidates) {
+    try {
+      const info = await stat(candidate)
+      return `${candidate}:${info.mtimeMs}:${info.size}`
+    } catch {}
+  }
+  return null
+}
+
 /**
  * @param {string} executable
  * @param {AbortSignal} [signal] aborts a superseded ytDlpGetInfo probe
  * @returns {Promise<string | null>} the version, or null if the executable doesn't work
  */
 async function getYtDlpVersion(executable, signal) {
+  // Playback asks for the version on every request and PyInstaller builds take
+  // a moment to answer, so reuse the answer until the binary file changes.
+  const fileKey = await getExecutableFileKey(executable)
+  const cached = fileKey === null ? undefined : ytDlpVersionCache.get(executable)
+  if (cached !== undefined && cached.fileKey === fileKey) {
+    return cached.version
+  }
+
   try {
     // PyInstaller onefile builds extract on first launch; allow time for that on slow disks/VMs
     const { stdout } = await execFileAsync(executable, ['--version'], {
@@ -733,7 +769,11 @@ async function getYtDlpVersion(executable, signal) {
       windowsHide: true,
       signal
     })
-    return stdout.trim()
+    const version = stdout.trim()
+    if (fileKey !== null) {
+      ytDlpVersionCache.set(executable, { fileKey, version })
+    }
+    return version
   } catch {
     return null
   }

@@ -57,6 +57,7 @@ function absoluteSeekFixture(props) {
     seekingIsPossible: { value: seekingAllowed },
     hasPlaybackPosition: { value: false },
     hasLoaded: { value: true },
+    loadGeneration: 0,
     pendingMetadataSeek: null,
     seekBarMouseDown: false,
     resumeAutoplayAfterSeek: false,

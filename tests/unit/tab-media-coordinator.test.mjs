@@ -517,3 +517,40 @@ test('reports playback starts without treating owner reselection as a new start'
   tabMediaCoordinator.setPresented('second-playing-tab')
   assert.equal(states.at(-1).playbackStarted, false)
 })
+
+test('clearing calls from unmounting children do not re-register a closed tab', t => {
+  const descriptors = ['navigator', 'window'].map(key => [key, Object.getOwnPropertyDescriptor(globalThis, key)])
+  Object.defineProperty(globalThis, 'navigator', { configurable: true, value: {} })
+  Object.defineProperty(globalThis, 'window', { configurable: true, value: {} })
+  t.after(() => {
+    for (const tabId of ['closed-tab', 'other-tab']) tabMediaCoordinator.unregister(tabId)
+    for (const [key, descriptor] of descriptors) {
+      if (descriptor) Object.defineProperty(globalThis, key, descriptor)
+      else delete globalThis[key]
+    }
+  })
+
+  tabMediaCoordinator.setPresented('closed-tab')
+  tabMediaCoordinator.setActionHandlers('closed-tab', 'player', { pause() {} })
+  tabMediaCoordinator.setMetadata('closed-tab', { title: 'Video' })
+  tabMediaCoordinator.setPlaybackState('closed-tab', 'playing')
+  assert.equal(tabMediaCoordinator.isRegistered('closed-tab'), true)
+
+  // The tab shell unregisters in beforeUnmount, then the Watch children clear
+  // their own state during their teardown.
+  tabMediaCoordinator.unregister('closed-tab')
+  tabMediaCoordinator.setMetadata('closed-tab', null)
+  tabMediaCoordinator.setActionHandlers('closed-tab', 'player', {})
+  tabMediaCoordinator.setActionHandlers('closed-tab', 'playlist', {})
+  tabMediaCoordinator.setPlaybackState('closed-tab', 'none')
+  tabMediaCoordinator.setPositionState('closed-tab', null)
+  tabMediaCoordinator.setMiniPlayer('closed-tab', false)
+  assert.equal(tabMediaCoordinator.isRegistered('closed-tab'), false)
+
+  // A dead tab must not become the presented one either: metadata from a live
+  // tab takes over as before.
+  tabMediaCoordinator.setMetadata('other-tab', { title: 'Other' })
+  assert.equal(tabMediaCoordinator.isRegistered('other-tab'), true)
+  tabMediaCoordinator.setPlaybackState('other-tab', 'playing')
+  assert.equal(tabMediaCoordinator.isRegistered('closed-tab'), false)
+})

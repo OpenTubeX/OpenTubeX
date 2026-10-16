@@ -1661,6 +1661,9 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   playlistRequestGeneration++
+  // A load scheduled just before leaving would otherwise fetch the playlist,
+  // update subscription details and set the tab title for a disposed view.
+  getPlaylistInfoDebounce.cancel()
   releasePlaylistPreloadUi()
   clearPlaylistPreloadComplete()
   removePlaybackSourceCacheChangeListener()

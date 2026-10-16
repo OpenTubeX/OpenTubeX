@@ -2600,13 +2600,23 @@ function runApp() {
 
             response.on('end', () => {
               const data = Buffer.concat(chunks)
-
-              const expiryTimestamp = extractExpiryTimestamp(response.headers)
               const mimeType = response.headers['content-type']
 
-              imageCache.add(url, mimeType, data, expiryTimestamp)
+              // Only a complete 200 response is an image worth keeping; an error
+              // page or a partial 206 answer would be served to every later
+              // request for the URL as if it were the whole image.
+              if (response.statusCode === 200) {
+                imageCache.add(url, mimeType, data, extractExpiryTimestamp(response.headers))
+              }
 
-              resolve(new Response(data, {
+              // Response() only accepts 200-599 and throws when a body accompanies
+              // a status that forbids one.
+              const status = response.statusCode >= 200 && response.statusCode <= 599
+                ? response.statusCode
+                : 502
+              const bodyAllowed = ![204, 205, 304].includes(status)
+              resolve(new Response(bodyAllowed ? data : null, {
+                status,
                 headers: { 'content-type': mimeType }
               }))
             })

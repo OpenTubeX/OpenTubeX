@@ -678,22 +678,19 @@ export function updateVideoListAfterProcessing(videos, now = Date.now()) {
  * @param {string} channelId
  */
 export async function parseYouTubeRSSFeed(rssString, channelId) {
-  try {
-    const { name: channelName, videos } = process.env.IS_ELECTRON
-      ? await window.ftElectron.subscriptionAutoRefresh.processFeed({ format: 'rss', text: rssString, channelId })
-          .catch(() => parseSubscriptionRss(rssString, channelId))
-      : parseSubscriptionRss(rssString, channelId)
+  // A body that is not a feed (consent page, bot challenge, truncated response)
+  // must surface as an error so the caller keeps the cached entries and falls
+  // back, instead of treating it as a channel without videos.
+  const { name: channelName, videos } = process.env.IS_ELECTRON
+    ? await window.ftElectron.subscriptionAutoRefresh.processFeed({ format: 'rss', text: rssString, channelId })
+        .catch(() => parseSubscriptionRss(rssString, channelId))
+    : parseSubscriptionRss(rssString, channelId)
 
-    return {
-      name: channelName,
-      // Enrichment downloads a watch page per candidate, so cap how many of them
-      // a single channel can have in flight at once.
-      videos: await enrichSubscriptionRssEntries(videos)
-    }
-  } catch {
-    return {
-      videos: []
-    }
+  return {
+    name: channelName,
+    // Enrichment downloads a watch page per candidate, so cap how many of them
+    // a single channel can have in flight at once.
+    videos: await enrichSubscriptionRssEntries(videos)
   }
 }
 

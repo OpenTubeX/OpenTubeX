@@ -688,6 +688,12 @@ function enableLiveChat() {
 async function getLiveChatLocal() {
   const videoInfo = await getLocalVideoInfo(props.videoId)
 
+  // The component tears down while this request is pending when the video
+  // changes or the chat closes; starting a chat now would poll forever.
+  if (isUnmounted) {
+    return
+  }
+
   if (videoInfo.livechat) {
     liveChatInstance = videoInfo.getLiveChat()
 

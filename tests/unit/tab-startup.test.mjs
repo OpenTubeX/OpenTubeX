@@ -875,3 +875,31 @@ test('retries a scheduled preview refresh after the hover tooltip closes', async
   assert.equal(captures, 1, 'refreshes without another navigation or activation')
   assert.equal(tab.previewCaptureTimeoutId, null)
 })
+
+test('state broadcasts carry a tab avatar only when it changed', async t => {
+  const manager = createManager(t)
+  const sent = []
+  manager.browserWindow.webContents.send = (channel, payload) => {
+    if (channel === IpcChannels.TABS_STATE_UPDATED) sent.push(payload)
+  }
+  await manager.restoreFromData(session(2), { restoreTabLoadState: true })
+  manager.bridge.markReady()
+  const avatar = 'data:image/jpeg;base64,QUJD'
+  manager.tabs.get('tab-0').avatarDataUrl = avatar
+  const avatarsSent = () => sent.at(-1).tabs.map(tab => tab.avatarUrl)
+
+  manager._broadcastStateUpdate()
+  assert.deepEqual(avatarsSent(), [avatar, null], 'the first ready broadcast announces every avatar')
+  manager._broadcastStateUpdate()
+  assert.deepEqual(avatarsSent(), [undefined, undefined], 'unchanged avatars are left out')
+
+  manager.tabs.get('tab-0').avatarDataUrl = null
+  manager._broadcastStateUpdate()
+  assert.deepEqual(avatarsSent(), [null, undefined], 'clearing an avatar is still announced')
+
+  manager.bridge.ready = false
+  manager._broadcastStateUpdate()
+  manager.bridge.markReady()
+  assert.deepEqual(avatarsSent(), [null, null], 'a reloading renderer gets every avatar again')
+  assert.equal(manager.getState().tabs[0].avatarUrl, null, 'direct state requests always include avatars')
+})

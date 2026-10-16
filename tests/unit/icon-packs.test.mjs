@@ -155,3 +155,14 @@ async function readRendererSources() {
   await walk(rendererRoot)
   return files
 }
+
+test('the alias table only carries aliases the icon map can use', () => {
+  // The full Font Awesome alias list is ~65 KB of mostly identity entries that
+  // every renderer bundle would ship and parse; only aliases that rename a
+  // mapped icon affect resolution or the semantic data-icon attribute.
+  for (const [alias, canonical] of Object.entries(aliases)) {
+    assert.notEqual(alias, canonical, `identity alias ${alias} is dead weight`)
+    assert.ok(canonical in mapping || alias in mapping,
+      `alias ${alias} -> ${canonical} points at an icon no pack maps`)
+  }
+})

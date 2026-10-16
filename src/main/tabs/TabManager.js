@@ -749,6 +749,8 @@ export class TabManager {
     this._avatarsEnabled = true
     /** Tabs whose navigation history the renderer has already been sent. */
     this._historyAnnouncedTabIds = new Set()
+    /** @type {Map<string, string | null>} avatar data URL last sent per tab */
+    this._announcedAvatarUrls = new Map()
     this.bridge = new TabRendererBridge(browserWindow)
     this._initialPresentationResolved = false
     this._initialPresentationPromise = new Promise(resolve => {
@@ -2900,17 +2902,25 @@ export class TabManager {
    * @returns {object}
    */
   /**
-   * @param {{ historyForTabIds?: Set<string> | null }} [options]
+   * @param {{ historyForTabIds?: Set<string> | null, announcedAvatarUrls?: Map<string, string | null> | null }} [options]
    *   Which tabs the navigation history should be included for. Defaults to all
-   *   of them; pass a set to leave it out for the rest.
+   *   of them; pass a set to leave it out for the rest. Tabs whose avatar data
+   *   URL matches `announcedAvatarUrls` leave `avatarUrl` undefined so the
+   *   renderer keeps the one it already has.
    */
-  getState({ historyForTabIds = null } = {}) {
+  getState({ historyForTabIds = null, announcedAvatarUrls = null } = {}) {
     const tabs = Array.from(this.tabs.values()).map(tab => {
       // The renderer only consumes this when it first learns about a tab
       // (e.g. session restore); afterwards it owns the live history. Sending it
       // on every update would serialize each tab's whole history over IPC just
       // for the renderer to discard it.
       const includeHistory = historyForTabIds === null || historyForTabIds.has(tab.id)
+      // Avatars are base64 images; resending every tab's on each playing or
+      // loading flip is the bulk of a state update.
+      const avatarUrl = tab.avatarDataUrl ?? null
+      const includeAvatar = announcedAvatarUrls === null ||
+        !announcedAvatarUrls.has(tab.id) ||
+        announcedAvatarUrls.get(tab.id) !== avatarUrl
 
       return {
         id: tab.id,
@@ -2921,7 +2931,7 @@ export class TabManager {
         url: tab.url,
         route: cloneRoute(tab.route),
         title: tab.title,
-        avatarUrl: tab.avatarDataUrl,
+        avatarUrl: includeAvatar ? avatarUrl : undefined,
         isActive: tab.id === this.activeTabId,
         isActivatable: this._isTabActivatable(tab),
         isUnloaded: tab.loadState === 'unloaded' && !this._deferredStartupTabIds.has(tab.id),
@@ -3009,6 +3019,7 @@ export class TabManager {
     // in full — whichever one survives is the one the tabs get created from.
     if (!this.bridge.ready) {
       this._historyAnnouncedTabIds.clear()
+      this._announcedAvatarUrls.clear()
       this.bridge.send(IpcChannels.TABS_STATE_UPDATED, this.getState())
       return
     }
@@ -3020,7 +3031,10 @@ export class TabManager {
       }
     }
 
-    this.bridge.send(IpcChannels.TABS_STATE_UPDATED, this.getState({ historyForTabIds }))
+    this.bridge.send(IpcChannels.TABS_STATE_UPDATED, this.getState({
+      historyForTabIds,
+      announcedAvatarUrls: this._announcedAvatarUrls
+    }))
 
     for (const tabId of historyForTabIds) {
       this._historyAnnouncedTabIds.add(tabId)
@@ -3028,6 +3042,14 @@ export class TabManager {
     for (const tabId of this._historyAnnouncedTabIds) {
       if (!this.tabs.has(tabId)) {
         this._historyAnnouncedTabIds.delete(tabId)
+      }
+    }
+    for (const [tabId, tab] of this.tabs) {
+      this._announcedAvatarUrls.set(tabId, tab.avatarDataUrl ?? null)
+    }
+    for (const tabId of this._announcedAvatarUrls.keys()) {
+      if (!this.tabs.has(tabId)) {
+        this._announcedAvatarUrls.delete(tabId)
       }
     }
   }
