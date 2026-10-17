@@ -15,7 +15,7 @@ CI version codes use twice the Git commit count for nightlies and add one for st
 
 Stable releases attach only production APKs to the application's GitHub release. F-Droid builds and publishes the promoted nightly APK directly in its signed repository, without creating another GitHub release.
 
-`python3 _scripts/android_apks.py android/app/build/outputs/apk/nightly android-apks` validates the complete output set, stages the download filenames and prints a size breakdown. Use the `release` directory and `--release` for production. The universal release filename is `org.opentubex.app-VERSION-beta.apk`. CI rejects APKs over 75 MiB per architecture or 220 MiB universal; the universal budget includes bundled SQLite for all four architectures. Adjust these budgets deliberately when adding runtime dependencies.
+`python3 _scripts/android_apks.py android/app/build/outputs/apk/nightly android-apks` validates the complete output set, stages the download filenames and prints a size breakdown. Use the `release` directory and `--release` for production. The universal release filename is `org.opentubex.app-VERSION-beta.apk`. CI rejects APKs over 75 MiB per architecture or 225 MiB universal; the universal budget includes bundled SQLite and the Go helpers for all four architectures. Adjust these budgets deliberately when adding runtime dependencies.
 
 Dev installs alongside Nightly and production with its own settings, subscriptions, history and files. The first Dev installation starts fresh; existing Nightly data stays in Nightly and is not copied automatically. Further Dev APKs update the Dev installation.
 

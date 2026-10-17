@@ -107,11 +107,11 @@ class ApkPackagingTest(unittest.TestCase):
         def inspect_oversized_universal(path, abi):
             sizes = inspect(path, abi)
             if abi == "universal":
-                sizes["native"] += round(220.01 * apks.MIB) - sum(sizes.values())
+                sizes["native"] += round(225.01 * apks.MIB) - sum(sizes.values())
             return sizes
 
         with patch.object(apks, "inspect_apk", side_effect=inspect_oversized_universal):
-            with self.assertRaisesRegex(ValueError, "220.01 MiB exceeds the 220 MiB size budget"):
+            with self.assertRaisesRegex(ValueError, "225.01 MiB exceeds the 225 MiB size budget"):
                 apks.prepare(self.source, self.output)
         self.assertFalse(self.output.exists())
 
