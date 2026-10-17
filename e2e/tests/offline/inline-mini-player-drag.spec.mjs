@@ -1433,6 +1433,8 @@ test('swiping across the scroll-triggered bottom bar returns to the video', { ta
     for (const end of ['touchCancel', 'touchEnd']) {
       await touch('touchStart', cancelPoint)
       await touch('touchMove', { ...cancelPoint, y: cancelPoint.y - 40 })
+      // Hold the drag so its release is not a fling.
+      await page.waitForTimeout(300)
       await touch(end)
       // The bar must stay docked after a gesture below the restore threshold.
       await page.waitForTimeout(400)
@@ -1456,6 +1458,85 @@ test('swiping across the scroll-triggered bottom bar returns to the video', { ta
       await page.waitForTimeout(400)
     }
   } finally {
+    await touch('touchEnd').catch(() => {})
+    await cdp.detach()
+  }
+})
+
+test('bottom bar taps restore despite finger drift or a dropped click, and short flicks restore it', { tag: '@scale' }, async ({ app, page }) => {
+  const player = await openMobilePlayer(app, page)
+  await page.evaluate(() => {
+    const spacer = document.createElement('div')
+    spacer.style.height = '2000px'
+    document.body.append(spacer)
+  })
+  const cdp = await page.context().newCDPSession(page)
+  const touch = (type, point) => cdp.send('Input.dispatchTouchEvent', {
+    type, touchPoints: point ? [point] : []
+  })
+  const tap = async ({ drift = 0, dropClick = false }) => {
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+    const point = await player.evaluate(mobileMiniPlayerReturnPoint, 'title')
+    if (dropClick) {
+      // Chromium dispatches no click for a tap that stops a page fling.
+      await page.evaluate(() => {
+        window.dropClick = event => event.stopImmediatePropagation()
+        window.addEventListener('click', window.dropClick, true)
+      })
+    }
+    // Hardware timestamps keep the measured speed independent of how long
+    // the app takes to handle each event.
+    const timestamp = Date.now() / 1000
+    const send = (type, time, point) => cdp.send('Input.dispatchTouchEvent', {
+      type, timestamp: timestamp + time, touchPoints: point ? [point] : []
+    })
+    await send('touchStart', 0, point)
+    if (drift) await send('touchMove', 0.02, { ...point, y: point.y + drift })
+    await send('touchEnd', 0.04)
+    if (dropClick) {
+      // The click that never came must not swallow the next tap's click.
+      const clicked = await page.evaluate(() => {
+        window.removeEventListener('click', window.dropClick, true)
+        let clicked = false
+        const target = document.createElement('button')
+        target.addEventListener('click', () => { clicked = true })
+        document.body.append(target)
+        target.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
+        target.click()
+        target.remove()
+        return clicked
+      })
+      expect(clicked).toBe(true)
+    }
+  }
+  // A quick 40px flick is below the swipe distance but commits as a fling.
+  const taps = [{ drift: -12 }, { dropClick: true }, { drift: -40 }]
+  const scrollTaps = [...taps, { drift: 16, dropClick: true }]
+  try {
+    for (const gesture of scrollTaps) {
+      await page.evaluate(() => window.scrollTo(0, 1200))
+      await tap(gesture)
+      await expect(player, JSON.stringify(gesture)).not.toHaveClass(/scrollMiniPlayer/)
+      await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
+      await page.evaluate(() => window.removeEventListener('click', window.dropClick, true))
+    }
+    for (const gesture of [...taps, { drift: 12 }]) {
+      const bounds = await player.boundingBox()
+      const start = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }
+      await touch('touchStart', start)
+      for (const distance of [20, 40, 60, 80, 100]) {
+        await touch('touchMove', { ...start, y: start.y + distance })
+      }
+      await touch('touchEnd')
+      await expect(page).not.toHaveURL(/#\/watch\//)
+      await tap(gesture)
+      await expect(page, JSON.stringify(gesture)).toHaveURL(/#\/watch\//)
+      await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+      await page.evaluate(() => window.removeEventListener('click', window.dropClick, true))
+    }
+  } finally {
+    await page.evaluate(() => window.removeEventListener('click', window.dropClick, true)).catch(() => {})
     await touch('touchEnd').catch(() => {})
     await cdp.detach()
   }

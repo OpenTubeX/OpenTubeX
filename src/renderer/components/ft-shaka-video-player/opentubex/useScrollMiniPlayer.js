@@ -1516,6 +1516,16 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  // A tap whose drift already started a restore drag completes that drag.
+  function restoreScrollMiniPlayerFromTap() {
+    if (inlineDrag?.restoring) {
+      finishScrollMiniPlayerDrag(true)
+      return
+    }
+    scrollRestoreDrag = false
+    scrollMiniScrollToTop()
+  }
+
   function dismissCrossTabMiniPlayer(event) {
     event?.preventDefault()
     event?.stopPropagation()
@@ -1979,6 +1989,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     scrollMiniResizeHandleOnLightBg,
     scrollMiniScrollToTop,
     restoreInlinePlayer,
+    restoreScrollMiniPlayerFromTap,
     scrollMiniTogglePlayPause,
     revealScrollMiniPlayerControls,
     scrollMiniVolume,

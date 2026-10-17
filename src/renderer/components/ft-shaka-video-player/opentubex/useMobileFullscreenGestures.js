@@ -49,7 +49,7 @@ export function useMobileFullscreenGestures({
   /** @type {number | null} */
   let mobileMiniPlayerDismissTimer = null
   let mobileMiniPlayerDismissSequence = 0
-  /** @type {{ pointerId: number, startX: number, startY: number, startTime: number, fullscreen: boolean, restoring: boolean, minimizing?: boolean, dismissing?: boolean, shorts: boolean, distance: number, tapDirection: number, controlsShownAtStart: boolean, fullscreenSwipeEnabled: boolean, surfaceTap: boolean, action: string, adjusting: boolean, height: number, width: number, seeking: boolean, seekState: { time: number, start: number, end: number } | null } | null} */
+  /** @type {{ pointerId: number, startX: number, startY: number, startTime: number, fullscreen: boolean, restoring: boolean, returnTarget: boolean, minimizing?: boolean, dismissing?: boolean, shorts: boolean, distance: number, tapDirection: number, controlsShownAtStart: boolean, fullscreenSwipeEnabled: boolean, surfaceTap: boolean, action: string, adjusting: boolean, height: number, width: number, seeking: boolean, seekState: { time: number, start: number, end: number } | null } | null} */
   let mobileFullscreenGesture = null
   /** @type {number | null} */
   let mobileFullscreenSettleTimer = null
@@ -141,10 +141,11 @@ export function useMobileFullscreenGestures({
       pointerId: event.pointerId,
       startX: event.clientX,
       startY: event.clientY,
-      startTime: performance.now(),
+      startTime: event.timeStamp,
       surfaceTap,
       fullscreen: isFullscreenActive(),
       restoring,
+      returnTarget: restoring && event.target instanceof Element && event.target.closest('.mobileMiniBarReturn:enabled') !== null,
       shorts,
       distance: 0,
       tapDirection: relativeX <= 0.35 ? -1 : relativeX >= 0.65 ? 1 : 0,
@@ -245,6 +246,12 @@ export function useMobileFullscreenGestures({
       event.stopPropagation()
       return true
     }
+    // A bar that cannot be dismissed keeps a drifting tap until it leaves the
+    // tap tolerance, so its release can still restore the player.
+    if (mobileFullscreenGesture.returnTarget) {
+      if (Math.hypot(deltaX, deltaY) >= 28) mobileFullscreenGesture = null
+      return false
+    }
     if (!mobileFullscreenGesture.fullscreenSwipeEnabled) {
       if (Math.max(Math.abs(deltaX), Math.abs(deltaY)) >= 12) {
         mobileFullscreenGesture = null
@@ -320,6 +327,16 @@ export function useMobileFullscreenGestures({
       if (preview && isFullscreenActive() && isSeekSwipeEnabled()) seekToTime(preview.time)
       return true
     }
+    // Event times keep a busy main thread from slowing a measured fling.
+    const elapsed = Math.max(1, event.timeStamp - gesture.startTime)
+    // A short swipe still commits when it is flung.
+    const swipeCommitted = gesture.distance >= 64 || (gesture.distance >= 28 && gesture.distance / elapsed >= 0.55)
+    // Restore taps on the bar here rather than through its click. A finger that
+    // drifts a few pixels starts a drag, and a tap that stops a page fling
+    // reaches the bar without Chromium dispatching a click at all.
+    const restoreTap = gesture.returnTarget && !swipeCommitted && elapsed <= 450 &&
+      Math.hypot(event.clientX - gesture.startX, event.clientY - gesture.startY) < 28
+    if (restoreTap) suppressNextClick()
     if (gesture.minimizing || gesture.dismissing) {
       const container = getContainer()
       if (container?.hasPointerCapture(event.pointerId)) container.releasePointerCapture(event.pointerId)
@@ -328,12 +345,22 @@ export function useMobileFullscreenGestures({
       mobileControlSuppressClickUntil = performance.now() + 350
       event.preventDefault()
       event.stopImmediatePropagation()
-      if (gesture.dismissing) settleMobileMiniPlayerDismiss(gesture.distance >= 64, gesture.height)
-      else miniPlayerDrag.finish(gesture.distance >= 64)
+      if (restoreTap) {
+        clearMobileMiniPlayerDismiss()
+        miniPlayerDrag.restore()
+      } else if (gesture.dismissing) {
+        settleMobileMiniPlayerDismiss(swipeCommitted, gesture.height)
+      } else {
+        miniPlayerDrag.finish(swipeCommitted)
+      }
       return true
     }
-    // Restore taps through the button's click, after Android has dispatched it.
-    // Restoring on pointerup can send that click into the newly exposed Watch page.
+    if (restoreTap) {
+      event.preventDefault()
+      event.stopImmediatePropagation()
+      miniPlayerDrag.restore()
+      return true
+    }
     if (gesture.restoring) return false
     if (gesture.adjusting) {
       adjustments.finish()
@@ -348,7 +375,6 @@ export function useMobileFullscreenGestures({
     }
     if (!mobileFullscreenSwiping.value) {
       if (!gesture.surfaceTap) return false
-      const elapsed = performance.now() - gesture.startTime
       const distance = Math.hypot(
         event.clientX - gesture.startX,
         event.clientY - gesture.startY
@@ -373,11 +399,26 @@ export function useMobileFullscreenGestures({
     mobileSurfaceSuppressTouchEndUntil = performance.now() + 350
     mobileControlSuppressClickUntil = performance.now() + 350
 
-    const elapsed = Math.max(1, performance.now() - gesture.startTime)
-    const shouldToggle = gesture.distance >= 64 ||
-      (gesture.distance >= 28 && gesture.distance / elapsed >= 0.55)
-    settleMobileFullscreenGesture(shouldToggle, gesture.fullscreen)
+    settleMobileFullscreenGesture(swipeCommitted, gesture.fullscreen)
     return true
+  }
+
+  // The tap's click may still follow and would land on the restored Watch page.
+  // A new touch means it never came, so that touch's click is left alone.
+  function suppressNextClick() {
+    const remove = () => {
+      clearTimeout(timer)
+      window.removeEventListener('click', block, true)
+      window.removeEventListener('pointerdown', remove, true)
+    }
+    const block = event => {
+      remove()
+      event.preventDefault()
+      event.stopImmediatePropagation()
+    }
+    const timer = window.setTimeout(remove, 350)
+    window.addEventListener('click', block, true)
+    window.addEventListener('pointerdown', remove, true)
   }
 
   function settleMobileFullscreenGesture(shouldToggle, wasFullscreen) {
