@@ -290,6 +290,39 @@ test('closes an unskipped toast when a category correction disables its segment'
   await expect(toast).toHaveCount(0)
 })
 
+test('shrinks an unskipped group to its remaining segments after a category correction', async ({ app, page }) => {
+  const { panel, video } = await openSegments(app, page, [
+    { ...timedSegment, segment: [11, 18] },
+    { ...timedSegment, UUID: 'contained-segment', segment: [12, 14] }
+  ])
+  await page.route('**/api/voteOnSponsorTime?*', route => route.fulfill({ status: 200 }))
+  await page.evaluate(() => {
+    const store = window.$store
+    store.commit('setSponsorBlockIntro', { color: '#00ffff', skip: 'doNothing' })
+  })
+  await panel.getByRole('button', { name: 'Close', exact: true }).click()
+  await video.evaluate(element => {
+    element.currentTime = 11.2
+    element.dispatchEvent(new Event('timeupdate'))
+  })
+  const toast = page.locator('.ftVideoPlayer .skippedSegment')
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(18)
+  await toast.getByRole('button', { name: /^Unskip/ }).click()
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(11)
+  await toast.getByRole('button', { name: 'Edit', exact: true }).click()
+  await toast.getByRole('button', { name: 'Change category', exact: true }).click()
+  await toast.locator('select').selectOption('intro')
+  await toast.getByRole('button', { name: 'Submit category vote', exact: true }).click()
+  await expect(page.locator('.sponsorBlockMarker')).toHaveCount(1)
+
+  // leaving the remaining segment closes the toast even though the removed one extended further
+  await video.evaluate(element => {
+    element.currentTime = 15
+    element.dispatchEvent(new Event('timeupdate'))
+  })
+  await expect(toast).toHaveCount(0)
+})
+
 test.describe('segment editor layout', { tag: '@scale' }, () => {
   test.use({
     seed: {

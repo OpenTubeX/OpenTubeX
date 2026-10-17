@@ -2715,6 +2715,12 @@ export default defineComponent({
           if (toastSegments.length > 0) {
             toast.translatedCategory = formatSponsorBlockToastCategories(toastSegments)
             toast.color = getSponsorBlockInfoSegmentColor(toastSegments[0].category)
+            // an unskipped group stays unskipped only for the range of its remaining segments
+            if (toastSegments.some(({ uuid }) => sponsorBlockDoNotSkipSegments.has(uuid))) {
+              const range = getSponsorBlockSegmentsRange(toastSegments)
+              toast.groupUuids?.forEach(groupUuid => sponsorBlockDoNotSkipSegments.delete(groupUuid))
+              toastSegments.forEach(({ uuid }) => sponsorBlockDoNotSkipSegments.set(uuid, range))
+            }
           } else {
             removeSponsorBlockToast(toast.uuid)
           }
@@ -2905,6 +2911,17 @@ export default defineComponent({
     function formatSponsorBlockToastCategories(segments) {
       const translatedCategories = [...new Set(segments.map(({ category }) => translateSponsorBlockCategory(category)))]
       return new Intl.ListFormat(locale.value, { style: 'long', type: 'conjunction' }).format(translatedCategories)
+    }
+
+    /**
+     * @param {{ startTime: number, endTime: number }[]} segments
+     * @returns {{ startTime: number, endTime: number }}
+     */
+    function getSponsorBlockSegmentsRange(segments) {
+      return {
+        startTime: Math.min(...segments.map(segment => segment.startTime)),
+        endTime: Math.max(...segments.map(segment => segment.endTime))
+      }
     }
 
     /**
@@ -3702,10 +3719,7 @@ export default defineComponent({
       }
 
       const groupSegments = getSponsorBlockToastSegments(uuid)
-      const range = {
-        startTime: Math.min(...groupSegments.map(groupSegment => groupSegment.startTime)),
-        endTime: Math.max(...groupSegments.map(groupSegment => groupSegment.endTime))
-      }
+      const range = getSponsorBlockSegmentsRange(groupSegments)
       groupSegments.forEach(groupSegment => {
         sponsorBlockDoNotSkipSegments.set(groupSegment.uuid, range)
         sponsorBlockDismissedPromptSegments.add(groupSegment.uuid)
