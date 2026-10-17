@@ -56,13 +56,15 @@
               :key="channel.key"
               class="previewChannel"
             >
-              <img
+              <FtRetryImage
                 v-if="channel.thumbnail"
+                :fallback-icon="['fas', 'circle-user']"
+                height="35"
+                width="35"
+                loading="lazy"
                 :src="channel.thumbnail"
                 alt=""
-                loading="lazy"
-                @error="$event.target.hidden = true"
-              >
+              />
             </span>
           </template>
         </nav>
@@ -121,6 +123,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtLogoFull from '../FtLogoFull/FtLogoFull.vue'
+import FtRetryImage from '../FtRetryImage.vue'
 import FtProfileIcon from '../FtProfileIcon/FtProfileIcon.vue'
 
 import store from '../../store/index'

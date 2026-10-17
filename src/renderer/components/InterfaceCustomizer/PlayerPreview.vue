@@ -92,11 +92,11 @@
             data-preview-control="quickPlaybackSpeedBar"
           >
             <span
-              v-for="rate in quickPlaybackRates"
-              :key="rate"
+              v-for="(rate, index) in quickPlaybackRates"
+              :key="index"
               class="previewRate"
-              :class="{ active: rate === 1 }"
-            >{{ `${rate}x` }}</span>
+              :class="{ active: rate.speed === 1 }"
+            >{{ rate.label }}</span>
           </span>
           <span class="previewPill previewRightGroup">
             <span
@@ -147,6 +147,7 @@ import { useI18n } from 'vue-i18n'
 import store from '../../store/index'
 import { PlayerIcons, ZOOM_IN_ICON_VIEWBOX } from '../../../constants'
 import { FULLSCREEN_ACTION_DEFINITIONS } from '../../helpers/fullscreenActions'
+import { getQuickPlaybackRateLabel } from '../../helpers/player/quickPlaybackRateLabel'
 import { AB_REPEAT_PREVIEW_ICON, SHAKA_PREVIEW_ICONS } from './playerPreviewIcons'
 
 const props = defineProps({
@@ -175,17 +176,23 @@ const showFullscreenActionsWhenPaused = computed(() => store.getters.getShowFull
 const displayVideoPlayButton = computed(() => !IS_CAPACITOR && store.getters.getDisplayVideoPlayButton)
 const enableScreenshot = computed(() => store.getters.getEnableScreenshot)
 
+// Parse and label the options like the player's quick playback speed bar.
 const quickPlaybackRates = computed(() => {
   if (!store.getters.getUseQuickPlaybackSpeedBar) return []
+  let options = []
   try {
-    const options = JSON.parse(store.getters.getQuickPlaybackSpeedBarOptions || '[]')
-    const rates = Array.isArray(options)
-      ? options.map(option => Number.parseFloat(option?.speed)).filter(speed => Number.isFinite(speed) && speed > 0)
+    const parsed = JSON.parse(store.getters.getQuickPlaybackSpeedBarOptions || '[]')
+    options = Array.isArray(parsed)
+      ? parsed
+          .map(option => ({
+            speed: Number.parseFloat(option?.speed),
+            name: typeof option?.name === 'string' ? option.name : '',
+          }))
+          .filter(option => Number.isFinite(option.speed) && option.speed > 0)
       : []
-    return rates.length > 0 ? rates : [1]
-  } catch {
-    return [1]
-  }
+  } catch {}
+  if (options.length === 0) options = [{ speed: 1, name: '' }]
+  return options.map(option => ({ ...option, label: getQuickPlaybackRateLabel(option.speed, option.name, t) }))
 })
 
 const fullscreenActions = computed(() => {

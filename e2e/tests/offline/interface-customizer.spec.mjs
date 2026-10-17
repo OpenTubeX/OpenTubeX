@@ -58,8 +58,13 @@ test.describe('interface customizer', () => {
     await expect(preview.locator('[data-preview-control="screenshot"]')).toHaveCount(0)
     await toggle('Enable screenshot').click()
     await expect(preview.locator('[data-preview-control="screenshot"]')).toBeVisible()
+    await page.evaluate(() => window.$store.dispatch('updateQuickPlaybackSpeedBarOptions', JSON.stringify([
+      { speed: 0.5, name: '' }, { speed: 1, name: '' }, { speed: 1.5, name: 'Lecture' }, { speed: 2, name: '' },
+    ])))
     await toggle('Use Quick Playback Speed Bar').click()
-    await expect(preview.locator('[data-preview-control="quickPlaybackSpeedBar"]')).toBeVisible()
+    // The preview labels the options like the player's speed bar.
+    await expect(preview.locator('[data-preview-control="quickPlaybackSpeedBar"] .previewRate'))
+      .toHaveText(['50%', 'Normal', 'Lecture', '2x'])
 
     await customizer.getByRole('tab', { name: 'Player menu', exact: true }).click()
     await expect(preview.locator('[data-preview-overflow-item="lightsOff"]')).toHaveCount(0)

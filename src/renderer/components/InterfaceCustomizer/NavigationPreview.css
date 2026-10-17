@@ -188,7 +188,7 @@
   overflow: hidden;
 }
 
-.previewChannel img {
+.previewChannel :deep(:is(img, .retryImagePlaceholder)) {
   block-size: 100%;
   inline-size: 100%;
   object-fit: cover;

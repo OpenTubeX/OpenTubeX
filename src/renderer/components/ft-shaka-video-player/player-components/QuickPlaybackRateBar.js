@@ -4,6 +4,7 @@ import { FtIcon } from '@opentubex/icons'
 
 import i18n from '../../../i18n/index'
 import { isReducedMotionEnabled } from '../../../helpers/reducedMotion'
+import { getQuickPlaybackRateLabel } from '../../../helpers/player/quickPlaybackRateLabel'
 
 /**
  * @typedef {{ speed: number, name?: string }} QuickPlaybackRateOption
@@ -180,19 +181,7 @@ export class QuickPlaybackRateBar extends shaka.ui.Element {
    * @returns {string}
    */
   getPlaybackRateLabel_(speed, name) {
-    if (typeof name === 'string' && name.trim() !== '') {
-      return name.trim()
-    }
-
-    if (this.isSameRate_(speed, 1)) {
-      return i18n.global.t('Video.Player.Normal')
-    }
-
-    if (speed < 1) {
-      return `${Math.round(speed * 100)}%`
-    }
-
-    return `${speed}x`
+    return getQuickPlaybackRateLabel(speed, name, i18n.global.t)
   }
 
   /** @private */
