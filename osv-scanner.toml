@@ -1,0 +1,13 @@
+# Advisories without a fixed release. Each package is only used by build or lint tooling and never ships in OpenTubeX.
+
+[[IgnoredVulns]]
+id = "GHSA-vfj7-8cjw-p6xm"
+reason = "braces: no fixed release; used by micromatch in stylelint, globby and the webpack dev server."
+
+[[IgnoredVulns]]
+id = "GHSA-ch52-4w7c-c8xp"
+reason = "http-cache-semantics: no fixed release; used by got in electron-builder's Electron download, which shares no cache between users."
+
+[[IgnoredVulns]]
+id = "GHSA-hp3w-g68c-fv3c"
+reason = "sprintf-js: no fixed release; used for logging by global-agent in electron-builder's Electron download."
