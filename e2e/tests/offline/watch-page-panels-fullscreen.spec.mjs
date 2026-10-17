@@ -938,10 +938,16 @@ test.describe('fullscreen playlist dock', () => {
     await expectCaptionCentered()
 
     for (let index = 1; index <= 9; index++) {
+      const previousPlayer = await player.elementHandle()
       await player.locator('.skip-next-button').click({ force: true })
       await expect(page).toHaveURL(new RegExp(
         `#\\/watch\\/playlist${String(index).padStart(3, '0')}\\?.*playlistId=${FULLSCREEN_PLAYLIST_ID}`
       ))
+      // The previous video's player and caption stay mounted until the new
+      // video replaces them. Checking or skipping before that would act on the
+      // old player, so wait for the replacement.
+      await expect.poll(() => previousPlayer.evaluate(element => element.isConnected)).toBe(false)
+      await previousPlayer.dispose()
       await expectCaptionCentered()
     }
   })
