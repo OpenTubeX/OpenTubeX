@@ -60,6 +60,7 @@ Global:
 Search Listing:
   Label:
     Members Only: Members only
+    Possibly AI-generated: Possibly AI-generated
 Stats:
   Replace old device: "Replace old device"
   Replacement explanation: "Combine {device} with this device only if both entries belong to the same physical device."
@@ -1169,6 +1170,13 @@ Settings:
     Resolution: "Resolution"
     Loop: "Loop"
     Off: "Off"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Hide AI slop channels
+    Hide AI Slop Channels Tooltip: Hides channels on the community-maintained AiSList blocklist (aisloplist.com) from search results, trending and recommendations, and labels videos from channels on its warnlist. Subscriptions aren't affected. The lists are downloaded from GitHub once a day and only apply to results loaded with the Local API.
+    Downloading: Downloading the lists…
+    Failed to Download: Couldn't download the lists
+    Loaded Status: "Blocked channels: {blocked} · Flagged channels: {warned} · Updated: {date}"
 Tutorial:
   Skip: Skip
   Next: Next

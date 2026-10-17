@@ -61,6 +61,7 @@ Global:
 Search Listing:
   Label:
     Members Only: Μόνο για μέλη
+    Possibly AI-generated: Πιθανώς δημιουργημένο από AI
 Stats:
   Replace old device: "Αντικατάσταση παλιάς συσκευής"
   Replacement explanation: "Συνδυάστε το {device} με αυτή τη συσκευή μόνο αν και οι δύο καταχωρίσεις ανήκουν στην ίδια φυσική συσκευή."
@@ -1193,6 +1194,13 @@ Settings:
     Resolution: "Ανάλυση"
     Loop: "Επανάληψη"
     Off: "Ανενεργό"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Απόκρυψη καναλιών με χαμηλής ποιότητας περιεχόμενο AI
+    Hide AI Slop Channels Tooltip: Αποκρύπτει τα κανάλια της λίστας αποκλεισμού AiSList που συντηρεί η κοινότητα (aisloplist.com) από τα αποτελέσματα αναζήτησης, τις τάσεις και τις προτάσεις, και επισημαίνει τα βίντεο από κανάλια της λίστας προειδοποίησής της. Οι συνδρομές δεν επηρεάζονται. Οι λίστες λαμβάνονται από το GitHub μία φορά την ημέρα και ισχύουν μόνο για αποτελέσματα που φορτώνονται μέσω του τοπικού API.
+    Downloading: Λήψη των λιστών…
+    Failed to Download: Δεν ήταν δυνατή η λήψη των λιστών
+    Loaded Status: "Αποκλεισμένα κανάλια: {blocked} · Επισημασμένα κανάλια: {warned} · Ενημέρωση: {date}"
 Tutorial:
   Skip: Παράλειψη
   Next: Επόμενο

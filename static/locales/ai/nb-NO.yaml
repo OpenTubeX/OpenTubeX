@@ -61,6 +61,7 @@ Global:
 Search Listing:
   Label:
     Members Only: Bare for medlemmer
+    Possibly AI-generated: Muligens KI-generert
 Stats:
   Replace old device: "Erstatt gammel enhet"
   Replacement explanation: "Slå bare sammen {device} med denne enheten hvis begge oppføringene tilhører samme fysiske enhet."
@@ -1191,6 +1192,13 @@ Settings:
     Resolution: "Oppløsning"
     Loop: "Gjenta"
     Off: "Av"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Skjul kanaler med KI-søppel
+    Hide AI Slop Channels Tooltip: Skjuler kanaler på den fellesskapsdrevne AiSList-blokkeringslisten (aisloplist.com) fra søkeresultater, På vei opp og anbefalinger, og merker videoer fra kanaler på advarselslisten. Abonnementer påvirkes ikke. Listene lastes ned fra GitHub én gang om dagen og gjelder bare resultater som er lastet inn med det lokale API-et.
+    Downloading: Laster ned listene…
+    Failed to Download: Kunne ikke laste ned listene
+    Loaded Status: "Blokkerte kanaler: {blocked} · Flaggede kanaler: {warned} · Oppdatert: {date}"
 Tutorial:
   Skip: Hopp over
   Next: Neste

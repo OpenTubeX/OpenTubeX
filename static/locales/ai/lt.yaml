@@ -67,6 +67,7 @@ Search Listing:
     Members Only: Tik nariams
     3D: 3D
     Closed Captions: Subtitrai kurtiesiems ir neprigirdintiesiems
+    Possibly AI-generated: Galbūt sukurta DI
 Search Filters:
   Possible Age Restriction Hint: "YouTube galėjo pritaikyti amžiaus apribojimą šiai paieškos užklausai."
   Cookie Search Failed: "Paieška su sukonfigūruotais slapukais nepavyko."
@@ -1456,6 +1457,13 @@ Settings:
     Resolution: "Raiška"
     Loop: "Kartoti"
     Off: "Išjungta"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Slėpti nekokybiško DI turinio kanalus
+    Hide AI Slop Channels Tooltip: Paslepia bendruomenės prižiūrimame AiSList blokavimo sąraše (aisloplist.com) esančius kanalus paieškos rezultatuose, populiariuose vaizdo įrašuose ir rekomendacijose bei pažymi vaizdo įrašus iš kanalų, esančių jo įspėjimų sąraše. Prenumeratoms tai neturi įtakos. Sąrašai atsisiunčiami iš GitHub kartą per dieną ir taikomi tik rezultatams, įkeltiems naudojant vietinį API.
+    Downloading: Atsisiunčiami sąrašai…
+    Failed to Download: Nepavyko atsisiųsti sąrašų
+    Loaded Status: "Užblokuoti kanalai: {blocked} · Pažymėti kanalai: {warned} · Atnaujinta: {date}"
 Tutorial:
   Skip: Praleisti
   Next: Toliau

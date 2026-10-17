@@ -1,3 +1,4 @@
+import { isOnAiSlopList } from './aiSlopList'
 import { enrichShortPublicationDates } from './api/short-publication'
 import { parseSubscriptionRss, parseRssUpcomingInfo, isRssUpcomingPremiereCandidate } from './api/feed-rss'
 import { shallowReactive } from 'vue'
@@ -484,6 +485,7 @@ export function isUpcomingPremiere(video, now = Date.now()) {
  *  hideUpcomingPremieres?: boolean,
  *  hideChannelsBasedOnText?: boolean,
  *  hiddenChannelNames?: Set<string>,
+ *  aiSlopChannels?: Set<string>,
  *  forbiddenTitles?: string[],
  * }} preferences
  */
@@ -492,6 +494,7 @@ export function isVideoHiddenByPreferences(video, {
   hideUpcomingPremieres = false,
   hideChannelsBasedOnText = true,
   hiddenChannelNames = new Set(),
+  aiSlopChannels = new Set(),
   forbiddenTitles = []
 } = {}) {
   if (hideLiveStreams && (video.liveNow || video.isUpcoming)) {
@@ -506,6 +509,10 @@ export function isVideoHiddenByPreferences(video, {
   }
 
   if (hiddenChannelNames.has(video.authorId) || hiddenChannelNames.has(video.author)) {
+    return true
+  }
+
+  if (isOnAiSlopList(aiSlopChannels, video)) {
     return true
   }
 

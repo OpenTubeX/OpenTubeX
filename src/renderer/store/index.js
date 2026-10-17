@@ -1,6 +1,7 @@
 import { createStore } from 'vuex'
 // import createPersistedState from 'vuex-persistedstate'
 
+import aiSlopList from './modules/ai-slop-list'
 import downloads from './modules/downloads'
 import history from './modules/history'
 import recommendations from './modules/recommendations'
@@ -99,6 +100,7 @@ function reloadRecommendationEvidenceAfterHistoryRemoval(store) {
 
 export default createStore({
   modules: {
+    aiSlopList,
     downloads,
     history,
     recommendations,

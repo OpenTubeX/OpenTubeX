@@ -87,6 +87,7 @@ Search Listing:
     Members Only: Samo za člane
     3D: 3D
     Closed Captions: Podnapisi za gluhe in naglušne
+    Possibly AI-generated: Morda ustvarjeno z UI
 Search Filters:
   Possible Age Restriction Hint: "YouTube je morda za to iskalno poizvedbo nastavil starostno omejitev."
   Cookie Search Failed: "Iskanje z nastavljenimi piškotki ni uspelo."
@@ -1510,6 +1511,13 @@ Settings:
     Resolution: "Ločljivost"
     Loop: "Ponavljanje"
     Off: "Izklopljeno"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Skrij kanale z nekakovostno vsebino UI
+    Hide AI Slop Channels Tooltip: Skrije kanale s seznama blokiranih AiSList, ki ga vzdržuje skupnost (aisloplist.com), iz rezultatov iskanja, priljubljenih in priporočil ter označi videoposnetke kanalov z njegovega seznama opozoril. Naročnine niso prizadete. Seznami se z GitHuba prenesejo enkrat na dan in veljajo le za rezultate, naložene z lokalnim APV.
+    Downloading: Prenašanje seznamov…
+    Failed to Download: Seznamov ni bilo mogoče prenesti
+    Loaded Status: "Blokirani kanali: {blocked} · Označeni kanali: {warned} · Posodobljeno: {date}"
 Tutorial:
   Skip: Preskoči
   Next: Naprej

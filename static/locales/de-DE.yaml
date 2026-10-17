@@ -1514,6 +1514,13 @@ Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Return YouTube Dislike aktivieren
     Return YouTube Dislike Url: API-URL
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: KI-Slop-Kanäle ausblenden
+    Hide AI Slop Channels Tooltip: Blendet Kanäle von der durch die Community gepflegten AiSList-Sperrliste (aisloplist.com) in Suchergebnissen, Trends und Empfehlungen aus und kennzeichnet Videos von Kanälen auf ihrer Warnliste. Abonnements sind nicht betroffen. Die Listen werden einmal täglich von GitHub heruntergeladen und gelten nur für Ergebnisse, die über die lokale API geladen werden.
+    Downloading: Listen werden heruntergeladen …
+    Failed to Download: Die Listen konnten nicht heruntergeladen werden
+    Loaded Status: 'Gesperrte Kanäle: {blocked} · Markierte Kanäle: {warned} · Aktualisiert: {date}'
   Quick Settings:
     Quick Settings: Schnelleinstellungen
     Customize Quick Settings: Schnelleinstellungen anpassen
@@ -2734,6 +2741,7 @@ Search Listing:
     360 Video: 360°
     New: Neu
     Members Only: Nur für Mitglieder
+    Possibly AI-generated: Möglicherweise KI-generiert
     3D: 3D
 Keys:
   arrowdown: Pfeil nach unten

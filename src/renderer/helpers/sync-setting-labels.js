@@ -341,6 +341,7 @@ export const SYNC_SETTING_LABELS = {
   unsubscriptionPopupStatus: 'Settings.Subscription Settings.Confirm Before Unsubscribing',
   updateRelativeTimestamps: 'Settings.General Settings.Update Relative Timestamps',
   useAITranslationCompletions: 'Settings.General Settings.Use AI Translation Completions',
+  useAiSlopList: 'Settings.AiSList Settings.Hide AI Slop Channels',
   useCustomShortsPlayer: 'Settings.Player Settings.Use YouTube-style Shorts',
   useDeArrowThumbnails: 'Settings.SponsorBlock Settings.UseDeArrowThumbnails',
   useDeArrowTitles: 'Settings.SponsorBlock Settings.UseDeArrowTitles',

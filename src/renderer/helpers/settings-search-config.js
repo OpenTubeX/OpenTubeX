@@ -175,6 +175,9 @@ export const SETTINGS_SEARCH_SOURCES = {
     type: 'return-youtube-dislike',
     key: 'Settings.Return YouTube Dislike Settings'
   }, {
+    type: 'ai-slop-list',
+    key: 'Settings.AiSList Settings'
+  }, {
     type: 'player',
     key: 'Settings.Player Settings',
     include: new Set(['Voice-over Translation']),

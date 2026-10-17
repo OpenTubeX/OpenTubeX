@@ -61,6 +61,7 @@ Global:
 Search Listing:
   Label:
     Members Only: Numai pentru membri
+    Possibly AI-generated: Posibil generat de IA
 Stats:
   Replace old device: "Înlocuiește dispozitivul vechi"
   Replacement explanation: "Combină {device} cu acest dispozitiv doar dacă ambele intrări aparțin aceluiași dispozitiv fizic."
@@ -1204,6 +1205,13 @@ Settings:
     Resolution: "Rezoluție"
     Loop: "Repetare"
     Off: "Dezactivat"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Ascunde canalele cu conținut IA de proastă calitate
+    Hide AI Slop Channels Tooltip: Ascunde canalele de pe lista de blocare AiSList întreținută de comunitate (aisloplist.com) din rezultatele căutării, tendințe și recomandări și etichetează videoclipurile canalelor de pe lista sa de avertizare. Abonamentele nu sunt afectate. Listele sunt descărcate de pe GitHub o dată pe zi și se aplică doar rezultatelor încărcate cu API-ul local.
+    Downloading: Se descarcă listele…
+    Failed to Download: Listele nu au putut fi descărcate
+    Loaded Status: "Canale blocate: {blocked} · Canale semnalate: {warned} · Actualizat: {date}"
 Tutorial:
   Skip: Omite
   Next: Înainte

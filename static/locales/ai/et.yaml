@@ -61,6 +61,7 @@ Global:
 Search Listing:
   Label:
     Members Only: Ainult liikmetele
+    Possibly AI-generated: Võib olla tehisintellekti loodud
 Stats:
   Replace old device: "Asenda vana seade"
   Replacement explanation: "Ühenda {device} selle seadmega ainult siis, kui mõlemad kirjed kuuluvad samale füüsilisele seadmele."
@@ -1184,6 +1185,13 @@ Settings:
     Resolution: "Eraldusvõime"
     Loop: "Kordus"
     Off: "Väljas"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Peida tehisintellekti rämpssisuga kanalid
+    Hide AI Slop Channels Tooltip: Peidab kogukonna hallatavas AiSListi blokeerimisloendis (aisloplist.com) olevad kanalid otsingutulemustest, populaarsust koguvate videote hulgast ja soovitustest ning märgistab videod, mis pärinevad selle hoiatusloendis olevatelt kanalitelt. Tellimusi see ei mõjuta. Loendid laaditakse GitHubist alla kord päevas ja need kehtivad ainult kohaliku API kaudu laaditud tulemustele.
+    Downloading: Loendite allalaadimine…
+    Failed to Download: Loendeid ei õnnestunud alla laadida
+    Loaded Status: "Blokeeritud kanalid: {blocked} · Märgistatud kanalid: {warned} · Uuendatud: {date}"
 Tutorial:
   Skip: Jäta vahele
   Next: Edasi

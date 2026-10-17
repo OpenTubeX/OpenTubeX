@@ -8,6 +8,7 @@ import { runCooperatively } from '../../src/renderer/helpers/cooperativeTask.js'
 import { mergeRecommendationCandidates } from '../../src/renderer/helpers/recommendationCandidates.js'
 import { shouldHideMembersOnlyContent } from '../../src/renderer/helpers/restricted-playback.js'
 import { getUpcomingPremiereTimestamp } from '../../src/renderer/helpers/subscription-entries.js'
+import { isOnAiSlopList } from '../../src/renderer/helpers/aiSlopList.js'
 
 const subscriptionsSource = await readFile(new URL('../../src/renderer/helpers/subscriptions.js', import.meta.url), 'utf8')
 const premiereStart = subscriptionsSource.indexOf('export function isUpcomingPremiere(')
@@ -17,7 +18,7 @@ const isUpcomingPremiere = compileFunction(`${premiereSource.replace('export ', 
 const visibilityStart = subscriptionsSource.indexOf('export function isVideoHiddenByPreferences(')
 const visibilitySource = subscriptionsSource.slice(visibilityStart, subscriptionsSource.indexOf('\n}\n', visibilityStart) + 2)
 const isVideoHiddenByPreferences = compileFunction(`${visibilitySource.replace('export ', '')}\nreturn isVideoHiddenByPreferences`,
-  ['isUpcomingPremiere'])(isUpcomingPremiere)
+  ['isUpcomingPremiere', 'isOnAiSlopList'])(isUpcomingPremiere, isOnAiSlopList)
 
 const source = (await readFile(new URL('../../src/renderer/composables/useHomeRecommendations.js', import.meta.url), 'utf8'))
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
@@ -130,6 +131,7 @@ for (const [setting, value] of [
 for (const { name, settings, updated, candidate } of [
   { name: 'live streams', settings: { getHideLiveStreams: true }, updated: { getHideLiveStreams: false }, candidate: { liveNow: true } },
   { name: 'hidden channels', settings: { getActiveChannelsHiddenNames: new Set(['hidden']) }, updated: { getActiveChannelsHiddenNames: new Set() }, candidate: { authorId: 'hidden' } },
+  { name: 'the AI slop list', settings: { getUseAiSlopList: true, getAiSlopBlockedChannels: new Set(['@slop']) }, updated: { getUseAiSlopList: false, getAiSlopBlockedChannels: new Set() }, candidate: { authorHandle: '@Slop' } },
   { name: 'forbidden titles', settings: { getActiveForbiddenTitles: ['hidden subject'] }, updated: { getActiveForbiddenTitles: [] }, candidate: { title: 'Hidden subject' } },
   { name: 'membership authentication', settings: { getYtDlpPlaybackAuthMode: 'none' }, updated: { getYtDlpPlaybackAuthMode: 'file', getYtDlpPlaybackCookiesPath: '/fixture/cookies.txt' }, candidate: { isMembersOnly: true } },
 ]) {
@@ -151,7 +153,7 @@ for (const { name, settings, updated, candidate } of [
   })
 }
 
-for (const [setting, value] of [['getRecommendationExploration', 0.5], ['getEnableBlockLists', true]]) {
+for (const [setting, value] of [['getRecommendationExploration', 0.5], ['getEnableBlockLists', true], ['getAiSlopListFetchedAt', 123]]) {
   test(`revisiting Home reranks cached candidates after ${setting} changes`, async () => {
     const first = createFeed({ candidates: [{ videoId: 'candidate' }] })
     await waitForFeed(first.feed)
@@ -226,6 +228,25 @@ for (const refreshOtherHome of [false, true]) {
     }
   })
 }
+
+test('turning off the AI slop list while Home is open restores the blocked candidates', async () => {
+  const mounted = createFeed({
+    settings: { getUseAiSlopList: true, getAiSlopBlockedChannels: new Set(['@slop']), getAiSlopListFetchedAt: 1 },
+    candidates: [{ videoId: 'normal' }, { videoId: 'slop', authorHandle: '@Slop' }],
+  })
+  try {
+    await waitForFeed(mounted.feed)
+    assert.deepEqual(mounted.feed.recommendations.value.map(video => video.videoId), ['normal'])
+    Object.assign(mounted.getters, { getUseAiSlopList: false, getAiSlopBlockedChannels: new Set(), getAiSlopListFetchedAt: null })
+    for (let index = 0; index < 1000 && mounted.feed.recommendations.value.length < 2; index++) {
+      await new Promise(resolve => setTimeout(resolve, 1))
+    }
+    assert.deepEqual(mounted.feed.recommendations.value.map(video => video.videoId), ['normal', 'slop'])
+    assert.equal(mounted.work.requests, 1)
+  } finally {
+    mounted.stop()
+  }
+})
 
 test('changing exploration during Load more preserves the appended feed', async () => {
   const { feed, getters, work, stop } = createFeed({

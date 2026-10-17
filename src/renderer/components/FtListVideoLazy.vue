@@ -125,6 +125,13 @@ const channelsHiddenNames = computed(() => {
   return store.getters.getActiveChannelsHiddenNames
 })
 
+/** @type {import('vue').ComputedRef<Set<string>>} */
+const aiSlopChannels = computed(() => {
+  if (!props.useChannelsHiddenPreference) { return EMPTY_SET }
+
+  return store.getters.getAiSlopBlockedChannels
+})
+
 /** @type {import('vue').ComputedRef<string[]>} */
 const forbiddenTitles = computed(() => {
   if (!props.hideForbiddenTitles) { return [] }
@@ -134,6 +141,7 @@ const forbiddenTitles = computed(() => {
 const shouldBeVisible = computed(() => {
   return !isVideoHiddenByPreferences(props.data, {
     hiddenChannelNames: channelsHiddenNames.value,
+    aiSlopChannels: aiSlopChannels.value,
     forbiddenTitles: forbiddenTitles.value,
     hideChannelsBasedOnText: false,
   })

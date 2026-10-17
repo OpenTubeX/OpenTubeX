@@ -61,6 +61,7 @@ Global:
 Search Listing:
   Label:
     Members Only: الأعضاء فقط
+    Possibly AI-generated: قد يكون مُنشأً بالذكاء الاصطناعي
 Stats:
   Replace old device: "استبدال الجهاز القديم"
   Replacement explanation: "ادمج {device} مع هذا الجهاز فقط إذا كان الإدخالان يخصان الجهاز الفعلي نفسه."
@@ -1210,6 +1211,13 @@ Settings:
     Resolution: "الدقة"
     Loop: "تكرار"
     Off: "إيقاف"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: إخفاء قنوات المحتوى الرديء المُنشأ بالذكاء الاصطناعي
+    Hide AI Slop Channels Tooltip: يُخفي القنوات المدرجة في قائمة الحظر AiSList التي يديرها المجتمع (aisloplist.com) من نتائج البحث والمحتوى الرائج والمقترحات، ويضع تسمية على الفيديوهات من القنوات المدرجة في قائمة التحذير الخاصة بها. لا تتأثر الاشتراكات. تُنزَّل القوائم من GitHub مرة واحدة يوميًا ولا تنطبق إلا على النتائج المحمّلة باستخدام واجهة البرمجة المحلية.
+    Downloading: جارٍ تنزيل القوائم…
+    Failed to Download: تعذّر تنزيل القوائم
+    Loaded Status: "القنوات المحظورة: {blocked} · القنوات المُعلَّمة: {warned} · آخر تحديث: {date}"
 Tutorial:
   Skip: تخطي
   Next: التالي

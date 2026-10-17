@@ -89,6 +89,7 @@ import {
 } from './lazyListComponents'
 
 import store from '../../store/index'
+import { isOnAiSlopList } from '../../helpers/aiSlopList'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 
 const props = defineProps({
@@ -243,6 +244,13 @@ const channelsHiddenNames = computed(() => {
   return store.getters.getActiveChannelsHiddenNames
 })
 
+/** @type {import('vue').ComputedRef<Set<string>>} */
+const aiSlopChannels = computed(() => {
+  if (!props.useChannelsHiddenPreference) { return EMPTY_SET }
+
+  return store.getters.getAiSlopBlockedChannels
+})
+
 /** @type {import('vue').ComputedRef<string[]>} */
 const forbiddenTitles = computed(() => {
   if (!props.hideForbiddenTitles) { return [] }
@@ -261,6 +269,7 @@ const showResult = computed(() => {
       hideLiveStreams: hideLiveStreams.value,
       hideUpcomingPremieres: hideUpcomingPremieres.value,
       hiddenChannelNames: channelsHiddenNames.value,
+      aiSlopChannels: aiSlopChannels.value,
       forbiddenTitles: forbiddenTitles.value
     })) {
       return false
@@ -279,6 +288,10 @@ const showResult = computed(() => {
     const lowerCaseName = props.data.name?.toLowerCase()
 
     if ((attrsToCheck.some(a => a != null && channelsHiddenNames.value.has(a))) ||
+      isOnAiSlopList(aiSlopChannels.value, {
+        authorId: props.data.id ?? props.data.authorId,
+        authorHandle: props.data.handle ?? props.data.channelHandle
+      }) ||
       (forbiddenTitles.value.some((text) => lowerCaseName.includes(text)))) {
       // hide channels by author
       return false

@@ -211,12 +211,16 @@
   white-space-collapse: collapse;
 }
 
-.membersOnlyTag {
+.membersOnlyTag,
+.aiSlopTag {
   align-items: center;
-  color: var(--members-only-color);
   display: inline-flex;
   gap: 3px;
   white-space: nowrap;
+}
+
+.membersOnlyTag {
+  color: var(--members-only-color);
 }
 
 .videoTagLine .videoTag:first-child {

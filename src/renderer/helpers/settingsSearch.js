@@ -224,6 +224,10 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     }
   }
 
+  if (sectionType === 'ai-slop-list') {
+    return supportsLocalApi
+  }
+
   if (sectionType === 'return-youtube-dislike' && group === 'Return YouTube Dislike Url') {
     return store.getters.getUseReturnYouTubeDislikes
   }

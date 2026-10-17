@@ -61,6 +61,7 @@ Global:
 Search Listing:
   Label:
     Members Only: 會員專屬
+    Possibly AI-generated: 可能由 AI 生成
 Stats:
   Replace old device: "取代舊裝置"
   Replacement explanation: "僅當兩筆記錄屬於同一台實體裝置時，才將 {device} 與此裝置合併。"
@@ -1184,6 +1185,13 @@ Settings:
     Resolution: "解析度"
     Loop: "循環"
     Off: "關閉"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: 隱藏 AI 垃圾內容頻道
+    Hide AI Slop Channels Tooltip: 在搜尋結果、發燒影片和推薦內容中隱藏社群維護的 AiSList 封鎖清單（aisloplist.com）上的頻道，並為其警告清單上頻道的影片加上標籤。不會影響訂閱內容。清單每天從 GitHub 下載一次，且僅適用於透過本機 API 載入的結果。
+    Downloading: 正在下載清單…
+    Failed to Download: 無法下載清單
+    Loaded Status: 已封鎖頻道：{blocked} · 已標記頻道：{warned} · 更新時間：{date}
 Tutorial:
   Skip: 略過
   Next: 下一步

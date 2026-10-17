@@ -73,6 +73,7 @@ export function useHomeRecommendations(visible) {
         hideLiveStreams: store.getters.getHideLiveStreams,
         hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
         hiddenChannelNames: store.getters.getActiveChannelsHiddenNames,
+        aiSlopChannels: store.getters.getAiSlopBlockedChannels,
         forbiddenTitles: store.getters.getActiveForbiddenTitles,
       })
   }
@@ -142,6 +143,8 @@ export function useHomeRecommendations(visible) {
     hideLiveStreams: store.getters.getHideLiveStreams,
     hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
     hiddenChannels: [...(store.getters.getActiveChannelsHiddenNames ?? [])],
+    // The update time stands in for the list contents, which are too large to serialize
+    aiSlopList: [store.getters.getUseAiSlopList, store.getters.getAiSlopListFetchedAt],
     forbiddenTitles: store.getters.getActiveForbiddenTitles,
     hideMembersOnly: shouldHideMembersOnlyContent(true, store.getters),
   }))
@@ -336,6 +339,7 @@ export function useHomeRecommendations(visible) {
   }
   watch(exploration, updateRanking)
   watch(() => store.getters.getEnableBlockLists, updateRanking)
+  watch([() => store.getters.getUseAiSlopList, () => store.getters.getAiSlopListFetchedAt], updateRanking)
   onBeforeUnmount(cancelRequest)
   return {
     enabled,

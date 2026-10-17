@@ -502,6 +502,10 @@
     "ri": "replay-10-line",
     "material": "replay-10-rounded"
   },
+  "robot": {
+    "ri": "robot-2-line",
+    "material": "robot-2-outline-rounded"
+  },
   "rss": {
     "ri": "rss-line",
     "material": "rss-feed-rounded"

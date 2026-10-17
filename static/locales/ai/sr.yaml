@@ -63,6 +63,7 @@ Global:
 Search Listing:
   Label:
     Members Only: Само за чланове
+    Possibly AI-generated: Можда генерисано помоћу AI
 Stats:
   Replace old device: "Замени стари уређај"
   Replacement explanation: "Спојите {device} са овим уређајем само ако оба уноса припадају истом физичком уређају."
@@ -1232,6 +1233,13 @@ Settings:
     Resolution: "Резолуција"
     Loop: "Понављање"
     Off: "Искључено"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Сакриј канале са неквалитетним AI садржајем
+    Hide AI Slop Channels Tooltip: Сакрива канале са листе блокирања AiSList коју одржава заједница (aisloplist.com) из резултата претраге, трендова и препорука и означава видео снимке канала са њене листе упозорења. Праћења нису обухваћена. Листе се преузимају са GitHub-а једном дневно и примењују се само на резултате учитане помоћу локалног API-ја.
+    Downloading: Преузимање листа…
+    Failed to Download: Није могуће преузети листе
+    Loaded Status: "Блокирани канали: {blocked} · Означени канали: {warned} · Ажурирано: {date}"
 Tutorial:
   Skip: Прескочи
   Next: Даље

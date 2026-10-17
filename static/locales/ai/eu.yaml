@@ -61,6 +61,7 @@ Global:
 Search Listing:
   Label:
     Members Only: Kideentzat soilik
+    Possibly AI-generated: Agian AA bidez sortua
 Stats:
   Replace old device: "Ordeztu gailu zaharra"
   Replacement explanation: "Batu {device} gailu honekin bi sarrerak gailu fisiko berarenak badira soilik."
@@ -1187,6 +1188,13 @@ Settings:
     Resolution: "Bereizmena"
     Loop: "Begizta"
     Off: "Desaktibatuta"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Ezkutatu AA bidezko zabor-edukiko kanalak
+    Hide AI Slop Channels Tooltip: Komunitateak mantentzen duen AiSList blokeo-zerrendako (aisloplist.com) kanalak ezkutatzen ditu bilaketa-emaitzetatik, joeretatik eta gomendioetatik, eta haren abisu-zerrendako kanalen bideoak etiketatzen ditu. Harpidetzei ez die eragiten. Zerrendak egunean behin deskargatzen dira GitHub-etik, eta tokiko APIarekin kargatutako emaitzei soilik aplikatzen zaizkie.
+    Downloading: Zerrendak deskargatzen…
+    Failed to Download: Ezin izan dira zerrendak deskargatu
+    Loaded Status: "Blokeatutako kanalak: {blocked} · Markatutako kanalak: {warned} · Eguneratua: {date}"
 Tutorial:
   Skip: Saltatu
   Next: Hurrengoa
