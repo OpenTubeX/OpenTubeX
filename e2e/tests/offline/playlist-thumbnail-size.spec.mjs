@@ -201,7 +201,7 @@ test.describe('playlist thumbnail sizing', { tag: '@scale' }, () => {
     await expect(grid.locator('.ft-list-video.grid').first()).toBeVisible()
     // Moving videos requires the custom sort order.
     await page.evaluate(() => window.$store.dispatch('updateUserPlaylistSortOrder', 'custom'))
-    const moveDownIcon = page.locator('.playlistItemsCard .downArrowIcon [data-icon]').first()
+    const moveDownIcon = page.locator('.playlistItemsCard').getByRole('button', { name: 'Move Video Down' }).first().locator('[data-icon]')
     await expect(moveDownIcon).toHaveAttribute('data-icon', 'arrow-right')
     // A single column moves videos up and down.
     await page.evaluate(() => window.$store.dispatch('updatePlaylistViewType', 'fullWidth'))
