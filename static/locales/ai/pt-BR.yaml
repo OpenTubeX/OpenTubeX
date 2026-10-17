@@ -1167,6 +1167,21 @@ Settings:
     Unlocking: A desbloquear…
   Search Settings: Procurar nas configurações
   No Settings Found: Nenhuma configuração encontrada
+  Interface Customizer:
+    Customize Interface: "Personalizar interface"
+    Preview: "Prévia"
+    Player: "Player"
+    Desktop: "Computador"
+    Mobile: "Celular"
+    Playing: "Reproduzindo"
+    Player Menu: "Menu do player"
+    Fullscreen: "Tela cheia"
+    Paused: "Pausado"
+    Controls: "Controles"
+    Example Video Title: "Vídeo de exemplo"
+    Resolution: "Resolução"
+    Loop: "Repetir"
+    Off: "Desativado"
 Tutorial:
   Skip: Ignorar
   Next: Seguinte

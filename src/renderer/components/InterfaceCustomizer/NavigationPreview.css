@@ -1,0 +1,258 @@
+.navigationPreview {
+  block-size: 100%;
+  display: flex;
+  justify-content: center;
+  user-select: none;
+}
+
+.previewWindow {
+  background-color: var(--bg-color);
+  block-size: 100%;
+  border: 1px solid var(--divider-color);
+  border-radius: calc(12px * var(--ui-roundness));
+  box-sizing: border-box;
+  color: var(--primary-text-color);
+  display: flex;
+  flex-direction: column;
+  inline-size: 100%;
+  overflow: hidden;
+}
+
+.mobile .previewWindow {
+  border-radius: calc(24px * var(--ui-roundness));
+  border-width: 6px;
+  inline-size: min(100%, 320px);
+}
+
+.previewTopBar {
+  align-items: center;
+  background-color: var(--card-bg-color);
+  block-size: 56px;
+  box-sizing: border-box;
+  display: flex;
+  flex-shrink: 0;
+  gap: 16px;
+  padding-inline: 16px 12px;
+}
+
+.previewTopBarIcon {
+  font-size: 20px;
+}
+
+.previewLogo {
+  block-size: 24px;
+  flex-shrink: 0;
+  inline-size: auto;
+}
+
+.previewSearch {
+  align-items: center;
+  background-color: var(--search-bar-color);
+  block-size: 36px;
+  border-radius: calc(18px * var(--ui-roundness));
+  color: var(--secondary-text-color);
+  display: flex;
+  flex: 1 1 auto;
+  justify-content: flex-end;
+  max-inline-size: 360px;
+  min-inline-size: 36px;
+  padding-inline: 12px;
+  box-sizing: border-box;
+}
+
+.mobile .previewSearch {
+  background: none;
+  flex: 0 0 auto;
+  margin-inline-start: auto;
+  padding: 0;
+}
+
+.previewProfile {
+  align-items: center;
+  block-size: 36px;
+  border-radius: 50%;
+  display: inline-flex;
+  flex-shrink: 0;
+  font-size: 18px;
+  inline-size: 36px;
+  justify-content: center;
+  margin-inline-start: auto;
+}
+
+.mobile .previewProfile {
+  margin-inline-start: 0;
+}
+
+.previewBody {
+  display: flex;
+  flex: 1 1 auto;
+  min-block-size: 0;
+}
+
+.previewRail {
+  background-color: var(--side-nav-color);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  inline-size: var(--desktop-nav-rail-width, 104px);
+  overflow: hidden;
+  padding-block-start: 10px;
+}
+
+.hiddenLabels .previewRail {
+  inline-size: 50px;
+}
+
+.previewRail .previewNavItem {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 4px;
+  padding-block: 6px;
+  padding-inline: 4px;
+  position: relative;
+}
+
+.hiddenLabels .previewRail .previewNavItem {
+  block-size: 50px;
+  box-sizing: border-box;
+  justify-content: center;
+  padding: 0;
+}
+
+.previewNavIcon {
+  display: grid;
+  font-size: 24px;
+  block-size: 32px;
+  place-items: center;
+  inline-size: 64px;
+  border-radius: calc(24px * var(--ui-roundness));
+}
+
+.hiddenLabels .previewNavIcon {
+  block-size: 42px;
+  inline-size: 42px;
+  font-size: 20px;
+}
+
+.previewNavLabel {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  max-inline-size: 100%;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.hiddenLabels .previewRail .previewNavLabel {
+  display: none;
+}
+
+.previewNavItem.active {
+  color: var(--primary-color);
+}
+
+.previewNavItem.active .previewNavIcon {
+  background-color: color-mix(in srgb, var(--primary-color) 20%, transparent);
+}
+
+.previewNavItem.active .previewNavLabel {
+  color: var(--primary-text-color);
+  font-weight: 700;
+}
+
+.previewRail hr {
+  background-color: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
+  block-size: 1px;
+  border: 0;
+  inline-size: calc(100% - 24px);
+  margin: 12px;
+}
+
+.previewChannel {
+  align-self: center;
+  background-color: var(--secondary-card-bg-color);
+  background-position: center;
+  background-size: cover;
+  block-size: 35px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  inline-size: 35px;
+  margin-block: 5px;
+}
+
+.previewPage {
+  align-content: start;
+  display: grid;
+  flex: 1 1 auto;
+  gap: 16px 12px;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  overflow: hidden;
+  padding: 16px;
+}
+
+.mobile .previewPage {
+  grid-template-columns: 1fr;
+}
+
+.previewCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.previewThumbnail {
+  aspect-ratio: 16 / 9;
+  background-color: var(--secondary-card-bg-color);
+  border-radius: calc(10px * var(--ui-roundness));
+}
+
+.previewLine {
+  background-color: var(--secondary-card-bg-color);
+  block-size: 10px;
+  border-radius: calc(5px * var(--ui-roundness));
+}
+
+.previewLine.short {
+  inline-size: 60%;
+}
+
+.previewBottomBar {
+  background-color: var(--side-nav-color);
+  block-size: 60px;
+  box-sizing: border-box;
+  display: flex;
+  flex-shrink: 0;
+  gap: 4px;
+  padding-inline: 4px;
+}
+
+.compactLabels .previewBottomBar {
+  block-size: 48px;
+}
+
+.mobile .previewBottomBar .previewNavItem {
+  align-items: center;
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: 4px;
+  justify-content: center;
+  min-inline-size: 0;
+}
+
+.mobile .previewBottomBar .previewNavIcon {
+  inline-size: min(64px, 100%);
+}
+
+.mobile .previewBottomBar .previewNavLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.compactLabels .previewBottomBar .previewNavLabel {
+  display: none;
+}

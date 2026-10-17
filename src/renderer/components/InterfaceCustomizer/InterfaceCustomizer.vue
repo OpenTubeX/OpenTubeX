@@ -1,0 +1,231 @@
+<template>
+  <FtSettingsSection :title="t('Settings.Navigation and Controls')">
+    <div class="customizerLauncher">
+      <FtButton
+        data-settings-subpage="customize-interface"
+        :label="t('Settings.Interface Customizer.Customize Interface')"
+        :icon="['fas', 'sliders-h']"
+        @click="open = true"
+      />
+    </div>
+  </FtSettingsSection>
+
+  <FtSettingsSubpage
+    :open="open"
+    :title="t('Settings.Interface Customizer.Customize Interface')"
+    :icon="['fas', 'sliders-h']"
+    flush
+    @close="open = false"
+  >
+    <template #breadcrumb-action>
+      <FtSyncedSettingIndicator
+        v-if="activeTab.syncKey"
+        :setting-key="activeTab.syncKey"
+      />
+    </template>
+    <div class="interfaceCustomizer">
+      <div class="customizerHeader">
+        <FtTabs
+          class="customizerTabs"
+          :aria-label="t('Settings.Interface Customizer.Customize Interface')"
+          @keydown="handleTabKeydown($event, tabs, activeTabId, selectTab)"
+        >
+          <button
+            v-for="tab in tabs"
+            :id="`${idPrefix}-tab-${tab.id}`"
+            :key="tab.id"
+            type="button"
+            role="tab"
+            :aria-selected="tab.id === activeTabId"
+            :aria-controls="`${idPrefix}-panel`"
+            :tabindex="tab.id === activeTabId ? 0 : -1"
+            :data-settings-subpage-tab="tab.id"
+            :title="tab.label"
+            @click="selectTab(tab.id)"
+          >
+            <FtIcon
+              :icon="tab.icon"
+              aria-hidden="true"
+            />
+            <span class="tabLabel">{{ tab.label }}</span>
+          </button>
+        </FtTabs>
+      </div>
+      <div
+        :id="`${idPrefix}-panel`"
+        class="customizerPanel"
+        role="tabpanel"
+        :aria-labelledby="`${idPrefix}-tab-${activeTabId}`"
+      >
+        <section
+          class="customizerPreview"
+          :aria-label="t('Settings.Interface Customizer.Preview')"
+        >
+          <FtTabs
+            v-if="activeTab.previewModes.length > 1"
+            class="previewModes"
+            variant="segmented"
+            :aria-label="t('Settings.Interface Customizer.Preview')"
+            @keydown="handleTabKeydown($event, activeTab.previewModes, activePreviewMode, selectPreviewMode)"
+          >
+            <button
+              v-for="mode in activeTab.previewModes"
+              :key="mode.id"
+              type="button"
+              role="tab"
+              :aria-selected="mode.id === activePreviewMode"
+              :aria-controls="`${idPrefix}-preview`"
+              :tabindex="mode.id === activePreviewMode ? 0 : -1"
+              :data-preview-mode="mode.id"
+              :title="mode.label"
+              @click="selectPreviewMode(mode.id)"
+            >
+              <FtIcon
+                :icon="mode.icon"
+                aria-hidden="true"
+              />
+              <span class="tabLabel">{{ mode.label }}</span>
+            </button>
+          </FtTabs>
+          <div
+            :id="`${idPrefix}-preview`"
+            class="previewStage"
+          >
+            <NavigationPreview
+              v-if="activeTabId === 'navigation'"
+              :layout="activePreviewMode"
+            />
+            <div
+              v-else-if="activeTabId === 'quickSettings'"
+              class="quickSettingsStage"
+            >
+              <FtQuickSettingsMenu preview />
+            </div>
+            <PlayerPreview
+              v-else
+              :state="activePreviewMode"
+            />
+          </div>
+        </section>
+        <div
+          :key="activeTabId"
+          v-overlay-scrollbars
+          class="customizerEditorScroll"
+        >
+          <div class="customizerEditor">
+            <NavigationCustomizer v-if="activeTabId === 'navigation'" />
+            <QuickSettingsCustomizer v-else-if="activeTabId === 'quickSettings'" />
+            <PlayerAppearanceEditor v-else-if="activeTabId === 'player'" />
+            <FullscreenActionsCustomizer v-else />
+          </div>
+        </div>
+      </div>
+    </div>
+  </FtSettingsSubpage>
+</template>
+
+<script setup>
+import { FtIcon } from '@opentubex/icons'
+import { computed, nextTick, reactive, ref, useId } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+import FtButton from '../FtButton/FtButton.vue'
+import FtQuickSettingsMenu from '../FtQuickSettingsMenu/FtQuickSettingsMenu.vue'
+import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
+import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
+import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
+import FtTabs from '../FtTabs/FtTabs.vue'
+import FullscreenActionsCustomizer from '../FullscreenActionsCustomizer/FullscreenActionsCustomizer.vue'
+import NavigationCustomizer from '../NavigationCustomizer/NavigationCustomizer.vue'
+import QuickSettingsCustomizer from '../QuickSettingsCustomizer/QuickSettingsCustomizer.vue'
+import NavigationPreview from './NavigationPreview.vue'
+import PlayerAppearanceEditor from './PlayerAppearanceEditor.vue'
+import PlayerPreview from './PlayerPreview.vue'
+
+const { t } = useI18n()
+const idPrefix = `interface-customizer-${useId().replaceAll(':', '')}`
+const open = ref(false)
+const activeTabId = ref('navigation')
+
+const tabs = computed(() => {
+  const fullscreenModes = [
+    { id: 'fullscreen', icon: ['fas', 'expand'], label: t('Settings.Interface Customizer.Fullscreen') },
+    { id: 'paused', icon: ['fas', 'pause'], label: t('Settings.Interface Customizer.Paused') },
+  ]
+  return [
+    {
+      id: 'navigation',
+      icon: ['fas', 'bars'],
+      label: t('Settings.General Settings.Navigation.Navigation'),
+      syncKey: 'navigationItems',
+      previewModes: [
+        { id: 'desktop', icon: ['fas', 'display'], label: t('Settings.Interface Customizer.Desktop') },
+        { id: 'mobile', icon: ['fas', 'smartphone'], label: t('Settings.Interface Customizer.Mobile') },
+      ],
+    },
+    {
+      id: 'quickSettings',
+      icon: ['fas', 'sliders-h'],
+      label: t('Settings.Quick Settings.Quick Settings'),
+      syncKey: 'quickSettings',
+      previewModes: [],
+    },
+    {
+      id: 'player',
+      icon: ['fas', 'circle-play'],
+      label: t('Settings.Interface Customizer.Player'),
+      syncKey: null,
+      previewModes: [
+        { id: 'window', icon: ['fas', 'play'], label: t('Settings.Interface Customizer.Playing') },
+        { id: 'menu', icon: ['fas', 'gear'], label: t('Settings.Interface Customizer.Player Menu') },
+        ...fullscreenModes,
+      ],
+    },
+    {
+      id: 'fullscreenActions',
+      icon: ['fas', 'expand'],
+      label: t('Settings.Fullscreen Actions.Title'),
+      syncKey: 'fullscreenActions',
+      previewModes: fullscreenModes,
+    },
+  ]
+})
+
+const activeTab = computed(() => tabs.value.find(tab => tab.id === activeTabId.value))
+
+// Each tab remembers the preview state last chosen for it.
+const previewModes = reactive({})
+const activePreviewMode = computed(() => previewModes[activeTabId.value] ?? activeTab.value.previewModes[0]?.id)
+
+function selectTab(tabId) {
+  activeTabId.value = tabId
+}
+
+function selectPreviewMode(modeId) {
+  previewModes[activeTabId.value] = modeId
+}
+
+async function handleTabKeydown(event, items, selectedId, select) {
+  const index = items.findIndex(item => item.id === selectedId)
+  const rtl = getComputedStyle(event.currentTarget).direction === 'rtl'
+  const offsets = { ArrowLeft: rtl ? 1 : -1, ArrowRight: rtl ? -1 : 1 }
+  let nextIndex
+  if (event.key in offsets) {
+    nextIndex = (index + offsets[event.key] + items.length) % items.length
+  } else if (event.key === 'Home') {
+    nextIndex = 0
+  } else if (event.key === 'End') {
+    nextIndex = items.length - 1
+  } else {
+    return
+  }
+
+  event.preventDefault()
+  const tablist = event.currentTarget
+  select(items[nextIndex].id)
+  await nextTick()
+  tablist.querySelector('[role="tab"][aria-selected="true"]')?.focus()
+}
+</script>
+
+<style scoped src="./InterfaceCustomizer.css" />

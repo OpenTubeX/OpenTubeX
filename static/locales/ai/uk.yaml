@@ -1193,6 +1193,21 @@ Settings:
   No Settings Found: Налаштувань не знайдено
   Experimental Settings:
     Disable Hardware Acceleration: Вимкнути апаратне прискорення
+  Interface Customizer:
+    Customize Interface: "Налаштувати інтерфейс"
+    Preview: "Попередній перегляд"
+    Player: "Програвач"
+    Desktop: "Комп’ютер"
+    Mobile: "Мобільний"
+    Playing: "Відтворення"
+    Player Menu: "Меню програвача"
+    Fullscreen: "Повний екран"
+    Paused: "Призупинено"
+    Controls: "Елементи керування"
+    Example Video Title: "Приклад відео"
+    Resolution: "Роздільність"
+    Loop: "Повтор"
+    Off: "Вимк."
 Tutorial:
   Skip: Пропустити
   Next: Далі

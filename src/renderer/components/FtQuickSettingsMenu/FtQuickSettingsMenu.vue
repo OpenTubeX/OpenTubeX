@@ -1,6 +1,21 @@
 <template>
-  <div class="quickSettings">
+  <div
+    class="quickSettings"
+    :class="{ quickSettingsPreview: preview }"
+  >
+    <span
+      v-if="preview"
+      class="previewProfileTrigger"
+      aria-hidden="true"
+      :style="{ background: activeProfile.bgColor, color: activeProfile.textColor }"
+    >
+      <FtProfileIcon
+        :profile="activeProfile"
+        :fallback="activeProfileInitial"
+      />
+    </span>
     <button
+      v-else
       ref="triggerRef"
       type="button"
       class="profileTrigger"
@@ -29,7 +44,7 @@
     </button>
 
     <FtMobileSheet
-      v-if="menuRendered"
+      v-if="menuRendered || preview"
       :enabled="phoneLayout"
       :open="menuOpen"
       :title="profilePanelOpen ? t('Profile.Profile Select') : t('Settings.Quick Settings.Quick Settings')"
@@ -61,12 +76,12 @@
         @after-leave="handleMenuAfterLeave"
       >
         <FtCard
-          v-if="menuOpen || phoneLayout"
+          v-if="menuOpen || phoneLayout || preview"
           :id="id"
           ref="menuRef"
           class="quickSettingsMenu"
           :class="{ phoneQuickSettings: phoneLayout }"
-          :role="phoneLayout ? null : 'dialog'"
+          :role="phoneLayout || preview ? null : 'dialog'"
           :aria-label="t('Settings.Quick Settings.Quick Settings')"
           tabindex="-1"
           @focusout="handleMenuFocusOut"
@@ -133,6 +148,7 @@
           <template v-else>
             <div
               class="profileHeaderRow"
+              :inert="preview"
             >
               <button
                 type="button"
@@ -399,7 +415,10 @@
                   </div>
                 </section>
 
-                <div class="menuLinks">
+                <div
+                  class="menuLinks"
+                  :inert="preview"
+                >
                   <slot
                     name="overflow-actions"
                     :close="closeMenu"
@@ -479,12 +498,14 @@ import { getThemeClassification, hasFixedThemeColors } from '../../../appearance
 const quickHeaderActions = useTemplateRef('quickHeaderActions')
 const props = defineProps({
   compactHeader: { type: Boolean, default: false },
-  headerActionsOverflow: { type: Boolean, default: false }
+  headerActionsOverflow: { type: Boolean, default: false },
+  // Renders the open menu inline for the interface customizer.
+  preview: { type: Boolean, default: false }
 })
 const { locale, t } = useI18n()
 const id = useId()
 const shortViewport = usePhoneLayout('(max-height: 600px)')
-const phoneLayout = computed(() => props.compactHeader || shortViewport.value)
+const phoneLayout = computed(() => !props.preview && (props.compactHeader || shortViewport.value))
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 const USING_ELECTRON = process.env.IS_ELECTRON
 const systemColorScheme = window.matchMedia('(prefers-color-scheme: dark)')
@@ -754,6 +775,7 @@ onMounted(() => {
   document.addEventListener('pointerdown', handleDocumentPointerDown, true)
   document.addEventListener('pointerup', handleDocumentPointerUp, true)
   document.addEventListener('pointercancel', handleDocumentPointerUp, true)
+  if (props.preview) nextTick(observeMainContent)
 })
 onBeforeUnmount(() => {
   window.removeEventListener('focus', handleWindowFocus)

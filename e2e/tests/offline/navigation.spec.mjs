@@ -1,4 +1,4 @@
-import { test, expect, goTo, goToSettingsSection, sel, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, sel, setWindowSize, openInterfaceCustomizer } from '../../helpers/app.mjs'
 import { DEFAULT_NAVIGATION_ITEMS } from '../../../src/navigationItems.js'
 
 // Fractional UI scales snap layout sizes to device pixels.
@@ -18,19 +18,19 @@ test.describe('navigation options outline', { tag: '@scale' }, () => {
       await expect.poll(() => page.evaluate(() => innerWidth)).toBe(width)
     }
     await resize(900)
-    const appearance = await goToSettingsSection(page, 'appearance')
+    await goToSettingsSection(page, 'appearance')
     await page.getByRole('button', { name: 'Maximize', exact: true }).click()
-    await appearance.getByRole('button', { name: 'Customize navigation' }).click()
+    await openInterfaceCustomizer(page, 'navigation')
     await resize(350)
-    const scroller = page.locator('.settingsSubpageScroll:visible')
-    const content = scroller.locator('.settingsSubpageContent')
+    const scroller = page.locator('.customizerEditorScroll:visible')
+    const content = scroller.locator('.customizerEditor')
     const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
     const thumb = scrollbar.locator('.os-scrollbar-handle')
     async function scrollToEnd() {
       await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
       await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
       await expect.poll(() => content.evaluate(element => {
-        const viewport = element.closest('.settingsSubpageScroll')
+        const viewport = element.closest('.customizerEditorScroll')
         return Math.abs(element.getBoundingClientRect().bottom - viewport.getBoundingClientRect().bottom +
           Number.parseFloat(getComputedStyle(viewport).paddingBottom)) * devicePixelRatio
       })).toBeLessThanOrEqual(2)
@@ -38,7 +38,7 @@ test.describe('navigation options outline', { tag: '@scale' }, () => {
     async function expectShorter(previousHeight, previousThumb) {
       await expect.poll(() => content.evaluate(element => element.getBoundingClientRect().height)).toBeLessThan(previousHeight)
       await expect.poll(() => content.evaluate(element => {
-        const viewport = element.closest('.settingsSubpageScroll')
+        const viewport = element.closest('.customizerEditorScroll')
         const contentEnd = element.getBoundingClientRect().bottom - viewport.getBoundingClientRect().top +
           viewport.scrollTop + Number.parseFloat(getComputedStyle(viewport).paddingBottom)
         return (viewport.scrollTop - Math.max(0, contentEnd - viewport.clientHeight)) * devicePixelRatio
@@ -46,7 +46,7 @@ test.describe('navigation options outline', { tag: '@scale' }, () => {
       await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
       await expect.poll(() => thumb.evaluate(element => element.getBoundingClientRect().height)).toBeGreaterThan(previousThumb)
       await expect.poll(() => content.evaluate(element => {
-        const viewport = element.closest('.settingsSubpageScroll')
+        const viewport = element.closest('.customizerEditorScroll')
         const contentEnd = element.getBoundingClientRect().bottom - viewport.getBoundingClientRect().top +
           viewport.scrollTop + Number.parseFloat(getComputedStyle(viewport).paddingBottom)
         const bar = viewport.querySelector('.os-scrollbar-vertical')
@@ -91,8 +91,7 @@ test.describe('navigation options outline', { tag: '@scale' }, () => {
 
   test('encloses all three switches at desktop and narrow widths', async ({ app, page }, testInfo) => {
     await setWindowSize(app, page, { width: 900, height: 650 })
-    const appearance = await goToSettingsSection(page, 'appearance')
-    await appearance.getByRole('button', { name: 'Customize navigation' }).click()
+    await openInterfaceCustomizer(page, 'navigation')
     const group = page.locator('.fixedNavigationOptions')
     await expect(group.getByRole('checkbox')).toHaveCount(3)
     for (const narrow of [false, true]) {
@@ -105,10 +104,10 @@ test.describe('navigation options outline', { tag: '@scale' }, () => {
         })
       }), { message: 'the outline leaves space above and below every switch label' }).toBe(true)
       await group.scrollIntoViewIfNeeded()
-      const scroller = page.locator('.settingsSubpageScroll:visible')
+      const scroller = page.locator('.customizerEditorScroll:visible')
       await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
       await expect.poll(() => group.evaluate(element => {
-        const scroller = element.closest('.settingsSubpageScroll')
+        const scroller = element.closest('.customizerEditorScroll')
         return scroller.getBoundingClientRect().bottom - element.getBoundingClientRect().bottom -
           Number.parseFloat(getComputedStyle(scroller).paddingBottom)
       }), { message: 'extra space remains below the outlined options at the end of the page' }).toBeGreaterThan(15)
@@ -119,26 +118,28 @@ test.describe('navigation options outline', { tag: '@scale' }, () => {
         body: Buffer.from(screenshot, 'base64'), contentType: 'image/png'
       })
     }
-    const scroller = page.locator('.settingsSubpageScroll:visible')
+    const scroller = page.locator('.customizerEditorScroll:visible')
     const items = page.locator('.selectedItems .selectedItem')
     await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
     while (await items.count() > 0) {
       await items.last().getByRole('button', { name: /^Remove / }).click()
       await expect.poll(() => scroller.evaluate(element => {
-        const content = element.querySelector('.settingsSubpageContent')
+        const content = element.querySelector('.customizerEditor')
         const contentEnd = content.getBoundingClientRect().bottom - element.getBoundingClientRect().top +
           element.scrollTop + Number.parseFloat(getComputedStyle(element).paddingBottom)
         return element.scrollTop - Math.max(0, contentEnd - element.clientHeight)
       }), { message: 'removing navigation items leaves no obsolete scroll offset' }).toBeLessThanOrEqual(1)
     }
-    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeLessThanOrEqual(1)
-    await expect(scroller.locator(':scope > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-unusable/)
+    // The remaining options may still overflow the editor below the preview.
+    await expect.poll(() => scroller.evaluate(element => {
+      const unusable = element.querySelector(':scope > .os-scrollbar-vertical').classList.contains('os-scrollbar-unusable')
+      return unusable === (element.scrollHeight - element.clientHeight <= 1)
+    }), { message: 'the scrollbar matches the remaining scroll range' }).toBe(true)
   })
 })
 
 test('navigation visibility and compact labels are saved through their settings controls', async ({ app, page }) => {
-  const appearance = await goToSettingsSection(page, 'appearance')
-  await appearance.getByRole('button', { name: 'Customize navigation' }).click()
+  await openInterfaceCustomizer(page, 'navigation')
   for (const name of ["Always show navigation bar when it's at the bottom", "Compact navigation bar when it's at the bottom"]) {
     const toggle = page.getByRole('checkbox', { name: new RegExp(`^${name}`) })
     await expect(toggle).not.toBeChecked()
@@ -146,8 +147,7 @@ test('navigation visibility and compact labels are saved through their settings 
     await expect(toggle).toBeChecked()
   }
   ;({ page } = await app.relaunch())
-  const restoredAppearance = await goToSettingsSection(page, 'appearance')
-  await restoredAppearance.getByRole('button', { name: 'Customize navigation' }).click()
+  await openInterfaceCustomizer(page, 'navigation')
   for (const name of ["Always show navigation bar when it's at the bottom", "Compact navigation bar when it's at the bottom"]) {
     await expect(page.getByRole('checkbox', { name: new RegExp(`^${name}`) })).toBeChecked()
   }
@@ -397,8 +397,7 @@ test.describe('side nav navigation', () => {
   })
 
   test('customizes navigation order on the side bar and mobile bar', async ({ page }) => {
-    const appearance = await goToSettingsSection(page, 'appearance')
-    await appearance.getByRole('button', { name: 'Customize navigation' }).click()
+    await openInterfaceCustomizer(page, 'navigation')
 
     const selectedItems = page.locator('.selectedItems')
     const selectedIds = () => selectedItems.locator('.selectedItem').evaluateAll(rows => (
@@ -459,8 +458,7 @@ test.describe('side nav navigation', () => {
   })
 
   test('clamps the add-item picker after its options shrink', async ({ page }) => {
-    const appearance = await goToSettingsSection(page, 'appearance')
-    await appearance.getByRole('button', { name: 'Customize navigation' }).click()
+    await openInterfaceCustomizer(page, 'navigation')
 
     const selectedItems = page.locator('.selectedItems .selectedItem')
     while (await selectedItems.count() > 0) {

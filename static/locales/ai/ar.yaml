@@ -1193,6 +1193,21 @@ Settings:
   No Settings Found: لم يتم العثور على إعدادات
   Experimental Settings:
     Disable Hardware Acceleration: تعطيل تسريع الأجهزة
+  Interface Customizer:
+    Customize Interface: "تخصيص الواجهة"
+    Preview: "معاينة"
+    Player: "المشغّل"
+    Desktop: "سطح المكتب"
+    Mobile: "الجوّال"
+    Playing: "قيد التشغيل"
+    Player Menu: "قائمة المشغّل"
+    Fullscreen: "ملء الشاشة"
+    Paused: "متوقف مؤقتًا"
+    Controls: "عناصر التحكم"
+    Example Video Title: "فيديو تجريبي"
+    Resolution: "الدقة"
+    Loop: "تكرار"
+    Off: "إيقاف"
 Tutorial:
   Skip: تخطي
   Next: التالي

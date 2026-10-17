@@ -1,11 +1,11 @@
 import { IpcChannels } from '../../../src/constants.js'
-import { test, expect, goToSettingsSection, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, setWindowSize, openInterfaceCustomizer } from '../../helpers/app.mjs'
 
 const editors = [
-  { name: 'quick setting categories', button: 'Customize quick settings', row: '.selectedSection', attribute: 'data-section-id' },
-  { name: 'quick settings within a category', button: 'Customize quick settings', row: '[data-section-id="appearance"] .selectedSetting', attribute: 'data-setting-id' },
-  { name: 'navigation', button: 'Customize navigation', row: '.selectedItem', attribute: 'data-navigation-item-id' },
-  { name: 'fullscreen actions', button: 'Customize fullscreen actions', row: '.selectedAction', attribute: 'data-fullscreen-action-id' },
+  { name: 'quick setting categories', tab: 'quick settings', row: '.selectedSection', attribute: 'data-section-id' },
+  { name: 'quick settings within a category', tab: 'quick settings', row: '[data-section-id="appearance"] .selectedSetting', attribute: 'data-setting-id' },
+  { name: 'navigation', tab: 'navigation', row: '.selectedItem', attribute: 'data-navigation-item-id' },
+  { name: 'fullscreen actions', tab: 'fullscreen actions', row: '.selectedAction', attribute: 'data-fullscreen-action-id' },
 ]
 
 /** Return visible geometry with a useful failure instead of a null dereference. */
@@ -66,9 +66,8 @@ test.describe('quick-settings scroll range', { tag: '@scale' }, () => {
 
   test('clamps after removing rows and whole categories, resetting, and resizing', async ({ app, page }) => {
     await setWindowSize(app, page, { width: 500, height: 600 })
-    const appearance = await goToSettingsSection(page, 'appearance')
-    await appearance.getByRole('button', { name: 'Customize quick settings', exact: true }).click()
-    const scroller = page.locator('.settingsSubpageScroll:visible')
+    await openInterfaceCustomizer(page, 'quick settings')
+    const scroller = page.locator('.customizerEditorScroll:visible')
     const scrollToBottom = async () => {
       await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
       await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
@@ -113,8 +112,7 @@ for (const [editor, method] of [
 ]) {
   test(`does not announce a failed ${editor.name} ${method} reorder and retries after relaunch`, async ({ app, page }) => {
     const openEditor = async () => {
-      const appearance = await goToSettingsSection(page, 'appearance')
-      await appearance.getByRole('button', { name: editor.button, exact: true }).click()
+      await openInterfaceCustomizer(page, editor.tab)
       return page.locator(editor.row)
     }
     let rows = await openEditor()
@@ -171,15 +169,15 @@ test.describe('in-place settings reordering', { tag: '@scale' }, () => {
   for (const editor of editors) {
     test(`slides ${editor.name} in place and persists only on drop`, async ({ app, page, uiScale }) => {
       if (uiScale === 125) await setWindowSize(app, page, { width: 500, height: 850 })
-      const appearance = await goToSettingsSection(page, 'appearance')
-      await appearance.getByRole('button', { name: editor.button, exact: true }).click()
+      await openInterfaceCustomizer(page, editor.tab)
       const rows = page.locator(editor.row)
       const ids = () => rows.evaluateAll((elements, attribute) => elements.map(element => element.getAttribute(attribute)), editor.attribute)
       const initial = await ids()
       const first = rows.first()
       const second = rows.nth(1)
       const handle = first.locator('.dragHandle').first()
-      await handle.scrollIntoViewIfNeeded()
+      // Leave the editor height below the preview for both rows.
+      await first.evaluate(element => element.scrollIntoView({ block: 'start' }))
       const start = await visibleBox(handle)
       const source = await visibleBox(first)
       const target = await visibleBox(second)
@@ -203,15 +201,13 @@ test.describe('in-place settings reordering', { tag: '@scale' }, () => {
       await expect(rows.locator('[style*="translateY"]')).toHaveCount(0)
       await expect.poll(() => rows.evaluateAll(elements => elements.every(element => getComputedStyle(element).transform === 'none'))).toBe(true)
       await page.reload()
-      const reloaded = await goToSettingsSection(page, 'appearance')
-      await reloaded.getByRole('button', { name: editor.button, exact: true }).click()
+      await openInterfaceCustomizer(page, editor.tab)
       await expect.poll(ids).toEqual(reordered)
     })
   }
 
   test('confines individual quick settings to their category and cancels with Escape', async ({ page }) => {
-    const appearance = await goToSettingsSection(page, 'appearance')
-    await appearance.getByRole('button', { name: 'Customize quick settings', exact: true }).click()
+    await openInterfaceCustomizer(page, 'quick settings')
     const rows = page.locator('.selectedSetting')
     const ids = () => rows.evaluateAll(elements => elements.map(element => element.dataset.settingId))
     const original = await ids()
@@ -233,8 +229,7 @@ test.describe('in-place settings reordering', { tag: '@scale' }, () => {
 
 for (const cancellation of ['pointercancel', 'lostpointercapture', 'resize']) {
   test(`cancels a navigation drag on ${cancellation}`, async ({ app, page }) => {
-    const appearance = await goToSettingsSection(page, 'appearance')
-    await appearance.getByRole('button', { name: 'Customize navigation', exact: true }).click()
+    await openInterfaceCustomizer(page, 'navigation')
     const rows = page.locator('.selectedItem')
     const ids = () => rows.evaluateAll(elements => elements.map(element => element.dataset.navigationItemId))
     const original = await ids()
@@ -266,8 +261,7 @@ for (const cancellation of ['pointercancel', 'lostpointercapture', 'resize']) {
 
 test('settles without motion when reduced motion is enabled', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
-  const appearance = await goToSettingsSection(page, 'appearance')
-  await appearance.getByRole('button', { name: 'Customize fullscreen actions', exact: true }).click()
+  await openInterfaceCustomizer(page, 'fullscreen actions')
   const rows = page.locator('.selectedAction')
   const original = await rows.evaluateAll(elements => elements.map(element => element.dataset.fullscreenActionId))
   const source = await visibleBox(rows.first().locator('.dragHandle'))
@@ -285,8 +279,7 @@ test.describe('unequal category heights', () => {
   test.use({ seed: { settings: { quickSettings: ['baseTheme', 'mainColor', 'uiScale', 'defaultQuality'] } } })
 
   test('moves a tall category past a shorter last category without increasing the scroll range', async ({ page }) => {
-    const appearance = await goToSettingsSection(page, 'appearance')
-    await appearance.getByRole('button', { name: 'Customize quick settings', exact: true }).click()
+    await openInterfaceCustomizer(page, 'quick settings')
     const first = page.locator('.selectedSection').first()
     const last = page.locator('.selectedSection').last()
     const original = await page.locator('.selectedSection').evaluateAll(elements => elements.map(element => element.dataset.sectionId))
@@ -313,11 +306,10 @@ test.describe('reorder edge scrolling', () => {
 
   test('scrolls while holding a row near the edge without extending the content range', async ({ app, page }) => {
     await setWindowSize(app, page, { width: 800, height: 600 })
-    const appearance = await goToSettingsSection(page, 'appearance')
-    await appearance.getByRole('button', { name: 'Customize navigation', exact: true }).click()
+    await openInterfaceCustomizer(page, 'navigation')
     const rows = page.locator('.selectedItem')
     const original = await rows.evaluateAll(elements => elements.map(element => element.dataset.navigationItemId))
-    const scroller = page.locator('.settingsSubpageScroll')
+    const scroller = page.locator('.customizerEditorScroll')
     await scroller.evaluate(element => { element.scrollTop = 0 })
     const scrollHeight = await scroller.evaluate(element => element.scrollHeight)
     const bounds = await visibleBox(scroller)
@@ -340,8 +332,7 @@ test.describe('explicit reduced motion override', () => {
   test('animates reordering when the app overrides system reduced motion', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await expect(page.locator('html')).toHaveAttribute('data-reduced-motion', 'no-preference')
-    const appearance = await goToSettingsSection(page, 'appearance')
-    await appearance.getByRole('button', { name: 'Customize navigation', exact: true }).click()
+    await openInterfaceCustomizer(page, 'navigation')
     const rows = page.locator('.selectedItem')
     const original = await rows.evaluateAll(elements => elements.map(element => element.dataset.navigationItemId))
     const source = await visibleBox(rows.first().locator('.dragHandle'))

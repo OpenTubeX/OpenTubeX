@@ -1,4 +1,4 @@
-import { test, expect, goTo, goToSettingsSection, sel, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, sel, setWindowSize, openInterfaceCustomizer } from '../../helpers/app.mjs'
 import { mockPlayableWatchPage, watchHistoryEntry, watchViewHandle } from '../../helpers/watch.mjs'
 
 const musicModeSeed = {
@@ -192,8 +192,7 @@ test('excludes music mode from saved Quick Settings and the customizer', async (
   await expect(menu.locator('[data-setting-id="defaultPlayback"]')).toBeVisible()
   await attachScreenshot('quick-settings-menu-without-music-mode')
   await page.locator('.profileTrigger').click()
-  const appearance = await goToSettingsSection(page, 'appearance')
-  await appearance.getByRole('button', { name: 'Customize quick settings' }).click()
+  await openInterfaceCustomizer(page, 'quick settings')
   await expect(page.getByRole('button', { name: 'Remove Music Mode', exact: true })).toHaveCount(0)
   await page.getByRole('button', { name: 'Add setting' }).click()
   const search = page.getByLabel('Search settings')

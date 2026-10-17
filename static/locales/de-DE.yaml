@@ -344,6 +344,21 @@ History:
 Most Popular Feed Empty: Der Feed „Am beliebtesten“ dieser Invidious-Instanz ist leer.
 Settings:
   Navigation and Controls: "Navigation & Bedienelemente"
+  Interface Customizer:
+    Customize Interface: Oberfläche anpassen
+    Preview: Vorschau
+    Player: Video-Player
+    Desktop: Desktop
+    Mobile: Mobil
+    Playing: Wiedergabe
+    Player Menu: Player-Menü
+    Fullscreen: Vollbild
+    Paused: Pausiert
+    Controls: Bedienelemente
+    Example Video Title: Beispielvideo
+    Resolution: Auflösung
+    Loop: Endlosschleife
+    Off: Aus
   Fullscreen Actions:
     Recommended Videos: "Empfohlene Videos"
     Title: "Vollbildaktionen"

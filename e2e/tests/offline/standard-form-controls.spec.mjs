@@ -1,4 +1,4 @@
-import { test, expect, goToSettingsSection, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, goToSettingsSection, setWindowSize, openInterfaceCustomizer } from '../../helpers/app.mjs'
 
 test.describe('standard form controls', () => {
   test.use({ seed: { settings: { useQuickPlaybackSpeedBar: true, forbiddenTitles: '["example"]' } } })
@@ -171,7 +171,7 @@ test.describe('inline field alignment', { tag: '@scale' }, () => {
 
 test('quick-settings picker hover follows UI roundness', async ({ page }) => {
   await goToSettingsSection(page, 'appearance')
-  await page.getByRole('button', { name: 'Customize quick settings' }).click()
+  await openInterfaceCustomizer(page, 'quick settings')
   await page.getByRole('button', { name: 'Add setting' }).click()
   const option = page.locator('.settingPicker .list > li').first()
   await option.hover()

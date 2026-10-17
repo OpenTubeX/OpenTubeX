@@ -5,6 +5,7 @@ import {
   expect,
   goTo,
   goToSettingsSection,
+  openInterfaceCustomizer,
   openNewWindowFromTabBar,
   setWindowSize,
   waitForAppReady,
@@ -421,9 +422,8 @@ test.describe('hidden Home page', () => {
       lazyLoad: true
     }))
 
-    const appearanceSettings = await goToSettingsSection(page, 'appearance')
-    await appearanceSettings.getByRole('button', { name: 'Customize navigation' }).click()
-    const navigationSubpage = page.locator('.settingsSubpageContent')
+    await openInterfaceCustomizer(page, 'navigation')
+    const navigationSubpage = page.locator('.customizerEditor')
     await navigationSubpage.getByRole('button', { name: 'Remove Home' }).click()
     await expect(page.locator('.sideNav a[href="#/home"]')).toHaveCount(0)
     await expect(page).toHaveURL(/#\/subscriptions$/)

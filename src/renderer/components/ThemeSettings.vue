@@ -456,7 +456,7 @@
       @click="handleSmoothScrolling"
     />
   </FtSettingsSection>
-  <QuickSettingsCustomizer />
+  <InterfaceCustomizer />
 </template>
 
 <script setup>
@@ -478,7 +478,7 @@ import FtButton from './FtButton/FtButton.vue'
 import FtPrompt from './FtPrompt/FtPrompt.vue'
 import ThemeDiscovery from './ThemeDiscovery.vue'
 import CustomThemeEditor from './CustomThemeEditor/CustomThemeEditor.vue'
-import QuickSettingsCustomizer from './QuickSettingsCustomizer/QuickSettingsCustomizer.vue'
+import InterfaceCustomizer from './InterfaceCustomizer/InterfaceCustomizer.vue'
 
 import store from '../store/index'
 import { getThemeClassification, hasFixedThemeColors } from '../../appearanceSettings'

@@ -1493,6 +1493,21 @@ Settings:
     Set Password To Prevent Access: Nastavite geslo, da preprečite dostop do nastavitev
     Set Password: Nastavi geslo
     Remove Password: Odstrani geslo
+  Interface Customizer:
+    Customize Interface: "Prilagodi vmesnik"
+    Preview: "Predogled"
+    Player: "Predvajalnik"
+    Desktop: "Računalnik"
+    Mobile: "Mobilno"
+    Playing: "Predvajanje"
+    Player Menu: "Meni predvajalnika"
+    Fullscreen: "Celozaslonski način"
+    Paused: "Zaustavljeno"
+    Controls: "Kontrolniki"
+    Example Video Title: "Primer videoposnetka"
+    Resolution: "Ločljivost"
+    Loop: "Ponavljanje"
+    Off: "Izklopljeno"
 Tutorial:
   Skip: Preskoči
   Next: Naprej

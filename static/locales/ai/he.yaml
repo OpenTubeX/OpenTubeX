@@ -1198,6 +1198,21 @@ Settings:
   No Settings Found: לא נמצאו הגדרות
   Experimental Settings:
     Disable Hardware Acceleration: השבתת האצת חומרה
+  Interface Customizer:
+    Customize Interface: "התאמת הממשק"
+    Preview: "תצוגה מקדימה"
+    Player: "נגן"
+    Desktop: "מחשב"
+    Mobile: "נייד"
+    Playing: "מתנגן"
+    Player Menu: "תפריט הנגן"
+    Fullscreen: "מסך מלא"
+    Paused: "מושהה"
+    Controls: "פקדים"
+    Example Video Title: "סרטון לדוגמה"
+    Resolution: "רזולוציה"
+    Loop: "לולאה"
+    Off: "כבוי"
 Tutorial:
   Skip: דילוג
   Next: הבא

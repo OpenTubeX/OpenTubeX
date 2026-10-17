@@ -1167,6 +1167,21 @@ Settings:
     Unlocking: Déverrouillage…
   Search Settings: Rechercher dans les paramètres
   No Settings Found: Aucun paramètre trouvé
+  Interface Customizer:
+    Customize Interface: "Personnaliser l’interface"
+    Preview: "Aperçu"
+    Player: "Lecteur"
+    Desktop: "Ordinateur"
+    Mobile: "Mobile"
+    Playing: "Lecture"
+    Player Menu: "Menu du lecteur"
+    Fullscreen: "Plein écran"
+    Paused: "En pause"
+    Controls: "Commandes"
+    Example Video Title: "Vidéo d’exemple"
+    Resolution: "Résolution"
+    Loop: "Boucle"
+    Off: "Désactivé"
 Tutorial:
   Skip: Ignorer
   Next: Suivant

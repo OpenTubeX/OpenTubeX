@@ -1,4 +1,4 @@
-import { test, expect, goTo, goToSettingsSection, latestSettings, setWindowSize, readDatastore } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, latestSettings, setWindowSize, readDatastore, openInterfaceCustomizer } from '../../helpers/app.mjs'
 
 test.describe('settings', () => {
   test('highlights changed settings and resets them to defaults', async ({ page, attachScreenshot }) => {
@@ -238,26 +238,27 @@ test.describe('synced setting indicators', () => {
   })
 
   test('allows quick settings and navigation customization to be excluded independently', async ({ page }) => {
-    const appearance = await goToSettingsSection(page, 'appearance')
-    const quickSettings = appearance.locator('.settingButtonWithSync').filter({
-      hasText: 'Customize quick settings'
-    })
-    const navigation = appearance.locator('.settingButtonWithSync').filter({
-      hasText: 'Customize navigation'
-    })
+    const customizer = await openInterfaceCustomizer(page, 'quick settings')
+    const sync = page.locator('.settingsBreadcrumb .syncedSettingIndicator')
+    const selectTab = async (tab) => {
+      await customizer.locator(`[data-settings-subpage-tab="${tab}"]`).click()
+      await expect(customizer.locator(`[data-settings-subpage-tab="${tab}"]`)).toHaveAttribute('aria-selected', 'true')
+    }
 
-    await quickSettings.getByRole('button', { name: 'Stop syncing this setting' }).click()
-    await expect(quickSettings.getByRole('button', { name: 'Sync this setting' })).toBeVisible()
-    await expect(navigation.getByRole('button', { name: 'Stop syncing this setting' })).toBeVisible()
+    await sync.click()
+    await expect(sync).toHaveAccessibleName('Sync this setting')
+    await selectTab('navigation')
+    await expect(sync).toHaveAccessibleName('Stop syncing this setting')
 
-    await navigation.getByRole('button', { name: 'Stop syncing this setting' }).click()
-    await expect(navigation.getByRole('button', { name: 'Sync this setting' })).toBeVisible()
+    await sync.click()
+    await expect(sync).toHaveAccessibleName('Sync this setting')
     await expect.poll(() => page.evaluate(() => {
       const store = window.$store
       return store.state.settings.syncServerSettingsExcluded
     })).toEqual(['quickSettings', 'navigationItems'])
 
-    await quickSettings.getByRole('button', { name: 'Sync this setting' }).click()
+    await selectTab('quickSettings')
+    await sync.click()
     await expect.poll(() => page.evaluate(() => {
       const store = window.$store
       return store.state.settings.syncServerSettingsExcluded
@@ -265,8 +266,6 @@ test.describe('synced setting indicators', () => {
   })
 
   for (const { section, label, settingKey } of [
-    { section: 'appearance', label: 'Customize quick settings', settingKey: 'quickSettings' },
-    { section: 'appearance', label: 'Customize navigation', settingKey: 'navigationItems' },
     { section: 'playback', label: 'Customize Quick Playback Speed Bar', settingKey: 'quickPlaybackSpeedBarOptions' }
   ]) {
     test(`shares the ${settingKey} sync toggle between its launcher and breadcrumb`, async ({ app, page }) => {

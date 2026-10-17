@@ -109,23 +109,27 @@ export const SETTINGS_SEARCH_SOURCES = {
     include: GENERAL_APPEARANCE_KEYS,
     exclude: new Set(['Navigation'])
   }, {
-    type: 'fullscreen-actions',
-    key: 'Settings.Fullscreen Actions',
-    include: new Set(['Title', 'Customize'])
+    type: 'interface-customizer',
+    key: 'Settings.Interface Customizer',
+    include: new Set(['Customize Interface'])
   }, {
     type: 'fullscreen-actions',
     key: 'Settings.Fullscreen Actions',
-    include: new Set(['Add Action', 'Quick Bookmark']),
-    subpage: 'fullscreen-actions'
+    include: new Set(['Title', 'Customize', 'Add Action', 'Quick Bookmark']),
+    subpage: 'customize-interface',
+    subpageTab: 'fullscreenActions'
   }, {
     type: 'navigation',
     key: 'Settings.General Settings.Navigation',
-    include: new Set(['Navigation', 'Customize Navigation'])
+    include: new Set(['Navigation', 'Customize Navigation', 'Show Active Subscriptions', 'Add Item', 'Always Show Navigation Bar', 'Compact Tab Labels']),
+    subpage: 'customize-interface',
+    subpageTab: 'navigation'
   }, {
-    type: 'navigation',
-    key: 'Settings.General Settings.Navigation',
-    include: new Set(['Show Active Subscriptions', 'Add Item', 'Always Show Navigation Bar', 'Compact Tab Labels']),
-    subpage: 'navigation'
+    type: 'quick-settings',
+    key: 'Settings.Quick Settings',
+    include: new Set(['Quick Settings', 'Customize Quick Settings', 'Add Setting']),
+    subpage: 'customize-interface',
+    subpageTab: 'quickSettings'
   }],
   playback: [{
     type: 'player',

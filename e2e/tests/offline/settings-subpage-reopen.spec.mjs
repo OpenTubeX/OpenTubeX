@@ -1,4 +1,4 @@
-import { test, expect, goTo, goToSettingsSection, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, setWindowSize, openInterfaceCustomizer } from '../../helpers/app.mjs'
 import { hashPassword } from '../../../src/renderer/helpers/passwords.js'
 
 const password = 'test-settings-password'
@@ -32,10 +32,10 @@ for (const protectedSettings of [false, true]) {
       }
     })
 
-    for (const { label, addLabel, pickerSelector } of [
-      { label: 'Customize navigation', addLabel: 'Add item', pickerSelector: '.itemPickerPopover' },
-      { label: 'Customize fullscreen actions', addLabel: 'Add action', pickerSelector: '.itemPickerPopover' },
-      { label: 'Customize quick settings', addLabel: 'Add setting', pickerSelector: '.settingPickerPopover' },
+    for (const { label, tab, addLabel, pickerSelector } of [
+      { label: 'Customize navigation', tab: 'navigation', addLabel: 'Add item', pickerSelector: '.itemPickerPopover' },
+      { label: 'Customize fullscreen actions', tab: 'fullscreen actions', addLabel: 'Add action', pickerSelector: '.itemPickerPopover' },
+      { label: 'Customize quick settings', tab: 'quick settings', addLabel: 'Add setting', pickerSelector: '.settingPickerPopover' },
     ]) {
       test(`dismisses ${label} picker through Preferences`, async ({ app, page }) => {
         await goTo(page, 'settings')
@@ -44,8 +44,7 @@ for (const protectedSettings of [false, true]) {
           await passwordInput.fill(password)
           await passwordInput.press('Enter')
         }
-        const appearance = await goToSettingsSection(page, 'appearance')
-        await appearance.getByRole('button', { name: new RegExp(`^${label}$`, 'i') }).click()
+        await openInterfaceCustomizer(page, tab)
         const addButton = page.getByRole('button', { name: new RegExp(`^${addLabel}$`, 'i') })
         const addButtonHandle = await addButton.elementHandle()
         const picker = page.locator(pickerSelector)
@@ -59,7 +58,7 @@ for (const protectedSettings of [false, true]) {
           await passwordInput.fill(password)
           await passwordInput.press('Enter')
         }
-        await expect(page.locator('.settingsBreadcrumb')).toContainText(new RegExp(label, 'i'))
+        await expect(page.locator('.settingsBreadcrumb')).toContainText('Customize interface')
         await expect(picker).toHaveCount(0)
         await expect(addButton).toHaveAttribute('aria-expanded', 'false')
         await addButton.click()
@@ -829,11 +828,10 @@ test.describe('protected settings subpage reopening', () => {
       await passwordInput.fill(password)
       await passwordInput.press('Enter')
       await expect(page.locator('.settingsPassword')).toHaveCount(0)
-      const appearance = await goToSettingsSection(page, 'appearance')
-      await appearance.getByRole('button', { name: 'Customize navigation', exact: true }).click()
+      await openInterfaceCustomizer(page, 'navigation')
       const subpage = page.locator('.selectedItem').first()
       await expect(subpage).toBeVisible()
-      const scroller = page.locator('.settingsSubpageScroll').visible()
+      const scroller = page.locator('.customizerEditorScroll').visible()
       await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
       await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
       const scrollTop = await scroller.evaluate(element => element.scrollTop)
@@ -856,7 +854,7 @@ test.describe('protected settings subpage reopening', () => {
       await passwordInput.fill(password)
       await passwordInput.press('Enter')
       await expect(page.locator('.settingsPassword')).toHaveCount(0)
-      await expect(page.locator('.settingsBreadcrumb')).toContainText('Customize navigation')
+      await expect(page.locator('.settingsBreadcrumb')).toContainText('Customize interface')
       await expect(page.locator('.selectedItem').last()).toBeVisible()
       await expect.poll(async () => Math.abs(await scroller.evaluate(element => element.scrollTop) - scrollTop))
         .toBeLessThanOrEqual(1)
@@ -958,17 +956,17 @@ test.describe('settings subpage reopening', () => {
   })
 
   for (const narrow of [false, true]) {
-    for (const { section, label, title, content } of [
-      { section: 'appearance', label: 'Customize navigation', content: '.selectedItem' },
-      { section: 'appearance', label: 'Customize quick settings', content: '.selectedSection' },
-      { section: 'appearance', label: 'Customize fullscreen actions', content: '.selectedAction' },
+    for (const { section, label, tab, title, content } of [
+      { section: 'appearance', label: 'Customize interface', content: '.selectedItem' },
+      { section: 'appearance', label: 'Customize interface', tab: 'fullscreenActions', content: '.selectedAction' },
       { section: 'appearance', label: 'Create custom theme', title: 'Custom theme creator', content: '.customThemeEditor' },
       { section: 'playback', label: 'Manage Saved Channels', title: 'Saved Channel Settings', content: '.channelListContainer' },
     ]) {
-      test(`keeps ${label} when settings is closed and reopened${narrow ? ' in a narrow window' : ''}`, async ({ app, page }) => {
+      test(`keeps ${label}${tab ? ` ${tab} tab` : ''} when settings is closed and reopened${narrow ? ' in a narrow window' : ''}`, async ({ app, page }) => {
         if (narrow) await setWindowSize(app, page, { width: 500, height: 700 })
         const category = await goToSettingsSection(page, section)
         await category.getByRole('button', { name: label }).click()
+        if (tab) await page.locator(`[data-settings-subpage-tab="${tab}"]`).click()
         const breadcrumb = page.locator('.settingsBreadcrumb')
         const subpage = page.locator(content).first()
         await expect(breadcrumb).toContainText(title ?? label)

@@ -1167,6 +1167,21 @@ Settings:
     Unlocking: ロックを解除中…
   Search Settings: 設定を検索
   No Settings Found: 設定が見つかりません
+  Interface Customizer:
+    Customize Interface: "インターフェースをカスタマイズ"
+    Preview: "プレビュー"
+    Player: "プレーヤー"
+    Desktop: "デスクトップ"
+    Mobile: "モバイル"
+    Playing: "再生中"
+    Player Menu: "プレーヤーメニュー"
+    Fullscreen: "全画面"
+    Paused: "一時停止中"
+    Controls: "コントロール"
+    Example Video Title: "サンプル動画"
+    Resolution: "解像度"
+    Loop: "ループ"
+    Off: "オフ"
 Tutorial:
   Skip: スキップ
   Next: 次へ

@@ -1198,6 +1198,21 @@ Settings:
   No Settings Found: Asetuksia ei löytynyt
   Experimental Settings:
     Disable Hardware Acceleration: Poista laitteistokiihdytys käytöstä
+  Interface Customizer:
+    Customize Interface: "Mukauta käyttöliittymää"
+    Preview: "Esikatselu"
+    Player: "Soitin"
+    Desktop: "Tietokone"
+    Mobile: "Mobiili"
+    Playing: "Toistetaan"
+    Player Menu: "Soittimen valikko"
+    Fullscreen: "Koko näyttö"
+    Paused: "Keskeytetty"
+    Controls: "Säätimet"
+    Example Video Title: "Esimerkkivideo"
+    Resolution: "Resoluutio"
+    Loop: "Toista uudelleen"
+    Off: "Pois"
 Tutorial:
   Skip: Ohita
   Next: Seuraava

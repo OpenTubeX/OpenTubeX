@@ -15,7 +15,7 @@ const NON_SETTING_MESSAGE_KEY_PATTERN = /(?:^Are you sure\b|^Failed to\b|^Invali
  * command palette. Visibility follows the controls currently rendered by the
  * active settings state.
  * @param {object} options
- * @returns {Map<string, Array<{label: string, tab?: string, subpage?: string}>>}
+ * @returns {Map<string, Array<{label: string, tab?: string, subpage?: string, subpageTab?: string}>>}
  */
 export function createSettingsSearchIndex(options) {
   const {
@@ -42,7 +42,8 @@ export function createSettingsSearchIndex(options) {
       ...sources.flatMap(source => getSettingsSearchSourceValues(source, options).map(label => ({
         label,
         ...(source.tab === undefined ? {} : { tab: source.tab }),
-        ...(source.subpage === undefined ? {} : { subpage: source.subpage })
+        ...(source.subpage === undefined ? {} : { subpage: source.subpage }),
+        ...(source.subpageTab === undefined ? {} : { subpageTab: source.subpageTab })
       }))),
       ...(extraValues[section.type] ?? []).map(label => ({ label }))
     ]

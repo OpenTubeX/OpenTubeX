@@ -1293,6 +1293,21 @@ Settings:
     Set Password To Prevent Access: Establecer una contraseña para impedir el acceso a los ajustes
     Set Password: Establecer contraseña
     Remove Password: Eliminar contraseña
+  Interface Customizer:
+    Customize Interface: "Personalizar interfaz"
+    Preview: "Vista previa"
+    Player: "Reproductor"
+    Desktop: "Computadora"
+    Mobile: "Celular"
+    Playing: "Reproduciendo"
+    Player Menu: "Menú del reproductor"
+    Fullscreen: "Pantalla completa"
+    Paused: "En pausa"
+    Controls: "Controles"
+    Example Video Title: "Video de ejemplo"
+    Resolution: "Resolución"
+    Loop: "Repetir"
+    Off: "Desactivado"
 Tutorial:
   Skip: Omitir
   Next: Siguiente

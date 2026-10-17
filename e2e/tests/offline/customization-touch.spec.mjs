@@ -1,4 +1,4 @@
-import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
+import { test, expect, openInterfaceCustomizer } from '../../helpers/app.mjs'
 
 test.describe('touch customization', { tag: '@scale' }, () => {
   for (const { name, rowSelector, idAttribute, handleSelector = '.dragHandle' } of [
@@ -8,11 +8,10 @@ test.describe('touch customization', { tag: '@scale' }, () => {
   ]) {
     test(`scrolls to offscreen ${name} items during a touch drag`, async ({ page }) => {
       await page.setViewportSize({ width: 375, height: 600 })
-      const appearance = await goToSettingsSection(page, 'appearance')
-      await appearance.getByRole('button', { name: `Customize ${name}` }).click()
+      await openInterfaceCustomizer(page, name)
 
       const rows = page.locator(rowSelector)
-      const scroller = page.locator('.settingsSubpageScroll')
+      const scroller = page.locator('.customizerEditorScroll')
       const itemIds = () => rows.evaluateAll((elements, attribute) => (
         elements.map(element => element.getAttribute(attribute))
       ), idAttribute)
@@ -55,8 +54,7 @@ test.describe('touch customization', { tag: '@scale' }, () => {
 
     test(`reorders ${name} by touch and cancels interrupted drags`, async ({ page }) => {
       await page.setViewportSize({ width: 375, height: 812 })
-      const appearance = await goToSettingsSection(page, 'appearance')
-      await appearance.getByRole('button', { name: `Customize ${name}` }).click()
+      await openInterfaceCustomizer(page, name)
 
       const rows = page.locator(rowSelector)
       const itemIds = () => rows.evaluateAll((elements, attribute) => (
@@ -96,14 +94,19 @@ test.describe('touch customization', { tag: '@scale' }, () => {
         await expect(page.locator(`${rowSelector}.dropBefore, ${rowSelector}.dropAfter`)).toHaveCount(0)
       }
 
+      // Quick settings categories are tall; keep both drag ends inside the
+      // editor below the live preview so edge scrolling cannot move the target.
+      const far = name === 'quick settings' ? 1 : 2
+      const moved = original.slice()
+      moved.splice(0, 0, moved.splice(far, 1)[0])
       try {
-        await drag(2, 0)
-        await expect.poll(itemIds).toEqual([original[2], original[0], original[1], ...original.slice(3)])
+        await drag(far, 0)
+        await expect.poll(itemIds).toEqual(moved)
         await expect(page.getByRole('button', { name: 'Reset to defaults' })).toBeEnabled()
-        await drag(0, 2)
+        await drag(0, far)
         await expect.poll(itemIds).toEqual(original)
         await expect(page.getByRole('button', { name: 'Reset to defaults' })).toBeDisabled()
-        await drag(2, 0, true)
+        await drag(far, 0, true)
         await expect.poll(itemIds).toEqual(original)
       } finally {
         await session.detach()

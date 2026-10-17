@@ -1187,6 +1187,21 @@ Settings:
   No Settings Found: Nu s-au găsit setări
   Experimental Settings:
     Disable Hardware Acceleration: Dezactivează accelerarea hardware
+  Interface Customizer:
+    Customize Interface: "Personalizează interfața"
+    Preview: "Previzualizare"
+    Player: "Player"
+    Desktop: "Computer"
+    Mobile: "Mobil"
+    Playing: "Se redă"
+    Player Menu: "Meniul playerului"
+    Fullscreen: "Ecran complet"
+    Paused: "Întrerupt"
+    Controls: "Comenzi"
+    Example Video Title: "Videoclip exemplu"
+    Resolution: "Rezoluție"
+    Loop: "Repetare"
+    Off: "Dezactivat"
 Tutorial:
   Skip: Omite
   Next: Înainte

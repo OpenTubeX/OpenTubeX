@@ -1170,6 +1170,21 @@ Settings:
     Unlocking: Kilid açılır…
   Search Settings: Tənzimləmələrdə axtar
   No Settings Found: Tənzimləmə tapılmadı
+  Interface Customizer:
+    Customize Interface: "İnterfeysi fərdiləşdir"
+    Preview: "Önizləmə"
+    Player: "Pleyer"
+    Desktop: "Masaüstü"
+    Mobile: "Mobil"
+    Playing: "Oynadılır"
+    Player Menu: "Pleyer menyusu"
+    Fullscreen: "Tam ekran"
+    Paused: "Fasilədə"
+    Controls: "İdarəetmə elementləri"
+    Example Video Title: "Nümunə video"
+    Resolution: "Ölçü imkanı"
+    Loop: "Təkrarla"
+    Off: "Söndürülüb"
 Tutorial:
   Skip: Ötür
   Next: Növbəti

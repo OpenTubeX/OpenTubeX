@@ -1198,6 +1198,21 @@ Settings:
   No Settings Found: Geen instellingen gevonden
   Experimental Settings:
     Disable Hardware Acceleration: Hardwareversnelling uitschakelen
+  Interface Customizer:
+    Customize Interface: "Interface aanpassen"
+    Preview: "Voorbeeld"
+    Player: "Speler"
+    Desktop: "Desktop"
+    Mobile: "Mobiel"
+    Playing: "Speelt af"
+    Player Menu: "Spelermenu"
+    Fullscreen: "Volledig scherm"
+    Paused: "Gepauzeerd"
+    Controls: "Bediening"
+    Example Video Title: "Voorbeeldvideo"
+    Resolution: "Resolutie"
+    Loop: "Herhalen"
+    Off: "Uit"
 Tutorial:
   Skip: Overslaan
   Next: Volgende

@@ -1,0 +1,328 @@
+/* The preview lays the player out at 800 design pixels wide and scales it to
+   its stage, so the controls keep their real proportions at any size. */
+.playerPreview {
+  --preview-aspect-ratio: calc(16 / 9);
+
+  align-items: center;
+  block-size: 100%;
+  display: flex;
+  justify-content: center;
+  user-select: none;
+}
+
+.playerPreview.fullscreen {
+  --preview-aspect-ratio: calc(16 / 10);
+}
+
+.previewPlayer {
+  --u: 0.125cqi;
+  --pill-color: rgb(0 0 0 / 28%);
+  --pill-size: calc(34 * var(--u));
+
+  aspect-ratio: var(--preview-aspect-ratio);
+  background-color: #000;
+  border-radius: calc(12px * var(--ui-roundness));
+  color: #fff;
+  container-type: inline-size;
+  font-size: calc(13 * var(--u));
+  inline-size: min(100cqi, 100cqb * var(--preview-aspect-ratio));
+  overflow: hidden;
+  position: relative;
+}
+
+.fullscreen .previewPlayer {
+  border-radius: 0;
+}
+
+.previewVideo {
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(180deg, #3a4d6b 0%, #c98a6b 62%, #e8b48a 100%);
+  inline-size: 100%;
+  inset-block-start: 50%;
+  overflow: hidden;
+  position: absolute;
+  translate: 0 -50%;
+}
+
+.previewVideoSun {
+  aspect-ratio: 1;
+  background: radial-gradient(circle, #ffe2a8 0%, #ffc26e 45%, rgb(255 194 110 / 0%) 70%);
+  inline-size: 26%;
+  inset-block-start: 22%;
+  inset-inline-start: 58%;
+  position: absolute;
+}
+
+.previewVideoHill {
+  aspect-ratio: 3;
+  background: #2c3a4f;
+  border-radius: 50% 50% 0 0;
+  inline-size: 90%;
+  inset-block-end: -12%;
+  inset-inline-start: -10%;
+  position: absolute;
+}
+
+.previewVideoHill.back {
+  background: #4a5873;
+  inline-size: 80%;
+  inset-block-end: -6%;
+  inset-inline-start: 40%;
+  z-index: -1;
+}
+
+.previewTitle {
+  background-color: #000;
+  block-size: calc(62.5 * var(--u));
+  box-sizing: border-box;
+  font-size: calc(24 * var(--u));
+  font-weight: 700;
+  inset-block-start: 0;
+  inset-inline: 0;
+  padding-block-start: calc(12 * var(--u));
+  padding-inline: calc(18 * var(--u));
+  position: absolute;
+}
+
+.previewIcon {
+  block-size: calc(22 * var(--u));
+  fill: currentcolor;
+  inline-size: calc(22 * var(--u));
+}
+
+.previewBigPlay {
+  align-items: center;
+  background-color: rgb(0 0 0 / 50%);
+  block-size: calc(80 * var(--u));
+  border-radius: 50%;
+  display: flex;
+  inline-size: calc(80 * var(--u));
+  inset: 0;
+  justify-content: center;
+  margin: auto;
+  position: absolute;
+}
+
+.previewBigPlay .previewIcon {
+  block-size: 60%;
+  inline-size: 60%;
+}
+
+.previewControls {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: calc(8 * var(--u));
+  inset-block-end: 0;
+  inset-inline: 0;
+  padding-block-end: calc(8 * var(--u));
+  padding-inline: calc(18 * var(--u));
+  position: absolute;
+}
+
+.fullscreen .previewControls {
+  background-color: #000;
+  padding-block-start: calc(10 * var(--u));
+}
+
+.previewSeekBar {
+  background-color: rgb(255 255 255 / 40%);
+  block-size: calc(4 * var(--u));
+  border-radius: calc(2px * var(--ui-roundness));
+  position: relative;
+}
+
+.previewSeekBarPlayed {
+  background-color: var(--primary-color);
+  border-radius: inherit;
+  inline-size: 22%;
+  inset-block: 0;
+  position: absolute;
+}
+
+.previewSeekBarThumb {
+  aspect-ratio: 1;
+  background-color: #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 60%);
+  inline-size: calc(12 * var(--u));
+  inset-block-start: 50%;
+  inset-inline-start: 22%;
+  position: absolute;
+  translate: -50% -50%;
+}
+
+.previewButtonPanel {
+  align-items: center;
+  direction: ltr;
+  display: flex;
+  gap: calc(7 * var(--u));
+}
+
+.previewPill {
+  align-items: center;
+  backdrop-filter: blur(10px) saturate(1.15);
+  background: linear-gradient(145deg, rgb(255 255 255 / 8%), rgb(255 255 255 / 2%)), var(--pill-color);
+  block-size: var(--pill-size);
+  border-radius: calc(var(--pill-size) / 2 * var(--ui-roundness));
+  box-shadow: inset 0 1px rgb(255 255 255 / 14%), inset 0 0 0 1px rgb(255 255 255 / 6%);
+  box-sizing: border-box;
+  display: flex;
+  flex-shrink: 0;
+}
+
+.previewIconPill {
+  inline-size: var(--pill-size);
+  justify-content: center;
+}
+
+.previewTextPill {
+  font-weight: 500;
+  padding-inline: calc(12 * var(--u));
+  white-space: nowrap;
+}
+
+.previewSpacer {
+  flex: 1 1 auto;
+}
+
+/* Like the real speed bar, give up space to the other controls and clip. */
+.previewRateBar {
+  flex-shrink: 1;
+  gap: calc(2 * var(--u));
+  min-inline-size: 0;
+  overflow: hidden;
+  padding-inline: calc(4 * var(--u));
+}
+
+.previewRate {
+  flex-shrink: 0;
+  white-space: nowrap;
+  border-radius: calc(13 * var(--u) * var(--ui-roundness));
+  font-weight: 500;
+  padding-block: calc(4 * var(--u));
+  padding-inline: calc(8 * var(--u));
+}
+
+.previewRate.active {
+  background-color: rgb(255 255 255 / 22%);
+}
+
+.previewRightGroup {
+  gap: calc(4 * var(--u));
+  padding-inline: calc(4 * var(--u));
+}
+
+.previewIconButton {
+  align-items: center;
+  block-size: calc(30 * var(--u));
+  border-radius: 50%;
+  display: flex;
+  inline-size: calc(40 * var(--u));
+  justify-content: center;
+}
+
+.previewIconButton.open {
+  background-color: rgb(255 255 255 / 14%);
+}
+
+.previewAutoplayToggle {
+  align-items: center;
+  background-color: rgb(255 255 255 / 30%);
+  block-size: calc(16 * var(--u));
+  border-radius: calc(8 * var(--u));
+  display: flex;
+  inline-size: calc(34 * var(--u));
+  margin-inline: calc(6 * var(--u));
+}
+
+.previewAutoplayKnob {
+  align-items: center;
+  background-color: #fff;
+  block-size: calc(18 * var(--u));
+  border-radius: 50%;
+  color: #555;
+  display: flex;
+  inline-size: calc(18 * var(--u));
+  justify-content: center;
+}
+
+.previewAutoplayKnob .previewIcon {
+  block-size: 70%;
+  inline-size: 70%;
+}
+
+.previewOverflowMenu {
+  backdrop-filter: blur(10px);
+  background-color: rgb(28 28 28 / 85%);
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: calc(12 * var(--u) * var(--ui-roundness));
+  display: grid;
+  gap: calc(4 * var(--u));
+  grid-template-columns: repeat(4, calc(94 * var(--u)));
+  inset-block-end: calc(62 * var(--u));
+  inset-inline-end: calc(140 * var(--u));
+  padding: calc(5 * var(--u));
+  position: absolute;
+}
+
+.previewOverflowItem {
+  align-items: center;
+  background-color: rgb(255 255 255 / 6%);
+  border-radius: calc(8 * var(--u) * var(--ui-roundness));
+  display: flex;
+  flex-direction: column;
+  font-size: calc(11 * var(--u));
+  gap: calc(2 * var(--u));
+  padding-block: calc(8 * var(--u));
+  padding-inline: calc(4 * var(--u));
+  text-align: center;
+}
+
+.previewOverflowItem .previewIcon,
+.previewOverflowFtIcon {
+  block-size: calc(18 * var(--u));
+  font-size: calc(18 * var(--u));
+  inline-size: calc(18 * var(--u));
+}
+
+.previewOverflowLabel {
+  overflow-wrap: anywhere;
+}
+
+.previewOverflowValue {
+  color: rgb(255 255 255 / 60%);
+  font-size: calc(10 * var(--u));
+}
+
+.previewFullscreenActions {
+  backdrop-filter: blur(6px);
+  background-color: rgb(0 0 0 / 25%);
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: calc(24 * var(--u) * var(--ui-roundness));
+  box-shadow: 0 2px 8px rgb(0 0 0 / 35%);
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(4 * var(--u));
+  inset-block-end: calc(82 * var(--u));
+  inset-inline-end: calc(24 * var(--u));
+  max-inline-size: calc(100% - 48 * var(--u));
+  padding: calc(4 * var(--u));
+  position: absolute;
+}
+
+.previewFullscreenAction {
+  align-items: center;
+  block-size: calc(40 * var(--u));
+  display: flex;
+  font-size: calc(20 * var(--u));
+  inline-size: calc(40 * var(--u));
+  justify-content: center;
+}
+
+.hideControls .previewControls,
+.hideControls .previewBigPlay,
+.hideTitle .previewTitle,
+.hideActions .previewFullscreenActions {
+  visibility: hidden;
+}

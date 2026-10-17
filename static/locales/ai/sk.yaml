@@ -1167,6 +1167,21 @@ Settings:
     Unlocking: Odomyká sa…
   Search Settings: Hľadať v nastaveniach
   No Settings Found: Nenašli sa žiadne nastavenia
+  Interface Customizer:
+    Customize Interface: "Prispôsobiť rozhranie"
+    Preview: "Ukážka"
+    Player: "Prehrávač"
+    Desktop: "Počítač"
+    Mobile: "Mobil"
+    Playing: "Prehráva sa"
+    Player Menu: "Ponuka prehrávača"
+    Fullscreen: "Celá obrazovka"
+    Paused: "Pozastavené"
+    Controls: "Ovládacie prvky"
+    Example Video Title: "Ukážkové video"
+    Resolution: "Rozlíšenie"
+    Loop: "Opakovanie"
+    Off: "Vypnuté"
 Tutorial:
   Skip: Preskočiť
   Next: Ďalej

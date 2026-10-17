@@ -1167,6 +1167,21 @@ Settings:
     Unlocking: Kilit açılıyor…
   Search Settings: Arama ayarları
   No Settings Found: Ayar bulunamadı
+  Interface Customizer:
+    Customize Interface: "Arayüzü özelleştir"
+    Preview: "Önizleme"
+    Player: "Oynatıcı"
+    Desktop: "Masaüstü"
+    Mobile: "Mobil"
+    Playing: "Oynatılıyor"
+    Player Menu: "Oynatıcı menüsü"
+    Fullscreen: "Tam ekran"
+    Paused: "Duraklatıldı"
+    Controls: "Kontroller"
+    Example Video Title: "Örnek video"
+    Resolution: "Çözünürlük"
+    Loop: "Döngü"
+    Off: "Kapalı"
 Tutorial:
   Skip: Atla
   Next: İleri

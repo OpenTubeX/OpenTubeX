@@ -1191,6 +1191,21 @@ Settings:
   No Settings Found: Không tìm thấy cài đặt
   Experimental Settings:
     Disable Hardware Acceleration: Tắt tăng tốc phần cứng
+  Interface Customizer:
+    Customize Interface: "Tùy chỉnh giao diện"
+    Preview: "Xem trước"
+    Player: "Trình phát"
+    Desktop: "Máy tính"
+    Mobile: "Di động"
+    Playing: "Đang phát"
+    Player Menu: "Menu trình phát"
+    Fullscreen: "Toàn màn hình"
+    Paused: "Đã tạm dừng"
+    Controls: "Điều khiển"
+    Example Video Title: "Video mẫu"
+    Resolution: "Độ phân giải"
+    Loop: "Lặp lại"
+    Off: "Tắt"
 Tutorial:
   Skip: Bỏ qua
   Next: Tiếp

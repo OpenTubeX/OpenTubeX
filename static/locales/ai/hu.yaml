@@ -1167,6 +1167,21 @@ Settings:
     Unlocking: Feloldás…
   Search Settings: Keresési beállítások
   No Settings Found: Nem találhatók beállítások
+  Interface Customizer:
+    Customize Interface: "Felület testreszabása"
+    Preview: "Előnézet"
+    Player: "Lejátszó"
+    Desktop: "Asztali"
+    Mobile: "Mobil"
+    Playing: "Lejátszás"
+    Player Menu: "Lejátszó menü"
+    Fullscreen: "Teljes képernyő"
+    Paused: "Szüneteltetve"
+    Controls: "Vezérlők"
+    Example Video Title: "Példavideó"
+    Resolution: "Felbontás"
+    Loop: "Ismétlés"
+    Off: "Ki"
 Tutorial:
   Skip: Kihagyás
   Next: Tovább

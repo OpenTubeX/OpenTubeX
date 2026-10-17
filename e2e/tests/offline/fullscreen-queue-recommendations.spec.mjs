@@ -1,6 +1,6 @@
 import { writeFile } from 'node:fs/promises'
 
-import { test, expect, goToSettingsSection, setPlayerFullscreen, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, setPlayerFullscreen, setWindowSize, openInterfaceCustomizer } from '../../helpers/app.mjs'
 import { findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
@@ -105,8 +105,7 @@ for (const { uiScale, iconPack, colorScheme } of [
       await setWindowSize(app, page, { width: 1360, height: 850 })
       await page.emulateMedia({ colorScheme })
       await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
-      const appearance = await goToSettingsSection(page, 'appearance')
-      await appearance.getByRole('button', { name: 'Customize fullscreen actions', exact: true }).click()
+      await openInterfaceCustomizer(page, 'fullscreen actions')
       await expect(page.locator('.selectedAction[data-fullscreen-action-id="queue"]')).toBeVisible()
       await expect(page.locator('.selectedAction[data-fullscreen-action-id="download"]')).toHaveCount(0)
       await expect(page.locator('.selectedAction[data-fullscreen-action-id="recommendations"]')).toHaveCount(0)

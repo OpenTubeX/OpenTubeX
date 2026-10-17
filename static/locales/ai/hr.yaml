@@ -1176,6 +1176,21 @@ Settings:
   No Settings Found: Nisu pronađene postavke
   Experimental Settings:
     Disable Hardware Acceleration: Onemogući hardversko ubrzanje
+  Interface Customizer:
+    Customize Interface: "Prilagodi sučelje"
+    Preview: "Pregled"
+    Player: "Player"
+    Desktop: "Računalo"
+    Mobile: "Mobitel"
+    Playing: "Reproducira se"
+    Player Menu: "Izbornik playera"
+    Fullscreen: "Cijeli zaslon"
+    Paused: "Pauzirano"
+    Controls: "Kontrole"
+    Example Video Title: "Primjer videa"
+    Resolution: "Razlučivost"
+    Loop: "Ponavljanje"
+    Off: "Isključeno"
 Tutorial:
   Skip: Preskoči
   Next: Dalje

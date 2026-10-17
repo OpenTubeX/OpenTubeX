@@ -1439,6 +1439,21 @@ Settings:
     Remove Password: Pašalinti slaptažodį
   Experimental Settings:
     Disable Hardware Acceleration: Išjungti aparatinį spartinimą
+  Interface Customizer:
+    Customize Interface: "Tinkinti sąsają"
+    Preview: "Peržiūra"
+    Player: "Grotuvas"
+    Desktop: "Kompiuteris"
+    Mobile: "Mobilusis"
+    Playing: "Leidžiama"
+    Player Menu: "Grotuvo meniu"
+    Fullscreen: "Visas ekranas"
+    Paused: "Pristabdyta"
+    Controls: "Valdikliai"
+    Example Video Title: "Pavyzdinis vaizdo įrašas"
+    Resolution: "Raiška"
+    Loop: "Kartoti"
+    Off: "Išjungta"
 Tutorial:
   Skip: Praleisti
   Next: Toliau

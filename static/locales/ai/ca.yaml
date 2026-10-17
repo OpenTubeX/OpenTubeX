@@ -1525,6 +1525,21 @@ Settings:
     Set Password To Prevent Access: Definiu una contrasenya per impedir l'accés a la configuració
     Set Password: Defineix la contrasenya
     Remove Password: Suprimeix la contrasenya
+  Interface Customizer:
+    Customize Interface: "Personalitza la interfície"
+    Preview: "Previsualització"
+    Player: "Reproductor"
+    Desktop: "Escriptori"
+    Mobile: "Mòbil"
+    Playing: "En reproducció"
+    Player Menu: "Menú del reproductor"
+    Fullscreen: "Pantalla completa"
+    Paused: "En pausa"
+    Controls: "Controls"
+    Example Video Title: "Vídeo d'exemple"
+    Resolution: "Resolució"
+    Loop: "Repetició"
+    Off: "Desactivat"
 Tutorial:
   Skip: Omet
   Next: Següent
