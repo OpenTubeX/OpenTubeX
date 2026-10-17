@@ -1830,3 +1830,41 @@ test.describe('quick settings focus after control updates', () => {
     await expect(menu).toBeVisible()
   })
 })
+
+test.describe('quick settings focus during a pending update', () => {
+  test.use({ seed: { settings: { quickSettings: ['thumbnailSize', 'playlistThumbnailSize'] } } })
+
+  test('keeps focus on a control chosen while another control saves', async ({ page }) => {
+    await page.locator('.profileTrigger').click()
+    const globalSlider = page.locator('.thumbnailSizeSlider input')
+    const playlistSlider = page.locator('.playlistThumbnailSizeSlider input')
+    await expect(playlistSlider).toBeVisible()
+    await page.evaluate(() => {
+      const store = window.$store
+      const dispatch = store.dispatch
+      store.dispatch = (type, payload) => {
+        if (type !== 'updateThumbnailSize') return dispatch(type, payload)
+        return new Promise(resolve => {
+          window.releaseThumbnailSizeUpdate = () => {
+            const update = dispatch(type, payload)
+            resolve(update)
+            return update
+          }
+        })
+      }
+    })
+
+    await globalSlider.press('Home')
+    await expect.poll(() => page.evaluate(() => typeof window.releaseThumbnailSizeUpdate)).toBe('function')
+    await playlistSlider.focus()
+    await page.evaluate(async () => {
+      await window.releaseThumbnailSizeUpdate()
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+    })
+
+    await expect(playlistSlider).toBeFocused()
+    await page.keyboard.press('End')
+    await expect(playlistSlider).toHaveValue('180')
+    await expect(globalSlider).toHaveValue('60')
+  })
+})

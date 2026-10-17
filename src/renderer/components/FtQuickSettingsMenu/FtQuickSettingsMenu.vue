@@ -911,7 +911,10 @@ async function runSettingUpdate(update) {
     await update()
   } finally {
     await nextTick()
-    if (focusTarget?.isConnected && menu?.contains(focusTarget)) {
+    // Keep focus on another menu control chosen while the update was saving.
+    const activeElement = document.activeElement
+    const focusMovedToControl = activeElement !== focusTarget && activeElement !== menu && menu?.contains(activeElement)
+    if (!focusMovedToControl && focusTarget?.isConnected && menu?.contains(focusTarget)) {
       focusTarget.focus({ preventScroll: true, focusVisible: true })
     } else if (!menu?.matches(':focus-within')) {
       await focusMenu()
