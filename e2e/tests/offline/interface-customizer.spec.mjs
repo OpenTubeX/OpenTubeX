@@ -92,8 +92,10 @@ test.describe('interface customizer', () => {
     await expect.poll(async () => JSON.stringify(await previewIds()) === JSON.stringify(await editorIds()), { message: 'the preview matches the editor order' }).toBe(true)
     await customizer.locator('[data-fullscreen-action-id="share"]').getByRole('button', { name: /^Move .* up$/ }).click()
     await expect.poll(async () => JSON.stringify(await previewIds()) === JSON.stringify(await editorIds()), { message: 'the preview matches the editor order' }).toBe(true)
-    while (await customizer.locator('.selectedAction').count()) {
-      await customizer.locator('.selectedAction').last().getByRole('button', { name: /^Remove / }).click()
+    const rows = customizer.locator('.selectedAction')
+    for (let remaining = await rows.count(); remaining > 0; remaining--) {
+      await rows.last().getByRole('button', { name: /^Remove / }).click()
+      await expect(rows).toHaveCount(remaining - 1)
     }
     await expect(customizer.locator('.previewFullscreenActions')).toHaveCount(0)
   })
@@ -186,17 +188,19 @@ test.describe('interface customizer', () => {
         await expect.poll(() => customizer.locator('.previewStage').evaluate(stage => {
           const bounds = stage.getBoundingClientRect()
           return [...stage.querySelectorAll('.previewPlayer, .previewOverflowMenu, .previewFullscreenActions, .previewButtonPanel')]
-            .every(element => {
+            .filter(element => {
               const rect = element.getBoundingClientRect()
-              return rect.left >= bounds.left - 0.5 && rect.right <= bounds.right + 0.5 &&
-                rect.top >= bounds.top - 0.5 && rect.bottom <= bounds.bottom + 0.5
+              return rect.left < bounds.left - 0.5 || rect.right > bounds.right + 0.5 ||
+                rect.top < bounds.top - 0.5 || rect.bottom > bounds.bottom + 0.5
             })
-        }), { message: `${mode} preview at ${size.width}px` }).toBe(true)
+            .map(element => element.className)
+        }), { message: `${mode} preview elements outside the stage at ${size.width}px` }).toEqual([])
         await expect.poll(() => customizer.locator('.previewPlayer').evaluate(player => {
           const bounds = player.getBoundingClientRect()
           return [...player.querySelectorAll('.previewButtonPanel > *, .previewRightGroup > *')]
-            .every(element => element.getBoundingClientRect().right <= bounds.right + 0.5)
-        }), { message: `${mode} controls fit the player at ${size.width}px` }).toBe(true)
+            .filter(element => element.getBoundingClientRect().right > bounds.right + 0.5)
+            .map(element => element.className)
+        }), { message: `${mode} controls past the player edge at ${size.width}px` }).toEqual([])
       }
     }
   })
