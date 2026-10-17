@@ -41,7 +41,7 @@ async function switchContrast(app, label, checked) {
 async function controlContrast(app, control, kind) {
   const { page } = app
   await control.scrollIntoViewIfNeeded()
-  const points = await control.evaluate((element, kind) => {
+  const [surface, ...edge] = await sampleColors(app, page.locator('.settingsWindow'), () => control.evaluate((element, kind) => {
     const rect = element.getBoundingClientRect()
     const container = element.closest('.settingsWindow').getBoundingClientRect()
     const x = rect.left - container.left
@@ -51,8 +51,7 @@ async function controlContrast(app, control, kind) {
     return kind === 'slider'
       ? [[x + rect.width * 0.85, y - 8], ...[-1, 0, 1].map(offset => [x + rect.width * 0.85, y + offset])]
       : [[x - 4, y], ...[-0.5, 0.5, 1.5].map(offset => [x + offset, y])]
-  }, kind)
-  const [surface, ...edge] = await sampleColors(app, page.locator('.settingsWindow'), points)
+  }, kind))
   return { surface, edge, ratio: Math.max(...edge.map(color => contrastRatio(color, surface))) }
 }
 
@@ -331,6 +330,25 @@ test.describe('hotPink contrast', () => {
       return { foreground: rgb(style.color), background: rgb(style.backgroundColor) }
     })
     expect.soft(contrastRatio(colors.foreground, colors.background), `header hover ${JSON.stringify(colors)}`).toBeGreaterThanOrEqual(3)
+  })
+})
+
+test.describe('contrast sampling during settings animations', () => {
+  test.use({ seed: { settings: { baseTheme: 'hotPink', currentLocale: 'en-US' } } })
+
+  test('measures slider coordinates after the section finishes moving', { tag: '@scale' }, async ({ app, page }) => {
+    await goToSettingsSection(page, 'theme')
+    const input = page.getByRole('slider', { name: /UI Roundness/ })
+    await input.scrollIntoViewIfNeeded()
+    await input.evaluate(element => {
+      // Hold the section four pixels below its final position while measuring.
+      const section = element.closest('.settingsContent > [data-section]')
+      const animation = section.animate([{ transform: 'translateY(4px)' }, { transform: 'none' }], { duration: 180 })
+      animation.pause()
+      animation.currentTime = 0
+    })
+    const slider = await controlContrast(app, input, 'slider')
+    expect(slider.ratio, JSON.stringify(slider)).toBeGreaterThanOrEqual(3)
   })
 })
 

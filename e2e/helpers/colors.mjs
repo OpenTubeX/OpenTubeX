@@ -9,6 +9,8 @@ export async function sampleColors(app, region, points, { finishAnimations = tru
     }
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
   }, finishAnimations)
+  // Geometry-based points must be measured after scrolling and animations settle.
+  const samplePoints = typeof points === 'function' ? await points() : points
   const origin = await region.evaluate(element => { const { x, y } = element.getBoundingClientRect(); return { x, y } })
   const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }))
   // Capture Electron's actual zoomed framebuffer; Playwright's screenshot
@@ -26,5 +28,5 @@ export async function sampleColors(app, region, points, { finishAnimations = tru
       [...context.getImageData(Math.floor((x + origin.x) * bitmap.width / viewport.width), Math.floor((y + origin.y) * bitmap.height / viewport.height), 1, 1).data].slice(0, 3))
     bitmap.close()
     return colors
-  }, { base64, points, origin, viewport })
+  }, { base64, points: samplePoints, origin, viewport })
 }
