@@ -72,10 +72,10 @@ test('releases distant playlist rows without changing the scroll range', { tag: 
   await page.evaluate(() => window.scrollTo(0, 0))
   await expect(rows.first().locator('.ft-list-video')).toBeVisible()
   await expect(rows.last().locator('.ft-list-video')).toHaveCount(0)
-  expect(Math.abs(await scrollRange() - range)).toBeLessThanOrEqual(1)
+  await expect.poll(async () => Math.abs(await scrollRange() - range)).toBeLessThanOrEqual(1)
 
   // Returning to the end restores the same offset without empty space.
   await page.evaluate(top => window.scrollTo(0, top), scrollY)
   await expect(rows.last().locator('.ft-list-video')).toBeVisible()
-  expect(Math.abs(await page.evaluate(() => window.scrollY) - scrollY)).toBeLessThanOrEqual(1)
+  await expect.poll(async () => Math.abs(await page.evaluate(() => window.scrollY) - scrollY)).toBeLessThanOrEqual(1)
 })
