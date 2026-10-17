@@ -286,8 +286,6 @@ test('collects removed scrollbar images and updates overflow when surviving imag
 })
 
 test('keeps many unloaded tabs lightweight after repeated player reloads', { tag: '@performance' }, async ({ app, page }, testInfo) => {
-  // Listener-count failure under investigation: https://github.com/OpenTubeX/OpenTubeX/issues/2130
-  test.fixme(true, 'Intermittent listener-count failure after player unloading')
   test.setTimeout(180_000)
   await mockPlayableWatchPage(app, page)
   // Failing avatars make every tab retry and fall back to its page icon for
