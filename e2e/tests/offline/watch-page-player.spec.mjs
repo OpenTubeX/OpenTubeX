@@ -632,12 +632,20 @@ test('shows the audio-track player and custom visualizer for YouTube Music track
   await expect(canvas).toBeVisible()
 
   const artworkSrc = await artwork.getAttribute('src')
+  // A failed thumbnail falls back to the next smaller resolution. Hold that
+  // request so the fixture cannot load it before the hidden state is checked.
+  const fallbackRequests = []
+  const fallbackPattern = /\/vi\/[^/]+\/sddefault\.jpg/
+  await page.route(fallbackPattern, route => { fallbackRequests.push(route) })
   await artwork.dispatchEvent('error')
+  await expect(artwork).toHaveAttribute('src', fallbackPattern)
   await expect(artwork).toBeHidden()
   await artwork.evaluate((element) => {
     element.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/%3E'
   })
   await expect(artwork).toBeVisible()
+  await page.unroute(fallbackPattern)
+  await Promise.all(fallbackRequests.map(route => route.abort().catch(() => {})))
   await artwork.evaluate((element, src) => { element.src = src }, artworkSrc)
   await expect.poll(() => artwork.evaluate(element => element.naturalWidth)).toBeGreaterThan(0)
 
