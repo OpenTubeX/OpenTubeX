@@ -435,11 +435,11 @@ jobs:
       shell: bash
       run: |
         set -euo pipefail
-        release="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}")"
-        jq --raw-output '.assets[] | select(.name | endswith(".intoto.jsonl") | not)
-          | "\(.digest // error("\(.name) has no digest") | ltrimstr("sha256:"))  \(.name)"' \
-          <<< "$release" > "$RUNNER_TEMP/checksums.txt"
-        echo "tag=$(jq --raw-output .tag_name <<< "$release")" >> "$GITHUB_OUTPUT"
+        gh api --paginate "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}/assets?per_page=100" \
+          --jq '.[] | select(.name | endswith(".intoto.jsonl") | not)
+            | "\(.digest // error("\(.name) has no digest") | ltrimstr("sha256:"))  \(.name)"' \
+          > "$RUNNER_TEMP/checksums.txt"
+        echo "tag=$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)" >> "$GITHUB_OUTPUT"
 
     - name: Attest build provenance
       id: attest

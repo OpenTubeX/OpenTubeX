@@ -2,11 +2,11 @@
 
 [[IgnoredVulns]]
 id = "GHSA-vfj7-8cjw-p6xm"
-reason = "braces: no fixed release; used by micromatch in stylelint, globby and the webpack dev server."
+reason = "braces: no fixed release; used by micromatch in stylelint, globby and webpack, which only reaches the app tree as an optional peer of vue-router's build plugin."
 
 [[IgnoredVulns]]
 id = "GHSA-ch52-4w7c-c8xp"
-reason = "http-cache-semantics: no fixed release; used by got in electron-builder's Electron download, which shares no cache between users."
+reason = "http-cache-semantics: no fixed release; used by got in electron-builder's Electron download, which never passes got a response cache."
 
 [[IgnoredVulns]]
 id = "GHSA-hp3w-g68c-fv3c"
