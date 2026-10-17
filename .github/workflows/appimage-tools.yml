@@ -11,6 +11,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: appimage-tools
+  cancel-in-progress: false
+
 jobs:
   update:
     if: github.repository == 'OpenTubeX/OpenTubeX'
