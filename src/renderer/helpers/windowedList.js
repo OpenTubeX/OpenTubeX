@@ -39,6 +39,8 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
       for (const { candidate, height } of measured) candidate.evict(height)
     })
   }
+  // scrollMargin extends the overscan into nested scrollers such as the
+  // watch-page playlist. Browsers without it mount rows as they appear.
   const intersection = new Intersection(entries => {
     for (const entry of entries) {
       const item = items.get(entry.target)
@@ -47,7 +49,7 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
       if (item.near) item.mount()
       else item.release()
     }
-  }, { rootMargin: `${WINDOWED_LIST_OVERSCAN_PX}px 0px` })
+  }, { rootMargin: `${WINDOWED_LIST_OVERSCAN_PX}px 0px`, scrollMargin: `${WINDOWED_LIST_OVERSCAN_PX}px 0px` })
   const resize = new Resize(entries => {
     for (const entry of entries) {
       const item = items.get(entry.target)

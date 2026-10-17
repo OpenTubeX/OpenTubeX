@@ -411,6 +411,15 @@ function cancelLoaderSettle() {
   pointer-events: none;
 }
 
+/* Android WebView ticks animations under this opacity: 0 layer on the main
+   thread. A spinner in a neighbor would otherwise render a frame per refresh. */
+.pageSwipePrewarm,
+.pageSwipePrewarm :deep(*),
+.pageSwipePrewarm :deep(*::before),
+.pageSwipePrewarm :deep(*::after) {
+  animation-play-state: paused !important;
+}
+
 .pageSwipeFrom,
 .pageSwipeTo {
   background-color: var(--bg-color);
