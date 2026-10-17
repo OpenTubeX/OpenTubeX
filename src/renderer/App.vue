@@ -3889,7 +3889,7 @@ function handleKeyboardShortcuts(event) {
     return
   }
 
-  if (matchesKeyboardShortcut(event, shortcuts.NAVIGATE_TO_DOWNLOADS)) {
+  if (supportsYtDlp && matchesKeyboardShortcut(event, shortcuts.NAVIGATE_TO_DOWNLOADS)) {
     event.preventDefault()
     store.dispatch('showSettingsWindow', 'downloads')
     return
