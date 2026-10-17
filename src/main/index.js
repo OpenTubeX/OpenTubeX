@@ -3229,13 +3229,16 @@ function runApp() {
     // A dead renderer (e.g. V8 out of memory) otherwise leaves a frozen window
     // until the app is restarted. Stop after repeated crashes to avoid a loop.
     let lastRendererCrash = 0
-    newWindow.webContents.on('render-process-gone', (_event, { reason, exitCode }) => {
+    newWindow.webContents.on('render-process-gone', async (_event, { reason, exitCode }) => {
       if (reason === 'clean-exit') return
       console.error(`Renderer process gone (${reason}, exit code ${exitCode})`)
       const now = Date.now()
       if (now - lastRendererCrash < 60_000) return
       lastRendererCrash = now
-      newWindow.webContents.reload()
+      await TabManager.getFromWebContents(newWindow.webContents)?.unloadBackgroundTabs().catch(error => {
+        console.error('Failed to unload background tabs after a renderer crash:', error)
+      })
+      if (!newWindow.isDestroyed()) newWindow.webContents.reload()
     })
 
     if (savedMaximized) {

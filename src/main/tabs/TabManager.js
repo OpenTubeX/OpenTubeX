@@ -1722,6 +1722,18 @@ export class TabManager {
   }
 
   /**
+   * A crashed renderer lost every page, so only the selected tab should mount
+   * again when the window reloads. Otherwise an out-of-memory crash would
+   * restore all the pages that filled the memory.
+   * @returns {Promise<void>}
+   */
+  async unloadBackgroundTabs() {
+    await this.unloadTabs([...this.tabs.values()]
+      .filter(tab => tab.loadState !== 'unloaded' && tab.id !== this.activeTabId && tab.id !== this.presentedTabId)
+      .map(tab => tab.id))
+  }
+
+  /**
    * Unload several tabs at once, see {@link closeTabs}.
    * @param {string[]} tabIds
    * @returns {Promise<void>}
