@@ -1259,14 +1259,18 @@ watch(playlistItemsWrapper, (wrapper) => {
   }
   // Windowed rows shrink to measured shells after layout changes without any
   // child list mutation, so watch each row's size as well as the viewport.
-  playlistItemsResizeObserver = new ResizeObserver(scheduleClamp)
-  playlistItemsResizeObserver.observe(container)
-  const observeItems = () => {
-    for (const item of container.querySelectorAll(':scope > .playlistItem')) playlistItemsResizeObserver.observe(item)
-  }
-  observeItems()
-  playlistItemsObserver = new MutationObserver(() => {
-    observeItems()
+  const resizeObserver = playlistItemsResizeObserver = new ResizeObserver(scheduleClamp)
+  resizeObserver.observe(container)
+  for (const item of container.querySelectorAll(':scope > .playlistItem')) resizeObserver.observe(item)
+  playlistItemsObserver = new MutationObserver(records => {
+    for (const { addedNodes, removedNodes } of records) {
+      for (const node of removedNodes) {
+        if (node.nodeType === Node.ELEMENT_NODE) resizeObserver.unobserve(node)
+      }
+      for (const node of addedNodes) {
+        if (node.nodeType === Node.ELEMENT_NODE && node.classList.contains('playlistItem')) resizeObserver.observe(node)
+      }
+    }
     scheduleClamp()
   })
   playlistItemsObserver.observe(container, { childList: true })
