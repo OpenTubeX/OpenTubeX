@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: Ukloniti više kartica iz memorije?
   Message: Time će se iz memorije ukloniti {count} kartica. | Time će se iz memorije ukloniti {count} kartice. | Time će se iz memorije ukloniti {count} kartica.
   Unload Tabs: Ukloni {count} karticu iz memorije | Ukloni {count} kartice iz memorije | Ukloni {count} kartica iz memorije
+Tabs Unloaded To Free Memory: Radi oslobađanja memorije uklonjena je {count} kartica koju niste nedavno koristili | Radi oslobađanja memorije uklonjene su {count} kartice koje niste nedavno koristili | Radi oslobađanja memorije uklonjeno je {count} kartica koje niste nedavno koristili
 Use Vertical Tabs: Koristi okomite kartice
 Use Horizontal Tabs: Koristi vodoravne kartice
 Resize Tab Bar: Promijeni veličinu trake kartica

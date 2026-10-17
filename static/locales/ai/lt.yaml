@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: Pašalinti kelias korteles iš atminties?
   Message: Iš atminties bus pašalinta {count} kortelė. | Iš atminties bus pašalintos {count} kortelės. | Iš atminties bus pašalinta {count} kortelių.
   Unload Tabs: Pašalinti iš atminties {count} kortelę | Pašalinti iš atminties {count} korteles | Pašalinti iš atminties {count} kortelių
+Tabs Unloaded To Free Memory: Atminčiai atlaisvinti pašalinta {count} kortelė, kurios neseniai nenaudojote | Atminčiai atlaisvinti pašalintos {count} kortelės, kurių neseniai nenaudojote | Atminčiai atlaisvinti pašalinta {count} kortelių, kurių neseniai nenaudojote
 Use Vertical Tabs: Naudoti vertikalias korteles
 Use Horizontal Tabs: Naudoti horizontalias korteles
 Resize Tab Bar: Keisti kortelių juostos dydį

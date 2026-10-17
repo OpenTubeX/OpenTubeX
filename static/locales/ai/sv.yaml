@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: Frigör flera flikar?
   Message: Detta frigör {count} flikar.
   Unload Tabs: Frigör {count} flikar
+Tabs Unloaded To Free Memory: '{count} flik som du inte har använt på sistone frigjordes för att spara minne | {count} flikar som du inte har använt på sistone frigjordes för att spara minne'
 Use Vertical Tabs: Använd vertikala flikar
 Use Horizontal Tabs: Använd vågräta flikar
 Resize Tab Bar: Ändra storlek på flikfältet

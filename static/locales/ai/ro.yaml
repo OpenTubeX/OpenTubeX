@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: Descărcați mai multe file din memorie?
   Message: Se va descărca {count} filă din memorie. | Se vor descărca {count} file din memorie.
   Unload Tabs: Descarcă {count} filă din memorie | Descarcă {count} file din memorie
+Tabs Unloaded To Free Memory: Pentru a elibera memorie, s-a descărcat {count} filă pe care nu ați mai folosit-o recent | Pentru a elibera memorie, s-au descărcat {count} file pe care nu le-ați mai folosit recent | Pentru a elibera memorie, s-au descărcat {count} de file pe care nu le-ați mai folosit recent
 Use Vertical Tabs: Folosește file verticale
 Use Horizontal Tabs: Folosește file orizontale
 Resize Tab Bar: Redimensionează bara de file

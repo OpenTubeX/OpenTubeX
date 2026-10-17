@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: Losa marga flipa úr minni?
   Message: Þetta losar {count} flipa úr minni. | Þetta losar {count} flipa úr minni.
   Unload Tabs: Losa {count} flipa úr minni | Losa {count} flipa úr minni
+Tabs Unloaded To Free Memory: '{count} flipi sem þú hefur ekki notað nýlega var losaður úr minni | {count} flipar sem þú hefur ekki notað nýlega voru losaðir úr minni'
 Use Vertical Tabs: Nota lóðrétta flipa
 Use Horizontal Tabs: Nota lárétta flipa
 Resize Tab Bar: Breyta stærð flipastiku

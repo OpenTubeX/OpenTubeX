@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: ¿Descargar varias pestañas de la memoria?
   Message: Se descargarán {count} pestañas de la memoria. | Se descargarán {count} pestañas de la memoria.
   Unload Tabs: Descargar {count} pestañas de la memoria | Descargar {count} pestañas de la memoria
+Tabs Unloaded To Free Memory: Para liberar memoria, se ha descargado {count} pestaña que no has usado recientemente | Para liberar memoria, se han descargado {count} de pestañas que no has usado recientemente | Para liberar memoria, se han descargado {count} pestañas que no has usado recientemente
 Use Vertical Tabs: Usar pestañas verticales
 Use Horizontal Tabs: Usar pestañas horizontales
 Resize Tab Bar: Cambiar el tamaño de la barra de pestañas

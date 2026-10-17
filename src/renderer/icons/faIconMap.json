@@ -395,6 +395,10 @@
     "ri": "search-line",
     "material": "search-rounded"
   },
+  "memory": {
+    "ri": "ram-2-line",
+    "material": "memory-alt-outline-rounded"
+  },
   "message": {
     "ri": "message-2-line",
     "material": "sms-outline"

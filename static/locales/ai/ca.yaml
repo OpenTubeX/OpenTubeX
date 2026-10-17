@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: Voleu descarregar diverses pestanyes?
   Message: Es descarregarà {count} pestanya. | Es descarregaran {count} pestanyes.
   Unload Tabs: Descarrega {count} pestanya | Descarrega {count} pestanyes
+Tabs Unloaded To Free Memory: 'S''ha descarregat {count} pestanya que no heu fet servir recentment per alliberar memòria | S''han descarregat {count} de pestanyes que no heu fet servir recentment per alliberar memòria | S''han descarregat {count} pestanyes que no heu fet servir recentment per alliberar memòria'
 Use Vertical Tabs: Utilitza pestanyes verticals
 Use Horizontal Tabs: Utilitza pestanyes horitzontals
 Resize Tab Bar: Redimensiona la barra de pestanyes

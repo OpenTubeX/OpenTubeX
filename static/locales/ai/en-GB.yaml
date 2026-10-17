@@ -41,6 +41,7 @@ Unload Multiple Tabs Confirmation:
   Title: Unload multiple tabs?
   Message: This will unload {count} tabs.
   Unload Tabs: Unload {count} Tabs
+Tabs Unloaded To Free Memory: 'Unloaded {count} tab you haven''t used recently to free memory | Unloaded {count} tabs you haven''t used recently to free memory'
 Use Vertical Tabs: Use Vertical Tabs
 Use Horizontal Tabs: Use Horizontal Tabs
 Resize Tab Bar: Resize Tab Bar

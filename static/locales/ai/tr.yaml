@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: Birden fazla sekme bellekten kaldırılsın mı?
   Message: Bu işlem {count} sekmeyi bellekten kaldıracak.
   Unload Tabs: '{count} Sekmeyi Bellekten Kaldır'
+Tabs Unloaded To Free Memory: Bellekte yer açmak için son zamanlarda kullanmadığınız {count} sekme bellekten kaldırıldı | Bellekte yer açmak için son zamanlarda kullanmadığınız {count} sekme bellekten kaldırıldı
 Use Vertical Tabs: Dikey Sekmeleri Kullan
 Use Horizontal Tabs: Yatay Sekmeleri Kullan
 Resize Tab Bar: Sekme Çubuğunu Yeniden Boyutlandır

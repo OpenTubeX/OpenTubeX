@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: Kiürít több lapot?
   Message: Ezzel kiürít {count} lapot.
   Unload Tabs: Lapok kiürítése ({count})
+Tabs Unloaded To Free Memory: '{count} nemrég nem használt lap kiürítve a memória felszabadításához | {count} nemrég nem használt lap kiürítve a memória felszabadításához'
 Use Vertical Tabs: Függőleges lapok használata
 Use Horizontal Tabs: Vízszintes lapok használata
 Resize Tab Bar: Lapsáv átméretezése

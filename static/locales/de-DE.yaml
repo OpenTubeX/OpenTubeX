@@ -3230,6 +3230,7 @@ Unload Multiple Tabs Confirmation:
   Title: Mehrere Tabs entladen?
   Message: Dadurch werden {count} Tabs entladen.
   Unload Tabs: '{count} Tabs entladen'
+Tabs Unloaded To Free Memory: '{count} länger nicht genutzter Tab wurde entladen, um Arbeitsspeicher freizugeben | {count} länger nicht genutzte Tabs wurden entladen, um Arbeitsspeicher freizugeben'
 Update to {version}: Auf {version} aktualisieren
 Tutorial:
   Skip: Überspringen

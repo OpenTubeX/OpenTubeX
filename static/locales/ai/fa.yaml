@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: چند زبانه از حافظه خارج شوند؟
   Message: با این کار {count} زبانه از حافظه خارج می‌شود.
   Unload Tabs: خارج کردن {count} زبانه از حافظه
+Tabs Unloaded To Free Memory: برای آزاد کردن حافظه، {count} زبانه که اخیراً از آن استفاده نکرده‌اید از حافظه خارج شد | برای آزاد کردن حافظه، {count} زبانه که اخیراً از آن‌ها استفاده نکرده‌اید از حافظه خارج شدند
 Compact side navigation: فشرده کردن نوار پیمایش کناری
 Expand side navigation: گسترش نوار پیمایش کناری
 Use Vertical Tabs: استفاده از زبانه‌های عمودی

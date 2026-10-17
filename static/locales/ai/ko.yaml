@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: 여러 탭을 언로드하시겠습니까?
   Message: 탭 {count}개를 언로드합니다.
   Unload Tabs: 탭 {count}개 언로드
+Tabs Unloaded To Free Memory: 메모리를 확보하기 위해 최근에 사용하지 않은 탭 {count}개를 언로드했습니다
 Compact side navigation: 측면 탐색 메뉴 축소
 Expand side navigation: 측면 탐색 메뉴 펼치기
 Use Vertical Tabs: 세로 탭 사용

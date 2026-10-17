@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: Освобождаване на няколко раздела?
   Message: Това ще освободи {count} раздела от паметта.
   Unload Tabs: Освободи {count} раздела
+Tabs Unloaded To Free Memory: '{count} раздел, който не сте използвали скоро, беше освободен от паметта | {count} раздела, които не сте използвали скоро, бяха освободени от паметта'
 Use Vertical Tabs: Използвай вертикални раздели
 Use Horizontal Tabs: Използвай хоризонтални раздели
 Resize Tab Bar: Преоразмеряване на лентата с раздели

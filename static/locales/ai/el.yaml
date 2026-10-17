@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: Αποφόρτωση πολλών καρτελών;
   Message: Θα αποφορτωθούν {count} καρτέλες.
   Unload Tabs: Αποφόρτωση {count} καρτελών
+Tabs Unloaded To Free Memory: Αποφορτώθηκε {count} καρτέλα που δεν έχετε χρησιμοποιήσει πρόσφατα για απελευθέρωση μνήμης | Αποφορτώθηκαν {count} καρτέλες που δεν έχετε χρησιμοποιήσει πρόσφατα για απελευθέρωση μνήμης
 Use Vertical Tabs: Χρήση κατακόρυφων καρτελών
 Use Horizontal Tabs: Χρήση οριζόντιων καρτελών
 Resize Tab Bar: Αλλαγή μεγέθους γραμμής καρτελών

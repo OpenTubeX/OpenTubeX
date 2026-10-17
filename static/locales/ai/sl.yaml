@@ -41,6 +41,7 @@ Unload Multiple Tabs Confirmation:
   Title: Želite razbremeniti več zavihkov?
   Message: S tem boste razbremenili {count} zavihek. | S tem boste razbremenili {count} zavihka. | S tem boste razbremenili {count} zavihke. | S tem boste razbremenili {count} zavihkov.
   Unload Tabs: Razbremeni {count} zavihek | Razbremeni {count} zavihka | Razbremeni {count} zavihke | Razbremeni {count} zavihkov
+Tabs Unloaded To Free Memory: Za sprostitev pomnilnika je bil razbremenjen {count} zavihek, ki ga niste nedavno uporabljali | Za sprostitev pomnilnika sta bila razbremenjena {count} zavihka, ki ju niste nedavno uporabljali | Za sprostitev pomnilnika so bili razbremenjeni {count} zavihki, ki jih niste nedavno uporabljali | Za sprostitev pomnilnika je bilo razbremenjenih {count} zavihkov, ki jih niste nedavno uporabljali
 Compact side navigation: Strni stransko krmarjenje
 Expand side navigation: Razširi stransko krmarjenje
 Right-click or hold to see history: Za ogled zgodovine kliknite z desno tipko ali pridržite

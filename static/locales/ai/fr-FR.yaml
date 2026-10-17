@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: Décharger plusieurs onglets ?
   Message: Cette action déchargera {count} onglets. | Cette action déchargera {count} onglets.
   Unload Tabs: Décharger {count} onglets | Décharger {count} onglets
+Tabs Unloaded To Free Memory: '{count} onglet que vous n’avez pas utilisé récemment a été déchargé pour libérer de la mémoire | {count} d’onglets que vous n’avez pas utilisés récemment ont été déchargés pour libérer de la mémoire | {count} onglets que vous n’avez pas utilisés récemment ont été déchargés pour libérer de la mémoire'
 Use Vertical Tabs: Utiliser les onglets verticaux
 Use Horizontal Tabs: Utiliser les onglets horizontaux
 Resize Tab Bar: Redimensionner la barre d’onglets

@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: Scaricare più schede dalla memoria?
   Message: Verrà scaricata dalla memoria {count} scheda. | Verranno scaricate dalla memoria {count} schede.
   Unload Tabs: Scarica {count} scheda dalla memoria | Scarica {count} schede dalla memoria
+Tabs Unloaded To Free Memory: Per liberare memoria è stata scaricata {count} scheda che non usavi da tempo | Per liberare memoria sono state scaricate {count} di schede che non usavi da tempo | Per liberare memoria sono state scaricate {count} schede che non usavi da tempo
 Use Vertical Tabs: Usa schede verticali
 Use Horizontal Tabs: Usa schede orizzontali
 Resize Tab Bar: Ridimensiona barra delle schede

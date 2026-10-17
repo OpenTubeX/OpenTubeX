@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: பல தாவல்களை இறக்கவா?
   Message: இது {count} தாவல்களை இறக்கும்.
   Unload Tabs: '{count} தாவல்களை இறக்கு'
+Tabs Unloaded To Free Memory: நினைவகத்தை விடுவிக்க, சமீபத்தில் நீங்கள் பயன்படுத்தாத {count} தாவல் இறக்கப்பட்டது | நினைவகத்தை விடுவிக்க, சமீபத்தில் நீங்கள் பயன்படுத்தாத {count} தாவல்கள் இறக்கப்பட்டன
 Use Vertical Tabs: செங்குத்துத் தாவல்களைப் பயன்படுத்து
 Use Horizontal Tabs: கிடைமட்டத் தாவல்களைப் பயன்படுத்து
 Resize Tab Bar: தாவல் பட்டையின் அளவை மாற்று

@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: "Diskargañ meur a ivinell?"
   Message: "Diskarget e vo {count} ivinell. | Diskarget e vo {count} ivinell. | Diskarget e vo {count} ivinell. | Diskarget e vo {count} ivinell. | Diskarget e vo {count} ivinell."
   Unload Tabs: "Diskargañ {count} ivinell | Diskargañ {count} ivinell | Diskargañ {count} ivinell | Diskargañ {count} ivinell | Diskargañ {count} ivinell"
+Tabs Unloaded To Free Memory: 'Diskarget eo bet {count} ivinell n''ho peus ket implijet nevez zo evit frankaat memor | Diskarget eo bet {count} ivinell n''ho peus ket implijet nevez zo evit frankaat memor | Diskarget eo bet {count} ivinell n''ho peus ket implijet nevez zo evit frankaat memor | Diskarget eo bet {count} ivinell n''ho peus ket implijet nevez zo evit frankaat memor | Diskarget eo bet {count} ivinell n''ho peus ket implijet nevez zo evit frankaat memor'
 Use Vertical Tabs: "Implijout ivinelloù a-serzh"
 Use Horizontal Tabs: "Implijout ivinelloù a-blaen"
 Resize Tab Bar: "Kemmañ ment barrenn an ivinelloù"
