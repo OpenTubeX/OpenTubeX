@@ -447,12 +447,22 @@ export async function setPlayerFullscreen(page, fullscreen) {
  * `uiScale` is set per project: tests tagged `@scale` also run at 95% and
  * 125%. Read the fixture instead of seeding `settings.uiScale` in those tests.
  */
+/**
+ * Workers that share an X server can move each other's cursor, steal focus and
+ * interrupt drags. On Linux, each worker gets its own Xvfb whenever it is
+ * installed; `E2E_XVFB=0` keeps the current display, `E2E_XVFB=1` requires Xvfb.
+ */
+function usesPrivateDisplay() {
+  if (process.env.E2E_XVFB) return process.env.E2E_XVFB !== '0'
+  return process.platform === 'linux' &&
+    (process.env.PATH ?? '').split(path.delimiter).some(directory => directory && existsSync(path.join(directory, 'Xvfb')))
+}
+
 export const test = base.extend({
-  // With E2E_XVFB set, each worker gets its own X server, so parallel tests
-  // cannot move each other's cursor or steal focus. Xvfb picks a free display.
+  // Each worker's private X server picks a free display.
   // eslint-disable-next-line no-empty-pattern -- Playwright requires a fixture object
   xvfbDisplay: [async ({}, use) => {
-    if (!process.env.E2E_XVFB) {
+    if (!usesPrivateDisplay()) {
       await use(process.env.DISPLAY)
       return
     }

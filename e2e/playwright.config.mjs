@@ -15,7 +15,8 @@ export default defineConfig({
     timeout: 15_000
   },
   // Workers that share an X server can move each other's cursor and interrupt
-  // drags or auto-hide timers. E2E_XVFB gives each worker a private display.
+  // drags or auto-hide timers, so on Linux each worker gets a private Xvfb
+  // display (see helpers/app.mjs). CI sets E2E_XVFB=1 to require it.
   // CI runners have 4 vCPUs; a third Electron worker makes timing checks flaky.
   workers: process.env.CI ? (process.env.E2E_XVFB ? 2 : 1) : undefined,
   reporter: [['list'], ['html', { outputFolder: 'report', open: 'never' }]],

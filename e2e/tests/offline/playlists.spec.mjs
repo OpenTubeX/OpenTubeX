@@ -726,8 +726,7 @@ test.describe('custom playlists overview order', () => {
   })
 
   for (const layout of ['grid', 'list']) {
-    // Flaky under parallel workers: https://github.com/OpenTubeX/OpenTubeX/issues/2145
-    test.fixme(`reorders ${layout} playlists by keyboard and drag and drop`, async ({ app, page }) => {
+    test(`reorders ${layout} playlists by keyboard and drag and drop`, async ({ app, page }) => {
       await dispatchStoreAction(page, 'updateListType', layout)
       await goTo(page, 'userplaylists')
 

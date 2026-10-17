@@ -112,8 +112,6 @@ for (const [editor, method] of [
   [editors[3], 'pointer'],
 ]) {
   test(`does not announce a failed ${editor.name} ${method} reorder and retries after relaunch`, async ({ app, page }) => {
-    // Flaky under parallel workers: https://github.com/OpenTubeX/OpenTubeX/issues/2145
-    test.fixme(editor === editors[1] && method === 'pointer')
     const openEditor = async () => {
       const appearance = await goToSettingsSection(page, 'appearance')
       await appearance.getByRole('button', { name: editor.button, exact: true }).click()
@@ -172,8 +170,6 @@ test.describe('in-place settings reordering', { tag: '@scale' }, () => {
 
   for (const editor of editors) {
     test(`slides ${editor.name} in place and persists only on drop`, async ({ app, page, uiScale }) => {
-      // Flaky under parallel workers: https://github.com/OpenTubeX/OpenTubeX/issues/2145
-      test.fixme(editor === editors[2])
       if (uiScale === 125) await setWindowSize(app, page, { width: 500, height: 850 })
       const appearance = await goToSettingsSection(page, 'appearance')
       await appearance.getByRole('button', { name: editor.button, exact: true }).click()
@@ -341,8 +337,7 @@ test.describe('reorder edge scrolling', () => {
 test.describe('explicit reduced motion override', () => {
   test.use({ seed: { settings: { reducedMotion: 'off' } } })
 
-  // Flaky under parallel workers: https://github.com/OpenTubeX/OpenTubeX/issues/2145
-  test.fixme('animates reordering when the app overrides system reduced motion', async ({ page }) => {
+  test('animates reordering when the app overrides system reduced motion', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await expect(page.locator('html')).toHaveAttribute('data-reduced-motion', 'no-preference')
     const appearance = await goToSettingsSection(page, 'appearance')
