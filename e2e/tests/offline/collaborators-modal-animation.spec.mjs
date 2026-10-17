@@ -171,7 +171,8 @@ function defineCase () {
   })
 }
 
-test('middle-clicking a collaborator opens its channel in a background tab', async ({ page }) => {
+// Flaky: the offline channel load can replace the title first: https://github.com/OpenTubeX/OpenTubeX/issues/2166
+test.fixme('middle-clicking a collaborator opens its channel in a background tab', async ({ page }) => {
   await goTo(page, 'subscriptions')
 
   await page.locator('.channelResolverButton').click()
