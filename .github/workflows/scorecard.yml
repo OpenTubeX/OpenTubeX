@@ -34,6 +34,8 @@ jobs:
         with:
           results_file: results.sarif
           results_format: sarif
+          # Fine-grained token with read-only Administration access, needed for the Branch-Protection check.
+          repo_token: ${{ secrets.SCORECARD_TOKEN }}
           publish_results: true
 
       - name: Upload artifact
