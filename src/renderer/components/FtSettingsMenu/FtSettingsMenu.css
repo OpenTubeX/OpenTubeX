@@ -40,9 +40,13 @@
 }
 
 .title.active {
-  color: var(--side-nav-hover-text-color);
-  background: var(--side-nav-hover-color);
+  color: var(--primary-text-color);
+  background: var(--selected-container-color);
   font-weight: 600;
+}
+
+.title.active:is(:hover, :focus-visible) {
+  background: var(--selected-container-hover-color);
 }
 
 .settingsMenu.filtered .titleItem {

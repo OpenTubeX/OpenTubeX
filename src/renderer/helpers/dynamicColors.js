@@ -46,6 +46,7 @@ export function dynamicThemeColors(palette, dark, black = false) {
   const pressed = (base, onColor) => materialStateColor(base, onColor, 0.12)
   // Preserve Android distributions that offer pure-black system surfaces.
   const surface = black || (dark && palette.neutral1[900] === '#000000') ? '#000000' : roles.surface
+  const neutralHover = hover(roles.surfaceContainerLow, roles.onSurface)
   const colors = {
     primaryText: roles.onSurface,
     secondaryText: roles.onSurfaceVariant,
@@ -91,12 +92,13 @@ export function dynamicThemeColors(palette, dark, black = false) {
     scrollbarTextHover: roles.onPrimary,
     dropdownHover: roles.secondaryContainer,
     dropdownHoverText: roles.onSurface,
-    sideNavHover: roles.secondaryContainer,
-    sideNavHoverText: roles.onSecondaryContainer,
+    // Hover is a neutral state layer so it never matches the selected container.
+    sideNavHover: neutralHover,
+    sideNavHoverText: roles.onSurface,
     sideNavActive: roles.secondaryContainer,
     sideNavActiveText: roles.onSecondaryContainer,
-    headerHover: roles.secondaryContainer,
-    headerHoverText: roles.onSecondaryContainer,
+    headerHover: neutralHover,
+    headerHoverText: roles.onSurface,
     headerPressed: pressed(roles.secondaryContainer, roles.onSecondaryContainer),
     headerPressedText: roles.onSecondaryContainer,
     coloredHeaderHover: hover(roles.primary, roles.onPrimary),

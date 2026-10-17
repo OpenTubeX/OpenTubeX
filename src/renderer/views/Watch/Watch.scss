@@ -944,9 +944,13 @@
     }
 
     .shortsCommentsPanel :deep(.fullscreenCommentAction:hover),
-    .shortsCommentsPanel :deep(.fullscreenCommentAction:focus-visible),
-    .shortsCommentsPanel :deep(.fullscreenCommentAction.active) {
+    .shortsCommentsPanel :deep(.fullscreenCommentAction:focus-visible) {
       background-color: var(--side-nav-hover-color);
+    }
+
+    .shortsCommentsPanel :deep(.fullscreenCommentAction.active) {
+      color: var(--primary-color);
+      background-color: var(--selected-container-color);
     }
 
     .shortsAuxPanelOpen {

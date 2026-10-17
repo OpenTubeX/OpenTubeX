@@ -57,10 +57,14 @@
 }
 
 .transcriptHeaderAction:hover,
-.transcriptHeaderAction:focus-visible,
-.transcriptHeaderAction.active {
+.transcriptHeaderAction:focus-visible {
   color: var(--side-nav-hover-text-color);
   background-color: var(--side-nav-hover-color);
+}
+
+.transcriptHeaderAction.active {
+  color: var(--primary-color);
+  background-color: var(--selected-container-color);
 }
 
 .transcriptLanguageMenu {

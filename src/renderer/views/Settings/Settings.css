@@ -220,15 +220,28 @@
   display: block;
 }
 
-.settingsHeaderButton:hover,
-.settingsHeaderButton:focus-visible,
-.settingsHeaderButton.active {
+/* Touch taps leave :hover applied, which must not look like an enabled toggle. */
+@media (hover: hover) {
+  .settingsHeaderButton:hover {
+    color: var(--side-nav-hover-text-color);
+    background: var(--side-nav-hover-color);
+  }
+}
+
+.settingsHeaderButton:focus-visible {
   color: var(--side-nav-hover-text-color);
   background: var(--side-nav-hover-color);
 }
 
 .settingsHeaderButton.active {
-  color: var(--settings-changed-color, var(--primary-color));
+  --settings-header-active-color: var(--settings-changed-color, var(--primary-color));
+
+  color: var(--settings-header-active-color);
+  background: color-mix(in srgb, var(--settings-header-active-color) 20%, transparent);
+}
+
+.settingsHeaderButton.active:is(:hover, :focus-visible) {
+  background: color-mix(in srgb, var(--settings-header-active-color) 28%, transparent);
 }
 
 .settingsPage {

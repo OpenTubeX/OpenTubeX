@@ -108,9 +108,12 @@
 }
 
 .fullscreenCommentAction:hover,
-.fullscreenCommentAction:focus-visible,
-.fullscreenCommentAction.active {
+.fullscreenCommentAction:focus-visible {
   background-color: rgb(255 255 255 / 20%);
+}
+
+.fullscreenCommentAction.active {
+  background-color: rgb(255 255 255 / 34%);
 }
 
 .commentCreatorFilterAvatar {
@@ -336,10 +339,18 @@
 }
 
 .commentHeaderIconAction:hover,
-.commentHeaderIconAction:focus-visible,
-.commentHeaderIconAction.active {
+.commentHeaderIconAction:focus-visible {
   color: var(--side-nav-hover-text-color);
   background-color: var(--side-nav-hover-color);
+}
+
+.commentHeaderIconAction.active {
+  color: var(--primary-color);
+  background-color: var(--selected-container-color);
+}
+
+.commentHeaderIconAction.active:is(:hover, :focus-visible) {
+  background-color: var(--selected-container-hover-color);
 }
 
 .commentHeaderIconActionAligned {
