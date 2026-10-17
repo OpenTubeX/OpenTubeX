@@ -1,0 +1,31 @@
+name: Gradle Wrapper
+
+# Runs on every push without path filters so the latest development commit
+# always has a successful validation run, which OpenSSF Scorecard requires.
+on:
+  push:
+    branches: [ development ]
+  pull_request:
+    branches: [ master, development, '**-RC' ]
+
+cache-mode: none
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+
+    - name: Validate Gradle wrapper checksums
+      uses: gradle/actions/wrapper-validation@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
