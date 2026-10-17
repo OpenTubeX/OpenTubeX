@@ -223,8 +223,7 @@ test.describe('interface customizer with Invidious', () => {
   test('loads navigation preview avatars through the selected backend', async ({ page }) => {
     await page.route('https://invidious.test/**', route => route.fulfill({ status: 404 }))
     const customizer = await openInterfaceCustomizer(page, 'navigation')
-    const avatar = customizer.locator('.previewChannel').first()
-    await expect(avatar).toHaveAttribute('style', /invidious\.test/)
-    await expect(avatar).not.toHaveAttribute('style', /ggpht\.com/)
+    const avatar = customizer.locator('.previewChannel img').first()
+    await expect(avatar).toHaveAttribute('src', /^https:\/\/invidious\.test\//)
   })
 })

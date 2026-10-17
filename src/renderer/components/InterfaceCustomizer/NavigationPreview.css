@@ -174,13 +174,18 @@
 .previewChannel {
   align-self: center;
   background-color: var(--secondary-card-bg-color);
-  background-position: center;
-  background-size: cover;
   block-size: 35px;
   border-radius: 50%;
   flex-shrink: 0;
   inline-size: 35px;
   margin-block: 5px;
+  overflow: hidden;
+}
+
+.previewChannel img {
+  block-size: 100%;
+  inline-size: 100%;
+  object-fit: cover;
 }
 
 .previewPage {

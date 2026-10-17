@@ -54,8 +54,15 @@
               v-for="channel in channels"
               :key="channel.key"
               class="previewChannel"
-              :style="{ backgroundImage: channel.thumbnail ? `url(&quot;${channel.thumbnail}&quot;)` : null }"
-            />
+            >
+              <img
+                v-if="channel.thumbnail"
+                :src="channel.thumbnail"
+                alt=""
+                loading="lazy"
+                @error="$event.target.hidden = true"
+              >
+            </span>
           </template>
         </nav>
         <div class="previewPage">
