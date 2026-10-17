@@ -1718,7 +1718,7 @@ export class TabManager {
       .sort((a, b) => a.lastActiveAt - b.lastActiveAt)
     const tabIds = candidates.slice(0, Math.ceil(candidates.length / 2)).map(tab => tab.id)
     await this.unloadTabs(tabIds)
-    return tabIds.length
+    return tabIds.filter(tabId => this.tabs.get(tabId)?.loadState === 'unloaded').length
   }
 
   /**
@@ -1728,8 +1728,13 @@ export class TabManager {
    * @returns {Promise<void>}
    */
   async unloadBackgroundTabs() {
+    // A crash during a tab switch leaves the previous tab presented. Its page
+    // is gone too, so unload it right away instead of deferring it.
+    if (this.presentedTabId !== this.activeTabId) {
+      this.presentedTabId = null
+    }
     await this.unloadTabs([...this.tabs.values()]
-      .filter(tab => tab.loadState !== 'unloaded' && tab.id !== this.activeTabId && tab.id !== this.presentedTabId)
+      .filter(tab => tab.loadState !== 'unloaded' && tab.id !== this.activeTabId)
       .map(tab => tab.id))
   }
 

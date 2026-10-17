@@ -940,3 +940,36 @@ test('a renderer crash unloads every background tab, including playing ones', as
   await manager.unloadBackgroundTabs()
   assert.deepEqual([selected, ...tabs].map(tab => tab.loadState), ['loaded', 'unloaded', 'unloaded', 'unloaded'])
 })
+
+test('a renderer crash during a tab switch also unloads the previously presented tab', async t => {
+  const manager = createManager(t)
+  const previous = manager.createTab({ route: '/history' })
+  presentActive(manager)
+  const next = await manager.createTabWithPreference({ route: '/subscriptions', makeActive: true })
+  assert.equal(manager.presentedTabId, previous.id)
+
+  await manager.unloadBackgroundTabs()
+  assert.equal(previous.loadState, 'unloaded')
+  assert.notEqual(next.loadState, 'unloaded')
+})
+
+test('memory pressure only counts tabs that were actually unloaded', async t => {
+  const manager = createManager(t)
+  manager.createTab({ route: '/history' })
+  presentActive(manager)
+  const tabs = []
+  for (let index = 0; index < 4; index++) {
+    const tab = await manager.createTabWithPreference({ route: `/channel/${index}`, makeActive: false })
+    manager.markTabMounted(tab.id, tab.mountRevision)
+    tab.lastActiveAt = index
+    tabs.push(tab)
+  }
+  const unloadTab = manager.unloadTab.bind(manager)
+  manager.unloadTab = async tabId => {
+    if (tabId === tabs[0].id) throw new Error('unload failed')
+    return unloadTab(tabId)
+  }
+  t.mock.method(console, 'error', () => {})
+
+  assert.equal(await manager.unloadLeastRecentlyUsedTabs(), 1)
+})
