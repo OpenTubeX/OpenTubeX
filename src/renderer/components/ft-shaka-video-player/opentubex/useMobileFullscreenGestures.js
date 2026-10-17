@@ -398,10 +398,12 @@ export function useMobileFullscreenGestures({
   }
 
   // The tap's click may still follow and would land on the restored Watch page.
+  // A new touch means it never came, so that touch's click is left alone.
   function suppressNextClick() {
     const remove = () => {
       clearTimeout(timer)
       window.removeEventListener('click', block, true)
+      window.removeEventListener('pointerdown', remove, true)
     }
     const block = event => {
       remove()
@@ -410,6 +412,7 @@ export function useMobileFullscreenGestures({
     }
     const timer = window.setTimeout(remove, 350)
     window.addEventListener('click', block, true)
+    window.addEventListener('pointerdown', remove, true)
   }
 
   function settleMobileFullscreenGesture(shouldToggle, wasFullscreen) {

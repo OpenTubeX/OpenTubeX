@@ -1494,6 +1494,21 @@ test('bottom bar taps restore despite finger drift or a dropped click, and short
     await send('touchStart', 0, point)
     if (drift) await send('touchMove', 0.02, { ...point, y: point.y + drift })
     await send('touchEnd', 0.04)
+    if (dropClick) {
+      // The click that never came must not swallow the next tap's click.
+      const clicked = await page.evaluate(() => {
+        window.removeEventListener('click', window.dropClick, true)
+        let clicked = false
+        const target = document.createElement('button')
+        target.addEventListener('click', () => { clicked = true })
+        document.body.append(target)
+        target.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
+        target.click()
+        target.remove()
+        return clicked
+      })
+      expect(clicked).toBe(true)
+    }
   }
   // A quick 40px flick is below the swipe distance but commits as a fling.
   const taps = [{ drift: -12 }, { dropClick: true }, { drift: -40 }]
@@ -1523,6 +1538,7 @@ test('bottom bar taps restore despite finger drift or a dropped click, and short
       await page.waitForTimeout(400)
     }
   } finally {
+    await page.evaluate(() => window.removeEventListener('click', window.dropClick, true)).catch(() => {})
     await touch('touchEnd').catch(() => {})
     await cdp.detach()
   }
