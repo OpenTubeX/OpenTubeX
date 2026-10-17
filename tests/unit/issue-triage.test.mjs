@@ -7,6 +7,8 @@ import {
   formatReply,
   hasBotReaction,
   shouldReply,
+  sourceChunks,
+  sweepCandidates,
   validateDecision
 } from '../../_scripts/issueTriage.mjs'
 import { eligibleAuthor } from '../../_scripts/issueTriageCommon.mjs'
@@ -255,4 +257,59 @@ test('triage leaves rejected feature-request alternatives to a maintainer', asyn
   })
   assert.equal(calls, 2)
   assert.equal(result.answer, null)
+})
+
+test('long sources split into heading-aligned chunks within the limit', () => {
+  const content = '# Features\n\n## Playback\n\n### A\naaaa\n### B\nbbbb\n## Library\n\n### C\ncccc\n'
+  const chunks = sourceChunks(content, 'extra-features', 30)
+  assert.equal(chunks.join(''), content)
+  assert.ok(chunks.length > 1)
+  assert.ok(chunks.every(chunk => chunk.length <= 30))
+  assert.ok(chunks.slice(1).every(chunk => /^#{2,3} /.test(chunk)))
+  assert.deepEqual(sourceChunks('## Short\nText', 'playback'), ['## Short\nText'])
+})
+
+test('triage answers from a later chunk of a long source', async t => {
+  const originalFetch = globalThis.fetch
+  t.after(() => { globalThis.fetch = originalFetch })
+  const evidence = 'Queue videos from their three-dot menus, then manage and drag to reorder them in a side panel on the watch page.'
+  const sources = []
+  globalThis.fetch = async (_, options) => {
+    const request = JSON.parse(options.body)
+    let output = { labels: ['enhancement'], reply: 'answer', source: 'extra-features' }
+    if (request.text.format.name === 'triage_answer') {
+      const { source } = JSON.parse(request.input)
+      sources.push(source)
+      output = source.includes(evidence)
+        ? { answer: 'Open the video menu and choose Add to Queue.', evidence, supported: true }
+        : { answer: '', evidence: '', supported: false }
+    }
+    return { ok: true, json: async () => ({
+      status: 'completed',
+      output: [{ content: [{ type: 'output_text', text: JSON.stringify(output) }] }]
+    }) }
+  }
+  const content = `## Playback\n\n${'Playback detail. '.repeat(1800)}\n## Appearance\n\n${'Appearance detail. '.repeat(1000)}\n## Library\n\n### Watch queue\n\n${evidence}\n`
+  assert.ok(content.length > 48000 && content.length < 96000)
+  const issue = { title: 'Queue Feature', body: 'Add a queue.', comments: { nodes: [] } }
+  const result = await assess(issue, { readSource: async () => content })
+  assert.equal(sources.length, 2)
+  assert.ok(sources.every(source => source.length <= 48000))
+  assert.equal(result.reply, 'answer')
+  assert.match(result.answer, /extra-features\/#watch-queue/)
+})
+
+test('scheduled sweep picks recent community issues after the event run had time to finish', () => {
+  const now = Date.parse('2026-10-17T12:00:00Z')
+  const issue = (number, createdAt, extra = {}) => ({
+    number, created_at: createdAt, user: { login: 'reporter', type: 'User' }, ...extra
+  })
+  assert.deepEqual(sweepCandidates([
+    issue(1, '2026-10-17T11:55:00Z'),
+    issue(2, '2026-10-17T11:40:00Z'),
+    issue(3, '2026-10-12T12:00:00Z'),
+    issue(4, '2026-10-17T11:00:00Z', { pull_request: {} }),
+    issue(5, '2026-10-17T11:00:00Z', { user: { login: 'D3SOX', type: 'User' } }),
+    issue(6, '2026-10-09T12:00:00Z')
+  ], now), [2, 3])
 })
