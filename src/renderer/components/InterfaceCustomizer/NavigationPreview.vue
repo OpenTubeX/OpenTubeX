@@ -9,10 +9,14 @@
           v-if="layout === 'desktop'"
           class="previewTopBarIcon"
           :icon="['fas', 'bars']"
+          aria-hidden="true"
         />
         <FtLogoFull class="previewLogo" />
         <span class="previewSearch">
-          <FtIcon :icon="['fas', 'search']" />
+          <FtIcon
+            :icon="['fas', 'search']"
+            aria-hidden="true"
+          />
         </span>
         <span
           class="previewProfile"
@@ -37,7 +41,10 @@
             :data-preview-navigation-item="item.id"
           >
             <span class="previewNavIcon">
-              <FtIcon :icon="item.icon" />
+              <FtIcon
+                :icon="item.icon"
+                aria-hidden="true"
+              />
             </span>
             <span class="previewNavLabel">{{ item.label }}</span>
           </div>
@@ -75,7 +82,10 @@
           :data-preview-navigation-item="item.id"
         >
           <span class="previewNavIcon">
-            <FtIcon :icon="item.icon" />
+            <FtIcon
+              :icon="item.icon"
+              aria-hidden="true"
+            />
           </span>
           <span class="previewNavLabel">{{ item.shortLabel }}</span>
         </div>
@@ -85,7 +95,10 @@
           data-preview-navigation-item="more"
         >
           <span class="previewNavIcon">
-            <FtIcon :icon="['fas', 'ellipsis-h']" />
+            <FtIcon
+              :icon="['fas', 'ellipsis-h']"
+              aria-hidden="true"
+            />
           </span>
           <span class="previewNavLabel">{{ t('More') }}</span>
         </div>

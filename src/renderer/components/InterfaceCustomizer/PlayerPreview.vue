@@ -49,6 +49,7 @@
             v-else
             class="previewOverflowFtIcon"
             :icon="item.icon"
+            aria-hidden="true"
           />
           <span class="previewOverflowLabel">{{ item.label }}</span>
           <span class="previewOverflowValue">{{ item.value }}</span>
@@ -65,7 +66,10 @@
           :title="action.label"
           :data-preview-fullscreen-action="action.id"
         >
-          <FtIcon :icon="action.icon" />
+          <FtIcon
+            :icon="action.icon"
+            aria-hidden="true"
+          />
         </span>
       </div>
       <div class="previewControls">

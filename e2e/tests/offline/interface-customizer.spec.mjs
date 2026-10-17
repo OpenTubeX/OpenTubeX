@@ -12,9 +12,9 @@ test.describe('interface customizer', () => {
       elements.map(element => element.getAttribute('href').replace('#/', ''))
     ))
 
-    await expect.poll(previewIds).toEqual(await editorIds())
+    await expect.poll(async () => JSON.stringify(await previewIds()) === JSON.stringify(await editorIds()), 'the preview matches the editor order').toBe(true)
     await customizer.locator('[data-navigation-item-id="subscriptions"]').getByRole('button', { name: /^Move .* up$/ }).click()
-    await expect.poll(previewIds).toEqual(await editorIds())
+    await expect.poll(async () => JSON.stringify(await previewIds()) === JSON.stringify(await editorIds()), 'the preview matches the editor order').toBe(true)
     expect((await previewIds())[0]).toBe('subscriptions')
     await customizer.locator('[data-navigation-item-id="history"]').getByRole('button', { name: /^Remove / }).click()
     await expect(preview.locator('[data-preview-navigation-item="history"]')).toHaveCount(0)
@@ -89,9 +89,9 @@ test.describe('interface customizer', () => {
       elements.map(element => element.dataset.fullscreenActionId)
     ))
 
-    await expect.poll(previewIds).toEqual(await editorIds())
+    await expect.poll(async () => JSON.stringify(await previewIds()) === JSON.stringify(await editorIds()), 'the preview matches the editor order').toBe(true)
     await customizer.locator('[data-fullscreen-action-id="share"]').getByRole('button', { name: /^Move .* up$/ }).click()
-    await expect.poll(previewIds).toEqual(await editorIds())
+    await expect.poll(async () => JSON.stringify(await previewIds()) === JSON.stringify(await editorIds()), 'the preview matches the editor order').toBe(true)
     while (await customizer.locator('.selectedAction').count()) {
       await customizer.locator('.selectedAction').last().getByRole('button', { name: /^Remove / }).click()
     }
@@ -143,6 +143,19 @@ test.describe('interface customizer', () => {
     await expect(customizer.getByRole('tabpanel', { name: 'Paused', exact: true })).toHaveClass(/previewStage/)
     await customizer.locator('[data-settings-subpage-tab="quickSettings"]').click()
     await expect(customizer.locator('.previewStage')).not.toHaveAttribute('role', 'tabpanel')
+  })
+
+  test('gives preview mode tabs a full touch target on touch screens', async ({ page }) => {
+    const customizer = await openInterfaceCustomizer(page, 'player')
+    const mode = customizer.getByRole('tab', { name: 'Paused', exact: true })
+    const session = await page.context().newCDPSession(page)
+    try {
+      await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+      await expect.poll(() => page.evaluate(() => matchMedia('(any-pointer: coarse)').matches)).toBe(true)
+      await expect.poll(() => mode.evaluate(element => element.getBoundingClientRect().height)).toBeGreaterThanOrEqual(48)
+    } finally {
+      await session.detach()
+    }
   })
 
   test('supports keyboard tab switching', async ({ page }) => {

@@ -54,6 +54,13 @@
   max-inline-size: 100%;
 }
 
+/* Keep the compact mode switcher a full touch target on touch screens. */
+@media (any-pointer: coarse) {
+  .previewModes {
+    --material-tab-min-height: var(--phone-touch-target, 48px);
+  }
+}
+
 .previewStage {
   container-type: size;
   flex: 1 1 auto;
