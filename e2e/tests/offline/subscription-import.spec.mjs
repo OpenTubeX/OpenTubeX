@@ -104,6 +104,10 @@ test('imports current OpenTubeX subscriptions without rejecting profile icons', 
     const exactProfile = profiles.find(({ _id }) => _id === 'exact-test-profile')
     const primaryNameProfile = profiles.find(({ _id }) => _id === 'primary-name-profile')
     const idCollisionProfile = profiles.find(({ name }) => name === 'Collision Import')
+    // the import shows its toast before the profile writes reach the store, so keep polling until they do
+    if (!unrelatedProfile || !exactProfile || !primaryNameProfile || !idCollisionProfile) {
+      return null
+    }
     return {
       hasSubscription: profile.subscriptions.some(({ id }) => id === 'UCcurrentFormatImport'),
       icon: profile.icon,
