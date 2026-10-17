@@ -2919,9 +2919,10 @@ export default defineComponent({
         return
       }
 
-      // describe the segments the toast still acts on, or drop it when none remain
+      // describe the segments the toast still acts on, or drop it and its unskip state when none remain
       const toastSegments = getSponsorBlockToastSegments(toast.uuid)
       if (toastSegments.length === 0) {
+        (toast.groupUuids ?? [toast.uuid]).forEach(groupUuid => sponsorBlockDoNotSkipSegments.delete(groupUuid))
         removeSponsorBlockToast(toast.uuid)
         return
       }

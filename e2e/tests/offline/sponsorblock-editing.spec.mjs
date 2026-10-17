@@ -288,6 +288,20 @@ test('closes an unskipped toast when a category correction disables its segment'
   await toast.getByRole('button', { name: 'Submit category vote', exact: true }).click()
   await expect(page.locator('.sponsorBlockMarker')).toHaveCount(0)
   await expect(toast).toHaveCount(0)
+
+  // correcting it back makes it auto-skip again, as no toast is left to reskip it
+  await page.getByRole('button', { name: 'Open SponsorBlock info', exact: true }).click()
+  await panel.locator('.sponsorBlockSegmentSummary').click()
+  await panel.getByRole('button', { name: 'Edit', exact: true }).click()
+  await panel.getByRole('button', { name: 'Change category', exact: true }).click()
+  await panel.locator('select').selectOption('sponsor')
+  await panel.getByRole('button', { name: 'Submit category vote', exact: true }).click()
+  await expect(page.locator('.sponsorBlockMarker')).toHaveCount(1)
+  await video.evaluate(element => {
+    element.currentTime = 11.5
+    element.dispatchEvent(new Event('timeupdate'))
+  })
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(12)
 })
 
 test('shrinks an unskipped group to its remaining segments after a category correction', async ({ app, page }) => {
