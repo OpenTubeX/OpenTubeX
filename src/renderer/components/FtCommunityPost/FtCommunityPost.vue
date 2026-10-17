@@ -2,7 +2,7 @@
   <div
     class="ft-list-post ft-list-item outside"
     :appearance="appearance"
-    :class="{ list: listType === 'list', grid: listType === 'grid' }"
+    :class="{ list: listType === 'list', grid: listType !== 'list' }"
   >
     <div
       class="author-div"

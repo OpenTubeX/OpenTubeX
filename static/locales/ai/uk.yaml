@@ -392,6 +392,8 @@ Settings:
       Automatic: 'Автоматично'
       Phone: 'Телефон'
       Tablet: 'Планшет'
+    Video View Type:
+      Full Width: На всю ширину
   Context Menu Search Settings:
     Context Menu Search Settings: Пошук із контекстного меню
     Description: Виберіть пошукові системи, які з’являтимуться після клацання правою кнопкою миші виділеного тексту. Результати пошуку відкриються в типовому браузері.

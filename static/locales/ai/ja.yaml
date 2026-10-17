@@ -388,6 +388,8 @@ Settings:
       Automatic: '自動'
       Phone: 'スマートフォン'
       Tablet: 'タブレット'
+    Video View Type:
+      Full Width: 全幅
   Context Menu Search Settings:
     Context Menu Search Settings: コンテキストメニュー検索
     Description: 選択したテキストを右クリックしたときに表示する検索エンジンを選択します。検索結果は既定のブラウザーで開きます。

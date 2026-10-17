@@ -720,8 +720,8 @@ const THEME_TEXT_COLOR = 'var(--text-with-main-color)'
 // Width threshold in px at which we switch to using a more heavily altered view for mobile users
 const MOBILE_WIDTH_THRESHOLD = 680
 
-// Height threshold in px at which we switch to using a more heavily altered playlist view for mobile users
-const PLAYLIST_HEIGHT_FORCE_LIST_THRESHOLD = 500
+// Height threshold in px below which playlist info leaves the sticky top bar
+const PLAYLIST_HEIGHT_COMPACT_THRESHOLD = 500
 
 // Acting on this many tabs at once (or more) asks for a confirmation first
 const MULTIPLE_TABS_CONFIRM_THRESHOLD = 5
@@ -860,7 +860,7 @@ export {
   THEME_BG_COLOR,
   THEME_TEXT_COLOR,
   MOBILE_WIDTH_THRESHOLD,
-  PLAYLIST_HEIGHT_FORCE_LIST_THRESHOLD,
+  PLAYLIST_HEIGHT_COMPACT_THRESHOLD,
   MULTIPLE_TABS_CONFIRM_THRESHOLD,
   SEARCH_CHAR_LIMIT,
   SEARCH_RESULTS_DISPLAY_LIMIT,

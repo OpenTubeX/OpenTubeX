@@ -392,6 +392,8 @@ Settings:
       Automatic: 'Tự động'
       Phone: 'Điện thoại'
       Tablet: 'Máy tính bảng'
+    Video View Type:
+      Full Width: Toàn chiều rộng
   Context Menu Search Settings:
     Context Menu Search Settings: Tìm kiếm trong menu ngữ cảnh
     Description: Chọn công cụ tìm kiếm xuất hiện khi bạn nhấp chuột phải vào văn bản đã chọn. Kết quả tìm kiếm sẽ mở trong trình duyệt mặc định.

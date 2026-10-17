@@ -114,6 +114,8 @@ test('phone playlist centers pending current items when opened', { tag: '@scale'
   await page.setViewportSize({ width: 480, height: 800 })
   await page.evaluate(async () => {
     const store = window.$store
+    // Phone grid cards can detach while being clicked: https://github.com/OpenTubeX/OpenTubeX/issues/2149
+    await store.dispatch('updatePlaylistViewType', 'list')
     const playlist = store.getters.getPlaylist('layout-playlist')
     const [current, ...others] = playlist.videos
     await store.dispatch('updatePlaylist', { ...playlist, videos: [...others.slice(0, 8), current, ...others.slice(8)] })

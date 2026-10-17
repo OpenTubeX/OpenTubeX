@@ -27,10 +27,24 @@ test('every phone thumbnail slider step changes the card width proportionally', 
   }
 })
 
-test('phone grids fill the row above 100% and stop growing at full width', () => {
-  for (const width of [313, 343, 428.8, 640]) {
+test('only the full width view type fills the row with one card', () => {
+  for (const [width, viewportWidth] of [[343, 343], [640, 640], [1200, 1440]]) {
+    for (const size of [60, 100, 180]) {
+      const sized = getThumbnailGridStyles(size, width, viewportWidth)
+      const fullWidth = getThumbnailGridStyles(size, width, viewportWidth, width, true)
+      assert.ok(Number.parseFloat(sized['--thumbnail-grid-size']) < width)
+      assert.equal(fullWidth['--thumbnail-grid-size'], `${width}px`)
+      assert.equal(fullWidth['--thumbnail-grid-stretch'], 'calc(100% - 0px)')
+      // Wider windows keep sized Shorts; phones show them through the grid size.
+      assert.equal(fullWidth['--shorts-thumbnail-grid-min-size'], sized['--shorts-thumbnail-grid-min-size'])
+    }
+  }
+})
+
+test('phone grids show larger saved sizes at two cards per row', () => {
+  for (const width of [313, 343, 428.8]) {
     for (const size of [110, 140, 180]) {
-      assert.equal(getThumbnailGridStyles(size, width)['--thumbnail-grid-size'], `${width}px`)
+      assert.deepEqual(getThumbnailGridStyles(size, width), getThumbnailGridStyles(100, width))
     }
   }
 })

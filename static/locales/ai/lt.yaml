@@ -507,6 +507,8 @@ Settings:
       Automatic: 'Automatiškai'
       Phone: 'Telefonas'
       Tablet: 'Planšetinis kompiuteris'
+    Video View Type:
+      Full Width: Visas plotis
   Context Menu Search Settings:
     Context Menu Search Settings: Paieška kontekstiniame meniu
     Description: Pasirinkite paieškos sistemas, rodomas spustelėjus pažymėtą tekstą dešiniuoju pelės mygtuku. Paieškos rezultatai atveriami numatytojoje naršyklėje.

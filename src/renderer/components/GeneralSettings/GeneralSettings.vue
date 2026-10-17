@@ -250,7 +250,7 @@
         setting-key="listType"
         :select-names="viewTypeNames"
         :select-values="VIEW_TYPE_VALUES"
-        :icon="listType === 'grid' ? ['fas', 'grip'] : ['fas', 'list']"
+        :icon="VIEW_TYPE_ICONS[listType]"
         @change="updateListType"
       />
       <FtSelect
@@ -261,7 +261,7 @@
         setting-key="playlistViewType"
         :select-names="viewTypeNames"
         :select-values="VIEW_TYPE_VALUES"
-        :icon="playlistViewType === 'grid' ? ['fas', 'grip'] : ['fas', 'list']"
+        :icon="VIEW_TYPE_ICONS[playlistViewType]"
         @change="updatePlaylistViewType"
       />
       <FtSelect
@@ -803,14 +803,16 @@ function updateStartupBehavior(value) {
   store.dispatch('updateStartupBehavior', value)
 }
 
-const VIEW_TYPE_VALUES = ['grid', 'list']
+const VIEW_TYPE_VALUES = ['grid', 'fullWidth', 'list']
+const VIEW_TYPE_ICONS = { grid: ['fas', 'grip'], fullWidth: ['fas', 'grip-lines'], list: ['fas', 'list'] }
 
 const viewTypeNames = computed(() => [
   t('Settings.General Settings.Video View Type.Grid'),
+  t('Settings.General Settings.Video View Type.Full Width'),
   t('Settings.General Settings.Video View Type.List')
 ])
 
-/** @type {import('vue').ComputedRef<'grid' | 'list'>} */
+/** @type {import('vue').ComputedRef<'grid' | 'fullWidth' | 'list'>} */
 const listType = computed(() => store.getters.getListType)
 
 /**

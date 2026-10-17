@@ -388,6 +388,8 @@ Settings:
       Automatic: 'Otomatis'
       Phone: 'Ponsel'
       Tablet: 'Tablet'
+    Video View Type:
+      Full Width: Lebar penuh
   Context Menu Search Settings:
     Context Menu Search Settings: Pencarian Menu Konteks
     Description: Pilih mesin pencari yang muncul saat Anda mengeklik kanan teks terpilih. Pencarian dibuka di peramban bawaan.

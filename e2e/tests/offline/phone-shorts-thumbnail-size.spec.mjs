@@ -43,7 +43,7 @@ for (const listType of ['grid', 'list']) {
       }
     })
 
-    test('scales portrait cards distinctly and stops at full width', async ({ app, page }) => {
+    test('scales portrait cards distinctly up to two per row', async ({ app, page }) => {
       await app.electronApp.evaluate(({ BrowserWindow }) => {
         const window = BrowserWindow.getAllWindows()[0]
         window.setMinimumSize(0, 0)
@@ -59,19 +59,26 @@ for (const listType of ['grid', 'list']) {
 
       await page.locator('.profileTrigger').click()
       const slider = page.locator('.thumbnailSizeSlider .input')
-      await expect(slider).toHaveAttribute('max', '110')
+      await expect(slider).toHaveAttribute('max', '100')
       await expect.poll(columns).toBe(2)
       const defaultWidth = await cardWidth()
-      for (let size = 60; size <= 110; size += 10) {
+      for (let size = 60; size <= 100; size += 10) {
         await slider.evaluate((element, value) => {
           element.value = String(value)
           element.dispatchEvent(new Event('input', { bubbles: true }))
           element.dispatchEvent(new Event('change', { bubbles: true }))
         }, size)
-        await expect.poll(cardWidth).toBeCloseTo(size === 110 ? gridWidth : defaultWidth * size / 100, 0)
+        await expect.poll(cardWidth).toBeCloseTo(defaultWidth * size / 100, 0)
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
       }
-      await expect.poll(columns).toBe(1)
+      await expect.poll(columns).toBe(2)
+
+      if (listType === 'grid') {
+        // Full width shows one Short per row on phones.
+        await page.evaluate(() => window.$store.dispatch('updateListType', 'fullWidth'))
+        await expect.poll(columns).toBe(1)
+        await expect.poll(cardWidth).toBeCloseTo(gridWidth, 0)
+      }
 
       if (listType === 'list') {
         await page.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()

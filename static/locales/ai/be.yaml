@@ -407,6 +407,8 @@ Settings:
       Automatic: 'Аўтаматычна'
       Phone: 'Тэлефон'
       Tablet: 'Планшэт'
+    Video View Type:
+      Full Width: На ўсю шырыню
   Context Menu Search Settings:
     Context Menu Search Settings: Пошук з кантэкстнага меню
     Description: Выберыце пошукавыя сістэмы, якія будуць паказвацца пасля націскання правай кнопкай мышы на вылучаным тэксце. Вынікі адкрываюцца ў прадвызначаным браўзеры.

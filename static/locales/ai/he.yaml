@@ -392,6 +392,8 @@ Settings:
       Automatic: 'אוטומטי'
       Phone: 'טלפון'
       Tablet: 'טאבלט'
+    Video View Type:
+      Full Width: רוחב מלא
   Context Menu Search Settings:
     Context Menu Search Settings: חיפוש מתפריט ההקשר
     Description: יש לבחור אילו מנועי חיפוש יופיעו בלחיצה ימנית על טקסט מסומן. החיפושים ייפתחו בדפדפן ברירת המחדל.

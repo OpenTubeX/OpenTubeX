@@ -525,6 +525,8 @@ Settings:
       Automatic: 'Automàtica'
       Phone: 'Telèfon'
       Tablet: 'Tauleta'
+    Video View Type:
+      Full Width: Amplada completa
   Context Menu Search Settings:
     Context Menu Search Settings: Cerca al menú contextual
     Description: Trieu quins motors de cerca apareixen en fer clic dret al text seleccionat. Les cerques s'obren al navegador predeterminat.

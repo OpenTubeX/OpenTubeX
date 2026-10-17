@@ -390,6 +390,8 @@ Settings:
       Automatic: 'Automatski'
       Phone: 'Telefon'
       Tablet: 'Tablet'
+    Video View Type:
+      Full Width: Puna širina
   Context Menu Search Settings:
     Context Menu Search Settings: Pretraživanje iz kontekstnog izbornika
     Description: Odaberite tražilice koje se prikazuju kada desnom tipkom miša kliknete odabrani tekst. Pretraživanja se otvaraju u zadanom pregledniku.

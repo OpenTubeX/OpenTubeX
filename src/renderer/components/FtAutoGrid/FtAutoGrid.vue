@@ -25,7 +25,7 @@ import { computed, inject, nextTick, onActivated, onBeforeUnmount, onBeforeUpdat
 import store from '../../store/index'
 
 import { getThumbnailGridStyles, PHONE_THUMBNAIL_VIEWPORT_WIDTH } from '../../constants/thumbnailSize'
-import { setThumbnailGridVisible, thumbnailSizeSettingKey } from '../../composables/useThumbnailSizeSlider'
+import { setThumbnailGridVisible, thumbnailSizeSettingKey, VIEW_TYPE_SETTINGS } from '../../composables/useThumbnailSizeSlider'
 import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
 import { measureStableGridWidth } from './gridWidth'
 import { measureLeavingItemLayouts } from './leavingItemLayout'
@@ -128,14 +128,18 @@ function applyThumbnailSizeStyles() {
     return
   }
 
-  const styles = getThumbnailGridStyles(store.state.settings[thumbnailSizeSetting], gridWidth, window.innerWidth, renderedGridWidth)
+  const fullWidth = store.state.settings[VIEW_TYPE_SETTINGS[thumbnailSizeSetting]] === 'fullWidth'
+  const styles = getThumbnailGridStyles(store.state.settings[thumbnailSizeSetting], gridWidth, window.innerWidth, renderedGridWidth, fullWidth)
 
   for (const [property, value] of Object.entries(styles)) {
     element.style.setProperty(property, value)
   }
 }
 
-watch(() => store.state.settings[thumbnailSizeSetting], applyThumbnailSizeStyles)
+watch(() => [
+  store.state.settings[thumbnailSizeSetting],
+  store.state.settings[VIEW_TYPE_SETTINGS[thumbnailSizeSetting]]
+], applyThumbnailSizeStyles)
 
 let leavingItemLayouts = null
 let pendingLeavingItems = []

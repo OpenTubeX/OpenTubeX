@@ -1484,8 +1484,9 @@ for (const width of [1600, 480]) {
       const thumbnail = menu.getByRole('slider', { name: 'Thumbnail Size' })
       const value = Number(await thumbnail.inputValue())
       const step = Number(await thumbnail.getAttribute('step'))
-      await thumbnail.press('ArrowRight')
-      await expect(thumbnail).toHaveValue(String(value + step))
+      // Phone grids start at their largest size, so step down.
+      await thumbnail.press('ArrowLeft')
+      await expect(thumbnail).toHaveValue(String(value - step))
       await expect(thumbnail).toHaveCSS('outline-style', 'solid')
       if (uiScale === 100) {
         await menu.locator('.profileSummary').focus()

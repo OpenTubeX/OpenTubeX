@@ -41,7 +41,7 @@ defineProps({
   }
 })
 
-/** @type {import('vue').ComputedRef<'grid' | 'list'>} */
+/** @type {import('vue').ComputedRef<'grid' | 'fullWidth' | 'list'>} */
 const displayValue = computed(() => store.getters.getListType)
 </script>
 

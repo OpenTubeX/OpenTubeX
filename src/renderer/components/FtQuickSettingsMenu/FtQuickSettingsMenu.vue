@@ -330,7 +330,7 @@
                       setting-key="listType"
                       :select-names="viewTypeNames"
                       :select-values="VIEW_TYPE_VALUES"
-                      :icon="listType === 'grid' ? ['fas', 'grip'] : ['fas', 'list']"
+                      :icon="VIEW_TYPE_ICONS[listType]"
                       @change="updateSetting('ListType', $event)"
                     />
                     <FtSelect
@@ -341,7 +341,7 @@
                       setting-key="playlistViewType"
                       :select-names="viewTypeNames"
                       :select-values="VIEW_TYPE_VALUES"
-                      :icon="playlistViewType === 'grid' ? ['fas', 'grip'] : ['fas', 'list']"
+                      :icon="VIEW_TYPE_ICONS[playlistViewType]"
                       @change="updateSetting('PlaylistViewType', $event)"
                     />
                     <FtToggleSwitch
@@ -545,9 +545,11 @@ const systemThemeOptions = computed(() => {
 const COLOR_VALUES = colors.map(color => color.name)
 const COLOR_SWATCHES = colors.map(color => color.value)
 const colorNames = useColorTranslations()
-const VIEW_TYPE_VALUES = ['grid', 'list']
+const VIEW_TYPE_VALUES = ['grid', 'fullWidth', 'list']
+const VIEW_TYPE_ICONS = { grid: ['fas', 'grip'], fullWidth: ['fas', 'grip-lines'], list: ['fas', 'list'] }
 const viewTypeNames = computed(() => [
   t('Settings.General Settings.Video View Type.Grid'),
+  t('Settings.General Settings.Video View Type.Full Width'),
   t('Settings.General Settings.Video View Type.List')
 ])
 const LOCALE_VALUES = ['system', ...allLocales]

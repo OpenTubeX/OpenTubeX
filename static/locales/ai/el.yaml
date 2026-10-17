@@ -388,6 +388,8 @@ Settings:
       Automatic: 'Αυτόματα'
       Phone: 'Τηλέφωνο'
       Tablet: 'Tablet'
+    Video View Type:
+      Full Width: Πλήρες πλάτος
   Context Menu Search Settings:
     Context Menu Search Settings: Αναζήτηση από το μενού περιβάλλοντος
     Description: Επιλέξτε ποιες μηχανές αναζήτησης θα εμφανίζονται όταν κάνετε δεξί κλικ σε επιλεγμένο κείμενο. Οι αναζητήσεις ανοίγουν στο προεπιλεγμένο πρόγραμμα περιήγησης.

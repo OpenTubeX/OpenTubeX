@@ -390,6 +390,8 @@ Settings:
       Automatic: 'Автоматично'
       Phone: 'Телефон'
       Tablet: 'Таблет'
+    Video View Type:
+      Full Width: Цяла ширина
   Context Menu Search Settings:
     Context Menu Search Settings: Търсене от контекстното меню
     Description: Изберете кои търсачки да се показват при щракване с десния бутон върху избран текст. Търсенията се отварят в стандартния ви браузър.

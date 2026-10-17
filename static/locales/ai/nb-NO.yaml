@@ -388,6 +388,8 @@ Settings:
       Automatic: 'Automatisk'
       Phone: 'Telefon'
       Tablet: 'Nettbrett'
+    Video View Type:
+      Full Width: Full bredde
   Context Menu Search Settings:
     Context Menu Search Settings: Søk fra hurtigmenyen
     Description: Velg hvilke søkemotorer som vises når du høyreklikker på merket tekst. Søk åpnes i standardnettleseren din.

@@ -2,7 +2,7 @@
   <div
     ref="playlistPage"
     :class="{
-      [listType]: true,
+      [pageLayout]: true,
       playlistInEditMode,
       hasNoPlaylistDescription: !playlistDescription,
       oneOrFewer: shownVideoCount < 2
@@ -64,7 +64,7 @@
         :preload-complete="playlistPreloadComplete"
         :search-video-mode-allowed="isUserPlaylistRequested && shownVideoCount > 1"
         :search-query-text="searchQueryTextRequested"
-        :theme="listType === 'list' ? 'base' : 'top-bar'"
+        :theme="pageLayout === 'list' ? 'base' : 'top-bar'"
         class="playlistInfo"
         @dragstart.prevent
         @enter-edit-mode="playlistInEditMode = true"
@@ -118,7 +118,7 @@
           :hot-zone-enabled="isSortOrderCustom && isVideoDragging && !draggedVideo.pointerDragging"
         >
           <FtElementList
-            v-if="listType === 'grid'"
+            v-if="playlistViewType !== 'list'"
             :data="visiblePlaylistItems"
             data-type="video"
             display="grid"
@@ -295,7 +295,7 @@ import {
 } from '../../helpers/player/ytDlpPlayback'
 import { buildYtDlpPlaybackCacheKey, preloadYtDlpPlaybackSources } from '../../helpers/player/ytDlpPlaybackPreload'
 import { startProgressBarOperation } from '../../helpers/progressBar'
-import { MOBILE_WIDTH_THRESHOLD, PLAYLIST_HEIGHT_FORCE_LIST_THRESHOLD } from '../../../constants'
+import { MOBILE_WIDTH_THRESHOLD, PLAYLIST_HEIGHT_COMPACT_THRESHOLD } from '../../../constants'
 import { useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
 import { useTabToast } from '../../composables/useTabToast'
 
@@ -363,7 +363,7 @@ const nextInvidiousPlaylistPage = ref(null)
 const isLoadingMore = ref(false)
 const nextPageError = ref('')
 const playlistInEditMode = ref(false)
-const forceListView = ref(false)
+const compactLayout = ref(false)
 let alreadyShownNotice = false
 let fetchedLocalPlaylistItemCount = 0
 let playlistRequestGeneration = 0
@@ -455,8 +455,13 @@ const linkedPlaylistThumbnail = computed(() => {
     : ''
 })
 
+/** @type {import('vue').ComputedRef<'grid' | 'fullWidth' | 'list'>} */
+const playlistViewType = computed(() => store.getters.getPlaylistViewType)
+
+// A sticky top bar would cover too much of small windows, so they show the
+// playlist info like list view does. This never changes the item layout.
 /** @type {import('vue').ComputedRef<'grid' | 'list'>} */
-const listType = computed(() => !forceListView.value ? store.getters.getPlaylistViewType : 'list')
+const pageLayout = computed(() => compactLayout.value || playlistViewType.value === 'list' ? 'list' : 'grid')
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const userPlaylistsReady = computed(() => store.getters.getPlaylistsReady)
@@ -1646,7 +1651,7 @@ if (isUserPlaylistRequested.value && searchQueryTextPresent.value) {
 }
 
 function handleResize() {
-  forceListView.value = window.innerWidth <= MOBILE_WIDTH_THRESHOLD || window.innerHeight <= PLAYLIST_HEIGHT_FORCE_LIST_THRESHOLD
+  compactLayout.value = window.innerWidth <= MOBILE_WIDTH_THRESHOLD || window.innerHeight <= PLAYLIST_HEIGHT_COMPACT_THRESHOLD
 }
 
 function handleCloseAlert() {

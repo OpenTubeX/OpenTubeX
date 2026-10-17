@@ -17,7 +17,7 @@ test('mobile thumbnail actions retain availability, state, and handlers', () => 
     isInAnyPlaylist: ref(false), isQuickBookmarkEnabled: ref(true), props: reactive({ quickBookmarkButtonEnabled: true, canMoveVideoUp: false, canMoveVideoDown: false, canRemoveFromPlaylist: false }),
     quickBookmarkIconText: ref('Bookmark'), quickBookmarkIcon: ref(['far', 'bookmark']),
     isInQuickBookmarkPlaylist: ref(false), inUserPlaylist: ref(false),
-    effectiveListTypeIsList: ref(true),
+    verticalMoveControls: ref(true),
     canToggleLiveReminder: ref(false), liveReminderActive: ref(false), liveReminderLoading: ref(false),
     t: key => key,
     mobilePlaylistPickerOpen: ref(false),
