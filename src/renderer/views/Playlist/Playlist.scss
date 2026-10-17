@@ -54,7 +54,14 @@
 }
 
 .routerView {
+  // How far floating field labels extend above their outline
+  --playlist-label-outset: 7px;
+
   display: flex;
+
+  @media (any-pointer: coarse), (width <= 680px) {
+    --playlist-label-outset: 9px;
+  }
 
   &.grid {
     flex-direction: column;
@@ -300,11 +307,27 @@
         inline-size: 100%;
         // Reset margin
         margin-inline-end: 0;
+
+        // Join the stacked cards into one surface
+        border-end-start-radius: 0;
+        border-end-end-radius: 0;
       }
 
       .playlistItemsCard {
         box-sizing: border-box;
         inline-size: 100%;
+        border-start-start-radius: 0;
+        border-start-end-radius: 0;
+
+        // The sort select's own margin provides the top inset
+        &:has(> .sortSelect:first-child) {
+          padding-block-start: 0;
+        }
+      }
+
+      // Only leave room for the floating label so the gap below the search field matches the one above it.
+      .sortSelect {
+        margin-block-start: var(--playlist-label-outset);
       }
     }
   }

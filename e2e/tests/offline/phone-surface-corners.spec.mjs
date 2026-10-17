@@ -24,13 +24,13 @@ async function expectFullWidth(surface) {
   })).toBeLessThanOrEqual(1)
 }
 
-async function expectInsetRounded(surface) {
+async function expectInsetRounded(surface, corner = 'borderTopLeftRadius') {
   await expect(surface).toBeVisible()
   await expect.poll(() => surface.evaluate(element => {
     const bounds = element.getBoundingClientRect()
     return Math.min(bounds.left, innerWidth - bounds.right)
   })).toBeGreaterThan(0)
-  await expect.poll(() => surface.evaluate(element => Number.parseFloat(getComputedStyle(element).borderTopLeftRadius))).toBeGreaterThan(0)
+  await expect.poll(() => surface.evaluate((element, corner) => Number.parseFloat(getComputedStyle(element)[corner]), corner)).toBeGreaterThan(0)
 }
 
 async function navigate(page, route) {
@@ -261,7 +261,8 @@ test.describe('phone surface corners', { tag: '@scale' }, () => {
       await page.setViewportSize({ width: Math.round(width * uiScale / 100), height: Math.round(900 * uiScale / 100) })
       await navigate(page, 'playlist/empty-corners?playlistType=user')
       await expectInsetRounded(page.locator('.playlistInfoContainer:visible'))
-      await expectInsetRounded(page.locator('.playlistItemsCard:visible'))
+      // Stacked playlist cards square the corners where they meet, so check the outer one.
+      await expectInsetRounded(page.locator('.playlistItemsCard:visible'), 'borderBottomLeftRadius')
       await navigate(page, 'history')
       await expectInsetRounded(page.locator('.tabContent[aria-hidden="false"] .ft-card:visible').first())
     }

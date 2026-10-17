@@ -51,7 +51,17 @@ for (const playlistViewType of ['grid', 'list']) {
               const description = element.querySelector('.playlistDescription')?.getBoundingClientRect()
               const contentBottom = description && description.height > 0 ? description.bottom : stats.bottom
               const separator = element.querySelector('.playlistInfoSeparator').getBoundingClientRect()
+              const itemsCard = document.querySelector('.playlistItemsCard')
+              const sortLabel = itemsCard.querySelector('.sortSelect .select-label').getBoundingClientRect()
               return {
+                stacked: itemsCard.getBoundingClientRect().top >= panel.bottom - 1,
+                sortBelowSearch: sortLabel.top - search.bottom,
+                joinRadii: [
+                  getComputedStyle(element).borderEndStartRadius,
+                  getComputedStyle(element).borderEndEndRadius,
+                  getComputedStyle(itemsCard).borderStartStartRadius,
+                  getComputedStyle(itemsCard).borderStartEndRadius,
+                ],
                 centerDifference: Math.abs((actions.left + actions.right) / 2 - panel.x - panel.width / 2),
                 searchAbove: Math.min(search.top, searchLabel.top) - actions.bottom,
                 searchBelow: panel.bottom - search.bottom,
@@ -69,6 +79,12 @@ for (const playlistViewType of ['grid', 'list']) {
               expect(gaps.statsBelow, 'list panel gaps should be 16px').toBeCloseTo(16, 0)
               expect(Math.abs(gaps.actionsAbove - gaps.statsBelow), 'space above actions should match space below metadata').toBeLessThanOrEqual(1)
               expect(Math.abs(gaps.searchAbove - gaps.statsBelow), 'space below actions should match space below metadata').toBeLessThanOrEqual(1)
+              expect(gaps.stacked, 'info panel should stack above the videos up to 850px').toBe(width <= 850)
+              if (gaps.stacked) {
+                expect(gaps.searchBelow, 'stacked panel should end 16px below the search field').toBeCloseTo(16, 0)
+                expect(Math.abs(gaps.sortBelowSearch - gaps.searchAbove), 'search field should have equal space above and below').toBeLessThanOrEqual(1)
+                expect(gaps.joinRadii, 'stacked cards should not round the corners where they meet').toEqual(['0px', '0px', '0px', '0px'])
+              }
             }
           }).toPass({ timeout: 2000 })
         }
@@ -94,3 +110,28 @@ for (const playlistViewType of ['grid', 'list']) {
     })
   })
 }
+
+test.describe('stacked playlist without a sort select', { tag: '@scale' }, () => {
+  test.use({
+    seed: {
+      settings: { playlistViewType: 'list' },
+      playlists: [{
+        _id: 'single-video',
+        playlistName: 'Single video',
+        description: '',
+        protected: false,
+        videos: [{ videoId: 'layout00000', title: 'Only video', author: 'Test channel', lengthSeconds: 120, playlistItemId: 'single-item', type: 'video' }],
+        lastUpdatedAt: 1700000000000,
+      }],
+    },
+  })
+
+  test('keeps the items card top inset', async ({ page, uiScale }) => {
+    await page.setViewportSize({ width: Math.round(375 * uiScale / 100), height: Math.round(900 * uiScale / 100) })
+    await goTo(page, 'userplaylists')
+    await page.getByRole('link', { name: 'Single video', exact: true }).click()
+    await expect(page.locator('.playlistItem')).toHaveCount(1)
+    await expect(page.locator('.playlistItemsCard .sortSelect')).toHaveCount(0)
+    await expect(page.locator('.playlistItemsCard')).toHaveCSS('padding-top', '10px')
+  })
+})
