@@ -102,6 +102,8 @@ for (const { uiScale, iconPack, colorScheme } of [
     })
 
     test('adds optional actions, edits the queue and restores fullscreen docks', async ({ app, page }, testInfo) => {
+      // Hundreds of steps; under parallel load this exceeds the default 60s budget while still progressing
+      test.setTimeout(120_000)
       await setWindowSize(app, page, { width: 1360, height: 850 })
       await page.emulateMedia({ colorScheme })
       await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
