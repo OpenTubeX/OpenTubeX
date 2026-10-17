@@ -316,7 +316,7 @@ test.describe('download opened without a connection', () => {
     }
   })
 
-  test('collapses the offline page and restores metadata after reconnecting', async ({ app, page }) => {
+  test('collapses the offline page and restores metadata after reconnecting', { tag: '@scale' }, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page, { captionVideoIds: ['jNQXAC9IVRw'] })
     await setWindowSize(app, page, { width: 480, height: 800 })
     await page.evaluate(() => {
@@ -331,13 +331,14 @@ test.describe('download opened without a connection', () => {
     const video = await page.locator('.ftVideoPlayer video').elementHandle()
     await expect(page.locator('.watchVideoRecommendations')).toContainText('Other saved video')
     await expect(page.locator('.watchVideoRecommendations a[href*="downloadId=92"]')).toBeVisible()
-    for (const scale of [1, 0.95, 1.25]) {
-      await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
-      await expect.poll(() => page.evaluate(() => {
-        const contentEnd = document.querySelector('.watchVideoRecommendations').getBoundingClientRect().bottom + window.scrollY
-        return document.documentElement.scrollHeight - Math.max(window.innerHeight, contentEnd)
-      })).toBeLessThan(48)
-    }
+    await expect.poll(() => page.evaluate(() => {
+      const recommendations = document.querySelector('.watchVideoRecommendations')
+      const routeView = document.querySelector('.app > .routerView')
+      // The final card margin and banner clearance are intentional page space.
+      const contentEnd = recommendations.getBoundingClientRect().bottom + window.scrollY +
+        parseFloat(getComputedStyle(recommendations).marginBottom) + parseFloat(getComputedStyle(routeView).paddingBottom)
+      return Math.abs(document.documentElement.scrollHeight - Math.max(window.innerHeight, contentEnd))
+    })).toBeLessThanOrEqual(1)
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
     const watch = await watchViewHandle(page)
     await watch.evaluate(vm => vm.$store.dispatch('updateForbiddenTitles', JSON.stringify(['Other saved'])))
