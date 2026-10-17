@@ -9,10 +9,21 @@ if [ ! -f "$DEB_PATH" ]; then
 	exit 1
 fi
 
+# Retry pacman because the package mirror occasionally stalls mid-download.
+# Completed downloads stay in the cache, so each attempt resumes where it stopped.
+pacman_retry() {
+	for attempt in 1 2 3 4 5; do
+		pacman "$@" && return 0
+		>&2 echo "pacman failed (attempt $attempt/5), retrying..."
+		sleep $((attempt * 5))
+	done
+	return 1
+}
+
 # Install packaging tools (mirrors anylinux-setup-action)
 pacman-key --init
-pacman -Syy --noconfirm archlinux-keyring
-pacman -Syu --noconfirm \
+pacman_retry -Syy --noconfirm archlinux-keyring
+pacman_retry -Syu --noconfirm \
 	7zip             \
 	base-devel       \
 	freetype2        \
