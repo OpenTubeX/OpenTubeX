@@ -152,7 +152,7 @@ test.describe('interface customizer', () => {
     await expect(customizer.locator('.previewStage')).not.toHaveAttribute('role', 'tabpanel')
   })
 
-  test('gives preview mode tabs a full touch target on touch screens', async ({ page }) => {
+  test('gives preview mode tabs a full touch target on touch screens', { tag: '@scale' }, async ({ page }) => {
     const customizer = await openInterfaceCustomizer(page, 'player')
     const mode = customizer.getByRole('tab', { name: 'Paused', exact: true })
     const session = await page.context().newCDPSession(page)
@@ -254,7 +254,7 @@ test.describe('interface customizer with a custom profile image', () => {
     }
   })
 
-  test('fits the profile image to the preview avatars', async ({ page }) => {
+  test('fits the profile image to the preview avatars', { tag: '@scale' }, async ({ page }) => {
     const customizer = await openInterfaceCustomizer(page, 'navigation')
     const expectFilled = async (avatar) => {
       const image = avatar.locator('img')
