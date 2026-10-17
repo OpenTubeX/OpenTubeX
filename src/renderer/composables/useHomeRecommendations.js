@@ -339,6 +339,7 @@ export function useHomeRecommendations(visible) {
   }
   watch(exploration, updateRanking)
   watch(() => store.getters.getEnableBlockLists, updateRanking)
+  watch([() => store.getters.getUseAiSlopList, () => store.getters.getAiSlopListFetchedAt], updateRanking)
   onBeforeUnmount(cancelRequest)
   return {
     enabled,

@@ -229,6 +229,25 @@ for (const refreshOtherHome of [false, true]) {
   })
 }
 
+test('turning off the AI slop list while Home is open restores the blocked candidates', async () => {
+  const mounted = createFeed({
+    settings: { getUseAiSlopList: true, getAiSlopBlockedChannels: new Set(['@slop']), getAiSlopListFetchedAt: 1 },
+    candidates: [{ videoId: 'normal' }, { videoId: 'slop', authorHandle: '@Slop' }],
+  })
+  try {
+    await waitForFeed(mounted.feed)
+    assert.deepEqual(mounted.feed.recommendations.value.map(video => video.videoId), ['normal'])
+    Object.assign(mounted.getters, { getUseAiSlopList: false, getAiSlopBlockedChannels: new Set(), getAiSlopListFetchedAt: null })
+    for (let index = 0; index < 1000 && mounted.feed.recommendations.value.length < 2; index++) {
+      await new Promise(resolve => setTimeout(resolve, 1))
+    }
+    assert.deepEqual(mounted.feed.recommendations.value.map(video => video.videoId), ['normal', 'slop'])
+    assert.equal(mounted.work.requests, 1)
+  } finally {
+    mounted.stop()
+  }
+})
+
 test('changing exploration during Load more preserves the appended feed', async () => {
   const { feed, getters, work, stop } = createFeed({
     candidates: Array.from({ length: 60 }, (_, index) => ({ videoId: `candidate-${index}` })),
