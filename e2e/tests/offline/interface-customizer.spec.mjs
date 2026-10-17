@@ -12,9 +12,9 @@ test.describe('interface customizer', () => {
       elements.map(element => element.getAttribute('href').replace('#/', ''))
     ))
 
-    await expect.poll(async () => JSON.stringify(await previewIds()) === JSON.stringify(await editorIds()), 'the preview matches the editor order').toBe(true)
+    await expect.poll(async () => JSON.stringify(await previewIds()) === JSON.stringify(await editorIds()), { message: 'the preview matches the editor order' }).toBe(true)
     await customizer.locator('[data-navigation-item-id="subscriptions"]').getByRole('button', { name: /^Move .* up$/ }).click()
-    await expect.poll(async () => JSON.stringify(await previewIds()) === JSON.stringify(await editorIds()), 'the preview matches the editor order').toBe(true)
+    await expect.poll(async () => JSON.stringify(await previewIds()) === JSON.stringify(await editorIds()), { message: 'the preview matches the editor order' }).toBe(true)
     expect((await previewIds())[0]).toBe('subscriptions')
     await customizer.locator('[data-navigation-item-id="history"]').getByRole('button', { name: /^Remove / }).click()
     await expect(preview.locator('[data-preview-navigation-item="history"]')).toHaveCount(0)
@@ -89,9 +89,9 @@ test.describe('interface customizer', () => {
       elements.map(element => element.dataset.fullscreenActionId)
     ))
 
-    await expect.poll(async () => JSON.stringify(await previewIds()) === JSON.stringify(await editorIds()), 'the preview matches the editor order').toBe(true)
+    await expect.poll(async () => JSON.stringify(await previewIds()) === JSON.stringify(await editorIds()), { message: 'the preview matches the editor order' }).toBe(true)
     await customizer.locator('[data-fullscreen-action-id="share"]').getByRole('button', { name: /^Move .* up$/ }).click()
-    await expect.poll(async () => JSON.stringify(await previewIds()) === JSON.stringify(await editorIds()), 'the preview matches the editor order').toBe(true)
+    await expect.poll(async () => JSON.stringify(await previewIds()) === JSON.stringify(await editorIds()), { message: 'the preview matches the editor order' }).toBe(true)
     while (await customizer.locator('.selectedAction').count()) {
       await customizer.locator('.selectedAction').last().getByRole('button', { name: /^Remove / }).click()
     }
@@ -191,12 +191,12 @@ test.describe('interface customizer', () => {
               return rect.left >= bounds.left - 0.5 && rect.right <= bounds.right + 0.5 &&
                 rect.top >= bounds.top - 0.5 && rect.bottom <= bounds.bottom + 0.5
             })
-        }), `${mode} preview at ${size.width}px`).toBe(true)
+        }), { message: `${mode} preview at ${size.width}px` }).toBe(true)
         await expect.poll(() => customizer.locator('.previewPlayer').evaluate(player => {
           const bounds = player.getBoundingClientRect()
           return [...player.querySelectorAll('.previewButtonPanel > *, .previewRightGroup > *')]
             .every(element => element.getBoundingClientRect().right <= bounds.right + 0.5)
-        }), `${mode} controls fit the player at ${size.width}px`).toBe(true)
+        }), { message: `${mode} controls fit the player at ${size.width}px` }).toBe(true)
       }
     }
   })
