@@ -582,6 +582,17 @@
   padding-inline-end: 4px;
 }
 
+// The pinned search starts at the header's edge padding, so match it before the actions.
+.app.capacitorTabs:not(.capacitorTabletLayout) .phoneLayout.phoneSearchPinned .topNavInner {
+  gap: 12px;
+
+  // Icon-only actions have no background, and their 20px glyph already sits
+  // 14px inside the 48px target, so the target itself supplies the space.
+  &:has(> .profiles > :first-child:not(.quickSettings)) {
+    gap: 0;
+  }
+}
+
 @container phone-logo (width < 138px) {
   // The full logo needs its 25px icon, 100px name, 5px internal gap and 8px padding.
   .app.capacitorTabs .phoneLayout .logoText {
@@ -633,6 +644,10 @@
 
   .app.capacitorTabs:not(.capacitorTabletLayout) .phoneLayout:not(.phoneSearchPinned) .side:first-child {
     padding-inline-end: 8px;
+  }
+
+  .app.capacitorTabs:not(.capacitorTabletLayout) .phoneLayout.phoneSearchPinned .topNavInner:not(:has(> .profiles > :first-child:not(.quickSettings))) {
+    gap: 8px;
   }
 }
 

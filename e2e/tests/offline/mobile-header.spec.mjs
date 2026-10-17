@@ -433,6 +433,30 @@ test('phone header keeps the brand and replaces its row with balanced search', {
   await expect(input).toBeFocused()
 })
 
+// Returns how far the pill's space before the first header action is from its
+// expected value. A filled action gets the header's edge padding. An icon-only
+// action's glyph already sits 14px inside its 48px target, so the targets touch.
+function pinnedSearchSpacing(pill) {
+  return pill.evaluate(element => {
+    const pill = element.getBoundingClientRect()
+    const header = document.querySelector('.topNav').getBoundingClientRect()
+    const action = document.querySelector('.topNav .profiles > *')
+    const expected = action.matches('.quickSettings') ? pill.left - header.left : 0
+    return Math.abs(action.getBoundingClientRect().left - pill.right - expected)
+  })
+}
+
+test('always-visible phone search keeps its edge spacing before the profile button', { tag: '@scale' }, async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 375, height: 850 })
+  await enablePhoneHeader(page)
+  await page.evaluate(() => window.$store.commit('setAlwaysShowMobileSearchBar', true))
+  const pill = page.locator('.pinnedSearchTrigger')
+  await expect(pill).toBeVisible()
+  // Phones can disable tabs, which leaves the filled profile button first.
+  await page.evaluate(() => document.querySelector('.topNav .capacitorPhoneTabSwitcher').remove())
+  await expect.poll(() => pinnedSearchSpacing(pill)).toBeLessThan(0.5)
+})
+
 test('always-visible phone search returns to its pill and persists', { tag: '@scale' }, async ({ app, page, attachScreenshot, uiScale }) => {
   await setWindowSize(app, page, { width: 375, height: 850 })
   await page.emulateMedia({ reducedMotion: 'reduce' })
@@ -451,8 +475,9 @@ test('always-visible phone search returns to its pill and persists', { tag: '@sc
   await expect.poll(() => pill.evaluate(element => {
     const pill = element.getBoundingClientRect()
     const tabs = document.querySelector('.capacitorPhoneTabSwitcherButton').getBoundingClientRect()
-    return pill.height >= 47.9 && pill.width >= 47.9 && pill.right <= tabs.left && pill.left >= 0
+    return pill.height >= 47.9 && pill.width >= 47.9 && pill.right <= tabs.left + 0.1 && pill.left >= 0
   })).toBe(true)
+  await expect.poll(() => pinnedSearchSpacing(pill)).toBeLessThan(0.5)
   await attachScreenshot('always-visible mobile search')
   await pill.click()
   const input = page.locator('.topNav .ft-input')
