@@ -136,6 +136,7 @@ Search Listing:
     Subtitles: Subtitles
     New: New
     Members Only: Members only
+    Possibly AI-generated: Possibly AI-generated
     3D: 3D
     # Aria labels
     Closed Captions: Closed Captions
@@ -1853,6 +1854,13 @@ Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Enable Return YouTube Dislike
     Return YouTube Dislike Url: API URL
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Hide AI slop channels
+    Hide AI Slop Channels Tooltip: Hides channels on the community-maintained AiSList blocklist (aisloplist.com) from search results, trending and recommendations, and labels videos from channels on its warnlist. Subscriptions aren't affected. The lists are downloaded from GitHub once a day and only apply to results loaded with the Local API.
+    Downloading: Downloading the lists…
+    Failed to Download: Couldn't download the lists
+    Loaded Status: 'Blocked channels: {blocked} · Flagged channels: {warned} · Updated: {date}'
   Parental Control Settings:
     Parental Control Settings: Parental Control
     Hide Unsubscribe Button: Hide Unsubscribe Button

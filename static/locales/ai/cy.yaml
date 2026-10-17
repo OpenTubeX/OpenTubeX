@@ -61,6 +61,7 @@ Global:
 Search Listing:
   Label:
     Members Only: Aelodau yn unig
+    Possibly AI-generated: Wedi'i gynhyrchu gan AI o bosibl
 Stats:
   Replace old device: "Disodli hen ddyfais"
   Replacement explanation: "Cyfunwch {device} â'r ddyfais hon dim ond os yw'r ddau gofnod yn perthyn i'r un ddyfais ffisegol."
@@ -1188,6 +1189,13 @@ Settings:
     Resolution: "Cydraniad"
     Loop: "Dolen"
     Off: "I ffwrdd"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Cuddio sianeli sothach AI
+    Hide AI Slop Channels Tooltip: Yn cuddio sianeli sydd ar restr rwystro AiSList a gynhelir gan y gymuned (aisloplist.com) o ganlyniadau chwilio, fideos sy'n trendio ac argymhellion, ac yn labelu fideos gan sianeli sydd ar ei rhestr rybuddio. Nid yw tanysgrifiadau'n cael eu heffeithio. Caiff y rhestrau eu llwytho i lawr o GitHub unwaith y dydd a dim ond i ganlyniadau a lwythwyd gyda'r API Lleol y maent yn berthnasol.
+    Downloading: Yn llwytho'r rhestrau i lawr…
+    Failed to Download: Methu llwytho'r rhestrau i lawr
+    Loaded Status: "Sianeli wedi'u rhwystro: {blocked} · Sianeli wedi'u nodi: {warned} · Diweddarwyd: {date}"
 Tutorial:
   Skip: Hepgor
   Next: Nesaf

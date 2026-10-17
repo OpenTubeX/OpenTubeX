@@ -61,6 +61,7 @@ Global:
 Search Listing:
   Label:
     Members Only: Pouze pro členy
+    Possibly AI-generated: Možná vytvořeno AI
 Stats:
   Replace old device: "Nahradit staré zařízení"
   Replacement explanation: "Spojte {device} s tímto zařízením pouze tehdy, pokud oba záznamy patří stejnému fyzickému zařízení."
@@ -1184,6 +1185,13 @@ Settings:
     Resolution: "Rozlišení"
     Loop: "Opakování"
     Off: "Vypnuto"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Skrýt kanály s nekvalitním obsahem od AI
+    Hide AI Slop Channels Tooltip: Skryje kanály z komunitně spravovaného blokovacího seznamu AiSList (aisloplist.com) ve výsledcích hledání, trendech a doporučeních a označí videa z kanálů na jeho seznamu varování. Odběry nejsou ovlivněny. Seznamy se stahují z GitHubu jednou denně a platí pouze pro výsledky načtené pomocí lokálního API.
+    Downloading: Stahování seznamů…
+    Failed to Download: Seznamy se nepodařilo stáhnout
+    Loaded Status: "Blokované kanály: {blocked} · Označené kanály: {warned} · Aktualizováno: {date}"
 Tutorial:
   Skip: Přeskočit
   Next: Další

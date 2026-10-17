@@ -61,6 +61,7 @@ Global:
 Search Listing:
   Label:
     Members Only: לחברים בלבד
+    Possibly AI-generated: ייתכן שנוצר באמצעות AI
 Stats:
   Replace old device: "החלפת מכשיר ישן"
   Replacement explanation: "יש לשלב את {device} עם המכשיר הזה רק אם שתי הרשומות שייכות לאותו מכשיר פיזי."
@@ -1215,6 +1216,13 @@ Settings:
     Resolution: "רזולוציה"
     Loop: "לולאה"
     Off: "כבוי"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: הסתרת ערוצים של תוכן AI באיכות ירודה
+    Hide AI Slop Channels Tooltip: מסתיר ערוצים שמופיעים ברשימת החסימה AiSList המתוחזקת על ידי הקהילה (aisloplist.com) מתוצאות חיפוש, מהסרטונים החמים ומההמלצות, ומסמן סרטונים מערוצים שמופיעים ברשימת האזהרה שלה. המינויים אינם מושפעים. הרשימות מורדות מ־GitHub פעם ביום וחלות רק על תוצאות שנטענו באמצעות ה־API המקומי.
+    Downloading: הרשימות בהורדה…
+    Failed to Download: לא ניתן היה להוריד את הרשימות
+    Loaded Status: "ערוצים חסומים: {blocked} · ערוצים מסומנים: {warned} · עודכן: {date}"
 Tutorial:
   Skip: דילוג
   Next: הבא

@@ -61,6 +61,7 @@ Global:
 Search Listing:
   Label:
     Members Only: Vain jäsenille
+    Possibly AI-generated: Mahdollisesti tekoälyn tuottama
 Stats:
   Replace old device: "Korvaa vanha laite"
   Replacement explanation: "Yhdistä {device} tähän laitteeseen vain, jos molemmat merkinnät kuuluvat samalle fyysiselle laitteelle."
@@ -1215,6 +1216,13 @@ Settings:
     Resolution: "Resoluutio"
     Loop: "Toista uudelleen"
     Off: "Pois"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Piilota tekoälyroskaa julkaisevat kanavat
+    Hide AI Slop Channels Tooltip: Piilottaa yhteisön ylläpitämällä AiSList-estolistalla (aisloplist.com) olevat kanavat hakutuloksista, Nousussa-osiosta ja suosituksista sekä merkitsee sen varoituslistalla olevien kanavien videot. Tilauksiin tämä ei vaikuta. Listat ladataan GitHubista kerran päivässä, ja ne koskevat vain paikallisella API:lla ladattuja tuloksia.
+    Downloading: Ladataan listoja…
+    Failed to Download: Listojen lataaminen epäonnistui
+    Loaded Status: "Estetyt kanavat: {blocked} · Merkityt kanavat: {warned} · Päivitetty: {date}"
 Tutorial:
   Skip: Ohita
   Next: Seuraava

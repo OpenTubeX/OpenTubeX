@@ -76,6 +76,7 @@ Search Listing:
     Members Only: Només per a membres
     3D: 3D
     Closed Captions: Subtítols
+    Possibly AI-generated: Possiblement generat per IA
 Search Filters:
   Possible Age Restriction Hint: "És possible que YouTube hagi aplicat una restricció d’edat a aquesta consulta de cerca."
   Cookie Search Failed: "La cerca amb les galetes configurades ha fallat."
@@ -1542,6 +1543,13 @@ Settings:
     Resolution: "Resolució"
     Loop: "Repetició"
     Off: "Desactivat"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Amaga els canals de contingut brossa generat per IA
+    Hide AI Slop Channels Tooltip: Amaga els canals de la llista de bloqueig AiSList mantinguda per la comunitat (aisloplist.com) dels resultats de la cerca, les tendències i les recomanacions, i etiqueta els vídeos dels canals de la seva llista d'advertència. Les subscripcions no es veuen afectades. Les llistes es baixen de GitHub un cop al dia i només s'apliquen als resultats carregats amb l'API local.
+    Downloading: S'estan baixant les llistes…
+    Failed to Download: No s'han pogut baixar les llistes
+    Loaded Status: "Canals bloquejats: {blocked} · Canals marcats: {warned} · Actualitzat: {date}"
 Tutorial:
   Skip: Omet
   Next: Següent

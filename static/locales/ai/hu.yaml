@@ -61,6 +61,7 @@ Global:
 Search Listing:
   Label:
     Members Only: Csak tagoknak
+    Possibly AI-generated: Lehet, hogy MI által generált
 Stats:
   Replace old device: "Régi eszköz lecserélése"
   Replacement explanation: "Csak akkor egyesítsd a(z) {device} bejegyzést ezzel az eszközzel, ha mindkét bejegyzés ugyanahhoz a fizikai eszközhöz tartozik."
@@ -1184,6 +1185,13 @@ Settings:
     Resolution: "Felbontás"
     Loop: "Ismétlés"
     Off: "Ki"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Gyenge minőségű MI-tartalmat gyártó csatornák elrejtése
+    Hide AI Slop Channels Tooltip: Elrejti a közösség által karbantartott AiSList tiltólistán (aisloplist.com) szereplő csatornákat a keresési eredményekből, a felkapott videók közül és az ajánlásokból, valamint megjelöli a figyelmeztető listáján szereplő csatornák videóit. A feliratkozásokat nem érinti. A listák naponta egyszer töltődnek le a GitHubról, és csak a helyi API-val betöltött találatokra vonatkoznak.
+    Downloading: Listák letöltése…
+    Failed to Download: Nem sikerült letölteni a listákat
+    Loaded Status: "Letiltott csatornák: {blocked} · Megjelölt csatornák: {warned} · Frissítve: {date}"
 Tutorial:
   Skip: Kihagyás
   Next: Tovább

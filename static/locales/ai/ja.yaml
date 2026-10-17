@@ -61,6 +61,7 @@ Global:
 Search Listing:
   Label:
     Members Only: メンバー限定
+    Possibly AI-generated: AI 生成の可能性あり
 Stats:
   Replace old device: "古いデバイスを置き換える"
   Replacement explanation: "両方の項目が同じ物理デバイスのものである場合のみ、{device} をこのデバイスと統合してください。"
@@ -1184,6 +1185,13 @@ Settings:
     Resolution: "解像度"
     Loop: "ループ"
     Off: "オフ"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: 低品質な AI 生成チャンネルを非表示
+    Hide AI Slop Channels Tooltip: コミュニティが管理する AiSList のブロックリスト (aisloplist.com) に掲載されているチャンネルを検索結果、急上昇、おすすめから非表示にし、警告リストに掲載されているチャンネルの動画にラベルを付けます。登録チャンネルには影響しません。リストは 1 日 1 回 GitHub からダウンロードされ、内部 API で読み込まれた結果にのみ適用されます。
+    Downloading: リストをダウンロードしています…
+    Failed to Download: リストをダウンロードできませんでした
+    Loaded Status: "ブロック済みチャンネル: {blocked} · 警告対象チャンネル: {warned} · 更新日時: {date}"
 Tutorial:
   Skip: スキップ
   Next: 次へ

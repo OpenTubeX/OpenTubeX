@@ -61,6 +61,7 @@ Global:
 Search Listing:
   Label:
     Members Only: Khusus anggota
+    Possibly AI-generated: Mungkin dibuat oleh AI
 Stats:
   Replace old device: "Ganti perangkat lama"
   Replacement explanation: "Gabungkan {device} dengan perangkat ini hanya jika kedua entri berasal dari perangkat fisik yang sama."
@@ -1187,6 +1188,13 @@ Settings:
     Resolution: "Resolusi"
     Loop: "Ulangi"
     Off: "Mati"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Sembunyikan kanal konten sampah AI
+    Hide AI Slop Channels Tooltip: Menyembunyikan kanal yang ada di daftar blokir AiSList yang dikelola komunitas (aisloplist.com) dari hasil pencarian, video yang sedang tren, dan rekomendasi, serta memberi label pada video dari kanal yang ada di daftar peringatannya. Langganan tidak terpengaruh. Daftar diunduh dari GitHub sekali sehari dan hanya berlaku untuk hasil yang dimuat dengan API Lokal.
+    Downloading: Mengunduh daftar…
+    Failed to Download: Tidak dapat mengunduh daftar
+    Loaded Status: "Kanal diblokir: {blocked} · Kanal ditandai: {warned} · Diperbarui: {date}"
 Tutorial:
   Skip: Lewati
   Next: Berikutnya

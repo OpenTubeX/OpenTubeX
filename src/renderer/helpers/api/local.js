@@ -1,5 +1,5 @@
 import { normalizeCommentFetchResponse } from './local-comment-response'
-import { createLocalFeedParsers } from './local-feed-parsers'
+import { createLocalFeedParsers, getChannelHandleFromEndpoint } from './local-feed-parsers'
 import { createOriginalChannelNameResolver } from './original-channel-name'
 import { runBackgroundJob } from '../background-jobs.js'
 import { ClientType, Constants, Innertube, Mixins, Parser, Platform, Player, Session, UniversalCache, Utils, YT, YTNodes } from 'youtubei.js'
@@ -1808,6 +1808,7 @@ export function parseLocalWatchNextVideo(video) {
       title: video.title.text?.trim(),
       author: video.author.name,
       authorId: video.author.id,
+      authorHandle: getChannelHandleFromEndpoint(video.author.endpoint),
       viewCount: video.view_count == null ? null : extractNumberFromString(video.view_count.text),
       published,
       lengthSeconds: isNaN(video.duration.seconds) ? '' : video.duration.seconds,

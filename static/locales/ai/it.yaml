@@ -61,6 +61,7 @@ Global:
 Search Listing:
   Label:
     Members Only: Solo membri
+    Possibly AI-generated: Forse generato con l'IA
 Stats:
   Replace old device: "Sostituisci il vecchio dispositivo"
   Replacement explanation: "Combina {device} con questo dispositivo solo se entrambe le voci appartengono allo stesso dispositivo fisico."
@@ -1184,6 +1185,13 @@ Settings:
     Resolution: "Risoluzione"
     Loop: "Ripeti"
     Off: "Disattivato"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Nascondi i canali di contenuti spazzatura generati dall'IA
+    Hide AI Slop Channels Tooltip: Nasconde i canali presenti nella lista di blocco AiSList gestita dalla comunità (aisloplist.com) dai risultati di ricerca, dalle tendenze e dai consigli, ed etichetta i video dei canali presenti nella sua lista di avviso. Le iscrizioni non sono interessate. Le liste vengono scaricate da GitHub una volta al giorno e si applicano solo ai risultati caricati con le API locali.
+    Downloading: Download delle liste in corso…
+    Failed to Download: Impossibile scaricare le liste
+    Loaded Status: "Canali bloccati: {blocked} · Canali segnalati: {warned} · Aggiornato: {date}"
 Tutorial:
   Skip: Salta
   Next: Avanti

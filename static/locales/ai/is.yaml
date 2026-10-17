@@ -61,6 +61,7 @@ Global:
 Search Listing:
   Label:
     Members Only: Aðeins fyrir meðlimi
+    Possibly AI-generated: Hugsanlega gert með gervigreind
 Stats:
   Replace old device: "Skipta út gömlu tæki"
   Replacement explanation: "Sameinaðu {device} aðeins við þetta tæki ef báðar færslurnar tilheyra sama raunverulega tækinu."
@@ -1192,6 +1193,13 @@ Settings:
     Resolution: "Upplausn"
     Loop: "Endurtaka"
     Off: "Slökkt"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Fela rásir með lélegu gervigreindarefni
+    Hide AI Slop Channels Tooltip: Felur rásir á bannlista AiSList sem samfélagið heldur úti (aisloplist.com) í leitarniðurstöðum, vinsælu efni og tillögum og merkir myndskeið frá rásum á viðvörunarlista þess. Áskriftir verða ekki fyrir áhrifum. Listarnir eru sóttir frá GitHub einu sinni á dag og eiga aðeins við um niðurstöður sem hlaðið er inn með staðværa API-kerfisviðmótinu.
+    Downloading: Sæki listana…
+    Failed to Download: Ekki tókst að sækja listana
+    Loaded Status: "Útilokaðar rásir: {blocked} · Merktar rásir: {warned} · Uppfært: {date}"
 Tutorial:
   Skip: Sleppa
   Next: Næsta

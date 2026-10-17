@@ -63,6 +63,7 @@ Global:
 Search Listing:
   Label:
     Members Only: فقط اعضا
+    Possibly AI-generated: احتمالاً تولیدشده با هوش مصنوعی
 Search Filters:
   Possible Age Restriction Hint: "ممکن است YouTube برای این عبارت جستجو محدودیت سنی اعمال کرده باشد."
   Cookie Search Failed: "جستجو با کوکی‌های تنظیم‌شده ناموفق بود."
@@ -1239,6 +1240,13 @@ Settings:
     Resolution: "وضوح"
     Loop: "تکرار"
     Off: "خاموش"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: پنهان کردن کانال‌های محتوای بی‌کیفیت هوش مصنوعی
+    Hide AI Slop Channels Tooltip: کانال‌های موجود در فهرست مسدودسازی AiSList که توسط جامعه نگهداری می‌شود (aisloplist.com) را از نتایج جست و جو، پربازدیدها و پیشنهادها پنهان می‌کند و ویدیوهای کانال‌های موجود در فهرست هشدار آن را برچسب‌گذاری می‌کند. دنبال کرده ها تحت تأثیر قرار نمی‌گیرند. فهرست‌ها روزی یک بار از GitHub دانلود می‌شوند و فقط برای نتایجی اعمال می‌شوند که با ای پی ای داخلی بارگذاری شده‌اند.
+    Downloading: در حال دانلود فهرست‌ها…
+    Failed to Download: دانلود فهرست‌ها ممکن نشد
+    Loaded Status: "کانال‌های مسدودشده: {blocked} · کانال‌های علامت‌گذاری‌شده: {warned} · به‌روزرسانی: {date}"
 Tutorial:
   Skip: ردکردن
   Next: بعدی

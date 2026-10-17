@@ -73,6 +73,7 @@ export function useHomeRecommendations(visible) {
         hideLiveStreams: store.getters.getHideLiveStreams,
         hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
         hiddenChannelNames: store.getters.getActiveChannelsHiddenNames,
+        aiSlopChannels: store.getters.getAiSlopBlockedChannels,
         forbiddenTitles: store.getters.getActiveForbiddenTitles,
       })
   }

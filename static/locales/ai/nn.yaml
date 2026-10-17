@@ -61,6 +61,7 @@ Global:
 Search Listing:
   Label:
     Members Only: Berre for medlemmer
+    Possibly AI-generated: Kanskje KI-generert
 Stats:
   Replace old device: "Byt ut gammal eining"
   Replacement explanation: "Slå berre saman {device} med denne eininga dersom begge oppføringane høyrer til same fysiske eining."
@@ -1359,6 +1360,13 @@ Settings:
     Resolution: "Oppløysing"
     Loop: "Gjenta"
     Off: "Av"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Gøym kanalar med KI-søppel
+    Hide AI Slop Channels Tooltip: Gøymer kanalar på den fellesskapsdrivne AiSList-blokkeringslista (aisloplist.com) frå søkeresultat, På veg opp og tilrådingar, og merkjer videoar frå kanalar på åtvaringslista. Abonnement vert ikkje påverka. Listene vert lasta ned frå GitHub éin gong om dagen og gjeld berre resultat som er lasta inn med det lokale API-et.
+    Downloading: Lastar ned listene…
+    Failed to Download: Klarte ikkje å laste ned listene
+    Loaded Status: "Blokkerte kanalar: {blocked} · Flagga kanalar: {warned} · Oppdatert: {date}"
 Tutorial:
   Skip: Hopp over
   Next: Neste

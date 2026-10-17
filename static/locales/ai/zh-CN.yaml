@@ -61,6 +61,7 @@ Global:
 Search Listing:
   Label:
     Members Only: 仅限会员
+    Possibly AI-generated: 可能由 AI 生成
 Stats:
   Replace old device: "替换旧设备"
   Replacement explanation: "仅当两条记录属于同一台实际设备时，才将 {device} 与此设备合并。"
@@ -1184,6 +1185,13 @@ Settings:
     Resolution: "分辨率"
     Loop: "循环"
     Off: "关闭"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: 隐藏 AI 垃圾内容频道
+    Hide AI Slop Channels Tooltip: 在搜索结果、热门和推荐中隐藏社区维护的 AiSList 屏蔽列表（aisloplist.com）中的频道，并为其警告列表中频道的视频添加标签。不影响订阅。列表每天从 GitHub 下载一次，仅适用于通过本地API加载的结果。
+    Downloading: 正在下载列表…
+    Failed to Download: 无法下载列表
+    Loaded Status: 已屏蔽频道：{blocked} · 已标记频道：{warned} · 更新时间：{date}
 Tutorial:
   Skip: 跳过
   Next: 下一步

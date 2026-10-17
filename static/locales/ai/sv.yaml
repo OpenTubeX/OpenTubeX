@@ -61,6 +61,7 @@ Global:
 Search Listing:
   Label:
     Members Only: Endast medlemmar
+    Possibly AI-generated: Möjligen AI-genererad
 Stats:
   Replace old device: "Ersätt gammal enhet"
   Replacement explanation: "Slå bara ihop {device} med den här enheten om båda posterna tillhör samma fysiska enhet."
@@ -1190,6 +1191,13 @@ Settings:
     Resolution: "Upplösning"
     Loop: "Upprepa"
     Off: "Av"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Dölj kanaler med AI-skräp
+    Hide AI Slop Channels Tooltip: Döljer kanaler på den gemenskapsunderhållna AiSList-blockeringslistan (aisloplist.com) i sökresultat, Populärt just nu och rekommendationer, och märker videor från kanaler på dess varningslista. Prenumerationer påverkas inte. Listorna laddas ned från GitHub en gång om dagen och gäller bara resultat som läses in med det lokala API:et.
+    Downloading: Laddar ned listorna…
+    Failed to Download: Det gick inte att ladda ned listorna
+    Loaded Status: "Blockerade kanaler: {blocked} · Flaggade kanaler: {warned} · Uppdaterad: {date}"
 Tutorial:
   Skip: Hoppa över
   Next: Nästa

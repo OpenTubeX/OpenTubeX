@@ -318,9 +318,19 @@
           @close="showCollaboratorsPrompt = false"
         />
         <div
-          v-if="isMembersOnly || is4k || hasCaptions || is8k || isNew || isVr180 || isVr360 || is3D"
+          v-if="isAiSlopWarned || isMembersOnly || is4k || hasCaptions || is8k || isNew || isVr180 || isVr360 || is3D"
           class="videoTagLine"
         >
+          <div
+            v-if="isAiSlopWarned"
+            class="videoTag aiSlopTag"
+          >
+            <FtIcon
+              :icon="['fas', 'robot']"
+              aria-hidden="true"
+            />
+            {{ t('Search Listing.Label.Possibly AI-generated') }}
+          </div>
           <div
             v-if="isMembersOnly"
             class="videoTag membersOnlyTag"
@@ -489,6 +499,7 @@ import {
   debounce
 } from '../../helpers/utils.js'
 import { getLocalVideoChannels } from '../../helpers/api/local.js'
+import { isOnAiSlopList } from '../../helpers/aiSlopList.js'
 import { isHistoryEntryWatched } from '../../helpers/history.js'
 import { liveReminder, supportsLiveReminders } from '../../helpers/liveReminders'
 import { getUpcomingPremiereTimestamp } from '../../helpers/subscription-entries.js'
@@ -651,6 +662,8 @@ const isVr360 = ref(false)
 const is3D = ref(false)
 const hasCaptions = ref(false)
 const isMembersOnly = ref(false)
+/** Channels on the AiSList warnlist are labelled instead of being hidden */
+const isAiSlopWarned = computed(() => isOnAiSlopList(store.getters.getAiSlopWarnedChannels, props.data))
 const isUpcoming = ref(false)
 const isStation = ref(false)
 const showDownloadPrompt = ref(false)

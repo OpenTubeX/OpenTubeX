@@ -7,6 +7,7 @@ Global:
 Search Listing:
   Label:
     Members Only: Tylko dla wspierających
+    Possibly AI-generated: Możliwie wygenerowane przez AI
 Home Page:
   Keep disabled and hide this section: "Pozostaw wyłączone i ukryj tę sekcję"
   Familiar description: "Preferuj nieobejrzane filmy z kanałów, które już lubisz."
@@ -633,6 +634,13 @@ Settings:
     Resolution: "Rozdzielczość"
     Loop: "Zapętlenie"
     Off: "Wył."
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Ukryj kanały z niskiej jakości treściami AI
+    Hide AI Slop Channels Tooltip: Ukrywa kanały z prowadzonej przez społeczność listy blokowania AiSList (aisloplist.com) w wynikach wyszukiwania, sekcji Na czasie i rekomendacjach oraz oznacza filmy z kanałów z jej listy ostrzeżeń. Nie wpływa na subskrypcje. Listy są pobierane z GitHuba raz dziennie i dotyczą tylko wyników wczytanych za pomocą lokalnego API.
+    Downloading: Pobieranie list…
+    Failed to Download: Nie udało się pobrać list
+    Loaded Status: "Zablokowane kanały: {blocked} · Oznaczone kanały: {warned} · Zaktualizowano: {date}"
 Tutorial:
   Skip: Pomiń
   Next: Dalej

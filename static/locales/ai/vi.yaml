@@ -61,6 +61,7 @@ Global:
 Search Listing:
   Label:
     Members Only: Chỉ dành cho hội viên
+    Possibly AI-generated: Có thể do AI tạo
 Stats:
   Replace old device: "Thay thế thiết bị cũ"
   Replacement explanation: "Chỉ kết hợp {device} với thiết bị này nếu cả hai mục thuộc cùng một thiết bị vật lý."
@@ -1208,6 +1209,13 @@ Settings:
     Resolution: "Độ phân giải"
     Loop: "Lặp lại"
     Off: "Tắt"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Ẩn các kênh nội dung rác do AI tạo
+    Hide AI Slop Channels Tooltip: Ẩn các kênh trong danh sách chặn AiSList do cộng đồng duy trì (aisloplist.com) khỏi kết quả tìm kiếm, xu hướng và đề xuất, đồng thời gắn nhãn cho video từ các kênh trong danh sách cảnh báo của nó. Không ảnh hưởng đến các kênh đã đăng ký. Danh sách được tải xuống từ GitHub mỗi ngày một lần và chỉ áp dụng cho kết quả được tải bằng API địa phương.
+    Downloading: Đang tải xuống danh sách…
+    Failed to Download: Không thể tải xuống danh sách
+    Loaded Status: "Kênh bị chặn: {blocked} · Kênh bị gắn cờ: {warned} · Cập nhật: {date}"
 Tutorial:
   Skip: Bỏ qua
   Next: Tiếp

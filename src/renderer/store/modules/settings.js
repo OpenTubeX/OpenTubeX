@@ -544,6 +544,7 @@ const state = {
   useRssFeeds: false,
   useReturnYouTubeDislikes: false,
   returnYouTubeDislikesUrl: 'https://ryd-proxy.kavin.rocks',
+  useAiSlopList: false,
   useSponsorBlock: false,
   videoVolumeMouseScroll: false,
   videoPlaybackRateMouseScroll: false,
@@ -630,6 +631,11 @@ const state = {
 export const DEFAULT_SETTINGS = Object.freeze(structuredClone(state))
 
 const sideEffectHandlers = {
+  useAiSlopList: ({ dispatch }, value) => {
+    // Not awaited so that downloading the list doesn't delay startup
+    dispatch(value ? 'loadAiSlopList' : 'clearAiSlopList')
+  },
+
   useAITranslationCompletions: (_store, value) => {
     return setAITranslationCompletionsEnabled(value)
   },

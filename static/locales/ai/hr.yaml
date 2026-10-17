@@ -61,6 +61,7 @@ Global:
 Search Listing:
   Label:
     Members Only: Samo za članove
+    Possibly AI-generated: Možda generirano umjetnom inteligencijom
 Stats:
   Replace old device: "Zamijeni stari uređaj"
   Replacement explanation: "Spojite {device} s ovim uređajem samo ako oba unosa pripadaju istom fizičkom uređaju."
@@ -1193,6 +1194,13 @@ Settings:
     Resolution: "Razlučivost"
     Loop: "Ponavljanje"
     Off: "Isključeno"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Sakrij kanale s nekvalitetnim AI sadržajem
+    Hide AI Slop Channels Tooltip: Skriva kanale s popisa blokiranja AiSList koji održava zajednica (aisloplist.com) iz rezultata pretrage, trendova i preporuka te označava videozapise kanala s njegova popisa upozorenja. Pretplate nisu obuhvaćene. Popisi se preuzimaju s GitHuba jednom dnevno i primjenjuju se samo na rezultate učitane putem lokalnog sučelja.
+    Downloading: Preuzimanje popisa…
+    Failed to Download: Nije moguće preuzeti popise
+    Loaded Status: "Blokirani kanali: {blocked} · Označeni kanali: {warned} · Ažurirano: {date}"
 Tutorial:
   Skip: Preskoči
   Next: Dalje

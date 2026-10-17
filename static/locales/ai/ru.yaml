@@ -43,6 +43,7 @@ Global:
 Search Listing:
   Label:
     Members Only: Только для участников
+    Possibly AI-generated: Возможно, создано ИИ
 Stats:
   Replace old device: "Заменить старое устройство"
   Replacement explanation: "Объединяйте {device} с этим устройством только если обе записи относятся к одному физическому устройству."
@@ -1185,6 +1186,13 @@ Settings:
     Resolution: "Разрешение"
     Loop: "Повтор"
     Off: "Выкл."
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Скрывать каналы с низкопробным ИИ-контентом
+    Hide AI Slop Channels Tooltip: Скрывает каналы из поддерживаемого сообществом блок-листа AiSList (aisloplist.com) в результатах поиска, трендах и рекомендациях, а также помечает видео с каналов из его списка предупреждений. Подписки не затрагиваются. Списки загружаются с GitHub раз в день и применяются только к результатам, загруженным через локальный API.
+    Downloading: Загрузка списков…
+    Failed to Download: Не удалось загрузить списки
+    Loaded Status: "Заблокированные каналы: {blocked} · Помеченные каналы: {warned} · Обновлено: {date}"
 Tutorial:
   Skip: Пропустить
   Next: Далее

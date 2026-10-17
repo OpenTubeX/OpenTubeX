@@ -46,6 +46,7 @@ import { clampOverlayScrollTop, isOverlayScrollTopOutOfBounds, restoreOverlayScr
 import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
 import { liveReminder, supportsLiveReminders } from '../../helpers/liveReminders'
 import { DOWNLOADED_MEDIA_MIME_TYPES } from '../../../constants'
+import { isOnAiSlopList } from '../../helpers/aiSlopList'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import { downloadWatchRoute, isPlayableDownloadFile } from '../../helpers/downloadPlayback'
 import { parseLocalVideoGames } from '../../helpers/video-games'
@@ -1098,6 +1099,7 @@ export default defineComponent({
       if (this.isOffline) return this.offlineDownloadSuggestions.length > 0
       return this.recommendedVideos.some(video => !isVideoHiddenByPreferences(video, {
         hiddenChannelNames: this.$store.getters.getActiveChannelsHiddenNames,
+        aiSlopChannels: this.$store.getters.getAiSlopBlockedChannels,
         forbiddenTitles: this.$store.getters.getActiveForbiddenTitles,
         hideChannelsBasedOnText: false,
       }))
@@ -6655,6 +6657,7 @@ export default defineComponent({
     isHiddenVideo: function (forbiddenTitles, channelsHidden, video) {
       return channelsHidden.some(ch => ch.name === video.authorId) ||
         channelsHidden.some(ch => ch.name === video.author) ||
+        isOnAiSlopList(this.$store.getters.getAiSlopBlockedChannels, video) ||
         forbiddenTitles.some((text) => video.title?.toLowerCase().includes(text)) ||
         forbiddenTitles.some((text) => video.author?.toLowerCase().includes(text))
     },

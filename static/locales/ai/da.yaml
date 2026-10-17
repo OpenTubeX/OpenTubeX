@@ -63,6 +63,7 @@ Global:
 Search Listing:
   Label:
     Members Only: Kun for medlemmer
+    Possibly AI-generated: Muligvis AI-genereret
 Stats:
   Replace old device: "Erstat gammel enhed"
   Replacement explanation: "Kombiner kun {device} med denne enhed, hvis begge poster tilhører den samme fysiske enhed."
@@ -1236,6 +1237,13 @@ Settings:
     Resolution: "Opløsning"
     Loop: "Gentag"
     Off: "Fra"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Skjul kanaler med AI-skrald
+    Hide AI Slop Channels Tooltip: Skjuler kanaler på den fællesskabsvedligeholdte AiSList-blokeringsliste (aisloplist.com) i søgeresultater, Hot lige nu og anbefalinger og markerer videoer fra kanaler på dens advarselsliste. Abonnementer påvirkes ikke. Listerne downloades fra GitHub én gang om dagen og gælder kun for resultater, der er indlæst med den lokale API.
+    Downloading: Downloader listerne…
+    Failed to Download: Listerne kunne ikke downloades
+    Loaded Status: "Blokerede kanaler: {blocked} · Markerede kanaler: {warned} · Opdateret: {date}"
 Tutorial:
   Skip: Spring over
   Next: Næste

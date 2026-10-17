@@ -61,6 +61,7 @@ Global:
 Search Listing:
   Label:
     Members Only: Yalnız üzvlər üçün
+    Possibly AI-generated: Süni intellektlə yaradılmış ola bilər
 Stats:
   Replace old device: "Köhnə cihazı əvəz et"
   Replacement explanation: "{device} qeydini bu cihazla yalnız hər iki qeyd eyni fiziki cihaza aid olduqda birləşdirin."
@@ -1187,6 +1188,13 @@ Settings:
     Resolution: "Ölçü imkanı"
     Loop: "Təkrarla"
     Off: "Söndürülüb"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Süni intellektlə yaradılmış keyfiyyətsiz kanalları gizlət
+    Hide AI Slop Channels Tooltip: İcma tərəfindən idarə olunan AiSList blok siyahısındakı (aisloplist.com) kanalları axtarış nəticələrindən, trendlərdən və tövsiyələrdən gizlədir, xəbərdarlıq siyahısındakı kanalların videolarını isə etiketləyir. Abunəliklərə təsir etmir. Siyahılar gündə bir dəfə GitHub-dan endirilir və yalnız Yerli API ilə yüklənən nəticələrə tətbiq olunur.
+    Downloading: Siyahılar endirilir…
+    Failed to Download: Siyahılar endirilə bilmədi
+    Loaded Status: "Bloklanmış kanallar: {blocked} · İşarələnmiş kanallar: {warned} · Yenilənib: {date}"
 Tutorial:
   Skip: Ötür
   Next: Növbəti

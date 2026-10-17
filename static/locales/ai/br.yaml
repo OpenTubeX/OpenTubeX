@@ -61,6 +61,7 @@ Global:
 Search Listing:
   Label:
     Members Only: "Evit an izili hepken"
+    Possibly AI-generated: Krouet gant an IA marteze
 Stats:
   Replace old device: "Erlec'hiañ an trevnad kozh"
   Replacement explanation: "Kendeuzit {device} gant an trevnad-mañ nemet ma'z eo an daou enmoned eus an hevelep trevnad fizikel."
@@ -1184,6 +1185,13 @@ Settings:
     Resolution: "Spisder"
     Loop: "Adlenn"
     Off: "Lazhet"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Kuzhat ar chadennoù gant danvez izel krouet gant an IA
+    Hide AI Slop Channels Tooltip: Kuzhat a ra ar chadennoù zo war roll-stankañ AiSList meret gant ar gumuniezh (aisloplist.com) en disoc'hoù klask, an traoù diouzh ar c'hiz hag ar c'hinnigoù, hag ouzhpennañ a ra ur skritellig d'ar videoioù eus ar chadennoù zo war e roll-diwall. N'eo ket tizhet ar c'houmanantoù. Pellgarget e vez ar rolloù diwar GitHub ur wech bemdez ha ne dalvezont nemet evit an disoc'hoù karget gant an API lec'hel.
+    Downloading: O pellgargañ ar rolloù…
+    Failed to Download: N'eus ket bet gallet pellgargañ ar rolloù
+    Loaded Status: "Chadennoù stanket: {blocked} · Chadennoù merket: {warned} · Hizivaet: {date}"
 Tutorial:
   Skip: "Lammat"
   Next: "War-lerc'h"

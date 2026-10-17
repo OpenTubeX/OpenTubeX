@@ -61,6 +61,7 @@ Global:
 Search Listing:
   Label:
     Members Only: Alleen voor leden
+    Possibly AI-generated: Mogelijk door AI gegenereerd
 Stats:
   Replace old device: "Oud apparaat vervangen"
   Replacement explanation: "Combineer {device} alleen met dit apparaat als beide vermeldingen bij hetzelfde fysieke apparaat horen."
@@ -1215,6 +1216,13 @@ Settings:
     Resolution: "Resolutie"
     Loop: "Herhalen"
     Off: "Uit"
+  AiSList Settings:
+    AiSList Settings: AiSList
+    Hide AI Slop Channels: Kanalen met AI-rommel verbergen
+    Hide AI Slop Channels Tooltip: Verbergt kanalen op de door de community bijgehouden AiSList-blokkeerlijst (aisloplist.com) in zoekresultaten, trending en aanbevelingen, en labelt video's van kanalen op de waarschuwingslijst ervan. Abonnementen worden niet beïnvloed. De lijsten worden eenmaal per dag van GitHub gedownload en gelden alleen voor resultaten die met de lokale API zijn geladen.
+    Downloading: Lijsten downloaden…
+    Failed to Download: Kan de lijsten niet downloaden
+    Loaded Status: "Geblokkeerde kanalen: {blocked} · Gemarkeerde kanalen: {warned} · Bijgewerkt: {date}"
 Tutorial:
   Skip: Overslaan
   Next: Volgende

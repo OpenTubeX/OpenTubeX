@@ -22,6 +22,16 @@ if (process.env.SUPPORTS_LOCAL_API) {
   Parser.addRuntimeParser('ShortsLockupView', ShortsLockupViewWithThumbnail)
 }
 
+/**
+ * @param {import('youtubei.js').YTNodes.NavigationEndpoint | undefined} endpoint
+ * @returns {string | undefined} the channel handle including the leading `@`
+ */
+export function getChannelHandleFromEndpoint(endpoint) {
+  const url = endpoint?.payload?.canonicalBaseUrl ?? endpoint?.metadata?.url
+
+  return typeof url === 'string' && url.startsWith('/@') ? url.slice(1) : undefined
+}
+
 export function createLocalFeedParsers(shouldHideMembersOnly) {
   const TRACKING_PARAM_NAMES = [
     'utm_source',
@@ -599,6 +609,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         title: video.title.text?.trim(),
         author: video.author.name !== 'N/A' ? video.author.name : channelName,
         authorId: video.author.id !== 'N/A' ? video.author.id : channelId,
+        authorHandle: getChannelHandleFromEndpoint(video.author.endpoint),
         authorThumbnailUrl: getResultAuthorThumbnailUrl(video),
         hasCollaborators: video.author.id === 'N/A' && isCollaborativeVideoAuthor(video.author.name),
         description: video.description,
@@ -815,10 +826,12 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
           }
         }
 
-        const imageAuthorId = lockupView.metadata.image?.renderer_context?.command_context?.on_tap?.payload?.browseId
+        const imageEndpoint = lockupView.metadata.image?.renderer_context?.command_context?.on_tap
+        const imageAuthorId = imageEndpoint?.payload?.browseId
         const author = authorPart?.text ?? channelName ??
           metadataParts.find(part => part.avatar_stack?.text?.text)?.avatar_stack.text.text
         const authorId = authorPart?.endpoint?.payload?.browseId ?? imageAuthorId ?? channelId
+        const authorHandle = getChannelHandleFromEndpoint(authorPart?.endpoint) ?? getChannelHandleFromEndpoint(imageEndpoint)
         const hasCollaborators = authorPart?.endpoint == null && isCollaborativeVideoAuthor(author)
 
         return {
@@ -828,6 +841,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
           title: lockupView.metadata.title.text?.trim(),
           author,
           authorId,
+          authorHandle,
           hasCollaborators,
           viewCount,
           published: calculatePublishedDate(publishedText, liveNow, isUpcoming, premiereDate),
