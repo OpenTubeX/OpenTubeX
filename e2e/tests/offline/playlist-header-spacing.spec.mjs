@@ -111,7 +111,7 @@ for (const playlistViewType of ['grid', 'list']) {
   })
 }
 
-test.describe('stacked playlist without a sort select', () => {
+test.describe('stacked playlist without a sort select', { tag: '@scale' }, () => {
   test.use({
     seed: {
       settings: { playlistViewType: 'list' },
@@ -126,8 +126,8 @@ test.describe('stacked playlist without a sort select', () => {
     },
   })
 
-  test('keeps the items card top inset', async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 900 })
+  test('keeps the items card top inset', async ({ page, uiScale }) => {
+    await page.setViewportSize({ width: Math.round(375 * uiScale / 100), height: Math.round(900 * uiScale / 100) })
     await goTo(page, 'userplaylists')
     await page.getByRole('link', { name: 'Single video', exact: true }).click()
     await expect(page.locator('.playlistItem')).toHaveCount(1)
