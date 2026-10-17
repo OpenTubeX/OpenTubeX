@@ -227,6 +227,22 @@ jobs:
         docker run --rm -v "$PWD":/work -w /work -e UPINFO ghcr.io/pkgforge-dev/archlinux:latest \
           sh _scripts/package-anylinux-appimage.sh "build/opentubex_${VERSION}_amd64.deb"
 
+    - name: Download pinned AppImage tools
+      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-armv7l')
+      shell: bash
+      working-directory: build
+      run: |
+        set -euo pipefail
+        wget -q "https://github.com/AppImage/appimagetool/releases/download/1.9.1/appimagetool-x86_64.AppImage" -O appimagetool.AppImage
+        wget -q "https://github.com/AppImage/type2-runtime/releases/download/20251108/runtime-x86_64" -O runtime
+        wget -q "https://github.com/AppImage/type2-runtime/releases/download/20251108/runtime-armhf" -O runtime-armhf
+        sha256sum --check --strict - <<'EOF'
+        ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0  appimagetool.AppImage
+        2fca8b443c92510f1483a883f60061ad09b46b978b2631c807cd873a47ec260d  runtime
+        e9060d37577b8a29914ec12d8740add24e19ff29012fb1fa0f60daf62db0688d  runtime-armhf
+        EOF
+        chmod +x appimagetool.AppImage runtime
+
     - name: Convert ARMv7l AppImage to static runtime and add update information
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-armv7l')
       shell: bash
@@ -235,14 +251,12 @@ jobs:
       run: |
         cd build
         appimage="OpenTubeX-${VERSION}-armv7l.AppImage"
-        wget "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage" -O ./appimagetool.AppImage
-        wget "https://github.com/AppImage/type2-runtime/releases/download/continuous/runtime-x86_64" -O runtime
-        chmod +x ./"$appimage" ./appimagetool.AppImage ./runtime
+        chmod +x ./"$appimage"
         update_information='gh-releases-zsync|OpenTubeX|OpenTubeX|latest-all|opentubex-*-armv7l.AppImage.zsync'
         TARGET_APPIMAGE="$appimage" ./runtime --appimage-extract && rm -f ./"$appimage"
         ARCH=armhf ./appimagetool.AppImage --comp zstd --mksquashfs-opt -Xcompression-level --mksquashfs-opt 20 \
-          -u "$update_information" -n ./squashfs-root ./"$appimage"
-        rm -rf ./squashfs-root ./appimagetool.AppImage ./runtime
+          --runtime-file ./runtime-armhf -u "$update_information" -n ./squashfs-root ./"$appimage"
+        rm -rf ./squashfs-root ./appimagetool.AppImage ./runtime ./runtime-armhf
 
     - name: Convert ARM64 AppImage to Anylinux AppImage
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
