@@ -422,9 +422,43 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
+      attestations: write
       contents: write
+      id-token: write
 
     steps:
+    - name: List release asset digests
+      id: assets
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_ID: ${{ inputs.releaseId }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        release="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}")"
+        jq --raw-output '.assets[] | select(.name | endswith(".intoto.jsonl") | not)
+          | "\(.digest // error("\(.name) has no digest") | ltrimstr("sha256:"))  \(.name)"' \
+          <<< "$release" > "$RUNNER_TEMP/checksums.txt"
+        echo "tag=$(jq --raw-output .tag_name <<< "$release")" >> "$GITHUB_OUTPUT"
+
+    - name: Attest build provenance
+      id: attest
+      uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+      with:
+        subject-checksums: ${{ runner.temp }}/checksums.txt
+
+    - name: Upload provenance to release
+      env:
+        GH_TOKEN: ${{ github.token }}
+        BUNDLE: ${{ steps.attest.outputs.bundle-path }}
+        TAG: ${{ steps.assets.outputs.tag }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        provenance="$RUNNER_TEMP/opentubex-${TAG#v}.intoto.jsonl"
+        cp "$BUNDLE" "$provenance"
+        gh release upload "$TAG" "$provenance" --clobber --repo "$GITHUB_REPOSITORY"
+
     - name: Publish release if it is a draft
       if: inputs.publishRelease
       env:

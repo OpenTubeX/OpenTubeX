@@ -575,7 +575,9 @@ jobs:
 
     permissions:
       actions: read
+      attestations: write
       contents: write
+      id-token: write
       issues: read
       pull-requests: read
 
@@ -608,6 +610,12 @@ jobs:
 
           cp "${files[0]}" "release-assets/$artifact_name"
         done
+
+    - name: Attest build provenance
+      id: attest
+      uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+      with:
+        subject-path: release-assets/*
 
     - name: Generate nightly release notes
       env:
@@ -656,12 +664,14 @@ jobs:
       id: release
       env:
         GH_TOKEN: ${{ github.token }}
+        BUNDLE: ${{ steps.attest.outputs.bundle-path }}
       shell: bash
       run: |
         set -euo pipefail
         base_version="$(jq --raw-output .version package.json)"
         version="${base_version}-nightly-${GITHUB_RUN_NUMBER}"
         tag="v${version}"
+        cp "$BUNDLE" "release-assets/opentubex-${version}.intoto.jsonl"
 
         gh release create "$tag" release-assets/* \
           --prerelease \
