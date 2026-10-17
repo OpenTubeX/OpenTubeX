@@ -240,27 +240,31 @@ test('shows local activity and keeps Home customization after relaunch', async (
   await expect(page.locator('[data-home-section]').first()).toHaveAttribute('data-home-section', 'watchStats')
 })
 
-// Quarantined: the slide occasionally doesn't start under load. https://github.com/OpenTubeX/OpenTubeX/issues/2156
-test.fixme('slides between Home shelf pages', async ({ page }) => {
+test('slides between Home shelf pages', async ({ page }) => {
   await goTo(page, 'home')
   const newSinceLastVisit = page.locator('[data-home-section="newSinceLastVisit"]')
+  const shelfPages = newSinceLastVisit.locator('[data-home-shelf-page]')
   await expect(newSinceLastVisit.getByText('New Home post', { exact: true })).toBeVisible()
   // Record transitions as they start; sampling mid-flight misses short slides on a busy machine.
+  // A starved renderer can dispatch transitionrun after Vue's fallback timer removed the
+  // transition classes, so identify the entering page by its number instead of its classes.
   await newSinceLastVisit.evaluate(element => {
-    element.startedShelfTransitions = []
+    element.slidingShelfPages = []
     element.addEventListener('transitionrun', event => {
-      if (event.propertyName === 'transform') element.startedShelfTransitions.push(event.target.className)
+      if (event.propertyName === 'transform') element.slidingShelfPages.push(event.target.dataset.homeShelfPage)
     })
   })
-  const startedShelfTransition = name => expect.poll(() => newSinceLastVisit.evaluate((element, name) => (
-    element.startedShelfTransitions.some(className => className.includes(name))
-  ), name)).toBe(true)
+  const slideTo = async (buttonName, pageNumber) => {
+    await newSinceLastVisit.evaluate(element => { element.slidingShelfPages = [] })
+    await newSinceLastVisit.getByRole('button', { name: buttonName }).click()
+    await expect.poll(() => newSinceLastVisit.evaluate(element => element.slidingShelfPages))
+      .toContain(pageNumber)
+    await expect(shelfPages).toHaveCount(1)
+    await expect(shelfPages).toHaveAttribute('data-home-shelf-page', pageNumber)
+  }
 
-  await newSinceLastVisit.getByRole('button', { name: 'Next New since last visit page' }).click()
-  await startedShelfTransition('shelf-next-enter-active')
-  await expect(newSinceLastVisit.locator('[data-home-shelf-page="2"]')).toBeVisible()
-  await newSinceLastVisit.getByRole('button', { name: 'Previous New since last visit page' }).click()
-  await startedShelfTransition('shelf-previous-enter-active')
+  await slideTo('Next New since last visit page', '2')
+  await slideTo('Previous New since last visit page', '1')
 })
 
 test('opens the subscriptions New feed from its Home summary', async ({ page }) => {
