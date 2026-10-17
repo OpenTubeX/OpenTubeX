@@ -63,6 +63,12 @@ for (const feed of ['videos', 'new']) {
       await page.evaluate(() => {
         window.__refreshLongTasks = []
         window.__refreshCompletedAt = null
+        window.__refreshEnterStyleReads = 0
+        window.__refreshGetComputedStyle = window.getComputedStyle
+        window.getComputedStyle = function (element, ...args) {
+          if (element.classList.contains('feed-enter-active')) window.__refreshEnterStyleReads++
+          return window.__refreshGetComputedStyle.call(this, element, ...args)
+        }
         window.addEventListener('opentubex-subscription-refresh-completed', () => {
           window.__refreshCompletedAt = performance.now()
         }, { once: true })
@@ -81,12 +87,14 @@ for (const feed of ['videos', 'new']) {
       const metrics = await page.evaluate(() => {
         window.__refreshLongTasks.push(...window.__refreshObserver.takeRecords().map(entry => ({ startTime: entry.startTime, duration: entry.duration })))
         window.__refreshObserver.disconnect()
+        window.getComputedStyle = window.__refreshGetComputedStyle
         const completedAt = window.__refreshCompletedAt
         // The completion task can also publish cards. Only include its portion
         // inside the refresh, as well as all preceding refresh tasks.
         const durations = window.__refreshLongTasks.map(entry => Math.max(0, Math.min(entry.duration, completedAt - entry.startTime)))
         return {
           completedAt,
+          enterStyleReads: window.__refreshEnterStyleReads,
           durations,
           blockingMs: durations.reduce((total, duration) => total + Math.max(0, duration - 50), 0)
         }
@@ -98,6 +106,8 @@ for (const feed of ['videos', 'new']) {
       await cdp.detach()
       await testInfo.attach('subscription refresh responsiveness', { body: JSON.stringify(metrics), contentType: 'application/json' })
       expect(metrics.completedAt).not.toBeNull()
+      // Known feed durations avoid a forced style read for each entering card.
+      expect(metrics.enterStyleReads, JSON.stringify(metrics)).toBe(0)
       // Measure input blocking while fetching, including any incremental card
       // redraws. Final publication after completion is outside this interval.
       // Gross bound only; tighter wall-clock budgets are too noisy on shared runners.

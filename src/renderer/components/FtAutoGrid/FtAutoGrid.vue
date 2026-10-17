@@ -4,6 +4,7 @@
     tag="div"
     name="feed"
     :appear="appear"
+    :duration="transitionDurations"
     :move-class="moveClass"
     :style="{ '--feed-transition-duration': feedTransitionDuration }"
     :class="{
@@ -61,9 +62,8 @@ const MOVE_TRANSITION_MAX_ITEMS = 50
 
 const gridElement = useTemplateRef('gridElement')
 const thumbnailSizeSetting = inject(thumbnailSizeSettingKey, 'thumbnailSize')
-const feedTransitionDuration = computed(() => {
-  return `${300 / getAnimationSpeedMultiplier(store.getters.getAnimationSpeed)}ms`
-})
+const animationSpeedMultiplier = computed(() => getAnimationSpeedMultiplier(store.getters.getAnimationSpeed))
+const feedTransitionDuration = computed(() => `${300 / animationSpeedMultiplier.value}ms`)
 
 // The thumbnail size custom properties are written straight to the element
 // instead of through a reactive `:style` binding, and the measured width is
@@ -110,6 +110,18 @@ let reducedMotionQuery = null
 function handleReducedMotionChange(event) {
   prefersReducedMotion.value = event.matches
 }
+
+// Vue otherwise infers timing with getComputedStyle for every entering card,
+// interleaving style reads with class writes across the whole incoming batch.
+const transitionDurations = computed(() => {
+  const reducedMotion = store.getters.getReducedMotion === 'on' ||
+    (store.getters.getReducedMotion === 'system' && prefersReducedMotion.value)
+  return {
+    enter: reducedMotion ? 0 : 300 / animationSpeedMultiplier.value,
+    // Only the New feed fades departing cards; other lists remove them immediately.
+    leave: reducedMotion || !gridElement.value?.$el?.closest('.newFeed') ? 0 : 200 / animationSpeedMultiplier.value
+  }
+})
 
 // 'feed-move-suppressed' has no transition, so the TransitionGroup bails out of
 // the move handling instead of measuring and translating every child.
