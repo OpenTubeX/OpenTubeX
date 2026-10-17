@@ -331,22 +331,13 @@ function loadVideosFromCacheForAllActiveProfileChannels() {
   isLoading.value = false
 }
 
-// Show fetched channels during smaller refreshes. Large cached feeds update
-// when the refresh finishes to avoid repeatedly sorting the whole list.
-let deferredChannelUpdates = false
+// Large cached feeds publish refreshed channels in batches because each
+// update rebuilds and sorts every cached entry.
 useSubscriptionChannelUpdates('videos', () => {
-  // Rebuilding and sorting tens of thousands of cached entries after every
-  // channel response can make the refresh itself slower than the requests.
-  // Keep the cached feed visible and publish the final list when it finishes.
-  if (!subscriptionCacheReady.value) return
-  if (store.getters.getSubscriptionFeedRefreshInProgress &&
-    (isLargeCachedFeed.value || deferredChannelUpdates)) {
-    deferredChannelUpdates = true
-    return
+  if (subscriptionCacheReady.value) {
+    loadVideosFromCacheForAllActiveProfileChannels()
   }
-  loadVideosFromCacheForAllActiveProfileChannels()
-  deferredChannelUpdates = false
-})
+}, () => isLargeCachedFeed.value)
 
 async function loadVideosForSubscriptionsFromRemote() {
   const wasShowingCache = !isLoading.value && videoList.value.length > 0
@@ -367,19 +358,11 @@ async function loadVideosForSubscriptionsFromRemote() {
     if (refreshedVideos !== null) {
       if (isTabPresented?.value !== false) {
         loadVideosFromCacheForAllActiveProfileChannels()
-        deferredChannelUpdates = false
       }
       lastRemoteRefreshSuccessTimestamp.value = store.getters.getSubscriptionFeedLastRefreshTimestamp
     }
   } finally {
-    try {
-      if (deferredChannelUpdates && isTabPresented?.value !== false) {
-        loadVideosFromCacheForAllActiveProfileChannels()
-        deferredChannelUpdates = false
-      }
-    } finally {
-      isLoading.value = false
-    }
+    isLoading.value = false
   }
 }
 

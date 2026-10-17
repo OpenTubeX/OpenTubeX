@@ -508,6 +508,17 @@ test.describe('subscription refresh with many tabs', () => {
   test('keeps the renderer responsive while refreshing a large profile on a slower CPU', { tag: '@performance' }, ({ app, page }, testInfo) =>
     checkLargeProfileRefresh({ app, page }, testInfo, false, true))
 
+  test('shows channels fetched while a large refresh is still running', async ({ page }) => {
+    test.setTimeout(120_000)
+    await routeFeeds(page, index => index === 0 ? 0 : 8_000)
+    await expect(page.getByText('Video 0-0', { exact: true })).toBeVisible({ timeout: 30_000 })
+
+    await page.getByRole('button', { name: /Refresh Videos/ }).click()
+    await expect(page.getByText('Fresh video 0', { exact: true })).toBeVisible({ timeout: 5_000 })
+    await expect(page.getByRole('button', { name: 'Cancel refresh' })).toBeVisible()
+    await page.getByRole('button', { name: 'Cancel refresh' }).click()
+  })
+
   test('shows channels fetched before a large refresh is cancelled', async ({ page }) => {
     test.setTimeout(120_000)
     await routeFeeds(page, index => index === 0 ? 0 : 8_000)
