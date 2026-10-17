@@ -72,6 +72,7 @@ const feedTransitionDuration = computed(() => {
 // costs a layout pass over the whole feed. Dragging the thumbnail size slider
 // emits an event per step, which turned that into hundreds of forced layouts.
 let gridWidth = 0
+let renderedGridWidth = 0
 let active = true
 
 function updateGridSliderLimit() {
@@ -127,7 +128,7 @@ function applyThumbnailSizeStyles() {
     return
   }
 
-  const styles = getThumbnailGridStyles(store.state.settings[thumbnailSizeSetting], gridWidth, window.innerWidth)
+  const styles = getThumbnailGridStyles(store.state.settings[thumbnailSizeSetting], gridWidth, window.innerWidth, renderedGridWidth)
 
   for (const [property, value] of Object.entries(styles)) {
     element.style.setProperty(property, value)
@@ -189,50 +190,88 @@ let resizeObserver = null
 let phoneWidthQuery = null
 let observedScrollbarWidth = 0
 let observedViewportWidth = null
+let pageAtBottom = false
+
+function updatePageAtBottom() {
+  const root = document.documentElement
+  pageAtBottom = window.scrollY > 0 && root.scrollHeight - root.clientHeight - window.scrollY <= 2
+}
+
+/**
+ * @param {number} contentWidth
+ * @param {boolean} [viewportCrossedPhoneWidth]
+ */
+function updateGridWidth(contentWidth, viewportCrossedPhoneWidth = false) {
+  const element = gridElement.value?.$el
+  if (!element) return
+  const scrollbarCompensated = document.documentElement.style.overflow === 'hidden' &&
+    document.body.style.paddingInlineEnd !== ''
+  const measurement = measureStableGridWidth(
+    contentWidth,
+    observedScrollbarWidth,
+    observedViewportWidth,
+    window.innerWidth,
+    document.documentElement.clientWidth,
+    scrollbarCompensated
+  )
+  observedScrollbarWidth = measurement.scrollbarWidth
+  observedViewportWidth = measurement.viewportWidth
+
+  const widthAdjustmentChanged = contentWidth - measurement.gridWidth !== renderedGridWidth - gridWidth
+  renderedGridWidth = contentWidth
+
+  if (measurement.gridWidth !== gridWidth) {
+    // Scroll anchoring keeps the top visible card in place, which leaves a
+    // page that was scrolled to its end above the new end.
+    const keepBottom = pageAtBottom && gridWidth > 0 && measurement.gridWidth > 0 && !element.closest('[inert]')
+    suppressMoveTransition.value = true
+    clearTimeout(suppressResetTimeout)
+    suppressResetTimeout = setTimeout(() => {
+      suppressMoveTransition.value = false
+    }, 100)
+
+    gridWidth = measurement.gridWidth
+    updateGridSliderLimit()
+    applyThumbnailSizeStyles()
+    thumbnailSizeReady.value = gridWidth > 0
+    if (keepBottom) window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' })
+  } else if (widthAdjustmentChanged || viewportCrossedPhoneWidth) {
+    // Keeps the stretched size equal to the stable one under a transient
+    // scrollbar, and applies the phone column minimum to a constrained grid.
+    applyThumbnailSizeStyles()
+  }
+  updatePageAtBottom()
+}
+
+// A grid whose width stays the same still changes its phone column minimum.
+// The stored width belongs to the previous layout, so measure the new one.
+function handlePhoneWidthChange() {
+  const element = gridElement.value?.$el
+  if (!element || gridWidth === 0) return
+  const style = getComputedStyle(element)
+  const horizontalInsets = ['paddingLeft', 'paddingRight', 'borderLeftWidth', 'borderRightWidth']
+    .reduce((total, property) => total + (Number.parseFloat(style[property]) || 0), 0)
+  updateGridWidth(element.getBoundingClientRect().width - horizontalInsets, true)
+}
 
 onMounted(() => {
   phoneWidthQuery = window.matchMedia(`(width <= ${PHONE_THUMBNAIL_VIEWPORT_WIDTH}px)`)
-  phoneWidthQuery.addEventListener('change', applyThumbnailSizeStyles)
+  phoneWidthQuery.addEventListener('change', handlePhoneWidthChange)
   reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
   prefersReducedMotion.value = reducedMotionQuery.matches
   reducedMotionQuery.addEventListener('change', handleReducedMotionChange)
 
-  resizeObserver = new ResizeObserver(([entry]) => {
-    const scrollbarCompensated = document.documentElement.style.overflow === 'hidden' &&
-      document.body.style.paddingInlineEnd !== ''
-    const measurement = measureStableGridWidth(
-      entry.contentRect.width,
-      observedScrollbarWidth,
-      observedViewportWidth,
-      window.innerWidth,
-      document.documentElement.clientWidth,
-      scrollbarCompensated
-    )
-    observedScrollbarWidth = measurement.scrollbarWidth
-    observedViewportWidth = measurement.viewportWidth
-
-    if (measurement.gridWidth !== gridWidth) {
-      suppressMoveTransition.value = true
-      clearTimeout(suppressResetTimeout)
-      suppressResetTimeout = setTimeout(() => {
-        suppressMoveTransition.value = false
-      }, 100)
-
-      gridWidth = measurement.gridWidth
-      updateGridSliderLimit()
-      applyThumbnailSizeStyles()
-      thumbnailSizeReady.value = gridWidth > 0
-    }
-  })
-
+  resizeObserver = new ResizeObserver(([entry]) => updateGridWidth(entry.contentRect.width))
   resizeObserver.observe(gridElement.value.$el)
+  window.addEventListener('scroll', updatePageAtBottom, { passive: true })
 })
 
 onBeforeUnmount(() => {
   active = false
   updateGridSliderLimit()
   resizeObserver?.disconnect()
-  phoneWidthQuery?.removeEventListener('change', applyThumbnailSizeStyles)
+  phoneWidthQuery?.removeEventListener('change', handlePhoneWidthChange)
+  window.removeEventListener('scroll', updatePageAtBottom)
   reducedMotionQuery?.removeEventListener('change', handleReducedMotionChange)
   clearTimeout(suppressResetTimeout)
 })

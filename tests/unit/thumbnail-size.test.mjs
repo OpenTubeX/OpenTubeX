@@ -63,11 +63,30 @@ test('scales YouTube-style Shorts cards with the thumbnail size setting', () => 
   )
 })
 
+test('stretches cards with the rendered grid width from the same size', () => {
+  const resolveStretch = (stretch, width) => {
+    const [, offset, ratio = '1'] = stretch.match(/^calc\(\(?100% - (-?[\d.]+)px\)?(?: \* ([\d.e-]+))?\)$/)
+    return (width - Number(offset)) * Number(ratio)
+  }
+  for (const [size, gridWidth, viewportWidth, renderedWidth] of [
+    [100, 396, 412, 396], [60, 396, 412, 396], [140, 396, 412, 396],
+    [100, 844, 1000, 844], [180, 844, 1000, 829], [100, 450, 900, 450]
+  ]) {
+    const styles = getThumbnailGridStyles(size, gridWidth, viewportWidth, renderedWidth)
+    const stretch = resolveStretch(styles['--thumbnail-grid-stretch'], renderedWidth)
+    assert.ok(Math.abs(stretch - Number.parseFloat(styles['--thumbnail-grid-size'])) < 1e-9)
+    // Grows with the grid before the next measurement.
+    assert.ok(resolveStretch(styles['--thumbnail-grid-stretch'], renderedWidth + 100) > stretch)
+  }
+  assert.equal(getThumbnailGridStyles(100)['--thumbnail-grid-stretch'], '0px')
+})
+
 // Only the grid properties depend on the measured grid width; keeping the list
 // ones separate is what lets them live on the document body.
 test('keeps the grid and list properties separate', () => {
   assert.deepEqual(Object.keys(getThumbnailGridStyles(100, 800)), [
     '--thumbnail-grid-size',
+    '--thumbnail-grid-stretch',
     '--shorts-thumbnail-grid-min-size'
   ])
   assert.deepEqual(getThumbnailListStyles(50), {

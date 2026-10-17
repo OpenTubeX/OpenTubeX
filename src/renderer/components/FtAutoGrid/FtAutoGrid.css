@@ -6,7 +6,7 @@
 }
 
 .grid.thumbnailSizeReady {
-  grid-template-columns: repeat(auto-fill, min(var(--thumbnail-grid-size), 100%));
+  grid-template-columns: repeat(auto-fill, min(max(var(--thumbnail-grid-size), var(--thumbnail-grid-stretch)), 100%));
 }
 
 .grid.youtubeStyleShorts,
@@ -23,7 +23,7 @@
 
 @media (width <= 680px) {
   .grid.youtubeStyleShorts.thumbnailSizeReady {
-    grid-template-columns: repeat(auto-fill, min(var(--thumbnail-grid-size), 100%));
+    grid-template-columns: repeat(auto-fill, min(max(var(--thumbnail-grid-size), var(--thumbnail-grid-stretch)), 100%));
     justify-content: space-evenly;
   }
 }

@@ -61,6 +61,22 @@ async function dragSlider(page, values) {
   }
 }
 
+/**
+ * Scroll to the end of the page once late card layout (images, text) no longer
+ * changes its height, so that the page is still at its end afterwards.
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+async function scrollToSettledBottom(page) {
+  await expect.poll(() => page.evaluate(async () => {
+    const root = document.documentElement
+    const height = root.scrollHeight
+    window.scrollTo(0, height)
+    await new Promise(resolve => setTimeout(resolve, 200))
+    return root.scrollHeight === height && (root.scrollHeight - root.clientHeight - window.scrollY) * devicePixelRatio <= 2
+  })).toBe(true)
+}
+
 test.describe('thumbnail size slider', () => {
   for (const width of [375, 412]) {
     test(`fits thumbnails to a ${width}px window`, { tag: '@scale' }, async ({ app, page, uiScale }) => {
@@ -173,10 +189,7 @@ test.describe('thumbnail size slider', () => {
       await page.evaluate(() => document.fonts.ready)
       await setSize(110)
       await expect.poll(() => page.locator('.autoGrid').evaluate(element => getComputedStyle(element).gridTemplateColumns.split(' ').length)).toBe(1)
-      await expect.poll(async () => {
-        await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
-        return Math.abs((await scrollState()).bottomDistance)
-      }).toBeLessThanOrEqual(2)
+      await scrollToSettledBottom(page)
       const before = await scrollState()
       expect(before.offset).toBeGreaterThan(0)
 
@@ -194,6 +207,46 @@ test.describe('thumbnail size slider', () => {
       await expect.poll(async () => Math.abs((await scrollState()).thumbBottomDistance)).toBeLessThanOrEqual(1)
       await expect.poll(async () => (await scrollState()).thumbHeightError).toBeLessThanOrEqual(1)
       expect((await scrollState()).scrollbarVisible).toBe(true)
+    })
+  }
+
+  for (const [from, to, columns] of [[412, 1000, [2, 3]], [1000, 412, [3, 2]]]) {
+    test(`keeps the bottom when resizing across the phone breakpoint from ${from}px to ${to}px`, { tag: '@scale' }, async ({ app, page, uiScale }) => {
+      // https://github.com/OpenTubeX/OpenTubeX/issues/2143
+      const resize = width => app.electronApp.evaluate(({ BrowserWindow }, { width, uiScale }) => {
+        const window = BrowserWindow.getAllWindows()[0]
+        window.setMinimumSize(0, 0)
+        window.setContentSize(Math.round(width * uiScale / 100), 900)
+      }, { width, uiScale })
+      const grid = page.locator('.autoGrid')
+      const columnCount = () => grid.evaluate(element => getComputedStyle(element).gridTemplateColumns.split(' ').length)
+      const bottomDistance = () => page.evaluate(() => {
+        const root = document.documentElement
+        return (root.scrollHeight - root.clientHeight - window.scrollY) * devicePixelRatio
+      })
+
+      await resize(from)
+      await goTo(page, 'subscriptions')
+      await expect(page.getByText('Feed video 00')).toBeVisible()
+      await expect.poll(columnCount).toBe(columns[0])
+      await scrollToSettledBottom(page)
+      // An intermediate layout that shortens the page clamps its scroll
+      // position, which fires a scroll event.
+      await grid.evaluate(element => {
+        window.gridScrollLayouts = []
+        window.addEventListener('scroll', () => {
+          window.gridScrollLayouts.push(getComputedStyle(element).gridTemplateColumns)
+        }, { passive: true })
+      })
+
+      await resize(to)
+      await expect.poll(columnCount).toBe(columns[1])
+      // Give a late measurement the chance to change the layout again.
+      await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 300)))
+      const finalColumns = await grid.evaluate(element => getComputedStyle(element).gridTemplateColumns)
+      const layouts = await page.evaluate(() => window.gridScrollLayouts)
+      expect(layouts.filter(layout => layout !== finalColumns), 'no intermediate layout moves the page').toEqual([])
+      expect(Math.abs(await bottomDistance())).toBeLessThanOrEqual(2)
     })
   }
 

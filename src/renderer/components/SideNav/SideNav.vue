@@ -1,7 +1,7 @@
 <template>
   <FtFlexBox
     class="sideNav"
-    :class="[{ opened: isOpen, expanded: isOpen || props.forceExpanded, scrollHidden, compactLabels: compactNavigationLabels, highlightTransitionsDisabled }, applyHiddenLabels]"
+    :class="[{ opened: isOpen, expanded: isOpen || props.forceExpanded, scrollHidden, compactLabels: compactNavigationLabels, highlightTransitionsDisabled, layoutTransitionsDisabled }, applyHiddenLabels]"
     data-tutorial="navigation"
     role="navigation"
     @focusin="resetScrollVisibility"
@@ -293,6 +293,22 @@ let observedLabelTexts = []
 let labelFitFrame
 const mobileLayout = window.matchMedia('(max-width: 680px)')
 
+// Crossing the phone breakpoint swaps the full-width bar for the rail. Its
+// width transition would otherwise resize the page over several frames.
+const layoutTransitionsDisabled = ref(false)
+let layoutTransitionFrame
+
+function handleMobileLayoutChange() {
+  scheduleLabelFit()
+  layoutTransitionsDisabled.value = true
+  cancelAnimationFrame(layoutTransitionFrame)
+  layoutTransitionFrame = requestAnimationFrame(() => {
+    layoutTransitionFrame = requestAnimationFrame(() => {
+      layoutTransitionsDisabled.value = false
+    })
+  })
+}
+
 function scheduleLabelFit() {
   cancelAnimationFrame(labelFitFrame)
   labelFitFrame = requestAnimationFrame(fitNavigationLabels)
@@ -409,7 +425,7 @@ watch([isOpen, () => props.forceExpanded, hideText, visibleNavigationItems, hide
 
 onMounted(() => {
   labelObserver = new ResizeObserver(scheduleLabelFit)
-  mobileLayout.addEventListener('change', scheduleLabelFit)
+  mobileLayout.addEventListener('change', handleMobileLayoutChange)
   scheduleLabelFit()
   updateScrollLayout()
   window.addEventListener('scroll', updateScrollVisibility, { passive: true })
@@ -419,7 +435,8 @@ onMounted(() => {
 onBeforeUnmount(() => {
   cancelAnimationFrame(labelFitFrame)
   labelObserver?.disconnect()
-  mobileLayout.removeEventListener('change', scheduleLabelFit)
+  cancelAnimationFrame(layoutTransitionFrame)
+  mobileLayout.removeEventListener('change', handleMobileLayoutChange)
   if (scrollResumeFrame !== null) cancelAnimationFrame(scrollResumeFrame)
   window.removeEventListener('scroll', updateScrollVisibility)
   window.removeEventListener('resize', updateScrollLayout)

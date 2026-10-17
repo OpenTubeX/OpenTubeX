@@ -185,6 +185,10 @@
   transition: none;
 }
 
+.sideNav.layoutTransitionsDisabled {
+  transition: none;
+}
+
 @media only screen and (width <= 680px) {
   .inner {
     display: contents; /* sunglasses emoji */
