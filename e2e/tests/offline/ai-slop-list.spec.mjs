@@ -31,6 +31,22 @@ function videoRenderer(videoId, title, channelName, handle, index) {
   }
 }
 
+function channelRenderer(channelName, handle, index) {
+  const channelId = `UC${String(index).padStart(22, '0')}`
+
+  return {
+    channelRenderer: {
+      channelId,
+      title: { simpleText: channelName },
+      thumbnail: { thumbnails: [{ url: 'https://yt3.ggpht.com/channel-avatar', width: 160, height: 160 }] },
+      navigationEndpoint: { browseEndpoint: { browseId: channelId } },
+      subscriberCountText: { simpleText: handle },
+      videoCountText: { simpleText: '1.2K subscribers' },
+      descriptionSnippet: { simpleText: '' }
+    }
+  }
+}
+
 const searchResponse = {
   contents: {
     twoColumnSearchResultsRenderer: {
@@ -41,7 +57,9 @@ const searchResponse = {
               contents: [
                 videoRenderer('aaaaaaaaaaa', 'Handmade pottery tutorial', 'Real Potter', '@RealPotter', 1),
                 videoRenderer('bbbbbbbbbbb', 'Cat saves the world', 'Slop Factory', '@SlopFactory', 2),
-                videoRenderer('ccccccccccc', 'Ancient history explained', 'Maybe Narrated', '@Maybe%C3%91arrated', 3)
+                videoRenderer('ccccccccccc', 'Ancient history explained', 'Maybe Narrated', '@Maybe%C3%91arrated', 3),
+                channelRenderer('Maybe Narrated', '@MaybeÑarrated', 3),
+                channelRenderer('Slop Factory', '@SlopFactory', 2)
               ]
             }
           }]
@@ -63,6 +81,7 @@ test('hides blocklisted channels and labels warnlisted channels in search result
   })
   await page.route('https://www.youtube.com/youtubei/v1/search**', route => route.fulfill({ json: searchResponse }))
   await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
+  await page.route('https://yt3.ggpht.com/**', route => fulfillVisualFixture(route, 'avatar'))
 
   const addOns = await goToSettingsSection(page, 'add-ons')
   await addOns.locator('label.switch-label').filter({ hasText: 'Hide AI slop channels' }).click()
@@ -80,6 +99,9 @@ test('hides blocklisted channels and labels warnlisted channels in search result
   await expect(warned.locator('.aiSlopTag')).toHaveText('Possibly AI-generated')
   await expect(results.filter({ hasText: 'Cat saves the world' })).toHaveCount(0)
   await expect(results.filter({ hasText: 'Handmade pottery tutorial' }).locator('.aiSlopTag')).toHaveCount(0)
+  const channels = page.locator('.ft-list-channel')
+  await expect(channels.filter({ hasText: 'Maybe Narrated' }).locator('.aiSlopTag')).toHaveText('Possibly AI-generated')
+  await expect(channels.filter({ hasText: 'Slop Factory' })).toHaveCount(0)
   await attachScreenshot('AiSList search results')
 
   await page.evaluate(() => window.$store.dispatch('updateUseAiSlopList', false))

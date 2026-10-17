@@ -66,3 +66,20 @@
 .metadataWrapped .hasMetadataSeparator::before {
   content: none;
 }
+
+.videoTagLine {
+  margin-block-start: 3px;
+}
+
+.channelTag {
+  align-items: center;
+  backdrop-filter: var(--secondary-card-bg-blur, none);
+  background-color: var(--secondary-card-bg-color);
+  border-radius: calc(2px * var(--ui-roundness));
+  display: inline-flex;
+  font-size: 10px;
+  font-weight: 500;
+  gap: 3px;
+  padding: 3px;
+  white-space: nowrap;
+}

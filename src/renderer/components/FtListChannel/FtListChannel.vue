@@ -66,6 +66,18 @@
             {{ $t('Global.Counts.Video Count', {count: formattedVideoCount}, videoCount) }}
           </span>
         </div>
+        <div
+          v-if="isAiSlopWarned"
+          class="videoTagLine"
+        >
+          <span class="channelTag aiSlopTag">
+            <FtIcon
+              :icon="['fas', 'robot']"
+              aria-hidden="true"
+            />
+            {{ $t('Search Listing.Label.Possibly AI-generated') }}
+          </span>
+        </div>
         <p
           v-if="listType === 'list'"
           v-safer-html="description"
@@ -86,6 +98,7 @@
 
 <script setup>
 import FtRetryImage from '../FtRetryImage.vue'
+import { FtIcon } from '@opentubex/icons'
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 
 import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'
@@ -93,6 +106,7 @@ import { vSaferHtml } from '../../directives/vSaferHtml'
 
 import store from '../../store/index'
 
+import { isOnAiSlopList } from '../../helpers/aiSlopList'
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { getOriginalChannelName } from '../../helpers/api/local'
 import { formatNumber } from '../../helpers/utils'
@@ -127,6 +141,12 @@ const hideChannelSubscriptions = computed(() => {
 const hideUnsubscribeButton = computed(() => {
   return store.getters.getHideUnsubscribeButton
 })
+
+/** Channels on the AiSList warnlist are labelled instead of being hidden */
+const isAiSlopWarned = computed(() => isOnAiSlopList(store.getters.getAiSlopWarnedChannels, {
+  authorId: props.data.id ?? props.data.authorId,
+  authorHandle: props.data.handle ?? props.data.channelHandle
+}))
 
 const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)
 
