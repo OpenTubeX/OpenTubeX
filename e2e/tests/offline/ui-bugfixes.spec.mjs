@@ -216,7 +216,8 @@ for (const theme of ['light', 'dark']) {
     const cards = grid.locator('.capacitorPhoneTabRow')
     await expect(cards).toHaveCount(5)
     await expect(grid.locator('.capacitorPhoneTabDragHandle')).toHaveCount(0)
-    await expect(cards.nth(1).locator('.capacitorTabThumbnail')).toBeVisible()
+    // The loading shimmer shares the thumbnail class until the image loads.
+    await expect(cards.nth(1).locator('img.capacitorTabThumbnail')).toBeVisible()
     await expect.poll(() => cards.nth(1).locator('img').evaluate(image => image.naturalWidth)).toBe(320)
     await expect(cards.nth(2).locator('.capacitorTabPreviewAvatar')).toBeVisible()
     await expect(cards.first().locator('.capacitorTabPreviewPin')).toBeVisible()
