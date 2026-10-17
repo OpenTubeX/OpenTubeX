@@ -259,6 +259,9 @@ test.describe('watch page', () => {
     const overflowMenu = player.locator('.shaka-overflow-menu')
     const auxPanel = page.locator('.shortsAuxPanel')
 
+    // Shorts hide their top controls while playing without pointer activity,
+    // so reveal them like a user would instead of racing their fade-out.
+    await player.hover()
     await moreOptions.click()
     await expect(overflowMenu.locator(':scope > button').first())
       .toHaveAccessibleName('Video information')
@@ -614,33 +617,42 @@ test.describe('watch page', () => {
       )
     })).toBe(true)
 
-    await panel.getByRole('button', { name: 'Close Chapters' }).click()
-    await expect(panel).toHaveClass(/chapters-panel-leave-active/)
-    const leavingScrollbar = await panel.evaluate((element) => {
-      const viewport = element.querySelector('.chaptersWrapper')
-      return viewport && {
-        initializing: viewport.hasAttribute('data-overlayscrollbars-initialize'),
-        nativeScrollbarWidth: getComputedStyle(viewport).scrollbarWidth
+    const closeChapters = panel.getByRole('button', { name: 'Close Chapters' })
+    await expect(closeChapters).toBeEnabled()
+    // Click and read the leaving state in one renderer task: the leave
+    // transition only lasts 250ms, which a loaded machine can exceed between
+    // separate Playwright calls, detaching the panel before it is measured.
+    const leaving = await closeChapters.evaluate(async (button) => {
+      const panelElement = button.closest('.watchVideoChaptersPanel')
+      button.click()
+      await window.__sidebarRoundnessWatchView.$nextTick()
+
+      const viewport = panelElement.querySelector('.chaptersWrapper')
+      const layoutElement = document.querySelector('.videoLayout')
+      const infoBounds = document.querySelector('.infoArea').getBoundingClientRect()
+      const panelBounds = panelElement.getBoundingClientRect()
+
+      return {
+        leaveActive: panelElement.isConnected &&
+          panelElement.classList.contains('chapters-panel-leave-active'),
+        scrollbar: viewport && {
+          initializing: viewport.hasAttribute('data-overlayscrollbars-initialize'),
+          nativeScrollbarWidth: getComputedStyle(viewport).scrollbarWidth
+        },
+        layout: {
+          noSidebar: layoutElement.classList.contains('noSidebar'),
+          infoRight: infoBounds.right,
+          panelLeft: panelBounds.left
+        }
       }
     })
-    expect(leavingScrollbar).toEqual({
+    expect(leaving.leaveActive).toBe(true)
+    expect(leaving.scrollbar).toEqual({
       initializing: true,
       nativeScrollbarWidth: 'none'
     })
 
-    const leavingLayout = await page.evaluate(() => {
-      const layoutElement = document.querySelector('.videoLayout')
-      const infoElement = document.querySelector('.infoArea')
-      const panelElement = document.querySelector('.watchVideoChaptersPanel')
-      const infoBounds = infoElement.getBoundingClientRect()
-      const panelBounds = panelElement.getBoundingClientRect()
-
-      return {
-        noSidebar: layoutElement.classList.contains('noSidebar'),
-        infoRight: infoBounds.right,
-        panelLeft: panelBounds.left
-      }
-    })
+    const leavingLayout = leaving.layout
     expect(leavingLayout.noSidebar).toBe(false)
     expect(leavingLayout.panelLeft).toBeGreaterThanOrEqual(leavingLayout.infoRight - 1)
 

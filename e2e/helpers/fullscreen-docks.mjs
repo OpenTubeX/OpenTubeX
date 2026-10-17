@@ -2,6 +2,7 @@
 export async function measureFullscreenDockToggle(watch, open) {
   return watch.evaluate(async (component, open) => {
     const video = document.querySelector('.ftVideoPlayer video')
+    const player = document.querySelector('.ftVideoPlayer')
     const controls = document.querySelector('.ftVideoPlayer .shaka-controls-container')
     const widths = [video.clientWidth]
     const controlWidths = [controls.clientWidth]
@@ -31,7 +32,10 @@ export async function measureFullscreenDockToggle(watch, open) {
             bounds.width / video.videoWidth, bounds.height / video.videoHeight
           ))
           frames.push(now - start)
-          if (now - start < 450) requestAnimationFrame(sample)
+          // Closing commits its layout two frames late, so on a loaded machine
+          // the dock can still be settling after the sampling window.
+          const settled = player.classList.contains('fullscreenDockLayoutOpen') === open
+          if (now - start < 450 || !settled) requestAnimationFrame(sample)
           else resolve()
         }
         requestAnimationFrame(sample)
