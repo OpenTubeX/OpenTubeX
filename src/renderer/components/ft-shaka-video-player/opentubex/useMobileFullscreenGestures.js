@@ -246,6 +246,12 @@ export function useMobileFullscreenGestures({
       event.stopPropagation()
       return true
     }
+    // A bar that cannot be dismissed keeps a drifting tap until it leaves the
+    // tap tolerance, so its release can still restore the player.
+    if (mobileFullscreenGesture.returnTarget) {
+      if (Math.hypot(deltaX, deltaY) >= 28) mobileFullscreenGesture = null
+      return false
+    }
     if (!mobileFullscreenGesture.fullscreenSwipeEnabled) {
       if (Math.max(Math.abs(deltaX), Math.abs(deltaY)) >= 12) {
         mobileFullscreenGesture = null

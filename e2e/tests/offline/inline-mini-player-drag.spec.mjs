@@ -1512,15 +1512,14 @@ test('bottom bar taps restore despite finger drift or a dropped click, and short
   }
   // A quick 40px flick is below the swipe distance but commits as a fling.
   const taps = [{ drift: -12 }, { dropClick: true }, { drift: -40 }]
+  const scrollTaps = [...taps, { drift: 16, dropClick: true }]
   try {
-    for (const gesture of taps) {
+    for (const gesture of scrollTaps) {
       await page.evaluate(() => window.scrollTo(0, 1200))
       await tap(gesture)
       await expect(player, JSON.stringify(gesture)).not.toHaveClass(/scrollMiniPlayer/)
       await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
       await page.evaluate(() => window.removeEventListener('click', window.dropClick, true))
-      // Let click suppression from this gesture expire before the next one.
-      await page.waitForTimeout(400)
     }
     for (const gesture of [...taps, { drift: 12 }]) {
       const bounds = await player.boundingBox()
@@ -1535,7 +1534,6 @@ test('bottom bar taps restore despite finger drift or a dropped click, and short
       await expect(page, JSON.stringify(gesture)).toHaveURL(/#\/watch\//)
       await expect(player).not.toHaveClass(/scrollMiniPlayer/)
       await page.evaluate(() => window.removeEventListener('click', window.dropClick, true))
-      await page.waitForTimeout(400)
     }
   } finally {
     await page.evaluate(() => window.removeEventListener('click', window.dropClick, true)).catch(() => {})
