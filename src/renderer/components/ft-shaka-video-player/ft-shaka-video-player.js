@@ -3640,7 +3640,8 @@ export default defineComponent({
      * @returns {boolean} whether anything was actually unskipped
      */
     function unskipSponsorBlockSegment(uuid) {
-      const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
+      // a grouped toast keeps working when its first segment was removed (e.g. after a category change)
+      const segment = getSponsorBlockToastSegments(uuid)[0]
       if (!segment) {
         return false
       }
@@ -3715,7 +3716,7 @@ export default defineComponent({
      * @returns {boolean} whether anything was actually re-skipped
      */
     function redoSkipSponsorBlockSegment(uuid) {
-      const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
+      const segment = getSponsorBlockToastSegments(uuid)[0]
       if (!segment || isSponsorBlockPointSegment(segment)) {
         return false
       }

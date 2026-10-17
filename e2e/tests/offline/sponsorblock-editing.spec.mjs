@@ -226,6 +226,36 @@ test('stops muting when a category correction disables the last playback segment
   await expect(page.locator('.sponsorBlockMarker')).toHaveCount(0)
 })
 
+test('keeps a grouped skip toast working after its first segment is disabled by a category correction', async ({ app, page }) => {
+  const { panel, video } = await openSegments(app, page, [
+    { ...timedSegment, segment: [11, 11.5] },
+    { ...timedSegment, UUID: 'adjacent-segment', segment: [11.5, 13] }
+  ])
+  await page.route('**/api/voteOnSponsorTime?*', route => route.fulfill({ status: 200 }))
+  await page.evaluate(() => {
+    const store = window.$store
+    store.commit('setSponsorBlockIntro', { color: '#00ffff', skip: 'doNothing' })
+  })
+  await panel.getByRole('button', { name: 'Close', exact: true }).click()
+  await video.evaluate(element => {
+    element.currentTime = 11.2
+    element.dispatchEvent(new Event('timeupdate'))
+  })
+  const toast = page.locator('.ftVideoPlayer .skippedSegment')
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(13)
+  await toast.getByRole('button', { name: 'Edit', exact: true }).click()
+  await toast.getByRole('button', { name: 'Change category', exact: true }).click()
+  await toast.locator('select').selectOption('intro')
+  await toast.getByRole('button', { name: 'Submit category vote', exact: true }).click()
+  await expect(page.locator('.sponsorBlockMarker')).toHaveCount(1)
+  await toast.getByRole('button', { name: 'Edit', exact: true }).click()
+
+  await toast.getByRole('button', { name: /^Unskip/ }).click()
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(11.5)
+  await toast.getByRole('button', { name: /^Reskip/ }).click()
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(13)
+})
+
 test.describe('segment editor layout', { tag: '@scale' }, () => {
   test.use({
     seed: {
