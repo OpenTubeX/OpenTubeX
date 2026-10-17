@@ -1,4 +1,4 @@
-import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
+import { test, expect, openInterfaceCustomizer } from '../../helpers/app.mjs'
 
 for (const { name, lastItem, addButton, pickerRole } of [
   { name: 'fullscreen actions', lastItem: 'Quick bookmark', addButton: 'Add action', pickerRole: 'menu' },
@@ -6,8 +6,7 @@ for (const { name, lastItem, addButton, pickerRole } of [
   { name: 'quick settings', lastItem: 'Region for trending', addButton: 'Add setting', pickerRole: 'dialog' },
 ]) {
   test(`disables ${name} reset only when the default items and order are restored`, async ({ page }) => {
-    const appearance = await goToSettingsSection(page, 'appearance')
-    await appearance.getByRole('button', { name: `Customize ${name}` }).click()
+    await openInterfaceCustomizer(page, name)
 
     const reset = page.getByRole('button', { name: 'Reset to defaults', exact: true })
     const moveUp = page.getByRole('button', { name: `Move ${lastItem} up`, exact: true })
