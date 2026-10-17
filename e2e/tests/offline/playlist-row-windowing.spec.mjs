@@ -144,6 +144,6 @@ test('keeps a valid offset when searching, resizing or removing at the end of a 
 test('keeps only rows near the viewport mounted in long playlists', { tag: '@performance' }, async ({ page }) => {
   await openPlaylist(page)
   await scrollToEnd(page)
-  const mounted = await rowsOf(page).filter({ has: page.locator('.ft-list-video') }).count()
-  expect(mounted).toBeLessThan(VIDEO_COUNT / 2)
+  const mountedRows = rowsOf(page).filter({ has: page.locator('.ft-list-video') })
+  await expect.poll(() => mountedRows.count()).toBeLessThan(VIDEO_COUNT / 2)
 })
