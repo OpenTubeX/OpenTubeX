@@ -224,11 +224,13 @@ export async function verifyPlaylistSwipeRemoval(page, session, screenshot = asy
       await page.evaluate(id => { location.hash = `#/playlist/${id}?playlistType=user` }, saved.playlistId)
     }
     await expect(page).toHaveURL(new RegExp(`#/playlist/${saved.playlistId}`))
-    await page.evaluate(() => {
+    // In the bookmark playlist, the bookmark gesture removes the swiped entry.
+    await page.evaluate(async id => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateQuickBookmarkTargetPlaylistId', id)
       store.commit('setThumbnailLeftSwipeAction', 'addToPlaylist')
-      store.commit('setThumbnailRightSwipeAction', 'addToPlaylist')
-    })
+      store.commit('setThumbnailRightSwipeAction', 'quickBookmark')
+    }, saved.playlistId)
     for (const [layout, distance] of [['grid', -100], ['list', 100]]) {
       await page.evaluate(layout => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setListType', layout), layout)
       const cards = page.locator('.ft-list-video:visible')

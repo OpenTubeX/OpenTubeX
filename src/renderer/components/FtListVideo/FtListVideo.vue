@@ -1429,7 +1429,11 @@ function getThumbnailSwipeAction(direction) {
     ? store.getters.getThumbnailLeftSwipeAction
     : store.getters.getThumbnailRightSwipeAction
   if (actionId === 'disabled') return null
-  if (actionId === 'addToPlaylist' && inUserPlaylist.value && props.canRemoveFromPlaylist) {
+  // In the bookmark playlist, the bookmark shortcut removes the swiped entry.
+  const isQuickBookmarkPlaylist = () => selectedUserPlaylist.value != null &&
+    selectedUserPlaylist.value._id === quickBookmarkPlaylist.value?._id
+  if (inUserPlaylist.value && props.canRemoveFromPlaylist &&
+    (actionId === 'addToPlaylist' || (actionId === 'quickBookmark' && isQuickBookmarkPlaylist()))) {
     actionId = 'removeFromPlaylist'
   }
   const action = [...mobileThumbnailActions.value, ...videoContextMenuItems.value]
