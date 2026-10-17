@@ -333,6 +333,31 @@ test('shrinks an unskipped group to its remaining segments after a category corr
   await expect(toast).toHaveCount(0)
 })
 
+test('keeps a grouped toast for the remaining segments after copying one of them', async ({ app, page }) => {
+  const { panel, video } = await openSegments(app, page, [
+    { ...timedSegment, segment: [11, 11.5] },
+    { ...timedSegment, UUID: 'adjacent-segment', segment: [11.5, 13] }
+  ])
+  await page.route('**/api/voteOnSponsorTime?*', route => route.fulfill({ status: 200 }))
+  await panel.getByRole('button', { name: 'Close', exact: true }).click()
+  await video.evaluate(element => {
+    element.currentTime = 11.2
+    element.dispatchEvent(new Event('timeupdate'))
+  })
+  const toast = page.locator('.ftVideoPlayer .skippedSegment')
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(13)
+  await toast.getByRole('button', { name: 'Edit', exact: true }).click()
+  await toast.getByRole('button', { name: 'Copy & downvote', exact: true }).click()
+  const submissionMenu = page.locator('.sponsorBlockSubmissionMenu')
+  await expect(submissionMenu).toBeVisible()
+  await expect(toast).toHaveCount(1)
+  await submissionMenu.getByRole('button', { name: 'Close', exact: true }).click()
+  await expect(submissionMenu).toHaveCount(0)
+
+  await toast.getByRole('button', { name: /^Unskip/ }).click()
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(11.5)
+})
+
 test.describe('segment editor layout', { tag: '@scale' }, () => {
   test.use({
     seed: {
