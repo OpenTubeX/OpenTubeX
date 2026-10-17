@@ -232,6 +232,13 @@ test('shows local activity and keeps Home customization after relaunch', async (
   await expect(page.locator('[data-home-section="playlists"]')).toHaveCount(0)
   await expect(page.locator('[data-home-section]').first()).toHaveAttribute('data-home-section', 'watchStats')
 
+  // The UI updates optimistically; wait for the complete layout to reach storage.
+  const expectedLayout = await page.evaluate(() => window.$store.getters.getHomeSectionLayout)
+  await expect.poll(() => page.evaluate(async findAction => {
+    const settings = await window.ftElectron.dbSettings(findAction)
+    return settings.find(setting => setting._id === 'homeSectionLayout')?.value
+  }, DBActions.GENERAL.FIND)).toEqual(expectedLayout)
+
   const relaunched = await app.relaunch()
   page = relaunched.page
   await goTo(page, 'home')
