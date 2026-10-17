@@ -364,6 +364,56 @@ test.describe('watch page', () => {
     await expect(prompt).toHaveCount(0)
   })
 
+  test('shows one toast for SponsorBlock segments skipped together', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    const segments = [[10, 11.5], [11.51, 14], [13, 20]].map((segment, index) => ({
+      UUID: `chained-sponsor-${index}`,
+      actionType: 'skip',
+      category: 'sponsor',
+      description: '',
+      locked: 0,
+      segment,
+      videoDuration: 30,
+      votes: 1
+    }))
+    await page.route('**/api/skipSegments/**', route => route.fulfill({
+      body: JSON.stringify([{ videoID: 'jNQXAC9IVRw', segments }]),
+      contentType: 'application/json'
+    }))
+    await page.evaluate(() => {
+      const store = window.$store
+      store.commit('setUseSponsorBlock', true)
+    })
+    await openMockedVideo(page)
+    await expect(page.locator('.sponsorBlockMarker')).toHaveCount(3)
+
+    const video = page.locator('.ftVideoPlayer video')
+    const seekTo = time => video.evaluate((element, time) => {
+      element.pause()
+      element.currentTime = time
+      element.dispatchEvent(new Event('timeupdate'))
+    }, time)
+
+    await seekTo(10.2)
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(20)
+    await page.evaluate(() => new Promise(resolve => {
+      requestAnimationFrame(() => requestAnimationFrame(resolve))
+    }))
+    const toast = page.locator('.skippedSegment')
+    expect(await toast.allInnerTexts()).toEqual([expect.stringContaining('Sponsor Skipped')])
+
+    // unskipping covers the whole group, so playback inside a later segment is not skipped again
+    await toast.getByRole('button', { name: 'Unskip' }).click()
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(10)
+    await seekTo(13.5)
+    await expect(toast.getByRole('button', { name: 'Reskip' })).toBeVisible()
+    expect(await video.evaluate(element => element.currentTime)).toBe(13.5)
+
+    await toast.getByRole('button', { name: 'Reskip' }).click()
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(20)
+    expect(await toast.count()).toBe(1)
+  })
+
   test('dismisses a SponsorBlock prompt when playback ends', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await page.route('**/api/skipSegments/**', route => route.fulfill({
