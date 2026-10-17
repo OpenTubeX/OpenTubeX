@@ -17,6 +17,8 @@ Stable releases attach only production APKs to the application's GitHub release.
 
 `python3 _scripts/android_apks.py android/app/build/outputs/apk/nightly android-apks` validates the complete output set, stages the download filenames and prints a size breakdown. Use the `release` directory and `--release` for production. The universal release filename is `org.opentubex.app-VERSION-beta.apk`. CI rejects APKs over 75 MiB per architecture or 225 MiB universal; the universal budget includes bundled SQLite and the Go helpers for all four architectures. Adjust these budgets deliberately when adding runtime dependencies.
 
+Stable releases also publish lite APKs, named `org.opentubex.app-VERSION-beta-lite[-ABI].apk`, for devices with little storage. Build them with `-Plite`; they omit the yt-dlp runtime, FFmpeg and the Rumble helper, and the app hides downloads, the yt-dlp playback engine and cookie-authenticated features. Validate them with `--lite`, which rejects packaged runtime files and applies budgets of 20 MiB per architecture and 35 MiB universal. Lite and full APKs share the application ID, signing key and version code, so either installs over the other; lite deletes the runtime a full build unpacked.
+
 Dev installs alongside Nightly and production with its own settings, subscriptions, history and files. The first Dev installation starts fresh; existing Nightly data stays in Nightly and is not copied automatically. Further Dev APKs update the Dev installation.
 
 After syncing Capacitor, verify the package IDs, launcher names, instrumentation IDs and nightly signing key from the repository root:

@@ -11,6 +11,9 @@ import zipfile
 
 ABIS = {"arm64-v8a", "armeabi-v7a", "x86", "x86_64"}
 MIB = 1024 * 1024
+# Lite APKs omit the yt-dlp runtime, FFmpeg and the Rumble helper.
+LITE_ABI_MIB, LITE_UNIVERSAL_MIB = 20, 35
+RUNTIME_LIBRARIES = ("python", "qjs", "ffmpeg", "ffprobe", "python.zip", "ffmpeg.zip", "opentubex_rumble_http")
 # Android provides these at runtime; every other dependency must be packaged.
 SYSTEM_LIBRARIES = {"libc.so", "libdl.so", "liblog.so", "libm.so"}
 
@@ -86,7 +89,7 @@ def check_dependencies(apk, arch):
             pending.append(dependency)
 
 
-def inspect_apk(path, abi):
+def inspect_apk(path, abi, lite=False):
     sizes = dict(native=0, dex=0, web=0, other=0)
     with zipfile.ZipFile(path) as apk:
         if apk.testzip() is not None:
@@ -96,6 +99,11 @@ def inspect_apk(path, abi):
         if native_abis != expected:
             raise ValueError(f"{path}: expected architectures {expected}, found {native_abis}")
         for arch in expected:
+            if lite:
+                packaged = [name for name in RUNTIME_LIBRARIES if f"lib/{arch}/lib{name}.so" in apk.namelist()]
+                if packaged:
+                    raise ValueError(f"{path}: lite APK packages the yt-dlp runtime: {', '.join(packaged)}")
+                continue
             for executable in ("python", "qjs", "ffmpeg", "ffprobe"):
                 apk.getinfo(f"lib/{arch}/lib{executable}.so")
             for runtime in ("python", "ffmpeg"):
@@ -117,7 +125,9 @@ def inspect_apk(path, abi):
     return sizes
 
 
-def prepare(source, destination, *, release=False, max_abi_mib=75, max_universal_mib=225):
+def prepare(source, destination, *, release=False, lite=False, max_abi_mib=None, max_universal_mib=None):
+    max_abi_mib = max_abi_mib or (LITE_ABI_MIB if lite else 75)
+    max_universal_mib = max_universal_mib or (LITE_UNIVERSAL_MIB if lite else 225)
     metadata = json.loads((source / "output-metadata.json").read_text())
     package = "org.opentubex.app" + ("" if release else ".nightly")
     if metadata["applicationId"] != package:
@@ -149,7 +159,7 @@ def prepare(source, destination, *, release=False, max_abi_mib=75, max_universal
 
     rows = []
     for abi, path in sorted(apks.items()):
-        sizes = inspect_apk(path, abi)
+        sizes = inspect_apk(path, abi, lite)
         limit = max_universal_mib if abi == "universal" else max_abi_mib
         total = sum(sizes.values()) / MIB
         if total > limit:
@@ -157,9 +167,9 @@ def prepare(source, destination, *, release=False, max_abi_mib=75, max_universal
         if release:
             # Keep the universal APK without an architecture suffix.
             suffix = "" if abi == "universal" else f"-{abi}"
-            name = f"org.opentubex.app-{version}-beta{suffix}.apk"
+            name = f"org.opentubex.app-{version}-beta{'-lite' if lite else ''}{suffix}.apk"
         else:
-            name = f"opentubex-{version}-android-{abi}.apk"
+            name = f"opentubex-{version}-android-{'lite-' if lite else ''}{abi}.apk"
         rows.append((path, name, sizes, total))
 
     # Validate the whole set before making anything available for publication.
@@ -180,7 +190,8 @@ if __name__ == "__main__":
     parser.add_argument("source", type=Path)
     parser.add_argument("destination", type=Path)
     parser.add_argument("--release", action="store_true")
-    parser.add_argument("--max-abi-mib", type=float, default=75)
-    parser.add_argument("--max-universal-mib", type=float, default=225)
+    parser.add_argument("--lite", action="store_true", help="validate APKs built without the yt-dlp runtime")
+    parser.add_argument("--max-abi-mib", type=float)
+    parser.add_argument("--max-universal-mib", type=float)
     args = parser.parse_args()
     print(prepare(**vars(args)), end="")

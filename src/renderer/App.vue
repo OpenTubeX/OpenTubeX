@@ -2152,7 +2152,7 @@ const androidSubscriptionRefreshConfiguration = computed(() => {
 
   return createAndroidSubscriptionRefreshConfiguration({
     profiles: store.getters.getProfileList,
-    automaticDownloadRules: store.getters.getEnableDownloads ? parseAutomaticDownloadRules(store.getters.getYtDlpAutomaticDownloadRules) : {},
+    automaticDownloadRules: supportsYtDlp && store.getters.getEnableDownloads ? parseAutomaticDownloadRules(store.getters.getYtDlpAutomaticDownloadRules) : {},
     closedAppRefreshEnabled: enableClosedAppSubscriptionRefresh.value,
     backend: store.getters.getBackendPreference,
     useRss: store.getters.getUseRssFeeds,

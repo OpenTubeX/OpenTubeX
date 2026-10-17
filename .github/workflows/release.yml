@@ -216,6 +216,9 @@ jobs:
         pnpm run capacitor:sync:android
         ./android/gradlew --project-dir android :app:assembleRelease -PsplitApks
         python3 _scripts/android_apks.py android/app/build/outputs/apk/release android-apks --release
+        # Lite APKs omit yt-dlp and FFmpeg for devices with little storage.
+        ./android/gradlew --project-dir android :app:assembleRelease -PsplitApks -Plite
+        python3 _scripts/android_apks.py android/app/build/outputs/apk/release android-lite-apks --release --lite
 
     - name: Convert x64 AppImage to Anylinux AppImage
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
@@ -290,7 +293,7 @@ jobs:
 
         case "$RUNTIME" in
           android)
-            cp android-apks/*.apk release-assets/
+            cp android-apks/*.apk android-lite-apks/*.apk release-assets/
             ;;
           linux-x64)
             cp "build/opentubex-${VERSION}.zip" \

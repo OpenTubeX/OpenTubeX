@@ -60,6 +60,16 @@ class ApkPackagingTest(unittest.TestCase):
     def write_metadata(self):
         (self.source / "output-metadata.json").write_text(json.dumps(self.metadata))
 
+    def write_lite_apks(self, runtime=False):
+        for element in self.metadata["elements"]:
+            abi = element["filters"][0]["value"] if element["filters"] else None
+            with zipfile.ZipFile(self.source / element["outputFile"], "w") as apk:
+                apk.writestr("classes.dex", b"fixture")
+                for arch in [abi] if abi else apks.ABIS:
+                    apk.writestr(f"lib/{arch}/libopentubex_cast.so", b"fixture")
+                    if runtime:
+                        apk.writestr(f"lib/{arch}/libffmpeg.so", b"fixture")
+
     def write_apk(self, name, abis, build_only=False, ffmpeg=b"fixture", python_files=(), ffmpeg_files=()):
         def runtime(files):
             data = io.BytesIO()
@@ -94,6 +104,27 @@ class ApkPackagingTest(unittest.TestCase):
         apks.prepare(self.source, self.output, release=True)
         self.assertTrue((self.output / "org.opentubex.app-0.34.0-beta.apk").exists())
         self.assertTrue((self.output / "org.opentubex.app-0.34.0-beta-arm64-v8a.apk").exists())
+
+    def test_names_lite_release_apks(self):
+        self.metadata["applicationId"] = "org.opentubex.app"
+        for element in self.metadata["elements"]:
+            element["versionName"] = "0.34.0"
+        self.write_metadata()
+        self.write_lite_apks()
+        apks.prepare(self.source, self.output, release=True, lite=True)
+        self.assertTrue((self.output / "org.opentubex.app-0.34.0-beta-lite.apk").exists())
+        self.assertTrue((self.output / "org.opentubex.app-0.34.0-beta-lite-arm64-v8a.apk").exists())
+
+    def test_rejects_lite_apks_with_the_yt_dlp_runtime(self):
+        self.write_lite_apks(runtime=True)
+        with self.assertRaisesRegex(ValueError, "lite APK packages the yt-dlp runtime: ffmpeg"):
+            apks.prepare(self.source, self.output, lite=True)
+        self.assertFalse(self.output.exists())
+
+    def test_enforces_lite_download_size_budget(self):
+        self.write_lite_apks()
+        with self.assertRaisesRegex(ValueError, "size budget"):
+            apks.prepare(self.source, self.output, lite=True, max_abi_mib=0.0001)
 
     def test_rejects_incomplete_set_before_copying(self):
         self.metadata["elements"].pop()
@@ -147,8 +178,8 @@ class ApkPackagingTest(unittest.TestCase):
     def test_accepts_universal_apk_with_bundled_sqlite(self):
         inspect = apks.inspect_apk
 
-        def inspect_with_sqlite(path, abi):
-            sizes = inspect(path, abi)
+        def inspect_with_sqlite(path, abi, lite=False):
+            sizes = inspect(path, abi, lite)
             if abi == "universal":
                 # Size observed in the first nightly with bundled SQLite.
                 sizes["native"] += round(217.61 * apks.MIB) - sum(sizes.values())
@@ -163,8 +194,8 @@ class ApkPackagingTest(unittest.TestCase):
     def test_enforces_universal_download_size_budget(self):
         inspect = apks.inspect_apk
 
-        def inspect_oversized_universal(path, abi):
-            sizes = inspect(path, abi)
+        def inspect_oversized_universal(path, abi, lite=False):
+            sizes = inspect(path, abi, lite)
             if abi == "universal":
                 sizes["native"] += round(225.01 * apks.MIB) - sum(sizes.values())
             return sizes

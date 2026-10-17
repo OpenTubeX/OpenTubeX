@@ -142,12 +142,17 @@ test('stable releases build only production APKs and sort between nightlies by v
   assert.equal(result.status, 0, result.stderr)
   const invocations = (await readFile(join(directory, 'gradle.log'), 'utf8')).trim().split('\n')
   const stableCode = Number(invocations[0].split('|')[1])
-  assert.equal(invocations.length, 1)
-  assert.ok(invocations[0].includes(':app:assembleRelease'))
-  assert.ok(!invocations[0].includes(':app:assembleNightly'))
-  assert.ok(invocations[0].endsWith(`|${stableCode}|0.35.0`))
+  assert.equal(invocations.length, 2)
+  for (const invocation of invocations) {
+    assert.ok(invocation.includes(':app:assembleRelease'))
+    assert.ok(!invocation.includes(':app:assembleNightly'))
+    assert.ok(invocation.endsWith(`|${stableCode}|0.35.0`))
+  }
+  assert.ok(!invocations[0].includes('-Plite'))
+  assert.ok(invocations[1].includes('-Plite'))
   const packaging = await readFile(join(directory, 'packaging.log'), 'utf8')
-  assert.match(packaging, /apk\/release android-apks --release/)
+  assert.match(packaging, /apk\/release android-apks --release\n/)
+  assert.match(packaging, /apk\/release android-lite-apks --release --lite/)
   assert.doesNotMatch(packaging, /apk\/nightly/)
 
   const nightlyWorkflow = load(await readFile('.github/workflows/build.yml', 'utf8'))
@@ -185,6 +190,12 @@ test('stable releases attach only production APKs', async (t) => {
     suffix => `org.opentubex.app-0.34.0-beta${suffix}.apk`
   )
   for (const name of names) await writeFile(join(source, name), name)
+  const liteSource = join(directory, 'android-lite-apks')
+  await mkdir(liteSource)
+  const liteNames = ['', '-arm64-v8a', '-armeabi-v7a', '-x86', '-x86_64'].map(
+    suffix => `org.opentubex.app-0.34.0-beta-lite${suffix}.apk`
+  )
+  for (const name of liteNames) await writeFile(join(liteSource, name), name)
   const nightlyNames = ['universal', 'arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64'].map(
     abi => `opentubex-0.34.0-android-${abi}.apk`
   )
@@ -197,8 +208,8 @@ test('stable releases attach only production APKs', async (t) => {
     encoding: 'utf8'
   })
   assert.equal(result.status, 0, result.stderr)
-  assert.deepEqual((await readdir(join(directory, 'release-assets'))).sort(), names.sort())
-  for (const name of names) {
+  assert.deepEqual((await readdir(join(directory, 'release-assets'))).sort(), [...names, ...liteNames].sort())
+  for (const name of [...names, ...liteNames]) {
     assert.equal(await readFile(join(directory, 'release-assets', name), 'utf8'), name)
   }
   const upload = workflow.jobs.build.steps.find(step => step.name === 'Upload release assets')

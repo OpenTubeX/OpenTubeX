@@ -35,8 +35,10 @@ public class OpenTubeXWebViewClient extends BridgeWebViewClient {
         super(bridge);
         sabrRequests = SabrRequestRegistry.shared();
         externalStreams = ExternalStreamRequestRegistry.shared();
-        externalStreamClient = ExternalStreamRedirects.client().newBuilder()
-            .addInterceptor(new RumbleManifestTransport(bridge.getContext())).build();
+        okhttp3.OkHttpClient.Builder externalStreamBuilder = ExternalStreamRedirects.client().newBuilder();
+        // Lite builds omit the Rumble HTTP helper along with yt-dlp.
+        if (BuildConfig.BUNDLES_YT_DLP) externalStreamBuilder.addInterceptor(new RumbleManifestTransport(bridge.getContext()));
+        externalStreamClient = externalStreamBuilder.build();
     }
 
     @Override

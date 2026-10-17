@@ -11,6 +11,7 @@ import { dlnaCast, retainIosMediaSources } from '../../helpers/player/dlnaCast'
 import { selectDlnaSource, selectDlnaTracks } from '../../helpers/player/dlnaSource'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import { ytDlp } from '../../helpers/ytDlp'
+import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 
 const props = defineProps({
   formats: { type: Array, required: true },
@@ -79,7 +80,7 @@ const options = computed(() => {
 })
 
 async function refreshSource() {
-  if (!props.videoId || castId.value || sourceLoading || disposed) return
+  if (!supportsYtDlp || !props.videoId || castId.value || sourceLoading || disposed) return
   sourceLoading = true
   mergedSource.value = null
   try {

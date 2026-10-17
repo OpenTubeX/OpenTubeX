@@ -11,12 +11,13 @@ const adapterSource = (await readFile(new URL('../../src/renderer/helpers/ytDlp.
   .replace(/^export /gm, '')
 const getters = { getYtDlpPlaybackAuthMode: 'file', getYtDlpPlaybackCookiesPath: '/private/yt-dlp-cookies.txt' }
 
-function searchSupport(env, settings = getters) {
+function searchSupport(env, settings = getters, lite = false) {
   const start = pageSource.indexOf('const supportsCookieSearch =')
   const end = pageSource.indexOf('let searchRequestId', start)
   assert.ok(start >= 0 && end > start, 'Search support declarations must be present in the SFC')
   return vm.runInNewContext(`${pageSource.slice(start, end)}\n;({ supportsCookieSearch, configured: cookiesConfigured.value })`, {
     process: { env },
+    supportsYtDlp: !!(env.IS_ELECTRON || env.IS_CAPACITOR) && !lite,
     store: { getters: settings },
     computed: callback => ({ get value() { return callback() } }),
     hasConfiguredRestrictedPlaybackAuthentication: (settings, supported) => hasConfiguredRestrictedPlaybackAuthentication(settings, supported, !!env.IS_CAPACITOR)
@@ -36,6 +37,7 @@ test('cookie search remains enabled on Electron and unavailable on iOS and the w
     assert.equal(searchSupport(env).configured, false)
   }
   assert.equal(searchSupport({ IS_CAPACITOR: true }, {}).configured, false)
+  assert.equal(searchSupport({ IS_CAPACITOR: true }, getters, true).supportsCookieSearch, false, 'Lite Android builds omit yt-dlp')
   assert.equal(searchSupport({ IS_CAPACITOR: true }, { getYtDlpPlaybackAuthMode: 'browser', getYtDlpPlaybackCookiesBrowser: 'firefox' }).configured, false)
 })
 

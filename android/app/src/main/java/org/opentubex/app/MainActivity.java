@@ -62,7 +62,8 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(DlnaPlugin.class);
         registerPlugin(ChromecastPlugin.class);
         registerPlugin(PoTokenPlugin.class);
-        registerPlugin(YtDlpPlugin.class);
+        // Lite builds omit the runtime; the renderer then hides yt-dlp features.
+        if (BuildConfig.BUNDLES_YT_DLP) registerPlugin(YtDlpPlugin.class);
         registerPlugin(AndroidUiPlugin.class);
         registerPlugin(AndroidBackPlugin.class);
         registerPlugin(AndroidDynamicColorsPlugin.class);

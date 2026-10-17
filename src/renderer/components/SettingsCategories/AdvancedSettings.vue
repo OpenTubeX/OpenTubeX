@@ -2,7 +2,7 @@
   <div class="settingsCategory">
     <GeneralSettings mode="providers" />
     <ExternalPlayerSettings v-if="USING_ELECTRON" />
-    <ExternalSoftwareSettings v-if="USING_ELECTRON || IS_CAPACITOR" />
+    <ExternalSoftwareSettings v-if="USING_ELECTRON || (IS_CAPACITOR && supportsYtDlp)" />
     <ProxySettings v-if="USING_ELECTRON || IS_CAPACITOR" />
     <ExperimentalSettings v-if="USING_ELECTRON" />
   </div>
@@ -14,6 +14,7 @@ import ExternalPlayerSettings from '../ExternalPlayerSettings.vue'
 import ExternalSoftwareSettings from '../ExternalSoftwareSettings.vue'
 import GeneralSettings from '../GeneralSettings/GeneralSettings.vue'
 import ProxySettings from '../ProxySettings/ProxySettings.vue'
+import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR && !process.env.IS_IOS
 const USING_ELECTRON = !!process.env.IS_ELECTRON
