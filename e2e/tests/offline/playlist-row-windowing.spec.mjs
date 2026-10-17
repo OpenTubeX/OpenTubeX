@@ -110,7 +110,7 @@ test('keeps a valid offset when searching, resizing or removing at the end of a 
   // Searching replaces the rows with a short result list.
   await jumpToEnd(page)
   // Typing through fill() would scroll the field into view and leave the end.
-  const search = page.getByRole('searchbox', { name: 'Search for Videos' })
+  const search = page.getByRole('searchbox', { name: 'Search for videos', exact: true })
   const type = text => search.evaluate((input, value) => {
     input.value = value
     input.dispatchEvent(new Event('input', { bubbles: true }))
