@@ -2,6 +2,18 @@ import { test, expect, setPlayerFullscreen, setWindowSize } from '../../helpers/
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
+// Playback and late chapter loads rewrite the current title. Keep the long
+// sample title so only the panel width decides the compact layout.
+function pinChapterTitle (title) {
+  return title.evaluate(element => {
+    const text = 'MacPacker: zips all the way down'
+    element.textContent = text
+    new MutationObserver(() => {
+      if (element.textContent !== text) element.textContent = text
+    }).observe(element, { characterData: true, childList: true, subtree: true })
+  })
+}
+
 test.use({
   seed: {
     settings: {
@@ -49,7 +61,7 @@ test('chapter controls narrow quick speeds first during playback', { tag: '@scal
   const title = panel.locator('.ft-chapters-current-title')
   const bar = panel.locator('.ft-quick-playback-rate-bar')
   await panel.evaluate(element => { element.style.width = '1300px' })
-  await title.evaluate(element => { element.textContent = 'MacPacker: zips all the way down' })
+  await pinChapterTitle(title)
   await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
 
   await video.evaluate(element => element.pause())
@@ -88,8 +100,7 @@ test('chapter controls narrow quick speeds first during playback', { tag: '@scal
   await expect.poll(() => panel.locator('.ft-chapters-button').evaluate(element => element.getBoundingClientRect().width)).toBeCloseTo(48, 0)
 })
 
-// Flaky under parallel load: https://github.com/OpenTubeX/OpenTubeX/issues/2165
-test.fixme('chapters animate between title and icon in both player themes', async ({ app, page }) => {
+test('chapters animate between title and icon in both player themes', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
   await video.evaluate(element => element.pause())
@@ -103,25 +114,39 @@ test.fixme('chapters animate between title and icon in both player themes', asyn
     await page.evaluate(value => window.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
     await panel.evaluate(element => { element.style.width = '1300px' })
     await expect(panel).not.toHaveClass(/ft-controls-compact-chapters/)
-    await button.locator('.ft-chapters-current-title').evaluate(element => { element.textContent = 'MacPacker: zips all the way down' })
+    await pinChapterTitle(button.locator('.ft-chapters-current-title'))
     await expect.poll(() => button.evaluate(element => element.getBoundingClientRect().width)).toBeGreaterThan(150)
 
     for (const width of [700, 1300]) {
       const animation = await panel.evaluate(async (element, width) => {
         const button = element.querySelector(':scope > .ft-chapters-button')
         const measure = () => ({ width: button.getBoundingClientRect().width, titleOpacity: Number(getComputedStyle(button.querySelector('.ft-chapters-current-title')).opacity), iconOpacity: Number(getComputedStyle(button.querySelector('.ft-chapters-icon')).opacity) })
+        const nextFrame = () => new Promise(resolve => requestAnimationFrame(resolve))
         const initial = measure()
         element.style.width = `${width}px`
-        await new Promise(resolve => setTimeout(resolve, 40))
+        while (element.classList.contains('ft-controls-compact-chapters') !== (width === 700)) {
+          await nextFrame()
+        }
+        // Seek the CSS transitions to their midpoint instead of sampling them
+        // with wall-clock timers, which a busy runner can overshoot.
+        const transitions = button.getAnimations({ subtree: true })
+        transitions.forEach(transition => transition.pause())
+        await Promise.all(transitions.map(transition => transition.ready))
+        transitions.forEach(transition => { transition.currentTime = Number(transition.effect.getTiming().duration) / 2 })
         // A control mutation remeasures the row during the transition.
         button.classList.toggle('open')
-        await new Promise(resolve => setTimeout(resolve, 60))
+        await nextFrame()
+        await nextFrame()
         const middle = measure()
+        const restarted = button.getAnimations({ subtree: true })
+          .filter(transition => transition.transitionProperty !== 'rotate' && !transitions.includes(transition)).length
+        transitions.forEach(transition => transition.finish())
         while (button.getAnimations({ subtree: true }).length) {
           await Promise.all(button.getAnimations({ subtree: true }).map(animation => animation.finished.catch(() => {})))
         }
-        return { initial, middle, final: measure() }
+        return { initial, middle, restarted, final: measure() }
       }, width)
+      expect(animation.restarted).toBe(0)
       expect(animation.middle.width).toBeGreaterThan(Math.min(animation.initial.width, animation.final.width) + 1)
       expect(animation.middle.width).toBeLessThan(Math.max(animation.initial.width, animation.final.width) - 1)
       expect(animation.middle.titleOpacity).toBeGreaterThan(0)
@@ -252,8 +277,7 @@ test('chapter chevron animates opening and closing unless motion is reduced', as
   expect(await chevron.evaluate(element => element.getAnimations().length)).toBe(0)
 })
 
-// Flaky under parallel load: https://github.com/OpenTubeX/OpenTubeX/issues/2165
-test.fixme('chapter animation keeps the right control glass aligned without quick speeds', { tag: '@scale' }, async ({ app, page }) => {
+test('chapter animation keeps the right control glass aligned without quick speeds', { tag: '@scale' }, async ({ app, page }) => {
   await page.evaluate(() => window.$store.dispatch('updateUseQuickPlaybackSpeedBar', false))
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
@@ -263,7 +287,7 @@ test.fixme('chapter animation keeps the right control glass aligned without quic
   const panel = player.locator('.shaka-controls-button-panel')
   const button = panel.locator('.ft-chapters-button')
   await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
-  await button.locator('.ft-chapters-current-title').evaluate(element => { element.textContent = 'MacPacker: zips all the way down' })
+  await pinChapterTitle(button.locator('.ft-chapters-current-title'))
 
   for (const width of [1300, 500, 1300]) {
     await panel.evaluate((element, width) => { element.style.width = `${width}px` }, width)
