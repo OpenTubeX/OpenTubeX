@@ -34,6 +34,11 @@ const videos = Array.from({ length: 12 }, (_, index) => ({
   type: 'video'
 }))
 
+// Every test launches Electron, starts playback and then runs several layout
+// phases, which leaves little headroom under the default timeout when parallel
+// workers share the CPU.
+test.describe.configure({ timeout: 120_000 })
+
 test.use({
   seed: {
     settings: {
@@ -305,6 +310,11 @@ test('landscape fullscreen playlist shows more videos and keeps controls outside
   await setWindowSize(app, page, { width: 960, height: 440 })
   await page.setViewportSize({ width: Math.round(960 * uiScale / 100), height: Math.round(440 * uiScale / 100) })
   await setPlayerFullscreen(page, true)
+  // The action pill only takes pointer events while Shaka's controls are
+  // shown, and they auto-hide after a few idle seconds.
+  const player = page.locator('.ftVideoPlayer')
+  await player.hover({ position: { x: 20, y: 20 } })
+  await expect(player.locator('.shaka-controls-container')).toHaveAttribute('shown', 'true')
   await page.locator('.fullscreenPlaylistToggle').click()
   const dock = page.locator('.fullscreenPlaylistTarget')
   await expect(dock.locator('.playlistItemsWrapper')).toBeVisible()
