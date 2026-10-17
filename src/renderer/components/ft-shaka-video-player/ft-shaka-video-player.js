@@ -2715,9 +2715,11 @@ export default defineComponent({
           if (toastSegments.length > 0) {
             toast.translatedCategory = formatSponsorBlockToastCategories(toastSegments)
             toast.color = getSponsorBlockInfoSegmentColor(toastSegments[0].category)
-            // an unskipped group stays unskipped only for the range of its remaining segments
-            if (toastSegments.some(({ uuid }) => sponsorBlockDoNotSkipSegments.has(uuid))) {
-              const range = getSponsorBlockSegmentsRange(toastSegments)
+            // an unskipped group stays unskipped until playback passes its remaining segments,
+            // keeping the original start so playback before them doesn't count as leaving the group
+            const previousRange = toastSegments.map(({ uuid }) => sponsorBlockDoNotSkipSegments.get(uuid)).find(Boolean)
+            if (previousRange) {
+              const range = { startTime: previousRange.startTime, endTime: getSponsorBlockSegmentsRange(toastSegments).endTime }
               toast.groupUuids?.forEach(groupUuid => sponsorBlockDoNotSkipSegments.delete(groupUuid))
               toastSegments.forEach(({ uuid }) => sponsorBlockDoNotSkipSegments.set(uuid, range))
             }

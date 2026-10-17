@@ -315,6 +315,16 @@ test('shrinks an unskipped group to its remaining segments after a category corr
   await toast.getByRole('button', { name: 'Submit category vote', exact: true }).click()
   await expect(page.locator('.sponsorBlockMarker')).toHaveCount(1)
 
+  // playback before and inside the remaining segment stays unskipped
+  for (const time of [11.2, 12.5]) {
+    await video.evaluate((element, time) => {
+      element.currentTime = time
+      element.dispatchEvent(new Event('timeupdate'))
+    }, time)
+    expect(await video.evaluate(element => element.currentTime)).toBe(time)
+  }
+  await expect(toast).toHaveCount(1)
+
   // leaving the remaining segment closes the toast even though the removed one extended further
   await video.evaluate(element => {
     element.currentTime = 15
