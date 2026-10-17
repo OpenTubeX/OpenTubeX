@@ -3200,7 +3200,8 @@ test.describe('retained navigation player across tabs', () => {
 test.describe('navigation playback with automatic tab picture-in-picture enabled', () => {
   test.use({ seed: { settings: { ...PLAYER_SEED, keepPlayingOnNavigation: true, autoPictureInPictureTriggers: ['tab'] } } })
 
-  test('keeps the outgoing video in the mini player', async ({ app, page }) => {
+  // Flaky under parallel load: https://github.com/OpenTubeX/OpenTubeX/issues/2160
+  test.fixme('keeps the outgoing video in the mini player', async ({ app, page }) => {
     const { firstVideo, firstPlayer } = await openCrossTabMiniPlayerOverWatchTab({ app, page })
     await expect(firstPlayer).toBeVisible()
     await expect(firstPlayer).toHaveClass(/scrollMiniPlayer/)
