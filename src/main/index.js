@@ -3226,6 +3226,18 @@ function runApp() {
       mainWindow = newWindow
     }
 
+    // A dead renderer (e.g. V8 out of memory) otherwise leaves a frozen window
+    // until the app is restarted. Stop after repeated crashes to avoid a loop.
+    let lastRendererCrash = 0
+    newWindow.webContents.on('render-process-gone', (_event, { reason, exitCode }) => {
+      if (reason === 'clean-exit') return
+      console.error(`Renderer process gone (${reason}, exit code ${exitCode})`)
+      const now = Date.now()
+      if (now - lastRendererCrash < 60_000) return
+      lastRendererCrash = now
+      newWindow.webContents.reload()
+    })
+
     if (savedMaximized) {
       newWindow.maximize()
     }
