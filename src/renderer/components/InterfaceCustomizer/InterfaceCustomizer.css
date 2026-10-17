@@ -114,7 +114,13 @@
     flex-wrap: nowrap;
   }
 
+  /* Hide the label visually but keep it as the tab's accessible name. */
   [role='tab'][aria-selected='false'] .tabLabel {
-    display: none;
+    block-size: 1px;
+    clip-path: inset(50%);
+    inline-size: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
   }
 }

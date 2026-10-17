@@ -103,6 +103,7 @@ import FtLogoFull from '../FtLogoFull/FtLogoFull.vue'
 import FtProfileIcon from '../FtProfileIcon/FtProfileIcon.vue'
 
 import store from '../../store/index'
+import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { getFirstCharacter } from '../../helpers/strings'
 import { translateProfileName } from '../../helpers/profileSwitching'
 import { filterAvailableNavigationItems } from '../../../navigationAvailability'
@@ -149,10 +150,17 @@ const mobilePrimaryItems = computed(() => items.value.length > 5 ? items.value.s
 const mobileOverflowCount = computed(() => items.value.length - mobilePrimaryItems.value.length)
 
 const channels = computed(() => {
-  const subscriptions = activeProfile.value.subscriptions.slice(0, 4).map(channel => ({
-    key: channel.id,
-    thumbnail: channel.thumbnail?.replace(/=s\d+/, '=s35'),
-  }))
+  // Load thumbnails through the selected backend, like the side navigation.
+  const instanceUrl = store.getters.getBackendPreference === 'invidious'
+    ? store.getters.getCurrentInvidiousInstanceUrl
+    : null
+  const subscriptions = activeProfile.value.subscriptions.slice(0, 4).map(channel => {
+    const thumbnail = channel.thumbnail?.replace(/=s\d+/, '=s35')
+    return {
+      key: channel.id,
+      thumbnail: thumbnail && instanceUrl ? youtubeImageUrlToInvidious(thumbnail, instanceUrl) : thumbnail,
+    }
+  })
   // Show placeholders so the option remains visible without subscriptions.
   while (subscriptions.length < 4) subscriptions.push({ key: `placeholder-${subscriptions.length}`, thumbnail: null })
   return subscriptions

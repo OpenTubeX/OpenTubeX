@@ -14,7 +14,7 @@
         :default-value="store.state.settings[setting.key]"
         :setting-key="setting.key"
         compact
-        @change="updateSetting(setting.key, $event)"
+        @change="store.dispatch(setting.action, $event)"
       />
     </section>
   </div>
@@ -37,15 +37,18 @@ const groups = computed(() => [
     settings: [
       !process.env.IS_CAPACITOR && {
         key: 'displayVideoPlayButton',
+        action: 'updateDisplayVideoPlayButton',
         label: t('Settings.Player Settings.Display Play Button In Video Player'),
       },
       {
         key: 'useQuickPlaybackSpeedBar',
+        action: 'updateUseQuickPlaybackSpeedBar',
         label: t('Settings.Player Settings.Use Quick Playback Speed Bar'),
         tooltip: t('Tooltips.Player Settings.Use Quick Playback Speed Bar'),
       },
       {
         key: 'enableScreenshot',
+        action: 'updateEnableScreenshot',
         label: t('Settings.Player Settings.Screenshot.Enable'),
       },
     ],
@@ -56,25 +59,30 @@ const groups = computed(() => [
     settings: [
       !process.env.IS_IOS && {
         key: 'showSkipSilenceButton',
+        action: 'updateShowSkipSilenceButton',
         label: t('Settings.Player Settings.Show Skip Silence Toggle'),
         tooltip: t('Tooltips.Player Settings.Show Skip Silence Toggle'),
       },
       {
         key: 'showMusicModeToggle',
+        action: 'updateShowMusicModeToggle',
         label: t('Settings.Player Settings.Show Music Mode Toggle'),
         tooltip: t('Video.Player.Music Mode Description'),
       },
       {
         key: 'showLightsOffToggle',
+        action: 'updateShowLightsOffToggle',
         label: t('Settings.Player Settings.Show Lights Off Toggle'),
       },
       {
         key: 'enableVideoZoom',
+        action: 'updateEnableVideoZoom',
         label: t('Settings.Player Settings.Enable Video Zoom'),
         tooltip: t('Tooltips.Player Settings.Enable Video Zoom'),
       },
       {
         key: 'disableAbRepeat',
+        action: 'updateDisableAbRepeat',
         label: t('Settings.Distraction Free Settings.Disable A-B Repeat'),
       },
     ],
@@ -85,23 +93,23 @@ const groups = computed(() => [
     settings: [
       {
         key: 'showPlayerControlsWhenPaused',
+        action: 'updateShowPlayerControlsWhenPaused',
         label: t('Settings.Distraction Free Settings.Show Player Controls'),
       },
       {
         key: 'showVideoTitleWhenPaused',
+        action: 'updateShowVideoTitleWhenPaused',
         label: t('Settings.Distraction Free Settings.Show Video Title'),
       },
       {
         key: 'showFullscreenActionsWhenPaused',
+        action: 'updateShowFullscreenActionsWhenPaused',
         label: t('Settings.Distraction Free Settings.Show Bottom Right Actions Dock'),
       },
     ],
   },
 ].map(group => ({ ...group, settings: group.settings.filter(Boolean) })))
 
-function updateSetting(key, value) {
-  store.dispatch(`update${key[0].toUpperCase()}${key.slice(1)}`, value)
-}
 </script>
 
 <style scoped>

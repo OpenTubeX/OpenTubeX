@@ -106,6 +106,45 @@ test.describe('interface customizer', () => {
     await expect(page.locator('.selectedAction').first()).toBeVisible()
   })
 
+  test('restores each tab editor scroll position when switching tabs', { tag: '@scale' }, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 900, height: 600 })
+    const customizer = await openInterfaceCustomizer(page, 'navigation')
+    const scroller = customizer.locator('.customizerEditorScroll')
+    const scrollTop = () => scroller.evaluate(element => element.scrollTop)
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(scrollTop).toBeGreaterThan(0)
+    const navigationTop = await scrollTop()
+
+    await customizer.locator('[data-settings-subpage-tab="quickSettings"]').click()
+    await expect.poll(scrollTop).toBeLessThanOrEqual(1)
+    await scroller.evaluate(element => { element.scrollTop = 40 })
+    await expect.poll(scrollTop).toBeGreaterThan(30)
+    const quickSettingsTop = await scrollTop()
+
+    await customizer.locator('[data-settings-subpage-tab="navigation"]').click()
+    await expect.poll(async () => Math.abs(await scrollTop() - navigationTop)).toBeLessThanOrEqual(1)
+    await customizer.locator('[data-settings-subpage-tab="quickSettings"]').click()
+    await expect.poll(async () => Math.abs(await scrollTop() - quickSettingsTop)).toBeLessThanOrEqual(1)
+
+    // A shortened editor clamps its stored position to the remaining content.
+    await page.evaluate(() => window.$store.dispatch('updateNavigationItems', ['home']))
+    await customizer.locator('[data-settings-subpage-tab="navigation"]').click()
+    await expect.poll(() => scroller.evaluate(element => (
+      element.scrollTop <= Math.max(0, element.scrollHeight - element.clientHeight) + 1
+    ))).toBe(true)
+    await expect.poll(scrollTop).toBeLessThan(navigationTop)
+  })
+
+  test('labels the preview stage with the selected preview mode', async ({ page }) => {
+    const customizer = await openInterfaceCustomizer(page, 'player')
+    const stage = customizer.getByRole('tabpanel', { name: 'Playing', exact: true })
+    await expect(stage).toHaveClass(/previewStage/)
+    await customizer.getByRole('tab', { name: 'Paused', exact: true }).click()
+    await expect(customizer.getByRole('tabpanel', { name: 'Paused', exact: true })).toHaveClass(/previewStage/)
+    await customizer.locator('[data-settings-subpage-tab="quickSettings"]').click()
+    await expect(customizer.locator('.previewStage')).not.toHaveAttribute('role', 'tabpanel')
+  })
+
   test('supports keyboard tab switching', async ({ page }) => {
     const customizer = await openInterfaceCustomizer(page, 'navigation')
     const navigationTab = customizer.locator('[data-settings-subpage-tab="navigation"]')
@@ -147,5 +186,32 @@ test.describe('interface customizer', () => {
         }), `${mode} controls fit the player at ${size.width}px`).toBe(true)
       }
     }
+  })
+})
+
+test.describe('interface customizer with Invidious', () => {
+  test.use({
+    seed: {
+      settings: { backendPreference: 'invidious', defaultInvidiousInstance: 'https://invidious.test' },
+      profiles: [{
+        _id: 'allChannels',
+        name: 'All Channels',
+        bgColor: '#000000',
+        textColor: '#FFFFFF',
+        subscriptions: [{
+          id: 'UCpreviewchannel',
+          name: 'Preview Channel',
+          thumbnail: 'https://yt3.ggpht.com/preview-avatar=s176-c-k-c0x00ffffff-no-rj'
+        }]
+      }]
+    }
+  })
+
+  test('loads navigation preview avatars through the selected backend', async ({ page }) => {
+    await page.route('https://invidious.test/**', route => route.fulfill({ status: 404 }))
+    const customizer = await openInterfaceCustomizer(page, 'navigation')
+    const avatar = customizer.locator('.previewChannel').first()
+    await expect(avatar).toHaveAttribute('style', /invidious\.test/)
+    await expect(avatar).not.toHaveAttribute('style', /ggpht\.com/)
   })
 })

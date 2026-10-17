@@ -70,6 +70,7 @@
           >
             <button
               v-for="mode in activeTab.previewModes"
+              :id="`${idPrefix}-preview-mode-${mode.id}`"
               :key="mode.id"
               type="button"
               role="tab"
@@ -90,6 +91,8 @@
           <div
             :id="`${idPrefix}-preview`"
             class="previewStage"
+            :role="activeTab.previewModes.length > 1 ? 'tabpanel' : null"
+            :aria-labelledby="activeTab.previewModes.length > 1 ? `${idPrefix}-preview-mode-${activePreviewMode}` : null"
           >
             <NavigationPreview
               v-if="activeTabId === 'navigation'"
@@ -109,6 +112,7 @@
         </section>
         <div
           :key="activeTabId"
+          ref="editorScrollRef"
           v-overlay-scrollbars
           class="customizerEditorScroll"
         >
@@ -126,7 +130,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, reactive, ref, useId } from 'vue'
+import { computed, nextTick, reactive, ref, useId, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
@@ -141,6 +145,8 @@ import QuickSettingsCustomizer from '../QuickSettingsCustomizer/QuickSettingsCus
 import NavigationPreview from './NavigationPreview.vue'
 import PlayerAppearanceEditor from './PlayerAppearanceEditor.vue'
 import PlayerPreview from './PlayerPreview.vue'
+
+import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 
 const { t } = useI18n()
 const idPrefix = `interface-customizer-${useId().replaceAll(':', '')}`
@@ -197,8 +203,20 @@ const activeTab = computed(() => tabs.value.find(tab => tab.id === activeTabId.v
 const previewModes = reactive({})
 const activePreviewMode = computed(() => previewModes[activeTabId.value] ?? activeTab.value.previewModes[0]?.id)
 
-function selectTab(tabId) {
+const editorScrollRef = useTemplateRef('editorScrollRef')
+// Each tab returns to the editor position it was left at.
+const editorScrollTops = {}
+
+async function selectTab(tabId) {
+  if (tabId === activeTabId.value) return
+  if (editorScrollRef.value) editorScrollTops[activeTabId.value] = editorScrollRef.value.scrollTop
   activeTabId.value = tabId
+  await nextTick()
+  const scroller = editorScrollRef.value
+  if (!scroller) return
+  restoreOverlayScrollTop(scroller, editorScrollTops[tabId] ?? 0)
+  // The tab's content may have become shorter while it was hidden.
+  clampOverlayScrollTop(scroller, scroller.querySelector('.customizerEditor'))
 }
 
 function selectPreviewMode(modeId) {
