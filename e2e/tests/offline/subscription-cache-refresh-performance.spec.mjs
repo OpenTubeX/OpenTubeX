@@ -44,6 +44,7 @@ for (const feed of ['videos', 'new', 'shorts']) {
       responses[0].videos[0].title = 'Refreshed video 0-0'
       // Remote responses do not know about this device's synced seen marks.
       responses[0].videos[1].isNewInSubscriptionFeed = true
+      store.commit('setSubscriptionFeedRefreshTab', 'videos')
       store.commit('setSubscriptionFeedRefreshInProgress', true)
       // Let the initial snapshot and refresh controls paint before measuring
       // steady per-channel updates; completion remains part of the timed run.
@@ -60,7 +61,8 @@ for (const feed of ['videos', 'new', 'shorts']) {
         if (!publishingFinalUpdate) steadyTimerGaps.push(gap)
         previousTick = now
       }, 16)
-      // Count whole-feed sorts: per-channel updates must not rebuild the feed.
+      // Count whole-feed sorts: large refreshes rebuild the feed in batches,
+      // not for every channel response.
       const feedSorts = { steady: 0, final: 0 }
       const originalSort = Array.prototype.sort
       const originalToSorted = Array.prototype.toSorted
@@ -83,6 +85,7 @@ for (const feed of ['videos', 'new', 'shorts']) {
           await new Promise(resolve => setTimeout(resolve, 20))
         }
       }))
+      const steadyMs = performance.now() - started
       publishingFinalUpdate = true
       store.commit('setSubscriptionFeedRefreshInProgress', false)
       window.dispatchEvent(new CustomEvent('opentubex-subscription-refresh-channel', {
@@ -100,6 +103,7 @@ for (const feed of ['videos', 'new', 'shorts']) {
       steadyTimerGaps.sort((a, b) => a - b)
       return {
         elapsedMs,
+        steadyMs,
         seenVideoIsNew: store.getters.getVideoCache[responses[0].channelId].videos[1].isNewInSubscriptionFeed,
         updates: durations.length,
         medianUpdateMs: durations.sort((a, b) => a - b)[Math.floor(durations.length / 2)],
@@ -126,8 +130,10 @@ for (const feed of ['videos', 'new', 'shorts']) {
     for (const sample of samples) {
       expect(sample.updates).toBe(feed === 'shorts' ? 933 : 80)
       expect(sample.seenVideoIsNew).toBe(false)
-      // Publishing the whole feed once at completion may sort it once.
-      expect(sample.feedSorts.steady, JSON.stringify(samples)).toBe(0)
+      // The first channel publishes immediately, later ones at most once per
+      // 2 second batch. Publishing at completion may sort the feed once more.
+      expect(sample.feedSorts.steady, JSON.stringify(samples))
+        .toBeLessThanOrEqual(1 + Math.floor(sample.steadyMs / 2000))
       expect(sample.feedSorts.final, JSON.stringify(samples)).toBeLessThanOrEqual(1)
     }
     if (feed !== 'shorts') await expect(page.getByText('Refreshed video 0-0', { exact: true })).toBeVisible()
@@ -154,7 +160,7 @@ test.describe('large cached feed with most entries hidden', () => {
     }
   })
 
-  test('defers rebuilding cached videos while channel responses arrive', async ({ page }) => {
+  test('shows the first refreshed channel immediately while channel responses arrive', async ({ page }) => {
     await page.route(/^https?:\/\//, abortUnmockedRequest)
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="videos"]').click()
@@ -168,13 +174,14 @@ test.describe('large cached feed with most entries hidden', () => {
           videos: JSON.parse(JSON.stringify(cache.videos))
         }))
       responses[0].videos[0].title = 'Refreshed video 0-0'
+      store.commit('setSubscriptionFeedRefreshTab', 'videos')
       store.commit('setSubscriptionFeedRefreshInProgress', true)
       const started = performance.now()
       await store.dispatch('updateSubscriptionVideosCacheByChannel', responses[0])
       window.dispatchEvent(new CustomEvent('opentubex-subscription-refresh-channel', {
         detail: { tab: 'videos' }
       }))
-      // The visible feed must not publish the update during this period.
+      // The first refreshed channel publishes without waiting for a batch.
       await new Promise(resolve => setTimeout(resolve, 200))
       const updatedDuringRefresh = document.body.textContent.includes('Refreshed video 0-0')
       for (const response of responses.slice(1)) {
@@ -192,7 +199,7 @@ test.describe('large cached feed with most entries hidden', () => {
       return { elapsed, updatedDuringRefresh }
     })
 
-    expect(metrics.updatedDuringRefresh).toBe(false)
+    expect(metrics.updatedDuringRefresh).toBe(true)
     // Gross hang bound only.
     expect(metrics.elapsed).toBeLessThan(15_000)
     await expect(page.getByText('Refreshed video 0-0', { exact: true })).toBeVisible()
