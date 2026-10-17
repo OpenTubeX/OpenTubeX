@@ -332,6 +332,8 @@ test.describe('new subscriptions feed', () => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await page.getByRole('button', { name: 'Show tabbed view' }).click()
+    // The view switches once its setting saves.
+    await expect(page.getByRole('tablist', { name: 'New content tabs' })).toBeVisible()
 
     const tabs = page.locator('[data-new-feed-tab]')
     await expect(tabs).toHaveCount(4)
@@ -562,6 +564,8 @@ test.describe('new subscriptions feed', () => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await page.getByRole('button', { name: 'Show tabbed view' }).click()
+    // The view switches once its setting saves.
+    await expect(page.getByRole('tablist', { name: 'New content tabs' })).toBeVisible()
 
     await page.evaluate(() => {
       const store = window.$store
@@ -580,10 +584,7 @@ test.describe('new subscriptions feed', () => {
     await page.locator('[data-new-feed-tab="shorts"]').click()
     await expect(page.getByText('New short', { exact: true })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Mark all as seen' })).toBeVisible()
-    expect(await page.evaluate(() => {
-      window.__unsubscribeMarkSeen()
-      return window.__markSeenMutations
-    })).toEqual([[
+    await expect.poll(() => page.evaluate(() => window.__markSeenMutations)).toEqual([[
       {
         tab: 'videos',
         channelId: CHANNEL_ID,
@@ -596,6 +597,8 @@ test.describe('new subscriptions feed', () => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await page.getByRole('button', { name: 'Show tabbed view' }).click()
+    // The view switches once its setting saves.
+    await expect(page.getByRole('tablist', { name: 'New content tabs' })).toBeVisible()
 
     const tabs = page.getByRole('tablist', { name: 'New content tabs' })
     const videosTab = tabs.locator('[data-new-feed-tab="videos"]')
@@ -633,6 +636,8 @@ test.describe('new subscriptions feed', () => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await page.getByRole('button', { name: 'Show tabbed view' }).click()
+    // The view switches once its setting saves.
+    await expect(page.getByRole('tablist', { name: 'New content tabs' })).toBeVisible()
     const videos = page.locator('[data-new-feed-tab="videos"]')
     const shorts = page.locator('[data-new-feed-tab="shorts"]')
     const session = await page.context().newCDPSession(page)
@@ -1237,6 +1242,8 @@ test.describe('new feed settings and seen state', () => {
     await page.getByRole('button', { name: 'Show tabbed view' }).click()
     await expect(page.getByRole('tablist', { name: 'New content tabs' }).locator('.newContentDot')).toHaveCount(0)
     await page.getByRole('button', { name: 'Show combined view' }).click()
+    // Mark all as seen covers the view that is active when clicked, which switches once the setting saves.
+    await expect(page.getByRole('button', { name: 'Show tabbed view' })).toBeVisible()
     const newVideoCard = page.locator('.ft-list-video').filter({
       has: page.getByRole('heading', { name: 'New video', exact: true })
     })
@@ -1255,15 +1262,16 @@ test.describe('new feed settings and seen state', () => {
     })
     await markAllAsSeen.click()
     await expect(page.getByText('There is no new content.')).toBeVisible()
-    expect(await page.evaluate(() => {
-      window.__unsubscribeMarkSeen()
-      return window.__markSeenMutations.map(batch => batch.map(({ tab, channelId }) => ({ tab, channelId })))
-    })).toEqual([[
+    // The panel clears its cards before the cache writes finish and commit.
+    await expect.poll(() => page.evaluate(() => (
+      window.__markSeenMutations.map(batch => batch.map(({ tab, channelId }) => ({ tab, channelId })))
+    ))).toEqual([[
       { tab: 'videos', channelId: CHANNEL_ID },
       { tab: 'shorts', channelId: CHANNEL_ID },
       { tab: 'live', channelId: CHANNEL_ID },
       { tab: 'posts', channelId: CHANNEL_ID }
     ]])
+    await page.evaluate(() => window.__unsubscribeMarkSeen())
     await expect(markAllAsSeen).toHaveCount(0)
 
     const relaunched = await app.relaunch()
