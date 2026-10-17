@@ -346,7 +346,7 @@
 
 .app > .routerView {
   min-inline-size: 0;
-  padding-block-end: var(--connection-status-space, 0);
+  padding-block-end: var(--connection-status-page-space, 0);
   container-name: route;
   container-type: inline-size;
 }
