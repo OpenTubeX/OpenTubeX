@@ -185,6 +185,13 @@ test.describe('in-place settings reordering', { tag: '@scale' }, () => {
       const x = start.x + start.width / 2
       const y = start.y + start.height / 2
       const distance = target.y + target.height / 2 - source.y - source.height / 2 + 8
+      // The drag starts inside the edge auto-scroll zone, so a busy machine can scroll the list a little.
+      const scrollTop = () => first.evaluate(element => {
+        let scroller = element.parentElement
+        while (scroller && !/auto|scroll/.test(getComputedStyle(scroller).overflowY)) scroller = scroller.parentElement
+        return scroller?.scrollTop ?? 0
+      })
+      const scrollStart = await scrollTop()
       await page.mouse.move(x, y)
       await page.mouse.down()
       await page.mouse.move(x, y + distance, { steps: 12 })
@@ -194,7 +201,9 @@ test.describe('in-place settings reordering', { tag: '@scale' }, () => {
       await expect.poll(() => second.evaluate(element => new DOMMatrixReadOnly(getComputedStyle(element).transform).m42)).toBeLessThan(-10)
       await expect.poll(ids).toEqual(initial)
       const dragged = await visibleBox(first)
-      expect(dragged.y - source.y).toBeCloseTo(Math.min(distance, last.y + last.height - source.y - source.height), 0)
+      const scrolled = await scrollTop() - scrollStart
+      // The row follows the pointer until it reaches the end of the list, which moves with the scroll.
+      expect(dragged.y - source.y).toBeCloseTo(Math.min(distance, last.y + last.height - source.y - source.height - scrolled), 0)
       await page.mouse.up()
       const reordered = [initial[1], initial[0], ...initial.slice(2)]
       await expect.poll(ids).toEqual(reordered)
