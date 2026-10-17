@@ -922,8 +922,7 @@ test('uses the menu action icon while its image loads and after failure', async 
   await expect(menu.locator('[data-icon="magnifying-glass"]')).toBeVisible()
 })
 
-// Flaky under parallel workers: https://github.com/OpenTubeX/OpenTubeX/issues/2146
-test.fixme('protects captured tab previews while loading and after failure', async ({ app, page }, testInfo) => {
+test('protects captured tab previews while loading and after failure', async ({ app, page }, testInfo) => {
   await app.electronApp.evaluate(({ ipcMain }, channels) => {
     ipcMain.removeHandler(channels.TABS_CAPTURE_PREVIEW)
     ipcMain.handle(channels.TABS_CAPTURE_PREVIEW, () => null)
@@ -937,17 +936,31 @@ test.fixme('protects captured tab previews while loading and after failure', asy
     if (failImages) return route.abort()
     pending.push(route)
   })
-  await page.locator('.tab').first().hover()
   const preview = page.locator('.tabTooltipPreview')
-  await expect.poll(() => pending.length).toBeGreaterThan(0)
-  await expect(preview.locator('img:not(.retryImagePlaceholder)')).toBeHidden()
-  await expect(preview.locator('.retryImagePlaceholder')).toBeVisible()
+  // Windows of other workers on a shared X display can blur this one or move
+  // the pointer out of it, which dismisses the tooltip. Hover again until the
+  // expected preview state shows.
+  const expectTooltip = check => expect(async () => {
+    if (!await preview.isVisible()) {
+      const viewport = page.viewportSize() ?? await page.evaluate(() => ({ width: innerWidth, height: innerHeight }))
+      await page.mouse.move(viewport.width / 2, viewport.height / 2)
+      await page.locator('.tab').first().hover()
+    }
+    await check()
+  }).toPass()
+
+  await expectTooltip(async () => {
+    expect(pending.length).toBeGreaterThan(0)
+    await expect(preview.locator('img:not(.retryImagePlaceholder)')).toBeHidden({ timeout: 1000 })
+    await expect(preview.locator('.retryImagePlaceholder')).toBeVisible({ timeout: 1000 })
+  })
   await preview.screenshot({ path: testInfo.outputPath('captured-tab-placeholder.png') })
   failImages = true
   while (pending.length) await pending.shift().abort()
-  await page.locator('.tab').first().hover()
-  await expect(preview.locator('img')).toHaveCount(0)
-  await expect(preview.locator('.tabTooltipFallbackIcon')).toBeVisible()
+  await expectTooltip(async () => {
+    await expect(preview.locator('img')).toHaveCount(0, { timeout: 1000 })
+    await expect(preview.locator('.tabTooltipFallbackIcon')).toBeVisible({ timeout: 1000 })
+  })
   await preview.screenshot({ path: testInfo.outputPath('captured-tab-fallback.png') })
 })
 
