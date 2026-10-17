@@ -217,7 +217,8 @@ for (const [theme, scale] of [['openTubeXLight', 100], ['openTubeXDark', 125]]) 
         await page.keyboard.press('Tab')
         await expect(button).toBeFocused()
         const focused = await renderedColors(button)
-        expect.soft(focused.background, `${name} focus differs from enabled`).not.toEqual(colors.background)
+        const distance = Math.max(...focused.background.map((channel, i) => Math.abs(channel - colors.background[i])))
+        expect.soft(distance, `${name} focus differs from enabled`).toBeGreaterThanOrEqual(8)
       }
     })
 
@@ -330,5 +331,21 @@ test.describe('hotPink contrast', () => {
       return { foreground: rgb(style.color), background: rgb(style.backgroundColor) }
     })
     expect.soft(contrastRatio(colors.foreground, colors.background), `header hover ${JSON.stringify(colors)}`).toBeGreaterThanOrEqual(3)
+  })
+})
+
+test.describe('bright main color toggle contrast', () => {
+  test.use({ seed: { settings: { baseTheme: 'light', mainColor: 'Yellow', currentLocale: 'en-US' } } })
+
+  test('enabled settings-header toggles stay readable and visible with a bright main color', async ({ page }) => {
+    await goToSettingsSection(page, 'general')
+    const button = page.getByRole('button', { name: 'Highlight settings changed from defaults', exact: true })
+    if (await button.getAttribute('aria-pressed') !== 'true') await button.click()
+    await page.mouse.move(0, 0)
+    await button.blur()
+    const enabled = await renderedColors(button)
+    const surface = await renderedColors(page.locator('.settingsHeaderActions'))
+    expect(contrastRatio(enabled.foreground, enabled.background), 'enabled icon').toBeGreaterThanOrEqual(3)
+    expect(contrastRatio(enabled.background, surface.background), 'enabled container').toBeGreaterThanOrEqual(1.2)
   })
 })

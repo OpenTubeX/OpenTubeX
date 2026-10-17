@@ -113,7 +113,7 @@
 /* Outranks the base-no-default hover rule so the enabled state stays visible. */
 .headerViewToggle :deep(.iconButton.base-no-default[aria-pressed='true']) {
   background-color: var(--selected-container-color);
-  color: var(--primary-color);
+  color: var(--on-selected-container-color);
 }
 
 .headerViewToggle :deep(.iconButton.base-no-default[aria-pressed='true']:is(:hover, :focus-visible)) {

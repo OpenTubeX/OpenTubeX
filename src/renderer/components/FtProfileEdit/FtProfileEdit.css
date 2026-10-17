@@ -67,9 +67,15 @@ h3 {
   background: var(--side-nav-hover-color);
 }
 
+/* Keep a focus indicator when outlines are hidden. */
+.builtinIconOption:focus-visible,
+.emojiOption:focus-visible {
+  border-color: var(--primary-color);
+}
+
 .builtinIconOption.selected,
 .emojiOption.selected {
-  color: var(--primary-color);
+  color: var(--on-selected-container-color);
   background: var(--selected-container-color);
   border-color: var(--primary-color);
 }

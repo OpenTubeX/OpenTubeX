@@ -63,7 +63,7 @@
 }
 
 .transcriptHeaderAction.active {
-  color: var(--primary-color);
+  color: var(--on-selected-container-color);
   background-color: var(--selected-container-color);
 }
 
