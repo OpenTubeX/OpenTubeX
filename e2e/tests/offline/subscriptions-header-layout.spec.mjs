@@ -605,6 +605,7 @@ test.describe('subscriptions header layout', () => {
           container,
           tabs,
           titleGap: label.top - title.bottom,
+          highlightGap: selectedTab.top - title.bottom,
           indicatorGap: selectedTab.bottom - 3 - label.bottom
         }
       })
@@ -615,6 +616,8 @@ test.describe('subscriptions header layout', () => {
       expect(layout.tabs.every(tab => tab.height >= 44)).toBe(true)
       expect(layout.titleGap).toBeGreaterThanOrEqual(-1)
       expect(layout.titleGap).toBeLessThanOrEqual(24)
+      // The selected tab's highlight must not touch the title above it.
+      expect(layout.highlightGap).toBeGreaterThanOrEqual(7.5)
       await expectTabHighlightAligned(page.locator('.tabs [aria-selected="true"]'))
       expect(layout.indicatorGap).toBeGreaterThanOrEqual(-1)
       expect(layout.indicatorGap).toBeLessThanOrEqual(12.5)
