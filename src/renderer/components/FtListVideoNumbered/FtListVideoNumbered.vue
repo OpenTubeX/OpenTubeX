@@ -91,7 +91,7 @@ import { useI18n } from 'vue-i18n'
 
 import { usePlaylistDrag } from '../../composables/usePlaylistDrag'
 import { vFirstVisible } from '../../helpers/firstVisible'
-import { observeWindowedListItem } from '../../helpers/windowedList'
+import { observeNestedWindowedListItem } from '../../helpers/windowedList'
 import store from '../../store/index'
 import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 
@@ -239,7 +239,7 @@ if (windowed) {
     windowItem?.dispose()
     windowItem = null
     if (!element) return
-    windowItem = observeWindowedListItem(element, {
+    windowItem = observeNestedWindowedListItem(element, {
       mount: onFirstVisible,
       unmount: height => { shellHeight.value = height; visible.value = false },
       isMounted: () => visible.value,

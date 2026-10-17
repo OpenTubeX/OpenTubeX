@@ -107,14 +107,16 @@ test('protected offscreen cards do not repeatedly read layout', t => {
   f.windowing.disconnect()
 })
 
-test('extends the overscan into nested scrollers such as the watch-page playlist', () => {
-  let options
-  const windowing = createListWindow({
-    IntersectionObserver: class { constructor(_fn, opts) { options = opts } observe() {} unobserve() {} disconnect() {} },
+test('extends the overscan into nested scrollers only for nested windows', () => {
+  const options = []
+  const create = nested => createListWindow({
+    IntersectionObserver: class { constructor(_fn, opts) { options.push(opts) } observe() {} unobserve() {} disconnect() {} },
     ResizeObserver: class { observe() {} unobserve() {} disconnect() {} },
     requestAnimationFrame: () => 1,
     cancelAnimationFrame() {},
-  })
-  assert.equal(options.rootMargin, options.scrollMargin)
-  windowing.disconnect()
+  }, { nested })
+  create(false).disconnect()
+  create(true).disconnect()
+  assert.equal(options[0].scrollMargin, undefined)
+  assert.equal(options[1].scrollMargin, options[1].rootMargin)
 })

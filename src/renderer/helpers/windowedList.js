@@ -2,7 +2,7 @@
 // overscan region; measured fractional heights keep the scroll range stable.
 export const WINDOWED_LIST_OVERSCAN_PX = 800
 
-export function createListWindow({ IntersectionObserver: Intersection, ResizeObserver: Resize, requestAnimationFrame: frame, cancelAnimationFrame: cancel } = globalThis) {
+export function createListWindow({ IntersectionObserver: Intersection, ResizeObserver: Resize, requestAnimationFrame: frame, cancelAnimationFrame: cancel } = globalThis, { nested = false } = {}) {
   const items = new Map()
   const releases = new Set()
   const widthRemeasures = new Set()
@@ -41,6 +41,7 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
   }
   // scrollMargin extends the overscan into nested scrollers such as the
   // watch-page playlist. Browsers without it mount rows as they appear.
+  const margin = `${WINDOWED_LIST_OVERSCAN_PX}px 0px`
   const intersection = new Intersection(entries => {
     for (const entry of entries) {
       const item = items.get(entry.target)
@@ -49,7 +50,7 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
       if (item.near) item.mount()
       else item.release()
     }
-  }, { rootMargin: `${WINDOWED_LIST_OVERSCAN_PX}px 0px`, scrollMargin: `${WINDOWED_LIST_OVERSCAN_PX}px 0px` })
+  }, nested ? { rootMargin: margin, scrollMargin: margin } : { rootMargin: margin })
   const resize = new Resize(entries => {
     for (const entry of entries) {
       const item = items.get(entry.target)
@@ -140,4 +141,12 @@ let sharedWindow
 export function observeWindowedListItem(element, options) {
   sharedWindow ??= createListWindow()
   return sharedWindow.observe(element, options)
+}
+
+// Feeds keep their nested panels lean; playlist rows also need overscan inside
+// the watch-page playlist scroller.
+let nestedWindow
+export function observeNestedWindowedListItem(element, options) {
+  nestedWindow ??= createListWindow(globalThis, { nested: true })
+  return nestedWindow.observe(element, options)
 }
