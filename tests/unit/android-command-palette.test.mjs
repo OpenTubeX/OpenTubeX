@@ -11,8 +11,8 @@ const source = (await readFile(new URL('../../src/renderer/helpers/commandPalett
 const shortcuts = { APP: { GENERAL: {} }, VIDEO_PLAYER: { GENERAL: {}, PLAYBACK: {} } }
 const createRegistry = new Function('createSettingsSearchIndex', 'getConfiguredKeyboardShortcuts',
   'DefaultKeyboardShortcuts', 'KeyboardShortcuts', 'shouldShowKeyboardShortcutCommand',
-  'isTrendingAvailable', 'isMostPopularAvailable', `${source}\nreturn createCommandPaletteRegistry`)(
-  createSettingsSearchIndex, () => shortcuts, shortcuts, shortcuts, () => false, () => false, () => false
+  'isTrendingAvailable', 'isMostPopularAvailable', 'isLiteBuild', `${source}\nreturn createCommandPaletteRegistry`)(
+  createSettingsSearchIndex, () => shortcuts, shortcuts, shortcuts, () => false, () => false, () => false, false
 )
 
 test('opening the ordinary command registry does not read the video library', () => {
@@ -61,6 +61,26 @@ for (const isCapacitor of [true, false]) {
     }
   })
 }
+
+test('lite Android builds omit download commands', () => {
+  const createLiteRegistry = new Function('createSettingsSearchIndex', 'getConfiguredKeyboardShortcuts',
+    'DefaultKeyboardShortcuts', 'KeyboardShortcuts', 'shouldShowKeyboardShortcutCommand',
+    'isTrendingAvailable', 'isMostPopularAvailable', 'isLiteBuild', `${source}\nreturn createCommandPaletteRegistry`)(
+    createSettingsSearchIndex, () => shortcuts, shortcuts, shortcuts, () => false, () => false, () => false, true
+  )
+  const commands = createLiteRegistry({
+    isElectron: false,
+    downloads: [],
+    isCapacitor: true,
+    routePath: '/settings',
+    routeAvailable: () => true,
+    t: key => key,
+    tm: path => path.split('.').reduce((value, key) => value?.[key], messages),
+    store: { getters: { getChannelsHiddenParsed: [], getForbiddenTitlesParsed: [], getTabs: [], getProfileList: [], getAllPlaylists: [], getYtDlpDownloads: {} } },
+  })
+  assert.ok(commands.some(command => command.id === 'settings.root'))
+  assert.ok(!commands.some(command => ['settings.download', 'downloads.open'].includes(command.id)))
+})
 
 test('extra thumbnail action commands are available only in desktop layouts', () => {
   for (const isCapacitor of [false, true]) {

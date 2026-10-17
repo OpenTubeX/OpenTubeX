@@ -43,9 +43,11 @@ test('subtitle helper selects the Android bridge without an Electron global', as
     .replace(/^export /gm, '')
     .replace(/import\('\.\.\/ytDlp(?:\.js)?'\)/g, 'Promise.resolve({ ytDlp: androidBridge })')
   const bridge = { ytDlpGetSubtitle: async requested => { assert.equal(requested, url); return vtt } }
-  const getSubtitleRequestUrl = new Function('process', 'globalThis', 'isYouTubeSubtitleUrl', 'androidBridge', `${source}\nreturn getSubtitleRequestUrl`)(
-    { env: { IS_CAPACITOR: true } }, { window: {} }, isYouTubeSubtitleUrl, bridge)
-  const result = await getSubtitleRequestUrl(url, { getYtDlpSubtitleUseCookies: true })
+  const helper = isLiteBuild => new Function('process', 'globalThis', 'isYouTubeSubtitleUrl', 'androidBridge', 'isLiteBuild', `${source}\nreturn getSubtitleRequestUrl`)(
+    { env: { IS_CAPACITOR: true } }, { window: {} }, isYouTubeSubtitleUrl, bridge, isLiteBuild)
+  const result = await helper(false)(url, { getYtDlpSubtitleUseCookies: true })
   assert.match(result, /^data:text\/vtt;/)
   assert.equal(await (await fetch(result)).text(), vtt)
+  // Lite Android builds omit yt-dlp, so subtitles load directly.
+  assert.equal(await helper(true)(url, { getYtDlpSubtitleUseCookies: true }), url)
 })

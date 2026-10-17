@@ -11,6 +11,7 @@ import { buildYtDlpStoryboardVtt } from '../../main/ytDlpStoryboard'
 import { isYouTubeSubtitleUrl } from '../../youtubeSubtitle'
 import { buildYtDlpSearchArguments, normalizeYtDlpSearchResults, completeYtDlpSearchPlaylists } from '../../ytDlpSearch'
 import { chooseAndroidDirectory } from './androidStorage'
+import { isLiteBuild } from './ytDlpCapabilities'
 
 const native = process.env.IS_CAPACITOR ? registerPlugin('YtDlp') : null
 
@@ -274,7 +275,7 @@ const capacitor = {
 }
 
 export function initializeCapacitorYtDlp() {
-  if (!native) return () => {}
+  if (!native || isLiteBuild) return () => {}
   return store.watch(() => JSON.stringify(configuration()), value => {
     native.configure({ configuration: JSON.parse(value) }).catch(error => console.error('Could not configure mobile downloads', error))
   }, { immediate: true })

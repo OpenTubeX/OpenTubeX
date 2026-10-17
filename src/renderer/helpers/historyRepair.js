@@ -4,6 +4,7 @@ import { HistoryRepairUnavailableError, parseHistoryRepairPlayer, parseHistoryRe
 import { ytDlp } from './ytDlp'
 import { getLocalHistoryMetadata } from './api/local'
 import { getInvidiousHistoryMetadata } from './api/invidious'
+import { supportsYtDlp } from './ytDlpCapabilities'
 
 export const metadataRepairBusy = ref(false)
 
@@ -18,7 +19,7 @@ export function createRepairState() {
 export const historyRepairState = createRepairState()
 
 export const repairCookiesConfigured = computed(() => {
-  if (!process.env.IS_ELECTRON && !process.env.IS_CAPACITOR) return false
+  if (!supportsYtDlp) return false
   const getters = store.getters
   return getters.getYtDlpPlaybackAuthMode === 'file'
     ? !!getters.getYtDlpPlaybackCookiesPath?.trim()

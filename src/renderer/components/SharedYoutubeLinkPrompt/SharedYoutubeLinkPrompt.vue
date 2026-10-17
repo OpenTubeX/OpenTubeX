@@ -92,6 +92,7 @@ import { getLocalHistoryMetadata } from '../../helpers/api/local'
 import { getInvidiousHistoryMetadata } from '../../helpers/api/invidious'
 import { parseHistoryRepairPlayer } from '../../../historyRepair'
 import { showToast } from '../../helpers/utils'
+import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 
 const props = defineProps({
   url: { type: String, required: true },
@@ -102,7 +103,7 @@ const { t } = useI18n()
 const loading = ref(false)
 const failed = ref(false)
 const showDownloadPrompt = ref(false)
-const enableDownloads = computed(() => store.getters.getEnableDownloads)
+const enableDownloads = computed(() => supportsYtDlp && store.getters.getEnableDownloads)
 const controller = new AbortController()
 onBeforeUnmount(() => controller.abort())
 watch(enableDownloads, enabled => { if (!enabled) showDownloadPrompt.value = false })

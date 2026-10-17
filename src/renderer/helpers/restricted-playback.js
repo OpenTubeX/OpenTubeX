@@ -1,3 +1,5 @@
+import { supportsYtDlp } from './ytDlpCapabilities.js'
+
 /**
  * @param {Record<string, unknown>} getters
  * @param {boolean} [supported]
@@ -5,7 +7,7 @@
  */
 export function hasConfiguredRestrictedPlaybackAuthentication(
   getters,
-  supported = (process.env.IS_ELECTRON || (process.env.IS_CAPACITOR && !process.env.IS_IOS)),
+  supported = (supportsYtDlp && !process.env.IS_IOS),
   isCapacitor = Boolean(process.env.IS_CAPACITOR)
 ) {
   const cookiePath = getters.getYtDlpPlaybackCookiesPath
@@ -23,6 +25,6 @@ export function hasConfiguredRestrictedPlaybackAuthentication(
  * @param {Record<string, unknown>} getters
  * @param {boolean} [isElectron]
  */
-export function shouldHideMembersOnlyContent(isMembersOnly, getters, isElectron = (process.env.IS_ELECTRON || (process.env.IS_CAPACITOR && !process.env.IS_IOS))) {
+export function shouldHideMembersOnlyContent(isMembersOnly, getters, isElectron = (supportsYtDlp && !process.env.IS_IOS)) {
   return Boolean(isMembersOnly && !hasConfiguredRestrictedPlaybackAuthentication(getters, isElectron))
 }

@@ -32,6 +32,31 @@ interface RuntimePackerParameters extends TransformParameters {
 
 @CacheableTransform
 abstract class PackNativeRuntime implements TransformAction<RuntimePackerParameters> {
+    // No bundled executable, Python extension module or library they load
+    // links these. FFmpeg resolves zlib, liblzma and libbz2 from the
+    // identical Python copies, which come first in LD_LIBRARY_PATH.
+    // _scripts/android_apks.py verifies that every dependency still resolves.
+    static final List<String> UNUSED_FFMPEG_LIBRARIES = [
+        'libOpenSLES', 'libbrotlienc', 'libbz2', 'libcharset', 'libffi', 'libfftw3_threads',
+        'libfftw3f', 'libfftw3f_threads', 'libfftw3l', 'libfftw3l_threads', 'libgio-2.0',
+        'libgirepository-2.0', 'libgmodule-2.0', 'libgmpxx', 'libgnutls-dane', 'libgnutlsxx',
+        'libgobject-2.0', 'libgthread-2.0', 'libharfbuzz-cairo', 'libharfbuzz-gobject',
+        'libharfbuzz-subset', 'liblzma', 'libout123', 'libpcre2-16', 'libpcre2-32',
+        'libpcre2-posix', 'librubberband-jni', 'libsoxr-lsr', 'libsyn123', 'libtheora',
+        'libv4l1', 'libv4l2', 'libv4l2rds', 'libv4lconvert', 'libwebpdecoder', 'libwebpdemux', 'libz'
+    ]
+    static final java.util.regex.Pattern UNUSED_FFMPEG = java.util.regex.Pattern.compile(
+        '^usr/lib/(?:(?:girepository-1\\.0|glib-2\\.0|libv4l)/.*|libOpenCL\\.l?a|v4l1compat\\.so|v4l2convert\\.so|(?:' +
+        UNUSED_FFMPEG_LIBRARIES.collect { java.util.regex.Pattern.quote(it) }.join('|') + ')\\.so(?:\\.[0-9.]+)?)$')
+    // QuickJS executes via libqjs.so; its static archive only links new
+    // executables. Python's test modules and lib2to3 are never imported.
+    static final java.util.regex.Pattern UNUSED_PYTHON = java.util.regex.Pattern.compile(
+        '^usr/lib/(?:quickjs/libquickjs\\.a|python3\\.[0-9]+/(?:lib2to3/.*|lib-dynload/(?:_ctypes_test|_test[a-z_]*|_xxtestfuzz)\\..*))$')
+
+    static boolean unused(String name, boolean python) {
+        (python ? UNUSED_PYTHON : UNUSED_FFMPEG).matcher(name).matches()
+    }
+
     @InputArtifact
     @PathSensitive(PathSensitivity.NAME_ONLY)
     abstract Provider<FileSystemLocation> getInputArtifact()
@@ -77,9 +102,7 @@ abstract class PackNativeRuntime implements TransformAction<RuntimePackerParamet
                 new SeekableInMemoryByteChannel(source)
             ).withCloseable { archive ->
                 archive.entries.each { ZipArchiveEntry entry ->
-                    // QuickJS executes via libqjs.so. This static archive is
-                    // only needed when linking a new executable at build time.
-                    if (python && entry.name == 'usr/lib/quickjs/libquickjs.a') return
+                    if (unused(entry.name, python)) return
                     File target = new File(staging, entry.name)
                     if (!target.canonicalPath.startsWith(staging.canonicalPath + File.separator)) {
                         throw new GradleException("Unsafe runtime path: ${entry.name}")
@@ -129,7 +152,7 @@ abstract class PackNativeRuntime implements TransformAction<RuntimePackerParamet
                 new SeekableInMemoryByteChannel(source)
             ).withCloseable { archive ->
                 archive.entries.each { ZipArchiveEntry entry ->
-                    if (python && entry.name == 'usr/lib/quickjs/libquickjs.a') return
+                    if (unused(entry.name, python)) return
                     output.putArchiveEntry(new ZipArchiveEntry(entry))
                     archive.getInputStream(entry).withCloseable { it.transferTo(output) }
                     output.closeArchiveEntry()

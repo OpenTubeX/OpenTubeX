@@ -511,7 +511,7 @@ const settingsWindowOpen = computed(() => (
   !['about', 'downloads'].includes(store.getters.getSettingsWindowView)
 ))
 const showDownloadsButton = computed(() => (
-  (isElectron || process.env.IS_CAPACITOR) &&
+  supportsYtDlp &&
   enableDownloads.value &&
   moveDownloadsToAppHeader.value &&
   !(settingsWindowMinimized.value && settingsWindowView.value === 'downloads')

@@ -29,6 +29,15 @@ public final class OpenTubeXApplication extends Application {
             prepareWebViewResources();
         }
         AndroidProxy.initialize(this);
+        if (!BuildConfig.BUNDLES_YT_DLP) {
+            // Free the runtime and partial downloads a previously installed full
+            // build left behind. The small queue file keeps download history if
+            // the user returns to a full build; its downloads then restart.
+            for (String name : new String[] { "youtubedl-android", "yt-dlp-downloads" }) {
+                java.io.File directory = new java.io.File(getNoBackupFilesDir(), name);
+                if (directory.exists()) new Thread(() -> YtDlpFiles.deleteTree(directory), "yt-dlp-cleanup").start();
+            }
+        }
     }
 
     private void prepareWebViewResources() {

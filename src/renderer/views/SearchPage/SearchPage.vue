@@ -127,6 +127,7 @@ import { SEARCH_CHAR_LIMIT } from '../../../constants'
 import { useTabContext, useTabTitle } from '../../tabs/TabContext'
 import { ytDlp } from '../../helpers/ytDlp'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
+import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -150,7 +151,7 @@ const searchNotice = shallowRef(null)
 const searchParams = ref('')
 const isRetryingWithCookies = ref(false)
 const cookieSearchFailed = ref(false)
-const supportsCookieSearch = !!(process.env.IS_ELECTRON || (process.env.IS_CAPACITOR && !process.env.IS_IOS))
+const supportsCookieSearch = supportsYtDlp && !process.env.IS_IOS
 const cookiesConfigured = computed(() => hasConfiguredRestrictedPlaybackAuthentication(store.getters, supportsCookieSearch))
 let searchRequestId = 0
 

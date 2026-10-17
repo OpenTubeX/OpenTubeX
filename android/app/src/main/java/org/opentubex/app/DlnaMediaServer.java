@@ -55,6 +55,11 @@ final class DlnaMediaServer implements AutoCloseable {
         this.context = context;
         this.startSeconds = Double.isFinite(startSeconds) ? Math.max(0, startSeconds) : 0;
         if (audio != null) {
+            // Separate streams need FFmpeg, which lite builds omit.
+            if (!BuildConfig.BUNDLES_YT_DLP) {
+                close();
+                throw new IOException("Separate audio requires FFmpeg");
+            }
             List<DlnaMediaServer> inputs = new ArrayList<>();
             try {
                 YtDlpRuntime.initialize(context);

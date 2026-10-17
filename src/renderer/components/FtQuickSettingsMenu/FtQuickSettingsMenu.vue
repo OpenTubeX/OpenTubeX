@@ -459,6 +459,7 @@
 
 <script setup>
 import { CAPACITOR_UI_SCALE_MIN, CAPACITOR_UI_SCALE_MAX } from '../../helpers/capacitorUiScale'
+import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -608,7 +609,7 @@ const proxyUrl = computed(() => (
   `${store.getters.getProxyProtocol}://${store.getters.getProxyHostname}:${store.getters.getProxyPort}`
 ))
 const showDownloadsShortcut = computed(() => (
-  (USING_ELECTRON || process.env.IS_CAPACITOR) &&
+  supportsYtDlp &&
   store.getters.getEnableDownloads &&
   (!store.getters.getMoveDownloadsToAppHeader || props.headerActionsOverflow)
 ))

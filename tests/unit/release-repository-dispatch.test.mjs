@@ -24,6 +24,10 @@ async function fixture (t, tag) {
     ...['arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64', 'universal'].map(arch => stable
       ? `org.opentubex.app-${version}${arch === 'universal' ? '' : `-${arch}`}.apk`
       : `opentubex-${version}-android-${arch}.apk`),
+    ...(stable
+      ? ['arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64', 'universal'].map(arch =>
+        `org.opentubex.app-${version}-lite${arch === 'universal' ? '' : `-${arch}`}.apk`)
+      : []),
     `opentubex-${version.replace(/-beta$/, '')}-ios-unsigned.ipa`,
   ]
   for (const name of ['gh', 'wget']) {
@@ -101,7 +105,7 @@ const stableConsumers = {
   'rpm-update': /\.(amd64|arm64)\.rpm$/,
   'apt-update': /\.deb$/,
   'snap-update': /_beta_(amd64|arm64)\.deb$/,
-  'fdroid-update': /\.apk$/,
+  'fdroid-update': /-beta(-(arm64-v8a|armeabi-v7a|x86_64|x86))?\.apk$/,
   'sidestore-update': /-ios-unsigned\.ipa$/,
   'nix-update': /(_beta_(amd64|arm64)\.deb|-mac-(x64|arm64)\.zip)$/,
   'homebrew-update': /-mac-(x64|arm64)\.zip$/,

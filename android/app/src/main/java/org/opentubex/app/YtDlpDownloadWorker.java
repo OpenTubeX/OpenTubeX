@@ -25,6 +25,8 @@ public final class YtDlpDownloadWorker extends Worker {
     }
 
     @NonNull @Override public Result doWork() {
+        // Work queued by a previously installed full build cannot run in lite builds.
+        if (!BuildConfig.BUNDLES_YT_DLP) return Result.success();
         OpenTubeXNotificationChannels.createAll(getApplicationContext());
         boolean foreground = AppVisibility.isVisible();
         long started = android.os.SystemClock.elapsedRealtime();
