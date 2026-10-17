@@ -293,6 +293,12 @@ test.describe('download settings', () => {
       })
     ])
 
+    // Toasts pause while hovered, so a click retried under one never lands.
+    const waitForToasts = async () => {
+      await page.mouse.move(0, 0)
+      await expect(page.locator('[data-sonner-toast]')).toHaveCount(0, { timeout: 15_000 })
+    }
+    await waitForToasts()
     await page.getByRole('button', { name: 'Create Copy' }).click()
     await expect(name).toHaveValue('Podcast Copy')
     await page.getByRole('button', { name: 'Save Template' }).click()
@@ -303,6 +309,7 @@ test.describe('download settings', () => {
     })).toEqual(['Podcast', 'Podcast Copy'])
 
     await name.fill('Podcast')
+    await waitForToasts()
     await page.getByRole('button', { name: 'Save Template' }).click()
     await expect(page.getByText('A download template named "Podcast" already exists.')).toBeVisible()
     await expect.poll(() => page.evaluate(() => {
