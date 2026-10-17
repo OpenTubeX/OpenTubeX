@@ -61,7 +61,13 @@ export function isOnAiSlopList(entries, { authorId, authorHandle }) {
  */
 export function loadCachedAiSlopList() {
   try {
-    const { fetchedAt, blocked, warned } = JSON.parse(localStorage.getItem(CACHE_KEY))
+    const cached = localStorage.getItem(CACHE_KEY)
+
+    if (cached === null) {
+      return null
+    }
+
+    const { fetchedAt, blocked, warned } = JSON.parse(cached)
 
     if (typeof fetchedAt !== 'number' || typeof blocked !== 'string' || typeof warned !== 'string') {
       return null
