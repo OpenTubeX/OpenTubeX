@@ -39,10 +39,15 @@
   background: var(--side-nav-hover-color);
 }
 
+/* Match selected navigation items: a subtle tint with readable text. */
 .title.active {
-  color: var(--side-nav-hover-text-color);
-  background: var(--side-nav-hover-color);
+  color: var(--primary-text-color);
+  background: color-mix(in srgb, var(--primary-color) 20%, transparent);
   font-weight: 600;
+}
+
+.title.active:is(:hover, :focus-visible) {
+  background: color-mix(in srgb, var(--primary-color) 28%, transparent);
 }
 
 .settingsMenu.filtered .titleItem {

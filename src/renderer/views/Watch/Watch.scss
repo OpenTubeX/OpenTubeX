@@ -944,9 +944,17 @@
     }
 
     .shortsCommentsPanel :deep(.fullscreenCommentAction:hover),
-    .shortsCommentsPanel :deep(.fullscreenCommentAction:focus-visible),
-    .shortsCommentsPanel :deep(.fullscreenCommentAction.active) {
+    .shortsCommentsPanel :deep(.fullscreenCommentAction:focus-visible) {
       background-color: var(--side-nav-hover-color);
+    }
+
+    .shortsCommentsPanel :deep(.fullscreenCommentAction.active) {
+      color: var(--on-selected-container-color);
+      background-color: var(--selected-container-color);
+    }
+
+    .shortsCommentsPanel :deep(.fullscreenCommentAction.active:is(:hover, :focus-visible)) {
+      background-color: var(--selected-container-hover-color);
     }
 
     .shortsAuxPanelOpen {

@@ -76,6 +76,11 @@ body {
   --colored-header-button-hover-text-color: var(--text-with-main-color);
   --colored-header-button-pressed-color: var(--primary-color-active);
   --colored-header-button-pressed-text-color: var(--text-with-main-color);
+
+  /* Enabled toggles are filled so they stay distinct from neutral hover and focus colors. */
+  --selected-container-color: var(--primary-color);
+  --selected-container-hover-color: var(--primary-color-hover);
+  --on-selected-container-color: var(--text-with-main-color);
 }
 
 /* Inherit native touch sizing into dialogs and other teleported controls too. */

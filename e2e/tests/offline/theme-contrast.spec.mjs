@@ -3,6 +3,21 @@ import { sampleColors } from '../../helpers/colors.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
+/** Text color and background composited over ancestors, including color(srgb ...) values. */
+function renderedColors(locator) {
+  return locator.evaluate(element => {
+    const rgba = color => color.match(/[\d.]+/g).map(Number)
+      .map((value, i) => color.startsWith('color(srgb ') && i < 3 ? value * 255 : value)
+    const ancestors = []
+    for (let node = element; node; node = node.parentElement) ancestors.unshift(node)
+    const background = ancestors.reduce((below, node) => {
+      const [r, g, b, alpha = 1] = rgba(getComputedStyle(node).backgroundColor)
+      return [r, g, b].map((channel, i) => Math.round(channel * alpha + below[i] * (1 - alpha)))
+    }, [255, 255, 255])
+    return { foreground: rgba(getComputedStyle(element).color).slice(0, 3), background }
+  })
+}
+
 function contrastRatio(first, second) {
   const luminance = rgb => rgb.map(value => value / 255)
     .map(value => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4)
@@ -190,14 +205,20 @@ for (const [theme, scale] of [['openTubeXLight', 100], ['openTubeXDark', 125]]) 
         const button = page.getByRole('button', { name, exact: true })
         if (await button.getAttribute('aria-pressed') !== 'true') await button.click()
         await expect(button).toHaveAttribute('aria-pressed', 'true')
-        const colors = await button.evaluate(element => {
-          const style = getComputedStyle(element)
-          const rgb = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)
-          return { foreground: rgb(style.color), background: rgb(style.backgroundColor) }
-        })
+        await page.mouse.move(0, 0)
+        await button.blur()
+        const colors = await renderedColors(button)
         expect.soft(contrastRatio(colors.foreground, colors.background), name).toBeGreaterThanOrEqual(3)
         await button.click()
         await expect(button).toHaveAttribute('aria-pressed', 'false')
+        // Keyboard focus on a disabled toggle must not look enabled.
+        await page.mouse.move(0, 0)
+        await page.keyboard.press('Shift+Tab')
+        await page.keyboard.press('Tab')
+        await expect(button).toBeFocused()
+        const focused = await renderedColors(button)
+        const distance = Math.max(...focused.background.map((channel, i) => Math.abs(channel - colors.background[i])))
+        expect.soft(distance, `${name} focus differs from enabled`).toBeGreaterThanOrEqual(8)
       }
     })
 
@@ -271,13 +292,14 @@ test.describe('hotPink contrast', () => {
         await button.focus()
       }
       const colors = await button.evaluate(element => {
-        const rgb = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)
-        const style = getComputedStyle(element)
-        const background = style.backgroundColor === 'rgba(0, 0, 0, 0)'
-          ? getComputedStyle(element.closest('.settingsMenu')).backgroundColor
-          : style.backgroundColor
+        // Selected categories use a translucent color-mix(), serialized as color(srgb ...).
+        const rgba = color => color.match(/[\d.]+/g).map(Number)
+          .map((value, i) => color.startsWith('color(srgb ') && i < 3 ? value * 255 : value)
+        const rgb = color => rgba(color).slice(0, 3)
+        const menu = rgb(getComputedStyle(element.closest('.settingsMenu')).backgroundColor)
+        const [r, g, b, alpha = 1] = rgba(getComputedStyle(element).backgroundColor)
         return {
-          background: rgb(background),
+          background: [r, g, b].map((channel, i) => channel * alpha + menu[i] * (1 - alpha)),
           title: rgb(getComputedStyle(element.querySelector('.titleText')).color),
           description: rgb(getComputedStyle(element.querySelector('.titleDescription')).color)
         }
@@ -309,5 +331,22 @@ test.describe('hotPink contrast', () => {
       return { foreground: rgb(style.color), background: rgb(style.backgroundColor) }
     })
     expect.soft(contrastRatio(colors.foreground, colors.background), `header hover ${JSON.stringify(colors)}`).toBeGreaterThanOrEqual(3)
+  })
+})
+
+test.describe('bright main color toggle contrast', () => {
+  test.use({ seed: { settings: { baseTheme: 'light', mainColor: 'Yellow', currentLocale: 'en-US' } } })
+
+  test('enabled settings-header toggles stay readable and visible with a bright main color', async ({ page }) => {
+    await goToSettingsSection(page, 'general')
+    const button = page.getByRole('button', { name: 'Highlight settings changed from defaults', exact: true })
+    if (await button.getAttribute('aria-pressed') !== 'true') await button.click()
+    await expect(button).toHaveAttribute('aria-pressed', 'true')
+    await page.mouse.move(0, 0)
+    await button.blur()
+    const enabled = await renderedColors(button)
+    const surface = await renderedColors(page.locator('.settingsHeaderActions'))
+    expect(contrastRatio(enabled.foreground, enabled.background), 'enabled icon').toBeGreaterThanOrEqual(3)
+    expect(contrastRatio(enabled.background, surface.background), 'enabled container').toBeGreaterThanOrEqual(1.2)
   })
 })

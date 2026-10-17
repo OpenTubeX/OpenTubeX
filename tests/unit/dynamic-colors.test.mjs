@@ -70,6 +70,8 @@ test('dynamic palettes map Material surface and content roles in both appearance
     assert.equal(colors.textWithAccent, roles.onSecondary)
     assert.equal(colors.sideNavActive, roles.secondaryContainer)
     assert.equal(colors.sideNavActiveText, roles.onSecondaryContainer)
+    assert.notEqual(colors.sideNavHover, colors.sideNavActive, 'Hover does not look selected')
+    assert.notEqual(colors.headerHover, colors.sideNavActive, 'Header hover does not look selected')
     for (const color of Object.values(colors)) assert.match(color, /^#[0-9a-f]{6}$/)
   }
 })

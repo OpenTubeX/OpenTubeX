@@ -260,6 +260,29 @@ for (const [theme, label] of variants) {
       expect(Math.max(contrast(rendered.track, rendered.surface), contrast(rendered.border, rendered.surface)), `${theme}: toggle boundary`).toBeGreaterThanOrEqual(3)
       expect(Math.max(contrast(rendered.thumb, rendered.track), contrast(rendered.outline, rendered.track)), `${theme}: toggle thumb boundary`).toBeGreaterThanOrEqual(3)
     }
+    // Hover and focus use a neutral state layer; only enabled header toggles are tinted.
+    const highlight = page.getByRole('button', { name: 'Highlight settings changed from defaults', exact: true })
+    if (await highlight.getAttribute('aria-pressed') !== 'true') await highlight.click()
+    await page.mouse.move(0, 0)
+    await highlight.blur()
+    const enabled = await colorsOf(highlight)
+    await highlight.click()
+    await expect(highlight).toHaveAttribute('aria-pressed', 'false')
+    for (const state of ['hover', 'focus']) {
+      if (state === 'hover') await highlight.hover()
+      else {
+        await page.mouse.move(0, 0)
+        await page.keyboard.press('Shift+Tab')
+        await page.keyboard.press('Tab')
+        await expect(highlight).toBeFocused()
+      }
+      const disabled = await colorsOf(highlight)
+      const distance = Math.max(...disabled.background.map((channel, i) => Math.abs(channel - enabled.background[i])))
+      expect(distance, `${theme}: ${state} header toggle differs from enabled`).toBeGreaterThanOrEqual(8)
+    }
+    await page.mouse.move(0, 0)
+    await highlight.click()
+    await page.mouse.move(0, 0)
     const button = section.getByRole('button', { name: 'Test toast', exact: true })
     for (const state of ['normal', 'hover', 'focus', 'pressed']) {
       await button.scrollIntoViewIfNeeded()

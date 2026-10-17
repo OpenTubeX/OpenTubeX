@@ -110,9 +110,14 @@
   inline-size: 36px;
 }
 
-.headerViewToggle :deep(.iconButton[aria-pressed='true']) {
-  background-color: var(--side-nav-active-color);
-  color: var(--side-nav-active-text-color);
+/* Outranks the base-no-default hover rule so the enabled state stays visible. */
+.headerViewToggle :deep(.iconButton.base-no-default[aria-pressed='true']) {
+  background-color: var(--selected-container-color);
+  color: var(--on-selected-container-color);
+}
+
+.headerViewToggle :deep(.iconButton.base-no-default[aria-pressed='true']:is(:hover, :focus-visible)) {
+  background-color: var(--selected-container-hover-color);
 }
 
 .subscriptionsHeader .headerActions .headerRefreshWidget {

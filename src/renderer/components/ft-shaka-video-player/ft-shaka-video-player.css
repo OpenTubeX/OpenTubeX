@@ -3294,16 +3294,26 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 .fullscreenAction:hover,
 .fullscreenAction:focus-visible,
-.fullscreenAction.open,
 .fullscreenActions :deep(.fullscreenShareAction > .iconButton:hover),
 .fullscreenActions :deep(.fullscreenShareAction > .iconButton:focus-visible),
 .fullscreenActions :deep(.fullscreenShareAction > .iconButton.pressed),
 .fullscreenActions :deep(.fullscreenPlaylistAction > .iconButton:hover),
 .fullscreenActions :deep(.fullscreenPlaylistAction > .iconButton:focus-visible),
-.fullscreenActions :deep(.fullscreenPlaylistAction.open > .iconButton),
 .fullscreenActions :deep(.fullscreenPlaylistAction > .iconButton.pressed) {
   color: #fff;
   background-color: rgb(255 255 255 / 18%);
+}
+
+/* An open panel's toggle stays brighter than a hovered or focused one. */
+.fullscreenAction.open,
+.fullscreenActions :deep(.fullscreenPlaylistAction.open > .iconButton) {
+  color: #fff;
+  background-color: rgb(255 255 255 / 34%);
+}
+
+.fullscreenAction.open:is(:hover, :focus-visible),
+.fullscreenActions :deep(.fullscreenPlaylistAction.open > .iconButton:is(:hover, :focus-visible)) {
+  background-color: rgb(255 255 255 / 42%);
 }
 
 .fullscreenAction.fullscreenQuickBookmarkAction.open {
@@ -3782,13 +3792,21 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 .fullscreenTranscriptTarget :deep(.transcriptHeaderAction:hover),
 .fullscreenTranscriptTarget :deep(.transcriptHeaderAction:focus-visible),
-.fullscreenTranscriptTarget :deep(.transcriptHeaderAction.active),
 .fullscreenTranscriptTarget :deep(.transcriptHeaderActions .iconButton:hover),
 .fullscreenTranscriptTarget :deep(.transcriptHeaderActions .iconButton:focus-visible),
 .fullscreenSponsorBlockTarget :deep(.sponsorBlockHeaderActions button:hover:not(:disabled)),
 .fullscreenSponsorBlockTarget :deep(.sponsorBlockHeaderActions button:focus-visible:not(:disabled)) {
   color: #fff;
   background-color: rgb(255 255 255 / 20%);
+}
+
+.fullscreenTranscriptTarget :deep(.transcriptHeaderAction.active) {
+  color: #fff;
+  background-color: rgb(255 255 255 / 34%);
+}
+
+.fullscreenTranscriptTarget :deep(.transcriptHeaderAction.active:is(:hover, :focus-visible)) {
+  background-color: rgb(255 255 255 / 42%);
 }
 
 .fullscreenTranscriptTarget :deep(.transcriptControls) {
