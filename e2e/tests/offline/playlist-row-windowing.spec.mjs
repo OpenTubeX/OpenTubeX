@@ -55,10 +55,12 @@ test('releases distant playlist rows without changing the scroll range', { tag: 
     })
     .every(row => row.querySelector('.ft-list-video')))
   const atEnd = () => page.evaluate(() => window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1)
-  do {
+  // 300 rows fit in far fewer viewports; the cap fails fast if the end never settles.
+  for (let step = 0; !await atEnd(); step++) {
+    expect(step).toBeLessThan(200)
     await page.evaluate(() => window.scrollBy(0, window.innerHeight))
     await expect.poll(viewportMounted).toBe(true)
-  } while (!await atEnd())
+  }
   await expect(rows.last().locator('.ft-list-video')).toBeVisible()
 
   // Rows near the top were released to shells sized like the mounted rows.
