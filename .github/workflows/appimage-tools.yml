@@ -1,0 +1,103 @@
+name: Update AppImage tools
+
+# Dependabot cannot track the AppImage tools that release.yml downloads, so this
+# opens a PR when AppImage/appimagetool or AppImage/type2-runtime tags a new release.
+# Editing a workflow needs UPSTREAM_SYNC_TOKEN's Workflows write access.
+on:
+  schedule:
+    - cron: "41 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  update:
+    if: github.repository == 'OpenTubeX/OpenTubeX'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ secrets.UPSTREAM_SYNC_TOKEN }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: development
+          persist-credentials: false
+
+      - name: Update pinned versions and checksums
+        id: update
+        run: |
+          set -euo pipefail
+          file=.github/workflows/release.yml
+
+          digest() {
+            gh api "repos/$1/releases/tags/$2" \
+              --jq ".assets[] | select(.name == \"$3\") | .digest // empty | ltrimstr(\"sha256:\")"
+          }
+
+          update() {
+            local repo=$1 current latest pair asset name hash
+            shift
+            current=$(grep -oP "github\.com/$repo/releases/download/\K[^/]+" "$file" | head -1)
+            # Skip the rolling "continuous" and "old" tags.
+            latest=$(gh api "repos/$repo/releases?per_page=100" \
+              --jq '[.[] | select(.prerelease | not) | select(.tag_name | test("^[0-9]"))][0].tag_name')
+            if [[ -z "$latest" || "$latest" == "$current" ]]; then
+              return
+            fi
+            # Each argument is "<release asset>:<downloaded file name>".
+            for pair in "$@"; do
+              asset=${pair%%:*} name=${pair#*:}
+              hash=$(digest "$repo" "$latest" "$asset")
+              if [[ -z "$hash" ]] || ! grep -qE "^ +[0-9a-f]{64}  $name\$" "$file"; then
+                echo "::error::Cannot update $asset from $repo $current to $latest."
+                exit 1
+              fi
+              sed -i -E "s/^( +)[0-9a-f]{64}  $name\$/\1$hash  $name/" "$file"
+            done
+            sed -i "s|$repo/releases/download/$current/|$repo/releases/download/$latest/|g" "$file"
+            echo "- [$repo $latest](https://github.com/$repo/releases/tag/$latest) (from $current)" >> "$RUNNER_TEMP/changes.md"
+          }
+
+          update AppImage/appimagetool appimagetool-x86_64.AppImage:appimagetool.AppImage
+          update AppImage/type2-runtime runtime-x86_64:runtime runtime-armhf:runtime-armhf
+
+          if [[ -f "$RUNNER_TEMP/changes.md" ]]; then
+            {
+              echo 'changes<<EOF'
+              cat "$RUNNER_TEMP/changes.md"
+              echo EOF
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Select release milestone
+        id: milestone
+        if: steps.update.outputs.changes
+        run: |
+          milestone=$(gh api --paginate "repos/$GITHUB_REPOSITORY/milestones?state=open&per_page=100" |
+            jq -s '[.[][] | select(.title | test("[0-9]+\\.[0-9]+"))] |
+              sort_by(.title | capture("(?<version>[0-9]+(?:\\.[0-9]+)+)").version |
+                split(".") | map(tonumber)) | .[0].number // empty')
+          echo "number=$milestone" >> "$GITHUB_OUTPUT"
+
+      - name: Create or update pull request
+        if: steps.update.outputs.changes
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          token: ${{ secrets.UPSTREAM_SYNC_TOKEN }}
+          base: development
+          branch: appimage-tools
+          delete-branch: true
+          milestone: ${{ steps.milestone.outputs.number }}
+          commit-message: "ci(release): update AppImage tools"
+          title: "ci(release): update AppImage tools"
+          body: |
+            Updates the AppImage tools pinned in `release.yml` for the ARMv7l AppImage:
+
+            ${{ steps.update.outputs.changes }}
+
+            The checksums come from the digests GitHub records for the release assets.
