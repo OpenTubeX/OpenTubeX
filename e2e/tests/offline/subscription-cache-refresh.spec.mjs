@@ -125,17 +125,21 @@ test.describe('consecutive refreshes with a changing cache size', () => {
     }
     await expect(page.getByText('Finished Videos snapshot', { exact: true })).toBeVisible()
 
-    await page.evaluate(async () => {
+    const updateFirstTitle = (title) => page.evaluate(async (title) => {
       const store = window.$store
       const [channelId, cache] = Object.entries(store.getters.getVideoCache)[0]
       const videos = JSON.parse(JSON.stringify(cache.videos))
-      videos[0].title = 'Pending large-cache update'
+      videos[0].title = title
       await store.dispatch('updateSubscriptionVideosCacheByChannel', { channelId, videos })
       window.dispatchEvent(new CustomEvent('opentubex-subscription-refresh-channel', { detail: { tab: 'shorts' } }))
-      await new Promise(resolve => setTimeout(resolve, 200))
-    })
-    // The new feed's cache has crossed the size threshold. Its updates wait.
-    await expect(page.getByText('Finished Videos snapshot', { exact: true })).toBeVisible()
+    }, title)
+    // The new feed's cache has crossed the size threshold. Its first refreshed
+    // channel appears immediately, then updates wait for the next batch.
+    await updateFirstTitle('First large-cache update')
+    await expect(page.getByText('First large-cache update', { exact: true })).toBeVisible({ timeout: 1000 })
+    await updateFirstTitle('Pending large-cache update')
+    await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 200)))
+    await expect(page.getByText('First large-cache update', { exact: true })).toBeVisible()
     await expect(page.getByText('Pending large-cache update', { exact: true })).toHaveCount(0)
 
     await page.evaluate(async () => {

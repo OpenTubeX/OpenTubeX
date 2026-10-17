@@ -189,7 +189,7 @@ const sortBy = computed(() => {
 })
 const activeSubscriptions = computed(() => store.getters.getActiveProfile.subscriptions)
 const cachedContentDuringRefresh = shallowRef(null)
-let deferChannelUpdates = false
+let isLargeCachedFeed = false
 const contentOptions = computed(() => ({
   activeSubscriptions: activeSubscriptions.value,
   historyCacheById: store.getters.getHistoryCacheById,
@@ -218,7 +218,7 @@ watch([
 ], ([refreshing]) => {
   if (!refreshing) {
     cachedContentDuringRefresh.value = null
-    deferChannelUpdates = false
+    isLargeCachedFeed = false
     return
   }
 
@@ -230,21 +230,21 @@ watch([
     }
     if (cachedEntryCount > MAX_INCREMENTAL_SUBSCRIPTION_FEED_ENTRIES) break
   }
-  deferChannelUpdates = cachedEntryCount > MAX_INCREMENTAL_SUBSCRIPTION_FEED_ENTRIES
+  isLargeCachedFeed = cachedEntryCount > MAX_INCREMENTAL_SUBSCRIPTION_FEED_ENTRIES
   // Snapshot every refresh so incoming responses cannot each rebuild the DOM.
-  // Small feeds publish coalesced updates; large feeds publish at completion.
+  // Small feeds publish coalesced updates; large feeds publish in batches.
   cachedContentDuringRefresh.value = getCurrentContentByCategory()
 }, { immediate: true, flush: 'sync' })
 
 for (const feedType of ['videos', 'shorts', 'live', 'posts']) {
   useSubscriptionChannelUpdates(feedType, () => {
-    if (cachedContentDuringRefresh.value === null || deferChannelUpdates) return
+    if (cachedContentDuringRefresh.value === null) return
     cachedContentDuringRefresh.value = getCurrentContentByCategory()
-  })
+  }, () => isLargeCachedFeed)
 }
 
-// Cache updates can wait until the refresh ends, but local filtering and sort
-// choices should still affect the list while a large refresh is running.
+// Cache updates are batched during large refreshes, but local filtering and
+// sort choices should affect the list immediately.
 watch([
   contentOptions,
   () => store.getters.getSubscriptionSeenVideos,
