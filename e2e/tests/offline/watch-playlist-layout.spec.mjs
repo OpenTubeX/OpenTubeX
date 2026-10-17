@@ -355,3 +355,91 @@ test('landscape fullscreen playlist shows more videos and keeps controls outside
   await attachScreenshot('landscape fullscreen playlist')
   await setPlayerFullscreen(page, false)
 })
+
+test.describe('long watch playlist', () => {
+  const longVideos = Array.from({ length: 120 }, (_, index) => ({
+    ...videos[index % videos.length],
+    videoId: index === 0 ? 'jNQXAC9IVRw' : `longvideo${String(index).padStart(3, '0')}`,
+    title: `Long playlist video ${index + 1}`,
+    timeAdded: Date.now() + index,
+    playlistItemId: `long-item-${index}`,
+  }))
+
+  test.use({
+    seed: {
+      settings: {
+        animationSpeed: 0,
+        userPlaylistSortOrder: 'custom',
+        videoPlaybackEngine: 'built-in',
+        ytDlpPlaybackEngineDefaultMigration: true
+      },
+      playlists: [{
+        _id: 'long-playlist',
+        playlistName: 'Long test playlist',
+        protected: false,
+        description: '',
+        videos: longVideos,
+        createdAt: Date.now(),
+        lastUpdatedAt: Date.now()
+      }]
+    }
+  })
+
+  test('remeasures released rows when a height-only breakpoint restyles the fullscreen playlist', { tag: '@scale' }, async ({ app, page, uiScale }) => {
+    await mockPlayableWatchPage(app, page)
+    await goTo(page, 'userplaylists')
+    await page.getByText('Long test playlist', { exact: true }).click()
+    await page.getByText('Long playlist video 1', { exact: true }).click()
+    await waitForPlayback(page)
+
+    // Landscape above the 600px height breakpoint, then only the height changes.
+    await setWindowSize(app, page, { width: 1000, height: 700 })
+    await page.setViewportSize({ width: Math.round(1000 * uiScale / 100), height: Math.round(700 * uiScale / 100) })
+    await setPlayerFullscreen(page, true)
+    const player = page.locator('.ftVideoPlayer')
+    await player.hover({ position: { x: 20, y: 20 } })
+    await expect(player.locator('.shaka-controls-container')).toHaveAttribute('shown', 'true')
+    await page.locator('.fullscreenPlaylistToggle').click()
+    const list = page.locator('.fullscreenPlaylistTarget .playlistItemsWrapper')
+    await expect(list).toBeVisible()
+
+    const shellCount = () => list.evaluate(element => [...element.querySelectorAll(':scope > .playlistItem')]
+      .filter(row => !row.querySelector('.ft-list-video') && row.style.blockSize).length)
+    const rowHeight = () => list.evaluate(element => element.querySelector(':scope > .playlistItem:has(.ft-list-video)').getBoundingClientRect().height)
+    // Scroll to the end so rows near the top become measured shells.
+    await expect.poll(async () => {
+      await list.evaluate(element => { element.scrollTop = element.scrollHeight })
+      return shellCount()
+    }).toBeGreaterThan(20)
+    const tallRow = await rowHeight()
+
+    // setWindowSize waits for both dimensions to change, so resize the height alone directly.
+    await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setBounds({ width: 1000, height: 440 }))
+    await page.setViewportSize({ width: Math.round(1000 * uiScale / 100), height: Math.round(440 * uiScale / 100) })
+    await expect.poll(rowHeight).toBeLessThan(tallRow - 1)
+    await list.evaluate(element => { element.scrollTop = element.scrollHeight })
+    // At fractional UI scales the offset snaps to device pixels and scrollHeight
+    // rounds, so the end may sit up to about a pixel past the last row. Stale
+    // shells or a retained overflow range leave far more empty space than that.
+    await expect.poll(() => list.evaluate(element => {
+      const rows = element.querySelectorAll(':scope > .playlistItem')
+      const last = rows[rows.length - 1]
+      return element.getBoundingClientRect().bottom - last.getBoundingClientRect().bottom -
+        (Number.parseFloat(getComputedStyle(last).marginBlockEnd) || 0)
+    })).toBeLessThan(2)
+
+    // Stale shells would change the range once the rows near the top mount again.
+    const range = () => list.evaluate(element => element.scrollHeight)
+    let settled = 0
+    await expect.poll(async () => {
+      const current = await range()
+      const stable = Math.abs(current - settled) <= 1
+      settled = current
+      return stable
+    }).toBe(true)
+    await list.evaluate(element => { element.scrollTop = 0 })
+    await expect(list.locator(':scope > .playlistItem').first().locator('.ft-list-video')).toBeVisible()
+    await expect.poll(async () => Math.abs(await range() - settled)).toBeLessThanOrEqual(1)
+    await setPlayerFullscreen(page, false)
+  })
+})

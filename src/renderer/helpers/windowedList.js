@@ -2,13 +2,13 @@
 // overscan region; measured fractional heights keep the scroll range stable.
 export const WINDOWED_LIST_OVERSCAN_PX = 800
 
-export function createListWindow({ IntersectionObserver: Intersection, ResizeObserver: Resize, requestAnimationFrame: frame, cancelAnimationFrame: cancel } = globalThis) {
+export function createListWindow({ IntersectionObserver: Intersection, ResizeObserver: Resize, requestAnimationFrame: frame, cancelAnimationFrame: cancel } = globalThis, { nested = false, viewport = globalThis } = {}) {
   const items = new Map()
   const releases = new Set()
   const widthRemeasures = new Set()
   let releaseFrame = null
   let remeasureFrame = null
-  function scheduleWidthRemeasure(item) {
+  function scheduleRemeasure(item) {
     widthRemeasures.add(item)
     if (remeasureFrame !== null) return
     remeasureFrame = frame(remeasureWidths)
@@ -39,6 +39,31 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
       for (const { candidate, height } of measured) candidate.evict(height)
     })
   }
+  // Height-only breakpoints, such as landscape phones, can restyle every row
+  // without the width change that remeasures shells. The keyboard resizing the
+  // viewport leaves rows unchanged, so only a mounted row's new height counts.
+  let viewportWidth = viewport.innerWidth
+  let viewportCheck = null
+  function checkViewportResize() {
+    if (viewport.innerWidth !== viewportWidth) {
+      viewportWidth = viewport.innerWidth
+      return
+    }
+    if (viewportCheck !== null) return
+    viewportCheck = frame(() => {
+      viewportCheck = null
+      const restyled = [...items.values()].some(item => item.isMounted() && item.height > 0 &&
+        Math.abs(item.element.getBoundingClientRect().height - item.height) > 0.5)
+      if (!restyled) return
+      for (const item of items.values()) {
+        if (!item.near && !item.isMounted() && item.height > 0) scheduleRemeasure(item)
+      }
+    })
+  }
+  if (nested) viewport.addEventListener('resize', checkViewportResize)
+  // scrollMargin extends the overscan into nested scrollers such as the
+  // watch-page playlist. Browsers without it mount rows as they appear.
+  const margin = `${WINDOWED_LIST_OVERSCAN_PX}px 0px`
   const intersection = new Intersection(entries => {
     for (const entry of entries) {
       const item = items.get(entry.target)
@@ -47,7 +72,7 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
       if (item.near) item.mount()
       else item.release()
     }
-  }, { rootMargin: `${WINDOWED_LIST_OVERSCAN_PX}px 0px` })
+  }, nested ? { rootMargin: margin, scrollMargin: margin } : { rootMargin: margin })
   const resize = new Resize(entries => {
     for (const entry of entries) {
       const item = items.get(entry.target)
@@ -56,7 +81,7 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
       const height = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height
       const resized = item.width !== null && Math.abs(width - item.width) > 0.01
       item.width = width
-      if (resized && !item.isMounted() && item.height > 0) scheduleWidthRemeasure(item)
+      if (resized && !item.isMounted() && item.height > 0) scheduleRemeasure(item)
       else if (item.isMounted()) {
         item.height = height
         if (!item.near) item.release()
@@ -123,8 +148,11 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
     disconnect() {
       cancel(releaseFrame)
       cancel(remeasureFrame)
+      cancel(viewportCheck)
       releaseFrame = null
       remeasureFrame = null
+      viewportCheck = null
+      if (nested) viewport.removeEventListener('resize', checkViewportResize)
       for (const item of items.values()) item.dispose()
       releases.clear()
       widthRemeasures.clear()
@@ -138,4 +166,12 @@ let sharedWindow
 export function observeWindowedListItem(element, options) {
   sharedWindow ??= createListWindow()
   return sharedWindow.observe(element, options)
+}
+
+// Rows inside their own scroller, such as the watch-page playlist, need the
+// overscan there too. Top-level lists and feeds use the shared window above.
+let nestedWindow
+export function observeNestedWindowedListItem(element, options) {
+  nestedWindow ??= createListWindow(globalThis, { nested: true })
+  return nestedWindow.observe(element, options)
 }

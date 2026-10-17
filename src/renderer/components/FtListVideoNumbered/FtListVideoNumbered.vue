@@ -1,9 +1,8 @@
 <template>
   <div
-    ref="root"
-    v-observe-visibility="visible ? false : {
-      callback: onVisibilityChanged
-    }"
+    ref="row"
+    v-first-visible="windowed || visible ? false : onFirstVisible"
+    :style="!visible && shellHeight ? { blockSize: `${shellHeight}px` } : undefined"
     :class="{
       placeholder: !visible,
       draggable: canBecomeDraggable,
@@ -87,10 +86,12 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { usePlaylistDrag } from '../../composables/usePlaylistDrag'
+import { vFirstVisible } from '../../helpers/firstVisible'
+import { observeNestedWindowedListItem, observeWindowedListItem } from '../../helpers/windowedList'
 import store from '../../store/index'
 import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 
@@ -180,6 +181,10 @@ const props = defineProps({
   isCurrentVideo: {
     type: Boolean,
     default: false
+  },
+  nestedScroller: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -195,7 +200,6 @@ const emit = defineEmits([
   'drag-video-end'
 ])
 const visible = ref(props.initialVisibleState)
-const root = useTemplateRef('root')
 const { t } = useI18n()
 const downloadAvailable = computed(() => {
   if (!props.downloadId) return false
@@ -228,17 +232,38 @@ if (!props.initialVisibleState) {
   })
 }
 
-/**
- * @param {boolean} isVisible
- */
-async function onVisibilityChanged(isVisible) {
-  if (!isVisible) return
+// Long playlists release distant rows to measured shells. Mounted rows would
+// otherwise accumulate while scrolling and slow down every style update.
+const windowed = process.env.IS_CAPACITOR || process.env.IS_ELECTRON
+const row = useTemplateRef('row')
+const shellHeight = ref(0)
+if (windowed) {
+  let windowItem = null
+  watch(row, element => {
+    windowItem?.dispose()
+    windowItem = null
+    if (!element) return
+    const observe = props.nestedScroller ? observeNestedWindowedListItem : observeWindowedListItem
+    windowItem = observe(element, {
+      mount: onFirstVisible,
+      unmount: height => { shellHeight.value = height; visible.value = false },
+      isMounted: () => visible.value,
+      isProtected: () => props.isVideoDragging || pointerDragging.value ||
+        element.contains(document.activeElement) ||
+        !!element.querySelector('[aria-expanded="true"], [role="dialog"]'),
+    })
+  }, { flush: 'post' })
+  onBeforeUnmount(() => windowItem?.dispose())
+}
+
+async function onFirstVisible() {
+  if (visible.value) return
 
   // A slow renderer can report a row after its list already scrolled past it,
   // for example after centering the current video. Without native scroll
   // anchoring (phone panels disable it), the growing row would push the visible
   // rows down, so keep them in place ourselves.
-  const element = root.value
+  const element = row.value
   const scroller = element?.parentElement
   const placeholderBounds = scroller != null && getComputedStyle(scroller).overflowAnchor === 'none'
     ? element.getBoundingClientRect()

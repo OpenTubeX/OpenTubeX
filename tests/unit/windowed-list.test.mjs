@@ -106,3 +106,76 @@ test('protected offscreen cards do not repeatedly read layout', t => {
   assert.equal(f.reads(), reads)
   f.windowing.disconnect()
 })
+
+function fakeViewport() {
+  const listeners = new Set()
+  return {
+    innerWidth: 400,
+    addEventListener(_type, listener) { listeners.add(listener) },
+    removeEventListener(_type, listener) { listeners.delete(listener) },
+    resize() { for (const listener of listeners) listener() },
+    listeners,
+  }
+}
+
+test('extends the overscan into nested scrollers only for nested windows', () => {
+  const options = []
+  const create = nested => createListWindow({
+    IntersectionObserver: class { constructor(_fn, opts) { options.push(opts) } observe() {} unobserve() {} disconnect() {} },
+    ResizeObserver: class { observe() {} unobserve() {} disconnect() {} },
+    requestAnimationFrame: () => 1,
+    cancelAnimationFrame() {},
+  }, { nested, viewport: fakeViewport() })
+  create(false).disconnect()
+  create(true).disconnect()
+  assert.equal(options[0].scrollMargin, undefined)
+  assert.equal(options[1].scrollMargin, options[1].rootMargin)
+})
+
+test('remeasures nested shells only when a height-only resize restyles mounted rows', () => {
+  let intersect, resize
+  const frames = []
+  const viewport = fakeViewport()
+  const windowing = createListWindow({
+    IntersectionObserver: class { constructor(fn) { intersect = fn } observe() {} unobserve() {} disconnect() {} },
+    ResizeObserver: class { constructor(fn) { resize = fn } observe() {} unobserve() {} disconnect() {} },
+    requestAnimationFrame(fn) { frames.push(fn); return frames.length },
+    cancelAnimationFrame() {},
+  }, { nested: true, viewport })
+  const runFrames = () => { while (frames.length) frames.shift()() }
+
+  let rowHeight = 100
+  const mounted = new Map()
+  const refreshes = []
+  const add = name => {
+    const element = { getBoundingClientRect: () => ({ height: rowHeight }) }
+    mounted.set(element, true)
+    windowing.observe(element, {
+      mount() { if (!mounted.get(element)) refreshes.push(name); mounted.set(element, true) },
+      unmount() { mounted.set(element, false) },
+      isMounted: () => mounted.get(element),
+      isProtected: () => false,
+    })
+    resize([{ target: element, contentRect: { width: 300, height: rowHeight } }])
+    return element
+  }
+  const near = add('near')
+  const shell = add('shell')
+  intersect([{ target: near, isIntersecting: true }, { target: shell, isIntersecting: false }])
+  runFrames()
+  assert.equal(mounted.get(shell), false)
+
+  // The keyboard shrinks the viewport, but rows keep their height.
+  viewport.resize()
+  runFrames()
+  assert.deepEqual(refreshes, [])
+
+  // A height-only breakpoint shrinks every row; the stale shell is rebuilt.
+  rowHeight = 60
+  viewport.resize()
+  runFrames()
+  assert.deepEqual(refreshes, ['shell'])
+
+  windowing.disconnect()
+  assert.equal(viewport.listeners.size, 0)
+})
