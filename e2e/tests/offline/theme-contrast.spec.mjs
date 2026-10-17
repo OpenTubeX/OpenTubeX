@@ -341,6 +341,7 @@ test.describe('bright main color toggle contrast', () => {
     await goToSettingsSection(page, 'general')
     const button = page.getByRole('button', { name: 'Highlight settings changed from defaults', exact: true })
     if (await button.getAttribute('aria-pressed') !== 'true') await button.click()
+    await expect(button).toHaveAttribute('aria-pressed', 'true')
     await page.mouse.move(0, 0)
     await button.blur()
     const enabled = await renderedColors(button)

@@ -67,6 +67,10 @@
   background-color: var(--selected-container-color);
 }
 
+.transcriptHeaderAction.active:is(:hover, :focus-visible) {
+  background-color: var(--selected-container-hover-color);
+}
+
 .transcriptLanguageMenu {
   position: absolute;
   z-index: 4;

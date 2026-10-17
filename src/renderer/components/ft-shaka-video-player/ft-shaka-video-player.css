@@ -3311,6 +3311,11 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   background-color: rgb(255 255 255 / 34%);
 }
 
+.fullscreenAction.open:is(:hover, :focus-visible),
+.fullscreenActions :deep(.fullscreenPlaylistAction.open > .iconButton:is(:hover, :focus-visible)) {
+  background-color: rgb(255 255 255 / 42%);
+}
+
 .fullscreenAction.fullscreenQuickBookmarkAction.open {
   color: var(--favorite-icon-color);
 }
@@ -3798,6 +3803,10 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 .fullscreenTranscriptTarget :deep(.transcriptHeaderAction.active) {
   color: #fff;
   background-color: rgb(255 255 255 / 34%);
+}
+
+.fullscreenTranscriptTarget :deep(.transcriptHeaderAction.active:is(:hover, :focus-visible)) {
+  background-color: rgb(255 255 255 / 42%);
 }
 
 .fullscreenTranscriptTarget :deep(.transcriptControls) {

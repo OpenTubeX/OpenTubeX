@@ -953,6 +953,10 @@
       background-color: var(--selected-container-color);
     }
 
+    .shortsCommentsPanel :deep(.fullscreenCommentAction.active:is(:hover, :focus-visible)) {
+      background-color: var(--selected-container-hover-color);
+    }
+
     .shortsAuxPanelOpen {
       display: flex;
       opacity: 1;

@@ -116,6 +116,10 @@
   background-color: rgb(255 255 255 / 34%);
 }
 
+.fullscreenCommentAction.active:is(:hover, :focus-visible) {
+  background-color: rgb(255 255 255 / 42%);
+}
+
 .commentCreatorFilterAvatar {
   inline-size: var(--comment-creator-filter-avatar-size, 20px);
   block-size: var(--comment-creator-filter-avatar-size, 20px);
