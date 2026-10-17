@@ -100,7 +100,9 @@ with http.server.ThreadingHTTPServer(('127.0.0.1', 0), Metadata) as server:
         'url': f'http://127.0.0.1:{server.server_port}/metadata',
         'method': 'GET', 'headers': {'Cookie': 'test=fixture'}, 'timeout': 3000,
     }).encode()
-    result = original_run([os.environ['OPENTUBEX_RUMBLE_HTTP']], input=payload,
+    # The relay refuses loopback destinations, so reach this fixture directly.
+    environment = {name: value for name, value in os.environ.items() if name != 'https_proxy'}
+    result = original_run([os.environ['OPENTUBEX_RUMBLE_HTTP']], input=payload, env=environment,
                           capture_output=True, timeout=5, check=True)
     response = json.loads(result.stdout)
     assert response['status'] == 200
