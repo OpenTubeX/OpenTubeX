@@ -676,6 +676,13 @@ test.describe('settings', () => {
         thumbHeight: handle.getBoundingClientRect().height
       }
     })
+    // OverlayScrollbars positions the thumb after the scroll event, so let it settle before taking the baseline.
+    await expect.poll(async () => {
+      const first = await measure()
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+      const second = await measure()
+      return Math.abs(second.thumbTop - first.thumbTop) + Math.abs(second.scrollTop - first.scrollTop)
+    }).toBe(0)
     const box = await slider.boundingBox()
     expect(box, 'Animation Speed slider must be visible before dragging').not.toBeNull()
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
