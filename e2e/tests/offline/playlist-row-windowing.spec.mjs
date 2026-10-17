@@ -46,24 +46,28 @@ async function scrollToEnd(page) {
       return bottom > 0 && top < window.innerHeight
     })
     .every(row => row.querySelector('.ft-list-video')))
-  const atEnd = () => page.evaluate(() => window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1)
+  // One evaluation, so a page loaded between two checks can't pass for the end.
+  const atEnd = () => page.evaluate(count => document.querySelectorAll('.playlistItems > .playlistItem').length === count &&
+    window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1, VIDEO_COUNT)
   // Far fewer steps are needed; the cap fails fast if the end never settles.
   for (let step = 0; ; step++) {
     expect(step).toBeLessThan(200)
     await page.evaluate(() => window.scrollBy(0, window.innerHeight))
     await expect.poll(viewportMounted).toBe(true)
-    if (await atEnd() && await rowsOf(page).count() === VIDEO_COUNT) break
+    if (await atEnd()) break
   }
   await expect(rowsOf(page).last().locator('.ft-list-video')).toBeVisible()
 }
 
 /** Jumps to the end, loading later pages, without visiting every row. */
 async function jumpToEnd(page) {
-  await expect.poll(async () => {
-    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
-    return await rowsOf(page).count() === VIDEO_COUNT &&
-      await page.evaluate(() => window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1)
-  }).toBe(true)
+  // Placeholders grow as they mount, so the end only counts once the last row is real.
+  await expect.poll(() => page.evaluate(count => {
+    window.scrollTo(0, document.documentElement.scrollHeight)
+    const rows = document.querySelectorAll('.playlistItems > .playlistItem')
+    return rows.length === count && !!rows[rows.length - 1].querySelector('.ft-list-video') &&
+      window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1
+  }, VIDEO_COUNT)).toBe(true)
   await expect(rowsOf(page).last().locator('.ft-list-video')).toBeVisible()
 }
 
