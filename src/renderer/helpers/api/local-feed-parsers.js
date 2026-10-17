@@ -830,8 +830,10 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         const imageAuthorId = imageEndpoint?.payload?.browseId
         const author = authorPart?.text ?? channelName ??
           metadataParts.find(part => part.avatar_stack?.text?.text)?.avatar_stack.text.text
-        const authorId = authorPart?.endpoint?.payload?.browseId ?? imageAuthorId ?? channelId
-        const authorHandle = getChannelHandleFromEndpoint(authorPart?.endpoint) ?? getChannelHandleFromEndpoint(imageEndpoint)
+        const authorEndpoint = authorPart?.endpoint?.payload?.browseId ? authorPart.endpoint : imageAuthorId ? imageEndpoint : undefined
+        const authorId = authorEndpoint?.payload.browseId ?? channelId
+        // Read the handle from the same endpoint as the ID so they always describe the same channel
+        const authorHandle = getChannelHandleFromEndpoint(authorEndpoint)
         const hasCollaborators = authorPart?.endpoint == null && isCollaborativeVideoAuthor(author)
 
         return {
