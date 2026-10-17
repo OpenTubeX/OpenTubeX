@@ -1146,6 +1146,14 @@ const customActions = {
     normalizeNavigationItems(value)
   ),
 
+  // Home customization edits build on the previous edit, so commit them before the save finishes.
+  updateHomeSectionLayout: ({ commit, state }, value) => updateOrderedSetting(
+    commit,
+    state,
+    'homeSectionLayout',
+    value
+  ),
+
   updateYtDlpAutomaticDownloadRules: ({ commit, state }, update) => {
     // Capture authorization during the gesture, before earlier saves can delay this one.
     const persist = process.env.IS_ELECTRON
