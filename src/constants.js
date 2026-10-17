@@ -75,6 +75,7 @@ const IpcChannels = {
   TABS_DELETE_GROUP: 'tabs-delete-group',
   TABS_SET_GROUP: 'tabs-set-group',
   TABS_RUN_ORGANIZER_ACTION: 'tabs-run-organizer-action',
+  TABS_UNLOAD_LEAST_RECENTLY_USED: 'tabs-unload-least-recently-used',
   TABS_GET_MOVE_TARGETS: 'tabs-get-move-targets',
   TABS_MOVE_TO_WINDOW: 'tabs-move-to-window',
   TABS_SET_SELECTED: 'tabs-set-selected',

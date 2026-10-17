@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: לפרוק כמה כרטיסיות?
   Message: פעולה זו תפרוק {count} כרטיסייה. | פעולה זו תפרוק {count} כרטיסיות.
   Unload Tabs: פריקת {count} כרטיסייה | פריקת {count} כרטיסיות
+Tabs Unloaded To Free Memory: נפרקה {count} כרטיסייה שלא השתמשת בה לאחרונה כדי לפנות זיכרון | נפרקו {count} כרטיסיות שלא השתמשת בהן לאחרונה כדי לפנות זיכרון | נפרקו {count} כרטיסיות שלא השתמשת בהן לאחרונה כדי לפנות זיכרון
 Use Vertical Tabs: שימוש בכרטיסיות אנכיות
 Use Horizontal Tabs: שימוש בכרטיסיות אופקיות
 Resize Tab Bar: שינוי גודל סרגל הכרטיסיות

@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: Frigjøre flere faner?
   Message: Dette frigjør {count} faner.
   Unload Tabs: Frigjør {count} faner
+Tabs Unloaded To Free Memory: '{count} fane du ikke har brukt nylig, ble frigjort for å spare minne | {count} faner du ikke har brukt nylig, ble frigjort for å spare minne'
 Use Vertical Tabs: Bruk loddrette faner
 Use Horizontal Tabs: Bruk vannrette faner
 Resize Tab Bar: Endre størrelsen på fanelinjen

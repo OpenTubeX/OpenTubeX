@@ -1707,6 +1707,21 @@ export class TabManager {
   }
 
   /**
+   * Frees renderer memory before it runs out by unloading the older half of the
+   * loaded background tabs. The selected tab and playing tabs stay loaded.
+   * @returns {Promise<number>} The number of unloaded tabs
+   */
+  async unloadLeastRecentlyUsedTabs() {
+    const candidates = [...this.tabs.values()]
+      .filter(tab => tab.loadState === 'loaded' && !tab.isPlaying &&
+        tab.id !== this.activeTabId && tab.id !== this.presentedTabId)
+      .sort((a, b) => a.lastActiveAt - b.lastActiveAt)
+    const tabIds = candidates.slice(0, Math.ceil(candidates.length / 2)).map(tab => tab.id)
+    await this.unloadTabs(tabIds)
+    return tabIds.length
+  }
+
+  /**
    * Unload several tabs at once, see {@link closeTabs}.
    * @param {string[]} tabIds
    * @returns {Promise<void>}

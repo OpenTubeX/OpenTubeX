@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: Poistetaanko useita välilehtiä muistista?
   Message: Tämä poistaa {count} välilehteä muistista.
   Unload Tabs: Poista {count} välilehteä muistista
+Tabs Unloaded To Free Memory: Muistin vapauttamiseksi poistettiin {count} välilehti, jota et ole käyttänyt äskettäin | Muistin vapauttamiseksi poistettiin {count} välilehteä, joita et ole käyttänyt äskettäin
 Use Vertical Tabs: Käytä pystysuuntaisia välilehtiä
 Use Horizontal Tabs: Käytä vaakasuuntaisia välilehtiä
 Resize Tab Bar: Muuta välilehtipalkin kokoa

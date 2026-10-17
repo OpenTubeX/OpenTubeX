@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: Uvoľniť viacero kariet?
   Message: Uvoľní sa {count} karta. | Uvoľní sa {count} kariet.
   Unload Tabs: Uvoľniť {count} kartu | Uvoľniť {count} kariet
+Tabs Unloaded To Free Memory: Kvôli nedostatku pamäte sa uvoľnila {count} karta, ktorú ste nedávno nepoužili | Kvôli nedostatku pamäte sa uvoľnili {count} karty, ktoré ste nedávno nepoužili | Kvôli nedostatku pamäte sa uvoľnilo {count} kariet, ktoré ste nedávno nepoužili
 Use Vertical Tabs: Použiť zvislé karty
 Use Horizontal Tabs: Použiť vodorovné karty
 Resize Tab Bar: Zmeniť veľkosť panela kariet

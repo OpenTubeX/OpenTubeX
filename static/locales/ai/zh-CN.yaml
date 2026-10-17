@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: 要卸载多个标签页吗？
   Message: 将卸载 {count} 个标签页。
   Unload Tabs: 卸载 {count} 个标签页
+Tabs Unloaded To Free Memory: 为释放内存，已卸载 {count} 个最近未使用的标签页
 Use Vertical Tabs: 使用垂直标签页
 Use Horizontal Tabs: 使用水平标签页
 Resize Tab Bar: 调整标签栏大小

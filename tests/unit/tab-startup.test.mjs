@@ -903,3 +903,24 @@ test('state broadcasts carry a tab avatar only when it changed', async t => {
   assert.deepEqual(avatarsSent(), [null, null], 'a reloading renderer gets every avatar again')
   assert.equal(manager.getState().tabs[0].avatarUrl, null, 'direct state requests always include avatars')
 })
+
+test('memory pressure unloads the older half of idle background tabs', async t => {
+  const manager = createManager(t)
+  const selected = manager.createTab({ route: '/history' })
+  presentActive(manager)
+  const tabs = []
+  for (let index = 0; index < 5; index++) {
+    const tab = await manager.createTabWithPreference({ route: `/channel/${index}`, makeActive: false })
+    manager.markTabMounted(tab.id, tab.mountRevision)
+    tab.lastActiveAt = index
+    tabs.push(tab)
+  }
+  tabs[0].isPlaying = true
+  selected.lastActiveAt = -1
+
+  assert.equal(await manager.unloadLeastRecentlyUsedTabs(), 2)
+  assert.deepEqual(
+    [selected, ...tabs].map(tab => tab.loadState),
+    ['loaded', 'loaded', 'unloaded', 'unloaded', 'loaded', 'loaded']
+  )
+})

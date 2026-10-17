@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: Bongkar beberapa tab?
   Message: Tindakan ini akan membongkar {count} tab dari memori.
   Unload Tabs: Bongkar {count} Tab
+Tabs Unloaded To Free Memory: '{count} tab yang belum Anda gunakan baru-baru ini dibongkar untuk mengosongkan memori'
 Use Vertical Tabs: Gunakan Tab Vertikal
 Use Horizontal Tabs: Gunakan Tab Horizontal
 Resize Tab Bar: Ubah Ukuran Bilah Tab

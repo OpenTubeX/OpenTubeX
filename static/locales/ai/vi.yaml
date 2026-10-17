@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: Dỡ nhiều thẻ?
   Message: Thao tác này sẽ dỡ {count} thẻ.
   Unload Tabs: Dỡ {count} thẻ
+Tabs Unloaded To Free Memory: Đã dỡ {count} thẻ bạn không dùng gần đây để giải phóng bộ nhớ
 Use Vertical Tabs: Dùng thẻ dọc
 Use Horizontal Tabs: Dùng thẻ ngang
 Resize Tab Bar: Đổi kích thước thanh thẻ

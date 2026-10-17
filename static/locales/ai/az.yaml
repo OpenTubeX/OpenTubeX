@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: Bir neçə vərəq yaddaşdan çıxarılsın?
   Message: Bu, {count} vərəqi yaddaşdan çıxaracaq.
   Unload Tabs: "{count} vərəqi yaddaşdan çıxar"
+Tabs Unloaded To Free Memory: Yaddaşı boşaltmaq üçün son vaxtlar istifadə etmədiyiniz {count} vərəq yaddaşdan çıxarıldı | Yaddaşı boşaltmaq üçün son vaxtlar istifadə etmədiyiniz {count} vərəq yaddaşdan çıxarıldı
 Use Vertical Tabs: Şaquli vərəqlərdən istifadə et
 Use Horizontal Tabs: Üfüqi vərəqlərdən istifadə et
 Resize Tab Bar: Vərəq panelinin ölçüsünü dəyiş

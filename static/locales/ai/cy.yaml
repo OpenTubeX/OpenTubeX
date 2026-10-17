@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: Dadlwytho mwy nag un tab?
   Message: Bydd hyn yn dadlwytho {count} o dabiau. | Bydd hyn yn dadlwytho {count} tab. | Bydd hyn yn dadlwytho {count} dab. | Bydd hyn yn dadlwytho {count} thab. | Bydd hyn yn dadlwytho {count} thab. | Bydd hyn yn dadlwytho {count} tab.
   Unload Tabs: Dadlwytho {count} o dabiau | Dadlwytho {count} tab | Dadlwytho {count} dab | Dadlwytho {count} thab | Dadlwytho {count} thab | Dadlwytho {count} tab
+Tabs Unloaded To Free Memory: 'Wedi dadlwytho {count} o dabiau nad ydych wedi''u defnyddio''n ddiweddar i ryddhau cof | Wedi dadlwytho {count} tab nad ydych wedi''i ddefnyddio''n ddiweddar i ryddhau cof | Wedi dadlwytho {count} dab nad ydych wedi''u defnyddio''n ddiweddar i ryddhau cof | Wedi dadlwytho {count} thab nad ydych wedi''u defnyddio''n ddiweddar i ryddhau cof | Wedi dadlwytho {count} thab nad ydych wedi''u defnyddio''n ddiweddar i ryddhau cof | Wedi dadlwytho {count} tab nad ydych wedi''u defnyddio''n ddiweddar i ryddhau cof'
 Use Vertical Tabs: Defnyddio tabiau fertigol
 Use Horizontal Tabs: Defnyddio tabiau llorweddol
 Resize Tab Bar: Newid maint y bar tabiau

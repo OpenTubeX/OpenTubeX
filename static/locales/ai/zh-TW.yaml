@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: 要卸載多個分頁嗎？
   Message: 這會卸載 {count} 個分頁。
   Unload Tabs: 卸載 {count} 個分頁
+Tabs Unloaded To Free Memory: 為釋放記憶體，已卸載 {count} 個最近未使用的分頁
 Use Vertical Tabs: 使用垂直分頁
 Use Horizontal Tabs: 使用水平分頁
 Resize Tab Bar: 調整分頁列大小

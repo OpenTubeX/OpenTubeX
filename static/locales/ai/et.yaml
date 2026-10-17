@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: Kas laadida mitu vahekaarti mälust välja?
   Message: See laadib {count} vahekaarti mälust välja.
   Unload Tabs: Laadi {count} vahekaarti mälust välja
+Tabs Unloaded To Free Memory: Mälu vabastamiseks laaditi välja {count} vahekaart, mida te pole hiljuti kasutanud | Mälu vabastamiseks laaditi välja {count} vahekaarti, mida te pole hiljuti kasutanud
 Use Vertical Tabs: Kasuta püstiseid vahekaarte
 Use Horizontal Tabs: Kasuta rõhtsaid vahekaarte
 Resize Tab Bar: Muuda vahekaardiriba suurust

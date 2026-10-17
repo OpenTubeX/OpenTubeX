@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: 複数のタブを解放しますか？
   Message: '{count}個のタブをメモリから解放します。'
   Unload Tabs: '{count}個のタブを解放する'
+Tabs Unloaded To Free Memory: メモリを確保するため、最近使っていない{count}個のタブを解放しました
 Use Vertical Tabs: 縦型タブを使用
 Use Horizontal Tabs: 横型タブを使用
 Resize Tab Bar: タブバーのサイズを変更

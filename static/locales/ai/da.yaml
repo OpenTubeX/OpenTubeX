@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: Frigør flere faner?
   Message: Dette frigør {count} faner.
   Unload Tabs: Frigør {count} faner
+Tabs Unloaded To Free Memory: '{count} fane, du ikke har brugt for nylig, blev frigjort for at spare hukommelse | {count} faner, du ikke har brugt for nylig, blev frigjort for at spare hukommelse'
 Compact side navigation: Kompakt sidenavigation
 Expand side navigation: Udvid sidenavigation
 Use Vertical Tabs: Brug lodrette faner

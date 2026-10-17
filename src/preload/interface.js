@@ -118,6 +118,13 @@ export default {
     hideSplash: process.argv.includes('--hide-startup-splash=true')
   },
   isFlatpak: process.env.FLATPAK_ID !== undefined,
+  /**
+   * @returns {{ usedHeapSize: number, heapSizeLimit: number }} V8 heap usage of this renderer in KB
+   */
+  getHeapStatistics: () => {
+    const { usedHeapSize, heapSizeLimit } = process.getHeapStatistics()
+    return { usedHeapSize, heapSizeLimit }
+  },
   runtimeVersions: Object.freeze({
     electron: process.versions.electron,
     chromium: process.versions.chrome,
@@ -1296,6 +1303,13 @@ export default {
 
     runOrganizerAction: (action, tabIds) => {
       return ipcRenderer.invoke(IpcChannels.TABS_RUN_ORGANIZER_ACTION, action, tabIds)
+    },
+
+    /**
+     * @returns {Promise<number>} The number of unloaded tabs
+     */
+    unloadLeastRecentlyUsed: () => {
+      return ipcRenderer.invoke(IpcChannels.TABS_UNLOAD_LEAST_RECENTLY_USED)
     },
 
     getMoveTargets: () => {

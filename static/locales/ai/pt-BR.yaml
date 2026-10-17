@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: Baixar várias guias da memória?
   Message: Esta ação baixará {count} guia da memória. | Esta ação baixará {count} guias da memória.
   Unload Tabs: Baixar {count} guia | Baixar {count} guias
+Tabs Unloaded To Free Memory: Para liberar memória, foi baixada {count} guia que você não usou recentemente | Para liberar memória, foram baixadas {count} de guias que você não usou recentemente | Para liberar memória, foram baixadas {count} guias que você não usou recentemente
 Use Vertical Tabs: Usar guias verticais
 Use Horizontal Tabs: Usar guias horizontais
 Resize Tab Bar: Redimensionar barra de guias

@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: Queres descargar varias lapelas?
   Message: Isto descargará {count} lapelas.
   Unload Tabs: Descargar {count} lapelas
+Tabs Unloaded To Free Memory: Descargouse {count} lapela que non usaches recentemente para liberar memoria | Descargáronse {count} lapelas que non usaches recentemente para liberar memoria
 Use Vertical Tabs: Usar lapelas verticais
 Use Horizontal Tabs: Usar lapelas horizontais
 Resize Tab Bar: Redimensionar a barra de lapelas

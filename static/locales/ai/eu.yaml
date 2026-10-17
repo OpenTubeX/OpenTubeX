@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: Hainbat fitxa memoriatik kendu?
   Message: Ekintza honek {count} fitxa memoriatik kenduko ditu.
   Unload Tabs: Kendu {count} fitxa memoriatik
+Tabs Unloaded To Free Memory: Memoria askatzeko, azkenaldian erabili ez duzun fitxa {count} memoriatik kendu da | Memoria askatzeko, azkenaldian erabili ez dituzun {count} fitxa memoriatik kendu dira
 Use Vertical Tabs: Erabili fitxa bertikalak
 Use Horizontal Tabs: Erabili fitxa horizontalak
 Resize Tab Bar: Aldatu fitxa-barraren tamaina

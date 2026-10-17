@@ -746,6 +746,7 @@ import { tabRuntimeRegistry } from './tabs/TabRuntimeRegistry'
 import { getTabAvatarUrl, getTabPageIcon, getTabPreviewFallbackUrl } from './tabs/tabPreview'
 import { preloadResolvedRoute, preloadUtilityRoutes } from './router/index'
 import { initializeCapacitorPullToRefresh } from './helpers/capacitorPullToRefresh'
+import { startMemoryPressureMonitor } from './helpers/memoryPressure'
 
 const SettingsWindow = defineAsyncComponent(() => import('./views/Settings/Settings.vue'))
 const FtPlaylistAddVideoPrompt = defineAsyncComponent(() => import('./components/FtPlaylistAddVideoPrompt/FtPlaylistAddVideoPrompt.vue'))
@@ -1282,6 +1283,7 @@ let removeSubscriptionAutoRefreshCancelListener = null
 let removeSubscriptionAutoRefreshStateChangedListener = null
 let removeBackgroundResultsAvailableListener = null
 let removeTabsStateListener = null
+let stopMemoryPressureMonitor = null
 let removeReloadRequestListener = null
 let removeConfirmMultipleTabsActionListener = null
 let removeLibraryNoticesListener = null
@@ -1694,6 +1696,14 @@ onMounted(async () => {
       removeTabsStateListener = removeListener
       window.ftElectron.tabs.rendererReady()
     })
+    stopMemoryPressureMonitor = startMemoryPressureMonitor({
+      getHeapStatistics: window.ftElectron.getHeapStatistics,
+      unloadTabs: window.ftElectron.tabs.unloadLeastRecentlyUsed,
+      notify: count => showToast({
+        message: t('Tabs Unloaded To Free Memory', { count }, count),
+        icon: ['fas', 'memory']
+      })
+    })
   }
 
   const settingsReady = store.dispatch('grabUserSettings').then(async tutorialState => {
@@ -2012,6 +2022,7 @@ onBeforeUnmount(() => {
   removeSubscriptionAutoRefreshStateChangedListener?.()
   removeBackgroundResultsAvailableListener?.()
   removeTabsStateListener?.()
+  stopMemoryPressureMonitor?.()
   removeReloadRequestListener?.()
   removeConfirmMultipleTabsActionListener?.()
   removeLibraryNoticesListener?.()

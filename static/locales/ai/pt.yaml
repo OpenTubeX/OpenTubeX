@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: Descarregar vários separadores da memória?
   Message: Esta ação descarregará {count} separador da memória. | Esta ação descarregará {count} separadores da memória.
   Unload Tabs: Descarregar {count} separador | Descarregar {count} separadores
+Tabs Unloaded To Free Memory: Para libertar memória, foi descarregado {count} separador que não utilizou recentemente | Para libertar memória, foram descarregados {count} de separadores que não utilizou recentemente | Para libertar memória, foram descarregados {count} separadores que não utilizou recentemente
 Use Vertical Tabs: Usar separadores verticais
 Use Horizontal Tabs: Usar separadores horizontais
 Resize Tab Bar: Redimensionar barra de separadores

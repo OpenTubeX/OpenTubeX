@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: Vil du laste ut fleire faner?
   Message: Dette lastar ut {count} faner.
   Unload Tabs: Last ut {count} faner
+Tabs Unloaded To Free Memory: '{count} fane du ikkje har brukt nyleg, vart lasta ut for å frigjere minne | {count} faner du ikkje har brukt nyleg, vart lasta ut for å frigjere minne'
 Use Vertical Tabs: Bruk loddrette faner
 Use Horizontal Tabs: Bruk vassrette faner
 Resize Tab Bar: Endre storleik på fanelinja

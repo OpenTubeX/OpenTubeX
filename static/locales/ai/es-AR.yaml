@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: ¿Descargar varias pestañas de la memoria?
   Message: Se descargarán {count} pestañas de la memoria. | Se descargarán {count} pestañas de la memoria.
   Unload Tabs: Descargar {count} pestañas de la memoria | Descargar {count} pestañas de la memoria
+Tabs Unloaded To Free Memory: Para liberar memoria, se descargó {count} pestaña que no usaste recientemente | Para liberar memoria, se descargaron {count} de pestañas que no usaste recientemente | Para liberar memoria, se descargaron {count} pestañas que no usaste recientemente
 Compact side navigation: Navegación lateral compacta
 Expand side navigation: Expandir navegación lateral
 Use Vertical Tabs: Usar pestañas verticales

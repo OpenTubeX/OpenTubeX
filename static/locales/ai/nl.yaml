@@ -42,6 +42,7 @@ Unload Multiple Tabs Confirmation:
   Title: Meerdere tabbladen uit het geheugen verwijderen?
   Message: Hiermee worden {count} tabbladen uit het geheugen verwijderd.
   Unload Tabs: '{count} tabbladen uit het geheugen verwijderen'
+Tabs Unloaded To Free Memory: Om geheugen vrij te maken, is {count} tabblad dat je recent niet hebt gebruikt uit het geheugen verwijderd | Om geheugen vrij te maken, zijn {count} tabbladen die je recent niet hebt gebruikt uit het geheugen verwijderd
 Use Vertical Tabs: Verticale tabbladen gebruiken
 Use Horizontal Tabs: Horizontale tabbladen gebruiken
 Resize Tab Bar: Grootte van tabbladbalk aanpassen

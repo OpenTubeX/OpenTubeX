@@ -2,6 +2,7 @@
 Version {versionNumber} is now available.: Dostępna jest już wersja {versionNumber}.
 See changes and update: Zobacz zmiany i zaktualizuj
 Dismiss: Odrzuć
+Tabs Unloaded To Free Memory: Aby zwolnić pamięć, uśpiono {count} ostatnio nieużywaną kartę | Aby zwolnić pamięć, uśpiono {count} ostatnio nieużywane karty | Aby zwolnić pamięć, uśpiono {count} ostatnio nieużywanych kart
 Global:
   Loading More: Wczytywanie kolejnych elementów
 Search Listing:
