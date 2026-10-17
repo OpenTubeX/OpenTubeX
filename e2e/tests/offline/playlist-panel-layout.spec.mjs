@@ -104,7 +104,10 @@ for (const playlistViewType of ['grid', 'list']) {
         }
         for (const roundness of [100, 0, 200]) {
           await page.evaluate(value => window.$store.dispatch('updateUiRoundness', value), roundness)
-          await expect(panel).toHaveCSS('border-radius', `${12 * roundness / 100}px`, { timeout: 2000 })
+          const radius = `${12 * roundness / 100}px`
+          // Stacked panels square the bottom corners where they meet the items card.
+          const stacked = layout === 'list' && width <= 850 && roundness > 0
+          await expect(panel).toHaveCSS('border-radius', stacked ? `${radius} ${radius} 0px 0px` : radius, { timeout: 2000 })
           if (layout === 'grid') {
             await expect(panel).toHaveCSS('box-shadow', 'none')
             await expect(async () => {
