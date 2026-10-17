@@ -2,6 +2,7 @@ import importlib.util
 import io
 import json
 from pathlib import Path
+import struct
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -12,6 +13,31 @@ spec = importlib.util.spec_from_file_location(
 )
 apks = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(apks)
+
+
+def elf(*needed):
+    """Build a minimal 64-bit ELF file that links the given libraries."""
+    strings, offsets = b"\0", []
+    for name in needed:
+        offsets.append(len(strings))
+        strings += name.encode() + b"\0"
+    table = 64 + 2 * 56
+    dynamic = b"".join(struct.pack("<qQ", tag, value)
+                       for tag, value in [(1, offset) for offset in offsets] + [(5, table), (0, 0)])
+    size = table + len(strings) + len(dynamic)
+    return (b"\x7fELF\x02\x01\x01" + bytes(9)
+            + struct.pack("<HHIQQQIHHHHHH", 3, 183, 1, 0, 64, 0, 0, 64, 56, 2, 0, 0, 0)
+            + struct.pack("<IIQQQQQQ", 1, 4, 0, 0, 0, size, size, 0x1000)
+            + struct.pack("<IIQQQQQQ", 2, 4, table + len(strings), table + len(strings), 0,
+                          len(dynamic), len(dynamic), 8)
+            + strings + dynamic)
+
+
+def symlink(name, target):
+    info = zipfile.ZipInfo(name)
+    info.create_system = 3
+    info.external_attr = 0o120777 << 16
+    return info, target
 
 
 class ApkPackagingTest(unittest.TestCase):
@@ -34,19 +60,25 @@ class ApkPackagingTest(unittest.TestCase):
     def write_metadata(self):
         (self.source / "output-metadata.json").write_text(json.dumps(self.metadata))
 
-    def write_apk(self, name, abis, build_only=False):
-        runtime = io.BytesIO()
-        with zipfile.ZipFile(runtime, "w") as archive:
-            archive.writestr("usr/lib/runtime.so", b"fixture")
-            if build_only:
-                archive.writestr("usr/lib/quickjs/libquickjs.a", b"build-only")
+    def write_apk(self, name, abis, build_only=False, ffmpeg=b"fixture", python_files=(), ffmpeg_files=()):
+        def runtime(files):
+            data = io.BytesIO()
+            with zipfile.ZipFile(data, "w") as archive:
+                archive.writestr("usr/lib/runtime.so", b"fixture")
+                if build_only:
+                    archive.writestr("usr/lib/quickjs/libquickjs.a", b"build-only")
+                for entry, content in files:
+                    archive.writestr(entry, content)
+            return data.getvalue()
+
         with zipfile.ZipFile(self.source / name, "w") as apk:
             apk.writestr("classes.dex", b"fixture")
             for abi in abis:
-                for executable in ("python", "qjs", "ffmpeg", "ffprobe"):
+                for executable in ("python", "qjs", "ffprobe"):
                     apk.writestr(f"lib/{abi}/lib{executable}.so", b"fixture")
-                for package in ("python", "ffmpeg"):
-                    apk.writestr(f"lib/{abi}/lib{package}.zip.so", runtime.getvalue())
+                apk.writestr(f"lib/{abi}/libffmpeg.so", ffmpeg)
+                apk.writestr(f"lib/{abi}/libpython.zip.so", runtime(python_files))
+                apk.writestr(f"lib/{abi}/libffmpeg.zip.so", runtime(ffmpeg_files))
 
     def test_names_and_reports_all_nightly_apks(self):
         report = apks.prepare(self.source, self.output)
@@ -78,6 +110,33 @@ class ApkPackagingTest(unittest.TestCase):
     def test_rejects_build_only_runtime_files(self):
         self.write_apk("app-arm64-v8a-nightly.apk", {"arm64-v8a"}, build_only=True)
         with self.assertRaisesRegex(ValueError, "build-only"):
+            apks.prepare(self.source, self.output)
+
+    def test_resolves_runtime_libraries_through_symlinks_in_either_runtime(self):
+        self.write_apk("app-arm64-v8a-nightly.apk", {"arm64-v8a"}, ffmpeg=elf("libavcodec.so.61", "libc.so"),
+                       python_files=[("usr/lib/libz.so.1.3.1", elf()), symlink("usr/lib/libz.so.1", "libz.so.1.3.1")],
+                       ffmpeg_files=[("usr/lib/libavcodec.so.61.19.101", elf("libz.so.1")),
+                                     symlink("usr/lib/libavcodec.so.61", "libavcodec.so.61.19.101")])
+        apks.prepare(self.source, self.output)
+        self.assertEqual(len(list(self.output.glob("*.apk"))), 5)
+
+    def test_rejects_runtime_without_a_linked_library(self):
+        self.write_apk("app-arm64-v8a-nightly.apk", {"arm64-v8a"}, ffmpeg=elf("libavcodec.so.61"),
+                       ffmpeg_files=[("usr/lib/libavcodec.so.61", elf("libx264.so.164"))])
+        with self.assertRaisesRegex(ValueError, "libavcodec.so.61 needs libx264.so.164"):
+            apks.prepare(self.source, self.output)
+        self.assertFalse(self.output.exists())
+
+    def test_rejects_python_module_without_a_linked_library(self):
+        self.write_apk("app-arm64-v8a-nightly.apk", {"arm64-v8a"},
+                       python_files=[("usr/lib/python3.12/lib-dynload/_ssl.cpython-312.so", elf("libssl.so.3"))])
+        with self.assertRaisesRegex(ValueError, "_ssl.cpython-312.so needs libssl.so.3"):
+            apks.prepare(self.source, self.output)
+
+    def test_rejects_dangling_runtime_symlinks(self):
+        self.write_apk("app-arm64-v8a-nightly.apk", {"arm64-v8a"},
+                       ffmpeg_files=[symlink("usr/lib/libz.so.1", "libz.so.1.3.1")])
+        with self.assertRaisesRegex(ValueError, "dangling symlink: usr/lib/libz.so.1"):
             apks.prepare(self.source, self.output)
 
     def test_enforces_download_size_budget(self):

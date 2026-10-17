@@ -6,10 +6,84 @@ import json
 from pathlib import Path
 import re
 import shutil
+import struct
 import zipfile
 
 ABIS = {"arm64-v8a", "armeabi-v7a", "x86", "x86_64"}
 MIB = 1024 * 1024
+# Android provides these at runtime; every other dependency must be packaged.
+SYSTEM_LIBRARIES = {"libc.so", "libdl.so", "liblog.so", "libm.so"}
+
+
+def elf_needed(data):
+    """Return an ELF file's DT_NEEDED entries, or None for other files."""
+    if data[:4] != b"\x7fELF":
+        return None
+    wide, order = data[4] == 2, "<" if data[5] == 1 else ">"
+    if wide:
+        offset, = struct.unpack_from(order + "Q", data, 0x20)
+        size, count = struct.unpack_from(order + "HH", data, 0x36)
+        program, dynamic = "IIQQQQ", "qQ"
+    else:
+        offset, = struct.unpack_from(order + "I", data, 0x1C)
+        size, count = struct.unpack_from(order + "HH", data, 0x2A)
+        program, dynamic = "IIIII", "iI"
+    loads, entries = [], []
+    for index in range(count):
+        values = struct.unpack_from(order + program, data, offset + index * size)
+        kind, (file_offset, address, _, length) = values[0], values[2:6] if wide else values[1:5]
+        if kind == 1:
+            loads.append((address, file_offset, length))
+        elif kind == 2:
+            step = struct.calcsize(order + dynamic)
+            entries = [struct.unpack_from(order + dynamic, data, file_offset + start)
+                       for start in range(0, length, step)]
+    table = next((value for tag, value in entries if tag == 5), None)
+    if table is None:
+        return []
+    table = next(file_offset + table - address for address, file_offset, length in loads
+                 if address <= table < address + length)
+    return [data[table + value:data.index(b"\0", table + value)].decode()
+            for tag, value in entries if tag == 1]
+
+
+def check_dependencies(apk, arch):
+    """Ensure pruning the runtimes left every loaded library resolvable."""
+    files = {}
+    for name in ("python", "qjs", "ffmpeg", "ffprobe"):
+        files[f"lib{name}.so"] = apk.read(f"lib/{arch}/lib{name}.so")
+    roots = list(files)
+    for runtime in ("python", "ffmpeg"):
+        with zipfile.ZipFile(io.BytesIO(apk.read(f"lib/{arch}/lib{runtime}.zip.so"))) as archive:
+            for entry in archive.infolist():
+                name = entry.filename
+                if entry.is_dir() or not name.startswith("usr/lib/"):
+                    continue
+                target = entry
+                while (target.external_attr >> 16) & 0o170000 == 0o120000:
+                    link = (Path(target.filename).parent / archive.read(target).decode()).as_posix()
+                    try:
+                        target = archive.getinfo(link)
+                    except KeyError:
+                        raise ValueError(f"{arch}: {runtime} runtime has a dangling symlink: {name}") from None
+                data = archive.read(target)
+                if "/" not in name[len("usr/lib/"):]:
+                    # LD_LIBRARY_PATH lists Python's libraries before FFmpeg's.
+                    files.setdefault(Path(name).name, data)
+                elif name.endswith(".so"):
+                    # Python loads extension modules on import.
+                    roots.append(name)
+                    files[name] = data
+    pending, seen = roots, set(roots)
+    while pending:
+        name = pending.pop()
+        for dependency in elf_needed(files[name]) or []:
+            if dependency in SYSTEM_LIBRARIES or dependency in seen:
+                continue
+            if dependency not in files:
+                raise ValueError(f"{arch}: {name} needs {dependency}, which is not packaged")
+            seen.add(dependency)
+            pending.append(dependency)
 
 
 def inspect_apk(path, abi):
@@ -30,6 +104,7 @@ def inspect_apk(path, abi):
                         raise ValueError(f"Corrupt {runtime} runtime: {path}")
                     if "usr/lib/quickjs/libquickjs.a" in archive.namelist():
                         raise ValueError(f"{path}: build-only QuickJS static library is packaged")
+            check_dependencies(apk, arch)
         for entry in apk.infolist():
             name = entry.filename
             category = (
