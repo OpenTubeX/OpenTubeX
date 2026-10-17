@@ -318,7 +318,11 @@
         inline-size: 100%;
         border-start-start-radius: 0;
         border-start-end-radius: 0;
-        padding-block-start: 0;
+
+        // The sort select's own margin provides the top inset
+        &:has(> .sortSelect:first-child) {
+          padding-block-start: 0;
+        }
       }
 
       // Only leave room for the floating label so the gap below the search field matches the one above it.

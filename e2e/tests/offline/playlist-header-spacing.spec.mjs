@@ -110,3 +110,28 @@ for (const playlistViewType of ['grid', 'list']) {
     })
   })
 }
+
+test.describe('stacked playlist without a sort select', () => {
+  test.use({
+    seed: {
+      settings: { playlistViewType: 'list' },
+      playlists: [{
+        _id: 'single-video',
+        playlistName: 'Single video',
+        description: '',
+        protected: false,
+        videos: [{ videoId: 'layout00000', title: 'Only video', author: 'Test channel', lengthSeconds: 120, playlistItemId: 'single-item', type: 'video' }],
+        lastUpdatedAt: 1700000000000,
+      }],
+    },
+  })
+
+  test('keeps the items card top inset', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 900 })
+    await goTo(page, 'userplaylists')
+    await page.getByRole('link', { name: 'Single video', exact: true }).click()
+    await expect(page.locator('.playlistItem')).toHaveCount(1)
+    await expect(page.locator('.playlistItemsCard .sortSelect')).toHaveCount(0)
+    await expect(page.locator('.playlistItemsCard')).toHaveCSS('padding-top', '10px')
+  })
+})
