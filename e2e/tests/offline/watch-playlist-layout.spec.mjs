@@ -38,6 +38,8 @@ test.use({
   seed: {
     settings: {
       animationSpeed: 0,
+      // Grid cards can detach while being clicked: https://github.com/OpenTubeX/OpenTubeX/issues/2149
+      playlistViewType: 'list',
       userPlaylistSortOrder: 'custom',
       videoPlaybackEngine: 'built-in',
       ytDlpPlaybackEngineDefaultMigration: true
