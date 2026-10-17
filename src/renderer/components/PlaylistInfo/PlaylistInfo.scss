@@ -100,13 +100,7 @@
 }
 
 .searchInputsRow {
-  --playlist-search-label-outset: 7px;
-
   margin-block-start: 8px;
-
-  @media (any-pointer: coarse), (width <= 680px) {
-    --playlist-search-label-outset: 9px;
-  }
 }
 
 .base {
@@ -125,7 +119,7 @@
   .searchInputsRow {
     --input-bottom-spacing: 6px;
 
-    margin-block-start: calc(16px + var(--playlist-search-label-outset));
+    margin-block-start: calc(16px + var(--playlist-label-outset));
   }
 }
 
@@ -201,7 +195,7 @@
   .searchInputsRow {
     --input-bottom-spacing: 6px;
 
-    margin-block-start: calc(16px + var(--playlist-search-label-outset));
+    margin-block-start: calc(16px + var(--playlist-label-outset));
   }
 }
 

@@ -79,6 +79,7 @@ for (const playlistViewType of ['grid', 'list']) {
               expect(gaps.statsBelow, 'list panel gaps should be 16px').toBeCloseTo(16, 0)
               expect(Math.abs(gaps.actionsAbove - gaps.statsBelow), 'space above actions should match space below metadata').toBeLessThanOrEqual(1)
               expect(Math.abs(gaps.searchAbove - gaps.statsBelow), 'space below actions should match space below metadata').toBeLessThanOrEqual(1)
+              expect(gaps.stacked, 'info panel should stack above the videos up to 850px').toBe(width <= 850)
               if (gaps.stacked) {
                 expect(gaps.searchBelow, 'stacked panel should end 16px below the search field').toBeCloseTo(16, 0)
                 expect(Math.abs(gaps.sortBelowSearch - gaps.searchAbove), 'search field should have equal space above and below').toBeLessThanOrEqual(1)

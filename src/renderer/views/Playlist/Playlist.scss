@@ -54,7 +54,14 @@
 }
 
 .routerView {
+  // How far floating field labels extend above their outline
+  --playlist-label-outset: 7px;
+
   display: flex;
+
+  @media (any-pointer: coarse), (width <= 680px) {
+    --playlist-label-outset: 9px;
+  }
 
   &.grid {
     flex-direction: column;
@@ -316,11 +323,7 @@
 
       // Only leave room for the floating label so the gap below the search field matches the one above it.
       .sortSelect {
-        margin-block-start: 7px;
-
-        @media (any-pointer: coarse), (width <= 680px) {
-          margin-block-start: 9px;
-        }
+        margin-block-start: var(--playlist-label-outset);
       }
     }
   }
