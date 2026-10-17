@@ -378,6 +378,24 @@ jobs:
         files: release-assets/*
         fail_on_unmatched_files: true
 
+    # publish-release only attests release assets that match these checksums.
+    # Node hashes the same way on every runner OS.
+    - name: Record release asset checksums
+      working-directory: release-assets
+      shell: bash
+      run: |
+        node -e 'const { createHash } = require("node:crypto"); const fs = require("node:fs")
+        for (const file of fs.readdirSync(".")) console.log(`${createHash("sha256").update(fs.readFileSync(file)).digest("hex")}  ${file}`)' \
+          > "$RUNNER_TEMP/checksums.txt"
+
+    - name: Upload release asset checksums
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: checksums-${{ matrix.runtime }}
+        path: ${{ runner.temp }}/checksums.txt
+        retention-days: 1
+        overwrite: true
+
   ios:
     name: Build iOS IPA
     permissions:
@@ -415,6 +433,17 @@ jobs:
         draft: true
         files: release-assets/*.ipa
         fail_on_unmatched_files: true
+    - name: Record release asset checksums
+      working-directory: release-assets
+      shell: bash
+      run: sha256sum -- *.ipa > "$RUNNER_TEMP/checksums.txt"
+    - name: Upload release asset checksums
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: checksums-ios
+        path: ${{ runner.temp }}/checksums.txt
+        retention-days: 1
+        overwrite: true
 
   publish-release:
     name: Publish draft release
@@ -427,7 +456,13 @@ jobs:
       id-token: write
 
     steps:
-    - name: List release asset digests
+    - name: Download release asset checksums
+      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+      with:
+        pattern: checksums-*
+        path: ${{ runner.temp }}/build-checksums
+
+    - name: Check release assets against build outputs
       id: assets
       env:
         GH_TOKEN: ${{ github.token }}
@@ -435,10 +470,15 @@ jobs:
       shell: bash
       run: |
         set -euo pipefail
+        cat "$RUNNER_TEMP"/build-checksums/*/checksums.txt | sort -k 2 > "$RUNNER_TEMP/checksums.txt"
         gh api --paginate "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}/assets?per_page=100" \
           --jq '.[] | select(.name | endswith(".intoto.jsonl") | not)
             | "\(.digest // error("\(.name) has no digest") | ltrimstr("sha256:"))  \(.name)"' \
-          > "$RUNNER_TEMP/checksums.txt"
+          | sort -k 2 > "$RUNNER_TEMP/release-checksums.txt"
+        if ! diff -u "$RUNNER_TEMP/checksums.txt" "$RUNNER_TEMP/release-checksums.txt"; then
+          echo "::error::The release assets do not match the files the build jobs uploaded."
+          exit 1
+        fi
         echo "tag=$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)" >> "$GITHUB_OUTPUT"
 
     - name: Attest build provenance
