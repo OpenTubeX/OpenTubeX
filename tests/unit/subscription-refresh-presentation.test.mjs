@@ -90,6 +90,20 @@ test('slow publications lengthen the batch interval of a large refresh', async (
   } finally { app.scope.stop() }
 })
 
+test('a new large refresh publishes its first channel immediately after a recent publication', async () => {
+  const app = setup(40)
+  try {
+    await app.channel()
+    await app.flush()
+    app.state.getSubscriptionFeedRefreshInProgress = false
+    await nextTick()
+    app.state.getSubscriptionFeedRefreshInProgress = true
+    await nextTick()
+    await app.channel()
+    assert.deepEqual(app.delays, [0])
+  } finally { app.scope.stop() }
+})
+
 test('a large cached feed batches a refresh of few channels', async () => {
   const app = setup(3, true, 'videos', () => true)
   try {

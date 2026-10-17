@@ -515,8 +515,9 @@ test.describe('subscription refresh with many tabs', () => {
 
     await page.getByRole('button', { name: /Refresh Videos/ }).click()
     await expect(page.getByText('Fresh video 0', { exact: true })).toBeVisible({ timeout: 5_000 })
-    await expect(page.getByRole('button', { name: 'Cancel refresh' })).toBeVisible()
-    await page.getByRole('button', { name: 'Cancel refresh' }).click()
+    const cancelRefresh = page.getByRole('button', { name: 'Cancel refresh', exact: true })
+    await expect(cancelRefresh).toBeVisible()
+    await cancelRefresh.click()
   })
 
   test('shows channels fetched before a large refresh is cancelled', async ({ page }) => {

@@ -95,9 +95,14 @@ export function useSubscriptionChannelUpdates(tab, onChannelsRefreshed, isLargeF
     schedule()
   })
 
-  // Publish a finished or cancelled refresh without waiting for the batch.
   watch(isRefreshing, (refreshing) => {
-    if (refreshing || !updatePending) return
+    // Show the first channel of a new refresh without waiting for a batch
+    if (refreshing) {
+      lastRun = 0
+      return
+    }
+    // Publish a finished or cancelled refresh without waiting for the batch
+    if (!updatePending) return
     clearTimeout(timeout)
     timeout = null
     schedule()
