@@ -53,9 +53,13 @@ for (const playlistViewType of ['grid', 'list']) {
               const separator = element.querySelector('.playlistInfoSeparator').getBoundingClientRect()
               const itemsCard = document.querySelector('.playlistItemsCard')
               const sortLabel = itemsCard.querySelector('.sortSelect .select-label').getBoundingClientRect()
+              const sortField = itemsCard.querySelector('.sortSelect .select-text').getBoundingClientRect()
+              const firstThumbnail = itemsCard.querySelector('.videoThumbnail').getBoundingClientRect()
               return {
                 stacked: itemsCard.getBoundingClientRect().top >= panel.bottom - 1,
                 sortBelowSearch: sortLabel.top - search.bottom,
+                sortBelowCardTop: sortLabel.top - itemsCard.getBoundingClientRect().top,
+                sortBelow: firstThumbnail.top - sortField.bottom,
                 joinRadii: [
                   getComputedStyle(element).borderEndStartRadius,
                   getComputedStyle(element).borderEndEndRadius,
@@ -71,6 +75,8 @@ for (const playlistViewType of ['grid', 'list']) {
               }
             })
             expect(gaps.centerDifference, 'action icons should be horizontally centered').toBeLessThanOrEqual(1)
+            const sortAbove = layout === 'list' && gaps.stacked ? gaps.sortBelowSearch : gaps.sortBelowCardTop
+            expect(Math.abs(gaps.sortBelow - sortAbove), 'sort select should have equal space above and below').toBeLessThanOrEqual(1)
             if (layout === 'grid') {
               expect(gaps.searchAbove, 'grid panel gaps should be 16px').toBeCloseTo(16, 0)
               expect(Math.abs(gaps.iconsAbove - gaps.searchAbove), 'action icons should have equal space above and below').toBeLessThanOrEqual(1)

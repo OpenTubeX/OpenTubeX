@@ -282,11 +282,24 @@
 .sortSelect {
   /* Put it on the right and align with 'More Options' dropdown button */
   margin-inline: auto 20px;
+
+  // With the card gap and item padding, match the space above the floating label
+  margin-block-end: 10px;
+}
+
+// The card padding adds to the space above the label
+.routerView.list .sortSelect {
+  margin-block-end: 17px;
 }
 
 @media only screen and (width <= 850px) {
   .playlistItem :deep(.ft-list-video) {
     padding-block: 4px;
+  }
+
+  // Keep the first thumbnail where the default 6px item padding puts it
+  .playlistItems {
+    margin-block-start: 2px;
   }
 
   .playlistItem :deep(.restArea) {
@@ -327,7 +340,7 @@
 
       // Only leave room for the floating label so the gap below the search field matches the one above it.
       .sortSelect {
-        margin-block-start: var(--playlist-label-outset);
+        margin-block: var(--playlist-label-outset) 0;
       }
     }
   }
