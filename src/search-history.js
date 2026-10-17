@@ -144,3 +144,12 @@ export function mergeSearchHistoryEntries(currentEntries, importedEntries) {
 export function sortSearchHistoryByLastUpdatedAt(historyItems) {
   return historyItems.sort((a, b) => b.lastUpdatedAt - a.lastUpdatedAt)
 }
+
+/**
+ * Search filters are stored per tab on platforms with logical tabs (Electron and Capacitor).
+ * @param {string | null | undefined} presentedTabId
+ * @returns {string}
+ */
+export function getSearchFilterTabId(presentedTabId) {
+  return (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) ? (presentedTabId ?? 'web') : 'web'
+}
