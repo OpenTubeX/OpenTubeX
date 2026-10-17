@@ -1224,6 +1224,21 @@ Settings:
   No Settings Found: تنظیمی پیدا نشد
   Experimental Settings:
     Disable Hardware Acceleration: غیرفعال کردن شتاب‌دهی سخت‌افزاری
+  Interface Customizer:
+    Customize Interface: "سفارشی‌سازی رابط"
+    Preview: "پیش‌نمایش"
+    Player: "پخش‌کننده"
+    Desktop: "رایانه"
+    Mobile: "موبایل"
+    Playing: "در حال پخش"
+    Player Menu: "منوی پخش‌کننده"
+    Fullscreen: "تمام‌صفحه"
+    Paused: "مکث‌شده"
+    Controls: "کنترل‌ها"
+    Example Video Title: "ویدیوی نمونه"
+    Resolution: "وضوح"
+    Loop: "تکرار"
+    Off: "خاموش"
 Tutorial:
   Skip: ردکردن
   Next: بعدی

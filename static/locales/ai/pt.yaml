@@ -1202,6 +1202,21 @@ Settings:
   No Settings Found: Nenhuma definição encontrada
   Experimental Settings:
     Disable Hardware Acceleration: Desativar aceleração por hardware
+  Interface Customizer:
+    Customize Interface: "Personalizar interface"
+    Preview: "Pré-visualização"
+    Player: "Reprodutor"
+    Desktop: "Computador"
+    Mobile: "Telemóvel"
+    Playing: "A reproduzir"
+    Player Menu: "Menu do reprodutor"
+    Fullscreen: "Ecrã inteiro"
+    Paused: "Em pausa"
+    Controls: "Controlos"
+    Example Video Title: "Vídeo de exemplo"
+    Resolution: "Resolução"
+    Loop: "Repetir"
+    Off: "Desativado"
 Tutorial:
   Skip: Ignorar
   Next: Seguinte

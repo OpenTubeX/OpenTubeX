@@ -1154,6 +1154,21 @@ Settings:
   No Settings Found: No settings found
   Experimental Settings:
     Disable Hardware Acceleration: Disable Hardware Acceleration
+  Interface Customizer:
+    Customize Interface: "Customise interface"
+    Preview: "Preview"
+    Player: "Player"
+    Desktop: "Desktop"
+    Mobile: "Mobile"
+    Playing: "Playing"
+    Player Menu: "Player menu"
+    Fullscreen: "Full screen"
+    Paused: "Paused"
+    Controls: "Controls"
+    Example Video Title: "Example video"
+    Resolution: "Resolution"
+    Loop: "Loop"
+    Off: "Off"
 Tutorial:
   Skip: Skip
   Next: Next

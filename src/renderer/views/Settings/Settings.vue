@@ -1187,6 +1187,10 @@ async function openSearchResult(sectionType, match) {
   if (match.subpage) {
     settingsContentRef.value?.querySelector(`[data-settings-subpage="${match.subpage}"]`)?.click()
     await nextTick()
+    if (match.subpageTab) {
+      settingsSubpageContentRef.value?.querySelector(`[data-settings-subpage-tab="${match.subpageTab}"]`)?.click()
+      await nextTick()
+    }
   }
 
   const content = subpageTitle.value ? settingsSubpageContentRef.value : settingsContentRef.value

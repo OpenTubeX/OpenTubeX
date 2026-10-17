@@ -1169,6 +1169,21 @@ Settings:
     Unlocking: 正在解鎖…
   Search Settings: 搜尋設定
   No Settings Found: 找不到設定
+  Interface Customizer:
+    Customize Interface: "自訂介面"
+    Preview: "預覽"
+    Player: "播放器"
+    Desktop: "桌面"
+    Mobile: "行動裝置"
+    Playing: "播放中"
+    Player Menu: "播放器選單"
+    Fullscreen: "全螢幕"
+    Paused: "已暫停"
+    Controls: "控制項"
+    Example Video Title: "範例影片"
+    Resolution: "解析度"
+    Loop: "循環"
+    Off: "關閉"
 Tutorial:
   Skip: 略過
   Next: 下一步

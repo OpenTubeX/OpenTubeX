@@ -1,4 +1,4 @@
-import { test, expect, goToSettingsSection, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, setWindowSize, openInterfaceCustomizer } from '../../helpers/app.mjs'
 
 for (const { uiScale, width, iconPack, colorScheme } of [
   { uiScale: 100, width: 1100, iconPack: 'material', colorScheme: 'dark' },
@@ -19,17 +19,16 @@ for (const { uiScale, width, iconPack, colorScheme } of [
       }
     })
 
-    for (const { subpage, label, rowSelector } of [
-      { subpage: 'quick-settings', label: 'Customize quick settings', rowSelector: '.selectedSetting' },
-      { subpage: 'navigation', label: 'Customize navigation', rowSelector: '.selectedItem' },
-      { subpage: 'fullscreen-actions', label: 'Customize fullscreen actions', rowSelector: '.selectedAction' },
+    for (const { subpage, tab, rowSelector } of [
+      { subpage: 'quick-settings', tab: 'quick settings', rowSelector: '.selectedSetting' },
+      { subpage: 'navigation', tab: 'navigation', rowSelector: '.selectedItem' },
+      { subpage: 'fullscreen-actions', tab: 'fullscreen actions', rowSelector: '.selectedAction' },
     ]) {
       test(`keeps ${subpage} hover and focus backgrounds circular`, async ({ app, page }) => {
         await setWindowSize(app, page, { width, height: 800 })
         await page.emulateMedia({ colorScheme })
         await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
-        const appearance = await goToSettingsSection(page, 'appearance')
-        await appearance.getByRole('button', { name: label, exact: true }).click()
+        await openInterfaceCustomizer(page, tab)
         const row = page.locator(rowSelector).nth(1)
         const buttons = row.locator('.iconButton')
         await expect(buttons).toHaveCount(3)

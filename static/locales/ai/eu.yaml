@@ -1172,6 +1172,21 @@ Settings:
     Unlocking: Desblokeatzen…
   Search Settings: Bilaketa-ezarpenak
   No Settings Found: Ez da ezarpenik aurkitu
+  Interface Customizer:
+    Customize Interface: "Pertsonalizatu interfazea"
+    Preview: "Aurrebista"
+    Player: "Erreproduzigailua"
+    Desktop: "Mahaigaina"
+    Mobile: "Mugikorra"
+    Playing: "Erreproduzitzen"
+    Player Menu: "Erreproduzigailuaren menua"
+    Fullscreen: "Pantaila osoa"
+    Paused: "Pausatuta"
+    Controls: "Kontrolak"
+    Example Video Title: "Adibideko bideoa"
+    Resolution: "Bereizmena"
+    Loop: "Begizta"
+    Off: "Desaktibatuta"
 Tutorial:
   Skip: Saltatu
   Next: Hurrengoa

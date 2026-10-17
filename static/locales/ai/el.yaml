@@ -1178,6 +1178,21 @@ Settings:
   No Settings Found: Δεν βρέθηκαν ρυθμίσεις
   Experimental Settings:
     Disable Hardware Acceleration: Απενεργοποίηση επιτάχυνσης υλικού
+  Interface Customizer:
+    Customize Interface: "Προσαρμογή διεπαφής"
+    Preview: "Προεπισκόπηση"
+    Player: "Πρόγραμμα αναπαραγωγής"
+    Desktop: "Υπολογιστής"
+    Mobile: "Κινητό"
+    Playing: "Αναπαράγεται"
+    Player Menu: "Μενού προγράμματος αναπαραγωγής"
+    Fullscreen: "Πλήρης οθόνη"
+    Paused: "Σε παύση"
+    Controls: "Χειριστήρια"
+    Example Video Title: "Παράδειγμα βίντεο"
+    Resolution: "Ανάλυση"
+    Loop: "Επανάληψη"
+    Off: "Ανενεργό"
 Tutorial:
   Skip: Παράλειψη
   Next: Επόμενο

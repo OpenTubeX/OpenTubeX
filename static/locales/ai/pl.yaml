@@ -618,6 +618,21 @@ Settings:
     Unlocking: Odblokowywanie…
   Search Settings: Przeszukaj ustawienia
   No Settings Found: Nie znaleziono ustawień
+  Interface Customizer:
+    Customize Interface: "Dostosuj interfejs"
+    Preview: "Podgląd"
+    Player: "Odtwarzacz"
+    Desktop: "Komputer"
+    Mobile: "Telefon"
+    Playing: "Odtwarzanie"
+    Player Menu: "Menu odtwarzacza"
+    Fullscreen: "Pełny ekran"
+    Paused: "Wstrzymano"
+    Controls: "Elementy sterujące"
+    Example Video Title: "Przykładowy film"
+    Resolution: "Rozdzielczość"
+    Loop: "Zapętlenie"
+    Off: "Wył."
 Tutorial:
   Skip: Pomiń
   Next: Dalej

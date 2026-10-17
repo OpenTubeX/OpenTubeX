@@ -1221,6 +1221,21 @@ Settings:
   No Settings Found: Ingen indstillinger fundet
   Experimental Settings:
     Disable Hardware Acceleration: Deaktiver hardwareacceleration
+  Interface Customizer:
+    Customize Interface: "Tilpas brugerflade"
+    Preview: "Forhåndsvisning"
+    Player: "Afspiller"
+    Desktop: "Computer"
+    Mobile: "Mobil"
+    Playing: "Afspiller"
+    Player Menu: "Afspillermenu"
+    Fullscreen: "Fuld skærm"
+    Paused: "Sat på pause"
+    Controls: "Knapper"
+    Example Video Title: "Eksempelvideo"
+    Resolution: "Opløsning"
+    Loop: "Gentag"
+    Off: "Fra"
 Tutorial:
   Skip: Spring over
   Next: Næste

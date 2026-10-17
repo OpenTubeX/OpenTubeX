@@ -1177,6 +1177,21 @@ Settings:
     Unlocking: Aflæsi…
   Search Settings: Leitarstillingar
   No Settings Found: Engar stillingar fundust
+  Interface Customizer:
+    Customize Interface: "Sérsníða viðmót"
+    Preview: "Forskoðun"
+    Player: "Spilari"
+    Desktop: "Tölva"
+    Mobile: "Farsími"
+    Playing: "Í spilun"
+    Player Menu: "Valmynd spilara"
+    Fullscreen: "Allur skjárinn"
+    Paused: "Í bið"
+    Controls: "Stýringar"
+    Example Video Title: "Sýnidæmi um myndskeið"
+    Resolution: "Upplausn"
+    Loop: "Endurtaka"
+    Off: "Slökkt"
 Tutorial:
   Skip: Sleppa
   Next: Næsta

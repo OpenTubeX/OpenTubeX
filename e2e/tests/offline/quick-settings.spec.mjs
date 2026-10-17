@@ -1,4 +1,4 @@
-import { test, expect, expectScrollAtRenderedEnd, goToSettingsSection, latestSettings, setWindowSize, readDatastore } from '../../helpers/app.mjs'
+import { test, expect, expectScrollAtRenderedEnd, goToSettingsSection, latestSettings, setWindowSize, readDatastore, openInterfaceCustomizer } from '../../helpers/app.mjs'
 import { DEFAULT_QUICK_SETTINGS, normalizeQuickSettings } from '../../../src/renderer/helpers/quickSettings.js'
 import { DEFAULT_CUSTOM_THEME } from '../../../src/customTheme.js'
 
@@ -819,8 +819,7 @@ test.describe('quick system themes', () => {
   test.use({ seed: { settings: { quickSettings: ['baseTheme'], baseTheme: 'system', currentLocale: 'en-US', uiScale: 125 } } })
 
   test('adds light and dark selectors and persists their choices across restart', async ({ app, page }, testInfo) => {
-    const appearance = await goToSettingsSection(page, 'appearance')
-    await appearance.getByRole('button', { name: 'Customize quick settings' }).click()
+    await openInterfaceCustomizer(page, 'quick settings')
     await page.getByRole('button', { name: 'Add setting' }).click()
     const search = page.getByLabel('Search settings')
     for (const label of ['Light theme', 'Dark theme']) {
@@ -934,8 +933,7 @@ test.describe('additional quick settings', () => {
   test.use({ seed: { settings: { quickSettings: [], uiScale: 125 } } })
 
   test('keeps the next picker search while the previous setting save completes', async ({ page }) => {
-    const appearance = await goToSettingsSection(page, 'appearance')
-    await appearance.getByRole('button', { name: 'Customize quick settings' }).click()
+    await openInterfaceCustomizer(page, 'quick settings')
     await page.getByRole('button', { name: 'Add setting' }).click()
     await page.evaluate(() => {
       const store = window.$store
@@ -961,8 +959,7 @@ test.describe('additional quick settings', () => {
 
   test('adds all suggested controls, groups them, and persists changes across restart', async ({ app, page }, testInfo) => {
     test.setTimeout(120_000)
-    const appearance = await goToSettingsSection(page, 'appearance')
-    await appearance.getByRole('button', { name: 'Customize quick settings' }).click()
+    await openInterfaceCustomizer(page, 'quick settings')
     await page.getByRole('button', { name: 'Add setting' }).click()
     const search = page.getByLabel('Search settings')
     for (const [, label] of ADDITIONAL_QUICK_SETTINGS) {
@@ -1504,8 +1501,7 @@ test.describe('customizable quick settings', () => {
   })
 
   test('centers setting icons vertically within their rows', async ({ page }) => {
-    const appearance = await goToSettingsSection(page, 'appearance')
-    await appearance.getByRole('button', { name: 'Customize quick settings' }).click()
+    await openInterfaceCustomizer(page, 'quick settings')
 
     const offsets = await page.locator('.selectedSetting').evaluateAll(rows => rows.map(row => {
       const icon = row.querySelector('.selectedSettingIcon > svg')
@@ -1543,15 +1539,11 @@ test.describe('customizable quick settings', () => {
 
   test('adds basic controls from Appearance and resets them', async ({ app, page }) => {
     const appearance = await goToSettingsSection(page, 'appearance')
-    const customizeButton = appearance.getByRole('button', { name: 'Customize quick settings' })
-    const launcher = appearance.locator('.customizerLaunchers')
-    await expect(launcher).toBeVisible()
-    await expect(customizeButton).toBeVisible()
-    await expect(launcher.getByRole('button')).toHaveCount(3)
-    await expect(launcher.getByRole('button', { name: 'Customize navigation' })).toBeVisible()
-    await expect(launcher.getByRole('button', { name: 'Customize fullscreen actions' })).toBeVisible()
-    await customizeButton.click()
-    await expect(page.locator('.settingsBreadcrumb')).toContainText('Customize quick settings')
+    const launcher = appearance.locator('.customizerLauncher')
+    await expect(launcher.getByRole('button')).toHaveCount(1)
+    await expect(launcher.getByRole('button', { name: 'Customize interface', exact: true })).toBeVisible()
+    await openInterfaceCustomizer(page, 'quick settings')
+    await expect(page.locator('.settingsBreadcrumb')).toContainText('Customize interface')
 
     const selectedSettings = page.locator('.selectedSettings')
     await expect(selectedSettings.locator('.selectedSetting')).toHaveCount(DEFAULT_QUICK_SETTINGS.length)
@@ -1561,7 +1553,7 @@ test.describe('customizable quick settings', () => {
     ))).toEqual(DEFAULT_QUICK_SETTINGS)
     const actions = page.locator('.quickSettingsActions')
     const [subpageBounds, actionsBounds, settingsBounds, actionButtonBounds] = await Promise.all([
-      page.locator('.settingsSubpageContent').boundingBox(),
+      page.locator('.customizerEditor').boundingBox(),
       actions.boundingBox(),
       selectedSettings.boundingBox(),
       actions.getByRole('button').evaluateAll(buttons => buttons.map(button => (
@@ -1615,7 +1607,7 @@ test.describe('customizable quick settings', () => {
     })).toContain('127.0.0.1:9050')
 
     await menu.getByRole('button', { name: 'All Settings' }).click()
-    await expect(page.locator('.settingsBreadcrumb')).toContainText('Customize quick settings')
+    await expect(page.locator('.settingsBreadcrumb')).toContainText('Customize interface')
     await page.getByRole('button', { name: 'Reset to defaults' }).click()
     await expect(page.locator('.selectedSetting')).toHaveCount(DEFAULT_QUICK_SETTINGS.length)
     await expect(page.locator('.selectedSettings')).toContainText(/Base theme/i)
@@ -1623,8 +1615,7 @@ test.describe('customizable quick settings', () => {
   })
 
   test('rearranges categories together and controls within their category', async ({ page, attachScreenshot }) => {
-    const appearance = await goToSettingsSection(page, 'appearance')
-    await appearance.getByRole('button', { name: 'Customize quick settings' }).click()
+    await openInterfaceCustomizer(page, 'quick settings')
 
     const selectedSettings = page.locator('.selectedSettings')
     const settingIds = () => selectedSettings.locator('.selectedSetting').evaluateAll(rows => (
@@ -1650,7 +1641,8 @@ test.describe('customizable quick settings', () => {
 
     const content = selectedSettings.locator('[data-section-id="content"]')
     const playback = selectedSettings.locator('[data-section-id="playback"]')
-    await content.locator('.dragHandle').first().scrollIntoViewIfNeeded()
+    // Keep both categories inside the editor viewport below the preview.
+    await playback.evaluate(element => element.scrollIntoView({ block: 'start' }))
     const handleBounds = await content.locator('.dragHandle').first().boundingBox()
     const contentBounds = await content.boundingBox()
     const playbackBounds = await playback.boundingBox()
@@ -1677,7 +1669,7 @@ test.describe('customizable quick settings', () => {
     ))).toEqual(contentFirst)
 
     await menu.getByRole('button', { name: 'All Settings' }).click()
-    await expect(page.locator('.settingsBreadcrumb')).toContainText('Customize quick settings')
+    await expect(page.locator('.settingsBreadcrumb')).toContainText('Customize interface')
     await expect(selectedSettings).toBeVisible()
     await expect.poll(settingIds).toEqual(contentFirst)
   })
@@ -1695,8 +1687,7 @@ test.describe('grouped quick settings at narrow fractional scale', () => {
 
   test('groups saved categories and moves whole groups with touch and keyboard', async ({ app, page, attachScreenshot }) => {
     await setWindowSize(app, page, { width: 500, height: 850 })
-    const appearance = await goToSettingsSection(page, 'appearance')
-    await appearance.getByRole('button', { name: 'Customize quick settings' }).click()
+    await openInterfaceCustomizer(page, 'quick settings')
     const sections = page.locator('.selectedSection')
     const ids = () => sections.evaluateAll(rows => rows.map(row => row.dataset.sectionId))
     await expect.poll(ids).toEqual(['appearance', 'playback', 'content'])
@@ -1709,6 +1700,8 @@ test.describe('grouped quick settings at narrow fractional scale', () => {
     const playback = page.locator('[data-section-id="playback"]')
     const appearanceSection = page.locator('[data-section-id="appearance"]')
     const handle = playback.locator('.dragHandle').first()
+    // The editor scrolls below the preview; start from the visible category.
+    await playback.scrollIntoViewIfNeeded()
     const target = await appearanceSection.boundingBox()
     const source = await handle.boundingBox()
     const sourceRow = await playback.boundingBox()
@@ -1745,8 +1738,7 @@ test.describe('quick settings customization at fractional UI scale', () => {
     await app.electronApp.evaluate(({ BrowserWindow }) => {
       BrowserWindow.getAllWindows()[0]?.setBounds({ x: 0, y: 0, width: 900, height: 650 })
     })
-    const appearance = await goToSettingsSection(page, 'appearance')
-    await appearance.getByRole('button', { name: 'Customize quick settings' }).click()
+    await openInterfaceCustomizer(page, 'quick settings')
     await page.getByRole('button', { name: 'Add setting' }).click()
 
     const settingPicker = page.getByLabel('Search settings')

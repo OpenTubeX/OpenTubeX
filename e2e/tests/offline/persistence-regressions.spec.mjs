@@ -1,4 +1,4 @@
-import { test, expect, goToSettingsSection, latestSettings, readDatastore } from '../../helpers/app.mjs'
+import { test, expect, latestSettings, readDatastore, openInterfaceCustomizer } from '../../helpers/app.mjs'
 import { decryptSyncDocument, encryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
 
 test('encrypted subscription retries retain concurrent remote edits', async ({ page }) => {
@@ -81,14 +81,13 @@ test('encrypted subscription retries retain concurrent remote edits', async ({ p
   })).toEqual(['added-locally', 'added-remotely', 'base'])
 })
 
-for (const [setting, launcher, attribute] of [
-  ['quickSettings', 'Customize quick settings', 'data-setting-id'],
-  ['navigationItems', 'Customize navigation', 'data-navigation-item-id'],
+for (const [setting, tab, attribute] of [
+  ['quickSettings', 'quick settings', 'data-setting-id'],
+  ['navigationItems', 'navigation', 'data-navigation-item-id'],
 ]) {
   test(`${setting} retains consecutive removals before persistence finishes`, async ({ app, page }) => {
-    const appearance = await goToSettingsSection(page, 'appearance')
-    await appearance.getByRole('button', { name: launcher }).click()
-    const rows = page.locator(`[${attribute}]`)
+    await openInterfaceCustomizer(page, tab)
+    const rows = page.locator(`.customizerEditor [${attribute}]`)
     const initial = await rows.evaluateAll((elements, attribute) => elements.map(element => element.getAttribute(attribute)), attribute)
     expect(initial.length).toBeGreaterThan(2)
     // One renderer task guarantees that both real click handlers run before
@@ -225,8 +224,7 @@ for (const mode of ['all', 'video', 'post']) {
 test('failed Home re-addition redirects when removal was already persisted', async ({ app, page }) => {
   await page.locator('.sideNav .navOption[title="Home"]').click()
   await expect.poll(() => page.evaluate(() => window.$store.getters.getActiveTab.route.path)).toBe('/home')
-  const appearance = await goToSettingsSection(page, 'appearance')
-  await appearance.getByRole('button', { name: 'Customize navigation' }).click()
+  await openInterfaceCustomizer(page, 'navigation')
   await app.electronApp.evaluate(({ ipcMain }) => {
     const original = ipcMain._invokeHandlers.get('db-settings')
     let writes = 0

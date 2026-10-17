@@ -1,207 +1,179 @@
 <template>
-  <FtSettingsSection
-    :title="t('Settings.Navigation and Controls')"
+  <div
+    ref="quickSettingsActionsRef"
+    class="quickSettingsActions"
   >
-    <div class="customizerLaunchers">
-      <div class="settingButtonWithSync">
-        <FtButton
-          :label="t('Settings.Quick Settings.Customize Quick Settings')"
-          :icon="['fas', 'sliders-h']"
-          @click="open = true"
-        />
-        <FtSyncedSettingIndicator setting-key="quickSettings" />
-      </div>
-      <NavigationCustomizer />
-      <FullscreenActionsCustomizer />
-    </div>
-  </FtSettingsSection>
-
-  <FtSettingsSubpage
-    :open="open"
-    :title="t('Settings.Quick Settings.Customize Quick Settings')"
-    :icon="['fas', 'sliders-h']"
-    grow-with-content
-    @close="close"
-  >
-    <template #breadcrumb-action>
-      <FtSyncedSettingIndicator setting-key="quickSettings" />
-    </template>
     <div
-      ref="quickSettingsActionsRef"
-      class="quickSettingsActions"
+      ref="settingPickerAnchorRef"
+      class="settingPickerAnchor"
     >
+      <FtButton
+        :label="t('Settings.Quick Settings.Add Setting')"
+        :icon="['fas', 'plus']"
+        aria-haspopup="dialog"
+        :aria-expanded="settingPickerOpen"
+        :aria-controls="settingPickerId"
+        @click="toggleSettingPicker"
+      />
       <div
-        ref="settingPickerAnchorRef"
-        class="settingPickerAnchor"
+        v-if="settingPickerOpen"
+        :id="settingPickerId"
+        class="settingPickerPopover"
+        data-settings-escape-scope
+        role="dialog"
+        :aria-label="t('Settings.Quick Settings.Add Setting')"
+        @keydown.esc.stop="closeSettingPicker(true)"
       >
-        <FtButton
-          :label="t('Settings.Quick Settings.Add Setting')"
-          :icon="['fas', 'plus']"
-          aria-haspopup="dialog"
-          :aria-expanded="settingPickerOpen"
-          :aria-controls="settingPickerId"
-          @click="toggleSettingPicker"
+        <FtInput
+          ref="settingPickerRef"
+          class="settingPicker"
+          input-type="search"
+          :placeholder="t('Settings.Search Settings')"
+          :label="t('Settings.Search Settings')"
+          :show-label="false"
+          :show-action-button="false"
+          :show-data-when-empty="true"
+          :is-search="true"
+          :value="settingSearchQuery"
+          :data-list="availableSettingLabels"
+          :data-list-properties="availableSettingProperties"
+          @input="settingSearchQuery = $event"
+          @click="addQuickSetting"
         />
-        <div
-          v-if="settingPickerOpen"
-          :id="settingPickerId"
-          class="settingPickerPopover"
-          data-settings-escape-scope
-          role="dialog"
-          :aria-label="t('Settings.Quick Settings.Add Setting')"
-          @keydown.esc.stop="closeSettingPicker(true)"
+      </div>
+    </div>
+    <FtButton
+      :label="t('KeyboardShortcutPrompt.Reset to Defaults')"
+      :icon="['fas', 'undo']"
+      :disabled="isDefaultQuickSettings"
+      theme="secondary"
+      @click="resetQuickSettings"
+    />
+  </div>
+
+  <ul
+    v-if="selectedSettings.length > 0"
+    class="selectedSettings"
+  >
+    <li
+      v-for="(section, sectionIndex) in selectedSections"
+      :key="section.id"
+      class="selectedSection"
+      :data-section-id="section.id"
+      :class="{ dragging: draggedSectionId === section.id }"
+      :style="rowStyle(section.id)"
+    >
+      <div class="sectionHeader">
+        <span
+          class="dragHandle"
+          aria-hidden="true"
+          @dragstart.prevent
+          @pointerdown="startPointerDrag($event, section.id)"
+          @pointermove="movePointerDrag"
+          @pointerup="endPointerDrag"
+          @pointercancel="cancelPointerDrag"
+          @lostpointercapture="cancelPointerDrag"
         >
-          <FtInput
-            ref="settingPickerRef"
-            class="settingPicker"
-            input-type="search"
-            :placeholder="t('Settings.Search Settings')"
-            :label="t('Settings.Search Settings')"
-            :show-label="false"
-            :show-action-button="false"
-            :show-data-when-empty="true"
-            :is-search="true"
-            :value="settingSearchQuery"
-            :data-list="availableSettingLabels"
-            :data-list-properties="availableSettingProperties"
-            @input="settingSearchQuery = $event"
-            @click="addQuickSetting"
+          <FtIcon :icon="['fas', 'grip']" />
+        </span>
+        <FtIcon
+          class="selectedSettingIcon"
+          :icon="section.icon"
+          aria-hidden="true"
+        />
+        <h3>{{ section.label }}</h3>
+        <div class="settingActions">
+          <FtIconButton
+            :title="t('Home Page.Move section up', { section: section.label })"
+            :disabled="sectionIndex === 0"
+            :icon="['fas', 'arrow-up']"
+            :use-shadow="false"
+            theme="base"
+            @click="moveQuickSection(section.id, -1)"
+          />
+          <FtIconButton
+            :title="t('Home Page.Move section down', { section: section.label })"
+            :disabled="sectionIndex === selectedSections.length - 1"
+            :icon="['fas', 'arrow-down']"
+            :use-shadow="false"
+            theme="base"
+            @click="moveQuickSection(section.id, 1)"
           />
         </div>
       </div>
-      <FtButton
-        :label="t('KeyboardShortcutPrompt.Reset to Defaults')"
-        :icon="['fas', 'undo']"
-        :disabled="isDefaultQuickSettings"
-        theme="secondary"
-        @click="resetQuickSettings"
-      />
-    </div>
-
-    <ul
-      v-if="selectedSettings.length > 0"
-      class="selectedSettings"
-    >
-      <li
-        v-for="(section, sectionIndex) in selectedSections"
-        :key="section.id"
-        class="selectedSection"
-        :data-section-id="section.id"
-        :class="{ dragging: draggedSectionId === section.id }"
-        :style="rowStyle(section.id)"
-      >
-        <div class="sectionHeader">
+      <ul class="sectionSettings">
+        <li
+          v-for="(setting, index) in section.settings"
+          :key="setting.id"
+          class="selectedSetting"
+          :data-setting-id="setting.id"
+          :class="{ dragging: draggedSettingId === setting.id }"
+          :style="settingRowStyle(setting.id)"
+        >
           <span
             class="dragHandle"
             aria-hidden="true"
             @dragstart.prevent
-            @pointerdown="startPointerDrag($event, section.id)"
-            @pointermove="movePointerDrag"
-            @pointerup="endPointerDrag"
-            @pointercancel="cancelPointerDrag"
-            @lostpointercapture="cancelPointerDrag"
+            @pointerdown="startSettingDrag($event, setting.id)"
+            @pointermove="moveSettingDrag"
+            @pointerup="endSettingDrag"
+            @pointercancel="cancelSettingDrag"
+            @lostpointercapture="cancelSettingDrag"
           >
             <FtIcon :icon="['fas', 'grip']" />
           </span>
           <FtIcon
             class="selectedSettingIcon"
-            :icon="section.icon"
+            :icon="setting.icon"
             aria-hidden="true"
           />
-          <h3>{{ section.label }}</h3>
+          <span>{{ setting.label }}</span>
           <div class="settingActions">
             <FtIconButton
-              :title="t('Home Page.Move section up', { section: section.label })"
-              :disabled="sectionIndex === 0"
+              class="settingAction"
+              :title="t('Home Page.Move section up', { section: setting.label })"
+              :disabled="index === 0"
               :icon="['fas', 'arrow-up']"
               :use-shadow="false"
               theme="base"
-              @click="moveQuickSection(section.id, -1)"
+              @click="moveQuickSetting(section, setting.id, -1)"
             />
             <FtIconButton
-              :title="t('Home Page.Move section down', { section: section.label })"
-              :disabled="sectionIndex === selectedSections.length - 1"
+              class="settingAction"
+              :title="t('Home Page.Move section down', { section: setting.label })"
+              :disabled="index === section.settings.length - 1"
               :icon="['fas', 'arrow-down']"
               :use-shadow="false"
               theme="base"
-              @click="moveQuickSection(section.id, 1)"
+              @click="moveQuickSetting(section, setting.id, 1)"
+            />
+            <FtIconButton
+              class="settingAction"
+              :title="`${t('Search Bar.Remove')} ${setting.label}`"
+              :icon="['fas', 'xmark']"
+              :use-shadow="false"
+              theme="base"
+              @click="removeQuickSetting(setting.id)"
             />
           </div>
-        </div>
-        <ul class="sectionSettings">
-          <li
-            v-for="(setting, index) in section.settings"
-            :key="setting.id"
-            class="selectedSetting"
-            :data-setting-id="setting.id"
-            :class="{ dragging: draggedSettingId === setting.id }"
-            :style="settingRowStyle(setting.id)"
-          >
-            <span
-              class="dragHandle"
-              aria-hidden="true"
-              @dragstart.prevent
-              @pointerdown="startSettingDrag($event, setting.id)"
-              @pointermove="moveSettingDrag"
-              @pointerup="endSettingDrag"
-              @pointercancel="cancelSettingDrag"
-              @lostpointercapture="cancelSettingDrag"
-            >
-              <FtIcon :icon="['fas', 'grip']" />
-            </span>
-            <FtIcon
-              class="selectedSettingIcon"
-              :icon="setting.icon"
-              aria-hidden="true"
-            />
-            <span>{{ setting.label }}</span>
-            <div class="settingActions">
-              <FtIconButton
-                class="settingAction"
-                :title="t('Home Page.Move section up', { section: setting.label })"
-                :disabled="index === 0"
-                :icon="['fas', 'arrow-up']"
-                :use-shadow="false"
-                theme="base"
-                @click="moveQuickSetting(section, setting.id, -1)"
-              />
-              <FtIconButton
-                class="settingAction"
-                :title="t('Home Page.Move section down', { section: setting.label })"
-                :disabled="index === section.settings.length - 1"
-                :icon="['fas', 'arrow-down']"
-                :use-shadow="false"
-                theme="base"
-                @click="moveQuickSetting(section, setting.id, 1)"
-              />
-              <FtIconButton
-                class="settingAction"
-                :title="`${t('Search Bar.Remove')} ${setting.label}`"
-                :icon="['fas', 'xmark']"
-                :use-shadow="false"
-                theme="base"
-                @click="removeQuickSetting(setting.id)"
-              />
-            </div>
-          </li>
-        </ul>
-      </li>
-    </ul>
-    <p
-      v-else
-      class="emptyState"
-    >
-      {{ t('Settings.No Settings Found') }}
-    </p>
-    <p
-      class="reorderStatus"
-      role="status"
-      aria-live="polite"
-      aria-atomic="true"
-    >
-      {{ reorderStatus }}
-    </p>
-  </FtSettingsSubpage>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <p
+    v-else
+    class="emptyState"
+  >
+    {{ t('Settings.No Settings Found') }}
+  </p>
+  <p
+    class="reorderStatus"
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+  >
+    {{ reorderStatus }}
+  </p>
 </template>
 
 <script setup>
@@ -212,11 +184,6 @@ import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
 import FtInput from '../FtInput/FtInput.vue'
-import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
-import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
-import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
-import NavigationCustomizer from '../NavigationCustomizer/NavigationCustomizer.vue'
-import FullscreenActionsCustomizer from '../FullscreenActionsCustomizer/FullscreenActionsCustomizer.vue'
 
 import store from '../../store/index'
 import { moveItemByVisibleOffset } from '../../../orderedItems'
@@ -230,7 +197,6 @@ import {
 } from '../../helpers/quickSettings'
 
 const { locale, t } = useI18n()
-const open = ref(false)
 const settingPickerOpen = ref(false)
 const settingSearchQuery = ref('')
 const reorderStatus = ref('')
@@ -271,13 +237,6 @@ const availableSettingProperties = computed(() => availableSettings.value.map(se
   iconName: setting.icon[1],
 })))
 
-function close() {
-  open.value = false
-  closeSettingPicker()
-  stopDragging()
-  stopSettingDrag()
-}
-
 async function toggleSettingPicker() {
   if (!settingsOverlayActive.value) return
   if (settingPickerOpen.value) {
@@ -309,7 +268,7 @@ function closeSettingPickerFromOutside(event) {
 
 function clampQuickSettingsScroll() {
   const content = quickSettingsActionsRef.value?.parentElement
-  const scroller = content?.closest('.settingsSubpageScroll')
+  const scroller = content?.closest('.customizerEditorScroll')
   if (scroller) clampOverlayScrollTop(scroller, content)
 }
 
@@ -320,7 +279,7 @@ watch(quickSettingsActionsRef, (actions) => {
 
   quickSettingsResizeObserver = new ResizeObserver(clampQuickSettingsScroll)
   quickSettingsResizeObserver.observe(actions.parentElement)
-  quickSettingsResizeObserver.observe(actions.closest('.settingsSubpageScroll'))
+  quickSettingsResizeObserver.observe(actions.closest('.customizerEditorScroll'))
   clampQuickSettingsScroll()
 })
 
@@ -404,7 +363,6 @@ async function moveQuickSection(sectionId, offset) {
 const {
   draggedItemId: draggedSectionId,
   rowStyle,
-  stopDragging,
   startPointerDrag,
   movePointerDrag,
   endPointerDrag,
@@ -424,7 +382,6 @@ const {
   movePointerDrag: moveSettingDrag,
   endPointerDrag: endSettingDrag,
   cancelPointerDrag: cancelSettingDrag,
-  stopDragging: stopSettingDrag,
 } = useOrderedItemReorder({
   items: quickSettings,
   rowSelector: '.selectedSetting',
@@ -440,17 +397,6 @@ function resetQuickSettings() {
 </script>
 
 <style scoped>
-.customizerLaunchers {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.settingButtonWithSync {
-  align-items: center;
-  display: inline-flex;
-}
-
 .quickSettingsActions {
   display: flex;
   flex-wrap: wrap;

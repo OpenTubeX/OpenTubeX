@@ -1169,6 +1169,21 @@ Settings:
     Unlocking: Sblocco in corso…
   Search Settings: Cerca nelle impostazioni
   No Settings Found: Nessuna impostazione trovata
+  Interface Customizer:
+    Customize Interface: "Personalizza interfaccia"
+    Preview: "Anteprima"
+    Player: "Lettore"
+    Desktop: "Desktop"
+    Mobile: "Dispositivo mobile"
+    Playing: "In riproduzione"
+    Player Menu: "Menu del lettore"
+    Fullscreen: "Schermo intero"
+    Paused: "In pausa"
+    Controls: "Controlli"
+    Example Video Title: "Video di esempio"
+    Resolution: "Risoluzione"
+    Loop: "Ripeti"
+    Off: "Disattivato"
 Tutorial:
   Skip: Salta
   Next: Avanti

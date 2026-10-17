@@ -1,0 +1,133 @@
+.customizerLauncher {
+  display: flex;
+  justify-content: center;
+}
+
+.interfaceCustomizer {
+  block-size: 100%;
+  container-type: size;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Keep the tabs outside the editor's scroll viewport. */
+.customizerHeader {
+  border-block-end: 1px solid var(--divider-color);
+  flex-shrink: 0;
+  padding-block: 8px;
+  padding-inline: 12px;
+}
+
+.customizerTabs {
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.customizerPanel {
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-areas: 'editor preview';
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  min-block-size: 0;
+}
+
+.customizerPreview {
+  background-color: var(--bg-color);
+  border-inline-start: 1px solid var(--divider-color);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  grid-area: preview;
+  min-block-size: 0;
+  min-inline-size: 0;
+  padding: 16px;
+}
+
+.previewModes {
+  --material-tab-min-height: 34px;
+  --material-tab-padding-inline: 12px;
+  --material-tab-font-size: 14px;
+
+  align-self: center;
+  flex-shrink: 0;
+  max-inline-size: 100%;
+}
+
+/* Keep the compact mode switcher a full touch target on touch screens. */
+@media (any-pointer: coarse) {
+  .previewModes {
+    --material-tab-min-height: var(--phone-touch-target, 48px);
+  }
+}
+
+.previewStage {
+  container-type: size;
+  flex: 1 1 auto;
+  min-block-size: 0;
+}
+
+.quickSettingsStage {
+  background-color: var(--card-bg-color);
+  block-size: 100%;
+  border: 1px solid var(--divider-color);
+  border-radius: calc(12px * var(--ui-roundness));
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 8px;
+}
+
+.customizerEditorScroll {
+  box-sizing: border-box;
+  grid-area: editor;
+  min-block-size: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 20px;
+}
+
+/* Lay out the editors like a settings subpage, which contains their margins. */
+.customizerEditor {
+  display: flex;
+  flex-direction: column;
+}
+
+@container (width <= 760px) {
+  .customizerPanel {
+    grid-template:
+      'preview' clamp(120px, 30cqb, 280px)
+      'editor' minmax(0, 1fr)
+      / minmax(0, 1fr);
+  }
+
+  .customizerPreview {
+    border-block-end: 1px solid var(--divider-color);
+    border-inline-start: 0;
+    padding: 12px;
+  }
+
+  .customizerEditorScroll {
+    padding-block: 16px;
+    padding-inline: 12px;
+  }
+}
+
+/* Narrow layouts keep one row of tabs by labelling only the selected ones. */
+@container (width <= 560px) {
+  .customizerTabs,
+  .previewModes {
+    --material-tab-padding-inline: 12px;
+
+    flex-wrap: nowrap;
+  }
+
+  /* Hide the label visually but keep it as the tab's accessible name. */
+  [role='tab'][aria-selected='false'] .tabLabel {
+    block-size: 1px;
+    clip-path: inset(50%);
+    inline-size: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+  }
+}

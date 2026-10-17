@@ -1169,6 +1169,21 @@ Settings:
     Unlocking: Avamine…
   Search Settings: Otsingu seaded
   No Settings Found: Seadeid ei leitud
+  Interface Customizer:
+    Customize Interface: "Kohanda liidest"
+    Preview: "Eelvaade"
+    Player: "Pleier"
+    Desktop: "Arvuti"
+    Mobile: "Mobiil"
+    Playing: "Esitamisel"
+    Player Menu: "Pleieri menüü"
+    Fullscreen: "Täisekraan"
+    Paused: "Peatatud"
+    Controls: "Juhtnupud"
+    Example Video Title: "Näidisvideo"
+    Resolution: "Eraldusvõime"
+    Loop: "Kordus"
+    Off: "Väljas"
 Tutorial:
   Skip: Jäta vahele
   Next: Edasi

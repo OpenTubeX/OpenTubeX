@@ -1171,6 +1171,21 @@ Settings:
     Unlocking: Desbloqueando…
   Search Settings: Buscar ajustes
   No Settings Found: No se encontraron ajustes
+  Interface Customizer:
+    Customize Interface: "Personalizar interfaz"
+    Preview: "Vista previa"
+    Player: "Reproductor"
+    Desktop: "Escritorio"
+    Mobile: "Móvil"
+    Playing: "Reproduciendo"
+    Player Menu: "Menú del reproductor"
+    Fullscreen: "Pantalla completa"
+    Paused: "En pausa"
+    Controls: "Controles"
+    Example Video Title: "Vídeo de ejemplo"
+    Resolution: "Resolución"
+    Loop: "Repetir"
+    Off: "Desactivado"
 Tutorial:
   Skip: Omitir
   Next: Siguiente

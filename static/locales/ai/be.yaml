@@ -1227,6 +1227,21 @@ Settings:
   No Settings Found: Налады не знойдзены
   Experimental Settings:
     Disable Hardware Acceleration: Адключыць апаратнае паскарэнне
+  Interface Customizer:
+    Customize Interface: "Наладзіць інтэрфейс"
+    Preview: "Папярэдні прагляд"
+    Player: "Прайгравальнік"
+    Desktop: "Камп’ютар"
+    Mobile: "Мабільны"
+    Playing: "Прайграецца"
+    Player Menu: "Меню прайгравальніка"
+    Fullscreen: "Поўны экран"
+    Paused: "Прыпынена"
+    Controls: "Элементы кіравання"
+    Example Video Title: "Прыклад відэа"
+    Resolution: "Раздзяляльнасць"
+    Loop: "Паўтор"
+    Off: "Выкл."
 Tutorial:
   Skip: Прапусціць
   Next: Далей

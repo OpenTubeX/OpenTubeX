@@ -1175,6 +1175,21 @@ Settings:
   No Settings Found: Inga inställningar hittades
   Experimental Settings:
     Disable Hardware Acceleration: Inaktivera maskinvaruacceleration
+  Interface Customizer:
+    Customize Interface: "Anpassa gränssnitt"
+    Preview: "Förhandsvisning"
+    Player: "Spelare"
+    Desktop: "Dator"
+    Mobile: "Mobil"
+    Playing: "Spelas upp"
+    Player Menu: "Spelarmeny"
+    Fullscreen: "Helskärm"
+    Paused: "Pausad"
+    Controls: "Kontroller"
+    Example Video Title: "Exempelvideo"
+    Resolution: "Upplösning"
+    Loop: "Upprepa"
+    Off: "Av"
 Tutorial:
   Skip: Hoppa över
   Next: Nästa

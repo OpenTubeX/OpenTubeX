@@ -659,6 +659,27 @@ export async function goToSettingsSection(page, section) {
   return content
 }
 
+const INTERFACE_CUSTOMIZER_TABS = {
+  navigation: 'navigation',
+  'quick settings': 'quickSettings',
+  player: 'player',
+  'fullscreen actions': 'fullscreenActions'
+}
+
+/**
+ * Opens Customize interface from the Appearance settings and selects one of its tabs.
+ * @param {import('@playwright/test').Page} page
+ * @param {'navigation' | 'quick settings' | 'player' | 'fullscreen actions'} tab
+ */
+export async function openInterfaceCustomizer(page, tab) {
+  const appearance = await goToSettingsSection(page, 'appearance')
+  await appearance.getByRole('button', { name: 'Customize interface', exact: true }).click()
+  const tabButton = page.locator(`.interfaceCustomizer [data-settings-subpage-tab="${INTERFACE_CUSTOMIZER_TABS[tab]}"]`)
+  await tabButton.click()
+  await expect(tabButton).toHaveAttribute('aria-selected', 'true')
+  return page.locator('.interfaceCustomizer')
+}
+
 /**
  * Starts collecting the CSS animations that play from here on. The classes that
  * trigger them are cleared once they have run, so waiting on the class instead

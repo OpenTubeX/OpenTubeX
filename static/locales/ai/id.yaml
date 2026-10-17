@@ -1172,6 +1172,21 @@ Settings:
     Unlocking: Membuka kunci…
   Search Settings: Cari pengaturan
   No Settings Found: Pengaturan tidak ditemukan
+  Interface Customizer:
+    Customize Interface: "Sesuaikan antarmuka"
+    Preview: "Pratinjau"
+    Player: "Pemutar"
+    Desktop: "Desktop"
+    Mobile: "Seluler"
+    Playing: "Sedang diputar"
+    Player Menu: "Menu pemutar"
+    Fullscreen: "Layar penuh"
+    Paused: "Dijeda"
+    Controls: "Kontrol"
+    Example Video Title: "Video contoh"
+    Resolution: "Resolusi"
+    Loop: "Ulangi"
+    Off: "Mati"
 Tutorial:
   Skip: Lewati
   Next: Berikutnya

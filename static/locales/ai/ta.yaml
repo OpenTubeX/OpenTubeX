@@ -1201,6 +1201,21 @@ Settings:
   No Settings Found: அமைப்புகள் எதுவும் கிடைக்கவில்லை
   Experimental Settings:
     Disable Hardware Acceleration: வன்பொருள் முடுக்கத்தை முடக்கு
+  Interface Customizer:
+    Customize Interface: "இடைமுகத்தைத் தனிப்பயனாக்கு"
+    Preview: "முன்னோட்டம்"
+    Player: "இயக்கி"
+    Desktop: "கணினி"
+    Mobile: "மொபைல்"
+    Playing: "இயங்குகிறது"
+    Player Menu: "இயக்கி பட்டியல்"
+    Fullscreen: "முழுத்திரை"
+    Paused: "இடைநிறுத்தப்பட்டது"
+    Controls: "கட்டுப்பாடுகள்"
+    Example Video Title: "மாதிரி காணொளி"
+    Resolution: "தெளிவுத்திறன்"
+    Loop: "மீண்டும் இயக்கு"
+    Off: "அணை"
 Tutorial:
   Skip: தவிர்
   Next: அடுத்து

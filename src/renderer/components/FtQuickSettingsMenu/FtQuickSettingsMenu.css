@@ -11,7 +11,8 @@
   --quick-settings-viewport-offset: var(--bottom-tab-bar-height);
 }
 
-.profileTrigger {
+.profileTrigger,
+.previewProfileTrigger {
   position: relative;
   align-items: center;
   border: 0;
@@ -515,4 +516,16 @@
   block-size: var(--phone-touch-target, 48px);
   padding: 0;
   font-size: 20px;
+}
+
+/* The interface customizer shows the open menu below its trigger, sized to the preview. */
+.quickSettingsPreview {
+  align-items: flex-start;
+  block-size: 100%;
+  justify-content: flex-end;
+}
+
+.quickSettingsPreview .quickSettingsMenu {
+  inline-size: min(440px, 100%);
+  max-block-size: calc(100% - 48px);
 }

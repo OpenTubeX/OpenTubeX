@@ -1170,6 +1170,21 @@ Settings:
   No Settings Found: Настройки не найдены
   Experimental Settings:
     Disable Hardware Acceleration: Отключить аппаратное ускорение
+  Interface Customizer:
+    Customize Interface: "Настроить интерфейс"
+    Preview: "Предпросмотр"
+    Player: "Проигрыватель"
+    Desktop: "Компьютер"
+    Mobile: "Телефон"
+    Playing: "Воспроизведение"
+    Player Menu: "Меню проигрывателя"
+    Fullscreen: "Полный экран"
+    Paused: "Пауза"
+    Controls: "Элементы управления"
+    Example Video Title: "Пример видео"
+    Resolution: "Разрешение"
+    Loop: "Повтор"
+    Off: "Выкл."
 Tutorial:
   Skip: Пропустить
   Next: Далее

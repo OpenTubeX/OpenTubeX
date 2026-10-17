@@ -1,4 +1,4 @@
-import { test, expect, goToSettingsSection, setPlayerFullscreen, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, setPlayerFullscreen, setWindowSize, openInterfaceCustomizer } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
@@ -13,11 +13,10 @@ for (const { uiScale, width, height, colorScheme } of [
       await setWindowSize(app, page, { width, height })
       await page.emulateMedia({ colorScheme })
       await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
-      const appearance = await goToSettingsSection(page, 'appearance')
-      await appearance.getByRole('button', { name: 'Customize fullscreen actions', exact: true }).click()
+      await openInterfaceCustomizer(page, 'fullscreen actions')
       const rows = page.locator('.selectedAction')
       await expect(rows).toHaveCount(9)
-      await page.locator('.settingsSubpageContent').screenshot({ path: testInfo.outputPath(`customizer-${colorScheme}.png`) })
+      await page.locator('.interfaceCustomizer').screenshot({ path: testInfo.outputPath(`customizer-${colorScheme}.png`) })
       while (await rows.count()) {
         await rows.last().getByRole('button', { name: /^Remove / }).click()
       }
@@ -32,8 +31,7 @@ for (const { uiScale, width, height, colorScheme } of [
       const selectedIds = () => rows.evaluateAll(elements => elements.map(element => element.dataset.fullscreenActionId))
       await expect.poll(selectedIds).toEqual(['comments', 'share'])
       await page.reload()
-      const reloadedAppearance = await goToSettingsSection(page, 'appearance')
-      await reloadedAppearance.getByRole('button', { name: 'Customize fullscreen actions', exact: true }).click()
+      await openInterfaceCustomizer(page, 'fullscreen actions')
       await expect.poll(selectedIds).toEqual(['comments', 'share'])
       await page.locator('.settingsCloseButton').click()
 
@@ -73,13 +71,12 @@ for (const { uiScale, width, height, colorScheme } of [
 
     test('clamps customization scrolling after removal and responsive resize', async ({ app, page }) => {
       await setWindowSize(app, page, { width: 375, height: 600 })
-      const appearance = await goToSettingsSection(page, 'appearance')
-      await appearance.getByRole('button', { name: 'Customize fullscreen actions', exact: true }).click()
+      await openInterfaceCustomizer(page, 'fullscreen actions')
       const rows = page.locator('.selectedAction')
-      const scroller = page.locator('.settingsSubpageScroll')
+      const scroller = page.locator('.customizerEditorScroll')
       const expectAtContentEnd = async () => {
         await expect.poll(() => scroller.evaluate(element => {
-          const content = element.querySelector('.settingsSubpageContent')
+          const content = element.querySelector('.customizerEditor')
           const contentEnd = content.getBoundingClientRect().bottom + Number.parseFloat(getComputedStyle(element).paddingBottom)
           const viewportEnd = element.getBoundingClientRect().bottom
           return Math.abs(Math.max(-element.scrollTop, contentEnd - viewportEnd)) * devicePixelRatio
@@ -92,7 +89,7 @@ for (const { uiScale, width, height, colorScheme } of [
       }
       const expectValidScroll = async () => {
         await expect.poll(() => scroller.evaluate(element => {
-          const content = element.querySelector('.settingsSubpageContent')
+          const content = element.querySelector('.customizerEditor')
           const contentEnd = content.getBoundingClientRect().bottom + Number.parseFloat(getComputedStyle(element).paddingBottom)
           const viewportEnd = element.getBoundingClientRect().bottom
           const maximum = Math.max(0, contentEnd - viewportEnd + element.scrollTop)

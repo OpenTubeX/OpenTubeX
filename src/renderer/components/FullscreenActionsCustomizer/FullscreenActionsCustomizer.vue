@@ -1,171 +1,150 @@
 <template>
-  <div class="settingButtonWithSync">
-    <FtButton
-      data-settings-subpage="fullscreen-actions"
-      :label="t('Settings.Fullscreen Actions.Customize')"
-      :icon="['fas', 'sliders-h']"
-      @click="open = true"
-    />
-    <FtSyncedSettingIndicator setting-key="fullscreenActions" />
-  </div>
-
-  <FtSettingsSubpage
-    :open="open"
-    grow-with-content
-    :title="t('Settings.Fullscreen Actions.Customize')"
-    :icon="['fas', 'sliders-h']"
-    @close="close"
+  <div
+    ref="actionListRef"
+    class="fullscreenActionsControls"
   >
-    <template #breadcrumb-action>
-      <FtSyncedSettingIndicator setting-key="fullscreenActions" />
-    </template>
     <div
-      ref="actionListRef"
-      class="fullscreenActionsControls"
+      ref="itemPickerAnchorRef"
+      class="itemPickerAnchor"
     >
+      <FtButton
+        :label="t('Settings.Fullscreen Actions.Add Action')"
+        :icon="['fas', 'plus']"
+        aria-haspopup="menu"
+        :aria-expanded="itemPickerOpen"
+        :aria-controls="itemPickerId"
+        :disabled="availableItems.length === 0"
+        @click="toggleItemPicker"
+      />
       <div
-        ref="itemPickerAnchorRef"
-        class="itemPickerAnchor"
+        v-if="itemPickerOpen"
+        :id="itemPickerId"
+        class="itemPickerPopover"
+        data-settings-escape-scope
+        role="menu"
+        tabindex="-1"
+        :aria-label="t('Settings.Fullscreen Actions.Add Action')"
+        @keydown.esc.stop="closeItemPicker(true)"
+        @keydown.down.prevent="focusAdjacentPickerItem($event, 1)"
+        @keydown.up.prevent="focusAdjacentPickerItem($event, -1)"
       >
-        <FtButton
-          :label="t('Settings.Fullscreen Actions.Add Action')"
-          :icon="['fas', 'plus']"
-          aria-haspopup="menu"
-          :aria-expanded="itemPickerOpen"
-          :aria-controls="itemPickerId"
-          :disabled="availableItems.length === 0"
-          @click="toggleItemPicker"
-        />
         <div
-          v-if="itemPickerOpen"
-          :id="itemPickerId"
-          class="itemPickerPopover"
-          data-settings-escape-scope
-          role="menu"
-          tabindex="-1"
-          :aria-label="t('Settings.Fullscreen Actions.Add Action')"
-          @keydown.esc.stop="closeItemPicker(true)"
-          @keydown.down.prevent="focusAdjacentPickerItem($event, 1)"
-          @keydown.up.prevent="focusAdjacentPickerItem($event, -1)"
+          ref="itemPickerListRef"
+          v-overlay-scrollbars
+          class="itemPickerList"
+          role="none"
         >
-          <div
-            ref="itemPickerListRef"
-            v-overlay-scrollbars
-            class="itemPickerList"
+          <ul
+            ref="itemPickerContentRef"
+            class="itemPickerContent"
             role="none"
           >
-            <ul
-              ref="itemPickerContentRef"
-              class="itemPickerContent"
+            <li
+              v-for="item in availableItems"
+              :key="item.id"
               role="none"
             >
-              <li
-                v-for="item in availableItems"
-                :key="item.id"
-                role="none"
+              <button
+                type="button"
+                class="itemPickerOption"
+                role="menuitem"
+                @click="addItem(item.id)"
               >
-                <button
-                  type="button"
-                  class="itemPickerOption"
-                  role="menuitem"
-                  @click="addItem(item.id)"
-                >
-                  <FtIcon
-                    class="itemPickerIcon"
-                    :icon="item.icon"
-                    aria-hidden="true"
-                  />
-                  <bdi>{{ item.label }}</bdi>
-                </button>
-              </li>
-            </ul>
-          </div>
+                <FtIcon
+                  class="itemPickerIcon"
+                  :icon="item.icon"
+                  aria-hidden="true"
+                />
+                <bdi>{{ item.label }}</bdi>
+              </button>
+            </li>
+          </ul>
         </div>
       </div>
-      <FtButton
-        :label="t('KeyboardShortcutPrompt.Reset to Defaults')"
-        :icon="['fas', 'undo']"
-        :disabled="isDefaultActions"
-        theme="secondary"
-        @click="resetItems"
-      />
     </div>
+    <FtButton
+      :label="t('KeyboardShortcutPrompt.Reset to Defaults')"
+      :icon="['fas', 'undo']"
+      :disabled="isDefaultActions"
+      theme="secondary"
+      @click="resetItems"
+    />
+  </div>
 
-    <ul
-      v-if="selectedActions.length > 0"
-      class="selectedActions"
+  <ul
+    v-if="selectedActions.length > 0"
+    class="selectedActions"
+  >
+    <li
+      v-for="(item, index) in selectedActions"
+      :key="item.id"
+      class="selectedAction"
+      :data-fullscreen-action-id="item.id"
+      :class="{ dragging: draggedItemId === item.id }"
+      :style="rowStyle(item.id)"
     >
-      <li
-        v-for="(item, index) in selectedActions"
-        :key="item.id"
-        class="selectedAction"
-        :data-fullscreen-action-id="item.id"
-        :class="{ dragging: draggedItemId === item.id }"
-        :style="rowStyle(item.id)"
+      <span
+        class="dragHandle"
+        aria-hidden="true"
+        @dragstart.prevent
+        @pointerdown="startPointerDrag($event, item.id)"
+        @pointermove="movePointerDrag"
+        @pointerup="endPointerDrag"
+        @pointercancel="cancelPointerDrag"
+        @lostpointercapture="cancelPointerDrag"
       >
-        <span
-          class="dragHandle"
-          aria-hidden="true"
-          @dragstart.prevent
-          @pointerdown="startPointerDrag($event, item.id)"
-          @pointermove="movePointerDrag"
-          @pointerup="endPointerDrag"
-          @pointercancel="cancelPointerDrag"
-          @lostpointercapture="cancelPointerDrag"
-        >
-          <FtIcon :icon="['fas', 'grip']" />
-        </span>
-        <FtIcon
-          class="selectedActionIcon"
-          :icon="item.icon"
-          aria-hidden="true"
+        <FtIcon :icon="['fas', 'grip']" />
+      </span>
+      <FtIcon
+        class="selectedActionIcon"
+        :icon="item.icon"
+        aria-hidden="true"
+      />
+      <span>{{ item.label }}</span>
+      <div class="itemActions">
+        <FtIconButton
+          class="itemAction"
+          :title="t('Home Page.Move section up', { section: item.label })"
+          :disabled="index === 0"
+          :icon="['fas', 'arrow-up']"
+          :use-shadow="false"
+          theme="base"
+          @click="moveItem(item.id, -1)"
         />
-        <span>{{ item.label }}</span>
-        <div class="itemActions">
-          <FtIconButton
-            class="itemAction"
-            :title="t('Home Page.Move section up', { section: item.label })"
-            :disabled="index === 0"
-            :icon="['fas', 'arrow-up']"
-            :use-shadow="false"
-            theme="base"
-            @click="moveItem(item.id, -1)"
-          />
-          <FtIconButton
-            class="itemAction"
-            :title="t('Home Page.Move section down', { section: item.label })"
-            :disabled="index === selectedActions.length - 1"
-            :icon="['fas', 'arrow-down']"
-            :use-shadow="false"
-            theme="base"
-            @click="moveItem(item.id, 1)"
-          />
-          <FtIconButton
-            class="itemAction"
-            :title="`${t('Search Bar.Remove')} ${item.label}`"
-            :icon="['fas', 'xmark']"
-            :use-shadow="false"
-            theme="base"
-            @click="removeItem(item.id)"
-          />
-        </div>
-      </li>
-    </ul>
-    <p
-      class="reorderStatus"
-      role="status"
-      aria-live="polite"
-      aria-atomic="true"
-    >
-      {{ reorderStatus }}
-    </p>
-    <p
-      v-if="selectedActions.length === 0"
-      class="emptyState"
-    >
-      {{ t('Settings.Fullscreen Actions.Empty') }}
-    </p>
-  </FtSettingsSubpage>
+        <FtIconButton
+          class="itemAction"
+          :title="t('Home Page.Move section down', { section: item.label })"
+          :disabled="index === selectedActions.length - 1"
+          :icon="['fas', 'arrow-down']"
+          :use-shadow="false"
+          theme="base"
+          @click="moveItem(item.id, 1)"
+        />
+        <FtIconButton
+          class="itemAction"
+          :title="`${t('Search Bar.Remove')} ${item.label}`"
+          :icon="['fas', 'xmark']"
+          :use-shadow="false"
+          theme="base"
+          @click="removeItem(item.id)"
+        />
+      </div>
+    </li>
+  </ul>
+  <p
+    class="reorderStatus"
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+  >
+    {{ reorderStatus }}
+  </p>
+  <p
+    v-if="selectedActions.length === 0"
+    class="emptyState"
+  >
+    {{ t('Settings.Fullscreen Actions.Empty') }}
+  </p>
 </template>
 
 <script setup>
@@ -175,8 +154,6 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplate
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
-import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
-import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 
 import store from '../../store/index'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
@@ -189,7 +166,6 @@ import {
 } from '../../helpers/fullscreenActions'
 
 const { locale, t } = useI18n()
-const open = ref(false)
 const itemPickerOpen = ref(false)
 const reorderStatus = ref('')
 const itemPickerId = `fullscreen-action-picker-${useId().replaceAll(':', '')}`
@@ -219,12 +195,6 @@ const selectedActions = computed(() => fullscreenActions.value
 const availableItems = computed(() => catalog.value
   .filter(item => !fullscreenActions.value.includes(item.id))
   .toSorted((left, right) => left.label.localeCompare(right.label, locale.value)))
-
-function close() {
-  open.value = false
-  closeItemPicker()
-  stopDragging()
-}
 
 async function toggleItemPicker() {
   if (!settingsOverlayActive.value) return
@@ -274,7 +244,7 @@ function stopObservingItemPicker() {
 
 function clampActionScroll() {
   const content = actionListRef.value?.parentElement
-  const scroller = content?.closest('.settingsSubpageScroll')
+  const scroller = content?.closest('.customizerEditorScroll')
   if (scroller) clampOverlayScrollTop(scroller, content)
 }
 
@@ -285,7 +255,7 @@ watch(actionListRef, (options) => {
 
   actionResizeObserver = new ResizeObserver(clampActionScroll)
   actionResizeObserver.observe(options.parentElement)
-  actionResizeObserver.observe(options.closest('.settingsSubpageScroll'))
+  actionResizeObserver.observe(options.closest('.customizerEditorScroll'))
   clampActionScroll()
 })
 
@@ -358,7 +328,6 @@ function moveItem(itemId, offset) {
 const {
   draggedItemId,
   rowStyle,
-  stopDragging,
   startPointerDrag,
   movePointerDrag,
   endPointerDrag,
@@ -377,11 +346,6 @@ function resetItems() {
 </script>
 
 <style scoped>
-.settingButtonWithSync {
-  align-items: center;
-  display: inline-flex;
-}
-
 .fullscreenActionsControls {
   display: flex;
   flex-wrap: wrap;

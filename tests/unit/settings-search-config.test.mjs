@@ -479,19 +479,23 @@ test('settings search retains the subpage containing each control', () => {
     store: { getters: { getUseQuickPlaybackSpeedBar: true } },
     usingElectron: true,
   })
-  for (const [section, label, subpage] of [
-    ['appearance', 'Show active subscriptions in sidebar', 'navigation'],
-    ['appearance', "Always show navigation bar when it's at the bottom", 'navigation'],
-    ['appearance', "Compact navigation bar when it's at the bottom", 'navigation'],
-    ['appearance', 'Add item', 'navigation'],
-    ['playback', 'Add Playback Speed', 'quick-playback-speed'],
-    ['playback', 'Playback Speed', 'quick-playback-speed'],
-    ['appearance', 'Customize navigation', undefined],
-    ['playback', 'Default Playback Rate', undefined]
+  for (const [section, label, subpage, subpageTab] of [
+    ['appearance', 'Show active subscriptions in sidebar', 'customize-interface', 'navigation'],
+    ['appearance', "Always show navigation bar when it's at the bottom", 'customize-interface', 'navigation'],
+    ['appearance', "Compact navigation bar when it's at the bottom", 'customize-interface', 'navigation'],
+    ['appearance', 'Add item', 'customize-interface', 'navigation'],
+    ['appearance', 'Customize navigation', 'customize-interface', 'navigation'],
+    ['appearance', 'Add setting', 'customize-interface', 'quickSettings'],
+    ['appearance', 'Add action', 'customize-interface', 'fullscreenActions'],
+    ['appearance', 'Customize interface', undefined, undefined],
+    ['playback', 'Add Playback Speed', 'quick-playback-speed', undefined],
+    ['playback', 'Playback Speed', 'quick-playback-speed', undefined],
+    ['playback', 'Default Playback Rate', undefined, undefined]
   ]) {
     const match = values.get(section).find(match => match.label === label)
     assert.ok(match, label)
     assert.equal(match.subpage, subpage, label)
+    assert.equal(match.subpageTab, subpageTab, label)
   }
 })
 
