@@ -5,57 +5,58 @@ import path from 'node:path'
 import { test, expect } from '../../helpers/app.mjs'
 
 const pixel = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a6l8AAAAASUVORK5CYII=', 'base64')
-const server = createServer()
 let origin
 let otherOrigin
 let accountRequests = 0
+// Playwright reruns beforeAll for every batch of this file's tests a worker
+// receives, while the module stays loaded. Register the handler only once.
+const server = createServer(async (request, response) => {
+  // Model services that support API requests but do not implement browser CORS.
+  if (request.method === 'OPTIONS') {
+    response.writeHead(405).end()
+    return
+  }
+  if (request.url === '/frame') {
+    response.setHeader('Content-Type', 'text/html')
+    response.end('<!doctype html><title>Foreign frame</title><body>foreign content</body>')
+    return
+  }
+  if (request.url === '/redirect') {
+    response.writeHead(302, { Location: `${otherOrigin}/api` }).end()
+    return
+  }
+  if (request.url === '/image') {
+    response.writeHead(200, { 'Content-Type': 'image/png' }).end(pixel)
+    return
+  }
+  if (request.url === '/media') {
+    response.writeHead(206, {
+      'Content-Type': 'application/octet-stream',
+      'Content-Range': 'bytes 2-5/8',
+      'Accept-Ranges': 'bytes'
+    }).end('2345')
+    return
+  }
+  const chunks = []
+  for await (const chunk of request) chunks.push(chunk)
+  response.writeHead(request.url === '/unauthorized' ? 401 : 200, {
+    'Content-Type': 'application/json',
+    'Cache-Control': 'public, max-age=3600',
+    'X-Response-Fixture': 'visible'
+  }).end(JSON.stringify({
+    ...(request.url === '/account' ? { requestNumber: ++accountRequests } : {}),
+    method: request.method,
+    body: Buffer.concat(chunks).toString(),
+    authorization: request.headers.authorization,
+    range: request.headers.range
+  }))
+})
 
 test.use({
   launchArgs: ['--host-resolver-rules=MAP *.otx-test.invalid 127.0.0.1', '--no-proxy-server']
 })
 
 test.beforeAll(async () => {
-  server.on('request', async (request, response) => {
-    // Model services that support API requests but do not implement browser CORS.
-    if (request.method === 'OPTIONS') {
-      response.writeHead(405).end()
-      return
-    }
-    if (request.url === '/frame') {
-      response.setHeader('Content-Type', 'text/html')
-      response.end('<!doctype html><title>Foreign frame</title><body>foreign content</body>')
-      return
-    }
-    if (request.url === '/redirect') {
-      response.writeHead(302, { Location: `${otherOrigin}/api` }).end()
-      return
-    }
-    if (request.url === '/image') {
-      response.writeHead(200, { 'Content-Type': 'image/png' }).end(pixel)
-      return
-    }
-    if (request.url === '/media') {
-      response.writeHead(206, {
-        'Content-Type': 'application/octet-stream',
-        'Content-Range': 'bytes 2-5/8',
-        'Accept-Ranges': 'bytes'
-      }).end('2345')
-      return
-    }
-    const chunks = []
-    for await (const chunk of request) chunks.push(chunk)
-    response.writeHead(request.url === '/unauthorized' ? 401 : 200, {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'public, max-age=3600',
-      'X-Response-Fixture': 'visible'
-    }).end(JSON.stringify({
-      ...(request.url === '/account' ? { requestNumber: ++accountRequests } : {}),
-      method: request.method,
-      body: Buffer.concat(chunks).toString(),
-      authorization: request.headers.authorization,
-      range: request.headers.range
-    }))
-  })
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
   const { port } = server.address()
   origin = `http://server.otx-test.invalid:${port}`
