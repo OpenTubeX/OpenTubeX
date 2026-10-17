@@ -1,4 +1,5 @@
 import { test, expect, setWindowSize } from '../../helpers/app.mjs'
+import { WINDOWED_LIST_OVERSCAN_PX } from '../../../src/renderer/helpers/windowedList.js'
 
 const VIDEO_COUNT = 150
 
@@ -144,6 +145,11 @@ test('keeps a valid offset when searching, resizing or removing at the end of a 
 test('keeps only rows near the viewport mounted in long playlists', { tag: '@performance' }, async ({ page }) => {
   await openPlaylist(page)
   await scrollToEnd(page)
-  const mountedRows = rowsOf(page).filter({ has: page.locator('.ft-list-video') })
-  await expect.poll(() => mountedRows.count()).toBeLessThan(VIDEO_COUNT / 2)
+  // Only the viewport plus the overscan on both sides may stay mounted, whatever the playlist length.
+  await expect.poll(() => page.evaluate(overscan => {
+    const rows = [...document.querySelectorAll('.playlistItems > .playlistItem')]
+    const mounted = rows.filter(row => row.querySelector('.ft-list-video'))
+    const rowHeight = Math.min(...mounted.map(row => row.getBoundingClientRect().height))
+    return mounted.length - Math.ceil((window.innerHeight + 2 * overscan) / rowHeight) - 2
+  }, WINDOWED_LIST_OVERSCAN_PX)).toBeLessThanOrEqual(0)
 })
