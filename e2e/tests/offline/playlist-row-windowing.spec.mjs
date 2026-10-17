@@ -149,6 +149,7 @@ test('keeps only rows near the viewport mounted in long playlists', { tag: '@per
   await expect.poll(() => page.evaluate(overscan => {
     const rows = [...document.querySelectorAll('.playlistItems > .playlistItem')]
     const mounted = rows.filter(row => row.querySelector('.ft-list-video'))
+    if (mounted.length === 0) return Infinity
     const rowHeight = Math.min(...mounted.map(row => row.getBoundingClientRect().height))
     return mounted.length - Math.ceil((window.innerHeight + 2 * overscan) / rowHeight) - 2
   }, WINDOWED_LIST_OVERSCAN_PX)).toBeLessThanOrEqual(0)
