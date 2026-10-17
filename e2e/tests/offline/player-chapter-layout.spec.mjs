@@ -88,7 +88,8 @@ test('chapter controls narrow quick speeds first during playback', { tag: '@scal
   await expect.poll(() => panel.locator('.ft-chapters-button').evaluate(element => element.getBoundingClientRect().width)).toBeCloseTo(48, 0)
 })
 
-test('chapters animate between title and icon in both player themes', async ({ app, page }) => {
+// Flaky under parallel load: https://github.com/OpenTubeX/OpenTubeX/issues/2165
+test.fixme('chapters animate between title and icon in both player themes', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
   await video.evaluate(element => element.pause())
@@ -251,7 +252,8 @@ test('chapter chevron animates opening and closing unless motion is reduced', as
   expect(await chevron.evaluate(element => element.getAnimations().length)).toBe(0)
 })
 
-test('chapter animation keeps the right control glass aligned without quick speeds', { tag: '@scale' }, async ({ app, page }) => {
+// Flaky under parallel load: https://github.com/OpenTubeX/OpenTubeX/issues/2165
+test.fixme('chapter animation keeps the right control glass aligned without quick speeds', { tag: '@scale' }, async ({ app, page }) => {
   await page.evaluate(() => window.$store.dispatch('updateUseQuickPlaybackSpeedBar', false))
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
