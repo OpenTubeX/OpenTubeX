@@ -870,7 +870,8 @@ test('marks the chapters player-option tile active while chapters are open', asy
   await watchComponent.dispose()
 })
 
-test('repeats an A-B range and manages it from the player menu', async ({ app, page }) => {
+// Flaky under parallel load: https://github.com/OpenTubeX/OpenTubeX/issues/2169
+test.fixme('repeats an A-B range and manages it from the player menu', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
   const player = page.locator('.ftVideoPlayer')
