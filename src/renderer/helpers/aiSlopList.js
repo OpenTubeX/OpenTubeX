@@ -93,5 +93,9 @@ export function saveCachedAiSlopList({ fetchedAt, blocked, warned }) {
 }
 
 export function removeCachedAiSlopList() {
-  localStorage.removeItem(CACHE_KEY)
+  try {
+    localStorage.removeItem(CACHE_KEY)
+  } catch (error) {
+    console.error('Failed to remove the cached AiSList channel lists', error)
+  }
 }
