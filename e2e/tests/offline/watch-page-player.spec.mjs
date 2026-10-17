@@ -870,8 +870,7 @@ test('marks the chapters player-option tile active while chapters are open', asy
   await watchComponent.dispose()
 })
 
-// Flaky under parallel load: https://github.com/OpenTubeX/OpenTubeX/issues/2169
-test.fixme('repeats an A-B range and manages it from the player menu', async ({ app, page }) => {
+test('repeats an A-B range and manages it from the player menu', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
   const player = page.locator('.ftVideoPlayer')
@@ -1012,10 +1011,34 @@ test.fixme('repeats an A-B range and manages it from the player menu', async ({ 
   })
 
   await expect.poll(() => page.evaluate(() => window.__abRepeatBoundaryTime ?? null)).not.toBeNull()
-  const boundaryTime = await page.evaluate(() => window.__abRepeatBoundaryTime)
   const boundaryTolerance = 0.015
-  expect(boundaryTime).toBeGreaterThan(expectedBoundaryTime - boundaryTolerance)
-  expect(boundaryTime).toBeLessThan(expectedBoundaryTime + boundaryTolerance)
+  expect(await page.evaluate(() => window.__abRepeatBoundaryTime)).toBeGreaterThan(expectedBoundaryTime - boundaryTolerance)
+
+  // A busy renderer can stall real playback checks past point B. Step a fake
+  // playback clock instead, so the check sees exactly when B is reached.
+  // Blocking timeupdate leaves the boundary scheduler as the only checker.
+  const boundarySeeks = await video.evaluate(async (element) => {
+    let currentTime = 6.45
+    const seeks = []
+    const blockTimeupdate = event => event.stopImmediatePropagation()
+    element.addEventListener('timeupdate', blockTimeupdate, { capture: true })
+    Object.defineProperty(element, 'currentTime', {
+      configurable: true,
+      get: () => currentTime,
+      set: value => { seeks.push(value) }
+    })
+    await new Promise(resolve => setTimeout(resolve, 200))
+    const early = [...seeks]
+    currentTime = 6.49
+    const deadline = performance.now() + 5000
+    while (seeks.length === early.length && performance.now() < deadline) {
+      await new Promise(resolve => setTimeout(resolve, 4))
+    }
+    delete element.currentTime
+    element.removeEventListener('timeupdate', blockTimeupdate, { capture: true })
+    return { early, seek: seeks[early.length] ?? null }
+  })
+  expect(boundarySeeks).toEqual({ early: [], seek: 5.25 })
 
   await video.evaluate(element => element.pause())
   await player.hover()
