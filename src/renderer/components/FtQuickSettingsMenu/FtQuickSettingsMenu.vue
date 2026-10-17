@@ -213,8 +213,8 @@
                 class="quickSettingsContent"
               >
                 <section
-                  v-for="(section, sectionIndex) in orderedQuickSettingSections"
-                  :key="`${section.id}-${sectionIndex}`"
+                  v-for="section in orderedQuickSettingSections"
+                  :key="`${section.id}-${section.settings[0].id}`"
                   class="menuSection"
                 >
                   <h3>
