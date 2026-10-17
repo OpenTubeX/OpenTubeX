@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="root"
     v-observe-visibility="visible ? false : {
       callback: onVisibilityChanged
     }"
@@ -86,11 +87,12 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { usePlaylistDrag } from '../../composables/usePlaylistDrag'
 import store from '../../store/index'
+import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 
 import FtListVideo from '../FtListVideo/FtListVideo.vue'
 
@@ -193,6 +195,7 @@ const emit = defineEmits([
   'drag-video-end'
 ])
 const visible = ref(props.initialVisibleState)
+const root = useTemplateRef('root')
 const { t } = useI18n()
 const downloadAvailable = computed(() => {
   if (!props.downloadId) return false
@@ -228,14 +231,32 @@ if (!props.initialVisibleState) {
 /**
  * @param {boolean} isVisible
  */
-function onVisibilityChanged(isVisible) {
-  if (isVisible) {
-    visible.value = isVisible
+async function onVisibilityChanged(isVisible) {
+  if (!isVisible) return
 
-    if (stopWatchingInitialVisibleState) {
-      stopWatchingInitialVisibleState()
-      stopWatchingInitialVisibleState = null
-    }
+  // A slow renderer can report a row after its list already scrolled past it,
+  // for example after centering the current video. Without native scroll
+  // anchoring (phone panels disable it), the growing row would push the visible
+  // rows down, so keep them in place ourselves.
+  const element = root.value
+  const scroller = element?.parentElement
+  const placeholderBounds = scroller != null && getComputedStyle(scroller).overflowAnchor === 'none'
+    ? element.getBoundingClientRect()
+    : null
+  const aboveViewport = placeholderBounds != null &&
+    placeholderBounds.bottom <= scroller.getBoundingClientRect().top
+
+  visible.value = true
+
+  if (stopWatchingInitialVisibleState) {
+    stopWatchingInitialVisibleState()
+    stopWatchingInitialVisibleState = null
+  }
+
+  if (aboveViewport) {
+    await nextTick()
+    const growth = element.getBoundingClientRect().height - placeholderBounds.height
+    if (growth !== 0) restoreOverlayScrollTop(scroller, scroller.scrollTop + growth)
   }
 }
 
