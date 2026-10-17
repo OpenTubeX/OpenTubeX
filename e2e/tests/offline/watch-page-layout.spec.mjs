@@ -432,6 +432,35 @@ test('chapters stay centered through layout changes until manually scrolled', { 
   await expect.poll(() => scroller.evaluate(element => (
     Math.abs(element.scrollTop - (element.scrollHeight - element.clientHeight))
   ))).toBeLessThan(2)
+  // Revealing the list re-centers the current chapter one frame later. A wheel
+  // in between, e.g. while a dock slides in, must win over that deferred frame.
+  await scroller.evaluate(element => new Promise(resolve => {
+    let hidden = false
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) {
+        hidden = true
+        element.style.translate = ''
+      } else if (hidden) {
+        observer.disconnect()
+        // A task after every observer callback of this update, before the next frame.
+        const channel = new MessageChannel()
+        channel.port1.onmessage = () => {
+          element.dispatchEvent(new WheelEvent('wheel'))
+          element.scrollTop = element.scrollHeight
+          resolve()
+        }
+        channel.port2.postMessage(null)
+      }
+    })
+    observer.observe(element)
+    element.style.translate = '-100000px'
+  }))
+  expect(await scroller.evaluate(async element => {
+    for (let frame = 0; frame < 10; frame++) {
+      await new Promise(resolve => requestAnimationFrame(resolve))
+    }
+    return Math.abs(element.scrollTop - (element.scrollHeight - element.clientHeight))
+  })).toBeLessThan(2)
   await scroller.locator('.chapterSeek').nth(32).click()
   await expect(scroller.locator('.chapter.current .chapterTitle')).toHaveText('Chapter 33')
   await scroller.evaluate(element => { element.style.maxBlockSize = '240px' })

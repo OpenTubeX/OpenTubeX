@@ -249,7 +249,8 @@ function scrollToCurrentChapter(remainingAttempts = 5) {
   const container = chaptersWrapper.value
   const currentItem = chaptersContent.value?.children[currentIndex.value]
 
-  if (!container || !currentItem) {
+  // Deferred and retried calls run a frame later; a manual scroll in between wins.
+  if (!followCurrentChapter || !container || !currentItem) {
     return
   }
 
