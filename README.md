@@ -29,6 +29,9 @@ endorsed by, maintained by, or supported by the FreeTube project.
   <a href="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/codeql.yml">
     <img alt="CodeQL" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/codeql.svg" />
   </a>
+  <a href="https://scorecard.dev/viewer/?uri=github.com/OpenTubeX/OpenTubeX">
+    <img alt="OpenSSF Scorecard" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/scorecard.svg" />
+  </a>
   <a href="https://weblate.opentubex.org/engage/opentubex/">
     <img alt="Translation status" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/translations.svg" />
   </a>
