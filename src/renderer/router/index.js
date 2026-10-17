@@ -158,7 +158,8 @@ export const routes = [
         },
         component: SettingsRoute
       }]
-    : []),
+    // Lite Android builds may restore tabs saved by a full build.
+    : [{ path: '/downloads', redirect: '/' }]),
   {
     path: '/stats',
     name: 'stats',
@@ -233,7 +234,7 @@ export const routes = [
         },
         component: ExternalMedia
       }]
-    : []),
+    : [{ path: '/external-media', redirect: '/' }]),
   {
     path: '/hashtag/:hashtag',
     meta: {
