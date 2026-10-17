@@ -168,6 +168,32 @@ test('adding to a playlist becomes removal only in an editable playlist context'
   assert.equal(context.resolve('right'), null)
 })
 
+test('bookmarking becomes removal only in the bookmark playlist', () => {
+  const bookmark = { actionId: 'quickBookmark', label: 'Bookmark', run() {} }
+  const remove = { actionId: 'removeFromPlaylist', label: 'Remove', run() {} }
+  const bookmarks = { _id: 'bookmarks' }
+  const context = {
+    store: { getters: { getThumbnailLeftSwipeAction: 'quickBookmark', getThumbnailRightSwipeAction: 'quickBookmark' } },
+    mobileThumbnailActions: { value: [bookmark, remove] },
+    videoContextMenuItems: { value: [] },
+    inUserPlaylist: { value: true },
+    props: { canRemoveFromPlaylist: true },
+    selectedUserPlaylist: { value: bookmarks },
+    quickBookmarkPlaylist: { value: bookmarks },
+  }
+  vm.runInNewContext(`${resolver}; globalThis.resolve = getThumbnailSwipeAction`, context)
+  assert.equal(context.resolve('left'), remove)
+  context.selectedUserPlaylist.value = { _id: 'other' }
+  assert.equal(context.resolve('left'), bookmark)
+  context.selectedUserPlaylist.value = null
+  context.quickBookmarkPlaylist.value = undefined
+  assert.equal(context.resolve('left'), bookmark)
+  context.selectedUserPlaylist.value = bookmarks
+  context.quickBookmarkPlaylist.value = bookmarks
+  context.props.canRemoveFromPlaylist = false
+  assert.equal(context.resolve('left'), bookmark)
+})
+
 test('copy shortcuts resolve existing submenu actions for Invidious sharing and public playlists', () => {
   const copy = { actionId: 'copyYoutube', run() {} }
   const context = {
