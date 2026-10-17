@@ -240,6 +240,7 @@
             :is-sort-order-custom="isSortOrderCustom"
             :is-video-dragging="isVideoDragging"
             appearance="watchPlaylistItem"
+            nested-scroller
             :initial-visible-state="index < (currentVideoIndexZeroBased + 4) && index > (currentVideoIndexZeroBased - 4)"
             @drag-video="setDraggedVideo"
             @drag-video-end="onDragVideoEnd"
@@ -1256,10 +1257,19 @@ watch(playlistItemsWrapper, (wrapper) => {
       }
     })
   }
-  playlistItemsObserver = new MutationObserver(scheduleClamp)
-  playlistItemsObserver.observe(container, { childList: true })
+  // Windowed rows shrink to measured shells after layout changes without any
+  // child list mutation, so watch each row's size as well as the viewport.
   playlistItemsResizeObserver = new ResizeObserver(scheduleClamp)
   playlistItemsResizeObserver.observe(container)
+  const observeItems = () => {
+    for (const item of container.querySelectorAll(':scope > .playlistItem')) playlistItemsResizeObserver.observe(item)
+  }
+  observeItems()
+  playlistItemsObserver = new MutationObserver(() => {
+    observeItems()
+    scheduleClamp()
+  })
+  playlistItemsObserver.observe(container, { childList: true })
 }, { flush: 'post' })
 
 onBeforeUnmount(stopObservingPlaylistItems)

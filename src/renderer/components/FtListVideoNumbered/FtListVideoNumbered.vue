@@ -91,7 +91,7 @@ import { useI18n } from 'vue-i18n'
 
 import { usePlaylistDrag } from '../../composables/usePlaylistDrag'
 import { vFirstVisible } from '../../helpers/firstVisible'
-import { observeNestedWindowedListItem } from '../../helpers/windowedList'
+import { observeNestedWindowedListItem, observeWindowedListItem } from '../../helpers/windowedList'
 import store from '../../store/index'
 import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 
@@ -181,6 +181,10 @@ const props = defineProps({
   isCurrentVideo: {
     type: Boolean,
     default: false
+  },
+  nestedScroller: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -239,7 +243,8 @@ if (windowed) {
     windowItem?.dispose()
     windowItem = null
     if (!element) return
-    windowItem = observeNestedWindowedListItem(element, {
+    const observe = props.nestedScroller ? observeNestedWindowedListItem : observeWindowedListItem
+    windowItem = observe(element, {
       mount: onFirstVisible,
       unmount: height => { shellHeight.value = height; visible.value = false },
       isMounted: () => visible.value,
