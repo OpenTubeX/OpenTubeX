@@ -396,16 +396,16 @@ test('play and pause icons morph in both player themes', async ({ app, page }) =
         const size = getComputedStyle(icon).fontSize
         const scale = new DOMMatrix(getComputedStyle(icon).transform).a
         window.__playMorphProbe = new Promise(resolve => {
-          const transition = new Promise(resolve => {
-            path.addEventListener('transitionrun', event => resolve(event.propertyName), { once: true })
-            setTimeout(() => resolve(null), 500)
-          })
-          transition.then(async property => {
-            await new Promise(resolve => setTimeout(resolve, 90))
+          path.addEventListener('transitionrun', event => {
+            const transition = path.getAnimations().find(animation =>
+              animation instanceof CSSTransition && animation.transitionProperty === 'd')
+            // Sample the actual morph before runner delays can finish it.
+            transition.pause()
+            transition.currentTime = Number(transition.effect.getTiming().duration) / 2
             const midpoint = getComputedStyle(path).d
-            await new Promise(resolve => setTimeout(resolve, 120))
-            resolve({ property, initial, midpoint, final: getComputedStyle(path).d, size, scale })
-          })
+            transition.finish()
+            resolve({ property: event.propertyName, initial, midpoint, final: getComputedStyle(path).d, size, scale })
+          }, { once: true })
         })
       })
       await player.locator('.shaka-controls-button-panel > .shaka-play-button').click({ force: true })
@@ -722,36 +722,42 @@ test('control glass stays blurred throughout the row fade', async ({ app, page }
   const panel = controls.locator('.shaka-controls-button-panel')
   const glass = panel.locator('.ft-time-display-group > .ft-control-glass')
   await controls.evaluate(element => element.setAttribute('shown', 'true'))
+  // Let the fade-in finish; reversing a partial fade shortens the fade-out.
+  await expect(glass).toHaveCSS('opacity', '1')
   await expect(glass).toHaveCSS('backdrop-filter', /blur\(10px\)/)
 
-  const fade = await controls.evaluate(async element => {
-    element.removeAttribute('shown')
-    await new Promise(resolve => setTimeout(resolve, 150))
+  // Sample the middle of the 600ms row fade on the animation timeline rather
+  // than after a wall-clock delay, which a loaded runner can overshoot.
+  const sampleFadeMidpoint = shown => controls.evaluate((element, shown) => {
+    if (shown) {
+      element.setAttribute('shown', 'true')
+    } else {
+      element.removeAttribute('shown')
+    }
+    const transitions = element.getAnimations({ subtree: true }).filter(animation => animation instanceof CSSTransition)
+    for (const transition of transitions) {
+      transition.pause()
+      transition.currentTime = 300
+    }
     const panel = element.querySelector('.shaka-controls-button-panel')
     const glass = panel.querySelector('.ft-time-display-group > .ft-control-glass')
-    return {
+    const sample = {
       panelOpacity: Number(getComputedStyle(panel).opacity),
       glassOpacity: Number(getComputedStyle(glass).opacity),
       glassBlur: getComputedStyle(glass).backdropFilter
     }
-  })
+    for (const transition of transitions) transition.play()
+    return sample
+  }, shown)
+
+  const fade = await sampleFadeMidpoint(false)
   expect(fade.panelOpacity).toBe(1)
   expect(fade.glassOpacity).toBeGreaterThan(0)
   expect(fade.glassOpacity).toBeLessThan(1)
   expect(fade.glassBlur).toContain('blur(10px)')
   await expect.poll(() => glass.evaluate(element => Number(getComputedStyle(element).opacity))).toBe(0)
 
-  const fadeIn = await controls.evaluate(async element => {
-    element.setAttribute('shown', 'true')
-    await new Promise(resolve => setTimeout(resolve, 150))
-    const panel = element.querySelector('.shaka-controls-button-panel')
-    const glass = panel.querySelector('.ft-time-display-group > .ft-control-glass')
-    return {
-      panelOpacity: Number(getComputedStyle(panel).opacity),
-      glassOpacity: Number(getComputedStyle(glass).opacity),
-      glassBlur: getComputedStyle(glass).backdropFilter
-    }
-  })
+  const fadeIn = await sampleFadeMidpoint(true)
   expect(fadeIn.panelOpacity).toBe(1)
   expect(fadeIn.glassOpacity).toBeGreaterThan(0)
   expect(fadeIn.glassOpacity).toBeLessThan(1)
