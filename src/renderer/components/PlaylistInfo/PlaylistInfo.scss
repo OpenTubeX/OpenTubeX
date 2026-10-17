@@ -123,6 +123,8 @@
   }
 
   .searchInputsRow {
+    --input-bottom-spacing: 6px;
+
     margin-block-start: calc(16px + var(--playlist-search-label-outset));
   }
 }
