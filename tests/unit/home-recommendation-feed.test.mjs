@@ -153,7 +153,7 @@ for (const { name, settings, updated, candidate } of [
   })
 }
 
-for (const [setting, value] of [['getRecommendationExploration', 0.5], ['getEnableBlockLists', true]]) {
+for (const [setting, value] of [['getRecommendationExploration', 0.5], ['getEnableBlockLists', true], ['getAiSlopListFetchedAt', 123]]) {
   test(`revisiting Home reranks cached candidates after ${setting} changes`, async () => {
     const first = createFeed({ candidates: [{ videoId: 'candidate' }] })
     await waitForFeed(first.feed)
