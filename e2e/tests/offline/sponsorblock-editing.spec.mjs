@@ -267,6 +267,29 @@ test('keeps a grouped skip toast working after its first segment is disabled by 
   await expect(toast).toHaveCount(0)
 })
 
+test('closes an unskipped toast when a category correction disables its segment', async ({ app, page }) => {
+  const { panel, video } = await openSegments(app, page)
+  await page.route('**/api/voteOnSponsorTime?*', route => route.fulfill({ status: 200 }))
+  await page.evaluate(() => {
+    const store = window.$store
+    store.commit('setSponsorBlockIntro', { color: '#00ffff', skip: 'doNothing' })
+  })
+  await panel.getByRole('button', { name: 'Close', exact: true }).click()
+  await video.evaluate(element => {
+    element.currentTime = 11.2
+    element.dispatchEvent(new Event('timeupdate'))
+  })
+  const toast = page.locator('.ftVideoPlayer .skippedSegment')
+  await toast.getByRole('button', { name: /^Unskip/ }).click()
+  await expect(toast.getByRole('button', { name: /^Reskip/ })).toBeVisible()
+  await toast.getByRole('button', { name: 'Edit', exact: true }).click()
+  await toast.getByRole('button', { name: 'Change category', exact: true }).click()
+  await toast.locator('select').selectOption('intro')
+  await toast.getByRole('button', { name: 'Submit category vote', exact: true }).click()
+  await expect(page.locator('.sponsorBlockMarker')).toHaveCount(0)
+  await expect(toast).toHaveCount(0)
+})
+
 test.describe('segment editor layout', { tag: '@scale' }, () => {
   test.use({
     seed: {

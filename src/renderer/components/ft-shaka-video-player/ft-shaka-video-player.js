@@ -2710,11 +2710,14 @@ export default defineComponent({
         }
         const toast = skippedSponsorBlockSegments.value.find(item => item.uuid === uuid || item.groupUuids?.includes(uuid))
         if (toast) {
-          // describe the segments the toast still acts on, falling back to the corrected one
+          // describe the segments the toast still acts on, or drop it when none remain
           const toastSegments = getSponsorBlockToastSegments(toast.uuid)
-          const labelSegments = toastSegments.length > 0 ? toastSegments : [segment]
-          toast.translatedCategory = formatSponsorBlockToastCategories(labelSegments)
-          toast.color = getSponsorBlockInfoSegmentColor(labelSegments[0].category)
+          if (toastSegments.length > 0) {
+            toast.translatedCategory = formatSponsorBlockToastCategories(toastSegments)
+            toast.color = getSponsorBlockInfoSegmentColor(toastSegments[0].category)
+          } else {
+            removeSponsorBlockToast(toast.uuid)
+          }
         }
         cancelSponsorBlockSkipSchedule()
         refreshSponsorBlockMarkers()
@@ -3412,12 +3415,15 @@ export default defineComponent({
       let newTime = 0
       const skippedSegments = []
 
-      sponsorBlockSegments.forEach(segment => {
-        if (segment.actionType !== 'skip' || isSponsorBlockPointSegment(segment) || sponsorBlockDoNotSkipSegments.has(segment.uuid)) {
-          return
-        }
+      const autoSkipSegments = sponsorBlockSegments.filter(segment =>
+        segment.actionType === 'skip' &&
+        !isSponsorBlockPointSegment(segment) &&
+        !sponsorBlockDoNotSkipSegments.has(segment.uuid) &&
+        autoSkip.has(segment.category)
+      )
 
-        if (autoSkip.has(segment.category) && currentTime < segment.endTime &&
+      autoSkipSegments.forEach(segment => {
+        if (currentTime < segment.endTime &&
           (segment.startTime <= currentTime ||
             // if we already have a segment to skip, check if there are any that are less than 150ms later,
             // so that we can skip them all in one go (especially useful on slow connections)
@@ -3430,6 +3436,13 @@ export default defineComponent({
       if (newTime === 0 || video_.ended) {
         return
       }
+
+      // segments contained in the skipped range are jumped over too, so they belong to the same toast
+      autoSkipSegments.forEach(segment => {
+        if (!skippedSegments.includes(segment) && segment.startTime < newTime && segment.endTime > currentTime) {
+          skippedSegments.push(segment)
+        }
+      })
 
       const videoEnd = player.seekRange().end
 

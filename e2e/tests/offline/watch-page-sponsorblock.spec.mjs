@@ -366,7 +366,8 @@ test.describe('watch page', () => {
 
   test('shows one toast for SponsorBlock segments skipped together', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
-    const segments = [[10, 11.5], [11.51, 14], [13, 20]].map((segment, index) => ({
+    // [15, 17] lies inside [13, 20], so the jump covers it without extending the skip
+    const segments = [[10, 11.5], [11.51, 14], [13, 20], [15, 17]].map((segment, index) => ({
       UUID: `chained-sponsor-${index}`,
       actionType: 'skip',
       category: 'sponsor',
@@ -385,7 +386,7 @@ test.describe('watch page', () => {
       store.commit('setUseSponsorBlock', true)
     })
     await openMockedVideo(page)
-    await expect(page.locator('.sponsorBlockMarker')).toHaveCount(3)
+    await expect(page.locator('.sponsorBlockMarker')).toHaveCount(4)
 
     const video = page.locator('.ftVideoPlayer video')
     const seekTo = time => video.evaluate((element, time) => {
@@ -408,6 +409,8 @@ test.describe('watch page', () => {
     await seekTo(13.5)
     await expect(toast.getByRole('button', { name: 'Reskip' })).toBeVisible()
     expect(await video.evaluate(element => element.currentTime)).toBe(13.5)
+    await seekTo(16)
+    expect(await video.evaluate(element => element.currentTime)).toBe(16)
 
     await toast.getByRole('button', { name: 'Reskip' }).click()
     await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(20)
