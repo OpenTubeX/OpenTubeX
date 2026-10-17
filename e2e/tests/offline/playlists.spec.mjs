@@ -865,8 +865,7 @@ test.describe('custom playlist order', () => {
   }
 
   for (const layout of ['list', 'grid']) {
-    // Loses focus intermittently: https://github.com/OpenTubeX/OpenTubeX/issues/2148
-    test.fixme(`keyboard reorders ${layout} playlists and keeps the handle focused`, async ({ page }) => {
+    test(`keyboard reorders ${layout} playlists and keeps the handle focused`, async ({ page }) => {
       await dispatchStoreAction(page, 'updatePlaylistViewType', layout)
       await goTo(page, 'userplaylists')
       await page.getByText('Large custom playlist').click()

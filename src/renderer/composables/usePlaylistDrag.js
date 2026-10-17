@@ -10,6 +10,10 @@ const KEYBOARD_MOVES = {
   End: 'move-video-to-the-bottom'
 }
 
+// Only the most recent keyboard move may restore focus, so an earlier one
+// cannot pull focus back to another row.
+let stopFocusRestore = null
+
 /** Share touch reordering between grid cards and numbered playlist rows. */
 export function usePlaylistDrag(emit) {
   const nativeDrag = handleDragAndDrop(emit)
@@ -129,16 +133,31 @@ export function usePlaylistDrag(emit) {
     if (!action || !handle || session || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
     event.preventDefault()
     event.stopPropagation()
-    // Reordering can reinsert the focused row, which drops focus. Restore it
-    // after the list patch; focusing also scrolls a moved row into view.
+    // Reordering can reinsert the focused row, which drops focus. The list can
+    // be patched more than once, e.g. again when the saved playlist arrives,
+    // so restore focus after every patch for a while. Focusing also scrolls a
+    // moved row into view.
+    stopFocusRestore?.()
+    const list = event.currentTarget.parentElement
     const observer = new MutationObserver(() => {
-      if (!handle.isConnected) return
-      observer.disconnect()
       // Leave focus alone if the user already moved it elsewhere.
-      if (document.activeElement === document.body || document.activeElement === null) handle.focus()
+      if (handle.isConnected && (document.activeElement === document.body || document.activeElement === null)) {
+        handle.focus()
+      }
     })
-    observer.observe(event.currentTarget.parentElement, { childList: true })
-    setTimeout(() => observer.disconnect(), 1000)
+    const stopOnFocusElsewhere = focusEvent => {
+      if (focusEvent.target !== handle) stop()
+    }
+    const timeout = setTimeout(stop, 2000)
+    function stop() {
+      observer.disconnect()
+      clearTimeout(timeout)
+      document.removeEventListener('focusin', stopOnFocusElsewhere)
+      if (stopFocusRestore === stop) stopFocusRestore = null
+    }
+    stopFocusRestore = stop
+    observer.observe(list, { childList: true })
+    document.addEventListener('focusin', stopOnFocusElsewhere)
     emit(action, video.videoId, video.playlistItemId)
   }
 
