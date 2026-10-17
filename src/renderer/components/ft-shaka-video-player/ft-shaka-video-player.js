@@ -2702,16 +2702,19 @@ export default defineComponent({
         await voteOnSponsorBlockSegment(videoId, uuid, category)
         if (props.videoId !== videoId) return
         segment.category = category
-        const toast = skippedSponsorBlockSegments.value.find(item => item.uuid === uuid)
-        if (toast) {
-          toast.translatedCategory = translateSponsorBlockCategory(category)
-          toast.color = getSponsorBlockInfoSegmentColor(category)
-        }
         hasSponsorBlockMusicOfftopicSegment.value = sponsorBlockInfoSegments.value.some(item => item.category === 'music_offtopic')
         sponsorBlockSegments = sponsorBlockSegments.filter(item => item.uuid !== uuid)
         if (SPONSORBLOCK_PLAYBACK_ACTION_TYPES.includes(segment.actionType) && sponsorSkips.value.seekBar.includes(category)) {
           sponsorBlockSegments.push(segment)
           sponsorBlockSegments.sort((a, b) => a.startTime - b.startTime)
+        }
+        const toast = skippedSponsorBlockSegments.value.find(item => item.uuid === uuid || item.groupUuids?.includes(uuid))
+        if (toast) {
+          // describe the segments the toast still acts on, falling back to the corrected one
+          const toastSegments = getSponsorBlockToastSegments(toast.uuid)
+          const labelSegments = toastSegments.length > 0 ? toastSegments : [segment]
+          toast.translatedCategory = formatSponsorBlockToastCategories(labelSegments)
+          toast.color = getSponsorBlockInfoSegmentColor(labelSegments[0].category)
         }
         cancelSponsorBlockSkipSchedule()
         refreshSponsorBlockMarkers()
@@ -2779,9 +2782,10 @@ export default defineComponent({
      * @param {string} uuid
      */
     function removeSponsorBlockToast(uuid) {
-      if (sponsorBlockToastEditingUuid.value === uuid) sponsorBlockToastEditingUuid.value = null
-      const index = skippedSponsorBlockSegments.value.findIndex(segment => segment.uuid === uuid)
+      // also accepts any segment of a grouped toast
+      const index = skippedSponsorBlockSegments.value.findIndex(segment => segment.uuid === uuid || segment.groupUuids?.includes(uuid))
       if (index !== -1) {
+        if (sponsorBlockToastEditingUuid.value === skippedSponsorBlockSegments.value[index].uuid) sponsorBlockToastEditingUuid.value = null
         clearTimeout(skippedSponsorBlockSegments.value[index].timeoutId)
         skippedSponsorBlockSegments.value.splice(index, 1)
       }
@@ -2889,6 +2893,15 @@ export default defineComponent({
         unskipTime: null,
         timeoutId: 0
       })
+    }
+
+    /**
+     * @param {{ category: SponsorBlockCategory }[]} segments
+     * @returns {string}
+     */
+    function formatSponsorBlockToastCategories(segments) {
+      const translatedCategories = [...new Set(segments.map(({ category }) => translateSponsorBlockCategory(category)))]
+      return new Intl.ListFormat(locale.value, { style: 'long', type: 'conjunction' }).format(translatedCategories)
     }
 
     /**
@@ -3439,11 +3452,10 @@ export default defineComponent({
         })
 
         // overlapping or adjacent segments are skipped in one jump, so show a single toast for all of them
-        const translatedCategories = [...new Set(skippedSegments.map(({ category }) => translateSponsorBlockCategory(category)))]
         upsertSkippedSponsorBlockToast({
           uuid: skippedSegments[0].uuid,
           groupUuids: skippedSegments.map(({ uuid }) => uuid),
-          translatedCategory: new Intl.ListFormat(locale.value, { style: 'long', type: 'conjunction' }).format(translatedCategories),
+          translatedCategory: formatSponsorBlockToastCategories(skippedSegments),
           color: getSponsorBlockToastColor(skippedSegments[0].category)
         })
       }

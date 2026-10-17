@@ -248,12 +248,23 @@ test('keeps a grouped skip toast working after its first segment is disabled by 
   await toast.locator('select').selectOption('intro')
   await toast.getByRole('button', { name: 'Submit category vote', exact: true }).click()
   await expect(page.locator('.sponsorBlockMarker')).toHaveCount(1)
+  // the label describes the segment the toast still acts on, not the disabled one
+  await expect(toast.locator('.skippedSegmentText')).toHaveText('Sponsor Skipped')
   await toast.getByRole('button', { name: 'Edit', exact: true }).click()
 
   await toast.getByRole('button', { name: /^Unskip/ }).click()
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(11.5)
   await toast.getByRole('button', { name: /^Reskip/ }).click()
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(13)
+
+  // leaving the unskipped range closes the toast
+  await toast.getByRole('button', { name: /^Unskip/ }).click()
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(11.5)
+  await video.evaluate(element => {
+    element.currentTime = 14
+    element.dispatchEvent(new Event('timeupdate'))
+  })
+  await expect(toast).toHaveCount(0)
 })
 
 test.describe('segment editor layout', { tag: '@scale' }, () => {
