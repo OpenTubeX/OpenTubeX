@@ -131,6 +131,7 @@ for (const [setting, value] of [
 for (const { name, settings, updated, candidate } of [
   { name: 'live streams', settings: { getHideLiveStreams: true }, updated: { getHideLiveStreams: false }, candidate: { liveNow: true } },
   { name: 'hidden channels', settings: { getActiveChannelsHiddenNames: new Set(['hidden']) }, updated: { getActiveChannelsHiddenNames: new Set() }, candidate: { authorId: 'hidden' } },
+  { name: 'the AI slop list', settings: { getUseAiSlopList: true, getAiSlopBlockedChannels: new Set(['@slop']) }, updated: { getUseAiSlopList: false, getAiSlopBlockedChannels: new Set() }, candidate: { authorHandle: '@Slop' } },
   { name: 'forbidden titles', settings: { getActiveForbiddenTitles: ['hidden subject'] }, updated: { getActiveForbiddenTitles: [] }, candidate: { title: 'Hidden subject' } },
   { name: 'membership authentication', settings: { getYtDlpPlaybackAuthMode: 'none' }, updated: { getYtDlpPlaybackAuthMode: 'file', getYtDlpPlaybackCookiesPath: '/fixture/cookies.txt' }, candidate: { isMembersOnly: true } },
 ]) {
