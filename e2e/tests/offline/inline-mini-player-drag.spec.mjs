@@ -900,6 +900,9 @@ test('mobile bar details fade at the destination during both swipe directions', 
 
 test('scroll docking fades the details at the bottom bar position', async ({ app, page }) => {
   const player = await openMobilePlayer(app, page)
+  // The slowest animation speed leaves enough frames under parallel load to
+  // sample the morph near its midpoint.
+  await page.evaluate(() => window.$store.dispatch('updateAnimationSpeed', 25))
   await page.evaluate(() => {
     const element = document.querySelector('.ftVideoPlayer')
     window.mobileBarMorphSamples = []
