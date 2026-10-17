@@ -10,6 +10,7 @@
       :style="{ background: activeProfile.bgColor, color: activeProfile.textColor }"
     >
       <FtProfileIcon
+        class="profileInitial"
         :profile="activeProfile"
         :fallback="activeProfileInitial"
       />

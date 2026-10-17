@@ -23,6 +23,7 @@
           :style="{ background: activeProfile.bgColor, color: activeProfile.textColor }"
         >
           <FtProfileIcon
+            class="previewProfileIcon"
             :profile="activeProfile"
             :fallback="profileInitial"
           />

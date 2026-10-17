@@ -77,6 +77,12 @@
   inline-size: 36px;
   justify-content: center;
   margin-inline-start: auto;
+  overflow: hidden;
+}
+
+.previewProfileIcon {
+  block-size: 100%;
+  inline-size: 100%;
 }
 
 .mobile .previewProfile {

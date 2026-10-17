@@ -227,3 +227,35 @@ test.describe('interface customizer with Invidious', () => {
     await expect(avatar).toHaveAttribute('src', /^https:\/\/invidious\.test\//)
   })
 })
+
+test.describe('interface customizer with a custom profile image', () => {
+  test.use({
+    seed: {
+      profiles: [{
+        _id: 'allChannels',
+        name: 'All Channels',
+        bgColor: '#000000',
+        textColor: '#FFFFFF',
+        subscriptions: [],
+        icon: {
+          type: 'image',
+          value: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/wHwAF/gL+Xw4AAAAASUVORK5CYII='
+        }
+      }]
+    }
+  })
+
+  test('fits the profile image to the preview avatars', async ({ page }) => {
+    const customizer = await openInterfaceCustomizer(page, 'navigation')
+    const expectFilled = async (avatar) => {
+      const image = avatar.locator('img')
+      await expect(image).toBeVisible()
+      const [avatarBox, imageBox] = await Promise.all([avatar.boundingBox(), image.boundingBox()])
+      expect(imageBox.width).toBeCloseTo(avatarBox.width, 0)
+      expect(imageBox.height).toBeCloseTo(avatarBox.height, 0)
+    }
+    await expectFilled(customizer.locator('.previewProfile'))
+    await customizer.locator('[data-settings-subpage-tab="quickSettings"]').click()
+    await expectFilled(customizer.locator('.previewProfileTrigger'))
+  })
+})
