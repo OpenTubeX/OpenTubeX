@@ -190,6 +190,12 @@ test.describe('playlist thumbnail sizing', { tag: '@scale' }, () => {
     await page.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()
 
     await page.evaluate(() => window.$store.dispatch('updatePlaylistViewType', 'grid'))
+    // The preference alone limits the slider, even without a mounted playlist grid.
+    await goTo(page, 'history')
+    const appearance = await goToSettingsSection(page, 'appearance')
+    await expect(appearance.getByRole('slider', { name: /^Playlist Thumbnail Size:/ })).toHaveAttribute('max', '100')
+    await page.locator('.settingsCloseButton').click()
+    await openPlaylist(page)
     await resize(app, page, 1440, uiScale)
     await expect(page.locator('.playlistPage')).toHaveClass(/\bgrid\b/)
     await expect(grid.locator('.ft-list-video.grid').first()).toBeVisible()

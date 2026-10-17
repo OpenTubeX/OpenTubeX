@@ -32,7 +32,7 @@ export function useThumbnailSizeSlider(settingKey = 'thumbnailSize') {
   onBeforeUnmount(() => query.removeEventListener('change', updatePhoneWidth))
 
   const maxThumbnailSize = computed(() => {
-    const prefersGrid = settingKey === 'thumbnailSize' && store.getters.getListType !== 'list'
+    const prefersGrid = store.state.settings[VIEW_TYPE_SETTINGS[settingKey]] !== 'list'
     const hasVisibleGrid = [...visibleGrids.values()].includes(settingKey)
     return phoneWidth.value && (prefersGrid || hasVisibleGrid)
       ? PHONE_THUMBNAIL_MAX_SIZE
