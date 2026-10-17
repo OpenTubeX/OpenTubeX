@@ -2345,11 +2345,11 @@ export default defineComponent({
     })
 
     /**
-     * Set of segment UUIDs that the user has explicitly unskipped.
-     * These segments will not be auto-skipped again until the user leaves the segment.
-     * @type {Set<string>}
+     * Segment UUIDs that the user has explicitly unskipped, mapped to the time range the user has to leave
+     * before they are auto-skipped again (the whole range of segments that were skipped together).
+     * @type {Map<string, { startTime: number, endTime: number }>}
      */
-    let sponsorBlockDoNotSkipSegments = new Set()
+    let sponsorBlockDoNotSkipSegments = new Map()
     /**
      * Set of segment UUIDs whose prompt has been dismissed until playback leaves the segment.
      * @type {Set<string>}
@@ -2460,7 +2460,7 @@ export default defineComponent({
       cancelSponsorBlockSkipSchedule()
 
       // Reset the do-not-skip set for the new video
-      sponsorBlockDoNotSkipSegments = new Set()
+      sponsorBlockDoNotSkipSegments = new Map()
       sponsorBlockDismissedPromptSegments = new Set()
       clearSponsorBlockMuteSegments()
       sponsorBlockSegments = []
@@ -2661,9 +2661,10 @@ export default defineComponent({
         if (copyToDraft) {
           if (!await copySponsorBlockSegmentToDraft(segment)) return
           closeSponsorBlockInfo()
-          removeSponsorBlockToast(uuid)
+          if (sponsorBlockToastEditingUuid.value === uuid) sponsorBlockToastEditingUuid.value = null
           // Keep the original from interrupting inspection and preview of the corrected draft.
           sponsorBlockSegments = sponsorBlockSegments.filter(item => item.uuid !== uuid)
+          refreshSponsorBlockToastSegments(uuid)
           cancelSponsorBlockSkipSchedule()
           refreshSponsorBlockMarkers()
           syncSponsorBlockPlaybackState()
@@ -2702,17 +2703,13 @@ export default defineComponent({
         await voteOnSponsorBlockSegment(videoId, uuid, category)
         if (props.videoId !== videoId) return
         segment.category = category
-        const toast = skippedSponsorBlockSegments.value.find(item => item.uuid === uuid)
-        if (toast) {
-          toast.translatedCategory = translateSponsorBlockCategory(category)
-          toast.color = getSponsorBlockInfoSegmentColor(category)
-        }
         hasSponsorBlockMusicOfftopicSegment.value = sponsorBlockInfoSegments.value.some(item => item.category === 'music_offtopic')
         sponsorBlockSegments = sponsorBlockSegments.filter(item => item.uuid !== uuid)
         if (SPONSORBLOCK_PLAYBACK_ACTION_TYPES.includes(segment.actionType) && sponsorSkips.value.seekBar.includes(category)) {
           sponsorBlockSegments.push(segment)
           sponsorBlockSegments.sort((a, b) => a.startTime - b.startTime)
         }
+        refreshSponsorBlockToastSegments(uuid)
         cancelSponsorBlockSkipSchedule()
         refreshSponsorBlockMarkers()
         syncSponsorBlockPlaybackState()
@@ -2779,9 +2776,10 @@ export default defineComponent({
      * @param {string} uuid
      */
     function removeSponsorBlockToast(uuid) {
-      if (sponsorBlockToastEditingUuid.value === uuid) sponsorBlockToastEditingUuid.value = null
-      const index = skippedSponsorBlockSegments.value.findIndex(segment => segment.uuid === uuid)
+      // also accepts any segment of a grouped toast
+      const index = skippedSponsorBlockSegments.value.findIndex(segment => segment.uuid === uuid || segment.groupUuids?.includes(uuid))
       if (index !== -1) {
+        if (sponsorBlockToastEditingUuid.value === skippedSponsorBlockSegments.value[index].uuid) sponsorBlockToastEditingUuid.value = null
         clearTimeout(skippedSponsorBlockSegments.value[index].timeoutId)
         skippedSponsorBlockSegments.value.splice(index, 1)
       }
@@ -2807,14 +2805,21 @@ export default defineComponent({
     }
 
     /**
-     * @param {{ uuid: string, translatedCategory: string, color: string, isHighlight?: boolean, unskipTime?: number }} toast
+     * @param {{ uuid: string, groupUuids?: string[], translatedCategory: string, color: string, isHighlight?: boolean, unskipTime?: number }} toast
      */
-    function upsertSkippedSponsorBlockToast({ uuid, translatedCategory, color, isHighlight = false, unskipTime }) {
+    function upsertSkippedSponsorBlockToast({ uuid, groupUuids = [uuid], translatedCategory, color, isHighlight = false, unskipTime }) {
       const hideAt = Date.now() + sponsorBlockSkippedToastDurationMs.value
+
+      // segments skipped together share one toast, so replace older toasts for any of them
+      skippedSponsorBlockSegments.value
+        .filter(skipped => skipped.uuid !== uuid && (skipped.groupUuids ?? [skipped.uuid]).some(groupUuid => groupUuids.includes(groupUuid)))
+        .forEach(skipped => removeSponsorBlockToast(skipped.uuid))
+
       const existingSkip = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
 
       if (existingSkip) {
         clearTimeout(existingSkip.timeoutId)
+        existingSkip.groupUuids = groupUuids
         existingSkip.translatedCategory = translatedCategory
         existingSkip.color = color
         existingSkip.unskipped = false
@@ -2832,6 +2837,7 @@ export default defineComponent({
 
       skippedSponsorBlockSegments.value.push({
         uuid,
+        groupUuids,
         translatedCategory,
         color,
         unskipped: false,
@@ -2884,19 +2890,80 @@ export default defineComponent({
     }
 
     /**
+     * @param {{ category: SponsorBlockCategory }[]} segments
+     * @returns {string}
+     */
+    function formatSponsorBlockToastCategories(segments) {
+      const translatedCategories = [...new Set(segments.map(({ category }) => translateSponsorBlockCategory(category)))]
+      return new Intl.ListFormat(locale.value, { style: 'long', type: 'conjunction' }).format(translatedCategories)
+    }
+
+    /**
+     * @param {{ startTime: number, endTime: number }[]} segments
+     * @returns {{ startTime: number, endTime: number }}
+     */
+    function getSponsorBlockSegmentsRange(segments) {
+      return {
+        startTime: Math.min(...segments.map(segment => segment.startTime)),
+        endTime: Math.max(...segments.map(segment => segment.endTime))
+      }
+    }
+
+    /**
+     * Updates the toast containing a segment after segments were removed from or re-added to playback.
+     * @param {string} uuid
+     */
+    function refreshSponsorBlockToastSegments(uuid) {
+      const toast = skippedSponsorBlockSegments.value.find(item => item.uuid === uuid || item.groupUuids?.includes(uuid))
+      if (!toast) {
+        return
+      }
+
+      // describe the segments the toast still acts on, or drop it and its unskip state when none remain
+      const toastSegments = getSponsorBlockToastSegments(toast.uuid)
+      if (toastSegments.length === 0) {
+        (toast.groupUuids ?? [toast.uuid]).forEach(groupUuid => sponsorBlockDoNotSkipSegments.delete(groupUuid))
+        removeSponsorBlockToast(toast.uuid)
+        return
+      }
+
+      toast.translatedCategory = formatSponsorBlockToastCategories(toastSegments)
+      toast.color = getSponsorBlockToastColor(toastSegments[0].category)
+      // an unskipped group stays unskipped until playback passes its remaining segments,
+      // keeping the original start so playback before them doesn't count as leaving the group
+      const previousRange = toastSegments.map(segment => sponsorBlockDoNotSkipSegments.get(segment.uuid)).find(Boolean)
+      if (previousRange) {
+        const range = { startTime: previousRange.startTime, endTime: getSponsorBlockSegmentsRange(toastSegments).endTime }
+        toast.groupUuids?.forEach(groupUuid => sponsorBlockDoNotSkipSegments.delete(groupUuid))
+        toastSegments.forEach(segment => sponsorBlockDoNotSkipSegments.set(segment.uuid, range))
+      }
+    }
+
+    /**
+     * Returns the segments a skipped toast stands for, as segments skipped in one go share a toast.
+     * @param {string} uuid
+     */
+    function getSponsorBlockToastSegments(uuid) {
+      const toastEntry = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
+      const groupUuids = toastEntry?.groupUuids ?? [uuid]
+      return sponsorBlockSegments.filter(segment => groupUuids.includes(segment.uuid))
+    }
+
+    /**
      * @param {string} uuid
      * @returns {string}
      */
     function getSponsorBlockToastTimeLabel(uuid) {
       const toastEntry = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
-      const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
+      const segments = getSponsorBlockToastSegments(uuid)
 
-      if (!toastEntry || !segment) {
+      if (!toastEntry || segments.length === 0) {
         return '0s'
       }
 
+      const endTime = Math.max(...segments.map(segment => segment.endTime))
       const remainingSeconds = toastEntry.unskipped || toastEntry.isMute
-        ? Math.max(segment.endTime - sponsorBlockCurrentTime.value, 0)
+        ? Math.max(endTime - sponsorBlockCurrentTime.value, 0)
         : (toastEntry.countdownPaused
             ? Math.max(toastEntry.hideRemainingMs, 0)
             : Math.max((toastEntry.hideAt ?? 0) - sponsorBlockToastNow.value, 0)) / 1000
@@ -3366,10 +3433,10 @@ export default defineComponent({
       }
 
       // Check if we've left any unskipped segments - if so, re-enable auto-skip for them
-      for (const uuid of sponsorBlockDoNotSkipSegments) {
+      for (const [uuid, range] of sponsorBlockDoNotSkipSegments) {
         const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
         if (segment && !isSponsorBlockPointSegment(segment) &&
-          (currentTime < segment.startTime - SPONSORBLOCK_SEGMENT_START_TOLERANCE_SECONDS || currentTime >= segment.endTime)) {
+          (currentTime < range.startTime - SPONSORBLOCK_SEGMENT_START_TOLERANCE_SECONDS || currentTime >= range.endTime)) {
           sponsorBlockDoNotSkipSegments.delete(uuid)
           removeSponsorBlockToast(uuid)
         }
@@ -3380,12 +3447,15 @@ export default defineComponent({
       let newTime = 0
       const skippedSegments = []
 
-      sponsorBlockSegments.forEach(segment => {
-        if (segment.actionType !== 'skip' || isSponsorBlockPointSegment(segment) || sponsorBlockDoNotSkipSegments.has(segment.uuid)) {
-          return
-        }
+      const autoSkipSegments = sponsorBlockSegments.filter(segment =>
+        segment.actionType === 'skip' &&
+        !isSponsorBlockPointSegment(segment) &&
+        !sponsorBlockDoNotSkipSegments.has(segment.uuid) &&
+        autoSkip.has(segment.category)
+      )
 
-        if (autoSkip.has(segment.category) && currentTime < segment.endTime &&
+      autoSkipSegments.forEach(segment => {
+        if (currentTime < segment.endTime &&
           (segment.startTime <= currentTime ||
             // if we already have a segment to skip, check if there are any that are less than 150ms later,
             // so that we can skip them all in one go (especially useful on slow connections)
@@ -3398,6 +3468,13 @@ export default defineComponent({
       if (newTime === 0 || video_.ended) {
         return
       }
+
+      // segments contained in the skipped range are jumped over too, so they belong to the same toast
+      autoSkipSegments.forEach(segment => {
+        if (!skippedSegments.includes(segment) && segment.startTime < newTime && segment.endTime > currentTime) {
+          skippedSegments.push(segment)
+        }
+      })
 
       const videoEnd = player.seekRange().end
 
@@ -3414,14 +3491,17 @@ export default defineComponent({
       sponsorBlockCurrentTime.value = newTime
 
       if (sponsorBlockShowSkippedToast.value) {
-        skippedSegments.forEach(({ uuid, category }) => {
+        skippedSegments.forEach(({ uuid }) => {
           removePromptSponsorBlockToast(uuid)
           sponsorBlockDismissedPromptSegments.add(uuid)
-          upsertSkippedSponsorBlockToast({
-            uuid,
-            translatedCategory: translateSponsorBlockCategory(category),
-            color: getSponsorBlockToastColor(category)
-          })
+        })
+
+        // overlapping or adjacent segments are skipped in one jump, so show a single toast for all of them
+        upsertSkippedSponsorBlockToast({
+          uuid: skippedSegments[0].uuid,
+          groupUuids: skippedSegments.map(({ uuid }) => uuid),
+          translatedCategory: formatSponsorBlockToastCategories(skippedSegments),
+          color: getSponsorBlockToastColor(skippedSegments[0].category)
         })
       }
     }
@@ -3617,7 +3697,8 @@ export default defineComponent({
      * @returns {boolean} whether anything was actually unskipped
      */
     function unskipSponsorBlockSegment(uuid) {
-      const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
+      // a grouped toast keeps working when its first segment was removed (e.g. after a category change)
+      const segment = getSponsorBlockToastSegments(uuid)[0]
       if (!segment) {
         return false
       }
@@ -3652,13 +3733,17 @@ export default defineComponent({
         return true
       }
 
-      sponsorBlockDoNotSkipSegments.add(uuid)
-      sponsorBlockDismissedPromptSegments.add(uuid)
-      removePromptSponsorBlockToast(uuid)
+      const groupSegments = getSponsorBlockToastSegments(uuid)
+      const range = getSponsorBlockSegmentsRange(groupSegments)
+      groupSegments.forEach(groupSegment => {
+        sponsorBlockDoNotSkipSegments.set(groupSegment.uuid, range)
+        sponsorBlockDismissedPromptSegments.add(groupSegment.uuid)
+        removePromptSponsorBlockToast(groupSegment.uuid)
+      })
 
       if (canSeek()) {
         const seekRange = player.seekRange()
-        const targetTime = Math.max(segment.startTime, seekRange.start)
+        const targetTime = Math.max(range.startTime, seekRange.start)
         accumulatedSeekSeconds = 0
         video.value.currentTime = targetTime
         sponsorBlockCurrentTime.value = targetTime
@@ -3685,7 +3770,7 @@ export default defineComponent({
      * @returns {boolean} whether anything was actually re-skipped
      */
     function redoSkipSponsorBlockSegment(uuid) {
-      const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
+      const segment = getSponsorBlockToastSegments(uuid)[0]
       if (!segment || isSponsorBlockPointSegment(segment)) {
         return false
       }
@@ -3702,13 +3787,16 @@ export default defineComponent({
         return true
       }
 
-      sponsorBlockDoNotSkipSegments.delete(uuid)
-      sponsorBlockDismissedPromptSegments.add(uuid)
-      removePromptSponsorBlockToast(uuid)
+      const groupSegments = getSponsorBlockToastSegments(uuid)
+      groupSegments.forEach(groupSegment => {
+        sponsorBlockDoNotSkipSegments.delete(groupSegment.uuid)
+        sponsorBlockDismissedPromptSegments.add(groupSegment.uuid)
+        removePromptSponsorBlockToast(groupSegment.uuid)
+      })
 
       if (canSeek()) {
         const seekRange = player.seekRange()
-        const targetTime = Math.min(segment.endTime, seekRange.end)
+        const targetTime = Math.min(Math.max(...groupSegments.map(groupSegment => groupSegment.endTime)), seekRange.end)
         accumulatedSeekSeconds = 0
         video.value.currentTime = targetTime
         sponsorBlockCurrentTime.value = targetTime
@@ -3719,6 +3807,7 @@ export default defineComponent({
       if (toastEntry) {
         upsertSkippedSponsorBlockToast({
           uuid,
+          groupUuids: toastEntry.groupUuids,
           translatedCategory: toastEntry.translatedCategory,
           color: toastEntry.color
         })
