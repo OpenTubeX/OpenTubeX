@@ -171,8 +171,11 @@ function defineCase () {
   })
 }
 
-// Flaky: the offline channel load can replace the title first: https://github.com/OpenTubeX/OpenTubeX/issues/2166
-test.fixme('middle-clicking a collaborator opens its channel in a background tab', async ({ page }) => {
+test('middle-clicking a collaborator opens its channel in a background tab', async ({ app, page }) => {
+  // A finished load publishes the channel's own name, or a fallback offline.
+  // Hold the request so the tab keeps the name taken from the link.
+  const heldRequests = []
+  await app.electronApp.context().route('**/youtubei/v1/browse**', route => { heldRequests.push(route) })
   await goTo(page, 'subscriptions')
 
   await page.locator('.channelResolverButton').click()
@@ -189,7 +192,9 @@ test.fixme('middle-clicking a collaborator opens its channel in a background tab
     const state = await window.ftElectron.tabs.getState()
     return state.tabs.find(tab => tab.id !== state.activeTabId)?.route.fullPath
   })).toBe('/channel/UCcccccccccccccccccccccc')
+  await expect.poll(() => heldRequests.length).toBeGreaterThan(0)
   await expect(page.locator(sel.tabs).nth(1)).toContainText('Channel C')
+  await Promise.all(heldRequests.map(route => route.abort()))
 })
 
 test('Ctrl+Alt+middle-clicking a feed video leaves its background tab unloaded', async ({ page }) => {
