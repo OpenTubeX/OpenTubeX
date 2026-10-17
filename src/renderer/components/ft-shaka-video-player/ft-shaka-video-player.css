@@ -4741,12 +4741,36 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   white-space: normal;
 }
 
+/*
+  The centred options would carry the row into the middle of a submenu that keeps
+  the taller menu height, so it is pinned to the bottom with its space reserved.
+*/
+:deep(.shaka-sub-menu.ft-menu-grid:has(> .ft-caption-timing-button)) {
+  --ft-caption-timing-row-size: var(--caption-timing-target-size, 32px);
+
+  padding-block-end: calc(var(--ft-caption-timing-row-size) + 4px);
+}
+
+/* Mirrors the header: full width, with its icon below the back arrow. */
 :deep(.shaka-sub-menu.ft-menu-grid > .ft-caption-timing-button) {
-  flex: 0 0 100%;
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline: 0;
+  inline-size: auto;
+  block-size: var(--ft-caption-timing-row-size);
+  min-block-size: 0;
+  padding-block: 0;
+  padding-inline: 10px;
+  margin: 0;
+  border-start-start-radius: 0;
+  border-start-end-radius: 0;
 }
 
 :deep(.shaka-sub-menu.ft-menu-grid > .ft-caption-timing-button > span) {
+  overflow: hidden;
   text-align: start;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Shaka's text-label margin also matches the nested icon wrapper. */

@@ -282,6 +282,34 @@ for (const usePlayerMenuGrid of [true, false]) {
       expect(await originalScroller.evaluate(element => element.isConnected)).toBe(true)
       await originalScroller.dispose()
     })
+
+    if (usePlayerMenuGrid) {
+      test('keeps the timing row at the bottom of the captions grid @scale', async ({ app, page }, testInfo) => {
+        await mockPlayableWatchPage(app, page, { captionTranslations: true })
+        const video = await openMockedVideo(page)
+        await video.evaluate(element => element.pause())
+        const player = page.locator('.ftVideoPlayer')
+        // Folding the control bar into the menu makes it taller than the captions submenu.
+        await setWindowSize(app, page, { width: 600, height: 800 })
+        await player.hover()
+        await player.getByRole('button', { name: 'More settings' }).click()
+        await player.locator('.shaka-overflow-menu > .shaka-caption-button').click()
+        const languageMenu = player.locator('.shaka-text-languages')
+        const timingRow = languageMenu.locator(':scope > .ft-caption-timing-button')
+        await expect(timingRow).toBeVisible()
+        await languageMenu.screenshot({ path: testInfo.outputPath('caption-timing-grid-row.png') })
+        const menuBounds = await getVisibleBounds(languageMenu)
+        const rowBounds = await getVisibleBounds(timingRow)
+        // A taller idle menu leaves free space, which belongs above the row rather than below it.
+        expect(menuBounds.height).toBeGreaterThan(rowBounds.height * 3)
+        expect(menuBounds.y + menuBounds.height - rowBounds.y - rowBounds.height).toBeLessThanOrEqual(1)
+        const choices = languageMenu.locator(':scope > button:not(.shaka-back-to-overflow-button, .ft-caption-options-button, .ft-caption-timing-button)')
+        for (const choice of await choices.all()) {
+          const choiceBounds = await getVisibleBounds(choice)
+          expect(choiceBounds.y + choiceBounds.height).toBeLessThanOrEqual(rowBounds.y + 1)
+        }
+      })
+    }
   })
 }
 
