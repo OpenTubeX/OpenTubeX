@@ -178,7 +178,8 @@ test('SponsorBlock markers stay visible on unbuffered track and distinguish play
   await waitForTrack(1)
   const input = track.locator('input')
   const bounds = await input.boundingBox()
-  const fraction = await video.evaluate(element => 7 / element.duration)
+  // Exercise the media clock's quantization of a fractional-microsecond target.
+  const fraction = await video.evaluate(element => 7.123456789 / element.duration)
   await page.mouse.move(bounds.x + 6 + (bounds.width - 12) * fraction, bounds.y + bounds.height / 2)
   await page.mouse.down()
   const target = Number(await input.inputValue())
@@ -186,8 +187,12 @@ test('SponsorBlock markers stay visible on unbuffered track and distinguish play
   await waitForTrack(target, target, target)
   await expectMarkerColors(target, target, target)
   await page.mouse.up()
-  await waitForTrack(target)
-  await expectMarkerColors(target)
+  await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
+  const played = await video.evaluate(element => element.currentTime)
+  // After seeking, the slider follows the media clock's microsecond precision.
+  expect(Math.abs(played - target)).toBeLessThan(0.000001)
+  await waitForTrack(played)
+  await expectMarkerColors(played)
 })
 
 test('SponsorBlock markers preserve category hues across accent colors', async ({ app, page }, testInfo) => {
