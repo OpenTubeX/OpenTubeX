@@ -165,8 +165,10 @@ test('scheduled archives preserve the existing-profile summary visibility defaul
   assert.equal(backup.data.settings.aiVideoSummaryMode, 'hide')
 })
 
-for (const landingPage of [undefined, 'home', 'history']) {
-  test(`scheduled archives preserve ${landingPage ?? 'the existing-profile default'} landing page`, async t => {
+for (const [landingPage, expectedLandingPage] of [
+  [undefined, 'subscriptions'], ['home', 'home'], ['history', 'history'], ['settings', 'subscriptions'],
+]) {
+  test(`scheduled archives resolve ${landingPage ?? 'the existing-profile default'} landing page`, async t => {
     const state = await setup(t)
     if (landingPage !== undefined) {
       const settings = createDesktopDatastore(path.join(state.profileDirectory, 'settings.sqlite'))
@@ -179,7 +181,7 @@ for (const landingPage of [undefined, 'home', 'history']) {
     await state.service.tick()
     const [filename] = await state.backups()
     const backup = await readUnifiedBackup(new Blob([await readFile(path.join(state.directory, filename))]))
-    assert.equal(backup.data.settings.landingPage, landingPage ?? 'subscriptions')
+    assert.equal(backup.data.settings.landingPage, expectedLandingPage)
   })
 }
 

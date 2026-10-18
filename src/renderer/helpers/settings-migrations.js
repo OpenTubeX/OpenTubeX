@@ -46,6 +46,10 @@ export async function migrateStoredAiVideoSummarySetting({
 export function migrateLegacySettings(settings) {
   const migratedSettings = { ...settings }
 
+  if (migratedSettings.landingPage === 'settings') {
+    migratedSettings.landingPage = 'subscriptions'
+  }
+
   const formerNavigationKeys = [
     'hideHome',
     'hidePopularVideos',
