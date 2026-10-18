@@ -35,6 +35,8 @@ export function createScheduledBackups({ readConfiguration, createArchive, saveS
       await saveStatus(status)
       localRetryAttempt = null
     } catch (error) {
+      // Only one folder's status is cached in memory. A restart or folder switch during a
+      // persistence failure can create an extra archive; normal retention still applies.
       localRetryAttempt = { directory: status.directory, at: now(), committedStatus: status.error ? null : status }
       throw error
     }
