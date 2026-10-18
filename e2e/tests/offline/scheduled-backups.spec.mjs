@@ -17,7 +17,7 @@ test('creates complete scheduled backups without sync and preserves the schedule
     await page.evaluate(async () => {
       await window.$store.dispatch('updateSearchHistoryEntry', { _id: 'scheduled-query', query: 'scheduled backup query', lastUpdatedAt: Date.now() })
       await window.$store.dispatch('recordWatchTime', { date: '2026-10-18', seconds: 42 })
-      // Exercise asynchronous compression in the packaged main process, used for entries over 160 KB.
+      // Exercise worker archive preparation in the packaged desktop app with a large section.
       await window.$store.dispatch('updateForbiddenTitles', JSON.stringify(Array.from({ length: 10_000 }, (_, index) => `scheduled backup test title ${index}`)))
     })
     await electronApp.evaluate(({ dialog }, folder) => {

@@ -15,6 +15,7 @@ const config = {
     main: path.join(__dirname, '../src/main/index.js'),
     subscriptionBackgroundWorker: path.join(__dirname, '../src/main/subscriptionBackgroundWorker.js'),
     sqliteNodeWorker: path.join(__dirname, '../src/datastores/sqliteNodeWorker.js'),
+    backupArchiveWorker: path.join(__dirname, '../src/main/backupArchiveWorker.js'),
   },
   module: {
     rules: [

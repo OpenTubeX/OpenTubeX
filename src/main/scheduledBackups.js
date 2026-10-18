@@ -1,14 +1,13 @@
 import { randomUUID } from 'node:crypto'
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { createUnifiedBackupAsync } from '../renderer/helpers/unifiedBackup.js'
 
 const DAY = 86_400_000
 const RETRY_INTERVAL = 300_000
 const BACKUP_FILENAME = /^opentubex-scheduled-backup-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}-\d{3}Z-[\da-f-]{36}\.zip$/
 
 /** One main-process scheduler serves every window, including windows hidden in the tray. */
-export function createScheduledBackups({ readConfiguration, readData, saveStatus, now = Date.now }) {
+export function createScheduledBackups({ readConfiguration, createArchive, saveStatus, now = Date.now }) {
   let active = null
   let stopped = false
 
@@ -26,14 +25,22 @@ export function createScheduledBackups({ readConfiguration, readData, saveStatus
     const nextStatus = { ...status, directory, lastAttemptAt: timestamp, error: false }
     const filename = `opentubex-scheduled-backup-${new Date(timestamp).toISOString().replaceAll(/[:.]/g, '-')}-${randomUUID()}.zip`
     const temporaryPath = path.join(directory, `.${filename}.tmp`)
+    let cancelled = false
+    async function configurationIsCurrent() {
+      const current = await readConfiguration()
+      return current.enabled === true && current.directory === directory
+    }
     try {
-      const archive = await createUnifiedBackupAsync(await readData())
+      const archive = await createArchive()
+      if (!await configurationIsCurrent()) { cancelled = true; return }
       // Keep old backups until a complete new archive is committed in the selected folder.
       // A missing folder is an error, so an unmounted drive never redirects backups locally.
-      await fs.writeFile(temporaryPath, new Uint8Array(await archive.arrayBuffer()), { flag: 'wx', mode: 0o600 })
+      await fs.writeFile(temporaryPath, archive, { flag: 'wx', mode: 0o600 })
+      if (!await configurationIsCurrent()) { cancelled = true; return }
       await fs.rename(temporaryPath, path.join(directory, filename))
       nextStatus.lastBackupAt = timestamp
       try {
+        if (!await configurationIsCurrent()) return
         const files = (await fs.readdir(directory, { withFileTypes: true }))
           .filter(entry => entry.isFile() && BACKUP_FILENAME.test(entry.name))
           .map(entry => entry.name).sort().reverse()
@@ -49,7 +56,7 @@ export function createScheduledBackups({ readConfiguration, readData, saveStatus
       await fs.unlink(temporaryPath).catch(error => {
         if (error.code !== 'ENOENT') console.error('Could not remove incomplete backup', error)
       })
-      await saveStatus(nextStatus)
+      if (!cancelled) await saveStatus(nextStatus)
     }
   }
 

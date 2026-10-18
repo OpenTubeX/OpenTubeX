@@ -4,9 +4,11 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
 import { createScheduledBackups } from '../../src/main/scheduledBackups.js'
+import { createBackupArchive } from '../../src/main/backupArchive.js'
 import { readUnifiedBackup } from '../../src/renderer/helpers/unifiedBackup.js'
 import { NON_TRANSFERABLE_SETTINGS } from '../../src/nonTransferableSettings.js'
 
+const workerPath = new URL('../../src/main/backupArchiveWorker.js', import.meta.url)
 const DAY = 86_400_000
 const data = {
   settings: { autoplayVideos: false },
@@ -25,7 +27,7 @@ async function setup(t) {
   const configuration = { enabled: true, directory, interval: 7, keepCount: 3, status: {} }
   const options = {
     readConfiguration: async () => structuredClone(configuration),
-    readData: async () => { reads++; return data },
+    createArchive: async () => { reads++; return createBackupArchive(data, workerPath) },
     saveStatus: async status => { configuration.status = status },
     now: () => timestamp,
   }
@@ -118,7 +120,7 @@ test('failed backup preparation preserves old backups and retries after five min
   const first = await state.backups()
   state.configuration.keepCount = 1
   state.advance(7 * DAY)
-  const failed = createScheduledBackups({ ...state.options, readData: async () => { throw new Error('read failed') } })
+  const failed = createScheduledBackups({ ...state.options, createArchive: async () => { throw new Error('read failed') } })
   await failed.tick()
   assert.equal(state.configuration.status.error, true)
   assert.deepEqual(await state.backups(), first)
@@ -191,4 +193,58 @@ test('retention failures preserve successful backup deadlines without five-minut
   assert.equal(state.reads(), 2)
   assert.equal(state.configuration.status.error, false)
   assert.equal((await state.backups()).length, 2)
+})
+
+test('backup preparation does not serialize sections on the calling thread', async t => {
+  const state = await setup(t)
+  const stringify = JSON.stringify
+  const sections = new Set(Object.values(data))
+  let serialized = 0
+  t.mock.method(JSON, 'stringify', (value, ...args) => {
+    if (sections.has(value)) serialized++
+    return stringify(value, ...args)
+  })
+  await state.service.tick()
+  assert.equal(serialized, 0)
+})
+
+for (const phase of ['preparation', 'temporary write']) {
+  for (const change of ['disable', 'folder']) {
+    test(`cancels a backup when ${change} changes during ${phase}`, async t => {
+      const state = await setup(t)
+      const old = 'opentubex-scheduled-backup-2020-01-01T00-00-00-000Z-00000000-0000-0000-0000-000000000000.zip'
+      await writeFile(path.join(state.directory, old), 'previous archive')
+      state.configuration.keepCount = 1
+      const changeConfiguration = () => {
+        if (change === 'disable') state.configuration.enabled = false
+        else state.configuration.directory = path.join(state.directory, 'new-folder')
+      }
+      let service
+      if (phase === 'preparation') {
+        service = createScheduledBackups({
+          ...state.options,
+          createArchive: async () => {
+            changeConfiguration()
+            return state.options.createArchive()
+          },
+        })
+      } else {
+        const write = fs.writeFile
+        t.mock.method(fs, 'writeFile', async (...args) => {
+          await write(...args)
+          if (String(args[0]).endsWith('.tmp')) changeConfiguration()
+        })
+        service = state.service
+      }
+      await service.tick()
+      assert.deepEqual(await readdir(state.directory), [old])
+      assert.equal(await readFile(path.join(state.directory, old), 'utf8'), 'previous archive')
+      assert.deepEqual(state.configuration.status, {})
+    })
+  }
+}
+
+
+test('archive worker failures reject instead of leaving a backup run pending', async () => {
+  await assert.rejects(createBackupArchive({}, workerPath), /No backup sections selected/)
 })

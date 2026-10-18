@@ -96,6 +96,7 @@ import { createSubscriptionBackgroundService } from './subscriptionBackground'
 import { supportsNativeNotifications } from './nativeNotifications'
 import { getTrayMenuIcon } from './trayMenuIcons'
 import { createScheduledBackups } from './scheduledBackups'
+import { createBackupArchive } from './backupArchive'
 import { NON_TRANSFERABLE_SETTINGS } from '../nonTransferableSettings'
 
 function getSystemAccentColor() {
@@ -1879,20 +1880,20 @@ function runApp() {
       const [enabled, directory, interval, keepCount, status] = await Promise.all(keys.map(async key => (await baseHandlers.settings._findOne(key))?.value))
       return { enabled, directory, interval: interval ?? 7, keepCount: keepCount ?? 5, status }
     },
-    async readData() {
+    async createArchive() {
       const [settings, profiles, playlists, history, searchHistory, records, adjustment] = await Promise.all([
         baseHandlers.settings.find(), baseHandlers.profiles.find(), baseHandlers.playlists.find(),
         baseHandlers.history.find(), baseHandlers.searchHistory.find(),
         baseHandlers.watchStats.find(), baseHandlers.watchStats.getHistoricalAdjustment(),
       ])
-      return {
+      return createBackupArchive({
         settings: Object.fromEntries(settings.filter(setting => !NON_TRANSFERABLE_SETTINGS.has(setting._id)).map(setting => [setting._id, setting.value])),
         profiles,
         playlists,
         history,
         searchHistory,
         watchStats: { records, adjustment },
-      }
+      }, path.join(__dirname, process.env.NODE_ENV === 'development' ? '../../dist/backupArchiveWorker.js' : 'backupArchiveWorker.js'))
     },
     saveStatus: status => updateSettingFromMain('scheduledBackupStatus', status),
   })
