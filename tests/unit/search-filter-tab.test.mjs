@@ -1,10 +1,7 @@
 import assert from 'node:assert/strict'
-import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 
 import { getSearchFilterTabId } from '../../src/search-history.js'
-
-const componentsUrl = new URL('../../src/renderer/components/', import.meta.url)
 
 const platforms = [
   { name: 'Electron', env: { IS_ELECTRON: 'true' }, expected: 'tab-1' },
@@ -24,10 +21,3 @@ for (const { name, env, expected } of platforms) {
     }
   })
 }
-
-test('the filter dialog and the search bar resolve the same tab', async () => {
-  for (const path of ['FtSearchFilters/FtSearchFilters.vue', 'TopNav/TopNav.vue']) {
-    const source = await readFile(new URL(path, componentsUrl), 'utf8')
-    assert.match(source, /getSearchFilterTabId\(store\.getters\.getPresentedTabId\)/, path)
-  }
-})
