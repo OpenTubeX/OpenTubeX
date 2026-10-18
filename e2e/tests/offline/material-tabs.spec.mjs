@@ -18,6 +18,19 @@ test('highlight capture resolves when its transition is canceled', async ({ page
   expect(await selectTabWithHighlightAnimation(tab)).toBeNull()
 })
 
+test('highlight fades keep the animation speed through a long task', async ({ page }) => {
+  await goToSettingsSection(page, 'data')
+  const tab = page.getByRole('tablist', { name: 'Data & Storage' }).getByRole('tab', { name: 'Storage', exact: true })
+  // Block the main thread after the fade starts and before transitionrun fires.
+  await tab.evaluate(element => element.addEventListener('click', () => {
+    requestAnimationFrame(() => setTimeout(() => {
+      const end = performance.now() + 300
+      while (performance.now() < end);
+    }))
+  }, { once: true }))
+  expect(await selectTabWithHighlightAnimation(tab)).toEqual({ property: 'opacity', playbackRate: 0.25, duration: 140 })
+})
+
 test('shared tabs crossfade between selections and snap after layout changes', async ({ app, page }) => {
   await goToSettingsSection(page, 'data')
   const tabs = page.getByRole('tablist', { name: 'Data & Storage' })

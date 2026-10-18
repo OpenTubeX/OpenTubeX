@@ -16,6 +16,8 @@
 <script setup>
 import { onBeforeUnmount, onMounted, onUpdated, useTemplateRef } from 'vue'
 
+import { applyAnimationSpeed } from '../../helpers/animationSpeed'
+
 const props = defineProps({
   variant: {
     type: String,
@@ -52,6 +54,16 @@ function updateSelection() {
     // Commit the opacity before restoring normal selection fades.
     getComputedStyle(selected ?? previousSelected, '::before').getPropertyValue('opacity')
     container.style.removeProperty('--material-tab-highlight-transition')
+  } else if (previousSelected !== undefined && selected !== previousSelected) {
+    // Start the fades now and apply the animation speed right away. Waiting for
+    // transitionrun lets a long task run them at full speed first.
+    for (const tab of [previousSelected, selected]) {
+      if (!tab?.isConnected) continue
+      getComputedStyle(tab, '::before').getPropertyValue('opacity')
+      tab.getAnimations({ subtree: true })
+        .filter(animation => animation.effect?.target === tab && animation.effect.pseudoElement === '::before')
+        .forEach(applyAnimationSpeed)
+    }
   }
   previousSelected = selected
 }
