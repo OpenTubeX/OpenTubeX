@@ -17,6 +17,14 @@ async function expectSquare(surface) {
   }
 }
 
+async function expectRounded(surface) {
+  await expect(surface).toBeVisible()
+  for (const corner of ['TopLeft', 'TopRight', 'BottomLeft', 'BottomRight']) {
+    await expect.poll(() => surface.evaluate((element, corner) =>
+      Number.parseFloat(getComputedStyle(element)[`border${corner}Radius`]), corner)).toBeGreaterThan(0)
+  }
+}
+
 async function expectFullWidth(surface) {
   await expect.poll(() => surface.evaluate(element => {
     const bounds = element.getBoundingClientRect()
@@ -324,13 +332,13 @@ test.describe('phone surface corners', { tag: '@scale' }, () => {
     const queue = page.locator('.watchVideoQueue:visible')
     await expectInsetRounded(queue)
     await expectFullWidth(page.locator('.watchVideoInfo:visible'))
-    await expectSquare(page.locator('.watchVideoInfo:visible'))
+    await expectRounded(page.locator('.watchVideoInfo:visible'))
     await expectSquare(page.locator('.ftVideoPlayer:visible'))
     await setWindowSize(app, page, { width: Math.round(640 * uiScale / 100), height: Math.round(390 * uiScale / 100) })
     await expectInsetRounded(page.locator('.ftVideoPlayer:visible'))
   })
 
-  test('keeps full-width watch cards square while preserving inset action panels', async ({ app, page, uiScale }, testInfo) => {
+  test('keeps gap-separated watch cards rounded while squaring the player', async ({ app, page, uiScale }, testInfo) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
     await setWindowSize(app, page, { width: Math.round(375 * uiScale / 100), height: Math.round(812 * uiScale / 100) })
@@ -339,7 +347,7 @@ test.describe('phone surface corners', { tag: '@scale' }, () => {
     await expect(cards).toHaveCount(3)
     for (const card of await cards.all()) {
       await expectFullWidth(card)
-      await expectSquare(card)
+      await expectRounded(card)
     }
     const comments = page.locator('.phoneCommentsButton')
     await expect(comments).toBeVisible()
@@ -363,11 +371,10 @@ test.describe('phone surface corners', { tag: '@scale' }, () => {
     const watch = await watchViewHandle(page)
     try {
       await watch.evaluate(view => { view.isLoading = true })
-      for (const surface of ['.videoPlayerPlaceholder', '.infoSkeleton']) {
-        await expectSquare(page.locator(`${surface}:visible`))
-      }
+      await expectSquare(page.locator('.videoPlayerPlaceholder:visible'))
+      await expectRounded(page.locator('.infoSkeleton:visible'))
       await watch.evaluate(view => { view.mobilePanel = 'comments' })
-      await expectSquare(page.locator('.commentsSkeleton:visible'))
+      await expectRounded(page.locator('.commentsSkeleton:visible'))
       await watch.evaluate(async view => {
         view.mobilePanel = null
         view.isLoading = false
