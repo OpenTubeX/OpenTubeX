@@ -92,9 +92,10 @@ import FtButton from '../FtButton/FtButton.vue'
 import FtCheckboxList from '../FtCheckboxList/FtCheckboxList.vue'
 
 import store from '../../store/index'
+import { getSearchFilterTabId } from '../../../search-history'
 
 const { t } = useI18n()
-const tabId = process.env.IS_ELECTRON ? (store.getters.getPresentedTabId ?? 'web') : 'web'
+const tabId = getSearchFilterTabId(store.getters.getPresentedTabId)
 
 const PRIORITIZE_VALUES = [
   'relevance',

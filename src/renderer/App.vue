@@ -211,6 +211,7 @@
     />
     <FtSearchFilters
       v-if="showSearchFilters"
+      :key="presentedTabId"
     />
     <SharedYoutubeLinkPrompt
       v-if="sharedYoutubeLink"
