@@ -366,7 +366,7 @@ test('automatically loads more at the bottom with a spinner and stops retrying o
   const scroller = gallery.locator('.discoveryScroller')
   await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
   await expect(gallery.locator('.spinnerContainer')).toBeVisible()
-  expect(requests).toEqual([1, 2])
+  await expect.poll(() => requests).toEqual([1, 2])
   finishSecondPage()
   await expect(gallery.locator('article')).toHaveCount(10)
   await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })

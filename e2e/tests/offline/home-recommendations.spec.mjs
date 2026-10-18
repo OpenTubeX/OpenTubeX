@@ -726,8 +726,16 @@ for (const state of ['no history', 'empty', 'error']) {
     await goTo(page, 'home')
     const section = recommendations(page)
     await expect(section.locator('.recommendationIntroduction p')).toHaveCSS('text-align', 'center')
+    const release = state === 'no history' ? null : backend.holdResponses()
     await setEnabled(page, true)
     const message = section.getByRole('status')
+    if (release) {
+      await expectBothSources(backend)
+      await expect(section).toHaveAttribute('aria-busy', 'true')
+      await expect(message).toHaveCount(0)
+      release()
+      await expect(section).toHaveAttribute('aria-busy', 'false')
+    }
     await expect(message).toHaveText(state === 'no history'
       ? NO_HISTORY
       : state === 'error' ? UNAVAILABLE : 'No recommendations found. Try refreshing after watching more videos.')
