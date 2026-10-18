@@ -71,7 +71,7 @@ const seed = {
   }))
 }
 
-test.use({ seed: { ...seed, settings: { ...seed.settings, uiScale: 125 } } })
+test.use({ seed })
 
 function card(page, category, channelId = CHANNEL_A, index = 0) {
   return page.locator(category === 'posts' ? '.ft-list-post' : '.ft-list-video')
@@ -79,7 +79,7 @@ function card(page, category, channelId = CHANNEL_A, index = 0) {
 }
 
 for (const category of types) {
-  test(`hides a channel's ${category} immediately and persists the setting`, async ({ app, page }) => {
+  test(`hides a channel's ${category} immediately and persists the setting`, { tag: '@scale' }, async ({ app, page }) => {
     await goTo(page, 'subscriptions')
     await page.locator(`[data-subscription-feed-tab="${category}"]`).click()
     const lastCard = card(page, category, CHANNEL_A, 17)
@@ -95,6 +95,12 @@ for (const category of types) {
     const action = page.getByRole(category === 'posts' ? 'option' : 'menuitem', { name: `Never show ${labels[category]} from this channel in feeds again`, exact: true })
     await expect(action).toBeVisible()
     await action.focus()
+    // Menu targeting may scroll its card into view. Hide from the actual end,
+    // so scroll anchoring cannot preserve a gap that existed before removal.
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+    await expect.poll(() => page.evaluate(() => Math.abs(
+      window.scrollY - Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
+    ))).toBeLessThanOrEqual(1)
     await page.keyboard.press('Enter')
     await expect(card(page, category)).toHaveCount(0)
     await expect(card(page, category, CHANNEL_B)).toBeVisible()
