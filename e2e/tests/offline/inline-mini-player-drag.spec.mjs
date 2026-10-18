@@ -1536,6 +1536,17 @@ test('tapping the scroll-triggered bottom bar expands it while the page scrolls 
   } finally {
     await page.evaluate(() => window.removeEventListener('scrollend', window.blockScrollEnd, true))
   }
+
+  // Reduced motion has no morph to wait for. The page jumps up, and the bar
+  // docks again on the next scroll down.
+  await page.evaluate(() => window.$store.dispatch('updateReducedMotion', 'on'))
+  await page.evaluate(() => window.scrollTo(0, 1200))
+  await expect(player).toHaveClass(/scrollMiniPlayer/)
+  await player.evaluate(element => element.querySelector('.mobileMiniBarReturn').click())
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
+  await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+  await page.evaluate(() => window.scrollTo(0, 1200))
+  await expect(player).toHaveClass(/scrollMiniPlayer/)
 })
 
 test('bottom bar taps restore despite finger drift or a dropped click, and short flicks restore it', { tag: '@scale' }, async ({ app, page }) => {
