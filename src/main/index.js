@@ -6182,6 +6182,8 @@ function runApp() {
       backgroundSubscriptions.setBackground(true).catch(error => console.error(error))
       return
     }
+    // macOS keeps the app and its backup schedule running without open windows.
+    if (process.platform === 'darwin' && !isQuitting) return
     // Clean up resources (datastores' compaction + Electron cache and storage data clearing)
     handleQuit()
   })

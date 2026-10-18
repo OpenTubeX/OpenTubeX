@@ -174,11 +174,13 @@ test('closing the last window leaves process shutdown to Quit, including macOS r
   const closingIndex = source.indexOf('\n  })', start)
   assert.ok(closingIndex > start, 'window-all-closed handler must have a closing boundary')
   const end = closingIndex + '\n  }'.length
-  for (const [enabled, quitting, expected] of [
-    [false, false, ['cleanup']], [true, false, ['tray', 'background']], [true, true, ['cleanup']]
+  for (const [platform, enabled, quitting, expected] of [
+    ['linux', false, false, ['cleanup']], ['linux', true, false, ['tray', 'background']], ['linux', true, true, ['cleanup']],
+    ['darwin', false, false, []], ['darwin', true, false, ['tray', 'background']], ['darwin', true, true, ['cleanup']]
   ]) {
     const calls = []
     const closed = vm.runInNewContext(`(${source.slice(start, end)})`, {
+      process: { platform },
       mainWindow: {}, trayWindows: [], keepRefreshingInBackground: enabled, isQuitting: quitting,
       backgroundSubscriptions: {
         stop: () => calls.push('stop'),

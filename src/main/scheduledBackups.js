@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import { readdir, rename, unlink, writeFile } from 'node:fs/promises'
+import fs from 'node:fs/promises'
 import path from 'node:path'
 import { createUnifiedBackupAsync } from '../renderer/helpers/unifiedBackup.js'
 
@@ -30,18 +30,23 @@ export function createScheduledBackups({ readConfiguration, readData, saveStatus
       const archive = await createUnifiedBackupAsync(await readData())
       // Keep old backups until a complete new archive is committed in the selected folder.
       // A missing folder is an error, so an unmounted drive never redirects backups locally.
-      await writeFile(temporaryPath, new Uint8Array(await archive.arrayBuffer()), { flag: 'wx', mode: 0o600 })
-      await rename(temporaryPath, path.join(directory, filename))
+      await fs.writeFile(temporaryPath, new Uint8Array(await archive.arrayBuffer()), { flag: 'wx', mode: 0o600 })
+      await fs.rename(temporaryPath, path.join(directory, filename))
       nextStatus.lastBackupAt = timestamp
-      const files = (await readdir(directory, { withFileTypes: true }))
-        .filter(entry => entry.isFile() && BACKUP_FILENAME.test(entry.name))
-        .map(entry => entry.name).sort().reverse()
-      for (const name of files.slice(keepCount)) await unlink(path.join(directory, name))
+      try {
+        const files = (await fs.readdir(directory, { withFileTypes: true }))
+          .filter(entry => entry.isFile() && BACKUP_FILENAME.test(entry.name))
+          .map(entry => entry.name).sort().reverse()
+        for (const name of files.slice(keepCount)) await fs.unlink(path.join(directory, name))
+      } catch (error) {
+        // A locked old file must not turn a completed backup into a five-minute retry loop.
+        console.error('Scheduled backup retention failed', error)
+      }
     } catch (error) {
       nextStatus.error = true
       console.error('Scheduled backup failed', error)
     } finally {
-      await unlink(temporaryPath).catch(error => {
+      await fs.unlink(temporaryPath).catch(error => {
         if (error.code !== 'ENOENT') console.error('Could not remove incomplete backup', error)
       })
       await saveStatus(nextStatus)

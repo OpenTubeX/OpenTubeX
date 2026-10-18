@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdtemp, readdir, readFile, rm, symlink, writeFile } from 'node:fs/promises'
+import fs, { mkdtemp, readdir, readFile, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
@@ -162,4 +162,33 @@ test('backup configuration and status are never exported or synced to another de
   for (const key of ['scheduledBackupEnabled', 'scheduledBackupFolderPath', 'scheduledBackupInterval', 'scheduledBackupKeepCount', 'scheduledBackupStatus']) {
     assert.ok(NON_TRANSFERABLE_SETTINGS.has(key))
   }
+})
+
+
+test('retention failures preserve successful backup deadlines without five-minute archive retries', async t => {
+  t.mock.method(console, 'error', () => {})
+  const state = await setup(t)
+  state.configuration.keepCount = 1
+  const locked = path.join(state.directory, 'opentubex-scheduled-backup-2020-01-01T00-00-00-000Z-00000000-0000-0000-0000-000000000000.zip')
+  await writeFile(locked, 'locked archive')
+  const unlink = fs.unlink
+  t.mock.method(fs, 'unlink', async filename => {
+    if (filename === locked) throw Object.assign(new Error('File is locked'), { code: 'EPERM' })
+    return unlink(filename)
+  })
+
+  await state.service.tick()
+  assert.equal(state.configuration.status.error, false)
+  assert.equal(state.configuration.status.lastBackupAt, state.options.now())
+  assert.equal((await state.backups()).length, 2)
+  state.advance(300_000)
+  await state.service.tick()
+  await createScheduledBackups(state.options).tick()
+  assert.equal(state.reads(), 1)
+  assert.equal((await state.backups()).length, 2)
+  state.advance(7 * DAY)
+  await state.service.tick()
+  assert.equal(state.reads(), 2)
+  assert.equal(state.configuration.status.error, false)
+  assert.equal((await state.backups()).length, 2)
 })
