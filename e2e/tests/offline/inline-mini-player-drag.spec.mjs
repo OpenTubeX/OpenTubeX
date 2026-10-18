@@ -1463,6 +1463,57 @@ test('swiping across the scroll-triggered bottom bar returns to the video', { ta
   }
 })
 
+test('tapping the scroll-triggered bottom bar expands it while the page scrolls up', { tag: '@scale' }, async ({ app, page }) => {
+  const player = await openMobilePlayer(app, page)
+  const settledTop = await player.locator('video').evaluate(video => video.getBoundingClientRect().top)
+  await page.evaluate(() => {
+    const spacer = document.createElement('div')
+    spacer.style.height = '2000px'
+    document.body.append(spacer)
+    window.scrollTo(0, 1200)
+  })
+  await expect(player).toHaveClass(/scrollMiniPlayer/)
+  await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+  await player.evaluate(element => {
+    const video = element.querySelector('video')
+    const frames = window.restoreFrames = []
+    const sample = () => {
+      frames.push({
+        morph: element.hasAttribute('data-mobile-mini-morph'),
+        scrollY: window.scrollY,
+        top: video.getBoundingClientRect().top
+      })
+      if (frames.length < 600) requestAnimationFrame(sample)
+    }
+    requestAnimationFrame(sample)
+  })
+  const point = await player.evaluate(mobileMiniPlayerReturnPoint, 'title')
+  const cdp = await page.context().newCDPSession(page)
+  try {
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] })
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  } finally {
+    await cdp.detach()
+  }
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
+  await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+  const frames = await page.evaluate(() => window.restoreFrames.splice(0))
+  const first = frames.findIndex(frame => frame.morph)
+  const last = frames.findLastIndex(frame => frame.morph)
+  expect(first).toBeGreaterThan(-1)
+  // The bar expands at once instead of waiting for the scroll to reveal its slot.
+  expect(frames[first].scrollY).toBeGreaterThan(600)
+  const morph = frames.slice(first, last + 1)
+  for (const [index, frame] of morph.entries()) {
+    // The video rises straight to its slot without overshooting the page top.
+    expect(frame.top, `frame ${index}`).toBeGreaterThanOrEqual(settledTop - 0.5)
+    if (index > 0) expect(frame.top, `frame ${index}`).toBeLessThanOrEqual(morph[index - 1].top + 0.5)
+  }
+  // The inline player takes over exactly where the morph ended.
+  expect(frames[last].top).toBeCloseTo(settledTop, 0)
+  expect(frames[last + 1].top).toBeCloseTo(settledTop, 0)
+})
+
 test('bottom bar taps restore despite finger drift or a dropped click, and short flicks restore it', { tag: '@scale' }, async ({ app, page }) => {
   const player = await openMobilePlayer(app, page)
   await page.evaluate(() => {

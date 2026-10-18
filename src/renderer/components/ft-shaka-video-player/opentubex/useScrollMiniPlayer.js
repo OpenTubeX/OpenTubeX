@@ -277,6 +277,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   let inlineDrag = null
   let inlineDragFrame = null
   let scrollRestoreDrag = false
+  let scrollMiniInlineHold = false
 
   function positionMobileMiniBarOverlay(bar) {
     mobileMiniBarOverlayStyle.value = {
@@ -1086,16 +1087,19 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
             })
           }
         }
+        // While a tap scrolls the page up, aim for where the slot lands and wait
+        // there, so the video does not chase a slot that is still offscreen.
+        const scrollToSlot = !expectedActive && scrollMiniInlineHold ? window.scrollY : 0
         const target = expectedActive
           ? nextRect
           : {
               left: slot?.left ?? nextRect.left,
-              top: slot?.top ?? nextRect.top,
+              top: (slot?.top ?? nextRect.top) + scrollToSlot,
               width: nextRect.width,
               height: nextRect.height
             }
         renderMobileMiniMorph(previousRect, target, videoFrom, videoTo, progress, !expectedActive)
-        if (time < 1) {
+        if (time < 1 || scrollToSlot > 0) {
           frameId = requestAnimationFrame(frame)
         } else {
           scrollMiniLayoutAnimation = null
@@ -1412,7 +1416,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
         syncScrollMiniPlayerState()
         updateScrollMiniDragHandleContrast()
       }
-    } else if (ratio < ENTER_MINI_RATIO && canActivateScrollMiniPlayer()) {
+    } else if (ratio < ENTER_MINI_RATIO && !scrollMiniInlineHold && canActivateScrollMiniPlayer()) {
       activateScrollMiniPlayer(animateActivation)
     }
   }
@@ -1491,9 +1495,33 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     updateScrollMiniPlayer()
   }
 
+  // Expand the bar right away instead of after the scroll reveals the inline
+  // slot, while the page scrolls up underneath it.
   function restoreInlinePlayer() {
-    window.scrollTo({ top: 0, behavior: 'instant' })
-    if (scrollMiniPlayerActive.value) deactivateScrollMiniPlayer()
+    if (scrollMiniPlayerActive.value && usesMobileMiniBar() && window.scrollY > 0) {
+      holdScrollMiniPlayerInline()
+      deactivateScrollMiniPlayer(true)
+      // The compositor scrolls on its own. Start it with the morph's first frame,
+      // so a slow layout switch cannot reveal the empty slot ahead of the video.
+      requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'smooth' }))
+      return
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  // Keep the restored player inline until the scroll settles, since its slot
+  // stays offscreen for most of the way up.
+  function holdScrollMiniPlayerInline() {
+    if (scrollMiniInlineHold) return
+    scrollMiniInlineHold = true
+    window.addEventListener('scrollend', releaseScrollMiniPlayerInlineHold, { once: true })
+  }
+
+  function releaseScrollMiniPlayerInlineHold() {
+    if (!scrollMiniInlineHold) return
+    scrollMiniInlineHold = false
+    window.removeEventListener('scrollend', releaseScrollMiniPlayerInlineHold)
+    updateScrollMiniPlayer()
   }
 
   function scrollMiniScrollToTop(event) {
@@ -1516,7 +1544,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
       return
     }
 
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    restoreInlinePlayer()
   }
 
   // A tap whose drift already started a restore drag completes that drag.
@@ -1816,6 +1844,8 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     window.removeEventListener('pointercancel', handleScrollMiniVolumePointerUpWindow)
     window.removeEventListener('scroll', handleScrollMiniWindowScroll)
     window.removeEventListener('resize', handleScrollMiniWindowResize)
+    window.removeEventListener('scrollend', releaseScrollMiniPlayerInlineHold)
+    scrollMiniInlineHold = false
 
     if (scrollMiniPlayerActive.value) {
       scrollMiniPlayerActive.value = false
