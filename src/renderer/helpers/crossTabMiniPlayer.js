@@ -4,31 +4,42 @@
  * most recently left video tab should float above the presented tab.
  */
 
+import { shallowRef } from 'vue'
+
 /**
  * @typedef {{
  *   canShow: () => boolean,
  *   hide: () => void,
- *   show: () => void
+ *   show: () => boolean
  * }} CrossTabMiniPlayerCandidate
  */
 
 /** @type {CrossTabMiniPlayerCandidate | null} */
 let latestCandidate = null
 
-/** @type {CrossTabMiniPlayerCandidate | null} */
-let owner = null
+/**
+ * Reactive, so the presented tab can yield its own scroll mini player when
+ * another tab takes over or releases the floating player.
+ *
+ * @type {import('vue').ShallowRef<CrossTabMiniPlayerCandidate | null>}
+ */
+const owner = shallowRef(null)
 
 /**
  * @param {CrossTabMiniPlayerCandidate} candidate
  */
 function showCandidate(candidate) {
-  if (owner === candidate) {
+  if (owner.value === candidate) {
     return
   }
 
-  owner?.hide()
-  owner = candidate
-  candidate.show()
+  owner.value?.hide()
+  owner.value = candidate
+  // A hidden tab that cannot measure its player stays inline, so it must not
+  // keep ownership and stop the presented tab from docking its own player.
+  if (!candidate.show()) {
+    owner.value = null
+  }
 }
 
 /**
@@ -60,8 +71,8 @@ export function markCrossTabMiniPlayerActive(candidate) {
  * @param {CrossTabMiniPlayerCandidate} candidate
  */
 export function refreshCrossTabMiniPlayer(candidate) {
-  if (owner === candidate && !candidate.canShow()) {
-    owner = null
+  if (owner.value === candidate && !candidate.canShow()) {
+    owner.value = null
     candidate.hide()
     return
   }
@@ -76,14 +87,14 @@ export function refreshCrossTabMiniPlayer(candidate) {
  * @returns {boolean}
  */
 export function isCrossTabMiniPlayerOwner(candidate) {
-  return owner === candidate
+  return owner.value === candidate
 }
 
 /**
  * @returns {boolean}
  */
 export function hasCrossTabMiniPlayerOwner() {
-  return owner !== null
+  return owner.value !== null
 }
 
 /**
@@ -92,8 +103,8 @@ export function hasCrossTabMiniPlayerOwner() {
  * @param {CrossTabMiniPlayerCandidate} candidate
  */
 export function releaseCrossTabMiniPlayerOwnership(candidate) {
-  if (owner === candidate) {
-    owner = null
+  if (owner.value === candidate) {
+    owner.value = null
   }
 }
 

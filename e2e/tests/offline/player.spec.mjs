@@ -2489,6 +2489,49 @@ test.describe('scroll mini player', () => {
       await expect(page.locator('.ftVideoPlayer.scrollMiniPlayer')).toHaveCount(1)
     })
 
+    test('keeps the active tab docked when a hidden tab cannot take the mini player', async ({ app, page }) => {
+      await openDemoVideo({ app, page })
+      const firstTab = page.locator('.tabBar .tab').first()
+      const firstTabId = await page.locator(activeTab).getAttribute('data-tab-id')
+      await page.locator('.tabBar .newTabButton').click()
+      await openDemoVideo({ app, page })
+      const secondTabId = await page.locator(activeTab).getAttribute('data-tab-id')
+      const activePlayer = page.locator(`.ftVideoPlayer[data-tab-id="${firstTabId}"]`)
+      const outgoingPlayer = page.locator(`.ftVideoPlayer[data-tab-id="${secondTabId}"]`)
+      const setOnAllTabs = async (value) => {
+        const watch = await page.evaluateHandle(findWatchComponent)
+        await watch.evaluate((component, value) => component.proxy.$store.dispatch('updateScrollMiniPlayerOnAllTabs', value), value)
+        await watch.dispose()
+      }
+
+      await firstTab.click()
+      await expect(outgoingPlayer).toHaveClass(/scrollMiniPlayer/)
+      await setOnAllTabs(false)
+      await expect(outgoingPlayer).not.toHaveClass(/scrollMiniPlayer/)
+      await scrollBelowPlayer(activePlayer)
+      await expect(activePlayer).toHaveClass(/scrollMiniPlayer/)
+
+      // The outgoing tab is hidden now, so it cannot measure a player to dock.
+      // Trying must not leave it owning the mini player the active tab gave up.
+      await setOnAllTabs(true)
+      await page.evaluate(() => window.scrollBy(0, 1))
+      await expect(outgoingPlayer).not.toHaveClass(/scrollMiniPlayer/)
+      await expect(activePlayer).toHaveClass(/scrollMiniPlayer/)
+    })
+
+    test('docks the scrolled active tab as soon as the cross-tab video ends', async ({ app, page }) => {
+      const { activePlayer, firstPlayer, firstVideo } = await openCrossTabMiniPlayerOverWatchTab({ app, page })
+      await scrollBelowPlayer(activePlayer)
+      await expect(activePlayer).not.toHaveClass(/scrollMiniPlayer/)
+
+      await firstVideo.evaluate(element => {
+        Object.defineProperty(element, 'ended', { configurable: true, value: true })
+        element.dispatchEvent(new Event('ended'))
+      })
+      await expect(firstPlayer).not.toHaveClass(/scrollMiniPlayer/)
+      await expect(activePlayer).toHaveClass(/scrollMiniPlayer/)
+    })
+
     test('allows the active tab mini player after the cross-tab video ends', async ({ app, page }) => {
       const { activePlayer, firstPlayer, firstVideo } = await openCrossTabMiniPlayerOverWatchTab({ app, page })
 
@@ -3207,8 +3250,7 @@ test.describe('retained navigation player across tabs', () => {
 test.describe('navigation playback with automatic tab picture-in-picture enabled', () => {
   test.use({ seed: { settings: { ...PLAYER_SEED, keepPlayingOnNavigation: true, autoPictureInPictureTriggers: ['tab'] } } })
 
-  // Flaky under parallel load: https://github.com/OpenTubeX/OpenTubeX/issues/2160
-  test.fixme('keeps the outgoing video in the mini player', async ({ app, page }) => {
+  test('keeps the outgoing video in the mini player', async ({ app, page }) => {
     const { firstVideo, firstPlayer } = await openCrossTabMiniPlayerOverWatchTab({ app, page })
     await expect(firstPlayer).toBeVisible()
     await expect(firstPlayer).toHaveClass(/scrollMiniPlayer/)

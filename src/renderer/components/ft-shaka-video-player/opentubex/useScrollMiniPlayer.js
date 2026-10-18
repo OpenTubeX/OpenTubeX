@@ -114,7 +114,10 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   const crossTabMiniPlayerCandidate = {
     canShow: () => canShowCrossTabMiniPlayer(),
     hide: () => deactivateScrollMiniPlayer(),
-    show: () => { if (!inlineDrag) activateScrollMiniPlayer(false) },
+    show: () => {
+      if (!inlineDrag) activateScrollMiniPlayer(false)
+      return scrollMiniPlayerActive.value
+    },
   }
 
   const scrollMiniPlayerStyle = computed(() => scrollMiniPlayerRectToStyle(scrollMiniPlayerRect.value))
@@ -1926,6 +1929,11 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     if (detached) fullWindowEnabled.value = false
   }, { flush: 'sync' })
   watch(scrollMiniPlayerOnAllTabs, () => updateScrollMiniPlayer())
+  // The presented tab yields to another tab's floating player, and may dock
+  // again once that player is released.
+  watch(hasCrossTabMiniPlayerOwner, () => {
+    if (isActiveTab.value) updateScrollMiniPlayer()
+  })
   watch(autoPictureInPictureOnTabChange, () => updateScrollMiniPlayer())
   watch(fullWindowEnabled, () => {
     refreshCrossTabMiniPlayer(crossTabMiniPlayerCandidate)
