@@ -5,74 +5,89 @@ import path from 'node:path'
 import { expect, goToSettingsSection, test } from '../../helpers/app.mjs'
 import { BACKUP_SECTIONS, createUnifiedBackup, readUnifiedBackup } from '../../../src/renderer/helpers/unifiedBackup.js'
 
-test('creates complete scheduled backups without sync and preserves the schedule after restart', async ({ app }, testInfo) => {
-  const directory = await mkdtemp(path.join(tmpdir(), 'opentubex-scheduled-backups-'))
-  try {
-    const { page, electronApp } = app
-    const section = await goToSettingsSection(page, 'data')
-    const controls = section.locator('.scheduledBackups')
-    const toggle = controls.getByRole('checkbox', { name: 'Enable scheduled backups' })
-    await expect(toggle).not.toBeChecked()
-    await expect(toggle).toBeDisabled()
-    await page.evaluate(async () => {
-      await window.$store.dispatch('updateSearchHistoryEntry', { _id: 'scheduled-query', query: 'scheduled backup query', lastUpdatedAt: Date.now() })
-      await window.$store.dispatch('recordWatchTime', { date: '2026-10-18', seconds: 42 })
-      // Exercise worker archive preparation in the packaged desktop app with a large section.
-      await window.$store.dispatch('updateForbiddenTitles', JSON.stringify(Array.from({ length: 10_000 }, (_, index) => `scheduled backup test title ${index}`)))
-    })
-    await electronApp.evaluate(({ dialog }, folder) => {
-      dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [folder] })
-    }, directory)
-    await controls.getByRole('button', { name: 'Choose backup folder' }).click()
-    await expect(controls.locator('.backupFolder')).toHaveText(directory)
-    await expect(toggle).toBeEnabled()
-    await controls.getByText('Enable scheduled backups', { exact: true }).click()
-    await expect(controls.getByRole('status')).toContainText('Last scheduled backup:')
-    const files = (await readdir(directory)).filter(name => name.endsWith('.zip'))
-    expect(files).toHaveLength(1)
-    const backup = await readUnifiedBackup(new Blob([await readFile(path.join(directory, files[0]))]))
-    expect(backup.manifest.sections).toEqual(BACKUP_SECTIONS)
-    expect(backup.data.searchHistory.some(entry => entry.query === 'scheduled backup query')).toBe(true)
-    expect(backup.data.watchStats.records.some(entry => entry.date === '2026-10-18' && entry.seconds === 42)).toBe(true)
-    expect(backup.data.settings).not.toHaveProperty('scheduledBackupEnabled')
-    expect(backup.data.settings).not.toHaveProperty('scheduledBackupFolderPath')
-    expect(backup.data.settings).not.toHaveProperty('syncServerToken')
-    expect(backup.data.settings).not.toHaveProperty('historyWatchedStatusMigrated')
-    expect(backup.data.settings.forbiddenTitles.length).toBeGreaterThan(160_000)
-    expect(await page.evaluate(() => window.$store.getters.getSyncServerEnabled)).toBe(false)
-    await controls.scrollIntoViewIfNeeded()
-    await page.screenshot({ path: testInfo.outputPath('scheduled-backups.png'), animations: 'disabled' })
-    await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'dark'))
-    await expect(page.locator('body')).toContainClass('dark')
-    await page.screenshot({ path: testInfo.outputPath('scheduled-backups-dark.png'), animations: 'disabled' })
-    const materialGlyphs = await controls.locator('.select-icon path').evaluateAll(paths => paths.map(path => path.getAttribute('d')))
-    await page.evaluate(() => window.$store.dispatch('updateIconPack', 'remix'))
-    await expect(controls.locator('.select-icon[data-icon-pack="remix"] svg')).toHaveCount(2)
-    await expect.poll(() => controls.locator('.select-icon path').evaluateAll(paths => paths.map(path => path.getAttribute('d')))).not.toEqual(materialGlyphs)
-    await page.screenshot({ path: testInfo.outputPath('scheduled-backups-remix.png'), animations: 'disabled' })
+test.describe('complete scheduled archives', () => {
+  test.use({
+    seed: {
+      searchHistory: [{ _id: 'scheduled-query', query: 'scheduled backup query', lastUpdatedAt: 1 }],
+      watchStats: [{ _id: 'scheduled-watch-time', date: '2026-10-18', seconds: 42 }],
+      settings: {
+        // Exercise worker archive preparation with a large section.
+        forbiddenTitles: JSON.stringify(Array.from({ length: 10_000 }, (_, index) => `scheduled backup test title ${index}`)),
+      },
+    },
+  })
 
-    const restarted = await app.relaunch()
-    const restartedSection = await goToSettingsSection(restarted.page, 'data')
-    await expect(restartedSection.getByRole('checkbox', { name: 'Enable scheduled backups' })).toBeChecked()
-    await expect(restartedSection.locator('.backupFolder')).toHaveText(directory)
-    await expect(restartedSection.locator('.scheduledBackups').getByRole('status')).toContainText('Last scheduled backup:')
-    expect((await readdir(directory)).filter(name => name.endsWith('.zip'))).toEqual(files)
+  test('creates complete scheduled backups without sync and preserves the schedule after restart', async ({ app }, testInfo) => {
+    const directory = await mkdtemp(path.join(tmpdir(), 'opentubex-scheduled-backups-'))
+    try {
+      const { page, electronApp } = app
+      const section = await goToSettingsSection(page, 'data')
+      const controls = section.locator('.scheduledBackups')
+      const toggle = controls.getByRole('checkbox', { name: 'Enable scheduled backups' })
+      await expect(toggle).not.toBeChecked()
+      await expect(toggle).toBeDisabled()
+      await electronApp.evaluate(({ dialog }, folder) => {
+        dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [folder] })
+      }, directory)
+      await controls.getByRole('button', { name: 'Choose backup folder' }).click()
+      await expect(controls.locator('.backupFolder')).toHaveText(directory)
+      await expect(toggle).toBeEnabled()
+      await controls.getByText('Enable scheduled backups', { exact: true }).click()
+      await expect(controls.getByRole('status')).toContainText('Last scheduled backup:')
+      const files = (await readdir(directory)).filter(name => name.endsWith('.zip'))
+      expect(files).toHaveLength(1)
+      const backupBytes = await readFile(path.join(directory, files[0]))
+      const backup = await readUnifiedBackup(new Blob([backupBytes]))
+      expect(backup.manifest.sections).toEqual(BACKUP_SECTIONS)
+      expect(backup.data.searchHistory.some(entry => entry.query === 'scheduled backup query')).toBe(true)
+      expect(backup.data.watchStats.records.some(entry => entry.date === '2026-10-18' && entry.seconds === 42)).toBe(true)
+      expect(backup.data.settings.autoplayVideos).toBe(true)
+      expect(backup.data.settings).not.toHaveProperty('scheduledBackupEnabled')
+      expect(backup.data.settings).not.toHaveProperty('scheduledBackupFolderPath')
+      expect(backup.data.settings).not.toHaveProperty('syncServerToken')
+      expect(backup.data.settings).not.toHaveProperty('historyWatchedStatusMigrated')
+      expect(backup.data.settings.forbiddenTitles.length).toBeGreaterThan(160_000)
+      expect(await page.evaluate(() => window.$store.getters.getSyncServerEnabled)).toBe(false)
+      await controls.scrollIntoViewIfNeeded()
+      await page.screenshot({ path: testInfo.outputPath('scheduled-backups.png'), animations: 'disabled' })
+      await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'dark'))
+      await expect(page.locator('body')).toContainClass('dark')
+      await page.screenshot({ path: testInfo.outputPath('scheduled-backups-dark.png'), animations: 'disabled' })
+      const materialGlyphs = await controls.locator('.select-icon path').evaluateAll(paths => paths.map(path => path.getAttribute('d')))
+      await page.evaluate(() => window.$store.dispatch('updateIconPack', 'remix'))
+      await expect(controls.locator('.select-icon[data-icon-pack="remix"] svg')).toHaveCount(2)
+      await expect.poll(() => controls.locator('.select-icon path').evaluateAll(paths => paths.map(path => path.getAttribute('d')))).not.toEqual(materialGlyphs)
+      await page.screenshot({ path: testInfo.outputPath('scheduled-backups-remix.png'), animations: 'disabled' })
 
-    const caughtUp = await app.relaunch(() => {
-      const db = new DatabaseSync(path.join(app.userDataDir, 'settings.sqlite'))
-      try {
-        const status = { directory, lastBackupAt: Date.now() - 30 * 86_400_000, lastAttemptAt: 0, error: false }
-        db.prepare('UPDATE docs SET data = ? WHERE id = ?').run(JSON.stringify({ _id: 'scheduledBackupStatus', value: status }), 'scheduledBackupStatus')
-      } finally {
-        db.close()
-      }
-    })
-    const caughtUpSection = await goToSettingsSection(caughtUp.page, 'data')
-    await expect.poll(async () => (await readdir(directory)).filter(name => name.endsWith('.zip')).length).toBe(2)
-    await expect(caughtUpSection.locator('.scheduledBackups').getByRole('status')).toContainText('Last scheduled backup:')
-  } finally {
-    await rm(directory, { recursive: true, force: true })
-  }
+      await page.evaluate(() => window.$store.dispatch('updateAutoplayVideos', false))
+      await expect.poll(() => page.evaluate(() => window.$store.getters.getAutoplayVideos)).toBe(false)
+      await importArchive(page, section, backupBytes)
+      await expect.poll(() => page.evaluate(() => window.$store.getters.getAutoplayVideos)).toBe(true)
+
+      const restarted = await app.relaunch()
+      const restartedSection = await goToSettingsSection(restarted.page, 'data')
+      expect(await restarted.page.evaluate(() => window.$store.getters.getAutoplayVideos)).toBe(true)
+      await expect(restartedSection.getByRole('checkbox', { name: 'Enable scheduled backups' })).toBeChecked()
+      await expect(restartedSection.locator('.backupFolder')).toHaveText(directory)
+      await expect(restartedSection.locator('.scheduledBackups').getByRole('status')).toContainText('Last scheduled backup:')
+      expect((await readdir(directory)).filter(name => name.endsWith('.zip'))).toEqual(files)
+
+      const caughtUp = await app.relaunch(() => {
+        const db = new DatabaseSync(path.join(app.userDataDir, 'settings.sqlite'))
+        try {
+          const status = { directory, lastBackupAt: Date.now() - 30 * 86_400_000, lastAttemptAt: 0, error: false }
+          db.prepare('UPDATE docs SET data = ? WHERE id = ?').run(JSON.stringify({ _id: 'scheduledBackupStatus', value: status }), 'scheduledBackupStatus')
+        } finally {
+          db.close()
+        }
+      })
+      const caughtUpSection = await goToSettingsSection(caughtUp.page, 'data')
+      await expect.poll(async () => (await readdir(directory)).filter(name => name.endsWith('.zip')).length).toBe(2)
+      await expect(caughtUpSection.locator('.scheduledBackups').getByRole('status')).toContainText('Last scheduled backup:')
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
 })
 
 test('reports unavailable destinations and schedules a retry without claiming success', async ({ app }) => {
@@ -141,15 +156,7 @@ test('restoring a crafted ZIP cannot enable backups or replace their local confi
         scheduledBackupStatus: { directory, lastBackupAt: 1, error: true },
       },
     })
-    const bytes = [...new Uint8Array(await archive.arrayBuffer())]
-    await page.evaluate(bytes => {
-      window.showOpenFilePicker = async () => [{
-        getFile: async () => new File([new Uint8Array(bytes)], 'crafted-backup.zip', { type: 'application/zip' }),
-      }]
-    }, bytes)
-    await section.getByRole('button', { name: 'Import backup' }).click()
-    await page.locator('.settingsSubpageContent').getByRole('button', { name: 'Import selected data' }).click()
-    await expect(page.locator('.toast', { hasText: 'Backup imported successfully' })).toBeVisible()
+    await importArchive(page, section, new Uint8Array(await archive.arrayBuffer()))
     const expected = { ...before, autoplayVideos: !before.autoplayVideos }
     expect(await readBackupSettings(page)).toEqual(expected)
 
@@ -223,4 +230,15 @@ function readBackupSettings(page) {
       scheduledBackupStatus: settings.scheduledBackupStatus,
     }
   })
+}
+
+async function importArchive(page, section, bytes) {
+  await page.evaluate(bytes => {
+    window.showOpenFilePicker = async () => [{
+      getFile: async () => new File([new Uint8Array(bytes)], 'backup.zip', { type: 'application/zip' }),
+    }]
+  }, [...bytes])
+  await section.getByRole('button', { name: 'Import backup' }).click()
+  await page.locator('.settingsSubpageContent').getByRole('button', { name: 'Import selected data' }).click()
+  await expect(page.locator('.toast', { hasText: 'Backup imported successfully' })).toBeVisible()
 }

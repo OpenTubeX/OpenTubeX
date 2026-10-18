@@ -129,7 +129,8 @@ for (const failure of [null, 'hash', 'write']) {
 const tutorialSource = await readFile(new URL('../../src/renderer/helpers/tutorialState.js', import.meta.url), 'utf8')
 const LAST_USED_VERSION_SETTING_ID = tutorialSource.match(/LAST_USED_VERSION_SETTING_ID = '([^']+)'/)[1]
 const TUTORIAL_AUDIENCE_SETTING_ID = tutorialSource.match(/TUTORIAL_AUDIENCE_SETTING_ID = '([^']+)'/)[1]
-const summaryDefault = settingsSource.match(/aiVideoSummaryMode: '([^']+)'/)[1]
+const { createDefaultSettings } = await import('../../src/settingsDefaults.js')
+const summaryDefault = createDefaultSettings({ supportsLocalApi: true, isElectron: true }).aiVideoSummaryMode
 const summaryEntriesStart = settingsSource.indexOf('      const legacyHideAiVideoSummariesEntry')
 const summaryEntriesEnd = settingsSource.indexOf('      const legacyPlaybackSpeedSyncEntry', summaryEntriesStart)
 const summaryStartupStart = settingsSource.indexOf('      if (legacyHideAiVideoSummariesEntry)')

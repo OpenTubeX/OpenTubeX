@@ -9,6 +9,7 @@ import { createScheduledBackups } from '../../src/main/scheduledBackups.js'
 import { createBackupArchiveFactory } from '../../src/main/backupArchive.js'
 import { readUnifiedBackup } from '../../src/renderer/helpers/unifiedBackup.js'
 import { NON_TRANSFERABLE_SETTINGS } from '../../src/nonTransferableSettings.js'
+import { createDefaultSettings } from '../../src/settingsDefaults.js'
 
 const workerPath = new URL('../../src/main/backupArchiveWorker.js', import.meta.url)
 const DAY = 86_400_000
@@ -20,6 +21,9 @@ const data = {
   searchHistory: [{ _id: 'query', query: 'music' }],
   watchStats: { records: [{ _id: 'watch-date', date: '2026-10-18', seconds: 42 }], adjustment: { defaultSpeed: 1.5, updatedAt: 2 } },
 }
+const transferableDefaults = Object.fromEntries(Object.entries(createDefaultSettings({ supportsLocalApi: true, isElectron: true }))
+  .filter(([key]) => !NON_TRANSFERABLE_SETTINGS.has(key)))
+const expectedData = { ...data, settings: { ...transferableDefaults, ...data.settings } }
 
 async function setup(t) {
   const directory = await mkdtemp(path.join(tmpdir(), 'opentubex-backups-'))
@@ -89,10 +93,21 @@ test('first backup is complete, importable, and shared by concurrent ticks', asy
   const files = await state.backups()
   assert.equal(files.length, 1)
   const backup = await readUnifiedBackup(new Blob([await readFile(path.join(state.directory, files[0]))]))
-  assert.deepEqual(backup.data, data)
+  assert.deepEqual(backup.data, expectedData)
   assert.equal(state.configuration.status.error, false)
   assert.equal(state.configuration.status.lastBackupAt, state.options.now())
   assert.deepEqual(await readdir(state.directory), files)
+})
+
+test('scheduled archives include unstored defaults alongside saved preferences', async t => {
+  const state = await setup(t)
+  await state.service.tick()
+  const [filename] = await state.backups()
+  const backup = await readUnifiedBackup(new Blob([await readFile(path.join(state.directory, filename))]))
+  assert.equal(backup.data.settings.autoplayVideos, false, 'stored preferences override defaults')
+  assert.equal(backup.data.settings.autoplayPlaylists, true, 'unstored defaults are captured')
+  assert.deepEqual(backup.data.settings.autoPictureInPictureTriggers, [])
+  for (const key of NON_TRANSFERABLE_SETTINGS) assert.equal(Object.hasOwn(backup.data.settings, key), false, key)
 })
 
 test('persisted deadlines survive restarts and missed intervals create one catch-up backup', async t => {
@@ -241,7 +256,7 @@ test('archive factory waits for datastore readiness before starting its worker',
   assert.equal(workersBeforeReady, 0)
   assert.equal(workers, 1)
   const backup = await readUnifiedBackup(new Blob([archive]))
-  assert.deepEqual(backup.data, data)
+  assert.deepEqual(backup.data, expectedData)
 })
 
 for (const phase of ['preparation', 'temporary write']) {

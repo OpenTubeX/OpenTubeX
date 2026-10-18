@@ -4,6 +4,7 @@ import { SqliteDatastore } from '../datastores/sqlite.js'
 import { desktopDatastorePaths } from '../datastores/sqliteNode.js'
 import { migrateLegacyHistoryRecord } from '../history.js'
 import { NON_TRANSFERABLE_SETTINGS } from '../nonTransferableSettings.js'
+import { createDefaultSettings } from '../settingsDefaults.js'
 import { createUnifiedBackup } from '../renderer/helpers/unifiedBackup.js'
 
 async function prepareArchive() {
@@ -41,8 +42,12 @@ async function prepareArchive() {
       watchStats.findAsync({ date: { $exists: true } }).sort({ date: 1 }),
       watchStats.findOneAsync({ _id: 'history-watch-time-v1' }),
     ])
+    const resolvedSettings = {
+      ...createDefaultSettings({ supportsLocalApi: true, isElectron: true }),
+      ...Object.fromEntries(savedSettings.map(setting => [setting._id, setting.value])),
+    }
     data = {
-      settings: Object.fromEntries(savedSettings.filter(setting => !NON_TRANSFERABLE_SETTINGS.has(setting._id)).map(setting => [setting._id, setting.value])),
+      settings: Object.fromEntries(Object.entries(resolvedSettings).filter(([key]) => !NON_TRANSFERABLE_SETTINGS.has(key))),
       profiles: savedProfiles,
       playlists: savedPlaylists,
       history: savedHistory.map(migrateLegacyHistoryRecord),
@@ -57,4 +62,4 @@ async function prepareArchive() {
   parentPort.postMessage(new Uint8Array(buffer), [buffer])
 }
 
-prepareArchive().catch(error => { throw error })
+prepareArchive()
