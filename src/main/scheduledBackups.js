@@ -10,13 +10,13 @@ const BACKUP_FILENAME = /^opentubex-scheduled-backup-\d{4}-\d{2}-\d{2}T\d{2}-\d{
 export function createScheduledBackups({ readConfiguration, createArchive, saveStatus, now = Date.now }) {
   let active = null
   let stopped = false
-  let localRetryDeadline = null
+  let localRetryAttempt = null
 
   async function saveBackupStatus(status) {
     try {
       await saveStatus(status)
     } catch (error) {
-      localRetryDeadline = { directory: status.directory, until: now() + RETRY_INTERVAL }
+      localRetryAttempt = { directory: status.directory, at: now() }
       throw error
     }
   }
@@ -29,9 +29,10 @@ export function createScheduledBackups({ readConfiguration, createArchive, saveS
 
     const status = configuration.status?.directory === directory ? configuration.status : {}
     const timestamp = now()
-    if ((localRetryDeadline?.directory === directory && localRetryDeadline.until > timestamp) ||
-      status.lastAttemptAt > timestamp - RETRY_INTERVAL ||
-      (!status.error && status.lastBackupAt > timestamp - interval * DAY)) return
+    const isRecent = (at, duration) => Number.isFinite(at) && at <= timestamp && at > timestamp - duration
+    if ((localRetryAttempt?.directory === directory && isRecent(localRetryAttempt.at, RETRY_INTERVAL)) ||
+      isRecent(status.lastAttemptAt, RETRY_INTERVAL) ||
+      (!status.error && isRecent(status.lastBackupAt, interval * DAY))) return
 
     const nextStatus = { ...status, directory, lastAttemptAt: timestamp, error: false }
     const filename = `opentubex-scheduled-backup-${new Date(timestamp).toISOString().replaceAll(/[:.]/g, '-')}-${randomUUID()}.zip`
@@ -53,13 +54,14 @@ export function createScheduledBackups({ readConfiguration, createArchive, saveS
       await fs.rename(temporaryPath, path.join(directory, filename))
       nextStatus.lastBackupAt = timestamp
       try {
+        // Keep the new archive even if older backups were named with an incorrect future clock.
         const files = (await fs.readdir(directory, { withFileTypes: true }))
-          .filter(entry => entry.isFile() && BACKUP_FILENAME.test(entry.name))
+          .filter(entry => entry.name !== filename && entry.isFile() && BACKUP_FILENAME.test(entry.name))
           .map(entry => entry.name).sort().reverse()
         const current = await readConfiguration()
         if (current.enabled !== true || current.directory !== directory ||
           !Number.isInteger(current.keepCount) || current.keepCount < 1 || current.keepCount > 100) return
-        for (const name of files.slice(current.keepCount)) await fs.unlink(path.join(directory, name))
+        for (const name of files.slice(current.keepCount - 1)) await fs.unlink(path.join(directory, name))
       } catch (error) {
         // A locked old file must not turn a completed backup into a five-minute retry loop.
         console.error('Scheduled backup retention failed', error)

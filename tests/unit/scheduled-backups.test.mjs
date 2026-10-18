@@ -147,6 +147,66 @@ test('persisted deadlines survive restarts and missed intervals create one catch
   assert.equal(state.reads(), 2)
 })
 
+for (const futureFields of [['lastAttemptAt'], ['lastBackupAt'], ['lastAttemptAt', 'lastBackupAt']]) {
+  test(`future ${futureFields.join(' and ')} timestamps do not suppress backups`, async t => {
+    const state = await setup(t)
+    state.configuration.status = {
+      directory: state.directory,
+      ...Object.fromEntries(futureFields.map(field => [field, state.options.now() + 120 * DAY])),
+    }
+    await state.service.tick()
+    assert.equal(state.reads(), 1)
+    assert.equal(state.configuration.status.lastBackupAt, state.options.now())
+    await state.service.tick()
+    assert.equal(state.reads(), 1)
+    state.advance(7 * DAY)
+    await state.service.tick()
+    assert.equal(state.reads(), 2)
+  })
+}
+
+test('correcting the clock backward creates and retains a new backup', async t => {
+  const state = await setup(t)
+  state.configuration.keepCount = 1
+  state.advance(120 * DAY)
+  await state.service.tick()
+  const [futureArchive] = await state.backups()
+  state.advance(-120 * DAY)
+  await state.service.tick()
+  assert.equal(state.reads(), 2)
+  assert.equal(state.configuration.status.lastBackupAt, state.options.now())
+  const files = await state.backups()
+  assert.equal(files.length, 1)
+  assert.equal(files.includes(futureArchive), false)
+  await state.service.tick()
+  assert.equal(state.reads(), 2)
+})
+
+test('correcting the clock backward resets a local status retry deadline', async t => {
+  const state = await setup(t)
+  let failStatus = true
+  const service = createScheduledBackups({
+    ...state.options,
+    saveStatus: status => {
+      if (failStatus) throw new Error('status unavailable')
+      return state.options.saveStatus(status)
+    },
+  })
+  state.advance(120 * DAY)
+  await assert.rejects(service.tick(), /status unavailable/)
+  state.advance(-120 * DAY)
+  await assert.rejects(service.tick(), /status unavailable/)
+  assert.equal(state.reads(), 2)
+  state.advance(299_999)
+  await service.tick()
+  assert.equal(state.reads(), 2)
+  failStatus = false
+  state.advance(1)
+  await service.tick()
+  assert.equal(state.reads(), 3)
+  assert.equal(state.configuration.status.lastBackupAt, state.options.now())
+})
+
 test('daily and 30-day schedules run at their selected interval', async t => {
   for (const interval of [1, 30]) {
     const state = await setup(t)
