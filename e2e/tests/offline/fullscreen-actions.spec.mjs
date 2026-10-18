@@ -51,6 +51,10 @@ for (const { uiScale, width, height, colorScheme } of [
       await player.hover({ position: { x: 20, y: 20 } })
       await dock.getByRole('button', { name: 'Comments', exact: true }).click()
       await expect(player.locator('.fullscreenCommentsOverlay.open')).toBeVisible()
+      // Opening the panel slides the dock; let that movement finish before clicking again.
+      await dock.evaluate(async element => {
+        await Promise.all(element.getAnimations().map(animation => animation.finished.catch(() => {})))
+      })
       await dock.getByRole('button', { name: 'Comments', exact: true }).click()
       await expect(player.locator('.fullscreenCommentsOverlay.open')).toHaveCount(0)
       await dock.screenshot({ path: testInfo.outputPath(`actions-${colorScheme}.png`) })
