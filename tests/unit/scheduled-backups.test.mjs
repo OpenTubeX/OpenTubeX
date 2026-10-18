@@ -469,6 +469,9 @@ test('changing the folder starts a fresh schedule and shutdown waits for an acti
   state.configuration.status = { directory: '/old-folder', lastBackupAt: state.options.now(), lastAttemptAt: state.options.now() }
   const tick = state.service.tick()
   await state.service.stop()
+  assert.equal(state.configuration.status.directory, state.directory)
+  assert.equal(state.configuration.status.lastBackupAt, state.options.now())
+  assert.equal((await state.backups()).length, 1)
   await tick
   assert.equal(state.reads(), 1)
   state.advance(7 * DAY)
