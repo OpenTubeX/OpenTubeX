@@ -96,7 +96,7 @@ import { createSubscriptionBackgroundService } from './subscriptionBackground'
 import { supportsNativeNotifications } from './nativeNotifications'
 import { getTrayMenuIcon } from './trayMenuIcons'
 import { createScheduledBackups } from './scheduledBackups'
-import { createBackupArchive } from './backupArchive'
+import { createBackupArchiveFactory } from './backupArchive'
 
 function getSystemAccentColor() {
   try {
@@ -1879,10 +1879,11 @@ function runApp() {
       const [enabled, directory, interval, keepCount, status] = await Promise.all(keys.map(async key => (await baseHandlers.settings._findOne(key))?.value))
       return { enabled, directory, interval: interval ?? 7, keepCount: keepCount ?? 5, status }
     },
-    async createArchive() {
-      await waitForDatastores()
-      return createBackupArchive(userDataPath, path.join(__dirname, process.env.NODE_ENV === 'development' ? '../../dist/backupArchiveWorker.js' : 'backupArchiveWorker.js'))
-    },
+    createArchive: createBackupArchiveFactory(userDataPath,
+      path.join(__dirname, process.env.NODE_ENV === 'development' ? '../../dist/backupArchiveWorker.js' : 'backupArchiveWorker.js'), async () => {
+        await waitForDatastores()
+        await baseHandlers.settings.migrate()
+      }),
     saveStatus: status => updateSettingFromMain('scheduledBackupStatus', status),
   })
   function checkScheduledBackup() {

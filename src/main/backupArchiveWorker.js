@@ -36,7 +36,7 @@ async function prepareArchive() {
     const searchHistory = open('search-history')
     const watchStats = open('watch-stats')
     const [savedSettings, savedProfiles, savedPlaylists, savedHistory, savedSearchHistory, records, migration] = await Promise.all([
-      settings.findAsync({}), profiles.findAsync({}), playlists.findAsync({}),
+      settings.findAsync({ _id: { $ne: 'bounds' } }), profiles.findAsync({}), playlists.findAsync({}),
       history.findAsync({}).sort({ timeWatched: -1 }), searchHistory.findAsync({}).sort({ lastUpdatedAt: -1 }),
       watchStats.findAsync({ date: { $exists: true } }).sort({ date: 1 }),
       watchStats.findOneAsync({ _id: 'history-watch-time-v1' }),

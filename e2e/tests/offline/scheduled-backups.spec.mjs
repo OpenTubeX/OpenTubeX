@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import { DatabaseSync } from 'node:sqlite'
 import path from 'node:path'
 import { expect, goToSettingsSection, test } from '../../helpers/app.mjs'
-import { BACKUP_SECTIONS, readUnifiedBackup } from '../../../src/renderer/helpers/unifiedBackup.js'
+import { BACKUP_SECTIONS, createUnifiedBackup, readUnifiedBackup } from '../../../src/renderer/helpers/unifiedBackup.js'
 
 test('creates complete scheduled backups without sync and preserves the schedule after restart', async ({ app }, testInfo) => {
   const directory = await mkdtemp(path.join(tmpdir(), 'opentubex-scheduled-backups-'))
@@ -123,6 +123,46 @@ test('retention keeps the selected number of scheduled backups and leaves manual
   }
 })
 
+test('restoring a crafted ZIP cannot enable backups or replace their local configuration', async ({ app }) => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'opentubex-backup-import-'))
+  try {
+    const old = 'opentubex-scheduled-backup-2020-01-01T00-00-00-000Z-00000000-0000-0000-0000-000000000000.zip'
+    await writeFile(path.join(directory, old), 'existing archive')
+    const { page } = app
+    const section = await goToSettingsSection(page, 'data')
+    const before = await readBackupSettings(page)
+    const archive = createUnifiedBackup({
+      settings: {
+        autoplayVideos: !before.autoplayVideos,
+        scheduledBackupEnabled: true,
+        scheduledBackupFolderPath: directory,
+        scheduledBackupInterval: 1,
+        scheduledBackupKeepCount: 1,
+        scheduledBackupStatus: { directory, lastBackupAt: 1, error: true },
+      },
+    })
+    const bytes = [...new Uint8Array(await archive.arrayBuffer())]
+    await page.evaluate(bytes => {
+      window.showOpenFilePicker = async () => [{
+        getFile: async () => new File([new Uint8Array(bytes)], 'crafted-backup.zip', { type: 'application/zip' }),
+      }]
+    }, bytes)
+    await section.getByRole('button', { name: 'Import backup' }).click()
+    await page.locator('.settingsSubpageContent').getByRole('button', { name: 'Import selected data' }).click()
+    await expect(page.locator('.toast', { hasText: 'Backup imported successfully' })).toBeVisible()
+    const expected = { ...before, autoplayVideos: !before.autoplayVideos }
+    expect(await readBackupSettings(page)).toEqual(expected)
+
+    const restarted = await app.relaunch()
+    await goToSettingsSection(restarted.page, 'data')
+    expect(await readBackupSettings(restarted.page)).toEqual(expected)
+    expect(await readdir(directory)).toEqual([old])
+    expect(await readFile(path.join(directory, old), 'utf8')).toBe('existing archive')
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
 test('cancels folder selection without enabling backups and keeps controls usable at narrow widths', { tag: '@scale' }, async ({ app }) => {
   const section = await goToSettingsSection(app.page, 'data')
   const controls = section.locator('.scheduledBackups')
@@ -170,3 +210,17 @@ test('cancels folder selection without enabling backups and keeps controls usabl
     }
   }
 })
+
+function readBackupSettings(page) {
+  return page.evaluate(() => {
+    const settings = window.$store.state.settings
+    return {
+      autoplayVideos: settings.autoplayVideos,
+      scheduledBackupEnabled: settings.scheduledBackupEnabled,
+      scheduledBackupFolderPath: settings.scheduledBackupFolderPath,
+      scheduledBackupInterval: settings.scheduledBackupInterval,
+      scheduledBackupKeepCount: settings.scheduledBackupKeepCount,
+      scheduledBackupStatus: settings.scheduledBackupStatus,
+    }
+  })
+}

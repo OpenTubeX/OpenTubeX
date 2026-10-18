@@ -3,10 +3,10 @@ import fs, { mkdtemp, readdir, readFile, rm, symlink, writeFile } from 'node:fs/
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
-import vm from 'node:vm'
 import { createDesktopDatastore } from '../../src/datastores/sqliteNode.js'
+import { migrateStoredSettings } from '../../src/datastores/settingsMigrations.js'
 import { createScheduledBackups } from '../../src/main/scheduledBackups.js'
-import { createBackupArchive } from '../../src/main/backupArchive.js'
+import { createBackupArchiveFactory } from '../../src/main/backupArchive.js'
 import { readUnifiedBackup } from '../../src/renderer/helpers/unifiedBackup.js'
 import { NON_TRANSFERABLE_SETTINGS } from '../../src/nonTransferableSettings.js'
 
@@ -49,7 +49,15 @@ async function setup(t) {
   const configuration = { enabled: true, directory, interval: 7, keepCount: 3, status: {} }
   const options = {
     readConfiguration: async () => structuredClone(configuration),
-    createArchive: async () => { reads++; return createBackupArchive(profileDirectory, workerPath) },
+    createArchive: createBackupArchiveFactory(profileDirectory, workerPath, async () => {
+      reads++
+      const settings = createDesktopDatastore(path.join(profileDirectory, 'settings.sqlite'))
+      try {
+        await migrateStoredSettings(settings)
+      } finally {
+        await settings.driver.close()
+      }
+    }),
     saveStatus: async status => { configuration.status = status },
     now: () => timestamp,
   }
@@ -217,29 +225,23 @@ test('retention failures preserve successful backup deadlines without five-minut
   assert.equal((await state.backups()).length, 2)
 })
 
-test('main-process backup preparation passes only the profile path without reading collections', async () => {
-  const source = await readFile(new URL('../../src/main/index.js', import.meta.url), 'utf8')
-  const start = source.indexOf('    async createArchive() {', source.indexOf('const scheduledBackups ='))
-  const end = source.indexOf('\n    saveStatus:', start)
-  let reads = 0
-  let profile
-  const find = async () => { reads++; return [] }
-  const createArchive = vm.runInNewContext(`({${source.slice(start, end)}}).createArchive`, {
-    baseHandlers: {
-      settings: { find }, profiles: { find }, playlists: { find }, history: { find },
-      searchHistory: { find }, watchStats: { find, getHistoricalAdjustment: find },
-    },
-    waitForDatastores: async () => {},
-    createBackupArchive: async directory => { profile = directory; return new Uint8Array() },
-    userDataPath: '/test/profile',
-    path,
-    process: { env: { NODE_ENV: 'production' } },
-    __dirname: '/test/app',
-    NON_TRANSFERABLE_SETTINGS,
-  })
-  await createArchive()
-  assert.equal(reads, 0, 'the main process must not materialize histories or playlists for structured cloning')
-  assert.equal(profile, '/test/profile', 'only the profile path should cross the worker boundary')
+test('archive factory waits for datastore readiness before starting its worker', async t => {
+  const state = await setup(t)
+  const ready = Promise.withResolvers()
+  let workers = 0
+  const onWorker = () => { workers++ }
+  process.on('worker', onWorker)
+  t.after(() => process.off('worker', onWorker))
+  const createArchive = createBackupArchiveFactory(state.profileDirectory, workerPath, () => ready.promise)
+  const pending = createArchive()
+  await new Promise(resolve => setImmediate(resolve))
+  const workersBeforeReady = workers
+  ready.resolve()
+  const archive = await pending
+  assert.equal(workersBeforeReady, 0)
+  assert.equal(workers, 1)
+  const backup = await readUnifiedBackup(new Blob([archive]))
+  assert.deepEqual(backup.data, data)
 })
 
 for (const phase of ['preparation', 'temporary write']) {
@@ -282,7 +284,8 @@ for (const phase of ['preparation', 'temporary write']) {
 test('archive worker failures reject without creating missing profile databases', async t => {
   const state = await setup(t)
   const missing = path.join(state.profileDirectory, 'missing')
-  await assert.rejects(createBackupArchive(missing, workerPath), /unable to open database/)
+  const createArchive = createBackupArchiveFactory(missing, workerPath, async () => {})
+  await assert.rejects(createArchive(), /unable to open database/)
   await assert.rejects(readdir(missing), { code: 'ENOENT' })
 })
 
@@ -345,3 +348,30 @@ for (const phase of ['preparation', 'temporary write', 'directory listing']) {
     assert.equal((await state.backups()).length, 5)
   })
 }
+
+
+test('scheduled archives normalize legacy settings and exclude internal window bounds', async t => {
+  const state = await setup(t)
+  const settings = createDesktopDatastore(path.join(state.profileDirectory, 'settings.sqlite'))
+  try {
+    await settings.insertAsync([
+      { _id: 'defaultTheatreMode', value: true },
+      { _id: 'saveWatchedProgress', value: false },
+      { _id: 'currentLocale', value: 'en_GB' },
+      { _id: 'screenshotAskPath', value: true },
+      { _id: 'bounds', value: { x: 10, y: 20 } },
+    ])
+  } finally {
+    await settings.driver.close()
+  }
+  await state.service.tick()
+  const [filename] = await state.backups()
+  const backup = await readUnifiedBackup(new Blob([await readFile(path.join(state.directory, filename))]))
+  assert.equal(backup.data.settings.defaultViewingMode, 'theatre')
+  assert.equal(backup.data.settings.watchedProgressSavingMode, 'never')
+  assert.equal(backup.data.settings.currentLocale, 'en-GB')
+  assert.equal(backup.data.settings.screenshotMode, 'prompt_folder')
+  for (const key of ['defaultTheatreMode', 'saveWatchedProgress', 'screenshotAskPath', 'bounds']) {
+    assert.equal(Object.hasOwn(backup.data.settings, key), false, key)
+  }
+})
