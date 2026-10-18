@@ -2148,3 +2148,4 @@ Library Format Changed:
   Title: "媒体库已迁移到新格式"
   Message: "你的媒体库现在使用新的存储格式。"
   Detail: "旧版本的 OpenTubeX 仍可打开你的媒体库，但会显示此次更新之前的状态。你在旧版本中所做的更改会在你回到此版本时添加回来。"
+Invidious Fallback Warning: "此请求绕过了你配置的 Invidious 实例，直接连接到 YouTube，从而暴露你的 IP 地址。"

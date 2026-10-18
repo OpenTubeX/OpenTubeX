@@ -2542,3 +2542,4 @@ Library Format Changed:
   Title: "Biblioteket er flytt til eit nytt format"
   Message: "Biblioteket ditt brukar no eit nytt lagringsformat."
   Detail: "Eldre versjonar av OpenTubeX kan framleis opne biblioteket ditt, men dei viser det slik det var før denne oppdateringa. Endringar du gjer i ein eldre versjon, blir lagde til når du går tilbake til denne versjonen."
+Invidious Fallback Warning: "Denne førespurnaden går utanom den konfigurerte Invidious-instansen din og koplar direkte til YouTube, noko som avslører IP-adressa di."

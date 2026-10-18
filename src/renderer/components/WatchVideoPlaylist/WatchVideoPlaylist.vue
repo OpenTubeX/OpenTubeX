@@ -286,7 +286,7 @@ import FtPrompt from '../FtPrompt/FtPrompt.vue'
 
 import store from '../../store/index'
 
-import { deepCopy, extractNumberFromString, getVideoThumbnailUrl, showApiErrorToast, showToast, throttle } from '../../helpers/utils'
+import { showInvidiousFallbackToast, deepCopy, extractNumberFromString, getVideoThumbnailUrl, showApiErrorToast, showToast, throttle } from '../../helpers/utils'
 import {
   getLocalCachedFeedContinuation,
   getLocalPlaylist,
@@ -1162,7 +1162,7 @@ async function getPlaylistInformationInvidious() {
     const errorMessage = t('Invidious API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
     if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
+      showInvidiousFallbackToast()
       getPlaylistInformationLocal()
     } else {
       isLoading.value = false

@@ -2148,3 +2148,4 @@ Library Format Changed:
   Title: "Knihovna byla převedena do nového formátu"
   Message: "Vaše knihovna nyní používá nový formát úložiště."
   Detail: "Starší verze OpenTubeX mohou vaši knihovnu stále otevřít, ale zobrazí ji ve stavu před touto aktualizací. Změny provedené ve starší verzi se přidají, až se vrátíte k této verzi."
+Invidious Fallback Warning: "Tento požadavek obchází nastavenou instanci Invidious a připojuje se přímo k YouTube, čímž odhaluje vaši IP adresu."

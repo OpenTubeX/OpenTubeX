@@ -639,7 +639,7 @@ import CommentImageAttachment from './CommentImageAttachment.vue'
 
 import store from '../../store/index'
 
-import { copyToClipboard, formatViewCount, getRelativeTimeFromDate, showApiErrorToast, showToast } from '../../helpers/utils'
+import { showInvidiousFallbackToast, copyToClipboard, formatViewCount, getRelativeTimeFromDate, showApiErrorToast, showToast } from '../../helpers/utils'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import {
   getCommentReplyAccessibleLabel,
@@ -2116,7 +2116,7 @@ async function getCommentDataInvidious() {
     showApiErrorToast(errorMessage, err)
 
     if (process.env.SUPPORTS_LOCAL_API && backendFallback.value && backendPreference.value === 'invidious') {
-      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
+      showInvidiousFallbackToast()
       return getCommentDataLocal()
     } else {
       isLoading.value = false
@@ -2218,7 +2218,7 @@ function getPostCommentsInvidious() {
     showApiErrorToast(errorMessage, err)
 
     if (process.env.SUPPORTS_LOCAL_API && backendFallback.value && backendPreference.value === 'invidious') {
-      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
+      showInvidiousFallbackToast()
       return getCommentDataLocal()
     } else {
       isLoading.value = false

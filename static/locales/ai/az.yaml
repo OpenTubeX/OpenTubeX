@@ -2158,3 +2158,4 @@ Library Format Changed:
   Title: "Kitabxana yeni formata köçürüldü"
   Message: "Kitabxananız artıq yeni saxlama formatından istifadə edir."
   Detail: "OpenTubeX-in köhnə versiyaları kitabxananızı hələ də aça bilər, lakin onu bu yeniləmədən əvvəlki kimi göstərir. Köhnə versiyada etdiyiniz dəyişikliklər bu versiyaya qayıtdığınız zaman əlavə edilir."
+Invidious Fallback Warning: "Bu sorğu konfiqurasiya etdiyiniz Invidious instansiyasından yan keçərək birbaşa YouTube-a qoşulur və IP ünvanınızı açıqlayır."

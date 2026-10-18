@@ -113,6 +113,7 @@ import FtAutoLoadNextPageWrapper from '../../components/FtAutoLoadNextPageWrappe
 import store from '../../store'
 
 import {
+  showInvidiousFallbackToast,
   searchFiltersMatch,
   showApiErrorToast,
   showToast,
@@ -509,7 +510,7 @@ async function performSearchInvidious(payload, options = { resetSearchPage: fals
     showApiErrorToast(errorMessage, err)
 
     if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
+      showInvidiousFallbackToast()
       await performSearchLocal(payload)
     } else {
       isLoading.value = false

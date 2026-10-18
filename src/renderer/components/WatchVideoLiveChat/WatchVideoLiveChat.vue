@@ -440,7 +440,7 @@ import { vSaferHtml } from '../../directives/vSaferHtml.js'
 
 import store from '../../store/index'
 
-import { formatNumber } from '../../helpers/utils'
+import { formatNumber, showInvidiousFallbackToast } from '../../helpers/utils'
 import { formatTime } from '../../helpers/dateFormat'
 import { getRandomColorClass } from '../../helpers/colors'
 import { getLocalVideoInfo, parseLocalTextRuns } from '../../helpers/api/local'
@@ -666,6 +666,7 @@ function initializeLiveChat() {
       break
     case 'invidious':
       if (backendFallback.value) {
+        showInvidiousFallbackToast()
         getLiveChatLocal()
       } else {
         hasError.value = true
@@ -678,6 +679,7 @@ function initializeLiveChat() {
 }
 
 function enableLiveChat() {
+  if (backendPreference.value === 'invidious') showInvidiousFallbackToast()
   hasError.value = false
   showEnableChat.value = false
   isLoading.value = true

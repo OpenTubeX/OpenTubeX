@@ -286,6 +286,11 @@ export function showToast(message, time = null, action = null, abortSignal = nul
   return detail.control
 }
 
+/** Announce every direct retry, including requests made by background tabs. */
+export function showInvidiousFallbackToast() {
+  showToastOnAllTabs(i18n.global.t('Invidious Fallback Warning'), 10000, ['fas', 'triangle-exclamation'])
+}
+
 /**
  * Shows a toast in every window and tab.
  * @param {string} message

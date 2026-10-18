@@ -3,6 +3,7 @@ import store from '../store/index'
 import { buildRecommendationProfileAsync, rankRecommendationCandidatesAsync, recommendationSubscriptionIds, getRecommendationLearningEntries } from '../helpers/recommendations'
 import { runCooperatively } from '../helpers/cooperativeTask'
 import { collectRecommendationCandidates, fetchRecommendationSource, mergeRecommendationCandidates } from '../helpers/recommendationCandidates'
+import { showInvidiousFallbackToast } from '../helpers/utils'
 import { getLocalChannelVideos, getLocalSearchResults, getLocalRelatedVideos } from '../helpers/api/local'
 import { getInvidiousChannelVideos, getInvidiousSearchResults, getInvidiousRelatedVideos } from '../helpers/api/invidious'
 import { isVideoHiddenByPreferences } from '../helpers/subscriptions'
@@ -268,8 +269,12 @@ export function useHomeRecommendations(visible) {
       }
     }
     function withFallback(local, invidious, signal) {
+      const directFallback = () => {
+        showInvidiousFallbackToast()
+        return local()
+      }
       return fetchRecommendationSource(backend === 'local' ? local : invidious,
-        fallback ? (backend === 'local' ? invidious : local) : null, signal)
+        fallback ? (backend === 'local' ? invidious : directFallback) : null, signal)
     }
   }
   async function feedback(video, type) {

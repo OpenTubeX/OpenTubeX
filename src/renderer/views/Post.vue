@@ -40,7 +40,7 @@ import store from '../store/index'
 
 import { getInvidiousCommunityPost } from '../helpers/api/invidious'
 import { getLocalCommunityPost } from '../helpers/api/local'
-import { showApiErrorToast, showToast } from '../helpers/utils'
+import { showInvidiousFallbackToast, showApiErrorToast, showToast } from '../helpers/utils'
 import { useTabTitle } from '../tabs/TabContext'
 
 const { t } = useI18n()
@@ -134,7 +134,7 @@ async function loadDataInvidiousAsync() {
     showApiErrorToast(errorMessage, error)
 
     if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
+      showInvidiousFallbackToast()
       await loadDataLocalAsync()
     } else {
       isLoading.value = false

@@ -2149,3 +2149,4 @@ Library Format Changed:
   Title: "Kitaplık yeni bir biçime taşındı"
   Message: "Kitaplığınız artık yeni bir depolama biçimi kullanıyor."
   Detail: "OpenTubeX'in eski sürümleri kitaplığınızı hâlâ açabilir, ancak onu bu güncellemeden önceki hâliyle gösterir. Eski bir sürümde yaptığınız değişiklikler bu sürüme döndüğünüzde eklenir."
+Invidious Fallback Warning: "Bu istek, yapılandırdığınız Invidious sunucusunu atlayarak doğrudan YouTube’a bağlanır ve IP adresinizi açığa çıkarır."

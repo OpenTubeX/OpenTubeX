@@ -66,7 +66,7 @@ import FtAutoLoadNextPageWrapper from '../../components/FtAutoLoadNextPageWrappe
 import store from '../../store/index'
 import { useRoute } from 'vue-router'
 import { getHashtagLocal, parseLocalListVideo } from '../../helpers/api/local'
-import { showApiErrorToast, showToast } from '../../helpers/utils'
+import { showInvidiousFallbackToast, showApiErrorToast, showToast } from '../../helpers/utils'
 import { getHashtagInvidious } from '../../helpers/api/invidious'
 import { useI18n } from 'vue-i18n'
 import { useTabTitle } from '../../tabs/TabContext'
@@ -143,7 +143,7 @@ async function getInvidiousHashtag(page = 1) {
     const errorMessage = t('Invidious API Error (Click to copy)')
     showApiErrorToast(errorMessage, error)
     if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
+      showInvidiousFallbackToast()
       resetData()
       getLocalHashtag()
     } else {

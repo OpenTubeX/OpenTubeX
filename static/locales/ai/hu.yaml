@@ -2149,3 +2149,4 @@ Library Format Changed:
   Title: "A könyvtár új formátumba került"
   Message: "A könyvtárad mostantól új tárolási formátumot használ."
   Detail: "Az OpenTubeX régebbi verziói továbbra is meg tudják nyitni a könyvtáradat, de a frissítés előtti állapotában mutatják. A régebbi verzióban végzett módosítások bekerülnek, amikor visszatérsz ehhez a verzióhoz."
+Invidious Fallback Warning: "Ez a kérés megkerüli a beállított Invidious-példányt, és közvetlenül a YouTube-hoz csatlakozik, felfedve az IP-címedet."

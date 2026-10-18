@@ -317,6 +317,7 @@ import FtButton from '../../components/FtButton/FtButton.vue'
 import store from '../../store/index'
 
 import {
+  showInvidiousFallbackToast,
   extractNumberFromString,
   getChannelPlaylistId,
   getIconForSortPreference,
@@ -1194,7 +1195,7 @@ async function getChannelInfoInvidious() {
     showApiErrorToast(errorMessage, err)
 
     if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
+      showInvidiousFallbackToast()
       getChannelLocal()
     } else {
       isLoading.value = false
@@ -1821,7 +1822,7 @@ async function getPlaylistsInvidious() {
     const errorMessage = t('Invidious API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
     if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
+      showInvidiousFallbackToast()
       getChannelPlaylistsLocal()
     } else {
       isLoading.value = false
@@ -1944,7 +1945,7 @@ async function channelInvidiousReleases() {
     const errorMessage = t('Invidious API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
     if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
+      showInvidiousFallbackToast()
       getChannelReleasesLocal()
     } else {
       isLoading.value = false
@@ -2042,7 +2043,7 @@ async function channelInvidiousPodcasts() {
     showApiErrorToast(errorMessage, err)
 
     if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
+      showInvidiousFallbackToast()
       getChannelPodcastsLocal()
     } else {
       isLoading.value = false
@@ -2142,7 +2143,7 @@ async function channelInvidiousCourses() {
     showApiErrorToast(errorMessage, err)
 
     if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
+      showInvidiousFallbackToast()
       getChannelCoursesLocal()
     } else {
       isLoading.value = false
@@ -2283,7 +2284,7 @@ async function getCommunityPostsInvidious() {
     showApiErrorToast(errorMessage, err)
 
     if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
+      showInvidiousFallbackToast()
       getCommunityPostsLocal()
     }
   }
@@ -2436,7 +2437,7 @@ async function searchChannelInvidious() {
     showApiErrorToast(errorMessage, err)
 
     if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
+      showInvidiousFallbackToast()
       searchChannelLocal()
     } else {
       isSearchTabLoading.value = false

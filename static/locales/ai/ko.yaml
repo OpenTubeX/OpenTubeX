@@ -2603,3 +2603,4 @@ Library Format Changed:
   Title: "라이브러리를 새 형식으로 옮겼습니다"
   Message: "라이브러리가 이제 새 저장 형식을 사용합니다."
   Detail: "이전 버전의 OpenTubeX에서도 라이브러리를 열 수 있지만 이 업데이트 이전 상태로 표시됩니다. 이전 버전에서 변경한 내용은 이 버전으로 돌아오면 추가됩니다."
+Invidious Fallback Warning: "이 요청은 설정한 Invidious 인스턴스를 우회하여 YouTube에 직접 연결하므로 IP 주소가 노출됩니다."

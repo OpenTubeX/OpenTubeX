@@ -3345,3 +3345,4 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Desktop-Verknüpfung erstellen
+Invidious Fallback Warning: "Diese Anfrage umgeht deine konfigurierte Invidious-Instanz und verbindet sich direkt mit YouTube. Dabei wird deine IP-Adresse offengelegt."

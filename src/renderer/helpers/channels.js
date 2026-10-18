@@ -1,5 +1,6 @@
 import { invidiousGetChannelInfo } from './api/invidious'
 import { getLocalChannel, parseLocalChannelHeader } from './api/local'
+import { showInvidiousFallbackToast } from './utils'
 
 /**
  * @param {string} id
@@ -23,6 +24,7 @@ async function findChannelById(id, backendOptions) {
     }
     if (process.env.SUPPORTS_LOCAL_API && backendOptions.fallback) {
       if (backendOptions.preference === 'invidious') {
+        showInvidiousFallbackToast()
         return await getLocalChannel(id)
       }
       if (backendOptions.preference === 'local') {
