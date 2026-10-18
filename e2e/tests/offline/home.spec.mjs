@@ -559,9 +559,9 @@ test.describe('legacy landing page visibility', () => {
 })
 
 test.describe('compact scaled Home page', () => {
-  test.use({ seed: { ...homeSeed, settings: { uiScale: 95 } } })
+  test.use({ seed: homeSeed })
 
-  test('keeps Capacitor phone pages inside the viewport and clear of the bottom navigation', async ({ app, page }) => {
+  test('keeps Capacitor phone pages inside the viewport and clear of the bottom navigation', { tag: '@scale' }, async ({ app, page }) => {
     await setWindowSize(app, page, { width: 375, height: 700 })
     await goTo(page, 'home')
     await page.evaluate(() => {
@@ -591,6 +591,9 @@ test.describe('compact scaled Home page', () => {
       )).toBeLessThanOrEqual(1)
 
       const metrics = await page.evaluate(({ pageSelector, cardSelector }) => {
+        // Feed layout and navigation focus can change the offset after the
+        // earlier scroll. Measure clearance at the current rendered page end.
+        window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' })
         const pageBounds = document.querySelector(pageSelector).getBoundingClientRect()
         const firstCardBounds = document.querySelector(cardSelector).getBoundingClientRect()
         const cards = [...document.querySelectorAll(`${pageSelector} .ft-card`)]
@@ -623,7 +626,7 @@ test.describe('compact scaled Home page', () => {
     }
   })
 
-  test('fits customization controls without horizontal overflow', async ({ app, page }) => {
+  test('fits customization controls without horizontal overflow', { tag: '@scale' }, async ({ app, page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await setWindowSize(app, page, { width: 375, height: 700 })
     await goTo(page, 'home')
