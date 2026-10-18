@@ -26,9 +26,7 @@ test.describe('complete scheduled archives', () => {
       const toggle = controls.getByRole('checkbox', { name: 'Enable scheduled backups' })
       await expect(toggle).not.toBeChecked()
       await expect(toggle).toBeDisabled()
-      await electronApp.evaluate(({ dialog }, folder) => {
-        dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [folder] })
-      }, directory)
+      await stubBackupFolder(electronApp, directory)
       await controls.getByRole('button', { name: 'Choose backup folder' }).click()
       await expect(controls.locator('.backupFolder')).toHaveText(directory)
       await expect(toggle).toBeEnabled()
@@ -96,9 +94,7 @@ test('reports unavailable destinations and schedules a retry without claiming su
   try {
     const section = await goToSettingsSection(app.page, 'data')
     const controls = section.locator('.scheduledBackups')
-    await app.electronApp.evaluate(({ dialog }, folder) => {
-      dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [folder] })
-    }, directory)
+    await stubBackupFolder(app.electronApp, directory)
     await controls.getByRole('button', { name: 'Choose backup folder' }).click()
     await expect(controls.locator('.backupFolder')).toHaveText(directory)
     await rm(directory, { recursive: true })
@@ -124,9 +120,7 @@ test('retention keeps the selected number of scheduled backups and leaves manual
     await app.page.getByRole('option', { name: '1', exact: true }).click()
     await controls.getByRole('combobox', { name: 'Backup frequency' }).click()
     await app.page.getByRole('option', { name: 'Daily', exact: true }).click()
-    await app.electronApp.evaluate(({ dialog }, folder) => {
-      dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [folder] })
-    }, directory)
+    await stubBackupFolder(app.electronApp, directory)
     await controls.getByRole('button', { name: 'Choose backup folder' }).click()
     await controls.getByText('Enable scheduled backups', { exact: true }).click()
     await expect(controls.getByRole('status')).toContainText('Last scheduled backup:')
@@ -178,9 +172,7 @@ test('cancels folder selection without enabling backups and keeps controls usabl
   await expect(section.locator('.dataStoragePanel > .scheduledBackups ~ *')).toHaveCount(0)
   await expect(controls.getByRole('heading', { name: 'Scheduled backups', level: 3 })).toBeVisible()
   await expect(controls.locator('.select-icon')).toHaveCount(2)
-  await app.electronApp.evaluate(({ dialog }) => {
-    dialog.showOpenDialog = async () => ({ canceled: true, filePaths: [] })
-  })
+  await stubBackupFolder(app.electronApp)
   await controls.getByRole('button', { name: 'Choose backup folder' }).click()
   await expect(controls.locator('.backupFolder')).toHaveText('No backup folder selected')
   await expect(controls.getByRole('checkbox', { name: 'Enable scheduled backups' })).toBeDisabled()
@@ -242,4 +234,10 @@ async function importArchive(page, section, bytes) {
   await section.getByRole('button', { name: 'Import backup' }).click()
   await page.locator('.settingsSubpageContent').getByRole('button', { name: 'Import selected data' }).click()
   await expect(page.locator('.toast', { hasText: 'Backup imported successfully' })).toBeVisible()
+}
+
+function stubBackupFolder(electronApp, folder = null) {
+  return electronApp.evaluate(({ dialog }, folder) => {
+    dialog.showOpenDialog = async () => ({ canceled: folder === null, filePaths: folder === null ? [] : [folder] })
+  }, folder)
 }
