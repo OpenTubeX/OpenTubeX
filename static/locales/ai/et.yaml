@@ -956,6 +956,19 @@ Settings:
     Show Bottom Right Actions Dock: Kuva all paremal toiminguriba
     Paused Interface Hide Delay: Liidese peitmise viivitus pausi ajal
   Data Settings:
+    Scheduled backups: "Ajastatud varukoopiad"
+    Scheduled backup description: "Salvesta täielikud ZIP-varukoopiad, kui OpenTubeX on avatud. Vahele jäänud koopiad luuakse käivitamisel. Piirang kehtib ainult selle kausta ajastatud koopiatele."
+    Choose backup folder: "Vali varukoopiate kaust"
+    No backup folder selected: "Varukoopiate kausta pole valitud"
+    Enable scheduled backups: "Luba ajastatud varukoopiad"
+    Backup frequency: "Varundamise sagedus"
+    Backups to keep: "Säilitatavate koopiate arv"
+    Daily: "Iga päev"
+    Weekly: "Iga nädal"
+    Every 30 days: "Iga 30 päeva järel"
+    Last scheduled backup: "Viimane ajastatud varukoopia: {date}"
+    No scheduled backup yet: "Ajastatud varukoopiat veel pole"
+    Scheduled backup failed: "Varundamine nurjus. Kontrolli, et kausta saaks kirjutada. Uus katse viie minuti pärast."
     Import Preview:
       Title: Muudatuste eelvaade
       New: "Uued: {count}"

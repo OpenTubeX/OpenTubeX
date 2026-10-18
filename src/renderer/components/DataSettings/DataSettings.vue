@@ -291,6 +291,7 @@
       </FtFlexBox>
     </FtSettingsSubpage>
   </FtSettingsSection>
+  <ScheduledBackupSettings v-if="USING_ELECTRON" />
 </template>
 
 <script setup>
@@ -303,6 +304,7 @@ import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
+import ScheduledBackupSettings from './ScheduledBackupSettings.vue'
 
 import store from '../../store/index'
 import { defaultUpdaterId, NON_TRANSFERABLE_SETTINGS } from '../../store/modules/settings'
@@ -346,6 +348,7 @@ import {
 
 const IMPORT_DIRECTORY_ID = 'data-settings-import'
 const START_IN_DIRECTORY = 'downloads'
+const USING_ELECTRON = process.env.IS_ELECTRON
 const { t } = useI18n()
 const backupImportContent = useTemplateRef('backupImportContent')
 const takeoutImportContent = useTemplateRef('takeoutImportContent')

@@ -960,6 +960,19 @@ Settings:
     Add: Dodaj
     Remove: Ukloni
   Data Settings:
+    Scheduled backups: "Zakazane sigurnosne kopije"
+    Scheduled backup description: "Spremajte potpune ZIP kopije dok je OpenTubeX otvoren. Propuštene kopije izrađuju se pri pokretanju. Ograničenje vrijedi samo za zakazane kopije u ovoj mapi."
+    Choose backup folder: "Odaberi mapu sigurnosnih kopija"
+    No backup folder selected: "Nije odabrana mapa sigurnosnih kopija"
+    Enable scheduled backups: "Omogući zakazane sigurnosne kopije"
+    Backup frequency: "Učestalost izrade kopija"
+    Backups to keep: "Broj kopija za zadržavanje"
+    Daily: "Dnevno"
+    Weekly: "Tjedno"
+    Every 30 days: "Svakih 30 dana"
+    Last scheduled backup: "Posljednja zakazana kopija: {date}"
+    No scheduled backup yet: "Još nema zakazane sigurnosne kopije"
+    Scheduled backup failed: "Izrada kopije nije uspjela. Provjerite može li se pisati u mapu. Novi pokušaj za pet minuta."
     Import Preview:
       Title: Pregled promjena
       New: "Novi: {count}"

@@ -989,6 +989,19 @@ Settings:
     Add: Дадаць
     Remove: Выдаліць
   Data Settings:
+    Scheduled backups: "Запланаваныя рэзервовыя копіі"
+    Scheduled backup description: "Захоўвайце поўныя ZIP-копіі, пакуль OpenTubeX адкрыты. Прапушчаныя копіі ствараюцца пры запуску. Абмежаванне датычыцца толькі запланаваных копій у гэтай папцы."
+    Choose backup folder: "Выбраць папку рэзервовых копій"
+    No backup folder selected: "Папка рэзервовых копій не выбрана"
+    Enable scheduled backups: "Уключыць запланаваныя рэзервовыя копіі"
+    Backup frequency: "Частата рэзервовага капіявання"
+    Backups to keep: "Колькасць копій для захавання"
+    Daily: "Штодня"
+    Weekly: "Штотыдзень"
+    Every 30 days: "Кожныя 30 дзён"
+    Last scheduled backup: "Апошняя запланаваная копія: {date}"
+    No scheduled backup yet: "Запланаваных копій пакуль няма"
+    Scheduled backup failed: "Не ўдалося стварыць копію. Праверце магчымасць запісу ў папку. Паўтор праз пяць хвілін."
     Import Preview:
       Title: Папярэдні прагляд змен
       New: "Новыя: {count}"

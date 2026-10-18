@@ -59,6 +59,13 @@ const GENERAL_PROVIDER_KEYS = new Set([
 
 const WATCH_STATISTICS_KEYS = new Set(['Enable Watch Statistics', 'Week Starts On'])
 
+const SCHEDULED_BACKUP_KEYS = new Set([
+  'Scheduled backups', 'Scheduled backup description', 'Choose backup folder',
+  'No backup folder selected', 'Enable scheduled backups', 'Backup frequency',
+  'Backups to keep', 'Daily', 'Weekly', 'Every 30 days', 'Last scheduled backup',
+  'No scheduled backup yet', 'Scheduled backup failed'
+])
+
 const PRIVACY_STORAGE_KEYS = new Set([
   'Automatic History Retention',
   'Automatic History Retention Placeholder',
@@ -196,7 +203,13 @@ export const SETTINGS_SEARCH_SOURCES = {
   data: [{
     type: 'data',
     key: 'Settings.Data Settings',
-    exclude: DATA_STORAGE_KEYS,
+    exclude: new Set([...DATA_STORAGE_KEYS, ...SCHEDULED_BACKUP_KEYS]),
+    tab: 'data'
+  }, {
+    type: 'data',
+    key: 'Settings.Data Settings',
+    include: SCHEDULED_BACKUP_KEYS,
+    electronOnly: true,
     tab: 'data'
   }, {
     type: 'storage',
@@ -322,6 +335,7 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
   },
   data: {
     '': [
+      ...SCHEDULED_BACKUP_KEYS,
       'Data Settings',
       'Import Subscriptions',
       'Export Subscriptions',

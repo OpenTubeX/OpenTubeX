@@ -966,6 +966,19 @@ Settings:
     Add: إضافة
     Remove: إزالة
   Data Settings:
+    Scheduled backups: "النسخ الاحتياطية المجدولة"
+    Scheduled backup description: "احفظ نسخ ZIP كاملة أثناء فتح OpenTubeX. تُنفّذ النسخ الفائتة عند بدء التشغيل. ينطبق الحد فقط على النسخ المجدولة في هذا المجلد."
+    Choose backup folder: "اختيار مجلد النسخ الاحتياطي"
+    No backup folder selected: "لم يُحدَّد مجلد للنسخ الاحتياطي"
+    Enable scheduled backups: "تفعيل النسخ الاحتياطية المجدولة"
+    Backup frequency: "تكرار النسخ الاحتياطي"
+    Backups to keep: "عدد النسخ المطلوب الاحتفاظ بها"
+    Daily: "يوميًا"
+    Weekly: "أسبوعيًا"
+    Every 30 days: "كل 30 يومًا"
+    Last scheduled backup: "آخر نسخة احتياطية مجدولة: {date}"
+    No scheduled backup yet: "لا توجد نسخة احتياطية مجدولة بعد"
+    Scheduled backup failed: "فشل النسخ الاحتياطي. تأكد من إمكانية الكتابة في المجلد. ستُعاد المحاولة خلال خمس دقائق."
     Import Preview:
       Title: معاينة التغييرات
       New: "جديد: {count}"

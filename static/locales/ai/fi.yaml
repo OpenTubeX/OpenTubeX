@@ -971,6 +971,19 @@ Settings:
     Add: Lisää
     Remove: Poista
   Data Settings:
+    Scheduled backups: "Ajastetut varmuuskopiot"
+    Scheduled backup description: "Tallenna täydellisiä ZIP-varmuuskopioita, kun OpenTubeX on auki. Väliin jääneet kopiot luodaan käynnistyessä. Raja koskee vain tämän kansion ajastettuja kopioita."
+    Choose backup folder: "Valitse varmuuskopioiden kansio"
+    No backup folder selected: "Varmuuskopioiden kansiota ei ole valittu"
+    Enable scheduled backups: "Ota ajastetut varmuuskopiot käyttöön"
+    Backup frequency: "Varmuuskopioinnin tiheys"
+    Backups to keep: "Säilytettävien kopioiden määrä"
+    Daily: "Päivittäin"
+    Weekly: "Viikoittain"
+    Every 30 days: "30 päivän välein"
+    Last scheduled backup: "Viimeisin ajastettu varmuuskopio: {date}"
+    No scheduled backup yet: "Ei vielä ajastettua varmuuskopiota"
+    Scheduled backup failed: "Varmuuskopiointi epäonnistui. Tarkista kansion kirjoitusoikeus. Uusi yritys viiden minuutin kuluttua."
     Import Preview:
       Title: Esikatsele muutoksia
       New: "Uudet: {count}"

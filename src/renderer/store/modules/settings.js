@@ -1,3 +1,4 @@
+import { NON_TRANSFERABLE_SETTINGS } from '../../../nonTransferableSettings.js'
 import { DEFAULT_MATERIAL_SEED_COLOR, normalizeMaterialSeedColor } from '../../../materialTheme.js'
 import i18n, { loadLocale, setAITranslationCompletionsEnabled } from '../../i18n/index'
 import allLocales from '../../../../static/locales/activeLocales.json'
@@ -58,6 +59,7 @@ import {
   normalizeNavigationItems,
 } from '../../../navigationItems.js'
 import { migrateStoredAiVideoSummarySetting, migrateSyncServerUrl } from '../../helpers/settings-migrations.js'
+export { NON_TRANSFERABLE_SETTINGS } from '../../../nonTransferableSettings.js'
 
 const CHANNEL_SETTINGS_SYNC_MIGRATION_SETTING = 'channelSettingsSyncMigration'
 const TUTORIAL_STATE_SETTING_IDS = new Set([
@@ -219,6 +221,11 @@ export const defaultSideEffectsTriggerId = settingId =>
 /*****/
 
 const state = {
+  scheduledBackupEnabled: false,
+  scheduledBackupFolderPath: '',
+  scheduledBackupInterval: 7,
+  scheduledBackupKeepCount: 5,
+  scheduledBackupStatus: {},
   alwaysShowScrollbars: false,
   autoOpenChapters: false,
   autoplayPlaylists: true,
@@ -795,88 +802,6 @@ const sideEffectHandlers = {
 }
 
 const settingsWithSideEffects = Object.keys(sideEffectHandlers)
-
-export const NON_TRANSFERABLE_SETTINGS = new Set([
-  // Installed fonts are specific to the current operating system.
-  'appFont',
-  /* Depends on process.env.IS_ELECTRON */
-  // ProxySettings
-  'useProxy',
-  'proxyProtocol',
-  'proxyHostname',
-  'proxyPort',
-  'proxyUsername',
-  'proxyPassword',
-  // ExternalPlayerSettings
-  'externalPlayer',
-  'externalPlayerExecutable',
-  'externalPlayerIgnoreWarnings',
-  'externalPlayerIgnoreDefaultArgs',
-  'externalPlayerCustomArgs',
-  'showAddedExternalPlayerCustomArgs',
-  // ExternalSoftwareSettings
-  'videoPlaybackEngine',
-  'playbackEngineFallback',
-  'ytDlpSource',
-  'ytDlpChannel',
-  'ytDlpPath',
-  'ytDlpPlaybackAuthMode',
-  'ytDlpPlaybackCookiesPath',
-  'ytDlpPlaybackCookiesBrowser',
-  'ytDlpPlaybackCookiesBrowserProfile',
-  'ytDlpPlaybackAlwaysUseCookies',
-  'ytDlpSubtitleUseCookies',
-  'ytDlpDownloadUseCookies',
-  'ytDlpPlaybackCacheMaxEntrySize',
-  'ytDlpFfmpegSource',
-  'ytDlpFfmpegPath',
-  'externalSoftwareUpdateMode',
-  // DownloadSettings
-  'ytDlpDownloadFolderPath',
-  'ytDlpDownloadCustomArgs',
-  // Others
-  'disableSmoothScrolling',
-  'useTrayIcon',
-  'trayIconPreset',
-  'hideToTrayOnClose',
-  'hideToTrayOnMinimize',
-  'settingsPassword',
-  'screenshotAskPath',
-  'screenshotFolderPath',
-  'syncServerEnabled',
-  'syncServerUrl',
-  'syncServerUsername',
-  'syncServerToken',
-  'syncServerDeviceId',
-  'syncServerDeviceName',
-  'syncServerWatchStatsReset',
-  'syncServerPrivacyMode',
-  'syncServerPrivacyKey',
-  'syncServerPrivacySalt',
-  'syncServerAutoSync',
-  'syncServerResumeAutoSync',
-  'syncServerSyncSubscriptions',
-  'syncServerSyncPlaylists',
-  'syncServerSyncHistory',
-  'syncServerSyncWatchStats',
-  'syncServerSyncLiveReminders',
-  'syncServerSyncProfiles',
-  'syncServerSyncSessions',
-  'syncServerSharedTabs',
-  'syncServerSyncSettings',
-  'syncServerSettingsExcluded',
-  'syncServerSettingUpdatedAt',
-  'syncServerLastSyncAt',
-  'syncServerSnapshot',
-  'syncServerActivityClearedThrough',
-  'subscriptionSeenVideos',
-  'subscriptionSeenPosts',
-
-  /* Depends on process.env.SUPPORTS_LOCAL_API */
-  'backendFallback',
-  'backendPreference',
-  'proxyVideos',
-])
 
 export const NON_SYNCABLE_SETTINGS = new Set([
   ...NON_TRANSFERABLE_SETTINGS,

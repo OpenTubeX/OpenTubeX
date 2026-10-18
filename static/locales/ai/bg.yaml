@@ -960,6 +960,19 @@ Settings:
     Add: Добавяне
     Remove: Премахване
   Data Settings:
+    Scheduled backups: "Планирани резервни копия"
+    Scheduled backup description: "Запазвайте пълни ZIP копия, докато OpenTubeX е отворен. Пропуснатите копия се създават при стартиране. Ограничението важи само за планираните копия в тази папка."
+    Choose backup folder: "Избор на папка за резервни копия"
+    No backup folder selected: "Няма избрана папка за резервни копия"
+    Enable scheduled backups: "Включване на планирани резервни копия"
+    Backup frequency: "Честота на архивиране"
+    Backups to keep: "Брой копия за запазване"
+    Daily: "Ежедневно"
+    Weekly: "Ежеседмично"
+    Every 30 days: "На всеки 30 дни"
+    Last scheduled backup: "Последно планирано копие: {date}"
+    No scheduled backup yet: "Все още няма планирано резервно копие"
+    Scheduled backup failed: "Архивирането е неуспешно. Проверете дали папката позволява запис. Нов опит след пет минути."
     Import Preview:
       Title: Преглед на промените
       New: "Нови: {count}"

@@ -1,4 +1,4 @@
-import { Unzip, UnzipInflate, zipSync, strToU8, strFromU8 } from 'fflate'
+import { Unzip, UnzipInflate, zip, zipSync, strToU8, strFromU8 } from 'fflate'
 
 export const BACKUP_SECTIONS = ['settings', 'profiles', 'playlists', 'history', 'searchHistory', 'watchStats']
 const MAX_ARCHIVE_SIZE = 128 * 1024 * 1024
@@ -46,7 +46,7 @@ export function mergeBackupWatchStatsAdjustment(currentRecords, currentAdjustmen
   return importedAdjustment
 }
 
-export function createUnifiedBackup(data) {
+function createBackupFiles(data) {
   const sections = BACKUP_SECTIONS.filter(section => Object.hasOwn(data, section))
   if (sections.length === 0) throw new Error('No backup sections selected')
   const files = {
@@ -59,9 +59,24 @@ export function createUnifiedBackup(data) {
     totalSize += files[`${section}.json`].length
     if (totalSize > MAX_TOTAL_SIZE) throw new Error('Backup data is too large')
   }
-  const archive = zipSync(files, { level: 6 })
+  return files
+}
+
+function backupBlob(archive) {
   if (archive.length > MAX_ARCHIVE_SIZE) throw new Error('Backup archive is too large')
   return new Blob([archive], { type: 'application/zip' })
+}
+
+export function createUnifiedBackup(data) {
+  return backupBlob(zipSync(createBackupFiles(data), { level: 6 }))
+}
+
+export async function createUnifiedBackupAsync(data) {
+  const files = createBackupFiles(data)
+  const archive = await new Promise((resolve, reject) => {
+    zip(files, { level: 6 }, (error, result) => error ? reject(error) : resolve(result))
+  })
+  return backupBlob(archive)
 }
 
 export async function readUnifiedBackup(file) {

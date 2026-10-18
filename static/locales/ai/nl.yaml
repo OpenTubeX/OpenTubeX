@@ -971,6 +971,19 @@ Settings:
     Add: Toevoegen
     Remove: Verwijderen
   Data Settings:
+    Scheduled backups: "Geplande back-ups"
+    Scheduled backup description: "Bewaar volledige ZIP-back-ups terwijl OpenTubeX geopend is. Gemiste back-ups worden bij het opstarten gemaakt. De limiet geldt alleen voor geplande back-ups in deze map."
+    Choose backup folder: "Back-upmap kiezen"
+    No backup folder selected: "Geen back-upmap gekozen"
+    Enable scheduled backups: "Geplande back-ups inschakelen"
+    Backup frequency: "Back-upfrequentie"
+    Backups to keep: "Aantal te bewaren back-ups"
+    Daily: "Dagelijks"
+    Weekly: "Wekelijks"
+    Every 30 days: "Elke 30 dagen"
+    Last scheduled backup: "Laatste geplande back-up: {date}"
+    No scheduled backup yet: "Nog geen geplande back-up"
+    Scheduled backup failed: "Back-up mislukt. Controleer of de map beschrijfbaar is. Nieuwe poging over vijf minuten."
     Import Preview:
       Title: Wijzigingen vooraf bekijken
       New: "Nieuw: {count}"

@@ -336,6 +336,9 @@ test('quit waits for the queued tray icon cache write', async () => {
   const trayIconWrite = new Promise(resolve => { finishWrite = resolve })
   const context = vm.createContext({
     trayIconWrite,
+    clearInterval,
+    scheduledBackupTimer: undefined,
+    scheduledBackups: { stop: async () => {} },
     updateWatchQueue: async () => {},
     baseHandlers: { compactAllDatastores: async () => {} },
     shutdownYtDlpDownloads: async () => {},
@@ -359,6 +362,9 @@ test('quit waits for pending watch queue writes', async () => {
   const queueWrite = new Promise(resolve => { finishWrite = resolve })
   const context = vm.createContext({
     trayIconWrite: Promise.resolve(),
+    clearInterval,
+    scheduledBackupTimer: undefined,
+    scheduledBackups: { stop: async () => {} },
     updateWatchQueue: () => queueWrite,
     baseHandlers: { compactAllDatastores: async () => {} },
     shutdownYtDlpDownloads: async () => {},

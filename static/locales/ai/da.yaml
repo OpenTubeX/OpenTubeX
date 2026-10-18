@@ -983,6 +983,19 @@ Settings:
     Add: Tilføj
     Remove: Fjern
   Data Settings:
+    Scheduled backups: "Planlagte sikkerhedskopier"
+    Scheduled backup description: "Gem komplette ZIP-sikkerhedskopier, mens OpenTubeX er åbent. Manglende kopier oprettes ved opstart. Grænsen gælder kun planlagte kopier i denne mappe."
+    Choose backup folder: "Vælg mappe til sikkerhedskopier"
+    No backup folder selected: "Ingen mappe til sikkerhedskopier valgt"
+    Enable scheduled backups: "Aktivér planlagte sikkerhedskopier"
+    Backup frequency: "Hyppighed"
+    Backups to keep: "Antal kopier, der skal gemmes"
+    Daily: "Dagligt"
+    Weekly: "Ugentligt"
+    Every 30 days: "Hver 30. dag"
+    Last scheduled backup: "Seneste planlagte sikkerhedskopi: {date}"
+    No scheduled backup yet: "Ingen planlagt sikkerhedskopi endnu"
+    Scheduled backup failed: "Sikkerhedskopieringen mislykkedes. Kontrollér, at der kan skrives til mappen. Prøver igen om fem minutter."
     Import Preview:
       Title: Forhåndsvis ændringer
       New: "Nye: {count}"

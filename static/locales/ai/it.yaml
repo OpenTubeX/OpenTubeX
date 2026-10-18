@@ -956,6 +956,19 @@ Settings:
     Show Bottom Right Actions Dock: Mostra barra delle azioni in basso a destra
     Paused Interface Hide Delay: Ritardo prima di nascondere l'interfaccia in pausa
   Data Settings:
+    Scheduled backups: "Backup pianificati"
+    Scheduled backup description: "Salva backup ZIP completi mentre OpenTubeX è aperto. I backup saltati vengono eseguiti all’avvio. Il limite riguarda solo i backup pianificati in questa cartella."
+    Choose backup folder: "Scegli la cartella dei backup"
+    No backup folder selected: "Nessuna cartella di backup selezionata"
+    Enable scheduled backups: "Attiva i backup pianificati"
+    Backup frequency: "Frequenza dei backup"
+    Backups to keep: "Backup da conservare"
+    Daily: "Ogni giorno"
+    Weekly: "Ogni settimana"
+    Every 30 days: "Ogni 30 giorni"
+    Last scheduled backup: "Ultimo backup pianificato: {date}"
+    No scheduled backup yet: "Nessun backup pianificato finora"
+    Scheduled backup failed: "Backup non riuscito. Verifica che la cartella sia scrivibile. Nuovo tentativo tra cinque minuti."
     Import Preview:
       Title: Anteprima delle modifiche
       New: "Nuovi: {count}"

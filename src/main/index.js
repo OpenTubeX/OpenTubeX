@@ -95,6 +95,8 @@ import {
 import { createSubscriptionBackgroundService } from './subscriptionBackground'
 import { supportsNativeNotifications } from './nativeNotifications'
 import { getTrayMenuIcon } from './trayMenuIcons'
+import { createScheduledBackups } from './scheduledBackups'
+import { NON_TRANSFERABLE_SETTINGS } from '../nonTransferableSettings'
 
 function getSystemAccentColor() {
   try {
@@ -1871,6 +1873,33 @@ function runApp() {
 
   const userDataPath = app.getPath('userData')
   const backgroundSubscriptions = createSubscriptionBackgroundService(userDataPath)
+  const scheduledBackups = createScheduledBackups({
+    async readConfiguration() {
+      const keys = ['scheduledBackupEnabled', 'scheduledBackupFolderPath', 'scheduledBackupInterval', 'scheduledBackupKeepCount', 'scheduledBackupStatus']
+      const [enabled, directory, interval, keepCount, status] = await Promise.all(keys.map(async key => (await baseHandlers.settings._findOne(key))?.value))
+      return { enabled, directory, interval: interval ?? 7, keepCount: keepCount ?? 5, status }
+    },
+    async readData() {
+      const [settings, profiles, playlists, history, searchHistory, records, adjustment] = await Promise.all([
+        baseHandlers.settings.find(), baseHandlers.profiles.find(), baseHandlers.playlists.find(),
+        baseHandlers.history.find(), baseHandlers.searchHistory.find(),
+        baseHandlers.watchStats.find(), baseHandlers.watchStats.getHistoricalAdjustment(),
+      ])
+      return {
+        settings: Object.fromEntries(settings.filter(setting => !NON_TRANSFERABLE_SETTINGS.has(setting._id)).map(setting => [setting._id, setting.value])),
+        profiles,
+        playlists,
+        history,
+        searchHistory,
+        watchStats: { records, adjustment },
+      }
+    },
+    saveStatus: status => updateSettingFromMain('scheduledBackupStatus', status),
+  })
+  function checkScheduledBackup() {
+    scheduledBackups.tick().catch(error => console.error('Could not check scheduled backups', error))
+  }
+  let scheduledBackupTimer
   let keepRefreshingInBackground = false
 
   ipcMain.handle(IpcChannels.SUBSCRIPTION_BACKGROUND, async (event, method, value) => {
@@ -2141,6 +2170,8 @@ function runApp() {
   let proxyUrl
 
   app.on('ready', async (_, __) => {
+    scheduledBackupTimer = setInterval(checkScheduledBackup, 60_000)
+    checkScheduledBackup()
     try {
       await applyYtDlpPlaybackCacheSettings()
     } catch (error) {
@@ -4335,6 +4366,18 @@ function runApp() {
     })
   })
 
+  ipcMain.handle(IpcChannels.CHOOSE_SCHEDULED_BACKUP_FOLDER, async (event) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) return
+    const currentPath = (await baseHandlers.settings._findOne('scheduledBackupFolderPath'))?.value
+    const options = { defaultPath: currentPath || app.getPath('documents'), properties: ['openDirectory', 'createDirectory'] }
+    const window = BrowserWindow.fromWebContents(event.sender)
+    const result = await (window ? dialog.showOpenDialog(window, options) : dialog.showOpenDialog(options))
+    if (result.canceled || !result.filePaths[0]) return
+    await updateSettingFromMain('scheduledBackupFolderPath', result.filePaths[0])
+    checkScheduledBackup()
+    return result.filePaths[0]
+  })
+
   /**
    * @param {import('electron').WebContents} webContents
    * @param {string | undefined} [currentPath]
@@ -5367,9 +5410,8 @@ function runApp() {
           return await baseHandlers.settings.find()
 
         case DBActions.GENERAL.UPSERT:
-          // This one is only allowed to be changed by the CHOOSE_DEFAULT_FOLDER IPC action
-          // to avoid the "write to default folder" IPC calls being abused to write to arbitrary locations
-          if (data._id === 'screenshotFolderPath') {
+          // Destinations require a native folder picker. Backup status is written by the scheduler.
+          if (['screenshotFolderPath', 'scheduledBackupFolderPath', 'scheduledBackupStatus'].includes(data._id)) {
             return null
           }
 
@@ -5380,6 +5422,11 @@ function runApp() {
             { event: SyncEvents.GENERAL.UPSERT, data }
           )
           switch (data._id) {
+            case 'scheduledBackupEnabled':
+            case 'scheduledBackupInterval':
+            case 'scheduledBackupKeepCount':
+              checkScheduledBackup()
+              break
             case 'contextMenuSearchEngines':
               configuredSearchEngines = parseSearchEngines(data.value)
               break
@@ -6188,6 +6235,9 @@ function runApp() {
     if (resourcesCleanUpDone) {
       return
     }
+
+    clearInterval(scheduledBackupTimer)
+    await scheduledBackups.stop().catch(error => console.error('Could not finish scheduled backup', error))
 
     await Promise.allSettled([
       trayIconWrite,

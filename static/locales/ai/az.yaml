@@ -958,6 +958,19 @@ Settings:
     Show Bottom Right Actions Dock: Aşağı sağdakı əməliyyat panelini göstər
     Paused Interface Hide Delay: Fasilə interfeysinin gizlənmə gecikməsi
   Data Settings:
+    Scheduled backups: "Planlaşdırılmış ehtiyat nüsxələr"
+    Scheduled backup description: "OpenTubeX açıq olduqda tam ZIP ehtiyat nüsxələri saxlanılır. Buraxılmış nüsxələr açılışda yaradılır. Limit yalnız bu qovluqdakı planlaşdırılmış nüsxələrə aiddir."
+    Choose backup folder: "Ehtiyat nüsxə qovluğunu seç"
+    No backup folder selected: "Ehtiyat nüsxə qovluğu seçilməyib"
+    Enable scheduled backups: "Planlaşdırılmış ehtiyat nüsxələri aktivləşdir"
+    Backup frequency: "Ehtiyat nüsxələmə tezliyi"
+    Backups to keep: "Saxlanılacaq nüsxələrin sayı"
+    Daily: "Gündəlik"
+    Weekly: "Həftəlik"
+    Every 30 days: "Hər 30 gündən bir"
+    Last scheduled backup: "Son planlaşdırılmış ehtiyat nüsxə: {date}"
+    No scheduled backup yet: "Hələ planlaşdırılmış ehtiyat nüsxə yoxdur"
+    Scheduled backup failed: "Ehtiyat nüsxələmə uğursuz oldu. Qovluğa yazmaq mümkün olduğunu yoxlayın. Beş dəqiqədən sonra yenidən cəhd ediləcək."
     Import Preview:
       Title: Dəyişikliklərə ön baxış
       New: "Yeni: {count}"

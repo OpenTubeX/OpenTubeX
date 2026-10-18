@@ -22,6 +22,21 @@ const locale = loadYaml(await readFile(
 ))
 const getAtPath = (value, path) => path.split('.').reduce((nested, key) => nested?.[key], value)
 
+test('scheduled backup settings are searchable only on desktop', () => {
+  for (const [usingElectron, isCapacitor] of [[true, false], [false, true], [false, false]]) {
+    const entries = createSettingsSearchIndex({
+      sections: [{ type: 'data', title: 'Data', description: '' }],
+      tm: path => getAtPath(locale, path),
+      store: { getters: {} },
+      usingElectron,
+      isCapacitor,
+    }).get('data')
+    for (const label of ['Scheduled backups', 'Enable scheduled backups', 'Backup frequency', 'Backups to keep']) {
+      assert.equal(entries.some(entry => entry.label === label), usingElectron, label)
+    }
+  }
+})
+
 test('playback search indexes the lights off visibility toggle instead of its player action', () => {
   const entries = createSettingsSearchIndex({
     sections: [{ type: 'playback', title: 'Playback', description: '' }],

@@ -76,6 +76,7 @@ ipcRenderer.on(IpcChannels.TABS_EXIT_FULLSCREEN, (_, targetTabId) => {
 })
 
 export default {
+  chooseScheduledBackupFolder: () => ipcRenderer.invoke(IpcChannels.CHOOSE_SCHEDULED_BACKUP_FOLDER),
   watchQueue: {
     update: async request => {
       const snapshot = await ipcRenderer.invoke(IpcChannels.WATCH_QUEUE_UPDATE, JSON.parse(JSON.stringify(request)))

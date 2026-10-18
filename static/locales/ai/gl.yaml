@@ -966,6 +966,19 @@ Settings:
     Add: Engadir
     Remove: Eliminar
   Data Settings:
+    Scheduled backups: "Copias de seguridade programadas"
+    Scheduled backup description: "Garda copias ZIP completas mentres OpenTubeX está aberto. As copias pendentes fanse ao iniciar. O límite só se aplica ás copias programadas deste cartafol."
+    Choose backup folder: "Escoller cartafol de copias"
+    No backup folder selected: "Non se escolleu un cartafol de copias"
+    Enable scheduled backups: "Activar copias programadas"
+    Backup frequency: "Frecuencia das copias"
+    Backups to keep: "Copias que se conservarán"
+    Daily: "Diariamente"
+    Weekly: "Semanalmente"
+    Every 30 days: "Cada 30 días"
+    Last scheduled backup: "Última copia programada: {date}"
+    No scheduled backup yet: "Aínda non hai copias programadas"
+    Scheduled backup failed: "Fallou a copia. Comproba que se pode escribir no cartafol. Tentarase de novo en cinco minutos."
     Import Preview:
       Title: Vista previa dos cambios
       New: "Novos: {count}"

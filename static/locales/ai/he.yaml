@@ -971,6 +971,19 @@ Settings:
     Add: הוספה
     Remove: הסרה
   Data Settings:
+    Scheduled backups: "גיבויים מתוזמנים"
+    Scheduled backup description: "שמירת גיבויי ZIP מלאים כאשר OpenTubeX פתוח. גיבויים שהוחמצו מתבצעים בהפעלה. המגבלה חלה רק על גיבויים מתוזמנים בתיקייה זו."
+    Choose backup folder: "בחירת תיקיית גיבוי"
+    No backup folder selected: "לא נבחרה תיקיית גיבוי"
+    Enable scheduled backups: "הפעלת גיבויים מתוזמנים"
+    Backup frequency: "תדירות גיבוי"
+    Backups to keep: "מספר גיבויים לשמירה"
+    Daily: "מדי יום"
+    Weekly: "מדי שבוע"
+    Every 30 days: "כל 30 יום"
+    Last scheduled backup: "הגיבוי המתוזמן האחרון: {date}"
+    No scheduled backup yet: "עדיין אין גיבוי מתוזמן"
+    Scheduled backup failed: "הגיבוי נכשל. יש לבדוק שניתן לכתוב לתיקייה. ניסיון נוסף בעוד חמש דקות."
     Import Preview:
       Title: תצוגה מקדימה של השינויים
       New: "חדשים: {count}"

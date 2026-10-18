@@ -956,6 +956,19 @@ Settings:
     Show Bottom Right Actions Dock: Dangos doc gweithredoedd y gwaelod ar y dde
     Paused Interface Hide Delay: Oedi cyn cuddio'r rhyngwyneb wrth oedi
   Data Settings:
+    Scheduled backups: "Copïau wrth gefn wedi’u hamserlennu"
+    Scheduled backup description: "Cadw copïau ZIP cyflawn tra bo OpenTubeX ar agor. Gwneir copïau a gollwyd wrth gychwyn. Dim ond copïau wedi’u hamserlennu yn y ffolder hon sy’n cyfrif tuag at y terfyn."
+    Choose backup folder: "Dewis ffolder copïau wrth gefn"
+    No backup folder selected: "Dim ffolder copïau wrth gefn wedi’i dewis"
+    Enable scheduled backups: "Galluogi copïau wrth gefn wedi’u hamserlennu"
+    Backup frequency: "Amlder copïau wrth gefn"
+    Backups to keep: "Copïau i’w cadw"
+    Daily: "Bob dydd"
+    Weekly: "Bob wythnos"
+    Every 30 days: "Bob 30 diwrnod"
+    Last scheduled backup: "Copi olaf wedi’i amserlennu: {date}"
+    No scheduled backup yet: "Dim copi wedi’i amserlennu eto"
+    Scheduled backup failed: "Methodd y copi. Gwiriwch fod modd ysgrifennu i’r ffolder. Ceisio eto ymhen pum munud."
     Import Preview:
       Title: Rhagolwg o’r newidiadau
       New: "Newydd: {count}"

@@ -956,6 +956,19 @@ Settings:
     Show Bottom Right Actions Dock: "Diskouez kael an oberoù en traoñ a-zehou"
     Paused Interface Hide Delay: "Dale a-raok kuzhat an etrefas en ehan"
   Data Settings:
+    Scheduled backups: "Eiladennoù gwareziñ steuñvet"
+    Scheduled backup description: "Enrollañ eiladennoù ZIP klok pa vez OpenTubeX digor. An eiladennoù manket a vez graet d’ar loc’hañ. An harz a dalvez evit an eiladennoù steuñvet en teuliad-mañ hepken."
+    Choose backup folder: "Dibab teuliad ar gwareziñ"
+    No backup folder selected: "Teuliad gwareziñ ebet dibabet"
+    Enable scheduled backups: "Gweredekaat ar gwareziñ steuñvet"
+    Backup frequency: "Stankted ar gwareziñ"
+    Backups to keep: "Niver a eiladennoù da virout"
+    Daily: "Bemdez"
+    Weekly: "Bep sizhun"
+    Every 30 days: "Bep 30 deiz"
+    Last scheduled backup: "Eiladenn steuñvet ziwezhañ: {date}"
+    No scheduled backup yet: "Eiladenn steuñvet ebet c’hoazh"
+    Scheduled backup failed: "C’hwitet eo ar gwareziñ. Gwiriit e c’haller skrivañ en teuliad. Klasket e vo adarre a-benn pemp munut."
     Import Preview:
       Title: Rakwel ar cʼhemmoù
       New: "Nevez: {count}"
