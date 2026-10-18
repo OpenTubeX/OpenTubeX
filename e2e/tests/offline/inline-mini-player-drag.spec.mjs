@@ -1483,7 +1483,7 @@ test('tapping the scroll-triggered bottom bar expands it while the page scrolls 
         scrollY: window.scrollY,
         top: video.getBoundingClientRect().top
       })
-      if (frames.length < 600) requestAnimationFrame(sample)
+      if (!window.restoreFramesDone) requestAnimationFrame(sample)
     }
     requestAnimationFrame(sample)
   })
@@ -1497,7 +1497,11 @@ test('tapping the scroll-triggered bottom bar expands it while the page scrolls 
   }
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
   await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
-  const frames = await page.evaluate(() => window.restoreFrames.splice(0))
+  // Sample one more frame after the morph so the handoff is always recorded.
+  const frames = await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => {
+    window.restoreFramesDone = true
+    resolve(window.restoreFrames.splice(0))
+  }))))
   const first = frames.findIndex(frame => frame.morph)
   const last = frames.findLastIndex(frame => frame.morph)
   expect(first).toBeGreaterThan(-1)
@@ -1511,6 +1515,7 @@ test('tapping the scroll-triggered bottom bar expands it while the page scrolls 
   }
   // The inline player takes over exactly where the morph ended.
   expect(frames[last].top).toBeCloseTo(settledTop, 0)
+  expect(last + 1, 'a frame after the morph').toBeLessThan(frames.length)
   expect(frames[last + 1].top).toBeCloseTo(settledTop, 0)
 
   // Older WebKit has no scrollend. The bar must still dock again afterwards,
