@@ -1386,6 +1386,7 @@ test.describe('tab bar', () => {
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(4)
 
     const transitionProperties = await page.evaluate(() => {
       const tabs = Array.from(document.querySelectorAll('.tabBar .tab'))
