@@ -23,7 +23,7 @@ const data = {
 }
 const transferableDefaults = Object.fromEntries(Object.entries(createDefaultSettings({ supportsLocalApi: true, isElectron: true }))
   .filter(([key]) => !NON_TRANSFERABLE_SETTINGS.has(key)))
-const expectedData = { ...data, settings: { ...transferableDefaults, ...data.settings, landingPage: 'subscriptions' } }
+const expectedData = { ...data, settings: { ...transferableDefaults, ...data.settings, landingPage: 'subscriptions', aiVideoSummaryMode: 'hide' } }
 
 async function setup(t) {
   const directory = await mkdtemp(path.join(tmpdir(), 'opentubex-backups-'))
@@ -114,6 +114,55 @@ test('scheduled archives include unstored defaults alongside saved preferences',
   assert.equal(backup.data.settings.autoplayPlaylists, true, 'unstored defaults are captured')
   assert.deepEqual(backup.data.settings.autoPictureInPictureTriggers, [])
   for (const key of NON_TRANSFERABLE_SETTINGS) assert.equal(Object.hasOwn(backup.data.settings, key), false, key)
+})
+
+for (const currentSettings of [false, true]) {
+  test(`scheduled archives migrate legacy preferences before defaults with current settings ${currentSettings}`, async t => {
+    const state = await setup(t)
+    const legacy = {
+      useVerticalTabBar: true, showSubscriptionRefreshToast: false, hideLiveChat: true,
+      moveDownloadsToQuickSettings: false, hideAiVideoSummaries: true,
+      hideHome: true, hidePopularVideos: true, hideTrendingVideos: true,
+      autoPictureInPictureMode: 'never', autoPictureInPictureOnTabChange: true, thumbnailSize: 240,
+    }
+    const current = {
+      tabBarPosition: 'right', showProgressBarToast: true, hideLiveChatReplay: false,
+      moveDownloadsToAppHeader: false, aiVideoSummaryMode: 'expanded', navigationItems: ['history'],
+      autoPictureInPictureTriggers: ['minimize'], scrollMiniPlayerEnabled: true, playlistThumbnailSize: 180,
+    }
+    const settings = createDesktopDatastore(path.join(state.profileDirectory, 'settings.sqlite'))
+    try {
+      await settings.insertAsync(Object.entries({ ...legacy, ...(currentSettings ? current : {}) })
+        .map(([_id, value]) => ({ _id, value })))
+    } finally {
+      await settings.driver.close()
+    }
+    await state.service.tick()
+    const [filename] = await state.backups()
+    const backup = await readUnifiedBackup(new Blob([await readFile(path.join(state.directory, filename))]))
+    const expected = currentSettings ? current : {
+      tabBarPosition: 'left', showProgressBarToast: false, hideLiveChatReplay: true,
+      moveDownloadsToAppHeader: true, aiVideoSummaryMode: 'hide',
+      navigationItems: ['subscriptions', 'userplaylists', 'history', 'subscribedchannels', 'stats'],
+      autoPictureInPictureTriggers: ['tab', 'minimize'], scrollMiniPlayerEnabled: false, playlistThumbnailSize: 240,
+    }
+    for (const [key, value] of Object.entries(expected)) assert.deepEqual(backup.data.settings[key], value, key)
+    for (const key of ['hideHome', 'hidePopularVideos', 'hideTrendingVideos']) {
+      assert.equal(backup.data.settings[key], false, key)
+    }
+    for (const key of ['useVerticalTabBar', 'showSubscriptionRefreshToast', 'moveDownloadsToQuickSettings',
+      'hideAiVideoSummaries', 'autoPictureInPictureMode', 'autoPictureInPictureOnTabChange']) {
+      assert.equal(Object.hasOwn(backup.data.settings, key), false, key)
+    }
+  })
+}
+
+test('scheduled archives preserve the existing-profile summary visibility default', async t => {
+  const state = await setup(t)
+  await state.service.tick()
+  const [filename] = await state.backups()
+  const backup = await readUnifiedBackup(new Blob([await readFile(path.join(state.directory, filename))]))
+  assert.equal(backup.data.settings.aiVideoSummaryMode, 'hide')
 })
 
 for (const landingPage of [undefined, 'home', 'history']) {
@@ -364,8 +413,11 @@ test('retention failures preserve successful backup deadlines without five-minut
   t.mock.method(console, 'error', () => {})
   const state = await setup(t)
   state.configuration.keepCount = 1
-  const locked = path.join(state.directory, 'opentubex-scheduled-backup-2020-01-01T00-00-00-000Z-00000000-0000-0000-0000-000000000000.zip')
+  const locked = path.join(state.directory, 'opentubex-scheduled-backup-2020-03-01T00-00-00-000Z-00000000-0000-0000-0000-000000000000.zip')
   await writeFile(locked, 'locked archive')
+  for (const month of ['01', '02']) {
+    await writeFile(path.join(state.directory, `opentubex-scheduled-backup-2020-${month}-01T00-00-00-000Z-00000000-0000-0000-0000-000000000000.zip`), 'older archive')
+  }
   const unlink = fs.unlink
   t.mock.method(fs, 'unlink', async filename => {
     if (filename === locked) throw Object.assign(new Error('File is locked'), { code: 'EPERM' })
@@ -376,6 +428,7 @@ test('retention failures preserve successful backup deadlines without five-minut
   assert.equal(state.configuration.status.error, false)
   assert.equal(state.configuration.status.lastBackupAt, state.options.now())
   assert.equal((await state.backups()).length, 2)
+  assert.deepEqual((await state.backups()).filter(name => name.includes('2020-')), [path.basename(locked)])
   state.advance(300_000)
   await state.service.tick()
   await createScheduledBackups(state.options).tick()
@@ -479,6 +532,61 @@ test('unwritable destinations skip archive preparation', async t => {
   }
 })
 
+test('stale scheduler temporary archives are cleaned before preparation without touching recent or unrelated files', async t => {
+  const state = await setup(t)
+  const filename = 'opentubex-scheduled-backup-2020-01-01T00-00-00-000Z-00000000-0000-0000-0000-000000000000.zip'
+  const stale = `.${filename}.tmp`
+  const recent = '.opentubex-scheduled-backup-2020-02-01T00-00-00-000Z-00000000-0000-0000-0000-000000000000.zip.tmp'
+  const manual = '.opentubex-backup-2020-01-01.zip.tmp'
+  const symbolic = '.opentubex-scheduled-backup-2020-03-01T00-00-00-000Z-00000000-0000-0000-0000-000000000000.zip.tmp'
+  const folder = '.opentubex-scheduled-backup-2020-04-01T00-00-00-000Z-00000000-0000-0000-0000-000000000000.zip.tmp'
+  for (const name of [stale, recent, manual]) await writeFile(path.join(state.directory, name), 'incomplete')
+  const old = new Date(state.options.now() - 2 * DAY)
+  const recentTime = new Date(state.options.now() - 60_000)
+  await fs.utimes(path.join(state.directory, stale), old, old)
+  await fs.utimes(path.join(state.directory, recent), recentTime, recentTime)
+  await fs.utimes(path.join(state.directory, manual), old, old)
+  await symlink(path.join(state.directory, manual), path.join(state.directory, symbolic))
+  await fs.mkdir(path.join(state.directory, folder))
+  let filesAtPreparation
+  const service = createScheduledBackups({
+    ...state.options,
+    createArchive: async () => {
+      filesAtPreparation = await readdir(state.directory)
+      return state.options.createArchive()
+    },
+  })
+  await service.tick()
+  assert.equal(filesAtPreparation.includes(stale), false)
+  for (const name of [recent, manual, symbolic, folder]) assert.equal(filesAtPreparation.includes(name), true, name)
+  assert.equal(await readFile(path.join(state.directory, manual), 'utf8'), 'incomplete')
+  assert.equal(state.configuration.status.error, false)
+  assert.equal((await state.backups()).length, 1)
+})
+
+test('a locked stale temporary archive does not prevent cleaning other files or committing a backup', async t => {
+  t.mock.method(console, 'error', () => {})
+  const state = await setup(t)
+  const filenames = ['01', '02'].map(month => `.opentubex-scheduled-backup-2020-${month}-01T00-00-00-000Z-00000000-0000-0000-0000-000000000000.zip.tmp`)
+  const old = new Date(state.options.now() - 2 * DAY)
+  for (const filename of filenames) {
+    const file = path.join(state.directory, filename)
+    await writeFile(file, 'incomplete')
+    await fs.utimes(file, old, old)
+  }
+  const unlink = fs.unlink
+  t.mock.method(fs, 'unlink', async filename => {
+    if (filename === path.join(state.directory, filenames[0])) throw Object.assign(new Error('File is locked'), { code: 'EPERM' })
+    return unlink(filename)
+  })
+  await state.service.tick()
+  const remaining = await readdir(state.directory)
+  assert.equal(remaining.includes(filenames[0]), true)
+  assert.equal(remaining.includes(filenames[1]), false)
+  assert.equal(state.configuration.status.error, false)
+  assert.equal((await state.backups()).length, 1)
+})
+
 for (const phase of ['preparation', 'temporary write', 'directory listing']) {
   test(`retention uses the latest limit after ${phase}`, async t => {
     const state = await setup(t)
@@ -502,9 +610,10 @@ for (const phase of ['preparation', 'temporary write', 'directory listing']) {
       })
     } else {
       const list = fs.readdir
+      let listings = 0
       t.mock.method(fs, 'readdir', async (...args) => {
         const entries = await list(...args)
-        state.configuration.keepCount = 5
+        if (++listings === 2) state.configuration.keepCount = 5
         return entries
       })
     }

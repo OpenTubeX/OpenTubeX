@@ -6,6 +6,7 @@ import { migrateLegacyHistoryRecord } from '../history.js'
 import { NON_TRANSFERABLE_SETTINGS } from '../nonTransferableSettings.js'
 import { createDefaultSettings, resolveDefaultLandingPage } from '../settingsDefaults.js'
 import { createUnifiedBackup } from '../renderer/helpers/unifiedBackup.js'
+import { migrateLegacySettings } from '../renderer/helpers/settings-migrations.js'
 
 async function prepareArchive() {
   const databases = []
@@ -42,10 +43,12 @@ async function prepareArchive() {
       watchStats.findAsync({ date: { $exists: true } }).sort({ date: 1 }),
       watchStats.findOneAsync({ _id: 'history-watch-time-v1' }),
     ])
+    const isFreshInstallation = savedSettings.length === 0 && savedProfiles.length === 0
     const resolvedSettings = {
       ...createDefaultSettings({ supportsLocalApi: true, isElectron: true }),
-      landingPage: resolveDefaultLandingPage(savedSettings.length === 0 && savedProfiles.length === 0),
-      ...Object.fromEntries(savedSettings.map(setting => [setting._id, setting.value])),
+      landingPage: resolveDefaultLandingPage(isFreshInstallation),
+      aiVideoSummaryMode: isFreshInstallation ? 'collapsed' : 'hide',
+      ...migrateLegacySettings(Object.fromEntries(savedSettings.map(setting => [setting._id, setting.value]))),
     }
     data = {
       settings: Object.fromEntries(Object.entries(resolvedSettings).filter(([key]) => !NON_TRANSFERABLE_SETTINGS.has(key))),

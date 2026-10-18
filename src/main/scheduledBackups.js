@@ -6,6 +6,24 @@ const DAY = 86_400_000
 const RETRY_INTERVAL = 300_000
 const BACKUP_FILENAME = /^opentubex-scheduled-backup-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}-\d{3}Z-[\da-f-]{36}\.zip$/
 
+async function cleanStaleTemporaryArchives(directory, timestamp) {
+  try {
+    for (const entry of await fs.readdir(directory, { withFileTypes: true })) {
+      if (!entry.isFile() || !entry.name.startsWith('.') || !entry.name.endsWith('.tmp') ||
+        !BACKUP_FILENAME.test(entry.name.slice(1, -4))) continue
+      const filename = path.join(directory, entry.name)
+      try {
+        const { mtimeMs } = await fs.stat(filename)
+        if (timestamp - mtimeMs >= DAY) await fs.unlink(filename)
+      } catch (error) {
+        if (error.code !== 'ENOENT') console.error('Could not remove incomplete backup', error)
+      }
+    }
+  } catch (error) {
+    console.error('Could not check incomplete backups', error)
+  }
+}
+
 /** One main-process scheduler serves every window, including windows hidden in the tray. */
 export function createScheduledBackups({ readConfiguration, createArchive, saveStatus, now = Date.now }) {
   let active = null
@@ -45,6 +63,7 @@ export function createScheduledBackups({ readConfiguration, createArchive, saveS
     try {
       if (!(await fs.stat(directory)).isDirectory()) throw new Error('Backup destination is not a folder')
       await fs.access(directory, fs.constants.W_OK)
+      await cleanStaleTemporaryArchives(directory, timestamp)
       const archive = await createArchive()
       if (!await configurationIsCurrent()) { cancelled = true; return }
       // Keep old backups until a complete new archive is committed in the selected folder.
@@ -61,7 +80,9 @@ export function createScheduledBackups({ readConfiguration, createArchive, saveS
         const current = await readConfiguration()
         if (current.enabled !== true || current.directory !== directory ||
           !Number.isInteger(current.keepCount) || current.keepCount < 1 || current.keepCount > 100) return
-        for (const name of files.slice(current.keepCount - 1)) await fs.unlink(path.join(directory, name))
+        for (const name of files.slice(current.keepCount - 1)) {
+          await fs.unlink(path.join(directory, name)).catch(error => console.error('Scheduled backup retention failed', error))
+        }
       } catch (error) {
         // A locked old file must not turn a completed backup into a five-minute retry loop.
         console.error('Scheduled backup retention failed', error)
