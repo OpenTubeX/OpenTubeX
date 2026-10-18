@@ -91,8 +91,9 @@ class Settings {
   }
 
   static migrate() {
-    this.migrationPromise ??= migrateStoredSettings(db.settings).finally(() => {
+    this.migrationPromise ??= migrateStoredSettings(db.settings).catch(error => {
       this.migrationPromise = null
+      throw error
     })
     return this.migrationPromise
   }

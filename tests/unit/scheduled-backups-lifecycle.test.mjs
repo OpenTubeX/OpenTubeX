@@ -18,6 +18,8 @@ function lifecycle(platform) {
     mainWindow: {},
     trayWindows: [],
     keepRefreshingInBackground: false,
+    ensureBackgroundTray: () => calls.push('tray'),
+    backgroundSubscriptions: { setBackground: async () => calls.push('background') },
     isQuitting: false,
     clearInterval: () => calls.push('clear timer'),
     scheduledBackupTimer: {},
@@ -28,7 +30,7 @@ function lifecycle(platform) {
     shutdownYtDlpDownloads: async () => {},
     session: { defaultSession: { clearCache: async () => {}, clearStorageData: async () => {} } },
   })
-  vm.runInContext(`let resourcesCleanUpDone = false; ${events}\n${handleQuit}\n${cleanup}`, context)
+  vm.runInContext(`let resourcesCleanUpDone = false; let resourcesCleanUpPromise = null; ${events}\n${handleQuit}\n${cleanup}`, context)
   return { handlers, calls, context }
 }
 
@@ -51,3 +53,41 @@ test('Linux stops scheduled backups and exits after the last window closes', asy
   await new Promise(resolve => setImmediate(resolve))
   assert.deepEqual(calls, ['clear timer', 'stop backups', 'quit'])
 })
+
+for (const platform of ['linux', 'win32']) {
+  test(`${platform} Quit from windowless background mode waits for the active backup`, async () => {
+    const { handlers, calls, context } = lifecycle(platform)
+    const finished = Promise.withResolvers()
+    context.scheduledBackups.stop = async () => { calls.push('stop backups'); await finished.promise }
+    context.keepRefreshingInBackground = true
+    handlers.get('window-all-closed')()
+    assert.deepEqual(calls, ['tray', 'background'])
+    assert.equal(context.mainWindow, null)
+    context.isQuitting = true
+    const quit = handlers.get('will-quit')
+    assert.equal(typeof quit, 'function')
+    quit({ preventDefault: () => calls.push('wait for cleanup') })
+    await new Promise(resolve => setImmediate(resolve))
+    assert.deepEqual(calls, ['tray', 'background', 'wait for cleanup', 'clear timer', 'stop backups'])
+    finished.resolve()
+    await new Promise(resolve => setImmediate(resolve))
+    assert.deepEqual(calls, ['tray', 'background', 'wait for cleanup', 'clear timer', 'stop backups', 'quit'])
+    quit({ preventDefault: () => assert.fail('completed cleanup must allow Quit') })
+  })
+}
+
+for (const platform of ['linux', 'win32', 'darwin']) {
+  test(`${platform} overlapping window closure and Quit share backup cleanup`, async () => {
+    const { handlers, calls, context } = lifecycle(platform)
+    const finished = Promise.withResolvers()
+    context.isQuitting = true
+    context.scheduledBackups.stop = async () => { calls.push('stop backups'); await finished.promise }
+    handlers.get('window-all-closed')()
+    handlers.get('will-quit')({ preventDefault() {} })
+    await new Promise(resolve => setImmediate(resolve))
+    assert.deepEqual(calls, ['clear timer', 'stop backups'])
+    finished.resolve()
+    await new Promise(resolve => setImmediate(resolve))
+    assert.deepEqual(calls, ['clear timer', 'stop backups', 'quit'])
+  })
+}

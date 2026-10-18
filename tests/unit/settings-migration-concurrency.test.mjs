@@ -24,6 +24,10 @@ const { settings } = await import('../../src/datastores/handlers/base.js')
 hooks.deregister()
 delete globalThis.__settingsMigrationDatastore
 test.after(() => datastore.driver.close())
+test.beforeEach(async () => {
+  settings.migrationPromise = null
+  await datastore.removeAsync({}, { multi: true })
+})
 
 test('concurrent settings reads and backups migrate once before accepting newer preferences', async t => {
   await datastore.insertAsync({ _id: 'defaultTheatreMode', value: true })
@@ -56,7 +60,6 @@ test('concurrent settings reads and backups migrate once before accepting newer 
 })
 
 test('a failed settings migration rejects dependent writes and can be retried', async t => {
-  await datastore.removeAsync({}, { multi: true })
   await datastore.insertAsync({ _id: 'defaultTheatreMode', value: true })
   const failRead = t.mock.method(datastore, 'findOneAsync', async () => { throw new Error('storage unavailable') })
   await assert.rejects(settings.upsert('defaultViewingMode', 'default'), /storage unavailable/)
@@ -65,4 +68,20 @@ test('a failed settings migration rejects dependent writes and can be retried', 
   await settings.upsert('defaultViewingMode', 'default')
   assert.equal((await datastore.findOneAsync({ _id: 'defaultViewingMode' })).value, 'default')
   assert.equal(await datastore.findOneAsync({ _id: 'defaultTheatreMode' }), null)
+})
+
+test('completed migrations add no legacy lookups to subsequent settings saves', async t => {
+  await datastore.insertAsync({ _id: 'currentLocale', value: 'en_GB' })
+  const findOne = datastore.findOneAsync.bind(datastore)
+  let reads = 0
+  t.mock.method(datastore, 'findOneAsync', (...args) => { reads++; return findOne(...args) })
+  await settings.migrate()
+  const migrationReads = reads
+  assert.equal((await findOne({ _id: 'currentLocale' })).value, 'en-GB')
+  await settings.upsert('autoplayVideos', false)
+  await settings.upsert('defaultViewingMode', 'theatre')
+  await settings.find()
+  await settings.migrate()
+  assert.equal(reads, migrationReads)
+  assert.equal((await findOne({ _id: 'autoplayVideos' })).value, false)
 })

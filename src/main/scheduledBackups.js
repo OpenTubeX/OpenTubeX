@@ -10,6 +10,16 @@ const BACKUP_FILENAME = /^opentubex-scheduled-backup-\d{4}-\d{2}-\d{2}T\d{2}-\d{
 export function createScheduledBackups({ readConfiguration, createArchive, saveStatus, now = Date.now }) {
   let active = null
   let stopped = false
+  let localRetryDeadline = null
+
+  async function saveBackupStatus(status) {
+    try {
+      await saveStatus(status)
+    } catch (error) {
+      localRetryDeadline = { directory: status.directory, until: now() + RETRY_INTERVAL }
+      throw error
+    }
+  }
 
   async function run() {
     const configuration = await readConfiguration()
@@ -19,7 +29,8 @@ export function createScheduledBackups({ readConfiguration, createArchive, saveS
 
     const status = configuration.status?.directory === directory ? configuration.status : {}
     const timestamp = now()
-    if (status.lastAttemptAt > timestamp - RETRY_INTERVAL ||
+    if ((localRetryDeadline?.directory === directory && localRetryDeadline.until > timestamp) ||
+      status.lastAttemptAt > timestamp - RETRY_INTERVAL ||
       (!status.error && status.lastBackupAt > timestamp - interval * DAY)) return
 
     const nextStatus = { ...status, directory, lastAttemptAt: timestamp, error: false }
@@ -60,7 +71,7 @@ export function createScheduledBackups({ readConfiguration, createArchive, saveS
       await fs.unlink(temporaryPath).catch(error => {
         if (error.code !== 'ENOENT') console.error('Could not remove incomplete backup', error)
       })
-      if (!cancelled) await saveStatus(nextStatus)
+      if (!cancelled) await saveBackupStatus(nextStatus)
     }
   }
 

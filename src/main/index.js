@@ -6146,6 +6146,7 @@ function runApp() {
   // ************************************************* //
 
   let resourcesCleanUpDone = false
+  let resourcesCleanUpPromise = null
 
   // `before-quit` fires on every platform before any windows start closing.
   // Confirm app-level quit requests here, then mark the app as quitting so
@@ -6178,30 +6179,17 @@ function runApp() {
     handleQuit()
   })
 
-  if (process.platform === 'darwin') {
-    // `window-all-closed` doesn't fire for Cmd+Q
-    // https://www.electronjs.org/docs/latest/api/app#event-window-all-closed
-    // This is also fired when `app.quit` called
-    // Not using `before-quit` since that one is fired before windows are closed
-    app.on('will-quit', e => {
-      // Let app quit when the cleanup is finished
-
-      if (resourcesCleanUpDone) { return }
-
-      e.preventDefault()
-      cleanUpResources().finally(() => {
-        // Quit AFTER the resources cleanup is finished
-        // Which calls the listener again, which is why we have the variable
-
-        app.quit()
-      })
-    })
-  }
+  // Actual Quit also needs cleanup after the last window closed into background mode.
+  app.on('will-quit', event => {
+    if (resourcesCleanUpDone) return
+    event.preventDefault()
+    cleanUpResources().finally(() => app.quit())
+  })
 
   function handleQuit() {
     cleanUpResources().finally(() => {
       mainWindow = null
-      if (process.platform !== 'darwin') {
+      if (process.platform !== 'darwin' && !isQuitting) {
         app.quit()
       }
     })
@@ -6228,31 +6216,34 @@ function runApp() {
       return
     }
 
-    clearInterval(scheduledBackupTimer)
-    await scheduledBackups.stop().catch(error => console.error('Could not finish scheduled backup', error))
+    resourcesCleanUpPromise ??= (async () => {
+      clearInterval(scheduledBackupTimer)
+      await scheduledBackups.stop().catch(error => console.error('Could not finish scheduled backup', error))
 
-    await Promise.allSettled([
-      trayIconWrite,
-      // Queue requests run in order, so a read waits for pending queue writes
-      updateWatchQueue({}),
-      baseHandlers.compactAllDatastores(),
-      shutdownYtDlpDownloads(),
-      session.defaultSession.clearCache(),
-      session.defaultSession.clearStorageData({
-        storages: [
-          'appcache',
-          'cookies',
-          'filesystem',
-          'indexdb',
-          'shadercache',
-          'websql',
-          'serviceworkers',
-          'cachestorage'
-        ]
-      })
-    ])
+      await Promise.allSettled([
+        trayIconWrite,
+        // Queue requests run in order, so a read waits for pending queue writes
+        updateWatchQueue({}),
+        baseHandlers.compactAllDatastores(),
+        shutdownYtDlpDownloads(),
+        session.defaultSession.clearCache(),
+        session.defaultSession.clearStorageData({
+          storages: [
+            'appcache',
+            'cookies',
+            'filesystem',
+            'indexdb',
+            'shadercache',
+            'websql',
+            'serviceworkers',
+            'cachestorage'
+          ]
+        })
+      ])
 
-    resourcesCleanUpDone = true
+      resourcesCleanUpDone = true
+    })()
+    return resourcesCleanUpPromise
   }
 
   // MacOS event

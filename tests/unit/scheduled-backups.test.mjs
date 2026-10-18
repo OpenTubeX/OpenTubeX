@@ -198,6 +198,70 @@ test('failed backup preparation preserves old backups and retries after five min
   assert.equal((await state.backups()).includes(first[0]), false)
 })
 
+for (const preparationFails of [false, true]) {
+  test(`status persistence failure backs off after ${preparationFails ? 'failed' : 'successful'} archive preparation`, async t => {
+    t.mock.method(console, 'error', () => {})
+    const state = await setup(t)
+    let attempts = 0
+    let failStatus = true
+    const service = createScheduledBackups({
+      ...state.options,
+      createArchive: async () => {
+        attempts++
+        if (attempts === 1) {
+          state.advance(600_000)
+          if (preparationFails) throw new Error('archive unavailable')
+        }
+        return state.options.createArchive()
+      },
+      saveStatus: status => {
+        if (failStatus) throw new Error('status unavailable')
+        return state.options.saveStatus(status)
+      },
+    })
+    await assert.rejects(service.tick(), /status unavailable/)
+    const files = await state.backups()
+    for (let minute = 0; minute < 4; minute++) {
+      state.advance(60_000)
+      await service.tick()
+    }
+    state.advance(59_999)
+    await service.tick()
+    assert.equal(attempts, 1)
+    assert.deepEqual(await state.backups(), files)
+    failStatus = false
+    state.advance(1)
+    await service.tick()
+    assert.equal(attempts, 2)
+    assert.equal(state.configuration.status.error, false)
+    assert.equal((await state.backups()).length, preparationFails ? 1 : 2)
+    state.advance(60_000)
+    await service.tick()
+    assert.equal(attempts, 2)
+  })
+}
+
+test('a status persistence retry deadline does not delay a newly selected folder', async t => {
+  const state = await setup(t)
+  const other = await mkdtemp(path.join(tmpdir(), 'opentubex-other-backups-'))
+  t.after(() => rm(other, { recursive: true, force: true }))
+  const originalDirectory = state.directory
+  const service = createScheduledBackups({
+    ...state.options,
+    saveStatus: status => {
+      if (status.directory === originalDirectory) throw new Error('status unavailable')
+      return state.options.saveStatus(status)
+    },
+  })
+  await assert.rejects(service.tick(), /status unavailable/)
+  state.advance(60_000)
+  state.configuration.directory = other
+  await service.tick()
+  assert.equal(state.reads(), 2)
+  assert.equal(state.configuration.status.directory, other)
+  assert.equal((await readdir(other)).filter(name => name.endsWith('.zip')).length, 1)
+})
+
 test('missing destinations stay missing and report failure without resetting the last success', async t => {
   t.mock.method(console, 'error', () => {})
   const state = await setup(t)

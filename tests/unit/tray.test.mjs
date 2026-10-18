@@ -344,7 +344,7 @@ test('quit waits for the queued tray icon cache write', async () => {
     shutdownYtDlpDownloads: async () => {},
     session: { defaultSession: { clearCache: async () => {}, clearStorageData: async () => {} } },
   })
-  vm.runInContext(`let resourcesCleanUpDone = false; ${source.slice(source.indexOf('  async function cleanUpResources()'), source.indexOf('  // MacOS event'))}`, context)
+  vm.runInContext(`let resourcesCleanUpDone = false; let resourcesCleanUpPromise = null; ${source.slice(source.indexOf('  async function cleanUpResources()'), source.indexOf('  // MacOS event'))}`, context)
   let finished = false
   const cleanup = context.cleanUpResources().then(() => { finished = true })
   try {
@@ -370,7 +370,7 @@ test('quit waits for pending watch queue writes', async () => {
     shutdownYtDlpDownloads: async () => {},
     session: { defaultSession: { clearCache: async () => {}, clearStorageData: async () => {} } },
   })
-  vm.runInContext(`let resourcesCleanUpDone = false; ${source.slice(source.indexOf('  async function cleanUpResources()'), source.indexOf('  // MacOS event'))}`, context)
+  vm.runInContext(`let resourcesCleanUpDone = false; let resourcesCleanUpPromise = null; ${source.slice(source.indexOf('  async function cleanUpResources()'), source.indexOf('  // MacOS event'))}`, context)
   let finished = false
   const cleanup = context.cleanUpResources().then(() => { finished = true })
   await new Promise(resolve => setImmediate(resolve))
