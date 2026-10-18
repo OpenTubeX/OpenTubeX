@@ -244,16 +244,17 @@ test('correcting the clock backward resets a local status retry deadline', async
   state.advance(120 * DAY)
   await assert.rejects(service.tick(), /status unavailable/)
   state.advance(-120 * DAY)
+  const correctedAt = state.options.now()
   await assert.rejects(service.tick(), /status unavailable/)
-  assert.equal(state.reads(), 2)
+  assert.equal(state.reads(), 2, 'a future committed timestamp must not delay the next backup')
   state.advance(299_999)
   await service.tick()
   assert.equal(state.reads(), 2)
   failStatus = false
   state.advance(1)
   await service.tick()
-  assert.equal(state.reads(), 3)
-  assert.equal(state.configuration.status.lastBackupAt, state.options.now())
+  assert.equal(state.reads(), 2, 'status recovery must not recreate the archive')
+  assert.equal(state.configuration.status.lastBackupAt, correctedAt)
 })
 
 test('daily and 30-day schedules run at their selected interval', async t => {
@@ -347,14 +348,85 @@ for (const preparationFails of [false, true]) {
     failStatus = false
     state.advance(1)
     await service.tick()
-    assert.equal(attempts, 2)
+    assert.equal(attempts, preparationFails ? 2 : 1)
     assert.equal(state.configuration.status.error, false)
-    assert.equal((await state.backups()).length, preparationFails ? 1 : 2)
+    assert.equal((await state.backups()).length, 1)
+    if (!preparationFails) assert.deepEqual(await state.backups(), files)
     state.advance(60_000)
     await service.tick()
-    assert.equal(attempts, 2)
+    assert.equal(attempts, preparationFails ? 2 : 1)
   })
 }
+
+test('persistent status-write failures retry only the committed status and preserve the backup interval', async t => {
+  const state = await setup(t)
+  const committedAt = state.options.now()
+  const attemptedStatuses = []
+  let failStatus = true
+  const service = createScheduledBackups({
+    ...state.options,
+    saveStatus: status => {
+      attemptedStatuses.push(structuredClone(status))
+      if (failStatus) throw new Error('status unavailable')
+      return state.options.saveStatus(status)
+    },
+  })
+  await assert.rejects(service.tick(), /status unavailable/)
+  const files = await state.backups()
+  assert.equal(files.length, 1)
+  const committedStatus = { directory: state.directory, lastAttemptAt: committedAt, lastBackupAt: committedAt, error: false }
+  for (let retry = 0; retry < 3; retry++) {
+    state.advance(299_999)
+    await service.tick()
+    assert.equal(attemptedStatuses.length, retry + 1)
+    state.advance(1)
+    await assert.rejects(service.tick(), /status unavailable/)
+    assert.equal(attemptedStatuses.length, retry + 2)
+    assert.deepEqual(attemptedStatuses.at(-1), committedStatus)
+    assert.equal(state.reads(), 1, 'status retries must not read or compress the library again')
+    assert.deepEqual(await state.backups(), files)
+  }
+  failStatus = false
+  state.advance(300_000)
+  await service.tick()
+  assert.equal(attemptedStatuses.length, 5)
+  assert.deepEqual(state.configuration.status, committedStatus)
+  assert.equal(state.reads(), 1)
+  assert.deepEqual(await state.backups(), files)
+  state.advance(committedAt + 7 * DAY - state.options.now() - 1)
+  await service.tick()
+  assert.equal(state.reads(), 1)
+  state.advance(1)
+  await service.tick()
+  assert.equal(state.reads(), 2)
+  assert.equal(state.configuration.status.lastBackupAt, state.options.now())
+})
+
+test('a long status-storage outage still allows backups at the normal scheduled interval', async t => {
+  const state = await setup(t)
+  const statuses = []
+  const service = createScheduledBackups({
+    ...state.options,
+    saveStatus: status => {
+      statuses.push(structuredClone(status))
+      throw new Error('status unavailable')
+    },
+  })
+  await assert.rejects(service.tick(), /status unavailable/)
+  const first = await state.backups()
+  state.advance(7 * DAY)
+  await assert.rejects(service.tick(), /status unavailable/)
+  assert.equal(state.reads(), 2)
+  const files = await state.backups()
+  assert.equal(files.length, 2)
+  assert.ok(files.includes(first[0]))
+  assert.equal(statuses.at(-1).lastBackupAt, state.options.now())
+  state.advance(300_000)
+  await assert.rejects(service.tick(), /status unavailable/)
+  assert.equal(state.reads(), 2)
+  assert.deepEqual(await state.backups(), files)
+  assert.deepEqual(statuses.at(-1), statuses.at(-2))
+})
 
 test('a status persistence retry deadline does not delay a newly selected folder', async t => {
   const state = await setup(t)

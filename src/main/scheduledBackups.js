@@ -33,8 +33,9 @@ export function createScheduledBackups({ readConfiguration, createArchive, saveS
   async function saveBackupStatus(status) {
     try {
       await saveStatus(status)
+      localRetryAttempt = null
     } catch (error) {
-      localRetryAttempt = { directory: status.directory, at: now() }
+      localRetryAttempt = { directory: status.directory, at: now(), committedStatus: status.error ? null : status }
       throw error
     }
   }
@@ -45,12 +46,17 @@ export function createScheduledBackups({ readConfiguration, createArchive, saveS
     if (enabled !== true || typeof directory !== 'string' || !path.isAbsolute(directory) ||
       ![1, 7, 30].includes(interval) || !Number.isInteger(keepCount) || keepCount < 1 || keepCount > 100) return
 
-    const status = configuration.status?.directory === directory ? configuration.status : {}
+    const retry = localRetryAttempt?.directory === directory ? localRetryAttempt : null
+    const status = retry?.committedStatus ?? (configuration.status?.directory === directory ? configuration.status : {})
     const timestamp = now()
     const isRecent = (at, duration) => Number.isFinite(at) && at <= timestamp && at > timestamp - duration
-    if ((localRetryAttempt?.directory === directory && isRecent(localRetryAttempt.at, RETRY_INTERVAL)) ||
-      isRecent(status.lastAttemptAt, RETRY_INTERVAL) ||
-      (!status.error && isRecent(status.lastBackupAt, interval * DAY))) return
+    if (retry && isRecent(retry.at, RETRY_INTERVAL)) return
+    if (!status.error && isRecent(status.lastBackupAt, interval * DAY)) {
+      // The archive is already committed. Retry only its status until the next backup is due.
+      if (retry?.committedStatus) await saveBackupStatus(status)
+      return
+    }
+    if (isRecent(status.lastAttemptAt, RETRY_INTERVAL)) return
 
     const nextStatus = { ...status, directory, lastAttemptAt: timestamp, error: false }
     const filename = `opentubex-scheduled-backup-${new Date(timestamp).toISOString().replaceAll(/[:.]/g, '-')}-${randomUUID()}.zip`
