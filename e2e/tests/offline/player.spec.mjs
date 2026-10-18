@@ -1357,12 +1357,19 @@ test('auto-translates captions into an arbitrary language', async ({ app, page, 
   await expect.poll(() => translations.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
   await attachScreenshot('auto-translate language grid')
 
-  const frenchResponse = page.waitForResponse(response => {
-    const url = new URL(response.url())
-    return url.pathname === '/api/timedtext' && url.searchParams.get('tlang') === 'fr'
+  const isFrenchCaptions = url => url.pathname === '/api/timedtext' && url.searchParams.get('tlang') === 'fr'
+  const frenchResponse = page.waitForResponse(response => isFrenchCaptions(new URL(response.url())))
+  // Selecting a language closes the menu once its captions load. Hold French
+  // until German is chosen, so the later choice always overtakes the earlier one.
+  let releaseFrench
+  const frenchHeld = new Promise(resolve => { releaseFrench = resolve })
+  await page.route(isFrenchCaptions, async route => {
+    await frenchHeld
+    await route.fallback()
   })
   await translations.getByRole('button', { name: 'French' }).click()
   await translations.getByRole('button', { name: 'German' }).click()
+  releaseFrench()
   await expect(player.locator('.shaka-text-languages')).toBeVisible()
   expect(await overflowMenu.evaluate(element => element.scrollTop)).toBe(0)
   await expect(player.locator('.shaka-text-languages')).toContainText('German')
