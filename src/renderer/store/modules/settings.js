@@ -1338,6 +1338,10 @@ for (const settingId of Object.keys(state)) {
   const getterId = defaultGetterId(settingId)
   const mutationId = defaultMutationId(settingId)
   const updaterId = defaultUpdaterId(settingId)
+  const handleUpdateError = error => {
+    console.error(error)
+    if (['scheduledBackupEnabled', 'scheduledBackupInterval', 'scheduledBackupKeepCount'].includes(settingId)) throw error
+  }
 
   getters[getterId] = (state) => state[settingId]
   mutations[mutationId] = (state, value) => { state[settingId] = value }
@@ -1359,9 +1363,7 @@ for (const settingId of Object.keys(state)) {
         dispatch(triggerId, value)
 
         commit(mutationId, value)
-      }).catch(errMessage => {
-        console.error(errMessage)
-      })
+      }).catch(handleUpdateError)
     )
   } else {
     actions[updaterId] = ({ commit, state }, value) => (
@@ -1372,9 +1374,7 @@ for (const settingId of Object.keys(state)) {
         await recordSettingSyncTimestamp(commit, state, settingId)
 
         if (isLatest()) commit(mutationId, value)
-      }).catch(errMessage => {
-        console.error(errMessage)
-      })
+      }).catch(handleUpdateError)
     )
   }
 }

@@ -1880,9 +1880,10 @@ function runApp() {
       return { enabled, directory, interval: interval ?? 7, keepCount: keepCount ?? 5, status }
     },
     createArchive: createBackupArchiveFactory(userDataPath,
-      path.join(__dirname, process.env.NODE_ENV === 'development' ? '../../dist/backupArchiveWorker.js' : 'backupArchiveWorker.js'), async () => {
-        await waitForDatastores()
-        await baseHandlers.settings.migrate()
+      path.join(__dirname, process.env.NODE_ENV === 'development' ? '../../dist/backupArchiveWorker.js' : 'backupArchiveWorker.js'), {
+        waitForDatastores,
+        settings: baseHandlers.settings,
+        watchStats: baseHandlers.watchStats,
       }),
     saveStatus: status => updateSettingFromMain('scheduledBackupStatus', status),
   })

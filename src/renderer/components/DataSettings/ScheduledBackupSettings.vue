@@ -19,6 +19,7 @@
       <FtToggleSwitch
         :label="t('Settings.Data Settings.Enable scheduled backups')"
         :default-value="enabled"
+        controlled
         :disabled="!directory"
         @change="update('scheduledBackupEnabled', $event)"
       />
@@ -76,8 +77,8 @@ const lastBackup = computed(() => status.value.lastBackupAt
 async function update(key, value) {
   try {
     await store.dispatch(`update${key[0].toUpperCase()}${key.slice(1)}`, value)
-  } catch (error) {
-    showToast({ message: `${t('Settings.Data Settings.Unable to write file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
+  } catch {
+    showToast({ message: t('Settings.Data Settings.Unable to write file'), icon: ['fas', 'circle-exclamation'] })
   }
 }
 

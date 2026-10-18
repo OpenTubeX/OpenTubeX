@@ -51,22 +51,28 @@ async function setup(t) {
   let timestamp = Date.UTC(2026, 9, 18)
   let reads = 0
   const configuration = { enabled: true, directory, interval: 7, keepCount: 3, status: {} }
+  const initialization = {
+    waitForDatastores: async () => { reads++ },
+    settings: {
+      async migrate() {
+        const settings = createDesktopDatastore(path.join(profileDirectory, 'settings.sqlite'))
+        try {
+          await migrateStoredSettings(settings)
+        } finally {
+          await settings.driver.close()
+        }
+      }
+    },
+    watchStats: { migrateHistory: async () => {} },
+  }
   const options = {
     readConfiguration: async () => structuredClone(configuration),
-    createArchive: createBackupArchiveFactory(profileDirectory, workerPath, async () => {
-      reads++
-      const settings = createDesktopDatastore(path.join(profileDirectory, 'settings.sqlite'))
-      try {
-        await migrateStoredSettings(settings)
-      } finally {
-        await settings.driver.close()
-      }
-    }),
+    createArchive: createBackupArchiveFactory(profileDirectory, workerPath, initialization),
     saveStatus: async status => { configuration.status = status },
     now: () => timestamp,
   }
   return {
-    directory, profileDirectory, configuration, options,
+    directory, profileDirectory, configuration, options, initialization,
     service: createScheduledBackups(options),
     advance: milliseconds => { timestamp += milliseconds },
     reads: () => reads,
@@ -329,7 +335,9 @@ test('archive factory waits for datastore readiness before starting its worker',
   const onWorker = () => { workers++ }
   process.on('worker', onWorker)
   t.after(() => process.off('worker', onWorker))
-  const createArchive = createBackupArchiveFactory(state.profileDirectory, workerPath, () => ready.promise)
+  const createArchive = createBackupArchiveFactory(state.profileDirectory, workerPath, {
+    ...state.initialization, waitForDatastores: () => ready.promise,
+  })
   const pending = createArchive()
   await new Promise(resolve => setImmediate(resolve))
   const workersBeforeReady = workers
@@ -381,7 +389,7 @@ for (const phase of ['preparation', 'temporary write']) {
 test('archive worker failures reject without creating missing profile databases', async t => {
   const state = await setup(t)
   const missing = path.join(state.profileDirectory, 'missing')
-  const createArchive = createBackupArchiveFactory(missing, workerPath, async () => {})
+  const createArchive = createBackupArchiveFactory(missing, workerPath, state.initialization)
   await assert.rejects(createArchive(), /unable to open database/)
   await assert.rejects(readdir(missing), { code: 'ENOENT' })
 })

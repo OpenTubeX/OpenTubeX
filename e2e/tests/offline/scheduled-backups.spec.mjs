@@ -4,6 +4,7 @@ import path from 'node:path'
 import { expect, goToSettingsSection, test } from '../../helpers/app.mjs'
 import { createDesktopDatastore, desktopDatastorePaths } from '../../../src/datastores/sqliteNode.js'
 import { BACKUP_SECTIONS, createUnifiedBackup, readUnifiedBackup } from '../../../src/renderer/helpers/unifiedBackup.js'
+import { DBActions, IpcChannels } from '../../../src/constants.js'
 
 test.describe('complete scheduled archives', () => {
   test.use({
@@ -135,6 +136,55 @@ test('retention keeps the selected number of scheduled backups and leaves manual
     await rm(directory, { recursive: true, force: true })
   }
 })
+
+for (const { key, label, option, original, saved } of [
+  { key: 'scheduledBackupEnabled', label: 'Enable scheduled backups', original: false, saved: true },
+  { key: 'scheduledBackupInterval', label: 'Backup frequency', option: 'Daily', original: 7, saved: 1 },
+  { key: 'scheduledBackupKeepCount', label: 'Backups to keep', option: '1', original: 5, saved: 1 },
+]) {
+  test(`reports a failed ${key} save, retains the previous value and allows retrying`, async ({ app, page }, testInfo) => {
+    const directory = await mkdtemp(path.join(tmpdir(), 'opentubex-backup-save-'))
+    try {
+      const section = await goToSettingsSection(page, 'data')
+      const controls = section.locator('.scheduledBackups')
+      await stubBackupFolder(app.electronApp, directory)
+      await controls.getByRole('button', { name: 'Choose backup folder' }).click()
+      await expect(controls.locator('.backupFolder')).toHaveText(directory)
+      await app.electronApp.evaluate(({ ipcMain }, { channel, action, key }) => {
+        const original = ipcMain._invokeHandlers.get(channel)
+        let fail = true
+        ipcMain.removeHandler(channel)
+        ipcMain.handle(channel, (event, request) => {
+          if (fail && request.action === action && request.data?._id === key) {
+            fail = false
+            throw new Error('Scheduled backup preference save failed')
+          }
+          return original(event, request)
+        })
+      }, { channel: IpcChannels.DB_SETTINGS, action: DBActions.GENERAL.UPSERT, key })
+      async function chooseValue() {
+        if (option) {
+          await controls.getByRole('combobox', { name: label }).click()
+          await page.getByRole('option', { name: option, exact: true }).click()
+        } else {
+          await controls.getByText(label, { exact: true }).click()
+        }
+      }
+      await chooseValue()
+      await expect(page.locator('.toast', { hasText: 'Unable to write file' })).toBeVisible()
+      expect((await readBackupSettings(page))[key]).toBe(original)
+      if (!option) await expect(controls.getByRole('checkbox', { name: label })).not.toBeChecked()
+      else await expect(controls.getByRole('combobox', { name: label })).toHaveText(key === 'scheduledBackupInterval' ? 'Weekly' : '5')
+      if (!option) await page.screenshot({ path: testInfo.outputPath('backup-setting-write-failed.png'), animations: 'disabled' })
+      await chooseValue()
+      await expect.poll(async () => (await readBackupSettings(page))[key]).toBe(saved)
+      const restarted = await app.relaunch()
+      expect((await readBackupSettings(restarted.page))[key]).toBe(saved)
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+}
 
 test('restoring a crafted ZIP cannot enable backups or replace their local configuration', async ({ app }) => {
   const directory = await mkdtemp(path.join(tmpdir(), 'opentubex-backup-import-'))
