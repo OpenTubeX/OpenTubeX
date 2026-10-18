@@ -532,18 +532,21 @@ test('unwritable destinations skip archive preparation', async t => {
   }
 })
 
-test('stale scheduler temporary archives are cleaned before preparation without touching recent or unrelated files', async t => {
+test('stale and future-dated scheduler temporary archives are cleaned without touching recent or unrelated files', async t => {
   const state = await setup(t)
   const filename = 'opentubex-scheduled-backup-2020-01-01T00-00-00-000Z-00000000-0000-0000-0000-000000000000.zip'
   const stale = `.${filename}.tmp`
+  const future = '.opentubex-scheduled-backup-2027-02-01T00-00-00-000Z-00000000-0000-0000-0000-000000000000.zip.tmp'
   const recent = '.opentubex-scheduled-backup-2020-02-01T00-00-00-000Z-00000000-0000-0000-0000-000000000000.zip.tmp'
   const manual = '.opentubex-backup-2020-01-01.zip.tmp'
   const symbolic = '.opentubex-scheduled-backup-2020-03-01T00-00-00-000Z-00000000-0000-0000-0000-000000000000.zip.tmp'
   const folder = '.opentubex-scheduled-backup-2020-04-01T00-00-00-000Z-00000000-0000-0000-0000-000000000000.zip.tmp'
-  for (const name of [stale, recent, manual]) await writeFile(path.join(state.directory, name), 'incomplete')
+  for (const name of [stale, future, recent, manual]) await writeFile(path.join(state.directory, name), 'incomplete')
   const old = new Date(state.options.now() - 2 * DAY)
   const recentTime = new Date(state.options.now() - 60_000)
   await fs.utimes(path.join(state.directory, stale), old, old)
+  const futureTime = new Date(state.options.now() + 120 * DAY)
+  await fs.utimes(path.join(state.directory, future), futureTime, futureTime)
   await fs.utimes(path.join(state.directory, recent), recentTime, recentTime)
   await fs.utimes(path.join(state.directory, manual), old, old)
   await symlink(path.join(state.directory, manual), path.join(state.directory, symbolic))
@@ -558,6 +561,7 @@ test('stale scheduler temporary archives are cleaned before preparation without 
   })
   await service.tick()
   assert.equal(filesAtPreparation.includes(stale), false)
+  assert.equal(filesAtPreparation.includes(future), false, 'a clock correction must not keep interrupted archives for months')
   for (const name of [recent, manual, symbolic, folder]) assert.equal(filesAtPreparation.includes(name), true, name)
   assert.equal(await readFile(path.join(state.directory, manual), 'utf8'), 'incomplete')
   assert.equal(state.configuration.status.error, false)

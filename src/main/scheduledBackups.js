@@ -14,7 +14,7 @@ async function cleanStaleTemporaryArchives(directory, timestamp) {
       const filename = path.join(directory, entry.name)
       try {
         const { mtimeMs } = await fs.stat(filename)
-        if (timestamp - mtimeMs >= DAY) await fs.unlink(filename)
+        if (mtimeMs > timestamp || timestamp - mtimeMs >= DAY) await fs.unlink(filename)
       } catch (error) {
         if (error.code !== 'ENOENT') console.error('Could not remove incomplete backup', error)
       }
