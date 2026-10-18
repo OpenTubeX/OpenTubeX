@@ -279,7 +279,7 @@ import store from '../../store/index'
 
 import { getConfiguredKeyboardShortcuts, SEARCH_RESULTS_DISPLAY_LIMIT } from '../../../constants'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
-import { getSearchHistoryEntryQuery } from '../../../search-history'
+import { getSearchFilterTabId, getSearchHistoryEntryQuery } from '../../../search-history'
 import { isUnloadedBackgroundTabClick, localizeAndAddKeyboardShortcutToActionTitle, openInternalPath } from '../../helpers/utils'
 import { translateWindowTitle } from '../../helpers/strings'
 import { getLocalSearchSuggestions } from '../../helpers/api/local'
@@ -620,9 +620,7 @@ function getSearchHistoryEntryDisplayText(entry) {
 }
 
 /** @type {import('vue').ComputedRef<string>} */
-const searchFilterTabId = computed(() => usesLogicalTabs
-  ? (store.getters.getPresentedTabId ?? 'web')
-  : 'web')
+const searchFilterTabId = computed(() => getSearchFilterTabId(store.getters.getPresentedTabId))
 
 /** @type {import('vue').ComputedRef<any>} */
 const searchSettings = computed(() => store.getters.getSearchSettings(searchFilterTabId.value))
