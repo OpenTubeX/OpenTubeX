@@ -2148,3 +2148,4 @@ Library Format Changed:
   Title: "Libreria convertita in un nuovo formato"
   Message: "La tua libreria ora usa un nuovo formato di archiviazione."
   Detail: "Le versioni precedenti di OpenTubeX possono ancora aprire la tua libreria, ma la mostrano com'era prima di questo aggiornamento. Le modifiche apportate in una versione precedente vengono aggiunte quando torni a questa versione."
+Invidious Fallback Warning: "Questa richiesta aggira l’istanza Invidious configurata e si connette direttamente a YouTube, esponendo il tuo indirizzo IP."

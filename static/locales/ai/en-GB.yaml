@@ -2138,3 +2138,4 @@ Library Format Changed:
   Title: "Library moved to a new format"
   Message: "Your library now uses a new storage format."
   Detail: "Older versions of OpenTubeX can still open your library, but they show it as it was before this update. Changes you make in an older version are added back when you return to this version."
+Invidious Fallback Warning: "This request bypasses your configured Invidious instance and connects directly to YouTube, exposing your IP address."

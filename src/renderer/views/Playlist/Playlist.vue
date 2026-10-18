@@ -273,6 +273,7 @@ import {
   getIconForSortPreference,
   getVideoThumbnailUrl,
   showToast,
+  showInvidiousFallbackToast,
   deepCopy,
   throttle,
 } from '../../helpers/utils'
@@ -1014,7 +1015,7 @@ async function getPlaylistInvidious() {
     console.error(err)
 
     if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      console.warn('Error getting data with Invidious, falling back to local backend')
+      showInvidiousFallbackToast()
       return getPlaylistLocal()
     } else {
       updatePageTitle()

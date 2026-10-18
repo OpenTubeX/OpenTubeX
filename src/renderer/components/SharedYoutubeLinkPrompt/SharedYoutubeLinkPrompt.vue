@@ -91,7 +91,7 @@ import store from '../../store'
 import { getLocalHistoryMetadata } from '../../helpers/api/local'
 import { getInvidiousHistoryMetadata } from '../../helpers/api/invidious'
 import { parseHistoryRepairPlayer } from '../../../historyRepair'
-import { showToast } from '../../helpers/utils'
+import { showInvidiousFallbackToast, showToast } from '../../helpers/utils'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 
 const props = defineProps({
@@ -127,6 +127,7 @@ async function loadVideo(signal) {
     info = await (prefersInvidious ? loadInvidious() : loadLocal())
   } catch (error) {
     if (signal.aborted || !store.getters.getBackendFallback) throw error
+    if (prefersInvidious) showInvidiousFallbackToast()
     info = await (prefersInvidious ? loadLocal() : loadInvidious())
   }
   if (typeof info.title !== 'string' || !info.title.trim()) throw new Error('Video title unavailable')

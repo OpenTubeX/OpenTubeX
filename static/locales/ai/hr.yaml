@@ -2178,3 +2178,4 @@ Library Format Changed:
   Title: "Biblioteka je premještena u novi format"
   Message: "Vaša biblioteka sada koristi novi format pohrane."
   Detail: "Starije verzije OpenTubeXa i dalje mogu otvoriti vašu biblioteku, ali je prikazuju onakvom kakva je bila prije ovog ažuriranja. Promjene koje napravite u starijoj verziji dodaju se kada se vratite na ovu verziju."
+Invidious Fallback Warning: "Ovaj zahtjev zaobilazi postavljenu instancu Invidiousa i povezuje se izravno s YouTubeom, otkrivajući tvoju IP adresu."

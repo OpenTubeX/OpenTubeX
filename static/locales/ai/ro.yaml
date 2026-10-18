@@ -2198,3 +2198,4 @@ Library Format Changed:
   Title: "Biblioteca a fost mutată într-un format nou"
   Message: "Biblioteca ta folosește acum un format nou de stocare."
   Detail: "Versiunile mai vechi ale OpenTubeX pot deschide în continuare biblioteca, dar o afișează așa cum era înainte de această actualizare. Modificările făcute într-o versiune mai veche sunt adăugate când revii la această versiune."
+Invidious Fallback Warning: "Această cerere ocolește instanța Invidious configurată și se conectează direct la YouTube, expunându-ți adresa IP."

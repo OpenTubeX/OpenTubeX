@@ -90,6 +90,7 @@ function createSearch (backend) {
     updateSubscriptionDetails: results => updatedChannels.push(results),
     showApiErrorToast: (...args) => notices.push(args),
     showToast: message => notices.push(message),
+    showInvidiousFallbackToast: () => notices.push('direct fallback warning'),
     t: text => text,
     console: { error: error => errors.push(error) },
     process: { env: { SUPPORTS_LOCAL_API: true } }

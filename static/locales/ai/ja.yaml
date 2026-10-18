@@ -2148,3 +2148,4 @@ Library Format Changed:
   Title: "ライブラリを新しい形式に移行しました"
   Message: "ライブラリは新しい保存形式を使用するようになりました。"
   Detail: "以前のバージョンの OpenTubeX でもライブラリを開けますが、この更新前の状態で表示されます。以前のバージョンで行った変更は、このバージョンに戻ったときに追加されます。"
+Invidious Fallback Warning: "このリクエストは設定した Invidious インスタンスを経由せず、YouTube に直接接続するため、IP アドレスが公開されます。"

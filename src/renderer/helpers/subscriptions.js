@@ -21,6 +21,7 @@ import {
   parseLocalPlaylistVideos
 } from './api/local'
 import {
+  showInvidiousFallbackToast,
   getChannelPlaylistId,
   showApiErrorToast,
   showToast,
@@ -370,10 +371,10 @@ async function fetchSubscriptionsConcurrently(channels, fetchChannel) {
       try {
         if (activeRefresh?.networkRecovery) {
           const preferredBackend = store.getters.getBackendPreference
-          await activeRefresh.networkRecovery.run(useFallback => fetchChannel(
-            channel,
-            useFallback ? (preferredBackend === 'local' ? 'invidious' : 'local') : preferredBackend
-          ))
+          await activeRefresh.networkRecovery.run(useFallback => {
+            if (useFallback && preferredBackend === 'invidious') showInvidiousFallbackToast()
+            return fetchChannel(channel, useFallback ? (preferredBackend === 'local' ? 'invidious' : 'local') : preferredBackend)
+          })
         } else {
           await fetchChannel(channel)
         }
@@ -406,8 +407,8 @@ async function fetchSubscriptionsInBatches(channels, fetchChannel) {
   }
 }
 
-// Bulk refreshes retain individual diagnostics in the log, without announcing
-// every backend switch as another notification.
+// Routine fallback notices stay quiet during bulk refreshes. Direct retries use
+// showInvidiousFallbackToast so privacy warnings remain visible.
 function showSubscriptionFallbackToast(options) {
   if (!activeRefresh) showToast(options)
 }
@@ -1202,7 +1203,7 @@ async function getChannelPostsInvidious(channel, t, errorChannels) {
       store.getters.getBackendPreference === 'invidious' &&
       store.getters.getBackendFallback
     ) {
-      showSubscriptionFallbackToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
+      showInvidiousFallbackToast()
       return await getChannelPostsLocal(channel, t, errorChannels)
     }
 
@@ -1323,7 +1324,7 @@ async function getChannelVideosInvidiousScraper(channel, t, errorChannels, faile
         return await getChannelVideosInvidiousRSS(channel, t, errorChannels, failedAttempts + 1)
       case 1:
         if (process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
-          showSubscriptionFallbackToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
+          showInvidiousFallbackToast()
           return await getChannelVideosLocalScraper(channel, t, errorChannels, failedAttempts + 1)
         }
         return { videos: null }
@@ -1374,7 +1375,7 @@ async function getChannelVideosInvidiousRSS(channel, t, errorChannels, failedAtt
         return await getChannelVideosInvidiousScraper(channel, t, errorChannels, failedAttempts + 1)
       case 1:
         if (process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
-          showSubscriptionFallbackToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
+          showInvidiousFallbackToast()
           return await getChannelVideosLocalRSS(channel, t, errorChannels, failedAttempts + 1)
         }
         return { videos: null }
@@ -1518,7 +1519,7 @@ async function getChannelShortsInvidious(channel, t, errorChannels, failedAttemp
     })
 
     if (failedAttempts === 0 && process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
-      showSubscriptionFallbackToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
+      showInvidiousFallbackToast()
       return await getChannelShortsLocal(channel, t, errorChannels, failedAttempts + 1)
     }
 
@@ -1623,7 +1624,7 @@ async function getChannelLiveInvidious(channel, t, errorChannels, failedAttempts
         return await getChannelLiveInvidiousRSS(channel, t, errorChannels, failedAttempts + 1)
       case 1:
         if (process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
-          showSubscriptionFallbackToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
+          showInvidiousFallbackToast()
           return await getChannelLiveLocal(channel, t, errorChannels, failedAttempts + 1)
         }
         return { videos: null }
@@ -1674,7 +1675,7 @@ async function getChannelLiveInvidiousRSS(channel, t, errorChannels, failedAttem
         return await getChannelLiveInvidious(channel, t, errorChannels, failedAttempts + 1)
       case 1:
         if (process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
-          showSubscriptionFallbackToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
+          showInvidiousFallbackToast()
           return await getChannelLiveLocalRSS(channel, t, errorChannels, failedAttempts + 1)
         }
         return { videos: null }

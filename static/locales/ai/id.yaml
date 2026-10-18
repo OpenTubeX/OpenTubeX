@@ -2164,3 +2164,4 @@ Library Format Changed:
   Title: "Pustaka dipindahkan ke format baru"
   Message: "Pustaka Anda kini menggunakan format penyimpanan baru."
   Detail: "Versi lama OpenTubeX masih dapat membuka pustaka Anda, tetapi menampilkannya seperti sebelum pembaruan ini. Perubahan yang Anda buat di versi lama akan ditambahkan saat Anda kembali ke versi ini."
+Invidious Fallback Warning: "Permintaan ini melewati instans Invidious yang Anda konfigurasi dan terhubung langsung ke YouTube, sehingga mengungkap alamat IP Anda."

@@ -173,18 +173,19 @@ function videoActions({ backend = 'local', fallback = false, local, invidious, t
   const failed = { value: false }
   const calls = []
   const emitted = []
+  const warnings = []
   const store = {
     getters: { getBackendPreference: backend, getBackendFallback: fallback },
     dispatch: async (...args) => calls.push(args),
     commit: (...args) => calls.push(args)
   }
-  const add = compileFunction(`${actions}\nreturn addVideo`, ['props', 'store', 'controller', 'loading', 'failed', 'getLocalHistoryMetadata', 'getInvidiousHistoryMetadata', 'parseHistoryRepairPlayer', 'emit', 'showToast', 't', 'console', 'AbortSignal'])(
+  const add = compileFunction(`${actions}\nreturn addVideo`, ['props', 'store', 'controller', 'loading', 'failed', 'getLocalHistoryMetadata', 'getInvidiousHistoryMetadata', 'parseHistoryRepairPlayer', 'emit', 'showToast', 't', 'console', 'AbortSignal', 'showInvidiousFallbackToast'])(
     { videoId: id }, store, controller, loading, failed,
     local ?? (async () => ({ videoDetails: { videoId: id, title: video.title, author: video.author, channelId: video.authorId, lengthSeconds: '120' } })),
     invidious ?? (async () => video), parseHistoryRepairPlayer,
-    event => emitted.push(event), () => {}, key => key, { error() {} }, { any: AbortSignal.any, timeout }
+    event => emitted.push(event), () => {}, key => key, { error() {} }, { any: AbortSignal.any, timeout }, () => warnings.push('direct')
   )
-  return { add, calls, emitted, failed, loading, controller }
+  return { add, calls, emitted, failed, loading, controller, warnings }
 }
 
 test('local metadata queues the shared video without starting playback', async () => {
@@ -233,6 +234,7 @@ test('Invidious failure uses local metadata for both actions only when fallback 
       })
       await h.add(action)
       assert.equal(localLoads, fallback ? 1 : 0)
+      assert.equal(h.warnings.length, fallback ? 1 : 0)
       assert.equal(h.failed.value, !fallback)
       assert.equal(h.calls.length, fallback ? 1 : 0)
       if (fallback) {

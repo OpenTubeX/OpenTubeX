@@ -52,6 +52,7 @@ import { downloadWatchRoute, isPlayableDownloadFile } from '../../helpers/downlo
 import { parseLocalVideoGames } from '../../helpers/video-games'
 import { parseChannelPreferences } from '../../helpers/channel-preferences'
 import {
+  showInvidiousFallbackToast,
   buildChaptersVttFile,
   buildVTTFileLocally,
   formatDurationAsTimestamp,
@@ -4361,6 +4362,7 @@ export default defineComponent({
           backendFailed = true
           if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
           const canFallback = process.env.SUPPORTS_LOCAL_API && this.backendPreference === 'invidious' && this.backendFallback
+          if (canFallback) showInvidiousFallbackToast()
           if (metadataOnly) {
             if (canFallback) return this.getVideoInformationLocal(loadGeneration, true)
             console.error('Could not restore downloaded video metadata', err)
@@ -4371,7 +4373,6 @@ export default defineComponent({
           if (canFallback) {
             const errorMessage = this.t('Invidious API Error (Click to copy)')
             showApiErrorToast(errorMessage, err, this.showTabToast)
-            this.showTabToast({ message: this.t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
             this.getVideoInformationLocal(loadGeneration)
           } else {
             const restrictedPlaybackError = this.getRestrictedPlaybackErrorType(err.message || err.toString())

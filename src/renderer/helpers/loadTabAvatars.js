@@ -13,6 +13,7 @@ import {
   youtubeImageUrlToInvidious
 } from './api/invidious'
 import { getLocalVideoAvatarUrl } from './video-collaborators'
+import { showInvidiousFallbackToast } from './utils'
 
 const TAB_AVATAR_LOAD_CONCURRENCY = 4
 let activeAvatarLoads = 0
@@ -95,6 +96,7 @@ async function loadTabAvatar(tab) {
   }
 
   if (avatarBytes == null && store.getters.getBackendFallback) {
+    if (!useLocalApi) showInvidiousFallbackToast()
     avatarBytes = await fetchAvatarBytes(routePath, !useLocalApi)
   }
   if (avatarBytes == null) return false

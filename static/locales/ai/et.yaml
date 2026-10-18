@@ -2151,3 +2151,4 @@ Library Format Changed:
   Title: "Kogu viidi uude vormingusse"
   Message: "Sinu kogu kasutab nüüd uut salvestusvormingut."
   Detail: "OpenTubeXi vanemad versioonid saavad sinu kogu endiselt avada, kuid näitavad seda sellisena, nagu see oli enne seda uuendust. Vanemas versioonis tehtud muudatused lisatakse, kui naased selle versiooni juurde."
+Invidious Fallback Warning: "See päring läheb sinu seadistatud Invidiousi serverist mööda ja ühendub otse YouTube’iga, avaldades sinu IP-aadressi."

@@ -3365,3 +3365,4 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Create a desktop shortcut
+Invidious Fallback Warning: "This request bypasses your configured Invidious instance and connects directly to YouTube, exposing your IP address."

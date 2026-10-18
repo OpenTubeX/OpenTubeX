@@ -280,7 +280,7 @@ import store from '../../store/index'
 import { getConfiguredKeyboardShortcuts, SEARCH_RESULTS_DISPLAY_LIMIT } from '../../../constants'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
 import { getSearchFilterTabId, getSearchHistoryEntryQuery } from '../../../search-history'
-import { isUnloadedBackgroundTabClick, localizeAndAddKeyboardShortcutToActionTitle, openInternalPath } from '../../helpers/utils'
+import { isUnloadedBackgroundTabClick, localizeAndAddKeyboardShortcutToActionTitle, openInternalPath, showInvidiousFallbackToast } from '../../helpers/utils'
 import { translateWindowTitle } from '../../helpers/strings'
 import { getLocalSearchSuggestions } from '../../helpers/api/local'
 import { getInvidiousSearchSuggestions } from '../../helpers/api/invidious'
@@ -1046,6 +1046,7 @@ async function loadSearchSuggestions(query, controller) {
         suggestions = (await getInvidiousSearchSuggestions(query, signal)).suggestions
       } catch (error) {
         if (signal.aborted || !process.env.SUPPORTS_LOCAL_API || !backendFallback.value) throw error
+        showInvidiousFallbackToast()
         suggestions = await getLocalSearchSuggestions(query, signal)
       }
     } else {

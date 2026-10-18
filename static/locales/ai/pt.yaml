@@ -2205,3 +2205,4 @@ Library Format Changed:
   Title: "Biblioteca transferida para um novo formato"
   Message: "A sua biblioteca usa agora um novo formato de armazenamento."
   Detail: "As versões anteriores do OpenTubeX ainda podem abrir a sua biblioteca, mas mostram-na como estava antes desta atualização. As alterações que fizer numa versão anterior são adicionadas quando voltar a esta versão."
+Invidious Fallback Warning: "Este pedido ignora a instância Invidious configurada e liga-se diretamente ao YouTube, expondo o seu endereço IP."

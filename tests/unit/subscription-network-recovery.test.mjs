@@ -33,6 +33,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
   const window = new EventTarget()
   const navigator = { onLine: online }
   const toasts = []
+  const warnings = []
   const copied = []
   const subscriptionRefreshErrors = { value: null }
   const requests = []
@@ -91,6 +92,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
     startAutomaticDownloadsForChannel: async () => {},
     getChannelPlaylistId: id => id,
     showApiErrorToast: (...args) => toasts.push(args),
+    showInvidiousFallbackToast: () => warnings.push('direct fallback warning'),
     copyToClipboard: text => copied.push(text),
     showToast: (...args) => {
       toasts.push(args)
@@ -135,7 +137,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
   vm.runInContext(`${source}\nglobalThis.api = { refreshSubscriptionVideosFromRemote, refreshSubscriptionShortsFromRemote, refreshSubscriptionLiveFromRemote, refreshSubscriptionPostsFromRemote, cancelSubscriptionRefresh, updateVideoListAfterProcessing }`, context)
   return {
     get details() { return [...subscriptionRefreshErrors.value.values()].map(channel => channel.trace).join('\n') },
-    ...context.api, refresh: context.api[`refreshSubscription${feed}FromRemote`], navigator, requests, fallbackRequests, toasts, copied, writes, events, getters, recovery: sharedRecovery,
+    ...context.api, refresh: context.api[`refreshSubscription${feed}FromRemote`], navigator, requests, fallbackRequests, toasts, warnings, copied, writes, events, getters, recovery: sharedRecovery,
     reconnect() {
       fail = false
       navigator.onLine = true
@@ -338,12 +340,15 @@ for (const feed of ['Videos', 'Shorts', 'Live', 'Posts']) {
         t.mock.timers.tick(5000)
         await flushPromises()
         assert.ok(app.fallbackRequests.length > 0, 'recovery must try the reachable fallback')
+        assert.equal(app.warnings.length, backend === 'invidious' ? app.fallbackRequests.length : 0,
+          'each direct fallback must warn even during bulk network recovery')
         for (let i = 0; i < 30; i++) {
           t.mock.timers.tick(1000)
           await flushPromises()
         }
         assert.equal(app.writes.filter(write => write.key.endsWith('CacheByChannel')).length, 20)
         assert.equal(app.requests.length, 9, 'reuse the working backend for the rest of this refresh')
+        assert.equal(app.warnings.length, backend === 'invidious' ? app.fallbackRequests.length : 0)
         assert.equal(app.toasts.length, 0)
         assert.deepEqual(app.events, ['completed', 'finished'])
       } finally {

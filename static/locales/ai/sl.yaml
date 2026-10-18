@@ -2745,3 +2745,4 @@ Library Format Changed:
   Title: "Knjižnica je bila premaknjena v nov format"
   Message: "Vaša knjižnica zdaj uporablja nov format shranjevanja."
   Detail: "Starejše različice OpenTubeX lahko še vedno odprejo vašo knjižnico, vendar jo prikažejo takšno, kot je bila pred to posodobitvijo. Spremembe, ki jih naredite v starejši različici, se dodajo, ko se vrnete na to različico."
+Invidious Fallback Warning: "Ta zahteva zaobide nastavljeni strežnik Invidious in se poveže neposredno z YouTubom ter razkrije vaš naslov IP."
