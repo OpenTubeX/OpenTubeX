@@ -43,7 +43,7 @@ import { MATERIAL_SYSTEM_SEED, MATERIAL_THEME_VALUES, materialColorScheme, mater
 import { resolveSystemTheme, resolveSystemThemeSettings } from '../appearanceSettings'
 import { applySyncServerUserAgent } from '../syncServerUserAgent'
 import * as baseHandlers from '../datastores/handlers/base'
-import { liveReminders, onLegacyDatastoreChanges, onLegacyDatastoreImported } from '../datastores'
+import { liveReminders, onLegacyDatastoreChanges, onLegacyDatastoreImported, waitForDatastores } from '../datastores'
 import { extractExpiryTimestamp, ImageCache } from './ImageCache'
 import { constants as fsConstants, existsSync } from 'fs'
 import { createReadStream } from 'node:fs'
@@ -95,6 +95,8 @@ import {
 import { createSubscriptionBackgroundService } from './subscriptionBackground'
 import { supportsNativeNotifications } from './nativeNotifications'
 import { getTrayMenuIcon } from './trayMenuIcons'
+import { createScheduledBackups } from './scheduledBackups'
+import { createBackupArchiveFactory } from './backupArchive'
 
 function getSystemAccentColor() {
   try {
@@ -1871,6 +1873,24 @@ function runApp() {
 
   const userDataPath = app.getPath('userData')
   const backgroundSubscriptions = createSubscriptionBackgroundService(userDataPath)
+  const scheduledBackups = createScheduledBackups({
+    async readConfiguration() {
+      const keys = ['scheduledBackupEnabled', 'scheduledBackupFolderPath', 'scheduledBackupInterval', 'scheduledBackupKeepCount', 'scheduledBackupStatus']
+      const [enabled, directory, interval, keepCount, status] = await Promise.all(keys.map(async key => (await baseHandlers.settings._findOne(key))?.value))
+      return { enabled, directory, interval: interval ?? 7, keepCount: keepCount ?? 5, status }
+    },
+    createArchive: createBackupArchiveFactory(userDataPath,
+      path.join(__dirname, process.env.NODE_ENV === 'development' ? '../../dist/backupArchiveWorker.js' : 'backupArchiveWorker.js'), {
+        waitForDatastores,
+        settings: baseHandlers.settings,
+        watchStats: baseHandlers.watchStats,
+      }),
+    saveStatus: status => updateSettingFromMain('scheduledBackupStatus', status),
+  })
+  function checkScheduledBackup() {
+    scheduledBackups.tick().catch(error => console.error('Could not check scheduled backups', error))
+  }
+  let scheduledBackupTimer
   let keepRefreshingInBackground = false
 
   ipcMain.handle(IpcChannels.SUBSCRIPTION_BACKGROUND, async (event, method, value) => {
@@ -2141,6 +2161,8 @@ function runApp() {
   let proxyUrl
 
   app.on('ready', async (_, __) => {
+    scheduledBackupTimer = setInterval(checkScheduledBackup, 60_000)
+    checkScheduledBackup()
     try {
       await applyYtDlpPlaybackCacheSettings()
     } catch (error) {
@@ -4335,6 +4357,18 @@ function runApp() {
     })
   })
 
+  ipcMain.handle(IpcChannels.CHOOSE_SCHEDULED_BACKUP_FOLDER, async (event) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) return
+    const currentPath = (await baseHandlers.settings._findOne('scheduledBackupFolderPath'))?.value
+    const options = { defaultPath: currentPath || app.getPath('documents'), properties: ['openDirectory', 'createDirectory'] }
+    const window = BrowserWindow.fromWebContents(event.sender)
+    const result = await (window ? dialog.showOpenDialog(window, options) : dialog.showOpenDialog(options))
+    if (result.canceled || !result.filePaths[0]) return
+    await updateSettingFromMain('scheduledBackupFolderPath', result.filePaths[0])
+    checkScheduledBackup()
+    return result.filePaths[0]
+  })
+
   /**
    * @param {import('electron').WebContents} webContents
    * @param {string | undefined} [currentPath]
@@ -5367,9 +5401,8 @@ function runApp() {
           return await baseHandlers.settings.find()
 
         case DBActions.GENERAL.UPSERT:
-          // This one is only allowed to be changed by the CHOOSE_DEFAULT_FOLDER IPC action
-          // to avoid the "write to default folder" IPC calls being abused to write to arbitrary locations
-          if (data._id === 'screenshotFolderPath') {
+          // Destinations require a native folder picker. Backup status is written by the scheduler.
+          if (['screenshotFolderPath', 'scheduledBackupFolderPath', 'scheduledBackupStatus'].includes(data._id)) {
             return null
           }
 
@@ -5380,6 +5413,11 @@ function runApp() {
             { event: SyncEvents.GENERAL.UPSERT, data }
           )
           switch (data._id) {
+            case 'scheduledBackupEnabled':
+            case 'scheduledBackupInterval':
+            case 'scheduledBackupKeepCount':
+              checkScheduledBackup()
+              break
             case 'contextMenuSearchEngines':
               configuredSearchEngines = parseSearchEngines(data.value)
               break
@@ -6109,6 +6147,7 @@ function runApp() {
   // ************************************************* //
 
   let resourcesCleanUpDone = false
+  let resourcesCleanUpPromise = null
 
   // `before-quit` fires on every platform before any windows start closing.
   // Confirm app-level quit requests here, then mark the app as quitting so
@@ -6135,34 +6174,23 @@ function runApp() {
       backgroundSubscriptions.setBackground(true).catch(error => console.error(error))
       return
     }
+    // macOS keeps the app and its backup schedule running without open windows.
+    if (process.platform === 'darwin' && !isQuitting) return
     // Clean up resources (datastores' compaction + Electron cache and storage data clearing)
     handleQuit()
   })
 
-  if (process.platform === 'darwin') {
-    // `window-all-closed` doesn't fire for Cmd+Q
-    // https://www.electronjs.org/docs/latest/api/app#event-window-all-closed
-    // This is also fired when `app.quit` called
-    // Not using `before-quit` since that one is fired before windows are closed
-    app.on('will-quit', e => {
-      // Let app quit when the cleanup is finished
-
-      if (resourcesCleanUpDone) { return }
-
-      e.preventDefault()
-      cleanUpResources().finally(() => {
-        // Quit AFTER the resources cleanup is finished
-        // Which calls the listener again, which is why we have the variable
-
-        app.quit()
-      })
-    })
-  }
+  // Actual Quit also needs cleanup after the last window closed into background mode.
+  app.on('will-quit', event => {
+    if (resourcesCleanUpDone) return
+    event.preventDefault()
+    cleanUpResources().finally(() => app.quit())
+  })
 
   function handleQuit() {
     cleanUpResources().finally(() => {
       mainWindow = null
-      if (process.platform !== 'darwin') {
+      if (process.platform !== 'darwin' && !isQuitting) {
         app.quit()
       }
     })
@@ -6189,28 +6217,34 @@ function runApp() {
       return
     }
 
-    await Promise.allSettled([
-      trayIconWrite,
-      // Queue requests run in order, so a read waits for pending queue writes
-      updateWatchQueue({}),
-      baseHandlers.compactAllDatastores(),
-      shutdownYtDlpDownloads(),
-      session.defaultSession.clearCache(),
-      session.defaultSession.clearStorageData({
-        storages: [
-          'appcache',
-          'cookies',
-          'filesystem',
-          'indexdb',
-          'shadercache',
-          'websql',
-          'serviceworkers',
-          'cachestorage'
-        ]
-      })
-    ])
+    resourcesCleanUpPromise ??= (async () => {
+      clearInterval(scheduledBackupTimer)
+      await scheduledBackups.stop().catch(error => console.error('Could not finish scheduled backup', error))
 
-    resourcesCleanUpDone = true
+      await Promise.allSettled([
+        trayIconWrite,
+        // Queue requests run in order, so a read waits for pending queue writes
+        updateWatchQueue({}),
+        baseHandlers.compactAllDatastores(),
+        shutdownYtDlpDownloads(),
+        session.defaultSession.clearCache(),
+        session.defaultSession.clearStorageData({
+          storages: [
+            'appcache',
+            'cookies',
+            'filesystem',
+            'indexdb',
+            'shadercache',
+            'websql',
+            'serviceworkers',
+            'cachestorage'
+          ]
+        })
+      ])
+
+      resourcesCleanUpDone = true
+    })()
+    return resourcesCleanUpPromise
   }
 
   // MacOS event

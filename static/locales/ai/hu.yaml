@@ -956,6 +956,19 @@ Settings:
     Show Bottom Right Actions Dock: Jobb alsó műveletsáv megjelenítése
     Paused Interface Hide Delay: Szüneteltetett kezelőfelület elrejtési késleltetése
   Data Settings:
+    Scheduled backups: "Ütemezett biztonsági mentések"
+    Scheduled backup description: "Teljes ZIP-mentések készítése, amíg az OpenTubeX nyitva van. A kimaradt mentések indításkor készülnek el. A korlát csak az ebben a mappában lévő ütemezett mentésekre vonatkozik."
+    Choose backup folder: "Mentési mappa kiválasztása"
+    No backup folder selected: "Nincs kiválasztva mentési mappa"
+    Enable scheduled backups: "Ütemezett mentések engedélyezése"
+    Backup frequency: "Mentés gyakorisága"
+    Backups to keep: "Megtartandó mentések száma"
+    Daily: "Naponta"
+    Weekly: "Hetente"
+    Every 30 days: "30 naponta"
+    Last scheduled backup: "Utolsó ütemezett mentés: {date}"
+    No scheduled backup yet: "Még nincs ütemezett mentés"
+    Scheduled backup failed: "A mentés sikertelen. Ellenőrizze, hogy a mappa írható-e. Újabb kísérlet öt perc múlva."
     Import Preview:
       Title: Változások előnézete
       New: "Új: {count}"

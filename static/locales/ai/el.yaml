@@ -958,6 +958,19 @@ Settings:
     Show Bottom Right Actions Dock: Εμφάνιση βάσης ενεργειών κάτω δεξιά
     Paused Interface Hide Delay: Καθυστέρηση απόκρυψης περιβάλλοντος κατά την παύση
   Data Settings:
+    Scheduled backups: "Προγραμματισμένα αντίγραφα ασφαλείας"
+    Scheduled backup description: "Αποθήκευση πλήρων αντιγράφων ZIP όσο το OpenTubeX είναι ανοιχτό. Τα παραλειπόμενα αντίγραφα δημιουργούνται κατά την εκκίνηση. Το όριο ισχύει μόνο για προγραμματισμένα αντίγραφα σε αυτόν τον φάκελο."
+    Choose backup folder: "Επιλογή φακέλου αντιγράφων"
+    No backup folder selected: "Δεν επιλέχθηκε φάκελος αντιγράφων"
+    Enable scheduled backups: "Ενεργοποίηση προγραμματισμένων αντιγράφων"
+    Backup frequency: "Συχνότητα αντιγράφων"
+    Backups to keep: "Αντίγραφα προς διατήρηση"
+    Daily: "Καθημερινά"
+    Weekly: "Εβδομαδιαία"
+    Every 30 days: "Κάθε 30 ημέρες"
+    Last scheduled backup: "Τελευταίο προγραμματισμένο αντίγραφο: {date}"
+    No scheduled backup yet: "Δεν υπάρχει ακόμη προγραμματισμένο αντίγραφο"
+    Scheduled backup failed: "Η δημιουργία αντιγράφου απέτυχε. Ελέγξτε ότι ο φάκελος είναι εγγράψιμος. Νέα προσπάθεια σε πέντε λεπτά."
     Import Preview:
       Title: Προεπισκόπηση αλλαγών
       New: "Νέες: {count}"

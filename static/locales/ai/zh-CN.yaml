@@ -956,6 +956,19 @@ Settings:
     Show Bottom Right Actions Dock: 显示右下角操作栏
     Paused Interface Hide Delay: 暂停界面隐藏延迟
   Data Settings:
+    Scheduled backups: "定时备份"
+    Scheduled backup description: "在 OpenTubeX 打开时保存完整的 ZIP 备份。错过的备份将在启动时执行。保留数量限制仅适用于此文件夹中的定时备份。"
+    Choose backup folder: "选择备份文件夹"
+    No backup folder selected: "尚未选择备份文件夹"
+    Enable scheduled backups: "启用定时备份"
+    Backup frequency: "备份频率"
+    Backups to keep: "保留备份数量"
+    Daily: "每天"
+    Weekly: "每周"
+    Every 30 days: "每 30 天"
+    Last scheduled backup: "上次定时备份：{date}"
+    No scheduled backup yet: "尚无定时备份"
+    Scheduled backup failed: "备份失败。请检查文件夹是否可写。将在五分钟后重试。"
     Import Preview:
       Title: 预览更改
       New: 新增：{count}

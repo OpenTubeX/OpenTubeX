@@ -956,6 +956,19 @@ Settings:
     Show Bottom Right Actions Dock: Erakutsi ekintzen panela behean eskuinean
     Paused Interface Hide Delay: Pausatutako interfazea ezkutatzeko atzerapena
   Data Settings:
+    Scheduled backups: "Programatutako babeskopiak"
+    Scheduled backup description: "Gorde ZIP babeskopia osoak OpenTubeX irekita dagoen bitartean. Egin gabeko kopiak abiaraztean egiten dira. Muga karpeta honetako programatutako kopiei soilik aplikatzen zaie."
+    Choose backup folder: "Aukeratu babeskopien karpeta"
+    No backup folder selected: "Ez da babeskopien karpetarik aukeratu"
+    Enable scheduled backups: "Gaitu programatutako babeskopiak"
+    Backup frequency: "Babeskopien maiztasuna"
+    Backups to keep: "Gordeko diren kopiak"
+    Daily: "Egunero"
+    Weekly: "Astero"
+    Every 30 days: "30 egunean behin"
+    Last scheduled backup: "Azken babeskopia programatua: {date}"
+    No scheduled backup yet: "Oraindik ez dago babeskopia programaturik"
+    Scheduled backup failed: "Babeskopiak huts egin du. Egiaztatu karpetan idatz daitekeela. Bost minutu barru berriro saiatuko da."
     Import Preview:
       Title: Aldaketen aurrebista
       New: "Berriak: {count}"

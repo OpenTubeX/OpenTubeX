@@ -1178,6 +1178,19 @@ Settings:
     Add: 추가
     Remove: 제거
   Data Settings:
+    Scheduled backups: "예약 백업"
+    Scheduled backup description: "OpenTubeX가 열려 있는 동안 전체 ZIP 백업을 저장합니다. 놓친 백업은 시작 시 실행됩니다. 보관 한도는 이 폴더의 예약 백업에만 적용됩니다."
+    Choose backup folder: "백업 폴더 선택"
+    No backup folder selected: "백업 폴더를 선택하지 않았습니다"
+    Enable scheduled backups: "예약 백업 사용"
+    Backup frequency: "백업 주기"
+    Backups to keep: "보관할 백업 수"
+    Daily: "매일"
+    Weekly: "매주"
+    Every 30 days: "30일마다"
+    Last scheduled backup: "마지막 예약 백업: {date}"
+    No scheduled backup yet: "아직 예약 백업이 없습니다"
+    Scheduled backup failed: "백업에 실패했습니다. 폴더에 쓸 수 있는지 확인하세요. 5분 후에 다시 시도합니다."
     Import Preview:
       Title: 변경 사항 미리 보기
       New: "신규: {count}"

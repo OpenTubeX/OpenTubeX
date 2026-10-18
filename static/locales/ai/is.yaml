@@ -960,6 +960,19 @@ Settings:
     Show Bottom Right Actions Dock: Sýna aðgerðastiku neðst til hægri
     Paused Interface Hide Delay: Töf áður en viðmót er falið í hléi
   Data Settings:
+    Scheduled backups: "Áætluð öryggisafrit"
+    Scheduled backup description: "Vistaðu heil ZIP-öryggisafrit á meðan OpenTubeX er opið. Afrit sem gleymdust eru gerð við ræsingu. Hámarkið gildir aðeins um áætluð afrit í þessari möppu."
+    Choose backup folder: "Velja möppu fyrir öryggisafrit"
+    No backup folder selected: "Engin afritamappa valin"
+    Enable scheduled backups: "Virkja áætluð öryggisafrit"
+    Backup frequency: "Tíðni afritunar"
+    Backups to keep: "Fjöldi afrita sem á að geyma"
+    Daily: "Daglega"
+    Weekly: "Vikulega"
+    Every 30 days: "Á 30 daga fresti"
+    Last scheduled backup: "Síðasta áætlaða öryggisafrit: {date}"
+    No scheduled backup yet: "Ekkert áætlað öryggisafrit enn"
+    Scheduled backup failed: "Afritun mistókst. Athugaðu að hægt sé að skrifa í möppuna. Reynt aftur eftir fimm mínútur."
     Import Preview:
       Title: Forskoða breytingar
       New: "Nýtt: {count}"

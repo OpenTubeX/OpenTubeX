@@ -1,0 +1,29 @@
+.scheduledBackups {
+  margin-block-start: 24px;
+}
+
+.scheduledBackups p {
+  color: var(--secondary-text-color);
+  font-size: 0.9em;
+  text-align: center;
+}
+
+.backupFolderChoice {
+  justify-content: center;
+}
+
+.backupFolder {
+  overflow-wrap: anywhere;
+}
+
+.backupControls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 24px;
+}
+
+.backupControls > * {
+  flex: 1 1 220px;
+  min-inline-size: 0;
+}

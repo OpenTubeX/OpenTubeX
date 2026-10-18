@@ -1554,6 +1554,19 @@ Settings:
     Add: Add
     Remove: Remove
   Data Settings:
+    Scheduled backups: "Scheduled backups"
+    Scheduled backup description: "Save complete ZIP backups while OpenTubeX is open. Missed backups run on startup. The limit applies only to scheduled backups in this folder."
+    Choose backup folder: "Choose backup folder"
+    No backup folder selected: "No backup folder selected"
+    Enable scheduled backups: "Enable scheduled backups"
+    Backup frequency: "Backup frequency"
+    Backups to keep: "Backups to keep"
+    Daily: "Daily"
+    Weekly: "Weekly"
+    Every 30 days: "Every 30 days"
+    Last scheduled backup: "Last scheduled backup: {date}"
+    No scheduled backup yet: "No scheduled backup yet"
+    Scheduled backup failed: "Backup failed. Check that the folder is writable. Retrying in five minutes."
     Import Preview:
       Title: Preview changes
       New: "New: {count}"

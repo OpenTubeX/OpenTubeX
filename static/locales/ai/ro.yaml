@@ -960,6 +960,19 @@ Settings:
     Add: Adaugă
     Remove: Elimină
   Data Settings:
+    Scheduled backups: "Copii de siguranță programate"
+    Scheduled backup description: "Salvează copii ZIP complete cât timp OpenTubeX este deschis. Copiile ratate sunt create la pornire. Limita se aplică doar copiilor programate din acest dosar."
+    Choose backup folder: "Alege dosarul copiilor"
+    No backup folder selected: "Nu este ales niciun dosar"
+    Enable scheduled backups: "Activează copiile programate"
+    Backup frequency: "Frecvența copiilor"
+    Backups to keep: "Copii de păstrat"
+    Daily: "Zilnic"
+    Weekly: "Săptămânal"
+    Every 30 days: "La fiecare 30 de zile"
+    Last scheduled backup: "Ultima copie programată: {date}"
+    No scheduled backup yet: "Încă nu există nicio copie programată"
+    Scheduled backup failed: "Copierea a eșuat. Verifică dacă dosarul permite scrierea. Se reîncearcă peste cinci minute."
     Import Preview:
       Title: Previzualizează modificările
       New: "Noi: {count}"

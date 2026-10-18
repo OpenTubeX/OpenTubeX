@@ -1102,6 +1102,19 @@ Settings:
     Add: Legg til
     Remove: Fjern
   Data Settings:
+    Scheduled backups: "Planlagde tryggleikskopiar"
+    Scheduled backup description: "Lagra fullstendige ZIP-kopiar medan OpenTubeX er ope. Uteblivne kopiar vert laga ved oppstart. Grensa gjeld berre planlagde kopiar i denne mappa."
+    Choose backup folder: "Vel mappe for tryggleikskopiar"
+    No backup folder selected: "Inga mappe for tryggleikskopiar vald"
+    Enable scheduled backups: "Slå på planlagde tryggleikskopiar"
+    Backup frequency: "Kor ofte det skal takast kopiar"
+    Backups to keep: "Tal på kopiar som skal behaldast"
+    Daily: "Dagleg"
+    Weekly: "Kvar veke"
+    Every 30 days: "Kvar 30. dag"
+    Last scheduled backup: "Siste planlagde tryggleikskopi: {date}"
+    No scheduled backup yet: "Ingen planlagd tryggleikskopi enno"
+    Scheduled backup failed: "Tryggleikskopieringa feila. Sjekk at mappa er skrivbar. Prøver att om fem minutt."
     Import Preview:
       Title: Førehandsvis endringar
       New: "Nye: {count}"

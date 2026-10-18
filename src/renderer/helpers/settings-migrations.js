@@ -46,6 +46,10 @@ export async function migrateStoredAiVideoSummarySetting({
 export function migrateLegacySettings(settings) {
   const migratedSettings = { ...settings }
 
+  if (migratedSettings.landingPage === 'settings') {
+    migratedSettings.landingPage = 'subscriptions'
+  }
+
   const formerNavigationKeys = [
     'hideHome',
     'hidePopularVideos',
@@ -80,6 +84,24 @@ export function migrateLegacySettings(settings) {
     }
     delete migratedSettings.useVerticalTabBar
   }
+
+  if (!Object.hasOwn(migratedSettings, 'playlistThumbnailSize') && Object.hasOwn(migratedSettings, 'thumbnailSize')) {
+    migratedSettings.playlistThumbnailSize = migratedSettings.thumbnailSize
+  }
+
+  if (!Object.hasOwn(migratedSettings, 'autoPictureInPictureTriggers')) {
+    const enabled = Object.hasOwn(migratedSettings, 'autoPictureInPictureOnTabChange')
+      ? migratedSettings.autoPictureInPictureOnTabChange === true
+      : Object.hasOwn(migratedSettings, 'autoPictureInPictureMode')
+        ? ['tab', 'both'].includes(migratedSettings.autoPictureInPictureMode)
+        : null
+    if (enabled !== null) migratedSettings.autoPictureInPictureTriggers = enabled ? ['tab', 'minimize'] : []
+  }
+  if (!Object.hasOwn(migratedSettings, 'scrollMiniPlayerEnabled') && Object.hasOwn(migratedSettings, 'autoPictureInPictureMode')) {
+    migratedSettings.scrollMiniPlayerEnabled = migratedSettings.autoPictureInPictureMode !== 'never'
+  }
+  delete migratedSettings.autoPictureInPictureMode
+  delete migratedSettings.autoPictureInPictureOnTabChange
 
   if (Object.hasOwn(migratedSettings, 'moveDownloadsToQuickSettings')) {
     if (!Object.hasOwn(migratedSettings, 'moveDownloadsToAppHeader')) {

@@ -966,6 +966,19 @@ Settings:
     Add: Thêm
     Remove: Xóa
   Data Settings:
+    Scheduled backups: "Sao lưu theo lịch"
+    Scheduled backup description: "Lưu bản sao ZIP đầy đủ khi OpenTubeX đang mở. Các lần sao lưu bị lỡ sẽ chạy khi khởi động. Giới hạn chỉ áp dụng cho bản sao theo lịch trong thư mục này."
+    Choose backup folder: "Chọn thư mục sao lưu"
+    No backup folder selected: "Chưa chọn thư mục sao lưu"
+    Enable scheduled backups: "Bật sao lưu theo lịch"
+    Backup frequency: "Tần suất sao lưu"
+    Backups to keep: "Số bản sao cần giữ"
+    Daily: "Hằng ngày"
+    Weekly: "Hằng tuần"
+    Every 30 days: "Mỗi 30 ngày"
+    Last scheduled backup: "Lần sao lưu theo lịch gần nhất: {date}"
+    No scheduled backup yet: "Chưa có bản sao lưu theo lịch"
+    Scheduled backup failed: "Sao lưu thất bại. Hãy kiểm tra quyền ghi vào thư mục. Sẽ thử lại sau năm phút."
     Import Preview:
       Title: Xem trước thay đổi
       New: "Mới: {count}"

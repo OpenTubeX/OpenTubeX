@@ -956,6 +956,19 @@ Settings:
     Show Bottom Right Actions Dock: 右下の操作ドックを表示
     Paused Interface Hide Delay: 一時停止中のインターフェースを隠すまでの時間
   Data Settings:
+    Scheduled backups: "定期バックアップ"
+    Scheduled backup description: "OpenTubeX の起動中に完全な ZIP バックアップを保存します。実行できなかったバックアップは次回起動時に作成されます。保存数の上限は、このフォルダー内の定期バックアップにのみ適用されます。"
+    Choose backup folder: "バックアップフォルダーを選択"
+    No backup folder selected: "バックアップフォルダーが未選択です"
+    Enable scheduled backups: "定期バックアップを有効にする"
+    Backup frequency: "バックアップの頻度"
+    Backups to keep: "保存するバックアップ数"
+    Daily: "毎日"
+    Weekly: "毎週"
+    Every 30 days: "30 日ごと"
+    Last scheduled backup: "前回の定期バックアップ: {date}"
+    No scheduled backup yet: "定期バックアップはまだありません"
+    Scheduled backup failed: "バックアップに失敗しました。フォルダーに書き込めることを確認してください。5 分後に再試行します。"
     Import Preview:
       Title: 変更をプレビュー
       New: "新規: {count}"

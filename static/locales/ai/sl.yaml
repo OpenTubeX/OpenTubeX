@@ -1217,6 +1217,19 @@ Settings:
     Add: Dodaj
     Remove: Odstrani
   Data Settings:
+    Scheduled backups: "Načrtovane varnostne kopije"
+    Scheduled backup description: "Shranjujte celotne kopije ZIP, ko je OpenTubeX odprt. Zamujene kopije se ustvarijo ob zagonu. Omejitev velja le za načrtovane kopije v tej mapi."
+    Choose backup folder: "Izberi mapo varnostnih kopij"
+    No backup folder selected: "Mapa varnostnih kopij ni izbrana"
+    Enable scheduled backups: "Omogoči načrtovane varnostne kopije"
+    Backup frequency: "Pogostost kopiranja"
+    Backups to keep: "Število shranjenih kopij"
+    Daily: "Dnevno"
+    Weekly: "Tedensko"
+    Every 30 days: "Vsakih 30 dni"
+    Last scheduled backup: "Zadnja načrtovana kopija: {date}"
+    No scheduled backup yet: "Načrtovane kopije še ni"
+    Scheduled backup failed: "Varnostno kopiranje ni uspelo. Preverite, ali je mogoče pisati v mapo. Ponovni poskus čez pet minut."
     Import Preview:
       Title: Predogled sprememb
       New: "Novi: {count}"

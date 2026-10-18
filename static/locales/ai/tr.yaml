@@ -956,6 +956,19 @@ Settings:
     Show Bottom Right Actions Dock: Sağ Alt İşlem Panelini Göster
     Paused Interface Hide Delay: Duraklatılmış Arayüzü Gizleme Gecikmesi
   Data Settings:
+    Scheduled backups: "Zamanlanmış yedeklemeler"
+    Scheduled backup description: "OpenTubeX açıkken tam ZIP yedekleri kaydedin. Kaçırılan yedeklemeler açılışta yapılır. Sınır yalnızca bu klasördeki zamanlanmış yedekler için geçerlidir."
+    Choose backup folder: "Yedekleme klasörünü seç"
+    No backup folder selected: "Yedekleme klasörü seçilmedi"
+    Enable scheduled backups: "Zamanlanmış yedeklemeleri etkinleştir"
+    Backup frequency: "Yedekleme sıklığı"
+    Backups to keep: "Saklanacak yedek sayısı"
+    Daily: "Günlük"
+    Weekly: "Haftalık"
+    Every 30 days: "Her 30 günde bir"
+    Last scheduled backup: "Son zamanlanmış yedekleme: {date}"
+    No scheduled backup yet: "Henüz zamanlanmış yedek yok"
+    Scheduled backup failed: "Yedekleme başarısız oldu. Klasörün yazılabilir olduğunu kontrol edin. Beş dakika sonra yeniden denenecek."
     Import Preview:
       Title: Değişiklikleri önizle
       New: "Yeni: {count}"

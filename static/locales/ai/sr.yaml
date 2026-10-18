@@ -980,6 +980,19 @@ Settings:
     Add: Додај
     Remove: Уклони
   Data Settings:
+    Scheduled backups: "Заказане резервне копије"
+    Scheduled backup description: "Чувајте потпуне ZIP копије док је OpenTubeX отворен. Пропуштене копије праве се при покретању. Ограничење важи само за заказане копије у овој фасцикли."
+    Choose backup folder: "Изабери фасциклу за копије"
+    No backup folder selected: "Није изабрана фасцикла за копије"
+    Enable scheduled backups: "Омогући заказане резервне копије"
+    Backup frequency: "Учесталост копирања"
+    Backups to keep: "Број копија за чување"
+    Daily: "Дневно"
+    Weekly: "Недељно"
+    Every 30 days: "Сваких 30 дана"
+    Last scheduled backup: "Последња заказана копија: {date}"
+    No scheduled backup yet: "Још нема заказане резервне копије"
+    Scheduled backup failed: "Прављење копије није успело. Проверите да ли се у фасциклу може писати. Нови покушај за пет минута."
     Import Preview:
       Title: Преглед промена
       New: "Нови: {count}"

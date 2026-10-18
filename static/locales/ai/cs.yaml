@@ -956,6 +956,19 @@ Settings:
     Show Bottom Right Actions Dock: Zobrazovat panel akcí vpravo dole
     Paused Interface Hide Delay: Prodleva skrytí rozhraní při pozastavení
   Data Settings:
+    Scheduled backups: "Plánované zálohy"
+    Scheduled backup description: "Ukládejte úplné ZIP zálohy, když je OpenTubeX otevřený. Zmeškané zálohy se vytvoří při spuštění. Limit platí jen pro plánované zálohy v této složce."
+    Choose backup folder: "Vybrat složku záloh"
+    No backup folder selected: "Není vybrána složka záloh"
+    Enable scheduled backups: "Povolit plánované zálohy"
+    Backup frequency: "Četnost zálohování"
+    Backups to keep: "Počet uchovávaných záloh"
+    Daily: "Denně"
+    Weekly: "Týdně"
+    Every 30 days: "Každých 30 dní"
+    Last scheduled backup: "Poslední plánovaná záloha: {date}"
+    No scheduled backup yet: "Zatím žádná plánovaná záloha"
+    Scheduled backup failed: "Zálohování selhalo. Ověřte, že lze do složky zapisovat. Další pokus za pět minut."
     Import Preview:
       Title: Náhled změn
       New: "Nové: {count}"

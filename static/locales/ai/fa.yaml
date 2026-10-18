@@ -989,6 +989,19 @@ Settings:
     Add: افزودن
     Remove: حذف
   Data Settings:
+    Scheduled backups: "پشتیبان‌گیری زمان‌بندی‌شده"
+    Scheduled backup description: "هنگام باز بودن OpenTubeX نسخه‌های کامل ZIP ذخیره کنید. پشتیبان‌های انجام‌نشده هنگام راه‌اندازی ساخته می‌شوند. محدودیت فقط برای پشتیبان‌های زمان‌بندی‌شده در این پوشه است."
+    Choose backup folder: "انتخاب پوشهٔ پشتیبان"
+    No backup folder selected: "پوشهٔ پشتیبان انتخاب نشده"
+    Enable scheduled backups: "فعال‌سازی پشتیبان‌گیری زمان‌بندی‌شده"
+    Backup frequency: "بسامد پشتیبان‌گیری"
+    Backups to keep: "تعداد پشتیبان‌های نگهداری‌شده"
+    Daily: "روزانه"
+    Weekly: "هفتگی"
+    Every 30 days: "هر ۳۰ روز"
+    Last scheduled backup: "آخرین پشتیبان زمان‌بندی‌شده: {date}"
+    No scheduled backup yet: "هنوز پشتیبان زمان‌بندی‌شده‌ای وجود ندارد"
+    Scheduled backup failed: "پشتیبان‌گیری ناموفق بود. قابل‌نوشتن بودن پوشه را بررسی کنید. تلاش دوباره تا پنج دقیقهٔ دیگر."
     Import Preview:
       Title: پیش‌نمایش تغییرات
       New: "جدید: {count}"

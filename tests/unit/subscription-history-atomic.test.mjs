@@ -5,6 +5,7 @@ import vm from 'node:vm'
 import Datastore from '@seald-io/nedb'
 import { migrateLegacyHistoryRecord } from '../../src/history.js'
 import * as seenVideos from '../../src/subscriptionSeenVideos.js'
+import { migrateStoredSettings } from '../../src/datastores/settingsMigrations.js'
 
 const source = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
 
@@ -18,7 +19,7 @@ async function fixture(marks = []) {
   const errors = []
   const { Settings, History } = vm.runInNewContext(
     source.slice(source.indexOf('class Settings {'), source.indexOf('\nclass WatchStats {')) + '\n({Settings, History})',
-    { db, ...seenVideos, migrateLegacyHistoryRecord, console: { error: error => errors.push(error) } }
+    { db, ...seenVideos, migrateLegacyHistoryRecord, migrateStoredSettings, console: { error: error => errors.push(error) } }
   )
   return { db, Settings, History, errors }
 }

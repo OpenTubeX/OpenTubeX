@@ -1191,6 +1191,19 @@ Settings:
     Add: Pridėti
     Remove: Pašalinti
   Data Settings:
+    Scheduled backups: "Suplanuotos atsarginės kopijos"
+    Scheduled backup description: "Išsaugokite visas ZIP kopijas, kol OpenTubeX atidaryta. Praleistos kopijos kuriamos paleidžiant. Riba taikoma tik suplanuotoms kopijoms šiame aplanke."
+    Choose backup folder: "Pasirinkti kopijų aplanką"
+    No backup folder selected: "Nepasirinktas atsarginių kopijų aplankas"
+    Enable scheduled backups: "Įjungti suplanuotas atsargines kopijas"
+    Backup frequency: "Kopijų kūrimo dažnis"
+    Backups to keep: "Saugomų kopijų skaičius"
+    Daily: "Kasdien"
+    Weekly: "Kas savaitę"
+    Every 30 days: "Kas 30 dienų"
+    Last scheduled backup: "Paskutinė suplanuota kopija: {date}"
+    No scheduled backup yet: "Suplanuotos kopijos dar nėra"
+    Scheduled backup failed: "Kopijos sukurti nepavyko. Patikrinkite, ar į aplanką galima rašyti. Bus bandoma po penkių minučių."
     Import Preview:
       Title: Pakeitimų peržiūra
       New: "Nauji: {count}"

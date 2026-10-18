@@ -960,6 +960,19 @@ Settings:
     Add: Lägg till
     Remove: Ta bort
   Data Settings:
+    Scheduled backups: "Schemalagda säkerhetskopior"
+    Scheduled backup description: "Spara fullständiga ZIP-kopior medan OpenTubeX är öppet. Missade kopior skapas vid start. Gränsen gäller bara schemalagda kopior i den här mappen."
+    Choose backup folder: "Välj mapp för säkerhetskopior"
+    No backup folder selected: "Ingen mapp för säkerhetskopior vald"
+    Enable scheduled backups: "Aktivera schemalagda säkerhetskopior"
+    Backup frequency: "Kopieringsfrekvens"
+    Backups to keep: "Antal kopior att behålla"
+    Daily: "Dagligen"
+    Weekly: "Varje vecka"
+    Every 30 days: "Var 30:e dag"
+    Last scheduled backup: "Senaste schemalagda kopia: {date}"
+    No scheduled backup yet: "Ingen schemalagd säkerhetskopia ännu"
+    Scheduled backup failed: "Säkerhetskopieringen misslyckades. Kontrollera att mappen är skrivbar. Försöker igen om fem minuter."
     Import Preview:
       Title: Förhandsgranska ändringar
       New: "Nya: {count}"

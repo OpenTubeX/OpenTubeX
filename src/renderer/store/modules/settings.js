@@ -1,63 +1,40 @@
-import { DEFAULT_MATERIAL_SEED_COLOR, normalizeMaterialSeedColor } from '../../../materialTheme.js'
+import { createDefaultSettings, resolveDefaultLandingPage } from '../../../settingsDefaults.js'
+import { NON_TRANSFERABLE_SETTINGS } from '../../../nonTransferableSettings.js'
+import { normalizeMaterialSeedColor } from '../../../materialTheme.js'
 import i18n, { loadLocale, setAITranslationCompletionsEnabled } from '../../i18n/index'
 import allLocales from '../../../../static/locales/activeLocales.json'
-import {
-  applyKeyboardShortcutOverrides,
-  DEFAULT_LANDING_PAGE,
-  DEFAULT_QUICK_PLAYBACK_SPEED_BAR_OPTIONS,
-  DEFAULT_WATCHED_PERCENTAGE_THRESHOLD,
-  LEGACY_DEFAULT_LANDING_PAGE,
-  MAIN_PROFILE_ID,
-  resolveLandingPage,
-  sanitizeKeyboardShortcutOverrides,
-  SyncEvents,
-} from '../../../constants'
+import { applyKeyboardShortcutOverrides, resolveLandingPage, sanitizeKeyboardShortcutOverrides, SyncEvents } from '../../../constants'
 import { DBProfileHandlers, DBSettingHandlers } from '../../../datastores/handlers/index'
 import { hashPassword } from '../../helpers/passwords'
 import { ANDROID_PROXY_SETTING_KEYS, configureAndroidProxy, readAndroidProxySettings } from '../../helpers/androidProxy'
 import { ensureAndroidLocalNetworkAccess } from '../../helpers/androidLocalNetwork'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { getSystemLocale, showToast } from '../../helpers/utils'
-import { DEFAULT_THUMBNAIL_SIZE } from '../../constants/thumbnailSize'
-import { DEFAULT_FIXED_TAB_WIDTH } from '../../constants/tabWidth'
 import { normalizeTabBarPosition } from '../../constants/tabBarPosition'
-import { DEFAULT_SCROLLBAR_THUMB_WIDTH } from '../../constants/scrollbar'
 import { setReducedMotionPreference } from '../../helpers/reducedMotion'
 import { setAnimationSpeed } from '../../helpers/animationSpeed'
-import { DEFAULT_SCROLL_SPEED } from '../../helpers/scrollSpeed'
-import { DEFAULT_SEARCH_ENGINES_SETTING } from '../../../searchEngines'
-import { DEFAULT_SEGMENT_PREFETCH_LIMIT } from '../../helpers/player/segmentPrefetch'
 import { normalizeYouTubeCaptionLanguageCode } from '../../helpers/player/youtubeCaptionLanguages'
 import { currentIconPack, isIconPack, setIconPack } from '../../icons/iconPackState'
 import { resolveBaseTheme, resolveSystemTheme } from '../../../appearanceSettings.js'
 import { resolveColor } from '../../helpers/colors.js'
-import { DEFAULT_APP_FONT, normalizeAppFont } from '../../helpers/appFont.js'
+import { normalizeAppFont } from '../../helpers/appFont.js'
 import {
   LAST_USED_VERSION_SETTING_ID,
   TUTORIAL_AUDIENCE_SETTING_ID,
 } from '../../helpers/tutorialState.js'
-import { DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB } from '../../../ytDlpPlaybackCacheSettings.js'
-import {
-  DEFAULT_YT_DLP_PRELOAD_CONCURRENCY,
-  DEFAULT_YT_DLP_PRELOAD_COUNT,
-} from '../../helpers/player/ytDlpPlaybackPreload.js'
 import { terminateCommentTranslationLanguageDetector } from '../../helpers/comment-translations'
-import { DEFAULT_HOME_SECTION_LAYOUT } from '../../helpers/homeSections.js'
 import { isSettingSyncableOnPlatform } from '../../helpers/platformSettings.js'
 import { SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY } from '../../helpers/subscription-settings-sync'
 import { CUSTOM_THEMES_SYNC_KEY } from '../../../customTheme.js'
-import { DEFAULT_QUICK_SETTINGS, normalizeQuickSettings } from '../../helpers/quickSettings.js'
-import { DEFAULT_FULLSCREEN_ACTIONS, normalizeFullscreenActions } from '../../helpers/fullscreenActions.js'
+import { normalizeQuickSettings } from '../../helpers/quickSettings.js'
+import { normalizeFullscreenActions } from '../../helpers/fullscreenActions.js'
 import { createOptimisticSettingUpdater, createSettingUpdateQueue } from '../../helpers/settingUpdateQueue.js'
 import { mergeSubscriptionSeenVideos } from '../../../subscriptionSeenVideos.js'
 import { mergeSubscriptionSeenPosts } from '../../../subscriptionSeenPosts.js'
 import { filterAvailableNavigationItems } from '../../../navigationAvailability.js'
-import {
-  DEFAULT_NAVIGATION_ITEMS,
-  navigationItemsFromLegacySettings,
-  normalizeNavigationItems,
-} from '../../../navigationItems.js'
+import { navigationItemsFromLegacySettings, normalizeNavigationItems } from '../../../navigationItems.js'
 import { migrateStoredAiVideoSummarySetting, migrateSyncServerUrl } from '../../helpers/settings-migrations.js'
+export { NON_TRANSFERABLE_SETTINGS } from '../../../nonTransferableSettings.js'
 
 const CHANNEL_SETTINGS_SYNC_MIGRATION_SETTING = 'channelSettingsSyncMigration'
 const TUTORIAL_STATE_SETTING_IDS = new Set([
@@ -85,7 +62,7 @@ const TUTORIAL_STATE_SETTING_IDS = new Set([
  * The first method benefits from the auto-generation of
  * a getter, a mutation and a few actions related to the setting.
  * This method should be preferred whenever possible:
- * - `state`
+ * - `state`, initialized by `src/settingsDefaults.js`
  *
  * The last one DOES NOT feature any kind of auto-generation and should
  * only be used in scenarios that don't fall under the other 2 options:
@@ -218,413 +195,10 @@ export const defaultSideEffectsTriggerId = settingId =>
   'trigger' + capitalize(settingId) + 'SideEffects'
 /*****/
 
-const state = {
-  alwaysShowScrollbars: false,
-  autoOpenChapters: false,
-  autoplayPlaylists: true,
-  skipUnavailablePlaylistVideos: true,
-  autoplayVideos: true,
-  // Combinable triggers for automatically entering Picture-in-Picture: 'tab', 'minimize', 'blur'
-  autoPictureInPictureTriggers: [],
-  mobileAutoPictureInPicture: true,
-  scrollMiniPlayerEnabled: true,
-  compactMobileMiniPlayer: false,
-  scrollMiniPlayerOnAllTabs: false,
-  keepPlayingOnNavigation: true,
-  scrollMiniPlayerSavedRect: '',
-  crossTabMiniPlayerSavedRect: '',
-  scrollbarThumbWidth: DEFAULT_SCROLLBAR_THUMB_WIDTH,
-  scrollSpeed: DEFAULT_SCROLL_SPEED,
-  avoidTranslation: 'disabled',
-  backendFallback: false,
-  backendPreference: !process.env.SUPPORTS_LOCAL_API ? 'invidious' : 'local',
-  barColor: false,
-  checkForUpdates: true,
-  internetConnectivityChecks: true,
-  capacitorLayoutMode: 'auto',
-  alwaysShowMobileSearchBar: false,
-  commentTranslationIgnoredLanguages: [],
-  confirmCloseApp: true,
-  confirmCloseMultipleTabs: true,
-  confirmCloseWindowWithMultipleTabs: true,
-  confirmLoadMultipleTabs: true,
-  confirmUnloadMultipleTabs: true,
-  appFont: DEFAULT_APP_FONT,
-  baseTheme: 'system',
-  materialSeedColor: DEFAULT_MATERIAL_SEED_COLOR,
-  systemLightTheme: 'light',
-  systemDarkTheme: 'dark',
-  iconPack: 'material',
-  mainColor: 'Red',
-  secColor: 'Blue',
-  defaultAutoplayInterruptionIntervalHours: 3,
-  defaultCaptionSettings: '{}',
-  enableCommentTranslations: true,
-  enableCaptionTranslations: false,
-  preferredCaptionLocale: '',
-  defaultInterval: 5,
-  defaultPlayback: 1,
-  defaultProfile: MAIN_PROFILE_ID,
-  defaultQuality: '720',
-  defaultSkipInterval: 5,
-  seekIntervalMultiplyByPlaybackRate: false,
-  // How many segments per stream shaka-player downloads in parallel ahead of the playhead
-  segmentPrefetchLimit: DEFAULT_SEGMENT_PREFETCH_LIMIT,
-  showPlaybackRateAdjustedTimestamp: false,
-  useCustomShortsPlayer: true,
-  loopShorts: true,
-  defaultViewingMode: 'default',
-  defaultVideoFormat: 'dash',
-  disableSmoothScrolling: false,
-  disableChannelLinks: false,
-  displayVideoPlayButton: false,
-  ambientMode: false,
-  musicVisualizer: true,
-  showMusicModeToggle: false,
-  enableVideoMetadataCache: false,
-  enableWatchStats: true,
-  statsWeekStartsOn: '1',
-  enableSearchSuggestions: true,
-  contextMenuSearchEngines: DEFAULT_SEARCH_ENGINES_SETTING,
-  enableSubtitlesByDefault: false,
-  enterFullscreenOnDisplayRotate: true,
-  fullscreenRotationIgnoresSystemLock: false,
-  rotateFullscreenToLandscape: true,
-  enableMobileFullscreenSwipe: true,
-  enableMobileFullscreenSeek: true,
-  mobileLeftSwipeAction: 'disabled',
-  mobileRightSwipeAction: 'disabled',
-  mobileFullscreenBrightness: false,
-  continuePlaybackWhenScreenIsLocked: true,
-  externalLinkHandling: '',
-  externalPlayer: '',
-  externalPlayerExecutable: '',
-  externalPlayerIgnoreWarnings: false,
-  externalPlayerIgnoreDefaultArgs: false,
-  externalPlayerCustomArgs: '[]',
-  showAddedExternalPlayerCustomArgs: true,
-  videoPlaybackEngine: 'built-in',
-  playbackEngineFallback: true,
-  ytDlpSource: 'system',
-  ytDlpChannel: 'stable',
-  ytDlpPath: '',
-  ytDlpPlaybackAuthMode: 'none',
-  ytDlpPlaybackCookiesPath: '',
-  ytDlpPlaybackCookiesBrowser: '',
-  ytDlpPlaybackCookiesBrowserProfile: '',
-  ytDlpPlaybackAlwaysUseCookies: false,
-  ytDlpSubtitleUseCookies: false,
-  ytDlpDownloadUseCookies: true,
-  ytDlpPlaybackCacheMaxEntrySize: DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB,
-  ytDlpPreloadEnabled: false,
-  ytDlpPreloadCount: DEFAULT_YT_DLP_PRELOAD_COUNT,
-  ytDlpPreloadConcurrency: DEFAULT_YT_DLP_PRELOAD_CONCURRENCY,
-  ytDlpFfmpegSource: 'system',
-  ytDlpFfmpegPath: '',
-  externalSoftwareUpdateMode: 'automatic',
-  enableDownloads: true,
-  moveDownloadsToAppHeader: false,
-  moveSettingsToAppHeader: false,
-  ytDlpDownloadFolderPath: '',
-  ytDlpDownloadCustomArgs: '',
-  ytDlpMaxConcurrentDownloads: 2,
-  ytDlpDownloadBandwidthLimit: '0',
-  ytDlpDownloadTemplates: '[]',
-  ytDlpSelectedTemplate: 'video:best',
-  ytDlpAutomaticDownloadRules: '{}',
-  disableAbRepeat: false,
-  hideRepeatStats: false,
-  expandSideBar: false,
-  hideActiveSubscriptions: false,
-  hideChannelAvatars: false,
-  hideChannelCommunity: false,
-  hideChannelHome: false,
-  hideChannelPlaylists: false,
-  hideChannelReleases: false,
-  hideChannelPodcasts: false,
-  hideChannelCourses: false,
-  hideChannelShorts: false,
-  hideChannelSubscriptions: false,
-  hideCommentLikes: false,
-  hideCommentPhotos: false,
-  hideComments: false,
-  hideEndScreenAnnotations: false,
-  hideEndScreenRecommendations: false,
-  hidePaidPromotion: false,
-  hideFeaturedChannels: false,
-  channelsHidden: '[]',
-  forbiddenTitles: '[]',
-  enableBlockLists: true,
-  showAddedChannelsHidden: true,
-  showAddedForbiddenTitles: true,
-  hideVideoDescription: false,
-  aiVideoSummaryMode: 'collapsed',
-  hideLiveChat: false,
-  hideLiveChatReplay: false,
-  hideLiveStreams: false,
-  hideHeaderLogo: false,
-  hideHeaderSyncIndicator: false,
-  hideStartupSplash: false,
-  // Former navigation switches remain loadable so older settings can migrate.
-  hideHome: false,
-  // This also controls playlist actions outside navigation.
-  hidePlaylists: false,
-  hidePopularVideos: false,
-  hideRecommendedVideos: false,
-  hideSearchBar: false,
-  hideSideBarOnWatchPages: true,
-  hideSharingActions: false,
-  hideSubscriptionsVideos: false,
-  hideSubscriptionsShorts: false,
-  hideSubscriptionsLive: false,
-  hideSubscriptionsCommunity: false,
-  hideTrendingVideos: false,
-  hideUnsubscribeButton: false,
-  hideUpcomingPremieres: false,
-  hideVideoLikesAndDislikes: false,
-  hideVideoViews: false,
-  shortenViewCounts: true,
-  hideWatchedSubs: false,
-  hideUploader: false,
-  unsubscriptionPopupStatus: false,
-  hideLabelsSideBar: false,
-  hideSettingsCategoryDescriptions: false,
-  alwaysShowNavigationBar: false,
-  compactNavigationLabels: false,
-  hideChapters: false,
-  hidePopularityGraph: false,
-  homeSectionLayout: DEFAULT_HOME_SECTION_LAYOUT.map(section => ({ ...section })),
-  enableHomeRecommendations: false,
-  recommendationExploration: 0.2,
-  showDistractionFreeTitles: false,
-  showPlayerControlsWhenPaused: true,
-  showVideoTitleWhenPaused: true,
-  showFullscreenActionsWhenPaused: true,
-  pausedInterfaceHideDelay: 2.5,
-  playingInterfaceHideDelay: 3,
-  showLiveChatTimestamps: false,
-  liveChatFilter: 'TOP_CHAT',
-  landingPage: DEFAULT_LANDING_PAGE,
-  enableMobileTabs: true,
-  newTabPosition: 'afterCurrentInOrder',
-  tabCloseFocus: 'lastActiveTab',
-  startupBehavior: 'loadLastActiveTab',
-  showTabIcons: true,
-  showTabPreviews: true,
-  tabLoadingIndicator: 'bar',
-  updateRelativeTimestamps: true,
-  tabBarPosition: 'top',
-  verticalTabBarWidth: 220,
-  useFixedTabWidth: false,
-  fixedTabWidth: DEFAULT_FIXED_TAB_WIDTH,
-  listType: 'grid',
-  playlistViewType: 'grid',
-  quickSettings: [...DEFAULT_QUICK_SETTINGS],
-  fullscreenActions: [...DEFAULT_FULLSCREEN_ACTIONS],
-  navigationItems: [...DEFAULT_NAVIGATION_ITEMS],
-  maxVideoPlaybackRate: 3,
-  onlyShowLatestFromChannel: false,
-  onlyShowLatestFromChannelNumber: 1,
-  openDeepLinksInNewWindow: false,
-  playNextVideo: false,
-  playlistReverseStates: {},
-  proxyHostname: '127.0.0.1',
-  proxyPort: '9050',
-  proxyUsername: '',
-  proxyPassword: '',
-  proxyProtocol: 'socks5',
-  videoIpBlockScriptPath: '',
-  proxyVideos: !process.env.SUPPORTS_LOCAL_API,
-  region: 'US',
-  rememberHistory: true,
-  // Empty means history is retained indefinitely.
-  historyRetentionDays: '',
-  rememberSearchHistory: true,
-  rememberTabNavigationHistory: false,
-  // 'auto', 'semi-auto', 'never'
-  watchedProgressSavingMode: 'auto',
-  watchedPercentageThreshold: DEFAULT_WATCHED_PERCENTAGE_THRESHOLD,
-  saveVideoHistoryWithLastViewedPlaylist: true,
-  showFamilyFriendlyOnly: false,
-  sponsorBlockShowSkippedToast: true,
-  sponsorBlockSkippedToastDuration: 6,
-  sponsorBlockEnableSubmission: false,
-  sponsorBlockUserId: '',
-  sponsorBlockGeneratedUserId: '',
-  sponsorBlockDraftSegmentsByVideoId: {},
-  sponsorBlockChannelWhitelist: [],
-  sponsorBlockUrl: 'https://sponsor.ajay.app',
-  sponsorBlockSponsor: {
-    color: 'Green',
-    skip: 'autoSkip'
-  },
-  sponsorBlockSelfPromo: {
-    color: 'Yellow',
-    skip: 'promptToSkip'
-  },
-  sponsorBlockInteraction: {
-    color: 'Pink',
-    skip: 'promptToSkip'
-  },
-  sponsorBlockIntro: {
-    color: 'Cyan',
-    skip: 'promptToSkip'
-  },
-  sponsorBlockOutro: {
-    color: 'Blue',
-    skip: 'promptToSkip'
-  },
-  sponsorBlockRecap: {
-    color: 'Indigo',
-    skip: 'promptToSkip'
-  },
-  sponsorBlockHook: {
-    color: 'Blue',
-    skip: 'promptToSkip'
-  },
-  sponsorBlockMusicOffTopic: {
-    color: 'Orange',
-    skip: 'promptToSkip'
-  },
-  sponsorBlockFiller: {
-    color: 'Purple',
-    skip: 'promptToSkip'
-  },
-  sponsorBlockHighlight: {
-    color: 'Red',
-    skip: 'promptToSkip'
-  },
-  thumbnailPreference: '',
-  thumbnailDataSaver: false,
-  showThumbnailPreviews: true,
-  showVideoMenuButton: false,
-  thumbnailSize: DEFAULT_THUMBNAIL_SIZE,
-  playlistThumbnailSize: DEFAULT_THUMBNAIL_SIZE,
-  uiRoundness: 100,
-  animationSpeed: 100,
-  showToastTimeoutIndicator: true,
-  usePlayerMenuGrid: true,
-  useFrostedGlassPlayerUi: true,
-  toastPosition: 'bottom-left',
-  extraThumbnailAction: '',
-  thumbnailLeftSwipeAction: 'disabled',
-  thumbnailRightSwipeAction: 'disabled',
-  blurThumbnails: false,
-  syncServerEnabled: false,
-  syncServerUrl: 'https://sync.opentubex.org',
-  syncServerUsername: '',
-  syncServerToken: '',
-  syncServerDeviceId: '',
-  syncServerDeviceName: '',
-  syncServerWatchStatsReset: null,
-  syncServerPrivacyMode: 'unknown',
-  syncServerPrivacyKey: '',
-  syncServerPrivacySalt: '',
-  syncServerAutoSync: true,
-  syncServerResumeAutoSync: false,
-  syncServerSyncSubscriptions: true,
-  syncServerSyncPlaylists: true,
-  syncServerSyncHistory: true,
-  syncServerSyncWatchStats: true,
-  syncServerSyncLiveReminders: true,
-  syncServerSyncProfiles: true,
-  syncServerSyncSessions: true,
-  syncServerSharedTabs: false,
-  syncServerSyncSettings: true,
-  syncServerSettingsExcluded: [],
-  syncServerSettingUpdatedAt: {},
-  syncServerLastSyncAt: 0,
-  syncServerSnapshot: '{}',
-  syncServerActivityClearedThrough: {},
-  subscriptionSeenVideos: '[]',
-  subscriptionSeenPosts: '[]',
-  playlistBookmarks: [],
-  useProxy: false,
-  userPlaylistSortOrder: 'date_added_descending',
-  useRssFeeds: false,
-  useReturnYouTubeDislikes: false,
-  returnYouTubeDislikesUrl: 'https://ryd-proxy.kavin.rocks',
-  useAiSlopList: false,
-  useSponsorBlock: false,
-  videoVolumeMouseScroll: false,
-  videoPlaybackRateMouseScroll: false,
-  videoSkipMouseScroll: false,
-  videoPlaybackRateInterval: 0.25,
-  rememberVolume: true,
-  enableVideoZoom: true,
-  showLightsOffToggle: false,
-  showSkipSilenceButton: false,
-  showDlnaCastButton: false,
-  showChromecastButton: false,
-  enableSkipSilenceByDefault: false,
-  useVoiceOverTranslation: false,
-  voiceOverTranslationPrepareInBackground: false,
-  voiceOverTranslationLanguage: 'en',
-  voiceOverTranslationVolume: 100,
-  voiceOverTranslationOriginalVolume: 10,
-  holdToDoublePlaybackSpeed: true,
-  keyboardShortcuts: '{}',
-  rememberPlaybackSpeedPerChannel: false,
-  autoUpdateChannelPlaybackSpeeds: false,
-  channelPlaybackSpeeds: '{}',
-  useQuickPlaybackSpeedBar: false,
-  quickPlaybackSpeedBarOptions: JSON.stringify(DEFAULT_QUICK_PLAYBACK_SPEED_BAR_OPTIONS),
-  rememberVideoQualityPerChannel: false,
-  autoUpdateChannelVideoQualities: false,
-  channelVideoQualities: '{}',
-  rememberSubtitlesStatePerChannel: false,
-  autoUpdateChannelSubtitlesStates: false,
-  channelSubtitlesStates: '{}',
-  rememberVolumePerChannel: false,
-  autoUpdateChannelVolumes: false,
-  channelVolumes: '{}',
-  enableScreenshot: false,
-  screenshotMode: 'prompt_folder',
-  screenshotFormat: 'png',
-  screenshotQuality: 95,
-  screenshotFolderPath: '',
-  screenshotFilenamePattern: '%Y%M%D-%H%N%S',
-  highlightChangedSettings: true,
-  showPerformanceImpactIndicators: false,
-  fetchSubscriptionsAutomatically: true,
-  showScheduledLiveStreamsFirst: true,
-  showNewSubscriptionFeed: true,
-  showNewSubscriptionFeedIndicators: false,
-  newSubscriptionFeedView: 'combined',
-  newSubscriptionFeedSortBy: 'newest',
-  subscriptionFeedAutoRefreshInterval: '0',
-  subscriptionShortsAutoRefreshInterval: '0',
-  subscriptionLiveAutoRefreshInterval: '0',
-  subscriptionPostsAutoRefreshInterval: '0',
-  enableClosedAppSubscriptionRefresh: !process.env.IS_ELECTRON,
-  showProgressBarToast: true,
-  settingsPassword: '',
-  useDeArrowTitles: false,
-  useDeArrowThumbnails: false,
-  deArrowThumbnailGeneratorUrl: 'https://dearrow-thumb.ajay.app',
-  // This makes the `favorites` playlist uses as quick bookmark target
-  // If the playlist is removed quick bookmark is disabled
-  quickBookmarkTargetPlaylistId: 'favorites',
-  generalAutoLoadMorePaginatedItemsEnabled: true,
-  enablePullToRefresh: true,
-  useTrayIcon: true,
-  trayIconPreset: 'default',
-  hideToTrayOnClose: false,
-  hideToTrayOnMinimize: false,
-  dateFormat: 'locale',
-  timeFormat: 'locale',
-
-  // The settings below have side effects
-  useAITranslationCompletions: true,
-  currentLocale: 'system',
-  reducedMotion: 'system',
-  defaultInvidiousInstance: '',
-  defaultVolume: 1,
-  uiScale: 100,
-  userPlaylistsSortBy: 'latest_played_first',
-  userPlaylistsCustomOrder: [],
-  userHistorySortBy: 'latest_played_first',
-}
+const state = createDefaultSettings({
+  supportsLocalApi: process.env.SUPPORTS_LOCAL_API,
+  isElectron: process.env.IS_ELECTRON,
+})
 
 // Keep a snapshot separate from Vuex's reactive state so settings can reliably
 // be compared with and restored to their original values.
@@ -795,88 +369,6 @@ const sideEffectHandlers = {
 }
 
 const settingsWithSideEffects = Object.keys(sideEffectHandlers)
-
-export const NON_TRANSFERABLE_SETTINGS = new Set([
-  // Installed fonts are specific to the current operating system.
-  'appFont',
-  /* Depends on process.env.IS_ELECTRON */
-  // ProxySettings
-  'useProxy',
-  'proxyProtocol',
-  'proxyHostname',
-  'proxyPort',
-  'proxyUsername',
-  'proxyPassword',
-  // ExternalPlayerSettings
-  'externalPlayer',
-  'externalPlayerExecutable',
-  'externalPlayerIgnoreWarnings',
-  'externalPlayerIgnoreDefaultArgs',
-  'externalPlayerCustomArgs',
-  'showAddedExternalPlayerCustomArgs',
-  // ExternalSoftwareSettings
-  'videoPlaybackEngine',
-  'playbackEngineFallback',
-  'ytDlpSource',
-  'ytDlpChannel',
-  'ytDlpPath',
-  'ytDlpPlaybackAuthMode',
-  'ytDlpPlaybackCookiesPath',
-  'ytDlpPlaybackCookiesBrowser',
-  'ytDlpPlaybackCookiesBrowserProfile',
-  'ytDlpPlaybackAlwaysUseCookies',
-  'ytDlpSubtitleUseCookies',
-  'ytDlpDownloadUseCookies',
-  'ytDlpPlaybackCacheMaxEntrySize',
-  'ytDlpFfmpegSource',
-  'ytDlpFfmpegPath',
-  'externalSoftwareUpdateMode',
-  // DownloadSettings
-  'ytDlpDownloadFolderPath',
-  'ytDlpDownloadCustomArgs',
-  // Others
-  'disableSmoothScrolling',
-  'useTrayIcon',
-  'trayIconPreset',
-  'hideToTrayOnClose',
-  'hideToTrayOnMinimize',
-  'settingsPassword',
-  'screenshotAskPath',
-  'screenshotFolderPath',
-  'syncServerEnabled',
-  'syncServerUrl',
-  'syncServerUsername',
-  'syncServerToken',
-  'syncServerDeviceId',
-  'syncServerDeviceName',
-  'syncServerWatchStatsReset',
-  'syncServerPrivacyMode',
-  'syncServerPrivacyKey',
-  'syncServerPrivacySalt',
-  'syncServerAutoSync',
-  'syncServerResumeAutoSync',
-  'syncServerSyncSubscriptions',
-  'syncServerSyncPlaylists',
-  'syncServerSyncHistory',
-  'syncServerSyncWatchStats',
-  'syncServerSyncLiveReminders',
-  'syncServerSyncProfiles',
-  'syncServerSyncSessions',
-  'syncServerSharedTabs',
-  'syncServerSyncSettings',
-  'syncServerSettingsExcluded',
-  'syncServerSettingUpdatedAt',
-  'syncServerLastSyncAt',
-  'syncServerSnapshot',
-  'syncServerActivityClearedThrough',
-  'subscriptionSeenVideos',
-  'subscriptionSeenPosts',
-
-  /* Depends on process.env.SUPPORTS_LOCAL_API */
-  'backendFallback',
-  'backendPreference',
-  'proxyVideos',
-])
 
 export const NON_SYNCABLE_SETTINGS = new Set([
   ...NON_TRANSFERABLE_SETTINGS,
@@ -1395,9 +887,7 @@ const customActions = {
       if (!hasLandingPage) {
         const profiles = await DBProfileHandlers.find()
         const isFreshInstallation = userSettings.length === 0 && profiles.length === 0
-        const resolvedLandingPage = isFreshInstallation
-          ? DEFAULT_LANDING_PAGE
-          : LEGACY_DEFAULT_LANDING_PAGE
+        const resolvedLandingPage = resolveDefaultLandingPage(isFreshInstallation)
         commit('setLandingPage', resolvedLandingPage)
         landingPageToInitialize = isFreshInstallation
           ? resolvedLandingPage
@@ -1848,6 +1338,10 @@ for (const settingId of Object.keys(state)) {
   const getterId = defaultGetterId(settingId)
   const mutationId = defaultMutationId(settingId)
   const updaterId = defaultUpdaterId(settingId)
+  const handleUpdateError = error => {
+    console.error(error)
+    if (['scheduledBackupEnabled', 'scheduledBackupInterval', 'scheduledBackupKeepCount'].includes(settingId)) throw error
+  }
 
   getters[getterId] = (state) => state[settingId]
   mutations[mutationId] = (state, value) => { state[settingId] = value }
@@ -1869,9 +1363,7 @@ for (const settingId of Object.keys(state)) {
         dispatch(triggerId, value)
 
         commit(mutationId, value)
-      }).catch(errMessage => {
-        console.error(errMessage)
-      })
+      }).catch(handleUpdateError)
     )
   } else {
     actions[updaterId] = ({ commit, state }, value) => (
@@ -1882,9 +1374,7 @@ for (const settingId of Object.keys(state)) {
         await recordSettingSyncTimestamp(commit, state, settingId)
 
         if (isLatest()) commit(mutationId, value)
-      }).catch(errMessage => {
-        console.error(errMessage)
-      })
+      }).catch(handleUpdateError)
     )
   }
 }

@@ -336,12 +336,15 @@ test('quit waits for the queued tray icon cache write', async () => {
   const trayIconWrite = new Promise(resolve => { finishWrite = resolve })
   const context = vm.createContext({
     trayIconWrite,
+    clearInterval,
+    scheduledBackupTimer: undefined,
+    scheduledBackups: { stop: async () => {} },
     updateWatchQueue: async () => {},
     baseHandlers: { compactAllDatastores: async () => {} },
     shutdownYtDlpDownloads: async () => {},
     session: { defaultSession: { clearCache: async () => {}, clearStorageData: async () => {} } },
   })
-  vm.runInContext(`let resourcesCleanUpDone = false; ${source.slice(source.indexOf('  async function cleanUpResources()'), source.indexOf('  // MacOS event'))}`, context)
+  vm.runInContext(`let resourcesCleanUpDone = false; let resourcesCleanUpPromise = null; ${source.slice(source.indexOf('  async function cleanUpResources()'), source.indexOf('  // MacOS event'))}`, context)
   let finished = false
   const cleanup = context.cleanUpResources().then(() => { finished = true })
   try {
@@ -359,12 +362,15 @@ test('quit waits for pending watch queue writes', async () => {
   const queueWrite = new Promise(resolve => { finishWrite = resolve })
   const context = vm.createContext({
     trayIconWrite: Promise.resolve(),
+    clearInterval,
+    scheduledBackupTimer: undefined,
+    scheduledBackups: { stop: async () => {} },
     updateWatchQueue: () => queueWrite,
     baseHandlers: { compactAllDatastores: async () => {} },
     shutdownYtDlpDownloads: async () => {},
     session: { defaultSession: { clearCache: async () => {}, clearStorageData: async () => {} } },
   })
-  vm.runInContext(`let resourcesCleanUpDone = false; ${source.slice(source.indexOf('  async function cleanUpResources()'), source.indexOf('  // MacOS event'))}`, context)
+  vm.runInContext(`let resourcesCleanUpDone = false; let resourcesCleanUpPromise = null; ${source.slice(source.indexOf('  async function cleanUpResources()'), source.indexOf('  // MacOS event'))}`, context)
   let finished = false
   const cleanup = context.cleanUpResources().then(() => { finished = true })
   await new Promise(resolve => setImmediate(resolve))

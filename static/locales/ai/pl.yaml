@@ -472,6 +472,19 @@ Settings:
     Show Bottom Right Actions Dock: Pokazuj panel działań w prawym dolnym rogu
     Paused Interface Hide Delay: Opóźnienie ukrywania interfejsu po wstrzymaniu
   Data Settings:
+    Scheduled backups: "Zaplanowane kopie zapasowe"
+    Scheduled backup description: "Zapisuj pełne kopie ZIP, gdy OpenTubeX jest otwarty. Pominięte kopie są tworzone przy uruchomieniu. Limit dotyczy tylko zaplanowanych kopii w tym folderze."
+    Choose backup folder: "Wybierz folder kopii zapasowych"
+    No backup folder selected: "Nie wybrano folderu kopii zapasowych"
+    Enable scheduled backups: "Włącz zaplanowane kopie zapasowe"
+    Backup frequency: "Częstotliwość tworzenia kopii"
+    Backups to keep: "Liczba zachowywanych kopii"
+    Daily: "Codziennie"
+    Weekly: "Co tydzień"
+    Every 30 days: "Co 30 dni"
+    Last scheduled backup: "Ostatnia zaplanowana kopia: {date}"
+    No scheduled backup yet: "Nie ma jeszcze zaplanowanej kopii"
+    Scheduled backup failed: "Tworzenie kopii nie powiodło się. Sprawdź możliwość zapisu w folderze. Ponowna próba za pięć minut."
     Import Preview:
       Title: Podgląd zmian
       New: "Nowe: {count}"

@@ -956,6 +956,19 @@ Settings:
     Show Bottom Right Actions Dock: Tampilkan Dok Tindakan Kanan Bawah
     Paused Interface Hide Delay: Jeda Sebelum Menyembunyikan Antarmuka yang Dijeda
   Data Settings:
+    Scheduled backups: "Cadangan terjadwal"
+    Scheduled backup description: "Simpan cadangan ZIP lengkap saat OpenTubeX terbuka. Cadangan yang terlewat dibuat saat aplikasi dimulai. Batas hanya berlaku untuk cadangan terjadwal di folder ini."
+    Choose backup folder: "Pilih folder cadangan"
+    No backup folder selected: "Belum memilih folder cadangan"
+    Enable scheduled backups: "Aktifkan cadangan terjadwal"
+    Backup frequency: "Frekuensi pencadangan"
+    Backups to keep: "Jumlah cadangan yang disimpan"
+    Daily: "Setiap hari"
+    Weekly: "Setiap minggu"
+    Every 30 days: "Setiap 30 hari"
+    Last scheduled backup: "Cadangan terjadwal terakhir: {date}"
+    No scheduled backup yet: "Belum ada cadangan terjadwal"
+    Scheduled backup failed: "Pencadangan gagal. Pastikan folder dapat ditulisi. Mencoba lagi dalam lima menit."
     Import Preview:
       Title: Pratinjau perubahan
       New: "Baru: {count}"

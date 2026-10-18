@@ -1148,6 +1148,19 @@ Settings:
     Cleanup Complete: Speicherbereinigung abgeschlossen
     Cleanup Failed: Speicherbereinigung fehlgeschlagen
   Data Settings:
+    Scheduled backups: "Geplante Sicherungen"
+    Scheduled backup description: "Vollständige ZIP-Sicherungen erstellen, während OpenTubeX geöffnet ist. Verpasste Sicherungen werden beim Start nachgeholt. Die Begrenzung gilt nur für geplante Sicherungen in diesem Ordner."
+    Choose backup folder: "Sicherungsordner auswählen"
+    No backup folder selected: "Kein Sicherungsordner ausgewählt"
+    Enable scheduled backups: "Geplante Sicherungen aktivieren"
+    Backup frequency: "Sicherungshäufigkeit"
+    Backups to keep: "Anzahl aufzubewahrender Sicherungen"
+    Daily: "Täglich"
+    Weekly: "Wöchentlich"
+    Every 30 days: "Alle 30 Tage"
+    Last scheduled backup: "Letzte geplante Sicherung: {date}"
+    No scheduled backup yet: "Noch keine geplante Sicherung"
+    Scheduled backup failed: "Sicherung fehlgeschlagen. Prüfe, ob der Ordner beschreibbar ist. Erneuter Versuch in fünf Minuten."
     Import Preview:
       Title: Änderungen vorab ansehen
       New: "Neu: {count}"
