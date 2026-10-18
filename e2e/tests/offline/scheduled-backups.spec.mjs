@@ -213,7 +213,7 @@ test('cancels folder selection without enabling backups and keeps controls usabl
       await expect(select).toBeVisible()
       await select.click()
       await expect(app.page.getByRole('listbox')).toBeVisible()
-      await app.page.keyboard.press('Escape')
+      await select.press('Escape')
     }
   }
 })
