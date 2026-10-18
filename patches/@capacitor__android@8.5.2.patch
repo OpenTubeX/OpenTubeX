@@ -13,7 +13,7 @@ index 9a3c6e0739682c9ff3b1254324ef59bb4fb2f4bd..0cca9fb306c9a5ff8b7450a132bb2427
          this.pluginCallForLastActivity = null;
          return pluginCallForLastActivity;
 diff --git a/capacitor/src/main/java/com/getcapacitor/plugin/util/HttpRequestHandler.java b/capacitor/src/main/java/com/getcapacitor/plugin/util/HttpRequestHandler.java
-index 69278bc63b3fc8b2489ac3cf88b37c0330d3e516..ad8b13c9b5ed38346fc5506739dc6481fd56a123 100644
+index 69278bc63b3fc8b2489ac3cf88b37c0330d3e516..72a2f1b0bb626def3aa7df1f88c5a12c10660d99 100644
 --- a/capacitor/src/main/java/com/getcapacitor/plugin/util/HttpRequestHandler.java
 +++ b/capacitor/src/main/java/com/getcapacitor/plugin/util/HttpRequestHandler.java
 @@ -219,7 +219,9 @@ public class HttpRequestHandler {
@@ -27,3 +27,16 @@ index 69278bc63b3fc8b2489ac3cf88b37c0330d3e516..ad8b13c9b5ed38346fc5506739dc6481
  
          InputStream errorStream = connection.getErrorStream();
          if (errorStream != null) {
+@@ -241,6 +243,12 @@ public class HttpRequestHandler {
+         InputStream errorStream = connection.getErrorStream();
+         String contentType = connection.getHeaderField("Content-Type");
+ 
++        // Text callers parse JSON themselves. Parsing it here as well rebuilds
++        // the whole object graph on the WebView's UI thread for every response.
++        if (responseType == ResponseType.TEXT) {
++            return readStreamAsString(errorStream != null ? errorStream : connection.getInputStream());
++        }
++
+         if (errorStream != null) {
+             if (isOneOf(contentType, MimeType.APPLICATION_JSON, MimeType.APPLICATION_VND_API_JSON)) {
+                 return parseJSON(readStreamAsString(errorStream));
