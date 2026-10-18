@@ -29,13 +29,23 @@ for (const currentLocale of ['en-US', 'ar']) {
         }, ids.length)
       }
 
+      // Control frames to scroll immediately after a tab becomes visible.
+      const frozenTime = Date.now()
+      await page.clock.install({ time: frozenTime })
+      await page.clock.pauseAt(frozenTime)
       const savedOffsets = new Map(ids.map(id => [id, 0]))
       for (const id of [...ids, ...ids]) {
-        await page.locator(`.tab[data-tab-id="${id}"]`).click()
-        await expect(page.locator(`.tabContent[data-tab-id="${id}"]`)).toHaveAttribute('aria-hidden', 'false')
+        // The paused clock cannot satisfy Playwright's animation-frame stability wait.
+        await page.locator(`.tab[data-tab-id="${id}"]`).click({ force: true })
+        await expect.poll(async () => {
+          await page.clock.runFor(16)
+          return page.locator(`.tabContent[data-tab-id="${id}"]`).getAttribute('aria-hidden')
+        }).toBe('false')
         await expect.poll(() => page.evaluate(() => window.scrollY)).toBeCloseTo(savedOffsets.get(id), 0)
         await page.evaluate(() => window.scrollTo({ top: 350, behavior: 'instant' }))
         savedOffsets.set(id, await page.evaluate(() => window.scrollY))
+        await page.clock.runFor(100)
+        expect(await page.evaluate(() => window.scrollY)).toBeCloseTo(savedOffsets.get(id), 0)
         await expect.poll(() => page.evaluate(() => {
           const maximum = document.documentElement.scrollHeight - window.innerHeight
           const scrollbar = document.querySelector('body > .os-scrollbar-vertical')
@@ -46,6 +56,7 @@ for (const currentLocale of ['en-US', 'ar']) {
             Math.abs(thumb.top - track.top - expected) <= 2 / devicePixelRatio
         })).toBe(true)
       }
+      await page.clock.resume()
       await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', ids.at(-1))
 
       // Start at the long page's end before reducing the range to zero.

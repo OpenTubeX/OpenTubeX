@@ -183,9 +183,10 @@ export class TabNavigationService {
         tabMediaCoordinator.setPresented(tabId)
         this.projectTitle(tabId)
         await nextTick()
+        // Restore before painting the revealed tab so a new scroll cannot be overwritten.
+        this.restoreScroll(tabId)
       })
       await nextAnimationFrame()
-      this.restoreScroll(tabId)
 
       await tabLifecycleService.run(tabId, 'activate', { fromTabId: outgoingTabId })
       if (this.isTransitionStale(tabId, revision, requestId)) {
