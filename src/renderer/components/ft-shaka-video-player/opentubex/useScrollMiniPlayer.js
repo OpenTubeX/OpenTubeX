@@ -1077,7 +1077,8 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
             holdScrollY = window.scrollY
             holdScrollMovedAt = now
           }
-          if (holdScrollY === 0 || now - holdScrollMovedAt > SCROLL_MINI_RESTORE_SCROLL_STALL_MS) {
+          // Safari reports a negative offset while overscrolling the top.
+          if (holdScrollY <= 0 || now - holdScrollMovedAt > SCROLL_MINI_RESTORE_SCROLL_STALL_MS) {
             scrollMiniInlineHold = false
             updateScrollMiniPlayer()
             if (scrollMiniLayoutAnimation !== animation) return
@@ -1104,7 +1105,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
         }
         // While a tap scrolls the page up, aim for where the slot lands and wait
         // there, so the video does not chase a slot that is still offscreen.
-        const scrollToSlot = !expectedActive && scrollMiniInlineHold ? window.scrollY : 0
+        const scrollToSlot = !expectedActive && scrollMiniInlineHold ? Math.max(0, window.scrollY) : 0
         const target = expectedActive
           ? nextRect
           : {
@@ -1517,6 +1518,11 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     if (scrollMiniPlayerActive.value && (usesMobileMiniBar() || !scrolled)) {
       deactivateScrollMiniPlayer(true)
       if (!scrolled) return
+      // Reduced motion skips the morph, which is what releases the hold.
+      if (isReducedMotionEnabled()) {
+        window.scrollTo({ top: 0, behavior: 'instant' })
+        return
+      }
       // Keep the player inline until the scroll settles, since its slot stays
       // offscreen for most of the way up. Deactivation cancels any older hold.
       scrollMiniInlineHold = true
