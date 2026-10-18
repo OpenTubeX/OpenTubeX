@@ -126,6 +126,10 @@ test('portrait Shorts actions open phone sheets instead of side panels', async (
   expect(await watch.evaluate(vm => vm.showSidebarChapters)).toBe(false)
 
   await setPlayerFullscreen(page, true)
+  // Without a window manager the fullscreen window briefly takes the landscape
+  // screen size before it returns to its phone bounds.
+  await expect.poll(() => page.evaluate(() => window.innerWidth)).toBe(480)
+  await expect.poll(() => watch.evaluate(vm => vm.shortsPhonePanelsEnabled)).toBe(true)
   await page.locator('.playerFullscreenTitleOverlay').evaluate(title => title.click())
   await expect.poll(() => page.locator('.ftVideoPlayer').evaluate(player => document.fullscreenElement === player)).toBe(false)
   await expect(page.locator('.dockedSheet[open]')).toBeVisible()
