@@ -31,6 +31,8 @@ export function createScheduledBackups({ readConfiguration, createArchive, saveS
       return current.enabled === true && current.directory === directory
     }
     try {
+      if (!(await fs.stat(directory)).isDirectory()) throw new Error('Backup destination is not a folder')
+      await fs.access(directory, fs.constants.W_OK)
       const archive = await createArchive()
       if (!await configurationIsCurrent()) { cancelled = true; return }
       // Keep old backups until a complete new archive is committed in the selected folder.
@@ -40,11 +42,13 @@ export function createScheduledBackups({ readConfiguration, createArchive, saveS
       await fs.rename(temporaryPath, path.join(directory, filename))
       nextStatus.lastBackupAt = timestamp
       try {
-        if (!await configurationIsCurrent()) return
         const files = (await fs.readdir(directory, { withFileTypes: true }))
           .filter(entry => entry.isFile() && BACKUP_FILENAME.test(entry.name))
           .map(entry => entry.name).sort().reverse()
-        for (const name of files.slice(keepCount)) await fs.unlink(path.join(directory, name))
+        const current = await readConfiguration()
+        if (current.enabled !== true || current.directory !== directory ||
+          !Number.isInteger(current.keepCount) || current.keepCount < 1 || current.keepCount > 100) return
+        for (const name of files.slice(current.keepCount)) await fs.unlink(path.join(directory, name))
       } catch (error) {
         // A locked old file must not turn a completed backup into a five-minute retry loop.
         console.error('Scheduled backup retention failed', error)

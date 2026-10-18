@@ -3,6 +3,8 @@ import fs, { mkdtemp, readdir, readFile, rm, symlink, writeFile } from 'node:fs/
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
+import vm from 'node:vm'
+import { createDesktopDatastore } from '../../src/datastores/sqliteNode.js'
 import { createScheduledBackups } from '../../src/main/scheduledBackups.js'
 import { createBackupArchive } from '../../src/main/backupArchive.js'
 import { readUnifiedBackup } from '../../src/renderer/helpers/unifiedBackup.js'
@@ -14,25 +16,45 @@ const data = {
   settings: { autoplayVideos: false },
   profiles: [{ _id: 'allChannels', name: 'Main', subscriptions: [{ id: 'UCexample' }] }],
   playlists: [{ _id: 'favorites', playlistName: 'Favorites', videos: [{ videoId: 'abcdefghijk' }] }],
-  history: [{ videoId: 'abcdefghijk', timeWatched: 1, watchProgress: 30 }],
+  history: [{ _id: 'history-video', videoId: 'abcdefghijk', timeWatched: 1, watchProgress: 30, isWatched: false }],
   searchHistory: [{ _id: 'query', query: 'music' }],
-  watchStats: { records: [{ date: '2026-10-18', seconds: 42 }], adjustment: null },
+  watchStats: { records: [{ _id: 'watch-date', date: '2026-10-18', seconds: 42 }], adjustment: { defaultSpeed: 1.5, updatedAt: 2 } },
 }
 
 async function setup(t) {
   const directory = await mkdtemp(path.join(tmpdir(), 'opentubex-backups-'))
   t.after(() => rm(directory, { recursive: true, force: true }))
+  const profileDirectory = await mkdtemp(path.join(tmpdir(), 'opentubex-backup-profile-'))
+  t.after(() => rm(profileDirectory, { recursive: true, force: true }))
+  const collections = {
+    settings: [...Object.entries(data.settings).map(([_id, value]) => ({ _id, value })),
+      { _id: 'syncServerToken', value: 'excluded-test-token' }, { _id: 'scheduledBackupEnabled', value: true }],
+    profiles: data.profiles,
+    playlists: data.playlists,
+    history: data.history,
+    'search-history': data.searchHistory,
+    'watch-stats': [...data.watchStats.records, { _id: 'history-watch-time-v1', adjustment: data.watchStats.adjustment }],
+  }
+  for (const [name, documents] of Object.entries(collections)) {
+    const datastore = createDesktopDatastore(path.join(profileDirectory, `${name}.sqlite`), undefined,
+      name === 'playlists' ? { childField: 'videos' } : {})
+    try {
+      await datastore.insertAsync(documents)
+    } finally {
+      await datastore.driver.close()
+    }
+  }
   let timestamp = Date.UTC(2026, 9, 18)
   let reads = 0
   const configuration = { enabled: true, directory, interval: 7, keepCount: 3, status: {} }
   const options = {
     readConfiguration: async () => structuredClone(configuration),
-    createArchive: async () => { reads++; return createBackupArchive(data, workerPath) },
+    createArchive: async () => { reads++; return createBackupArchive(profileDirectory, workerPath) },
     saveStatus: async status => { configuration.status = status },
     now: () => timestamp,
   }
   return {
-    directory, configuration, options,
+    directory, profileDirectory, configuration, options,
     service: createScheduledBackups(options),
     advance: milliseconds => { timestamp += milliseconds },
     reads: () => reads,
@@ -195,17 +217,29 @@ test('retention failures preserve successful backup deadlines without five-minut
   assert.equal((await state.backups()).length, 2)
 })
 
-test('backup preparation does not serialize sections on the calling thread', async t => {
-  const state = await setup(t)
-  const stringify = JSON.stringify
-  const sections = new Set(Object.values(data))
-  let serialized = 0
-  t.mock.method(JSON, 'stringify', (value, ...args) => {
-    if (sections.has(value)) serialized++
-    return stringify(value, ...args)
+test('main-process backup preparation passes only the profile path without reading collections', async () => {
+  const source = await readFile(new URL('../../src/main/index.js', import.meta.url), 'utf8')
+  const start = source.indexOf('    async createArchive() {', source.indexOf('const scheduledBackups ='))
+  const end = source.indexOf('\n    saveStatus:', start)
+  let reads = 0
+  let profile
+  const find = async () => { reads++; return [] }
+  const createArchive = vm.runInNewContext(`({${source.slice(start, end)}}).createArchive`, {
+    baseHandlers: {
+      settings: { find }, profiles: { find }, playlists: { find }, history: { find },
+      searchHistory: { find }, watchStats: { find, getHistoricalAdjustment: find },
+    },
+    waitForDatastores: async () => {},
+    createBackupArchive: async directory => { profile = directory; return new Uint8Array() },
+    userDataPath: '/test/profile',
+    path,
+    process: { env: { NODE_ENV: 'production' } },
+    __dirname: '/test/app',
+    NON_TRANSFERABLE_SETTINGS,
   })
-  await state.service.tick()
-  assert.equal(serialized, 0)
+  await createArchive()
+  assert.equal(reads, 0, 'the main process must not materialize histories or playlists for structured cloning')
+  assert.equal(profile, '/test/profile', 'only the profile path should cross the worker boundary')
 })
 
 for (const phase of ['preparation', 'temporary write']) {
@@ -245,6 +279,69 @@ for (const phase of ['preparation', 'temporary write']) {
 }
 
 
-test('archive worker failures reject instead of leaving a backup run pending', async () => {
-  await assert.rejects(createBackupArchive({}, workerPath), /No backup sections selected/)
+test('archive worker failures reject without creating missing profile databases', async t => {
+  const state = await setup(t)
+  const missing = path.join(state.profileDirectory, 'missing')
+  await assert.rejects(createBackupArchive(missing, workerPath), /unable to open database/)
+  await assert.rejects(readdir(missing), { code: 'ENOENT' })
 })
+
+
+test('unavailable destinations skip archive preparation on every retry', async t => {
+  t.mock.method(console, 'error', () => {})
+  const state = await setup(t)
+  await rm(state.directory, { recursive: true })
+  await state.service.tick()
+  state.advance(300_000)
+  await state.service.tick()
+  assert.equal(state.configuration.status.error, true)
+  assert.equal(state.reads(), 0)
+})
+
+test('unwritable destinations skip archive preparation', async t => {
+  t.mock.method(console, 'error', () => {})
+  const state = await setup(t)
+  await fs.chmod(state.directory, 0o500)
+  try {
+    await state.service.tick()
+    assert.equal(state.configuration.status.error, true)
+    assert.equal(state.reads(), 0)
+  } finally {
+    await fs.chmod(state.directory, 0o700)
+  }
+})
+
+for (const phase of ['preparation', 'temporary write', 'directory listing']) {
+  test(`retention uses the latest limit after ${phase}`, async t => {
+    const state = await setup(t)
+    state.configuration.keepCount = 1
+    for (let day = 1; day <= 4; day++) {
+      await writeFile(path.join(state.directory, `opentubex-scheduled-backup-2020-01-0${day}T00-00-00-000Z-00000000-0000-0000-0000-000000000000.zip`), 'old archive')
+    }
+    if (phase === 'preparation') {
+      state.service = createScheduledBackups({
+        ...state.options,
+        createArchive: async () => {
+          state.configuration.keepCount = 5
+          return state.options.createArchive()
+        },
+      })
+    } else if (phase === 'temporary write') {
+      const write = fs.writeFile
+      t.mock.method(fs, 'writeFile', async (...args) => {
+        await write(...args)
+        if (String(args[0]).endsWith('.tmp')) state.configuration.keepCount = 5
+      })
+    } else {
+      const list = fs.readdir
+      t.mock.method(fs, 'readdir', async (...args) => {
+        const entries = await list(...args)
+        state.configuration.keepCount = 5
+        return entries
+      })
+    }
+    await state.service.tick()
+    assert.equal(state.configuration.status.error, false)
+    assert.equal((await state.backups()).length, 5)
+  })
+}

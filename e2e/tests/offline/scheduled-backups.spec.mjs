@@ -43,7 +43,7 @@ test('creates complete scheduled backups without sync and preserves the schedule
     await controls.scrollIntoViewIfNeeded()
     await page.screenshot({ path: testInfo.outputPath('scheduled-backups.png'), animations: 'disabled' })
     await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'dark'))
-    await expect(page.locator('body')).toHaveClass(/dark/)
+    await expect(page.locator('body')).toContainClass('dark')
     await page.screenshot({ path: testInfo.outputPath('scheduled-backups-dark.png'), animations: 'disabled' })
     const materialGlyphs = await controls.locator('.select-icon path').evaluateAll(paths => paths.map(path => path.getAttribute('d')))
     await page.evaluate(() => window.$store.dispatch('updateIconPack', 'remix'))
@@ -126,7 +126,8 @@ test('retention keeps the selected number of scheduled backups and leaves manual
 test('cancels folder selection without enabling backups and keeps controls usable at narrow widths', { tag: '@scale' }, async ({ app }) => {
   const section = await goToSettingsSection(app.page, 'data')
   const controls = section.locator('.scheduledBackups')
-  await expect(section.locator('.dataStoragePanel > .settingsSection').last()).toHaveClass(/scheduledBackups/)
+  await expect(section.locator('.dataStoragePanel > .scheduledBackups')).toBeVisible()
+  await expect(section.locator('.dataStoragePanel > .scheduledBackups ~ *')).toHaveCount(0)
   await expect(controls.getByRole('heading', { name: 'Scheduled backups', level: 3 })).toBeVisible()
   await expect(controls.locator('.select-icon')).toHaveCount(2)
   await app.electronApp.evaluate(({ dialog }) => {

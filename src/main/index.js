@@ -43,7 +43,7 @@ import { MATERIAL_SYSTEM_SEED, MATERIAL_THEME_VALUES, materialColorScheme, mater
 import { resolveSystemTheme, resolveSystemThemeSettings } from '../appearanceSettings'
 import { applySyncServerUserAgent } from '../syncServerUserAgent'
 import * as baseHandlers from '../datastores/handlers/base'
-import { liveReminders, onLegacyDatastoreChanges, onLegacyDatastoreImported } from '../datastores'
+import { liveReminders, onLegacyDatastoreChanges, onLegacyDatastoreImported, waitForDatastores } from '../datastores'
 import { extractExpiryTimestamp, ImageCache } from './ImageCache'
 import { constants as fsConstants, existsSync } from 'fs'
 import { createReadStream } from 'node:fs'
@@ -97,7 +97,6 @@ import { supportsNativeNotifications } from './nativeNotifications'
 import { getTrayMenuIcon } from './trayMenuIcons'
 import { createScheduledBackups } from './scheduledBackups'
 import { createBackupArchive } from './backupArchive'
-import { NON_TRANSFERABLE_SETTINGS } from '../nonTransferableSettings'
 
 function getSystemAccentColor() {
   try {
@@ -1881,19 +1880,8 @@ function runApp() {
       return { enabled, directory, interval: interval ?? 7, keepCount: keepCount ?? 5, status }
     },
     async createArchive() {
-      const [settings, profiles, playlists, history, searchHistory, records, adjustment] = await Promise.all([
-        baseHandlers.settings.find(), baseHandlers.profiles.find(), baseHandlers.playlists.find(),
-        baseHandlers.history.find(), baseHandlers.searchHistory.find(),
-        baseHandlers.watchStats.find(), baseHandlers.watchStats.getHistoricalAdjustment(),
-      ])
-      return createBackupArchive({
-        settings: Object.fromEntries(settings.filter(setting => !NON_TRANSFERABLE_SETTINGS.has(setting._id)).map(setting => [setting._id, setting.value])),
-        profiles,
-        playlists,
-        history,
-        searchHistory,
-        watchStats: { records, adjustment },
-      }, path.join(__dirname, process.env.NODE_ENV === 'development' ? '../../dist/backupArchiveWorker.js' : 'backupArchiveWorker.js'))
+      await waitForDatastores()
+      return createBackupArchive(userDataPath, path.join(__dirname, process.env.NODE_ENV === 'development' ? '../../dist/backupArchiveWorker.js' : 'backupArchiveWorker.js'))
     },
     saveStatus: status => updateSettingFromMain('scheduledBackupStatus', status),
   })
