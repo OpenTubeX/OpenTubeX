@@ -1512,6 +1512,25 @@ test('tapping the scroll-triggered bottom bar expands it while the page scrolls 
   // The inline player takes over exactly where the morph ended.
   expect(frames[last].top).toBeCloseTo(settledTop, 0)
   expect(frames[last + 1].top).toBeCloseTo(settledTop, 0)
+
+  // Older WebKit has no scrollend. The bar must still dock again afterwards,
+  // also when a touch stops the restore scroll halfway.
+  await page.evaluate(() => {
+    window.blockScrollEnd = event => event.stopImmediatePropagation()
+    window.addEventListener('scrollend', window.blockScrollEnd, true)
+  })
+  try {
+    await page.evaluate(() => window.scrollTo(0, 1200))
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+    await player.evaluate(element => element.querySelector('.mobileMiniBarReturn').click())
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThan(1100)
+    await page.evaluate(() => window.scrollTo({ top: 1200, behavior: 'instant' }))
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+  } finally {
+    await page.evaluate(() => window.removeEventListener('scrollend', window.blockScrollEnd, true))
+  }
 })
 
 test('bottom bar taps restore despite finger drift or a dropped click, and short flicks restore it', { tag: '@scale' }, async ({ app, page }) => {
