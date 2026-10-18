@@ -6,6 +6,7 @@ import Datastore from '@seald-io/nedb'
 import { toRaw } from 'vue'
 import * as historyHelpers from '../../src/history.js'
 import * as seenHelpers from '../../src/subscriptionSeenVideos.js'
+import { migrateStoredSettings } from '../../src/datastores/settingsMigrations.js'
 
 const source = await readFile(new URL('../../src/renderer/store/modules/history.js', import.meta.url), 'utf8')
 const baseSource = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
@@ -20,7 +21,7 @@ async function fixture(fail = false) {
   await db.settings.insertAsync({ _id: 'subscriptionSeenVideos', value: JSON.stringify(savedMarks) })
   const records = ['unseen', 'seen', 'unrelated'].map(record)
   await db.history.insertAsync(records)
-  const baseDependencies = { db, ...historyHelpers, ...seenHelpers, console: { error() {} } }
+  const baseDependencies = { db, ...historyHelpers, ...seenHelpers, migrateStoredSettings, console: { error() {} } }
   const History = compileFunction(baseSource.slice(baseSource.indexOf('class Settings {'), baseSource.indexOf('\nclass WatchStats {'))
     + '\nreturn History', Object.keys(baseDependencies))(...Object.values(baseDependencies))
   if (fail) History.updateSubscriptionState = async () => { throw new Error('history persistence failed') }

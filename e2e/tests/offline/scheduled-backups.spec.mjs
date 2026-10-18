@@ -1,8 +1,8 @@
 import { mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { DatabaseSync } from 'node:sqlite'
 import path from 'node:path'
 import { expect, goToSettingsSection, test } from '../../helpers/app.mjs'
+import { createDesktopDatastore, desktopDatastorePaths } from '../../../src/datastores/sqliteNode.js'
 import { BACKUP_SECTIONS, createUnifiedBackup, readUnifiedBackup } from '../../../src/renderer/helpers/unifiedBackup.js'
 
 test.describe('complete scheduled archives', () => {
@@ -40,6 +40,7 @@ test.describe('complete scheduled archives', () => {
       expect(backup.data.searchHistory.some(entry => entry.query === 'scheduled backup query')).toBe(true)
       expect(backup.data.watchStats.records.some(entry => entry.date === '2026-10-18' && entry.seconds === 42)).toBe(true)
       expect(backup.data.settings.autoplayVideos).toBe(true)
+      expect(backup.data.settings.landingPage).toBe('subscriptions')
       expect(backup.data.settings).not.toHaveProperty('scheduledBackupEnabled')
       expect(backup.data.settings).not.toHaveProperty('scheduledBackupFolderPath')
       expect(backup.data.settings).not.toHaveProperty('syncServerToken')
@@ -65,19 +66,21 @@ test.describe('complete scheduled archives', () => {
       const restarted = await app.relaunch()
       const restartedSection = await goToSettingsSection(restarted.page, 'data')
       expect(await restarted.page.evaluate(() => window.$store.getters.getAutoplayVideos)).toBe(true)
+      expect(await restarted.page.evaluate(() => window.$store.getters.getLandingPage)).toBe('subscriptions')
       await expect(restartedSection.getByRole('checkbox', { name: 'Enable scheduled backups' })).toBeChecked()
       await expect(restartedSection.locator('.backupFolder')).toHaveText(directory)
       await expect(restartedSection.locator('.scheduledBackups').getByRole('status')).toContainText('Last scheduled backup:')
       expect((await readdir(directory)).filter(name => name.endsWith('.zip'))).toEqual(files)
 
-      const caughtUp = await app.relaunch(() => {
-        const db = new DatabaseSync(path.join(app.userDataDir, 'settings.sqlite'))
+      const caughtUp = await app.relaunch(async () => {
+        const { filename, legacy } = desktopDatastorePaths(app.userDataDir, 'settings')
+        const db = createDesktopDatastore(filename, legacy)
         try {
           const status = { directory, lastBackupAt: Date.now() - 30 * 86_400_000, lastAttemptAt: 0, error: false }
-          const result = db.prepare('UPDATE docs SET data = ? WHERE id = ?').run(JSON.stringify({ _id: 'scheduledBackupStatus', value: status }), 'scheduledBackupStatus')
-          expect(result.changes).toBe(1)
+          const result = await db.updateAsync({ _id: 'scheduledBackupStatus' }, { _id: 'scheduledBackupStatus', value: status })
+          expect(result.numAffected).toBe(1)
         } finally {
-          db.close()
+          await db.driver.close()
         }
       })
       const caughtUpSection = await goToSettingsSection(caughtUp.page, 'data')

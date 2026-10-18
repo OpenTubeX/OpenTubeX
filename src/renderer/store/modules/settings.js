@@ -1,9 +1,9 @@
-import { createDefaultSettings } from '../../../settingsDefaults.js'
+import { createDefaultSettings, resolveDefaultLandingPage } from '../../../settingsDefaults.js'
 import { NON_TRANSFERABLE_SETTINGS } from '../../../nonTransferableSettings.js'
 import { normalizeMaterialSeedColor } from '../../../materialTheme.js'
 import i18n, { loadLocale, setAITranslationCompletionsEnabled } from '../../i18n/index'
 import allLocales from '../../../../static/locales/activeLocales.json'
-import { applyKeyboardShortcutOverrides, DEFAULT_LANDING_PAGE, LEGACY_DEFAULT_LANDING_PAGE, resolveLandingPage, sanitizeKeyboardShortcutOverrides, SyncEvents } from '../../../constants'
+import { applyKeyboardShortcutOverrides, resolveLandingPage, sanitizeKeyboardShortcutOverrides, SyncEvents } from '../../../constants'
 import { DBProfileHandlers, DBSettingHandlers } from '../../../datastores/handlers/index'
 import { hashPassword } from '../../helpers/passwords'
 import { ANDROID_PROXY_SETTING_KEYS, configureAndroidProxy, readAndroidProxySettings } from '../../helpers/androidProxy'
@@ -887,9 +887,7 @@ const customActions = {
       if (!hasLandingPage) {
         const profiles = await DBProfileHandlers.find()
         const isFreshInstallation = userSettings.length === 0 && profiles.length === 0
-        const resolvedLandingPage = isFreshInstallation
-          ? DEFAULT_LANDING_PAGE
-          : LEGACY_DEFAULT_LANDING_PAGE
+        const resolvedLandingPage = resolveDefaultLandingPage(isFreshInstallation)
         commit('setLandingPage', resolvedLandingPage)
         landingPageToInitialize = isFreshInstallation
           ? resolvedLandingPage

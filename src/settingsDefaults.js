@@ -1,5 +1,5 @@
 import { DEFAULT_MATERIAL_SEED_COLOR } from './materialTheme.js'
-import { DEFAULT_LANDING_PAGE, DEFAULT_QUICK_PLAYBACK_SPEED_BAR_OPTIONS, DEFAULT_WATCHED_PERCENTAGE_THRESHOLD, MAIN_PROFILE_ID } from './constants.js'
+import { DEFAULT_LANDING_PAGE, LEGACY_DEFAULT_LANDING_PAGE, DEFAULT_QUICK_PLAYBACK_SPEED_BAR_OPTIONS, DEFAULT_WATCHED_PERCENTAGE_THRESHOLD, MAIN_PROFILE_ID } from './constants.js'
 import { DEFAULT_THUMBNAIL_SIZE } from './renderer/constants/thumbnailSize.js'
 import { DEFAULT_FIXED_TAB_WIDTH } from './renderer/constants/tabWidth.js'
 import { DEFAULT_SCROLLBAR_THUMB_WIDTH } from './renderer/constants/scrollbar.js'
@@ -13,6 +13,11 @@ import { DEFAULT_HOME_SECTION_LAYOUT } from './renderer/helpers/homeSections.js'
 import { DEFAULT_QUICK_SETTINGS } from './renderer/helpers/quickSettings.js'
 import { DEFAULT_FULLSCREEN_ACTIONS } from './renderer/helpers/fullscreenActions.js'
 import { DEFAULT_NAVIGATION_ITEMS } from './navigationItems.js'
+
+/** Preserve the landing-page default used before Home was introduced. */
+export function resolveDefaultLandingPage(isFreshInstallation) {
+  return isFreshInstallation ? DEFAULT_LANDING_PAGE : LEGACY_DEFAULT_LANDING_PAGE
+}
 
 /** Create independent preference defaults for the current application platform. */
 export function createDefaultSettings({ supportsLocalApi, isElectron }) {

@@ -23,7 +23,7 @@ const data = {
 }
 const transferableDefaults = Object.fromEntries(Object.entries(createDefaultSettings({ supportsLocalApi: true, isElectron: true }))
   .filter(([key]) => !NON_TRANSFERABLE_SETTINGS.has(key)))
-const expectedData = { ...data, settings: { ...transferableDefaults, ...data.settings } }
+const expectedData = { ...data, settings: { ...transferableDefaults, ...data.settings, landingPage: 'subscriptions' } }
 
 async function setup(t) {
   const directory = await mkdtemp(path.join(tmpdir(), 'opentubex-backups-'))
@@ -109,6 +109,24 @@ test('scheduled archives include unstored defaults alongside saved preferences',
   assert.deepEqual(backup.data.settings.autoPictureInPictureTriggers, [])
   for (const key of NON_TRANSFERABLE_SETTINGS) assert.equal(Object.hasOwn(backup.data.settings, key), false, key)
 })
+
+for (const landingPage of [undefined, 'home', 'history']) {
+  test(`scheduled archives preserve ${landingPage ?? 'the existing-profile default'} landing page`, async t => {
+    const state = await setup(t)
+    if (landingPage !== undefined) {
+      const settings = createDesktopDatastore(path.join(state.profileDirectory, 'settings.sqlite'))
+      try {
+        await settings.insertAsync({ _id: 'landingPage', value: landingPage })
+      } finally {
+        await settings.driver.close()
+      }
+    }
+    await state.service.tick()
+    const [filename] = await state.backups()
+    const backup = await readUnifiedBackup(new Blob([await readFile(path.join(state.directory, filename))]))
+    assert.equal(backup.data.settings.landingPage, landingPage ?? 'subscriptions')
+  })
+}
 
 test('persisted deadlines survive restarts and missed intervals create one catch-up backup', async t => {
   const state = await setup(t)

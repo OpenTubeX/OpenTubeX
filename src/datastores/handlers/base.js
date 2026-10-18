@@ -21,6 +21,7 @@ const HISTORY_WATCHED_STATUS_MIGRATION_ID = 'historyWatchedStatusMigrated'
 
 class Settings {
   static pendingSeenStateUpdate = Promise.resolve()
+  static migrationPromise = null
 
   static runSeenStateUpdate(operation) {
     // Share one queue for complete history-status and subscription-mark edits
@@ -90,10 +91,14 @@ class Settings {
   }
 
   static migrate() {
-    return migrateStoredSettings(db.settings)
+    this.migrationPromise ??= migrateStoredSettings(db.settings).finally(() => {
+      this.migrationPromise = null
+    })
+    return this.migrationPromise
   }
 
-  static upsert(_id, value) {
+  static async upsert(_id, value) {
+    await this.migrate()
     return db.settings.updateAsync({ _id }, { _id, value }, { upsert: true })
   }
 

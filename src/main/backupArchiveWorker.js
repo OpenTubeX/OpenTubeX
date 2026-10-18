@@ -4,7 +4,7 @@ import { SqliteDatastore } from '../datastores/sqlite.js'
 import { desktopDatastorePaths } from '../datastores/sqliteNode.js'
 import { migrateLegacyHistoryRecord } from '../history.js'
 import { NON_TRANSFERABLE_SETTINGS } from '../nonTransferableSettings.js'
-import { createDefaultSettings } from '../settingsDefaults.js'
+import { createDefaultSettings, resolveDefaultLandingPage } from '../settingsDefaults.js'
 import { createUnifiedBackup } from '../renderer/helpers/unifiedBackup.js'
 
 async function prepareArchive() {
@@ -44,6 +44,7 @@ async function prepareArchive() {
     ])
     const resolvedSettings = {
       ...createDefaultSettings({ supportsLocalApi: true, isElectron: true }),
+      landingPage: resolveDefaultLandingPage(savedSettings.length === 0 && savedProfiles.length === 0),
       ...Object.fromEntries(savedSettings.map(setting => [setting._id, setting.value])),
     }
     data = {
