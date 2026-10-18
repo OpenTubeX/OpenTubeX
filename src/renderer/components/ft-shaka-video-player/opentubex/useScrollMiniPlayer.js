@@ -56,6 +56,8 @@ const SCROLL_MINI_DRAG_HANDLE_CONTRAST_MS = 400
 const SCROLL_MINI_POINTER_REVEAL_SUPPRESS_MS = 250
 const SCROLL_MINI_POINTER_REVEAL_MIN_DISTANCE = 8
 const SCROLL_MINI_LAYOUT_ANIMATION_DURATION_MS = 300
+// A restore scroll that has not moved for this long was stopped by a touch.
+const SCROLL_MINI_RESTORE_SCROLL_STALL_MS = 300
 
 /**
  * OpenTubeX's scroll mini-player integration. Keeping this composable outside the
@@ -1006,6 +1008,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     scrollMiniLayoutAnimationSequence++
     scrollMiniLayoutAnimation?.cancel()
     scrollMiniLayoutAnimation = null
+    scrollMiniInlineHold = false
     scrollMiniPlayerAnimating.value = false
     mobileMiniBarOverlayStyle.value = null
   }
@@ -1056,6 +1059,8 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
         getAnimationSpeedMultiplier(store.getters.getAnimationSpeed)
       const started = performance.now()
       let frameId = null
+      let holdScrollY = null
+      let holdScrollMovedAt = started
       const animation = {
         cancel() {
           if (frameId !== null) cancelAnimationFrame(frameId)
@@ -1065,6 +1070,19 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
       }
       const frame = now => {
         if (scrollMiniLayoutAnimation !== animation) return
+        if (!expectedActive && scrollMiniInlineHold) {
+          // Release the hold once the restore scroll reaches the top or a touch
+          // stops it. Older WebKit dispatches no scrollend.
+          if (window.scrollY !== holdScrollY) {
+            holdScrollY = window.scrollY
+            holdScrollMovedAt = now
+          }
+          if (holdScrollY === 0 || now - holdScrollMovedAt > SCROLL_MINI_RESTORE_SCROLL_STALL_MS) {
+            scrollMiniInlineHold = false
+            updateScrollMiniPlayer()
+            if (scrollMiniLayoutAnimation !== animation) return
+          }
+        }
         const time = Math.min(1, Math.max(0, (now - started) / duration))
         const progress = time * time * (3 - 2 * time)
         // Read the stable inline slot before writing the transform. Its bounds
@@ -1495,30 +1513,19 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   // Expand the bar right away instead of after the scroll reveals the inline
   // slot, while the page scrolls up underneath it.
   function restoreInlinePlayer() {
-    if (scrollMiniPlayerActive.value && usesMobileMiniBar() && window.scrollY > 0) {
-      holdScrollMiniPlayerInline()
+    const scrolled = window.scrollY > 0
+    if (scrollMiniPlayerActive.value && (usesMobileMiniBar() || !scrolled)) {
       deactivateScrollMiniPlayer(true)
+      if (!scrolled) return
+      // Keep the player inline until the scroll settles, since its slot stays
+      // offscreen for most of the way up. Deactivation cancels any older hold.
+      scrollMiniInlineHold = true
       // The compositor scrolls on its own. Start it with the morph's first frame,
       // so a slow layout switch cannot reveal the empty slot ahead of the video.
       requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'smooth' }))
       return
     }
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  // Keep the restored player inline until the scroll settles, since its slot
-  // stays offscreen for most of the way up.
-  function holdScrollMiniPlayerInline() {
-    if (scrollMiniInlineHold) return
-    scrollMiniInlineHold = true
-    window.addEventListener('scrollend', releaseScrollMiniPlayerInlineHold, { once: true })
-  }
-
-  function releaseScrollMiniPlayerInlineHold() {
-    if (!scrollMiniInlineHold) return
-    scrollMiniInlineHold = false
-    window.removeEventListener('scrollend', releaseScrollMiniPlayerInlineHold)
-    updateScrollMiniPlayer()
   }
 
   function scrollMiniScrollToTop(event) {
@@ -1841,8 +1848,6 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     window.removeEventListener('pointercancel', handleScrollMiniVolumePointerUpWindow)
     window.removeEventListener('scroll', handleScrollMiniWindowScroll)
     window.removeEventListener('resize', handleScrollMiniWindowResize)
-    window.removeEventListener('scrollend', releaseScrollMiniPlayerInlineHold)
-    scrollMiniInlineHold = false
 
     if (scrollMiniPlayerActive.value) {
       scrollMiniPlayerActive.value = false
