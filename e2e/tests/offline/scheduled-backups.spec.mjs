@@ -76,7 +76,8 @@ test.describe('complete scheduled archives', () => {
         const db = new DatabaseSync(path.join(app.userDataDir, 'settings.sqlite'))
         try {
           const status = { directory, lastBackupAt: Date.now() - 30 * 86_400_000, lastAttemptAt: 0, error: false }
-          db.prepare('UPDATE docs SET data = ? WHERE id = ?').run(JSON.stringify({ _id: 'scheduledBackupStatus', value: status }), 'scheduledBackupStatus')
+          const result = db.prepare('UPDATE docs SET data = ? WHERE id = ?').run(JSON.stringify({ _id: 'scheduledBackupStatus', value: status }), 'scheduledBackupStatus')
+          expect(result.changes).toBe(1)
         } finally {
           db.close()
         }
