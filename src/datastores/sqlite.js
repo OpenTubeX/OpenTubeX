@@ -469,7 +469,8 @@ export class SqliteDatastore {
       return prepared
     })
     const keys = docs.map(doc => keyOf(doc._id))
-    const duplicate = keys.find((key, index) => keys.indexOf(key) !== index)
+    const seen = new Set()
+    const duplicate = keys.find(key => seen.size === seen.add(key).size)
     if (duplicate !== undefined) throw uniqueViolation(duplicate)
     const [existing] = await this._query(SQL.existingIds, [JSON.stringify(keys)])
     if (existing) throw uniqueViolation(existing[0])

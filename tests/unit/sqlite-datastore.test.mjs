@@ -432,6 +432,25 @@ test('rejects duplicate IDs and invalid updates without partial writes', async (
   assert.deepEqual(await store.findAsync({}), [{ _id: 'a' }])
 })
 
+test('large batch inserts check duplicate IDs in linear time', async (t) => {
+  const store = memory(t)
+  const docs = Array.from({ length: 20000 }, (_, index) => ({ _id: `video-${index}` }))
+  const indexOf = Array.prototype.indexOf
+  let scans = 0
+  // A synced history inserts every record at once; scanning the batch per key stalled Android's UI thread.
+  Array.prototype.indexOf = function (...args) {
+    if (this.length >= docs.length) scans++
+    return indexOf.apply(this, args)
+  }
+  try {
+    await store.insertAsync(docs)
+  } finally {
+    Array.prototype.indexOf = indexOf
+  }
+  assert.equal(scans, 0)
+  assert.equal(await store.countAsync({}), docs.length)
+})
+
 test('indexed lookups find string and numeric IDs exactly like NeDB', async (t) => {
   const store = memory(t, { indexes: ['videoId'] })
   await store.insertAsync([{ _id: '5', videoId: 'x' }, { _id: 5, videoId: 'y' }, { _id: 'z', videoId: ['x'] }])
