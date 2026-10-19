@@ -377,6 +377,9 @@ const previewVideoIndex = ref(1)
 
 const prevVideoBeforeDeletion = ref(null)
 let getPlaylistInfoRun = false
+// Bumped per playlist change so a request for an earlier visit of the same
+// playlist cannot overwrite a later one.
+let playlistLoadGeneration = 0
 let previewAnimationFrame = null
 let previewPointerClientX = 0
 
@@ -649,6 +652,7 @@ if (isTabPresented != null) {
 }
 
 watch(() => props.playlistId, () => {
+  playlistLoadGeneration += 1
   isFetchingPlaylistContinuation.value = false
   hasUnloadedPlaylistVideos.value = false
   resetUnavailableSkipChain()
@@ -1102,11 +1106,12 @@ async function loadCachedPlaylistInformation(cachedPlaylist) {
 
 async function getPlaylistInformationLocal() {
   const playlistId = props.playlistId
+  const generation = playlistLoadGeneration
   isLoading.value = true
 
   try {
     const playlist = await getLocalPlaylist(playlistId)
-    if (props.playlistId !== playlistId) return
+    if (generation !== playlistLoadGeneration) return
 
     let channelName_
 
@@ -1135,7 +1140,7 @@ async function getPlaylistInformationLocal() {
     if (!isFetchingPlaylistContinuation.value) return
 
     await untilEndOfLocalPlayList(playlist, (p) => {
-      if (props.playlistId !== playlistId) return
+      if (generation !== playlistLoadGeneration) return
       const newVideos = parseLocalPlaylistVideos(p.items)
       videos.push(...newVideos)
       playlistItems.value = applyReversePlaylistState(videos.slice())
@@ -1144,9 +1149,9 @@ async function getPlaylistInformationLocal() {
         randomizedPlaylistItems.value = randomizedPlaylistItems.value.concat(shuffleItems(newVideos.slice()))
       }
     }, { runCallbackOnceFirst: false })
-    if (props.playlistId === playlistId) hasUnloadedPlaylistVideos.value = false
+    if (generation === playlistLoadGeneration) hasUnloadedPlaylistVideos.value = false
   } catch (err) {
-    if (props.playlistId !== playlistId) return
+    if (generation !== playlistLoadGeneration) return
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
@@ -1157,17 +1162,17 @@ async function getPlaylistInformationLocal() {
       isLoading.value = false
     }
   } finally {
-    if (props.playlistId === playlistId) isFetchingPlaylistContinuation.value = false
+    if (generation === playlistLoadGeneration) isFetchingPlaylistContinuation.value = false
   }
 }
 
 async function getPlaylistInformationInvidious() {
-  const playlistId = props.playlistId
+  const generation = playlistLoadGeneration
   isLoading.value = true
 
   try {
-    const result = await invidiousGetPlaylistInfo(playlistId)
-    if (props.playlistId !== playlistId) return
+    const result = await invidiousGetPlaylistInfo(props.playlistId)
+    if (generation !== playlistLoadGeneration) return
 
     playlistTitle.value = result.title
     playlistTotalVideoCount.value = result.videoCount
@@ -1178,7 +1183,7 @@ async function getPlaylistInformationInvidious() {
 
     isLoading.value = false
   } catch (err) {
-    if (props.playlistId !== playlistId) return
+    if (generation !== playlistLoadGeneration) return
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)

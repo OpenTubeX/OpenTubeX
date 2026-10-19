@@ -29,6 +29,7 @@ function harness() {
   const isLoading = ref(true)
   const errors = []
   const context = {
+    playlistLoadGeneration: 0,
     props, playlistItems, isLoading, isFetchingPlaylistContinuation, hasUnloadedPlaylistVideos,
     randomizedPlaylistItems: shallowRef([]), shuffleEnabled: ref(false), loopEnabled: ref(false), computed,
     playlistTitle: ref(''), playlistTotalVideoCount: ref(0), channelName: ref(''), channelId: ref(''),
@@ -51,6 +52,7 @@ function harness() {
   return {
     props, playlistItems, isLoading, isFetchingPlaylistContinuation, hasUnloadedPlaylistVideos, errors, state,
     load,
+    changePlaylist: playlistId => { props.playlistId = playlistId; context.playlistLoadGeneration += 1 },
     resolveFirstPage: () => firstPage.resolve({
       info: { title: 'YouTube playlist', total_items: '100', author: { name: 'Test', id: 'channel' } },
       items: [{ videoId: 'first' }, { videoId: 'second' }],
@@ -100,7 +102,7 @@ test('a failed later page keeps the first page and clears the loading state', as
 test('a slow playlist fetch cannot replace a different playlist opened afterwards', async () => {
   const state = harness()
   const loading = state.load()
-  state.props.playlistId = 'different-playlist'
+  state.changePlaylist('different-playlist')
   state.playlistItems.value = [{ videoId: 'different' }]
   state.title.value = 'Different playlist'
   state.isLoading.value = false
@@ -112,4 +114,21 @@ test('a slow playlist fetch cannot replace a different playlist opened afterward
   assert.equal(state.title.value, 'Different playlist')
   assert.equal(state.isFetchingPlaylistContinuation.value, false)
   assert.equal(state.errors.length, 0)
+})
+
+test('a slow playlist fetch cannot replace a later visit of the same playlist', async () => {
+  const state = harness()
+  const loading = state.load()
+  state.changePlaylist('different-playlist')
+  state.changePlaylist('youtube-playlist')
+  state.playlistItems.value = [{ videoId: 'newer' }]
+  state.title.value = 'Newer load'
+  state.isLoading.value = false
+  state.resolveFirstPage()
+  state.finishContinuation([{ videoId: 'third' }])
+  await loading
+
+  assert.deepEqual(state.playlistItems.value.map(video => video.videoId), ['newer'])
+  assert.equal(state.title.value, 'Newer load')
+  assert.equal(state.isFetchingPlaylistContinuation.value, false)
 })
