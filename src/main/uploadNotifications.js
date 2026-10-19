@@ -1,5 +1,5 @@
 import { readFile, rm, writeFile, rename } from 'node:fs/promises'
-import { createUploadNotificationState, getUploadUrl, takeNewUploads } from '../newUploadNotifications.js'
+import { createUploadNotificationState, forgetUnconfiguredFeeds, getUploadUrl, takeNewUploads } from '../newUploadNotifications.js'
 
 /**
  * Single desktop source of truth for new-upload notifications, shared by
@@ -28,11 +28,19 @@ export function createUploadNotifier({ file, show }) {
     return state
   }
 
+  async function save() {
+    await writeFile(file + '.tmp', JSON.stringify(state), { mode: 0o600 })
+    await rename(file + '.tmp', file)
+  }
+
   return {
     configure(value) {
       return run(async () => {
         configuration = value
-        if (value?.enabled === true) return
+        if (value?.enabled === true) {
+          if (forgetUnconfiguredFeeds(await load(), value)) await save()
+          return
+        }
         // Start from a fresh baseline when notifications are enabled again.
         state = createUploadNotificationState()
         await rm(file, { force: true })
@@ -53,8 +61,7 @@ export function createUploadNotifier({ file, show }) {
           feedType,
           entries.filter(entry => channel.membersOnly === true || !entry.membersOnly)
         )
-        await writeFile(file + '.tmp', JSON.stringify(current), { mode: 0o600 })
-        await rename(file + '.tmp', file)
+        await save()
 
         for (const upload of uploads) {
           const type = upload.live ? 'live' : feedType

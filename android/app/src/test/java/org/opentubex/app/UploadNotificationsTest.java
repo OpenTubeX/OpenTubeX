@@ -80,4 +80,45 @@ public class UploadNotificationsTest {
         assertEquals("Hi there", post.getString("title"));
         assertEquals((NOW / 1000 - 7200) * 1000, post.getLong("published"));
     }
+
+    @Test
+    public void marksMembersOnlyVideosFromLocalResponses() throws Exception {
+        JSONObject renderer = new JSONObject().put("videoRenderer", new JSONObject()
+            .put("videoId", "members1")
+            .put("title", new JSONObject().put("simpleText", "Members"))
+            .put("badges", new JSONArray().put(new JSONObject().put("metadataBadgeRenderer",
+                new JSONObject().put("style", "BADGE_STYLE_TYPE_MEMBERS_ONLY")))));
+        JSONObject lockup = new JSONObject().put("lockupViewModel", new JSONObject()
+            .put("contentType", "LOCKUP_CONTENT_TYPE_VIDEO")
+            .put("contentId", "members2")
+            .put("metadata", new JSONObject().put("lockupMetadataViewModel", new JSONObject()
+                .put("metadata", new JSONObject().put("contentMetadataViewModel", new JSONObject()
+                    .put("metadataRows", new JSONArray().put(new JSONObject().put("badges", new JSONArray()
+                        .put(new JSONObject().put("badgeViewModel", new JSONObject().put("badgeStyle", "BADGE_MEMBERS_ONLY")))))))))));
+        JSONObject publicVideo = new JSONObject().put("videoRenderer", new JSONObject().put("videoId", "public"));
+        JSONObject payload = new JSONObject().put("backgroundFormat", "local").put("data", new JSONObject()
+            .put("contents", new JSONArray().put(renderer).put(lockup).put(publicVideo)));
+
+        JSONArray entries = UploadNotifications.entries("videos", payload, NOW);
+        assertTrue(entries.getJSONObject(0).getBoolean("membersOnly"));
+        assertTrue(entries.getJSONObject(1).getBoolean("membersOnly"));
+        assertEquals(false, entries.getJSONObject(2).getBoolean("membersOnly"));
+    }
+
+    @Test
+    public void forgetsBaselinesOfFeedsWithNotificationsOff() throws Exception {
+        JSONObject state = new JSONObject();
+        UploadNotifications.takeNewUploads(state, "UC1", "videos", Arrays.asList(entry("a", NOW - HOUR)), NOW);
+        UploadNotifications.takeNewUploads(state, "UC1", "posts", Arrays.asList(entry("p", NOW - HOUR)), NOW);
+        UploadNotifications.takeNewUploads(state, "UC2", "videos", Arrays.asList(entry("x", NOW - HOUR)), NOW);
+        JSONObject configuration = new JSONObject().put("enabled", true).put("channels", new JSONObject()
+            .put("UC1", new JSONObject().put("feedTypes", new JSONArray().put("videos"))));
+
+        assertTrue(UploadNotifications.forgetUnconfiguredFeeds(state, configuration));
+        assertEquals(Arrays.asList("UC1:videos"), Arrays.asList(state.getJSONObject("known").names().getString(0)));
+        assertEquals(1, state.getJSONObject("known").length());
+        assertEquals(false, UploadNotifications.forgetUnconfiguredFeeds(state, configuration));
+        assertTrue(UploadNotifications.takeNewUploads(state, "UC2", "videos",
+            Arrays.asList(entry("y", NOW - HOUR), entry("x", NOW - HOUR)), NOW).isEmpty());
+    }
 }

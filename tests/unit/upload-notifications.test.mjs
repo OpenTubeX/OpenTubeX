@@ -125,3 +125,29 @@ test('the desktop notifier persists state and shows localized notifications', as
     await rm(directory, { recursive: true, force: true })
   }
 })
+
+test('turning a channel off and on again starts from a fresh baseline', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'upload-notifications-'))
+  try {
+    const shown = []
+    const notifier = createUploadNotifier({ file: path.join(directory, 'state.json'), show: notification => shown.push(notification) })
+    const configure = feedTypes => notifier.configure({
+      enabled: true,
+      titles: { videos: '{channel}' },
+      channels: {
+        UC1: { name: 'One', feedTypes, membersOnly: false },
+        UC2: { name: 'Two', feedTypes: ['videos'], membersOnly: false }
+      }
+    })
+    await configure(['videos'])
+    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('a', Date.now())] })
+    await configure([])
+    await configure(['videos'])
+    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('b', Date.now()), entry('a', Date.now())] })
+    assert.deepEqual(shown, [])
+    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('c', Date.now()), entry('b', Date.now()), entry('a', Date.now())] })
+    assert.deepEqual(shown.map(notification => notification.body), ['Title c'])
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})

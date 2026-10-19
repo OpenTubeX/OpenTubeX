@@ -41,7 +41,32 @@ final class UploadNotifications {
     static synchronized void configure(Context context, JSONObject configuration) {
         preferences(context).edit().putString(CONFIGURATION_KEY, configuration.toString()).apply();
         // Start from a fresh baseline when notifications are enabled again.
-        if (!configuration.optBoolean("enabled")) stateFile(context).delete();
+        if (!configuration.optBoolean("enabled")) {
+            stateFile(context).delete();
+            return;
+        }
+        try {
+            JSONObject state = readState(context);
+            if (forgetUnconfiguredFeeds(state, configuration)) writeState(context, state);
+        } catch (Exception error) {
+            android.util.Log.w("OpenTubeXUploads", "Unable to update upload notification state", error);
+        }
+    }
+
+    /** Drops baselines of feeds whose notifications are off. Mirrors forgetUnconfiguredFeeds. */
+    static boolean forgetUnconfiguredFeeds(JSONObject state, JSONObject configuration) {
+        JSONObject known = state.optJSONObject("known");
+        if (known == null) return false;
+        JSONObject channels = configuration.optJSONObject("channels");
+        List<String> removed = new ArrayList<>();
+        for (Iterator<String> keys = known.keys(); keys.hasNext();) {
+            String key = keys.next();
+            int separator = key.lastIndexOf(':');
+            JSONObject channel = channels == null ? null : channels.optJSONObject(key.substring(0, separator));
+            if (channel == null || !contains(channel.optJSONArray("feedTypes"), key.substring(separator + 1))) removed.add(key);
+        }
+        for (String key : removed) known.remove(key);
+        return !removed.isEmpty();
     }
 
     /** Checks a raw response saved by the scheduled refresh worker. */
@@ -68,17 +93,9 @@ final class UploadNotifications {
             if (entry != null && (membersOnly || !entry.optBoolean("membersOnly"))) available.add(entry);
         }
 
-        File file = stateFile(context);
-        JSONObject state;
-        try {
-            state = new JSONObject(new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8));
-        } catch (Exception missingOrInvalid) {
-            state = new JSONObject();
-        }
+        JSONObject state = readState(context);
         List<JSONObject> uploads = takeNewUploads(state, channelId, feedType, available, System.currentTimeMillis());
-        File temporary = new File(file.getPath() + ".tmp");
-        Files.write(temporary.toPath(), state.toString().getBytes(StandardCharsets.UTF_8));
-        Files.move(temporary.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+        writeState(context, state);
 
         JSONObject titles = configuration.optJSONObject("titles");
         String name = channel.optString("name");
@@ -167,7 +184,8 @@ final class UploadNotifications {
                 .put("title", video.optString("title"))
                 .put("published", video.optLong("published") * 1000)
                 .put("live", video.optBoolean("liveNow"))
-                .put("upcoming", video.optBoolean("isUpcoming")));
+                .put("upcoming", video.optBoolean("isUpcoming"))
+                .put("membersOnly", video.optBoolean("isMembersOnly")));
         }
         return result;
     }
@@ -233,6 +251,21 @@ final class UploadNotifications {
             result.put(value);
         }
         return result;
+    }
+
+    private static JSONObject readState(Context context) {
+        try {
+            return new JSONObject(new String(Files.readAllBytes(stateFile(context).toPath()), StandardCharsets.UTF_8));
+        } catch (Exception missingOrInvalid) {
+            return new JSONObject();
+        }
+    }
+
+    private static void writeState(Context context, JSONObject state) throws Exception {
+        File file = stateFile(context);
+        File temporary = new File(file.getPath() + ".tmp");
+        Files.write(temporary.toPath(), state.toString().getBytes(StandardCharsets.UTF_8));
+        Files.move(temporary.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
     }
 
     private static File stateFile(Context context) {

@@ -70,6 +70,24 @@ export function createUploadNotificationState() {
 }
 
 /**
+ * Drops the baselines of feeds whose notifications are off, so turning them on
+ * again does not report what was uploaded in the meantime.
+ * @param {{ known: Record<string, string[]>, notified: string[] }} state
+ * @param {ReturnType<typeof createUploadNotificationConfiguration>} configuration
+ * @returns {boolean} whether any baseline was dropped
+ */
+export function forgetUnconfiguredFeeds(state, configuration) {
+  let changed = false
+  for (const key of Object.keys(state.known)) {
+    const separator = key.lastIndexOf(':')
+    if (configuration.channels?.[key.slice(0, separator)]?.feedTypes.includes(key.slice(separator + 1))) continue
+    delete state.known[key]
+    changed = true
+  }
+  return changed
+}
+
+/**
  * Records a channel feed and returns its entries that appeared since the last
  * observation. The first observation of a feed only establishes a baseline,
  * and a response without overlap is treated as a replaced list, not as uploads.
