@@ -292,10 +292,14 @@ final class UploadNotifications {
         return result;
     }
 
-    private static JSONObject readState(Context context) {
+    /** Starts fresh for a missing or corrupt file; other read errors propagate so state is not overwritten. */
+    private static JSONObject readState(Context context) throws java.io.IOException {
+        File file = stateFile(context);
+        if (!file.exists()) return new JSONObject();
+        String text = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
         try {
-            return new JSONObject(new String(Files.readAllBytes(stateFile(context).toPath()), StandardCharsets.UTF_8));
-        } catch (Exception missingOrInvalid) {
+            return new JSONObject(text);
+        } catch (org.json.JSONException invalid) {
             return new JSONObject();
         }
     }

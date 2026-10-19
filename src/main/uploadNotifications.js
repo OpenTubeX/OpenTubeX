@@ -19,8 +19,17 @@ export function createUploadNotifier({ file, show }) {
 
   async function load() {
     if (state) return state
+    let text
     try {
-      const saved = JSON.parse(await readFile(file, 'utf8'))
+      text = await readFile(file, 'utf8')
+    } catch (error) {
+      // Other read errors propagate, so a later save cannot overwrite the state.
+      if (error.code !== 'ENOENT') throw error
+      state = createUploadNotificationState()
+      return state
+    }
+    try {
+      const saved = JSON.parse(text)
       state = saved?.known && Array.isArray(saved.notified) ? saved : createUploadNotificationState()
     } catch {
       state = createUploadNotificationState()
