@@ -4544,10 +4544,30 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   text-align: var(--caption-text-align) !important;
 }
 
+/*
+  Word-timed cues render one span per word inside Shaka's wrapper, so the
+  wrapper owns the background and clones its rounding onto every line. The
+  wrapper must stay inline for that, so its cue can't be a flex container.
+*/
+:deep(.shaka-text-container :has(> .shaka-text-wrapper)) {
+  display: block !important;
+}
+
+:deep(.shaka-text-container .shaka-text-wrapper),
 :deep(.shaka-text-container [translate='no']),
 :deep(.shaka-speech-to-text-container [translate='no']) {
   border-radius: calc(4px * var(--ui-roundness));
   background-color: var(--caption-background-color) !important;
+  box-decoration-break: clone;
+}
+
+:deep(.shaka-text-container .shaka-text-wrapper [translate='no']) {
+  border-radius: 0;
+  background-color: transparent !important;
+}
+
+:deep(.shaka-text-container [translate='no']),
+:deep(.shaka-speech-to-text-container [translate='no']) {
   color: var(--caption-text-color) !important;
   -webkit-font-smoothing: antialiased;
   -webkit-text-stroke: var(--caption-text-stroke-width) var(--caption-edge-color);
