@@ -203,3 +203,28 @@ test('withheld members-first uploads notify once they become public', () => {
   assert.deepEqual(ids(takeVisibleUploads(state, 'UC1', 'videos', [entry('m', NOW), entry('a', NOW)], false, NOW + 8 * 24 * HOUR)), ['m'])
   assert.deepEqual(ids(takeVisibleUploads(state, 'UC1', 'videos', [entry('m', NOW), entry('a', NOW)], false, NOW)), [])
 })
+
+test('turning a feed off also forgets its withheld members-only uploads', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'upload-notifications-'))
+  try {
+    const shown = []
+    const notifier = createUploadNotifier({ file: path.join(directory, 'state.json'), show: notification => shown.push(notification) })
+    const configure = feedTypes => notifier.configure({
+      enabled: true,
+      titles: { videos: '{channel}' },
+      channels: {
+        UC1: { name: 'One', feedTypes, membersOnly: false },
+        UC2: { name: 'Two', feedTypes: ['videos'], membersOnly: false }
+      }
+    })
+    await configure(['videos'])
+    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('a', Date.now())] })
+    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('m', Date.now(), { membersOnly: true }), entry('a', Date.now())] })
+    await configure([])
+    await configure(['videos'])
+    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('m', Date.now()), entry('a', Date.now())] })
+    assert.deepEqual(shown, [])
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})

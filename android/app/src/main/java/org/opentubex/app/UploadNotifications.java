@@ -65,7 +65,11 @@ final class UploadNotifications {
             JSONObject channel = channels == null || separator < 0 ? null : channels.optJSONObject(key.substring(0, separator));
             if (channel == null || !contains(channel.optJSONArray("feedTypes"), key.substring(separator + 1))) removed.add(key);
         }
-        for (String key : removed) known.remove(key);
+        JSONObject withheld = state.optJSONObject("withheld");
+        for (String key : removed) {
+            known.remove(key);
+            if (withheld != null) withheld.remove(key);
+        }
         return !removed.isEmpty();
     }
 
@@ -160,7 +164,10 @@ final class UploadNotifications {
     /** Mirrors takeVisibleUploads: withholds members-only uploads and notifies them once public. */
     static List<JSONObject> takeVisibleUploads(JSONObject state, String channelId, String feedType, List<JSONObject> entries,
                                                boolean showMembersOnly, long now) throws Exception {
-        JSONArray withheld = state.optJSONArray("withheld");
+        String key = channelId + ":" + feedType;
+        JSONObject withheldByFeed = state.optJSONObject("withheld");
+        if (withheldByFeed == null) state.put("withheld", withheldByFeed = new JSONObject());
+        JSONArray withheld = withheldByFeed.optJSONArray(key);
         Set<String> withheldIds = new LinkedHashSet<>();
         if (withheld != null) for (int i = 0; i < withheld.length(); i++) withheldIds.add(withheld.getString(i));
         List<JSONObject> released = new ArrayList<>();
@@ -179,7 +186,8 @@ final class UploadNotifications {
             else if (!releasedIds.contains(upload.getString("id"))) result.add(upload);
         }
         for (String id : withheldIds) if (!releasedIds.contains(id)) nextWithheld.add(id);
-        state.put("withheld", limit(nextWithheld, KNOWN_ID_LIMIT));
+        if (nextWithheld.isEmpty()) withheldByFeed.remove(key);
+        else withheldByFeed.put(key, limit(nextWithheld, KNOWN_ID_LIMIT));
         return result;
     }
 
