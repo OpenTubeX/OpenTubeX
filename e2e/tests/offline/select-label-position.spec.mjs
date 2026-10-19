@@ -122,6 +122,8 @@ test.describe('select labels', { tag: '@scale' }, () => {
         element.querySelector('.select-text').blur()
       })
       await page.evaluate(() => document.fonts.ready)
+      // The outline's color transition must settle before the baseline capture.
+      await control.evaluate(element => Promise.all(element.getAnimations({ subtree: true }).map(animation => animation.finished)))
       const clip = await control.evaluate(element => {
         const bounds = element.getBoundingClientRect()
         return {

@@ -752,12 +752,23 @@ for (const width of [1600, 480]) {
           await expect(field).toHaveCSS('outline-style', 'none')
           const focused = await field.evaluate(element => {
             const style = getComputedStyle(element)
-            return { shadow: style.boxShadow, caret: style.caretColor, border: element.closest('.outlined') ? getComputedStyle(element.parentElement.querySelector('.inputOutline')).borderBottomColor : style.borderBottomColor }
+            const outline = element.closest('.outlined') ? getComputedStyle(element.parentElement.querySelector('.inputOutline')) : null
+            return {
+              shadow: style.boxShadow,
+              caret: style.caretColor,
+              border: outline ? outline.borderBottomColor : style.borderBottomColor,
+              // Chromium truncates zoomed border widths to whole device pixels.
+              borderDevicePixels: outline ? Math.round(parseFloat(outline.borderBottomWidth) * devicePixelRatio) : 0,
+              focusWidth: parseFloat(style.getPropertyValue('--focus-border-width')),
+            }
           })
           if (variant === 'filled') expect(focused.shadow).toContain('0px -2px')
           else {
-            expect(focused.shadow).toContain('1px 0px 0px 0px inset')
-            expect(focused.shadow).toContain('-1px 0px 0px 0px inset')
+            // The fieldset's block borders stay at least two device pixels at
+            // every UI scale and the inner side shadows match that thickness.
+            expect(focused.borderDevicePixels).toBeGreaterThanOrEqual(2)
+            expect(focused.shadow).toContain(`${focused.focusWidth - 1}px 0px 0px 0px inset`)
+            expect(focused.shadow).toContain(`-${focused.focusWidth - 1}px 0px 0px 0px inset`)
             expect(focused.shadow).not.toContain('0px -2px 0px 0px inset')
           }
           await expect.poll(() => field.evaluate(element => {

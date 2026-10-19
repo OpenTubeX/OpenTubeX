@@ -9,6 +9,7 @@ body {
 
   --app-font-family: 'Geist Variable', system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   --ui-roundness: 1;
+  --focus-border-width: 2px;
   --form-control-height: 45px;
   --native-color-scheme: light;
   --form-control-value-padding: 18px 4px;
@@ -81,6 +82,20 @@ body {
   --selected-container-color: var(--primary-color);
   --selected-container-hover-color: var(--primary-color-hover);
   --on-selected-container-color: var(--text-with-main-color);
+}
+
+/* Chromium truncates zoomed border widths to whole device pixels, so a 2px
+   focus border renders as thin as the 1px rest state below 100% UI scale. */
+@media (resolution < 1dppx) {
+  body {
+    --focus-border-width: 3px;
+  }
+}
+
+@media (resolution < 0.67dppx) {
+  body {
+    --focus-border-width: 4px;
+  }
 }
 
 /* Inherit native touch sizing into dialogs and other teleported controls too. */
