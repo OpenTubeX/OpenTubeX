@@ -1,4 +1,5 @@
 import Capacitor
+import ImageIO
 import UIKit
 import WidgetKit
 
@@ -43,7 +44,7 @@ public class HomeWidgetsPlugin: CAPPlugin, CAPBridgedPlugin {
             guard let file = HomeWidgetStore.thumbnailFile(for: video), let url = URL(string: video.thumbnail) else { continue }
             keep.insert(file.lastPathComponent)
             if FileManager.default.fileExists(atPath: file.path) { continue }
-            guard let data = ThumbnailDownload.run(url, authorization: authorization), let image = UIImage(data: data),
+            guard let data = ThumbnailDownload.run(url, authorization: authorization), let image = Self.decode(data),
                   let jpeg = Self.thumbnail(from: image).jpegData(compressionQuality: 0.85) else { continue }
             downloaded = (try? jpeg.write(to: file, options: .atomic)) != nil || downloaded
         }
@@ -52,6 +53,17 @@ public class HomeWidgetsPlugin: CAPPlugin, CAPBridgedPlugin {
             try? FileManager.default.removeItem(at: file)
         }
         return downloaded
+    }
+
+    /// Decodes at most 1280 px on the longer side, so huge dimensions never become a full bitmap.
+    private static func decode(_ data: Data) -> UIImage? {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil),
+              let image = CGImageSourceCreateThumbnailAtIndex(source, 0, [
+                  kCGImageSourceCreateThumbnailFromImageAlways: true,
+                  kCGImageSourceCreateThumbnailWithTransform: true,
+                  kCGImageSourceThumbnailMaxPixelSize: 1280,
+              ] as CFDictionary) else { return nil }
+        return UIImage(cgImage: image)
     }
 
     /// Center-crops to a small 16:9 image; widget extensions have little memory.
