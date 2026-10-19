@@ -164,6 +164,8 @@ test.describe('subscription settings layout', { tag: '@scale' }, () => {
 })
 
 test('keeps the popover and Subscription Settings manager in sync', async ({ app, page }) => {
+  // Two app launches and a full edit round trip exceed the default budget when workers run in parallel.
+  test.slow()
   const subscriptionSettings = await goToSettingsSection(page, 'subscription')
   await subscriptionSettings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
   await expect.poll(() => page.evaluate(() => {
