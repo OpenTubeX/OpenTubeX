@@ -62,7 +62,7 @@ final class UploadNotifications {
         for (Iterator<String> keys = known.keys(); keys.hasNext();) {
             String key = keys.next();
             int separator = key.lastIndexOf(':');
-            JSONObject channel = channels == null ? null : channels.optJSONObject(key.substring(0, separator));
+            JSONObject channel = channels == null || separator < 0 ? null : channels.optJSONObject(key.substring(0, separator));
             if (channel == null || !contains(channel.optJSONArray("feedTypes"), key.substring(separator + 1))) removed.add(key);
         }
         for (String key : removed) known.remove(key);

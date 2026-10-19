@@ -114,6 +114,7 @@ public class UploadNotificationsTest {
         JSONObject configuration = new JSONObject().put("enabled", true).put("channels", new JSONObject()
             .put("UC1", new JSONObject().put("feedTypes", new JSONArray().put("videos"))));
 
+        state.getJSONObject("known").put("malformed", new JSONArray().put("z"));
         assertTrue(UploadNotifications.forgetUnconfiguredFeeds(state, configuration));
         assertEquals(Arrays.asList("UC1:videos"), Arrays.asList(state.getJSONObject("known").names().getString(0)));
         assertEquals(1, state.getJSONObject("known").length());
