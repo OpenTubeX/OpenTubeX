@@ -272,6 +272,7 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
       'Log In', 'Register', 'Privacy Policy', 'Pair Another Device', 'Pair With Existing Device',
       'Device Name', 'Pairing Code', 'Create Pairing Code', 'Use Text Pairing Code',
       'Show QR Code', 'Enter Pairing Code', 'Check Pairing Code', 'Scan QR Code',
+      'Use Pairing Invite', 'Show Pairing Invite',
       'Pairing Codes Match', 'Approve Pairing', 'Try Again', 'Scan Again',
       'Turn Flashlight On', 'Turn Flashlight Off', 'Confirm Data Loss',
       'Sync Automatically', 'Watch stats', 'Profiles', 'Open Tabs', 'Use Shared Tabs',
