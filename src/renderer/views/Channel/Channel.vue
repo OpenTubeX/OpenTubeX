@@ -742,6 +742,9 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   document.removeEventListener('keydown', handlePanelTabNavigation)
+  // Leaving for another view stops the route watcher, so invalidate pending
+  // loads here as well; a late URL resolution must not navigate back.
+  channelRouteGeneration += 1
 })
 
 /**
