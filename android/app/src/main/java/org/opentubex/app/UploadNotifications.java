@@ -92,12 +92,10 @@ final class UploadNotifications {
             if (entry != null) available.add(entry);
         }
 
-        // The baseline includes members-only entries, so they are not reported
-        // as new once members-only content becomes visible.
         JSONObject state = readState(context);
-        List<JSONObject> uploads = takeNewUploads(state, channelId, feedType, available, System.currentTimeMillis());
+        List<JSONObject> uploads = takeVisibleUploads(state, channelId, feedType, available,
+            channel.optBoolean("membersOnly"), System.currentTimeMillis());
         writeState(context, state);
-        if (!channel.optBoolean("membersOnly")) uploads.removeIf(upload -> upload.optBoolean("membersOnly"));
 
         JSONObject titles = configuration.optJSONObject("titles");
         String name = channel.optString("name");
@@ -157,6 +155,32 @@ final class UploadNotifications {
         for (int i = 0; i < notified.length(); i++) nextNotified.add(notified.getString(i));
         state.put("notified", limit(nextNotified, NOTIFIED_ID_LIMIT));
         return uploads;
+    }
+
+    /** Mirrors takeVisibleUploads: withholds members-only uploads and notifies them once public. */
+    static List<JSONObject> takeVisibleUploads(JSONObject state, String channelId, String feedType, List<JSONObject> entries,
+                                               boolean showMembersOnly, long now) throws Exception {
+        JSONArray withheld = state.optJSONArray("withheld");
+        Set<String> withheldIds = new LinkedHashSet<>();
+        if (withheld != null) for (int i = 0; i < withheld.length(); i++) withheldIds.add(withheld.getString(i));
+        List<JSONObject> released = new ArrayList<>();
+        Set<String> releasedIds = new HashSet<>();
+        for (JSONObject entry : entries) {
+            String id = entry.optString("id");
+            if (!entry.optBoolean("membersOnly") && !entry.optBoolean("upcoming") && withheldIds.contains(id) && releasedIds.add(id)) {
+                released.add(entry);
+            }
+        }
+        List<JSONObject> uploads = takeNewUploads(state, channelId, feedType, entries, now);
+        LinkedHashSet<String> nextWithheld = new LinkedHashSet<>();
+        List<JSONObject> result = new ArrayList<>(released);
+        for (JSONObject upload : uploads) {
+            if (!showMembersOnly && upload.optBoolean("membersOnly")) nextWithheld.add(upload.getString("id"));
+            else if (!releasedIds.contains(upload.getString("id"))) result.add(upload);
+        }
+        for (String id : withheldIds) if (!releasedIds.contains(id)) nextWithheld.add(id);
+        state.put("withheld", limit(nextWithheld, KNOWN_ID_LIMIT));
+        return result;
     }
 
     /** Converts a saved refresh response into the entries produced by normalizeUploadEntries. */

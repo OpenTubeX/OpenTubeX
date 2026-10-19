@@ -77,7 +77,7 @@ function htmlToText(html) {
     })
 }
 
-/** @returns {{ known: Record<string, string[]>, notified: string[] }} */
+/** @returns {{ known: Record<string, string[]>, notified: string[], withheld?: string[] }} */
 export function createUploadNotificationState() {
   return { known: {}, notified: [] }
 }
@@ -132,6 +132,31 @@ export function takeNewUploads(state, channelId, feedType, entries, now = Date.n
   ))
   state.notified = [...uploads.map(entry => entry.id), ...state.notified].slice(0, NOTIFIED_ID_LIMIT)
   return uploads
+}
+
+/**
+ * Like takeNewUploads, but withholds members-only uploads unless they are shown.
+ * The baseline still records them, so turning members-only content on does not
+ * report old ones. A withheld upload notifies once it is no longer members-only,
+ * as members-first videos do when they become public.
+ * @param {{ known: Record<string, string[]>, notified: string[], withheld?: string[] }} state
+ * @param {string} channelId
+ * @param {string} feedType
+ * @param {ReturnType<typeof normalizeUploadEntries>} entries
+ * @param {boolean} showMembersOnly
+ * @param {number} [now]
+ */
+export function takeVisibleUploads(state, channelId, feedType, entries, showMembersOnly, now = Date.now()) {
+  const withheld = state.withheld ?? []
+  const released = entries.filter(entry => !entry.membersOnly && !entry.upcoming && withheld.includes(entry.id))
+  const uploads = takeNewUploads(state, channelId, feedType, entries, now)
+  const visible = uploads.filter(entry => showMembersOnly || !entry.membersOnly)
+  const releasedIds = new Set(released.map(entry => entry.id))
+  state.withheld = [
+    ...uploads.filter(entry => !visible.includes(entry)).map(entry => entry.id),
+    ...withheld.filter(id => !releasedIds.has(id))
+  ].slice(0, KNOWN_ID_LIMIT)
+  return [...released, ...visible.filter(entry => !releasedIds.has(entry.id))]
 }
 
 /**

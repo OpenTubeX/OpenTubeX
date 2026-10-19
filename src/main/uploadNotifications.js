@@ -1,5 +1,5 @@
 import { readFile, rm, writeFile, rename } from 'node:fs/promises'
-import { createUploadNotificationState, forgetUnconfiguredFeeds, getUploadUrl, takeNewUploads } from '../newUploadNotifications.js'
+import { createUploadNotificationState, forgetUnconfiguredFeeds, getUploadUrl, takeVisibleUploads } from '../newUploadNotifications.js'
 
 /**
  * Single desktop source of truth for new-upload notifications, shared by
@@ -54,10 +54,7 @@ export function createUploadNotifier({ file, show }) {
         const channel = configuration?.enabled === true ? configuration.channels?.[channelId] : null
         if (!channel?.feedTypes?.includes(feedType)) return
 
-        // The baseline includes members-only entries, so they are not reported
-        // as new once members-only content becomes visible.
-        const uploads = takeNewUploads(await load(), channelId, feedType, entries)
-          .filter(entry => channel.membersOnly === true || !entry.membersOnly)
+        const uploads = takeVisibleUploads(await load(), channelId, feedType, entries, channel.membersOnly === true)
         await save()
 
         for (const upload of uploads) {

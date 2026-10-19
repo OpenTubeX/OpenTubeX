@@ -9,7 +9,8 @@ import {
   createUploadNotificationState,
   getUploadUrl,
   normalizeUploadEntries,
-  takeNewUploads
+  takeNewUploads,
+  takeVisibleUploads
 } from '../../src/newUploadNotifications.js'
 import { createUploadNotifier } from '../../src/main/uploadNotifications.js'
 
@@ -192,4 +193,13 @@ test('members-only uploads seen while hidden stay known once they become visible
 test('post text decodes named and numeric entities', () => {
   const [post] = normalizeUploadEntries([{ postId: 'p', postText: 'a&nbsp;b &#39;c&#x27; &AMP; &unknown; &#99999999;' }])
   assert.equal(post.title, "a\u00A0b 'c' & &unknown; &#99999999;")
+})
+
+test('withheld members-first uploads notify once they become public', () => {
+  const state = createUploadNotificationState()
+  const ids = uploads => uploads.map(upload => upload.id)
+  takeVisibleUploads(state, 'UC1', 'videos', [entry('a', NOW)], false, NOW)
+  assert.deepEqual(ids(takeVisibleUploads(state, 'UC1', 'videos', [entry('m', NOW, { membersOnly: true }), entry('a', NOW)], false, NOW)), [])
+  assert.deepEqual(ids(takeVisibleUploads(state, 'UC1', 'videos', [entry('m', NOW), entry('a', NOW)], false, NOW + 8 * 24 * HOUR)), ['m'])
+  assert.deepEqual(ids(takeVisibleUploads(state, 'UC1', 'videos', [entry('m', NOW), entry('a', NOW)], false, NOW)), [])
 })

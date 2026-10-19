@@ -121,4 +121,16 @@ public class UploadNotificationsTest {
         assertTrue(UploadNotifications.takeNewUploads(state, "UC2", "videos",
             Arrays.asList(entry("y", NOW - HOUR), entry("x", NOW - HOUR)), NOW).isEmpty());
     }
+
+    @Test
+    public void notifiesWithheldMembersFirstUploadsOnceTheyArePublic() throws Exception {
+        JSONObject state = new JSONObject();
+        UploadNotifications.takeVisibleUploads(state, "UC1", "videos", Arrays.asList(entry("a", NOW)), false, NOW);
+        assertTrue(UploadNotifications.takeVisibleUploads(state, "UC1", "videos",
+            Arrays.asList(entry("m", NOW).put("membersOnly", true), entry("a", NOW)), false, NOW).isEmpty());
+        assertEquals(Arrays.asList("m"), ids(UploadNotifications.takeVisibleUploads(state, "UC1", "videos",
+            Arrays.asList(entry("m", NOW), entry("a", NOW)), false, NOW + 8 * 24 * HOUR)));
+        assertTrue(UploadNotifications.takeVisibleUploads(state, "UC1", "videos",
+            Arrays.asList(entry("m", NOW), entry("a", NOW)), false, NOW).isEmpty());
+    }
 }
