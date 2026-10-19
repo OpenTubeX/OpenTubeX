@@ -5092,8 +5092,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   display: none;
 }
 
-/* added to the body element */
-:global(html:has(body.playerFullWindow)) {
+/* added to the body element, and appPlayerFullWindow to <html> */
+:global(:root.appPlayerFullWindow) {
   overflow: hidden;
 }
 
@@ -5321,21 +5321,22 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
     );
   }
 
-  :global(.app.capacitorPhoneLayout:has(.sideNav.scrollHidden):not(:has(.sideNav :focus-visible)) .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar) {
+  /* stylelint-disable-next-line selector-max-compound-selectors */
+  :global(.app.capacitorPhoneLayout > .sideNav.scrollHidden:not(:has(:focus-visible)) ~ * .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar) {
     translate: 0 var(--mobile-nav-height);
     transition: height var(--mobile-mini-expand-duration, 0ms) ease, translate 220ms cubic-bezier(0.4, 0, 1, 1), transform var(--mobile-mini-dismiss-duration, 0ms) ease-out;
   }
 }
 
-:global(.app.capacitorTabs:has(.mobileMiniBar) > .routerView) {
+:global(:root.appMiniBar .app.capacitorTabs > .routerView) {
   padding-block-end: calc(108px + var(--connection-status-space, 0px));
 }
 
-:global(.app.capacitorTabs:has(.mobileMiniBar .mobileMiniBarCompact) > .routerView) {
+:global(:root.appMiniBarCompact .app.capacitorTabs > .routerView) {
   padding-block-end: calc(112px + var(--connection-status-space, 0px));
 }
 
-:global(.app.capacitorTabs:has(.mobileMiniBar.mobileMiniBarCollapsed) > .routerView) {
+:global(:root.appMiniBarCollapsed .app.capacitorTabs > .routerView) {
   padding-block-end: calc(64px + var(--connection-status-space, 0px));
 }
 

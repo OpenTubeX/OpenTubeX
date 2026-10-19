@@ -316,6 +316,7 @@ export function setAndroidPictureInPictureDocumentState(active, { transitioning 
     classes.toggle('androidPictureInPictureRestoring', true)
   }
   classes.toggle('androidPictureInPicture', active)
+  document.documentElement.classList.toggle('appPictureInPicture', active)
   classes.toggle('androidPictureInPictureEntering', active && transitioning)
   if (active) classes.toggle('androidPictureInPictureRestoring', false)
   else if (classes.contains('androidPictureInPictureRestoring')) {

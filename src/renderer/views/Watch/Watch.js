@@ -3,6 +3,7 @@ import WatchVideoSummary from '../../components/WatchVideoSummary/WatchVideoSumm
 import FtPhonePanel from '../../components/FtPhonePanel/FtPhonePanel.vue'
 import PhoneCommentsButton from '../../components/PhoneCommentsButton/PhoneCommentsButton.vue'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
+import { holdRootClass } from '../../helpers/rootClasses'
 import { connectionEvents, initializeNetworkRecovery, getConnectionState } from '../../helpers/networkRecovery'
 import { ytDlp } from '../../helpers/ytDlp'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
@@ -1305,6 +1306,17 @@ export default defineComponent({
     }
   },
   watch: {
+    // Ambient light extends past the layout, so the app clips its overflow.
+    ambientModeActive: {
+      handler(active) {
+        if (active && !this.releaseAmbientModeClass) this.releaseAmbientModeClass = holdRootClass('appAmbientMode')
+        else if (!active && this.releaseAmbientModeClass) {
+          this.releaseAmbientModeClass()
+          this.releaseAmbientModeClass = null
+        }
+      },
+      immediate: true
+    },
     downloadAvailable(available) {
       if (!available) this.showDownloadPrompt = false
     },
@@ -1495,6 +1507,8 @@ export default defineComponent({
     if (isOverlayScrollTopOutOfBounds(rail, contentEnd)) clampOverlayScrollTop(rail, contentEnd)
   },
   beforeUnmount: function () {
+    this.releaseAmbientModeClass?.()
+    this.releaseAmbientModeClass = null
     connectionEvents.removeEventListener('change', this.handleDownloadConnectionChange)
     document.removeEventListener('keydown', this.handleShortsNavigationKeydown, true)
     window.removeEventListener('resize', this.updateShortsViewportHeight)

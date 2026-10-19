@@ -71,7 +71,7 @@
   padding-block-start: var(--app-safe-area-inset-top);
 }
 
-:global(body:has(.tabBar .os-scrollbar-horizontal.os-scrollbar-visible)) {
+:global(:root.appTabBarScrollbar body) {
   --horizontal-tab-scrollbar-space: var(--scrollbar-track-width);
 }
 
@@ -107,7 +107,7 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-:global(html:has(body.androidPictureInPicture)),
+:global(:root.appPictureInPicture),
 :global(body.androidPictureInPicture) {
   overflow: hidden !important;
   scrollbar-width: none !important;
@@ -327,12 +327,12 @@
   display: none !important;
 }
 
-.app:has(.videoLayout.ambientModeActive) {
+:global(:root.appAmbientMode .app) {
   overflow-inline: clip;
 }
 
-:global(html:has(.app.capacitorPhoneLayout)),
-:global(body:has(.app.capacitorPhoneLayout)) {
+:global(:root.appPhoneLayout),
+:global(:root.appPhoneLayout body) {
   max-inline-size: 100%;
   overflow-inline: clip;
   overscroll-behavior: none;
@@ -853,11 +853,11 @@
 }
 
 @media only screen and (width <= 680px) {
-  :global(body:has(.app.compactNavigation)) {
+  :global(:root.appCompactNavigation body) {
     --mobile-nav-content-height: 48px;
   }
 
-  .app:has(> .progressBar) {
+  :global(:root.appProgressBar .app) {
     --mobile-progress-bar-space: var(--progress-bar-height);
   }
 

@@ -40,7 +40,7 @@
 
 /* The app page keeps its own scrollbar behind the modal. Do not let it show
    through beside the settings content while the modal covers the viewport. */
-:global(body:has(.settingsWindow.maximized) > .os-scrollbar) {
+:global(:root.appSettingsMaximized body > .os-scrollbar) {
   visibility: hidden;
 }
 

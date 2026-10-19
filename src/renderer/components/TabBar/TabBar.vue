@@ -149,6 +149,7 @@ import { fetchTabAvatarBytes } from '../../helpers/tabAvatar'
 import { getMissingTabAvatarTabs, loadMissingTabAvatars } from '../../helpers/loadTabAvatars'
 import { computeReorderOffsets } from '../../helpers/reorderOffsets'
 import { clampOverlayScrollLeft, clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { useRootClass } from '../../helpers/rootClasses'
 import SortableTab from './SortableTab.vue'
 import TabTooltip from './TabTooltip.vue'
 import TabTooltipOverlay from './TabTooltipOverlay.vue'
@@ -339,6 +340,19 @@ const tabOrganizerTooltip = computed(() => {
 })
 
 const tabBarRef = useTemplateRef('tabBarRef')
+// The app makes room for a visible horizontal scrollbar, which OverlayScrollbars toggles.
+const horizontalScrollbarVisible = ref(false)
+watch(tabBarRef, (element, _previous, onCleanup) => {
+  const update = () => {
+    horizontalScrollbarVisible.value = element?.querySelector('.os-scrollbar-horizontal.os-scrollbar-visible') != null
+  }
+  update()
+  if (!element) return
+  const observer = new MutationObserver(update)
+  observer.observe(element, { subtree: true, childList: true, attributes: true, attributeFilter: ['class'] })
+  onCleanup(() => observer.disconnect())
+}, { immediate: true, flush: 'sync' })
+useRootClass('appTabBarScrollbar', horizontalScrollbarVisible)
 const tabsContentRef = useTemplateRef('tabsContentRef')
 const dropZoneRef = useTemplateRef('dropZoneRef')
 const closeTooltipsSignal = ref(0)

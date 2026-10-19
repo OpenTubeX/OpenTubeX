@@ -1,6 +1,7 @@
 <template>
   <div
     v-if="dataReady"
+    ref="appRoot"
     class="app"
     :class="[{
       hideOutlines: outlinesHidden,
@@ -662,6 +663,7 @@ import {
 import { startProgressBarOperation } from './helpers/progressBar'
 import { initializePlatformInfo, isLinuxWayland, supportsAutoPictureInPictureMinimize } from './helpers/platform'
 import { cacheStartupAppearance, revealStartupSplash } from './helpers/startupSplash'
+import { mirrorAppState } from './helpers/rootClasses'
 import {
   shouldShowProgressStartToast,
   shouldUseProgressToast,
@@ -1134,6 +1136,10 @@ const hideSubscriptionsLive = computed(() => store.getters.getHideLiveStreams ||
 const hideSubscriptionsPosts = computed(() => store.getters.getHideSubscriptionsCommunity || store.getters.getUseRssFeeds)
 
 const dataReady = ref(false)
+// Page-wide and teleported styles read the layout from <html>.
+watch(useTemplateRef('appRoot'), (app, _previous, onCleanup) => {
+  if (app) onCleanup(mirrorAppState(app))
+}, { flush: 'sync' })
 const subscriptionCacheReady = computed(() => store.getters.getSubscriptionCacheReady)
 const showTutorial = ref(false)
 const findbarVisible = ref(false)
