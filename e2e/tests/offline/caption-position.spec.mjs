@@ -46,6 +46,28 @@ test('applies UI roundness to the player and caption backgrounds', async ({ app,
   await expect(player).toHaveCSS('border-radius', '24px')
 })
 
+test('rounds word-timed caption lines instead of each word', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
+  await mockPlayableWatchPage(app, page, {
+    captionText: '<c>Every</c><c> word</c><c> has</c><c> a</c><c> span,</c>\n<c>but</c><c> lines</c><c> share</c><c> one</c>'
+  })
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  await page.evaluate(() => window.$store.dispatch('updateUiRoundness', 200))
+
+  const line = page.locator('.ftVideoPlayer .shaka-text-container .shaka-text-wrapper')
+  const words = line.locator('[translate="no"]')
+  await expect(words).toHaveCount(9)
+  await expect(line).toHaveCSS('border-radius', '8px')
+  await expect(line).toHaveCSS('box-decoration-break', 'clone')
+  await expect.poll(() => line.evaluate(element => element.getClientRects().length)).toBe(2)
+  await expect(line).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+  for (const word of await words.all()) {
+    await expect(word).toHaveCSS('border-radius', '0px')
+    await expect(word).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+  }
+  await attachScreenshot('word-timed captions rounded per line')
+})
+
 test('applies UI roundness to the caption settings preview background', async ({ page, attachScreenshot }) => {
   await goTo(page, 'settings')
   await page.locator('.settingsMenu [data-section="playback"]').click()
