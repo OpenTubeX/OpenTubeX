@@ -39,6 +39,8 @@ test('automatic unload badges @scale distinguish manual tabs and clear on activa
   await expect(autoTab).toHaveAttribute('aria-label', /Automatically unloaded to free memory/)
   const tabBounds = await autoTab.boundingBox()
   const badgeBounds = await autoTab.locator('.autoUnloadIcon').boundingBox()
+  expect(tabBounds, 'automatically unloaded tab is rendered').not.toBeNull()
+  expect(badgeBounds, 'automatic unloading badge is rendered').not.toBeNull()
   expect(badgeBounds.x).toBeGreaterThanOrEqual(tabBounds.x)
   expect(badgeBounds.y).toBeGreaterThanOrEqual(tabBounds.y)
   expect(badgeBounds.x + badgeBounds.width).toBeLessThanOrEqual(tabBounds.x + tabBounds.width)
