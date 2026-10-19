@@ -74,14 +74,14 @@ test('separates canceled downloads without offering retry-all', async ({ page })
   await expect(page.getByRole('heading', { name: 'Downloaded', exact: true })).toHaveCount(0)
 })
 
-test('shares one yt-dlp version probe across concurrent downloads', async ({ app, page }) => {
+test('shares one yt-dlp version probe across concurrent downloads and keeps custom runtime opt-outs', async ({ app, page }) => {
   const executable = path.join(app.userDataDir, 'probed-yt-dlp.sh')
   const probesFile = path.join(app.userDataDir, 'version-probes.txt')
   const argumentsFile = path.join(app.userDataDir, 'probed-arguments.txt')
   await writeFile(executable, [
     '#!/bin/sh',
     `if [ "$1" = "--version" ]; then printf '%s\\n' probe >> '${probesFile}'; sleep 0.5; printf '%s\\n' '2026.08.19'; exit; fi`,
-    `printf '%s\\n' "$@" >> '${argumentsFile}'`,
+    `printf '%s\\n' "$@" -- >> '${argumentsFile}'`,
   ].join('\n'))
   await chmod(executable, 0o755)
   await configureQueue(page, {
@@ -92,13 +92,17 @@ test('shares one yt-dlp version probe across concurrent downloads', async ({ app
 
   const results = await page.evaluate(downloads => Promise.all(
     downloads.map(download => window.ftElectron.ytDlpDownload(download))
-  ), ['kkkkkkkkkkk', 'lllllllllll', 'mmmmmmmmmmm'].map(videoId => ({ videoId, title: videoId, mode: 'video' })))
+  ), ['kkkkkkkkkkk', 'lllllllllll', 'mmmmmmmmmmm'].map(videoId => ({ videoId, title: videoId, mode: 'video', customArgs: '--no-js-runtimes' })))
   expect(results.every(result => Number.isInteger(result?.id))).toBe(true)
   expect(await readFile(probesFile, 'utf8')).toBe('probe\n')
+  // A custom --no-js-runtimes must come after the automatic runtime so it still disables it.
   await expect.poll(async () => {
-    const lines = (await readFile(argumentsFile, 'utf8').catch(() => '')).split('\n')
-    return lines.filter(line => line === '--js-runtimes').length
-  }).toBe(3)
+    const commands = (await readFile(argumentsFile, 'utf8').catch(() => '')).split('--\n').slice(0, -1)
+    return commands.map(command => {
+      const lines = command.split('\n')
+      return lines.indexOf('--js-runtimes') !== -1 && lines.indexOf('--js-runtimes') < lines.indexOf('--no-js-runtimes')
+    })
+  }).toEqual([true, true, true])
 })
 
 test('controls queue order, running jobs, bandwidth, and retry-all', async ({ app, page }) => {

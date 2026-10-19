@@ -724,8 +724,9 @@ async function pushProxyArgument(args) {
  * @param {string} executable
  * @param {string[]} args
  */
-async function pushJsRuntimeArgument(executable, args) {
-  args.push(...jsRuntimeArguments(await getYtDlpVersion(executable), process.execPath))
+async function prependJsRuntimeArgument(executable, args) {
+  // Leading, so a custom --no-js-runtimes later in the command still disables it.
+  args.unshift(...jsRuntimeArguments(await getYtDlpVersion(executable), process.execPath))
 }
 
 /** Makes `--js-runtimes node:<execPath>` start Electron as plain Node.js. */
@@ -2507,7 +2508,7 @@ async function startYtDlpDownload(
       return { error: result.error }
     }
   }
-  await pushJsRuntimeArgument(executable, args)
+  await prependJsRuntimeArgument(executable, args)
 
   // Authorization and executable setup contain awaits, so another refresh can
   // start the same video after the initial fast-path check above.
