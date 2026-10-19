@@ -53,7 +53,14 @@ test('yt-dlp captions flag dubbed transcripts and translate from the original la
   assert.equal(new URL(captionTranslations[0].url).searchParams.get('lang'), 'en')
   assert.equal(new URL(captionTranslations[0].url).searchParams.get('tlang'), 'de')
 
-  // A mismatching language without a matching transcript is not evidence of dubs
+  // Authored original captions still identify the auto-generated tracks as dubs
+  const authored = mapPlaybackCaptions({
+    en: { ext: 'vtt', url: 'https://www.youtube.com/api/timedtext?v=aaaaaaaaaaa&lang=en&fmt=vtt', name: 'English' },
+    'de-orig': requested['de-orig']
+  }, null, false, 'en-US')
+  assert.equal(authored.captions.find(caption => caption.language === 'de').isDubbed, true)
+
+  // A mismatching language without original language captions is not evidence of dubs
   const single = mapPlaybackCaptions({ de: requested['de-orig'] }, null, false, 'en')
   assert.equal(single.captions[0].isDubbed, false)
 })
