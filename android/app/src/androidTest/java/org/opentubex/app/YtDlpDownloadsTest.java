@@ -173,12 +173,13 @@ public class YtDlpDownloadsTest {
         assertNotNull(folder);
         String folderUri = DocumentsContract.buildTreeDocumentUri(InstrumentationRegistry.getInstrumentation().getContext().getPackageName() + ".documents", DocumentsContract.getDocumentId(folder.getUri())).toString();
         grant(context, Uri.parse(folderUri));
-        String fixtureCookie = "127.0.0.1\tFALSE\t/\tFALSE\t0\ttest_session\tfixture";
+        String fixtureCookie = null;
         boolean fixtureCreated = false;
         try (FixtureServer server = new FixtureServer(InstrumentationRegistry.getInstrumentation().getContext())) {
             server.requireCookie = true;
             org.junit.Assume.assumeTrue("A session was saved before the fixture started", cookies.createNewFile());
             fixtureCreated = true;
+            fixtureCookie = server.host() + "\tFALSE\t/\tFALSE\t0\ttest_session\tfixture";
             YtDlpFiles.write(cookies, ("# Netscape HTTP Cookie File\n" + fixtureCookie + "\n").getBytes(StandardCharsets.UTF_8));
             JSONObject config = new JSONObject().put("enabled", true).put("folder", folderUri)
                 .put("cookies", cookies.getAbsolutePath()).put("useCookies", false);
@@ -266,7 +267,8 @@ public class YtDlpDownloadsTest {
     }
 
     private static final class FixtureServer implements AutoCloseable {
-        final ServerSocket server = new ServerSocket(0, 10, InetAddress.getByName("127.0.0.1"));
+        // yt-dlp runs through the proxy relay, which refuses loopback destinations.
+        final ServerSocket server = new ServerSocket(0, 10, interfaceAddress());
         final AtomicInteger rangeRequests = new AtomicInteger();
         volatile boolean requireCookie;
         final byte[] media;
@@ -305,7 +307,17 @@ public class YtDlpDownloadsTest {
             });
             thread.start();
         }
-        String url() { return "http://127.0.0.1:" + server.getLocalPort() + "/demo.webm"; }
+        String host() { return server.getInetAddress().getHostAddress(); }
+        String url() { return "http://" + host() + ":" + server.getLocalPort() + "/demo.webm"; }
+        private static InetAddress interfaceAddress() throws SocketException {
+            for (NetworkInterface network : java.util.Collections.list(NetworkInterface.getNetworkInterfaces())) {
+                if (!network.isUp() || network.isLoopback()) continue;
+                for (InetAddress address : java.util.Collections.list(network.getInetAddresses())) {
+                    if (address instanceof Inet4Address) return address;
+                }
+            }
+            throw new SocketException("No non-loopback IPv4 address for the fixture server");
+        }
         @Override public void close() throws Exception { server.close(); thread.join(5000); }
     }
 }
