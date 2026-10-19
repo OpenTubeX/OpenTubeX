@@ -216,6 +216,9 @@
             :value="channel"
             :select-names="channelNames"
             :select-values="channelValues"
+            lazy-options
+            @focusin="channelPickerOpened = true"
+            @open="channelPickerOpened = true"
             @change="channel = $event"
           />
           <FtButton
@@ -595,7 +598,11 @@ const historyCacheSorted = computed(() => {
   }
 })
 
+// Large histories can contain thousands of channels. Collect them once the
+// picker is focused instead of delaying every navigation to History.
+const channelPickerOpened = ref(false)
 const channels = computed(() => {
+  if (!channelPickerOpened.value && !channel.value) return []
   const options = getHistoryChannels(store.getters.getHistoryCacheSorted, locale.value)
   // Retain the selected option if its last record is removed or repaired.
   // Silently clearing it would unexpectedly broaden the results.

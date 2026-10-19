@@ -41,10 +41,11 @@ export function getHistoryChannels(videos, locale) {
   }
   const nameCounts = new Map()
   for (const name of channels.values()) nameCounts.set(name, (nameCounts.get(name) ?? 0) + 1)
+  const collator = new Intl.Collator(locale)
   return Array.from(channels, ([value, name]) => ({
     value,
     name: nameCounts.get(name) > 1 && value.startsWith('id:') ? `${name} (${value.slice(3)})` : name,
-  })).sort((a, b) => a.name.localeCompare(b.name, locale))
+  })).sort((a, b) => collator.compare(a.name, b.name))
 }
 
 /**

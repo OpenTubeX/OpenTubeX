@@ -18,7 +18,7 @@
       @change="change"
     >
       <option
-        v-for="(name, index) in selectNames"
+        v-for="{ name, index } in nativeOptions"
         :key="selectValues[index]"
         :dir="isLocaleSelector ? 'auto' : null"
         :value="selectValues[index]"
@@ -169,7 +169,7 @@
           @keydown="handlePickerKeydown"
         >
           <template
-            v-for="({ name, index }, visibleIndex) in filteredOptions"
+            v-for="({ name, index }, visibleIndex) in renderedOptions"
             :key="selectValues[index]"
           >
             <li
@@ -229,6 +229,12 @@
               </span>
             </li>
           </template>
+          <li
+            v-if="renderedOptions.length < filteredOptions.length"
+            ref="loadMoreSentinel"
+            class="selectLoadMore"
+            role="presentation"
+          />
         </ul>
         <!-- eslint-enable vuejs-accessibility/no-autofocus -->
       </FtMobileSheet>
@@ -238,7 +244,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef, watch, watchEffect } from 'vue'
 import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
 
 import FtMobileSheet from '../FtMobileSheet/FtMobileSheet.vue'
@@ -333,6 +339,12 @@ const props = defineProps({
   dropdownZIndex: {
     type: [Number, String],
     default: null
+  },
+  // Very long lists render rows on demand and keep only the selected value in
+  // the hidden native select.
+  lazyOptions: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -344,6 +356,7 @@ const selectRoot = useTemplateRef('selectRoot')
 const selectButton = useTemplateRef('selectButton')
 const dropdown = useTemplateRef('dropdown')
 const options = useTemplateRef('options')
+const loadMoreSentinel = useTemplateRef('loadMoreSentinel')
 
 const phoneLayout = usePhoneLayout(process.env.IS_CAPACITOR
   ? `(any-pointer: coarse), ${PHONE_LAYOUT_QUERY}`
@@ -352,6 +365,31 @@ const search = ref('')
 const filteredOptions = computed(() => props.selectNames
   .map((name, index) => ({ name, index }))
   .filter(({ name }) => !phoneLayout.value || name.toLocaleLowerCase().includes(search.value.trim().toLocaleLowerCase())))
+const OPTION_PAGE_SIZE = 100
+const renderLimit = ref(OPTION_PAGE_SIZE)
+const renderedOptions = computed(() => props.lazyOptions ? filteredOptions.value.slice(0, renderLimit.value) : filteredOptions.value)
+const nativeOptions = computed(() => {
+  if (!props.lazyOptions) return props.selectNames.map((name, index) => ({ name, index }))
+  return selectedIndex.value === -1 ? [] : [{ name: selectedName.value, index: selectedIndex.value }]
+})
+
+/** @param {number} visibleIndex */
+function renderOptionAt(visibleIndex) {
+  if (visibleIndex >= renderLimit.value) {
+    renderLimit.value = Math.ceil((visibleIndex + 1) / OPTION_PAGE_SIZE) * OPTION_PAGE_SIZE
+  }
+}
+
+watchEffect(onCleanup => {
+  const sentinel = loadMoreSentinel.value
+  if (!sentinel) return
+  // The implicit root still respects clipping by the scrolling dropdown.
+  const observer = new IntersectionObserver(entries => {
+    if (entries.some(entry => entry.isIntersecting)) renderLimit.value += OPTION_PAGE_SIZE
+  }, { rootMargin: '200px' })
+  observer.observe(sentinel)
+  onCleanup(() => observer.disconnect())
+})
 const dropdownShown = ref(false)
 useAnchoredViewportBounds(selectButton, dropdown, computed(() => dropdownShown.value && !phoneLayout.value))
 const dropdownRendered = ref(false)
@@ -395,6 +433,7 @@ watch(dropdownShown, (shown) => {
 })
 
 watch([search, phoneLayout], async () => {
+  renderLimit.value = OPTION_PAGE_SIZE
   await nextTick()
   await refreshDropdownLayout()
 })
@@ -431,6 +470,7 @@ function openDropdown() {
   if (props.disabled || !settingsOverlayActive.value) return
 
   search.value = ''
+  renderLimit.value = OPTION_PAGE_SIZE
   emit('open')
   activeIndex.value = Math.max(0, selectedIndex.value)
   // Mobile sheets must keep focus inside their subscription popup. Desktop lists
@@ -543,10 +583,11 @@ function moveActiveIndex(offset) {
 }
 
 function scrollActiveOptionIntoView() {
+  const visibleIndex = filteredOptions.value.findIndex(option => option.index === activeIndex.value)
+  renderOptionAt(visibleIndex)
   nextTick(() => {
     if (!settingsOverlayActive.value || !dropdownShown.value) return
-    const visibleIndex = filteredOptions.value.findIndex(option => option.index === activeIndex.value)
-    options.value?.[visibleIndex]?.scrollIntoView({ block: 'nearest' })
+    options.value?.find(option => option.id === `${id}-option-${activeIndex.value}`)?.scrollIntoView({ block: 'nearest' })
   })
 }
 

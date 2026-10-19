@@ -639,3 +639,7 @@
   background-color: color-mix(in srgb, var(--primary-text-color) 5%, var(--card-bg-color));
   list-style: none;
 }
+
+.selectLoadMore {
+  block-size: 1px;
+}

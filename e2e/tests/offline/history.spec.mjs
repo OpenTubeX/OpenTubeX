@@ -1298,6 +1298,8 @@ test.describe('history date and channel browsing', () => {
     await scrollPageToEnd(page)
     // Change the picker without scrolling the page back to the control.
     await page.locator('.historyChannelFilter select').evaluate(select => {
+      // The hidden native select only holds the current channel.
+      select.add(new Option('Other Channel', 'id:UC-other'))
       select.value = 'id:UC-other'
       select.dispatchEvent(new Event('change', { bubbles: true }))
     })
