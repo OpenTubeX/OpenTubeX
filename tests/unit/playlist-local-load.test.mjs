@@ -4,6 +4,8 @@ import test from 'node:test'
 import vm from 'node:vm'
 import { computed, reactive, ref, shallowRef } from 'vue'
 
+import { getPlaylistSkipAvailability } from '../../src/renderer/helpers/playlists.js'
+
 const playlistSource = readFileSync(new URL('../../src/renderer/components/WatchVideoPlaylist/WatchVideoPlaylist.vue', import.meta.url), 'utf8')
 
 function extractSourceBetweenMarkers(source, start, end) {
@@ -38,7 +40,7 @@ function harness() {
     shufflePlaylistItems: () => { randomizedPlaylistItems.value = playlistItems.value.slice().reverse() },
     shuffleItems: items => items,
     playlistTitle: ref(''), playlistTotalVideoCount: ref(0), channelName: ref(''), channelId: ref(''),
-    backendPreference: ref('local'), backendFallback,
+    backendPreference: ref('local'), backendFallback, prevVideoBeforeDeletion: ref(null), getPlaylistSkipAvailability,
     applyReversePlaylistState: videos => videos.slice(),
     findIndexOfCurrentVideoInPlaylist: videos => videos.findIndex(item => item.videoId === props.videoId),
     parseLocalPlaylistVideos: videos => videos,
@@ -54,6 +56,9 @@ function harness() {
   }
   const load = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'async function getPlaylistInformationLocal() {', '\nasync function getPlaylistInformationInvidious(')}\ngetPlaylistInformationLocal`, context)
   const state = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'const currentVideoIndexZeroBased =', '\nwatch(')}\n;({ nextVideo, isWaitingForNextVideo })`, context)
+  Object.assign(context, state)
+  const skips = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'const previousVideoSourceIndex =', '\nwatch(')}\n;({ canPlayNextVideo, canPlayPreviousVideo })`, context)
+  Object.assign(state, skips)
   return {
     props, playlistItems, isLoading, isFetchingPlaylistContinuation, hasUnloadedPlaylistVideos, errors, state,
     load, backendFallback,
@@ -185,4 +190,24 @@ test('a failed later page does not restart the playlist when the current video i
   assert.equal(state.hasUnloadedPlaylistVideos.value, true)
   assert.equal(state.state.isWaitingForNextVideo.value, false)
   assert.equal(state.state.nextVideo.value, null)
+})
+
+test('previous and next navigation stay unavailable while the current video may be on an unloaded page', async () => {
+  const state = harness()
+  state.props.videoId = 'third'
+  const loading = state.load()
+  state.resolveFirstPage()
+  await new Promise(resolve => setImmediate(resolve))
+
+  assert.equal(state.state.canPlayPreviousVideo.value, false)
+  assert.equal(state.state.canPlayNextVideo.value, false)
+
+  state.failContinuation(new Error('Continuation failed'))
+  await loading
+
+  assert.equal(state.state.canPlayPreviousVideo.value, false)
+  assert.equal(state.state.canPlayNextVideo.value, false)
+
+  state.props.videoId = 'second'
+  assert.equal(state.state.canPlayPreviousVideo.value, true)
 })

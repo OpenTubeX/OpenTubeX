@@ -488,11 +488,12 @@ const videoIsNotPlaylistItem = computed(() => videoIndexInPlaylistItems.value ==
 const isWaitingForNextVideo = computed(() => isFetchingPlaylistContinuation.value &&
   (videoIsLastPlaylistItem.value || videoIsNotPlaylistItem.value))
 
+// A page that is still loading or failed to load may hold the current video;
+// wrapping to the first or last entry would jump away from its real neighbours.
+const currentVideoMayBeUnloaded = computed(() => hasUnloadedPlaylistVideos.value && videoIsNotPlaylistItem.value)
+
 const nextVideo = computed(() => {
-  if (isWaitingForNextVideo.value) return null
-  // A page that failed to load may hold the current video; wrapping to the
-  // first entry would restart the playlist from its beginning.
-  if (hasUnloadedPlaylistVideos.value && videoIsNotPlaylistItem.value) return null
+  if (isWaitingForNextVideo.value || currentVideoMayBeUnloaded.value) return null
   const targetList = shuffleEnabled.value ? randomizedPlaylistItems.value : playlistItems.value
   const targetVideoIndex = (videoIsNotPlaylistItem.value || videoIsLastPlaylistItem.value)
     ? 0
@@ -977,9 +978,7 @@ function onMoveDraggedVideo(video, source) {
 }
 
 function playNextVideo() {
-  if (isWaitingForNextVideo.value) return
-  // The current video may be on a page that failed to load; see nextVideo.
-  if (hasUnloadedPlaylistVideos.value && videoIsNotPlaylistItem.value) return
+  if (isWaitingForNextVideo.value || currentVideoMayBeUnloaded.value) return
   const videoIndex = videoIndexInPlaylistItems.value
   const targetVideoIndex = (videoIsNotPlaylistItem.value || videoIsLastPlaylistItem.value) ? 0 : videoIndex + 1
 
@@ -1034,6 +1033,7 @@ function playNextVideo() {
 }
 
 function playPreviousVideo() {
+  if (currentVideoMayBeUnloaded.value) return
   // At the start of the playlist there is nothing to go back to, unless loop wraps us around
   if (!canPlayPreviousVideo.value) {
     showToast({ message: t('The playlist is at the beginning. Enable loop to continue playing'), icon: ['fas', 'retweet'] })
@@ -1511,6 +1511,7 @@ const previousVideoSourceIndex = computed(() => {
 })
 
 const skipAvailability = computed(() => {
+  if (currentVideoMayBeUnloaded.value) return { canPlayNext: false, canPlayPrevious: false }
   const items = shuffleEnabled.value ? randomizedPlaylistItems.value : playlistItems.value
 
   return getPlaylistSkipAvailability({
