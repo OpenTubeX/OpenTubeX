@@ -502,12 +502,12 @@ function handleSeeking(time) {
   seekTimer = null
   seeking.value = true
   currentTime.value = time
-  syncCompanionAudio(time)
+  syncCompanionAudio(time, 0)
 }
 
 function handleSeeked(time) {
   currentTime.value = time
-  syncCompanionAudio(time)
+  syncCompanionAudio(time, 0)
   if (store.getters.getWatchedProgressSavingMode === 'auto' || player.value?.isPaused()) savePosition()
   if (seekTimer !== null) clearTimeout(seekTimer)
   seekTimer = setTimeout(() => {
@@ -653,10 +653,11 @@ const metadataRows = computed(() => {
 })
 const playerErrorHandler = ref(() => {})
 
-function syncCompanionAudio(time) {
+// Playback may drift slightly between the tracks, but a seek has to land exactly.
+function syncCompanionAudio(time, tolerance = 0.5) {
   const audio = companionAudio.value
   // A looping Coub video has its own timeline; seeking it must not restart the soundtrack.
-  if (audio && companionAudioNeeded.value && !getCompanionVideo()?.loop && Number.isFinite(time) && Math.abs(audio.currentTime - time) > 0.5) {
+  if (audio && companionAudioNeeded.value && !getCompanionVideo()?.loop && Number.isFinite(time) && Math.abs(audio.currentTime - time) > tolerance) {
     audio.currentTime = time
   }
 }
@@ -687,7 +688,7 @@ function restoreCompanionPosition() {
     player.value.setCurrentTime(position % video.duration)
   } else {
     player.value.setCurrentTime(position)
-    syncCompanionAudio(position)
+    syncCompanionAudio(position, 0)
   }
 }
 

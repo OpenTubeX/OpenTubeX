@@ -224,8 +224,11 @@ for (const seekBeforeMetadata of [false, true]) {
       await page.locator(sel.searchInput).press('Enter')
       await expect.poll(() => video.evaluate(element => element.readyState).catch(() => 0)).toBeGreaterThanOrEqual(2)
       expect(await audio.evaluate(element => Number.isFinite(element.duration))).toBe(false)
-      await video.evaluate(element => { element.pause(); element.currentTime = 0.75 })
-      await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
+      // The second seek lands within the playback drift tolerance of the first.
+      for (const seconds of [1.2, 0.75]) {
+        await video.evaluate((element, seconds) => { element.pause(); element.currentTime = seconds }, seconds)
+        await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
+      }
       releaseAudio()
       await expect.poll(() => audio.evaluate(element => Number.isFinite(element.duration))).toBe(true)
       await expect(video).toHaveJSProperty('loop', true)
