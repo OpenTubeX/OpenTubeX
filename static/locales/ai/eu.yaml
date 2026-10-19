@@ -1124,6 +1124,17 @@ Settings:
     Pairing Verification Unavailable: Ez dago sinkronizazio-bilduma zifraturik transferitutako gakoa egiaztatzeko. Sinkronizatu lehendik dagoen gailua eta saiatu berriro.
     Pairing Completed: Gailua parekatu da
     Pairing Approved: Gailuaren parekatzea onartu da
+    Use Pairing Invite: Erabili konektatutako gailuko kodea
+    Show Pairing Invite: Erakutsi parekatze-kodea
+    Scan Pairing Invite: Gehitzen ari zaren gailuan, ireki "Parekatu lehendik dagoen gailu batekin", aukeratu "Erabili konektatutako gailuko kodea" eta eskaneatu kode hau.
+    Pairing Invite QR Alt: Gehitzen ari zaren gailua parekatzeko QR kodea
+    Pairing Invite Text Hint: Kopiatu kode hau gehitzen ari zaren gailura. Gailu batek zure konturako sarbidea eskatzeko aukera ematen du; beraz, garbitu arbeleko historiatik parekatu ondoren.
+    Pairing Invite Warning: Erakutsi kode hau gehitzen ari zaren gailuari soilik. Haren eskaera gailu honetan onartu beharko duzu oraindik.
+    Pairing Invite Scan Hint: Eskaneatu konektatutako gailuan agertzen den parekatze-kodea.
+    Pairing Invite Entry Hint: Itsatsi konektatutako gailuan agertzen den parekatze-kodea.
+    Pairing Invite Code Hint: Onartu eskaera konektatutako gailuan, kode hau agertzen bada soilik. Ondoren, parekatzea automatikoki amaituko da.
+    Pairing Invite Approval Hint: Onartu gehitzen ari zaren gailuak kode hau erakusten badu soilik.
+    Pairing Invite Approved: Parekatzea onartu da. Gailu berriak automatikoki amaituko du parekatzea.
     Disconnect: Deskonektatu
     Delete Account: Ezabatu sinkronizazio-kontua
     Delete Account Confirmation: Sinkronizazio-kontua ezabatu?

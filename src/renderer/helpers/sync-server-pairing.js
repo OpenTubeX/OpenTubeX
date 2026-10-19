@@ -16,6 +16,7 @@ import {
 
 export const PAIRING_PROTOCOL_VERSION = 1
 export const PAIRING_QR_PREFIX = 'opentubex-pairing:'
+export const PAIRING_INVITE_PREFIX = 'opentubex-pairing-invite:'
 
 const SESSION_ID_BYTES = 32
 const DEVICE_ID_BYTES = 16
@@ -48,6 +49,13 @@ const QR_FIELDS = [
   'pairingSecret',
 ]
 const BOUND_REQUEST_FIELDS = [...QR_FIELDS, 'accountId']
+const INVITE_FIELDS = [
+  'version',
+  'origin',
+  'sessionId',
+  'pairingSecret',
+  'recipientToken',
+]
 const KEY_FIELDS = [
   'version',
   'username',
@@ -116,6 +124,17 @@ function validatePairingRequest(request) {
   validateSyncServerDeviceName(request.recipientDeviceName)
   base64UrlToBytes(request.pairingSecret, PAIRING_SECRET_BYTES)
   return request
+}
+
+function validatePairingInvite(invite) {
+  if (!hasExactFields(invite, INVITE_FIELDS) || invite.version !== PAIRING_PROTOCOL_VERSION) {
+    throw new Error()
+  }
+  normalizePairingOrigin(invite.origin)
+  base64UrlToBytes(invite.sessionId, SESSION_ID_BYTES)
+  base64UrlToBytes(invite.pairingSecret, PAIRING_SECRET_BYTES)
+  base64UrlToBytes(invite.recipientToken, RECIPIENT_TOKEN_BYTES)
+  return invite
 }
 
 function validateBoundPairingRequest(request) {
@@ -192,27 +211,73 @@ function parseEncryptedPayload(value) {
   }
 }
 
-export async function createPairingRecipient(deviceName, savedDeviceId) {
+function encodePayload(prefix, value) {
+  const payload = `${prefix}${bytesToBase64Url(new TextEncoder().encode(JSON.stringify(value)))}`
+  if (payload.length > MAX_QR_LENGTH) throw new Error()
+  return payload
+}
+
+function decodePayload(prefix, payload, validate) {
+  if (typeof payload !== 'string' || payload.length > MAX_QR_LENGTH || !payload.startsWith(prefix)) {
+    throw new Error()
+  }
+  const bytes = base64UrlToBytes(payload.slice(prefix.length))
+  const serialized = new TextDecoder('utf-8', { fatal: true }).decode(bytes)
+  const value = validate(JSON.parse(serialized))
+  if (JSON.stringify(value) !== serialized) throw new Error()
+  return value
+}
+
+/**
+ * Creates the session credentials that a connected device shows to the device
+ * being added. The new device registers its own key under this session.
+ */
+export function createPairingInvite(origin) {
+  return validatePairingInvite({
+    version: PAIRING_PROTOCOL_VERSION,
+    origin: normalizePairingOrigin(origin),
+    sessionId: randomBase64Url(SESSION_ID_BYTES),
+    pairingSecret: randomBase64Url(PAIRING_SECRET_BYTES),
+    recipientToken: randomBase64Url(RECIPIENT_TOKEN_BYTES),
+  })
+}
+
+export function createPairingInvitePayload(invite) {
+  return encodePayload(PAIRING_INVITE_PREFIX, validatePairingInvite(invite))
+}
+
+export function parsePairingInvitePayload(payload) {
+  try {
+    return decodePayload(PAIRING_INVITE_PREFIX, payload, validatePairingInvite)
+  } catch {
+    throw new Error('This is not a valid OpenTubeX pairing code')
+  }
+}
+
+export async function createPairingRecipient(deviceName, savedDeviceId, invite = null) {
+  if (invite) validatePairingInvite(invite)
   const keyPair = await suite.kem.generateKeyPair()
   const recipientPublicKey = await suite.kem.serializePublicKey(keyPair.publicKey)
-  const recipientTokenBytes = crypto.getRandomValues(new Uint8Array(RECIPIENT_TOKEN_BYTES))
+  const recipientTokenBytes = invite
+    ? base64UrlToBytes(invite.recipientToken, RECIPIENT_TOKEN_BYTES)
+    : crypto.getRandomValues(new Uint8Array(RECIPIENT_TOKEN_BYTES))
   const recipientTokenHash = await crypto.subtle.digest('SHA-256', recipientTokenBytes)
   return {
-    sessionId: randomBase64Url(SESSION_ID_BYTES),
+    sessionId: invite?.sessionId ?? randomBase64Url(SESSION_ID_BYTES),
     recipientDeviceId: isCanonicalBase64Url(savedDeviceId, DEVICE_ID_BYTES)
       ? savedDeviceId
       : randomBase64Url(DEVICE_ID_BYTES),
     recipientDeviceName: validateSyncServerDeviceName(deviceName),
     recipientPublicKey: bytesToBase64Url(new Uint8Array(recipientPublicKey)),
-    pairingSecret: randomBase64Url(PAIRING_SECRET_BYTES),
+    pairingSecret: invite?.pairingSecret ?? randomBase64Url(PAIRING_SECRET_BYTES),
     recipientToken: bytesToBase64Url(recipientTokenBytes),
     recipientTokenHash: bytesToBase64Url(new Uint8Array(recipientTokenHash)),
     recipientKey: keyPair.privateKey,
   }
 }
 
-export function createPairingQrPayload(recipient, origin) {
-  const request = validatePairingRequest({
+export function createPairingRequest(recipient, origin) {
+  return validatePairingRequest({
     version: PAIRING_PROTOCOL_VERSION,
     origin: normalizePairingOrigin(origin),
     sessionId: recipient.sessionId,
@@ -221,10 +286,45 @@ export function createPairingQrPayload(recipient, origin) {
     recipientDeviceName: recipient.recipientDeviceName,
     pairingSecret: recipient.pairingSecret,
   })
-  const encoded = bytesToBase64Url(new TextEncoder().encode(JSON.stringify(request)))
-  const payload = `${PAIRING_QR_PREFIX}${encoded}`
-  if (payload.length > MAX_QR_LENGTH) throw new Error()
-  return payload
+}
+
+export function createPairingQrPayload(recipient, origin) {
+  return encodePayload(PAIRING_QR_PREFIX, createPairingRequest(recipient, origin))
+}
+
+/**
+ * Rebuilds the pairing request from an unclaimed session that a new device
+ * created for this device's invite.
+ */
+export function pairingRequestFromInviteSession(invite, session) {
+  validatePairingInvite(invite)
+  const request = validatePairingRequest({
+    version: PAIRING_PROTOCOL_VERSION,
+    origin: invite.origin,
+    sessionId: invite.sessionId,
+    recipientPublicKey: session?.recipient_public_key,
+    recipientDeviceId: session?.recipient_device_id,
+    recipientDeviceName: session?.recipient_device_name,
+    pairingSecret: invite.pairingSecret,
+  })
+  if (!pairingSessionMatchesRequest(session, request)) throw new Error()
+  return request
+}
+
+/**
+ * Derives the code both devices show before an invite is approved. Anyone who
+ * sees the invite can register a key under it, so the user must confirm that
+ * the approving device sees the same key as the device being added.
+ */
+export async function pairingComparisonCode(request) {
+  const qrRequest = Object.fromEntries(QR_FIELDS.map(field => [field, request[field]]))
+  validatePairingRequest(qrRequest)
+  const digest = await crypto.subtle.digest(
+    'SHA-256',
+    new TextEncoder().encode(JSON.stringify(qrRequest))
+  )
+  const value = new DataView(digest).getUint32(0)
+  return String(value % 1000000).padStart(6, '0')
 }
 
 export function bindPairingRequestToAccount(request, accountId) {
@@ -237,14 +337,7 @@ export function bindPairingRequestToAccount(request, accountId) {
 
 export function parsePairingQrPayload(payload) {
   try {
-    if (typeof payload !== 'string' || payload.length > MAX_QR_LENGTH || !payload.startsWith(PAIRING_QR_PREFIX)) {
-      throw new Error()
-    }
-    const bytes = base64UrlToBytes(payload.slice(PAIRING_QR_PREFIX.length))
-    const serialized = new TextDecoder('utf-8', { fatal: true }).decode(bytes)
-    const request = validatePairingRequest(JSON.parse(serialized))
-    if (JSON.stringify(request) !== serialized) throw new Error()
-    return request
+    return decodePayload(PAIRING_QR_PREFIX, payload, validatePairingRequest)
   } catch {
     throw new Error('This is not a valid OpenTubeX pairing code')
   }

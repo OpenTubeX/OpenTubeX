@@ -1129,6 +1129,17 @@ Settings:
     Pairing Verification Unavailable: Det finns ingen krypterad synkroniseringssamling som kan verifiera den överförda nyckeln. Synkronisera den befintliga enheten och försök igen.
     Pairing Completed: Parkopplingen av enheten är klar
     Pairing Approved: Parkopplingen av enheten har godkänts
+    Use Pairing Invite: Använd kod från ansluten enhet
+    Show Pairing Invite: Visa parkopplingskod
+    Scan Pairing Invite: Öppna "Parkoppla med en befintlig enhet" på enheten du lägger till, välj "Använd kod från ansluten enhet" och skanna koden.
+    Pairing Invite QR Alt: QR-kod för parkoppling av enheten du lägger till
+    Pairing Invite Text Hint: Kopiera koden till enheten du lägger till. Med den kan en enhet begära åtkomst till ditt konto, så rensa den från urklippshistoriken efter parkopplingen.
+    Pairing Invite Warning: Visa koden endast för enheten du lägger till. Du måste fortfarande godkänna dess begäran på den här enheten.
+    Pairing Invite Scan Hint: Skanna parkopplingskoden som visas på din anslutna enhet.
+    Pairing Invite Entry Hint: Klistra in parkopplingskoden som visas på din anslutna enhet.
+    Pairing Invite Code Hint: Godkänn begäran på din anslutna enhet endast om den visar den här koden. Parkopplingen slutförs sedan automatiskt.
+    Pairing Invite Approval Hint: Godkänn endast om enheten du lägger till visar den här koden.
+    Pairing Invite Approved: Parkopplingen har godkänts. Den nya enheten slutför parkopplingen automatiskt.
     Disconnect: Koppla från
     Delete Account: Ta bort synkroniseringskonto
     Delete Account Confirmation: Ta bort synkroniseringskontot?

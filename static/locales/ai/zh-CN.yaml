@@ -1125,6 +1125,17 @@ Settings:
     Pairing Verification Unavailable: 没有可用于验证所传输密钥的加密同步集合。请先同步现有设备，然后重试。
     Pairing Completed: 设备配对完成
     Pairing Approved: 设备配对已批准
+    Use Pairing Invite: 使用已连接设备上的配对码
+    Show Pairing Invite: 显示配对码
+    Scan Pairing Invite: 在要添加的设备上打开“与现有设备配对”，选择“使用已连接设备上的配对码”，然后扫描此码。
+    Pairing Invite QR Alt: 要添加的设备的配对二维码
+    Pairing Invite Text Hint: 将此码复制到要添加的设备上。此码可让设备请求访问您的账户，因此配对后请将其从剪贴板历史记录中清除。
+    Pairing Invite Warning: 仅向要添加的设备显示此码。您仍需在此设备上批准其请求。
+    Pairing Invite Scan Hint: 扫描已连接设备上显示的配对码。
+    Pairing Invite Entry Hint: 粘贴已连接设备上显示的配对码。
+    Pairing Invite Code Hint: 仅当已连接设备显示此码时，才在该设备上批准请求。之后配对将自动完成。
+    Pairing Invite Approval Hint: 仅当要添加的设备显示此码时才批准。
+    Pairing Invite Approved: 配对已批准。新设备将自动完成配对。
     Disconnect: 断开连接
     Delete Account: 删除同步账户
     Delete Account Confirmation: 要删除同步账户吗？

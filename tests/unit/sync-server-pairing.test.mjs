@@ -8,11 +8,17 @@ import {
 } from '@hpke/core'
 import {
   bindPairingRequestToAccount,
+  createPairingInvite,
+  createPairingInvitePayload,
   createPairingQrPayload,
   createPairingRecipient,
+  createPairingRequest,
   decryptPairingKey,
   encryptPairingKey,
+  pairingComparisonCode,
+  pairingRequestFromInviteSession,
   pairingSessionMatchesRequest,
+  parsePairingInvitePayload,
   parsePairingQrPayload,
   randomPairingDeviceId,
   randomPairingVerificationCode,
@@ -197,4 +203,77 @@ test('creates fixed-width numeric verification codes', () => {
   for (let index = 0; index < 100; index++) {
     assert.match(randomPairingVerificationCode(), /^\d{6}$/)
   }
+})
+
+function unclaimedSession (request) {
+  return {
+    version: 1,
+    id: request.sessionId,
+    account_id: null,
+    recipient_public_key: request.recipientPublicKey,
+    recipient_device_id: request.recipientDeviceId,
+    recipient_device_name: request.recipientDeviceName,
+    approving_device_id: null,
+    expires_at: Date.now() + 60000,
+    approved: false,
+  }
+}
+
+test('invites from a connected device let the new device register its own key', async () => {
+  const invite = parsePairingInvitePayload(createPairingInvitePayload(createPairingInvite(ORIGIN)))
+  const deviceId = randomPairingDeviceId()
+  const recipient = await createPairingRecipient('Phone', deviceId, invite)
+  assert.equal(recipient.sessionId, invite.sessionId)
+  assert.equal(recipient.pairingSecret, invite.pairingSecret)
+  assert.equal(recipient.recipientToken, invite.recipientToken)
+  assert.equal(recipient.recipientDeviceId, deviceId)
+  const tokenHash = await crypto.subtle.digest('SHA-256', Buffer.from(invite.recipientToken, 'base64url'))
+  assert.equal(recipient.recipientTokenHash, Buffer.from(tokenHash).toString('base64url'))
+
+  const recipientRequest = createPairingRequest(recipient, ORIGIN)
+  const approverRequest = pairingRequestFromInviteSession(invite, unclaimedSession(recipientRequest))
+  assert.deepEqual(approverRequest, recipientRequest)
+
+  const comparisonCode = await pairingComparisonCode(approverRequest)
+  assert.match(comparisonCode, /^\d{6}$/)
+  assert.equal(await pairingComparisonCode(recipientRequest), comparisonCode)
+
+  const approvingDeviceId = randomPairingDeviceId()
+  const request = bindPairingRequestToAccount(approverRequest, ACCOUNT_ID)
+  const payload = await encryptPairingKey(request, approvingDeviceId, {
+    ...TRANSFER,
+    verificationCode: comparisonCode,
+  })
+  const received = await decryptPairingKey(
+    bindPairingRequestToAccount(recipientRequest, ACCOUNT_ID),
+    approvingDeviceId,
+    recipient.recipientKey,
+    payload
+  )
+  assert.equal(received.verificationCode, comparisonCode)
+})
+
+test('a key registered by another device under an invite produces a different comparison code', async () => {
+  const invite = createPairingInvite(ORIGIN)
+  const legitimate = createPairingRequest(await createPairingRecipient('Phone', '', invite), ORIGIN)
+  const intruder = createPairingRequest(await createPairingRecipient('Phone', '', invite), ORIGIN)
+  const approverRequest = pairingRequestFromInviteSession(invite, unclaimedSession(intruder))
+  assert.notEqual(await pairingComparisonCode(approverRequest), await pairingComparisonCode(legitimate))
+})
+
+test('rejects claimed, foreign, or malformed invite sessions and payloads', async () => {
+  const invite = createPairingInvite(ORIGIN)
+  const request = createPairingRequest(await createPairingRecipient('Phone', '', invite), ORIGIN)
+  const session = unclaimedSession(request)
+  assert.throws(() => pairingRequestFromInviteSession(invite, { ...session, account_id: ACCOUNT_ID }))
+  assert.throws(() => pairingRequestFromInviteSession(invite, { ...session, approved: true }))
+  assert.throws(() => pairingRequestFromInviteSession(createPairingInvite(ORIGIN), session))
+  assert.throws(() => pairingRequestFromInviteSession(invite, { ...session, recipient_public_key: 'short' }))
+
+  assert.throws(() => createPairingInvite('http://sync.example.com'))
+  const inviteCode = createPairingInvitePayload(invite)
+  assert.throws(() => parsePairingQrPayload(inviteCode), /not a valid OpenTubeX pairing code/)
+  const qrCode = createPairingQrPayload(await createPairingRecipient('Phone'), ORIGIN)
+  assert.throws(() => parsePairingInvitePayload(qrCode), /not a valid OpenTubeX pairing code/)
+  assert.throws(() => parsePairingInvitePayload(`${inviteCode}A`), /not a valid OpenTubeX pairing code/)
 })

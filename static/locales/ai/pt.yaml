@@ -1150,6 +1150,17 @@ Settings:
     Pairing Verification Unavailable: Não está disponível nenhuma coleção de sincronização encriptada para verificar a chave transferida. Sincronize o dispositivo existente e tente novamente.
     Pairing Completed: Emparelhamento do dispositivo concluído
     Pairing Approved: Emparelhamento do dispositivo aprovado
+    Use Pairing Invite: Usar código do dispositivo ligado
+    Show Pairing Invite: Mostrar código de emparelhamento
+    Scan Pairing Invite: No dispositivo que está a adicionar, abra «Emparelhar com um dispositivo existente», escolha «Usar código do dispositivo ligado» e leia este código.
+    Pairing Invite QR Alt: Código QR de emparelhamento para o dispositivo que está a adicionar
+    Pairing Invite Text Hint: Copie este código para o dispositivo que está a adicionar. Permite que um dispositivo peça acesso à sua conta, por isso apague-o do histórico da área de transferência depois de emparelhar.
+    Pairing Invite Warning: Mostre este código apenas ao dispositivo que está a adicionar. Continua a ter de aprovar o pedido dele neste dispositivo.
+    Pairing Invite Scan Hint: Leia o código de emparelhamento apresentado no seu dispositivo ligado.
+    Pairing Invite Entry Hint: Cole o código de emparelhamento apresentado no seu dispositivo ligado.
+    Pairing Invite Code Hint: Aprove o pedido no seu dispositivo ligado apenas se mostrar este código. Depois, o emparelhamento termina automaticamente.
+    Pairing Invite Approval Hint: Aprove apenas se o dispositivo que está a adicionar mostrar este código.
+    Pairing Invite Approved: Emparelhamento aprovado. O novo dispositivo conclui o emparelhamento automaticamente.
     Disconnect: Desligar
     Delete Account: Eliminar conta de sincronização
     Delete Account Confirmation: Eliminar a conta de sincronização?

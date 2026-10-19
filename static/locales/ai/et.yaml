@@ -1124,6 +1124,17 @@ Settings:
     Pairing Verification Unavailable: Edastatud võtme kontrollimiseks pole saadaval ühtegi krüptitud sünkroonimiskogu. Sünkroonige olemasolev seade ja proovige uuesti.
     Pairing Completed: Seadme sidumine on lõpetatud
     Pairing Approved: Seadme sidumine on kinnitatud
+    Use Pairing Invite: Kasuta ühendatud seadme koodi
+    Show Pairing Invite: Kuva sidumiskood
+    Scan Pairing Invite: Avage lisatavas seadmes „Seo olemasoleva seadmega”, valige „Kasuta ühendatud seadme koodi” ja skannige see kood.
+    Pairing Invite QR Alt: Lisatava seadme sidumise QR-kood
+    Pairing Invite Text Hint: Kopeerige see kood lisatavasse seadmesse. Selle abil saab seade taotleda juurdepääsu teie kontole, seega kustutage see pärast sidumist lõikelaua ajaloost.
+    Pairing Invite Warning: Näidake seda koodi ainult lisatavale seadmele. Selle taotlus tuleb siiski selles seadmes kinnitada.
+    Pairing Invite Scan Hint: Skannige ühendatud seadmes kuvatav sidumiskood.
+    Pairing Invite Entry Hint: Kleepige ühendatud seadmes kuvatav sidumiskood.
+    Pairing Invite Code Hint: Kinnitage taotlus ühendatud seadmes ainult siis, kui seal kuvatakse see kood. Seejärel lõpeb sidumine automaatselt.
+    Pairing Invite Approval Hint: Kinnitage ainult siis, kui lisatav seade kuvab seda koodi.
+    Pairing Invite Approved: Sidumine on kinnitatud. Uus seade lõpetab sidumise automaatselt.
     Disconnect: Katkesta ühendus
     Delete Account: Kustuta sünkroonimiskonto
     Delete Account Confirmation: Kas kustutada sünkroonimiskonto?

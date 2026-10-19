@@ -1124,6 +1124,17 @@ Settings:
     Pairing Verification Unavailable: Aucune collection de synchronisation chiffrée ne permet de vérifier la clé transférée. Synchronisez l’appareil existant, puis réessayez.
     Pairing Completed: Association de l’appareil terminée
     Pairing Approved: Association de l’appareil approuvée
+    Use Pairing Invite: Utiliser le code de l’appareil connecté
+    Show Pairing Invite: Afficher le code d’association
+    Scan Pairing Invite: Sur l’appareil que vous ajoutez, ouvrez « Associer à un appareil existant », choisissez « Utiliser le code de l’appareil connecté » et scannez ce code.
+    Pairing Invite QR Alt: Code QR d’association pour l’appareil que vous ajoutez
+    Pairing Invite Text Hint: Copiez ce code sur l’appareil que vous ajoutez. Il permet à un appareil de demander l’accès à votre compte ; effacez-le donc de l’historique du presse-papiers après l’association.
+    Pairing Invite Warning: Montrez ce code uniquement à l’appareil que vous ajoutez. Vous devrez tout de même approuver sa demande sur cet appareil.
+    Pairing Invite Scan Hint: Scannez le code d’association affiché sur votre appareil connecté.
+    Pairing Invite Entry Hint: Collez le code d’association affiché sur votre appareil connecté.
+    Pairing Invite Code Hint: N’approuvez la demande sur votre appareil connecté que s’il affiche ce code. L’association se termine ensuite automatiquement.
+    Pairing Invite Approval Hint: N’approuvez que si l’appareil que vous ajoutez affiche ce code.
+    Pairing Invite Approved: Association approuvée. Le nouvel appareil termine l’association automatiquement.
     Disconnect: Se déconnecter
     Delete Account: Supprimer le compte de synchronisation
     Delete Account Confirmation: Supprimer le compte de synchronisation ?

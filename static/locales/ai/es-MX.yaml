@@ -1295,6 +1295,17 @@ Settings:
     Pairing Verification Unavailable: No hay ninguna colección de sincronización cifrada disponible para verificar la clave transferida. Sincroniza el dispositivo existente y vuelve a intentarlo.
     Pairing Completed: Vinculación del dispositivo completada
     Pairing Approved: Vinculación del dispositivo aprobada
+    Use Pairing Invite: Usar código del dispositivo conectado
+    Show Pairing Invite: Mostrar código de vinculación
+    Scan Pairing Invite: En el dispositivo que estás añadiendo, abre «Vincular con un dispositivo existente», elige «Usar código del dispositivo conectado» y escanea este código.
+    Pairing Invite QR Alt: Código QR de vinculación para el dispositivo que estás añadiendo
+    Pairing Invite Text Hint: Copia este código en el dispositivo que estás añadiendo. Permite que un dispositivo solicite acceso a tu cuenta, así que bórralo del historial del portapapeles después de vincularlo.
+    Pairing Invite Warning: Muestra este código solo al dispositivo que estás añadiendo. Aun así, tendrás que aprobar su solicitud en este dispositivo.
+    Pairing Invite Scan Hint: Escanea el código de vinculación que aparece en tu dispositivo conectado.
+    Pairing Invite Entry Hint: Pega el código de vinculación que aparece en tu dispositivo conectado.
+    Pairing Invite Code Hint: Aprueba la solicitud en tu dispositivo conectado solo si muestra este código. Después, la vinculación se completa automáticamente.
+    Pairing Invite Approval Hint: Aprueba solo si el dispositivo que estás añadiendo muestra este código.
+    Pairing Invite Approved: Vinculación aprobada. El nuevo dispositivo completa la vinculación automáticamente.
     Disconnect: Desconectar
     Delete Account: Eliminar cuenta de sincronización
     Delete Account Confirmation: ¿Eliminar la cuenta de sincronización?

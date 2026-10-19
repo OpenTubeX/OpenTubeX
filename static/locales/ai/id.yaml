@@ -1124,6 +1124,17 @@ Settings:
     Pairing Verification Unavailable: Tidak ada koleksi sinkronisasi terenkripsi untuk memverifikasi kunci yang ditransfer. Selaraskan perangkat yang sudah ada, lalu coba lagi.
     Pairing Completed: Pemasangan perangkat selesai
     Pairing Approved: Pemasangan perangkat disetujui
+    Use Pairing Invite: Gunakan kode dari perangkat terhubung
+    Show Pairing Invite: Tampilkan kode pemasangan
+    Scan Pairing Invite: Pada perangkat yang sedang Anda tambahkan, buka "Pasangkan dengan perangkat yang sudah ada", pilih "Gunakan kode dari perangkat terhubung", lalu pindai kode ini.
+    Pairing Invite QR Alt: Kode QR pemasangan untuk perangkat yang sedang Anda tambahkan
+    Pairing Invite Text Hint: Salin kode ini ke perangkat yang sedang Anda tambahkan. Kode ini memungkinkan perangkat meminta akses ke akun Anda, jadi hapus dari riwayat papan klip setelah pemasangan.
+    Pairing Invite Warning: Tampilkan kode ini hanya kepada perangkat yang sedang Anda tambahkan. Anda tetap perlu menyetujui permintaannya di perangkat ini.
+    Pairing Invite Scan Hint: Pindai kode pemasangan yang ditampilkan pada perangkat Anda yang terhubung.
+    Pairing Invite Entry Hint: Tempel kode pemasangan yang ditampilkan pada perangkat Anda yang terhubung.
+    Pairing Invite Code Hint: Setujui permintaan di perangkat Anda yang terhubung hanya jika perangkat itu menampilkan kode ini. Pemasangan lalu selesai secara otomatis.
+    Pairing Invite Approval Hint: Setujui hanya jika perangkat yang sedang Anda tambahkan menampilkan kode ini.
+    Pairing Invite Approved: Pemasangan disetujui. Perangkat baru menyelesaikan pemasangan secara otomatis.
     Disconnect: Putuskan sambungan
     Delete Account: Hapus akun sinkronisasi
     Delete Account Confirmation: Hapus akun sinkronisasi?

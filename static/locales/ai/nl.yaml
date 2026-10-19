@@ -1148,6 +1148,17 @@ Settings:
     Pairing Verification Unavailable: Er is geen versleutelde synchronisatieverzameling beschikbaar om de overgedragen sleutel te verifiëren. Synchroniseer het bestaande apparaat en probeer het opnieuw.
     Pairing Completed: Apparaat gekoppeld
     Pairing Approved: Apparaatkoppeling goedgekeurd
+    Use Pairing Invite: Code van verbonden apparaat gebruiken
+    Show Pairing Invite: Koppelcode tonen
+    Scan Pairing Invite: 'Open op het apparaat dat je toevoegt "Met een bestaand apparaat koppelen", kies "Code van verbonden apparaat gebruiken" en scan deze code.'
+    Pairing Invite QR Alt: QR-koppelcode voor het apparaat dat je toevoegt
+    Pairing Invite Text Hint: Kopieer deze code naar het apparaat dat je toevoegt. Hiermee kan een apparaat toegang tot je account aanvragen. Wis de code daarom na het koppelen uit de klembordgeschiedenis.
+    Pairing Invite Warning: Toon deze code alleen aan het apparaat dat je toevoegt. Je moet het verzoek van dat apparaat nog steeds op dit apparaat goedkeuren.
+    Pairing Invite Scan Hint: Scan de koppelcode die op je verbonden apparaat wordt getoond.
+    Pairing Invite Entry Hint: Plak de koppelcode die op je verbonden apparaat wordt getoond.
+    Pairing Invite Code Hint: Keur het verzoek op je verbonden apparaat alleen goed als daar deze code wordt getoond. Het koppelen wordt daarna automatisch voltooid.
+    Pairing Invite Approval Hint: Keur alleen goed als het apparaat dat je toevoegt deze code toont.
+    Pairing Invite Approved: Koppeling goedgekeurd. Het nieuwe apparaat voltooit het koppelen automatisch.
     Disconnect: Verbinding verbreken
     Delete Account: Synchronisatieaccount verwijderen
     Delete Account Confirmation: Synchronisatieaccount verwijderen?

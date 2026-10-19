@@ -1124,6 +1124,17 @@ Settings:
     Pairing Verification Unavailable: 転送されたキーを確認できる暗号化済みの同期コレクションがありません。既存のデバイスを同期してから再試行してください。
     Pairing Completed: デバイスのペアリングが完了しました
     Pairing Approved: デバイスのペアリングを承認しました
+    Use Pairing Invite: 接続済みのデバイスのコードを使用
+    Show Pairing Invite: ペアリングコードを表示
+    Scan Pairing Invite: 追加するデバイスで「既存のデバイスとペアリング」を開き、「接続済みのデバイスのコードを使用」を選んで、このコードをスキャンしてください。
+    Pairing Invite QR Alt: 追加するデバイス用のペアリングQRコード
+    Pairing Invite Text Hint: このコードを追加するデバイスにコピーしてください。このコードを使うとデバイスがアカウントへのアクセスを要求できるため、ペアリング後はクリップボード履歴から消去してください。
+    Pairing Invite Warning: このコードは追加するデバイスにのみ表示してください。そのデバイスの要求は、引き続きこのデバイスで承認する必要があります。
+    Pairing Invite Scan Hint: 接続済みのデバイスに表示されたペアリングコードをスキャンしてください。
+    Pairing Invite Entry Hint: 接続済みのデバイスに表示されたペアリングコードを貼り付けてください。
+    Pairing Invite Code Hint: 接続済みのデバイスにこのコードが表示されている場合のみ、要求を承認してください。その後、ペアリングは自動的に完了します。
+    Pairing Invite Approval Hint: 追加するデバイスにこのコードが表示されている場合のみ承認してください。
+    Pairing Invite Approved: ペアリングを承認しました。新しいデバイスで自動的にペアリングが完了します。
     Disconnect: 切断
     Delete Account: 同期アカウントを削除
     Delete Account Confirmation: 同期アカウントを削除しますか？

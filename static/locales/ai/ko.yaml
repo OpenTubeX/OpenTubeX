@@ -1361,6 +1361,17 @@ Settings:
     Pairing Verification Unavailable: 전송된 키를 확인할 암호화된 동기화 컬렉션이 없습니다. 기존 기기를 동기화한 후 다시 시도하세요.
     Pairing Completed: 기기 페어링을 완료했습니다
     Pairing Approved: 기기 페어링을 승인했습니다
+    Use Pairing Invite: 연결된 기기의 코드 사용
+    Show Pairing Invite: 페어링 코드 표시
+    Scan Pairing Invite: '추가할 기기에서 "기존 기기와 페어링"을 열고 "연결된 기기의 코드 사용"을 선택한 다음 이 코드를 스캔하세요.'
+    Pairing Invite QR Alt: 추가할 기기용 페어링 QR 코드
+    Pairing Invite Text Hint: 이 코드를 추가할 기기에 복사하세요. 이 코드로 기기가 계정 접근을 요청할 수 있으므로 페어링 후 클립보드 기록에서 지우세요.
+    Pairing Invite Warning: 이 코드는 추가할 기기에만 보여 주세요. 해당 기기의 요청은 여전히 이 기기에서 승인해야 합니다.
+    Pairing Invite Scan Hint: 연결된 기기에 표시된 페어링 코드를 스캔하세요.
+    Pairing Invite Entry Hint: 연결된 기기에 표시된 페어링 코드를 붙여 넣으세요.
+    Pairing Invite Code Hint: 연결된 기기에 이 코드가 표시되는 경우에만 요청을 승인하세요. 그러면 페어링이 자동으로 완료됩니다.
+    Pairing Invite Approval Hint: 추가할 기기에 이 코드가 표시되는 경우에만 승인하세요.
+    Pairing Invite Approved: 페어링을 승인했습니다. 새 기기에서 페어링이 자동으로 완료됩니다.
     Disconnect: 연결 해제
     Delete Account: 동기화 계정 삭제
     Delete Account Confirmation: 동기화 계정을 삭제하시겠습니까?

@@ -1374,6 +1374,17 @@ Settings:
     Pairing Verification Unavailable: Nėra užšifruotų sinchronizuojamų duomenų rinkinio perduotam raktui patikrinti. Sinchronizuokite esamą įrenginį ir bandykite dar kartą.
     Pairing Completed: Įrenginys susietas
     Pairing Approved: Įrenginio susiejimas patvirtintas
+    Use Pairing Invite: Naudoti prijungto įrenginio kodą
+    Show Pairing Invite: Rodyti susiejimo kodą
+    Scan Pairing Invite: Pridedamame įrenginyje atverkite „Susieti su esamu įrenginiu“, pasirinkite „Naudoti prijungto įrenginio kodą“ ir nuskaitykite šį kodą.
+    Pairing Invite QR Alt: Pridedamo įrenginio susiejimo QR kodas
+    Pairing Invite Text Hint: Nukopijuokite šį kodą į pridedamą įrenginį. Juo įrenginys gali paprašyti prieigos prie jūsų paskyros, todėl susieję išvalykite jį iš iškarpinės istorijos.
+    Pairing Invite Warning: Šį kodą rodykite tik pridedamam įrenginiui. Jo prašymą vis tiek turėsite patvirtinti šiame įrenginyje.
+    Pairing Invite Scan Hint: Nuskaitykite prijungtame įrenginyje rodomą susiejimo kodą.
+    Pairing Invite Entry Hint: Įklijuokite prijungtame įrenginyje rodomą susiejimo kodą.
+    Pairing Invite Code Hint: Prašymą prijungtame įrenginyje patvirtinkite tik tada, jei jame rodomas šis kodas. Tada susiejimas bus užbaigtas automatiškai.
+    Pairing Invite Approval Hint: Patvirtinkite tik tada, jei pridedamame įrenginyje rodomas šis kodas.
+    Pairing Invite Approved: Susiejimas patvirtintas. Naujasis įrenginys susiejimą užbaigs automatiškai.
     Disconnect: Atsijungti
     Delete Account: Ištrinti sinchronizavimo paskyrą
     Delete Account Confirmation: Ištrinti sinchronizavimo paskyrą?

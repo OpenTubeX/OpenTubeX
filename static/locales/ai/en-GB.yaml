@@ -1105,6 +1105,17 @@ Settings:
     Pairing Verification Unavailable: No encrypted sync collection is available to verify the transferred key. Sync the existing device, then try again.
     Pairing Completed: Device pairing completed
     Pairing Approved: Device pairing approved
+    Use Pairing Invite: Use code from connected device
+    Show Pairing Invite: Show pairing code
+    Scan Pairing Invite: 'On the device you are adding, open "Pair with an existing device", choose "Use code from connected device", and scan this code.'
+    Pairing Invite QR Alt: Pairing QR code for the device you are adding
+    Pairing Invite Text Hint: Copy this code to the device you are adding. It lets a device request access to your account, so clear it from clipboard history after pairing.
+    Pairing Invite Warning: Show this code only to the device you are adding. You still need to approve its request on this device.
+    Pairing Invite Scan Hint: Scan the pairing code shown on your connected device.
+    Pairing Invite Entry Hint: Paste the pairing code shown on your connected device.
+    Pairing Invite Code Hint: Approve the request on your connected device only if it shows this code. Pairing then finishes automatically.
+    Pairing Invite Approval Hint: Approve only if the device you are adding shows this code.
+    Pairing Invite Approved: Pairing approved. The new device finishes pairing automatically.
     Disconnect: Disconnect
     Delete Account: Delete sync account
     Delete Account Confirmation: Delete sync account?

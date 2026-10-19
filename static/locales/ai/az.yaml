@@ -1097,6 +1097,17 @@ Settings:
     Pairing Verification Unavailable: Ötürülmüş açarı yoxlamaq üçün şifrələnmiş sinxronizasiya toplusu mövcud deyil. Mövcud cihazı sinxronlaşdırın, sonra yenidən cəhd edin.
     Pairing Completed: Cihazların qoşalaşdırılması tamamlandı
     Pairing Approved: Cihazların qoşalaşdırılması təsdiqləndi
+    Use Pairing Invite: Qoşulmuş cihazdan kodu istifadə et
+    Show Pairing Invite: Qoşalaşdırma kodunu göstər
+    Scan Pairing Invite: Əlavə etdiyiniz cihazda “Mövcud cihazla qoşalaşdır” bölməsini açın, “Qoşulmuş cihazdan kodu istifadə et” seçin və bu kodu skan edin.
+    Pairing Invite QR Alt: Əlavə etdiyiniz cihaz üçün qoşalaşdırma QR kodu
+    Pairing Invite Text Hint: Bu kodu əlavə etdiyiniz cihaza köçürün. O, istənilən cihaza hesabınıza giriş tələb etməyə imkan verir, ona görə qoşalaşdırmadan sonra mübadilə buferinin tarixçəsindən silin.
+    Pairing Invite Warning: Bu kodu yalnız əlavə etdiyiniz cihaza göstərin. Onun sorğusunu yenə də bu cihazda təsdiqləməlisiniz.
+    Pairing Invite Scan Hint: Qoşulmuş cihazınızda göstərilən qoşalaşdırma kodunu skan edin.
+    Pairing Invite Entry Hint: Qoşulmuş cihazınızda göstərilən qoşalaşdırma kodunu yapışdırın.
+    Pairing Invite Code Hint: Sorğunu qoşulmuş cihazınızda yalnız orada bu kod göstərildikdə təsdiqləyin. Bundan sonra qoşalaşdırma avtomatik tamamlanacaq.
+    Pairing Invite Approval Hint: Yalnız əlavə etdiyiniz cihaz bu kodu göstərirsə təsdiqləyin.
+    Pairing Invite Approved: Qoşalaşdırma təsdiqləndi. Yeni cihaz qoşalaşdırmanı avtomatik tamamlayacaq.
     Disconnect: Bağlantını kəs
     Delete Account: Sinxronizasiya hesabını sil
     Delete Account Confirmation: Sinxronizasiya hesabı silinsin?

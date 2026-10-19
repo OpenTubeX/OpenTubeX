@@ -1128,6 +1128,17 @@ Settings:
     Pairing Verification Unavailable: Nije dostupna nijedna šifrirana zbirka sinkronizacije za provjeru prenesenog ključa. Sinkronizirajte postojeći uređaj, a zatim pokušajte ponovno.
     Pairing Completed: Uparivanje uređaja dovršeno
     Pairing Approved: Uparivanje uređaja odobreno
+    Use Pairing Invite: Upotrijebi kôd s povezanog uređaja
+    Show Pairing Invite: Prikaži kôd za uparivanje
+    Scan Pairing Invite: Na uređaju koji dodajete otvorite "Upari s postojećim uređajem", odaberite "Upotrijebi kôd s povezanog uređaja" i skenirajte ovaj kôd.
+    Pairing Invite QR Alt: QR kôd za uparivanje uređaja koji dodajete
+    Pairing Invite Text Hint: Kopirajte ovaj kôd na uređaj koji dodajete. Omogućuje uređaju da zatraži pristup vašem računu pa ga nakon uparivanja izbrišite iz povijesti međuspremnika.
+    Pairing Invite Warning: Ovaj kôd pokažite samo uređaju koji dodajete. Njegov zahtjev i dalje morate odobriti na ovom uređaju.
+    Pairing Invite Scan Hint: Skenirajte kôd za uparivanje prikazan na vašem povezanom uređaju.
+    Pairing Invite Entry Hint: Zalijepite kôd za uparivanje prikazan na vašem povezanom uređaju.
+    Pairing Invite Code Hint: Zahtjev na povezanom uređaju odobrite samo ako se na njemu prikazuje ovaj kôd. Uparivanje se zatim automatski dovršava.
+    Pairing Invite Approval Hint: Odobrite samo ako uređaj koji dodajete prikazuje ovaj kôd.
+    Pairing Invite Approved: Uparivanje odobreno. Novi uređaj automatski dovršava uparivanje.
     Disconnect: Prekini vezu
     Delete Account: Izbriši račun za sinkronizaciju
     Delete Account Confirmation: Izbrisati račun za sinkronizaciju?
