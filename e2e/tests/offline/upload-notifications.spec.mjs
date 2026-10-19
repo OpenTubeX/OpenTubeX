@@ -39,13 +39,13 @@ test('the bell is off per channel until turned on, which selects every type', as
   await expect(bell).toHaveAttribute('aria-pressed', 'false')
   await bell.click()
   await expect(bell).toHaveAttribute('aria-pressed', 'true')
-  await expect.poll(() => readNotificationTypes(app.userDataDir)).toEqual({
+  await expect.poll(() => readNotificationTypes(app.userDataDir)).toStrictEqual({
     'Alpha Channel': ['videos', 'shorts', 'live', 'posts'],
     'Beta Channel': undefined
   })
 
   // The popover keeps feed settings only.
-  await page.locator('.channel', { hasText: 'Alpha Channel' }).getByRole('button', { name: 'Subscription settings' }).click()
+  await page.locator('.channel', { hasText: 'Alpha Channel' }).getByRole('button', { name: 'Subscription settings', exact: true }).click()
   await expect(page.locator('.profileDropdown')).toBeVisible()
   await expect(page.locator('.profileDropdown').getByText('Notify about new uploads')).toHaveCount(0)
   await page.keyboard.press('Escape')
@@ -54,16 +54,16 @@ test('the bell is off per channel until turned on, which selects every type', as
   await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
   const alpha = page.getByRole('group', { name: 'Alpha Channel' })
   await alpha.getByRole('group', { name: 'Notify about new uploads' }).getByRole('checkbox', { name: 'Shorts' }).click()
-  await expect.poll(() => readNotificationTypes(app.userDataDir)).toEqual({
+  await expect.poll(() => readNotificationTypes(app.userDataDir)).toStrictEqual({
     'Alpha Channel': ['videos', 'live', 'posts'],
     'Beta Channel': undefined
   })
   // Feed types hidden from the subscription feed are not fetched, so they cannot notify.
   const liveNotification = alpha.getByRole('group', { name: 'Notify about new uploads' }).getByRole('checkbox', { name: 'Live' })
-  await alpha.getByRole('group', { name: 'Show in subscription feed' }).getByRole('checkbox', { name: 'Live' }).click()
+  await alpha.getByRole('group', { name: 'Show in subscription feed', exact: true }).getByRole('checkbox', { name: 'Live' }).click()
   await expect(liveNotification).toBeDisabled()
   await expect(liveNotification).toHaveAttribute('aria-checked', 'false')
-  await alpha.getByRole('group', { name: 'Show in subscription feed' }).getByRole('checkbox', { name: 'Live' }).click()
+  await alpha.getByRole('group', { name: 'Show in subscription feed', exact: true }).getByRole('checkbox', { name: 'Live' }).click()
   await expect(liveNotification).toBeEnabled()
   await expect(liveNotification).toHaveAttribute('aria-checked', 'true')
   const beta = page.getByRole('group', { name: 'Beta Channel' })
@@ -73,7 +73,7 @@ test('the bell is off per channel until turned on, which selects every type', as
   const bulk = page.locator('.bulkFeedTypeSettings')
   await expect(bulk.getByRole('checkbox', { name: 'Notify about new uploads' })).toHaveAttribute('aria-checked', 'mixed')
   await bulk.locator('label', { hasText: 'Notify about new uploads' }).click()
-  await expect.poll(() => readNotificationTypes(app.userDataDir)).toEqual({
+  await expect.poll(() => readNotificationTypes(app.userDataDir)).toStrictEqual({
     'Alpha Channel': ['videos', 'live', 'posts'],
     'Beta Channel': ['videos', 'shorts', 'live', 'posts']
   })
