@@ -1961,9 +1961,12 @@ function runApp() {
     const defaultTrayIconPath = process.env.NODE_ENV === 'development'
       ? path.join(__dirname, '..', '..', '_icons', 'iconColor.png')
       : path.join(__dirname, '..', '_icons', 'iconColor.png')
+    const image = nativeImage.createFromPath(defaultTrayIconPath)
+    // Chromium keeps several copies of the tray bitmap, so the 512px logo
+    // would cost ~55 MB. Match the 64px size of the selectable tray icons.
     return process.platform === 'darwin'
-      ? createMacTrayImage(nativeImage.createFromPath(defaultTrayIconPath))
-      : defaultTrayIconPath
+      ? createMacTrayImage(image)
+      : image.resize({ width: 64, height: 64, quality: 'best' })
   }
 
   function ensureBackgroundTray() {

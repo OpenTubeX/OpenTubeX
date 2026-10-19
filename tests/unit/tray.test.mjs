@@ -7,14 +7,14 @@ import vm from 'node:vm'
 const source = await readFile(new URL('../../src/main/index.js', import.meta.url), 'utf8')
 
 // Minimal stand-in for Electron's nativeImage, covering only the surface the
-// macOS tray image code uses. resize() records the requested height and toPNG()
+// tray image code uses. resize() records the requested size and toPNG()
 // returns it as the encoded-buffer stand-in, so the Darwin assertions check the
 // sizes the code asks for without a real PNG encoder (Electron's nativeImage is
 // unavailable in this vm fixture).
 const fakeImage = (height, extra = {}) => ({
   height,
   ...extra,
-  resize: ({ height: resized }) => fakeImage(resized),
+  resize: ({ width, height: resized }) => fakeImage(resized, { width }),
   toPNG: () => fakeImage(height),
 })
 
@@ -314,6 +314,15 @@ test('a recreated tray receives a menu even when its contents are unchanged', ()
   context.configure({ enabled: true })
   assert.ok(trays[1].menu.length > 0)
 })
+
+for (const platform of ['linux', 'win32']) {
+  // Chromium keeps several copies of the tray bitmap, so the 512px app logo costs ~55 MB.
+  test(`default tray artwork is downscaled on ${platform}`, () => {
+    const { context, trays } = fixture(platform)
+    context.configure({})
+    assert.deepEqual([trays[0].image.width, trays[0].image.height], [64, 64])
+  })
+}
 
 for (const platform of ['linux', 'win32', 'darwin']) {
   test(`selected tray artwork survives tray recreation on ${platform}`, () => {
