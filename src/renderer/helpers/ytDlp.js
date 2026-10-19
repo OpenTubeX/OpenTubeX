@@ -200,14 +200,15 @@ const capacitor = {
       if (isYouTubeVideo && !useDefaultClients) args.push('--extractor-args', useAuthentication ? 'youtube:player_client=default,web_safari' : 'youtube:player_client=default,web_embedded,-android_vr')
       args.push(isYouTubeVideo ? `https://www.youtube.com/watch?v=${videoId}` : videoId)
       const [info, binaries] = await Promise.all([extract(args, useAuthentication, !isYouTubeVideo, parseYtDlpPlaybackInfo, true), native.info()])
-      const playbackCaptions = mapPlaybackCaptions(info.requested_subtitles, info.subtitles, !isYouTubeVideo)
+      const playbackCaptions = mapPlaybackCaptions(info.requested_subtitles, info.subtitles, !isYouTubeVideo, info.language)
       let formats = Array.isArray(info.formats) ? info.formats : []
       if (process.env.IS_IOS) {
         // WebKit cannot fetch yt-dlp's media URLs through CORS, including
         // YouTube's googlevideo streams. Use the native scheme for HTTP media.
         if (!isYouTubeVideo) formats = formats.filter(format => format.protocol === 'https' && format.url)
         const httpFormats = formats.filter(format => format.protocol === 'https' && format.url)
-        const subtitles = Object.values(info.requested_subtitles ?? {}).filter(subtitle => subtitle?.url?.startsWith('https://'))
+        // Caption mapping can replace translation URLs, so register the mapped ones
+        const subtitles = [...playbackCaptions.captions, ...playbackCaptions.captionTranslations].filter(caption => caption.url.startsWith('https://'))
         const requests = [...httpFormats, ...subtitles]
         const { urls } = await native.registerMedia({ formats: requests })
         const registeredUrls = new Map(requests.map((entry, index) => [new URL(entry.url).toString(), urls[index]]))
