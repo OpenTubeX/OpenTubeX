@@ -29,6 +29,7 @@ function harness({ laterPageError = null } = {}) {
   let failContinuation
   const continuation = new Promise((resolve, reject) => { finishContinuation = resolve; failContinuation = reject })
   const context = {
+    playlistLoadGeneration: 0,
     props, randomizedPlaylistItems, shuffleEnabled, loopEnabled,
     isFetchingPlaylistContinuation, hasUnloadedPlaylistVideos, computed, watch: observe,
     isLoading, playlistItems, getPlaylistInfoRun: false,
@@ -85,6 +86,7 @@ function harness({ laterPageError = null } = {}) {
     items, playlistItems, isLoading, errors, watch, loopEnabled,
     nextVideo: state.nextVideo, unavailableCount: state.playlistUnavailableVideoCount,
     props, randomizedPlaylistItems,
+    changePlaylist: playlistId => { props.playlistId = playlistId; context.playlistLoadGeneration += 1 },
     enableShuffle: () => { shuffleEnabled.value = true; shuffle() },
     load: () => load({ id: 'youtube-playlist', title: 'YouTube playlist', totalVideoCount: 100,
       channelName: 'Test', channelId: 'channel', items, continuationData: 'continuation' }),
@@ -120,11 +122,23 @@ test('a later continuation failure preserves pages already loaded for autoplay',
 test('a cached continuation cannot replace a different playlist after navigation', async () => {
   const state = harness()
   const loading = state.load()
-  state.props.playlistId = 'different-playlist'
+  state.changePlaylist('different-playlist')
   state.playlistItems.value = [{ videoId: 'different' }]
   state.finishContinuation({ items: [{ videoId: 'third' }] })
   await loading
   assert.deepEqual(state.playlistItems.value.map(video => video.videoId), ['different'])
+})
+
+test('a cached continuation cannot extend a later visit of the same playlist', async t => {
+  const state = harness()
+  state.observeUpcoming(t)
+  const loading = state.load()
+  state.changePlaylist('different-playlist')
+  state.changePlaylist('youtube-playlist')
+  state.playlistItems.value = [{ videoId: 'newer' }]
+  state.finishContinuation({ items: [{ videoId: 'third' }] })
+  await loading
+  assert.deepEqual(state.playlistItems.value.map(video => video.videoId), ['newer'])
 })
 
 test('a failed YouTube playlist continuation preserves autoplay and clears the loading state', async () => {

@@ -1064,6 +1064,7 @@ function playPreviousVideo() {
  * @param {{ id: string, title: string, channelName: string, channelId: string, items: VideoData[], continuationData: string | null }} cachedPlaylist
  */
 async function loadCachedPlaylistInformation(cachedPlaylist) {
+  const generation = playlistLoadGeneration
   getPlaylistInfoRun = true
   store.commit('setCachedPlaylist', { tabId: playlistCacheTabId, value: null })
 
@@ -1085,7 +1086,7 @@ async function loadCachedPlaylistInformation(cachedPlaylist) {
   try {
     const continuationData = await getLocalCachedFeedContinuation('playlist', cachedPlaylist.continuationData)
     await untilEndOfLocalPlayList(continuationData, (p) => {
-      if (props.playlistId !== cachedPlaylist.id) return
+      if (generation !== playlistLoadGeneration) return
       const newVideos = parseLocalPlaylistVideos(p.items)
       videos.push(...newVideos)
       playlistItems.value = applyReversePlaylistState(videos.slice())
@@ -1094,13 +1095,13 @@ async function loadCachedPlaylistInformation(cachedPlaylist) {
         randomizedPlaylistItems.value = randomizedPlaylistItems.value.concat(shuffleItems(newVideos.slice()))
       }
     })
-    if (props.playlistId === cachedPlaylist.id) hasUnloadedPlaylistVideos.value = false
+    if (generation === playlistLoadGeneration) hasUnloadedPlaylistVideos.value = false
   } catch (err) {
-    if (props.playlistId !== cachedPlaylist.id) return
+    if (generation !== playlistLoadGeneration) return
     console.error(err)
     showApiErrorToast(t('Local API Error (Click to copy)'), err)
   } finally {
-    if (props.playlistId === cachedPlaylist.id) isFetchingPlaylistContinuation.value = false
+    if (generation === playlistLoadGeneration) isFetchingPlaylistContinuation.value = false
   }
 }
 
