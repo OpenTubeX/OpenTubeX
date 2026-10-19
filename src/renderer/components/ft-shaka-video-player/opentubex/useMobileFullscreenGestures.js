@@ -605,9 +605,11 @@ export function useMobileFullscreenGestures({
   }
 
   function handleMobilePlayerTouchEnd(event) {
+    // Compare the input time so a busy main thread cannot let the touchend of
+    // an already handled tap reach Shaka's own surface toggle.
     if (
       !isCapacitorMobilePlayer() ||
-      (!mobileSeekTouchCancelled && performance.now() >= mobileSurfaceSuppressTouchEndUntil)
+      (!mobileSeekTouchCancelled && event.timeStamp >= mobileSurfaceSuppressTouchEndUntil)
     ) {
       return
     }

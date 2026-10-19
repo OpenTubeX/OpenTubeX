@@ -325,7 +325,7 @@ test('keeps the configured interface hide delay when playback resumes', async ({
   const controls = player.locator('.shaka-controls-container')
   await page.evaluate(async () => {
     const store = window.$store
-    await store.dispatch('updatePlayingInterfaceHideDelay', 10)
+    await store.dispatch('updatePlayingInterfaceHideDelay', 60)
   })
   await setPlayerFullscreen(page, true)
   await video.evaluate(element => element.pause())
@@ -1594,6 +1594,8 @@ test('uses mobile surface taps for controls and keeps an on-video play button', 
     const store = window.$store
     await store.dispatch('updateRememberVolume', false)
     await store.dispatch('updateDefaultVolume', 0.25)
+    // Outlast the expect timeout so only a tap can hide the playing controls.
+    await store.dispatch('updatePlayingInterfaceHideDelay', 60)
   })
   const video = await openMockedVideo(page)
   await expect.poll(() => appRoot.evaluate(element => Math.abs(
@@ -1634,21 +1636,27 @@ test('uses mobile surface taps for controls and keeps an on-video play button', 
         pointerId,
         pointerType: 'touch'
       }
-      element.dispatchEvent(new PointerEvent('pointerdown', pointer))
-      element.dispatchEvent(new TouchEvent('touchstart', {
-        bubbles: true,
-        touches: [new Touch({ identifier: pointerId, target: element, clientX, clientY })]
-      }))
-      element.dispatchEvent(new PointerEvent('pointerup', pointer))
-      return !element.dispatchEvent(new TouchEvent('touchend', {
-        bubbles: true, cancelable: true
-      }))
+      // Create every event before dispatching so their timestamps describe a
+      // quick tap even when the handlers of earlier events run slowly.
+      const events = [
+        new PointerEvent('pointerdown', pointer),
+        new TouchEvent('touchstart', {
+          bubbles: true,
+          touches: [new Touch({ identifier: pointerId, target: element, clientX, clientY })]
+        }),
+        new PointerEvent('pointerup', pointer),
+        new TouchEvent('touchend', { bubbles: true, cancelable: true })
+      ]
+      const touchEnd = events.pop()
+      for (const event of events) element.dispatchEvent(event)
+      return !element.dispatchEvent(touchEnd)
     }, { clientX, clientY, pointerId: currentPointerId })
   }
 
   expect(await tapPlayer()).toBe(true)
-  await expect.poll(() => surface.getAttribute('shown'), { timeout: 500 }).toBeNull()
+  await expect(surface).not.toHaveAttribute('shown')
   expect(await video.evaluate(element => element.paused)).toBe(false)
+  await page.evaluate(() => window.$store.dispatch('updatePlayingInterfaceHideDelay', 3))
 
   expect(await tapPlayer()).toBe(true)
   await expect(surface).toHaveAttribute('shown', 'true')
@@ -1660,16 +1668,19 @@ test('uses mobile surface taps for controls and keeps an on-video play button', 
   await surface.evaluate(element => element.removeAttribute('shown'))
   await video.evaluate(element => element.pause())
   await expect(surface).toHaveAttribute('shown', 'true')
+  // Paused controls stay shown on their own, so only the tap can hide them.
   expect(await tapPlayer()).toBe(true)
-  await expect.poll(() => surface.getAttribute('shown'), { timeout: 500 }).toBeNull()
+  await expect(surface).not.toHaveAttribute('shown')
   expect(await video.evaluate(element => element.paused)).toBe(true)
 
   expect(await tapPlayer(0.85)).toBe(true)
   await expect(surface).toHaveAttribute('shown', 'true')
   // Space the taps so they are not handled as a double tap.
   await page.waitForTimeout(500)
+  // Side taps wait out the double-tap window before hiding; a double tap would
+  // seek instead and leave the paused controls shown.
   expect(await tapPlayer(0.85)).toBe(true)
-  await expect.poll(() => surface.getAttribute('shown'), { timeout: 500 }).toBeNull()
+  await expect(surface).not.toHaveAttribute('shown')
 
   expect(await tapPlayer()).toBe(true)
   await expect(surface).toHaveAttribute('shown', 'true')

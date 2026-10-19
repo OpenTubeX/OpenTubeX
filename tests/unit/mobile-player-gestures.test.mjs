@@ -114,7 +114,7 @@ test('left and right vertical swipes use their configured actions with fractiona
     g.finishMobileFullscreenGesture(event(x, 49.75))
     assert.deepEqual(calls, [['begin', action], ['update', 0.5], 'finish'])
     assert.equal(captures.size, 0)
-    const touchEnd = event()
+    const touchEnd = event(50, 150, { timeStamp: performance.now() })
     g.handleMobilePlayerTouchEnd(touchEnd)
     assert.equal(touchEnd.prevented, true)
     g.handleMobilePlayerSurfaceClick(event(x))
@@ -128,6 +128,19 @@ test('a tap still shows controls and does not call native adjustments', t => {
   g.moveMobileFullscreenGesture(event(51, 148))
   g.finishMobileFullscreenGesture(event(51, 148))
   assert.deepEqual(calls, ['show'])
+})
+
+test('a tap suppresses its own touch end even when the main thread handles it late', t => {
+  let now = 1000
+  t.mock.method(performance, 'now', () => now)
+  const { gestures: g, event, calls } = fixture(t)
+  g.startMobileFullscreenGesture(event(210, 150, { timeStamp: now }))
+  g.finishMobileFullscreenGesture(event(210, 150, { timeStamp: now }))
+  assert.deepEqual(calls, ['show'])
+  const touchEnd = event(210, 150, { timeStamp: now })
+  now += 1000
+  g.handleMobilePlayerTouchEnd(touchEnd)
+  assert.equal(touchEnd.prevented, true)
 })
 
 test('center swipes retain fullscreen and disabled sides allow fullscreen swipes', t => {
@@ -260,7 +273,7 @@ test('fullscreen swipe controls auto-hide after the configured delay despite sup
   g.moveMobileFullscreenGesture(event(210, 50))
   container.dispatchEvent(new Event('touchmove'))
   g.finishMobileFullscreenGesture(event(210, 50))
-  const touchEnd = event()
+  const touchEnd = event(50, 150, { timeStamp: performance.now() })
   g.handleMobilePlayerTouchEnd(touchEnd)
   assert.equal(touchEnd.prevented, true)
   t.mock.timers.tick(0)
@@ -355,7 +368,7 @@ for (const [placement, x] of [['toolbar', 50], ['center', 210]]) {
       (placement === 'toolbar' && selectors.includes('.shaka-controls-button-panel')) ? target : null
     g.startMobileFullscreenGesture(event(x, 150, { target }))
     g.finishMobileFullscreenGesture(event(x, 150, { target }))
-    const touchEnd = event(x, 150, { target })
+    const touchEnd = event(x, 150, { target, timeStamp: performance.now() })
     g.handleMobilePlayerTouchEnd(touchEnd)
     assert.notEqual(touchEnd.prevented, true, 'Touch end must allow the replay click')
     const click = event(x, 150, { target })
@@ -674,7 +687,7 @@ for (const [direction, x, endX, time] of [[1, 50, 150, 90], [-1, 370, 270, 30]])
     assert.deepEqual(calls, [['seek', time]])
     assert.equal(g.mobileSeekPreview.value, null)
     assert.equal(captures.size, 0)
-    const touchEnd = event(endX, 250)
+    const touchEnd = event(endX, 250, { timeStamp: performance.now() })
     g.handleMobilePlayerTouchEnd(touchEnd)
     assert.equal(touchEnd.prevented, true)
     g.handleMobilePlayerSurfaceClick(event(endX, 250))
@@ -813,11 +826,11 @@ test('cancelled seeking suppresses late touch releases until both fingers are li
   g.moveMobileFullscreenGesture(event(250, 150))
   g.startMobileFullscreenGesture(event(300, 150, { pointerId: 2, isPrimary: false }))
   now += 1000
-  const firstRelease = event(250, 150, { touches: [{}] })
+  const firstRelease = event(250, 150, { touches: [{}], timeStamp: now })
   g.handleMobilePlayerTouchEnd(firstRelease)
   assert.equal(firstRelease.prevented, true)
   now += 1000
-  const lastRelease = event(300, 150, { touches: [] })
+  const lastRelease = event(300, 150, { touches: [], timeStamp: now })
   g.handleMobilePlayerTouchEnd(lastRelease)
   assert.equal(lastRelease.prevented, true)
   assert.equal(calls.some(call => Array.isArray(call) && call[0] === 'seek'), false)
