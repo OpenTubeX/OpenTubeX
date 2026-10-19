@@ -62,8 +62,15 @@ async function trackHistoryNavigations(page, block = false) {
     const router = Reflect.ownKeys(instance.provides).map(key => instance.provides[key])
       .find(value => value?.currentRoute && typeof value.beforeEach === 'function')
     const tracker = { releases: [], completed: [] }
-    if (block) router.beforeEach(() => new Promise(resolve => tracker.releases.push(resolve)))
-    router.afterEach(to => { tracker.completed.push(to.fullPath) })
+    // The tab router runs afterEach hooks after updating the URL, so a save
+    // the test already saw in the URL can still finish after tracking starts.
+    // Only count navigations that passed this tracker's guard.
+    const started = new WeakSet()
+    router.beforeEach(to => {
+      started.add(to)
+      if (block) return new Promise(resolve => tracker.releases.push(resolve))
+    })
+    router.afterEach(to => { if (started.has(to)) tracker.completed.push(to.fullPath) })
     window.__historyNavigations = tracker
   }, block)
 }
@@ -72,6 +79,13 @@ async function releaseHistoryNavigation(page, completedCount) {
   await expect.poll(() => page.evaluate(() => window.__historyNavigations.releases.length)).toBe(1)
   await page.evaluate(() => window.__historyNavigations.releases.shift()())
   await expect.poll(() => page.evaluate(() => window.__historyNavigations.completed.length)).toBe(completedCount)
+}
+
+async function pauseClock(page) {
+  // pauseAt() fast-forwards from the fake clock's current time, which keeps
+  // running until the call reaches the page. Under load that can take longer
+  // than a short lead, but never longer than the test may run.
+  await page.clock.pauseAt(await page.evaluate(() => Date.now()) + test.info().timeout)
 }
 
 async function scrollPageToEnd(page) {
@@ -659,7 +673,7 @@ test.describe('history search pagination', () => {
     await page.getByRole('button', { name: 'Load More Videos' }).click()
     await expect(videos).toHaveCount(200)
     await page.clock.install()
-    await page.clock.pauseAt(new Date(Date.now() + 1000))
+    await pauseClock(page)
 
     for (const query of ['', '   ']) {
       await input.fill(query)
@@ -718,7 +732,7 @@ test.describe('history search pagination', () => {
 
     await scrollPageToEnd(page)
     await page.clock.install()
-    await page.clock.pauseAt(new Date(Date.now() + 1000))
+    await pauseClock(page)
     await updateInputWithoutScrolling(filterInput, 'Beta match')
     await expect(page.locator('.historySearchLoader')).toBeVisible()
     await expect(videos).toHaveCount(0)
@@ -735,9 +749,7 @@ test.describe('history search pagination', () => {
 
     await scrollPageToEnd(page)
     await expect(videos.filter({ hasText: 'beta match lowercase' })).toHaveCount(1)
-    // The resumed fake clock runs ahead of Node's wall clock by the previous
-    // pause, so a Date.now()-based target can already lie in the past.
-    await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000))
+    await pauseClock(page)
     await page.getByRole('checkbox', { name: 'Case Sensitive Search' }).evaluate(element => element.click())
     await expect(page.locator('.historySearchLoader')).toBeVisible()
     await expect(videos).toHaveCount(0)
@@ -986,7 +998,7 @@ test.describe('history search feedback', () => {
     const loader = page.locator('.historySearchLoader')
     await expect(videos).toHaveCount(2)
     await page.clock.install()
-    await page.clock.pauseAt(new Date(Date.now() + 1000))
+    await pauseClock(page)
 
     await input.fill('city tour')
     await expect(loader).toBeVisible()
@@ -1038,7 +1050,7 @@ test.describe('history search locale changes', () => {
     await scrollPageToEnd(page)
 
     await page.clock.install()
-    await page.clock.pauseAt(new Date(Date.now() + 1000))
+    await pauseClock(page)
     await page.evaluate(async () => {
       const store = window.$store
       await store.dispatch('updateCurrentLocale', 'tr')
