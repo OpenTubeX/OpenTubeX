@@ -612,6 +612,10 @@ Settings:
     UseDeArrowTitles: Erabili DeArrow bideo-izenburuak
     UseDeArrowThumbnails: Erabili DeArrow irudi txikietarako
     'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)': DeArrow Thumbnail Generator API URLa (lehenetsia https://dearrow-thumb.ajay.app da)
+    Excluded Channels:
+      Disabled Message: Kanal batzuk IDaren bidez baztertu dira eta ez dira prozesatu. Funtzioa blokeatuta dago ID horiek eguneratzen diren bitartean
+      Excluded Channels: Baztertutako kanalak
+      Tooltip: Idatzi kanal baten IDa SponsorBlock desgaitzeko. Kanal honetako bideoetako babesle-zatiak ez dira saltatuko. Idatzitako kanalaren IDak guztiz bat etorri behar du, eta maiuskulak eta minuskulak bereizten ditu.
   Parental Control Settings:
     Show Family Friendly Only: Erakutsi familientzat aproposa dena bakarrik
     Hide Unsubscribe Button: Ezkutatu harpidetza kentzeko botoia
@@ -718,6 +722,7 @@ Channel:
       Newest: 'Berrienak'
       Oldest: 'Zaharrenak'
       Most Popular: 'Jarraituenak'
+    This channel has videos but none could be displayed, try fetching more: Kanal honek bideoak ditu, baina ezin izan da bat ere erakutsi; saiatu gehiago eskuratzen
     This channel does not currently have any videos: 'Kanal honek ez du bideorik'
   Playlists:
     Playlists: 'Erreprodukzio-zerrendak'
@@ -883,6 +888,18 @@ Video:
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'SABR atzerapen denbora geratzen da: {remindingTimeSeconds}s'
   Popout Live Chat: Erakutsi txata
   Private: Bideo pribatuak ezin dira ikusi OpenTubeX-n, Google-ren saioa irekitzea eta bideoaren jabetza behar baitute.
+  Collapse Playlist: Tolestu erreprodukzio-zerrenda
+  Expand Playlist: Zabaldu erreprodukzio-zerrenda
+  Premiere: Estreinaldia
+  Playlist:
+    Unavailable videos are hidden: Erabilgarri ez dagoen bideo 1 ezkutatuta dago | Erabilgarri ez dauden {count} bideo ezkutatuta daude
+  Enable SponsorBlock on Channel: Gaitu SponsorBlock kanalean
+  Disable SponsorBlock on Channel: Desgaitu SponsorBlock kanalean
+  AI: AA
+  'AI: Content was made with AI': 'AA: edukia adimen artifizialarekin egin da'
+  How this was made: Nola egin den
+  Station: Irratia
+  Reload Page: Freskatu orria
 Playlist:
   #& About
   View Full Playlist: 'Ikusi erreprodukzio-zerrenda osoa'
@@ -1147,3 +1164,5 @@ Compact side navigation: Trinkotu alboko nabigazioa
 Expand side navigation: Zabaldu alboko nabigazioa
 Screenshot Clipboard Success: Pantaila-argazkia arbelean gorde da
 Screenshot Clipboard Error: Pantaila-argazkia arbelean kopiatzeak huts egin du
+SponsorBlock Disabled on Channel: SponsorBlock desgaituta dago {channel} kanalean
+SponsorBlock Enabled on Channel: SponsorBlock gaituta dago {channel} kanalean

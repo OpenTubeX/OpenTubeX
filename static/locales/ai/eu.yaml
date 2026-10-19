@@ -1164,9 +1164,6 @@ Settings:
     Reloading video after IP block recovery: Bideoa berriro kargatzen IP blokeoa berreskuratu ondoren
     Failed to select IP block recovery script: Ezin izan da IP blokeoa berreskuratzeko scripta hautatu
   SponsorBlock Settings:
-    Excluded Channels:
-      Excluded Channels: "Salbuetsitako kanalak"
-      Tooltip: "Sartu kanalaren IDa haren bideoetan SponsorBlock segmentuak ez saltatzeko. IDak bat etorri behar du zehazki, maiuskulak eta minuskulak bereizita."
     Enable SponsorBlock Submission: Gaitu SponsorBlock-era bidaltzea
     SponsorBlock Private User ID (optional): Erabiltzailearen ID pribatua (aukerakoa)
     SponsorBlock Private User ID Tooltip: Itsatsi arakatzailearen hedapeneko SponsorBlock erabiltzaile-ID pribatua. Utzi hutsik aplikazioak sortutako ID bat erabiltzeko.
@@ -1280,8 +1277,6 @@ Channel:
   Channel Name Unavailable: Kanalaren izena ez dago erabilgarri
   Search Result Types: Bilaketa-emaitzen motak
   All Results: Guztiak
-  Videos:
-    This channel has videos but none could be displayed, try fetching more: "Kanal honek bideoak ditu, baina ezin izan da bat ere erakutsi. Saiatu gehiago kargatzen"
 Video:
   External DRM Protected: "DRM babestutako bideoak ezin dira erreproduzitu OpenTubeXn, kode itxiko osagai jabedunak behar baitituzte."
   Invalid Media URL: "Multimedia URLa ez da baliozkoa"
@@ -1337,8 +1332,6 @@ Video:
   Configure Restricted Playback Cookies Hint: "Konfiguratu cookieak Ezarpenak → Kanpoko softwarea → yt-dlp cookieak atalean."
   Try With Configured Cookies: Saiatu konfiguratutako cookieekin
   Restricted Playback Authentication Failed Template: 'yt-dlp-k ezin izan du bideo hau atzitu konfiguratutako cookieekin: {error}'
-  Collapse Playlist: Tolestu erreprodukzio-zerrenda
-  Expand Playlist: Zabaldu erreprodukzio-zerrenda
   Unmark As Watched: Kendu ikusita marka
   Video has been unmarked as watched: Bideoari ikusita marka kendu zaio
   Save Channel Playback Speed: Gorde kanalaren erreprodukzio-abiadura
@@ -1363,8 +1356,6 @@ Video:
   Notification unavailable: Sistemaren jakinarazpenak ez daude erabilgarri
   Scheduled video starting: Programatutako bideoa hasten ari da
   Live notification body: '{videoTitle} orain hasiko da'
-  Premiere: Estreinaldia
-  AI: AI
   AI-generated content: Adimen artifizialak sortutako edukia
   Collaborators: Kolaboratzaileak
   Live Chat Replay: Zuzeneko txataren errepikapena
@@ -1586,9 +1577,6 @@ Video:
       Error: "Ezin izan da bideoa igorri"
       Error With Details: "Ezin izan da bideoa igorri: {error}"
       Untrusted Receiver: "Hartzailearen ziurtagiria ez da fidagarria. Erabili autentifikatutako Google Cast hartzaile bat."
-  Station: Estazioa
-  Playlist:
-    Unavailable videos are hidden: Erabilgarri ez dagoen bideo 1 ezkutatuta dago | Erabilgarri ez dauden {count} bideo ezkutatuta daude
   External Media:
     Dislikes: "Desatsegitea | Desatsegiteak"
     Reposts: "Berriro argitaratzea | Berriro argitaratzeak"
@@ -1614,7 +1602,6 @@ Video:
       subscriber_only: "Harpidedunentzat bakarrik"
       needs_auth: "Saioa hasi behar da"
       unlisted: "Zerrendatu gabeak"
-  How this was made: Nola egin den
 Playlist:
   Playlist Already Preloaded: "Erreprodukzio-zerrendako bideo guztiak aurrez kargatuta daude"
   Playlist Preload Progress: "Bideoak aurrez kargatzen: {completed}/{requested}"
