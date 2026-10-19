@@ -398,6 +398,10 @@ Settings:
       Tablet: 'Tabled'
     Video View Type:
       Full Width: Lled llawn
+    Grid Columns:
+      Grid Columns: "Colofnau'r grid"
+      Playlist Grid Columns: Colofnau grid rhestri chwarae
+      Auto: Awtomatig
   Context Menu Search Settings:
     Context Menu Search Settings: Chwilio o'r ddewislen cyd-destun
     Description: Dewiswch pa beiriannau chwilio sy'n ymddangos pan fyddwch yn de-glicio testun a ddewiswyd. Mae chwiliadau'n agor yn eich porwr rhagosodedig.
@@ -1903,6 +1907,8 @@ Tooltips:
     Auto Refresh Interval: "Pa mor aml y mae OpenTubeX yn adnewyddu eich ffrwd tanysgrifiadau'n awtomatig tra bo'r ap ar agor. Ar Android, mae cyfwng nad yw’n sero hefyd yn adnewyddu’r ffrwd pan fydd yr ap ar gau."
     Refresh Subscriptions While App Is Closed: "Yn adnewyddu ffrydiau gan ddefnyddio eich gosodiadau. Ar y bwrdd gwaith, mae OpenTubeX yn aros yn hambwrdd y system nes i chi adael. Android sy’n rheoli pryd mae adnewyddu cefndirol yn digwydd."
   Theme Settings:
+    Thumbnail Size: "Yn newid maint mân-luniau fideos mewn gridiau a rhestrau. Mae gridiau gyda nifer sefydlog o golofnau neu'r math gwedd Lled Llawn yn llenwi pob rhes yn lle hynny, felly yno dim ond mân-luniau rhestrau a Shorts y mae'n eu newid. Mewn ffenestri maint ffôn, mae mân-luniau'r grid wedi'u cyfyngu i 100%."
+    Playlist Thumbnail Size: "Yn newid maint mân-luniau fideos ar dudalennau rhestri chwarae. Mae gridiau gyda nifer sefydlog o golofnau neu'r math gwedd Lled Llawn yn llenwi pob rhes yn lle hynny, felly yno dim ond mân-luniau rhestrau a Shorts y mae'n eu newid. Mewn ffenestri maint ffôn, mae mân-luniau'r grid wedi'u cyfyngu i 100%."
     Compact Settings Categories: "Yn cuddio disgrifiadau ac yn lleihau uchder categorïau gosodiadau."
     Show Progress as Notification: Mae'n dangos hysbysiad parhaol â chynnydd byw ar gyfer gweithredoedd cefndir, megis adnewyddu tanysgrifiadau a lawrlwytho offer a reolir, yn lle defnyddio'r bar cynnydd byd-eang.
     Always Show Scrollbars: Mae'n cadw'r bariau sgrolio'n weladwy bob amser. Pan fydd wedi'i analluogi, maent yn pylu ychydig ar ôl i chi roi'r gorau i symud y llygoden ac yn ailymddangos cyn gynted ag y byddwch yn ei symud eto.

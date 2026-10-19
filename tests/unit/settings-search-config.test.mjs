@@ -55,6 +55,20 @@ test('scheduled backup settings are searchable only on desktop', () => {
   }
 })
 
+test('grid column settings are searchable while their view type is a grid', () => {
+  for (const [listType, playlistViewType] of [['grid', 'list'], ['fullWidth', 'grid']]) {
+    const labels = createSettingsSearchIndex({
+      sections: [{ type: 'appearance', title: 'Appearance', description: '' }],
+      tm: path => getAtPath(locale, path),
+      store: { getters: { getListType: listType, getPlaylistViewType: playlistViewType } },
+      usingElectron: true,
+    }).get('appearance').map(({ label }) => label)
+    assert.equal(labels.includes('Grid Columns'), listType === 'grid')
+    assert.equal(labels.includes('Playlist Grid Columns'), playlistViewType === 'grid')
+    assert.ok(!labels.includes('Auto'))
+  }
+})
+
 test('playback search indexes the lights off visibility toggle instead of its player action', () => {
   const entries = createSettingsSearchIndex({
     sections: [{ type: 'playback', title: 'Playback', description: '' }],

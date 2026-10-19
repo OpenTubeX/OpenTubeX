@@ -398,6 +398,10 @@ Settings:
       Tablet: 'Tableta'
     Video View Type:
       Full Width: Zabalera osoa
+    Grid Columns:
+      Grid Columns: Saretako zutabeak
+      Playlist Grid Columns: Erreprodukzio-zerrenden saretako zutabeak
+      Auto: Automatikoa
   Context Menu Search Settings:
     Context Menu Search Settings: Laster-menuko bilaketa
     Description: Aukeratu hautatutako testuan eskuineko klik egitean agertuko diren bilaketa-motorrak. Bilaketak arakatzaile lehenetsian irekiko dira.
@@ -1886,6 +1890,8 @@ Tooltips:
     Auto Refresh Interval: "OpenTubeX aplikazioak harpidetza-jarioa automatikoki freskatuko duen maiztasuna, aplikazioa irekita dagoen bitartean. Androiden, zero ez den tarte batek jarioa freskatzen du aplikazioa itxita dagoenean ere."
     Refresh Subscriptions While App Is Closed: "Jarioak hautatutako ezarpenekin eguneratzen ditu. Ordenagailuan, OpenTubeX sistemaren erretiluan geratzen da irten arte. Android-ek atzeko planoko eguneratzeen unea kontrolatzen du."
   Theme Settings:
+    Thumbnail Size: "Bideoen miniaturen tamaina aldatzen du sareta eta zerrendetan. Zutabe kopuru finkoa edo Zabalera osoa ikuspegia duten saretek errenkada bakoitza betetzen dute horren ordez, beraz han zerrendetako miniaturak eta Shorts-ak soilik aldatzen ditu. Telefono-tamainako leihoetan saretako miniaturak % 100era mugatzen dira."
+    Playlist Thumbnail Size: "Bideoen miniaturen tamaina aldatzen du erreprodukzio-zerrenden orrietan. Zutabe kopuru finkoa edo Zabalera osoa ikuspegia duten saretek errenkada bakoitza betetzen dute horren ordez, beraz han zerrendetako miniaturak eta Shorts-ak soilik aldatzen ditu. Telefono-tamainako leihoetan saretako miniaturak % 100era mugatzen dira."
     Compact Settings Categories: "Deskribapenak ezkutatu eta ezarpen-kategorien altuera murrizten du."
     Show Progress as Notification: Jakinarazpen iraunkor batean erakusten du atzeko planoko eragiketen uneko aurrerapena, hala nola harpidetzen freskatzea eta kudeatutako tresnen deskargak, aurrerapen-barra globala erabili beharrean.
     Always Show Scrollbars: Korritze-barrak ikusgai mantentzen ditu beti. Desgaituta dagoenean, sagua mugitzeari utzi eta handik gutxira desagertzen dira, eta berriro mugitu bezain laster agertzen.

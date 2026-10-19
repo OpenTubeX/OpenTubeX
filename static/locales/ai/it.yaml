@@ -398,6 +398,10 @@ Settings:
       Tablet: 'Tablet'
     Video View Type:
       Full Width: Larghezza piena
+    Grid Columns:
+      Grid Columns: Colonne della griglia
+      Playlist Grid Columns: Colonne della griglia delle playlist
+      Auto: Automatico
   Context Menu Search Settings:
     Context Menu Search Settings: Ricerca dal menu contestuale
     Description: Scegli quali motori di ricerca mostrare quando fai clic destro sul testo selezionato. Le ricerche si aprono nel browser predefinito.
@@ -1876,6 +1880,8 @@ Tooltips:
     Auto Refresh Interval: "Frequenza con cui OpenTubeX aggiorna automaticamente il feed delle iscrizioni mentre l'app è aperta. Su Android, un intervallo diverso da zero aggiorna il feed anche quando l’app è chiusa."
     Refresh Subscriptions While App Is Closed: "Aggiorna i feed con le impostazioni scelte. Sul desktop, OpenTubeX rimane nell’area di notifica fino all’uscita. Android decide quando eseguire gli aggiornamenti in background."
   Theme Settings:
+    Thumbnail Size: "Ridimensiona le miniature dei video in griglie ed elenchi. Le griglie con un numero fisso di colonne o il tipo di vista Larghezza piena riempiono invece ogni riga, quindi lì cambia solo le miniature degli elenchi e gli Shorts. Nelle finestre delle dimensioni di un telefono, le miniature della griglia sono limitate al 100%."
+    Playlist Thumbnail Size: "Ridimensiona le miniature dei video nelle pagine delle playlist. Le griglie con un numero fisso di colonne o il tipo di vista Larghezza piena riempiono invece ogni riga, quindi lì cambia solo le miniature degli elenchi e gli Shorts. Nelle finestre delle dimensioni di un telefono, le miniature della griglia sono limitate al 100%."
     Compact Settings Categories: "Nasconde le descrizioni e riduce l’altezza delle categorie delle impostazioni."
     Show Progress as Notification: Mostra una notifica persistente con l'avanzamento in tempo reale delle operazioni in background, come l'aggiornamento delle iscrizioni e il download degli strumenti gestiti, al posto della barra di avanzamento globale.
     Always Show Scrollbars: Mantiene le barre di scorrimento sempre visibili. Se disabilitato, scompaiono poco dopo che smetti di muovere il mouse e riappaiono non appena lo muovi di nuovo.

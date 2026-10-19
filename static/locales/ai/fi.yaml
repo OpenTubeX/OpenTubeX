@@ -402,6 +402,10 @@ Settings:
       Tablet: 'Tabletti'
     Video View Type:
       Full Width: Koko leveys
+    Grid Columns:
+      Grid Columns: Ruudukon sarakkeet
+      Playlist Grid Columns: Soittolistojen ruudukon sarakkeet
+      Auto: Automaattinen
   Context Menu Search Settings:
     Context Menu Search Settings: Pikavalikon haku
     Description: Valitse hakukoneet, jotka näkyvät, kun napsautat valittua tekstiä hiiren kakkospainikkeella. Haut avautuvat oletusselaimessasi.
@@ -1923,6 +1927,8 @@ Tooltips:
     Auto Refresh Interval: "Kuinka usein OpenTubeX päivittää tilausnäkymän automaattisesti sovelluksen ollessa avoinna. Androidissa nollasta poikkeava aikaväli päivittää syötteen myös sovelluksen ollessa suljettuna."
     Refresh Subscriptions While App Is Closed: "Päivittää syötteet valitsemillasi asetuksilla. Tietokoneella OpenTubeX pysyy ilmoitusalueella lopettamiseen asti. Android päättää taustapäivitysten ajankohdan."
   Theme Settings:
+    Thumbnail Size: "Muuttaa videoiden pikkukuvien kokoa ruudukoissa ja luetteloissa. Ruudukot, joissa on kiinteä sarakemäärä tai Koko leveys -näkymä, täyttävät sen sijaan jokaisen rivin, joten siellä se muuttaa vain luetteloiden pikkukuvia ja Shortseja. Puhelimen kokoisissa ikkunoissa ruudukon pikkukuvat rajoitetaan 100 %:iin."
+    Playlist Thumbnail Size: "Muuttaa videoiden pikkukuvien kokoa soittolistasivuilla. Ruudukot, joissa on kiinteä sarakemäärä tai Koko leveys -näkymä, täyttävät sen sijaan jokaisen rivin, joten siellä se muuttaa vain luetteloiden pikkukuvia ja Shortseja. Puhelimen kokoisissa ikkunoissa ruudukon pikkukuvat rajoitetaan 100 %:iin."
     Compact Settings Categories: "Piilottaa kuvaukset ja pienentää asetuskategorioiden korkeutta."
     Show Progress as Notification: Näyttää taustatoimintojen, kuten tilausten päivityksen ja ylläpidettyjen työkalujen latausten, etenemisen jatkuvassa ilmoituksessa yleisen edistymispalkin sijaan.
     Always Show Scrollbars: Pitää vierityspalkit aina näkyvissä. Kun asetus on poistettu käytöstä, ne häipyvät pian hiiren liikkeen pysähdyttyä ja tulevat uudelleen näkyviin heti, kun hiirtä liikutetaan.

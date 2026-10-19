@@ -398,6 +398,10 @@ Settings:
       Tablet: 'Tablet'
     Video View Type:
       Full Width: Celá šírka
+    Grid Columns:
+      Grid Columns: Stĺpce mriežky
+      Playlist Grid Columns: Stĺpce mriežky playlistov
+      Auto: Automaticky
   Context Menu Search Settings:
     Context Menu Search Settings: Hľadanie v kontextovej ponuke
     Description: Vyberte vyhľadávače, ktoré sa zobrazia po kliknutí pravým tlačidlom na označený text. Výsledky hľadania sa otvoria v predvolenom prehliadači.
@@ -1876,6 +1880,8 @@ Tooltips:
     Auto Refresh Interval: "Určuje, ako často OpenTubeX automaticky obnoví kanál odberov, kým je aplikácia otvorená. V Androide nenulový interval obnovuje kanál aj vtedy, keď je aplikácia zatvorená."
     Refresh Subscriptions While App Is Closed: "Obnovuje kanály podľa zvolených nastavení. Na počítači zostáva OpenTubeX v oblasti oznámení až do ukončenia. Android určuje čas obnovovania na pozadí."
   Theme Settings:
+    Thumbnail Size: "Mení veľkosť miniatúr videí v mriežkach a zoznamoch. Mriežky s pevným počtom stĺpcov alebo zobrazenie Plná šírka namiesto toho vyplnia každý riadok, takže tam mení len miniatúry v zoznamoch a Shorts. V oknách veľkosti telefónu sú miniatúry v mriežke obmedzené na 100 %."
+    Playlist Thumbnail Size: "Mení veľkosť miniatúr videí na stránkach playlistov. Mriežky s pevným počtom stĺpcov alebo zobrazenie Plná šírka namiesto toho vyplnia každý riadok, takže tam mení len miniatúry v zoznamoch a Shorts. V oknách veľkosti telefónu sú miniatúry v mriežke obmedzené na 100 %."
     Compact Settings Categories: "Skryje popisy a zmenší výšku kategórií nastavení."
     Show Progress as Notification: Namiesto globálneho ukazovateľa priebehu zobrazí trvalé oznámenie s aktuálnym priebehom operácií na pozadí, napríklad obnovovania odberov a sťahovania spravovaných nástrojov.
     Always Show Scrollbars: Posúvače zostanú stále viditeľné. Po vypnutí krátko po zastavení pohybu myši zmiznú a pri ďalšom pohybe sa znova zobrazia.

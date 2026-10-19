@@ -28,6 +28,7 @@ const GENERAL_EVERYDAY_KEYS = new Set([
 
 const GENERAL_APPEARANCE_KEYS = new Set([
   'Data Saver Thumbnails',
+  'Grid Columns',
   'Mobile Layout',
   'Navigation',
   'Playlist View Type',
@@ -293,6 +294,7 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
     'Preferred API Backend': ['Preferred API Backend'],
     'Playlist View Type': ['Playlist View Type'],
     'Video View Type': ['Video View Type'],
+    'Grid Columns': ['Grid Columns', 'Playlist Grid Columns'],
     'Thumbnail Preference': ['Thumbnail Preference'],
     'Extra Thumbnail Action Button': ['Extra Thumbnail Action Button'],
     'External Link Handling': ['External Link Handling']

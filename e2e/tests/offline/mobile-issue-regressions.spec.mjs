@@ -23,9 +23,10 @@ test('touch sliders allow scrolling without changing settings', { tag: '@scale' 
   try {
     const viewport = page.locator('.settingsContent')
     const before = await viewport.evaluate(element => element.scrollTop)
-    await gesture(4, -120)
+    // The slider sits near the end of the page, so scroll back towards the top.
+    await gesture(4, 120)
     await expect(slider).toHaveValue('100')
-    await expect.poll(() => viewport.evaluate(element => element.scrollTop)).toBeGreaterThan(before)
+    await expect.poll(() => viewport.evaluate(element => element.scrollTop)).toBeLessThan(before)
     await gesture(35, 0)
     await expect(slider).not.toHaveValue('100')
     // A tap remains an alternative to dragging, and keyboard input still works.

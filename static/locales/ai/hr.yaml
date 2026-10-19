@@ -400,6 +400,10 @@ Settings:
       Tablet: 'Tablet'
     Video View Type:
       Full Width: Puna širina
+    Grid Columns:
+      Grid Columns: Stupci rešetke
+      Playlist Grid Columns: Stupci rešetke popisa za reprodukciju
+      Auto: Automatski
   Context Menu Search Settings:
     Context Menu Search Settings: Pretraživanje iz kontekstnog izbornika
     Description: Odaberite tražilice koje se prikazuju kada desnom tipkom miša kliknete odabrani tekst. Pretraživanja se otvaraju u zadanom pregledniku.
@@ -1903,6 +1907,8 @@ Tooltips:
     Auto Refresh Interval: "Učestalost kojom OpenTubeX automatski osvježava sažetak pretplata dok je aplikacija otvorena. Na Androidu interval koji nije nula osvježava sažetak i dok je aplikacija zatvorena."
     Refresh Subscriptions While App Is Closed: "Osvježava sadržaj prema odabranim postavkama. Na računalu OpenTubeX ostaje u sistemskoj traci do izlaska. Android određuje vrijeme osvježavanja u pozadini."
   Theme Settings:
+    Thumbnail Size: "Mijenja veličinu sličica videozapisa u rešetkama i popisima. Rešetke s fiksnim brojem stupaca ili prikaz Puna širina umjesto toga popunjavaju svaki redak, pa tamo mijenja samo sličice popisa i Shorts. U prozorima veličine telefona sličice rešetke ograničene su na 100 %."
+    Playlist Thumbnail Size: "Mijenja veličinu sličica videozapisa na stranicama popisa za reprodukciju. Rešetke s fiksnim brojem stupaca ili prikaz Puna širina umjesto toga popunjavaju svaki redak, pa tamo mijenja samo sličice popisa i Shorts. U prozorima veličine telefona sličice rešetke ograničene su na 100 %."
     Compact Settings Categories: "Skriva opise i smanjuje visinu kategorija postavki."
     Show Progress as Notification: Umjesto opće trake napretka prikazuje trajnu obavijest s trenutačnim napretkom pozadinskih postupaka, poput osvježavanja pretplata i preuzimanja alata kojima se upravlja.
     Always Show Scrollbars: Drži klizne trake uvijek vidljivima. Kada je isključeno, nestaju ubrzo nakon što prestanete pomicati miš i ponovno se pojavljuju čim ga pomaknete.

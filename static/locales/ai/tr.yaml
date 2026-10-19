@@ -398,6 +398,10 @@ Settings:
       Tablet: 'Tablet'
     Video View Type:
       Full Width: Tam genişlik
+    Grid Columns:
+      Grid Columns: Izgara sütunları
+      Playlist Grid Columns: Oynatma listesi ızgara sütunları
+      Auto: Otomatik
   Context Menu Search Settings:
     Context Menu Search Settings: Bağlam Menüsü Araması
     Description: Seçili metne sağ tıkladığınızda görünecek arama motorlarını seçin. Aramalar varsayılan tarayıcınızda açılır.
@@ -1877,6 +1881,8 @@ Tooltips:
     Auto Refresh Interval: "Uygulama açıkken OpenTubeX'in abonelik akışınızı ne sıklıkla otomatik yenileyeceğini belirler. Android’de sıfırdan farklı bir aralık, uygulama kapalıyken de akışı yeniler."
     Refresh Subscriptions While App Is Closed: "Akışları seçtiğiniz ayarlarla yeniler. Masaüstünde OpenTubeX, çıkış yapana kadar sistem tepsisinde kalır. Android, arka plan yenilemelerinin zamanını belirler."
   Theme Settings:
+    Thumbnail Size: "Izgaralarda ve listelerde video küçük resimlerini ölçeklendirir. Sabit sütun sayısına sahip ızgaralar veya Tam Genişlik görünüm türü bunun yerine her satırı doldurur, bu yüzden orada yalnızca liste küçük resimlerini ve Shorts'u değiştirir. Telefon boyutundaki pencerelerde ızgara küçük resimleri %100 ile sınırlıdır."
+    Playlist Thumbnail Size: "Oynatma listesi sayfalarında video küçük resimlerini ölçeklendirir. Sabit sütun sayısına sahip ızgaralar veya Tam Genişlik görünüm türü bunun yerine her satırı doldurur, bu yüzden orada yalnızca liste küçük resimlerini ve Shorts'u değiştirir. Telefon boyutundaki pencerelerde ızgara küçük resimleri %100 ile sınırlıdır."
     Compact Settings Categories: "Açıklamaları gizler ve ayar kategorilerinin yüksekliğini azaltır."
     Show Progress as Notification: Abonelik yenilemeleri ve yönetilen araç indirmeleri gibi arka plan işlemlerinin anlık ilerlemesini genel ilerleme çubuğu yerine kalıcı bir bildirimde gösterir.
     Always Show Scrollbars: Kaydırma çubuklarını her zaman görünür tutar. Devre dışı bırakıldığında fareyi hareket ettirmeyi bıraktıktan kısa süre sonra kaybolur ve yeniden hareket ettirdiğinizde görünür.

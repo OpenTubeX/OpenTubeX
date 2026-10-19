@@ -593,6 +593,10 @@
     "ri": "terminal-box-line",
     "material": "terminal-rounded"
   },
+  "table-columns": {
+    "ri": "layout-column-line",
+    "material": "view-column-outline-rounded"
+  },
   "thumbs-down": {
     "ri": "thumb-down-line",
     "material": "thumb-down-outline"

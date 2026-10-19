@@ -402,6 +402,10 @@ Settings:
       Tablet: 'Tableta'
     Video View Type:
       Full Width: Ancho completo
+    Grid Columns:
+      Grid Columns: Columnas da grella
+      Playlist Grid Columns: Columnas da grella das listas
+      Auto: Automático
   Context Menu Search Settings:
     Context Menu Search Settings: Busca no menú contextual
     Description: Escolle os motores de busca que aparecen ao premer co botón dereito sobre o texto seleccionado. As buscas ábrense no navegador predeterminado.
@@ -1927,6 +1931,8 @@ Tooltips:
     Auto Refresh Interval: "Frecuencia coa que OpenTubeX actualiza automaticamente a fonte das subscricións mentres a aplicación está aberta. En Android, un intervalo distinto de cero tamén actualiza a fonte mentres a aplicación está pechada."
     Refresh Subscriptions While App Is Closed: "Actualiza as fontes coa configuración seleccionada. No escritorio, OpenTubeX permanece na bandexa do sistema ata saír. Android controla cando se executan as actualizacións en segundo plano."
   Theme Settings:
+    Thumbnail Size: "Escala as miniaturas dos vídeos en grellas e listas. As grellas cun número fixo de columnas ou o tipo de vista Ancho completo enchen cada fila, así que alí só cambia as miniaturas das listas e os Shorts. Nas xanelas do tamaño dun teléfono, as miniaturas da grella limítanse ao 100 %."
+    Playlist Thumbnail Size: "Escala as miniaturas dos vídeos nas páxinas de listas de reprodución. As grellas cun número fixo de columnas ou o tipo de vista Ancho completo enchen cada fila, así que alí só cambia as miniaturas das listas e os Shorts. Nas xanelas do tamaño dun teléfono, as miniaturas da grella limítanse ao 100 %."
     Compact Settings Categories: "Agocha as descricións e reduce a altura das categorías de configuración."
     Show Progress as Notification: Amosa unha notificación persistente co progreso en directo das operacións en segundo plano, como as actualizacións das subscricións e as descargas de ferramentas xestionadas, en lugar da barra de progreso global.
     Always Show Scrollbars: Mantén as barras de desprazamento visibles en todo momento. Se se desactiva, esvaecen pouco despois de deixar de mover o rato e reaparecen en canto volves movelo.

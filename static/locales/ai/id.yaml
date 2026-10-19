@@ -398,6 +398,10 @@ Settings:
       Tablet: 'Tablet'
     Video View Type:
       Full Width: Lebar penuh
+    Grid Columns:
+      Grid Columns: Kolom kisi
+      Playlist Grid Columns: Kolom kisi daftar putar
+      Auto: Otomatis
   Context Menu Search Settings:
     Context Menu Search Settings: Pencarian Menu Konteks
     Description: Pilih mesin pencari yang muncul saat Anda mengeklik kanan teks terpilih. Pencarian dibuka di peramban bawaan.
@@ -1892,6 +1896,8 @@ Tooltips:
     Auto Refresh Interval: "Frekuensi OpenTubeX memperbarui umpan langganan secara otomatis selama aplikasi terbuka. Di Android, interval bukan nol juga memperbarui feed saat aplikasi ditutup."
     Refresh Subscriptions While App Is Closed: "Memperbarui feed sesuai setelan yang dipilih. Di desktop, OpenTubeX tetap di baki sistem sampai Anda keluar. Android menentukan waktu pembaruan latar belakang."
   Theme Settings:
+    Thumbnail Size: "Mengubah ukuran gambar mini video di kisi dan daftar. Kisi dengan jumlah kolom tetap atau jenis tampilan Lebar Penuh akan mengisi setiap baris, jadi di sana penggeser hanya mengubah gambar mini daftar dan Shorts. Di jendela seukuran ponsel, gambar mini kisi dibatasi hingga 100%."
+    Playlist Thumbnail Size: "Mengubah ukuran gambar mini video di halaman daftar putar. Kisi dengan jumlah kolom tetap atau jenis tampilan Lebar Penuh akan mengisi setiap baris, jadi di sana penggeser hanya mengubah gambar mini daftar dan Shorts. Di jendela seukuran ponsel, gambar mini kisi dibatasi hingga 100%."
     Compact Settings Categories: "Menyembunyikan deskripsi dan mengurangi tinggi kategori pengaturan."
     Show Progress as Notification: Menampilkan notifikasi tetap dengan progres langsung untuk operasi latar belakang, seperti pembaruan langganan dan unduhan alat terkelola, sebagai pengganti bilah progres global.
     Always Show Scrollbars: Mempertahankan bilah gulir agar selalu terlihat. Jika dinonaktifkan, bilah memudar sesaat setelah Anda berhenti menggerakkan tetikus dan muncul kembali begitu tetikus digerakkan.

@@ -503,3 +503,21 @@ test.describe('settings', () => {
     await expect(page.locator('.settingsContent')).toContainText('No settings found')
   })
 })
+
+test.describe('grid columns settings search', () => {
+  test.use({ seed: { settings: { currentLocale: 'en-US' } } })
+
+  test('opens and highlights the grid column select', async ({ page }) => {
+    await goTo(page, 'settings')
+    const search = page.getByRole('searchbox', { name: 'Search settings' })
+
+    await search.fill('playlist grid')
+    await expect(page.locator('.settingsSearchResultMatch')).toHaveText(['Playlist Grid Columns'])
+    await search.fill('grid columns')
+    await expect(page.locator('.settingsSearchResultMatch')).toHaveText(['Grid Columns'])
+    await page.getByRole('button', { name: 'Grid Columns', exact: true }).click()
+
+    await expect(page.locator('.settingsSearchTarget')).toContainText('Grid Columns')
+    await expect(page.getByRole('combobox', { name: 'Grid Columns', exact: true })).toBeVisible()
+  })
+})

@@ -402,6 +402,10 @@ Settings:
       Tablet: 'Tablet'
     Video View Type:
       Full Width: Volledige breedte
+    Grid Columns:
+      Grid Columns: Rasterkolommen
+      Playlist Grid Columns: Rasterkolommen voor afspeellijsten
+      Auto: Automatisch
   Context Menu Search Settings:
     Context Menu Search Settings: Zoeken via contextmenu
     Description: Kies welke zoekmachines verschijnen wanneer je met de rechtermuisknop op geselecteerde tekst klikt. Zoekopdrachten worden in je standaardbrowser geopend.
@@ -1934,6 +1938,8 @@ Tooltips:
     Auto Refresh Interval: "Hoe vaak OpenTubeX je abonnementsfeed automatisch vernieuwt terwijl de app geopend is. Op Android vernieuwt een interval dat niet nul is de feed ook wanneer de app gesloten is."
     Refresh Subscriptions While App Is Closed: "Ververst feeds met je gekozen instellingen. Op de computer blijft OpenTubeX in het systeemvak totdat je afsluit. Android bepaalt wanneer verversingen op de achtergrond worden uitgevoerd."
   Theme Settings:
+    Thumbnail Size: "Schaalt videominiaturen in rasters en lijsten. Rasters met een vast aantal kolommen of de weergave Volledige breedte vullen in plaats daarvan elke rij, dus daar verandert de schuifregelaar alleen lijstminiaturen en Shorts. In vensters ter grootte van een telefoon zijn rasterminiaturen beperkt tot 100%."
+    Playlist Thumbnail Size: "Schaalt videominiaturen op afspeellijstpagina's. Rasters met een vast aantal kolommen of de weergave Volledige breedte vullen in plaats daarvan elke rij, dus daar verandert de schuifregelaar alleen lijstminiaturen en Shorts. In vensters ter grootte van een telefoon zijn rasterminiaturen beperkt tot 100%."
     Compact Settings Categories: "Verbergt beschrijvingen en verkleint de hoogte van instellingencategorieën."
     Show Progress as Notification: Toont een blijvende melding met actuele voortgang voor achtergrondbewerkingen, zoals het vernieuwen van abonnementen en downloaden van beheerde hulpprogramma's, in plaats van de algemene voortgangsbalk.
     Always Show Scrollbars: Houdt de schuifbalken altijd zichtbaar. Als dit is uitgeschakeld, verdwijnen ze kort nadat je stopt met het bewegen van de muis en verschijnen ze weer zodra je de muis beweegt.

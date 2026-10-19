@@ -535,6 +535,10 @@ Settings:
       Tablet: 'Tauleta'
     Video View Type:
       Full Width: Amplada completa
+    Grid Columns:
+      Grid Columns: Columnes de la quadrícula
+      Playlist Grid Columns: Columnes de la quadrícula de llistes
+      Auto: Automàtic
   Context Menu Search Settings:
     Context Menu Search Settings: Cerca al menú contextual
     Description: Trieu quins motors de cerca apareixen en fer clic dret al text seleccionat. Les cerques s'obren al navegador predeterminat.
@@ -2434,6 +2438,8 @@ Tooltips:
     Auto Refresh Interval: "Freqüència amb què l'OpenTubeX actualitza automàticament el canal de subscripcions mentre l'aplicació està oberta. A Android, un interval diferent de zero també actualitza el canal quan l’aplicació està tancada."
     Refresh Subscriptions While App Is Closed: "Actualitza els canals amb la configuració seleccionada. A l’escriptori, OpenTubeX es manté a la safata del sistema fins que en sortiu. Android controla quan s’executen les actualitzacions en segon pla."
   Theme Settings:
+    Thumbnail Size: "Canvia la mida de les miniatures dels vídeos a les quadrícules i llistes. Les quadrícules amb un nombre fix de columnes o el tipus de vista Amplada completa omplen cada fila, de manera que allà només canvia les miniatures de les llistes i els Shorts. A les finestres de mida de telèfon, les miniatures de la quadrícula es limiten al 100%."
+    Playlist Thumbnail Size: "Canvia la mida de les miniatures dels vídeos a les pàgines de llistes de reproducció. Les quadrícules amb un nombre fix de columnes o el tipus de vista Amplada completa omplen cada fila, de manera que allà només canvia les miniatures de les llistes i els Shorts. A les finestres de mida de telèfon, les miniatures de la quadrícula es limiten al 100%."
     Compact Settings Categories: "Amaga les descripcions i redueix l’alçada de les categories de configuració."
     Show Progress as Notification: Mostra una notificació persistent amb el progrés en directe de les operacions en segon pla, com ara actualitzar les subscripcions i baixar eines gestionades, en lloc d'utilitzar la barra de progrés general.
     Always Show Scrollbars: Manté les barres de desplaçament sempre visibles. Si es desactiva, s'esvaeixen poc després que deixeu de moure el ratolí i reapareixen quan el torneu a moure.

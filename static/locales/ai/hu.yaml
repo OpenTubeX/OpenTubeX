@@ -398,6 +398,10 @@ Settings:
       Tablet: 'Táblagép'
     Video View Type:
       Full Width: Teljes szélesség
+    Grid Columns:
+      Grid Columns: Rácsoszlopok
+      Playlist Grid Columns: Lejátszási listák rácsoszlopai
+      Auto: Automatikus
   Context Menu Search Settings:
     Context Menu Search Settings: Keresés a helyi menüből
     Description: Válassza ki, mely keresőmotorok jelenjenek meg a kijelölt szövegre jobb gombbal kattintva. A keresések az alapértelmezett böngészőben nyílnak meg.
@@ -1877,6 +1881,8 @@ Tooltips:
     Auto Refresh Interval: "Milyen gyakran frissítse automatikusan az OpenTubeX a feliratkozási hírfolyamot, amíg az alkalmazás nyitva van. Androidon a nullától eltérő időköz akkor is frissíti a hírfolyamot, amikor az alkalmazás be van zárva."
     Refresh Subscriptions While App Is Closed: "A kiválasztott beállításokkal frissíti a hírcsatornákat. Számítógépen az OpenTubeX kilépésig a rendszertálcán marad. Androidon a rendszer határozza meg a háttérfrissítések idejét."
   Theme Settings:
+    Thumbnail Size: "Átméretezi a videók bélyegképeit a rácsokban és listákban. A rögzített oszlopszámú vagy Teljes szélesség nézetű rácsok ehelyett kitöltik az összes sort, így ott csak a listák bélyegképeit és a Shorts videókat módosítja. Telefonméretű ablakokban a rács bélyegképei legfeljebb 100%-osak lehetnek."
+    Playlist Thumbnail Size: "Átméretezi a videók bélyegképeit a lejátszási listák oldalain. A rögzített oszlopszámú vagy Teljes szélesség nézetű rácsok ehelyett kitöltik az összes sort, így ott csak a listák bélyegképeit és a Shorts videókat módosítja. Telefonméretű ablakokban a rács bélyegképei legfeljebb 100%-osak lehetnek."
     Compact Settings Categories: "Elrejti a leírásokat és csökkenti a beállításkategóriák magasságát."
     Show Progress as Notification: Állandó értesítés megjelenítése a háttérműveletek, például a feliratkozások frissítése és a kezelt eszközök letöltése valós idejű állapotával a globális folyamatjelző helyett.
     Always Show Scrollbars: A görgetősávok állandó megjelenítése. Kikapcsolva röviddel az egér mozgatásának befejezése után elhalványulnak, és az egér újbóli megmozdításakor ismét megjelennek.

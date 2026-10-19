@@ -410,6 +410,10 @@ Settings:
       Tablet: 'Tablet'
     Video View Type:
       Full Width: Fuld bredde
+    Grid Columns:
+      Grid Columns: Gitterkolonner
+      Playlist Grid Columns: Gitterkolonner for playlister
+      Auto: Automatisk
   Context Menu Search Settings:
     Context Menu Search Settings: Søgning i genvejsmenuen
     Description: Vælg, hvilke søgemaskiner der vises, når du højreklikker på markeret tekst. Søgninger åbnes i din standardbrowser.
@@ -1958,6 +1962,8 @@ Tooltips:
     Auto Refresh Interval: "Hvor ofte OpenTubeX automatisk opdaterer dit abonnementsfeed, mens appen er åben. På Android opdaterer et interval over nul også feedet, mens appen er lukket."
     Refresh Subscriptions While App Is Closed: "Opdaterer feeds med dine valgte indstillinger. På computeren forbliver OpenTubeX i systembakken, indtil du afslutter. Android styrer, hvornår baggrundsopdateringer kører."
   Theme Settings:
+    Thumbnail Size: "Skalerer videominiaturer i gitre og lister. Gitre med et fast antal kolonner eller visningstypen Fuld bredde udfylder i stedet hver række, så dér ændrer den kun listeminiaturer og Shorts. I vinduer på størrelse med en telefon er gitterminiaturer begrænset til 100 %."
+    Playlist Thumbnail Size: "Skalerer videominiaturer på playlistesider. Gitre med et fast antal kolonner eller visningstypen Fuld bredde udfylder i stedet hver række, så dér ændrer den kun listeminiaturer og Shorts. I vinduer på størrelse med en telefon er gitterminiaturer begrænset til 100 %."
     Compact Settings Categories: "Skjuler beskrivelser og reducerer højden på indstillingskategorier."
     Show Progress as Notification: Viser en vedvarende meddelelse med aktuel status for baggrundshandlinger, f.eks. opdatering af abonnementer og download af administrerede værktøjer, i stedet for den globale statuslinje.
     Always Show Scrollbars: Holder rullebjælkerne synlige hele tiden. Når funktionen er slået fra, toner de ud, kort efter at du holder op med at bevæge musen, og vises igen, så snart du bevæger den.

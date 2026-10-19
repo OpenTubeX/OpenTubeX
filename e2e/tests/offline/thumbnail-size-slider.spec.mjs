@@ -273,6 +273,39 @@ test.describe('thumbnail size slider', () => {
     await attachScreenshot('feed in full width view')
   })
 
+  test('shows the chosen number of grid columns', { tag: '@scale' }, async ({ page, attachScreenshot }) => {
+    const appearance = await goToSettingsSection(page, 'appearance')
+    const columns = appearance.getByRole('combobox', { name: 'Grid Columns', exact: true })
+    await expect(columns).toHaveText('Auto')
+    await columns.click()
+    await page.getByRole('option', { name: '5', exact: true }).click()
+    await expect(columns).toHaveText('5')
+    await attachScreenshot('grid columns setting')
+    await page.locator('.settingsCloseButton').click()
+
+    await goTo(page, 'subscriptions')
+    await expect(page.getByText('Feed video 00')).toBeVisible()
+    const grid = page.locator('.autoGrid')
+    const columnCount = () => grid.evaluate(element => getComputedStyle(element).gridTemplateColumns.split(' ').length)
+    await expect.poll(columnCount).toBe(5)
+    // The thumbnail size no longer decides the column count.
+    await page.evaluate(() => window.$store.dispatch('updateThumbnailSize', 180))
+    await expect.poll(columnCount).toBe(5)
+    await attachScreenshot('feed with five columns')
+
+    await page.evaluate(() => window.$store.dispatch('updateGridColumns', 0))
+    await expect.poll(columnCount).toBeLessThan(5)
+  })
+
+  test('explains when the thumbnail size slider has no effect on grids', async ({ page, attachScreenshot }) => {
+    const appearance = await goToSettingsSection(page, 'appearance')
+    const slider = appearance.locator('.pure-material-slider').filter({ hasText: /^Thumbnail Size/ })
+    await slider.locator('.selectTooltip .button').focus()
+    const tooltip = page.locator('body > [role="tooltip"]:visible')
+    await expect(tooltip).toContainText('fixed column count')
+    await attachScreenshot('thumbnail size tooltip')
+  })
+
   test('resizes the feed without re-measuring every card', async ({ page, attachScreenshot }) => {
     await goTo(page, 'subscriptions')
     await expect(page.getByText('Feed video 00')).toBeVisible()

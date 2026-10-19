@@ -30,10 +30,11 @@ function getDefaultGridColumnCount(gridWidth, viewportWidth) {
  * @param {number} [gridWidth] the stable measured width
  * @param {number} [viewportWidth]
  * @param {number} [renderedWidth] the grid's current content width
- * @param {boolean} [fullWidth] Show one card per row. Shorts keep their sized
- * grid in wider windows, where a full-width portrait card would not fit.
+ * @param {number} [columns] A fixed number of cards per row, or 0 to derive it
+ * from the grid width and thumbnail size. Shorts keep their sized grid in wider
+ * windows, where a few portrait cards per row would not fit.
  */
-export function getThumbnailGridStyles(thumbnailSize, gridWidth = 0, viewportWidth = gridWidth, renderedWidth = gridWidth, fullWidth = false) {
+export function getThumbnailGridStyles(thumbnailSize, gridWidth = 0, viewportWidth = gridWidth, renderedWidth = gridWidth, columns = 0) {
   // Larger cards cannot fit two per row on a phone, so a size saved in a wider
   // window shows at the phone slider's endpoint.
   const phone = gridWidth > 0 && viewportWidth <= PHONE_THUMBNAIL_VIEWPORT_WIDTH
@@ -42,9 +43,10 @@ export function getThumbnailGridStyles(thumbnailSize, gridWidth = 0, viewportWid
   let size = DEFAULT_GRID_ITEM_SIZE * scale
   let stretch = '0px'
 
-  if (fullWidth && gridWidth > 0) {
-    size = gridWidth
-    stretch = `calc(100% - ${widthAdjustment}px)`
+  if (columns > 0 && gridWidth > 0) {
+    const gaps = (columns - 1) * GRID_GAP
+    size = (gridWidth - gaps) / columns
+    stretch = `calc((100% - ${widthAdjustment + gaps}px) / ${columns})`
   } else if (gridWidth > 0) {
     const columnCount = getDefaultGridColumnCount(gridWidth, viewportWidth)
     const gaps = (columnCount - 1) * GRID_GAP

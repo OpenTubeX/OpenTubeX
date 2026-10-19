@@ -132,6 +132,9 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
   }
 
   if (sectionType === 'general') {
+    if (group === 'Grid Columns') {
+      return store.getters[item === 'Playlist Grid Columns' ? 'getPlaylistViewType' : 'getListType'] === 'grid'
+    }
     if (group === 'Thumbnail Swipe Gestures') return isCapacitor || phoneLayout
     if (group === 'Extra Thumbnail Action Button') return !isCapacitor && !phoneLayout
     if (['Stream Extraction Method', 'Automatically switch stream extraction methods'].includes(group)) return usingElectron || isCapacitor

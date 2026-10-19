@@ -380,28 +380,6 @@
         @change="updateUiScale"
       />
       <FtSlider
-        :label="t('Settings.Theme Settings.Thumbnail Size')"
-        :default-value="thumbnailSize"
-        setting-key="thumbnailSize"
-        :min-value="MIN_THUMBNAIL_SIZE"
-        :max-value="maxThumbnailSize"
-        :step="THUMBNAIL_SIZE_STEP"
-        value-extension="%"
-        @input="previewThumbnailSize"
-        @change="updateThumbnailSize"
-      />
-      <FtSlider
-        :label="t('Settings.Theme Settings.Playlist Thumbnail Size')"
-        :default-value="playlistThumbnailSize"
-        setting-key="playlistThumbnailSize"
-        :min-value="MIN_THUMBNAIL_SIZE"
-        :max-value="maxPlaylistThumbnailSize"
-        :step="THUMBNAIL_SIZE_STEP"
-        value-extension="%"
-        @input="previewPlaylistThumbnailSize"
-        @change="updatePlaylistThumbnailSize"
-      />
-      <FtSlider
         :label="t('Settings.Theme Settings.UI Roundness')"
         :default-value="uiRoundness"
         setting-key="uiRoundness"
@@ -487,11 +465,6 @@ import { customThemeIdFromValue } from '../../customTheme'
 import { colors } from '../helpers/colors'
 import { useColorTranslations } from '../composables/colors'
 import { useBaseThemeOptions } from '../composables/baseThemes'
-import { useThumbnailSizeSlider } from '../composables/useThumbnailSizeSlider'
-import {
-  MIN_THUMBNAIL_SIZE,
-  THUMBNAIL_SIZE_STEP
-} from '../constants/thumbnailSize'
 import {
   FIXED_TAB_WIDTH_STEP,
   MAX_FIXED_TAB_WIDTH,
@@ -962,8 +935,6 @@ function updateUiScale(value) {
   store.dispatch('updateUiScale', value)
 }
 
-const { thumbnailSize, maxThumbnailSize } = useThumbnailSizeSlider()
-const { thumbnailSize: playlistThumbnailSize, maxThumbnailSize: maxPlaylistThumbnailSize } = useThumbnailSizeSlider('playlistThumbnailSize')
 const uiRoundness = computed(() => store.getters.getUiRoundness)
 const scrollbarThumbWidth = computed(
   () => normalizeScrollbarThumbWidth(store.getters.getScrollbarThumbWidth)
@@ -989,28 +960,6 @@ onUnmounted(() => {
   systemReducedMotion.removeEventListener('change', updateSystemReducedMotion)
   systemColorScheme.removeEventListener('change', updateSystemColorScheme)
 })
-
-/**
- * @param {number} value
- */
-function previewThumbnailSize(value) {
-  store.commit('setThumbnailSize', value)
-}
-
-/**
- * @param {number} value
- */
-function updateThumbnailSize(value) {
-  store.dispatch('updateThumbnailSize', value)
-}
-
-function previewPlaylistThumbnailSize(value) {
-  store.commit('setPlaylistThumbnailSize', value)
-}
-
-function updatePlaylistThumbnailSize(value) {
-  store.dispatch('updatePlaylistThumbnailSize', value)
-}
 
 /**
  * @param {number} value

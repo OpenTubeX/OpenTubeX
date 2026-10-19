@@ -398,6 +398,10 @@ Settings:
       Tablet: 'Tabletă'
     Video View Type:
       Full Width: Lățime completă
+    Grid Columns:
+      Grid Columns: Coloanele grilei
+      Playlist Grid Columns: Coloanele grilei de playlisturi
+      Auto: Automat
   Context Menu Search Settings:
     Context Menu Search Settings: Căutare din meniul contextual
     Description: Alegeți motoarele de căutare care apar când faceți clic dreapta pe textul selectat. Căutările se deschid în browserul implicit.
@@ -1923,6 +1927,8 @@ Tooltips:
     Auto Refresh Interval: "Frecvența cu care OpenTubeX reîmprospătează automat fluxul de abonamente cât timp aplicația este deschisă. Pe Android, un interval diferit de zero actualizează fluxul și când aplicația este închisă."
     Refresh Subscriptions While App Is Closed: "Actualizează fluxurile cu setările alese. Pe desktop, OpenTubeX rămâne în zona de notificare până la ieșire. Android stabilește când rulează actualizările în fundal."
   Theme Settings:
+    Thumbnail Size: "Scalează miniaturile videoclipurilor în grile și liste. Grilele cu un număr fix de coloane sau tipul de vizualizare Lățime completă umplu în schimb fiecare rând, așa că acolo modifică doar miniaturile din liste și Shorts. În ferestrele de mărimea unui telefon, miniaturile din grilă sunt limitate la 100%."
+    Playlist Thumbnail Size: "Scalează miniaturile videoclipurilor pe paginile playlisturilor. Grilele cu un număr fix de coloane sau tipul de vizualizare Lățime completă umplu în schimb fiecare rând, așa că acolo modifică doar miniaturile din liste și Shorts. În ferestrele de mărimea unui telefon, miniaturile din grilă sunt limitate la 100%."
     Compact Settings Categories: "Ascunde descrierile și reduce înălțimea categoriilor de setări."
     Show Progress as Notification: Afișează o notificare persistentă cu progresul în timp real pentru operațiunile din fundal, cum ar fi reîmprospătarea abonamentelor și descărcarea instrumentelor gestionate, în locul barei globale de progres.
     Always Show Scrollbars: Păstrează barele de derulare vizibile permanent. Când opțiunea este dezactivată, acestea dispar treptat la scurt timp după ce opriți mișcarea mouse-ului și reapar imediat ce îl mișcați din nou.
