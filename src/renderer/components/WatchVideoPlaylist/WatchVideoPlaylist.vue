@@ -490,9 +490,9 @@ const isWaitingForNextVideo = computed(() => isFetchingPlaylistContinuation.valu
 
 const nextVideo = computed(() => {
   if (isWaitingForNextVideo.value) return null
-  // Pages that failed to load may hold the current video or its successor;
-  // wrapping to the first entry would restart a partially loaded playlist.
-  if (hasUnloadedPlaylistVideos.value && (videoIsNotPlaylistItem.value || videoIsLastPlaylistItem.value)) return null
+  // A page that failed to load may hold the current video; wrapping to the
+  // first entry would restart the playlist from its beginning.
+  if (hasUnloadedPlaylistVideos.value && videoIsNotPlaylistItem.value) return null
   const targetList = shuffleEnabled.value ? randomizedPlaylistItems.value : playlistItems.value
   const targetVideoIndex = (videoIsNotPlaylistItem.value || videoIsLastPlaylistItem.value)
     ? 0
