@@ -102,3 +102,35 @@ test('searches channels beyond the rendered page on phones', async ({ page }) =>
   await expect(page.locator('.ft-list-video')).toHaveCount(1)
   await expect(page.getByText('History performance video 4999', { exact: true })).toBeVisible()
 })
+
+test('long history lists stop measuring every card once moves cannot animate', async ({ page }) => {
+  await goTo(page, 'history')
+  await expect(page.locator('.autoGrid > *')).toHaveCount(100)
+  await page.evaluate(() => {
+    window.__cardMeasurements = 0
+    window.__originalGetBoundingClientRect = Element.prototype.getBoundingClientRect
+    Element.prototype.getBoundingClientRect = function () {
+      if (this.parentElement?.classList.contains('autoGrid')) window.__cardMeasurements++
+      return window.__originalGetBoundingClientRect.call(this)
+    }
+  })
+  try {
+    // Rewatching moves an entry to the top and rerenders the whole list.
+    const rewatch = async index => {
+      const videoId = await page.evaluate(async index => {
+        const store = window.$store
+        const record = store.getters.getHistoryCacheSorted[index]
+        await store.dispatch('updateHistory', { ...record, timeWatched: Date.now() })
+        return record.videoId
+      }, index)
+      await expect(page.locator('.autoGrid > *').first()).toHaveAttribute('data-video-id', videoId)
+    }
+    // The first update finds that the move class has no transform.
+    await rewatch(50)
+    await page.evaluate(() => { window.__cardMeasurements = 0 })
+    await rewatch(60)
+    expect(await page.evaluate(() => window.__cardMeasurements)).toBe(0)
+  } finally {
+    await page.evaluate(() => { Element.prototype.getBoundingClientRect = window.__originalGetBoundingClientRect })
+  }
+})

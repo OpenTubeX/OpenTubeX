@@ -1,0 +1,138 @@
+diff --git a/dist/runtime-dom.cjs.js b/dist/runtime-dom.cjs.js
+index 28e369f033a00b626f7bec2d2a102edf1a02c9ad..a33c2e7ab72bed1e264de0fc6acd115e4efb4dc3 100644
+--- a/dist/runtime-dom.cjs.js
++++ b/dist/runtime-dom.cjs.js
+@@ -1370,6 +1370,9 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+     let children;
+     let origins;
+     let moves;
++    // A move class without a transform cannot animate. Stop measuring every
++    // child before each update until the class changes.
++    let staticMoveClass;
+     const willMove = () => {
+       if (moves === void 0) {
+         moves = prevChildren.length > 0 && hasCSSTransform(
+@@ -1383,6 +1386,7 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+     runtimeCore.onUpdated(() => {
+       pendingGroups.delete(instance);
+       if (!willMove()) {
++        if (prevChildren.length) staticMoveClass = resolveMoveClass(props);
+         prevChildren = [];
+         origins = void 0;
+         return;
+@@ -1419,12 +1423,13 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+       let tag = rawProps.tag || runtimeCore.Fragment;
+       prevChildren = [];
+       moves = void 0;
++      const measure = resolveMoveClass(rawProps) !== staticMoveClass;
+       if (children) {
+         for (let i = 0; i < children.length; i++) {
+           const child = children[i];
+           if (child.el && child.el instanceof Element && // Hidden v-show nodes have no previous layout box to animate from.
+           !child.el[vShowHidden]) {
+-            prevChildren.push(child);
++            if (measure) prevChildren.push(child);
+             runtimeCore.setTransitionHooks(
+               child,
+               runtimeCore.resolveTransitionHooks(
+@@ -1434,7 +1439,7 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+                 instance
+               )
+             );
+-            positionMap.set(child, getPosition(child.el));
++            if (measure) positionMap.set(child, getPosition(child.el));
+           }
+         }
+       }
+diff --git a/dist/runtime-dom.cjs.prod.js b/dist/runtime-dom.cjs.prod.js
+index da30760ae029bb2784bc0d66738c8bd0ff17003f..b662b2007c55a902f91b04f48ac95bf81fc8e23f 100644
+--- a/dist/runtime-dom.cjs.prod.js
++++ b/dist/runtime-dom.cjs.prod.js
+@@ -1273,6 +1273,9 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+     let children;
+     let origins;
+     let moves;
++    // A move class without a transform cannot animate. Stop measuring every
++    // child before each update until the class changes.
++    let staticMoveClass;
+     const willMove = () => {
+       if (moves === void 0) {
+         moves = prevChildren.length > 0 && hasCSSTransform(
+@@ -1286,6 +1289,7 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+     runtimeCore.onUpdated(() => {
+       pendingGroups.delete(instance);
+       if (!willMove()) {
++        if (prevChildren.length) staticMoveClass = resolveMoveClass(props);
+         prevChildren = [];
+         origins = void 0;
+         return;
+@@ -1322,12 +1326,13 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+       let tag = rawProps.tag || runtimeCore.Fragment;
+       prevChildren = [];
+       moves = void 0;
++      const measure = resolveMoveClass(rawProps) !== staticMoveClass;
+       if (children) {
+         for (let i = 0; i < children.length; i++) {
+           const child = children[i];
+           if (child.el && child.el instanceof Element && // Hidden v-show nodes have no previous layout box to animate from.
+           !child.el[vShowHidden]) {
+-            prevChildren.push(child);
++            if (measure) prevChildren.push(child);
+             runtimeCore.setTransitionHooks(
+               child,
+               runtimeCore.resolveTransitionHooks(
+@@ -1337,7 +1342,7 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+                 instance
+               )
+             );
+-            positionMap.set(child, getPosition(child.el));
++            if (measure) positionMap.set(child, getPosition(child.el));
+           }
+         }
+       }
+diff --git a/dist/runtime-dom.esm-bundler.js b/dist/runtime-dom.esm-bundler.js
+index 363fc8774518bcd9fcf4d65586b5feae0351a57b..d7142420ec78e2637c0eb57ea60b672d040fecb4 100644
+--- a/dist/runtime-dom.esm-bundler.js
++++ b/dist/runtime-dom.esm-bundler.js
+@@ -1435,6 +1435,9 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+     let children;
+     let origins;
+     let moves;
++    // A move class without a transform cannot animate. Stop measuring every
++    // child before each update until the class changes.
++    let staticMoveClass;
+     const willMove = () => {
+       if (moves === void 0) {
+         moves = prevChildren.length > 0 && hasCSSTransform(
+@@ -1448,6 +1451,7 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+     onUpdated(() => {
+       pendingGroups.delete(instance);
+       if (!willMove()) {
++        if (prevChildren.length) staticMoveClass = resolveMoveClass(props);
+         prevChildren = [];
+         origins = void 0;
+         return;
+@@ -1484,12 +1488,13 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+       let tag = rawProps.tag || Fragment;
+       prevChildren = [];
+       moves = void 0;
++      const measure = resolveMoveClass(rawProps) !== staticMoveClass;
+       if (children) {
+         for (let i = 0; i < children.length; i++) {
+           const child = children[i];
+           if (child.el && child.el instanceof Element && // Hidden v-show nodes have no previous layout box to animate from.
+           !child.el[vShowHidden]) {
+-            prevChildren.push(child);
++            if (measure) prevChildren.push(child);
+             setTransitionHooks(
+               child,
+               resolveTransitionHooks(
+@@ -1499,7 +1504,7 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+                 instance
+               )
+             );
+-            positionMap.set(child, getPosition(child.el));
++            if (measure) positionMap.set(child, getPosition(child.el));
+           }
+         }
+       }
