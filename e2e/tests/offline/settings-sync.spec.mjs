@@ -717,6 +717,14 @@ test.describe('sync settings', () => {
         })
       } else if (pathname === '/v1/account/login') {
         await route.fulfill({ status: 200, json: { jwt: 'renewed-token' } })
+      } else if (pathname === '/v1/encrypted_sync/events' || pathname === '/v1/account/sessions') {
+        // Opening the section refreshes account activity and devices. Answer
+        // those so only "Sync now" expires the session, not a background refresh
+        // that can finish before the button is clicked.
+        await route.fulfill({
+          status: 200,
+          json: pathname === '/v1/account/sessions' ? { sessions: [] } : []
+        })
       } else if (authorization === 'invalid-token') {
         await route.fulfill({
           status: 401,
