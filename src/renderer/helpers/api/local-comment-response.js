@@ -1,14 +1,20 @@
-import { Parser, YTNodes } from 'youtubei.js'
+/**
+ * Keeps the comment UI and saved pins on the same attachment shape.
+ * @param {import('youtubei.js').YTNodes.CommentImageAttachmentView | null | undefined} attachment
+ */
+export function parseLocalCommentImageAttachment(attachment) {
+  if (!attachment) return undefined
 
-// youtubei.js handles voice attachments but currently drops image attachments.
-class CommentViewWithImageAttachment extends YTNodes.CommentView {
-  applyMutations(comment, toolbarState, toolbarSurface, commentSurface) {
-    super.applyMutations(comment, toolbarState, toolbarSurface, commentSurface)
-    this.image_attachment = commentSurface?.imageAttachmentViewModel?.commentImageAttachmentViewModel
+  return {
+    width: attachment.width,
+    height: attachment.height,
+    image: { sources: attachment.image },
+    unavailableText: attachment.unavailable_text,
+    rendererContext: {
+      accessibilityContext: { label: attachment.renderer_context?.accessibility_context?.label }
+    }
   }
 }
-
-Parser.addRuntimeParser('CommentView', CommentViewWithImageAttachment)
 
 /**
  * YouTube serves both flat and nested comment replies. youtubei.js expects

@@ -1,26 +1,9 @@
-import { Parser, YTNodes, Utils, YT, Mixins, Misc } from 'youtubei.js'
+import { YTNodes, Utils, YT, Mixins, Misc } from 'youtubei.js'
 import Autolinker from 'autolinker'
 import { extractNumberFromString, calculatePublishedDate, escapeHTML, CHANNEL_HANDLE_REGEX } from '../feed-metadata.js'
 import { isCollaborativeVideoAuthor } from '../video-collaborators.js'
 import { getThumbnailPreviewUrl } from '../thumbnailPreview.js'
 import { getResultAuthorThumbnailUrl } from '../result-channel-avatar.js'
-
-// YouTube moved Shorts grid images from `thumbnail` to
-// `thumbnailViewModel.thumbnailViewModel.image.sources`. Preserve that exact
-// source while youtubei.js still expects the old field.
-if (process.env.SUPPORTS_LOCAL_API) {
-  class ShortsLockupViewWithThumbnail extends YTNodes.ShortsLockupView {
-    constructor(data) {
-      const sources = data.thumbnailViewModel?.thumbnailViewModel?.image?.sources
-      const hasThumbnail = data.thumbnail?.thumbnails?.length > 0
-      super(hasThumbnail || !sources
-        ? data
-        : { ...data, thumbnail: { thumbnails: sources } })
-    }
-  }
-
-  Parser.addRuntimeParser('ShortsLockupView', ShortsLockupViewWithThumbnail)
-}
 
 /**
  * @param {import('youtubei.js').YTNodes.NavigationEndpoint | undefined} endpoint
@@ -265,7 +248,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         authorId: channelId,
         viewCount: shortsLockupView.overlay_metadata.secondary_text ? parseLocalSubscriberCount(shortsLockupView.overlay_metadata.secondary_text.text) : null,
         thumbnailUrl: getShortsLockupThumbnailUrl(shortsLockupView),
-        lowResolutionThumbnailUrl: shortsLockupView.thumbnail?.at(-1)?.url,
+        lowResolutionThumbnailUrl: getShortsLockupThumbnailUrl(shortsLockupView, -1),
         isShort: true,
         lengthSeconds: ''
       }
@@ -417,7 +400,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         title: shortsLockupView.overlay_metadata.primary_text.text?.trim(),
         viewCount,
         thumbnailUrl: getShortsLockupThumbnailUrl(shortsLockupView),
-        lowResolutionThumbnailUrl: shortsLockupView.thumbnail?.at(-1)?.url,
+        lowResolutionThumbnailUrl: getShortsLockupThumbnailUrl(shortsLockupView, -1),
         isShort: true,
         lengthSeconds: ''
       }
@@ -487,10 +470,12 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
 
   /**
    * @param {import('youtubei.js').YTNodes.ShortsLockupView} short
+   * @param {number} [index]
    * @returns {string | undefined}
    */
-  function getShortsLockupThumbnailUrl(short) {
-    return short.thumbnail?.at(0)?.url
+  function getShortsLockupThumbnailUrl(short, index = 0) {
+    const thumbnails = short.thumbnail?.length ? short.thumbnail : short.thumbnail_view_model?.image
+    return thumbnails?.at(index)?.url
   }
 
   /**

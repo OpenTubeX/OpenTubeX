@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { Parser, YTNodes } from 'youtubei.js'
-import { normalizeCommentResponse } from '../../src/renderer/helpers/api/local-comment-response.js'
+import { normalizeCommentResponse, parseLocalCommentImageAttachment } from '../../src/renderer/helpers/api/local-comment-response.js'
 
 const comment = id => ({ commentViewModel: { commentId: id, commentKey: id } })
 const continuation = token => ({
@@ -111,6 +111,23 @@ test('preserves animated image attachments from comment surface mutations', () =
   normalizeCommentResponse(data)
   const parsed = Parser.parseResponse(data)
   const thread = parsed.on_response_received_endpoints[0].contents[0]
-  assert.deepEqual(thread.comment.image_attachment, attachment)
+  const image = thread.comment.image_attachment
+  assert.ok(image instanceof YTNodes.CommentImageAttachmentView)
+  assert.equal(image.image_format_hint, 'IMAGE_FORMAT_ANIMATED_WEBP')
+  const parsedAttachment = parseLocalCommentImageAttachment(image)
+  assert.equal(parsedAttachment.image.sources[0].url, attachment.image.sources[0].url)
+  assert.equal(parsedAttachment.width, attachment.width)
+  assert.equal(parsedAttachment.height, attachment.height)
+  assert.equal(parsedAttachment.unavailableText, attachment.unavailableText)
+  assert.equal(parsedAttachment.rendererContext.accessibilityContext.label, attachment.rendererContext.accessibilityContext.label)
   assert.equal(thread.comment.content.toString(), 'Reply text')
+})
+
+test('preserves unavailable comment images without a source', () => {
+  const attachment = new YTNodes.CommentImageAttachmentView({ unavailableText: 'Image unavailable' })
+  const parsed = parseLocalCommentImageAttachment(attachment)
+  assert.deepEqual(parsed.image.sources, [])
+  assert.equal(parsed.unavailableText, 'Image unavailable')
+  assert.equal(parseLocalCommentImageAttachment(null), undefined)
+  assert.equal(parseLocalCommentImageAttachment(undefined), undefined)
 })

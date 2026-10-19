@@ -1,4 +1,4 @@
-import { normalizeCommentFetchResponse } from './local-comment-response'
+import { normalizeCommentFetchResponse, parseLocalCommentImageAttachment } from './local-comment-response'
 import { createLocalFeedParsers, getChannelHandleFromEndpoint } from './local-feed-parsers'
 import { createOriginalChannelNameResolver } from './original-channel-name'
 import { runBackgroundJob } from '../background-jobs.js'
@@ -2048,7 +2048,7 @@ export function parseLocalComment(comment, commentThread = undefined) {
     isMember: !!comment.is_member,
     text: Autolinker.link(parseLocalTextRuns(commentTextRuns, 16, { looseChannelNameDetection: true })),
     translationText: getCommentTranslationSource(commentTextRuns),
-    imageAttachment: comment.image_attachment,
+    imageAttachment: parseLocalCommentImageAttachment(comment.image_attachment),
     isHearted: !!comment.is_hearted,
     hasOwnerReplied,
     hasReplyToken,

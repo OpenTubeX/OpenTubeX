@@ -22,7 +22,7 @@ patchedDependencies:
   overlayscrollbars@2.16.0: 5cf83e67b2d20d5556131f278ab8fdeece199eafcfcaf6b838b0e949366d2281
   shaka-player@5.1.12: cf2e5c9a138eec272ac8db5df51977f756e60fed28f24946e54c67fe0e465724
   vue-sonner@2.0.9: 34b2065fecd4314653c24cdfc38ff5f2910def4942ed265ec374d66c0e5c0940
-  youtubei.js@18.1.0: 4b2da53547fc17cef9f2b96e74da3c52bae54f24d1ba89bbddc9d31507f0195d
+  youtubei.js@18.2.0: 6b1778abfed6e4ceddb70ca09ccf77c0150faa1b13d5c37886eb0cd4003f2080
 
 importers:
 
@@ -194,8 +194,8 @@ importers:
         specifier: ^4.1.0
         version: 4.1.0(vue@3.5.44)
       youtubei.js:
-        specifier: ^18.1.0
-        version: 18.1.0(patch_hash=4b2da53547fc17cef9f2b96e74da3c52bae54f24d1ba89bbddc9d31507f0195d)
+        specifier: ^18.2.0
+        version: 18.2.0(patch_hash=6b1778abfed6e4ceddb70ca09ccf77c0150faa1b13d5c37886eb0cd4003f2080)
     devDependencies:
       '@capacitor/cli':
         specifier: ^8.5.3
@@ -5247,8 +5247,8 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  youtubei.js@18.1.0:
-    resolution: {integrity: sha512-4Goo3ZeO6/kE8Mq67eC8Z9K1rijeqRwyKxf/YM4lqf8bB4r/s8JC0V3YFx7+l/AJR3LnAsulTsiIj+AFe0cduA==}
+  youtubei.js@18.2.0:
+    resolution: {integrity: sha512-4xvEEOk7ezu/MrYcQUABzWGKn4I2hRgjtrS8EYJmZsNXTirpF02y856tp4ART4F1tvb9XCitAYPnCFQSlz0XYA==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -10701,7 +10701,7 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  youtubei.js@18.1.0(patch_hash=4b2da53547fc17cef9f2b96e74da3c52bae54f24d1ba89bbddc9d31507f0195d):
+  youtubei.js@18.2.0(patch_hash=6b1778abfed6e4ceddb70ca09ccf77c0150faa1b13d5c37886eb0cd4003f2080):
     dependencies:
       '@bufbuild/protobuf': 2.14.1
       fflate: 0.8.3
