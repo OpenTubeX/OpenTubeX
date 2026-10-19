@@ -452,6 +452,14 @@ test('periodic fallback does not sync while the mobile app is hidden', async t =
   assert.equal(f.calls.length, 1)
 })
 
+test('queued event syncs do not run while the mobile app is hidden', async t => {
+  const f = await schedulingFixture(t, { IS_CAPACITOR: 'true' })
+  f.schedule('history')
+  f.setHidden(true)
+  await f.tick(30000)
+  assert.equal(f.calls.length, 0)
+})
+
 test('periodic fallback resumes after a live disconnect', async t => {
   const f = await schedulingFixture(t)
   f.liveConnection.setConnected(true)

@@ -1748,6 +1748,8 @@ const actions = {
           !rootState.settings.syncServerAutoSync ||
           !rootState.settings.syncServerToken ||
           !isSyncReasonEnabled(rootState.settings, reason)) return
+      // The visibility handler schedules a sync once the mobile app is shown again.
+      if (process.env.IS_CAPACITOR && isAppHidden()) return
       dispatch('syncWithSyncServer', {
         skipIfRecent: reason === 'automatic',
         automatic: true,
