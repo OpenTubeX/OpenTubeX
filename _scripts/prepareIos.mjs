@@ -61,6 +61,18 @@ project = project.replace(/(504EC3181FED79650016851F \/\* Release \*\/ = \{[\s\S
   return start + updated + end
 })
 if (!configuredRelease) throw new Error('Unable to configure iOS Release identity: missing Release configuration')
+// The widget extension's identifier and App Group derive from the app's.
+let configuredWidgets = false
+project = project.replace(/(E1D6E7000000000000000043 \/\* Release \*\/ = \{[\s\S]*?buildSettings = \{)([\s\S]*?)(\n\t\t\t\};)/, (match, start, settings, end) => {
+  if (!/APP_BUNDLE_IDENTIFIER = [^;]+;/.test(settings) || !/APP_URL_SCHEME = [^;]+;/.test(settings)) {
+    throw new Error('Unable to configure iOS Release identity: missing widget build settings')
+  }
+  configuredWidgets = true
+  return start + settings
+    .replace(/APP_BUNDLE_IDENTIFIER = [^;]+;/, `APP_BUNDLE_IDENTIFIER = ${appId};`)
+    .replace(/APP_URL_SCHEME = [^;]+;/, `APP_URL_SCHEME = ${appUrlScheme};`) + end
+})
+if (!configuredWidgets) throw new Error('Unable to configure iOS Release identity: missing widget Release configuration')
 const configPath = new URL('ios/App/App/capacitor.config.json', root)
 const config = JSON.parse(readFileSync(configPath, 'utf8'))
 config.appId = appId

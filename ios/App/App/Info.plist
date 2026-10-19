@@ -71,6 +71,8 @@
 	<array>
 		<string>audio</string>
 	</array>
+	<key>OpenTubeXAppGroup</key>
+	<string>group.$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

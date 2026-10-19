@@ -592,6 +592,8 @@ import { parseAutomaticDownloadRules } from './helpers/automaticDownloadRules'
 import { isAppHidden, setAndroidAppActive, setAndroidAppVisible } from './helpers/appVisibility.js'
 import { initializeShimmerVisibility } from './helpers/shimmerVisibility.js'
 import { createAppShortcuts, getAppShortcutPath } from './helpers/appShortcuts'
+import { getHomeWidgetPage } from './helpers/homeWidgetData'
+import { syncContinueWatchingWidget } from './helpers/homeWidgets'
 import { AppShortcuts } from '@capawesome/capacitor-app-shortcuts'
 import { playbackScreenWake } from './helpers/playbackScreenWake'
 import { FtIcon } from '@opentubex/icons'
@@ -5151,8 +5153,35 @@ function openSharedYoutubeLink() {
 }
 
 async function enableCapacitorIntegrations() {
-  const openUrl = url => {
+  const openUrl = async url => {
     if (!url) return
+    const widgetPage = getHomeWidgetPage(url)
+    if (widgetPage) {
+      await store.dispatch('hideSettingsWindow')
+      if (widgetPage.route) return openInternalPath(widgetPage.route)
+      const focusSearch = () => {
+        if (document.getElementById('app')?.inert) {
+          // The startup splash keeps the app inert until it is hidden.
+          document.addEventListener('startup-splash-hidden', focusSearch, { once: true })
+        } else {
+          window.dispatchEvent(new CustomEvent('opentubex:focus-search'))
+        }
+      }
+      // A cold start opens the URL before the top navigation is mounted, and
+      // open prompts make it inert, so its search cannot take focus yet.
+      const canFocusSearch = () => dataReady.value && !isAnyPromptOpen.value
+      if (canFocusSearch()) {
+        focusSearch()
+      } else {
+        const stop = watch(canFocusSearch, ready => {
+          if (!ready) return
+          stop()
+          // Let the update render and mount the top navigation first.
+          nextTick(focusSearch)
+        })
+      }
+      return
+    }
     // iOS URL handling can remove the embedded protocol's colon.
     const target = url.replace(/^opentubex(?:-nightly)?:(?:\/\/)?/, '').replace(/^(https?)\/\//, '$1://')
     return handleYoutubeLink(target)
@@ -5188,6 +5217,7 @@ async function enableCapacitorIntegrations() {
     })
     AppShortcuts.set({ shortcuts: supportsYtDlp ? shortcuts : shortcuts.filter(shortcut => shortcut.id !== 'downloads') }).catch(error => console.error('Failed to update app shortcuts', error))
   }, { immediate: true })
+  const stopHomeWidgetUpdates = syncContinueWatchingWidget(store, watch)
   const removeReminderActions = await initializeCapacitorLiveReminderActions((videoId) => {
     handleYoutubeLink(`https://www.youtube.com/watch?v=${videoId}`)
   })
@@ -5245,6 +5275,7 @@ async function enableCapacitorIntegrations() {
   return () => {
     clearTimeout(backgroundStateTimeout)
     stopShortcutUpdates()
+    stopHomeWidgetUpdates()
     shortcutHandle.remove()
     backButtonHandle?.remove()
     removeAndroidBack?.()

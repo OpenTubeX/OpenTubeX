@@ -15,4 +15,12 @@
     <string name="media_fast_forward">Vorspulen</string>
     <string name="notification_channel_downloads_name">Downloads</string>
     <string name="notification_channel_downloads_description">Fortschritt von Video- und Audiodownloads</string>
+    <string name="widget_continue_watching_name">Weiterschauen</string>
+    <string name="widget_continue_watching_description">Begonnene Videos fortsetzen</string>
+    <string name="widget_continue_watching_empty">Begonnene Videos erscheinen hier</string>
+    <string name="widget_quick_access_name">Schnellzugriff</string>
+    <string name="widget_quick_access_description">Suche, Abos oder Später ansehen öffnen</string>
+    <string name="widget_search">Suche</string>
+    <string name="widget_subscriptions">Abos</string>
+    <string name="widget_watch_later">Später ansehen</string>
 </resources>

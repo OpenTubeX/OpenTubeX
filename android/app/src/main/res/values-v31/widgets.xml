@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Follow the launcher's wallpaper colors and corner radii. -->
+    <color name="widget_background">@android:color/system_neutral1_50</color>
+    <color name="widget_surface">@android:color/system_accent2_100</color>
+    <color name="widget_text">@android:color/system_neutral1_900</color>
+    <color name="widget_text_secondary">@android:color/system_neutral2_700</color>
+    <color name="widget_accent">@android:color/system_accent1_600</color>
+    <dimen name="widget_radius">@android:dimen/system_app_widget_background_radius</dimen>
+    <dimen name="widget_inner_radius">@android:dimen/system_app_widget_inner_radius</dimen>
+</resources>

@@ -4,4 +4,7 @@
     <!-- SSDP requires this managed capability in the installer's signing profile.
          CI creates unsigned IPAs; simulator tests do not verify device approval. -->
     <key>com.apple.developer.networking.multicast</key><true/>
+    <!-- Shares the Continue watching cache with the home screen widgets. -->
+    <key>com.apple.security.application-groups</key>
+    <array><string>group.$(PRODUCT_BUNDLE_IDENTIFIER)</string></array>
 </dict></plist>

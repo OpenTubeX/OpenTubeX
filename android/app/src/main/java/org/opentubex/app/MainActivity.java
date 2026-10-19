@@ -77,6 +77,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(SabrHttpPlugin.class);
         registerPlugin(VoiceOverHttpPlugin.class);
         registerPlugin(AndroidSharePlugin.class);
+        registerPlugin(HomeWidgetsPlugin.class);
         super.onCreate(savedInstanceState);
         lastOrientation = getResources().getConfiguration().orientation;
         // Capacitor must select its no-title theme before the decor is created.

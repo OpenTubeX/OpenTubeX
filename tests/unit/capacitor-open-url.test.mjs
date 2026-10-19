@@ -4,7 +4,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 
 const app = readFileSync('src/renderer/App.vue', 'utf8')
-const start = app.indexOf('  const openUrl = url => {', app.indexOf('async function enableCapacitorIntegrations()'))
+const start = app.indexOf('  const openUrl = async url => {', app.indexOf('async function enableCapacitorIntegrations()'))
 const fragment = app.slice(start, app.indexOf('  const backButtonHandle', start))
 
 for (const [input, expected] of [
@@ -16,7 +16,7 @@ for (const [input, expected] of [
 ]) {
   test(`Capacitor opens ${input} as a YouTube URL`, () => {
     const urls = []
-    const openUrl = vm.runInNewContext(`${fragment}\nopenUrl`, { handleYoutubeLink: url => urls.push(url) })
+    const openUrl = vm.runInNewContext(`${fragment}\nopenUrl`, { getHomeWidgetPage: () => null, handleYoutubeLink: url => urls.push(url) })
     openUrl(input)
     assert.deepEqual(urls, [expected])
   })

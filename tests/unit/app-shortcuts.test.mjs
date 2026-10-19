@@ -4,6 +4,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 
 import { createAppShortcuts, getAppShortcutPath } from '../../src/renderer/helpers/appShortcuts.js'
+import { getHomeWidgetPage } from '../../src/renderer/helpers/homeWidgetData.js'
 import { resolveMobileContextLinkCopyUrl } from '../../src/renderer/helpers/mobileLinkActions.js'
 
 const pages = ['subscriptions', 'userplaylists', 'history', 'downloads']
@@ -45,9 +46,19 @@ test('retained startup clicks and running-app clicks navigate and update localiz
   let settingsOpen = true
   let updateLocale
   let stopped = false
+  let widgetSyncStopped = false
+  const appWindow = new EventTarget()
+  let searchFocusRequests = 0
+  appWindow.addEventListener('opentubex:focus-search', () => { searchFocusRequests++ })
   const locale = { value: 'en-US' }
   const enable = vm.runInNewContext(`${integration}\nenableCapacitorIntegrations`, {
-    window: new EventTarget(),
+    window: appWindow,
+    document: { getElementById: () => null },
+    CustomEvent,
+    dataReady: { value: true },
+    isAnyPromptOpen: { value: false },
+    getHomeWidgetPage,
+    syncContinueWatchingWidget: () => () => { widgetSyncStopped = true },
     Capacitor: { getPlatform: () => 'android' },
     supportsYtDlp: true,
     handleAndroidBack() {},
@@ -96,9 +107,9 @@ test('retained startup clicks and running-app clicks navigate and update localiz
     t: key => `${locale.value}:${key}`,
     createAppShortcuts,
     getAppShortcutPath,
-    openInternalPath: ({ path }) => {
+    openInternalPath: ({ path, query }) => {
       assert.equal(settingsOpen, false, 'settings must not cover the destination')
-      paths.push(path)
+      paths.push(query ? `${path}?${new URLSearchParams(query)}` : path)
     },
     handleYoutubeLink: url => { youtubeLinks.push(url) },
   })
@@ -115,6 +126,14 @@ test('retained startup clicks and running-app clicks navigate and update localiz
   listeners.get('appUrlOpen')({ url: 'opentubex://https://www.youtube.com/watch?v=jNQXAC9IVRw' })
   listeners.get('appUrlOpen')({ url: 'opentubex://https//www.youtube.com/feed/subscriptions' })
   assert.deepEqual(youtubeLinks, ['https://www.youtube.com/feed/history', 'https://youtu.be/123', 'https://www.youtube.com/watch?v=jNQXAC9IVRw', 'https://www.youtube.com/feed/subscriptions'])
+  for (const page of ['subscriptions', 'watch-later', 'search']) {
+    settingsOpen = true
+    listeners.get('appUrlOpen')({ url: `opentubex://open/${page}` })
+    await new Promise(resolve => setImmediate(resolve))
+  }
+  assert.deepEqual(paths.slice(pages.length), ['/subscriptions', '/playlist/watchLater?playlistType=user'])
+  assert.equal(searchFocusRequests, 1)
+  assert.equal(youtubeLinks.length, 4, 'widget pages must not be treated as YouTube links')
   assert.equal(updates[0][2].title, 'en-US:History.History')
   locale.value = 'de-DE'
   updateLocale()
@@ -122,6 +141,7 @@ test('retained startup clicks and running-app clicks navigate and update localiz
   cleanup()
   assert.deepEqual(wakeStates, [true, false])
   assert.equal(stopped, true)
+  assert.equal(widgetSyncStopped, true)
   assert.equal(listeners.size, 0)
 })
 
