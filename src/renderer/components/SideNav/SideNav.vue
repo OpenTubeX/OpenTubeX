@@ -113,7 +113,7 @@ import store from '../../store/index'
 
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { filterAvailableNavigationItems } from '../../../navigationAvailability'
-import { deepCopy, localizeAndAddKeyboardShortcutToActionTitle } from '../../helpers/utils'
+import { localizeAndAddKeyboardShortcutToActionTitle } from '../../helpers/utils'
 import { getConfiguredKeyboardShortcuts } from '../../../constants'
 import { NAVIGATION_ITEM_DEFINITIONS } from '../../../navigationItems'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
@@ -177,27 +177,20 @@ const activeProfile = computed(() => {
 })
 
 const activeSubscriptions = computed(() => {
-  /** @type {any[]} */
-  const subscriptions = deepCopy(activeProfile.value.subscriptions)
+  const instanceUrl = backendPreference.value === 'invidious' ? currentInvidiousInstanceUrl.value : null
 
-  subscriptions.forEach(channel => {
+  // Only copy the displayed fields: a deep copy would track every nested
+  // channel setting and rerun this for unrelated subscription updates.
+  const subscriptions = activeProfile.value.subscriptions.map(({ id, name, thumbnail }) => {
     // Change thumbnail size to 35x35, as that's the size we display it
     // so we don't need to download a bigger image (the default is 176x176)
-    channel.thumbnail = channel.thumbnail?.replace(/=s\d+/, '=s35')
+    thumbnail = thumbnail?.replace(/=s\d+/, '=s35')
+    if (instanceUrl !== null) thumbnail = youtubeImageUrlToInvidious(thumbnail, instanceUrl)
+    return { id, name, thumbnail, sortKey: name?.toLowerCase() ?? '' }
   })
 
-  const locale_ = locale.value
-  subscriptions.sort((a, b) => {
-    return a.name?.toLowerCase().localeCompare(b.name?.toLowerCase(), locale_)
-  })
-
-  if (backendPreference.value === 'invidious') {
-    const instanceUrl = currentInvidiousInstanceUrl.value
-
-    subscriptions.forEach((channel) => {
-      channel.thumbnail = youtubeImageUrlToInvidious(channel.thumbnail, instanceUrl)
-    })
-  }
+  const collator = new Intl.Collator(locale.value)
+  subscriptions.sort((a, b) => collator.compare(a.sortKey, b.sortKey))
 
   return subscriptions
 })

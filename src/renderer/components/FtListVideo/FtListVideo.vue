@@ -2435,18 +2435,11 @@ watch(id, () => {
   debounceGetDeArrowThumbnail.cancel()
 })
 
-const fetchingDeArrowData = new Set()
 watch([id, showDeArrowTitle, showDeArrowThumbnail], async ([videoId, titles, thumbnails]) => {
   if (!videoId || (!titles && !thumbnails)) return
 
   if (!deArrowCache.value) {
-    if (fetchingDeArrowData.has(videoId)) return
-    fetchingDeArrowData.add(videoId)
-    try {
-      await fetchDeArrowData(videoId)
-    } finally {
-      fetchingDeArrowData.delete(videoId)
-    }
+    await fetchDeArrowData(videoId)
   } else if (thumbnails && deArrowCache.value.thumbnail == null) {
     debounceGetDeArrowThumbnail()
   }
