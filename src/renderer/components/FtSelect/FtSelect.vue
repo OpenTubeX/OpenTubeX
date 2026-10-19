@@ -179,7 +179,7 @@
             :key="selectValues[index]"
           >
             <li
-              v-if="optionGroupLabels[optionGroups[index]] && (windowStart + visibleIndex === 0 || optionGroups[index] !== optionGroups[filteredOptions[windowStart + visibleIndex - 1].index])"
+              v-if="optionGroupLabels[optionGroups[index]] && (visibleIndex === 0 || optionGroups[index] !== optionGroups[renderedOptions[visibleIndex - 1].index])"
               :id="`${id}-group-${optionGroups[index]}`"
               class="selectGroupHeading"
               role="presentation"
