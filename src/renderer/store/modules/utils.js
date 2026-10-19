@@ -16,6 +16,7 @@ import {
   loadLegacyVideoAvatarCache,
 } from '../../helpers/channelThumbnailStorage'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
+import { getSearchFilterTabId } from '../../../search-history'
 import {
   mergeYouTubeCaptionLanguageCodes,
   YOUTUBE_CAPTION_LANGUAGE_CODES,
@@ -504,7 +505,7 @@ const actions = {
     commit('setRegionValues', countries.codes)
   },
 
-  async getYoutubeUrlInfo({ rootState, state }, urlStr) {
+  async getYoutubeUrlInfo({ rootState, getters, rootGetters }, urlStr) {
     // Returns
     // - urlType [String] `video`, `playlist`
     //
@@ -628,7 +629,7 @@ const actions = {
           return { urlType: 'unknown' }
         }
 
-        const searchSettings = state.searchSettings
+        const searchSettings = getters.getSearchSettings(getSearchFilterTabId(rootGetters.getPresentedTabId))
         const query = {
           prioritize: searchSettings.prioritize,
           time: searchSettings.time,
