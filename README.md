@@ -317,11 +317,17 @@ published by the Free Software Foundation, either version 3 of the License, or
 ## 📈 Project activity
 
 <p align="center">
-  <img alt="OpenTubeX project activity over the last 30 days" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/project-activity.svg" width="740" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://opentubex-badges.withered-flower-f0f2.workers.dev/project-activity.svg" />
+    <img alt="OpenTubeX project activity over the last 30 days" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/project-activity-light.svg" width="740" />
+  </picture>
 </p>
 
 <p align="center">
   <a href="https://www.star-history.com/?repos=OpenTubeX%2FOpenTubeX&type=date&legend=bottom-right">
-    <img alt="OpenTubeX star history" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/star-history.svg" width="740" />
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://opentubex-badges.withered-flower-f0f2.workers.dev/star-history.svg" />
+      <img alt="OpenTubeX star history" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/star-history-light.svg" width="740" />
+    </picture>
   </a>
 </p>
