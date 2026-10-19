@@ -46,7 +46,7 @@ test('applies UI roundness to the player and caption backgrounds', async ({ app,
   await expect(player).toHaveCSS('border-radius', '24px')
 })
 
-test('rounds word-timed caption lines instead of each word', async ({ app, page, attachScreenshot }) => {
+test('rounds word-timed caption lines instead of each word', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
   await mockPlayableWatchPage(app, page, {
     captionText: '<c>Every</c><c> word</c><c> has</c><c> a</c><c> span,</c>\n<c>but</c><c> lines</c><c> share</c><c> one</c>'
   })
@@ -59,7 +59,7 @@ test('rounds word-timed caption lines instead of each word', async ({ app, page,
   await expect(words).toHaveCount(9)
   await expect(line).toHaveCSS('border-radius', '8px')
   await expect(line).toHaveCSS('box-decoration-break', 'clone')
-  expect(await line.evaluate(element => element.getClientRects().length)).toBe(2)
+  await expect.poll(() => line.evaluate(element => element.getClientRects().length)).toBe(2)
   await expect(line).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
   for (const word of await words.all()) {
     await expect(word).toHaveCSS('border-radius', '0px')
