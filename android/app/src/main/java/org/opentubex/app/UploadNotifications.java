@@ -199,10 +199,15 @@ final class UploadNotifications {
             if (comments != null) {
                 for (int i = 0; i < comments.length(); i++) {
                     JSONObject comment = comments.getJSONObject(i);
+                    // Match the foreground parser, which reads contentHtml and publishedText.
+                    String text = comment.optString("content");
+                    if (text.isEmpty()) text = comment.optString("contentHtml").replaceAll("<br\\s*/?>", "\n").replaceAll("<[^>]*>", "");
+                    long published = comment.optLong("published");
+                    if (published <= 0) published = SubscriptionRefreshDownloadMetadata.published(comment.optString("publishedText"), now);
                     result.put(new JSONObject()
                         .put("id", comment.optString("commentId"))
-                        .put("title", comment.optString("content"))
-                        .put("published", comment.optLong("published") * 1000));
+                        .put("title", text)
+                        .put("published", published * 1000));
                 }
             } else if (payload.optString("backgroundFormat").equals("local")) {
                 collectPosts(payload.optJSONObject("data"), result, now);

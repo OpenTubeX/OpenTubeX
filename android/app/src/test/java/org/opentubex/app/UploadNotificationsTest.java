@@ -67,6 +67,12 @@ public class UploadNotificationsTest {
         assertEquals("Hello", post.getString("title"));
         assertEquals(2_000_000L, post.getLong("published"));
 
+        JSONObject htmlPosts = new JSONObject().put("comments", new JSONArray()
+            .put(new JSONObject().put("commentId", "post3").put("contentHtml", "Line<br>two <b>bold</b>").put("publishedText", "3 hours ago")));
+        post = UploadNotifications.entries("posts", htmlPosts, NOW).getJSONObject(0);
+        assertEquals("Line\ntwo bold", post.getString("title"));
+        assertEquals((NOW / 1000 - 3 * 3600) * 1000, post.getLong("published"));
+
         JSONObject localPosts = new JSONObject().put("backgroundFormat", "local").put("data", new JSONObject()
             .put("contents", new JSONArray().put(new JSONObject().put("backstagePostThreadRenderer", new JSONObject()
                 .put("post", new JSONObject().put("backstagePostRenderer", new JSONObject()
