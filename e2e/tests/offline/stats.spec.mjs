@@ -514,9 +514,9 @@ test.describe('synced watch stats', () => {
     await picker.getByRole('button', { name: 'Pixel', exact: true }).click()
     await page.locator('.resetStatsButton').click()
     await page.getByRole('button', { name: 'Reset', exact: true }).click()
-    await expect(total).toContainText('0 min')
+    await expect(total.locator('strong')).toHaveText('0 min')
     await page.evaluate(() => window.$store.dispatch('syncWithSyncServer'))
-    await expect(total).toContainText('0 min')
+    await expect(total.locator('strong')).toHaveText('0 min')
     expect(devices).toHaveLength(1)
     expect(devices[0].reset.baselines[phone]).toEqual({ [today]: 1800, [yesterday]: 1800 })
     // Disconnect clears the remote cache, so the offline reset must be completed

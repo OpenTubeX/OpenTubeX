@@ -407,7 +407,8 @@ test.describe('tab previews disabled', () => {
 
 /**
  * Groups the active tab with unloaded tabs so previews cover both captured pages
- * and fallbacks without fetching remote content.
+ * and fallbacks. Local routes avoid avatar fetches and temporary token windows
+ * that can close while Playwright advances the browser context's clock.
  * @param {import('@playwright/test').Page} page
  * @param {number} count total tabs in the collapsed group, including the active tab
  * @returns {Promise<{groupId: string, tabIds: string[]}>}
@@ -418,7 +419,7 @@ async function createCollapsedPreviewGroup(page, count = 4) {
     const ids = [state.tabs.find(tab => tab.isActive).id]
     for (let index = 1; index < count; index++) {
       const tab = await window.ftElectron.tabs.create({
-        route: `/watch/group-preview-${index}`,
+        route: '/history',
         title: `Group preview ${index}`,
         makeActive: false,
         lazyLoad: true
@@ -493,7 +494,7 @@ test.describe('tab group previews', () => {
     await expect(tooltip.locator('.tabTooltipPreview img').first()).toHaveAttribute('src', /^data:image\/jpeg/)
     await expect(tooltip.locator('.tabTooltipPreviewFallback')).toHaveCount(3)
     await expect(tooltip.locator('.tabTooltipGridTitleIcon[data-icon="rss"]')).toHaveCount(1)
-    await expect(tooltip.locator('.tabTooltipGridTitleIcon[data-icon="clapperboard"]')).toHaveCount(3)
+    await expect(tooltip.locator('.tabTooltipGridTitleIcon[data-icon="clock-rotate-left"]')).toHaveCount(3)
     await expect(trigger).toHaveAttribute('aria-describedby', await tooltip.getAttribute('id'))
 
     const positions = await tooltip.locator('.tabTooltipGridItem').evaluateAll(items => ({
