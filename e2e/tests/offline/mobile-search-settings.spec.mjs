@@ -236,6 +236,9 @@ test.describe('mobile channel search metadata', () => {
 
     const cards = page.locator('.autoGrid > .grid')
     await expect(cards).toHaveCount(4)
+    // Channel and playlist cards are async components, so each grid shell can
+    // exist before its card has rendered.
+    await expect(cards.locator(':scope > .ft-list-item')).toHaveCount(4)
     const layout = await cards.evaluateAll(elements => {
       return elements.map(element => {
         const card = element.querySelector('.ft-list-item')
