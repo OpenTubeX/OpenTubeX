@@ -179,6 +179,17 @@ test.describe('settings', () => {
     await expect(page.locator('.settingsWindow')).toBeHidden()
   })
 
+  test('reopens a section while the previous window is still closing', async ({ page }) => {
+    // Stretch the leave animation so the reopen always starts mid-close.
+    await page.addStyleTag({ content: '.settingsWindow.settings-window-leave-active { animation-duration: 2s !important; }' })
+    await goToSettingsSection(page, 'focus')
+    await page.locator('.settingsCloseButton').click()
+    await expect(page.locator('.settingsWindow.settings-window-leave-active')).toHaveCount(1)
+    const focus = await goToSettingsSection(page, 'focus')
+    await expect(focus).toBeVisible()
+    await expect(page.locator('.settingsWindow')).toHaveCount(1)
+  })
+
   test('keeps the current compact view throughout the close animation at 95% UI scale', async ({ page }) => {
     await page.evaluate(() => {
       const store = window.$store

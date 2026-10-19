@@ -644,7 +644,10 @@ const SETTINGS_CATEGORY_BY_LEGACY_SECTION = {
 
 /** Opens Settings and selects one category in the two-column modal layout. */
 export async function goToSettingsSection(page, section) {
-  if (!await page.locator('.settingsWindow').isVisible()) {
+  // A window still playing its leave animation is visible but about to be
+  // removed, so it must be reopened rather than reused.
+  if (!await page.locator('.settingsWindow:not(.settings-window-leave-active)').isVisible()) {
+    await expect(page.locator('.settingsWindow')).toBeHidden()
     await goTo(page, 'settings')
   }
   const category = SETTINGS_CATEGORY_BY_LEGACY_SECTION[section] ?? section
