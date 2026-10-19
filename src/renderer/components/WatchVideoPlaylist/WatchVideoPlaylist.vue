@@ -380,6 +380,8 @@ let getPlaylistInfoRun = false
 // Bumped per playlist change so a request for an earlier visit of the same
 // playlist cannot overwrite a later one.
 let playlistLoadGeneration = 0
+// Unmounting stops the playlist watcher, so abandon pending page loads here.
+onBeforeUnmount(() => { playlistLoadGeneration += 1 })
 let previewAnimationFrame = null
 let previewPointerClientX = 0
 

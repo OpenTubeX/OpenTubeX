@@ -34,7 +34,9 @@ function harness() {
   const backendFallback = ref(false)
   const errors = []
   const continuationChecks = []
+  const unmountCallbacks = []
   const context = {
+    onBeforeUnmount: callback => unmountCallbacks.push(callback),
     playlistLoadGeneration: 0,
     props, playlistItems, isLoading, isFetchingPlaylistContinuation, hasUnloadedPlaylistVideos,
     randomizedPlaylistItems, shuffleEnabled, loopEnabled: ref(false), computed,
@@ -56,6 +58,7 @@ function harness() {
     showApiErrorToast: (_message, error) => errors.push(error), showToast() {}, t: key => key,
     console: { error: error => errors.push(error) },
   }
+  vm.runInNewContext(extractSourceBetweenMarkers(playlistSource, '// Unmounting stops the playlist watcher', '\nlet previewAnimationFrame'), context)
   const load = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'async function getPlaylistInformationLocal() {', '\nasync function getPlaylistInformationInvidious(')}\ngetPlaylistInformationLocal`, context)
   const state = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'const currentVideoIndexZeroBased =', '\nwatch(')}\n;({ nextVideo, isWaitingForNextVideo, upcomingVideos })`, context)
   Object.assign(context, state)
@@ -65,6 +68,7 @@ function harness() {
     props, playlistItems, isLoading, isFetchingPlaylistContinuation, hasUnloadedPlaylistVideos, errors, state,
     load, backendFallback, continuationChecks,
     randomizedPlaylistItems, shuffleEnabled,
+    unmount: () => unmountCallbacks.forEach(callback => callback()),
     changePlaylist: playlistId => { props.playlistId = playlistId; context.playlistLoadGeneration += 1 },
     resolveFirstPage: () => firstPage.resolve({
       info: { title: 'YouTube playlist', total_items: '100', author: { name: 'Test', id: 'channel' } },
@@ -224,6 +228,18 @@ test('switching playlists stops requesting the remaining pages of the previous o
   await loading
 
   assert.deepEqual(state.continuationChecks, [false])
+})
+
+test('leaving the watch view stops requesting pages and reporting their errors', async () => {
+  const state = harness()
+  const loading = state.load()
+  state.resolveFirstPage()
+  await new Promise(resolve => setImmediate(resolve))
+  state.unmount()
+  state.failContinuation(new Error('Continuation failed'))
+  await loading
+
+  assert.equal(state.errors.length, 0)
 })
 
 test('no upcoming videos are reported while the current video may be on an unloaded page', async () => {
