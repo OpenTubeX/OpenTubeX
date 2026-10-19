@@ -765,10 +765,11 @@ for (const width of [1600, 480]) {
           if (variant === 'filled') expect(focused.shadow).toContain('0px -2px')
           else {
             // The fieldset's block borders stay at least two device pixels at
-            // every UI scale and the inner side shadows match that thickness.
+            // every UI scale. Half-width side shadows supplement the resting
+            // side borders without making them thicker than the block borders.
             expect(focused.borderDevicePixels).toBeGreaterThanOrEqual(2)
-            expect(focused.shadow).toContain(`${focused.focusWidth - 1}px 0px 0px 0px inset`)
-            expect(focused.shadow).toContain(`-${focused.focusWidth - 1}px 0px 0px 0px inset`)
+            expect(focused.shadow).toContain(`${focused.focusWidth / 2}px 0px 0px 0px inset`)
+            expect(focused.shadow).toContain(`-${focused.focusWidth / 2}px 0px 0px 0px inset`)
             expect(focused.shadow).not.toContain('0px -2px 0px 0px inset')
           }
           await expect.poll(() => field.evaluate(element => {
