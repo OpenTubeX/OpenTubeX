@@ -16,6 +16,9 @@ test('unloads the least recently used background tabs to free memory', async ({ 
   }
   await page.locator(`.tab[data-tab-id="${activeTabId}"]`).click()
   await expect(page.locator(`.tabContent[data-tab-id="${activeTabId}"]`)).toHaveAttribute('aria-hidden', 'false')
+  // Main keeps the previously presented tab loaded until the renderer reports
+  // the switch, which arrives asynchronously after the DOM update.
+  await expect.poll(() => page.evaluate(() => window.ftElectron.tabs.getState().then(state => state.presentedTabId))).toBe(activeTabId)
 
   expect(await page.evaluate(() => window.ftElectron.tabs.unloadLeastRecentlyUsed())).toBe(2)
   await expect(content(tabIds[0])).toHaveCount(0)
