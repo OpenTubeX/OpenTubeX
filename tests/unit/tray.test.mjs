@@ -315,6 +315,15 @@ test('a recreated tray receives a menu even when its contents are unchanged', ()
   assert.ok(trays[1].menu.length > 0)
 })
 
+for (const platform of ['linux', 'win32']) {
+  // Chromium keeps several copies of the tray bitmap, so the 512px app logo costs ~55 MB.
+  test(`default tray artwork is downscaled on ${platform}`, () => {
+    const { context, trays } = fixture(platform)
+    context.configure({})
+    assert.equal(trays[0].image.height, 64)
+  })
+}
+
 for (const platform of ['linux', 'win32', 'darwin']) {
   test(`selected tray artwork survives tray recreation on ${platform}`, () => {
     const { context, trays } = fixture(platform)
