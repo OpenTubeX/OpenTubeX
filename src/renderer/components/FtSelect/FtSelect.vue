@@ -475,6 +475,12 @@ watch(dropdownShown, (shown) => {
   }
 })
 
+// Rows from a moved or extended window can be wider than the measured ones.
+// Resize before scrolling them into view, which waits for the next tick.
+watch([windowStart, renderLimit], () => {
+  if (props.lazyOptions && dropdownShown.value) updateDropdownPosition()
+}, { flush: 'post' })
+
 watch([search, phoneLayout], async () => {
   resetRenderedOptions()
   await nextTick()

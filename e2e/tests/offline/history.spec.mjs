@@ -1485,6 +1485,7 @@ test.describe('history date and channel browsing', () => {
 
 test.describe('lazy history channel picker', () => {
   const channelNames = Array.from({ length: 400 }, (_, index) => `Picker channel ${String(index).padStart(4, '0')}`)
+  channelNames[399] += ' with a much longer name than any channel on the first page of this picker'
   test.use({
     seed: {
       history: channelNames.map((author, index) =>
@@ -1601,6 +1602,21 @@ test.describe('lazy history channel picker', () => {
     await expect(options).toHaveCount(100)
     await expect.poll(() => dropdown.evaluate(menu => menu.scrollTop)).toBeLessThanOrEqual(1)
     await expectListWithinScrollRange(dropdown)
+  })
+
+  test('widens the desktop picker for a longer label on a distant page @scale', async ({ page }) => {
+    await goTo(page, 'history')
+    const dropdown = await openChannelPicker(page)
+    const options = dropdown.getByRole('option')
+    await expect(options).toHaveCount(100)
+    const rowHeight = await options.first().evaluate(option => option.getBoundingClientRect().height)
+
+    await page.keyboard.press('End')
+    const longest = dropdown.getByRole('option', { name: channelNames.at(-1), exact: true })
+    await expect(longest).toBeInViewport()
+    // The label stays on one line instead of wrapping into the first page's width.
+    await expect.poll(() => longest.evaluate(option => option.getBoundingClientRect().height))
+      .toBeLessThanOrEqual(rowHeight + 1)
   })
 
   test('End and Home reach the ends of the phone picker', async ({ page }) => {
