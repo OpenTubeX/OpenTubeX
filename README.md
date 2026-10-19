@@ -318,14 +318,14 @@ published by the Free Software Foundation, either version 3 of the License, or
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://opentubex-badges.withered-flower-f0f2.workers.dev/project-activity.svg" />
-    <img alt="OpenTubeX project activity over the last 30 days" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/project-activity-light.svg" width="740" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://opentubex-badges.withered-flower-f0f2.workers.dev/project-activity.svg?v=obsidian" />
+    <img alt="OpenTubeX project activity over the last 30 days" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/project-activity-light.svg?v=obsidian" width="740" />
   </picture>
 </p>
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://opentubex-badges.withered-flower-f0f2.workers.dev/star-history.svg" />
-    <img alt="OpenTubeX star history" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/star-history-light.svg" width="740" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://opentubex-badges.withered-flower-f0f2.workers.dev/star-history.svg?v=obsidian" />
+    <img alt="OpenTubeX star history" src="https://opentubex-badges.withered-flower-f0f2.workers.dev/star-history-light.svg?v=obsidian" width="740" />
   </picture>
 </p>
