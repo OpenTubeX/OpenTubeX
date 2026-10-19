@@ -22,7 +22,17 @@ export function usePlayerAudioOutput(video) {
   let gainNodes = null
   /** @type {Promise<void> | null} */
   let setupPromise = null
+  /** @type {HTMLVideoElement | null} */
+  let routedVideo = null
   let destroyed = false
+
+  // The element only plays through the graph, so an interruption that suspends
+  // the context, such as a phone call on Android, would otherwise leave it silent.
+  function resumeWhilePlaying() {
+    if (audioContext?.state === 'suspended' && routedVideo?.paused === false) {
+      audioContext.resume().catch(error => console.warn('Unable to resume player audio output', error))
+    }
+  }
 
   async function setupGraph() {
     const videoElement = video.value
@@ -43,6 +53,9 @@ export function usePlayerAudioOutput(video) {
     boost.gain.value = gains.boost
     source.connect(voiceOver).connect(boost).connect(audioContext.destination)
     gainNodes = { voiceOver, boost }
+    routedVideo = videoElement
+    audioContext.addEventListener('statechange', resumeWhilePlaying)
+    videoElement.addEventListener('playing', resumeWhilePlaying)
   }
 
   /**
@@ -77,6 +90,9 @@ export function usePlayerAudioOutput(video) {
 
   onBeforeUnmount(() => {
     destroyed = true
+    audioContext?.removeEventListener('statechange', resumeWhilePlaying)
+    routedVideo?.removeEventListener('playing', resumeWhilePlaying)
+    routedVideo = null
     audioContext?.close().catch(() => {})
     audioContext = null
     gainNodes = null

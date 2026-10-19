@@ -30,8 +30,11 @@ class FakeGainNode extends FakeAudioNode {
   }
 }
 
-class FakeAudioContext {
+class FakeAudioContext extends EventTarget {
   constructor () {
+    super()
+    this.state = 'running'
+    this.resumeCount = 0
     this.currentTime = 0
     this.destination = new FakeAudioNode()
     this.sources = []
@@ -39,7 +42,10 @@ class FakeAudioContext {
     FakeAudioContext.instances.push(this)
   }
 
-  async resume () {}
+  async resume () {
+    this.resumeCount++
+    this.state = 'running'
+  }
 
   async close () {
     this.closed = true
@@ -58,6 +64,10 @@ class FakeAudioContext {
 }
 
 FakeAudioContext.instances = []
+
+function createVideo () {
+  return Object.assign(new EventTarget(), { tagName: 'VIDEO', paused: false })
+}
 
 function mountAudioOutput (video) {
   let output
@@ -80,7 +90,7 @@ test('player audio stages share one media element source', async (t) => {
     globalThis.AudioContext = OriginalAudioContext
   })
 
-  const element = { tagName: 'VIDEO' }
+  const element = createVideo()
   const mounted = mountAudioOutput(shallowRef(element))
 
   // Unity gain leaves the element's audio untouched.
@@ -126,13 +136,43 @@ test('stage values set before the graph exists apply when it is built', async (t
   await output.setGain('boost', 2)
   assert.equal(FakeAudioContext.instances.length, 0)
 
-  video.value = { tagName: 'VIDEO' }
+  video.value = createVideo()
   await output.setGain('voiceOver', 0.5)
 
   const [voiceOver] = FakeAudioContext.instances[0].sources[0].connections
   const [boost] = voiceOver.connections
   assert.equal(voiceOver.gain.value, 0.5)
   assert.equal(boost.gain.value, 2)
+})
+
+test('a suspended graph resumes while the video plays', async (t) => {
+  const OriginalAudioContext = globalThis.AudioContext
+  globalThis.AudioContext = FakeAudioContext
+  FakeAudioContext.instances = []
+  t.after(() => {
+    globalThis.AudioContext = OriginalAudioContext
+  })
+
+  const element = createVideo()
+  const { output, unmount } = mountAudioOutput(shallowRef(element))
+  t.after(unmount)
+  await output.setGain('boost', 1.5)
+  const [context] = FakeAudioContext.instances
+  const resumesAfterSetup = context.resumeCount
+
+  // An audio interruption suspends the context while the media keeps playing.
+  context.state = 'suspended'
+  context.dispatchEvent(new Event('statechange'))
+  assert.equal(context.resumeCount, resumesAfterSetup + 1)
+
+  // Paused media resumes the graph once it plays again.
+  element.paused = true
+  context.state = 'suspended'
+  context.dispatchEvent(new Event('statechange'))
+  assert.equal(context.resumeCount, resumesAfterSetup + 1)
+  element.paused = false
+  element.dispatchEvent(new Event('playing'))
+  assert.equal(context.resumeCount, resumesAfterSetup + 2)
 })
 
 test('volume boost only accepts offered levels', () => {
