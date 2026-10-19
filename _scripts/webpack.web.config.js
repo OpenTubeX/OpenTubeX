@@ -175,7 +175,9 @@ const config = {
       excludeChunks: ['processTaskWorker'],
       filename: 'index.html',
       template: path.resolve(__dirname, '../src/index.ejs'),
-      templateParameters: isCapacitor ? { startupSplash: getStartupSplash() } : {}
+      templateParameters: isCapacitor
+        ? { startupSplash: getStartupSplash({ staticProgress: process.env.CAPACITOR_PLATFORM !== 'ios' }) }
+        : {}
     }),
     new VueLoaderPlugin(),
     new MiniCssExtractPlugin({

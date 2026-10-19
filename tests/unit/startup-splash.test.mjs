@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { createRequire } from 'node:module'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
@@ -233,4 +234,12 @@ test('Capacitor waits for data, tab presentation, and route content before revea
   releaseRoute()
   await pending
   assert.equal(reveals, 1)
+})
+
+test('Android splash keeps its progress bar still so bridge calls are not delayed by redraws', () => {
+  const getStartupSplash = createRequire(import.meta.url)('../../_scripts/startupSplash.js')
+  // An unconditional rule after the reduced-motion media query.
+  const stillBar = /\.startupProgress \{ animation: none; transform: translateX\(-35%\); \}\s*$/
+  assert.doesNotMatch(getStartupSplash().styles, stillBar, 'Electron and iOS keep the animated bar')
+  assert.match(getStartupSplash({ staticProgress: true }).styles, stillBar)
 })
