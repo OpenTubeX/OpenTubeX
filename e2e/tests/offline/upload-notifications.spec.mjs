@@ -108,20 +108,23 @@ test.describe('with a channel notification turned on', () => {
       })
     ), { channelId, feedType, ids })
 
-    // The renderer configures the main process once its data is ready.
+    // The renderer configures the main process once its data is ready. Fresh IDs
+    // per attempt keep an attempt that races the configuration from blocking later ones.
+    let attempt = 0
     await expect.poll(async () => {
-      await observe(CHANNEL_ID, 'videos', ['a'])
-      await observe(CHANNEL_ID, 'videos', ['probe', 'a'])
+      attempt++
+      await observe(CHANNEL_ID, 'videos', [`seed${attempt}`])
+      await observe(CHANNEL_ID, 'videos', [`probe${attempt}`, `seed${attempt}`])
       return (await shown()).length
     }).toBe(1)
 
-    await observe(CHANNEL_ID, 'videos', ['b', 'probe', 'a'])
+    await observe(CHANNEL_ID, 'videos', ['b', `probe${attempt}`, `seed${attempt}`])
     await observe(CHANNEL_ID, 'posts', ['p1'])
     await observe(CHANNEL_ID, 'posts', ['p2', 'p1'])
     await observe(OTHER_CHANNEL_ID, 'videos', ['x1'])
     await observe(OTHER_CHANNEL_ID, 'videos', ['x2', 'x1'])
     expect(await shown()).toEqual([
-      { title: 'New video from Alpha Channel', body: 'Upload probe' },
+      { title: 'New video from Alpha Channel', body: `Upload probe${attempt}` },
       { title: 'New video from Alpha Channel', body: 'Upload b' }
     ])
   })
