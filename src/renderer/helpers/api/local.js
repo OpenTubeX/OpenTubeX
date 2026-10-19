@@ -421,12 +421,22 @@ export async function getLocalSearchContinuation(continuationData) {
  * @param {(input, init) => Promise<Response>} fetchFunc
  */
 async function getHTMLPage(url, kind, fetchFunc) {
+  const timeZone = process.env.IS_ELECTRON ? Intl.DateTimeFormat().resolvedOptions().timeZone : undefined
   // This returns session/tracking cookies but they get removed in onHeadersReceived in the main process before they are saved by Electron
   const htmlResponse = await fetchFunc(url,
     {
       headers: {
         // We need to be able to parse the localised strings in the /next response data (e.g. view counts and published dates)
-        'Accept-Language': 'en-US'
+        'Accept-Language': 'en-US',
+        ...(
+          // The "Cookie" header is forbidden by the fetch spec, so we set it as X-Cookie here
+          // and then convert it to the Cookie header in the main process
+          timeZone
+            ? {
+                'X-Cookie': `PREF=tz=${timeZone.replace('/', '.')}`
+              }
+            : {}
+        )
       }
     }
   )

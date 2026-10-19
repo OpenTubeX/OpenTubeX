@@ -436,7 +436,9 @@ async function initializeSwiper() {
         enabled: true,
         clickable: true
       },
-      slidesPerView: 1
+      slidesPerView: 1,
+      // prevents slides from bleeding over due to rounding errors
+      spaceBetween: 10
     }
 
     Object.assign(swiperContainer, swiperOptions)

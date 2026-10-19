@@ -65,7 +65,7 @@ import { applyYtDlpPlaybackCacheSettings, handleYtDlpPlaybackCacheClear, handleY
 import { generatePoToken } from './poTokenGenerator'
 import { expandMultipleOnlyPluralMessages, selectPluralForm } from '../renderer/i18n/plurals'
 import { composeLocaleMessages } from '../localeComposition'
-import { appendYouTubeTimeZonePreference, buildProxyUrl, DEFAULT_PROXY_SETTINGS, isNonPublicNetworkAddress, isOpenTubeXUrl } from './utils'
+import { buildProxyUrl, DEFAULT_PROXY_SETTINGS, isNonPublicNetworkAddress, isOpenTubeXUrl } from './utils'
 import { isInvidiousInstanceUrl } from './invidiousAuthorization'
 import { RendererCors } from './rendererCors'
 import { TabManager } from './tabs/TabManager'
@@ -2412,10 +2412,14 @@ function runApp() {
         requestHeaders['Sec-Fetch-Mode'] = 'navigate'
         requestHeaders['Sec-Fetch-Site'] = 'none'
         requestHeaders['Sec-Fetch-User'] = '?1'
-        requestHeaders.Cookie = appendYouTubeTimeZonePreference(
-          requestHeaders.Cookie,
-          Intl.DateTimeFormat().resolvedOptions().timeZone
-        )
+
+        if (requestHeaders['X-Cookie']) {
+          requestHeaders.Cookie = requestHeaders.Cookie
+            ? requestHeaders.Cookie + ';' + requestHeaders['X-Cookie']
+            : requestHeaders['X-Cookie']
+
+          delete requestHeaders['X-Cookie']
+        }
       } else if (url === 'https://www.youtube.com/sw.js_data' || url.startsWith('https://www.youtube.com/api/timedtext')) {
         requestHeaders.Referer = 'https://www.youtube.com/sw.js'
         requestHeaders['Sec-Fetch-Site'] = 'same-origin'
@@ -2475,7 +2479,8 @@ function runApp() {
       if (responseHeaders && (
         url === 'https://www.youtube.com/sw.js_data' ||
         url === 'https://www.youtube.com/iframe_api' ||
-        url.startsWith('https://www.youtube.com/watch?')
+        url.startsWith('https://www.youtube.com/watch?') ||
+        (new URL(url).origin === 'https://www.youtube.com' && new URL(url).pathname === '/')
       )) {
         delete responseHeaders['set-cookie']
         delete responseHeaders['content-security-policy']
