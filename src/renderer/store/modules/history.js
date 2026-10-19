@@ -245,12 +245,15 @@ const mutations = {
   },
 
   upsertToHistoryCache(state, record) {
-    const i = state.historyCacheSorted.findIndex((currentRecord) => {
+    // Search and shift the raw array, then publish it once. Splicing through
+    // the reactive proxy wrapped and triggered every record it moved.
+    const history = toRaw(state.historyCacheSorted)
+    const i = history.findIndex((currentRecord) => {
       return record.videoId === currentRecord.videoId
     })
 
     if (i !== -1) {
-      const currentRecord = state.historyCacheSorted[i]
+      const currentRecord = history[i]
 
       // Watched-status and other metadata-only updates keep their current position.
       // A newer timeWatched means the video was watched again and should become the
@@ -260,11 +263,9 @@ const mutations = {
         state.historyCacheById[record.videoId] = record
         return
       }
-
-      state.historyCacheSorted.splice(i, 1)
     }
 
-    state.historyCacheSorted.unshift(record)
+    state.historyCacheSorted = i === -1 ? [record, ...history] : [record, ...history.slice(0, i), ...history.slice(i + 1)]
     state.historyCacheById[record.videoId] = record
   },
 
