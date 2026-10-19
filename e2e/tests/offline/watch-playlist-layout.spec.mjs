@@ -405,13 +405,17 @@ test.describe('long watch playlist', () => {
 
     const shellCount = () => list.evaluate(element => [...element.querySelectorAll(':scope > .playlistItem')]
       .filter(row => !row.querySelector('.ft-list-video') && row.style.blockSize).length)
-    const rowHeight = () => list.evaluate(element => element.querySelector(':scope > .playlistItem:has(.ft-list-video)').getBoundingClientRect().height)
+    // NaN until a row mounts, which fails both height comparisons below.
+    const rowHeight = () => list.evaluate(element => element.querySelector(':scope > .playlistItem:has(.ft-list-video)')
+      ?.getBoundingClientRect().height ?? Number.NaN)
     // Scroll to the end so rows near the top become measured shells.
     await expect.poll(async () => {
       await list.evaluate(element => { element.scrollTop = element.scrollHeight })
       return shellCount()
     }).toBeGreaterThan(20)
-    const tallRow = await rowHeight()
+    // Rows near the end mount from an intersection observer after the scroll.
+    let tallRow
+    await expect.poll(async () => (tallRow = await rowHeight())).toBeGreaterThan(0)
 
     // setWindowSize waits for both dimensions to change, so resize the height alone directly.
     await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setBounds({ width: 1000, height: 440 }))
