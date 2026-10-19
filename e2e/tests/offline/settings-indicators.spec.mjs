@@ -410,8 +410,9 @@ test.describe('synced setting indicators', () => {
   test('spreads the theme sliders evenly over their rows', async ({ page }) => {
     await goTo(page, 'settings')
     const themeSection = await goToSettingsSection(page, 'appearance')
-    const sliders = themeSection.locator('.sliderGrid > *')
-    await expect(sliders).toHaveCount(7)
+    // Video lists and thumbnails has its own slider grid further down.
+    const sliders = themeSection.locator('.sliderGrid').first().locator(':scope > *')
+    await expect(sliders).toHaveCount(5)
 
     const boxes = await sliders.evaluateAll((elements) => elements.map((element) => {
       const { y, width } = element.getBoundingClientRect()
@@ -423,7 +424,7 @@ test.describe('synced setting indicators', () => {
     for (const { y } of boxes) {
       rowSizes.set(y, (rowSizes.get(y) ?? 0) + 1)
     }
-    expect([...rowSizes.values()]).toEqual([3, 3, 1])
+    expect([...rowSizes.values()]).toEqual([3, 2])
     // The row they landed on doesn't change how much room they get.
     expect(new Set(boxes.map(({ width }) => width)).size).toBe(1)
   })
