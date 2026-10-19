@@ -12,6 +12,7 @@ import {
 } from '../../helpers/app.mjs'
 
 const PAIRING_SERVER_URL = 'https://pairing.example'
+const PAIRING_ACCOUNT_ID = '0198e2d4-8ad2-7f73-8d6e-4f076707ce25'
 
 function pairingComparisonCode(request) {
   const fields = ['version', 'origin', 'sessionId', 'recipientPublicKey', 'recipientDeviceId', 'recipientDeviceName', 'pairingSecret']
@@ -210,13 +211,13 @@ test.describe('settings', () => {
       origin: PAIRING_SERVER_URL,
       sessionId: randomBytes(32).toString('base64url'),
       pairingSecret: randomBytes(32).toString('base64url'),
-      recipientToken: randomBytes(32).toString('base64url')
+      recipientToken: randomBytes(32).toString('base64url'),
+      accountId: PAIRING_ACCOUNT_ID
     }
     const inviteCode = `opentubex-pairing-invite:${Buffer.from(JSON.stringify(invite)).toString('base64url')}`
     let createdSession
     let pendingSession
     let pollToken
-    let cancelledRecipientToken
 
     await page.route(`${PAIRING_SERVER_URL}/**`, async route => {
       const request = route.request()
@@ -251,11 +252,6 @@ test.describe('settings', () => {
         await route.fulfill({ json: pendingSession })
         return
       }
-      if (url.pathname === `/v1/pairing/${invite.sessionId}` && request.method() === 'DELETE') {
-        cancelledRecipientToken = request.headers()['x-pairing-token']
-        await route.fulfill({ status: 204 })
-        return
-      }
       await route.fulfill({ status: 404 })
     })
 
@@ -288,9 +284,9 @@ test.describe('settings', () => {
     }))
     await expect.poll(() => pollToken).toBe(invite.recipientToken)
 
-    await dialog.locator('.promptFixedFooter').getByRole('button', { name: 'Cancel' }).click()
-    await expect(dialog).toHaveCount(0)
-    await expect.poll(() => cancelledRecipientToken).toBe(invite.recipientToken)
+    // Anyone who saw the invite could claim the session with another account.
+    pendingSession = { ...pendingSession, account_id: '0198e2d4-8ad2-7f73-8d6e-4f076707ce26' }
+    await expect(dialog.getByRole('alert')).toContainText('The pairing request changed')
   })
 
   test('keeps the sync server idle until sync is enabled', async ({ page }) => {
@@ -322,7 +318,11 @@ test.describe('secure pairing manual entry', () => {
         syncServerPrivacyKey: `${'A'.repeat(43)}=`,
         syncServerPrivacyMode: 'enhanced',
         syncServerPrivacySalt: `${'A'.repeat(22)}==`,
-        syncServerToken: 'pairing-test-token',
+        syncServerToken: [
+          Buffer.from('{"alg":"HS256","typ":"JWT"}').toString('base64url'),
+          Buffer.from(JSON.stringify({ sub: PAIRING_ACCOUNT_ID, exp: 4102444800 })).toString('base64url'),
+          'signature'
+        ].join('.'),
         syncServerUrl: serverUrl,
         syncServerUsername: 'pairing-user'
       }
@@ -490,8 +490,9 @@ test.describe('secure pairing manual entry', () => {
       (await codeField.inputValue()).slice('opentubex-pairing-invite:'.length),
       'base64url'
     ).toString())
-    expect(Object.keys(invite)).toEqual(['version', 'origin', 'sessionId', 'pairingSecret', 'recipientToken'])
+    expect(Object.keys(invite)).toEqual(['version', 'origin', 'sessionId', 'pairingSecret', 'recipientToken', 'accountId'])
     expect(invite.origin).toBe(serverUrl)
+    expect(invite.accountId).toBe(accountId)
 
     await expect.poll(() => pollTokens.length).toBeGreaterThan(0)
     expect(new Set(pollTokens)).toEqual(new Set([invite.recipientToken]))

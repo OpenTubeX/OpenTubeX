@@ -481,6 +481,7 @@ import {
   parsePairingInvitePayload,
   parsePairingQrPayload,
   randomPairingVerificationCode,
+  syncServerTokenAccountId,
 } from '../../helpers/sync-server-pairing'
 import {
   PRIVACY_VERSION,
@@ -685,7 +686,7 @@ async function startReceiving(invite = null) {
     const request = createPairingRequest(recipient, origin)
     if (!pairingSessionMatchesRequest(session, request)) throw new Error()
 
-    receiver = { client, recipient, request, consumed: false, transfer: null, comparisonCode: '' }
+    receiver = { client, recipient, request, invite, consumed: false, transfer: null, comparisonCode: '' }
     receiveExpiresAt.value = session.expires_at
     if (invite) {
       const comparisonCode = await pairingComparisonCode(request)
@@ -732,6 +733,10 @@ async function pollReceiver() {
       active.recipient.recipientToken
     )
     if (receiver !== active || !receivePromptOpen.value) return
+    // Only the inviting account may claim a session created from its invite.
+    if (active.invite && session.account_id !== null && session.account_id !== active.invite.accountId) {
+      throw new Error(t('Settings.Sync Settings.Pairing Request Changed'))
+    }
     const boundRequest = session.account_id === null
       ? active.request
       : bindPairingRequestToAccount(active.request, session.account_id)
@@ -948,7 +953,10 @@ async function showInvite() {
   approveMode.value = 'invite'
   approveStage.value = 'inviting'
   try {
-    const invite = createPairingInvite(normalizeSyncServerUrl(props.serverUrl))
+    const invite = createPairingInvite(
+      normalizeSyncServerUrl(props.serverUrl),
+      syncServerTokenAccountId(store.getters.getSyncServerToken)
+    )
     const code = createPairingInvitePayload(invite)
     const image = await QRCode.toDataURL(code, {
       errorCorrectionLevel: 'M',

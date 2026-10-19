@@ -20,6 +20,7 @@ import {
   pairingSessionMatchesRequest,
   parsePairingInvitePayload,
   parsePairingQrPayload,
+  syncServerTokenAccountId,
   randomPairingDeviceId,
   randomPairingVerificationCode,
 } from '../../src/renderer/helpers/sync-server-pairing.js'
@@ -220,7 +221,7 @@ function unclaimedSession (request) {
 }
 
 test('invites from a connected device let the new device register its own key', async () => {
-  const invite = parsePairingInvitePayload(createPairingInvitePayload(createPairingInvite(ORIGIN)))
+  const invite = parsePairingInvitePayload(createPairingInvitePayload(createPairingInvite(ORIGIN, ACCOUNT_ID)))
   const deviceId = randomPairingDeviceId()
   const recipient = await createPairingRecipient('Phone', deviceId, invite)
   assert.equal(recipient.sessionId, invite.sessionId)
@@ -254,7 +255,7 @@ test('invites from a connected device let the new device register its own key', 
 })
 
 test('a key registered by another device under an invite produces a different comparison code', async () => {
-  const invite = createPairingInvite(ORIGIN)
+  const invite = createPairingInvite(ORIGIN, ACCOUNT_ID)
   const legitimate = createPairingRequest(await createPairingRecipient('Phone', '', invite), ORIGIN)
   const intruder = createPairingRequest(await createPairingRecipient('Phone', '', invite), ORIGIN)
   const approverRequest = pairingRequestFromInviteSession(invite, unclaimedSession(intruder))
@@ -262,18 +263,31 @@ test('a key registered by another device under an invite produces a different co
 })
 
 test('rejects claimed, foreign, or malformed invite sessions and payloads', async () => {
-  const invite = createPairingInvite(ORIGIN)
+  const invite = createPairingInvite(ORIGIN, ACCOUNT_ID)
   const request = createPairingRequest(await createPairingRecipient('Phone', '', invite), ORIGIN)
   const session = unclaimedSession(request)
   assert.throws(() => pairingRequestFromInviteSession(invite, { ...session, account_id: ACCOUNT_ID }))
   assert.throws(() => pairingRequestFromInviteSession(invite, { ...session, approved: true }))
-  assert.throws(() => pairingRequestFromInviteSession(createPairingInvite(ORIGIN), session))
+  assert.throws(() => pairingRequestFromInviteSession(createPairingInvite(ORIGIN, ACCOUNT_ID), session))
   assert.throws(() => pairingRequestFromInviteSession(invite, { ...session, recipient_public_key: 'short' }))
 
-  assert.throws(() => createPairingInvite('http://sync.example.com'))
+  assert.throws(() => createPairingInvite('http://sync.example.com', ACCOUNT_ID))
+  assert.throws(() => createPairingInvite(ORIGIN, 'not-an-account'))
   const inviteCode = createPairingInvitePayload(invite)
   assert.throws(() => parsePairingQrPayload(inviteCode), /not a valid OpenTubeX pairing code/)
   const qrCode = createPairingQrPayload(await createPairingRecipient('Phone'), ORIGIN)
   assert.throws(() => parsePairingInvitePayload(qrCode), /not a valid OpenTubeX pairing code/)
   assert.throws(() => parsePairingInvitePayload(`${inviteCode}A`), /not a valid OpenTubeX pairing code/)
+})
+
+test('reads the inviting account from its sync server session token', () => {
+  const token = claims => [
+    Buffer.from('{"alg":"HS256"}').toString('base64url'),
+    Buffer.from(JSON.stringify(claims)).toString('base64url'),
+    'signature',
+  ].join('.')
+  assert.equal(syncServerTokenAccountId(token({ sub: ACCOUNT_ID, exp: 1 })), ACCOUNT_ID)
+  for (const invalid of [token({ sub: 'someone' }), token({}), 'opaque-token', '', null]) {
+    assert.throws(() => syncServerTokenAccountId(invalid))
+  }
 })

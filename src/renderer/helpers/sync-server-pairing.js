@@ -55,6 +55,7 @@ const INVITE_FIELDS = [
   'sessionId',
   'pairingSecret',
   'recipientToken',
+  'accountId',
 ]
 const KEY_FIELDS = [
   'version',
@@ -134,6 +135,7 @@ function validatePairingInvite(invite) {
   base64UrlToBytes(invite.sessionId, SESSION_ID_BYTES)
   base64UrlToBytes(invite.pairingSecret, PAIRING_SECRET_BYTES)
   base64UrlToBytes(invite.recipientToken, RECIPIENT_TOKEN_BYTES)
+  validateAccountId(invite.accountId)
   return invite
 }
 
@@ -229,16 +231,33 @@ function decodePayload(prefix, payload, validate) {
 }
 
 /**
- * Creates the session credentials that a connected device shows to the device
- * being added. The new device registers its own key under this session.
+ * Returns the account ID from the subject of a sync server session token.
  */
-export function createPairingInvite(origin) {
+export function syncServerTokenAccountId(token) {
+  try {
+    const payload = token.split('.')[1]
+    const claims = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(base64UrlToBytes(payload)))
+    return validateAccountId(claims?.sub)
+  } catch {
+    // Callers show their generic pairing failure for an unreadable token.
+    throw new Error()
+  }
+}
+
+/**
+ * Creates the session credentials that a connected device shows to the device
+ * being added. The new device registers its own key under this session and
+ * accepts it only from the inviting account, because anyone who sees the invite
+ * could otherwise claim and approve the session with their own account.
+ */
+export function createPairingInvite(origin, accountId) {
   return validatePairingInvite({
     version: PAIRING_PROTOCOL_VERSION,
     origin: normalizePairingOrigin(origin),
     sessionId: randomBase64Url(SESSION_ID_BYTES),
     pairingSecret: randomBase64Url(PAIRING_SECRET_BYTES),
     recipientToken: randomBase64Url(RECIPIENT_TOKEN_BYTES),
+    accountId,
   })
 }
 
