@@ -517,6 +517,10 @@ Settings:
       Tablet: 'Planšetinis kompiuteris'
     Video View Type:
       Full Width: Visas plotis
+    Grid Columns:
+      Grid Columns: Tinklelio stulpeliai
+      Playlist Grid Columns: Grojaraščių tinklelio stulpeliai
+      Auto: Automatiškai
   Context Menu Search Settings:
     Context Menu Search Settings: Paieška kontekstiniame meniu
     Description: Pasirinkite paieškos sistemas, rodomas spustelėjus pažymėtą tekstą dešiniuoju pelės mygtuku. Paieškos rezultatai atveriami numatytojoje naršyklėje.
@@ -2299,6 +2303,8 @@ Tooltips:
     Auto Refresh Interval: "Kaip dažnai OpenTubeX automatiškai atnaujina prenumeratų sklaidos kanalą, kol programa atverta. „Android“ sistemoje nenulinis intervalas atnaujina sklaidos kanalą ir tada, kai programa uždaryta."
     Refresh Subscriptions While App Is Closed: "Atnaujina srautus pagal pasirinktus nustatymus. Kompiuteryje OpenTubeX lieka sistemos dėkle, kol išeinate. Android nustato foninių atnaujinimų laiką."
   Theme Settings:
+    Thumbnail Size: "Keičia vaizdo įrašų miniatiūrų dydį tinkleliuose ir sąrašuose. Tinkleliai su fiksuotu stulpelių skaičiumi arba Viso pločio rodiniu vietoj to užpildo kiekvieną eilutę, todėl ten keičiamos tik sąrašų miniatiūros ir Shorts. Telefono dydžio languose tinklelio miniatiūros ribojamos iki 100 %."
+    Playlist Thumbnail Size: "Keičia vaizdo įrašų miniatiūrų dydį grojaraščių puslapiuose. Tinkleliai su fiksuotu stulpelių skaičiumi arba Viso pločio rodiniu vietoj to užpildo kiekvieną eilutę, todėl ten keičiamos tik sąrašų miniatiūros ir Shorts. Telefono dydžio languose tinklelio miniatiūros ribojamos iki 100 %."
     Compact Settings Categories: "Paslepia aprašymus ir sumažina nustatymų kategorijų aukštį."
     Show Progress as Notification: Vietoje bendros eigos juostos rodo nuolatinį pranešimą su tikralaike foninių operacijų, pvz., prenumeratų atnaujinimo ir tvarkomų įrankių atsisiuntimo, eiga.
     Always Show Scrollbars: Slinkties juostos visada lieka matomos. Išjungus jos netrukus išblėsta nustojus judinti pelę ir vėl pasirodo vos ją pajudinus.

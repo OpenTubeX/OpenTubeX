@@ -402,6 +402,10 @@ Settings:
       Tablet: 'Máy tính bảng'
     Video View Type:
       Full Width: Toàn chiều rộng
+    Grid Columns:
+      Grid Columns: Số cột lưới
+      Playlist Grid Columns: Số cột lưới danh sách phát
+      Auto: Tự động
   Context Menu Search Settings:
     Context Menu Search Settings: Tìm kiếm trong menu ngữ cảnh
     Description: Chọn công cụ tìm kiếm xuất hiện khi bạn nhấp chuột phải vào văn bản đã chọn. Kết quả tìm kiếm sẽ mở trong trình duyệt mặc định.
@@ -1915,6 +1919,8 @@ Tooltips:
     Auto Refresh Interval: "Tần suất OpenTubeX tự động làm mới bảng tin đăng ký khi ứng dụng đang mở. Trên Android, khoảng thời gian khác 0 cũng làm mới bảng tin khi ứng dụng đã đóng."
     Refresh Subscriptions While App Is Closed: "Làm mới nguồn cấp theo cài đặt đã chọn. Trên máy tính, OpenTubeX ở trong khay hệ thống cho đến khi bạn thoát. Android quyết định thời điểm làm mới trong nền."
   Theme Settings:
+    Thumbnail Size: "Thay đổi kích thước hình thu nhỏ video trong lưới và danh sách. Lưới có số cột cố định hoặc kiểu xem Toàn chiều rộng sẽ lấp đầy từng hàng, nên ở đó thanh trượt chỉ thay đổi hình thu nhỏ trong danh sách và Shorts. Trong cửa sổ cỡ điện thoại, hình thu nhỏ dạng lưới bị giới hạn ở 100%."
+    Playlist Thumbnail Size: "Thay đổi kích thước hình thu nhỏ video trên trang danh sách phát. Lưới có số cột cố định hoặc kiểu xem Toàn chiều rộng sẽ lấp đầy từng hàng, nên ở đó thanh trượt chỉ thay đổi hình thu nhỏ trong danh sách và Shorts. Trong cửa sổ cỡ điện thoại, hình thu nhỏ dạng lưới bị giới hạn ở 100%."
     Compact Settings Categories: "Ẩn mô tả và giảm chiều cao của danh mục cài đặt."
     Show Progress as Notification: Hiện thông báo cố định với tiến trình trực tiếp cho các thao tác nền, chẳng hạn làm mới đăng ký và tải công cụ được quản lý, thay cho thanh tiến trình chung.
     Always Show Scrollbars: Luôn giữ thanh cuộn hiển thị. Khi tắt, thanh cuộn mờ dần ngay sau khi bạn ngừng di chuyển chuột và xuất hiện lại khi bạn di chuyển chuột.

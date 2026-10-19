@@ -230,6 +230,9 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     fixedTabWidth: DEFAULT_FIXED_TAB_WIDTH,
     listType: 'grid',
     playlistViewType: 'grid',
+    // 0 derives the column count from the window width and thumbnail size.
+    gridColumns: 0,
+    playlistGridColumns: 0,
     quickSettings: [...DEFAULT_QUICK_SETTINGS],
     fullscreenActions: [...DEFAULT_FULLSCREEN_ACTIONS],
     navigationItems: [...DEFAULT_NAVIGATION_ITEMS],

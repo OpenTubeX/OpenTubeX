@@ -420,6 +420,10 @@ Settings:
       Tablet: 'Nettbrett'
     Video View Type:
       Full Width: Full breidd
+    Grid Columns:
+      Grid Columns: Rutenettkolonnar
+      Playlist Grid Columns: Rutenettkolonnar for spelelister
+      Auto: Automatisk
   Context Menu Search Settings:
     Context Menu Search Settings: Søk i høgreklikkmenyen
     Description: Vel kva søkjemotorar som skal visast når du høgreklikkar på merkt tekst. Søka blir opna i standardnettlesaren din.
@@ -2190,6 +2194,8 @@ Tooltips:
     Auto Refresh Interval: "Kor ofte OpenTubeX automatisk oppdaterer abonnementsstraumen medan appen er open. På Android oppdaterer eit intervall over null òg straumen medan appen er lukka."
     Refresh Subscriptions While App Is Closed: "Oppdaterer straumar med innstillingane du har valt. På datamaskina blir OpenTubeX i systemfeltet til du avsluttar. Android avgjer når bakgrunnsoppdateringar køyrer."
   Theme Settings:
+    Thumbnail Size: "Skalerer videominiatyrbilete i rutenett og lister. Rutenett med eit fast tal kolonnar eller visingstypen Full breidd fyller i staden kvar rad, så der endrar han berre listeminiatyrbilete og Shorts. I vindauge på storleik med ein telefon er rutenettminiatyrbilete avgrensa til 100 %."
+    Playlist Thumbnail Size: "Skalerer videominiatyrbilete på spelelistesider. Rutenett med eit fast tal kolonnar eller visingstypen Full breidd fyller i staden kvar rad, så der endrar han berre listeminiatyrbilete og Shorts. I vindauge på storleik med ein telefon er rutenettminiatyrbilete avgrensa til 100 %."
     Compact Settings Categories: "Gøymer skildringar og reduserer høgda på innstillingskategoriar."
     Show Progress as Notification: Viser eit vedvarande varsel med framdrift i sanntid for bakgrunnsoperasjonar, til dømes oppdatering av abonnementsstraumen og nedlasting av administrerte verktøy, i staden for den globale framdriftslinja.
     Always Show Scrollbars: Held rullefelta synlege heile tida. Når dette er slått av, tonar dei ut kort tid etter at du sluttar å flytte musa, og kjem fram att så snart du flyttar henne.

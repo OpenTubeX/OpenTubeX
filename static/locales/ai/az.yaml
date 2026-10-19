@@ -400,6 +400,10 @@ Settings:
       Open in YouTube: YouTube-da aç
     Video View Type:
       Full Width: Tam en
+    Grid Columns:
+      Grid Columns: Şəbəkə sütunları
+      Playlist Grid Columns: Pleylist şəbəkə sütunları
+      Auto: Avtomatik
   Context Menu Search Settings:
     Context Menu Search Settings: Kontekst menyusunda axtarış
     Description: Seçilmiş mətnə sağ kliklədikdə görünəcək axtarış sistemlərini seçin. Axtarışlar ilkin brauzerinizdə açılır.
@@ -1889,6 +1893,8 @@ Tooltips:
     Auto Refresh Interval: Tətbiq açıq olduqda OpenTubeX-in abunəlik axınınızı hansı tezliklə avtomatik yeniləyəcəyi. Android-də sıfırdan fərqli aralıq tətbiq bağlı olduqda da axını yeniləyir.
     Refresh Subscriptions While App Is Closed: "Lentləri seçdiyiniz parametrlərlə yeniləyir. Masaüstündə OpenTubeX çıxana qədər sistem treyində qalır. Android arxa plan yeniləmələrinin vaxtını müəyyən edir."
   Theme Settings:
+    Thumbnail Size: "Şəbəkələrdə və siyahılarda video miniatürlərinin ölçüsünü dəyişir. Sabit sütun sayı və ya Tam en görünüşü olan şəbəkələr əvəzində hər sətri doldurur, ona görə orada yalnız siyahı miniatürlərini və Shorts-u dəyişir. Telefon ölçülü pəncərələrdə şəbəkə miniatürləri 100% ilə məhdudlaşır."
+    Playlist Thumbnail Size: "Pleylist səhifələrində video miniatürlərinin ölçüsünü dəyişir. Sabit sütun sayı və ya Tam en görünüşü olan şəbəkələr əvəzində hər sətri doldurur, ona görə orada yalnız siyahı miniatürlərini və Shorts-u dəyişir. Telefon ölçülü pəncərələrdə şəbəkə miniatürləri 100% ilə məhdudlaşır."
     Compact Settings Categories: "Təsvirləri gizlədir və ayar kateqoriyalarının hündürlüyünü azaldır."
     Show Progress as Notification: Ümumi gedişat zolağı əvəzinə abunəlik yeniləmələri və idarə olunan vasitələrin endirilməsi kimi arxa plan əməliyyatlarının cari gedişatını daimi bildirişdə göstərir.
     Always Show Scrollbars: Sürüşdürmə zolaqlarını həmişə görünən saxlayır. Bağlandıqda, siçanı hərəkət etdirməyi dayandırdıqdan az sonra solub yox olur və onu yenidən hərəkət etdirən kimi görünürlər.

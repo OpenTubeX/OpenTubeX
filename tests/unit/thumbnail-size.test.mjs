@@ -31,12 +31,25 @@ test('only the full width view type fills the row with one card', () => {
   for (const [width, viewportWidth] of [[343, 343], [640, 640], [1200, 1440]]) {
     for (const size of [60, 100, 180]) {
       const sized = getThumbnailGridStyles(size, width, viewportWidth)
-      const fullWidth = getThumbnailGridStyles(size, width, viewportWidth, width, true)
+      const fullWidth = getThumbnailGridStyles(size, width, viewportWidth, width, 1)
       assert.ok(Number.parseFloat(sized['--thumbnail-grid-size']) < width)
       assert.equal(fullWidth['--thumbnail-grid-size'], `${width}px`)
-      assert.equal(fullWidth['--thumbnail-grid-stretch'], 'calc(100% - 0px)')
+      assert.equal(fullWidth['--thumbnail-grid-stretch'], 'calc((100% - 0px) / 1)')
       // Wider windows keep sized Shorts; phones show them through the grid size.
       assert.equal(fullWidth['--shorts-thumbnail-grid-min-size'], sized['--shorts-thumbnail-grid-min-size'])
+    }
+  }
+})
+
+test('a fixed column count fills each row regardless of thumbnail size', () => {
+  for (const [width, viewportWidth] of [[343, 343], [800, 1200], [1600, 1920]]) {
+    for (const columns of [2, 5, 10]) {
+      for (const size of [60, 100, 180]) {
+        const styles = getThumbnailGridStyles(size, width, viewportWidth, width + 12, columns)
+        const cardSize = Number.parseFloat(styles['--thumbnail-grid-size'])
+        assert.ok(Math.abs(cardSize * columns + (columns - 1) * 8 - width) < 1e-9)
+        assert.equal(styles['--thumbnail-grid-stretch'], `calc((100% - ${12 + (columns - 1) * 8}px) / ${columns})`)
+      }
     }
   }
 })

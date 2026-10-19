@@ -400,6 +400,10 @@ Settings:
       Tablet: 'Spjaldtölva'
     Video View Type:
       Full Width: Full breidd
+    Grid Columns:
+      Grid Columns: Dálkar hnitanets
+      Playlist Grid Columns: Dálkar hnitanets spilunarlista
+      Auto: Sjálfvirkt
   Context Menu Search Settings:
     Context Menu Search Settings: Leit í samhengisvalmynd
     Description: Veldu hvaða leitarvélar birtast þegar þú hægrismellir á valinn texta. Leitin opnast í sjálfgefna vafranum þínum.
@@ -1901,6 +1905,8 @@ Tooltips:
     Auto Refresh Interval: "Hversu oft OpenTubeX endurnýjar áskriftarstreymið sjálfkrafa meðan forritið er opið. Í Android endurnýjar bil sem er ekki núll einnig veituna þegar appið er lokað."
     Refresh Subscriptions While App Is Closed: "Endurnýjar efnisveitur með völdum stillingum. Á tölvu helst OpenTubeX í kerfisbakkanum þar til þú hættir. Android stjórnar því hvenær bakgrunnsuppfærslur fara fram."
   Theme Settings:
+    Thumbnail Size: "Breytir stærð smámynda myndskeiða í hnitanetum og listum. Hnitanet með föstum dálkafjölda eða yfirlitsgerðinni Full breidd fylla þess í stað hverja röð, svo þar breytir það aðeins smámyndum í listum og Shorts. Í gluggum á stærð við síma takmarkast smámyndir hnitanets við 100%."
+    Playlist Thumbnail Size: "Breytir stærð smámynda myndskeiða á síðum spilunarlista. Hnitanet með föstum dálkafjölda eða yfirlitsgerðinni Full breidd fylla þess í stað hverja röð, svo þar breytir það aðeins smámyndum í listum og Shorts. Í gluggum á stærð við síma takmarkast smámyndir hnitanets við 100%."
     Compact Settings Categories: "Felur lýsingar og minnkar hæð stillingaflokka."
     Show Progress as Notification: Sýnir tilkynningu með framvindu bakgrunnsaðgerða í rauntíma sem hverfur ekki, svo sem við endurnýjun áskriftarstreymis og niðurhal tóla sem forritið sér um, í stað almennu framvindustikunnar.
     Always Show Scrollbars: Heldur skrunstikum alltaf sýnilegum. Ef slökkt er á þessu dofna þær stuttu eftir að músin hættir að hreyfast og birtast aftur um leið og hún er hreyfð.

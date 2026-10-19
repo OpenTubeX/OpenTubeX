@@ -26,7 +26,7 @@ import { computed, inject, nextTick, onActivated, onBeforeUnmount, onBeforeUpdat
 import store from '../../store/index'
 
 import { getThumbnailGridStyles, PHONE_THUMBNAIL_VIEWPORT_WIDTH } from '../../constants/thumbnailSize'
-import { setThumbnailGridVisible, thumbnailSizeSettingKey, VIEW_TYPE_SETTINGS } from '../../composables/useThumbnailSizeSlider'
+import { GRID_COLUMNS_SETTINGS, setThumbnailGridVisible, thumbnailSizeSettingKey, VIEW_TYPE_SETTINGS } from '../../composables/useThumbnailSizeSlider'
 import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
 import { measureStableGridWidth } from './gridWidth'
 import { measureLeavingItemLayouts } from './leavingItemLayout'
@@ -133,6 +133,13 @@ const moveClass = computed(() => {
   return suppressed ? 'feed-move-suppressed' : undefined
 })
 
+// Grids forced on a list preference, such as Shorts, keep automatic columns.
+function getGridColumns() {
+  const viewType = store.state.settings[VIEW_TYPE_SETTINGS[thumbnailSizeSetting]]
+  if (viewType === 'fullWidth') return 1
+  return viewType === 'grid' ? store.state.settings[GRID_COLUMNS_SETTINGS[thumbnailSizeSetting]] : 0
+}
+
 function applyThumbnailSizeStyles() {
   const element = gridElement.value?.$el
 
@@ -140,8 +147,7 @@ function applyThumbnailSizeStyles() {
     return
   }
 
-  const fullWidth = store.state.settings[VIEW_TYPE_SETTINGS[thumbnailSizeSetting]] === 'fullWidth'
-  const styles = getThumbnailGridStyles(store.state.settings[thumbnailSizeSetting], gridWidth, window.innerWidth, renderedGridWidth, fullWidth)
+  const styles = getThumbnailGridStyles(store.state.settings[thumbnailSizeSetting], gridWidth, window.innerWidth, renderedGridWidth, getGridColumns())
 
   for (const [property, value] of Object.entries(styles)) {
     element.style.setProperty(property, value)
@@ -150,7 +156,8 @@ function applyThumbnailSizeStyles() {
 
 watch(() => [
   store.state.settings[thumbnailSizeSetting],
-  store.state.settings[VIEW_TYPE_SETTINGS[thumbnailSizeSetting]]
+  store.state.settings[VIEW_TYPE_SETTINGS[thumbnailSizeSetting]],
+  store.state.settings[GRID_COLUMNS_SETTINGS[thumbnailSizeSetting]]
 ], applyThumbnailSizeStyles)
 
 let leavingItemLayouts = null

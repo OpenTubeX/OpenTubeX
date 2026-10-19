@@ -176,6 +176,10 @@ Settings:
       Load landing page, keep other tabs unloaded: Wczytaj stronę startową, pozostaw inne karty niewczytane
     Video View Type:
       Full Width: Pełna szerokość
+    Grid Columns:
+      Grid Columns: Kolumny siatki
+      Playlist Grid Columns: Kolumny siatki playlist
+      Auto: Automatycznie
   Theme Settings:
     Material Accent Color: "Kolor akcentu Material"
     Material Wallpaper Colors: "Kolory tapety"
@@ -1094,6 +1098,8 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: Umieszcza nadchodzące transmisje na żywo i premiery na górze kanału subskrypcji. Po wyłączeniu pozostają na pozycji zgodnej z datą ogłoszenia aż do rozpoczęcia. Po wyłączeniu odśwież kanał subskrypcji, aby pobrać daty ogłoszenia istniejących zaplanowanych pozycji.
     Refresh Subscriptions While App Is Closed: "Odświeża kanały zgodnie z wybranymi ustawieniami. Na komputerze OpenTubeX pozostaje w zasobniku systemowym do zamknięcia programu. Android określa czas odświeżania w tle."
   Theme Settings:
+    Thumbnail Size: "Skaluje miniatury filmów w siatkach i listach. Siatki ze stałą liczbą kolumn lub widok Pełna szerokość zamiast tego wypełniają każdy wiersz, więc tam suwak zmienia tylko miniatury list i Shorts. W oknach wielkości telefonu miniatury siatki są ograniczone do 100%."
+    Playlist Thumbnail Size: "Skaluje miniatury filmów na stronach playlist. Siatki ze stałą liczbą kolumn lub widok Pełna szerokość zamiast tego wypełniają każdy wiersz, więc tam suwak zmienia tylko miniatury list i Shorts. W oknach wielkości telefonu miniatury siatki są ograniczone do 100%."
     Compact Settings Categories: "Ukrywa opisy i zmniejsza wysokość kategorii ustawień."
     Show Progress as Notification: Zamiast ogólnego paska postępu wyświetla stałe powiadomienie z bieżącym postępem operacji w tle, takich jak odświeżanie subskrypcji i pobieranie zarządzanych narzędzi.
     Scroll Speed: Zmienia odległość przewijania gestami kółka myszy i panelu dotykowego.

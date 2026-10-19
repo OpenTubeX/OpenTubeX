@@ -450,6 +450,10 @@ Settings:
       List: Liste
     Playlist View Type:
       Playlist View Type: Playlist-Ansicht
+    Grid Columns:
+      Grid Columns: Rasterspalten
+      Playlist Grid Columns: Playlist-Rasterspalten
+      Auto: Automatisch
     Thumbnail Preference:
       Thumbnail Preference: Vorschaubilder
       Default: Standard
@@ -2679,6 +2683,8 @@ Tooltips:
     UseDeArrowTitles: Videotitel durch von der Community eingereichte Titel von DeArrow ersetzen.
     UseDeArrowThumbnails: Video-Miniaturansichten durch Miniaturansichten von DeArrow ersetzen.
   Theme Settings:
+    Thumbnail Size: Skaliert Vorschaubilder in Rastern und Listen. Raster mit fester Spaltenanzahl oder der Ansicht „Volle Breite“ füllen stattdessen jede Zeile, dort ändert der Regler nur Listen-Vorschaubilder und Shorts. In Fenstern mit Smartphone-Größe sind Raster-Vorschaubilder auf 100 % begrenzt.
+    Playlist Thumbnail Size: Skaliert Vorschaubilder auf Playlist-Seiten. Raster mit fester Spaltenanzahl oder der Ansicht „Volle Breite“ füllen stattdessen jede Zeile, dort ändert der Regler nur Listen-Vorschaubilder und Shorts. In Fenstern mit Smartphone-Größe sind Raster-Vorschaubilder auf 100 % begrenzt.
     Show Progress as Notification: >-
       Zeigt bei Hintergrundvorgängen wie dem Aktualisieren von Abos und Downloads verwalteter Werkzeuge eine dauerhafte
       Benachrichtigung mit dem aktuellen Fortschritt anstelle des globalen Fortschrittsbalkens an.

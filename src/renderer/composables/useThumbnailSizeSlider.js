@@ -15,6 +15,12 @@ export const VIEW_TYPE_SETTINGS = {
   playlistThumbnailSize: 'playlistViewType'
 }
 
+/** The grid column setting that pairs with each thumbnail size setting. */
+export const GRID_COLUMNS_SETTINGS = {
+  thumbnailSize: 'gridColumns',
+  playlistThumbnailSize: 'playlistGridColumns'
+}
+
 const visibleGrids = shallowReactive(new Map())
 
 // Some views, including YouTube-style Shorts, force a grid even when the

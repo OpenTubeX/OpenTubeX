@@ -254,6 +254,17 @@
         @change="updateListType"
       />
       <FtSelect
+        v-if="mode === 'appearance' && listType === 'grid'"
+        size-to-content
+        :placeholder="t('Settings.General Settings.Grid Columns.Grid Columns')"
+        :value="gridColumns"
+        setting-key="gridColumns"
+        :select-names="gridColumnNames"
+        :select-values="GRID_COLUMN_VALUES"
+        :icon="['fas', 'table-columns']"
+        @change="updateGridColumns"
+      />
+      <FtSelect
         v-if="mode === 'appearance'"
         size-to-content
         :placeholder="t('Settings.General Settings.Playlist View Type.Playlist View Type')"
@@ -263,6 +274,17 @@
         :select-values="VIEW_TYPE_VALUES"
         :icon="VIEW_TYPE_ICONS[playlistViewType]"
         @change="updatePlaylistViewType"
+      />
+      <FtSelect
+        v-if="mode === 'appearance' && playlistViewType === 'grid'"
+        size-to-content
+        :placeholder="t('Settings.General Settings.Grid Columns.Playlist Grid Columns')"
+        :value="playlistGridColumns"
+        setting-key="playlistGridColumns"
+        :select-names="gridColumnNames"
+        :select-values="GRID_COLUMN_VALUES"
+        :icon="['fas', 'table-columns']"
+        @change="updatePlaylistGridColumns"
       />
       <FtSelect
         v-if="mode === 'appearance'"
@@ -383,6 +405,32 @@
         @change="updateRegion"
       />
     </div>
+    <FtSliderGrid v-if="mode === 'appearance'">
+      <FtSlider
+        :label="t('Settings.Theme Settings.Thumbnail Size')"
+        :tooltip="t('Tooltips.Theme Settings.Thumbnail Size')"
+        :default-value="thumbnailSize"
+        setting-key="thumbnailSize"
+        :min-value="MIN_THUMBNAIL_SIZE"
+        :max-value="maxThumbnailSize"
+        :step="THUMBNAIL_SIZE_STEP"
+        value-extension="%"
+        @input="previewThumbnailSize"
+        @change="updateThumbnailSize"
+      />
+      <FtSlider
+        :label="t('Settings.Theme Settings.Playlist Thumbnail Size')"
+        :tooltip="t('Tooltips.Theme Settings.Playlist Thumbnail Size')"
+        :default-value="playlistThumbnailSize"
+        setting-key="playlistThumbnailSize"
+        :min-value="MIN_THUMBNAIL_SIZE"
+        :max-value="maxPlaylistThumbnailSize"
+        :step="THUMBNAIL_SIZE_STEP"
+        value-extension="%"
+        @input="previewPlaylistThumbnailSize"
+        @change="updatePlaylistThumbnailSize"
+      />
+    </FtSliderGrid>
     <div
       v-if="mode === 'providers' && (backendPreference === 'invidious' || backendFallback)"
     >
@@ -458,6 +506,8 @@ import { useRouter } from 'vue-router'
 
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
+import FtSlider from '../FtSlider/FtSlider.vue'
+import FtSliderGrid from '../FtSliderGrid/FtSliderGrid.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import FtCheckboxList from '../FtCheckboxList/FtCheckboxList.vue'
@@ -474,6 +524,8 @@ import { translateWindowTitle } from '../../helpers/strings'
 import { initializePlatformInfo, supportsAutoPictureInPictureMinimize } from '../../helpers/platform'
 import { filterAvailableNavigationItems } from '../../../navigationAvailability'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
+import { useThumbnailSizeSlider } from '../../composables/useThumbnailSizeSlider'
+import { MIN_THUMBNAIL_SIZE, THUMBNAIL_SIZE_STEP } from '../../constants/thumbnailSize'
 import {
   DATE_FORMAT_OPTIONS,
   TIME_FORMAT_OPTIONS,
@@ -830,6 +882,58 @@ const playlistViewType = computed(() => store.getters.getPlaylistViewType)
  */
 function updatePlaylistViewType(value) {
   store.dispatch('updatePlaylistViewType', value)
+}
+
+// 0 lets the window width and thumbnail size decide; one column is Full Width.
+const GRID_COLUMN_VALUES = [0, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+const gridColumnNames = computed(() => GRID_COLUMN_VALUES.map(columns => (
+  columns === 0 ? t('Settings.General Settings.Grid Columns.Auto') : String(columns)
+)))
+
+/** @type {import('vue').ComputedRef<number>} */
+const gridColumns = computed(() => store.getters.getGridColumns)
+
+/**
+ * @param {number} value
+ */
+function updateGridColumns(value) {
+  store.dispatch('updateGridColumns', value)
+}
+
+/** @type {import('vue').ComputedRef<number>} */
+const playlistGridColumns = computed(() => store.getters.getPlaylistGridColumns)
+
+/**
+ * @param {number} value
+ */
+function updatePlaylistGridColumns(value) {
+  store.dispatch('updatePlaylistGridColumns', value)
+}
+
+const { thumbnailSize, maxThumbnailSize } = useThumbnailSizeSlider()
+const { thumbnailSize: playlistThumbnailSize, maxThumbnailSize: maxPlaylistThumbnailSize } = useThumbnailSizeSlider('playlistThumbnailSize')
+
+/**
+ * @param {number} value
+ */
+function previewThumbnailSize(value) {
+  store.commit('setThumbnailSize', value)
+}
+
+/**
+ * @param {number} value
+ */
+function updateThumbnailSize(value) {
+  store.dispatch('updateThumbnailSize', value)
+}
+
+function previewPlaylistThumbnailSize(value) {
+  store.commit('setPlaylistThumbnailSize', value)
+}
+
+function updatePlaylistThumbnailSize(value) {
+  store.dispatch('updatePlaylistThumbnailSize', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

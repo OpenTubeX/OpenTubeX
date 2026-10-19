@@ -400,6 +400,10 @@ Settings:
       Tablet: 'Surfplatta'
     Video View Type:
       Full Width: Full bredd
+    Grid Columns:
+      Grid Columns: Rutnätskolumner
+      Playlist Grid Columns: Rutnätskolumner för spellistor
+      Auto: Automatiskt
   Context Menu Search Settings:
     Context Menu Search Settings: Sökning från snabbmenyn
     Description: Välj vilka sökmotorer som visas när du högerklickar på markerad text. Sökningar öppnas i din standardwebbläsare.
@@ -1896,6 +1900,8 @@ Tooltips:
     Auto Refresh Interval: "Hur ofta OpenTubeX automatiskt uppdaterar prenumerationsflödet medan appen är öppen. På Android uppdaterar ett intervall över noll även flödet när appen är stängd."
     Refresh Subscriptions While App Is Closed: "Uppdaterar flöden med dina valda inställningar. På datorn stannar OpenTubeX i systemfältet tills du avslutar. Android bestämmer när bakgrundsuppdateringar körs."
   Theme Settings:
+    Thumbnail Size: "Skalar videominiatyrer i rutnät och listor. Rutnät med ett fast antal kolumner eller vytypen Full bredd fyller i stället varje rad, så där ändrar reglaget bara listminiatyrer och Shorts. I fönster i telefonstorlek är rutnätsminiatyrer begränsade till 100 %."
+    Playlist Thumbnail Size: "Skalar videominiatyrer på spellistesidor. Rutnät med ett fast antal kolumner eller vytypen Full bredd fyller i stället varje rad, så där ändrar reglaget bara listminiatyrer och Shorts. I fönster i telefonstorlek är rutnätsminiatyrer begränsade till 100 %."
     Compact Settings Categories: "Döljer beskrivningar och minskar höjden på inställningskategorier."
     Show Progress as Notification: Visar en beständig avisering med aktuellt förlopp för bakgrundsåtgärder, exempelvis uppdatering av prenumerationer och nedladdning av hanterade verktyg, i stället för det globala förloppsfältet.
     Always Show Scrollbars: Håller rullningslisterna synliga hela tiden. När funktionen är inaktiverad tonas de bort en kort stund efter att du slutat röra musen och visas igen så snart du rör den.

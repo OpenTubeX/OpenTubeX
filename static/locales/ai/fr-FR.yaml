@@ -398,6 +398,10 @@ Settings:
       Tablet: 'Tablette'
     Video View Type:
       Full Width: Pleine largeur
+    Grid Columns:
+      Grid Columns: Colonnes de la grille
+      Playlist Grid Columns: Colonnes de la grille des playlists
+      Auto: Automatique
   Context Menu Search Settings:
     Context Menu Search Settings: Recherche du menu contextuel
     Description: Choisissez les moteurs de recherche proposés lorsque vous faites un clic droit sur du texte sélectionné. Les recherches s’ouvrent dans votre navigateur par défaut.
@@ -1875,6 +1879,8 @@ Tooltips:
     Auto Refresh Interval: "Fréquence à laquelle OpenTubeX actualise automatiquement votre flux d’abonnements tant que l’application est ouverte. Sur Android, un intervalle non nul actualise aussi le flux lorsque l’application est fermée."
     Refresh Subscriptions While App Is Closed: "Actualise les flux avec les paramètres choisis. Sur ordinateur, OpenTubeX reste dans la zone de notification jusqu’à ce que vous le quittiez. Android détermine quand les actualisations en arrière-plan s’exécutent."
   Theme Settings:
+    Thumbnail Size: "Redimensionne les miniatures des vidéos dans les grilles et les listes. Les grilles avec un nombre de colonnes fixe ou le type d’affichage Pleine largeur remplissent plutôt chaque ligne ; le curseur n’y modifie donc que les miniatures des listes et les Shorts. Dans les fenêtres de la taille d’un téléphone, les miniatures de la grille sont limitées à 100 %."
+    Playlist Thumbnail Size: "Redimensionne les miniatures des vidéos sur les pages de playlists. Les grilles avec un nombre de colonnes fixe ou le type d’affichage Pleine largeur remplissent plutôt chaque ligne ; le curseur n’y modifie donc que les miniatures des listes et les Shorts. Dans les fenêtres de la taille d’un téléphone, les miniatures de la grille sont limitées à 100 %."
     Compact Settings Categories: "Masque les descriptions et réduit la hauteur des catégories de paramètres."
     Show Progress as Notification: Affiche une notification persistante indiquant en temps réel la progression des opérations en arrière-plan, comme l’actualisation des abonnements et le téléchargement des outils gérés, au lieu d’utiliser la barre de progression globale.
     Always Show Scrollbars: Maintient les barres de défilement visibles en permanence. Lorsque cette option est désactivée, elles disparaissent peu après l’arrêt du mouvement de la souris et réapparaissent dès que vous la déplacez.

@@ -398,6 +398,10 @@ Settings:
       Tablet: 'Tablezenn'
     Video View Type:
       Full Width: Led klok
+    Grid Columns:
+      Grid Columns: Bannoù ar gael
+      Playlist Grid Columns: Bannoù gael ar rolloù-lenn
+      Auto: Emgefreek
   Context Menu Search Settings:
     Context Menu Search Settings: "Klask diwar ar roll lañser"
     Description: "Dibabit ar c'hefluskerioù enklask a vo diskouezet pa glikot a-zehou war destenn diuzet. Digoret e vo an enklaskoù en ho merdeer dre ziouer."
@@ -1885,6 +1889,8 @@ Tooltips:
     Auto Refresh Interval: "Alies ma adkarg OpenTubeX gwazh ho koumanantoù ent emgefreek pa vez digor an arload. War Android, un etremez anvannel a freska ar gwazh ivez pa vez serret an arload."
     Refresh Subscriptions While App Is Closed: "Hizivaat a ra al lanvioù gant an arventennoù dibabet. War an urzhiataer e chom OpenTubeX e takad ar c'hemennoù betek kuitaat. Android a ziviz pegoulz e vez hizivaet en drekleur."
   Theme Settings:
+    Thumbnail Size: "Cheñch a ra ment ar skeudennigoù videoioù er gaelioù hag el listennoù. Ar gaelioù gant un niver a vannoù start pe gant ar gwel Led klok a leugn pep renk e-lec'h, neuze ne cheñch nemet skeudennigoù al listennoù hag ar Shorts eno. War ar prenestroù ment ur pellgomzer eo bevennet skeudennigoù ar gael da 100%."
+    Playlist Thumbnail Size: "Cheñch a ra ment ar skeudennigoù videoioù war pajennoù ar rolloù-lenn. Ar gaelioù gant un niver a vannoù start pe gant ar gwel Led klok a leugn pep renk e-lec'h, neuze ne cheñch nemet skeudennigoù al listennoù hag ar Shorts eno. War ar prenestroù ment ur pellgomzer eo bevennet skeudennigoù ar gael da 100%."
     Compact Settings Categories: "Kuzhat a ra an deskrivadurioù ha bihanaat a ra uhelder rummadoù an arventennoù."
     Show Progress as Notification: "Diskouez ur rebuad padus gant araokadur diouzhtu evit an oberoù en drekleur, evel adkargañ ar c'houmanantoù ha pellgargañ ostilhoù meret, e-lec'h implijout ar varrenn araokadur hollek."
     Always Show Scrollbars: "Derc'hel ar barrennoù dibunañ gwelus bepred. Pa vez diweredekaet e steuziont nebeut goude ma paouezit da zilec'hiañ al logodenn hag e tistroont kerkent ha ma tilec'hiit anezhi en-dro."
