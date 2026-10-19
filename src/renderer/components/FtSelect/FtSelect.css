@@ -454,7 +454,7 @@
 
 /* Thicken all four edges without moving the label at fractional zoom. */
 .select.outlined .select-text:focus {
-  box-shadow: inset calc(var(--focus-border-width) - 1px) 0 var(--primary-color), inset calc(1px - var(--focus-border-width)) 0 var(--primary-color);
+  box-shadow: inset calc(var(--focus-border-width) / 2) 0 var(--primary-color), inset calc(var(--focus-border-width) / -2) 0 var(--primary-color);
 }
 
 @media (forced-colors: active) {

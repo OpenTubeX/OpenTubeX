@@ -316,7 +316,7 @@
    without changing the legend's position, including at fractional zoom. */
 .outlined.floatingLabel .ft-input:focus {
   border-color: transparent;
-  box-shadow: inset calc(var(--focus-border-width) - 1px) 0 var(--primary-color), inset calc(1px - var(--focus-border-width)) 0 var(--primary-color);
+  box-shadow: inset calc(var(--focus-border-width) / 2) 0 var(--primary-color), inset calc(var(--focus-border-width) / -2) 0 var(--primary-color);
 }
 
 .outlined .selectLabelIcon :deep(.ft-icon__glyph) {
