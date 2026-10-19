@@ -796,6 +796,7 @@ test.describe('tab bar', () => {
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(4)
 
     const tabs = page.locator(sel.tabs)
     await tabs.first().click()
@@ -819,6 +820,7 @@ test.describe('tab bar', () => {
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(4)
 
     const tabs = page.locator(sel.tabs)
     await tabs.first().click()
@@ -851,6 +853,7 @@ test.describe('tab bar', () => {
   test('applies close and reload shortcuts to the selected tabs', async ({ page }) => {
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(3)
 
     let tabs = page.locator(sel.tabs)
     await tabs.first().click()
@@ -1104,6 +1107,7 @@ test.describe('tab bar', () => {
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(4)
 
     const result = await page.evaluate(async () => {
       const initialState = await window.ftElectron.tabs.getState()
@@ -1147,6 +1151,7 @@ test.describe('tab bar', () => {
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(4)
 
     const tabs = page.locator(sel.tabs)
     const originalIds = await tabs.evaluateAll(elements => {
@@ -1201,6 +1206,7 @@ test.describe('tab bar', () => {
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(5)
 
     const tabs = page.locator(sel.tabs)
     const originalIds = await tabs.evaluateAll(elements => {
@@ -1317,6 +1323,7 @@ test.describe('tab bar', () => {
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(4)
 
     const neighborAnimation = await page.evaluate(() => {
       const tabs = Array.from(document.querySelectorAll('.tabBar .tab'))
@@ -1431,6 +1438,7 @@ test.describe('tab bar', () => {
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(5)
 
     const tabs = page.locator(sel.tabs)
     const originalIds = await tabs.evaluateAll(elements => {
@@ -1503,6 +1511,7 @@ test.describe('tab bar', () => {
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(4)
 
     const tabs = page.locator(sel.tabs)
     const originalIds = await tabs.evaluateAll(elements => {
