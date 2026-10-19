@@ -1482,3 +1482,87 @@ test.describe('history date and channel browsing', () => {
     })).toEqual({ target: 60, buttons: [true, true] })
   })
 })
+
+test.describe('lazy history channel picker', () => {
+  const channelNames = Array.from({ length: 400 }, (_, index) => `Picker channel ${String(index).padStart(4, '0')}`)
+  test.use({
+    seed: {
+      history: channelNames.map((author, index) =>
+        historyEntry(`picker${String(index).padStart(5, '0')}`, `Picker video ${index}`, now - index * 60_000, false, { author, authorId: `UC-picker-${index}` })),
+    },
+  })
+
+  async function openChannelPicker(page) {
+    await openHistoryFilters(page)
+    const picker = page.getByRole('combobox', { name: 'Channel', exact: true })
+    await picker.click()
+    return page.locator(`#${await picker.getAttribute('aria-controls')}`)
+  }
+
+  test('reopens at a late selection and keeps rows in place while loading earlier pages @scale', async ({ page }) => {
+    await page.setViewportSize({ width: 400, height: 800 })
+    const selected = channelNames.at(-150)
+    await goTo(page, 'history')
+    let dropdown = await openChannelPicker(page)
+    await page.locator('.mobileSheet[open]').getByRole('searchbox', { name: 'Search', exact: true }).fill(selected)
+    await dropdown.getByRole('option', { name: selected, exact: true }).click()
+    const picker = page.getByRole('combobox', { name: 'Channel', exact: true })
+    await expect(picker).toContainText(selected)
+    await expect(page.locator('.mobileSheet[open]')).toHaveCount(0)
+
+    await picker.click()
+    dropdown = page.locator(`#${await picker.getAttribute('aria-controls')}`)
+    const options = dropdown.getByRole('option')
+    const selectedOption = dropdown.getByRole('option', { name: selected, exact: true })
+    await expect(selectedOption).toHaveAttribute('aria-selected', 'true')
+    await expect(selectedOption).toBeInViewport()
+    // Only the selected option's page is rendered, not the pages before it.
+    expect(await options.count()).toBeLessThanOrEqual(200)
+    await expect(dropdown.getByRole('option', { name: 'All channels', exact: true })).toHaveCount(0)
+
+    // Loading the page above must not move the rows that are already visible.
+    const firstRendered = options.first()
+    const firstName = await firstRendered.textContent()
+    const renderedCount = await options.count()
+    await dropdown.evaluate(menu => { menu.scrollTop = 0 })
+    await expect.poll(() => options.count()).toBeGreaterThan(renderedCount)
+    await expect.poll(() => dropdown.evaluate(menu => menu.scrollTop)).toBeGreaterThan(0)
+    await expect(dropdown.getByRole('option', { name: firstName.trim(), exact: true })).toBeInViewport()
+  })
+
+  test('clamps the scrolled picker when searching shortens it @scale', async ({ page }) => {
+    await page.setViewportSize({ width: 400, height: 800 })
+    await goTo(page, 'history')
+    const dropdown = await openChannelPicker(page)
+    const sheet = page.locator('.mobileSheet[open]').filter({ has: dropdown })
+    const options = dropdown.getByRole('option')
+    const scrollbar = dropdown.locator(':scope > .os-scrollbar-vertical')
+
+    // Scroll to the bottom until every page is loaded.
+    await expect(async () => {
+      await dropdown.evaluate(menu => { menu.scrollTop = menu.scrollHeight })
+      expect(await options.count()).toBe(channelNames.length + 1)
+    }).toPass()
+    await expect(dropdown.getByRole('option', { name: channelNames.at(-1), exact: true })).toBeInViewport()
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+
+    await sheet.getByRole('searchbox', { name: 'Search', exact: true }).fill('0123')
+    await expect(options).toHaveCount(1)
+    await expect(options.first()).toBeInViewport()
+    await expect.poll(() => dropdown.evaluate(menu =>
+      menu.scrollTop <= 1 && menu.scrollHeight <= menu.clientHeight + 1
+    )).toBe(true)
+    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+  })
+
+  test('End and Home reach the ends of the phone picker', async ({ page }) => {
+    await page.setViewportSize({ width: 400, height: 800 })
+    await goTo(page, 'history')
+    const dropdown = await openChannelPicker(page)
+    await expect(dropdown).toBeFocused()
+    await page.keyboard.press('End')
+    await expect(dropdown.getByRole('option', { name: channelNames.at(-1), exact: true })).toBeFocused()
+    await page.keyboard.press('Home')
+    await expect(dropdown.getByRole('option', { name: 'All channels', exact: true })).toBeFocused()
+  })
+})
