@@ -123,11 +123,15 @@ export async function openMockedVideo(page, videoId = 'jNQXAC9IVRw') {
   const previousPlayer = !new RegExp(`#\\/watch\\/${videoId}`).test(page.url()) && await player.count() > 0
     ? await player.elementHandle()
     : null
-  await page.locator(sel.searchInput).fill(`https://www.youtube.com/watch?v=${videoId}`)
-  await page.locator(sel.searchInput).press('Enter')
-  await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${videoId}`))
-  if (previousPlayer) {
-    await expect.poll(() => previousPlayer.evaluate(element => element.isConnected), { timeout: 30_000 }).toBe(false)
+  try {
+    await page.locator(sel.searchInput).fill(`https://www.youtube.com/watch?v=${videoId}`)
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${videoId}`))
+    if (previousPlayer) {
+      await expect.poll(() => previousPlayer.evaluate(element => element.isConnected), { timeout: 30_000 }).toBe(false)
+    }
+  } finally {
+    await previousPlayer?.dispose()
   }
   await expect(player).toBeVisible({ timeout: 30_000 })
 
