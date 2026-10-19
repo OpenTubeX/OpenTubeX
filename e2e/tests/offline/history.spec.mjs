@@ -1492,6 +1492,22 @@ test.describe('lazy history channel picker', () => {
     },
   })
 
+  async function expectListWithinScrollRange(list) {
+    await expect.poll(() => list.evaluate(menu => {
+      const maximumScrollTop = Math.max(0, menu.scrollHeight - menu.clientHeight)
+      const scrollbar = menu.querySelector(':scope > .os-scrollbar-vertical')
+      const rows = menu.querySelectorAll(':scope > li')
+      const contentBottom = rows[rows.length - 1].getBoundingClientRect().bottom +
+        Number.parseFloat(getComputedStyle(menu).paddingBottom)
+      return {
+        withinRange: menu.scrollTop <= maximumScrollTop + 1,
+        // Scrolled lists end at their content without empty space below it.
+        noEmptySpace: menu.scrollTop <= 1 || Math.abs(contentBottom - menu.getBoundingClientRect().bottom) <= 1,
+        scrollbarMatchesOverflow: scrollbar.classList.contains('os-scrollbar-unusable') === (maximumScrollTop <= 1),
+      }
+    })).toEqual({ withinRange: true, noEmptySpace: true, scrollbarMatchesOverflow: true })
+  }
+
   async function openChannelPicker(page) {
     await openHistoryFilters(page)
     const picker = page.getByRole('combobox', { name: 'Channel', exact: true })
@@ -1553,6 +1569,38 @@ test.describe('lazy history channel picker', () => {
       menu.scrollTop <= 1 && menu.scrollHeight <= menu.clientHeight + 1
     )).toBe(true)
     await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+  })
+
+  test('loads the next page before the end of the list is visible @scale', async ({ page }) => {
+    await goTo(page, 'history')
+    const dropdown = await openChannelPicker(page)
+    const options = dropdown.getByRole('option')
+    await expect(options).toHaveCount(100)
+    await dropdown.evaluate(menu => { menu.scrollTop = menu.scrollHeight - menu.clientHeight - 100 })
+    await expect(options).toHaveCount(200)
+  })
+
+  test('resets the scrolled picker when it crosses the phone layout breakpoint @scale', async ({ page }) => {
+    await page.setViewportSize({ width: 400, height: 800 })
+    await goTo(page, 'history')
+    const dropdown = await openChannelPicker(page)
+    const options = dropdown.getByRole('option')
+    await expect(async () => {
+      await dropdown.evaluate(menu => { menu.scrollTop = menu.scrollHeight })
+      expect(await options.count()).toBe(channelNames.length + 1)
+    }).toPass()
+
+    // Leaving the phone layout closes the sheet instead of keeping a shortened
+    // list open. Reopening starts from the first page within its range.
+    const picker = page.getByRole('combobox', { name: 'Channel', exact: true })
+    await page.setViewportSize({ width: 1200, height: 800 })
+    await expect(picker).toHaveAttribute('aria-expanded', 'false')
+    await expect(dropdown).toHaveCount(0)
+    await picker.click()
+    await expect(dropdown).not.toHaveClass(/phonePicker/)
+    await expect(options).toHaveCount(100)
+    await expect.poll(() => dropdown.evaluate(menu => menu.scrollTop)).toBeLessThanOrEqual(1)
+    await expectListWithinScrollRange(dropdown)
   })
 
   test('End and Home reach the ends of the phone picker', async ({ page }) => {
