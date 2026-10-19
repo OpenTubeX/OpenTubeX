@@ -74,6 +74,7 @@ test.describe('SponsorBlock submission', { tag: '@scale' }, () => {
         await page.emulateMedia({ colorScheme: scheme })
         await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${scheme}\\b`))
         await page.locator('.ftVideoPlayer').hover()
+        await expect(page.locator('.shaka-seek-bar-container')).toHaveCSS('opacity', '1')
         const screenshot = await capture(app)
         const samples = await page.evaluate(async screenshotBase64 => {
           const image = new Image()

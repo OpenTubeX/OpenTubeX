@@ -985,7 +985,8 @@ test('Twitch livestream omits playback speed from player options', async ({ app,
   await expect(player.locator('.shaka-overflow-menu-button')).toBeVisible()
   expect(await player.locator('video').evaluate(video => video.ui.getConfiguration().overflowMenuButtons)).not.toContain('playback_rate')
   expect(await player.locator('video').evaluate(video => video.ui.getConfiguration().controlPanelElements)).not.toContain('ft_quick_playback_rate_bar')
-  expect(await player.locator('video').evaluate(video => video.playbackRate)).toBe(1)
+  // Shaka temporarily sets the effective rate to zero while buffering.
+  await expect.poll(() => player.locator('video').evaluate(video => video.playbackRate)).toBe(1)
 })
 
 test('external media starts at the default playback speed', async ({ app, page }) => {
