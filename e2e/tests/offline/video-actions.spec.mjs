@@ -434,6 +434,7 @@ test.describe('video downloads', () => {
     await writeFile(downloadedFile, '')
     await writeFile(executable, [
       '#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
       `printf '%s\\n' "$@" > '${capturedArgs}'`,
       `printf '%s\\n' '${metadataLine}'`,
       `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t1\\t640\\t360\\t${downloadedFile}\\n'`
@@ -470,6 +471,7 @@ test.describe('video downloads', () => {
     await writeFile(downloadedFile, '')
     await writeFile(executable, [
       '#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
       `printf '%s\\n' '${metadataLine}'`,
       `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t1\\t640\\t360\\t${downloadedFile}\\n'`
     ].join('\n'))
@@ -725,7 +727,7 @@ test.describe('video downloads', () => {
   test('applies global custom arguments before download-specific arguments', async ({ app, page }) => {
     const executable = path.join(app.userDataDir, 'capture-global-yt-dlp-args.sh')
     const capturedArgs = path.join(app.userDataDir, 'captured-global-yt-dlp-args.txt')
-    await writeFile(executable, `#!/bin/sh\nprintf '%s\\n' "$@" > "${capturedArgs}"\n`)
+    await writeFile(executable, `#!/bin/sh\nif [ "$1" = "--version" ]; then echo 2026.08.19; exit; fi\nprintf '%s\\n' "$@" > "${capturedArgs}"\n`)
     await chmod(executable, 0o755)
     await page.evaluate(async ({ ytDlpPath, globalArgs }) => {
       const store = window.$store
@@ -774,7 +776,7 @@ test.describe('video downloads', () => {
   test('escapes percent signs in local playlist folder names', async ({ app, page }) => {
     const executable = path.join(app.userDataDir, 'capture-yt-dlp-args.sh')
     const capturedArgs = path.join(app.userDataDir, 'captured-yt-dlp-args.txt')
-    await writeFile(executable, `#!/bin/sh\nprintf '%s\\n' "$@" > "${capturedArgs}"\n`)
+    await writeFile(executable, `#!/bin/sh\nif [ "$1" = "--version" ]; then echo 2026.08.19; exit; fi\nprintf '%s\\n' "$@" > "${capturedArgs}"\n`)
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
       const store = window.$store
@@ -795,7 +797,7 @@ test.describe('video downloads', () => {
   test('prefixes Windows reserved local playlist folder names', async ({ app, page }) => {
     const executable = path.join(app.userDataDir, 'capture-yt-dlp-args.sh')
     const capturedArgs = path.join(app.userDataDir, 'captured-yt-dlp-args.txt')
-    await writeFile(executable, `#!/bin/sh\nprintf '%s\\n' "$@" > "${capturedArgs}"\n`)
+    await writeFile(executable, `#!/bin/sh\nif [ "$1" = "--version" ]; then echo 2026.08.19; exit; fi\nprintf '%s\\n' "$@" > "${capturedArgs}"\n`)
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
       const store = window.$store
@@ -836,7 +838,7 @@ test.describe('video downloads', () => {
 
   test('keeps untitled multi-video downloads in history', async ({ app, page }) => {
     const executable = path.join(app.userDataDir, 'fake-yt-dlp.sh')
-    await writeFile(executable, '#!/bin/sh\nsleep 0.2\n')
+    await writeFile(executable, '#!/bin/sh\nif [ "$1" = "--version" ]; then echo 2026.08.19; exit; fi\nsleep 0.2\n')
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
       const store = window.$store
@@ -865,6 +867,7 @@ test.describe('video downloads', () => {
     await writeFile(downloadedFile, '')
     await writeFile(executable, [
       '#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
       `printf '%s\\n' '${metadataLine}'`,
       `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t1\\t640\\t360\\t${downloadedFile}\\n'`
     ].join('\n'))
@@ -903,6 +906,7 @@ test.describe('video downloads', () => {
     await writeFile(downloadedFile, '')
     await writeFile(executable, [
       '#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
       'printf \'__OPENTUBEX_METADATA__:"eeeeeeeeeee"\\t"Current video title"\\tnull\\tnull\\tnull\\n\'',
       `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t1\\t640\\t360\\t${downloadedFile}\\n'`
     ].join('\n'))
@@ -941,6 +945,7 @@ test.describe('video downloads', () => {
     await writeFile(downloadedAudioFile, silentWav(2))
     await writeFile(executable, [
       '#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
       `printf '%s\\n' "$@" >> '${argumentsFile}'`,
       'if printf \'%s\\n\' "$@" | grep -q -- \'--extract-audio\'; then',
       `  printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t2\\tNA\\tNA\\t${downloadedAudioFile}\\n'`,
@@ -1129,6 +1134,7 @@ test.describe('video downloads', () => {
     const fallbackDownloadFolder = await app.electronApp.evaluate(({ app }) => app.getPath('temp'))
     await writeFile(executable, [
       '#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
       `printf '%s\\n' "$@" > '${argumentsFile}'`,
       'exit 1'
     ].join('\n'))
@@ -1164,6 +1170,7 @@ test.describe('video downloads', () => {
     await writeFile(downloadedFile, silentWav(duration))
     await writeFile(executable, [
       '#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
       `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t${duration}\\tNA\\tNA\\t${downloadedFile}\\n'`
     ].join('\n'))
     await chmod(executable, 0o755)
@@ -1202,6 +1209,7 @@ test.describe('video downloads', () => {
     await writeFile(downloadedFile, '')
     await writeFile(executable, [
       '#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
       `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t1\\tNA\\tNA\\t${downloadedFile}\\n'`
     ].join('\n'))
     await chmod(executable, 0o755)
@@ -1242,6 +1250,7 @@ test.describe('video downloads', () => {
     await mkdir(downloadedDirectory)
     await writeFile(executable, [
       '#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
       `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t1\\tNA\\tNA\\t${downloadedDirectory}\\n'`
     ].join('\n'))
     await chmod(executable, 0o755)
@@ -1271,6 +1280,7 @@ test.describe('video downloads', () => {
     await copyFile(DEMO_MEDIA_PATH, availableFile)
     await writeFile(executable, [
       '#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
       `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t${availableFile}\\n'`,
       `printf '__OPENTUBEX_FILE__:fffffffffff\\t${missingFile}\\n'`
     ].join('\n'))
@@ -1311,7 +1321,7 @@ test.describe('video downloads', () => {
 
   test('broadcasts active downloads to other windows', async ({ app, page }) => {
     const executable = path.join(app.userDataDir, 'fake-yt-dlp.sh')
-    await writeFile(executable, '#!/bin/sh\nprintf "[download] 10.0%% at 1MiB/s ETA 00:10\\n"\nexec sleep 30\n')
+    await writeFile(executable, '#!/bin/sh\nif [ "$1" = "--version" ]; then echo 2026.08.19; exit; fi\nprintf "[download] 10.0%% at 1MiB/s ETA 00:10\\n"\nexec sleep 30\n')
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
       const store = window.$store
@@ -1358,7 +1368,7 @@ test.describe('video downloads', () => {
 
   test('flushes completed download history before quitting', async ({ app, page }) => {
     const executable = path.join(app.userDataDir, 'fake-yt-dlp.sh')
-    await writeFile(executable, '#!/bin/sh\nprintf "[download] 100.0%% at 1MiB/s ETA 00:00\\n"\nsleep 0.2\n')
+    await writeFile(executable, '#!/bin/sh\nif [ "$1" = "--version" ]; then echo 2026.08.19; exit; fi\nprintf "[download] 100.0%% at 1MiB/s ETA 00:00\\n"\nsleep 0.2\n')
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
       const store = window.$store
@@ -1387,6 +1397,7 @@ test.describe('video downloads', () => {
     // yt-dlp announces subtitle files on stdout instead of the `--print` output
     await writeFile(executable, [
       '#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
       `printf '%s\\n' "$@" > ${argumentsFile}`,
       'printf "[info] Writing video subtitles to: /tmp/subtitles.en.srt\\n"',
       'printf "[info] Writing video subtitles to: /tmp/subtitles.de.srt\\n"'
@@ -1443,6 +1454,7 @@ test.describe('video downloads', () => {
     const metadataLine = `__OPENTUBEX_METADATA__:${JSON.stringify('eeeeeeeeeee')}\t${JSON.stringify(longTitle)}\tnull\tnull\tnull`
     await writeFile(executable, [
       '#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
       `printf '%s\\n' "$@" > ${argumentsFile}`,
       `printf '%s\\n' '${metadataLine}'`,
       'printf "[info] Writing video subtitles to: /tmp/subtitles.en.srt\\n"'
@@ -1479,6 +1491,7 @@ test.describe('video downloads', () => {
     const attemptMarker = path.join(app.userDataDir, 'subtitle-retry-attempted')
     await writeFile(executable, [
       '#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
       'printf "[info] Writing video subtitles to: /tmp/subtitles.en.vtt\\n"',
       `if [ -f ${attemptMarker} ]; then exit 0; fi`,
       `printf retried > ${attemptMarker}`,
@@ -1524,6 +1537,7 @@ test.describe('video downloads', () => {
     const attemptsFile = path.join(app.userDataDir, 'retry-attempts.txt')
     await writeFile(executable, [
       '#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
       `printf 'retry\\n' >> '${attemptsFile}'`,
       'sleep 0.5',
       'exit 1'
@@ -1561,6 +1575,7 @@ test.describe('video downloads', () => {
     const attemptsFile = path.join(app.userDataDir, 'concurrent-retry-attempts.txt')
     await writeFile(executable, [
       '#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
       `printf 'retry\\n' >> '${attemptsFile}'`,
       'sleep 0.5',
       'exit 1'

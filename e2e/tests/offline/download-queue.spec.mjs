@@ -74,12 +74,44 @@ test('separates canceled downloads without offering retry-all', async ({ page })
   await expect(page.getByRole('heading', { name: 'Downloaded', exact: true })).toHaveCount(0)
 })
 
+test('shares one yt-dlp version probe across concurrent downloads and keeps custom runtime opt-outs', async ({ app, page }) => {
+  const executable = path.join(app.userDataDir, 'probed-yt-dlp.sh')
+  const probesFile = path.join(app.userDataDir, 'version-probes.txt')
+  const argumentsFile = path.join(app.userDataDir, 'probed-arguments.txt')
+  await writeFile(executable, [
+    '#!/bin/sh',
+    `if [ "$1" = "--version" ]; then printf '%s\\n' probe >> '${probesFile}'; sleep 0.5; printf '%s\\n' '2026.08.19'; exit; fi`,
+    `printf '%s\\n' "$@" -- >> '${argumentsFile}'`,
+  ].join('\n'))
+  await chmod(executable, 0o755)
+  await configureQueue(page, {
+    ytDlpPath: executable,
+    ytDlpDownloadFolderPath: app.userDataDir,
+    ytDlpMaxConcurrentDownloads: 3,
+  })
+
+  const results = await page.evaluate(downloads => Promise.all(
+    downloads.map(download => window.ftElectron.ytDlpDownload(download))
+  ), ['kkkkkkkkkkk', 'lllllllllll', 'mmmmmmmmmmm'].map(videoId => ({ videoId, title: videoId, mode: 'video', customArgs: '--no-js-runtimes' })))
+  expect(results.every(result => Number.isInteger(result?.id))).toBe(true)
+  expect(await readFile(probesFile, 'utf8')).toBe('probe\n')
+  // A custom --no-js-runtimes must come after the automatic runtime so it still disables it.
+  await expect.poll(async () => {
+    const commands = (await readFile(argumentsFile, 'utf8').catch(() => '')).split('--\n').slice(0, -1)
+    return commands.map(command => {
+      const lines = command.split('\n')
+      return lines.indexOf('--js-runtimes') !== -1 && lines.indexOf('--js-runtimes') < lines.indexOf('--no-js-runtimes')
+    })
+  }).toEqual([true, true, true])
+})
+
 test('controls queue order, running jobs, bandwidth, and retry-all', async ({ app, page }) => {
   const executable = path.join(app.userDataDir, 'queued-yt-dlp.sh')
   const startsFile = path.join(app.userDataDir, 'queue-starts.txt')
   const failureMarker = path.join(app.userDataDir, 'failed-once')
   await writeFile(executable, [
     '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
     'for argument do case "$argument" in https://www.youtube.com/watch?v=*) url="$argument" ;; esac; done',
     'id="$' + '{url##*=}"',
     `printf '%s\\n' "$id" >> '${startsFile}'`,
@@ -183,6 +215,7 @@ test('clears pause-all after every download is individually resumed', async ({ a
   const startsFile = path.join(app.userDataDir, 'individual-resume-starts.txt')
   await writeFile(executable, [
     '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
     'for argument do case "$argument" in https://www.youtube.com/watch?v=*) url="$argument" ;; esac; done',
     'id="$' + '{url##*=}"',
     `printf '%s\\n' "$id" >> '${startsFile}'`,
@@ -232,6 +265,7 @@ test('keeps the unsupported active-pause fallback resumable', async ({ app, page
   const startsFile = path.join(app.userDataDir, 'fallback-pause-starts.txt')
   await writeFile(executable, [
     '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
     'for argument do case "$argument" in https://www.youtube.com/watch?v=*) url="$argument" ;; esac; done',
     'id="$' + '{url##*=}"',
     `printf '%s\\n' "$id" >> '${startsFile}'`,
@@ -319,6 +353,7 @@ test('keeps paused downloads queued across a restart', async ({ app, page }) => 
   const startsFile = path.join(app.userDataDir, 'persisted-starts.txt')
   await writeFile(executable, [
     '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
     'for argument do case "$argument" in https://www.youtube.com/watch?v=*) url="$argument" ;; esac; done',
     'id="$' + '{url##*=}"',
     `printf '%s\\n' "$id" >> '${startsFile}'`,
@@ -391,6 +426,7 @@ test('checks destination space before starting a download', async ({ app, page }
   const startsFile = path.join(app.userDataDir, 'space-check-starts.txt')
   await writeFile(executable, [
     '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
     'for argument do case "$argument" in https://www.youtube.com/watch?v=*) url="$argument" ;; esac; done',
     'id="$' + '{url##*=}"',
     `printf '%s\\n' "$id" >> '${startsFile}'`,
@@ -469,6 +505,7 @@ test('shows preparation and processing without a stale percentage or ETA', async
   const finish = path.join(app.userDataDir, 'finish-download')
   await writeFile(executable, [
     '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
     `while [ ! -f '${transfer}' ]; do sleep 0.05; done`,
     "printf '__OPENTUBEX_DOWNLOAD__:downloading\\t97.3%%\\t2MiB/s\\t00:00\\n' >&2",
     `while [ ! -f '${processing}' ]; do sleep 0.05; done`,

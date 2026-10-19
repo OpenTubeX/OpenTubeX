@@ -3,7 +3,7 @@ import test from 'node:test'
 import { readFile } from 'node:fs/promises'
 import YAML from 'yaml'
 import { createI18n } from 'vue-i18n'
-import { buildYtDlpDownloadArguments, playbackImpersonationArguments, playbackSubtitleArguments } from '../../src/ytDlpArguments.js'
+import { buildYtDlpDownloadArguments, jsRuntimeArguments, playbackImpersonationArguments, playbackSubtitleArguments } from '../../src/ytDlpArguments.js'
 import { EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE, PLAYBACK_INFO_OUTPUT_TEMPLATE, mapExternalPlaybackMetadata, mapPlaybackCaptions, mapPlaybackFormat } from '../../src/ytDlpMetadata.js'
 
 const videoId = 'jNQXAC9IVRw'
@@ -14,6 +14,16 @@ test('Chrome impersonation applies only to Rumble playback URLs', () => {
   }
   for (const url of ['https://notrumble.com/video', 'https://rumble.com.example/video', 'https://www.youtube.com/watch?v=jNQXAC9IVRw']) {
     assert.deepEqual(playbackImpersonationArguments(url), [])
+  }
+})
+
+test('Electron runs as the JavaScript runtime only for yt-dlp builds that accept the option', () => {
+  const runtime = ['--js-runtimes', 'node:/opt/OpenTubeX/opentubex']
+  for (const version of ['2025.11.12', '2026.08.19', '2026.08.19.232912']) {
+    assert.deepEqual(jsRuntimeArguments(version, '/opt/OpenTubeX/opentubex'), runtime)
+  }
+  for (const version of ['2025.11.11', '2025.10.22', 'unknown', null]) {
+    assert.deepEqual(jsRuntimeArguments(version, '/opt/OpenTubeX/opentubex'), [])
   }
 })
 
