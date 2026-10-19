@@ -120,6 +120,31 @@ for (const [name, createDatastore] of Object.entries(backends)) {
     assert.equal(stored[0].watchProgress, 20)
   })
 
+  test(`${name}: a sync waits for a history overwrite instead of creating a duplicate`, async t => {
+    const { db, History } = await fixture(t, createDatastore)
+    await History.upsert(record('video'))
+    const removeAsync = db.history.removeAsync.bind(db.history)
+    const removing = Promise.withResolvers()
+    const release = Promise.withResolvers()
+    db.history.removeAsync = async (...args) => {
+      const result = await removeAsync(...args)
+      removing.resolve()
+      await release.promise
+      return result
+    }
+
+    const overwrite = History.overwrite([record('video', { timeWatched: 2 })])
+    await removing.promise
+    const sync = History.applySyncChanges({ insertions: [record('video', { timeWatched: 3 })], updates: [], deletions: [] })
+    release.resolve()
+    await Promise.all([overwrite, sync])
+
+    db.history.removeAsync = removeAsync
+    const stored = await db.history.findAsync({ videoId: 'video' })
+    assert.equal(stored.length, 1)
+    assert.equal(stored[0].timeWatched, 3)
+  })
+
   test(`${name}: loading history removes older duplicates so later writes target the kept record`, async t => {
     const { db, History } = await fixture(t, createDatastore)
     await db.history.insertAsync([record('video', { timeWatched: 1 }), record('video', { timeWatched: 3 }), record('other', { timeWatched: 2 })])

@@ -269,15 +269,18 @@ class History {
     return Settings.runSeenStateUpdate(() => db.history.updateAsync({ videoId: migratedRecord.videoId }, migratedRecord, { upsert: true }))
   }
 
-  static async overwrite(records) {
-    const migratedRecords = records.map(migrateLegacyHistoryRecord)
-    const retained = new Set(migratedRecords.map(record => record.videoId))
-    const removed = (await db.history.findAsync({}, { videoId: 1 })).map(record => record.videoId).filter(id => !retained.has(id))
-    if (removed.length) await recommendations.remove(removed)
+  static overwrite(records) {
+    // A queued sync must not insert a record between the removal and insertion.
+    return Settings.runSeenStateUpdate(async () => {
+      const migratedRecords = records.map(migrateLegacyHistoryRecord)
+      const retained = new Set(migratedRecords.map(record => record.videoId))
+      const removed = (await db.history.findAsync({}, { videoId: 1 })).map(record => record.videoId).filter(id => !retained.has(id))
+      if (removed.length) await recommendations.remove(removed)
 
-    await db.history.removeAsync({}, { multi: true })
+      await db.history.removeAsync({}, { multi: true })
 
-    await db.history.insertAsync(migratedRecords)
+      await db.history.insertAsync(migratedRecords)
+    })
   }
 
   static applySyncChanges(changes) {
