@@ -309,6 +309,9 @@ test('switching application tabs snaps the active sidebar highlight', async ({ a
   await page.evaluate(() => window.ftElectron.tabs.create({ route: '/history', makeActive: true }))
   await expect(page.locator(sel.tabs)).toHaveCount(2)
   await expect(page.locator('.sideNav a[href="#/history"]').first()).toHaveClass(/router-link-active/)
+  // goTo clicked the Subscriptions link; its hover-out feedback would otherwise
+  // start when the first tab click moves the pointer away.
+  await page.mouse.move(800, 60)
   await page.locator('.sideNav').evaluate(async nav => {
     await Promise.all(nav.getAnimations({ subtree: true })
       .filter(animation => animation instanceof CSSTransition)
