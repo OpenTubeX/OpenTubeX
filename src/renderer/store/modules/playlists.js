@@ -348,11 +348,13 @@ const actions = {
     try {
       const payload = (await DBPlaylistHandlers.find()).filter((e) => e != null)
       if (payload.length === 0) {
-        // Not using `addPlaylists` to ensure required attributes with dynamic values added
-        state.defaultPlaylists.forEach(playlist => {
+        // Not using `addPlaylists` to ensure required attributes with dynamic values added.
+        // Create them in order and wait, so the first default becomes the quick
+        // bookmark target and the playlists exist before `playlistsReady` is set.
+        for (const playlist of state.defaultPlaylists) {
           // Deep copy so `addPlaylist` doesn't mutate the defaults template in state
-          dispatch('addPlaylist', deepCopy(playlist))
-        })
+          await dispatch('addPlaylist', deepCopy(playlist))
+        }
       } else {
         const dateNow = Date.now()
         const currentTime = Date.now()
