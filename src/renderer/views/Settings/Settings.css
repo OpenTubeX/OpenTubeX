@@ -56,9 +56,11 @@
   transform: translateY(8px) scale(0.98);
 }
 
+/* A closing window must not take clicks meant for the controls it uncovers. */
 .settingsWindow.settings-window-leave-active {
   transform-origin: center;
   animation: settings-window-leave 160ms ease;
+  pointer-events: none;
 }
 
 @keyframes settings-window-leave {

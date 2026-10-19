@@ -157,6 +157,28 @@ test.describe('settings', () => {
     await expect(page.locator('.settingsWindow')).toBeHidden()
   })
 
+  test('lets clicks through to the page while closing', async ({ page }) => {
+    await goTo(page, 'settings')
+    const interceptedClicks = await page.locator('.settingsWindow').evaluate(element => new Promise(resolve => {
+      const bounds = element.getBoundingClientRect()
+      const x = bounds.left + bounds.width / 2
+      const y = bounds.top + bounds.height / 2
+      let interceptedClicks = false
+      const sample = () => {
+        if (!element.isConnected) {
+          resolve(interceptedClicks)
+          return
+        }
+        interceptedClicks ||= element.contains(document.elementFromPoint(x, y))
+        requestAnimationFrame(sample)
+      }
+      element.querySelector('.settingsCloseButton').click()
+      requestAnimationFrame(sample)
+    }))
+    expect(interceptedClicks).toBe(false)
+    await expect(page.locator('.settingsWindow')).toBeHidden()
+  })
+
   test('keeps the current compact view throughout the close animation at 95% UI scale', async ({ page }) => {
     await page.evaluate(() => {
       const store = window.$store
