@@ -459,7 +459,7 @@ test.describe('download settings', () => {
     await scrollToBottom(scroller)
     await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
 
-    await setWindowSize(app, page, { width: 1200, height: 900 })
+    await setWindowSize(app, page, { width: 1200, height: 1000 })
     await expect.poll(() => manager.evaluate(element => element.clientWidth)).toBeGreaterThan(760)
     await expectScrollAtRenderedEnd(scroller)
     await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
