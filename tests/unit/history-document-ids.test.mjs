@@ -70,6 +70,30 @@ for (const [name, createDatastore] of Object.entries(backends)) {
     assert.equal(await db.history.countAsync({ videoId: 'other' }), 1)
   })
 
+  test(`${name}: playback writes wait for a running sync instead of creating a duplicate`, async t => {
+    const { db, History } = await fixture(t, createDatastore)
+    const findAsync = db.history.findAsync.bind(db.history)
+    const lookup = Promise.withResolvers()
+    const release = Promise.withResolvers()
+    db.history.findAsync = (...args) => {
+      lookup.resolve()
+      return release.promise.then(() => findAsync(...args))
+    }
+
+    const sync = History.applySyncChanges({ insertions: [record('video', { timeWatched: 2 })], updates: [], deletions: [] })
+    await lookup.promise
+    const playback = History.upsert(record('video', { timeWatched: 3 }))
+    const progress = History.updateWatchProgress('video', 20)
+    release.resolve()
+    await Promise.all([sync, playback, progress])
+
+    db.history.findAsync = findAsync
+    const stored = await db.history.findAsync({ videoId: 'video' })
+    assert.equal(stored.length, 1)
+    assert.equal(stored[0].timeWatched, 3)
+    assert.equal(stored[0].watchProgress, 20)
+  })
+
   test(`${name}: loading history removes older duplicates so later writes target the kept record`, async t => {
     const { db, History } = await fixture(t, createDatastore)
     await db.history.insertAsync([record('video', { timeWatched: 1 }), record('video', { timeWatched: 3 }), record('other', { timeWatched: 2 })])
