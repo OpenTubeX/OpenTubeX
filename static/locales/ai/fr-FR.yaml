@@ -250,6 +250,12 @@ History:
   Custom: Personnalisé
   History Older Than Days Removed: L’historique de visionnage datant de plus de 1 jour a été supprimé | L’historique de visionnage datant de plus de {days} jours a été supprimé | L’historique de visionnage datant de plus de {days} jours a été supprimé
 Settings:
+  Tab Unloading:
+    Automatically unload tabs: "Décharger automatiquement les onglets"
+    Memory threshold: "Seuil de mémoire"
+    Tabs to unload: "Onglets à décharger"
+    Automatic unloading help: "Décharger les onglets en arrière-plan les plus anciens pour libérer de la mémoire. Les onglets actifs et en lecture restent chargés."
+    Memory threshold help: "Pourcentage de la limite de mémoire du moteur de rendu, et non de la RAM totale du système."
   Password Settings:
     Failed to Save Password: "Impossible d’enregistrer le mot de passe."
     Confirm Password: "Confirmer le mot de passe"
@@ -2161,3 +2167,4 @@ Library Format Changed:
   Message: "Votre bibliothèque utilise désormais un nouveau format de stockage."
   Detail: "Les versions antérieures d'OpenTubeX peuvent toujours ouvrir votre bibliothèque, mais l'affichent telle qu'elle était avant cette mise à jour. Les modifications effectuées dans une version antérieure sont ajoutées lorsque vous revenez à cette version."
 Invidious Fallback Warning: "Cette requête contourne votre instance Invidious configurée et se connecte directement à YouTube, exposant votre adresse IP."
+Automatically unloaded to free memory: "Déchargé automatiquement pour libérer de la mémoire"

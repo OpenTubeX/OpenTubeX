@@ -269,6 +269,12 @@ History:
   Custom: سفارشی
   History Older Than Days Removed: تاریخچه تماشای قدیمی‌تر از 1 روز حذف شد | تاریخچه تماشای قدیمی‌تر از {days} روز حذف شد
 Settings:
+  Tab Unloading:
+    Automatically unload tabs: "خارج کردن خودکار زبانه‌ها از حافظه"
+    Memory threshold: "آستانهٔ حافظه"
+    Tabs to unload: "زبانه‌های قابل تخلیه"
+    Automatic unloading help: "قدیمی‌ترین زبانه‌های پس‌زمینه را برای آزاد کردن حافظه تخلیه می‌کند. زبانه‌های فعال و در حال پخش بارگذاری‌شده می‌مانند."
+    Memory threshold help: "درصدی از سقف حافظهٔ فرایند نمایش، نه کل حافظهٔ رم سیستم."
   Password Settings:
     Failed to Save Password: "ذخیره گذرواژه ناموفق بود."
     Confirm Password: "تأیید گذرواژه"
@@ -2251,3 +2257,4 @@ Library Format Changed:
   Message: "کتابخانهٔ شما اکنون از قالب ذخیره‌سازی جدیدی استفاده می‌کند."
   Detail: "نسخه‌های قدیمی‌تر OpenTubeX همچنان می‌توانند کتابخانهٔ شما را باز کنند، اما آن را همان‌طور که پیش از این به‌روزرسانی بود نشان می‌دهند. تغییراتی که در نسخهٔ قدیمی‌تر انجام می‌دهید هنگام بازگشت به این نسخه افزوده می‌شوند."
 Invidious Fallback Warning: "این درخواست نمونهٔ Invidious پیکربندی‌شدهٔ شما را دور می‌زند و مستقیماً به YouTube وصل می‌شود و نشانی IP شما را آشکار می‌کند."
+Automatically unloaded to free memory: "برای آزاد کردن حافظه به‌طور خودکار تخلیه شد"

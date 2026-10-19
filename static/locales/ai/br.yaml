@@ -250,6 +250,12 @@ History:
   Custom: "Personelaet"
   History Older Than Days Removed: "Dilamet eo bet an istor sellout koshoc'h eget 1 devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} zevezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh."
 Settings:
+  Tab Unloading:
+    Automatically unload tabs: "Diskargañ an ivinelloù ent emgefre"
+    Memory threshold: "Treuzoù ar vemor"
+    Tabs to unload: "Ivinelloù da ziskargañ"
+    Automatic unloading help: "Diskargañ an ivinelloù koshañ en drekleur evit dieubiñ memor. Chom a ra karget an ivinelloù oberiant hag ar re o lenn."
+    Memory threshold help: "Dregantad eus bevenn vemor ar c'hewerier deouez, ha n'eo ket eus holl RAM ar reizhiad."
   Password Settings:
     Failed to Save Password: "N'eus ket bet gallet enrollañ ar ger-tremen."
     Confirm Password: "Kadarnaat ar ger-tremen"
@@ -2171,3 +2177,4 @@ Library Format Changed:
   Message: "Ul lakadur stokañ nevez a vez implijet gant ho levraoueg bremañ."
   Detail: "Gallout a ra stummoù koshoc'h OpenTubeX digeriñ ho levraoueg c'hoazh, met diskouez a reont anezhi evel ma oa a-raok an hizivadenn-mañ. Ar c'hemmoù a rit en ur stumm koshoc'h a vez ouzhpennet pa zistroit d'ar stumm-mañ."
 Invidious Fallback Warning: "An azgoulenn-mañ a dremen heb ho skouer Invidious kefluniet hag a gennask war-eeun ouzh YouTube, o tiskouez ho chomlec’h IP."
+Automatically unloaded to free memory: "Diskarget ent emgefre evit dieubiñ memor"

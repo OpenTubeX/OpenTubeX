@@ -250,6 +250,12 @@ History:
   Custom: Personalizado
   History Older Than Days Removed: Foi removido o histórico de reprodução com mais de 1 dia | Foi removido o histórico de reprodução com mais de {days} dias | Foi removido o histórico de reprodução com mais de {days} dias
 Settings:
+  Tab Unloading:
+    Automatically unload tabs: "Descarregar abas automaticamente"
+    Memory threshold: "Limite de memória"
+    Tabs to unload: "Abas a descarregar"
+    Automatic unloading help: "Descarrega as abas em segundo plano mais antigas para liberar memória. As abas ativas e em reprodução permanecem carregadas."
+    Memory threshold help: "Porcentagem do limite de memória do renderizador, não da RAM total do sistema."
   Password Settings:
     Failed to Save Password: "Não foi possível salvar a senha."
     Confirm Password: "Confirmar senha"
@@ -2163,3 +2169,4 @@ Library Format Changed:
   Message: "Sua biblioteca agora usa um novo formato de armazenamento."
   Detail: "Versões anteriores do OpenTubeX ainda podem abrir sua biblioteca, mas a mostram como estava antes desta atualização. As alterações que você fizer em uma versão anterior são adicionadas quando você voltar a esta versão."
 Invidious Fallback Warning: "Esta solicitação ignora a instância do Invidious configurada e se conecta diretamente ao YouTube, expondo seu endereço IP."
+Automatically unloaded to free memory: "Descarregada automaticamente para liberar memória"

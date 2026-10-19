@@ -254,6 +254,12 @@ History:
   Custom: Mukautettu
   History Older Than Days Removed: Yli päivän vanha katseluhistoria on poistettu | Yli {days} päivää vanha katseluhistoria on poistettu
 Settings:
+  Tab Unloading:
+    Automatically unload tabs: "Poista välilehdet muistista automaattisesti"
+    Memory threshold: "Muistikynnys"
+    Tabs to unload: "Muistista poistettavat välilehdet"
+    Automatic unloading help: "Poista vanhimmat taustavälilehdet muistista. Aktiiviset ja toistavat välilehdet pysyvät ladattuina."
+    Memory threshold help: "Prosenttiosuus renderöintiprosessin muistirajasta, ei järjestelmän koko RAM-muistista."
   Password Settings:
     Failed to Save Password: "Salasanan tallentaminen epäonnistui."
     Confirm Password: "Vahvista salasana"
@@ -2214,3 +2220,4 @@ Library Format Changed:
   Message: "Kirjastosi käyttää nyt uutta tallennusmuotoa."
   Detail: "OpenTubeX:n vanhemmat versiot voivat yhä avata kirjastosi, mutta ne näyttävät sen sellaisena kuin se oli ennen tätä päivitystä. Vanhemmassa versiossa tekemäsi muutokset lisätään, kun palaat tähän versioon."
 Invidious Fallback Warning: "Tämä pyyntö ohittaa määrittämäsi Invidious-instanssin ja muodostaa yhteyden suoraan YouTubeen paljastaen IP-osoitteesi."
+Automatically unloaded to free memory: "Poistettu muistista automaattisesti muistin vapauttamiseksi"

@@ -251,6 +251,12 @@ History:
   Custom: Custom
   History Older Than Days Removed: Watch history older than 1 day has been removed | Watch history older than {days} days has been removed
 Settings:
+  Tab Unloading:
+    Automatically unload tabs: "Automatically unload tabs"
+    Memory threshold: "Memory threshold"
+    Tabs to unload: "Tabs to unload"
+    Automatic unloading help: "Unload the oldest background tabs to free memory. Active and playing tabs stay loaded."
+    Memory threshold help: "Percentage of the renderer's memory limit, not total system RAM."
   Password Settings:
     Failed to Save Password: "Failed to save password."
     Confirm Password: "Confirm password"
@@ -2152,3 +2158,4 @@ Library Format Changed:
   Message: "Your library now uses a new storage format."
   Detail: "Older versions of OpenTubeX can still open your library, but they show it as it was before this update. Changes you make in an older version are added back when you return to this version."
 Invidious Fallback Warning: "This request bypasses your configured Invidious instance and connects directly to YouTube, exposing your IP address."
+Automatically unloaded to free memory: "Automatically unloaded to free memory"

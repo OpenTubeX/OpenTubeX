@@ -2,6 +2,9 @@ import { BUILTIN_BASE_THEME_VALUES, BUILTIN_BASE_THEME_TRANSLATION_KEYS } from '
 
 // Stable setting keys map to the same translation keys used by their controls.
 export const SYNC_SETTING_LABELS = {
+  autoUnloadTabs: 'Settings.Tab Unloading.Automatically unload tabs',
+  autoUnloadMemoryThreshold: 'Settings.Tab Unloading.Memory threshold',
+  autoUnloadTabPercentage: 'Settings.Tab Unloading.Tabs to unload',
   aiVideoSummaryMode: 'Settings.Distraction Free Settings.AI Video Summaries',
   alwaysShowNavigationBar: 'Settings.General Settings.Navigation.Always Show Navigation Bar',
   alwaysShowScrollbars: 'Settings.Theme Settings.Always Show Scrollbars',

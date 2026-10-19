@@ -232,6 +232,11 @@ export const SETTINGS_SEARCH_SOURCES = {
     key: 'Settings.Sync Settings'
   }],
   advanced: [{
+    type: 'tab-unloading',
+    key: 'Settings.Tab Unloading',
+    include: new Set(['Automatically unload tabs', 'Memory threshold', 'Tabs to unload']),
+    electronOnly: true
+  }, {
     type: 'general',
     key: 'Settings.General Settings',
     include: GENERAL_PROVIDER_KEYS

@@ -343,6 +343,12 @@ History:
   History Older Than Days Removed: Der Wiedergabeverlauf, der älter als {days} Tage ist, wurde gelöscht
 Most Popular Feed Empty: Der Feed „Am beliebtesten“ dieser Invidious-Instanz ist leer.
 Settings:
+  Tab Unloading:
+    Automatically unload tabs: "Tabs automatisch entladen"
+    Memory threshold: "Speicherschwelle"
+    Tabs to unload: "Zu entladende Tabs"
+    Automatic unloading help: "Die ältesten Hintergrund-Tabs entladen, um Speicher freizugeben. Aktive und abspielende Tabs bleiben geladen."
+    Memory threshold help: "Prozent des Speicherlimits des Renderers, nicht des gesamten Arbeitsspeichers."
   Navigation and Controls: "Navigation & Bedienelemente"
   Interface Customizer:
     Customize Interface: Oberfläche anpassen
@@ -3359,3 +3365,4 @@ Mobile Navigation:
 Installer:
   Create Desktop Shortcut: Desktop-Verknüpfung erstellen
 Invidious Fallback Warning: "Diese Anfrage umgeht deine konfigurierte Invidious-Instanz und verbindet sich direkt mit YouTube. Dabei wird deine IP-Adresse offengelegt."
+Automatically unloaded to free memory: "Automatisch entladen, um Speicher freizugeben"

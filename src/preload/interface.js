@@ -1309,8 +1309,8 @@ export default {
     /**
      * @returns {Promise<number>} The number of unloaded tabs
      */
-    unloadLeastRecentlyUsed: () => {
-      return ipcRenderer.invoke(IpcChannels.TABS_UNLOAD_LEAST_RECENTLY_USED)
+    unloadLeastRecentlyUsed: (percentage) => {
+      return ipcRenderer.invoke(IpcChannels.TABS_UNLOAD_LEAST_RECENTLY_USED, percentage)
     },
 
     getMoveTargets: () => {

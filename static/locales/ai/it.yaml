@@ -250,6 +250,12 @@ History:
   Custom: Personalizzato
   History Older Than Days Removed: La cronologia di visione più vecchia di 1 giorno è stata rimossa | La cronologia di visione più vecchia di {days} giorni è stata rimossa | La cronologia di visione più vecchia di {days} giorni è stata rimossa
 Settings:
+  Tab Unloading:
+    Automatically unload tabs: "Scarica automaticamente le schede"
+    Memory threshold: "Soglia di memoria"
+    Tabs to unload: "Schede da scaricare"
+    Automatic unloading help: "Scarica le schede in background meno recenti per liberare memoria. Le schede attive e in riproduzione restano caricate."
+    Memory threshold help: "Percentuale del limite di memoria del renderer, non della RAM totale del sistema."
   Password Settings:
     Failed to Save Password: "Impossibile salvare la password."
     Confirm Password: "Conferma password"
@@ -2162,3 +2168,4 @@ Library Format Changed:
   Message: "La tua libreria ora usa un nuovo formato di archiviazione."
   Detail: "Le versioni precedenti di OpenTubeX possono ancora aprire la tua libreria, ma la mostrano com'era prima di questo aggiornamento. Le modifiche apportate in una versione precedente vengono aggiunte quando torni a questa versione."
 Invidious Fallback Warning: "Questa richiesta aggira l’istanza Invidious configurata e si connette direttamente a YouTube, esponendo il tuo indirizzo IP."
+Automatically unloaded to free memory: "Scaricata automaticamente per liberare memoria"

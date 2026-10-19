@@ -272,6 +272,12 @@ History:
   Custom: Personalizado
   History Older Than Days Removed: Se ha eliminado el historial de reproducción de más de 1 día | Se ha eliminado el historial de reproducción de más de {days} días | Se ha eliminado el historial de reproducción de más de {days} días
 Settings:
+  Tab Unloading:
+    Automatically unload tabs: "Descargar pestañas automáticamente"
+    Memory threshold: "Umbral de memoria"
+    Tabs to unload: "Pestañas que descargar"
+    Automatic unloading help: "Descarga las pestañas en segundo plano más antiguas para liberar memoria. Las pestañas activas y en reproducción permanecen cargadas."
+    Memory threshold help: "Porcentaje del límite de memoria del renderizador, no de la RAM total del sistema."
   Navigation and Controls: "Navegación y controles"
   Fullscreen Actions:
     Recommended Videos: "Videos recomendados"
@@ -2725,3 +2731,4 @@ Library Format Changed:
   Message: "Tu biblioteca ahora usa un formato de almacenamiento nuevo."
   Detail: "Las versiones anteriores de OpenTubeX todavía pueden abrir tu biblioteca, pero la muestran como estaba antes de esta actualización. Los cambios que hagas en una versión anterior se agregan cuando vuelvas a esta versión."
 Invidious Fallback Warning: "Esta solicitud omite la instancia de Invidious que configuraste y se conecta directamente a YouTube, exponiendo tu dirección IP."
+Automatically unloaded to free memory: "Descargada automáticamente para liberar memoria"

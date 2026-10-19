@@ -250,6 +250,12 @@ History:
   Custom: Vlastní
   History Older Than Days Removed: Historie sledování starší než 1 den byla odstraněna | Historie sledování starší než {days} dny byla odstraněna | Historie sledování starší než {days} dní byla odstraněna
 Settings:
+  Tab Unloading:
+    Automatically unload tabs: "Automaticky uvolňovat karty z paměti"
+    Memory threshold: "Práh paměti"
+    Tabs to unload: "Karty k uvolnění"
+    Automatic unloading help: "Uvolní nejstarší karty na pozadí z paměti. Aktivní a přehrávající karty zůstanou načtené."
+    Memory threshold help: "Procento limitu paměti vykreslovacího procesu, nikoli celkové paměti RAM systému."
   Password Settings:
     Failed to Save Password: "Heslo se nepodařilo uložit."
     Confirm Password: "Potvrďte heslo"
@@ -2162,3 +2168,4 @@ Library Format Changed:
   Message: "Vaše knihovna nyní používá nový formát úložiště."
   Detail: "Starší verze OpenTubeX mohou vaši knihovnu stále otevřít, ale zobrazí ji ve stavu před touto aktualizací. Změny provedené ve starší verzi se přidají, až se vrátíte k této verzi."
 Invidious Fallback Warning: "Tento požadavek obchází nastavenou instanci Invidious a připojuje se přímo k YouTube, čímž odhaluje vaši IP adresu."
+Automatically unloaded to free memory: "Automaticky uvolněno z paměti"

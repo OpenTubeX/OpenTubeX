@@ -250,6 +250,12 @@ History:
   Custom: Kohandatud
   History Older Than Days Removed: Ühest päevast vanem vaatamisajalugu on eemaldatud | {days} päevast vanem vaatamisajalugu on eemaldatud
 Settings:
+  Tab Unloading:
+    Automatically unload tabs: "Vabasta vahelehed automaatselt mälust"
+    Memory threshold: "Mälulävi"
+    Tabs to unload: "Mälust vabastatavad vahelehed"
+    Automatic unloading help: "Vabasta vanimad taustal olevad vahelehed mälust. Aktiivsed ja esitavad vahelehed jäävad laadituks."
+    Memory threshold help: "Protsent renderdusprotsessi mälupiirangust, mitte süsteemi kogu muutmälust."
   Password Settings:
     Failed to Save Password: "Parooli salvestamine ebaõnnestus."
     Confirm Password: "Kinnita parool"
@@ -2165,3 +2171,4 @@ Library Format Changed:
   Message: "Sinu kogu kasutab nüüd uut salvestusvormingut."
   Detail: "OpenTubeXi vanemad versioonid saavad sinu kogu endiselt avada, kuid näitavad seda sellisena, nagu see oli enne seda uuendust. Vanemas versioonis tehtud muudatused lisatakse, kui naased selle versiooni juurde."
 Invidious Fallback Warning: "See päring läheb sinu seadistatud Invidiousi serverist mööda ja ühendub otse YouTube’iga, avaldades sinu IP-aadressi."
+Automatically unloaded to free memory: "Mälu vabastamiseks automaatselt maha laaditud"

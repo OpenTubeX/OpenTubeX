@@ -261,6 +261,12 @@ History:
   Custom: Brugerdefineret
   History Older Than Days Removed: Visningshistorik, der er ældre end 1 dag, er blevet slettet | Visningshistorik, der er ældre end {days} dage, er blevet slettet
 Settings:
+  Tab Unloading:
+    Automatically unload tabs: "Aflæs automatisk faner"
+    Memory threshold: "Hukommelsestærskel"
+    Tabs to unload: "Faner der skal aflæsses"
+    Automatic unloading help: "Aflæs de ældste baggrundsfaner for at frigøre hukommelse. Aktive og afspillende faner forbliver indlæst."
+    Memory threshold help: "Procentdel af renderingsprocessens hukommelsesgrænse, ikke systemets samlede RAM."
   Password Settings:
     Failed to Save Password: "Kunne ikke gemme adgangskoden."
     Confirm Password: "Bekræft adgangskode"
@@ -2251,3 +2257,4 @@ Library Format Changed:
   Message: "Dit bibliotek bruger nu et nyt lagringsformat."
   Detail: "Ældre versioner af OpenTubeX kan stadig åbne dit bibliotek, men de viser det, som det var før denne opdatering. Ændringer, du foretager i en ældre version, tilføjes, når du vender tilbage til denne version."
 Invidious Fallback Warning: "Denne anmodning omgår din konfigurerede Invidious-instans og opretter forbindelse direkte til YouTube, hvilket afslører din IP-adresse."
+Automatically unloaded to free memory: "Automatisk aflæsset for at frigøre hukommelse"

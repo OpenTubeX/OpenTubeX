@@ -1699,6 +1699,11 @@ onMounted(async () => {
     })
     stopMemoryPressureMonitor = startMemoryPressureMonitor({
       getHeapStatistics: window.ftElectron.getHeapStatistics,
+      getSettings: () => ({
+        enabled: store.getters.getAutoUnloadTabs,
+        memoryThreshold: store.getters.getAutoUnloadMemoryThreshold,
+        tabPercentage: store.getters.getAutoUnloadTabPercentage
+      }),
       unloadTabs: window.ftElectron.tabs.unloadLeastRecentlyUsed,
       notify: count => showToast({
         message: t('Tabs Unloaded To Free Memory', { count }, count),

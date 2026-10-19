@@ -973,3 +973,35 @@ test('memory pressure only counts tabs that were actually unloaded', async t => 
 
   assert.equal(await manager.unloadLeastRecentlyUsedTabs(), 1)
 })
+
+for (const [percentage, count] of [[10, 1], [25, 1], [75, 3], [100, 4], [NaN, 2], [0, 2], [101, 2]]) {
+  test(`memory pressure unload percentage ${percentage} selects ${count} oldest tabs`, async t => {
+    const manager = createManager(t)
+    manager.createTab({ route: '/history' })
+    presentActive(manager)
+    const tabs = []
+    for (let index = 0; index < 4; index++) {
+      const tab = await manager.createTabWithPreference({ route: `/channel/${index}`, makeActive: false })
+      manager.markTabMounted(tab.id, tab.mountRevision)
+      tab.lastActiveAt = index
+      tabs.push(tab)
+    }
+    assert.equal(await manager.unloadLeastRecentlyUsedTabs(percentage), count)
+    assert.deepEqual(tabs.map(tab => tab.automaticallyUnloaded), tabs.map((_, index) => index < count))
+    assert.equal(manager.getState().tabs.filter(tab => tab.automaticallyUnloaded).length, count)
+    const snapshot = manager.getSessionData()
+    const restored = createManager(t, 'restored-auto-unloaded', 2)
+    await restored.restoreFromData(snapshot, { restoreTabLoadState: true })
+    assert.equal(restored.getState().tabs.filter(tab => tab.automaticallyUnloaded).length, count)
+
+    manager.loadTab(tabs[0].id)
+    assert.equal(tabs[0].automaticallyUnloaded, false)
+    manager.markTabMounted(tabs[0].id, tabs[0].mountRevision)
+    await manager.unloadTab(tabs[0].id)
+    assert.equal(tabs[0].automaticallyUnloaded, false, 'manual unloading has no automatic badge')
+    if (count > 1) {
+      manager.activateTab(tabs[1].id)
+      assert.equal(tabs[1].automaticallyUnloaded, false, 'activation clears the badge')
+    }
+  })
+}

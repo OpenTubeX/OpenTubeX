@@ -250,6 +250,12 @@ History:
   Custom: Egyéni
   History Older Than Days Removed: Az 1 napnál régebbi megtekintési előzmények eltávolítva | A(z) {days} napnál régebbi megtekintési előzmények eltávolítva
 Settings:
+  Tab Unloading:
+    Automatically unload tabs: "Lapok automatikus kiürítése"
+    Memory threshold: "Memóriaküszöb"
+    Tabs to unload: "Kiürítendő lapok"
+    Automatic unloading help: "A legrégebbi háttérlapok kiürítése memóriát szabadít fel. Az aktív és lejátszó lapok betöltve maradnak."
+    Memory threshold help: "A megjelenítőfolyamat memóriakorlátjának százaléka, nem a rendszer teljes RAM-jáé."
   Password Settings:
     Failed to Save Password: "Nem sikerült menteni a jelszót."
     Confirm Password: "Jelszó megerősítése"
@@ -2163,3 +2169,4 @@ Library Format Changed:
   Message: "A könyvtárad mostantól új tárolási formátumot használ."
   Detail: "Az OpenTubeX régebbi verziói továbbra is meg tudják nyitni a könyvtáradat, de a frissítés előtti állapotában mutatják. A régebbi verzióban végzett módosítások bekerülnek, amikor visszatérsz ehhez a verzióhoz."
 Invidious Fallback Warning: "Ez a kérés megkerüli a beállított Invidious-példányt, és közvetlenül a YouTube-hoz csatlakozik, felfedve az IP-címedet."
+Automatically unloaded to free memory: "Automatikusan kiürítve memória felszabadításához"

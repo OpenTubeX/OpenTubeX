@@ -364,6 +364,12 @@ History:
   Custom: Pasirinktinai
   History Older Than Days Removed: Pašalinti senesni nei 1 dienos žiūrėjimo istorijos įrašai | Pašalinti senesni nei {days} dienų žiūrėjimo istorijos įrašai | Pašalinti senesni nei {days} dienų žiūrėjimo istorijos įrašai
 Settings:
+  Tab Unloading:
+    Automatically unload tabs: "Automatiškai iškrauti korteles"
+    Memory threshold: "Atminties slenkstis"
+    Tabs to unload: "Iškraunamos kortelės"
+    Automatic unloading help: "Iškrauti seniausias fonines korteles, kad būtų atlaisvinta atmintis. Aktyvios ir turinį leidžiančios kortelės lieka įkeltos."
+    Memory threshold help: "Atvaizdavimo proceso atminties ribos procentas, o ne visos sistemos RAM."
   Navigation and Controls: "Naršymas ir valdikliai"
   Fullscreen Actions:
     Recommended Videos: "Rekomenduojami vaizdo įrašai"
@@ -2663,3 +2669,4 @@ Library Format Changed:
   Message: "Jūsų biblioteka dabar naudoja naują saugojimo formatą."
   Detail: "Senesnės OpenTubeX versijos vis dar gali atidaryti jūsų biblioteką, tačiau rodo ją tokią, kokia ji buvo prieš šį atnaujinimą. Senesnėje versijoje atlikti pakeitimai pridedami, kai grįžtate į šią versiją."
 Invidious Fallback Warning: "Ši užklausa apeina jūsų sukonfigūruotą „Invidious“ egzempliorių ir jungiasi tiesiogiai prie „YouTube“, atskleisdama jūsų IP adresą."
+Automatically unloaded to free memory: "Automatiškai iškrauta atminčiai atlaisvinti"

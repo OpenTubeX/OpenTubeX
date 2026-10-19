@@ -382,6 +382,12 @@ History:
   Custom: Personalitzat
   History Older Than Days Removed: S'ha suprimit l'historial de reproducció anterior a 1 dia | S'ha suprimit l'historial de reproducció anterior a {days} dies | S'ha suprimit l'historial de reproducció anterior a {days} dies
 Settings:
+  Tab Unloading:
+    Automatically unload tabs: "Descarrega les pestanyes automàticament"
+    Memory threshold: "Llindar de memòria"
+    Tabs to unload: "Pestanyes per descarregar"
+    Automatic unloading help: "Descarrega les pestanyes en segon pla més antigues per alliberar memòria. Les pestanyes actives i en reproducció es mantenen carregades."
+    Memory threshold help: "Percentatge del límit de memòria del renderitzador, no de la RAM total del sistema."
   Navigation and Controls: "Navegació i controls"
   Fullscreen Actions:
     Recommended Videos: "Vídeos recomanats"
@@ -2809,3 +2815,4 @@ Library Format Changed:
   Message: "La vostra biblioteca ara fa servir un format d'emmagatzematge nou."
   Detail: "Les versions anteriors d'OpenTubeX encara poden obrir la biblioteca, però la mostren tal com era abans d'aquesta actualització. Els canvis que feu en una versió anterior s'afegeixen quan torneu a aquesta versió."
 Invidious Fallback Warning: "Aquesta sol·licitud omet la instància d’Invidious que heu configurat i es connecta directament a YouTube, exposant la vostra adreça IP."
+Automatically unloaded to free memory: "Descarregada automàticament per alliberar memòria"

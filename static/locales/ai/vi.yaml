@@ -254,6 +254,12 @@ History:
   Custom: Tùy chỉnh
   History Older Than Days Removed: Đã xóa lịch sử xem cũ hơn {days} ngày
 Settings:
+  Tab Unloading:
+    Automatically unload tabs: "Tự động dỡ tải thẻ"
+    Memory threshold: "Ngưỡng bộ nhớ"
+    Tabs to unload: "Tỷ lệ thẻ cần dỡ tải"
+    Automatic unloading help: "Dỡ tải các thẻ nền cũ nhất để giải phóng bộ nhớ. Các thẻ đang hoạt động và đang phát vẫn được tải."
+    Memory threshold help: "Phần trăm giới hạn bộ nhớ của tiến trình kết xuất, không phải tổng RAM của hệ thống."
   Password Settings:
     Failed to Save Password: "Không thể lưu mật khẩu."
     Confirm Password: "Xác nhận mật khẩu"
@@ -2204,3 +2210,4 @@ Library Format Changed:
   Message: "Thư viện của bạn hiện dùng định dạng lưu trữ mới."
   Detail: "Các phiên bản cũ hơn của OpenTubeX vẫn có thể mở thư viện của bạn, nhưng hiển thị nó như trước bản cập nhật này. Các thay đổi bạn thực hiện trong phiên bản cũ hơn sẽ được thêm lại khi bạn quay lại phiên bản này."
 Invidious Fallback Warning: "Yêu cầu này bỏ qua máy chủ Invidious bạn đã cấu hình và kết nối trực tiếp đến YouTube, làm lộ địa chỉ IP của bạn."
+Automatically unloaded to free memory: "Đã tự động dỡ tải để giải phóng bộ nhớ"
