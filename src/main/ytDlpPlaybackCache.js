@@ -150,16 +150,17 @@ function saveEntries() {
   // every change, so a burst of updates (for example preloading the upcoming
   // playlist videos) shares one write that snapshots the latest entries.
   if (pendingWrite === null) {
-    pendingWrite = writeQueue
+    const write = writeQueue
       .catch(() => {})
       .then(async () => {
-        pendingWrite = null
+        if (pendingWrite === write) pendingWrite = null
         const path = cachePath()
         const temporaryPath = `${path}.tmp`
         await writeFile(temporaryPath, JSON.stringify([...entries.values()]), 'utf8')
         await rename(temporaryPath, path)
       })
-    writeQueue = pendingWrite
+    pendingWrite = write
+    writeQueue = write
   }
   return pendingWrite
 }
@@ -259,6 +260,9 @@ export async function clearYtDlpPlaybackCache() {
       rm(cachePath(), { force: true }),
       rm(`${cachePath()}.tmp`, { force: true })
     ]))
+  // A save requested from now on must run after the clear, not share a
+  // write that was queued before it.
+  pendingWrite = null
   await writeQueue
 }
 
