@@ -24,10 +24,14 @@ export function syncContinueWatchingWidget(store, watch) {
       return getVideoThumbnailUrl(videoId, store.getters.getBackendPreference,
         store.getters.getCurrentInvidiousInstanceUrl, preference)?.replace(/\/maxresdefault\.jpg$/, '/mqdefault.jpg')
     })
-    const snapshot = JSON.stringify(videos)
+    // Native downloads send this only to the instance's own origin.
+    const authorization = store.getters.getBackendPreference === 'invidious' && store.getters.getCurrentInvidiousInstanceAuthorization
+      ? { url: store.getters.getCurrentInvidiousInstanceUrl, value: store.getters.getCurrentInvidiousInstanceAuthorization }
+      : null
+    const snapshot = JSON.stringify({ videos, authorization })
     if (snapshot === lastSnapshot) return
     lastSnapshot = snapshot
-    HomeWidgets.setContinueWatching({ videos }).catch(error => console.error('Failed to update home screen widgets', error))
+    HomeWidgets.setContinueWatching({ videos, authorization }).catch(error => console.error('Failed to update home screen widgets', error))
   }
   const stop = watch(() => [
     store.state.history.continueWatchingRevision,
@@ -35,6 +39,7 @@ export function syncContinueWatchingWidget(store, watch) {
     store.getters.getBlurThumbnails,
     store.getters.getBackendPreference,
     store.getters.getCurrentInvidiousInstanceUrl,
+    store.getters.getCurrentInvidiousInstanceAuthorization,
   ], ([revision]) => {
     clearTimeout(timeout)
     // Revision 0 means history has not loaded yet; keep the last cached list.

@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
+import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -88,8 +89,21 @@ final class HomeWidgets {
         }
     }
 
+    /** Credentials for an Invidious instance, sent only to that instance's origin. */
+    record Authorization(HttpUrl origin, String value) {
+        static Authorization fromJson(JSONObject json) {
+            HttpUrl origin = json == null ? null : HttpUrl.parse(json.optString("url"));
+            String value = json == null ? "" : json.optString("value");
+            return origin == null || value.isEmpty() ? null : new Authorization(origin, value);
+        }
+
+        boolean appliesTo(HttpUrl url) {
+            return url.scheme().equals(origin.scheme()) && url.host().equals(origin.host()) && url.port() == origin.port();
+        }
+    }
+
     /** Stores the list, shows it at once, then adds missing thumbnails. Call off the main thread. */
-    static void setContinueWatching(Context context, List<Video> videos) throws JSONException {
+    static void setContinueWatching(Context context, List<Video> videos, Authorization authorization) throws JSONException {
         synchronized (LOCK) {
             JSONArray array = new JSONArray();
             for (Video video : videos) array.put(video.toJson());
@@ -104,7 +118,7 @@ final class HomeWidgets {
                 File file = thumbnailFile(context, video);
                 if (file == null) continue;
                 keep.add(file.getName());
-                if (!file.isFile()) downloaded |= download(video.thumbnail(), file);
+                if (!file.isFile()) downloaded |= download(video.thumbnail(), file, authorization);
             }
             File[] files = directory.listFiles();
             if (files != null) {
@@ -215,8 +229,13 @@ final class HomeWidgets {
         return client;
     }
 
-    private static boolean download(String url, File file) {
-        try (Response response = client().newCall(new Request.Builder().url(url).build()).execute()) {
+    private static boolean download(String source, File file, Authorization authorization) {
+        HttpUrl url = HttpUrl.parse(source);
+        if (url == null) return false;
+        Request.Builder request = new Request.Builder().url(url);
+        // OkHttp drops this header when a redirect leaves the instance's host.
+        if (authorization != null && authorization.appliesTo(url)) request.header("Authorization", authorization.value());
+        try (Response response = client().newCall(request.build()).execute()) {
             ResponseBody body = response.body();
             if (!response.isSuccessful() || body == null) return false;
             byte[] encoded = AndroidMediaArtwork.readArtworkBytes(body.byteStream(), body.contentLength());

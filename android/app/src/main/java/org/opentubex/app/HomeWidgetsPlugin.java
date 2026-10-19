@@ -16,7 +16,8 @@ public class HomeWidgetsPlugin extends Plugin {
     public void setContinueWatching(PluginCall call) {
         executor.execute(() -> {
             try {
-                HomeWidgets.setContinueWatching(getContext(), HomeWidgets.parse(call.getArray("videos")));
+                HomeWidgets.setContinueWatching(getContext(), HomeWidgets.parse(call.getArray("videos")),
+                    HomeWidgets.Authorization.fromJson(call.getObject("authorization")));
                 call.resolve();
             } catch (Exception error) {
                 call.reject("Unable to update home screen widgets", error);
