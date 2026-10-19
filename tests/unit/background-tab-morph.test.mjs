@@ -93,3 +93,53 @@ test('reduced motion opens the tab without measuring or cloning the thumbnail', 
   await context.morphThumbnailIntoNewTab(new Element(), async () => { created++; return { id: 'new-tab' } })
   assert.equal(created, 1)
 })
+
+for (const timedOut of [false, true]) {
+  test(`waits for the new tab to render and cleans up when ${timedOut ? 'timed out' : 'found'}`, async () => {
+    let notify
+    let expire
+    let disconnected = false
+    let appended = false
+    let target = null
+    const image = {
+      style: {}, removeAttribute() {}, setAttribute() {}, remove() {},
+      animate() { return { finished: Promise.resolve() } }
+    }
+    class Element {
+      querySelector() { return this }
+      getBoundingClientRect() { return { x: 200.5, y: 300.5, width: 320, height: 180 } }
+      cloneNode() { return image }
+    }
+    const context = vm.createContext({
+      HTMLElement: Element,
+      document: {
+        body: { append() { appended = true } },
+        querySelector: () => target
+      },
+      CSS: { escape: value => value },
+      MutationObserver: class {
+        constructor(callback) { notify = callback }
+        observe() {}
+        disconnect() { disconnected = true }
+      },
+      setTimeout(callback) { expire = callback; return 1 },
+      clearTimeout() {},
+      isReducedMotionEnabled: () => false,
+      nextTick: () => Promise.resolve()
+    })
+    vm.runInContext(source, context)
+    const opening = context.morphThumbnailIntoNewTab(new Element(), async () => ({ id: 'delayed-tab' }))
+    await new Promise(setImmediate)
+    assert.equal(appended, false)
+    assert.equal(typeof notify, 'function')
+    if (timedOut) {
+      expire()
+    } else {
+      target = { getBoundingClientRect: () => ({ x: 20.5, y: 40.5, width: 160, height: 45 }) }
+      notify()
+    }
+    await opening
+    assert.equal(appended, !timedOut)
+    assert.equal(disconnected, true)
+  })
+}

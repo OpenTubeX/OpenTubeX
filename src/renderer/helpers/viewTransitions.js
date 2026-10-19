@@ -68,7 +68,7 @@ export async function morphThumbnailIntoNewTab(linkElement, createTab) {
   if (!source?.width || !source.height || !tab?.id) return
 
   await nextTick()
-  const target = document.querySelector(`.tab[data-tab-id="${CSS.escape(tab.id)}"]`)
+  const target = await waitForNewTabTarget(tab.id)
   const destination = target?.getBoundingClientRect()
   if (!destination?.width || !destination.height) return
 
@@ -94,6 +94,28 @@ export async function morphThumbnailIntoNewTab(linkElement, createTab) {
     }
   ], { duration: 300, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' })
   animation.finished.then(() => image.remove(), () => image.remove())
+}
+
+/** @param {string} tabId */
+function waitForNewTabTarget(tabId) {
+  const selector = `.tab[data-tab-id="${CSS.escape(tabId)}"]`
+  const target = document.querySelector(selector)
+  if (target) return Promise.resolve(target)
+
+  // The creation reply can arrive before the renderer receives its tab state.
+  return new Promise(resolve => {
+    const finish = (target) => {
+      clearTimeout(timer)
+      observer.disconnect()
+      resolve(target)
+    }
+    const observer = new MutationObserver(() => {
+      const target = document.querySelector(selector)
+      if (target) finish(target)
+    })
+    const timer = setTimeout(() => finish(null), 3000)
+    observer.observe(document.body, { childList: true, subtree: true })
+  })
 }
 
 /**
