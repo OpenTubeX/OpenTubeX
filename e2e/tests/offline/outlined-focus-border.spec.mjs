@@ -60,7 +60,8 @@ async function expectEvenFocusBorder(app, page, field, outlineSelector) {
       }
       return [vertical(geometry.top), vertical(geometry.bottom), ...sides]
     }, geometry)
-    expect(Math.min(...thicknesses), JSON.stringify({ thicknesses, geometry })).toBeGreaterThanOrEqual(Math.floor(2 * geometry.pixelRatio))
+    // Focus must stay visibly thicker than the 1px resting border at every UI scale.
+    expect(Math.min(...thicknesses), JSON.stringify({ thicknesses, geometry })).toBeGreaterThanOrEqual(Math.max(2, Math.floor(2 * geometry.pixelRatio)))
     expect(Math.max(...thicknesses), JSON.stringify(thicknesses)).toBeLessThanOrEqual(Math.ceil(2 * geometry.pixelRatio))
     expect(Math.max(...thicknesses) - Math.min(...thicknesses), `top, bottom, side rows: ${thicknesses}`).toBeLessThanOrEqual(1)
   }).toPass({ timeout: 5000 })

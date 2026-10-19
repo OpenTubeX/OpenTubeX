@@ -96,33 +96,31 @@ test.describe('consecutive refreshes with a changing cache size', () => {
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await expect(page.getByText('Video 0-0', { exact: true })).toBeVisible()
 
-    // Retain the pending promise while the large IPC payload triggers garbage collection.
-    const refresh = await page.evaluateHandle(() => {
+    // Report completion through page state. Awaiting the pending promise over
+    // the protocol lets V8 report it as collected while the large IPC payload
+    // triggers garbage collection.
+    await page.evaluate(() => {
       const store = window.$store
       const [channelId, cache] = Object.entries(store.getters.getVideoCache)[0]
       const videos = JSON.parse(JSON.stringify(cache.videos))
       store.commit('setSubscriptionFeedRefreshTab', 'videos')
       store.commit('setSubscriptionFeedRefreshInProgress', true)
-      return {
-        finished: store.dispatch('updateSubscriptionVideosCacheByChannel', {
-          channelId,
-          videos: [
-            { ...videos[0], title: 'Finished Videos snapshot' },
-            ...Array.from({ length: 5000 }, (_, index) => ({
-              ...videos[0], videoId: `hidden-${index}`, isNewInSubscriptionFeed: false
-            }))
-          ]
-        }).then(() => {
-          // A synchronized refresh can switch feeds without an idle state.
-          store.commit('setSubscriptionFeedRefreshTab', 'shorts')
-        })
-      }
+      window.__cacheRefreshOutcome = null
+      store.dispatch('updateSubscriptionVideosCacheByChannel', {
+        channelId,
+        videos: [
+          { ...videos[0], title: 'Finished Videos snapshot' },
+          ...Array.from({ length: 5000 }, (_, index) => ({
+            ...videos[0], videoId: `hidden-${index}`, isNewInSubscriptionFeed: false
+          }))
+        ]
+      }).then(() => {
+        // A synchronized refresh can switch feeds without an idle state.
+        store.commit('setSubscriptionFeedRefreshTab', 'shorts')
+        window.__cacheRefreshOutcome = 'finished'
+      }, error => { window.__cacheRefreshOutcome = String(error) })
     })
-    try {
-      await refresh.evaluate(state => state.finished)
-    } finally {
-      await refresh.dispose()
-    }
+    await expect.poll(() => page.evaluate(() => window.__cacheRefreshOutcome)).toBe('finished')
     await expect(page.getByText('Finished Videos snapshot', { exact: true })).toBeVisible()
 
     const updateFirstTitle = (title) => page.evaluate(async (title) => {

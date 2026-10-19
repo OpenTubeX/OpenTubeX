@@ -735,7 +735,9 @@ test.describe('history search pagination', () => {
 
     await scrollPageToEnd(page)
     await expect(videos.filter({ hasText: 'beta match lowercase' })).toHaveCount(1)
-    await page.clock.pauseAt(new Date(Date.now() + 1000))
+    // The resumed fake clock runs ahead of Node's wall clock by the previous
+    // pause, so a Date.now()-based target can already lie in the past.
+    await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000))
     await page.getByRole('checkbox', { name: 'Case Sensitive Search' }).evaluate(element => element.click())
     await expect(page.locator('.historySearchLoader')).toBeVisible()
     await expect(videos).toHaveCount(0)
