@@ -142,7 +142,8 @@ const actions = {
       updates: changes.updates.map(migrateLegacyHistoryRecord),
       deletions: changes.deletions,
     }
-    await DBHistoryHandlers.applySyncChanges(migratedChanges, changes.assertActive)
+    const skipped = new Set(await DBHistoryHandlers.applySyncChanges(migratedChanges, changes.assertActive))
+    if (skipped.size > 0) migratedChanges.insertions = migratedChanges.insertions.filter(record => !skipped.has(record.videoId))
     commit('applyHistorySyncChanges', migratedChanges)
   },
 

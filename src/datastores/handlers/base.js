@@ -292,19 +292,28 @@ class History {
       await db.history.removeAsync(createIdQuery('videoId', deletions), { multi: true })
     }
     // Playback can store a video while the merge waits on the server. Update
-    // it instead of inserting a duplicate record for the same video.
+    // it instead of inserting a duplicate, unless it was watched more recently.
     const insertionIds = insertions.map(record => record.videoId)
     const stored = insertionIds.length > 0
-      ? new Set((await db.history.findAsync(createIdQuery('videoId', insertionIds), { videoId: 1 })).map(record => record.videoId))
-      : new Set()
+      ? new Map((await db.history.findAsync(createIdQuery('videoId', insertionIds), { videoId: 1, timeWatched: 1 }))
+          .map(record => [record.videoId, record.timeWatched]))
+      : new Map()
+    const skipped = new Set(insertions
+      .filter(record => stored.has(record.videoId) && !(record.timeWatched > stored.get(record.videoId)))
+      .map(record => record.videoId))
     const migratedInsertions = insertions.filter(record => !stored.has(record.videoId)).map(historyReplacement)
-    const migratedUpdates = [...updates, ...insertions.filter(record => stored.has(record.videoId))].map(historyReplacement)
+    const migratedUpdates = [
+      ...updates,
+      ...insertions.filter(record => stored.has(record.videoId) && !skipped.has(record.videoId)),
+    ].map(historyReplacement)
     for (const record of migratedUpdates) {
       await db.history.updateAsync({ videoId: record.videoId }, record, { upsert: true })
     }
     if (migratedInsertions.length > 0) {
       await db.history.insertAsync(migratedInsertions)
     }
+    // Caches must keep the newer stored records too.
+    return [...skipped]
   }
 
   static migrateWatchedStatus() {

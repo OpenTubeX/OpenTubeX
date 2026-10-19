@@ -194,6 +194,16 @@ test('playback upserts, progress and sync additions preserve evidence without re
   assert.deepEqual(evidenceIds(f.store.getters.getRecommendationRecords), ['retained'])
 })
 
+test('sync insertions keep newer local history in the cache', async () => {
+  const f = fixture()
+  await f.store.dispatch('updateHistory', video('watched', 3))
+
+  await f.store.dispatch('applyHistorySyncChanges', { insertions: [video('watched', 2)], updates: [], deletions: [] })
+
+  assert.equal(f.store.getters.getHistoryCacheById.watched.timeWatched, 3)
+  assert.deepEqual(f.store.getters.getHistoryCacheSorted.map(record => record.timeWatched), [3])
+})
+
 test('history removal does not eagerly initialize unused recommendation state', async () => {
   const f = fixture()
   await f.store.dispatch('updateHistory', video('removed'))

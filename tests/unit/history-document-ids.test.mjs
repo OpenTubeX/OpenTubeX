@@ -70,6 +70,19 @@ for (const [name, createDatastore] of Object.entries(backends)) {
     assert.equal(await db.history.countAsync({ videoId: 'other' }), 1)
   })
 
+  test(`${name}: sync insertions keep a record watched more recently in another window`, async t => {
+    const { db, History } = await fixture(t, createDatastore)
+    await History.upsert(record('video', { timeWatched: 3, watchProgress: 30 }))
+
+    const skipped = await History.applySyncChanges({ insertions: [record('video', { timeWatched: 2 }), record('other')], updates: [], deletions: [] })
+
+    assert.deepEqual([...skipped], ['video'])
+    const stored = await db.history.findAsync({ videoId: 'video' })
+    assert.equal(stored.length, 1)
+    assert.equal(stored[0].timeWatched, 3)
+    assert.equal(stored[0].watchProgress, 30)
+  })
+
   test(`${name}: playback writes wait for a running sync instead of creating a duplicate`, async t => {
     const { db, History } = await fixture(t, createDatastore)
     const findAsync = db.history.findAsync.bind(db.history)
