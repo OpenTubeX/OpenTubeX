@@ -2823,12 +2823,17 @@ export default defineComponent({
         existingSkip.translatedCategory = translatedCategory
         existingSkip.color = color
         existingSkip.unskipped = false
-        existingSkip.hideAt = hideAt
         existingSkip.hideRemainingMs = sponsorBlockSkippedToastDurationMs.value
-        existingSkip.countdownPaused = false
         existingSkip.isHighlight = isHighlight
         existingSkip.isMute = false
         existingSkip.unskipTime = unskipTime ?? null
+        // A toast under the pointer or focus stays until it is left, even when its segment is skipped again
+        if (existingSkip.countdownPaused) {
+          existingSkip.hideAt = null
+          existingSkip.timeoutId = 0
+          return
+        }
+        existingSkip.hideAt = hideAt
         existingSkip.timeoutId = setTimeout(() => {
           removeSponsorBlockToast(uuid)
         }, sponsorBlockSkippedToastDurationMs.value)

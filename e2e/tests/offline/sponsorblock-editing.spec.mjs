@@ -47,6 +47,8 @@ async function openSegments(app, page, segments = [timedSegment], beforeOpen = n
   await page.getByRole('button', { name: 'Open SponsorBlock info', exact: true }).click()
   const panel = page.locator('.watchVideoSponsorBlock')
   await expect(panel.locator('.sponsorBlockSegment')).toHaveCount(segments.length)
+  // Rows still move while the panel grows open, so a click could press one row and release on another
+  await expect(panel).not.toHaveClass(/sidebar-panel-enter/)
   return { panel, video }
 }
 
@@ -483,6 +485,27 @@ test.describe('segment editor layout', { tag: '@scale' }, () => {
     }
     await fullscreenPanel.getByRole('button', { name: 'Copy & downvote', exact: true }).click()
     await expect(page.locator('.sponsorBlockSubmissionMenu')).toBeVisible()
+  })
+
+  test('keeps a hovered skipped toast when its segment is skipped again', async ({ app, page }) => {
+    const { panel, video } = await openSegments(app, page)
+    await panel.getByRole('button', { name: 'Close', exact: true }).click()
+    await page.evaluate(() => window.$store.commit('setSponsorBlockSkippedToastDuration', 1))
+    const skip = () => video.evaluate(element => {
+      element.currentTime = 11.2
+      element.dispatchEvent(new Event('timeupdate'))
+    })
+    await skip()
+    const toast = page.locator('.ftVideoPlayer .skippedSegment')
+    await expect(toast).toBeVisible()
+    await page.evaluate(() => window.scrollTo(0, 0))
+    await toast.hover({ position: { x: 12, y: 12 } })
+    await skip()
+    // Outlast the 2 s minimum toast duration
+    await page.waitForTimeout(2500)
+    await expect(toast).toBeVisible({ timeout: 1 })
+    await page.mouse.move(0, 0)
+    await expect(toast).toBeHidden()
   })
 
   test('edits directly from a skipped toast and keeps its editor inside the player', async ({ app, page, uiScale }, testInfo) => {
