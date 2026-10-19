@@ -1334,7 +1334,7 @@
 
   .sidebar-panel-enter-to,
   .sidebar-panel-leave-from {
-    max-block-size: 700px;
+    max-block-size: var(--sidebar-panel-max-block-size, 700px);
     opacity: 1;
   }
 

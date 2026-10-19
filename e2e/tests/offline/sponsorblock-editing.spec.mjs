@@ -31,7 +31,7 @@ const timedSegment = {
   votes: 1
 }
 
-async function openSegments(app, page, segments = [timedSegment]) {
+async function openSegments(app, page, segments = [timedSegment], beforeOpen = null) {
   await mockPlayableWatchPage(app, page)
   await page.route('**/api/skipSegments/**', route => route.fulfill({
     body: JSON.stringify([{ videoID: 'jNQXAC9IVRw', segments }]),
@@ -43,6 +43,7 @@ async function openSegments(app, page, segments = [timedSegment]) {
   }))
   const video = await openMockedVideo(page)
   await video.evaluate(element => element.pause())
+  await beforeOpen?.()
   await page.getByRole('button', { name: 'Open SponsorBlock info', exact: true }).click()
   const panel = page.locator('.watchVideoSponsorBlock')
   await expect(panel.locator('.sponsorBlockSegment')).toHaveCount(segments.length)
@@ -389,6 +390,42 @@ test.describe('segment editor layout', { tag: '@scale' }, () => {
         secColor: 'Blue'
       }
     }
+  })
+
+  test('opens at its resting height and keeps a scroll made while opening', async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 1440, height: 960 })
+    let opening
+    const { panel } = await openSegments(app, page, Array.from({ length: 9 }, (_, index) => ({
+      ...timedSegment, UUID: `segment-${index}`, segment: [index, index + 0.5]
+    })), async () => {
+      // Sample every frame of the opening transition and scroll to the end
+      // halfway through, like a user reaching for the last segment.
+      opening = page.evaluate(() => new Promise(resolve => {
+        const heights = []
+        let scrolled = false
+        const sample = () => {
+          const panel = document.querySelector('.watchVideoSponsorBlock')
+          if (panel) {
+            heights.push(panel.getBoundingClientRect().height)
+            const content = panel.querySelector('.sponsorBlockContent')
+            if (!scrolled && content && content.scrollHeight > content.clientHeight + 1 && heights.length > 3) {
+              content.scrollTop = content.scrollHeight
+              scrolled = true
+            }
+            if (!panel.className.includes('sidebar-panel-enter') && scrolled) {
+              requestAnimationFrame(() => requestAnimationFrame(() => resolve({ heights, scrollTop: content.scrollTop })))
+              return
+            }
+          }
+          requestAnimationFrame(sample)
+        }
+        requestAnimationFrame(sample)
+      }))
+    })
+    const { heights, scrollTop } = await opening
+    const finalHeight = await panel.evaluate(element => element.getBoundingClientRect().height)
+    expect(Math.max(...heights), JSON.stringify(heights)).toBeLessThanOrEqual(finalHeight + 1)
+    expect(scrollTop).toBeGreaterThan(0)
   })
 
   test('keeps category edits inside the panel and clamps after collapsing, cancellation, and resize', async ({ app, page }) => {

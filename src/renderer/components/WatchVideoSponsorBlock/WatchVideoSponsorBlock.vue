@@ -432,7 +432,9 @@ function isSegmentPassed(segment) {
   box-sizing: border-box;
   min-inline-size: 0;
   max-inline-size: 100%;
-  max-block-size: 500px;
+  /* The sidebar opening transition grows to this height before handing over. */
+  --sidebar-panel-max-block-size: 500px;
+  max-block-size: var(--sidebar-panel-max-block-size);
   overflow: hidden;
   color: var(--primary-text-color);
   background-color: var(--card-bg-color);
