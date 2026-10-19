@@ -80,6 +80,7 @@ test('controls queue order, running jobs, bandwidth, and retry-all', async ({ ap
   const failureMarker = path.join(app.userDataDir, 'failed-once')
   await writeFile(executable, [
     '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
     'for argument do case "$argument" in https://www.youtube.com/watch?v=*) url="$argument" ;; esac; done',
     'id="$' + '{url##*=}"',
     `printf '%s\\n' "$id" >> '${startsFile}'`,
@@ -183,6 +184,7 @@ test('clears pause-all after every download is individually resumed', async ({ a
   const startsFile = path.join(app.userDataDir, 'individual-resume-starts.txt')
   await writeFile(executable, [
     '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
     'for argument do case "$argument" in https://www.youtube.com/watch?v=*) url="$argument" ;; esac; done',
     'id="$' + '{url##*=}"',
     `printf '%s\\n' "$id" >> '${startsFile}'`,
@@ -232,6 +234,7 @@ test('keeps the unsupported active-pause fallback resumable', async ({ app, page
   const startsFile = path.join(app.userDataDir, 'fallback-pause-starts.txt')
   await writeFile(executable, [
     '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
     'for argument do case "$argument" in https://www.youtube.com/watch?v=*) url="$argument" ;; esac; done',
     'id="$' + '{url##*=}"',
     `printf '%s\\n' "$id" >> '${startsFile}'`,
@@ -319,6 +322,7 @@ test('keeps paused downloads queued across a restart', async ({ app, page }) => 
   const startsFile = path.join(app.userDataDir, 'persisted-starts.txt')
   await writeFile(executable, [
     '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
     'for argument do case "$argument" in https://www.youtube.com/watch?v=*) url="$argument" ;; esac; done',
     'id="$' + '{url##*=}"',
     `printf '%s\\n' "$id" >> '${startsFile}'`,
@@ -391,6 +395,7 @@ test('checks destination space before starting a download', async ({ app, page }
   const startsFile = path.join(app.userDataDir, 'space-check-starts.txt')
   await writeFile(executable, [
     '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
     'for argument do case "$argument" in https://www.youtube.com/watch?v=*) url="$argument" ;; esac; done',
     'id="$' + '{url##*=}"',
     `printf '%s\\n' "$id" >> '${startsFile}'`,
@@ -469,6 +474,7 @@ test('shows preparation and processing without a stale percentage or ETA', async
   const finish = path.join(app.userDataDir, 'finish-download')
   await writeFile(executable, [
     '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
     `while [ ! -f '${transfer}' ]; do sleep 0.05; done`,
     "printf '__OPENTUBEX_DOWNLOAD__:downloading\\t97.3%%\\t2MiB/s\\t00:00\\n' >&2",
     `while [ ! -f '${processing}' ]; do sleep 0.05; done`,

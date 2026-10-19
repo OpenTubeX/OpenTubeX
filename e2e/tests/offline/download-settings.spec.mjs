@@ -497,6 +497,7 @@ test.describe('automatic download authorization', () => {
     await copyFile(DEMO_MEDIA_PATH, downloadedFile)
     await writeFile(executable, [
       '#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf \'%s\\n\' \'2026.08.19\'; exit; fi',
       'for argument in "$@"; do',
       '  if [ "$argument" = "--dump-single-json" ]; then',
       `    printf '%s\\n' metadata >> ${metadataLookupsFile}`,
