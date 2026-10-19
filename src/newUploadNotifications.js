@@ -64,8 +64,9 @@ export function normalizeUploadEntries(entries) {
 function htmlToText(html) {
   return html
     .replaceAll(/<br\s*\/?>/gi, '\n')
-    // Also drops an unclosed tag, so no markup survives.
-    .replaceAll(/<[^>]*>?/g, '')
+    .replaceAll(/<[^>]*>/g, '')
+    // Drops what is left of malformed tags, so no markup survives.
+    .replaceAll(/[<>]/g, '')
     .replaceAll(/&(amp|lt|gt|quot|#39);/g, (_, entity) => ({ amp: '&', lt: '<', gt: '>', quot: '"', '#39': "'" })[entity])
 }
 
