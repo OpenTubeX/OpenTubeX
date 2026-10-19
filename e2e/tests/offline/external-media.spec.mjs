@@ -248,9 +248,14 @@ for (const seekBeforeMetadata of [false, true]) {
     await video.evaluate(element => element.dispatchEvent(new Event('pause')))
     await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeCloseTo(position, 1)
     await goTo(page, 'history')
-    await open()
-    expect(await audio.evaluate(element => element.currentTime)).toBeGreaterThanOrEqual(position)
-    expect(await video.evaluate(element => element.currentTime)).toBeCloseTo(position % await video.evaluate(element => element.duration), 0)
+    // Check the restored positions before playback moves them: on a slow
+    // runner the looping video can wrap before a playing check reads it.
+    await page.evaluate(() => window.$store.dispatch('updateAutoplayVideos', false))
+    await page.locator(sel.searchInput).fill(mediaUrl)
+    await page.locator(sel.searchInput).press('Enter')
+    await expect.poll(() => audio.evaluate(element => element.currentTime).catch(() => 0)).toBeCloseTo(position, 1)
+    const videoDuration = await video.evaluate(element => element.duration)
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(position % videoDuration, 1)
     await audio.evaluate(element => { element.currentTime = element.duration - 0.1 })
     await video.evaluate(element => element.play())
     await expect.poll(() => audio.evaluate(element => element.ended)).toBe(true)
@@ -1100,12 +1105,25 @@ test.describe('Twitch theater mode at 125% UI scale', () => {
     const player = page.locator(`${activeTab} .externalMediaPlayer`)
     const theaterButton = player.locator('.theatre-button')
     await expect(theaterButton).toBeVisible()
+    // Playing media hides idle controls, and a hidden button cannot take the
+    // focus that press() moves to it. Paused media keeps the controls shown.
+    await (await waitForPlayback(page)).evaluate(element => element.pause())
+    // Record scaling animations as they start: a slow runner can otherwise
+    // read getAnimations() only after the 400 ms animation has finished.
+    await player.evaluate(element => {
+      const animate = element.animate
+      element.scaleAnimations = []
+      element.animate = function (keyframes, options) {
+        const animation = animate.call(this, keyframes, options)
+        if (keyframes.some(frame => frame.transform?.includes('scale('))) element.scaleAnimations.push(animation)
+        return animation
+      }
+    })
     for (const enabled of [true, false]) {
       await theaterButton.press('Enter')
       await expect(page.locator(`${activeTab} .externalMediaLayout`)).toHaveClass(enabled ? /useTheatreMode/ : /^(?!.*useTheatreMode)/)
-      expect(await player.evaluate(element => element.getAnimations().some(animation =>
-        animation.effect.getKeyframes().some(frame => frame.transform?.includes('scale('))
-      ))).toBe(true)
+      expect(await player.evaluate(element => element.scaleAnimations.splice(0)
+        .some(animation => animation.effect.getComputedTiming().duration > 0))).toBe(true)
       await player.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
     }
 
