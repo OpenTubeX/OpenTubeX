@@ -228,3 +228,11 @@ test('turning a feed off also forgets its withheld members-only uploads', async 
     await rm(directory, { recursive: true, force: true })
   }
 })
+
+test('withheld uploads are released when they turn public in another feed of the channel', () => {
+  const state = createUploadNotificationState()
+  takeVisibleUploads(state, 'UC1', 'videos', [entry('a', NOW)], false, NOW)
+  takeVisibleUploads(state, 'UC1', 'live', [entry('b', NOW)], false, NOW)
+  takeVisibleUploads(state, 'UC1', 'videos', [entry('m', NOW, { membersOnly: true }), entry('a', NOW)], false, NOW)
+  assert.deepEqual(takeVisibleUploads(state, 'UC1', 'live', [entry('m', NOW), entry('b', NOW)], false, NOW).map(upload => upload.id), ['m'])
+})

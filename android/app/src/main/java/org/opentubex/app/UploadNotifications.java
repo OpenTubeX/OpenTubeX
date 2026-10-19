@@ -56,7 +56,7 @@ final class UploadNotifications {
     /** Drops baselines of feeds whose notifications are off. Mirrors forgetUnconfiguredFeeds. */
     static boolean forgetUnconfiguredFeeds(JSONObject state, JSONObject configuration) {
         JSONObject known = state.optJSONObject("known");
-        if (known == null) return false;
+        if (known == null) known = new JSONObject();
         JSONObject channels = configuration.optJSONObject("channels");
         List<String> removed = new ArrayList<>();
         for (Iterator<String> keys = known.keys(); keys.hasNext();) {
@@ -65,12 +65,19 @@ final class UploadNotifications {
             JSONObject channel = channels == null || separator < 0 ? null : channels.optJSONObject(key.substring(0, separator));
             if (channel == null || !contains(channel.optJSONArray("feedTypes"), key.substring(separator + 1))) removed.add(key);
         }
+        for (String key : removed) known.remove(key);
+        boolean changed = !removed.isEmpty();
         JSONObject withheld = state.optJSONObject("withheld");
-        for (String key : removed) {
-            known.remove(key);
-            if (withheld != null) withheld.remove(key);
+        if (withheld == null) return changed;
+        List<String> forgotten = new ArrayList<>();
+        for (Iterator<String> keys = withheld.keys(); keys.hasNext();) {
+            String channelId = keys.next();
+            JSONObject channel = channels == null ? null : channels.optJSONObject(channelId);
+            JSONArray feedTypes = channel == null ? null : channel.optJSONArray("feedTypes");
+            if (feedTypes == null || feedTypes.length() == 0) forgotten.add(channelId);
         }
-        return !removed.isEmpty();
+        for (String channelId : forgotten) withheld.remove(channelId);
+        return changed || !forgotten.isEmpty();
     }
 
     /** Checks a raw response saved by the scheduled refresh worker. */
@@ -164,7 +171,8 @@ final class UploadNotifications {
     /** Mirrors takeVisibleUploads: withholds members-only uploads and notifies them once public. */
     static List<JSONObject> takeVisibleUploads(JSONObject state, String channelId, String feedType, List<JSONObject> entries,
                                                boolean showMembersOnly, long now) throws Exception {
-        String key = channelId + ":" + feedType;
+        // Kept per channel because shorts and streams can move between its feeds.
+        String key = channelId;
         JSONObject withheldByFeed = state.optJSONObject("withheld");
         if (withheldByFeed == null) state.put("withheld", withheldByFeed = new JSONObject());
         JSONArray withheld = withheldByFeed.optJSONArray(key);
@@ -201,7 +209,7 @@ final class UploadNotifications {
                     JSONObject comment = comments.getJSONObject(i);
                     // Match the foreground parser, which reads contentHtml and publishedText.
                     String text = comment.optString("content");
-                    if (text.isEmpty()) text = comment.optString("contentHtml").replaceAll("<br\\s*/?>", "\n").replaceAll("<[^>]*>", "");
+                    if (text.isEmpty()) text = htmlToText(comment.optString("contentHtml"));
                     long published = comment.optLong("published");
                     if (published <= 0) published = SubscriptionRefreshDownloadMetadata.published(comment.optString("publishedText"), now);
                     result.put(new JSONObject()
@@ -245,6 +253,42 @@ final class UploadNotifications {
             }
             for (Iterator<String> keys = object.keys(); keys.hasNext();) collectPosts(object.get(keys.next()), posts, now);
         }
+    }
+
+    /** Mirrors htmlToText in src/newUploadNotifications.js. */
+    static String htmlToText(String html) {
+        String text = html.replaceAll("(?i)<br\\s*/?>", "\n");
+        String previous;
+        do {
+            previous = text;
+            text = text.replaceAll("<[^>]*>", "");
+        } while (!text.equals(previous));
+        java.util.regex.Matcher matcher = java.util.regex.Pattern
+            .compile("(?i)&(?:#(\\d+)|#x([\\da-f]+)|(amp|lt|gt|quot|apos|nbsp));").matcher(text);
+        StringBuilder result = new StringBuilder();
+        while (matcher.find()) {
+            String replacement = matcher.group();
+            if (matcher.group(3) != null) {
+                switch (matcher.group(3).toLowerCase(java.util.Locale.ROOT)) {
+                    case "amp": replacement = "&"; break;
+                    case "lt": replacement = "<"; break;
+                    case "gt": replacement = ">"; break;
+                    case "quot": replacement = "\""; break;
+                    case "apos": replacement = "'"; break;
+                    default: replacement = "\u00A0";
+                }
+            } else {
+                try {
+                    int codePoint = matcher.group(1) != null ? Integer.parseInt(matcher.group(1)) : Integer.parseInt(matcher.group(2), 16);
+                    if (Character.isValidCodePoint(codePoint)) replacement = new String(Character.toChars(codePoint));
+                } catch (NumberFormatException tooLarge) {
+                    // Leave out-of-range references unchanged, like the renderer.
+                }
+            }
+            matcher.appendReplacement(result, java.util.regex.Matcher.quoteReplacement(replacement));
+        }
+        matcher.appendTail(result);
+        return result.toString();
     }
 
     static String url(String feedType, String id) {

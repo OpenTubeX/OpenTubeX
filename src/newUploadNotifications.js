@@ -95,7 +95,11 @@ export function forgetUnconfiguredFeeds(state, configuration) {
     const separator = key.lastIndexOf(':')
     if (configuration.channels?.[key.slice(0, separator)]?.feedTypes.includes(key.slice(separator + 1))) continue
     delete state.known[key]
-    delete state.withheld?.[key]
+    changed = true
+  }
+  for (const channelId of Object.keys(state.withheld ?? {})) {
+    if (configuration.channels?.[channelId]?.feedTypes.length > 0) continue
+    delete state.withheld[channelId]
     changed = true
   }
   return changed
@@ -139,7 +143,8 @@ export function takeNewUploads(state, channelId, feedType, entries, now = Date.n
  * Like takeNewUploads, but withholds members-only uploads unless they are shown.
  * The baseline still records them, so turning members-only content on does not
  * report old ones. A withheld upload notifies once it is no longer members-only,
- * as members-first videos do when they become public.
+ * as members-first videos do when they become public. Withheld IDs are kept per
+ * channel because shorts and streams can move between a channel's feeds.
  * @param {{ known: Record<string, string[]>, notified: string[], withheld?: Record<string, string[]> }} state
  * @param {string} channelId
  * @param {string} feedType
@@ -148,8 +153,7 @@ export function takeNewUploads(state, channelId, feedType, entries, now = Date.n
  * @param {number} [now]
  */
 export function takeVisibleUploads(state, channelId, feedType, entries, showMembersOnly, now = Date.now()) {
-  const key = `${channelId}:${feedType}`
-  const withheld = state.withheld?.[key] ?? []
+  const withheld = state.withheld?.[channelId] ?? []
   const released = entries.filter(entry => !entry.membersOnly && !entry.upcoming && withheld.includes(entry.id))
   const uploads = takeNewUploads(state, channelId, feedType, entries, now)
   const visible = uploads.filter(entry => showMembersOnly || !entry.membersOnly)
@@ -158,8 +162,8 @@ export function takeVisibleUploads(state, channelId, feedType, entries, showMemb
     ...uploads.filter(entry => !visible.includes(entry)).map(entry => entry.id),
     ...withheld.filter(id => !releasedIds.has(id))
   ].slice(0, KNOWN_ID_LIMIT)
-  state.withheld = { ...state.withheld, [key]: nextWithheld }
-  if (nextWithheld.length === 0) delete state.withheld[key]
+  state.withheld = { ...state.withheld, [channelId]: nextWithheld }
+  if (nextWithheld.length === 0) delete state.withheld[channelId]
   return [...released, ...visible.filter(entry => !releasedIds.has(entry.id))]
 }
 

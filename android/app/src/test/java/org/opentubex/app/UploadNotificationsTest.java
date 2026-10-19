@@ -68,9 +68,9 @@ public class UploadNotificationsTest {
         assertEquals(2_000_000L, post.getLong("published"));
 
         JSONObject htmlPosts = new JSONObject().put("comments", new JSONArray()
-            .put(new JSONObject().put("commentId", "post3").put("contentHtml", "Line<br>two <b>bold</b>").put("publishedText", "3 hours ago")));
+            .put(new JSONObject().put("commentId", "post3").put("contentHtml", "Line<br>two <b>bold</b> &amp;&#39;&#x27;&nbsp;&#99999999999;").put("publishedText", "3 hours ago")));
         post = UploadNotifications.entries("posts", htmlPosts, NOW).getJSONObject(0);
-        assertEquals("Line\ntwo bold", post.getString("title"));
+        assertEquals("Line\ntwo bold &''\u00A0&#99999999999;", post.getString("title"));
         assertEquals((NOW / 1000 - 3 * 3600) * 1000, post.getLong("published"));
 
         JSONObject localPosts = new JSONObject().put("backgroundFormat", "local").put("data", new JSONObject()
@@ -150,5 +150,16 @@ public class UploadNotificationsTest {
         assertTrue(UploadNotifications.forgetUnconfiguredFeeds(state, new JSONObject().put("channels", new JSONObject())));
         assertTrue(UploadNotifications.takeVisibleUploads(state, "UC1", "videos",
             Arrays.asList(entry("m", NOW), entry("a", NOW)), false, NOW).isEmpty());
+    }
+
+    @Test
+    public void releasesWithheldUploadsSeenInAnotherFeedOfTheChannel() throws Exception {
+        JSONObject state = new JSONObject();
+        UploadNotifications.takeVisibleUploads(state, "UC1", "videos", Arrays.asList(entry("a", NOW)), false, NOW);
+        UploadNotifications.takeVisibleUploads(state, "UC1", "live", Arrays.asList(entry("b", NOW)), false, NOW);
+        UploadNotifications.takeVisibleUploads(state, "UC1", "videos",
+            Arrays.asList(entry("m", NOW).put("membersOnly", true), entry("a", NOW)), false, NOW);
+        assertEquals(Arrays.asList("m"), ids(UploadNotifications.takeVisibleUploads(state, "UC1", "live",
+            Arrays.asList(entry("m", NOW), entry("b", NOW)), false, NOW)));
     }
 }
