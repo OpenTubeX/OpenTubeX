@@ -1079,6 +1079,8 @@ async function loadCachedPlaylistInformation(cachedPlaylist) {
   // Playback must not wait for later pages when the next video is already cached.
   const videos = cachedPlaylist.items.slice()
   playlistItems.value = applyReversePlaylistState(videos.slice())
+  // Shuffle stays enabled across playlists, so rebuild the order from this one.
+  if (shuffleEnabled.value) shufflePlaylistItems()
   isLoading.value = false
 
   if (!isFetchingPlaylistContinuation.value) return
@@ -1136,6 +1138,7 @@ async function getPlaylistInformationLocal() {
     // Show the first page right away; later pages append while playback continues.
     const videos = parseLocalPlaylistVideos(playlist.items)
     playlistItems.value = applyReversePlaylistState(videos.slice())
+    if (shuffleEnabled.value) shufflePlaylistItems()
     isLoading.value = false
 
     if (!isFetchingPlaylistContinuation.value) return
@@ -1181,6 +1184,7 @@ async function getPlaylistInformationInvidious() {
     channelId.value = result.authorId
 
     playlistItems.value = applyReversePlaylistState(result.videos)
+    if (shuffleEnabled.value) shufflePlaylistItems()
 
     isLoading.value = false
   } catch (err) {

@@ -24,6 +24,8 @@ function harness() {
   const continuation = deferred()
   const props = reactive({ playlistId: 'youtube-playlist', videoId: 'second' })
   const playlistItems = shallowRef([])
+  const randomizedPlaylistItems = shallowRef([])
+  const shuffleEnabled = ref(false)
   const isFetchingPlaylistContinuation = ref(false)
   const hasUnloadedPlaylistVideos = ref(false)
   const isLoading = ref(true)
@@ -31,7 +33,9 @@ function harness() {
   const context = {
     playlistLoadGeneration: 0,
     props, playlistItems, isLoading, isFetchingPlaylistContinuation, hasUnloadedPlaylistVideos,
-    randomizedPlaylistItems: shallowRef([]), shuffleEnabled: ref(false), loopEnabled: ref(false), computed,
+    randomizedPlaylistItems, shuffleEnabled, loopEnabled: ref(false), computed,
+    shufflePlaylistItems: () => { randomizedPlaylistItems.value = playlistItems.value.slice().reverse() },
+    shuffleItems: items => items,
     playlistTitle: ref(''), playlistTotalVideoCount: ref(0), channelName: ref(''), channelId: ref(''),
     backendPreference: ref('local'), backendFallback: ref(false),
     applyReversePlaylistState: videos => videos.slice(),
@@ -52,6 +56,7 @@ function harness() {
   return {
     props, playlistItems, isLoading, isFetchingPlaylistContinuation, hasUnloadedPlaylistVideos, errors, state,
     load,
+    randomizedPlaylistItems, shuffleEnabled,
     changePlaylist: playlistId => { props.playlistId = playlistId; context.playlistLoadGeneration += 1 },
     resolveFirstPage: () => firstPage.resolve({
       info: { title: 'YouTube playlist', total_items: '100', author: { name: 'Test', id: 'channel' } },
@@ -131,4 +136,20 @@ test('a slow playlist fetch cannot replace a later visit of the same playlist', 
   assert.deepEqual(state.playlistItems.value.map(video => video.videoId), ['newer'])
   assert.equal(state.title.value, 'Newer load')
   assert.equal(state.isFetchingPlaylistContinuation.value, false)
+})
+
+test('a new playlist rebuilds the shuffled order instead of extending the previous one', async () => {
+  const state = harness()
+  state.shuffleEnabled.value = true
+  state.randomizedPlaylistItems.value = [{ videoId: 'previous-playlist' }]
+  const loading = state.load()
+  state.resolveFirstPage()
+  await new Promise(resolve => setImmediate(resolve))
+
+  assert.deepEqual(state.randomizedPlaylistItems.value.map(video => video.videoId), ['second', 'first'])
+
+  state.finishContinuation([{ videoId: 'third' }])
+  await loading
+
+  assert.deepEqual(state.randomizedPlaylistItems.value.map(video => video.videoId), ['second', 'first', 'third'])
 })
