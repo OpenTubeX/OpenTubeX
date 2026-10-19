@@ -19,6 +19,7 @@ test('the Obtainium nightly link allows architecture APKs and the universal fall
   assert.equal(settings.filterReleaseTitlesByRegEx, 'nightly')
   for (const abi of ['arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64', 'universal']) {
     assert.ok(filter.test(`opentubex-0.34.0-nightly-1234-android-${abi}.apk`), abi)
+    assert.ok(!filter.test(`opentubex-0.34.0-nightly-1234-android-lite-${abi}.apk`), abi)
   }
   assert.ok(!filter.test('org.opentubex.app-0.34.0-beta-arm64-v8a.apk'))
   assert.ok(!filter.test('opentubex-0.34.0-nightly-1234-android-arm64-v8a.apk.sha256'))
@@ -42,7 +43,7 @@ test('embeds the generated nightly version in the Android web bundle', async () 
   )
 })
 
-test('publishes all architecture APKs alongside the existing desktop artifacts', async (t) => {
+test('publishes full and lite architecture APKs alongside the existing desktop artifacts', async (t) => {
   const directory = await mkdtemp(join(tmpdir(), 'android-nightly-assets-'))
   t.after(() => rm(directory, { recursive: true, force: true }))
   const version = '0.34.0-nightly-1234'
@@ -50,8 +51,8 @@ test('publishes all architecture APKs alongside the existing desktop artifacts',
   const desktop = join(directory, 'artifacts', desktopName)
   await mkdir(desktop, { recursive: true })
   await writeFile(join(desktop, 'app.AppImage'), 'desktop')
-  const names = ['arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64', 'universal'].map(
-    abi => `opentubex-${version}-android-${abi}.apk`
+  const names = ['arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64', 'universal'].flatMap(
+    abi => ['', 'lite-'].map(flavor => `opentubex-${version}-android-${flavor}${abi}.apk`)
   )
   const workflow = load(await readFile('.github/workflows/build.yml', 'utf8'))
   const uploads = workflow.jobs.android.steps.filter(step => step.uses?.startsWith('actions/upload-artifact@'))
@@ -62,6 +63,7 @@ test('publishes all architecture APKs alongside the existing desktop artifacts',
     assert.equal(upload.with['if-no-files-found'], 'error')
     const path = upload.with.path.replace('${{ steps.apk.outputs.version }}', version)
     const name = upload.with.name.replace('${{ steps.apk.outputs.version }}', version)
+    assert.equal(path.split('/')[0], name.includes('-lite-') ? 'android-lite-apks' : 'android-apks')
     assert.equal(path.split('/').pop(), name)
     uploadedNames.push(name)
     const artifact = join(directory, 'artifacts', name)
@@ -160,6 +162,7 @@ test('stable releases build only production APKs and sort between nightlies by v
   for (const commitCount of [12345, 12346]) {
     await writeFile(join(directory, 'git'), `#!/bin/sh\necho ${commitCount}\n`)
     await writeFile(join(directory, 'gradle.log'), '')
+    await writeFile(join(directory, 'packaging.log'), '')
     await writeFile(join(directory, 'package.json'), JSON.stringify({ version: '0.35.0' }))
     const nightly = spawnSync('bash', ['-c', nightlyBuild.run], {
       cwd: directory,
@@ -173,7 +176,19 @@ test('stable releases build only production APKs and sort between nightlies by v
       encoding: 'utf8'
     })
     assert.equal(nightly.status, 0, nightly.stderr)
-    const nightlyCode = Number((await readFile(join(directory, 'gradle.log'), 'utf8')).split('|')[1])
+    const nightlyInvocations = (await readFile(join(directory, 'gradle.log'), 'utf8')).trim().split('\n')
+    const nightlyCode = Number(nightlyInvocations[0].split('|')[1])
+    assert.equal(nightlyInvocations.length, 2)
+    for (const invocation of nightlyInvocations) {
+      assert.ok(invocation.includes(':app:assembleNightly -PsplitApks'))
+      assert.ok(invocation.includes('verifyBuildIdentity'))
+      assert.ok(invocation.endsWith(`|${nightlyCode}|0.35.0-nightly-1234`))
+    }
+    assert.ok(!nightlyInvocations[0].includes('-Plite'))
+    assert.ok(nightlyInvocations[1].includes('-Plite'))
+    assert.equal(await readFile(join(directory, 'packaging.log'), 'utf8'),
+      '_scripts/android_apks.py android/app/build/outputs/apk/nightly android-apks\n' +
+      '_scripts/android_apks.py android/app/build/outputs/apk/nightly android-lite-apks --lite\n')
     assert.ok(commitCount === 12345 ? nightlyCode < stableCode : nightlyCode > stableCode,
       'Stable promotion must update the same-commit nightly and accept the next nightly update')
   }

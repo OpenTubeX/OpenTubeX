@@ -518,6 +518,9 @@ jobs:
         ./android/gradlew --project-dir android :app:assembleNightly -PsplitApks \
           -I ../tests/android/build-identity.init.gradle verifyBuildIdentity
         python3 _scripts/android_apks.py android/app/build/outputs/apk/nightly android-apks
+        ./android/gradlew --project-dir android :app:assembleNightly -PsplitApks -Plite \
+          -I ../tests/android/build-identity.init.gradle verifyBuildIdentity
+        python3 _scripts/android_apks.py android/app/build/outputs/apk/nightly android-lite-apks --lite
         printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
 
     - name: Upload Android arm64-v8a APK
@@ -553,6 +556,41 @@ jobs:
       with:
         name: opentubex-${{ steps.apk.outputs.version }}-android-universal.apk
         path: android-apks/opentubex-${{ steps.apk.outputs.version }}-android-universal.apk
+        if-no-files-found: error
+
+    - name: Upload Android lite arm64-v8a APK
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: opentubex-${{ steps.apk.outputs.version }}-android-lite-arm64-v8a.apk
+        path: android-lite-apks/opentubex-${{ steps.apk.outputs.version }}-android-lite-arm64-v8a.apk
+        if-no-files-found: error
+
+    - name: Upload Android lite armeabi-v7a APK
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: opentubex-${{ steps.apk.outputs.version }}-android-lite-armeabi-v7a.apk
+        path: android-lite-apks/opentubex-${{ steps.apk.outputs.version }}-android-lite-armeabi-v7a.apk
+        if-no-files-found: error
+
+    - name: Upload Android lite x86 APK
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: opentubex-${{ steps.apk.outputs.version }}-android-lite-x86.apk
+        path: android-lite-apks/opentubex-${{ steps.apk.outputs.version }}-android-lite-x86.apk
+        if-no-files-found: error
+
+    - name: Upload Android lite x86_64 APK
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: opentubex-${{ steps.apk.outputs.version }}-android-lite-x86_64.apk
+        path: android-lite-apks/opentubex-${{ steps.apk.outputs.version }}-android-lite-x86_64.apk
+        if-no-files-found: error
+
+    - name: Upload Android lite universal APK
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: opentubex-${{ steps.apk.outputs.version }}-android-lite-universal.apk
+        path: android-lite-apks/opentubex-${{ steps.apk.outputs.version }}-android-lite-universal.apk
         if-no-files-found: error
 
   ios:
@@ -723,7 +761,7 @@ jobs:
             pattern: '_(amd64|arm64)[.]deb$'
             count: 2
           - repository: fdroid
-            pattern: '[.]apk$'
+            pattern: '-android-(arm64-v8a|armeabi-v7a|x86_64|x86|universal)[.]apk$'
             count: 5
           - repository: flatpak
             pattern: '-linux-(x64|arm64)-portable[.]zip$'

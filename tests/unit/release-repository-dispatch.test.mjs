@@ -24,10 +24,9 @@ async function fixture (t, tag) {
     ...['arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64', 'universal'].map(arch => stable
       ? `org.opentubex.app-${version}${arch === 'universal' ? '' : `-${arch}`}.apk`
       : `opentubex-${version}-android-${arch}.apk`),
-    ...(stable
-      ? ['arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64', 'universal'].map(arch =>
-        `org.opentubex.app-${version}-lite${arch === 'universal' ? '' : `-${arch}`}.apk`)
-      : []),
+    ...['arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64', 'universal'].map(arch => stable
+      ? `org.opentubex.app-${version}-lite${arch === 'universal' ? '' : `-${arch}`}.apk`
+      : `opentubex-${version}-android-lite-${arch}.apk`),
     `opentubex-${version.replace(/-beta$/, '')}-ios-unsigned.ipa`,
   ]
   for (const name of ['gh', 'wget']) {

@@ -105,6 +105,15 @@ class ApkPackagingTest(unittest.TestCase):
         self.assertTrue((self.output / "org.opentubex.app-0.34.0-beta.apk").exists())
         self.assertTrue((self.output / "org.opentubex.app-0.34.0-beta-arm64-v8a.apk").exists())
 
+    def test_names_lite_nightly_apks(self):
+        self.write_lite_apks()
+        apks.prepare(self.source, self.output, lite=True)
+        self.assertEqual(
+            {path.name for path in self.output.glob("*.apk")},
+            {f"opentubex-0.34.0-nightly-1234-android-lite-{abi}.apk"
+             for abi in apks.ABIS | {"universal"}},
+        )
+
     def test_names_lite_release_apks(self):
         self.metadata["applicationId"] = "org.opentubex.app"
         for element in self.metadata["elements"]:
