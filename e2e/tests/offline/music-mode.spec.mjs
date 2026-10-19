@@ -36,7 +36,16 @@ async function setMusicMode(page, enabled) {
 async function expectPlayback(page, position, rate) {
   const video = page.locator(videoSelector)
   await expect.poll(() => video.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2)
-  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(position, 0)
+  // Playing videos keep advancing, so on a slow machine a sampled currentTime
+  // can already be past the expected position. Use where the played range
+  // containing the current position began instead.
+  await expect.poll(() => video.evaluate(element => {
+    if (element.paused) return element.currentTime
+    for (let index = element.played.length - 1; index >= 0; index--) {
+      if (element.played.start(index) <= element.currentTime) return element.played.start(index)
+    }
+    return element.currentTime
+  })).toBeCloseTo(position, 0)
   await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(rate)
   return video
 }
@@ -135,6 +144,13 @@ async function openShort(page, id) {
   await page.locator(sel.searchInput).press('Enter')
   await expect(page).toHaveURL(new RegExp(`#/watch/${id}\\?short=true$`))
   await expect(page.locator('.ftVideoPlayer')).toHaveClass(/shortsPlayer/)
+  // The URL changes before the watch view starts loading the Short, so the
+  // previous Short's player can briefly match every playback check below.
+  // Wait for this Short's metadata load, which also resets the channel.
+  const watch = await watchViewHandle(page)
+  await expect.poll(() => watch.evaluate((view, videoId) => (
+    view.videoId === videoId && !view.isLoading && view.$refs.player?.hasLoaded === true
+  ), id)).toBe(true)
   return expectPlayback(page, 0, 1)
 }
 
@@ -146,9 +162,13 @@ test('music mode restarts a retained Short at zero and normal speed', async ({ a
   const watch = await watchViewHandle(page)
   await page.locator('body').press('p')
   await page.locator('body').press('p')
-  await firstVideo.evaluate(element => { element.currentTime = 5 })
+  // Pause before seeking: a seek into an already played range would report
+  // that range's start.
+  await firstVideo.evaluate(element => {
+    element.pause()
+    element.currentTime = 5
+  })
   await expectPlayback(page, 5, 1.5)
-  await firstVideo.evaluate(element => element.pause())
   await openShort(page, 'musicvideo1')
   await openShort(page, 'jNQXAC9IVRw')
   expect(await retainedVideo.evaluate(element => element === document.querySelector('.ftVideoPlayer video'))).toBe(true)
