@@ -1617,6 +1617,24 @@ final class AppTests: XCTestCase {
         XCTAssertEqual(result, #"{"rolledBack":true,"summary":[[5,1.5],[1700000000000,null],["\u0001{\"id\":null}",null],["text",null]],"largeRow":true}"#)
     }
 
+    func testFilesystemTemporaryFileRoundTrip() async throws {
+        try await openApplication()
+        let result = try await webView.callAsyncJavaScript("""
+            const filesystem = Capacitor.Plugins.Filesystem
+            const options = { path: `filesystem-test-${crypto.randomUUID()}.txt`, directory: 'TEMPORARY' }
+            const data = 'Temporary file: Grüß dich 👋'
+            await filesystem.writeFile({ ...options, data, encoding: 'utf8' })
+            try {
+                const info = await filesystem.stat(options)
+                const file = await filesystem.readFile({ ...options, encoding: 'utf8' })
+                return file.data === data && info.type === 'file' && info.size === new TextEncoder().encode(data).length
+            } finally {
+                await filesystem.deleteFile(options)
+            }
+            """, arguments: [:], in: nil, contentWorld: .page) as? Bool
+        XCTAssertEqual(result, true)
+    }
+
     func testApplicationOffline() async throws {
         try await openApplication()
         let ytDlpAvailable = try await webView.callAsyncJavaScript("return (await Capacitor.Plugins.YtDlp.info()).ytDlp.available", arguments: [:], in: nil, contentWorld: .page) as? Bool

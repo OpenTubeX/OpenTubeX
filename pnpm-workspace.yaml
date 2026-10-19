@@ -18,6 +18,8 @@ minimumReleaseAgeExclude:
   - electron@43.8.0
   - eslint-plugin-jsdoc@65.3.12
   - postcss@8.5.31
+  - '@vot.js/core@3.2.0'
+  - '@vot.js/shared@3.2.0'
 
 patchedDependencies:
   '@capacitor-community/screen-brightness@8.0.0': patches/@capacitor-community__screen-brightness@8.0.0.patch
