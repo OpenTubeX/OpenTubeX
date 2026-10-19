@@ -9,6 +9,9 @@ import {
 test('platform-specific settings stay local to every device', () => {
   assert.deepEqual([...DEVICE_LOCAL_SETTING_KEYS], [
     'autoPictureInPictureTriggers',
+    'autoUnloadTabs',
+    'autoUnloadMemoryThreshold',
+    'autoUnloadTabPercentage',
     'autoUpdateChannelVolumes',
     'channelVolumes',
     'continuePlaybackWhenScreenIsLocked',

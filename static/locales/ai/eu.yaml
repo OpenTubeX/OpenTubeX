@@ -250,6 +250,12 @@ History:
   Custom: Pertsonalizatua
   History Older Than Days Removed: Egun 1 baino zaharragoa den ikustaldi-historia kendu da | {days} egun baino zaharragoa den ikustaldi-historia kendu da
 Settings:
+  Tab Unloading:
+    Automatically unload tabs: "Deskargatu fitxak automatikoki"
+    Memory threshold: "Memoriaren atalasea"
+    Tabs to unload: "Deskargatu beharreko fitxak"
+    Automatic unloading help: "Deskargatu atzeko planoko fitxa zaharrenak memoria askatzeko. Fitxa aktiboak eta erreproduzitzen ari direnak kargatuta geratzen dira."
+    Memory threshold help: "Errendatze-prozesuaren memoria-mugaren ehunekoa, ez sistemaren RAM osoarena."
   Password Settings:
     Failed to Save Password: "Ezin izan da pasahitza gorde."
     Confirm Password: "Berretsi pasahitza"
@@ -2172,3 +2178,4 @@ Library Format Changed:
   Message: "Zure liburutegiak biltegiratze formatu berria erabiltzen du orain."
   Detail: "OpenTubeX-en bertsio zaharragoek zure liburutegia ireki dezakete oraindik, baina eguneratze honen aurretik zegoen bezala erakusten dute. Bertsio zaharrago batean egiten dituzun aldaketak bertsio honetara itzultzen zarenean gehitzen dira."
 Invidious Fallback Warning: "Eskaera honek konfiguratutako Invidious instantzia saihesten du eta zuzenean YouTubera konektatzen da, zure IP helbidea agerian utziz."
+Automatically unloaded to free memory: "Automatikoki deskargatuta memoria askatzeko"

@@ -252,6 +252,12 @@ History:
   Custom: Fərdi
   History Older Than Days Removed: 1 gündən köhnə baxış tarixçəsi silindi | {days} gündən köhnə baxış tarixçəsi silindi
 Settings:
+  Tab Unloading:
+    Automatically unload tabs: "Vərəqləri avtomatik yaddaşdan çıxar"
+    Memory threshold: "Yaddaş həddi"
+    Tabs to unload: "Yaddaşdan çıxarılacaq vərəqlər"
+    Automatic unloading help: "Yaddaşı boşaltmaq üçün ən köhnə arxa plan vərəqlərini çıxarır. Aktiv və oxudulan vərəqlər yüklənmiş qalır."
+    Memory threshold help: "Sistemin ümumi RAM-ının deyil, təsvir prosesinin yaddaş limitinin faizi."
   Password Settings:
     Failed to Save Password: "Parolu yadda saxlamaq mümkün olmadı."
     Confirm Password: "Şifrəni təsdiqləyin"
@@ -2172,3 +2178,4 @@ Library Format Changed:
   Message: "Kitabxananız artıq yeni saxlama formatından istifadə edir."
   Detail: "OpenTubeX-in köhnə versiyaları kitabxananızı hələ də aça bilər, lakin onu bu yeniləmədən əvvəlki kimi göstərir. Köhnə versiyada etdiyiniz dəyişikliklər bu versiyaya qayıtdığınız zaman əlavə edilir."
 Invidious Fallback Warning: "Bu sorğu konfiqurasiya etdiyiniz Invidious instansiyasından yan keçərək birbaşa YouTube-a qoşulur və IP ünvanınızı açıqlayır."
+Automatically unloaded to free memory: "Yaddaşı boşaltmaq üçün avtomatik çıxarıldı"

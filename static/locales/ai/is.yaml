@@ -252,6 +252,12 @@ History:
   Custom: Sérsniðið
   History Older Than Days Removed: Áhorfsferli eldri en 1 dags hefur verið eytt | Áhorfsferli eldri en {days} daga hefur verið eytt
 Settings:
+  Tab Unloading:
+    Automatically unload tabs: "Losa flipa sjálfkrafa úr minni"
+    Memory threshold: "Minnisþröskuldur"
+    Tabs to unload: "Flipar sem á að losa"
+    Automatic unloading help: "Losa elstu bakgrunnsflipana úr minni. Virkir flipar og flipar í spilun haldast hlaðnir."
+    Memory threshold help: "Hlutfall af minnismörkum birtingarferlisins, ekki af öllu vinnsluminni kerfisins."
   Password Settings:
     Failed to Save Password: "Ekki tókst að vista lykilorðið."
     Confirm Password: "Staðfesta lykilorð"
@@ -2189,3 +2195,4 @@ Library Format Changed:
   Message: "Safnið þitt notar nú nýtt geymslusnið."
   Detail: "Eldri útgáfur af OpenTubeX geta enn opnað safnið þitt, en þær sýna það eins og það var fyrir þessa uppfærslu. Breytingum sem þú gerir í eldri útgáfu er bætt við þegar þú snýrð aftur í þessa útgáfu."
 Invidious Fallback Warning: "Þessi beiðni fer fram hjá Invidious-þjóninum sem þú stilltir og tengist beint við YouTube, sem afhjúpar IP-töluna þína."
+Automatically unloaded to free memory: "Sjálfkrafa losað úr minni"

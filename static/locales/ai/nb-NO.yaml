@@ -250,6 +250,12 @@ History:
   Custom: Egendefinert
   History Older Than Days Removed: Seerlogg eldre enn 1 dag er fjernet | Seerlogg eldre enn {days} dager er fjernet
 Settings:
+  Tab Unloading:
+    Automatically unload tabs: "Last ut faner automatisk"
+    Memory threshold: "Minneterskel"
+    Tabs to unload: "Faner som skal lastes ut"
+    Automatic unloading help: "Last ut de eldste bakgrunnsfanene for å frigjøre minne. Aktive faner og faner med avspilling forblir lastet inn."
+    Memory threshold help: "Prosent av gjengivelsesprosessens minnegrense, ikke systemets totale RAM."
   Password Settings:
     Failed to Save Password: "Kunne ikke lagre passordet."
     Confirm Password: "Bekreft passord"
@@ -2188,3 +2194,4 @@ Library Format Changed:
   Message: "Biblioteket ditt bruker nå et nytt lagringsformat."
   Detail: "Eldre versjoner av OpenTubeX kan fortsatt åpne biblioteket ditt, men de viser det slik det var før denne oppdateringen. Endringer du gjør i en eldre versjon, legges til når du går tilbake til denne versjonen."
 Invidious Fallback Warning: "Denne forespørselen omgår den konfigurerte Invidious-instansen din og kobler direkte til YouTube, noe som avslører IP-adressen din."
+Automatically unloaded to free memory: "Automatisk lastet ut for å frigjøre minne"

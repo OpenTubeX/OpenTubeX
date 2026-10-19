@@ -339,6 +339,12 @@ History:
   Custom: 사용자 지정
   History Older Than Days Removed: '{days}일보다 오래된 시청 기록을 제거했습니다'
 Settings:
+  Tab Unloading:
+    Automatically unload tabs: "자동으로 탭 언로드"
+    Memory threshold: "메모리 임계값"
+    Tabs to unload: "언로드할 탭 비율"
+    Automatic unloading help: "가장 오래된 백그라운드 탭을 언로드하여 메모리를 확보합니다. 활성 탭과 재생 중인 탭은 로드된 상태로 유지됩니다."
+    Memory threshold help: "시스템 전체 RAM이 아닌 렌더러 메모리 한도에 대한 비율입니다."
   Password Settings:
     Failed to Save Password: "비밀번호를 저장하지 못했습니다."
     Confirm Password: "비밀번호 확인"
@@ -2617,3 +2623,4 @@ Library Format Changed:
   Message: "라이브러리가 이제 새 저장 형식을 사용합니다."
   Detail: "이전 버전의 OpenTubeX에서도 라이브러리를 열 수 있지만 이 업데이트 이전 상태로 표시됩니다. 이전 버전에서 변경한 내용은 이 버전으로 돌아오면 추가됩니다."
 Invidious Fallback Warning: "이 요청은 설정한 Invidious 인스턴스를 우회하여 YouTube에 직접 연결하므로 IP 주소가 노출됩니다."
+Automatically unloaded to free memory: "메모리 확보를 위해 자동으로 언로드됨"

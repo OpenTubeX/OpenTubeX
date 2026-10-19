@@ -254,6 +254,12 @@ History:
   Custom: Personalizado
   History Older Than Days Removed: Eliminouse o historial de visualización de máis de 1 día | Eliminouse o historial de visualización de máis de {days} días
 Settings:
+  Tab Unloading:
+    Automatically unload tabs: "Descargar pestanas automaticamente"
+    Memory threshold: "Limiar de memoria"
+    Tabs to unload: "Pestanas para descargar"
+    Automatic unloading help: "Descarga as pestanas en segundo plano máis antigas para liberar memoria. As pestanas activas e en reprodución permanecen cargadas."
+    Memory threshold help: "Porcentaxe do límite de memoria do renderizador, non da RAM total do sistema."
   Password Settings:
     Failed to Save Password: "Non se puido gardar o contrasinal."
     Confirm Password: "Confirmar contrasinal"
@@ -2216,3 +2222,4 @@ Library Format Changed:
   Message: "A túa biblioteca usa agora un formato de almacenamento novo."
   Detail: "As versións anteriores de OpenTubeX aínda poden abrir a túa biblioteca, pero amósana tal como estaba antes desta actualización. Os cambios que fagas nunha versión anterior engádense cando volvas a esta versión."
 Invidious Fallback Warning: "Esta solicitude omite a instancia de Invidious que configuraches e conéctase directamente a YouTube, expoñendo o teu enderezo IP."
+Automatically unloaded to free memory: "Descargada automaticamente para liberar memoria"

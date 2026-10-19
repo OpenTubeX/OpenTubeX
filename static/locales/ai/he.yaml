@@ -254,6 +254,12 @@ History:
   Custom: בהתאמה אישית
   History Older Than Days Removed: היסטוריית צפייה מלפני יותר מ־1 יום נמחקה | היסטוריית צפייה מלפני יותר מ־{days} ימים נמחקה | היסטוריית צפייה מלפני יותר מ־{days} ימים נמחקה
 Settings:
+  Tab Unloading:
+    Automatically unload tabs: "פריקת לשוניות אוטומטית"
+    Memory threshold: "סף זיכרון"
+    Tabs to unload: "לשוניות לפריקה"
+    Automatic unloading help: "פריקת הלשוניות הוותיקות ביותר ברקע כדי לפנות זיכרון. לשוניות פעילות ולשוניות שמנגנות נשארות טעונות."
+    Memory threshold help: "אחוז ממגבלת הזיכרון של תהליך התצוגה, ולא מסך זיכרון המערכת."
   Password Settings:
     Failed to Save Password: "שמירת הסיסמה נכשלה."
     Confirm Password: "אישור הסיסמה"
@@ -2216,3 +2222,4 @@ Library Format Changed:
   Message: "הספרייה שלך משתמשת כעת בפורמט אחסון חדש."
   Detail: "גרסאות ישנות יותר של OpenTubeX עדיין יכולות לפתוח את הספרייה שלך, אבל הן מציגות אותה כפי שהייתה לפני העדכון הזה. שינויים שתבצע בגרסה ישנה יותר יתווספו כשתחזור לגרסה זו."
 Invidious Fallback Warning: "בקשה זו עוקפת את שרת Invidious שהגדרת ומתחברת ישירות ל־YouTube, תוך חשיפת כתובת ה־IP שלך."
+Automatically unloaded to free memory: "נפרקה אוטומטית כדי לפנות זיכרון"

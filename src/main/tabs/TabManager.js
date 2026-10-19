@@ -97,6 +97,7 @@ const TAB_AVATAR_SIZE = 64
  * @property {ReturnType<typeof setTimeout> | null} previewCaptureTimeoutId
  * @property {Promise<string | null> | null} previewCapturePromise
  * @property {boolean} skipSilence
+ * @property {boolean} automaticallyUnloaded
  * @property {TabLoadState} loadState
  * @property {boolean} preloadInBackground
  * @property {number} mountRevision
@@ -1033,6 +1034,7 @@ export class TabManager {
       openPosition = DEFAULT_NEW_TAB_POSITION,
       lazyLoad = false,
       isUnloaded = false,
+      automaticallyUnloaded = false,
       preloadInBackground = false,
       history = null,
       historyIndex = null,
@@ -1087,6 +1089,7 @@ export class TabManager {
       previewCapturePromise: null,
       skipSilence: skipSilence === true,
       loadState: startsUnloaded ? 'unloaded' : 'mounting',
+      automaticallyUnloaded: startsUnloaded && automaticallyUnloaded === true,
       mountDeferred: shouldMount && !makeActive && _deferMount,
       preloadInBackground: Boolean(preloadInBackground),
       mountRevision: shouldMount ? 1 : 0,
@@ -1264,6 +1267,7 @@ export class TabManager {
 
     if (tab.loadState === 'unloaded') {
       this._deferredStartupTabIds.delete(tabId)
+      tab.automaticallyUnloaded = false
       tab.loadState = 'mounting'
       tab.mountRevision += 1
       this._setTabLoadingSource(tab, TAB_LOADING_SOURCE_MOUNT, true)
@@ -1707,17 +1711,19 @@ export class TabManager {
   }
 
   /**
-   * Frees renderer memory before it runs out by unloading the older half of the
+   * Frees renderer memory before it runs out by unloading a percentage of the oldest
    * loaded background tabs. The selected tab and playing tabs stay loaded.
+   * @param {number} [percentage]
    * @returns {Promise<number>} The number of unloaded tabs
    */
-  async unloadLeastRecentlyUsedTabs() {
+  async unloadLeastRecentlyUsedTabs(percentage = 50) {
+    if (!Number.isFinite(percentage) || percentage < 10 || percentage > 100) percentage = 50
     const candidates = [...this.tabs.values()]
       .filter(tab => tab.loadState === 'loaded' && !tab.isPlaying &&
         tab.id !== this.activeTabId && tab.id !== this.presentedTabId)
       .sort((a, b) => a.lastActiveAt - b.lastActiveAt)
-    const tabIds = candidates.slice(0, Math.ceil(candidates.length / 2)).map(tab => tab.id)
-    await this.unloadTabs(tabIds)
+    const tabIds = candidates.slice(0, Math.ceil(candidates.length * percentage / 100)).map(tab => tab.id)
+    await this.unloadTabs(tabIds, true)
     return tabIds.filter(tabId => this.tabs.get(tabId)?.loadState === 'unloaded').length
   }
 
@@ -1741,9 +1747,10 @@ export class TabManager {
   /**
    * Unload several tabs at once, see {@link closeTabs}.
    * @param {string[]} tabIds
+   * @param {boolean} [automaticallyUnloaded]
    * @returns {Promise<void>}
    */
-  async unloadTabs(tabIds) {
+  async unloadTabs(tabIds, automaticallyUnloaded = false) {
     const unloadingTabIds = tabIds.filter(tabId => this.tabs.has(tabId))
     if (unloadingTabIds.length === 0) {
       return
@@ -1763,7 +1770,7 @@ export class TabManager {
       }
 
       for (const tabId of batchedTabIds) {
-        await this.unloadTab(tabId).catch(error => {
+        await this.unloadTab(tabId, automaticallyUnloaded).catch(error => {
           console.error('Failed to unload tab:', error)
         })
       }
@@ -1772,7 +1779,7 @@ export class TabManager {
     // The presented tab captures a fresh preview before it goes. Run it outside
     // the manager-wide batch so the capture cannot hold back unrelated updates.
     if (presentedTabId != null && unloadingTabIds.includes(presentedTabId)) {
-      await this.unloadTab(presentedTabId).catch(error => {
+      await this.unloadTab(presentedTabId, automaticallyUnloaded).catch(error => {
         console.error('Failed to unload tab:', error)
       })
     }
@@ -2464,6 +2471,7 @@ export class TabManager {
     this._deferredStartupTabIds.delete(tabId)
     tab.mountDeferred = false
     this._startupMountQueue.delete(tabId)
+    tab.automaticallyUnloaded = false
     tab.loadState = 'mounting'
     tab.preloadInBackground = tab.id !== this.activeTabId
     tab.mountRevision += 1
@@ -2484,6 +2492,7 @@ export class TabManager {
     }
 
     this._deferredStartupTabIds.delete(tabId)
+    tab.automaticallyUnloaded = false
     tab.loadState = 'mounting'
     tab.mountDeferred = deferMount
     if (deferMount) this._startupMountQueue.add(tabId)
@@ -2497,9 +2506,10 @@ export class TabManager {
 
   /**
    * @param {string} tabId
+   * @param {boolean} [automaticallyUnloaded]
    * @returns {Promise<boolean>}
    */
-  async unloadTab(tabId) {
+  async unloadTab(tabId, automaticallyUnloaded = false) {
     const tab = this.tabs.get(tabId)
     if (tab?.loadState === 'unloaded' && this._deferredStartupTabIds.delete(tabId)) {
       this._syncTabLoadingState(tab)
@@ -2566,6 +2576,7 @@ export class TabManager {
     }
 
     tab.loadState = 'unloaded'
+    tab.automaticallyUnloaded = automaticallyUnloaded
     tab.mountDeferred = false
     this._startupMountQueue.delete(tabId)
     this._resolveTabMountWaiters(tabId, tab.mountRevision, false)
@@ -2966,6 +2977,7 @@ export class TabManager {
         avatarUrl: includeAvatar ? avatarUrl : undefined,
         isActive: tab.id === this.activeTabId,
         isActivatable: this._isTabActivatable(tab),
+        automaticallyUnloaded: tab.loadState === 'unloaded' && tab.automaticallyUnloaded === true,
         isUnloaded: tab.loadState === 'unloaded' && !this._deferredStartupTabIds.has(tab.id),
         mountDeferred: tab.mountDeferred === true,
         isLoading: this._getTabLoadingState(tab),
@@ -3157,6 +3169,7 @@ export class TabManager {
           groupId: tab.groupId,
           skipSilence: tab.skipSilence === true,
           // Startup deferral delays mounting without changing the saved load intent.
+          automaticallyUnloaded: tab.loadState === 'unloaded' && tab.automaticallyUnloaded === true,
           isUnloaded: (tab.loadState === 'unloaded' && !this._deferredStartupTabIds.has(tab.id)) ||
             this._deferredUnloadTabIds.has(tab.id),
           ...(tab.placementOpenerTabId != null && {
@@ -3209,6 +3222,7 @@ export class TabManager {
         isPinned: tab.isPinned || false,
         color: TabManager.normalizeTabColor(tab.color),
         groupId: tab.groupId,
+        automaticallyUnloaded: tab.loadState === 'unloaded' && tab.automaticallyUnloaded === true,
         isUnloaded: (tab.loadState === 'unloaded' && !this._deferredStartupTabIds.has(tab.id)) ||
           this._deferredUnloadTabIds.has(tab.id),
         ...(tab.placementOpenerTabId != null && {
@@ -3315,6 +3329,7 @@ export class TabManager {
             persistHistory: restoreNavigationHistory,
             makeActive: false,
             openPosition: 'end',
+            automaticallyUnloaded: tabData.automaticallyUnloaded,
             lazyLoad: tabData.isUnloaded === true,
             preloadInBackground: tabData.isUnloaded === false,
             _deferUpdates: true
@@ -3496,6 +3511,7 @@ export class TabManager {
             openerTabId: typeof tabData.placementOpenerTabId === 'string'
               ? tabData.placementOpenerTabId
               : null,
+            automaticallyUnloaded: tabData.automaticallyUnloaded,
             lazyLoad: restoreAsUnloaded,
             _deferMount: !makeActive,
             preloadInBackground: loadInBackground && !makeActive && !deferForActiveWatchTab

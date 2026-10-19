@@ -250,6 +250,12 @@ History:
   Custom: Özel
   History Older Than Days Removed: 1 günden eski izleme geçmişi kaldırıldı | {days} günden eski izleme geçmişi kaldırıldı
 Settings:
+  Tab Unloading:
+    Automatically unload tabs: "Sekmeleri otomatik olarak bellekten kaldır"
+    Memory threshold: "Bellek eşiği"
+    Tabs to unload: "Bellekten kaldırılacak sekmeler"
+    Automatic unloading help: "Belleği boşaltmak için en eski arka plan sekmelerini kaldırır. Etkin ve oynatılan sekmeler yüklü kalır."
+    Memory threshold help: "Sistemin toplam RAM'inin değil, görüntüleme işleminin bellek sınırının yüzdesi."
   Password Settings:
     Failed to Save Password: "Parola kaydedilemedi."
     Confirm Password: "Parolayı doğrulayın"
@@ -2163,3 +2169,4 @@ Library Format Changed:
   Message: "Kitaplığınız artık yeni bir depolama biçimi kullanıyor."
   Detail: "OpenTubeX'in eski sürümleri kitaplığınızı hâlâ açabilir, ancak onu bu güncellemeden önceki hâliyle gösterir. Eski bir sürümde yaptığınız değişiklikler bu sürüme döndüğünüzde eklenir."
 Invidious Fallback Warning: "Bu istek, yapılandırdığınız Invidious sunucusunu atlayarak doğrudan YouTube’a bağlanır ve IP adresinizi açığa çıkarır."
+Automatically unloaded to free memory: "Belleği boşaltmak için otomatik olarak kaldırıldı"

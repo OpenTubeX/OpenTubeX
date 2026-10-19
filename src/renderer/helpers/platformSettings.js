@@ -1,5 +1,8 @@
 export const DEVICE_LOCAL_SETTING_KEYS = new Set([
   'autoPictureInPictureTriggers',
+  'autoUnloadTabs',
+  'autoUnloadMemoryThreshold',
+  'autoUnloadTabPercentage',
   'autoUpdateChannelVolumes',
   'channelVolumes',
   'continuePlaybackWhenScreenIsLocked',

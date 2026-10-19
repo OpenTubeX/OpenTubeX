@@ -252,6 +252,12 @@ History:
   Custom: Prilagođeno
   History Older Than Days Removed: Uklonjena je povijest gledanja starija od 1 dana | Uklonjena je povijest gledanja starija od {days} dana | Uklonjena je povijest gledanja starija od {days} dana
 Settings:
+  Tab Unloading:
+    Automatically unload tabs: "Automatski ukloni kartice iz memorije"
+    Memory threshold: "Prag memorije"
+    Tabs to unload: "Kartice za uklanjanje iz memorije"
+    Automatic unloading help: "Uklanja najstarije pozadinske kartice iz memorije. Aktivne kartice i kartice s reprodukcijom ostaju učitane."
+    Memory threshold help: "Postotak ograničenja memorije procesa iscrtavanja, a ne ukupnog RAM-a sustava."
   Password Settings:
     Failed to Save Password: "Spremanje lozinke nije uspjelo."
     Confirm Password: "Potvrdite lozinku"
@@ -2192,3 +2198,4 @@ Library Format Changed:
   Message: "Vaša biblioteka sada koristi novi format pohrane."
   Detail: "Starije verzije OpenTubeXa i dalje mogu otvoriti vašu biblioteku, ali je prikazuju onakvom kakva je bila prije ovog ažuriranja. Promjene koje napravite u starijoj verziji dodaju se kada se vratite na ovu verziju."
 Invidious Fallback Warning: "Ovaj zahtjev zaobilazi postavljenu instancu Invidiousa i povezuje se izravno s YouTubeom, otkrivajući tvoju IP adresu."
+Automatically unloaded to free memory: "Automatski uklonjeno radi oslobađanja memorije"

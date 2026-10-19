@@ -250,6 +250,12 @@ History:
   Custom: Personalizat
   History Older Than Days Removed: Istoricul vizionărilor mai vechi de 1 zi a fost șters | Istoricul vizionărilor mai vechi de {days} zile a fost șters | Istoricul vizionărilor mai vechi de {days} de zile a fost șters
 Settings:
+  Tab Unloading:
+    Automatically unload tabs: "Eliberează automat filele din memorie"
+    Memory threshold: "Prag de memorie"
+    Tabs to unload: "File de eliberat"
+    Automatic unloading help: "Eliberează cele mai vechi file din fundal pentru a recupera memorie. Filele active și cele care redau conținut rămân încărcate."
+    Memory threshold help: "Procent din limita de memorie a procesului de randare, nu din memoria RAM totală a sistemului."
   Password Settings:
     Failed to Save Password: "Parola nu a putut fi salvată."
     Confirm Password: "Confirmă parola"
@@ -2212,3 +2218,4 @@ Library Format Changed:
   Message: "Biblioteca ta folosește acum un format nou de stocare."
   Detail: "Versiunile mai vechi ale OpenTubeX pot deschide în continuare biblioteca, dar o afișează așa cum era înainte de această actualizare. Modificările făcute într-o versiune mai veche sunt adăugate când revii la această versiune."
 Invidious Fallback Warning: "Această cerere ocolește instanța Invidious configurată și se conectează direct la YouTube, expunându-ți adresa IP."
+Automatically unloaded to free memory: "Eliberată automat pentru a recupera memorie"

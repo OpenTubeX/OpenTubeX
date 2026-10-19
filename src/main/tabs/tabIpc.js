@@ -259,8 +259,8 @@ export async function setupTabsIPC(options = {}) {
     return manager.setTabsGroup(tabIds.filter(tabId => typeof tabId === 'string'), groupId)
   })
 
-  ipcMain.handle(IpcChannels.TABS_UNLOAD_LEAST_RECENTLY_USED, async (event) => {
-    return await getManager(event)?.unloadLeastRecentlyUsedTabs() ?? 0
+  ipcMain.handle(IpcChannels.TABS_UNLOAD_LEAST_RECENTLY_USED, async (event, percentage) => {
+    return await getManager(event)?.unloadLeastRecentlyUsedTabs(percentage) ?? 0
   })
 
   ipcMain.handle(IpcChannels.TABS_RUN_ORGANIZER_ACTION, async (event, action, tabIds) => {

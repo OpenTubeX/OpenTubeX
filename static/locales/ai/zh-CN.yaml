@@ -250,6 +250,12 @@ History:
   Custom: 自定义
   History Older Than Days Removed: 已删除 {days} 天前的观看历史记录
 Settings:
+  Tab Unloading:
+    Automatically unload tabs: "自动卸载标签页"
+    Memory threshold: "内存阈值"
+    Tabs to unload: "卸载标签页比例"
+    Automatic unloading help: "卸载最久未使用的后台标签页以释放内存。当前标签页和正在播放的标签页保持加载。"
+    Memory threshold help: "占渲染进程内存上限的百分比，而非系统总内存。"
   Password Settings:
     Failed to Save Password: "无法保存密码。"
     Confirm Password: "确认密码"
@@ -2162,3 +2168,4 @@ Library Format Changed:
   Message: "你的媒体库现在使用新的存储格式。"
   Detail: "旧版本的 OpenTubeX 仍可打开你的媒体库，但会显示此次更新之前的状态。你在旧版本中所做的更改会在你回到此版本时添加回来。"
 Invidious Fallback Warning: "此请求绕过了你配置的 Invidious 实例，直接连接到 YouTube，从而暴露你的 IP 地址。"
+Automatically unloaded to free memory: "已自动卸载以释放内存"

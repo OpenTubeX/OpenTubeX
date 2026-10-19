@@ -88,6 +88,12 @@ User Playlists:
   Playlist Thumbnail: "Miniatura playlisty"
   Restore Default Thumbnail: "Przywróć domyślną miniaturę"
 Settings:
+  Tab Unloading:
+    Automatically unload tabs: "Automatycznie zwalniaj karty z pamięci"
+    Memory threshold: "Próg pamięci"
+    Tabs to unload: "Karty do zwolnienia"
+    Automatic unloading help: "Zwalniaj najstarsze karty w tle, aby odzyskać pamięć. Aktywne i odtwarzające karty pozostają załadowane."
+    Memory threshold help: "Procent limitu pamięci renderera, a nie całkowitej pamięci RAM systemu."
   Password Settings:
     Failed to Save Password: "Nie udało się zapisać hasła."
     Confirm Password: "Potwierdź hasło"
@@ -1387,3 +1393,4 @@ Library Format Changed:
   Message: "Twoja biblioteka używa teraz nowego formatu zapisu."
   Detail: "Starsze wersje OpenTubeX nadal mogą otworzyć Twoją bibliotekę, ale pokazują ją w stanie sprzed tej aktualizacji. Zmiany wprowadzone w starszej wersji zostaną dodane po powrocie do tej wersji."
 Invidious Fallback Warning: "To żądanie pomija skonfigurowaną instancję Invidious i łączy się bezpośrednio z YouTube, ujawniając Twój adres IP."
+Automatically unloaded to free memory: "Automatycznie zwolniono z pamięci"

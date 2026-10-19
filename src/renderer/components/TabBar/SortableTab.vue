@@ -1,6 +1,6 @@
 <template>
   <TabTooltip
-    :title="displayTitle"
+    :title="accessibleTitle"
     :tabs="[tab]"
     :group="group"
     :is-active="tab.isActive"
@@ -18,7 +18,7 @@
         :data-reorder-id="tab.id"
         :class="tabClasses"
         :style="tabStyle"
-        :aria-label="displayTitle"
+        :aria-label="accessibleTitle"
         :aria-pressed="isSelected"
         role="button"
         tabindex="-1"
@@ -69,11 +69,23 @@
               class="playingIcon playingBadge"
               aria-hidden="true"
             />
+            <FtIcon
+              v-else-if="tab.automaticallyUnloaded"
+              :icon="['fas', 'memory']"
+              class="autoUnloadIcon playingBadge"
+              aria-hidden="true"
+            />
           </span>
           <FtIcon
             v-else-if="tab.isPlaying"
             :icon="['fas', 'play']"
             class="playingIcon"
+            aria-hidden="true"
+          />
+          <FtIcon
+            v-else-if="tab.automaticallyUnloaded"
+            :icon="['fas', 'memory']"
+            class="autoUnloadIcon"
             aria-hidden="true"
           />
           <span class="tabTitleText">{{ displayTitle }}</span>
@@ -108,6 +120,7 @@ import FtRetryImage from '../FtRetryImage.vue'
 import FtEmbeddedProgress from '../FtEmbeddedProgress/FtEmbeddedProgress.vue'
 import { FtIcon } from '@opentubex/icons'
 import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import store from '../../store/index'
 import { getTabAccentColor } from '../../constants/tabColors'
 import { getTabAvatarUrl, getTabPageIcon, getTabPreviewFallbackUrl } from '../../tabs/tabPreview'
@@ -217,6 +230,10 @@ const tabStyle = computed(() => {
   return style
 })
 
+const { t } = useI18n()
+const accessibleTitle = computed(() => props.tab.automaticallyUnloaded
+  ? `${displayTitle.value} — ${t('Automatically unloaded to free memory')}`
+  : displayTitle.value)
 const displayTitle = computed(() => formatTabTitle(props.tab.title))
 
 // When a tab points at a channel page and no screenshot has been captured yet,
@@ -443,6 +460,12 @@ watch(tabAvatarUrl, (avatarUrl) => {
   pointer-events: none;
 }
 
+.autoUnloadIcon {
+  font-size: 12px;
+  color: var(--primary-text-color);
+  flex-shrink: 0;
+}
+
 .playingIcon {
   font-size: 8px;
   color: var(--accent-color, var(--primary-text-color));
@@ -461,6 +484,12 @@ watch(tabAvatarUrl, (avatarUrl) => {
   border-radius: 50%;
   background-color: var(--tab-background-color);
   font-size: 7px;
+}
+
+.autoUnloadIcon.playingBadge {
+  inline-size: 12px;
+  block-size: 12px;
+  font-size: 10px;
 }
 
 .tab.pinned .playingBadge {
