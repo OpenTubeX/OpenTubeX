@@ -2,7 +2,9 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFile } from 'node:fs/promises'
 import vm from 'node:vm'
+import Datastore from '@seald-io/nedb'
 
+import { migrateStoredSettings } from '../../src/datastores/settingsMigrations.js'
 import { DEFAULT_NAVIGATION_ITEMS } from '../../src/navigationItems.js'
 import {
   migrateLegacySettings,
@@ -305,4 +307,33 @@ test('startup persists the new sync URL and retries after a failed write without
   assert.equal(stored.syncServerToken, 'existing-token')
   assert.equal(stored.syncServerPrivacyKey, 'existing-key')
   assert.equal(stored.syncServerDeviceId, 'existing-device')
+})
+
+test('settings migrations read every legacy key in one query', async () => {
+  const settings = new Datastore()
+  await settings.insertAsync([
+    { _id: 'currentLocale', value: 'en_GB' },
+    { _id: 'externalPlayerCustomArgs', value: '--a;--b' },
+    { _id: 'defaultTheatreMode', value: true },
+    { _id: 'saveWatchedProgress', value: false },
+    { _id: 'screenshotAskPath', value: true },
+  ])
+  let reads = 0
+  for (const method of ['findAsync', 'findOneAsync']) {
+    const original = settings[method].bind(settings)
+    settings[method] = (...args) => { reads++; return original(...args) }
+  }
+
+  await migrateStoredSettings(settings)
+
+  assert.equal(reads, 1)
+  settings.findAsync = Datastore.prototype.findAsync
+  const stored = Object.fromEntries((await settings.findAsync({})).map(({ _id, value }) => [_id, value]))
+  assert.deepEqual(stored, {
+    currentLocale: 'en-GB',
+    externalPlayerCustomArgs: '["--a","--b"]',
+    defaultViewingMode: 'theatre',
+    watchedProgressSavingMode: 'never',
+    screenshotMode: 'prompt_folder',
+  })
 })

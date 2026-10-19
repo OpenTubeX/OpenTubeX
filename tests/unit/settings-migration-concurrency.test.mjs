@@ -24,6 +24,8 @@ const { settings } = await import('../../src/datastores/handlers/base.js')
 hooks.deregister()
 delete globalThis.__settingsMigrationDatastore
 test.after(() => datastore.driver.close())
+// Migrations read every legacy setting in one query.
+const isLegacyLookup = query => Array.isArray(query?._id?.$in) && query._id.$in.includes('defaultTheatreMode')
 test.beforeEach(async () => {
   settings.migrationPromise = null
   await datastore.removeAsync({}, { multi: true })
@@ -34,10 +36,11 @@ test('concurrent settings reads and backups migrate once before accepting newer 
   const reachedLegacy = Promise.withResolvers()
   const release = Promise.withResolvers()
   const findOne = datastore.findOneAsync.bind(datastore)
+  const find = datastore.findAsync.bind(datastore)
   let legacyReads = 0
-  t.mock.method(datastore, 'findOneAsync', async query => {
-    const saved = await findOne(query)
-    if (query._id === 'defaultTheatreMode') {
+  t.mock.method(datastore, 'findAsync', async query => {
+    const saved = await find(query)
+    if (isLegacyLookup(query)) {
       legacyReads++
       reachedLegacy.resolve()
       await release.promise
@@ -61,7 +64,7 @@ test('concurrent settings reads and backups migrate once before accepting newer 
 
 test('a failed settings migration rejects dependent writes and can be retried', async t => {
   await datastore.insertAsync({ _id: 'defaultTheatreMode', value: true })
-  const failRead = t.mock.method(datastore, 'findOneAsync', async () => { throw new Error('storage unavailable') })
+  const failRead = t.mock.method(datastore, 'findAsync', async () => { throw new Error('storage unavailable') })
   await assert.rejects(settings.upsert('defaultViewingMode', 'default'), /storage unavailable/)
   failRead.mock.restore()
   assert.equal(await datastore.findOneAsync({ _id: 'defaultViewingMode' }), null)
@@ -73,10 +76,15 @@ test('a failed settings migration rejects dependent writes and can be retried', 
 test('completed migrations add no legacy lookups to subsequent settings saves', async t => {
   await datastore.insertAsync({ _id: 'currentLocale', value: 'en_GB' })
   const findOne = datastore.findOneAsync.bind(datastore)
+  const find = datastore.findAsync.bind(datastore)
   let reads = 0
-  t.mock.method(datastore, 'findOneAsync', (...args) => { reads++; return findOne(...args) })
+  t.mock.method(datastore, 'findAsync', query => {
+    if (isLegacyLookup(query)) reads++
+    return find(query)
+  })
   await settings.migrate()
   const migrationReads = reads
+  assert.equal(migrationReads, 1)
   assert.equal((await findOne({ _id: 'currentLocale' })).value, 'en-GB')
   await settings.upsert('autoplayVideos', false)
   await settings.upsert('defaultViewingMode', 'theatre')

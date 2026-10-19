@@ -39,10 +39,23 @@ function workerDrivers() {
 
 /** @returns {(name: string) => import('./sqlite.js').SqliteDriver} */
 function nativeDrivers() {
-  const { registerPlugin } = require('@capacitor/core')
+  const { Capacitor, registerPlugin } = require('@capacitor/core')
   const plugin = registerPlugin('LibraryDatabase')
+  // Android writes large reads to a file: fetching it from the local server
+  // is an order of magnitude faster than one multi-megabyte bridge message.
+  const read = name => async (sql, params = []) => {
+    const { path } = await plugin.query({ name, sql, params })
+    try {
+      const response = await fetch(Capacitor.convertFileSrc(path))
+      if (!response.ok) throw new Error(`Unable to read library results: ${response.status}`)
+      return await response.json()
+    } finally {
+      plugin.release({ path }).catch(() => {})
+    }
+  }
   return name => ({
     execute: async (statements, transaction = false) => (await plugin.execute({ name, statements, transaction })).results,
+    ...(process.env.IS_IOS ? {} : { read: read(name) }),
     drop: () => plugin.drop({ name }),
   })
 }

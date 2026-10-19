@@ -115,6 +115,7 @@ export async function parseLegacyDatafile(raw) {
  *   `transaction`, either every statement commits or none does.
  * @property {() => Promise<void>} drop Deletes the database.
  * @property {() => Promise<string>} [backup] Copies the database, returning the copy's name.
+ * @property {(sql: string, params?: unknown[]) => Promise<unknown[][]>} [read] Runs a large read-only query.
  *
  * @typedef {object} LegacySource The NeDB datastore this database replaces.
  * @property {() => Promise<{ data: object[], indexes: string[] }>} read
@@ -192,7 +193,8 @@ export class SqliteDatastore {
     return statements.length ? this.driver.execute(statements, transaction) : []
   }
 
-  async _query(sql, params = []) {
+  async _query(sql, params = [], large = false) {
+    if (large && this.driver.read) return this.driver.read(sql, params)
     return (await this.driver.execute([[sql, params]]))[0]
   }
 
@@ -386,7 +388,7 @@ export class SqliteDatastore {
       if (field === '_id') return this._query(multiple ? SQL.byIds : SQL.byId, [param])
       return this._query(this._indexQuery(field, multiple), [param])
     }
-    return this._query(SQL.all)
+    return this._query(SQL.all, [], true)
   }
 
   /** @returns {Promise<{ id: unknown, doc: object, hasChildren: boolean }[]>} */
@@ -401,7 +403,7 @@ export class SqliteDatastore {
         doc[this.childField] = []
         byParent.set(id, doc[this.childField])
       }
-      for (const [parent, data] of await this._query(SQL.childrenOf, [JSON.stringify([...byParent.keys()])])) {
+      for (const [parent, data] of await this._query(SQL.childrenOf, [JSON.stringify([...byParent.keys()])], true)) {
         byParent.get(parent).push(deserialize(data))
       }
     }

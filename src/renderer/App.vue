@@ -1741,6 +1741,12 @@ onMounted(async () => {
   const profilesReady = settingsReady.then(() => (
     store.dispatch('grabAllProfiles', t('Profile.All Channels'))
   ))
+  // The library needs only settings (history retention) and profiles
+  // (subscriptions). Load it during the remaining startup work instead of after.
+  const libraryReady = Promise.all([
+    settingsReady.then(() => Promise.all([store.dispatch('grabHistory'), store.dispatch('grabAllPlaylists')])),
+    profilesReady.then(() => store.dispatch('grabAllSubscriptions')),
+  ])
   tabsReady.then(() => {
     const initialRoute = usesLogicalTabs ? store.getters.getActiveTab?.route : route
     if (initialRoute) {
@@ -1804,11 +1810,6 @@ onMounted(async () => {
       await setLastUsedVersion(packageDetails.version)
     }
 
-    const syncDataReady = Promise.all([
-      store.dispatch('grabHistory'),
-      store.dispatch('grabAllPlaylists'),
-      store.dispatch('grabAllSubscriptions'),
-    ])
     store.dispatch('grabSearchHistoryEntries')
 
     // YouTube links have to be caught in both builds, otherwise the browser
@@ -1828,7 +1829,7 @@ onMounted(async () => {
       removeCapacitorIntegrationListeners = await enableCapacitorIntegrations()
     }
 
-    await syncDataReady
+    await libraryReady
     store.dispatch('initializeSyncServer').catch(error => {
       console.error('Initial sync server sync failed', error)
     })
