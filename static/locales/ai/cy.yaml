@@ -159,6 +159,10 @@ Home Page:
   All sections hidden: Mae pob adran wedi'i chuddio
   All sections hidden description: Addaswch yr hafan i ddangos adran eto.
 Subscriptions:
+  New video from {channel}: Fideo newydd gan {channel}
+  New short from {channel}: Byr newydd gan {channel}
+  '{channel} is live': Mae {channel} yn fyw
+  New post from {channel}: Postiad newydd gan {channel}
   Mark As Unseen: Marcio fel heb ei weld
   Copy Error Details: "Copïo manylion technegol"
   Refresh Errors: "Sianeli na ellid eu hadnewyddu: {channels}. Cliciwch i weld y manylion."
@@ -943,6 +947,7 @@ Settings:
     Live Auto Refresh Interval: Cyfwng adnewyddu ffrydiau byw yn awtomatig
     Posts Auto Refresh Interval: Cyfwng adnewyddu postiadau yn awtomatig
     Refresh Subscriptions While App Is Closed: "Adnewyddu tanysgrifiadau pan fydd yr ap ar gau"
+    Notify About New Uploads: Hysbysu am gynnwys newydd
   Distraction Free Settings:
     Hide Popularity Graph: "Cuddio’r graff poblogrwydd"
     Enable Block Lists: "Galluogi rhestrau blocio"
@@ -1303,6 +1308,7 @@ Channel:
   Unlimited: Diderfyn
   More videos hidden: '+{count} yn rhagor | +{count} yn rhagor | +{count} yn rhagor | +{count} yn rhagor | +{count} yn rhagor | +{count} yn rhagor'
   Show in subscription feed: Dangos yn y ffrwd tanysgrifiadau
+  Notify about new uploads: Hysbysu am gynnwys newydd
   Channel Name Unavailable: Nid yw enw'r sianel ar gael
   Search Result Types: Mathau o ganlyniadau chwilio
   All Results: Pob un
@@ -1923,6 +1929,7 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: Mae'n cadw ffrydiau byw a premières sydd ar ddod ar frig y ffrwd tanysgrifiadau. Pan fydd wedi'i analluogi, maent yn aros yn safle eu cyhoeddiad nes iddynt ddechrau. Adnewyddwch y ffrwd tanysgrifiadau unwaith ar ôl analluogi'r dewis i gyrchu dyddiadau cyhoeddi cofnodion sydd eisoes wedi'u hamserlennu.
     Auto Refresh Interval: "Pa mor aml y mae OpenTubeX yn adnewyddu eich ffrwd tanysgrifiadau'n awtomatig tra bo'r ap ar agor. Ar Android, mae cyfwng nad yw’n sero hefyd yn adnewyddu’r ffrwd pan fydd yr ap ar gau."
     Refresh Subscriptions While App Is Closed: "Yn adnewyddu ffrydiau gan ddefnyddio eich gosodiadau. Ar y bwrdd gwaith, mae OpenTubeX yn aros yn hambwrdd y system nes i chi adael. Android sy’n rheoli pryd mae adnewyddu cefndirol yn digwydd."
+    Notify About New Uploads: Yn dangos hysbysiadau system ar y ddyfais hon ar gyfer sianeli rydych wedi troi eu hysbysiadau ymlaen yn eu gosodiadau tanysgrifio. Mae OpenTubeX yn gwirio am gynnwys newydd pan fydd tanysgrifiadau'n cael eu hadnewyddu, felly dewiswch gyfwng adnewyddu awtomatig. I gael hysbysiadau pan fydd yr ap ar gau, galluogwch adnewyddu pan fydd yr ap ar gau hefyd.
   Theme Settings:
     Thumbnail Size: "Yn newid maint mân-luniau fideos mewn gridiau a rhestrau. Mae gridiau gyda nifer sefydlog o golofnau neu'r math gwedd Lled Llawn yn llenwi pob rhes yn lle hynny, felly yno dim ond mân-luniau rhestrau a Shorts y mae'n eu newid. Mewn ffenestri maint ffôn, mae mân-luniau'r grid wedi'u cyfyngu i 100%."
     Playlist Thumbnail Size: "Yn newid maint mân-luniau fideos ar dudalennau rhestri chwarae. Mae gridiau gyda nifer sefydlog o golofnau neu'r math gwedd Lled Llawn yn llenwi pob rhes yn lle hynny, felly yno dim ond mân-luniau rhestrau a Shorts y mae'n eu newid. Mewn ffenestri maint ffôn, mae mân-luniau'r grid wedi'u cyfyngu i 100%."

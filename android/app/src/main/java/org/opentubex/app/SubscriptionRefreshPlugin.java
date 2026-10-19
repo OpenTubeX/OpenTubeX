@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
@@ -179,6 +180,34 @@ public class SubscriptionRefreshPlugin extends Plugin {
         SubscriptionRefreshConfiguration.save(getContext(), configuration);
         SubscriptionRefreshScheduler.reconcile(getContext());
         call.resolve();
+    }
+
+    @PluginMethod
+    public void configureUploadNotifications(PluginCall call) {
+        JSObject configuration = call.getObject("configuration");
+        if (configuration == null) {
+            call.reject("A notification configuration is required");
+            return;
+        }
+        UploadNotifications.configure(getContext(), configuration);
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void observeUploads(PluginCall call) {
+        String channelId = call.getString("channelId");
+        String feedType = call.getString("feedType");
+        JSArray entries = call.getArray("entries");
+        if (channelId == null || feedType == null || entries == null) {
+            call.reject("A channel feed is required");
+            return;
+        }
+        try {
+            UploadNotifications.observe(getContext(), channelId, feedType, entries);
+            call.resolve();
+        } catch (Exception error) {
+            call.reject("Unable to check for new uploads", error);
+        }
     }
 
     @PluginMethod

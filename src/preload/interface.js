@@ -934,6 +934,8 @@ export default {
     nextBackgroundResult: () => ipcRenderer.invoke(IpcChannels.SUBSCRIPTION_BACKGROUND, 'next'),
     acknowledgeBackgroundResult: id => ipcRenderer.invoke(IpcChannels.SUBSCRIPTION_BACKGROUND, 'acknowledge', id),
     backgroundCompleted: value => ipcRenderer.invoke(IpcChannels.SUBSCRIPTION_BACKGROUND, 'completed', value),
+    configureUploadNotifications: configuration => ipcRenderer.invoke(IpcChannels.SUBSCRIPTION_BACKGROUND, 'configureUploadNotifications', configuration),
+    observeUploads: value => ipcRenderer.invoke(IpcChannels.SUBSCRIPTION_BACKGROUND, 'observeUploads', value),
     /**
      * Atomically claim ownership of the subscription auto refresh.
      * @param {string} tabId

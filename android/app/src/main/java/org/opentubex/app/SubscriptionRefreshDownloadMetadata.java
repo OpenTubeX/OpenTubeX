@@ -66,7 +66,7 @@ final class SubscriptionRefreshDownloadMetadata {
         return nodes.getLength() == 0 ? "" : nodes.item(0).getTextContent();
     }
 
-    private static String label(JSONObject value) {
+    static String label(JSONObject value) {
         if (value == null) return "";
         if (value.has("simpleText")) return value.optString("simpleText");
         if (value.has("content")) return value.optString("content");
@@ -76,7 +76,7 @@ final class SubscriptionRefreshDownloadMetadata {
         return result.toString();
     }
 
-    private static long published(String text, long now) {
+    static long published(String text, long now) {
         Matcher age = AGE.matcher(text);
         if (!age.find()) return 0;
         long seconds;

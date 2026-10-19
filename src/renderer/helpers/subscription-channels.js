@@ -1,6 +1,6 @@
 export const SUBSCRIPTION_FEED_TYPES = Object.freeze(['videos', 'shorts', 'live', 'posts'])
 export const MAX_INCREMENTAL_SUBSCRIPTION_FEED_ENTRIES = 5000
-const CHANNEL_SETTING_KEYS = ['feedTypes', 'dailyVideoLimit', 'showMembersOnly']
+const CHANNEL_SETTING_KEYS = ['feedTypes', 'notificationFeedTypes', 'dailyVideoLimit', 'showMembersOnly']
 
 /**
  * @param {(key: string) => string} t
@@ -29,7 +29,7 @@ export function getSubscriptionDailyVideoLimitOptions(t) {
 }
 
 /**
- * @param {{ feedTypes?: unknown, dailyVideoLimit?: unknown, showMembersOnly?: unknown } | undefined} channel
+ * @param {{ feedTypes?: unknown, notificationFeedTypes?: unknown, dailyVideoLimit?: unknown, showMembersOnly?: unknown } | undefined} channel
  */
 export function normalizeSubscriptionChannelSettings(channel) {
   const dailyVideoLimit = channel?.dailyVideoLimit
@@ -38,6 +38,10 @@ export function normalizeSubscriptionChannelSettings(channel) {
     feedTypes: Array.isArray(channel?.feedTypes)
       ? SUBSCRIPTION_FEED_TYPES.filter(type => channel.feedTypes.includes(type))
       : [...SUBSCRIPTION_FEED_TYPES],
+    // Like a bell, notifications stay off until enabled for the channel.
+    notificationFeedTypes: Array.isArray(channel?.notificationFeedTypes)
+      ? SUBSCRIPTION_FEED_TYPES.filter(type => channel.notificationFeedTypes.includes(type))
+      : [],
     dailyVideoLimit: dailyVideoLimit === null ||
       (Number.isInteger(dailyVideoLimit) && dailyVideoLimit > 0)
       ? dailyVideoLimit
@@ -91,7 +95,7 @@ export function getNextSubscriptionSettingsTimestamp(subscriptions) {
 /**
  * Applies only requested preferences, preserving concurrent edits to other fields.
  * @param {object} subscription
- * @param {{ feedTypes?: string[], dailyVideoLimit?: number | null, showMembersOnly?: boolean }} settings
+ * @param {{ feedTypes?: string[], notificationFeedTypes?: string[], dailyVideoLimit?: number | null, showMembersOnly?: boolean }} settings
  * @param {number} updatedAt
  * @param {boolean} [preserveNewerSettings] Keep fields edited at or after this patch.
  */
@@ -102,9 +106,10 @@ export function getChannelWithUpdatedSettings(subscription, settings, updatedAt,
   ]))
   for (const key of CHANNEL_SETTING_KEYS) {
     if (!Object.hasOwn(settings, key)) continue
-    if (key === 'feedTypes' && !Array.isArray(settings[key])) continue
+    const isList = key === 'feedTypes' || key === 'notificationFeedTypes'
+    if (isList && !Array.isArray(settings[key])) continue
     if (preserveNewerSettings && fieldUpdatedAt[key] >= updatedAt) continue
-    if (key === 'feedTypes') {
+    if (isList) {
       channel[key] = [...settings[key]]
     } else if (settings[key] === undefined || (key === 'showMembersOnly' && typeof settings[key] !== 'boolean')) {
       delete channel[key]

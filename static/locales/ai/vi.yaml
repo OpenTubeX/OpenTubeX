@@ -159,6 +159,10 @@ Home Page:
   All sections hidden: Tất cả các mục đều bị ẩn
   All sections hidden description: Tùy chỉnh Trang chủ để hiển thị lại một mục.
 Subscriptions:
+  New video from {channel}: Video mới từ {channel}
+  New short from {channel}: Shorts mới từ {channel}
+  '{channel} is live': "{channel} đang phát trực tiếp"
+  New post from {channel}: Bài đăng mới từ {channel}
   Mark As Unseen: Đánh dấu là chưa xem
   Copy Error Details: "Sao chép chi tiết kỹ thuật"
   Refresh Errors: "Các kênh không thể làm mới: {channels}. Nhấp để xem chi tiết."
@@ -951,6 +955,7 @@ Settings:
     Live Auto Refresh Interval: Khoảng tự động làm mới luồng trực tiếp
     Posts Auto Refresh Interval: Khoảng tự động làm mới bài đăng
     Refresh Subscriptions While App Is Closed: "Làm mới đăng ký khi ứng dụng đã đóng"
+    Notify About New Uploads: Thông báo nội dung mới tải lên
   Distraction Free Settings:
     Hide Popularity Graph: "Ẩn biểu đồ mức độ phổ biến"
     Enable Block Lists: "Bật danh sách chặn"
@@ -1323,6 +1328,7 @@ Channel:
   Unlimited: Không giới hạn
   More videos hidden: '+{count} video khác'
   Show in subscription feed: Hiển thị trong nguồn cấp dữ liệu đăng ký
+  Notify about new uploads: Thông báo nội dung mới tải lên
   Channel Name Unavailable: Không có tên kênh
   Search Result Types: Loại kết quả tìm kiếm
   All Results: Tất cả
@@ -1935,6 +1941,7 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: Giữ luồng trực tiếp và buổi công chiếu sắp tới ở đầu bảng tin đăng ký. Khi tắt, chúng vẫn ở vị trí thông báo cho đến khi bắt đầu. Hãy làm mới bảng tin đăng ký một lần sau khi tắt để lấy ngày thông báo cho các mục đã lên lịch hiện có.
     Auto Refresh Interval: "Tần suất OpenTubeX tự động làm mới bảng tin đăng ký khi ứng dụng đang mở. Trên Android, khoảng thời gian khác 0 cũng làm mới bảng tin khi ứng dụng đã đóng."
     Refresh Subscriptions While App Is Closed: "Làm mới nguồn cấp theo cài đặt đã chọn. Trên máy tính, OpenTubeX ở trong khay hệ thống cho đến khi bạn thoát. Android quyết định thời điểm làm mới trong nền."
+    Notify About New Uploads: Hiện thông báo hệ thống trên thiết bị này cho các kênh mà bạn đã bật thông báo trong cài đặt đăng ký của kênh. OpenTubeX kiểm tra nội dung mới khi làm mới đăng ký, vì vậy hãy chọn khoảng thời gian tự động làm mới. Để nhận thông báo khi ứng dụng đã đóng, hãy bật thêm tùy chọn làm mới khi ứng dụng đã đóng.
   Theme Settings:
     Thumbnail Size: "Thay đổi kích thước hình thu nhỏ video trong lưới và danh sách. Lưới có số cột cố định hoặc kiểu xem Toàn chiều rộng sẽ lấp đầy từng hàng, nên ở đó thanh trượt chỉ thay đổi hình thu nhỏ trong danh sách và Shorts. Trong cửa sổ cỡ điện thoại, hình thu nhỏ dạng lưới bị giới hạn ở 100%."
     Playlist Thumbnail Size: "Thay đổi kích thước hình thu nhỏ video trên trang danh sách phát. Lưới có số cột cố định hoặc kiểu xem Toàn chiều rộng sẽ lấp đầy từng hàng, nên ở đó thanh trượt chỉ thay đổi hình thu nhỏ trong danh sách và Shorts. Trong cửa sổ cỡ điện thoại, hình thu nhỏ dạng lưới bị giới hạn ở 100%."

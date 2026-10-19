@@ -22,6 +22,7 @@ test('platform-specific settings stay local to every device', () => {
     'enableMobileFullscreenSwipe',
     'enableMobileTabs',
     'enablePullToRefresh',
+    'enableUploadNotifications',
     'fullscreenRotationIgnoresSystemLock',
     'hideToTrayOnClose',
     'hideToTrayOnMinimize',

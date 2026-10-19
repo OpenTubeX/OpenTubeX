@@ -1,0 +1,118 @@
+import {
+  test,
+  expect,
+  goTo,
+  goToSettingsSection,
+  readDatastore,
+} from '../../helpers/app.mjs'
+
+const CHANNEL_ID = `UC${'0'.repeat(22)}`
+const OTHER_CHANNEL_ID = `UC${'1'.repeat(22)}`
+const profile = subscriptions => [{
+  _id: 'allChannels',
+  name: 'All Channels',
+  bgColor: '#000000',
+  textColor: '#FFFFFF',
+  subscriptions
+}]
+
+test.use({
+  seed: {
+    settings: { currentLocale: 'en-US', fetchSubscriptionsAutomatically: false },
+    profiles: profile([
+      { id: CHANNEL_ID, name: 'Alpha Channel', thumbnail: '' },
+      { id: OTHER_CHANNEL_ID, name: 'Beta Channel', thumbnail: '' }
+    ])
+  }
+})
+
+function readNotificationTypes(userDataDir) {
+  const records = readDatastore(userDataDir, 'profiles').trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
+  const subscriptions = new Map(records.map(record => [record._id, record])).get('allChannels').subscriptions
+  return Object.fromEntries(subscriptions.map(channel => [channel.name, channel.notificationFeedTypes]))
+}
+
+test('the bell is off per channel until turned on, which selects every type', async ({ app, page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await goTo(page, 'subscribedchannels')
+  const bell = page.locator('.channel', { hasText: 'Alpha Channel' }).getByRole('button', { name: 'Notify about new uploads' })
+  await expect(bell).toHaveAttribute('aria-pressed', 'false')
+  await bell.click()
+  await expect(bell).toHaveAttribute('aria-pressed', 'true')
+  await expect.poll(() => readNotificationTypes(app.userDataDir)).toEqual({
+    'Alpha Channel': ['videos', 'shorts', 'live', 'posts'],
+    'Beta Channel': undefined
+  })
+
+  // The popover keeps feed settings only.
+  await page.locator('.channel', { hasText: 'Alpha Channel' }).getByRole('button', { name: 'Subscription settings' }).click()
+  await expect(page.locator('.profileDropdown')).toBeVisible()
+  await expect(page.locator('.profileDropdown').getByText('Notify about new uploads')).toHaveCount(0)
+  await page.keyboard.press('Escape')
+
+  const settings = await goToSettingsSection(page, 'subscription')
+  await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
+  const alpha = page.getByRole('group', { name: 'Alpha Channel' })
+  await alpha.getByRole('group', { name: 'Notify about new uploads' }).getByRole('checkbox', { name: 'Shorts' }).click()
+  await expect.poll(() => readNotificationTypes(app.userDataDir)).toEqual({
+    'Alpha Channel': ['videos', 'live', 'posts'],
+    'Beta Channel': undefined
+  })
+  const beta = page.getByRole('group', { name: 'Beta Channel' })
+  await expect(beta.getByRole('checkbox', { name: 'Notify about new uploads' })).not.toBeChecked()
+  await page.getByRole('checkbox', { name: 'Alpha Channel' }).click()
+  await page.getByRole('checkbox', { name: 'Beta Channel' }).click()
+  const bulk = page.locator('.bulkFeedTypeSettings')
+  await expect(bulk.getByRole('checkbox', { name: 'Notify about new uploads' })).toHaveAttribute('aria-checked', 'mixed')
+  await bulk.locator('label', { hasText: 'Notify about new uploads' }).click()
+  await expect.poll(() => readNotificationTypes(app.userDataDir)).toEqual({
+    'Alpha Channel': ['videos', 'live', 'posts'],
+    'Beta Channel': ['videos', 'shorts', 'live', 'posts']
+  })
+})
+
+test.describe('with a channel notification turned on', () => {
+  test.use({
+    seed: {
+      settings: { currentLocale: 'en-US', fetchSubscriptionsAutomatically: false },
+      profiles: profile([
+        { id: CHANNEL_ID, name: 'Alpha Channel', thumbnail: '', notificationFeedTypes: ['videos', 'live'] },
+        { id: OTHER_CHANNEL_ID, name: 'Beta Channel', thumbnail: '' }
+      ])
+    }
+  })
+
+  test('refresh results notify only about new uploads of turned-on channels and types', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ Notification }) => {
+      globalThis.shownUploadNotifications = []
+      Notification.prototype.show = function () {
+        globalThis.shownUploadNotifications.push({ title: this.title, body: this.body })
+      }
+    })
+    const shown = () => app.electronApp.evaluate(() => globalThis.shownUploadNotifications)
+    const observe = (channelId, feedType, ids) => page.evaluate(({ channelId, feedType, ids }) => (
+      window.ftElectron.subscriptionAutoRefresh.observeUploads({
+        channelId,
+        feedType,
+        entries: ids.map(id => ({ id, title: `Upload ${id}`, published: Date.now(), live: false, upcoming: false, membersOnly: false }))
+      })
+    ), { channelId, feedType, ids })
+
+    // The renderer configures the main process once its data is ready.
+    await expect.poll(async () => {
+      await observe(CHANNEL_ID, 'videos', ['a'])
+      await observe(CHANNEL_ID, 'videos', ['probe', 'a'])
+      return (await shown()).length
+    }).toBe(1)
+
+    await observe(CHANNEL_ID, 'videos', ['b', 'probe', 'a'])
+    await observe(CHANNEL_ID, 'posts', ['p1'])
+    await observe(CHANNEL_ID, 'posts', ['p2', 'p1'])
+    await observe(OTHER_CHANNEL_ID, 'videos', ['x1'])
+    await observe(OTHER_CHANNEL_ID, 'videos', ['x2', 'x1'])
+    expect(await shown()).toEqual([
+      { title: 'New video from Alpha Channel', body: 'Upload probe' },
+      { title: 'New video from Alpha Channel', body: 'Upload b' }
+    ])
+  })
+})

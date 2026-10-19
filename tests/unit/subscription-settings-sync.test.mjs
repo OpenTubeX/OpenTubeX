@@ -61,18 +61,18 @@ function createClient(entries = []) {
 }
 
 test('syncs subscription settings through the existing settings collection to another device', async () => {
-  const first = createStore([{ id: 'channel', name: 'Original', feedTypes: ['shorts'], dailyVideoLimit: 3, showMembersOnly: true }])
+  const first = createStore([{ id: 'channel', name: 'Original', feedTypes: ['shorts'], notificationFeedTypes: ['posts'], dailyVideoLimit: 3, showMembersOnly: true }])
   const client = createClient()
   await context.syncSettings(client, first)
   assert.deepEqual(client.entries.find(entry => entry.key === key).value.channel.value, {
-    feedTypes: ['shorts'], dailyVideoLimit: 3, showMembersOnly: true,
+    feedTypes: ['shorts'], notificationFeedTypes: ['posts'], dailyVideoLimit: 3, showMembersOnly: true,
   })
   const second = createStore([{ id: 'channel', name: 'Local name', thumbnail: 'local-thumbnail' }])
   await context.syncSettings(client, second)
   for (const profile of second.state.profiles.profileList) {
     assert.deepEqual(profile.subscriptions[0], {
       id: 'channel', name: 'Local name', thumbnail: 'local-thumbnail',
-      feedTypes: ['shorts'], dailyVideoLimit: 3, showMembersOnly: true,
+      feedTypes: ['shorts'], notificationFeedTypes: ['posts'], dailyVideoLimit: 3, showMembersOnly: true,
       subscriptionSettingsUpdatedAt: client.entries.find(entry => entry.key === key).value.channel.updatedAt,
     })
   }

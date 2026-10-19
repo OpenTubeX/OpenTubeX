@@ -1,0 +1,127 @@
+import assert from 'node:assert/strict'
+import { mkdtemp, readFile, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
+import test from 'node:test'
+
+import {
+  createUploadNotificationConfiguration,
+  createUploadNotificationState,
+  getUploadUrl,
+  normalizeUploadEntries,
+  takeNewUploads
+} from '../../src/newUploadNotifications.js'
+import { createUploadNotifier } from '../../src/main/uploadNotifications.js'
+
+const NOW = Date.UTC(2026, 9, 19)
+const HOUR = 3_600_000
+
+function entry(id, published = NOW - HOUR, extra = {}) {
+  return { id, title: `Title ${id}`, published, live: false, upcoming: false, membersOnly: false, ...extra }
+}
+
+test('the first observation of a feed only records a baseline', () => {
+  const state = createUploadNotificationState()
+  assert.deepEqual(takeNewUploads(state, 'UC1', 'videos', [entry('b'), entry('a')], NOW), [])
+  assert.deepEqual(state.known['UC1:videos'], ['b', 'a'])
+})
+
+test('entries ahead of the newest known entry are new uploads, once', () => {
+  const state = createUploadNotificationState()
+  takeNewUploads(state, 'UC1', 'videos', [entry('b'), entry('a')], NOW)
+
+  const uploads = takeNewUploads(state, 'UC1', 'videos', [entry('d'), entry('c'), entry('b'), entry('a')], NOW)
+  assert.deepEqual(uploads.map(upload => upload.id), ['d', 'c'])
+  assert.deepEqual(takeNewUploads(state, 'UC1', 'videos', [entry('d'), entry('c'), entry('b')], NOW), [])
+})
+
+test('responses without overlap, old entries, and upcoming entries do not notify', () => {
+  const state = createUploadNotificationState()
+  takeNewUploads(state, 'UC1', 'live', [entry('a')], NOW)
+
+  assert.deepEqual(takeNewUploads(state, 'UC1', 'live', [entry('x'), entry('y')], NOW), [])
+  assert.deepEqual(takeNewUploads(state, 'UC1', 'live', [entry('old', NOW - 8 * 24 * HOUR), entry('a')], NOW), [])
+
+  const scheduled = entry('stream', NOW + HOUR, { upcoming: true })
+  assert.deepEqual(takeNewUploads(state, 'UC1', 'live', [scheduled, entry('a')], NOW), [])
+  const live = entry('stream', NOW + HOUR, { live: true })
+  assert.deepEqual(takeNewUploads(state, 'UC1', 'live', [live, entry('a')], NOW).map(upload => upload.id), ['stream'])
+})
+
+test('a feed that was empty notifies its first entries, and other feeds do not repeat them', () => {
+  const state = createUploadNotificationState()
+  takeNewUploads(state, 'UC1', 'shorts', [], NOW)
+  takeNewUploads(state, 'UC1', 'videos', [entry('a')], NOW)
+
+  assert.deepEqual(takeNewUploads(state, 'UC1', 'shorts', [entry('s', 0)], NOW).map(upload => upload.id), ['s'])
+  assert.deepEqual(takeNewUploads(state, 'UC1', 'videos', [entry('s', 0), entry('a')], NOW), [])
+})
+
+test('feed entries are normalized for videos and posts', () => {
+  assert.deepEqual(normalizeUploadEntries([
+    { videoId: 'v', title: 'Video', published: 5, liveNow: true, isMembersOnly: true },
+    { postId: 'p', postText: 'Hello <a href="x">world</a> &amp; more', publishedTime: 6 },
+    { title: 'missing id' }
+  ]), [
+    { id: 'v', title: 'Video', published: 5, live: true, upcoming: false, membersOnly: true },
+    { id: 'p', title: 'Hello world & more', published: 6, live: false, upcoming: false, membersOnly: false }
+  ])
+  assert.equal(getUploadUrl('posts', 'p1'), 'https://www.youtube.com/post/p1')
+  assert.equal(getUploadUrl('shorts', 's1'), 'https://www.youtube.com/shorts/s1')
+  assert.equal(getUploadUrl('live', 'v1'), 'https://www.youtube.com/watch?v=v1')
+})
+
+test('only channels with notifications turned on are configured', () => {
+  const input = {
+    enabled: true,
+    subscriptions: [
+      { id: 'UC1', name: 'One' },
+      { id: 'UC2', name: 'Two', notificationFeedTypes: ['posts', 'invalid', 'videos'], showMembersOnly: true },
+      { id: 'UC3', name: 'Three', notificationFeedTypes: [] }
+    ],
+    showMembersOnly: true,
+    titles: {}
+  }
+  assert.deepEqual(createUploadNotificationConfiguration(input).channels, {
+    UC2: { name: 'Two', feedTypes: ['videos', 'posts'], membersOnly: true }
+  })
+  assert.deepEqual(createUploadNotificationConfiguration({ ...input, enabled: false }), { enabled: false })
+  assert.deepEqual(createUploadNotificationConfiguration({ ...input, subscriptions: [{ id: 'UC1' }] }), { enabled: false })
+})
+
+test('the desktop notifier persists state and shows localized notifications', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'upload-notifications-'))
+  try {
+    const file = path.join(directory, 'state.json')
+    const shown = []
+    const notifier = createUploadNotifier({ file, show: notification => shown.push(notification) })
+    await notifier.configure({
+      enabled: true,
+      titles: { videos: 'New video from {channel}', live: '{channel} is live' },
+      channels: { UC1: { name: 'One', feedTypes: ['videos'], membersOnly: false } }
+    })
+    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('a')] })
+    await notifier.observe({ channelId: 'UC1', feedType: 'posts', entries: [entry('p')] })
+
+    const restarted = createUploadNotifier({ file, show: notification => shown.push(notification) })
+    await restarted.configure({
+      enabled: true,
+      titles: { videos: 'New video from {channel}', live: '{channel} is live' },
+      channels: { UC1: { name: 'One', feedTypes: ['videos'], membersOnly: false } }
+    })
+    await restarted.observe({
+      channelId: 'UC1',
+      feedType: 'videos',
+      entries: [entry('m', NOW, { membersOnly: true }), entry('l', Date.now(), { live: true }), entry('b', Date.now()), entry('a')]
+    })
+    assert.deepEqual(shown, [
+      { title: 'One is live', body: 'Title l', url: 'https://www.youtube.com/watch?v=l' },
+      { title: 'New video from One', body: 'Title b', url: 'https://www.youtube.com/watch?v=b' }
+    ])
+
+    await restarted.configure({ enabled: false })
+    await assert.rejects(readFile(file))
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})

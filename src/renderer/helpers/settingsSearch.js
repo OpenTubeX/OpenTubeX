@@ -100,7 +100,10 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
 
   if (isIos && (
     (sectionType === 'general' && ['Stream Extraction Method', 'Swipe to refresh'].includes(group)) ||
-    (sectionType === 'subscription' && group === 'Refresh Subscriptions While App Is Closed') ||
+    (sectionType === 'subscription' && [
+      'Refresh Subscriptions While App Is Closed',
+      'Notify About New Uploads'
+    ].includes(group)) ||
     (sectionType === 'player' && group === 'Voice-over Translation')
   )) return false
 

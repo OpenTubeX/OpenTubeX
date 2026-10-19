@@ -241,6 +241,7 @@ const collectionLabels = {
 }
 const detailLabels = {
   feedTypes: 'Channel.Show in subscription feed',
+  notificationFeedTypes: 'Channel.Notify about new uploads',
   dailyVideoLimit: 'Channel.Videos per day',
   showMembersOnly: 'Search Listing.Label.Members Only',
 }
@@ -260,7 +261,7 @@ function displayActivityValue(entry) {
   if (entry.key === 'keyboardShortcuts' && entry.detail && typeof entry.value === 'string') {
     return entry.value ? getLocalizedShortcut(entry.value) : t('KeyboardShortcutPrompt.Unassigned')
   }
-  if (entry.detail === 'feedTypes') {
+  if (entry.detail === 'feedTypes' || entry.detail === 'notificationFeedTypes') {
     return typeof entry.value === 'string' && entry.value
       // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
       ? entry.value.split(',').map(type => feedTypeLabels[type] ? t(feedTypeLabels[type]) : type).join(', ')

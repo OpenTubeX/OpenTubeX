@@ -72,6 +72,16 @@ export function configureAndroidSubscriptionRefresh(configuration) {
   return SubscriptionRefresh.configure({ configuration })
 }
 
+export function configureAndroidUploadNotifications(configuration) {
+  if (!SubscriptionRefresh) return Promise.resolve()
+  return SubscriptionRefresh.configureUploadNotifications({ configuration })
+}
+
+export function observeAndroidUploads(value) {
+  if (!SubscriptionRefresh) return Promise.resolve()
+  return SubscriptionRefresh.observeUploads(value)
+}
+
 export async function isAndroidSubscriptionRefreshActive() {
   if (!SubscriptionRefresh) return false
   const { active } = await SubscriptionRefresh.isActive()

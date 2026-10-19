@@ -168,6 +168,10 @@ Home Page:
   All sections hidden: 모든 섹션이 숨겨져 있습니다
   All sections hidden description: 홈을 맞춤 설정하여 섹션을 다시 표시하세요.
 Subscriptions:
+  New video from {channel}: "{channel}의 새 동영상"
+  New short from {channel}: "{channel}의 새 쇼츠"
+  '{channel} is live': "{channel}에서 라이브 방송 중"
+  New post from {channel}: "{channel}의 새 게시물"
   Mark As Unseen: 보지 않음으로 표시
   Copy Error Details: "기술 세부 정보 복사"
   Refresh Errors: "새로고침하지 못한 채널: {channels}. 클릭하여 세부 정보를 확인하세요."
@@ -1135,6 +1139,7 @@ Settings:
     Live Auto Refresh Interval: 실시간 스트림 자동 새로 고침 간격
     Posts Auto Refresh Interval: 게시물 자동 새로 고침 간격
     Refresh Subscriptions While App Is Closed: "앱이 닫혀 있을 때 구독 새로 고침"
+    Notify About New Uploads: 새 업로드 알림
     Limit the number of videos displayed for each channel: 채널별 표시 동영상 수 제한
     To: 다음으로
     Confirm Before Unsubscribing: 구독 취소 전 확인
@@ -1559,6 +1564,7 @@ Channel:
   Unlimited: 무제한
   More videos hidden: '+{count}개 더'
   Show in subscription feed: 구독 피드에 표시
+  Notify about new uploads: 새 업로드 알림
   Channel Name Unavailable: 채널 이름을 확인할 수 없습니다
   Search Result Types: 검색 결과 유형
   All Results: 전체
@@ -2281,6 +2287,7 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: 예정된 실시간 스트림과 최초 공개를 구독 피드 맨 위에 유지합니다. 비활성화하면 시작될 때까지 공지된 위치에 유지됩니다. 비활성화한 후 구독 피드를 한 번 새로 고쳐 기존 예정 항목의 공지 날짜를 가져오세요.
     Auto Refresh Interval: "앱이 열려 있는 동안 OpenTubeX에서 구독 피드를 자동으로 새로 고칠 간격입니다. Android에서는 0이 아닌 간격을 선택하면 앱이 닫혀 있을 때도 피드를 새로 고칩니다."
     Refresh Subscriptions While App Is Closed: "선택한 설정으로 피드를 새로고침합니다. 데스크톱에서는 종료할 때까지 OpenTubeX가 시스템 트레이에 남습니다. Android는 백그라운드 새로고침 시간을 결정합니다."
+    Notify About New Uploads: 구독 설정에서 알림을 켠 채널에 대해 이 기기에 시스템 알림을 표시합니다. OpenTubeX는 구독을 새로 고칠 때 새 콘텐츠를 확인하므로 자동 새로 고침 간격을 선택하세요. 앱이 닫혀 있을 때도 알림을 받으려면 앱이 닫혀 있을 때 새로 고침도 사용하도록 설정하세요.
   Theme Settings:
     Thumbnail Size: "그리드와 목록에서 동영상 썸네일 크기를 조정합니다. 열 수가 고정된 그리드나 전체 너비 보기 유형은 대신 각 행을 채우므로, 여기서는 목록 썸네일과 Shorts만 변경됩니다. 휴대전화 크기의 창에서는 그리드 썸네일이 100%로 제한됩니다."
     Playlist Thumbnail Size: "재생목록 페이지에서 동영상 썸네일 크기를 조정합니다. 열 수가 고정된 그리드나 전체 너비 보기 유형은 대신 각 행을 채우므로, 여기서는 목록 썸네일과 Shorts만 변경됩니다. 휴대전화 크기의 창에서는 그리드 썸네일이 100%로 제한됩니다."

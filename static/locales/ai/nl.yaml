@@ -159,6 +159,10 @@ Home Page:
   All sections hidden: Alle secties zijn verborgen
   All sections hidden description: Pas de startpagina aan om weer een sectie te tonen.
 Subscriptions:
+  New video from {channel}: Nieuwe video van {channel}
+  New short from {channel}: Nieuwe Short van {channel}
+  '{channel} is live': "{channel} is live"
+  New post from {channel}: Nieuwe post van {channel}
   Mark As Unseen: Markeren als ongezien
   Copy Error Details: "Technische details kopiëren"
   Refresh Errors: "Kanalen die niet konden worden vernieuwd: {channels}. Klik om details te bekijken."
@@ -956,6 +960,7 @@ Settings:
     Live Auto Refresh Interval: Interval voor automatisch vernieuwen van livestreams
     Posts Auto Refresh Interval: Interval voor automatisch vernieuwen van berichten
     Refresh Subscriptions While App Is Closed: "Abonnementen vernieuwen terwijl de app gesloten is"
+    Notify About New Uploads: Melden bij nieuwe uploads
   Distraction Free Settings:
     Hide Popularity Graph: "Populariteitsgrafiek verbergen"
     Enable Block Lists: "Blokkeerlijsten inschakelen"
@@ -1333,6 +1338,7 @@ Channel:
   Unlimited: Onbeperkt
   More videos hidden: '+{count} meer | +{count} meer'
   Show in subscription feed: Tonen in abonnementenfeed
+  Notify about new uploads: Melden bij nieuwe uploads
   Channel Name Unavailable: Kanaalnaam niet beschikbaar
   Search Result Types: Typen zoekresultaten
   All Results: Alles
@@ -1954,6 +1960,7 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: Houdt aankomende livestreams en premières bovenaan de abonnementsfeed. Als dit is uitgeschakeld, blijven ze tot hun start op de positie van hun aankondiging staan. Vernieuw na het uitschakelen de abonnementsfeed eenmaal om de aankondigingsdatums van bestaande geplande items op te halen.
     Auto Refresh Interval: "Hoe vaak OpenTubeX je abonnementsfeed automatisch vernieuwt terwijl de app geopend is. Op Android vernieuwt een interval dat niet nul is de feed ook wanneer de app gesloten is."
     Refresh Subscriptions While App Is Closed: "Ververst feeds met je gekozen instellingen. Op de computer blijft OpenTubeX in het systeemvak totdat je afsluit. Android bepaalt wanneer verversingen op de achtergrond worden uitgevoerd."
+    Notify About New Uploads: Toont systeemmeldingen op dit apparaat voor kanalen waarvan je de meldingen hebt ingeschakeld in hun abonnementsinstellingen. OpenTubeX controleert op nieuwe inhoud wanneer abonnementen worden vernieuwd, dus kies een interval voor automatisch vernieuwen. Om ook meldingen te krijgen terwijl de app gesloten is, schakel je ook vernieuwen terwijl de app gesloten is in.
   Theme Settings:
     Thumbnail Size: "Schaalt videominiaturen in rasters en lijsten. Rasters met een vast aantal kolommen of de weergave Volledige breedte vullen in plaats daarvan elke rij, dus daar verandert de schuifregelaar alleen lijstminiaturen en Shorts. In vensters ter grootte van een telefoon zijn rasterminiaturen beperkt tot 100%."
     Playlist Thumbnail Size: "Schaalt videominiaturen op afspeellijstpagina's. Rasters met een vast aantal kolommen of de weergave Volledige breedte vullen in plaats daarvan elke rij, dus daar verandert de schuifregelaar alleen lijstminiaturen en Shorts. In vensters ter grootte van een telefoon zijn rasterminiaturen beperkt tot 100%."

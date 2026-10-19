@@ -24,7 +24,6 @@
 }
 
 
-
 .channelSettingsHeader :deep(.ft-input-component) {
   --input-bottom-spacing: 0;
 
@@ -224,6 +223,15 @@
   display: grid;
   gap: 6px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.bulkNotificationSetting {
+  margin-block-start: var(--settings-row-gap, 20px);
+}
+
+.bulkNotificationSetting + .feedTypeOptions,
+.notificationSettings > .feedTypeOptions {
+  margin-block-start: 8px;
 }
 
 .feedTypeOption {

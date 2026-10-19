@@ -159,6 +159,10 @@ Home Page:
   All sections hidden: Semua bagian disembunyikan
   All sections hidden description: Sesuaikan Beranda untuk menampilkan kembali bagian.
 Subscriptions:
+  New video from {channel}: Video baru dari {channel}
+  New short from {channel}: Video singkat baru dari {channel}
+  '{channel} is live': "{channel} sedang siaran langsung"
+  New post from {channel}: Postingan baru dari {channel}
   Mark As Unseen: Tandai sebagai belum dilihat
   Copy Error Details: "Salin detail teknis"
   Refresh Errors: "Channel yang tidak dapat diperbarui: {channels}. Klik untuk melihat detail."
@@ -943,6 +947,7 @@ Settings:
     Live Auto Refresh Interval: Interval Pembaruan Otomatis Siaran Langsung
     Posts Auto Refresh Interval: Interval Pembaruan Otomatis Postingan
     Refresh Subscriptions While App Is Closed: "Perbarui Langganan Saat Aplikasi Ditutup"
+    Notify About New Uploads: Beri Notifikasi Unggahan Baru
   Distraction Free Settings:
     Hide Popularity Graph: "Sembunyikan Grafik Popularitas"
     Enable Block Lists: "Aktifkan daftar blokir"
@@ -1301,6 +1306,7 @@ Channel:
   Unlimited: Tanpa batas
   More videos hidden: '+{count} lainnya'
   Show in subscription feed: Tampilkan di feed langganan
+  Notify about new uploads: Beri notifikasi unggahan baru
   Channel Name Unavailable: Nama saluran tidak tersedia
   Search Result Types: Jenis hasil pencarian
   All Results: Semua
@@ -1912,6 +1918,7 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: Mempertahankan siaran langsung dan premiere mendatang di bagian atas umpan langganan. Jika dinonaktifkan, item tetap pada posisi pengumuman hingga dimulai. Perbarui umpan langganan satu kali setelah menonaktifkannya untuk mengambil tanggal pengumuman entri terjadwal yang sudah ada.
     Auto Refresh Interval: "Frekuensi OpenTubeX memperbarui umpan langganan secara otomatis selama aplikasi terbuka. Di Android, interval bukan nol juga memperbarui feed saat aplikasi ditutup."
     Refresh Subscriptions While App Is Closed: "Memperbarui feed sesuai setelan yang dipilih. Di desktop, OpenTubeX tetap di baki sistem sampai Anda keluar. Android menentukan waktu pembaruan latar belakang."
+    Notify About New Uploads: Menampilkan notifikasi sistem di perangkat ini untuk channel yang notifikasinya Anda aktifkan di pengaturan langganannya. OpenTubeX memeriksa konten baru saat langganan diperbarui, jadi pilih interval pembaruan otomatis. Agar tetap mendapat notifikasi saat aplikasi ditutup, aktifkan juga pembaruan saat aplikasi ditutup.
   Theme Settings:
     Thumbnail Size: "Mengubah ukuran gambar mini video di kisi dan daftar. Kisi dengan jumlah kolom tetap atau jenis tampilan Lebar Penuh akan mengisi setiap baris, jadi di sana penggeser hanya mengubah gambar mini daftar dan Shorts. Di jendela seukuran ponsel, gambar mini kisi dibatasi hingga 100%."
     Playlist Thumbnail Size: "Mengubah ukuran gambar mini video di halaman daftar putar. Kisi dengan jumlah kolom tetap atau jenis tampilan Lebar Penuh akan mengisi setiap baris, jadi di sana penggeser hanya mengubah gambar mini daftar dan Shorts. Di jendela seukuran ponsel, gambar mini kisi dibatasi hingga 100%."

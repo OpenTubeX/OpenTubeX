@@ -159,6 +159,10 @@ Home Page:
   All sections hidden: Minden szakasz el van rejtve
   All sections hidden description: Szabja testre a kezdőlapot egy szakasz újbóli megjelenítéséhez.
 Subscriptions:
+  New video from {channel}: "Új videó: {channel}"
+  New short from {channel}: "Új rövid videó: {channel}"
+  '{channel} is live': "{channel} élőben közvetít"
+  New post from {channel}: "Új bejegyzés: {channel}"
   Mark As Unseen: Megjelölés nem látottként
   Copy Error Details: "Technikai részletek másolása"
   Refresh Errors: "Nem frissíthető csatornák: {channels}. Kattintson a részletek megtekintéséhez."
@@ -943,6 +947,7 @@ Settings:
     Live Auto Refresh Interval: Élő közvetítések automatikus frissítésének időköze
     Posts Auto Refresh Interval: Bejegyzések automatikus frissítésének időköze
     Refresh Subscriptions While App Is Closed: "Feliratkozások frissítése bezárt alkalmazásnál"
+    Notify About New Uploads: Értesítés új feltöltésekről
   Distraction Free Settings:
     Hide Popularity Graph: "Népszerűségi grafikon elrejtése"
     Enable Block Lists: "Tiltólisták engedélyezése"
@@ -1298,6 +1303,7 @@ Channel:
   Unlimited: Korlátlan
   More videos hidden: '+{count} további | +{count} további'
   Show in subscription feed: Megjelenítés a feliratkozási hírfolyamban
+  Notify about new uploads: Értesítés új feltöltésekről
   Channel Name Unavailable: A csatorna neve nem érhető el
   Search Result Types: Keresési találatok típusai
   All Results: Összes
@@ -1897,6 +1903,7 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: A közelgő élő közvetítések és premierek a feliratkozási hírfolyam tetején maradnak. Kikapcsolva a kezdésükig a bejelentésük helyén maradnak. Kikapcsolás után frissítse egyszer a feliratkozási hírfolyamot a meglévő ütemezett bejegyzések bejelentési dátumának lekéréséhez.
     Auto Refresh Interval: "Milyen gyakran frissítse automatikusan az OpenTubeX a feliratkozási hírfolyamot, amíg az alkalmazás nyitva van. Androidon a nullától eltérő időköz akkor is frissíti a hírfolyamot, amikor az alkalmazás be van zárva."
     Refresh Subscriptions While App Is Closed: "A kiválasztott beállításokkal frissíti a hírcsatornákat. Számítógépen az OpenTubeX kilépésig a rendszertálcán marad. Androidon a rendszer határozza meg a háttérfrissítések idejét."
+    Notify About New Uploads: Rendszerértesítéseket jelenít meg ezen az eszközön azokról a csatornákról, amelyeknek a feliratkozási beállításaiban bekapcsolta az értesítéseket. Az OpenTubeX a feliratkozások frissítésekor keres új tartalmat, ezért válasszon automatikus frissítési időközt. Ha bezárt alkalmazásnál is értesítést szeretne kapni, kapcsolja be a bezárt alkalmazásnál történő frissítést is.
   Theme Settings:
     Thumbnail Size: "Átméretezi a videók bélyegképeit a rácsokban és listákban. A rögzített oszlopszámú vagy Teljes szélesség nézetű rácsok ehelyett kitöltik az összes sort, így ott csak a listák bélyegképeit és a Shorts videókat módosítja. Telefonméretű ablakokban a rács bélyegképei legfeljebb 100%-osak lehetnek."
     Playlist Thumbnail Size: "Átméretezi a videók bélyegképeit a lejátszási listák oldalain. A rögzített oszlopszámú vagy Teljes szélesség nézetű rácsok ehelyett kitöltik az összes sort, így ott csak a listák bélyegképeit és a Shorts videókat módosítja. Telefonméretű ablakokban a rács bélyegképei legfeljebb 100%-osak lehetnek."

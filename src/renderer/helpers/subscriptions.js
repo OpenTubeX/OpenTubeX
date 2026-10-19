@@ -40,6 +40,7 @@ import {
 } from './subscription-entries'
 import { mapConcurrently } from './concurrent-map'
 import { includeAutomaticDownloadChannels, startAutomaticDownloadsForChannel } from './automaticDownloads'
+import { reportSubscriptionUploads } from './uploadNotifications'
 import { extractAssignedJsonObject } from './assigned-json'
 import { getInvidiousSubscriptionPremiereUpdate, getLocalSubscriptionPremiereUpdate, shouldRefreshSubscriptionPremiere } from './subscription-premieres'
 import { shouldShowProgressStartToast } from './progressPresentation'
@@ -831,6 +832,7 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
           videos
         })
         await startAutomaticDownloadsForChannel(channel, videos, 'videos', t, electronRefreshOwnerTabId)
+        reportSubscriptionUploads(channel.id, 'videos', videos)
         notifySubscriptionChannelRefreshed('videos')
       }
 
@@ -930,6 +932,7 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
           videos
         })
         await startAutomaticDownloadsForChannel(channel, videos, 'shorts', t, electronRefreshOwnerTabId)
+        reportSubscriptionUploads(channel.id, 'shorts', videos)
         notifySubscriptionChannelRefreshed('shorts')
       }
 
@@ -1031,6 +1034,7 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
           videos
         })
         await startAutomaticDownloadsForChannel(channel, videos, 'live', t, electronRefreshOwnerTabId)
+        reportSubscriptionUploads(channel.id, 'live', videos)
         notifySubscriptionChannelRefreshed('live')
       }
 
@@ -1127,6 +1131,7 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
         channelId: channel.id,
         posts
       })
+      reportSubscriptionUploads(channel.id, 'posts', posts)
       notifySubscriptionChannelRefreshed('posts')
 
       const channelPost = posts.find(post => post.authorId === channel.id)

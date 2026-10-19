@@ -159,6 +159,10 @@ Home Page:
   All sections hidden: 所有版块均已隐藏
   All sections hidden description: 自定义首页以重新显示版块。
 Subscriptions:
+  New video from {channel}: "{channel} 发布了新视频"
+  New short from {channel}: "{channel} 发布了新短视频"
+  '{channel} is live': "{channel} 正在直播"
+  New post from {channel}: "{channel} 发布了新帖子"
   Mark As Unseen: 标记为未看过
   Copy Error Details: "复制技术详情"
   Refresh Errors: "无法刷新的频道：{channels}。点击查看详情。"
@@ -942,6 +946,7 @@ Settings:
     Live Auto Refresh Interval: 直播自动刷新间隔
     Posts Auto Refresh Interval: 帖子自动刷新间隔
     Refresh Subscriptions While App Is Closed: "应用关闭时刷新订阅"
+    Notify About New Uploads: 新上传通知
   Distraction Free Settings:
     Hide Popularity Graph: "隐藏热度图"
     Enable Block Lists: "启用屏蔽列表"
@@ -1297,6 +1302,7 @@ Channel:
   Unlimited: 不限
   More videos hidden: '另有 {count} 个'
   Show in subscription feed: 在订阅动态中显示
+  Notify about new uploads: 新上传通知
   Channel Name Unavailable: 频道名称不可用
   Search Result Types: 搜索结果类型
   All Results: 全部
@@ -1895,6 +1901,7 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: 将即将开始的直播和首映置于订阅动态顶部。禁用后，它们会保留在公告发布时的位置，直到开始。禁用后请刷新一次订阅动态，以获取现有预定项目的公告日期。
     Auto Refresh Interval: "OpenTubeX 在应用打开期间自动刷新订阅动态的频率。 在 Android 上，非零间隔还会在应用关闭时刷新订阅源。"
     Refresh Subscriptions While App Is Closed: "使用所选设置刷新订阅。在桌面端，OpenTubeX 会留在系统托盘中，直到您退出。Android 系统决定后台刷新的运行时间。"
+    Notify About New Uploads: 在此设备上为你在订阅设置中开启了通知的频道显示系统通知。OpenTubeX 会在刷新订阅时检查新内容，因此请选择自动刷新间隔。若要在应用关闭时也收到通知，请同时启用应用关闭时刷新订阅。
   Theme Settings:
     Thumbnail Size: "缩放网格和列表中的视频缩略图。列数固定的网格或“全宽”视图会改为填满每一行，因此在这些情况下只会改变列表缩略图和 Shorts。在手机大小的窗口中，网格缩略图最大为 100%。"
     Playlist Thumbnail Size: "缩放播放列表页面中的视频缩略图。列数固定的网格或“全宽”视图会改为填满每一行，因此在这些情况下只会改变列表缩略图和 Shorts。在手机大小的窗口中，网格缩略图最大为 100%。"

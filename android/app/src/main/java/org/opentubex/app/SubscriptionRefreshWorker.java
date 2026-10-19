@@ -264,6 +264,7 @@ public final class SubscriptionRefreshWorker extends Worker {
                         }
                     }
                     if (stored) {
+                        UploadNotifications.observePayload(context, channelId, feedType, payload);
                         if (BuildConfig.BUNDLES_YT_DLP) try { YtDlpDownloads.get(context).discover(channelId, feedType, payload); }
                         catch (Exception error) { android.util.Log.w("OpenTubeXYtDlp", "Unable to queue automatic downloads", error); }
                         completed++;

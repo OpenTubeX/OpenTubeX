@@ -159,6 +159,10 @@ Home Page:
   All sections hidden: Bütün bölmələr gizlədilib
   All sections hidden description: Bölməni yenidən göstərmək üçün ana səhifəni fərdiləşdirin.
 Subscriptions:
+  New video from {channel}: "{channel} kanalından yeni video"
+  New short from {channel}: "{channel} kanalından yeni Shorts"
+  '{channel} is live': "{channel} canlı yayımdadır"
+  New post from {channel}: "{channel} kanalından yeni post"
   Mark As Unseen: Görülməmiş kimi işarələ
   Copy Error Details: "Texniki təfərrüatları kopyala"
   Refresh Errors: "Yenilənə bilməyən kanallar: {channels}. Təfərrüatlara baxmaq üçün klikləyin."
@@ -945,6 +949,7 @@ Settings:
     Live Auto Refresh Interval: Canlı yayımların avtomatik yenilənmə aralığı
     Posts Auto Refresh Interval: Paylaşımların avtomatik yenilənmə aralığı
     Refresh Subscriptions While App Is Closed: Tətbiq bağlı olarkən abunəlikləri yenilə
+    Notify About New Uploads: Yeni yükləmələr barədə bildiriş göndər
   Distraction Free Settings:
     Hide Popularity Graph: "Populyarlıq qrafikini gizlət"
     Enable Block Lists: "Blok siyahılarını aktivləşdir"
@@ -1301,6 +1306,7 @@ Channel:
   Unlimited: Limitsiz
   More videos hidden: +{count} daha çox | +{count} daha çox
   Show in subscription feed: Abunəlik lentində göstər
+  Notify about new uploads: Yeni yükləmələr barədə bildiriş göndər
   Channel Name Unavailable: Kanal adı mövcud deyil
   Search Result Types: Axtarış nəticələrinin növləri
   All Results: Hamısı
@@ -1909,6 +1915,7 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: Gələcək canlı yayımları və premyeraları abunəlik axınının yuxarısında saxlayır. Bağlandıqda, onlar başlayana qədər elan edildikləri mövqedə qalırlar. Mövcud planlaşdırılmış elementlərin elan tarixlərini almaq üçün bağladıqdan sonra abunəlik axınını bir dəfə yeniləyin.
     Auto Refresh Interval: Tətbiq açıq olduqda OpenTubeX-in abunəlik axınınızı hansı tezliklə avtomatik yeniləyəcəyi. Android-də sıfırdan fərqli aralıq tətbiq bağlı olduqda da axını yeniləyir.
     Refresh Subscriptions While App Is Closed: "Lentləri seçdiyiniz parametrlərlə yeniləyir. Masaüstündə OpenTubeX çıxana qədər sistem treyində qalır. Android arxa plan yeniləmələrinin vaxtını müəyyən edir."
+    Notify About New Uploads: Abunəlik ayarlarında bildirişlərini aktiv etdiyiniz kanallar üçün bu cihazda sistem bildirişləri göstərir. OpenTubeX yeni məzmunu abunəliklər yeniləndikdə yoxlayır, buna görə avtomatik yeniləmə aralığı seçin. Tətbiq bağlı olarkən bildiriş almaq üçün tətbiq bağlı olarkən yeniləməni də aktiv edin.
   Theme Settings:
     Thumbnail Size: "Şəbəkələrdə və siyahılarda video miniatürlərinin ölçüsünü dəyişir. Sabit sütun sayı və ya Tam en görünüşü olan şəbəkələr əvəzində hər sətri doldurur, ona görə orada yalnız siyahı miniatürlərini və Shorts-u dəyişir. Telefon ölçülü pəncərələrdə şəbəkə miniatürləri 100% ilə məhdudlaşır."
     Playlist Thumbnail Size: "Pleylist səhifələrində video miniatürlərinin ölçüsünü dəyişir. Sabit sütun sayı və ya Tam en görünüşü olan şəbəkələr əvəzində hər sətri doldurur, ona görə orada yalnız siyahı miniatürlərini və Shorts-u dəyişir. Telefon ölçülü pəncərələrdə şəbəkə miniatürləri 100% ilə məhdudlaşır."

@@ -192,6 +192,10 @@ Home Page:
   All sections hidden: Totes les seccions estan ocultes
   All sections hidden description: Personalitzeu l'inici per tornar a mostrar una secció.
 Subscriptions:
+  New video from {channel}: Vídeo nou de {channel}
+  New short from {channel}: Curt nou de {channel}
+  '{channel} is live': "{channel} està en directe"
+  New post from {channel}: Publicació nova de {channel}
   Mark As Unseen: Marca com a no vist
   Copy Error Details: "Copia els detalls tècnics"
   Refresh Errors: "Canals que no s'han pogut actualitzar: {channels}. Feu clic per veure els detalls."
@@ -1206,6 +1210,7 @@ Settings:
     Live Auto Refresh Interval: Interval d'actualització automàtica dels directes
     Posts Auto Refresh Interval: Interval d'actualització automàtica de les publicacions
     Refresh Subscriptions While App Is Closed: "Actualitza les subscripcions amb l'aplicació tancada"
+    Notify About New Uploads: Notifica les pujades noves
     Limit the number of videos displayed for each channel: Limita el nombre de vídeos mostrats per canal
     To: A
     Confirm Before Unsubscribing: Confirma abans de donar-se de baixa
@@ -1666,6 +1671,7 @@ Channel:
   Unlimited: Sense límit
   More videos hidden: '+{count} més | +{count} més | +{count} més'
   Show in subscription feed: Mostra al canal de subscripcions
+  Notify about new uploads: Notifica les pujades noves
   Channel Name Unavailable: El nom del canal no està disponible
   Search Result Types: Tipus de resultats de cerca
   All Results: Tot
@@ -2454,6 +2460,7 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: Manté les properes emissions en directe i estrenes a dalt del canal de subscripcions. Si es desactiva, romanen a la posició de l'anunci fins que comencen. Després de desactivar-ho, actualitzeu el canal una vegada per obtenir les dates d'anunci de les entrades programades existents.
     Auto Refresh Interval: "Freqüència amb què l'OpenTubeX actualitza automàticament el canal de subscripcions mentre l'aplicació està oberta. A Android, un interval diferent de zero també actualitza el canal quan l’aplicació està tancada."
     Refresh Subscriptions While App Is Closed: "Actualitza els canals amb la configuració seleccionada. A l’escriptori, OpenTubeX es manté a la safata del sistema fins que en sortiu. Android controla quan s’executen les actualitzacions en segon pla."
+    Notify About New Uploads: Mostra notificacions del sistema en aquest dispositiu per als canals dels quals heu activat les notificacions a la seva configuració de subscripció. OpenTubeX cerca contingut nou quan s'actualitzen les subscripcions, així que trieu un interval d'actualització automàtica. Per rebre notificacions amb l'aplicació tancada, activeu també l'actualització amb l'aplicació tancada.
   Theme Settings:
     Thumbnail Size: "Canvia la mida de les miniatures dels vídeos a les quadrícules i llistes. Les quadrícules amb un nombre fix de columnes o el tipus de vista Amplada completa omplen cada fila, de manera que allà només canvia les miniatures de les llistes i els Shorts. A les finestres de mida de telèfon, les miniatures de la quadrícula es limiten al 100%."
     Playlist Thumbnail Size: "Canvia la mida de les miniatures dels vídeos a les pàgines de llistes de reproducció. Les quadrícules amb un nombre fix de columnes o el tipus de vista Amplada completa omplen cada fila, de manera que allà només canvia les miniatures de les llistes i els Shorts. A les finestres de mida de telèfon, les miniatures de la quadrícula es limiten al 100%."

@@ -23,4 +23,6 @@
     <string name="widget_search">Suche</string>
     <string name="widget_subscriptions">Abos</string>
     <string name="widget_watch_later">Später ansehen</string>
+    <string name="notification_channel_new_uploads_name">Neue Uploads</string>
+    <string name="notification_channel_new_uploads_description">Benachrichtigungen, wenn abonnierte Kanäle neue Inhalte veröffentlichen</string>
 </resources>

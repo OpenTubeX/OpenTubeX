@@ -1,0 +1,114 @@
+import { normalizeSubscriptionChannelSettings } from './renderer/helpers/subscription-channels.js'
+
+/**
+ * Only channels with notifications turned on are included.
+ * @param {{
+ *   enabled: boolean,
+ *   subscriptions: object[],
+ *   showMembersOnly: boolean,
+ *   titles: Record<string, string>
+ * }} input
+ */
+export function createUploadNotificationConfiguration({ enabled, subscriptions, showMembersOnly, titles }) {
+  const channels = enabled
+    ? Object.fromEntries(subscriptions.flatMap(channel => {
+        if (typeof channel?.id !== 'string' || channel.id.length === 0) return []
+        const settings = normalizeSubscriptionChannelSettings(channel)
+        if (settings.notificationFeedTypes.length === 0) return []
+        return [[channel.id, {
+          name: channel.name ?? '',
+          feedTypes: settings.notificationFeedTypes,
+          membersOnly: showMembersOnly && settings.showMembersOnly
+        }]]
+      }))
+    : {}
+  return Object.keys(channels).length === 0 ? { enabled: false } : { enabled: true, titles, channels }
+}
+
+const KNOWN_ID_LIMIT = 200
+const NOTIFIED_ID_LIMIT = 1000
+// Feeds can surface older entries, for example when a video becomes public.
+const MAXIMUM_AGE_MS = 7 * 86_400_000
+
+/**
+ * Reduces parsed feed entries to the fields notifications need, newest first.
+ * @param {unknown} entries
+ * @returns {{ id: string, title: string, published: number, live: boolean, upcoming: boolean, membersOnly: boolean }[]}
+ */
+export function normalizeUploadEntries(entries) {
+  if (!Array.isArray(entries)) return []
+  return entries.flatMap(entry => {
+    const id = entry?.videoId ?? entry?.postId
+    if (typeof id !== 'string' || id.length === 0) return []
+    const title = typeof entry.title === 'string'
+      ? entry.title
+      : typeof entry.postText === 'string' ? htmlToText(entry.postText) : ''
+    return [{
+      id,
+      title,
+      published: Number(entry.published ?? entry.publishedTime) || 0,
+      live: entry.liveNow === true,
+      upcoming: entry.isUpcoming === true,
+      membersOnly: entry.isMembersOnly === true
+    }]
+  })
+}
+
+/**
+ * @param {string} html
+ */
+function htmlToText(html) {
+  return html
+    .replaceAll(/<br\s*\/?>/gi, '\n')
+    .replaceAll(/<[^>]*>/g, '')
+    .replaceAll(/&(amp|lt|gt|quot|#39);/g, (_, entity) => ({ amp: '&', lt: '<', gt: '>', quot: '"', '#39': "'" })[entity])
+}
+
+/** @returns {{ known: Record<string, string[]>, notified: string[] }} */
+export function createUploadNotificationState() {
+  return { known: {}, notified: [] }
+}
+
+/**
+ * Records a channel feed and returns its entries that appeared since the last
+ * observation. The first observation of a feed only establishes a baseline,
+ * and a response without overlap is treated as a replaced list, not as uploads.
+ * Upcoming entries are skipped until they go live or are published.
+ * @param {{ known: Record<string, string[]>, notified: string[] }} state
+ * @param {string} channelId
+ * @param {string} feedType
+ * @param {ReturnType<typeof normalizeUploadEntries>} entries
+ * @param {number} [now]
+ */
+export function takeNewUploads(state, channelId, feedType, entries, now = Date.now()) {
+  const key = `${channelId}:${feedType}`
+  const available = entries.filter(entry => !entry.upcoming)
+  const known = state.known[key]
+  state.known[key] = [...new Set([...available.map(entry => entry.id), ...(known ?? [])])].slice(0, KNOWN_ID_LIMIT)
+  if (!Array.isArray(known)) return []
+
+  const knownIds = new Set(known)
+  const firstKnownIndex = known.length === 0
+    ? available.length
+    : available.findIndex(entry => knownIds.has(entry.id))
+  if (firstKnownIndex < 0) return []
+
+  // Shorts and streams can also appear in another feed of the same channel.
+  const notifiedIds = new Set(state.notified)
+  const uploads = available.slice(0, firstKnownIndex).filter(entry => (
+    !notifiedIds.has(entry.id) &&
+    (entry.live || entry.published === 0 || now - entry.published <= MAXIMUM_AGE_MS)
+  ))
+  state.notified = [...uploads.map(entry => entry.id), ...state.notified].slice(0, NOTIFIED_ID_LIMIT)
+  return uploads
+}
+
+/**
+ * @param {string} feedType
+ * @param {string} id
+ */
+export function getUploadUrl(feedType, id) {
+  if (feedType === 'posts') return `https://www.youtube.com/post/${encodeURIComponent(id)}`
+  if (feedType === 'shorts') return `https://www.youtube.com/shorts/${encodeURIComponent(id)}`
+  return `https://www.youtube.com/watch?v=${encodeURIComponent(id)}`
+}
