@@ -643,6 +643,14 @@ const customActions = {
     normalizeQuickSettings(value)
   ),
 
+  // Each speed or name edit rewrites the whole list from the current state.
+  updateQuickPlaybackSpeedBarOptions: ({ commit, state }, value) => updateOrderedSetting(
+    commit,
+    state,
+    'quickPlaybackSpeedBarOptions',
+    value
+  ),
+
   updateNavigationItems: ({ commit, state }, value) => updateOrderedSetting(
     commit,
     state,

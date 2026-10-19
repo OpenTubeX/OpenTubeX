@@ -37,6 +37,36 @@ test.describe('standard form controls', () => {
     await expect(row.locator('.quickPlaybackSpeedName')).toContainText('1.25')
   })
 
+  test('keeps a playback speed edit while its save is still pending', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      const original = ipcMain._invokeHandlers.get('db-settings')
+      let held = false
+      ipcMain.removeHandler('db-settings')
+      ipcMain.handle('db-settings', async (event, request) => {
+        if (!held && request.action === 2 && request.data._id === 'quickPlaybackSpeedBarOptions') {
+          held = true
+          await new Promise(resolve => { globalThis.releaseQuickPlaybackSpeedWrite = resolve })
+        }
+        return original(event, request)
+      })
+    })
+    await goToSettingsSection(page, 'playback')
+    await page.getByRole('button', { name: 'Customize Quick Playback Speed Bar' }).click()
+    const row = page.locator('.quickPlaybackSpeedEntry').first()
+    const speed = row.getByRole('spinbutton', { name: 'Playback Speed', exact: true })
+    await speed.fill('1.25')
+    await speed.press('Tab')
+    await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.releaseQuickPlaybackSpeedWrite)).toBe('function')
+
+    await row.getByRole('button', { name: 'Edit Playback Speed Name' }).click()
+    await row.getByRole('textbox', { name: 'Name', exact: true }).fill('Comfortable')
+    await app.electronApp.evaluate(() => globalThis.releaseQuickPlaybackSpeedWrite())
+    await expect(speed).toHaveValue('1.25')
+    await expect.poll(() => page.evaluate(() => (
+      JSON.parse(window.$store.getters.getQuickPlaybackSpeedBarOptions)[0]
+    ))).toMatchObject({ speed: 1.25, name: 'Comfortable' })
+  })
+
   test('shows and hides tag entries with the shared checkbox without losing them', async ({ page }) => {
     const section = await goToSettingsSection(page, 'distraction')
     const field = section.locator('.containingTextFlexBox .ft-input-tags-component')
