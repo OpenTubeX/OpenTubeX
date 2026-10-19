@@ -7,14 +7,14 @@ import vm from 'node:vm'
 const source = await readFile(new URL('../../src/main/index.js', import.meta.url), 'utf8')
 
 // Minimal stand-in for Electron's nativeImage, covering only the surface the
-// macOS tray image code uses. resize() records the requested height and toPNG()
+// tray image code uses. resize() records the requested size and toPNG()
 // returns it as the encoded-buffer stand-in, so the Darwin assertions check the
 // sizes the code asks for without a real PNG encoder (Electron's nativeImage is
 // unavailable in this vm fixture).
 const fakeImage = (height, extra = {}) => ({
   height,
   ...extra,
-  resize: ({ height: resized }) => fakeImage(resized),
+  resize: ({ width, height: resized }) => fakeImage(resized, { width }),
   toPNG: () => fakeImage(height),
 })
 
@@ -320,7 +320,7 @@ for (const platform of ['linux', 'win32']) {
   test(`default tray artwork is downscaled on ${platform}`, () => {
     const { context, trays } = fixture(platform)
     context.configure({})
-    assert.equal(trays[0].image.height, 64)
+    assert.deepEqual([trays[0].image.width, trays[0].image.height], [64, 64])
   })
 }
 
