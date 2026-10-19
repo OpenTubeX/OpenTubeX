@@ -496,6 +496,8 @@ let hasEnded = false
 let isUnmounted = false
 let stayAtBottom = true
 let isScrollingToBottom = false
+/** Incremented by user scroll input so pending live-edge jumps can yield to it. */
+let userScrollGeneration = 0
 /** @type {number | null} */
 let liveEdgeScrollFrame = null
 /** @type {ReturnType<typeof setTimeout> | null} */
@@ -804,9 +806,15 @@ watch(commentsRef, (element, _previous, onCleanup) => {
  * their final height before the chat is anchored to the live edge.
  */
 function scrollToLiveAfterLayout() {
+  const generation = userScrollGeneration
   nextTick(() => {
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => scrollToBottom('instant'))
+      requestAnimationFrame(() => {
+        // Scrolling during these frames must not be snapped back to the live edge.
+        if (generation === userScrollGeneration) {
+          scrollToBottom('instant')
+        }
+      })
     })
   })
 }
@@ -1299,6 +1307,7 @@ function stopScrollingToBottom() {
 
   isScrollingToBottom = false
   stayAtBottom = false
+  userScrollGeneration++
 }
 
 /**

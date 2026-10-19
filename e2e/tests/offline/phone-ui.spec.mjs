@@ -237,6 +237,22 @@ test.describe('phone UI', () => {
     const chat = page.locator('dialog[open] .phoneLiveChat')
     await expect(chat).toBeVisible()
     await expect(chat).toBeInViewport()
+    // Scroll away as soon as the messages mount, in the same task as the wheel
+    // input. The chat anchors to the live edge a few frames after loading
+    // finishes, and that pending jump must not override the user's scroll.
+    await page.locator('dialog[open]').evaluate(dialog => {
+      window.phoneChatScrolledAway = new Promise(resolve => {
+        const observer = new MutationObserver(() => {
+          const scroller = dialog.querySelector('.phoneLiveChat .liveChatComments')
+          if (scroller?.querySelectorAll('.chatMessage').length !== 45) return
+          observer.disconnect()
+          scroller.dispatchEvent(new WheelEvent('wheel', { deltaY: -100 }))
+          scroller.scrollTop = 180
+          resolve()
+        })
+        observer.observe(dialog, { childList: true, subtree: true })
+      })
+    })
     await view.evaluate(view => {
       view.liveChat.emit('start', {
         actions: Array.from({ length: 45 }, (_, index) => {
@@ -254,14 +270,15 @@ test.describe('phone UI', () => {
         })
       })
     })
+    await page.evaluate(() => window.phoneChatScrolledAway)
     const scroller = chat.locator('.liveChatComments')
     await expect(scroller.locator('.chatMessage')).toHaveCount(45)
-    // Until the enter animations finish, the scroll range still changes. A position set
-    // earlier can count as the live edge, which intentionally resumes following it.
-    await expect(scroller.locator('.live-chat-message-enter-active')).toHaveCount(0)
-    await scroller.dispatchEvent('wheel', { deltaY: -100 })
-    await scroller.evaluate(element => { element.scrollTop = 180 })
-    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeCloseTo(180, 0)
+    // Read back after the frames in which the post-load live-edge jump would run.
+    const scrollTop = await scroller.evaluate(async element => {
+      for (let frame = 0; frame < 3; frame++) await new Promise(requestAnimationFrame)
+      return element.scrollTop
+    })
+    expect(scrollTop).toBeCloseTo(180, 0)
     await page.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()
     await expect(page.locator('dialog[open]')).toHaveCount(0)
     expect(await view.evaluate(view => view.liveChatOpen)).toBe(false)
