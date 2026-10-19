@@ -41,11 +41,11 @@ export function getMaterialPalette(seed, theme) {
 
 /** Map Android's tonal palette to the existing theme roles. */
 export function dynamicThemeColors(palette, dark, black = false) {
-  const roles = materialColorScheme(palette, dark)
+  const roles = materialColorScheme(palette, dark, black)
   const hover = (base, onColor) => materialStateColor(base, onColor, 0.08)
   const pressed = (base, onColor) => materialStateColor(base, onColor, 0.12)
   // Preserve Android distributions that offer pure-black system surfaces.
-  const surface = black || (dark && palette.neutral1[900] === '#000000') ? '#000000' : roles.surface
+  const surface = dark && palette.neutral1[900] === '#000000' ? '#000000' : roles.surface
   const neutralHover = hover(roles.surfaceContainerLow, roles.onSurface)
   const colors = {
     primaryText: roles.onSurface,
@@ -59,7 +59,7 @@ export function dynamicThemeColors(palette, dark, black = false) {
     searchBar: roles.surfaceContainerHighest,
     settingsSearchBar: roles.surfaceContainerHighest,
     instanceMenu: roles.surfaceContainerHigh,
-    primaryInput: materialColorScheme(palette, true).surfaceContainerLow,
+    primaryInput: dark ? roles.surfaceContainerLow : materialColorScheme(palette, true).surfaceContainerLow,
     border: roles.outline,
     subtleSurface: roles.surfaceContainerHighest,
     primary: roles.primary,
@@ -111,7 +111,7 @@ export function dynamicThemeColors(palette, dark, black = false) {
 
 export function applyDynamicColors(palette, dark, black = false) {
   const colors = dynamicThemeColors(palette, dark, black)
-  const roles = materialColorScheme(palette, dark)
+  const roles = materialColorScheme(palette, dark, black)
   for (const role of MATERIAL_COLOR_ROLES) {
     document.body.style.setProperty(materialColorProperty(role), roles[role])
   }
