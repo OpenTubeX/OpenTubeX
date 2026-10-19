@@ -287,10 +287,12 @@ function displayActivityValue(entry) {
       }
     }
   }
-  if (typeof entry.value === 'string') {
+  if (typeof entry.value === 'string' || typeof entry.value === 'number') {
     const valueKey = SYNC_SETTING_VALUE_LABELS[entry.key]?.[entry.value]
     // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
     if (valueKey && te(valueKey)) return t(valueKey)
+  }
+  if (typeof entry.value === 'string') {
     if (entry.key === 'statsWeekStartsOn' && /^[0-6]$/.test(entry.value)) {
       return new Intl.DateTimeFormat(locale.value, { weekday: 'long', timeZone: 'UTC' })
         .format(new Date(Date.UTC(2023, 0, Number(entry.value) + 1)))

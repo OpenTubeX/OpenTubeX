@@ -124,6 +124,23 @@ test.describe('account activity labels', () => {
     await expect(activity.nth(2)).toContainText(/Laptop changed Screenshot [Ff]ormat to JPEG/)
   })
 
+  test('names automatic grid columns and shows fixed counts as numbers', async ({ page }) => {
+    const sync = await goToSettingsSection(page, 'sync')
+    await page.evaluate(() => {
+      const store = window.$store
+      store.commit('setSyncServerToken', 'test-token')
+      store.commit('setSyncServerActivity', [
+        { id: 'auto', deviceName: 'Laptop', key: 'gridColumns', value: 0, createdAt: Date.now() },
+        { id: 'fixed', deviceName: 'Laptop', key: 'playlistGridColumns', value: 5, createdAt: Date.now() - 1 },
+      ])
+      store.commit('setSyncServerLiveSupported', true)
+      store.commit('setSyncServerEnabled', true)
+    })
+    const activity = sync.locator('.syncActivity .activityList li')
+    await expect(activity.nth(0)).toContainText('Laptop changed Grid Columns to Auto')
+    await expect(activity.nth(1)).toContainText('Laptop changed Playlist Grid Columns to 5')
+  })
+
   test('shows shortcut bindings as shortcuts and summarizes older JSON entries', async ({ page }) => {
     const sync = await goToSettingsSection(page, 'sync')
     await page.evaluate(() => {
