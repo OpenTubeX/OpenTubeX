@@ -911,8 +911,13 @@ test.describe('fullscreen playlist dock', () => {
   test('keeps positioned captions centered across playlist videos', async ({ app, page }) => {
     test.setTimeout(120_000)
     await mockPlayableWatchPage(app, page, { captionCueSettings: 'position:63% align:start' })
-    await openMockedVideo(page)
+    // The seeded watch progress, plus any playback before opening the
+    // playlist, resumes the first entry near the end of the 30 second demo
+    // media. It could then end and advance the playlist while the test acts
+    // on its player, so start it from the beginning instead.
+    await page.evaluate(() => window.$store.dispatch('removeFromHistory', 'jNQXAC9IVRw'))
     await openFullscreenPlaylistVideo(page)
+    await waitForPlayback(page)
 
     const player = page.locator('.ftVideoPlayer')
     const caption = player.locator('.shaka-text-container [translate="no"]')
