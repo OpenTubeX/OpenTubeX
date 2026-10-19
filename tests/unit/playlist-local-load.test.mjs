@@ -33,6 +33,7 @@ function harness() {
   const isLoading = ref(true)
   const backendFallback = ref(false)
   const errors = []
+  const continuationChecks = []
   const context = {
     playlistLoadGeneration: 0,
     props, playlistItems, isLoading, isFetchingPlaylistContinuation, hasUnloadedPlaylistVideos,
@@ -49,6 +50,7 @@ function harness() {
     untilEndOfLocalPlayList: async (_page, callback, options) => {
       assert.equal(options?.runCallbackOnceFirst, false)
       callback(await continuation.promise)
+      continuationChecks.push(options.shouldContinue())
     },
     getPlaylistInformationInvidious: () => { throw new Error('unexpected fallback') },
     showApiErrorToast: (_message, error) => errors.push(error), showToast() {}, t: key => key,
@@ -61,7 +63,7 @@ function harness() {
   Object.assign(state, skips)
   return {
     props, playlistItems, isLoading, isFetchingPlaylistContinuation, hasUnloadedPlaylistVideos, errors, state,
-    load, backendFallback,
+    load, backendFallback, continuationChecks,
     randomizedPlaylistItems, shuffleEnabled,
     changePlaylist: playlistId => { props.playlistId = playlistId; context.playlistLoadGeneration += 1 },
     resolveFirstPage: () => firstPage.resolve({
@@ -210,4 +212,16 @@ test('previous and next navigation stay unavailable while the current video may 
 
   state.props.videoId = 'second'
   assert.equal(state.state.canPlayPreviousVideo.value, true)
+})
+
+test('switching playlists stops requesting the remaining pages of the previous one', async () => {
+  const state = harness()
+  const loading = state.load()
+  state.resolveFirstPage()
+  await new Promise(resolve => setImmediate(resolve))
+  state.changePlaylist('different-playlist')
+  state.finishContinuation([{ videoId: 'third' }])
+  await loading
+
+  assert.deepEqual(state.continuationChecks, [false])
 })

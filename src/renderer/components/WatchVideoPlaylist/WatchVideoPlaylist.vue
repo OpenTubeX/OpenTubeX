@@ -1104,7 +1104,7 @@ async function loadCachedPlaylistInformation(cachedPlaylist) {
         // Keep the established shuffle order, including entries already played.
         randomizedPlaylistItems.value = randomizedPlaylistItems.value.concat(shuffleItems(newVideos.slice()))
       }
-    })
+    }, { shouldContinue: () => generation === playlistLoadGeneration })
     if (generation === playlistLoadGeneration) hasUnloadedPlaylistVideos.value = false
   } catch (err) {
     if (generation !== playlistLoadGeneration) return
@@ -1161,7 +1161,7 @@ async function getPlaylistInformationLocal() {
           // Keep the established shuffle order, including entries already played.
           randomizedPlaylistItems.value = randomizedPlaylistItems.value.concat(shuffleItems(newVideos.slice()))
         }
-      }, { runCallbackOnceFirst: false })
+      }, { runCallbackOnceFirst: false, shouldContinue: () => generation === playlistLoadGeneration })
       if (generation === playlistLoadGeneration) hasUnloadedPlaylistVideos.value = false
     } catch (err) {
       // Keep the pages already shown instead of replacing them through the fallback.

@@ -25,6 +25,7 @@ function harness({ laterPageError = null } = {}) {
   const isLoading = ref(false)
   const errors = []
   const toasts = []
+  const continuationChecks = []
   const router = { push() {} }
   let finishContinuation
   let failContinuation
@@ -41,8 +42,9 @@ function harness({ laterPageError = null } = {}) {
     findIndexOfCurrentVideoInPlaylist: videos => videos.findIndex(item => item.videoId === props.videoId),
     getLocalCachedFeedContinuation: () => continuation,
     parseLocalPlaylistVideos: videos => videos,
-    untilEndOfLocalPlayList: async (page, callback) => {
+    untilEndOfLocalPlayList: async (page, callback, options) => {
       callback(page)
+      continuationChecks.push(options.shouldContinue())
       if (laterPageError) throw laterPageError
     },
     expectedAutoSkipItem: null, router, showToast: toast => toasts.push(toast),
@@ -80,7 +82,7 @@ function harness({ laterPageError = null } = {}) {
   context.emit = (_name, videos) => watch.handleUpcomingPlaylistVideosChange(videos)
   return {
     observeUpcoming: t => t.after(vm.runInNewContext(extractSourceBetweenMarkers(playlistSource, '\nwatch(', '\nconst playlistPageLinkTo'), context)),
-    toasts,
+    toasts, continuationChecks,
     notifyUpcoming: () => watch.handleUpcomingPlaylistVideosChange(state.upcomingVideos.value),
     cancelAutoplay: () => cancel.call(watch, true),
     replayVideo: () => replay.call(watch),
@@ -259,4 +261,13 @@ test('manual next-video navigation does not restart the playlist when the curren
   state.props.videoId = 'first'
   state.playNext()
   assert.equal(pushes[0]?.path, '/watch/second')
+})
+
+test('a cached continuation stops requesting pages after navigating to a different playlist', async () => {
+  const state = harness()
+  const loading = state.load()
+  state.changePlaylist('different-playlist')
+  state.finishContinuation({ items: [{ videoId: 'third' }] })
+  await loading
+  assert.deepEqual(state.continuationChecks, [false])
 })
