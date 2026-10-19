@@ -143,16 +143,33 @@ class Settings {
   // ******************** //
 }
 
+// Records are replaced by video ID. A cached or duplicate record can carry
+// another document's `_id`, which NeDB refuses to change, so keep the stored one.
+function historyReplacement(record) {
+  const { _id, ...fields } = migrateLegacyHistoryRecord(record)
+  return fields
+}
+
 class History {
   static migrationPromise = null
 
   static async find() {
     await this.migrateWatchedStatus()
     const records = await db.history.findAsync({}).sort({ timeWatched: -1 })
+    // Older sync runs could insert a video already written locally. Keep the
+    // newest record so updates by video ID and the cache agree on one document.
+    const seen = new Set()
+    const duplicateIds = []
+    const uniqueRecords = records.filter(record => {
+      if (!seen.has(record.videoId)) return seen.add(record.videoId)
+      duplicateIds.push(record._id)
+      return false
+    })
+    if (duplicateIds.length > 0) await db.history.removeAsync(createIdQuery('_id', duplicateIds), { multi: true })
     // Prepare the index once the datastore is loaded, before playback and bulk
     // edits start writing by video ID. Seen-mark merging is not always enabled.
     await db.history.ensureIndexAsync({ fieldName: 'videoId' })
-    return records
+    return uniqueRecords
   }
 
   static updateSubscriptionState({ records = [], unseenVideo, metadata, acknowledgedRepairs }) {
@@ -206,7 +223,7 @@ class History {
         if (affectedDocuments) updatedRecords.push(affectedDocuments)
       } else {
         for (const record of records) {
-          const migratedRecord = migrateLegacyHistoryRecord(record)
+          const migratedRecord = historyReplacement(record)
           const { affectedDocuments } = await db.history.updateAsync(
             { videoId: migratedRecord.videoId }, migratedRecord,
             { upsert: true, returnUpdatedDocs: true }
@@ -243,7 +260,7 @@ class History {
   }
 
   static upsert(record) {
-    const migratedRecord = migrateLegacyHistoryRecord(record)
+    const migratedRecord = historyReplacement(record)
     return db.history.updateAsync({ videoId: migratedRecord.videoId }, migratedRecord, { upsert: true })
   }
 
@@ -259,13 +276,18 @@ class History {
   }
 
   static async applySyncChanges({ insertions, updates, deletions }) {
-    const migratedInsertions = insertions.map(migrateLegacyHistoryRecord)
-    const migratedUpdates = updates.map(migrateLegacyHistoryRecord)
-
     if (deletions.length > 0) {
       await recommendations.remove(deletions)
       await db.history.removeAsync(createIdQuery('videoId', deletions), { multi: true })
     }
+    // Playback can store a video while the merge waits on the server. Update
+    // it instead of inserting a duplicate record for the same video.
+    const insertionIds = insertions.map(record => record.videoId)
+    const stored = insertionIds.length > 0
+      ? new Set((await db.history.findAsync(createIdQuery('videoId', insertionIds), { videoId: 1 })).map(record => record.videoId))
+      : new Set()
+    const migratedInsertions = insertions.filter(record => !stored.has(record.videoId)).map(historyReplacement)
+    const migratedUpdates = [...updates, ...insertions.filter(record => stored.has(record.videoId))].map(historyReplacement)
     for (const record of migratedUpdates) {
       await db.history.updateAsync({ videoId: record.videoId }, record, { upsert: true })
     }
