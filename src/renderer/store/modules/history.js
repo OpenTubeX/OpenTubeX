@@ -19,6 +19,14 @@ function getRetentionCutoff(days) {
 }
 
 const continueWatchingCache = new WeakMap()
+// Progress and last-viewed playlist saves keep every record's identity, channel
+// and watched status. Views derived from those skip the frequent playback saves.
+const PLAYBACK_MUTATIONS = new Set([
+  'updateRecordWatchProgressInHistoryCache',
+  'updateRecordLastViewedPlaylistIdInHistoryCache',
+  'unsetRecordsLastViewedPlaylistIdInHistoryCache',
+  'unsetRecordsLastViewedPlaylistIdsInHistoryCache',
+])
 const CONTINUE_WATCHING_MUTATIONS = new Set([
   'setHistoryCacheSorted',
   'upsertToHistoryCache',
@@ -30,6 +38,7 @@ const CONTINUE_WATCHING_MUTATIONS = new Set([
 
 const state = {
   historyRevision: 0,
+  historyEntriesRevision: 0,
   continueWatchingRevision: 0,
   historyCacheSorted: [],
 
@@ -376,6 +385,7 @@ export default {
   mutations: Object.fromEntries(Object.entries(mutations).map(([name, mutation]) => [name, (state, payload) => {
     mutation(state, payload)
     state.historyRevision++
+    if (!PLAYBACK_MUTATIONS.has(name)) state.historyEntriesRevision++
     if (CONTINUE_WATCHING_MUTATIONS.has(name)) state.continueWatchingRevision++
   }]))
 }

@@ -797,7 +797,9 @@
   --mobile-toast-inset: 0px;
 }
 
-:root :fullscreen .toast-holder[data-sonner-toaster]:is(.position-top-left, .position-top-center, .position-top-right) {
+/* Matches the phone and tablet top positions' specificity, then wins by order. */
+/* stylelint-disable-next-line selector-max-compound-selectors */
+:root body :fullscreen .toast-holder[data-sonner-toaster]:is(.position-top-left, .position-top-center, .position-top-right) {
   inset-block: calc(var(--offset-top) + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))) auto;
 }
 

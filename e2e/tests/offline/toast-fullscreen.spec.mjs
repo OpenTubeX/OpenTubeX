@@ -76,6 +76,33 @@ test.describe('player fullscreen toast', () => {
   })
 })
 
+test.describe('player fullscreen top toast on phones', () => {
+  test.use({
+    seed: {
+      settings: {
+        toastPosition: 'top-center',
+        videoPlaybackEngine: 'built-in',
+        ytDlpPlaybackEngineDefaultMigration: true
+      }
+    }
+  })
+
+  test('drops the phone header offset in player fullscreen', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await setPlayerFullscreen(page, true)
+    await page.evaluate(() => window.ftElectron.showToastOnAllTabs('Fullscreen toast', 30000, ['fas', 'check']))
+    const holder = page.locator(':fullscreen .toast-holder.position-top-center')
+    await expect(holder.locator('.toast', { hasText: 'Fullscreen toast' })).toBeVisible()
+    const top = () => holder.evaluate(element => getComputedStyle(element).top)
+    const desktopTop = await top()
+    // Fullscreen hides the app header, so the phone layout keeps the same inset.
+    await page.locator('.app').evaluate(element => element.classList.add('capacitorPhoneLayout'))
+    await expect(page.locator('html')).toHaveClass(/appPhoneLayout/)
+    expect(await top()).toBe(desktopTop)
+  })
+})
+
 test('uses available toast width', { tag: '@scale' }, async ({ app, page, uiScale, attachScreenshot }) => {
   const message = 'Channel has been removed from your subscriptions'
   await page.evaluate(message => {

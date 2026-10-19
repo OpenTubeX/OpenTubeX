@@ -6,6 +6,7 @@
     :appear="appear"
     :duration="transitionDurations"
     :move-class="moveClass"
+    :data-skip-move="moveClass === 'feed-move-suppressed' ? '' : null"
     :style="{ '--feed-transition-duration': feedTransitionDuration }"
     :class="{
       autoGrid: true,
@@ -123,8 +124,8 @@ const transitionDurations = computed(() => {
   }
 })
 
-// 'feed-move-suppressed' has no transition, so the TransitionGroup bails out of
-// the move handling instead of measuring and translating every child.
+// 'feed-move-suppressed' has no transition, and data-skip-move tells the
+// patched TransitionGroup not to measure every child before each update.
 const moveClass = computed(() => {
   const suppressed = suppressMoveTransition.value ||
     prefersReducedMotion.value ||

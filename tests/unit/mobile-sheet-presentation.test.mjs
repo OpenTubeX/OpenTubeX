@@ -63,7 +63,8 @@ function mountSheet(t, expandPanel = null, { reducedMotion = false } = {}) {
       : name === 'phonePanelInlinePlayer' ? () => inlineElement.value
         : name === 'expandPhonePanel' ? expandPanel : null,
     performance,
-    onBeforeUnmount: callback => cleanup.push(callback), onUpdated() {},
+    onBeforeUnmount: callback => cleanup.push(callback), onUpdated() {}, onActivated() {}, onDeactivated() {},
+    updateMobileSheetRootClass() {},
     MutationObserver: class { observe() {} disconnect() {} },
     ResizeObserver: class {
       constructor(callback) { resizeCallback = callback }

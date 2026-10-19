@@ -1,30 +1,23 @@
 diff --git a/dist/runtime-dom.cjs.js b/dist/runtime-dom.cjs.js
-index 28e369f033a00b626f7bec2d2a102edf1a02c9ad..a33c2e7ab72bed1e264de0fc6acd115e4efb4dc3 100644
+index 28e369f033a00b626f7bec2d2a102edf1a02c9ad..97714ed8d872ba57bb99307f9494e72249818195 100644
 --- a/dist/runtime-dom.cjs.js
 +++ b/dist/runtime-dom.cjs.js
-@@ -1370,6 +1370,9 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
-     let children;
-     let origins;
-     let moves;
-+    // A move class without a transform cannot animate. Stop measuring every
-+    // child before each update until the class changes.
-+    let staticMoveClass;
-     const willMove = () => {
-       if (moves === void 0) {
-         moves = prevChildren.length > 0 && hasCSSTransform(
-@@ -1383,6 +1386,7 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
-     runtimeCore.onUpdated(() => {
-       pendingGroups.delete(instance);
-       if (!willMove()) {
-+        if (prevChildren.length) staticMoveClass = resolveMoveClass(props);
-         prevChildren = [];
-         origins = void 0;
-         return;
-@@ -1419,12 +1423,13 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+@@ -1363,7 +1363,7 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+     tag: String,
+     moveClass: String
+   }),
+-  setup(props, { slots }) {
++  setup(props, { slots, attrs }) {
+     const instance = runtimeCore.getCurrentInstance();
+     const state = runtimeCore.useTransitionState();
+     let prevChildren;
+@@ -1419,12 +1419,15 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
        let tag = rawProps.tag || runtimeCore.Fragment;
        prevChildren = [];
        moves = void 0;
-+      const measure = resolveMoveClass(rawProps) !== staticMoveClass;
++      // data-skip-move declares a move class that never animates. Skip
++      // measuring every child before each update only to find no transform.
++      const measure = attrs["data-skip-move"] == null;
        if (children) {
          for (let i = 0; i < children.length; i++) {
            const child = children[i];
@@ -35,7 +28,7 @@ index 28e369f033a00b626f7bec2d2a102edf1a02c9ad..a33c2e7ab72bed1e264de0fc6acd115e
              runtimeCore.setTransitionHooks(
                child,
                runtimeCore.resolveTransitionHooks(
-@@ -1434,7 +1439,7 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+@@ -1434,7 +1437,7 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
                  instance
                )
              );
@@ -45,32 +38,25 @@ index 28e369f033a00b626f7bec2d2a102edf1a02c9ad..a33c2e7ab72bed1e264de0fc6acd115e
          }
        }
 diff --git a/dist/runtime-dom.cjs.prod.js b/dist/runtime-dom.cjs.prod.js
-index da30760ae029bb2784bc0d66738c8bd0ff17003f..b662b2007c55a902f91b04f48ac95bf81fc8e23f 100644
+index da30760ae029bb2784bc0d66738c8bd0ff17003f..4832ff028b24fe36a79e0006a8e31d80380cb669 100644
 --- a/dist/runtime-dom.cjs.prod.js
 +++ b/dist/runtime-dom.cjs.prod.js
-@@ -1273,6 +1273,9 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
-     let children;
-     let origins;
-     let moves;
-+    // A move class without a transform cannot animate. Stop measuring every
-+    // child before each update until the class changes.
-+    let staticMoveClass;
-     const willMove = () => {
-       if (moves === void 0) {
-         moves = prevChildren.length > 0 && hasCSSTransform(
-@@ -1286,6 +1289,7 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
-     runtimeCore.onUpdated(() => {
-       pendingGroups.delete(instance);
-       if (!willMove()) {
-+        if (prevChildren.length) staticMoveClass = resolveMoveClass(props);
-         prevChildren = [];
-         origins = void 0;
-         return;
-@@ -1322,12 +1326,13 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+@@ -1266,7 +1266,7 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+     tag: String,
+     moveClass: String
+   }),
+-  setup(props, { slots }) {
++  setup(props, { slots, attrs }) {
+     const instance = runtimeCore.getCurrentInstance();
+     const state = runtimeCore.useTransitionState();
+     let prevChildren;
+@@ -1322,12 +1322,15 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
        let tag = rawProps.tag || runtimeCore.Fragment;
        prevChildren = [];
        moves = void 0;
-+      const measure = resolveMoveClass(rawProps) !== staticMoveClass;
++      // data-skip-move declares a move class that never animates. Skip
++      // measuring every child before each update only to find no transform.
++      const measure = attrs["data-skip-move"] == null;
        if (children) {
          for (let i = 0; i < children.length; i++) {
            const child = children[i];
@@ -81,7 +67,7 @@ index da30760ae029bb2784bc0d66738c8bd0ff17003f..b662b2007c55a902f91b04f48ac95bf8
              runtimeCore.setTransitionHooks(
                child,
                runtimeCore.resolveTransitionHooks(
-@@ -1337,7 +1342,7 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+@@ -1337,7 +1340,7 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
                  instance
                )
              );
@@ -91,32 +77,25 @@ index da30760ae029bb2784bc0d66738c8bd0ff17003f..b662b2007c55a902f91b04f48ac95bf8
          }
        }
 diff --git a/dist/runtime-dom.esm-bundler.js b/dist/runtime-dom.esm-bundler.js
-index 363fc8774518bcd9fcf4d65586b5feae0351a57b..d7142420ec78e2637c0eb57ea60b672d040fecb4 100644
+index 363fc8774518bcd9fcf4d65586b5feae0351a57b..b62ab7ddd9f470aeb4454a1045c180245a6126b3 100644
 --- a/dist/runtime-dom.esm-bundler.js
 +++ b/dist/runtime-dom.esm-bundler.js
-@@ -1435,6 +1435,9 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
-     let children;
-     let origins;
-     let moves;
-+    // A move class without a transform cannot animate. Stop measuring every
-+    // child before each update until the class changes.
-+    let staticMoveClass;
-     const willMove = () => {
-       if (moves === void 0) {
-         moves = prevChildren.length > 0 && hasCSSTransform(
-@@ -1448,6 +1451,7 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
-     onUpdated(() => {
-       pendingGroups.delete(instance);
-       if (!willMove()) {
-+        if (prevChildren.length) staticMoveClass = resolveMoveClass(props);
-         prevChildren = [];
-         origins = void 0;
-         return;
-@@ -1484,12 +1488,13 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+@@ -1428,7 +1428,7 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+     tag: String,
+     moveClass: String
+   }),
+-  setup(props, { slots }) {
++  setup(props, { slots, attrs }) {
+     const instance = getCurrentInstance();
+     const state = useTransitionState();
+     let prevChildren;
+@@ -1484,12 +1484,15 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
        let tag = rawProps.tag || Fragment;
        prevChildren = [];
        moves = void 0;
-+      const measure = resolveMoveClass(rawProps) !== staticMoveClass;
++      // data-skip-move declares a move class that never animates. Skip
++      // measuring every child before each update only to find no transform.
++      const measure = attrs["data-skip-move"] == null;
        if (children) {
          for (let i = 0; i < children.length; i++) {
            const child = children[i];
@@ -127,7 +106,7 @@ index 363fc8774518bcd9fcf4d65586b5feae0351a57b..d7142420ec78e2637c0eb57ea60b672d
              setTransitionHooks(
                child,
                resolveTransitionHooks(
-@@ -1499,7 +1504,7 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+@@ -1499,7 +1502,7 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
                  instance
                )
              );

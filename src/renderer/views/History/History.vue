@@ -603,9 +603,9 @@ const historyCacheSorted = computed(() => {
 const channelPickerOpened = ref(false)
 // Scanning every record through the reactive proxy made each mounted History
 // tab track the whole library and rebuild these options on any history write.
-// Read the raw records and invalidate by revision instead.
+// Read the raw records and invalidate them when entries change, not on progress saves.
 const rawHistory = computed(() => ({
-  revision: store.state.history.historyRevision,
+  revision: store.state.history.historyEntriesRevision,
   records: toRaw(store.getters.getHistoryCacheSorted),
 }))
 const channels = computed(() => {

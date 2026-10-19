@@ -53,6 +53,14 @@ const APP_CLASSES = {
 }
 
 /**
+ * Mirrors whether any mobile sheet is open on <html>. Sheets may be teleported
+ * anywhere, so this checks the document rather than one component.
+ */
+export function updateMobileSheetRootClass() {
+  document.documentElement.classList.toggle('appMobileSheetOpen', document.querySelector('.mobileSheet[open]') !== null)
+}
+
+/**
  * Mirrors the rendered .app layout and its open mobile sheets on <html>.
  * Observing the DOM keeps every way of changing them covered, as :has() did.
  * @param {Element} app
@@ -64,14 +72,14 @@ export function mirrorAppState(app) {
     for (const [name, rootName] of Object.entries(APP_CLASSES)) root.toggle(rootName, app.classList.contains(name))
     root.toggle('appProgressBar', app.querySelector(':scope > .progressBar') !== null)
   }
-  // Sheets may be teleported anywhere. Only `open` attribute changes are observed.
-  const updateSheets = () => root.toggle('appMobileSheetOpen', document.querySelector('.mobileSheet[open]') !== null)
+  // Sheets close before unmounting. KeepAlive moves them without closing and
+  // calls updateMobileSheetRootClass(), so only `open` changes are observed.
   const appObserver = new MutationObserver(updateApp)
   appObserver.observe(app, { attributes: true, attributeFilter: ['class'], childList: true })
-  const sheetObserver = new MutationObserver(updateSheets)
+  const sheetObserver = new MutationObserver(updateMobileSheetRootClass)
   sheetObserver.observe(document.body, { subtree: true, attributes: true, attributeFilter: ['open'] })
   updateApp()
-  updateSheets()
+  updateMobileSheetRootClass()
   return () => {
     appObserver.disconnect()
     sheetObserver.disconnect()
