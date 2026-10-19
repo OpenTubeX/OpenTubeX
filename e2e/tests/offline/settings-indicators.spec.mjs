@@ -410,8 +410,10 @@ test.describe('synced setting indicators', () => {
   test('spreads the theme sliders evenly over their rows', async ({ page }) => {
     await goTo(page, 'settings')
     const themeSection = await goToSettingsSection(page, 'appearance')
-    // Video lists and thumbnails has its own slider grid further down.
-    const sliders = themeSection.locator('.sliderGrid').first().locator(':scope > *')
+    // Video lists and thumbnails has its own slider grid on the same page.
+    const sliders = themeSection.locator('.sliderGrid')
+      .filter({ has: page.getByRole('slider', { name: /^UI Roundness:/ }) })
+      .locator(':scope > *')
     await expect(sliders).toHaveCount(5)
 
     const boxes = await sliders.evaluateAll((elements) => elements.map((element) => {
