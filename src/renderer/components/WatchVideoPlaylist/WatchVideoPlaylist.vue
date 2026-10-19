@@ -1101,10 +1101,12 @@ async function loadCachedPlaylistInformation(cachedPlaylist) {
 }
 
 async function getPlaylistInformationLocal() {
+  const playlistId = props.playlistId
   isLoading.value = true
 
   try {
-    const playlist = await getLocalPlaylist(props.playlistId)
+    const playlist = await getLocalPlaylist(playlistId)
+    if (props.playlistId !== playlistId) return
 
     let channelName_
 
@@ -1122,15 +1124,29 @@ async function getPlaylistInformationLocal() {
     channelName.value = channelName_
     channelId.value = playlist.info.author?.id
 
-    const videos = []
-    await untilEndOfLocalPlayList(playlist, (p) => {
-      videos.push(...parseLocalPlaylistVideos(p.items))
-    })
+    hasUnloadedPlaylistVideos.value = playlist.has_continuation
+    isFetchingPlaylistContinuation.value = hasUnloadedPlaylistVideos.value
 
-    playlistItems.value = applyReversePlaylistState(videos)
-
+    // Show the first page right away; later pages append while playback continues.
+    const videos = parseLocalPlaylistVideos(playlist.items)
+    playlistItems.value = applyReversePlaylistState(videos.slice())
     isLoading.value = false
+
+    if (!isFetchingPlaylistContinuation.value) return
+
+    await untilEndOfLocalPlayList(playlist, (p) => {
+      if (props.playlistId !== playlistId) return
+      const newVideos = parseLocalPlaylistVideos(p.items)
+      videos.push(...newVideos)
+      playlistItems.value = applyReversePlaylistState(videos.slice())
+      if (shuffleEnabled.value) {
+        // Keep the established shuffle order, including entries already played.
+        randomizedPlaylistItems.value = randomizedPlaylistItems.value.concat(shuffleItems(newVideos.slice()))
+      }
+    }, { runCallbackOnceFirst: false })
+    if (props.playlistId === playlistId) hasUnloadedPlaylistVideos.value = false
   } catch (err) {
+    if (props.playlistId !== playlistId) return
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
@@ -1140,14 +1156,18 @@ async function getPlaylistInformationLocal() {
     } else {
       isLoading.value = false
     }
+  } finally {
+    if (props.playlistId === playlistId) isFetchingPlaylistContinuation.value = false
   }
 }
 
 async function getPlaylistInformationInvidious() {
+  const playlistId = props.playlistId
   isLoading.value = true
 
   try {
-    const result = await invidiousGetPlaylistInfo(props.playlistId)
+    const result = await invidiousGetPlaylistInfo(playlistId)
+    if (props.playlistId !== playlistId) return
 
     playlistTitle.value = result.title
     playlistTotalVideoCount.value = result.videoCount
@@ -1158,6 +1178,7 @@ async function getPlaylistInformationInvidious() {
 
     isLoading.value = false
   } catch (err) {
+    if (props.playlistId !== playlistId) return
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
