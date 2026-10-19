@@ -37,6 +37,28 @@ for (const type of ['ReelItem', 'ShortsLockupView']) {
   })
 }
 
+for (const thumbnail of [undefined, { thumbnails: [] }]) {
+  test(`Shorts view model images retain both resolutions with ${thumbnail ? 'empty' : 'missing'} legacy thumbnails`, () => {
+    const short = new YTNodes.ShortsLockupView({
+      thumbnail,
+      thumbnailViewModel: {
+        thumbnailViewModel: {
+          image: { sources: [
+            { url: 'https://i.ytimg.com/short-small.jpg?rs=signed', width: 120, height: 180 },
+            { url: 'https://i.ytimg.com/short-large.jpg?rs=signed', width: 720, height: 1080 }
+          ] }
+        }
+      },
+      onTap: { innertubeCommand: { reelWatchEndpoint: { videoId: 'short' } } },
+      overlayMetadata: { primaryText: { content: 'Short' } }
+    })
+    for (const parse of [parseShort, parseLocalPlaylistVideo]) {
+      assert.equal(parse(short).thumbnailUrl, 'https://i.ytimg.com/short-large.jpg?rs=signed')
+      assert.equal(parse(short).lowResolutionThumbnailUrl, 'https://i.ytimg.com/short-small.jpg?rs=signed')
+    }
+  })
+}
+
 test('video cards request maximum resolution for both backends', () => {
   assert.equal(getVideoThumbnailUrl('video', 'local', ''), 'https://i.ytimg.com/vi/video/maxresdefault.jpg')
   assert.equal(getVideoThumbnailUrl('video', 'invidious', 'https://invidious.test'), 'https://invidious.test/vi/video/maxresdefault.jpg')
