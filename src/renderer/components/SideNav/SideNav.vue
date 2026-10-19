@@ -60,6 +60,7 @@
               v-if="pinnedPlaylistThumbnail(playlist) != null"
               :fallback-icon="['fas', 'list']"
               class="channelThumbnail playlistThumbnail"
+              :class="{ blur: blurThumbnails }"
               height="35"
               width="35"
               loading="lazy"
@@ -153,7 +154,7 @@ import store from '../../store/index'
 
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { filterAvailableNavigationItems } from '../../../navigationAvailability'
-import { localizeAndAddKeyboardShortcutToActionTitle } from '../../helpers/utils'
+import { getVideoThumbnailUrl, localizeAndAddKeyboardShortcutToActionTitle } from '../../helpers/utils'
 import { getConfiguredKeyboardShortcuts } from '../../../constants'
 import { NAVIGATION_ITEM_DEFINITIONS } from '../../../navigationItems'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
@@ -264,13 +265,15 @@ const pinnedPlaylists = computed(() => {
 })
 
 function pinnedPlaylistThumbnail(playlist) {
-  if (store.getters.getThumbnailPreference === 'hidden') return null
+  const thumbnailPreference = store.getters.getThumbnailPreference
+  if (thumbnailPreference === 'hidden') return null
   if (playlist.customThumbnail) return playlist.customThumbnail
   const videoId = playlist.videos[0]?.videoId
   if (videoId == null) return null
-  const origin = backendPreference.value === 'invidious' ? currentInvidiousInstanceUrl.value : 'https://i.ytimg.com'
-  return `${origin}/vi/${videoId}/default.jpg`
+  return getVideoThumbnailUrl(videoId, backendPreference.value, currentInvidiousInstanceUrl.value, thumbnailPreference)
 }
+
+const blurThumbnails = computed(() => store.getters.getBlurThumbnails)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideActiveSubscriptions = computed(() => {

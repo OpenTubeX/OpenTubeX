@@ -839,6 +839,11 @@ test.describe('custom playlists overview order', () => {
     ;({ page } = await app.relaunch())
     await expect.poll(() => page.locator('.sideNav .pinnedPlaylists .navChannel').evaluateAll(links => links.map(link => link.title)))
       .toEqual(['Overview B'])
+
+    // Deleting a pinned playlist also removes it from the synced setting.
+    await dispatchStoreAction(page, 'removePlaylist', 'custom-overview-b')
+    await expect(page.locator('.sideNav .pinnedPlaylists')).toHaveCount(0)
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getPinnedPlaylistIds)).toEqual([])
   })
 })
 

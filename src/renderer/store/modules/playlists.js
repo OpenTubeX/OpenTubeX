@@ -468,10 +468,18 @@ const actions = {
 
       await DBPlaylistHandlers.deleteAll()
       commit('removeAllPlaylists')
+      await dispatch('unpinPlaylists', playlistIds)
       return true
     } catch (errMessage) {
       console.error(errMessage)
       return false
+    }
+  },
+
+  async unpinPlaylists({ dispatch, rootGetters }, playlistIds) {
+    const pinnedIds = rootGetters.getPinnedPlaylistIds
+    if (pinnedIds.some(id => playlistIds.includes(id))) {
+      await dispatch('updatePinnedPlaylistIds', pinnedIds.filter(id => !playlistIds.includes(id)))
     }
   },
 
@@ -492,6 +500,7 @@ const actions = {
 
       await DBPlaylistHandlers.delete(playlistId)
       commit('removePlaylist', playlistId)
+      await dispatch('unpinPlaylists', [playlistId])
     } catch (errMessage) {
       console.error(errMessage)
     }
@@ -503,6 +512,7 @@ const actions = {
 
       await DBPlaylistHandlers.deleteMultiple(playlistIds)
       commit('removePlaylists', playlistIds)
+      await dispatch('unpinPlaylists', playlistIds)
     } catch (errMessage) {
       console.error(errMessage)
     }
