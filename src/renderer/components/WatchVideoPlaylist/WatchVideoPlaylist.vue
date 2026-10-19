@@ -503,6 +503,8 @@ const nextVideo = computed(() => {
 })
 
 const upcomingVideos = computed(() => {
+  // Entries before an unloaded current video are not upcoming, so do not preload them.
+  if (currentVideoMayBeUnloaded.value) return []
   const targetList = shuffleEnabled.value ? randomizedPlaylistItems.value : playlistItems.value
   const currentIndex = findIndexOfCurrentVideoInPlaylist(targetList)
   const startIndex = currentIndex === -1 ? 0 : currentIndex + 1

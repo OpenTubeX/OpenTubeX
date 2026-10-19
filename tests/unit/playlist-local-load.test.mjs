@@ -57,7 +57,7 @@ function harness() {
     console: { error: error => errors.push(error) },
   }
   const load = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'async function getPlaylistInformationLocal() {', '\nasync function getPlaylistInformationInvidious(')}\ngetPlaylistInformationLocal`, context)
-  const state = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'const currentVideoIndexZeroBased =', '\nwatch(')}\n;({ nextVideo, isWaitingForNextVideo })`, context)
+  const state = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'const currentVideoIndexZeroBased =', '\nwatch(')}\n;({ nextVideo, isWaitingForNextVideo, upcomingVideos })`, context)
   Object.assign(context, state)
   const skips = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'const previousVideoSourceIndex =', '\nwatch(')}\n;({ canPlayNextVideo, canPlayPreviousVideo })`, context)
   Object.assign(state, skips)
@@ -224,4 +224,17 @@ test('switching playlists stops requesting the remaining pages of the previous o
   await loading
 
   assert.deepEqual(state.continuationChecks, [false])
+})
+
+test('no upcoming videos are reported while the current video may be on an unloaded page', async () => {
+  const state = harness()
+  state.props.videoId = 'third'
+  const loading = state.load()
+  state.resolveFirstPage()
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(state.state.upcomingVideos.value.length, 0)
+
+  state.finishContinuation([{ videoId: 'third' }, { videoId: 'fourth' }])
+  await loading
+  assert.deepEqual(state.state.upcomingVideos.value.map(video => video.videoId), ['fourth'])
 })
