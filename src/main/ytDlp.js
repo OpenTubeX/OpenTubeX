@@ -2,7 +2,7 @@ import { historyRepairYtDlpArguments, historyRepairYtDlpError } from '../history
 import {
   buildYtDlpDownloadArguments, ID_REGEX, PLAYLIST_ID_REGEX, DOWNLOAD_TITLE_FILENAME_BYTE_LIMIT,
   SUBTITLE_FORMATS, MAX_LOCAL_PLAYLIST_VIDEOS, isDeniedCustomArgument, AUTOMATIC_NUMBER_LIMITS,
-  splitArguments, automaticNumber, playbackImpersonationArguments, playbackSubtitleArguments, isYtDlpMediaUrl,
+  splitArguments, automaticNumber, playbackImpersonationArguments, playbackSubtitleArguments, isYtDlpMediaUrl, jsRuntimeArguments,
 } from '../ytDlpArguments'
 import { EXTERNAL_PLAYBACK_FORMAT_SELECTOR, PLAYBACK_INFO_OUTPUT_TEMPLATE, PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE, parseYtDlpPlaybackInfo, toFiniteNumber, toNonEmptyString, mapPlaybackFormat, mapPlaybackCaptions, mapExternalPlaybackMetadata } from '../ytDlpMetadata'
 import { getTwitchCreatorUrl, resolveYtDlpCreatorAvatarUrl } from './ytDlpCreatorAvatar'
@@ -718,6 +718,19 @@ async function pushProxyArgument(args) {
   if (proxyUrl !== null) {
     args.push('--proxy', proxyUrl)
   }
+}
+
+/**
+ * @param {string} executable
+ * @param {string[]} args
+ */
+async function pushJsRuntimeArgument(executable, args) {
+  args.push(...jsRuntimeArguments(await getYtDlpVersion(executable), process.execPath))
+}
+
+/** Makes `--js-runtimes node:<execPath>` start Electron as plain Node.js. */
+function ytDlpEnvironment() {
+  return { ...process.env, ELECTRON_RUN_AS_NODE: '1' }
 }
 
 /** @type {Map<string, { fileKey: string, version: string }>} */
@@ -1845,27 +1858,23 @@ export async function handleYtDlpGetPlaybackInfo(
     }
   }
 
-  args.push(mediaUrl)
+  // Unlike --dump-single-json, yt-dlp's projected output does not expose its
+  // own version in the template context. The probe is cached per binary.
+  const version = await getYtDlpVersion(executable)
+  args.push(...jsRuntimeArguments(version, process.execPath), mediaUrl)
 
   let stdout
   let stderr
-  let version
   let extractedCookies = ''
   try {
-    // Unlike --dump-single-json, yt-dlp's projected output does not expose its
-    // own version in the template context. Resolve it alongside extraction so
-    // a slow version probe does not add another timeout to playback.
-    const [playbackInfo, resolvedVersion] = await Promise.all([
-      execFileAsync(executable, args, {
-        timeout: PLAYBACK_INFO_TIMEOUT,
-        maxBuffer: PLAYBACK_INFO_MAX_BUFFER,
-        windowsHide: true
-      }),
-      getYtDlpVersion(executable)
-    ])
+    const playbackInfo = await execFileAsync(executable, args, {
+      timeout: PLAYBACK_INFO_TIMEOUT,
+      maxBuffer: PLAYBACK_INFO_MAX_BUFFER,
+      windowsHide: true,
+      env: ytDlpEnvironment()
+    })
     stdout = playbackInfo.stdout
     stderr = playbackInfo.stderr
-    version = resolvedVersion
     if (cookieFile !== null) extractedCookies = await readFile(cookieFile, 'utf8').catch(() => '')
   } catch (error) {
     if (error.code === 'ENOENT') {
@@ -2481,6 +2490,7 @@ async function startYtDlpDownload(
       return { error: result.error }
     }
   }
+  await pushJsRuntimeArgument(executable, args)
 
   // Authorization and executable setup contain awaits, so another refresh can
   // start the same video after the initial fast-path check above.
@@ -2630,7 +2640,7 @@ async function startYtDlpDownload(
   individuallyResumedDownloadIds.delete(id)
   status.status = 'preparing'
   status.started = true
-  const child = spawn(executable, args, { windowsHide: true })
+  const child = spawn(executable, args, { windowsHide: true, env: ytDlpEnvironment() })
   const entry = { child, cancelled: false, paused: false, restarting: false, restartStatus: 'queued' }
   activeDownloads.set(id, entry)
   showAutomaticDownloadNotification(payload, 'started')

@@ -29,6 +29,17 @@ export function playbackSubtitleArguments(isYouTubeVideo) {
     '--sub-format', isYouTubeVideo ? 'vtt' : 'vtt/srt/ttml/dfxp'
   ]
 }
+/**
+ * Lets desktop yt-dlp solve YouTube's JavaScript challenges with Electron's bundled
+ * Node.js (run with `ELECTRON_RUN_AS_NODE=1`) when Deno is not installed.
+ * Builds before 2025.11.12 reject the option, so skip them and unknown versions.
+ * @param {string | null} version
+ * @param {string} nodePath
+ */
+export function jsRuntimeArguments(version, nodePath) {
+  const date = /^\d{4}\.\d{2}\.\d{2}/.exec(version ?? '')?.[0]
+  return date !== undefined && date >= '2025.11.12' ? ['--js-runtimes', `node:${nodePath}`] : []
+}
 const SPONSORBLOCK_CATEGORIES = ['sponsor', 'intro', 'outro', 'selfpromo', 'interaction', 'music_offtopic', 'preview', 'filler']
 // Keeps local-playlist URLs comfortably below Windows' process command-line limit.
 export const MAX_LOCAL_PLAYLIST_VIDEOS = 500
