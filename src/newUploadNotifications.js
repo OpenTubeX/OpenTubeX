@@ -70,7 +70,11 @@ function htmlToText(html) {
     text = text.replaceAll(/<[^>]*>/g, '')
   } while (text !== previous)
   return text
-    .replaceAll(/&(amp|lt|gt|quot|#39);/g, (_, entity) => ({ amp: '&', lt: '<', gt: '>', quot: '"', '#39': "'" })[entity])
+    .replaceAll(/&(?:#(\d+)|#x([\da-f]+)|(amp|lt|gt|quot|apos|nbsp));/gi, (match, decimal, hex, name) => {
+      if (name) return { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: '\u00A0' }[name.toLowerCase()]
+      const codePoint = decimal ? Number(decimal) : Number.parseInt(hex, 16)
+      return codePoint <= 0x10FFFF ? String.fromCodePoint(codePoint) : match
+    })
 }
 
 /** @returns {{ known: Record<string, string[]>, notified: string[] }} */

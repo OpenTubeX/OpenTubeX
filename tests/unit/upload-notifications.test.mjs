@@ -188,3 +188,8 @@ test('members-only uploads seen while hidden stay known once they become visible
     await rm(directory, { recursive: true, force: true })
   }
 })
+
+test('post text decodes named and numeric entities', () => {
+  const [post] = normalizeUploadEntries([{ postId: 'p', postText: 'a&nbsp;b &#39;c&#x27; &AMP; &unknown; &#99999999;' }])
+  assert.equal(post.title, "a\u00A0b 'c' & &unknown; &#99999999;")
+})
