@@ -35,7 +35,7 @@ function readNotificationTypes(userDataDir) {
 test('the bell is off per channel until turned on, which selects every type', async ({ app, page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await goTo(page, 'subscribedchannels')
-  const bell = page.locator('.channel', { hasText: 'Alpha Channel' }).getByRole('button', { name: 'Notify about new uploads' })
+  const bell = page.locator('.channel', { hasText: 'Alpha Channel' }).getByRole('button', { name: 'Notify about new uploads', exact: true })
   await expect(bell).toHaveAttribute('aria-pressed', 'false')
   await bell.click()
   await expect(bell).toHaveAttribute('aria-pressed', 'true')
@@ -123,7 +123,7 @@ test.describe('with a channel notification turned on', () => {
     await observe(CHANNEL_ID, 'posts', ['p2', 'p1'])
     await observe(OTHER_CHANNEL_ID, 'videos', ['x1'])
     await observe(OTHER_CHANNEL_ID, 'videos', ['x2', 'x1'])
-    expect(await shown()).toEqual([
+    expect(await shown()).toStrictEqual([
       { title: 'New video from Alpha Channel', body: `Upload probe${attempt}` },
       { title: 'New video from Alpha Channel', body: 'Upload b' }
     ])
