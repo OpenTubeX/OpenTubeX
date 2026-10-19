@@ -115,8 +115,12 @@ test('icon choice focus outlines follow keyboard and gamepad navigation, not poi
   await radio.check()
   await expect(radio).toBeChecked()
   await expect(card).toHaveCSS('outline-style', 'none')
-  await page.keyboard.press('Tab')
+  // The radio group is the last tab stop in the document. Tabbing past it hands
+  // focus to the browser process and back asynchronously, so leave the group
+  // backwards to the settings header instead and return with Tab.
   await page.keyboard.press('Shift+Tab')
+  await expect(page.locator('.settingsCloseButton')).toBeFocused()
+  await page.keyboard.press('Tab')
   await expect(radio).toBeFocused()
   await expect(card).toHaveCSS('outline-style', 'solid')
   await page.locator('input[name="trayIconPreset"][value="dark"]').check()
