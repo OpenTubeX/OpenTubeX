@@ -651,4 +651,77 @@ test.describe('automatic download authorization', () => {
     expect(await readFile(metadataLookupsFile, 'utf8')).toBe(metadataLookupsBeforeDuplicate)
     await page.evaluate((tabId) => window.ftElectron.subscriptionAutoRefresh.release(tabId), refreshOwnerTabId)
   })
+  test('keeps automatic downloads waiting on battery power when charging is required', async ({ app, page }) => {
+    const executable = path.join(app.userDataDir, 'fake-charging-yt-dlp.sh')
+    const startedFile = path.join(app.userDataDir, 'started-ccccccccccc')
+    await writeFile(executable, [
+      '#!/bin/sh',
+      'for argument in "$@"; do',
+      '  if [ "$argument" = "--dump-single-json" ]; then',
+      `    printf '%s\\n' '{"id":"ccccccccccc","channel_id":"${BETA_CHANNEL_ID}","timestamp":1786669200}'`,
+      '    exit 0',
+      '  fi',
+      '  case "$argument" in https://www.youtube.com/watch?v=*) touch "' + app.userDataDir + '/started-$' + '{argument##*=}" ;; esac',
+      'done'
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await app.electronApp.evaluate(({ powerMonitor }) => {
+      globalThis.onBatteryPower = true
+      powerMonitor.isOnBatteryPower = () => globalThis.onBatteryPower
+    })
+    await page.evaluate(async (ytDlpPath) => {
+      const store = window.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+      await store.dispatch('updateYtDlpAutomaticDownloadsRequireCharging', true)
+    }, executable)
+
+    if ((await page.evaluate(() => window.ftElectron.subscriptionAutoRefresh.isInProgress())).inProgress) {
+      await page.evaluate(() => window.ftElectron.subscriptionAutoRefresh.cancel())
+      await expect.poll(() => page.evaluate(async () => (
+        await window.ftElectron.subscriptionAutoRefresh.isInProgress()
+      ).inProgress)).toBe(false)
+    }
+    const refreshOwnerTabId = await page.evaluate(async () => {
+      const tabId = window.$store.getters.getActiveTabId
+      return await window.ftElectron.subscriptionAutoRefresh.acquire(tabId, 'videos') ? tabId : null
+    })
+    expect(refreshOwnerTabId).not.toBeNull()
+
+    const result = await page.evaluate((download) => window.ftElectron.ytDlpDownload(download), {
+      videoId: 'ccccccccccc',
+      title: 'Automatic charging video',
+      mode: 'video',
+      template: 'video:best',
+      automatic: true,
+      channelId: BETA_CHANNEL_ID,
+      automaticMediaType: 'video',
+      refreshOwnerTabId
+    })
+    expect(result).toEqual({ id: expect.any(Number) })
+    // Manual downloads ignore the requirement.
+    await expect.poll(async () => {
+      await page.bringToFront()
+      return page.evaluate(() => window.ftElectron.ytDlpDownload({
+        videoId: 'ddddddddddd', title: 'Manual battery video', mode: 'video'
+      }))
+    }).toEqual({ id: expect.any(Number) })
+
+    const status = id => page.evaluate(async (id) => (
+      (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)
+    ), id)
+    await expect.poll(() => readFile(path.join(app.userDataDir, 'started-ddddddddddd')).then(() => true, () => false)).toBe(true)
+    await expect.poll(async () => (await status(result.id))?.waitingFor).toBe('charging')
+    expect((await status(result.id)).status).toBe('queued')
+    await goTo(page, 'downloads')
+    await expect(page.locator('.downloadRow').filter({ hasText: 'Automatic charging video' })).toContainText('Waiting for a charger')
+    await expect.poll(() => readFile(startedFile).then(() => true, () => false)).toBe(false)
+
+    await app.electronApp.evaluate(({ powerMonitor }) => {
+      globalThis.onBatteryPower = false
+      powerMonitor.emit('on-ac')
+    })
+    await expect.poll(() => readFile(startedFile).then(() => true, () => false)).toBe(true)
+    await expect(page.locator('.downloadRow').filter({ hasText: 'Automatic charging video' })).not.toContainText('Waiting for a charger')
+    await page.evaluate((tabId) => window.ftElectron.subscriptionAutoRefresh.release(tabId), refreshOwnerTabId)
+  })
 })

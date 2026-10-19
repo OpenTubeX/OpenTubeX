@@ -763,6 +763,8 @@ Settings:
     Title Includes: Pealkiri sisaldab
     Title Excludes: Pealkiri ei sisalda
     Title Filter Hint: Eralda pealkirja otsingusõnad komadega. Video pealkiri peab sisaldama vähemalt üht nõutud otsingusõna ega tohi sisaldada ühtki välistatud otsingusõna.
+    Automatic Downloads Require Unmetered Network: "Ainult mahupiiranguta võrkudes"
+    Automatic Downloads Require Charging: "Ainult laadimise ajal"
   External Software Settings:
     Create YouTube session: "Loo YouTube’i seanss"
     YouTube session hint: "Vajadusel logi sisse ja salvesta seanss. Vali seadetes, kas kasutada seda allalaadimiseks, esitamiseks või subtiitrite jaoks."
@@ -2089,6 +2091,8 @@ Downloads:
     Audio Best: Heli - parim kvaliteet
     Audio Format: Heli - {format}
     Subtitles Format: Subtiitrid - {format}
+  Waiting for Unmetered Network: "Ootab mahupiiranguta võrku"
+  Waiting for Charging: "Ootab laadijat"
 Channels:
   Load More Channels: "Laadi rohkem kanaleid"
 Theme Discovery:

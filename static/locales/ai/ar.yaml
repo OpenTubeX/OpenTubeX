@@ -771,6 +771,8 @@ Settings:
     Title Includes: يتضمن العنوان
     Title Excludes: العنوان يستبعد
     Title Filter Hint: افصل بين مصطلحات العناوين المتعددة بفواصل. يجب أن يتطابق الفيديو مع مصطلح واحد مدرج على الأقل ولا يتطابق مع أي مصطلحات مستبعدة.
+    Automatic Downloads Require Unmetered Network: "فقط على الشبكات غير المحدودة"
+    Automatic Downloads Require Charging: "فقط أثناء الشحن"
   External Software Settings:
     Create YouTube session: "إنشاء جلسة YouTube"
     YouTube session hint: "سجّل الدخول عند الحاجة، ثم احفظ الجلسة. اختر في الإعدادات استخدامها للتنزيلات أو التشغيل أو الترجمات."
@@ -2115,6 +2117,8 @@ Downloads:
     Audio Best: الصوت - أفضل جودة
     Audio Format: الصوت - {format}
     Subtitles Format: ترجمات - {format}
+  Waiting for Unmetered Network: "في انتظار شبكة غير محدودة"
+  Waiting for Charging: "في انتظار الشاحن"
 Channels:
   Load More Channels: "تحميل المزيد من القنوات"
 Search Bar:

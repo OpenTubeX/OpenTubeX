@@ -1273,6 +1273,8 @@ Settings:
     Automatic Downloads No Channels: Subscribe to a channel before configuring automatic downloads.
     No Matching Automatic Download Channels: No channels match your search.
     Automatic Downloads Livestreams: Livestreams
+    Automatic Downloads Require Unmetered Network: Only on unmetered networks
+    Automatic Downloads Require Charging: Only while charging
     Minimum Duration Seconds: Minimum duration (seconds)
     Maximum Duration Seconds: Maximum duration (seconds)
     Minimum File Size MB: Minimum file size (MB)
@@ -3293,6 +3295,8 @@ Downloads:
   Processing: Processing…
   Queued: Queued
   Queued Position: 'Queued, position {position}'
+  Waiting for Unmetered Network: Waiting for an unmetered network
+  Waiting for Charging: Waiting for a charger
   Paused: Paused
   Pausing: The current job will finish, then the queue will pause
   Download Complete: Download complete

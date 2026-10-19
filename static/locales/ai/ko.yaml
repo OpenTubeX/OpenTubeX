@@ -941,6 +941,8 @@ Settings:
     Title Includes: 제목에 포함
     Title Excludes: 제목에서 제외
     Title Filter Hint: 제목 검색어가 여러 개이면 쉼표로 구분하세요. 동영상은 포함 검색어 중 하나 이상과 일치하고 제외 검색어와는 모두 일치하지 않아야 합니다.
+    Automatic Downloads Require Unmetered Network: "데이터 무제한 네트워크에서만"
+    Automatic Downloads Require Charging: "충전 중일 때만"
   External Software Settings:
     Create YouTube session: "YouTube 세션 만들기"
     YouTube session hint: "필요한 경우 로그인한 다음 세션을 저장하세요. 설정에서 다운로드, 재생 또는 자막에 사용할지 선택하세요."
@@ -2544,6 +2546,8 @@ Downloads:
     Audio Best: 오디오 - 최고 품질
     Audio Format: 오디오 - {format}
     Subtitles Format: 자막 - {format}
+  Waiting for Unmetered Network: "데이터 무제한 네트워크를 기다리는 중"
+  Waiting for Charging: "충전기를 기다리는 중"
 Channels:
   Load More Channels: "채널 더 불러오기"
 Search Bar:

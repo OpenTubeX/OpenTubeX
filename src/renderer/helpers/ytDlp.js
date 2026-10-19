@@ -49,6 +49,8 @@ function configuration() {
     folder: store.getters.getYtDlpDownloadFolderPath,
     channel: store.getters.getYtDlpChannel,
     enabled: store.getters.getEnableDownloads,
+    automaticRequireUnmetered: store.getters.getYtDlpAutomaticDownloadsRequireUnmetered,
+    automaticRequireCharging: store.getters.getYtDlpAutomaticDownloadsRequireCharging,
   }
 }
 

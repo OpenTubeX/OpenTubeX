@@ -763,6 +763,8 @@ Settings:
     Title Includes: Izenburuak hau du
     Title Excludes: Izenburuak ez du hau
     Title Filter Hint: Bereizi izenburuko terminoak komaz. Bideoak sartutako terminoetako batekin bat etorri behar du gutxienez, eta baztertutako terminoekin ez.
+    Automatic Downloads Require Unmetered Network: "Neurtu gabeko sareetan soilik"
+    Automatic Downloads Require Charging: "Kargatzen ari denean soilik"
   External Software Settings:
     Create YouTube session: "Sortu YouTube saioa"
     YouTube session hint: "Hasi saioa beharrezkoa bada eta gorde. Aukeratu ezarpenetan deskargetarako, erreprodukziorako edo azpitituluetarako erabiltzea."
@@ -2096,6 +2098,8 @@ Downloads:
     Audio Best: Audioa - Kalitate onena
     Audio Format: Audioa - {format}
     Subtitles Format: Azpitituluak - {format}
+  Waiting for Unmetered Network: "Neurtu gabeko sare baten zain"
+  Waiting for Charging: "Kargagailu baten zain"
 Channels:
   Load More Channels: "Kargatu kanal gehiago"
 Theme Discovery:

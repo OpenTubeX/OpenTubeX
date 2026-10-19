@@ -763,6 +763,8 @@ Settings:
     Title Includes: タイトルに含む
     Title Excludes: タイトルから除外
     Title Filter Hint: 複数のタイトル条件はコンマで区切ってください。含める条件のいずれかに一致し、除外条件には一つも一致しない動画が対象になります。
+    Automatic Downloads Require Unmetered Network: "従量制ではないネットワークのみ"
+    Automatic Downloads Require Charging: "充電中のみ"
   External Software Settings:
     Create YouTube session: "YouTube セッションを作成"
     YouTube session hint: "必要に応じてログインし、セッションを保存してください。ダウンロード、再生、字幕のどれに使用するかは設定で選択できます。"
@@ -2086,6 +2088,8 @@ Downloads:
     Audio Best: 音声 - 最高品質
     Audio Format: 音声 - {format}
     Subtitles Format: 字幕 - {format}
+  Waiting for Unmetered Network: "従量制ではないネットワークを待機中"
+  Waiting for Charging: "充電器の接続を待機中"
 Channels:
   Load More Channels: "チャンネルをさらに読み込む"
 Theme Discovery:

@@ -6,6 +6,14 @@ import java.util.Locale;
 import java.util.function.Predicate;
 
 final class YtDlpAutomaticDownloads {
+    /** Returns the first unmet requirement that keeps a queued automatic download from starting. */
+    static String waitingFor(JSONObject record, JSONObject configuration, boolean unmetered, boolean charging) {
+        if (!record.optBoolean("automatic")) return null;
+        if (configuration.optBoolean("automaticRequireUnmetered") && !unmetered) return "unmetered";
+        if (configuration.optBoolean("automaticRequireCharging") && !charging) return "charging";
+        return null;
+    }
+
     static boolean matches(JSONObject video, String source, JSONObject rule, long now) {
         if (!video.optString("videoId").matches("[\\w-]{11}") || video.optBoolean("isUpcoming") || video.optBoolean("premiere")) return false;
         String kind = source.equals("shorts") ? "includeShorts" : source.equals("live") || video.optBoolean("liveNow") ? "includeLivestreams" : "includeVideos";

@@ -794,6 +794,8 @@ Settings:
     Title Includes: Загаловак змяшчае
     Title Excludes: Загаловак не змяшчае
     Title Filter Hint: Раздзяляйце некалькі фрагментаў загалоўка коскамі. Відэа павінна змяшчаць прынамсі адзін дададзены фрагмент і не змяшчаць ніводнага выключанага.
+    Automatic Downloads Require Unmetered Network: "Толькі ў безлімітных сетках"
+    Automatic Downloads Require Charging: "Толькі падчас зарадкі"
   External Software Settings:
     Create YouTube session: "Стварыць сеанс YouTube"
     YouTube session hint: "Пры неабходнасці ўвайдзіце і захавайце сеанс. У наладах выберыце, ці выкарыстоўваць яго для спампоўванняў, прайгравання або субцітраў."
@@ -2187,6 +2189,8 @@ Downloads:
     Audio Best: Аўдыя — найлепшая якасць
     Audio Format: Аўдыя — {format}
     Subtitles Format: Субцітры — {format}
+  Waiting for Unmetered Network: "Чаканне безлімітнай сеткі"
+  Waiting for Charging: "Чаканне зараднай прылады"
 Channels:
   Load More Channels: "Загрузіць больш каналаў"
 Search Bar:

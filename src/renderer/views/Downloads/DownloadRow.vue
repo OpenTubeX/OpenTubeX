@@ -316,6 +316,8 @@ const statusText = computed(() => {
   }
   switch (props.download.status) {
     case 'queued':
+      if (props.download.waitingFor === 'unmetered') return t('Downloads.Waiting for Unmetered Network')
+      if (props.download.waitingFor === 'charging') return t('Downloads.Waiting for Charging')
       return props.queuePosition > 0
         ? t('Downloads.Queued Position', { position: props.queuePosition })
         : t('Downloads.Queued')

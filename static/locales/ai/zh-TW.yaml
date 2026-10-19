@@ -763,6 +763,8 @@ Settings:
     Title Includes: 標題包含
     Title Excludes: 標題不含
     Title Filter Hint: 請用逗號分隔多個標題詞彙。影片必須至少符合一個包含詞彙，且不得含有任何排除詞彙。
+    Automatic Downloads Require Unmetered Network: "僅在非計量付費網路上"
+    Automatic Downloads Require Charging: "僅在充電時"
   External Software Settings:
     Create YouTube session: "建立 YouTube 工作階段"
     YouTube session hint: "如有需要，請登入並儲存工作階段。在設定中選擇是否將其用於下載、播放或字幕。"
@@ -2089,6 +2091,8 @@ Downloads:
     Audio Best: 音訊 - 最佳品質
     Audio Format: 音訊 - {format}
     Subtitles Format: 字幕 - {format}
+  Waiting for Unmetered Network: "正在等待非計量付費網路"
+  Waiting for Charging: "正在等待充電器"
 Channels:
   Load More Channels: "載入更多頻道"
 Theme Discovery:

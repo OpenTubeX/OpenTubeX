@@ -763,6 +763,8 @@ Settings:
     Title Includes: "An titl a endalc'h"
     Title Excludes: "An titl n'endalc'h ket"
     Title Filter Hint: "Dispartiit termenoù an titl gant skejoù. Ur video a rank klotañ gant un termen enkorfet da vihanañ ha gant termen ezkorfet ebet."
+    Automatic Downloads Require Unmetered Network: "War ar rouedadoù hep muzuliañ hepken"
+    Automatic Downloads Require Charging: "E-pad ar c'hargañ hepken"
   External Software Settings:
     Create YouTube session: "Krouiñ un estez YouTube"
     YouTube session hint: "Kevreit ma vez ezhomm ha saveteit an estez. Dibabit en arventennoù he implijout evit ar pellgargañ, al lenn pe an istitloù."
@@ -2095,6 +2097,8 @@ Downloads:
     Audio Best: "Son: perzhded gwellañ"
     Audio Format: "Son: {format}"
     Subtitles Format: "Istitloù: {format}"
+  Waiting for Unmetered Network: "O c'hortoz ur rouedad hep muzuliañ"
+  Waiting for Charging: "O c'hortoz ur garger"
 Channels:
   Load More Channels: "Kargañ muioc'h a chadennoù"
 Theme Discovery:

@@ -17,6 +17,23 @@
           {{ t('Settings.Download Settings.Automatic Downloads New Only') }}
         </p>
       </div>
+      <div class="automaticDownloadRequirements">
+        <FtToggleSwitch
+          v-if="isAndroid"
+          :label="t('Settings.Download Settings.Automatic Downloads Require Unmetered Network')"
+          :compact="true"
+          :default-value="requireUnmetered"
+          setting-key="ytDlpAutomaticDownloadsRequireUnmetered"
+          @change="value => store.dispatch('updateYtDlpAutomaticDownloadsRequireUnmetered', value)"
+        />
+        <FtToggleSwitch
+          :label="t('Settings.Download Settings.Automatic Downloads Require Charging')"
+          :compact="true"
+          :default-value="requireCharging"
+          setting-key="ytDlpAutomaticDownloadsRequireCharging"
+          @change="value => store.dispatch('updateYtDlpAutomaticDownloadsRequireCharging', value)"
+        />
+      </div>
       <FtInput
         input-type="search"
         :label="t('Settings.Channel Settings.Search Channels')"
@@ -221,6 +238,10 @@ import { DEFAULT_DOWNLOAD_TEMPLATES } from '../../helpers/downloadTemplates'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 
 const { locale, t } = useI18n()
+// Electron cannot detect metered connections; Android exposes both states.
+const isAndroid = process.env.IS_CAPACITOR && !process.env.IS_IOS
+const requireUnmetered = computed(() => store.getters.getYtDlpAutomaticDownloadsRequireUnmetered)
+const requireCharging = computed(() => store.getters.getYtDlpAutomaticDownloadsRequireCharging)
 const showManager = ref(false)
 const searchQuery = ref('')
 const automaticDownloadsScroller = useTemplateRef('automaticDownloadsScroller')
@@ -356,6 +377,12 @@ function displayNumber(value) {
 .automaticDownloadsDescription {
   display: grid;
   gap: 8px;
+}
+
+.automaticDownloadRequirements {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
 }
 
 .automaticDownloadsHeader p {

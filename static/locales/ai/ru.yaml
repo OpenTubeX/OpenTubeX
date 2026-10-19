@@ -746,6 +746,8 @@ Settings:
     Title Includes: Заголовок содержит
     Title Excludes: Заголовок не содержит
     Title Filter Hint: Разделяйте условия для заголовка запятыми. Видео должно соответствовать хотя бы одному включённому условию и не соответствовать ни одному исключённому.
+    Automatic Downloads Require Unmetered Network: "Только в безлимитных сетях"
+    Automatic Downloads Require Charging: "Только во время зарядки"
   External Software Settings:
     Create YouTube session: "Создать сеанс YouTube"
     YouTube session hint: "При необходимости войдите в аккаунт и сохраните сеанс. В настройках выберите, использовать ли его для скачивания, воспроизведения или субтитров."
@@ -2103,6 +2105,8 @@ Downloads:
     Audio Best: Аудио - лучшее качество
     Audio Format: Аудио - {format}
     Subtitles Format: Субтитры - {format}
+  Waiting for Unmetered Network: "Ожидание безлимитной сети"
+  Waiting for Charging: "Ожидание зарядного устройства"
 Channels:
   Load More Channels: "Загрузить больше каналов"
 Search Bar:

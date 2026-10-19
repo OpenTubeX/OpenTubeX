@@ -143,6 +143,8 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     ytDlpDownloadTemplates: '[]',
     ytDlpSelectedTemplate: 'video:best',
     ytDlpAutomaticDownloadRules: '{}',
+    ytDlpAutomaticDownloadsRequireUnmetered: false,
+    ytDlpAutomaticDownloadsRequireCharging: false,
     disableAbRepeat: false,
     hideRepeatStats: false,
     expandSideBar: false,

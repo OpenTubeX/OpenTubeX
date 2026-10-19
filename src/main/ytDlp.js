@@ -12,7 +12,7 @@ import { chmod, mkdir, mkdtemp, readFile, rename, rm, stat, statfs, writeFile } 
 import { delimiter, dirname, join } from 'node:path'
 import { promisify } from 'node:util'
 import { inflateRawSync } from 'node:zlib'
-import { app, BrowserWindow, net, Notification, shell } from 'electron'
+import { app, BrowserWindow, net, Notification, powerMonitor, shell } from 'electron'
 import { settings } from '../datastores/handlers/base'
 import { buildProxyUrl, isOpenTubeXUrl } from './utils'
 import { TabManager } from './tabs/TabManager'
@@ -295,6 +295,7 @@ function takeGetInfoAbortSignal(key) {
  * @property {YtDlpDownloadPayload} [retryPayload]
  * @property {'queued' | 'preparing' | 'downloading' | 'processing' | 'pausing' | 'paused' | 'completed' | 'failed' | 'cancelled' | 'skipped'} status
  * @property {number} queuePosition
+ * @property {'unmetered' | 'charging' | null} [waitingFor] unmet automatic download requirement
  * @property {boolean} [started]
  * @property {number} percent
  * @property {string | null} speed
@@ -365,6 +366,9 @@ let persistedDownloadQueueRestorePromise = null
 let shuttingDownDownloads = false
 let downloadQueuePaused = false
 let downloadQueuePauseAllRequested = false
+let powerSourceListenersAdded = false
+/** @type {NodeJS.Timeout | null} */
+let powerSourcePollTimer = null
 
 /** @type {Map<number, { child: import('node:child_process').ChildProcess, cancelled: boolean, paused: boolean, restarting: boolean, restartStatus: 'queued' | 'paused' }>} */
 const activeDownloads = new Map()
@@ -456,14 +460,55 @@ async function getDownloadQueueSettings() {
   }
 }
 
+/**
+ * Electron cannot detect metered connections, so charging is the only
+ * automatic download requirement on desktop.
+ * @returns {Promise<'charging' | null>}
+ */
+async function getAutomaticDownloadWaitingFor() {
+  const requireCharging = await settings._findOne('ytDlpAutomaticDownloadsRequireCharging')
+  return requireCharging?.value === true && powerMonitor.isOnBatteryPower() ? 'charging' : null
+}
+
+function watchPowerSource(waiting) {
+  const drain = () => requestDownloadQueueDrain().catch(error => console.warn('Could not schedule downloads', error))
+  if (waiting && !powerSourceListenersAdded) {
+    powerSourceListenersAdded = true
+    powerMonitor.on('on-ac', drain)
+    powerMonitor.on('on-battery', drain)
+  }
+  // Power source events are not emitted on every platform.
+  if (waiting && powerSourcePollTimer === null) {
+    powerSourcePollTimer = setInterval(drain, 60_000)
+    powerSourcePollTimer.unref()
+  } else if (!waiting && powerSourcePollTimer !== null) {
+    clearInterval(powerSourcePollTimer)
+    powerSourcePollTimer = null
+  }
+}
+
 async function drainDownloadQueue() {
   if (shuttingDownDownloads) return
   const queueSettings = await getDownloadQueueSettings()
+  const automaticWaitingFor = await getAutomaticDownloadWaitingFor()
+
+  let waiting = false
+  for (const id of queuedDownloadWaiters.keys()) {
+    const record = downloadRecords.get(id)
+    if (record?.status !== 'queued') continue
+    const waitingFor = record.automatic === true ? automaticWaitingFor : null
+    waiting ||= waitingFor !== null
+    if ((record.waitingFor ?? null) !== waitingFor) {
+      record.waitingFor = waitingFor
+      broadcastDownloadStatus(record)
+    }
+  }
+  watchPowerSource(waiting)
 
   while (runningDownloadCount < queueSettings.concurrency) {
     const next = [...queuedDownloadWaiters.keys()]
       .map(id => downloadRecords.get(id))
-      .filter(record => record?.status === 'queued' && (
+      .filter(record => record?.status === 'queued' && !record.waitingFor && (
         !downloadQueuePaused || individuallyResumedDownloadIds.has(record.id)
       ))
       .sort(compareQueuedDownloads)[0]

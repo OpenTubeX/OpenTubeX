@@ -765,6 +765,8 @@ Settings:
     Title Includes: Ο τίτλος περιλαμβάνει
     Title Excludes: Ο τίτλος δεν περιλαμβάνει
     Title Filter Hint: Διαχωρίστε πολλούς όρους τίτλου με κόμματα. Ένα βίντεο πρέπει να αντιστοιχεί σε τουλάχιστον έναν όρο συμπερίληψης και σε κανέναν όρο αποκλεισμού.
+    Automatic Downloads Require Unmetered Network: "Μόνο σε δίκτυα χωρίς χρέωση δεδομένων"
+    Automatic Downloads Require Charging: "Μόνο κατά τη φόρτιση"
   External Software Settings:
     Create YouTube session: "Δημιουργία συνεδρίας YouTube"
     YouTube session hint: "Συνδεθείτε αν χρειάζεται και αποθηκεύστε τη συνεδρία. Επιλέξτε στις ρυθμίσεις αν θα χρησιμοποιείται για λήψεις, αναπαραγωγή ή υπότιτλους."
@@ -2115,6 +2117,8 @@ Downloads:
     Audio Best: Ήχος - Βέλτιστη ποιότητα
     Audio Format: Ήχος - {format}
     Subtitles Format: Υπότιτλοι - {format}
+  Waiting for Unmetered Network: "Αναμονή για δίκτυο χωρίς χρέωση δεδομένων"
+  Waiting for Charging: "Αναμονή για φορτιστή"
 Channels:
   Load More Channels: "Φόρτωση περισσότερων καναλιών"
 Search Bar:

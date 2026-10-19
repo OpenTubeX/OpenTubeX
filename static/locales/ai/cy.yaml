@@ -763,6 +763,8 @@ Settings:
     Title Includes: Mae'r teitl yn cynnwys
     Title Excludes: Nid yw'r teitl yn cynnwys
     Title Filter Hint: Gwahanwch nifer o dermau teitl â choma. Rhaid i fideo gyfateb i o leiaf un term i'w gynnwys a dim un term i'w eithrio.
+    Automatic Downloads Require Unmetered Network: "Ar rwydweithiau heb fesurydd yn unig"
+    Automatic Downloads Require Charging: "Wrth wefru yn unig"
   External Software Settings:
     Create YouTube session: "Creu sesiwn YouTube"
     YouTube session hint: "Mewngofnodwch os oes angen, yna cadwch y sesiwn. Dewiswch yn y gosodiadau a ddylid ei defnyddio ar gyfer lawrlwythiadau, chwarae neu isdeitlau."
@@ -2115,6 +2117,8 @@ Downloads:
     Audio Best: Sain - Ansawdd gorau
     Audio Format: Sain - {format}
     Subtitles Format: Isdeitlau - {format}
+  Waiting for Unmetered Network: "Yn aros am rwydwaith heb fesurydd"
+  Waiting for Charging: "Yn aros am wefrydd"
 Channels:
   Load More Channels: "Llwytho mwy o sianeli"
 Search Bar:

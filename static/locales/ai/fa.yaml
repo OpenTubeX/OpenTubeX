@@ -794,6 +794,8 @@ Settings:
     Title Includes: عنوان شامل باشد
     Title Excludes: عنوان شامل نباشد
     Title Filter Hint: عبارت‌های عنوان را با ویرگول جدا کنید. ویدیو باید دست‌کم با یکی از عبارت‌های شامل‌شده و با هیچ‌یک از عبارت‌های کنارگذاشته‌شده مطابقت داشته باشد.
+    Automatic Downloads Require Unmetered Network: "فقط در شبکه‌های بدون محدودیت"
+    Automatic Downloads Require Charging: "فقط هنگام شارژ"
   External Software Settings:
     Create YouTube session: "ایجاد نشست YouTube"
     YouTube session hint: "در صورت نیاز وارد شوید و نشست را ذخیره کنید. در تنظیمات انتخاب کنید که برای بارگیری، پخش یا زیرنویس استفاده شود."
@@ -2178,6 +2180,8 @@ Downloads:
     Audio Best: صدا - بهترین کیفیت
     Audio Format: صدا - {format}
     Subtitles Format: زیرنویس - {format}
+  Waiting for Unmetered Network: "در انتظار شبکهٔ بدون محدودیت"
+  Waiting for Charging: "در انتظار شارژر"
 Channels:
   Load More Channels: "بارگیری کانال‌های بیشتر"
 Search Bar:

@@ -767,6 +767,8 @@ Settings:
     Title Includes: Titill inniheldur
     Title Excludes: Titill inniheldur ekki
     Title Filter Hint: Aðgreindu fleiri en eitt leitarorð fyrir titil með kommum. Myndband verður að passa við minnst eitt leitarorð sem á að taka með en ekkert þeirra sem á að útiloka.
+    Automatic Downloads Require Unmetered Network: "Aðeins á ómældum netum"
+    Automatic Downloads Require Charging: "Aðeins meðan verið er að hlaða"
   External Software Settings:
     Create YouTube session: "Búa til YouTube-setu"
     YouTube session hint: "Skráðu þig inn ef þörf krefur og vistaðu setuna. Veldu í stillingum hvort nota eigi hana fyrir niðurhal, spilun eða skjátexta."
@@ -2113,6 +2115,8 @@ Downloads:
     Audio Best: Hljóð – bestu gæði
     Audio Format: Hljóð – {format}
     Subtitles Format: Skjátextar – {format}
+  Waiting for Unmetered Network: "Bíður eftir ómældu neti"
+  Waiting for Charging: "Bíður eftir hleðslutæki"
 Channels:
   Load More Channels: "Hlaða fleiri rásum"
 Theme Discovery:

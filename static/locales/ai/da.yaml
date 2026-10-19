@@ -787,6 +787,8 @@ Settings:
     Title Includes: Titlen indeholder
     Title Excludes: Titlen indeholder ikke
     Title Filter Hint: Adskil flere titelord med kommaer. En video skal matche mindst ét inkluderet ord og ingen af de ekskluderede ord.
+    Automatic Downloads Require Unmetered Network: "Kun på netværk uden datamåling"
+    Automatic Downloads Require Charging: "Kun under opladning"
   External Software Settings:
     Create YouTube session: "Opret YouTube-session"
     YouTube session hint: "Log ind om nødvendigt, og gem sessionen. Vælg i indstillingerne, om den skal bruges til downloads, afspilning eller undertekster."
@@ -2174,6 +2176,8 @@ Downloads:
     Audio Best: Lyd - bedste kvalitet
     Audio Format: Lyd - {format}
     Subtitles Format: Undertekster - {format}
+  Waiting for Unmetered Network: "Venter på et netværk uden datamåling"
+  Waiting for Charging: "Venter på en oplader"
 Channels:
   Load More Channels: "Indlæs flere kanaler"
 Search Bar:
