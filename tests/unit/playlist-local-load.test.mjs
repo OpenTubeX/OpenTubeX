@@ -29,6 +29,7 @@ function harness() {
   const isFetchingPlaylistContinuation = ref(false)
   const hasUnloadedPlaylistVideos = ref(false)
   const isLoading = ref(true)
+  const backendFallback = ref(false)
   const errors = []
   const context = {
     playlistLoadGeneration: 0,
@@ -37,7 +38,7 @@ function harness() {
     shufflePlaylistItems: () => { randomizedPlaylistItems.value = playlistItems.value.slice().reverse() },
     shuffleItems: items => items,
     playlistTitle: ref(''), playlistTotalVideoCount: ref(0), channelName: ref(''), channelId: ref(''),
-    backendPreference: ref('local'), backendFallback: ref(false),
+    backendPreference: ref('local'), backendFallback,
     applyReversePlaylistState: videos => videos.slice(),
     findIndexOfCurrentVideoInPlaylist: videos => videos.findIndex(item => item.videoId === props.videoId),
     parseLocalPlaylistVideos: videos => videos,
@@ -55,7 +56,7 @@ function harness() {
   const state = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'const currentVideoIndexZeroBased =', '\nwatch(')}\n;({ nextVideo, isWaitingForNextVideo })`, context)
   return {
     props, playlistItems, isLoading, isFetchingPlaylistContinuation, hasUnloadedPlaylistVideos, errors, state,
-    load,
+    load, backendFallback,
     randomizedPlaylistItems, shuffleEnabled,
     changePlaylist: playlistId => { props.playlistId = playlistId; context.playlistLoadGeneration += 1 },
     resolveFirstPage: () => firstPage.resolve({
@@ -92,6 +93,7 @@ test('an uncached YouTube playlist shows its first page before later pages load 
 
 test('a failed later page keeps the first page and clears the loading state', async () => {
   const state = harness()
+  state.backendFallback.value = true
   const loading = state.load()
   state.resolveFirstPage()
   const failure = new Error('Continuation failed')

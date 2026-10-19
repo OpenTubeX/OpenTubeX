@@ -25,6 +25,7 @@ function harness({ laterPageError = null } = {}) {
   const isLoading = ref(false)
   const errors = []
   const toasts = []
+  const router = { push() {} }
   let finishContinuation
   let failContinuation
   const continuation = new Promise((resolve, reject) => { finishContinuation = resolve; failContinuation = reject })
@@ -44,7 +45,7 @@ function harness({ laterPageError = null } = {}) {
       callback(page)
       if (laterPageError) throw laterPageError
     },
-    expectedAutoSkipItem: null, router: { push() {} }, showToast: toast => toasts.push(toast),
+    expectedAutoSkipItem: null, router, showToast: toast => toasts.push(toast),
     showApiErrorToast: (_message, error) => errors.push(error), t: key => key,
     console: { error: error => errors.push(error) },
   }
@@ -90,7 +91,7 @@ function harness({ laterPageError = null } = {}) {
     enableShuffle: () => { shuffleEnabled.value = true; shuffle() },
     load: () => load({ id: 'youtube-playlist', title: 'YouTube playlist', totalVideoCount: 100,
       channelName: 'Test', channelId: 'channel', items, continuationData: 'continuation' }),
-    finishContinuation, failContinuation,
+    finishContinuation, failContinuation, router, playNext,
     endVideo: () => ended.call(watch),
   }
 }
@@ -243,3 +244,19 @@ for (const result of ['empty', 'failed']) {
     assert.ok(state.watch.autoplayCountdown == null)
   })
 }
+
+test('manual next-video navigation does not restart the playlist when the current video is on a failed page', async () => {
+  const state = harness()
+  const pushes = []
+  state.router.push = route => pushes.push(route)
+  state.props.videoId = 'third'
+  const loading = state.load()
+  state.failContinuation(new Error('Continuation failed'))
+  await loading
+  state.playNext()
+  assert.deepEqual(pushes, [])
+
+  state.props.videoId = 'first'
+  state.playNext()
+  assert.equal(pushes[0]?.path, '/watch/second')
+})

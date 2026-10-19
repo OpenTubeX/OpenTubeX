@@ -978,6 +978,8 @@ function onMoveDraggedVideo(video, source) {
 
 function playNextVideo() {
   if (isWaitingForNextVideo.value) return
+  // The current video may be on a page that failed to load; see nextVideo.
+  if (hasUnloadedPlaylistVideos.value && videoIsNotPlaylistItem.value) return
   const videoIndex = videoIndexInPlaylistItems.value
   const targetVideoIndex = (videoIsNotPlaylistItem.value || videoIsLastPlaylistItem.value) ? 0 : videoIndex + 1
 
@@ -1149,17 +1151,24 @@ async function getPlaylistInformationLocal() {
 
     if (!isFetchingPlaylistContinuation.value) return
 
-    await untilEndOfLocalPlayList(playlist, (p) => {
+    try {
+      await untilEndOfLocalPlayList(playlist, (p) => {
+        if (generation !== playlistLoadGeneration) return
+        const newVideos = parseLocalPlaylistVideos(p.items)
+        videos.push(...newVideos)
+        playlistItems.value = applyReversePlaylistState(videos.slice())
+        if (shuffleEnabled.value) {
+          // Keep the established shuffle order, including entries already played.
+          randomizedPlaylistItems.value = randomizedPlaylistItems.value.concat(shuffleItems(newVideos.slice()))
+        }
+      }, { runCallbackOnceFirst: false })
+      if (generation === playlistLoadGeneration) hasUnloadedPlaylistVideos.value = false
+    } catch (err) {
+      // Keep the pages already shown instead of replacing them through the fallback.
       if (generation !== playlistLoadGeneration) return
-      const newVideos = parseLocalPlaylistVideos(p.items)
-      videos.push(...newVideos)
-      playlistItems.value = applyReversePlaylistState(videos.slice())
-      if (shuffleEnabled.value) {
-        // Keep the established shuffle order, including entries already played.
-        randomizedPlaylistItems.value = randomizedPlaylistItems.value.concat(shuffleItems(newVideos.slice()))
-      }
-    }, { runCallbackOnceFirst: false })
-    if (generation === playlistLoadGeneration) hasUnloadedPlaylistVideos.value = false
+      console.error(err)
+      showApiErrorToast(t('Local API Error (Click to copy)'), err)
+    }
   } catch (err) {
     if (generation !== playlistLoadGeneration) return
     console.error(err)
