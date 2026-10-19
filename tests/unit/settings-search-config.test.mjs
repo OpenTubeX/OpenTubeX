@@ -22,6 +22,24 @@ const locale = loadYaml(await readFile(
 ))
 const getAtPath = (value, path) => path.split('.').reduce((nested, key) => nested?.[key], value)
 
+test('automatic tab unloading controls are searchable only on Electron', () => {
+  for (const [usingElectron, isCapacitor] of [[true, false], [false, true], [false, false]]) {
+    const entries = createSettingsSearchIndex({
+      sections: [{ type: 'advanced', title: 'Advanced', description: '' }],
+      tm: path => getAtPath(locale, path),
+      store: { getters: {} },
+      usingElectron,
+      isCapacitor,
+    }).get('advanced')
+    for (const label of ['Automatically unload tabs', 'Memory threshold', 'Tabs to unload']) {
+      assert.equal(entries.some(entry => entry.label === label), usingElectron, label)
+    }
+    for (const key of ['Automatic unloading help', 'Memory threshold help']) {
+      assert.equal(entries.some(entry => entry.label === locale.Settings['Tab Unloading'][key]), false, key)
+    }
+  }
+})
+
 test('scheduled backup settings are searchable only on desktop', () => {
   for (const [usingElectron, isCapacitor] of [[true, false], [false, true], [false, false]]) {
     const entries = createSettingsSearchIndex({

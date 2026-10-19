@@ -59,7 +59,12 @@ test('automatic unloading settings @scale can be changed and disabled', async ({
   await expect(page.locator('.topNav')).toBeVisible()
   const general = await goToSettingsSection(page, 'general')
   await expect(general.locator('[data-setting-key="autoUnloadTabs"]')).toHaveCount(0)
-  await goToSettingsSection(page, 'advanced')
+  for (const label of ['Automatically unload tabs', 'Memory threshold', 'Tabs to unload']) {
+    await goToSettingsSection(page, 'general')
+    await page.getByRole('searchbox', { name: 'Search settings' }).fill(label)
+    await page.getByRole('button', { name: label, exact: true }).click()
+    await expect(page.locator('.settingsSearchTarget')).toContainText(label)
+  }
   await expect(page.getByRole('heading', { name: 'Automatically unload tabs', exact: true })).toBeVisible()
   const toggle = page.getByRole('checkbox', { name: /^Automatically unload tabs/ })
   await expect(toggle).toBeChecked()
