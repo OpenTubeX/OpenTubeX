@@ -1310,6 +1310,8 @@ test.describe('history date and channel browsing', () => {
     await scrollPageToEnd(page)
     // Change the picker without scrolling the page back to the control.
     await page.locator('.historyChannelFilter select').evaluate(select => {
+      // The hidden native select only holds the current channel.
+      select.add(new Option('Other Channel', 'id:UC-other'))
       select.value = 'id:UC-other'
       select.dispatchEvent(new Event('change', { bubbles: true }))
     })
@@ -1490,5 +1492,153 @@ test.describe('history date and channel browsing', () => {
           .map(button => button.getBoundingClientRect().height >= target - 1),
       }
     })).toEqual({ target: 60, buttons: [true, true] })
+  })
+})
+
+test.describe('lazy history channel picker', () => {
+  const channelNames = Array.from({ length: 400 }, (_, index) => `Picker channel ${String(index).padStart(4, '0')}`)
+  channelNames[399] += ' with a much longer name than any channel on the first page of this picker'
+  test.use({
+    seed: {
+      history: channelNames.map((author, index) =>
+        historyEntry(`picker${String(index).padStart(5, '0')}`, `Picker video ${index}`, now - index * 60_000, false, { author, authorId: `UC-picker-${index}` })),
+    },
+  })
+
+  async function expectListWithinScrollRange(list) {
+    await expect.poll(() => list.evaluate(menu => {
+      const maximumScrollTop = Math.max(0, menu.scrollHeight - menu.clientHeight)
+      const scrollbar = menu.querySelector(':scope > .os-scrollbar-vertical')
+      const rows = menu.querySelectorAll(':scope > li')
+      const contentBottom = rows[rows.length - 1].getBoundingClientRect().bottom +
+        Number.parseFloat(getComputedStyle(menu).paddingBottom)
+      return {
+        withinRange: menu.scrollTop <= maximumScrollTop + 1,
+        // Scrolled lists end at their content without empty space below it.
+        noEmptySpace: menu.scrollTop <= 1 || Math.abs(contentBottom - menu.getBoundingClientRect().bottom) <= 1,
+        scrollbarMatchesOverflow: scrollbar.classList.contains('os-scrollbar-unusable') === (maximumScrollTop <= 1),
+      }
+    })).toEqual({ withinRange: true, noEmptySpace: true, scrollbarMatchesOverflow: true })
+  }
+
+  async function openChannelPicker(page) {
+    await openHistoryFilters(page)
+    const picker = page.getByRole('combobox', { name: 'Channel', exact: true })
+    await picker.click()
+    return page.locator(`#${await picker.getAttribute('aria-controls')}`)
+  }
+
+  test('reopens at a late selection and keeps rows in place while loading earlier pages @scale', async ({ page }) => {
+    await page.setViewportSize({ width: 400, height: 800 })
+    const selected = channelNames.at(-150)
+    await goTo(page, 'history')
+    let dropdown = await openChannelPicker(page)
+    await page.locator('.mobileSheet[open]').getByRole('searchbox', { name: 'Search', exact: true }).fill(selected)
+    await dropdown.getByRole('option', { name: selected, exact: true }).click()
+    const picker = page.getByRole('combobox', { name: 'Channel', exact: true })
+    await expect(picker).toContainText(selected)
+    await expect(page.locator('.mobileSheet[open]')).toHaveCount(0)
+
+    await picker.click()
+    dropdown = page.locator(`#${await picker.getAttribute('aria-controls')}`)
+    const options = dropdown.getByRole('option')
+    const selectedOption = dropdown.getByRole('option', { name: selected, exact: true })
+    await expect(selectedOption).toHaveAttribute('aria-selected', 'true')
+    await expect(selectedOption).toBeInViewport()
+    // Only the selected option's page is rendered, not the pages before it.
+    expect(await options.count()).toBeLessThanOrEqual(200)
+    await expect(dropdown.getByRole('option', { name: 'All channels', exact: true })).toHaveCount(0)
+
+    // Loading the page above must not move the rows that are already visible.
+    const firstRendered = options.first()
+    const firstName = await firstRendered.textContent()
+    const renderedCount = await options.count()
+    await dropdown.evaluate(menu => { menu.scrollTop = 0 })
+    await expect.poll(() => options.count()).toBeGreaterThan(renderedCount)
+    await expect.poll(() => dropdown.evaluate(menu => menu.scrollTop)).toBeGreaterThan(0)
+    await expect(dropdown.getByRole('option', { name: firstName.trim(), exact: true })).toBeInViewport()
+  })
+
+  test('clamps the scrolled picker when searching shortens it @scale', async ({ page }) => {
+    await page.setViewportSize({ width: 400, height: 800 })
+    await goTo(page, 'history')
+    const dropdown = await openChannelPicker(page)
+    const sheet = page.locator('.mobileSheet[open]').filter({ has: dropdown })
+    const options = dropdown.getByRole('option')
+    const scrollbar = dropdown.locator(':scope > .os-scrollbar-vertical')
+
+    // Scroll to the bottom until every page is loaded.
+    await expect(async () => {
+      await dropdown.evaluate(menu => { menu.scrollTop = menu.scrollHeight })
+      expect(await options.count()).toBe(channelNames.length + 1)
+    }).toPass()
+    await expect(dropdown.getByRole('option', { name: channelNames.at(-1), exact: true })).toBeInViewport()
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+
+    await sheet.getByRole('searchbox', { name: 'Search', exact: true }).fill('0123')
+    await expect(options).toHaveCount(1)
+    await expect(options.first()).toBeInViewport()
+    await expect.poll(() => dropdown.evaluate(menu =>
+      menu.scrollTop <= 1 && menu.scrollHeight <= menu.clientHeight + 1
+    )).toBe(true)
+    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+  })
+
+  test('loads the next page before the end of the list is visible @scale', async ({ page }) => {
+    await goTo(page, 'history')
+    const dropdown = await openChannelPicker(page)
+    const options = dropdown.getByRole('option')
+    await expect(options).toHaveCount(100)
+    await dropdown.evaluate(menu => { menu.scrollTop = menu.scrollHeight - menu.clientHeight - 100 })
+    await expect(options).toHaveCount(200)
+  })
+
+  test('resets the scrolled picker when it crosses the phone layout breakpoint @scale', async ({ page }) => {
+    await page.setViewportSize({ width: 400, height: 800 })
+    await goTo(page, 'history')
+    const dropdown = await openChannelPicker(page)
+    const options = dropdown.getByRole('option')
+    await expect(async () => {
+      await dropdown.evaluate(menu => { menu.scrollTop = menu.scrollHeight })
+      expect(await options.count()).toBe(channelNames.length + 1)
+    }).toPass()
+
+    // Leaving the phone layout closes the sheet instead of keeping a shortened
+    // list open. Reopening starts from the first page within its range.
+    const picker = page.getByRole('combobox', { name: 'Channel', exact: true })
+    await page.setViewportSize({ width: 1200, height: 800 })
+    await expect(picker).toHaveAttribute('aria-expanded', 'false')
+    await expect(dropdown).toHaveCount(0)
+    await picker.click()
+    await expect(dropdown).not.toHaveClass(/phonePicker/)
+    await expect(options).toHaveCount(100)
+    await expect.poll(() => dropdown.evaluate(menu => menu.scrollTop)).toBeLessThanOrEqual(1)
+    await expectListWithinScrollRange(dropdown)
+  })
+
+  test('widens the desktop picker for a longer label on a distant page @scale', async ({ page }) => {
+    await goTo(page, 'history')
+    const dropdown = await openChannelPicker(page)
+    const options = dropdown.getByRole('option')
+    await expect(options).toHaveCount(100)
+    const rowHeight = await options.first().evaluate(option => option.getBoundingClientRect().height)
+
+    await page.keyboard.press('End')
+    const longest = dropdown.getByRole('option', { name: channelNames.at(-1), exact: true })
+    await expect(longest).toBeInViewport()
+    // The label stays on one line instead of wrapping into the first page's width.
+    await expect.poll(() => longest.evaluate(option => option.getBoundingClientRect().height))
+      .toBeLessThanOrEqual(rowHeight + 1)
+  })
+
+  test('End and Home reach the ends of the phone picker', async ({ page }) => {
+    await page.setViewportSize({ width: 400, height: 800 })
+    await goTo(page, 'history')
+    const dropdown = await openChannelPicker(page)
+    await expect(dropdown).toBeFocused()
+    await page.keyboard.press('End')
+    await expect(dropdown.getByRole('option', { name: channelNames.at(-1), exact: true })).toBeFocused()
+    await page.keyboard.press('Home')
+    await expect(dropdown.getByRole('option', { name: 'All channels', exact: true })).toBeFocused()
   })
 })
