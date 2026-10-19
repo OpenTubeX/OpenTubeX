@@ -153,3 +153,20 @@ test('a new playlist rebuilds the shuffled order instead of extending the previo
 
   assert.deepEqual(state.randomizedPlaylistItems.value.map(video => video.videoId), ['second', 'first', 'third'])
 })
+
+test('autoplay waits for the page containing the current video instead of restarting the playlist', async () => {
+  const state = harness()
+  state.props.videoId = 'third'
+  const loading = state.load()
+  state.resolveFirstPage()
+  await new Promise(resolve => setImmediate(resolve))
+
+  assert.equal(state.state.isWaitingForNextVideo.value, true)
+  assert.equal(state.state.nextVideo.value, null)
+
+  state.finishContinuation([{ videoId: 'third' }, { videoId: 'fourth' }])
+  await loading
+
+  assert.equal(state.state.isWaitingForNextVideo.value, false)
+  assert.equal(state.state.nextVideo.value.videoId, 'fourth')
+})

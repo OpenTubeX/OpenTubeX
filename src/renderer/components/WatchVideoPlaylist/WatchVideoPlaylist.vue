@@ -483,7 +483,10 @@ const videoIsLastPlaylistItem = computed(() => {
 
 const videoIsNotPlaylistItem = computed(() => videoIndexInPlaylistItems.value === -1)
 
-const isWaitingForNextVideo = computed(() => isFetchingPlaylistContinuation.value && videoIsLastPlaylistItem.value)
+// The current video may still be on an unloaded page, so do not fall back to
+// the playlist start while later pages are loading.
+const isWaitingForNextVideo = computed(() => isFetchingPlaylistContinuation.value &&
+  (videoIsLastPlaylistItem.value || videoIsNotPlaylistItem.value))
 
 const nextVideo = computed(() => {
   if (isWaitingForNextVideo.value) return null
