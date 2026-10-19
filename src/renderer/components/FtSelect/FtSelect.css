@@ -643,3 +643,8 @@
 .selectLoadMore {
   block-size: 1px;
 }
+
+/* Lazy lists compensate for rows inserted above the viewport themselves. */
+.selectDropdown.lazyOptions {
+  overflow-anchor: none;
+}

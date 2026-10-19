@@ -158,7 +158,7 @@
           ref="dropdown"
           v-overlay-scrollbars
           class="selectDropdown"
-          :class="[dropdownPlacement, { phonePicker: phoneLayout }]"
+          :class="[dropdownPlacement, { phonePicker: phoneLayout, lazyOptions }]"
           role="listbox"
           tabindex="-1"
           :autofocus="phoneLayout"
@@ -168,12 +168,18 @@
           @mousedown="handleDropdownMouseDown"
           @keydown="handlePickerKeydown"
         >
+          <li
+            v-if="lazyOptions && windowStart > 0"
+            ref="loadPreviousSentinel"
+            class="selectLoadMore"
+            role="presentation"
+          />
           <template
             v-for="({ name, index }, visibleIndex) in renderedOptions"
             :key="selectValues[index]"
           >
             <li
-              v-if="optionGroupLabels[optionGroups[index]] && (visibleIndex === 0 || optionGroups[index] !== optionGroups[filteredOptions[visibleIndex - 1].index])"
+              v-if="optionGroupLabels[optionGroups[index]] && (windowStart + visibleIndex === 0 || optionGroups[index] !== optionGroups[filteredOptions[windowStart + visibleIndex - 1].index])"
               :id="`${id}-group-${optionGroups[index]}`"
               class="selectGroupHeading"
               role="presentation"
@@ -230,7 +236,7 @@
             </li>
           </template>
           <li
-            v-if="renderedOptions.length < filteredOptions.length"
+            v-if="lazyOptions && renderLimit < filteredOptions.length"
             ref="loadMoreSentinel"
             class="selectLoadMore"
             role="presentation"
@@ -357,6 +363,7 @@ const selectButton = useTemplateRef('selectButton')
 const dropdown = useTemplateRef('dropdown')
 const options = useTemplateRef('options')
 const loadMoreSentinel = useTemplateRef('loadMoreSentinel')
+const loadPreviousSentinel = useTemplateRef('loadPreviousSentinel')
 
 const phoneLayout = usePhoneLayout(process.env.IS_CAPACITOR
   ? `(any-pointer: coarse), ${PHONE_LAYOUT_QUERY}`
@@ -366,30 +373,65 @@ const filteredOptions = computed(() => props.selectNames
   .map((name, index) => ({ name, index }))
   .filter(({ name }) => !phoneLayout.value || name.toLocaleLowerCase().includes(search.value.trim().toLocaleLowerCase())))
 const OPTION_PAGE_SIZE = 100
+// Lazy lists render the filtered options in [windowStart, renderLimit).
+const windowStart = ref(0)
 const renderLimit = ref(OPTION_PAGE_SIZE)
-const renderedOptions = computed(() => props.lazyOptions ? filteredOptions.value.slice(0, renderLimit.value) : filteredOptions.value)
+const renderedOptions = computed(() => props.lazyOptions ? filteredOptions.value.slice(windowStart.value, renderLimit.value) : filteredOptions.value)
 const nativeOptions = computed(() => {
   if (!props.lazyOptions) return props.selectNames.map((name, index) => ({ name, index }))
   return selectedIndex.value === -1 ? [] : [{ name: selectedName.value, index: selectedIndex.value }]
 })
 
-/** @param {number} visibleIndex */
+function resetRenderedOptions() {
+  windowStart.value = 0
+  renderLimit.value = OPTION_PAGE_SIZE
+}
+
+/**
+ * Extend the rendered window by a page to reach a neighbouring option, or move
+ * it to a distant one without rendering every option in between.
+ * @param {number} visibleIndex
+ */
 function renderOptionAt(visibleIndex) {
-  if (visibleIndex >= renderLimit.value) {
-    renderLimit.value = Math.ceil((visibleIndex + 1) / OPTION_PAGE_SIZE) * OPTION_PAGE_SIZE
+  if (!props.lazyOptions || visibleIndex < 0) return
+  if (visibleIndex >= windowStart.value && visibleIndex < renderLimit.value) return
+  if (visibleIndex >= renderLimit.value && visibleIndex < renderLimit.value + OPTION_PAGE_SIZE) {
+    renderLimit.value += OPTION_PAGE_SIZE
+  } else if (visibleIndex < windowStart.value && visibleIndex >= windowStart.value - OPTION_PAGE_SIZE) {
+    windowStart.value -= OPTION_PAGE_SIZE
+  } else {
+    windowStart.value = Math.floor(visibleIndex / OPTION_PAGE_SIZE) * OPTION_PAGE_SIZE
+    renderLimit.value = windowStart.value + OPTION_PAGE_SIZE
   }
 }
 
-watchEffect(onCleanup => {
-  const sentinel = loadMoreSentinel.value
-  if (!sentinel) return
-  // The implicit root still respects clipping by the scrolling dropdown.
-  const observer = new IntersectionObserver(entries => {
-    if (entries.some(entry => entry.isIntersecting)) renderLimit.value += OPTION_PAGE_SIZE
-  }, { rootMargin: '200px' })
-  observer.observe(sentinel)
-  onCleanup(() => observer.disconnect())
+/**
+ * @param {import('vue').Ref<HTMLElement | null>} sentinelRef
+ * @param {() => void} load
+ */
+function loadWhenVisible(sentinelRef, load) {
+  watchEffect(onCleanup => {
+    const sentinel = sentinelRef.value
+    if (!sentinel) return
+    // The implicit root still respects clipping by the scrolling dropdown.
+    const observer = new IntersectionObserver(entries => {
+      if (entries.some(entry => entry.isIntersecting)) load()
+    }, { rootMargin: '200px' })
+    observer.observe(sentinel)
+    onCleanup(() => observer.disconnect())
+  })
+}
+
+loadWhenVisible(loadMoreSentinel, () => { renderLimit.value += OPTION_PAGE_SIZE })
+loadWhenVisible(loadPreviousSentinel, async () => {
+  const menu = dropdown.value
+  const scrollHeight = menu?.scrollHeight ?? 0
+  windowStart.value = Math.max(0, windowStart.value - OPTION_PAGE_SIZE)
+  await nextTick()
+  // Keep the visible rows in place while earlier rows are inserted above them.
+  if (menu) menu.scrollTop += menu.scrollHeight - scrollHeight
 })
+
 const dropdownShown = ref(false)
 useAnchoredViewportBounds(selectButton, dropdown, computed(() => dropdownShown.value && !phoneLayout.value))
 const dropdownRendered = ref(false)
@@ -433,7 +475,7 @@ watch(dropdownShown, (shown) => {
 })
 
 watch([search, phoneLayout], async () => {
-  renderLimit.value = OPTION_PAGE_SIZE
+  resetRenderedOptions()
   await nextTick()
   await refreshDropdownLayout()
 })
@@ -470,7 +512,7 @@ function openDropdown() {
   if (props.disabled || !settingsOverlayActive.value) return
 
   search.value = ''
-  renderLimit.value = OPTION_PAGE_SIZE
+  resetRenderedOptions()
   emit('open')
   activeIndex.value = Math.max(0, selectedIndex.value)
   // Mobile sheets must keep focus inside their subscription popup. Desktop lists
@@ -582,12 +624,22 @@ function moveActiveIndex(offset) {
   scrollActiveOptionIntoView()
 }
 
+/** @param {number} index */
+function getOptionId(index) {
+  return `${id}-option-${index}`
+}
+
+/** @param {number} index */
+function findOptionElement(index) {
+  return options.value?.find(option => option.id === getOptionId(index))
+}
+
 function scrollActiveOptionIntoView() {
   const visibleIndex = filteredOptions.value.findIndex(option => option.index === activeIndex.value)
   renderOptionAt(visibleIndex)
   nextTick(() => {
     if (!settingsOverlayActive.value || !dropdownShown.value) return
-    options.value?.find(option => option.id === `${id}-option-${activeIndex.value}`)?.scrollIntoView({ block: 'nearest' })
+    findOptionElement(activeIndex.value)?.scrollIntoView({ block: 'nearest' })
   })
 }
 
@@ -747,15 +799,18 @@ function handleFocusOut(event) {
 function handlePickerKeydown(event) {
   if (!phoneLayout.value || !['ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) return
   event.preventDefault()
-  const rows = options.value ?? []
-  const current = rows.indexOf(document.activeElement)
+  const visibleOptions = filteredOptions.value
+  const current = visibleOptions.findIndex(option => getOptionId(option.index) === document.activeElement?.id)
   const next = event.key === 'Home'
     ? 0
     : event.key === 'End'
-      ? rows.length - 1
-      : Math.max(0, Math.min(rows.length - 1, current + (event.key === 'ArrowDown' ? 1 : -1)))
-  activeIndex.value = filteredOptions.value[next]?.index ?? activeIndex.value
-  rows[next]?.focus()
+      ? visibleOptions.length - 1
+      : Math.max(0, Math.min(visibleOptions.length - 1, current + (event.key === 'ArrowDown' ? 1 : -1)))
+  const option = visibleOptions[next]
+  if (!option) return
+  activeIndex.value = option.index
+  renderOptionAt(next)
+  nextTick(() => findOptionElement(option.index)?.focus())
 }
 
 function handleDropdownPointerDown() {
