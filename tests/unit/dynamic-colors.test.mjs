@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
+import { Hct, argbFromHex } from '@material/material-color-utilities'
 import { dynamicThemeColors, applyDynamicColors, initializeAndroidDynamicColors, androidDynamicColors, desktopSystemAccentColor, getMaterialPalette } from '../../src/renderer/helpers/dynamicColors.js'
 import { DEFAULT_MATERIAL_SEED_COLOR, MATERIAL_SYSTEM_SEED, MATERIAL_THEME_VALUES, MATERIAL_SEED_PRESETS, materialColorScheme, materialStateColor, materialSeedPalette, materialThemeMode, normalizeMaterialSeedColor, normalizeSystemAccentColor } from '../../src/materialTheme.js'
 import { hasFixedThemeColors, resolveBaseTheme, resolveSystemTheme } from '../../src/appearanceSettings.js'
@@ -113,6 +114,34 @@ test('LineageOS pure-black mode keeps the page black with distinguishable cards 
   assert.equal(dark.primary, materialColorScheme(colors, true).primary, 'Wallpaper accents are preserved')
   assert.notEqual(dark.dropdownHover, dark.background, 'Hover states remain distinguishable')
   assert.equal(dynamicThemeColors(colors, false).cardBackground, materialColorScheme(colors, false).surfaceContainerLow)
+})
+
+test('Material Black keeps expressive wallpaper neutrals from tinting surfaces', () => {
+  // Android 17's expressive palettes give neutrals a strong hue, which made
+  // Material Black cards and bars navy (#12183d) next to the black page.
+  const chromatic = Object.fromEntries(Object.entries(materialSeedPalette('#4285f4')).map(([family, shades]) => [
+    family,
+    family.startsWith('neutral') ? materialSeedPalette('#12183d').accent1 : shades,
+  ]))
+  const colors = dynamicThemeColors(chromatic, true, true)
+  const roles = materialColorScheme(chromatic, true, true)
+  // Rounding to sRGB adds up to one unit of chroma near black.
+  const chroma = hex => Hct.fromInt(argbFromHex(hex)).chroma - 1
+  assert.equal(colors.background, '#000000')
+  assert.equal(colors.sideNav, '#000000')
+  for (const surface of ['cardBackground', 'secondaryCardBackground', 'searchBar', 'instanceMenu', 'primaryInput', 'subtleSurface']) {
+    assert.ok(chroma(colors[surface]) <= 4, `${surface} stays neutral`)
+    assert.ok(Hct.fromInt(argbFromHex(colors[surface])).tone <= 16, `${surface} stays near black`)
+  }
+  assert.ok(contrast(colors.cardBackground, colors.background) > 1, 'Cards remain distinguishable')
+  for (const text of ['primaryText', 'secondaryText']) {
+    assert.ok(chroma(colors[text]) <= 8, `${text} stays neutral`)
+    assert.ok(contrast(colors[text], colors.searchBar) >= 4.5, `${text} remains readable`)
+  }
+  assert.ok(contrast(roles.outline, colors.background) >= 3, 'Outlines remain visible')
+  assert.equal(colors.primary, materialColorScheme(chromatic, true).primary, 'Wallpaper accents are preserved')
+  assert.equal(colors.sideNavActive, materialColorScheme(chromatic, true).secondaryContainer)
+  assert.deepEqual(materialColorScheme(chromatic, true, false), materialColorScheme(chromatic, true), 'Material Dark is unchanged')
 })
 
 test('switching back from dynamic colors or a custom-theme preview restores the selected theme', async (t) => {

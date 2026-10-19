@@ -55,19 +55,42 @@ export function materialColorProperty(role) {
   return '--md-sys-color-' + role.replaceAll(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)
 }
 
-/** Preserve Android's wallpaper palettes while resolving Material 3 roles. */
-export function materialColorScheme(palette, dark) {
-  const tonal = family => TonalPalette.fromInt(argbFromHex(palette[family][500]))
-  const template = new SchemeTonalSpot(Hct.fromInt(argbFromHex(palette.accent1[500])), dark, 0)
+/** Black surfaces step up from pure black, matching the regular Black theme's elevation. */
+const BLACK_SURFACE_TONES = {
+  surface: 0,
+  surfaceContainerLowest: 0,
+  surfaceContainerLow: 4,
+  surfaceContainer: 8,
+  surfaceContainerHigh: 12,
+  surfaceContainerHighest: 16,
+}
+
+/**
+ * Preserve Android's wallpaper palettes while resolving Material 3 roles.
+ * Black keeps the accent palettes but caps neutral chroma, so expressive
+ * wallpaper palettes cannot tint surfaces, text, and outlines.
+ */
+export function materialColorScheme(palette, dark, black = false) {
+  const tonal = (family, maxChroma = Infinity) => {
+    const hct = Hct.fromInt(argbFromHex(palette[family][500]))
+    return hct.chroma > maxChroma ? TonalPalette.fromHueAndChroma(hct.hue, maxChroma) : TonalPalette.fromHct(hct)
+  }
+  const template = new SchemeTonalSpot(Hct.fromInt(argbFromHex(palette.accent1[500])), dark || black, 0)
   const scheme = new DynamicScheme({
     ...template,
     primaryPalette: tonal('accent1'),
     secondaryPalette: tonal('accent2'),
     tertiaryPalette: tonal('accent3'),
-    neutralPalette: tonal('neutral1'),
-    neutralVariantPalette: tonal('neutral2'),
+    neutralPalette: tonal('neutral1', black ? 4 : Infinity),
+    neutralVariantPalette: tonal('neutral2', black ? 8 : Infinity),
   })
-  return Object.fromEntries(MATERIAL_COLOR_ROLES.map(role => [role, hexFromArgb(scheme[role])]))
+  const roles = Object.fromEntries(MATERIAL_COLOR_ROLES.map(role => [role, hexFromArgb(scheme[role])]))
+  if (black) {
+    for (const [role, tone] of Object.entries(BLACK_SURFACE_TONES)) {
+      roles[role] = hexFromArgb(scheme.neutralPalette.tone(tone))
+    }
+  }
+  return roles
 }
 
 /** Material state layers use the matching on-color at 8% / 12% opacity. */
