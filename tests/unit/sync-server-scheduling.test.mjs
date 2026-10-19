@@ -272,6 +272,7 @@ async function schedulingFixture(t, platform = {}) {
       ${action('startSyncServerAutoSync')}
       ${action('stopSyncServerAutoSync')}
       ${action('scheduleSyncServer')}
+      ${action('resumeHiddenEventSyncs')}
     }; ({ actions, liveConnection })`, sandbox)
   const context = {
     rootState: {
@@ -287,6 +288,7 @@ async function schedulingFixture(t, platform = {}) {
     liveConnection,
     start: () => actions.startSyncServerAutoSync(context),
     schedule: reason => actions.scheduleSyncServer(context, reason),
+    resume: () => actions.resumeHiddenEventSyncs(context),
     sync: options => actions.syncWithSyncServer(context, options),
     stop: () => actions.stopSyncServerAutoSync(context),
     block: () => { blockSync = true },
@@ -452,12 +454,19 @@ test('periodic fallback does not sync while the mobile app is hidden', async t =
   assert.equal(f.calls.length, 1)
 })
 
-test('queued event syncs do not run while the mobile app is hidden', async t => {
+test('queued event syncs wait while the mobile app is hidden and replay on resume', async t => {
   const f = await schedulingFixture(t, { IS_CAPACITOR: 'true' })
   f.schedule('history')
   f.setHidden(true)
   await f.tick(30000)
   assert.equal(f.calls.length, 0)
+  f.setHidden(false)
+  f.resume()
+  await f.tick(30000)
+  assert.equal(f.calls.length, 1)
+  f.resume()
+  await f.tick(30000)
+  assert.equal(f.calls.length, 1)
 })
 
 test('periodic fallback resumes after a live disconnect', async t => {

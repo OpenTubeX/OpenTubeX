@@ -84,6 +84,8 @@ const activeSyncClients = new Set()
 let autoSyncTimer = null
 let autoSyncController = new AbortController()
 const eventSyncTimers = new Map()
+// Event syncs that came due while a mobile app was hidden; replayed on resume.
+const hiddenEventSyncReasons = new Set()
 let lifecycleSyncStarted = false
 let reminderSyncListenerStarted = false
 let deviceRefreshId = 0
@@ -1545,6 +1547,7 @@ const actions = {
         if (!isAppHidden()) {
           dispatch('startSyncServerLive')
           dispatch('scheduleSyncServer', 'automatic')
+          dispatch('resumeHiddenEventSyncs')
         }
       })
     }
@@ -1748,8 +1751,10 @@ const actions = {
           !rootState.settings.syncServerAutoSync ||
           !rootState.settings.syncServerToken ||
           !isSyncReasonEnabled(rootState.settings, reason)) return
-      // The visibility handler schedules a sync once the mobile app is shown again.
-      if (process.env.IS_CAPACITOR && isAppHidden()) return
+      if (process.env.IS_CAPACITOR && isAppHidden()) {
+        hiddenEventSyncReasons.add(reason)
+        return
+      }
       dispatch('syncWithSyncServer', {
         skipIfRecent: reason === 'automatic',
         automatic: true,
@@ -1757,6 +1762,12 @@ const actions = {
         console.error('Sync server event sync failed', error)
       })
     }, Math.max(0, Math.min(delay, firstChangeAt + maxWait - Date.now())))
+  },
+
+  resumeHiddenEventSyncs({ dispatch }) {
+    const reasons = [...hiddenEventSyncReasons]
+    hiddenEventSyncReasons.clear()
+    for (const reason of reasons) dispatch('scheduleSyncServer', reason)
   },
 
   async setSyncServerAutoSync({ dispatch }, enabled) {
