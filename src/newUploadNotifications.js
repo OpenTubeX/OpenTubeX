@@ -62,11 +62,14 @@ export function normalizeUploadEntries(entries) {
  * @param {string} html
  */
 function htmlToText(html) {
-  return html
-    .replaceAll(/<br\s*\/?>/gi, '\n')
-    .replaceAll(/<[^>]*>/g, '')
-    // Drops what is left of malformed tags, so no markup survives.
-    .replaceAll(/[<>]/g, '')
+  let text = html.replaceAll(/<br\s*\/?>/gi, '\n')
+  // Repeat until stable so removing one tag cannot join the pieces of another.
+  let previous
+  do {
+    previous = text
+    text = text.replaceAll(/<[^>]*>/g, '')
+  } while (text !== previous)
+  return text
     .replaceAll(/&(amp|lt|gt|quot|#39);/g, (_, entity) => ({ amp: '&', lt: '<', gt: '>', quot: '"', '#39': "'" })[entity])
 }
 
