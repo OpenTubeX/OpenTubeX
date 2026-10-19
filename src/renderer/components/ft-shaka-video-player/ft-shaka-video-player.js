@@ -9817,7 +9817,7 @@ export default defineComponent({
                 ? t('Video.Player.Volume Boost.Off')
                 : `${Math.round(boost * 100)}%`,
               getLabel: () => t('Video.Player.Volume Boost.Volume Boost'),
-              icon: PlayerIcons.VOLUME_UP_FILLED,
+              mappedIcon: 'volume-high',
               className: 'volume-boost',
             },
             events,

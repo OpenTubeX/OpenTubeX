@@ -1240,6 +1240,14 @@ test('volume boost amplifies the audio within its tab', async ({ app, page, atta
   // The player only routes its audio through Web Audio once it is boosted.
   expect(await sourceCount()).toBe(0)
 
+  // The icon follows the selected icon pack.
+  const boostIcon = boostButton.locator(':scope > svg')
+  await expect(boostIcon.locator('path')).not.toHaveCount(0)
+  const materialIcon = await boostIcon.innerHTML()
+  await page.evaluate(() => window.$store.dispatch('updateIconPack', 'remix'))
+  await expect.poll(() => boostIcon.innerHTML()).not.toBe(materialIcon)
+  await expect(boostIcon.locator('path')).not.toHaveCount(0)
+
   await boostButton.click()
   const boostMenu = player.locator('.volume-boost-menu')
   await expect(boostMenu.getByRole('button')).toHaveText(['Volume Boost', 'Off', '125%', '150%', '175%', '200%'])

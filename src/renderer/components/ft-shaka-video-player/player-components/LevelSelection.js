@@ -1,7 +1,10 @@
 import shaka from 'shaka-player'
-import { watch } from 'vue'
+import { h, render, watch } from 'vue'
+import { Icon } from '@iconify/vue/offline'
 
 import { PlayerIcons } from '../../../../constants'
+import { currentIconPack } from '../../../icons/iconPackState'
+import { resolveIconifyId } from '../../../icons/resolveIconifyId'
 
 /**
  * A settings submenu that picks one of a few preset levels, such as zoom or
@@ -15,15 +18,23 @@ export class LevelSelection extends shaka.ui.SettingsMenu {
    *   levels: readonly number[],
    *   formatLevel: (value: number) => string,
    *   getLabel: () => string,
-   *   icon: string | { path: string, viewBox: string },
+   *   icon?: string | { path: string, viewBox: string },
+   *   mappedIcon?: string,
    *   className: string
    * }} options
    * @param {EventTarget} events
    * @param {HTMLElement} parent
    * @param {shaka.ui.Controls} controls
    */
-  constructor({ value, updateValue, levels, formatLevel, getLabel, icon, className }, events, parent, controls) {
+  constructor({ value, updateValue, levels, formatLevel, getLabel, icon, mappedIcon, className }, events, parent, controls) {
     super(parent, controls, icon)
+
+    /** @private Follows the selected icon pack */
+    this.stopIconWatch_ = mappedIcon && watch(currentIconPack, () => {
+      const svg = this.icon.getSvgElement()
+      svg.setAttribute('viewBox', '0 0 24 24')
+      render(h(Icon, { icon: resolveIconifyId(mappedIcon), width: 24, height: 24 }), svg)
+    }, { immediate: true })
 
     this.button.classList.add(`${className}-button`, 'shaka-tooltip-status')
     this.menu.classList.add(`${className}-menu`)
@@ -84,6 +95,10 @@ export class LevelSelection extends shaka.ui.SettingsMenu {
 
   release() {
     this.stopValueWatch_()
+    if (this.stopIconWatch_) {
+      this.stopIconWatch_()
+      render(null, this.icon.getSvgElement())
+    }
     super.release()
   }
 
