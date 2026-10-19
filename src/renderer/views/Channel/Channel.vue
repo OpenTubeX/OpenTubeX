@@ -749,6 +749,7 @@ onBeforeUnmount(() => {
  * @param {string|undefined} tab
  */
 async function resolveChannelUrl(url, tab = undefined) {
+  const expectedRouteGeneration = channelRouteGeneration
   let id
 
   if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
@@ -756,6 +757,10 @@ async function resolveChannelUrl(url, tab = undefined) {
   } else {
     id = await getLocalChannelId(url)
   }
+
+  // The tab moved on while the URL was resolving; replacing the route now
+  // would yank the user back to this channel.
+  if (expectedRouteGeneration !== channelRouteGeneration) return
 
   if (id === null) {
     // the channel page shows an error about the channel not existing when the id is @@@
