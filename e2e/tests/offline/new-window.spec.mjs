@@ -35,6 +35,11 @@ async function openSecondWindowWithTwoTabs(app, page) {
   const newWindow = await openNewWindowFromTabBar(app, page)
   await waitForAppReady(newWindow)
   await newWindow.locator('.newTabButton').click()
+  // The click only dispatches the renderer's tab creation; wait until the main
+  // process owns both tabs before tests read or close them.
+  await expect.poll(() => newWindow.evaluate(async () => (
+    (await window.ftElectron.tabs.getState()).tabs.length
+  ))).toBe(2)
 
   const windowId = await app.electronApp.evaluate(({ BrowserWindow }, knownIds) => (
     BrowserWindow.getAllWindows().find(window => !knownIds.includes(window.id))?.id
