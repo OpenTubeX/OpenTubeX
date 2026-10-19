@@ -1450,6 +1450,9 @@ Video:
     Zoom:
       Zoom: "Zoum"
       'Off': "Lazhet"
+    Volume Boost:
+      Volume Boost: "Kreskiñ an ampled"
+      'Off': "Lazhet"
     Auto-generated Caption Template: "{language} (savet ent emgefreek)"
     Up next in {seconds}: "Da-heul a-benn {seconds}"
     Resize dock: "Kemmañ ment ar gael"

@@ -46,6 +46,7 @@ export function getVoiceOverPlaybackRate(playbackRate, drift) {
  *   autoPrepare: import('vue').ComputedRef<boolean>,
  *   originalVolume: import('vue').ComputedRef<number>,
  *   voiceVolume: import('vue').ComputedRef<number>,
+ *   setOutputGain: (value: number) => Promise<void>,
  *   onError: (error: unknown) => void
  * }} options
  */
@@ -56,6 +57,7 @@ export function useVoiceOverTranslation({
   autoPrepare,
   originalVolume,
   voiceVolume,
+  setOutputGain,
   onError
 }) {
   const state = ref('idle')
@@ -72,65 +74,9 @@ export function useVoiceOverTranslation({
   let requestGeneration = 0
   let pollAttempts = 0
   let enableOnReady = false
-  let destroyed = false
 
-  /** @type {AudioContext | null} */
-  let outputAudioContext = null
-  /** @type {GainNode | null} */
-  let outputGainNode = null
-  let outputGraphSetupPromise = null
-
-  async function setupOutputGraph() {
-    if (outputGainNode) {
-      return
-    }
-
-    const videoElement = video.value
-    if (!videoElement) {
-      return
-    }
-
-    outputAudioContext ??= new AudioContext()
-    await outputAudioContext.resume()
-    if (destroyed || video.value !== videoElement) {
-      return
-    }
-
-    // A media element can only have one MediaElementAudioSourceNode. Future
-    // output processing for the player must reuse this graph.
-    const source = outputAudioContext.createMediaElementSource(videoElement)
-    outputGainNode = outputAudioContext.createGain()
-    outputGainNode.gain.value = enabled.value ? originalVolume.value : 1
-    source.connect(outputGainNode)
-    outputGainNode.connect(outputAudioContext.destination)
-  }
-
-  async function updateOriginalVolume() {
-    const initialGain = enabled.value ? originalVolume.value : 1
-    if (!outputGainNode && initialGain !== 1) {
-      try {
-        outputGraphSetupPromise ??= setupOutputGraph()
-        await outputGraphSetupPromise
-        if (!outputGainNode) {
-          outputGraphSetupPromise = null
-        }
-      } catch (error) {
-        if (!outputGainNode) {
-          outputGraphSetupPromise = null
-        }
-        console.warn('Unable to adjust original audio volume', error)
-        return
-      }
-    }
-
-    if (!outputGainNode) {
-      return
-    }
-
-    const gain = enabled.value ? originalVolume.value : 1
-    const now = outputGainNode.context.currentTime
-    outputGainNode.gain.cancelScheduledValues(now)
-    outputGainNode.gain.setTargetAtTime(gain, now, 0.015)
+  function updateOriginalVolume() {
+    setOutputGain(enabled.value ? originalVolume.value : 1)
   }
 
   function clearPollTimeout() {
@@ -430,15 +376,10 @@ export function useVoiceOverTranslation({
   }
 
   onBeforeUnmount(() => {
-    destroyed = true
     reset()
     if (video.value) {
       detach(video.value)
     }
-    outputAudioContext?.close().catch(() => {})
-    outputAudioContext = null
-    outputGainNode = null
-    outputGraphSetupPromise = null
   })
 
   watch([enabled, originalVolume], updateOriginalVolume)

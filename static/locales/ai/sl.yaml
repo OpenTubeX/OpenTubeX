@@ -1871,6 +1871,9 @@ Video:
     Zoom:
       Zoom: Povečava
       'Off': 'Izklopljeno'
+    Volume Boost:
+      Volume Boost: "Ojačitev glasnosti"
+      'Off': "Izklopljeno"
     TranslatedCaptionTemplate: '{language} (prevedeno iz jezika »{originalLanguage}«)'
     Auto-generated Caption Template: '{language} (samodejno ustvarjeno)'
     Audio Tracks: Zvočni posnetki

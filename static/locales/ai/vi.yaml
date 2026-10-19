@@ -1474,6 +1474,9 @@ Video:
     Zoom:
       Zoom: Thu phóng
       'Off': 'Tắt'
+    Volume Boost:
+      Volume Boost: "Tăng âm lượng"
+      'Off': "Tắt"
     Auto-generated Caption Template: '{language} (tự động tạo)'
     Up next in {seconds}: Tiếp theo sau {seconds}
     Resize dock: Đổi kích thước thanh bên

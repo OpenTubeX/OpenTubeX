@@ -1453,6 +1453,9 @@ Video:
     Zoom:
       Zoom: Zoom
       'Off': 'Nonaktif'
+    Volume Boost:
+      Volume Boost: "Penguat volume"
+      'Off': "Nonaktif"
     Auto-generated Caption Template: '{language} (dibuat otomatis)'
     Up next in {seconds}: Berikutnya dalam {seconds}
     Resize dock: Ubah ukuran dok

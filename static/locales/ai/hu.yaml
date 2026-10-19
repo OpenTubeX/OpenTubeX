@@ -1441,6 +1441,9 @@ Video:
     Zoom:
       Zoom: Nagyítás
       'Off': 'Ki'
+    Volume Boost:
+      Volume Boost: "Hangerő-erősítés"
+      'Off': "Ki"
     Auto-generated Caption Template: '{language} (automatikusan létrehozott)'
     Up next in {seconds}: Következik {seconds} múlva
     Resize dock: Dokkolt panel átméretezése

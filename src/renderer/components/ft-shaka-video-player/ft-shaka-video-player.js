@@ -25,7 +25,7 @@ import { getSubtitleRequestUrl } from '../../helpers/player/subtitleCookies'
 import { enableTwitchTsVideoGap } from '../../helpers/player/twitchTsVideoGap'
 import LightsOffOverlay from './LightsOffOverlay.vue'
 import { BooleanSettingButton } from './player-components/BooleanSettingButton'
-import { KeyboardShortcuts, PlayerIcons } from '../../../constants'
+import { KeyboardShortcuts, PlayerIcons, ZOOM_IN_ICON_VIEWBOX } from '../../../constants'
 import { useTabContext, useTabLifecycle } from '../../tabs/TabContext'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 import { AmbientModeButton } from './player-components/AmbientModeButton'
@@ -48,7 +48,7 @@ import { QuickPlaybackRateBar, setQuickPlaybackRateBarContext } from './player-c
 import './player-components/SeekPreviewBar'
 import { ScreenshotButton } from './player-components/ScreenshotButton'
 import { SkipSilenceButton } from './player-components/SkipSilenceButton'
-import { VideoZoomSelection } from './player-components/VideoZoomSelection'
+import { LevelSelection } from './player-components/LevelSelection'
 import { VoiceOverTranslationButton } from './player-components/VoiceOverTranslationButton'
 import { SleepTimer } from './player-components/SleepTimer'
 import { ShortsVideoInfoButton } from './player-components/ShortsVideoInfoButton'
@@ -134,6 +134,7 @@ import {
   stepVideoZoom,
   VIDEO_ZOOM_LEVELS,
 } from '../../helpers/player/videoZoom'
+import { DEFAULT_VOLUME_BOOST, sanitizeVolumeBoost, VOLUME_BOOST_LEVELS } from '../../helpers/player/volumeBoost'
 import { shouldStartPaidPromotionTimer } from '../../helpers/player/paidPromotion'
 import { resolveSponsorBlockEnterTarget, resolveSponsorBlockEnterTargets } from '../../helpers/player/sponsorBlockShortcut'
 import { createSponsorBlockMuteController } from '../../helpers/player/sponsorBlockMute'
@@ -167,6 +168,7 @@ import { useScrollMiniPlayer } from './opentubex/useScrollMiniPlayer'
 import { useSilenceSkipping } from './opentubex/useSilenceSkipping'
 import { useSleepTimer } from './opentubex/useSleepTimer'
 import { useSponsorBlockSubmission } from './opentubex/useSponsorBlockSubmission'
+import { usePlayerAudioOutput } from './opentubex/usePlayerAudioOutput'
 import { useVoiceOverTranslation } from './opentubex/useVoiceOverTranslation'
 import FtVideoAnnotations from '../FtVideoAnnotations/FtVideoAnnotations.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'
@@ -1433,6 +1435,7 @@ export default defineComponent({
       return voiceOverTranslationAvailable.value &&
         store.getters.getVoiceOverTranslationPrepareInBackground
     })
+    const playerAudioOutput = usePlayerAudioOutput(video)
     const voiceOverTranslation = useVoiceOverTranslation({
       video,
       videoId: computed(() => props.videoId),
@@ -1440,6 +1443,7 @@ export default defineComponent({
       autoPrepare: voiceOverTranslationAutoPrepare,
       originalVolume: voiceOverTranslationOriginalVolume,
       voiceVolume: voiceOverTranslationVolume,
+      setOutputGain: value => playerAudioOutput.setGain('voiceOver', value),
       onError: error => {
         const message = error instanceof RangeError
           ? t('Video.Player.Voice-over Translation.Duration Error')
@@ -4082,6 +4086,22 @@ export default defineComponent({
       return props.format === 'dash' && props.vrProjection === 'EQUIRECTANGULAR'
     })
 
+    // Like skip silence and voice-over translation, this needs Web Audio
+    // processing, which the player does not use on iOS.
+    const volumeBoostPossible = !process.env.IS_IOS
+    const volumeBoost = computed(() => {
+      return volumeBoostPossible ? sanitizeVolumeBoost(store.getters.getTabVolumeBoost(mediaTabId)) : DEFAULT_VOLUME_BOOST
+    })
+
+    /**
+     * @param {number} value
+     */
+    function updateVolumeBoost(value) {
+      store.commit('setTabVolumeBoost', { tabId: mediaTabId, value: sanitizeVolumeBoost(value) })
+    }
+
+    watch(volumeBoost, value => playerAudioOutput.setGain('boost', value))
+
     const enableVideoZoom = computed(() => store.getters.getEnableVideoZoom)
     const selectedVideoZoom = computed(() => {
       return sanitizeVideoZoom(store.getters.getTabVideoZoom(mediaTabId))
@@ -5053,6 +5073,7 @@ export default defineComponent({
           'ft_ambient_mode',
           'ft_lights_off',
           'ft_video_zoom',
+          'ft_volume_boost',
           'ft_loop',
           'ft_ab_repeat',
           'ft_screenshot',
@@ -5105,6 +5126,7 @@ export default defineComponent({
           'ft_ambient_mode',
           'ft_lights_off',
           'ft_video_zoom',
+          'ft_volume_boost',
           'ft_loop',
           'ft_ab_repeat',
           'recenter_vr',
@@ -5155,6 +5177,10 @@ export default defineComponent({
 
       if (!videoZoomPossible.value) {
         removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_video_zoom')
+      }
+
+      if (!volumeBoostPossible) {
+        removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_volume_boost')
       }
 
       if (!showLightsOffToggle.value) {
@@ -9758,9 +9784,16 @@ export default defineComponent({
       /** @implements {shaka.extern.IUIElement.Factory} */
       class VideoZoomSelectionFactory {
         create(rootElement, controls) {
-          return new VideoZoomSelection(
-            videoZoom,
-            updateVideoZoom,
+          return new LevelSelection(
+            {
+              value: videoZoom,
+              updateValue: updateVideoZoom,
+              levels: VIDEO_ZOOM_LEVELS,
+              formatLevel: zoom => zoom === DEFAULT_VIDEO_ZOOM ? t('Video.Player.Zoom.Off') : formatVideoZoom(zoom),
+              getLabel: () => t('Video.Player.Zoom.Zoom'),
+              icon: { path: PlayerIcons.ZOOM_IN_ROUNDED, viewBox: ZOOM_IN_ICON_VIEWBOX },
+              className: 'video-zoom',
+            },
             events,
             rootElement,
             controls
@@ -9769,6 +9802,32 @@ export default defineComponent({
       }
 
       registerOwnElement(shakaOverflowMenu, 'ft_video_zoom', new VideoZoomSelectionFactory())
+    }
+
+    function registerVolumeBoostSelection() {
+      /** @implements {shaka.extern.IUIElement.Factory} */
+      class VolumeBoostSelectionFactory {
+        create(rootElement, controls) {
+          return new LevelSelection(
+            {
+              value: volumeBoost,
+              updateValue: updateVolumeBoost,
+              levels: VOLUME_BOOST_LEVELS,
+              formatLevel: boost => boost === DEFAULT_VOLUME_BOOST
+                ? t('Video.Player.Volume Boost.Off')
+                : `${Math.round(boost * 100)}%`,
+              getLabel: () => t('Video.Player.Volume Boost.Volume Boost'),
+              icon: PlayerIcons.VOLUME_UP_FILLED,
+              className: 'volume-boost',
+            },
+            events,
+            rootElement,
+            controls
+          )
+        }
+      }
+
+      registerOwnElement(shakaOverflowMenu, 'ft_volume_boost', new VolumeBoostSelectionFactory())
     }
 
     function registerLightsOffButton() {
@@ -11914,6 +11973,7 @@ export default defineComponent({
       )
 
       voiceOverTranslation.attach(videoElement)
+      playerAudioOutput.setGain('boost', volumeBoost.value)
 
       await initializeActiveTab()
 
@@ -12038,6 +12098,7 @@ export default defineComponent({
       registerMusicVisualizerButton()
       registerMusicModeButton()
       registerVideoZoomSelection()
+      registerVolumeBoostSelection()
       registerLightsOffButton()
       registerSkipSilenceButton()
       registerVoiceOverTranslationButton()

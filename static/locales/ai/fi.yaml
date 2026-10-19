@@ -1482,6 +1482,9 @@ Video:
     Zoom:
       Zoom: Zoomaus
       'Off': 'Pois käytöstä'
+    Volume Boost:
+      Volume Boost: "Äänenvoimakkuuden vahvistus"
+      'Off': "Pois käytöstä"
     Auto-generated Caption Template: '{language} (luotu automaattisesti)'
     Up next in {seconds}: Seuraavaksi {seconds} kuluttua
     Resize dock: Muuta telakan kokoa

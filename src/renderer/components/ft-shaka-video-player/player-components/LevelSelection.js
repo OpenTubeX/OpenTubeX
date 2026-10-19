@@ -1,33 +1,41 @@
 import shaka from 'shaka-player'
 import { watch } from 'vue'
 
-import i18n from '../../../i18n/index'
-import { PlayerIcons, ZOOM_IN_ICON_VIEWBOX } from '../../../../constants'
-import {
-  DEFAULT_VIDEO_ZOOM,
-  formatVideoZoom,
-  VIDEO_ZOOM_LEVELS,
-} from '../../../helpers/player/videoZoom'
+import { PlayerIcons } from '../../../../constants'
 
-export class VideoZoomSelection extends shaka.ui.SettingsMenu {
+/**
+ * A settings submenu that picks one of a few preset levels, such as zoom or
+ * volume boost.
+ */
+export class LevelSelection extends shaka.ui.SettingsMenu {
   /**
-   * @param {import('vue').ComputedRef<number>} videoZoom
-   * @param {(value: number) => void} updateVideoZoom
+   * @param {{
+   *   value: import('vue').ComputedRef<number>,
+   *   updateValue: (value: number) => void,
+   *   levels: readonly number[],
+   *   formatLevel: (value: number) => string,
+   *   getLabel: () => string,
+   *   icon: string | { path: string, viewBox: string },
+   *   className: string
+   * }} options
    * @param {EventTarget} events
    * @param {HTMLElement} parent
    * @param {shaka.ui.Controls} controls
    */
-  constructor(videoZoom, updateVideoZoom, events, parent, controls) {
-    super(parent, controls, {
-      path: PlayerIcons.ZOOM_IN_ROUNDED,
-      viewBox: ZOOM_IN_ICON_VIEWBOX,
-    })
+  constructor({ value, updateValue, levels, formatLevel, getLabel, icon, className }, events, parent, controls) {
+    super(parent, controls, icon)
 
-    this.button.classList.add('video-zoom-button', 'shaka-tooltip-status')
-    this.menu.classList.add('video-zoom-menu')
+    this.button.classList.add(`${className}-button`, 'shaka-tooltip-status')
+    this.menu.classList.add(`${className}-menu`)
 
     /** @private */
-    this.videoZoom_ = videoZoom
+    this.value_ = value
+
+    /** @private */
+    this.formatLevel_ = formatLevel
+
+    /** @private */
+    this.getLabel_ = getLabel
 
     /** @type {SVGElement} */
     const checkmarkIcon = new shaka.ui.Icon(null, PlayerIcons.DONE_FILLED).getSvgElement()
@@ -38,18 +46,18 @@ export class VideoZoomSelection extends shaka.ui.SettingsMenu {
     this.checkmarkIcon_ = checkmarkIcon
 
     /** @private @type {Map<number, HTMLButtonElement>} */
-    this.zoomButtons_ = new Map()
+    this.levelButtons_ = new Map()
 
-    for (const zoom of VIDEO_ZOOM_LEVELS) {
+    for (const level of levels) {
       const button = document.createElement('button')
       button.appendChild(document.createElement('span'))
       this.menu.appendChild(button)
 
       this.eventManager.listen(button, 'click', () => {
-        updateVideoZoom(zoom)
+        updateValue(level)
       })
 
-      this.zoomButtons_.set(zoom, button)
+      this.levelButtons_.set(level, button)
     }
 
     this.eventManager.listen(events, 'localeChanged', () => {
@@ -66,7 +74,7 @@ export class VideoZoomSelection extends shaka.ui.SettingsMenu {
     }
 
     /** @private */
-    this.stopVideoZoomWatch_ = watch(this.videoZoom_, () => {
+    this.stopValueWatch_ = watch(this.value_, () => {
       this.updateState_()
     })
 
@@ -75,23 +83,21 @@ export class VideoZoomSelection extends shaka.ui.SettingsMenu {
   }
 
   release() {
-    this.stopVideoZoomWatch_()
+    this.stopValueWatch_()
     super.release()
   }
 
   /** @private */
   updateLocalisedStrings_() {
-    const label = i18n.global.t('Video.Player.Zoom.Zoom')
+    const label = this.getLabel_()
 
     this.button.ariaLabel = label
     this.nameSpan.textContent = label
     this.backSpan.textContent = label
     this.backButton.ariaLabel = this.localization.resolve('BACK')
 
-    for (const [zoom, button] of this.zoomButtons_) {
-      button.querySelector('span').textContent = zoom === DEFAULT_VIDEO_ZOOM
-        ? i18n.global.t('Video.Player.Zoom.Off')
-        : formatVideoZoom(zoom)
+    for (const [level, button] of this.levelButtons_) {
+      button.querySelector('span').textContent = this.formatLevel_(level)
     }
 
     this.updateState_()
@@ -99,10 +105,10 @@ export class VideoZoomSelection extends shaka.ui.SettingsMenu {
 
   /** @private */
   updateState_() {
-    const currentZoom = this.videoZoom_.value
+    const currentLevel = this.value_.value
 
-    for (const [zoom, button] of this.zoomButtons_) {
-      const isSelected = zoom === currentZoom
+    for (const [level, button] of this.levelButtons_) {
+      const isSelected = level === currentLevel
 
       button.querySelector('span').classList.toggle('shaka-chosen-item', isSelected)
       button.ariaSelected = isSelected ? 'true' : 'false'
@@ -112,9 +118,7 @@ export class VideoZoomSelection extends shaka.ui.SettingsMenu {
       }
     }
 
-    const status = currentZoom === DEFAULT_VIDEO_ZOOM
-      ? i18n.global.t('Video.Player.Zoom.Off')
-      : formatVideoZoom(currentZoom)
+    const status = this.formatLevel_(currentLevel)
 
     this.currentSelection.textContent = status
     this.button.setAttribute('shaka-status', status)

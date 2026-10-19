@@ -1477,6 +1477,9 @@ Video:
     Zoom:
       Zoom: تكبير
       Off: عن
+    Volume Boost:
+      Volume Boost: "تعزيز الصوت"
+      'Off': "إيقاف"
     Auto-generated Caption Template: '{language} (تم إنشاؤه تلقائيًا)'
     Up next in {seconds}: التالي في {seconds}
     Resize dock: تغيير حجم قفص الاتهام

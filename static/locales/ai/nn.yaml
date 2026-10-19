@@ -1690,6 +1690,9 @@ Video:
     Zoom:
       Zoom: Forstørring
       'Off': 'Av'
+    Volume Boost:
+      Volume Boost: "Volumforsterking"
+      'Off': "Av"
     TranslatedCaptionTemplate: '{language} (omsett frå "{originalLanguage}")'
     Auto-generated Caption Template: '{language} (automatisk generert)'
     Audio Tracks: Lydspor

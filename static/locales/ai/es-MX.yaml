@@ -1724,6 +1724,9 @@ Video:
     Zoom:
       Zoom: Zoom
       'Off': Desactivado
+    Volume Boost:
+      Volume Boost: "Amplificación de volumen"
+      'Off': "Desactivada"
     TranslatedCaptionTemplate: '{language} (traducido de "{originalLanguage}")'
     Auto-generated Caption Template: '{language} (generados automáticamente)'
     Audio Tracks: Pistas de audio

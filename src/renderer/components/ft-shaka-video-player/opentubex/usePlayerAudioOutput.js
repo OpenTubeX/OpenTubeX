@@ -1,0 +1,87 @@
+import { onBeforeUnmount } from 'vue'
+
+/** @typedef {'voiceOver' | 'boost'} PlayerAudioGainStage */
+
+/**
+ * Routes the player's audio through gain stages that multiply with the
+ * element volume. The graph is only built once a stage leaves unity gain,
+ * because a media element can never be detached from Web Audio again.
+ *
+ * A media element can only have one MediaElementAudioSourceNode, so all output
+ * processing for the player must share this graph.
+ *
+ * @param {import('vue').Ref<HTMLVideoElement | null>} video
+ */
+export function usePlayerAudioOutput(video) {
+  /** @type {Record<PlayerAudioGainStage, number>} */
+  const gains = { voiceOver: 1, boost: 1 }
+
+  /** @type {AudioContext | null} */
+  let audioContext = null
+  /** @type {Record<PlayerAudioGainStage, GainNode> | null} */
+  let gainNodes = null
+  /** @type {Promise<void> | null} */
+  let setupPromise = null
+  let destroyed = false
+
+  async function setupGraph() {
+    const videoElement = video.value
+    if (!videoElement) {
+      return
+    }
+
+    audioContext ??= new AudioContext()
+    await audioContext.resume()
+    if (destroyed || video.value !== videoElement) {
+      return
+    }
+
+    const source = audioContext.createMediaElementSource(videoElement)
+    const voiceOver = audioContext.createGain()
+    const boost = audioContext.createGain()
+    voiceOver.gain.value = gains.voiceOver
+    boost.gain.value = gains.boost
+    source.connect(voiceOver).connect(boost).connect(audioContext.destination)
+    gainNodes = { voiceOver, boost }
+  }
+
+  /**
+   * @param {PlayerAudioGainStage} stage
+   * @param {number} value
+   */
+  async function setGain(stage, value) {
+    gains[stage] = value
+
+    if (!gainNodes && value !== 1) {
+      try {
+        setupPromise ??= setupGraph()
+        await setupPromise
+      } catch (error) {
+        console.warn('Unable to adjust player audio output', error)
+      } finally {
+        if (!gainNodes) {
+          setupPromise = null
+        }
+      }
+    }
+
+    if (!gainNodes) {
+      return
+    }
+
+    const gain = gainNodes[stage].gain
+    const now = audioContext.currentTime
+    gain.cancelScheduledValues(now)
+    gain.setTargetAtTime(gains[stage], now, 0.015)
+  }
+
+  onBeforeUnmount(() => {
+    destroyed = true
+    audioContext?.close().catch(() => {})
+    audioContext = null
+    gainNodes = null
+    setupPromise = null
+  })
+
+  return { setGain }
+}

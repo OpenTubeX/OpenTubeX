@@ -1453,6 +1453,9 @@ Video:
     Zoom:
       Zoom: Miqyas
       'Off': 'Bağlı'
+    Volume Boost:
+      Volume Boost: "Səs gücləndirmə"
+      'Off': "Söndürülüb"
     Auto-generated Caption Template: '{language} (avtomatik yaradılıb)'
     Up next in {seconds}: "{seconds} saniyədən sonra növbəti"
     Resize dock: Panelin ölçüsünü dəyiş

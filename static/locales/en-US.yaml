@@ -2405,6 +2405,9 @@ Video:
     Zoom:
       Zoom: Zoom
       Off: 'Off'
+    Volume Boost:
+      Volume Boost: Volume Boost
+      Off: 'Off'
     TranslatedCaptionTemplate: '{language} (translated from "{originalLanguage}")'
     Auto-generated Caption Template: '{language} (auto-generated)'
     Audio Tracks: Audio Tracks

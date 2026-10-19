@@ -1,6 +1,7 @@
 import packageDetails from '../../../../package.json'
 import { getTabPageIcon } from '../../tabs/tabPageIcon'
 import { DEFAULT_VIDEO_ZOOM } from '../../helpers/player/videoZoom'
+import { DEFAULT_VOLUME_BOOST } from '../../helpers/player/volumeBoost'
 import { reconcilePendingTabOrder } from '../../tabs/pendingTabOrder'
 import { formatTabTitle } from '../../tabs/tabTitle'
 import { getCapacitorTabService } from '../../tabs/CapacitorTabService'
@@ -26,6 +27,7 @@ const state = {
   tabBarScrollPosition: 0,
   currentWatchTimestamps: {},
   videoZoomByTabId: {},
+  volumeBoostByTabId: {},
   lightsOffByTabId: {},
   musicModeByTabId: {},
   skipSilenceByTabId: {}
@@ -51,6 +53,7 @@ const getters = {
   getCurrentWatchTimestamp: (state) => state.currentWatchTimestamps[state.activeTabId] ?? null,
   getWatchTimestamp: (state) => (tabId) => state.currentWatchTimestamps[tabId] ?? null,
   getTabVideoZoom: (state) => (tabId) => state.videoZoomByTabId[tabId] ?? DEFAULT_VIDEO_ZOOM,
+  getTabVolumeBoost: (state) => (tabId) => state.volumeBoostByTabId[tabId] ?? DEFAULT_VOLUME_BOOST,
   getTabSkipSilence: (state) => (tabId) => state.skipSilenceByTabId[tabId] ?? false,
   getTabHistoryState: (state) => (tabId) => {
     const tab = state.tabs.find(candidate => candidate.id === tabId)
@@ -139,6 +142,11 @@ const mutations = {
     for (const tabId of Object.keys(state.videoZoomByTabId)) {
       if (tabId !== 'web' && !incomingIds.has(tabId)) {
         delete state.videoZoomByTabId[tabId]
+      }
+    }
+    for (const tabId of Object.keys(state.volumeBoostByTabId)) {
+      if (tabId !== 'web' && !incomingIds.has(tabId)) {
+        delete state.volumeBoostByTabId[tabId]
       }
     }
     for (const tabId of Object.keys(state.lightsOffByTabId)) {
@@ -273,6 +281,10 @@ const mutations = {
 
   setTabVideoZoom(state, { tabId, value }) {
     state.videoZoomByTabId[tabId] = value
+  },
+
+  setTabVolumeBoost(state, { tabId, value }) {
+    state.volumeBoostByTabId[tabId] = value
   },
 
   setTabLightsOff(state, { tabId, value }) {

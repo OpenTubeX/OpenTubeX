@@ -1463,6 +1463,9 @@ Video:
     Zoom:
       Zoom: Aðdráttur
       'Off': 'Slökkt'
+    Volume Boost:
+      Volume Boost: "Hljóðstyrksaukning"
+      'Off': "Slökkt"
     Auto-generated Caption Template: '{language} (útbúið sjálfkrafa)'
     Up next in {seconds}: Næst eftir {seconds}
     Resize dock: Breyta stærð spjalds
