@@ -53,8 +53,8 @@ importers:
         specifier: ^8.0.3
         version: 8.0.3(@capacitor/core@8.5.3)
       '@capacitor/filesystem':
-        specifier: ^8.1.4
-        version: 8.1.4(@capacitor/core@8.5.3)
+        specifier: ^8.1.5
+        version: 8.1.5(@capacitor/core@8.5.3)
       '@capacitor/haptics':
         specifier: ^8.0.2
         version: 8.0.2(@capacitor/core@8.5.3)
@@ -491,8 +491,8 @@ packages:
     peerDependencies:
       '@capacitor/core': '>=8.0.0'
 
-  '@capacitor/filesystem@8.1.4':
-    resolution: {integrity: sha512-8MXmt10cb+dGWoh8jUeO8on0U6iETQCX5k+fmdB278PZ3MYDEVGQo08+hroaOtUbK3+5stiRk4/K6QBHKepv0A==}
+  '@capacitor/filesystem@8.1.5':
+    resolution: {integrity: sha512-m1RkI8L83NJeppEKyRWioK3MDp2vjlA+QfUQcF8/xRlcXNC2HYxqoyYJ+K4M0EcVovy+g+4F24S05+bhK4Vgdg==}
     peerDependencies:
       '@capacitor/core': '>=8.0.0'
 
@@ -5370,7 +5370,7 @@ snapshots:
     dependencies:
       '@capacitor/core': 8.5.3
 
-  '@capacitor/filesystem@8.1.4(@capacitor/core@8.5.3)':
+  '@capacitor/filesystem@8.1.5(@capacitor/core@8.5.3)':
     dependencies:
       '@capacitor/core': 8.5.3
       '@capacitor/synapse': 1.0.4
@@ -6571,7 +6571,7 @@ snapshots:
 
   '@vue/compiler-core@3.5.43':
     dependencies:
-      '@babel/parser': 7.29.8
+      '@babel/parser': 7.29.9
       '@vue/shared': 3.5.43
       entities: 7.0.1
       estree-walker: 2.0.2
@@ -6597,14 +6597,14 @@ snapshots:
 
   '@vue/compiler-sfc@3.5.43':
     dependencies:
-      '@babel/parser': 7.29.8
+      '@babel/parser': 7.29.9
       '@vue/compiler-core': 3.5.43
       '@vue/compiler-dom': 3.5.43
       '@vue/compiler-ssr': 3.5.43
       '@vue/shared': 3.5.43
       estree-walker: 2.0.2
       magic-string: 0.30.21
-      postcss: 8.5.29
+      postcss: 8.5.31
       source-map-js: 1.2.2
 
   '@vue/compiler-sfc@3.5.44':
