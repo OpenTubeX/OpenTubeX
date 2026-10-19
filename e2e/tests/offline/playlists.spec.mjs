@@ -774,6 +774,33 @@ test.describe('custom playlists overview order', () => {
         .toHaveText(['Overview A', 'Overview C', 'Overview B'])
     })
   }
+
+  test('keeps a drag move when the cursor enters the gliding target again', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+    const titles = page.locator('.playlistList [data-playlist-drag-item] .h3Title')
+    await expect(titles).toHaveText(['Overview C', 'Overview B', 'Overview A'])
+
+    // After A takes C's place, C glides away beneath the cursor and fires
+    // dragenter again once the move throttle has passed.
+    await page.evaluate(async () => {
+      const card = name => [...document.querySelectorAll('.playlistList [data-playlist-drag-item]')]
+        .find(element => element.textContent.includes(`Overview ${name}`))
+      const dataTransfer = new DataTransfer()
+      const fire = (element, type) => element.dispatchEvent(new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer }))
+      const source = card('A')
+      fire(source, 'dragstart')
+      // The cards receive the dragged playlist on the next render.
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+      fire(card('C'), 'dragenter')
+      await new Promise(resolve => setTimeout(resolve, 150))
+      fire(card('C').querySelector('.h3Title'), 'dragenter')
+      fire(source, 'dragend')
+    })
+
+    await expect(titles).toHaveText(['Overview A', 'Overview C', 'Overview B'])
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getUserPlaylistsCustomOrder))
+      .toEqual(['custom-overview-a', 'custom-overview-c', 'custom-overview-b'])
+  })
 })
 
 test.describe('custom playlist order', () => {

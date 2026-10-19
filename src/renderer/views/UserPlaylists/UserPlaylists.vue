@@ -465,6 +465,9 @@ async function movePlaylist(id, getTargetIndex) {
  */
 function moveDraggedPlaylistTemporarily(target, source) {
   pendingNativeDragMove = null
+  // The cards glide after a move, so the cursor can enter the same target again.
+  // Moving onto it twice would undo the first move. Pointer drags track this themselves.
+  if (!source.pointerDragging && target.videoId === lastNativeDragTargetId) return
   const ids = tempCustomOrder.value?.slice() ?? allPlaylists.value.map(playlistKey)
   const targetIndex = ids.indexOf(target.videoId)
   const sourceIndex = ids.indexOf(source.videoId)
@@ -473,7 +476,11 @@ function moveDraggedPlaylistTemporarily(target, source) {
   ids.splice(sourceIndex, 1)
   ids.splice(targetIndex, 0, source.videoId)
   tempCustomOrder.value = ids
+  lastNativeDragTargetId = target.videoId
 }
+
+/** @type {string | null} Playlist the natively dragged card last moved onto */
+let lastNativeDragTargetId = null
 
 /** @type {Parameters<typeof moveDraggedPlaylistTemporarily> | null} Latest native target skipped by the throttle */
 let pendingNativeDragMove = null
@@ -497,6 +504,7 @@ function onMoveDraggedPlaylist(target, source) {
 
 async function onDragPlaylistEnd() {
   if (pendingNativeDragMove != null) moveDraggedPlaylistTemporarily(...pendingNativeDragMove)
+  lastNativeDragTargetId = null
   if (tempCustomOrder.value != null) {
     await store.dispatch('updateUserPlaylistsCustomOrder', tempCustomOrder.value)
   }
