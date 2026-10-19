@@ -1721,6 +1721,7 @@ const actions = {
     clearTimeout(autoSyncTimer)
     for (const pending of eventSyncTimers.values()) clearTimeout(pending.timer)
     eventSyncTimers.clear()
+    hiddenEventSyncReasons.clear()
     autoSyncTimer = null
   },
 

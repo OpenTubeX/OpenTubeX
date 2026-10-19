@@ -469,6 +469,20 @@ test('queued event syncs wait while the mobile app is hidden and replay on resum
   assert.equal(f.calls.length, 1)
 })
 
+test('stopping automatic sync discards event syncs queued while hidden', async t => {
+  const f = await schedulingFixture(t, { IS_CAPACITOR: 'true' })
+  f.schedule('history')
+  f.setHidden(true)
+  await f.tick(30000)
+  f.stop()
+  f.start()
+  f.setHidden(false)
+  const calls = f.calls.length
+  f.resume()
+  await f.tick(30000)
+  assert.equal(f.calls.length, calls)
+})
+
 test('periodic fallback resumes after a live disconnect', async t => {
   const f = await schedulingFixture(t)
   f.liveConnection.setConnected(true)
