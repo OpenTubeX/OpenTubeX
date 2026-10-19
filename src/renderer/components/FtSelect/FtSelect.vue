@@ -592,7 +592,9 @@ async function refreshDropdownLayout() {
   await nextTick()
 
   const menu = dropdown.value
-  const contentEnd = options.value?.at(-1) ?? null
+  // Rows inserted above the window can be appended to the ref array.
+  const lastRendered = renderedOptions.value.at(-1)
+  const contentEnd = (lastRendered && findOptionElement(lastRendered.index)) ?? null
   if (menu !== null) clampOverlayScrollTop(menu, contentEnd)
 }
 
