@@ -200,7 +200,7 @@ const capacitor = {
       if (isYouTubeVideo && !useDefaultClients) args.push('--extractor-args', useAuthentication ? 'youtube:player_client=default,web_safari' : 'youtube:player_client=default,web_embedded,-android_vr')
       args.push(isYouTubeVideo ? `https://www.youtube.com/watch?v=${videoId}` : videoId)
       const [info, binaries] = await Promise.all([extract(args, useAuthentication, !isYouTubeVideo, parseYtDlpPlaybackInfo, true), native.info()])
-      const playbackCaptions = mapPlaybackCaptions(info.requested_subtitles, info.subtitles, !isYouTubeVideo, info.language)
+      const playbackCaptions = mapPlaybackCaptions(info.requested_subtitles, info.subtitles, !isYouTubeVideo, isYouTubeVideo ? info.language : null)
       let formats = Array.isArray(info.formats) ? info.formats : []
       if (process.env.IS_IOS) {
         // WebKit cannot fetch yt-dlp's media URLs through CORS, including

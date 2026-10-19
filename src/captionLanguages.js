@@ -45,7 +45,8 @@ export function findCaptionByLocale(captions, preferredLocale) {
 /**
  * Selects the caption that should be enabled by default.
  * Transcripts of dubbed audio are never picked, as they are machine translations of lower quality.
- * @template {{ language: string, isAutotranslated?: boolean, isDubbed?: boolean }} T
+ * Without a match for the preferred locale, the original audio language is preferred.
+ * @template {{ language: string, isAutotranslated?: boolean, isDubbed?: boolean, isOriginalLanguage?: boolean }} T
  * @param {T[]} captions
  * @param {string} preferredLocale
  * @param {boolean} enableCaptionTranslations
@@ -56,7 +57,10 @@ export function getPreferredCaption(captions, preferredLocale, enableCaptionTran
     !caption.isDubbed && (enableCaptionTranslations || !caption.isAutotranslated)
   )
 
-  return findCaptionByLocale(selectableCaptions, preferredLocale) ?? selectableCaptions[0] ?? null
+  return findCaptionByLocale(selectableCaptions, preferredLocale) ??
+    selectableCaptions.find(caption => caption.isOriginalLanguage) ??
+    selectableCaptions[0] ??
+    null
 }
 
 /**

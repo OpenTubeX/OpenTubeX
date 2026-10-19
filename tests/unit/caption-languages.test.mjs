@@ -30,6 +30,10 @@ test('default captions skip transcripts of dubbed audio', () => {
 
   assert.equal(getPreferredCaption(captions, 'de', true), captions[1])
   assert.equal(getPreferredCaption(captions, 'de', false), captions[2])
+
+  // Without a match, the original language wins over the first track in sort order
+  const withArabic = [{ language: 'ar', label: 'Arabic' }, ...captions.slice(0, 2), { ...captions[2], isOriginalLanguage: true }]
+  assert.equal(getPreferredCaption(withArabic, 'de', false), withArabic[3])
 })
 
 test('yt-dlp captions flag dubbed transcripts and translate from the original language', () => {
@@ -44,6 +48,7 @@ test('yt-dlp captions flag dubbed transcripts and translate from the original la
 
   const { captions, captionTranslations } = mapPlaybackCaptions(requested, null, false, 'en-US')
   assert.deepEqual(captions.map(caption => [caption.language, !!caption.isDubbed]), [['bn', true], ['en', false], ['de', true]])
+  assert.deepEqual(captions.filter(caption => caption.isOriginalLanguage).map(caption => caption.language), ['en'])
   assert.equal(captionTranslations[0].originalLanguage, 'en')
   assert.equal(new URL(captionTranslations[0].url).searchParams.get('lang'), 'en')
   assert.equal(new URL(captionTranslations[0].url).searchParams.get('tlang'), 'de')
