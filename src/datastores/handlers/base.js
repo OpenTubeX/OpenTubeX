@@ -298,8 +298,9 @@ class History {
       ? new Map((await db.history.findAsync(createIdQuery('videoId', insertionIds), { videoId: 1, timeWatched: 1 }))
           .map(record => [record.videoId, record.timeWatched]))
       : new Map()
+    // Progress-only records have no watch time, so a synced record replaces them.
     const skipped = new Set(insertions
-      .filter(record => stored.has(record.videoId) && !(record.timeWatched > stored.get(record.videoId)))
+      .filter(record => Number.isFinite(stored.get(record.videoId)) && !(record.timeWatched > stored.get(record.videoId)))
       .map(record => record.videoId))
     const migratedInsertions = insertions.filter(record => !stored.has(record.videoId)).map(historyReplacement)
     const migratedUpdates = [
