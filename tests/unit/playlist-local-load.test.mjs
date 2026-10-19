@@ -59,7 +59,7 @@ function harness() {
     console: { error: error => errors.push(error) },
   }
   vm.runInNewContext(extractSourceBetweenMarkers(playlistSource, '// Unmounting stops the playlist watcher', '\nlet previewAnimationFrame'), context)
-  const load = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'async function getPlaylistInformationLocal() {', '\nasync function getPlaylistInformationInvidious(')}\ngetPlaylistInformationLocal`, context)
+  const load = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'function appendLocalPlaylistPage(', '\nasync function loadCachedPlaylistInformation(')}\n${extractSourceBetweenMarkers(playlistSource, 'async function getPlaylistInformationLocal() {', '\nasync function getPlaylistInformationInvidious(')}\ngetPlaylistInformationLocal`, context)
   const state = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'const currentVideoIndexZeroBased =', '\nwatch(')}\n;({ nextVideo, isWaitingForNextVideo, upcomingVideos })`, context)
   Object.assign(context, state)
   const skips = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'const previousVideoSourceIndex =', '\nwatch(')}\n;({ canPlayNextVideo, canPlayPreviousVideo })`, context)

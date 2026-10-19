@@ -51,7 +51,7 @@ function harness({ laterPageError = null } = {}) {
     showApiErrorToast: (_message, error) => errors.push(error), t: key => key,
     console: { error: error => errors.push(error) },
   }
-  const load = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'async function loadCachedPlaylistInformation(', '\nasync function getPlaylistInformationLocal(')}\nloadCachedPlaylistInformation`, context)
+  const load = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'function appendLocalPlaylistPage(', '\nasync function getPlaylistInformationLocal(')}\nloadCachedPlaylistInformation`, context)
   const shuffle = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'function shuffleItems(', '\nconst playlistItemsWrapper =')}\nshufflePlaylistItems`, context)
   const state = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'const currentVideoIndexZeroBased =', '\nwatch(')}\n;({ nextVideo, upcomingVideos, playlistUnavailableVideoCount, isWaitingForNextVideo })`, context)
 

@@ -1073,6 +1073,20 @@ function playPreviousVideo() {
 }
 
 /**
+ * @param {object[]} videos every video loaded so far, extended in place
+ * @param {object[]} items the raw items of the next page
+ */
+function appendLocalPlaylistPage(videos, items) {
+  const newVideos = parseLocalPlaylistVideos(items)
+  videos.push(...newVideos)
+  playlistItems.value = applyReversePlaylistState(videos.slice())
+  if (shuffleEnabled.value) {
+    // Keep the established shuffle order, including entries already played.
+    randomizedPlaylistItems.value = randomizedPlaylistItems.value.concat(shuffleItems(newVideos.slice()))
+  }
+}
+
+/**
  * @param {{ id: string, title: string, channelName: string, channelId: string, items: VideoData[], continuationData: string | null }} cachedPlaylist
  */
 async function loadCachedPlaylistInformation(cachedPlaylist) {
@@ -1101,13 +1115,7 @@ async function loadCachedPlaylistInformation(cachedPlaylist) {
     const continuationData = await getLocalCachedFeedContinuation('playlist', cachedPlaylist.continuationData)
     await untilEndOfLocalPlayList(continuationData, (p) => {
       if (generation !== playlistLoadGeneration) return
-      const newVideos = parseLocalPlaylistVideos(p.items)
-      videos.push(...newVideos)
-      playlistItems.value = applyReversePlaylistState(videos.slice())
-      if (shuffleEnabled.value) {
-        // Keep the established shuffle order, including entries already played.
-        randomizedPlaylistItems.value = randomizedPlaylistItems.value.concat(shuffleItems(newVideos.slice()))
-      }
+      appendLocalPlaylistPage(videos, p.items)
     }, { shouldContinue: () => generation === playlistLoadGeneration })
     if (generation === playlistLoadGeneration) hasUnloadedPlaylistVideos.value = false
   } catch (err) {
@@ -1158,13 +1166,7 @@ async function getPlaylistInformationLocal() {
     try {
       await untilEndOfLocalPlayList(playlist, (p) => {
         if (generation !== playlistLoadGeneration) return
-        const newVideos = parseLocalPlaylistVideos(p.items)
-        videos.push(...newVideos)
-        playlistItems.value = applyReversePlaylistState(videos.slice())
-        if (shuffleEnabled.value) {
-          // Keep the established shuffle order, including entries already played.
-          randomizedPlaylistItems.value = randomizedPlaylistItems.value.concat(shuffleItems(newVideos.slice()))
-        }
+        appendLocalPlaylistPage(videos, p.items)
       }, { runCallbackOnceFirst: false, shouldContinue: () => generation === playlistLoadGeneration })
       if (generation === playlistLoadGeneration) hasUnloadedPlaylistVideos.value = false
     } catch (err) {
