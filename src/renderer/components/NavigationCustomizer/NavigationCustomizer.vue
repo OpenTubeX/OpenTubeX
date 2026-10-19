@@ -175,6 +175,7 @@ import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../store/index'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { listenForOutsidePress } from '../../helpers/outsidePress'
 import { useOrderedItemReorder } from '../../composables/useOrderedItemReorder'
 import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
 import { moveItemByVisibleOffset } from '../../../orderedItems'
@@ -296,11 +297,12 @@ watch(itemPickerOpen, async (isOpen) => {
   clampItemPickerScroll()
 })
 
-onMounted(() => document.addEventListener('pointerdown', closeItemPickerFromOutside))
+let stopOutsidePress = null
+onMounted(() => { stopOutsidePress = listenForOutsidePress(closeItemPickerFromOutside) })
 onBeforeUnmount(() => {
   stopObservingItemPicker()
   navigationResizeObserver?.disconnect()
-  document.removeEventListener('pointerdown', closeItemPickerFromOutside)
+  stopOutsidePress?.()
 })
 
 async function updateItems(items) {

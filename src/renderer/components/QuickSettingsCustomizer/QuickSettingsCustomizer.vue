@@ -190,6 +190,7 @@ import { moveItemByVisibleOffset } from '../../../orderedItems'
 import { useOrderedItemReorder } from '../../composables/useOrderedItemReorder'
 import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { listenForOutsidePress } from '../../helpers/outsidePress'
 import {
   createQuickSettingCatalog,
   createQuickSettingSections,
@@ -283,10 +284,11 @@ watch(quickSettingsActionsRef, (actions) => {
   clampQuickSettingsScroll()
 })
 
-onMounted(() => document.addEventListener('pointerdown', closeSettingPickerFromOutside))
+let stopOutsidePress = null
+onMounted(() => { stopOutsidePress = listenForOutsidePress(closeSettingPickerFromOutside) })
 onBeforeUnmount(() => {
   quickSettingsResizeObserver?.disconnect()
-  document.removeEventListener('pointerdown', closeSettingPickerFromOutside)
+  stopOutsidePress?.()
 })
 
 async function addQuickSetting(_, { dataListIndex }) {

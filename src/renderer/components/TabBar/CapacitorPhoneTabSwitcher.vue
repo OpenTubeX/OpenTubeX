@@ -46,6 +46,7 @@
             role="dialog"
             aria-modal="true"
             aria-labelledby="capacitor-phone-tab-dialog-title"
+            :data-android-back-nested="activeView === 'history' || undefined"
             :inert="organizerGesture || sessionToDelete !== null || sessionToOpen !== null"
           >
             <header class="capacitorPhoneTabHeader">

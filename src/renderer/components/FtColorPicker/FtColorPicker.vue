@@ -223,6 +223,7 @@ import { useI18n } from 'vue-i18n'
 
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getAnchoredPosition, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
+import { listenForOutsidePress } from '../../helpers/outsidePress'
 import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewportBounds'
 import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
 
@@ -304,7 +305,8 @@ watch(open, async value => {
     removeOpenListeners()
     return
   }
-  document.addEventListener('pointerdown', closeFromOutside)
+  stopOutsidePress?.()
+  stopOutsidePress = listenForOutsidePress(closeFromOutside)
   window.addEventListener('resize', positionPopover)
   if (!supportsAnchorPositioning) window.addEventListener('scroll', positionPopover, true)
   await nextTick()
@@ -573,6 +575,7 @@ function positionPopover() {
   }, { above: top < triggerBounds.top, gap: 8, bottomMargin: margin })
 }
 
+let stopOutsidePress = null
 function closeFromOutside(event) {
   if (triggerRef.value?.contains(event.target) || popoverRef.value?.contains(event.target)) return
   closePicker(false, false)
@@ -581,7 +584,8 @@ function closeFromOutside(event) {
 function removeOpenListeners() {
   popoverResizeObserver?.disconnect()
   popoverResizeObserver = null
-  document.removeEventListener('pointerdown', closeFromOutside)
+  stopOutsidePress?.()
+  stopOutsidePress = null
   window.removeEventListener('resize', positionPopover)
   window.removeEventListener('scroll', positionPopover, true)
 }

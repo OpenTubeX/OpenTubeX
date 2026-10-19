@@ -652,10 +652,8 @@ import { calculateColorLuminance, resolveColor } from './helpers/colors'
 import { matchesKeyboardShortcut } from './helpers/keyboardShortcuts'
 import { hasVisibleGamepadLayer, initializeGamepadNavigation } from './helpers/gamepadNavigation'
 import { initializeAndroidBack } from './helpers/androidBack'
-import { getAndroidBackPlayer, getAndroidBackSheet, settleAndroidBackAnimation } from './helpers/androidBackGesture'
+import { getAndroidBackPlayer, getAndroidBackSheet } from './helpers/androidBackGesture'
 import { createAndroidBackDialogPreview } from './helpers/androidBackDialog'
-import { applyAnimationSpeed } from './helpers/animationSpeed'
-import { isReducedMotionEnabled } from './helpers/reducedMotion'
 import { keyboardEventInitFromShortcut, OPEN_COMMAND_PALETTE_EVENT } from './helpers/commandPalette'
 import { createCommandPaletteRegistry } from './helpers/commandPaletteRegistry'
 import {
@@ -1203,7 +1201,9 @@ const {
   startDrag: startMobileContextDrag, moveTouch: moveMobileContextTouch, filterClick: filterMobileContextClick,
   updateScrollAction: updateMobileContextScrollAction,
   enter: enterMobileContextSheet, leave: leaveMobileContextSheet
-} = useBottomSheetDismiss(mobileLinkActionsRef, closeMobileLinkActions)
+} = useBottomSheetDismiss(mobileLinkActionsRef, closeMobileLinkActions, {
+  canDismissOnBack: () => mobileContextMenuStack.value.length === 1
+})
 const mobileLinkActionsScrollRef = useTemplateRef('mobileLinkActionsScrollRef')
 const mobileLinkActionsContentRef = useTemplateRef('mobileLinkActionsContentRef')
 watch(mobileLinkActionsContentRef, (content, _, onCleanup) => {
@@ -3655,7 +3655,9 @@ function getAndroidBackTarget() {
   const phoneTabDialog = document.querySelector('.capacitorPhoneTabDialog')
   const tabTarget = phoneTabDialog?.contains(focused) ? focused : phoneTabDialog
   const searchTarget = phoneSearch?.contains(focused) ? focused : phoneSearch
-  return modalDialog ?? prompt ?? (settingsWindow?.contains(focused) ? focused : settingsWindow) ?? openDialog ?? tabTarget ?? searchTarget ?? focused
+  // Focused popups inside a prompt or settings close before their window.
+  const promptTarget = prompt?.contains(focused) ? focused : prompt
+  return modalDialog ?? promptTarget ?? (settingsWindow?.contains(focused) ? focused : settingsWindow) ?? openDialog ?? tabTarget ?? searchTarget ?? focused
 }
 
 async function handleAndroidBack() {
@@ -3664,7 +3666,8 @@ async function handleAndroidBack() {
     return
   }
 
-  const hadOpenLayer = hasVisibleGamepadLayer() || isSideNavOpen.value
+  const sideNavShown = isSideNavShown()
+  const hadOpenLayer = hasVisibleGamepadLayer() || sideNavShown
   const target = getAndroidBackTarget()
   const escapeEvent = new KeyboardEvent('keydown', {
     key: 'Escape',
@@ -3673,7 +3676,7 @@ async function handleAndroidBack() {
     cancelable: true,
   })
 
-  if (isSideNavOpen.value) {
+  if (sideNavShown) {
     closeSideNav()
     return
   }
@@ -3698,48 +3701,86 @@ function shouldInterceptAndroidBack() {
   const tabId = presentedTabId.value
   return Boolean(store.getters.getConfirmCloseApp ||
     (tabId && store.getters.getTabHistoryState(tabId).canGoBack) ||
-    isSideNavOpen.value || settingsWindowOpen.value || isAnyPromptOpen.value ||
+    isSideNavShown() || settingsWindowOpen.value || isAnyPromptOpen.value ||
     mobileContextLink.value || mobileContextActions.value ||
     document.fullscreenElement || document.querySelector('.ftVideoPlayer.fullWindow, dialog[open], .topNav.phoneSearchOpen') ||
     hasVisibleGamepadLayer())
 }
 
+/** Narrow layouts show the bottom navigation bar instead of the drawer. */
+function isSideNavShown() {
+  return isSideNavOpen.value && window.matchMedia('(width > 680px)').matches
+}
+
+/** @param {Element} target */
+function getAndroidBackPopup(target) {
+  const popup = target.closest?.('[data-settings-escape-scope], .iconDropdown')
+  if (popup) return popup
+  const id = target.closest?.('[aria-expanded="true"][aria-controls]')?.getAttribute('aria-controls')
+  const controlled = id ? document.getElementById(id) : null
+  // Disclosure buttons also control panels, which Back does not close.
+  return controlled?.matches('[role="listbox"], [role="menu"], [role="dialog"]') ? controlled : null
+}
+
+/**
+ * Shrink the visible part of a page into a card, like Android's in-app Back.
+ * Pages have no visible fixed-position children, which a transform would move.
+ * @param {HTMLElement} page
+ */
+function getAndroidBackPageKeyframes(page) {
+  const bounds = page.getBoundingClientRect()
+  const top = Math.max(0, -bounds.top)
+  const left = Math.max(0, -bounds.left)
+  const bottom = Math.max(0, bounds.bottom - window.innerHeight)
+  const right = Math.max(0, bounds.right - window.innerWidth)
+  const transformOrigin = `${window.innerWidth / 2 - bounds.left}px ${window.innerHeight / 2 - bounds.top}px`
+  const visible = `${top}px ${right}px ${bottom}px ${left}px`
+  return [
+    { transformOrigin, transform: 'scale(1)', clipPath: `inset(${visible} round 0px)` },
+    { transformOrigin, transform: 'scale(0.9)', clipPath: `inset(${visible} round 32px)` }
+  ]
+}
+
+/** Use the first preview that can begin; the rest keep their ordinary Back. */
+function combineAndroidBackPreviews(previews) {
+  let active = null
+  return {
+    begin() {
+      active = previews.find(preview => preview?.begin()) ?? null
+      return active !== null
+    },
+    update(progress) { active?.update(progress) },
+    finish(commit) { return active?.finish(commit) },
+    cancel() { active?.cancel() },
+  }
+}
+
 function getAndroidBackPreview() {
-  if (mobileContextLink.value || mobileContextActions.value) return null
-  if (isSideNavOpen.value) {
-    if (!useWatchSideNavOverlay.value || !window.matchMedia('(width > 680px)').matches) return null
+  if (mobileContextLink.value || mobileContextActions.value) {
+    return mobileLinkActionsRef.value ? getAndroidBackSheet(mobileLinkActionsRef.value) : null
+  }
+  if (isSideNavShown()) {
     const drawer = document.querySelector('.sideNav')
-    if (!drawer || isReducedMotionEnabled()) return null
-    let animation
-    return {
-      begin() {
-        const direction = isLocaleRightToLeft.value ? 1 : -1
-        animation = applyAnimationSpeed(drawer.animate([
+    if (!drawer) return null
+    const overlay = useWatchSideNavOverlay.value
+    return createAndroidBackDialogPreview(drawer, handleAndroidBack, isSideNavShown, () => overlay
+      ? [
           { transform: 'translateX(0)' },
-          { transform: `translateX(${direction * drawer.getBoundingClientRect().width}px)` }
-        ], { duration: 200, fill: 'both' }))
-        animation.pause()
-        return true
-      },
-      update(progress) { animation.currentTime = progress * Number(animation.effect.getTiming().duration) },
-      async finish(commit) {
-        await settleAndroidBackAnimation(animation, commit)
-        if (commit) {
-          closeSideNav()
-          await nextTick()
-          // Keep the finished effect until the closed styles take over.
-          await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
-        }
-        animation.cancel()
-      },
-      cancel() { animation?.cancel() },
-    }
+          { transform: `translateX(${(isLocaleRightToLeft.value ? 1 : -1) * drawer.getBoundingClientRect().width}px)` }
+        ]
+      // The rail pushes the page, so it collapses like the button does.
+      : [{ inlineSize: getComputedStyle(drawer).inlineSize }, { inlineSize: 'var(--desktop-nav-rail-width)' }])
   }
   const target = getAndroidBackTarget()
-  const sheet = getAndroidBackSheet(target)
+  const sheet = getAndroidBackSheet(target) ?? getAndroidBackSheet(target.closest?.('[data-bottom-sheet]'))
   if (sheet && !target.classList.contains('compactSheet')) return sheet
+  const popup = getAndroidBackPopup(target)
+  if (popup) {
+    return createAndroidBackDialogPreview(popup, handleAndroidBack, () =>
+      popup.isConnected && getAndroidBackPopup(getAndroidBackTarget()) === popup)
+  }
   const dialog = target.closest?.('.settingsWindow, .prompt, dialog[open]')
-  if (dialog && !target.closest?.('[aria-expanded="true"], [data-settings-escape-scope]')) {
+  if (dialog && !target.closest?.('[aria-expanded="true"]')) {
     const nested = dialog.hasAttribute('data-android-back-nested')
     const content = nested
       ? dialog.querySelector('.settingsContent') ?? dialog
@@ -3748,9 +3789,36 @@ function getAndroidBackPreview() {
       content.isConnected && dialog.hasAttribute('data-android-back-nested') === nested &&
       getAndroidBackTarget().closest?.('.settingsWindow, .prompt, dialog[open]') === dialog)
   }
-  if (settingsWindowOpen.value || isAnyPromptOpen.value || hasVisibleGamepadLayer() ||
+  const tabOverlay = target.closest?.('.capacitorPhoneTabOverlay')
+  if (tabOverlay) {
+    // Back returns from tab history to open tabs inside the switcher.
+    const isClosing = () => tabOverlay.isConnected && !tabOverlay.querySelector('.capacitorPhoneTabDialog:is([inert], [data-android-back-nested])') &&
+      getAndroidBackTarget().closest?.('.capacitorPhoneTabOverlay') === tabOverlay
+    if (!isClosing()) return null
+    return createAndroidBackDialogPreview(tabOverlay, handleAndroidBack, isClosing, () => [
+      { opacity: 1, transform: 'none' },
+      { opacity: 0, transform: 'scale(0.94)' }
+    ])
+  }
+  const search = target.closest?.('.topNav.phoneSearchOpen')
+  const searchContainer = search?.querySelector('.searchContainer')
+  if (searchContainer) {
+    return createAndroidBackDialogPreview(searchContainer, handleAndroidBack, () =>
+      searchContainer.isConnected && getAndroidBackTarget().closest?.('.topNav.phoneSearchOpen') === search, () => [
+      { opacity: 1, transform: 'none' },
+      { opacity: 0, transform: `translateX(${isLocaleRightToLeft.value ? -24 : 24}px)` }
+    ])
+  }
+  const tabId = presentedTabId.value
+  if (!tabId || settingsWindowOpen.value || isAnyPromptOpen.value || hasVisibleGamepadLayer() ||
     document.fullscreenElement || document.querySelector('dialog[open], .topNav.phoneSearchOpen')) return null
-  return getAndroidBackPlayer(presentedTabId.value)
+  const page = document.querySelector(`.tabContent[data-tab-id="${CSS.escape(tabId)}"]`)
+  return combineAndroidBackPreviews([
+    getAndroidBackPlayer(tabId),
+    page && createAndroidBackDialogPreview(page, handleAndroidBack, () =>
+      page.isConnected && presentedTabId.value === tabId && store.getters.getTabHistoryState(tabId).canGoBack,
+    getAndroidBackPageKeyframes)
+  ])
 }
 
 function handleAndroidPictureInPictureChange(event) {

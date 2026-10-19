@@ -5,6 +5,32 @@ import vm from 'node:vm'
 import { nextTick, ref, watch } from 'vue'
 import { createAndroidBackGestureHandler, getAndroidBackPlayer, registerAndroidBackPlayer, settleAndroidBackAnimation } from '../../src/renderer/helpers/androidBackGesture.js'
 
+const appSource = readFileSync(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
+const dialogSource = readFileSync(new URL('../../src/renderer/helpers/androidBackDialog.js', import.meta.url), 'utf8')
+  .replace(/^import .*$/gm, '').replace(/^export /gm, '')
+
+/** Evaluates App.vue's preview selection, including its helpers, with test globals. */
+function loadPreviewSelection(context) {
+  const start = appSource.indexOf('function isSideNavShown()')
+  const createAndroidBackDialogPreview = vm.runInNewContext(`${dialogSource}; createAndroidBackDialogPreview`, {
+    nextTick, settleAndroidBackAnimation, applyAnimationSpeed: animation => animation,
+    isReducedMotionEnabled: () => false, requestAnimationFrame: context.requestAnimationFrame,
+    getComputedStyle: () => ({ inlineSize: '200px' }),
+  })
+  return vm.runInNewContext(`${appSource.slice(start, appSource.indexOf('\nfunction handleAndroidPictureInPictureChange', start))}\ngetAndroidBackPreview`, {
+    mobileContextLink: { value: null }, mobileContextActions: { value: null }, createAndroidBackDialogPreview,
+    getComputedStyle: () => ({ inlineSize: '200px' }), ...context,
+  })
+}
+
+function drawerElement(animation) {
+  return {
+    isConnected: true, inert: false, querySelector: () => null, animate: () => animation,
+    getBoundingClientRect: () => ({ width: 240 }),
+    style: { getPropertyValue: () => '', getPropertyPriority: () => '', setProperty() {}, removeProperty() {} },
+  }
+}
+
 function fixture(available = true) {
   const calls = []
   const preview = {
@@ -109,15 +135,16 @@ test('retained players are selected by tab and an old unmount cannot remove a re
 })
 
 test('root allows the system preview only when no confirmation, history, fullscreen or layer consumes Back', () => {
-  const source = readFileSync(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
+  const source = appSource
   const start = source.indexOf('function shouldInterceptAndroidBack()')
   const getters = { getConfirmCloseApp: false, getTabHistoryState: () => ({ canGoBack: false }) }
+  let wide = true
   const document = { fullscreenElement: null, querySelector: () => null }
   let layerVisible = false
   const refs = Object.fromEntries(['isSideNavOpen', 'settingsWindowOpen', 'isAnyPromptOpen', 'mobileContextLink', 'mobileContextActions']
     .map(name => [name, { value: null }]))
-  const shouldIntercept = vm.runInNewContext(`${source.slice(start, source.indexOf('\nfunction getAndroidBackPreview()', start))}\nshouldInterceptAndroidBack`, {
-    store: { getters }, presentedTabId: { value: 'one' }, document,
+  const shouldIntercept = vm.runInNewContext(`${source.slice(start, source.indexOf('\n/** @param {Element} target */', start))}\nshouldInterceptAndroidBack`, {
+    store: { getters }, presentedTabId: { value: 'one' }, document, window: { matchMedia: () => ({ matches: wide }) },
     hasVisibleGamepadLayer: () => layerVisible, ...refs
   })
   assert.equal(shouldIntercept(), false)
@@ -137,25 +164,26 @@ test('root allows the system preview only when no confirmation, history, fullscr
   document.fullscreenElement = null
   layerVisible = true
   assert.equal(shouldIntercept(), true)
+  layerVisible = false
+  // Narrow layouts replace the drawer with the bottom bar, so it cannot consume Back.
+  wide = false
+  refs.isSideNavOpen.value = true
+  assert.equal(shouldIntercept(), false)
 })
 
 test('a side drawer restored to zero progress cancels without replaying its animation', async () => {
-  const source = readFileSync(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
-  const start = source.indexOf('function getAndroidBackPreview()')
   let reversed = false
   let closed = false
   let cancelled = false
   const animation = {
-    currentTime: 0, effect: { getTiming: () => ({ duration: 200 }) }, finished: Promise.resolve(),
+    currentTime: 0, effect: { getTiming: () => ({ duration: 180 }) }, finished: Promise.resolve(),
     pause() {}, reverse() { reversed = true }, cancel() { cancelled = true },
   }
-  const getPreview = vm.runInNewContext(`${source.slice(start, source.indexOf('\nfunction handleAndroidPictureInPictureChange', start))}\ngetAndroidBackPreview`, {
-    mobileContextLink: { value: null }, mobileContextActions: { value: null },
+  const getPreview = loadPreviewSelection({
     isSideNavOpen: { value: true }, useWatchSideNavOverlay: { value: true }, isLocaleRightToLeft: { value: false },
     window: { matchMedia: () => ({ matches: true }) },
-    document: { querySelector: () => ({ animate: () => animation, getBoundingClientRect: () => ({ width: 240 }) }) },
-    isReducedMotionEnabled: () => false, applyAnimationSpeed: animation => animation, settleAndroidBackAnimation,
-    closeSideNav: () => { closed = true },
+    document: { querySelector: () => drawerElement(animation) },
+    handleAndroidBack: async () => { closed = true },
   })
   const preview = getPreview()
   preview.begin()
@@ -168,8 +196,6 @@ test('a side drawer restored to zero progress cancels without replaying its anim
 })
 
 test('committing the side drawer keeps its finished frame until the closed state renders', async () => {
-  const source = readFileSync(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
-  const start = source.indexOf('function getAndroidBackPreview()')
   const opened = ref(true)
   let renderedClosed = false
   const stop = watch(opened, value => { renderedClosed = !value }, { flush: 'post' })
@@ -177,17 +203,15 @@ test('committing the side drawer keeps its finished frame until the closed state
   let cancelledBeforeRender = false
   const frames = []
   const animation = {
-    currentTime: 0, effect: { getTiming: () => ({ duration: 200 }) }, finished: Promise.resolve(),
+    currentTime: 0, effect: { getTiming: () => ({ duration: 180 }) }, finished: Promise.resolve(),
     pause() {}, play() {},
     cancel() { cancelled = true; cancelledBeforeRender = !renderedClosed },
   }
-  const getPreview = vm.runInNewContext(`${source.slice(start, source.indexOf('\nfunction handleAndroidPictureInPictureChange', start))}\ngetAndroidBackPreview`, {
-    mobileContextLink: { value: null }, mobileContextActions: { value: null },
+  const getPreview = loadPreviewSelection({
     isSideNavOpen: opened, useWatchSideNavOverlay: { value: true }, isLocaleRightToLeft: { value: false },
     window: { matchMedia: () => ({ matches: true }) },
-    document: { querySelector: () => ({ animate: () => animation, getBoundingClientRect: () => ({ width: 240 }) }) },
-    isReducedMotionEnabled: () => false, applyAnimationSpeed: animation => animation, settleAndroidBackAnimation,
-    closeSideNav: () => { opened.value = false }, nextTick,
+    document: { querySelector: () => drawerElement(animation) },
+    handleAndroidBack: async () => { opened.value = false },
     requestAnimationFrame: callback => frames.push(callback),
   })
   try {
