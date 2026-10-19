@@ -170,3 +170,17 @@ test('autoplay waits for the page containing the current video instead of restar
   assert.equal(state.state.isWaitingForNextVideo.value, false)
   assert.equal(state.state.nextVideo.value.videoId, 'fourth')
 })
+
+test('a failed later page does not restart the playlist when the current video is not loaded', async () => {
+  const state = harness()
+  state.props.videoId = 'third'
+  const loading = state.load()
+  state.resolveFirstPage()
+  state.failContinuation(new Error('Continuation failed'))
+  await loading
+
+  assert.equal(state.isFetchingPlaylistContinuation.value, false)
+  assert.equal(state.hasUnloadedPlaylistVideos.value, true)
+  assert.equal(state.state.isWaitingForNextVideo.value, false)
+  assert.equal(state.state.nextVideo.value, null)
+})
