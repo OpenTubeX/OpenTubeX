@@ -1637,6 +1637,10 @@ const actions = {
         const connected = await liveConnection.isConnected()
         if (signal.aborted || !rootState.settings.syncServerEnabled || !rootState.settings.syncServerAutoSync ||
             !rootState.settings.syncServerToken || isSyncServerOffline()) return
+        // A hidden mobile app has stopped its live connection on purpose; the
+        // visibility handler syncs once it is shown again instead of polling
+        // in the background.
+        if (process.env.IS_CAPACITOR && isAppHidden()) return
         // Live notifications replace periodic downloads, but failed uploads
         // and reminders awaiting permission still need a retry.
         const retryPending = rootState.syncServer.syncServerStatus === 'error' ||
