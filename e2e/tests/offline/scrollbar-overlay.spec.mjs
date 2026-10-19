@@ -447,24 +447,40 @@ test.describe('overlay scrollbars', () => {
     await attachScreenshot('themed scrollbar handle')
   })
 
-  test('clicking the track jumps to that position', async ({ page }) => {
+  test('clicks on a wide track outside the handle reach the content underneath', { tag: '@scale' }, async ({ page }) => {
     await addPageOverflow(page)
-    // Otherwise there is nothing to scroll and the assertion below would fail
-    // whether or not click scrolling works.
-    expect(await page.evaluate(() => window.scrollY)).toBe(0)
-
-    // Needs the ClickScrollPlugin to be registered; without it the library
-    // ignores clickScroll and the track does nothing.
-    const track = page.locator(`${PAGE_SCROLLBAR} .os-scrollbar-track`)
-    // DOM overflow can precede the deferred scrollbar measurement. Reveal the
-    // idle track and use an actionable click after its range has caught up.
-    await expect.poll(() => pageScrollbarRangeError(page)).toBeLessThanOrEqual(1)
+    await page.evaluate(() => {
+      window.$store.commit('setScrollbarThumbWidth', 20)
+      const button = document.createElement('button')
+      button.dataset.scrollbarTestTarget = ''
+      Object.assign(button.style, {
+        position: 'fixed',
+        insetInlineEnd: '0',
+        insetBlockEnd: '0',
+        inlineSize: '40px',
+        blockSize: '40px',
+        zIndex: '1'
+      })
+      button.addEventListener('click', () => { window.__scrollbarTestClicks = (window.__scrollbarTestClicks ?? 0) + 1 })
+      document.body.append(button)
+    })
+    const scrollbar = page.locator(PAGE_SCROLLBAR)
+    // An unusable scrollbar ignores pointers anyway, which would pass vacuously.
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
     await page.mouse.move(800, 400)
-    await track.hover()
-    const box = await track.boundingBox()
-    await track.click({ position: { x: box.width / 2, y: box.height - 20 } })
+    await expect(scrollbar).toHaveCSS('opacity', '1')
 
-    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
+    // The handle sits at the top, so the bottom of the track is empty.
+    const track = await scrollbar.locator('.os-scrollbar-track').boundingBox()
+    const target = await page.locator('[data-scrollbar-test-target]').boundingBox()
+    const x = track.x + track.width / 2
+    const y = target.y + target.height / 2
+    expect(x).toBeGreaterThan(target.x)
+    expect(y).toBeLessThan(track.y + track.height)
+    await page.mouse.click(x, y)
+
+    expect(await page.evaluate(() => window.__scrollbarTestClicks)).toBe(1)
+    expect(await page.evaluate(() => window.scrollY)).toBe(0)
   })
 
   test('dragging the page handle scrolls the document', async ({ page }) => {
@@ -861,6 +877,14 @@ test.describe('overlay scrollbars', () => {
 
     const width = Number(await slider.inputValue())
     expect(width).toBeGreaterThan(6)
+    await page.getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(page.locator('.settingsWindow')).toBeHidden()
+
+    // A wider thumb rests at the default width so it doesn't cover content,
+    // and only grows to the configured width once the pointer is on it.
+    await page.mouse.move(800, 400)
+    await expect.poll(() => handle.evaluate((element) => element.clientWidth)).toBe(6)
+    await handle.hover()
     await expect.poll(() => handle.evaluate((element) => element.clientWidth)).toBe(width)
   })
 

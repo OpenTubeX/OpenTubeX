@@ -2558,6 +2558,12 @@ body .os-scrollbar {
   --os-padding-perpendicular: 2px;
   --os-padding-axis: 2px;
   --os-handle-interactive-area-offset: 4px;
+
+  /* A wide thumb would cover the content beside it, so it rests at the default
+     width and only grows to the configured width while hovered or dragged. */
+  --os-handle-perpendicular-size: min(var(--scrollbar-thumb-width), 6px);
+  --os-handle-perpendicular-size-hover: 100%;
+  --os-handle-perpendicular-size-active: 100%;
   --os-handle-border-radius: calc(var(--scrollbar-thumb-width) * var(--ui-roundness));
   --os-handle-bg: var(--scrollbar-color);
   --os-handle-bg-hover: var(--scrollbar-color-hover);

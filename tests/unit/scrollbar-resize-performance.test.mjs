@@ -193,7 +193,7 @@ test('page scrollbar ignores clipped tab-bar mutations while nested scrollbars s
   assert.equal(ignore({ target: { parentElement: null } }), false)
   assert.deepEqual(Array.from(options.update.debounce.resize), [0, 33])
   assert.equal(options.update.deferContentMutation, true)
-  context.nested = { elements: { viewport: tab } }
+  context.nested = { target: tab, elements: { viewport: tab } }
   assert.equal(vm.runInContext('scrollbarOptions(nested).update', context), undefined, 'nested tab-bar scrolling keeps its own observers')
   context.document.documentElement.dir = 'rtl'
   assert.equal(options.update.flowDirectionStyles().direction, 'rtl')
