@@ -117,10 +117,19 @@ export function findWatchComponent() {
  * @param {string} [videoId]
  */
 export async function openMockedVideo(page, videoId = 'jNQXAC9IVRw') {
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  // Switching videos keeps the previous player mounted and playing until its
+  // replacement mounts, so wait for it to leave before waiting for playback.
+  const previousPlayer = !new RegExp(`#\\/watch\\/${videoId}`).test(page.url()) && await player.count() > 0
+    ? await player.elementHandle()
+    : null
   await page.locator(sel.searchInput).fill(`https://www.youtube.com/watch?v=${videoId}`)
   await page.locator(sel.searchInput).press('Enter')
   await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${videoId}`))
-  await expect(page.locator(`${activeTab} .ftVideoPlayer`)).toBeVisible({ timeout: 30_000 })
+  if (previousPlayer) {
+    await expect.poll(() => previousPlayer.evaluate(element => element.isConnected), { timeout: 30_000 }).toBe(false)
+  }
+  await expect(player).toBeVisible({ timeout: 30_000 })
 
   return waitForPlayback(page)
 }
