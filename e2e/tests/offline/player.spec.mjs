@@ -2348,7 +2348,11 @@ test.describe('scroll mini player', () => {
     })
 
     test('remembers separate mini player positions for scrolling and tab switches', async ({ app, page }) => {
-      await openDemoVideo({ app, page })
+      // Two cold launches with playback each; an ended video leaves the mini
+      // player, and this test can outlast the short demo clip on a busy machine.
+      test.slow()
+      const loopDemoVideo = video => video.evaluate(element => { element.loop = true })
+      await loopDemoVideo(await openDemoVideo({ app, page }))
       let player = page.locator('.ftVideoPlayer')
       const videoTab = page.locator('.tabBar .tab').first()
       const readPosition = () => player.evaluate(element => ({
@@ -2392,7 +2396,7 @@ test.describe('scroll mini player', () => {
       await page.getByRole('link', { name: 'Go to Subscriptions', exact: true }).click()
       await expect(page).toHaveURL(/#\/subscriptions$/)
       ;({ page } = await app.relaunch())
-      await openDemoVideo({ app, page })
+      await loopDemoVideo(await openDemoVideo({ app, page }))
       player = page.locator('.ftVideoPlayer')
       await scrollBelowPlayer(player)
       await expect.poll(readPosition).toEqual(scrollPosition)
