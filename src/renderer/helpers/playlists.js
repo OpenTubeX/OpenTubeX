@@ -37,6 +37,106 @@ export function getSortedPlaylistItems(playlistItems, sortOrder, locale, reverse
   })
 }
 
+export const USER_PLAYLISTS_SORT_BY_OPTIONS = {
+  NameAscending: 'name_ascending',
+  NameDescending: 'name_descending',
+
+  LatestCreatedFirst: 'latest_created_first',
+  EarliestCreatedFirst: 'earliest_created_first',
+
+  LatestUpdatedFirst: 'latest_updated_first',
+  EarliestUpdatedFirst: 'earliest_updated_first',
+
+  LatestPlayedFirst: 'latest_played_first',
+  EarliestPlayedFirst: 'earliest_played_first',
+
+  Custom: 'custom',
+}
+
+/** @param {{ _id?: string, playlistId?: string }} playlist */
+export function playlistKey(playlist) {
+  return playlist._id ?? playlist.playlistId
+}
+
+/**
+ * Sorts playlists the way the Playlists page shows them.
+ * @param {any[]} playlists
+ * @param {string} sortBy a USER_PLAYLISTS_SORT_BY_OPTIONS value
+ * @param {string[]} customOrder playlist keys in the custom order
+ * @param {Intl.Collator} collator
+ */
+export function sortUserPlaylists(playlists, sortBy, customOrder, collator) {
+  if (!Object.values(USER_PLAYLISTS_SORT_BY_OPTIONS).includes(sortBy)) {
+    console.error(`Unknown sortBy: ${sortBy}`)
+    return playlists
+  }
+
+  if (sortBy === USER_PLAYLISTS_SORT_BY_OPTIONS.Custom) {
+    const positions = new Map(customOrder.map((id, index) => [id, index]))
+    // Playlists missing from the saved order, such as new ones, come first.
+    return playlists.toSorted((a, b) => {
+      return (positions.get(playlistKey(a)) ?? -1) - (positions.get(playlistKey(b)) ?? -1) || b.createdAt - a.createdAt
+    })
+  }
+
+  return playlists.toSorted((a, b) => {
+    switch (sortBy) {
+      case USER_PLAYLISTS_SORT_BY_OPTIONS.NameAscending:
+        return collator.compare(a.playlistName, b.playlistName)
+      case USER_PLAYLISTS_SORT_BY_OPTIONS.NameDescending:
+        return collator.compare(b.playlistName, a.playlistName)
+      case USER_PLAYLISTS_SORT_BY_OPTIONS.LatestCreatedFirst:
+        if (a.createdAt > b.createdAt) { return -1 }
+        if (a.createdAt < b.createdAt) { return 1 }
+
+        return collator.compare(a.playlistName, b.playlistName)
+      case USER_PLAYLISTS_SORT_BY_OPTIONS.EarliestCreatedFirst:
+        if (a.createdAt < b.createdAt) { return -1 }
+        if (a.createdAt > b.createdAt) { return 1 }
+
+        return collator.compare(a.playlistName, b.playlistName)
+      case USER_PLAYLISTS_SORT_BY_OPTIONS.LatestUpdatedFirst:
+        if (a.lastUpdatedAt > b.lastUpdatedAt) { return -1 }
+        if (a.lastUpdatedAt < b.lastUpdatedAt) { return 1 }
+
+        return collator.compare(a.playlistName, b.playlistName)
+      case USER_PLAYLISTS_SORT_BY_OPTIONS.EarliestUpdatedFirst:
+        if (a.lastUpdatedAt < b.lastUpdatedAt) { return -1 }
+        if (a.lastUpdatedAt > b.lastUpdatedAt) { return 1 }
+
+        return collator.compare(a.playlistName, b.playlistName)
+      case USER_PLAYLISTS_SORT_BY_OPTIONS.LatestPlayedFirst:
+        if (a.lastPlayedAt == null && b.lastPlayedAt == null) {
+          return collator.compare(a.playlistName, b.playlistName)
+        }
+
+        // Never played playlist = move to last
+        if (a.lastPlayedAt == null) { return 1 }
+        if (b.lastPlayedAt == null) { return -1 }
+        if (a.lastPlayedAt > b.lastPlayedAt) { return -1 }
+        if (a.lastPlayedAt < b.lastPlayedAt) { return 1 }
+
+        return collator.compare(a.playlistName, b.playlistName)
+      case USER_PLAYLISTS_SORT_BY_OPTIONS.EarliestPlayedFirst:
+        // Never played playlist = first
+        if (a.lastPlayedAt == null && b.lastPlayedAt == null) {
+          return collator.compare(a.playlistName, b.playlistName)
+        }
+
+        // Never played playlist = move to first
+        if (a.lastPlayedAt == null) { return -1 }
+        if (b.lastPlayedAt == null) { return 1 }
+        if (a.lastPlayedAt < b.lastPlayedAt) { return -1 }
+        if (a.lastPlayedAt > b.lastPlayedAt) { return 1 }
+
+        return collator.compare(a.playlistName, b.playlistName)
+      default:
+        // should never happen as we detect this before calling toSorted
+        return 0
+    }
+  })
+}
+
 /**
  * Whether the playlist has a video to skip to from the current position,
  * so that the player only offers the skip buttons that actually do something.

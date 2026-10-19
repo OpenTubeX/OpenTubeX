@@ -196,6 +196,10 @@ export const SYNC_SETTING_LABELS = {
   onlyShowLatestFromChannelNumber: 'Settings.Subscription Settings.To',
   openDeepLinksInNewWindow: 'Settings.General Settings.Open Deep Links In New Window',
   pausedInterfaceHideDelay: 'Settings.Distraction Free Settings.Paused Interface Hide Delay',
+  pinnedPlaylistIds: [
+    'Playlists',
+    'User Playlists.Pin to Navigation'
+  ],
   playNextVideo: 'Settings.Player Settings.Play Next Video',
   playingInterfaceHideDelay: 'Settings.Distraction Free Settings.Playing Interface Hide Delay',
   playlistReverseStates: [

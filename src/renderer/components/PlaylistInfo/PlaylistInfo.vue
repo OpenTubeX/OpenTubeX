@@ -184,6 +184,14 @@
           />
           <FtIconButton
             v-if="!editMode && isUserPlaylist"
+            :title="isPinnedToNavigation ? $t('User Playlists.Unpin from Navigation') : $t('User Playlists.Pin to Navigation')"
+            :icon="['fas', isPinnedToNavigation ? 'thumbtack-slash' : 'thumbtack']"
+            :aria-pressed="isPinnedToNavigation"
+            :theme="isPinnedToNavigation ? 'secondary' : 'base-no-default'"
+            @click="togglePinnedToNavigation"
+          />
+          <FtIconButton
+            v-if="!editMode && isUserPlaylist"
             :title="$t('User Playlists.Edit Playlist Info')"
             :icon="['fas', 'edit']"
             theme="secondary"
@@ -676,6 +684,15 @@ const markedAsQuickBookmarkTarget = computed(() => {
     quickBookmarkPlaylist.value &&
     quickBookmarkPlaylist.value._id === selectedUserPlaylist.value._id
 })
+
+const pinnedPlaylistIds = computed(() => store.getters.getPinnedPlaylistIds)
+const isPinnedToNavigation = computed(() => pinnedPlaylistIds.value.includes(props.id))
+
+function togglePinnedToNavigation() {
+  store.dispatch('updatePinnedPlaylistIds', isPinnedToNavigation.value
+    ? pinnedPlaylistIds.value.filter(id => id !== props.id)
+    : [...pinnedPlaylistIds.value, props.id])
+}
 
 const playlistDeletionDisabledLabel = computed(() => {
   return t('User Playlists["Cannot delete the quick bookmark target playlist."]')

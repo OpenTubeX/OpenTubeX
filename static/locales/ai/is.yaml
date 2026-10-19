@@ -191,6 +191,8 @@ Feed:
   Next Auto Refresh: 'Næsta sjálfvirka endurnýjun: {date}'
 User Playlists:
   This playlist is private or does not exist.: "Þessi spilunarlisti er lokaður eða er ekki til."
+  Pin to Navigation: "Festa við valmynd"
+  Unpin from Navigation: "Losa úr valmynd"
   Reorder Hint: Dragðu eða notaðu örvalyklana til að endurraða
   Add new videos to the top (custom order): "Bæta nýjum myndskeiðum efst (sérsniðin röð)"
   Repair Playlists: Lagfæra spilunarlista

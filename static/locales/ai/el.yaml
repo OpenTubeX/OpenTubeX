@@ -189,6 +189,8 @@ Feed:
   Next Auto Refresh: 'Επόμενη αυτόματη ανανέωση: {date}'
 User Playlists:
   This playlist is private or does not exist.: "Αυτή η λίστα αναπαραγωγής είναι ιδιωτική ή δεν υπάρχει."
+  Pin to Navigation: "Καρφίτσωμα στην πλοήγηση"
+  Unpin from Navigation: "Ξεκαρφίτσωμα από την πλοήγηση"
   Reorder Hint: Σύρετε ή χρησιμοποιήστε τα πλήκτρα βέλους για αναδιάταξη
   Add new videos to the top (custom order): "Προσθήκη νέων βίντεο στην κορυφή (προσαρμοσμένη σειρά)"
   Repair Playlists: Επιδιόρθωση λιστών αναπαραγωγής

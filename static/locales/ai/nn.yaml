@@ -189,6 +189,8 @@ Feed:
   Next Auto Refresh: 'Neste automatiske oppdatering: {date}'
 User Playlists:
   This playlist is private or does not exist.: "Denne spelelista er privat eller finst ikkje."
+  Pin to Navigation: "Fest til navigasjonen"
+  Unpin from Navigation: "Løys frå navigasjonen"
   Reorder Hint: Dra eller bruk piltastane for å endre rekkjefølgja
   Add new videos to the top (custom order): "Legg til nye videoar øvst (eigendefinert rekkjefølgje)"
   Repair Playlists: Reparer spelelister

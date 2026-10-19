@@ -44,6 +44,45 @@
       />
       <hr>
       <div
+        v-if="pinnedPlaylists.length > 0"
+        class="mobileHidden pinnedPlaylists"
+      >
+        <router-link
+          v-for="playlist in pinnedPlaylists"
+          :key="playlist._id"
+          :to="{ path: `/playlist/${playlist._id}`, query: { playlistType: 'user' } }"
+          class="navChannel channelLink"
+          :title="playlist.playlistName"
+          role="button"
+        >
+          <div class="thumbnailContainer">
+            <FtRetryImage
+              v-if="pinnedPlaylistThumbnail(playlist) != null"
+              :fallback-icon="['fas', 'list']"
+              class="channelThumbnail playlistThumbnail"
+              height="35"
+              width="35"
+              loading="lazy"
+              :src="pinnedPlaylistThumbnail(playlist)"
+              :alt="isOpen ? '' : playlist.playlistName"
+            />
+            <FtIcon
+              v-else
+              class="channelThumbnail noThumbnail playlistThumbnail"
+              :icon="['fas', 'list']"
+            />
+          </div>
+          <p
+            v-if="isOpen"
+            class="navLabel"
+            dir="auto"
+          >
+            {{ playlist.playlistName }}
+          </p>
+        </router-link>
+        <hr v-if="!hideActiveSubscriptions">
+      </div>
+      <div
         v-if="!hideActiveSubscriptions"
         class="mobileHidden"
       >
@@ -120,6 +159,7 @@ import { NAVIGATION_ITEM_DEFINITIONS } from '../../../navigationItems'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { createMobileNavigationScroll, mobileNavigationMinimizePreview } from '../../helpers/mobileNavigationScroll'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
+import { sortUserPlaylists } from '../../helpers/playlists'
 
 const { locale, t } = useI18n()
 const appKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
@@ -210,6 +250,26 @@ function onActiveSubscriptionsVisibilityChanged(isVisible) {
   if (isVisible) {
     activeSubscriptionLimit.value += activeSubscriptionsPerPage
   }
+}
+
+const pinnedPlaylists = computed(() => {
+  const pinnedIds = new Set(store.getters.getPinnedPlaylistIds)
+  // Follow the order of the Playlists page, so it can be arranged there.
+  return sortUserPlaylists(
+    store.getters.getAllPlaylists.filter(playlist => pinnedIds.has(playlist._id)),
+    store.getters.getUserPlaylistsSortBy,
+    store.getters.getUserPlaylistsCustomOrder,
+    new Intl.Collator([locale.value, 'en'], { sensitivity: 'base' })
+  )
+})
+
+function pinnedPlaylistThumbnail(playlist) {
+  if (store.getters.getThumbnailPreference === 'hidden') return null
+  if (playlist.customThumbnail) return playlist.customThumbnail
+  const videoId = playlist.videos[0]?.videoId
+  if (videoId == null) return null
+  const origin = backendPreference.value === 'invidious' ? currentInvidiousInstanceUrl.value : 'https://i.ytimg.com'
+  return `${origin}/vi/${videoId}/default.jpg`
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -410,10 +470,10 @@ watch([
 })
 
 // Reconcile the real content end when rail labels or destinations disappear.
-watch([isOpen, () => props.forceExpanded, hideText, visibleNavigationItems, hideActiveSubscriptions, displayedActiveSubscriptions], () => {
+watch([isOpen, () => props.forceExpanded, hideText, visibleNavigationItems, pinnedPlaylists, hideActiveSubscriptions, displayedActiveSubscriptions], () => {
   const inner = innerRef.value
   if (inner == null || window.matchMedia('(max-width: 680px)').matches) return
-  const contentEnd = inner.querySelector(':scope > div.mobileHidden') ?? inner.querySelector('hr')
+  const contentEnd = [...inner.querySelectorAll(':scope > div.mobileHidden')].at(-1) ?? inner.querySelector('hr')
   clampOverlayScrollTop(inner, contentEnd)
 }, { flush: 'post' })
 

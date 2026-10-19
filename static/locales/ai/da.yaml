@@ -193,6 +193,8 @@ Feed:
   Next Auto Refresh: 'Næste automatiske opdatering: {date}'
 User Playlists:
   This playlist is private or does not exist.: "Denne playliste er privat eller findes ikke."
+  Pin to Navigation: "Fastgør til navigation"
+  Unpin from Navigation: "Frigør fra navigation"
   Reorder Hint: Træk eller brug piletasterne for at ændre rækkefølgen
   Add new videos to the top (custom order): "Tilføj nye videoer øverst (brugerdefineret rækkefølge)"
   Repair Playlists: Reparer afspilningslister

@@ -191,6 +191,8 @@ Feed:
   Next Auto Refresh: 'הרענון האוטומטי הבא: {date}'
 User Playlists:
   This playlist is private or does not exist.: "פלייליסט זה פרטי או שאינו קיים."
+  Pin to Navigation: "הצמדה לניווט"
+  Unpin from Navigation: "ביטול הצמדה מהניווט"
   Reorder Hint: גררו או השתמשו במקשי החצים כדי לשנות את הסדר
   Add new videos to the top (custom order): "הוספת סרטונים חדשים לראש הרשימה (סדר מותאם אישית)"
   Repair Playlists: תיקון רשימות השמעה

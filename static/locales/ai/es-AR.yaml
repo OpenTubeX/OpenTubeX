@@ -201,6 +201,8 @@ Feed:
   Next Auto Refresh: 'Próxima actualización automática: {date}'
 User Playlists:
   This playlist is private or does not exist.: "Esta lista de reproducción es privada o no existe."
+  Pin to Navigation: "Fijar en la navegación"
+  Unpin from Navigation: "Dejar de fijar en la navegación"
   Reorder Hint: Arrastrá o usá las teclas de flecha para reordenar
   Add new videos to the top (custom order): "Agregar videos nuevos al principio (orden personalizado)"
   Repair Playlists: Reparar listas de reproducción

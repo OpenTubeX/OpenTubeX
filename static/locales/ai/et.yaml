@@ -189,6 +189,8 @@ Feed:
   Next Auto Refresh: 'Järgmine automaatne värskendamine: {date}'
 User Playlists:
   This playlist is private or does not exist.: "See esitusloend on privaatne või seda pole olemas."
+  Pin to Navigation: "Kinnita navigeerimisribale"
+  Unpin from Navigation: "Eemalda navigeerimisribalt"
   Reorder Hint: Järjestuse muutmiseks lohista või kasuta nooleklahve
   Add new videos to the top (custom order): "Lisa uued videod algusesse (kohandatud järjestus)"
   Repair Playlists: Paranda esitusloendeid

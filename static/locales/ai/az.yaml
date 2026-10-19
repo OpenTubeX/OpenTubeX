@@ -191,6 +191,8 @@ Feed:
   Next Auto Refresh: 'Növbəti avtomatik yeniləmə: {date}'
 User Playlists:
   This playlist is private or does not exist.: "Bu oynatma siyahısı şəxsidir və ya mövcud deyil."
+  Pin to Navigation: "Naviqasiyaya bərkit"
+  Unpin from Navigation: "Naviqasiyadan ayır"
   Reorder Hint: Sıralamanı dəyişmək üçün sürükləyin və ya ox düymələrindən istifadə edin
   Add new videos to the top (custom order): "Yeni videoları yuxarıya əlavə et (fərdi sıra)"
   Repair Playlists: Pleylistləri düzəlt

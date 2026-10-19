@@ -191,6 +191,8 @@ Feed:
   Next Auto Refresh: 'Наступне автоматичне оновлення: {date}'
 User Playlists:
   This playlist is private or does not exist.: "Цей плейлист приватний або не існує."
+  Pin to Navigation: "Закріпити в навігації"
+  Unpin from Navigation: "Відкріпити від навігації"
   Reorder Hint: Перетягніть або скористайтеся клавішами зі стрілками, щоб змінити порядок
   Add new videos to the top (custom order): "Додавати нові відео на початок (власний порядок)"
   Repair Playlists: Відновити списки відтворення
