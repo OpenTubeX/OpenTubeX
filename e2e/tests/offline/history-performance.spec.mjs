@@ -51,7 +51,8 @@ test('opening History does not collect or render its channels across relaunches 
       await expect(options.first()).toBeVisible()
       await expect(options).toHaveCount(100)
 
-      await dropdown.evaluate(menu => { menu.scrollTop = menu.scrollHeight })
+      // The next page loads before the end of the list becomes visible.
+      await dropdown.evaluate(menu => { menu.scrollTop = menu.scrollHeight - menu.clientHeight - 100 })
       await expect(options).toHaveCount(200)
       await expect(page.locator('.historyChannelFilter option')).toHaveCount(1)
     } finally {

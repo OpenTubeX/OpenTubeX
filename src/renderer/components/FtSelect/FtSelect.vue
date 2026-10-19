@@ -412,11 +412,12 @@ function renderOptionAt(visibleIndex) {
 function loadWhenVisible(sentinelRef, load) {
   watchEffect(onCleanup => {
     const sentinel = sentinelRef.value
-    if (!sentinel) return
-    // The implicit root still respects clipping by the scrolling dropdown.
+    const menu = dropdown.value
+    if (!sentinel || !menu) return
+    // Observe within the scrolling list so the margin loads pages early.
     const observer = new IntersectionObserver(entries => {
       if (entries.some(entry => entry.isIntersecting)) load()
-    }, { rootMargin: '200px' })
+    }, { root: menu, rootMargin: '200px' })
     observer.observe(sentinel)
     onCleanup(() => observer.disconnect())
   })
