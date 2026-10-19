@@ -424,8 +424,11 @@ test.describe('watch page', () => {
     const readbackAnchor = liveChatComments.locator('.comment').filter({
       has: page.getByText('Mock live chat message 30', { exact: true })
     })
-    await liveChatComments.dispatchEvent('wheel')
+    // Scroll away from the live edge in the same task as the wheel input, like a
+    // real wheel scroll. A separate step lets the pending scroll event from the
+    // jump to the bottom run in between and re-enable live-edge following.
     await liveChatComments.evaluate((element) => {
+      element.dispatchEvent(new WheelEvent('wheel'))
       const anchor = Array.from(element.querySelectorAll('.comment'))
         .find(comment => comment.querySelector('.chatMessage')?.textContent === 'Mock live chat message 30')
       element.scrollTop = anchor.offsetTop
