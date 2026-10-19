@@ -1,23 +1,27 @@
 import { normalizeSubscriptionChannelSettings } from './renderer/helpers/subscription-channels.js'
 
 /**
- * Only channels with notifications turned on are included.
+ * Only channels with notifications turned on are included, limited to the
+ * feed types that subscription refreshes fetch.
  * @param {{
  *   enabled: boolean,
  *   subscriptions: object[],
+ *   hiddenFeedTypes?: string[],
  *   showMembersOnly: boolean,
  *   titles: Record<string, string>
  * }} input
  */
-export function createUploadNotificationConfiguration({ enabled, subscriptions, showMembersOnly, titles }) {
+export function createUploadNotificationConfiguration({ enabled, subscriptions, hiddenFeedTypes = [], showMembersOnly, titles }) {
   const channels = enabled
     ? Object.fromEntries(subscriptions.flatMap(channel => {
         if (typeof channel?.id !== 'string' || channel.id.length === 0) return []
         const settings = normalizeSubscriptionChannelSettings(channel)
-        if (settings.notificationFeedTypes.length === 0) return []
+        const feedTypes = settings.notificationFeedTypes
+          .filter(feedType => settings.feedTypes.includes(feedType) && !hiddenFeedTypes.includes(feedType))
+        if (feedTypes.length === 0) return []
         return [[channel.id, {
           name: channel.name ?? '',
-          feedTypes: settings.notificationFeedTypes,
+          feedTypes,
           membersOnly: showMembersOnly && settings.showMembersOnly
         }]]
       }))
@@ -60,7 +64,8 @@ export function normalizeUploadEntries(entries) {
 function htmlToText(html) {
   return html
     .replaceAll(/<br\s*\/?>/gi, '\n')
-    .replaceAll(/<[^>]*>/g, '')
+    // Also drops an unclosed tag, so no markup survives.
+    .replaceAll(/<[^>]*>?/g, '')
     .replaceAll(/&(amp|lt|gt|quot|#39);/g, (_, entity) => ({ amp: '&', lt: '<', gt: '>', quot: '"', '#39': "'" })[entity])
 }
 

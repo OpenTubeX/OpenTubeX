@@ -58,6 +58,14 @@ test('the bell is off per channel until turned on, which selects every type', as
     'Alpha Channel': ['videos', 'live', 'posts'],
     'Beta Channel': undefined
   })
+  // Feed types hidden from the subscription feed are not fetched, so they cannot notify.
+  const liveNotification = alpha.getByRole('group', { name: 'Notify about new uploads' }).getByRole('checkbox', { name: 'Live' })
+  await alpha.getByRole('group', { name: 'Show in subscription feed' }).getByRole('checkbox', { name: 'Live' }).click()
+  await expect(liveNotification).toBeDisabled()
+  await expect(liveNotification).toHaveAttribute('aria-checked', 'false')
+  await alpha.getByRole('group', { name: 'Show in subscription feed' }).getByRole('checkbox', { name: 'Live' }).click()
+  await expect(liveNotification).toBeEnabled()
+  await expect(liveNotification).toHaveAttribute('aria-checked', 'true')
   const beta = page.getByRole('group', { name: 'Beta Channel' })
   await expect(beta.getByRole('checkbox', { name: 'Notify about new uploads' })).not.toBeChecked()
   await page.getByRole('checkbox', { name: 'Alpha Channel' }).click()
@@ -85,6 +93,8 @@ test.describe('with a channel notification turned on', () => {
   test('refresh results notify only about new uploads of turned-on channels and types', async ({ app, page }) => {
     await app.electronApp.evaluate(({ Notification }) => {
       globalThis.shownUploadNotifications = []
+      // CI has no notification server.
+      Notification.isSupported = () => true
       Notification.prototype.show = function () {
         globalThis.shownUploadNotifications.push({ title: this.title, body: this.body })
       }

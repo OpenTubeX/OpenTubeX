@@ -272,6 +272,13 @@
   color: var(--primary-text-color);
 }
 
+.feedTypeOption:disabled {
+  background-color: transparent;
+  color: var(--secondary-text-color);
+  cursor: default;
+  opacity: 0.5;
+}
+
 .feedTypeOption > span {
   min-inline-size: 0;
   overflow-wrap: anywhere;

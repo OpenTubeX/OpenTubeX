@@ -411,7 +411,7 @@ test.describe('settings control spacing', { tag: '@scale' }, () => {
     ]) {
       await resize(app, page, 1600, uiScale)
       const section = await openCategory(page, category)
-      await section.getByRole('button', { name }).click()
+      await section.getByRole('button', { name, exact: typeof name === 'string' }).click()
       const field = page.locator(selector)
       await expect(field).toBeVisible()
       for (const width of [1600, 480, 1600]) {

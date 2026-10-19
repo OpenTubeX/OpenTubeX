@@ -102,7 +102,7 @@
   justify-content: center;
   min-block-size: 40px;
   padding-block: 5px;
-  padding-inline: 10px;
+  padding-inline: 6px;
 }
 
 .notificationBell:is(:hover, :focus-visible),

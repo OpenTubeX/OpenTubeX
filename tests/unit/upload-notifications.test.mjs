@@ -89,6 +89,20 @@ test('only channels with notifications turned on are configured', () => {
   assert.deepEqual(createUploadNotificationConfiguration({ ...input, subscriptions: [{ id: 'UC1' }] }), { enabled: false })
 })
 
+test('only feed types that refreshes fetch can notify', () => {
+  const configuration = createUploadNotificationConfiguration({
+    enabled: true,
+    subscriptions: [
+      { id: 'UC1', name: 'One', feedTypes: ['videos', 'shorts'], notificationFeedTypes: ['videos', 'shorts', 'posts'] },
+      { id: 'UC2', name: 'Two', feedTypes: ['posts'], notificationFeedTypes: ['videos'] }
+    ],
+    hiddenFeedTypes: ['shorts'],
+    showMembersOnly: false,
+    titles: {}
+  })
+  assert.deepEqual(configuration.channels, { UC1: { name: 'One', feedTypes: ['videos'], membersOnly: false } })
+})
+
 test('the desktop notifier persists state and shows localized notifications', async () => {
   const directory = await mkdtemp(path.join(tmpdir(), 'upload-notifications-'))
   try {

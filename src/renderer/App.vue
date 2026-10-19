@@ -1139,6 +1139,13 @@ const hideSubscriptionsLive = computed(() => store.getters.getHideLiveStreams ||
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideSubscriptionsPosts = computed(() => store.getters.getHideSubscriptionsCommunity || store.getters.getUseRssFeeds)
 
+const hiddenSubscriptionFeedTypes = computed(() => [
+  ...(hideSubscriptionsVideos.value ? ['videos'] : []),
+  ...(hideSubscriptionsShorts.value ? ['shorts'] : []),
+  ...(hideSubscriptionsLive.value ? ['live'] : []),
+  ...(hideSubscriptionsPosts.value ? ['posts'] : [])
+])
+
 const dataReady = ref(false)
 // Page-wide and teleported styles read the layout from <html>.
 watch(useTemplateRef('appRoot'), (app, _previous, onCleanup) => {
@@ -2181,12 +2188,7 @@ const androidSubscriptionRefreshConfiguration = computed(() => {
       live: subscriptionLiveAutoRefreshInterval.value,
       posts: subscriptionPostsAutoRefreshInterval.value
     },
-    hiddenFeedTypes: [
-      ...(hideSubscriptionsVideos.value ? ['videos'] : []),
-      ...(hideSubscriptionsShorts.value ? ['shorts'] : []),
-      ...(hideSubscriptionsLive.value ? ['live'] : []),
-      ...(hideSubscriptionsPosts.value ? ['posts'] : [])
-    ],
+    hiddenFeedTypes: hiddenSubscriptionFeedTypes.value,
     instanceUrl: store.getters.getCurrentInvidiousInstanceUrl,
     authorization: store.getters.getCurrentInvidiousInstanceAuthorization,
     titles: Object.fromEntries(subscriptionAutoRefreshTabs.map(tab => [
@@ -2222,6 +2224,7 @@ const uploadNotificationConfiguration = computed(() => {
   return createUploadNotificationConfiguration({
     enabled: store.getters.getEnableUploadNotifications,
     subscriptions: store.getters.getProfileList[0]?.subscriptions ?? [],
+    hiddenFeedTypes: hiddenSubscriptionFeedTypes.value,
     showMembersOnly: hasConfiguredRestrictedPlaybackAuthentication(store.getters),
     titles: {
       videos: t('Subscriptions.New video from {channel}', { channel: '{channel}' }),

@@ -308,9 +308,10 @@
                   :key="feedType.id"
                   type="button"
                   class="feedTypeOption"
-                  :class="{ enabled: isFeedTypeEnabled(channel, feedType.id, 'notificationFeedTypes') }"
+                  :class="{ enabled: isNotifying(channel, feedType.id) }"
                   role="checkbox"
-                  :aria-checked="isFeedTypeEnabled(channel, feedType.id, 'notificationFeedTypes')"
+                  :aria-checked="isNotifying(channel, feedType.id)"
+                  :disabled="!isFeedTypeEnabled(channel, feedType.id)"
                   @click="updateFeedType(
                     channel,
                     feedType.id,
@@ -324,7 +325,7 @@
                   />
                   <span>{{ feedType.label }}</span>
                   <FtIcon
-                    v-if="isFeedTypeEnabled(channel, feedType.id, 'notificationFeedTypes')"
+                    v-if="isNotifying(channel, feedType.id)"
                     class="feedTypeCheck"
                     :icon="['fas', 'check']"
                     aria-hidden="true"
@@ -547,6 +548,15 @@ function channelLimitValue(channel) {
  */
 function isFeedTypeEnabled(channel, feedType, key = 'feedTypes') {
   return channelSettings(channel)[key].includes(feedType)
+}
+
+/**
+ * Only fetched feed types can notify.
+ * @param {object} channel
+ * @param {string} feedType
+ */
+function isNotifying(channel, feedType) {
+  return isFeedTypeEnabled(channel, feedType) && isFeedTypeEnabled(channel, feedType, 'notificationFeedTypes')
 }
 
 /**
