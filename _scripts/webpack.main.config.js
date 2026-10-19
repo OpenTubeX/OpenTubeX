@@ -20,6 +20,15 @@ const config = {
   module: {
     rules: [
       {
+        include: require.resolve('dbus-native/lib/address.js'),
+        resolve: {
+          alias: {
+            // Electron uses Node sockets; Bun's optional FFI loader cannot be bundled.
+            './transport-bun$': path.join(__dirname, '../src/main/dbusNodeTransport.js')
+          }
+        }
+      },
+      {
         // The Windows addon path is resolved at runtime. Dependencies such as
         // font-list still need webpack to follow their static createRequire calls.
         include: path.join(__dirname, '../src/main/desktopShare.js'),
