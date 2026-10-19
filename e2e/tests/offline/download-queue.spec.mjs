@@ -74,6 +74,33 @@ test('separates canceled downloads without offering retry-all', async ({ page })
   await expect(page.getByRole('heading', { name: 'Downloaded', exact: true })).toHaveCount(0)
 })
 
+test('shares one yt-dlp version probe across concurrent downloads', async ({ app, page }) => {
+  const executable = path.join(app.userDataDir, 'probed-yt-dlp.sh')
+  const probesFile = path.join(app.userDataDir, 'version-probes.txt')
+  const argumentsFile = path.join(app.userDataDir, 'probed-arguments.txt')
+  await writeFile(executable, [
+    '#!/bin/sh',
+    `if [ "$1" = "--version" ]; then printf '%s\\n' probe >> '${probesFile}'; sleep 0.5; printf '%s\\n' '2026.08.19'; exit; fi`,
+    `printf '%s\\n' "$@" >> '${argumentsFile}'`,
+  ].join('\n'))
+  await chmod(executable, 0o755)
+  await configureQueue(page, {
+    ytDlpPath: executable,
+    ytDlpDownloadFolderPath: app.userDataDir,
+    ytDlpMaxConcurrentDownloads: 3,
+  })
+
+  const results = await page.evaluate(downloads => Promise.all(
+    downloads.map(download => window.ftElectron.ytDlpDownload(download))
+  ), ['kkkkkkkkkkk', 'lllllllllll', 'mmmmmmmmmmm'].map(videoId => ({ videoId, title: videoId, mode: 'video' })))
+  expect(results.every(result => Number.isInteger(result?.id))).toBe(true)
+  expect(await readFile(probesFile, 'utf8')).toBe('probe\n')
+  await expect.poll(async () => {
+    const lines = (await readFile(argumentsFile, 'utf8').catch(() => '')).split('\n')
+    return lines.filter(line => line === '--js-runtimes').length
+  }).toBe(3)
+})
+
 test('controls queue order, running jobs, bandwidth, and retry-all', async ({ app, page }) => {
   const executable = path.join(app.userDataDir, 'queued-yt-dlp.sh')
   const startsFile = path.join(app.userDataDir, 'queue-starts.txt')

@@ -735,6 +735,8 @@ function ytDlpEnvironment() {
 
 /** @type {Map<string, { fileKey: string, version: string }>} */
 const ytDlpVersionCache = new Map()
+/** @type {Map<string, Promise<string | null>>} */
+const pendingYtDlpVersions = new Map()
 
 /**
  * Identifies the file execFile would run so the version cache can tell when
@@ -775,20 +777,35 @@ async function getYtDlpVersion(executable, signal) {
     return cached.version
   }
 
-  try {
-    // PyInstaller onefile builds extract on first launch; allow time for that on slow disks/VMs
-    const { stdout } = await execFileAsync(executable, ['--version'], {
-      timeout: 60_000,
-      windowsHide: true,
-      signal
-    })
-    const version = stdout.trim()
-    if (fileKey !== null) {
-      ytDlpVersionCache.set(executable, { fileKey, version })
+  // Concurrent downloads and playback share one probe; an abortable probe keeps its own.
+  const pendingKey = `${executable}\0${fileKey}`
+  const pending = signal === undefined ? pendingYtDlpVersions.get(pendingKey) : undefined
+  if (pending !== undefined) return pending
+
+  const probe = (async () => {
+    try {
+      // PyInstaller onefile builds extract on first launch; allow time for that on slow disks/VMs
+      const { stdout } = await execFileAsync(executable, ['--version'], {
+        timeout: 60_000,
+        windowsHide: true,
+        signal
+      })
+      const version = stdout.trim()
+      if (fileKey !== null) {
+        ytDlpVersionCache.set(executable, { fileKey, version })
+      }
+      return version
+    } catch {
+      return null
     }
-    return version
-  } catch {
-    return null
+  })()
+  if (signal !== undefined) return probe
+
+  pendingYtDlpVersions.set(pendingKey, probe)
+  try {
+    return await probe
+  } finally {
+    pendingYtDlpVersions.delete(pendingKey)
   }
 }
 
