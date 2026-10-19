@@ -86,16 +86,18 @@ final class UploadNotifications {
         JSONObject channel = channels == null ? null : channels.optJSONObject(channelId);
         if (channel == null || !contains(channel.optJSONArray("feedTypes"), feedType)) return;
 
-        boolean membersOnly = channel.optBoolean("membersOnly");
         List<JSONObject> available = new ArrayList<>();
         for (int i = 0; i < entries.length(); i++) {
             JSONObject entry = entries.optJSONObject(i);
-            if (entry != null && (membersOnly || !entry.optBoolean("membersOnly"))) available.add(entry);
+            if (entry != null) available.add(entry);
         }
 
+        // The baseline includes members-only entries, so they are not reported
+        // as new once members-only content becomes visible.
         JSONObject state = readState(context);
         List<JSONObject> uploads = takeNewUploads(state, channelId, feedType, available, System.currentTimeMillis());
         writeState(context, state);
+        if (!channel.optBoolean("membersOnly")) uploads.removeIf(upload -> upload.optBoolean("membersOnly"));
 
         JSONObject titles = configuration.optJSONObject("titles");
         String name = channel.optString("name");

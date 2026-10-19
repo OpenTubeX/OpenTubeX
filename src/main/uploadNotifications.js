@@ -54,13 +54,10 @@ export function createUploadNotifier({ file, show }) {
         const channel = configuration?.enabled === true ? configuration.channels?.[channelId] : null
         if (!channel?.feedTypes?.includes(feedType)) return
 
-        const current = await load()
-        const uploads = takeNewUploads(
-          current,
-          channelId,
-          feedType,
-          entries.filter(entry => channel.membersOnly === true || !entry.membersOnly)
-        )
+        // The baseline includes members-only entries, so they are not reported
+        // as new once members-only content becomes visible.
+        const uploads = takeNewUploads(await load(), channelId, feedType, entries)
+          .filter(entry => channel.membersOnly === true || !entry.membersOnly)
         await save()
 
         for (const upload of uploads) {

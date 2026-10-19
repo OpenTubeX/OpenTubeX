@@ -165,3 +165,26 @@ test('turning a channel off and on again starts from a fresh baseline', async ()
     await rm(directory, { recursive: true, force: true })
   }
 })
+
+test('members-only uploads seen while hidden stay known once they become visible', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'upload-notifications-'))
+  try {
+    const shown = []
+    const notifier = createUploadNotifier({ file: path.join(directory, 'state.json'), show: notification => shown.push(notification) })
+    const configure = membersOnly => notifier.configure({
+      enabled: true,
+      titles: { videos: '{channel}' },
+      channels: { UC1: { name: 'One', feedTypes: ['videos'], membersOnly } }
+    })
+    await configure(false)
+    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('a', Date.now())] })
+    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('m', Date.now(), { membersOnly: true }), entry('a', Date.now())] })
+    await configure(true)
+    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('m', Date.now(), { membersOnly: true }), entry('a', Date.now())] })
+    assert.deepEqual(shown, [])
+    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('n', Date.now(), { membersOnly: true }), entry('m', Date.now(), { membersOnly: true }), entry('a', Date.now())] })
+    assert.deepEqual(shown.map(notification => notification.body), ['Title n'])
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
