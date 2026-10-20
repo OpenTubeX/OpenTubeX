@@ -711,10 +711,12 @@ test.describe('automatic download authorization', () => {
     ), id)
     await expect.poll(() => readFile(path.join(app.userDataDir, 'started-ddddddddddd')).then(() => true, () => false)).toBe(true)
     await expect.poll(async () => (await status(result.id))?.waitingFor).toBe('charging')
-    expect((await status(result.id)).status).toBe('queued')
+    // The automatic download was queued first, so the drain that started the
+    // manual download has already decided to hold it back.
+    expect(await status(result.id)).toEqual(expect.objectContaining({ status: 'queued', started: false }))
+    expect(await readFile(startedFile).then(() => true, () => false)).toBe(false)
     await goTo(page, 'downloads')
     await expect(page.locator('.downloadRow').filter({ hasText: 'Automatic charging video' })).toContainText('Waiting for a charger')
-    await expect.poll(() => readFile(startedFile).then(() => true, () => false)).toBe(false)
 
     await app.electronApp.evaluate(({ powerMonitor }) => {
       globalThis.onBatteryPower = false
