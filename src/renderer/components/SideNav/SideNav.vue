@@ -87,10 +87,12 @@
         v-if="pinnedChannels.length > 0"
         class="mobileHidden pinnedChannels"
       >
-        <router-link
+        <component
+          :is="enableChannelLinks ? 'router-link' : 'span'"
           v-for="channel in pinnedChannels"
           :key="channel.id"
           :to="`/channel/${channel.id}`"
+          :class="enableChannelLinks ? '' : 'disabledIcon'"
           class="navChannel channelLink mobileHidden"
           :title="channel.name"
           :aria-label="channel.name"
@@ -122,7 +124,7 @@
           >
             {{ channel.name }}
           </p>
-        </router-link>
+        </component>
         <hr v-if="!hideActiveSubscriptions">
       </div>
       <div

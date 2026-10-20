@@ -18,7 +18,7 @@ test.beforeEach(async ({ page }) => {
       json: {
         author: 'Channel',
         authorId: channelId,
-        authorThumbnails: [{ url: `https://invidious.test/avatar/${channelId}`, width: 48, height: 48 }],
+        authorThumbnails: [{ url: `https://yt3.googleusercontent.com/${channelId}=s176`, width: 48, height: 48 }],
         authorBanners: [],
         description: 'Channel description',
         subCount: 0,
@@ -33,7 +33,7 @@ test.beforeEach(async ({ page }) => {
   })
   // The saved avatar uses Electron's native decoder, which needs a raster image.
   const avatar = await readFile(new URL('../../fixtures/media/avatar.png', import.meta.url))
-  await page.route('https://invidious.test/avatar/**', route => route.fulfill({ body: avatar, contentType: 'image/png' }))
+  await page.route('https://invidious.test/ggpht/**', route => route.fulfill({ body: avatar, contentType: 'image/png' }))
 })
 
 test('pins unsubscribed channels, persists them and unpins after navigation', async ({ app, page }, testInfo) => {
@@ -48,7 +48,7 @@ test('pins unsubscribed channels, persists them and unpins after navigation', as
   await expect(pinned).toHaveCount(1)
   await expect(pinned).toHaveAttribute('href', `#/channel/${id}`)
   await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).pinnedChannels)
-    .toEqual([{ id, name: 'Channel', thumbnail: `https://invidious.test/avatar/${id}` }])
+    .toEqual([{ id, name: 'Channel', thumbnail: `https://yt3.googleusercontent.com/${id}=s176` }])
   await page.reload()
   await waitForAppReady(page)
   await expect(pinned).toHaveCount(1)
@@ -67,4 +67,35 @@ test('pins unsubscribed channels, persists them and unpins after navigation', as
   await expect(pinned).toHaveCount(0)
   await expect(pin).toHaveAttribute('aria-pressed', 'false')
   await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).pinnedChannels).toEqual([])
+})
+
+test('pinned channels respect disabled channel links', async ({ page }) => {
+  const id = 'UCaaaaaaaaaaaaaaaaaaaaaa'
+  await page.evaluate(id => window.$store.dispatch('updatePinnedChannels', [{ id, name: 'Channel', thumbnail: null }]), id)
+  const pinned = page.locator('.sideNav .pinnedChannels .navChannel')
+  await expect(pinned).toHaveAttribute('href', `#/channel/${id}`)
+  await page.evaluate(() => window.$store.dispatch('updateDisableChannelLinks', true))
+  await expect(pinned).not.toHaveAttribute('href')
+  await expect(pinned).toHaveClass(/disabledIcon/)
+  const url = page.url()
+  await pinned.click({ force: true })
+  await expect(page).toHaveURL(url)
+  await page.evaluate(() => window.$store.dispatch('updateDisableChannelLinks', false))
+  await expect(pinned).toHaveAttribute('href', `#/channel/${id}`)
+})
+
+test('pinned avatars follow the active backend and Invidious instance', async ({ page }) => {
+  const id = 'UCaaaaaaaaaaaaaaaaaaaaaa'
+  const avatar = await readFile(new URL('../../fixtures/media/avatar.png', import.meta.url))
+  await page.route('https://other.invidious.test/ggpht/**', route => route.fulfill({ body: avatar, contentType: 'image/png' }))
+  await page.route('https://yt3.googleusercontent.com/**', route => route.fulfill({ body: avatar, contentType: 'image/png' }))
+  await page.evaluate(id => window.ftElectron.tabs.create({ route: `/channel/${id}`, makeActive: true }), id)
+  await page.getByRole('button', { name: 'Pin to Navigation', exact: true }).click()
+  const image = page.locator('.sideNav .pinnedChannels img')
+  await expect(image).toHaveAttribute('src', `https://invidious.test/ggpht/${id}=s35`)
+  await page.evaluate(() => window.$store.dispatch('updateDefaultInvidiousInstance', 'https://other.invidious.test'))
+  await expect(image).toHaveAttribute('src', `https://other.invidious.test/ggpht/${id}=s35`)
+  await page.evaluate(() => window.$store.dispatch('updateBackendPreference', 'local'))
+  await expect(image).toHaveAttribute('src', `https://yt3.googleusercontent.com/${id}=s35`)
+  await expect.poll(() => image.evaluate(element => element.complete && element.naturalWidth > 0)).toBe(true)
 })
