@@ -165,8 +165,7 @@ export async function measureLargeFeedScroll(page) {
   }
 }
 
-async function collectRendererHeapAfterGcKiB(page, settleMs = 0) {
-  if (settleMs > 0) await page.waitForTimeout(settleMs)
+async function collectRendererHeapAfterGcKiB(page) {
   const session = await page.context().newCDPSession(page)
   try {
     // Collect Blink's disposed DOM wrappers as well as ordinary V8 objects.
@@ -248,6 +247,35 @@ export async function measurePlaybackHeapGrowth(page) {
   if (await expandNavigation.isVisible()) await expandNavigation.click()
   await goTo(page, 'trending')
   await expect(page.locator('.ftVideoPlayer')).toHaveCount(0)
+  await page.evaluate(() => {
+    if (window.__heapSampledPlayers) return
+    const seen = new WeakSet()
+    window.__heapSampledPlayers = []
+    document.addEventListener('playing', event => {
+      if (!(event.target instanceof HTMLVideoElement) || seen.has(event.target)) return
+      seen.add(event.target)
+      window.__heapSampledPlayers.push(new WeakRef(event.target))
+    }, true)
+  })
+
+  // Avatar requests can retain closed players until their five-second deadline,
+  // which a loaded runner can stretch. Sample once the closed players are collected,
+  // bounded so that a deliberately retained player is still measured.
+  async function collectAfterClosedPlayers() {
+    const session = await page.context().newCDPSession(page)
+    try {
+      const deadline = Date.now() + 20_000
+      while (Date.now() < deadline) {
+        await session.send('HeapProfiler.collectGarbage')
+        const retained = await page.evaluate(() => window.__heapSampledPlayers.filter(reference => reference.deref()).length)
+        if (retained === 0) break
+        await page.waitForTimeout(250)
+      }
+    } finally {
+      await session.detach()
+    }
+    return collectRendererHeapAfterGcKiB(page)
+  }
 
   async function cycle() {
     const tab = await page.evaluate(() => window.ftElectron.tabs.create({
@@ -264,12 +292,9 @@ export async function measurePlaybackHeapGrowth(page) {
 
   // Exclude one-time player initialization, lazy modules and media caches.
   await cycle()
-  // Avatar requests can retain closed players until their five-second deadline.
-  // Sample both sides after that bounded work settles, rather than measuring
-  // timing-dependent temporary retention as a player leak.
-  const before = await collectRendererHeapAfterGcKiB(page, 5000)
+  const before = await collectAfterClosedPlayers()
   for (let index = 0; index < playbackCycles; index++) await cycle()
-  const after = await collectRendererHeapAfterGcKiB(page, 5000)
+  const after = await collectAfterClosedPlayers()
   return Math.max(0, after - before) / 1024
 }
 

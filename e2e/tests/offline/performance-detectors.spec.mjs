@@ -136,7 +136,8 @@ test('collects disposed players when application data grows during heap sampling
 })
 
 test('detects retained players across complete playback and tab disposal cycles', { tag: '@performance' }, async ({ app, page }, testInfo) => {
-  test.setTimeout(120_000)
+  // The retained players never get collected, so both candidate samples wait out their bound.
+  test.setTimeout(180_000)
   await mockPlayableWatchPage(app, page)
   const base = await measurePlaybackHeapGrowth(page)
   await page.evaluate(() => {
