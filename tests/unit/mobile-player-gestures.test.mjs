@@ -168,6 +168,34 @@ test('committed fullscreen swipe starts after painting without a settle delay', 
   assert.equal(calls.includes('fullscreen'), true, 'A committed swipe must not wait for the 140 ms settle animation')
 })
 
+test('a swipe exits rotation fullscreen without entering native fullscreen', async t => {
+  let rotationFullscreen = true
+  let nativeToggles = 0
+  const optionsSource = playerSource.split('} = useMobileFullscreenGestures({')[1]
+  const context = vm.createContext({
+    isNativeFullscreenActive: () => false,
+    get androidRotationFullscreen() { return rotationFullscreen },
+    exitAndroidRotationFullscreen: () => { rotationFullscreen = false },
+    finishAndroidFullscreenExit() {},
+    ui: { getControls: () => ({ toggleFullScreen: () => { nativeToggles++ } }) },
+  })
+  const fullscreen = vm.runInContext(`(${optionsSource.match(/isFullscreenActive: ([^\n]+),/)[1]})`, context)
+  const toggleFullscreen = vm.runInContext(`(${optionsSource.match(/togglePlayerFullScreen: ([\s\S]*?\n      \}),/)[1]})`, context)
+  const { gestures: g, event, paint } = fixture(t, { fullscreen, toggleFullscreen })
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  assert.equal(fullscreen(), true, 'Rotation fullscreen must be recognized by gestures')
+  g.startMobileFullscreenGesture(event(210, 50))
+  assert.equal(g.moveMobileFullscreenGesture(event(210, 150)), true)
+  g.finishMobileFullscreenGesture(event(210, 150))
+  t.mock.timers.tick(0)
+  await nextTick()
+  paint()
+  paint()
+  await Promise.resolve()
+  assert.equal(rotationFullscreen, false)
+  assert.equal(nativeToggles, 0)
+})
+
 for (const interrupt of ['none', 'new touch', 'cancel', 'unmount', 'fullscreen changed']) {
   test(`fullscreen swipe paints its reset before handoff (${interrupt})`, async t => {
     let fullscreen = false

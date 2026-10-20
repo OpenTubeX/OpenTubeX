@@ -5640,7 +5640,7 @@ export default defineComponent({
           : time
         seekBySeconds(target - video.value.currentTime, true, false, false)
       },
-      isFullscreenActive: () => isNativeFullscreenActive(),
+      isFullscreenActive: () => isNativeFullscreenActive() || androidRotationFullscreen,
       isFullscreenMetadataShown: () => showFullscreenMetadata.value,
       isFullscreenSwipeEnabled: () => enableMobileFullscreenSwipe.value,
       isSeekSwipeEnabled: () => store.getters.getEnableMobileFullscreenSeek,
@@ -5675,6 +5675,10 @@ export default defineComponent({
       showOverlayControls,
       togglePlayerFullScreen: () => {
         finishAndroidFullscreenExit(true)
+        if (androidRotationFullscreen) {
+          exitAndroidRotationFullscreen()
+          return
+        }
         return ui?.getControls().toggleFullScreen()
       },
     })
