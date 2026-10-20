@@ -115,6 +115,11 @@ async function mockDlna(app) {
   })
 }
 
+// The mock receiver applies the start position asynchronously, so later state edits must wait for it.
+async function waitForCastStart(app) {
+  await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.startCompletions)).toBe(1)
+}
+
 async function choice(page, name) {
   await page.locator('.chromecastControl > button').click()
   await page.getByRole('option', { name, exact: true }).click()
@@ -816,6 +821,7 @@ test('packaged sender discovers and plays on the selected authenticated Cast rec
 test('navigation persists the receiver position without a manual save', async ({ app, page }) => {
   const watch = await openCastVideo(app, page)
   await choice(page, 'Test TV')
+  await waitForCastStart(app)
   await app.electronApp.evaluate(() => { globalThis.castTest.state.currentTime = 18 })
   await expect.poll(() => watch.evaluate(vm => vm.currentTime)).toBe(18)
   await page.locator('.sideNav a[href="#/history"]').first().evaluate(link => link.click())
@@ -832,6 +838,7 @@ for (const failStop of [false, true]) {
   test(`a status polling error releases local controls with a ${failStop ? 'failed' : 'successful'} stop`, async ({ app, page }) => {
     const watch = await openCastVideo(app, page)
     await choice(page, 'Test TV')
+    await waitForCastStart(app)
     await app.electronApp.evaluate(() => { globalThis.castTest.state.currentTime = 18 })
     await expect.poll(() => watch.evaluate(vm => vm.currentTime)).toBe(18)
     const successfulCalls = await app.electronApp.evaluate(failStop => {
@@ -858,6 +865,7 @@ test('natural receiver completion marks watched and invokes Watch completion onc
   const watch = await openCastVideo(app, page)
   await watch.evaluate(vm => { window.castCompletions = 0; vm.handleVideoEnded = () => { window.castCompletions++ } })
   await choice(page, 'Test TV')
+  await waitForCastStart(app)
   await app.electronApp.evaluate(() => { Object.assign(globalThis.castTest.state, { currentTime: 30, ended: true }) })
   await expect.poll(() => page.evaluate(() => window.castCompletions)).toBe(1)
   await expect.poll(() => watch.evaluate(vm => vm.historyEntry?.isWatched)).toBe(true)
