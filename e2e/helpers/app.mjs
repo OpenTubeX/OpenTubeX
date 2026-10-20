@@ -426,9 +426,28 @@ export async function setPlayerFullscreen(page, fullscreen) {
   const player = page.locator('.ftVideoPlayer')
   const isFullscreen = await player.evaluate((element) => document.fullscreenElement === element)
 
-  if (isFullscreen !== fullscreen) {
-    await page.evaluate(() => document.activeElement?.blur())
+  // Under load, the window can fail to change its fullscreen state, which
+  // Chromium reports as a fullscreenerror. Only then is pressing again safe.
+  for (let attempt = 0; attempt < (isFullscreen === fullscreen ? 0 : 3); attempt++) {
+    await page.evaluate(() => {
+      window.__e2eFullscreenResult = null
+      const record = (event) => {
+        document.removeEventListener('fullscreenchange', record)
+        document.removeEventListener('fullscreenerror', record)
+        window.__e2eFullscreenResult = event.type
+      }
+      document.addEventListener('fullscreenchange', record)
+      document.addEventListener('fullscreenerror', record)
+      document.activeElement?.blur()
+    })
     await page.keyboard.press('f')
+
+    let result = null
+    await expect.poll(async () => {
+      result = await page.evaluate(() => window.__e2eFullscreenResult)
+      return result
+    }).not.toBeNull()
+    if (result === 'fullscreenchange') break
   }
 
   await expect.poll(

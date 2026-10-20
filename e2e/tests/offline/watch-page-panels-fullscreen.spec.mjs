@@ -971,8 +971,11 @@ test.describe('fullscreen playlist dock', () => {
     const scroller = playlist.locator('.playlistItemsWrapper')
     const items = scroller.locator('.playlistItem')
     await expect(items).toHaveCount(FULLSCREEN_PLAYLIST.videos.length)
-    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
-    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    // The dock may still be laying out its items, so keep scrolling until it can.
+    await expect.poll(() => scroller.evaluate(element => {
+      element.scrollTop = element.scrollHeight
+      return element.scrollTop
+    })).toBeGreaterThan(0)
 
     await page.evaluate(async ({ playlistId, playlistItemIds, videoIds }) => {
       const store = window.$store
