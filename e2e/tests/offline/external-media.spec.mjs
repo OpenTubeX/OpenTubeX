@@ -85,6 +85,60 @@ for (const live of [false, true]) {
   })
 }
 
+test('unloaded Twitch tabs resolve their title when selected, reloaded, and reopened', async ({ app, page }, testInfo) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false)
+  const tab = await page.evaluate(url => window.ftElectron.tabs.create({
+    route: '/external-media', query: { url }, makeActive: false, lazyLoad: true
+  }), mediaUrl)
+  const tabElement = page.locator(`.tab[data-tab-id="${tab.id}"]`)
+  await expect(tabElement).toHaveClass(/unloaded/)
+  await tabElement.click()
+  await waitForPlayback(page)
+  await expect(tabElement.locator('.tabTitleText')).toHaveText('A Twitch broadcast')
+
+  await tabElement.click({ button: 'middle', modifiers: ['Control'] })
+  await expect(tabElement).toHaveClass(/unloaded/)
+  await expect(page.locator(`.tabContent[data-tab-id="${tab.id}"] .routerView`)).toHaveCount(0)
+  await tabElement.click()
+  await waitForPlayback(page)
+  await expect(tabElement.locator('.tabTitleText')).toHaveText('A Twitch broadcast')
+
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(tabElement.locator('.tabTitleText')).toHaveText('A Twitch broadcast')
+
+  await tabElement.click({ button: 'middle', modifiers: ['Control'] })
+  await expect(tabElement).toHaveClass(/unloaded/)
+  await tabElement.click({ button: 'middle' })
+  await page.keyboard.press('Control+Shift+T')
+  await waitForPlayback(page)
+  await expect(page.locator(`${sel.activeTab} .tabTitleText`)).toHaveText('A Twitch broadcast')
+  const screenshot = testInfo.outputPath('restored-twitch-tab.png')
+  await page.locator(sel.activeTab).screenshot({ path: screenshot })
+  await testInfo.attach('Restored Twitch tab', { path: screenshot, contentType: 'image/png' })
+})
+
+test('restored unloaded Twitch tabs replace their route placeholder after startup', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false)
+  await page.evaluate(() => window.$store.dispatch('updateStartupBehavior', 'restoreTabLoadState'))
+  const tab = await page.evaluate(url => window.ftElectron.tabs.create({
+    route: '/external-media', query: { url }, makeActive: false, lazyLoad: true
+  }), mediaUrl)
+  ;({ page } = await app.relaunch())
+  await routeDemoMedia(page)
+  const tabElement = page.locator(`.tab[data-tab-id="${tab.id}"]`)
+  await expect(tabElement).toHaveClass(/unloaded/)
+  await tabElement.click()
+  await waitForPlayback(page)
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(tabElement.locator('.tabTitleText')).toHaveText('A Twitch broadcast')
+})
+
 test('external media resumes its last playback position after reopening and restarting', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
   const mediaUrl = 'https://www.twitch.tv/videos/123456789'

@@ -30,6 +30,7 @@ function setup() {
     routes: [
       { path: '/channel/:id', name: 'channel', component: {} },
       { path: '/watch/:id', name: 'watch', component: {} },
+      { path: '/external-media', component: {}, meta: { title: 'Watch', hasDynamicTitle: true } },
       { path: '/subscriptions', name: 'subscriptions', component: {}, meta: { title: 'Subscriptions' } },
     ],
   })
@@ -85,3 +86,22 @@ test('fresh channel navigation uses its own placeholder and can publish a new na
   await navigation.forward('tab')
   assert.equal(tab().contentTitle, 'Another channel')
 })
+
+for (const mode of ['push', 'replace']) {
+  test(`${mode} to the same restored external URL preserves its resolved title and history`, async () => {
+    const { store, navigation } = setup()
+    const query = { url: 'https://www.twitch.tv/videos/123456789' }
+    // The main process serializes saved tab routes with URLSearchParams,
+    // which escapes ':' and '/' differently from Vue Router.
+    const route = { path: '/external-media', query, fullPath: `/external-media?${new URLSearchParams(query)}` }
+    store.commit('setTabsState', { tabs: [{ id: 'restored', route, title: 'A Twitch broadcast', loadState: 'loaded' }] })
+    await navigation[mode]('restored', { path: '/external-media', query })
+    assert.equal(store.getters.getTabById('restored').contentTitle, 'A Twitch broadcast')
+    assert.equal(store.getters.getTabById('restored').history.length, 1)
+
+    await navigation.push('restored', { path: '/external-media', query: { url: 'https://www.twitch.tv/other' } })
+    const changed = store.getters.getTabById('restored')
+    assert.equal(changed.contentTitle, changed.route.fullPath, 'different media still clears the old title')
+    assert.equal(changed.history.length, 2)
+  })
+}

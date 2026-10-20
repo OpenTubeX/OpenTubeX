@@ -307,7 +307,10 @@ export class TabNavigationService {
     const initialTitle = typeof location?.state?.tabTitle === 'string'
       ? location.state.tabTitle
       : null
-    const sameRoute = route.fullPath === tab.route.fullPath
+    // Persisted main-process routes and Vue Router encode query strings
+    // differently. Compare resolved routes so reopening the same URL does not
+    // clear its title without triggering a new content load.
+    const sameRoute = route.fullPath === from.fullPath
     const preserveContentTitle = location?.state?.skipTabRouteLoading === true
     const preserveScroll = location?.state?.preserveScroll === true
     const titlePending = initialTitle === null && route.path.startsWith('/watch/')
