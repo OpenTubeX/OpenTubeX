@@ -134,6 +134,7 @@
                 }"
                 role="checkbox"
                 :aria-checked="selectedNotificationFeedTypeStates[feedType.id]"
+                :disabled="selectedChannelsForFeedType(feedType.id, 'notificationFeedTypes').length === 0"
                 @click="updateSelectedFeedType(feedType.id, 'notificationFeedTypes')"
               >
                 <FtIcon
@@ -594,11 +595,11 @@ function clearChannelSelection() {
  * @param {(channel: SubscriptionChannel) => boolean} isEnabled
  * @returns {boolean | 'mixed'}
  */
-function selectedState(isEnabled) {
-  const enabledCount = selectedChannels.value.filter(isEnabled).length
+function selectedState(isEnabled, channels = selectedChannels.value) {
+  const enabledCount = channels.filter(isEnabled).length
 
   if (enabledCount === 0) return false
-  if (enabledCount === selectedChannels.value.length) return true
+  if (enabledCount === channels.length) return true
   return 'mixed'
 }
 
@@ -610,7 +611,18 @@ function selectedState(isEnabled) {
 function selectedFeedTypeState(feedType, key = 'feedTypes') {
   return selectedState(channel => (
     isFeedTypeEnabled(channel, feedType, key)
-  ))
+  ), selectedChannelsForFeedType(feedType, key))
+}
+
+/**
+ * Notifications only apply to channels that show the feed type.
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} feedType
+ * @param {'feedTypes' | 'notificationFeedTypes'} key
+ */
+function selectedChannelsForFeedType(feedType, key) {
+  return key === 'notificationFeedTypes'
+    ? selectedChannels.value.filter(channel => isFeedTypeEnabled(channel, feedType))
+    : selectedChannels.value
 }
 
 const selectedFeedTypeStates = computed(() => Object.fromEntries(
@@ -629,7 +641,7 @@ const selectedNotificationFeedTypeStates = computed(() => Object.fromEntries(
  */
 function updateSelectedFeedType(feedType, key = 'feedTypes') {
   const enabled = selectedFeedTypeState(feedType, key) !== true
-  persistChannelSettingsUpdates(selectedChannels.value
+  persistChannelSettingsUpdates(selectedChannelsForFeedType(feedType, key)
     .filter(channel => isFeedTypeEnabled(channel, feedType, key) !== enabled)
     .map(channel => ({
       channel,

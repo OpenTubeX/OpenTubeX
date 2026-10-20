@@ -38,8 +38,14 @@ export function createUploadNotifier({ file, show }) {
   }
 
   async function save() {
-    await writeFile(file + '.tmp', JSON.stringify(state), { mode: 0o600 })
-    await rename(file + '.tmp', file)
+    try {
+      await writeFile(file + '.tmp', JSON.stringify(state), { mode: 0o600 })
+      await rename(file + '.tmp', file)
+    } catch (error) {
+      // Reload the last saved state, so a later refresh detects these uploads again.
+      state = null
+      throw error
+    }
   }
 
   return {

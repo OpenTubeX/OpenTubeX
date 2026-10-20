@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdtemp, readFile, rm } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
@@ -235,4 +235,27 @@ test('withheld uploads are released when they turn public in another feed of the
   takeVisibleUploads(state, 'UC1', 'live', [entry('b', NOW)], false, NOW)
   takeVisibleUploads(state, 'UC1', 'videos', [entry('m', NOW, { membersOnly: true }), entry('a', NOW)], false, NOW)
   assert.deepEqual(takeVisibleUploads(state, 'UC1', 'live', [entry('m', NOW), entry('b', NOW)], false, NOW).map(upload => upload.id), ['m'])
+})
+
+test('a failed save keeps detected uploads for the next refresh', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'upload-notifications-'))
+  try {
+    const file = path.join(directory, 'state.json')
+    const shown = []
+    const notifier = createUploadNotifier({ file, show: notification => shown.push(notification) })
+    await notifier.configure({ enabled: true, titles: { videos: '{channel}' }, channels: { UC1: { name: 'One', feedTypes: ['videos'], membersOnly: false } } })
+    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: [entry('a', Date.now())] })
+    const saved = await readFile(file, 'utf8')
+    await rm(file)
+    // A directory in place of the file makes the rename fail.
+    await mkdir(file)
+    const feed = [entry('b', Date.now()), entry('a', Date.now())]
+    await assert.rejects(notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: feed }))
+    await rm(file, { recursive: true })
+    await writeFile(file, saved)
+    await notifier.observe({ channelId: 'UC1', feedType: 'videos', entries: feed })
+    assert.deepEqual(shown.map(notification => notification.body), ['Title b'])
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
 })

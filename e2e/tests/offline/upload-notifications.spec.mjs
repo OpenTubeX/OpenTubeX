@@ -77,6 +77,16 @@ test('the bell is off per channel until turned on, which selects every type', as
     'Alpha Channel': ['videos', 'live', 'posts'],
     'Beta Channel': ['videos', 'shorts', 'live', 'posts']
   })
+
+  // Bulk notification changes skip channels that hide the feed type.
+  await alpha.getByRole('group', { name: 'Show in subscription feed', exact: true }).getByRole('checkbox', { name: 'Posts' }).click()
+  const bulkPosts = bulk.getByRole('group', { name: 'Notify about new uploads', exact: true }).getByRole('checkbox', { name: 'Posts' })
+  await expect(bulkPosts).toHaveAttribute('aria-checked', 'true')
+  await bulkPosts.click()
+  await expect.poll(() => readNotificationTypes(app.userDataDir)).toStrictEqual({
+    'Alpha Channel': ['videos', 'live', 'posts'],
+    'Beta Channel': ['videos', 'shorts', 'live']
+  })
 })
 
 test.describe('with a channel notification turned on', () => {
