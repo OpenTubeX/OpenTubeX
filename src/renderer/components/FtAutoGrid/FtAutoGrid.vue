@@ -218,7 +218,17 @@ let pageAtBottom = false
 
 function keepPageAtBottom(frames) {
   window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' })
-  if (frames > 0) requestAnimationFrame(() => keepPageAtBottom(frames - 1))
+  const target = window.scrollY
+  if (frames > 0) {
+    requestAnimationFrame(() => {
+      // Growing rows leave the position in place and shrinking ones keep it at
+      // the end. A position above both means the page was scrolled away.
+      const root = document.documentElement
+      const atBottom = root.scrollHeight - root.clientHeight - window.scrollY <= 2
+      if (window.scrollY < target - 2 && !atBottom) return
+      keepPageAtBottom(frames - 1)
+    })
+  }
 }
 
 function updatePageAtBottom() {

@@ -16,7 +16,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /** Native SQLite for the library datastores, which keeps them out of WebView storage. */
 @CapacitorPlugin(name = "LibraryDatabase")
@@ -28,7 +30,12 @@ public class LibraryDatabasePlugin extends Plugin {
     private final Map<String, LibraryDatabase> databases = new ConcurrentHashMap<>();
 
     private ExecutorService executor(String name) {
-        return executors.computeIfAbsent(String.valueOf(name), key -> Executors.newSingleThreadExecutor());
+        return executors.computeIfAbsent(String.valueOf(name), key -> {
+            // Keep the per-database order, but let an idle database's thread exit.
+            ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+            executor.allowCoreThreadTimeOut(true);
+            return executor;
+        });
     }
 
     // Large reads, such as loading all history at startup, cost seconds as one
