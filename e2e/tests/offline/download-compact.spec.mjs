@@ -26,6 +26,41 @@ test.describe('compact downloads', { tag: '@scale' }, () => {
     }
   })
 
+  test('keeps the mode visible until an output format is known', async ({ page }, testInfo) => {
+    await goTo(page, 'downloads')
+    for (const status of ['queued', 'preparing']) {
+      for (const [mode, label] of [['video', 'Video'], ['audio', 'Audio'], ['subtitles', 'Subtitles']]) {
+        await page.evaluate(({ status, mode }) => {
+          window.$store.commit('upsertYtDlpDownload', {
+            id: 2,
+            title: 'Pending output',
+            status,
+            mode,
+            destination: null,
+            destinations: [],
+            files: []
+          })
+        }, { status, mode })
+        const row = page.locator('.downloadRow').filter({ hasText: 'Pending output' })
+        await expect(row.locator('.downloadSummary')).toHaveText(label)
+      }
+    }
+    await page.locator('.downloadRow').filter({ hasText: 'Pending output' }).screenshot({ path: testInfo.outputPath('pending-download-mode.png') })
+    await page.evaluate(() => {
+      window.$store.commit('upsertYtDlpDownload', {
+        id: 2,
+        title: 'Pending output',
+        status: 'downloading',
+        mode: 'audio',
+        destination: '/downloads/audio.opus',
+        destinations: [],
+        files: [],
+        sizeBytes: 1024
+      })
+    })
+    await expect(page.locator('.downloadRow').filter({ hasText: 'Pending output' }).locator('.downloadSummary')).toHaveText('OPUS | 1 KiB')
+  })
+
   test('uses comfortable touch targets in the downloads menu', async ({ app, page }, testInfo) => {
     await setWindowSize(app, page, { width: 375, height: 650 })
     await page.getByRole('button', { name: 'Quick settings', exact: true }).click()

@@ -287,7 +287,7 @@ const channelName = computed(() => {
   return authors.length === 1 ? authors[0] : ''
 })
 const compactSummary = computed(() => [
-  downloadFormats(props.download).map(format => format.toUpperCase()).join(', '),
+  downloadFormats(props.download).map(format => format.toUpperCase()).join(', ') || modeLabel.value,
   Number.isFinite(props.download.sizeBytes) && props.download.sizeBytes >= 0
     ? formatBytes(props.download.sizeBytes)
     : ''
