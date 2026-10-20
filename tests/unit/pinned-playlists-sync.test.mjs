@@ -8,13 +8,13 @@ const start = source.indexOf('export function getSyncableSettingKeys(')
 const getSyncableSettingKeys = vm.runInNewContext(
   `${source.slice(start, source.indexOf('\n}\n', start) + 2).replace('export ', '')}\ngetSyncableSettingKeys`,
   {
-    state: { pinnedPlaylistIds: [], userPlaylistsSortBy: 'custom' },
+    state: { pinnedChannels: [], pinnedPlaylistIds: [], userPlaylistsSortBy: 'custom' },
     isSettingSyncEnabled: () => true,
     isSettingSyncableOnPlatform: () => true,
   }
 )
 
-test('pinned playlists sync only together with playlists', () => {
-  assert.deepEqual([...getSyncableSettingKeys({ syncServerSyncPlaylists: true })], ['pinnedPlaylistIds', 'userPlaylistsSortBy'])
-  assert.deepEqual([...getSyncableSettingKeys({ syncServerSyncPlaylists: false })], ['userPlaylistsSortBy'])
+test('channel pins sync independently while playlist pins require playlist sync', () => {
+  assert.deepEqual([...getSyncableSettingKeys({ syncServerSyncPlaylists: true })], ['pinnedChannels', 'pinnedPlaylistIds', 'userPlaylistsSortBy'])
+  assert.deepEqual([...getSyncableSettingKeys({ syncServerSyncPlaylists: false })], ['pinnedChannels', 'userPlaylistsSortBy'])
 })

@@ -64,6 +64,15 @@
             class="shareIcon"
           />
 
+          <FtIconButton
+            v-if="!hasErrorMessage || isPinnedToNavigation"
+            :title="isPinnedToNavigation ? $t('User Playlists.Unpin from Navigation') : $t('User Playlists.Pin to Navigation')"
+            :icon="['fas', isPinnedToNavigation ? 'thumbtack-slash' : 'thumbtack']"
+            :aria-pressed="isPinnedToNavigation"
+            :theme="isPinnedToNavigation ? 'secondary' : 'base-no-default'"
+            @click="togglePinnedToNavigation"
+          />
+
           <FtSubscribeButton
             v-if="!hideUnsubscribeButton && (!hasErrorMessage || isSubscribed)"
             :channel-id="id"
@@ -431,6 +440,15 @@ const props = defineProps({
     default: ''
   },
 })
+
+const pinnedChannels = computed(() => store.getters.getPinnedChannels)
+const isPinnedToNavigation = computed(() => pinnedChannels.value.some(channel => channel.id === props.id))
+
+function togglePinnedToNavigation() {
+  store.dispatch('updatePinnedChannels', isPinnedToNavigation.value
+    ? pinnedChannels.value.filter(channel => channel.id !== props.id)
+    : [...pinnedChannels.value, { id: props.id, name: props.name || props.id, thumbnail: props.thumbnailUrl }])
+}
 
 const emit = defineEmits(['change-tab', 'search', 'subscribed'])
 

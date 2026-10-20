@@ -81,6 +81,48 @@
             {{ playlist.playlistName }}
           </p>
         </router-link>
+        <hr v-if="pinnedChannels.length > 0 || !hideActiveSubscriptions">
+      </div>
+      <div
+        v-if="pinnedChannels.length > 0"
+        class="mobileHidden pinnedChannels"
+      >
+        <router-link
+          v-for="channel in pinnedChannels"
+          :key="channel.id"
+          :to="`/channel/${channel.id}`"
+          class="navChannel channelLink mobileHidden"
+          :title="channel.name"
+          :aria-label="channel.name"
+          role="button"
+        >
+          <div
+            class="thumbnailContainer"
+          >
+            <FtRetryImage
+              v-if="channel.thumbnail != null"
+              :fallback-icon="['fas', 'circle-user']"
+              class="channelThumbnail"
+              height="35"
+              width="35"
+              loading="lazy"
+              :src="channel.thumbnail"
+              :alt="isOpen ? '' : channel.name"
+            />
+            <FtIcon
+              v-else
+              class="channelThumbnail noThumbnail"
+              :icon="['fas', 'circle-user']"
+            />
+          </div>
+          <p
+            v-if="isOpen"
+            class="navLabel"
+            dir="auto"
+          >
+            {{ channel.name }}
+          </p>
+        </router-link>
         <hr v-if="!hideActiveSubscriptions">
       </div>
       <div
@@ -217,6 +259,14 @@ const currentInvidiousInstanceUrl = computed(() => {
 const activeProfile = computed(() => {
   return store.getters.getActiveProfile
 })
+
+const pinnedChannels = computed(() => store.getters.getPinnedChannels.map(channel => {
+  let thumbnail = channel.thumbnail?.replace(/=s\d+/, '=s35')
+  if (backendPreference.value === 'invidious') {
+    thumbnail = youtubeImageUrlToInvidious(thumbnail, currentInvidiousInstanceUrl.value)
+  }
+  return { ...channel, thumbnail }
+}))
 
 const activeSubscriptions = computed(() => {
   const instanceUrl = backendPreference.value === 'invidious' ? currentInvidiousInstanceUrl.value : null
@@ -474,7 +524,7 @@ watch([
 })
 
 // Reconcile the real content end when rail labels or destinations disappear.
-watch([isOpen, () => props.forceExpanded, hideText, visibleNavigationItems, pinnedPlaylists, hideActiveSubscriptions, displayedActiveSubscriptions], () => {
+watch([isOpen, () => props.forceExpanded, hideText, visibleNavigationItems, pinnedPlaylists, pinnedChannels, hideActiveSubscriptions, displayedActiveSubscriptions], () => {
   const inner = innerRef.value
   if (inner == null || window.matchMedia('(max-width: 680px)').matches) return
   const contentEnd = [...inner.querySelectorAll(':scope > div.mobileHidden')].at(-1) ?? inner.querySelector('hr')

@@ -1129,3 +1129,31 @@ test.describe('pinned playlists in the sidebar', () => {
     await expect(pinned).toHaveCount(0)
   })
 })
+
+test.describe('pinned channels in the sidebar', () => {
+  test.use({
+    seed: {
+      settings: {
+        alwaysShowScrollbars: true,
+        hideActiveSubscriptions: true,
+        pinnedChannels: Array.from({ length: 20 }, (_, index) => ({
+          id: `UC${index.toString().padStart(22, '0')}`,
+          name: `Pinned channel ${index}`,
+          thumbnail: null
+        }))
+      }
+    }
+  })
+
+  test('clamps the sidebar when pinned channels are removed or resized', { tag: '@scale' }, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 1100, height: 500 })
+    const pinned = page.locator('.sideNav .pinnedChannels .navChannel')
+    await expect(pinned).toHaveCount(20)
+    await expectSidebarClampedAfterChanges(page, [
+      async () => page.evaluate(() => window.$store.dispatch('updatePinnedChannels', window.$store.getters.getPinnedChannels.slice(0, 12))),
+      async () => setWindowSize(app, page, { width: 1150, height: 700 }),
+      async () => page.evaluate(() => window.$store.dispatch('updatePinnedChannels', []))
+    ])
+    await expect(pinned).toHaveCount(0)
+  })
+})
