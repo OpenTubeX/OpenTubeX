@@ -906,6 +906,24 @@ test.describe('history cleanup', () => {
     }
   })
 
+  test('keeps the custom history age label clear of the dropdown @scale', async ({ app, page }) => {
+    await goTo(page, 'history')
+    await page.getByRole('button', { name: 'Delete Old History' }).click()
+    const dialog = page.getByRole('dialog')
+    await dialog.locator('select').selectOption('custom')
+    const days = dialog.getByRole('spinbutton', { name: 'Number of days', exact: false })
+    await expect(days).toBeVisible()
+
+    for (const size of [{ width: 1100, height: 800 }, { width: 400, height: 850 }]) {
+      await setWindowSize(app, page, size)
+      await expect.poll(async () => {
+        const dropdown = await dialog.getByRole('combobox').boundingBox()
+        const label = await dialog.locator('.ft-input-component label').boundingBox()
+        return label.y - (dropdown.y + dropdown.height)
+      }).toBeGreaterThanOrEqual(8)
+    }
+  })
+
   test('deletes only entries older than the selected cutoff', async ({ app, page }) => {
     await goTo(page, 'history')
     await expect(page.getByText('Recent video')).toBeVisible()

@@ -222,6 +222,10 @@
   inline-size: 100%;
 }
 
+.cleanupPromptContent > :deep(.ft-input-component) {
+  margin-block-start: 20px;
+}
+
 .cleanupWarning {
   color: var(--tertiary-text-color);
   font-size: 0.9rem;
