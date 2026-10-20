@@ -708,6 +708,7 @@ Settings:
     Concurrent Preloads: "Едновременни предварителни зареждания"
     Ignore System Rotation Lock for Fullscreen: Игнориране на системното заключване на завъртането за цял екран
     Swipe Left or Right to Seek in Fullscreen: Плъзнете наляво или надясно за превъртане на цял екран
+    Show Swipe to Seek Preview: Показване на преглед при превъртане с плъзгане
     Enable Google Cast: "Активиране на Google Cast"
   Channel Settings:
     Channel Settings: Настройки за каналите

@@ -706,6 +706,7 @@ Settings:
     Concurrent Preloads: "Samaaegsed eellaadimised"
     Ignore System Rotation Lock for Fullscreen: Eira täisekraani jaoks süsteemi pööramislukku
     Swipe Left or Right to Seek in Fullscreen: Täisekraanil kerimiseks pühkige vasakule või paremale
+    Show Swipe to Seek Preview: Näita pühkimisega kerimise eelvaadet
     Enable Google Cast: "Luba Google Cast"
   Channel Settings:
     Channel Settings: Kanali seaded

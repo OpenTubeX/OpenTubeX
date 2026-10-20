@@ -719,6 +719,7 @@ Settings:
     Concurrent Preloads: "טעינות מראש במקביל"
     Ignore System Rotation Lock for Fullscreen: התעלמות מנעילת סיבוב המערכת עבור מסך מלא
     Swipe Left or Right to Seek in Fullscreen: החלקה שמאלה או ימינה כדי לדלג במסך מלא
+    Show Swipe to Seek Preview: הצגת תצוגה מקדימה בעת דילוג בהחלקה
     Enable Google Cast: "הפעלת Google Cast"
   Channel Settings:
     Channel Settings: הגדרות ערוץ

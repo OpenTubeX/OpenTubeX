@@ -706,6 +706,7 @@ Settings:
     Concurrent Preloads: "同時先読み数"
     Ignore System Rotation Lock for Fullscreen: 全画面表示ではシステムの回転ロックを無視する
     Swipe Left or Right to Seek in Fullscreen: 全画面で左右にスワイプしてシーク
+    Show Swipe to Seek Preview: スワイプでシークするときにプレビューを表示
     Enable Google Cast: "Google Castを有効にする"
   Channel Settings:
     Channel Settings: チャンネル設定

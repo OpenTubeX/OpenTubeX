@@ -239,6 +239,15 @@
       />
       <FtToggleSwitch
         v-if="IS_CAPACITOR"
+        :label="t('Settings.Player Settings.Show Swipe to Seek Preview')"
+        :compact="true"
+        :default-value="store.getters.getShowMobileSeekPreview"
+        :disabled="!store.getters.getEnableMobileFullscreenSeek"
+        setting-key="showMobileSeekPreview"
+        @change="store.dispatch('updateShowMobileSeekPreview', $event)"
+      />
+      <FtToggleSwitch
+        v-if="IS_CAPACITOR"
         :label="t('Settings.Player Settings.Continue Playback When Screen Is Locked')"
         :compact="true"
         :default-value="continuePlaybackWhenScreenIsLocked"

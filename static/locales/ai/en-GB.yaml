@@ -693,6 +693,7 @@ Settings:
     Concurrent Preloads: "Concurrent Preloads"
     Ignore System Rotation Lock for Fullscreen: Ignore system rotation lock for fullscreen
     Swipe Left or Right to Seek in Fullscreen: Swipe left or right to seek in fullscreen
+    Show Swipe to Seek Preview: Show swipe-to-seek preview
     Enable Google Cast: "Enable Google Cast"
   Channel Settings:
     Channel Settings: Channel Settings

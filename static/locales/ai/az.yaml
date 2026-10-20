@@ -708,6 +708,7 @@ Settings:
     Parallel Segment Loading: Seqmentlərin paralel yüklənməsi
     Ignore System Rotation Lock for Fullscreen: Tam ekran üçün sistemin fırlanma kilidini nəzərə alma
     Swipe Left or Right to Seek in Fullscreen: Tam ekranda irəli və ya geri keçmək üçün sola və ya sağa sürüşdürün
+    Show Swipe to Seek Preview: Sürüşdürərək keçid önizləməsini göstər
     Enable Google Cast: "Google Cast aktivləşdir"
   Channel Settings:
     Channel Settings: Kanal tənzimləmələri

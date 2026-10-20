@@ -103,6 +103,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     rotateFullscreenToLandscape: true,
     enableMobileFullscreenSwipe: true,
     enableMobileFullscreenSeek: true,
+    showMobileSeekPreview: true,
     mobileLeftSwipeAction: 'disabled',
     mobileRightSwipeAction: 'disabled',
     mobileFullscreenBrightness: false,

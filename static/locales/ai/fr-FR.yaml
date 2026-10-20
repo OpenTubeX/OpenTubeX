@@ -705,6 +705,7 @@ Settings:
     Concurrent Preloads: "Préchargements simultanés"
     Ignore System Rotation Lock for Fullscreen: Ignorer le verrouillage de rotation du système pour le plein écran
     Swipe Left or Right to Seek in Fullscreen: Balayer vers la gauche ou la droite pour avancer ou reculer en plein écran
+    Show Swipe to Seek Preview: Afficher l’aperçu lors du balayage pour avancer ou reculer
     Enable Google Cast: "Activer Google Cast"
   Channel Settings:
     Channel Settings: Paramètres des chaînes

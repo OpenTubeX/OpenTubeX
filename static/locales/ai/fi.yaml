@@ -719,6 +719,7 @@ Settings:
     Concurrent Preloads: "Samanaikaiset esilataukset"
     Ignore System Rotation Lock for Fullscreen: Ohita järjestelmän kiertolukitus koko näytössä
     Swipe Left or Right to Seek in Fullscreen: Kelaa koko näytössä pyyhkäisemällä vasemmalle tai oikealle
+    Show Swipe to Seek Preview: Näytä esikatselu pyyhkäisemällä kelattaessa
     Enable Google Cast: "Ota Google Cast käyttöön"
   Channel Settings:
     Channel Settings: Kanava-asetukset

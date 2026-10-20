@@ -710,6 +710,7 @@ Settings:
     Concurrent Preloads: "Samtímis forhleðslur"
     Ignore System Rotation Lock for Fullscreen: Hunsa snúningslæsingu kerfisins fyrir allan skjáinn
     Swipe Left or Right to Seek in Fullscreen: Strjúktu til vinstri eða hægri til að spóla á öllum skjánum
+    Show Swipe to Seek Preview: Sýna forskoðun þegar strokið er til að spóla
     Enable Google Cast: "Virkja Google Cast"
   Channel Settings:
     Channel Settings: Rásarstillingar

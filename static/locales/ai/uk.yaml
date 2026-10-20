@@ -714,6 +714,7 @@ Settings:
     Concurrent Preloads: "Одночасне попереднє завантаження"
     Ignore System Rotation Lock for Fullscreen: Ігнорувати системне блокування повороту для повноекранного режиму
     Swipe Left or Right to Seek in Fullscreen: Проводьте ліворуч або праворуч для перемотування в повноекранному режимі
+    Show Swipe to Seek Preview: Показувати попередній перегляд під час перемотування свайпом
     Enable Google Cast: "Увімкнути Google Cast"
   Channel Settings:
     Channel Settings: Налаштування каналів

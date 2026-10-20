@@ -706,6 +706,7 @@ Settings:
     Concurrent Preloads: "Súbežné prednačítania"
     Ignore System Rotation Lock for Fullscreen: Ignorovať systémový zámok otáčania pre celú obrazovku
     Swipe Left or Right to Seek in Fullscreen: Potiahnutím doľava alebo doprava posúvať prehrávanie na celej obrazovke
+    Show Swipe to Seek Preview: Zobraziť náhľad pri pretáčaní potiahnutím
     Enable Google Cast: "Povoliť Google Cast"
   Channel Settings:
     Channel Settings: Nastavenia kanálov
