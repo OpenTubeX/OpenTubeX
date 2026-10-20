@@ -58,10 +58,32 @@ test('parses a paid live-chat message represented as simple text', () => {
     purchase_amount: '$5.00',
     author: {
       id: 'author-id',
-      name: simpleText('Author'),
+      name: 'Author',
       thumbnails: [{ url: 'avatar' }]
     }
   })
 
   assert.equal(parsed.message, '&lt;paid message&gt;')
+  assert.equal(parsed.author.name, 'Author')
 })
+
+for (const authorName of [{ simpleText: '@donor' }, { runs: [{ text: '@donor' }] }]) {
+  test(`preserves the donor handle from a paid-message node (${Object.keys(authorName)[0]})`, () => {
+    const message = new YTNodes.LiveChatPaidMessage({
+      id: 'donation',
+      authorName,
+      authorExternalChannelId: 'donor-channel',
+      authorPhoto: { thumbnails: [{ url: 'avatar' }] },
+      message: { simpleText: 'Thank you!' },
+      purchaseAmountText: { simpleText: '$10.00' },
+      contextMenuEndpoint: {},
+      contextMenuAccessibility: { accessibilityData: { label: 'Menu' } },
+      timestampUsec: '1000000'
+    })
+
+    const parsed = parseLiveChatSuperChat(message)
+    assert.equal(parsed.author.name, '@donor')
+    assert.equal(parsed.author.id, 'donor-channel')
+    assert.equal(parsed.superChat.amount, '$10.00')
+  })
+}
