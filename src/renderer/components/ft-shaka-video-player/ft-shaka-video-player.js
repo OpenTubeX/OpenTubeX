@@ -711,7 +711,7 @@ export default defineComponent({
     const shortsPaused = ref(false)
     const playbackEnded = ref(false)
     /** @type {number | null} */
-    let shortsEndSeekTarget = null
+    let endSeekTarget = null
     const autoplayCanceled = ref(false)
     const shortsMuted = ref(false)
     const shortsCaptionsAvailable = ref(false)
@@ -6429,7 +6429,7 @@ export default defineComponent({
       voiceOverTranslation.reset()
       showPoster.value = true
       playbackEnded.value = false
-      shortsEndSeekTarget = null
+      endSeekTarget = null
       sponsorBlockMuteController.reset()
       clearSponsorBlockMuteSegments()
       if (props.shortsPlayer) {
@@ -7167,7 +7167,7 @@ export default defineComponent({
         video.value.pause()
         return
       }
-      if (props.shortsPlayer && (playbackEnded.value || isShortsEndSeekPosition())) {
+      if (playbackEnded.value || isEndSeekPosition()) {
         setCurrentTime(player.seekRange().start)
       }
       if (!video.value.paused) initialAutoplayCanceled = false
@@ -7269,7 +7269,7 @@ export default defineComponent({
 
     function handleEnded() {
       if (shortsNavigationSuspended.value) return
-      shortsEndSeekTarget = null
+      endSeekTarget = null
       clearSabrBackoffTimer({ refreshPreview: true })
       const sleepTimerEnded = sleepTimer.consumeEndOfVideo()
       if (!sleepTimerEnded && abRepeatEnabled.value && hasValidAbRepeatRange()) {
@@ -7314,21 +7314,22 @@ export default defineComponent({
       emit('ended', sleepTimerEnded)
     }
 
-    function isShortsEndSeekPosition() {
-      if (shortsEndSeekTarget === null || !video.value) return false
+    function isEndSeekPosition() {
+      if (endSeekTarget === null || !video.value) return false
       const currentTime = video.value.currentTime
       const backoff = player.getConfiguration().streaming.durationBackoff
-      const backedOffTarget = Math.max(player.seekRange().start, shortsEndSeekTarget - backoff)
+      const backedOffTarget = Math.max(player.seekRange().start, endSeekTarget - backoff)
       // Accept Shaka's duration clamp, but discard a superseding timeline or
-      // Media Session seek. Media timestamps can be rounded to milliseconds.
-      return Math.abs(currentTime - shortsEndSeekTarget) < 0.001 ||
+      // Media Session seek. The seek bar stops 1 ms before duration; allow
+      // timestamp rounding as well, only for an explicitly requested end seek.
+      return Math.abs(currentTime - endSeekTarget) < 0.002 ||
         Math.abs(currentTime - backedOffTarget) < 0.001
     }
 
     function handleSeeking() {
       if (shortsNavigationSuspended.value) return
       hasPlaybackPosition.value = true
-      if (!isShortsEndSeekPosition()) shortsEndSeekTarget = null
+      if (!isEndSeekPosition()) endSeekTarget = null
       playbackEnded.value = false
       sleepTimer.checkChapterBoundary()
       cancelSponsorBlockSkipSchedule()
@@ -7340,7 +7341,15 @@ export default defineComponent({
     function handleSeeked() {
       if (shortsNavigationSuspended.value) return
       updateMobileMiniBarProgress()
-      if (isShortsEndSeekPosition()) playbackEnded.value = true
+      if (isEndSeekPosition()) playbackEnded.value = true
+      // A paused seek can reach the end without dispatching an ended event.
+      // Show replay without starting autoplay from a paused video.
+      if (!props.shortsPlayer && video.value?.paused && !video.value.loop && !isLive.value &&
+          !(abRepeatEnabled.value && hasValidAbRepeatRange()) &&
+          (playbackEnded.value || video.value.ended || player?.isEnded())) {
+        playbackEnded.value = true
+        autoplayCanceled.value = true
+      }
       if (playbackEnded.value || video.value?.ended) {
         syncPlayPauseControlIcons()
       }
@@ -10812,7 +10821,7 @@ export default defineComponent({
       if (!(canSeekResult || canSeek())) {
         return
       }
-      shortsEndSeekTarget = null
+      endSeekTarget = null
 
       const seekRange = player.seekRange()
 
@@ -11375,11 +11384,12 @@ export default defineComponent({
             const seekRange = player.seekRange()
             const wasPaused = video_.paused
             setCurrentTime(seekRange.end)
-            if (props.shortsPlayer && wasPaused && !isLive.value && !video_.loop) {
+            if (wasPaused && !isLive.value && !video_.loop &&
+                !(abRepeatEnabled.value && hasValidAbRepeatRange())) {
               // Paused seeks need not fire ended, and Shaka can back off from
               // the duration. End still means replay, without counting a seek
-              // as a naturally completed Short.
-              shortsEndSeekTarget = seekRange.end
+              // as naturally completed playback.
+              endSeekTarget = seekRange.end
               playbackEnded.value = !video_.seeking
               syncPlayPauseControlIcons()
             }
@@ -13074,7 +13084,7 @@ export default defineComponent({
      */
     function setCurrentTime(time) {
       if (!seekingIsPossible.value) return
-      shortsEndSeekTarget = null
+      endSeekTarget = null
       accumulatedSeekSeconds = 0
       rememberSeekPosition(time)
       video.value.currentTime = time
@@ -13091,8 +13101,15 @@ export default defineComponent({
      * @param {number} time
      */
     function rememberSeekPosition(time) {
-      // Explicit seeks supersede End even when they match Shaka's backoff.
-      shortsEndSeekTarget = null
+      // Explicit seeks supersede earlier end intent, even at its backoff position.
+      endSeekTarget = null
+      // Shaka temporarily pauses while scrubbing. Retain a requested end only
+      // after it has restored the original playback state, including seek retries.
+      if (player && video.value.paused && !props.shortsPlayer && !isLive.value && !video.value.loop &&
+          !ui?.getControls().isSeeking() && !(abRepeatEnabled.value && hasValidAbRepeatRange())) {
+        const { start, end } = player.seekRange()
+        if (Number.isFinite(end) && end > start && time >= end) endSeekTarget = end
+      }
       hasPlaybackPosition.value = true
       if (pendingMetadataSeek !== null || !hasLoaded.value || !videoLayoutReady.value || video.value.readyState < 3) pendingMetadataSeek = time
     }

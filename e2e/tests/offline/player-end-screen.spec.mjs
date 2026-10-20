@@ -50,6 +50,65 @@ async function openVideo({ app, page }) {
   return { video, watch }
 }
 
+async function seekTimelineToEnd(page) {
+  await page.locator('.ftVideoPlayer').hover()
+  await expect(page.locator('.shaka-seek-bar')).toBeEnabled()
+  await page.locator('.shaka-seek-bar').evaluate(input => {
+    const rect = input.getBoundingClientRect()
+    const mouse = { bubbles: true, clientX: rect.right, clientY: rect.top + rect.height / 2 }
+    input.dispatchEvent(new MouseEvent('mousedown', mouse))
+    input.dispatchEvent(new MouseEvent('mouseup', mouse))
+  })
+}
+
+for (const method of ['End', 'End with backoff', 'timeline', 'timeline with backoff', 'media seek']) {
+  test(`shows the end screen after a paused seek to the end using ${method}`, async ({ app, page, attachScreenshot }) => {
+    const { video, watch } = await openVideo({ app, page })
+    await watch.evaluate(component => { component.proxy.autoplayNextRecommendedVideo = true })
+    await video.evaluate(element => element.pause())
+    if (method.endsWith('with backoff')) {
+      await video.evaluate(element => {
+        // Reproduce Shaka's MSE duration clamp using the real media element.
+        element.ui.getControls().getPlayer().configure('streaming.durationBackoff', 0.5)
+        element.addEventListener('seeking', () => {
+          if (element.currentTime > element.duration - 0.5) element.currentTime = element.duration - 0.5
+        })
+      })
+    }
+    if (method.startsWith('End')) {
+      await page.locator('body').press('End')
+    } else if (method.startsWith('timeline')) {
+      await seekTimelineToEnd(page)
+      await page.locator('.shaka-seek-bar').evaluate(input => input.blur())
+    } else {
+      await video.evaluate(element => { element.currentTime = element.duration })
+    }
+    await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
+    const poster = page.locator('.endedPoster')
+    await expect(poster).toBeVisible()
+    await expect(poster.locator('img:not(.retryImagePlaceholder)')).toHaveCSS('opacity', '0.35')
+    await expect(page.locator('.autoplayCountdownOverlay')).toHaveCount(0)
+    await expect(page.locator('.videoAnnotations')).toHaveCount(0)
+    await attachScreenshot(`paused seek to end using ${method}`)
+    await page.locator('body').press('k')
+    await expect(poster).toHaveCount(0)
+    await expect.poll(() => video.evaluate(element => !element.paused && element.currentTime < element.duration / 2)).toBe(true)
+    await video.evaluate(element => element.pause())
+    await page.locator('body').press('End')
+    await expect(poster).toBeVisible()
+    await video.evaluate(element => { element.currentTime = 1 })
+    await expect(poster).toHaveCount(0)
+    await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
+  })
+}
+
+test('a timeline seek to the end while playing still completes playback', async ({ app, page }) => {
+  const { video } = await openVideo({ app, page })
+  await seekTimelineToEnd(page)
+  await expect.poll(() => video.evaluate(element => element.ended)).toBe(true)
+  await expect(page.locator('.endedPoster')).toBeVisible()
+})
+
 for (const dataSaver of [false, true]) {
   test(`reuses the startup poster and its resolution fallback with data saver ${dataSaver}`, async ({ app, page }) => {
     await page.evaluate(async dataSaver => {

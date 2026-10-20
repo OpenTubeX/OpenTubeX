@@ -54,6 +54,11 @@ test('DVR metadata does not disable seeking for ordinary videos or ended streams
 function absoluteSeekFixture(props) {
   const seekingAllowed = canSeekLive({ manifestMimeType: 'application/dash+xml', ...props })
   const state = {
+    props,
+    isLive: { value: props.isLive !== false },
+    abRepeatEnabled: { value: false },
+    ui: { getControls: () => ({ isSeeking: () => false }) },
+    player: { seekRange: () => ({ start: 0, end: 30 }) },
     seekingIsPossible: { value: seekingAllowed },
     hasPlaybackPosition: { value: false },
     hasLoaded: { value: true },
@@ -129,6 +134,26 @@ test('retains the latest absolute seek before metadata, including zero', () => {
   }
 })
 
+test('retains seeks before Shaka is assigned and applies the latest after initialization', () => {
+  const { state, setCurrentTime, handleCanPlay } = absoluteSeekFixture({ isLive: false })
+  const player = state.player
+  state.player = null
+  state.ui = null
+  state.hasLoaded.value = false
+  state.video.value.readyState = 0
+  for (const time of [15, 0, 5]) {
+    setCurrentTime(time)
+    assert.equal(state.pendingMetadataSeek, time)
+    assert.equal(state.hasPlaybackPosition.value, true)
+    assert.equal(state.endSeekTarget, null)
+  }
+  state.player = player
+  state.video.value.readyState = 3
+  handleCanPlay()
+  assert.equal(state.video.value.currentTime, 5)
+  assert.equal(state.pendingMetadataSeek, null)
+})
+
 test('consumes the startup seek even when canplay precedes Shaka loaded', () => {
   const { state, setCurrentTime, handleCanPlay } = absoluteSeekFixture({ isLive: false })
   state.hasLoaded.value = false
@@ -195,7 +220,7 @@ test('a mouse drag retains the latest timeline value and consumes its release', 
   const { state, handleSeekBarInput, handleSeekBarMouseChange } = absoluteSeekFixture({ isLive: false })
   state.video.value.readyState = 1
   handleSeekBarInput({ type: 'mousedown', target: { matches: () => true, value: '5' } })
-  state.ui = { getControls: () => ({ getDisplayTime: () => 15 }) }
+  state.ui = { getControls: () => ({ isSeeking: () => false, getDisplayTime: () => 15 }) }
   handleSeekBarMouseChange({ type: 'mousemove' })
   assert.equal(state.pendingMetadataSeek, 15)
   assert.equal(state.seekBarMouseDown, true)
@@ -209,7 +234,7 @@ for (const endEvent of ['mouseup', 'touchend', 'touchcancel', 'blur']) {
     const { state, handleSeekBarInput, handleSeekBarMouseChange } = absoluteSeekFixture({ isLive: false })
     state.video.value.autoplay = true
     state.videoLayoutReady.value = false
-    state.ui = { getControls: () => ({ getDisplayTime: () => 5 }) }
+    state.ui = { getControls: () => ({ isSeeking: () => false, getDisplayTime: () => 5 }) }
     const target = { matches: () => true, value: '5' }
     handleSeekBarInput({ type: endEvent.startsWith('touch') ? 'touchstart' : 'mousedown', target })
     // The first frame may become ready while the pointer is still held down.
@@ -228,7 +253,7 @@ for (const [autoplay, ready] of [[false, false], [true, true]]) {
     const { state, handleSeekBarInput, handleSeekBarMouseChange } = absoluteSeekFixture({ isLive: false })
     state.video.value.autoplay = autoplay
     state.videoLayoutReady.value = ready
-    state.ui = { getControls: () => ({ getDisplayTime: () => 5 }) }
+    state.ui = { getControls: () => ({ isSeeking: () => false, getDisplayTime: () => 5 }) }
     handleSeekBarInput({ type: 'mousedown', target: { matches: () => true, value: '5' } })
     handleSeekBarMouseChange({ type: 'mouseup' })
     assert.equal(state.playCalls, 0)
@@ -242,7 +267,7 @@ for (const action of ['pause', 'stop', 'exposed pause']) {
       const requestPause = action === 'exposed pause' ? pause : state.handlers[action]
       state.video.value.autoplay = true
       state.videoLayoutReady.value = false
-      state.ui = { getControls: () => ({ getDisplayTime: () => 5 }) }
+      state.ui = { getControls: () => ({ isSeeking: () => false, getDisplayTime: () => 5 }) }
       if (!duringSeek) requestPause()
       handleSeekBarInput({ type: 'mousedown', target: { matches: () => true, value: '5' } })
       if (duringSeek) requestPause()
