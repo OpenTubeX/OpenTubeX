@@ -615,6 +615,7 @@ Settings:
     Skip Unavailable Playlist Videos: "Nem elérhető videók kihagyása a lejátszási listákban"
     Lights Off: Fények lekapcsolása
     Show Lights Off Toggle: Fények lekapcsolása kapcsolójának megjelenítése
+    Show Volume Boost Toggle: "Hangerő-erősítés kapcsoló megjelenítése"
     Swipe Gestures:
       Fullscreen Brightness: Maximális fényerő teljes képernyőn
       Left: Bal oldali húzás

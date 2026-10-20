@@ -1220,22 +1220,30 @@ test('volume boost amplifies the audio within its tab', async ({ app, page, atta
     }
   })
   const sourceCount = () => page.evaluate(() => window.__volumeBoostSources.length)
-  const outputGain = () => page.evaluate(() => {
+  const outputGain = (sourceIndex = -1) => page.evaluate((sourceIndex) => {
     const gainTo = (node) => {
       if (node === node.context.destination) return 1
       const own = node instanceof GainNode ? node.gain.value : 1
       const paths = (node.__targets ?? []).map(gainTo).filter(gain => gain !== null)
       return paths.length === 1 ? own * paths[0] : null
     }
-    const gain = gainTo(window.__volumeBoostSources.at(-1))
+    const gain = gainTo(window.__volumeBoostSources.at(sourceIndex))
     return gain === null ? null : Math.round(gain * 100) / 100
-  })
+  }, sourceIndex)
 
   await openDemoVideo({ app, page })
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
   await player.hover()
   await player.getByRole('button', { name: 'More settings' }).click()
   const boostButton = player.locator('.shaka-overflow-menu .volume-boost-button')
+  // Volume boost is opt-in.
+  await expect(player.locator('.shaka-overflow-menu')).toBeVisible()
+  await expect(boostButton).toHaveCount(0)
+  await page.evaluate(() => window.$store.dispatch('updateShowVolumeBoostToggle', true))
+  // Rebuilding the controls closes the menu.
+  await expect(player.locator('.shaka-overflow-menu')).toBeHidden()
+  await player.hover()
+  await player.getByRole('button', { name: 'More settings' }).click()
   await expect(boostButton).toContainText('Off')
   // The player only routes its audio through Web Audio once it is boosted.
   expect(await sourceCount()).toBe(0)
@@ -1277,6 +1285,11 @@ test('volume boost amplifies the audio within its tab', async ({ app, page, atta
   await nextPlayer.getByRole('button', { name: 'More settings' }).click()
   await expect(nextPlayer.locator('.volume-boost-button')).toContainText('Off')
   expect(await sourceCount()).toBe(2)
+
+  // Hiding the toggle again also stops boosting the background tab.
+  await page.evaluate(() => window.$store.dispatch('updateShowVolumeBoostToggle', false))
+  await expect(nextPlayer.locator('.volume-boost-button')).toHaveCount(0)
+  await expect.poll(() => outputGain(1)).toBe(1)
 })
 
 test.describe('mobile player menus', { tag: '@scale' }, () => {

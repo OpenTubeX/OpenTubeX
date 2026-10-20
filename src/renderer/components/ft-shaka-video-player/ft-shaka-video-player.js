@@ -4094,9 +4094,9 @@ export default defineComponent({
 
     // Like skip silence and voice-over translation, this needs Web Audio
     // processing, which the player does not use on iOS.
-    const volumeBoostPossible = !process.env.IS_IOS
+    const volumeBoostPossible = computed(() => !process.env.IS_IOS && store.getters.getShowVolumeBoostToggle)
     const volumeBoost = computed(() => {
-      return volumeBoostPossible ? sanitizeVolumeBoost(store.getters.getTabVolumeBoost(mediaTabId)) : DEFAULT_VOLUME_BOOST
+      return volumeBoostPossible.value ? sanitizeVolumeBoost(store.getters.getTabVolumeBoost(mediaTabId)) : DEFAULT_VOLUME_BOOST
     })
 
     /**
@@ -5185,7 +5185,7 @@ export default defineComponent({
         removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_video_zoom')
       }
 
-      if (!volumeBoostPossible) {
+      if (!volumeBoostPossible.value) {
         removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_volume_boost')
       }
 

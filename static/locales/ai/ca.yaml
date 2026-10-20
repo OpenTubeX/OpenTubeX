@@ -831,6 +831,7 @@ Settings:
     Skip Unavailable Playlist Videos: "Omet els vídeos no disponibles de les llistes de reproducció"
     Lights Off: Llums apagats
     Show Lights Off Toggle: Mostra el commutador per apagar els llums
+    Show Volume Boost Toggle: "Mostra el commutador d'amplificació del volum"
     Swipe Gestures:
       Fullscreen Brightness: Brillantor màxima a pantalla completa
       Left: Lliscar al costat esquerre

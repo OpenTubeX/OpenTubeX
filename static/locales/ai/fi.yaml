@@ -619,6 +619,7 @@ Settings:
     Skip Unavailable Playlist Videos: "Ohita soittolistojen videot, joita ei voi toistaa"
     Lights Off: Valot pois
     Show Lights Off Toggle: Näytä valojen sammutuskytkin
+    Show Volume Boost Toggle: "Näytä äänenvoimakkuuden vahvistuksen valitsin"
     Swipe Gestures:
       Fullscreen Brightness: Täysi kirkkaus koko näytössä
       Left: Pyyhkäisy vasemmalla

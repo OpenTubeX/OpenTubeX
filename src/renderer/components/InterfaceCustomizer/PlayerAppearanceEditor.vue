@@ -74,6 +74,11 @@ const groups = computed(() => [
         action: 'updateShowLightsOffToggle',
         label: t('Settings.Player Settings.Show Lights Off Toggle'),
       },
+      !process.env.IS_IOS && {
+        key: 'showVolumeBoostToggle',
+        action: 'updateShowVolumeBoostToggle',
+        label: t('Settings.Player Settings.Show Volume Boost Toggle'),
+      },
       {
         key: 'enableVideoZoom',
         action: 'updateEnableVideoZoom',

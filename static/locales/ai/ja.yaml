@@ -615,6 +615,7 @@ Settings:
     Skip Unavailable Playlist Videos: "再生リスト内の視聴できない動画をスキップ"
     Lights Off: 照明を消す
     Show Lights Off Toggle: 照明を消す切り替えを表示
+    Show Volume Boost Toggle: "音量ブーストの切り替えを表示"
     Swipe Gestures:
       Fullscreen Brightness: 全画面表示で明るさを最大にする
       Left: 左側のスワイプ

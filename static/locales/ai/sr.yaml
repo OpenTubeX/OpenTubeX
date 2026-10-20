@@ -628,6 +628,7 @@ Settings:
     Skip Unavailable Playlist Videos: "Прескочи недоступне видео-снимке у плејлистама"
     Lights Off: Угаси светла
     Show Lights Off Toggle: Прикажи прекидач за гашење светала
+    Show Volume Boost Toggle: "Прикажи прекидач за појачање јачине звука"
     Swipe Gestures:
       Fullscreen Brightness: Највећа осветљеност на целом екрану
       Left: Превлачење на левој страни
