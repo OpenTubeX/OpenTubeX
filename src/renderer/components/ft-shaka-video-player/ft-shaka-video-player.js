@@ -5067,8 +5067,11 @@ export default defineComponent({
     }
 
     const uiConfig = computed(() => {
-      // A yt-dlp source can be live even when Shaka sees a finite media file.
-      const showPlaybackRateControls = !isLive.value && !props.isLive
+      // DVR playback supports speed changes after seeking behind the live edge.
+      // The seeking check confirms a DVR window for HLS, but assumes DASH is seekable.
+      const liveDvrIsConfirmed = props.isLive && seekingIsPossible.value &&
+        (props.isLiveDvrEnabled === true || props.manifestMimeType === 'application/x-mpegurl')
+      const showPlaybackRateControls = (!isLive.value && !props.isLive) || liveDvrIsConfirmed
       const mobile = isCapacitorMobilePlayer()
       const controlPanelElements = [
         ...(!mobile ? ['ft_skip_previous', 'play_pause', 'ft_skip_next', 'mute', 'volume'] : []),
