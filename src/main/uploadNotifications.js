@@ -74,11 +74,16 @@ export function createUploadNotifier({ file, show }) {
 
         for (const upload of uploads) {
           const type = upload.live ? 'live' : feedType
-          show({
-            title: (configuration.titles?.[type] ?? '{channel}').replaceAll('{channel}', channel.name || channelId),
-            body: upload.title,
-            url: getUploadUrl(feedType, upload.id)
-          })
+          try {
+            show({
+              title: (configuration.titles?.[type] ?? '{channel}').replaceAll('{channel}', channel.name || channelId),
+              body: upload.title,
+              url: getUploadUrl(feedType, upload.id)
+            })
+          } catch (error) {
+            // One failed notification must not skip the others.
+            console.error('Failed to show an upload notification', error)
+          }
         }
       })
     }

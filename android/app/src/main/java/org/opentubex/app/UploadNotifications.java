@@ -114,7 +114,12 @@ final class UploadNotifications {
             String type = upload.optBoolean("live") ? "live" : feedType;
             String title = (titles == null ? "{channel}" : titles.optString(type, "{channel}"))
                 .replace("{channel}", name.isEmpty() ? channelId : name);
-            show(context, title, upload.optString("title"), url(feedType, upload.getString("id")));
+            try {
+                show(context, title, upload.optString("title"), url(feedType, upload.getString("id")));
+            } catch (RuntimeException error) {
+                // One failed notification must not skip the others.
+                android.util.Log.w("OpenTubeXUploads", "Unable to show an upload notification", error);
+            }
         }
     }
 
