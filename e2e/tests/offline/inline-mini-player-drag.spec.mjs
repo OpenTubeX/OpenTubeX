@@ -400,6 +400,41 @@ test.describe('browsing scroll during mobile minimize', () => {
     }
   })
 
+  test('a short watch page excludes the retained history from its scroll range', { tag: '@scale' }, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await setWindowSize(app, page, { width: 480, height: 850 })
+    await page.evaluate(async () => {
+      await window.$store.dispatch('updateHideRecommendedVideos', true)
+      await window.$store.dispatch('updateScrollMiniPlayerEnabled', false)
+    })
+    const history = page.locator('.tabContent > .routerView').first()
+    await expect(history.locator('.ft-list-video').first()).toBeVisible()
+    await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }))
+    const historyHeight = await history.evaluate(element => element.scrollHeight)
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
+    await history.locator(`a[href="#/watch/${watchHistoryEntry.videoId}"]`).first().evaluate(element => element.click())
+    const video = await waitForPlayback(page)
+    await video.evaluate(element => element.pause())
+    const view = await page.evaluateHandle(findWatchComponent)
+    for (const offline of [false, true]) {
+      await view.evaluate((component, offline) => { component.proxy.isOffline = offline }, offline)
+      await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }))
+      await expect.poll(() => page.evaluate(() => {
+        const browsing = document.querySelector('.tabContent[aria-hidden="false"] > .browsingBehindWatch')
+        const actual = document.scrollingElement.scrollHeight
+        // The retained page must have the same scroll extent as an absent page,
+        // including the platform's normal header and bottom-navigation spacing.
+        const display = browsing.style.display
+        browsing.style.display = 'none'
+        const withoutBrowsing = document.scrollingElement.scrollHeight
+        browsing.style.display = display
+        return actual - withoutBrowsing
+      })).toBeLessThanOrEqual(1)
+      expect(await page.locator('.videoLayout').evaluate(element => element.getBoundingClientRect().height)).toBeLessThan(historyHeight)
+    }
+    await view.dispose()
+  })
+
   test('minimize reveals history at its saved scroll position', { tag: '@scale' }, async ({ app, page }, testInfo) => {
     await mockPlayableWatchPage(app, page)
     await setWindowSize(app, page, { width: 480, height: 850 })
