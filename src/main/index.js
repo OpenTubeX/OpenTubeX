@@ -2656,7 +2656,10 @@ function runApp() {
           })
 
           newRequest.on('error', (err) => {
+            // Settle the request so the <img> fires its error event and the
+            // renderer can show a placeholder instead of waiting forever.
             console.error(err)
+            reject(err)
           })
 
           newRequest.end()

@@ -187,11 +187,17 @@ const actions = {
       await DBPlaylistHandlers.create([payload])
 
       const noQuickBookmarkSet = !rootState.settings.quickBookmarkTargetPlaylistId || !state.playlists.some((playlist) => playlist._id === rootState.settings.quickBookmarkTargetPlaylistId)
-      if (noQuickBookmarkSet) {
-        dispatch('updateQuickBookmarkTargetPlaylistId', payload._id, { root: true })
-      }
-
       commit('addPlaylist', payload)
+      if (noQuickBookmarkSet) {
+        // Settings persist asynchronously; wait so a playlist added right after
+        // this one sees the new target instead of replacing it. The playlist is
+        // already saved, so a failed settings write must not report it as lost.
+        try {
+          await dispatch('updateQuickBookmarkTargetPlaylistId', payload._id, { root: true })
+        } catch (error) {
+          console.error(error)
+        }
+      }
       return true
     } catch (errMessage) {
       console.error(errMessage)
@@ -348,11 +354,13 @@ const actions = {
     try {
       const payload = (await DBPlaylistHandlers.find()).filter((e) => e != null)
       if (payload.length === 0) {
-        // Not using `addPlaylists` to ensure required attributes with dynamic values added
-        state.defaultPlaylists.forEach(playlist => {
+        // Not using `addPlaylists` to ensure required attributes with dynamic values added.
+        // Create them in order and wait, so the first default becomes the quick
+        // bookmark target and the playlists exist before `playlistsReady` is set.
+        for (const playlist of state.defaultPlaylists) {
           // Deep copy so `addPlaylist` doesn't mutate the defaults template in state
-          dispatch('addPlaylist', deepCopy(playlist))
-        })
+          await dispatch('addPlaylist', deepCopy(playlist))
+        }
       } else {
         const dateNow = Date.now()
         const currentTime = Date.now()

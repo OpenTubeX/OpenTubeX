@@ -24,6 +24,7 @@ const CACHE_KEY_HASH_REGEX = /^[a-f\d]{64}$/
 const entries = new Map()
 let loadPromise = null
 let writeQueue = Promise.resolve()
+let pendingWrite = null
 let cacheEnabled = true
 let maxEntryLength = DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB * BYTES_PER_MEGABYTE
 
@@ -145,15 +146,23 @@ async function loadEntries() {
 }
 
 function saveEntries() {
-  writeQueue = writeQueue
-    .catch(() => {})
-    .then(async () => {
-      const path = cachePath()
-      const temporaryPath = `${path}.tmp`
-      await writeFile(temporaryPath, JSON.stringify([...entries.values()]), 'utf8')
-      await rename(temporaryPath, path)
-    })
-  return writeQueue
+  // Entries can be several megabytes each and the whole file is rewritten on
+  // every change, so a burst of updates (for example preloading the upcoming
+  // playlist videos) shares one write that snapshots the latest entries.
+  if (pendingWrite === null) {
+    const write = writeQueue
+      .catch(() => {})
+      .then(async () => {
+        if (pendingWrite === write) pendingWrite = null
+        const path = cachePath()
+        const temporaryPath = `${path}.tmp`
+        await writeFile(temporaryPath, JSON.stringify([...entries.values()]), 'utf8')
+        await rename(temporaryPath, path)
+      })
+    pendingWrite = write
+    writeQueue = write
+  }
+  return pendingWrite
 }
 
 export async function handleYtDlpPlaybackCacheGet(event, videoId, cacheKey) {
@@ -251,6 +260,9 @@ export async function clearYtDlpPlaybackCache() {
       rm(cachePath(), { force: true }),
       rm(`${cachePath()}.tmp`, { force: true })
     ]))
+  // A save requested from now on must run after the clear, not share a
+  // write that was queued before it.
+  pendingWrite = null
   await writeQueue
 }
 

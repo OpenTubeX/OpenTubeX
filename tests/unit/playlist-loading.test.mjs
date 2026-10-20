@@ -15,7 +15,7 @@ function playlist(_id, playlistName, protectedValue = false) {
   }
 }
 
-async function fixture(records) {
+async function fixture(records, { settingsDelay = false, settingsError = null } = {}) {
   const db = { playlists: new Datastore({ inMemoryOnly: true }) }
   await db.playlists.insertAsync(records)
   const DBPlaylistHandlers = vm.runInNewContext(
@@ -34,16 +34,22 @@ async function fixture(records) {
   }
   const module = vm.runInNewContext(
     source.slice(source.indexOf('function generateRandomPlaylistId()')).replace('export default', 'globalThis.playlistsModule =') + '\nplaylistsModule',
-    { DBPlaylistHandlers, ...videoCounts, processToBeAddedPlaylistVideo: () => {}, console: { error: error => errors.push(error) } }
+    { DBPlaylistHandlers, ...videoCounts, deepCopy: value => structuredClone(value), processToBeAddedPlaylistVideo: () => {}, console: { error: error => errors.push(error) } }
   )
   const context = {
     state: module.state,
-    rootState: { settings: { quickBookmarkTargetPlaylistId: records[0]._id } },
+    rootState: { settings: { quickBookmarkTargetPlaylistId: records[0]?._id ?? '' } },
     commit: (name, value) => module.mutations[name](module.state, value),
-    dispatch: (name, value) => module.actions[name]?.(context, value),
+    dispatch: async (name, value) => {
+      if (name !== 'updateQuickBookmarkTargetPlaylistId') return module.actions[name]?.(context, value)
+      // Like the generated settings updater, commit only after persisting.
+      if (settingsDelay) await new Promise(resolve => setTimeout(resolve, 5))
+      if (settingsError) throw settingsError
+      context.rootState.settings.quickBookmarkTargetPlaylistId = value
+    },
   }
   return {
-    db, module, errors, handlers: DBPlaylistHandlers,
+    db, module, errors, handlers: DBPlaylistHandlers, rootState: context.rootState,
     dispatch: context.dispatch,
     async load() {
       await module.actions.grabAllPlaylists(context)
@@ -51,6 +57,28 @@ async function fixture(records) {
     },
   }
 }
+
+test('first launch keeps the first default playlist as the quick bookmark target despite slow settings writes', async () => {
+  const { module, rootState, errors, load } = await fixture([], { settingsDelay: true })
+  await load()
+  assert.equal(module.state.playlists.map(item => item._id).join(), 'favorites,watchLater')
+  // Let any settings write still in flight land before checking the final target.
+  await new Promise(resolve => setTimeout(resolve, 20))
+  assert.equal(rootState.settings.quickBookmarkTargetPlaylistId, 'favorites')
+  assert.deepEqual(errors, [])
+})
+
+test('a failed quick bookmark update still adds the saved playlist', async () => {
+  const failure = new Error('Settings write failed')
+  const { module, errors, dispatch, load } = await fixture([playlist('favorites', 'Favorites')], { settingsError: failure })
+  await load()
+  module.state.playlists = []
+  const result = await dispatch('addPlaylist', { _id: 'new-empty', playlistName: 'New empty', videos: [] })
+  assert.equal(result, true)
+  assert.equal(module.state.playlists.some(item => item._id === 'new-empty'), true)
+  assert.equal(errors.length, 1)
+  assert.equal(errors[0], failure)
+})
 
 test('adding a playlist reports a failed database write without updating the store', async () => {
   const { db, module, errors, handlers, dispatch, load } = await fixture([playlist('favorites', 'Favorites')])

@@ -47,7 +47,9 @@ function emitUpdated(videoId, scheduled) {
 
 async function requestNotificationPermission() {
   let status = await LocalNotifications.checkPermissions()
-  if (status.display !== 'granted') {
+  // Only prompt while the system still allows it; a denied permission would
+  // otherwise be requested again by every automatic sync of remote reminders.
+  if (status.display === 'prompt' || status.display === 'prompt-with-rationale') {
     status = await LocalNotifications.requestPermissions()
   }
   return status.display === 'granted'

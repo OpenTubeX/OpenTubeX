@@ -377,6 +377,11 @@ const previewVideoIndex = ref(1)
 
 const prevVideoBeforeDeletion = ref(null)
 let getPlaylistInfoRun = false
+// Bumped per playlist change so a request for an earlier visit of the same
+// playlist cannot overwrite a later one.
+let playlistLoadGeneration = 0
+// Unmounting stops the playlist watcher, so abandon pending page loads here.
+onBeforeUnmount(() => { playlistLoadGeneration += 1 })
 let previewAnimationFrame = null
 let previewPointerClientX = 0
 
@@ -480,10 +485,17 @@ const videoIsLastPlaylistItem = computed(() => {
 
 const videoIsNotPlaylistItem = computed(() => videoIndexInPlaylistItems.value === -1)
 
-const isWaitingForNextVideo = computed(() => isFetchingPlaylistContinuation.value && videoIsLastPlaylistItem.value)
+// The current video may still be on an unloaded page, so do not fall back to
+// the playlist start while later pages are loading.
+const isWaitingForNextVideo = computed(() => isFetchingPlaylistContinuation.value &&
+  (videoIsLastPlaylistItem.value || videoIsNotPlaylistItem.value))
+
+// A page that is still loading or failed to load may hold the current video;
+// wrapping to the first or last entry would jump away from its real neighbours.
+const currentVideoMayBeUnloaded = computed(() => hasUnloadedPlaylistVideos.value && videoIsNotPlaylistItem.value)
 
 const nextVideo = computed(() => {
-  if (isWaitingForNextVideo.value) return null
+  if (isWaitingForNextVideo.value || currentVideoMayBeUnloaded.value) return null
   const targetList = shuffleEnabled.value ? randomizedPlaylistItems.value : playlistItems.value
   const targetVideoIndex = (videoIsNotPlaylistItem.value || videoIsLastPlaylistItem.value)
     ? 0
@@ -493,6 +505,8 @@ const nextVideo = computed(() => {
 })
 
 const upcomingVideos = computed(() => {
+  // Entries before an unloaded current video are not upcoming, so do not preload them.
+  if (currentVideoMayBeUnloaded.value) return []
   const targetList = shuffleEnabled.value ? randomizedPlaylistItems.value : playlistItems.value
   const currentIndex = findIndexOfCurrentVideoInPlaylist(targetList)
   const startIndex = currentIndex === -1 ? 0 : currentIndex + 1
@@ -649,6 +663,7 @@ if (isTabPresented != null) {
 }
 
 watch(() => props.playlistId, () => {
+  playlistLoadGeneration += 1
   isFetchingPlaylistContinuation.value = false
   hasUnloadedPlaylistVideos.value = false
   resetUnavailableSkipChain()
@@ -967,7 +982,7 @@ function onMoveDraggedVideo(video, source) {
 }
 
 function playNextVideo() {
-  if (isWaitingForNextVideo.value) return
+  if (isWaitingForNextVideo.value || currentVideoMayBeUnloaded.value) return
   const videoIndex = videoIndexInPlaylistItems.value
   const targetVideoIndex = (videoIsNotPlaylistItem.value || videoIsLastPlaylistItem.value) ? 0 : videoIndex + 1
 
@@ -1022,6 +1037,7 @@ function playNextVideo() {
 }
 
 function playPreviousVideo() {
+  if (currentVideoMayBeUnloaded.value) return
   // At the start of the playlist there is nothing to go back to, unless loop wraps us around
   if (!canPlayPreviousVideo.value) {
     showToast({ message: t('The playlist is at the beginning. Enable loop to continue playing'), icon: ['fas', 'retweet'] })
@@ -1057,9 +1073,33 @@ function playPreviousVideo() {
 }
 
 /**
+ * @param {object[]} videos every video loaded so far, extended in place
+ * @param {object[]} items the raw items of the next page
+ */
+function appendLocalPlaylistPage(videos, items) {
+  const newVideos = parseLocalPlaylistVideos(items)
+  videos.push(...newVideos)
+  playlistItems.value = applyReversePlaylistState(videos.slice())
+  if (!shuffleEnabled.value) return
+  const order = randomizedPlaylistItems.value.slice()
+  const start = findIndexOfCurrentVideoInPlaylist(order) + 1
+  if (start === 0) {
+    // The current video may be on this page; restart the order from it.
+    shufflePlaylistItems()
+    return
+  }
+  // Keep entries up to the current video and mix new ones into the unplayed rest.
+  for (const video of newVideos) {
+    order.splice(start + Math.floor(Math.random() * (order.length - start + 1)), 0, video)
+  }
+  randomizedPlaylistItems.value = order
+}
+
+/**
  * @param {{ id: string, title: string, channelName: string, channelId: string, items: VideoData[], continuationData: string | null }} cachedPlaylist
  */
 async function loadCachedPlaylistInformation(cachedPlaylist) {
+  const generation = playlistLoadGeneration
   getPlaylistInfoRun = true
   store.commit('setCachedPlaylist', { tabId: playlistCacheTabId, value: null })
 
@@ -1074,6 +1114,8 @@ async function loadCachedPlaylistInformation(cachedPlaylist) {
   // Playback must not wait for later pages when the next video is already cached.
   const videos = cachedPlaylist.items.slice()
   playlistItems.value = applyReversePlaylistState(videos.slice())
+  // Shuffle stays enabled across playlists, so rebuild the order from this one.
+  if (shuffleEnabled.value) shufflePlaylistItems()
   isLoading.value = false
 
   if (!isFetchingPlaylistContinuation.value) return
@@ -1081,30 +1123,27 @@ async function loadCachedPlaylistInformation(cachedPlaylist) {
   try {
     const continuationData = await getLocalCachedFeedContinuation('playlist', cachedPlaylist.continuationData)
     await untilEndOfLocalPlayList(continuationData, (p) => {
-      if (props.playlistId !== cachedPlaylist.id) return
-      const newVideos = parseLocalPlaylistVideos(p.items)
-      videos.push(...newVideos)
-      playlistItems.value = applyReversePlaylistState(videos.slice())
-      if (shuffleEnabled.value) {
-        // Keep the established shuffle order, including entries already played.
-        randomizedPlaylistItems.value = randomizedPlaylistItems.value.concat(shuffleItems(newVideos.slice()))
-      }
-    })
-    if (props.playlistId === cachedPlaylist.id) hasUnloadedPlaylistVideos.value = false
+      if (generation !== playlistLoadGeneration) return
+      appendLocalPlaylistPage(videos, p.items)
+    }, { shouldContinue: () => generation === playlistLoadGeneration })
+    if (generation === playlistLoadGeneration) hasUnloadedPlaylistVideos.value = false
   } catch (err) {
-    if (props.playlistId !== cachedPlaylist.id) return
+    if (generation !== playlistLoadGeneration) return
     console.error(err)
     showApiErrorToast(t('Local API Error (Click to copy)'), err)
   } finally {
-    if (props.playlistId === cachedPlaylist.id) isFetchingPlaylistContinuation.value = false
+    if (generation === playlistLoadGeneration) isFetchingPlaylistContinuation.value = false
   }
 }
 
 async function getPlaylistInformationLocal() {
+  const playlistId = props.playlistId
+  const generation = playlistLoadGeneration
   isLoading.value = true
 
   try {
-    const playlist = await getLocalPlaylist(props.playlistId)
+    const playlist = await getLocalPlaylist(playlistId)
+    if (generation !== playlistLoadGeneration) return
 
     let channelName_
 
@@ -1122,15 +1161,31 @@ async function getPlaylistInformationLocal() {
     channelName.value = channelName_
     channelId.value = playlist.info.author?.id
 
-    const videos = []
-    await untilEndOfLocalPlayList(playlist, (p) => {
-      videos.push(...parseLocalPlaylistVideos(p.items))
-    })
+    hasUnloadedPlaylistVideos.value = playlist.has_continuation
+    isFetchingPlaylistContinuation.value = hasUnloadedPlaylistVideos.value
 
-    playlistItems.value = applyReversePlaylistState(videos)
-
+    // Show the first page right away; later pages append while playback continues.
+    const videos = parseLocalPlaylistVideos(playlist.items)
+    playlistItems.value = applyReversePlaylistState(videos.slice())
+    if (shuffleEnabled.value) shufflePlaylistItems()
     isLoading.value = false
+
+    if (!isFetchingPlaylistContinuation.value) return
+
+    try {
+      await untilEndOfLocalPlayList(playlist, (p) => {
+        if (generation !== playlistLoadGeneration) return
+        appendLocalPlaylistPage(videos, p.items)
+      }, { runCallbackOnceFirst: false, shouldContinue: () => generation === playlistLoadGeneration })
+      if (generation === playlistLoadGeneration) hasUnloadedPlaylistVideos.value = false
+    } catch (err) {
+      // Keep the pages already shown instead of replacing them through the fallback.
+      if (generation !== playlistLoadGeneration) return
+      console.error(err)
+      showApiErrorToast(t('Local API Error (Click to copy)'), err)
+    }
   } catch (err) {
+    if (generation !== playlistLoadGeneration) return
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
@@ -1140,14 +1195,18 @@ async function getPlaylistInformationLocal() {
     } else {
       isLoading.value = false
     }
+  } finally {
+    if (generation === playlistLoadGeneration) isFetchingPlaylistContinuation.value = false
   }
 }
 
 async function getPlaylistInformationInvidious() {
+  const generation = playlistLoadGeneration
   isLoading.value = true
 
   try {
     const result = await invidiousGetPlaylistInfo(props.playlistId)
+    if (generation !== playlistLoadGeneration) return
 
     playlistTitle.value = result.title
     playlistTotalVideoCount.value = result.videoCount
@@ -1155,9 +1214,11 @@ async function getPlaylistInformationInvidious() {
     channelId.value = result.authorId
 
     playlistItems.value = applyReversePlaylistState(result.videos)
+    if (shuffleEnabled.value) shufflePlaylistItems()
 
     isLoading.value = false
   } catch (err) {
+    if (generation !== playlistLoadGeneration) return
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
@@ -1465,6 +1526,7 @@ const previousVideoSourceIndex = computed(() => {
 })
 
 const skipAvailability = computed(() => {
+  if (currentVideoMayBeUnloaded.value) return { canPlayNext: false, canPlayPrevious: false }
   const items = shuffleEnabled.value ? randomizedPlaylistItems.value : playlistItems.value
 
   return getPlaylistSkipAvailability({

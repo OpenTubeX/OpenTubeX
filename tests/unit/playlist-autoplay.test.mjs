@@ -25,10 +25,13 @@ function harness({ laterPageError = null } = {}) {
   const isLoading = ref(false)
   const errors = []
   const toasts = []
+  const continuationChecks = []
+  const router = { push() {} }
   let finishContinuation
   let failContinuation
   const continuation = new Promise((resolve, reject) => { finishContinuation = resolve; failContinuation = reject })
   const context = {
+    playlistLoadGeneration: 0,
     props, randomizedPlaylistItems, shuffleEnabled, loopEnabled,
     isFetchingPlaylistContinuation, hasUnloadedPlaylistVideos, computed, watch: observe,
     isLoading, playlistItems, getPlaylistInfoRun: false,
@@ -39,15 +42,16 @@ function harness({ laterPageError = null } = {}) {
     findIndexOfCurrentVideoInPlaylist: videos => videos.findIndex(item => item.videoId === props.videoId),
     getLocalCachedFeedContinuation: () => continuation,
     parseLocalPlaylistVideos: videos => videos,
-    untilEndOfLocalPlayList: async (page, callback) => {
+    untilEndOfLocalPlayList: async (page, callback, options) => {
       callback(page)
+      continuationChecks.push(options.shouldContinue())
       if (laterPageError) throw laterPageError
     },
-    expectedAutoSkipItem: null, router: { push() {} }, showToast: toast => toasts.push(toast),
+    expectedAutoSkipItem: null, router, showToast: toast => toasts.push(toast),
     showApiErrorToast: (_message, error) => errors.push(error), t: key => key,
     console: { error: error => errors.push(error) },
   }
-  const load = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'async function loadCachedPlaylistInformation(', '\nasync function getPlaylistInformationLocal(')}\nloadCachedPlaylistInformation`, context)
+  const load = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'function appendLocalPlaylistPage(', '\nasync function getPlaylistInformationLocal(')}\nloadCachedPlaylistInformation`, context)
   const shuffle = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'function shuffleItems(', '\nconst playlistItemsWrapper =')}\nshufflePlaylistItems`, context)
   const state = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'const currentVideoIndexZeroBased =', '\nwatch(')}\n;({ nextVideo, upcomingVideos, playlistUnavailableVideoCount, isWaitingForNextVideo })`, context)
 
@@ -78,17 +82,18 @@ function harness({ laterPageError = null } = {}) {
   context.emit = (_name, videos) => watch.handleUpcomingPlaylistVideosChange(videos)
   return {
     observeUpcoming: t => t.after(vm.runInNewContext(extractSourceBetweenMarkers(playlistSource, '\nwatch(', '\nconst playlistPageLinkTo'), context)),
-    toasts,
+    toasts, continuationChecks,
     notifyUpcoming: () => watch.handleUpcomingPlaylistVideosChange(state.upcomingVideos.value),
     cancelAutoplay: () => cancel.call(watch, true),
     replayVideo: () => replay.call(watch),
     items, playlistItems, isLoading, errors, watch, loopEnabled,
     nextVideo: state.nextVideo, unavailableCount: state.playlistUnavailableVideoCount,
     props, randomizedPlaylistItems,
+    changePlaylist: playlistId => { props.playlistId = playlistId; context.playlistLoadGeneration += 1 },
     enableShuffle: () => { shuffleEnabled.value = true; shuffle() },
     load: () => load({ id: 'youtube-playlist', title: 'YouTube playlist', totalVideoCount: 100,
       channelName: 'Test', channelId: 'channel', items, continuationData: 'continuation' }),
-    finishContinuation, failContinuation,
+    finishContinuation, failContinuation, router, playNext,
     endVideo: () => ended.call(watch),
   }
 }
@@ -120,11 +125,23 @@ test('a later continuation failure preserves pages already loaded for autoplay',
 test('a cached continuation cannot replace a different playlist after navigation', async () => {
   const state = harness()
   const loading = state.load()
-  state.props.playlistId = 'different-playlist'
+  state.changePlaylist('different-playlist')
   state.playlistItems.value = [{ videoId: 'different' }]
   state.finishContinuation({ items: [{ videoId: 'third' }] })
   await loading
   assert.deepEqual(state.playlistItems.value.map(video => video.videoId), ['different'])
+})
+
+test('a cached continuation cannot extend a later visit of the same playlist', async t => {
+  const state = harness()
+  state.observeUpcoming(t)
+  const loading = state.load()
+  state.changePlaylist('different-playlist')
+  state.changePlaylist('youtube-playlist')
+  state.playlistItems.value = [{ videoId: 'newer' }]
+  state.finishContinuation({ items: [{ videoId: 'third' }] })
+  await loading
+  assert.deepEqual(state.playlistItems.value.map(video => video.videoId), ['newer'])
 })
 
 test('a failed YouTube playlist continuation preserves autoplay and clears the loading state', async () => {
@@ -229,3 +246,28 @@ for (const result of ['empty', 'failed']) {
     assert.ok(state.watch.autoplayCountdown == null)
   })
 }
+
+test('manual next-video navigation does not restart the playlist when the current video is on a failed page', async () => {
+  const state = harness()
+  const pushes = []
+  state.router.push = route => pushes.push(route)
+  state.props.videoId = 'third'
+  const loading = state.load()
+  state.failContinuation(new Error('Continuation failed'))
+  await loading
+  state.playNext()
+  assert.deepEqual(pushes, [])
+
+  state.props.videoId = 'first'
+  state.playNext()
+  assert.equal(pushes[0]?.path, '/watch/second')
+})
+
+test('a cached continuation stops requesting pages after navigating to a different playlist', async () => {
+  const state = harness()
+  const loading = state.load()
+  state.changePlaylist('different-playlist')
+  state.finishContinuation({ items: [{ videoId: 'third' }] })
+  await loading
+  assert.deepEqual(state.continuationChecks, [false])
+})

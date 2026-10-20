@@ -148,7 +148,21 @@ export async function getSponsorBlockVideoLabel(videoId) {
   return request
 }
 
-export async function deArrowData(videoId) {
+/** @type {Map<string, Promise<object | undefined>>} */
+const pendingDeArrowData = new Map()
+
+export function deArrowData(videoId) {
+  // Cards showing the same video (for example on overlapping home shelves)
+  // share one request until the result lands in the store cache.
+  let pending = pendingDeArrowData.get(videoId)
+  if (pending === undefined) {
+    pending = fetchDeArrowData(videoId).finally(() => pendingDeArrowData.delete(videoId))
+    pendingDeArrowData.set(videoId, pending)
+  }
+  return pending
+}
+
+async function fetchDeArrowData(videoId) {
   const videoIdHashPrefix = await getVideoHash(videoId)
   const requestUrl = `${store.getters.getSponsorBlockUrl}/api/branding/${videoIdHashPrefix}`
 

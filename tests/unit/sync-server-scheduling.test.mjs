@@ -245,7 +245,7 @@ test('nested remote dispatches and thrown dispatches restore their origin scope'
   assert.equal(isRemoteSyncDispatch(), false)
 })
 
-async function schedulingFixture(t) {
+async function schedulingFixture(t, platform = {}) {
   t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 1000000 })
   const source = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
   const declarations = source.slice(source.indexOf('const EVENT_SYNC_'), source.indexOf('function isSyncServerOffline'))
@@ -255,9 +255,11 @@ async function schedulingFixture(t) {
   let blockSync = false
   let pendingLock = Promise.resolve()
   let releaseLock
+  let hidden = false
   const sandbox = {
     Date, setTimeout, clearTimeout, AbortController, console, isRecentSync, isSyncReasonEnabled, SyncLiveConnectionState, AUTO_SYNC_INTERVAL_MS,
     SyncCollectionCache: class {}, isSyncServerOffline: () => false,
+    process: { env: platform }, isAppHidden: () => hidden,
     withSyncLock: callback => pendingLock.then(callback),
     runSync: async () => {
       calls.push(Date.now())
@@ -270,6 +272,7 @@ async function schedulingFixture(t) {
       ${action('startSyncServerAutoSync')}
       ${action('stopSyncServerAutoSync')}
       ${action('scheduleSyncServer')}
+      ${action('resumeHiddenEventSyncs')}
     }; ({ actions, liveConnection })`, sandbox)
   const context = {
     rootState: {
@@ -285,9 +288,11 @@ async function schedulingFixture(t) {
     liveConnection,
     start: () => actions.startSyncServerAutoSync(context),
     schedule: reason => actions.scheduleSyncServer(context, reason),
+    resume: () => actions.resumeHiddenEventSyncs(context),
     sync: options => actions.syncWithSyncServer(context, options),
     stop: () => actions.stopSyncServerAutoSync(context),
     block: () => { blockSync = true },
+    setHidden: value => { hidden = value },
     holdLock: () => { pendingLock = new Promise(resolve => { releaseLock = resolve }) },
     releaseLock: () => releaseLock(),
     release: () => { blockSync = false; releaseSync() },
@@ -435,6 +440,48 @@ for (const connected of [true, false]) {
     assert.equal(f.calls.length, connected ? 0 : 2)
   })
 }
+
+test('periodic fallback does not sync while the mobile app is hidden', async t => {
+  const f = await schedulingFixture(t, { IS_CAPACITOR: 'true' })
+  f.liveConnection.setConnected(false)
+  f.start()
+  f.setHidden(true)
+  await f.tick(AUTO_SYNC_INTERVAL_MS)
+  await f.tick(AUTO_SYNC_INTERVAL_MS)
+  assert.equal(f.calls.length, 0)
+  f.setHidden(false)
+  await f.tick(AUTO_SYNC_INTERVAL_MS)
+  assert.equal(f.calls.length, 1)
+})
+
+test('queued event syncs wait while the mobile app is hidden and replay on resume', async t => {
+  const f = await schedulingFixture(t, { IS_CAPACITOR: 'true' })
+  f.schedule('history')
+  f.setHidden(true)
+  await f.tick(30000)
+  assert.equal(f.calls.length, 0)
+  f.setHidden(false)
+  f.resume()
+  await f.tick(30000)
+  assert.equal(f.calls.length, 1)
+  f.resume()
+  await f.tick(30000)
+  assert.equal(f.calls.length, 1)
+})
+
+test('stopping automatic sync discards event syncs queued while hidden', async t => {
+  const f = await schedulingFixture(t, { IS_CAPACITOR: 'true' })
+  f.schedule('history')
+  f.setHidden(true)
+  await f.tick(30000)
+  f.stop()
+  f.start()
+  f.setHidden(false)
+  const calls = f.calls.length
+  f.resume()
+  await f.tick(30000)
+  assert.equal(f.calls.length, calls)
+})
 
 test('periodic fallback resumes after a live disconnect', async t => {
   const f = await schedulingFixture(t)

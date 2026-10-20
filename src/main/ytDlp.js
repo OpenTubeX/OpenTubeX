@@ -547,13 +547,18 @@ function hasAutomaticDownloadRecord(videoId) {
 function saveDownloadRecords() {
   downloadRecordsSaveQueue = downloadRecordsSaveQueue
     .catch(() => {})
-    .then(() => {
+    .then(async () => {
       const records = [...downloadRecords.values()]
         .map(record => ['preparing', 'downloading', 'processing', 'pausing'].includes(record.status)
           ? { ...record, status: record.status === 'pausing' ? 'paused' : 'queued', speed: null, eta: null }
           : record)
         .slice(-200)
-      return writeFile(getDownloadRecordsPath(), JSON.stringify(records), 'utf8')
+      // Write atomically so a crash mid-write cannot wipe the download history
+      // and reset the id counter.
+      const path = getDownloadRecordsPath()
+      const temporaryPath = `${path}.tmp`
+      await writeFile(temporaryPath, JSON.stringify(records), 'utf8')
+      await rename(temporaryPath, path)
     })
   return downloadRecordsSaveQueue
 }
