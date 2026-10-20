@@ -4131,6 +4131,15 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   }
 }
 
+.ftVideoPlayer.portraitFullscreenDocks.fullscreenDockLayoutOpen:is(:fullscreen, .fullWindow) > .fullscreenActions {
+  inset-block-end: calc(70% + var(--mobile-fullscreen-actions-block-end, 82px));
+  max-block-size: calc(30% - var(--mobile-fullscreen-actions-block-end, 82px) - max(52px, var(--sponsorblock-notice-block-size, 0px) + 16px));
+}
+
+.ftVideoPlayer.portraitFullscreenDocks.fullscreenDockLayoutOpen .skippedSegmentsWrapper {
+  bottom: calc(70% + var(--sponsorblock-notice-bottom));
+}
+
 /* Keep SponsorBlock notices inside the video area when a dock is open. */
 .ftVideoPlayer:fullscreen:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .fullscreenQueueOpen, .fullscreenRecommendationsOpen, .chaptersOverlayOpen) .skippedSegmentsWrapper,
 .ftVideoPlayer.fullWindow:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .fullscreenQueueOpen, .fullscreenRecommendationsOpen, .chaptersOverlayOpen) .skippedSegmentsWrapper,

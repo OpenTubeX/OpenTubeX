@@ -91,12 +91,18 @@ test.describe('mobile SponsorBlock', () => {
       })
       await player.locator('.fullscreenActions').getByRole('button', { name: 'Queue', exact: true }).click()
       await expect(player.locator('.fullscreenQueueOverlay.open')).toBeVisible()
-      await expect.poll(() => player.locator('.fullscreenActions').evaluate(element => element.getBoundingClientRect().height)).toBeGreaterThan(50)
+      // A full-width portrait panel leaves room for a single row of actions.
+      await expect.poll(() => player.locator('.fullscreenActions').evaluate(element => element.getBoundingClientRect().height)).toBeCloseTo(50, 0)
       await expect.poll(async () => {
         const noticeBox = await notice.boundingBox()
         const dockBox = await player.locator('.fullscreenActions').boundingBox()
         return Math.abs(dockBox.y - noticeBox.y - noticeBox.height - 8)
       }).toBeLessThan(1)
+      if (mode === 'fullscreen') {
+        await notice.getByRole('button', { name: 'Skip (Enter)', exact: true }).click()
+        await expect(notice.getByRole('button', { name: 'Unskip (Enter)', exact: true })).toBeVisible()
+        await notice.getByRole('button', { name: 'Unskip (Enter)', exact: true }).click()
+      }
       await player.locator('.fullscreenQueueOverlay.open').getByRole('button', { name: 'Close', exact: true }).click()
       await page.evaluate(() => window.$store.commit('clearWatchQueue'))
 
@@ -134,7 +140,7 @@ test.describe('mobile SponsorBlock', () => {
 })
 
 for (const mobile of [false, true]) {
-  test.describe(`minimum fullscreen with SponsorBlock (${mobile ? 'mobile' : 'desktop'})`, { tag: '@scale' }, () => {
+  test.describe(`minimum landscape fullscreen with SponsorBlock (${mobile ? 'mobile' : 'desktop'})`, { tag: '@scale' }, () => {
     test.use({
       seed: {
         settings: {
@@ -153,7 +159,7 @@ for (const mobile of [false, true]) {
         store.commit('addVideoToWatchQueue', { video: { videoId: 'queued00000', title: 'Queue test' } })
         store.commit('setFullscreenActions', ['queue', 'sponsorBlock', 'comments', 'share', 'addToPlaylist', 'quickBookmark'])
       })
-      await setWindowSize(app, page, { width: 340, height: 380 })
+      await setWindowSize(app, page, { width: 382, height: 380 })
       await setPlayerFullscreen(page, true)
       await player.locator('.fullscreenActions').getByRole('button', { name: 'Queue', exact: true }).click()
       const actions = player.locator('.fullscreenActions')

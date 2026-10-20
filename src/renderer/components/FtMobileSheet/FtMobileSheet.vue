@@ -11,11 +11,10 @@
       :style="sheetStyle"
       :role="enabled ? null : 'presentation'"
       :aria-label="enabled ? title : null"
+      v-on="enabled && headerSelector ? { pointerdownCapture: startContentHeaderDrag, clickCapture: filterContentHeaderClick } : {}"
       @cancel.prevent="dismiss"
       @keydown.esc.prevent.stop="dismiss"
       @pointerdown.stop
-      @pointerdown.capture="startContentHeaderDrag"
-      @click.capture="filterContentHeaderClick"
       @click="handleClick"
       @dblclick.stop
       @touchstart.stop

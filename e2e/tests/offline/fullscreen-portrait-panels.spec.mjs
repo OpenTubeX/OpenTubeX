@@ -86,6 +86,12 @@ test('portrait fullscreen docks use bottom panels and return to side docks in la
     const queue = sheet.locator('.fullscreenQueueOverlay.open')
     await expect(queue).toBeVisible()
     await expect(player.locator('.fullscreenMetadataOverlay.open')).toHaveCount(0)
+    await player.hover({ position: { x: 20, y: 20 } })
+    await expect.poll(() => player.locator('.fullscreenActions').evaluate(element => {
+      const bounds = element.getBoundingClientRect()
+      const sheetTop = element.parentElement.querySelector('.fullscreenDockSheet').getBoundingClientRect().top
+      return bounds.top >= 0 && bounds.bottom <= sheetTop
+    })).toBe(true)
     const scroller = queue.locator('.queueItems')
     await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
     await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)

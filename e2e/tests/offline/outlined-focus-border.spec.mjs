@@ -4,6 +4,16 @@ import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 import { writeFile } from 'node:fs/promises'
 
 async function expectEvenFocusBorder(app, page, field, outlineSelector) {
+  // Responsive fullscreen sheets can still be entering after a window resize.
+  // Measure the resting label only once its ancestors have stopped moving.
+  await field.evaluate(async element => {
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+    const animations = []
+    for (let ancestor = element; ancestor; ancestor = ancestor.parentElement) {
+      animations.push(...ancestor.getAnimations())
+    }
+    await Promise.all(animations.map(animation => animation.finished.catch(() => {})))
+  })
   await field.evaluate(element => element.blur())
   const restingLabel = await field.evaluate((element, outlineSelector) => {
     const bounds = element.parentElement.querySelector(`${outlineSelector} label`).getBoundingClientRect()
