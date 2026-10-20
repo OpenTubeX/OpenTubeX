@@ -664,11 +664,13 @@ test.describe('settings', () => {
       await expect(utilityWindow).toBeVisible()
       await expect.poll(() => page.evaluate(() => window.utilityWindowMorphs))
         .toEqual([{ before: [icon], after: ['window'] }])
+      await expect(page.locator('.iconMorphTarget')).toHaveCount(0)
 
       await utilityWindow.getByRole('button', { name: 'Close', exact: true }).click()
       await expect(utilityWindow).toBeHidden()
       await expect.poll(() => page.evaluate(() => window.utilityWindowMorphs))
         .toEqual([{ before: [icon], after: ['window'] }, { before: ['window'], after: [icon] }])
+      await expect(page.locator('.iconMorphTarget')).toHaveCount(0)
     }
   })
 
