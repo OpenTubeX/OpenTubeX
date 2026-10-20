@@ -52,7 +52,7 @@ export async function applySubscriptionSettingsSync(store, value) {
     }
     const remote = value[channel.id].value ?? {}
     // Older clients omit notification choices; keep this device's choice for them.
-    const settings = normalizeSubscriptionChannelSettings(Object.hasOwn(remote, 'notificationFeedTypes')
+    const settings = normalizeSubscriptionChannelSettings(Array.isArray(remote.notificationFeedTypes)
       ? remote
       : { ...remote, notificationFeedTypes: channel.notificationFeedTypes })
     if (channel.subscriptionSettingsUpdatedAt === updatedAt &&

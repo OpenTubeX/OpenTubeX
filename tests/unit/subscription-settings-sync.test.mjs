@@ -327,6 +327,8 @@ test('records from clients without notification choices keep the local bell', as
   assert.deepEqual(saved[0].notificationFeedTypes, ['videos', 'live'])
   assert.equal(saved[0].dailyVideoLimit, 2)
 
-  await subscriptionSync.applySubscriptionSettingsSync(store, { channel: { value: { notificationFeedTypes: [] }, updatedAt: 6 } })
-  assert.deepEqual(saved[1].notificationFeedTypes, [])
+  await subscriptionSync.applySubscriptionSettingsSync(store, { channel: { value: { notificationFeedTypes: null }, updatedAt: 6 } })
+  assert.deepEqual(saved[1].notificationFeedTypes, ['videos', 'live'])
+  await subscriptionSync.applySubscriptionSettingsSync(store, { channel: { value: { notificationFeedTypes: [] }, updatedAt: 7 } })
+  assert.deepEqual(saved[2].notificationFeedTypes, [])
 })
