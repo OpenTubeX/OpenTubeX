@@ -193,6 +193,8 @@ Feed:
   Next Auto Refresh: 'Další automatické obnovení: {date}'
 User Playlists:
   This playlist is private or does not exist.: "Tento playlist je soukromý nebo neexistuje."
+  Pin to Navigation: "Připnout do navigace"
+  Unpin from Navigation: "Odepnout z navigace"
   Reorder Hint: Přetáhněte nebo použijte klávesy se šipkami pro změnu pořadí
   Add new videos to the top (custom order): "Přidávat nová videa na začátek (vlastní pořadí)"
   Repair Playlists: Opravit playlisty

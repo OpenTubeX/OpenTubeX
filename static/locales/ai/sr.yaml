@@ -197,6 +197,8 @@ Feed:
   Next Auto Refresh: 'Следеће аутоматско освежавање: {date}'
 User Playlists:
   This playlist is private or does not exist.: "Ова плејлиста је приватна или не постоји."
+  Pin to Navigation: "Закачи у навигацију"
+  Unpin from Navigation: "Откачи из навигације"
   Reorder Hint: Превуците или користите тастере са стрелицама да бисте променили редослед
   Add new videos to the top (custom order): "Додај нове видео-снимке на врх (прилагођени редослед)"
   Repair Playlists: Поправи листе за репродукцију

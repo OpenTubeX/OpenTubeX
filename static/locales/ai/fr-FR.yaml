@@ -192,6 +192,8 @@ Feed:
   Cancel Refresh: Annuler l’actualisation
   Next Auto Refresh: 'Prochaine actualisation automatique : {date}'
 User Playlists:
+  Pin to Navigation: "Épingler à la navigation"
+  Unpin from Navigation: "Retirer de la navigation"
   Reorder Hint: Faites glisser ou utilisez les touches fléchées pour réorganiser
   Add new videos to the top (custom order): "Ajouter les nouvelles vidéos en haut (ordre personnalisé)"
   Repair Playlists: Réparer les playlists

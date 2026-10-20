@@ -195,6 +195,8 @@ Feed:
   Next Auto Refresh: 'Sljedeće automatsko osvježavanje: {date}'
 User Playlists:
   This playlist is private or does not exist.: "Ovaj popis za reprodukciju je privatan ili ne postoji."
+  Pin to Navigation: "Prikvači na navigaciju"
+  Unpin from Navigation: "Otkvači s navigacije"
   Reorder Hint: Povucite ili koristite tipke sa strelicama za promjenu redoslijeda
   Add new videos to the top (custom order): "Dodaj nove videozapise na vrh (prilagođeni redoslijed)"
   Repair Playlists: Popravi popise za reprodukciju

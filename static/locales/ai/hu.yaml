@@ -193,6 +193,8 @@ Feed:
   Next Auto Refresh: 'Következő automatikus frissítés: {date}'
 User Playlists:
   This playlist is private or does not exist.: "Ez a lejátszási lista privát, vagy nem létezik."
+  Pin to Navigation: "Rögzítés a navigációban"
+  Unpin from Navigation: "Rögzítés feloldása a navigációban"
   Reorder Hint: Húzza el, vagy használja a nyílbillentyűket az átrendezéshez
   Add new videos to the top (custom order): "Új videók hozzáadása felülre (egyéni sorrend)"
   Repair Playlists: Lejátszási listák javítása

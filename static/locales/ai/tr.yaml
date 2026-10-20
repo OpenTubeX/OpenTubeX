@@ -192,6 +192,8 @@ Feed:
   Cancel Refresh: Yenilemeyi iptal et
   Next Auto Refresh: 'Sonraki otomatik yenileme: {date}'
 User Playlists:
+  Pin to Navigation: "Gezinmeye sabitle"
+  Unpin from Navigation: "Gezinmeden sabitlemeyi kaldır"
   Reorder Hint: Yeniden sıralamak için sürükleyin veya ok tuşlarını kullanın
   Add new videos to the top (custom order): "Yeni videoları en üste ekle (özel sıralama)"
   Repair Playlists: Oynatma listelerini onar

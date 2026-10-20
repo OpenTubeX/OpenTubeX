@@ -224,6 +224,8 @@ Feed:
   Refresh Feed: Atnaujinti {subscriptionName}
 User Playlists:
   This playlist is private or does not exist.: "Šis grojaraštis yra privatus arba neegzistuoja."
+  Pin to Navigation: "Prisegti prie naršymo"
+  Unpin from Navigation: "Atsegti nuo naršymo"
   Reorder Hint: Vilkite arba naudokite rodyklių klavišus, kad pakeistumėte tvarką
   Add new videos to the top (custom order): "Pridėti naujus vaizdo įrašus viršuje (pasirinktinė tvarka)"
   Repair Playlists: Taisyti grojaraščius

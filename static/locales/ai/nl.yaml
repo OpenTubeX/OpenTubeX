@@ -195,6 +195,8 @@ Feed:
   Next Auto Refresh: 'Volgende automatische vernieuwing: {date}'
 User Playlists:
   This playlist is private or does not exist.: "Deze afspeellijst is privé of bestaat niet."
+  Pin to Navigation: "Vastmaken aan navigatie"
+  Unpin from Navigation: "Losmaken van navigatie"
   Reorder Hint: Sleep of gebruik de pijltjestoetsen om de volgorde te wijzigen
   Add new videos to the top (custom order): "Nieuwe video’s bovenaan toevoegen (aangepaste volgorde)"
   Repair Playlists: Afspeellijsten herstellen

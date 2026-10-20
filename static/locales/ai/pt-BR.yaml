@@ -193,6 +193,8 @@ Feed:
   Next Auto Refresh: 'Próxima atualização automática: {date}'
 User Playlists:
   This playlist is private or does not exist.: "Esta playlist é privada ou não existe."
+  Pin to Navigation: "Fixar na navegação"
+  Unpin from Navigation: "Desafixar da navegação"
   Reorder Hint: Arraste ou use as teclas de seta para reordenar
   Add new videos to the top (custom order): "Adicionar novos vídeos no início (ordem personalizada)"
   Repair Playlists: Reparar playlists

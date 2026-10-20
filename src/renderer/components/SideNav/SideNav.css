@@ -292,3 +292,13 @@
     display: block;
   }
 }
+
+.channelThumbnail.playlistThumbnail {
+  border-radius: calc(8px * var(--ui-roundness));
+  object-fit: cover;
+}
+
+.channelThumbnail.playlistThumbnail.blur {
+  clip-path: inset(0 round calc(8px * var(--ui-roundness)));
+  filter: blur(5px);
+}

@@ -194,6 +194,8 @@ Feed:
   Next Auto Refresh: 'Next auto refresh: {date}'
 User Playlists:
   This playlist is private or does not exist.: "This playlist is private or does not exist."
+  Pin to Navigation: "Pin to Navigation"
+  Unpin from Navigation: "Unpin from Navigation"
   Reorder Hint: Drag or use the arrow keys to reorder
   Add new videos to the top (custom order): "Add new videos to the top (custom order)"
   Repair Playlists: Repair Playlists

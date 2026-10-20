@@ -801,6 +801,59 @@ test.describe('custom playlists overview order', () => {
     await expect.poll(() => page.evaluate(() => window.$store.getters.getUserPlaylistsCustomOrder))
       .toEqual(['custom-overview-a', 'custom-overview-c', 'custom-overview-b'])
   })
+
+  test('pins playlists to the side navigation in the overview order', async ({ app, page }) => {
+    const pinned = page.locator('.sideNav .pinnedPlaylists .navChannel')
+    const pinnedTitles = () => pinned.evaluateAll(links => links.map(link => link.title))
+    async function togglePin(name, action) {
+      await goTo(page, 'userplaylists')
+      await page.getByRole('link', { name: `Overview ${name}` }).first().click()
+      await page.getByRole('button', { name: action }).click()
+      await expect(page.getByRole('button', { name: action === 'Pin to Navigation' ? 'Unpin from Navigation' : 'Pin to Navigation' })).toBeVisible()
+    }
+
+    await expect(pinned).toHaveCount(0)
+    await togglePin('A', 'Pin to Navigation')
+    await togglePin('B', 'Pin to Navigation')
+    // Playlists without a saved position start newest first.
+    await expect.poll(pinnedTitles).toEqual(['Overview B', 'Overview A'])
+
+    await goTo(page, 'userplaylists')
+    await page.locator('.playlistList [data-playlist-drag-item]')
+      .filter({ hasText: 'Overview A' })
+      .getByRole('button', { name: 'Drag or use the arrow keys to reorder' })
+      .focus()
+    await page.keyboard.press('Home')
+    await expect.poll(pinnedTitles).toEqual(['Overview A', 'Overview B'])
+
+    await goTo(page, 'history')
+    await page.locator('.sideNav .pinnedPlaylists .navChannel[title="Overview B"]').click()
+    await expect(page).toHaveURL(/#\/playlist\/custom-overview-b\?playlistType=user/)
+    await expect(page.locator('.playlistInfo')).toContainText('Overview B')
+
+    await togglePin('A', 'Unpin from Navigation')
+    await expect.poll(pinnedTitles).toEqual(['Overview B'])
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getPinnedPlaylistIds))
+      .toEqual(['custom-overview-b'])
+
+    ;({ page } = await app.relaunch())
+    await expect.poll(() => page.locator('.sideNav .pinnedPlaylists .navChannel').evaluateAll(links => links.map(link => link.title)))
+      .toEqual(['Overview B'])
+
+    // Quick successive pins build on each other before the first save finishes.
+    expect(await page.evaluate(async () => {
+      const store = window.$store
+      const pin = id => store.dispatch('updatePinnedPlaylistIds', [...store.getters.getPinnedPlaylistIds, id])
+      await Promise.all([pin('custom-overview-c'), pin('custom-overview-a')])
+      return store.getters.getPinnedPlaylistIds
+    })).toEqual(['custom-overview-b', 'custom-overview-c', 'custom-overview-a'])
+
+    // Deleting a pinned playlist also removes it from the synced setting.
+    await dispatchStoreAction(page, 'removePlaylist', 'custom-overview-b')
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getPinnedPlaylistIds))
+      .toEqual(['custom-overview-c', 'custom-overview-a'])
+    await expect(page.locator('.sideNav .pinnedPlaylists .navChannel[title="Overview B"]')).toHaveCount(0)
+  })
 })
 
 test.describe('custom playlist order', () => {

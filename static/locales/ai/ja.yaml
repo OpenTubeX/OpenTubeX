@@ -193,6 +193,8 @@ Feed:
   Next Auto Refresh: '次回の自動更新: {date}'
 User Playlists:
   This playlist is private or does not exist.: "この再生リストは非公開か、存在しません。"
+  Pin to Navigation: "ナビゲーションに固定"
+  Unpin from Navigation: "ナビゲーションから固定解除"
   Reorder Hint: ドラッグするか矢印キーで並べ替え
   Add new videos to the top (custom order): "新しい動画を先頭に追加（カスタム順）"
   Repair Playlists: プレイリストを修復

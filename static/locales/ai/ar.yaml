@@ -195,6 +195,8 @@ Feed:
   Next Auto Refresh: 'التحديث التلقائي التالي: {date}'
 User Playlists:
   This playlist is private or does not exist.: "قائمة التشغيل هذه خاصة أو غير موجودة."
+  Pin to Navigation: "تثبيت في شريط التنقل"
+  Unpin from Navigation: "إلغاء التثبيت من شريط التنقل"
   Reorder Hint: اسحب أو استخدم مفاتيح الأسهم لإعادة الترتيب
   Add new videos to the top (custom order): "إضافة الفيديوهات الجديدة في الأعلى (ترتيب مخصص)"
   Repair Playlists: إصلاح قوائم التشغيل

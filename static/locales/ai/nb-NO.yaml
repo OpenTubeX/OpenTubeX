@@ -192,6 +192,8 @@ Feed:
   Cancel Refresh: Avbryt oppdatering
   Next Auto Refresh: 'Neste automatiske oppdatering: {date}'
 User Playlists:
+  Pin to Navigation: "Fest til navigasjonen"
+  Unpin from Navigation: "Løsne fra navigasjonen"
   Reorder Hint: Dra eller bruk piltastene for å endre rekkefølgen
   Add new videos to the top (custom order): "Legg til nye videoer øverst (egendefinert rekkefølge)"
   Repair Playlists: Reparer spillelister

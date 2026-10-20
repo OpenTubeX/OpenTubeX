@@ -193,6 +193,8 @@ Feed:
   Next Auto Refresh: 'Pembaruan otomatis berikutnya: {date}'
 User Playlists:
   This playlist is private or does not exist.: "Daftar putar ini bersifat pribadi atau tidak ada."
+  Pin to Navigation: "Sematkan ke Navigasi"
+  Unpin from Navigation: "Lepas Sematan dari Navigasi"
   Reorder Hint: Seret atau gunakan tombol panah untuk mengurutkan ulang
   Add new videos to the top (custom order): "Tambahkan video baru di bagian atas (urutan khusus)"
   Repair Playlists: Perbaiki playlist

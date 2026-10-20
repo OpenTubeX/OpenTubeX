@@ -277,6 +277,7 @@ import { playlistRepairState, startPlaylistRepair, cancelPlaylistRepair } from '
 
 import { ctrlFHandler, debounce, getIconForSortPreference, throttle } from '../../helpers/utils'
 import { isValidPlaylistBookmark, playlistBookmarkToListData } from '../../helpers/playlist-bookmarks'
+import { playlistKey, sortUserPlaylists, USER_PLAYLISTS_SORT_BY_OPTIONS as SORT_BY_OPTIONS } from '../../helpers/playlists'
 import { useTabContext } from '../../tabs/TabContext'
 
 const { locale, t } = useI18n()
@@ -291,22 +292,6 @@ const showLoadMoreButton = ref(false)
 const query = ref('')
 const doSearchPlaylistsWithMatchingVideos = ref(false)
 const activeData = ref([])
-
-const SORT_BY_OPTIONS = {
-  NameAscending: 'name_ascending',
-  NameDescending: 'name_descending',
-
-  LatestCreatedFirst: 'latest_created_first',
-  EarliestCreatedFirst: 'earliest_created_first',
-
-  LatestUpdatedFirst: 'latest_updated_first',
-  EarliestUpdatedFirst: 'earliest_updated_first',
-
-  LatestPlayedFirst: 'latest_played_first',
-  EarliestPlayedFirst: 'earliest_played_first',
-
-  Custom: 'custom',
-}
 
 const SORT_BY_VALUES = Object.values(SORT_BY_OPTIONS)
 
@@ -355,86 +340,8 @@ const allPlaylists = computed(() => {
       .map(playlistBookmarkToListData),
   ]
 
-  const sortBy_ = sortBy.value
-
-  if (!SORT_BY_VALUES.includes(sortBy_)) {
-    console.error(`Unknown sortBy: ${sortBy_}`)
-    return playlists
-  }
-
-  if (sortBy_ === SORT_BY_OPTIONS.Custom) {
-    const order = tempCustomOrder.value ?? store.getters.getUserPlaylistsCustomOrder
-    const positions = new Map(order.map((id, index) => [id, index]))
-    // Playlists missing from the saved order, such as new ones, come first.
-    return playlists.toSorted((a, b) => {
-      return (positions.get(playlistKey(a)) ?? -1) - (positions.get(playlistKey(b)) ?? -1) || b.createdAt - a.createdAt
-    })
-  }
-
-  const collator = cachedCollator.value
-
-  return playlists.toSorted((a, b) => {
-    switch (sortBy_) {
-      case SORT_BY_OPTIONS.NameAscending:
-        return collator.compare(a.playlistName, b.playlistName)
-      case SORT_BY_OPTIONS.NameDescending:
-        return collator.compare(b.playlistName, a.playlistName)
-      case SORT_BY_OPTIONS.LatestCreatedFirst:
-        if (a.createdAt > b.createdAt) { return -1 }
-        if (a.createdAt < b.createdAt) { return 1 }
-
-        return collator.compare(a.playlistName, b.playlistName)
-      case SORT_BY_OPTIONS.EarliestCreatedFirst:
-        if (a.createdAt < b.createdAt) { return -1 }
-        if (a.createdAt > b.createdAt) { return 1 }
-
-        return collator.compare(a.playlistName, b.playlistName)
-      case SORT_BY_OPTIONS.LatestUpdatedFirst:
-        if (a.lastUpdatedAt > b.lastUpdatedAt) { return -1 }
-        if (a.lastUpdatedAt < b.lastUpdatedAt) { return 1 }
-
-        return collator.compare(a.playlistName, b.playlistName)
-      case SORT_BY_OPTIONS.EarliestUpdatedFirst:
-        if (a.lastUpdatedAt < b.lastUpdatedAt) { return -1 }
-        if (a.lastUpdatedAt > b.lastUpdatedAt) { return 1 }
-
-        return collator.compare(a.playlistName, b.playlistName)
-      case SORT_BY_OPTIONS.LatestPlayedFirst:
-        if (a.lastPlayedAt == null && b.lastPlayedAt == null) {
-          return collator.compare(a.playlistName, b.playlistName)
-        }
-
-        // Never played playlist = move to last
-        if (a.lastPlayedAt == null) { return 1 }
-        if (b.lastPlayedAt == null) { return -1 }
-        if (a.lastPlayedAt > b.lastPlayedAt) { return -1 }
-        if (a.lastPlayedAt < b.lastPlayedAt) { return 1 }
-
-        return collator.compare(a.playlistName, b.playlistName)
-      case SORT_BY_OPTIONS.EarliestPlayedFirst:
-        // Never played playlist = first
-        if (a.lastPlayedAt == null && b.lastPlayedAt == null) {
-          return collator.compare(a.playlistName, b.playlistName)
-        }
-
-        // Never played playlist = move to first
-        if (a.lastPlayedAt == null) { return -1 }
-        if (b.lastPlayedAt == null) { return 1 }
-        if (a.lastPlayedAt < b.lastPlayedAt) { return -1 }
-        if (a.lastPlayedAt > b.lastPlayedAt) { return 1 }
-
-        return collator.compare(a.playlistName, b.playlistName)
-      default:
-        // should never happen as we detect this before calling toSorted
-        return 0
-    }
-  })
+  return sortUserPlaylists(playlists, sortBy.value, tempCustomOrder.value ?? store.getters.getUserPlaylistsCustomOrder, cachedCollator.value)
 })
-
-/** @param {{ _id?: string, playlistId?: string }} playlist */
-function playlistKey(playlist) {
-  return playlist._id ?? playlist.playlistId
-}
 
 /** @type {import('vue').Ref<string[] | null>} Order shown while dragging, saved on drop */
 const tempCustomOrder = ref(null)

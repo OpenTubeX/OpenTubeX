@@ -168,6 +168,8 @@ Feed:
   Next Auto Refresh: 'Следующее автоматическое обновление: {date}'
 User Playlists:
   This playlist is private or does not exist.: "Этот плейлист закрыт или не существует."
+  Pin to Navigation: "Закрепить в навигации"
+  Unpin from Navigation: "Открепить от навигации"
   Reorder Hint: Перетащите или используйте клавиши со стрелками, чтобы изменить порядок
   Add new videos to the top (custom order): "Добавлять новые видео в начало (свой порядок)"
   Repair Playlists: Восстановить плейлисты

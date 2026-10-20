@@ -405,6 +405,8 @@ export function getSyncableSettingKeys(settings) {
   return Object.keys(state).filter(settingKey => (
     isSettingSyncEnabled(settings, settingKey) &&
     !(settingKey === 'defaultProfile' && !settings.syncServerSyncProfiles) &&
+    // Pins name playlist IDs that only exist on peers when playlists sync too.
+    !(settingKey === 'pinnedPlaylistIds' && !settings.syncServerSyncPlaylists) &&
     isSettingSyncableOnPlatform(settingKey)
   ))
 }
@@ -657,6 +659,9 @@ const customActions = {
     'navigationItems',
     normalizeNavigationItems(value)
   ),
+
+  // Pin toggles build on the previous edit, so commit them before the save finishes.
+  updatePinnedPlaylistIds: ({ commit, state }, value) => updateOrderedSetting(commit, state, 'pinnedPlaylistIds', value),
 
   // Home customization edits build on the previous edit, so commit them before the save finishes.
   updateHomeSectionLayout: ({ commit, state }, value) => updateOrderedSetting(

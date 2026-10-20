@@ -422,6 +422,8 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     // This makes the `favorites` playlist uses as quick bookmark target
     // If the playlist is removed quick bookmark is disabled
     quickBookmarkTargetPlaylistId: 'favorites',
+    // User playlists shown in the side navigation
+    pinnedPlaylistIds: [],
     generalAutoLoadMorePaginatedItemsEnabled: true,
     enablePullToRefresh: true,
     useTrayIcon: true,

@@ -234,6 +234,8 @@ Feed:
   Refresh Feed: Osveži {subscriptionName}
 User Playlists:
   This playlist is private or does not exist.: "Ta seznam predvajanja je zaseben ali ne obstaja."
+  Pin to Navigation: "Pripni v navigacijo"
+  Unpin from Navigation: "Odpni iz navigacije"
   Reorder Hint: Povlecite ali uporabite smerne tipke za spreminjanje vrstnega reda
   Add new videos to the top (custom order): "Dodaj nove videoposnetke na vrh (vrstni red po meri)"
   Repair Playlists: Popravi sezname predvajanja

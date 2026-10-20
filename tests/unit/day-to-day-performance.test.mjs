@@ -5,6 +5,7 @@ import vm from 'node:vm'
 import { computed, effectScope, nextTick, ref, watch } from 'vue'
 import { createStore } from 'vuex'
 import * as videoCounts from '../../src/renderer/helpers/playlist-video-counts.js'
+import { playlistKey, sortUserPlaylists, USER_PLAYLISTS_SORT_BY_OPTIONS } from '../../src/renderer/helpers/playlists.js'
 
 function source(path) {
   return readFileSync(new URL(`../../src/renderer/${path}`, import.meta.url), 'utf8')
@@ -46,6 +47,7 @@ function overview(store) {
     document: { removeEventListener() {} },
     getIconForSortPreference() {},
     throttle: callback => callback,
+    playlistKey, sortUserPlaylists, SORT_BY_OPTIONS: USER_PLAYLISTS_SORT_BY_OPTIONS,
     isValidPlaylistBookmark: () => true, playlistBookmarkToListData: value => value,
     debounce(callback) {
       const wrapped = () => pending.add(callback)
