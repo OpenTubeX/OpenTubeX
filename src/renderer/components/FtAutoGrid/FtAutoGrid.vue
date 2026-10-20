@@ -87,6 +87,7 @@ onActivated(() => {
   updateGridSliderLimit()
 })
 onDeactivated(() => {
+  keepBottomGeneration++
   active = false
   updateGridSliderLimit()
 })
@@ -216,17 +217,22 @@ let observedScrollbarWidth = 0
 let observedViewportWidth = null
 let pageAtBottom = false
 
-function keepPageAtBottom(frames) {
+// A newer measurement, deactivation or unmount cancels pending settle frames.
+let keepBottomGeneration = 0
+
+function keepPageAtBottom(frames, generation) {
+  if (generation !== keepBottomGeneration) return
   window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' })
   const target = window.scrollY
   if (frames > 0) {
     requestAnimationFrame(() => {
+      if (generation !== keepBottomGeneration) return
       // Growing rows leave the position in place and shrinking ones keep it at
       // the end. A position above both means the page was scrolled away.
       const root = document.documentElement
       const atBottom = root.scrollHeight - root.clientHeight - window.scrollY <= 2
       if (window.scrollY < target - 2 && !atBottom) return
-      keepPageAtBottom(frames - 1)
+      keepPageAtBottom(frames - 1, generation)
     })
   }
 }
@@ -278,7 +284,10 @@ function updateGridWidth(contentWidth, viewportCrossedPhoneWidth = false) {
     thumbnailSizeReady.value = gridWidth > 0
     // thumbnailSizeReady resizes the cards once Vue renders it, and windowed
     // rows settle their measured size over the following frames.
-    if (keepBottom) nextTick(() => keepPageAtBottom(2))
+    if (keepBottom) {
+      const generation = ++keepBottomGeneration
+      nextTick(() => keepPageAtBottom(2, generation))
+    }
   } else if (widthAdjustmentChanged || viewportCrossedPhoneWidth) {
     // Keeps the stretched size equal to the stable one under a transient
     // scrollbar, and applies the phone column minimum to a constrained grid.
@@ -311,6 +320,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  keepBottomGeneration++
   active = false
   updateGridSliderLimit()
   resizeObserver?.disconnect()
