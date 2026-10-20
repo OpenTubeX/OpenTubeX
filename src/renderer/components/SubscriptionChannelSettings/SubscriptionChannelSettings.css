@@ -24,7 +24,6 @@
 }
 
 
-
 .channelSettingsHeader :deep(.ft-input-component) {
   --input-bottom-spacing: 0;
 
@@ -226,6 +225,15 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.bulkNotificationSetting {
+  margin-block-start: var(--settings-row-gap, 20px);
+}
+
+.bulkNotificationSetting + .feedTypeOptions,
+.notificationSettings > .feedTypeOptions {
+  margin-block-start: 8px;
+}
+
 .feedTypeOption {
   align-items: center;
   background-color: transparent;
@@ -262,6 +270,13 @@
 .feedTypeOption.mixed {
   border-color: color-mix(in srgb, var(--primary-color) 55%, var(--border-color));
   color: var(--primary-text-color);
+}
+
+.feedTypeOption:disabled {
+  background-color: transparent;
+  color: var(--secondary-text-color);
+  cursor: default;
+  opacity: 0.5;
 }
 
 .feedTypeOption > span {

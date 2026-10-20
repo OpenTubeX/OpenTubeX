@@ -32,6 +32,17 @@
         @click="handleUnsubscribeConfirmation"
       />
       <button
+        v-if="isNotificationBellEnabled"
+        type="button"
+        :title="$t('Channel.Notify about new uploads')"
+        :aria-label="$t('Channel.Notify about new uploads')"
+        :aria-pressed="notificationsEnabled"
+        class="notificationBell"
+        @click="updateNotifications(!notificationsEnabled)"
+      >
+        <FtIcon :icon="['fas', notificationsEnabled ? 'bell' : 'bell-slash']" />
+      </button>
+      <button
         v-if="isSubscriptionOptionsEnabled"
         type="button"
         :title="subscriptionOptionsTitle"
@@ -311,6 +322,11 @@ const isSubscriptionOptionsEnabled = computed(() => {
   return !props.hideProfileDropdownToggle && isSubscribed.value
 })
 
+const uploadNotificationsSupported = process.env.IS_ELECTRON || (process.env.IS_CAPACITOR && !process.env.IS_IOS)
+const isNotificationBellEnabled = computed(() => (
+  uploadNotificationsSupported && isSubscriptionOptionsEnabled.value
+))
+
 const isProfileDropdownOpen = ref(false)
 const buttonList = useTemplateRef('buttonList')
 const profileDropdown = useTemplateRef('profileDropdown')
@@ -393,12 +409,13 @@ const storedChannelSettings = computed(() => {
   return normalizeSubscriptionChannelSettings(subscription)
 })
 
-/** @type {import('vue').Ref<{feedTypes: string[], dailyVideoLimit: number|null|undefined, showMembersOnly: boolean} | null>} */
+/** @type {import('vue').Ref<{feedTypes: string[], notificationFeedTypes: string[], dailyVideoLimit: number|null|undefined, showMembersOnly: boolean} | null>} */
 const optimisticChannelSettings = ref(null)
 const activeChannelSettings = computed(() => (
   optimisticChannelSettings.value ?? storedChannelSettings.value
 ))
 const enabledFeedTypes = computed(() => new Set(activeChannelSettings.value.feedTypes))
+const notificationsEnabled = computed(() => activeChannelSettings.value.notificationFeedTypes.length > 0)
 const dailyVideoLimitValue = computed(() => (
   formatSubscriptionDailyVideoLimit(activeChannelSettings.value.dailyVideoLimit)
 ))
@@ -591,6 +608,7 @@ function handleSubscription(profile) {
       name: props.channelName,
       thumbnail: props.channelThumbnail,
       feedTypes: [...activeChannelSettings.value.feedTypes],
+      notificationFeedTypes: [...activeChannelSettings.value.notificationFeedTypes],
       showMembersOnly: activeChannelSettings.value.showMembersOnly
     }
     if (activeChannelSettings.value.dailyVideoLimit !== undefined) {
@@ -644,6 +662,16 @@ function updateFeedType(feedType, enabled) {
 }
 
 /**
+ * Turning notifications on starts with every feed type.
+ * @param {boolean} enabled
+ */
+function updateNotifications(enabled) {
+  persistChannelSettings({
+    notificationFeedTypes: enabled ? feedTypes.value.map(feedType => feedType.id) : []
+  })
+}
+
+/**
  * @param {string} value
  */
 function updateDailyVideoLimit(value) {
@@ -660,7 +688,7 @@ function updateShowMembersOnly(value) {
 }
 
 /**
- * @param {{feedTypes?: string[], dailyVideoLimit?: number|null|undefined, showMembersOnly?: boolean}} patch
+ * @param {{feedTypes?: string[], notificationFeedTypes?: string[], dailyVideoLimit?: number|null|undefined, showMembersOnly?: boolean}} patch
  */
 function persistChannelSettings(patch) {
   const settings = {

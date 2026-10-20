@@ -159,6 +159,10 @@ Home Page:
   All sections hidden: Toate secțiunile sunt ascunse
   All sections hidden description: Personalizează pagina principală pentru a afișa din nou o secțiune.
 Subscriptions:
+  New video from {channel}: Videoclip nou de la {channel}
+  New short from {channel}: Short nou de la {channel}
+  '{channel} is live': "{channel} transmite live"
+  New post from {channel}: Postare nouă de la {channel}
   Mark As Unseen: Marchează ca nevăzut
   Copy Error Details: "Copiază detaliile tehnice"
   Refresh Errors: "Canale care nu au putut fi actualizate: {channels}. Faceți clic pentru a vedea detaliile."
@@ -945,6 +949,7 @@ Settings:
     Live Auto Refresh Interval: Interval de reîmprospătare automată a transmisiunilor în direct
     Posts Auto Refresh Interval: Interval de reîmprospătare automată a postărilor
     Refresh Subscriptions While App Is Closed: "Reîmprospătează abonamentele când aplicația este închisă"
+    Notify About New Uploads: Notifică despre încărcări noi
   Distraction Free Settings:
     Hide Popularity Graph: "Ascunde graficul de popularitate"
     Enable Block Lists: "Activează listele de blocare"
@@ -1322,6 +1327,7 @@ Channel:
   Unlimited: Nelimitat
   More videos hidden: '+{count} în plus | +{count} în plus | +{count} în plus'
   Show in subscription feed: Afișează în fluxul de abonamente
+  Notify about new uploads: Notifică despre încărcări noi
   Channel Name Unavailable: Numele canalului nu este disponibil
   Search Result Types: Tipuri de rezultate ale căutării
   All Results: Toate
@@ -1943,6 +1949,7 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: Păstrează viitoarele transmisiuni în direct și premiere în partea de sus a fluxului de abonamente. Când opțiunea este dezactivată, acestea rămân la poziția anunțului până când încep. Reîmprospătați o dată fluxul de abonamente după dezactivare pentru a prelua datele anunțurilor înregistrărilor programate existente.
     Auto Refresh Interval: "Frecvența cu care OpenTubeX reîmprospătează automat fluxul de abonamente cât timp aplicația este deschisă. Pe Android, un interval diferit de zero actualizează fluxul și când aplicația este închisă."
     Refresh Subscriptions While App Is Closed: "Actualizează fluxurile cu setările alese. Pe desktop, OpenTubeX rămâne în zona de notificare până la ieșire. Android stabilește când rulează actualizările în fundal."
+    Notify About New Uploads: Afișează notificări de sistem pe acest dispozitiv pentru canalele ale căror notificări le-ați activat în setările lor de abonament. OpenTubeX caută conținut nou când abonamentele se reîmprospătează, așa că alegeți un interval de reîmprospătare automată. Pentru a primi notificări când aplicația este închisă, activați și reîmprospătarea când aplicația este închisă.
   Theme Settings:
     Thumbnail Size: "Scalează miniaturile videoclipurilor în grile și liste. Grilele cu un număr fix de coloane sau tipul de vizualizare Lățime completă umplu în schimb fiecare rând, așa că acolo modifică doar miniaturile din liste și Shorts. În ferestrele de mărimea unui telefon, miniaturile din grilă sunt limitate la 100%."
     Playlist Thumbnail Size: "Scalează miniaturile videoclipurilor pe paginile playlisturilor. Grilele cu un număr fix de coloane sau tipul de vizualizare Lățime completă umplu în schimb fiecare rând, așa că acolo modifică doar miniaturile din liste și Shorts. În ferestrele de mărimea unui telefon, miniaturile din grilă sunt limitate la 100%."

@@ -61,18 +61,18 @@ function createClient(entries = []) {
 }
 
 test('syncs subscription settings through the existing settings collection to another device', async () => {
-  const first = createStore([{ id: 'channel', name: 'Original', feedTypes: ['shorts'], dailyVideoLimit: 3, showMembersOnly: true }])
+  const first = createStore([{ id: 'channel', name: 'Original', feedTypes: ['shorts'], notificationFeedTypes: ['posts'], dailyVideoLimit: 3, showMembersOnly: true }])
   const client = createClient()
   await context.syncSettings(client, first)
   assert.deepEqual(client.entries.find(entry => entry.key === key).value.channel.value, {
-    feedTypes: ['shorts'], dailyVideoLimit: 3, showMembersOnly: true,
+    feedTypes: ['shorts'], notificationFeedTypes: ['posts'], dailyVideoLimit: 3, showMembersOnly: true,
   })
   const second = createStore([{ id: 'channel', name: 'Local name', thumbnail: 'local-thumbnail' }])
   await context.syncSettings(client, second)
   for (const profile of second.state.profiles.profileList) {
     assert.deepEqual(profile.subscriptions[0], {
       id: 'channel', name: 'Local name', thumbnail: 'local-thumbnail',
-      feedTypes: ['shorts'], dailyVideoLimit: 3, showMembersOnly: true,
+      feedTypes: ['shorts'], notificationFeedTypes: ['posts'], dailyVideoLimit: 3, showMembersOnly: true,
       subscriptionSettingsUpdatedAt: client.entries.find(entry => entry.key === key).value.channel.updatedAt,
     })
   }
@@ -317,4 +317,18 @@ test('subscribing with untouched defaults does not upload a per-channel settings
 test('explicit resets to defaults remain in the sync payload', () => {
   const store = createStore([{ id: 'reset', subscriptionSettingsUpdatedAt: 123 }])
   assert.equal(subscriptionSync.getSubscriptionSettingsForSync(store).reset.updatedAt, 123)
+})
+
+test('records from clients without notification choices keep the local bell', async () => {
+  const store = createStore([{ id: 'channel', notificationFeedTypes: ['videos', 'live'] }])
+  const saved = []
+  store.dispatch = async (_, payload) => { saved.push(payload.settings); return true }
+  await subscriptionSync.applySubscriptionSettingsSync(store, { channel: { value: { dailyVideoLimit: 2 }, updatedAt: 5 } })
+  assert.deepEqual(saved[0].notificationFeedTypes, ['videos', 'live'])
+  assert.equal(saved[0].dailyVideoLimit, 2)
+
+  await subscriptionSync.applySubscriptionSettingsSync(store, { channel: { value: { notificationFeedTypes: null }, updatedAt: 6 } })
+  assert.deepEqual(saved[1].notificationFeedTypes, ['videos', 'live'])
+  await subscriptionSync.applySubscriptionSettingsSync(store, { channel: { value: { notificationFeedTypes: [] }, updatedAt: 7 } })
+  assert.deepEqual(saved[2].notificationFeedTypes, [])
 })

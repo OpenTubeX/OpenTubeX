@@ -63,6 +63,15 @@
             @change="updateSubscriptionPostsAutoRefreshInterval"
           />
         </div>
+        <FtToggleSwitch
+          v-if="(IS_CAPACITOR && !IS_IOS) || IS_ELECTRON"
+          :label="$t('Settings.Subscription Settings.Notify About New Uploads')"
+          :default-value="enableUploadNotifications"
+          setting-key="enableUploadNotifications"
+          :tooltip="$t('Tooltips.Subscription Settings.Notify About New Uploads')"
+          compact
+          @change="updateEnableUploadNotifications"
+        />
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
@@ -186,6 +195,16 @@ const enableClosedAppSubscriptionRefresh = computed(() => store.getters.getEnabl
  */
 function updateEnableClosedAppSubscriptionRefresh(value) {
   store.dispatch('updateEnableClosedAppSubscriptionRefresh', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const enableUploadNotifications = computed(() => store.getters.getEnableUploadNotifications)
+
+/**
+ * @param {boolean} value
+ */
+function updateEnableUploadNotifications(value) {
+  store.dispatch('updateEnableUploadNotifications', value)
 }
 
 /** @type {import('vue').ComputedRef<string>} */

@@ -159,6 +159,10 @@ Home Page:
   All sections hidden: すべてのセクションが非表示です
   All sections hidden description: ホームをカスタマイズして、セクションを再表示してください。
 Subscriptions:
+  New video from {channel}: "{channel}の新しい動画"
+  New short from {channel}: "{channel}の新しいショート動画"
+  '{channel} is live': "{channel}がライブ配信中"
+  New post from {channel}: "{channel}の新しい投稿"
   Mark As Unseen: 未視聴にする
   Copy Error Details: "技術的な詳細をコピー"
   Refresh Errors: "更新できなかったチャンネル: {channels}。クリックして詳細を表示します。"
@@ -943,6 +947,7 @@ Settings:
     Live Auto Refresh Interval: ライブ配信の自動更新間隔
     Posts Auto Refresh Interval: 投稿の自動更新間隔
     Refresh Subscriptions While App Is Closed: "アプリを閉じている間も登録チャンネルを更新"
+    Notify About New Uploads: 新着アップロードを通知
   Distraction Free Settings:
     Hide Popularity Graph: "人気度グラフを非表示"
     Enable Block Lists: "ブロックリストを有効にする"
@@ -1298,6 +1303,7 @@ Channel:
   Unlimited: 無制限
   More videos hidden: '他{count}件'
   Show in subscription feed: 登録チャンネルフィードに表示
+  Notify about new uploads: 新着アップロードを通知
   Channel Name Unavailable: チャンネル名を取得できません
   Search Result Types: 検索結果の種類
   All Results: すべて
@@ -1896,6 +1902,7 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: 予定されているライブ配信とプレミア公開を登録チャンネルのフィード上部に表示します。無効にすると、開始するまで告知時の位置に表示されます。無効にした後、一度フィードを更新すると、既存の予定項目の告知日を取得できます。
     Auto Refresh Interval: "アプリの起動中にOpenTubeXが登録チャンネルのフィードを自動更新する間隔です。 Android では、0 以外の間隔を選ぶと、アプリを閉じている間もフィードが更新されます。"
     Refresh Subscriptions While App Is Closed: "選択した設定でフィードを更新します。デスクトップでは、終了するまでOpenTubeXがシステムトレイに常駐します。Androidでは、バックグラウンド更新の実行時刻をシステムが制御します。"
+    Notify About New Uploads: 登録設定で通知をオンにしたチャンネルについて、このデバイスにシステム通知を表示します。OpenTubeXは登録チャンネルの更新時に新着コンテンツを確認するため、自動更新の間隔を選択してください。アプリを閉じている間も通知を受け取るには、アプリを閉じている間の更新も有効にしてください。
   Theme Settings:
     Thumbnail Size: "グリッドとリストの動画サムネイルの大きさを変更します。列数を固定したグリッドや「全幅」表示では各行を埋めるため、そこではリストのサムネイルとショートだけが変わります。スマートフォンサイズのウィンドウでは、グリッドのサムネイルは 100% までに制限されます。"
     Playlist Thumbnail Size: "再生リストのページの動画サムネイルの大きさを変更します。列数を固定したグリッドや「全幅」表示では各行を埋めるため、そこではリストのサムネイルとショートだけが変わります。スマートフォンサイズのウィンドウでは、グリッドのサムネイルは 100% までに制限されます。"

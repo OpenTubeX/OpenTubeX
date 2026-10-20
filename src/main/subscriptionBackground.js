@@ -3,7 +3,7 @@ import path from 'node:path'
 import { existsSync } from 'node:fs'
 
 /** Owns the separate process; HTTP uses Electron's configured proxy/session. */
-export function createSubscriptionBackgroundService(userDataPath) {
+export function createSubscriptionBackgroundService(userDataPath, { onUploads } = {}) {
   const resultPath = path.join(userDataPath, 'background-subscription-results')
   let worker = null
   let ready = null
@@ -20,6 +20,10 @@ export function createSubscriptionBackgroundService(userDataPath) {
     const child = utilityProcess.fork(path.join(__dirname, 'subscriptionBackgroundWorker.js'), [resultPath], { serviceName: 'Subscription refresh' })
     worker = child
     child.on('message', async message => {
+      if (message.type === 'uploads') {
+        onUploads?.(message)
+        return
+      }
       if (message.type === 'abort') {
         requests.get(message.id)?.abort()
         return

@@ -4,6 +4,7 @@ import { createSubscriptionBackgroundScheduler } from './subscriptionBackgroundS
 import { parseAndEnrichBackgroundFeed } from '../renderer/helpers/api/background-feed-parser'
 import { fetchBackgroundSubscriptionChannel } from '../subscriptionBackgroundRequests'
 import { processSubscriptionFeed } from './subscriptionFeedProcessing.js'
+import { normalizeUploadEntries } from '../newUploadNotifications.js'
 
 const results = createSubscriptionBackgroundResults(process.argv[2])
 const requests = new Map()
@@ -29,9 +30,13 @@ function fetchText(request, signal) {
 
 const scheduler = createSubscriptionBackgroundScheduler({
   fetchChannel: async (configuration, feed, channel, signal) => {
-    return fetchBackgroundSubscriptionChannel(configuration, feed, channel, signal, fetchText, async payload => ({
+    const payload = await fetchBackgroundSubscriptionChannel(configuration, feed, channel, signal, fetchText, async payload => ({
       backgroundFormat: 'entries', entries: await parseAndEnrichBackgroundFeed(payload, feed, channel, configuration.instanceUrl, fetchText, signal)
     }))
+    if (payload?.backgroundFormat === 'entries') {
+      process.parentPort.postMessage({ type: 'uploads', channelId: channel, feedType: feed, entries: normalizeUploadEntries(payload.entries) })
+    }
+    return payload
   },
   saveResult: result => results.save(result)
 })

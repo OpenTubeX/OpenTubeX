@@ -159,6 +159,10 @@ Home Page:
   All sections hidden: Atal guztiak ezkutatuta daude
   All sections hidden description: Pertsonalizatu hasiera atal bat berriro erakusteko.
 Subscriptions:
+  New video from {channel}: "{channel} kanalaren bideo berria"
+  New short from {channel}: "{channel} kanalaren labur berria"
+  '{channel} is live': "{channel} zuzenean dago"
+  New post from {channel}: "{channel} kanalaren argitalpen berria"
   Mark As Unseen: Markatu ikusi gabeko gisa
   Copy Error Details: "Kopiatu xehetasun teknikoak"
   Refresh Errors: "Eguneratu ezin izan diren kanalak: {channels}. Egin klik xehetasunak ikusteko."
@@ -943,6 +947,7 @@ Settings:
     Live Auto Refresh Interval: Zuzeneko emankizunen freskatze automatikoaren tartea
     Posts Auto Refresh Interval: Argitalpenen freskatze automatikoaren tartea
     Refresh Subscriptions While App Is Closed: "Freskatu harpidetzak aplikazioa itxita dagoenean"
+    Notify About New Uploads: Jakinarazi igoera berriak
   Distraction Free Settings:
     Hide Popularity Graph: "Ezkutatu ospearen grafikoa"
     Enable Block Lists: "Gaitu blokeo-zerrendak"
@@ -1298,6 +1303,7 @@ Channel:
   Unlimited: Mugagabea
   More videos hidden: '+{count} gehiago | +{count} gehiago'
   Show in subscription feed: Erakutsi harpidetzen jarioan
+  Notify about new uploads: Jakinarazi igoera berriak
   Channel Name Unavailable: Kanalaren izena ez dago erabilgarri
   Search Result Types: Bilaketa-emaitzen motak
   All Results: Guztiak
@@ -1906,6 +1912,7 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: Laster hasiko diren zuzeneko emankizunak eta estreinaldiak harpidetza-jarioaren goialdean mantentzen ditu. Desgaituta dagoenean, iragarpenaren kokapenean geratzen dira hasi arte. Desgaitu ondoren, freskatu behin harpidetza-jarioa lehendik programatutako elementuen iragarpen-datak eskuratzeko.
     Auto Refresh Interval: "OpenTubeX aplikazioak harpidetza-jarioa automatikoki freskatuko duen maiztasuna, aplikazioa irekita dagoen bitartean. Androiden, zero ez den tarte batek jarioa freskatzen du aplikazioa itxita dagoenean ere."
     Refresh Subscriptions While App Is Closed: "Jarioak hautatutako ezarpenekin eguneratzen ditu. Ordenagailuan, OpenTubeX sistemaren erretiluan geratzen da irten arte. Android-ek atzeko planoko eguneratzeen unea kontrolatzen du."
+    Notify About New Uploads: Gailu honetan sistemaren jakinarazpenak erakusten ditu harpidetza-ezarpenetan jakinarazpenak aktibatu dituzun kanaletarako. OpenTubeX-ek eduki berria bilatzen du harpidetzak freskatzean; beraz, aukeratu freskatze automatikoaren tarte bat. Aplikazioa itxita dagoenean jakinarazpenak jasotzeko, gaitu ere freskatzea aplikazioa itxita dagoenean.
   Theme Settings:
     Thumbnail Size: "Bideoen miniaturen tamaina aldatzen du sareta eta zerrendetan. Zutabe kopuru finkoa edo Zabalera osoa ikuspegia duten saretek errenkada bakoitza betetzen dute horren ordez, beraz han zerrendetako miniaturak eta Shorts-ak soilik aldatzen ditu. Telefono-tamainako leihoetan saretako miniaturak % 100era mugatzen dira."
     Playlist Thumbnail Size: "Bideoen miniaturen tamaina aldatzen du erreprodukzio-zerrenden orrietan. Zutabe kopuru finkoa edo Zabalera osoa ikuspegia duten saretek errenkada bakoitza betetzen dute horren ordez, beraz han zerrendetako miniaturak eta Shorts-ak soilik aldatzen ditu. Telefono-tamainako leihoetan saretako miniaturak % 100era mugatzen dira."

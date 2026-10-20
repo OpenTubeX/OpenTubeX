@@ -58,11 +58,18 @@ test.describe('subscription settings layout', { tag: '@scale' }, () => {
       await card.scrollIntoViewIfNeeded()
       const gaps = await card.evaluate(element => {
         const feed = element.querySelector('.feedTypeOptions').getBoundingClientRect()
+        const notifications = element.querySelector('.notificationSettings').getBoundingClientRect()
         const members = element.querySelector('.membersOnlySetting').getBoundingClientRect()
-        const toggle = element.querySelector('.switch-ctn').getBoundingClientRect()
+        const toggle = element.querySelector('.membersOnlySetting .switch-ctn').getBoundingClientRect()
         const daily = element.querySelector('.dailyLimitSetting').getBoundingClientRect()
         const select = element.querySelector('.select-label').getBoundingClientRect()
-        return [members.top - feed.bottom, toggle.top - members.top - 1, daily.top - toggle.bottom, select.top - daily.top - 1]
+        return [
+          notifications.top - feed.bottom,
+          members.top - notifications.bottom,
+          toggle.top - members.top - 1,
+          daily.top - toggle.bottom,
+          select.top - daily.top - 1
+        ]
       })
       for (const gap of gaps) expect.soft(gap).toBeCloseTo(gaps[1], 0)
       for (const label of await card.locator('.feedTypeOption > span').all()) {
@@ -138,9 +145,8 @@ test.describe('subscription settings layout', { tag: '@scale' }, () => {
       const bulkMembers = toolbar.getByRole('checkbox', { name: 'Members only' })
       expect.soft(await bulkMembers.evaluate(element => element.tagName), 'bulk members setting uses the standard switch').toBe('INPUT')
       const bulkGap = await toolbar.evaluate(element => {
-        const buttons = element.querySelector('.bulkFeedTypeOptions').getBoundingClientRect()
-        const additional = element.querySelector('.bulkAdditionalSettings').getBoundingClientRect()
-        return additional.top - buttons.bottom
+        const additional = element.querySelector('.bulkAdditionalSettings')
+        return additional.getBoundingClientRect().top - additional.previousElementSibling.getBoundingClientRect().bottom
       })
       expect.soft(bulkGap, 'bulk controls use the regular 20px settings gap').toBeCloseTo(20, 0)
       await expect(toolbar).toBeInViewport({ ratio: 0.999 })

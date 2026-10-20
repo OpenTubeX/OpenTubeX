@@ -93,6 +93,7 @@ import {
   shouldMonitorKdeWaylandWindowState,
 } from './kdeWaylandWindowState'
 import { createSubscriptionBackgroundService } from './subscriptionBackground'
+import { createUploadNotifier } from './uploadNotifications'
 import { supportsNativeNotifications } from './nativeNotifications'
 import { getTrayMenuIcon } from './trayMenuIcons'
 import { createScheduledBackups } from './scheduledBackups'
@@ -1847,7 +1848,7 @@ function runApp() {
   /** @type {Map<number, Array<{url: string, tabId: string | null}>>} */
   const pendingOpenUrlsByWebContentsId = new Map()
   const openUrlReadyWebContentsIds = new Set()
-  const activeLiveNotifications = new Set()
+  const activeNotifications = new Set()
   const ozonePlatform = app.commandLine.getSwitchValue('ozone-platform')
   const isWaylandPlatform = detectWaylandPlatform({
     platform: process.platform,
@@ -1872,7 +1873,13 @@ function runApp() {
   supportsAutoPictureInPictureMinimize.then(supported => { isTrayOnMinimizeSupported = supported })
 
   const userDataPath = app.getPath('userData')
-  const backgroundSubscriptions = createSubscriptionBackgroundService(userDataPath)
+  const uploadNotifier = createUploadNotifier({
+    file: path.join(userDataPath, 'upload-notifications.json'),
+    show: showUrlNotification
+  })
+  const backgroundSubscriptions = createSubscriptionBackgroundService(userDataPath, {
+    onUploads: value => uploadNotifier.observe(value).catch(() => {})
+  })
   const scheduledBackups = createScheduledBackups({
     async readConfiguration() {
       const keys = ['scheduledBackupEnabled', 'scheduledBackupFolderPath', 'scheduledBackupInterval', 'scheduledBackupKeepCount', 'scheduledBackupStatus']
@@ -1907,6 +1914,8 @@ function runApp() {
         return backgroundSubscriptions.next()
       case 'acknowledge': return backgroundSubscriptions.acknowledge(value)
       case 'completed': return backgroundSubscriptions.completed(value)
+      case 'configureUploadNotifications': return uploadNotifier.configure(value)
+      case 'observeUploads': return uploadNotifier.observe(value)
     }
   })
 
@@ -1999,24 +2008,31 @@ function runApp() {
   }
 
   function showLiveReminderNotification(reminder) {
+    showUrlNotification({
+      title: reminder.notificationTitle,
+      body: reminder.notificationBody,
+      url: `https://www.youtube.com/watch?v=${reminder.videoId}`
+    })
+  }
+
+  /**
+   * @param {{ title: string, body: string, url: string }} options
+   */
+  function showUrlNotification({ title, body, url }) {
     if (!supportsNativeNotifications(Notification)) return
 
-    const notification = new Notification({
-      title: reminder.notificationTitle,
-      body: reminder.notificationBody
-    })
-    activeLiveNotifications.add(notification)
-    notification.once('close', () => activeLiveNotifications.delete(notification))
+    const notification = new Notification({ title, body })
+    activeNotifications.add(notification)
+    notification.once('close', () => activeNotifications.delete(notification))
     notification.once('click', () => {
-      activeLiveNotifications.delete(notification)
-      const videoUrl = `https://www.youtube.com/watch?v=${reminder.videoId}`
+      activeNotifications.delete(notification)
 
       if (!mainWindow || mainWindow.isDestroyed()) {
-        createWindowForOpenUrl(videoUrl, {
+        createWindowForOpenUrl(url, {
           showWindowNow: true,
           reuseEmptyRootTab: true
         }).catch(error => {
-          console.error('Failed to open live stream reminder', error)
+          console.error('Failed to open notification URL', error)
         })
         return
       }
@@ -2030,7 +2046,7 @@ function runApp() {
         mainWindow.show()
       }
       mainWindow.focus()
-      openUrlInWindow(mainWindow, videoUrl)
+      openUrlInWindow(mainWindow, url)
     })
     notification.show()
   }

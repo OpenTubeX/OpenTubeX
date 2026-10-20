@@ -159,6 +159,10 @@ Home Page:
   All sections hidden: Svi su odjeljci skriveni
   All sections hidden description: Prilagodite početnu stranicu kako biste ponovno prikazali odjeljak.
 Subscriptions:
+  New video from {channel}: Novi video s kanala {channel}
+  New short from {channel}: Novi kratki video s kanala {channel}
+  '{channel} is live': "{channel} emitira uživo"
+  New post from {channel}: Nova objava s kanala {channel}
   Mark As Unseen: Označi kao neviđeno
   Copy Error Details: "Kopiraj tehničke pojedinosti"
   Refresh Errors: "Kanali koji se nisu mogli osvježiti: {channels}. Kliknite za prikaz pojedinosti."
@@ -945,6 +949,7 @@ Settings:
     Live Auto Refresh Interval: Razmak automatskog osvježavanja prijenosa uživo
     Posts Auto Refresh Interval: Razmak automatskog osvježavanja objava
     Refresh Subscriptions While App Is Closed: "Osvježavaj pretplate dok je aplikacija zatvorena"
+    Notify About New Uploads: Obavijesti o novom sadržaju
   Distraction Free Settings:
     Hide Popularity Graph: "Sakrij grafikon popularnosti"
     Enable Block Lists: "Omogući popise blokiranih"
@@ -1308,6 +1313,7 @@ Channel:
   Unlimited: Neograničeno
   More videos hidden: '+{count} više | +{count} više | +{count} više'
   Show in subscription feed: Prikaži u sažetku pretplata
+  Notify about new uploads: Obavijesti o novom sadržaju
   Channel Name Unavailable: Naziv kanala nije dostupan
   Search Result Types: Vrste rezultata pretraživanja
   All Results: Sve
@@ -1923,6 +1929,7 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: Zadržava predstojeće prijenose uživo i premijere na vrhu sažetka pretplata. Kada je isključeno, ostaju na mjestu svoje najave sve do početka. Nakon isključivanja jednom osvježite sažetak pretplata kako biste dohvatili datume najave za postojeće zakazane stavke.
     Auto Refresh Interval: "Učestalost kojom OpenTubeX automatski osvježava sažetak pretplata dok je aplikacija otvorena. Na Androidu interval koji nije nula osvježava sažetak i dok je aplikacija zatvorena."
     Refresh Subscriptions While App Is Closed: "Osvježava sadržaj prema odabranim postavkama. Na računalu OpenTubeX ostaje u sistemskoj traci do izlaska. Android određuje vrijeme osvježavanja u pozadini."
+    Notify About New Uploads: Prikazuje obavijesti sustava na ovom uređaju za kanale kojima ste uključili obavijesti u njihovim postavkama pretplate. OpenTubeX provjerava novi sadržaj pri osvježavanju pretplata, stoga odaberite razmak automatskog osvježavanja. Za obavijesti dok je aplikacija zatvorena uključite i osvježavanje dok je aplikacija zatvorena.
   Theme Settings:
     Thumbnail Size: "Mijenja veličinu sličica videozapisa u rešetkama i popisima. Rešetke s fiksnim brojem stupaca ili prikaz Puna širina umjesto toga popunjavaju svaki redak, pa tamo mijenja samo sličice popisa i Shorts. U prozorima veličine telefona sličice rešetke ograničene su na 100 %."
     Playlist Thumbnail Size: "Mijenja veličinu sličica videozapisa na stranicama popisa za reprodukciju. Rešetke s fiksnim brojem stupaca ili prikaz Puna širina umjesto toga popunjavaju svaki redak, pa tamo mijenja samo sličice popisa i Shorts. U prozorima veličine telefona sličice rešetke ograničene su na 100 %."

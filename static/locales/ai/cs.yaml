@@ -159,6 +159,10 @@ Home Page:
   All sections hidden: Všechny sekce jsou skryté
   All sections hidden description: Přizpůsobte domovskou stránku a některou sekci znovu zobrazte.
 Subscriptions:
+  New video from {channel}: Nové video od {channel}
+  New short from {channel}: Nový Short od {channel}
+  '{channel} is live': "{channel} vysílá živě"
+  New post from {channel}: Nový příspěvek od {channel}
   Mark As Unseen: Označit jako neviděné
   Copy Error Details: "Kopírovat technické podrobnosti"
   Refresh Errors: "Kanály, které se nepodařilo obnovit: {channels}. Kliknutím zobrazíte podrobnosti."
@@ -943,6 +947,7 @@ Settings:
     Live Auto Refresh Interval: Interval automatického obnovení živých přenosů
     Posts Auto Refresh Interval: Interval automatického obnovení příspěvků
     Refresh Subscriptions While App Is Closed: "Obnovovat odběry, když je aplikace zavřená"
+    Notify About New Uploads: Oznamovat nový obsah
   Distraction Free Settings:
     Hide Popularity Graph: "Skrýt graf popularity"
     Enable Block Lists: "Povolit seznamy blokovaných"
@@ -1298,6 +1303,7 @@ Channel:
   Unlimited: Bez omezení
   More videos hidden: '+{count} dalších | +{count} dalších | +{count} dalších'
   Show in subscription feed: Zobrazit v odběrech
+  Notify about new uploads: Oznamovat nový obsah
   Channel Name Unavailable: Název kanálu není dostupný
   Search Result Types: Typy výsledků hledání
   All Results: Vše
@@ -1896,6 +1902,7 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: Ponechá nadcházející živé přenosy a premiéry v horní části kanálu odběrů. Pokud je funkce vypnutá, zůstanou až do zahájení na pozici podle data oznámení. Po vypnutí jednou obnovte kanál odběrů, aby se načetla data oznámení stávajících naplánovaných položek.
     Auto Refresh Interval: "Určuje, jak často OpenTubeX automaticky obnovuje kanál odběrů, když je aplikace otevřená. V Androidu nenulový interval obnovuje kanál také tehdy, když je aplikace zavřená."
     Refresh Subscriptions While App Is Closed: "Aktualizuje kanály podle zvoleného nastavení. Na počítači zůstává OpenTubeX v oznamovací oblasti až do ukončení. Android určuje čas aktualizací na pozadí."
+    Notify About New Uploads: Zobrazuje na tomto zařízení systémová oznámení pro kanály, u kterých jste v nastavení odběru zapnuli oznámení. OpenTubeX kontroluje nový obsah při obnovení odběrů, proto zvolte interval automatického obnovení. Chcete-li dostávat oznámení i při zavřené aplikaci, zapněte také obnovování při zavřené aplikaci.
   Theme Settings:
     Thumbnail Size: "Mění velikost miniatur videí v mřížkách a seznamech. Mřížky s pevným počtem sloupců nebo zobrazení Plná šířka místo toho vyplní každý řádek, takže tam mění jen miniatury v seznamech a Shorts. V oknech velikosti telefonu jsou miniatury v mřížce omezeny na 100 %."
     Playlist Thumbnail Size: "Mění velikost miniatur videí na stránkách playlistů. Mřížky s pevným počtem sloupců nebo zobrazení Plná šířka místo toho vyplní každý řádek, takže tam mění jen miniatury v seznamech a Shorts. V oknech velikosti telefonu jsou miniatury v mřížce omezeny na 100 %."

@@ -66,7 +66,7 @@ final class SubscriptionRefreshDownloadMetadata {
         return nodes.getLength() == 0 ? "" : nodes.item(0).getTextContent();
     }
 
-    private static String label(JSONObject value) {
+    static String label(JSONObject value) {
         if (value == null) return "";
         if (value.has("simpleText")) return value.optString("simpleText");
         if (value.has("content")) return value.optString("content");
@@ -76,7 +76,7 @@ final class SubscriptionRefreshDownloadMetadata {
         return result.toString();
     }
 
-    private static long published(String text, long now) {
+    static long published(String text, long now) {
         Matcher age = AGE.matcher(text);
         if (!age.find()) return 0;
         long seconds;
@@ -112,6 +112,12 @@ final class SubscriptionRefreshDownloadMetadata {
         if (rows != null) for (int i = 0; i < rows.length(); i++) {
             JSONObject row = rows.optJSONObject(i);
             JSONArray parts = row == null ? null : row.optJSONArray("metadataParts");
+            JSONArray badges = row == null ? null : row.optJSONArray("badges");
+            if (badges != null) for (int j = 0; j < badges.length(); j++) {
+                JSONObject badge = badges.optJSONObject(j);
+                JSONObject view = badge == null ? null : badge.optJSONObject("badgeViewModel");
+                if (view != null && view.optString("badgeStyle").equals("BADGE_MEMBERS_ONLY")) video.put("isMembersOnly", true);
+            }
             if (parts == null) continue;
             for (int j = 0; j < parts.length(); j++) {
                 JSONObject part = parts.optJSONObject(j);
@@ -138,6 +144,8 @@ final class SubscriptionRefreshDownloadMetadata {
             JSONObject metadataBadge = object.optJSONObject("metadataBadgeRenderer");
             if (metadataBadge != null) {
                 if (metadataBadge.optString("style").equals("BADGE_STYLE_TYPE_LIVE_NOW")) video.put("liveNow", true);
+                // Also used for members-first videos.
+                if (metadataBadge.optString("style").equals("BADGE_STYLE_TYPE_MEMBERS_ONLY")) video.put("isMembersOnly", true);
                 return;
             }
             JSONObject status = object.optJSONObject("thumbnailOverlayTimeStatusRenderer");

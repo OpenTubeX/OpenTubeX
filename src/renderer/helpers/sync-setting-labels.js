@@ -90,6 +90,7 @@ export const SYNC_SETTING_LABELS = {
   displayVideoPlayButton: 'Settings.Player Settings.Display Play Button In Video Player',
   enableCaptionTranslations: 'Settings.Player Settings.Caption Appearance.Enable Translations',
   enableClosedAppSubscriptionRefresh: 'Settings.Subscription Settings.Refresh Subscriptions While App Is Closed',
+  enableUploadNotifications: 'Settings.Subscription Settings.Notify About New Uploads',
   enableCommentTranslations: 'Settings.General Settings.Comment Translation.Enable',
   enableDownloads: 'Settings.Download Settings.Enable Downloads',
   enableHomeRecommendations: 'Home Page.Enable recommendations',

@@ -159,6 +159,10 @@ Home Page:
   All sections hidden: Todas as secções estão ocultas
   All sections hidden description: Personalize a página inicial para voltar a mostrar uma secção.
 Subscriptions:
+  New video from {channel}: Novo vídeo de {channel}
+  New short from {channel}: Novo Short de {channel}
+  '{channel} is live': "{channel} está em direto"
+  New post from {channel}: Nova publicação de {channel}
   Mark As Unseen: Marcar como não visto
   Copy Error Details: "Copiar detalhes técnicos"
   Refresh Errors: "Canais que não foi possível atualizar: {channels}. Clique para ver os detalhes."
@@ -958,6 +962,7 @@ Settings:
     Live Auto Refresh Interval: Intervalo de atualização automática das transmissões em direto
     Posts Auto Refresh Interval: Intervalo de atualização automática das publicações
     Refresh Subscriptions While App Is Closed: "Atualizar subscrições com a aplicação fechada"
+    Notify About New Uploads: Notificar novos carregamentos
   Distraction Free Settings:
     Hide Popularity Graph: "Ocultar gráfico de popularidade"
     Enable Block Lists: "Ativar listas de bloqueio"
@@ -1332,6 +1337,7 @@ Channel:
   Unlimited: Sem limite
   More videos hidden: '+{count} mais | +{count} mais | +{count} mais'
   Show in subscription feed: Mostrar no feed de subscrições
+  Notify about new uploads: Notificar novos carregamentos
   Channel Name Unavailable: Nome do canal indisponível
   Search Result Types: Tipos de resultados da pesquisa
   All Results: Todos
@@ -1949,6 +1955,7 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: Mantém as próximas emissões em direto e estreias no início do feed de subscrições. Quando esta opção está desativada, permanecem na posição em que foram anunciadas até começarem. Depois de desativar, atualize uma vez o feed de subscrições para obter as datas de anúncio das entradas agendadas existentes.
     Auto Refresh Interval: "A frequência com que o OpenTubeX atualiza automaticamente o feed de subscrições enquanto a aplicação está aberta. No Android, um intervalo diferente de zero também atualiza o feed enquanto a aplicação está fechada."
     Refresh Subscriptions While App Is Closed: "Atualiza os feeds com as definições escolhidas. No computador, o OpenTubeX permanece na área de notificação até sair. O Android controla quando as atualizações em segundo plano são executadas."
+    Notify About New Uploads: Mostra notificações do sistema neste dispositivo para os canais cujas notificações ativou nas respetivas definições de subscrição. O OpenTubeX procura conteúdo novo quando as subscrições são atualizadas, por isso escolha um intervalo de atualização automática. Para receber notificações com a aplicação fechada, ative também a atualização com a aplicação fechada.
   Theme Settings:
     Thumbnail Size: "Ajusta o tamanho das miniaturas dos vídeos em grelhas e listas. Grelhas com um número fixo de colunas ou o tipo de vista Largura total preenchem cada linha, por isso aí só altera as miniaturas das listas e os Shorts. Em janelas do tamanho de um telemóvel, as miniaturas da grelha ficam limitadas a 100%."
     Playlist Thumbnail Size: "Ajusta o tamanho das miniaturas dos vídeos nas páginas de listas de reprodução. Grelhas com um número fixo de colunas ou o tipo de vista Largura total preenchem cada linha, por isso aí só altera as miniaturas das listas e os Shorts. Em janelas do tamanho de um telemóvel, as miniaturas da grelha ficam limitadas a 100%."

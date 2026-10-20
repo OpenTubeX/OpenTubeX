@@ -37,13 +37,16 @@ test('handles a missing subscriptions array', () => {
 test('shares normalized channel-setting values between settings interfaces', () => {
   assert.deepEqual(normalizeSubscriptionChannelSettings({
     feedTypes: ['posts', 'invalid', 'videos'],
+    notificationFeedTypes: ['live', 'invalid'],
     dailyVideoLimit: 0,
     showMembersOnly: true
   }), {
     feedTypes: ['videos', 'posts'],
+    notificationFeedTypes: ['live'],
     dailyVideoLimit: undefined,
     showMembersOnly: true
   })
+  assert.deepEqual(normalizeSubscriptionChannelSettings({}).notificationFeedTypes, [])
   assert.equal(formatSubscriptionDailyVideoLimit(undefined), 'global')
   assert.equal(formatSubscriptionDailyVideoLimit(null), 'unlimited')
   assert.equal(formatSubscriptionDailyVideoLimit(2), '2')

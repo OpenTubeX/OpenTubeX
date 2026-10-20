@@ -143,6 +143,10 @@ Home Page:
   All sections hidden description: Passe die Startseite an, um wieder einen Bereich anzuzeigen.
 
 Subscriptions:
+  New video from {channel}: Neues Video von {channel}
+  New short from {channel}: Neuer Short von {channel}
+  '{channel} is live': '{channel} ist live'
+  New post from {channel}: Neuer Beitrag von {channel}
   Mark As Unseen: Als ungesehen markieren
   Copy Error Details: "Technische Details kopieren"
   Refresh Errors: "Nicht aktualisierte Kanäle: {channels}. Klicken, um Details anzuzeigen."
@@ -1028,6 +1032,7 @@ Settings:
     Live Auto Refresh Interval: Automatisches Aktualisierungsinterval für Livestreams
     Posts Auto Refresh Interval: Automatisches Aktualisierungsinterval für Beiträge
     Refresh Subscriptions While App Is Closed: Abos bei geschlossener App aktualisieren
+    Notify About New Uploads: Über neue Uploads benachrichtigen
   Privacy Settings:
     Internet Connectivity Checks: "Internetverbindung prüfen"
     Internet Connectivity Checks Tooltip: "Prüft den Internetzugang mit kleinen Anfragen an einen von GrapheneOS gehosteten Server."
@@ -1832,6 +1837,7 @@ Channel:
   Subscribe: Abonnieren
   Unsubscribe: Deabonnieren
   Show in subscription feed: Im Abo-Feed anzeigen
+  Notify about new uploads: Über neue Uploads benachrichtigen
   Search Channel: Kanal durchsuchen
   Your search results have returned 0 results: Deine Suche hat 0 Ergebnisse geliefert
   Videos:
@@ -2619,6 +2625,7 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: Zeigt bevorstehende Livestreams und Premieren oben im Abo-Feed an. Wenn deaktiviert, bleiben sie bis zum Start an der Position ihrer Ankündigung. Aktualisiere den Abo-Feed nach dem Deaktivieren einmal, um die Ankündigungszeitpunkte bestehender geplanter Einträge abzurufen.
     Auto Refresh Interval: "Wie oft OpenTubeX automatisch deine Abos aktualisiert während die Anwendung geöffnet ist. Unter Android wird der Feed bei einem Intervall ungleich null auch aktualisiert, während die App geschlossen ist."
     Refresh Subscriptions While App Is Closed: "Aktualisiert Feeds mit deinen gewählten Einstellungen. Auf dem Desktop bleibt OpenTubeX bis zum Beenden im Infobereich aktiv. Android bestimmt, wann Aktualisierungen im Hintergrund ausgeführt werden."
+    Notify About New Uploads: "Zeigt auf diesem Gerät Systembenachrichtigungen für Kanäle, deren Benachrichtigungen du in ihren Abo-Einstellungen aktiviert hast. OpenTubeX sucht beim Aktualisieren der Abos nach neuen Inhalten, wähle daher ein automatisches Aktualisierungsintervall. Um auch bei geschlossener App benachrichtigt zu werden, aktiviere zusätzlich die Aktualisierung bei geschlossener App."
   Player Settings:
     Enable Caption Translations: Wenn aktiviert, bevorzugen die Untertitel-Schaltfläche und das Tastenkürzel C eine automatisch übersetzte Spur in der bevorzugten Untertitelsprache, wenn das Video keine passende Originalspur bereitstellt.
     Default Video Format: Lege die Formate fest, die bei der Wiedergabe eines Videos verwendet werden. DASH-Formate können höhere Auflösungen wiedergeben. Altformate sind auf maximal 360p beschränkt, verbrauchen aber weniger Bandbreite. Audioformate sind reine Audiostreams.

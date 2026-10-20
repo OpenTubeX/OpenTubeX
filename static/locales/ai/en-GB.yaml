@@ -158,6 +158,10 @@ Home Page:
   All sections hidden: All sections are hidden
   All sections hidden description: Customise Home to show a section again.
 Subscriptions:
+  New video from {channel}: New video from {channel}
+  New short from {channel}: New short from {channel}
+  '{channel} is live': "{channel} is live"
+  New post from {channel}: New post from {channel}
   Mark As Unseen: Mark As Unseen
   Copy Error Details: "Copy technical details"
   Refresh Errors: "Channels that could not be refreshed: {channels}. Click to view details."
@@ -929,6 +933,7 @@ Settings:
     Live Auto Refresh Interval: Live Auto Refresh Interval
     Posts Auto Refresh Interval: Posts Auto Refresh Interval
     Refresh Subscriptions While App Is Closed: "Refresh Subscriptions While App Is Closed"
+    Notify About New Uploads: Notify About New Uploads
   Distraction Free Settings:
     Hide Popularity Graph: "Hide Popularity Graph"
     Enable Block Lists: "Enable block lists"
@@ -1284,6 +1289,7 @@ Channel:
   Unlimited: Unlimited
   More videos hidden: '+{count} more | +{count} more'
   Show in subscription feed: Show in subscription feed
+  Notify about new uploads: Notify about new uploads
   Channel Name Unavailable: Channel name unavailable
   Search Result Types: Search result types
   All Results: All
@@ -1885,6 +1891,7 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: Keeps upcoming live streams and premieres at the top of the subscription feed. When disabled, they remain at their announcement position until they start. Refresh the subscription feed once after disabling to retrieve announcement dates for existing scheduled entries.
     Auto Refresh Interval: "How often OpenTubeX automatically refreshes your subscription feed while the app is open. On Android, a nonzero interval also refreshes it while the app is closed."
     Refresh Subscriptions While App Is Closed: "Refreshes feeds using your selected settings. On desktop, OpenTubeX stays in the system tray until you quit. Android controls when background refreshes run."
+    Notify About New Uploads: Shows system notifications on this device for channels whose notifications you turned on in their subscription settings. OpenTubeX checks for new content when subscriptions refresh, so choose an auto refresh interval. To be notified while the app is closed, also enable refreshing while the app is closed.
   Theme Settings:
     Thumbnail Size: "Scales video thumbnails in grids and lists. Grids with a fixed column count or the Full Width view type fill each row instead, so there it only changes list thumbnails and Shorts. Phone-sized windows limit grid thumbnails to 100%."
     Playlist Thumbnail Size: "Scales video thumbnails on playlist pages. Grids with a fixed column count or the Full Width view type fill each row instead, so there it only changes list thumbnails and Shorts. Phone-sized windows limit grid thumbnails to 100%."

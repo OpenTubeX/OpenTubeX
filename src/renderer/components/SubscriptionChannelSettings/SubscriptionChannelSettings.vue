@@ -106,6 +106,56 @@
               />
             </button>
           </div>
+          <template v-if="uploadNotificationsSupported">
+            <div class="bulkNotificationSetting">
+              <FtToggleSwitch
+                :label="t('Channel.Notify about new uploads')"
+                :default-value="selectedNotificationState === true"
+                :indeterminate="selectedNotificationState === 'mixed'"
+                compact
+                controlled
+                @change="updateSelectedNotifications"
+              />
+            </div>
+            <div
+              v-if="selectedNotificationState !== false"
+              class="feedTypeOptions bulkFeedTypeOptions"
+              role="group"
+              :aria-label="t('Channel.Notify about new uploads')"
+            >
+              <button
+                v-for="feedType in feedTypes"
+                :key="feedType.id"
+                type="button"
+                class="feedTypeOption"
+                :class="{
+                  enabled: selectedNotificationFeedTypeStates[feedType.id] === true,
+                  mixed: selectedNotificationFeedTypeStates[feedType.id] === 'mixed'
+                }"
+                role="checkbox"
+                :aria-checked="selectedNotificationFeedTypeStates[feedType.id]"
+                :disabled="selectedChannelsForFeedType(feedType.id, 'notificationFeedTypes').length === 0"
+                @click="updateSelectedFeedType(feedType.id, 'notificationFeedTypes')"
+              >
+                <FtIcon
+                  :icon="feedType.icon"
+                  aria-hidden="true"
+                />
+                <span>{{ feedType.label }}</span>
+                <FtIcon
+                  v-if="selectedNotificationFeedTypeStates[feedType.id] === true"
+                  class="feedTypeCheck"
+                  :icon="['fas', 'check']"
+                  aria-hidden="true"
+                />
+                <span
+                  v-else-if="selectedNotificationFeedTypeStates[feedType.id] === 'mixed'"
+                  class="feedTypeMixedIndicator"
+                  aria-hidden="true"
+                />
+              </button>
+            </div>
+          </template>
           <div class="bulkAdditionalSettings">
             <FtToggleSwitch
               v-if="restrictedPlaybackConfigured"
@@ -238,6 +288,53 @@
               </div>
             </div>
             <div
+              v-if="uploadNotificationsSupported"
+              class="notificationSettings"
+            >
+              <FtToggleSwitch
+                :label="t('Channel.Notify about new uploads')"
+                :default-value="channelSettings(channel).notificationFeedTypes.length > 0"
+                compact
+                controlled
+                @change="value => updateNotifications(channel, value)"
+              />
+              <div
+                v-if="channelSettings(channel).notificationFeedTypes.length > 0"
+                class="feedTypeOptions"
+                role="group"
+                :aria-label="t('Channel.Notify about new uploads')"
+              >
+                <button
+                  v-for="feedType in feedTypes"
+                  :key="feedType.id"
+                  type="button"
+                  class="feedTypeOption"
+                  :class="{ enabled: isNotifying(channel, feedType.id) }"
+                  role="checkbox"
+                  :aria-checked="isNotifying(channel, feedType.id)"
+                  :disabled="!isFeedTypeEnabled(channel, feedType.id)"
+                  @click="updateFeedType(
+                    channel,
+                    feedType.id,
+                    !isFeedTypeEnabled(channel, feedType.id, 'notificationFeedTypes'),
+                    'notificationFeedTypes'
+                  )"
+                >
+                  <FtIcon
+                    :icon="feedType.icon"
+                    aria-hidden="true"
+                  />
+                  <span>{{ feedType.label }}</span>
+                  <FtIcon
+                    v-if="isNotifying(channel, feedType.id)"
+                    class="feedTypeCheck"
+                    :icon="['fas', 'check']"
+                    aria-hidden="true"
+                  />
+                </button>
+              </div>
+            </div>
+            <div
               v-if="restrictedPlaybackConfigured"
               class="membersOnlySetting"
             >
@@ -308,7 +405,8 @@ import {
   getSubscriptionFeedTypeOptions,
   getUpdatedSubscriptionFeedTypes,
   normalizeSubscriptionChannelSettings,
-  parseSubscriptionDailyVideoLimit
+  parseSubscriptionDailyVideoLimit,
+  SUBSCRIPTION_FEED_TYPES
 } from '../../helpers/subscription-channels'
 
 const { locale, t } = useI18n()
@@ -390,6 +488,7 @@ const { page: channelPage, hasMore: hasMoreChannels, displayedItems: displayedCh
 })
 
 const feedTypes = computed(() => getSubscriptionFeedTypeOptions(t))
+const uploadNotificationsSupported = process.env.IS_ELECTRON || (process.env.IS_CAPACITOR && !process.env.IS_IOS)
 const limitOptions = computed(() => getSubscriptionDailyVideoLimitOptions(t))
 const limitNames = computed(() => limitOptions.value.map(option => option.label))
 const limitValues = computed(() => limitOptions.value.map(option => option.value))
@@ -431,6 +530,7 @@ watch(channels, (channelList) => {
  * @typedef {object} SubscriptionChannel
  * @property {string} id
  * @property {string[]|undefined} feedTypes
+ * @property {string[]|undefined} notificationFeedTypes
  * @property {number|null|undefined} dailyVideoLimit
  * @property {boolean|undefined} showMembersOnly
  */
@@ -445,9 +545,19 @@ function channelLimitValue(channel) {
 /**
  * @param {SubscriptionChannel} channel
  * @param {'videos' | 'shorts' | 'live' | 'posts'} feedType
+ * @param {'feedTypes' | 'notificationFeedTypes'} [key]
  */
-function isFeedTypeEnabled(channel, feedType) {
-  return channelSettings(channel).feedTypes.includes(feedType)
+function isFeedTypeEnabled(channel, feedType, key = 'feedTypes') {
+  return channelSettings(channel)[key].includes(feedType)
+}
+
+/**
+ * Only fetched feed types can notify.
+ * @param {object} channel
+ * @param {string} feedType
+ */
+function isNotifying(channel, feedType) {
+  return isFeedTypeEnabled(channel, feedType) && isFeedTypeEnabled(channel, feedType, 'notificationFeedTypes')
 }
 
 /**
@@ -485,41 +595,67 @@ function clearChannelSelection() {
  * @param {(channel: SubscriptionChannel) => boolean} isEnabled
  * @returns {boolean | 'mixed'}
  */
-function selectedState(isEnabled) {
-  const enabledCount = selectedChannels.value.filter(isEnabled).length
+function selectedState(isEnabled, channels = selectedChannels.value) {
+  const enabledCount = channels.filter(isEnabled).length
 
   if (enabledCount === 0) return false
-  if (enabledCount === selectedChannels.value.length) return true
+  if (enabledCount === channels.length) return true
   return 'mixed'
 }
 
 /**
  * @param {'videos' | 'shorts' | 'live' | 'posts'} feedType
+ * @param {'feedTypes' | 'notificationFeedTypes'} [key]
  * @returns {boolean | 'mixed'}
  */
-function selectedFeedTypeState(feedType) {
+function selectedFeedTypeState(feedType, key = 'feedTypes') {
   return selectedState(channel => (
-    isFeedTypeEnabled(channel, feedType)
-  ))
+    isFeedTypeEnabled(channel, feedType, key)
+  ), selectedChannelsForFeedType(feedType, key))
+}
+
+/**
+ * Notifications only apply to channels that show the feed type.
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} feedType
+ * @param {'feedTypes' | 'notificationFeedTypes'} key
+ */
+function selectedChannelsForFeedType(feedType, key) {
+  return key === 'notificationFeedTypes'
+    ? selectedChannels.value.filter(channel => isFeedTypeEnabled(channel, feedType))
+    : selectedChannels.value
 }
 
 const selectedFeedTypeStates = computed(() => Object.fromEntries(
   feedTypes.value.map(({ id }) => [id, selectedFeedTypeState(id)])
 ))
+const selectedNotificationState = computed(() => selectedState(channel => (
+  channelSettings(channel).notificationFeedTypes.length > 0
+)))
+const selectedNotificationFeedTypeStates = computed(() => Object.fromEntries(
+  feedTypes.value.map(({ id }) => [id, selectedFeedTypeState(id, 'notificationFeedTypes')])
+))
 
 /**
  * @param {'videos' | 'shorts' | 'live' | 'posts'} feedType
+ * @param {'feedTypes' | 'notificationFeedTypes'} [key]
  */
-function updateSelectedFeedType(feedType) {
-  const enabled = selectedFeedTypeState(feedType) !== true
-  persistChannelSettingsUpdates(selectedChannels.value
-    .filter(channel => isFeedTypeEnabled(channel, feedType) !== enabled)
+function updateSelectedFeedType(feedType, key = 'feedTypes') {
+  const enabled = selectedFeedTypeState(feedType, key) !== true
+  persistChannelSettingsUpdates(selectedChannelsForFeedType(feedType, key)
+    .filter(channel => isFeedTypeEnabled(channel, feedType, key) !== enabled)
     .map(channel => ({
       channel,
       patch: {
-        feedTypes: getUpdatedSubscriptionFeedTypes(channelSettings(channel).feedTypes, feedType, enabled)
+        [key]: getUpdatedSubscriptionFeedTypes(channelSettings(channel)[key], feedType, enabled)
       }
     })))
+}
+
+function updateSelectedNotifications() {
+  const enabled = selectedNotificationState.value !== true
+  persistChannelSettingsUpdates(selectedChannels.value
+    .filter(channel => (channelSettings(channel).notificationFeedTypes.length > 0) !== enabled)
+    .map(channel => ({ channel, patch: { notificationFeedTypes: enabled ? [...SUBSCRIPTION_FEED_TYPES] : [] } })))
 }
 
 function updateSelectedShowMembersOnly() {
@@ -544,14 +680,26 @@ function updateSelectedChannelLimit(value) {
  * @param {SubscriptionChannel} channel
  * @param {'videos' | 'shorts' | 'live' | 'posts'} feedType
  * @param {boolean} enabled
+ * @param {'feedTypes' | 'notificationFeedTypes'} [key]
  */
-function updateFeedType(channel, feedType, enabled) {
+function updateFeedType(channel, feedType, enabled, key = 'feedTypes') {
   persistChannelSettings(channel, {
-    feedTypes: getUpdatedSubscriptionFeedTypes(
-      channelSettings(channel).feedTypes,
+    [key]: getUpdatedSubscriptionFeedTypes(
+      channelSettings(channel)[key],
       feedType,
       enabled
     )
+  })
+}
+
+/**
+ * Turning notifications on starts with every feed type.
+ * @param {SubscriptionChannel} channel
+ * @param {boolean} enabled
+ */
+function updateNotifications(channel, enabled) {
+  persistChannelSettings(channel, {
+    notificationFeedTypes: enabled ? [...SUBSCRIPTION_FEED_TYPES] : []
   })
 }
 
@@ -584,7 +732,7 @@ function channelSettings(channel) {
 
 /**
  * @param {SubscriptionChannel} channel
- * @param {{ feedTypes?: string[], dailyVideoLimit?: number|null|undefined, showMembersOnly?: boolean }} patch
+ * @param {{ feedTypes?: string[], notificationFeedTypes?: string[], dailyVideoLimit?: number|null|undefined, showMembersOnly?: boolean }} patch
  */
 function persistChannelSettings(channel, patch) {
   persistChannelSettingsUpdates([{ channel, patch }])

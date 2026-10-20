@@ -159,6 +159,10 @@ Home Page:
   All sections hidden: Kaikki osiot on piilotettu
   All sections hidden description: Mukauta etusivua, jotta voit näyttää osion uudelleen.
 Subscriptions:
+  New video from {channel}: Uusi video kanavalta {channel}
+  New short from {channel}: Uusi Short kanavalta {channel}
+  '{channel} is live': "{channel} on livenä"
+  New post from {channel}: Uusi postaus kanavalta {channel}
   Mark As Unseen: Merkitse näkemättömäksi
   Copy Error Details: "Kopioi tekniset tiedot"
   Refresh Errors: "Kanavat, joita ei voitu päivittää: {channels}. Näytä tiedot napsauttamalla."
@@ -956,6 +960,7 @@ Settings:
     Live Auto Refresh Interval: Suorien lähetysten automaattisen päivityksen aikaväli
     Posts Auto Refresh Interval: Julkaisujen automaattisen päivityksen aikaväli
     Refresh Subscriptions While App Is Closed: "Päivitä tilaukset sovelluksen ollessa suljettuna"
+    Notify About New Uploads: Ilmoita uusista latauksista
   Distraction Free Settings:
     Hide Popularity Graph: "Piilota suosiokaavio"
     Enable Block Lists: "Ota estolistat käyttöön"
@@ -1330,6 +1335,7 @@ Channel:
   Unlimited: Rajoittamaton
   More videos hidden: '+{count} lisää | +{count} lisää'
   Show in subscription feed: Näytä tilaussyötteessä
+  Notify about new uploads: Ilmoita uusista latauksista
   Channel Name Unavailable: Kanavan nimeä ei ole saatavilla
   Search Result Types: Hakutulosten tyypit
   All Results: Kaikki
@@ -1943,6 +1949,7 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: Pitää tulevat suorat lähetykset ja ensi-illat tilausnäkymän alussa. Kun asetus on poistettu käytöstä, ne pysyvät ilmoitusajankohdan mukaisella paikallaan alkamiseensa asti. Päivitä tilausnäkymä kerran asetuksen poistamisen jälkeen, jotta olemassa olevien ajastettujen kohteiden ilmoituspäivät haetaan.
     Auto Refresh Interval: "Kuinka usein OpenTubeX päivittää tilausnäkymän automaattisesti sovelluksen ollessa avoinna. Androidissa nollasta poikkeava aikaväli päivittää syötteen myös sovelluksen ollessa suljettuna."
     Refresh Subscriptions While App Is Closed: "Päivittää syötteet valitsemillasi asetuksilla. Tietokoneella OpenTubeX pysyy ilmoitusalueella lopettamiseen asti. Android päättää taustapäivitysten ajankohdan."
+    Notify About New Uploads: Näyttää tällä laitteella järjestelmäilmoituksia kanavista, joiden ilmoitukset olet ottanut käyttöön niiden tilausasetuksissa. OpenTubeX tarkistaa uuden sisällön tilauksia päivitettäessä, joten valitse automaattisen päivityksen aikaväli. Jos haluat ilmoituksia myös sovelluksen ollessa suljettuna, ota käyttöön myös päivitys sovelluksen ollessa suljettuna.
   Theme Settings:
     Thumbnail Size: "Muuttaa videoiden pikkukuvien kokoa ruudukoissa ja luetteloissa. Ruudukot, joissa on kiinteä sarakemäärä tai Koko leveys -näkymä, täyttävät sen sijaan jokaisen rivin, joten siellä se muuttaa vain luetteloiden pikkukuvia ja Shortseja. Puhelimen kokoisissa ikkunoissa ruudukon pikkukuvat rajoitetaan 100 %:iin."
     Playlist Thumbnail Size: "Muuttaa videoiden pikkukuvien kokoa soittolistasivuilla. Ruudukot, joissa on kiinteä sarakemäärä tai Koko leveys -näkymä, täyttävät sen sijaan jokaisen rivin, joten siellä se muuttaa vain luetteloiden pikkukuvia ja Shortseja. Puhelimen kokoisissa ikkunoissa ruudukon pikkukuvat rajoitetaan 100 %:iin."

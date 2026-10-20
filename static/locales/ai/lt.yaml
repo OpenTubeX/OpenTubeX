@@ -183,6 +183,10 @@ Home Page:
   All sections hidden: Visi skyriai paslėpti
   All sections hidden description: Tinkinkite pradžios puslapį, kad vėl būtų rodomas skyrius.
 Subscriptions:
+  New video from {channel}: Naujas vaizdo įrašas iš {channel}
+  New short from {channel}: Naujas šortas iš {channel}
+  '{channel} is live': "{channel} transliuoja tiesiogiai"
+  New post from {channel}: Naujas įrašas iš {channel}
   Mark As Unseen: Pažymėti kaip nematytą
   Copy Error Details: "Kopijuoti techninę informaciją"
   Refresh Errors: "Kanalai, kurių nepavyko atnaujinti: {channels}. Spustelėkite, kad peržiūrėtumėte išsamią informaciją."
@@ -1155,6 +1159,7 @@ Settings:
     Live Auto Refresh Interval: Tiesioginių transliacijų automatinio atnaujinimo intervalas
     Posts Auto Refresh Interval: Įrašų automatinio atnaujinimo intervalas
     Refresh Subscriptions While App Is Closed: "Atnaujinti prenumeratas, kai programa uždaryta"
+    Notify About New Uploads: Pranešti apie naujus įkėlimus
     Limit the number of videos displayed for each channel: Riboti kiekvieno kanalo rodomų vaizdo įrašų skaičių
     To: Iki
     Confirm Before Unsubscribing: Klausti prieš atsisakant prenumeratos
@@ -1580,6 +1585,7 @@ Channel:
   Unlimited: Neribota
   More videos hidden: '+{count} daugiau | +{count} daugiau | +{count} daugiau'
   Show in subscription feed: Rodyti prenumeratų sraute
+  Notify about new uploads: Pranešti apie naujus įkėlimus
   Channel Name Unavailable: Kanalo pavadinimas nepasiekiamas
   Search Result Types: Paieškos rezultatų tipai
   All Results: Visi
@@ -2319,6 +2325,7 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: Būsimas tiesiogines transliacijas ir premjeras rodo prenumeratų sklaidos kanalo viršuje. Išjungus iki pradžios jos lieka ten, kur buvo paskelbtos. Išjungę vieną kartą atnaujinkite prenumeratų sklaidos kanalą, kad gautumėte esamų suplanuotų elementų paskelbimo datas.
     Auto Refresh Interval: "Kaip dažnai OpenTubeX automatiškai atnaujina prenumeratų sklaidos kanalą, kol programa atverta. „Android“ sistemoje nenulinis intervalas atnaujina sklaidos kanalą ir tada, kai programa uždaryta."
     Refresh Subscriptions While App Is Closed: "Atnaujina srautus pagal pasirinktus nustatymus. Kompiuteryje OpenTubeX lieka sistemos dėkle, kol išeinate. Android nustato foninių atnaujinimų laiką."
+    Notify About New Uploads: Šiame įrenginyje rodo sistemos pranešimus apie kanalus, kurių pranešimus įjungėte jų prenumeratos nustatymuose. OpenTubeX naujo turinio ieško atnaujindama prenumeratas, todėl pasirinkite automatinio atnaujinimo intervalą. Kad gautumėte pranešimus, kai programa uždaryta, taip pat įjunkite atnaujinimą, kai programa uždaryta.
   Theme Settings:
     Thumbnail Size: "Keičia vaizdo įrašų miniatiūrų dydį tinkleliuose ir sąrašuose. Tinkleliai su fiksuotu stulpelių skaičiumi arba Viso pločio rodiniu vietoj to užpildo kiekvieną eilutę, todėl ten keičiamos tik sąrašų miniatiūros ir Shorts. Telefono dydžio languose tinklelio miniatiūros ribojamos iki 100 %."
     Playlist Thumbnail Size: "Keičia vaizdo įrašų miniatiūrų dydį grojaraščių puslapiuose. Tinkleliai su fiksuotu stulpelių skaičiumi arba Viso pločio rodiniu vietoj to užpildo kiekvieną eilutę, todėl ten keičiamos tik sąrašų miniatiūros ir Shorts. Telefono dydžio languose tinklelio miniatiūros ribojamos iki 100 %."

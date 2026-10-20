@@ -15,6 +15,7 @@ final class OpenTubeXNotificationChannels {
     static final String SUBSCRIPTION_REFRESH_ID = "subscription-refresh";
     static final String DOWNLOADS_ID = "yt-dlp-downloads";
     static final String LIVE_REMINDERS_ID = "live-reminders";
+    static final String NEW_UPLOADS_ID = "new-uploads";
     private static final String OBSOLETE_LOCAL_NOTIFICATIONS_DEFAULT_ID = "default";
 
     static final class ChannelSpec {
@@ -73,6 +74,14 @@ final class OpenTubeXNotificationChannels {
                 R.string.notification_channel_downloads_description,
                 NotificationManager.IMPORTANCE_LOW,
                 false
+            ),
+            // UploadNotifications owns alerts for new subscription content.
+            new ChannelSpec(
+                NEW_UPLOADS_ID,
+                R.string.notification_channel_new_uploads_name,
+                R.string.notification_channel_new_uploads_description,
+                NotificationManager.IMPORTANCE_DEFAULT,
+                true
             ),
         };
     }

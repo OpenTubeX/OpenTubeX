@@ -27,4 +27,6 @@
     <string name="widget_search">Search</string>
     <string name="widget_subscriptions">Subscriptions</string>
     <string name="widget_watch_later">Watch Later</string>
+    <string name="notification_channel_new_uploads_name">New uploads</string>
+    <string name="notification_channel_new_uploads_description">Alerts when subscribed channels publish new content</string>
 </resources>

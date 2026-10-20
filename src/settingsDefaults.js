@@ -413,6 +413,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     subscriptionLiveAutoRefreshInterval: '0',
     subscriptionPostsAutoRefreshInterval: '0',
     enableClosedAppSubscriptionRefresh: !isElectron,
+    enableUploadNotifications: true,
     showProgressBarToast: true,
     settingsPassword: '',
     useDeArrowTitles: false,

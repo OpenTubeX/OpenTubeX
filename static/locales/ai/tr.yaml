@@ -159,6 +159,10 @@ Home Page:
   All sections hidden: Tüm bölümler gizli
   All sections hidden description: Bir bölümü yeniden göstermek için Ana Sayfayı özelleştirin.
 Subscriptions:
+  New video from {channel}: "{channel} kanalından yeni video"
+  New short from {channel}: "{channel} kanalından yeni kısa video"
+  '{channel} is live': "{channel} canlı yayında"
+  New post from {channel}: "{channel} kanalından yeni gönderi"
   Mark As Unseen: Görülmedi olarak işaretle
   Copy Error Details: "Teknik ayrıntıları kopyala"
   Refresh Errors: "Yenilenemeyen kanallar: {channels}. Ayrıntıları görmek için tıklayın."
@@ -942,6 +946,7 @@ Settings:
     Live Auto Refresh Interval: Canlı Yayınların Otomatik Yenileme Aralığı
     Posts Auto Refresh Interval: Gönderilerin Otomatik Yenileme Aralığı
     Refresh Subscriptions While App Is Closed: "Uygulama Kapalıyken Abonelikleri Yenile"
+    Notify About New Uploads: Yeni Yüklemeleri Bildir
   Distraction Free Settings:
     Hide Popularity Graph: "Popülerlik Grafiğini Gizle"
     Enable Block Lists: "Engelleme listelerini etkinleştir"
@@ -1297,6 +1302,7 @@ Channel:
   Unlimited: Sınırsız
   More videos hidden: '+{count} daha | +{count} daha'
   Show in subscription feed: Abonelik akışında göster
+  Notify about new uploads: Yeni yüklemeleri bildir
   Channel Name Unavailable: Kanal adı kullanılamıyor
   Search Result Types: Arama sonucu türleri
   All Results: Tümü
@@ -1896,6 +1902,7 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: Yaklaşan canlı yayınları ve ilk gösterimleri abonelik akışının en üstünde tutar. Devre dışı bırakıldığında başlayana kadar duyuruldukları konumda kalırlar. Mevcut planlanmış kayıtların duyuru tarihlerini almak için devre dışı bıraktıktan sonra abonelik akışını bir kez yenileyin.
     Auto Refresh Interval: "Uygulama açıkken OpenTubeX'in abonelik akışınızı ne sıklıkla otomatik yenileyeceğini belirler. Android’de sıfırdan farklı bir aralık, uygulama kapalıyken de akışı yeniler."
     Refresh Subscriptions While App Is Closed: "Akışları seçtiğiniz ayarlarla yeniler. Masaüstünde OpenTubeX, çıkış yapana kadar sistem tepsisinde kalır. Android, arka plan yenilemelerinin zamanını belirler."
+    Notify About New Uploads: Abonelik ayarlarında bildirimlerini açtığınız kanallar için bu cihazda sistem bildirimleri gösterir. OpenTubeX yeni içeriği abonelikler yenilendiğinde denetler, bu nedenle bir otomatik yenileme aralığı seçin. Uygulama kapalıyken de bildirim almak için uygulama kapalıyken yenilemeyi de etkinleştirin.
   Theme Settings:
     Thumbnail Size: "Izgaralarda ve listelerde video küçük resimlerini ölçeklendirir. Sabit sütun sayısına sahip ızgaralar veya Tam Genişlik görünüm türü bunun yerine her satırı doldurur, bu yüzden orada yalnızca liste küçük resimlerini ve Shorts'u değiştirir. Telefon boyutundaki pencerelerde ızgara küçük resimleri %100 ile sınırlıdır."
     Playlist Thumbnail Size: "Oynatma listesi sayfalarında video küçük resimlerini ölçeklendirir. Sabit sütun sayısına sahip ızgaralar veya Tam Genişlik görünüm türü bunun yerine her satırı doldurur, bu yüzden orada yalnızca liste küçük resimlerini ve Shorts'u değiştirir. Telefon boyutundaki pencerelerde ızgara küçük resimleri %100 ile sınırlıdır."

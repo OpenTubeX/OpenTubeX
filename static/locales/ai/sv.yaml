@@ -159,6 +159,10 @@ Home Page:
   All sections hidden: Alla avsnitt är dolda
   All sections hidden description: Anpassa startsidan för att visa ett avsnitt igen.
 Subscriptions:
+  New video from {channel}: Ny video från {channel}
+  New short from {channel}: Ny Short från {channel}
+  '{channel} is live': "{channel} sänder live"
+  New post from {channel}: Nytt inlägg från {channel}
   Mark As Unseen: Markera som osedd
   Copy Error Details: "Kopiera tekniska detaljer"
   Refresh Errors: "Kanaler som inte kunde uppdateras: {channels}. Klicka för att visa detaljer."
@@ -945,6 +949,7 @@ Settings:
     Live Auto Refresh Interval: Intervall för automatisk uppdatering av liveströmmar
     Posts Auto Refresh Interval: Intervall för automatisk uppdatering av inlägg
     Refresh Subscriptions While App Is Closed: "Uppdatera prenumerationer medan appen är stängd"
+    Notify About New Uploads: Avisera om nya uppladdningar
   Distraction Free Settings:
     Hide Popularity Graph: "Dölj popularitetsgraf"
     Enable Block Lists: "Aktivera blockeringslistor"
@@ -1305,6 +1310,7 @@ Channel:
   Unlimited: Obegränsat
   More videos hidden: '+{count} till | +{count} till'
   Show in subscription feed: Visa i prenumerationsflödet
+  Notify about new uploads: Avisera om nya uppladdningar
   Channel Name Unavailable: Kanalnamnet är inte tillgängligt
   Search Result Types: Typer av sökresultat
   All Results: Alla
@@ -1916,6 +1922,7 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: Behåller kommande liveströmmar och premiärer högst upp i prenumerationsflödet. När funktionen är inaktiverad ligger de kvar på platsen för tillkännagivandet tills de startar. Uppdatera prenumerationsflödet en gång efter inaktiveringen för att hämta tillkännagivandedatum för befintliga schemalagda poster.
     Auto Refresh Interval: "Hur ofta OpenTubeX automatiskt uppdaterar prenumerationsflödet medan appen är öppen. På Android uppdaterar ett intervall över noll även flödet när appen är stängd."
     Refresh Subscriptions While App Is Closed: "Uppdaterar flöden med dina valda inställningar. På datorn stannar OpenTubeX i systemfältet tills du avslutar. Android bestämmer när bakgrundsuppdateringar körs."
+    Notify About New Uploads: Visar systemaviseringar på den här enheten för kanaler vars aviseringar du har aktiverat i deras prenumerationsinställningar. OpenTubeX söker efter nytt innehåll när prenumerationer uppdateras, så välj ett intervall för automatisk uppdatering. Om du vill få aviseringar medan appen är stängd aktiverar du även uppdatering medan appen är stängd.
   Theme Settings:
     Thumbnail Size: "Skalar videominiatyrer i rutnät och listor. Rutnät med ett fast antal kolumner eller vytypen Full bredd fyller i stället varje rad, så där ändrar reglaget bara listminiatyrer och Shorts. I fönster i telefonstorlek är rutnätsminiatyrer begränsade till 100 %."
     Playlist Thumbnail Size: "Skalar videominiatyrer på spellistesidor. Rutnät med ett fast antal kolumner eller vytypen Full bredd fyller i stället varje rad, så där ändrar reglaget bara listminiatyrer och Shorts. I fönster i telefonstorlek är rutnätsminiatyrer begränsade till 100 %."

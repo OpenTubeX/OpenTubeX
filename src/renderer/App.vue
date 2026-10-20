@@ -688,6 +688,8 @@ import {
   startAndroidSubscriptionRefresh,
   updateAndroidSubscriptionRefresh
 } from './helpers/androidSubscriptionRefresh'
+import { configureUploadNotifications } from './helpers/uploadNotifications'
+import { createUploadNotificationConfiguration } from '../newUploadNotifications'
 import {
   AndroidSubscriptionRefreshPayloadError,
   createAndroidSubscriptionRefreshConfiguration,
@@ -695,7 +697,7 @@ import {
   normalizeAndroidSubscriptionRefreshPayload,
   processAndroidSubscriptionRefreshChannelResult
 } from './helpers/androidSubscriptionRefreshData'
-import { shouldHideMembersOnlyContent } from './helpers/restricted-playback'
+import { hasConfiguredRestrictedPlaybackAuthentication, shouldHideMembersOnlyContent } from './helpers/restricted-playback'
 import { normalizeLocalSubscriptionFeed } from './helpers/api/local'
 import { normalizeInvidiousSubscriptionFeed } from './helpers/api/invidious'
 import { classifyRequestFailure, formatRequestDiagnostic } from './helpers/api/requestDiagnostics'
@@ -1136,6 +1138,13 @@ const hideSubscriptionsLive = computed(() => store.getters.getHideLiveStreams ||
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideSubscriptionsPosts = computed(() => store.getters.getHideSubscriptionsCommunity || store.getters.getUseRssFeeds)
+
+const hiddenSubscriptionFeedTypes = computed(() => [
+  ...(hideSubscriptionsVideos.value ? ['videos'] : []),
+  ...(hideSubscriptionsShorts.value ? ['shorts'] : []),
+  ...(hideSubscriptionsLive.value ? ['live'] : []),
+  ...(hideSubscriptionsPosts.value ? ['posts'] : [])
+])
 
 const dataReady = ref(false)
 // Page-wide and teleported styles read the layout from <html>.
@@ -2179,12 +2188,7 @@ const androidSubscriptionRefreshConfiguration = computed(() => {
       live: subscriptionLiveAutoRefreshInterval.value,
       posts: subscriptionPostsAutoRefreshInterval.value
     },
-    hiddenFeedTypes: [
-      ...(hideSubscriptionsVideos.value ? ['videos'] : []),
-      ...(hideSubscriptionsShorts.value ? ['shorts'] : []),
-      ...(hideSubscriptionsLive.value ? ['live'] : []),
-      ...(hideSubscriptionsPosts.value ? ['posts'] : [])
-    ],
+    hiddenFeedTypes: hiddenSubscriptionFeedTypes.value,
     instanceUrl: store.getters.getCurrentInvidiousInstanceUrl,
     authorization: store.getters.getCurrentInvidiousInstanceAuthorization,
     titles: Object.fromEntries(subscriptionAutoRefreshTabs.map(tab => [
@@ -2211,6 +2215,35 @@ watch(androidSubscriptionRefreshConfiguration, async configuration => {
     }
   } catch (error) {
     console.error('Failed to configure closed-app subscription refreshes', error)
+  }
+}, { deep: true })
+
+const uploadNotificationConfiguration = computed(() => {
+  if (process.env.IS_IOS || (!isCapacitor && !isElectron) || !dataReady.value) return null
+
+  return createUploadNotificationConfiguration({
+    enabled: store.getters.getEnableUploadNotifications,
+    subscriptions: store.getters.getProfileList[0]?.subscriptions ?? [],
+    hiddenFeedTypes: hiddenSubscriptionFeedTypes.value,
+    showMembersOnly: hasConfiguredRestrictedPlaybackAuthentication(store.getters),
+    titles: {
+      videos: t('Subscriptions.New video from {channel}', { channel: '{channel}' }),
+      shorts: t('Subscriptions.New short from {channel}', { channel: '{channel}' }),
+      live: t('Subscriptions.{channel} is live', { channel: '{channel}' }),
+      posts: t('Subscriptions.New post from {channel}', { channel: '{channel}' })
+    }
+  })
+})
+
+watch(uploadNotificationConfiguration, async configuration => {
+  if (configuration === null) return
+  try {
+    await configureUploadNotifications(configuration)
+    if (configuration.enabled && isCapacitor && await requestAndroidSubscriptionRefreshNotificationPermission()) {
+      showAndroidSubscriptionRefreshNotificationWarning()
+    }
+  } catch (error) {
+    console.error('Failed to configure upload notifications', error)
   }
 }, { deep: true })
 

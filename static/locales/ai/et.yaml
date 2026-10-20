@@ -159,6 +159,10 @@ Home Page:
   All sections hidden: Kõik jaotised on peidetud
   All sections hidden description: Kohanda avalehte, et mõni jaotis uuesti kuvada.
 Subscriptions:
+  New video from {channel}: Uus video kanalilt {channel}
+  New short from {channel}: Uus lühivideo kanalilt {channel}
+  '{channel} is live': "{channel} on otse-eetris"
+  New post from {channel}: Uus postitus kanalilt {channel}
   Mark As Unseen: Märgi mittenähtuks
   Copy Error Details: "Kopeeri tehnilised üksikasjad"
   Refresh Errors: "Kanalid, mida ei saanud värskendada: {channels}. Klõpsa üksikasjade vaatamiseks."
@@ -943,6 +947,7 @@ Settings:
     Live Auto Refresh Interval: Otseülekannete automaatse värskendamise intervall
     Posts Auto Refresh Interval: Postituste automaatse värskendamise intervall
     Refresh Subscriptions While App Is Closed: "Värskenda tellimusi, kui rakendus on suletud"
+    Notify About New Uploads: Teavita uutest üleslaadimistest
   Distraction Free Settings:
     Hide Popularity Graph: "Peida populaarsuse graafik"
     Enable Block Lists: "Luba blokeerimisloendid"
@@ -1298,6 +1303,7 @@ Channel:
   Unlimited: Piiramata
   More videos hidden: '+{count} veel | +{count} veel'
   Show in subscription feed: Kuva tellimuste voos
+  Notify about new uploads: Teavita uutest üleslaadimistest
   Channel Name Unavailable: Kanali nimi pole saadaval
   Search Result Types: Otsingutulemuste tüübid
   All Results: Kõik
@@ -1899,6 +1905,7 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: Hoiab eelseisvad otseülekanded ja esilinastused tellimuste voo alguses. Kui see on välja lülitatud, jäävad need ülekande alguseni oma väljakuulutamise kohale. Olemasolevate ajastatud kirjete väljakuulutamise kuupäevade hankimiseks värskenda pärast väljalülitamist üks kord tellimuste voogu.
     Auto Refresh Interval: "Kui tihti OpenTubeX rakenduse töötamise ajal tellimuste voogu automaatselt värskendab. Androidis värskendab nullist erinev intervall voogu ka siis, kui rakendus on suletud."
     Refresh Subscriptions While App Is Closed: "Värskendab vooge valitud seadistustega. Arvutis jääb OpenTubeX süsteemisalve kuni väljumiseni. Android määrab taustavärskenduste aja."
+    Notify About New Uploads: Kuvab selles seadmes süsteemiteavitusi kanalite kohta, mille teavitused oled nende tellimuse seadetes sisse lülitanud. OpenTubeX kontrollib uut sisu tellimuste värskendamisel, seega vali automaatse värskendamise intervall. Et saada teavitusi ka siis, kui rakendus on suletud, luba ka värskendamine suletud rakenduse korral.
   Theme Settings:
     Thumbnail Size: "Muudab videote pisipiltide suurust ruudustikes ja loendites. Fikseeritud veergude arvuga või täislaiuse vaatega ruudustikud täidavad selle asemel iga rea, seega muudab see seal ainult loendite pisipilte ja Shortse. Telefonisuurustes akendes on ruudustiku pisipildid piiratud 100%-ga."
     Playlist Thumbnail Size: "Muudab videote pisipiltide suurust esitusloendite lehtedel. Fikseeritud veergude arvuga või täislaiuse vaatega ruudustikud täidavad selle asemel iga rea, seega muudab see seal ainult loendite pisipilte ja Shortse. Telefonisuurustes akendes on ruudustiku pisipildid piiratud 100%-ga."

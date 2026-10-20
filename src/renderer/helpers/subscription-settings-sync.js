@@ -50,7 +50,11 @@ export async function applySubscriptionSettingsSync(store, value) {
     if (!isValidSubscriptionSettingsTimestamp(updatedAt)) {
       throw new Error('Invalid subscription settings timestamp')
     }
-    const settings = normalizeSubscriptionChannelSettings(value[channel.id].value)
+    const remote = value[channel.id].value ?? {}
+    // Older clients omit notification choices; keep this device's choice for them.
+    const settings = normalizeSubscriptionChannelSettings(Array.isArray(remote.notificationFeedTypes)
+      ? remote
+      : { ...remote, notificationFeedTypes: channel.notificationFeedTypes })
     if (channel.subscriptionSettingsUpdatedAt === updatedAt &&
         areJsonValuesEqual(normalizeSubscriptionChannelSettings(channel), settings)) continue
     const saved = await store.dispatch('updateChannelSettings', { channelId: channel.id, settings, fromSync: true, updatedAt })

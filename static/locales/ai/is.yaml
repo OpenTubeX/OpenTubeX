@@ -159,6 +159,10 @@ Home Page:
   All sections hidden: Allir hlutar eru faldir
   All sections hidden description: Sérsníddu heimasíðuna til að sýna hluta aftur.
 Subscriptions:
+  New video from {channel}: Nýtt myndskeið frá {channel}
+  New short from {channel}: Ný símamynd frá {channel}
+  '{channel} is live': "{channel} er í beinni"
+  New post from {channel}: Ný færsla frá {channel}
   Mark As Unseen: Merkja sem óséð
   Copy Error Details: "Afrita tæknilegar upplýsingar"
   Refresh Errors: "Rásir sem ekki tókst að uppfæra: {channels}. Smelltu til að sjá upplýsingar."
@@ -947,6 +951,7 @@ Settings:
     Live Auto Refresh Interval: Bil milli sjálfvirkra uppfærslna beinna útsendinga
     Posts Auto Refresh Interval: Bil milli sjálfvirkra uppfærslna færslna
     Refresh Subscriptions While App Is Closed: "Uppfæra áskriftir þegar forritið er lokað"
+    Notify About New Uploads: Tilkynna um nýtt efni
   Distraction Free Settings:
     Hide Popularity Graph: "Fela vinsældarit"
     Enable Block Lists: "Virkja blokkunarlista"
@@ -1307,6 +1312,7 @@ Channel:
   Unlimited: Ótakmarkað
   More videos hidden: '+{count} til viðbótar | +{count} til viðbótar'
   Show in subscription feed: Sýna í áskriftarstraumi
+  Notify about new uploads: Tilkynna um nýtt efni
   Channel Name Unavailable: Heiti rásar er ekki tiltækt
   Search Result Types: Tegundir leitarniðurstaðna
   All Results: Allt
@@ -1921,6 +1927,7 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: Heldur væntanlegum beinum útsendingum og frumsýningum efst í áskriftarstreymi. Ef slökkt er á þessu haldast þær á upprunalegum stað í röðinni þar til þær hefjast. Endurnýjaðu áskriftarstreymið einu sinni eftir að slökkt er á þessu til að sækja tilkynningardagsetningar fyrir fyrirliggjandi tímasettar færslur.
     Auto Refresh Interval: "Hversu oft OpenTubeX endurnýjar áskriftarstreymið sjálfkrafa meðan forritið er opið. Í Android endurnýjar bil sem er ekki núll einnig veituna þegar appið er lokað."
     Refresh Subscriptions While App Is Closed: "Endurnýjar efnisveitur með völdum stillingum. Á tölvu helst OpenTubeX í kerfisbakkanum þar til þú hættir. Android stjórnar því hvenær bakgrunnsuppfærslur fara fram."
+    Notify About New Uploads: Birtir kerfistilkynningar á þessu tæki fyrir rásir sem þú hefur kveikt á tilkynningum fyrir í áskriftarstillingum þeirra. OpenTubeX athugar hvort nýtt efni sé komið þegar áskriftir eru uppfærðar, svo veldu bil milli sjálfvirkra uppfærslna. Til að fá tilkynningar þegar forritið er lokað skaltu einnig virkja uppfærslu þegar forritið er lokað.
   Theme Settings:
     Thumbnail Size: "Breytir stærð smámynda myndskeiða í hnitanetum og listum. Hnitanet með föstum dálkafjölda eða yfirlitsgerðinni Full breidd fylla þess í stað hverja röð, svo þar breytir það aðeins smámyndum í listum og Shorts. Í gluggum á stærð við síma takmarkast smámyndir hnitanets við 100%."
     Playlist Thumbnail Size: "Breytir stærð smámynda myndskeiða á síðum spilunarlista. Hnitanet með föstum dálkafjölda eða yfirlitsgerðinni Full breidd fylla þess í stað hverja röð, svo þar breytir það aðeins smámyndum í listum og Shorts. Í gluggum á stærð við síma takmarkast smámyndir hnitanets við 100%."

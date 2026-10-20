@@ -57,6 +57,10 @@ Home Page:
   All sections hidden: Wszystkie sekcje są ukryte
   All sections hidden description: Dostosuj stronę główną, aby ponownie wyświetlić sekcję.
 Subscriptions:
+  New video from {channel}: Nowy film od {channel}
+  New short from {channel}: Nowy film Short od {channel}
+  '{channel} is live': "{channel} nadaje na żywo"
+  New post from {channel}: Nowy wpis od {channel}
   Mark As Unseen: Oznacz jako niewidziane
   Copy Error Details: "Kopiuj szczegóły techniczne"
   Refresh Errors: "Kanały, których nie udało się odświeżyć: {channels}. Kliknij, aby zobaczyć szczegóły."
@@ -460,6 +464,7 @@ Settings:
   Subscription Settings:
     Show Scheduled Live Streams / Premieres First: Najpierw pokazuj zaplanowane transmisje na żywo i premiery
     Refresh Subscriptions While App Is Closed: "Odświeżaj subskrypcje, gdy aplikacja jest zamknięta"
+    Notify About New Uploads: Powiadamiaj o nowościach
   Distraction Free Settings:
     Hide Popularity Graph: "Ukryj wykres popularności"
     Enable Block Lists: "Włącz listy blokowania"
@@ -746,6 +751,7 @@ Channel:
   Unlimited: Bez ograniczeń
   More videos hidden: '+{count} więcej | +{count} więcej | +{count} więcej'
   Show in subscription feed: Pokaż w kanale subskrypcji
+  Notify about new uploads: Powiadamiaj o nowościach
   Channel Name Unavailable: Nazwa kanału jest niedostępna
   Search Result Types: Typy wyników wyszukiwania
   All Results: Wszystkie
@@ -1114,6 +1120,7 @@ Tooltips:
   Subscription Settings:
     Show Scheduled Live Streams / Premieres First: Umieszcza nadchodzące transmisje na żywo i premiery na górze kanału subskrypcji. Po wyłączeniu pozostają na pozycji zgodnej z datą ogłoszenia aż do rozpoczęcia. Po wyłączeniu odśwież kanał subskrypcji, aby pobrać daty ogłoszenia istniejących zaplanowanych pozycji.
     Refresh Subscriptions While App Is Closed: "Odświeża kanały zgodnie z wybranymi ustawieniami. Na komputerze OpenTubeX pozostaje w zasobniku systemowym do zamknięcia programu. Android określa czas odświeżania w tle."
+    Notify About New Uploads: Wyświetla na tym urządzeniu powiadomienia systemowe dla kanałów, dla których włączono powiadomienia w ich ustawieniach subskrypcji. OpenTubeX sprawdza nowe treści podczas odświeżania subskrypcji, więc wybierz interwał odświeżania. Aby otrzymywać powiadomienia, gdy aplikacja jest zamknięta, włącz także odświeżanie, gdy aplikacja jest zamknięta.
   Theme Settings:
     Thumbnail Size: "Skaluje miniatury filmów w siatkach i listach. Siatki ze stałą liczbą kolumn lub widok Pełna szerokość zamiast tego wypełniają każdy wiersz, więc tam suwak zmienia tylko miniatury list i Shorts. W oknach wielkości telefonu miniatury siatki są ograniczone do 100%."
     Playlist Thumbnail Size: "Skaluje miniatury filmów na stronach playlist. Siatki ze stałą liczbą kolumn lub widok Pełna szerokość zamiast tego wypełniają każdy wiersz, więc tam suwak zmienia tylko miniatury list i Shorts. W oknach wielkości telefonu miniatury siatki są ograniczone do 100%."

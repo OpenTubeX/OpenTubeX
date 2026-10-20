@@ -159,6 +159,10 @@ Home Page:
   All sections hidden: Alle deler er skjult
   All sections hidden description: Tilpass startsiden for å vise en del igjen.
 Subscriptions:
+  New video from {channel}: Ny video fra {channel}
+  New short from {channel}: Ny Shorts-video fra {channel}
+  '{channel} is live': "{channel} sender direkte"
+  New post from {channel}: Nytt innlegg fra {channel}
   Mark As Unseen: Merk som ikke sett
   Copy Error Details: "Kopier tekniske detaljer"
   Refresh Errors: "Kanaler som ikke kunne oppdateres: {channels}. Klikk for å se detaljer."
@@ -942,6 +946,7 @@ Settings:
     Live Auto Refresh Interval: Intervall for automatisk oppdatering av direktesendinger
     Posts Auto Refresh Interval: Intervall for automatisk oppdatering av innlegg
     Refresh Subscriptions While App Is Closed: "Oppdater abonnementer mens appen er lukket"
+    Notify About New Uploads: Varsle om nye opplastinger
   Distraction Free Settings:
     Hide Popularity Graph: "Skjul popularitetsgraf"
     Enable Block Lists: "Aktiver blokkeringslister"
@@ -1297,6 +1302,7 @@ Channel:
   Unlimited: Ubegrenset
   More videos hidden: '+{count} til | +{count} til'
   Show in subscription feed: Vis i abonnementsfeeden
+  Notify about new uploads: Varsle om nye opplastinger
   Channel Name Unavailable: Kanalnavnet er ikke tilgjengelig
   Search Result Types: Typer søkeresultater
   All Results: Alle
@@ -1900,6 +1906,7 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: Beholder kommende direktesendinger og premierer øverst i abonnementsstrømmen. Når dette er slått av, blir de stående der de ble kunngjort, til de starter. Oppdater abonnementsstrømmen én gang etter at dette er slått av, for å hente kunngjøringsdatoer for eksisterende planlagte elementer.
     Auto Refresh Interval: "Hvor ofte OpenTubeX automatisk oppdaterer abonnementsstrømmen mens appen er åpen. På Android oppdaterer et intervall over null også strømmen mens appen er lukket."
     Refresh Subscriptions While App Is Closed: "Oppdaterer strømmer med innstillingene du har valgt. På datamaskinen blir OpenTubeX i systemstatusfeltet til du avslutter. Android bestemmer når bakgrunnsoppdateringer kjøres."
+    Notify About New Uploads: Viser systemvarsler på denne enheten for kanaler du har slått på varsler for i abonnementsinnstillingene deres. OpenTubeX ser etter nytt innhold når abonnementer oppdateres, så velg et intervall for automatisk oppdatering. For å bli varslet mens appen er lukket, må du også slå på oppdatering mens appen er lukket.
   Theme Settings:
     Thumbnail Size: "Skalerer videominiatyrbilder i rutenett og lister. Rutenett med et fast antall kolonner eller visningstypen Full bredde fyller i stedet hver rad, så der endrer den bare listeminiatyrbilder og Shorts. I vinduer på størrelse med en telefon er rutenettminiatyrbilder begrenset til 100 %."
     Playlist Thumbnail Size: "Skalerer videominiatyrbilder på spillelistesider. Rutenett med et fast antall kolonner eller visningstypen Full bredde fyller i stedet hver rad, så der endrer den bare listeminiatyrbilder og Shorts. I vinduer på størrelse med en telefon er rutenettminiatyrbilder begrenset til 100 %."
