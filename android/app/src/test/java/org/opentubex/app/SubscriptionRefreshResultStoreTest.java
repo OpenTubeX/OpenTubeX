@@ -72,4 +72,12 @@ public class SubscriptionRefreshResultStoreTest {
             SubscriptionRefreshResultStore.fingerprint(new JSONObject("{\"url\":\"/watch?v=bcdefghijkl\"}"))
         );
     }
+
+    @Test
+    public void fingerprintUrlDropsAQueryOfOnlyVolatileParameters() {
+        assertEquals("https://www.youtube.com/watch",
+            SubscriptionRefreshResultStore.fingerprintUrl("https://www.youtube.com/watch?pp=abc"));
+        assertEquals("https://www.youtube.com/watch?v=abcdefghijk",
+            SubscriptionRefreshResultStore.fingerprintUrl("https://www.youtube.com/watch?pp=abc&v=abcdefghijk"));
+    }
 }

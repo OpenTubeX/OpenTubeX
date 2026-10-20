@@ -250,6 +250,8 @@ final class SubscriptionRefreshResultStore {
             if (result.charAt(result.length() - 1) != '?') result.append('&');
             result.append(parameter);
         }
+        // A URL whose parameters were all volatile matches the same URL without them.
+        if (result.charAt(result.length() - 1) == '?') result.setLength(result.length() - 1);
         return result.toString();
     }
 
