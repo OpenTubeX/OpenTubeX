@@ -27,6 +27,12 @@ export function createWatchTimeTracker(isCounting, record, now = Date.now) {
   /** @type {Record<string, number>} */
   let pendingByDate = {}
 
+  function persistPending() {
+    const pending = Object.entries(pendingByDate)
+    pendingByDate = {}
+    return Promise.all(pending.map(([date, milliseconds]) => record(date, milliseconds / 1000)))
+  }
+
   const tracker = {
     get lastTick() {
       return lastTick
@@ -51,15 +57,15 @@ export function createWatchTimeTracker(isCounting, record, now = Date.now) {
       }
       lastTick = time
 
+      // Keep the baseline so continuous playback does not lose the next interval.
       if (tracker.pendingMilliseconds >= FLUSH_THRESHOLD_MS) {
-        tracker.flush()
+        persistPending()
       }
     },
+    /** Persists pending time and starts a new baseline, e.g. when playback stops. */
     flush() {
       lastTick = null
-      const pending = Object.entries(pendingByDate)
-      pendingByDate = {}
-      return Promise.all(pending.map(([date, milliseconds]) => record(date, milliseconds / 1000)))
+      return persistPending()
     },
     clear() {
       lastTick = null

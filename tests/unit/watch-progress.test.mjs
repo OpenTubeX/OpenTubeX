@@ -68,7 +68,6 @@ test('watch time ignores delayed ticks and records pending seconds per day', asy
   now += 1000
   tracker.track()
   assert.deepEqual(recorded, [['2026-10-20', 10]], 'Ten seconds of playback flush automatically')
-  tracker.track()
   now += 2500
   tracker.track()
   await tracker.flush()
