@@ -3655,9 +3655,12 @@ function getAndroidBackTarget() {
   const phoneTabDialog = document.querySelector('.capacitorPhoneTabDialog')
   const tabTarget = phoneTabDialog?.contains(focused) ? focused : phoneTabDialog
   const searchTarget = phoneSearch?.contains(focused) ? focused : phoneSearch
+  // Color pickers in settings are teleported out of the window they belong to.
+  const colorPicker = document.querySelector('.colorPickerPopover')
+  const colorPickerTarget = colorPicker?.contains(focused) ? focused : colorPicker
   // Focused popups inside a prompt or settings close before their window.
   const promptTarget = prompt?.contains(focused) ? focused : prompt
-  return modalDialog ?? promptTarget ?? (settingsWindow?.contains(focused) ? focused : settingsWindow) ?? openDialog ?? tabTarget ?? searchTarget ?? focused
+  return colorPickerTarget ?? modalDialog ?? promptTarget ?? (settingsWindow?.contains(focused) ? focused : settingsWindow) ?? openDialog ?? tabTarget ?? searchTarget ?? focused
 }
 
 async function handleAndroidBack() {
@@ -3721,7 +3724,7 @@ function isSideNavBackTarget() {
 
 /** @param {Element} target */
 function getAndroidBackPopup(target) {
-  const popup = target.closest?.('[data-settings-escape-scope], .iconDropdown')
+  const popup = target.closest?.('[data-settings-escape-scope], .iconDropdown, .colorPickerPopover')
   if (popup) return popup
   const id = target.closest?.('[aria-expanded="true"][aria-controls]')?.getAttribute('aria-controls')
   const controlled = id ? document.getElementById(id) : null

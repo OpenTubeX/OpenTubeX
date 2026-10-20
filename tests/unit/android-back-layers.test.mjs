@@ -126,3 +126,20 @@ test('Back targets a focused popup inside a prompt before the prompt itself', ()
   document.activeElement = {}
   assert.equal(getTarget(), prompt)
 })
+
+test('Back targets a color picker teleported out of settings before the settings window', () => {
+  const settingsWindow = { contains: () => false }
+  const field = {}
+  const popover = { contains: element => element === field }
+  const document = {
+    activeElement: field,
+    querySelector: selector => selector === '.colorPickerPopover' ? popover : selector === '.settingsWindow' ? settingsWindow : null,
+    querySelectorAll: () => [],
+  }
+  const getTarget = appFunction('getAndroidBackTarget', { document, settingsWindowOpen: { value: true }, HTMLElement: Object })
+  assert.equal(getTarget(), field)
+  document.activeElement = {}
+  assert.equal(getTarget(), popover, 'the picker closes even when focus stayed outside it')
+  const getPopup = appFunction('getAndroidBackPopup', { document })
+  assert.equal(getPopup({ closest: selector => selector.includes('.colorPickerPopover') ? popover : null }), popover)
+})
