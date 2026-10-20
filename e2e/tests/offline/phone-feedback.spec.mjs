@@ -209,9 +209,11 @@ test('opens comments from a mini player at the inline video position', { tag: '@
 })
 
 test('phone options keep the page scrollable and omit the extra header', async ({ app, page }) => {
+  // Load the player at its final size so a resize cannot rebuild the clicked control.
+  await setWindowSize(app, page, { width: 480, height: 800 })
+  await page.getByRole('button', { name: 'Open Search Container' }).click()
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
-  await setWindowSize(app, page, { width: 480, height: 800 })
   await page.locator('.shaka-overflow-menu-button').click({ force: true })
   const menu = page.locator('.phonePlayerOptions[open]')
   await expect(menu).toBeVisible()
