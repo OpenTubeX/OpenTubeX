@@ -3666,7 +3666,7 @@ async function handleAndroidBack() {
     return
   }
 
-  const sideNavShown = isSideNavShown()
+  const sideNavShown = isSideNavBackTarget()
   const hadOpenLayer = hasVisibleGamepadLayer() || sideNavShown
   const target = getAndroidBackTarget()
   const escapeEvent = new KeyboardEvent('keydown', {
@@ -3710,6 +3710,13 @@ function shouldInterceptAndroidBack() {
 /** Narrow layouts show the bottom navigation bar instead of the drawer. */
 function isSideNavShown() {
   return isSideNavOpen.value && window.matchMedia('(width > 680px)').matches
+}
+
+/** Back closes the side nav only when no layer is open above it. */
+function isSideNavBackTarget() {
+  return isSideNavShown() && !isAnyPromptOpen.value && !settingsWindowOpen.value &&
+    !mobileContextLink.value && !mobileContextActions.value && !document.querySelector('dialog[open]') &&
+    !getAndroidBackPopup(document.activeElement ?? document.body)
 }
 
 /** @param {Element} target */
@@ -3759,11 +3766,11 @@ function getAndroidBackPreview() {
   if (mobileContextLink.value || mobileContextActions.value) {
     return mobileLinkActionsRef.value ? getAndroidBackSheet(mobileLinkActionsRef.value) : null
   }
-  if (isSideNavShown()) {
+  if (isSideNavBackTarget()) {
     const drawer = document.querySelector('.sideNav')
     if (!drawer) return null
     const overlay = useWatchSideNavOverlay.value
-    return createAndroidBackDialogPreview(drawer, handleAndroidBack, isSideNavShown, () => overlay
+    return createAndroidBackDialogPreview(drawer, handleAndroidBack, isSideNavBackTarget, () => overlay
       ? [
           { transform: 'translateX(0)' },
           { transform: `translateX(${(isLocaleRightToLeft.value ? 1 : -1) * drawer.getBoundingClientRect().width}px)` }

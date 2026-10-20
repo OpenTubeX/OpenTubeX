@@ -19,8 +19,13 @@ function loadPreviewSelection(context) {
   })
   return vm.runInNewContext(`${appSource.slice(start, appSource.indexOf('\nfunction handleAndroidPictureInPictureChange', start))}\ngetAndroidBackPreview`, {
     mobileContextLink: { value: null }, mobileContextActions: { value: null }, createAndroidBackDialogPreview,
+    isAnyPromptOpen: { value: false }, settingsWindowOpen: { value: false },
     getComputedStyle: () => ({ inlineSize: '200px' }), ...context,
   })
+}
+
+function drawerDocument(drawer, activeElement = { closest: () => null }) {
+  return { activeElement, querySelector: selector => selector === '.sideNav' ? drawer : null }
 }
 
 function drawerElement(animation) {
@@ -182,7 +187,7 @@ test('a side drawer restored to zero progress cancels without replaying its anim
   const getPreview = loadPreviewSelection({
     isSideNavOpen: { value: true }, useWatchSideNavOverlay: { value: true }, isLocaleRightToLeft: { value: false },
     window: { matchMedia: () => ({ matches: true }) },
-    document: { querySelector: () => drawerElement(animation) },
+    document: drawerDocument(drawerElement(animation)),
     handleAndroidBack: async () => { closed = true },
   })
   const preview = getPreview()
@@ -210,7 +215,7 @@ test('committing the side drawer keeps its finished frame until the closed state
   const getPreview = loadPreviewSelection({
     isSideNavOpen: opened, useWatchSideNavOverlay: { value: true }, isLocaleRightToLeft: { value: false },
     window: { matchMedia: () => ({ matches: true }) },
-    document: { querySelector: () => drawerElement(animation) },
+    document: drawerDocument(drawerElement(animation)),
     handleAndroidBack: async () => { opened.value = false },
     requestAnimationFrame: callback => frames.push(callback),
   })
@@ -231,4 +236,20 @@ test('committing the side drawer keeps its finished frame until the closed state
   } finally {
     stop()
   }
+})
+
+test('Back previews a prompt or dropdown above the side nav instead of the side nav', () => {
+  let animated = false
+  const drawer = { ...drawerElement({}), animate: () => { animated = true } }
+  const context = {
+    isSideNavOpen: { value: true }, useWatchSideNavOverlay: { value: false }, isLocaleRightToLeft: { value: false },
+    window: { matchMedia: () => ({ matches: true }) }, handleAndroidBack: async () => {},
+    getAndroidBackTarget: () => ({ closest: () => null, classList: { contains: () => false } }),
+    getAndroidBackSheet: () => null, presentedTabId: { value: null },
+  }
+  const prompt = loadPreviewSelection({ ...context, isAnyPromptOpen: { value: true }, document: drawerDocument(drawer) })()
+  assert.ok(!prompt?.begin(), 'an inert side nav behind a prompt is not the Back target')
+  const dropdown = { closest: selector => selector.includes('.iconDropdown') ? {} : null }
+  loadPreviewSelection({ ...context, document: drawerDocument(drawer, dropdown) })()?.begin()
+  assert.equal(animated, false)
 })
