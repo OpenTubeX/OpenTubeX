@@ -505,7 +505,12 @@ const actions = {
     commit('setRegionValues', countries.codes)
   },
 
-  async getYoutubeUrlInfo({ rootState, getters, rootGetters }, urlStr) {
+  /**
+   * @param {string | { url: string, tabId?: string }} payload the URL, optionally
+   * with the tab it opens in, whose search filters apply instead of the presented tab's
+   */
+  async getYoutubeUrlInfo({ rootState, getters, rootGetters }, payload) {
+    let { url: urlStr, tabId = rootGetters.getPresentedTabId } = typeof payload === 'string' ? { url: payload } : payload
     // Returns
     // - urlType [String] `video`, `playlist`
     //
@@ -629,7 +634,7 @@ const actions = {
           return { urlType: 'unknown' }
         }
 
-        const searchSettings = getters.getSearchSettings(getSearchFilterTabId(rootGetters.getPresentedTabId))
+        const searchSettings = getters.getSearchSettings(getSearchFilterTabId(tabId))
         const query = {
           prioritize: searchSettings.prioritize,
           time: searchSettings.time,

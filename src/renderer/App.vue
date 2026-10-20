@@ -4987,7 +4987,7 @@ async function handleYoutubeLink(href, {
   lazyLoad = false,
   tabId = null
 } = {}) {
-  const result = await store.dispatch('getYoutubeUrlInfo', href)
+  const result = await store.dispatch('getYoutubeUrlInfo', tabId ? { url: href, tabId } : href)
   // Middle clicks should open tabs in background (not make them active)
   const makeActive = !isMiddleClick
   const openPath = (options) => {

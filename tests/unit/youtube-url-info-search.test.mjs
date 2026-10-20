@@ -74,3 +74,22 @@ test('search URLs fall back to the default filters when the tab has none', async
   assert.equal(result.urlType, 'search')
   assert.deepEqual(structuredClone(result.query), { prioritize: 'relevance', time: '', type: 'all', duration: '', features: [] })
 })
+
+test('search URLs opened in a specific tab use that tab\'s filters instead of the presented one', async () => {
+  const originalEnv = process.env
+  process.env = { IS_ELECTRON: 'true' }
+  try {
+    const context = createContext({
+      'tab-2': { prioritize: 'upload_date', time: 'week', type: 'video', duration: 'short', features: ['hd'] },
+      'tab-3': { prioritize: 'view_count', time: 'month', type: 'all', duration: '', features: [] },
+    }, 'tab-2')
+
+    const result = await getYoutubeUrlInfo(context, { url: 'https://www.youtube.com/results?search_query=test', tabId: 'tab-3' })
+
+    assert.equal(result.urlType, 'search')
+    assert.equal(result.query.prioritize, 'view_count')
+    assert.equal(result.query.time, 'month')
+  } finally {
+    process.env = originalEnv
+  }
+})
