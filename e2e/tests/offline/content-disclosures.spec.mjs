@@ -1,6 +1,6 @@
 import { test, expect, setWindowSize } from '../../helpers/app.mjs'
 import { mockWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
-import { openMockedVideo } from '../../helpers/player.mjs'
+import { openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { fulfillVisualFixture, expectImagesLoaded } from '../../helpers/visual-fixtures.mjs'
 
 const disclosure = {
@@ -51,6 +51,9 @@ test.describe('content disclosures', { tag: '@scale' }, () => {
         vm.isLoading = false
         await vm.$nextTick()
       }, { text, item: autoDubbed })
+      // Toggling isLoading remounts the player. Wait for it to load and pause it, so its
+      // resize cannot move the description while the test clicks it.
+      await (await waitForPlayback(page)).evaluate(element => element.pause())
 
       await expect(card).toHaveClass(/short/)
       await expect(card.locator('.contentDisclosureTitle')).toHaveText('How this was made')
