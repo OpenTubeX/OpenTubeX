@@ -226,6 +226,13 @@ const sideEffectHandlers = {
     }
   },
 
+  showVolumeBoostToggle: ({ commit }, value) => {
+    // Turning the toggle back on must not resume an earlier boost
+    if (!value) {
+      commit('clearTabVolumeBoosts')
+    }
+  },
+
   keyboardShortcuts: (_store, value) => {
     applyKeyboardShortcutOverrides(value)
   },

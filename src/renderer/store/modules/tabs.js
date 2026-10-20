@@ -287,6 +287,10 @@ const mutations = {
     state.volumeBoostByTabId[tabId] = value
   },
 
+  clearTabVolumeBoosts(state) {
+    state.volumeBoostByTabId = {}
+  },
+
   setTabLightsOff(state, { tabId, value }) {
     state.lightsOffByTabId[tabId] = value === true
   },

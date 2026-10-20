@@ -1290,6 +1290,13 @@ test('volume boost amplifies the audio within its tab', async ({ app, page, atta
   await page.evaluate(() => window.$store.dispatch('updateShowVolumeBoostToggle', false))
   await expect(nextPlayer.locator('.volume-boost-button')).toHaveCount(0)
   await expect.poll(() => outputGain(1)).toBe(1)
+
+  // Showing it again does not resume the earlier boost.
+  await page.evaluate(() => window.$store.dispatch('updateShowVolumeBoostToggle', true))
+  await nextPlayer.hover()
+  await nextPlayer.getByRole('button', { name: 'More settings' }).click()
+  await expect(nextPlayer.locator('.volume-boost-button')).toContainText('Off')
+  await expect.poll(() => outputGain(1)).toBe(1)
 })
 
 test.describe('mobile player menus', { tag: '@scale' }, () => {
