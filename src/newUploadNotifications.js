@@ -153,7 +153,8 @@ export function takeNewUploads(state, channelId, feedType, entries, now = Date.n
  * @param {number} [now]
  */
 export function takeVisibleUploads(state, channelId, feedType, entries, showMembersOnly, now = Date.now()) {
-  const withheld = state.withheld?.[channelId] ?? []
+  // Once members-only content is shown, withheld uploads are already accessible.
+  const withheld = showMembersOnly ? [] : state.withheld?.[channelId] ?? []
   const released = entries.filter(entry => !entry.membersOnly && !entry.upcoming && withheld.includes(entry.id))
   const uploads = takeNewUploads(state, channelId, feedType, entries, now)
   const visible = uploads.filter(entry => showMembersOnly || !entry.membersOnly)

@@ -162,4 +162,16 @@ public class UploadNotificationsTest {
         assertEquals(Arrays.asList("m"), ids(UploadNotifications.takeVisibleUploads(state, "UC1", "live",
             Arrays.asList(entry("m", NOW), entry("b", NOW)), false, NOW)));
     }
+
+    @Test
+    public void forgetsWithheldUploadsOnceMembersOnlyContentIsShown() throws Exception {
+        JSONObject state = new JSONObject();
+        UploadNotifications.takeVisibleUploads(state, "UC1", "videos", Arrays.asList(entry("a", NOW)), false, NOW);
+        UploadNotifications.takeVisibleUploads(state, "UC1", "videos",
+            Arrays.asList(entry("m", NOW).put("membersOnly", true), entry("a", NOW)), false, NOW);
+        assertTrue(UploadNotifications.takeVisibleUploads(state, "UC1", "videos",
+            Arrays.asList(entry("m", NOW).put("membersOnly", true), entry("a", NOW)), true, NOW).isEmpty());
+        assertTrue(UploadNotifications.takeVisibleUploads(state, "UC1", "videos",
+            Arrays.asList(entry("m", NOW), entry("a", NOW)), false, NOW).isEmpty());
+    }
 }

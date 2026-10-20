@@ -259,3 +259,11 @@ test('a failed save keeps detected uploads for the next refresh', async () => {
     await rm(directory, { recursive: true, force: true })
   }
 })
+
+test('withheld uploads are forgotten once members-only content is shown', () => {
+  const state = createUploadNotificationState()
+  takeVisibleUploads(state, 'UC1', 'videos', [entry('a', NOW)], false, NOW)
+  takeVisibleUploads(state, 'UC1', 'videos', [entry('m', NOW, { membersOnly: true }), entry('a', NOW)], false, NOW)
+  assert.deepEqual(takeVisibleUploads(state, 'UC1', 'videos', [entry('m', NOW, { membersOnly: true }), entry('a', NOW)], true, NOW), [])
+  assert.deepEqual(takeVisibleUploads(state, 'UC1', 'videos', [entry('m', NOW), entry('a', NOW)], false, NOW), [])
+})

@@ -180,7 +180,8 @@ final class UploadNotifications {
         String key = channelId;
         JSONObject withheldByFeed = state.optJSONObject("withheld");
         if (withheldByFeed == null) state.put("withheld", withheldByFeed = new JSONObject());
-        JSONArray withheld = withheldByFeed.optJSONArray(key);
+        // Once members-only content is shown, withheld uploads are already accessible.
+        JSONArray withheld = showMembersOnly ? null : withheldByFeed.optJSONArray(key);
         Set<String> withheldIds = new LinkedHashSet<>();
         if (withheld != null) for (int i = 0; i < withheld.length(); i++) withheldIds.add(withheld.getString(i));
         List<JSONObject> released = new ArrayList<>();
