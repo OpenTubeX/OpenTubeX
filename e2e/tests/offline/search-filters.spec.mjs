@@ -1,4 +1,4 @@
-import { test, expect, sel } from '../../helpers/app.mjs'
+import { test, expect, sel, setWindowSize } from '../../helpers/app.mjs'
 
 test('right-clicking the search filter button clears active filters', async ({ page }) => {
   const searchInput = page.locator(sel.searchInput)
@@ -81,4 +81,24 @@ test('desktop search filter options keep compact spacing', { tag: '@scale' }, as
   expect(overflow).toBeLessThanOrEqual(0)
 
   await page.locator('.searchFiltersCard').screenshot({ path: testInfo.outputPath('search-filters.png') })
+})
+
+test.describe('system-font search filters', () => {
+  test.use({ seed: { settings: { appFont: 'system' } } })
+
+  test('checkbox highlights fit without a scrollbar on a laptop', { tag: '@scale' }, async ({ page, app }, testInfo) => {
+    await setWindowSize(app, page, { width: 1901, height: 1012 })
+    await page.locator('.navFilterButton').click()
+    const scroller = page.locator('.searchFiltersCard .promptContentScroller')
+    await expect.poll(() => scroller.evaluate(element => {
+      const viewport = element.querySelector('[data-overlayscrollbars-viewport]') ?? element
+      return viewport.scrollHeight - viewport.clientHeight
+    })).toBe(0)
+    await page.locator('.searchRadio input[value="location"] + label').hover()
+    await expect.poll(() => scroller.evaluate(element => {
+      const viewport = element.querySelector('[data-overlayscrollbars-viewport]') ?? element
+      return viewport.scrollHeight - viewport.clientHeight
+    })).toBe(0)
+    await page.locator('.searchFiltersCard').screenshot({ path: testInfo.outputPath('system-font-search-filters.png') })
+  })
 })

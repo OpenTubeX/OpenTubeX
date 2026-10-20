@@ -57,9 +57,9 @@
 }
 
 @media (width > 680px) and (height > 600px) and (not (any-pointer: coarse)) {
-  /* Room for the 40px checkbox state layer around the last 20px label */
+  /* Half the 40px state layer keeps it inside the column regardless of font height. */
   .searchRadio {
-    padding-block-end: 10px;
+    padding-block-end: 20px;
   }
 
   .searchRadio :deep(input + label) {
