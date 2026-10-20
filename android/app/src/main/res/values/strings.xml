@@ -19,4 +19,12 @@
     <string name="media_fast_forward">Fast forward</string>
     <string name="notification_channel_downloads_name">Downloads</string>
     <string name="notification_channel_downloads_description">Progress for video and audio downloads</string>
+    <string name="widget_continue_watching_name">Continue watching</string>
+    <string name="widget_continue_watching_description">Resume videos you started watching</string>
+    <string name="widget_continue_watching_empty">Videos you start watching appear here</string>
+    <string name="widget_quick_access_name">Quick access</string>
+    <string name="widget_quick_access_description">Open Search, Subscriptions or Watch Later</string>
+    <string name="widget_search">Search</string>
+    <string name="widget_subscriptions">Subscriptions</string>
+    <string name="widget_watch_later">Watch Later</string>
 </resources>

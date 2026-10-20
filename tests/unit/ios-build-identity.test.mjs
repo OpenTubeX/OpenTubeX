@@ -40,6 +40,9 @@ test('iOS preparation gives nightly its own Release identity and restores stable
     assert.ok(release.includes(`PRODUCT_BUNDLE_IDENTIFIER = ${id};`))
     assert.ok(release.includes(`APP_DISPLAY_NAME = "${name}";`))
     assert.ok(release.includes(`APP_URL_SCHEME = ${id.endsWith('.nightly') ? 'opentubex-nightly' : 'opentubex'};`))
+    const widgets = project.match(/E1D6E7000000000000000043 \/\* Release \*\/ = \{[\s\S]*?name = Release;/)[0]
+    assert.ok(widgets.includes(`APP_BUNDLE_IDENTIFIER = ${id};`), 'the widget extension must stay inside the app identifier')
+    assert.ok(widgets.includes(`APP_URL_SCHEME = ${id.endsWith('.nightly') ? 'opentubex-nightly' : 'opentubex'};`))
     assert.ok(debug.includes('PRODUCT_BUNDLE_IDENTIFIER = org.opentubex.app.dev;'))
     assert.ok(debug.includes('APP_DISPLAY_NAME = "OpenTubeX Dev";'))
     assert.ok(release.includes(`MARKETING_VERSION = ${version.split('-')[0]};`))
@@ -53,6 +56,7 @@ test('iOS preparation gives nightly its own Release identity and restores stable
     ['missing bundle identifier', originalProject.replace('PRODUCT_BUNDLE_IDENTIFIER = org.opentubex.app;', '')],
     ['missing display name', originalProject.replace('APP_DISPLAY_NAME = OpenTubeX;', '')],
     ['missing URL scheme', originalProject.replace('APP_URL_SCHEME = opentubex;\n\t\t\t\tPRODUCT_BUNDLE_IDENTIFIER = org.opentubex.app;', 'PRODUCT_BUNDLE_IDENTIFIER = org.opentubex.app;')],
+    ['missing widget bundle identifier', originalProject.replace('APP_BUNDLE_IDENTIFIER = org.opentubex.app;', '')],
   ]) {
     await t.test(`rejects ${name} before changing Capacitor identity`, async () => {
       await writeFile(projectPath, invalidProject)

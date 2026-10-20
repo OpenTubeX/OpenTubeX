@@ -33,6 +33,12 @@ A12790000000000000000022 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBu
 A12790000000000000000032 = {isa = PBXBuildFile; fileRef = A12790000000000000000031; };
 D1A000000000000000000005 /* DlnaMux.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A000000000000000000006; };
 D1A000000000000000000001 /* DlnaPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A000000000000000000002; };
+E1D6E7000000000000000011 /* HomeWidgetStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D6E7000000000000000001 /* HomeWidgetStore.swift */; };
+E1D6E7000000000000000012 /* HomeWidgetsPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D6E7000000000000000002 /* HomeWidgetsPlugin.swift */; };
+E1D6E7000000000000000013 /* HomeWidgetStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D6E7000000000000000001 /* HomeWidgetStore.swift */; };
+E1D6E7000000000000000014 /* OpenTubeXWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D6E7000000000000000003 /* OpenTubeXWidgets.swift */; };
+E1D6E7000000000000000015 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = E1D6E7000000000000000008 /* Localizable.strings */; };
+E1D6E7000000000000000016 /* OpenTubeXWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E1D6E7000000000000000009 /* OpenTubeXWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -43,6 +49,15 @@ D1A000000000000000000001 /* DlnaPlugin.swift in Sources */ = {isa = PBXBuildFile
 			dstSubfolderSpec = 10;
 			files = (B0C0DE000000000000000005 /* Python.xcframework in Embed Frameworks */,);
 			name = "Embed Python";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E1D6E7000000000000000033 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (E1D6E7000000000000000016 /* OpenTubeXWidgets.appex in Embed Foundation Extensions */,);
+			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -76,6 +91,14 @@ A12790000000000000000021 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; 
 D1A000000000000000000006 /* DlnaMux.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DlnaMux.swift; sourceTree = "<group>"; };
 D1A000000000000000000002 /* DlnaPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DlnaPlugin.swift; sourceTree = "<group>"; };
 D1A000000000000000000003 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
+E1D6E7000000000000000001 /* HomeWidgetStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeWidgetStore.swift; sourceTree = "<group>"; };
+E1D6E7000000000000000002 /* HomeWidgetsPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeWidgetsPlugin.swift; sourceTree = "<group>"; };
+E1D6E7000000000000000003 /* OpenTubeXWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenTubeXWidgets.swift; sourceTree = "<group>"; };
+E1D6E7000000000000000004 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+E1D6E7000000000000000005 /* OpenTubeXWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OpenTubeXWidgets.entitlements; sourceTree = "<group>"; };
+E1D6E7000000000000000006 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+E1D6E7000000000000000007 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
+E1D6E7000000000000000009 /* OpenTubeXWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = OpenTubeXWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,6 +112,7 @@ D1A000000000000000000003 /* App.entitlements */ = {isa = PBXFileReference; lastK
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 A12790000000000000000008 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+E1D6E7000000000000000031 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -99,6 +123,7 @@ A12790000000000000000008 = {isa = PBXFrameworksBuildPhase; buildActionMask = 214
 				B0C0DE000000000000000004 /* Python.xcframework */,
 				504EC3061FED79650016851F /* App */,
  A12790000000000000000004 /* AppTests */,
+				E1D6E7000000000000000020 /* OpenTubeXWidgets */,
 				504EC3051FED79650016851F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -108,6 +133,7 @@ A12790000000000000000008 = {isa = PBXFrameworksBuildPhase; buildActionMask = 214
 			children = (
 				504EC3041FED79650016851F /* App.app */,
  A12790000000000000000003 /* AppTests.xctest */,
+				E1D6E7000000000000000009 /* OpenTubeXWidgets.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -116,6 +142,8 @@ A12790000000000000000008 = {isa = PBXFrameworksBuildPhase; buildActionMask = 214
 			isa = PBXGroup;
 			children = (
 				9582B6822FE993A50072D4E8 /* SceneDelegate.swift */,
+				E1D6E7000000000000000001 /* HomeWidgetStore.swift */,
+				E1D6E7000000000000000002 /* HomeWidgetsPlugin.swift */,
 				EFFEF58AE86EE85681F8C5CC /* IOSStoragePlugin.swift */,
 				17E8A803B8BDE00E40D550C8 /* LibraryDatabasePlugin.swift */,
 				B0C0DE000000000000000002 /* IOSYtDlpPlugin.swift */,
@@ -140,6 +168,7 @@ A12790000000000000000021,
 			sourceTree = "<group>";
 		};
 A12790000000000000000004 /* AppTests */ = {isa = PBXGroup; children = (D1A000000000000000000008, A12790000000000000000002, B0C0DE000000000000000011 /* fixture.mp4 */, B0C0DE000000000000000013 /* fixture.m4a */, B0C0DE000000000000000015 /* fragmented-duration.mp4 */,); path = AppTests; sourceTree = "<group>"; };
+E1D6E7000000000000000020 /* OpenTubeXWidgets */ = {isa = PBXGroup; children = (E1D6E7000000000000000003 /* OpenTubeXWidgets.swift */, E1D6E7000000000000000008 /* Localizable.strings */, E1D6E7000000000000000004 /* Info.plist */, E1D6E7000000000000000005 /* OpenTubeXWidgets.entitlements */,); path = OpenTubeXWidgets; sourceTree = "<group>"; };
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -152,10 +181,12 @@ A12790000000000000000004 /* AppTests */ = {isa = PBXGroup; children = (D1A000000
 				504EC3021FED79650016851F /* Resources */,
 				B0C0DE000000000000000006 /* Embed Python */,
 				B0C0DE000000000000000007 /* Install Python */,
+				E1D6E7000000000000000033 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				E1D6E7000000000000000044 /* PBXTargetDependency */,
 			);
 			name = App;
 			packageProductDependencies = (
@@ -166,13 +197,16 @@ A12790000000000000000004 /* AppTests */ = {isa = PBXGroup; children = (D1A000000
 			productType = "com.apple.product-type.application";
 		};
 A12790000000000000000005 /* AppTests */ = {isa = PBXNativeTarget; buildConfigurationList = A12790000000000000000006; buildPhases = (A12790000000000000000007, A12790000000000000000008, B0C0DE000000000000000012,); buildRules = (); dependencies = (A12790000000000000000009,); name = AppTests; productName = AppTests; productReference = A12790000000000000000003; productType = "com.apple.product-type.bundle.unit-test"; };
+E1D6E7000000000000000040 /* OpenTubeXWidgets */ = {isa = PBXNativeTarget; buildConfigurationList = E1D6E7000000000000000041 /* Build configuration list for PBXNativeTarget "OpenTubeXWidgets" */; buildPhases = (E1D6E7000000000000000030 /* Sources */, E1D6E7000000000000000031 /* Frameworks */, E1D6E7000000000000000032 /* Resources */,); buildRules = (); dependencies = (); name = OpenTubeXWidgets; productName = OpenTubeXWidgets; productReference = E1D6E7000000000000000009 /* OpenTubeXWidgets.appex */; productType = "com.apple.product-type.app-extension"; };
 /* End PBXNativeTarget section */
 
 /* Begin PBXContainerItemProxy section */
 A12790000000000000000010 = {isa = PBXContainerItemProxy; containerPortal = 504EC2FC1FED79650016851F; proxyType = 1; remoteGlobalIDString = 504EC3031FED79650016851F; remoteInfo = App; };
+E1D6E7000000000000000045 /* PBXContainerItemProxy */ = {isa = PBXContainerItemProxy; containerPortal = 504EC2FC1FED79650016851F /* Project object */; proxyType = 1; remoteGlobalIDString = E1D6E7000000000000000040; remoteInfo = OpenTubeXWidgets; };
 /* End PBXContainerItemProxy section */
 /* Begin PBXTargetDependency section */
 A12790000000000000000009 = {isa = PBXTargetDependency; target = 504EC3031FED79650016851F; targetProxy = A12790000000000000000010; };
+E1D6E7000000000000000044 /* PBXTargetDependency */ = {isa = PBXTargetDependency; target = E1D6E7000000000000000040 /* OpenTubeXWidgets */; targetProxy = E1D6E7000000000000000045 /* PBXContainerItemProxy */; };
 /* End PBXTargetDependency section */
 /* Begin iOS permission localizations */
 		A12791000000000000000000 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "en-US"; path = "en-US.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
@@ -248,6 +282,7 @@ A12790000000000000000031 = {isa = PBXVariantGroup; children = (A1279100000000000
 			knownRegions = (
 				en,
 				Base,
+				de,
 			);
 			mainGroup = 504EC2FB1FED79650016851F;
 			packageReferences = (
@@ -259,6 +294,7 @@ A12790000000000000000031 = {isa = PBXVariantGroup; children = (A1279100000000000
 			targets = (
 				504EC3031FED79650016851F /* App */,
  A12790000000000000000005 /* AppTests */,
+				E1D6E7000000000000000040 /* OpenTubeXWidgets */,
 			);
 		};
 /* End PBXProject section */
@@ -279,6 +315,7 @@ A12790000000000000000022,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+E1D6E7000000000000000032 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (E1D6E7000000000000000015 /* Localizable.strings in Resources */,); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
@@ -312,10 +349,13 @@ D1A000000000000000000005 /* DlnaMux.swift in Sources */,
 				742C997910E5852D79525ECA /* PoTokenPlugin.swift in Sources */,
 				360CE579A61E6545D4B4085A /* IOSNetwork.swift in Sources */,
 				6B081A4DECC439923E312E1F /* OpenTubeXViewController.swift in Sources */,
+				E1D6E7000000000000000011 /* HomeWidgetStore.swift in Sources */,
+				E1D6E7000000000000000012 /* HomeWidgetsPlugin.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 A12790000000000000000007 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A12790000000000000000001,); runOnlyForDeploymentPostprocessing = 0; };
+E1D6E7000000000000000030 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (E1D6E7000000000000000013 /* HomeWidgetStore.swift in Sources */, E1D6E7000000000000000014 /* OpenTubeXWidgets.swift in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
@@ -325,6 +365,15 @@ A12790000000000000000007 = {isa = PBXSourcesBuildPhase; buildActionMask = 214748
 				504EC3111FED79650016851F /* Base */,
 			);
 			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		E1D6E7000000000000000008 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E1D6E7000000000000000006 /* en */,
+				E1D6E7000000000000000007 /* de */,
+			);
+			name = Localizable.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -491,6 +540,58 @@ A12790000000000000000007 = {isa = PBXSourcesBuildPhase; buildActionMask = 214748
 		};
 A12790000000000000000011 = {isa = XCBuildConfiguration; buildSettings = {BUNDLE_LOADER = "$(TEST_HOST)"; TEST_HOST = "$(BUILT_PRODUCTS_DIR)/App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/App"; GENERATE_INFOPLIST_FILE = YES; CODE_SIGN_STYLE = Automatic; PRODUCT_BUNDLE_IDENTIFIER = org.opentubex.app.dev.tests; PRODUCT_NAME = "$(TARGET_NAME)"; IPHONEOS_DEPLOYMENT_TARGET = 17.4; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; }; name = Debug; };
 A12790000000000000000012 = {isa = XCBuildConfiguration; buildSettings = {BUNDLE_LOADER = "$(TEST_HOST)"; TEST_HOST = "$(BUILT_PRODUCTS_DIR)/App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/App"; GENERATE_INFOPLIST_FILE = YES; CODE_SIGN_STYLE = Automatic; PRODUCT_BUNDLE_IDENTIFIER = org.opentubex.app.dev.tests; PRODUCT_NAME = "$(TARGET_NAME)"; IPHONEOS_DEPLOYMENT_TARGET = 17.4; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; }; name = Release; };
+		E1D6E7000000000000000042 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				APP_BUNDLE_IDENTIFIER = org.opentubex.app.dev;
+				APP_URL_SCHEME = opentubex;
+				CODE_SIGN_ENTITLEMENTS = OpenTubeXWidgets/OpenTubeXWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = OpenTubeXWidgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.35.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(APP_BUNDLE_IDENTIFIER).widgets";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		E1D6E7000000000000000043 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				APP_BUNDLE_IDENTIFIER = org.opentubex.app;
+				APP_URL_SCHEME = opentubex;
+				CODE_SIGN_ENTITLEMENTS = OpenTubeXWidgets/OpenTubeXWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = OpenTubeXWidgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.35.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(APP_BUNDLE_IDENTIFIER).widgets";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -513,6 +614,7 @@ A12790000000000000000012 = {isa = XCBuildConfiguration; buildSettings = {BUNDLE_
 			defaultConfigurationName = Release;
 		};
 A12790000000000000000006 = {isa = XCConfigurationList; buildConfigurations = (A12790000000000000000011, A12790000000000000000012,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+E1D6E7000000000000000041 /* Build configuration list for PBXNativeTarget "OpenTubeXWidgets" */ = {isa = XCConfigurationList; buildConfigurations = (E1D6E7000000000000000042 /* Debug */, E1D6E7000000000000000043 /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */

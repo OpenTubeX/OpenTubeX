@@ -152,6 +152,7 @@ for (const eventFirst of [false, true]) {
       initializeCapacitorLiveReminderActions: async () => () => {},
       addAndroidMediaSessionActionListener: async () => () => {},
       AppShortcuts: { addListener: async () => ({ remove() {} }) },
+      syncContinueWatchingWidget: () => () => {},
       watch: () => () => {},
       locale: {},
       setAndroidAppVisible: visible => changes.push(visible),
@@ -212,6 +213,8 @@ test('Capacitor integrations do not register the Android back button on iOS', as
     Capacitor: { getPlatform: () => 'ios' },
     playbackScreenWake: createPlaybackScreenWake({ async keepAwake() {}, async allowSleep() {} }),
     AppShortcuts: { addListener: async () => ({ remove() {} }) },
+    syncContinueWatchingWidget: () => () => {},
+    store: {},
     watch: () => () => {},
     locale: {},
     CapacitorApp: {

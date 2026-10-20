@@ -2416,6 +2416,43 @@ final class AppTests: XCTestCase {
         XCTAssertEqual(result?["result"] as? Int, 42)
     }
 
+    func testHomeWidgetsCacheContinueWatchingAndOpenTheirLinks() async throws {
+        try await openApplication()
+        XCTAssertNotNil(HomeWidgetStore.directory, "The app and its widgets must share an App Group")
+        _ = try await evaluate("testStore.dispatch('updateHistory', { videoId: 'jNQXAC9IVRw', title: 'Me at the zoo', author: 'jawed', lengthSeconds: 19, watchProgress: 7.5, timeWatched: Date.now(), isWatched: false, type: 'video' }); true")
+        var deadline = Date().addingTimeInterval(15)
+        while HomeWidgetStore.videos().first?.videoId != "jNQXAC9IVRw" && Date() < deadline {
+            try await Task.sleep(nanoseconds: 200_000_000)
+        }
+        let video = try XCTUnwrap(HomeWidgetStore.videos().first)
+        XCTAssertEqual(video.videoId, "jNQXAC9IVRw")
+        XCTAssertEqual(video.title, "Me at the zoo")
+        XCTAssertEqual(video.author, "jawed")
+        XCTAssertEqual(video.watchProgress, 7)
+        XCTAssertEqual(video.lengthSeconds, 19)
+        XCTAssertTrue(video.thumbnail.hasSuffix("/vi/jNQXAC9IVRw/mqdefault.jpg"), video.thumbnail)
+
+        for (page, path) in [("subscriptions", "/subscriptions"), ("watch-later", "/playlist/watchLater")] {
+            let opened = await UIApplication.shared.open(try XCTUnwrap(URL(string: "opentubex://open/\(page)")))
+            XCTAssertTrue(opened)
+            try await wait("testRouter.currentRoute.value.path === '\(path)'")
+        }
+        _ = await UIApplication.shared.open(try XCTUnwrap(URL(string: "opentubex://open/search")))
+        try await wait("document.activeElement?.closest('.searchInput') != null")
+        _ = await UIApplication.shared.open(try XCTUnwrap(URL(string: "opentubex://https://www.youtube.com/watch?v=jNQXAC9IVRw&t=7s")))
+        try await wait("testRouter.currentRoute.value.path === '/watch/jNQXAC9IVRw' && testRouter.currentRoute.value.query.timestamp == 7")
+
+        // The watch page saves its video to history, so leave it first.
+        _ = try await evaluate("testRouter.push('/subscriptions'); true")
+        try await wait("testRouter.currentRoute.value.path === '/subscriptions'")
+        _ = try await evaluate("testStore.dispatch('removeFromHistory', 'jNQXAC9IVRw'); true")
+        deadline = Date().addingTimeInterval(15)
+        while HomeWidgetStore.videos().contains(where: { $0.videoId == "jNQXAC9IVRw" }) && Date() < deadline {
+            try await Task.sleep(nanoseconds: 200_000_000)
+        }
+        XCTAssertFalse(HomeWidgetStore.videos().contains(where: { $0.videoId == "jNQXAC9IVRw" }))
+    }
+
     func testCustomURLRouting() async throws {
         try await openApplication()
         _ = try await evaluate("testRouter.push('/subscriptions'); true")

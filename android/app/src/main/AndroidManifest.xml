@@ -48,6 +48,30 @@
             android:name=".SubscriptionRefreshCancelReceiver"
             android:exported="false" />
 
+        <receiver
+            android:name=".ContinueWatchingWidgetProvider"
+            android:exported="false"
+            android:label="@string/widget_continue_watching_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_continue_watching_info" />
+        </receiver>
+
+        <receiver
+            android:name=".QuickAccessWidgetProvider"
+            android:exported="false"
+            android:label="@string/widget_quick_access_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_quick_access_info" />
+        </receiver>
+
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density|assetsPaths"
             android:name=".MainActivity"

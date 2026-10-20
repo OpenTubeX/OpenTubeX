@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:orientation="horizontal"
+    android:padding="6dp">
+
+    <LinearLayout
+        android:id="@+id/widget_search"
+        style="@style/HomeWidgetAction">
+
+        <ImageView
+            style="@style/HomeWidgetActionIcon"
+            android:src="@drawable/ic_widget_search" />
+
+        <TextView
+            style="@style/HomeWidgetActionLabel"
+            android:text="@string/widget_search" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/widget_subscriptions"
+        style="@style/HomeWidgetAction">
+
+        <ImageView
+            style="@style/HomeWidgetActionIcon"
+            android:src="@drawable/ic_widget_subscriptions" />
+
+        <TextView
+            style="@style/HomeWidgetActionLabel"
+            android:text="@string/widget_subscriptions" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/widget_watch_later"
+        style="@style/HomeWidgetAction">
+
+        <ImageView
+            style="@style/HomeWidgetActionIcon"
+            android:src="@drawable/ic_widget_watch_later" />
+
+        <TextView
+            style="@style/HomeWidgetActionLabel"
+            android:text="@string/widget_watch_later" />
+    </LinearLayout>
+</LinearLayout>

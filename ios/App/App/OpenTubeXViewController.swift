@@ -41,6 +41,7 @@ class OpenTubeXViewController: CAPBridgeViewController {
         bridge?.registerPluginInstance(IOSMediaSessionPlugin())
         bridge?.registerPluginInstance(ScreenshotPlugin())
         bridge?.registerPluginInstance(IOSUiPlugin())
+        bridge?.registerPluginInstance(HomeWidgetsPlugin())
         do {
             // Playback supports AirPlay by default; explicit allowAirPlay requires playAndRecord.
             try AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback)
