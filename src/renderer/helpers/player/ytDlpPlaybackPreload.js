@@ -44,7 +44,7 @@ function scheduleYtDlpPlaybackPreload(loadSource, concurrency) {
  */
 export function buildYtDlpPlaybackCacheKey(getters) {
   return JSON.stringify([
-    'captions-v4',
+    'captions-v5',
     getters.getYtDlpSource,
     getters.getYtDlpChannel,
     getters.getYtDlpPath,
