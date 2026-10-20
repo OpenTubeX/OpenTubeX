@@ -120,6 +120,11 @@ export function takeNewUploads(state, channelId, feedType, entries, now = Date.n
   const key = `${channelId}:${feedType}`
   const available = entries.filter(entry => !entry.upcoming)
   const known = state.known[key]
+  // Shorts and streams can move between feeds, so IDs another feed of the channel
+  // already recorded are not new, even when this feed's baseline is younger.
+  const knownElsewhere = new Set(Object.entries(state.known)
+    .filter(([otherKey]) => otherKey !== key && otherKey.startsWith(`${channelId}:`))
+    .flatMap(([, ids]) => ids))
   state.known[key] = [...new Set([...available.map(entry => entry.id), ...(known ?? [])])].slice(0, KNOWN_ID_LIMIT)
   if (!Array.isArray(known)) return []
 
@@ -132,7 +137,7 @@ export function takeNewUploads(state, channelId, feedType, entries, now = Date.n
   // Shorts and streams can also appear in another feed of the same channel.
   const notifiedIds = new Set(state.notified)
   const uploads = available.slice(0, firstKnownIndex).filter(entry => (
-    !notifiedIds.has(entry.id) &&
+    !notifiedIds.has(entry.id) && !knownElsewhere.has(entry.id) &&
     (entry.live || entry.published === 0 || now - entry.published <= MAXIMUM_AGE_MS)
   ))
   state.notified = [...uploads.map(entry => entry.id), ...state.notified].slice(0, NOTIFIED_ID_LIMIT)

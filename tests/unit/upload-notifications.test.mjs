@@ -267,3 +267,12 @@ test('withheld uploads are forgotten once members-only content is shown', () => 
   assert.deepEqual(takeVisibleUploads(state, 'UC1', 'videos', [entry('m', NOW, { membersOnly: true }), entry('a', NOW)], true, NOW), [])
   assert.deepEqual(takeVisibleUploads(state, 'UC1', 'videos', [entry('m', NOW), entry('a', NOW)], false, NOW), [])
 })
+
+test('entries another feed of the channel already recorded are not new', () => {
+  const state = createUploadNotificationState()
+  takeNewUploads(state, 'UC1', 'videos', [entry('s', NOW), entry('a', NOW)], NOW)
+  takeNewUploads(state, 'UC1', 'shorts', [], NOW)
+  takeNewUploads(state, 'UC2', 'shorts', [], NOW)
+  assert.deepEqual(takeNewUploads(state, 'UC1', 'shorts', [entry('s', NOW)], NOW), [])
+  assert.deepEqual(takeNewUploads(state, 'UC2', 'shorts', [entry('s', NOW)], NOW).map(upload => upload.id), ['s'])
+})

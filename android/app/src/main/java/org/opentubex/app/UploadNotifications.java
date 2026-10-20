@@ -139,6 +139,15 @@ final class UploadNotifications {
         JSONArray notified = state.optJSONArray("notified");
         if (notified == null) notified = new JSONArray();
         JSONArray known = knownByFeed.optJSONArray(key);
+        // Shorts and streams can move between feeds, so IDs another feed of the channel
+        // already recorded are not new, even when this feed's baseline is younger.
+        Set<String> knownElsewhere = new HashSet<>();
+        for (Iterator<String> keys = knownByFeed.keys(); keys.hasNext();) {
+            String otherKey = keys.next();
+            if (otherKey.equals(key) || !otherKey.startsWith(channelId + ":")) continue;
+            JSONArray ids = knownByFeed.optJSONArray(otherKey);
+            if (ids != null) for (int i = 0; i < ids.length(); i++) knownElsewhere.add(ids.optString(i));
+        }
 
         Set<String> knownIds = new HashSet<>();
         LinkedHashSet<String> updated = new LinkedHashSet<>();
@@ -163,7 +172,7 @@ final class UploadNotifications {
         LinkedHashSet<String> nextNotified = new LinkedHashSet<>();
         for (JSONObject entry : available.subList(0, firstKnownIndex)) {
             long published = entry.optLong("published");
-            if (notifiedIds.contains(entry.getString("id")) ||
+            if (notifiedIds.contains(entry.getString("id")) || knownElsewhere.contains(entry.getString("id")) ||
                 !(entry.optBoolean("live") || published == 0 || now - published <= MAXIMUM_AGE_MILLIS)) continue;
             uploads.add(entry);
             nextNotified.add(entry.getString("id"));

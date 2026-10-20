@@ -174,4 +174,14 @@ public class UploadNotificationsTest {
         assertTrue(UploadNotifications.takeVisibleUploads(state, "UC1", "videos",
             Arrays.asList(entry("m", NOW), entry("a", NOW)), false, NOW).isEmpty());
     }
+
+    @Test
+    public void skipsEntriesAnotherFeedOfTheChannelAlreadyRecorded() throws Exception {
+        JSONObject state = new JSONObject();
+        UploadNotifications.takeNewUploads(state, "UC1", "videos", Arrays.asList(entry("s", NOW), entry("a", NOW)), NOW);
+        UploadNotifications.takeNewUploads(state, "UC1", "shorts", new ArrayList<>(), NOW);
+        UploadNotifications.takeNewUploads(state, "UC2", "shorts", new ArrayList<>(), NOW);
+        assertTrue(UploadNotifications.takeNewUploads(state, "UC1", "shorts", Arrays.asList(entry("s", NOW)), NOW).isEmpty());
+        assertEquals(Arrays.asList("s"), ids(UploadNotifications.takeNewUploads(state, "UC2", "shorts", Arrays.asList(entry("s", NOW)), NOW)));
+    }
 }
