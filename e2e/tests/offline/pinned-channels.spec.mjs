@@ -192,3 +192,30 @@ test('removing a pin discards cached details before sync adds it again', async (
   await page.evaluate(id => window.$store.commit('setPinnedChannels', [{ id, name: 'New synced name', thumbnail: null }]), id)
   await expect(page.locator('.sideNav .pinnedChannels .navChannel')).toHaveAttribute('title', 'New synced name')
 })
+
+for (const saved of [true, false]) {
+  test(`refreshes pin metadata only after a successful save (${saved})`, async ({ page }) => {
+    const id = 'UCaaaaaaaaaaaaaaaaaaaaaa'
+    await page.evaluate(id => window.ftElectron.tabs.create({ route: `/channel/${id}`, makeActive: true }), id)
+    const pin = page.getByRole('button', { name: 'Pin to Navigation', exact: true })
+    await expect(pin).toBeVisible()
+    await page.evaluate(() => {
+      const store = window.$store
+      window.pinMetadataRefreshes = 0
+      store._actions.updatePinnedChannels = [value => {
+        store.commit('setPinnedChannels', value)
+        return new Promise(resolve => { window.finishPinSave = resolve })
+      }]
+      store._actions.refreshPinnedChannelMetadata = [() => { window.pinMetadataRefreshes++ }]
+    })
+    await pin.click()
+    await expect(page.getByRole('button', { name: 'Unpin from Navigation', exact: true })).toBeVisible()
+    expect(await page.evaluate(() => window.pinMetadataRefreshes)).toBe(0)
+    await page.evaluate(saved => {
+      if (!saved) window.$store.commit('setPinnedChannels', [])
+      window.finishPinSave(saved)
+    }, saved)
+    await expect.poll(() => page.evaluate(() => window.pinMetadataRefreshes)).toBe(saved ? 1 : 0)
+    if (!saved) await expect(pin).toBeVisible()
+  })
+}
