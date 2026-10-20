@@ -965,8 +965,6 @@ Settings:
     Show Video Title: Vis videotittel
     Show Bottom Right Actions Dock: Vis handlingsfelt nederst til høyre
     Paused Interface Hide Delay: Forsinkelse før grensesnittet skjules ved pause
-    Add: Legg til
-    Remove: Fjern
   Data Settings:
     Scheduled backups: "Planlagte sikkerhetskopier"
     Scheduled backup description: "Lagre fullstendige ZIP-kopier mens OpenTubeX er åpent. Uteblitte kopier opprettes ved oppstart. Grensen gjelder bare planlagte kopier i denne mappen."
@@ -1187,9 +1185,6 @@ Settings:
     Reloading video after IP block recovery: Laster inn videoen på nytt etter gjenoppretting fra IP-blokkering
     Failed to select IP block recovery script: Klarte ikke å velge skript for gjenoppretting etter IP-blokkering
   SponsorBlock Settings:
-    Excluded Channels:
-      Excluded Channels: "Unntatte kanaler"
-      Tooltip: "Skriv inn en kanal-ID for å hindre at SponsorBlock-segmenter hoppes over i kanalens videoer. ID-en må samsvare nøyaktig og skiller mellom store og små bokstaver."
     Enable SponsorBlock Submission: Slå på innsending til SponsorBlock
     SponsorBlock Private User ID (optional): Privat bruker-ID (valgfritt)
     SponsorBlock Private User ID Tooltip: Lim inn den private SponsorBlock-bruker-ID-en fra nettleserutvidelsen. La feltet stå tomt for å bruke en ID som programmet oppretter.
@@ -1210,8 +1205,6 @@ Settings:
     Unlocking: Låser opp…
   Search Settings: Søkeinnstillinger
   No Settings Found: Fant ingen innstillinger
-  Experimental Settings:
-    Disable Hardware Acceleration: Deaktiver maskinvareakselerasjon
   Interface Customizer:
     Customize Interface: "Tilpass grensesnitt"
     Preview: "Forhåndsvisning"
@@ -1291,7 +1284,6 @@ Profile:
   Use Initial: Bruk forbokstav
   The selected image could not be loaded: Det valgte bildet kunne ikke lastes inn
   Theme Color: Temafarge
-  Go To Profile Manager: Gå til profilbehandling
 Channel:
   About:
     Links: Lenker
@@ -1306,8 +1298,6 @@ Channel:
   Channel Name Unavailable: Kanalnavnet er ikke tilgjengelig
   Search Result Types: Typer søkeresultater
   All Results: Alle
-  Videos:
-    This channel has videos but none could be displayed, try fetching more: "Denne kanalen har videoer, men ingen kunne vises. Prøv å hente flere"
 Video:
   External DRM Protected: "DRM-beskyttede videoer kan ikke bli avspilt i OpenTubeX, ettersom de krever proprietære komponenter med lukket kildekode."
   Invalid Media URL: "Ugyldig medie-URL"
@@ -1387,8 +1377,6 @@ Video:
   Notification unavailable: Systemvarsler er ikke tilgjengelige
   Scheduled video starting: Den planlagte videoen starter
   Live notification body: '{videoTitle} starter nå'
-  Premiere: Premiere
-  AI: AI
   AI-generated content: AI-generert innhold
   Collaborators: Samarbeidspartnere
   Live Chat Replay: Reprise av direktechat
@@ -1608,9 +1596,6 @@ Video:
       Error: "Kunne ikke strømme videoen"
       Error With Details: "Kunne ikke strømme videoen: {error}"
       Untrusted Receiver: "Mottakerens sertifikat er ikke klarert. Bruk en autentisert Google Cast-mottaker."
-  Station: Stasjon
-  Playlist:
-    Unavailable videos are hidden: 1 utilgjengelig video er skjult | {count} utilgjengelige videoer er skjult
   External Media:
     Dislikes: "Misliking | Mislikinger"
     Reposts: "Videredeling | Videredelinger"
@@ -1636,7 +1621,6 @@ Video:
       subscriber_only: "Kun abonnenter"
       needs_auth: "Pålogging kreves"
       unlisted: "Ikke oppført"
-  How this was made: Slik ble dette laget
 Playlist:
   Playlist Already Preloaded: "Alle videoene i spillelisten er allerede forhåndslastet"
   Playlist Preload Progress: "Forhåndslaster videoer: {completed} av {requested}"
@@ -1646,7 +1630,6 @@ Playlist:
   Playlist Preload Complete: "Forhåndslastede videoer: {count}."
   Playlist Preload Partial: "Forhåndslastet {preloaded} av {requested} videoer. {failed} kunne ikke forhåndslastes."
   Playlist Preload Pagination Failed: "Hele spillelisten kunne ikke lastes, så forhåndslastingen ble avbrutt."
-  Unavailable videos are hidden: Utilgjengelige videoer er skjult
 Change Format:
   yt-dlp Error Template: "yt-dlp kunne ikke hente strømmene: {error}"
   Local Video File: Lokal videofil
@@ -1812,7 +1795,6 @@ Comments:
   Getting comment replies, please wait: Henter svar på kommentaren, vent litt
   Reload Comments: Last inn kommentarer på nytt
   Reply Count: 1 svar | {replyCount} svar
-  Comments are turned off: Kommentarer er slått av
   YouTube did not provide advertised replies: YouTube viste at denne kommentaren har svar, men leverte dem ikke. De kan ha blitt slettet eller skjult, så svarknappen ble fjernet.
   Pinned by you: Festet av deg
   A reply is pinned: Et svar er festet
@@ -1925,8 +1907,6 @@ Tooltips:
     Scroll Speed: Endrer hvor langt musehjul- og styreflatebevegelser ruller.
     Use Fixed Tab Width: Gir alle faner i det vannrette fanefeltet samme bredde i stedet for å tilpasse bredden etter tittelen.
     Use Grid Player Menu: Ordner innstillingsmenyen til videospilleren som et rutenett med fliser i stedet for en liste med rader.
-  Experimental Settings:
-    Disable Hardware Acceleration: Deaktiverer GPU-maskinvareakselerasjon. Kan løse grafikkproblemer, men vil sannsynligvis redusere ytelsen.
 The playlist is at the beginning. Enable loop to continue playing: Spillelisten er ved begynnelsen. Slå på gjentakelse for å fortsette avspillingen
 External link opening has been disabled in Settings → Privacy: Åpning av eksterne lenker er slått av under Innstillinger → Personvern
 KeyboardShortcutPrompt:
@@ -2115,8 +2095,6 @@ Channels:
   Load More Channels: "Last inn flere kanaler"
 Search Bar:
   Use Suggestion: Bruk forslag
-  Open Search Container: Åpne søkefeltet
-  Search: Søk
 Theme Discovery:
   Discover Themes: "Finn temaer"
   Refresh: "Last inn på nytt"

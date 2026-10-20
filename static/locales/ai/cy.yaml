@@ -188,6 +188,7 @@ Feed:
   Cancel Refresh: Canslo'r adnewyddiad
   Next Auto Refresh: 'Adnewyddiad awtomatig nesaf: {date}'
 User Playlists:
+  This playlist is private or does not exist.: "Mae'r rhestr chwarae hon yn breifat neu nid yw'n bodoli."
   Reorder Hint: Llusgwch neu defnyddiwch y bysellau saeth i aildrefnu
   Add new videos to the top (custom order): "Ychwanegu fideos newydd ar y brig (trefn bersonol)"
   Repair Playlists: Atgyweirio rhestrau chwarae

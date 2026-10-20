@@ -18,8 +18,6 @@ import 'overlayscrollbars/styles/overlayscrollbars.css'
 import 'vue-sonner/style.css'
 import './helpers/anchoredPosition.css'
 
-import { ObserveVisibility } from 'vue-observe-visibility'
-
 import { FtIcon, FtIconLayers } from './icons/iconComponents'
 
 installNetworkFetch({
@@ -36,7 +34,6 @@ app.config.performance = process.env.NODE_ENV === 'development'
 app
   .component('FtIcon', FtIcon)
   .component('FtIconLayers', FtIconLayers)
-  .directive('observe-visibility', ObserveVisibility)
   .directive('overlay-scrollbars', overlayScrollbarsDirective)
 
   .use(router)

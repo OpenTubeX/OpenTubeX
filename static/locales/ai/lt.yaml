@@ -219,6 +219,7 @@ Feed:
   Next Auto Refresh: 'Kitas automatinis atnaujinimas: {date}'
   Refresh Feed: Atnaujinti {subscriptionName}
 User Playlists:
+  This playlist is private or does not exist.: "Šis grojaraštis yra privatus arba neegzistuoja."
   Reorder Hint: Vilkite arba naudokite rodyklių klavišus, kad pakeistumėte tvarką
   Add new videos to the top (custom order): "Pridėti naujus vaizdo įrašus viršuje (pasirinktinė tvarka)"
   Repair Playlists: Taisyti grojaraščius

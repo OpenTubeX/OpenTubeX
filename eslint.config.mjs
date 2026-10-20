@@ -328,6 +328,8 @@ export default defineConfig([
 
       'vue/no-unused-emit-declarations': 'error',
       'vue/prefer-use-template-ref': 'error',
+      // v-overlay-scrollbars is registered globally in main.js
+      'vue/no-undef-directives': ['error', { ignore: ['overlay-scrollbars'] }],
 
       'jsdoc/check-alignment': 'error',
       'jsdoc/check-property-names': 'error',

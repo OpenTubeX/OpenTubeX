@@ -70,6 +70,7 @@ Trending:
   Unsupported Backend: Popularne treści wymagają lokalnego API. Wybierz lokalne API lub włącz zapasowy backend.
 Most Popular Feed Empty: Kanał „Najpopularniejsze” tej instancji Invidious jest pusty.
 User Playlists:
+  This playlist is private or does not exist.: "Ta playlista jest prywatna lub nie istnieje."
   Reorder Hint: Przeciągnij lub użyj klawiszy strzałek, aby zmienić kolejność
   Add new videos to the top (custom order): "Dodawaj nowe filmy na początku (kolejność niestandardowa)"
   Repair Playlists: Napraw playlisty

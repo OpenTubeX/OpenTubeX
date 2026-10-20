@@ -30,6 +30,14 @@ export function parseLocalVideoCollaborators(videoInfo) {
     ? author.collaborators
     : endpoint?.command?.inline_content?.custom_content?.items
 
+  return parseLocalCollaboratorItems(collaborators)
+}
+
+/**
+ * @param {import('youtubei.js').YTNodes.ListItemView[] | undefined} collaborators
+ * @returns {LocalVideoCollaborator[]}
+ */
+export function parseLocalCollaboratorItems(collaborators) {
   return collaborators?.flatMap((collaborator) => {
     const channelId = collaborator.title?.endpoint?.payload?.browseId ??
       collaborator.renderer_context?.command_context?.on_tap?.payload?.browseId

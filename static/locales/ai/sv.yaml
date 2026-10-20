@@ -190,6 +190,7 @@ Feed:
   Cancel Refresh: Avbryt uppdatering
   Next Auto Refresh: 'Nästa automatiska uppdatering: {date}'
 User Playlists:
+  This playlist is private or does not exist.: "Den här spellistan är privat eller finns inte."
   Reorder Hint: Dra eller använd piltangenterna för att ändra ordning
   Add new videos to the top (custom order): "Lägg till nya videor överst (anpassad ordning)"
   Repair Playlists: Reparera spellistor

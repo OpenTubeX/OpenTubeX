@@ -103,6 +103,7 @@ import FtRetryImage from '../FtRetryImage.vue'
 import NavLabel from './NavLabel.vue'
 import { FtIcon } from '@opentubex/icons'
 import { computed, onBeforeUnmount, onMounted, onUpdated, ref, useTemplateRef, watch } from 'vue'
+import { ObserveVisibility as vObserveVisibility } from 'vue-observe-visibility'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 

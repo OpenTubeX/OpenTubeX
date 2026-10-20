@@ -66,6 +66,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { FtIcon } from '@opentubex/icons'
+import { ObserveVisibility as vObserveVisibility } from 'vue-observe-visibility'
 
 import { getCenteredChapterScrollTop } from './chapterScroll'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'

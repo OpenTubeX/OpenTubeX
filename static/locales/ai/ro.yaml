@@ -188,6 +188,7 @@ Feed:
   Cancel Refresh: Anulează reîmprospătarea
   Next Auto Refresh: 'Următoarea reîmprospătare automată: {date}'
 User Playlists:
+  This playlist is private or does not exist.: "Această listă de redare este privată sau nu există."
   Reorder Hint: Trageți sau folosiți tastele săgeți pentru a reordona
   Add new videos to the top (custom order): "Adaugă videoclipurile noi la început (ordine personalizată)"
   Repair Playlists: Repară listele de redare

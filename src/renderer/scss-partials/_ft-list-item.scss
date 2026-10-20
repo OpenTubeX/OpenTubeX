@@ -1,7 +1,7 @@
 /* stylelint-disable no-descending-specificity */
 $thumbnail-overlay-opacity: 0.85;
 $watched-transition-duration: 0.5s;
-$grab-bar-padding: 1em;
+$grid-mode-grab-bar-padding: 1em;
 
 @mixin is-result {
   @at-root {
@@ -75,7 +75,7 @@ $grab-bar-padding: 1em;
   -webkit-touch-callout: none;
 
   // Space a bit from the thumbnail.
-  padding-block: $grab-bar-padding;
+  padding-block: $grid-mode-grab-bar-padding;
 
   svg {
     // Make icon appears more centered from default `-0.125em` from FA style
@@ -516,14 +516,13 @@ $grab-bar-padding: 1em;
     display: flex;
     flex-direction: column;
     min-block-size: 230px;
-    padding-block-end: 20px;
+    padding-block-end: $grid-mode-grab-bar-padding;
     box-sizing: border-box;
     block-size: 100%;
 
     &:has(> .grabBar) {
       // Make top & bottom padding look consistent
-      /* stylelint-disable-next-line declaration-property-value-no-unknown */
-      padding-block: 0 $grab-bar-padding;
+      padding-block-start: 0;
     }
 
     .info {

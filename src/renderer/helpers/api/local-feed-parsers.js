@@ -1,7 +1,7 @@
 import { YTNodes, Utils, YT, Mixins, Misc } from 'youtubei.js'
 import Autolinker from 'autolinker'
 import { extractNumberFromString, calculatePublishedDate, escapeHTML, CHANNEL_HANDLE_REGEX } from '../feed-metadata.js'
-import { isCollaborativeVideoAuthor } from '../video-collaborators.js'
+import { isCollaborativeVideoAuthor, parseLocalCollaboratorItems } from '../video-collaborators.js'
 import { getThumbnailPreviewUrl } from '../thumbnailPreview.js'
 import { getResultAuthorThumbnailUrl } from '../result-channel-avatar.js'
 
@@ -532,6 +532,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         author: video.author?.name ?? channelName,
         authorId: (video.author?.id != null && video.author.id !== 'N/A') ? video.author.id : channelId,
         hasCollaborators: (video.author?.id == null || video.author.id === 'N/A') && isCollaborativeVideoAuthor(video.author?.name),
+        collaborators: parseLocalCollaboratorItems(video.author?.collaborators),
         viewCount: video.views.text == null ? null : extractNumberFromString(video.views.text),
         published,
         lengthSeconds: isLive ? '' : Utils.timeToSeconds(video.duration.text),
@@ -597,6 +598,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         authorHandle: getChannelHandleFromEndpoint(video.author.endpoint),
         authorThumbnailUrl: getResultAuthorThumbnailUrl(video),
         hasCollaborators: video.author.id === 'N/A' && isCollaborativeVideoAuthor(video.author.name),
+        collaborators: parseLocalCollaboratorItems(video.author.collaborators),
         description: video.description,
         viewCount,
         published,
@@ -771,7 +773,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
               }
             }
           } else {
-            const durationBadge = thumbnailBottomOverlayView.badges.find(badge => /^[\d:]+$/.test(badge.text))
+            const durationBadge = thumbnailBottomOverlayView.badges.find(badge => /^[\d:,]+$/.test(badge.text))
 
             if (durationBadge) {
               lengthSeconds = Utils.timeToSeconds(durationBadge.text)
@@ -820,6 +822,10 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         // Read the handle from the same endpoint as the ID so they always describe the same channel
         const authorHandle = getChannelHandleFromEndpoint(authorEndpoint)
         const hasCollaborators = authorPart?.endpoint == null && isCollaborativeVideoAuthor(author)
+        const collaborators = parseLocalCollaboratorItems(
+          imageEndpoint?.command?.inline_content?.custom_content?.items
+            ?.filter(item => item.renderer_context?.command_context?.on_tap?.metadata?.page_type === 'WEB_PAGE_TYPE_CHANNEL')
+        )
 
         return {
           type: 'video',
@@ -830,6 +836,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
           authorId,
           authorHandle,
           hasCollaborators,
+          collaborators,
           viewCount,
           published: calculatePublishedDate(publishedText, liveNow, isUpcoming, premiereDate),
           lengthSeconds,

@@ -623,6 +623,7 @@
 import { FtIcon } from '@opentubex/icons'
 import { inject, computed, nextTick, onBeforeUnmount, ref, shallowRef, toRaw, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { ObserveVisibility as vObserveVisibility } from 'vue-observe-visibility'
 
 import FtCard from '../ft-card/ft-card.vue'
 import CommentFilterMenu from './CommentFilterMenu.vue'

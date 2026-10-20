@@ -190,6 +190,7 @@ Feed:
   Cancel Refresh: Yeniləməni ləğv et
   Next Auto Refresh: 'Növbəti avtomatik yeniləmə: {date}'
 User Playlists:
+  This playlist is private or does not exist.: "Bu oynatma siyahısı şəxsidir və ya mövcud deyil."
   Reorder Hint: Sıralamanı dəyişmək üçün sürükləyin və ya ox düymələrindən istifadə edin
   Add new videos to the top (custom order): "Yeni videoları yuxarıya əlavə et (fərdi sıra)"
   Repair Playlists: Pleylistləri düzəlt

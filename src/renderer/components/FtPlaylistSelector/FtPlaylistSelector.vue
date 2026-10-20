@@ -56,6 +56,7 @@
 import { FtIcon } from '@opentubex/icons'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { ObserveVisibility as vObserveVisibility } from 'vue-observe-visibility'
 
 import store from '../../store/index'
 import FtRetryImage from '../FtRetryImage.vue'

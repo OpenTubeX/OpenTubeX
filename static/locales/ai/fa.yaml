@@ -202,6 +202,7 @@ Feed:
   Cancel Refresh: لغو تازه‌سازی
   Next Auto Refresh: 'تازه‌سازی خودکار بعدی: {date}'
 User Playlists:
+  This playlist is private or does not exist.: "این فهرست پخش خصوصی است یا وجود ندارد."
   Reorder Hint: برای تغییر ترتیب، بکشید یا از کلیدهای جهت‌نما استفاده کنید
   Add new videos to the top (custom order): "افزودن ویدیوهای جدید به ابتدای فهرست (ترتیب سفارشی)"
   Repair Playlists: ترمیم فهرست‌های پخش

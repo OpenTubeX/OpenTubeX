@@ -463,8 +463,9 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  /** @type {import('vue').PropType<import('youtubei.js').YT.LiveChat | null>} */
   liveChat: {
-    type: EventTarget,
+    type: Object,
     default: null
   },
   videoId: {

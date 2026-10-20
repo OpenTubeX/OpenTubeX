@@ -8,7 +8,7 @@ import { ytDlp } from '../../helpers/ytDlp'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { probeHlsManifest } from '../../helpers/player/hlsManifest'
 import { sampleRecommendationPlayback } from '../../../recommendation-learning'
-import { defineComponent, markRaw } from 'vue'
+import { defineComponent, markRaw, shallowRef } from 'vue'
 import { Capacitor } from '@capacitor/core'
 import { useRoute, useRouter } from 'vue-router'
 import { mapActions } from 'vuex'
@@ -228,6 +228,7 @@ export default defineComponent({
     const setTabAvatar = useTabAvatar()
     const showTabToast = useTabToast()
     const relativeTimeNow = useRelativeTimeClock()
+    const liveChat = shallowRef(null)
 
     return {
       t,
@@ -245,7 +246,8 @@ export default defineComponent({
       setTabTitle,
       setTabAvatar,
       showTabToast,
-      relativeTimeNow
+      relativeTimeNow,
+      liveChat
     }
   },
   data: function () {
@@ -289,7 +291,6 @@ export default defineComponent({
       /** @type {boolean | null} */
       isLiveDvrEnabled: null,
       isPremiere: false,
-      liveChat: null,
       liveChatIsReplay: false,
       liveChatOpen: true,
       isLiveContent: false,
@@ -6656,7 +6657,7 @@ export default defineComponent({
     },
 
     isHiddenVideo: function (forbiddenTitles, channelsHidden, video) {
-      return channelsHidden.some(ch => ch.name === video.authorId) ||
+      return channelsHidden.some(ch => ch.name === video.authorId || ch.name === video.collaborators?.[0]?.id) ||
         channelsHidden.some(ch => ch.name === video.author) ||
         isOnAiSlopList(this.$store.getters.getAiSlopBlockedChannels, video) ||
         forbiddenTitles.some((text) => video.title?.toLowerCase().includes(text)) ||

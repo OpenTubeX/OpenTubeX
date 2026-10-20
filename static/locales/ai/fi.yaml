@@ -190,6 +190,7 @@ Feed:
   Cancel Refresh: Peruuta päivitys
   Next Auto Refresh: 'Seuraava automaattinen päivitys: {date}'
 User Playlists:
+  This playlist is private or does not exist.: "Tämä soittolista on yksityinen tai sitä ei ole olemassa."
   Reorder Hint: Järjestä uudelleen vetämällä tai nuolinäppäimillä
   Add new videos to the top (custom order): "Lisää uudet videot alkuun (oma järjestys)"
   Repair Playlists: Korjaa soittolistat

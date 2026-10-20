@@ -68,6 +68,20 @@ test('hides videos from blocklisted channels only when the blocklist is passed',
   assert.equal(isVideoHiddenByPreferences(video), false)
 })
 
+test('hides collaboration videos by their main author and regular videos by author ID', () => {
+  const hiddenChannelNames = new Set([CHANNEL_ID])
+  const collaboration = {
+    title: 'Title',
+    author: 'Main and Guest',
+    authorId: null,
+    collaborators: [{ id: CHANNEL_ID, name: 'Main' }, { id: 'UCguest', name: 'Guest' }]
+  }
+
+  assert.equal(isVideoHiddenByPreferences(collaboration, { hiddenChannelNames }), true)
+  assert.equal(isVideoHiddenByPreferences({ title: 'Title', author: 'Main', authorId: CHANNEL_ID }, { hiddenChannelNames }), true)
+  assert.equal(isVideoHiddenByPreferences({ ...collaboration, collaborators: collaboration.collaborators.toReversed() }, { hiddenChannelNames }), false)
+})
+
 test('restores cached lists and ignores malformed caches', () => {
   useLocalStorage()
   saveCachedAiSlopList({ fetchedAt: 123, blocked: ['@a', CHANNEL_ID], warned: [] })

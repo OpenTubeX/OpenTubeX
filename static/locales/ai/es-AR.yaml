@@ -200,6 +200,7 @@ Feed:
   Cancel Refresh: Cancelar actualización
   Next Auto Refresh: 'Próxima actualización automática: {date}'
 User Playlists:
+  This playlist is private or does not exist.: "Esta lista de reproducción es privada o no existe."
   Reorder Hint: Arrastrá o usá las teclas de flecha para reordenar
   Add new videos to the top (custom order): "Agregar videos nuevos al principio (orden personalizado)"
   Repair Playlists: Reparar listas de reproducción

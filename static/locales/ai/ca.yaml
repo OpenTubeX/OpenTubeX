@@ -237,6 +237,7 @@ Feed:
   Next Auto Refresh: 'Propera actualització automàtica: {date}'
   Refresh Feed: Actualitza {subscriptionName}
 User Playlists:
+  This playlist is private or does not exist.: "Aquesta llista de reproducció és privada o no existeix."
   Reorder Hint: Arrossegueu o utilitzeu les tecles de fletxa per reordenar
   Add new videos to the top (custom order): "Afegeix els vídeos nous al principi (ordre personalitzat)"
   Repair Playlists: Repara les llistes

@@ -950,6 +950,12 @@ async function getPlaylistLocal() {
   } catch (err) {
     if (!requestIsCurrent()) return
 
+    if (err?.message?.includes('This playlist type is unviewable') ||
+        err?.message?.includes('The playlist does not exist')) {
+      showUnviewablePlaylistError()
+      return
+    }
+
     console.error(err)
 
     if (backendPreference.value === 'local' && backendFallback.value) {
@@ -962,6 +968,12 @@ async function getPlaylistLocal() {
       playlistErrorRetryable.value = true
     }
   }
+}
+
+function showUnviewablePlaylistError() {
+  updatePageTitle()
+  isLoading.value = false
+  playlistError.value = t("User Playlists['This playlist is private or does not exist.']")
 }
 
 async function getPlaylistInvidious() {
@@ -1013,6 +1025,11 @@ async function getPlaylistInvidious() {
     if (!requestIsCurrent()) return
 
     console.error(err)
+
+    if (err?.message?.includes('Could not extract playlistSidebarRenderer')) {
+      showUnviewablePlaylistError()
+      return
+    }
 
     if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
       showInvidiousFallbackToast()

@@ -19,6 +19,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { ObserveVisibility as vObserveVisibility } from 'vue-observe-visibility'
 
 import FtSpinner from './FtSpinner/FtSpinner.vue'
 import store from '../store/index'

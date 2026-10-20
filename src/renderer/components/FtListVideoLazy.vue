@@ -34,6 +34,7 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue'
+import { ObserveVisibility as vObserveVisibility } from 'vue-observe-visibility'
 
 import FtListVideo from './FtListVideo/FtListVideo.vue'
 

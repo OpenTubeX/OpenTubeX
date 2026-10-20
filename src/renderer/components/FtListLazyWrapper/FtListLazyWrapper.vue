@@ -77,6 +77,7 @@
 <script setup>
 import { computed, onBeforeUnmount, reactive, ref, useTemplateRef, watch } from 'vue'
 import { observeWindowedListItem, WINDOWED_LIST_OVERSCAN_PX } from '../../helpers/windowedList.js'
+import { ObserveVisibility as vObserveVisibility } from 'vue-observe-visibility'
 
 import { usePlaylistDrag } from '../../composables/usePlaylistDrag'
 

@@ -190,6 +190,7 @@ Feed:
   Cancel Refresh: Скасувати оновлення
   Next Auto Refresh: 'Наступне автоматичне оновлення: {date}'
 User Playlists:
+  This playlist is private or does not exist.: "Цей плейлист приватний або не існує."
   Reorder Hint: Перетягніть або скористайтеся клавішами зі стрілками, щоб змінити порядок
   Add new videos to the top (custom order): "Додавати нові відео на початок (власний порядок)"
   Repair Playlists: Відновити списки відтворення

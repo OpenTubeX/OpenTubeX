@@ -509,7 +509,12 @@ export function isVideoHiddenByPreferences(video, {
     return true
   }
 
-  if (hiddenChannelNames.has(video.authorId) || hiddenChannelNames.has(video.author)) {
+  if (
+    hiddenChannelNames.has(video.authorId) ||
+    // Collaboration videos list their main author first
+    hiddenChannelNames.has(video.collaborators?.[0]?.id) ||
+    hiddenChannelNames.has(video.author)
+  ) {
     return true
   }
 

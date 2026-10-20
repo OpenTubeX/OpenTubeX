@@ -71,7 +71,7 @@
           tabindex="-1"
           :to="watchVideoRouterLink"
           :aria-label="title"
-          @click="handleWatchPageLinkClick"
+          @click.capture="handleWatchPageLinkClick"
           @auxclick="handleWatchPageLinkClick"
           @pointerenter="startThumbnailPreview"
           @pointerleave="stopThumbnailPreview"
@@ -243,7 +243,7 @@
         <RouterLink
           class="title"
           :to="watchVideoRouterLink"
-          @click="handleWatchPageLinkClick"
+          @click.capture="handleWatchPageLinkClick"
           @auxclick="handleWatchPageLinkClick"
         >
           <h3
@@ -1626,12 +1626,16 @@ function handleOptionsClick(option) {
     case 'openInvidiousChannel':
       openExternalLink(getInvidiousChannelUrl())
       break
-    case 'hideChannel':
-      hideChannel(channelName.value, channelId.value)
+    case 'hideChannel': {
+      const name = channelCollaborators.value.length > 0 ? channelCollaborators.value[0].name : channelName.value
+      hideChannel(name, channelId.value)
       break
-    case 'unhideChannel':
-      unhideChannel(channelName.value, channelId.value)
+    }
+    case 'unhideChannel': {
+      const name = channelCollaborators.value.length > 0 ? channelCollaborators.value[0].name : channelName.value
+      unhideChannel(name, channelId.value)
       break
+    }
     case 'download':
       showDownloadPrompt.value = true
       break
@@ -1861,18 +1865,11 @@ const watchPageLinkQuery = computed(() => {
   return query
 })
 
-const watchVideoRouterLink = computed(() => {
-  // For `router-link` attribute `to`
-  if (!externalPlayerIsDefaultViewingMode.value) {
-    return {
-      path: `/watch/${id.value}`,
-      query: watchPageLinkQuery.value,
-      state: { tabTitle: title.value },
-    }
-  } else {
-    return {}
-  }
-})
+const watchVideoRouterLink = computed(() => ({
+  path: `/watch/${id.value}`,
+  query: watchPageLinkQuery.value,
+  state: { tabTitle: title.value },
+}))
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const useDeArrowTitles = computed(() => store.getters.getUseDeArrowTitles)
@@ -1900,7 +1897,7 @@ const deArrowCache = computed(() => store.getters.getDeArrowCache[id.value])
 const disableChannelLinks = computed(() => store.getters.getDisableChannelLinks)
 
 const shouldShowChannelResolverButton = computed(() => !disableChannelLinks.value && channelName.value !== null && (
-  !!props.data.hasCollaborators || channelId.value === null
+  !!props.data.hasCollaborators || channelCollaborators.value.length > 1 || channelId.value === null
 ))
 
 async function handleWatchPageLinkClick(event) {
@@ -1914,6 +1911,7 @@ async function handleWatchPageLinkClick(event) {
   markSubscriptionVideoAsSeen()
 
   if (externalPlayerIsDefaultViewingMode.value) {
+    event?.preventDefault()
     openInExternalPlayer()
     return
   }
@@ -2196,8 +2194,9 @@ function parseVideoData() {
   }
 
   channelName.value = props.data.author ?? null
-  channelId.value = props.data.authorId ?? null
   channelCollaborators.value = props.data.collaborators ?? []
+  // Collaboration videos have no authorId; the first collaborator is the main author
+  channelId.value = props.data.authorId ?? channelCollaborators.value[0]?.id ?? null
 
   if ((props.data.lengthSeconds === '' || props.data.lengthSeconds === '0:00') && historyEntryExists.value) {
     lengthSeconds.value = historyEntry.value.lengthSeconds

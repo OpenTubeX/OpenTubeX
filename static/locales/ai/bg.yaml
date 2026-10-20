@@ -190,6 +190,7 @@ Feed:
   Cancel Refresh: Отмени обновяването
   Next Auto Refresh: 'Следващо автоматично обновяване: {date}'
 User Playlists:
+  This playlist is private or does not exist.: "Този плейлист е частен или не съществува."
   Reorder Hint: Плъзнете или използвайте клавишите със стрелки, за да пренаредите
   Add new videos to the top (custom order): "Добавяне на нови видеоклипове най-отгоре (персонализиран ред)"
   Repair Playlists: Поправка на плейлистите
