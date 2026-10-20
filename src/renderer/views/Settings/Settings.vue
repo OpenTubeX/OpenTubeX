@@ -838,6 +838,11 @@ onBeforeUnmount(() => {
   cancelStandaloneScrollClamp()
 })
 
+// A morph removes the window without a leave transition, so deactivation is too late
+watch(settingsWindowMorphing, (morphing) => {
+  if (morphing && windowActive.value) preserveScrollPositions()
+})
+
 watch(isProfileManagerOpen, (open) => {
   if (!open) {
     stopObservingProfileManager()
@@ -1364,11 +1369,10 @@ function handleResize(width) {
 }
 
 function closeSettings() {
-  store.dispatch('hideSettingsWindow')
+  store.dispatch('closeSettingsWindowToIcon')
 }
 
 function minimizeSettings() {
-  preserveScrollPositions()
   store.dispatch('minimizeSettingsWindow')
 }
 
