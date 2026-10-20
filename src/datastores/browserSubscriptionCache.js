@@ -129,16 +129,46 @@ export function createBrowserSubscriptionCache(loadLegacyRecords, name = 'opentu
     })
   }
 
+  function markRecordAsSeen(record, tab, entries) {
+    const field = subscriptionFeedField(tab)
+    if (!record[field]) return false
+    const marked = preserveSubscriptionSeenEntries(record[field], entries, tab === 'posts' ? 'postId' : 'videoId')
+    if (marked === record[field]) return false
+    record[field] = marked
+    return true
+  }
+
   return {
     markEntriesAsSeen(channelId, tab, entries) {
-      const field = subscriptionFeedField(tab)
       const snapshot = JSON.parse(JSON.stringify(entries))
-      return updateChannel(channelId, record => {
-        if (!record[field]) return false
-        const marked = preserveSubscriptionSeenEntries(record[field], snapshot, tab === 'posts' ? 'postId' : 'videoId')
-        if (marked === record[field]) return false
-        record[field] = marked
-        return true
+      return updateChannel(channelId, record => markRecordAsSeen(record, tab, snapshot))
+    },
+    async markEntriesAsSeenMany(marks) {
+      // One transaction for the whole feed. Marks are grouped by channel so
+      // that each record is read and written once.
+      const marksByChannel = new Map()
+      for (const { channelId, tab, entries } of JSON.parse(JSON.stringify(marks))) {
+        if (!marksByChannel.has(channelId)) marksByChannel.set(channelId, [])
+        marksByChannel.get(channelId).push({ tab, entries })
+      }
+      return transaction(await database(), ['channels'], 'readwrite', (tx, done, fail) => {
+        const channels = tx.objectStore('channels')
+        for (const [channelId, channelMarks] of marksByChannel) {
+          const request = channels.get(channelId)
+          request.onsuccess = () => {
+            try {
+              const record = request.result
+              if (!record) return
+              let changed = false
+              for (const { tab, entries } of channelMarks) {
+                changed = markRecordAsSeen(record, tab, entries) || changed
+              }
+              if (changed) channels.put(record)
+            } catch (error) {
+              fail(error)
+            }
+          }
+        }
       })
     },
     async find() {

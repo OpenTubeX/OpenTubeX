@@ -517,6 +517,25 @@ export class SqliteDatastore {
     return this._exclusive(() => this._insert(newDoc))
   }
 
+  /**
+   * Replaces or inserts whole documents in one transaction. A feed refresh
+   * writes hundreds of channels; one commit costs one disk sync instead of
+   * one per channel.
+   * @param {object[]} docs documents with their `_id`
+   */
+  replaceManyAsync(docs) {
+    return this._exclusive(async () => {
+      const statements = []
+      for (const doc of docs) {
+        if (doc?._id === undefined) throw new Error('Replaced documents need an _id')
+        model.checkObject(doc)
+        statements.push(...await this._writeStatements(keyOf(doc._id), doc, true))
+      }
+      await this._execute(statements, true)
+      return docs.length
+    })
+  }
+
   find(query = {}, projection = {}) {
     return new Cursor(this, query).projection(projection)
   }

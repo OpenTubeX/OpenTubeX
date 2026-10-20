@@ -6194,6 +6194,28 @@ function runApp() {
           )
           return null
 
+        case DBActions.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN_MANY:
+          await baseHandlers.subscriptionCache.markEntriesAsSeenMany(data)
+          syncOtherWindows(
+            IpcChannels.SYNC_SUBSCRIPTION_CACHE,
+            event,
+            { event: SyncEvents.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN_MANY, data }
+          )
+          return null
+
+        case DBActions.SUBSCRIPTION_CACHE.UPDATE_FEEDS: {
+          const applied = await baseHandlers.subscriptionCache.updateFeeds(data)
+          const updates = data.filter((_, index) => applied[index])
+          if (updates.length > 0) {
+            syncOtherWindows(
+              IpcChannels.SYNC_SUBSCRIPTION_CACHE,
+              event,
+              { event: SyncEvents.SUBSCRIPTION_CACHE.UPDATE_FEEDS, data: updates }
+            )
+          }
+          return applied
+        }
+
         case DBActions.SUBSCRIPTION_CACHE.UPDATE_LIVE_STREAMS_BY_CHANNEL:
           if (!await baseHandlers.subscriptionCache.updateLiveStreamsByChannelId(data.channelId, data.entries, data.timestamp)) return false
           syncOtherWindows(

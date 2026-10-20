@@ -7,7 +7,7 @@ import { hasReachedWatchedThreshold, migrateLegacyHistoryRecord } from '../../hi
 import { resolveSearchHistoryEntry } from '../../search-history'
 import { createRecommendationStore } from '../recommendations'
 import { createIdQuery } from '../idQuery'
-import { mergeSubscriptionSeenVideos, parseSubscriptionSeenVideos, nextSubscriptionSeenTimestamp } from '../../subscriptionSeenVideos'
+import { MAX_SUBSCRIPTION_SEEN_VIDEOS, mergeSubscriptionSeenVideos, parseSubscriptionSeenVideos, nextSubscriptionSeenTimestamp } from '../../subscriptionSeenVideos'
 import { preserveSubscriptionSeenEntries, subscriptionFeedField } from '../../subscriptionFeedState'
 import { mergeSubscriptionSeenPosts, parseSubscriptionSeenPosts } from '../../subscriptionSeenPosts'
 import { mergeBackupWatchStatsAdjustment, mergeBackupWatchStatsRecord, validateBackupWatchStats } from '../../renderer/helpers/unifiedBackup'
@@ -62,7 +62,12 @@ class Settings {
           ...(update.isUnseen === true ? { unseenAt: timestamp } : {})
         }))
       : update)
-    const videoIds = [...new Set([...local, ...incoming].map(entry => entry.videoId))]
+    // Watched videos leave the list. Checking every stored mark reads a
+    // history record per mark, so that only happens once the list is full and
+    // eviction would otherwise drop recent marks; stored marks were checked
+    // when they arrived.
+    const candidates = local.length + incoming.length > MAX_SUBSCRIPTION_SEEN_VIDEOS ? [...local, ...incoming] : incoming
+    const videoIds = [...new Set(candidates.map(entry => entry.videoId))]
     await db.history.ensureIndexAsync({ fieldName: 'videoId' })
     const historyById = {}
     // NeDB checks each candidate against every ID in $in. Small indexed
@@ -1091,47 +1096,122 @@ class SearchHistory {
 
 class SubscriptionCache {
   static pendingUpdates = new Map()
+  // Clearing the cache waits for every pending update, and later updates wait
+  // for it, so no update can write back a channel it read before the clear.
+  static clearing = Promise.resolve()
+  static FEED_FIELDS = new Set(['videos', 'shorts', 'liveStreams', 'communityPosts'])
 
-  static queueUpdate(channelId, field, operation) {
-    const key = JSON.stringify([channelId, field])
-    const previous = this.pendingUpdates.get(key) ?? Promise.resolve()
-    const update = previous.catch(() => {}).then(operation)
-    this.pendingUpdates.set(key, update)
+  /**
+   * Runs `operation` after the pending updates of the given channels and
+   * before later ones. Updates replace whole channel documents, so every
+   * feed of a channel shares its queue.
+   * @template T
+   * @param {string[]} channelIds
+   * @param {() => Promise<T>} operation
+   * @returns {Promise<T>}
+   */
+  static queueUpdates(channelIds, operation) {
+    const previous = channelIds.map(channelId => this.pendingUpdates.get(channelId) ?? Promise.resolve())
+    const update = Promise.allSettled([this.clearing, ...previous]).then(operation)
+    for (const channelId of channelIds) this.pendingUpdates.set(channelId, update)
     return update.finally(() => {
-      if (this.pendingUpdates.get(key) === update) this.pendingUpdates.delete(key)
+      for (const channelId of channelIds) {
+        if (this.pendingUpdates.get(channelId) === update) this.pendingUpdates.delete(channelId)
+      }
     })
   }
 
-  static updateFeed(channelId, entries, timestamp, field) {
-    return this.queueUpdate(channelId, field, async () => {
-      const timestampField = `${field}Timestamp`
-      const current = await db.subscriptionCache.findOneAsync({ _id: channelId })
-      if (new Date(current?.[timestampField]).getTime() > new Date(timestamp).getTime()) return false
+  static queueUpdate(channelId, operation) {
+    return this.queueUpdates([channelId], operation)
+  }
 
-      entries = preserveSubscriptionSeenEntries(entries, current?.[field], field === 'communityPosts' ? 'postId' : 'videoId')
-
-      await db.subscriptionCache.updateAsync(
-        { _id: channelId },
-        { $set: { [field]: entries, [timestampField]: timestamp } },
-        { upsert: true }
-      )
-      return true
+  /**
+   * Stores fetched feeds for many channels in one SQLite transaction. A feed whose
+   * stored timestamp is newer than the fetched one stays as it is.
+   * @param {{ channelId: string, field: string, entries: object[], timestamp: Date | string }[]} updates
+   * @returns {Promise<boolean[]>} whether each update was applied
+   */
+  static updateFeeds(updates) {
+    for (const { field } of updates) {
+      if (!this.FEED_FIELDS.has(field)) throw new Error(`Unknown subscription feed: ${field}`)
+    }
+    const channelIds = [...new Set(updates.map(({ channelId }) => channelId))]
+    return this.queueUpdates(channelIds, async () => {
+      const documents = await this._loadDocuments(channelIds)
+      const changed = new Set()
+      const applied = []
+      for (const { channelId, field, entries, timestamp } of updates) {
+        const current = documents.get(channelId)
+        const timestampField = `${field}Timestamp`
+        if (new Date(current?.[timestampField]).getTime() > new Date(timestamp).getTime()) {
+          applied.push(false)
+          continue
+        }
+        documents.set(channelId, {
+          ...current,
+          _id: channelId,
+          [field]: preserveSubscriptionSeenEntries(entries, current?.[field], field === 'communityPosts' ? 'postId' : 'videoId'),
+          [timestampField]: timestamp,
+        })
+        changed.add(channelId)
+        applied.push(true)
+      }
+      await this._replaceDocuments([...changed].map(channelId => documents.get(channelId)))
+      return applied
     })
+  }
+
+  static async updateFeed(channelId, entries, timestamp, field) {
+    return (await this.updateFeeds([{ channelId, field, entries, timestamp }]))[0]
+  }
+
+  /** @returns {Promise<Map<string, object>>} the stored channel documents by ID */
+  static async _loadDocuments(channelIds) {
+    // SQLite, the desktop datastore, looks `_id` lists up through its primary
+    // key. createIdQuery's `$where` for large lists would scan every row there.
+    const docs = await db.subscriptionCache.findAsync({ _id: { $in: channelIds } })
+    return new Map(docs.map(doc => [doc._id, doc]))
+  }
+
+  /**
+   * The desktop datastore is SQLite, which replaces the documents in one
+   * transaction. NeDB, used by unit tests, has no transactional bulk replace,
+   * so its fallback writes the documents one by one, without atomicity.
+   */
+  static _replaceDocuments(docs) {
+    if (docs.length === 0) return Promise.resolve()
+    if (typeof db.subscriptionCache.replaceManyAsync === 'function') return db.subscriptionCache.replaceManyAsync(docs)
+    return Promise.all(docs.map(doc => db.subscriptionCache.updateAsync({ _id: doc._id }, doc, { upsert: true })))
   }
 
   static find() {
     return db.subscriptionCache.findAsync({})
   }
 
-  static markEntriesAsSeen(channelId, tab, entries) {
-    const field = subscriptionFeedField(tab)
-    return this.queueUpdate(channelId, field, async () => {
-      const current = await db.subscriptionCache.findOneAsync({ _id: channelId })
-      if (!current?.[field]) return
-      const marked = preserveSubscriptionSeenEntries(current[field], entries, tab === 'posts' ? 'postId' : 'videoId')
-      if (marked === current[field]) return
-      await db.subscriptionCache.updateAsync({ _id: channelId }, { $set: { [field]: marked } })
+  /**
+   * Marks entries of many channel feeds as seen in one SQLite transaction.
+   * @param {{ channelId: string, tab: string, entries: object[] }[]} marks
+   */
+  static markEntriesAsSeenMany(marks) {
+    const channelIds = [...new Set(marks.map(({ channelId }) => channelId))]
+    return this.queueUpdates(channelIds, async () => {
+      const documents = await this._loadDocuments(channelIds)
+      const changed = new Set()
+      for (const { channelId, tab, entries } of marks) {
+        const field = subscriptionFeedField(tab)
+        const current = documents.get(channelId)
+        if (!current?.[field]) continue
+        const marked = preserveSubscriptionSeenEntries(current[field], entries, tab === 'posts' ? 'postId' : 'videoId')
+        if (marked === current[field]) continue
+        documents.set(channelId, { ...current, [field]: marked })
+        changed.add(channelId)
+      }
+      await this._replaceDocuments([...changed].map(channelId => documents.get(channelId)))
     })
+  }
+
+  static markEntriesAsSeen(channelId, tab, entries) {
+    return this.markEntriesAsSeenMany([{ channelId, tab, entries }])
   }
 
   static updateVideosByChannelId(channelId, entries, timestamp) {
@@ -1147,7 +1227,7 @@ class SubscriptionCache {
   }
 
   static updateShortsWithChannelPageShortsByChannelId(channelId, entries) {
-    return SubscriptionCache.queueUpdate(channelId, 'shorts', async () => {
+    return SubscriptionCache.queueUpdate(channelId, async () => {
       const doc = await db.subscriptionCache.findOneAsync({ _id: channelId }, { shorts: 1 })
 
       if (!Array.isArray(doc?.shorts)) {
@@ -1189,11 +1269,15 @@ class SubscriptionCache {
   }
 
   static deleteMultipleChannels(channelIds) {
-    return db.subscriptionCache.removeAsync({ _id: { $in: channelIds } }, { multi: true })
+    // Updates replace whole documents, so a deletion between their read and
+    // write would be undone. Queue it with the channels' updates.
+    return this.queueUpdates(channelIds, () => db.subscriptionCache.removeAsync({ _id: { $in: channelIds } }, { multi: true }))
   }
 
   static deleteAll() {
-    return db.subscriptionCache.removeAsync({}, { multi: true })
+    this.clearing = Promise.allSettled([this.clearing, ...this.pendingUpdates.values()])
+      .then(() => db.subscriptionCache.removeAsync({}, { multi: true }))
+    return this.clearing
   }
 }
 

@@ -2,6 +2,11 @@ import { rmSync } from 'node:fs'
 import { basename, dirname, join } from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
 
+// A refresh rebuilds this cache, so its writes need not wait for the disk.
+// In write-ahead-log mode a crash still keeps every committed transaction;
+// only power loss can drop the last ones.
+const REBUILDABLE_DATABASES = new Set(['subscription-cache'])
+
 /**
  * Electron's built-in SQLite. Statements run synchronously, so every batch is
  * a single uninterrupted step. The app runs this in sqliteNodeWorker.js.
@@ -30,7 +35,7 @@ export function createNodeSqliteDriver(filename, backupDirectory = dirname(filen
       if (filename !== ':memory:') db.exec('PRAGMA journal_mode = WAL')
     }
     // Every committed write survives power loss.
-    db.exec('PRAGMA synchronous = FULL')
+    db.exec(`PRAGMA synchronous = ${REBUILDABLE_DATABASES.has(basename(filename, '.sqlite')) ? 'NORMAL' : 'FULL'}`)
     return db
   }
 

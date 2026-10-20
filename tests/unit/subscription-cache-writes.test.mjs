@@ -8,6 +8,7 @@ import { ensureSubscriptionFeedEntryState } from '../../src/renderer/helpers/sub
 import * as seenData from '../../src/subscriptionSeenVideos.js'
 import * as feedState from '../../src/subscriptionFeedState.js'
 import { applySubscriptionSeenVideosToCache, applySubscriptionSeenPostsToCache } from '../../src/renderer/helpers/subscription-seen-videos.js'
+import { DBActions } from '../../src/constants.js'
 
 // The handlers module imports the platform datastore singleton through webpack.
 // Run the actual cache class with an isolated real NeDB for each interleaving.
@@ -15,7 +16,7 @@ const source = await readFile(new URL('../../src/datastores/handlers/base.js', i
 const start = source.indexOf('class SubscriptionCache {')
 const cacheSource = source.slice(start, source.indexOf('\nclass ', start + 1))
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/subscription-cache.js', import.meta.url), 'utf8')
-const moduleSource = storeSource.slice(storeSource.indexOf('const MAX_CONCURRENT_CACHE_WRITES'))
+const moduleSource = storeSource.slice(storeSource.indexOf('/**\n * Electron datastore payloads'))
   .replace('export default', 'globalThis.cacheModule =')
 
 for (const [tab, field, cacheKey, update, mark] of [
@@ -299,3 +300,142 @@ test('a failed closed-app fingerprint reset keeps the cache so clearing it can b
   assert.deepEqual(deleted, [])
   assert.deepEqual(commits, [])
 })
+
+test('a refresh stores many channel feeds in one transaction and keeps their other feeds', async () => {
+  const db = { subscriptionCache: new Datastore({ inMemoryOnly: true }) }
+  const Cache = vm.runInNewContext(`${cacheSource}\nSubscriptionCache`, { db, ...feedState })
+  await Cache.updateShortsByChannelId('a', [{ videoId: 'short' }], new Date(1000))
+  await Cache.updateVideosByChannelId('b', [{ videoId: 'newer' }], new Date(3000))
+  const replaced = []
+  db.subscriptionCache.replaceManyAsync = async docs => {
+    replaced.push(docs.map(doc => doc._id))
+    for (const doc of docs) await db.subscriptionCache.updateAsync({ _id: doc._id }, doc, { upsert: true })
+  }
+  const applied = await Cache.updateFeeds([
+    { channelId: 'a', field: 'videos', entries: [{ videoId: 'a1' }], timestamp: new Date(2000) },
+    { channelId: 'b', field: 'videos', entries: [{ videoId: 'stale' }], timestamp: new Date(2000) },
+    { channelId: 'c', field: 'liveStreams', entries: [{ videoId: 'live' }], timestamp: new Date(2000) },
+  ])
+  assert.deepEqual(structuredClone(applied), [true, false, true])
+  assert.deepEqual(structuredClone(replaced), [['a', 'c']])
+  const docs = Object.fromEntries((await Cache.find()).map(doc => [doc._id, doc]))
+  assert.deepEqual(structuredClone(docs.a.shorts.map(video => video.videoId)), ['short'])
+  assert.deepEqual(structuredClone(docs.a.videos.map(video => video.videoId)), ['a1'])
+  assert.equal(new Date(docs.a.videosTimestamp).getTime(), 2000)
+  assert.deepEqual(structuredClone(docs.b.videos.map(video => video.videoId)), ['newer'])
+  assert.deepEqual(structuredClone(docs.c.liveStreams.map(video => video.videoId)), ['live'])
+  assert.throws(() => Cache.updateFeeds([{ channelId: 'a', field: 'posts', entries: [], timestamp: new Date() }]), /Unknown subscription feed/)
+})
+
+test('feed writes queued while one crosses IPC go together in the next request', async () => {
+  const bridgeSource = await readFile(new URL('../../src/datastores/handlers/electron.js', import.meta.url), 'utf8')
+  const start = bridgeSource.indexOf('// Subscription cache requests reach the main process')
+  const requests = []
+  let release
+  const context = vm.createContext({
+    DBActions,
+    dbSubscriptionCache: (action, data) => new Promise(resolve => {
+      requests.push({ action, data })
+      release = () => resolve(data.map(() => true))
+    }),
+  })
+  const Cache = vm.runInContext(`${bridgeSource.slice(start, bridgeSource.indexOf('\nfunction compactAllDatastores'))}\nSubscriptionCache`, context)
+  const first = Cache.updateVideosByChannelId('a', [{ videoId: 'a1' }], new Date(1000))
+  await Promise.resolve()
+  assert.equal(requests.length, 1)
+  const later = [
+    Cache.updateShortsByChannelId('b', [], new Date(1000)),
+    Cache.updateLiveStreamsByChannelId('c', [], new Date(1000)),
+    Cache.updateCommunityPostsByChannelId('d', [], new Date(1000)),
+  ]
+  release()
+  assert.equal(await first, true)
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(requests.length, 2)
+  assert.ok(requests.every(({ action }) => action === DBActions.SUBSCRIPTION_CACHE.UPDATE_FEEDS))
+  assert.deepEqual(structuredClone(requests[0].data.map(({ channelId, field }) => [channelId, field])), [['a', 'videos']])
+  assert.deepEqual(structuredClone(requests[1].data.map(({ channelId, field }) => [channelId, field])),
+    [['b', 'shorts'], ['c', 'liveStreams'], ['d', 'communityPosts']])
+  release()
+  assert.deepEqual(structuredClone(await Promise.all(later)), [true, true, true])
+})
+
+test('cache requests keep their order around batched feed writes', async () => {
+  const bridgeSource = await readFile(new URL('../../src/datastores/handlers/electron.js', import.meta.url), 'utf8')
+  const start = bridgeSource.indexOf('// Subscription cache requests reach the main process')
+  const requests = []
+  const pending = []
+  const context = vm.createContext({
+    DBActions,
+    dbSubscriptionCache: (action, data) => new Promise(resolve => {
+      requests.push(action === DBActions.SUBSCRIPTION_CACHE.UPDATE_FEEDS ? data.map(({ channelId }) => channelId) : action)
+      pending.push(() => resolve(Array.isArray(data) ? data.map(() => true) : null))
+    }),
+  })
+  const Cache = vm.runInContext(`${bridgeSource.slice(start, bridgeSource.indexOf('\nfunction compactAllDatastores'))}\nSubscriptionCache`, context)
+  const settle = () => new Promise(resolve => setImmediate(resolve))
+
+  const writes = [Cache.updateVideosByChannelId('a', [], new Date(1000))]
+  await settle()
+  // While the first write crosses IPC: a write, a deletion, then another write.
+  writes.push(Cache.updateVideosByChannelId('b', [], new Date(1000)))
+  const deletion = Cache.deleteAll()
+  writes.push(Cache.updateVideosByChannelId('c', [], new Date(1000)))
+  while (pending.length > 0) {
+    pending.shift()()
+    await settle()
+  }
+  await Promise.all([...writes, deletion])
+
+  assert.deepEqual(structuredClone(requests), [['a'], ['b'], DBActions.GENERAL.DELETE_ALL, ['c']])
+})
+
+test('marking many channel feeds seen is one write', async () => {
+  const db = { subscriptionCache: new Datastore({ inMemoryOnly: true }) }
+  const Cache = vm.runInNewContext(`${cacheSource}\nSubscriptionCache`, { db, ...feedState })
+  for (const channelId of ['a', 'b', 'c']) {
+    await Cache.updateVideosByChannelId(channelId, [{ videoId: `${channelId}-video`, isNewInSubscriptionFeed: true }], new Date(1000))
+  }
+  const replaced = []
+  db.subscriptionCache.replaceManyAsync = async docs => {
+    replaced.push(docs.map(doc => doc._id))
+    for (const doc of docs) await db.subscriptionCache.updateAsync({ _id: doc._id }, doc, { upsert: true })
+  }
+  await Cache.markEntriesAsSeenMany([
+    { channelId: 'a', tab: 'videos', entries: [{ videoId: 'a-video', isNewInSubscriptionFeed: false }] },
+    { channelId: 'b', tab: 'videos', entries: [{ videoId: 'absent', isNewInSubscriptionFeed: false }] },
+    { channelId: 'c', tab: 'videos', entries: [{ videoId: 'c-video', isNewInSubscriptionFeed: false }] },
+  ])
+  assert.deepEqual(structuredClone(replaced), [['a', 'c']])
+  const docs = Object.fromEntries((await Cache.find()).map(doc => [doc._id, doc.videos[0].isNewInSubscriptionFeed]))
+  assert.deepEqual(docs, { a: false, b: true, c: false })
+})
+
+for (const deletion of ['deleteAll', 'deleteMultipleChannels']) {
+  test(`${deletion} during a refresh is not undone by the refresh write`, async () => {
+    const db = { subscriptionCache: new Datastore({ inMemoryOnly: true }) }
+    const Cache = vm.runInNewContext(`${cacheSource}\nSubscriptionCache`, { db, ...feedState })
+    await Cache.updateFeeds([
+      { channelId: 'channel', field: 'videos', entries: [{ videoId: 'old' }], timestamp: new Date(1000) },
+      { channelId: 'channel', field: 'shorts', entries: [{ videoId: 'short' }], timestamp: new Date(1000) },
+    ])
+
+    // Hold the refresh between reading the channel and writing it back.
+    let releaseRead
+    const read = new Promise(resolve => { releaseRead = resolve })
+    const findAsync = db.subscriptionCache.findAsync.bind(db.subscriptionCache)
+    db.subscriptionCache.findAsync = async (...args) => {
+      const docs = await findAsync(...args)
+      await read
+      return docs
+    }
+    const refresh = Cache.updateFeeds([{ channelId: 'channel', field: 'videos', entries: [{ videoId: 'new' }], timestamp: new Date(2000) }])
+    await new Promise(resolve => setImmediate(resolve))
+    const removal = deletion === 'deleteAll' ? Cache.deleteAll() : Cache.deleteMultipleChannels(['channel'])
+    releaseRead()
+    db.subscriptionCache.findAsync = findAsync
+    await Promise.all([refresh, removal])
+
+    assert.deepEqual(await Cache.find(), [])
+  })
+}

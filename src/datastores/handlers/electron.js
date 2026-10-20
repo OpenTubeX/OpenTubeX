@@ -318,56 +318,93 @@ class SearchHistory {
   }
 }
 
+// Subscription cache requests reach the main process in the order they were
+// made, so a deletion cannot be undone by a write made before it.
+let subscriptionCacheRequests = Promise.resolve()
+/** @type {{ update: object, resolve: (applied: boolean) => void, reject: (error: Error) => void }[] | null} */
+let openSubscriptionFeedBatch = null
+
+/** @param {() => Promise<any>} send */
+function enqueueSubscriptionCacheRequest(send) {
+  const request = subscriptionCacheRequests.then(send)
+  subscriptionCacheRequests = request.catch(() => {})
+  return request
+}
+
+/**
+ * A refresh writes one feed per channel. Writes made while an earlier request
+ * is on its way to the main process go together in the next request, which
+ * stores them in one transaction.
+ * @param {{ channelId: string, field: string, entries: object[], timestamp: Date }} update
+ * @returns {Promise<boolean>} false when a newer feed was already stored
+ */
+function queueSubscriptionFeedUpdate(update) {
+  return new Promise((resolve, reject) => {
+    if (!openSubscriptionFeedBatch) {
+      const batch = []
+      openSubscriptionFeedBatch = batch
+      enqueueSubscriptionCacheRequest(async () => {
+        if (openSubscriptionFeedBatch === batch) openSubscriptionFeedBatch = null
+        try {
+          const applied = await dbSubscriptionCache(DBActions.SUBSCRIPTION_CACHE.UPDATE_FEEDS, batch.map(({ update }) => update))
+          batch.forEach(({ resolve }, index) => resolve(applied[index]))
+        } catch (error) {
+          for (const { reject } of batch) reject(error)
+        }
+      })
+    }
+    openSubscriptionFeedBatch.push({ update, resolve, reject })
+  })
+}
+
+/** Sends any other cache request in order. Later writes start a new batch. */
+function subscriptionCacheRequest(action, data) {
+  openSubscriptionFeedBatch = null
+  return enqueueSubscriptionCacheRequest(() => dbSubscriptionCache(action, data))
+}
+
 class SubscriptionCache {
   static markEntriesAsSeen(channelId, tab, entries) {
-    return dbSubscriptionCache(DBActions.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN, { channelId, tab, entries })
+    return subscriptionCacheRequest(DBActions.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN, { channelId, tab, entries })
+  }
+
+  static markEntriesAsSeenMany(marks) {
+    return subscriptionCacheRequest(DBActions.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN_MANY, marks)
   }
 
   static find() {
-    return dbSubscriptionCache(DBActions.GENERAL.FIND)
+    return subscriptionCacheRequest(DBActions.GENERAL.FIND)
   }
 
   static updateVideosByChannelId(channelId, entries, timestamp) {
-    return dbSubscriptionCache(
-      DBActions.SUBSCRIPTION_CACHE.UPDATE_VIDEOS_BY_CHANNEL,
-      { channelId, entries, timestamp }
-    )
+    return queueSubscriptionFeedUpdate({ channelId, field: 'videos', entries, timestamp })
   }
 
   static updateLiveStreamsByChannelId(channelId, entries, timestamp) {
-    return dbSubscriptionCache(
-      DBActions.SUBSCRIPTION_CACHE.UPDATE_LIVE_STREAMS_BY_CHANNEL,
-      { channelId, entries, timestamp }
-    )
+    return queueSubscriptionFeedUpdate({ channelId, field: 'liveStreams', entries, timestamp })
   }
 
   static updateShortsByChannelId(channelId, entries, timestamp) {
-    return dbSubscriptionCache(
-      DBActions.SUBSCRIPTION_CACHE.UPDATE_SHORTS_BY_CHANNEL,
-      { channelId, entries, timestamp }
-    )
+    return queueSubscriptionFeedUpdate({ channelId, field: 'shorts', entries, timestamp })
   }
 
   static updateShortsWithChannelPageShortsByChannelId(channelId, entries) {
-    return dbSubscriptionCache(
+    return subscriptionCacheRequest(
       DBActions.SUBSCRIPTION_CACHE.UPDATE_SHORTS_WITH_CHANNEL_PAGE_SHORTS_BY_CHANNEL,
       { channelId, entries }
     )
   }
 
   static updateCommunityPostsByChannelId(channelId, entries, timestamp) {
-    return dbSubscriptionCache(
-      DBActions.SUBSCRIPTION_CACHE.UPDATE_COMMUNITY_POSTS_BY_CHANNEL,
-      { channelId, entries, timestamp }
-    )
+    return queueSubscriptionFeedUpdate({ channelId, field: 'communityPosts', entries, timestamp })
   }
 
   static deleteMultipleChannels(channelIds) {
-    return dbSubscriptionCache(DBActions.GENERAL.DELETE_MULTIPLE, channelIds)
+    return subscriptionCacheRequest(DBActions.GENERAL.DELETE_MULTIPLE, channelIds)
   }
 
   static deleteAll() {
-    return dbSubscriptionCache(DBActions.GENERAL.DELETE_ALL)
+    return subscriptionCacheRequest(DBActions.GENERAL.DELETE_ALL)
   }
 }
 
