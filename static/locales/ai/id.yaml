@@ -2219,3 +2219,12 @@ Library Format Changed:
   Detail: "Versi lama OpenTubeX masih dapat membuka pustaka Anda, tetapi menampilkannya seperti sebelum pembaruan ini. Perubahan yang Anda buat di versi lama akan ditambahkan saat Anda kembali ke versi ini."
 Invidious Fallback Warning: "Permintaan ini melewati instans Invidious yang Anda konfigurasi dan terhubung langsung ke YouTube, sehingga mengungkap alamat IP Anda."
 Automatically unloaded to free memory: "Dibongkar otomatis untuk mengosongkan memori"
+Home Widgets:
+  Continue Watching: "Lanjutkan menonton"
+  Continue Watching Description: "Lanjutkan video yang mulai Anda tonton"
+  Continue Watching Empty: "Video yang mulai Anda tonton akan muncul di sini"
+  Quick Access: "Akses cepat"
+  Quick Access Description: "Buka Cari, Langganan, atau Tonton Nanti"
+  Search: "Cari"
+  Subscriptions: "Langganan"
+  Watch Later: "Tonton Nanti"

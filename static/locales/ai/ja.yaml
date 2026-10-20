@@ -2203,3 +2203,12 @@ Library Format Changed:
   Detail: "以前のバージョンの OpenTubeX でもライブラリを開けますが、この更新前の状態で表示されます。以前のバージョンで行った変更は、このバージョンに戻ったときに追加されます。"
 Invidious Fallback Warning: "このリクエストは設定した Invidious インスタンスを経由せず、YouTube に直接接続するため、IP アドレスが公開されます。"
 Automatically unloaded to free memory: "メモリを解放するために自動的にアンロードされました"
+Home Widgets:
+  Continue Watching: "視聴を続ける"
+  Continue Watching Description: "視聴を始めた動画を再開します"
+  Continue Watching Empty: "視聴を始めた動画がここに表示されます"
+  Quick Access: "クイックアクセス"
+  Quick Access Description: "検索、登録チャンネル、後で見るを開きます"
+  Search: "検索"
+  Subscriptions: "登録チャンネル"
+  Watch Later: "後で見る"

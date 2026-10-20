@@ -2193,3 +2193,12 @@ Library Format Changed:
   Detail: "Older versions of OpenTubeX can still open your library, but they show it as it was before this update. Changes you make in an older version are added back when you return to this version."
 Invidious Fallback Warning: "This request bypasses your configured Invidious instance and connects directly to YouTube, exposing your IP address."
 Automatically unloaded to free memory: "Automatically unloaded to free memory"
+Home Widgets:
+  Continue Watching: "Continue watching"
+  Continue Watching Description: "Resume videos you started watching"
+  Continue Watching Empty: "Videos you start watching appear here"
+  Quick Access: "Quick access"
+  Quick Access Description: "Open Search, Subscriptions or Watch Later"
+  Search: "Search"
+  Subscriptions: "Subscriptions"
+  Watch Later: "Watch Later"

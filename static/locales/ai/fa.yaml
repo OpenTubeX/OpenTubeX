@@ -2292,3 +2292,12 @@ Library Format Changed:
   Detail: "نسخه‌های قدیمی‌تر OpenTubeX همچنان می‌توانند کتابخانهٔ شما را باز کنند، اما آن را همان‌طور که پیش از این به‌روزرسانی بود نشان می‌دهند. تغییراتی که در نسخهٔ قدیمی‌تر انجام می‌دهید هنگام بازگشت به این نسخه افزوده می‌شوند."
 Invidious Fallback Warning: "این درخواست نمونهٔ Invidious پیکربندی‌شدهٔ شما را دور می‌زند و مستقیماً به YouTube وصل می‌شود و نشانی IP شما را آشکار می‌کند."
 Automatically unloaded to free memory: "برای آزاد کردن حافظه به‌طور خودکار تخلیه شد"
+Home Widgets:
+  Continue Watching: "ادامهٔ تماشا"
+  Continue Watching Description: "ادامهٔ ویدیوهایی که تماشایشان را شروع کرده‌اید"
+  Continue Watching Empty: "ویدیوهایی که تماشایشان را شروع می‌کنید اینجا نمایش داده می‌شوند"
+  Quick Access: "دسترسی سریع"
+  Quick Access Description: "باز کردن جستجو، دنبال کرده ها یا تماشا در آینده"
+  Search: "جستجو"
+  Subscriptions: "دنبال کرده ها"
+  Watch Later: "تماشا در آینده"

@@ -2245,3 +2245,12 @@ Library Format Changed:
   Detail: "Các phiên bản cũ hơn của OpenTubeX vẫn có thể mở thư viện của bạn, nhưng hiển thị nó như trước bản cập nhật này. Các thay đổi bạn thực hiện trong phiên bản cũ hơn sẽ được thêm lại khi bạn quay lại phiên bản này."
 Invidious Fallback Warning: "Yêu cầu này bỏ qua máy chủ Invidious bạn đã cấu hình và kết nối trực tiếp đến YouTube, làm lộ địa chỉ IP của bạn."
 Automatically unloaded to free memory: "Đã tự động dỡ tải để giải phóng bộ nhớ"
+Home Widgets:
+  Continue Watching: "Tiếp tục xem"
+  Continue Watching Description: "Tiếp tục các video bạn đã bắt đầu xem"
+  Continue Watching Empty: "Các video bạn bắt đầu xem sẽ xuất hiện ở đây"
+  Quick Access: "Truy cập nhanh"
+  Quick Access Description: "Mở Tìm kiếm, Đăng ký hoặc Xem sau"
+  Search: "Tìm kiếm"
+  Subscriptions: "Đăng ký"
+  Watch Later: "Xem sau"

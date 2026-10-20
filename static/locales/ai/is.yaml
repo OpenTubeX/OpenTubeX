@@ -2230,3 +2230,12 @@ Library Format Changed:
   Detail: "Eldri útgáfur af OpenTubeX geta enn opnað safnið þitt, en þær sýna það eins og það var fyrir þessa uppfærslu. Breytingum sem þú gerir í eldri útgáfu er bætt við þegar þú snýrð aftur í þessa útgáfu."
 Invidious Fallback Warning: "Þessi beiðni fer fram hjá Invidious-þjóninum sem þú stilltir og tengist beint við YouTube, sem afhjúpar IP-töluna þína."
 Automatically unloaded to free memory: "Sjálfkrafa losað úr minni"
+Home Widgets:
+  Continue Watching: "Halda áfram að horfa"
+  Continue Watching Description: "Haltu áfram með myndskeið sem þú byrjaðir að horfa á"
+  Continue Watching Empty: "Myndskeið sem þú byrjar að horfa á birtast hér"
+  Quick Access: "Flýtiaðgangur"
+  Quick Access Description: "Opna Leit, Áskriftir eða Horfa síðar"
+  Search: "Leita"
+  Subscriptions: "Áskriftir"
+  Watch Later: "Horfa síðar"

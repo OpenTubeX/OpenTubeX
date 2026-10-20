@@ -2800,3 +2800,12 @@ Library Format Changed:
   Detail: "Starejše različice OpenTubeX lahko še vedno odprejo vašo knjižnico, vendar jo prikažejo takšno, kot je bila pred to posodobitvijo. Spremembe, ki jih naredite v starejši različici, se dodajo, ko se vrnete na to različico."
 Invidious Fallback Warning: "Ta zahteva zaobide nastavljeni strežnik Invidious in se poveže neposredno z YouTubom ter razkrije vaš naslov IP."
 Automatically unloaded to free memory: "Samodejno razloženo za sprostitev pomnilnika"
+Home Widgets:
+  Continue Watching: "Nadaljuj ogled"
+  Continue Watching Description: "Nadaljujte videoposnetke, ki ste jih začeli gledati"
+  Continue Watching Empty: "Tukaj se prikažejo videoposnetki, ki jih začnete gledati"
+  Quick Access: "Hitri dostop"
+  Quick Access Description: "Odpri Iskanje, Naročnine ali Za poznejši ogled"
+  Search: "Iskanje"
+  Subscriptions: "Naročnine"
+  Watch Later: "Za poznejši ogled"

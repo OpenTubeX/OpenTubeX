@@ -3384,6 +3384,16 @@ Native Permissions:
   Local Network Denied: "Die Berechtigung für Geräte in der Nähe wurde verweigert."
   Local Network: "Geräte im lokalen Netzwerk finden, Videos auf diese Geräte übertragen und Einstellungen und Daten geräteübergreifend synchronisieren."
 
+Home Widgets:
+  Continue Watching: Weiterschauen
+  Continue Watching Description: Begonnene Videos fortsetzen
+  Continue Watching Empty: Begonnene Videos erscheinen hier
+  Quick Access: Schnellzugriff
+  Quick Access Description: Suche, Abos oder Später ansehen öffnen
+  Search: Suche
+  Subscriptions: Abos
+  Watch Later: Später ansehen
+
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.
 Mobile Navigation:
   home: "Start"

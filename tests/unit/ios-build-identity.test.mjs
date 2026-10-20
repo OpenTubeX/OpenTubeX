@@ -13,6 +13,7 @@ async function prepareFixture(t) {
   }
   await symlink(resolve('node_modules'), join(directory, 'node_modules'))
   await copyFile('_scripts/prepareIos.mjs', join(directory, '_scripts/prepareIos.mjs'))
+  await copyFile('_scripts/nativeTranslations.mjs', join(directory, '_scripts/nativeTranslations.mjs'))
   await copyFile('ios/App/CapApp-SPM/Package.swift', join(directory, 'ios/App/CapApp-SPM/Package.swift'))
   const projectPath = join(directory, 'ios/App/App.xcodeproj/project.pbxproj')
   await copyFile('ios/App/App.xcodeproj/project.pbxproj', projectPath)

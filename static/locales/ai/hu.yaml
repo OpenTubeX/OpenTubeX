@@ -2204,3 +2204,12 @@ Library Format Changed:
   Detail: "Az OpenTubeX régebbi verziói továbbra is meg tudják nyitni a könyvtáradat, de a frissítés előtti állapotában mutatják. A régebbi verzióban végzett módosítások bekerülnek, amikor visszatérsz ehhez a verzióhoz."
 Invidious Fallback Warning: "Ez a kérés megkerüli a beállított Invidious-példányt, és közvetlenül a YouTube-hoz csatlakozik, felfedve az IP-címedet."
 Automatically unloaded to free memory: "Automatikusan kiürítve memória felszabadításához"
+Home Widgets:
+  Continue Watching: "Megtekintés folytatása"
+  Continue Watching Description: "Folytasd az elkezdett videókat"
+  Continue Watching Empty: "Az elkezdett videók itt jelennek meg"
+  Quick Access: "Gyors elérés"
+  Quick Access Description: "Keresés, Feliratkozások vagy Megnézendő megnyitása"
+  Search: "Keresés"
+  Subscriptions: "Feliratkozások"
+  Watch Later: "Megnézendő"

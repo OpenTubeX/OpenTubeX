@@ -2704,3 +2704,12 @@ Library Format Changed:
   Detail: "Senesnės OpenTubeX versijos vis dar gali atidaryti jūsų biblioteką, tačiau rodo ją tokią, kokia ji buvo prieš šį atnaujinimą. Senesnėje versijoje atlikti pakeitimai pridedami, kai grįžtate į šią versiją."
 Invidious Fallback Warning: "Ši užklausa apeina jūsų sukonfigūruotą „Invidious“ egzempliorių ir jungiasi tiesiogiai prie „YouTube“, atskleisdama jūsų IP adresą."
 Automatically unloaded to free memory: "Automatiškai iškrauta atminčiai atlaisvinti"
+Home Widgets:
+  Continue Watching: "Tęsti žiūrėjimą"
+  Continue Watching Description: "Tęskite pradėtus žiūrėti vaizdo įrašus"
+  Continue Watching Empty: "Čia rodomi vaizdo įrašai, kuriuos pradedate žiūrėti"
+  Quick Access: "Greita prieiga"
+  Quick Access Description: "Atidaryti Paiešką, Prenumeratas arba Žiūrėti vėliau"
+  Search: "Ieškoti"
+  Subscriptions: "Prenumeratos"
+  Watch Later: "Žiūrėti vėliau"

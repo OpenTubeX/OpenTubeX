@@ -2205,3 +2205,12 @@ Library Format Changed:
   Detail: "舊版 OpenTubeX 仍可開啟你的媒體庫，但會顯示此次更新之前的狀態。你在舊版中所做的變更會在你回到此版本時加回來。"
 Invidious Fallback Warning: "此請求繞過了你設定的 Invidious 執行個體，直接連線至 YouTube，因而暴露你的 IP 位址。"
 Automatically unloaded to free memory: "已自動卸載以釋放記憶體"
+Home Widgets:
+  Continue Watching: "繼續觀看"
+  Continue Watching Description: "繼續觀看你已開始觀看的影片"
+  Continue Watching Empty: "你開始觀看的影片會顯示在這裡"
+  Quick Access: "快速存取"
+  Quick Access Description: "開啟搜尋、訂閱或稍後觀看"
+  Search: "搜尋"
+  Subscriptions: "訂閱"
+  Watch Later: "稍後觀看"

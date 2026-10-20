@@ -2257,3 +2257,12 @@ Library Format Changed:
   Detail: "גרסאות ישנות יותר של OpenTubeX עדיין יכולות לפתוח את הספרייה שלך, אבל הן מציגות אותה כפי שהייתה לפני העדכון הזה. שינויים שתבצע בגרסה ישנה יותר יתווספו כשתחזור לגרסה זו."
 Invidious Fallback Warning: "בקשה זו עוקפת את שרת Invidious שהגדרת ומתחברת ישירות ל־YouTube, תוך חשיפת כתובת ה־IP שלך."
 Automatically unloaded to free memory: "נפרקה אוטומטית כדי לפנות זיכרון"
+Home Widgets:
+  Continue Watching: "המשך צפייה"
+  Continue Watching Description: "המשך סרטונים שהתחלת לצפות בהם"
+  Continue Watching Empty: "סרטונים שתתחיל לצפות בהם יופיעו כאן"
+  Quick Access: "גישה מהירה"
+  Quick Access Description: "פתיחת חיפוש, מינויים או לצפייה בהמשך"
+  Search: "חיפוש"
+  Subscriptions: "מינויים"
+  Watch Later: "לצפייה בהמשך"
