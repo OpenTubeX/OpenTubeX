@@ -1126,6 +1126,17 @@ Settings:
     Pairing Verification Unavailable: Ingen kryptert synkroniseringssamling er tilgjengelig for å kontrollere den overførte nøkkelen. Synkroniser den eksisterende enheten, og prøv på nytt.
     Pairing Completed: Sammenkoblingen av enhetene er fullført
     Pairing Approved: Sammenkoblingen av enhetene er godkjent
+    Use Pairing Invite: Bruk kode fra tilkoblet enhet
+    Show Pairing Invite: Vis sammenkoblingskode
+    Scan Pairing Invite: 'Åpne "Koble sammen med en eksisterende enhet" på enheten du legger til, velg "Bruk kode fra tilkoblet enhet", og skann denne koden.'
+    Pairing Invite QR Alt: QR-kode for sammenkobling av enheten du legger til
+    Pairing Invite Text Hint: Kopier denne koden til enheten du legger til. Den lar en enhet be om tilgang til kontoen din, så fjern den fra utklippstavlehistorikken etter sammenkoblingen.
+    Pairing Invite Warning: Vis denne koden bare til enheten du legger til. Du må fortsatt godkjenne forespørselen fra den på denne enheten.
+    Pairing Invite Scan Hint: Skann sammenkoblingskoden som vises på den tilkoblede enheten din.
+    Pairing Invite Entry Hint: Lim inn sammenkoblingskoden som vises på den tilkoblede enheten din.
+    Pairing Invite Code Hint: Godkjenn forespørselen på den tilkoblede enheten bare hvis den viser denne koden. Sammenkoblingen fullføres deretter automatisk.
+    Pairing Invite Approval Hint: Godkjenn bare hvis enheten du legger til, viser denne koden.
+    Pairing Invite Approved: Sammenkoblingen er godkjent. Den nye enheten fullfører sammenkoblingen automatisk.
     Disconnect: Koble fra
     Delete Account: Slett synkroniseringskonto
     Delete Account Confirmation: Vil du slette synkroniseringskontoen?

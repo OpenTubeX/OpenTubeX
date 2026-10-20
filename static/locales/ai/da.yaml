@@ -1166,6 +1166,17 @@ Settings:
     Pairing Verification Unavailable: Der er ingen krypteret synkroniseringssamling til at bekræfte den overførte nøgle. Synkroniser den eksisterende enhed, og prøv igen.
     Pairing Completed: Parringen af enheden er fuldført
     Pairing Approved: Parringen af enheden er godkendt
+    Use Pairing Invite: Brug kode fra tilsluttet enhed
+    Show Pairing Invite: Vis parringskode
+    Scan Pairing Invite: 'Åbn "Par med en eksisterende enhed" på den enhed, du tilføjer, vælg "Brug kode fra tilsluttet enhed", og scan denne kode.'
+    Pairing Invite QR Alt: Parrings-QR-kode til den enhed, du tilføjer
+    Pairing Invite Text Hint: Kopiér denne kode til den enhed, du tilføjer. Den lader en enhed anmode om adgang til din konto, så ryd den fra udklipsholderens historik efter parringen.
+    Pairing Invite Warning: Vis kun denne kode for den enhed, du tilføjer. Du skal stadig godkende dens anmodning på denne enhed.
+    Pairing Invite Scan Hint: Scan parringskoden, der vises på din tilsluttede enhed.
+    Pairing Invite Entry Hint: Indsæt parringskoden, der vises på din tilsluttede enhed.
+    Pairing Invite Code Hint: Godkend kun anmodningen på din tilsluttede enhed, hvis den viser denne kode. Parringen fuldføres derefter automatisk.
+    Pairing Invite Approval Hint: Godkend kun, hvis den enhed, du tilføjer, viser denne kode.
+    Pairing Invite Approved: Parringen er godkendt. Den nye enhed fuldfører parringen automatisk.
     Disconnect: Afbryd forbindelsen
     Delete Account: Slet synkroniseringskonto
     Delete Account Confirmation: Slet synkroniseringskontoen?

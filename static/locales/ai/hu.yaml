@@ -1124,6 +1124,17 @@ Settings:
     Pairing Verification Unavailable: Nem érhető el titkosított szinkronizálási gyűjtemény az átvitt kulcs ellenőrzéséhez. Szinkronizálja a meglévő eszközt, majd próbálja újra.
     Pairing Completed: Eszközpárosítás befejezve
     Pairing Approved: Eszközpárosítás jóváhagyva
+    Use Pairing Invite: Csatlakoztatott eszköz kódjának használata
+    Show Pairing Invite: Párosítási kód megjelenítése
+    Scan Pairing Invite: A hozzáadni kívánt eszközön nyissa meg a „Párosítás meglévő eszközzel” menüpontot, válassza a „Csatlakoztatott eszköz kódjának használata” lehetőséget, és olvassa be ezt a kódot.
+    Pairing Invite QR Alt: Párosítási QR-kód a hozzáadni kívánt eszközhöz
+    Pairing Invite Text Hint: Másolja ezt a kódot a hozzáadni kívánt eszközre. Ezzel egy eszköz hozzáférést kérhet a fiókjához, ezért a párosítás után törölje a vágólap előzményeiből.
+    Pairing Invite Warning: Ezt a kódot csak a hozzáadni kívánt eszköznek mutassa meg. A kérését továbbra is jóvá kell hagynia ezen az eszközön.
+    Pairing Invite Scan Hint: Olvassa be a csatlakoztatott eszközén megjelenő párosítási kódot.
+    Pairing Invite Entry Hint: Illessze be a csatlakoztatott eszközén megjelenő párosítási kódot.
+    Pairing Invite Code Hint: Csak akkor hagyja jóvá a kérést a csatlakoztatott eszközén, ha az ezt a kódot mutatja. A párosítás ezután automatikusan befejeződik.
+    Pairing Invite Approval Hint: Csak akkor hagyja jóvá, ha a hozzáadni kívánt eszköz ezt a kódot mutatja.
+    Pairing Invite Approved: Párosítás jóváhagyva. Az új eszköz automatikusan befejezi a párosítást.
     Disconnect: Leválasztás
     Delete Account: Szinkronizálási fiók törlése
     Delete Account Confirmation: Törli a szinkronizálási fiókot?

@@ -1124,6 +1124,17 @@ Settings:
     Pairing Verification Unavailable: Nid oes casgliad cysoni wedi'i amgryptio ar gael i ddilysu'r allwedd a drosglwyddwyd. Cysonwch y ddyfais bresennol, yna rhowch gynnig arall arni.
     Pairing Completed: Wedi cwblhau paru'r ddyfais
     Pairing Approved: Wedi cymeradwyo paru'r ddyfais
+    Use Pairing Invite: Defnyddio cod o ddyfais gysylltiedig
+    Show Pairing Invite: Dangos cod paru
+    Scan Pairing Invite: 'Ar y ddyfais rydych chi''n ei hychwanegu, agorwch "Paru â dyfais bresennol", dewiswch "Defnyddio cod o ddyfais gysylltiedig", a sganiwch y cod hwn.'
+    Pairing Invite QR Alt: Cod QR paru ar gyfer y ddyfais rydych chi'n ei hychwanegu
+    Pairing Invite Text Hint: Copïwch y cod hwn i'r ddyfais rydych chi'n ei hychwanegu. Mae'n gadael i ddyfais ofyn am fynediad i'ch cyfrif, felly cliriwch ef o hanes y clipfwrdd ar ôl paru.
+    Pairing Invite Warning: Dangoswch y cod hwn i'r ddyfais rydych chi'n ei hychwanegu yn unig. Mae angen i chi gymeradwyo ei chais ar y ddyfais hon o hyd.
+    Pairing Invite Scan Hint: Sganiwch y cod paru sy'n cael ei ddangos ar eich dyfais gysylltiedig.
+    Pairing Invite Entry Hint: Gludwch y cod paru sy'n cael ei ddangos ar eich dyfais gysylltiedig.
+    Pairing Invite Code Hint: Cymeradwywch y cais ar eich dyfais gysylltiedig dim ond os yw'n dangos y cod hwn. Bydd y paru wedyn yn gorffen yn awtomatig.
+    Pairing Invite Approval Hint: Cymeradwywch dim ond os yw'r ddyfais rydych chi'n ei hychwanegu yn dangos y cod hwn.
+    Pairing Invite Approved: Wedi cymeradwyo'r paru. Bydd y ddyfais newydd yn gorffen paru'n awtomatig.
     Disconnect: Datgysylltu
     Delete Account: Dileu'r cyfrif cysoni
     Delete Account Confirmation: Dileu'r cyfrif cysoni?

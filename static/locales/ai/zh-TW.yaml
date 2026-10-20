@@ -1125,6 +1125,17 @@ Settings:
     Pairing Verification Unavailable: 沒有可用來驗證所傳送金鑰的加密同步資料集合。請先同步現有裝置，再試一次。
     Pairing Completed: 裝置配對完成
     Pairing Approved: 已核准裝置配對
+    Use Pairing Invite: 使用已連線裝置上的代碼
+    Show Pairing Invite: 顯示配對碼
+    Scan Pairing Invite: 請在要新增的裝置上開啟「與現有裝置配對」，選擇「使用已連線裝置上的代碼」，然後掃描此代碼。
+    Pairing Invite QR Alt: 要新增之裝置的配對 QR Code
+    Pairing Invite Text Hint: 請將此代碼複製到要新增的裝置。此代碼可讓裝置要求存取您的帳號，因此配對後請將其從剪貼簿記錄中清除。
+    Pairing Invite Warning: 只向要新增的裝置顯示此代碼。您仍需在此裝置上核准其要求。
+    Pairing Invite Scan Hint: 掃描已連線裝置上顯示的配對碼。
+    Pairing Invite Entry Hint: 貼上已連線裝置上顯示的配對碼。
+    Pairing Invite Code Hint: 只有在已連線裝置顯示此代碼時，才在該裝置上核准要求。配對隨後會自動完成。
+    Pairing Invite Approval Hint: 只有在要新增的裝置顯示此代碼時才可核准。
+    Pairing Invite Approved: 已核准配對。新裝置會自動完成配對。
     Disconnect: 中斷連線
     Delete Account: 刪除同步帳號
     Delete Account Confirmation: 要刪除同步帳號嗎？

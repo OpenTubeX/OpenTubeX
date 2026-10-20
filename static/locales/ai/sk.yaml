@@ -1125,6 +1125,17 @@ Settings:
     Pairing Verification Unavailable: Na overenie preneseného kľúča nie je dostupná žiadna zašifrovaná synchronizovaná kolekcia. Synchronizujte existujúce zariadenie a skúste to znova.
     Pairing Completed: Párovanie zariadenia bolo dokončené
     Pairing Approved: Párovanie zariadenia bolo schválené
+    Use Pairing Invite: Použiť kód z pripojeného zariadenia
+    Show Pairing Invite: Zobraziť párovací kód
+    Scan Pairing Invite: Na pridávanom zariadení otvorte „Spárovať s existujúcim zariadením“, vyberte „Použiť kód z pripojeného zariadenia“ a naskenujte tento kód.
+    Pairing Invite QR Alt: Párovací QR kód pre pridávané zariadenie
+    Pairing Invite Text Hint: Skopírujte tento kód do pridávaného zariadenia. Umožňuje zariadeniu požiadať o prístup k vášmu účtu, preto ho po spárovaní vymažte z histórie schránky.
+    Pairing Invite Warning: Tento kód ukážte iba pridávanému zariadeniu. Jeho žiadosť musíte aj tak schváliť na tomto zariadení.
+    Pairing Invite Scan Hint: Naskenujte párovací kód zobrazený na pripojenom zariadení.
+    Pairing Invite Entry Hint: Vložte párovací kód zobrazený na pripojenom zariadení.
+    Pairing Invite Code Hint: Žiadosť na pripojenom zariadení schváľte, len ak zobrazuje tento kód. Párovanie sa potom dokončí automaticky.
+    Pairing Invite Approval Hint: Schváľte, len ak pridávané zariadenie zobrazuje tento kód.
+    Pairing Invite Approved: Párovanie bolo schválené. Nové zariadenie dokončí párovanie automaticky.
     Disconnect: Odpojiť
     Delete Account: Odstrániť synchronizačný účet
     Delete Account Confirmation: Odstrániť synchronizačný účet?

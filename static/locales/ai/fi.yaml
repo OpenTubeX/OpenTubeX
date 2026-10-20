@@ -1148,6 +1148,17 @@ Settings:
     Pairing Verification Unavailable: Siirrettyä avainta ei voi vahvistaa, koska salattua synkronointikokoelmaa ei ole saatavilla. Synkronoi olemassa oleva laite ja yritä sitten uudelleen.
     Pairing Completed: Laitteen paritus on valmis
     Pairing Approved: Laitteen paritus hyväksyttiin
+    Use Pairing Invite: Käytä yhdistetyn laitteen koodia
+    Show Pairing Invite: Näytä parituskoodi
+    Scan Pairing Invite: Avaa lisättävässä laitteessa "Parita olemassa olevan laitteen kanssa", valitse "Käytä yhdistetyn laitteen koodia" ja skannaa tämä koodi.
+    Pairing Invite QR Alt: Lisättävän laitteen parituksen QR-koodi
+    Pairing Invite Text Hint: Kopioi tämä koodi lisättävään laitteeseen. Sen avulla laite voi pyytää pääsyä tiliisi, joten poista se leikepöydän historiasta parituksen jälkeen.
+    Pairing Invite Warning: Näytä tämä koodi vain lisättävälle laitteelle. Sinun on silti hyväksyttävä sen pyyntö tässä laitteessa.
+    Pairing Invite Scan Hint: Skannaa yhdistetyssä laitteessasi näkyvä parituskoodi.
+    Pairing Invite Entry Hint: Liitä yhdistetyssä laitteessasi näkyvä parituskoodi.
+    Pairing Invite Code Hint: Hyväksy pyyntö yhdistetyssä laitteessasi vain, jos siinä näkyy tämä koodi. Paritus valmistuu sen jälkeen automaattisesti.
+    Pairing Invite Approval Hint: Hyväksy vain, jos lisättävä laite näyttää tämän koodin.
+    Pairing Invite Approved: Paritus hyväksyttiin. Uusi laite viimeistelee parituksen automaattisesti.
     Disconnect: Katkaise yhteys
     Delete Account: Poista synkronointitili
     Delete Account Confirmation: Poistetaanko synkronointitili?

@@ -1148,6 +1148,17 @@ Settings:
     Pairing Verification Unavailable: אין אוסף סנכרון מוצפן שאפשר לאמת באמצעותו את המפתח שהועבר. סנכרנו את המכשיר הקיים ונסו שוב.
     Pairing Completed: צימוד המכשיר הושלם
     Pairing Approved: צימוד המכשיר אושר
+    Use Pairing Invite: שימוש בקוד מהמכשיר המחובר
+    Show Pairing Invite: הצגת קוד הצימוד
+    Scan Pairing Invite: במכשיר שאתם מוסיפים, פתחו את "צימוד עם מכשיר קיים", בחרו "שימוש בקוד מהמכשיר המחובר" וסרקו את הקוד הזה.
+    Pairing Invite QR Alt: קוד QR לצימוד המכשיר שאתם מוסיפים
+    Pairing Invite Text Hint: העתיקו את הקוד למכשיר שאתם מוסיפים. הוא מאפשר למכשיר לבקש גישה לחשבון שלכם, לכן מחקו אותו מהיסטוריית הלוח לאחר הצימוד.
+    Pairing Invite Warning: הציגו את הקוד רק למכשיר שאתם מוסיפים. עדיין תצטרכו לאשר את הבקשה שלו במכשיר הזה.
+    Pairing Invite Scan Hint: סרקו את קוד הצימוד שמוצג במכשיר המחובר שלכם.
+    Pairing Invite Entry Hint: הדביקו את קוד הצימוד שמוצג במכשיר המחובר שלכם.
+    Pairing Invite Code Hint: אשרו את הבקשה במכשיר המחובר שלכם רק אם מוצג בו הקוד הזה. לאחר מכן הצימוד יושלם אוטומטית.
+    Pairing Invite Approval Hint: אשרו רק אם המכשיר שאתם מוסיפים מציג את הקוד הזה.
+    Pairing Invite Approved: הצימוד אושר. המכשיר החדש ישלים את הצימוד אוטומטית.
     Disconnect: ניתוק
     Delete Account: מחיקת חשבון הסנכרון
     Delete Account Confirmation: למחוק את חשבון הסנכרון?

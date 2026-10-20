@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto'
+import { createHash, randomBytes } from 'node:crypto'
 
 import {
   test,
@@ -10,6 +10,29 @@ import {
   waitForAppReady,
   readDatastore,
 } from '../../helpers/app.mjs'
+
+const PAIRING_SERVER_URL = 'https://pairing.example'
+const PAIRING_ACCOUNT_ID = '0198e2d4-8ad2-7f73-8d6e-4f076707ce25'
+
+function pairingComparisonCode(request) {
+  const fields = ['version', 'origin', 'sessionId', 'recipientPublicKey', 'recipientDeviceId', 'recipientDeviceName', 'pairingSecret']
+  const digest = createHash('sha256')
+    .update(JSON.stringify(Object.fromEntries(fields.map(field => [field, request[field]]))))
+    .digest()
+  return String(digest.readUInt32BE(0) % 1000000).padStart(6, '0')
+}
+
+async function disableCamera(page) {
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'mediaDevices', {
+      configurable: true,
+      value: {
+        enumerateDevices: () => Promise.resolve([]),
+        getUserMedia: () => Promise.reject(new Error('No camera'))
+      }
+    })
+  })
+}
 
 test.describe('settings', () => {
   test('links the server-provided sync privacy policy and clears it when switching servers', async ({ page }) => {
@@ -182,6 +205,90 @@ test.describe('settings', () => {
       .digest('base64url')).toBe(createdSession.recipient_token_hash)
   })
 
+  test('joins with a pairing code shown on a connected device', async ({ page }) => {
+    const invite = {
+      version: 1,
+      origin: PAIRING_SERVER_URL,
+      sessionId: randomBytes(32).toString('base64url'),
+      pairingSecret: randomBytes(32).toString('base64url'),
+      recipientToken: randomBytes(32).toString('base64url'),
+      accountId: PAIRING_ACCOUNT_ID
+    }
+    const inviteCode = `opentubex-pairing-invite:${Buffer.from(JSON.stringify(invite)).toString('base64url')}`
+    let createdSession
+    let pendingSession
+    let pollToken
+
+    await page.route(`${PAIRING_SERVER_URL}/**`, async route => {
+      const request = route.request()
+      const url = new URL(request.url())
+      if (url.pathname === '/health') {
+        await route.fulfill({
+          json: {
+            status: 'ok',
+            capabilities: { encrypted_sync: 1, live_sync: 1, key_pairing: 1 }
+          }
+        })
+        return
+      }
+      if (url.pathname === '/v1/pairing' && request.method() === 'POST') {
+        createdSession = request.postDataJSON()
+        pendingSession = {
+          version: 1,
+          id: createdSession.id,
+          account_id: null,
+          recipient_public_key: createdSession.recipient_public_key,
+          recipient_device_id: createdSession.recipient_device_id,
+          recipient_device_name: createdSession.recipient_device_name,
+          approving_device_id: null,
+          expires_at: Date.now() + 120_000,
+          approved: false
+        }
+        await route.fulfill({ status: 201, json: pendingSession })
+        return
+      }
+      if (url.pathname === `/v1/pairing/${invite.sessionId}` && request.method() === 'GET') {
+        pollToken = request.headers()['x-pairing-token']
+        await route.fulfill({ json: pendingSession })
+        return
+      }
+      await route.fulfill({ status: 404 })
+    })
+
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
+    const syncSection = page.locator('[data-section="sync"]')
+    await syncSection.getByText('Enable Sync', { exact: true }).click()
+    await syncSection.getByLabel('Sync server URL').fill(PAIRING_SERVER_URL)
+    await syncSection.getByLabel('Sync server URL').press('Tab')
+    await disableCamera(page)
+
+    await syncSection.getByRole('button', { name: 'Pair with an existing device' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Pair with an existing device' })
+    await dialog.getByRole('button', { name: 'Use code from connected device' }).click()
+    await expect(dialog.getByRole('alert')).toContainText('could not access a camera')
+    await dialog.getByRole('textbox', { name: 'Pairing code' }).fill(inviteCode)
+    await dialog.getByRole('button', { name: 'Check code' }).click()
+
+    const comparisonCode = dialog.locator('.pairingVerificationCode')
+    await expect(comparisonCode).toHaveText(/^\d{6}$/)
+    expect(createdSession).toMatchObject({ version: 1, id: invite.sessionId })
+    expect(createdSession.recipient_token_hash).toBe(createHash('sha256')
+      .update(Buffer.from(invite.recipientToken, 'base64url'))
+      .digest('base64url'))
+    await expect(comparisonCode).toHaveText(pairingComparisonCode({
+      ...invite,
+      recipientPublicKey: createdSession.recipient_public_key,
+      recipientDeviceId: createdSession.recipient_device_id,
+      recipientDeviceName: createdSession.recipient_device_name
+    }))
+    await expect.poll(() => pollToken).toBe(invite.recipientToken)
+
+    // Anyone who saw the invite could claim the session with another account.
+    pendingSession = { ...pendingSession, account_id: '0198e2d4-8ad2-7f73-8d6e-4f076707ce26' }
+    await expect(dialog.getByRole('alert')).toContainText('The pairing request changed')
+  })
+
   test('keeps the sync server idle until sync is enabled', async ({ page }) => {
     const syncRequests = []
     await page.route('https://sync.opentubex.org/**', async (route) => {
@@ -211,7 +318,11 @@ test.describe('secure pairing manual entry', () => {
         syncServerPrivacyKey: `${'A'.repeat(43)}=`,
         syncServerPrivacyMode: 'enhanced',
         syncServerPrivacySalt: `${'A'.repeat(22)}==`,
-        syncServerToken: 'pairing-test-token',
+        syncServerToken: [
+          Buffer.from('{"alg":"HS256","typ":"JWT"}').toString('base64url'),
+          Buffer.from(JSON.stringify({ sub: PAIRING_ACCOUNT_ID, exp: 4102444800 })).toString('base64url'),
+          'signature'
+        ].join('.'),
         syncServerUrl: serverUrl,
         syncServerUsername: 'pairing-user'
       }
@@ -276,15 +387,7 @@ test.describe('secure pairing manual entry', () => {
     const syncSection = page.locator('[data-section="sync"]')
     await expect(syncSection.getByText('Enhanced privacy is enabled.')).toBeVisible()
 
-    await page.evaluate(() => {
-      Object.defineProperty(navigator, 'mediaDevices', {
-        configurable: true,
-        value: {
-          enumerateDevices: () => Promise.resolve([]),
-          getUserMedia: () => Promise.reject(new Error('No camera'))
-        }
-      })
-    })
+    await disableCamera(page)
 
     await syncSection.getByRole('button', { name: 'Pair another device' }).click()
     const dialog = page.getByRole('dialog', { name: 'Pair another device' })
@@ -302,6 +405,106 @@ test.describe('secure pairing manual entry', () => {
     expect(JSON.stringify(approvedPayload)).not.toMatch(/fresh\.pairing\.token|pairing-user/)
     await expect(dialog.locator('.promptFixedFooter').getByRole('button', { name: 'Close' }))
       .toBeVisible()
+  })
+  test('shows a pairing code when this device cannot scan the new device', async ({ page }) => {
+    const accountId = '0198e2d4-8ad2-7f73-8d6e-4f076707ce25'
+    const recipient = {
+      recipientPublicKey: 'sfG4QN56MkGwJ0jPmwW3TcjF6EUSmHOIF712qo6-jCs',
+      recipientDeviceId: 'MDEyMzQ1Njc4OTo7PD0-Pw',
+      recipientDeviceName: 'Phone without login'
+    }
+    let invite = null
+    let registered = false
+    const pollTokens = []
+    let approvedPayload
+
+    function session(overrides = {}) {
+      return {
+        version: 1,
+        id: invite.sessionId,
+        account_id: null,
+        recipient_public_key: recipient.recipientPublicKey,
+        recipient_device_id: recipient.recipientDeviceId,
+        recipient_device_name: recipient.recipientDeviceName,
+        approving_device_id: null,
+        expires_at: Date.now() + 120_000,
+        approved: false,
+        ...overrides
+      }
+    }
+
+    await page.route(`${serverUrl}/**`, async route => {
+      const request = route.request()
+      const url = new URL(request.url())
+      if (url.pathname === '/health') {
+        await route.fulfill({
+          json: {
+            status: 'ok',
+            capabilities: { encrypted_sync: 1, live_sync: 1, key_pairing: 1 }
+          }
+        })
+        return
+      }
+      if (invite && url.pathname === `/v1/pairing/${invite.sessionId}` && request.method() === 'GET') {
+        pollTokens.push(request.headers()['x-pairing-token'])
+        if (registered) await route.fulfill({ json: session() })
+        else await route.fulfill({ status: 404, body: 'pairing session not found or expired' })
+        return
+      }
+      if (invite && url.pathname === `/v1/pairing/${invite.sessionId}/claim`) {
+        expect(request.postDataJSON()).toMatchObject({
+          recipient_public_key: recipient.recipientPublicKey,
+          recipient_device_id: recipient.recipientDeviceId,
+          recipient_device_name: recipient.recipientDeviceName
+        })
+        await route.fulfill({
+          json: { session: session({ account_id: accountId }), jwt: 'fresh.pairing.token' }
+        })
+        return
+      }
+      if (invite && url.pathname === `/v1/pairing/${invite.sessionId}` && request.method() === 'PUT') {
+        approvedPayload = request.postDataJSON()
+        await route.fulfill({ status: 204 })
+        return
+      }
+      await route.fulfill({ status: 404 })
+    })
+
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
+    const syncSection = page.locator('[data-section="sync"]')
+    await expect(syncSection.getByText('Enhanced privacy is enabled.')).toBeVisible()
+    await disableCamera(page)
+
+    await syncSection.getByRole('button', { name: 'Pair another device' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Pair another device' })
+    await expect(dialog.getByRole('alert')).toContainText('could not access a camera')
+    await dialog.getByRole('button', { name: 'Show pairing code' }).click()
+    await expect(dialog.getByRole('img', { name: 'Pairing QR code for the device you are adding' }))
+      .toBeVisible()
+    await expect(dialog.getByText('Pairing code expires at')).toBeVisible()
+    await dialog.getByRole('button', { name: 'Use text code instead' }).click()
+    const codeField = dialog.getByRole('textbox', { name: 'Pairing code' })
+    await expect(codeField).toHaveValue(/^opentubex-pairing-invite:/)
+    invite = JSON.parse(Buffer.from(
+      (await codeField.inputValue()).slice('opentubex-pairing-invite:'.length),
+      'base64url'
+    ).toString())
+    expect(Object.keys(invite)).toEqual(['version', 'origin', 'sessionId', 'pairingSecret', 'recipientToken', 'accountId'])
+    expect(invite.origin).toBe(serverUrl)
+    expect(invite.accountId).toBe(accountId)
+
+    await expect.poll(() => pollTokens.length).toBeGreaterThan(0)
+    expect(new Set(pollTokens)).toEqual(new Set([invite.recipientToken]))
+    registered = true
+
+    const comparisonCode = pairingComparisonCode({ ...invite, ...recipient })
+    await expect(dialog.locator('.pairingVerificationCode')).toHaveText(comparisonCode)
+    await expect(dialog.getByText('Phone without login', { exact: true })).toBeVisible()
+    await dialog.getByRole('button', { name: 'Approve pairing' }).click()
+    await expect(dialog.getByText('The new device finishes pairing automatically.')).toBeVisible()
+    expect(approvedPayload.encrypted_payload).toMatch(/^[\w-]+$/)
+    expect(JSON.stringify(approvedPayload)).not.toMatch(/fresh\.pairing\.token|pairing-user/)
   })
 })
 

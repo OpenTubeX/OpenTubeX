@@ -1144,6 +1144,17 @@ Settings:
     Pairing Verification Unavailable: Không có bộ dữ liệu đồng bộ đã mã hóa để xác minh khóa được chuyển. Hãy đồng bộ thiết bị hiện có rồi thử lại.
     Pairing Completed: Đã ghép nối thiết bị
     Pairing Approved: Đã phê duyệt ghép nối thiết bị
+    Use Pairing Invite: Dùng mã từ thiết bị đã kết nối
+    Show Pairing Invite: Hiện mã ghép nối
+    Scan Pairing Invite: Trên thiết bị bạn đang thêm, mở "Ghép nối với thiết bị hiện có", chọn "Dùng mã từ thiết bị đã kết nối" rồi quét mã này.
+    Pairing Invite QR Alt: Mã QR ghép nối cho thiết bị bạn đang thêm
+    Pairing Invite Text Hint: Sao chép mã này sang thiết bị bạn đang thêm. Mã này cho phép một thiết bị yêu cầu truy cập tài khoản của bạn, vì vậy hãy xóa mã khỏi lịch sử bộ nhớ tạm sau khi ghép nối.
+    Pairing Invite Warning: Chỉ hiển thị mã này cho thiết bị bạn đang thêm. Bạn vẫn cần phê duyệt yêu cầu của thiết bị đó trên thiết bị này.
+    Pairing Invite Scan Hint: Quét mã ghép nối hiển thị trên thiết bị đã kết nối của bạn.
+    Pairing Invite Entry Hint: Dán mã ghép nối hiển thị trên thiết bị đã kết nối của bạn.
+    Pairing Invite Code Hint: Chỉ phê duyệt yêu cầu trên thiết bị đã kết nối nếu thiết bị đó hiển thị mã này. Sau đó quá trình ghép nối sẽ tự động hoàn tất.
+    Pairing Invite Approval Hint: Chỉ phê duyệt nếu thiết bị bạn đang thêm hiển thị mã này.
+    Pairing Invite Approved: Đã phê duyệt ghép nối. Thiết bị mới sẽ tự động hoàn tất ghép nối.
     Disconnect: Ngắt kết nối
     Delete Account: Xóa tài khoản đồng bộ
     Delete Account Confirmation: Xóa tài khoản đồng bộ?

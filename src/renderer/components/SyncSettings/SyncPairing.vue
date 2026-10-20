@@ -36,22 +36,96 @@
           :value="deviceName"
           show-label
           @input="deviceName = $event"
-          @keydown.enter="startReceiving"
+          @keydown.enter="startReceiving()"
         />
         <FtFlexBox class="pairingActions">
           <FtButton
             :label="t('Settings.Sync Settings.Create Pairing Code')"
             :icon="['fas', 'key']"
             :disabled="deviceName.trim() === ''"
-            @click="startReceiving"
+            @click="startReceiving()"
+          />
+          <FtButton
+            :label="t('Settings.Sync Settings.Use Pairing Invite')"
+            :icon="['fas', 'qrcode']"
+            :disabled="deviceName.trim() === ''"
+            @click="scanInvite"
+          />
+        </FtFlexBox>
+      </template>
+      <template v-else-if="receiveStage === 'scanning'">
+        <SyncPairingScanner
+          :key="receiveScanAttempt"
+          :hint="t('Settings.Sync Settings.Pairing Invite Scan Hint')"
+          @scan="submitInvite"
+          @cancel="openInviteEntry"
+          @unavailable="openInviteEntry(t('Settings.Sync Settings.Camera Unavailable'))"
+        />
+        <FtFlexBox class="pairingActions">
+          <FtButton
+            :label="t('Settings.Sync Settings.Enter Pairing Code')"
+            :icon="['fas', 'keyboard']"
+            @click="openInviteEntry()"
+          />
+        </FtFlexBox>
+      </template>
+      <template v-else-if="receiveStage === 'manual'">
+        <p>{{ t('Settings.Sync Settings.Pairing Invite Entry Hint') }}</p>
+        <FtInput
+          ref="manualInviteCodeInput"
+          :label="t('Settings.Sync Settings.Pairing Code')"
+          :icon="['fas', 'key']"
+          :value="manualInviteCode"
+          :placeholder="t('Form Inputs.Example', { example: 'opentubex-pairing-invite:…' })"
+          :maxlength="2048"
+          :show-action-button="false"
+          multiline
+          @input="manualInviteCode = $event"
+        />
+        <p
+          v-if="receiveError"
+          class="pairingError"
+          role="alert"
+        >
+          {{ receiveError }}
+        </p>
+        <FtFlexBox class="pairingActions">
+          <FtButton
+            :label="t('Settings.Sync Settings.Check Pairing Code')"
+            :icon="['fas', 'check']"
+            :disabled="manualInviteCode.trim() === ''"
+            @click="submitInvite(manualInviteCode)"
+          />
+          <FtButton
+            :label="t('Settings.Sync Settings.Scan QR Code')"
+            :icon="['fas', 'qrcode']"
+            @click="scanInvite"
           />
         </FtFlexBox>
       </template>
       <template v-else-if="receiveStage === 'creating'">
         <FtLoader />
         <p aria-live="polite">
-          {{ t('Settings.Sync Settings.Creating Pairing Code') }}
+          {{ receiveComparisonCode === null
+            ? t('Settings.Sync Settings.Creating Pairing Code')
+            : t('Settings.Sync Settings.Checking Pairing Request') }}
         </p>
+      </template>
+      <template v-else-if="receiveStage === 'waiting' && receiveComparisonCode">
+        <p class="pairingWarning">
+          {{ t('Settings.Sync Settings.Compare Pairing Codes') }}
+        </p>
+        <p class="pairingVerificationCode">
+          {{ receiveComparisonCode }}
+        </p>
+        <p>{{ t('Settings.Sync Settings.Pairing Invite Code Hint') }}</p>
+        <div
+          class="pairingPollStatus pairingSecondary"
+          aria-live="polite"
+        >
+          <FtLoader />
+          <span>{{ t('Settings.Sync Settings.Pairing Expires', { time: receiveExpiryLabel }) }}</span>
+        </div>
       </template>
       <template v-else-if="receiveStage === 'waiting'">
         <template v-if="showTextCode">
@@ -154,33 +228,28 @@
     fixed-layout
     @click="closeScanner"
   >
-    <div class="pairingContent">
+    <div
+      class="pairingContent"
+      :class="{ pairingWaiting: approveStage === 'invite' }"
+    >
       <template v-if="approveStage === 'scanning'">
-        <p>{{ t('Settings.Sync Settings.Pairing Scan Hint') }}</p>
-        <FtLoader v-if="usingNativeScanner" />
-        <div
-          v-else
-          class="scannerFrame"
-        >
-          <video
-            ref="scannerVideo"
-            class="scannerVideo"
-            autoplay
-            muted
-            playsinline
-          />
-        </div>
-        <p
-          class="pairingSecondary"
-          aria-live="polite"
-        >
-          {{ t('Settings.Sync Settings.Waiting For Pairing Code') }}
-        </p>
+        <SyncPairingScanner
+          :key="approveScanAttempt"
+          :hint="t('Settings.Sync Settings.Pairing Scan Hint')"
+          @scan="handleScan"
+          @cancel="openManualEntry"
+          @unavailable="approveScannerUnavailable"
+        />
         <FtFlexBox class="pairingActions">
           <FtButton
             :label="t('Settings.Sync Settings.Enter Pairing Code')"
             :icon="['fas', 'keyboard']"
             @click="openManualEntry"
+          />
+          <FtButton
+            :label="t('Settings.Sync Settings.Show Pairing Invite')"
+            :icon="['fas', 'qrcode']"
+            @click="showInvite"
           />
         </FtFlexBox>
       </template>
@@ -216,18 +285,85 @@
             :icon="['fas', 'qrcode']"
             @click="restartScanner"
           />
+          <FtButton
+            :label="t('Settings.Sync Settings.Show Pairing Invite')"
+            :icon="['fas', 'qrcode']"
+            @click="showInvite"
+          />
         </FtFlexBox>
       </template>
-      <template v-else-if="approveStage === 'checking' || approveStage === 'approving'">
+      <template v-else-if="approveStage === 'invite'">
+        <template v-if="showInviteText">
+          <FtInput
+            ref="inviteCodeInput"
+            :label="t('Settings.Sync Settings.Pairing Code')"
+            :icon="['fas', 'key']"
+            :value="inviteCode"
+            :placeholder="t('Form Inputs.Example', { example: 'opentubex-pairing-invite:…' })"
+            :show-action-button="false"
+            readonly
+            select-on-click
+            @focus="inviteCodeInput?.select()"
+          />
+          <p>{{ t('Settings.Sync Settings.Pairing Invite Text Hint') }}</p>
+        </template>
+        <template v-else>
+          <img
+            class="pairingQr"
+            :src="inviteQrImage"
+            :alt="t('Settings.Sync Settings.Pairing Invite QR Alt')"
+          >
+          <p>{{ t('Settings.Sync Settings.Scan Pairing Invite') }}</p>
+        </template>
+        <FtFlexBox class="pairingActions pairingModeActions">
+          <FtButton
+            :label="showInviteText
+              ? t('Settings.Sync Settings.Show QR Code')
+              : t('Settings.Sync Settings.Use Text Pairing Code')"
+            :icon="showInviteText ? ['fas', 'qrcode'] : ['fas', 'keyboard']"
+            @click="showInviteText = !showInviteText"
+          />
+          <FtButton
+            :label="t('Settings.Sync Settings.Scan QR Code')"
+            :icon="['fas', 'qrcode']"
+            @click="restartScanner"
+          />
+        </FtFlexBox>
+        <p class="pairingWarning">
+          {{ t('Settings.Sync Settings.Pairing Invite Warning') }}
+        </p>
+        <div
+          class="pairingPollStatus pairingSecondary"
+          aria-live="polite"
+        >
+          <FtLoader />
+          <span>{{ t('Settings.Sync Settings.Pairing Expires', { time: inviteExpiryLabel }) }}</span>
+        </div>
+      </template>
+      <template v-else-if="approveStage === 'inviting' || approveStage === 'checking' || approveStage === 'approving'">
         <FtLoader />
         <p aria-live="polite">
-          {{ approveStage === 'checking'
-            ? t('Settings.Sync Settings.Checking Pairing Request')
-            : t('Settings.Sync Settings.Approving Pairing Request') }}
+          {{ approveStage === 'inviting'
+            ? t('Settings.Sync Settings.Creating Pairing Code')
+            : approveStage === 'checking'
+              ? t('Settings.Sync Settings.Checking Pairing Request')
+              : t('Settings.Sync Settings.Approving Pairing Request') }}
         </p>
       </template>
       <template v-else-if="approveStage === 'confirm'">
-        <p class="pairingWarning">
+        <template v-if="approveComparisonCode">
+          <p class="pairingWarning">
+            {{ t('Settings.Sync Settings.Compare Pairing Codes') }}
+          </p>
+          <p class="pairingVerificationCode">
+            {{ approveComparisonCode }}
+          </p>
+          <p>{{ t('Settings.Sync Settings.Pairing Invite Approval Hint') }}</p>
+        </template>
+        <p
+          v-else
+          class="pairingWarning"
+        >
           {{ t('Settings.Sync Settings.Pairing Approval Warning') }}
         </p>
         <dl class="pairingDetails">
@@ -252,6 +388,11 @@
           />
         </FtFlexBox>
       </template>
+      <template v-else-if="approveStage === 'approved' && approveComparisonCode">
+        <p aria-live="polite">
+          {{ t('Settings.Sync Settings.Pairing Invite Approved') }}
+        </p>
+      </template>
       <template v-else-if="approveStage === 'approved'">
         <p class="pairingWarning">
           {{ t('Settings.Sync Settings.Compare Pairing Codes') }}
@@ -270,18 +411,34 @@
         </p>
         <FtFlexBox class="pairingActions">
           <FtButton
-            :label="pairingApproval
-              ? t('Settings.Sync Settings.Try Again')
-              : t('Settings.Sync Settings.Scan Again')"
+            v-if="pairingApproval"
+            :label="t('Settings.Sync Settings.Try Again')"
             :icon="['fas', 'sync']"
-            @click="pairingApproval ? approvePairing() : restartScanner()"
+            @click="approvePairing"
           />
           <FtButton
-            v-if="!pairingApproval"
-            :label="t('Settings.Sync Settings.Enter Pairing Code')"
-            :icon="['fas', 'keyboard']"
-            @click="openManualEntry"
+            v-else-if="approveMode === 'invite'"
+            :label="t('Settings.Sync Settings.Try Again')"
+            :icon="['fas', 'sync']"
+            @click="showInvite"
           />
+          <template v-else>
+            <FtButton
+              :label="t('Settings.Sync Settings.Scan Again')"
+              :icon="['fas', 'sync']"
+              @click="restartScanner"
+            />
+            <FtButton
+              :label="t('Settings.Sync Settings.Enter Pairing Code')"
+              :icon="['fas', 'keyboard']"
+              @click="openManualEntry"
+            />
+            <FtButton
+              :label="t('Settings.Sync Settings.Show Pairing Invite')"
+              :icon="['fas', 'qrcode']"
+              @click="showInvite"
+            />
+          </template>
         </FtFlexBox>
       </template>
     </div>
@@ -299,7 +456,6 @@
 
 <script setup>
 import QRCode from 'qrcode'
-import QrScanner from 'qr-scanner'
 import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -308,16 +464,24 @@ import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
+import SyncPairingScanner from './SyncPairingScanner.vue'
 
 import {
   bindPairingRequestToAccount,
+  createPairingInvite,
+  createPairingInvitePayload,
   createPairingQrPayload,
   createPairingRecipient,
+  createPairingRequest,
   decryptPairingKey,
   encryptPairingKey,
+  pairingComparisonCode,
+  pairingRequestFromInviteSession,
   pairingSessionMatchesRequest,
+  parsePairingInvitePayload,
   parsePairingQrPayload,
   randomPairingVerificationCode,
+  syncServerTokenAccountId,
 } from '../../helpers/sync-server-pairing'
 import {
   PRIVACY_VERSION,
@@ -363,6 +527,11 @@ const { locale, t } = useI18n()
 const usingNativeScanner = Boolean(process.env.IS_CAPACITOR)
 const timeFormat = computed(() => store.getters.getTimeFormat)
 
+// Invites stay valid longer than the server's two-minute session because the
+// device being added still has to open its settings and scan the code.
+const INVITE_TTL_MS = 5 * 60 * 1000
+const POLL_INTERVAL_MS = 2000
+
 const receivePromptOpen = ref(false)
 const receiveStage = ref('name')
 const receiveError = ref('')
@@ -373,30 +542,41 @@ const pairingCode = ref('')
 const showTextCode = ref(false)
 const receiveExpiresAt = ref(0)
 const receiveVerificationCode = ref('')
+const receiveComparisonCode = ref(null)
+const receiveScanAttempt = ref(0)
+const manualInviteCode = ref('')
 const approvePromptOpen = ref(false)
+const approveMode = ref('scan')
 const approveStage = ref('scanning')
 const approveError = ref('')
+const approveScanAttempt = ref(0)
 const manualPairingCode = ref('')
 const pairingRequest = ref(null)
 const approvalVerificationCode = ref('')
-const scannerVideo = useTemplateRef('scannerVideo')
+const approveComparisonCode = ref('')
+const inviteQrImage = ref('')
+const inviteCode = ref('')
+const showInviteText = ref(false)
+const inviteExpiresAt = ref(0)
 const pairingCodeInput = useTemplateRef('pairingCodeInput')
 const manualPairingCodeInput = useTemplateRef('manualPairingCodeInput')
+const manualInviteCodeInput = useTemplateRef('manualInviteCodeInput')
+const inviteCodeInput = useTemplateRef('inviteCodeInput')
 
-const receiveExpiryLabel = computed(() => formatTime(
-  receiveExpiresAt.value,
-  locale.value,
-  timeFormat.value,
-  { timeStyle: 'medium' }
-))
+const receiveExpiryLabel = computed(() => formatExpiry(receiveExpiresAt.value))
+const inviteExpiryLabel = computed(() => formatExpiry(inviteExpiresAt.value))
+
+function formatExpiry(timestamp) {
+  return formatTime(timestamp, locale.value, timeFormat.value, { timeStyle: 'medium' })
+}
 
 let receiver = null
 let pollTimer = null
-let scanner = null
-let scannerHandled = false
 let receiveSequence = 0
 let approveSequence = 0
 let pairingClient = null
+let activeInvite = null
+let inviteTimer = null
 const pairingApproval = ref(null)
 
 const currentDeviceInfoPromise = getCurrentSyncServerDeviceInfo().catch(() => ({ name: '' }))
@@ -420,12 +600,49 @@ function resetReceiver() {
   showTextCode.value = false
   receiveExpiresAt.value = 0
   receiveVerificationCode.value = ''
+  receiveComparisonCode.value = null
+  manualInviteCode.value = ''
 }
 
-async function startReceiving() {
+function scanInvite() {
+  receiveError.value = ''
+  receiveScanAttempt.value++
+  receiveStage.value = 'scanning'
+}
+
+async function openInviteEntry(error = '') {
+  receiveError.value = error
+  receiveStage.value = 'manual'
+  await nextTick()
+  manualInviteCodeInput.value?.focus()
+}
+
+function submitInvite(code) {
+  if (receiveStage.value !== 'scanning' && receiveStage.value !== 'manual') return
+  let invite
+  try {
+    invite = parsePairingInvitePayload(code.trim())
+    if (invite.origin !== normalizeSyncServerUrl(props.serverUrl)) {
+      throw new Error(t('Settings.Sync Settings.Pairing Server Mismatch'))
+    }
+  } catch (error) {
+    openInviteEntry(error.message)
+    return
+  }
+  manualInviteCode.value = ''
+  startReceiving(invite)
+}
+
+/**
+ * Registers this device's key with the sync server. Without an invite, this
+ * device shows a code for a connected device to scan. With an invite from a
+ * connected device, it joins that device's session and shows a comparison code.
+ */
+async function startReceiving(invite = null) {
   const sequence = ++receiveSequence
   receiveStage.value = 'creating'
   receiveError.value = ''
+  receiveComparisonCode.value = invite ? '' : null
 
   const { name } = await currentDeviceInfoPromise
   if (sequence !== receiveSequence || !receivePromptOpen.value) return
@@ -447,8 +664,17 @@ async function startReceiving() {
     if (capabilities.key_pairing !== 1 || capabilities.encrypted_sync !== 1) {
       throw new Error(t('Settings.Sync Settings.Pairing Unsupported'))
     }
-    const recipient = await createPairingRecipient(requestedName, props.deviceId)
-    const session = await client.createPairingSession(recipient)
+    const recipient = await createPairingRecipient(requestedName, props.deviceId, invite)
+    let session
+    try {
+      session = await client.createPairingSession(recipient)
+    } catch (error) {
+      // Another device already used this invite.
+      if (invite && error?.status === 409) {
+        throw new Error(t('Settings.Sync Settings.Pairing Request Changed'), { cause: error })
+      }
+      throw error
+    }
     if (sequence !== receiveSequence || !receivePromptOpen.value) {
       try {
         await client.cancelPairingSession(recipient.sessionId, recipient.recipientToken)
@@ -456,25 +682,32 @@ async function startReceiving() {
       client.cancel()
       return
     }
-    const code = createPairingQrPayload(
-      recipient,
-      normalizeSyncServerUrl(props.serverUrl)
-    )
-    const request = parsePairingQrPayload(code)
+    const origin = normalizeSyncServerUrl(props.serverUrl)
+    const request = createPairingRequest(recipient, origin)
     if (!pairingSessionMatchesRequest(session, request)) throw new Error()
 
-    receiver = { client, recipient, request, consumed: false, transfer: null }
+    receiver = { client, recipient, request, invite, consumed: false, transfer: null, comparisonCode: '' }
     receiveExpiresAt.value = session.expires_at
-    const image = await QRCode.toDataURL(code, {
-      errorCorrectionLevel: 'M',
-      margin: 2,
-      width: 320,
-    })
-    if (sequence !== receiveSequence || receiver?.client !== client || !receivePromptOpen.value) {
-      return
+    if (invite) {
+      const comparisonCode = await pairingComparisonCode(request)
+      if (sequence !== receiveSequence || receiver?.client !== client || !receivePromptOpen.value) {
+        return
+      }
+      receiver.comparisonCode = comparisonCode
+      receiveComparisonCode.value = comparisonCode
+    } else {
+      const code = createPairingQrPayload(recipient, origin)
+      const image = await QRCode.toDataURL(code, {
+        errorCorrectionLevel: 'M',
+        margin: 2,
+        width: 320,
+      })
+      if (sequence !== receiveSequence || receiver?.client !== client || !receivePromptOpen.value) {
+        return
+      }
+      qrImage.value = image
+      pairingCode.value = code
     }
-    qrImage.value = image
-    pairingCode.value = code
     receiveStage.value = 'waiting'
     schedulePoll()
   } catch (error) {
@@ -488,7 +721,7 @@ async function startReceiving() {
 
 function schedulePoll() {
   clearTimeout(pollTimer)
-  pollTimer = setTimeout(pollReceiver, 2000)
+  pollTimer = setTimeout(pollReceiver, POLL_INTERVAL_MS)
 }
 
 async function pollReceiver() {
@@ -500,6 +733,10 @@ async function pollReceiver() {
       active.recipient.recipientToken
     )
     if (receiver !== active || !receivePromptOpen.value) return
+    // Only the inviting account may claim a session created from its invite.
+    if (active.invite && session.account_id !== null && session.account_id !== active.invite.accountId) {
+      throw new Error(t('Settings.Sync Settings.Pairing Request Changed'))
+    }
     const boundRequest = session.account_id === null
       ? active.request
       : bindPairingRequestToAccount(active.request, session.account_id)
@@ -534,6 +771,14 @@ async function pollReceiver() {
     if (receiver !== active || !receivePromptOpen.value) return
     active.request = boundRequest
     active.transfer = privacy
+    if (active.comparisonCode) {
+      // The user already compared this code before approving on the connected device.
+      if (privacy.verificationCode !== active.comparisonCode) {
+        throw new Error(t('Settings.Sync Settings.Pairing Request Changed'))
+      }
+      await completeReceiver(active)
+      return
+    }
     receiveVerificationCode.value = privacy.verificationCode
     receiveStage.value = 'confirm'
   } catch (error) {
@@ -543,9 +788,13 @@ async function pollReceiver() {
   }
 }
 
-async function confirmReceiver() {
+function confirmReceiver() {
   const active = receiver
   if (!active?.transfer || receiveStage.value !== 'confirm') return
+  return completeReceiver(active)
+}
+
+async function completeReceiver(active) {
   receiveStage.value = 'finishing'
   const privacy = active.transfer
   try {
@@ -632,101 +881,166 @@ async function closeReceiver() {
   resetReceiver()
 }
 
-async function openScanner() {
-  approveSequence++
-  approvePromptOpen.value = true
-  approveStage.value = 'scanning'
-  approveError.value = ''
-  manualPairingCode.value = ''
-  pairingRequest.value = null
-  pairingApproval.value = null
-  approvalVerificationCode.value = ''
-  await nextTick()
-  startScanner()
-}
-
-async function startScanner() {
-  const sequence = approveSequence
-  stopScanner()
-  scannerHandled = false
-  try {
-    // Keep the build flag here so Webpack excludes native scanner chunks on desktop/web.
-    if (process.env.IS_CAPACITOR) {
-      const { scanNativePairingCode } = await import('../../helpers/nativePairingScanner')
-      if (sequence !== approveSequence || !approvePromptOpen.value) return
-      const code = await scanNativePairingCode({
-        instructions: t('Settings.Sync Settings.Pairing Scan Hint'),
-        cancelLabel: t('Cancel'),
-        torchOnLabel: t('Settings.Sync Settings.Turn Flashlight Off'),
-        torchOffLabel: t('Settings.Sync Settings.Turn Flashlight On'),
-      })
-      if (sequence !== approveSequence || !approvePromptOpen.value) return
-      if (code === null) {
-        await openManualEntry()
-      } else {
-        await handleScan({ data: code })
-      }
-      return
-    }
-    scanner = new QrScanner(scannerVideo.value, handleScan, {
-      highlightScanRegion: true,
-      highlightCodeOutline: true,
-      maxScansPerSecond: 10,
-      preferredCamera: 'environment',
-      returnDetailedScanResult: true,
-    })
-    await scanner.start()
-  } catch {
-    if (sequence !== approveSequence || !approvePromptOpen.value) return
-    stopScanner()
-    if (usingNativeScanner) await openManualEntry()
-    approveError.value = t('Settings.Sync Settings.Camera Unavailable')
-    if (!usingNativeScanner) approveStage.value = 'error'
-  }
-}
-
-async function openManualEntry() {
+function resetApproval() {
   approveSequence++
   pairingClient?.cancel()
   pairingClient = null
-  stopScanner()
-  scannerHandled = false
-  approveStage.value = 'manual'
+  releaseInvite()
+  approveMode.value = 'scan'
   approveError.value = ''
   pairingRequest.value = null
   pairingApproval.value = null
+  approvalVerificationCode.value = ''
+}
+
+function openScanner() {
+  approvePromptOpen.value = true
+  restartScanner()
+}
+
+function restartScanner() {
+  resetApproval()
+  manualPairingCode.value = ''
+  approveScanAttempt.value++
+  approveStage.value = 'scanning'
+}
+
+async function approveScannerUnavailable() {
+  if (usingNativeScanner) {
+    await openManualEntry()
+  } else {
+    approveStage.value = 'error'
+  }
+  approveError.value = t('Settings.Sync Settings.Camera Unavailable')
+}
+
+async function openManualEntry() {
+  resetApproval()
+  approveStage.value = 'manual'
   await nextTick()
   manualPairingCodeInput.value?.focus()
 }
 
 function submitManualCode() {
   const code = manualPairingCode.value.trim()
-  if (!code) return
-  scannerHandled = false
-  handleScan({ data: code })
+  if (code) handleScan(code)
 }
 
-async function handleScan(result) {
-  if (scannerHandled) return
-  scannerHandled = true
-  stopScanner()
+function handleScan(code) {
+  if (approveStage.value !== 'scanning' && approveStage.value !== 'manual') return
   approveStage.value = 'checking'
-  const sequence = approveSequence
   try {
-    const request = parsePairingQrPayload(result.data)
+    const request = parsePairingQrPayload(code)
     manualPairingCode.value = ''
     if (request.origin !== normalizeSyncServerUrl(props.serverUrl)) {
       throw new Error(t('Settings.Sync Settings.Pairing Server Mismatch'))
     }
-    if (sequence !== approveSequence || !approvePromptOpen.value) return
     pairingRequest.value = request
     approveStage.value = 'confirm'
   } catch (error) {
-    pairingClient = null
+    approveError.value = error?.message || t('Settings.Sync Settings.Pairing Failed')
+    approveStage.value = 'error'
+  }
+}
+
+/**
+ * Shows a code that lets the device being added register its key with this
+ * device's session, for devices that cannot scan the new device's code.
+ */
+async function showInvite() {
+  resetApproval()
+  const sequence = approveSequence
+  approveMode.value = 'invite'
+  approveStage.value = 'inviting'
+  try {
+    const invite = createPairingInvite(
+      normalizeSyncServerUrl(props.serverUrl),
+      syncServerTokenAccountId(store.getters.getSyncServerToken)
+    )
+    const code = createPairingInvitePayload(invite)
+    const image = await QRCode.toDataURL(code, {
+      errorCorrectionLevel: 'M',
+      margin: 2,
+      width: 320,
+    })
+    if (sequence !== approveSequence || !approvePromptOpen.value) return
+    activeInvite = { invite, client: new SyncServerClient(props.serverUrl), approved: false }
+    inviteQrImage.value = image
+    inviteCode.value = code
+    inviteExpiresAt.value = Date.now() + INVITE_TTL_MS
+    approveStage.value = 'invite'
+    scheduleInvitePoll()
+  } catch (error) {
     if (sequence !== approveSequence || !approvePromptOpen.value) return
     approveError.value = error?.message || t('Settings.Sync Settings.Pairing Failed')
     approveStage.value = 'error'
   }
+}
+
+function scheduleInvitePoll() {
+  clearTimeout(inviteTimer)
+  inviteTimer = setTimeout(pollInvite, POLL_INTERVAL_MS)
+}
+
+async function pollInvite() {
+  const active = activeInvite
+  if (!active || approveStage.value !== 'invite') return
+  try {
+    let session = null
+    try {
+      session = await active.client.getPairingSession(
+        active.invite.sessionId,
+        active.invite.recipientToken
+      )
+    } catch (error) {
+      // The device being added has not registered its key yet.
+      if (error?.status !== 404) throw error
+    }
+    if (activeInvite !== active) return
+    if (!session) {
+      if (Date.now() >= inviteExpiresAt.value) {
+        throw new Error(t('Settings.Sync Settings.Pairing Request Changed'))
+      }
+      scheduleInvitePoll()
+      return
+    }
+    let request
+    try {
+      request = pairingRequestFromInviteSession(active.invite, session)
+    } catch {
+      throw new Error(t('Settings.Sync Settings.Pairing Request Changed'))
+    }
+    const comparisonCode = await pairingComparisonCode(request)
+    if (activeInvite !== active) return
+    pairingRequest.value = request
+    approveComparisonCode.value = comparisonCode
+    approveStage.value = 'confirm'
+  } catch (error) {
+    if (activeInvite !== active) return
+    releaseInvite()
+    approveError.value = error?.message || t('Settings.Sync Settings.Pairing Failed')
+    approveStage.value = 'error'
+  }
+}
+
+function releaseInvite() {
+  clearTimeout(inviteTimer)
+  inviteTimer = null
+  const active = activeInvite
+  activeInvite = null
+  inviteQrImage.value = ''
+  inviteCode.value = ''
+  showInviteText.value = false
+  approveComparisonCode.value = ''
+  if (!active) return
+  if (active.approved) {
+    active.client.cancel()
+    return
+  }
+  // Delete a session registered under this invite so it cannot be approved later.
+  active.client.cancelPairingSession(active.invite.sessionId, active.invite.recipientToken)
+    .catch(() => {})
+    .finally(() => active.client.cancel())
 }
 
 async function approvePairing() {
@@ -759,7 +1073,7 @@ async function approvePairing() {
       pairingApproval.value = {
         request,
         approvingDeviceId: props.deviceId,
-        verificationCode: randomPairingVerificationCode(),
+        verificationCode: approveComparisonCode.value || randomPairingVerificationCode(),
         token: claim.jwt,
         encryptedPayload: '',
       }
@@ -786,6 +1100,7 @@ async function approvePairing() {
       approval.encryptedPayload
     )
     if (pairingClient === client) pairingClient = null
+    if (activeInvite) activeInvite.approved = true
     if (sequence !== approveSequence || !approvePromptOpen.value) return
     approvalVerificationCode.value = approval.verificationCode
     approveStage.value = 'approved'
@@ -798,46 +1113,19 @@ async function approvePairing() {
   }
 }
 
-async function restartScanner() {
-  approveSequence++
-  pairingClient?.cancel()
-  pairingClient = null
-  stopScanner()
-  approveStage.value = 'scanning'
-  approveError.value = ''
-  manualPairingCode.value = ''
-  pairingRequest.value = null
-  pairingApproval.value = null
-  approvalVerificationCode.value = ''
-  await nextTick()
-  startScanner()
-}
-
-function stopScanner() {
-  scanner?.destroy()
-  scanner = null
-}
-
 function closeScanner() {
-  approveSequence++
-  pairingClient?.cancel()
-  pairingClient = null
-  stopScanner()
+  resetApproval()
   approvePromptOpen.value = false
   approveStage.value = 'scanning'
-  approveError.value = ''
   manualPairingCode.value = ''
-  pairingRequest.value = null
-  pairingApproval.value = null
-  approvalVerificationCode.value = ''
 }
 
 onBeforeUnmount(() => {
   receiveSequence++
-  approveSequence++
-  stopScanner()
   pairingClient?.cancel()
   pairingClient = null
+  releaseInvite()
+  approveSequence++
   clearTimeout(pollTimer)
   receiver?.client.cancel()
   receiver = null

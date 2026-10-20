@@ -1697,6 +1697,17 @@ Settings:
     Pairing Verification Unavailable: Es sind keine verschlüsselten Synchronisierungsdaten verfügbar, mit denen der übertragene Schlüssel überprüft werden kann. Synchronisiere das vorhandene Gerät und versuche es erneut.
     Pairing Completed: Gerätekopplung abgeschlossen
     Pairing Approved: Gerätekopplung genehmigt
+    Use Pairing Invite: Code vom verbundenen Gerät verwenden
+    Show Pairing Invite: Kopplungscode anzeigen
+    Scan Pairing Invite: 'Öffne auf dem Gerät, das du hinzufügst, „Mit vorhandenem Gerät koppeln“, wähle „Code vom verbundenen Gerät verwenden“ und scanne diesen Code.'
+    Pairing Invite QR Alt: Kopplungs-QR-Code für das Gerät, das du hinzufügst
+    Pairing Invite Text Hint: Kopiere diesen Code auf das Gerät, das du hinzufügst. Damit kann ein Gerät Zugriff auf dein Konto anfordern, lösche ihn daher nach dem Koppeln aus dem Zwischenablageverlauf.
+    Pairing Invite Warning: Zeige diesen Code nur dem Gerät, das du hinzufügst. Du musst dessen Anfrage weiterhin auf diesem Gerät genehmigen.
+    Pairing Invite Scan Hint: Scanne den Kopplungscode, der auf deinem verbundenen Gerät angezeigt wird.
+    Pairing Invite Entry Hint: Füge den Kopplungscode ein, der auf deinem verbundenen Gerät angezeigt wird.
+    Pairing Invite Code Hint: Genehmige die Anfrage auf deinem verbundenen Gerät nur, wenn dort dieser Code angezeigt wird. Die Kopplung wird danach automatisch abgeschlossen.
+    Pairing Invite Approval Hint: Genehmige nur, wenn das Gerät, das du hinzufügst, diesen Code anzeigt.
+    Pairing Invite Approved: Kopplung genehmigt. Das neue Gerät schließt die Kopplung automatisch ab.
     Disconnect: Verbindung trennen
     Delete Account: Synchronisierungskonto löschen
     Delete Account Confirmation: Synchronisierungskonto löschen?

@@ -1285,6 +1285,17 @@ Settings:
     Pairing Verification Unavailable: Det finst inga kryptert synkroniseringssamling som kan kontrollera den overførte nøkkelen. Synkroniser den eksisterande eininga, og prøv på nytt.
     Pairing Completed: Paringa av eininga er fullført
     Pairing Approved: Paringa av eininga er godkjend
+    Use Pairing Invite: Bruk kode frå tilkopla eining
+    Show Pairing Invite: Vis paringskode
+    Scan Pairing Invite: 'Opna "Para med ei eksisterande eining" på eininga du legg til, vel "Bruk kode frå tilkopla eining", og skann denne koden.'
+    Pairing Invite QR Alt: QR-paringskode for eininga du legg til
+    Pairing Invite Text Hint: Kopier denne koden til eininga du legg til. Han lèt ei eining be om tilgang til kontoen din, så fjern han frå utklippstavlehistoria etter paringa.
+    Pairing Invite Warning: Vis denne koden berre til eininga du legg til. Du må framleis godkjenna førespurnaden hennar på denne eininga.
+    Pairing Invite Scan Hint: Skann paringskoden som blir vist på den tilkopla eininga di.
+    Pairing Invite Entry Hint: Lim inn paringskoden som blir vist på den tilkopla eininga di.
+    Pairing Invite Code Hint: Godkjenn førespurnaden på den tilkopla eininga di berre dersom ho viser denne koden. Paringa blir deretter fullført automatisk.
+    Pairing Invite Approval Hint: Godkjenn berre dersom eininga du legg til, viser denne koden.
+    Pairing Invite Approved: Paringa er godkjend. Den nye eininga fullfører paringa automatisk.
     Disconnect: Kopla frå
     Delete Account: Slett synkroniseringskontoen
     Delete Account Confirmation: Vil du sletta synkroniseringskontoen?

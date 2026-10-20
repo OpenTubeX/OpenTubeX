@@ -1130,6 +1130,17 @@ Settings:
     Pairing Verification Unavailable: Ekkert dulkóðað samstillingarsafn er tiltækt til að staðfesta flutta lykilinn. Samstilltu tengda tækið og reyndu síðan aftur.
     Pairing Completed: Pörun tækis lokið
     Pairing Approved: Pörun tækis samþykkt
+    Use Pairing Invite: Nota kóða frá tengdu tæki
+    Show Pairing Invite: Sýna pörunarkóða
+    Scan Pairing Invite: Opnaðu „Para við tæki sem er þegar tengt“ í tækinu sem þú ert að bæta við, veldu „Nota kóða frá tengdu tæki“ og skannaðu þennan kóða.
+    Pairing Invite QR Alt: QR-pörunarkóði fyrir tækið sem þú ert að bæta við
+    Pairing Invite Text Hint: Afritaðu þennan kóða í tækið sem þú ert að bæta við. Með honum getur tæki beðið um aðgang að reikningnum þínum, svo þú skalt hreinsa hann úr ferli klippiborðs eftir pörun.
+    Pairing Invite Warning: Sýndu þennan kóða aðeins tækinu sem þú ert að bæta við. Þú þarft samt að samþykkja beiðni þess í þessu tæki.
+    Pairing Invite Scan Hint: Skannaðu pörunarkóðann sem birtist í tengda tækinu þínu.
+    Pairing Invite Entry Hint: Límdu pörunarkóðann sem birtist í tengda tækinu þínu.
+    Pairing Invite Code Hint: Samþykktu beiðnina í tengda tækinu þínu aðeins ef það sýnir þennan kóða. Pörun lýkur síðan sjálfkrafa.
+    Pairing Invite Approval Hint: Samþykktu aðeins ef tækið sem þú ert að bæta við sýnir þennan kóða.
+    Pairing Invite Approved: Pörun samþykkt. Nýja tækið lýkur pörun sjálfkrafa.
     Disconnect: Aftengja
     Delete Account: Eyða samstillingarreikningi
     Delete Account Confirmation: Eyða samstillingarreikningi?

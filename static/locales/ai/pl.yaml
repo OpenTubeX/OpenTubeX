@@ -583,7 +583,7 @@ Settings:
     Password Changed: "Hasło zostało zmienione. Pozostałe urządzenia zostały wylogowane."
     Enable Sync: Włącz synchronizację
     Pair Another Device: Sparuj kolejne urządzenie
-    Pair With Existing Device: Sparuj z połączonym urządzeniem
+    Pair With Existing Device: Sparuj z istniejącym urządzeniem
     Device Name: Nazwa urządzenia
     This Device: To urządzenie
     Device Name Required: Wpisz nazwę tego urządzenia.
@@ -624,6 +624,17 @@ Settings:
     Pairing Verification Unavailable: Brak zaszyfrowanej kolekcji synchronizacji potrzebnej do sprawdzenia przesłanego klucza. Zsynchronizuj połączone urządzenie i spróbuj ponownie.
     Pairing Completed: Urządzenia zostały sparowane
     Pairing Approved: Sparowanie urządzeń zostało zatwierdzone
+    Use Pairing Invite: Użyj kodu z połączonego urządzenia
+    Show Pairing Invite: Pokaż kod parowania
+    Scan Pairing Invite: Na dodawanym urządzeniu otwórz „Sparuj z istniejącym urządzeniem”, wybierz „Użyj kodu z połączonego urządzenia” i zeskanuj ten kod.
+    Pairing Invite QR Alt: Kod QR parowania dla dodawanego urządzenia
+    Pairing Invite Text Hint: Skopiuj ten kod na dodawane urządzenie. Pozwala on urządzeniu poprosić o dostęp do Twojego konta, dlatego po sparowaniu usuń go z historii schowka.
+    Pairing Invite Warning: Pokaż ten kod tylko dodawanemu urządzeniu. Jego prośbę nadal musisz zatwierdzić na tym urządzeniu.
+    Pairing Invite Scan Hint: Zeskanuj kod parowania wyświetlony na połączonym urządzeniu.
+    Pairing Invite Entry Hint: Wklej kod parowania wyświetlony na połączonym urządzeniu.
+    Pairing Invite Code Hint: Zatwierdź prośbę na połączonym urządzeniu tylko wtedy, gdy wyświetla ono ten kod. Parowanie zakończy się wtedy automatycznie.
+    Pairing Invite Approval Hint: Zatwierdź tylko wtedy, gdy dodawane urządzenie wyświetla ten kod.
+    Pairing Invite Approved: Parowanie zatwierdzone. Nowe urządzenie automatycznie dokończy parowanie.
     Sync failed: "Synchronizacja nie powiodła się: {error}"
     Use Shared Tabs: 'Używaj jednego wspólnego zestawu kart na wszystkich urządzeniach'
     Shared Tabs Warning: 'Karty otwarte na tym urządzeniu staną się wspólnym zestawem. Pozostałe urządzenia podczas synchronizacji zastąpią nim swoje otwarte karty; karty z różnych urządzeń nie zostaną połączone.'

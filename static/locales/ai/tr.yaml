@@ -1125,6 +1125,17 @@ Settings:
     Pairing Verification Unavailable: Aktarılan anahtarı doğrulayacak şifrelenmiş eşitleme koleksiyonu yok. Mevcut cihazı eşitleyip yeniden deneyin.
     Pairing Completed: Cihaz eşleştirme tamamlandı
     Pairing Approved: Cihaz eşleştirme onaylandı
+    Use Pairing Invite: Bağlı cihazdaki kodu kullan
+    Show Pairing Invite: Eşleştirme kodunu göster
+    Scan Pairing Invite: Eklediğiniz cihazda "Mevcut bir cihazla eşleştir" seçeneğini açın, "Bağlı cihazdaki kodu kullan" seçeneğini seçin ve bu kodu tarayın.
+    Pairing Invite QR Alt: Eklediğiniz cihaz için eşleştirme QR kodu
+    Pairing Invite Text Hint: Bu kodu eklediğiniz cihaza kopyalayın. Bu kod bir cihazın hesabınıza erişim istemesini sağlar, bu nedenle eşleştirmeden sonra panonun geçmişinden silin.
+    Pairing Invite Warning: Bu kodu yalnızca eklediğiniz cihaza gösterin. Cihazın isteğini yine de bu cihazda onaylamanız gerekir.
+    Pairing Invite Scan Hint: Bağlı cihazınızda gösterilen eşleştirme kodunu tarayın.
+    Pairing Invite Entry Hint: Bağlı cihazınızda gösterilen eşleştirme kodunu yapıştırın.
+    Pairing Invite Code Hint: Bağlı cihazınızdaki isteği yalnızca bu kodu gösteriyorsa onaylayın. Eşleştirme ardından otomatik olarak tamamlanır.
+    Pairing Invite Approval Hint: Yalnızca eklediğiniz cihaz bu kodu gösteriyorsa onaylayın.
+    Pairing Invite Approved: Eşleştirme onaylandı. Yeni cihaz eşleştirmeyi otomatik olarak tamamlar.
     Disconnect: Bağlantıyı kes
     Delete Account: Eşitleme hesabını sil
     Delete Account Confirmation: Eşitleme hesabı silinsin mi?

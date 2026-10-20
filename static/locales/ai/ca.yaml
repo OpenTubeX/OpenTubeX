@@ -1444,6 +1444,17 @@ Settings:
     Pairing Verification Unavailable: No hi ha cap col·lecció de sincronització xifrada disponible per verificar la clau transferida. Sincronitzeu el dispositiu existent i torneu-ho a provar.
     Pairing Completed: S'ha completat la vinculació del dispositiu
     Pairing Approved: S'ha aprovat la vinculació del dispositiu
+    Use Pairing Invite: Utilitza el codi d'un dispositiu connectat
+    Show Pairing Invite: Mostra el codi de vinculació
+    Scan Pairing Invite: 'Al dispositiu que esteu afegint, obriu "Vincula amb un dispositiu existent", trieu "Utilitza el codi d''un dispositiu connectat" i escanegeu aquest codi.'
+    Pairing Invite QR Alt: Codi QR de vinculació per al dispositiu que esteu afegint
+    Pairing Invite Text Hint: Copieu aquest codi al dispositiu que esteu afegint. Permet que un dispositiu sol·liciti accés al vostre compte; esborreu-lo de l'historial del porta-retalls després de vincular-lo.
+    Pairing Invite Warning: Mostreu aquest codi només al dispositiu que esteu afegint. Encara heu d'aprovar-ne la sol·licitud en aquest dispositiu.
+    Pairing Invite Scan Hint: Escanegeu el codi de vinculació que es mostra al vostre dispositiu connectat.
+    Pairing Invite Entry Hint: Enganxeu el codi de vinculació que es mostra al vostre dispositiu connectat.
+    Pairing Invite Code Hint: Aproveu la sol·licitud al dispositiu connectat només si mostra aquest codi. Després, la vinculació s'acabarà automàticament.
+    Pairing Invite Approval Hint: Aproveu-la només si el dispositiu que esteu afegint mostra aquest codi.
+    Pairing Invite Approved: S'ha aprovat la vinculació. El dispositiu nou acabarà la vinculació automàticament.
     Disconnect: Desconnecta
     Delete Account: Suprimeix el compte de sincronització
     Delete Account Confirmation: Voleu suprimir el compte de sincronització?

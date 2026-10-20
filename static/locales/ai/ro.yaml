@@ -1136,6 +1136,17 @@ Settings:
     Pairing Verification Unavailable: Nu este disponibilă nicio colecție de sincronizare criptată pentru verificarea cheii transferate. Sincronizați dispozitivul existent, apoi încercați din nou.
     Pairing Completed: Asocierea dispozitivului s-a încheiat
     Pairing Approved: Asocierea dispozitivului a fost aprobată
+    Use Pairing Invite: Folosește codul de pe dispozitivul conectat
+    Show Pairing Invite: Afișează codul de asociere
+    Scan Pairing Invite: Pe dispozitivul pe care îl adăugați, deschideți „Asociază cu un dispozitiv existent”, alegeți „Folosește codul de pe dispozitivul conectat” și scanați acest cod.
+    Pairing Invite QR Alt: Cod QR de asociere pentru dispozitivul pe care îl adăugați
+    Pairing Invite Text Hint: Copiați acest cod pe dispozitivul pe care îl adăugați. Acesta permite unui dispozitiv să solicite acces la contul dvs., așa că ștergeți-l din istoricul clipboardului după asociere.
+    Pairing Invite Warning: Arătați acest cod numai dispozitivului pe care îl adăugați. Trebuie în continuare să aprobați solicitarea acestuia pe acest dispozitiv.
+    Pairing Invite Scan Hint: Scanați codul de asociere afișat pe dispozitivul conectat.
+    Pairing Invite Entry Hint: Lipiți codul de asociere afișat pe dispozitivul conectat.
+    Pairing Invite Code Hint: Aprobați solicitarea pe dispozitivul conectat numai dacă afișează acest cod. Asocierea se finalizează apoi automat.
+    Pairing Invite Approval Hint: Aprobați numai dacă dispozitivul pe care îl adăugați afișează acest cod.
+    Pairing Invite Approved: Asocierea a fost aprobată. Dispozitivul nou finalizează asocierea automat.
     Disconnect: Deconectează
     Delete Account: Șterge contul de sincronizare
     Delete Account Confirmation: Ștergeți contul de sincronizare?
