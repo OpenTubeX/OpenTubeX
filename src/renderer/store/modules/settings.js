@@ -658,6 +658,9 @@ const customActions = {
     normalizeNavigationItems(value)
   ),
 
+  // Pin toggles build on the previous edit, so commit them before the save finishes.
+  updatePinnedPlaylistIds: ({ commit, state }, value) => updateOrderedSetting(commit, state, 'pinnedPlaylistIds', value),
+
   // Home customization edits build on the previous edit, so commit them before the save finishes.
   updateHomeSectionLayout: ({ commit, state }, value) => updateOrderedSetting(
     commit,

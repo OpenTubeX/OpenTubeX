@@ -840,10 +840,19 @@ test.describe('custom playlists overview order', () => {
     await expect.poll(() => page.locator('.sideNav .pinnedPlaylists .navChannel').evaluateAll(links => links.map(link => link.title)))
       .toEqual(['Overview B'])
 
+    // Quick successive pins build on each other before the first save finishes.
+    expect(await page.evaluate(async () => {
+      const store = window.$store
+      const pin = id => store.dispatch('updatePinnedPlaylistIds', [...store.getters.getPinnedPlaylistIds, id])
+      await Promise.all([pin('custom-overview-c'), pin('custom-overview-a')])
+      return store.getters.getPinnedPlaylistIds
+    })).toEqual(['custom-overview-b', 'custom-overview-c', 'custom-overview-a'])
+
     // Deleting a pinned playlist also removes it from the synced setting.
     await dispatchStoreAction(page, 'removePlaylist', 'custom-overview-b')
-    await expect(page.locator('.sideNav .pinnedPlaylists')).toHaveCount(0)
-    await expect.poll(() => page.evaluate(() => window.$store.getters.getPinnedPlaylistIds)).toEqual([])
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getPinnedPlaylistIds))
+      .toEqual(['custom-overview-c', 'custom-overview-a'])
+    await expect(page.locator('.sideNav .pinnedPlaylists .navChannel[title="Overview B"]')).toHaveCount(0)
   })
 })
 
