@@ -1080,10 +1080,19 @@ function appendLocalPlaylistPage(videos, items) {
   const newVideos = parseLocalPlaylistVideos(items)
   videos.push(...newVideos)
   playlistItems.value = applyReversePlaylistState(videos.slice())
-  if (shuffleEnabled.value) {
-    // Keep the established shuffle order, including entries already played.
-    randomizedPlaylistItems.value = randomizedPlaylistItems.value.concat(shuffleItems(newVideos.slice()))
+  if (!shuffleEnabled.value) return
+  const order = randomizedPlaylistItems.value.slice()
+  const start = findIndexOfCurrentVideoInPlaylist(order) + 1
+  if (start === 0) {
+    // The current video may be on this page; restart the order from it.
+    shufflePlaylistItems()
+    return
   }
+  // Keep entries up to the current video and mix new ones into the unplayed rest.
+  for (const video of newVideos) {
+    order.splice(start + Math.floor(Math.random() * (order.length - start + 1)), 0, video)
+  }
+  randomizedPlaylistItems.value = order
 }
 
 /**

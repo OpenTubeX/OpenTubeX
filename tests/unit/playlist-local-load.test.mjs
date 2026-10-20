@@ -21,7 +21,7 @@ function deferred() {
   return { promise, resolve, reject }
 }
 
-function harness() {
+function harness({ random } = {}) {
   const firstPage = deferred()
   const continuation = deferred()
   const props = reactive({ playlistId: 'youtube-playlist', videoId: 'second' })
@@ -36,6 +36,7 @@ function harness() {
   const continuationChecks = []
   const unmountCallbacks = []
   const context = {
+    ...(random ? { Math: Object.create(Math, { random: { value: random } }) } : {}),
     onBeforeUnmount: callback => unmountCallbacks.push(callback),
     playlistLoadGeneration: 0,
     props, playlistItems, isLoading, isFetchingPlaylistContinuation, hasUnloadedPlaylistVideos,
@@ -164,7 +165,37 @@ test('a new playlist rebuilds the shuffled order instead of extending the previo
   state.finishContinuation([{ videoId: 'third' }])
   await loading
 
-  assert.deepEqual(state.randomizedPlaylistItems.value.map(video => video.videoId), ['second', 'first', 'third'])
+  const order = state.randomizedPlaylistItems.value.map(video => video.videoId)
+  assert.equal(order[0], 'second')
+  assert.deepEqual(order.slice(1).sort(), ['first', 'third'])
+})
+
+test('later pages are mixed into the unplayed part of the shuffled order', async () => {
+  const state = harness({ random: () => 0 })
+  const loading = state.load()
+  state.resolveFirstPage()
+  await new Promise(resolve => setImmediate(resolve))
+  state.shuffleEnabled.value = true
+  state.randomizedPlaylistItems.value = [{ videoId: 'second' }, { videoId: 'first' }]
+  state.finishContinuation([{ videoId: 'third' }, { videoId: 'fourth' }])
+  await loading
+
+  assert.deepEqual(state.randomizedPlaylistItems.value.map(video => video.videoId), ['second', 'fourth', 'third', 'first'])
+})
+
+test('a page containing the not yet loaded current video restarts the shuffled order from it', async () => {
+  const state = harness()
+  state.props.videoId = 'fourth'
+  const loading = state.load()
+  state.resolveFirstPage()
+  await new Promise(resolve => setImmediate(resolve))
+  state.shuffleEnabled.value = true
+  state.randomizedPlaylistItems.value = [{ videoId: 'second' }, { videoId: 'first' }]
+  state.finishContinuation([{ videoId: 'third' }, { videoId: 'fourth' }])
+  await loading
+
+  assert.equal(state.randomizedPlaylistItems.value[0].videoId, 'fourth')
+  assert.equal(state.randomizedPlaylistItems.value.length, 4)
 })
 
 test('autoplay waits for the page containing the current video instead of restarting the playlist', async () => {
