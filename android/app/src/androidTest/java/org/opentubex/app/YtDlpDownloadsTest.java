@@ -188,11 +188,13 @@ public class YtDlpDownloadsTest {
             assertEquals("Manual downloads ignore automatic download requirements", asList(manual), queue.claim());
             assertEquals("unmetered", queue.list().getJSONObject(0).getString("waitingFor"));
             assertFalse(queue.hasQueued());
-            assertEquals(asList("true/true"), wakes);
+            assertEquals(asList("true/false"), wakes);
+            assertTrue(queue.claim().isEmpty());
+            assertEquals("A pending wake-up is not scheduled again", 1, wakes.size());
             met[0] = true;
             assertTrue(queue.claim().isEmpty());
             assertEquals("charging", queue.list().getJSONObject(0).getString("waitingFor"));
-            assertEquals("A pending wake-up is not scheduled again", 1, wakes.size());
+            assertEquals("The next unmet requirement gets its own wake-up", asList("true/false", "false/true"), wakes);
             met[1] = true;
             assertTrue(queue.hasQueued());
             assertFalse(queue.list().getJSONObject(0).has("waitingFor"));

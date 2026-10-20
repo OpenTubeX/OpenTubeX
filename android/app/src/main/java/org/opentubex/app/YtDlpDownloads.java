@@ -199,7 +199,7 @@ final class YtDlpDownloads {
         boolean unmetered = !requireUnmetered || conditions.unmetered();
         boolean charging = !requireCharging || conditions.charging();
         boolean startable = false;
-        boolean waiting = false;
+        String waiting = null;
         boolean changed = false;
         for (JSONObject record : records.values()) {
             if (!record.optString("status").equals("queued")) continue;
@@ -211,13 +211,13 @@ final class YtDlpDownloads {
                 changed = true;
             }
             if (waitingFor == null) startable = true;
-            else waiting = true;
+            else waiting = waitingFor;
         }
         if (changed) save();
-        String required = requireUnmetered + "/" + requireCharging;
-        if (waiting && !required.equals(scheduledConditions)) {
-            scheduledConditions = required;
-            conditions.wakeWhen(requireUnmetered, requireCharging);
+        // Wake for the reason shown so the next unmet requirement replaces it.
+        if (waiting != null && !waiting.equals(scheduledConditions)) {
+            scheduledConditions = waiting;
+            conditions.wakeWhen(waiting.equals("unmetered"), waiting.equals("charging"));
         }
         return startable;
     }

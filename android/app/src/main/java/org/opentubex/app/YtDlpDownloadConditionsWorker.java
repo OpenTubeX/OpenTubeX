@@ -12,7 +12,7 @@ import androidx.work.WorkManager;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
-/** Runs once the network and charging requirements of waiting automatic downloads are met. */
+/** Runs once the requirement that automatic downloads are waiting for is met. */
 public final class YtDlpDownloadConditionsWorker extends Worker {
     public YtDlpDownloadConditionsWorker(@NonNull Context context, @NonNull WorkerParameters params) {
         super(context, params);
