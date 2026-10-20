@@ -589,7 +589,7 @@ export default defineComponent({
     },
     currentVideoQuality: {
       type: String,
-      default: '720'
+      default: null
     },
     delayLoadUntilUnix: {
       type: Number,
