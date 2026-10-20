@@ -263,6 +263,7 @@ const activeProfile = computed(() => {
 })
 
 const pinnedChannels = computed(() => store.getters.getPinnedChannels.map(channel => {
+  channel = { ...channel, ...store.getters.getPinnedChannelMetadata[channel.id] }
   let thumbnail = channel.thumbnail?.replace(/=s\d+/, '=s35')
   if (backendPreference.value === 'invidious') {
     thumbnail = youtubeImageUrlToInvidious(thumbnail, currentInvidiousInstanceUrl.value)

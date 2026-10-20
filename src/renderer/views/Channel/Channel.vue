@@ -807,14 +807,11 @@ async function ensureChannelInstance() {
 // Refresh saved details only from API responses, never from retained display state.
 function updateChannelDetails({ channelId, channelName, channelThumbnailUrl }) {
   store.dispatch('updateSubscriptionDetails', { channelId, channelName, channelThumbnailUrl })
-  const pins = store.getters.getPinnedChannels
-  const pin = pins.find(channel => channel.id === channelId)
-  if (!pin) return
-  const name = channelName || pin.name
-  const thumbnail = channelThumbnailUrl?.replace(/^https?:\/\/[^/]+\/ggpht/, 'https://yt3.googleusercontent.com') || pin.thumbnail
-  if (name === pin.name && thumbnail === pin.thumbnail) return
-  store.dispatch('updatePinnedChannels', pins.map(channel =>
-    channel.id === channelId ? { ...channel, name, thumbnail } : channel))
+  store.dispatch('refreshPinnedChannelMetadata', {
+    id: channelId,
+    name: channelName,
+    thumbnail: channelThumbnailUrl?.replace(/^https?:\/\/[^/]+\/ggpht/, 'https://yt3.googleusercontent.com')
+  })
 }
 
 async function getChannelLocal() {

@@ -426,6 +426,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     // User playlists shown in the side navigation
     pinnedPlaylistIds: [],
     pinnedChannels: [],
+    pinnedChannelMetadata: {},
     generalAutoLoadMorePaginatedItemsEnabled: true,
     enablePullToRefresh: true,
     useTrayIcon: true,

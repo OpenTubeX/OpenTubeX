@@ -131,18 +131,19 @@ test('refreshes saved pin metadata when reopening a channel', async ({ app, page
     { id: 'UCbbbbbbbbbbbbbbbbbbbbbb', name: 'Other channel', thumbnail: null },
     { id, name: 'Old channel name', thumbnail: 'https://yt3.googleusercontent.com/old=s176' }
   ]), id)
+  const membership = await page.evaluate(() => window.$store.getters.getPinnedChannels)
+  const pinEditTime = await page.evaluate(() => window.$store.state.settings.syncServerSettingUpdatedAt.pinnedChannels)
   await page.evaluate(id => window.ftElectron.tabs.create({ route: `/channel/${id}`, makeActive: true }), id)
-  const expected = [
-    { id: 'UCbbbbbbbbbbbbbbbbbbbbbb', name: 'Other channel', thumbnail: null },
-    { id, name: 'Channel', thumbnail: `https://yt3.googleusercontent.com/${id}=s176` }
-  ]
-  await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).pinnedChannels).toEqual(expected)
+  const expected = { [id]: { name: 'Channel', thumbnail: `https://yt3.googleusercontent.com/${id}=s176` } }
+  await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).pinnedChannelMetadata).toEqual(expected)
   const pinned = page.locator('.sideNav .pinnedChannels .navChannel').last()
   await expect(pinned).toHaveAttribute('title', 'Channel')
+  expect(await page.evaluate(() => window.$store.state.settings.syncServerSettingUpdatedAt.pinnedChannels)).toBe(pinEditTime)
+  expect(latestSettings(readDatastore(app.userDataDir, 'settings')).pinnedChannels).toEqual(membership)
   await expect(pinned.locator('img')).toHaveAttribute('src', `https://invidious.test/ggpht/${id}=s35`)
   await page.reload()
   await waitForAppReady(page)
-  await expect.poll(() => page.evaluate(() => window.$store.getters.getPinnedChannels)).toEqual(expected)
+  await expect.poll(() => page.evaluate(() => window.$store.getters.getPinnedChannelMetadata)).toEqual(expected)
 })
 
 test('keeps saved pin metadata when the channel cannot load', async ({ app, page }) => {

@@ -451,6 +451,7 @@ function togglePinnedToNavigation() {
   store.dispatch('updatePinnedChannels', isPinnedToNavigation.value
     ? pinnedChannels.value.filter(channel => channel.id !== props.id)
     : [...pinnedChannels.value, { id: props.id, name: props.name || props.id, thumbnail: pinThumbnail.value }])
+  store.dispatch('refreshPinnedChannelMetadata', { id: props.id, name: props.name, thumbnail: pinThumbnail.value })
 }
 
 const emit = defineEmits(['change-tab', 'search', 'subscribed'])

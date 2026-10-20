@@ -374,6 +374,8 @@ export const NON_SYNCABLE_SETTINGS = new Set([
   ...NON_TRANSFERABLE_SETTINGS,
   // Playlist bookmarks sync with playlists as their own collection.
   'playlistBookmarks',
+  // Automatic metadata refreshes must not compete with user pin edits.
+  'pinnedChannelMetadata',
   // Updating is tied to the installed application and operating system.
   'checkForUpdates',
   // Window coordinates are only valid for the display they were saved on.
@@ -663,6 +665,18 @@ const customActions = {
   // Pin toggles build on the previous edit, so commit them before the save finishes.
   updatePinnedPlaylistIds: ({ commit, state }, value) => updateOrderedSetting(commit, state, 'pinnedPlaylistIds', value),
   updatePinnedChannels: ({ commit, state }, value) => updateOrderedSetting(commit, state, 'pinnedChannels', value),
+  refreshPinnedChannelMetadata: ({ commit, state }, { id, name, thumbnail }) => {
+    const pin = state.pinnedChannels.find(channel => channel.id === id)
+    if (!pin) return
+    const previous = state.pinnedChannelMetadata[id] ?? pin
+    const details = { name: name || previous.name, thumbnail: thumbnail || previous.thumbnail }
+    if (details.name === previous.name && details.thumbnail === previous.thumbnail) return
+    const metadata = Object.fromEntries(state.pinnedChannels
+      .filter(channel => state.pinnedChannelMetadata[channel.id])
+      .map(channel => [channel.id, state.pinnedChannelMetadata[channel.id]]))
+    metadata[id] = details
+    return updateOrderedSetting(commit, state, 'pinnedChannelMetadata', metadata)
+  },
 
   // Home customization edits build on the previous edit, so commit them before the save finishes.
   updateHomeSectionLayout: ({ commit, state }, value) => updateOrderedSetting(
