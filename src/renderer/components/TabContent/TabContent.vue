@@ -385,6 +385,11 @@ function cancelLoaderSettle() {
   visibility: hidden;
 }
 
+/* Retained browsing content must not extend the Watch page's scroll range. */
+.tabContent:not(.hasWatchPreview) > .browsingBehindWatch {
+  overflow: clip;
+}
+
 /* Keep positioned items in the browsing page below the returning Watch preview. */
 .tabContent.hasWatchPreview > .routerView:not(.browsingBehindWatch) {
   position: relative;
