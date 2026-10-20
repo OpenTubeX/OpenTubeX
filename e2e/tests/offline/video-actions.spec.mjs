@@ -1354,10 +1354,24 @@ test.describe('video downloads', () => {
     await expect(otherDownload.getByTitle('Retry download')).toBeVisible()
     await expect(otherDownload).not.toContainText('Download canceled')
 
+    // Deliver retry broadcasts separately, as can happen on a busy renderer.
+    await app.electronApp.evaluate(({ webContents }) => {
+      for (const contents of webContents.getAllWebContents()) {
+        const send = contents.send.bind(contents)
+        contents.send = (channel, ...args) => {
+          if (channel === 'yt-dlp-download-status' || channel === 'yt-dlp-downloads-removed') {
+            const delay = channel === 'yt-dlp-download-status' ? 200 : 800
+            setTimeout(() => { if (!contents.isDestroyed()) send(channel, ...args) }, delay)
+          } else {
+            send(channel, ...args)
+          }
+        }
+      }
+    })
+
     await hydratedDownload.getByTitle('Retry download').click()
-    // The new queued record arrives before the old canceled record is removed.
-    await expect(otherDownload).toHaveCount(1)
-    await expect(otherDownload).toContainText('0.0%')
+    // Wait for the replacement and removal together; the old row also has count one.
+    await expect(otherDownload).toHaveText([/0\.0%/])
     await expect(hydratedDownload.getByTitle('Cancel Download')).toBeVisible()
     await hydratedDownload.getByTitle('Cancel Download').click()
     await expect(otherDownload.getByTitle('Retry download')).toBeVisible()
