@@ -6,24 +6,60 @@ import { join } from 'node:path'
 import test from 'node:test'
 import { load } from 'js-yaml'
 
-test('the Obtainium nightly link allows architecture APKs and the universal fallback', async () => {
+async function obtainiumApps () {
   const readme = await readFile('README.md', 'utf8')
-  const encoded = readme.match(/obtainium:\/\/app\/([^)]*)/)[1]
-  const app = JSON.parse(decodeURIComponent(encoded))
-  const settings = JSON.parse(app.additionalSettings)
-  const filter = new RegExp(settings.apkFilterRegEx)
+  return Object.fromEntries([...readme.matchAll(/obtainium:\/\/app\/([^)"]*)/g)].map(([, encoded]) => {
+    const app = JSON.parse(decodeURIComponent(encoded))
+    return [app.name, { ...app, settings: JSON.parse(app.additionalSettings) }]
+  }))
+}
 
-  assert.equal(app.id, 'org.opentubex.app.nightly')
-  assert.equal(settings.includePrereleases, true)
-  assert.equal(settings.fallbackToOlderReleases, true)
-  assert.equal(settings.filterReleaseTitlesByRegEx, 'nightly')
-  for (const abi of ['arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64', 'universal']) {
-    assert.ok(filter.test(`opentubex-0.34.0-nightly-1234-android-${abi}.apk`), abi)
-    assert.ok(!filter.test(`opentubex-0.34.0-nightly-1234-android-lite-${abi}.apk`), abi)
-  }
-  assert.ok(!filter.test('org.opentubex.app-0.34.0-beta-arm64-v8a.apk'))
-  assert.ok(!filter.test('opentubex-0.34.0-nightly-1234-android-arm64-v8a.apk.sha256'))
+// Lite APKs share the application ID, so each Obtainium link must match exactly one flavor.
+function assertApkFilter (settings, accepted, rejected) {
+  const filter = new RegExp(settings.apkFilterRegEx)
+  const accepts = name => filter.test(name) !== (settings.invertAPKFilter === true)
+  for (const name of accepted) assert.ok(accepts(name), name)
+  for (const name of rejected) assert.ok(!accepts(name), name)
   assert.equal(settings.autoApkFilterByArch, true)
+}
+
+const abis = ['arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64', 'universal']
+const nightlyApks = flavor => abis.map(abi => `opentubex-0.34.0-nightly-1234-android-${flavor}${abi}.apk`)
+const stableApks = flavor => ['', '-arm64-v8a', '-armeabi-v7a', '-x86', '-x86_64'].map(
+  suffix => `org.opentubex.app-0.34.0-beta${flavor}${suffix}.apk`
+)
+
+test('the Obtainium stable links pick only their own APK flavor', async () => {
+  const apps = await obtainiumApps()
+  for (const [name, accepted, rejected] of [
+    ['OpenTubeX', stableApks(''), stableApks('-lite')],
+    ['OpenTubeX Lite', stableApks('-lite'), stableApks('')]
+  ]) {
+    assert.equal(apps[name].id, 'org.opentubex.app')
+    assert.equal(apps[name].settings.includePrereleases, undefined)
+    assertApkFilter(apps[name].settings, accepted, rejected)
+  }
+  const readme = await readFile('README.md', 'utf8')
+  assert.doesNotMatch(readme, /obtainium:\/\/add\//)
+})
+
+test('the Obtainium nightly links allow architecture APKs and the universal fallback', async () => {
+  const apps = await obtainiumApps()
+  for (const [name, accepted, rejected] of [
+    ['OpenTubeX Nightly', nightlyApks(''), nightlyApks('lite-')],
+    ['OpenTubeX Nightly Lite', nightlyApks('lite-'), nightlyApks('')]
+  ]) {
+    const { id, settings } = apps[name]
+    assert.equal(id, 'org.opentubex.app.nightly')
+    assert.equal(settings.includePrereleases, true)
+    assert.equal(settings.fallbackToOlderReleases, true)
+    assert.equal(settings.filterReleaseTitlesByRegEx, 'nightly')
+    assertApkFilter(settings, accepted, [
+      ...rejected,
+      'org.opentubex.app-0.34.0-beta-arm64-v8a.apk',
+      `${accepted[0]}.sha256`
+    ])
+  }
 })
 
 test('embeds the generated nightly version in the Android web bundle', async () => {
