@@ -674,7 +674,7 @@ test.describe('settings', () => {
     }
   })
 
-  test('keeps the Settings scroll position when it morphs into and out of its header button', async ({ page }) => {
+  test('keeps the Settings scroll position when it morphs into and out of its header button', { tag: '@scale' }, async ({ page }) => {
     await goToSettingsSection(page, 'appearance')
     await page.evaluate(() => window.$store.dispatch('updateMoveSettingsToAppHeader', true))
     const content = page.locator('.settingsContent')
