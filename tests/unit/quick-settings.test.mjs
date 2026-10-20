@@ -132,3 +132,18 @@ test('adds a setting to its existing category instead of splitting the category'
     [...DEFAULT_QUICK_SETTINGS.slice(0, 4), 'iconPack', ...DEFAULT_QUICK_SETTINGS.slice(4)]
   )
 })
+
+test('Android quick settings do not offer Remember Volume, which the mobile player ignores', () => {
+  const android = createQuickSettingSections(key => key, false, true).flatMap(section => section.settings)
+  assert.ok(!android.some(setting => setting.id === 'rememberVolume'))
+  const desktop = createQuickSettingSections(key => key, true).flatMap(section => section.settings)
+  assert.ok(desktop.some(setting => setting.id === 'rememberVolume'))
+})
+
+test('disables quick settings whose parent setting turns them off', () => {
+  const definitions = new Map(QUICK_SETTING_DEFINITIONS.map(setting => [setting.id, setting]))
+  assert.equal(definitions.get('loopShorts').disabledWhen({ useCustomShortsPlayer: false }), true)
+  assert.equal(definitions.get('loopShorts').disabledWhen({ useCustomShortsPlayer: true }), false)
+  assert.equal(definitions.get('hideSubscriptionsLive').disabledWhen({ hideLiveStreams: true }), true)
+  assert.equal(definitions.get('enableSkipSilenceByDefault').disabledWhen({ showSkipSilenceButton: false }), true)
+})

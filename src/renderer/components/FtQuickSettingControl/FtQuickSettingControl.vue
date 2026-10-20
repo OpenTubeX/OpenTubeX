@@ -4,6 +4,7 @@
     :label="label"
     :default-value="value"
     :setting-key="definition.id"
+    :disabled="disabled"
     compact
     @change="emitUpdate"
   />
@@ -15,6 +16,7 @@
     :setting-key="definition.id"
     :select-names="selectNames"
     :select-values="definition.values"
+    :disabled="disabled"
     @change="emitUpdate"
   />
   <FtSlider
@@ -54,6 +56,7 @@ const { t } = useI18n()
 // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
 const label = computed(() => t(props.definition.labelKey))
 const value = computed(() => store.state.settings[props.definition.id])
+const disabled = computed(() => props.definition.disabledWhen?.(store.state.settings) ?? false)
 const selectNames = computed(() => props.definition.optionLabelKeys?.map((key) => {
   // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
   return t(key)
