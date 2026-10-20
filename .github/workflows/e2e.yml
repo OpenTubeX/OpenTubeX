@@ -106,7 +106,7 @@ jobs:
         import { createShardMatrix } from './e2e/shards.mjs'
 
         const [full, changed] = process.argv.slice(2).map(file => JSON.parse(readFileSync(file, 'utf8')))
-        console.log(`matrix=${JSON.stringify({ include: [1, 2].map(shard => ({ project: "offline", projects: "offline", shard, shardTotal: 2 })) })}`)
+        console.log(`matrix=${JSON.stringify({ include: Array.from({ length: 16 }, (_, i) => ({ project: "offline", projects: "offline", shard: i + 1, shardTotal: 16 })) })}`)
         NODE
       shell: bash
 
@@ -239,7 +239,7 @@ jobs:
         PROJECTS: ${{ matrix.projects }}
         E2E_XVFB: '1'
       run: |
-        test_args=("--shard=${{ matrix.shard }}/${{ matrix.shardTotal }}" "e2e/tests/offline/repeat-stats.spec.mjs" "--grep=hide in the mini player" "--repeat-each=50")
+        test_args=("--shard=1/1" "e2e/tests/offline/repeat-stats.spec.mjs" "--grep=hide in the mini player" "--repeat-each=3")
         for project in $PROJECTS; do
           test_args+=("--project=$project")
         done
