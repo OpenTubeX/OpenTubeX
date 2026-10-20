@@ -359,6 +359,7 @@ import { formatDate } from '../../helpers/dateFormat'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { isExternalMediaUrl } from '../../helpers/externalMediaUrl'
 import { getExternalMediaPosition, saveExternalMediaPosition } from '../../helpers/externalMediaPosition'
+import { createWatchTimeTracker } from '../../helpers/watchTimeTracker'
 import { useTabAvatar, useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
 import store from '../../store/index'
 
@@ -408,6 +409,14 @@ let loadGeneration = 0
 const canRetryWithCookies = computed(() => errorMessage.value && !drmError.value && isExternalMediaUrl(mediaUrl.value) && !attemptUsedCookies.value &&
   hasConfiguredRestrictedPlaybackAuthentication(store.getters))
 let seekTimer = null
+const watchTimeTracker = createWatchTimeTracker(
+  () => store.getters.getRememberHistory && store.getters.getEnableWatchStats && !loading.value && player.value?.isPaused() === false,
+  (date, seconds) => store.dispatch('recordWatchTime', { date, seconds })
+)
+watch(() => [store.getters.getRememberHistory, store.getters.getEnableWatchStats], ([remember, enabled]) => {
+  if (!remember || !enabled) watchTimeTracker.clear()
+})
+watch(() => store.getters.getWatchStatsResetVersion, () => watchTimeTracker.clear())
 
 const hostname = computed(() => {
   try {
@@ -753,6 +762,7 @@ function setCompanionPlaybackRate(rate) {
 function updateCurrentTime(seconds) {
   currentTime.value = seconds
   syncCompanionAudio(seconds)
+  watchTimeTracker.track()
   if (store.getters.getWatchedProgressSavingMode === 'auto' && Date.now() - lastPositionSave >= 2000) savePosition()
 }
 
@@ -771,11 +781,13 @@ function savePosition() {
 }
 
 function savePositionOnExit() {
+  watchTimeTracker.flush()
   if (store.getters.getWatchedProgressSavingMode === 'auto') savePosition()
 }
 
 function handlePlaybackStopped() {
   pauseCompanionAudio()
+  watchTimeTracker.flush()
   savePosition()
 }
 function seekTo(seconds) { player.value?.setCurrentTime(seconds) }

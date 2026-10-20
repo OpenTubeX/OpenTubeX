@@ -406,11 +406,11 @@ test('receiver buffering does not accumulate watched time and returns to playing
   await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
   await app.electronApp.evaluate(() => { globalThis.castTest.state.buffering = true })
   await expect.poll(() => watch.evaluate(vm => vm.chromecastStatus?.buffering)).toBe(true)
-  await watch.evaluate(vm => { vm.pendingWatchTimeByDate = {}; vm.watchTimeLastTick = null })
+  await watch.evaluate(vm => vm.watchTimeTracker.clear())
   const before = await app.electronApp.evaluate(() => globalThis.castTest.statusCalls)
   await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.statusCalls)).toBeGreaterThanOrEqual(before + 2)
-  expect(await watch.evaluate(vm => Object.values(vm.pendingWatchTimeByDate).reduce((sum, value) => sum + value, 0))).toBe(0)
-  expect(await watch.evaluate(vm => vm.watchTimeLastTick)).toBe(null)
+  expect(await watch.evaluate(vm => vm.watchTimeTracker.pendingMilliseconds)).toBe(0)
+  expect(await watch.evaluate(vm => vm.watchTimeTracker.lastTick)).toBe(null)
   expect(await watch.evaluate(vm => vm.chromecastStatus.paused)).toBe(false)
 
   await app.electronApp.evaluate(() => {
@@ -418,7 +418,7 @@ test('receiver buffering does not accumulate watched time and returns to playing
     globalThis.castTest.state.currentTime = 18
   })
   await expect.poll(() => watch.evaluate(vm => vm.chromecastStatus?.buffering)).toBe(false)
-  await expect.poll(() => watch.evaluate(vm => Object.values(vm.pendingWatchTimeByDate).reduce((sum, value) => sum + value, 0))).toBeGreaterThan(0)
+  await expect.poll(() => watch.evaluate(vm => vm.watchTimeTracker.pendingMilliseconds)).toBeGreaterThan(0)
   await app.electronApp.evaluate(() => { globalThis.castTest.state.buffering = true })
   await expect.poll(() => watch.evaluate(vm => vm.chromecastStatus?.buffering)).toBe(true)
   await choice(page, 'Return to local playback')

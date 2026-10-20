@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import { runInNewContext } from 'node:vm'
 import { isHistoryEntryWatched } from '../../src/history.js'
+import { createWatchTimeTracker } from '../../src/renderer/helpers/watchTimeTracker.js'
 
 const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
 const { _saveWatchProgress, addToHistory } = runInNewContext(`({
@@ -16,43 +17,64 @@ const timestampMethods = runInNewContext(`({
 
 test('receiver buffering resets watched-time accounting without changing pause state', () => {
   let now = Date.now()
-  class Clock extends Date {
-    static now() { return now }
-  }
-  const methods = runInNewContext(`({
+  const { isPlaybackPaused } = runInNewContext(`({
     ${source.slice(source.indexOf('    isPlaybackPaused()'), source.indexOf('    handleChromecastState('))}
-    ${source.slice(source.indexOf('    trackWatchTime()'), source.indexOf('    async flushWatchTime()'))}
-  })`, { Date: Clock })
-  const view = {
-    ...methods, rememberHistory: true, enableWatchStats: true,
-    chromecastStatus: { paused: false, buffering: false },
-    watchTimeLastTick: null, pendingWatchTimeByDate: {}, flushWatchTime() {},
-  }
-  const total = () => Object.values(view.pendingWatchTimeByDate).reduce((sum, value) => sum + value, 0)
-  view.trackWatchTime()
+  })`)
+  const view = { isPlaybackPaused, chromecastStatus: { paused: false, buffering: false } }
+  const tracker = createWatchTimeTracker(
+    () => !view.isPlaybackPaused() && !view.chromecastStatus?.buffering,
+    async () => {},
+    () => now
+  )
+  tracker.track()
   now += 1000
-  view.trackWatchTime()
-  assert.equal(total(), 1000)
+  tracker.track()
+  assert.equal(tracker.pendingMilliseconds, 1000)
   view.chromecastStatus.buffering = true
   assert.equal(view.isPlaybackPaused(), false)
   for (let i = 0; i < 6; i++) {
     now += 1000
-    view.trackWatchTime()
-    assert.equal(view.watchTimeLastTick, null)
-    assert.equal(total(), 1000)
+    tracker.track()
+    assert.equal(tracker.lastTick, null)
+    assert.equal(tracker.pendingMilliseconds, 1000)
   }
   view.chromecastStatus.buffering = false
   now += 1000
-  view.trackWatchTime()
-  assert.equal(total(), 1000, 'Resuming does not count the stalled interval')
+  tracker.track()
+  assert.equal(tracker.pendingMilliseconds, 1000, 'Resuming does not count the stalled interval')
   now += 1000
-  view.trackWatchTime()
-  assert.equal(total(), 2000)
+  tracker.track()
+  assert.equal(tracker.pendingMilliseconds, 2000)
   view.chromecastStatus.paused = true
   now += 1000
-  view.trackWatchTime()
-  assert.equal(total(), 2000)
-  assert.equal(view.watchTimeLastTick, null)
+  tracker.track()
+  assert.equal(tracker.pendingMilliseconds, 2000)
+  assert.equal(tracker.lastTick, null)
+})
+
+test('watch time ignores delayed ticks and records pending seconds per day', async () => {
+  let now = new Date(2026, 9, 20, 12).getTime()
+  const recorded = []
+  const tracker = createWatchTimeTracker(() => true, async (date, seconds) => { recorded.push([date, seconds]) }, () => now)
+  tracker.track()
+  now += 6000
+  tracker.track()
+  assert.equal(tracker.pendingMilliseconds, 0, 'A suspended timer does not count as playback')
+  for (let i = 0; i < 9; i++) {
+    now += 1000
+    tracker.track()
+  }
+  assert.deepEqual(recorded, [])
+  now += 1000
+  tracker.track()
+  assert.deepEqual(recorded, [['2026-10-20', 10]], 'Ten seconds of playback flush automatically')
+  tracker.track()
+  now += 2500
+  tracker.track()
+  await tracker.flush()
+  assert.deepEqual(recorded, [['2026-10-20', 10], ['2026-10-20', 2.5]])
+  assert.equal(tracker.pendingMilliseconds, 0)
+  assert.equal(tracker.lastTick, null)
 })
 
 test('timestamp actions use the active receiver position and return to local playback', () => {
