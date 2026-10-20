@@ -1032,6 +1032,40 @@ test.describe('history search feedback', () => {
     await expect(videos).toHaveCount(2)
     await expect(loader).toHaveCount(0)
   })
+
+  test('refreshes search results in place when history changes in the background', async ({ page }) => {
+    await goTo(page, 'history')
+    await page.getByRole('searchbox', { name: 'Search in History' }).fill('city')
+    const videos = page.locator('.ft-list-video')
+    const loader = page.locator('.historySearchLoader')
+    await expect(videos).toHaveCount(1)
+    await expect(loader).toHaveCount(0)
+
+    // Sync merges replace the history array without changing the search inputs.
+    const flashes = await page.evaluate(newRecord => new Promise(resolve => {
+      const flashes = []
+      const observer = new MutationObserver(mutations => {
+        for (const mutation of mutations) {
+          for (const node of mutation.addedNodes) {
+            if (node instanceof Element && node.matches('.historySearchLoader')) flashes.push('loader')
+          }
+          for (const node of mutation.removedNodes) {
+            if (node instanceof Element && (node.matches('.ft-list-video') || node.querySelector('.ft-list-video'))) flashes.push('results removed')
+          }
+        }
+      })
+      observer.observe(document.body, { childList: true, subtree: true })
+      window.$store.commit('applyHistorySyncChanges', { insertions: [newRecord], updates: [], deletions: [] })
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        observer.disconnect()
+        resolve(flashes)
+      }))
+    }), historyEntry('searchccccc', 'City river cruise', now + 1000))
+    expect(flashes).toEqual([])
+    await expect(videos).toHaveCount(2)
+    await expect(videos.first()).toContainText('City river cruise')
+    await expect(loader).toHaveCount(0)
+  })
 })
 
 test.describe('history search locale changes', () => {

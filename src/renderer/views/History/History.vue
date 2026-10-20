@@ -734,9 +734,10 @@ async function filterHistory() {
     return
   }
 
-  const searchInputs = [browseData.value, query.value, doCaseSensitiveSearch.value, locale.value]
-  // Pagination repeats the same search. Keep its existing results visible so
-  // a temporary spinner cannot shorten the page and reset its scroll position.
+  const searchInputs = [fromDate.value, toDate.value, channel.value, sortBy.value, query.value, doCaseSensitiveSearch.value, locale.value]
+  // Pagination and background history changes (e.g. sync merges) repeat the
+  // same search. Keep its existing results visible so a temporary spinner
+  // cannot shorten the page and reset its scroll position.
   isSearching.value = !completedSearchInputs || searchInputs.some((value, index) => value !== completedSearchInputs[index])
   const filteredQuery = await filterVideosWithQueryAsync(
     browseData.value, query.value, doCaseSensitiveSearch.value, locale.value,
