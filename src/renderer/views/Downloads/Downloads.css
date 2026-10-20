@@ -99,15 +99,15 @@
 .downloadRow {
   background: var(--side-nav-color);
   border-radius: calc(8px * var(--ui-roundness));
-  gap: 20px;
+  gap: 12px;
   justify-content: space-between;
-  margin-block: 10px;
-  padding: 16px;
+  margin-block: 8px;
+  padding: 12px;
 }
 
 .downloadMain {
   flex: 1 1 auto;
-  gap: 16px;
+  gap: 12px;
   min-inline-size: 0;
 }
 
@@ -115,7 +115,7 @@
   aspect-ratio: 16 / 9;
   border-radius: calc(6px * var(--ui-roundness));
   flex: none;
-  inline-size: 144px;
+  inline-size: 96px;
   object-fit: cover;
 }
 
@@ -124,7 +124,8 @@
   min-inline-size: 0;
 }
 
-.downloadDetails h3 {
+.downloadDetails h3,
+.downloadChannel {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -177,7 +178,7 @@
 
 .downloadActions {
   flex: none;
-  gap: 6px;
+  gap: 4px;
 }
 
 .progressTrack {
@@ -232,18 +233,8 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .downloadRow {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .downloadActions {
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
-
   .downloadThumbnail {
-    inline-size: 112px;
+    inline-size: 80px;
   }
 }
 
@@ -252,13 +243,37 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
+  .downloadRow {
+    gap: 4px;
+    padding: 8px;
+  }
+
   .downloadMain {
-    align-items: stretch;
-    flex-direction: column;
+    gap: 8px;
   }
 
   .downloadThumbnail {
-    inline-size: min(180px, 100%);
-    margin-inline: auto;
+    inline-size: 64px;
   }
+}
+
+.downloadActions :deep(.btn) {
+  margin: 0;
+}
+
+.downloadSummary {
+  overflow-wrap: anywhere;
+}
+
+.downloadMetadata {
+  inline-size: min(480px, 65vw);
+  overflow-wrap: anywhere;
+}
+
+.downloadMetadata h3 {
+  white-space: normal;
+}
+
+.downloadMetadata .downloadThumbnail {
+  inline-size: 144px;
 }
