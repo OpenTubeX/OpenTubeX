@@ -62,13 +62,28 @@ async function connectMockGamepad(page) {
 
     Object.defineProperty(navigator, 'getGamepads', {
       configurable: true,
-      value: () => [null, gamepad]
+      value: () => {
+        // The app ignores gamepads while the window lacks focus
+        if (document.hasFocus()) window.__e2eGamepadPolls++
+        return [null, gamepad]
+      }
     })
     window.__e2eGamepad = gamepad
+    window.__e2eGamepadPolls = 0
     const event = new Event('gamepadconnected')
     Object.defineProperty(event, 'gamepad', { value: gamepad })
     window.dispatchEvent(event)
   })
+}
+
+/**
+ * Waits until the app has polled the gamepad while focused since `polls` was read.
+ * A fixed hold can fall between polls on a slow runner, so the input would be lost.
+ * @param {import('@playwright/test').Page} page
+ * @param {number} polls
+ */
+async function waitForGamepadPoll(page, polls) {
+  await page.waitForFunction(previous => window.__e2eGamepadPolls > previous, polls)
 }
 
 async function pressGamepadButton(page, action) {
@@ -77,33 +92,27 @@ async function pressGamepadButton(page, action) {
     throw new Error(`Unknown gamepad action: ${action}`)
   }
 
-  await page.evaluate((index) => {
-    const button = window.__e2eGamepad.buttons[index]
-    button.pressed = true
-    button.value = 1
-    window.__e2eGamepad.timestamp++
-  }, buttonIndex)
-  await page.waitForTimeout(50)
-  await page.evaluate((index) => {
-    const button = window.__e2eGamepad.buttons[index]
-    button.pressed = false
-    button.value = 0
-    window.__e2eGamepad.timestamp++
-  }, buttonIndex)
-  await page.waitForTimeout(50)
+  for (const pressed of [true, false]) {
+    const polls = await page.evaluate(({ index, pressed }) => {
+      const button = window.__e2eGamepad.buttons[index]
+      button.pressed = pressed
+      button.value = pressed ? 1 : 0
+      window.__e2eGamepad.timestamp++
+      return window.__e2eGamepadPolls
+    }, { index: buttonIndex, pressed })
+    await waitForGamepadPoll(page, polls)
+  }
 }
 
 async function moveGamepadAxis(page, axisIndex, value) {
-  await page.evaluate(({ index, axisValue }) => {
-    window.__e2eGamepad.axes[index] = axisValue
-    window.__e2eGamepad.timestamp++
-  }, { index: axisIndex, axisValue: value })
-  await page.waitForTimeout(50)
-  await page.evaluate((index) => {
-    window.__e2eGamepad.axes[index] = 0
-    window.__e2eGamepad.timestamp++
-  }, axisIndex)
-  await page.waitForTimeout(50)
+  for (const axisValue of [value, 0]) {
+    const polls = await page.evaluate(({ index, axisValue }) => {
+      window.__e2eGamepad.axes[index] = axisValue
+      window.__e2eGamepad.timestamp++
+      return window.__e2eGamepadPolls
+    }, { index: axisIndex, axisValue })
+    await waitForGamepadPoll(page, polls)
+  }
 }
 
 async function expectContainedContrastFocusIndicator(locator, contrastColor) {
