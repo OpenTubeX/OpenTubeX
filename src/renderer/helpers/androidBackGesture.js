@@ -5,7 +5,7 @@
 
 /** @type {Map<string, AndroidBackPreview>} */
 const players = new Map()
-/** @type {WeakMap<HTMLDialogElement, AndroidBackPreview>} */
+/** @type {WeakMap<HTMLElement, AndroidBackPreview>} */
 const sheets = new WeakMap()
 
 /** Finish from the held position; reversing at zero would replay from the end.
@@ -20,7 +20,7 @@ export async function settleAndroidBackAnimation(animation, commit) {
 }
 
 /**
- * @param {HTMLDialogElement} element
+ * @param {HTMLElement} element
  * @param {AndroidBackPreview} preview
  */
 export function registerAndroidBackSheet(element, preview) {
@@ -30,7 +30,7 @@ export function registerAndroidBackSheet(element, preview) {
   }
 }
 
-/** @param {HTMLDialogElement} element */
+/** @param {HTMLElement} element */
 export function getAndroidBackSheet(element) {
   return sheets.get(element) ?? null
 }

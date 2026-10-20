@@ -1,14 +1,66 @@
-import { onBeforeUnmount } from 'vue'
+import { nextTick, onBeforeUnmount, watch } from 'vue'
 import { applyAnimationSpeed } from '../helpers/animationSpeed'
+import { registerAndroidBackSheet, settleAndroidBackAnimation } from '../helpers/androidBackGesture'
 import { isReducedMotionEnabled } from '../helpers/reducedMotion'
+
+const BACK_PREVIEW_DURATION = 180
 
 // Shared by navigation and context sheets. Native upward scrolling remains
 // available; downward pulls only take over at the top of the touched scrollport.
-export function useBottomSheetDismiss(sheet, dismiss) {
+// `canDismissOnBack` is false while Back would return to a parent submenu.
+export function useBottomSheetDismiss(sheet, dismiss, { canDismissOnBack = () => true } = {}) {
   let drag = null
   let suppressClick = false
   let sheetAnimation = null
   let isLeaving = false
+  let backPreview = null
+
+  function cancelBackPreview() {
+    backPreview?.forEach(animation => animation.cancel())
+    backPreview = null
+  }
+
+  if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
+    watch(sheet, (element, _previous, onCleanup) => {
+      if (!element) return
+      const unregister = registerAndroidBackSheet(element, {
+        begin() {
+          if (isLeaving || drag?.active || isReducedMotionEnabled() || !canDismissOnBack()) return false
+          const transform = getComputedStyle(element).transform
+          sheetAnimation?.cancel()
+          const timing = { duration: BACK_PREVIEW_DURATION, fill: 'both' }
+          backPreview = [
+            element.animate([{ transform }, { transform: 'translateY(100%)' }], timing),
+            element.parentElement.animate([{ opacity: 1 }, { opacity: 0 }], timing)
+          ].map(animation => {
+            applyAnimationSpeed(animation)
+            animation.pause()
+            return animation
+          })
+          return true
+        },
+        update(progress) {
+          backPreview?.forEach(animation => { animation.currentTime = progress * BACK_PREVIEW_DURATION })
+        },
+        async finish(commit) {
+          const current = backPreview
+          if (!current) return
+          await Promise.all(current.map(animation => settleAndroidBackAnimation(animation, commit)))
+          if (backPreview !== current) return
+          if (!commit) return cancelBackPreview()
+          // The leave transition keeps the finished preview instead of animating again.
+          dismiss()
+          await nextTick()
+          if (backPreview === current) cancelBackPreview()
+        },
+        cancel: cancelBackPreview,
+      })
+      onCleanup(() => {
+        unregister()
+        cancelBackPreview()
+      })
+    }, { immediate: true, flush: 'post' })
+  }
 
   function clearDrag() {
     drag = null
@@ -128,6 +180,13 @@ export function useBottomSheetDismiss(sheet, dismiss) {
   function transition(backdrop, done, leaving) {
     isLeaving = leaving
     const element = backdrop.querySelector('[data-bottom-sheet]')
+    if (leaving && backPreview) {
+      element.style.transform = 'translateY(100%)'
+      backdrop.style.opacity = '0'
+      cancelBackPreview()
+      done()
+      return
+    }
     const transform = getComputedStyle(element).transform
     clearDrag()
     sheetAnimation?.cancel()
@@ -142,6 +201,7 @@ export function useBottomSheetDismiss(sheet, dismiss) {
   onBeforeUnmount(() => {
     clearDrag()
     sheetAnimation?.cancel()
+    cancelBackPreview()
   })
   return {
     startDrag,

@@ -446,6 +446,7 @@ import { getRandomColorClass } from '../../helpers/colors'
 import { getLocalVideoInfo, parseLocalTextRuns } from '../../helpers/api/local'
 import { isRecoverableNetworkError } from '../../helpers/networkRecovery'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { listenForOutsidePress } from '../../helpers/outsidePress'
 import {
   createCoalescingPoller,
   parseReplayOffsetMs,
@@ -618,7 +619,7 @@ onBeforeUnmount(() => {
     cancelAnimationFrame(liveEdgeScrollFrame)
     liveEdgeScrollFrame = null
   }
-  document.removeEventListener('pointerdown', handleChatSettingsClickOutside, true)
+  stopOutsidePress?.()
   if (scrollToLiveHoldTimer !== null) {
     clearTimeout(scrollToLiveHoldTimer)
     scrollToLiveHoldTimer = null
@@ -637,7 +638,7 @@ onBeforeUnmount(() => {
 onMounted(() => {
   // Fullscreen docks stop pointer events from bubbling into the player. Capture
   // the event first so clicking another dock can still dismiss this menu.
-  document.addEventListener('pointerdown', handleChatSettingsClickOutside, true)
+  stopOutsidePress = listenForOutsidePress(handleChatSettingsClickOutside, true)
 
   // Setup can finish after a cached continuation has already returned. Starting
   // on the next frame guarantees the loading skeleton is painted before chat
@@ -1250,6 +1251,7 @@ function formatLiveChatTimestamp(comment) {
   return ''
 }
 
+let stopOutsidePress = null
 function handleChatSettingsClickOutside(event) {
   if (settingsMenuOpen.value && !liveChatActionsRef.value?.contains(event.target)) {
     settingsMenuOpen.value = false

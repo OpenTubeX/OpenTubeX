@@ -261,6 +261,7 @@ import FtTooltip from '../FtTooltip/FtTooltip.vue'
 import FtPerformanceImpact from '../FtPerformanceImpact/FtPerformanceImpact.vue'
 import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { listenForOutsidePress } from '../../helpers/outsidePress'
 import { getAnchoredPosition } from '../../helpers/anchoredPosition'
 import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewportBounds'
 
@@ -467,7 +468,8 @@ const selectedLocale = computed(() => {
 watch(dropdownShown, (shown) => {
   if (shown) {
     dropdownRendered.value = true
-    document.addEventListener('pointerdown', handleOutsidePointerDown, true)
+    stopOutsidePress?.()
+    stopOutsidePress = listenForOutsidePress(handleOutsidePointerDown, true)
     window.addEventListener('resize', refreshDropdownLayout)
   } else {
     if (!phoneLayout.value) dropdownRendered.value = false
@@ -779,6 +781,7 @@ function selectOption(index) {
   if (settingsOverlayActive.value) selectButton.value?.focus()
 }
 
+let stopOutsidePress = null
 function handleOutsidePointerDown(event) {
   if (phoneLayout.value) return
   const target = event.target
@@ -836,7 +839,8 @@ function handleDropdownMouseDown(event) {
 }
 
 function removeDropdownListeners() {
-  document.removeEventListener('pointerdown', handleOutsidePointerDown, true)
+  stopOutsidePress?.()
+  stopOutsidePress = null
   window.removeEventListener('resize', refreshDropdownLayout)
 }
 
