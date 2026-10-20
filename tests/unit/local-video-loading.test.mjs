@@ -41,6 +41,8 @@ function loader({ android = Promise.resolve({ data: {} }), token = Promise.resol
     getWatchHTMLWatchPage: async () => ({ session, playerResponse: embeddedPlayer ? playerResponse : undefined, nextResponse: embeddedNext ? {} : undefined }),
     localApiFetch: () => assert.fail('Unexpected network request'),
     Player: { create: createPlayer },
+    createBackgroundPlayer: createPlayer,
+    runBackgroundJob: () => assert.fail('Unexpected background job'),
     PlayerCache: class {},
     UniversalCache: class {},
     generateContentPoToken: () => { requests.push('token'); return token },

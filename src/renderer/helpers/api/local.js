@@ -11,6 +11,7 @@ import { checkHistoryRepairResponse } from '../../../historyRepair'
 import { SEARCH_CHAR_LIMIT } from '../../../constants'
 import store from '../../store/index'
 import { PlayerCache } from './PlayerCache'
+import { createBackgroundPlayer } from './background-player.js'
 import { loadSearchContinuation } from '../search-continuation'
 import {
   getCommentTranslationSource,
@@ -740,13 +741,9 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
   // Script setup and /next only depend on the HTML session. Start them together,
   // including when the player script is not cached yet.
   const playerReady = (async () => {
-    player ??= await Player.create(
-      process.env.IS_ELECTRON ? new PlayerCache() : new UniversalCache(false),
-      localApiFetch,
-      undefined,
-      // If we found the player ID in the HTML we can pass it in to save one request inside Player.create()
-      htmlExtracts.playerId
-    )
+    player ??= process.env.IS_ELECTRON
+      ? await createBackgroundPlayer(new PlayerCache(), localApiFetch, htmlExtracts.playerId, runBackgroundJob)
+      : await Player.create(new UniversalCache(false), localApiFetch, undefined, htmlExtracts.playerId)
     htmlExtracts.session.player = player
   })()
 
