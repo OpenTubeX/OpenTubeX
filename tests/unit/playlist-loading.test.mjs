@@ -15,7 +15,7 @@ function playlist(_id, playlistName, protectedValue = false) {
   }
 }
 
-async function fixture(records, { settingsDelay = false } = {}) {
+async function fixture(records, { settingsDelay = false, settingsError = null } = {}) {
   const db = { playlists: new Datastore({ inMemoryOnly: true }) }
   await db.playlists.insertAsync(records)
   const DBPlaylistHandlers = vm.runInNewContext(
@@ -44,6 +44,7 @@ async function fixture(records, { settingsDelay = false } = {}) {
       if (name !== 'updateQuickBookmarkTargetPlaylistId') return module.actions[name]?.(context, value)
       // Like the generated settings updater, commit only after persisting.
       if (settingsDelay) await new Promise(resolve => setTimeout(resolve, 5))
+      if (settingsError) throw settingsError
       context.rootState.settings.quickBookmarkTargetPlaylistId = value
     },
   }
@@ -65,6 +66,18 @@ test('first launch keeps the first default playlist as the quick bookmark target
   await new Promise(resolve => setTimeout(resolve, 20))
   assert.equal(rootState.settings.quickBookmarkTargetPlaylistId, 'favorites')
   assert.deepEqual(errors, [])
+})
+
+test('a failed quick bookmark update still adds the saved playlist', async () => {
+  const failure = new Error('Settings write failed')
+  const { module, errors, dispatch, load } = await fixture([playlist('favorites', 'Favorites')], { settingsError: failure })
+  await load()
+  module.state.playlists = []
+  const result = await dispatch('addPlaylist', { _id: 'new-empty', playlistName: 'New empty', videos: [] })
+  assert.equal(result, true)
+  assert.equal(module.state.playlists.some(item => item._id === 'new-empty'), true)
+  assert.equal(errors.length, 1)
+  assert.equal(errors[0], failure)
 })
 
 test('adding a playlist reports a failed database write without updating the store', async () => {
