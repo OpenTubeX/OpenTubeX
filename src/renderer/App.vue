@@ -3706,7 +3706,7 @@ function shouldInterceptAndroidBack() {
     (tabId && store.getters.getTabHistoryState(tabId).canGoBack) ||
     isSideNavShown() || settingsWindowOpen.value || isAnyPromptOpen.value ||
     mobileContextLink.value || mobileContextActions.value ||
-    document.fullscreenElement || document.querySelector('.ftVideoPlayer.fullWindow, dialog[open], .topNav.phoneSearchOpen') ||
+    document.fullscreenElement || document.querySelector('.ftVideoPlayer.fullWindow, dialog[open], .topNav.phoneSearchOpen, .iconDropdown') ||
     hasVisibleGamepadLayer())
 }
 

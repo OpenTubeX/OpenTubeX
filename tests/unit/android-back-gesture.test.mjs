@@ -170,6 +170,10 @@ test('root allows the system preview only when no confirmation, history, fullscr
   layerVisible = true
   assert.equal(shouldIntercept(), true)
   layerVisible = false
+  // Icon dropdowns have no popup role, so they need their own check.
+  document.querySelector = selector => selector.split(', ').includes('.iconDropdown') ? {} : null
+  assert.equal(shouldIntercept(), true)
+  document.querySelector = () => null
   // Narrow layouts replace the drawer with the bottom bar, so it cannot consume Back.
   wide = false
   refs.isSideNavOpen.value = true
