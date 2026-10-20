@@ -6378,6 +6378,14 @@ export default defineComponent({
             translationName
           }
         })
+
+        // Like built-in playback, offer a translation when no original caption matches the preferred locale
+        if (!findCaptionByLocale(this.captions.filter(caption => !caption.isDubbed), this.preferredCaptionLocale)) {
+          const translation = findCaptionByLocale(this.captionTranslations, this.preferredCaptionLocale)
+          if (translation) {
+            this.captions = sortCaptions([...this.captions, { ...translation, isAutotranslated: true }], this.preferredCaptionLocale)
+          }
+        }
       }
       // HLS manifests refresh themselves, so they don't expire the way the stream URLs do.
       // Keeping the backend's date stops playback errors from being blamed on an
