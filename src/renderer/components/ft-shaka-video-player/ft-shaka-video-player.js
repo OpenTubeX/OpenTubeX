@@ -5012,8 +5012,10 @@ export default defineComponent({
 
     const uiConfig = computed(() => {
       // DVR playback supports speed changes after seeking behind the live edge.
-      // Seeking eligibility only checks DVR restrictions for metadata-marked live sources.
-      const showPlaybackRateControls = (!isLive.value && !props.isLive) || (props.isLive && seekingIsPossible.value)
+      // The seeking check confirms a DVR window for HLS, but assumes DASH is seekable.
+      const liveDvrIsConfirmed = props.isLive && seekingIsPossible.value &&
+        (props.isLiveDvrEnabled === true || props.manifestMimeType === 'application/x-mpegurl')
+      const showPlaybackRateControls = (!isLive.value && !props.isLive) || liveDvrIsConfirmed
       const mobile = isCapacitorMobilePlayer()
       const controlPanelElements = [
         ...(!mobile ? ['ft_skip_previous', 'play_pause', 'ft_skip_next', 'mute', 'volume'] : []),

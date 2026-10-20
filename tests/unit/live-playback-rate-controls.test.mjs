@@ -40,6 +40,8 @@ for (const overflow of [false, true]) {
   for (const [label, props, expected] of [
     ['DVR livestream or premiere', { isLive: true, isLiveDvrEnabled: true }, true],
     ['HLS DVR without metadata', { isLive: true, manifestMimeType: 'application/x-mpegurl', manifestSrc: 'https://example.com/playlist_type/DVR/live.m3u8' }, true],
+    ['live DASH without DVR metadata', { isLive: true }, false],
+    ['live DASH with unknown DVR metadata', { isLive: true, isLiveDvrEnabled: null }, false],
     ['disabled DVR', { isLive: true, isLiveDvrEnabled: false }, false],
     ['built-in live playback', { isLive: true, playbackEngine: 'built-in', isLiveDvrEnabled: true }, false],
     ['short live window', { isLive: true, manifestMimeType: 'application/x-mpegurl', manifestSrc: 'https://example.com/manifest_duration/30/live.m3u8' }, false],
