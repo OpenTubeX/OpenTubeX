@@ -9,7 +9,7 @@ import { createSubscriptionRefreshStartController } from '../../src/renderer/hel
 async function loadHelpers(native, logger = console, notifications = { checkPermissions: async () => ({ display: 'granted' }) }) {
   const source = await readFile(new URL('../../src/renderer/helpers/androidSubscriptionRefresh.js', import.meta.url), 'utf8')
   return vm.runInNewContext(`${source.replace(/^import .*$/gm, '').replaceAll('export ', '')}
-    ({ startAndroidSubscriptionRefresh, finishAndroidSubscriptionRefresh, withAndroidSubscriptionRefreshBatch })`, {
+    ({ startAndroidSubscriptionRefresh, finishAndroidSubscriptionRefresh, withAndroidSubscriptionRefreshBatch, forgetAndroidSubscriptionRefreshFingerprints })`, {
     process: { env: { IS_CAPACITOR: true } },
     registerPlugin: () => native,
     LocalNotifications: notifications,
@@ -118,4 +118,17 @@ test('a batch reuses its permission result for every feed and clears it afterwar
   await helpers.startAndroidSubscriptionRefresh(3, 'Refresh', 'Cancel')
   await helpers.finishAndroidSubscriptionRefresh(3)
   assert.equal(requests, 2)
+})
+
+test('a failed native fingerprint reset reaches the cache clear that requested it', async () => {
+  const requests = []
+  const helpers = await loadHelpers({
+    async forgetFingerprints(options) {
+      requests.push(options)
+      throw new Error('Unable to reset pending subscription refresh fingerprints')
+    },
+  })
+  await assert.rejects(helpers.forgetAndroidSubscriptionRefreshFingerprints(['UCchannel']), /Unable to reset/)
+  await assert.rejects(helpers.forgetAndroidSubscriptionRefreshFingerprints(), /Unable to reset/)
+  assert.equal(JSON.stringify(requests), JSON.stringify([{ channelIds: ['UCchannel'] }, {}]))
 })

@@ -14,10 +14,13 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 
 import androidx.core.content.ContextCompat;
+import org.json.JSONException;
 
 @CapacitorPlugin(name = "SubscriptionRefresh")
 public class SubscriptionRefreshPlugin extends Plugin {
@@ -230,6 +233,20 @@ public class SubscriptionRefreshPlugin extends Plugin {
         } catch (Exception error) {
             call.reject("Unable to read pending subscription refresh data", error);
         }
+    }
+
+    @PluginMethod
+    public void forgetFingerprints(PluginCall call) {
+        Set<String> channelIds = null;
+        JSArray ids = call.getArray("channelIds");
+        try {
+            if (ids != null) channelIds = new HashSet<>(ids.<String>toList());
+        } catch (JSONException error) {
+            call.reject("Channel IDs must be strings", error);
+            return;
+        }
+        if (SubscriptionRefreshResultStore.forgetFingerprints(getContext(), channelIds)) call.resolve();
+        else call.reject("Unable to reset pending subscription refresh fingerprints");
     }
 
     @PluginMethod

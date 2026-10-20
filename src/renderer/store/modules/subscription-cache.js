@@ -7,6 +7,7 @@ import { applySubscriptionSeenVideosToCache, applySubscriptionSeenPostsToCache }
 import { preserveSubscriptionSeenEntries } from '../../../subscriptionFeedState'
 import { getSubscriptionsForFeed } from '../../helpers/subscription-channels'
 import { updateVideoListAfterProcessing } from '../../helpers/subscriptions'
+import { forgetAndroidSubscriptionRefreshFingerprints } from '../../helpers/androidSubscriptionRefresh'
 
 const MAX_CONCURRENT_CACHE_WRITES = 8
 
@@ -427,6 +428,8 @@ const actions = {
 
   async clearSubscriptionsCacheForManyChannels({ commit }, channelIds) {
     try {
+      // Forget first: a failure keeps the cache rows, so the cleanup is retried.
+      await forgetAndroidSubscriptionRefreshFingerprints(channelIds)
       await DBSubscriptionCacheHandlers.deleteMultipleChannels(channelIds)
       commit('clearCachesForManyChannels', channelIds)
     } catch (errMessage) {
@@ -436,6 +439,7 @@ const actions = {
 
   async clearSubscriptionsCache({ commit }) {
     try {
+      await forgetAndroidSubscriptionRefreshFingerprints()
       await DBSubscriptionCacheHandlers.deleteAll()
       commit('clearCaches')
       return true

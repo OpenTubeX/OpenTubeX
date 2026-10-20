@@ -102,6 +102,16 @@ export async function acknowledgeAndroidSubscriptionRefreshResult(id) {
   if (!removed) throw new Error('Unable to acknowledge pending subscription refresh data')
 }
 
+/**
+ * Closed-app refreshes skip feeds that match their last queued result. Once
+ * their cache is cleared, those feeds have to be queued again.
+ * @param {string[]} [channelIds] Omit to forget every channel.
+ */
+export function forgetAndroidSubscriptionRefreshFingerprints(channelIds) {
+  if (!SubscriptionRefresh) return Promise.resolve()
+  return SubscriptionRefresh.forgetFingerprints(channelIds ? { channelIds } : {})
+}
+
 export async function addAndroidSubscriptionRefreshCancelledListener(listener) {
   if (!SubscriptionRefresh) return () => {}
   const handle = await SubscriptionRefresh.addListener('cancelled', listener)

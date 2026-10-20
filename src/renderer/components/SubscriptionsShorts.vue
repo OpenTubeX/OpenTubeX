@@ -101,13 +101,16 @@ const lastShortRefreshTimestamp = computed(() => {
     return ''
   }
 
-  let latestTimestamp = null
+  // Closed-app refreshes skip unchanged channels, so their cache entries keep
+  // the previous fetch time while the completed refresh is newer.
+  let latestTimestamp = store.getters.getSubscriptionShortsLastRefreshTimestamp ?? 0
   cacheEntriesForAllActiveProfileChannels.value.forEach((cacheEntry) => {
-    if (!latestTimestamp || cacheEntry.timestamp.getTime() > latestTimestamp.getTime()) {
-      latestTimestamp = cacheEntry.timestamp
-    }
+    const timestamp = cacheEntry.timestamp.getTime()
+    // An invalid persisted date compares false instead of hiding valid ones.
+    if (timestamp > latestTimestamp) latestTimestamp = timestamp
   })
-  return getRelativeTimeFromDate(latestTimestamp.getTime(), true, true, now.value)
+  if (latestTimestamp === 0) return ''
+  return getRelativeTimeFromDate(latestTimestamp, true, true, now.value)
 })
 
 const refreshTitle = computed(() => {

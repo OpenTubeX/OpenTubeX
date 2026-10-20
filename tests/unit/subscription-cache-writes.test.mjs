@@ -266,3 +266,36 @@ test('loading persisted video caches supplies feed markers without changing know
   }
   assert.equal(state.postsCache.channel.posts[0].postContent.content.isNewInSubscriptionFeed, undefined)
 })
+
+test('clearing cached channels lets closed-app refreshes queue their unchanged feeds again', async () => {
+  const forgotten = []
+  const context = vm.createContext({
+    console, toRaw, ...seenData, ...feedState, applySubscriptionSeenVideosToCache, applySubscriptionSeenPostsToCache,
+    DBSubscriptionCacheHandlers: { deleteMultipleChannels: async () => {}, deleteAll: async () => {} },
+    forgetAndroidSubscriptionRefreshFingerprints: async channelIds => { forgotten.push(channelIds) },
+  })
+  vm.runInContext(moduleSource, context)
+  const { actions } = context.cacheModule
+  await actions.clearSubscriptionsCacheForManyChannels({ commit() {} }, ['UCremoved'])
+  await actions.clearSubscriptionsCache({ commit() {} })
+  assert.deepEqual(forgotten, [['UCremoved'], undefined])
+})
+
+test('a failed closed-app fingerprint reset keeps the cache so clearing it can be retried', async () => {
+  const deleted = []
+  const commits = []
+  const context = vm.createContext({
+    console: { ...console, error() {} }, toRaw, ...seenData, ...feedState, applySubscriptionSeenVideosToCache, applySubscriptionSeenPostsToCache,
+    DBSubscriptionCacheHandlers: {
+      deleteMultipleChannels: async channelIds => { deleted.push(channelIds) },
+      deleteAll: async () => { deleted.push('all') },
+    },
+    forgetAndroidSubscriptionRefreshFingerprints: async () => { throw new Error('Unable to reset fingerprints') },
+  })
+  vm.runInContext(moduleSource, context)
+  const commit = name => { commits.push(name) }
+  await context.cacheModule.actions.clearSubscriptionsCacheForManyChannels({ commit }, ['UCremoved'])
+  assert.equal(await context.cacheModule.actions.clearSubscriptionsCache({ commit }), false)
+  assert.deepEqual(deleted, [])
+  assert.deepEqual(commits, [])
+})
