@@ -57,6 +57,11 @@
 }
 
 @media (width > 680px) and (height > 600px) and (not (any-pointer: coarse)) {
+  /* Room for the 40px checkbox state layer around the last 20px label */
+  .searchRadio {
+    padding-block-end: 10px;
+  }
+
   .searchRadio :deep(input + label) {
     min-block-size: 0;
     padding-block: 0;

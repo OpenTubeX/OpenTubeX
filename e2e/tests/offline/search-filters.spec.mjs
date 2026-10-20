@@ -74,5 +74,11 @@ test('desktop search filter options keep compact spacing', { tag: '@scale' }, as
     expect(tops[i] - tops[i - 1]).toBeLessThan(32)
   }
 
+  const overflow = await page.locator('.searchFiltersCard .promptContentScroller').evaluate(element => {
+    const viewport = element.querySelector('[data-overlayscrollbars-viewport]') ?? element
+    return viewport.scrollHeight - viewport.clientHeight
+  })
+  expect(overflow).toBeLessThanOrEqual(0)
+
   await page.locator('.searchFiltersCard').screenshot({ path: testInfo.outputPath('search-filters.png') })
 })
