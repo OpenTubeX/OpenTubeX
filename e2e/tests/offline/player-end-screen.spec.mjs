@@ -50,6 +50,44 @@ async function openVideo({ app, page }) {
   return { video, watch }
 }
 
+for (const method of ['End', 'End with backoff', 'timeline']) {
+  test(`shows the end screen after a paused seek to the end using ${method}`, async ({ app, page, attachScreenshot }) => {
+    const { video, watch } = await openVideo({ app, page })
+    await watch.evaluate(component => { component.proxy.autoplayNextRecommendedVideo = true })
+    await video.evaluate(element => element.pause())
+    if (method === 'End with backoff') {
+      await video.evaluate(element => {
+        // Reproduce Shaka's MSE duration clamp using the real media element.
+        element.ui.getControls().getPlayer().configure('streaming.durationBackoff', 0.5)
+        element.addEventListener('seeking', () => {
+          element.currentTime = element.duration - 0.5
+        }, { once: true })
+      })
+    }
+    if (method.startsWith('End')) {
+      await page.locator('body').press('End')
+    } else {
+      await video.evaluate(element => { element.currentTime = element.duration })
+    }
+    await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
+    const poster = page.locator('.endedPoster')
+    await expect(poster).toBeVisible()
+    await expect(poster.locator('img:not(.retryImagePlaceholder)')).toHaveCSS('opacity', '0.35')
+    await expect(page.locator('.autoplayCountdownOverlay')).toHaveCount(0)
+    await expect(page.locator('.videoAnnotations')).toHaveCount(0)
+    await attachScreenshot(`paused seek to end using ${method}`)
+    await page.locator('body').press('k')
+    await expect(poster).toHaveCount(0)
+    await expect.poll(() => video.evaluate(element => !element.paused && element.currentTime < element.duration / 2)).toBe(true)
+    await video.evaluate(element => element.pause())
+    await page.locator('body').press('End')
+    await expect(poster).toBeVisible()
+    await video.evaluate(element => { element.currentTime = 1 })
+    await expect(poster).toHaveCount(0)
+    await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
+  })
+}
+
 for (const dataSaver of [false, true]) {
   test(`reuses the startup poster and its resolution fallback with data saver ${dataSaver}`, async ({ app, page }) => {
     await page.evaluate(async dataSaver => {

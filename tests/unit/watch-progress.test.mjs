@@ -73,7 +73,7 @@ test('timestamp actions use the active receiver position and return to local pla
 })
 
 const playerSource = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
-const seekingHandler = playerSource.slice(playerSource.indexOf('    function isShortsEndSeekPosition()'), playerSource.indexOf('    function handleSeeked()'))
+const seekingHandler = playerSource.slice(playerSource.indexOf('    function isEndSeekPosition()'), playerSource.indexOf('    function handleSeeked()'))
 
 function fixture(existing = true) {
   const element = Object.assign(new EventTarget(), {
@@ -81,7 +81,7 @@ function fixture(existing = true) {
   })
   const hasPlaybackPosition = { value: false }
   const handleSeeking = runInNewContext(`${seekingHandler}; handleSeeking`, {
-    hasPlaybackPosition, playbackEnded: { value: false }, shortsNavigationSuspended: { value: false }, shortsEndSeekTarget: null,
+    hasPlaybackPosition, playbackEnded: { value: false }, shortsNavigationSuspended: { value: false }, endSeekTarget: null,
     video: { value: element }, cancelSponsorBlockSkipSchedule() {},
     clearAbRepeatBoundarySchedule() {}, sleepTimer: { checkChapterBoundary() {} }, syncPlayPauseControlIcons() {}, emit() {},
   })
