@@ -428,9 +428,10 @@ const actions = {
 
   async clearSubscriptionsCacheForManyChannels({ commit }, channelIds) {
     try {
+      // Forget first: a failure keeps the cache rows, so the cleanup is retried.
+      await forgetAndroidSubscriptionRefreshFingerprints(channelIds)
       await DBSubscriptionCacheHandlers.deleteMultipleChannels(channelIds)
       commit('clearCachesForManyChannels', channelIds)
-      await forgetAndroidSubscriptionRefreshFingerprints(channelIds)
     } catch (errMessage) {
       console.error(errMessage)
     }
@@ -438,9 +439,9 @@ const actions = {
 
   async clearSubscriptionsCache({ commit }) {
     try {
+      await forgetAndroidSubscriptionRefreshFingerprints()
       await DBSubscriptionCacheHandlers.deleteAll()
       commit('clearCaches')
-      await forgetAndroidSubscriptionRefreshFingerprints()
       return true
     } catch (errMessage) {
       console.error(errMessage)
