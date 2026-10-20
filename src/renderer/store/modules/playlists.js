@@ -188,7 +188,9 @@ const actions = {
 
       const noQuickBookmarkSet = !rootState.settings.quickBookmarkTargetPlaylistId || !state.playlists.some((playlist) => playlist._id === rootState.settings.quickBookmarkTargetPlaylistId)
       if (noQuickBookmarkSet) {
-        dispatch('updateQuickBookmarkTargetPlaylistId', payload._id, { root: true })
+        // Settings persist asynchronously; wait so a playlist added right after
+        // this one sees the new target instead of replacing it.
+        await dispatch('updateQuickBookmarkTargetPlaylistId', payload._id, { root: true })
       }
 
       commit('addPlaylist', payload)
