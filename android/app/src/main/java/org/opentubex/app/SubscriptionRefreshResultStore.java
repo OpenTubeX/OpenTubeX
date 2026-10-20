@@ -197,7 +197,7 @@ final class SubscriptionRefreshResultStore {
         } else if (value instanceof JSONArray) {
             JSONArray array = (JSONArray) value;
             digest.update((byte) '[');
-            for (int index = 0; index < array.length(); index++) updateFingerprint(digest, array.opt(index));
+            for (int i = 0; i < array.length(); i++) updateFingerprint(digest, array.opt(i));
             digest.update((byte) ']');
         } else {
             digest.update(JSONObject.wrap(value).toString().getBytes(StandardCharsets.UTF_8));
