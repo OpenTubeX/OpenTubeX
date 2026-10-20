@@ -59,3 +59,41 @@ test('feed swipe matching excludes playlist jobs and stale cancelled downloads',
     3: completed,
   }, 'video'), completed)
 })
+
+test('download reversal prefers active work, then the newest matching record', () => {
+  const downloads = {
+    1: { id: 1, videoId: 'video', status: 'completed' },
+    2: { id: 2, videoId: 'video', status: 'downloading' },
+    3: { id: 3, videoId: 'video', status: 'queued' },
+    4: { id: 4, videoId: 'video', status: 'completed' },
+    5: { id: 5, videoId: 'other', status: 'downloading' },
+  }
+  assert.equal(findSwipeDownload(downloads, 'video'), downloads[3])
+  downloads[3].status = 'cancelled'
+  assert.equal(findSwipeDownload(downloads, 'video'), downloads[2])
+  downloads[2].status = 'completed'
+  assert.equal(findSwipeDownload(downloads, 'video'), downloads[4])
+})
+
+test('play-next moves all matching download files together in playlist order', () => {
+  const videos = ['first', 'second', 'third'].map(videoId => ({
+    videoId, title: videoId, route: { query: { downloadId: '12', downloadFilePath: `/${videoId}.mp4` } },
+  }))
+  const items = videos.map((video, index) => ({ ...video, queueItemId: `file-${index}` }))
+  const others = [{ videoId: 'before', queueItemId: 'before' }, { videoId: 'between', queueItemId: 'between' }]
+  const state = { items: [others[0], items[2], others[1], items[0], items[1]] }
+  const options = {
+    t,
+    commit: (name, payload) => {
+      watchQueueMutations[name](state, payload)
+      // Shared queue persistence can replace the array after each mutation.
+      state.items = structuredClone(state.items)
+    },
+    add: () => assert.fail('must preserve existing queued entries'),
+  }
+  const resolve = () => queueSwipeAction('playNext', videos, state.items, options)
+  resolve().run()
+  assert.deepEqual(state.items.map(item => item.queueItemId), ['file-0', 'file-1', 'file-2', 'before', 'between'])
+  resolve().run()
+  assert.deepEqual(state.items, others)
+})
