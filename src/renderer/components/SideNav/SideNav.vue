@@ -286,7 +286,8 @@ const activeSubscriptions = computed(() => {
   const collator = new Intl.Collator(locale.value)
   subscriptions.sort((a, b) => collator.compare(a.sortKey, b.sortKey))
 
-  return subscriptions
+  const pinnedIds = new Set(store.getters.getPinnedChannels.map(channel => channel.id))
+  return subscriptions.filter(channel => !pinnedIds.has(channel.id))
 })
 
 const activeSubscriptionLimit = ref(activeSubscriptionsPerPage)

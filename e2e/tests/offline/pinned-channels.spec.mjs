@@ -99,3 +99,28 @@ test('pinned avatars follow the active backend and Invidious instance', async ({
   await expect(image).toHaveAttribute('src', `https://yt3.googleusercontent.com/${id}=s35`)
   await expect.poll(() => image.evaluate(element => element.complete && element.naturalWidth > 0)).toBe(true)
 })
+
+for (const subscribeFirst of [true, false]) {
+  test(`shows subscribed pinned channels once when subscribing ${subscribeFirst ? 'before' : 'after'} pinning`, async ({ page }) => {
+    const id = 'UCaaaaaaaaaaaaaaaaaaaaaa'
+    await page.evaluate(id => window.ftElectron.tabs.create({ route: `/channel/${id}`, makeActive: true }), id)
+    const subscribe = page.locator('.channelDetails:visible .subscribeButton')
+    const pin = page.getByRole('button', { name: 'Pin to Navigation', exact: true })
+    if (subscribeFirst) {
+      await subscribe.click()
+      await expect(subscribe).toHaveText('Unsubscribe')
+    }
+    await pin.click()
+    if (!subscribeFirst) {
+      await subscribe.click()
+      await expect(subscribe).toHaveText('Unsubscribe')
+    }
+    const links = page.locator(`.sideNav .navChannel[href="#/channel/${id}"]`)
+    await expect(links).toHaveCount(1)
+    await expect(page.locator('.sideNav .pinnedChannels .navChannel')).toHaveCount(1)
+    await page.getByRole('button', { name: 'Unpin from Navigation', exact: true }).click()
+    await expect(page.locator('.sideNav .pinnedChannels .navChannel')).toHaveCount(0)
+    await expect(links).toHaveCount(1)
+    await expect(subscribe).toHaveText('Unsubscribe')
+  })
+}
