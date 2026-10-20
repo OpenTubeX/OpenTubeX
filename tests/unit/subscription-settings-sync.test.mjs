@@ -318,3 +318,15 @@ test('explicit resets to defaults remain in the sync payload', () => {
   const store = createStore([{ id: 'reset', subscriptionSettingsUpdatedAt: 123 }])
   assert.equal(subscriptionSync.getSubscriptionSettingsForSync(store).reset.updatedAt, 123)
 })
+
+test('records from clients without notification choices keep the local bell', async () => {
+  const store = createStore([{ id: 'channel', notificationFeedTypes: ['videos', 'live'] }])
+  const saved = []
+  store.dispatch = async (_, payload) => { saved.push(payload.settings); return true }
+  await subscriptionSync.applySubscriptionSettingsSync(store, { channel: { value: { dailyVideoLimit: 2 }, updatedAt: 5 } })
+  assert.deepEqual(saved[0].notificationFeedTypes, ['videos', 'live'])
+  assert.equal(saved[0].dailyVideoLimit, 2)
+
+  await subscriptionSync.applySubscriptionSettingsSync(store, { channel: { value: { notificationFeedTypes: [] }, updatedAt: 6 } })
+  assert.deepEqual(saved[1].notificationFeedTypes, [])
+})
