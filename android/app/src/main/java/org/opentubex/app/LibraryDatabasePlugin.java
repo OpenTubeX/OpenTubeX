@@ -30,7 +30,7 @@ public class LibraryDatabasePlugin extends Plugin {
     private final Map<String, LibraryDatabase> databases = new ConcurrentHashMap<>();
 
     private ExecutorService executor(String name) {
-        return executors.computeIfAbsent(String.valueOf(name), key -> {
+        return executors.computeIfAbsent(name, key -> {
             // Keep the per-database order, but let an idle database's thread exit.
             ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 30, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
             executor.allowCoreThreadTimeOut(true);
@@ -57,6 +57,10 @@ public class LibraryDatabasePlugin extends Plugin {
     @PluginMethod
     public void execute(PluginCall call) {
         String name = call.getString("name");
+        if (name == null) {
+            call.reject("Missing database name");
+            return;
+        }
         JSArray statements = call.getArray("statements");
         boolean transaction = Boolean.TRUE.equals(call.getBoolean("transaction", false));
         executor(name).execute(() -> {
@@ -75,6 +79,10 @@ public class LibraryDatabasePlugin extends Plugin {
     @PluginMethod
     public void query(PluginCall call) {
         String name = call.getString("name");
+        if (name == null) {
+            call.reject("Missing database name");
+            return;
+        }
         String sql = call.getString("sql");
         JSArray params = call.getArray("params");
         executor(name).execute(() -> {
@@ -112,6 +120,10 @@ public class LibraryDatabasePlugin extends Plugin {
     @PluginMethod
     public void drop(PluginCall call) {
         String name = call.getString("name");
+        if (name == null) {
+            call.reject("Missing database name");
+            return;
+        }
         executor(name).execute(() -> {
             try {
                 database(name).drop();
