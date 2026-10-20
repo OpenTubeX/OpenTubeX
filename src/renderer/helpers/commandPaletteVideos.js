@@ -59,7 +59,7 @@ export function * iterateLocalVideoCommands(context) {
     }
   }
   for (const video of queue) {
-    const command = entry(video, sources.queue, ['fas', 'list'], () => {
+    const command = entry(video, sources.queue, ['fas', 'queue'], () => {
       removeQueuedVideo(video.queueItemId)
       return playQueuedVideo(video.route ?? videoRoute(video))
     })

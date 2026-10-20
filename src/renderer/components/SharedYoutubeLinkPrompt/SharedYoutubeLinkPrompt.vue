@@ -145,7 +145,7 @@ async function addVideo(action) {
       await store.dispatch('showAddToPlaylistPromptForManyVideos', { videos: [video] })
     } else {
       store.commit('addVideoToWatchQueue', { video })
-      showToast({ message: t('Video.Added to Queue'), icon: ['fas', 'list'] })
+      showToast({ message: t('Video.Added to Queue'), icon: ['fas', 'queue'] })
     }
     emit('close')
   } catch (error) {

@@ -512,7 +512,7 @@
               :aria-expanded="String(showFullscreenQueue)"
               @click="setFullscreenQueue(!showFullscreenQueue)"
             >
-              <FtIcon :icon="['fas', 'list']" />
+              <FtIcon :icon="['fas', 'queue']" />
             </button>
             <button
               v-else-if="action === 'recommendations'"

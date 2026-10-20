@@ -388,7 +388,7 @@ async function queueDownload(download) {
   }
 
   for (const video of videos) store.commit('addVideoToWatchQueue', { video })
-  showToast({ message: t('Video.Added to Queue'), icon: ['fas', 'list'] })
+  showToast({ message: t('Video.Added to Queue'), icon: ['fas', 'queue'] })
 }
 async function playDownload(download) {
   return playDownloadedFile(download.id, null, {

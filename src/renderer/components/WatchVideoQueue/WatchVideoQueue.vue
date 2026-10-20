@@ -16,7 +16,7 @@
             <FtIcon
               v-if="fullscreenOverlay"
               class="queueTitleIcon"
-              :icon="['fas', 'list']"
+              :icon="['fas', 'queue']"
               aria-hidden="true"
             />
             <span class="queueLabel">{{ t('Video.Queue') }}</span>

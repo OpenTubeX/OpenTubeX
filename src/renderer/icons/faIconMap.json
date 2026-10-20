@@ -474,6 +474,10 @@
     "ri": "question-line",
     "material": "help-outline"
   },
+  "queue": {
+    "ri": "play-list-2-line",
+    "material": "playlist-play-rounded"
+  },
   "random": {
     "ri": "shuffle-line",
     "material": "shuffle-rounded"

@@ -958,7 +958,7 @@
           @click="openPhonePanel('queue')"
         >
           <ft-icon
-            :icon="['fas', 'list']"
+            :icon="['fas', 'queue']"
             aria-hidden="true"
           />
           <span class="phoneCommentsLabel">

@@ -1,5 +1,5 @@
 export const FULLSCREEN_ACTION_DEFINITIONS = Object.freeze([
-  { id: 'queue', labelKey: 'Video.Queue', icon: ['fas', 'list'] },
+  { id: 'queue', labelKey: 'Video.Queue', icon: ['fas', 'queue'] },
   { id: 'playlist', labelKey: 'Playlist.Playlist', icon: ['fas', 'list'] },
   { id: 'liveChat', labelKey: 'Video.Live Chat', icon: ['fas', 'message'] },
   { id: 'comments', labelKey: 'Comments.Comments', icon: ['fas', 'comment'] },
