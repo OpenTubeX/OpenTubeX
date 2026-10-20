@@ -10,12 +10,12 @@ function computedSource(name) {
   return source.slice(start, source.indexOf('\n    })', start) + '\n    })'.length)
 }
 
-function controls(props, overflow = false, quickBar = true) {
+function controls(props, overflow = false, quickBar = true, playerIsLive = props.isLive) {
   const state = {
     computed: getter => ({ get value() { return getter() } }),
     props: { captions: [], chapters: [], format: 'dash', playbackEngine: 'yt-dlp', manifestMimeType: 'application/dash+xml', ...props },
     process: { env: {} },
-    isLive: { value: props.isLive },
+    isLive: { value: playerIsLive },
     onlyUseOverFlowMenu: { value: overflow },
     useQuickPlaybackSpeedBar: { value: quickBar },
     isCapacitorMobilePlayer: () => false,
@@ -58,3 +58,15 @@ test('DVR playback respects the disabled quick bar preference', () => {
   assert.equal(config.overflowMenuButtons.includes('playback_rate'), true)
   assert.equal(config.controlPanelElements.includes('ft_quick_playback_rate_bar'), false)
 })
+
+for (const overflow of [false, true]) {
+  test(`Shaka-detected live playback without live metadata hides speed controls with overflow=${overflow}`, () => {
+    const config = controls({
+      isLive: false,
+      manifestMimeType: 'application/x-mpegurl',
+      manifestSrc: 'https://example.com/live.m3u8',
+    }, overflow, true, true)
+    assert.equal(config.overflowMenuButtons.includes('playback_rate'), false)
+    assert.equal(config.controlPanelElements.includes('ft_quick_playback_rate_bar'), false)
+  })
+}
