@@ -189,12 +189,18 @@ test('keeps channel header rows evenly spaced below the banner', async ({ app, p
     await store.dispatch('updateHideSharingActions', true)
     await store.dispatch('updateHideUnsubscribeButton', true)
   })
-  await expect(page.locator('.channelDetails:visible .infoActionsContainer')).toBeHidden()
+  const actions = page.locator('.channelDetails:visible .infoActionsContainer')
+  await expect(actions.locator(':scope > *')).toHaveCount(1)
+  await expect(actions.getByRole('button', { name: 'Pin to Navigation', exact: true })).toBeVisible()
   await expect.poll(() => page.locator('.channelDetails:visible').evaluate(header => {
     const info = header.querySelector('.thumbnailContainer').getBoundingClientRect()
     const search = header.querySelector('.channelSearch input').getBoundingClientRect()
-    return Math.round(search.top - info.bottom)
-  })).toBe(20)
+    const actions = header.querySelector('.infoActionsContainer').getBoundingClientRect()
+    return {
+      avatarToPin: Math.round(actions.top - info.bottom),
+      pinToSearch: Math.round(search.top - actions.bottom)
+    }
+  })).toEqual({ avatarToPin: 20, pinToSearch: 20 })
 })
 
 test('collapses channel search to an accessible icon at narrow widths', async ({ app, page }) => {

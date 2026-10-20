@@ -550,7 +550,7 @@ for (const width of [1600, 480]) {
   test.describe(`input alignment at ${width}px`, { tag: '@scale' }, () => {
     test.use({ seed: async ({ uiScale }, use) => use({ settings: { currentLocale: 'en-US', baseTheme: uiScale === 100 ? 'dark' : 'light', bounds: { x: 0, y: 0, width: Math.round(width * uiScale / 100), height: 900, maximized: false } } }) })
 
-    test('centers channel share and subscription buttons on the same row', async ({ app, page, uiScale }, testInfo) => {
+    test('centers channel share, pin and subscription buttons on the same row', async ({ app, page, uiScale }, testInfo) => {
       await page.emulateMedia({ reducedMotion: 'reduce' })
       await page.evaluate(async () => {
         const store = window.$store
@@ -596,8 +596,10 @@ for (const width of [1600, 480]) {
             await expect.poll(() => row.evaluate(element => {
               const share = element.querySelector('.shareButton .iconButton').getBoundingClientRect()
               const subscribe = element.querySelector('.subscribeButton').getBoundingClientRect()
-              return Math.abs(share.top + share.height / 2 - subscribe.top - subscribe.height / 2)
-            }), { message: `${label} and Share centers in ${direction}` }).toBeLessThanOrEqual(0.1)
+              const pin = element.querySelector(':scope > .ftIconButton:not(.shareIcon) .iconButton').getBoundingClientRect()
+              const center = subscribe.top + subscribe.height / 2
+              return Math.max(Math.abs(share.top + share.height / 2 - center), Math.abs(pin.top + pin.height / 2 - center))
+            }), { message: `${label}, Pin and Share centers in ${direction}` }).toBeLessThanOrEqual(0.1)
             if (viewportWidth <= 680) {
               await expect.poll(() => row.evaluate((element, direction) => {
                 const row = element.getBoundingClientRect()
@@ -627,14 +629,19 @@ for (const width of [1600, 480]) {
               const store = window.$store
               await store.dispatch(setting, true)
             }, setting)
-            await expect(row.locator(':scope > *')).toHaveCount(1)
+            await expect(row.locator(':scope > *')).toHaveCount(2)
+            await expect(row.getByRole('button', { name: 'Pin to Navigation', exact: true })).toBeVisible()
             await expect.poll(() => row.evaluate((element, remainingAction) => {
               const row = element.getBoundingClientRect()
               const action = element.querySelector(remainingAction).getBoundingClientRect()
-              return window.innerWidth <= 400
-                ? Math.abs(action.left + action.width / 2 - row.left - row.width / 2)
-                : Math.abs(action.left - row.left)
-            }, remainingAction), { message: `${remainingAction} keeps its alignment when shown alone` }).toBeLessThanOrEqual(1)
+              const pin = element.querySelector(':scope > .ftIconButton:not(.shareIcon)').getBoundingClientRect()
+              const left = Math.min(action.left, pin.left)
+              const right = Math.max(action.right, pin.right)
+              return Math.max(
+                Math.abs(action.top + action.height / 2 - pin.top - pin.height / 2),
+                window.innerWidth <= 400 ? Math.abs((left + right) / 2 - row.left - row.width / 2) : Math.abs(left - row.left)
+              )
+            }, remainingAction), { message: `${remainingAction} and Pin keep their alignment when the other action is hidden` }).toBeLessThanOrEqual(1)
             await page.evaluate(setting => window.$store.dispatch(setting, false), setting)
           }
         }
@@ -650,10 +657,21 @@ for (const width of [1600, 480]) {
               await expect.poll(() => row.evaluate(element => {
                 const row = element.getBoundingClientRect()
                 const actions = [...element.children]
-                return actions.length === 2 && actions.every(action => {
+                if (actions.length !== 3) return false
+                const lines = []
+                for (const action of actions) {
                   const rect = action.getBoundingClientRect()
-                  return Math.abs(rect.left + rect.width / 2 - row.left - row.width / 2) <= 1
-                })
+                  if (rect.left < row.left - 1 || rect.right > row.right + 1) return false
+                  const centerY = rect.top + rect.height / 2
+                  const line = lines.find(line => Math.abs(line.centerY - centerY) <= 1)
+                  if (line) {
+                    line.left = Math.min(line.left, rect.left)
+                    line.right = Math.max(line.right, rect.right)
+                  } else {
+                    lines.push({ centerY, left: rect.left, right: rect.right })
+                  }
+                }
+                return lines.every(line => Math.abs((line.left + line.right) / 2 - row.left - row.width / 2) <= 1)
               }), { message: `Wrapped actions remain centered at ${zoom * 100}% uiScale in ${locale}` }).toBe(true)
             }
           }
