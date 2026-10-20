@@ -136,4 +136,28 @@ test.describe('fullscreen action dock spacing', () => {
     })).toBeLessThanOrEqual(1)
     await dock.screenshot({ path: testInfo.outputPath('single-action.png') })
   })
+
+  test('keeps the scrollbar gutter beside actions while the dock scrolls', { tag: '@scale' }, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 340, height: 380 })
+    await page.evaluate(() => window.$store.dispatch('updateFullscreenActions', ['comments', 'queue', 'playlist', 'share', 'addToPlaylist', 'quickBookmark', 'download', 'recommendations']))
+    await mockPlayableWatchPage(app, page)
+    if (await page.getByRole('button', { name: 'Open Search Container', exact: true }).isVisible()) {
+      await page.getByRole('button', { name: 'Open Search Container', exact: true }).click()
+    }
+    await openMockedVideo(page)
+    await setPlayerFullscreen(page, true)
+    const player = page.locator('.ftVideoPlayer')
+    await player.locator('video').evaluate(element => element.pause())
+    const dock = player.locator('.fullscreenActions')
+    await expect(dock).toBeVisible()
+    await dock.getByRole('button', { name: 'Comments', exact: true }).click()
+    await expect(player.locator('.fullscreenCommentsOverlay.open')).toBeVisible()
+    await expect.poll(() => dock.evaluate(element => {
+      const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+      if (!scrollbar || scrollbar.classList.contains('os-scrollbar-unusable')) return 'not scrollable'
+      const trackStart = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect().left
+      const actionsEnd = Math.max(...[...element.querySelectorAll('.fullscreenActionsContent > *')].map(action => action.getBoundingClientRect().right))
+      return actionsEnd <= trackStart + 0.5
+    })).toBe(true)
+  })
 })
