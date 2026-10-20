@@ -155,3 +155,21 @@ test('keeps saved pin metadata when the channel cannot load', async ({ app, page
   await expect(page.locator('.sideNav .pinnedChannels .navChannel')).toHaveAttribute('title', 'Saved channel')
   expect(latestSettings(readDatastore(app.userDataDir, 'settings')).pinnedChannels).toEqual(saved)
 })
+
+test('does not copy the previous channel into a pin after a local load failure', async ({ app, page }) => {
+  const id = 'UCbbbbbbbbbbbbbbbbbbbbbb'
+  const saved = [{ id, name: 'Saved channel', thumbnail: 'https://yt3.googleusercontent.com/saved=s176' }]
+  await page.evaluate(() => window.ftElectron.tabs.create({ route: '/channel/UCaaaaaaaaaaaaaaaaaaaaaa', makeActive: true }))
+  await expect(page.locator('.channelDetails:visible .name')).toHaveText('Channel')
+  await page.evaluate(async saved => {
+    await window.$store.dispatch('updatePinnedChannels', saved)
+    await window.$store.dispatch('updateBackendPreference', 'local')
+  }, saved)
+  await page.route('**/youtubei/v1/browse**', route => route.fulfill({ status: 403, body: 'Forced channel load failure' }))
+  await page.locator('.sideNav .pinnedChannels .navChannel').click()
+  await expect(page).toHaveURL(new RegExp(`/channel/${id}`))
+  await expect(page.getByText(/^Local API Error \(Click to copy\)/)).toBeVisible()
+  await expect(page.locator('.channelDetails:visible')).toBeVisible()
+  await expect(page.locator('.sideNav .pinnedChannels .navChannel')).toHaveAttribute('title', 'Saved channel')
+  expect(latestSettings(readDatastore(app.userDataDir, 'settings')).pinnedChannels).toEqual(saved)
+})
