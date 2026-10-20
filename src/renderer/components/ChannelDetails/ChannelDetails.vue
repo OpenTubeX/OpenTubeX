@@ -444,12 +444,24 @@ const props = defineProps({
 const pinnedChannels = computed(() => store.getters.getPinnedChannels)
 const isPinnedToNavigation = computed(() => pinnedChannels.value.some(channel => channel.id === props.id))
 
+// Store the upstream avatar, as subscriptions do, so pins can change backends.
+const pinThumbnail = computed(() => props.thumbnailUrl?.replace(/^https?:\/\/[^/]+\/ggpht/, 'https://yt3.googleusercontent.com'))
+
+watch([() => props.id, () => props.name, pinThumbnail, () => props.hasErrorMessage], () => {
+  if (props.hasErrorMessage) return
+  const pin = pinnedChannels.value.find(channel => channel.id === props.id)
+  if (!pin) return
+  const name = props.name || pin.name
+  const thumbnail = pinThumbnail.value || pin.thumbnail
+  if (name === pin.name && thumbnail === pin.thumbnail) return
+  store.dispatch('updatePinnedChannels', pinnedChannels.value.map(channel =>
+    channel.id === props.id ? { ...channel, name, thumbnail } : channel))
+}, { immediate: true })
+
 function togglePinnedToNavigation() {
-  // Store the upstream avatar, as subscriptions do, so pins can change backends.
-  const thumbnail = props.thumbnailUrl?.replace(/^https?:\/\/[^/]+\/ggpht/, 'https://yt3.googleusercontent.com')
   store.dispatch('updatePinnedChannels', isPinnedToNavigation.value
     ? pinnedChannels.value.filter(channel => channel.id !== props.id)
-    : [...pinnedChannels.value, { id: props.id, name: props.name || props.id, thumbnail }])
+    : [...pinnedChannels.value, { id: props.id, name: props.name || props.id, thumbnail: pinThumbnail.value }])
 }
 
 const emit = defineEmits(['change-tab', 'search', 'subscribed'])

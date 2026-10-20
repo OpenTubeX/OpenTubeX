@@ -124,3 +124,34 @@ for (const subscribeFirst of [true, false]) {
     await expect(subscribe).toHaveText('Unsubscribe')
   })
 }
+
+test('refreshes saved pin metadata when reopening a channel', async ({ app, page }) => {
+  const id = 'UCaaaaaaaaaaaaaaaaaaaaaa'
+  await page.evaluate(id => window.$store.dispatch('updatePinnedChannels', [
+    { id: 'UCbbbbbbbbbbbbbbbbbbbbbb', name: 'Other channel', thumbnail: null },
+    { id, name: 'Old channel name', thumbnail: 'https://yt3.googleusercontent.com/old=s176' }
+  ]), id)
+  await page.evaluate(id => window.ftElectron.tabs.create({ route: `/channel/${id}`, makeActive: true }), id)
+  const expected = [
+    { id: 'UCbbbbbbbbbbbbbbbbbbbbbb', name: 'Other channel', thumbnail: null },
+    { id, name: 'Channel', thumbnail: `https://yt3.googleusercontent.com/${id}=s176` }
+  ]
+  await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).pinnedChannels).toEqual(expected)
+  const pinned = page.locator('.sideNav .pinnedChannels .navChannel').last()
+  await expect(pinned).toHaveAttribute('title', 'Channel')
+  await expect(pinned.locator('img')).toHaveAttribute('src', `https://invidious.test/ggpht/${id}=s35`)
+  await page.reload()
+  await waitForAppReady(page)
+  await expect.poll(() => page.evaluate(() => window.$store.getters.getPinnedChannels)).toEqual(expected)
+})
+
+test('keeps saved pin metadata when the channel cannot load', async ({ app, page }) => {
+  const id = 'UCaaaaaaaaaaaaaaaaaaaaaa'
+  const saved = [{ id, name: 'Saved channel', thumbnail: 'https://yt3.googleusercontent.com/saved=s176' }]
+  await page.evaluate(saved => window.$store.dispatch('updatePinnedChannels', saved), saved)
+  await page.route('https://invidious.test/api/v1/channels/**', route => route.fulfill({ status: 404, json: { error: 'Channel unavailable' } }))
+  await page.evaluate(id => window.ftElectron.tabs.create({ route: `/channel/${id}`, makeActive: true }), id)
+  await expect(page.getByRole('button', { name: 'Unpin from Navigation', exact: true })).toBeVisible()
+  await expect(page.locator('.sideNav .pinnedChannels .navChannel')).toHaveAttribute('title', 'Saved channel')
+  expect(latestSettings(readDatastore(app.userDataDir, 'settings')).pinnedChannels).toEqual(saved)
+})
