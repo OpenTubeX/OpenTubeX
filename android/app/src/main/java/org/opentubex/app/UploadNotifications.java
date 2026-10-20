@@ -111,7 +111,8 @@ final class UploadNotifications {
         JSONObject titles = configuration.optJSONObject("titles");
         String name = channel.optString("name");
         for (JSONObject upload : uploads) {
-            String type = upload.optBoolean("live") ? "live" : feedType;
+            // Ended streams in the live feed are announced like videos.
+            String type = upload.optBoolean("live") ? "live" : feedType.equals("live") ? "videos" : feedType;
             String title = (titles == null ? "{channel}" : titles.optString(type, "{channel}"))
                 .replace("{channel}", name.isEmpty() ? channelId : name);
             try {

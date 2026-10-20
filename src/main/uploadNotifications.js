@@ -73,7 +73,8 @@ export function createUploadNotifier({ file, show }) {
         await save()
 
         for (const upload of uploads) {
-          const type = upload.live ? 'live' : feedType
+          // Ended streams in the live feed are announced like videos.
+          const type = upload.live ? 'live' : feedType === 'live' ? 'videos' : feedType
           try {
             show({
               title: (configuration.titles?.[type] ?? '{channel}').replaceAll('{channel}', channel.name || channelId),

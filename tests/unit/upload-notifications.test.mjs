@@ -276,3 +276,17 @@ test('entries another feed of the channel already recorded are not new', () => {
   assert.deepEqual(takeNewUploads(state, 'UC1', 'shorts', [entry('s', NOW)], NOW), [])
   assert.deepEqual(takeNewUploads(state, 'UC2', 'shorts', [entry('s', NOW)], NOW).map(upload => upload.id), ['s'])
 })
+
+test('ended streams from the live feed are not announced as live', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'upload-notifications-'))
+  try {
+    const shown = []
+    const notifier = createUploadNotifier({ file: path.join(directory, 'state.json'), show: notification => shown.push(notification) })
+    await notifier.configure({ enabled: true, titles: { videos: 'New video', live: 'Live now' }, channels: { UC1: { name: 'One', feedTypes: ['live'], membersOnly: false } } })
+    await notifier.observe({ channelId: 'UC1', feedType: 'live', entries: [entry('a', Date.now())] })
+    await notifier.observe({ channelId: 'UC1', feedType: 'live', entries: [entry('l', Date.now(), { live: true }), entry('e', Date.now()), entry('a', Date.now())] })
+    assert.deepEqual(shown.map(notification => notification.title), ['Live now', 'New video'])
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
