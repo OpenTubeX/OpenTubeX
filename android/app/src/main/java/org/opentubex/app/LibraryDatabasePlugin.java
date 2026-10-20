@@ -9,6 +9,7 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
@@ -111,9 +112,14 @@ public class LibraryDatabasePlugin extends Plugin {
     @PluginMethod
     public void release(PluginCall call) {
         String path = call.getString("path");
-        File file = path == null ? null : new File(path);
-        // Only result files can be deleted.
-        if (file != null && results().equals(file.getParentFile())) file.delete();
+        try {
+            // Only files directly inside the results directory can be deleted.
+            // Canonical paths resolve "..", which a lexical parent check misses.
+            File file = path == null ? null : new File(path).getCanonicalFile();
+            if (file != null && results().getCanonicalFile().equals(file.getParentFile())) file.delete();
+        } catch (IOException error) {
+            // An unresolvable path is not a result file.
+        }
         call.resolve();
     }
 
