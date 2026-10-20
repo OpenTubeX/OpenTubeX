@@ -1443,6 +1443,9 @@ Video:
     Zoom:
       Zoom: Suurendus
       'Off': 'Väljas'
+    Volume Boost:
+      Volume Boost: "Helitugevuse võimendus"
+      'Off': "Väljas"
     Auto-generated Caption Template: '{language} (automaatselt loodud)'
     Up next in {seconds}: Järgmine algab {seconds} pärast
     Resize dock: Muuda doki suurust

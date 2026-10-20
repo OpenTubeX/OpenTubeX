@@ -1451,6 +1451,9 @@ Video:
     Zoom:
       Zoom: Zooma
       'Off': 'Desaktibatuta'
+    Volume Boost:
+      Volume Boost: "Bolumen-igoera"
+      'Off': "Desaktibatuta"
     Auto-generated Caption Template: '{language} (automatikoki sortua)'
     Up next in {seconds}: Hurrengoa {seconds} segundo barru
     Resize dock: Aldatu panelaren tamaina

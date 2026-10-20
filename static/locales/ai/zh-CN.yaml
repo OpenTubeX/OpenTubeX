@@ -1441,6 +1441,9 @@ Video:
     Zoom:
       Zoom: 缩放
       'Off': '关闭'
+    Volume Boost:
+      Volume Boost: "音量增强"
+      'Off': "关闭"
     Auto-generated Caption Template: '{language}（自动生成）'
     Up next in {seconds}: '{seconds} 秒后播放下一个'
     Resize dock: 调整停靠栏大小

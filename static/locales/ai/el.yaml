@@ -1460,6 +1460,9 @@ Video:
     Zoom:
       Zoom: Μεγέθυνση
       'Off': 'Ανενεργή'
+    Volume Boost:
+      Volume Boost: "Ενίσχυση έντασης"
+      'Off': "Ανενεργή"
     Auto-generated Caption Template: '{language} (δημιουργήθηκαν αυτόματα)'
     Up next in {seconds}: Επόμενο σε {seconds}
     Resize dock: Αλλαγή μεγέθους βάσης

@@ -1487,6 +1487,9 @@ Video:
     Zoom:
       Zoom: பெரிதாக்கம்
       'Off': முடக்கம்
+    Volume Boost:
+      Volume Boost: "ஒலியளவு அதிகரிப்பு"
+      'Off': "முடக்கம்"
     Auto-generated Caption Template: '{language} (தானாக உருவானது)'
     Up next in {seconds}: அடுத்தது {seconds}-இல்
     Resize dock: பலகையின் அளவை மாற்று

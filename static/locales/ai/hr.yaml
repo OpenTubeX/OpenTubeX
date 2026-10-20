@@ -1462,6 +1462,9 @@ Video:
     Zoom:
       Zoom: Zumiranje
       'Off': 'Isključeno'
+    Volume Boost:
+      Volume Boost: "Pojačanje glasnoće"
+      'Off': "Isključeno"
     Auto-generated Caption Template: '{language} (automatski generirano)'
     Up next in {seconds}: Sljedeći videozapis za {seconds}
     Resize dock: Promijeni veličinu usidrenog okna

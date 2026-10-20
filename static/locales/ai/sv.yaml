@@ -1455,6 +1455,9 @@ Video:
     Zoom:
       Zoom: Zoom
       'Off': 'Av'
+    Volume Boost:
+      Volume Boost: "Volymförstärkning"
+      'Off': "Av"
     Auto-generated Caption Template: '{language} (automatiskt genererade)'
     Up next in {seconds}: Härnäst om {seconds}
     Resize dock: Ändra storlek på dockan

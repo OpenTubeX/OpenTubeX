@@ -1490,6 +1490,9 @@ Video:
     Zoom:
       Zoom: Zoom
       'Off': Uit
+    Volume Boost:
+      Volume Boost: "Volumeversterking"
+      'Off': "Uit"
     Auto-generated Caption Template: '{language} (automatisch gegenereerd)'
     Up next in {seconds}: Hierna over {seconds}
     Resize dock: Grootte van paneel aanpassen

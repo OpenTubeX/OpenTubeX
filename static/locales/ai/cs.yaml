@@ -1441,6 +1441,9 @@ Video:
     Zoom:
       Zoom: Přiblížení
       'Off': 'Vypnuto'
+    Volume Boost:
+      Volume Boost: "Zesílení hlasitosti"
+      'Off': "Vypnuto"
     Auto-generated Caption Template: '{language} (automaticky vytvořené)'
     Up next in {seconds}: Další video za {seconds}
     Resize dock: Změnit velikost panelu

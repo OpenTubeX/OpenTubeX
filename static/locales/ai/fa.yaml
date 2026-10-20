@@ -1516,6 +1516,9 @@ Video:
     Zoom:
       Zoom: بزرگ‌نمایی
       'Off': 'خاموش'
+    Volume Boost:
+      Volume Boost: "تقویت صدا"
+      'Off': "خاموش"
     Auto-generated Caption Template: '{language} (تولیدشده به‌صورت خودکار)'
     Up next in {seconds}: مورد بعدی تا {seconds} ثانیه
     Resize dock: تغییر اندازهٔ داک

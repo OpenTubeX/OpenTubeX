@@ -1761,6 +1761,9 @@ Video:
     Zoom:
       Zoom: 확대/축소
       'Off': 끄기
+    Volume Boost:
+      Volume Boost: "볼륨 증폭"
+      'Off': "끄기"
     TranslatedCaptionTemplate: '{language} ("{originalLanguage}"에서 번역됨)'
     Auto-generated Caption Template: '{language} (자동 생성됨)'
     Audio Tracks: 오디오 트랙

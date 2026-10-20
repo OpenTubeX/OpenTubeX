@@ -2206,6 +2206,9 @@ Video:
     Zoom:
       Zoom: Zoom
       'Off': Aus
+    Volume Boost:
+      Volume Boost: Lautstärkeverstärkung
+      'Off': Aus
     Resize dock: Leiste in der Größe ändern
     Google Cast:
       Invalid Authentication: "Der Empfänger hat eine ungültige Authentifizierungsantwort gesendet."

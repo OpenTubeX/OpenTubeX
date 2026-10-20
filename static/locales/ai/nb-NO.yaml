@@ -1458,6 +1458,9 @@ Video:
     Zoom:
       Zoom: Forstørring
       'Off': 'Av'
+    Volume Boost:
+      Volume Boost: "Volumforsterkning"
+      'Off': "Av"
     Auto-generated Caption Template: '{language} (automatisk generert)'
     Up next in {seconds}: Neste om {seconds}
     Resize dock: Endre størrelsen på dokken

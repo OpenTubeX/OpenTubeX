@@ -1440,6 +1440,9 @@ Video:
     Zoom:
       Zoom: Zoom
       'Off': 'Désactivé'
+    Volume Boost:
+      Volume Boost: "Amplification du volume"
+      'Off': "Désactivée"
     Auto-generated Caption Template: '{language} (générés automatiquement)'
     Up next in {seconds}: À suivre dans {seconds}
     Resize dock: Redimensionner le panneau

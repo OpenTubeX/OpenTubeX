@@ -1441,6 +1441,9 @@ Video:
     Zoom:
       Zoom: ズーム
       'Off': 'オフ'
+    Volume Boost:
+      Volume Boost: "音量ブースト"
+      'Off': "オフ"
     Auto-generated Caption Template: '{language}（自動生成）'
     Up next in {seconds}: '{seconds}秒後に次の動画'
     Resize dock: ドックのサイズを変更

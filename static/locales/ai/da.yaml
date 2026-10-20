@@ -1509,6 +1509,9 @@ Video:
     Zoom:
       Zoom: Zoom
       'Off': 'Fra'
+    Volume Boost:
+      Volume Boost: "Lydstyrkeforstærkning"
+      'Off': "Fra"
     Auto-generated Caption Template: '{language} (automatisk genereret)'
     Up next in {seconds}: Næste om {seconds}
     Resize dock: Tilpas panelets størrelse

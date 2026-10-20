@@ -1425,6 +1425,9 @@ Video:
     Zoom:
       Zoom: Zoom
       'Off': 'Off'
+    Volume Boost:
+      Volume Boost: "Volume Boost"
+      'Off': "Off"
     Auto-generated Caption Template: "{language} (auto-generated)"
     Up next in {seconds}: Up next in {seconds}
     Resize dock: Resize dock

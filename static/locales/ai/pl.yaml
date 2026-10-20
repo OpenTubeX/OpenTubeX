@@ -839,6 +839,9 @@ Video:
     Zoom:
       Zoom: Powiększenie
       'Off': 'Wyłączone'
+    Volume Boost:
+      Volume Boost: "Wzmocnienie głośności"
+      'Off': "Wyłączone"
     Auto-generated Caption Template: '{language} (wygenerowane automatycznie)'
     Scroll Mini Player:
       Collapse Controls: "Zwiń sterowanie"

@@ -1462,6 +1462,9 @@ Video:
     Zoom:
       Zoom: Chwyddo
       'Off': 'I ffwrdd'
+    Volume Boost:
+      Volume Boost: "Hwb i’r sain"
+      'Off': "I ffwrdd"
     Auto-generated Caption Template: '{language} (wedi''i gynhyrchu''n awtomatig)'
     Up next in {seconds}: Nesaf ymhen {seconds}
     Resize dock: Newid maint y doc

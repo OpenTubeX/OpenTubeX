@@ -1477,6 +1477,9 @@ Video:
     Zoom:
       Zoom: Масштаб
       'Off': 'Вимкнено'
+    Volume Boost:
+      Volume Boost: "Підсилення гучності"
+      'Off': "Вимкнено"
     Auto-generated Caption Template: '{language} (створено автоматично)'
     Up next in {seconds}: Наступне через {seconds} с
     Resize dock: Змінити розмір панелі

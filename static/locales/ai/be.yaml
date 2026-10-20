@@ -1522,6 +1522,9 @@ Video:
     Zoom:
       Zoom: Маштаб
       'Off': 'Выкл.'
+    Volume Boost:
+      Volume Boost: "Узмацненне гучнасці"
+      'Off': "Выкл."
     Auto-generated Caption Template: '{language} (створана аўтаматычна)'
     Up next in {seconds}: Наступнае праз {seconds}
     Resize dock: Змяніць памер панэлі

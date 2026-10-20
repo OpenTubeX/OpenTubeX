@@ -1475,6 +1475,9 @@ Video:
     Zoom:
       Zoom: Zoom
       'Off': 'Dezactivat'
+    Volume Boost:
+      Volume Boost: "Amplificare volum"
+      'Off': "Dezactivată"
     Auto-generated Caption Template: '{language} (generate automat)'
     Up next in {seconds}: Urmează în {seconds}
     Resize dock: Redimensionează panoul

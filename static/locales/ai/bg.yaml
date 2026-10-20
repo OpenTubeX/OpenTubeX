@@ -1458,6 +1458,9 @@ Video:
     Zoom:
       Zoom: Мащабиране
       'Off': 'Изключено'
+    Volume Boost:
+      Volume Boost: "Усилване на звука"
+      'Off': "Изключено"
     Auto-generated Caption Template: '{language} (автоматично генерирани)'
     Up next in {seconds}: Следва след {seconds}
     Resize dock: Преоразмеряване на панела

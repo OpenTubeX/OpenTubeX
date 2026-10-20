@@ -1441,6 +1441,9 @@ Video:
     Zoom:
       Zoom: Yakınlaştırma
       'Off': Kapalı
+    Volume Boost:
+      Volume Boost: "Ses yükseltme"
+      'Off': "Kapalı"
     Auto-generated Caption Template: '{language} (otomatik oluşturuldu)'
     Up next in {seconds}: '{seconds} saniye sonra sıradaki'
     Resize dock: Paneli yeniden boyutlandır

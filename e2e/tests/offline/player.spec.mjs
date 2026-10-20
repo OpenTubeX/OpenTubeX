@@ -1205,6 +1205,80 @@ test('the overflow menu can turn the zoom off again', async ({ app, page, attach
   await watchComponent.dispose()
 })
 
+test('volume boost amplifies the audio within its tab', async ({ app, page, attachScreenshot }) => {
+  // The demo media is silent, so record the audio graph and multiply the gains
+  // between each player's media element and the output.
+  await page.evaluate(() => {
+    const connect = AudioNode.prototype.connect
+    window.__volumeBoostSources = []
+    AudioNode.prototype.connect = function (target, ...args) {
+      (this.__targets ??= []).push(target)
+      if (this instanceof MediaElementAudioSourceNode && !window.__volumeBoostSources.includes(this)) {
+        window.__volumeBoostSources.push(this)
+      }
+      return connect.call(this, target, ...args)
+    }
+  })
+  const sourceCount = () => page.evaluate(() => window.__volumeBoostSources.length)
+  const outputGain = () => page.evaluate(() => {
+    const gainTo = (node) => {
+      if (node === node.context.destination) return 1
+      const own = node instanceof GainNode ? node.gain.value : 1
+      const paths = (node.__targets ?? []).map(gainTo).filter(gain => gain !== null)
+      return paths.length === 1 ? own * paths[0] : null
+    }
+    const gain = gainTo(window.__volumeBoostSources.at(-1))
+    return gain === null ? null : Math.round(gain * 100) / 100
+  })
+
+  await openDemoVideo({ app, page })
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  await player.hover()
+  await player.getByRole('button', { name: 'More settings' }).click()
+  const boostButton = player.locator('.shaka-overflow-menu .volume-boost-button')
+  await expect(boostButton).toContainText('Off')
+  // The player only routes its audio through Web Audio once it is boosted.
+  expect(await sourceCount()).toBe(0)
+
+  // The icon follows the selected icon pack.
+  const boostIcon = boostButton.locator(':scope > svg')
+  await expect(boostIcon.locator('path')).not.toHaveCount(0)
+  const materialIcon = await boostIcon.innerHTML()
+  await page.evaluate(() => window.$store.dispatch('updateIconPack', 'remix'))
+  await expect.poll(() => boostIcon.innerHTML()).not.toBe(materialIcon)
+  await expect(boostIcon.locator('path')).not.toHaveCount(0)
+
+  await boostButton.click()
+  const boostMenu = player.locator('.volume-boost-menu')
+  await expect(boostMenu.getByRole('button')).toHaveText(['Volume Boost', 'Off', '125%', '150%', '175%', '200%'])
+  await attachScreenshot('volume boost menu')
+  await boostMenu.getByRole('button', { name: '150%' }).click()
+  await expect.poll(outputGain).toBe(1.5)
+  expect(await sourceCount()).toBe(1)
+
+  // Choosing a level returns to the overflow menu, which shows it.
+  await expect(boostButton).toContainText('150%')
+  await boostButton.click()
+  await expect(boostMenu.getByRole('button', { name: '150%' })).toHaveAttribute('aria-selected', 'true')
+  await boostMenu.getByRole('button', { name: '200%' }).click()
+  await expect.poll(outputGain).toBe(2)
+
+  // Another video in the same tab keeps the boost.
+  await openMockedVideo(page, 'aqz-KE-bpKQ')
+  await expect.poll(sourceCount).toBe(2)
+  await expect.poll(outputGain).toBe(2)
+
+  // A new tab starts without a boost.
+  await page.locator('.tabBar .newTabButton').click()
+  await expect(page.locator('.tabBar .tab')).toHaveCount(2)
+  const nextPlayer = page.locator(`${activeTab} .ftVideoPlayer`)
+  await openMockedVideo(page)
+  await nextPlayer.hover()
+  await nextPlayer.getByRole('button', { name: 'More settings' }).click()
+  await expect(nextPlayer.locator('.volume-boost-button')).toContainText('Off')
+  expect(await sourceCount()).toBe(2)
+})
+
 test.describe('mobile player menus', { tag: '@scale' }, () => {
   test('options and submenus stay above the center play button', async ({ app, page, attachScreenshot }) => {
     await mockPlayableWatchPage(app, page)
