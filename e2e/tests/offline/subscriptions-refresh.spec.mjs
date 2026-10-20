@@ -285,6 +285,9 @@ test.describe('incremental subscription feed refresh', () => {
     })
     await page.getByRole('button', { name: /Refresh Videos/ }).click()
     await page.locator(sel.newTabButton).click()
+    // Navigating before the new tab is active would send the old tab to History.
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    await expect(page.locator(sel.tabs).last()).toHaveClass(/active/)
     await goTo(page, 'history')
 
     await firstChannelResponse
