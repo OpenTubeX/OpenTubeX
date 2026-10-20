@@ -153,7 +153,7 @@ test('history edits during serialization prevent stale writes and retry with fre
   const context = vm.createContext({
     DBActions: { HISTORY: { APPLY_SYNC_CHANGES: 'sync' } },
     runBackgroundJob: (...args) => jobs.run(...args),
-    window: { ftElectron: { dbHistory: (action, value) => writes.push(JSON.parse(value)) } },
+    window: { ftElectron: { dbHistory: (action, value) => { writes.push(JSON.parse(value)); return [] } } },
   })
   vm.runInContext(handlers.replace(/^import .+\n/gm, '').replace(/export \{[\s\S]*?\}\n/g, '')
     .replace('export const recommendations', 'const recommendations') + '\nglobalThis.history = History', context)

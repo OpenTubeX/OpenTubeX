@@ -143,12 +143,34 @@ class Settings {
   // ******************** //
 }
 
+// Records are replaced by video ID. A cached or duplicate record can carry
+// another document's `_id`, which NeDB refuses to change, so keep the stored one.
+function historyReplacement(record) {
+  const { _id, ...fields } = migrateLegacyHistoryRecord(record)
+  return fields
+}
+
 class History {
   static migrationPromise = null
 
   static async find() {
     await this.migrateWatchedStatus()
-    const records = await db.history.findAsync({}).sort({ timeWatched: -1 })
+    // Queue the read with the writes, so none can land on a duplicate that is
+    // about to be removed.
+    const records = await Settings.runSeenStateUpdate(async () => {
+      const records = await db.history.findAsync({}).sort({ timeWatched: -1 })
+      // Older sync runs could insert a video already written locally. Keep the
+      // newest record so updates by video ID and the cache agree on one document.
+      const seen = new Set()
+      const duplicateIds = []
+      const uniqueRecords = records.filter(record => {
+        if (!seen.has(record.videoId)) return seen.add(record.videoId)
+        duplicateIds.push(record._id)
+        return false
+      })
+      if (duplicateIds.length > 0) await db.history.removeAsync(createIdQuery('_id', duplicateIds), { multi: true })
+      return uniqueRecords
+    })
     // Prepare the index once the datastore is loaded, before playback and bulk
     // edits start writing by video ID. Seen-mark merging is not always enabled.
     await db.history.ensureIndexAsync({ fieldName: 'videoId' })
@@ -206,7 +228,7 @@ class History {
         if (affectedDocuments) updatedRecords.push(affectedDocuments)
       } else {
         for (const record of records) {
-          const migratedRecord = migrateLegacyHistoryRecord(record)
+          const migratedRecord = historyReplacement(record)
           const { affectedDocuments } = await db.history.updateAsync(
             { videoId: migratedRecord.videoId }, migratedRecord,
             { upsert: true, returnUpdatedDocs: true }
@@ -243,35 +265,59 @@ class History {
   }
 
   static upsert(record) {
-    const migratedRecord = migrateLegacyHistoryRecord(record)
-    return db.history.updateAsync({ videoId: migratedRecord.videoId }, migratedRecord, { upsert: true })
+    const migratedRecord = historyReplacement(record)
+    return Settings.runSeenStateUpdate(() => db.history.updateAsync({ videoId: migratedRecord.videoId }, migratedRecord, { upsert: true }))
   }
 
-  static async overwrite(records) {
-    const migratedRecords = records.map(migrateLegacyHistoryRecord)
-    const retained = new Set(migratedRecords.map(record => record.videoId))
-    const removed = (await db.history.findAsync({}, { videoId: 1 })).map(record => record.videoId).filter(id => !retained.has(id))
-    if (removed.length) await recommendations.remove(removed)
+  static overwrite(records) {
+    // A queued sync must not insert a record between the removal and insertion.
+    return Settings.runSeenStateUpdate(async () => {
+      const migratedRecords = records.map(migrateLegacyHistoryRecord)
+      const retained = new Set(migratedRecords.map(record => record.videoId))
+      const removed = (await db.history.findAsync({}, { videoId: 1 })).map(record => record.videoId).filter(id => !retained.has(id))
+      if (removed.length) await recommendations.remove(removed)
 
-    await db.history.removeAsync({}, { multi: true })
+      await db.history.removeAsync({}, { multi: true })
 
-    await db.history.insertAsync(migratedRecords)
+      await db.history.insertAsync(migratedRecords)
+    })
   }
 
-  static async applySyncChanges({ insertions, updates, deletions }) {
-    const migratedInsertions = insertions.map(migrateLegacyHistoryRecord)
-    const migratedUpdates = updates.map(migrateLegacyHistoryRecord)
+  static applySyncChanges(changes) {
+    // Writes that can create a record share this queue, so none can store a
+    // video between the lookup below and the insertion.
+    return Settings.runSeenStateUpdate(() => this._applySyncChanges(changes))
+  }
 
+  static async _applySyncChanges({ insertions, updates, deletions }) {
     if (deletions.length > 0) {
       await recommendations.remove(deletions)
       await db.history.removeAsync(createIdQuery('videoId', deletions), { multi: true })
     }
+    // Playback can store a video while the merge waits on the server. Update
+    // it instead of inserting a duplicate, unless it was watched more recently.
+    const insertionIds = insertions.map(record => record.videoId)
+    const stored = insertionIds.length > 0
+      ? new Map((await db.history.findAsync(createIdQuery('videoId', insertionIds), { videoId: 1, timeWatched: 1 }))
+          .map(record => [record.videoId, record.timeWatched]))
+      : new Map()
+    // Progress-only records have no watch time, so a synced record replaces them.
+    const skipped = new Set(insertions
+      .filter(record => Number.isFinite(stored.get(record.videoId)) && !(record.timeWatched > stored.get(record.videoId)))
+      .map(record => record.videoId))
+    const migratedInsertions = insertions.filter(record => !stored.has(record.videoId)).map(historyReplacement)
+    const migratedUpdates = [
+      ...updates,
+      ...insertions.filter(record => stored.has(record.videoId) && !skipped.has(record.videoId)),
+    ].map(historyReplacement)
     for (const record of migratedUpdates) {
       await db.history.updateAsync({ videoId: record.videoId }, record, { upsert: true })
     }
     if (migratedInsertions.length > 0) {
       await db.history.insertAsync(migratedInsertions)
     }
+    // Caches must keep the newer stored records too.
+    return [...skipped]
   }
 
   static migrateWatchedStatus() {
@@ -333,11 +379,11 @@ class History {
   }
 
   static updateWatchProgress(videoId, watchProgress) {
-    return db.history.updateAsync({ videoId }, { $set: { watchProgress } }, { upsert: true })
+    return Settings.runSeenStateUpdate(() => db.history.updateAsync({ videoId }, { $set: { watchProgress } }, { upsert: true }))
   }
 
   static updateLastViewedPlaylist(videoId, lastViewedPlaylistId, lastViewedPlaylistType, lastViewedPlaylistItemId) {
-    return db.history.updateAsync({ videoId }, { $set: { lastViewedPlaylistId, lastViewedPlaylistType, lastViewedPlaylistItemId } }, { upsert: true })
+    return Settings.runSeenStateUpdate(() => db.history.updateAsync({ videoId }, { $set: { lastViewedPlaylistId, lastViewedPlaylistType, lastViewedPlaylistItemId } }, { upsert: true }))
   }
 
   static unsetLastViewedPlaylistForVideos(videoIds, lastViewedPlaylistId) {

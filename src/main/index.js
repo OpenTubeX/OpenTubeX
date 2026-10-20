@@ -5554,15 +5554,18 @@ function runApp() {
           )
           return null
 
-        case DBActions.HISTORY.APPLY_SYNC_CHANGES:
+        case DBActions.HISTORY.APPLY_SYNC_CHANGES: {
           if (typeof data === 'string') data = JSON.parse(data)
-          await baseHandlers.history.applySyncChanges(data)
+          // Other windows must keep stored records that were newer than the sync.
+          const skipped = new Set(await baseHandlers.history.applySyncChanges(data))
+          if (skipped.size > 0) data.insertions = data.insertions.filter(record => !skipped.has(record.videoId))
           syncOtherWindows(
             IpcChannels.SYNC_HISTORY,
             event,
             { event: SyncEvents.HISTORY.APPLY_SYNC_CHANGES, data }
           )
-          return null
+          return [...skipped]
+        }
 
         case DBActions.HISTORY.UPDATE_WATCH_PROGRESS:
           await baseHandlers.history.updateWatchProgress(data.videoId, data.watchProgress)
