@@ -674,6 +674,25 @@ test.describe('settings', () => {
     }
   })
 
+  test('keeps the Settings scroll position when it morphs into and out of its header button', async ({ page }) => {
+    await goToSettingsSection(page, 'appearance')
+    await page.evaluate(() => window.$store.dispatch('updateMoveSettingsToAppHeader', true))
+    const content = page.locator('.settingsContent')
+    await content.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    const scrollTop = await content.evaluate(element => element.scrollTop)
+
+    const settingsWindow = page.getByRole('dialog', { name: 'Settings', exact: true })
+    await settingsWindow.getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(settingsWindow).toBeHidden()
+    await page.locator('.topNav .settingsButton').click()
+    await expect(settingsWindow).toBeVisible()
+
+    await expect.poll(async () => Math.abs(
+      await content.evaluate(element => element.scrollTop) - scrollTop
+    )).toBeLessThanOrEqual(1)
+  })
+
   test('clamps the Downloads scroll position when a wider layout becomes shorter', async ({ page }) => {
     await page.evaluate(() => {
       localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({
