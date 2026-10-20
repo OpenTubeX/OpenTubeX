@@ -7,6 +7,8 @@ import { computed, defineComponent, inject, nextTick, onActivated, onBeforeUnmou
 import FtPaidPromotionBadge from '../FtPaidPromotionBadge/FtPaidPromotionBadge.vue'
 import FtRetryImage from '../FtRetryImage.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
+import FtMobileSheet from '../FtMobileSheet/FtMobileSheet.vue'
+import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import SponsorBlockSegmentEditor from '../WatchVideoSponsorBlock/SponsorBlockSegmentEditor.vue'
 import shaka from 'shaka-player'
 import { registerPlugin } from '@capacitor/core'
@@ -300,6 +302,7 @@ export default defineComponent({
     FtPaidPromotionBadge,
     FtRetryImage,
     FtSelect,
+    FtMobileSheet,
     SponsorBlockSegmentEditor,
     FtShareButton,
     FtIconButton,
@@ -1164,6 +1167,7 @@ export default defineComponent({
     }
 
     function fullscreenDockStyle(dock) {
+      if (portraitFullscreenDocks.value) return null
       const openDocks = getFullscreenOpenDocks(dock)
       const index = openDocks.indexOf(dock)
       const totalWeight = openDocks.reduce((total, name) => total + fullscreenDockWeights[name], 0)
@@ -1189,12 +1193,14 @@ export default defineComponent({
     }
 
     function fullscreenDockCanResize(dock) {
+      if (portraitFullscreenDocks.value) return false
       const openDocks = getFullscreenOpenDocks()
       const index = openDocks.indexOf(dock)
       return index >= 0 && index < openDocks.length - 1
     }
 
     function fullscreenDockCanReorder(dock) {
+      if (portraitFullscreenDocks.value) return false
       const openDocks = getFullscreenOpenDocks()
       return openDocks.length > 1 && openDocks.includes(dock)
     }
@@ -1207,6 +1213,7 @@ export default defineComponent({
     }
 
     function handleFullscreenDockHeaderDoubleClick(event, dock) {
+      if (portraitFullscreenDocks.value) return
       const target = event.target instanceof Element ? event.target : null
       const header = target?.closest(FULLSCREEN_DOCK_HEADER_SELECTOR)
       const interactiveTarget = target?.closest('button, a, input, select, textarea, [role="button"]')
@@ -1493,6 +1500,55 @@ export default defineComponent({
     const activeLegacyFormat = shallowRef(null)
 
     const fullWindowEnabled = ref(false)
+    const portraitLayout = usePhoneLayout('(orientation: portrait)')
+    const portraitFullscreenDocks = computed(() => portraitLayout.value && (isFullscreen.value || fullWindowEnabled.value))
+    const fullscreenDockTitles = computed(() => ({
+      metadata: t('Video.Metadata'),
+      transcript: t('Video.Transcript.Title'),
+      sponsorBlock: t('Settings.SponsorBlock Settings.SponsorBlock Settings'),
+      liveChat: t('Video.Live Chat'),
+      comments: t('Comments.Comments'),
+      queue: t('Video.Queue'),
+      playlist: t('Playlist.Playlist'),
+      recommendations: t('Settings.Fullscreen Actions.Recommended Videos'),
+      chapters: t('Chapters.Chapters'),
+    }))
+    const activePortraitDock = ref(null)
+    const fullscreenDockTitle = computed(() => activePortraitDock.value
+      ? fullscreenDockTitles.value[activePortraitDock.value]
+      : '')
+    const fullscreenDockClosers = {
+      metadata: closeFullscreenMetadata,
+      transcript: closeFullscreenTranscript,
+      sponsorBlock: closeFullscreenSponsorBlock,
+      liveChat: closeFullscreenLiveChat,
+      comments: closeFullscreenComments,
+      queue: closeFullscreenQueue,
+      playlist: closeFullscreenPlaylist,
+      recommendations: closeFullscreenRecommendations,
+      chapters: closeChaptersOverlay,
+    }
+    function closePortraitFullscreenDock() {
+      if (activePortraitDock.value) fullscreenDockClosers[activePortraitDock.value]()
+    }
+    watch(() => [portraitFullscreenDocks.value, ...fullscreenDockOrder.filter(isFullscreenDockOpen)], ([portrait, ...open], previous = []) => {
+      if (!portrait) return
+      const newlyOpened = open.find(dock => !previous.slice(1).includes(dock))
+      activePortraitDock.value = newlyOpened ?? (open.includes(activePortraitDock.value) ? activePortraitDock.value : open[0]) ?? null
+      for (const dock of open) {
+        if (dock !== activePortraitDock.value) fullscreenDockClosers[dock]()
+      }
+    })
+    watch(activePortraitDock, async dock => {
+      if (!dock) return
+      await nextTick()
+      if (portraitFullscreenDocks.value && activePortraitDock.value === dock) {
+        const overlay = dock === 'chapters'
+          ? chapterOverlay.value
+          : container.value?.querySelector('.fullscreenDockSheet > .open')
+        overlay?.focus({ preventScroll: true })
+      }
+    })
     const annotationVideoFit = computed(() => {
       return props.shortsPlayer && !isFullscreen.value && !fullWindowEnabled.value
         ? 'cover'
@@ -13355,6 +13411,11 @@ export default defineComponent({
     }
 
     return {
+      fullscreenDockHeaderSelector: FULLSCREEN_DOCK_HEADER_SELECTOR,
+      portraitFullscreenDocks,
+      fullscreenDockOpen,
+      fullscreenDockTitle,
+      closePortraitFullscreenDock,
       hasLoaded,
       useVrMode,
       androidFullscreenHostActive,

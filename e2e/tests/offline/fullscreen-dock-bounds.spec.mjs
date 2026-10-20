@@ -8,11 +8,14 @@ import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-f
 async function expectDockInsidePlayer(dock, closeLabel = 'Close') {
   await expect.poll(() => dock.evaluate(element => {
     const dock = element.getBoundingClientRect()
-    const player = element.closest('.ftVideoPlayer').getBoundingClientRect()
+    const container = element.closest('.ftVideoPlayer')
+    const player = container.getBoundingClientRect()
     const video = element.closest('.ftVideoPlayer').querySelector('video').getBoundingClientRect()
     return dock.left >= player.left && dock.right <= player.right &&
       dock.top >= player.top && dock.bottom <= player.bottom &&
-      Math.abs(video.width + dock.width + 22 - player.width) <= 1
+      (container.classList.contains('portraitFullscreenDocks')
+        ? Math.abs(dock.width - player.width) <= 1
+        : Math.abs(video.width + dock.width + 22 - player.width) <= 1)
   })).toBe(true)
   const close = dock.getByRole('button', { name: closeLabel, exact: true })
   await expect.poll(() => close.evaluate(element => {
@@ -60,7 +63,7 @@ for (const { uiScale, colorScheme } of [{ uiScale: 175, colorScheme: 'light' }, 
       }
     })
 
-    test('keeps queue and Up Next content and controls inside the minimum window', async ({ app, page }, testInfo) => {
+    test('keeps queue and Up Next content and controls inside a narrow landscape window', async ({ app, page }, testInfo) => {
       await page.emulateMedia({ colorScheme })
       await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
       await mockPlayableWatchPage(app, page)
@@ -80,7 +83,7 @@ for (const { uiScale, colorScheme } of [{ uiScale: 175, colorScheme: 'light' }, 
         })
         const player = page.locator('.ftVideoPlayer')
         await player.locator('video').evaluate(element => element.pause())
-        await setWindowSize(app, page, { width: 340, height: 380 })
+        await setWindowSize(app, page, { width: 382, height: 380 })
         await setPlayerFullscreen(page, true)
         const actions = player.locator('.fullscreenActions')
         await actions.getByRole('button', { name: 'Queue', exact: true }).click()
@@ -125,7 +128,7 @@ for (const { uiScale, colorScheme } of [{ uiScale: 175, colorScheme: 'light' }, 
         await setWindowSize(app, page, { width: 880, height: 600 })
         await expectDockInsidePlayer(queue)
         await expectValidScroll(queueScroller, '.queueItemsContent')
-        await setWindowSize(app, page, { width: 340, height: 380 })
+        await setWindowSize(app, page, { width: 382, height: 380 })
         await expectValidScroll(queueScroller, '.queueItemsContent')
         await queue.getByRole('button', { name: 'Close', exact: true }).click()
         await actions.getByRole('button', { name: 'Recommended videos', exact: true }).click()
@@ -139,7 +142,7 @@ for (const { uiScale, colorScheme } of [{ uiScale: 175, colorScheme: 'light' }, 
         await setWindowSize(app, page, { width: 880, height: 600 })
         await expectDockInsidePlayer(recommendations)
         await expectValidScroll(recommendationsScroller, '.recommendationsContent')
-        await setWindowSize(app, page, { width: 340, height: 380 })
+        await setWindowSize(app, page, { width: 382, height: 380 })
         await expectValidScroll(recommendationsScroller, '.recommendationsContent')
         await setWindowSize(app, page, { width: 342, height: 880 })
         await watch.evaluate(async component => {
@@ -156,30 +159,29 @@ for (const { uiScale, colorScheme } of [{ uiScale: 175, colorScheme: 'light' }, 
         await expect.poll(() => lastChapter.evaluate(element => {
           const rect = element.getBoundingClientRect()
           const dock = element.closest('.chapterOverlay').getBoundingClientRect()
-          const actions = element.closest('.ftVideoPlayer').querySelector('.fullscreenActions').getBoundingClientRect()
+          const sheet = element.closest('.fullscreenDockSheet').getBoundingClientRect()
           const target = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2)
-          return dock.bottom <= actions.top && element.contains(target)
+          return dock.bottom <= sheet.bottom && element.contains(target)
         })).toBe(true)
         await expectValidScroll(chapters.locator('.chaptersWrapper'), '.chaptersContent')
-        await chapters.locator('.chapterOverlayHeader').dblclick()
-        await expect.poll(() => chapters.evaluate(element => element.getBoundingClientRect().height)).toBeGreaterThanOrEqual(59)
-        await expect.poll(() => chapters.evaluate(element => element.getBoundingClientRect().height)).toBeLessThanOrEqual(62)
+        await expect(player.locator('.fullscreenDockSheet[open]')).toBeVisible()
+        await expect(recommendations).toHaveCount(0)
+        await expect(chapters.locator('.fullscreenDockResizeHandle')).toHaveCount(0)
         const chapterClose = chapters.getByRole('button', { name: 'Close Chapters', exact: true })
         await expect.poll(() => chapterClose.evaluate(element => {
           const rect = element.getBoundingClientRect()
           const target = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2)
           return element.contains(target)
         })).toBe(true)
-        await chapters.locator('.chapterOverlayHeader').dblclick()
-        await recommendations.locator('.fullscreenDockResizeHandle').press('ArrowDown')
+        await capture('portrait-chapters-scaled')
         await lastChapter.scrollIntoViewIfNeeded()
         await expectValidScroll(chapters.locator('.chaptersWrapper'), '.chaptersContent')
         await chapters.getByRole('button', { name: 'Close Chapters', exact: true }).click()
-        await expectValidScroll(recommendationsScroller, '.recommendationsContent')
-        await setWindowSize(app, page, { width: 340, height: 380 })
-        await recommendations.getByRole('button', { name: 'Close', exact: true }).click()
+        await expect(player.locator('.fullscreenDockSheet[open]')).toHaveCount(0)
+        await setWindowSize(app, page, { width: 382, height: 380 })
         await expect(player).not.toHaveClass(/fullscreenDockLayoutOpen/)
         await actions.getByRole('button', { name: 'Queue', exact: true }).click()
+        await setWindowSize(app, page, { width: 340, height: 384 })
         await watch.evaluate(component => component.proxy.$store.dispatch('updateCurrentLocale', 'de-DE'))
         await expect(queue.locator('.clearQueueLabel')).toHaveText('Warteschlange leeren')
         await expectDockInsidePlayer(queue, 'Schließen')

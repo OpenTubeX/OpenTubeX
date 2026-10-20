@@ -1,9 +1,10 @@
 <template>
   <Teleport
     to=".app"
-    :disabled="!docked"
+    :disabled="!docked || fullscreen"
   >
     <dialog
+      v-bind="$attrs"
       ref="dialog"
       class="mobileSheet"
       :class="{ dockedSheet: docked, compactSheet: compact && enabled, mobileSheetEnabled: enabled }"
@@ -13,6 +14,8 @@
       @cancel.prevent="dismiss"
       @keydown.esc.prevent.stop="dismiss"
       @pointerdown.stop
+      @pointerdown.capture="startContentHeaderDrag"
+      @click.capture="filterContentHeaderClick"
       @click="handleClick"
       @dblclick.stop
       @touchstart.stop
@@ -21,7 +24,7 @@
       <!-- Only filters post-drag clicks; the controls handle keyboard activation. -->
       <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events -->
       <header
-        v-if="enabled"
+        v-if="enabled && !headerSelector"
         class="mobileSheetHeader"
         @pointerdown="startDrag"
         @click.capture="handleHeaderClick"
@@ -68,13 +71,17 @@ import { registerAndroidBackSheet, settleAndroidBackAnimation } from '../../help
 import { lockBodyScroll, unlockBodyScroll } from '../FtPrompt/scrollLock'
 import { updateMobileSheetRootClass } from '../../helpers/rootClasses'
 
+defineOptions({ inheritAttrs: false })
+
 const props = defineProps({
   enabled: { type: Boolean, default: true },
   open: { type: Boolean, default: true },
   title: { type: String, required: true },
   back: { type: Boolean, default: false },
   compact: { type: Boolean, default: false },
-  belowPlayer: { type: Boolean, default: false }
+  belowPlayer: { type: Boolean, default: false },
+  fullscreen: { type: Boolean, default: false },
+  headerSelector: { type: String, default: '' }
 })
 const emit = defineEmits(['close', 'back', 'closed', 'suspend', 'resume'])
 const dialog = useTemplateRef('dialog')
@@ -94,9 +101,10 @@ const playerDragging = ref(false)
 const shortsPlayer = ref(false)
 const appHidden = ref(isAppHidden())
 const pictureInPicture = ref(document.body.classList.contains('androidPictureInPicture'))
-const docked = computed(() => props.enabled && props.belowPlayer && getPlayer !== null)
+const docked = computed(() => props.enabled && (props.fullscreen || (props.belowPlayer && getPlayer !== null)))
 const suspended = computed(() => docked.value &&
-  (!!fullscreenElement.value || playerCoversWindow.value || playerDragging.value || appHidden.value || pictureInPicture.value))
+  ((!props.fullscreen && (!!fullscreenElement.value || playerCoversWindow.value)) ||
+    playerDragging.value || appHidden.value || pictureInPicture.value))
 function updateVisibility() {
   appHidden.value = isAppHidden()
 }
@@ -201,6 +209,10 @@ function restorePlayback() {
 
 function measurePlayer() {
   if (!docked.value || !props.open || suspended.value) return
+  if (props.fullscreen) {
+    sheetTop.value = window.innerHeight * 0.3
+    return
+  }
   const player = getInlinePlayer?.() ?? getPlayer?.()
   if (!player) return
   sheetTop.value = Math.max(0, player.getBoundingClientRect().bottom)
@@ -308,10 +320,17 @@ watch(landscape, (value) => {
   }
 })
 
-function startDrag(event) {
+function startContentHeaderDrag(event) {
+  const header = props.headerSelector && event.target.closest(props.headerSelector)
+  if (header) startDrag(event, header)
+}
+function filterContentHeaderClick(event) {
+  if (props.headerSelector && event.target.closest(props.headerSelector)) handleHeaderClick(event)
+}
+function startDrag(event, header = event.currentTarget) {
   if (!docked.value || event.button !== 0 || event.isPrimary === false || drag) return
   suppressDragClick = false
-  drag = { id: event.pointerId, x: event.clientX, y: event.clientY, start: performance.now(), distance: 0, active: false, header: event.currentTarget }
+  drag = { id: event.pointerId, x: event.clientX, y: event.clientY, start: performance.now(), distance: 0, active: false, header }
   // A mouse can leave the header before crossing the drag threshold.
   window.addEventListener('pointermove', moveDrag, true)
   window.addEventListener('pointerup', endDrag, true)

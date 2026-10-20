@@ -54,10 +54,19 @@ for (const { layout, width, height, uiScale, cpuThrottle = 1 } of [
           expect(samples.widths.length, 'Video layout must not change on every animation frame').toBeLessThanOrEqual(2)
           expect(samples.controlWidths.length, 'Controls must not reflow on every animation frame').toBeLessThanOrEqual(2)
           expect(samples.animationKeyframes.length, 'The fitted video uses a compositor animation').toBe(2)
-          expect(samples.animationKeyframes[0].scale).not.toBe(samples.animationKeyframes[1].scale)
+          if (layout === 'phone portrait') {
+            expect(samples.animationKeyframes[0].translate).not.toBe(samples.animationKeyframes[1].translate)
+          } else {
+            expect(samples.animationKeyframes[0].scale).not.toBe(samples.animationKeyframes[1].scale)
+          }
           if (open) {
             await expect(player.locator('.fullscreenMetadataOverlay.open')).toBeVisible()
-            expect(samples.widths.at(-1)).toBeLessThan(initialWidth)
+            if (layout === 'phone portrait') {
+              expect(samples.widths.at(-1)).toBe(initialWidth)
+              await expect(player.locator('.fullscreenDockSheet[open]')).toBeVisible()
+            } else {
+              expect(samples.widths.at(-1)).toBeLessThan(initialWidth)
+            }
             const screenshot = await app.electronApp.evaluate(async ({ BrowserWindow }) =>
               (await BrowserWindow.getAllWindows()[0].webContents.capturePage()).toPNG().toString('base64'))
             await writeFile(testInfo.outputPath('open-dock.png'), Buffer.from(screenshot, 'base64'))

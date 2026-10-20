@@ -51,13 +51,14 @@ function mountSheet(t, expandPanel = null, { reducedMotion = false } = {}) {
     fullscreenElement: null, activeElement: null, querySelector: () => null,
     body: { classList: { contains: () => false } }
   })
-  const window = Object.assign(new EventTarget(), { scrollBy() {} })
+  const window = Object.assign(new EventTarget(), { innerHeight: 800, scrollBy() {} })
   const events = []
   const context = {
     computed, ref, shallowRef, watch, nextTick, document, window, innerHeight: 800,
     isAppHidden: () => !!document.hidden, isReducedMotionEnabled: () => reducedMotion,
     process: { env: { IS_CAPACITOR: true } }, registerAndroidBackSheet, settleAndroidBackAnimation,
     defineProps: () => props, defineEmits: () => (...args) => events.push(args),
+    defineOptions() {},
     useTemplateRef: () => dialog, usePhoneLayout: () => landscape,
     inject: name => name === 'phonePanelPlayer' ? () => player
       : name === 'phonePanelInlinePlayer' ? () => inlineElement.value
@@ -381,6 +382,24 @@ test('opening a regular video sheet in landscape keeps playback running', async 
 })
 
 for (const mode of ['browser', 'fullwindow']) {
+  test(`a fullscreen dock sheet stays open in ${mode} fullscreen`, async t => {
+    const sheet = mountSheet(t)
+    sheet.props.fullscreen = true
+    if (mode === 'browser') sheet.document.fullscreenElement = sheet.player
+    else sheet.player.coversWindow = true
+    sheet.state.updatePresentation()
+    sheet.props.open = true
+    await sheet.settle()
+    assert.equal(sheet.element.open, true)
+    assert.equal(sheet.state.sheetStyle.value.insetBlockStart, 'max(var(--app-safe-area-inset-top, 0px), 240px)')
+    assert.equal(sheet.events.some(([event]) => event === 'suspend'), false)
+    const back = getAndroidBackSheet(sheet.element)
+    assert.equal(back.begin(), true)
+    await back.finish(true)
+    assert.equal(sheet.element.open, false)
+    assert.ok(sheet.events.some(([event]) => event === 'close'))
+  })
+
   test(`an open below-player sheet hides during ${mode} fullscreen and returns below the player`, async t => {
     const sheet = mountSheet(t)
     sheet.props.open = true
