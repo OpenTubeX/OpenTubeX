@@ -49,10 +49,11 @@ async function scrollToBottom(scroller) {
   await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
 }
 
+// Offline refreshes of the seeded subscriptions fail and leave an error toast that can cover the editor.
 test.use({
   seed: {
     profiles: PROFILES,
-    settings: { currentLocale: 'en-US' }
+    settings: { currentLocale: 'en-US', fetchSubscriptionsAutomatically: false }
   }
 })
 
