@@ -63,3 +63,16 @@ test('right-clicking the search filter button clears only the active tab', async
   await expect(page.locator('input[type="radio"][value="popularity"]')).toBeChecked()
   await expect(page.locator('input[type="radio"][value="today"]')).not.toBeChecked()
 })
+
+test('desktop search filter options keep compact spacing', { tag: '@scale' }, async ({ page }, testInfo) => {
+  await page.locator('.navFilterButton').click()
+  const labels = page.locator('.searchRadio', { hasText: 'Type' }).locator('input + label')
+  await expect(labels).toHaveCount(6)
+
+  const tops = await labels.evaluateAll(elements => elements.map(element => element.getBoundingClientRect().top))
+  for (let i = 1; i < tops.length; i++) {
+    expect(tops[i] - tops[i - 1]).toBeLessThan(32)
+  }
+
+  await page.locator('.searchFiltersCard').screenshot({ path: testInfo.outputPath('search-filters.png') })
+})

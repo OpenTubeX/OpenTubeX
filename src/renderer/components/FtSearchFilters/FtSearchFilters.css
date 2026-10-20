@@ -56,6 +56,15 @@
   }
 }
 
+@media (width > 680px) and (height > 600px) and (not (any-pointer: coarse)) {
+  .searchRadio :deep(input + label) {
+    min-block-size: 0;
+    padding-block: 0;
+    margin-block-start: 10px;
+    line-height: normal;
+  }
+}
+
 @media only screen and (width <= 680px) {
   .searchRadio {
     border-inline-end: 0;
