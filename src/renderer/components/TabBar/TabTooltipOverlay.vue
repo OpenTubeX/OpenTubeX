@@ -156,7 +156,10 @@ function updateTooltipPosition() {
     const availableWidth = content.value.tabBarPosition === 'right'
       ? adjacentEdge - TOOLTIP_OFFSET_PX - TOOLTIP_MARGIN_PX
       : window.innerWidth - adjacentEdge - TOOLTIP_OFFSET_PX - TOOLTIP_MARGIN_PX
-    const constrainedWidth = Math.min(tooltipWidth, Math.max(120, availableWidth))
+    // The tooltip is anchored by its rail-side edge, so cap it at the full
+    // allowed width. Capping it at the rendered width would keep the previous
+    // tab's smaller width and cut off a longer title.
+    const constrainedWidth = Math.min(maxTooltipWidth, Math.max(120, availableWidth))
     const horizontalPosition = content.value.tabBarPosition === 'right'
       ? {
           left: 'auto',
@@ -269,6 +272,11 @@ function updateTooltipPosition() {
   white-space: nowrap;
   font-size: 12px;
   line-height: 1.35;
+}
+
+.tabTooltip:not(.withPreview) .tabTooltipTitle {
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .tabTooltipTitle:only-child {

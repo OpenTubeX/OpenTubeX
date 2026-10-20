@@ -403,6 +403,26 @@ test.describe('tab previews disabled', () => {
       await page.keyboard.up('Control')
     }
   })
+
+  for (const position of ['left', 'top']) {
+    test(`shows the full title after moving from a shorter tab with the ${position} tab bar`, async ({ page }) => {
+      await page.evaluate(async position => {
+        window.$store.commit('setTabBarPosition', position)
+        for (const title of ['Short', 'A considerably longer tab title that must wrap instead of being cut off']) {
+          await window.ftElectron.tabs.create({ title, route: '/history', makeActive: false, lazyLoad: true })
+        }
+      }, position)
+      const tabs = page.locator(sel.tabs)
+      await expect(tabs).toHaveCount(3)
+      const title = page.locator('.tabTooltip .tabTooltipTitle')
+
+      await tabs.nth(1).hover()
+      await expect(title).toHaveText('Short')
+      await tabs.nth(2).hover()
+      await expect(title).toHaveText(/must wrap/)
+      await expect.poll(() => title.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true)
+    })
+  }
 })
 
 /**
