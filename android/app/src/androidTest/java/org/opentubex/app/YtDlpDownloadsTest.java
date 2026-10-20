@@ -196,6 +196,7 @@ public class YtDlpDownloadsTest {
             met[1] = true;
             assertTrue(queue.hasQueued());
             assertFalse(queue.list().getJSONObject(0).has("waitingFor"));
+            assertFalse("Waiting state changes are saved", new YtDlpDownloads(context, state, () -> {}).list().getJSONObject(0).has("waitingFor"));
             assertEquals(asList(automatic), queue.claim());
         } finally { queue.cancelAll(); folder.delete(); YtDlpFiles.deleteTree(state); }
     }

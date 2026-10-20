@@ -200,6 +200,7 @@ final class YtDlpDownloads {
         boolean charging = !requireCharging || conditions.charging();
         boolean startable = false;
         boolean waiting = false;
+        boolean changed = false;
         for (JSONObject record : records.values()) {
             if (!record.optString("status").equals("queued")) continue;
             String waitingFor = YtDlpAutomaticDownloads.waitingFor(record, configuration, unmetered, charging);
@@ -207,10 +208,12 @@ final class YtDlpDownloads {
                 if (waitingFor == null) record.remove("waitingFor");
                 else record.put("waitingFor", waitingFor);
                 publish(record);
+                changed = true;
             }
             if (waitingFor == null) startable = true;
             else waiting = true;
         }
+        if (changed) save();
         String required = requireUnmetered + "/" + requireCharging;
         if (waiting && !required.equals(scheduledConditions)) {
             scheduledConditions = required;

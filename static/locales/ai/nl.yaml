@@ -776,7 +776,7 @@ Settings:
     Title Includes: Titel bevat
     Title Excludes: Titel bevat niet
     Title Filter Hint: Scheid meerdere titeltermen met komma's. Een video moet ten minste één opgenomen term bevatten en geen enkele uitgesloten term.
-    Automatic Downloads Require Unmetered Network: "Alleen op onbeperkte netwerken"
+    Automatic Downloads Require Unmetered Network: "Alleen op netwerken zonder datalimiet"
     Automatic Downloads Require Charging: "Alleen tijdens opladen"
   External Software Settings:
     Create YouTube session: "YouTube-sessie maken"
@@ -2150,7 +2150,7 @@ Downloads:
     Audio Best: Audio - beste kwaliteit
     Audio Format: Audio - {format}
     Subtitles Format: Ondertiteling - {format}
-  Waiting for Unmetered Network: "Wachten op een onbeperkt netwerk"
+  Waiting for Unmetered Network: "Wachten op een netwerk zonder datalimiet"
   Waiting for Charging: "Wachten op een oplader"
 Channels:
   Load More Channels: "Meer kanalen laden"

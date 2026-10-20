@@ -763,7 +763,7 @@ Settings:
     Title Includes: Judul memuat
     Title Excludes: Judul tidak memuat
     Title Filter Hint: Pisahkan beberapa istilah judul dengan koma. Video harus cocok dengan setidaknya satu istilah yang disertakan dan tidak boleh cocok dengan istilah yang dikecualikan.
-    Automatic Downloads Require Unmetered Network: "Hanya di jaringan tanpa kuota"
+    Automatic Downloads Require Unmetered Network: "Hanya di jaringan tidak terukur"
     Automatic Downloads Require Charging: "Hanya saat mengisi daya"
   External Software Settings:
     Create YouTube session: "Buat sesi YouTube"
@@ -2104,7 +2104,7 @@ Downloads:
     Audio Best: Audio - Kualitas Terbaik
     Audio Format: Audio - {format}
     Subtitles Format: Takarir - {format}
-  Waiting for Unmetered Network: "Menunggu jaringan tanpa kuota"
+  Waiting for Unmetered Network: "Menunggu jaringan tidak terukur"
   Waiting for Charging: "Menunggu pengisi daya"
 Channels:
   Load More Channels: "Muat lebih banyak channel"

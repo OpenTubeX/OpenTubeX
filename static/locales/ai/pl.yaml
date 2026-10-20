@@ -329,7 +329,7 @@ Settings:
   Download Settings:
     Concurrent Downloads: Jednoczesne pobieranie
     Bandwidth Limit: Limit przepustowości (KiB/s)
-    Automatic Downloads Require Unmetered Network: "Tylko w sieciach bez limitu danych"
+    Automatic Downloads Require Unmetered Network: "Tylko w sieciach bez pomiaru użycia danych"
     Automatic Downloads Require Charging: "Tylko podczas ładowania"
   External Software Settings:
     Create YouTube session: "Utwórz sesję YouTube"
@@ -1252,7 +1252,7 @@ Downloads:
   Automatic Download Skipped: Pominięte przez filtry automatycznego pobierania
   Templates:
     Subtitles Format: Napisy - {format}
-  Waiting for Unmetered Network: "Oczekiwanie na sieć bez limitu danych"
+  Waiting for Unmetered Network: "Oczekiwanie na sieć bez pomiaru użycia danych"
   Waiting for Charging: "Oczekiwanie na ładowarkę"
 Playlist:
   Playlist Already Preloaded: "Wszystkie filmy z playlisty są już wstępnie wczytane"
