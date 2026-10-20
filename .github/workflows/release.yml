@@ -854,7 +854,7 @@ jobs:
         GH_TOKEN: ${{ github.token }}
         RELEASE_ID: ${{ inputs.releaseId }}
       shell: bash
-      run: bash _scripts/wait-for-release-assets.sh "$RELEASE_ID" '-beta(-(arm64-v8a|armeabi-v7a|x86_64|x86))?[.]apk$' 5
+      run: bash _scripts/wait-for-release-assets.sh "$RELEASE_ID" '[.]apk$' 10
 
     - name: Trigger F-Droid repository workflow
       env:

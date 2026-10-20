@@ -104,7 +104,7 @@ const stableConsumers = {
   'rpm-update': /\.(amd64|arm64)\.rpm$/,
   'apt-update': /\.deb$/,
   'snap-update': /_beta_(amd64|arm64)\.deb$/,
-  'fdroid-update': /-beta(-(arm64-v8a|armeabi-v7a|x86_64|x86))?\.apk$/,
+  'fdroid-update': /\.apk$/,
   'sidestore-update': /-ios-unsigned\.ipa$/,
   'nix-update': /(_beta_(amd64|arm64)\.deb|-mac-(x64|arm64)\.zip)$/,
   'homebrew-update': /-mac-(x64|arm64)\.zip$/,

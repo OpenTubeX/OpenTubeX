@@ -61,6 +61,8 @@ class ApkPackagingTest(unittest.TestCase):
         (self.source / "output-metadata.json").write_text(json.dumps(self.metadata))
 
     def write_lite_apks(self, runtime=False):
+        self.metadata["applicationId"] += ".lite"
+        self.write_metadata()
         for element in self.metadata["elements"]:
             abi = element["filters"][0]["value"] if element["filters"] else None
             with zipfile.ZipFile(self.source / element["outputFile"], "w") as apk:
@@ -123,6 +125,13 @@ class ApkPackagingTest(unittest.TestCase):
         apks.prepare(self.source, self.output, release=True, lite=True)
         self.assertTrue((self.output / "org.opentubex.app-0.34.0-beta-lite.apk").exists())
         self.assertTrue((self.output / "org.opentubex.app-0.34.0-beta-lite-arm64-v8a.apk").exists())
+
+    def test_rejects_lite_apks_with_the_full_package_id(self):
+        self.write_lite_apks()
+        with self.assertRaisesRegex(ValueError, "Expected package org.opentubex.app.nightly, found org.opentubex.app.nightly.lite"):
+            apks.prepare(self.source, self.output)
+        with self.assertRaisesRegex(ValueError, "Expected package org.opentubex.app.lite, found org.opentubex.app.nightly.lite"):
+            apks.prepare(self.source, self.output, release=True, lite=True)
 
     def test_rejects_lite_apks_with_the_yt_dlp_runtime(self):
         self.write_lite_apks(runtime=True)

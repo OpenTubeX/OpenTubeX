@@ -129,7 +129,7 @@ def prepare(source, destination, *, release=False, lite=False, max_abi_mib=None,
     max_abi_mib = max_abi_mib or (LITE_ABI_MIB if lite else 75)
     max_universal_mib = max_universal_mib or (LITE_UNIVERSAL_MIB if lite else 225)
     metadata = json.loads((source / "output-metadata.json").read_text())
-    package = "org.opentubex.app" + ("" if release else ".nightly")
+    package = "org.opentubex.app" + ("" if release else ".nightly") + (".lite" if lite else "")
     if metadata["applicationId"] != package:
         raise ValueError(f"Expected package {package}, found {metadata['applicationId']}")
     apks = {}

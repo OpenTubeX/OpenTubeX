@@ -9,26 +9,35 @@ gradle.beforeProject { app ->
         } as org.gradle.api.Action)
         app.tasks.register('verifyBuildIdentity') {
             doLast {
-                assert variants.release.applicationId.get() == 'org.opentubex.app'
+                def lite = app.hasProperty('lite')
+                def liteIdSuffix = lite ? '.lite' : ''
+                def liteName = lite ? ' Lite' : ''
+                assert variants.release.applicationId.get() == "org.opentubex.app${liteIdSuffix}"
+                if (lite) {
+                    for (name in ['app_name', 'title_activity_main']) {
+                        def release = variants.release
+                        assert release.resValues.get()[release.makeResValueKey('string', name)]?.value == 'OpenTubeX Lite'
+                    }
+                }
                 for (entry in [
                     [
                         variant: 'debug',
                         suffix: 'dev',
-                        label: 'OpenTubeX Dev',
+                        label: "OpenTubeX Dev${liteName}",
                         resources: 'src/dev/res',
                         generatedResources: 'android/dev/res'
                     ],
                     [
                         variant: 'nightly',
                         suffix: 'nightly',
-                        label: 'OpenTubeX Nightly',
+                        label: "OpenTubeX Nightly${liteName}",
                         resources: 'src/debug/res',
                         generatedResources: 'android/debug/res'
                     ]
                 ]) {
                     def variant = variants[entry.variant]
                     def buildType = app.android.buildTypes.getByName(entry.variant)
-                    assert variant.applicationId.get() == "org.opentubex.app.${entry.suffix}"
+                    assert variant.applicationId.get() == "org.opentubex.app.${entry.suffix}${liteIdSuffix}"
                     assert app.android.sourceSets[entry.variant].res.srcDirs == [
                         app.file(entry.resources),
                         app.rootProject.file("../build/generated/app-icons/${entry.generatedResources}")

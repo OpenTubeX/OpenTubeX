@@ -3,7 +3,10 @@ apply plugin: 'com.android.application'
 def nativeNdkDirectory = androidComponents.sdkComponents.ndkDirectory
 def optimizedTestBuild = ['nightly', 'release'].contains(project.findProperty('testBuildType'))
 // Releases also publish lite APKs without the bundled yt-dlp runtime and FFmpeg.
+// They install as separate apps so app stores can list them next to the full builds.
 def liteBuild = project.hasProperty('lite')
+def liteIdSuffix = liteBuild ? '.lite' : ''
+def liteName = liteBuild ? ' Lite' : ''
 
 def releaseKeystorePath = System.getenv("ANDROID_RELEASE_KEYSTORE")
 def releaseStorePassword = System.getenv("ANDROID_RELEASE_STORE_PASSWORD")
@@ -152,9 +155,9 @@ android {
             // Local test builds must not receive published nightly updates.
             // Both testing identities stay separate from production because
             // the nightly signing key is public.
-            applicationIdSuffix ".dev"
-            resValue "string", "app_name", "OpenTubeX Dev"
-            resValue "string", "title_activity_main", "OpenTubeX Dev"
+            applicationIdSuffix ".dev${liteIdSuffix}"
+            resValue "string", "app_name", "OpenTubeX Dev${liteName}"
+            resValue "string", "title_activity_main", "OpenTubeX Dev${liteName}"
             signingConfig signingConfigs.nightly
         }
         release {
@@ -163,16 +166,21 @@ android {
             minifyEnabled true
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            if (liteBuild) proguardFiles 'proguard-lite.pro'
+            if (liteBuild) {
+                proguardFiles 'proguard-lite.pro'
+                applicationIdSuffix liteIdSuffix
+                resValue "string", "app_name", "OpenTubeX Lite"
+                resValue "string", "title_activity_main", "OpenTubeX Lite"
+            }
             if (releaseSigningConfigured) {
                 signingConfig signingConfigs.production
             }
         }
         nightly {
             initWith release
-            applicationIdSuffix ".nightly"
-            resValue "string", "app_name", "OpenTubeX Nightly"
-            resValue "string", "title_activity_main", "OpenTubeX Nightly"
+            applicationIdSuffix ".nightly${liteIdSuffix}"
+            resValue "string", "app_name", "OpenTubeX Nightly${liteName}"
+            resValue "string", "title_activity_main", "OpenTubeX Nightly${liteName}"
             signingConfig signingConfigs.nightly
             matchingFallbacks = ['release']
         }

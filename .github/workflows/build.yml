@@ -761,8 +761,8 @@ jobs:
             pattern: '_(amd64|arm64)[.]deb$'
             count: 2
           - repository: fdroid
-            pattern: '-android-(arm64-v8a|armeabi-v7a|x86_64|x86|universal)[.]apk$'
-            count: 5
+            pattern: '-android-(lite-)?(arm64-v8a|armeabi-v7a|x86_64|x86|universal)[.]apk$'
+            count: 10
           - repository: flatpak
             pattern: '-linux-(x64|arm64)-portable[.]zip$'
             count: 2

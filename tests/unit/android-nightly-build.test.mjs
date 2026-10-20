@@ -14,7 +14,7 @@ async function obtainiumApps () {
   }))
 }
 
-// Lite APKs share the application ID, so each Obtainium link must match exactly one flavor.
+// Lite APKs share each release with the full APKs, so each Obtainium link must match exactly one flavor.
 function assertApkFilter (settings, accepted, rejected) {
   const filter = new RegExp(settings.apkFilterRegEx)
   const accepts = name => filter.test(name) !== (settings.invertAPKFilter === true)
@@ -31,11 +31,11 @@ const stableApks = flavor => ['', '-arm64-v8a', '-armeabi-v7a', '-x86', '-x86_64
 
 test('the Obtainium stable links pick only their own APK flavor', async () => {
   const apps = await obtainiumApps()
-  for (const [name, accepted, rejected] of [
-    ['OpenTubeX', stableApks(''), stableApks('-lite')],
-    ['OpenTubeX Lite', stableApks('-lite'), stableApks('')]
+  for (const [name, id, accepted, rejected] of [
+    ['OpenTubeX', 'org.opentubex.app', stableApks(''), stableApks('-lite')],
+    ['OpenTubeX Lite', 'org.opentubex.app.lite', stableApks('-lite'), stableApks('')]
   ]) {
-    assert.equal(apps[name].id, 'org.opentubex.app')
+    assert.equal(apps[name].id, id)
     assert.equal(apps[name].settings.includePrereleases, undefined)
     assertApkFilter(apps[name].settings, accepted, rejected)
   }
@@ -45,12 +45,12 @@ test('the Obtainium stable links pick only their own APK flavor', async () => {
 
 test('the Obtainium nightly links allow architecture APKs and the universal fallback', async () => {
   const apps = await obtainiumApps()
-  for (const [name, accepted, rejected] of [
-    ['OpenTubeX Nightly', nightlyApks(''), nightlyApks('lite-')],
-    ['OpenTubeX Nightly Lite', nightlyApks('lite-'), nightlyApks('')]
+  for (const [name, id, accepted, rejected] of [
+    ['OpenTubeX Nightly', 'org.opentubex.app.nightly', nightlyApks(''), nightlyApks('lite-')],
+    ['OpenTubeX Nightly Lite', 'org.opentubex.app.nightly.lite', nightlyApks('lite-'), nightlyApks('')]
   ]) {
-    const { id, settings } = apps[name]
-    assert.equal(id, 'org.opentubex.app.nightly')
+    const { settings } = apps[name]
+    assert.equal(apps[name].id, id)
     assert.equal(settings.includePrereleases, true)
     assert.equal(settings.fallbackToOlderReleases, true)
     assert.equal(settings.filterReleaseTitlesByRegEx, 'nightly')
