@@ -13105,7 +13105,7 @@ export default defineComponent({
       endSeekTarget = null
       // Shaka temporarily pauses while scrubbing. Retain a requested end only
       // after it has restored the original playback state, including seek retries.
-      if (video.value.paused && !props.shortsPlayer && !isLive.value && !video.value.loop &&
+      if (player && video.value.paused && !props.shortsPlayer && !isLive.value && !video.value.loop &&
           !ui?.getControls().isSeeking() && !(abRepeatEnabled.value && hasValidAbRepeatRange())) {
         const { start, end } = player.seekRange()
         if (Number.isFinite(end) && end > start && time >= end) endSeekTarget = end

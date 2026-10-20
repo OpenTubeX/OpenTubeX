@@ -134,6 +134,26 @@ test('retains the latest absolute seek before metadata, including zero', () => {
   }
 })
 
+test('retains seeks before Shaka is assigned and applies the latest after initialization', () => {
+  const { state, setCurrentTime, handleCanPlay } = absoluteSeekFixture({ isLive: false })
+  const player = state.player
+  state.player = null
+  state.ui = null
+  state.hasLoaded.value = false
+  state.video.value.readyState = 0
+  for (const time of [15, 0, 5]) {
+    setCurrentTime(time)
+    assert.equal(state.pendingMetadataSeek, time)
+    assert.equal(state.hasPlaybackPosition.value, true)
+    assert.equal(state.endSeekTarget, null)
+  }
+  state.player = player
+  state.video.value.readyState = 3
+  handleCanPlay()
+  assert.equal(state.video.value.currentTime, 5)
+  assert.equal(state.pendingMetadataSeek, null)
+})
+
 test('consumes the startup seek even when canplay precedes Shaka loaded', () => {
   const { state, setCurrentTime, handleCanPlay } = absoluteSeekFixture({ isLive: false })
   state.hasLoaded.value = false
