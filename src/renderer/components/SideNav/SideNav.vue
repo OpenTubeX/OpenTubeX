@@ -255,6 +255,7 @@ function onActiveSubscriptionsVisibilityChanged(isVisible) {
 
 const pinnedPlaylists = computed(() => {
   const pinnedIds = new Set(store.getters.getPinnedPlaylistIds)
+  if (pinnedIds.size === 0) return []
   // Follow the order of the Playlists page, so it can be arranged there.
   return sortUserPlaylists(
     store.getters.getAllPlaylists.filter(playlist => pinnedIds.has(playlist._id)),
