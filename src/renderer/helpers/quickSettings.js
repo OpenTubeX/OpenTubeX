@@ -1,3 +1,5 @@
+import { normalizeToastPosition, TOAST_POSITION_VALUES } from '../constants/toastPosition.js'
+
 const CORE_QUICK_SETTINGS = [
   ['baseTheme', 'appearance', 'Settings.Theme Settings.Base Theme.Base Theme', { control: 'select', icon: ['fas', 'palette'] }],
   ['systemLightTheme', 'appearance', 'Settings.Theme Settings.Light Theme', { control: 'select', icon: ['fas', 'sun'] }],
@@ -87,7 +89,7 @@ export const BASIC_QUICK_SETTING_DEFINITIONS = Object.freeze([
     section: 'appearance',
     labelKey: 'Settings.Theme Settings.Toast Position.Toast Position',
     control: 'select',
-    values: ['bottom-left', 'bottom-center', 'bottom-right', 'top-left', 'top-center', 'top-right'],
+    values: TOAST_POSITION_VALUES,
     optionLabelKeys: [
       'Settings.Theme Settings.Toast Position.Bottom Left',
       'Settings.Theme Settings.Toast Position.Bottom Center',
@@ -96,6 +98,7 @@ export const BASIC_QUICK_SETTING_DEFINITIONS = Object.freeze([
       'Settings.Theme Settings.Toast Position.Top Center',
       'Settings.Theme Settings.Toast Position.Top Right',
     ],
+    effectiveValue: settings => normalizeToastPosition(settings.toastPosition),
     icon: ['fas', 'message'],
   },
   {
