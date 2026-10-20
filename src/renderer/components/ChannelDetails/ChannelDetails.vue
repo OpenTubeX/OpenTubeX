@@ -64,6 +64,15 @@
             class="shareIcon"
           />
 
+          <FtIconButton
+            v-if="canPin || isPinnedToNavigation"
+            :title="isPinnedToNavigation ? $t('User Playlists.Unpin from Navigation') : $t('User Playlists.Pin to Navigation')"
+            :icon="['fas', isPinnedToNavigation ? 'thumbtack-slash' : 'thumbtack']"
+            :aria-pressed="isPinnedToNavigation"
+            :theme="isPinnedToNavigation ? 'secondary' : 'base-no-default'"
+            @click="togglePinnedToNavigation"
+          />
+
           <FtSubscribeButton
             v-if="!hideUnsubscribeButton && (!hasErrorMessage || isSubscribed)"
             :channel-id="id"
@@ -394,6 +403,10 @@ const props = defineProps({
     type: String,
     default: null
   },
+  canPin: {
+    type: Boolean,
+    default: false
+  },
   hasErrorMessage: {
     type: Boolean,
     default: false
@@ -431,6 +444,21 @@ const props = defineProps({
     default: ''
   },
 })
+
+const pinnedChannels = computed(() => store.getters.getPinnedChannels)
+const isPinnedToNavigation = computed(() => pinnedChannels.value.some(channel => channel.id === props.id))
+
+// Store the upstream avatar, as subscriptions do, so pins can change backends.
+const pinThumbnail = computed(() => props.thumbnailUrl?.replace(/^https?:\/\/[^/]+\/ggpht/, 'https://yt3.googleusercontent.com'))
+
+async function togglePinnedToNavigation() {
+  if (!isPinnedToNavigation.value && !props.canPin) return
+  const saved = await store.dispatch('updatePinnedChannels', isPinnedToNavigation.value
+    ? pinnedChannels.value.filter(channel => channel.id !== props.id)
+    : [...pinnedChannels.value, { id: props.id, name: props.name || props.id, thumbnail: pinThumbnail.value }])
+  if (!saved) return
+  await store.dispatch('refreshPinnedChannelMetadata', { id: props.id, name: props.name, thumbnail: pinThumbnail.value })
+}
 
 const emit = defineEmits(['change-tab', 'search', 'subscribed'])
 

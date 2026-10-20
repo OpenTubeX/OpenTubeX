@@ -425,6 +425,8 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     quickBookmarkTargetPlaylistId: 'favorites',
     // User playlists shown in the side navigation
     pinnedPlaylistIds: [],
+    pinnedChannels: [],
+    pinnedChannelMetadata: {},
     generalAutoLoadMorePaginatedItemsEnabled: true,
     enablePullToRefresh: true,
     useTrayIcon: true,

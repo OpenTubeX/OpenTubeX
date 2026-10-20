@@ -10,6 +10,7 @@
       :name="channelName"
       :banner-url="bannerUrl"
       :has-error-message="!!errorMessage"
+      :can-pin="hasLoadedDetails && !errorMessage"
       :thumbnail-url="thumbnailUrl"
       :sub-count="subCount"
       :show-share-menu="showShareMenu"
@@ -450,6 +451,7 @@ watch(thumbnailUrl, (thumbnail) => {
 })
 
 const errorMessage = ref('')
+const hasLoadedDetails = ref(false)
 const showSearchBar = ref(true)
 const showShareMenu = ref(true)
 
@@ -637,6 +639,7 @@ watch(route, () => {
   }
   ownRouteFullPaths.length = 0
   channelRouteGeneration += 1
+  hasLoadedDetails.value = false
   isLoading.value = true
 
   if (route.query.url) {
@@ -804,6 +807,17 @@ async function ensureChannelInstance() {
   }
 }
 
+// Refresh saved details only from API responses, never from retained display state.
+function updateChannelDetails({ channelId, channelName, channelThumbnailUrl }) {
+  hasLoadedDetails.value = true
+  store.dispatch('updateSubscriptionDetails', { channelId, channelName, channelThumbnailUrl })
+  store.dispatch('refreshPinnedChannelMetadata', {
+    id: channelId,
+    name: channelName,
+    thumbnail: channelThumbnailUrl?.replace(/^https?:\/\/[^/]+\/ggpht/, 'https://yt3.googleusercontent.com')
+  })
+}
+
 async function getChannelLocal() {
   apiUsed = 'local'
   isLoading.value = true
@@ -835,7 +849,7 @@ async function getChannelLocal() {
       channelName.value = channelName_
       thumbnailUrl.value = channelThumbnailUrl
 
-      store.dispatch('updateSubscriptionDetails', { channelThumbnailUrl, channelName: channelName_, channelId: id.value })
+      updateChannelDetails({ channelThumbnailUrl, channelName: channelName_, channelId: id.value })
 
       setErrorMessage(t('Channel["This channel is age-restricted and currently cannot be viewed in OpenTubeX."]'), true)
       return
@@ -890,7 +904,7 @@ async function getChannelLocal() {
       subCount.value = null
     }
 
-    store.dispatch('updateSubscriptionDetails', { channelThumbnailUrl, channelName: channelName_, channelId })
+    updateChannelDetails({ channelThumbnailUrl, channelName: channelName_, channelId })
 
     if (channelInstance.has_about) {
       getChannelAboutLocal()
@@ -1129,7 +1143,7 @@ async function getChannelInfoInvidious() {
     subCount.value = response.subCount
     const thumbnail = response.authorThumbnails.at(-1)?.url ?? null
     thumbnailUrl.value = youtubeImageUrlToInvidious(thumbnail, currentInvidiousInstanceUrl.value)
-    store.dispatch('updateSubscriptionDetails', { channelThumbnailUrl: thumbnail, channelName: channelName_, channelId })
+    updateChannelDetails({ channelThumbnailUrl: thumbnail, channelName: channelName_, channelId })
     description.value = autolinker.link(response.description)
     links.value = []
     viewCount.value = response.totalViews
