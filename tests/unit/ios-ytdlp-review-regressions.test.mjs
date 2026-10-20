@@ -171,16 +171,21 @@ test('iOS native subtitle registration retains translated and authored track ide
   const end = source.indexOf('  async ytDlpGetRecommendations(', start)
   const original = 'https://www.youtube.com/api/timedtext?lang=en'
   const translated = `${original}&tlang=de`
+  const headers = { Referer: 'https://example.test/' }
+  const registered = []
   const context = vm.createContext({
     process: { env: { IS_IOS: true } },
     URL,
     native: {
       info: async () => ({ ytDlp: { version: 'fixture' } }),
-      registerMedia: async ({ formats }) => ({ urls: formats.map((_, index) => `capacitor://localhost/_opentubex_media/${index}`) }),
+      registerMedia: async ({ formats }) => {
+        registered.push(...formats)
+        return { urls: formats.map((_, index) => `capacitor://localhost/_opentubex_media/${index}`) }
+      },
     },
     extract: async () => ({
       requested_subtitles: {
-        en: { ext: 'vtt', url: original, name: 'English' },
+        en: { ext: 'vtt', url: original, name: 'English', http_headers: headers },
         de: { ext: 'vtt', url: translated, name: 'German' },
       },
       subtitles: { en: [{ ext: 'vtt', url: original }] },
@@ -206,6 +211,8 @@ test('iOS native subtitle registration retains translated and authored track ide
   assert.equal(result.captionTranslations[0].language, 'de')
   assert.equal(result.captionTranslations[0].originalLanguage, 'en')
   assert.match(result.captionTranslations[0].url, /^capacitor:\/\/localhost\//)
+  // The native proxy needs the headers yt-dlp requires for the subtitle
+  assert.deepEqual(registered.find(entry => entry.url === original).http_headers, headers)
 })
 
 test('iOS routes YouTube playback formats through the native media bridge', async () => {

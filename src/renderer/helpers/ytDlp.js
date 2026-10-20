@@ -207,8 +207,14 @@ const capacitor = {
         // YouTube's googlevideo streams. Use the native scheme for HTTP media.
         if (!isYouTubeVideo) formats = formats.filter(format => format.protocol === 'https' && format.url)
         const httpFormats = formats.filter(format => format.protocol === 'https' && format.url)
-        // Caption mapping can replace translation URLs, so register the mapped ones
-        const subtitles = [...playbackCaptions.captions, ...playbackCaptions.captionTranslations].filter(caption => caption.url.startsWith('https://'))
+        // Register the mapped captions, which can rebuild YouTube translation URLs,
+        // with the headers of the subtitle yt-dlp requested for the same URL
+        const requestedSubtitles = new Map(Object.values(info.requested_subtitles ?? {})
+          .filter(subtitle => subtitle?.url?.startsWith('https://'))
+          .map(subtitle => [new URL(subtitle.url).toString(), subtitle]))
+        const subtitles = [...playbackCaptions.captions, ...playbackCaptions.captionTranslations]
+          .filter(caption => caption.url.startsWith('https://'))
+          .map(caption => requestedSubtitles.get(caption.url) ?? { url: caption.url })
         const requests = [...httpFormats, ...subtitles]
         const { urls } = await native.registerMedia({ formats: requests })
         const registeredUrls = new Map(requests.map((entry, index) => [new URL(entry.url).toString(), urls[index]]))
