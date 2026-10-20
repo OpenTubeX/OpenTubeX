@@ -918,6 +918,7 @@ Settings:
     Concurrent Preloads: "Sočasno prednalaganje"
     Ignore System Rotation Lock for Fullscreen: Prezri sistemski zaklep vrtenja za celoten zaslon
     Swipe Left or Right to Seek in Fullscreen: Podrsnite levo ali desno za previjanje v celozaslonskem načinu
+    Show Swipe to Seek Preview: Pokaži predogled pri previjanju s potegom
     Enable Google Cast: "Omogoči Google Cast"
   Channel Settings:
     Channel Settings: Nastavitve kanalov

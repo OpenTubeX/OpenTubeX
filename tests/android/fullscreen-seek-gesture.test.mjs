@@ -2,11 +2,14 @@ import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
 import { readFile, writeFile, rm } from 'node:fs/promises'
 import { test } from 'node:test'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { chromium, expect } from '@playwright/test'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
 
 // Run against a current debug APK on a locked emulator, forwarding its WebView
 // socket and setting ANDROID_SERIAL and ANDROID_CDP_URL=http://127.0.0.1:<forwarded-port>.
+const screenshot = path => writeFile(path, execFileSync('adb', ['-s', process.env.ANDROID_SERIAL, 'exec-out', 'screencap', '-p']))
 const adb = (...args) => execFileSync('adb', ['-s', process.env.ANDROID_SERIAL, 'shell', ...args], { encoding: 'utf8' }).trim()
 
 test('fullscreen horizontal swipes preview, seek, and cancel without triggering other gestures', {
@@ -19,7 +22,7 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
   const session = await context.newCDPSession(page)
   let settings
   let watch
-  const spritePath = `/tmp/opentubex-seek-sprite-${process.pid}.png`
+  const spritePath = join(tmpdir(), `opentubex-seek-sprite-${process.pid}.png`)
   const deviceSpritePath = `/data/local/tmp/opentubex-seek-sprite-${process.pid}.png`
   const appSpritePath = `files/fullscreen-seek-fixture-${process.pid}.png`
   const rotation = adb('settings', 'get', 'system', 'user_rotation')
@@ -42,7 +45,7 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
       const values = {
         VideoPlaybackEngine: 'built-in', AutoplayVideos: false,
         UseSponsorBlock: false, UseReturnYouTubeDislikes: false,
-        EnableMobileFullscreenSwipe: false, EnableMobileFullscreenSeek: true, EnableVideoZoom: false, HoldToDoublePlaybackSpeed: false, RotateFullscreenToLandscape: false,
+        EnableMobileFullscreenSwipe: false, EnableMobileFullscreenSeek: true, ShowMobileSeekPreview: true, EnableVideoZoom: false, HoldToDoublePlaybackSpeed: false, RotateFullscreenToLandscape: false,
         EnterFullscreenOnDisplayRotate: false, PlayingInterfaceHideDelay: 5,
         MobileLeftSwipeAction: 'speed', MobileRightSwipeAction: 'speed', IconPack: 'material', SettingsWindowSection: 'playback',
       }
@@ -132,12 +135,31 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
       assert.equal(await video.evaluate(video => video.currentTime), 15, 'Dragging only previews the target')
       assert.equal(await video.evaluate(video => video.playbackRate), 1, 'Horizontal movement must not adjust speed')
       if (process.env.ANDROID_ARTIFACT_DIR) {
-        await page.screenshot({ path: `${process.env.ANDROID_ARTIFACT_DIR}/fullscreen-seek-${orientation}.png` })
+        await screenshot(`${process.env.ANDROID_ARTIFACT_DIR}/fullscreen-seek-${orientation}.png`)
       }
       await touch('touchEnd')
       await expect(preview).toHaveCount(0)
       await expect.poll(() => video.evaluate(video => video.currentTime)).toBe(21)
       assert.equal(await video.evaluate(video => video.paused), true, 'Paused playback stays paused')
+
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setShowMobileSeekPreview', false))
+      await resetTime()
+      await beginSeek(0.25, 0.2)
+      await expect(preview).toHaveCount(0)
+      await expect.poll(seekBarTime).toBe(21)
+      assert.equal(await video.evaluate(video => video.currentTime), 15)
+      if (process.env.ANDROID_ARTIFACT_DIR) {
+        await screenshot(`${process.env.ANDROID_ARTIFACT_DIR}/fullscreen-seek-no-popup-${orientation}.png`)
+      }
+      await touch('touchEnd')
+      await expect.poll(() => video.evaluate(video => video.currentTime)).toBe(21)
+      await resetTime()
+      await beginSeek(0.75, -0.2)
+      await expect.poll(seekBarTime).toBe(9)
+      await touch('touchCancel')
+      await expect.poll(seekBarTime).toBe(15)
+      assert.equal(await video.evaluate(video => video.currentTime), 15)
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setShowMobileSeekPreview', true))
 
       await resetTime()
       await beginSeek(0.75, -0.2)
@@ -217,11 +239,17 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
         throw Error(JSON.stringify(state))
       }
       await expect(thumbnail).toHaveCSS('background-position', '100% 0%')
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setShowMobileSeekPreview', false))
+      await expect(preview).toHaveCount(0)
+      await expect.poll(seekBarTime).toBe(21)
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setShowMobileSeekPreview', true))
+      await expect(thumbnail).toBeVisible()
+      await expect.poll(seekBarTime).toBe(21)
       await expect(thumbnail).toHaveCSS('background-size', '200% 100%')
       const bounds = await preview.boundingBox()
       const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }))
       assert.ok(bounds.x >= 0 && bounds.y >= 0 && bounds.x + bounds.width <= viewport.width && bounds.y + bounds.height <= viewport.height)
-      if (process.env.ANDROID_ARTIFACT_DIR) await page.screenshot({ path: `${process.env.ANDROID_ARTIFACT_DIR}/fullscreen-seek-thumbnail-${orientation}.png` })
+      if (process.env.ANDROID_ARTIFACT_DIR) await screenshot(`${process.env.ANDROID_ARTIFACT_DIR}/fullscreen-seek-thumbnail-${orientation}.png`)
       await touch('touchEnd')
       await expect(thumbnail).toHaveCount(0)
       await resetTime()
@@ -283,15 +311,24 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
       store.commit('setSettingsWindowSection', 'playback')
       location.hash = '#/settings'
     })
+    const previewToggle = page.locator('[data-setting-key="showMobileSeekPreview"]')
+    await expect(previewToggle).toBeVisible()
+    await expect(previewToggle.locator('input')).toBeChecked()
+    await previewToggle.locator('label').click()
+    await expect(previewToggle.locator('input')).not.toBeChecked()
+    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getShowMobileSeekPreview)).toBe(false)
     const toggle = page.locator('[data-setting-key="enableMobileFullscreenSeek"]')
     await expect(toggle).toBeVisible()
     await expect(toggle.locator('input')).toBeChecked()
     await toggle.locator('label').click()
     await expect(toggle.locator('input')).not.toBeChecked()
+    await expect(previewToggle.locator('input')).toBeDisabled()
     await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getEnableMobileFullscreenSeek)).toBe(false)
     await toggle.locator('label').click()
     await expect(toggle.locator('input')).toBeChecked()
-    if (process.env.ANDROID_ARTIFACT_DIR) await page.screenshot({ path: `${process.env.ANDROID_ARTIFACT_DIR}/fullscreen-seek-setting.png` })
+    await expect(previewToggle.locator('input')).toBeEnabled()
+    await expect(previewToggle.locator('input')).not.toBeChecked()
+    if (process.env.ANDROID_ARTIFACT_DIR) await screenshot(`${process.env.ANDROID_ARTIFACT_DIR}/fullscreen-seek-setting.png`)
 
   } finally {
     try {
@@ -300,6 +337,7 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
         document.querySelector('.ftVideoPlayer video')?.pause()
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
         for (const [key, value] of Object.entries(settings ?? {})) store.commit('set' + key, value)
+        if (settings?.ShowMobileSeekPreview !== undefined) await store.dispatch('updateShowMobileSeekPreview', settings.ShowMobileSeekPreview)
         if (settings?.IconPack) await store.dispatch('updateIconPack', settings.IconPack)
         if (window.__fullscreenSeekFetch) window.fetch = window.__fullscreenSeekFetch
         delete window.__fullscreenSeekFetch

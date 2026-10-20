@@ -705,6 +705,7 @@ Settings:
     Concurrent Preloads: "同時預先載入數量"
     Ignore System Rotation Lock for Fullscreen: 全螢幕時忽略系統旋轉鎖定
     Swipe Left or Right to Seek in Fullscreen: 全螢幕時向左或向右滑動以快轉或倒轉
+    Show Swipe to Seek Preview: 滑動快轉或倒轉時顯示預覽
     Enable Google Cast: "啟用 Google Cast"
   Channel Settings:
     Channel Settings: 頻道設定

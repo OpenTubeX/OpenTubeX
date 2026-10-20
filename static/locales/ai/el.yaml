@@ -708,6 +708,7 @@ Settings:
     Concurrent Preloads: "Ταυτόχρονες προφορτώσεις"
     Ignore System Rotation Lock for Fullscreen: Παράβλεψη κλειδώματος περιστροφής συστήματος για πλήρη οθόνη
     Swipe Left or Right to Seek in Fullscreen: Σύρετε αριστερά ή δεξιά για αναζήτηση σε πλήρη οθόνη
+    Show Swipe to Seek Preview: Εμφάνιση προεπισκόπησης κατά τη μετακίνηση με σάρωση
     Enable Google Cast: "Ενεργοποίηση Google Cast"
   Channel Settings:
     Channel Settings: Ρυθμίσεις καναλιών

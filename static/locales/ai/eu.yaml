@@ -706,6 +706,7 @@ Settings:
     Concurrent Preloads: "Aldibereko aurrekargak"
     Ignore System Rotation Lock for Fullscreen: Ez ikusi sistemaren biraketa-blokeoa pantaila osorako
     Swipe Left or Right to Seek in Fullscreen: Irristatu ezkerrera edo eskuinera pantaila osoan aurrera edo atzera egiteko
+    Show Swipe to Seek Preview: Erakutsi aurrebista hatza irristatuz aurrera edo atzera egitean
     Enable Google Cast: "Gaitu Google Cast"
   Channel Settings:
     Channel Settings: Kanalen ezarpenak

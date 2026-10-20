@@ -706,6 +706,7 @@ Settings:
     Concurrent Preloads: "Pré-carregamentos simultâneos"
     Ignore System Rotation Lock for Fullscreen: Ignorar o bloqueio de rotação do sistema para tela cheia
     Swipe Left or Right to Seek in Fullscreen: Deslizar para a esquerda ou direita para avançar ou retroceder em tela cheia
+    Show Swipe to Seek Preview: Mostrar prévia ao deslizar para avançar ou retroceder
     Enable Google Cast: "Ativar Google Cast"
   Channel Settings:
     Channel Settings: Configurações dos canais

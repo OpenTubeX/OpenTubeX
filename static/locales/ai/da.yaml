@@ -730,6 +730,7 @@ Settings:
     Concurrent Preloads: "Samtidige forudindlæsninger"
     Ignore System Rotation Lock for Fullscreen: Ignorer systemets rotationslås for fuld skærm
     Swipe Left or Right to Seek in Fullscreen: Stryg til venstre eller højre for at spole i fuld skærm
+    Show Swipe to Seek Preview: Vis forhåndsvisning ved spoling med stryg
     Enable Google Cast: "Aktivér Google Cast"
   Channel Settings:
     Channel Settings: Kanalindstillinger

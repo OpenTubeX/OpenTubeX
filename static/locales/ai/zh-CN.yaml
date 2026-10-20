@@ -705,6 +705,7 @@ Settings:
     Concurrent Preloads: "并发预加载数"
     Ignore System Rotation Lock for Fullscreen: 全屏时忽略系统旋转锁定
     Swipe Left or Right to Seek in Fullscreen: 全屏时向左或向右滑动以快进或快退
+    Show Swipe to Seek Preview: 滑动快进或快退时显示预览
     Enable Google Cast: "启用 Google Cast"
   Channel Settings:
     Channel Settings: 频道设置

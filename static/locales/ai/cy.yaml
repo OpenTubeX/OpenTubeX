@@ -706,6 +706,7 @@ Settings:
     Concurrent Preloads: "Rhaglwythiadau cydamserol"
     Ignore System Rotation Lock for Fullscreen: Anwybyddu clo cylchdroi’r system ar gyfer sgrin lawn
     Swipe Left or Right to Seek in Fullscreen: Sychwch i’r chwith neu’r dde i symud drwy’r fideo ar sgrin lawn
+    Show Swipe to Seek Preview: Dangos rhagolwg wrth lithro i symud drwy’r fideo
     Enable Google Cast: "Galluogi Google Cast"
   Channel Settings:
     Channel Settings: Gosodiadau sianeli

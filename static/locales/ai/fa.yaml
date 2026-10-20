@@ -737,6 +737,7 @@ Settings:
     Concurrent Preloads: "پیش‌بارگذاری‌های هم‌زمان"
     Ignore System Rotation Lock for Fullscreen: نادیده گرفتن قفل چرخش سیستم برای تمام‌صفحه
     Swipe Left or Right to Seek in Fullscreen: برای جلو یا عقب بردن در حالت تمام‌صفحه، به چپ یا راست بکشید
+    Show Swipe to Seek Preview: نمایش پیش‌نمایش هنگام جلو و عقب بردن با کشیدن
     Enable Google Cast: "فعال کردن Google Cast"
   Channel Settings:
     Channel Settings: تنظیمات کانال

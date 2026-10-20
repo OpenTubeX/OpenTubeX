@@ -36,6 +36,7 @@ test('platform-specific settings stay local to every device', () => {
     'rememberVolumePerChannel',
     'rotateFullscreenToLandscape',
     'scrollMiniPlayerOnAllTabs',
+    'showMobileSeekPreview',
     'showProgressBarToast',
     'showTabPreviews',
     'tabBarPosition',

@@ -720,6 +720,7 @@ Settings:
     Concurrent Preloads: "ஒரேநேர முன் ஏற்றங்கள்"
     Ignore System Rotation Lock for Fullscreen: முழுத்திரைக்காக அமைப்பின் சுழற்சிப் பூட்டைப் புறக்கணி
     Swipe Left or Right to Seek in Fullscreen: முழுத்திரையில் முன்னோக்கி அல்லது பின்னோக்கி நகர இடது அல்லது வலது பக்கம் ஸ்வைப் செய்யவும்
+    Show Swipe to Seek Preview: தேட ஸ்வைப் செய்யும்போது முன்னோட்டத்தைக் காட்டு
     Enable Google Cast: "Google Cast-ஐ இயக்கு"
   Channel Settings:
     Channel Settings: சேனல் அமைப்புகள்

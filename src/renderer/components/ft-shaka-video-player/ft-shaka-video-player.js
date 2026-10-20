@@ -5679,8 +5679,9 @@ export default defineComponent({
       },
     })
 
+    const visibleMobileSeekPreview = computed(() => store.getters.getShowMobileSeekPreview ? mobileSeekPreview.value : null)
     const mobileSeekThumbnailStyle = useSeekPreviewThumbnail({
-      preview: mobileSeekPreview,
+      preview: visibleMobileSeekPreview,
       getPlayer: () => player,
       getVideoId: () => props.videoId,
       loadImageDimensions,
@@ -13451,6 +13452,7 @@ export default defineComponent({
       mobileFullscreenSwipeSettling,
       mobileFullscreenSwipeStyle,
       mobileSeekPreview,
+      visibleMobileSeekPreview,
       mobileSeekPreviewMessage: computed(() => {
         const preview = mobileSeekPreview.value
         if (!preview) return ''

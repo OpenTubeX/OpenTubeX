@@ -714,6 +714,7 @@ Settings:
     Concurrent Preloads: "Số lượt tải trước đồng thời"
     Ignore System Rotation Lock for Fullscreen: Bỏ qua khóa xoay của hệ thống cho toàn màn hình
     Swipe Left or Right to Seek in Fullscreen: Vuốt sang trái hoặc phải để tua khi toàn màn hình
+    Show Swipe to Seek Preview: Hiển thị bản xem trước khi vuốt để tua
     Enable Google Cast: "Bật Google Cast"
   Channel Settings:
     Channel Settings: Cài đặt kênh

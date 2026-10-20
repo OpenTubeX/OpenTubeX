@@ -882,6 +882,7 @@ Settings:
     Concurrent Preloads: "동시 미리 로드 수"
     Ignore System Rotation Lock for Fullscreen: 전체 화면에서 시스템 회전 잠금 무시
     Swipe Left or Right to Seek in Fullscreen: 전체 화면에서 좌우로 스와이프하여 탐색
+    Show Swipe to Seek Preview: 스와이프로 탐색할 때 미리보기 표시
     Enable Google Cast: "Google Cast 활성화"
   Channel Settings:
     Channel Settings: 채널 설정

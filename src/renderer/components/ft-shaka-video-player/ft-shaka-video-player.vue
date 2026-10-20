@@ -1080,7 +1080,7 @@
         <span class="videoFillZoomEdge videoFillZoomEdgeLeft" />
       </div>
       <div
-        v-if="mobileSeekPreview"
+        v-if="visibleMobileSeekPreview"
         class="valueChangePopup mobileSeekPreview"
         role="status"
       >

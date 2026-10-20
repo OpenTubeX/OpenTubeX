@@ -329,6 +329,7 @@ Settings:
     Concurrent Preloads: "Jednoczesne wstępne ładowanie"
     Ignore System Rotation Lock for Fullscreen: Ignoruj systemową blokadę obrotu dla pełnego ekranu
     Swipe Left or Right to Seek in Fullscreen: Przesuń w lewo lub w prawo, aby przewijać na pełnym ekranie
+    Show Swipe to Seek Preview: Pokazuj podgląd podczas przewijania przesunięciem
     Enable Google Cast: "Włącz Google Cast"
   Channel Settings:
     Add Subscribed Channel: Dodaj subskrybowany kanał

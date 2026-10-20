@@ -714,6 +714,7 @@ Settings:
     Concurrent Preloads: "عمليات التحميل المسبق المتزامنة"
     Ignore System Rotation Lock for Fullscreen: تجاهل قفل دوران النظام لملء الشاشة
     Swipe Left or Right to Seek in Fullscreen: اسحب إلى اليسار أو اليمين للتقديم أو الترجيع في وضع ملء الشاشة
+    Show Swipe to Seek Preview: إظهار معاينة السحب للتقديم أو الترجيع
     Enable Google Cast: "تفعيل Google Cast"
   Channel Settings:
     Channel Settings: إعدادات القناة

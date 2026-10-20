@@ -705,6 +705,7 @@ Settings:
     Concurrent Preloads: "Eş Zamanlı Ön Yüklemeler"
     Ignore System Rotation Lock for Fullscreen: Tam ekran için sistem döndürme kilidini yok say
     Swipe Left or Right to Seek in Fullscreen: Tam ekranda ileri veya geri sarmak için sola veya sağa kaydırın
+    Show Swipe to Seek Preview: Kaydırarak sararken önizlemeyi göster
     Enable Google Cast: "Google Cast özelliğini etkinleştir"
   Channel Settings:
     Channel Settings: Kanal Ayarları

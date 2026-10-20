@@ -719,6 +719,7 @@ Settings:
     Concurrent Preloads: "Gelijktijdige voorladingen"
     Ignore System Rotation Lock for Fullscreen: Negeer de rotatievergrendeling van het systeem voor volledig scherm
     Swipe Left or Right to Seek in Fullscreen: Veeg naar links of rechts om te spoelen op volledig scherm
+    Show Swipe to Seek Preview: Voorbeeld tonen bij vegen om te spoelen
     Enable Google Cast: "Google Cast inschakelen"
   Channel Settings:
     Channel Settings: Kanaalinstellingen
