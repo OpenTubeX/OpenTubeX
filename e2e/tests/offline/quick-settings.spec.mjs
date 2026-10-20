@@ -1097,6 +1097,7 @@ test.describe('expanded quick settings catalog', () => {
     await expect(toggle('hideSubscriptionsLive')).toBeEnabled()
     await flip('hideLiveStreams')
     await expect(toggle('hideSubscriptionsLive')).toBeDisabled()
+    await expect(toggle('hideSubscriptionsLive')).toBeChecked()
     await attachScreenshot('subscription controls with the live toggle disabled by Hide Live Streams')
 
     const choose = async (id, label, option) => {
@@ -1128,6 +1129,7 @@ test.describe('expanded quick settings catalog', () => {
     await page.locator('.profileTrigger').click()
     const reopened = page.getByRole('dialog', { name: 'Quick settings' })
     await expect(reopened.locator('[data-setting-id="loopShorts"]').getByRole('checkbox')).toBeDisabled()
+    await expect(reopened.locator('[data-setting-id="hideSubscriptionsLive"]').getByRole('checkbox')).toBeChecked()
     await expect(reopened.locator('[data-setting-id="toastPosition"]').getByRole('combobox')).toContainText('Top right')
     await expect(reopened.locator('[data-setting-id="secColor"]').getByRole('combobox')).toContainText('Green')
   })

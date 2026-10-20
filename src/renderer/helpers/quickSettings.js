@@ -147,7 +147,7 @@ export const BASIC_QUICK_SETTING_DEFINITIONS = Object.freeze([
   ['hideVideoDescription', 'Settings.Distraction Free Settings.Hide Video Description', 'content', ['fas', 'file-lines']],
   ['hideChapters', 'Settings.Distraction Free Settings.Hide Chapters', 'content', ['fas', 'bars-progress']],
   ['showDistractionFreeTitles', 'Settings.Distraction Free Settings.Display Titles Without Excessive Capitalisation', 'content', ['fas', 'font']],
-  ['useAiSlopList', 'Settings.AiSList Settings.Hide AI Slop Channels', 'content', ['fas', 'users-slash']],
+  ['useAiSlopList', 'Settings.AiSList Settings.Hide AI Slop Channels', 'content', ['fas', 'users-slash'], { electronOnly: true, capacitorSupported: true }],
   ['showFamilyFriendlyOnly', 'Settings.Parental Control Settings.Show Family Friendly Only', 'content', ['fas', 'shield-halved']],
   ['showThumbnailPreviews', 'Settings.General Settings.Show Thumbnail Previews', 'content', ['fas', 'photo-film']],
   ['thumbnailDataSaver', 'Settings.General Settings.Data Saver Thumbnails', 'content', ['fas', 'images']],
@@ -155,7 +155,11 @@ export const BASIC_QUICK_SETTING_DEFINITIONS = Object.freeze([
   ['enableCommentTranslations', 'Settings.General Settings.Comment Translation.Enable', 'language', ['fas', 'language']],
   ['useVoiceOverTranslation', 'Settings.Player Settings.Voice-over Translation.Enable', 'language', ['fas', 'headphones'], { electronOnly: true, capacitorSupported: true, iosUnsupported: true }],
   ['hideSubscriptionsShorts', 'Settings.Distraction Free Settings.Hide Subscriptions Shorts', 'content', ['fas', 'eye-slash']],
-  ['hideSubscriptionsLive', 'Settings.Distraction Free Settings.Hide Subscriptions Live', 'content', ['fas', 'satellite-dish'], { disabledWhen: settings => settings.hideLiveStreams }],
+  ['hideSubscriptionsLive', 'Settings.Distraction Free Settings.Hide Subscriptions Live', 'content', ['fas', 'satellite-dish'], {
+    disabledWhen: settings => settings.hideLiveStreams,
+    // Hide Live Streams also hides live videos in Subscriptions
+    effectiveValue: settings => settings.hideLiveStreams || settings.hideSubscriptionsLive,
+  }],
   ['hideSubscriptionsCommunity', 'Settings.Distraction Free Settings.Hide Subscriptions Posts', 'content', ['fas', 'bullhorn']],
   ['fetchSubscriptionsAutomatically', 'Settings.Subscription Settings.Fetch Feed on Startup', 'content', ['fas', 'rss']],
   ['blurThumbnails', 'Settings.General Settings.Blur Thumbnails', 'content', ['fas', 'eye-slash']],

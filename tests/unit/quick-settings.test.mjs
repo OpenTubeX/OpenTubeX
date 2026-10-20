@@ -111,6 +111,8 @@ test('UI Scale and proxy are available in Android quick settings but not the web
   const web = createQuickSettingSections(key => key, false).flatMap(section => section.settings)
   assert.ok(!web.some(setting => setting.id === 'uiScale'))
   assert.ok(!web.some(setting => setting.id === 'useProxy'))
+  assert.ok(!web.some(setting => setting.id === 'useAiSlopList'))
+  assert.ok(android.some(setting => setting.id === 'useAiSlopList'))
 })
 
 test('iOS quick settings do not offer the unavailable proxy toggle', () => {
@@ -146,4 +148,5 @@ test('disables quick settings whose parent setting turns them off', () => {
   assert.equal(definitions.get('loopShorts').disabledWhen({ useCustomShortsPlayer: true }), false)
   assert.equal(definitions.get('hideSubscriptionsLive').disabledWhen({ hideLiveStreams: true }), true)
   assert.equal(definitions.get('enableSkipSilenceByDefault').disabledWhen({ showSkipSilenceButton: false }), true)
+  assert.equal(definitions.get('hideSubscriptionsLive').effectiveValue({ hideLiveStreams: true, hideSubscriptionsLive: false }), true)
 })
