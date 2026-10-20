@@ -54,6 +54,10 @@ export class CapacitorTabService {
     this.presentationOrder = 0
     this.flushOnHide = () => { if (isAppHidden()) this.flushPersistence() }
     this.flushOnPageHide = () => this.flushPersistence()
+    // Vue sets bound selects and toggles through DOM properties, so their
+    // defaults never match. Only `change` events mark a user's own choice.
+    this.changedControls = new WeakSet()
+    this.recordControlChange = event => this.changedControls.add(event.target)
     this.sessionGeneration = 0
     this.activationHistory = []
     this.disabledSession = null
@@ -123,6 +127,7 @@ export class CapacitorTabService {
     })
 
     globalThis.document?.addEventListener('visibilitychange', this.flushOnHide)
+    globalThis.document?.addEventListener('change', this.recordControlChange, true)
     globalThis.window?.addEventListener?.('pagehide', this.flushOnPageHide)
     this.lastPresented.set(session.activeTabId, ++this.presentationOrder)
     this.scheduleTabBudget()
@@ -488,13 +493,12 @@ export class CapacitorTabService {
     const candidates = session.tabs.filter(tab => {
       if (tab.id === session.activeTabId || tab.id === this.store.getters.getPresentedTabId ||
           tab.isPinned || tab.isPlaying || tab.isLoading || tab.loadState !== 'loaded') return false
-      if (!/^\/(?:home|subscriptions|subscribedchannels|trending|popular|history|search|channel|hashtag)(?:\/|$)/.test(tab.route.path)) return false
+      if (!/^\/(?:home|subscriptions|subscribedchannels|trending|popular|history|userplaylists|search|channel|hashtag)(?:\/|$)/.test(tab.route.path)) return false
       const root = roots.get(tab.id)
       return !root?.querySelector('[contenteditable="true"]') &&
-        ![...(root?.querySelectorAll('input, textarea, select') ?? [])].some(input => input.tagName === 'SELECT'
-          ? [...input.options].some(option => option.selected !== option.defaultSelected)
-          : !['button', 'submit', 'hidden'].includes(input.type) &&
-          (input.value !== input.defaultValue || input.checked !== input.defaultChecked))
+        ![...(root?.querySelectorAll('input, textarea, select') ?? [])].some(input => input.tagName === 'SELECT' || ['checkbox', 'radio', 'range'].includes(input.type)
+          ? this.changedControls.has(input)
+          : !['button', 'submit', 'hidden'].includes(input.type) && input.value !== input.defaultValue)
     }).sort((left, right) => (this.lastPresented.get(left.id) ?? 0) - (this.lastPresented.get(right.id) ?? 0))
     for (const tab of candidates.slice(0, Math.max(0, candidates.length - 2))) {
       session = unloadCapacitorTab(session, tab.id)
@@ -527,6 +531,7 @@ export class CapacitorTabService {
     clearTimeout(this.budgetTimer)
     this.budgetTimer = null
     globalThis.document?.removeEventListener('visibilitychange', this.flushOnHide)
+    globalThis.document?.removeEventListener('change', this.recordControlChange, true)
     globalThis.window?.removeEventListener?.('pagehide', this.flushOnPageHide)
     this.removeRouterHook()
     this.removeStoreSubscription()

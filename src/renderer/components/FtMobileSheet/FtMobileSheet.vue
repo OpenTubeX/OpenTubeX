@@ -59,13 +59,14 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, inject, nextTick, onBeforeUnmount, onUpdated, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, inject, nextTick, onActivated, onBeforeUnmount, onDeactivated, onUpdated, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { isAppHidden } from '../../helpers/appVisibility'
 import { applyAnimationSpeed } from '../../helpers/animationSpeed'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { registerAndroidBackSheet, settleAndroidBackAnimation } from '../../helpers/androidBackGesture'
 import { lockBodyScroll, unlockBodyScroll } from '../FtPrompt/scrollLock'
+import { updateMobileSheetRootClass } from '../../helpers/rootClasses'
 
 const props = defineProps({
   enabled: { type: Boolean, default: true },
@@ -418,6 +419,12 @@ function release(preservePresentation = false) {
   locked = false
   if (!preservePresentation && !anotherPanelOpen && previousFocus?.isConnected) previousFocus.focus({ preventScroll: true })
 }
+// KeepAlive moves an open sheet in and out of the document without closing it.
+// Vue caches a KeepAlive hook's wrapper on the function, which would retain
+// the first sheet that registered a shared function. Pass a new one each time.
+onActivated(() => updateMobileSheetRootClass())
+onDeactivated(() => updateMobileSheetRootClass())
+
 onBeforeUnmount(() => {
   openingSequence++
   document.removeEventListener('fullscreenchange', updatePresentation)

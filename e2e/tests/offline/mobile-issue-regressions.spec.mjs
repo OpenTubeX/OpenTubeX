@@ -1,4 +1,4 @@
-import { test, expect, goToSettingsSection, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, setWindowSize } from '../../helpers/app.mjs'
 
 test.use({ seed: { settings: { thumbnailSize: 100, fetchSubscriptionsAutomatically: false } } })
 
@@ -60,19 +60,32 @@ test('connection banner follows hidden navigation above progress', { tag: '@scal
   await expect.poll(gap).toBeCloseTo(6, 0)
   // Overlay layouts must cancel the hidden-nav transform, including reduced motion.
   for (const kind of ['sheet', 'settings']) {
-    await page.evaluate(kind => {
-      const overlay = document.createElement('div')
-      overlay.id = 'connection-overlay-test'
-      if (kind === 'sheet') { overlay.className = 'mobileSheet'; overlay.setAttribute('open', '') }
-      if (kind === 'settings') overlay.className = 'settingsWindow maximized'
-      document.querySelector('.app').append(overlay)
-    }, kind)
+    if (kind === 'sheet') {
+      // The mobile sheet component is developed separately; exercise its DOM contract.
+      await page.evaluate(() => {
+        const sheet = document.createElement('dialog')
+        sheet.id = 'connection-overlay-test'
+        sheet.className = 'mobileSheet'
+        document.querySelector('.app').append(sheet)
+        sheet.show()
+      })
+    } else {
+      await goTo(page, 'settings')
+      await expect(page.locator('.settingsWindow')).toHaveClass(/maximized/)
+    }
     await expect.poll(gap).toBeCloseTo(6, 0)
     await expect(banner).toHaveCSS('transition-duration', '0s')
-    await page.evaluate(() => {
-      document.body.append(document.querySelector('.connection-status-holder'))
-      document.querySelector('#connection-overlay-test').remove()
-    })
+    if (kind === 'sheet') {
+      await page.evaluate(() => {
+        document.body.append(document.querySelector('.connection-status-holder'))
+        const sheet = document.querySelector('#connection-overlay-test')
+        sheet.close()
+        sheet.remove()
+      })
+    } else {
+      await page.locator('.settingsWindowHeader').getByRole('button', { name: 'Close', exact: true }).click()
+      await expect(page.locator('.settingsWindow')).toBeHidden()
+    }
   }
   await page.locator('.sideNav').evaluate(element => element.classList.remove('scrollHidden'))
   await expect.poll(gap).toBeCloseTo(66, 0)

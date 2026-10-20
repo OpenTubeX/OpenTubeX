@@ -1,0 +1,117 @@
+diff --git a/dist/runtime-dom.cjs.js b/dist/runtime-dom.cjs.js
+index 28e369f033a00b626f7bec2d2a102edf1a02c9ad..97714ed8d872ba57bb99307f9494e72249818195 100644
+--- a/dist/runtime-dom.cjs.js
++++ b/dist/runtime-dom.cjs.js
+@@ -1363,7 +1363,7 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+     tag: String,
+     moveClass: String
+   }),
+-  setup(props, { slots }) {
++  setup(props, { slots, attrs }) {
+     const instance = runtimeCore.getCurrentInstance();
+     const state = runtimeCore.useTransitionState();
+     let prevChildren;
+@@ -1419,12 +1419,15 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+       let tag = rawProps.tag || runtimeCore.Fragment;
+       prevChildren = [];
+       moves = void 0;
++      // data-skip-move declares a move class that never animates. Skip
++      // measuring every child before each update only to find no transform.
++      const measure = attrs["data-skip-move"] == null;
+       if (children) {
+         for (let i = 0; i < children.length; i++) {
+           const child = children[i];
+           if (child.el && child.el instanceof Element && // Hidden v-show nodes have no previous layout box to animate from.
+           !child.el[vShowHidden]) {
+-            prevChildren.push(child);
++            if (measure) prevChildren.push(child);
+             runtimeCore.setTransitionHooks(
+               child,
+               runtimeCore.resolveTransitionHooks(
+@@ -1434,7 +1437,7 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+                 instance
+               )
+             );
+-            positionMap.set(child, getPosition(child.el));
++            if (measure) positionMap.set(child, getPosition(child.el));
+           }
+         }
+       }
+diff --git a/dist/runtime-dom.cjs.prod.js b/dist/runtime-dom.cjs.prod.js
+index da30760ae029bb2784bc0d66738c8bd0ff17003f..4832ff028b24fe36a79e0006a8e31d80380cb669 100644
+--- a/dist/runtime-dom.cjs.prod.js
++++ b/dist/runtime-dom.cjs.prod.js
+@@ -1266,7 +1266,7 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+     tag: String,
+     moveClass: String
+   }),
+-  setup(props, { slots }) {
++  setup(props, { slots, attrs }) {
+     const instance = runtimeCore.getCurrentInstance();
+     const state = runtimeCore.useTransitionState();
+     let prevChildren;
+@@ -1322,12 +1322,15 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+       let tag = rawProps.tag || runtimeCore.Fragment;
+       prevChildren = [];
+       moves = void 0;
++      // data-skip-move declares a move class that never animates. Skip
++      // measuring every child before each update only to find no transform.
++      const measure = attrs["data-skip-move"] == null;
+       if (children) {
+         for (let i = 0; i < children.length; i++) {
+           const child = children[i];
+           if (child.el && child.el instanceof Element && // Hidden v-show nodes have no previous layout box to animate from.
+           !child.el[vShowHidden]) {
+-            prevChildren.push(child);
++            if (measure) prevChildren.push(child);
+             runtimeCore.setTransitionHooks(
+               child,
+               runtimeCore.resolveTransitionHooks(
+@@ -1337,7 +1340,7 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+                 instance
+               )
+             );
+-            positionMap.set(child, getPosition(child.el));
++            if (measure) positionMap.set(child, getPosition(child.el));
+           }
+         }
+       }
+diff --git a/dist/runtime-dom.esm-bundler.js b/dist/runtime-dom.esm-bundler.js
+index 363fc8774518bcd9fcf4d65586b5feae0351a57b..b62ab7ddd9f470aeb4454a1045c180245a6126b3 100644
+--- a/dist/runtime-dom.esm-bundler.js
++++ b/dist/runtime-dom.esm-bundler.js
+@@ -1428,7 +1428,7 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+     tag: String,
+     moveClass: String
+   }),
+-  setup(props, { slots }) {
++  setup(props, { slots, attrs }) {
+     const instance = getCurrentInstance();
+     const state = useTransitionState();
+     let prevChildren;
+@@ -1484,12 +1484,15 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+       let tag = rawProps.tag || Fragment;
+       prevChildren = [];
+       moves = void 0;
++      // data-skip-move declares a move class that never animates. Skip
++      // measuring every child before each update only to find no transform.
++      const measure = attrs["data-skip-move"] == null;
+       if (children) {
+         for (let i = 0; i < children.length; i++) {
+           const child = children[i];
+           if (child.el && child.el instanceof Element && // Hidden v-show nodes have no previous layout box to animate from.
+           !child.el[vShowHidden]) {
+-            prevChildren.push(child);
++            if (measure) prevChildren.push(child);
+             setTransitionHooks(
+               child,
+               resolveTransitionHooks(
+@@ -1499,7 +1502,7 @@ const TransitionGroupImpl = /* @__PURE__ */ decorate({
+                 instance
+               )
+             );
+-            positionMap.set(child, getPosition(child.el));
++            if (measure) positionMap.set(child, getPosition(child.el));
+           }
+         }
+       }

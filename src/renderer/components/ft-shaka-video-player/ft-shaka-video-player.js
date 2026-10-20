@@ -176,6 +176,7 @@ import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtAddToPlaylistDropdown from '../FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
 import WatchVideoChapters from '../WatchVideoChapters/WatchVideoChapters.vue'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
+import { useRootClass } from '../../helpers/rootClasses'
 
 /** @typedef {import('../../helpers/sponsorblock').SponsorBlockCategory} SponsorBlockCategory */
 /** @typedef {string | { path: string, viewBox: string }} ValueChangeIcon */
@@ -7743,6 +7744,12 @@ export default defineComponent({
       video,
     })
 
+    // The page reserves room below its content for the bar (mirrors the template's classes).
+    const mobileMiniBarShown = computed(() => mobileMiniBar.value && (scrollMiniPlayerActive.value || scrollMiniPlayerAnimating.value))
+    useRootClass('appMiniBar', mobileMiniBarShown)
+    useRootClass('appMiniBarCompact', () => mobileMiniBarShown.value && compactMobileMiniPlayer.value && !scrollMiniPlayerDismissed.value)
+    useRootClass('appMiniBarCollapsed', () => mobileMiniBarShown.value && mobileMiniBarCollapsed.value)
+
     const mobileMiniBarControlsDisabled = computed(() => Boolean(scrollMiniPlayerDragStyle.value || scrollMiniPlayerAnimating.value || mobileMiniPlayerDismissSettling.value))
     const mobileMiniBarSeekDisabled = computed(() => mobileMiniBarControlsDisabled.value || !hasLoaded.value || !seekingIsPossible.value || !mobileMiniBarHasSeekRange.value)
     const mobileMiniBarSeeking = ref(false)
@@ -9564,9 +9571,11 @@ export default defineComponent({
         if (fullWindowEnabled.value) {
           document.body.dataset.playerFullWindowOwner = mediaTabId
           document.body.classList.add('playerFullWindow')
+          document.documentElement.classList.add('appPlayerFullWindow')
         } else if (document.body.dataset.playerFullWindowOwner === mediaTabId) {
           delete document.body.dataset.playerFullWindowOwner
           document.body.classList.remove('playerFullWindow')
+          document.documentElement.classList.remove('appPlayerFullWindow')
           // Nested fullscreen or Picture-in-Picture can leave the page instance
           // with the zero-overflow range it measured while this class was active.
           updateOverlayScrollbars(document.body)
@@ -12848,6 +12857,7 @@ export default defineComponent({
         if (document.body.dataset.playerFullWindowOwner === mediaTabId) {
           delete document.body.dataset.playerFullWindowOwner
           document.body.classList.remove('playerFullWindow')
+          document.documentElement.classList.remove('appPlayerFullWindow')
         }
       }
 

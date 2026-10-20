@@ -371,6 +371,7 @@
 <script setup>
 import FtInput from '../../components/FtInput/FtInput.vue'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
+import { useRootClass } from '../../helpers/rootClasses'
 import { FtIcon } from '@opentubex/icons'
 import {
   computed,
@@ -799,17 +800,22 @@ provide(settingsSubpageKey, {
   }
 })
 
+// KeepAlive retains the window while it is closed.
+const windowActive = ref(true)
+useRootClass('appSettingsMaximized', () => windowActive.value && isWindowMaximized.value)
 onMounted(() => {
   handleMounted()
   systemColorScheme.addEventListener('change', updateSystemColorScheme)
 })
 onActivated(() => {
+  windowActive.value = true
   handleMounted()
   nextTick(() => {
     if (unlocked.value || isStandaloneViewOpen.value) restorePreservedScrollPositions()
   })
 })
 onDeactivated(() => {
+  windowActive.value = false
   if (!settingsWindowMorphing.value) {
     preserveScrollPositions()
   }

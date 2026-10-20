@@ -19,6 +19,14 @@ function getRetentionCutoff(days) {
 }
 
 const continueWatchingCache = new WeakMap()
+// Progress and last-viewed playlist saves keep every record's identity, channel
+// and watched status. Views derived from those skip the frequent playback saves.
+const PLAYBACK_MUTATIONS = new Set([
+  'updateRecordWatchProgressInHistoryCache',
+  'updateRecordLastViewedPlaylistIdInHistoryCache',
+  'unsetRecordsLastViewedPlaylistIdInHistoryCache',
+  'unsetRecordsLastViewedPlaylistIdsInHistoryCache',
+])
 const CONTINUE_WATCHING_MUTATIONS = new Set([
   'setHistoryCacheSorted',
   'upsertToHistoryCache',
@@ -30,6 +38,7 @@ const CONTINUE_WATCHING_MUTATIONS = new Set([
 
 const state = {
   historyRevision: 0,
+  historyEntriesRevision: 0,
   continueWatchingRevision: 0,
   historyCacheSorted: [],
 
@@ -246,12 +255,15 @@ const mutations = {
   },
 
   upsertToHistoryCache(state, record) {
-    const i = state.historyCacheSorted.findIndex((currentRecord) => {
+    // Search and shift the raw array, then publish it once. Splicing through
+    // the reactive proxy wrapped and triggered every record it moved.
+    const history = toRaw(state.historyCacheSorted)
+    const i = history.findIndex((currentRecord) => {
       return record.videoId === currentRecord.videoId
     })
 
     if (i !== -1) {
-      const currentRecord = state.historyCacheSorted[i]
+      const currentRecord = history[i]
 
       // Watched-status and other metadata-only updates keep their current position.
       // A newer timeWatched means the video was watched again and should become the
@@ -261,11 +273,9 @@ const mutations = {
         state.historyCacheById[record.videoId] = record
         return
       }
-
-      state.historyCacheSorted.splice(i, 1)
     }
 
-    state.historyCacheSorted.unshift(record)
+    state.historyCacheSorted = i === -1 ? [record, ...history] : [record, ...history.slice(0, i), ...history.slice(i + 1)]
     state.historyCacheById[record.videoId] = record
   },
 
@@ -376,6 +386,7 @@ export default {
   mutations: Object.fromEntries(Object.entries(mutations).map(([name, mutation]) => [name, (state, payload) => {
     mutation(state, payload)
     state.historyRevision++
+    if (!PLAYBACK_MUTATIONS.has(name)) state.historyEntriesRevision++
     if (CONTINUE_WATCHING_MUTATIONS.has(name)) state.continueWatchingRevision++
   }]))
 }

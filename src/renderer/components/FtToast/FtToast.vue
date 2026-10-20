@@ -64,7 +64,7 @@
       :style="toastHolderStyle"
     >
       <FtConnectionStatus
-        v-if="connectionState !== 'online' && !(fullscreenTarget && connectionState === 'offline')"
+        v-if="showConnectionStatus"
         :state="connectionState"
       />
     </div>
@@ -82,6 +82,7 @@ import { showToast, ToastEventBus } from '../../helpers/utils'
 import store from '../../store'
 import FtEmbeddedProgress from '../FtEmbeddedProgress/FtEmbeddedProgress.vue'
 import FtToastItem from './FtToastItem.vue'
+import { useRootClass } from '../../helpers/rootClasses'
 import FtConnectionStatus from '../FtConnectionStatus/FtConnectionStatus.vue'
 import { connectionEvents, getConnectionState } from '../../helpers/networkRecovery'
 
@@ -164,6 +165,10 @@ const indefiniteToastIds = new Set()
 const abortListeners = new Map()
 /** @type {import('vue').Ref<Element|null>} */
 const fullscreenTarget = ref(null)
+const showConnectionStatus = computed(() => connectionState.value !== 'online' &&
+  !(fullscreenTarget.value && connectionState.value === 'offline'))
+// Pages reserve room for the status bar.
+useRootClass('appConnectionStatus', showConnectionStatus)
 /** @type {import('vue').Ref<HTMLElement|null>} */
 const progressToast = useTemplateRef('progressToast')
 const progressToastMinimized = ref(false)

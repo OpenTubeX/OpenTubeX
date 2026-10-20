@@ -6,6 +6,7 @@
     :appear="appear"
     :duration="transitionDurations"
     :move-class="moveClass"
+    :data-skip-move="moveClass === 'feed-move-suppressed' ? '' : null"
     :style="{ '--feed-transition-duration': feedTransitionDuration }"
     :class="{
       autoGrid: true,
@@ -86,6 +87,7 @@ onActivated(() => {
   updateGridSliderLimit()
 })
 onDeactivated(() => {
+  keepBottomGeneration++
   active = false
   updateGridSliderLimit()
 })
@@ -123,8 +125,8 @@ const transitionDurations = computed(() => {
   }
 })
 
-// 'feed-move-suppressed' has no transition, so the TransitionGroup bails out of
-// the move handling instead of measuring and translating every child.
+// 'feed-move-suppressed' has no transition, and data-skip-move tells the
+// patched TransitionGroup not to measure every child before each update.
 const moveClass = computed(() => {
   const suppressed = suppressMoveTransition.value ||
     prefersReducedMotion.value ||
@@ -215,6 +217,26 @@ let observedScrollbarWidth = 0
 let observedViewportWidth = null
 let pageAtBottom = false
 
+// A newer measurement, deactivation or unmount cancels pending settle frames.
+let keepBottomGeneration = 0
+
+function keepPageAtBottom(frames, generation) {
+  if (generation !== keepBottomGeneration) return
+  window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' })
+  const target = window.scrollY
+  if (frames > 0) {
+    requestAnimationFrame(() => {
+      if (generation !== keepBottomGeneration) return
+      // Growing rows leave the position in place and shrinking ones keep it at
+      // the end. A position above both means the page was scrolled away.
+      const root = document.documentElement
+      const atBottom = root.scrollHeight - root.clientHeight - window.scrollY <= 2
+      if (window.scrollY < target - 2 && !atBottom) return
+      keepPageAtBottom(frames - 1, generation)
+    })
+  }
+}
+
 function updatePageAtBottom() {
   const root = document.documentElement
   pageAtBottom = window.scrollY > 0 && root.scrollHeight - root.clientHeight - window.scrollY <= 2
@@ -245,8 +267,11 @@ function updateGridWidth(contentWidth, viewportCrossedPhoneWidth = false) {
 
   if (measurement.gridWidth !== gridWidth) {
     // Scroll anchoring keeps the top visible card in place, which leaves a
-    // page that was scrolled to its end above the new end.
-    const keepBottom = pageAtBottom && gridWidth > 0 && measurement.gridWidth > 0 && !element.closest('[inert]')
+    // page that was scrolled to its end above the new end. This includes the
+    // first measurement, when a grid replaces a list at the end of the page.
+    // Resize observations run after layout and any restored scroll position.
+    if (gridWidth === 0) updatePageAtBottom()
+    const keepBottom = pageAtBottom && measurement.gridWidth > 0 && !element.closest('[inert]')
     suppressMoveTransition.value = true
     clearTimeout(suppressResetTimeout)
     suppressResetTimeout = setTimeout(() => {
@@ -257,7 +282,12 @@ function updateGridWidth(contentWidth, viewportCrossedPhoneWidth = false) {
     updateGridSliderLimit()
     applyThumbnailSizeStyles()
     thumbnailSizeReady.value = gridWidth > 0
-    if (keepBottom) window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' })
+    // thumbnailSizeReady resizes the cards once Vue renders it, and windowed
+    // rows settle their measured size over the following frames.
+    if (keepBottom) {
+      const generation = ++keepBottomGeneration
+      nextTick(() => keepPageAtBottom(2, generation))
+    }
   } else if (widthAdjustmentChanged || viewportCrossedPhoneWidth) {
     // Keeps the stretched size equal to the stable one under a transient
     // scrollbar, and applies the phone column minimum to a constrained grid.
@@ -290,6 +320,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  keepBottomGeneration++
   active = false
   updateGridSliderLimit()
   resizeObserver?.disconnect()

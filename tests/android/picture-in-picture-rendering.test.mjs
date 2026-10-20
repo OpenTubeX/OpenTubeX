@@ -101,7 +101,10 @@ for (const { width, height } of [{ width: 400, height: 225 }, { width: 320.8, he
       try {
         const frame = await element.contentFrame()
         await frame.locator('video').waitFor()
-        await frame.locator('body').evaluate(body => body.classList.add('androidPictureInPicture'))
+        await frame.locator('body').evaluate(body => {
+          body.classList.add('androidPictureInPicture')
+          body.ownerDocument.documentElement.classList.add('appPictureInPicture')
+        })
         const geometry = await frame.evaluate(() => {
           const video = document.querySelector('video')
           const rect = video.getBoundingClientRect()

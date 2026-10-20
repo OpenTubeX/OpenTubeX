@@ -1,10 +1,13 @@
 package org.opentubex.app;
 
 import android.content.Context;
+import android.util.JsonWriter;
 import androidx.sqlite.SQLiteConnection;
 import androidx.sqlite.SQLiteStatement;
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver;
 import java.io.File;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -101,7 +104,34 @@ final class LibraryDatabase implements AutoCloseable {
         }
     }
 
-    private JSONArray run(String sql, JSONArray params) throws JSONException {
+    /** Streams one statement's rows as a JSON array of row arrays. */
+    synchronized void query(String sql, JSONArray params, Writer output) throws JSONException, IOException {
+        open();
+        SQLiteStatement statement = prepare(sql, params);
+        try (JsonWriter json = new JsonWriter(output)) {
+            json.beginArray();
+            int columns = statement.getColumnCount();
+            while (statement.step()) {
+                json.beginArray();
+                for (int column = 0; column < columns; column++) {
+                    switch (statement.getColumnType(column)) {
+                        case TYPE_INTEGER: json.value(statement.getLong(column)); break;
+                        case TYPE_FLOAT: json.value(statement.getDouble(column)); break;
+                        case TYPE_TEXT: json.value(statement.getText(column)); break;
+                        case TYPE_NULL: json.nullValue(); break;
+                        default: throw new IllegalStateException("Unsupported library value");
+                    }
+                }
+                json.endArray();
+            }
+            json.endArray();
+        } finally {
+            statement.reset();
+            statement.clearBindings();
+        }
+    }
+
+    private SQLiteStatement prepare(String sql, JSONArray params) throws JSONException {
         SQLiteStatement statement = statements.get(sql);
         if (statement == null) {
             statement = connection.prepare(sql);
@@ -111,6 +141,16 @@ final class LibraryDatabase implements AutoCloseable {
             for (int index = 0; params != null && index < params.length(); index++) {
                 bind(statement, index + 1, params.get(index));
             }
+        } catch (RuntimeException | JSONException error) {
+            statement.clearBindings();
+            throw error;
+        }
+        return statement;
+    }
+
+    private JSONArray run(String sql, JSONArray params) throws JSONException {
+        SQLiteStatement statement = prepare(sql, params);
+        try {
             JSONArray rows = new JSONArray();
             int columns = statement.getColumnCount();
             while (statement.step()) {

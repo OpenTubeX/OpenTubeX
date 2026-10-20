@@ -11,6 +11,7 @@ function renderer({ fit = 'contain', rect = { x: 12, y: 60, width: 400, height: 
   const listeners = new Map()
   const callbacks = new Map()
   const classes = new Set()
+  const rootClasses = new Set()
   const attributes = new Set()
   const properties = new Map()
   const player = {
@@ -31,7 +32,10 @@ function renderer({ fit = 'contain', rect = { x: 12, y: 60, width: 400, height: 
     hidden: false, hasFocus: () => true,
     body: { classList: { contains: name => classes.has(name), toggle: (name, on) => on ? classes.add(name) : classes.delete(name) } },
     querySelectorAll: () => [],
-    documentElement: { style: { setProperty: (name, value) => properties.set(name, value) } },
+    documentElement: {
+      style: { setProperty: (name, value) => properties.set(name, value) },
+      classList: { toggle: (name, on) => on ? rootClasses.add(name) : rootClasses.delete(name) },
+    },
   })
   const window = {
     innerWidth: 480, innerHeight: 800, outerWidth: 480, outerHeight: 800,
@@ -71,7 +75,7 @@ function renderer({ fit = 'contain', rect = { x: 12, y: 60, width: 400, height: 
       if (frames.delete(id)) callback()
     }
   }
-  return { ...api, video, calls, rect, classes, attributes, properties, window, document, plugin,
+  return { ...api, video, calls, rect, classes, rootClasses, attributes, properties, window, document, plugin,
     resize: () => resized?.(), listeners, step, flush: () => { while (frames.size) step() },
     expire: () => { for (const callback of [...timers.values()]) callback() } }
 }
@@ -325,6 +329,7 @@ for (const transitioning of [false, true]) {
     await entered
     assert.equal(r.calls.filter(([action]) => action === 'enter').length, 0)
     assert.ok(r.classes.has('androidPictureInPicture'))
+    assert.ok(r.rootClasses.has('appPictureInPicture'))
   })
 }
 
@@ -336,6 +341,7 @@ test('a foreground manual paint deadline restores the page and prevents a late r
   await entered
   assert.equal(r.calls.filter(([action]) => action === 'enter').length, 0)
   assert.equal(r.classes.has('androidPictureInPicture'), false)
+  assert.equal(r.rootClasses.has('appPictureInPicture'), false)
 })
 
 test('transient focus loss cancels manual entry and restores the page when focus returns', async () => {

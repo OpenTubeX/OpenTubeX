@@ -99,7 +99,7 @@ body {
 }
 
 /* Inherit native touch sizing into dialogs and other teleported controls too. */
-body:where(:has(.app.capacitorTabs)) {
+:where(:root.appCapacitorTabs) body {
   --form-control-height: max(56px, var(--phone-touch-target, 48px));
   --form-control-value-padding: 24px 8px;
   --form-control-label-top: 8px;

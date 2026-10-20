@@ -67,3 +67,18 @@ test('playlist metadata updates retain the cached Continue watching selection', 
   store.commit('unsetRecordsLastViewedPlaylistIdsInHistoryCache', ['playlist'])
   assert.equal(store.getters.getContinueWatchingHistory(), selected)
 })
+
+test('playback saves leave the history entries revision unchanged', () => {
+  const store = fixture()
+  const entries = [video('first'), video('second')]
+  store.commit('setHistoryCacheSorted', entries)
+  store.commit('setHistoryCacheById', Object.fromEntries(entries.map(entry => [entry.videoId, entry])))
+  const revisions = () => [store.state.history.historyRevision, store.state.history.historyEntriesRevision]
+  const [revision, entriesRevision] = revisions()
+  store.commit('updateRecordWatchProgressInHistoryCache', { videoId: 'first', watchProgress: 50 })
+  store.commit('updateRecordLastViewedPlaylistIdInHistoryCache', { videoId: 'first', lastViewedPlaylistId: 'playlist' })
+  // Sync conflict detection still sees every change.
+  assert.deepEqual(revisions(), [revision + 2, entriesRevision])
+  store.commit('upsertToHistoryCache', { ...entries[1], isWatched: true })
+  assert.deepEqual(revisions(), [revision + 3, entriesRevision + 1])
+})

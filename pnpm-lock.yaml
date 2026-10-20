@@ -19,6 +19,7 @@ patchedDependencies:
   '@capawesome/capacitor-clipboard@0.1.2': 729c6071cbf0e196e2212b015677cdd162c287dca48137c24250c0d056c9fd5b
   '@material/material-color-utilities@0.4.0': b1ce5dea9a31733ac3ddd4b236a80185e050df5f98e48bb7fd93f8ccf3f58378
   '@sqlite.org/sqlite-wasm@3.53.4-build2': 579d3e536bc0f7ef69623a576db802fe6dc8d02cfb6d6f085f190534a88941a7
+  '@vue/runtime-dom@3.5.44': c83073332910a00ffdd4471e0a1d9e44607292ac7992016492fbd5a237ba37fd
   overlayscrollbars@2.16.0: 5cf83e67b2d20d5556131f278ab8fdeece199eafcfcaf6b838b0e949366d2281
   shaka-player@5.1.12: cf2e5c9a138eec272ac8db5df51977f756e60fed28f24946e54c67fe0e465724
   vue-sonner@2.0.9: 34b2065fecd4314653c24cdfc38ff5f2910def4942ed265ec374d66c0e5c0940
@@ -6653,7 +6654,7 @@ snapshots:
       '@vue/reactivity': 3.5.44
       '@vue/shared': 3.5.44
 
-  '@vue/runtime-dom@3.5.44':
+  '@vue/runtime-dom@3.5.44(patch_hash=c83073332910a00ffdd4471e0a1d9e44607292ac7992016492fbd5a237ba37fd)':
     dependencies:
       '@vue/reactivity': 3.5.44
       '@vue/runtime-core': 3.5.44
@@ -6663,7 +6664,7 @@ snapshots:
   '@vue/server-renderer@3.5.44':
     dependencies:
       '@vue/compiler-ssr': 3.5.44
-      '@vue/runtime-dom': 3.5.44
+      '@vue/runtime-dom': 3.5.44(patch_hash=c83073332910a00ffdd4471e0a1d9e44607292ac7992016492fbd5a237ba37fd)
       '@vue/shared': 3.5.44
 
   '@vue/shared@3.5.43': {}
@@ -10426,7 +10427,7 @@ snapshots:
     dependencies:
       '@vue/compiler-dom': 3.5.44
       '@vue/compiler-sfc': 3.5.44
-      '@vue/runtime-dom': 3.5.44
+      '@vue/runtime-dom': 3.5.44(patch_hash=c83073332910a00ffdd4471e0a1d9e44607292ac7992016492fbd5a237ba37fd)
       '@vue/server-renderer': 3.5.44
       '@vue/shared': 3.5.44
     optionalDependencies:

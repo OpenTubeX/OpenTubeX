@@ -706,31 +706,32 @@
   }
 }
 
-/* Teleport puts the holders beside `.app`, hence the body queries.
+/* The App mirrors its layout classes on <html>: selecting them with
+   body:has() rechecked the whole page for every DOM change.
    Top positions stay below the app header. */
-body:has(.app.capacitorPhoneLayout) .toast-holder.position-top-left[data-sonner-toaster],
-body:has(.app.capacitorPhoneLayout) .toast-holder.position-top-center[data-sonner-toaster],
-body:has(.app.capacitorPhoneLayout) .toast-holder.position-top-right[data-sonner-toaster] {
+:root.appPhoneLayout body .toast-holder.position-top-left[data-sonner-toaster],
+:root.appPhoneLayout body .toast-holder.position-top-center[data-sonner-toaster],
+:root.appPhoneLayout body .toast-holder.position-top-right[data-sonner-toaster] {
   /* stylelint-disable liberty/use-logical-spec -- overrides sonner's physical mobile inset */
   top: calc(var(--offset-top) + 43px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px)));
   bottom: auto;
   /* stylelint-enable liberty/use-logical-spec */
 }
 
-body:has(.app.capacitorPhoneLayout) .progress-toast-holder.position-top-left,
-body:has(.app.capacitorPhoneLayout) .progress-toast-holder.position-top-center,
-body:has(.app.capacitorPhoneLayout) .progress-toast-holder.position-top-right {
+:root.appPhoneLayout body .progress-toast-holder.position-top-left,
+:root.appPhoneLayout body .progress-toast-holder.position-top-center,
+:root.appPhoneLayout body .progress-toast-holder.position-top-right {
   inset-block: calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + var(--top-nav-height, 60px) + 7px) auto;
 }
 
 /* Tablet tabs and the top navigation are both fixed app chrome on Android.
    Keep top-positioned toasts below them instead of covering either bar. */
-body:has(.app.capacitorTabletLayout) .toast-holder.position-top-left[data-sonner-toaster],
-body:has(.app.capacitorTabletLayout) .toast-holder.position-top-center[data-sonner-toaster],
-body:has(.app.capacitorTabletLayout) .toast-holder.position-top-right[data-sonner-toaster],
-body:has(.app.capacitorTabletLayout) .progress-toast-holder.position-top-left,
-body:has(.app.capacitorTabletLayout) .progress-toast-holder.position-top-center,
-body:has(.app.capacitorTabletLayout) .progress-toast-holder.position-top-right {
+:root.appTabletLayout body .toast-holder.position-top-left[data-sonner-toaster],
+:root.appTabletLayout body .toast-holder.position-top-center[data-sonner-toaster],
+:root.appTabletLayout body .toast-holder.position-top-right[data-sonner-toaster],
+:root.appTabletLayout body .progress-toast-holder.position-top-left,
+:root.appTabletLayout body .progress-toast-holder.position-top-center,
+:root.appTabletLayout body .progress-toast-holder.position-top-right {
   inset-block-start: calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + 48px + var(--top-nav-height, 60px) + 12px);
 }
 
@@ -751,23 +752,23 @@ body:has(.app.capacitorTabletLayout) .progress-toast-holder.position-top-right {
   inset-block-end: calc(var(--bottom-tab-bar-height) + var(--connection-navigation-inset, 0px) + var(--connection-progress-inset, 0px) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
 }
 
-body:has(.connection-status-holder .connectionStatus) {
+:root.appConnectionStatus body {
   --connection-status-space: calc(var(--connection-status-height, 0px) + var(--connection-progress-inset, 0px) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
 
   /* Keep the final page edge clear when fractional zoom rounds the scroll range. */
   --connection-status-page-space: calc(var(--connection-status-space) + 1px);
 }
 
-body:has(.app > .progressBar) {
+:root.appProgressBar body {
   --connection-progress-inset: 6px;
 }
 
-body:has(.app.capacitorPhoneLayout) {
+:root.appPhoneLayout body {
   --mobile-toast-inset: calc(var(--connection-navigation-inset, 60px) - 17px);
 }
 
 @media (width <= 680px) {
-  body:has(.app) {
+  :root body {
     --connection-navigation-inset: var(--mobile-nav-content-height, 60px);
     --mobile-toast-inset: calc(var(--connection-navigation-inset) - 17px);
   }
@@ -777,13 +778,13 @@ body:has(.app.capacitorPhoneLayout) {
     transition: transform 280ms cubic-bezier(0.2, 0, 0, 1);
   }
 
-  body:where(:has(.sideNav.scrollHidden):not(:has(.sideNav :focus-visible))) .connection-status-holder {
+  :where(.app > .sideNav.scrollHidden:not(:has(:focus-visible))) ~ .connection-status-holder {
     transform: translateY(calc(var(--connection-navigation-inset) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))));
     transition: transform 220ms cubic-bezier(0.4, 0, 1, 1);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    body:has(.app) .connection-status-holder {
+    :root body .connection-status-holder {
       transition: none;
     }
   }
@@ -791,19 +792,21 @@ body:has(.app.capacitorPhoneLayout) {
 
 /* Fullscreen hides app headers and navigation. Keep only the toast's normal
    edge inset and the device safe area, regardless of phone/tablet layout. */
-body:has(.app) :fullscreen .toast-holder[data-sonner-toaster] {
+:root :fullscreen .toast-holder[data-sonner-toaster] {
   /* stylelint-disable-next-line length-zero-no-unit -- added to lengths inside calc() */
   --mobile-toast-inset: 0px;
 }
 
-body:has(.app) :fullscreen .toast-holder[data-sonner-toaster]:is(.position-top-left, .position-top-center, .position-top-right) {
+/* Matches the phone and tablet top positions' specificity, then wins by order. */
+/* stylelint-disable-next-line selector-max-compound-selectors */
+:root body :fullscreen .toast-holder[data-sonner-toaster]:is(.position-top-left, .position-top-center, .position-top-right) {
   inset-block: calc(var(--offset-top) + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))) auto;
 }
 
-body:has(.app) :fullscreen .connection-status-holder,
-body:has(.mobileSheet[open]) .connection-status-holder,
-body:has(.app .settingsWindow.maximized) .connection-status-holder,
-body:has(.app .ftVideoPlayer.fullWindow) .connection-status-holder {
+:root :fullscreen .connection-status-holder,
+:root.appMobileSheetOpen body .connection-status-holder,
+:root.appSettingsMaximized body .connection-status-holder,
+:root.appPlayerFullWindow body .connection-status-holder {
   inset-inline: 0;
   inset-block-end: calc(var(--connection-progress-inset, 0px) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
   transform: none;

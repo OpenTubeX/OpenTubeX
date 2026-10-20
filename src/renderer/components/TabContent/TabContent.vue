@@ -8,7 +8,8 @@
       pageSwipeTo: isSwipeTarget,
       pageSwipePresented: isPresented && isCapacitor,
       pageSwipePrewarm: isPrewarmed,
-      pageSwipeSettling: pageSwipe?.settling
+      pageSwipeSettling: pageSwipe?.settling,
+      hasWatchPreview: watchPreviewing
     }"
     :style="pageSwipeStyle"
     :data-tab-id="tab.id"
@@ -42,6 +43,7 @@
       :tab-id="tab.id"
       :route="resolvedRoute"
       :presented="isPresented"
+      @preview="watchPreviewing = $event"
     />
   </div>
 </template>
@@ -121,6 +123,7 @@ const resolvedRoute = computed(() => navigation.resolve(routeFullPath.value))
 const isWatchRoute = computed(() => resolvedRoute.value.path.startsWith('/watch/'))
 const isBrowsingPresented = computed(() => isPresented.value && !isWatchRoute.value)
 const browsingInitialized = ref(false)
+const watchPreviewing = ref(false)
 // Background Watch tabs only need to preload the video. Mount their browsing
 // page on first presentation, then retain it so a dock gesture can reveal it
 // without mounting a route while the video is moving. Mobile swipe prewarming
@@ -383,12 +386,12 @@ function cancelLoaderSettle() {
 }
 
 /* Keep positioned items in the browsing page below the returning Watch preview. */
-.tabContent:has(.watchPreviewing) > .routerView:not(.browsingBehindWatch) {
+.tabContent.hasWatchPreview > .routerView:not(.browsingBehindWatch) {
   position: relative;
   z-index: 0;
 }
 
-.tabContent:has(.watchPreviewing) .browsingBehindWatch {
+.tabContent.hasWatchPreview .browsingBehindWatch {
   position: relative;
   inset: auto;
   visibility: visible;

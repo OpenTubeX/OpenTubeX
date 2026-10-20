@@ -38,11 +38,14 @@ const props = defineProps({
   route: { type: Object, required: true },
   presented: Boolean
 })
+const emit = defineEmits(['preview'])
 
 const navigation = getTabNavigationService()
 const watchRoot = useTemplateRef('watchRoot')
 const previewHost = useTemplateRef('previewHost')
 const previewActive = ref(false)
+// The tab keeps positioned browsing content below the returning preview.
+watch(previewActive, active => emit('preview', active), { flush: 'sync' })
 const previewStyle = shallowRef(null)
 let previewScroll = null
 let previewOrigin = null
@@ -393,6 +396,7 @@ watch(enabled, value => {
 }, { flush: 'sync' })
 
 onBeforeUnmount(() => {
+  emit('preview', false)
   clearMinimizePreview()
   unregisterPreviewScrollGuard()
   unregister()

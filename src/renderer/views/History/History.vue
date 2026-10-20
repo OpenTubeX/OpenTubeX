@@ -421,7 +421,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, toRaw, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { isNavigationFailure, NavigationFailureType, useRoute, useRouter } from 'vue-router'
 
@@ -601,9 +601,16 @@ const historyCacheSorted = computed(() => {
 // Large histories can contain thousands of channels. Collect them once the
 // picker is focused instead of delaying every navigation to History.
 const channelPickerOpened = ref(false)
+// Scanning every record through the reactive proxy made each mounted History
+// tab track the whole library and rebuild these options on any history write.
+// Read the raw records and invalidate them when entries change, not on progress saves.
+const rawHistory = computed(() => ({
+  revision: store.state.history.historyEntriesRevision,
+  records: toRaw(store.getters.getHistoryCacheSorted),
+}))
 const channels = computed(() => {
   if (!channelPickerOpened.value && !channel.value) return []
-  const options = getHistoryChannels(store.getters.getHistoryCacheSorted, locale.value)
+  const options = getHistoryChannels(rawHistory.value.records, locale.value)
   // Retain the selected option if its last record is removed or repaired.
   // Silently clearing it would unexpectedly broaden the results.
   if (channel.value && !options.some(option => option.value === channel.value)) {
@@ -630,7 +637,7 @@ watch([fromDate, toDate, channel], () => {
 }, { flush: 'sync' })
 
 const hasUnwatchedHistory = computed(() => {
-  return historyCacheSorted.value.some(record => record.isWatched !== true && canMarkHistoryEntryAsWatched(record))
+  return rawHistory.value.records.some(record => record.isWatched !== true && canMarkHistoryEntryAsWatched(record))
 })
 
 async function markAllAsWatched() {
