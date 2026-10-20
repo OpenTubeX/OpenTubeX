@@ -1364,7 +1364,7 @@ function handleResize(width) {
 }
 
 function closeSettings() {
-  store.dispatch('hideSettingsWindow')
+  store.dispatch('closeSettingsWindowToIcon')
 }
 
 function minimizeSettings() {

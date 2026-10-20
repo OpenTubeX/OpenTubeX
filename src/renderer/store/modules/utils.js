@@ -25,7 +25,8 @@ import {
 const CHANNEL_THUMBNAIL_CACHE_LIMIT = 200
 const VIDEO_AVATAR_CACHE_LIMIT = 200
 
-async function morphSettingsWindow(commit, update) {
+async function morphSettingsWindow(commit, update, icon = null) {
+  commit('setSettingsWindowMorphIcon', icon)
   commit('setSettingsWindowMorphing', true)
   await nextTick()
 
@@ -34,20 +35,44 @@ async function morphSettingsWindow(commit, update) {
 
   try {
     if (typeof document.startViewTransition !== 'function' || isReducedMotionEnabled()) {
-      update()
+      await update()
       await nextTick()
       return
     }
 
     const transition = document.startViewTransition(async () => {
-      update()
+      await update()
       await nextTick()
     })
     await transition.finished.catch(() => {})
   } finally {
     root.classList.remove('utilityWindowMorphActive')
     commit('setSettingsWindowMorphing', false)
+    commit('setSettingsWindowMorphIcon', null)
   }
+}
+
+// The window is an async component, so the first open renders it after the next tick
+function waitForSettingsWindowMorphTarget() {
+  const selector = '.settingsWindow.utilityWindowMorphTarget'
+  if (document.querySelector(selector)) return
+  return new Promise(resolve => {
+    const observer = new MutationObserver(() => {
+      if (document.querySelector(selector)) finish()
+    })
+    const timeout = setTimeout(finish, 1000)
+    function finish() {
+      observer.disconnect()
+      clearTimeout(timeout)
+      resolve()
+    }
+    observer.observe(document.body, { childList: true, subtree: true, attributeFilter: ['class'] })
+  })
+}
+
+function getSettingsWindowIcon(view) {
+  if (view === 'about') return null
+  return view === 'downloads' ? 'downloads' : 'settings'
 }
 
 function getOrCreateSearchSettings(state, tabId) {
@@ -86,6 +111,7 @@ const state = {
   settingsWindowOpen: false,
   settingsWindowMinimized: false,
   settingsWindowMorphing: false,
+  settingsWindowMorphIcon: null,
   settingsWindowReturnView: null,
   settingsWindowView: null,
   settingsWindowSection: null,
@@ -186,6 +212,10 @@ const getters = {
 
   getSettingsWindowMorphing(state) {
     return state.settingsWindowMorphing
+  },
+
+  getSettingsWindowMorphIcon(state) {
+    return state.settingsWindowMorphIcon
   },
 
   getSettingsWindowReturnView(state) {
@@ -458,6 +488,38 @@ const actions = {
     commit('setSettingsWindowReturnView', null)
     commit('setSettingsWindowMinimized', false)
     commit('setSettingsWindowOpen', false)
+  },
+
+  // Morphs out of the app header button for the view when the window is closed
+  openSettingsWindowFromIcon ({ state, commit, dispatch }, view = null) {
+    if (state.settingsWindowMorphing) return
+    if (state.settingsWindowOpen || state.settingsWindowMinimized) {
+      return dispatch('showSettingsWindow', view)
+    }
+    return morphSettingsWindow(commit, async () => {
+      commit('setIsKeyboardShortcutPromptShown', false)
+      commit('setSettingsWindowReturnView', null)
+      commit('setSettingsWindowView', view)
+      commit('setSettingsWindowMinimized', false)
+      commit('setSettingsWindowOpen', true)
+      await nextTick()
+      await waitForSettingsWindowMorphTarget()
+    }, getSettingsWindowIcon(view))
+  },
+
+  // Morphs back into the app header button for the current view if it is shown
+  closeSettingsWindowToIcon ({ state, commit, dispatch }) {
+    if (state.settingsWindowMorphing) return
+    const icon = getSettingsWindowIcon(state.settingsWindowView)
+    const iconButton = icon && document.querySelector(`[data-settings-window-icon="${icon}"]`)
+    if (!state.settingsWindowOpen || !iconButton?.getClientRects().length) {
+      return dispatch('hideSettingsWindow')
+    }
+    return morphSettingsWindow(commit, () => {
+      commit('setSettingsWindowReturnView', null)
+      commit('setSettingsWindowMinimized', false)
+      commit('setSettingsWindowOpen', false)
+    }, icon)
   },
 
   minimizeSettingsWindow ({ state, commit }) {
@@ -948,6 +1010,10 @@ const mutations = {
 
   setSettingsWindowMorphing (state, payload) {
     state.settingsWindowMorphing = payload
+  },
+
+  setSettingsWindowMorphIcon (state, payload) {
+    state.settingsWindowMorphIcon = payload
   },
 
   setSettingsWindowReturnView (state, payload) {

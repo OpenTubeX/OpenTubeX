@@ -193,6 +193,7 @@
           type="button"
           class="downloadsButton navButton"
           :class="{ active: downloadsWindowOpen }"
+          data-settings-window-icon="downloads"
           :aria-label="t('Settings.Download Settings.Download Settings')"
           :title="t('Settings.Download Settings.Download Settings')"
           :aria-pressed="downloadsWindowOpen"
@@ -202,12 +203,17 @@
             class="navIcon"
             :icon="['fas', 'download']"
           />
+          <span
+            v-if="isIconMorphTarget('downloads')"
+            class="iconMorphTarget utilityWindowMorphTarget"
+          />
         </button>
         <button
           v-if="showSettingsButton && !headerShortcutsOverflow"
           type="button"
           class="settingsButton navButton"
           :class="{ active: settingsWindowOpen }"
+          data-settings-window-icon="settings"
           :aria-label="t('Settings.Settings')"
           :title="t('Settings.Settings')"
           :aria-pressed="settingsWindowOpen"
@@ -216,6 +222,10 @@
           <FtIcon
             class="navIcon"
             :icon="['fas', 'cog']"
+          />
+          <span
+            v-if="isIconMorphTarget('settings')"
+            class="iconMorphTarget utilityWindowMorphTarget"
           />
         </button>
         <CapacitorPhoneTabSwitcher
@@ -533,8 +543,16 @@ const minimizedSettingsWindowIcon = computed(() => {
 })
 const restoreSettingsWindowLabel = computed(() => `${t('Restore')}: ${minimizedSettingsWindowTitle.value}`)
 
+// The window morphs into an empty placeholder so the button stays visible in the page
+// snapshot. The window and placeholder must never carry the morph name at the same time.
+function isIconMorphTarget(icon) {
+  return settingsWindowMorphing.value &&
+    store.getters.getSettingsWindowMorphIcon === icon &&
+    !store.getters.getSettingsWindowOpen
+}
+
 function toggleDownloadsWindow() {
-  store.dispatch(downloadsWindowOpen.value ? 'hideSettingsWindow' : 'showSettingsWindow', 'downloads')
+  store.dispatch(downloadsWindowOpen.value ? 'closeSettingsWindowToIcon' : 'openSettingsWindowFromIcon', 'downloads')
 }
 
 function openSyncSettings() {
@@ -543,7 +561,7 @@ function openSyncSettings() {
 }
 
 function toggleSettingsWindow() {
-  store.dispatch(settingsWindowOpen.value ? 'hideSettingsWindow' : 'showSettingsWindow')
+  store.dispatch(settingsWindowOpen.value ? 'closeSettingsWindowToIcon' : 'openSettingsWindowFromIcon')
 }
 
 function restoreSettingsWindow() {

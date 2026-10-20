@@ -637,6 +637,41 @@ test.describe('settings', () => {
     }
   })
 
+  test('morphs header Downloads and Settings windows out of and back into their buttons', async ({ page }) => {
+    await page.evaluate(async () => {
+      await window.$store.dispatch('updateMoveDownloadsToAppHeader', true)
+      await window.$store.dispatch('updateMoveSettingsToAppHeader', true)
+      const startViewTransition = document.startViewTransition.bind(document)
+      const morphTargets = () => [...document.querySelectorAll('.utilityWindowMorphTarget')]
+        .map(element => element.classList.contains('settingsWindow')
+          ? 'window'
+          : element.closest('[data-settings-window-icon]').dataset.settingsWindowIcon)
+      window.utilityWindowMorphs = []
+      document.startViewTransition = (update) => {
+        const morph = { before: morphTargets() }
+        window.utilityWindowMorphs.push(morph)
+        return startViewTransition(async () => {
+          await update()
+          morph.after = morphTargets()
+        })
+      }
+    })
+
+    for (const [icon, windowName] of [['downloads', 'Downloads'], ['settings', 'Settings']]) {
+      await page.evaluate(() => { window.utilityWindowMorphs = [] })
+      await page.locator(`.topNav [data-settings-window-icon="${icon}"]`).click()
+      const utilityWindow = page.getByRole('dialog', { name: windowName, exact: true })
+      await expect(utilityWindow).toBeVisible()
+      await expect.poll(() => page.evaluate(() => window.utilityWindowMorphs))
+        .toEqual([{ before: [icon], after: ['window'] }])
+
+      await utilityWindow.getByRole('button', { name: 'Close', exact: true }).click()
+      await expect(utilityWindow).toBeHidden()
+      await expect.poll(() => page.evaluate(() => window.utilityWindowMorphs))
+        .toEqual([{ before: [icon], after: ['window'] }, { before: ['window'], after: [icon] }])
+    }
+  })
+
   test('clamps the Downloads scroll position when a wider layout becomes shorter', async ({ page }) => {
     await page.evaluate(() => {
       localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({
