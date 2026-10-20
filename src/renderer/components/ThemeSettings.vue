@@ -554,7 +554,7 @@ const systemFonts = ref([])
 let systemFontsPromise = null
 
 const appFont = computed(() => normalizeAppFont(store.getters.getAppFont))
-const bundledFontNames = ['Figtree', 'Source Sans 3', 'IBM Plex Sans', 'Inter', 'Manrope', 'Plus Jakarta Sans']
+const bundledFontNames = ['Figtree', 'Source Sans 3', 'IBM Plex Sans', 'Inter', 'Manrope', 'Plus Jakarta Sans', 'Google Sans']
 const bundledFontValues = bundledFontNames.map(name => `${name} Variable`)
 const fontValues = computed(() => [
   DEFAULT_APP_FONT,
