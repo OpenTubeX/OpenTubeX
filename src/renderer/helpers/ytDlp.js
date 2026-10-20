@@ -6,7 +6,7 @@ import store from '../store/index'
 import { getDownloadTemplateOptions } from './downloadTemplates'
 import { normalizeAutomaticDownloadRule, parseAutomaticDownloadRules } from './automaticDownloadRules'
 import { buildYtDlpDownloadArguments, playbackSubtitleArguments } from '../../ytDlpArguments'
-import { EXTERNAL_PLAYBACK_FORMAT_SELECTOR, PLAYBACK_INFO_OUTPUT_TEMPLATE, EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE, parseYtDlpPlaybackInfo, mapPlaybackFormat, mapPlaybackCaptions, mapExternalPlaybackMetadata, toFiniteNumber, toNonEmptyString } from '../../ytDlpMetadata'
+import { EXTERNAL_PLAYBACK_FORMAT_SELECTOR, PLAYBACK_INFO_OUTPUT_TEMPLATE, EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE, parseYtDlpPlaybackInfo, mapPlaybackFormat, mapPlaybackCaptions, getOriginalAudioLanguage, mapExternalPlaybackMetadata, toFiniteNumber, toNonEmptyString } from '../../ytDlpMetadata'
 import { buildYtDlpStoryboardVtt } from '../../main/ytDlpStoryboard'
 import { isYouTubeSubtitleUrl } from '../../youtubeSubtitle'
 import { buildYtDlpSearchArguments, normalizeYtDlpSearchResults, completeYtDlpSearchPlaylists } from '../../ytDlpSearch'
@@ -200,14 +200,21 @@ const capacitor = {
       if (isYouTubeVideo && !useDefaultClients) args.push('--extractor-args', useAuthentication ? 'youtube:player_client=default,web_safari' : 'youtube:player_client=default,web_embedded,-android_vr')
       args.push(isYouTubeVideo ? `https://www.youtube.com/watch?v=${videoId}` : videoId)
       const [info, binaries] = await Promise.all([extract(args, useAuthentication, !isYouTubeVideo, parseYtDlpPlaybackInfo, true), native.info()])
-      const playbackCaptions = mapPlaybackCaptions(info.requested_subtitles, info.subtitles, !isYouTubeVideo)
+      const playbackCaptions = mapPlaybackCaptions(info.requested_subtitles, info.subtitles, !isYouTubeVideo, isYouTubeVideo ? getOriginalAudioLanguage(info.formats) : null)
       let formats = Array.isArray(info.formats) ? info.formats : []
       if (process.env.IS_IOS) {
         // WebKit cannot fetch yt-dlp's media URLs through CORS, including
         // YouTube's googlevideo streams. Use the native scheme for HTTP media.
         if (!isYouTubeVideo) formats = formats.filter(format => format.protocol === 'https' && format.url)
         const httpFormats = formats.filter(format => format.protocol === 'https' && format.url)
-        const subtitles = Object.values(info.requested_subtitles ?? {}).filter(subtitle => subtitle?.url?.startsWith('https://'))
+        // Register the mapped captions, which can rebuild YouTube translation URLs,
+        // with the headers of the subtitle yt-dlp requested for the same URL
+        const requestedSubtitles = new Map(Object.values(info.requested_subtitles ?? {})
+          .filter(subtitle => subtitle?.url?.startsWith('https://'))
+          .map(subtitle => [new URL(subtitle.url).toString(), subtitle]))
+        const subtitles = [...playbackCaptions.captions, ...playbackCaptions.captionTranslations]
+          .filter(caption => caption.url.startsWith('https://'))
+          .map(caption => requestedSubtitles.get(caption.url) ?? { url: caption.url })
         const requests = [...httpFormats, ...subtitles]
         const { urls } = await native.registerMedia({ formats: requests })
         const registeredUrls = new Map(requests.map((entry, index) => [new URL(entry.url).toString(), urls[index]]))

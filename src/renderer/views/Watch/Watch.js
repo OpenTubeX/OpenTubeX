@@ -90,12 +90,17 @@ import {
 import { sponsorBlockSkipSegments } from '../../helpers/sponsorblock'
 import { getVideoDislikes } from '../../helpers/returnyoutubedislike'
 import {
-  findCaptionByLocale,
-  getPreferredCaption,
   sortCaptions,
   MANIFEST_TYPE_DASH,
   MANIFEST_TYPE_HLS
 } from '../../helpers/player/utils'
+import {
+  findCaptionByLocale,
+  getCaptionTranslationSource,
+  getPreferredCaption,
+  isDubbedCaptionLanguage,
+  isSameBaseLanguage
+} from '../../../captionLanguages'
 import {
   checkYtDlpPlaybackUrl,
   getYtDlpPlaybackSource,
@@ -3869,6 +3874,9 @@ export default defineComponent({
 
             if (result.captions) {
               const captionTranslationLanguages = result.captions.translation_languages ?? []
+              // Only set when the video has multiple audio tracks, e.g. AI dubs
+              const originalLanguage = result.streaming_data.adaptive_formats.find(format => format.has_audio && format.is_original)?.language
+              const captionLanguages = result.captions.caption_tracks?.map(caption => caption.language_code) ?? []
               const captionTracks = result.captions?.caption_tracks?.map((caption) => {
                 const url = new URL(caption.base_url)
                 url.searchParams.set('fmt', 'vtt')
@@ -3878,13 +3886,16 @@ export default defineComponent({
                   url: url.toString(),
                   label: caption.name.text,
                   language: caption.language_code,
-                  mimeType: 'text/vtt'
+                  mimeType: 'text/vtt',
+                  isDubbed: caption.kind === 'asr' &&
+                    isDubbedCaptionLanguage(caption.language_code, originalLanguage, captionLanguages),
+                  isOriginalLanguage: !!originalLanguage && isSameBaseLanguage(caption.language_code, originalLanguage)
                 }
               }) ?? []
 
               this.$store.commit('setYouTubeCaptionLanguageCodes', captionTranslationLanguages)
               this.captionTranslations = captionTranslationLanguages.map(language =>
-                this.getTranslatedCaption(result.captions, language)
+                this.getTranslatedCaption(result.captions, language, originalLanguage)
               ).filter(Boolean)
 
               if (captionTracks.length > 0) {
@@ -3905,11 +3916,12 @@ export default defineComponent({
                     break
                 }
 
-                const hasPreferredCaption = findCaptionByLocale(captionTracks, this.preferredCaptionLocale) ||
-                  captionTracks.some(captionTrack => languagesSet.has(captionTrack.language))
+                const originalCaptionTracks = captionTracks.filter(captionTrack => !captionTrack.isDubbed)
+                const hasPreferredCaption = findCaptionByLocale(originalCaptionTracks, this.preferredCaptionLocale) ||
+                  originalCaptionTracks.some(captionTrack => languagesSet.has(captionTrack.language))
 
                 if (!hasPreferredCaption) {
-                  const translatedCaptionTrack = this.getTranslatedLocaleCaption(result.captions, languagesSet)
+                  const translatedCaptionTrack = this.getTranslatedLocaleCaption(result.captions, languagesSet, originalLanguage)
 
                   if (translatedCaptionTrack) {
                     captionTracks.push(translatedCaptionTrack)
@@ -6366,6 +6378,14 @@ export default defineComponent({
             translationName
           }
         })
+
+        // Like built-in playback, offer a translation when no original caption matches the preferred locale
+        if (!findCaptionByLocale(this.captions.filter(caption => !caption.isDubbed), this.preferredCaptionLocale)) {
+          const translation = findCaptionByLocale(this.captionTranslations, this.preferredCaptionLocale)
+          if (translation) {
+            this.captions = sortCaptions([...this.captions, { ...translation, isAutotranslated: true }], this.preferredCaptionLocale)
+          }
+        }
       }
       // HLS manifests refresh themselves, so they don't expire the way the stream URLs do.
       // Keeping the backend's date stops playback errors from being blamed on an
@@ -6563,9 +6583,10 @@ export default defineComponent({
     /**
      * @param {import('youtubei.js').YTNodes.PlayerCaptionsTracklist} captions
      * @param {Set<string>} userLanguages
+     * @param {string | null | undefined} originalLanguage
      * @returns {null|{ url: string, label: string, language: string, mimeType: string, isAutotranslated: boolean }}
      */
-    getTranslatedLocaleCaption: function (captions, userLanguages) {
+    getTranslatedLocaleCaption: function (captions, userLanguages, originalLanguage) {
       // check if we can translate to the users language
       let translationLanguage = captions.translation_languages.find(language => userLanguages.has(language.language_code))
 
@@ -6582,31 +6603,20 @@ export default defineComponent({
         }
       }
 
-      return this.getTranslatedCaption(captions, translationLanguage)
+      return this.getTranslatedCaption(captions, translationLanguage, originalLanguage)
     },
 
     /**
      * @param {import('youtubei.js').YTNodes.PlayerCaptionsTracklist} captions
      * @param {{ language_code: string, language_name: { text: string } }} translationLanguage
+     * @param {string | null | undefined} originalLanguage
      * @returns {null|{ url: string, label: string, language: string, mimeType: string, isAutotranslated: boolean }}
      */
-    getTranslatedCaption: function (captions, translationLanguage) {
+    getTranslatedCaption: function (captions, translationLanguage, originalLanguage) {
       const translationName = translationLanguage.language_name.text
       const translationCode = translationLanguage.language_code
 
-      let trackToTranslate
-
-      const autoGeneratedCaptionTrack = captions.caption_tracks.find(track => track.kind === 'asr')
-      if (autoGeneratedCaptionTrack) {
-        // Check if there is a user uploaded caption track in the language of the video, as that is more trustworthy than auto-generated captions
-        const userUploadedCaptionTrack = captions.caption_tracks.find(track => track.kind !== 'asr' && track.language_code === autoGeneratedCaptionTrack.language_code)
-
-        // Fallback to the auto-generated track if there is no user uploaded one that matches the video language
-        trackToTranslate = userUploadedCaptionTrack ?? autoGeneratedCaptionTrack
-      } else {
-        // if there is no auto-generated track choose the first translatable track
-        trackToTranslate = captions.caption_tracks.find(track => track.is_translatable) ?? captions.caption_tracks[0]
-      }
+      const trackToTranslate = getCaptionTranslationSource(captions.caption_tracks, originalLanguage)
 
       if (!trackToTranslate) {
         return null

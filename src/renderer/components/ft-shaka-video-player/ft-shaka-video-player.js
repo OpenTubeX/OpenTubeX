@@ -66,12 +66,12 @@ import { FtPlaybackAdjustedTime } from './player-components/FtPlaybackAdjustedTi
 import {
   deduplicateAudioTracks,
   findMostSimilarAudioBandwidth,
-  getPreferredCaption,
   getSponsorBlockSegments,
   logShakaError,
   repairInvidiousManifest,
   translateSponsorBlockCategory
 } from '../../helpers/player/utils'
+import { getPreferredCaption } from '../../../captionLanguages'
 import {
   addKeyboardShortcutToActionTitle,
   formatDurationAsTimestamp,

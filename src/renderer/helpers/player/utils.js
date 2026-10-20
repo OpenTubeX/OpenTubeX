@@ -179,38 +179,6 @@ export function translateSponsorBlockCategory(category, { short = true } = {}) {
 }
 
 /**
- * Finds the caption that most closely matches the preferred locale.
- * @template {{ language: string }} T
- * @param {T[]} captions
- * @param {string} preferredLocale
- * @returns {T | null}
- */
-export function findCaptionByLocale(captions, preferredLocale) {
-  const normalizedLocale = preferredLocale.replace('_', '-').toLowerCase()
-  const preferredLanguage = normalizedLocale.split('-')[0]
-
-  return captions.find(caption => caption.language.replace('_', '-').toLowerCase() === normalizedLocale) ??
-    captions.find(caption => caption.language.replace('_', '-').toLowerCase().split('-')[0] === preferredLanguage) ??
-    null
-}
-
-/**
- * Selects the caption that should be enabled by default.
- * @template {{ language: string, isAutotranslated?: boolean }} T
- * @param {T[]} captions
- * @param {string} preferredLocale
- * @param {boolean} enableCaptionTranslations
- * @returns {T | null}
- */
-export function getPreferredCaption(captions, preferredLocale, enableCaptionTranslations) {
-  const selectableCaptions = enableCaptionTranslations
-    ? captions
-    : captions.filter(caption => !caption.isAutotranslated)
-
-  return findCaptionByLocale(selectableCaptions, preferredLocale) ?? selectableCaptions[0] ?? null
-}
-
-/**
  * Moves the captions that are the most similar to the preferred language to the top
  * and sorts the remaining ones alphabetically.
  * @param {{
