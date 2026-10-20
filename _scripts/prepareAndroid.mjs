@@ -8,7 +8,8 @@ const legacyLanguages = { he: 'iw', id: 'in' }
 
 const languageVariants = Object.groupBy(locales, locale => locale.split('-')[0])
 
-// Regions are kept only to tell apart variants of the same language, so de-AT also uses de-DE.
+// Regions are kept only to tell apart variants of the same language, so a device set to
+// German (Austria) also gets the de-DE strings.
 export function resourceDirectory(locale) {
   if (locale === 'en-US') return 'values'
   const [language, region] = locale.split('-')
