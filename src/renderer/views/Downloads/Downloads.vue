@@ -151,6 +151,7 @@
         @open="openDownload(download.id)"
         @play="playDownload(download)"
         @queue="queueDownload(download)"
+        @queue-next="queueDownload(download, true)"
         @remove="pendingRemoval = download"
         @retry="retryDownload(download)"
       />
@@ -379,7 +380,7 @@ async function openDownload(id) {
     showToast({ message: t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] })
   }
 }
-async function queueDownload(download) {
+async function queueDownload(download, playNext = false) {
   const refreshedDownload = (await refreshDownloads()).find(record => record.id === download.id)
   const videos = refreshedDownload ? downloadQueueVideos(refreshedDownload) : []
   if (videos.length === 0) {
@@ -387,7 +388,7 @@ async function queueDownload(download) {
     return
   }
 
-  for (const video of videos) store.commit('addVideoToWatchQueue', { video })
+  for (const video of playNext ? videos.toReversed() : videos) store.commit('addVideoToWatchQueue', { video, playNext })
   showToast({ message: t('Video.Added to Queue'), icon: ['fas', 'queue'] })
 }
 async function playDownload(download) {

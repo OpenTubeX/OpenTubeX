@@ -1,5 +1,6 @@
-import { test, expect, goTo, goToSettingsSection } from '../../helpers/app.mjs'
-import { SWIPE_VIDEO, verifyThumbnailSwipes, verifyPlaylistSwipeRemoval, verifyCopySwipe, verifySwipeDownloadAvailability } from '../../helpers/thumbnail-swipe.mjs'
+import path from 'node:path'
+import { test, expect, goTo, goToSettingsSection, repoRoot } from '../../helpers/app.mjs'
+import { SWIPE_VIDEO, verifyThumbnailSwipes, verifyPlaylistSwipeRemoval, verifyCopySwipe, verifySwipeDownloadAvailability, verifyReverseSwipes, swipeAction } from '../../helpers/thumbnail-swipe.mjs'
 
 test.use({ seed: { history: [SWIPE_VIDEO] } })
 
@@ -83,6 +84,42 @@ for (const context of ['Invidious sharing', 'public playlist']) {
         await verifyCopySwipe(page, session, () => app.electronApp.evaluate(({ clipboard }) => clipboard.readText()),
           `https://youtu.be/${SWIPE_VIDEO.videoId}${publicPlaylist ? '?list=PLswipe-test' : ''}`)
         await expect(page.locator('.mobileLinkActions')).toHaveCount(0)
+      } finally { await session.detach() }
+    })
+  })
+}
+
+for (const surface of ['history', 'downloads']) {
+  test.describe(`reverse swipe on ${surface}`, () => {
+    const destination = path.join(repoRoot, 'e2e/fixtures/media/demo.webm')
+    test.use({
+      seed: {
+        settings: { enableDownloads: true },
+        history: [SWIPE_VIDEO],
+        downloads: [{
+          id: 2242,
+          videoId: SWIPE_VIDEO.videoId,
+          title: SWIPE_VIDEO.title,
+          status: 'completed',
+          mode: 'video',
+          destination,
+          destinations: [destination],
+          files: [{ videoId: SWIPE_VIDEO.videoId, path: destination, duration: 60, extension: 'webm' }],
+        }],
+      }
+    })
+    test('toggles queue and watched actions and offers download removal @scale', async ({ page, attachScreenshot }) => {
+      await page.setViewportSize({ width: 480, height: 900 })
+      await goTo(page, surface)
+      const session = await page.context().newCDPSession(page)
+      try {
+        await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+        const target = page.locator(surface === 'history' ? '.ft-list-video .title' : '.downloadRow h3').first()
+        await page.evaluate(() => window.$store.commit('setThumbnailLeftSwipeAction', 'download'))
+        await swipeAction(page, session, target, 'Remove File', attachScreenshot)
+        await expect(page.getByRole('dialog').filter({ hasText: 'Remove File' }).last()).toBeVisible()
+        await page.getByRole('button', { name: 'Cancel', exact: true }).click()
+        await verifyReverseSwipes(page, session, target, attachScreenshot)
       } finally { await session.detach() }
     })
   })

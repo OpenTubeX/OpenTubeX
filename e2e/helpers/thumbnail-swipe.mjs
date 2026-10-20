@@ -104,6 +104,7 @@ export async function verifyThumbnailSwipes(page, session, screenshot = async ()
     await touch('touchStart', point)
     return point
   }
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('clearWatchQueue'))
   await setActions('addToQueue', 'addToPlaylist')
   await expect(frame).toHaveClass(/thumbnailSwipeEnabled/)
   const before = await queueLength()
@@ -278,4 +279,62 @@ export async function verifyPlaylistSwipeRemoval(page, session, screenshot = asy
       for (const [key, value] of Object.entries(saved.settings)) await store.dispatch('update' + key, value)
     }, saved)
   }
+}
+
+export async function swipeAction(page, session, target, label, screenshot = async () => {}) {
+  // Earlier confirmations can cover the next touch target on a phone.
+  await page.locator('[data-sonner-toast]').evaluateAll(rows => {
+    for (const row of rows) row.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+  })
+  await target.scrollIntoViewIfNeeded()
+  await expect.poll(() => target.evaluate(node => {
+    const rect = node.getBoundingClientRect()
+    return node.contains(document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2))
+  })).toBe(true)
+  const rect = await target.boundingBox()
+  const point = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 }
+  await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] })
+  await session.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ ...point, x: point.x - 40 }] })
+  await session.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ ...point, x: point.x - 110 }] })
+  const feedback = page.locator('.thumbnailSwipeFeedback')
+  await expect(feedback).toHaveAttribute('title', label)
+  await expect(feedback).toHaveClass(/thumbnailSwipeReady/)
+  await screenshot(`reverse swipe ${label}`)
+  await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  await expect(feedback).toHaveCount(0)
+}
+
+export async function verifyReverseSwipes(page, session, target, screenshot = async () => {}) {
+  const configure = action => page.evaluate(action => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setThumbnailLeftSwipeAction', action)
+    store.commit('setThumbnailRightSwipeAction', 'disabled')
+  }, action)
+  const queue = () => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getWatchQueueLength)
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('clearWatchQueue')
+    store.commit('setWatchedPercentageThreshold', 90)
+  })
+  for (const [action, label] of [['addToQueue', 'Add to Queue'], ['playNext', 'Play Next']]) {
+    await configure(action)
+    await swipeAction(page, session, target, label)
+    await expect.poll(queue).toBe(1)
+    await swipeAction(page, session, target, /Remove .* from queue/, screenshot)
+    await expect.poll(queue).toBe(0)
+  }
+  const history = () => page.evaluate(id => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById[id], SWIPE_VIDEO.videoId)
+  for (const [action, label] of [['history', 'Mark As Watched'], ['markAsFullySeen', 'Mark As Fully Watched']]) {
+    await configure(action)
+    await swipeAction(page, session, target, label)
+    await expect.poll(async () => (await history())?.isWatched).toBe(true)
+    if (action === 'markAsFullySeen') await expect.poll(async () => (await history())?.watchProgress).toBe(60)
+    await swipeAction(page, session, target, 'Unmark As Watched', screenshot)
+    await expect.poll(async () => (await history())?.isWatched).toBe(false)
+  }
+  await configure('markAsFullySeen')
+  await swipeAction(page, session, target, 'Mark As Fully Watched')
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setWatchedPercentageThreshold', 0))
+  await swipeAction(page, session, target, 'Unmark As Watched')
+  await expect.poll(history).toBeUndefined()
 }

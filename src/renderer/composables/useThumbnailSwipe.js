@@ -35,8 +35,9 @@ export function useThumbnailSwipe({ getAction, cancelHold, suppressClick, onComm
       return
     }
     cancelSwipe()
+    const control = event.target.closest('button, [role="button"], .channelName, .grabBar, [role="dialog"], [role="menu"], .iconDropdown')
     if (!enabled.value || event.pointerType !== 'touch' || !event.isPrimary ||
-        event.target.closest('button, [role="button"], .channelName, .grabBar, [role="dialog"], [role="menu"], .iconDropdown')) return
+        (control && event.currentTarget.contains(control))) return
     const width = event.currentTarget.getBoundingClientRect().width
     pointer = {
       id: event.pointerId,
