@@ -772,6 +772,8 @@ Settings:
     Title Includes: O título inclúe
     Title Excludes: O título exclúe
     Title Filter Hint: Separa con comas os distintos termos do título. Un vídeo debe coincidir polo menos cun termo incluído e con ningún dos excluídos.
+    Automatic Downloads Require Unmetered Network: "Só en redes sen límite de datos"
+    Automatic Downloads Require Charging: "Só mentres se carga"
   External Software Settings:
     Create YouTube session: "Crear sesión de YouTube"
     YouTube session hint: "Inicia sesión se é necesario e gárdaa. Escolle nos axustes se usala para descargas, reprodución ou subtítulos."
@@ -2140,6 +2142,8 @@ Downloads:
     Audio Best: Son - Mellor calidade
     Audio Format: Son - {format}
     Subtitles Format: Subtítulos - {format}
+  Waiting for Unmetered Network: "Agardando por unha rede sen límite de datos"
+  Waiting for Charging: "Agardando por un cargador"
 Channels:
   Load More Channels: "Cargar máis canles"
 Search Bar:

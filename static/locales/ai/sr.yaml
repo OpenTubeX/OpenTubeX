@@ -786,6 +786,8 @@ Settings:
     Title Includes: Наслов садржи
     Title Excludes: Наслов не садржи
     Title Filter Hint: Више израза за наслов раздвоји запетама. Видео-снимак мора да садржи бар један укључени израз и ниједан искључени израз.
+    Automatic Downloads Require Unmetered Network: "Само на мрежама без ограничења података"
+    Automatic Downloads Require Charging: "Само током пуњења"
   External Software Settings:
     Create YouTube session: "Направи YouTube сесију"
     YouTube session hint: "Пријавите се ако је потребно и сачувајте сесију. У подешавањима изаберите да ли да је користите за преузимања, репродукцију или титлове."
@@ -2166,6 +2168,8 @@ Downloads:
     Audio Best: Аудио - најбољи квалитет
     Audio Format: Аудио - {format}
     Subtitles Format: Титлови - {format}
+  Waiting for Unmetered Network: "Чека се мрежа без ограничења података"
+  Waiting for Charging: "Чека се пуњач"
 Channels:
   Load More Channels: "Учитај још канала"
 Search Bar:

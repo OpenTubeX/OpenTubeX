@@ -778,6 +778,8 @@ Settings:
     Title Includes: தலைப்பில் உள்ளவை
     Title Excludes: தலைப்பில் இல்லாதவை
     Title Filter Hint: பல தலைப்புச் சொற்களைக் காற்புள்ளிகளால் பிரிக்கவும். ஒரு காணொளி சேர்க்கப்பட்ட சொற்களில் குறைந்தது ஒன்றுடன் பொருந்த வேண்டும்; விலக்கப்பட்ட சொற்கள் எதனுடனும் பொருந்தக்கூடாது.
+    Automatic Downloads Require Unmetered Network: "அளவிடப்படாத நெட்வொர்க்குகளில் மட்டும்"
+    Automatic Downloads Require Charging: "சார்ஜ் ஆகும்போது மட்டும்"
   External Software Settings:
     Create YouTube session: "YouTube அமர்வை உருவாக்கு"
     YouTube session hint: "தேவைப்பட்டால் உள்நுழைந்து அமர்வைச் சேமிக்கவும். பதிவிறக்கங்கள், இயக்கம் அல்லது வசனங்களுக்கு இதைப் பயன்படுத்த வேண்டுமா என்பதை அமைப்புகளில் தேர்வு செய்யவும்."
@@ -2145,6 +2147,8 @@ Downloads:
     Audio Best: ஒலி - சிறந்த தரம்
     Audio Format: ஒலி - {format}
     Subtitles Format: துணைத்தலைப்புகள் - {format}
+  Waiting for Unmetered Network: "அளவிடப்படாத நெட்வொர்க்கிற்காகக் காத்திருக்கிறது"
+  Waiting for Charging: "சார்ஜருக்காகக் காத்திருக்கிறது"
 Channels:
   Load More Channels: "மேலும் சேனல்களை ஏற்று"
 Search Bar:

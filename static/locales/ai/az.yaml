@@ -766,6 +766,8 @@ Settings:
     Title Includes: Başlıqda olan sözlər
     Title Excludes: Başlıqda olmayan sözlər
     Title Filter Hint: Başlıq üçün bir neçə ifadəni vergüllə ayırın. Video daxil edilən ifadələrdən ən azı birinə uyğun gəlməli və istisna edilən ifadələrin heç birini ehtiva etməməlidir.
+    Automatic Downloads Require Unmetered Network: "Yalnız limitsiz şəbəkələrdə"
+    Automatic Downloads Require Charging: "Yalnız şarj olunarkən"
   External Software Settings:
     Create YouTube session: "YouTube sessiyası yarat"
     YouTube session hint: "Lazım gələrsə daxil olun və sessiyanı yadda saxlayın. Ayarlarda sessiyanın endirmələr, oxutma və ya subtitrlər üçün istifadəsini seçin."
@@ -2100,6 +2102,8 @@ Downloads:
     Audio Best: Səs - Ən yaxşı keyfiyyət
     Audio Format: Səs - {format}
     Subtitles Format: Titrlər - {format}
+  Waiting for Unmetered Network: "Limitsiz şəbəkə gözlənilir"
+  Waiting for Charging: "Şarj cihazı gözlənilir"
 Theme Discovery:
   Discover Themes: Mövzuları kəşf et
   Refresh: Yenilə

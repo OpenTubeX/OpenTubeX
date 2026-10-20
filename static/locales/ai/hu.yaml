@@ -764,6 +764,8 @@ Settings:
     Title Includes: A cím tartalmazza
     Title Excludes: A cím nem tartalmazza
     Title Filter Hint: A cím több keresőkifejezését vesszővel válassza el. A videónak legalább egy megadott kifejezést tartalmaznia kell, a kizárt kifejezések egyikét sem tartalmazhatja.
+    Automatic Downloads Require Unmetered Network: "Csak nem forgalomkorlátos hálózaton"
+    Automatic Downloads Require Charging: "Csak töltés közben"
   External Software Settings:
     Create YouTube session: "YouTube-munkamenet létrehozása"
     YouTube session hint: "Szükség esetén jelentkezz be, majd mentsd a munkamenetet. A beállításokban válaszd ki, hogy letöltésekhez, lejátszáshoz vagy feliratokhoz használod-e."
@@ -2088,6 +2090,8 @@ Downloads:
     Audio Best: Hang - Legjobb minőség
     Audio Format: Hang - {format}
     Subtitles Format: Feliratok - {format}
+  Waiting for Unmetered Network: "Várakozás nem forgalomkorlátos hálózatra"
+  Waiting for Charging: "Várakozás töltőre"
 Channels:
   Load More Channels: "További csatornák betöltése"
 Theme Discovery:

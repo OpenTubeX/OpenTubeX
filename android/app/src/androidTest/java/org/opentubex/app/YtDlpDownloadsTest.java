@@ -163,6 +163,46 @@ public class YtDlpDownloadsTest {
         } finally { folder.delete(); YtDlpFiles.deleteTree(state); }
     }
 
+    @Test public void automaticDownloadsWaitForChargingAndUnmeteredNetwork() throws Exception {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        File state = new File(context.getCacheDir(), "yt-dlp-conditions-" + UUID.randomUUID());
+        state.mkdirs();
+        DocumentFile folder = tree(context).createDirectory(UUID.randomUUID().toString());
+        assertNotNull(folder);
+        String folderUri = DocumentsContract.buildTreeDocumentUri(InstrumentationRegistry.getInstrumentation().getContext().getPackageName() + ".documents", DocumentsContract.getDocumentId(folder.getUri())).toString();
+        grant(context, Uri.parse(folderUri));
+        boolean[] met = {false, false};
+        List<String> wakes = new java.util.ArrayList<>();
+        YtDlpDownloads queue = new YtDlpDownloads(context, state, () -> {});
+        queue.conditions = new YtDlpDownloads.Conditions() {
+            @Override public boolean unmetered() { return met[0]; }
+            @Override public boolean charging() { return met[1]; }
+            @Override public void wakeWhen(boolean unmetered, boolean charging) { wakes.add(unmetered + "/" + charging); }
+        };
+        try {
+            JSONObject config = new JSONObject().put("enabled", true).put("folder", folderUri).put("concurrency", 2)
+                .put("automaticRequireUnmetered", true).put("automaticRequireCharging", true);
+            JSONArray args = new JSONArray(asList("--output", "%(id)s.%(ext)s", "http://example.org/video.mp4"));
+            long automatic = queue.add(new JSONObject().put("mode", "video").put("videoId", "aaaaaaaaaaa").put("automatic", true), args, config, -1).getLong("id");
+            long manual = queue.add(new JSONObject().put("mode", "video").put("videoId", "bbbbbbbbbbb"), args, config, -1).getLong("id");
+            assertEquals("Manual downloads ignore automatic download requirements", asList(manual), queue.claim());
+            assertEquals("unmetered", queue.list().getJSONObject(0).getString("waitingFor"));
+            assertFalse(queue.hasQueued());
+            assertEquals(asList("true/false"), wakes);
+            assertTrue(queue.claim().isEmpty());
+            assertEquals("A pending wake-up is not scheduled again", 1, wakes.size());
+            met[0] = true;
+            assertTrue(queue.claim().isEmpty());
+            assertEquals("charging", queue.list().getJSONObject(0).getString("waitingFor"));
+            assertEquals("The next unmet requirement gets its own wake-up", asList("true/false", "false/true"), wakes);
+            met[1] = true;
+            assertTrue(queue.hasQueued());
+            assertFalse(queue.list().getJSONObject(0).has("waitingFor"));
+            assertFalse("Waiting state changes are saved", new YtDlpDownloads(context, state, () -> {}).list().getJSONObject(0).has("waitingFor"));
+            assertEquals(asList(automatic), queue.claim());
+        } finally { queue.cancelAll(); folder.delete(); YtDlpFiles.deleteTree(state); }
+    }
+
     @Test public void savedCookiesAreUsedOnlyWhenDownloadsOptInAndSurviveQueueRestart() throws Exception {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         File cookies = new File(context.getNoBackupFilesDir(), "yt-dlp-cookies.txt");

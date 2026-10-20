@@ -763,6 +763,8 @@ Settings:
     Title Includes: Başlık şunları içerir
     Title Excludes: Başlık şunları içermez
     Title Filter Hint: Birden fazla başlık terimini virgülle ayırın. Video, eklenen terimlerden en az biriyle eşleşmeli ve dışlanan terimlerden hiçbiriyle eşleşmemelidir.
+    Automatic Downloads Require Unmetered Network: "Yalnızca sınırsız ağlarda"
+    Automatic Downloads Require Charging: "Yalnızca şarj olurken"
   External Software Settings:
     Create YouTube session: "YouTube oturumu oluştur"
     YouTube session hint: "Gerekirse oturum açın ve oturumu kaydedin. Ayarlarda indirmeler, oynatma veya altyazılar için kullanılıp kullanılmayacağını seçin."
@@ -2087,6 +2089,8 @@ Downloads:
     Audio Best: Ses - En İyi Kalite
     Audio Format: Ses - {format}
     Subtitles Format: Alt Yazılar - {format}
+  Waiting for Unmetered Network: "Sınırsız bir ağ bekleniyor"
+  Waiting for Charging: "Şarj cihazı bekleniyor"
 Channels:
   Load More Channels: "Daha fazla kanal yükle"
 Theme Discovery:

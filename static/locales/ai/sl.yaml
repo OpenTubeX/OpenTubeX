@@ -980,6 +980,8 @@ Settings:
     Title Includes: Naslov vključuje
     Title Excludes: Naslov ne vključuje
     Title Filter Hint: Več izrazov za naslov ločite z vejicami. Videoposnetek se mora ujemati z vsaj enim vključenim izrazom in z nobenim izključenim izrazom.
+    Automatic Downloads Require Unmetered Network: "Samo v omrežjih brez omejitve prenosa"
+    Automatic Downloads Require Charging: "Samo med polnjenjem"
   External Software Settings:
     Create YouTube session: "Ustvari sejo YouTube"
     YouTube session hint: "Po potrebi se prijavite in shranite sejo. V nastavitvah izberite, ali naj se uporablja za prenose, predvajanje ali podnapise."
@@ -2691,6 +2693,8 @@ Downloads:
     Audio Best: Zvok - najboljša kakovost
     Audio Format: Zvok - {format}
     Subtitles Format: Podnapisi - {format}
+  Waiting for Unmetered Network: "Čakanje na omrežje brez omejitve prenosa"
+  Waiting for Charging: "Čakanje na polnilnik"
 Channels:
   Load More Channels: "Naloži več kanalov"
 Theme Discovery:

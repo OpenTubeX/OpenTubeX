@@ -777,6 +777,8 @@ Settings:
     Title Includes: Otsikko sisältää
     Title Excludes: Otsikko ei sisällä
     Title Filter Hint: Erota otsikon hakusanat pilkuilla. Videon otsikossa on oltava vähintään yksi mukaan otettava hakusana, eikä siinä saa olla yhtäkään pois rajattavaa hakusanaa.
+    Automatic Downloads Require Unmetered Network: "Vain rajoittamattomissa verkoissa"
+    Automatic Downloads Require Charging: "Vain latauksen aikana"
   External Software Settings:
     Create YouTube session: "Luo YouTube-istunto"
     YouTube session hint: "Kirjaudu tarvittaessa sisään ja tallenna istunto. Valitse asetuksista, käytetäänkö sitä latauksiin, toistoon vai tekstityksiin."
@@ -2138,6 +2140,8 @@ Downloads:
     Audio Best: Ääni - paras laatu
     Audio Format: Ääni - {format}
     Subtitles Format: Tekstitykset - {format}
+  Waiting for Unmetered Network: "Odotetaan rajoittamatonta verkkoa"
+  Waiting for Charging: "Odotetaan laturia"
 Channels:
   Load More Channels: "Lataa lisää kanavia"
 Search Bar:

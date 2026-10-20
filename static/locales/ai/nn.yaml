@@ -866,6 +866,8 @@ Settings:
     Title Includes: Tittelen inneheld
     Title Excludes: Tittelen inneheld ikkje
     Title Filter Hint: Skil fleire tittelord med komma. Ein video må samsvare med minst eitt inkludert ord og ingen ekskluderte ord.
+    Automatic Downloads Require Unmetered Network: "Berre på nettverk utan datamåling"
+    Automatic Downloads Require Charging: "Berre under lading"
   External Software Settings:
     Create YouTube session: "Opprett YouTube-økt"
     YouTube session hint: "Logg inn om nødvendig, og lagra økta. Vel i innstillingane om ho skal brukast til nedlastingar, avspeling eller undertekstar."
@@ -2481,6 +2483,8 @@ Downloads:
     Audio Best: Lyd - beste kvalitet
     Audio Format: Lyd - {format}
     Subtitles Format: Undertekstar - {format}
+  Waiting for Unmetered Network: "Ventar på eit nettverk utan datamåling"
+  Waiting for Charging: "Ventar på ein ladar"
 Channels:
   Load More Channels: "Last inn fleire kanalar"
 Theme Discovery:

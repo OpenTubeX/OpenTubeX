@@ -1013,6 +1013,8 @@ Settings:
     Title Includes: El títol inclou
     Title Excludes: El títol exclou
     Title Filter Hint: Separeu amb comes els diversos termes del títol. Un vídeo ha de coincidir amb almenys un terme inclòs i amb cap d'exclòs.
+    Automatic Downloads Require Unmetered Network: "Només en xarxes sense límit de dades"
+    Automatic Downloads Require Charging: "Només mentre es carrega"
   External Software Settings:
     Create YouTube session: "Crea una sessió de YouTube"
     YouTube session hint: "Inicia la sessió si cal i desa-la. Tria a la configuració si vols utilitzar-la per a baixades, reproducció o subtítols."
@@ -2743,6 +2745,8 @@ Downloads:
     Audio Best: Àudio - Millor qualitat
     Audio Format: Àudio - {format}
     Subtitles Format: Subtítols - {format}
+  Waiting for Unmetered Network: "S'està esperant una xarxa sense límit de dades"
+  Waiting for Charging: "S'està esperant un carregador"
 Theme Discovery:
   Discover Themes: "Descobreix temes"
   Refresh: "Actualitza"

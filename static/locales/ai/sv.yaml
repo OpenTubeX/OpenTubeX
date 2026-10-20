@@ -766,6 +766,8 @@ Settings:
     Title Includes: Titeln innehåller
     Title Excludes: Titeln innehåller inte
     Title Filter Hint: Avgränsa flera titelord med kommatecken. En video måste matcha minst ett inkluderat ord och får inte matcha något uteslutet ord.
+    Automatic Downloads Require Unmetered Network: "Endast på obegränsade nätverk"
+    Automatic Downloads Require Charging: "Endast under laddning"
   External Software Settings:
     Create YouTube session: "Skapa YouTube-session"
     YouTube session hint: "Logga in vid behov och spara sessionen. Välj i inställningarna om den ska användas för nedladdningar, uppspelning eller undertexter."
@@ -2109,6 +2111,8 @@ Downloads:
     Audio Best: Ljud – bästa kvalitet
     Audio Format: Ljud - {format}
     Subtitles Format: Undertexter - {format}
+  Waiting for Unmetered Network: "Väntar på ett obegränsat nätverk"
+  Waiting for Charging: "Väntar på en laddare"
 Channels:
   Load More Channels: "Läs in fler kanaler"
 Search Bar:

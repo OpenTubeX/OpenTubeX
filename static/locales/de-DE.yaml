@@ -1427,6 +1427,8 @@ Settings:
     Automatic Downloads No Channels: Abonniere einen Kanal, bevor du automatische Downloads einrichtest.
     No Matching Automatic Download Channels: Keine Kanäle entsprechen deiner Suche.
     Automatic Downloads Livestreams: Livestreams
+    Automatic Downloads Require Unmetered Network: Nur in ungetakteten Netzwerken
+    Automatic Downloads Require Charging: Nur beim Laden
     Minimum Duration Seconds: Mindestdauer (Sekunden)
     Maximum Duration Seconds: Höchstdauer (Sekunden)
     Minimum File Size MB: Mindestdateigröße (MB)
@@ -3145,6 +3147,8 @@ Downloads:
   Processing: Verarbeitung läuft…
   Queued: In Warteschlange
   Queued Position: 'Position in Warteschlange: {position}'
+  Waiting for Unmetered Network: Wartet auf ein ungetaktetes Netzwerk
+  Waiting for Charging: Wartet auf ein Ladegerät
   Paused: Pausiert
   Pausing: Der aktuelle Download wird abgeschlossen, dann wird die Warteschlange pausiert
   Download Complete: Download abgeschlossen

@@ -388,6 +388,8 @@ export const SYNC_SETTING_LABELS = {
   watchedPercentageThreshold: 'Settings.Privacy Settings.Watched Percentage Threshold',
   watchedProgressSavingMode: 'Settings.Privacy Settings.Save Watched Progress',
   ytDlpAutomaticDownloadRules: 'Settings.Download Settings.Automatic Downloads',
+  ytDlpAutomaticDownloadsRequireCharging: 'Settings.Download Settings.Automatic Downloads Require Charging',
+  ytDlpAutomaticDownloadsRequireUnmetered: 'Settings.Download Settings.Automatic Downloads Require Unmetered Network',
   ytDlpDownloadBandwidthLimit: 'Settings.Download Settings.Bandwidth Limit',
   ytDlpDownloadTemplates: 'Settings.Download Settings.Download Templates',
   ytDlpDownloadUseCookies: 'Settings.External Software Settings.Use cookies for downloads',

@@ -766,6 +766,8 @@ Settings:
     Title Includes: Заглавието съдържа
     Title Excludes: Заглавието не съдържа
     Title Filter Hint: Разделете с запетаи отделните изрази за заглавие. Видеоклипът трябва да съответства на поне един от включените изрази и на нито един от изключените.
+    Automatic Downloads Require Unmetered Network: "Само в нетаксувани мрежи"
+    Automatic Downloads Require Charging: "Само докато се зарежда"
   External Software Settings:
     Create YouTube session: "Създаване на сесия в YouTube"
     YouTube session hint: "Влезте при нужда и запазете сесията. В настройките изберете дали да се използва за изтегляния, възпроизвеждане или субтитри."
@@ -2112,6 +2114,8 @@ Downloads:
     Audio Best: Звук - най-добро качество
     Audio Format: Звук - {format}
     Subtitles Format: Субтитри - {format}
+  Waiting for Unmetered Network: "Изчакване на нетаксувана мрежа"
+  Waiting for Charging: "Изчакване на зарядно устройство"
 Channels:
   Load More Channels: "Зареждане на още канали"
 Search Bar:

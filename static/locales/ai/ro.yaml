@@ -766,6 +766,8 @@ Settings:
     Title Includes: Titlul include
     Title Excludes: Titlul exclude
     Title Filter Hint: Separați prin virgule mai mulți termeni pentru titlu. Un videoclip trebuie să corespundă cel puțin unui termen inclus și niciunui termen exclus.
+    Automatic Downloads Require Unmetered Network: "Doar în rețele necontorizate"
+    Automatic Downloads Require Charging: "Doar în timpul încărcării"
   External Software Settings:
     Create YouTube session: "Creează o sesiune YouTube"
     YouTube session hint: "Autentifică-te dacă este necesar și salvează sesiunea. Alege în setări dacă să o folosești pentru descărcări, redare sau subtitrări."
@@ -2138,6 +2140,8 @@ Downloads:
     Audio Best: Audio - Cea mai bună calitate
     Audio Format: Audio - {format}
     Subtitles Format: Subtitrări - {format}
+  Waiting for Unmetered Network: "Se așteaptă o rețea necontorizată"
+  Waiting for Charging: "Se așteaptă un încărcător"
 Channels:
   Load More Channels: "Încarcă mai multe canale"
 Search Bar:

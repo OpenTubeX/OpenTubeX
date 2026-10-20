@@ -21,6 +21,13 @@ import java.util.regex.Pattern;
 
 /** Native queue ownership keeps downloads independent of WebView and activity lifetime. */
 final class YtDlpDownloads {
+    interface Conditions {
+        boolean unmetered();
+        boolean charging();
+        /** Wakes the queue once every requested state is reached. */
+        void wakeWhen(boolean unmetered, boolean charging);
+    }
+
     private static YtDlpDownloads instance;
     private static final List<String> ACTIVE = asList("queued", "preparing", "downloading", "processing", "paused", "pausing");
     private static final Pattern PROGRESS = Pattern.compile("^\\[download]\\s+(\\d+(?:\\.\\d+)?)%(?:.*?\\bat\\s+(\\S+))?(?:.*?\\bETA\\s+(\\S+))?");
@@ -37,6 +44,8 @@ final class YtDlpDownloads {
     private int concurrency = 2;
     private int bandwidth;
     private JSONObject configuration = new JSONObject();
+    Conditions conditions;
+    private String scheduledConditions;
 
     static synchronized YtDlpDownloads get(Context context) {
         Context application = context.getApplicationContext();
@@ -49,6 +58,7 @@ final class YtDlpDownloads {
     YtDlpDownloads(Context context, File directory, Runnable schedule) {
         this.context = context;
         this.schedule = schedule;
+        conditions = YtDlpDownloadConditionsWorker.conditions(context);
         staging = new File(directory, "yt-dlp-downloads");
         file = new AtomicFile(new File(directory, "yt-dlp-downloads.json"));
         if (!file.getBaseFile().exists()) return;
@@ -80,6 +90,8 @@ final class YtDlpDownloads {
         concurrency = Math.max(1, Math.min(10, config.optInt("concurrency", 2)));
         bandwidth = Math.max(0, Math.min(10_000_000, config.optInt("bandwidth")));
         save();
+        // Disabled requirements release waiting automatic downloads.
+        if (hasQueued()) wake();
     }
 
     static JSONObject parseCompletedFile(String line) throws Exception {
@@ -175,9 +187,45 @@ final class YtDlpDownloads {
         return cookies;
     }
 
+    synchronized void conditionsMet() {
+        scheduledConditions = null;
+        wake();
+    }
+
+    /** Marks queued automatic downloads whose requirements are unmet and returns whether any queued download can start. */
+    private synchronized boolean refreshWaiting() throws Exception {
+        boolean requireUnmetered = configuration.optBoolean("automaticRequireUnmetered");
+        boolean requireCharging = configuration.optBoolean("automaticRequireCharging");
+        boolean unmetered = !requireUnmetered || conditions.unmetered();
+        boolean charging = !requireCharging || conditions.charging();
+        boolean startable = false;
+        String waiting = null;
+        boolean changed = false;
+        for (JSONObject record : records.values()) {
+            if (!record.optString("status").equals("queued")) continue;
+            String waitingFor = YtDlpAutomaticDownloads.waitingFor(record, configuration, unmetered, charging);
+            if (!Objects.equals(waitingFor, record.has("waitingFor") ? record.optString("waitingFor") : null)) {
+                if (waitingFor == null) record.remove("waitingFor");
+                else record.put("waitingFor", waitingFor);
+                publish(record);
+                changed = true;
+            }
+            if (waitingFor == null) startable = true;
+            else waiting = waitingFor;
+        }
+        if (changed) save();
+        // Wake for the reason shown so the next unmet requirement replaces it.
+        if (waiting != null && !waiting.equals(scheduledConditions)) {
+            scheduledConditions = waiting;
+            conditions.wakeWhen(waiting.equals("unmetered"), waiting.equals("charging"));
+        }
+        return startable;
+    }
+
     synchronized List<Long> claim() throws Exception {
+        refreshWaiting();
         List<JSONObject> pending = records.values().stream()
-            .filter(record -> record.optString("status").equals("queued") && !running.contains(record.optLong("id")))
+            .filter(record -> record.optString("status").equals("queued") && !record.has("waitingFor") && !running.contains(record.optLong("id")))
             .sorted(Comparator.comparingLong(record -> record.optLong("queuePosition")))
             .collect(java.util.stream.Collectors.toList());
         List<Long> ids = new ArrayList<>();
@@ -194,7 +242,10 @@ final class YtDlpDownloads {
     }
 
     synchronized boolean hasRunning() { return !running.isEmpty(); }
-    synchronized boolean hasQueued() { return records.values().stream().anyMatch(r -> r.optString("status").equals("queued")); }
+    synchronized boolean hasQueued() {
+        try { return refreshWaiting(); }
+        catch (Exception error) { throw new IllegalStateException(error); }
+    }
 
     void run(long id) {
         JSONObject record;

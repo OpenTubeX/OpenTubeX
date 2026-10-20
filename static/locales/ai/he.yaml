@@ -777,6 +777,8 @@ Settings:
     Title Includes: הכותרת כוללת
     Title Excludes: הכותרת אינה כוללת
     Title Filter Hint: הפרידו מונחי כותרת בפסיקים. סרטון חייב להתאים לפחות למונח אחד שנכלל ולא להתאים לאף מונח שהוחרג.
+    Automatic Downloads Require Unmetered Network: "רק ברשתות ללא הגבלת נתונים"
+    Automatic Downloads Require Charging: "רק בזמן טעינה"
   External Software Settings:
     Create YouTube session: "יצירת הפעלת YouTube"
     YouTube session hint: "יש להתחבר במידת הצורך ולשמור את ההפעלה. בהגדרות אפשר לבחור אם להשתמש בה להורדות, לניגון או לכתוביות."
@@ -2140,6 +2142,8 @@ Downloads:
     Audio Best: שמע - האיכות הטובה ביותר
     Audio Format: שמע - {format}
     Subtitles Format: כתוביות - {format}
+  Waiting for Unmetered Network: "ממתין לרשת ללא הגבלת נתונים"
+  Waiting for Charging: "ממתין למטען"
 Channels:
   Load More Channels: "טעינת ערוצים נוספים"
 Search Bar:

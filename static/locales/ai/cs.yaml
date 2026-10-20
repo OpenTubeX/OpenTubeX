@@ -764,6 +764,8 @@ Settings:
     Title Includes: Název obsahuje
     Title Excludes: Název neobsahuje
     Title Filter Hint: Více výrazů v názvu oddělte čárkami. Video musí odpovídat alespoň jednomu zahrnutému výrazu a žádnému vyloučenému výrazu.
+    Automatic Downloads Require Unmetered Network: "Pouze v neměřených sítích"
+    Automatic Downloads Require Charging: "Pouze během nabíjení"
   External Software Settings:
     Create YouTube session: "Vytvořit relaci YouTube"
     YouTube session hint: "V případě potřeby se přihlaste a uložte relaci. V nastavení zvolte, zda ji používat pro stahování, přehrávání nebo titulky."
@@ -2087,6 +2089,8 @@ Downloads:
     Audio Best: Zvuk – nejvyšší kvalita
     Audio Format: Zvuk – {format}
     Subtitles Format: Titulky – {format}
+  Waiting for Unmetered Network: "Čeká se na neměřenou síť"
+  Waiting for Charging: "Čeká se na nabíječku"
 Channels:
   Load More Channels: "Načíst další kanály"
 Theme Discovery:

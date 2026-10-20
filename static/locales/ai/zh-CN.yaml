@@ -763,6 +763,8 @@ Settings:
     Title Includes: 标题包含
     Title Excludes: 标题不包含
     Title Filter Hint: 多个标题关键词请用逗号分隔。视频必须至少匹配一个包含关键词，且不能匹配任何排除关键词。
+    Automatic Downloads Require Unmetered Network: "仅在不按流量计费的网络上"
+    Automatic Downloads Require Charging: "仅在充电时"
   External Software Settings:
     Create YouTube session: "创建 YouTube 会话"
     YouTube session hint: "如有需要，请登录并保存会话。在设置中选择是否将其用于下载、播放或字幕。"
@@ -2086,6 +2088,8 @@ Downloads:
     Audio Best: 音频 - 最佳质量
     Audio Format: 音频 - {format}
     Subtitles Format: 字幕 - {format}
+  Waiting for Unmetered Network: "正在等待不按流量计费的网络"
+  Waiting for Charging: "正在等待充电器"
 Channels:
   Load More Channels: "加载更多频道"
 Theme Discovery:

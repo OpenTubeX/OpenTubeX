@@ -772,6 +772,8 @@ Settings:
     Title Includes: Tiêu đề có chứa
     Title Excludes: Tiêu đề không chứa
     Title Filter Hint: Phân tách nhiều cụm từ trong tiêu đề bằng dấu phẩy. Video phải khớp ít nhất một cụm từ cần có và không khớp cụm từ loại trừ nào.
+    Automatic Downloads Require Unmetered Network: "Chỉ trên mạng không đo lưu lượng"
+    Automatic Downloads Require Charging: "Chỉ khi đang sạc"
   External Software Settings:
     Create YouTube session: "Tạo phiên YouTube"
     YouTube session hint: "Đăng nhập nếu cần rồi lưu phiên. Chọn trong cài đặt để sử dụng phiên cho tải xuống, phát hoặc phụ đề."
@@ -2128,6 +2130,8 @@ Downloads:
     Audio Best: Âm thanh - Chất lượng tốt nhất
     Audio Format: Âm thanh - {format}
     Subtitles Format: Phụ đề - {format}
+  Waiting for Unmetered Network: "Đang chờ mạng không đo lưu lượng"
+  Waiting for Charging: "Đang chờ bộ sạc"
 Channels:
   Load More Channels: "Tải thêm kênh"
 Search Bar:
