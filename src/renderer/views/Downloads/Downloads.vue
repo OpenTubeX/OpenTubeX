@@ -389,7 +389,7 @@ async function queueDownload(download, playNext = false) {
   }
 
   for (const video of playNext ? videos.toReversed() : videos) store.commit('addVideoToWatchQueue', { video, playNext })
-  showToast({ message: t('Video.Added to Queue'), icon: ['fas', 'queue'] })
+  showToast({ message: playNext ? t('Video.Added to Play Next') : t('Video.Added to Queue'), icon: ['fas', 'queue'] })
 }
 async function playDownload(download) {
   return playDownloadedFile(download.id, null, {

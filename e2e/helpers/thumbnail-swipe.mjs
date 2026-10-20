@@ -320,6 +320,8 @@ export async function verifyReverseSwipes(page, session, target, screenshot = as
     await configure(action)
     await swipeAction(page, session, target, label)
     await expect.poll(queue).toBe(1)
+    await expect.soft(page.getByText(action === 'playNext' ? 'Video will play next' : 'Video added to queue', { exact: true })).toBeVisible()
+    if (action === 'playNext') await screenshot('play next confirmation')
     await swipeAction(page, session, target, /Remove .* from queue/, screenshot)
     await expect.poll(queue).toBe(0)
   }
@@ -328,6 +330,7 @@ export async function verifyReverseSwipes(page, session, target, screenshot = as
     await configure(action)
     await swipeAction(page, session, target, label)
     await expect.poll(async () => (await history())?.isWatched).toBe(true)
+    expect.soft(await history()).not.toHaveProperty('route')
     if (action === 'markAsFullySeen') await expect.poll(async () => (await history())?.watchProgress).toBe(60)
     await swipeAction(page, session, target, 'Unmark As Watched', screenshot)
     await expect.poll(async () => (await history())?.isWatched).toBe(false)

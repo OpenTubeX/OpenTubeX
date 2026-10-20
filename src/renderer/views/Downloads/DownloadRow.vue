@@ -200,11 +200,10 @@
             :icon="['fas', 'xmark']"
             @click="showDetails = false"
           />
-        
+        </template>
+      </FtPrompt>
+    </article>
   </div>
-</template>
-    </FtPrompt>
-  </article>
 </template>
 
 <script setup>
@@ -306,7 +305,9 @@ function getThumbnailSwipeAction(direction) {
   const entries = videos.map(video => {
     const file = props.download.files.find(file => file.videoId === video.videoId)
     const history = store.getters.getHistoryCacheById[video.videoId]
-    return { ...video, ...history, lengthSeconds: file.duration ?? history?.lengthSeconds }
+    const entry = { ...video, ...history, lengthSeconds: file.duration ?? history?.lengthSeconds }
+    delete entry.route
+    return entry
   })
   const watched = entries.every(isHistoryEntryWatched)
   const fully = actionId === 'markAsFullySeen'
