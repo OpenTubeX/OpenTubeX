@@ -372,15 +372,26 @@ test('right control pill fades with its icons in both directions', async ({ app,
         .filter(animation => animation instanceof CSSTransition)
         .map(animation => animation.finished))
     }
+    // Sample 150ms into the fades on a paused clock, so a slow timer cannot land after them.
+    const sampleMidway = () => {
+      const transitions = controls.getAnimations({ subtree: true }).filter(animation => animation instanceof CSSTransition)
+      for (const transition of transitions) {
+        transition.pause()
+        transition.currentTime = 150
+      }
+      const state = snapshot()
+      for (const transition of transitions) transition.play()
+      return state
+    }
     controls.setAttribute('shown', 'true')
     await settle()
     controls.removeAttribute('shown')
-    await new Promise(resolve => setTimeout(resolve, 150))
-    const disappearing = snapshot()
+    const disappearing = sampleMidway()
     await settle()
     controls.setAttribute('shown', 'true')
-    await new Promise(resolve => setTimeout(resolve, 150))
-    return { appearing: snapshot(), disappearing }
+    const appearing = sampleMidway()
+    await settle()
+    return { appearing, disappearing }
   })
   for (const state of [result.appearing, result.disappearing]) {
     expect(state.iconOpacity).toBeGreaterThan(0)
