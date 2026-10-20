@@ -3724,7 +3724,7 @@ function isSideNavBackTarget() {
 
 /** @param {Element} target */
 function getAndroidBackPopup(target) {
-  const popup = target.closest?.('[data-settings-escape-scope], .iconDropdown, .colorPickerPopover')
+  const popup = target.closest?.('[data-settings-escape-scope], .iconDropdown, .colorPickerPopover, .contextMenu')
   if (popup) return popup
   const id = target.closest?.('[aria-expanded="true"][aria-controls]')?.getAttribute('aria-controls')
   const controlled = id ? document.getElementById(id) : null

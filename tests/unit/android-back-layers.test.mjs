@@ -143,3 +143,9 @@ test('Back targets a color picker teleported out of settings before the settings
   const getPopup = appFunction('getAndroidBackPopup', { document })
   assert.equal(getPopup({ closest: selector => selector.includes('.colorPickerPopover') ? popover : null }), popover)
 })
+
+test('Back closes a focused context menu as a popup', () => {
+  const menu = {}
+  const getPopup = appFunction('getAndroidBackPopup', { document: {} })
+  assert.equal(getPopup({ closest: selector => selector.split(', ').includes('.contextMenu') ? menu : null }), menu)
+})
