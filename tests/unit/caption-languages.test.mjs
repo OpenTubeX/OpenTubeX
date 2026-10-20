@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { getCaptionTranslationSource, getPreferredCaption } from '../../src/captionLanguages.js'
-import { mapPlaybackCaptions } from '../../src/ytDlpMetadata.js'
+import { getOriginalAudioLanguage, mapPlaybackCaptions } from '../../src/ytDlpMetadata.js'
 
 // YouTube lists an auto-generated track for every AI-dubbed audio track
 const dubbedVideoTracks = ['bn', 'nl', 'en', 'fr', 'de'].map(language => ({
@@ -65,4 +65,16 @@ test('yt-dlp captions flag dubbed transcripts and translate from the original la
   // A mismatching language without original language captions is not evidence of dubs
   const single = mapPlaybackCaptions({ de: requested['de-orig'] }, null, false, 'en')
   assert.equal(single.captions[0].isDubbed, false)
+})
+
+test('yt-dlp formats reveal the original audio language of dubbed videos', () => {
+  const audio = (xtags, language) => ({ url: `https://example.googlevideo.com/videoplayback?xtags=${encodeURIComponent(xtags)}`, language })
+  assert.equal(getOriginalAudioLanguage([
+    { url: 'https://i.ytimg.com/sb/storyboard.jpg' },
+    audio('acont=dubbed-auto:lang=de-DE', 'de-DE'),
+    audio('acont=original:lang=en-US', 'en-US')
+  ]), 'en-US')
+  // Videos with a single audio track have no audio track details
+  assert.equal(getOriginalAudioLanguage([{ url: 'https://example.googlevideo.com/videoplayback', language: 'en' }]), null)
+  assert.equal(getOriginalAudioLanguage(null), null)
 })

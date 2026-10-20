@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 
-import { mapPlaybackCaptions } from '../../src/ytDlpMetadata.js'
+import { getOriginalAudioLanguage, mapPlaybackCaptions } from '../../src/ytDlpMetadata.js'
 import { buildYtDlpDownloadArguments } from '../../src/ytDlpArguments.js'
 
 const read = path => readFile(new URL(`../../${path}`, import.meta.url), 'utf8')
@@ -151,6 +151,7 @@ test('iOS excludes external HLS manifests whose segments cannot use native trans
     PLAYBACK_INFO_OUTPUT_TEMPLATE: '',
     parseYtDlpPlaybackInfo: value => value,
     mapPlaybackCaptions: () => ({ captions: [], captionTranslations: [] }),
+    getOriginalAudioLanguage,
     mapExternalPlaybackMetadata: () => null,
     mapPlaybackFormat: value => value,
     buildYtDlpStoryboardVtt: () => null,
@@ -191,6 +192,7 @@ test('iOS native subtitle registration retains translated and authored track ide
     PLAYBACK_INFO_OUTPUT_TEMPLATE: '',
     parseYtDlpPlaybackInfo: value => value,
     mapPlaybackCaptions,
+    getOriginalAudioLanguage,
     mapExternalPlaybackMetadata: () => null,
     mapPlaybackFormat: value => value,
     buildYtDlpStoryboardVtt: () => null,
@@ -236,6 +238,7 @@ test('iOS routes YouTube playback formats through the native media bridge', asyn
     PLAYBACK_INFO_OUTPUT_TEMPLATE: '',
     parseYtDlpPlaybackInfo: value => value,
     mapPlaybackCaptions: () => ({ captions: [], captionTranslations: [] }),
+    getOriginalAudioLanguage,
     mapExternalPlaybackMetadata: () => null,
     mapPlaybackFormat: value => value,
     buildYtDlpStoryboardVtt: () => null,

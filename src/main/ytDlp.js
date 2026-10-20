@@ -4,7 +4,7 @@ import {
   SUBTITLE_FORMATS, MAX_LOCAL_PLAYLIST_VIDEOS, isDeniedCustomArgument, AUTOMATIC_NUMBER_LIMITS,
   splitArguments, automaticNumber, playbackImpersonationArguments, playbackSubtitleArguments, isYtDlpMediaUrl, jsRuntimeArguments,
 } from '../ytDlpArguments'
-import { EXTERNAL_PLAYBACK_FORMAT_SELECTOR, PLAYBACK_INFO_OUTPUT_TEMPLATE, PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE, parseYtDlpPlaybackInfo, toFiniteNumber, toNonEmptyString, mapPlaybackFormat, mapPlaybackCaptions, mapExternalPlaybackMetadata } from '../ytDlpMetadata'
+import { EXTERNAL_PLAYBACK_FORMAT_SELECTOR, PLAYBACK_INFO_OUTPUT_TEMPLATE, PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE, parseYtDlpPlaybackInfo, toFiniteNumber, toNonEmptyString, mapPlaybackFormat, mapPlaybackCaptions, getOriginalAudioLanguage, mapExternalPlaybackMetadata } from '../ytDlpMetadata'
 import { getTwitchCreatorUrl, resolveYtDlpCreatorAvatarUrl } from './ytDlpCreatorAvatar'
 import { execFile, spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
@@ -1981,7 +1981,7 @@ export async function handleYtDlpGetPlaybackInfo(
     registerExternalStreamHeaders(event.sender, externalRequests)
     registerExternalStreamCookies(event.sender, externalRequests, extractedCookies)
   }
-  const { captions, captionTranslations } = mapPlaybackCaptions(info.requested_subtitles, info.subtitles, !isYouTubeVideo, isYouTubeVideo ? info.language : null)
+  const { captions, captionTranslations } = mapPlaybackCaptions(info.requested_subtitles, info.subtitles, !isYouTubeVideo, isYouTubeVideo ? getOriginalAudioLanguage(info.formats) : null)
   const creatorAvatarUrl = isYouTubeVideo
     ? null
     : await resolveYtDlpCreatorAvatarUrl(info, (url, options) => net.fetch(url, options))

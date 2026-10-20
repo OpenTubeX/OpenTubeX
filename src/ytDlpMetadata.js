@@ -80,7 +80,6 @@ function playbackInfoOutputTemplate(formatFields, external = false, storyboardFi
     ',"duration":%(duration|null)j',
     ',"manifest_url":%(manifest_url|null)j',
     ',"requested_subtitles":%(requested_subtitles|null)j',
-    ',"language":%(language|null)j',
     ...(external ? [EXTERNAL_INFO_FIELDS] : []),
   `,"formats":%(formats.:.{${formatFields}})j`,
   // Project the selected storyboard only, avoiding the much larger media
@@ -214,6 +213,34 @@ export function mapPlaybackFormat(format) {
     fragmentCount: toFiniteNumber(format['fragments.0.fragment_count']) ??
       (Array.isArray(format.fragments) ? format.fragments.length : null)
   }
+}
+
+/**
+ * Finds the language of the original audio track of a YouTube video with multiple audio tracks, e.g. AI dubs.
+ * yt-dlp's top-level language follows the selected formats, which are storyboards during playback.
+ * @param {unknown} formats
+ * @returns {string | null}
+ */
+export function getOriginalAudioLanguage(formats) {
+  if (!Array.isArray(formats)) return null
+
+  for (const format of formats) {
+    const url = toNonEmptyString(format?.url)
+    if (url === null) continue
+
+    let xtags
+    try {
+      // googlevideo puts the audio track details into the URL
+      xtags = (new URL(url).searchParams.get('xtags') ?? '').split(':')
+    } catch {
+      continue
+    }
+    if (xtags.includes('acont=original')) {
+      return xtags.find(tag => tag.startsWith('lang='))?.slice('lang='.length) || toNonEmptyString(format.language)
+    }
+  }
+
+  return null
 }
 
 /**
