@@ -60,6 +60,7 @@
         :label="t('Settings.Theme Settings.Material Accent Color')"
         :allow-alpha="false"
         @update:model-value="updateCustomColor"
+        @change="flushCustomColor"
         @apply="seedBeforeEdit = null"
         @cancel="cancelCustomColor"
       >
@@ -83,7 +84,7 @@
 
 <script setup>
 import { useI18n } from 'vue-i18n'
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, ref } from 'vue'
 import FtColorPicker from './FtColorPicker/FtColorPicker.vue'
 import FtIcon from './FtIcon/FtIcon.vue'
 import { MATERIAL_SEED_PRESETS, MATERIAL_SYSTEM_SEED, materialColorScheme, materialSeedPalette } from '../../materialTheme.js'
@@ -103,15 +104,39 @@ const systemScheme = computed(() => androidDynamicColors.value.supported
   ? materialColorScheme(androidDynamicColors.value.palette, false)
   : null)
 const systemSelected = computed(() => props.modelValue === MATERIAL_SYSTEM_SEED)
-const customColor = computed(() => systemSelected.value
+const draftColor = ref(null)
+const customColor = computed(() => draftColor.value ?? (systemSelected.value
   ? materialColorScheme(getMaterialPalette(MATERIAL_SYSTEM_SEED), false).primary
-  : props.modelValue)
+  : props.modelValue))
+
+// Each seed change restyles the whole document, so dragging previews the app
+// at a limited rate while the picker follows every frame.
+const PREVIEW_INTERVAL_MS = 150
+let previewTimeout = null
+function emitDraftColor() {
+  if (draftColor.value !== null && draftColor.value !== props.modelValue) emit('update:modelValue', draftColor.value)
+}
+function previewDraftColor() {
+  emitDraftColor()
+  previewTimeout = setTimeout(() => {
+    previewTimeout = null
+    if (draftColor.value !== props.modelValue) previewDraftColor()
+  }, PREVIEW_INTERVAL_MS)
+}
+function flushCustomColor() {
+  clearTimeout(previewTimeout)
+  previewTimeout = null
+  emitDraftColor()
+  draftColor.value = null
+}
+onBeforeUnmount(flushCustomColor)
 
 // Canceling an edit that started from the system palette must keep following it.
 let seedBeforeEdit = null
 function updateCustomColor(color) {
   seedBeforeEdit ??= props.modelValue
-  emit('update:modelValue', color)
+  draftColor.value = color
+  if (previewTimeout === null) previewDraftColor()
 }
 function cancelCustomColor() {
   if (seedBeforeEdit === MATERIAL_SYSTEM_SEED) emit('update:modelValue', MATERIAL_SYSTEM_SEED)
