@@ -34,7 +34,8 @@ export function findSwipeDownload(downloads, videoId) {
   // the entire playlist because one of its videos happens to match.
   return Object.values(downloads)
     .filter(download => download.videoId === videoId && !download.playlistId &&
-      (ACTIVE_DOWNLOAD_STATUSES.has(download.status) || download.status === 'completed'))
+      (ACTIVE_DOWNLOAD_STATUSES.has(download.status) ||
+        (download.status === 'completed' && download.destination && download.availability !== 'missing')))
     .sort((a, b) => Number(ACTIVE_DOWNLOAD_STATUSES.has(b.status)) - Number(ACTIVE_DOWNLOAD_STATUSES.has(a.status)) || b.id - a.id)[0]
 }
 

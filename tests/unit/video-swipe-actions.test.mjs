@@ -52,9 +52,9 @@ test('download swipes cancel active work and remove completed files', () => {
 })
 
 test('feed swipe matching excludes playlist jobs and stale cancelled downloads', () => {
-  const completed = { id: 3, videoId: 'video', status: 'completed' }
+  const completed = { id: 3, videoId: 'video', status: 'completed', destination: '/video.mp4' }
   assert.equal(findSwipeDownload({
-    1: { videoId: 'video', playlistId: 'playlist', status: 'completed' },
+    1: { videoId: 'video', playlistId: 'playlist', status: 'completed', destination: '/video.mp4' },
     2: { videoId: 'video', status: 'cancelled' },
     3: completed,
   }, 'video'), completed)
@@ -62,10 +62,10 @@ test('feed swipe matching excludes playlist jobs and stale cancelled downloads',
 
 test('download reversal prefers active work, then the newest matching record', () => {
   const downloads = {
-    1: { id: 1, videoId: 'video', status: 'completed' },
+    1: { id: 1, videoId: 'video', status: 'completed', destination: '/video.mp4' },
     2: { id: 2, videoId: 'video', status: 'downloading' },
     3: { id: 3, videoId: 'video', status: 'queued' },
-    4: { id: 4, videoId: 'video', status: 'completed' },
+    4: { id: 4, videoId: 'video', status: 'completed', destination: '/video.mp4' },
     5: { id: 5, videoId: 'other', status: 'downloading' },
   }
   assert.equal(findSwipeDownload(downloads, 'video'), downloads[3])
@@ -96,4 +96,19 @@ test('play-next moves all matching download files together in playlist order', (
   assert.deepEqual(state.items.map(item => item.queueItemId), ['file-0', 'file-1', 'file-2', 'before', 'between'])
   resolve().run()
   assert.deepEqual(state.items, others)
+})
+
+test('download reversal skips unusable completed files but keeps active jobs eligible', () => {
+  const downloads = {
+    1: { id: 1, videoId: 'video', status: 'completed', destination: '/older.mp4' },
+    2: { id: 2, videoId: 'video', status: 'completed', destination: '/missing.mp4', availability: 'missing' },
+    3: { id: 3, videoId: 'video', status: 'completed' },
+  }
+  assert.equal(findSwipeDownload(downloads, 'video'), downloads[1])
+  delete downloads[1]
+  assert.equal(findSwipeDownload(downloads, 'video'), undefined)
+  for (const status of ['queued', 'preparing', 'downloading', 'processing', 'pausing', 'paused']) {
+    downloads[4] = { id: 4, videoId: 'video', status, availability: 'missing' }
+    assert.equal(findSwipeDownload(downloads, 'video'), downloads[4])
+  }
 })
