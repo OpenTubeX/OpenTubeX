@@ -611,7 +611,7 @@ export async function goTo(page, route) {
       await headerButton.click()
     } else {
       await page.locator('.profileTrigger').click()
-      await page.locator('.quickSettingsMenu .downloadsShortcut').click()
+      await page.getByRole('dialog', { name: 'Quick settings', exact: true }).getByRole('button', { name: 'Downloads', exact: true }).click()
     }
     await expect(page.getByRole('dialog', { name: 'Downloads', exact: true })).toBeVisible()
     return
