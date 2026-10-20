@@ -32,6 +32,11 @@ final class SubscriptionRefreshResultStore {
         "token", "targetId", "continueAction", "veCounter", "sectionIdentifier", "tag", "sequenceParams",
         "inlinePopStateEntityKey", "html5PlaybackOnesieConfig", "colorMap"
     ));
+    // Per-request signatures, redirect tokens and daily avatar versions. Other
+    // parameters, such as a video ID or a link's destination, are feed content.
+    private static final Set<String> VOLATILE_URL_PARAMETERS = new HashSet<>(Arrays.asList(
+        "pp", "rs", "sqp", "usqp", "redir_token", "continue", "days_since_epoch"
+    ));
     private static File indexedDirectory;
     private static SubscriptionRefreshResultIndex index;
 
@@ -209,11 +214,12 @@ final class SubscriptionRefreshResultStore {
             Collections.sort(keys);
             digest.update((byte) '{');
             for (String key : keys) {
-                updateFingerprint(digest, key);
                 Object child = object.opt(key);
-                // Signatures and redirect tokens vary per request in URL queries,
-                // but a different path, such as a new thumbnail, is a feed change.
-                if ("url".equals(key) && child instanceof String) child = ((String) child).split("\\?", 2)[0];
+                if ("url".equals(key) && child instanceof String) {
+                    child = fingerprintUrl((String) child);
+                    if (child == null) continue;
+                }
+                updateFingerprint(digest, key);
                 updateFingerprint(digest, child);
             }
             digest.update((byte) '}');
@@ -226,6 +232,25 @@ final class SubscriptionRefreshResultStore {
             digest.update(JSONObject.wrap(value).toString().getBytes(StandardCharsets.UTF_8));
             digest.update((byte) 0);
         }
+    }
+
+    static String fingerprintUrl(String url) {
+        int hostStart = url.indexOf("://");
+        int hostEnd = hostStart < 0 ? -1 : url.indexOf('/', hostStart + 3);
+        String host = hostStart < 0 ? "" : url.substring(hostStart + 3, hostEnd < 0 ? url.length() : hostEnd);
+        // YouTube rotates thumbnail variants (oar1.jpg, hq720_3.jpg) per
+        // request, while a replaced thumbnail keeps its path.
+        if (host.endsWith("ytimg.com")) return null;
+        int queryStart = url.indexOf('?');
+        if (queryStart < 0) return url;
+        StringBuilder result = new StringBuilder(url.substring(0, queryStart + 1));
+        for (String parameter : url.substring(queryStart + 1).split("&")) {
+            String name = parameter.split("=", 2)[0];
+            if (VOLATILE_URL_PARAMETERS.contains(name)) continue;
+            if (result.charAt(result.length() - 1) != '?') result.append('&');
+            result.append(parameter);
+        }
+        return result.toString();
     }
 
     private static String readFingerprint(File file) {

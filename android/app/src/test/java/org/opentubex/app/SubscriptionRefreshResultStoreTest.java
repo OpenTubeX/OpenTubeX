@@ -50,14 +50,26 @@ public class SubscriptionRefreshResultStoreTest {
     }
 
     @Test
-    public void fingerprintIgnoresUrlQueriesButNotUrlPaths() throws Exception {
+    public void fingerprintIgnoresPerRequestUrlValuesButNotLinkDestinations() throws Exception {
         assertEquals(
-            SubscriptionRefreshResultStore.fingerprint(new JSONObject("{\"url\":\"https://i.ytimg.com/vi/a/hq720.jpg?sqp=1&rs=x\"}")),
-            SubscriptionRefreshResultStore.fingerprint(new JSONObject("{\"url\":\"https://i.ytimg.com/vi/a/hq720.jpg?sqp=2&rs=y\"}"))
+            SubscriptionRefreshResultStore.fingerprint(new JSONObject(
+                "{\"url\":\"https://www.youtube.com/redirect?event=post&redir_token=a&q=https%3A%2F%2Fexample.com\","
+                    + "\"thumbnail\":{\"url\":\"https://i.ytimg.com/vi/a/oar1.jpg?sqp=1&rs=x\"},"
+                    + "\"watch\":{\"url\":\"/watch?v=abcdefghijk&pp=1\"}}")),
+            SubscriptionRefreshResultStore.fingerprint(new JSONObject(
+                "{\"url\":\"https://www.youtube.com/redirect?event=post&redir_token=b&q=https%3A%2F%2Fexample.com\","
+                    + "\"thumbnail\":{\"url\":\"https://i.ytimg.com/vi/a/oar3.jpg?sqp=2&rs=y\"},"
+                    + "\"watch\":{\"url\":\"/watch?v=abcdefghijk&pp=2\"}}"))
         );
         assertNotEquals(
-            SubscriptionRefreshResultStore.fingerprint(new JSONObject("{\"url\":\"https://i.ytimg.com/vi/a/oar2.jpg\"}")),
-            SubscriptionRefreshResultStore.fingerprint(new JSONObject("{\"url\":\"https://i.ytimg.com/vi/a/oar3.jpg\"}"))
+            SubscriptionRefreshResultStore.fingerprint(new JSONObject(
+                "{\"url\":\"https://www.youtube.com/redirect?redir_token=a&q=https%3A%2F%2Fexample.com\"}")),
+            SubscriptionRefreshResultStore.fingerprint(new JSONObject(
+                "{\"url\":\"https://www.youtube.com/redirect?redir_token=a&q=https%3A%2F%2Fexample.org\"}"))
+        );
+        assertNotEquals(
+            SubscriptionRefreshResultStore.fingerprint(new JSONObject("{\"url\":\"/watch?v=abcdefghijk\"}")),
+            SubscriptionRefreshResultStore.fingerprint(new JSONObject("{\"url\":\"/watch?v=bcdefghijkl\"}"))
         );
     }
 }
