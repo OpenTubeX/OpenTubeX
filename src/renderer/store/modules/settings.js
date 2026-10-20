@@ -405,6 +405,8 @@ export function getSyncableSettingKeys(settings) {
   return Object.keys(state).filter(settingKey => (
     isSettingSyncEnabled(settings, settingKey) &&
     !(settingKey === 'defaultProfile' && !settings.syncServerSyncProfiles) &&
+    // Pins name playlist IDs that only exist on peers when playlists sync too.
+    !(settingKey === 'pinnedPlaylistIds' && !settings.syncServerSyncPlaylists) &&
     isSettingSyncableOnPlatform(settingKey)
   ))
 }

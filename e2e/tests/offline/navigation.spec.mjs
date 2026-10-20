@@ -938,6 +938,38 @@ test('keeps existing localized More labels with AI completions off', async ({ ap
   }
 })
 
+/**
+ * Scrolls the sidebar to its end before each change, then checks the offset
+ * and scrollbar against the remaining content.
+ * @param {import('@playwright/test').Page} page
+ * @param {(() => Promise<unknown>)[]} changes
+ */
+async function expectSidebarClampedAfterChanges(page, changes) {
+  const scroller = page.locator('.sideNav .inner')
+  for (const [index, change] of changes.entries()) {
+    const previousOffset = await scroller.evaluate(element => {
+      element.scrollTop = element.scrollHeight
+      return element.scrollTop
+    })
+    await change()
+    await expect.poll(() => scroller.evaluate((element, previousOffset) => {
+      const bounds = element.getBoundingClientRect()
+      const children = [...element.children].filter(child => !child.classList.contains('os-scrollbar') && child.getBoundingClientRect().height > 0)
+      // Like the app's clamp, include the last element's trailing margin.
+      const end = children.at(-1).getBoundingClientRect().bottom + (Number.parseFloat(getComputedStyle(children.at(-1)).marginBlockEnd) || 0)
+      const maximum = Math.max(0, end - bounds.top + element.scrollTop - element.clientHeight)
+      const scrollbar = element.querySelector('.os-scrollbar-vertical')
+      const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
+      const thumb = scrollbar.querySelector('.os-scrollbar-handle').getBoundingClientRect()
+      return {
+        validOffset: Math.abs(element.scrollTop - Math.min(previousOffset, maximum)) <= 1,
+        usable: !scrollbar.classList.contains('os-scrollbar-unusable') === (maximum > 1),
+        matchingThumb: maximum <= 1 || Math.abs(thumb.height / track.height - element.clientHeight / (maximum + element.clientHeight)) < 0.03
+      }
+    }, previousOffset), { message: `sidebar scroll range after change ${index + 1}` }).toEqual({ validOffset: true, usable: true, matchingThumb: true })
+  }
+}
+
 test.describe('expressive desktop navigation', () => {
   test.use({
     seed: {
@@ -1037,7 +1069,6 @@ test.describe('expressive desktop navigation', () => {
   })
 
   test('clamps the sidebar after layout and content shorten at the scroll end', { tag: '@scale' }, async ({ app, page }) => {
-    const scroller = page.locator('.sideNav .inner')
     await setWindowSize(app, page, { width: 1100, height: 500 })
     const changes = [
       async () => page.evaluate(() => window.$store.commit('toggleSideNav')),
@@ -1053,26 +1084,48 @@ test.describe('expressive desktop navigation', () => {
       async () => page.evaluate(() => window.$store.commit('setNavigationItems', ['home', 'history'])),
       async () => page.evaluate(() => window.$store.commit('setHideActiveSubscriptions', true))
     ]
-    for (const [index, change] of changes.entries()) {
-      const previousOffset = await scroller.evaluate(element => {
-        element.scrollTop = element.scrollHeight
-        return element.scrollTop
-      })
-      await change()
-      await expect.poll(() => scroller.evaluate((element, previousOffset) => {
-        const bounds = element.getBoundingClientRect()
-        const children = [...element.children].filter(child => !child.classList.contains('os-scrollbar') && child.getBoundingClientRect().height > 0)
-        const end = children.at(-1).getBoundingClientRect().bottom
-        const maximum = Math.max(0, end - bounds.top + element.scrollTop - element.clientHeight)
-        const scrollbar = element.querySelector('.os-scrollbar-vertical')
-        const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
-        const thumb = scrollbar.querySelector('.os-scrollbar-handle').getBoundingClientRect()
-        return {
-          validOffset: Math.abs(element.scrollTop - Math.min(previousOffset, maximum)) <= 1,
-          usable: !scrollbar.classList.contains('os-scrollbar-unusable') === (maximum > 1),
-          matchingThumb: maximum <= 1 || Math.abs(thumb.height / track.height - element.clientHeight / (maximum + element.clientHeight)) < 0.03
-        }
-      }, previousOffset), { message: `sidebar scroll range after change ${index + 1}` }).toEqual({ validOffset: true, usable: true, matchingThumb: true })
+    await expectSidebarClampedAfterChanges(page, changes)
+  })
+})
+
+test.describe('pinned playlists in the sidebar', () => {
+  test.use({
+    seed: {
+      settings: { alwaysShowScrollbars: true, pinnedPlaylistIds: Array.from({ length: 8 }, (_, index) => `pinned-${index}`) },
+      playlists: Array.from({ length: 8 }, (_, index) => ({
+        _id: `pinned-${index}`,
+        playlistName: `Pinned ${index}`,
+        protected: false,
+        description: '',
+        videos: [],
+        createdAt: Date.now() - index * 1000,
+        lastUpdatedAt: Date.now()
+      })),
+      profiles: [{
+        _id: 'allChannels',
+        name: 'All Channels',
+        bgColor: '#000000',
+        textColor: '#FFFFFF',
+        subscriptions: Array.from({ length: 12 }, (_, index) => ({
+          id: `UC${index.toString().padStart(22, '0')}`,
+          name: `Channel ${index}`,
+          thumbnail: ''
+        }))
+      }]
     }
+  })
+
+  test('clamps the sidebar when pinned playlists are removed at the scroll end', { tag: '@scale' }, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 1100, height: 500 })
+    const pinned = page.locator('.sideNav .pinnedPlaylists .navChannel')
+    await expect(pinned).toHaveCount(8)
+    await expectSidebarClampedAfterChanges(page, [
+      async () => page.evaluate(() => window.$store.dispatch('updatePinnedPlaylistIds', ['pinned-0', 'pinned-1', 'pinned-2', 'pinned-3', 'pinned-4', 'pinned-5'])),
+      async () => page.evaluate(() => window.$store.dispatch('removePlaylist', 'pinned-5')),
+      async () => page.evaluate(() => window.$store.commit('setHideActiveSubscriptions', true)),
+      async () => page.evaluate(() => window.$store.dispatch('removePlaylists', ['pinned-2', 'pinned-3', 'pinned-4'])),
+      async () => page.evaluate(() => window.$store.dispatch('updatePinnedPlaylistIds', [])),
+    ])
+    await expect(pinned).toHaveCount(0)
   })
 })
