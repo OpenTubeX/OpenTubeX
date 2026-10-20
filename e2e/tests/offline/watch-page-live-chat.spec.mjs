@@ -74,6 +74,64 @@ test.describe('watch page', () => {
     await expect(page.locator(`${activeTab} .ftVideoPlayer`)).toBeVisible()
   })
 
+  test('shows the donor handle in live chat and the expanded donation', async ({ app, page, attachScreenshot }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    const view = await watchViewHandle(page)
+    await view.evaluate(async view => {
+      const listeners = new Map()
+      const chat = new EventTarget()
+      chat.is_replay = false
+      chat.on = (event, listener) => listeners.set(listener, event)
+      chat.once = chat.on
+      chat.off = (_event, listener) => listeners.delete(listener)
+      chat.stop = () => {}
+      chat.start = () => {
+        for (const [listener, event] of listeners) {
+          if (event !== 'start') continue
+          listener({
+            actions: [{
+              is: type => type.type === 'AddChatItemAction',
+              item: {
+                is: type => type.type === 'LiveChatPaidMessage',
+                id: 'donation',
+                timestamp: Date.now(),
+                message: { text: 'Thank you for the stream!' },
+                purchase_amount: '$10.00',
+                author: {
+                  id: 'donor-channel',
+                  name: '@donor',
+                  thumbnails: [{ url: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' }]
+                }
+              }
+            }]
+          })
+        }
+      }
+      view.$store.commit('setHideLiveChat', false)
+      view.liveChat = chat
+      view.liveChatIsReplay = false
+      view.liveChatOpen = true
+      view.isLive = true
+      view.isUpcoming = false
+      await view.$nextTick()
+    })
+
+    const chat = page.locator(`${activeTab} .watchVideoPlaylist`).filter({ hasText: 'Live Chat' })
+    const author = chat.locator('.liveChatComments .channelName')
+    await expect(author).toBeVisible()
+    await expect(author).toHaveText('@donor')
+    await expect(author).toHaveAttribute('href', '#/channel/donor-channel')
+    await chat.locator('.superChatComments .superChat').click()
+    const expanded = chat.locator('.openedSuperChat')
+    await expect(expanded.locator('.channelName')).toBeVisible()
+    await expect(expanded.locator('.channelName')).toHaveText('@donor')
+    await expect(expanded.locator('.channelName')).toHaveAttribute('href', '#/channel/donor-channel')
+    await expect(expanded.locator('.donationAmount')).toHaveText('$10.00')
+    await expect(expanded.locator('.chatMessage')).toHaveText('Thank you for the stream!')
+    await attachScreenshot('donor handle in live chat')
+  })
+
   test('retries failed live chat avatars and preserves the pop-out target', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)

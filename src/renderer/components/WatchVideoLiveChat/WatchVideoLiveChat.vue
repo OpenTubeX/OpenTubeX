@@ -1077,7 +1077,7 @@ function parseLiveChatSuperChat(superChat) {
     message: parseLiveChatMessage(superChat.message),
     author: {
       id: superChat.author.id,
-      name: superChat.author.name.text,
+      name: superChat.author.name,
       thumbnailUrl: superChat.author.thumbnails[0].url
     },
     superChat: {
