@@ -16,6 +16,8 @@ test('caption translations use the track in the original audio language', () => 
 
   const manualEnglish = { vss_id: '.en', language_code: 'en', is_translatable: true }
   assert.equal(getCaptionTranslationSource([...dubbedVideoTracks, manualEnglish], 'en-US'), manualEnglish)
+  const dubsOnly = dubbedVideoTracks.filter(track => track.language_code !== 'en')
+  assert.equal(getCaptionTranslationSource([...dubsOnly, manualEnglish], 'en-US'), manualEnglish)
 
   // Without dubs the original audio language is unknown
   assert.equal(getCaptionTranslationSource(dubbedVideoTracks, null).language_code, 'bn')
