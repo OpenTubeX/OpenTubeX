@@ -49,7 +49,8 @@ final class SubscriptionRefreshResultStore {
         // An unchanged feed would only make the app import the same data again.
         // A pending result for this slot already holds that payload.
         File fingerprintFile = new File(directory(context), slotName(slot) + ".fingerprint");
-        String fingerprint = fingerprint(payload);
+        // The channel ID lets a cache clear forget only that channel's fingerprints.
+        String fingerprint = channelId + "\n" + fingerprint(payload);
         if (fingerprint.equals(readFingerprint(fingerprintFile))) return;
         JSONObject result = baseResult("channel", profileId, feedType, timestamp)
             .put("channelId", channelId)
@@ -86,6 +87,18 @@ final class SubscriptionRefreshResultStore {
         JSONObject result = baseResult("failure", profileId, feedType, timestamp)
             .put("diagnostic", diagnostic.toJson());
         write(context, result, profileId + "\n" + feedType + "\nfailure");
+    }
+
+    // The app's cache no longer holds what these fingerprints describe, so the
+    // next refresh has to queue those feeds again. Null forgets every channel.
+    static synchronized void forgetFingerprints(Context context, Set<String> channelIds) {
+        File[] fingerprints = directory(context).listFiles((dir, name) -> name.endsWith(".fingerprint"));
+        if (fingerprints == null) return;
+        for (File file : fingerprints) {
+            String fingerprint = readFingerprint(file);
+            int end = fingerprint == null ? -1 : fingerprint.indexOf('\n');
+            if (channelIds == null || end < 0 || channelIds.contains(fingerprint.substring(0, end))) file.delete();
+        }
     }
 
     static synchronized void clearFailure(Context context, String profileId, String feedType) {

@@ -9,6 +9,7 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Collections;
 import java.util.UUID;
 import org.json.JSONObject;
 import org.junit.After;
@@ -63,6 +64,25 @@ public class SubscriptionRefreshResultStoreTest {
         assertEquals(4000, saved().getLong("timestamp"));
         assertEquals("Renamed video", saved().getJSONObject("payload").getJSONObject("data")
             .getJSONObject("contents").getString("title"));
+    }
+
+    @Test
+    public void clearingAChannelsCacheQueuesItsUnchangedFeedAgain() throws Exception {
+        write(payload("Video", "first"), 1000);
+        assertTrue(SubscriptionRefreshResultStore.acknowledge(context, saved().getString("id")));
+
+        SubscriptionRefreshResultStore.forgetFingerprints(context, Collections.singleton("UCother"));
+        write(payload("Video", "second"), 2000);
+        assertFalse("another channel's cache clear keeps this fingerprint", resultFile.exists());
+
+        SubscriptionRefreshResultStore.forgetFingerprints(context, Collections.singleton("UCchannel"));
+        write(payload("Video", "third"), 3000);
+        assertEquals(3000, saved().getLong("timestamp"));
+
+        assertTrue(SubscriptionRefreshResultStore.acknowledge(context, saved().getString("id")));
+        SubscriptionRefreshResultStore.forgetFingerprints(context, null);
+        write(payload("Video", "fourth"), 4000);
+        assertEquals("clearing the whole cache forgets every fingerprint", 4000, saved().getLong("timestamp"));
     }
 
     @Test
