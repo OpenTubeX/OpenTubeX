@@ -196,8 +196,11 @@ const lastVideoRefreshTimestamp = computed(() => {
   // the previous fetch time while the completed refresh is newer.
   let latestTimestamp = store.getters.getSubscriptionFeedLastRefreshTimestamp ?? 0
   cacheEntriesForAllActiveProfileChannels.value.forEach((cacheEntry) => {
-    latestTimestamp = Math.max(latestTimestamp, cacheEntry.timestamp.getTime())
+    const timestamp = cacheEntry.timestamp.getTime()
+    // An invalid persisted date compares false instead of hiding valid ones.
+    if (timestamp > latestTimestamp) latestTimestamp = timestamp
   })
+  if (latestTimestamp === 0) return ''
   return getRelativeTimeFromDate(latestTimestamp, true, true, now.value)
 })
 

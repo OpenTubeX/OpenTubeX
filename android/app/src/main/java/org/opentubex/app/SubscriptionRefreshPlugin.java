@@ -245,8 +245,8 @@ public class SubscriptionRefreshPlugin extends Plugin {
             call.reject("Channel IDs must be strings", error);
             return;
         }
-        SubscriptionRefreshResultStore.forgetFingerprints(getContext(), channelIds);
-        call.resolve();
+        if (SubscriptionRefreshResultStore.forgetFingerprints(getContext(), channelIds)) call.resolve();
+        else call.reject("Unable to reset pending subscription refresh fingerprints");
     }
 
     @PluginMethod

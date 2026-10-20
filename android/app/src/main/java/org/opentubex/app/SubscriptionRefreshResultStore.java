@@ -24,13 +24,13 @@ import java.util.UUID;
 
 final class SubscriptionRefreshResultStore {
     private static final String DIRECTORY_NAME = "subscription-refresh-results";
-    // YouTube varies these per request (tracking, redirect tokens, signed URLs,
-    // country order) even when the feed itself is unchanged.
+    // YouTube varies these per request (tracking, continuation tokens, country
+    // order) even when the feed itself is unchanged.
     private static final Set<String> VOLATILE_KEYS = new HashSet<>(Arrays.asList(
         "responseContext", "trackingParams", "clickTrackingParams", "trackingParam", "loggingDirectives",
         "frameworkUpdates", "availableCountryCodes", "availableCountries", "playerParams", "params",
         "token", "targetId", "continueAction", "veCounter", "sectionIdentifier", "tag", "sequenceParams",
-        "inlinePopStateEntityKey", "html5PlaybackOnesieConfig", "colorMap", "url"
+        "inlinePopStateEntityKey", "html5PlaybackOnesieConfig", "colorMap"
     ));
     private static File indexedDirectory;
     private static SubscriptionRefreshResultIndex index;
@@ -91,14 +91,20 @@ final class SubscriptionRefreshResultStore {
 
     // The app's cache no longer holds what these fingerprints describe, so the
     // next refresh has to queue those feeds again. Null forgets every channel.
-    static synchronized void forgetFingerprints(Context context, Set<String> channelIds) {
+    // Returns false when a matching fingerprint could not be deleted.
+    static synchronized boolean forgetFingerprints(Context context, Set<String> channelIds) {
         File[] fingerprints = directory(context).listFiles((dir, name) -> name.endsWith(".fingerprint"));
-        if (fingerprints == null) return;
+        if (fingerprints == null) return false;
+        boolean forgotten = true;
         for (File file : fingerprints) {
             String fingerprint = readFingerprint(file);
             int end = fingerprint == null ? -1 : fingerprint.indexOf('\n');
-            if (channelIds == null || end < 0 || channelIds.contains(fingerprint.substring(0, end))) file.delete();
+            if ((channelIds == null || end < 0 || channelIds.contains(fingerprint.substring(0, end))) &&
+                !file.delete() && file.exists()) {
+                forgotten = false;
+            }
         }
+        return forgotten;
     }
 
     static synchronized void clearFailure(Context context, String profileId, String feedType) {
@@ -204,7 +210,11 @@ final class SubscriptionRefreshResultStore {
             digest.update((byte) '{');
             for (String key : keys) {
                 updateFingerprint(digest, key);
-                updateFingerprint(digest, object.opt(key));
+                Object child = object.opt(key);
+                // Signatures and redirect tokens vary per request in URL queries,
+                // but a different path, such as a new thumbnail, is a feed change.
+                if ("url".equals(key) && child instanceof String) child = ((String) child).split("\\?", 2)[0];
+                updateFingerprint(digest, child);
             }
             digest.update((byte) '}');
         } else if (value instanceof JSONArray) {

@@ -109,9 +109,7 @@ export async function acknowledgeAndroidSubscriptionRefreshResult(id) {
  */
 export function forgetAndroidSubscriptionRefreshFingerprints(channelIds) {
   if (!SubscriptionRefresh) return Promise.resolve()
-  return SubscriptionRefresh.forgetFingerprints(channelIds ? { channelIds } : {}).catch(error => {
-    console.error('Failed to reset Android subscription refresh fingerprints', error)
-  })
+  return SubscriptionRefresh.forgetFingerprints(channelIds ? { channelIds } : {})
 }
 
 export async function addAndroidSubscriptionRefreshCancelledListener(listener) {

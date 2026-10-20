@@ -280,3 +280,13 @@ test('clearing cached channels lets closed-app refreshes queue their unchanged f
   await actions.clearSubscriptionsCache({ commit() {} })
   assert.deepEqual(forgotten, [['UCremoved'], undefined])
 })
+
+test('clearing the cache reports a failure when closed-app refreshes could not forget its feeds', async () => {
+  const context = vm.createContext({
+    console: { ...console, error() {} }, toRaw, ...seenData, ...feedState, applySubscriptionSeenVideosToCache, applySubscriptionSeenPostsToCache,
+    DBSubscriptionCacheHandlers: { deleteAll: async () => {} },
+    forgetAndroidSubscriptionRefreshFingerprints: async () => { throw new Error('Unable to reset fingerprints') },
+  })
+  vm.runInContext(moduleSource, context)
+  assert.equal(await context.cacheModule.actions.clearSubscriptionsCache({ commit() {} }), false)
+})

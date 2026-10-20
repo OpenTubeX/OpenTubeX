@@ -48,4 +48,16 @@ public class SubscriptionRefreshResultStoreTest {
             SubscriptionRefreshResultStore.fingerprint(new JSONObject("{\"a\":\"\",\"b\":\"x\"}"))
         );
     }
+
+    @Test
+    public void fingerprintIgnoresUrlQueriesButNotUrlPaths() throws Exception {
+        assertEquals(
+            SubscriptionRefreshResultStore.fingerprint(new JSONObject("{\"url\":\"https://i.ytimg.com/vi/a/hq720.jpg?sqp=1&rs=x\"}")),
+            SubscriptionRefreshResultStore.fingerprint(new JSONObject("{\"url\":\"https://i.ytimg.com/vi/a/hq720.jpg?sqp=2&rs=y\"}"))
+        );
+        assertNotEquals(
+            SubscriptionRefreshResultStore.fingerprint(new JSONObject("{\"url\":\"https://i.ytimg.com/vi/a/oar2.jpg\"}")),
+            SubscriptionRefreshResultStore.fingerprint(new JSONObject("{\"url\":\"https://i.ytimg.com/vi/a/oar3.jpg\"}"))
+        );
+    }
 }
