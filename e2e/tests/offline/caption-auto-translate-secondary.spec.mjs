@@ -237,3 +237,34 @@ test.describe('secondary captions under top-anchored main captions', () => {
     }).toBe(true)
   })
 })
+
+test.describe('secondary captions after Shaka replaces its caption area', () => {
+  test.use({ seed: { settings: { ...SEED, preferredCaptionLocale: 'en', secondaryCaptionLocale: 'de' } } })
+
+  test('follows the new caption area @scale', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page, CAPTIONS)
+    const video = await openMockedVideo(page)
+    await video.evaluate(element => element.pause())
+
+    const player = page.locator('.ftVideoPlayer')
+    const secondaryCaption = player.locator('.secondaryCaptions span')
+    await expect(secondaryCaption).toHaveText('Original caption (de)')
+
+    // Shaka creates a new caption area when it reloads, here it starts lower than the old one
+    await player.evaluate(element => {
+      const textContainer = element.querySelector('.shaka-text-container')
+      const replacement = textContainer.cloneNode(false)
+      replacement.style.top = '80px'
+      textContainer.replaceWith(replacement)
+    })
+    await video.evaluate(element => { element.currentTime = 0.1 })
+
+    await expect.poll(async () => {
+      const [captionBounds, areaBounds] = await Promise.all([
+        secondaryCaption.boundingBox(),
+        player.locator('.shaka-text-container').boundingBox(),
+      ])
+      return captionBounds.y >= areaBounds.y - 0.5
+    }).toBe(true)
+  })
+})

@@ -1746,6 +1746,8 @@ export default defineComponent({
     const secondaryCaptionsBox = ref({})
     /** @type {ResizeObserver | null} */
     let secondaryCaptionsBoxObserver = null
+    /** @type {HTMLElement | null} */
+    let observedTextContainer = null
     onBeforeUnmount(() => {
       secondaryCaptionAbortController?.abort()
       secondaryCaptionsBoxObserver?.disconnect()
@@ -1753,15 +1755,19 @@ export default defineComponent({
 
     function observeSecondaryCaptionsBox() {
       const textContainer = container.value?.querySelector('.shaka-text-container')
-      if (!(textContainer instanceof HTMLElement) || secondaryCaptionsBoxObserver) return
+      // Shaka replaces the container when it reloads, so follow the current one
+      if (!(textContainer instanceof HTMLElement) || textContainer === observedTextContainer) return
 
-      secondaryCaptionsBoxObserver = new ResizeObserver(() => {
+      secondaryCaptionsBoxObserver ??= new ResizeObserver(() => {
+        if (!observedTextContainer) return
         secondaryCaptionsBox.value = {
-          inset: `${textContainer.offsetTop}px auto auto ${textContainer.offsetLeft}px`,
-          inlineSize: `${textContainer.offsetWidth}px`,
-          blockSize: `${textContainer.offsetHeight}px`,
+          inset: `${observedTextContainer.offsetTop}px auto auto ${observedTextContainer.offsetLeft}px`,
+          inlineSize: `${observedTextContainer.offsetWidth}px`,
+          blockSize: `${observedTextContainer.offsetHeight}px`,
         }
       })
+      secondaryCaptionsBoxObserver.disconnect()
+      observedTextContainer = textContainer
       secondaryCaptionsBoxObserver.observe(textContainer)
     }
 
