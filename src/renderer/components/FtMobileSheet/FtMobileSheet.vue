@@ -420,8 +420,10 @@ function release(preservePresentation = false) {
   if (!preservePresentation && !anotherPanelOpen && previousFocus?.isConnected) previousFocus.focus({ preventScroll: true })
 }
 // KeepAlive moves an open sheet in and out of the document without closing it.
-onActivated(updateMobileSheetRootClass)
-onDeactivated(updateMobileSheetRootClass)
+// Vue caches a KeepAlive hook's wrapper on the function, which would retain
+// the first sheet that registered a shared function. Pass a new one each time.
+onActivated(() => updateMobileSheetRootClass())
+onDeactivated(() => updateMobileSheetRootClass())
 
 onBeforeUnmount(() => {
   openingSequence++

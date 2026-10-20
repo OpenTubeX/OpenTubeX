@@ -216,6 +216,11 @@ let observedScrollbarWidth = 0
 let observedViewportWidth = null
 let pageAtBottom = false
 
+function keepPageAtBottom(frames) {
+  window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' })
+  if (frames > 0) requestAnimationFrame(() => keepPageAtBottom(frames - 1))
+}
+
 function updatePageAtBottom() {
   const root = document.documentElement
   pageAtBottom = window.scrollY > 0 && root.scrollHeight - root.clientHeight - window.scrollY <= 2
@@ -246,8 +251,11 @@ function updateGridWidth(contentWidth, viewportCrossedPhoneWidth = false) {
 
   if (measurement.gridWidth !== gridWidth) {
     // Scroll anchoring keeps the top visible card in place, which leaves a
-    // page that was scrolled to its end above the new end.
-    const keepBottom = pageAtBottom && gridWidth > 0 && measurement.gridWidth > 0 && !element.closest('[inert]')
+    // page that was scrolled to its end above the new end. This includes the
+    // first measurement, when a grid replaces a list at the end of the page.
+    // Resize observations run after layout and any restored scroll position.
+    if (gridWidth === 0) updatePageAtBottom()
+    const keepBottom = pageAtBottom && measurement.gridWidth > 0 && !element.closest('[inert]')
     suppressMoveTransition.value = true
     clearTimeout(suppressResetTimeout)
     suppressResetTimeout = setTimeout(() => {
@@ -258,7 +266,9 @@ function updateGridWidth(contentWidth, viewportCrossedPhoneWidth = false) {
     updateGridSliderLimit()
     applyThumbnailSizeStyles()
     thumbnailSizeReady.value = gridWidth > 0
-    if (keepBottom) window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' })
+    // thumbnailSizeReady resizes the cards once Vue renders it, and windowed
+    // rows settle their measured size over the following frames.
+    if (keepBottom) nextTick(() => keepPageAtBottom(2))
   } else if (widthAdjustmentChanged || viewportCrossedPhoneWidth) {
     // Keeps the stretched size equal to the stable one under a transient
     // scrollbar, and applies the phone column minimum to a constrained grid.
