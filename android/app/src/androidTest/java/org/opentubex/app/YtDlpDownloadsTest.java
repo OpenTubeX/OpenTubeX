@@ -259,7 +259,7 @@ public class YtDlpDownloadsTest {
 
     static void grant(Context context, Uri uri) throws Exception {
         context.sendBroadcast(new android.content.Intent().setComponent(new android.content.ComponentName(InstrumentationRegistry.getInstrumentation().getContext().getPackageName(), YtDlpTestDocumentsProvider.GrantReceiver.class.getName()))
-            .addFlags(android.content.Intent.FLAG_INCLUDE_STOPPED_PACKAGES).putExtra("uri", uri.toString()).putExtra("targetPackage", context.getPackageName()));
+            .addFlags(android.content.Intent.FLAG_INCLUDE_STOPPED_PACKAGES | android.content.Intent.FLAG_RECEIVER_FOREGROUND).putExtra("uri", uri.toString()).putExtra("targetPackage", context.getPackageName()));
         long deadline = System.currentTimeMillis() + 5000;
         while (context.checkCallingOrSelfUriPermission(uri, android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION) != android.content.pm.PackageManager.PERMISSION_GRANTED && System.currentTimeMillis() < deadline) Thread.sleep(20);
         assertEquals("Test folder grant", android.content.pm.PackageManager.PERMISSION_GRANTED,

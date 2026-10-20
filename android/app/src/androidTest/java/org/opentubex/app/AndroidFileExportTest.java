@@ -216,7 +216,7 @@ public class AndroidFileExportTest {
     private static void grant(Context context, Uri uri) throws Exception {
         context.sendBroadcast(new Intent().setComponent(new ComponentName(
             InstrumentationRegistry.getInstrumentation().getContext().getPackageName(), YtDlpTestDocumentsProvider.GrantReceiver.class.getName()))
-            .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES).putExtra("uri", uri.toString()).putExtra("targetPackage", context.getPackageName()));
+            .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES | Intent.FLAG_RECEIVER_FOREGROUND).putExtra("uri", uri.toString()).putExtra("targetPackage", context.getPackageName()));
         long deadline = System.currentTimeMillis() + 5000;
         while (context.checkCallingOrSelfUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION) != PackageManager.PERMISSION_GRANTED && System.currentTimeMillis() < deadline) Thread.sleep(20);
         assertEquals(PackageManager.PERMISSION_GRANTED, context.checkCallingOrSelfUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION));
