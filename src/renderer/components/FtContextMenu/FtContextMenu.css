@@ -66,6 +66,31 @@
   padding-block: 4px;
 }
 
+@media (any-pointer: coarse) {
+  .touchFriendly {
+    inline-size: 280px;
+    font-size: 16px;
+  }
+
+  .touchFriendly .menuItem {
+    min-block-size: 48px;
+    padding-block: 12px;
+    padding-inline: 12px;
+  }
+}
+
+/* Native WebViews can report a fine pointer when a mouse is connected. */
+.nativeTouchMenu {
+  inline-size: 280px;
+  font-size: 16px;
+}
+
+.nativeTouchMenu .menuItem {
+  min-block-size: 48px;
+  padding-block: 12px;
+  padding-inline: 12px;
+}
+
 .tabMenuHeader {
   flex-shrink: 0;
   margin-block-end: 4px;

@@ -8,7 +8,7 @@
         v-if="isOpen"
         ref="menuRef"
         class="contextMenu"
-        :class="{ submenusOpenStart, compactTabMenu: tabColorMenu != null, videoMenu: localItems != null }"
+        :class="{ submenusOpenStart, compactTabMenu: tabColorMenu != null, videoMenu: localItems != null, touchFriendly, nativeTouchMenu: touchFriendly && IS_CAPACITOR }"
         :style="menuStyle"
         role="menu"
         :aria-label="t('Context Menu.Context Menu')"
@@ -202,12 +202,14 @@ import FtContextMenuItemIcon from './FtContextMenuItemIcon.vue'
 import { getTabDeviceMenuItem } from '../../helpers/tab-device-menu'
 
 const { t } = useI18n()
+const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 const route = useRoute()
 const menuRef = useTemplateRef('menuRef')
 const fullscreenTarget = ref(null)
 const isOpen = ref(false)
 const items = ref([])
 const localItems = shallowRef(null)
+const touchFriendly = ref(false)
 const sessionId = ref(null)
 const position = ref({ x: 0, y: 0 })
 const submenusOpenStart = ref(false)
@@ -422,6 +424,7 @@ async function open(event) {
   }
   if (request !== openRequest || (result.items.length === 0 && !channel)) return
 
+  touchFriendly.value = false
   localItems.value = channel ? ref(getChannelLinkMenuItems(channel, t)) : null
   await showMenu(result.items, result.sessionId, event.clientX, event.clientY, request)
 }
@@ -435,6 +438,7 @@ watch(() => route.fullPath, () => close())
 async function openLocalMenu(event) {
   const { items, x, y, contextEvent } = event.detail
   const request = ++openRequest
+  touchFriendly.value = event.detail.touchFriendly === true
   localItems.value = items
   let contextualMenu = { items: [], sessionId: null }
   if (process.env.IS_ELECTRON && contextEvent) {
@@ -501,6 +505,7 @@ function close(event) {
   scrollResizeObserver?.disconnect()
   isOpen.value = false
   localItems.value = null
+  touchFriendly.value = false
   items.value = []
 }
 

@@ -1,3 +1,4 @@
+import { chooseDownloadAction, openDownloadMenu } from '../../helpers/downloads.mjs'
 import { chmod, copyFile, mkdir, readFile, unlink, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
@@ -460,7 +461,8 @@ test.describe('video downloads', () => {
     await page.getByRole('button', { name: 'Close', exact: true }).click()
     await goTo(page, 'downloads')
     const downloadRow = page.locator('.downloadRow').filter({ hasText: longTitle })
-    await expect(downloadRow.getByText('The file name was shortened because the video title was too long.')).toBeVisible()
+    await chooseDownloadAction(page, downloadRow, 'Details')
+    await expect(page.getByRole('dialog', { name: 'Details', exact: true }).getByText('The file name was shortened because the video title was too long.')).toBeVisible()
   })
 
   test('warns when a playlist contains a shortened video title', async ({ app, page }) => {
@@ -496,7 +498,8 @@ test.describe('video downloads', () => {
 
     await goTo(page, 'downloads')
     const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Playlist with a long title' })
-    await expect(downloadRow.getByText('The file name was shortened because the video title was too long.')).toBeVisible()
+    await chooseDownloadAction(page, downloadRow, 'Details')
+    await expect(page.getByRole('dialog', { name: 'Details', exact: true }).getByText('The file name was shortened because the video title was too long.')).toBeVisible()
   })
 
   test('requests automatic subtitles only when needed and can retry playback extraction with yt-dlp default clients', async ({ app, page }) => {
@@ -1016,15 +1019,15 @@ test.describe('video downloads', () => {
     const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Downloaded demo' })
     await expect(downloadRow.locator('.downloadSummary')).toContainText('140 KiB')
     await expect(page.locator('.settingsBackButton')).toHaveCount(0)
-    await expect(downloadRow).toHaveCSS('flex-direction', 'column')
-    await expect(downloadRow.locator('.downloadMain')).toHaveCSS('flex-direction', 'column')
+    await expect(downloadRow).toHaveCSS('flex-direction', 'row')
+    await expect(downloadRow.locator('.downloadMain')).toHaveCSS('flex-direction', 'row')
     await expect.poll(async () => {
-      const [mainBounds, thumbnailBounds] = await Promise.all([
-        downloadRow.locator('.downloadMain').boundingBox(),
+      const [detailsBounds, thumbnailBounds] = await Promise.all([
+        downloadRow.locator('.downloadDetails').boundingBox(),
         downloadRow.locator('.downloadThumbnail:not(.retryImagePlaceholder)').boundingBox()
       ])
-      return thumbnailBounds.x + thumbnailBounds.width / 2 - (mainBounds.x + mainBounds.width / 2)
-    }).toBeCloseTo(0, 0)
+      return detailsBounds.x - (thumbnailBounds.x + thumbnailBounds.width)
+    }).toBeGreaterThan(0)
     await downloadRow.getByTitle('Play download').click()
     await expect(page).toHaveURL(new RegExp(`/watch/eeeeeeeeeee\\?downloadId=${result.id}`))
     await expect(page.locator('.infoArea .videoTitle')).toContainText('Downloaded demo')
@@ -1120,8 +1123,10 @@ test.describe('video downloads', () => {
     await expect(downloadRow).not.toContainText('Download unavailable')
     await expect(downloadRow).toContainText('The downloaded file is no longer available on the filesystem.')
     await expect(downloadRow.getByTitle('Play download')).toHaveCount(0)
-    await expect(downloadRow.getByTitle('Show in Folder')).toHaveCount(0)
-    await expect(downloadRow.getByTitle('Remove File')).toHaveCount(0)
+    const menu = await openDownloadMenu(page, downloadRow)
+    await expect(menu.getByRole('menuitem', { name: 'Show in Folder', exact: true })).toHaveCount(0)
+    await expect(menu.getByRole('menuitem', { name: 'Remove File', exact: true })).toHaveCount(0)
+    await page.keyboard.press('Escape')
     await page.getByRole('button', { name: 'Clear failed, canceled, skipped, and missing' }).click()
     await expect(downloadRow).toHaveCount(0)
     await expect(page.locator('.downloadRow').filter({ hasText: 'Downloaded audio alternative' })).toHaveCount(0)
@@ -1315,8 +1320,10 @@ test.describe('video downloads', () => {
     const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Partially available playlist' })
     await expect(downloadRow).toContainText('1 of 2 downloaded files are available.')
     await expect(downloadRow.getByTitle('Play download')).toBeVisible()
-    await expect(downloadRow.getByTitle('Show in Folder')).toBeVisible()
-    await expect(downloadRow.getByTitle('Remove File')).toBeVisible()
+    const menu = await openDownloadMenu(page, downloadRow)
+    await expect(menu.getByRole('menuitem', { name: 'Show in Folder', exact: true })).toBeVisible()
+    await expect(menu.getByRole('menuitem', { name: 'Remove File', exact: true })).toBeVisible()
+    await page.keyboard.press('Escape')
   })
 
   test('broadcasts active downloads to other windows', async ({ app, page }) => {
@@ -1349,7 +1356,7 @@ test.describe('video downloads', () => {
     const hydratedDownload = lateWindow.locator('.downloadRow').filter({ hasText: 'Bookmarkable video' })
     await expect(hydratedDownload).toContainText('0.0%')
 
-    await hydratedDownload.getByTitle('Cancel Download').click()
+    await chooseDownloadAction(lateWindow, hydratedDownload, 'Cancel Download')
     await expect(otherWindow.getByRole('heading', { name: 'Canceled', exact: true })).toBeVisible()
     await expect(otherDownload.getByTitle('Retry download')).toBeVisible()
     await expect(otherDownload).not.toContainText('Download canceled')
@@ -1372,8 +1379,7 @@ test.describe('video downloads', () => {
     await hydratedDownload.getByTitle('Retry download').click()
     // Wait for the replacement and removal together; the old row also has count one.
     await expect(otherDownload).toHaveText([/0\.0%/])
-    await expect(hydratedDownload.getByTitle('Cancel Download')).toBeVisible()
-    await hydratedDownload.getByTitle('Cancel Download').click()
+    await chooseDownloadAction(lateWindow, hydratedDownload, 'Cancel Download')
     await expect(otherDownload.getByTitle('Retry download')).toBeVisible()
 
     await lateWindow.getByRole('button', { name: 'Clear failed, canceled, skipped, and missing' }).click()
@@ -1454,8 +1460,11 @@ test.describe('video downloads', () => {
     await page.getByRole('button', { name: 'Close', exact: true }).click()
     await goTo(page, 'downloads')
     const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Bookmarkable video' })
-    await expect(downloadRow.locator('.downloadSummary')).toHaveText('Subtitles • Template: Subtitles - SRT')
-    await expect(downloadRow.locator('.destination')).toHaveText([
+    await expect(downloadRow.locator('.downloadSummary')).toHaveText('SRT | 0 B')
+    await chooseDownloadAction(page, downloadRow, 'Details')
+    const details = page.getByRole('dialog', { name: 'Details', exact: true })
+    await expect(details.locator('.downloadSummary')).toHaveText('Subtitles • Template: Subtitles - SRT')
+    await expect(details.locator('.destination')).toHaveText([
       '/tmp/subtitles.en.srt',
       '/tmp/subtitles.de.srt'
     ])
@@ -1497,7 +1506,8 @@ test.describe('video downloads', () => {
 
     await goTo(page, 'downloads')
     const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Subtitle playlist with a long title' })
-    await expect(downloadRow.getByText('The file name was shortened because the video title was too long.')).toBeVisible()
+    await chooseDownloadAction(page, downloadRow, 'Details')
+    await expect(page.getByRole('dialog', { name: 'Details', exact: true }).getByText('The file name was shortened because the video title was too long.')).toBeVisible()
   })
 
   test('keeps the source subtitle destination when conversion fails', async ({ app, page }) => {
@@ -1533,7 +1543,10 @@ test.describe('video downloads', () => {
     await page.getByRole('button', { name: 'Close', exact: true }).click()
     await goTo(page, 'downloads')
     const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Bookmarkable video' })
-    await expect(downloadRow.locator('.destination')).toHaveText('/tmp/subtitles.en.vtt')
+    await chooseDownloadAction(page, downloadRow, 'Details')
+    const details = page.getByRole('dialog', { name: 'Details', exact: true })
+    await expect(details.locator('.destination')).toHaveText('/tmp/subtitles.en.vtt')
+    await details.getByRole('button', { name: 'Close', exact: true }).click()
     await expect(downloadRow.locator('.downloadError')).toContainText('Subtitle conversion failed')
     await expect(downloadRow.getByRole('link', { name: 'recent yt-dlp issues for YouTube' })).toBeVisible()
     await expect(downloadRow).toContainText('then try switching the yt-dlp channel to Nightly or Master')
@@ -1706,7 +1719,7 @@ test('asks for confirmation before removing a downloaded file', async ({ page })
   }))
   expect(rowLayout.thumbnailRight).toBeLessThanOrEqual(rowLayout.detailsLeft)
 
-  await page.getByTitle('Remove File').click()
+  await chooseDownloadAction(page, downloadRow, 'Remove File')
   const removePrompt = page.getByRole('dialog', { name: 'Remove downloaded file?' })
   await expect(removePrompt).toContainText('Remove downloaded file?')
   await expect(removePrompt).toContainText('Finished download')

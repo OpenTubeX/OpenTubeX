@@ -1,4 +1,5 @@
 import path from 'node:path'
+import { chooseDownloadAction, openDownloadMenu } from '../../helpers/downloads.mjs'
 
 import { test, expect, goTo, repoRoot, setWindowSize, waitForAppReady } from '../../helpers/app.mjs'
 import { watchViewHandle } from '../../helpers/watch.mjs'
@@ -100,10 +101,13 @@ for (const mobile of [false, true]) {
         await goTo(page, 'downloads')
       }
       const row = title => page.locator('.downloadRow').filter({ has: page.getByRole('heading', { name: title, exact: true }) })
-      await expect(row('Missing download').getByRole('button', { name: 'Add to Queue', exact: true })).toHaveCount(0)
-      await expect(row('Subtitles only').getByRole('button', { name: 'Add to Queue', exact: true })).toHaveCount(0)
-      await row('Downloaded audio').getByRole('button', { name: 'Add to Queue', exact: true }).click()
-      await row('Downloaded playlist').getByRole('button', { name: 'Add to Queue', exact: true }).click()
+      for (const title of ['Missing download', 'Subtitles only']) {
+        const menu = await openDownloadMenu(page, row(title))
+        await expect(menu.getByRole('menuitem', { name: 'Add to Queue', exact: true })).toHaveCount(0)
+        await page.keyboard.press('Escape')
+      }
+      await chooseDownloadAction(page, row('Downloaded audio'), 'Add to Queue')
+      await chooseDownloadAction(page, row('Downloaded playlist'), 'Add to Queue')
       await expect.poll(() => page.evaluate(() => window.$store.getters.getWatchQueueLength)).toBe(3)
       const downloadsDialog = page.getByRole('dialog', { name: 'Downloads', exact: true })
       await expect(downloadsDialog).toBeVisible()
@@ -155,7 +159,7 @@ for (const mobile of [false, true]) {
           await goTo(page, 'downloads')
         }
         const row = title => page.locator('.downloadRow').filter({ has: page.getByRole('heading', { name: title, exact: true }) })
-        await row(sameDownload ? 'Downloaded audio' : 'Second audio download').getByRole('button', { name: 'Add to Queue', exact: true }).click()
+        await chooseDownloadAction(page, row(sameDownload ? 'Downloaded audio' : 'Second audio download'), 'Add to Queue')
         await row('Downloaded audio').getByRole('button', { name: 'Play download', exact: true }).click()
         const video = page.locator('video').first()
         await expect(video).toHaveAttribute('src', downloadSource(2, 'offline0002', audioPath))
@@ -183,12 +187,12 @@ for (const mobile of [false, true]) {
         await goTo(page, 'downloads')
       }
       const audio = page.locator('.downloadRow').filter({ hasText: 'Downloaded audio' })
-      await audio.getByRole('button', { name: 'Add to Queue', exact: true }).click()
-      await audio.getByRole('button', { name: 'Add to Queue', exact: true }).click()
-      await page.locator('.downloadRow').filter({ hasText: 'Downloaded playlist' }).getByRole('button', { name: 'Add to Queue', exact: true }).click()
+      await chooseDownloadAction(page, audio, 'Add to Queue')
+      await chooseDownloadAction(page, audio, 'Add to Queue')
+      await chooseDownloadAction(page, page.locator('.downloadRow').filter({ hasText: 'Downloaded playlist' }), 'Add to Queue')
       const queuedIds = () => page.evaluate(() => window.$store.getters.getWatchQueue.map(video => video.route.query.downloadId))
       await expect.poll(queuedIds).toEqual(['2', '2', '3', '3'])
-      await audio.getByRole('button', { name: 'Clear From List', exact: true }).click()
+      await chooseDownloadAction(page, audio, 'Clear From List')
       await expect(audio).toHaveCount(0)
       await expect.poll(queuedIds).toEqual(['3', '3'])
     })

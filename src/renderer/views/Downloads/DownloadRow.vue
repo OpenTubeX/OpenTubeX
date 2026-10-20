@@ -7,7 +7,10 @@
         alt=""
       />
       <div class="downloadDetails">
-        <h3 dir="auto">
+        <h3
+          dir="auto"
+          :title="download.title"
+        >
           {{ download.title }}
         </h3>
         <p
@@ -49,10 +52,10 @@
           />
         </div>
         <p
-          v-if="summary"
+          v-if="compactSummary"
           class="downloadSummary"
         >
-          {{ summary }}
+          {{ compactSummary }}
         </p>
         <p
           v-if="spaceWarningText"
@@ -67,6 +70,69 @@
         >
           {{ errorText }}
         </p>
+        <DownloadFailureHint v-if="download.status === 'failed'" />
+      </div>
+    </div>
+    <div class="downloadActions">
+      <FtIconButton
+        v-if="controllable"
+        :title="paused ? t('Downloads.Resume Download') : t('Downloads.Pause Download')"
+        :icon="['fas', paused ? 'play' : 'pause']"
+        theme="primary"
+        @click="paused ? emit('resume') : emit('pause')"
+      />
+      <FtIconButton
+        v-else-if="canRetry && !canPlay"
+        :title="t('Downloads.Retry Download')"
+        :icon="['fas', 'sync']"
+        theme="primary"
+        :disabled="retrying"
+        @click="emit('retry')"
+      />
+      <FtIconButton
+        v-else-if="canPlay"
+        :title="t('Downloads.Play Download')"
+        :icon="['fas', 'play']"
+        theme="primary"
+        @click="emit('play')"
+      />
+      <FtIconButton
+        ref="menuButton"
+        :title="t('Video.More Options')"
+        :icon="['fas', 'ellipsis-v']"
+        theme="base-no-default"
+        :use-shadow="false"
+        @click="openMenu"
+      />
+    </div>
+    <FtPrompt
+      v-if="showDetails"
+      :label="t('Channel.About.Details')"
+      autosize
+      fixed-layout
+      @click="showDetails = false"
+    >
+      <div class="downloadMetadata">
+        <FtRetryImage
+          :src="download.thumbnail || thumbnailPlaceholder"
+          class="downloadThumbnail"
+          alt=""
+        />
+        <h3 dir="auto">
+          {{ download.title }}
+        </h3>
+        <p
+          v-if="channelName"
+          dir="auto"
+        >
+          {{ channelName }}
+        </p>
+        <p
+          v-if="summary"
+          class="downloadSummary"
+        >
+          {{ summary }}
+        </p>
         <p
           v-if="download.titleTruncated"
           class="downloadWarning"
@@ -77,7 +143,6 @@
           />
           {{ t('Downloads.File Name Shortened') }}
         </p>
-        <DownloadFailureHint v-if="download.status === 'failed'" />
         <ul
           v-if="destinations.length > 0"
           class="destinationList"
@@ -99,100 +164,27 @@
           </li>
         </ul>
       </div>
-    </div>
-    <div class="downloadActions">
-      <template v-if="controllable">
-        <FtIconButton
-          v-if="queuePending"
-          :title="t('Downloads.Move Earlier')"
-          :icon="['fas', 'arrow-up']"
-          theme="secondary"
-          :disabled="!canMoveEarlier"
-          @click="emit('move', -1)"
-        />
-        <FtIconButton
-          v-if="queuePending"
-          :title="t('Downloads.Move Later')"
-          :icon="['fas', 'arrow-down']"
-          theme="secondary"
-          :disabled="!canMoveLater"
-          @click="emit('move', 1)"
-        />
-        <FtIconButton
-          v-if="download.status === 'paused' || download.status === 'pausing'"
-          :title="t('Downloads.Resume Download')"
-          :icon="['fas', 'play']"
-          theme="primary"
-          @click="emit('resume')"
-        />
-        <FtIconButton
-          v-else
-          :title="t('Downloads.Pause Download')"
-          :icon="['fas', 'pause']"
-          theme="secondary"
-          @click="emit('pause')"
-        />
-        <FtIconButton
-          :title="t('Downloads.Cancel Download')"
-          :icon="['fas', 'times']"
-          theme="destructive"
-          @click="cancelDownload"
+      <template #footer>
+        <FtButton
+          :label="t('Close')"
+          :icon="['fas', 'xmark']"
+          @click="showDetails = false"
         />
       </template>
-      <template v-else>
-        <FtIconButton
-          v-if="canRetry"
-          :title="t('Downloads.Retry Download')"
-          :icon="['fas', 'sync']"
-          theme="primary"
-          :disabled="retrying"
-          @click="emit('retry')"
-        />
-        <FtIconButton
-          v-if="canPlay"
-          :title="t('Downloads.Play Download')"
-          :icon="['fas', 'play']"
-          theme="primary"
-          @click="emit('play')"
-        />
-        <FtIconButton
-          v-if="canPlay && !IS_IOS"
-          :title="t('Video.Add to Queue')"
-          :icon="['fas', 'add-to-queue']"
-          theme="secondary"
-          @click="emit('queue')"
-        />
-        <FtIconButton
-          v-if="canAccessFiles"
-          :title="t('Downloads.Show in Folder')"
-          :icon="['fas', 'folder-open']"
-          theme="secondary"
-          @click="emit('open')"
-        />
-        <FtIconButton
-          v-if="canAccessFiles"
-          :title="t('Downloads.Remove File')"
-          :icon="['fas', 'trash']"
-          theme="destructive"
-          @click="emit('remove')"
-        />
-        <FtIconButton
-          :title="t('Downloads.Clear From List')"
-          :icon="['fas', 'times']"
-          theme="secondary"
-          @click="emit('clear')"
-        />
-      </template>
-    </div>
+    </FtPrompt>
   </article>
 </template>
 
 <script setup>
+import FtButton from '../../components/FtButton/FtButton.vue'
+import FtPrompt from '../../components/FtPrompt/FtPrompt.vue'
+import { downloadFormats } from '../../helpers/downloadFilters'
 import FtRetryImage from '../../components/FtRetryImage.vue'
 import { displayAndroidPath } from '../../helpers/androidStorage'
 import { ytDlp } from '../../helpers/ytDlp'
 import { FtIcon } from '@opentubex/icons'
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, ref, useTemplateRef } from 'vue'
+import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
 import { useI18n } from 'vue-i18n'
 import DownloadFailureHint from '../../components/DownloadFailureHint/DownloadFailureHint.vue'
 import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
@@ -215,6 +207,45 @@ const props = defineProps({
 const emit = defineEmits(['clear', 'move', 'open', 'pause', 'play', 'queue', 'remove', 'resume', 'retry'])
 const IS_IOS = !!process.env.IS_IOS
 const { t } = useI18n()
+const showDetails = ref(false)
+const menuButton = useTemplateRef('menuButton')
+const paused = computed(() => ['paused', 'pausing'].includes(props.download.status))
+const menuItems = computed(() => {
+  const items = [{ label: t('Channel.About.Details'), icon: ['fas', 'circle-info'], run: () => { showDetails.value = true } }]
+  if (controllable.value) {
+    if (queuePending.value) {
+      items.push(
+        { label: t('Downloads.Move Earlier'), icon: ['fas', 'arrow-up'], enabled: props.canMoveEarlier, run: () => emit('move', -1) },
+        { label: t('Downloads.Move Later'), icon: ['fas', 'arrow-down'], enabled: props.canMoveLater, run: () => emit('move', 1) }
+      )
+    }
+    items.push({ label: t('Downloads.Cancel Download'), icon: ['fas', 'times'], run: cancelDownload })
+  } else {
+    if (canRetry.value && canPlay.value) items.push({ label: t('Downloads.Retry Download'), icon: ['fas', 'sync'], enabled: !props.retrying, run: () => emit('retry') })
+    if (canPlay.value && !IS_IOS) items.push({ label: t('Video.Add to Queue'), icon: ['fas', 'add-to-queue'], run: () => emit('queue') })
+    if (canAccessFiles.value) {
+      items.push(
+        { label: t('Downloads.Show in Folder'), icon: ['fas', 'folder-open'], run: () => emit('open') },
+        { label: t('Downloads.Remove File'), icon: ['fas', 'trash'], run: () => emit('remove') }
+      )
+    }
+    items.push({ label: t('Downloads.Clear From List'), icon: ['fas', 'times'], run: () => emit('clear') })
+  }
+  return items.map(item => ({ enabled: true, ...item }))
+})
+function openMenu() {
+  const button = menuButton.value.$el.querySelector('button')
+  button.focus({ preventScroll: true })
+  const bounds = button.getBoundingClientRect()
+  window.dispatchEvent(new CustomEvent('opentubex:context-menu', {
+    detail: { x: document.body.dir === 'rtl' ? bounds.right : bounds.left, y: bounds.bottom, items: menuItems, touchFriendly: true }
+  }))
+}
+function closeMenu() {
+  window.dispatchEvent(new CustomEvent('opentubex:close-context-menu', { detail: menuItems }))
+}
+useSettingsOverlay(closeMenu)
+onBeforeUnmount(closeMenu)
 const inProgress = computed(() => ['preparing', 'downloading', 'processing'].includes(props.download.status))
 const progressPercentage = computed(() => (
   Number.isFinite(props.download.percent)
@@ -255,6 +286,12 @@ const channelName = computed(() => {
   const authors = [...new Set(props.download.files?.map(file => file.author).filter(Boolean) ?? [])]
   return authors.length === 1 ? authors[0] : ''
 })
+const compactSummary = computed(() => [
+  downloadFormats(props.download).map(format => format.toUpperCase()).join(', '),
+  Number.isFinite(props.download.sizeBytes) && props.download.sizeBytes >= 0
+    ? formatBytes(props.download.sizeBytes)
+    : ''
+].filter(Boolean).join(' | '))
 const summary = computed(() => {
   const templateName = downloadTemplateName(props.download.template, t)
 
