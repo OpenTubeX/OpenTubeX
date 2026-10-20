@@ -96,6 +96,7 @@
         fullscreenRecommendationsOpen: showFullscreenRecommendations,
         chaptersOverlayOpen: showChaptersOverlay && chapters.length > 0,
         fullscreenDockLayoutOpen,
+        portraitFullscreenDocks,
         fullscreenAmbientBarsVisible,
         fullscreenDockResizing,
         fullscreenDockReordering,
@@ -673,360 +674,378 @@
       >
         <span>{{ $t('Video.Player.Caption Appearance.Sample') }}</span>
       </div>
-      <Transition name="chapter-slide">
+      <FtMobileSheet
+        class="fullscreenDockSheet"
+        :enabled="portraitFullscreenDocks"
+        :open="fullscreenDockOpen"
+        :title="fullscreenDockTitle"
+        :header-selector="fullscreenDockHeaderSelector"
+        fullscreen
+        @close="closePortraitFullscreenDock"
+      >
+        <Transition name="chapter-slide">
+          <aside
+            v-if="showChaptersOverlay && (isFullscreen || fullWindowEnabled) && chapters.length > 0"
+            ref="chapterOverlay"
+            class="chapterOverlay shaka-no-propagation"
+            :class="{ fullscreenDockReorderable: fullscreenDockCanReorder('chapters') }"
+            :style="fullscreenDockStyle('chapters')"
+            :role="portraitFullscreenDocks ? 'presentation' : 'dialog'"
+            tabindex="-1"
+            :aria-label="$t('Chapters.Chapters')"
+            @click.stop
+            @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'chapters')"
+            @dblclick.stop
+            @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'chapters')"
+            @pointerdown.stop
+            @wheel.stop
+            @keydown.esc.stop.prevent="closeChaptersOverlay"
+          >
+            <button
+              v-if="fullscreenDockCanResize('chapters')"
+              type="button"
+              class="fullscreenDockResizeHandle"
+              :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
+              :title="$t('Video.Player.Resize dock', 'Resize dock')"
+              @pointerdown="handleFullscreenDockResizePointerDown($event, 'chapters')"
+              @keydown="handleFullscreenDockResizeKeydown($event, 'chapters')"
+              @dblclick.stop.prevent="resetFullscreenDockHeights"
+            />
+            <header class="chapterOverlayHeader">
+              <h2 class="chapterOverlayTitle">
+                <svg
+                  class="chapterOverlayTitleIcon"
+                  viewBox="0 -960 960 960"
+                  aria-hidden="true"
+                >
+                  <path d="m400-200-182 91q-20 10-39-1.5T160-145v-495q0-33 23.5-56.5T240-720h320q33 0 56.5 23.5T640-640v495q0 23-19 34.5t-39 1.5l-182-91Zm360-40q-17 0-28.5-11.5T720-280v-520H320q-17 0-28.5-11.5T280-840q0-17 11.5-28.5T320-880h400q33 0 56.5 23.5T800-800v520q0 17-11.5 28.5T760-240Z" />
+                </svg>
+                {{ chaptersKind === 'keyMoments' ? $t('Chapters.Key Moments') : $t('Chapters.Chapters') }}
+              </h2>
+              <button
+                type="button"
+                class="chapterOverlayClose"
+                :aria-label="$t('Chapters.Close Chapters')"
+                :title="$t('Chapters.Close Chapters')"
+                @click="closeChaptersOverlay"
+              >
+                <FtIcon :icon="['fas', 'xmark']" />
+              </button>
+            </header>
+            <WatchVideoChapters
+              :chapters="chapters"
+              :chapter-thumbnails="chapterThumbnails"
+              :current-chapter-index="currentChapterIndex"
+              :fallback-thumbnail="thumbnail"
+              @copy-timestamp="copyChapterTimestamp"
+              @timestamp-event="selectOverlayChapter"
+            />
+          </aside>
+        </Transition>
         <aside
-          v-if="showChaptersOverlay && (isFullscreen || fullWindowEnabled) && chapters.length > 0"
-          ref="chapterOverlay"
-          class="chapterOverlay shaka-no-propagation"
-          :class="{ fullscreenDockReorderable: fullscreenDockCanReorder('chapters') }"
-          :style="fullscreenDockStyle('chapters')"
-          role="dialog"
+          ref="fullscreenMetadataOverlay"
+          class="fullscreenMetadataOverlay shaka-no-propagation"
+          :class="{
+            open: showFullscreenMetadata,
+            fullscreenDockReorderable: fullscreenDockCanReorder('metadata')
+          }"
+          :style="fullscreenDockStyle('metadata')"
           tabindex="-1"
-          :aria-label="$t('Chapters.Chapters')"
+          :role="portraitFullscreenDocks ? 'presentation' : 'dialog'"
+          :aria-label="$t('Video.Metadata', 'Video information')"
+          :aria-hidden="String(!showFullscreenMetadata)"
+          :inert="!showFullscreenMetadata"
           @click.stop
-          @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'chapters')"
+          @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'metadata')"
           @dblclick.stop
-          @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'chapters')"
+          @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'metadata')"
           @pointerdown.stop
           @wheel.stop
-          @keydown.esc.stop.prevent="closeChaptersOverlay"
+          @keydown.esc.stop.prevent="closeFullscreenMetadata"
         >
           <button
-            v-if="fullscreenDockCanResize('chapters')"
+            v-if="fullscreenDockCanResize('metadata')"
             type="button"
             class="fullscreenDockResizeHandle"
             :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
             :title="$t('Video.Player.Resize dock', 'Resize dock')"
-            @pointerdown="handleFullscreenDockResizePointerDown($event, 'chapters')"
-            @keydown="handleFullscreenDockResizeKeydown($event, 'chapters')"
+            @pointerdown="handleFullscreenDockResizePointerDown($event, 'metadata')"
+            @keydown="handleFullscreenDockResizeKeydown($event, 'metadata')"
             @dblclick.stop.prevent="resetFullscreenDockHeights"
           />
-          <header class="chapterOverlayHeader">
-            <h2 class="chapterOverlayTitle">
-              <svg
-                class="chapterOverlayTitleIcon"
-                viewBox="0 -960 960 960"
-                aria-hidden="true"
-              >
-                <path d="m400-200-182 91q-20 10-39-1.5T160-145v-495q0-33 23.5-56.5T240-720h320q33 0 56.5 23.5T640-640v495q0 23-19 34.5t-39 1.5l-182-91Zm360-40q-17 0-28.5-11.5T720-280v-520H320q-17 0-28.5-11.5T280-840q0-17 11.5-28.5T320-880h400q33 0 56.5 23.5T800-800v520q0 17-11.5 28.5T760-240Z" />
-              </svg>
-              {{ chaptersKind === 'keyMoments' ? $t('Chapters.Key Moments') : $t('Chapters.Chapters') }}
+          <header class="fullscreenMetadataHeader">
+            <h2 class="fullscreenDockHeading">
+              <FtIcon
+                class="fullscreenDockHeadingIcon"
+                :icon="['fas', 'info-circle']"
+              />
+              {{ $t('Video.Metadata', 'Video information') }}
             </h2>
             <button
               type="button"
-              class="chapterOverlayClose"
-              :aria-label="$t('Chapters.Close Chapters')"
-              :title="$t('Chapters.Close Chapters')"
-              @click="closeChaptersOverlay"
+              class="fullscreenMetadataClose"
+              :aria-label="$t('Video.Close Metadata', 'Close video information')"
+              :title="$t('Video.Close Metadata', 'Close video information')"
+              @click="closeFullscreenMetadata"
             >
               <FtIcon :icon="['fas', 'xmark']" />
             </button>
           </header>
-          <WatchVideoChapters
-            :chapters="chapters"
-            :chapter-thumbnails="chapterThumbnails"
-            :current-chapter-index="currentChapterIndex"
-            :fallback-thumbnail="thumbnail"
-            @copy-timestamp="copyChapterTimestamp"
-            @timestamp-event="selectOverlayChapter"
+          <div
+            ref="fullscreenMetadataTarget"
+            v-overlay-scrollbars
+            class="fullscreenMetadataTarget"
           />
         </aside>
-      </Transition>
-      <aside
-        ref="fullscreenMetadataOverlay"
-        class="fullscreenMetadataOverlay shaka-no-propagation"
-        :class="{
-          open: showFullscreenMetadata,
-          fullscreenDockReorderable: fullscreenDockCanReorder('metadata')
-        }"
-        :style="fullscreenDockStyle('metadata')"
-        role="dialog"
-        :aria-label="$t('Video.Metadata', 'Video information')"
-        :aria-hidden="String(!showFullscreenMetadata)"
-        :inert="!showFullscreenMetadata"
-        @click.stop
-        @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'metadata')"
-        @dblclick.stop
-        @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'metadata')"
-        @pointerdown.stop
-        @wheel.stop
-        @keydown.esc.stop.prevent="closeFullscreenMetadata"
-      >
-        <button
-          v-if="fullscreenDockCanResize('metadata')"
-          type="button"
-          class="fullscreenDockResizeHandle"
-          :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
-          :title="$t('Video.Player.Resize dock', 'Resize dock')"
-          @pointerdown="handleFullscreenDockResizePointerDown($event, 'metadata')"
-          @keydown="handleFullscreenDockResizeKeydown($event, 'metadata')"
-          @dblclick.stop.prevent="resetFullscreenDockHeights"
-        />
-        <header class="fullscreenMetadataHeader">
-          <h2 class="fullscreenDockHeading">
-            <FtIcon
-              class="fullscreenDockHeadingIcon"
-              :icon="['fas', 'info-circle']"
-            />
-            {{ $t('Video.Metadata', 'Video information') }}
-          </h2>
+        <aside
+          ref="fullscreenTranscriptOverlay"
+          class="fullscreenTranscriptOverlay shaka-no-propagation"
+          :class="{
+            open: showFullscreenTranscript,
+            fullscreenDockReorderable: fullscreenDockCanReorder('transcript')
+          }"
+          :style="fullscreenDockStyle('transcript')"
+          tabindex="-1"
+          :role="portraitFullscreenDocks ? 'presentation' : 'dialog'"
+          :aria-label="$t('Video.Transcript.Title')"
+          :aria-hidden="String(!showFullscreenTranscript)"
+          :inert="!showFullscreenTranscript"
+          @click.stop
+          @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'transcript')"
+          @dblclick.stop
+          @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'transcript')"
+          @pointerdown.stop
+          @wheel.stop
+          @keydown.esc.stop.prevent="closeFullscreenTranscript"
+        >
           <button
+            v-if="fullscreenDockCanResize('transcript')"
             type="button"
-            class="fullscreenMetadataClose"
-            :aria-label="$t('Video.Close Metadata', 'Close video information')"
-            :title="$t('Video.Close Metadata', 'Close video information')"
-            @click="closeFullscreenMetadata"
-          >
-            <FtIcon :icon="['fas', 'xmark']" />
-          </button>
-        </header>
-        <div
-          ref="fullscreenMetadataTarget"
-          v-overlay-scrollbars
-          class="fullscreenMetadataTarget"
-        />
-      </aside>
-      <aside
-        ref="fullscreenTranscriptOverlay"
-        class="fullscreenTranscriptOverlay shaka-no-propagation"
-        :class="{
-          open: showFullscreenTranscript,
-          fullscreenDockReorderable: fullscreenDockCanReorder('transcript')
-        }"
-        :style="fullscreenDockStyle('transcript')"
-        role="dialog"
-        :aria-label="$t('Video.Transcript.Title')"
-        :aria-hidden="String(!showFullscreenTranscript)"
-        :inert="!showFullscreenTranscript"
-        @click.stop
-        @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'transcript')"
-        @dblclick.stop
-        @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'transcript')"
-        @pointerdown.stop
-        @wheel.stop
-        @keydown.esc.stop.prevent="closeFullscreenTranscript"
-      >
-        <button
-          v-if="fullscreenDockCanResize('transcript')"
-          type="button"
-          class="fullscreenDockResizeHandle"
-          :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
-          :title="$t('Video.Player.Resize dock', 'Resize dock')"
-          @pointerdown="handleFullscreenDockResizePointerDown($event, 'transcript')"
-          @keydown="handleFullscreenDockResizeKeydown($event, 'transcript')"
-          @dblclick.stop.prevent="resetFullscreenDockHeights"
-        />
-        <div
-          ref="fullscreenTranscriptTarget"
-          class="fullscreenTranscriptTarget"
-        />
-      </aside>
-      <aside
-        ref="fullscreenSponsorBlockOverlay"
-        class="fullscreenSponsorBlockOverlay shaka-no-propagation"
-        :class="{
-          open: showFullscreenSponsorBlock,
-          fullscreenDockReorderable: fullscreenDockCanReorder('sponsorBlock')
-        }"
-        :style="fullscreenDockStyle('sponsorBlock')"
-        role="dialog"
-        :aria-label="$t('Settings.SponsorBlock Settings.SponsorBlock Settings')"
-        :aria-hidden="String(!showFullscreenSponsorBlock)"
-        :inert="!showFullscreenSponsorBlock"
-        @click.stop
-        @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'sponsorBlock')"
-        @dblclick.stop
-        @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'sponsorBlock')"
-        @pointerdown.stop
-        @wheel.stop
-        @keydown.esc.stop.prevent="closeFullscreenSponsorBlock"
-      >
-        <button
-          v-if="fullscreenDockCanResize('sponsorBlock')"
-          type="button"
-          class="fullscreenDockResizeHandle"
-          :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
-          :title="$t('Video.Player.Resize dock', 'Resize dock')"
-          @pointerdown="handleFullscreenDockResizePointerDown($event, 'sponsorBlock')"
-          @keydown="handleFullscreenDockResizeKeydown($event, 'sponsorBlock')"
-          @dblclick.stop.prevent="resetFullscreenDockHeights"
-        />
-        <div
-          ref="fullscreenSponsorBlockTarget"
-          class="fullscreenSponsorBlockTarget"
-        />
-      </aside>
-      <aside
-        ref="fullscreenLiveChatOverlay"
-        class="fullscreenLiveChatOverlay shaka-no-propagation"
-        :class="{
-          open: showFullscreenLiveChat,
-          fullscreenDockReorderable: fullscreenDockCanReorder('liveChat')
-        }"
-        :style="fullscreenDockStyle('liveChat')"
-        role="dialog"
-        :aria-label="$t('Video.Live Chat')"
-        :aria-hidden="String(!showFullscreenLiveChat)"
-        :inert="!showFullscreenLiveChat"
-        @click.stop
-        @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'liveChat')"
-        @dblclick.stop
-        @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'liveChat')"
-        @pointerdown.stop
-        @wheel.stop
-        @keydown.esc.stop.prevent="closeFullscreenLiveChat"
-      >
-        <button
-          v-if="fullscreenDockCanResize('liveChat')"
-          type="button"
-          class="fullscreenDockResizeHandle"
-          :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
-          :title="$t('Video.Player.Resize dock', 'Resize dock')"
-          @pointerdown="handleFullscreenDockResizePointerDown($event, 'liveChat')"
-          @keydown="handleFullscreenDockResizeKeydown($event, 'liveChat')"
-          @dblclick.stop.prevent="resetFullscreenDockHeights"
-        />
-        <div
-          ref="fullscreenLiveChatTarget"
-          class="fullscreenLiveChatTarget"
-        />
-      </aside>
-      <aside
-        ref="fullscreenCommentsOverlay"
-        class="fullscreenCommentsOverlay shaka-no-propagation"
-        :class="{
-          open: showFullscreenComments,
-          fullscreenDockReorderable: fullscreenDockCanReorder('comments')
-        }"
-        :style="fullscreenDockStyle('comments')"
-        role="dialog"
-        :aria-label="$t('Comments.Comments')"
-        :aria-hidden="String(!showFullscreenComments)"
-        :inert="!showFullscreenComments"
-        @click.stop
-        @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'comments')"
-        @dblclick.stop
-        @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'comments')"
-        @pointerdown.stop
-        @wheel.stop
-        @keydown.esc.stop.prevent="closeFullscreenComments"
-      >
-        <button
-          v-if="fullscreenDockCanResize('comments')"
-          type="button"
-          class="fullscreenDockResizeHandle"
-          :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
-          :title="$t('Video.Player.Resize dock', 'Resize dock')"
-          @pointerdown="handleFullscreenDockResizePointerDown($event, 'comments')"
-          @keydown="handleFullscreenDockResizeKeydown($event, 'comments')"
-          @dblclick.stop.prevent="resetFullscreenDockHeights"
-        />
-      </aside>
-      <aside
-        ref="fullscreenPlaylistOverlay"
-        class="fullscreenPlaylistOverlay shaka-no-propagation"
-        :class="{
-          open: showFullscreenPlaylist,
-          fullscreenDockReorderable: fullscreenDockCanReorder('playlist')
-        }"
-        :style="fullscreenDockStyle('playlist')"
-        role="dialog"
-        :aria-label="$t('Playlist.Playlist')"
-        :aria-hidden="String(!showFullscreenPlaylist)"
-        :inert="!showFullscreenPlaylist"
-        @click.stop
-        @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'playlist')"
-        @dblclick.stop
-        @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'playlist')"
-        @pointerdown.stop
-        @wheel.stop
-        @keydown.esc.stop.prevent="closeFullscreenPlaylist"
-      >
-        <button
-          v-if="fullscreenDockCanResize('playlist')"
-          type="button"
-          class="fullscreenDockResizeHandle"
-          :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
-          :title="$t('Video.Player.Resize dock', 'Resize dock')"
-          @pointerdown="handleFullscreenDockResizePointerDown($event, 'playlist')"
-          @keydown="handleFullscreenDockResizeKeydown($event, 'playlist')"
-          @dblclick.stop.prevent="resetFullscreenDockHeights"
-        />
-        <div
-          ref="fullscreenPlaylistTarget"
-          class="fullscreenPlaylistTarget"
-        />
-      </aside>
-      <aside
-        ref="fullscreenQueueOverlay"
-        class="fullscreenQueueOverlay shaka-no-propagation"
-        :class="{
-          open: showFullscreenQueue,
-          fullscreenDockReorderable: fullscreenDockCanReorder('queue')
-        }"
-        :style="fullscreenDockStyle('queue')"
-        role="dialog"
-        :aria-label="$t('Video.Queue')"
-        :aria-hidden="String(!showFullscreenQueue)"
-        :inert="!showFullscreenQueue"
-        @click.stop
-        @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'queue')"
-        @dblclick.stop
-        @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'queue')"
-        @pointerdown.stop
-        @wheel.stop
-        @keydown.esc.stop.prevent="closeFullscreenQueue"
-      >
-        <button
-          v-if="fullscreenDockCanResize('queue')"
-          type="button"
-          class="fullscreenDockResizeHandle"
-          :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
-          :title="$t('Video.Player.Resize dock', 'Resize dock')"
-          @pointerdown="handleFullscreenDockResizePointerDown($event, 'queue')"
-          @keydown="handleFullscreenDockResizeKeydown($event, 'queue')"
-          @dblclick.stop.prevent="resetFullscreenDockHeights"
-        />
-        <div
-          ref="fullscreenQueueTarget"
-          class="fullscreenQueueTarget"
-        />
-      </aside>
-      <aside
-        ref="fullscreenRecommendationsOverlay"
-        class="fullscreenRecommendationsOverlay shaka-no-propagation"
-        :class="{
-          open: showFullscreenRecommendations,
-          fullscreenDockReorderable: fullscreenDockCanReorder('recommendations')
-        }"
-        :style="fullscreenDockStyle('recommendations')"
-        role="dialog"
-        :aria-label="$t('Settings.Fullscreen Actions.Recommended Videos')"
-        :aria-hidden="String(!showFullscreenRecommendations)"
-        :inert="!showFullscreenRecommendations"
-        @click.stop
-        @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'recommendations')"
-        @dblclick.stop
-        @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'recommendations')"
-        @pointerdown.stop
-        @wheel.stop
-        @keydown.esc.stop.prevent="closeFullscreenRecommendations"
-      >
-        <button
-          v-if="fullscreenDockCanResize('recommendations')"
-          type="button"
-          class="fullscreenDockResizeHandle"
-          :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
-          :title="$t('Video.Player.Resize dock', 'Resize dock')"
-          @pointerdown="handleFullscreenDockResizePointerDown($event, 'recommendations')"
-          @keydown="handleFullscreenDockResizeKeydown($event, 'recommendations')"
-          @dblclick.stop.prevent="resetFullscreenDockHeights"
-        />
-        <div
-          ref="fullscreenRecommendationsTarget"
-          class="fullscreenRecommendationsTarget"
-        />
-      </aside>
+            class="fullscreenDockResizeHandle"
+            :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
+            :title="$t('Video.Player.Resize dock', 'Resize dock')"
+            @pointerdown="handleFullscreenDockResizePointerDown($event, 'transcript')"
+            @keydown="handleFullscreenDockResizeKeydown($event, 'transcript')"
+            @dblclick.stop.prevent="resetFullscreenDockHeights"
+          />
+          <div
+            ref="fullscreenTranscriptTarget"
+            class="fullscreenTranscriptTarget"
+          />
+        </aside>
+        <aside
+          ref="fullscreenSponsorBlockOverlay"
+          class="fullscreenSponsorBlockOverlay shaka-no-propagation"
+          :class="{
+            open: showFullscreenSponsorBlock,
+            fullscreenDockReorderable: fullscreenDockCanReorder('sponsorBlock')
+          }"
+          :style="fullscreenDockStyle('sponsorBlock')"
+          tabindex="-1"
+          :role="portraitFullscreenDocks ? 'presentation' : 'dialog'"
+          :aria-label="$t('Settings.SponsorBlock Settings.SponsorBlock Settings')"
+          :aria-hidden="String(!showFullscreenSponsorBlock)"
+          :inert="!showFullscreenSponsorBlock"
+          @click.stop
+          @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'sponsorBlock')"
+          @dblclick.stop
+          @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'sponsorBlock')"
+          @pointerdown.stop
+          @wheel.stop
+          @keydown.esc.stop.prevent="closeFullscreenSponsorBlock"
+        >
+          <button
+            v-if="fullscreenDockCanResize('sponsorBlock')"
+            type="button"
+            class="fullscreenDockResizeHandle"
+            :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
+            :title="$t('Video.Player.Resize dock', 'Resize dock')"
+            @pointerdown="handleFullscreenDockResizePointerDown($event, 'sponsorBlock')"
+            @keydown="handleFullscreenDockResizeKeydown($event, 'sponsorBlock')"
+            @dblclick.stop.prevent="resetFullscreenDockHeights"
+          />
+          <div
+            ref="fullscreenSponsorBlockTarget"
+            class="fullscreenSponsorBlockTarget"
+          />
+        </aside>
+        <aside
+          ref="fullscreenLiveChatOverlay"
+          class="fullscreenLiveChatOverlay shaka-no-propagation"
+          :class="{
+            open: showFullscreenLiveChat,
+            fullscreenDockReorderable: fullscreenDockCanReorder('liveChat')
+          }"
+          :style="fullscreenDockStyle('liveChat')"
+          tabindex="-1"
+          :role="portraitFullscreenDocks ? 'presentation' : 'dialog'"
+          :aria-label="$t('Video.Live Chat')"
+          :aria-hidden="String(!showFullscreenLiveChat)"
+          :inert="!showFullscreenLiveChat"
+          @click.stop
+          @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'liveChat')"
+          @dblclick.stop
+          @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'liveChat')"
+          @pointerdown.stop
+          @wheel.stop
+          @keydown.esc.stop.prevent="closeFullscreenLiveChat"
+        >
+          <button
+            v-if="fullscreenDockCanResize('liveChat')"
+            type="button"
+            class="fullscreenDockResizeHandle"
+            :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
+            :title="$t('Video.Player.Resize dock', 'Resize dock')"
+            @pointerdown="handleFullscreenDockResizePointerDown($event, 'liveChat')"
+            @keydown="handleFullscreenDockResizeKeydown($event, 'liveChat')"
+            @dblclick.stop.prevent="resetFullscreenDockHeights"
+          />
+          <div
+            ref="fullscreenLiveChatTarget"
+            class="fullscreenLiveChatTarget"
+          />
+        </aside>
+        <aside
+          ref="fullscreenCommentsOverlay"
+          class="fullscreenCommentsOverlay shaka-no-propagation"
+          :class="{
+            open: showFullscreenComments,
+            fullscreenDockReorderable: fullscreenDockCanReorder('comments')
+          }"
+          :style="fullscreenDockStyle('comments')"
+          tabindex="-1"
+          :role="portraitFullscreenDocks ? 'presentation' : 'dialog'"
+          :aria-label="$t('Comments.Comments')"
+          :aria-hidden="String(!showFullscreenComments)"
+          :inert="!showFullscreenComments"
+          @click.stop
+          @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'comments')"
+          @dblclick.stop
+          @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'comments')"
+          @pointerdown.stop
+          @wheel.stop
+          @keydown.esc.stop.prevent="closeFullscreenComments"
+        >
+          <button
+            v-if="fullscreenDockCanResize('comments')"
+            type="button"
+            class="fullscreenDockResizeHandle"
+            :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
+            :title="$t('Video.Player.Resize dock', 'Resize dock')"
+            @pointerdown="handleFullscreenDockResizePointerDown($event, 'comments')"
+            @keydown="handleFullscreenDockResizeKeydown($event, 'comments')"
+            @dblclick.stop.prevent="resetFullscreenDockHeights"
+          />
+        </aside>
+        <aside
+          ref="fullscreenPlaylistOverlay"
+          class="fullscreenPlaylistOverlay shaka-no-propagation"
+          :class="{
+            open: showFullscreenPlaylist,
+            fullscreenDockReorderable: fullscreenDockCanReorder('playlist')
+          }"
+          :style="fullscreenDockStyle('playlist')"
+          tabindex="-1"
+          :role="portraitFullscreenDocks ? 'presentation' : 'dialog'"
+          :aria-label="$t('Playlist.Playlist')"
+          :aria-hidden="String(!showFullscreenPlaylist)"
+          :inert="!showFullscreenPlaylist"
+          @click.stop
+          @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'playlist')"
+          @dblclick.stop
+          @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'playlist')"
+          @pointerdown.stop
+          @wheel.stop
+          @keydown.esc.stop.prevent="closeFullscreenPlaylist"
+        >
+          <button
+            v-if="fullscreenDockCanResize('playlist')"
+            type="button"
+            class="fullscreenDockResizeHandle"
+            :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
+            :title="$t('Video.Player.Resize dock', 'Resize dock')"
+            @pointerdown="handleFullscreenDockResizePointerDown($event, 'playlist')"
+            @keydown="handleFullscreenDockResizeKeydown($event, 'playlist')"
+            @dblclick.stop.prevent="resetFullscreenDockHeights"
+          />
+          <div
+            ref="fullscreenPlaylistTarget"
+            class="fullscreenPlaylistTarget"
+          />
+        </aside>
+        <aside
+          ref="fullscreenQueueOverlay"
+          class="fullscreenQueueOverlay shaka-no-propagation"
+          :class="{
+            open: showFullscreenQueue,
+            fullscreenDockReorderable: fullscreenDockCanReorder('queue')
+          }"
+          :style="fullscreenDockStyle('queue')"
+          tabindex="-1"
+          :role="portraitFullscreenDocks ? 'presentation' : 'dialog'"
+          :aria-label="$t('Video.Queue')"
+          :aria-hidden="String(!showFullscreenQueue)"
+          :inert="!showFullscreenQueue"
+          @click.stop
+          @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'queue')"
+          @dblclick.stop
+          @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'queue')"
+          @pointerdown.stop
+          @wheel.stop
+          @keydown.esc.stop.prevent="closeFullscreenQueue"
+        >
+          <button
+            v-if="fullscreenDockCanResize('queue')"
+            type="button"
+            class="fullscreenDockResizeHandle"
+            :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
+            :title="$t('Video.Player.Resize dock', 'Resize dock')"
+            @pointerdown="handleFullscreenDockResizePointerDown($event, 'queue')"
+            @keydown="handleFullscreenDockResizeKeydown($event, 'queue')"
+            @dblclick.stop.prevent="resetFullscreenDockHeights"
+          />
+          <div
+            ref="fullscreenQueueTarget"
+            class="fullscreenQueueTarget"
+          />
+        </aside>
+        <aside
+          ref="fullscreenRecommendationsOverlay"
+          class="fullscreenRecommendationsOverlay shaka-no-propagation"
+          :class="{
+            open: showFullscreenRecommendations,
+            fullscreenDockReorderable: fullscreenDockCanReorder('recommendations')
+          }"
+          :style="fullscreenDockStyle('recommendations')"
+          tabindex="-1"
+          :role="portraitFullscreenDocks ? 'presentation' : 'dialog'"
+          :aria-label="$t('Settings.Fullscreen Actions.Recommended Videos')"
+          :aria-hidden="String(!showFullscreenRecommendations)"
+          :inert="!showFullscreenRecommendations"
+          @click.stop
+          @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'recommendations')"
+          @dblclick.stop
+          @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'recommendations')"
+          @pointerdown.stop
+          @wheel.stop
+          @keydown.esc.stop.prevent="closeFullscreenRecommendations"
+        >
+          <button
+            v-if="fullscreenDockCanResize('recommendations')"
+            type="button"
+            class="fullscreenDockResizeHandle"
+            :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
+            :title="$t('Video.Player.Resize dock', 'Resize dock')"
+            @pointerdown="handleFullscreenDockResizePointerDown($event, 'recommendations')"
+            @keydown="handleFullscreenDockResizeKeydown($event, 'recommendations')"
+            @dblclick.stop.prevent="resetFullscreenDockHeights"
+          />
+          <div
+            ref="fullscreenRecommendationsTarget"
+            class="fullscreenRecommendationsTarget"
+          />
+        </aside>
+      </FtMobileSheet>
       <div
         v-if="showStats"
         class="stats"

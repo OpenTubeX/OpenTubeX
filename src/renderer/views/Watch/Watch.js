@@ -1854,6 +1854,8 @@ export default defineComponent({
       if (this.fullscreenMetadataOpen) {
         this.$nextTick(() => {
           if (!wasOpen) restoreOverlayScrollTop(target, 0)
+          // Portrait fullscreen presents one bottom sheet at a time.
+          if (this.portraitLayout) return
           if (this.showTranscript && !this.fullscreenTranscriptOpen) {
             this.$refs.player?.setFullscreenTranscript(true)
           }

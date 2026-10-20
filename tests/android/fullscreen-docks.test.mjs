@@ -64,6 +64,7 @@ test('Android fullscreen docks animate without reflowing the player every frame'
     await player.evaluate(element => element.requestFullscreen())
     await expect.poll(() => page.evaluate(() => document.fullscreenElement !== null)).toBe(true)
     await expect(player).not.toHaveClass(/presentationModeChanging/)
+    const portrait = await page.evaluate(() => matchMedia('(orientation: portrait)').matches)
     const initialWidth = await video.evaluate(element => element.clientWidth)
     for (const open of [true, false, true, false]) {
       const samples = await measureFullscreenDockToggle(watch, open)
@@ -71,10 +72,18 @@ test('Android fullscreen docks animate without reflowing the player every frame'
       assert.ok(samples.widths.length <= 2, 'Video must lay out once per toggle')
       assert.ok(samples.controlWidths.length <= 2, 'Controls must lay out once per toggle')
       assert.equal(samples.animationKeyframes.length, 2, 'The video uses a compositor animation even when the emulator drops frames')
-      assert.notEqual(samples.animationKeyframes[0].scale, samples.animationKeyframes[1].scale)
+      const movement = portrait ? 'translate' : 'scale'
+      assert.notEqual(samples.animationKeyframes[0][movement], samples.animationKeyframes[1][movement])
       if (open) {
         await expect(player.locator('.fullscreenMetadataOverlay.open')).toBeVisible()
-        assert.ok(samples.widths.at(-1) < initialWidth)
+        if (portrait) {
+          assert.equal(samples.widths.at(-1), initialWidth)
+          const sheet = player.locator('.fullscreenDockSheet[open]')
+          await expect(sheet).toBeVisible()
+          assert.ok(await sheet.evaluate(element => Math.abs(element.getBoundingClientRect().width - innerWidth) < 1))
+        } else {
+          assert.ok(samples.widths.at(-1) < initialWidth)
+        }
       } else {
         assert.equal(samples.widths.at(-1), initialWidth)
       }
