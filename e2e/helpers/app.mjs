@@ -250,9 +250,17 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
   const electronProcess = electronApp.process()
   const context = electronApp.context()
   const startupErrors = []
+  const startupStderr = []
+  electronProcess.stderr.on('data', chunk => startupStderr.push(String(chunk)))
+  electronProcess.stdout.on('data', chunk => startupStderr.push(String(chunk)))
   // Keep the stack: a bare message such as a JSON syntax error cannot be traced.
   const recordStartupError = error => startupErrors.push(error.error().stack ?? error.error().message)
   context.on('weberror', recordStartupError)
+  const pendingStartupRequests = new Set()
+  context.on('request', request => pendingStartupRequests.add(request.url()))
+  context.on('requestfinished', request => pendingStartupRequests.delete(request.url()))
+  context.on('requestfailed', request => pendingStartupRequests.delete(request.url()))
+
 
   const notifyPhase = async (phase, page) => {
     try {
@@ -286,6 +294,20 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
     return launchApp(userDataDir, extraArgs, options, windowRetry + 1)
   }
   await notifyPhase('windowCreated', page)
+  await page.evaluate(() => {
+    window.__startupDiagnosticActions = new Map()
+    const capture = () => {
+      const store = document.querySelector('#app')?.__vue_app__?.config.globalProperties.$store
+      if (!store) { setTimeout(capture, 10); return }
+      store.subscribeAction({
+        before(action) { window.__startupDiagnosticActions.set(action, performance.now()) },
+        after(action) { window.__startupDiagnosticActions.delete(action) },
+        error(action) { window.__startupDiagnosticActions.delete(action) },
+      })
+    }
+    capture()
+  })
+
 
   // Fail fast if dist-e2e contains a development build (it would load the
   // dev server on localhost instead of the bundled files). A transient
@@ -336,6 +358,12 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
     await notifyPhase('interactive', page)
     expect(startupErrors, 'Renderer errors during startup').toEqual([])
   } catch (error) {
+    console.error('[DEBUG-startup-2236]', JSON.stringify({ stderr: startupStderr.join(''), requests: [...pendingStartupRequests], state: await page.evaluate(() => ({
+      ready: document.readyState,
+      mounted: !!document.querySelector('#app')?.__vue_app__,
+      actions: [...(window.__startupDiagnosticActions ?? [])].map(([action, start]) => ({ type: action.type, elapsed: performance.now() - start })),
+      resources: performance.getEntriesByType('resource').map(e => ({ name: e.name, start: e.startTime, duration: e.duration })),
+    })).catch(error => String(error)) }))
     await electronApp.close().catch(() => {})
     expect(startupErrors, 'Renderer errors during startup').toEqual([])
     throw error
