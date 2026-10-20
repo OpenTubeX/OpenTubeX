@@ -27,6 +27,12 @@ installNetworkFetch({
   corsDisabled: process.env.IS_ELECTRON
 })
 
+window.__startupDiagnosticActions = new Map()
+store.subscribeAction({
+  before(action) { window.__startupDiagnosticActions.set(action, performance.now()) },
+  after(action) { window.__startupDiagnosticActions.delete(action) },
+  error(action) { window.__startupDiagnosticActions.delete(action) },
+})
 const app = createApp(App)
 
 app.config.performance = process.env.NODE_ENV === 'development'

@@ -294,21 +294,6 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
     return launchApp(userDataDir, extraArgs, options, windowRetry + 1)
   }
   await notifyPhase('windowCreated', page)
-  await page.evaluate(() => {
-    window.__startupDiagnosticActions = new Map()
-    const capture = () => {
-      const store = document.querySelector('#app')?.__vue_app__?.config.globalProperties.$store
-      if (!store) { setTimeout(capture, 10); return }
-      store.subscribeAction({
-        before(action) { window.__startupDiagnosticActions.set(action, performance.now()) },
-        after(action) { window.__startupDiagnosticActions.delete(action) },
-        error(action) { window.__startupDiagnosticActions.delete(action) },
-      })
-    }
-    capture()
-  })
-
-
   // Fail fast if dist-e2e contains a development build (it would load the
   // dev server on localhost instead of the bundled files). A transient
   // chrome-error page can appear under heavy parallel load - reload once.

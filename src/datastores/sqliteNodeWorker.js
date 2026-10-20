@@ -15,8 +15,11 @@ function driver(filename, backupDirectory) {
 
 parentPort.on('message', async ({ id, method, filename, backupDirectory, statements, transaction }) => {
   try {
+    const start = performance.now()
     const target = driver(filename, backupDirectory)
     const result = method === 'execute' ? await target.execute(statements, transaction) : await target[method]()
+    const duration = performance.now() - start
+    if (duration > 1000) console.warn('[DEBUG-startup-database]', JSON.stringify({ filename, method, transaction, duration, statements: statements?.map(([sql]) => sql) }))
     if (method === 'drop' || method === 'close') drivers.delete(filename)
     parentPort.postMessage({ id, result })
   } catch (error) {
