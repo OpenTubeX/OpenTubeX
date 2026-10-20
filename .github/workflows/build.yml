@@ -97,7 +97,7 @@ jobs:
           os: ubuntu-24.04-arm
 
         - runtime: osx-x64
-          os: macOS-latest
+          os: macos-26-intel
 
         - runtime: osx-arm64
           os: macOS-latest
