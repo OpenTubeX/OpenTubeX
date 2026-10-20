@@ -55,7 +55,7 @@
     </div>
     <Teleport
       v-if="isProfileDropdownOpen"
-      to="body"
+      :to="profileDropdownTarget"
     >
       <Transition
         name="profile-dropdown"
@@ -328,6 +328,9 @@ const isNotificationBellEnabled = computed(() => (
 ))
 
 const isProfileDropdownOpen = ref(false)
+// Content outside a fullscreen element is not rendered, so the dropdown must
+// open inside the fullscreen player when the button is part of its overlay.
+const profileDropdownTarget = shallowRef(document.body)
 const buttonList = useTemplateRef('buttonList')
 const profileDropdown = useTemplateRef('profileDropdown')
 useAnchoredViewportBounds(buttonList, profileDropdown, isProfileDropdownOpen)
@@ -385,6 +388,7 @@ watch(isProfileDropdownOpen, async (open) => {
     window.addEventListener('scroll', scheduleProfileDropdownPositionUpdate, { capture: true, passive: true })
   }
   window.addEventListener('resize', scheduleProfileDropdownPositionUpdate)
+  document.addEventListener('fullscreenchange', closeProfileDropdownOnFullscreenChange)
 
   const scroller = profileDropdownScroller.value
   const content = profileListContent.value
@@ -549,8 +553,14 @@ function scheduleProfileDropdownPositionUpdate() {
   })
 }
 
+// The dropdown's teleport target only matches the fullscreen state it opened in.
+function closeProfileDropdownOnFullscreenChange() {
+  isProfileDropdownOpen.value = false
+}
+
 function removeProfileDropdownPositionTracking() {
   window.removeEventListener('resize', scheduleProfileDropdownPositionUpdate)
+  document.removeEventListener('fullscreenchange', closeProfileDropdownOnFullscreenChange)
   window.removeEventListener('scroll', scheduleProfileDropdownPositionUpdate, true)
   profileDropdownPositionMutationObserver?.disconnect()
   profileDropdownPositionMutationObserver = null
@@ -635,6 +645,7 @@ function toggleProfileDropdown() {
   if (isProfileDropdownOpen.value) {
     isProfileDropdownOpen.value = false
   } else {
+    profileDropdownTarget.value = subscribeButton.value?.closest(':fullscreen') ?? document.body
     prepareProfileDropdownPosition()
     isProfileDropdownOpen.value = true
   }
