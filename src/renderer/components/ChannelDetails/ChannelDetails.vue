@@ -65,7 +65,7 @@
           />
 
           <FtIconButton
-            v-if="!hasErrorMessage || isPinnedToNavigation"
+            v-if="canPin || isPinnedToNavigation"
             :title="isPinnedToNavigation ? $t('User Playlists.Unpin from Navigation') : $t('User Playlists.Pin to Navigation')"
             :icon="['fas', isPinnedToNavigation ? 'thumbtack-slash' : 'thumbtack']"
             :aria-pressed="isPinnedToNavigation"
@@ -403,6 +403,10 @@ const props = defineProps({
     type: String,
     default: null
   },
+  canPin: {
+    type: Boolean,
+    default: false
+  },
   hasErrorMessage: {
     type: Boolean,
     default: false
@@ -448,6 +452,7 @@ const isPinnedToNavigation = computed(() => pinnedChannels.value.some(channel =>
 const pinThumbnail = computed(() => props.thumbnailUrl?.replace(/^https?:\/\/[^/]+\/ggpht/, 'https://yt3.googleusercontent.com'))
 
 function togglePinnedToNavigation() {
+  if (!isPinnedToNavigation.value && !props.canPin) return
   store.dispatch('updatePinnedChannels', isPinnedToNavigation.value
     ? pinnedChannels.value.filter(channel => channel.id !== props.id)
     : [...pinnedChannels.value, { id: props.id, name: props.name || props.id, thumbnail: pinThumbnail.value }])

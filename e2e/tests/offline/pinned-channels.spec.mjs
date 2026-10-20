@@ -173,4 +173,22 @@ test('does not copy the previous channel into a pin after a local load failure',
   await expect(page.locator('.channelDetails:visible')).toBeVisible()
   await expect(page.locator('.sideNav .pinnedChannels .navChannel')).toHaveAttribute('title', 'Saved channel')
   expect(latestSettings(readDatastore(app.userDataDir, 'settings')).pinnedChannels).toEqual(saved)
+  await page.getByRole('button', { name: 'Unpin from Navigation', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Pin to Navigation', exact: true })).toHaveCount(0)
+})
+
+test('removing a pin discards cached details before sync adds it again', async ({ app, page }) => {
+  const id = 'UCaaaaaaaaaaaaaaaaaaaaaa'
+  await page.evaluate(async id => {
+    await window.$store.dispatch('updatePinnedChannels', [{ id, name: 'Original', thumbnail: null }])
+    await window.$store.dispatch('refreshPinnedChannelMetadata', { id, name: 'Local cached name', thumbnail: null })
+  }, id)
+  await expect(page.locator('.sideNav .pinnedChannels .navChannel')).toHaveAttribute('title', 'Local cached name')
+  await page.evaluate(() => window.$store.dispatch('updatePinnedChannels', []))
+  await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).pinnedChannelMetadata).toEqual({})
+  await page.reload()
+  await waitForAppReady(page)
+  // Settings sync applies membership through the setting mutation.
+  await page.evaluate(id => window.$store.commit('setPinnedChannels', [{ id, name: 'New synced name', thumbnail: null }]), id)
+  await expect(page.locator('.sideNav .pinnedChannels .navChannel')).toHaveAttribute('title', 'New synced name')
 })

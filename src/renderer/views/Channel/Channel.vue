@@ -10,6 +10,7 @@
       :name="channelName"
       :banner-url="bannerUrl"
       :has-error-message="!!errorMessage"
+      :can-pin="hasLoadedDetails && !errorMessage"
       :thumbnail-url="thumbnailUrl"
       :sub-count="subCount"
       :show-share-menu="showShareMenu"
@@ -450,6 +451,7 @@ watch(thumbnailUrl, (thumbnail) => {
 })
 
 const errorMessage = ref('')
+const hasLoadedDetails = ref(false)
 const showSearchBar = ref(true)
 const showShareMenu = ref(true)
 
@@ -637,6 +639,7 @@ watch(route, () => {
   }
   ownRouteFullPaths.length = 0
   channelRouteGeneration += 1
+  hasLoadedDetails.value = false
   isLoading.value = true
 
   if (route.query.url) {
@@ -806,6 +809,7 @@ async function ensureChannelInstance() {
 
 // Refresh saved details only from API responses, never from retained display state.
 function updateChannelDetails({ channelId, channelName, channelThumbnailUrl }) {
+  hasLoadedDetails.value = true
   store.dispatch('updateSubscriptionDetails', { channelId, channelName, channelThumbnailUrl })
   store.dispatch('refreshPinnedChannelMetadata', {
     id: channelId,
