@@ -40,10 +40,12 @@ function scrollbarOptions(initialization) {
       // Our move-to-show handler changes classes only when visibility changes.
       // The library's 'move' mode rewrites them on every scroll frame.
       autoHide: 'never',
-      // Track taps on a phone are easy to trigger while using nearby content.
-      // Keep desktop track clicks, but let mobile touches reach the content;
-      // the handle remains draggable on both platforms.
-      clickScroll: !process.env.IS_CAPACITOR
+      // Tracks overlay content, so clicks on an empty track must reach what is
+      // underneath. Only scrollbars in their own strip (the tab bar) opt in.
+      // Track taps on a phone are easy to trigger while using nearby content,
+      // so mobile never does; the handle remains draggable everywhere.
+      clickScroll: !process.env.IS_CAPACITOR &&
+        (initialization.target ?? initialization).matches('[data-scrollbar-click-scroll]')
     }
   }
 

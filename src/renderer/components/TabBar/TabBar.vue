@@ -12,6 +12,7 @@
       <div
         ref="dropZoneRef"
         v-overlay-scrollbars
+        data-scrollbar-click-scroll
         class="tabsContainer"
         @scroll="handleScroll"
         @wheel="handleWheel"
