@@ -61,7 +61,7 @@
         :allow-alpha="false"
         @update:model-value="updateCustomColor"
         @change="flushCustomColor"
-        @apply="seedBeforeEdit = null"
+        @apply="applyCustomColor"
         @cancel="cancelCustomColor"
       >
         <template #trigger>
@@ -138,7 +138,13 @@ function updateCustomColor(color) {
   draftColor.value = color
   if (previewTimeout === null) previewDraftColor()
 }
+// Drags interrupted by pointercancel or blur end without a change event.
+function applyCustomColor() {
+  flushCustomColor()
+  seedBeforeEdit = null
+}
 function cancelCustomColor() {
+  flushCustomColor()
   if (seedBeforeEdit === MATERIAL_SYSTEM_SEED) emit('update:modelValue', MATERIAL_SYSTEM_SEED)
   seedBeforeEdit = null
 }

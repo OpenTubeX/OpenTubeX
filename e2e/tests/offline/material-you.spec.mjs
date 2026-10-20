@@ -410,3 +410,20 @@ test('Material preset swatches preview palettes and persist the selected seed', 
   await goToSettingsSection(page, 'theme')
   await expect(blue).toHaveAttribute('aria-pressed', 'true')
 })
+
+test('applying a seed after an interrupted drag lets presets update the custom swatch', async ({ page }) => {
+  const section = await goToSettingsSection(page, 'theme')
+  await section.locator('.materialCustomSwatch .colorFieldTrigger').click()
+  const picker = page.getByRole('dialog', { name: 'Material accent color' })
+  const bounds = await picker.getByRole('slider', { name: 'Saturation and brightness' }).boundingBox()
+  await page.mouse.move(bounds.x + 4, bounds.y + 4)
+  await page.mouse.down()
+  await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
+  // A window blur cancels the drag without the picker's change event.
+  await page.evaluate(() => window.dispatchEvent(new Event('blur')))
+  await page.mouse.up()
+  await picker.getByRole('button', { name: 'Apply', exact: true }).click()
+  await expect(picker).toBeHidden()
+  await section.locator('.materialColorSwatches').getByRole('button', { name: 'Blue', exact: true }).click()
+  await expect(section.locator('.materialCustomColor')).toHaveCSS('background-color', 'rgb(66, 133, 244)')
+})
