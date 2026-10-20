@@ -1624,6 +1624,7 @@ Video:
       Error: "Ekki tókst að senda myndskeiðið"
       Error With Details: "Ekki tókst að senda myndskeiðið: {error}"
       Untrusted Receiver: "Vottorði móttakarans er ekki treyst. Notaðu auðkenndan Google Cast-móttakara."
+    Secondary Captions: Aukaskjátextar
   Playlist:
     Unavailable videos are hidden: 1 ótiltækt myndskeið er falið | {count} ótiltæk myndskeið eru falin
   External Media:

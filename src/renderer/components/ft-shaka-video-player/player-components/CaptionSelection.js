@@ -32,11 +32,17 @@ export class CaptionSelection extends shaka.ui.TextSelection {
    * @param {() => {id: string, url: string, label: string, translationName: string, language: string, mimeType: string}[]} getTranslations
    * @param {(caption: {id: string, url: string, label: string, language: string, mimeType: string}) => boolean} isTranslationSelected
    * @param {(caption: {url: string, label: string, language: string, mimeType: string}) => Promise<boolean>} selectTranslation
+   * @param {{
+   *   getOptions: () => {url: string, label: string, language: string, mimeType: string}[],
+   *   isAvailable: () => boolean,
+   *   isSelected: (caption: {url: string, label: string, language: string, mimeType: string} | null) => boolean,
+   *   select: (caption: {url: string, label: string, language: string, mimeType: string} | null) => Promise<boolean>
+   * }} secondary
    * @param {{getOffset: () => number, setOffset: (offset: number) => void}} timing
    * @param {!HTMLElement} parent
    * @param {!shaka.ui.Controls} controls
    */
-  constructor(events, getSettings, updateSetting, resetSettings, getTranslations, isTranslationSelected, selectTranslation, timing, parent, controls) {
+  constructor(events, getSettings, updateSetting, resetSettings, getTranslations, isTranslationSelected, selectTranslation, secondary, timing, parent, controls) {
     super(parent, controls)
 
     if (this.isSubMenu) {
@@ -61,46 +67,17 @@ export class CaptionSelection extends shaka.ui.TextSelection {
     this.getTranslations_ = getTranslations
     this.isTranslationSelected_ = isTranslationSelected
     this.selectTranslation_ = selectTranslation
+    this.secondary_ = secondary
     this.captionsOffButton_ = null
     this.openColorControl_ = null
-    this.translationOverlayFrame_ = 0
     this.timing_ = new CaptionTiming(events, timing, this.menu, parent, controls)
 
     this.optionsButton_ = document.createElement('button')
     this.optionsButton_.type = 'button'
     this.optionsButton_.classList.add('ft-caption-options-button')
 
-    this.autoTranslateButton_ = document.createElement('button')
-    this.autoTranslateButton_.type = 'button'
-    this.autoTranslateButton_.classList.add('ft-caption-auto-translate-button')
-    this.autoTranslateLabel_ = document.createElement('span')
-    this.autoTranslateButton_.appendChild(this.autoTranslateLabel_)
-
-    this.translationMenu_ = document.createElement('div')
-    this.translationMenu_.classList.add(
-      'shaka-no-propagation',
-      'shaka-show-controls-on-mouse-over',
-      'shaka-hidden',
-      'ft-caption-translation-menu',
-      this.isSubMenu ? 'shaka-sub-menu' : 'shaka-settings-menu'
-    )
-    const translationMenuParent = this.isSubMenu ? parent : controls.getControlsContainer()
-    translationMenuParent.appendChild(this.translationMenu_)
-
-    this.translationBackButton_ = document.createElement('button')
-    this.translationBackButton_.classList.add('shaka-back-to-overflow-button')
-    this.translationMenu_.appendChild(this.translationBackButton_)
-    this.translationBackIcon_ = new shaka.ui.Icon(
-      this.translationBackButton_,
-      shaka.ui.Enums.MaterialDesignSVGIcons.BACK
-    )
-    this.translationBackLabel_ = document.createElement('span')
-    this.translationBackButton_.appendChild(this.translationBackLabel_)
-    this.translationOptions_ = document.createElement('div')
-    this.translationOptions_.classList.add('ft-caption-translation-options')
-    this.translationMenu_.appendChild(this.translationOptions_)
-    this.translationButtons_ = []
-    this.translationSignature_ = ''
+    this.translationMenu_ = this.createOptionsMenu_(parent, 'ft-caption-auto-translate-button', 'ft-caption-translation')
+    this.secondaryMenu_ = this.createOptionsMenu_(parent, 'ft-caption-secondary-button', 'ft-caption-secondary')
 
     this.appearanceMenu_ = document.createElement('div')
     this.appearanceMenu_.classList.add(
@@ -150,26 +127,6 @@ export class CaptionSelection extends shaka.ui.TextSelection {
       this.appearanceBackButton_.focus()
     })
 
-    this.eventManager.listen(this.autoTranslateButton_, 'click', (event) => {
-      event.stopPropagation()
-      this.setMenuDisplay_(this.menu, false)
-      this.setMenuDisplay_(this.translationMenu_, true)
-      this.translationBackButton_.focus({ preventScroll: true })
-      cancelAnimationFrame(this.translationOverlayFrame_)
-      this.translationOverlayFrame_ = requestAnimationFrame(() => {
-        this.translationOverlayFrame_ = 0
-        addOverlayScrollbars(this.translationOptions_)
-        restoreOverlayScrollTop(this.translationOptions_, 0)
-      })
-    })
-
-    this.eventManager.listen(this.translationBackButton_, 'click', () => {
-      this.setMenuDisplay_(this.translationMenu_, false)
-      this.setMenuDisplay_(this.menu, true)
-      this.autoTranslateButton_.focus({ preventScroll: true })
-      this.resetMenuScroll_(this.menu.parentElement)
-    })
-
     this.eventManager.listen(this.appearanceBackButton_, 'click', () => {
       this.closeColorPopover_()
       this.setMenuDisplay_(this.appearanceMenu_, false)
@@ -185,6 +142,7 @@ export class CaptionSelection extends shaka.ui.TextSelection {
 
     this.eventManager.listen(events, 'localeChanged', () => {
       this.updateLocalisedStrings_()
+      this.addCaptionActions_()
     })
 
     // Shaka rebuilds the language menu whenever tracks or caption state change.
@@ -195,7 +153,8 @@ export class CaptionSelection extends shaka.ui.TextSelection {
     this.eventManager.listen(this.controls, 'submenuclose', () => {
       this.closeColorPopover_()
       this.setMenuDisplay_(this.appearanceMenu_, false)
-      this.setMenuDisplay_(this.translationMenu_, false)
+      this.setMenuDisplay_(this.translationMenu_.menu, false)
+      this.setMenuDisplay_(this.secondaryMenu_.menu, false)
     })
 
     this.updateLocalisedStrings_()
@@ -205,12 +164,151 @@ export class CaptionSelection extends shaka.ui.TextSelection {
 
   release() {
     this.timing_.release()
-    cancelAnimationFrame(this.translationOverlayFrame_)
-    this.translationOverlayFrame_ = 0
-    removeOverlayScrollbars(this.translationOptions_)
-    this.translationMenu_.remove()
+    for (const optionsMenu of [this.translationMenu_, this.secondaryMenu_]) {
+      cancelAnimationFrame(optionsMenu.overlayFrame)
+      removeOverlayScrollbars(optionsMenu.options)
+      optionsMenu.menu.remove()
+    }
     this.appearanceMenu_.remove()
     super.release()
+  }
+
+  /**
+   * Creates a submenu that lists choices, opened by a button in the captions menu.
+   * @param {!HTMLElement} parent
+   * @param {string} buttonClass
+   * @param {string} menuClass prefix of the classes that identify the submenu and its choices
+   * @returns {{button: HTMLButtonElement, label: HTMLSpanElement, menu: HTMLDivElement, backButton: HTMLButtonElement, backLabel: HTMLSpanElement, options: HTMLDivElement, buttons: HTMLButtonElement[], signature: string, overlayFrame: number}}
+   * @private
+   */
+  createOptionsMenu_(parent, buttonClass, menuClass) {
+    const button = document.createElement('button')
+    button.type = 'button'
+    button.classList.add(buttonClass)
+    const label = document.createElement('span')
+    button.appendChild(label)
+
+    const menu = document.createElement('div')
+    menu.classList.add(
+      'shaka-no-propagation',
+      'shaka-show-controls-on-mouse-over',
+      'shaka-hidden',
+      'ft-caption-list-menu',
+      `${menuClass}-menu`,
+      this.isSubMenu ? 'shaka-sub-menu' : 'shaka-settings-menu'
+    )
+    const menuParent = this.isSubMenu ? parent : this.controls.getControlsContainer()
+    menuParent.appendChild(menu)
+
+    const backButton = document.createElement('button')
+    backButton.classList.add('shaka-back-to-overflow-button')
+    menu.appendChild(backButton)
+    // eslint-disable-next-line no-new
+    new shaka.ui.Icon(backButton, shaka.ui.Enums.MaterialDesignSVGIcons.BACK)
+    const backLabel = document.createElement('span')
+    backButton.appendChild(backLabel)
+    const options = document.createElement('div')
+    options.classList.add('ft-caption-list-options', `${menuClass}-options`)
+    menu.appendChild(options)
+
+    const optionsMenu = { button, label, menu, backButton, backLabel, options, buttons: [], signature: '', overlayFrame: 0 }
+
+    this.eventManager.listen(button, 'click', (event) => {
+      event.stopPropagation()
+      this.setMenuDisplay_(this.menu, false)
+      this.setMenuDisplay_(menu, true)
+      backButton.focus({ preventScroll: true })
+      cancelAnimationFrame(optionsMenu.overlayFrame)
+      optionsMenu.overlayFrame = requestAnimationFrame(() => {
+        optionsMenu.overlayFrame = 0
+        addOverlayScrollbars(options)
+        restoreOverlayScrollTop(options, 0)
+      })
+    })
+
+    this.eventManager.listen(backButton, 'click', () => {
+      this.setMenuDisplay_(menu, false)
+      this.setMenuDisplay_(this.menu, true)
+      button.focus({ preventScroll: true })
+      this.resetMenuScroll_(this.menu.parentElement)
+    })
+
+    return optionsMenu
+  }
+
+  /**
+   * Rebuilds the choices of an options submenu when they changed.
+   * @template T
+   * @param {ReturnType<CaptionSelection['createOptionsMenu_']>} optionsMenu
+   * @param {{key: string, label: string, value: T}[]} choices
+   * @param {(value: T) => Promise<boolean>} select
+   * @param {(value: T) => boolean} isSelected
+   * @private
+   */
+  updateOptionsMenu_(optionsMenu, choices, select, isSelected) {
+    const signature = choices.map(choice => `${choice.key}\0${choice.label}`).join('\n')
+    if (signature !== optionsMenu.signature) {
+      optionsMenu.signature = signature
+      for (const button of optionsMenu.buttons) {
+        this.eventManager.unlisten(button, 'click')
+        button.remove()
+      }
+      optionsMenu.buttons = []
+
+      for (const choice of choices) {
+        const button = document.createElement('button')
+        button.type = 'button'
+        const label = document.createElement('span')
+        label.textContent = choice.label
+        button.appendChild(label)
+        optionsMenu.options.appendChild(button)
+        optionsMenu.buttons.push(button)
+
+        this.eventManager.listen(button, 'click', async () => {
+          button.disabled = true
+          const selected = await select(choice.value)
+          button.disabled = false
+          // Also after a failed selection, which can clear the previous choice
+          this.updateOptionsSelection_(optionsMenu, choices, isSelected)
+
+          if (selected) {
+            this.setMenuDisplay_(optionsMenu.menu, false)
+            this.setMenuDisplay_(this.menu, true)
+            this.menu.querySelector('.shaka-back-to-overflow-button')?.focus({ preventScroll: true })
+            this.resetMenuScroll_(this.menu.parentElement)
+          }
+        })
+      }
+    }
+
+    this.updateOptionsSelection_(optionsMenu, choices, isSelected)
+  }
+
+  /**
+   * @template T
+   * @param {ReturnType<CaptionSelection['createOptionsMenu_']>} optionsMenu
+   * @param {{value: T}[]} choices
+   * @param {(value: T) => boolean} isSelected
+   * @private
+   */
+  updateOptionsSelection_(optionsMenu, choices, isSelected) {
+    for (const [index, choice] of choices.entries()) {
+      const button = optionsMenu.buttons[index]
+      const label = button.querySelector(':scope > span')
+      const selected = isSelected(choice.value)
+      label.classList.toggle('shaka-chosen-item', selected)
+      button.ariaSelected = selected ? 'true' : 'false'
+      button.querySelector(':scope > .shaka-ui-icon.shaka-chosen-item')?.remove()
+      if (selected) {
+        const checkmark = new shaka.ui.Icon(
+          null,
+          shaka.ui.Enums.MaterialDesignSVGIcons.CHECKMARK
+        ).getSvgElement()
+        checkmark.classList.add('shaka-chosen-item')
+        checkmark.ariaHidden = 'true'
+        button.prepend(checkmark)
+      }
+    }
   }
 
   /**
@@ -398,11 +496,15 @@ export class CaptionSelection extends shaka.ui.TextSelection {
 
     this.optionsButton_.textContent = optionsLabel
     this.optionsButton_.ariaLabel = optionsLabel
-    const autoTranslateLabel = i18n.global.t('Video.Player.Auto-translate')
-    this.autoTranslateLabel_.textContent = autoTranslateLabel
-    this.autoTranslateButton_.ariaLabel = autoTranslateLabel
-    this.translationBackButton_.ariaLabel = this.localization.resolve('BACK')
-    this.translationBackLabel_.textContent = autoTranslateLabel
+    for (const [optionsMenu, label] of [
+      [this.translationMenu_, i18n.global.t('Video.Player.Auto-translate')],
+      [this.secondaryMenu_, i18n.global.t('Video.Player.Secondary Captions')],
+    ]) {
+      optionsMenu.label.textContent = label
+      optionsMenu.button.ariaLabel = label
+      optionsMenu.backButton.ariaLabel = this.localization.resolve('BACK')
+      optionsMenu.backLabel.textContent = label
+    }
     this.appearanceBackButton_.ariaLabel = this.localization.resolve('BACK')
     this.appearanceBackLabel_.textContent = title
     this.textColor_.label.textContent = i18n.global.t('Settings.Player Settings.Caption Appearance.Text Color')
@@ -532,85 +634,40 @@ export class CaptionSelection extends shaka.ui.TextSelection {
       this.eventManager.unlisten(this.captionsOffButton_, 'click')
     }
     this.captionsOffButton_ = captionsOffButton
-    this.updateTranslationOptions_()
+
+    const translations = this.getTranslations_()
+    this.updateOptionsMenu_(
+      this.translationMenu_,
+      translations.map(translation => ({ key: `${translation.id}\0${translation.url}`, label: translation.translationName, value: translation })),
+      this.selectTranslation_,
+      this.isTranslationSelected_
+    )
+    const secondaryCaptions = this.secondary_.getOptions()
+    this.updateOptionsMenu_(
+      this.secondaryMenu_,
+      [
+        { key: '', label: this.localization.resolve('OFF'), value: null },
+        ...secondaryCaptions.map(caption => ({ key: caption.url, label: caption.label, value: caption })),
+      ],
+      this.secondary_.select,
+      this.secondary_.isSelected
+    )
 
     if (!this.menu.contains(this.optionsButton_)) {
       this.menu.querySelector('.shaka-back-to-overflow-button')?.after(this.optionsButton_)
     }
-    if (this.getTranslations_().length > 0) {
-      if (!this.menu.contains(this.autoTranslateButton_)) {
-        this.menu.appendChild(this.autoTranslateButton_)
+    for (const [optionsMenu, available] of [
+      [this.translationMenu_, translations.length > 0],
+      [this.secondaryMenu_, this.secondary_.isAvailable()],
+    ]) {
+      if (!available) {
+        optionsMenu.button.remove()
+      } else if (!this.menu.contains(optionsMenu.button)) {
+        this.menu.appendChild(optionsMenu.button)
       }
-    } else {
-      this.autoTranslateButton_.remove()
     }
     if (this.menu.lastElementChild !== this.timing_.button) {
       this.menu.appendChild(this.timing_.button)
-    }
-  }
-
-  /** @private */
-  updateTranslationOptions_() {
-    const translations = this.getTranslations_()
-    const signature = translations.map(translation => `${translation.id}\0${translation.url}`).join('\n')
-    if (signature === this.translationSignature_) {
-      this.updateTranslationSelection_()
-      return
-    }
-
-    this.translationSignature_ = signature
-    for (const button of this.translationButtons_) {
-      this.eventManager.unlisten(button, 'click')
-      button.remove()
-    }
-    this.translationButtons_ = []
-
-    for (const translation of translations) {
-      const button = document.createElement('button')
-      button.type = 'button'
-      const label = document.createElement('span')
-      label.textContent = translation.translationName
-      button.appendChild(label)
-      this.translationOptions_.appendChild(button)
-      this.translationButtons_.push(button)
-
-      this.eventManager.listen(button, 'click', async () => {
-        button.disabled = true
-        const selected = await this.selectTranslation_(translation)
-        button.disabled = false
-
-        if (selected) {
-          this.updateTranslationSelection_()
-          this.setMenuDisplay_(this.translationMenu_, false)
-          this.setMenuDisplay_(this.menu, true)
-          this.menu.querySelector('.shaka-back-to-overflow-button')?.focus({ preventScroll: true })
-          this.resetMenuScroll_(this.menu.parentElement)
-        }
-      })
-    }
-
-    this.updateTranslationSelection_()
-  }
-
-  /** @private */
-  updateTranslationSelection_() {
-    const translations = this.getTranslations_()
-    for (const [index, translation] of translations.entries()) {
-      const button = this.translationButtons_[index]
-      const label = button.querySelector(':scope > span')
-      const isSelected = this.isTranslationSelected_(translation)
-      label.classList.toggle('shaka-chosen-item', isSelected)
-      button.ariaSelected = isSelected ? 'true' : 'false'
-      button.querySelector(':scope > .shaka-ui-icon.shaka-chosen-item')?.remove()
-      if (isSelected) {
-        const checkmark = new shaka.ui.Icon(
-          null,
-          shaka.ui.Enums.MaterialDesignSVGIcons.CHECKMARK
-        ).getSvgElement()
-        checkmark.classList.add('shaka-chosen-item')
-        checkmark.ariaHidden = 'true'
-        button.prepend(checkmark)
-      }
     }
   }
 

@@ -1586,6 +1586,7 @@ Video:
       Error: "Could not cast the video"
       Error With Details: "Could not cast the video: {error}"
       Untrusted Receiver: "The receiver's certificate is not trusted. Use an authenticated Google Cast receiver."
+    Secondary Captions: Secondary Captions
   Station: Station
   Playlist:
     Unavailable videos are hidden: 1 unavailable video is hidden | {count} unavailable videos are hidden

@@ -1636,6 +1636,7 @@ Video:
       Error: "Videoclipul nu a putut fi transmis"
       Error With Details: "Videoclipul nu a putut fi transmis: {error}"
       Untrusted Receiver: "Certificatul receptorului nu este de încredere. Folosește un receptor Google Cast autentificat."
+    Secondary Captions: Subtitrări secundare
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Timp rămas din reclama de început: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Timp rămas din așteptarea SABR: {remindingTimeSeconds}s'

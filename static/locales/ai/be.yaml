@@ -1683,6 +1683,7 @@ Video:
       Error: "Не ўдалося трансляваць відэа"
       Error With Details: "Не ўдалося трансляваць відэа: {error}"
       Untrusted Receiver: "Сертыфікат прыёмніка не з’яўляецца давераным. Выкарыстоўвайце аўтэнтыфікаваны прыёмнік Google Cast."
+    Secondary Captions: Другія субтытры
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Да канца рэкламы перад відэа: {remindingTimeSeconds} с'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Да паўторнай спробы SABR: {remindingTimeSeconds} с'

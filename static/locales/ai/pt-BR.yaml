@@ -1603,6 +1603,7 @@ Video:
       Error: "Não foi possível transmitir o vídeo"
       Error With Details: "Não foi possível transmitir o vídeo: {error}"
       Untrusted Receiver: "O certificado do receptor não é confiável. Use um receptor Google Cast autenticado."
+    Secondary Captions: Legendas secundárias
   External Media:
     Dislikes: "Desgosto | Desgostos | Desgostos"
     Reposts: "Republicação | Republicações | Republicações"

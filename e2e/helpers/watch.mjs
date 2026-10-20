@@ -144,10 +144,11 @@ function addCommentImages(body, attachments) {
  * @param {boolean} [options.playable] serve the demo video instead of an error
  * @param {boolean} [options.captionTranslations] include a translatable caption and target languages
  * @param {string} [options.captionCueSettings] append WebVTT settings to the test caption cue
- * @param {string} [options.captionText] replace the WebVTT test caption cue payload
+ * @param {string | ((language: string) => string)} [options.captionText] replace the WebVTT test caption cue payload, optionally per caption language
  * @param {string[]|null} [options.captionVideoIds] limit captions to these video IDs
  * @param {boolean} [options.ownerReply] mark the first reply thread as containing a video-owner reply
  * @param {boolean} [options.creatorReply] mark the first loaded reply as written by the video creator
+ * @param {{languageCode: string, name: string, kind?: 'asr', isTranslatable?: boolean}[]} [options.extraCaptionTracks] add caption tracks after the English one
  * @param {boolean} [options.commentTimestamp] add a timestamp to one top-level comment
  * @param {boolean} [options.blankCommentLikes] replace one comment's zero-like count with YouTube's whitespace representation
  * @param {object[]} [options.commentImages] add image attachments to comments and replies
@@ -160,6 +161,7 @@ export async function mockWatchPage(app, page, {
   captionCueSettings = '',
   captionText = 'Original caption',
   captionVideoIds = null,
+  extraCaptionTracks = [],
   ownerReply = false,
   creatorReply = false,
   commentTimestamp = false,
@@ -170,7 +172,7 @@ export async function mockWatchPage(app, page, {
 } = {}) {
   const counters = new Map()
   const includeCaptions = captionTranslations || captionCueSettings !== '' ||
-    captionText !== 'Original caption' || captionVideoIds !== null
+    captionText !== 'Original caption' || captionVideoIds !== null || extraCaptionTracks.length > 0
 
   await stubPoToken(app.electronApp)
 
@@ -191,7 +193,7 @@ export async function mockWatchPage(app, page, {
       const format = searchParams.get('fmt')
       const body = format === 'srt'
         ? '1\n00:00:00,000 --> 00:00:05,000\nTranslated caption\n'
-        : `WEBVTT\n\n00:00:00.000 --> 00:01:00.000 ${captionCueSettings}\n${captionText}\n`
+        : `WEBVTT\n\n00:00:00.000 --> 00:01:00.000 ${captionCueSettings}\n${typeof captionText === 'function' ? captionText(searchParams.get('lang')) : captionText}\n`
       const fulfill = () => route.fulfill({
         status: 200,
         contentType: format === 'srt' ? 'application/x-subrip' : 'text/vtt',
@@ -246,7 +248,14 @@ export async function mockWatchPage(app, page, {
               languageCode: 'en',
               ...(captionTranslations ? { kind: 'asr' } : {}),
               isTranslatable: true
-            }],
+            }, ...extraCaptionTracks.map(({ languageCode, name, kind, isTranslatable = true }) => ({
+              baseUrl: `https://www.youtube.com/api/timedtext?v=${videoId}&lang=${languageCode}`,
+              name: { simpleText: name },
+              vssId: `${kind === 'asr' ? 'a' : ''}.${languageCode}`,
+              languageCode,
+              ...(kind ? { kind } : {}),
+              isTranslatable
+            }))],
             translationLanguages: captionTranslations
               ? languageCodes.map(languageCode => ({
                   languageCode,

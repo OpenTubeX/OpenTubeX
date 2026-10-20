@@ -2225,6 +2225,7 @@ Video:
       Error: Voice-over-Übersetzung fehlgeschlagen. Bitte versuche es später erneut.
       Duration Error: Die Voice-over-Übersetzung ist nur für Videos mit einer Länge von bis zu vier Stunden verfügbar.
     Auto-translate: Automatisch übersetzen
+    Secondary Captions: Zweite Untertitel
     Zoom:
       Zoom: Zoom
       'Off': Aus

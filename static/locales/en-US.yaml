@@ -2400,6 +2400,7 @@ Video:
       Options: Options
       Sample: Captions look like this
     Auto-translate: Auto-translate
+    Secondary Captions: Secondary Captions
     Sleep Timer:
       Sleep Timer: Sleep timer
       Off: 'Off'

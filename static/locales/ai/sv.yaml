@@ -1616,6 +1616,7 @@ Video:
       Error: "Det gick inte att casta videon"
       Error With Details: "Det gick inte att casta videon: {error}"
       Untrusted Receiver: "Mottagarens certifikat är inte betrott. Använd en autentiserad Google Cast-mottagare."
+    Secondary Captions: Sekundära undertexter
   Station: Station
   Playlist:
     Unavailable videos are hidden: 1 otillgänglig video är dold | {count} otillgängliga videor är dolda

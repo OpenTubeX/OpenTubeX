@@ -1601,6 +1601,7 @@ Video:
       Error: "Video yayınlanamadı"
       Error With Details: "Video yayınlanamadı: {error}"
       Untrusted Receiver: "Alıcının sertifikasına güvenilmiyor. Kimliği doğrulanmış bir Google Cast alıcısı kullanın."
+    Secondary Captions: İkincil altyazılar
   External Media:
     Dislikes: "Beğenmeme | Beğenmeme"
     Reposts: "Repost | Repost"

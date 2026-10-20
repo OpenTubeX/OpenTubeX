@@ -666,6 +666,15 @@
         :video-fit="annotationVideoFit"
       />
       <div
+        v-if="secondaryCaptionText"
+        class="secondaryCaptions"
+        :class="{ secondaryCaptionsAtTop }"
+        :style="secondaryCaptionsBox"
+        translate="no"
+      >
+        <span>{{ secondaryCaptionText }}</span>
+      </div>
+      <div
         v-if="showCaptionAppearanceSample"
         class="captionAppearanceSample"
         :style="{ bottom: captionAppearanceSampleBottom }"

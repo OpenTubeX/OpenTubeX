@@ -94,6 +94,7 @@ import {
   MANIFEST_TYPE_DASH,
   MANIFEST_TYPE_HLS
 } from '../../helpers/player/utils'
+import { normalizeYouTubeCaptionLanguageCode } from '../../helpers/player/youtubeCaptionLanguages'
 import {
   findCaptionByLocale,
   getCaptionTranslationSource,
@@ -3920,7 +3921,12 @@ export default defineComponent({
                 const hasPreferredCaption = findCaptionByLocale(originalCaptionTracks, this.preferredCaptionLocale) ||
                   originalCaptionTracks.some(captionTrack => languagesSet.has(captionTrack.language))
 
-                if (!hasPreferredCaption) {
+                // The last auto-translation picked in the player wins over original tracks, as those can be incomplete
+                const rememberedTranslation = this.getRememberedTranslatedCaption(result.captions, originalLanguage)
+
+                if (rememberedTranslation) {
+                  captionTracks.push(rememberedTranslation)
+                } else if (!hasPreferredCaption) {
                   const translatedCaptionTrack = this.getTranslatedLocaleCaption(result.captions, languagesSet, originalLanguage)
 
                   if (translatedCaptionTrack) {
@@ -6364,7 +6370,7 @@ export default defineComponent({
             : caption.label
         })), this.preferredCaptionLocale)
         this.captionTranslations = source.captionTranslations.map(caption => {
-          if (!caption.originalLanguage) return caption
+          if (!caption.originalLanguage) return { ...caption, isAutotranslated: true }
 
           const translationName = getLanguageName(caption.language, caption.translationName)
           const originalLanguage = getLanguageName(caption.originalLanguage, caption.originalLanguage)
@@ -6375,12 +6381,21 @@ export default defineComponent({
               language: translationName,
               originalLanguage
             }),
-            translationName
+            translationName,
+            isAutotranslated: true
           }
         })
 
-        // Like built-in playback, offer a translation when no original caption matches the preferred locale
-        if (!findCaptionByLocale(this.captions.filter(caption => !caption.isDubbed), this.preferredCaptionLocale)) {
+        // Same as with the local API, the last auto-translation picked in the player wins over original tracks
+        const rememberedLanguage = normalizeYouTubeCaptionLanguageCode(this.$store.getters.getAutoTranslatedCaptionLocale)
+        const rememberedTranslation = rememberedLanguage && this.captionTranslations.find(caption =>
+          normalizeYouTubeCaptionLanguageCode(caption.language) === rememberedLanguage &&
+          normalizeYouTubeCaptionLanguageCode(caption.originalLanguage ?? '') !== rememberedLanguage
+        )
+        if (rememberedTranslation) {
+          this.captions = [...this.captions, { ...rememberedTranslation, isPreferredTranslation: true }]
+        } else if (!findCaptionByLocale(this.captions.filter(caption => !caption.isDubbed), this.preferredCaptionLocale)) {
+          // Like built-in playback, offer a translation when no original caption matches the preferred locale
           const translation = findCaptionByLocale(this.captionTranslations, this.preferredCaptionLocale)
           if (translation) {
             this.captions = sortCaptions([...this.captions, { ...translation, isAutotranslated: true }], this.preferredCaptionLocale)
@@ -6604,6 +6619,26 @@ export default defineComponent({
       }
 
       return this.getTranslatedCaption(captions, translationLanguage, originalLanguage)
+    },
+
+    /**
+     * Translates the video's captions into the language last picked from the player's auto-translate menu,
+     * unless they are already in that language.
+     * @param {import('youtubei.js').YTNodes.PlayerCaptionsTracklist} captions
+     * @param {string | null | undefined} originalLanguage
+     * @returns {null|{ url: string, label: string, language: string, mimeType: string, isAutotranslated: boolean, isPreferredTranslation: boolean }}
+     */
+    getRememberedTranslatedCaption: function (captions, originalLanguage) {
+      const languageCode = this.$store.getters.getAutoTranslatedCaptionLocale
+      const translationLanguage = languageCode && captions.translation_languages?.find(language => language.language_code === languageCode)
+      const trackToTranslate = translationLanguage && getCaptionTranslationSource(captions.caption_tracks, originalLanguage)
+
+      if (!trackToTranslate || normalizeYouTubeCaptionLanguageCode(trackToTranslate.language_code) === normalizeYouTubeCaptionLanguageCode(languageCode)) {
+        return null
+      }
+
+      const caption = this.getTranslatedCaption(captions, translationLanguage, originalLanguage)
+      return caption && { ...caption, isPreferredTranslation: true }
     },
 
     /**

@@ -1619,6 +1619,7 @@ Video:
       Error: "Видеото не можа да се предаде"
       Error With Details: "Видеото не можа да се предаде: {error}"
       Untrusted Receiver: "Сертификатът на приемника не е доверен. Използвайте удостоверен приемник Google Cast."
+    Secondary Captions: Втори субтитри
   Station: Станция
   Playlist:
     Unavailable videos are hidden: 1 недостъпен видеоклип е скрит | {count} недостъпни видеоклипа са скрити

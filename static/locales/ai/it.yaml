@@ -1601,6 +1601,7 @@ Video:
       Error: "Impossibile trasmettere il video"
       Error With Details: "Impossibile trasmettere il video: {error}"
       Untrusted Receiver: "Il certificato del ricevitore non è attendibile. Usa un ricevitore Google Cast autenticato."
+    Secondary Captions: Sottotitoli secondari
   External Media:
     Dislikes: "Non mi piace | Non mi piace | Non mi piace"
     Reposts: "Repost | Repost | Repost"

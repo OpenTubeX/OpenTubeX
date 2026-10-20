@@ -1623,6 +1623,7 @@ Video:
       Error: "Videozapis nije moguće prenijeti"
       Error With Details: "Videozapis nije moguće prenijeti: {error}"
       Untrusted Receiver: "Certifikat prijamnika nije pouzdan. Upotrijebite autentificirani Google Cast prijamnik."
+    Secondary Captions: Sekundarni titlovi
   Station: Postaja
   Playlist:
     Unavailable videos are hidden: 1 nedostupan videozapis je skriven | {count} nedostupna videozapisa su skrivena | {count} nedostupnih videozapisa je skriveno

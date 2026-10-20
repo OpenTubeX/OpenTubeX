@@ -89,6 +89,8 @@ export const SYNC_SETTING_LABELS = {
   disableChannelLinks: 'Settings.Parental Control Settings.Disable Channel Links',
   displayVideoPlayButton: 'Settings.Player Settings.Display Play Button In Video Player',
   enableCaptionTranslations: 'Settings.Player Settings.Caption Appearance.Enable Translations',
+  autoTranslatedCaptionLocale: 'Video.Player.Auto-translate',
+  secondaryCaptionLocale: 'Video.Player.Secondary Captions',
   enableClosedAppSubscriptionRefresh: 'Settings.Subscription Settings.Refresh Subscriptions While App Is Closed',
   enableUploadNotifications: 'Settings.Subscription Settings.Notify About New Uploads',
   enableCommentTranslations: 'Settings.General Settings.Comment Translation.Enable',

@@ -1950,6 +1950,7 @@ Video:
       Error: "동영상을 전송할 수 없습니다"
       Error With Details: "동영상을 전송할 수 없습니다: {error}"
       Untrusted Receiver: "수신기의 인증서를 신뢰할 수 없습니다. 인증된 Google Cast 수신기를 사용하세요."
+    Secondary Captions: 보조 자막
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': '프리롤 광고 남은 시간: {remindingTimeSeconds}초'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'SABR 대기 남은 시간: {remindingTimeSeconds}초'

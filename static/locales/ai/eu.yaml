@@ -1612,6 +1612,7 @@ Video:
       Error: "Ezin izan da bideoa igorri"
       Error With Details: "Ezin izan da bideoa igorri: {error}"
       Untrusted Receiver: "Hartzailearen ziurtagiria ez da fidagarria. Erabili autentifikatutako Google Cast hartzaile bat."
+    Secondary Captions: Bigarren mailako azpitituluak
   External Media:
     Dislikes: "Desatsegitea | Desatsegiteak"
     Reposts: "Berriro argitaratzea | Berriro argitaratzeak"

@@ -1602,6 +1602,7 @@ Video:
       Error: "Video se nepodařilo odeslat"
       Error With Details: "Video se nepodařilo odeslat: {error}"
       Untrusted Receiver: "Certifikát přijímače není důvěryhodný. Použijte ověřený přijímač Google Cast."
+    Secondary Captions: Druhé titulky
   External Media:
     Dislikes: "Dislajk | Dislajky | Dislajků"
     Reposts: "Repost | Reposty | Repostů"
