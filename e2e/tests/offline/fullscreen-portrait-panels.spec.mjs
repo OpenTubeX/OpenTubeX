@@ -89,8 +89,10 @@ test('portrait fullscreen docks use bottom panels and return to side docks in la
     await player.hover({ position: { x: 20, y: 20 } })
     await expect.poll(() => player.locator('.fullscreenActions').evaluate(element => {
       const bounds = element.getBoundingClientRect()
-      const sheetTop = element.parentElement.querySelector('.fullscreenDockSheet').getBoundingClientRect().top
-      return bounds.top >= 0 && bounds.bottom <= sheetTop
+      const sheet = element.parentElement.querySelector('.fullscreenDockSheet')
+      return matchMedia('(height <= 700px)').matches
+        ? bounds.top >= sheet.querySelector('.fullscreenQueueOverlay').getBoundingClientRect().bottom && bounds.bottom <= innerHeight
+        : bounds.top >= 0 && bounds.bottom <= sheet.getBoundingClientRect().top
     })).toBe(true)
     const scroller = queue.locator('.queueItems')
     await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
@@ -127,4 +129,56 @@ test('portrait fullscreen docks use bottom panels and return to side docks in la
   } finally {
     await watch.dispose()
   }
+})
+
+test('short portrait fullscreen keeps panel actions reachable', { tag: '@scale' }, async ({ app, page }, testInfo) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await setWindowSize(app, page, { width: 340, height: 380 })
+  await setPlayerFullscreen(page, true)
+  const player = page.locator('.ftVideoPlayer')
+  await player.evaluate(element => element.style.setProperty('--safe-area-inset-bottom', '24px'))
+  await player.locator('video').evaluate(element => element.pause())
+  await player.hover({ position: { x: 20, y: 20 } })
+  const actions = player.locator('.fullscreenActions')
+  await actions.getByRole('button', { name: 'Comments', exact: true }).click()
+  await expect(player.locator('.fullscreenDockSheet[open]')).toBeVisible()
+  await expect.poll(() => actions.evaluate(element => {
+    const bounds = element.getBoundingClientRect()
+    return bounds.top >= 0 && bounds.bottom <= innerHeight && bounds.left >= 0 && bounds.right <= innerWidth
+  })).toBe(true)
+  await actions.getByRole('button', { name: 'Comments', exact: true }).click()
+  await expect(player.locator('.fullscreenDockSheet[open]')).toHaveCount(0)
+  const watch = await page.evaluateHandle(findWatchComponent)
+  await watch.evaluate(component => {
+    for (let index = 0; index < 30; index++) {
+      component.proxy.$store.commit('addVideoToWatchQueue', {
+        video: { videoId: `queued${String(index).padStart(5, '0')}`, title: `Queued video ${index + 1}`, author: 'Queue channel' }
+      })
+    }
+  })
+  await actions.getByRole('button', { name: 'Queue', exact: true }).click()
+  await watch.dispose()
+  const queue = player.locator('.fullscreenQueueOverlay.open')
+  const scroller = queue.locator('.queueItems')
+  await expect(queue).toBeVisible()
+  await expect(player.locator('.fullscreenDockSheet[open]')).toHaveCSS('background-color', await queue.evaluate(element => getComputedStyle(element).backgroundColor))
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expectScrollAtRenderedEnd(scroller)
+  await expect.poll(async () => {
+    const content = await queue.boundingBox()
+    const dock = await actions.boundingBox()
+    return content.y + content.height <= dock.y
+  }).toBe(true)
+  await testInfo.attach('short-portrait-footer', {
+    body: Buffer.from(await app.electronApp.evaluate(async ({ BrowserWindow }) =>
+      (await BrowserWindow.getAllWindows()[0].webContents.capturePage()).toPNG().toString('base64')), 'base64'),
+    contentType: 'image/png'
+  })
+  await setWindowSize(app, page, { width: 420, height: 1000 })
+  await expectScrollAtRenderedEnd(scroller)
+  await player.hover({ position: { x: 20, y: 20 } })
+  await expect(player).toHaveAttribute('data-action-dock-visible', 'true')
+  await actions.getByRole('button', { name: 'Queue', exact: true }).click()
+  await expect(player.locator('.fullscreenDockSheet[open]')).toHaveCount(0)
 })

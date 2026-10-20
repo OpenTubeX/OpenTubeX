@@ -93,11 +93,16 @@ test.describe('mobile SponsorBlock', () => {
       await expect(player.locator('.fullscreenQueueOverlay.open')).toBeVisible()
       // A full-width portrait panel leaves room for a single row of actions.
       await expect.poll(() => player.locator('.fullscreenActions').evaluate(element => element.getBoundingClientRect().height)).toBeCloseTo(50, 0)
-      await expect.poll(async () => {
-        const noticeBox = await notice.boundingBox()
-        const dockBox = await player.locator('.fullscreenActions').boundingBox()
-        return Math.abs(dockBox.y - noticeBox.y - noticeBox.height - 8)
-      }).toBeLessThan(1)
+      await expect.poll(() => player.evaluate(element => {
+        const notice = element.querySelector('.skippedSegmentsWrapper').getBoundingClientRect()
+        const dock = element.querySelector('.fullscreenActions').getBoundingClientRect()
+        if (matchMedia('(height <= 700px)').matches) {
+          const queue = element.querySelector('.fullscreenQueueOverlay').getBoundingClientRect()
+          return notice.top >= 0 && notice.bottom <= dock.top &&
+            queue.bottom <= dock.top && dock.bottom <= innerHeight
+        }
+        return Math.abs(dock.top - notice.bottom - 8) < 1
+      })).toBe(true)
       if (mode === 'fullscreen') {
         await notice.getByRole('button', { name: 'Skip (Enter)', exact: true }).click()
         await expect(notice.getByRole('button', { name: 'Unskip (Enter)', exact: true })).toBeVisible()
@@ -139,8 +144,13 @@ test.describe('mobile SponsorBlock', () => {
   })
 })
 
-for (const mobile of [false, true]) {
-  test.describe(`minimum landscape fullscreen with SponsorBlock (${mobile ? 'mobile' : 'desktop'})`, { tag: '@scale' }, () => {
+for (const { mobile, width, orientation } of [
+  { mobile: false, width: 340, orientation: 'portrait' },
+  { mobile: true, width: 340, orientation: 'portrait' },
+  { mobile: false, width: 382, orientation: 'landscape' },
+  { mobile: true, width: 382, orientation: 'landscape' },
+]) {
+  test.describe(`minimum ${orientation} fullscreen with SponsorBlock (${mobile ? 'mobile' : 'desktop'})`, { tag: '@scale' }, () => {
     test.use({
       seed: {
         settings: {
@@ -159,7 +169,7 @@ for (const mobile of [false, true]) {
         store.commit('addVideoToWatchQueue', { video: { videoId: 'queued00000', title: 'Queue test' } })
         store.commit('setFullscreenActions', ['queue', 'sponsorBlock', 'comments', 'share', 'addToPlaylist', 'quickBookmark'])
       })
-      await setWindowSize(app, page, { width: 382, height: 380 })
+      await setWindowSize(app, page, { width, height: 380 })
       await setPlayerFullscreen(page, true)
       await player.locator('.fullscreenActions').getByRole('button', { name: 'Queue', exact: true }).click()
       const actions = player.locator('.fullscreenActions')

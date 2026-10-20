@@ -1109,6 +1109,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   page sidebar instead. When the comments panel is open too, chapters takes
   the available height is shared with the other open docks.
 */
+:deep(.fullscreenDockSheet),
 :is(.chapterOverlay, .fullscreenMetadataOverlay, .fullscreenTranscriptOverlay, .fullscreenSponsorBlockOverlay, .fullscreenLiveChatOverlay, .fullscreenCommentsOverlay, .fullscreenPlaylistOverlay, .fullscreenQueueOverlay, .fullscreenRecommendationsOverlay) {
   /* Fullscreen docks use the contrast-safe Catppuccin Mocha glass palette in
      every app theme because their background is the video, not the app page. */
@@ -4137,7 +4138,33 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 .ftVideoPlayer.portraitFullscreenDocks.fullscreenDockLayoutOpen .skippedSegmentsWrapper {
-  bottom: calc(70% + var(--sponsorblock-notice-bottom));
+  bottom: min(
+    calc(70% + var(--sponsorblock-notice-bottom)),
+    calc(100% - var(--sponsorblock-notice-block-size, 0px) - 8px)
+  );
+}
+
+/* Short portrait video areas cannot fit both playback controls and panel actions. */
+@media (height <= 700px) {
+  .ftVideoPlayer.portraitFullscreenDocks.fullscreenDockLayoutOpen:is(:fullscreen, .fullWindow) > .fullscreenActions {
+    inset-block-end: max(12px, var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+    max-block-size: 50px;
+    z-index: 9;
+  }
+
+  .ftVideoPlayer.portraitFullscreenDocks.fullscreenDockLayoutOpen[data-action-dock-visible='true'] {
+    /* The shared sheet reserves the footer for every panel, including the queue. */
+    /* stylelint-disable-next-line length-zero-no-unit */
+    --fullscreen-actions-footer-space: 0px;
+  }
+
+  .ftVideoPlayer.portraitFullscreenDocks.fullscreenDockLayoutOpen[data-action-dock-visible='true'] :deep(.fullscreenDockSheet) {
+    padding-block-end: calc(62px + max(12px, var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))));
+  }
+
+  .ftVideoPlayer.portraitFullscreenDocks.fullscreenDockLayoutOpen .skippedSegmentsWrapper {
+    z-index: 9;
+  }
 }
 
 /* Keep SponsorBlock notices inside the video area when a dock is open. */
