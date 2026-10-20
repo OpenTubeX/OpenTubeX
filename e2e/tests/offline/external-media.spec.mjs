@@ -475,6 +475,10 @@ for (const withChat of [false, true]) {
     }).toBe(true)
     await player.hover()
     await player.locator('.theatre-button').click()
+    // Leaving theatre mode slides the sidebar back up from below the viewport.
+    // Clicking a chapter while it moves can scroll the page and miss the button.
+    await expect.poll(() => externalMedia.evaluate(element => element.getAnimations({ subtree: true })
+      .filter(animation => animation.effect?.target?.matches('.externalMediaPlayer, .externalMediaInfo, .externalMediaSidebar')).length)).toBe(0)
     await panel.getByRole('button', { name: /Main segment/ }).click()
     await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThanOrEqual(10)
     // A 960 CSS-pixel viewport stacks the chapters below the details.
