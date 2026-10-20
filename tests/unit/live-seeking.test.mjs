@@ -54,6 +54,11 @@ test('DVR metadata does not disable seeking for ordinary videos or ended streams
 function absoluteSeekFixture(props) {
   const seekingAllowed = canSeekLive({ manifestMimeType: 'application/dash+xml', ...props })
   const state = {
+    props,
+    isLive: { value: props.isLive !== false },
+    abRepeatEnabled: { value: false },
+    ui: { getControls: () => ({ isSeeking: () => false }) },
+    player: { seekRange: () => ({ start: 0, end: 30 }) },
     seekingIsPossible: { value: seekingAllowed },
     hasPlaybackPosition: { value: false },
     hasLoaded: { value: true },
@@ -195,7 +200,7 @@ test('a mouse drag retains the latest timeline value and consumes its release', 
   const { state, handleSeekBarInput, handleSeekBarMouseChange } = absoluteSeekFixture({ isLive: false })
   state.video.value.readyState = 1
   handleSeekBarInput({ type: 'mousedown', target: { matches: () => true, value: '5' } })
-  state.ui = { getControls: () => ({ getDisplayTime: () => 15 }) }
+  state.ui = { getControls: () => ({ isSeeking: () => false, getDisplayTime: () => 15 }) }
   handleSeekBarMouseChange({ type: 'mousemove' })
   assert.equal(state.pendingMetadataSeek, 15)
   assert.equal(state.seekBarMouseDown, true)
@@ -209,7 +214,7 @@ for (const endEvent of ['mouseup', 'touchend', 'touchcancel', 'blur']) {
     const { state, handleSeekBarInput, handleSeekBarMouseChange } = absoluteSeekFixture({ isLive: false })
     state.video.value.autoplay = true
     state.videoLayoutReady.value = false
-    state.ui = { getControls: () => ({ getDisplayTime: () => 5 }) }
+    state.ui = { getControls: () => ({ isSeeking: () => false, getDisplayTime: () => 5 }) }
     const target = { matches: () => true, value: '5' }
     handleSeekBarInput({ type: endEvent.startsWith('touch') ? 'touchstart' : 'mousedown', target })
     // The first frame may become ready while the pointer is still held down.
@@ -228,7 +233,7 @@ for (const [autoplay, ready] of [[false, false], [true, true]]) {
     const { state, handleSeekBarInput, handleSeekBarMouseChange } = absoluteSeekFixture({ isLive: false })
     state.video.value.autoplay = autoplay
     state.videoLayoutReady.value = ready
-    state.ui = { getControls: () => ({ getDisplayTime: () => 5 }) }
+    state.ui = { getControls: () => ({ isSeeking: () => false, getDisplayTime: () => 5 }) }
     handleSeekBarInput({ type: 'mousedown', target: { matches: () => true, value: '5' } })
     handleSeekBarMouseChange({ type: 'mouseup' })
     assert.equal(state.playCalls, 0)
@@ -242,7 +247,7 @@ for (const action of ['pause', 'stop', 'exposed pause']) {
       const requestPause = action === 'exposed pause' ? pause : state.handlers[action]
       state.video.value.autoplay = true
       state.videoLayoutReady.value = false
-      state.ui = { getControls: () => ({ getDisplayTime: () => 5 }) }
+      state.ui = { getControls: () => ({ isSeeking: () => false, getDisplayTime: () => 5 }) }
       if (!duringSeek) requestPause()
       handleSeekBarInput({ type: 'mousedown', target: { matches: () => true, value: '5' } })
       if (duringSeek) requestPause()

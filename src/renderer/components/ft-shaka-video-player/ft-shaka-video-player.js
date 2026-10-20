@@ -7320,8 +7320,9 @@ export default defineComponent({
       const backoff = player.getConfiguration().streaming.durationBackoff
       const backedOffTarget = Math.max(player.seekRange().start, endSeekTarget - backoff)
       // Accept Shaka's duration clamp, but discard a superseding timeline or
-      // Media Session seek. Media timestamps can be rounded to milliseconds.
-      return Math.abs(currentTime - endSeekTarget) < 0.001 ||
+      // Media Session seek. The seek bar stops 1 ms before duration; allow
+      // timestamp rounding as well, only for an explicitly requested end seek.
+      return Math.abs(currentTime - endSeekTarget) < 0.002 ||
         Math.abs(currentTime - backedOffTarget) < 0.001
     }
 
@@ -13100,8 +13101,15 @@ export default defineComponent({
      * @param {number} time
      */
     function rememberSeekPosition(time) {
-      // Explicit seeks supersede End even when they match Shaka's backoff.
+      // Explicit seeks supersede earlier end intent, even at its backoff position.
       endSeekTarget = null
+      // Shaka temporarily pauses while scrubbing. Retain a requested end only
+      // after it has restored the original playback state, including seek retries.
+      if (video.value.paused && !props.shortsPlayer && !isLive.value && !video.value.loop &&
+          !ui?.getControls().isSeeking() && !(abRepeatEnabled.value && hasValidAbRepeatRange())) {
+        const { start, end } = player.seekRange()
+        if (Number.isFinite(end) && end > start && time >= end) endSeekTarget = end
+      }
       hasPlaybackPosition.value = true
       if (pendingMetadataSeek !== null || !hasLoaded.value || !videoLayoutReady.value || video.value.readyState < 3) pendingMetadataSeek = time
     }
