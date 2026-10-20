@@ -184,6 +184,7 @@ public class RotationFullscreenTest {
     }
 
     private void verifyRotationFullscreen(boolean physicalRotation) throws Exception {
+        boolean swipeExit = "true".equals(InstrumentationRegistry.getArguments().getString("swipeExit"));
         String media;
         try (InputStream input = InstrumentationRegistry.getInstrumentation().getContext()
             .getAssets().open("demo.webm")) {
@@ -212,6 +213,7 @@ public class RotationFullscreenTest {
                     (() => {
                         const app = document.querySelector('#app').__vue_app__.config.globalProperties;
                         const values = { EnterFullscreenOnDisplayRotate: true, FullscreenRotationIgnoresSystemLock: false,
+                            EnableMobileFullscreenSwipe: true,
                             VideoPlaybackEngine: 'built-in',
                             AutoplayVideos: false, UseSponsorBlock: false, UseReturnYouTubeDislikes: false,
                             UiScale: 100, CapacitorLayoutMode: 'phone', ScrollMiniPlayerEnabled: true };
@@ -282,7 +284,16 @@ public class RotationFullscreenTest {
                     scenario.onActivity(activity -> assertEquals("Only the explicit opt-in may force landscape",
                         physicalRotation, activity.getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE));
                     assertEquals("0", shell("settings get system accelerometer_rotation"));
-                    if (physicalRotation) {
+                    if (swipeExit) {
+                        // Swipe the center so side brightness/volume gestures do not intercept.
+                        int[] size = new int[2];
+                        scenario.onActivity(activity -> {
+                            size[0] = view.getWidth();
+                            size[1] = view.getHeight();
+                        });
+                        shell("input swipe " + size[0] / 2 + " " + size[1] / 3 + " "
+                            + size[0] / 2 + " " + size[1] * 4 / 5 + " 300");
+                    } else if (physicalRotation) {
                         scenario.moveToState(Lifecycle.State.CREATED);
                         android.util.Log.i("OpenTubeXRotationTest", "physical-fullscreen");
                         // Let the host turn the device upright while sensing is paused.
@@ -294,6 +305,11 @@ public class RotationFullscreenTest {
                     awaitCondition(view, "!document.body.classList.contains('playerFullWindow')");
                     awaitPageScrollbarEnabled(scenario, view, true);
                     assertInlinePortrait(scenario, view);
+                    if (swipeExit) {
+                        Thread.sleep(1000);
+                        assertEquals("Swipe must not enter native fullscreen or reopen rotation fullscreen", "false",
+                            evaluate(view, "!!document.fullscreenElement || !!document.querySelector('.videoLayout:popover-open')"));
+                    }
                     if (physicalRotation) {
                         scenario.onActivity(activity -> assertEquals("Restore the user's orientation policy",
                             ActivityInfo.SCREEN_ORIENTATION_USER, activity.getRequestedOrientation()));
