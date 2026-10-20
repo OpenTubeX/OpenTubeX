@@ -100,12 +100,16 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
 
   if (isIos && (
     (sectionType === 'general' && ['Stream Extraction Method', 'Swipe to refresh'].includes(group)) ||
-    (sectionType === 'subscription' && [
-      'Refresh Subscriptions While App Is Closed',
-      'Notify About New Uploads'
-    ].includes(group)) ||
     (sectionType === 'player' && group === 'Voice-over Translation')
   )) return false
+
+  // These need the desktop main process or the Android background worker.
+  if (sectionType === 'subscription' && [
+    'Refresh Subscriptions While App Is Closed',
+    'Notify About New Uploads'
+  ].includes(group)) {
+    return usingElectron || (isCapacitor && !isIos)
+  }
 
   if (sectionType === 'player' && group === 'Screenshot') {
     if (item === 'Enable') return true

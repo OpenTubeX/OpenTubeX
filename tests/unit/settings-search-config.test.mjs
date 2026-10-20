@@ -612,3 +612,19 @@ test('sync search indexes controls and actions without progress or server feedba
     assert.equal(values.includes(locale.Settings['Sync Settings'][key]), true, key)
   }
 })
+
+test('settings search lists background subscription features only where they run', () => {
+  for (const [usingElectron, isCapacitor, isIos, expected] of [[true, false, false, true], [false, true, false, true], [false, true, true, false], [false, false, false, false]]) {
+    const labels = [...createSettingsSearchIndex({
+      sections: [{ type: 'subscriptions', title: 'Subscriptions', description: '' }],
+      tm: path => getAtPath(locale, path),
+      store: { getters: {} },
+      isCapacitor,
+      isIos,
+      usingElectron,
+    }).values()].flat().map(entry => entry.label)
+    for (const label of ['Refresh Subscriptions While App Is Closed', 'Notify About New Uploads']) {
+      assert.equal(labels.includes(label), expected, `${label} ${usingElectron} ${isCapacitor} ${isIos}`)
+    }
+  }
+})
