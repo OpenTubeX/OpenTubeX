@@ -34,7 +34,7 @@ for (const preference of ['auto', 'vp9']) {
       const overlay = element.ui ?? element.querySelector('video')?.ui
       return overlay.getControls().getPlayer().getConfiguration().preferredVideo
     })
-    expect(preferences.map(entry => entry.codec)).toEqual(preference === 'auto' ? [''] : ['vp09', 'vp9'])
+    expect(preferences.map(entry => entry.codec)).toEqual(preference === 'auto' ? [''] : ['vp09', 'vp9', ''])
     expect(preferences.every(entry => entry.hdrLevel === 'AUTO')).toBe(true)
   })
 }
