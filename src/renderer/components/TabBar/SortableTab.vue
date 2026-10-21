@@ -280,7 +280,7 @@ watch(tabAvatarUrl, (avatarUrl) => {
   gap: 6px;
   padding-inline: 10px;
   padding-block: 6px;
-  --tab-background-color: var(--tab-surface-color, var(--bg-color));
+  --tab-background-color: var(--tab-surface-color, var(--inactive-tab-color));
 
   background-color: var(--tab-background-color);
   border-radius: calc(16px * var(--ui-roundness));
@@ -355,7 +355,7 @@ watch(tabAvatarUrl, (avatarUrl) => {
 }
 
 .tab.colored {
-  --tab-surface-color: color-mix(in srgb, var(--tab-accent-color) var(--tab-accent-mix), var(--bg-color));
+  --tab-surface-color: color-mix(in srgb, var(--tab-accent-color) var(--tab-accent-mix), var(--inactive-tab-color));
   --tab-hover-color: color-mix(in srgb, var(--tab-accent-color) 22%, var(--card-bg-color));
   --tab-active-color: color-mix(in srgb, var(--tab-accent-color) 26%, var(--card-bg-color));
   --tab-border-color: color-mix(in srgb, var(--tab-accent-color) var(--tab-accent-border-mix), var(--border-color));
