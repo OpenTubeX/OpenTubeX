@@ -3,7 +3,7 @@ import { chooseAndroidDirectory } from '../../helpers/androidStorage'
 import { isAppHidden, getAndroidAppActive, waitForAndroidAppState } from '../../helpers/appVisibility.js'
 import { playbackScreenWake } from '../../helpers/playbackScreenWake'
 import { createRepeatStatsTracker } from '../../helpers/player/repeatStats'
-import { computed, defineComponent, inject, nextTick, onActivated, onBeforeUnmount, onDeactivated, onMounted, onUnmounted, reactive, ref, shallowRef, watch } from 'vue'
+import { computed, defineComponent, inject, nextTick, onActivated, onBeforeUnmount, onDeactivated, onMounted, onUnmounted, reactive, ref, shallowRef, useId, watch } from 'vue'
 import FtPaidPromotionBadge from '../FtPaidPromotionBadge/FtPaidPromotionBadge.vue'
 import FtRetryImage from '../FtRetryImage.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
@@ -705,6 +705,8 @@ export default defineComponent({
     let suspendedShortsSabrReload = false
     const playerIsPresented = computed(() => !shortsNavigationSuspended.value && (isTabPresented?.value ?? true))
     const mediaTabId = tabId ?? 'web'
+    // A tab can hold a retained mini player next to another player.
+    const mediaSessionSource = `player-${useId()}`
     const lightsOff = computed(() => store.getters.getTabLightsOff(mediaTabId))
     const musicMode = computed(() => store.getters.getTabMusicMode(mediaTabId))
     const showMusicModeToggle = computed(() => store.getters.getShowMusicModeToggle)
@@ -7163,7 +7165,7 @@ export default defineComponent({
     // #endregion player locales
 
     function registerMediaSessionHandlers() {
-      tabMediaCoordinator.setActionHandlers(mediaTabId, 'player', {
+      tabMediaCoordinator.setActionHandlers(mediaTabId, mediaSessionSource, {
         play: () => video.value?.play(),
         pause,
         stop: () => {
@@ -13267,7 +13269,7 @@ export default defineComponent({
 
       if (!shortsNavigationSuspended.value) {
         tabMediaCoordinator.setMiniPlayer(mediaTabId, false)
-        tabMediaCoordinator.setActionHandlers(mediaTabId, 'player', {})
+        tabMediaCoordinator.setActionHandlers(mediaTabId, mediaSessionSource, {})
         tabMediaCoordinator.setPlaybackState(mediaTabId, 'none')
 
         // Clear tab playback state indicator when the active player is destroyed.
@@ -13305,7 +13307,7 @@ export default defineComponent({
       sleepTimer.pauseCountdown()
       cancelSponsorBlockSkipSchedule()
       clearAbRepeatBoundarySchedule()
-      tabMediaCoordinator.setActionHandlers(mediaTabId, 'player', {})
+      tabMediaCoordinator.setActionHandlers(mediaTabId, mediaSessionSource, {})
       tabMediaCoordinator.setPlaybackState(mediaTabId, 'none')
     }
 

@@ -285,7 +285,7 @@ for (const wasPlaying of [false, true]) {
       getSabrReloadState: () => ({ wasPlaying: !media.paused, playbackRate: 2, videoQuality: '144' }),
       emit: (...args) => emitted.push(args), registerMediaSessionHandlers() {},
       sleepTimer: { pauseCountdown() {} }, cancelSponsorBlockSkipSchedule() {}, clearAbRepeatBoundarySchedule() {},
-      tabMediaCoordinator: { setActionHandlers() {}, setPlaybackState() {} }, mediaTabId: 'shorts-tab',
+      tabMediaCoordinator: { setActionHandlers() {}, setPlaybackState() {} }, mediaTabId: 'shorts-tab', mediaSessionSource: 'player-shorts-tab',
       onDeactivated() {}, onActivated: callback => { activate = callback },
     }
     const suspend = vm.runInNewContext(`${sabrSource}\n${lifecycle}\nsuspendForShortsNavigation`, context)

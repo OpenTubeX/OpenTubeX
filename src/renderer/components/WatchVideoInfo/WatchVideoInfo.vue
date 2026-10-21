@@ -322,7 +322,7 @@ import FtRetryImage from '../FtRetryImage.vue'
 import { ytDlp } from '../../helpers/ytDlp'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
-import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
+import { computed, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtAddToPlaylistDropdown from '../FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
@@ -344,12 +344,10 @@ import { linkifyHashtagsAndHandles } from '../../helpers/descriptionLinks'
 import { escapeHTML, formatViewCount, getRelativeTimeFromDate, getVideoThumbnailUrl, isUnloadedBackgroundTabClick, openInternalPath, showToast } from '../../helpers/utils'
 import { translateSponsorBlockCategory } from '../../helpers/player/utils'
 import { parseChannelPreferences, removeChannelPreference } from '../../helpers/channel-preferences'
-import { useTabContext } from '../../tabs/TabContext'
-import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
+import { useMediaSessionMetadata } from '../../composables/useMediaSessionMetadata'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { formatDate } from '../../helpers/dateFormat'
 
-const { tabId } = useTabContext()
 const dateFormat = computed(() => store.getters.getDateFormat)
 
 const props = defineProps({
@@ -952,27 +950,11 @@ function handleExternalPlayer() {
   }
 }
 
-watch(
-  () => [props.title, props.channelName, props.videoThumbnail],
-  ([title, artist, artworkSrc]) => {
-    const metadata = {
-      title,
-      artist,
-      artwork: artworkSrc
-        ? [{ src: artworkSrc, sizes: '128x128', type: 'image/png' }]
-        : []
-    }
-    tabMediaCoordinator.setMetadata(
-      tabId ?? 'web',
-      typeof MediaMetadata === 'function' ? new MediaMetadata(metadata) : metadata
-    )
-  },
-  { immediate: true }
-)
-
-onBeforeUnmount(() => {
-  tabMediaCoordinator.setMetadata(tabId ?? 'web', null)
-})
+useMediaSessionMetadata(() => ({
+  title: props.title,
+  artist: props.channelName,
+  artworkSrc: props.videoThumbnail
+}))
 
 const showPlaylists = computed(() => !store.getters.getHidePlaylists)
 const isInAnyPlaylist = computed(() => store.getters.getPlaylistVideoCounts.has(props.id))

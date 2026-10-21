@@ -77,6 +77,7 @@ function absoluteSeekFixture(props) {
     accumulatedSeekSeconds: 5,
     video: { value: { currentTime: 10, duration: 30, paused: true, autoplay: false, pause() {}, play() { state.playCalls++; return Promise.resolve() }, fastSeek(time) { this.currentTime = time } } },
     mediaTabId: 'live-test',
+    mediaSessionSource: 'player-live-test',
     mediaSessionStopped: false,
     tabMediaCoordinator: {
       setActionHandlers(_id, _owner, handlers) { state.handlers = handlers },
