@@ -1023,6 +1023,13 @@ Settings:
     Import history formats: 'Støttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube-sikkerhetskopi (.json)'
     Import playlists formats: 'Støttede formater: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Støttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Channel playback speeds: "Avspillingshastigheter for kanaler"
+    Import channel playback speeds: "Importer avspillingshastigheter for kanaler"
+    Channel playback speeds file: "Fil med avspillingshastigheter for kanaler"
+    Import channel playback speeds formats: "Støttede formater: lagrede data fra brukerskriptet {script} (.json)"
+    Invalid channel playback speeds file: "Fant ingen avspillingshastigheter for kanaler i denne filen"
+    Channel playback speeds imported: "Importerte avspillingshastigheten for {count} kanal | Importerte avspillingshastighetene for {count} kanaler"
+    Channels not found: "{count} kanal ble ikke funnet | {count} kanaler ble ikke funnet"
   Sync Settings:
     Revoke Session Tabs Warning: "Denne enhetens synkroniserte fanesett vil også bli slettet."
     Revoke Session Partial Failure: "Synkroniserte fanesett ble slettet, men tilbakekallingen kunne ikke bekreftes. Prøv å tilbakekalle tilgangen igjen."

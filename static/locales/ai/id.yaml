@@ -1024,6 +1024,13 @@ Settings:
     Import history formats: 'Format yang didukung: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), cadangan LibreTube (.json)'
     Import playlists formats: 'Format yang didukung: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Format yang didukung: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Channel playback speeds: "Kecepatan pemutaran kanal"
+    Import channel playback speeds: "Impor kecepatan pemutaran kanal"
+    Channel playback speeds file: "Berkas kecepatan pemutaran kanal"
+    Import channel playback speeds formats: "Format yang didukung: penyimpanan skrip pengguna {script} (.json)"
+    Invalid channel playback speeds file: "Tidak ada kecepatan pemutaran kanal yang ditemukan dalam berkas ini"
+    Channel playback speeds imported: "Kecepatan pemutaran {count} kanal telah diimpor"
+    Channels not found: "{count} kanal tidak dapat ditemukan"
   Sync Settings:
     Revoke Session Tabs Warning: "Kumpulan tab tersinkronisasi perangkat ini juga akan dihapus."
     Revoke Session Partial Failure: "Kumpulan tab tersinkron telah dihapus, tetapi pencabutan akses tidak dapat dikonfirmasi. Coba cabut akses lagi."

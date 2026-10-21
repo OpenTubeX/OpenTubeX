@@ -292,11 +292,39 @@
     </FtSettingsSubpage>
   </FtSettingsSection>
   <ScheduledBackupSettings v-if="USING_ELECTRON" />
+  <FtSettingsSection
+    class="advancedDataSettings"
+    :title="t('Settings.Categories.Advanced')"
+  >
+    <h4 class="groupTitle">
+      {{ t('Settings.Data Settings.Channel playback speeds') }}
+    </h4>
+    <FtFlexBox class="box">
+      <FtButton
+        :label="t('Settings.Data Settings.Import channel playback speeds')"
+        :icon="['fas', 'folder-open']"
+        :disabled="channelPlaybackSpeedsBusy"
+        @click="importChannelPlaybackSpeeds"
+      />
+    </FtFlexBox>
+    <Translation
+      keypath="Settings.Data Settings.Import channel playback speeds formats"
+      tag="p"
+      class="importFormatsHint"
+    >
+      <template #script>
+        <a
+          class="importHelpLink"
+          :href="SPEED_BY_CHANNEL_URL"
+        >{{ SPEED_BY_CHANNEL_NAME }}</a>
+      </template>
+    </Translation>
+  </FtSettingsSection>
 </template>
 
 <script setup>
 import { computed, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { Translation, useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
 import FtCheckboxList from '../FtCheckboxList/FtCheckboxList.vue'
@@ -334,6 +362,9 @@ import {
   isLibreTubeWatchHistoryBackup,
 } from '../../helpers/libretube'
 import { parseLineDelimitedJson } from '../../helpers/line-delimited-json'
+import { parseChannelPreferences } from '../../helpers/channel-preferences'
+import { resolveChannelId } from '../../helpers/channels'
+import { parseSpeedByChannelValues, resolveSpeedByChannelValues } from '../../helpers/speed-by-channel-import'
 import { previewBackupImport, previewTakeoutImport, parseTakeoutSubscriptions, parseTakeoutWatchHistory, parseTakeoutSearchHistory } from '../../helpers/import-preview'
 import FtImportPreview from '../FtImportPreview/FtImportPreview.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
@@ -2183,6 +2214,81 @@ async function exportYouTubeSearchHistory() {
 }
 
 // #endregion search history
+
+// #region channel playback speeds
+
+const SPEED_BY_CHANNEL_NAME = 'Youtube Speed By Channel'
+const SPEED_BY_CHANNEL_URL = 'https://greasyfork.org/scripts/397614-youtube-speed-by-channel'
+const channelPlaybackSpeedsBusy = ref(false)
+
+async function importChannelPlaybackSpeeds() {
+  let response
+  try {
+    response = await readFileWithPicker(
+      t('Settings.Data Settings.Channel playback speeds file'),
+      { 'application/json': '.json' },
+      IMPORT_DIRECTORY_ID,
+      START_IN_DIRECTORY
+    )
+  } catch (err) {
+    const message = t('Settings.Data Settings.Unable to read file')
+    showToast({ message: `${message}: ${err}`, icon: ['fas', 'circle-exclamation'] })
+    return
+  }
+
+  if (response === null) {
+    return
+  }
+
+  const invalidMessage = t('Settings.Data Settings.Invalid channel playback speeds file')
+  const json = parseImportedJson(response.content, invalidMessage)
+  if (json === null) {
+    return
+  }
+
+  const entries = parseSpeedByChannelValues(json)
+  if (entries.length === 0) {
+    showToast({ message: invalidMessage, icon: ['fas', 'circle-exclamation'] })
+    return
+  }
+
+  channelPlaybackSpeedsBusy.value = true
+  try {
+    await runWithDataImportProgress(async progressOperation => {
+      const { speeds, notFound } = await resolveSpeedByChannelValues(entries, {
+        subscriptions: primaryProfile.value.subscriptions,
+        resolveHandle: handle => resolveChannelId(`https://www.youtube.com/${handle}`, store.getters.getBackendPreference),
+        onProgress: (resolved, total) => progressOperation.update({ percentage: (resolved / total) * 100 })
+      })
+
+      const count = Object.keys(speeds).length
+      if (count > 0) {
+        const currentSpeeds = parseChannelPreferences(store.getters.getChannelPlaybackSpeeds, 'channelPlaybackSpeeds')
+        await store.dispatch('updateChannelPlaybackSpeeds', JSON.stringify({ ...currentSpeeds, ...speeds }))
+        // The imported speeds would otherwise not be applied
+        if (!store.getters.getRememberPlaybackSpeedPerChannel) {
+          await store.dispatch('updateRememberPlaybackSpeedPerChannel', true)
+        }
+        showToast({
+          message: t('Settings.Data Settings.Channel playback speeds imported', { count }, count),
+          icon: ['fas', 'gauge'],
+        })
+      }
+
+      if (notFound.length > 0) {
+        console.warn('Channels not found while importing playback speeds:', notFound)
+        showToast({
+          message: t('Settings.Data Settings.Channels not found', { count: notFound.length }, notFound.length),
+          icon: ['fas', 'circle-exclamation'],
+        })
+      }
+    })
+  } finally {
+    channelPlaybackSpeedsBusy.value = false
+  }
+}
+
+// #endregion channel playback speeds
 
 // #region settings
 

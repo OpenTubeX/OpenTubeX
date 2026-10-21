@@ -1049,6 +1049,13 @@ Settings:
     Import history formats: 'ஆதரிக்கப்படும் வடிவங்கள்: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube காப்புநகல் (.json)'
     Import playlists formats: 'ஆதரிக்கப்படும் வடிவங்கள்: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'ஆதரிக்கப்படும் வடிவங்கள்: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Channel playback speeds: "சேனல் இயக்க வேகங்கள்"
+    Import channel playback speeds: "சேனல் இயக்க வேகங்களை இறக்குமதி செய்"
+    Channel playback speeds file: "சேனல் இயக்க வேகக் கோப்பு"
+    Import channel playback speeds formats: "ஆதரிக்கப்படும் வடிவங்கள்: {script} பயனர் ஸ்கிரிப்ட் சேமிப்பகம் (.json)"
+    Invalid channel playback speeds file: "இந்தக் கோப்பில் சேனல் இயக்க வேகங்கள் எதுவும் கிடைக்கவில்லை"
+    Channel playback speeds imported: "{count} சேனலின் இயக்க வேகம் இறக்குமதி செய்யப்பட்டது | {count} சேனல்களின் இயக்க வேகங்கள் இறக்குமதி செய்யப்பட்டன"
+    Channels not found: "{count} சேனலைக் கண்டறிய முடியவில்லை | {count} சேனல்களைக் கண்டறிய முடியவில்லை"
   Sync Settings:
     Revoke Session Tabs Warning: "இந்தச் சாதனத்தின் ஒத்திசைக்கப்பட்ட தாவல் தொகுப்புகளும் நீக்கப்படும்."
     Revoke Session Partial Failure: "ஒத்திசைக்கப்பட்ட தாவல் தொகுப்புகள் நீக்கப்பட்டன, ஆனால் அணுகல் ரத்துசெய்யப்பட்டதை உறுதிப்படுத்த முடியவில்லை. அணுகலை ரத்துசெய்ய மீண்டும் முயற்சிக்கவும்."

@@ -1024,6 +1024,13 @@ Settings:
     Import history formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), backup do LibreTube (.json)'
     Import playlists formats: 'Formatos suportados: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Channel playback speeds: "Velocidades de reprodução dos canais"
+    Import channel playback speeds: "Importar velocidades de reprodução dos canais"
+    Channel playback speeds file: "Arquivo de velocidades de reprodução dos canais"
+    Import channel playback speeds formats: "Formatos suportados: dados do userscript {script} (.json)"
+    Invalid channel playback speeds file: "Nenhuma velocidade de reprodução de canal foi encontrada neste arquivo"
+    Channel playback speeds imported: "Importada a velocidade de reprodução de {count} canal | Importadas as velocidades de reprodução de {count} de canais | Importadas as velocidades de reprodução de {count} canais"
+    Channels not found: "{count} canal não foi encontrado | {count} de canais não foram encontrados | {count} canais não foram encontrados"
   Sync Settings:
     Revoke Session Tabs Warning: "Os conjuntos de abas sincronizados deste dispositivo também serão excluídos."
     Revoke Session Partial Failure: "Os conjuntos de abas sincronizadas foram excluídos, mas não foi possível confirmar a revogação. Tente revogar o acesso novamente."

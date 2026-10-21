@@ -5,8 +5,8 @@ test('shows icons on data actions and vertically centers export choices', async 
   const dataSection = await goToSettingsSection(page, 'data')
   const actionButtons = dataSection.locator('.ft-flex-box.box > .btn')
 
-  await expect(actionButtons).toHaveCount(14)
-  await expect.poll(() => actionButtons.locator(':scope > .ft-icon').count()).toBe(14)
+  await expect(actionButtons).toHaveCount(15)
+  await expect.poll(() => actionButtons.locator(':scope > .ft-icon').count()).toBe(15)
 
   await dataSection.getByRole('button', { name: /Export Subscriptions/i }).click()
   const exportChoices = page.locator('.settingsSubpageContent .exportTypeButtons')

@@ -1023,6 +1023,13 @@ Settings:
     Import history formats: '支持的格式：OpenTubeX / FreeTube (.db)、YouTube Takeout (.json)、LibreTube 备份 (.json)'
     Import playlists formats: '支持的格式：OpenTubeX / FreeTube (.db)'
     Import search history formats: '支持的格式：OpenTubeX / FreeTube (.db)、YouTube Takeout (.json)'
+    Channel playback speeds: "频道播放速度"
+    Import channel playback speeds: "导入频道播放速度"
+    Channel playback speeds file: "频道播放速度文件"
+    Import channel playback speeds formats: "支持的格式：{script} 用户脚本存储数据 (.json)"
+    Invalid channel playback speeds file: "此文件中未找到频道播放速度"
+    Channel playback speeds imported: "已导入 {count} 个频道的播放速度"
+    Channels not found: "未能找到 {count} 个频道"
   Sync Settings:
     Revoke Session Tabs Warning: "此设备已同步的标签页集合也将被删除。"
     Revoke Session Partial Failure: "已删除同步的标签页组，但无法确认访问权限是否已撤销。请重试撤销访问权限。"

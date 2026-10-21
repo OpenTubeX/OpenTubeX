@@ -1,5 +1,5 @@
-import { invidiousGetChannelInfo } from './api/invidious'
-import { getLocalChannel, parseLocalChannelHeader } from './api/local'
+import { invidiousGetChannelId, invidiousGetChannelInfo } from './api/invidious'
+import { getLocalChannel, getLocalChannelId, parseLocalChannelHeader } from './api/local'
 import { showInvidiousFallbackToast } from './utils'
 
 /**
@@ -78,4 +78,18 @@ export async function findChannelTagInfo(id, backendOptions) {
  */
 export function checkYoutubeChannelId(id) {
   return /^UC[\w-]{22}$/.test(id)
+}
+
+/**
+ * Resolves a channel URL, such as one with a handle, to the channel's ID
+ * @param {string} url
+ * @param {string} backendPreference
+ * @returns {Promise<string | null>}
+ */
+export function resolveChannelId(url, backendPreference) {
+  if (!process.env.SUPPORTS_LOCAL_API || backendPreference === 'invidious') {
+    return invidiousGetChannelId(url)
+  }
+
+  return getLocalChannelId(url)
 }

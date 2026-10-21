@@ -1024,6 +1024,13 @@ Settings:
     Import history formats: '対応形式: OpenTubeX / FreeTube（.db）、YouTube Takeout（.json）、LibreTubeバックアップ（.json）'
     Import playlists formats: '対応形式: OpenTubeX / FreeTube（.db）'
     Import search history formats: '対応形式: OpenTubeX / FreeTube（.db）、YouTube Takeout（.json）'
+    Channel playback speeds: "チャンネル別の再生速度"
+    Import channel playback speeds: "チャンネル別再生速度のインポート"
+    Channel playback speeds file: "チャンネル別再生速度ファイル"
+    Import channel playback speeds formats: "対応形式: {script} ユーザースクリプトの保存データ（.json）"
+    Invalid channel playback speeds file: "このファイルにチャンネル別の再生速度が見つかりませんでした"
+    Channel playback speeds imported: "{count} チャンネルの再生速度をインポートしました"
+    Channels not found: "{count} チャンネルが見つかりませんでした"
   Sync Settings:
     Revoke Session Tabs Warning: "このデバイスの同期されたタブセットも削除されます。"
     Revoke Session Partial Failure: "同期されたタブセットは削除されましたが、アクセスの取り消しを確認できませんでした。もう一度アクセスの取り消しを試してください。"

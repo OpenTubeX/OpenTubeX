@@ -1124,6 +1124,13 @@ Settings:
     Import history formats: 'Formatos compatibles: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), copia de seguridad de LibreTube (.json)'
     Import playlists formats: 'Formatos compatibles: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Formatos compatibles: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Channel playback speeds: "Velocidades de reproducción de canales"
+    Import channel playback speeds: "Importar velocidades de reproducción de canales"
+    Channel playback speeds file: "Archivo de velocidades de reproducción de canales"
+    Import channel playback speeds formats: "Formatos compatibles: almacenamiento del script de usuario {script} (.json)"
+    Invalid channel playback speeds file: "No se encontraron velocidades de reproducción de canales en este archivo"
+    Channel playback speeds imported: "Se importó la velocidad de reproducción de {count} canal | Se importaron las velocidades de reproducción de {count} canales | Se importaron las velocidades de reproducción de {count} canales"
+    Channels not found: "No se pudo encontrar {count} canal | No se pudieron encontrar {count} canales | No se pudieron encontrar {count} canales"
   Sync Settings:
     Revoke Session Tabs Warning: "También se eliminarán los conjuntos de pestañas sincronizados de este dispositivo."
     Revoke Session Partial Failure: "Se eliminaron los conjuntos de pestañas sincronizados, pero no se pudo confirmar la revocación. Volvé a intentar revocar el acceso."

@@ -1274,6 +1274,13 @@ Settings:
     Import history formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube atsarginė kopija (.json)'
     Import playlists formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Channel playback speeds: "Kanalų atkūrimo greičiai"
+    Import channel playback speeds: "Importuoti kanalų atkūrimo greičius"
+    Channel playback speeds file: "Kanalų atkūrimo greičių failas"
+    Import channel playback speeds formats: "Palaikomi formatai: {script} naudotojo scenarijaus saugykla (.json)"
+    Invalid channel playback speeds file: "Šiame faile nerasta kanalų atkūrimo greičių"
+    Channel playback speeds imported: "Importuotas {count} kanalo atkūrimo greitis | Importuoti {count} kanalų atkūrimo greičiai | Importuoti {count} kanalų atkūrimo greičiai"
+    Channels not found: "{count} kanalas nerastas | {count} kanalai nerasti | {count} kanalų nerasta"
   Sync Settings:
     Revoke Session Tabs Warning: "Taip pat bus ištrinti šio įrenginio sinchronizuoti skirtukų rinkiniai."
     Revoke Session Partial Failure: "Sinchronizuoti skirtukų rinkiniai buvo ištrinti, tačiau prieigos atšaukimo patvirtinti nepavyko. Bandykite dar kartą atšaukti prieigą."

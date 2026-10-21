@@ -1023,6 +1023,13 @@ Settings:
     Import history formats: 'Formats pris en charge : OpenTubeX / FreeTube (.db), YouTube Takeout (.json), sauvegarde LibreTube (.json)'
     Import playlists formats: 'Formats pris en charge : OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Formats pris en charge : OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Channel playback speeds: "Vitesses de lecture des chaînes"
+    Import channel playback speeds: "Importer les vitesses de lecture des chaînes"
+    Channel playback speeds file: "Fichier des vitesses de lecture des chaînes"
+    Import channel playback speeds formats: "Formats pris en charge : stockage du script utilisateur {script} (.json)"
+    Invalid channel playback speeds file: "Aucune vitesse de lecture de chaîne n'a été trouvée dans ce fichier"
+    Channel playback speeds imported: "Vitesse de lecture de {count} chaîne importée | Vitesses de lecture de {count} de chaînes importées | Vitesses de lecture de {count} chaînes importées"
+    Channels not found: "{count} chaîne est introuvable | {count} de chaînes sont introuvables | {count} chaînes sont introuvables"
   Sync Settings:
     Revoke Session Tabs Warning: "Les ensembles d’onglets synchronisés de cet appareil seront également supprimés."
     Revoke Session Partial Failure: "Les ensembles d’onglets synchronisés ont été supprimés, mais la révocation n’a pas pu être confirmée. Réessayez de révoquer l’accès."

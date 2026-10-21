@@ -1018,6 +1018,13 @@ Settings:
     Import history formats: 'Поддерживаемые форматы: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), резервная копия LibreTube (.json)'
     Import playlists formats: 'Поддерживаемые форматы: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Поддерживаемые форматы: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Channel playback speeds: "Скорости воспроизведения каналов"
+    Import channel playback speeds: "Импортировать скорости воспроизведения каналов"
+    Channel playback speeds file: "Файл скоростей воспроизведения каналов"
+    Import channel playback speeds formats: "Поддерживаемые форматы: данные юзерскрипта {script} (.json)"
+    Invalid channel playback speeds file: "В этом файле не найдено скоростей воспроизведения каналов"
+    Channel playback speeds imported: "Импортирована скорость воспроизведения {count} канала | Импортированы скорости воспроизведения {count} каналов | Импортированы скорости воспроизведения {count} каналов"
+    Channels not found: "Не удалось найти {count} канал | Не удалось найти {count} канала | Не удалось найти {count} каналов"
   Sync Settings:
     Revoke Session Tabs Warning: "Синхронизированные наборы вкладок этого устройства также будут удалены."
     Revoke Session Partial Failure: "Синхронизированные наборы вкладок удалены, но отзыв доступа не удалось подтвердить. Повторите попытку отзыва доступа."

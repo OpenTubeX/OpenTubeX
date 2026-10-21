@@ -1024,6 +1024,13 @@ Settings:
     Import history formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube biztonsági másolat (.json)'
     Import playlists formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Channel playback speeds: "Csatornák lejátszási sebességei"
+    Import channel playback speeds: "Csatornák lejátszási sebességeinek importálása"
+    Channel playback speeds file: "Csatornák lejátszási sebességeit tartalmazó fájl"
+    Import channel playback speeds formats: "Támogatott formátumok: {script} felhasználói szkript tárolója (.json)"
+    Invalid channel playback speeds file: "Ebben a fájlban nem találhatók csatornákhoz tartozó lejátszási sebességek"
+    Channel playback speeds imported: "{count} csatorna lejátszási sebessége importálva | {count} csatorna lejátszási sebessége importálva"
+    Channels not found: "{count} csatorna nem található | {count} csatorna nem található"
   Sync Settings:
     Revoke Session Tabs Warning: "Az eszköz szinkronizált lapkészletei is törlődnek."
     Revoke Session Partial Failure: "A szinkronizált lapkészletek törlődtek, de a hozzáférés visszavonását nem sikerült megerősíteni. Próbáld újra visszavonni a hozzáférést."

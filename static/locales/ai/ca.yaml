@@ -1344,6 +1344,13 @@ Settings:
     Import history formats: 'Formats admesos: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), còpia de seguretat de LibreTube (.json)'
     Import playlists formats: 'Formats admesos: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Formats admesos: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Channel playback speeds: "Velocitats de reproducció dels canals"
+    Import channel playback speeds: "Importa les velocitats de reproducció dels canals"
+    Channel playback speeds file: "Fitxer de velocitats de reproducció dels canals"
+    Import channel playback speeds formats: "Formats admesos: emmagatzematge de l'script d'usuari {script} (.json)"
+    Invalid channel playback speeds file: "No s'ha trobat cap velocitat de reproducció de canal en aquest fitxer"
+    Channel playback speeds imported: "S'ha importat la velocitat de reproducció de {count} canal | S'han importat les velocitats de reproducció de {count} canals | S'han importat les velocitats de reproducció de {count} canals"
+    Channels not found: "No s'ha pogut trobar {count} canal | No s'han pogut trobar {count} canals | No s'han pogut trobar {count} canals"
   Sync Settings:
     Revoke Session Tabs Warning: "També se suprimiran els conjunts de pestanyes sincronitzats d’aquest dispositiu."
     Revoke Session Partial Failure: "S'han suprimit els conjunts de pestanyes sincronitzats, però no s'ha pogut confirmar la revocació. Torneu a provar de revocar l'accés."

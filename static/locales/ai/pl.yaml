@@ -494,6 +494,13 @@ Settings:
     Show Bottom Right Actions Dock: Pokazuj panel działań w prawym dolnym rogu
     Paused Interface Hide Delay: Opóźnienie ukrywania interfejsu po wstrzymaniu
   Data Settings:
+    Channel playback speeds: "Prędkości odtwarzania kanałów"
+    Import channel playback speeds: "Zaimportuj prędkości odtwarzania kanałów"
+    Channel playback speeds file: "Plik prędkości odtwarzania kanałów"
+    Import channel playback speeds formats: "Obsługiwane formaty: dane skryptu użytkownika {script} (.json)"
+    Invalid channel playback speeds file: "Nie znaleziono w tym pliku prędkości odtwarzania kanałów"
+    Channel playback speeds imported: "Zaimportowano prędkość odtwarzania {count} kanału | Zaimportowano prędkości odtwarzania {count} kanałów | Zaimportowano prędkości odtwarzania {count} kanałów"
+    Channels not found: "{count} kanał nie został znaleziony | {count} kanały nie zostały znalezione | {count} kanałów nie zostało znalezionych"
     Scheduled backups: "Zaplanowane kopie zapasowe"
     Scheduled backup description: "Zapisuj pełne kopie ZIP, gdy OpenTubeX jest otwarty. Pominięte kopie są tworzone przy uruchomieniu. Limit dotyczy tylko zaplanowanych kopii w tym folderze."
     Choose backup folder: "Wybierz folder kopii zapasowych"
