@@ -966,8 +966,7 @@ class Playlists {
   }
 
   static async _insertVideos(_id, lastUpdatedAt, videos, deduplicate) {
-    // NeDB cannot prepend atomically. Retry if another window changes the
-    // videos or insertion preference between reading and saving them.
+    // Retry if another window changes the playlist between reading and saving it.
     for (let attempt = 0; attempt < 5; attempt++) {
       const playlist = await db.playlists.findOneAsync({ _id })
       if (!playlist) return { status: PlaylistVideoAddResult.PLAYLIST_MISSING }
@@ -984,6 +983,20 @@ class Playlists {
 
       const addVideosToTop = playlist.addVideosToTop === true
       const updatedAt = Math.max(playlist.lastUpdatedAt || 0, lastUpdatedAt)
+      if (!addVideosToTop) {
+        // Appending neither reads nor rewrites the stored entries, so it cannot
+        // restore removed videos or undo metadata repairs. Anything else that
+        // adds entries also changes lastUpdatedAt, which keeps the duplicate
+        // check valid.
+        const { numAffected } = await db.playlists.updateAsync(
+          { _id, addVideosToTop: { $ne: true }, lastUpdatedAt: playlist.lastUpdatedAt === undefined ? { $exists: false } : playlist.lastUpdatedAt },
+          { $push: { videos: { $each: inserted } }, $set: { lastUpdatedAt: updatedAt } }
+        )
+        if (numAffected > 0) return { status: PlaylistVideoAddResult.ADDED, videos: inserted, addVideosToTop, lastUpdatedAt: updatedAt }
+        continue
+      }
+
+      // NeDB cannot prepend atomically, so compare the whole list.
       const { numAffected } = await db.playlists.updateAsync(
         {
           _id,
@@ -994,7 +1007,7 @@ class Playlists {
         },
         {
           $set: {
-            videos: addVideosToTop ? inserted.concat(playlist.videos) : playlist.videos.concat(inserted),
+            videos: inserted.concat(playlist.videos),
             lastUpdatedAt: updatedAt
           }
         }
