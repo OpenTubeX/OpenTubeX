@@ -91,6 +91,23 @@ test('retries after concurrent removal and preference changes without restoring 
   assert.equal(saved.addVideosToTop, false)
 })
 
+test('a concurrent edit that keeps the video count is detected by its timestamp', async () => {
+  const { db, Playlists } = await fixture(false)
+  const update = db.playlists.updateAsync.bind(db.playlists)
+  let intercepted = false
+  db.playlists.updateAsync = async (query, changes, options) => {
+    if (!intercepted && query.$where) {
+      intercepted = true
+      await update({ _id: 'custom' }, { $set: { videos: [{ videoId: 'second' }, { videoId: 'first' }], lastUpdatedAt: 15 } })
+    }
+    return update(query, changes, options)
+  }
+  await Playlists.upsertVideoByPlaylistId('custom', 20, { videoId: 'new' })
+  const saved = await db.playlists.findOneAsync({ _id: 'custom' })
+  assert.deepEqual(Array.from(saved.videos, v => v.videoId), ['second', 'first', 'new'])
+  assert.equal(saved.lastUpdatedAt, 20)
+})
+
 test('simultaneous bulk and single additions preserve every entry', async () => {
   const { db, Playlists } = await fixture(true)
   await Promise.all([

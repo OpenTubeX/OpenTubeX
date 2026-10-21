@@ -952,14 +952,14 @@ class Playlists {
         if (inserted.length === 0) return { status: PlaylistVideoAddResult.ALREADY_PRESENT }
       }
 
-      const snapshot = JSON.stringify(playlist.videos)
       const addVideosToTop = playlist.addVideosToTop === true
       const updatedAt = Math.max(playlist.lastUpdatedAt || 0, lastUpdatedAt)
       const { numAffected } = await db.playlists.updateAsync(
         {
           _id,
+          // Every edit stamps lastUpdatedAt; the count catches one made in the same millisecond.
           $where() {
-            return JSON.stringify(this.videos) === snapshot && (this.addVideosToTop === true) === addVideosToTop && this.lastUpdatedAt === playlist.lastUpdatedAt
+            return this.lastUpdatedAt === playlist.lastUpdatedAt && this.videos.length === playlist.videos.length && (this.addVideosToTop === true) === addVideosToTop
           }
         },
         {
