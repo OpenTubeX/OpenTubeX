@@ -372,6 +372,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     rememberVolume: true,
     enableVideoZoom: true,
     showLightsOffToggle: false,
+    showVolumeBoostToggle: false,
     showSkipSilenceButton: false,
     showDlnaCastButton: false,
     showChromecastButton: false,

@@ -619,6 +619,7 @@ Settings:
     Skip Unavailable Playlist Videos: "Пропускати недоступні відео в списках відтворення"
     Lights Off: Вимкнути світло
     Show Lights Off Toggle: Показувати перемикач вимкнення світла
+    Show Volume Boost Toggle: "Показувати перемикач підсилення гучності"
     Swipe Gestures:
       Fullscreen Brightness: Максимальна яскравість у повноекранному режимі
       Left: Жест на лівій стороні

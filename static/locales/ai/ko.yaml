@@ -776,6 +776,7 @@ Settings:
     Skip Unavailable Playlist Videos: "재생목록에서 볼 수 없는 동영상 건너뛰기"
     Lights Off: 조명 끄기
     Show Lights Off Toggle: 조명 끄기 토글 표시
+    Show Volume Boost Toggle: "볼륨 증폭 토글 표시"
     Swipe Gestures:
       Fullscreen Brightness: 전체 화면에서 최대 밝기 사용
       Left: 왼쪽 스와이프

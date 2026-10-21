@@ -615,6 +615,7 @@ Settings:
     Skip Unavailable Playlist Videos: "Jäta esitusloendis kättesaamatud videod vahele"
     Lights Off: Tuled välja
     Show Lights Off Toggle: Näita tulede väljalülitamise lülitit
+    Show Volume Boost Toggle: "Kuva helitugevuse võimenduse lüliti"
     Swipe Gestures:
       Fullscreen Brightness: Täisheledus täisekraanil
       Left: Vasakul küljel pühkimine

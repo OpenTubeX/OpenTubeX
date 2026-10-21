@@ -614,6 +614,7 @@ Settings:
     Skip Unavailable Playlist Videos: "略過播放清單中無法播放的影片"
     Lights Off: 關燈
     Show Lights Off Toggle: 顯示關燈開關
+    Show Volume Boost Toggle: "顯示音量增強切換"
     Swipe Gestures:
       Fullscreen Brightness: 全螢幕時使用最高亮度
       Left: 左側滑動

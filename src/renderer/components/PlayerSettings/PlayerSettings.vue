@@ -36,6 +36,14 @@
         @change="store.dispatch('updateShowLightsOffToggle', $event)"
       />
       <FtToggleSwitch
+        v-if="!IS_IOS"
+        :label="t('Settings.Player Settings.Show Volume Boost Toggle')"
+        :compact="true"
+        :default-value="store.getters.getShowVolumeBoostToggle"
+        setting-key="showVolumeBoostToggle"
+        @change="store.dispatch('updateShowVolumeBoostToggle', $event)"
+      />
+      <FtToggleSwitch
         :label="t('Settings.Player Settings.Show Music Mode Toggle')"
         :compact="true"
         :default-value="store.getters.getShowMusicModeToggle"

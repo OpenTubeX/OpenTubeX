@@ -271,6 +271,7 @@ export const SYNC_SETTING_LABELS = {
   showFamilyFriendlyOnly: 'Settings.Parental Control Settings.Show Family Friendly Only',
   showFullscreenActionsWhenPaused: 'Settings.Distraction Free Settings.Show Bottom Right Actions Dock',
   showLightsOffToggle: 'Settings.Player Settings.Show Lights Off Toggle',
+  showVolumeBoostToggle: 'Settings.Player Settings.Show Volume Boost Toggle',
   showLiveChatTimestamps: 'Video.Show Live Chat Timestamps',
   showMusicModeToggle: 'Settings.Player Settings.Show Music Mode Toggle',
   showNewSubscriptionFeed: 'Settings.Subscription Settings.Show New Content Feed',

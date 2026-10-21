@@ -614,6 +614,7 @@ Settings:
     Skip Unavailable Playlist Videos: "Oynatma listelerindeki kullanılamayan videoları atla"
     Lights Off: Işıkları kapat
     Show Lights Off Toggle: Işıkları kapatma düğmesini göster
+    Show Volume Boost Toggle: "Ses yükseltme düğmesini göster"
     Swipe Gestures:
       Fullscreen Brightness: Tam ekranda en yüksek parlaklık
       Left: Sol tarafta kaydırma
