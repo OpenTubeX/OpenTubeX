@@ -1,34 +1,44 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
-import { load } from 'js-yaml'
+import { homeWidgetStrings, loadTranslator, locales, root } from './nativeTranslations.mjs'
 
-// Use existing human/AI translations for native permission prompts.
-// iOS localizes InfoPlist.strings independently of the renderer's locale loader.
-const root = new URL('../', import.meta.url)
+// iOS localizes InfoPlist.strings and the widget extension independently of the renderer's locale loader.
 const read = path => readFileSync(new URL(path, root), 'utf8')
 const projectPath = new URL('ios/App/App.xcodeproj/project.pbxproj', root)
-const locales = JSON.parse(read('static/locales/activeLocales.json'))
 let project = readFileSync(projectPath, 'utf8')
 const references = []
 const children = []
+const widgetReferences = []
+const widgetChildren = []
+// The widget extension's SwiftUI strings use the en-US messages as their keys.
+const translateEnglish = loadTranslator('en-US')
 for (const [index, locale] of locales.entries()) {
-  const human = load(read(`static/locales/${locale}.yaml`))
-  let ai = {}
-  try { ai = load(read(`static/locales/ai/${locale}.yaml`)) ?? {} } catch (error) { if (error.code !== 'ENOENT') throw error }
+  const translate = loadTranslator(locale)
   const permissions = [
     ['NSCameraUsageDescription', 'Settings', 'Sync Settings', 'Pairing Scan Hint'],
     ['NSLocalNetworkUsageDescription', 'Native Permissions', 'Local Network']
-  ].map(([permission, ...path]) => {
-    const message = path.reduce((value, key) => value?.[key], human) || path.reduce((value, key) => value?.[key], ai)
-    if (!message) throw new Error(`Missing ${permission} translation: ${locale}`)
-    return `"${permission}" = ${JSON.stringify(message)};`
-  })
+  ].map(([permission, ...path]) => `"${permission}" = ${JSON.stringify(translate(...path))};`)
   const directory = new URL(`ios/App/App/${locale}.lproj/`, root)
   mkdirSync(directory, { recursive: true })
   writeFileSync(new URL('InfoPlist.strings', directory), `${permissions.join('\n')}\n`)
   const id = `A12791${index.toString(16).padStart(18, '0')}`.toUpperCase()
   references.push(`\t\t${id} = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "${locale}"; path = "${locale}.lproj/InfoPlist.strings"; sourceTree = "<group>"; };`)
   children.push(id)
+
+  const widgetStrings = Object.values(homeWidgetStrings)
+    .map(key => `${JSON.stringify(translateEnglish('Home Widgets', key))} = ${JSON.stringify(translate('Home Widgets', key))};`)
+  const widgetDirectory = new URL(`ios/App/OpenTubeXWidgets/${locale}.lproj/`, root)
+  mkdirSync(widgetDirectory, { recursive: true })
+  writeFileSync(new URL('Localizable.strings', widgetDirectory), `${widgetStrings.join('\n')}\n`)
+  const widgetId = `E1D6E8${index.toString(16).padStart(18, '0')}`.toUpperCase()
+  widgetReferences.push(`${widgetId} = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "${locale}"; path = "${locale}.lproj/Localizable.strings"; sourceTree = "<group>"; };`)
+  widgetChildren.push(widgetId)
 }
+const widgetStart = '/* Begin iOS widget localizations */'
+const widgetEnd = '/* End iOS widget localizations */'
+if (!project.includes(widgetStart)) throw new Error('Unable to localize iOS widgets: missing project markers')
+project = project.slice(0, project.indexOf(widgetStart)) +
+  `${widgetStart}\n${widgetReferences.join('\n')}\nE1D6E7000000000000000008 /* Localizable.strings */ = {isa = PBXVariantGroup; children = (${widgetChildren.join(',')},); name = Localizable.strings; sourceTree = "<group>"; };\n${widgetEnd}` +
+  project.slice(project.indexOf(widgetEnd) + widgetEnd.length)
 const start = '/* Begin iOS permission localizations */'
 const end = '/* End iOS permission localizations */'
 const generated = `${start}\n${references.join('\n')}\nA12790000000000000000031 = {isa = PBXVariantGroup; children = (${children.join(',')},); name = InfoPlist.strings; sourceTree = "<group>"; };\n${end}`

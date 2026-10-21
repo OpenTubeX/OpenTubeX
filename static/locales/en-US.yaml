@@ -3407,6 +3407,17 @@ Native Permissions:
   Local Network Denied: "Nearby devices permission was denied."
   Local Network: "Discover and cast videos to devices on your local network, and sync settings and data across devices."
 
+# Android and iOS home screen widgets; they follow the system language.
+Home Widgets:
+  Continue Watching: Continue watching
+  Continue Watching Description: Resume videos you started watching
+  Continue Watching Empty: Videos you start watching appear here
+  Quick Access: Quick access
+  Quick Access Description: Open Search, Subscriptions or Watch Later
+  Search: Search
+  Subscriptions: Subscriptions
+  Watch Later: Watch Later
+
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.
 Mobile Navigation:
   home: "Home"

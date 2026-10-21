@@ -96,8 +96,6 @@ E1D6E7000000000000000002 /* HomeWidgetsPlugin.swift */ = {isa = PBXFileReference
 E1D6E7000000000000000003 /* OpenTubeXWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenTubeXWidgets.swift; sourceTree = "<group>"; };
 E1D6E7000000000000000004 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 E1D6E7000000000000000005 /* OpenTubeXWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OpenTubeXWidgets.entitlements; sourceTree = "<group>"; };
-E1D6E7000000000000000006 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
-E1D6E7000000000000000007 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
 E1D6E7000000000000000009 /* OpenTubeXWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = OpenTubeXWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -367,15 +365,59 @@ E1D6E7000000000000000030 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActio
 			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";
 		};
-		E1D6E7000000000000000008 /* Localizable.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				E1D6E7000000000000000006 /* en */,
-				E1D6E7000000000000000007 /* de */,
-			);
-			name = Localizable.strings;
-			sourceTree = "<group>";
-		};
+/* Begin iOS widget localizations */
+E1D6E8000000000000000000 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "en-US"; path = "en-US.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000001 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "en-GB"; path = "en-GB.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000002 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "ar"; path = "ar.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000003 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "az"; path = "az.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000004 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "be"; path = "be.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000005 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "bg"; path = "bg.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000006 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "br"; path = "br.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000007 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "ca"; path = "ca.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000008 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "cs"; path = "cs.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000009 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "cy"; path = "cy.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E800000000000000000A = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "da"; path = "da.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E800000000000000000B = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "de-DE"; path = "de-DE.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E800000000000000000C = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "el"; path = "el.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E800000000000000000D = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es"; path = "es.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E800000000000000000E = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-AR"; path = "es-AR.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E800000000000000000F = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-MX"; path = "es-MX.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000010 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "et"; path = "et.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000011 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "eu"; path = "eu.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000012 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "fa"; path = "fa.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000013 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "fi"; path = "fi.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000014 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "fr-FR"; path = "fr-FR.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000015 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "gl"; path = "gl.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000016 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "he"; path = "he.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000017 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "hu"; path = "hu.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000018 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "hr"; path = "hr.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000019 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "id"; path = "id.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E800000000000000001A = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "is"; path = "is.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E800000000000000001B = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "it"; path = "it.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E800000000000000001C = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "ja"; path = "ja.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E800000000000000001D = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "ko"; path = "ko.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E800000000000000001E = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "lt"; path = "lt.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E800000000000000001F = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "nb-NO"; path = "nb-NO.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000020 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "nl"; path = "nl.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000021 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "nn"; path = "nn.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000022 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pl"; path = "pl.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000023 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt"; path = "pt.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000024 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "pt-BR.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000025 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-PT"; path = "pt-PT.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000026 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "ro"; path = "ro.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000027 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "ru"; path = "ru.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000028 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "sk"; path = "sk.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000029 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "sl"; path = "sl.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E800000000000000002A = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "sr"; path = "sr.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E800000000000000002B = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "sv"; path = "sv.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E800000000000000002C = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "ta"; path = "ta.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E800000000000000002D = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "tr"; path = "tr.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E800000000000000002E = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "uk"; path = "uk.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E800000000000000002F = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "vi"; path = "vi.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000030 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-CN"; path = "zh-CN.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E8000000000000000031 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-TW"; path = "zh-TW.lproj/Localizable.strings"; sourceTree = "<group>"; };
+E1D6E7000000000000000008 /* Localizable.strings */ = {isa = PBXVariantGroup; children = (E1D6E8000000000000000000,E1D6E8000000000000000001,E1D6E8000000000000000002,E1D6E8000000000000000003,E1D6E8000000000000000004,E1D6E8000000000000000005,E1D6E8000000000000000006,E1D6E8000000000000000007,E1D6E8000000000000000008,E1D6E8000000000000000009,E1D6E800000000000000000A,E1D6E800000000000000000B,E1D6E800000000000000000C,E1D6E800000000000000000D,E1D6E800000000000000000E,E1D6E800000000000000000F,E1D6E8000000000000000010,E1D6E8000000000000000011,E1D6E8000000000000000012,E1D6E8000000000000000013,E1D6E8000000000000000014,E1D6E8000000000000000015,E1D6E8000000000000000016,E1D6E8000000000000000017,E1D6E8000000000000000018,E1D6E8000000000000000019,E1D6E800000000000000001A,E1D6E800000000000000001B,E1D6E800000000000000001C,E1D6E800000000000000001D,E1D6E800000000000000001E,E1D6E800000000000000001F,E1D6E8000000000000000020,E1D6E8000000000000000021,E1D6E8000000000000000022,E1D6E8000000000000000023,E1D6E8000000000000000024,E1D6E8000000000000000025,E1D6E8000000000000000026,E1D6E8000000000000000027,E1D6E8000000000000000028,E1D6E8000000000000000029,E1D6E800000000000000002A,E1D6E800000000000000002B,E1D6E800000000000000002C,E1D6E800000000000000002D,E1D6E800000000000000002E,E1D6E800000000000000002F,E1D6E8000000000000000030,E1D6E8000000000000000031,); name = Localizable.strings; sourceTree = "<group>"; };
+/* End iOS widget localizations */
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */

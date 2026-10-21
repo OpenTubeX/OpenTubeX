@@ -2236,3 +2236,12 @@ Library Format Changed:
   Detail: "Starije verzije OpenTubeXa i dalje mogu otvoriti vašu biblioteku, ali je prikazuju onakvom kakva je bila prije ovog ažuriranja. Promjene koje napravite u starijoj verziji dodaju se kada se vratite na ovu verziju."
 Invidious Fallback Warning: "Ovaj zahtjev zaobilazi postavljenu instancu Invidiousa i povezuje se izravno s YouTubeom, otkrivajući tvoju IP adresu."
 Automatically unloaded to free memory: "Automatski uklonjeno radi oslobađanja memorije"
+Home Widgets:
+  Continue Watching: "Nastavi gledati"
+  Continue Watching Description: "Nastavi videozapise koje si počeo gledati"
+  Continue Watching Empty: "Ovdje se prikazuju videozapisi koje počneš gledati"
+  Quick Access: "Brzi pristup"
+  Quick Access Description: "Otvori Pretraživanje, Pretplate ili Pogledaj kasnije"
+  Search: "Pretraži"
+  Subscriptions: "Pretplate"
+  Watch Later: "Pogledaj kasnije"

@@ -2269,3 +2269,12 @@ Library Format Changed:
   Detail: "Oudere versies van OpenTubeX kunnen je bibliotheek nog openen, maar tonen die zoals die was vóór deze update. Wijzigingen die je in een oudere versie maakt, worden toegevoegd wanneer je terugkeert naar deze versie."
 Invidious Fallback Warning: "Dit verzoek omzeilt je ingestelde Invidious-instantie en maakt rechtstreeks verbinding met YouTube, waardoor je IP-adres wordt blootgesteld."
 Automatically unloaded to free memory: "Automatisch ontladen om geheugen vrij te maken"
+Home Widgets:
+  Continue Watching: "Verder kijken"
+  Continue Watching Description: "Hervat video's die je bent begonnen te kijken"
+  Continue Watching Empty: "Video's die je begint te kijken verschijnen hier"
+  Quick Access: "Snelle toegang"
+  Quick Access Description: "Open Zoeken, Abonnementen of Later bekijken"
+  Search: "Zoeken"
+  Subscriptions: "Abonnementen"
+  Watch Later: "Later bekijken"

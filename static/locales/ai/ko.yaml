@@ -2661,3 +2661,12 @@ Library Format Changed:
   Detail: "이전 버전의 OpenTubeX에서도 라이브러리를 열 수 있지만 이 업데이트 이전 상태로 표시됩니다. 이전 버전에서 변경한 내용은 이 버전으로 돌아오면 추가됩니다."
 Invidious Fallback Warning: "이 요청은 설정한 Invidious 인스턴스를 우회하여 YouTube에 직접 연결하므로 IP 주소가 노출됩니다."
 Automatically unloaded to free memory: "메모리 확보를 위해 자동으로 언로드됨"
+Home Widgets:
+  Continue Watching: "이어서 시청하기"
+  Continue Watching Description: "시청하던 동영상을 이어서 재생합니다"
+  Continue Watching Empty: "시청을 시작한 동영상이 여기에 표시됩니다"
+  Quick Access: "빠른 실행"
+  Quick Access Description: "검색, 구독 또는 나중에 볼 동영상을 엽니다"
+  Search: "검색"
+  Subscriptions: "구독"
+  Watch Later: "나중에 볼 동영상"

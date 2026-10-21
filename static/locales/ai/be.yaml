@@ -2304,3 +2304,12 @@ Library Format Changed:
   Detail: "Старыя версіі OpenTubeX па-ранейшаму могуць адкрыць вашу бібліятэку, але паказваюць яе такой, якой яна была да гэтага абнаўлення. Змены, зробленыя ў старой версіі, дадаюцца, калі вы вяртаецеся да гэтай версіі."
 Invidious Fallback Warning: "Гэты запыт абыходзіць наладжаны вамі асобнік Invidious і падключаецца непасрэдна да YouTube, раскрываючы ваш IP-адрас."
 Automatically unloaded to free memory: "Аўтаматычна выгружана для вызвалення памяці"
+Home Widgets:
+  Continue Watching: "Працягнуць прагляд"
+  Continue Watching Description: "Працягвайце відэа, якія вы пачалі глядзець"
+  Continue Watching Empty: "Тут з’явяцца відэа, якія вы пачнеце глядзець"
+  Quick Access: "Хуткі доступ"
+  Quick Access Description: "Адкрыць Пошук, Падпіскі або «Паглядзець пазней»"
+  Search: "Пошук"
+  Subscriptions: "Падпіскі"
+  Watch Later: "Паглядзець пазней"

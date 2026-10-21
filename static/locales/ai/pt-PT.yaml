@@ -2247,3 +2247,12 @@ Library Format Changed:
   Detail: "As versões anteriores do OpenTubeX ainda podem abrir a sua biblioteca, mas mostram-na como estava antes desta atualização. As alterações que fizer numa versão anterior são adicionadas quando voltar a esta versão."
 Invidious Fallback Warning: "Este pedido ignora a instância Invidious configurada e liga-se diretamente ao YouTube, expondo o teu endereço IP."
 Automatically unloaded to free memory: "Descarregado automaticamente para libertar memória"
+Home Widgets:
+  Continue Watching: "Continuar a ver"
+  Continue Watching Description: "Retome os vídeos que começou a ver"
+  Continue Watching Empty: "Os vídeos que começar a ver aparecem aqui"
+  Quick Access: "Acesso rápido"
+  Quick Access Description: "Abrir Pesquisar, Subscrições ou Ver mais tarde"
+  Search: "Pesquisar"
+  Subscriptions: "Subscrições"
+  Watch Later: "Ver mais tarde"

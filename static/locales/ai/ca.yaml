@@ -2853,3 +2853,12 @@ Library Format Changed:
   Detail: "Les versions anteriors d'OpenTubeX encara poden obrir la biblioteca, però la mostren tal com era abans d'aquesta actualització. Els canvis que feu en una versió anterior s'afegeixen quan torneu a aquesta versió."
 Invidious Fallback Warning: "Aquesta sol·licitud omet la instància d’Invidious que heu configurat i es connecta directament a YouTube, exposant la vostra adreça IP."
 Automatically unloaded to free memory: "Descarregada automàticament per alliberar memòria"
+Home Widgets:
+  Continue Watching: "Continua mirant"
+  Continue Watching Description: "Reprèn els vídeos que has començat a mirar"
+  Continue Watching Empty: "Els vídeos que comencis a mirar apareixeran aquí"
+  Quick Access: "Accés ràpid"
+  Quick Access Description: "Obre Cerca, Subscripcions o Per a més tard"
+  Search: "Cerca"
+  Subscriptions: "Subscripcions"
+  Watch Later: "Per a més tard"

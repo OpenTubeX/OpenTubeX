@@ -2600,3 +2600,12 @@ Library Format Changed:
   Detail: "Eldre versjonar av OpenTubeX kan framleis opne biblioteket ditt, men dei viser det slik det var før denne oppdateringa. Endringar du gjer i ein eldre versjon, blir lagde til når du går tilbake til denne versjonen."
 Invidious Fallback Warning: "Denne førespurnaden går utanom den konfigurerte Invidious-instansen din og koplar direkte til YouTube, noko som avslører IP-adressa di."
 Automatically unloaded to free memory: "Automatisk lasta ut for å frigjere minne"
+Home Widgets:
+  Continue Watching: "Hald fram med å sjå"
+  Continue Watching Description: "Hald fram med videoar du har byrja å sjå"
+  Continue Watching Empty: "Videoar du byrjar å sjå, blir viste her"
+  Quick Access: "Snarvegar"
+  Quick Access Description: "Opna Søk, Abonnement eller Sjå seinare"
+  Search: "Søkje"
+  Subscriptions: "Abonnement"
+  Watch Later: "Sjå seinare"

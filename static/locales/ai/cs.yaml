@@ -2206,3 +2206,12 @@ Library Format Changed:
   Detail: "Starší verze OpenTubeX mohou vaši knihovnu stále otevřít, ale zobrazí ji ve stavu před touto aktualizací. Změny provedené ve starší verzi se přidají, až se vrátíte k této verzi."
 Invidious Fallback Warning: "Tento požadavek obchází nastavenou instanci Invidious a připojuje se přímo k YouTube, čímž odhaluje vaši IP adresu."
 Automatically unloaded to free memory: "Automaticky uvolněno z paměti"
+Home Widgets:
+  Continue Watching: "Pokračovat ve sledování"
+  Continue Watching Description: "Pokračujte ve videích, která jste začali sledovat"
+  Continue Watching Empty: "Zde se zobrazí videa, která začnete sledovat"
+  Quick Access: "Rychlý přístup"
+  Quick Access Description: "Otevřít Hledání, Odběry nebo Zhlédnout později"
+  Search: "Hledat"
+  Subscriptions: "Odběry"
+  Watch Later: "Zhlédnout později"

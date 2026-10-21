@@ -2258,3 +2258,12 @@ Library Format Changed:
   Detail: "OpenTubeX:n vanhemmat versiot voivat yhä avata kirjastosi, mutta ne näyttävät sen sellaisena kuin se oli ennen tätä päivitystä. Vanhemmassa versiossa tekemäsi muutokset lisätään, kun palaat tähän versioon."
 Invidious Fallback Warning: "Tämä pyyntö ohittaa määrittämäsi Invidious-instanssin ja muodostaa yhteyden suoraan YouTubeen paljastaen IP-osoitteesi."
 Automatically unloaded to free memory: "Poistettu muistista automaattisesti muistin vapauttamiseksi"
+Home Widgets:
+  Continue Watching: "Jatka katselua"
+  Continue Watching Description: "Jatka videoita, joiden katselun aloitit"
+  Continue Watching Empty: "Videot, joiden katselun aloitat, näkyvät täällä"
+  Quick Access: "Pikakäyttö"
+  Quick Access Description: "Avaa Haku, Tilaukset tai Katso myöhemmin"
+  Search: "Hae"
+  Subscriptions: "Tilaukset"
+  Watch Later: "Katso myöhemmin"

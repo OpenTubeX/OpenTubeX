@@ -2209,3 +2209,12 @@ Library Format Changed:
   Detail: "OpenTubeXi vanemad versioonid saavad sinu kogu endiselt avada, kuid näitavad seda sellisena, nagu see oli enne seda uuendust. Vanemas versioonis tehtud muudatused lisatakse, kui naased selle versiooni juurde."
 Invidious Fallback Warning: "See päring läheb sinu seadistatud Invidiousi serverist mööda ja ühendub otse YouTube’iga, avaldades sinu IP-aadressi."
 Automatically unloaded to free memory: "Mälu vabastamiseks automaatselt maha laaditud"
+Home Widgets:
+  Continue Watching: "Jätka vaatamist"
+  Continue Watching Description: "Jätka videoid, mida hakkasid vaatama"
+  Continue Watching Empty: "Siin kuvatakse videod, mida hakkad vaatama"
+  Quick Access: "Kiirjuurdepääs"
+  Quick Access Description: "Ava Otsing, Tellimused või Vaata hiljem"
+  Search: "Otsi"
+  Subscriptions: "Tellimused"
+  Watch Later: "Vaata hiljem"

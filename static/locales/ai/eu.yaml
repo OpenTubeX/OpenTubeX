@@ -2216,3 +2216,12 @@ Library Format Changed:
   Detail: "OpenTubeX-en bertsio zaharragoek zure liburutegia ireki dezakete oraindik, baina eguneratze honen aurretik zegoen bezala erakusten dute. Bertsio zaharrago batean egiten dituzun aldaketak bertsio honetara itzultzen zarenean gehitzen dira."
 Invidious Fallback Warning: "Eskaera honek konfiguratutako Invidious instantzia saihesten du eta zuzenean YouTubera konektatzen da, zure IP helbidea agerian utziz."
 Automatically unloaded to free memory: "Automatikoki deskargatuta memoria askatzeko"
+Home Widgets:
+  Continue Watching: "Jarraitu ikusten"
+  Continue Watching Description: "Jarraitu ikusten hasitako bideoekin"
+  Continue Watching Empty: "Ikusten hasten zaren bideoak hemen agertuko dira"
+  Quick Access: "Sarbide azkarra"
+  Quick Access Description: "Ireki Bilatu, Harpidetzak edo Ikusi geroago"
+  Search: "Bilatu"
+  Subscriptions: "Harpidetzak"
+  Watch Later: "Ikusi geroago"

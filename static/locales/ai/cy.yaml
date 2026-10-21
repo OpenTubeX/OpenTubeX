@@ -2234,3 +2234,12 @@ Library Format Changed:
   Detail: "Gall fersiynau hŷn o OpenTubeX agor eich llyfrgell o hyd, ond maen nhw'n ei dangos fel yr oedd cyn y diweddariad hwn. Mae newidiadau a wnewch mewn fersiwn hŷn yn cael eu hychwanegu pan fyddwch yn dychwelyd i'r fersiwn hon."
 Invidious Fallback Warning: "Mae’r cais hwn yn osgoi’r enghraifft Invidious rydych wedi’i ffurfweddu ac yn cysylltu’n uniongyrchol â YouTube, gan ddatgelu eich cyfeiriad IP."
 Automatically unloaded to free memory: "Wedi'i ddadlwytho'n awtomatig i ryddhau cof"
+Home Widgets:
+  Continue Watching: "Parhau i wylio"
+  Continue Watching Description: "Ailddechrau fideos rydych chi wedi dechrau eu gwylio"
+  Continue Watching Empty: "Bydd fideos rydych chi'n dechrau eu gwylio yn ymddangos yma"
+  Quick Access: "Mynediad cyflym"
+  Quick Access Description: "Agor Chwilio, Tanysgrifiadau neu Gwylio Nes Ymlaen"
+  Search: "Chwilio"
+  Subscriptions: "Tanysgrifiadau"
+  Watch Later: "Gwylio Nes Ymlaen"

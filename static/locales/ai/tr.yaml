@@ -2206,3 +2206,12 @@ Library Format Changed:
   Detail: "OpenTubeX'in eski sürümleri kitaplığınızı hâlâ açabilir, ancak onu bu güncellemeden önceki hâliyle gösterir. Eski bir sürümde yaptığınız değişiklikler bu sürüme döndüğünüzde eklenir."
 Invidious Fallback Warning: "Bu istek, yapılandırdığınız Invidious sunucusunu atlayarak doğrudan YouTube’a bağlanır ve IP adresinizi açığa çıkarır."
 Automatically unloaded to free memory: "Belleği boşaltmak için otomatik olarak kaldırıldı"
+Home Widgets:
+  Continue Watching: "İzlemeye devam et"
+  Continue Watching Description: "İzlemeye başladığınız videolara devam edin"
+  Continue Watching Empty: "İzlemeye başladığınız videolar burada görünür"
+  Quick Access: "Hızlı erişim"
+  Quick Access Description: "Arama, Abonelikler veya Daha sonra izle sayfasını açın"
+  Search: "Ara"
+  Subscriptions: "Abonelikler"
+  Watch Later: "Daha sonra izle"
