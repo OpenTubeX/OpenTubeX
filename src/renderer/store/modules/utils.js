@@ -15,7 +15,7 @@ import {
   loadLegacyChannelThumbnailCache,
   loadLegacyVideoAvatarCache,
 } from '../../helpers/channelThumbnailStorage'
-import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
+import { morphUtilityWindow } from '../../helpers/utilityWindowMorph'
 import { getSearchFilterTabId } from '../../../search-history'
 import {
   mergeYouTubeCaptionLanguageCodes,
@@ -25,54 +25,24 @@ import {
 const CHANNEL_THUMBNAIL_CACHE_LIMIT = 200
 const VIDEO_AVATAR_CACHE_LIMIT = 200
 
-async function morphSettingsWindow(commit, update, icon = null) {
-  commit('setSettingsWindowMorphIcon', icon)
+async function morphSettingsWindow(commit, update, getButton) {
   commit('setSettingsWindowMorphing', true)
+  // The window transition must switch to the morph hooks before the update.
   await nextTick()
-
-  const root = document.documentElement
-  root.classList.add('utilityWindowMorphActive')
-
   try {
-    if (typeof document.startViewTransition !== 'function' || isReducedMotionEnabled()) {
-      await update()
-      await nextTick()
-      return
-    }
-
-    const transition = document.startViewTransition(async () => {
-      await update()
-      await nextTick()
-    })
-    await transition.finished.catch(() => {})
+    await morphUtilityWindow(update, getButton)
   } finally {
-    root.classList.remove('utilityWindowMorphActive')
     commit('setSettingsWindowMorphing', false)
-    commit('setSettingsWindowMorphIcon', null)
   }
 }
 
-// The window is an async component, so the first open renders it after the next tick
-function waitForSettingsWindowMorphTarget() {
-  const selector = '.settingsWindow.utilityWindowMorphTarget'
-  if (document.querySelector(selector)) return
-  return new Promise(resolve => {
-    const observer = new MutationObserver(() => {
-      if (document.querySelector(selector)) finish()
-    })
-    const timeout = setTimeout(finish, 1000)
-    function finish() {
-      observer.disconnect()
-      clearTimeout(timeout)
-      resolve()
-    }
-    observer.observe(document.body, { childList: true, subtree: true, attributeFilter: ['class'] })
-  })
+function getSettingsWindowIconButton(view) {
+  if (view === 'about') return null
+  return document.querySelector(`[data-settings-window-icon="${view === 'downloads' ? 'downloads' : 'settings'}"]`)
 }
 
-function getSettingsWindowIcon(view) {
-  if (view === 'about') return null
-  return view === 'downloads' ? 'downloads' : 'settings'
+function getMinimizedSettingsWindowButton() {
+  return document.querySelector('.minimizedUtilityButton')
 }
 
 function getOrCreateSearchSettings(state, tabId) {
@@ -111,7 +81,6 @@ const state = {
   settingsWindowOpen: false,
   settingsWindowMinimized: false,
   settingsWindowMorphing: false,
-  settingsWindowMorphIcon: null,
   settingsWindowReturnView: null,
   settingsWindowView: null,
   settingsWindowSection: null,
@@ -212,10 +181,6 @@ const getters = {
 
   getSettingsWindowMorphing(state) {
     return state.settingsWindowMorphing
-  },
-
-  getSettingsWindowMorphIcon(state) {
-    return state.settingsWindowMorphIcon
   },
 
   getSettingsWindowReturnView(state) {
@@ -502,24 +467,21 @@ const actions = {
       commit('setSettingsWindowView', view)
       commit('setSettingsWindowMinimized', false)
       commit('setSettingsWindowOpen', true)
-      await nextTick()
-      await waitForSettingsWindowMorphTarget()
-    }, getSettingsWindowIcon(view))
+    }, () => getSettingsWindowIconButton(view))
   },
 
   // Morphs back into the app header button for the current view if it is shown
   closeSettingsWindowToIcon ({ state, commit, dispatch }) {
     if (state.settingsWindowMorphing) return
-    const icon = getSettingsWindowIcon(state.settingsWindowView)
-    const iconButton = icon && document.querySelector(`[data-settings-window-icon="${icon}"]`)
-    if (!state.settingsWindowOpen || !iconButton?.getClientRects().length) {
+    const view = state.settingsWindowView
+    if (!state.settingsWindowOpen || !getSettingsWindowIconButton(view)?.getClientRects().length) {
       return dispatch('hideSettingsWindow')
     }
     return morphSettingsWindow(commit, () => {
       commit('setSettingsWindowReturnView', null)
       commit('setSettingsWindowMinimized', false)
       commit('setSettingsWindowOpen', false)
-    }, icon)
+    }, () => getSettingsWindowIconButton(view))
   },
 
   minimizeSettingsWindow ({ state, commit }) {
@@ -527,7 +489,7 @@ const actions = {
     return morphSettingsWindow(commit, () => {
       commit('setSettingsWindowOpen', false)
       commit('setSettingsWindowMinimized', true)
-    })
+    }, getMinimizedSettingsWindowButton)
   },
 
   restoreSettingsWindow ({ state, commit }) {
@@ -535,7 +497,7 @@ const actions = {
     return morphSettingsWindow(commit, () => {
       commit('setSettingsWindowMinimized', false)
       commit('setSettingsWindowOpen', true)
-    })
+    }, getMinimizedSettingsWindowButton)
   },
 
   showSettingsWindowRoot ({ commit }) {
@@ -1010,10 +972,6 @@ const mutations = {
 
   setSettingsWindowMorphing (state, payload) {
     state.settingsWindowMorphing = payload
-  },
-
-  setSettingsWindowMorphIcon (state, payload) {
-    state.settingsWindowMorphIcon = payload
   },
 
   setSettingsWindowReturnView (state, payload) {

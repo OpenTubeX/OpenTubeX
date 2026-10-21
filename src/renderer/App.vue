@@ -94,6 +94,7 @@
       :css="!settingsWindowMorphing"
       leave-from-class=""
       leave-to-class=""
+      v-bind="settingsWindowMorphing ? utilityWindowMorphHooks : {}"
     >
       <KeepAlive>
         <SettingsWindow
@@ -655,6 +656,7 @@ import { hasVisibleGamepadLayer, initializeGamepadNavigation } from './helpers/g
 import { initializeAndroidBack } from './helpers/androidBack'
 import { getAndroidBackPlayer, getAndroidBackSheet } from './helpers/androidBackGesture'
 import { createAndroidBackDialogPreview } from './helpers/androidBackDialog'
+import { utilityWindowMorphHooks } from './helpers/utilityWindowMorph'
 import { keyboardEventInitFromShortcut, OPEN_COMMAND_PALETTE_EVENT } from './helpers/commandPalette'
 import { createCommandPaletteRegistry } from './helpers/commandPaletteRegistry'
 import {

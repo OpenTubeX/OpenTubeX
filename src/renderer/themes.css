@@ -2408,9 +2408,11 @@ it can be safely elided. This looks quite pleasant on this theme. */
 
 /* destructive color in case of conflict with red color themes (sets new destructive color to purple)
   NOTE: RED COLORS MUST CONTAIN 'Red' IN CLASSNAME.
+  Descendants inherit the colors. A descendant selector here would restyle the
+  whole subtree of every element whose class changes.
 */
 /* stylelint-disable-next-line selector-no-qualifying-type */
-body:not(.custom)[class*='Red'] * {
+body:not(.custom)[class*='Red'] {
   --destructive-color: #9c27b0;
   --destructive-text-color: #fff;
   --destructive-hover-color: #8e24aa;
@@ -2421,7 +2423,7 @@ body:not(.custom)[class*='Red'] * {
   NOTE: PURPLE COLORS MUST CONTAIN 'Purple' IN CLASSNAME.
 */
 /* stylelint-disable-next-line selector-no-qualifying-type */
-body:not(.custom)[class*='Red'][class*='Purple'] * {
+body:not(.custom)[class*='Red'][class*='Purple'] {
   --destructive-color: #ff9800;
   --destructive-text-color: #fff;
   --destructive-hover-color: #fb8c00;
@@ -2524,20 +2526,6 @@ a:visited {
   object-fit: cover;
   pointer-events: none;
   transform-origin: top left;
-}
-
-:root.utilityWindowMorphActive .utilityWindowMorphTarget {
-  view-transition-name: utility-window-morph;
-}
-
-:root.utilityWindowMorphActive::view-transition-group(utility-window-morph) {
-  animation-duration: 260ms;
-  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-:root.utilityWindowMorphActive::view-transition-old(root),
-:root.utilityWindowMorphActive::view-transition-new(root) {
-  animation: none;
 }
 
 ::view-transition-old(root),

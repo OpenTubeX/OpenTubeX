@@ -178,7 +178,6 @@
           v-if="settingsWindowMinimized && !compactPhoneActions"
           type="button"
           class="minimizedUtilityButton navButton"
-          :class="{ utilityWindowMorphTarget: settingsWindowMorphing }"
           :aria-label="restoreSettingsWindowLabel"
           :title="restoreSettingsWindowLabel"
           @click="restoreSettingsWindow"
@@ -203,10 +202,6 @@
             class="navIcon"
             :icon="['fas', 'download']"
           />
-          <span
-            v-if="isIconMorphTarget('downloads')"
-            class="iconMorphTarget utilityWindowMorphTarget"
-          />
         </button>
         <button
           v-if="showSettingsButton && !headerShortcutsOverflow"
@@ -222,10 +217,6 @@
           <FtIcon
             class="navIcon"
             :icon="['fas', 'cog']"
-          />
-          <span
-            v-if="isIconMorphTarget('settings')"
-            class="iconMorphTarget utilityWindowMorphTarget"
           />
         </button>
         <CapacitorPhoneTabSwitcher
@@ -510,7 +501,6 @@ const enableDownloads = computed(() => store.getters.getEnableDownloads)
 const moveDownloadsToAppHeader = computed(() => store.getters.getMoveDownloadsToAppHeader)
 const moveSettingsToAppHeader = computed(() => store.getters.getMoveSettingsToAppHeader)
 const settingsWindowMinimized = computed(() => store.getters.getSettingsWindowMinimized)
-const settingsWindowMorphing = computed(() => store.getters.getSettingsWindowMorphing)
 const settingsWindowView = computed(() => store.getters.getSettingsWindowView)
 const downloadsWindowOpen = computed(() => (
   store.getters.getSettingsWindowOpen &&
@@ -542,14 +532,6 @@ const minimizedSettingsWindowIcon = computed(() => {
   return ['fas', 'cog']
 })
 const restoreSettingsWindowLabel = computed(() => `${t('Restore')}: ${minimizedSettingsWindowTitle.value}`)
-
-// The window morphs into an empty placeholder so the button stays visible in the page
-// snapshot. The window and placeholder must never carry the morph name at the same time.
-function isIconMorphTarget(icon) {
-  return settingsWindowMorphing.value &&
-    store.getters.getSettingsWindowMorphIcon === icon &&
-    !store.getters.getSettingsWindowOpen
-}
 
 function toggleDownloadsWindow() {
   store.dispatch(downloadsWindowOpen.value ? 'closeSettingsWindowToIcon' : 'openSettingsWindowFromIcon', 'downloads')

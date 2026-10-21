@@ -2,10 +2,7 @@
   <section
     ref="settingsWindowRef"
     class="settingsWindow"
-    :class="{
-      maximized: isWindowMaximized,
-      utilityWindowMorphTarget: settingsWindowMorphing
-    }"
+    :class="{ maximized: isWindowMaximized }"
     :style="windowStyle"
     role="dialog"
     :aria-label="windowTitle"
@@ -838,7 +835,7 @@ onBeforeUnmount(() => {
   cancelStandaloneScrollClamp()
 })
 
-// A morph removes the window without a leave transition, so deactivation is too late
+// A reduced-motion morph removes the window without a leave transition, so deactivation is too late
 watch(settingsWindowMorphing, (morphing) => {
   if (morphing && windowActive.value) preserveScrollPositions()
 })
