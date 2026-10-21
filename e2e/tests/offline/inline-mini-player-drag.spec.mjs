@@ -561,7 +561,7 @@ test.describe('browsing scroll during mobile minimize', () => {
         })
         await expect(history.locator('.historySearchLoader')).toHaveCount(0)
       } else {
-        await setWindowSize(app, page, trigger === 'resize' ? { width: 481, height: 1200 } : { width: 640, height: 900 })
+        await setWindowSize(app, page, trigger === 'resize' ? { width: 481, height: 1200 } : { width: 400, height: 900 })
       }
       const player = page.locator('.ftVideoPlayer')
       const cdp = await page.context().newCDPSession(page)
