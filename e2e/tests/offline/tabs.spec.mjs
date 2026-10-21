@@ -1912,10 +1912,12 @@ test.describe('tab bar', () => {
       })
       await window.ftElectron.tabs.setGroup(tabIds.slice(2), group.id)
       await window.ftElectron.tabs.updateGroup(group.id, { isCollapsed: true })
-      const store = window.$store
-      store.commit('setTabBarPosition', 'left')
       return group.id
     })
+    // Switching to vertical tabs re-renders the tab bar in a microtask. Inside the async evaluate above,
+    // a garbage collection during that render could collect its already settled promise before
+    // Playwright read the result.
+    await page.evaluate(() => window.$store.commit('setTabBarPosition', 'left'))
 
     const container = page.locator('.tabsContainer')
     const scrollbar = container.locator(':scope > .os-scrollbar-vertical')
