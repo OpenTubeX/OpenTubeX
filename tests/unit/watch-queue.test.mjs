@@ -113,6 +113,26 @@ test('adds videos to the end or front of the watch queue', () => {
   assert.equal(watchQueueGetters.getWatchQueueLength(state), 3)
 })
 
+test('appends a batch of videos in order and ignores a replayed batch', () => {
+  const state = createWatchQueueState()
+  watchQueueMutations.addVideoToWatchQueue(state, { video: video('queued') })
+  const payload = { videos: [video('one'), video('two'), video('one')], queueItemIds: ['a', 'b', 'c'] }
+
+  watchQueueMutations.addVideosToWatchQueue(state, payload)
+  watchQueueMutations.addVideosToWatchQueue(state, payload)
+
+  assert.deepEqual(state.items.map(item => item.videoId), ['queued', 'one', 'two', 'one'])
+  assert.deepEqual(state.items.slice(1).map(item => item.queueItemId), ['a', 'b', 'c'])
+  watchQueueMutations.addVideosToWatchQueue(state, { videos: [video('three')] })
+  assert.equal(new Set(state.items.map(item => item.queueItemId)).size, 5)
+})
+
+test('a queued batch is restored in order after restart', () => {
+  const storage = queueStorage()
+  persistentQueue(storage).commit('addVideosToWatchQueue', { videos: [video('one'), video('two')] })
+  assert.deepEqual(persistentQueue(storage).getters.getWatchQueue.map(item => item.videoId), ['one', 'two'])
+})
+
 test('reorders, removes, and clears queued videos', () => {
   const state = createWatchQueueState()
   for (const id of ['one', 'two', 'three']) {

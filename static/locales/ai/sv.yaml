@@ -1648,6 +1648,7 @@ Video:
       needs_auth: "Inloggning krävs"
       unlisted: "Olistad"
   How this was made: Så skapades detta
+  Save Queue to Playlist: "Spara kön i en spellista"
 Playlist:
   Playlist Already Preloaded: "Alla videor i spellistan är redan förladdade"
   Playlist Preload Progress: "Förladdar videor: {completed} av {requested}"
@@ -1658,6 +1659,8 @@ Playlist:
   Playlist Preload Partial: "Förinläste {preloaded} av {requested} videor. {failed} kunde inte förinläsas."
   Playlist Preload Pagination Failed: "Hela spellistan kunde inte läsas in, så förinläsningen avbröts."
   Unavailable videos are hidden: Otillgängliga videor är dolda
+  Add Playlist to Queue: "Lägg till spellistan i kön"
+  Playlist Added to Queue: "Spellistan har lagts till i kön"
 Change Format:
   yt-dlp Error Template: "yt-dlp kunde inte tillhandahålla strömmarna: {error}"
   Local Video File: Lokal videofil

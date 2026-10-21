@@ -1632,6 +1632,7 @@ Video:
       subscriber_only: "僅限訂閱者"
       needs_auth: "需要登入"
       unlisted: "未公開"
+  Save Queue to Playlist: "將佇列儲存至播放清單"
 Playlist:
   Playlist Already Preloaded: "播放清單中的所有影片均已預載"
   Playlist Preload Progress: "正在預載影片：{completed}/{requested}"
@@ -1641,6 +1642,8 @@ Playlist:
   Playlist Preload Complete: "已預先載入影片：{count}。"
   Playlist Preload Partial: "已預先載入 {requested} 部影片中的 {preloaded} 部，{failed} 部無法載入。"
   Playlist Preload Pagination Failed: "無法載入完整播放清單，已取消預先載入。"
+  Add Playlist to Queue: "將播放清單加入佇列"
+  Playlist Added to Queue: "播放清單已加入佇列"
 Change Format:
   yt-dlp Error Template: "yt-dlp 無法提供串流：{error}"
   Local Video File: 本機影片檔案

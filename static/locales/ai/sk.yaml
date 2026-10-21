@@ -1630,6 +1630,7 @@ Video:
       subscriber_only: "Iba predplatitelia"
       needs_auth: "Vyžaduje sa prihlásenie"
       unlisted: "Neuvedené"
+  Save Queue to Playlist: "Uložiť poradie do playlistu"
 Playlist:
   Playlist Already Preloaded: "Všetky videá v playliste sú už predbežne načítané"
   Playlist Preload Progress: "Predbežné načítavanie videí: {completed} z {requested}"
@@ -1639,6 +1640,8 @@ Playlist:
   Playlist Preload Complete: "Prednačítané videá: {count}."
   Playlist Preload Partial: "Prednačítaných {preloaded} z {requested} videí. {failed} sa nepodarilo prednačítať."
   Playlist Preload Pagination Failed: "Celý zoznam sa nepodarilo načítať, preto bolo prednačítanie zrušené."
+  Add Playlist to Queue: "Pridať playlist do poradia"
+  Playlist Added to Queue: "Playlist bol pridaný do poradia"
 Change Format:
   yt-dlp Error Template: "yt-dlp nedokázal poskytnúť streamy: {error}"
   Local Video File: Miestny súbor videa

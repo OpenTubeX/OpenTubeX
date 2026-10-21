@@ -1671,6 +1671,7 @@ Video:
       needs_auth: "Este necesară conectarea"
       unlisted: "Nelistat"
   How this was made: Cum a fost creat
+  Save Queue to Playlist: "Salvează coada într-o listă de redare"
 Playlist:
   Playlist Already Preloaded: "Toate videoclipurile din lista de redare sunt deja preîncărcate"
   Playlist Preload Progress: "Se preîncarcă videoclipurile: {completed} din {requested}"
@@ -1681,6 +1682,8 @@ Playlist:
   Playlist Preload Partial: "S-au preîncărcat {preloaded} din {requested} videoclipuri. {failed} nu au putut fi preîncărcate."
   Playlist Preload Pagination Failed: "Lista completă nu a putut fi încărcată, așa că preîncărcarea a fost anulată."
   Unavailable videos are hidden: Videoclipurile indisponibile sunt ascunse
+  Add Playlist to Queue: "Adaugă lista de redare în coadă"
+  Playlist Added to Queue: "Lista de redare a fost adăugată în coadă"
 Change Format:
   yt-dlp Error Template: "yt-dlp nu a putut furniza fluxurile: {error}"
   Local Video File: Fișier video local

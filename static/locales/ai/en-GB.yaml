@@ -1618,6 +1618,7 @@ Video:
       needs_auth: Sign-in required
       unlisted: Unlisted
   How this was made: How this was made
+  Save Queue to Playlist: "Save queue to playlist"
 Playlist:
   Playlist Already Preloaded: "All playlist videos are already preloaded"
   Playlist Preload Progress: "Preloading videos: {completed} of {requested}"
@@ -1628,6 +1629,8 @@ Playlist:
   Playlist Preload Partial: "Preloaded {preloaded} of {requested} videos. {failed} could not be preloaded."
   Playlist Preload Pagination Failed: "The full playlist could not be loaded, so preloading was cancelled."
   Unavailable videos are hidden: Unavailable videos are hidden
+  Add Playlist to Queue: "Add playlist to queue"
+  Playlist Added to Queue: "Playlist added to queue"
 Change Format:
   yt-dlp Error Template: "yt-dlp could not provide the streams: {error}"
   Local Video File: Local video file

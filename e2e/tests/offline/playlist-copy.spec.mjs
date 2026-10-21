@@ -162,3 +162,16 @@ test('copying stays busy during pagination and navigation cancels the pending di
   await finished
   await expect(page.getByRole('dialog')).toHaveCount(0)
 })
+
+test('adds every page of a remote playlist to the queue in order', async ({ page }) => {
+  const upstream = Array.from({ length: 102 }, (_, index) => video(index))
+  await page.route(/\/api\/v1\/playlists\/fork-source\?/, route => {
+    const pageNumber = Number(new URL(route.request().url()).searchParams.get('page') || 1)
+    return route.fulfill({ json: response(upstream.slice((pageNumber - 1) * 100, pageNumber * 100), upstream.length) })
+  })
+  await openPlaylist(page)
+  await page.getByTitle('Add Playlist to Queue', { exact: true }).click()
+  await expect(page.getByText('Playlist added to queue', { exact: true })).toBeVisible()
+  expect(await page.evaluate(() => window.$store.getters.getWatchQueue.map(item => item.videoId)))
+    .toEqual(upstream.map(video => video.videoId))
+})

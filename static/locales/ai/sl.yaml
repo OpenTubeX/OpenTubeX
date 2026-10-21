@@ -2095,6 +2095,7 @@ Video:
       needs_auth: "Zahtevana je prijava"
       unlisted: "Ni na seznamu"
   How this was made: Kako je bilo to ustvarjeno
+  Save Queue to Playlist: "Shrani čakalno vrsto na seznam predvajanja"
 Playlist:
   Playlist Already Preloaded: "Vsi videoposnetki na seznamu so že prednaloženi"
   Playlist Preload Progress: "Prednalaganje videoposnetkov: {completed} od {requested}"
@@ -2117,6 +2118,8 @@ Playlist:
   Playlist Preload Partial: "Prednaloženih je {preloaded} od {requested} videov. {failed} jih ni bilo mogoče prednaložiti."
   Playlist Preload Pagination Failed: "Celotnega seznama ni bilo mogoče naložiti, zato je bilo prednalaganje preklicano."
   Unavailable videos are hidden: Nedostopni videoposnetki so skriti
+  Add Playlist to Queue: "Dodaj seznam predvajanja v čakalno vrsto"
+  Playlist Added to Queue: "Seznam predvajanja je dodan v čakalno vrsto"
 Change Format:
   yt-dlp Error Template: "yt-dlp ni mogel zagotoviti tokov: {error}"
   Local Video File: Lokalna videodatoteka

@@ -75,7 +75,8 @@ const LOCAL_VIDEO_MUTATIONS = new Set([
   'addVideo', 'addVideos', 'removeAllPlaylists', 'removeAllVideos', 'removeVideo',
   'removeVideos', 'removePlaylist', 'removePlaylists', 'setAllPlaylists',
   'upsertYtDlpDownload', 'removeYtDlpDownload', 'addVideoToWatchQueue',
-  'removeVideoFromWatchQueue', 'moveVideoInWatchQueue', 'clearWatchQueue',
+  'addVideosToWatchQueue', 'removeVideoFromWatchQueue', 'moveVideoInWatchQueue',
+  'clearWatchQueue',
 ])
 
 /** Whether a store mutation changes locally searchable video metadata. */

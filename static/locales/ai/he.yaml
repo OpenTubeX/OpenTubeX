@@ -1677,6 +1677,7 @@ Video:
       needs_auth: "נדרשת כניסה"
       unlisted: "לא מופיע"
   How this was made: איך זה נוצר
+  Save Queue to Playlist: "שמירת התור ברשימת נגינה"
 Playlist:
   Playlist Already Preloaded: "כל סרטוני הפלייליסט כבר נטענו מראש"
   Playlist Preload Progress: "טוען סרטונים מראש: {completed} מתוך {requested}"
@@ -1687,6 +1688,8 @@ Playlist:
   Playlist Preload Partial: "נטענו מראש {preloaded} מתוך {requested} סרטונים. טעינת {failed} נכשלה."
   Playlist Preload Pagination Failed: "לא ניתן היה לטעון את כל רשימת ההשמעה, לכן הטעינה מראש בוטלה."
   Unavailable videos are hidden: סרטונים לא זמינים מוסתרים
+  Add Playlist to Queue: "הוספת רשימת הנגינה לתור"
+  Playlist Added to Queue: "רשימת הנגינה נוספה לתור"
 Change Format:
   yt-dlp Error Template: "yt-dlp לא הצליח לספק את הזרמים: {error}"
   Local Video File: קובץ וידאו מקומי

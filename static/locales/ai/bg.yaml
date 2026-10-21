@@ -1651,6 +1651,7 @@ Video:
       needs_auth: "Изисква се вписване"
       unlisted: "Непосочен в списъка"
   How this was made: Как е създадено това
+  Save Queue to Playlist: "Запазване на опашката в плейлист"
 Playlist:
   Playlist Already Preloaded: "Всички видеоклипове в плейлиста вече са предварително заредени"
   Playlist Preload Progress: "Предварително зареждане на видеоклипове: {completed} от {requested}"
@@ -1661,6 +1662,8 @@ Playlist:
   Playlist Preload Partial: "Предварително заредени са {preloaded} от {requested} видеа. {failed} не можаха да се заредят."
   Playlist Preload Pagination Failed: "Пълният плейлист не можа да се зареди и предварителното зареждане бе отменено."
   Unavailable videos are hidden: Недостъпните видеоклипове са скрити
+  Add Playlist to Queue: "Добавяне на плейлиста към опашката"
+  Playlist Added to Queue: "Плейлистът е добавен към опашката"
 Change Format:
   yt-dlp Error Template: "yt-dlp не успя да предостави потоците: {error}"
   Local Video File: Локален видеофайл

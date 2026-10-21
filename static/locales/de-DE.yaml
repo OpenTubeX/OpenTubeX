@@ -2308,6 +2308,7 @@ Video:
   Added to Play Next: Video wird als Nächstes wiedergegeben
   Added to Queue: Video zur Warteschlange hinzugefügt
   Clear Queue: Warteschlange leeren
+  Save Queue to Playlist: Warteschlange in Playlist speichern
   Queue Video Count: '{count} Video | {count} Videos'
   Remove from Queue: '{title} aus der Warteschlange entfernen'
   Drag to Reorder Queue: Ziehe {title}, um die Warteschlange neu anzuordnen
@@ -2364,6 +2365,8 @@ Playlist:
   #& About
   Close Playlist: Playlist schließen
   View Full Playlist: Vollständige Playlist ansehen
+  Add Playlist to Queue: Playlist zur Warteschlange hinzufügen
+  Playlist Added to Queue: Playlist zur Warteschlange hinzugefügt
   Preload Playlist: Alle Videos vorladen
   Preloading Playlist: Alle Videos werden vorgeladen ...
   Playlist Already Preloaded: Alle Videos der Playlist sind bereits vorgeladen

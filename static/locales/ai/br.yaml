@@ -1639,6 +1639,7 @@ Video:
       subscriber_only: "Enskrivadurioù hepken"
       needs_auth: "Ret eo kevreañ"
       unlisted: "Anlistennet"
+  Save Queue to Playlist: "Enrollañ al lost en ur roll-videoioù"
 Playlist:
   Playlist Already Preloaded: "Karget eo bet holl videoioù ar roll-lenn en a-raok"
   Playlist Preload Progress: "O kargañ videoioù en a-raok: {completed} diwar {requested}"
@@ -1648,6 +1649,8 @@ Playlist:
   Playlist Preload Complete: "Videoioù rakgarget: {count}."
   Playlist Preload Partial: "{preloaded} diwar {requested} video rakgarget. C’hwitet ez eus bet war {failed}."
   Playlist Preload Pagination Failed: "N’haller ket kargañ ar roll lenn a-bezh, setu eo bet nullet ar rakgargañ."
+  Add Playlist to Queue: "Ouzhpennañ ar roll-videoioù d'al lost"
+  Playlist Added to Queue: "Ouzhpennet eo bet ar roll-videoioù d'al lost"
 Change Format:
   yt-dlp Error Template: "N’en deus ket gallet yt-dlp pourchas al lanvioù: {error}"
   Local Video File: "Restr video lec'hel"

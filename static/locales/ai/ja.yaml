@@ -1630,6 +1630,7 @@ Video:
       subscriber_only: "購読者のみ"
       needs_auth: "サインインが必要です"
       unlisted: "限定公開"
+  Save Queue to Playlist: "キューを再生リストに保存"
 Playlist:
   Playlist Already Preloaded: "プレイリストのすべての動画は先読み済みです"
   Playlist Preload Progress: "動画を先読み中: {requested} 本中 {completed} 本"
@@ -1639,6 +1640,8 @@ Playlist:
   Playlist Preload Complete: "先読みした動画: {count}。"
   Playlist Preload Partial: "{requested} 本中 {preloaded} 本を先読みしました。{failed} 本は先読みできませんでした。"
   Playlist Preload Pagination Failed: "再生リスト全体を読み込めなかったため、先読みを中止しました。"
+  Add Playlist to Queue: "再生リストをキューに追加"
+  Playlist Added to Queue: "再生リストをキューに追加しました"
 Change Format:
   yt-dlp Error Template: "yt-dlpでストリームを取得できませんでした: {error}"
   Local Video File: ローカル動画ファイル

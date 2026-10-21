@@ -26,8 +26,21 @@
           </span>
         </div>
         <button
+          v-if="showPlaylists && playlistVideos.length > 0"
           type="button"
-          class="clearQueue"
+          class="queueHeaderAction saveQueue"
+          :aria-label="t('Video.Save Queue to Playlist')"
+          :title="t('Video.Save Queue to Playlist')"
+          @click="saveToPlaylist"
+        >
+          <FtIcon
+            :icon="['fas', 'playlist-add']"
+            aria-hidden="true"
+          />
+        </button>
+        <button
+          type="button"
+          class="queueHeaderAction clearQueue"
           :aria-label="t('Video.Clear Queue')"
           :title="t('Video.Clear Queue')"
           @click="clearQueue"
@@ -350,6 +363,26 @@ function remove(queueItemId) {
 
 function clearQueue() {
   store.commit('clearWatchQueue')
+}
+
+const showPlaylists = computed(() => !store.getters.getHidePlaylists)
+// Local playlists only hold YouTube videos, so other downloaded media stays queued only.
+const playlistVideos = computed(() => items.value
+  .filter(item => /^[\w-]{11}$/.test(item.videoId))
+  .map(item => ({
+    videoId: item.videoId,
+    title: item.title,
+    author: item.author,
+    authorId: item.authorId,
+    lengthSeconds: item.lengthSeconds ?? '',
+    published: item.published,
+    premiereDate: item.premiereDate,
+    premiereTimestamp: item.premiereTimestamp,
+    isMembersOnly: item.isMembersOnly,
+  })))
+
+function saveToPlaylist() {
+  store.dispatch('showAddToPlaylistPromptForManyVideos', { videos: playlistVideos.value })
 }
 </script>
 

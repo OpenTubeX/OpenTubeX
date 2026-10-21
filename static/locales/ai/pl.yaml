@@ -954,6 +954,7 @@ Video:
       subscriber_only: "Tylko subskrybenci"
       needs_auth: "Wymagane logowanie"
       unlisted: "Niepubliczny"
+  Save Queue to Playlist: "Zapisz kolejkę na playliście"
 Change Format:
   yt-dlp Error Template: "yt-dlp nie mógł dostarczyć strumieni: {error}"
   Local Video File: Lokalny plik filmu
@@ -1276,6 +1277,8 @@ Playlist:
   Playlist Preload Partial: "Wstępnie wczytano {preloaded} z {requested} filmów. Nie udało się wczytać {failed}."
   Playlist Preload Pagination Failed: "Nie udało się wczytać całej playlisty, więc anulowano wstępne wczytywanie."
   Unavailable videos are hidden: Niedostępne filmy są ukryte
+  Add Playlist to Queue: "Dodaj playlistę do kolejki"
+  Playlist Added to Queue: "Playlista dodana do kolejki"
 Channels:
   Load More Channels: "Wczytaj więcej kanałów"
 

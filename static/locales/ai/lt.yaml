@@ -2019,6 +2019,7 @@ Video:
       needs_auth: "Būtina prisijungti"
       unlisted: "Neįtrauktas į sąrašą"
   How this was made: Kaip tai buvo sukurta
+  Save Queue to Playlist: "Išsaugoti eilę grojaraštyje"
 Playlist:
   Playlist Already Preloaded: "Visi grojaraščio vaizdo įrašai jau įkelti iš anksto"
   Playlist Preload Progress: "Vaizdo įrašų išankstinis įkėlimas: {completed} iš {requested}"
@@ -2041,6 +2042,8 @@ Playlist:
   Playlist Preload Partial: "Iš anksto įkelta {preloaded} iš {requested} vaizdo įrašų. Nepavyko įkelti {failed}."
   Playlist Preload Pagination Failed: "Nepavyko įkelti viso grojaraščio, todėl išankstinis įkėlimas atšauktas."
   Unavailable videos are hidden: Nepasiekiami vaizdo įrašai paslėpti
+  Add Playlist to Queue: "Pridėti grojaraštį į eilę"
+  Playlist Added to Queue: "Grojaraštis pridėtas į eilę"
 Change Format:
   yt-dlp Error Template: "yt-dlp nepavyko pateikti srautų: {error}"
   Local Video File: Vietinis vaizdo įrašo failas

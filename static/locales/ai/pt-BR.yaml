@@ -1631,6 +1631,7 @@ Video:
       subscriber_only: "Apenas assinantes"
       needs_auth: "Início de sessão obrigatório"
       unlisted: "Não listado"
+  Save Queue to Playlist: "Salvar fila em uma playlist"
 Playlist:
   Playlist Already Preloaded: "Todos os vídeos da playlist já estão pré-carregados"
   Playlist Preload Progress: "Pré-carregando vídeos: {completed} de {requested}"
@@ -1640,6 +1641,8 @@ Playlist:
   Playlist Preload Complete: "Vídeos pré-carregados: {count}."
   Playlist Preload Partial: "Foram pré-carregados {preloaded} de {requested} vídeos. Não foi possível pré-carregar {failed}."
   Playlist Preload Pagination Failed: "Não foi possível carregar a lista completa, por isso o pré-carregamento foi cancelado."
+  Add Playlist to Queue: "Adicionar playlist à fila"
+  Playlist Added to Queue: "Playlist adicionada à fila"
 Change Format:
   yt-dlp Error Template: "O yt-dlp não conseguiu fornecer os streams: {error}"
   Local Video File: Arquivo de vídeo local

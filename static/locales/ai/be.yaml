@@ -1718,6 +1718,7 @@ Video:
       needs_auth: "Неабходна ўвайсці"
       unlisted: "Не ў спісе"
   How this was made: Як гэта было зроблена
+  Save Queue to Playlist: "Захаваць чаргу ў плэй-ліст"
 Playlist:
   Playlist Already Preloaded: "Усе відэа плэйліста ўжо папярэдне загружаны"
   Playlist Preload Progress: "Папярэдняя загрузка відэа: {completed} з {requested}"
@@ -1728,6 +1729,8 @@ Playlist:
   Playlist Preload Partial: "Папярэдне загружана {preloaded} з {requested} відэа. Не ўдалося загрузіць {failed}."
   Playlist Preload Pagination Failed: "Не ўдалося загрузіць увесь плэйліст, таму папярэдняя загрузка скасавана."
   Unavailable videos are hidden: Недаступныя відэа схаваныя
+  Add Playlist to Queue: "Дадаць плэй-ліст у чаргу"
+  Playlist Added to Queue: "Плэй-ліст дададзены ў чаргу"
 Change Format:
   yt-dlp Error Template: "yt-dlp не змог атрымаць патокі: {error}"
   Local Video File: Лакальны відэафайл

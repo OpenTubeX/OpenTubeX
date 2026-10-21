@@ -1629,6 +1629,7 @@ Video:
       subscriber_only: "Solo abbonati"
       needs_auth: "Accesso obbligatorio"
       unlisted: "Non elencato"
+  Save Queue to Playlist: "Salva coda in una playlist"
 Playlist:
   Playlist Already Preloaded: "Tutti i video della playlist sono già precaricati"
   Playlist Preload Progress: "Precaricamento video: {completed} di {requested}"
@@ -1638,6 +1639,8 @@ Playlist:
   Playlist Preload Complete: "Video precaricati: {count}."
   Playlist Preload Partial: "Precaricati {preloaded} video su {requested}. Impossibile precaricarne {failed}."
   Playlist Preload Pagination Failed: "Non è stato possibile caricare l’intera playlist, quindi il precaricamento è stato annullato."
+  Add Playlist to Queue: "Aggiungi playlist alla coda"
+  Playlist Added to Queue: "Playlist aggiunta alla coda"
 Change Format:
   yt-dlp Error Template: "yt-dlp non ha potuto fornire i flussi: {error}"
   Local Video File: File video locale

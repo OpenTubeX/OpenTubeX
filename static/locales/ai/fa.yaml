@@ -1712,6 +1712,7 @@ Video:
       needs_auth: "ورود به سیستم الزامی است"
       unlisted: "بدون لیست"
   How this was made: این چگونه ساخته شده است
+  Save Queue to Playlist: "ذخیرهٔ صف در فهرست پخش"
 Playlist:
   Playlist Already Preloaded: "همه ویدیوهای فهرست پخش از قبل پیش‌بارگذاری شده‌اند"
   Playlist Preload Progress: "در حال پیش‌بارگذاری ویدیوها: {completed} از {requested}"
@@ -1722,6 +1723,8 @@ Playlist:
   Playlist Preload Partial: "از {requested} ویدیو، {preloaded} مورد پیش‌بارگیری شد. پیش‌بارگیری {failed} مورد ناموفق بود."
   Playlist Preload Pagination Failed: "فهرست پخش کامل بارگیری نشد، بنابراین پیش‌بارگیری لغو شد."
   Unavailable videos are hidden: ویدیوهای در دسترس‌نبوده پنهان هستند
+  Add Playlist to Queue: "افزودن فهرست پخش به صف"
+  Playlist Added to Queue: "فهرست پخش به صف افزوده شد"
 Change Format:
   yt-dlp Error Template: "yt-dlp نتوانست جریان‌ها را فراهم کند: {error}"
   Local Video File: فایل ویدیویی محلی

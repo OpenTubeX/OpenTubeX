@@ -1914,6 +1914,7 @@ Video:
       needs_auth: "Pålogging krevst"
       unlisted: "Ikkje oppført"
   How this was made: Slik vart dette laga
+  Save Queue to Playlist: "Lagre køen i ei speleliste"
 Playlist:
   Playlist Already Preloaded: "Alle videoane i spelelista er allereie førehandslasta"
   Playlist Preload Progress: "Førehandslastar videoar: {completed} av {requested}"
@@ -1936,6 +1937,8 @@ Playlist:
   Playlist Preload Partial: "Førehandslasta {preloaded} av {requested} videoar. {failed} kunne ikkje førehandslastast."
   Playlist Preload Pagination Failed: "Heile spelelista kunne ikkje lastast, så førehandslastinga vart avbroten."
   Unavailable videos are hidden: Utilgjengelege videoar er gøymde
+  Add Playlist to Queue: "Legg til spelelista i køen"
+  Playlist Added to Queue: "Spelelista er lagd til i køen"
 Change Format:
   yt-dlp Error Template: "yt-dlp kunne ikkje hente straumane: {error}"
   Local Video File: Lokal videofil

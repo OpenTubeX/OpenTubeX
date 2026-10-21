@@ -1699,6 +1699,7 @@ Video:
       needs_auth: "Обавезна је пријава"
       unlisted: "Није на листи"
   How this was made: Како је ово направљено
+  Save Queue to Playlist: "Сачувај ред за репродукцију у плејлисту"
 Playlist:
   Playlist Already Preloaded: "Сви видео снимци са плејлисте су већ претходно учитани"
   Playlist Preload Progress: "Претходно учитавање видео снимака: {completed} од {requested}"
@@ -1709,6 +1710,8 @@ Playlist:
   Playlist Preload Partial: "Унапред је учитано {preloaded} од {requested} снимака. Учитавање {failed} видео-снимака унапред није успело."
   Playlist Preload Pagination Failed: "Цела плејлиста није могла да се учита, па је учитавање унапред отказано."
   Unavailable videos are hidden: Недоступни видео-снимци су скривени
+  Add Playlist to Queue: "Додај плејлисту у ред за репродукцију"
+  Playlist Added to Queue: "Плејлиста је додата у ред за репродукцију"
 Change Format:
   yt-dlp Error Template: "yt-dlp није могао да обезбеди стримове: {error}"
   Local Video File: Локална видео-датотека
