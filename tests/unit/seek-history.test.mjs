@@ -179,3 +179,33 @@ test('does not record while seeking is unavailable', () => {
   seek(300)
   assert.deepEqual(positions(), [])
 })
+
+test('SponsorBlock draft jumps are the viewer\'s own seeks', async () => {
+  const submissionSource = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/opentubex/useSponsorBlockSubmission.js', import.meta.url), 'utf8')
+  const match = submissionSource.match(/  async function previewSponsorBlockDraft\([^]*?\n  }/)
+  assert.ok(match, 'missing previewSponsorBlockDraft')
+
+  for (const [mode, point] of [['inspect', false], ['end', false], ['preview', false], ['preview', true]]) {
+    const seeks = []
+    const previewSponsorBlockDraft = vm.runInNewContext(`(${match[0].trim()})`, {
+      sponsorBlockDraftSegments: { value: [{ id: 'draft', startTime: 100, endTime: 160, actionType: point ? 'poi' : 'skip' }] },
+      sponsorBlockCurrentTime: { value: 0 },
+      sponsorBlockPreviewSkipSegment: { value: null },
+      sponsorBlockSubmissionError: { value: '' },
+      video: { value: { playbackRate: 1, play: async () => {} } },
+      SPONSORBLOCK_PREVIEW_SECONDS: 3,
+      canSeek: () => true,
+      saveSponsorBlockDraft: async () => true,
+      isSponsorBlockPointSegment: () => point,
+      setCurrentTime: (time, recordSeekHistory) => seeks.push(recordSeekHistory),
+      stopSponsorBlockPreviewSkip() {},
+      startSponsorBlockPreviewSkipMonitor() {},
+      replaceSponsorBlockDraftSegment() {},
+      persistSponsorBlockDrafts: async () => {},
+      showOverlayControls() {},
+      console,
+    })
+    await previewSponsorBlockDraft('draft', mode)
+    assert.deepEqual(seeks, [true], `${mode}${point ? ' point' : ''}`)
+  }
+})

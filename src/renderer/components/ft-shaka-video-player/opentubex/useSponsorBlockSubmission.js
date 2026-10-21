@@ -89,7 +89,7 @@ function normalizeSponsorBlockDraftTime(seconds) {
  *
  * @param {{
  *   canSeek: () => boolean,
- *   setCurrentTime: (time: number) => void,
+ *   setCurrentTime: (time: number, recordSeekHistory?: boolean) => void,
  *   events: EventTarget,
  *   getPlayer: () => import('shaka-player').Player | null,
  *   isLive: import('vue').Ref<boolean>,
@@ -612,7 +612,7 @@ export function useSponsorBlockSubmission({
     stopSponsorBlockPreviewSkip()
 
     if (mode === 'inspect') {
-      setCurrentTime(draft.startTime)
+      setCurrentTime(draft.startTime, true)
       sponsorBlockCurrentTime.value = draft.startTime
       showOverlayControls()
       return
@@ -623,14 +623,14 @@ export function useSponsorBlockSubmission({
         return
       }
 
-      setCurrentTime(draft.endTime)
+      setCurrentTime(draft.endTime, true)
       sponsorBlockCurrentTime.value = draft.endTime
       showOverlayControls()
       return
     }
 
     if (isSponsorBlockPointSegment(draft)) {
-      setCurrentTime(draft.startTime)
+      setCurrentTime(draft.startTime, true)
       sponsorBlockCurrentTime.value = draft.startTime
       replaceSponsorBlockDraftSegment(segmentId, (segment) => ({
         ...segment,
@@ -646,7 +646,7 @@ export function useSponsorBlockSubmission({
       ? 0
       : Math.max(draft.startTime - (SPONSORBLOCK_PREVIEW_SECONDS * video.value.playbackRate), 0)
 
-    setCurrentTime(previewStartTime)
+    setCurrentTime(previewStartTime, true)
     sponsorBlockCurrentTime.value = previewStartTime
     sponsorBlockPreviewSkipSegment.value = {
       id: draft.id,
