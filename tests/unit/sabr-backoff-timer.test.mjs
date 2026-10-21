@@ -35,7 +35,7 @@ function fixture() {
     tabMediaCoordinator: {
       setPlaybackState: (_id, state) => playbackStates.push(state),
       setActionHandlers: (_id, _source, handlers) => { context.handlers = handlers },
-    }, mediaTabId: 'test', process: { env: {} }, updateAutoPip: noop,
+    }, mediaTabId: 'test', mediaSessionSource: 'player-test', process: { env: {} }, updateAutoPip: noop,
     mediaSessionStopped: false, seekingIsPossible: { value: false },
     handlePause: () => playbackStates.push('paused'),
     scrollMiniPlayerActive: { value: false }, updateScrollMiniPlayer: noop, emit: noop,
