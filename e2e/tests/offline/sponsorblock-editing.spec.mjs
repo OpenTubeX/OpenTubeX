@@ -44,12 +44,18 @@ async function openSegments(app, page, segments = [timedSegment], beforeOpen = n
   const video = await openMockedVideo(page)
   await video.evaluate(element => element.pause())
   await beforeOpen?.()
+  const panel = await openPanel(page)
+  await expect(panel.locator('.sponsorBlockSegment')).toHaveCount(segments.length)
+  return { panel, video }
+}
+
+async function openPanel(page) {
   await page.getByRole('button', { name: 'Open SponsorBlock info', exact: true }).click()
   const panel = page.locator('.watchVideoSponsorBlock')
-  await expect(panel.locator('.sponsorBlockSegment')).toHaveCount(segments.length)
-  // Rows still move while the panel grows open, so a click could press one row and release on another
+  // Clicking a row the opening panel still clips scrolls it into view, and the row slides
+  // back as the panel grows, so the press and release could land on different elements
   await expect(panel).not.toHaveClass(/sidebar-panel-enter/)
-  return { panel, video }
+  return panel
 }
 
 async function captureThemes(page, component, testInfo, name) {
@@ -175,7 +181,7 @@ test('keeps the editable copy when its downvote fails and never toggles an exist
   await expect(editor.locator('select').nth(1)).toHaveValue('mute')
   await editor.locator('.sponsorBlockSubmissionClose').click()
   failVote = false
-  await page.getByRole('button', { name: 'Open SponsorBlock info', exact: true }).click()
+  await openPanel(page)
   await panel.locator('.sponsorBlockSegmentSummary').click()
   await panel.getByRole('button', { name: 'Edit', exact: true }).click()
   await panel.getByRole('button', { name: 'Downvote', exact: true }).click()
@@ -293,7 +299,7 @@ test('closes an unskipped toast when a category correction disables its segment'
   await expect(toast).toHaveCount(0)
 
   // correcting it back makes it auto-skip again, as no toast is left to reskip it
-  await page.getByRole('button', { name: 'Open SponsorBlock info', exact: true }).click()
+  await openPanel(page)
   await panel.locator('.sponsorBlockSegmentSummary').click()
   await panel.getByRole('button', { name: 'Edit', exact: true }).click()
   await panel.getByRole('button', { name: 'Change category', exact: true }).click()
