@@ -646,21 +646,24 @@ function getDragAutoScrollSpeed() {
 
   const {
     pointerCurrent, viewportStart, viewportEnd,
-    rects, groupStartIndex, groupEndIndex
+    rects, sourceIndex, groupEndIndex, minOffset
   } = dragSession
   const viewportSize = viewportEnd - viewportStart
   const edge = Math.min(DRAG_AUTO_SCROLL_EDGE_PX, viewportSize / 4)
-  // Stop once the dragged tabs' pinned or unpinned group is fully visible at
-  // that end, since they cannot move past it.
-  const groupRects = [rects[groupStartIndex], rects[groupEndIndex]]
-  const groupStart = Math.min(...groupRects.map(rect => rect.start))
-  const groupEnd = Math.max(...groupRects.map(rect => rect.start + rect.size))
   const scroll = containerScrollPosition(container)
   if (pointerCurrent < viewportStart + edge) {
-    return groupStart < scroll
+    // Scroll to the start of the list, past any pinned tabs before an
+    // unpinned drag, unless the grabbed tab held at the start of its group
+    // would leave the other end.
+    const sourceRect = rects[sourceIndex]
+    const minScroll = Math.max(0, sourceRect.start + minOffset + sourceRect.size - viewportSize)
+    return scroll > minScroll
       ? -Math.min(1, (viewportStart + edge - pointerCurrent) / edge)
       : 0
   }
+  // Stop once the end of the dragged tabs' group is visible, so a pinned tab
+  // held at the pinned boundary does not scroll out of view.
+  const groupEnd = rects[groupEndIndex].start + rects[groupEndIndex].size
   return groupEnd > scroll + viewportSize
     ? Math.max(0, Math.min(1, (pointerCurrent - viewportEnd + edge) / edge))
     : 0
