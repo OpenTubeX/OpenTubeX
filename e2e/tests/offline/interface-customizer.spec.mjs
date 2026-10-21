@@ -314,7 +314,29 @@ test.describe('interface customizer', () => {
     })
     expect(sizes.stageIsWider).toBe(true)
     expect(sizes.time).toBeCloseTo(13, 1)
-    expect(sizes.menuLabel).toBeCloseTo(11, 1)
+    // The phone layout sizes its menu like an 11px label on a 360px wide player.
+    expect(sizes.menuLabel).toBeCloseTo(11 * 800 / 360, 1)
+  })
+
+  test('shows the player menu preview over the whole player in the phone layout', { tag: '@scale' }, async ({ app, page }) => {
+    const customizer = await openInterfaceCustomizer(page, 'player')
+    await customizer.getByRole('tab', { name: 'Player menu', exact: true }).click()
+    const close = customizer.locator('.previewOverflowClose')
+    const menuCoversPlayer = () => customizer.locator('.previewPlayer').evaluate(player => {
+      const bounds = player.getBoundingClientRect()
+      const menu = player.querySelector('.previewOverflowMenu').getBoundingClientRect()
+      return ['left', 'top', 'right', 'bottom'].every(side => Math.abs(menu[side] - bounds[side]) < 0.5)
+    })
+    await expect.poll(menuCoversPlayer).toBe(false)
+    await expect(close).toBeHidden()
+
+    // Like the real player, the phone layout opens its menu over the whole player.
+    await setWindowSize(app, page, { width: 360, height: 760 })
+    await expect.poll(menuCoversPlayer).toBe(true)
+    await expect(close).toBeVisible()
+    await expect.poll(() => customizer.locator('.previewOverflowGrid').evaluate(grid => (
+      getComputedStyle(grid).gridTemplateColumns.split(' ').length
+    ))).toBe(4)
   })
 })
 

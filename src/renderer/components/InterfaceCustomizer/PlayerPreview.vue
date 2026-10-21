@@ -34,26 +34,31 @@
         v-if="state === 'menu'"
         class="previewOverflowMenu"
       >
-        <span
-          v-for="item in overflowItems"
-          :key="item.id"
-          class="previewOverflowItem"
-          :data-preview-overflow-item="item.id"
-        >
-          <PreviewIcon
-            v-if="item.path"
-            :path="item.path"
-            :view-box="item.viewBox"
-          />
-          <FtIcon
-            v-else
-            class="previewOverflowFtIcon"
-            :icon="item.icon"
-            aria-hidden="true"
-          />
-          <span class="previewOverflowLabel">{{ item.label }}</span>
-          <span class="previewOverflowValue">{{ item.value }}</span>
+        <span class="previewOverflowClose">
+          <PreviewIcon :path="SHAKA_PREVIEW_ICONS.CLOSE" />
         </span>
+        <div class="previewOverflowGrid">
+          <span
+            v-for="item in overflowItems"
+            :key="item.id"
+            class="previewOverflowItem"
+            :data-preview-overflow-item="item.id"
+          >
+            <PreviewIcon
+              v-if="item.path"
+              :path="item.path"
+              :view-box="item.viewBox"
+            />
+            <FtIcon
+              v-else
+              class="previewOverflowFtIcon"
+              :icon="item.icon"
+              aria-hidden="true"
+            />
+            <span class="previewOverflowLabel">{{ item.label }}</span>
+            <span class="previewOverflowValue">{{ item.value }}</span>
+          </span>
+        </div>
       </div>
       <div
         v-if="fullscreen && fullscreenActions.length > 0"
