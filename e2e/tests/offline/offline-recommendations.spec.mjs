@@ -62,8 +62,12 @@ for (const width of [1500, 480]) {
       await setWindowSize(app, page, { width, height: 850 })
       const recommendations = page.locator('.watchVideoRecommendations')
       await expect(recommendations.getByRole('heading', { name: 'Up Next', exact: true })).toBeVisible()
-      const originalTitles = await recommendations.locator('.h3Title').allTextContents()
-      expect(originalTitles.length).toBeGreaterThan(0)
+      // Rows past the first five mount as they scroll into view, so compare those five and the row count.
+      const rows = recommendations.locator('.recommendationsContent > div')
+      const firstTitles = () => recommendations.locator('.h3Title').allTextContents().then(titles => titles.slice(0, 5))
+      const originalRowCount = await rows.count()
+      const originalTitles = await firstTitles()
+      expect(originalTitles).toHaveLength(5)
       const watch = await watchViewHandle(page)
       try {
         expect(await watch.evaluate(vm => vm.localFilePlayback)).toBe(false)
@@ -89,7 +93,8 @@ for (const width of [1500, 480]) {
           window.dispatchEvent(new Event('online'))
         })
         await expect(recommendations.getByRole('heading', { name: 'Up Next', exact: true })).toBeVisible()
-        await expect(recommendations.locator('.h3Title')).toHaveText(originalTitles)
+        await expect(rows).toHaveCount(originalRowCount)
+        await expect.poll(firstTitles).toEqual(originalTitles)
         await expect(recommendations.locator('.offlineDownloadRecommendation')).toHaveCount(0)
       } finally {
         await watch.dispose()
