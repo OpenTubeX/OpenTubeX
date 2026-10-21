@@ -244,6 +244,11 @@ test('connection checks report actionable failures', async () => {
 
   assert.deepEqual(await checkYatteeServer('', null), { ok: false, error: 'invalid-url' })
   assert.deepEqual(await checkYatteeServer(server, null, { fetch: async () => { throw new TypeError('Failed to fetch') } }), { ok: false, error: 'unreachable' })
+
+  // A server that drops packets never answers, so the test has to give up on its own
+  const silent = (_url, { signal }) => new Promise((_resolve, reject) => signal?.addEventListener('abort', () => reject(signal.reason)))
+  const pending = new Promise(resolve => setTimeout(() => resolve('still testing'), 1000))
+  assert.deepEqual(await Promise.race([checkYatteeServer(server, null, { fetch: silent, timeout: 10 }), pending]), { ok: false, error: 'unreachable' })
   assert.deepEqual(await checkYatteeServer(server, null, respond(200, { name: 'yattee-server' })), { ok: false, error: 'credentials-required' })
   assert.deepEqual(await checkYatteeServer(server, 'Basic x', respond(401, { detail: 'Invalid credentials' })), { ok: false, error: 'invalid-credentials', status: 401 })
   assert.deepEqual(await checkYatteeServer(server, 'Basic x', respond(429, { detail: 'Too many' })), { ok: false, error: 'rate-limited', status: 429 })

@@ -335,15 +335,18 @@ export function createYatteeResponseError(response, body) {
  * @param {typeof fetch} [options.fetch] for the API requests
  * @param {typeof fetch | null} [options.mediaFetch] checks that the player may load the server's streams
  * @param {boolean} [options.requireHttps] whether the player needs HTTPS, see {@link isYatteeServerPlayableOnAndroid}
+ * @param {number} [options.timeout] milliseconds to wait for each response
  * @returns {Promise<{ ok: true, version: string | null } | { ok: false, error: YatteeConnectionError, status?: number }>}
  */
-export async function checkYatteeServer(serverUrl, authorization, { fetch: fetchFunction = fetch, mediaFetch = null, requireHttps = false } = {}) {
+export async function checkYatteeServer(serverUrl, authorization, { fetch: fetchFunction = fetch, mediaFetch = null, requireHttps = false, timeout = 15_000 } = {}) {
   if (serverUrl === '') return { ok: false, error: 'invalid-url' }
 
   let response
   try {
+    // A server that drops packets would otherwise keep the test running until the system gives up
     response = await fetchFunction(`${serverUrl}/info`, {
       cache: 'no-store',
+      signal: AbortSignal.timeout(timeout),
       ...(authorization ? { headers: { Authorization: authorization } } : {}),
     })
   } catch {
@@ -373,7 +376,7 @@ export async function checkYatteeServer(serverUrl, authorization, { fetch: fetch
   // The player's requests need CORS headers, unlike the API requests on mobile
   if (mediaFetch) {
     try {
-      await mediaFetch(`${serverUrl}/health`, { cache: 'no-store' })
+      await mediaFetch(`${serverUrl}/health`, { cache: 'no-store', signal: AbortSignal.timeout(timeout) })
     } catch {
       return { ok: false, error: 'cors' }
     }
