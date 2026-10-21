@@ -695,7 +695,18 @@ function enableLiveChat() {
 }
 
 async function getLiveChatLocal() {
-  const videoInfo = await getLocalVideoInfo(props.videoId)
+  let videoInfo
+  try {
+    videoInfo = await getLocalVideoInfo(props.videoId)
+  } catch (error) {
+    if (!isUnmounted) {
+      console.error(error)
+      errorMessage.value = `[${error.name}] ${error.message}`
+      hasError.value = true
+      isLoading.value = false
+    }
+    return
+  }
 
   // The component tears down while this request is pending when the video
   // changes or the chat closes; starting a chat now would poll forever.

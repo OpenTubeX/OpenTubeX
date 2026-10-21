@@ -7,8 +7,9 @@ import { EventEmitter } from 'node:events'
 import { createCastMediaServer, resolveCastMediaAddresses } from '../../src/main/castMediaServer.js'
 import { applyTwitchPlaylistOrigin } from '../../src/twitchPlaylistOrigin.js'
 import { isInvidiousInstanceUrl } from '../../src/main/invidiousAuthorization.js'
+import { normalizeYatteeServerUrl } from '../../src/renderer/helpers/api/yattee.js'
 
-async function fixture(defaultInstance = 'http://192.168.1.2:3000') {
+async function fixture(defaultInstance = 'http://192.168.1.2:3000', settings = {}) {
   const main = await readFile(new URL('../../src/main/index.js', import.meta.url), 'utf8')
   const handlers = new Map()
   const listeners = new Map()
@@ -34,7 +35,8 @@ async function fixture(defaultInstance = 'http://192.168.1.2:3000') {
     navigator: { userActivation }, document: { body: { dataset: {} } }, webFrame: {},
     process: { argv: [], env: {}, versions: {} }, console,
     isOpenTubeXUrl: url => url === 'app://opentubex/index.html',
-    baseHandlers: { settings: { _findOne: async () => ({ value: defaultInstance }) } },
+    baseHandlers: { settings: { _findOne: async id => ({ value: id in settings ? settings[id] : defaultInstance }) } },
+    normalizeYatteeServerUrl,
     invidiousAuthorizations: new Map(),
     resolveCastMediaAddresses, applyTwitchPlaylistOrigin, isInvidiousInstanceUrl,
     BrowserWindow: { fromWebContents: () => ({}) },
@@ -93,6 +95,13 @@ for (const configuredInstance of ['http://192.168.1.10:3000/invidious', 'http://
     assert.equal(await f.resolve(1, 'https://192.168.1.10:3000/video'), null)
   })
 }
+
+test('Cast authorizes the Yattee server on a private network when it is the API backend', async () => {
+  const f = await fixture('http://192.168.1.2:3000', { backendPreference: 'yattee', yatteeServerUrl: 'http://192.168.1.10:8085/' })
+  await f.start(undefined)
+  assert.deepEqual(await f.resolve(1, 'http://192.168.1.10:8085/proxy/relay?url=x'), [{ address: '192.168.1.10', family: 4 }])
+  assert.equal(await f.resolve(1, 'http://192.168.1.2:3000/video'), null)
+})
 
 test('each cast session retains its own configured private origin after settings change', async () => {
   const f = await fixture('http://192.168.1.10:3000')

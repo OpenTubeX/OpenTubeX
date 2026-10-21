@@ -57,7 +57,8 @@ function convertYatteeToLocalFormat(format, byteRanges, lengthSeconds) {
   if (localFormat.has_audio) {
     const xtags = (upstreamUrl.searchParams.get('xtags') ?? '').split(':')
 
-    localFormat.language = xtags.find(tag => tag.startsWith('lang='))?.split('=')[1] || format.audioTrack?.id || null
+    // Track IDs such as "en.4" combine the language with YouTube's track type
+    localFormat.language = xtags.find(tag => tag.startsWith('lang='))?.split('=')[1] || format.audioTrack?.id?.split('.')[0] || null
     localFormat.is_drc = xtags.includes('drc=1') || String(format.itag).endsWith('-drc')
 
     const audioContent = xtags.find(tag => tag.startsWith('acont='))?.split('=')[1]

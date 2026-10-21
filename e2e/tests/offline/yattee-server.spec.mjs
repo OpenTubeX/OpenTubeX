@@ -217,6 +217,25 @@ test.describe('without proxying', () => {
   })
 })
 
+test('reports a failure to load live chat directly from YouTube', async ({ page }) => {
+  await page.route(`${SERVER}/api/v1/videos/**`, route => route.fulfill({
+    json: { ...videoResponse, liveNow: true, lengthSeconds: 0, hlsUrl: `${SERVER}/proxy/relay?url=live`, formatStreams: [], adaptiveFormats: [] }
+  }))
+  await page.route(`${SERVER}/proxy/relay?**`, route => route.fulfill({ status: 404 }))
+
+  await page.locator(sel.searchInput).fill(`https://www.youtube.com/watch?v=${VIDEO_ID}`)
+  await page.locator(sel.searchInput).press('Enter')
+  const chatError = page.locator(`${activeTab} .messageContainer.hasError`)
+  await expect(chatError).toContainText('Live Chat is currently not supported with the Yattee server.')
+
+  // An aborted request would wait for the connection to return, so YouTube answers with an error instead
+  await page.route(/^https:\/\/(www\.)?youtube\.com\//, route => route.fulfill({ status: 400, body: 'Bad Request' }))
+  await chatError.getByRole('button', { name: 'Enable Live Chat' }).click()
+  await expect(chatError).toBeVisible()
+  await expect(chatError).not.toContainText('not supported')
+  await expect(page.locator(`${activeTab} .liveChatSkeleton`)).toHaveCount(0)
+})
+
 test('shows channel handles and subscriber counts in search results', async ({ page }) => {
   await page.route(`${SERVER}/api/v1/search?**`, route => route.fulfill({
     json: new URL(route.request().url()).searchParams.get('page') !== '1'
@@ -287,6 +306,12 @@ test('opens channels by handle with only the tabs the server provides', async ({
   const tabs = page.locator(`${activeTab} .channelDetails [role="tab"]`)
   await expect(tabs).toHaveText(['Videos', 'Shorts', 'Live', 'Playlists', 'About'])
   await expect(page.locator(`${activeTab} .ft-list-video`).first()).toContainText('Latest upload')
+
+  // Keyboard navigation reaches the About tab, which needs no request of its own
+  await tabs.filter({ hasText: 'Playlists' }).click()
+  await tabs.filter({ hasText: 'Playlists' }).press('ArrowRight')
+  await expect(tabs.filter({ hasText: 'About' })).toHaveAttribute('aria-selected', 'true')
+  await expect(page).toHaveURL(/\/channel\/UC-test-channel-id\/about$/)
   expect(channelRequests[0]).toBe('/api/v1/channels/@TestChannel')
   expect(channelRequests).not.toContain('/api/v1/channels/UC-test-channel-id/community')
 })

@@ -1955,7 +1955,7 @@ Video:
       unlisted: "Ikkje oppført"
   How this was made: Slik vart dette laga
   Save Queue to Playlist: "Lagre køen i ei speleliste"
-  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Direktechat er førebels ikkje støtta av Yattee-tenaren. Ei direkte tilkopling til YouTube er krevja.
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Direktechat er førebels ikkje støtta av Yattee-tenaren. Det krevst ei direkte tilkopling til YouTube.
 Playlist:
   Playlist Already Preloaded: "Alle videoane i spelelista er allereie førehandslasta"
   Playlist Preload Progress: "Førehandslastar videoar: {completed} av {requested}"

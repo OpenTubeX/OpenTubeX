@@ -4,7 +4,7 @@ import { calculatePublishedDate, escapeHTML } from '../feed-metadata.js'
 // Invidious API. These helpers adapt the parts where its responses differ.
 
 /** The channel tabs yattee-server implements, using OpenTubeX's tab names. */
-export const YATTEE_CHANNEL_TABS = ['videos', 'shorts', 'live', 'playlists']
+export const YATTEE_CHANNEL_TABS = ['videos', 'shorts', 'live', 'playlists', 'about']
 
 // The server builds absolute URLs for these routes from the request's Host
 // header, which is wrong when a reverse proxy doesn't forward it.

@@ -1109,7 +1109,8 @@ async function loadCachedPlaylistInformation(cachedPlaylist) {
   channelName.value = cachedPlaylist.channelName
   channelId.value = cachedPlaylist.channelId
 
-  hasUnloadedPlaylistVideos.value = process.env.SUPPORTS_LOCAL_API && !usesInvidiousApi(backendPreference.value) && cachedPlaylist.continuationData !== null
+  // Only the local API caches continuations, including when it was the fallback
+  hasUnloadedPlaylistVideos.value = process.env.SUPPORTS_LOCAL_API && cachedPlaylist.continuationData !== null
   isFetchingPlaylistContinuation.value = hasUnloadedPlaylistVideos.value
 
   // Playback must not wait for later pages when the next video is already cached.
