@@ -1299,6 +1299,8 @@ test.describe('tab bar', () => {
       const dragToEdge = async (tab, toEnd) => {
         const box = await tab.boundingBox()
         const bounds = await container.boundingBox()
+        expect(box).not.toBeNull()
+        expect(bounds).not.toBeNull()
         const edge = vertical
           ? (toEnd ? bounds.y + bounds.height - 4 : bounds.y + 4)
           : (toEnd ? bounds.x + bounds.width - 4 : bounds.x + 4)

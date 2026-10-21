@@ -624,6 +624,7 @@ function startDragAutoScroll() {
     if (vertical.value) {
       container.scrollTop += step
     } else {
+      // Only the horizontal layout animates wheel scrolling toward a target.
       cancelScrollAnimation()
       container.scrollLeft += step
     }
