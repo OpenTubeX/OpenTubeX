@@ -1088,6 +1088,8 @@ test('failed external media keeps its site title after unloading', async ({ app,
   await page.locator(sel.searchInput).press('Enter')
   await expect(page.locator(`${activeTab} .externalMediaError`)).toBeVisible()
   await page.locator(sel.newTabButton).click()
+  // Unload stays disabled for the only tab, so wait until the new tab is registered.
+  await expect(page.locator(sel.tabs)).toHaveCount(2)
   const tab = page.locator(sel.tabs).first()
   await tab.click({ button: 'right' })
   await page.getByRole('menuitem', { name: 'Unload Tab', exact: true }).click()
