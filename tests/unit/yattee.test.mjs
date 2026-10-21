@@ -7,6 +7,7 @@ import {
   YATTEE_CHANNEL_TABS,
   checkYatteeServer,
   createYatteeAuthorization,
+  fillYatteeShortDates,
   fillYatteeVideoAuthors,
   getYatteeStoryboard,
   getYatteeStreamExpiry,
@@ -306,4 +307,25 @@ test('channel tab videos get the channel name from the channel page or the subsc
 
   await invidiousGetChannelInfo('@visited')
   assert.equal((await getInvidiousChannelShorts('UCvisited')).videos[0].author, 'Visited channel')
+})
+
+test('Shorts dates come from earlier refreshes and lookups of new Shorts only', async () => {
+  const lookups = []
+  const getVideo = async videoId => { lookups.push(videoId); return { published: 1_700_000_000 } }
+  const shorts = [{ videoId: 'new' }, { videoId: 'known' }, { videoId: 'undated' }]
+
+  // Without an earlier refresh, every Short would need a lookup that makes the server extract the video
+  assert.deepEqual(await fillYatteeShortDates(shorts, undefined, getVideo), shorts)
+  assert.deepEqual(lookups, [])
+
+  const cached = [{ videoId: 'known', published: 1_600_000_000_000 }, { videoId: 'undated' }]
+  assert.deepEqual(await fillYatteeShortDates(shorts, cached, getVideo), [
+    { videoId: 'new', published: 1_700_000_000_000 },
+    { videoId: 'known', published: 1_600_000_000_000 },
+    { videoId: 'undated' }
+  ])
+  assert.deepEqual(lookups, ['new'])
+
+  const failing = async () => { throw new Error('offline') }
+  assert.deepEqual(await fillYatteeShortDates([{ videoId: 'new' }], cached, failing), [{ videoId: 'new' }])
 })

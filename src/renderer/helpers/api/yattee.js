@@ -1,3 +1,4 @@
+import { mapConcurrently } from '../concurrent-map.js'
 import { calculatePublishedDate, escapeHTML } from '../feed-metadata.js'
 
 // yattee-server (https://github.com/yattee/yattee-server) mostly follows the
@@ -238,6 +239,33 @@ export function fillYatteeVideoAuthors(videos, channelId, channelName = '') {
     video.authorUrl ||= `/channel/${channelId}`
   }
   return videos
+}
+
+/**
+ * Yattee servers return Shorts without the publication dates that subscriptions need
+ * for their order and New badges. Dates come from earlier refreshes, and only Shorts
+ * that appeared since then are looked up, because each lookup makes the server
+ * extract the whole video.
+ * @param {{ videoId: string, published?: number }[]} shorts
+ * @param {{ videoId: string, published?: number }[] | undefined} cachedShorts the channel's Shorts from the previous refresh
+ * @param {(videoId: string) => Promise<{ published?: number }>} getVideo
+ */
+export async function fillYatteeShortDates(shorts, cachedShorts, getVideo) {
+  if (!cachedShorts) return shorts
+
+  const cachedDates = new Map(cachedShorts.map(short => [short.videoId, short.published]))
+  return await mapConcurrently(shorts, 3, async short => {
+    if (Number.isFinite(short.published)) return short
+
+    let published = cachedDates.get(short.videoId)
+    if (!cachedDates.has(short.videoId)) {
+      try {
+        // The server reports seconds
+        published = (await getVideo(short.videoId)).published * 1000
+      } catch { }
+    }
+    return Number.isFinite(published) ? { ...short, published } : short
+  })
 }
 
 /**

@@ -10,8 +10,10 @@ import {
   getInvidiousChannelShorts,
   getInvidiousChannelVideos,
   invidiousFetch,
-  invidiousGetCommunityPosts
+  invidiousGetCommunityPosts,
+  invidiousGetVideoInformation
 } from './api/invidious'
+import { fillYatteeShortDates } from './api/yattee'
 import {
   getLocalChannel,
   getLocalChannelCommunity,
@@ -1526,7 +1528,7 @@ function hasInvidiousRssFeeds() {
 async function getChannelShortsYattee(channel, t, errorChannels) {
   try {
     const result = await getInvidiousChannelShorts(channel.id)
-    return { videos: result.videos }
+    return { videos: await fillYatteeShortDates(result.videos, store.getters.getShortsCache[channel.id]?.videos, invidiousGetVideoInformation) }
   } catch (err) {
     handleSubscriptionFetchError(channel, err, getInvidiousApiErrorMessage('yattee'), {
       category: 'subscription Shorts',
