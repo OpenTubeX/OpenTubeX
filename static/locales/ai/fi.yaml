@@ -639,6 +639,10 @@ Settings:
         Destructive pressed: Poistava toiminto painettaessa
         Text and icons on destructive actions: Poistavien toimintojen teksti ja kuvakkeet
   Player Settings:
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "Laaturaja rajoitetuissa verkoissa"
+      No Limit: "Ei rajaa"
+      Tooltip: "Mobiilidatassa ja muissa rajoitetuissa verkoissa videot alkavat tällä tai heikommalla laadulla. Voit silti valita soittimessa paremman laadun."
     Show Music Mode Toggle: "Näytä musiikkitilan kytkin"
     Enable DLNA Casting: "Ota DLNA-suoratoisto käyttöön"
     Skip Unavailable Playlist Videos: "Ohita soittolistojen videot, joita ei voi toistaa"

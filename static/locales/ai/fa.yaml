@@ -657,6 +657,10 @@ Settings:
       Catppuccin Latte Mauve: Catppuccin Latte Mauve
       Catppuccin Latte Red: Catppuccin Latte Red
   Player Settings:
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "محدودیت کیفیت در شبکه‌های محدود"
+      No Limit: "بدون محدودیت"
+      Tooltip: "در داده تلفن همراه و دیگر شبکه‌های محدود، ویدیوها با این کیفیت یا پایین‌تر شروع می‌شوند. همچنان می‌توانید کیفیت بالاتری را در پخش‌کننده انتخاب کنید."
     Show Music Mode Toggle: "نمایش کلید حالت موسیقی"
     Enable DLNA Casting: "فعال کردن پخش DLNA"
     Skip Unavailable Playlist Videos: "رد کردن ویدیوهای ناموجود در فهرست‌های پخش"

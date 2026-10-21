@@ -827,6 +827,10 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "Največja kvaliteta v omrežjih z omejitvijo prenosa"
+      No Limit: "Brez omejitve"
+      Tooltip: "Pri mobilnih podatkih in drugih omrežjih z omejitvijo prenosa se videoposnetki začnejo v tej ali nižji kvaliteti. V predvajalniku lahko še vedno izberete višjo kvaliteto."
     Show Music Mode Toggle: "Prikaži stikalo za glasbeni način"
     Enable DLNA Casting: "Omogoči predvajanje prek DLNA"
     Skip Unavailable Playlist Videos: "Preskoči nedostopne videoposnetke na seznamih predvajanja"

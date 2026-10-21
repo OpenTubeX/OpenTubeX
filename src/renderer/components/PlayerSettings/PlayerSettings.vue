@@ -391,6 +391,17 @@
         @change="updateDefaultQuality"
       />
       <FtSelect
+        v-if="IS_CAPACITOR && !IS_IOS"
+        :placeholder="t('Settings.Player Settings.Quality Limit on Metered Networks.Quality Limit on Metered Networks')"
+        :value="meteredNetworkQualityLimit"
+        setting-key="meteredNetworkQualityLimit"
+        :select-names="meteredNetworkQualityLimitNames"
+        :select-values="METERED_NETWORK_QUALITY_LIMIT_VALUES"
+        :tooltip="t('Settings.Player Settings.Quality Limit on Metered Networks.Tooltip')"
+        :icon="['fas', 'signal']"
+        @change="updateMeteredNetworkQualityLimit"
+      />
+      <FtSelect
         :placeholder="t('Settings.Player Settings.Video Playback Rate Interval')"
         :value="videoPlaybackRateIntervalString"
         setting-key="videoPlaybackRateInterval"
@@ -1176,6 +1187,23 @@ const defaultQuality = computed(() => {
  */
 function updateDefaultQuality(value) {
   store.dispatch('updateDefaultQuality', value)
+}
+
+const METERED_NETWORK_QUALITY_LIMIT_VALUES = ['none', ...RESOLUTION_VALUES]
+
+const meteredNetworkQualityLimitNames = computed(() => [
+  t('Settings.Player Settings.Quality Limit on Metered Networks.No Limit'),
+  ...qualityNames.value.slice(0, RESOLUTION_VALUES.length)
+])
+
+/** @type {import('vue').ComputedRef<'none' | '2160' | '1440' | '1080' | '720' | '480' | '360' | '240' | '144'>} */
+const meteredNetworkQualityLimit = computed(() => store.getters.getMeteredNetworkQualityLimit)
+
+/**
+ * @param {'none' | '2160' | '1440' | '1080' | '720' | '480' | '360' | '240' | '144'} value
+ */
+function updateMeteredNetworkQualityLimit(value) {
+  store.dispatch('updateMeteredNetworkQualityLimit', value)
 }
 
 const PLAYBACK_RATE_INTERVAL_VALUES = ['0.1', '0.25', '0.5', '1']

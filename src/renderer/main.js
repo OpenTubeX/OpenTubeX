@@ -12,6 +12,8 @@ import { installViewTransitions } from './helpers/viewTransitions'
 import { initializeAppScrollbars, overlayScrollbarsDirective } from './helpers/overlayScrollbars'
 import { releaseAutomaticDownloadSchedule } from './helpers/automaticDownloads'
 import { initializeAndroidDynamicColors } from './helpers/dynamicColors'
+import { observeAndroidNetworkMetered } from './helpers/androidUi'
+import { networkMetered } from './helpers/player/meteredNetworkQuality'
 // import the styles
 import 'overlayscrollbars/styles/overlayscrollbars.css'
 // Only the positioning and stacking rules are used, FtToast supplies the design
@@ -43,6 +45,10 @@ app
 installViewTransitions(router)
 
 const tabNavigation = initializeTabNavigationService(router, store)
+
+observeAndroidNetworkMetered(metered => { networkMetered.value = metered }).catch(error => {
+  console.error('Failed to observe metered networks:', error)
+})
 
 // Resolve native colors before App applies its first theme and system-bar style.
 const dynamicColorsReady = process.env.IS_CAPACITOR

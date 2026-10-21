@@ -638,6 +638,10 @@ Settings:
         Destructive pressed: Pöördumatu toiming vajutamisel
         Text and icons on destructive actions: Pöördumatute toimingute tekst ja ikoonid
   Player Settings:
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "Kvaliteedi piirang mahupiiranguga võrkudes"
+      No Limit: "Piirang puudub"
+      Tooltip: "Mobiilse andmeside ja teiste mahupiiranguga võrkude korral algavad videod selles või madalamas kvaliteedis. Pleieris saab siiski valida kõrgema kvaliteedi."
     Show Music Mode Toggle: "Kuva muusikarežiimi lüliti"
     Enable DLNA Casting: "Luba DLNA edastamine"
     Skip Unavailable Playlist Videos: "Jäta esitusloendis kättesaamatud videod vahele"

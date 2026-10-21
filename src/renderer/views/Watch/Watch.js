@@ -130,6 +130,7 @@ import {
 } from '../../helpers/player/shorts'
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
+import { limitQualityOnMeteredNetwork } from '../../helpers/player/meteredNetworkQuality'
 import { useI18n } from 'vue-i18n'
 import { useTabAvatar, useTabContext, useTabTitle } from '../../tabs/TabContext'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
@@ -6987,20 +6988,20 @@ export default defineComponent({
         return
       }
 
+      let quality = this.getDefaultVideoQuality()
       const rememberPerChannel = this.$store.getters.getRememberVideoQualityPerChannel
       if (rememberPerChannel && this.channelId) {
         try {
           const channelQualities = JSON.parse(this.$store.getters.getChannelVideoQualities || '{}')
           if (channelQualities[this.channelId] !== undefined) {
-            this.currentVideoQuality = this.normalizeVideoQuality(channelQualities[this.channelId])
-            return
+            quality = this.normalizeVideoQuality(channelQualities[this.channelId])
           }
         } catch (e) {
           console.error('Failed to parse channel video qualities:', e)
         }
       }
 
-      this.currentVideoQuality = this.getDefaultVideoQuality()
+      this.currentVideoQuality = limitQualityOnMeteredNetwork(quality, this.$store.getters.getMeteredNetworkQualityLimit)
     },
 
     destroyPlayer: async function(player = this.$refs.player) {

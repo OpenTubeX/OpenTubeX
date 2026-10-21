@@ -639,6 +639,10 @@ Settings:
         Destructive pressed: Acción destrutiva premida
         Text and icons on destructive actions: Texto e iconas das accións destrutivas
   Player Settings:
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "Calidade máxima en redes con límite de datos"
+      No Limit: "Sen límite"
+      Tooltip: "Con datos móbiles e outras redes con límite de datos, os vídeos comezan con esta calidade ou unha inferior. Aínda podes escoller unha calidade máis alta no reprodutor."
     Show Music Mode Toggle: "Mostrar o interruptor do modo de música"
     Enable DLNA Casting: "Activar a transmisión DLNA"
     Skip Unavailable Playlist Videos: "Omitir vídeos non dispoñibles nas listas de reprodución"

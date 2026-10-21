@@ -638,6 +638,10 @@ Settings:
         Destructive pressed: Ekintza suntsitzailea sakatzean
         Text and icons on destructive actions: Ekintza suntsitzaileetako testua eta ikonoak
   Player Settings:
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "Kalitate-muga sare neurtuetan"
+      No Limit: "Mugarik ez"
+      Tooltip: "Datu mugikorretan eta beste sare neurtu batzuetan, bideoak kalitate honetan edo txikiagoan hasten dira. Erreproduzigailuan kalitate handiagoa aukera dezakezu oraindik ere."
     Show Music Mode Toggle: "Erakutsi musika-moduaren etengailua"
     Enable DLNA Casting: "Gaitu DLNA bidezko igorpena"
     Skip Unavailable Playlist Videos: "Saltatu erabilgarri ez dauden bideoak erreprodukzio-zerrendetan"

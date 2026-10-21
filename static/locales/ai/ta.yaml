@@ -642,6 +642,10 @@ Settings:
         Destructive pressed: அழிக்கும் செயல் அழுத்தப்பட்டது
         Text and icons on destructive actions: அழிக்கும் செயல்களிலுள்ள உரையும் படவுருக்களும்
   Player Settings:
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "அளவிடப்பட்ட நெட்வொர்க்குகளில் தர வரம்பு"
+      No Limit: "வரம்பு இல்லை"
+      Tooltip: "மொபைல் டேட்டா மற்றும் பிற அளவிடப்பட்ட நெட்வொர்க்குகளில், வீடியோக்கள் இந்தத் தரத்திலோ அதைவிடக் குறைவான தரத்திலோ தொடங்கும். பிளேயரில் இன்னும் அதிகத் தரத்தைத் தேர்வுசெய்யலாம்."
     Show Music Mode Toggle: "இசைப் பயன்முறை மாற்றியைக் காட்டு"
     Enable DLNA Casting: "DLNA ஒளிபரப்பை இயக்கு"
     Skip Unavailable Playlist Videos: "பிளேலிஸ்ட்களில் கிடைக்காத காணொளிகளைத் தவிர்"

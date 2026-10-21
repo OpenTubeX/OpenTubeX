@@ -720,6 +720,10 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "Kvalitetsgrense på nettverk med datamåling"
+      No Limit: "Inga grense"
+      Tooltip: "På mobildata og andre nettverk med datamåling startar videoar i denne kvaliteten eller lågare. Du kan framleis velje høgare kvalitet i avspelaren."
     Show Music Mode Toggle: "Vis brytar for musikkmodus"
     Enable DLNA Casting: "Aktiver DLNA-kasting"
     Skip Unavailable Playlist Videos: "Hopp over utilgjengelege videoar i spelelister"

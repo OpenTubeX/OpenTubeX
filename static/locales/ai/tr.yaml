@@ -637,6 +637,10 @@ Settings:
         Destructive pressed: Basılı yıkıcı işlem
         Text and icons on destructive actions: Yıkıcı işlemlerdeki metin ve simgeler
   Player Settings:
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "Sınırlı Ağlarda Kalite Sınırı"
+      No Limit: "Sınır Yok"
+      Tooltip: "Mobil veride ve diğer sınırlı ağlarda videolar bu kalitede veya daha düşük kalitede başlar. Oynatıcıda yine de daha yüksek bir kalite seçebilirsiniz."
     Show Music Mode Toggle: "Müzik modu düğmesini göster"
     Enable DLNA Casting: "DLNA yayınını etkinleştir"
     Skip Unavailable Playlist Videos: "Oynatma listelerindeki kullanılamayan videoları atla"
