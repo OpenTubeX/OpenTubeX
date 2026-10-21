@@ -8163,6 +8163,12 @@ export default defineComponent({
         const activeTextTrack = player.getTextTracks().find(textTrack => textTrack.active)
 
         if (isUserAction) {
+          // For videos played from a URL, Shaka applies the preferred captions only after the first frame
+          // has loaded, if no captions are on by then. Drop the preference so it can't undo the user's choice.
+          if (player.getConfiguration().preferredText.length > 0) {
+            player.configure('preferredText', [])
+          }
+
           emit('subtitles-state-user-set', track !== null)
         }
 

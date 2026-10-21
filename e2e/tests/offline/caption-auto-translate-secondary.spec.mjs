@@ -107,6 +107,38 @@ test.describe('remembered auto-translation into the video language', () => {
   })
 })
 
+test.describe('captions turned off right after the player enables them', () => {
+  test.use({ seed: { settings: SEED } })
+
+  test('stay off when Shaka applies its caption preference afterwards', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page, CAPTIONS)
+    // The mocked video plays from a URL, so Shaka applies the preferred captions itself half a second after the
+    // first frame if no captions are on by then. Turn them off with the shortcut as soon as the player enables them.
+    await page.evaluate(() => {
+      new MutationObserver((_, observer) => {
+        const video = document.querySelector('.tabContent[aria-hidden="false"] video')
+        if (!video) return
+        observer.disconnect()
+        const turnOff = () => {
+          if (!video.ui?.getControls()?.getPlayer()?.getTextTracks().some(track => track.active)) return
+          video.textTracks.removeEventListener('change', turnOff)
+          window.captionsTurnedOffAt = video.currentTime
+          document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'c', code: 'KeyC', bubbles: true, cancelable: true }))
+        }
+        video.textTracks.addEventListener('change', turnOff)
+      }).observe(document.body, { childList: true, subtree: true })
+    })
+    const video = await openMockedVideo(page)
+    const turnedOffAt = await page.evaluate(() => window.captionsTurnedOffAt)
+    expect(turnedOffAt).toEqual(expect.any(Number))
+    await expect.poll(() => activeTextTrack(video)).toBe(null)
+
+    // Playing on for longer than Shaka waits
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(turnedOffAt + 1.5)
+    expect(await activeTextTrack(video)).toBe(null)
+  })
+})
+
 test.describe('secondary captions', () => {
   test.use({ seed: { settings: { ...SEED, preferredCaptionLocale: 'en' } } })
 
