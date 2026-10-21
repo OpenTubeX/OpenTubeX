@@ -676,10 +676,12 @@ watch(route, () => {
   searchContinuationData.value = null
   communityContinuationData.value = null
   showSearchBar.value = true
-  showVideoSortBy.value = true
-  showShortSortBy.value = true
-  showLiveSortBy.value = true
-  showPlaylistSortBy.value = true
+  // Yattee servers ignore the sort order of channel tabs
+  const sortable = backendPreference.value !== 'yattee'
+  showVideoSortBy.value = sortable
+  showShortSortBy.value = sortable
+  showLiveSortBy.value = sortable
+  showPlaylistSortBy.value = sortable
 
   currentTab.value = currentOrFirstTab(route.params.currentTab)
 

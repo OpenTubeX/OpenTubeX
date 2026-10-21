@@ -114,6 +114,7 @@ function fulfillRange(route, body) {
 }
 
 const SETTINGS = {
+  currentLocale: 'en-US',
   backendPreference: 'yattee',
   yatteeServerUrl: `${SERVER}/`,
   yatteeUsername: 'alex',
@@ -260,6 +261,14 @@ test('shows channel handles and subscriber counts in search results', async ({ p
   await expect(channel.locator('.subscriberCount')).toHaveText('16,900,000 subscribers')
 })
 
+test('only offers the search filters that the server supports', async ({ page }) => {
+  await page.locator('.navFilterButton').click()
+  const prompt = page.locator('.searchFiltersCard')
+  await expect(prompt.getByRole('radio', { name: 'Any Time', exact: true })).toBeVisible()
+  await expect(prompt.getByText('Features', { exact: true })).toHaveCount(0)
+  await expect(prompt.getByText('Subtitles', { exact: true })).toHaveCount(0)
+})
+
 test('opens channels by handle with only the tabs the server provides', async ({ page }) => {
   const channel = {
     authorId: 'UC-test-channel-id',
@@ -292,6 +301,20 @@ test('opens channels by handle with only the tabs the server provides', async ({
             videoThumbnails: [],
             liveNow: false,
             isUpcoming: false
+          }, {
+            type: 'video',
+            videoId: 'bbbbbbbbbbb',
+            title: 'Older upload',
+            author: '',
+            authorId: '',
+            authorUrl: '',
+            lengthSeconds: 60,
+            published: 1700000000,
+            publishedText: '1 day ago',
+            viewCount: 10,
+            videoThumbnails: [],
+            liveNow: false,
+            isUpcoming: false
           }],
           continuation: null
         }
@@ -306,6 +329,8 @@ test('opens channels by handle with only the tabs the server provides', async ({
   const tabs = page.locator(`${activeTab} .channelDetails [role="tab"]`)
   await expect(tabs).toHaveText(['Videos', 'Shorts', 'Live', 'Playlists', 'About'])
   await expect(page.locator(`${activeTab} .ft-list-video`).first()).toContainText('Latest upload')
+  // The server ignores the sort order
+  await expect(page.locator(`${activeTab} .channelContent .select`)).toHaveCount(0)
 
   // Keyboard navigation reaches the About tab, which needs no request of its own
   await tabs.filter({ hasText: 'Playlists' }).click()
