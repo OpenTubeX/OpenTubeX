@@ -145,6 +145,9 @@ test('Shorts resist dragging past feed boundaries and respect reduced motion', a
   await touch('touchEnd')
   await expect.poll(async () => (await player.boundingBox()).y).toBeCloseTo(bounds.y, 0)
   await expect(page).toHaveURL(new RegExp(`/watch/${previous}`))
+  // The player reaches its resting position on the settle animation's last
+  // frame, before the swipe stops settling and accepts a new touch.
+  await expect.poll(() => watch.evaluate(component => component.proxy.shortsSwipeSettling)).toBe(false)
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await touch('touchStart')
   await touch('touchMove', 0, -120)
