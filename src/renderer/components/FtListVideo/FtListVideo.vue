@@ -475,6 +475,7 @@ import { PHONE_LAYOUT_QUERY, usePhoneLayout } from '../../composables/usePhoneLa
 import FtRetryImage from '../FtRetryImage.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import { ytDlp } from '../../helpers/ytDlp'
+import { refreshDownloadRecords } from '../../helpers/downloadPlayback'
 import { queueSwipeAction, findSwipeDownload, downloadSwipeAction } from '../../helpers/videoSwipeActions'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
@@ -1446,6 +1447,7 @@ async function removeSwipeDownload(option) {
   if (await ytDlp.ytDlpRemoveDownload(download.id)) {
     store.commit('removeYtDlpDownload', download.id)
   } else {
+    await refreshDownloadRecords(ytDlp, store)
     showToast({ message: t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] })
   }
 }
