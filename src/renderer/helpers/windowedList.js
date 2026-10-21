@@ -18,11 +18,22 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
     // Rebuilding every distant card in one frame stalls large desktop feeds.
     let count = 0
     for (const item of widthRemeasures) {
+      // A hidden row measures nothing and would keep its stale height, so it
+      // waits until the resize observer reports its box again.
+      if (item.hidden) continue
+      if (count === 2) {
+        remeasureFrame = frame(remeasureWidths)
+        return
+      }
       widthRemeasures.delete(item)
-      if (items.has(item.element) && !item.near && !item.isMounted()) item.refresh()
-      if (++count === 2) break
+      if (items.has(item.element) && !item.near && !item.isMounted()) {
+        // The old height is stale. If the list hides before the row is laid
+        // out, the row stays mounted until it can be measured.
+        item.height = 0
+        item.refresh()
+      }
+      count++
     }
-    if (widthRemeasures.size) remeasureFrame = frame(remeasureWidths)
   }
   function scheduleRelease(item) {
     releases.add(item)
@@ -76,7 +87,11 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
   const resize = new Resize(entries => {
     for (const entry of entries) {
       const item = items.get(entry.target)
-      if (!item || entry.contentRect.width <= 0) continue
+      if (!item) continue
+      const wasHidden = item.hidden
+      item.hidden = entry.contentRect.width <= 0
+      if (item.hidden) continue
+      if (wasHidden && widthRemeasures.has(item)) scheduleRemeasure(item)
       const width = entry.borderBoxSize?.[0]?.inlineSize ?? entry.contentRect.width
       const height = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height
       const resized = item.width !== null && Math.abs(width - item.width) > 0.01
@@ -96,6 +111,7 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
       const item = {
         element,
         near: true,
+        hidden: false,
         width: null,
         height: 0,
         isMounted,

@@ -86,6 +86,59 @@ test('remeasures distant cards in bounded batches after their width changes', ()
   windowing.disconnect()
 })
 
+test('keeps remeasuring shells when the list hides during a remeasure', () => {
+  let intersect, resize
+  const frames = []
+  const windowing = createListWindow({
+    IntersectionObserver: class { constructor(fn) { intersect = fn } observe() {} unobserve() {} disconnect() {} },
+    ResizeObserver: class { constructor(fn) { resize = fn } observe() {} unobserve() {} disconnect() {} },
+    requestAnimationFrame(fn) { frames.push(fn); return frames.length },
+    cancelAnimationFrame() {},
+  })
+  const runFrame = () => { for (const callback of frames.splice(0)) callback() }
+  const runFrames = () => { while (frames.length) runFrame() }
+
+  let rowHeight = 100
+  let hidden = false
+  const mounted = new Map()
+  const shellHeights = new Map()
+  const elements = Array.from({ length: 6 }, () => {
+    const element = { getBoundingClientRect: () => ({ height: hidden ? 0 : rowHeight }) }
+    mounted.set(element, true)
+    windowing.observe(element, {
+      mount() { mounted.set(element, true) },
+      unmount(height) { mounted.set(element, false); shellHeights.set(element, height) },
+      isMounted: () => mounted.get(element),
+      isProtected: () => false,
+    })
+    return element
+  })
+  // Hidden rows, such as a playlist behind v-show, report an empty box.
+  const resizeAll = width => resize(elements.map(target => ({
+    target, contentRect: hidden ? { width: 0, height: 0 } : { width, height: rowHeight },
+  })))
+  resizeAll(300)
+  intersect(elements.map(target => ({ target, isIntersecting: false })))
+  runFrames()
+  assert.deepEqual([...shellHeights.values()], [100, 100, 100, 100, 100, 100])
+
+  // A restyle queues every shell. The first batch remounts two of them, but
+  // the list hides before they are laid out and before the other batches run.
+  rowHeight = 60
+  resizeAll(200)
+  runFrame()
+  hidden = true
+  resizeAll(200)
+  runFrames()
+
+  // Showing the list at the same width must still rebuild the stale shells.
+  hidden = false
+  resizeAll(200)
+  runFrames()
+  assert.deepEqual([...shellHeights.values()], [60, 60, 60, 60, 60, 60])
+  windowing.disconnect()
+})
+
 test('disconnect cancels protected retries and future frame work', t => {
   t.mock.timers.enable({ apis: ['setTimeout'] })
   const f = fixture()
