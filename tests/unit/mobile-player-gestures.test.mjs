@@ -12,7 +12,7 @@ class ElementStub {
   closest(selectors) { return this.selector && selectors.includes(this.selector) ? this : null }
 }
 
-function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = true, seekSwipe = () => true, mobile = true, mini = false, dismissible = () => false, reducedMotion = true, shorts = false, height = 200.5, nativeReplay = false, minimize = false, fullscreen = () => false, controls, toggleFullscreen, width = 400, seekState = () => ({ time: 60, start: 0, end: 600 }) } = {}) {
+function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = true, seekSwipe = () => true, mobile = true, mini = false, dismissible = () => false, reducedMotion = true, shorts = false, height = 200.5, nativeReplay = false, minimize = false, fullscreen = () => false, controls, toggleFullscreen, width = 400, surfaceWidth = width, seekState = () => ({ time: 60, start: 0, end: 600 }) } = {}) {
   t.mock.method(globalThis, 'setTimeout', setTimeout)
   const previous = { document: globalThis.document, window: globalThis.window, Element: globalThis.Element, requestAnimationFrame: globalThis.requestAnimationFrame }
   const frames = []
@@ -35,7 +35,7 @@ function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = t
     setup() {
       gestures = useMobileFullscreenGestures({
         getContainer: () => container,
-        getControls: () => controls ?? ({ getControlsContainer: () => ({ hasAttribute: () => false }), anySettingsMenusAreOpen: () => false, getConfig: () => ({ tapSeekDistance: 0 }), showUI: () => calls.push('show') }),
+        getControls: () => controls ?? ({ getControlsContainer: () => ({ hasAttribute: () => false, getBoundingClientRect: () => ({ left: 10, width: surfaceWidth, height }) }), anySettingsMenusAreOpen: () => false, getConfig: () => ({ tapSeekDistance: 0 }), showUI: () => calls.push('show') }),
         getSeekState: seekState,
         seekToTime: time => calls.push(['seek', time]),
         isFullscreenActive: fullscreen,
@@ -120,6 +120,22 @@ test('left and right vertical swipes use their configured actions with fractiona
     g.handleMobilePlayerSurfaceClick(event(x))
     assert.equal(calls.includes('show'), false)
   }
+})
+
+test('side zones and seek distance follow the video beside an open fullscreen dock', t => {
+  // A 160px dock leaves the video at 10-250px inside the 10-410px player.
+  for (const [x, action] of [[50, 'volume'], [130, null], [226, 'brightness']]) {
+    const { gestures: g, event, calls } = fixture(t, { left: 'volume', right: 'brightness', fullscreenSwipe: false, surfaceWidth: 240 })
+    g.startMobileFullscreenGesture(event(x))
+    assert.equal(g.moveMobileFullscreenGesture(event(x, 49.75)), action !== null)
+    g.finishMobileFullscreenGesture(event(x, 49.75))
+    assert.deepEqual(calls, action ? [['begin', action], ['update', 0.5], 'finish'] : [])
+  }
+  const { gestures: g, event } = fixture(t, { fullscreen: () => true, surfaceWidth: 240 })
+  g.startMobileFullscreenGesture(event(130, 150))
+  g.moveMobileFullscreenGesture(event(190, 150))
+  assert.deepEqual(g.mobileSeekPreview.value, { time: 90, seconds: 30 })
+  g.cancelMobileFullscreenGesture()
 })
 
 test('a tap still shows controls and does not call native adjustments', t => {
@@ -266,6 +282,7 @@ test('fullscreen swipe controls auto-hide after the configured delay despite sup
       getAttribute: name => attributes.get(name) ?? null,
       setAttribute: (name, value) => attributes.set(name, value),
       hasAttribute: name => attributes.has(name),
+      getBoundingClientRect: () => ({ left: 10, width: 400, height: 200.5 }),
     },
     videoContainer_: { classList, dataset: {} },
     video_: { paused: false },
@@ -802,7 +819,7 @@ test('an active vertical side swipe cannot become a horizontal seek', t => {
 
 test('an open settings menu leaves horizontal swipes to the menu', t => {
   const controls = {
-    getControlsContainer: () => ({ hasAttribute: () => true }),
+    getControlsContainer: () => ({ hasAttribute: () => true, getBoundingClientRect: () => ({ left: 10, width: 400, height: 200.5 }) }),
     anySettingsMenusAreOpen: () => true,
   }
   const { gestures: g, event, calls } = fixture(t, { fullscreen: () => true, controls })

@@ -83,6 +83,19 @@ export function useMobileFullscreenGestures({
     return target instanceof Element && target.closest('.shaka-controls-button-panel, .shaka-play-button, .scrollMiniPlayPause, .scrollMiniPointerLayer, .mobileMiniBarReturn') !== null
   }
 
+  // An open fullscreen dock narrows Shaka's controls to the video beside it.
+  // The scroll mini player hides them, which leaves the player bounds.
+  function getSurfaceBounds() {
+    const bounds = getControls()?.getControlsContainer().getBoundingClientRect()
+    return bounds?.width > 0 ? bounds : getContainer()?.getBoundingClientRect()
+  }
+
+  /** @returns {-1 | 0 | 1} The side of the video surface, or 0 for its center. */
+  function getMobileTapDirection(clientX, bounds = getSurfaceBounds()) {
+    const relativeX = bounds?.width > 0 ? (clientX - bounds.left) / bounds.width : 0.5
+    return relativeX <= 0.35 ? -1 : relativeX >= 0.65 ? 1 : 0
+  }
+
   function startMobileFullscreenGesture(event) {
     if (mobileMiniPlayerDismissSettling.value) return
     if (event.pointerType === 'touch' && !event.isPrimary) {
@@ -131,9 +144,9 @@ export function useMobileFullscreenGestures({
     mobileControlSuppressClickUntil = 0
     mobileSurfaceSuppressTouchEndUntil = 0
 
-    const bounds = getContainer()?.getBoundingClientRect()
-    const relativeX = bounds?.width > 0 ? (event.clientX - bounds.left) / bounds.width : 0.5
-    const side = relativeX <= 0.35 ? 'left' : relativeX >= 0.65 ? 'right' : null
+    const bounds = getSurfaceBounds()
+    const tapDirection = getMobileTapDirection(event.clientX, bounds)
+    const side = tapDirection < 0 ? 'left' : tapDirection > 0 ? 'right' : null
     const restoring = isScrollMiniPlayerActive()
     const shorts = isShortsPlayer()
     const action = side && !restoring && !shorts ? getSwipeAction(side) : 'disabled'
@@ -148,7 +161,7 @@ export function useMobileFullscreenGestures({
       returnTarget: restoring && event.target instanceof Element && event.target.closest('.mobileMiniBarReturn:enabled') !== null,
       shorts,
       distance: 0,
-      tapDirection: relativeX <= 0.35 ? -1 : relativeX >= 0.65 ? 1 : 0,
+      tapDirection,
       controlsShownAtStart: getControls()?.getControlsContainer().hasAttribute('shown') === true,
       fullscreenSwipeEnabled: !shorts && isFullscreenSwipeEnabled(),
       action: ['brightness', 'volume', 'speed'].includes(action) ? action : 'disabled',
@@ -644,10 +657,7 @@ export function useMobileFullscreenGestures({
     }
     mobilePlayerSuppressClickUntil = 0
     const controlsContainer = getControls()?.getControlsContainer()
-    const bounds = getContainer()?.getBoundingClientRect()
-    const relativeX = bounds?.width > 0 ? (event.clientX - bounds.left) / bounds.width : 0.5
-    const direction = relativeX <= 0.35 ? -1 : relativeX >= 0.65 ? 1 : 0
-    queueMobilePlayerSurfaceTap(controlsContainer?.hasAttribute('shown') !== true, direction)
+    queueMobilePlayerSurfaceTap(controlsContainer?.hasAttribute('shown') !== true, getMobileTapDirection(event.clientX))
     return true
   }
 
@@ -682,6 +692,7 @@ export function useMobileFullscreenGestures({
     consumeMobileTitleClickSuppression,
     dismissMobileMiniPlayer,
     finishMobileFullscreenGesture,
+    getMobileTapDirection,
     handleMobilePlayerSurfaceClick,
     handleMobilePlayerTouchEnd,
     mobileFullscreenSwipeSettling,

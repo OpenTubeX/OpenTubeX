@@ -1798,6 +1798,61 @@ test('uses mobile surface taps for controls and keeps an on-video play button', 
   expect(mobileCenterButtonWidth).toBeLessThanOrEqual(64)
 })
 
+test('keeps mobile double-tap seek zones on the video beside the fullscreen queue', { tag: '@scale' }, async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await page.locator('.app').evaluate(element => {
+    const applyMobileClass = () => {
+      if (!element.classList.contains('capacitorTabs')) element.classList.add('capacitorTabs')
+    }
+    new MutationObserver(applyMobileClass).observe(element, { attributeFilter: ['class'] })
+    applyMobileClass()
+  })
+  const video = await openMockedVideo(page)
+  await page.evaluate(() => window.$store.commit('addVideoToWatchQueue', {
+    video: { videoId: 'queued00000', title: 'Queued video', author: 'Queue channel' }
+  }))
+  await video.evaluate(element => element.pause())
+  // A landscape phone, where the queue takes about 40% of the player.
+  await setWindowSize(app, page, { width: 900, height: 400 })
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  await page.locator('body').press('s')
+  await expect(player).toHaveClass(/fullWindow/)
+  const surface = player.locator('.shaka-controls-container')
+  const watch = await page.evaluateHandle(findWatchComponent)
+  await watch.evaluate(component => component.proxy.$refs.player.setFullscreenQueue(true))
+  await expect(player.locator('.fullscreenQueueOverlay.open')).toBeVisible()
+  await expect.poll(() => player.evaluate(element => (
+    element.querySelector('.shaka-controls-container').getBoundingClientRect().right -
+    element.querySelector('.fullscreenQueueOverlay').getBoundingClientRect().left
+  ))).toBeLessThanOrEqual(0)
+
+  const cdp = await page.context().newCDPSession(page)
+  const touch = (type, point) => cdp.send('Input.dispatchTouchEvent', {
+    type, touchPoints: point ? [point] : []
+  })
+  try {
+    // Zones split the visible video, not the player that also holds the queue.
+    for (const [relativeX, direction] of [[0.9, 1], [0.1, -1], [0.5, 0]]) {
+      await video.evaluate(element => { element.currentTime = 10 })
+      const bounds = await surface.boundingBox()
+      const point = { x: bounds.x + bounds.width * relativeX, y: bounds.y + bounds.height * 0.3 }
+      expect(await page.evaluate(({ x, y }) => (
+        document.elementFromPoint(x, y)?.closest('.shaka-controls-container') !== null
+      ), point)).toBe(true)
+      for (let tap = 0; tap < 2; tap++) {
+        await touch('touchStart', point)
+        await touch('touchEnd')
+      }
+      await expect.poll(() => video.evaluate(element => Math.sign(element.currentTime - 10))).toBe(direction)
+      // Separate the next location's taps from this double tap.
+      await page.waitForTimeout(400)
+    }
+  } finally {
+    await touch('touchCancel').catch(() => {})
+    await cdp.detach()
+  }
+})
+
 test('caps the optional desktop center play button on wide players', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await page.evaluate(async () => {
