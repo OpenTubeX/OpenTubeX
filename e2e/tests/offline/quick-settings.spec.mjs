@@ -1134,6 +1134,18 @@ test.describe('expanded quick settings catalog', () => {
     await expect(reopened.locator('[data-setting-id="secColor"]').getByRole('combobox')).toContainText('Green')
   })
 
+  test('hides the parental control while a settings password locks Settings', async ({ page }) => {
+    await page.evaluate(() => window.$store.dispatch('updateQuickSettings', ['showFamilyFriendlyOnly', 'hideVideoViews']))
+    await page.locator('.profileTrigger').click()
+    const menu = page.getByRole('dialog', { name: 'Quick settings' })
+    await expect(menu.locator('[data-setting-id="showFamilyFriendlyOnly"]')).toBeVisible()
+    await page.evaluate(() => window.$store.dispatch('updateSettingsPassword', 'secret'))
+    await expect(menu.locator('[data-setting-id="showFamilyFriendlyOnly"]')).toHaveCount(0)
+    await expect(menu.locator('[data-setting-id="hideVideoViews"]')).toBeVisible()
+    await page.evaluate(() => window.$store.dispatch('updateSettingsPassword', ''))
+    await expect(menu.locator('[data-setting-id="showFamilyFriendlyOnly"]')).toBeVisible()
+  })
+
   test('hides the secondary color with the main color for fixed-palette themes', async ({ page }) => {
     await page.evaluate(() => window.$store.dispatch('updateQuickSettings', ['mainColor', 'secColor']))
     await page.locator('.profileTrigger').click()

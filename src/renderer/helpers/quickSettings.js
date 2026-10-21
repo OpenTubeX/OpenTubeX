@@ -151,7 +151,7 @@ export const BASIC_QUICK_SETTING_DEFINITIONS = Object.freeze([
   ['hideChapters', 'Settings.Distraction Free Settings.Hide Chapters', 'content', ['fas', 'bars-progress']],
   ['showDistractionFreeTitles', 'Settings.Distraction Free Settings.Display Titles Without Excessive Capitalisation', 'content', ['fas', 'font']],
   ['useAiSlopList', 'Settings.AiSList Settings.Hide AI Slop Channels', 'content', ['fas', 'users-slash'], { electronOnly: true, capacitorSupported: true }],
-  ['showFamilyFriendlyOnly', 'Settings.Parental Control Settings.Show Family Friendly Only', 'content', ['fas', 'shield-halved']],
+  ['showFamilyFriendlyOnly', 'Settings.Parental Control Settings.Show Family Friendly Only', 'content', ['fas', 'shield-halved'], { passwordProtected: true }],
   ['showThumbnailPreviews', 'Settings.General Settings.Show Thumbnail Previews', 'content', ['fas', 'photo-film']],
   ['thumbnailDataSaver', 'Settings.General Settings.Data Saver Thumbnails', 'content', ['fas', 'images']],
   ['enableCaptionTranslations', 'Settings.Player Settings.Caption Appearance.Enable Translations', 'language', ['fas', 'closed-captioning']],

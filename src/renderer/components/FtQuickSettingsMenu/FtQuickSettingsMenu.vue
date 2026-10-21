@@ -643,7 +643,9 @@ const orderedQuickSettingSections = computed(() => {
     .filter(setting => setting != null && (
       (!['mainColor', 'secColor'].includes(setting.id) || mainColorAvailable.value) &&
       (!['systemLightTheme', 'systemDarkTheme'].includes(setting.id) || baseTheme.value === 'system') &&
-      (setting.id !== 'region' || regionValues.value.length > 0)
+      (setting.id !== 'region' || regionValues.value.length > 0) &&
+      // Parental controls must not bypass the password that locks Settings.
+      (!setting.passwordProtected || store.getters.getSettingsPassword === '')
     ))
 
   return visibleSettings.reduce((sections, setting) => {
