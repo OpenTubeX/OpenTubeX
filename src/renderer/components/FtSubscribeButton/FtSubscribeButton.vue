@@ -374,12 +374,15 @@ function isInGroup(group) {
 }
 
 /** @param {import('../../helpers/subscription-groups').SubscriptionGroup} group */
-function toggleGroup(group) {
-  store.dispatch('setChannelInSubscriptionGroup', {
+async function toggleGroup(group) {
+  const saved = await store.dispatch('setChannelInSubscriptionGroup', {
     groupId: group.id,
     channelId: props.channelId,
     included: !isInGroup(group)
   })
+  if (!saved) {
+    showToast({ message: t('Subscription Groups.Save Failed'), icon: ['fas', 'circle-exclamation'] })
+  }
 }
 
 const isSubscriptionOptionsEnabled = computed(() => {

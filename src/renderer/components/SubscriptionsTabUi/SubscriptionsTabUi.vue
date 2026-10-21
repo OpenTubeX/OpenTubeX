@@ -8,12 +8,12 @@
       :youtube-style-shorts="youtubeStyleShorts"
     />
     <div
-      v-if="!displayIsLoading && errorChannels.length !== 0"
+      v-if="!displayIsLoading && visibleErrorChannels.length !== 0"
     >
       <h3> {{ $t("Subscriptions.Error Channels") }}</h3>
       <FtFlexBox>
         <FtChannelBubble
-          v-for="channel in errorChannels"
+          v-for="channel in visibleErrorChannels"
           :key="channel.id"
           :channel-name="channel.name"
           :channel-id="channel.id"
@@ -210,6 +210,13 @@ const activeVideoList = computed(() => {
 
 const activeProfileHasSubscriptions = computed(() => {
   return store.getters.getActiveProfile.subscriptions.length > 0
+})
+
+// Refreshes cover the whole profile, so only list the errors of the shown channels
+const visibleErrorChannels = computed(() => {
+  if (store.getters.getActiveSubscriptionGroup === null) return props.errorChannels
+  const channelIds = new Set(store.getters.getActiveGroupSubscriptions.map(channel => channel.id))
+  return props.errorChannels.filter(channel => channelIds.has(channel.id))
 })
 
 const activeGroupIsEmpty = computed(() => {

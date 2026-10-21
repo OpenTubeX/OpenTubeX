@@ -261,6 +261,18 @@ test.describe('editing subscription groups', () => {
     await expect(groups(page).getByRole('tab', { name: 'Music' })).toHaveAttribute('aria-selected', 'true')
   })
 
+  test('reports a group membership that cannot be saved', async ({ page }) => {
+    await page.evaluate(() => {
+      window.$store._actions.updateSubscriptionGroups = [() => Promise.resolve(false)]
+    })
+    await goTo(page, 'subscribedchannels')
+    await page.locator('.channel', { hasText: 'Beta Channel' }).locator('.profileDropdownToggle').click()
+    const music = page.locator('.profileDropdown').getByRole('group', { name: 'Groups' }).getByRole('checkbox', { name: 'Music' })
+    await music.click()
+    await expect(page.getByText('The group could not be saved.')).toBeVisible()
+    await expect(music).toHaveAttribute('aria-checked', 'false')
+  })
+
   test('switches groups with the arrow keys', async ({ page }) => {
     await goTo(page, 'subscriptions')
     const tabs = groups(page).getByRole('tab')
@@ -392,6 +404,59 @@ test.describe('custom channel order', () => {
     await expect(channelNames(page)).toHaveText(['Beta Channel', 'Alpha Channel', 'Gamma Channel'])
   })
 
+  /** Runs native drag events on the channel cards, named by part of their text */
+  async function nativeDrag(page, steps) {
+    await page.evaluate(async steps => {
+      const card = name => [...document.querySelectorAll('#subscribedChannelsList .channel')]
+        .find(element => element.textContent.includes(name))
+      const dataTransfer = new DataTransfer()
+      const fire = (element, type) => element.dispatchEvent(new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer }))
+      let source
+      for (const [type, name, wait] of steps) {
+        if (type === 'dragstart') source = card(name)
+        // A drag can end in a later call, which names its source again
+        fire(type === 'dragend' ? source ?? card(name) : card(name), type)
+        // The cards receive the dragged channel on the next render
+        if (type === 'dragstart') await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+        if (wait) await new Promise(resolve => setTimeout(resolve, wait))
+      }
+    }, steps)
+  }
+
+  test('moves onto the previous target again after returning to the dragged card', async ({ page }) => {
+    await goTo(page, 'subscribedchannels')
+    await expect(channelNames(page)).toHaveText(['Alpha Channel', 'Beta Channel', 'Gamma Channel'])
+
+    // Waits pass the move throttle, so only the target guard can skip a move
+    await nativeDrag(page, [
+      ['dragstart', 'Gamma'],
+      ['dragenter', 'Alpha', 150],
+      ['dragenter', 'Gamma', 150],
+      ['dragenter', 'Alpha'],
+      ['dragend']
+    ])
+
+    await expect(channelNames(page)).toHaveText(['Alpha Channel', 'Gamma Channel', 'Beta Channel'])
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getSubscribedChannelsCustomOrder))
+      .toEqual([ALPHA, GAMMA, BETA])
+  })
+
+  test('previews the last target skipped by the move throttle before the drop', async ({ page }) => {
+    await goTo(page, 'subscribedchannels')
+    await expect(channelNames(page)).toHaveText(['Alpha Channel', 'Beta Channel', 'Gamma Channel'])
+
+    await nativeDrag(page, [
+      ['dragstart', 'Alpha'],
+      ['dragenter', 'Beta'],
+      ['dragenter', 'Gamma', 300]
+    ])
+    await expect(channelNames(page)).toHaveText(['Beta Channel', 'Gamma Channel', 'Alpha Channel'])
+
+    await nativeDrag(page, [['dragend', 'Alpha']])
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getSubscribedChannelsCustomOrder))
+      .toEqual([BETA, GAMMA, ALPHA])
+  })
+
   test('keeps a drag move when the cursor enters the gliding target again', async ({ page }) => {
     await goTo(page, 'subscribedchannels')
     await expect(channelNames(page)).toHaveText(['Alpha Channel', 'Beta Channel', 'Gamma Channel'])
@@ -474,5 +539,31 @@ test.describe('subscription group touch targets', () => {
       expect(box.height).toBeGreaterThanOrEqual(47.75)
     }
     await session.detach()
+  })
+})
+
+test.describe('refresh errors in a group', () => {
+  test.use({
+    seed: seed({
+      backendPreference: 'invidious',
+      backendFallback: false,
+      defaultInvidiousInstance: 'https://feeds.example',
+      useRssFeeds: true,
+      subscriptionGroups: [{ id: 'music', name: 'Music', channelIds: [ALPHA, GAMMA] }]
+    })
+  })
+
+  test('only lists the errors of the channels in the selected group', async ({ page }) => {
+    await page.route('https://feeds.example/**', route => route.fulfill({ status: 404, body: 'Not found' }))
+    await goTo(page, 'subscriptions')
+    await page.getByRole('button', { name: /Refresh Videos/ }).click()
+
+    const errorChannels = page.getByRole('heading', { name: 'Channels with Errors', level: 3 })
+      .locator('xpath=..').locator('.channelName')
+    await expect(errorChannels).toHaveText(['Alpha Channel', 'Beta Channel', 'Gamma Channel'])
+    await groups(page).getByRole('tab', { name: 'Music' }).click()
+    await expect(errorChannels).toHaveText(['Alpha Channel', 'Gamma Channel'])
+    await groups(page).getByRole('tab', { name: 'All' }).click()
+    await expect(errorChannels).toHaveText(['Alpha Channel', 'Beta Channel', 'Gamma Channel'])
   })
 })

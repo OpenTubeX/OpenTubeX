@@ -333,7 +333,10 @@ function channelDragHandlers(channel) {
     },
     dragover: event => event.preventDefault(),
     dragenter: () => {
-      if (draggedChannel.value !== null) moveDraggedVideo(channelData, draggedChannel.value)
+      if (draggedChannel.value === null) return
+      // Coming back to the dragged card allows moving onto the previous target again
+      if (channel.id === draggedChannel.value.videoId) lastNativeDragTargetId = null
+      moveDraggedVideo(channelData, draggedChannel.value)
     },
     dragend: afterDrag
   }
@@ -400,8 +403,17 @@ let lastNativeDragTargetId = null
 /** @type {Parameters<typeof moveDraggedChannelTemporarily> | null} Latest native target skipped by the throttle */
 let pendingNativeDragMove = null
 
-// Native drags fire repeatedly while cards animate, so wait between moves.
-const moveDraggedChannelTemporarilyThrottled = throttle(moveDraggedChannelTemporarily, 100)
+// Native drags fire repeatedly while cards animate, so wait between moves. The
+// cursor can stop on a target skipped by the wait, so show that one afterwards.
+const moveDraggedChannelTemporarilyThrottled = throttle((target, source) => {
+  moveDraggedChannelTemporarily(target, source)
+  const drag = draggedChannel.value
+  setTimeout(() => {
+    if (draggedChannel.value === drag && pendingNativeDragMove !== null) {
+      moveDraggedChannelTemporarily(...pendingNativeDragMove)
+    }
+  }, 100)
+}, 100)
 
 /**
  * @param {import('../../helpers/dragAndDrop').VideoData} target
