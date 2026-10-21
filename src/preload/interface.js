@@ -76,6 +76,12 @@ ipcRenderer.on(IpcChannels.TABS_EXIT_FULLSCREEN, (_, targetTabId) => {
 })
 
 export default {
+  /**
+   * @param {string[]} sections
+   * @param {object} [settings] transferable settings, read from the profile when omitted
+   * @returns {Promise<Uint8Array>} the zip archive
+   */
+  createBackupArchive: (sections, settings) => ipcRenderer.invoke(IpcChannels.CREATE_BACKUP_ARCHIVE, sections, settings),
   chooseScheduledBackupFolder: () => ipcRenderer.invoke(IpcChannels.CHOOSE_SCHEDULED_BACKUP_FOLDER),
   watchQueue: {
     update: async request => {

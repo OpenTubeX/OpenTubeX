@@ -1880,18 +1880,21 @@ function runApp() {
   const backgroundSubscriptions = createSubscriptionBackgroundService(userDataPath, {
     onUploads: value => uploadNotifier.observe(value).catch(() => {})
   })
+  // Builds archives in a worker from read-only database snapshots, so neither
+  // this process nor the renderer stalls on large libraries.
+  const createBackupArchive = createBackupArchiveFactory(userDataPath,
+    path.join(__dirname, process.env.NODE_ENV === 'development' ? '../../dist/backupArchiveWorker.js' : 'backupArchiveWorker.js'), {
+      waitForDatastores,
+      settings: baseHandlers.settings,
+      watchStats: baseHandlers.watchStats,
+    })
   const scheduledBackups = createScheduledBackups({
     async readConfiguration() {
       const keys = ['scheduledBackupEnabled', 'scheduledBackupFolderPath', 'scheduledBackupInterval', 'scheduledBackupKeepCount', 'scheduledBackupStatus']
       const [enabled, directory, interval, keepCount, status] = await Promise.all(keys.map(async key => (await baseHandlers.settings._findOne(key))?.value))
       return { enabled, directory, interval: interval ?? 7, keepCount: keepCount ?? 5, status }
     },
-    createArchive: createBackupArchiveFactory(userDataPath,
-      path.join(__dirname, process.env.NODE_ENV === 'development' ? '../../dist/backupArchiveWorker.js' : 'backupArchiveWorker.js'), {
-        waitForDatastores,
-        settings: baseHandlers.settings,
-        watchStats: baseHandlers.watchStats,
-      }),
+    createArchive: () => createBackupArchive(),
     saveStatus: status => updateSettingFromMain('scheduledBackupStatus', status),
   })
   function checkScheduledBackup() {
@@ -4382,6 +4385,15 @@ function runApp() {
     }).catch((error) => {
       console.error('Unable to open profile directory', error)
     })
+  })
+
+  ipcMain.handle(IpcChannels.CREATE_BACKUP_ARCHIVE, async (event, sections, settings) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) return null
+    if (!Array.isArray(sections) || sections.some(section => typeof section !== 'string') ||
+      (settings !== undefined && (settings === null || typeof settings !== 'object' || Array.isArray(settings)))) {
+      throw new TypeError('Invalid backup sections or settings')
+    }
+    return createBackupArchive({ sections, settings })
   })
 
   ipcMain.handle(IpcChannels.CHOOSE_SCHEDULED_BACKUP_FOLDER, async (event) => {
