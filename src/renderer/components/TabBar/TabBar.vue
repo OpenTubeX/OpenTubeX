@@ -363,6 +363,10 @@ let selectionAnchorId = null
 
 // ===== Drag and drop state =====
 const DRAG_THRESHOLD_PX = 5
+const DRAG_AUTO_SCROLL_EDGE_PX = 48
+const DRAG_AUTO_SCROLL_PX_PER_MS = 0.6
+// Follow wall-clock time on slow frames, but limit the jump after a stall.
+const DRAG_AUTO_SCROLL_MAX_FRAME_MS = 100
 const SETTLE_DURATION_MS = 180
 const REORDER_STATE_UPDATE_TIMEOUT_MS = 300
 
@@ -390,6 +394,8 @@ const suppressTransitions = ref(false)
  * @property {number} pointerStart
  * @property {number} pointerCurrent
  * @property {number} scrollStart
+ * @property {number} viewportStart
+ * @property {number} viewportEnd
  * @property {Array<{id: string, start: number, size: number}>} rects
  * @property {number} gap
  * @property {number} groupStartIndex
@@ -407,6 +413,7 @@ const suppressTransitions = ref(false)
 /** @type {DragSession | null} */
 let dragSession = null
 let dragAnimationFrameId = null
+let dragAutoScrollFrameId = null
 let settleTimeoutId = null
 /** @type {{tabIds: string[], indexShift: number, isPinned: boolean} | null} */
 let pendingSettleReorder = null
@@ -512,6 +519,8 @@ function handleTabContainerPointerDown(event) {
     pointerStart: pointerAxisPosition(event),
     pointerCurrent: pointerAxisPosition(event),
     scrollStart: containerScroll,
+    viewportStart: vertical.value ? containerRect.top : containerRect.left,
+    viewportEnd: vertical.value ? containerRect.bottom : containerRect.right,
     rects,
     gap,
     groupStartIndex,
@@ -592,6 +601,69 @@ function handleDragPointerMove(event) {
   event.preventDefault()
 
   scheduleDragPositionUpdate()
+  startDragAutoScroll()
+}
+
+/**
+ * Scroll the tab list while the pointer is held near or past either end, so
+ * the dragged tabs can reach positions outside the visible range. The scroll
+ * handler then moves the dragged tabs along with the list.
+ */
+function startDragAutoScroll() {
+  if (dragAutoScrollFrameId != null || getDragAutoScrollSpeed() === 0) return
+
+  let previousTime = performance.now()
+  const scroll = (time) => {
+    const speed = getDragAutoScrollSpeed()
+    const container = dropZoneRef.value
+    if (speed === 0 || !container) {
+      dragAutoScrollFrameId = null
+      return
+    }
+
+    const elapsed = Math.max(0, Math.min(time - previousTime, DRAG_AUTO_SCROLL_MAX_FRAME_MS))
+    const step = speed * DRAG_AUTO_SCROLL_PX_PER_MS * elapsed
+    previousTime = time
+    if (vertical.value) {
+      container.scrollTop += step
+    } else {
+      // Only the horizontal layout animates wheel scrolling toward a target.
+      cancelScrollAnimation()
+      container.scrollLeft += step
+    }
+    dragAutoScrollFrameId = requestAnimationFrame(scroll)
+  }
+  dragAutoScrollFrameId = requestAnimationFrame(scroll)
+}
+
+/**
+ * @returns {number} -1 toward the start to 1 toward the end, growing as the
+ * pointer nears or passes that edge
+ */
+function getDragAutoScrollSpeed() {
+  const container = dropZoneRef.value
+  if (!dragSession?.started || !container) return 0
+
+  const {
+    pointerCurrent, viewportStart, viewportEnd,
+    rects, groupStartIndex, groupEndIndex
+  } = dragSession
+  const viewportSize = viewportEnd - viewportStart
+  const edge = Math.min(DRAG_AUTO_SCROLL_EDGE_PX, viewportSize / 4)
+  // Stop once the dragged tabs' pinned or unpinned group is fully visible at
+  // that end, since they cannot move past it.
+  const groupRects = [rects[groupStartIndex], rects[groupEndIndex]]
+  const groupStart = Math.min(...groupRects.map(rect => rect.start))
+  const groupEnd = Math.max(...groupRects.map(rect => rect.start + rect.size))
+  const scroll = containerScrollPosition(container)
+  if (pointerCurrent < viewportStart + edge) {
+    return groupStart < scroll
+      ? -Math.min(1, (viewportStart + edge - pointerCurrent) / edge)
+      : 0
+  }
+  return groupEnd > scroll + viewportSize
+    ? Math.max(0, Math.min(1, (pointerCurrent - viewportEnd + edge) / edge))
+    : 0
 }
 
 function scheduleDragPositionUpdate() {
@@ -842,6 +914,10 @@ function cleanupDragListeners() {
   if (dragAnimationFrameId != null) {
     cancelAnimationFrame(dragAnimationFrameId)
     dragAnimationFrameId = null
+  }
+  if (dragAutoScrollFrameId != null) {
+    cancelAnimationFrame(dragAutoScrollFrameId)
+    dragAutoScrollFrameId = null
   }
   window.removeEventListener('pointermove', handleDragPointerMove)
   window.removeEventListener('pointerup', handleDragPointerUp)
