@@ -371,7 +371,8 @@ test.describe('scroll mini player', { tag: '@scale' }, () => {
         }
       })
       if (resize) {
-        await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
+        // The morph can finish between toHaveAttribute's backoff polls, so check every frame.
+        await page.waitForFunction(() => document.querySelector('.ftVideoPlayer').hasAttribute('data-mobile-mini-morph'), null, { polling: 'raf' })
         await setWindowSize(app, page, { width: 640, height: 800 })
       }
       const { frames, landing } = await framesPromise
