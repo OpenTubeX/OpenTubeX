@@ -5,21 +5,21 @@ import { runInNewContext } from 'node:vm'
 import { getVideoCodecPreferences } from '../../src/renderer/helpers/player/videoCodecPreference.js'
 
 test('automatic selection leaves all supported codecs available for hardware selection', () => {
-  assert.deepEqual(getVideoCodecPreferences('auto', false), [])
-  assert.deepEqual(getVideoCodecPreferences('unknown', false), [])
+  assert.deepEqual(getVideoCodecPreferences('auto', false), [{ codec: '', hdrLevel: 'AUTO' }])
+  assert.deepEqual(getVideoCodecPreferences('unknown', false), [{ codec: '', hdrLevel: 'AUTO' }])
 })
 
 test('explicit preferences cover both VP9 identifiers', () => {
-  assert.deepEqual(getVideoCodecPreferences('vp9', false), ['vp09', 'vp9'])
-  assert.deepEqual(getVideoCodecPreferences('av1', false), ['av01'])
-  assert.deepEqual(getVideoCodecPreferences('h264', false), ['avc1'])
+  assert.deepEqual(getVideoCodecPreferences('vp9', false).map(entry => entry.codec), ['vp09', 'vp9'])
+  assert.deepEqual(getVideoCodecPreferences('av1', false).map(entry => entry.codec), ['av01'])
+  assert.deepEqual(getVideoCodecPreferences('h264', false).map(entry => entry.codec), ['avc1'])
 })
 
 test('VR keeps the VP9 demuxer workaround even when VP9 is preferred', () => {
-  assert.deepEqual(getVideoCodecPreferences('auto', true), ['av01', 'avc1'])
-  assert.deepEqual(getVideoCodecPreferences('vp9', true), ['av01', 'avc1'])
-  assert.deepEqual(getVideoCodecPreferences('h264', true), ['avc1', 'av01'])
-  assert.deepEqual(getVideoCodecPreferences('av1', true), ['av01', 'avc1'])
+  assert.deepEqual(getVideoCodecPreferences('auto', true).map(entry => entry.codec), ['av01', 'avc1'])
+  assert.deepEqual(getVideoCodecPreferences('vp9', true).map(entry => entry.codec), ['av01', 'avc1'])
+  assert.deepEqual(getVideoCodecPreferences('h264', true).map(entry => entry.codec), ['avc1', 'av01'])
+  assert.deepEqual(getVideoCodecPreferences('av1', true).map(entry => entry.codec), ['av01', 'avc1'])
 })
 
 // Exercise the installed player's filtering, including its fallback semantics.
@@ -32,10 +32,20 @@ const variants = ['av01.0.09M.08', 'vp9', 'avc1.64002a'].map(codecs => ({ video:
 
 test('Shaka selects the requested codec and falls back when it is absent', () => {
   const choose = (available, preference) => shaka.util.StreamUtils.choosePreferredCodecs(
-    available, getVideoCodecPreferences(preference, false), []
+    available, getVideoCodecPreferences(preference, false).map(entry => entry.codec), []
   )
   assert.deepEqual(choose(variants, 'vp9'), [variants[1]])
   assert.deepEqual(choose(variants, 'h264'), [variants[2]])
   assert.deepEqual(choose(variants.slice(1), 'av1'), variants.slice(1))
   assert.deepEqual(choose(variants, 'auto'), variants)
+})
+
+test('every codec preference retains automatic display HDR selection', () => {
+  for (const preference of ['auto', 'unknown', 'av1', 'vp9', 'h264']) {
+    for (const isVr of [false, true]) {
+      const entries = getVideoCodecPreferences(preference, isVr)
+      assert.ok(entries.length > 0, `${preference}, VR=${isVr}: automatic HDR entry missing`)
+      for (const entry of entries) assert.equal(entry.hdrLevel, 'AUTO')
+    }
+  }
 })

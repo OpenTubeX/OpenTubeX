@@ -4040,7 +4040,7 @@ export default defineComponent({
         // So use the AV1 and h264 codecs instead which it doesn't reject
         preferredVideo: getVideoCodecPreferences(
           store.getters.getPreferredVideoCodec, typeof props.vrProjection === 'string'
-        ).map(codec => ({ codec }))
+        )
       }
     }
 
