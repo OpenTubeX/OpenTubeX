@@ -105,7 +105,7 @@
               @play="playCompanionAudio"
               @playing="playCompanionAudio"
               @pause="handlePlaybackStopped"
-              @waiting="pauseCompanionAudio"
+              @waiting="handleBuffering"
               @ended="handlePlaybackStopped"
               @volume-updated="setCompanionVolume"
               @playback-rate-updated="setCompanionPlaybackRate"
@@ -752,6 +752,11 @@ function playCompanionAudio() {
 }
 
 function pauseCompanionAudio() { companionAudio.value?.pause() }
+function handleBuffering() {
+  pauseCompanionAudio()
+  // Buffering keeps the media unpaused, so restart the watch time baseline when playback resumes.
+  watchTimeTracker.flush()
+}
 function pauseCompanionVideo() { getCompanionVideo()?.pause() }
 function setCompanionVolume(volume) {
   if (companionAudio.value) companionAudio.value.volume = volume
