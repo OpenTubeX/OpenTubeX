@@ -1258,6 +1258,8 @@ Settings:
   Search Settings: Instellingen zoeken
   No Settings Found: Geen instellingen gevonden
   Experimental Settings:
+    Preferred Video Codec: Voorkeursvideocodec
+    Codec Description: Automatisch geeft de voorkeur aan hardwaredecodering. Wijzigingen gelden vanaf de volgende video. Een codecvoorkeur kan resoluties beperken; niet-beschikbare codecs worden vervangen. VP9 wordt vermeden voor VR vanwege een afspeelfout in de browser.
     Disable Hardware Acceleration: Hardwareversnelling uitschakelen
   Interface Customizer:
     Customize Interface: "Interface aanpassen"

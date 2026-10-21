@@ -1566,6 +1566,8 @@ Settings:
     Hide Search Bar: Oculta la barra de cerca
     Disable Channel Links: Desactiva els enllaços dels canals
   Experimental Settings:
+    Preferred Video Codec: Còdec de vídeo preferit
+    Codec Description: El mode automàtic prefereix la descodificació per maquinari. Els canvis s'apliquen al vídeo següent. La preferència de còdec pot limitar les resolucions; els còdecs no disponibles se substitueixen. S'evita VP9 en VR per un error de reproducció del navegador.
     Experimental Settings: Experimental
     Warning: Aquesta configuració és experimental i pot provocar fallades mentre estigui activada. Es recomana molt fer còpies de seguretat. Utilitzeu-la sota la vostra responsabilitat.
     Replace HTTP Cache: Substitueix la memòria cau HTTP

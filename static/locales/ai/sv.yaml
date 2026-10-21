@@ -1233,6 +1233,8 @@ Settings:
   Search Settings: Sök i inställningar
   No Settings Found: Inga inställningar hittades
   Experimental Settings:
+    Preferred Video Codec: Föredragen videokodek
+    Codec Description: Automatiskt föredrar hårdvaruavkodning. Ändringar gäller från nästa video. Ett kodekval kan begränsa upplösningar; otillgängliga kodekar ersätts. VP9 undviks för VR på grund av ett uppspelningsfel i webbläsaren.
     Disable Hardware Acceleration: Inaktivera maskinvaruacceleration
   Interface Customizer:
     Customize Interface: "Anpassa gränssnitt"

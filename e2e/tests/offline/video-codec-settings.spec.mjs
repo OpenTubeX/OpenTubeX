@@ -1,0 +1,20 @@
+import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
+
+test('codec preference defaults to auto and persists independently of quality', async ({ page, attachScreenshot }) => {
+  await goToSettingsSection(page, 'advanced')
+  const select = page.locator('.select').filter({ hasText: 'Preferred video codec' }).locator('select')
+  await expect(select).toHaveValue('auto')
+  await expect(select.locator('option')).toHaveText(['Auto', 'AV1', 'VP9', 'H.264'])
+  const quality = await page.evaluate(() => window.$store.getters.getDefaultQuality)
+  await select.selectOption('vp9')
+  await expect.poll(() => page.evaluate(() => window.$store.getters.getPreferredVideoCodec)).toBe('vp9')
+  await page.reload()
+  await goToSettingsSection(page, 'advanced')
+  await expect(select).toHaveValue('vp9')
+  expect(await page.evaluate(() => window.$store.getters.getDefaultQuality)).toBe(quality)
+  await expect(page.getByText('Auto prefers hardware decoding.', { exact: false })).toBeVisible()
+  await select.scrollIntoViewIfNeeded()
+  await expect(select).toBeInViewport()
+  await page.locator('.settingsWindow').evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
+  await attachScreenshot('experimental-codec-preference')
+})

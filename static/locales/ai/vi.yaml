@@ -1251,6 +1251,8 @@ Settings:
   Search Settings: Tìm trong cài đặt
   No Settings Found: Không tìm thấy cài đặt
   Experimental Settings:
+    Preferred Video Codec: Codec video ưu tiên
+    Codec Description: Chế độ tự động ưu tiên giải mã phần cứng. Thay đổi áp dụng cho video tiếp theo. Tùy chọn codec có thể giới hạn độ phân giải; codec không có sẵn sẽ được thay thế. VP9 được tránh dùng cho VR do lỗi phát của trình duyệt.
     Disable Hardware Acceleration: Tắt tăng tốc phần cứng
   Interface Customizer:
     Customize Interface: "Tùy chỉnh giao diện"

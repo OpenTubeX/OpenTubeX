@@ -1417,6 +1417,8 @@ Settings:
     Hide Search Bar: Ocultar barra de búsqueda
     Disable Channel Links: Deshabilitar Links de Canales
   Experimental Settings:
+    Preferred Video Codec: Códec de video preferido
+    Codec Description: El modo automático prefiere la decodificación por hardware. Los cambios se aplican al siguiente video. La preferencia de códec puede limitar las resoluciones; los códecs no disponibles se sustituyen. Se evita VP9 para VR por un error de reproducción del navegador.
     Experimental Settings: Experimental
     Warning: Estas configuraciones son experimentales, pueden causar fallos mientras están habilitadas. Es muy recomendable hacer copias de seguridad. ¡Úselo bajo su propio riesgo!
     Replace HTTP Cache: Reemplazar la caché HTTP

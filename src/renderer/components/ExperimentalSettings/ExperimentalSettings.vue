@@ -25,6 +25,21 @@
         @change="handleToggleDisableHardwareAcceleration"
       />
     </FtFlexBox>
+    <FtFlexBox>
+      <FtSelect
+        class="codec-select"
+        :placeholder="$t('Settings.Experimental Settings.Preferred Video Codec')"
+        :value="store.getters.getPreferredVideoCodec"
+        setting-key="preferredVideoCodec"
+        :select-names="[$t('Settings.Player Settings.Default Quality.Auto'), 'AV1', 'VP9', 'H.264']"
+        :select-values="['auto', 'av1', 'vp9', 'h264']"
+        :icon="['fas', 'file-video']"
+        @change="store.dispatch('updatePreferredVideoCodec', $event)"
+      />
+    </FtFlexBox>
+    <p class="codec-description">
+      {{ $t('Settings.Experimental Settings.Codec Description') }}
+    </p>
     <FtPrompt
       v-if="showRestartPrompt"
       autosize
@@ -43,6 +58,8 @@ import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
+import FtSelect from '../FtSelect/FtSelect.vue'
+import store from '../../store/index'
 
 const replaceHttpCacheLoading = ref(true)
 const replaceHttpCache = ref(false)

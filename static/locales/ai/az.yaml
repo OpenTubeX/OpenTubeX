@@ -259,6 +259,9 @@ History:
   Custom: Fərdi
   History Older Than Days Removed: 1 gündən köhnə baxış tarixçəsi silindi | {days} gündən köhnə baxış tarixçəsi silindi
 Settings:
+  Experimental Settings:
+    Preferred Video Codec: Üstünlük verilən video kodeki
+    Codec Description: Avtomatik rejim aparat dekodlaşdırmasına üstünlük verir. Dəyişikliklər növbəti videoya tətbiq olunur. Kodek seçimi təsvir ölçülərini məhdudlaşdıra bilər; mövcud olmayan kodeklər əvəzlənir. Brauzerdəki oxutma xətasına görə VR üçün VP9 istifadə edilmir.
   Tab Unloading:
     Automatically unload tabs: "Vərəqləri avtomatik yaddaşdan çıxar"
     Memory threshold: "Yaddaş həddi"

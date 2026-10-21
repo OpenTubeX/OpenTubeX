@@ -1478,6 +1478,8 @@ Settings:
   Search Settings: 설정 검색
   No Settings Found: 설정을 찾을 수 없습니다
   Experimental Settings:
+    Preferred Video Codec: 선호하는 동영상 코덱
+    Codec Description: 자동 모드는 하드웨어 디코딩을 우선합니다. 변경 사항은 다음 동영상에 적용됩니다. 코덱 선택에 따라 해상도가 제한될 수 있으며, 사용할 수 없는 코덱은 다른 코덱으로 대체됩니다. VR에서는 브라우저 재생 오류로 인해 VP9을 사용하지 않습니다.
     Disable Hardware Acceleration: 하드웨어 가속 비활성화
   Interface Customizer:
     Customize Interface: "인터페이스 사용자 지정"

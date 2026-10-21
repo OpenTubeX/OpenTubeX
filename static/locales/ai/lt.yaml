@@ -1499,6 +1499,8 @@ Settings:
     Set Password: Nustatyti slaptažodį
     Remove Password: Pašalinti slaptažodį
   Experimental Settings:
+    Preferred Video Codec: Pageidaujamas vaizdo kodekas
+    Codec Description: Automatinis režimas teikia pirmenybę aparatiniam dekodavimui. Pakeitimai taikomi kitam vaizdo įrašui. Kodeko pasirinkimas gali riboti raišką; nepasiekiami kodekai pakeičiami. VP9 nenaudojamas VR dėl naršyklės atkūrimo klaidos.
     Disable Hardware Acceleration: Išjungti aparatinį spartinimą
   Interface Customizer:
     Customize Interface: "Tinkinti sąsają"

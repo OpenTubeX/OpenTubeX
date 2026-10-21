@@ -1402,6 +1402,8 @@ Settings:
   Search Settings: Innstillingar for søk
   No Settings Found: Fann ingen innstillingar
   Experimental Settings:
+    Preferred Video Codec: Føretrekt videokodek
+    Codec Description: Automatisk føretrekkjer maskinvaredekoding. Endringar gjeld frå neste video. Eit kodekval kan avgrense oppløysingar; utilgjengelege kodekar blir erstatta. VP9 blir unngått for VR på grunn av ein avspelingsfeil i nettlesaren.
     Disable Hardware Acceleration: Slå av maskinvareakselerasjon
   Interface Customizer:
     Customize Interface: "Tilpass grensesnitt"

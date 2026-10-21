@@ -1536,6 +1536,8 @@ Settings:
     Hide Uploader on Watch page: Uploader auf der Videoseite ausblenden
     Disable Channel Links: Kanal-Links deaktivieren
   Experimental Settings:
+    Preferred Video Codec: Bevorzugter Videocodec
+    Codec Description: Auto bevorzugt Hardware-Decodierung. Änderungen gelten ab dem nächsten Video. Eine Codec-Präferenz kann Auflösungen einschränken; nicht verfügbare Codecs werden ersetzt. VP9 wird bei VR wegen eines Wiedergabefehlers im Browser vermieden.
     Experimental Settings: Experimentell
     Warning: Diese Einstellungen sind experimentell und können zu Abstürzen führen, wenn sie aktiviert sind. Es wird dringend empfohlen, Backups zu erstellen. Verwendung auf eigene Gefahr!
     Replace HTTP Cache: HTTP-Cache ersetzen

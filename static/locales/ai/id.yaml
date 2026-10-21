@@ -257,6 +257,9 @@ History:
   Custom: Khusus
   History Older Than Days Removed: Riwayat tontonan yang lebih lama dari {days} hari telah dihapus
 Settings:
+  Experimental Settings:
+    Preferred Video Codec: Codec video pilihan
+    Codec Description: Mode otomatis mengutamakan dekode perangkat keras. Perubahan berlaku untuk video berikutnya. Pilihan codec dapat membatasi resolusi; codec yang tidak tersedia diganti. VP9 dihindari untuk VR karena kesalahan pemutaran browser.
   Tab Unloading:
     Automatically unload tabs: "Bongkar tab secara otomatis"
     Memory threshold: "Ambang memori"
