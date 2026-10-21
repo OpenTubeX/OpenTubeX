@@ -57,10 +57,21 @@ test('reorders the control bar and moves removed buttons into the player menu', 
   await player.getByRole('button', { name: 'More settings' }).click()
   const menu = player.locator('.shaka-overflow-menu')
   await expect(menu).toBeVisible()
-  for (const id of initial.filter(id => !selected.includes(id))) {
-    await expect(menu.locator(`.${BUTTON_CLASSES[id]}`), id).toHaveCount(1)
+  const moved = initial.filter(id => !selected.includes(id))
+  expect(moved).toContain('theatreMode')
+  for (const id of moved) {
+    await expect(menu.locator(`.${BUTTON_CLASSES[id]}`), id).toBeVisible()
   }
   await expect(menu.locator('.shaka-fullscreen-button, .caption-toggle-button')).toHaveCount(0)
+  // Moved buttons give way to an open submenu like the other menu controls.
+  await menu.locator('.shaka-playbackrate-button').click()
+  for (const id of moved) {
+    await expect(menu.locator(`.${BUTTON_CLASSES[id]}`), id).toBeHidden()
+  }
+  await player.locator('.shaka-playback-rates .shaka-back-to-overflow-button').click()
+  for (const id of moved) {
+    await expect(menu.locator(`.${BUTTON_CLASSES[id]}`), id).toBeVisible()
+  }
   // A moved button keeps working from the menu.
   await menu.locator('.full-window-button').click()
   await expect(player).toHaveClass(/fullWindow/)
