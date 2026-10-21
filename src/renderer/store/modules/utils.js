@@ -86,6 +86,10 @@ function getOrCreateSearchSettings(state, tabId) {
   return state.searchSettingsByTabId[tabId]
 }
 
+// Each search keeps every loaded page of results, so a session only keeps the
+// most recently loaded ones to return to.
+const MAX_SESSION_SEARCHES = 30
+
 const state = {
   isSideNavOpen: false,
   outlinesHidden: true,
@@ -983,8 +987,12 @@ const mutations = {
         state.sessionSearchHistory[sameSearch].searchNotice = payload.searchNotice
         state.sessionSearchHistory[sameSearch].searchParams = payload.searchParams
       }
+      state.sessionSearchHistory.push(...state.sessionSearchHistory.splice(sameSearch, 1))
     } else {
       state.sessionSearchHistory.push(payload)
+      if (state.sessionSearchHistory.length > MAX_SESSION_SEARCHES) {
+        state.sessionSearchHistory.splice(0, state.sessionSearchHistory.length - MAX_SESSION_SEARCHES)
+      }
     }
   },
 
@@ -1084,6 +1092,17 @@ const mutations = {
    */
   clearTrendingCache(state, page) {
     state.trendingCache[page] = null
+  },
+
+  // Drops the caches of tabs that no longer exist.
+  pruneTabCaches(state, tabIds) {
+    for (const cache of [state.cachedPlaylists, state.searchSettingsByTabId, state.searchFilterValueChangedByTabId]) {
+      for (const tabId of Object.keys(cache)) {
+        if (tabId !== 'web' && !tabIds.has(tabId)) {
+          delete cache[tabId]
+        }
+      }
+    }
   },
 
   setCachedPlaylist(state, { tabId = 'web', value }) {

@@ -92,6 +92,14 @@ export class YtDlpPlaybackSourceCache {
     }
 
     this.sources.delete(videoId)
+    // Reading a source drops it once expired, but a large playlist preload
+    // would otherwise keep every unread one in memory for the session.
+    const now = this.now()
+    for (const [cachedVideoId, entry] of this.sources) {
+      if (!isYtDlpPlaybackSourceCacheable(entry.source, now, this.expiryMarginMs)) {
+        this.sources.delete(cachedVideoId)
+      }
+    }
     while (this.sources.size >= this.maxEntries) {
       this.sources.delete(this.sources.keys().next().value)
     }

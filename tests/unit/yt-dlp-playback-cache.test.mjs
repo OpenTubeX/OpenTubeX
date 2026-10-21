@@ -165,3 +165,17 @@ test('clears every source after the managed binary is updated', () => {
   assert.equal(cache.get('first', 'settings'), null)
   assert.equal(cache.get('second', 'settings'), null)
 })
+
+test('drops expired sources that were never read again when caching another one', () => {
+  let now = 1000000
+  const cache = new YtDlpPlaybackSourceCache({ expiryMarginMs: 0, now: () => now })
+  cache.ensureCapacity(100)
+  for (let index = 0; index < 100; index++) {
+    cache.set(`preloaded-${index}`, 'settings', source(new Date(now + 1000)))
+  }
+
+  now += 1000
+  cache.set('video', 'settings', source(new Date(now + 1000)))
+
+  assert.deepEqual([...cache.sources.keys()], ['video'])
+})
