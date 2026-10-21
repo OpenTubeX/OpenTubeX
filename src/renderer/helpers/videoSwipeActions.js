@@ -16,7 +16,13 @@ export function queueSwipeAction(actionId, videos, queue, { t, commit, add }) {
       if (remove) {
         for (const item of queued) commit('removeVideoFromWatchQueue', item.queueItemId)
       } else if (actionId === 'playNext' && queued.length > 0) {
-        const ordered = videos.flatMap(video => queued.filter(item => matchesVideo(item, video)))
+        const ordered = videos.flatMap(video => {
+          const existing = queued.filter(item => matchesVideo(item, video))
+          if (existing.length > 0) return existing
+          const queueItemId = crypto.randomUUID()
+          commit('addVideoToWatchQueue', { video, queueItemId })
+          return [{ queueItemId }]
+        })
         let targetQueueItemId = queue[0].queueItemId
         for (const item of ordered.toReversed()) {
           commit('moveVideoInWatchQueue', { queueItemId: item.queueItemId, targetQueueItemId })

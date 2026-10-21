@@ -83,7 +83,8 @@ test('Android thumbnail swipes use video actions and preserve mobile navigation'
       await page.evaluate(async saved => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
         for (const [key, value] of Object.entries(saved.settings)) await store.dispatch('update' + key, value)
-        await store.dispatch('overwriteHistory', saved.history)
+        const restored = await store.dispatch('overwriteHistory', saved.history.map(record => [record.videoId, record]))
+        if (!restored) throw new Error('Could not restore history after the swipe test')
         store.commit('clearWatchQueue')
         for (const video of saved.queue) store.commit('addVideoToWatchQueue', { video })
         location.hash = saved.route

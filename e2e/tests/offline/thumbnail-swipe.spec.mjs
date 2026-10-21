@@ -118,7 +118,7 @@ for (const surface of ['history', 'downloads']) {
         const target = page.locator(surface === 'history' ? '.ft-list-video .title' : '.downloadRow h3').first()
         await page.evaluate(() => window.$store.commit('setThumbnailLeftSwipeAction', 'download'))
         await swipeAction(page, session, target, 'Remove File', attachScreenshot)
-        await expect(page.getByRole('dialog').filter({ hasText: 'Remove File' }).last()).toBeVisible()
+        await expect(page.getByRole('dialog', { name: 'Remove downloaded file?', exact: true })).toBeVisible()
         await page.getByRole('button', { name: 'Cancel', exact: true }).click()
         await verifyReverseSwipes(page, session, target, attachScreenshot)
       } finally { await session.detach() }
@@ -163,7 +163,7 @@ test.describe('stale swipe download removal', () => {
       await page.getByRole('button', { name: 'Remove File', exact: true }).click()
       await expect.poll(() => page.evaluate(() => window.$store.getters.getYtDlpDownloads[2242]?.availability)).toBe('missing')
       await swipeAction(page, session, target, 'Download Video')
-      await expect(page.getByRole('dialog').filter({ hasText: 'Download Video' }).last()).toBeVisible()
+      await expect(page.getByRole('dialog', { name: SWIPE_VIDEO.title, exact: true })).toBeVisible()
     } finally { await session.detach() }
   })
 })

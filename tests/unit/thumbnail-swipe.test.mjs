@@ -214,7 +214,6 @@ test('copy shortcuts resolve existing submenu actions for Invidious sharing and 
   assert.equal(context.resolve('left'), null)
 })
 
-
 test('swipes work inside a containing dialog while nested controls stay excluded', () => {
   const { swipe, calls, event } = gesture()
   const parentDialog = {}
@@ -223,4 +222,13 @@ test('swipes work inside a containing dialog while nested controls stay excluded
   swipe.startSwipe(start)
   swipe.finishSwipe(event(-100))
   assert.ok(calls.includes('Left'))
+  calls.length = 0
+  const button = {}
+  const nestedStart = event(0, 0, { target: { closest: () => button } })
+  nestedStart.currentTarget.contains = node => node === button
+  swipe.startSwipe(nestedStart)
+  swipe.moveSwipe(event(-100))
+  swipe.finishSwipe(event(-100))
+  assert.equal(swipe.swipe.value, null)
+  assert.deepEqual(calls, [])
 })

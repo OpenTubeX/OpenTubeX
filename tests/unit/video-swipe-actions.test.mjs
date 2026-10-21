@@ -112,3 +112,25 @@ test('download reversal skips unusable completed files but keeps active jobs eli
     assert.equal(findSwipeDownload(downloads, 'video'), downloads[4])
   }
 })
+
+
+for (const missingIndex of [0, 1, 2]) {
+  test(`play-next restores missing playlist file ${missingIndex} without duplicating queued files`, () => {
+    const videos = ['first', 'second', 'third'].map(videoId => ({
+      videoId, route: { query: { downloadId: '12', downloadFilePath: `/${videoId}.mp4` } },
+    }))
+    const existing = videos.filter((_, index) => index !== missingIndex).map(video => ({ ...video, queueItemId: video.videoId }))
+    const other = { videoId: 'other', queueItemId: 'other' }
+    const state = { items: [other, ...existing.toReversed()] }
+    queueSwipeAction('playNext', videos, state.items, {
+      t,
+      commit: (name, payload) => {
+        watchQueueMutations[name](state, payload)
+        state.items = structuredClone(state.items)
+      },
+      add: () => assert.fail('must not add duplicates of existing files'),
+    }).run()
+    assert.deepEqual(state.items.map(item => item.videoId), ['first', 'second', 'third', 'other'])
+    for (const item of existing) assert.equal(state.items.find(entry => entry.videoId === item.videoId).queueItemId, item.queueItemId)
+  })
+}
