@@ -1495,9 +1495,34 @@ test('Twitch live chat scrolls like the YouTube chat panel', async ({ app, page,
   await expect(scroller.locator(':scope > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-visible/)
   await page.evaluate(() => window.ftElectron.setZoomFactor(1))
 
-  await page.locator(`${activeTab} .externalMediaPlayer .ftVideoPlayer`).click({ position: { x: 20, y: 20 } })
+  const externalPlayer = page.locator(`${activeTab} .externalMediaPlayer .ftVideoPlayer`)
+  await externalPlayer.click({ position: { x: 20, y: 20 } })
   await page.keyboard.press('s')
-  await page.locator(`${activeTab} .fullscreenLiveChatToggle`).click()
+  await expect(externalPlayer).toHaveClass(/\bfullWindow\b/)
+  await expect(externalPlayer).not.toHaveClass(/\bpresentationModeChanging\b/)
+  // Revealing dock content while it slides in from beyond the player edge, as
+  // focus, find-in-page and Playwright's actionability checks do, must not
+  // scroll the clipped player sideways. Wait for the slide so the wheel lands on
+  // the chat's final position.
+  const dockOpening = await page.locator(`${activeTab} .fullscreenLiveChatToggle`).evaluate(async toggle => {
+    const player = toggle.closest('.ftVideoPlayer')
+    const overlay = player.querySelector('.fullscreenLiveChatOverlay')
+    await new Promise(resolve => {
+      const observer = new MutationObserver(() => {
+        if (!overlay.classList.contains('open')) return
+        observer.disconnect()
+        resolve()
+      })
+      observer.observe(overlay, { attributeFilter: ['class'] })
+      toggle.click()
+    })
+    const transitions = overlay.getAnimations()
+    overlay.querySelector('.liveChatComments').scrollIntoView({ block: 'nearest', inline: 'nearest' })
+    await Promise.all(transitions.map(transition => transition.finished))
+    return { transitions: transitions.length, scrollLeft: player.scrollLeft }
+  })
+  expect(dockOpening.transitions).toBeGreaterThan(0)
+  expect(dockOpening.scrollLeft).toBe(0)
   const dockedChat = page.locator(`${activeTab} .fullscreenLiveChatTarget .twitchChat`)
   await expect(dockedChat).toBeVisible()
   const dockedScroller = dockedChat.locator('.liveChatComments')

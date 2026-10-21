@@ -25,8 +25,10 @@
     Fixes the seek bar thumbnails causing a horizontal scroll bar
     to appear after exiting full screen and full window.
     But also vertically in case context menu overflows.
+    Clip rather than hide so focus, find-in-page and scrollIntoView cannot
+    scroll the player sideways towards a dock that is still sliding in.
   */
-  overflow: hidden;
+  overflow: clip;
 }
 
 /* Override browser form fonts and Shaka's badge/tooltip fonts without changing their sizing. */
