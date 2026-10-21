@@ -5,6 +5,9 @@ import { createIdQuery } from './idQuery.js'
 export function createRecommendationStore(db, createEpoch = () => crypto.randomUUID()) {
   let pending = Promise.resolve()
   let pendingBatch = null
+  // Number of evidence records, learned on the first insertion. Counting or
+  // pruning reads every record, so it only runs once the limit may be exceeded.
+  let recordCount = null
   const queue = operation => {
     pendingBatch = null
     const result = pending.catch(() => {}).then(operation)
@@ -25,7 +28,8 @@ export function createRecommendationStore(db, createEpoch = () => crypto.randomU
   }
   return {
     find: () => queue(async () => {
-      await db.removeAsync({ _id: { $ne: 'meta' }, updatedAt: { $lt: Date.now() - RECOMMENDATION_RETENTION_MS } }, { multi: true })
+      const expired = await db.removeAsync({ _id: { $ne: 'meta' }, updatedAt: { $lt: Date.now() - RECOMMENDATION_RETENTION_MS } }, { multi: true })
+      if (recordCount !== null) recordCount -= expired
       return snapshot()
     }),
     record(event) {
@@ -51,9 +55,15 @@ export function createRecommendationStore(db, createEpoch = () => crypto.randomU
             for (const record of changed.values()) {
               if (existing.has(record._id)) await db.updateAsync({ _id: record._id }, record)
             }
-            const excess = await db.findAsync({ _id: { $ne: 'meta' } }, { _id: 1 }).sort({ updatedAt: -1 }).skip(RECOMMENDATION_RECORD_LIMIT)
-            removed = excess.map(entry => entry._id)
-            if (removed.length) await db.removeAsync(createIdQuery('_id', removed), { multi: true })
+            // Only insertions add records. Updates, such as watch progress
+            // saved during playback, never need the full scan.
+            if (recordCount !== null) recordCount += inserted.length
+            if (inserted.length && (recordCount === null || recordCount > RECOMMENDATION_RECORD_LIMIT)) {
+              const all = await db.findAsync({ _id: { $ne: 'meta' } }, { _id: 1 }).sort({ updatedAt: -1 })
+              removed = all.slice(RECOMMENDATION_RECORD_LIMIT).map(entry => entry._id)
+              if (removed.length) await db.removeAsync(createIdQuery('_id', removed), { multi: true })
+              recordCount = all.length - removed.length
+            }
             await db.updateAsync({ _id: 'meta' }, { $set: { revision: revision + 1 } })
           }
           return batch.events.map(entry => entry?.epoch !== epoch
@@ -68,13 +78,15 @@ export function createRecommendationStore(db, createEpoch = () => crypto.randomU
     },
     remove: videoIds => queue(async () => {
       const { revision } = await meta()
-      await db.removeAsync(createIdQuery('_id', videoIds), { multi: true })
+      const removed = await db.removeAsync(createIdQuery('_id', videoIds), { multi: true })
+      if (recordCount !== null) recordCount -= removed
       await db.updateAsync({ _id: 'meta' }, { _id: 'meta', version: 1, epoch: createEpoch(), revision: revision + 1 }, { upsert: true })
       return snapshot()
     }),
     reset: () => queue(async () => {
       const { revision } = await meta()
       await db.removeAsync({ _id: { $ne: 'meta' } }, { multi: true })
+      recordCount = 0
       await db.updateAsync({ _id: 'meta' }, { _id: 'meta', version: 1, epoch: createEpoch(), revision: revision + 1 })
       return snapshot()
     }),

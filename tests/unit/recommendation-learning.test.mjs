@@ -5,6 +5,8 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import Datastore from '@seald-io/nedb'
 import { createRecommendationStore } from '../../src/datastores/recommendations.js'
+import { SqliteDatastore } from '../../src/datastores/sqlite.js'
+import { createNodeSqliteDriver } from '../../src/datastores/sqliteNode.js'
 import { recommendationVideo, updateRecommendationRecord, sampleRecommendationPlayback, RECOMMENDATION_RECORD_LIMIT } from '../../src/recommendation-learning.js'
 const video = { videoId: 'linux-video', title: 'Linux desktop', authorId: 'channel', lengthSeconds: 600 }
 const memoryStore = () => createRecommendationStore(new Datastore({ inMemoryOnly: true }))
@@ -117,4 +119,49 @@ test('a burst of impressions prunes once and persists new records together', asy
   assert.equal(insert.mock.callCount(), 1)
   assert.equal(update.mock.callCount(), 1)
   assert.equal((await store.find()).records.length, 24)
+})
+
+test('watch progress on known videos never scans every learning record', async t => {
+  const driver = createNodeSqliteDriver(':memory:')
+  t.after(() => driver.close())
+  let scans = 0
+  const db = new SqliteDatastore({
+    driver: {
+      ...driver,
+      execute (statements, transaction) {
+        // A query without a WHERE clause reads and parses every stored document.
+        scans += statements.filter(([sql]) => sql === 'SELECT id, data, has_children FROM docs').length
+        return driver.execute(statements, transaction)
+      },
+    },
+  })
+  const store = createRecommendationStore(db)
+  const { epoch } = await store.find()
+  await db.insertAsync(Array.from({ length: 200 }, (_, i) => ({ ...video, _id: `video${i}`, videoId: `video${i}`, updatedAt: Date.now() - i })))
+  // The first insertion learns how many records exist.
+  await store.record({ type: 'positive', video, epoch })
+  scans = 0
+  for (let seconds = 10; seconds <= 60; seconds += 10) {
+    await store.record({ type: 'watch', video, epoch, sessionId: 'session', seconds })
+  }
+  assert.equal(scans, 0, 'saving playback evidence for a known video must not read every record')
+  await store.record({ type: 'click', video: { ...video, videoId: 'new-video' }, epoch })
+  assert.equal(scans, 0, 'an insertion below the limit must not read every record')
+  const { records } = await store.find()
+  assert.equal(records.length, 202)
+  assert.equal(records.find(record => record.videoId === video.videoId).watchSeconds, 60)
+})
+
+test('pruning still applies once insertions exceed the limit after the count is known', async () => {
+  const db = new Datastore({ inMemoryOnly: true })
+  const store = createRecommendationStore(db)
+  const { epoch } = await store.find()
+  const now = Date.now()
+  await db.insertAsync(Array.from({ length: RECOMMENDATION_RECORD_LIMIT - 1 }, (_, i) => ({ ...video, _id: `video${i}`, videoId: `video${i}`, updatedAt: now - 1000 - i })))
+  await store.record({ type: 'positive', video, epoch })
+  const result = await store.record({ type: 'positive', video: { ...video, videoId: 'newest' }, epoch })
+  assert.deepEqual(result.removed, [`video${RECOMMENDATION_RECORD_LIMIT - 2}`])
+  const { records } = await store.find()
+  assert.equal(records.length, RECOMMENDATION_RECORD_LIMIT)
+  assert.ok(records.some(record => record.videoId === 'newest'))
 })
