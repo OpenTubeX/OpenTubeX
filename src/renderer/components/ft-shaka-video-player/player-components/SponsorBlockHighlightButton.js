@@ -9,8 +9,10 @@ export class SponsorBlockHighlightButton extends shaka.ui.Element {
    * @param {EventTarget} events
    * @param {HTMLElement} parent
    * @param {shaka.ui.Controls} controls
+   * @param {{ visible: boolean, labelVisible: boolean, shortcutAvailable: boolean } | null} initialState
+   *   state already announced to earlier buttons, which is only dispatched again when it changes
    */
-  constructor(events, parent, controls) {
+  constructor(events, parent, controls, initialState) {
     super(parent, controls)
 
     /** @private */
@@ -45,6 +47,10 @@ export class SponsorBlockHighlightButton extends shaka.ui.Element {
     })
 
     this.updateLocalisedStrings_()
+
+    if (initialState) {
+      this.updateVisibility_(initialState)
+    }
   }
 
   /** @private */

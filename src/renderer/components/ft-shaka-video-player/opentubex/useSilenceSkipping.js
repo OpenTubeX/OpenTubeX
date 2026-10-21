@@ -86,13 +86,12 @@ export function releaseAnalysisSegmentsBefore(analysisSegments, appendQueue, end
  * seek directly to a known silence endpoint without changing playback rate.
  *
  * @param {object} options
- * @param {import('vue').ComputedRef<boolean>} options.available
  * @param {import('vue').ComputedRef<boolean>} options.enabled
  * @param {(time: number) => void} options.setCurrentTime
  * @param {import('vue').Ref<boolean>} options.isLive
  * @param {import('vue').Ref<HTMLVideoElement | null>} options.video
  */
-export function useSilenceSkipping({ available, enabled, isLive, video, setCurrentTime }) {
+export function useSilenceSkipping({ enabled, isLive, video, setCurrentTime }) {
   /** @type {AudioContext | null} */
   let analysisAudioContext = null
   /** @type {HTMLAudioElement | null} */
@@ -714,12 +713,21 @@ export function useSilenceSkipping({ available, enabled, isLive, video, setCurre
       return
     }
 
-    if (!available.value && !enabled.value) {
+    const { startTime: start, endTime: end } = context.segment
+    if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
       return
     }
 
-    const { startTime: start, endTime: end } = context.segment
-    if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
+    latestStreamId = streamId
+    for (const [otherStreamId, otherStream] of capturedStreams) {
+      if (otherStreamId !== streamId) {
+        otherStream.segments.clear()
+      }
+    }
+
+    // Media segments are only copied while skipping is enabled. Enabling it
+    // mid-playback starts the analysis with the next downloaded segments.
+    if (!enabled.value) {
       return
     }
 
@@ -731,18 +739,9 @@ export function useSilenceSkipping({ available, enabled, isLive, video, setCurre
       pruneCapturedSegments(stream)
     }
 
-    if (enabled.value && analysisStreamId === streamId) {
+    if (analysisStreamId === streamId) {
       queueSegmentForAnalysis(segment)
-    }
-
-    latestStreamId = streamId
-    for (const [otherStreamId, otherStream] of capturedStreams) {
-      if (otherStreamId !== streamId) {
-        otherStream.segments.clear()
-      }
-    }
-
-    if (enabled.value && analysisStreamId !== streamId && stream.initData) {
+    } else if (stream.initData) {
       silenceRanges = []
       setupSegmentAnalysis(streamId, stream)
     }
@@ -752,6 +751,10 @@ export function useSilenceSkipping({ available, enabled, isLive, video, setCurre
     if (!enabled.value || isLive.value) {
       destroyAnalysisPipeline()
       silenceRanges = []
+      // Keep the small init segments so analysis can restart later.
+      for (const stream of capturedStreams.values()) {
+        stream.segments.clear()
+      }
     } else {
       startAnalysisPipeline()
     }

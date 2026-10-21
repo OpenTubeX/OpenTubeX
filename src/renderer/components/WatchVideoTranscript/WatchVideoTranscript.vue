@@ -138,6 +138,7 @@
       <div
         v-for="segment in filteredSegments"
         :key="`${segment.start}-${segment.index}`"
+        v-memo="[segment, segment.index === activeSegmentIndex]"
         role="listitem"
       >
         <button
@@ -147,7 +148,7 @@
           :aria-current="segment.index === activeSegmentIndex ? 'true' : null"
           @click="emit('timestamp-event', segment.start)"
         >
-          <span class="transcriptTimestamp">{{ formatTimestamp(segment.start) }}</span>
+          <span class="transcriptTimestamp">{{ segment.timestamp }}</span>
           <span class="transcriptText">{{ segment.text }}</span>
         </button>
       </div>
@@ -413,7 +414,7 @@ function handleHeaderActionsFocusout(event) {
 
 function transcriptText() {
   return segments.value
-    .map(segment => `${formatTimestamp(segment.start)} ${segment.text}`)
+    .map(segment => `${segment.timestamp} ${segment.text}`)
     .join('\n')
 }
 
@@ -453,7 +454,7 @@ async function saveTranscript() {
 
 /**
  * @param {string} transcript
- * @returns {{ index: number, start: number, end: number, text: string }[]}
+ * @returns {{ index: number, start: number, end: number, text: string, activeUntil: number, timestamp: string }[]}
  */
 function parseTranscript(transcript) {
   const blocks = transcript.replaceAll('\r', '').replace(/^\uFEFF/, '').split(/\n{2,}/)
@@ -491,7 +492,8 @@ function parseTranscript(transcript) {
   let activeUntil = Number.NEGATIVE_INFINITY
   return segments.map(({ start, end, text }, index) => {
     activeUntil = Math.max(activeUntil, end)
-    return { index, start, end, text, activeUntil }
+    // Formatted once here instead of on every render of every row.
+    return { index, start, end, text, activeUntil, timestamp: formatTimestamp(start) }
   })
 }
 

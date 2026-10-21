@@ -17,6 +17,9 @@ test('sleep timer offers the current chapter and stops before the next one', asy
   await page.locator('.shaka-overflow-menu-button').click()
   await page.locator('.sleep-timer-button').click()
   await expect(chapterOption).toHaveClass(/shaka-hidden/)
+  // Late chapters no longer rebuild the controls, so close the menu before reopening it.
+  await page.keyboard.press('Escape')
+  await expect(page.locator('.sleep-timer-button')).toBeHidden()
 
   await watch.evaluate((vm, endSeconds) => {
     vm.videoChapters = [

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { createRenderer, ref } from 'vue'
+import { createRenderer, nextTick, ref } from 'vue'
 
 import {
   createRequestPresentationTracker,
@@ -21,11 +21,12 @@ test('rejects late responses from an earlier presentation', () => {
   assert.equal(tracker.isCurrent(currentRequest), true)
 })
 
-function analysisFixture (t, { standard = false, managed = false } = {}) {
-  const previous = Object.fromEntries(['MediaSource', 'ManagedMediaSource', 'document'].map(key =>
+function analysisFixture (t, { standard = false, managed = false, enabled = true } = {}) {
+  const previous = Object.fromEntries(['MediaSource', 'ManagedMediaSource', 'AudioContext', 'document'].map(key =>
     [key, Object.getOwnPropertyDescriptor(globalThis, key)]))
   const sources = []
   const audioElements = []
+  const appended = []
   class Source extends EventTarget {
     static isTypeSupported (type) { return type === 'audio/mp4; codecs="mp4a.40.2"' }
     constructor () {
@@ -33,6 +34,27 @@ function analysisFixture (t, { standard = false, managed = false } = {}) {
       this.readyState = 'closed'
       sources.push(this)
     }
+
+    addSourceBuffer () {
+      const buffer = Object.assign(new EventTarget(), {
+        updating: false,
+        appendBuffer (data) {
+          appended.push([...new Uint8Array(data)])
+          queueMicrotask(() => buffer.dispatchEvent(new Event('updateend')))
+        },
+      })
+      return buffer
+    }
+  }
+  const node = () => ({ connect () {}, disconnect () {} })
+  globalThis.AudioContext = class {
+    destination = {}
+    resume () { return Promise.resolve() }
+    close () { return Promise.resolve() }
+    createMediaElementSource = node
+    createGain = () => ({ ...node(), gain: { value: 1 } })
+    createChannelSplitter = () => ({ ...node(), numberOfOutputs: 2 })
+    createAnalyser = () => ({ ...node(), fftSize: 32 })
   }
   class ManagedSource extends Source {}
   globalThis.MediaSource = standard ? Source : undefined
@@ -40,7 +62,7 @@ function analysisFixture (t, { standard = false, managed = false } = {}) {
   globalThis.document = {
     createElement (tag) {
       assert.equal(tag, 'audio')
-      const audio = Object.assign(new EventTarget(), { pause () {}, load () {}, removeAttribute () {} })
+      const audio = Object.assign(new EventTarget(), { buffered: { length: 0 }, pause () {}, load () {}, removeAttribute () {} })
       audioElements.push(audio)
       return audio
     },
@@ -48,10 +70,11 @@ function analysisFixture (t, { standard = false, managed = false } = {}) {
   t.mock.method(URL, 'createObjectURL', () => 'blob:analysis-fixture')
   t.mock.method(URL, 'revokeObjectURL', () => {})
   let analysis
+  const enabledRef = ref(enabled)
   const renderer = createRenderer({ createComment: () => ({}), insert () {}, remove () {}, parentNode () {}, nextSibling () {} })
   const app = renderer.createApp({
     setup () {
-      analysis = useSilenceSkipping({ available: ref(true), enabled: ref(true), isLive: ref(false), video: ref(null), setCurrentTime () {} })
+      analysis = useSilenceSkipping({ enabled: enabledRef, isLive: ref(false), video: ref(null), setCurrentTime () {} })
       return () => null
     },
   })
@@ -63,13 +86,64 @@ function analysisFixture (t, { standard = false, managed = false } = {}) {
       else delete globalThis[key]
     }
   })
-  function response (segment) {
+  function response (segment, bytes = [1, 2, 3]) {
     const context = { stream: { id: 1, type: 'audio', mimeType: 'audio/mp4', codecs: 'mp4a.40.2' }, segment }
     analysis.handleSegmentRequest(context)
-    analysis.handleSegmentResponse({ data: new Uint8Array([1, 2, 3]).buffer }, context)
+    analysis.handleSegmentResponse({ data: new Uint8Array(bytes).buffer }, context)
   }
-  return { sources, audioElements, Source, ManagedSource, feed () { response(); response({ startTime: 0, endTime: 5 }) } }
+  async function openSource (index = 0) {
+    sources[index].readyState = 'open'
+    sources[index].dispatchEvent(new Event('sourceopen'))
+    for (let i = 0; i < 5; i++) await new Promise(resolve => setImmediate(resolve))
+  }
+  return {
+    sources,
+    audioElements,
+    appended,
+    enabled: enabledRef,
+    response,
+    openSource,
+    Source,
+    ManagedSource,
+    feed () { response(); response({ startTime: 0, endTime: 5 }) }
+  }
 }
+
+test('analyses the captured audio while skipping is enabled', async t => {
+  const f = analysisFixture(t, { standard: true })
+  f.response(undefined, [9])
+  f.response({ startTime: 0, endTime: 5 }, [1])
+  await f.openSource()
+  assert.deepEqual(f.appended, [[9], [1]])
+})
+
+test('does not copy media segments while skipping is disabled', async t => {
+  const f = analysisFixture(t, { standard: true, enabled: false })
+  f.response(undefined, [9])
+  f.response({ startTime: 0, endTime: 5 }, [1])
+  assert.equal(f.sources.length, 0)
+
+  // Enabling mid-playback starts the analysis from the next segment.
+  f.enabled.value = true
+  await nextTick()
+  assert.equal(f.sources.length, 1)
+  f.response({ startTime: 5, endTime: 10 }, [2])
+  await f.openSource()
+  assert.deepEqual(f.appended, [[9], [2]])
+})
+
+test('drops captured media segments when skipping is disabled', async t => {
+  const f = analysisFixture(t, { standard: true })
+  f.response(undefined, [9])
+  f.response({ startTime: 0, endTime: 5 }, [1])
+  f.enabled.value = false
+  await nextTick()
+  f.enabled.value = true
+  await nextTick()
+  assert.equal(f.sources.length, 2)
+  await f.openSource(1)
+  assert.deepEqual(f.appended, [[9]])
+})
 
 test('managed-only media support does not break the main player response filter', t => {
   const f = analysisFixture(t, { managed: true })

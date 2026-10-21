@@ -4330,7 +4330,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   transition: gap 200ms ease;
 }
 
-:deep(.shaka-controls-button-panel > .ft-chapters-button + .ft-shaka-highlight-button) {
+:deep(.shaka-controls-button-panel > .ft-chapters-button:not(.shaka-hidden) + .ft-shaka-highlight-button) {
   margin-inline-start: 2px;
 }
 

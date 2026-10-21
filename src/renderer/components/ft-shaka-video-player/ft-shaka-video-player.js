@@ -853,6 +853,9 @@ export default defineComponent({
     // Set when a UI reconfigure is requested while the player is not loaded, so
     // it can be flushed once loading finishes (see configureUI).
     let pendingUiReconfigure = false
+    // Serialized uiConfig last passed to ui.configure. Every configure rebuilds
+    // all controls, so unchanged configurations are not applied again.
+    let appliedUiConfigKey = ''
 
     // Whether this instance registered its custom control factories into the
     // shared global registry, so teardown removes this player's registrations
@@ -1136,6 +1139,10 @@ export default defineComponent({
     const currentChapterTitle = computed(() => {
       return props.chapters[props.currentChapterIndex]?.title ?? t('Chapters.Chapters')
     })
+    const chaptersAvailable = computed(() => props.chapters.length > 0)
+    // Chapter thumbnails download storyboard sheets, so they are only loaded
+    // once a chapter list has been opened for the current video.
+    let chapterThumbnailsWanted = false
     const shareablePlaylistId = computed(() => {
       return props.playlistId && store.getters.getPlaylist(props.playlistId) == null
         ? props.playlistId
@@ -1784,7 +1791,6 @@ export default defineComponent({
     })
 
     const silenceSkipping = useSilenceSkipping({
-      available: showSkipSilenceButton,
       setCurrentTime,
       enabled: skipSilence,
       isLive,
@@ -2500,6 +2506,9 @@ export default defineComponent({
     let sponsorBlockSkipScheduleTimeout = null
     let sponsorBlockSkipScheduleInterval = null
     let sponsorBlockSkipScheduleTaskController = null
+    // Identifies the boundary the pending schedule waits for, so timeupdates
+    // only reschedule after a seek, rate change or a different next segment.
+    let sponsorBlockSkipScheduleKey = null
 
     function cancelSponsorBlockSkipSchedule() {
       clearTimeout(sponsorBlockSkipScheduleTimeout)
@@ -2508,6 +2517,7 @@ export default defineComponent({
       sponsorBlockSkipScheduleTimeout = null
       sponsorBlockSkipScheduleInterval = null
       sponsorBlockSkipScheduleTaskController = null
+      sponsorBlockSkipScheduleKey = null
     }
 
     function clearSponsorBlockNotFoundRefetchTimeout() {
@@ -3447,6 +3457,13 @@ export default defineComponent({
     }
 
     /**
+     * Last state sent to the highlight button. Timeupdates only dispatch when
+     * it changes; rebuilt buttons start from it.
+     * @type {{ visible: boolean, labelVisible: boolean, shortcutAvailable: boolean } | null}
+     */
+    let sponsorBlockHighlightState = null
+
+    /**
      * @param {number} currentTime
      */
     function updateSponsorBlockHighlightState(currentTime = sponsorBlockCurrentTime.value) {
@@ -3460,17 +3477,24 @@ export default defineComponent({
         : null
 
       activeSponsorBlockHighlightSegment.value = nextHighlightSegment
-      events.dispatchEvent(new CustomEvent('sponsorBlockHighlightStateChanged', {
-        detail: {
-          visible: nextHighlightSegment !== null,
-          labelVisible: sponsorBlockHighlightLabelVisible,
-          shortcutAvailable: resolveSponsorBlockEnterTarget(
-            !!getActivePromptSponsorBlockToast(),
-            !!getActiveSponsorBlockToast(),
-            nextHighlightSegment !== null
-          ) === 'highlight'
-        }
-      }))
+      const state = {
+        visible: nextHighlightSegment !== null,
+        labelVisible: sponsorBlockHighlightLabelVisible,
+        shortcutAvailable: resolveSponsorBlockEnterTarget(
+          !!getActivePromptSponsorBlockToast(),
+          !!getActiveSponsorBlockToast(),
+          nextHighlightSegment !== null
+        ) === 'highlight'
+      }
+      if (
+        sponsorBlockHighlightState?.visible === state.visible &&
+        sponsorBlockHighlightState.labelVisible === state.labelVisible &&
+        sponsorBlockHighlightState.shortcutAvailable === state.shortcutAvailable
+      ) {
+        return
+      }
+      sponsorBlockHighlightState = state
+      events.dispatchEvent(new CustomEvent('sponsorBlockHighlightStateChanged', { detail: state }))
     }
 
     // the highlight button only advertises the Enter shortcut while no toast is claiming it
@@ -3677,6 +3701,8 @@ export default defineComponent({
         if (currentTime < segment.startTime) {
           const remainingMs = (segment.startTime - currentTime) * 1000 / videoElement.playbackRate
           if (remainingMs > SPONSORBLOCK_SKIP_SCHEDULE_LEAD_MS) {
+            // Woke too early (e.g. playback stalled): wait for the same boundary again.
+            cancelSponsorBlockSkipSchedule()
             scheduleSponsorBlockSkip()
             return false
           }
@@ -3722,8 +3748,6 @@ export default defineComponent({
     }
 
     function scheduleSponsorBlockSkip() {
-      cancelSponsorBlockSkipSchedule()
-
       const videoElement = video.value
       if (
         !useSponsorBlock.value ||
@@ -3736,13 +3760,24 @@ export default defineComponent({
         sponsorBlockSegments.length === 0 ||
         !canSeek()
       ) {
+        cancelSponsorBlockSkipSchedule()
         return
       }
 
       const segment = getNextSponsorBlockAutoSkipSegment(videoElement.currentTime)
       if (!segment) {
+        cancelSponsorBlockSkipSchedule()
         return
       }
+
+      // Seeks and pauses cancel the schedule, so an unchanged key means the
+      // pending timer still fires at the right time.
+      const scheduleKey = `${segment.uuid}:${segment.startTime}:${videoElement.playbackRate}`
+      if (scheduleKey === sponsorBlockSkipScheduleKey) {
+        return
+      }
+      cancelSponsorBlockSkipSchedule()
+      sponsorBlockSkipScheduleKey = scheduleKey
 
       const delayMs = (segment.startTime - videoElement.currentTime) * 1000 / videoElement.playbackRate
       if (delayMs <= SPONSORBLOCK_SKIP_SCHEDULE_LEAD_MS) {
@@ -5234,9 +5269,9 @@ export default defineComponent({
         ...(!mobile ? ['ft_skip_previous', 'play_pause', 'ft_skip_next', 'mute', 'volume'] : []),
         'time_and_duration',
         'ft_playback_adjusted_time',
-        ...((!onlyUseOverFlowMenu.value || mobile) && !props.shortsPlayer && props.chapters.length > 0
-          ? ['ft_chapters']
-          : []),
+        // Chapters often arrive after the controls are built, so the button
+        // hides itself while there are none instead of forcing a rebuild.
+        ...((!onlyUseOverFlowMenu.value || mobile) && !props.shortsPlayer ? ['ft_chapters'] : []),
         'ft_sponsorblock_highlight',
         'spacer'
       ]
@@ -5299,7 +5334,7 @@ export default defineComponent({
           'ft_sleep_timer',
           'ft_seek_history',
           ...(!props.shortsPlayer ? ['ft_autoplay_toggle'] : []),
-          ...(props.chapters.length > 0 ? ['ft_chapters'] : []),
+          'ft_chapters',
           'ft_skip_silence',
           'ft_voice_over_translation',
           'ft_music_visualizer',
@@ -5516,6 +5551,10 @@ export default defineComponent({
         pendingUiReconfigure = true
         return
       }
+
+      // This rebuild applies any reconfigure deferred while unloaded.
+      pendingUiReconfigure = false
+      appliedUiConfigKey = JSON.stringify(uiConfig.value)
 
       const reopenPhoneOptions = !firstTime && !!container.value?.querySelector('.phonePlayerOptions[open]')
 
@@ -6629,8 +6668,8 @@ export default defineComponent({
       }
     }
 
-    watch(uiConfig, (newValue, oldValue) => {
-      if (newValue !== oldValue && ui) {
+    watch(uiConfig, (newValue) => {
+      if (ui && JSON.stringify(newValue) !== appliedUiConfigKey) {
         configureUI()
       }
     })
@@ -6666,10 +6705,20 @@ export default defineComponent({
       }
     })
 
-    watch(() => props.chapters.length, (chapterCount) => {
-      if (chapterCount === 0) {
+    watch(() => props.chapters, (chapters) => {
+      if (chapters.length === 0) {
         closeChaptersOverlay()
       }
+      if (hasLoaded.value) {
+        // Chapters no longer rebuild the controls, so redraw their markers here.
+        refreshChapterMarkers()
+        loadChapterThumbnails()
+      }
+    })
+
+    watch(() => showChaptersOverlay.value || props.sidebarChaptersOpen, (open) => {
+      if (!open || chapterThumbnailsWanted) return
+      chapterThumbnailsWanted = true
       if (hasLoaded.value) {
         loadChapterThumbnails()
       }
@@ -9544,6 +9593,7 @@ export default defineComponent({
         create(rootElement, controls) {
           return new ChapterOverlayButton(
             currentChapterTitle,
+            chaptersAvailable,
             isNativeFullscreenActive() || fullWindowEnabled.value
               ? showChaptersOverlay.value
               : props.sidebarChaptersOpen,
@@ -9876,6 +9926,10 @@ export default defineComponent({
     async function loadChapterThumbnails() {
       const loadGeneration = ++chapterThumbnailLoadGeneration
       chapterThumbnails.value = []
+
+      if (!chapterThumbnailsWanted) {
+        return
+      }
 
       const activePlayer = player
       const videoId = props.videoId
@@ -10705,7 +10759,7 @@ export default defineComponent({
 
       class SponsorBlockHighlightButtonFactory {
         create(rootElement, controls) {
-          return new SponsorBlockHighlightButton(events, rootElement, controls)
+          return new SponsorBlockHighlightButton(events, rootElement, controls, sponsorBlockHighlightState)
         }
       }
 
@@ -12194,6 +12248,14 @@ export default defineComponent({
       )
     }
 
+    function refreshChapterMarkers() {
+      if (!player || !container.value?.querySelector('.shaka-seek-bar-container')) return
+      container.value.querySelectorAll('.chapterMarker').forEach(marker => marker.remove())
+      if (props.chapters.length > 0) {
+        createChapterMarkers()
+      }
+    }
+
     /**
      * @param {HTMLElement[]} markers
      */
@@ -12731,6 +12793,7 @@ export default defineComponent({
 
       player.addEventListener('loading', () => {
         chapterThumbnailLoadGeneration++
+        chapterThumbnailsWanted = showChaptersOverlay.value || props.sidebarChaptersOpen
         silenceSkipping.reset()
         hasLoaded.value = false
         hasPlaybackPosition.value = false
