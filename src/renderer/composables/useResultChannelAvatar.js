@@ -80,7 +80,7 @@ export function useResultChannelAvatar(result, channelId, enabled) {
     const resolvedChannel = await fetchChannelInfo(resolvingChannelId, {
       preference: store.getters.getBackendPreference,
       fallback: store.getters.getBackendFallback
-    })
+    }, { throttle: true, isWanted: () => generation === loadGeneration })
 
     if (
       generation === loadGeneration &&
