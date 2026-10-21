@@ -75,6 +75,7 @@ test.describe('resolution badges', { tag: '@scale' }, () => {
             clippedWidth: element.querySelector('span').scrollWidth - element.querySelector('span').clientWidth,
             raisedBy: label.top - text.top,
             gap: badge.left - label.right,
+            leftSpace: label.left - tile.left,
             rightSpace: tile.right - text.right,
             topSpace: text.top - tile.top,
           }
@@ -84,7 +85,8 @@ test.describe('resolution badges', { tag: '@scale' }, () => {
         expect(geometry.clippedWidth, context).toBeLessThanOrEqual(1)
         if (!geometry.wrapped) expect(geometry.raisedBy, context).toBeGreaterThan(2)
         expect(geometry.gap, context).toBeGreaterThanOrEqual(0)
-        expect(geometry.rightSpace, context).toBeGreaterThanOrEqual(0)
+        expect(geometry.leftSpace, context).toBeGreaterThanOrEqual(11.5)
+        expect(geometry.rightSpace, context).toBeGreaterThanOrEqual(11.5)
         expect(geometry.topSpace, context).toBeGreaterThanOrEqual(0)
       }
       if (uiScale === 100 && width === 1280) {

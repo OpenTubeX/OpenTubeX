@@ -1663,8 +1663,9 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 :deep(.shaka-sub-menu.ft-menu-grid > button.explicit-resolution) {
   flex-wrap: nowrap;
   align-items: center;
-  inline-size: 140px;
+  inline-size: 160px;
   max-inline-size: 100%;
+  padding-inline: 12px;
 }
 
 :deep(.shaka-sub-menu.ft-menu-grid > button.explicit-resolution > span) {
