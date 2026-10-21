@@ -112,6 +112,9 @@ test.describe('outlined focus borders', { tag: '@scale' }, () => {
           // The player animates into full window. A click while the actions are
           // still moving can land on the action bar instead of the toggle.
           await expect(player).not.toHaveClass(/presentationModeChanging/)
+          // The pointer stays where the full-window button was, which can be the
+          // seek bar now. Its hover lowers the action bar below the controls.
+          await player.hover({ position: { x: 20, y: 20 } })
         }
         // The pointer can rest on a Shaka control after the layout change, which
         // puts the action dock behind the controls until the pointer moves away.
