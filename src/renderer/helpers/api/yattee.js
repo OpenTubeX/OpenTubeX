@@ -229,9 +229,11 @@ export function normalizeYatteeSearchItem(item) {
  * Videos in channel tabs come without the channel's details.
  * @param {{author: string, authorId: string}[]} videos
  * @param {string} channelId
+ * @param {string} [channelName]
  */
-export function fillYatteeVideoAuthors(videos, channelId) {
+export function fillYatteeVideoAuthors(videos, channelId, channelName = '') {
   for (const video of videos) {
+    video.author ||= channelName
     video.authorId ||= channelId
     video.authorUrl ||= `/channel/${channelId}`
   }

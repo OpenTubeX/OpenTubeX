@@ -42,6 +42,17 @@ function isYatteeBackend() {
   return store.getters.getBackendPreference === 'yattee'
 }
 
+/** Yattee channel tabs leave out the channel name, so it comes from a loaded channel page or the subscriptions. */
+const yatteeChannelNames = new Map()
+
+/**
+ * @param {string} channelId
+ */
+function getYatteeChannelName(channelId) {
+  return yatteeChannelNames.get(channelId) ??
+    store.getters.getProfileList[0]?.subscriptions.find(channel => channel.id === channelId)?.name ?? ''
+}
+
 /**
  * @param {string} feature
  */
@@ -248,7 +259,9 @@ export async function invidiousGetChannelInfo(channelId) {
   })
 
   if (isYatteeBackend()) {
-    return normalizeYatteeChannel(channelInfo)
+    const channel = normalizeYatteeChannel(channelInfo)
+    yatteeChannelNames.set(channel.authorId, channel.author)
+    return channel
   }
 
   channelInfo.tabs = channelInfo.tabs.map(tab => {
@@ -302,7 +315,7 @@ export async function getInvidiousChannelVideos(channelId, sortBy, continuation,
   const response = await getInvidiousChannelTab('videos', channelId, continuation, sortBy, signal)
 
   if (isYatteeBackend()) {
-    fillYatteeVideoAuthors(response.videos, channelId)
+    fillYatteeVideoAuthors(response.videos, channelId, getYatteeChannelName(channelId))
   }
   normalizeManyInvidiousVideosAttributes(response.videos, channelId)
   setMultiplePublishedTimestamps(response.videos)
@@ -326,7 +339,7 @@ export async function getInvidiousChannelShorts(channelId, sortBy, continuation)
   const response = await getInvidiousChannelTab('shorts', channelId, continuation, sortBy)
 
   if (isYatteeBackend()) {
-    fillYatteeVideoAuthors(response.videos, channelId)
+    fillYatteeVideoAuthors(response.videos, channelId, getYatteeChannelName(channelId))
   }
 
   // workaround for Invidious sending incorrect information
@@ -351,7 +364,7 @@ export async function getInvidiousChannelLive(channelId, sortBy, continuation, s
   const response = await getInvidiousChannelTab('streams', channelId, continuation, sortBy, signal)
 
   if (isYatteeBackend()) {
-    fillYatteeVideoAuthors(response.videos, channelId)
+    fillYatteeVideoAuthors(response.videos, channelId, getYatteeChannelName(channelId))
   }
 
   normalizeManyInvidiousVideosAttributes(response.videos, channelId)
@@ -430,7 +443,7 @@ export async function searchInvidiousChannel(channelId, query, page) {
 
   // Yattee servers wrap the results like the channel tabs do
   if (isYatteeBackend() && !Array.isArray(response)) {
-    response = fillYatteeVideoAuthors(response.videos ?? [], channelId)
+    response = fillYatteeVideoAuthors(response.videos ?? [], channelId, getYatteeChannelName(channelId))
   }
 
   response.forEach((item) => {

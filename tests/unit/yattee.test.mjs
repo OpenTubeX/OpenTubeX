@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { readFileSync } from 'node:fs'
+import vm from 'node:vm'
 
 import {
   YATTEE_CHANNEL_TABS,
@@ -256,4 +258,34 @@ test('connection checks report actionable failures', async () => {
     await checkYatteeServer('http://192.168.1.5:8085', null, { fetch: info, mediaFetch: allowed, requireHttps: true }),
     { ok: false, error: 'https-required' }
   )
+})
+
+test('channel tab videos get the channel name from the channel page or the subscriptions', async () => {
+  const source = readFileSync(new URL('../../src/renderer/helpers/api/invidious.js', import.meta.url), 'utf8')
+  const extract = (start, end) => {
+    const from = source.indexOf(start)
+    const to = source.indexOf(end, from)
+    assert.ok(from >= 0 && to > from, `Update the extracted range around ${start}`)
+    return source.slice(from, to).replaceAll('export ', '')
+  }
+  const tabVideos = () => ({ videos: [{ videoId: 'a', author: '', authorId: '' }] })
+  const context = {
+    store: { getters: { getBackendPreference: 'yattee', getProfileList: [{ subscriptions: [{ id: 'UCsubscribed', name: 'Subscribed channel' }] }] } },
+    getInvidiousChannelTab: async () => tabVideos(),
+    invidiousAPICall: async () => ({ authorId: 'UCvisited', author: 'Visited channel' }),
+    normalizeYatteeChannel,
+    fillYatteeVideoAuthors,
+  }
+  const { getInvidiousChannelShorts, invidiousGetChannelInfo } = vm.runInNewContext(
+    `${extract('function isYatteeBackend()', '\n/**\n * @param {string} feature')}
+    ${extract('export async function invidiousGetChannelInfo(', '\n/**\n * @param {string} tab')}
+    ${extract('export async function getInvidiousChannelShorts(', '\n/**\n * @param {string} channelId\n * @param {string | undefined} sortBy\n * @param {string | undefined | null} continuation\n */\nexport async function getInvidiousChannelLive(')}
+    ;({ getInvidiousChannelShorts, invidiousGetChannelInfo })`,
+    context
+  )
+
+  assert.equal((await getInvidiousChannelShorts('UCsubscribed')).videos[0].author, 'Subscribed channel')
+
+  await invidiousGetChannelInfo('@visited')
+  assert.equal((await getInvidiousChannelShorts('UCvisited')).videos[0].author, 'Visited channel')
 })
