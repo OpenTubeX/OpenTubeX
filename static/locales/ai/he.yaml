@@ -1646,6 +1646,7 @@ Video:
       Error: "לא ניתן לשדר את הסרטון"
       Error With Details: "לא ניתן לשדר את הסרטון: {error}"
       Untrusted Receiver: "האישור של המקלט אינו מהימן. יש להשתמש במקלט Google Cast מאומת."
+    Secondary Captions: כתוביות משניות
   Station: תחנה
   Playlist:
     Unavailable videos are hidden: סרטון אחד שאינו זמין מוסתר | {count} סרטונים לא זמינים מוסתרים | {count} סרטונים לא זמינים מוסתרים

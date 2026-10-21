@@ -1636,6 +1636,7 @@ Video:
       Error: "Không thể truyền video"
       Error With Details: "Không thể truyền video: {error}"
       Untrusted Receiver: "Chứng chỉ của thiết bị nhận không đáng tin cậy. Hãy sử dụng thiết bị nhận Google Cast đã được xác thực."
+    Secondary Captions: Phụ đề phụ
   Station: Trạm
   Playlist:
     Unavailable videos are hidden: '{count} video không có sẵn đã bị ẩn'

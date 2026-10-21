@@ -1985,6 +1985,7 @@ Video:
       Error: "Nepavyko transliuoti vaizdo įrašo"
       Error With Details: "Nepavyko transliuoti vaizdo įrašo: {error}"
       Untrusted Receiver: "Imtuvo sertifikatas nėra patikimas. Naudokite autentifikuotą Google Cast imtuvą."
+    Secondary Captions: Antriniai subtitrai
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Reklamos prieš vaizdo įrašą likęs laikas: {remindingTimeSeconds} s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Likęs SABR delsos laikas: {remindingTimeSeconds} s'

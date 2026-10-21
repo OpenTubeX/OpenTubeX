@@ -73,6 +73,8 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     enableCommentTranslations: true,
     enableCaptionTranslations: false,
     preferredCaptionLocale: '',
+    autoTranslatedCaptionLocale: '',
+    secondaryCaptionLocale: '',
     defaultInterval: 5,
     defaultPlayback: 1,
     defaultProfile: MAIN_PROFILE_ID,

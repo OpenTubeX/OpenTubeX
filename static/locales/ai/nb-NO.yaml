@@ -1607,6 +1607,7 @@ Video:
       Error: "Kunne ikke strømme videoen"
       Error With Details: "Kunne ikke strømme videoen: {error}"
       Untrusted Receiver: "Mottakerens sertifikat er ikke klarert. Bruk en autentisert Google Cast-mottaker."
+    Secondary Captions: Sekundær teksting
   External Media:
     Dislikes: "Misliking | Mislikinger"
     Reposts: "Videredeling | Videredelinger"

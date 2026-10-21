@@ -1644,6 +1644,7 @@ Video:
       Error: "Videon lähetys epäonnistui"
       Error With Details: "Videon lähetys epäonnistui: {error}"
       Untrusted Receiver: "Vastaanottimen varmenteeseen ei luoteta. Käytä todennettua Google Cast -vastaanotinta."
+    Secondary Captions: Toissijaiset tekstitykset
   Station: Asema
   Playlist:
     Unavailable videos are hidden: 1 video, joka ei ole saatavilla, on piilotettu | {count} videota, jotka eivät ole saatavilla, on piilotettu

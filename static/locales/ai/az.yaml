@@ -1615,6 +1615,7 @@ Video:
       Error: "Videonu yayımlamaq mümkün olmadı"
       Error With Details: "Videonu yayımlamaq mümkün olmadı: {error}"
       Untrusted Receiver: "Qəbuledicinin sertifikatına etibar edilmir. Təsdiqlənmiş Google Cast qəbuledicisindən istifadə edin."
+    Secondary Captions: İkinci altyazılar
   External Media:
     Dislikes: "Bəyənməmə | Bəyənməmə"
     Reposts: "Repost | Repostlar"

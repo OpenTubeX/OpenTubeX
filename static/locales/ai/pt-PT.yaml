@@ -1636,6 +1636,7 @@ Video:
       Error: "Não foi possível transmitir o vídeo"
       Error With Details: "Não foi possível transmitir o vídeo: {error}"
       Untrusted Receiver: "O certificado do recetor não é de confiança. Usa um recetor Google Cast autenticado."
+    Secondary Captions: Legendas secundárias
   Station: Estação
   Playlist:
     Unavailable videos are hidden: 1 vídeo indisponível está oculto | {count} vídeos indisponíveis estão ocultos | {count} vídeos indisponíveis estão ocultos

@@ -1588,7 +1588,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 /* Keep the title centred in the header instead of after the back icon. */
 :deep(.shaka-sub-menu.ft-menu-grid > .shaka-back-to-overflow-button > .shaka-ui-icon),
-:deep(.shaka-overflow-menu.ft-menu-grid .ft-caption-timing-menu .shaka-ui-icon) {
+:deep(.shaka-overflow-menu.ft-menu-grid .ft-caption-timing-menu .shaka-ui-icon),
+:deep(.shaka-overflow-menu.ft-menu-grid .ft-caption-list-menu .shaka-ui-icon:not(.shaka-chosen-item)) {
   position: absolute;
   inset-inline-start: 10px;
   padding-inline-end: 0;
@@ -1636,12 +1637,12 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   selection is shown as a highlighted tile instead.
 */
 :deep(.shaka-sub-menu.ft-menu-grid .shaka-ui-icon.shaka-chosen-item),
-:deep(.ft-caption-translation-options.ft-menu-grid .shaka-ui-icon.shaka-chosen-item) {
+:deep(.ft-caption-list-options.ft-menu-grid .shaka-ui-icon.shaka-chosen-item) {
   display: none;
 }
 
 :deep(.shaka-sub-menu.ft-menu-grid > button:has(.shaka-chosen-item)),
-:deep(.ft-caption-translation-options.ft-menu-grid > button:has(.shaka-chosen-item)) {
+:deep(.ft-caption-list-options.ft-menu-grid > button:has(.shaka-chosen-item)) {
   background: color-mix(in srgb, var(--primary-color) 32%, transparent);
 }
 
@@ -1676,54 +1677,65 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 /* Keep the translation header and scrollbar outside each other's regions. */
-:deep(.shaka-overflow-menu:has(> .ft-caption-translation-menu:not(.shaka-hidden))) {
-  block-size: min(50vh, 340px);
+:deep(.shaka-overflow-menu:has(> .ft-caption-list-menu:not(.shaka-hidden))) {
   overflow: hidden;
 }
 
-:deep(.shaka-overflow-menu:has(> .ft-caption-translation-menu:not(.shaka-hidden)) > .os-scrollbar) {
+:deep(.shaka-overflow-menu:has(> .ft-caption-list-menu:not(.shaka-hidden)) > .os-scrollbar) {
   display: none;
 }
 
-:deep(.ft-caption-translation-menu) {
+/* As tall as the other submenus, growing with a long list up to a cap after which the options scroll */
+:deep(.ft-caption-list-menu) {
   display: flex;
   flex-direction: column;
-  block-size: 100%;
+  flex-grow: 1;
+  max-block-size: min(50vh, 340px);
   overflow: hidden;
 }
 
-:deep(.ft-caption-translation-menu > .shaka-back-to-overflow-button) {
+:deep(.ft-caption-list-menu > .shaka-back-to-overflow-button) {
   flex: 0 0 auto;
 }
 
-:deep(.ft-caption-translation-options) {
-  flex: 1 1 0;
-  block-size: 0;
+/* Centre the title like the headers of the other submenus */
+:deep(.shaka-overflow-menu.ft-menu-grid .ft-caption-list-menu > .shaka-back-to-overflow-button) {
+  position: relative;
+  justify-content: center;
+  block-size: var(--ft-submenu-header-size);
+  padding-block: 0;
+  margin-block-end: 0;
+}
+
+:deep(.ft-caption-list-options) {
+  flex: 1 1 auto;
   min-block-size: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
 }
 
-:deep(.ft-caption-translation-options > button) {
+:deep(.ft-caption-list-options > button) {
   box-sizing: border-box;
   inline-size: 100%;
 }
 
-:deep(.ft-caption-translation-options > .os-scrollbar) {
+:deep(.ft-caption-list-options > .os-scrollbar) {
   --os-handle-bg: rgb(255 255 255 / 40%);
   --os-handle-bg-hover: rgb(255 255 255 / 55%);
   --os-handle-bg-active: rgb(255 255 255 / 70%);
 }
 
-:deep(.ft-caption-translation-options.ft-menu-grid) {
+:deep(.ft-caption-list-options.ft-menu-grid) {
   display: flex;
   flex-flow: row wrap;
-  place-content: flex-start center;
+
+  /* Centred like the other submenus, but a list that scrolls starts at its first option */
+  place-content: safe center;
   gap: 4px;
   padding: 4px;
 }
 
-:deep(.ft-caption-translation-options.ft-menu-grid > button) {
+:deep(.ft-caption-list-options.ft-menu-grid > button) {
   flex-wrap: wrap;
   place-content: center;
   inline-size: 90px;
@@ -1737,12 +1749,12 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   white-space: normal;
 }
 
-:deep(.ft-caption-translation-options.ft-menu-grid > button:hover),
-:deep(.ft-caption-translation-options.ft-menu-grid > button:focus-visible) {
+:deep(.ft-caption-list-options.ft-menu-grid > button:hover),
+:deep(.ft-caption-list-options.ft-menu-grid > button:focus-visible) {
   background: rgb(255 255 255 / 20%);
 }
 
-:deep(.ft-caption-translation-options.ft-menu-grid > button > span) {
+:deep(.ft-caption-list-options.ft-menu-grid > button > span) {
   display: -webkit-box;
   overflow: hidden;
   max-inline-size: 100%;
@@ -4669,6 +4681,44 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 .captionAppearanceSample span {
+  padding-inline: 0.15em;
+  border-radius: calc(4px * var(--ui-roundness));
+  background-color: var(--caption-background-color);
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-stroke: var(--caption-text-stroke-width) var(--caption-edge-color);
+  paint-order: stroke fill;
+  text-rendering: geometricprecision;
+}
+
+/* Shaka only displays one caption track, so the secondary one sits at the opposite edge of the player */
+.secondaryCaptions {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: var(--caption-align-items);
+  justify-content: flex-end;
+  padding: var(--caption-edge-gap);
+  color: var(--caption-text-color);
+  font-family: var(--app-font-family);
+  font-size: min(
+    calc(20px * var(--caption-font-scale) * var(--caption-player-scale, 1)),
+    var(--caption-max-font-size, 100vb)
+  );
+  line-height: 1.4;
+  text-align: var(--caption-text-align);
+  text-shadow: var(--caption-text-shadow);
+  white-space: pre-line;
+  pointer-events: none;
+}
+
+.secondaryCaptions.secondaryCaptionsAtTop {
+  justify-content: flex-start;
+}
+
+.secondaryCaptions span {
   padding-inline: 0.15em;
   border-radius: calc(4px * var(--ui-roundness));
   background-color: var(--caption-background-color);

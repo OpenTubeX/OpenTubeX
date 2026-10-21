@@ -38,6 +38,18 @@ test('default captions skip transcripts of dubbed audio', () => {
   assert.equal(getPreferredCaption(withArabic, 'de', false), withArabic[3])
 })
 
+test('default captions prefer the auto-translation remembered from the player', () => {
+  const captions = [
+    { language: 'es', label: 'Spanish' },
+    { language: 'ko', label: 'Korean (auto-generated)', isOriginalLanguage: true },
+    { language: 'es', label: 'Spanish (translated from Korean)', isAutotranslated: true, isPreferredTranslation: true }
+  ]
+
+  // Also with caption translations turned off, as the user picked it in the player themselves
+  assert.equal(getPreferredCaption(captions, 'es', true), captions[2])
+  assert.equal(getPreferredCaption(captions, 'es', false), captions[2])
+})
+
 test('yt-dlp captions flag dubbed transcripts and translate from the original language', () => {
   const timedText = (lang, tlang) =>
     `https://www.youtube.com/api/timedtext?v=aaaaaaaaaaa&kind=asr&lang=${lang}${tlang ? `&tlang=${tlang}` : ''}&fmt=vtt`

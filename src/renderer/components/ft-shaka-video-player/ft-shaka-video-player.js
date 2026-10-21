@@ -73,7 +73,8 @@ import {
   repairInvidiousManifest,
   translateSponsorBlockCategory
 } from '../../helpers/player/utils'
-import { getPreferredCaption } from '../../../captionLanguages'
+import { findCaptionByLocale, getPreferredCaption } from '../../../captionLanguages'
+import { getActiveCueText } from '../../helpers/player/secondary-captions'
 import {
   addKeyboardShortcutToActionTitle,
   formatDurationAsTimestamp,
@@ -1600,9 +1601,13 @@ export default defineComponent({
     // The channel's subtitles state is more specific than the global default, so it wins
     const enableSubtitlesInitially = getSavedChannelSubtitlesState() ?? store.getters.getEnableSubtitlesByDefault
 
+    // Caption tracks are added in parallel, so Shaka's track order can differ from props.captions.
+    // Remember the caption itself to find its track once they are loaded.
+    let initialCaption = null
+
     if (restoreCaptionIndex === null && enableSubtitlesInitially && props.captions.length > 0) {
-      const caption = getCaptionToEnable()
-      restoreCaptionIndex = caption ? props.captions.indexOf(caption) : 0
+      initialCaption = getCaptionToEnable()
+      restoreCaptionIndex = initialCaption ? props.captions.indexOf(initialCaption) : 0
     }
 
     const showStats = ref(false)
@@ -1785,10 +1790,48 @@ export default defineComponent({
     // Timing belongs to the current video, rather than the saved appearance settings.
     let captionTimingOffset = props.sabrReloadState?.captionTimingOffset ?? 0
 
+    const secondaryCaptionText = ref('')
+    const secondaryCaptionsAtTop = computed(() => captionSettings.value.anchor.startsWith('bottom'))
+    /** @type {{ url: string, label: string, language: string, mimeType: string } | null} */
+    let secondaryCaption = null
+    /** @type {import('../../helpers/player/secondary-captions').SecondaryCaptionCue[]} */
+    let secondaryCaptionCues = []
+    /** @type {AbortController | null} */
+    let secondaryCaptionAbortController = null
+    // Follows Shaka's caption area, which makes room for the visible controls and the fullscreen side dock
+    const secondaryCaptionsBox = ref({})
+    /** @type {ResizeObserver | null} */
+    let secondaryCaptionsBoxObserver = null
+    /** @type {HTMLElement | null} */
+    let observedTextContainer = null
+    onBeforeUnmount(() => {
+      secondaryCaptionAbortController?.abort()
+      secondaryCaptionsBoxObserver?.disconnect()
+    })
+
+    function observeSecondaryCaptionsBox() {
+      const textContainer = container.value?.querySelector('.shaka-text-container')
+      // Shaka replaces the container when it reloads, so follow the current one
+      if (!(textContainer instanceof HTMLElement) || textContainer === observedTextContainer) return
+
+      secondaryCaptionsBoxObserver ??= new ResizeObserver(() => {
+        if (!observedTextContainer) return
+        secondaryCaptionsBox.value = {
+          inset: `${observedTextContainer.offsetTop}px auto auto ${observedTextContainer.offsetLeft}px`,
+          inlineSize: `${observedTextContainer.offsetWidth}px`,
+          blockSize: `${observedTextContainer.offsetHeight}px`,
+        }
+      })
+      secondaryCaptionsBoxObserver.disconnect()
+      observedTextContainer = textContainer
+      secondaryCaptionsBoxObserver.observe(textContainer)
+    }
+
     function updateCaptionTiming(offset) {
       if (!Number.isFinite(offset)) return
       captionTimingOffset = offset
       applyCaptionTiming()
+      updateSecondaryCaptionText()
       events.dispatchEvent(new Event('captionTimingChanged'))
     }
 
@@ -6324,9 +6367,9 @@ export default defineComponent({
       // they keep their own layouts.
       const submenus = menu.querySelectorAll(':scope > .shaka-sub-menu:not(.ft-caption-appearance-menu, .ft-caption-timing-menu)')
       for (const submenu of submenus) {
-        const isTranslationMenu = submenu.classList.contains('ft-caption-translation-menu')
-        submenu.classList.toggle('ft-menu-grid', usePlayerMenuGrid.value && !isTranslationMenu)
-        submenu.querySelector('.ft-caption-translation-options')
+        const isListMenu = submenu.classList.contains('ft-caption-list-menu')
+        submenu.classList.toggle('ft-menu-grid', usePlayerMenuGrid.value && !isListMenu)
+        submenu.querySelector('.ft-caption-list-options')
           ?.classList.toggle('ft-menu-grid', usePlayerMenuGrid.value)
       }
 
@@ -7418,6 +7461,7 @@ export default defineComponent({
         syncPlayPauseControlIcons()
       }
       sponsorBlockCurrentTime.value = video.value?.currentTime ?? 0
+      updateSecondaryCaptionText()
       sleepTimer.handleSeeked()
       checkAbRepeatBoundary(false)
       emit('seeked', video.value?.currentTime ?? 0)
@@ -7592,6 +7636,7 @@ export default defineComponent({
         sponsorBlockCurrentTime.value = currentTime
         annotationCurrentTime.value = currentTime
         updateHiddenShortsSeekBar(currentTime)
+        updateSecondaryCaptionText()
 
         emit('timeupdate', currentTime)
         emitTerminalSponsorBlockOutroStarted(currentTime)
@@ -8112,8 +8157,9 @@ export default defineComponent({
       const selectTextTrack = player.selectTextTrack.bind(player)
 
       // Shaka's own UI only passes the track, so anything without `isUserAction`
-      // is a selection the user made themselves
-      player.selectTextTrack = (track = null, isUserAction = true) => {
+      // is a selection the user made themselves. Only picking a track in the menu
+      // changes the remembered auto-translation, toggling captions on doesn't.
+      player.selectTextTrack = (track = null, isUserAction = true, isTrackChoice = isUserAction) => {
         const activeTextTrack = player.getTextTracks().find(textTrack => textTrack.active)
 
         if (isUserAction) {
@@ -8124,6 +8170,10 @@ export default defineComponent({
           clearDisplayedCaptions()
         } else {
           lastSelectedCaptionTrack = track
+
+          if (isTrackChoice) {
+            rememberAutoTranslatedCaption(track)
+          }
 
           if (activeTextTrack && activeTextTrack.id !== track.id) {
             selectTextTrack(null)
@@ -8851,6 +8901,25 @@ export default defineComponent({
             () => controls.getPlayer().isLive() ? [] : props.captionTranslations,
             caption => Boolean(findMatchingTextTrack(controls.getPlayer().getTextTracks(), caption)?.active),
             caption => selectCaptionTranslation(caption, controls.getPlayer()),
+            {
+              getOptions: () => {
+                if (controls.getPlayer().isLive()) return []
+                // The main track can't be shown a second time
+                const activeTrack = controls.getPlayer().getTextTracks().find(track => track.active)
+                return props.captions.filter(caption => !isShownAsMainCaption(caption, activeTrack))
+              },
+              isAvailable: () => {
+                if (controls.getPlayer().isLive() || props.captions.length === 0) return false
+                const activeTrack = controls.getPlayer().getTextTracks().find(track => track.active)
+                // A translated main track leaves even a video's only original track free to show as the second one,
+                // and a remembered secondary track always needs a way to turn it off
+                return secondaryCaption !== null || (activeTrack
+                  ? props.captions.some(caption => !isShownAsMainCaption(caption, activeTrack))
+                  : props.captions.length > 1)
+              },
+              isSelected: caption => caption === secondaryCaption,
+              select: caption => selectSecondaryCaption(caption),
+            },
             { getOffset: () => captionTimingOffset, setOffset: updateCaptionTiming },
             rootElement,
             controls
@@ -8919,6 +8988,141 @@ export default defineComponent({
       return true
     }
 
+    /**
+     * Picking an auto-translation makes later videos open with captions translated into the same language,
+     * picking any other track forgets it again.
+     * @param {shaka.extern.Track} track
+     */
+    function rememberAutoTranslatedCaption(track) {
+      // Tracks from a SABR manifest are not added by us, so they are only found through the caption list
+      const caption = captionSources.get(player)?.get(track.id) ??
+        props.captions.find(caption => findMatchingTextTrack([track], caption))
+      const language = caption?.isAutotranslated ? caption.language : ''
+
+      if (language !== store.getters.getAutoTranslatedCaptionLocale) {
+        store.dispatch('updateAutoTranslatedCaptionLocale', language)
+      }
+    }
+
+    /**
+     * Shows a second caption track alongside the main captions, Shaka can only display one track itself.
+     * @param {{ url: string, label: string, language: string, mimeType: string } | null} caption
+     * @param {boolean} [remember] keep the language for later videos
+     * @returns {Promise<boolean>}
+     */
+    async function selectSecondaryCaption(caption, remember = true) {
+      secondaryCaptionAbortController?.abort()
+      secondaryCaptionAbortController = null
+      secondaryCaption = caption
+      secondaryCaptionCues = []
+      updateSecondaryCaptionText()
+
+      const language = caption?.language ?? ''
+      if (remember && language !== store.getters.getSecondaryCaptionLocale) {
+        store.dispatch('updateSecondaryCaptionLocale', language)
+      }
+
+      if (!caption) {
+        return true
+      }
+
+      const abortController = new AbortController()
+      secondaryCaptionAbortController = abortController
+      const { signal } = abortController
+
+      try {
+        const response = await fetch(await getSubtitleRequestUrl(caption.url, store.getters), { signal })
+        if (!response.ok) {
+          throw new Error(`Secondary captions request failed with HTTP ${response.status}`)
+        }
+
+        const parserFactory = shaka.text.TextEngine.findParser(caption.mimeType)
+        const cues = parserFactory().parseMedia(
+          new TextEncoder().encode(await response.text()),
+          { periodStart: 0, segmentStart: 0, segmentEnd: Infinity, vttOffset: 0 },
+          caption.url,
+          []
+        )
+
+        if (signal.aborted) {
+          return false
+        }
+
+        secondaryCaptionCues = cues
+        updateSecondaryCaptionText()
+        return true
+      } catch (error) {
+        if (signal.aborted) {
+          return false
+        }
+        console.error('Failed to load secondary captions', error)
+        secondaryCaption = null
+        return false
+      } finally {
+        if (secondaryCaptionAbortController === abortController) {
+          secondaryCaptionAbortController = null
+        }
+      }
+    }
+
+    /**
+     * Loads the remembered secondary captions once the main captions are shown for a video.
+     */
+    function restoreSecondaryCaption() {
+      const language = store.getters.getSecondaryCaptionLocale
+      const activeTrack = player?.getTextTracks().find(track => track.active)
+
+      if (!language || !activeTrack || player.isLive() || (secondaryCaption && props.captions.includes(secondaryCaption))) {
+        return
+      }
+
+      const caption = findCaptionByLocale(
+        props.captions.filter(caption => !isShownAsMainCaption(caption, activeTrack)),
+        language
+      )
+
+      if (caption) {
+        selectSecondaryCaption(caption, false)
+      }
+    }
+
+    /**
+     * @param {{ label: string, language: string }} caption
+     * @param {shaka.extern.Track | undefined} activeTrack
+     */
+    function isShownAsMainCaption(caption, activeTrack) {
+      return activeTrack?.language === caption.language && activeTrack.label === caption.label
+    }
+
+    function updateSecondaryCaptionText() {
+      const activeTrack = secondaryCaptionCues.length > 0 ? player?.getTextTracks().find(track => track.active) : undefined
+
+      // Only shown together with the main captions, so turning captions off hides both
+      secondaryCaptionText.value = activeTrack && !isShownAsMainCaption(secondaryCaption, activeTrack)
+        ? getActiveCueText(secondaryCaptionCues, (video.value?.currentTime ?? 0) - captionTimingOffset)
+        : ''
+
+      if (secondaryCaptionText.value) {
+        observeSecondaryCaptionsBox()
+      }
+    }
+
+    function handleTextTrackChanged() {
+      syncShortsCaptionsEnabled()
+      restoreSecondaryCaption()
+      updateSecondaryCaptionText()
+    }
+
+    watch(() => props.captions, () => {
+      if (secondaryCaption && !props.captions.includes(secondaryCaption)) {
+        secondaryCaptionAbortController?.abort()
+        secondaryCaptionAbortController = null
+        secondaryCaption = null
+        secondaryCaptionCues = []
+        updateSecondaryCaptionText()
+      }
+    })
+
     function toggleCaptions() {
       const textTracks = player.getTextTracks()
 
@@ -8929,7 +9133,7 @@ export default defineComponent({
       if (textTracks.some(track => track.active)) {
         player.selectTextTrack(null)
       } else {
-        player.selectTextTrack(getTextTrackToEnable(textTracks))
+        player.selectTextTrack(getTextTrackToEnable(textTracks), true, false)
       }
 
       showOverlayControls()
@@ -12137,7 +12341,7 @@ export default defineComponent({
       )
       player.addEventListener('loaded', applyCaptionTiming)
       wrapTextTrackSelection()
-      player.addEventListener('textchanged', syncShortsCaptionsEnabled)
+      player.addEventListener('textchanged', handleTextTrackChanged)
 
       player.addEventListener('buffering', event => {
         isBuffering.value = event.buffering
@@ -12620,7 +12824,9 @@ export default defineComponent({
         const index = restoreCaptionIndex
         restoreCaptionIndex = null
 
-        const textTrack = player.getTextTracks()[index]
+        const textTracks = player.getTextTracks()
+        const textTrack = findMatchingTextTrack(textTracks, initialCaption) ?? textTracks[index]
+        initialCaption = null
 
         if (textTrack) {
           player.selectTextTrack(textTrack, false)
@@ -12951,7 +13157,7 @@ export default defineComponent({
       document.removeEventListener('click', handleQualityMenuClick, true)
       window.removeEventListener('blur', handleTemporaryPlaybackRateFocusLoss)
       window.removeEventListener('blur', handleSeekBarWindowBlur)
-      player?.removeEventListener('textchanged', syncShortsCaptionsEnabled)
+      player?.removeEventListener('textchanged', handleTextTrackChanged)
 
       cancelTemporaryPlaybackRateHolds()
 
@@ -13474,6 +13680,9 @@ export default defineComponent({
       captionPlayerVariables,
       captionAppearanceSampleBottom,
       showCaptionAppearanceSample,
+      secondaryCaptionText,
+      secondaryCaptionsBox,
+      secondaryCaptionsAtTop,
       isActiveTab,
       container,
       mobileMiniBarOverlay,

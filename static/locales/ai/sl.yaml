@@ -2061,6 +2061,7 @@ Video:
       Error: "Videoposnetka ni bilo mogoče predvajati na napravi"
       Error With Details: "Videoposnetka ni bilo mogoče predvajati na napravi: {error}"
       Untrusted Receiver: "Potrdilo sprejemnika ni zaupanja vredno. Uporabite preverjen sprejemnik Google Cast."
+    Secondary Captions: Sekundarni podnapisi
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Preostali čas oglasa pred videoposnetkom: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Preostali čas zakasnitve SABR: {remindingTimeSeconds}s'

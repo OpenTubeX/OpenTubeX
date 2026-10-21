@@ -1648,6 +1648,7 @@ Video:
       Error: "Non se puido transmitir o vídeo"
       Error With Details: "Non se puido transmitir o vídeo: {error}"
       Untrusted Receiver: "O certificado do receptor non é de confianza. Usa un receptor Google Cast autenticado."
+    Secondary Captions: Subtítulos secundarios
   Station: Estación
   Playlist:
     Unavailable videos are hidden: 1 vídeo non dispoñible está oculto | {count} vídeos non dispoñibles están ocultos

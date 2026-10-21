@@ -1914,6 +1914,7 @@ Video:
       Error: "No se pudo transmitir el video"
       Error With Details: "No se pudo transmitir el video: {error}"
       Untrusted Receiver: "El certificado del receptor no es de confianza. Usa un receptor Google Cast autenticado."
+    Secondary Captions: Subtítulos secundarios
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Tiempo restante previo al anuncio: {remindingTimeSeconds} s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Tiempo restante de retroceso de SABR: {remindingTimeSeconds} s'

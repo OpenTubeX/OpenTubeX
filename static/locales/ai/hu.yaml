@@ -1603,6 +1603,7 @@ Video:
       Error: "Nem sikerült átküldeni a videót"
       Error With Details: "Nem sikerült átküldeni a videót: {error}"
       Untrusted Receiver: "A fogadó tanúsítványa nem megbízható. Használj hitelesített Google Cast fogadót."
+    Secondary Captions: Másodlagos feliratok
   External Media:
     Dislikes: "Nemtetszés | Nemtetszés"
     Reposts: "Újbóli bejegyzés | Újbóli bejegyzés"

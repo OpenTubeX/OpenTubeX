@@ -1665,6 +1665,7 @@ Video:
       Error: "Видео није могуће емитовати"
       Error With Details: "Видео није могуће емитовати: {error}"
       Untrusted Receiver: "Сертификат пријемника није поуздан. Користите аутентификован Google Cast пријемник."
+    Secondary Captions: Секундарни титлови
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Преостало време уводног огласа: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Преостало време до поновног покушаја SABR-а: {remindingTimeSeconds}s'
