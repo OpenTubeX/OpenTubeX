@@ -82,6 +82,8 @@ export const BASIC_QUICK_SETTING_DEFINITIONS = Object.freeze([
       'Settings.General Settings.Reduced Motion.Force On',
       'Settings.General Settings.Reduced Motion.Force Off',
     ],
+    // The app follows the system preference for any unsupported value
+    effectiveValue: settings => ['on', 'off'].includes(settings.reducedMotion) ? settings.reducedMotion : 'system',
     icon: ['fas', 'gauge'],
   },
   {
