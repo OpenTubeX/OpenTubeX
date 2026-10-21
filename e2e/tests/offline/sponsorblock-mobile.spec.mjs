@@ -65,8 +65,16 @@ test.describe('mobile SponsorBlock', () => {
       const bottom = parseFloat(getComputedStyle(element.querySelector('.skippedSegmentsWrapper')).bottom)
       return Math.abs(bottom - Math.max(height * 0.15, 46 + height * 0.055))
     })).toBeLessThan(1)
+    // Shaka only shows its controls when the pointer moves over the player. Right after a switch
+    // the player can still have its previous size, so the pointer can land outside it or on the
+    // notice, which stops mouse moves. Move to a corner again until the controls show.
+    const showControls = () => expect(async () => {
+      await page.mouse.move(0, 0)
+      await player.hover({ position: { x: 20, y: 20 } })
+      await expect(player.locator('.shaka-controls-container')).toHaveAttribute('shown', 'true', { timeout: 1000 })
+    }).toPass({ timeout: 15_000 })
     const expectInlinePosition = async () => {
-      await player.hover()
+      await showControls()
       await expect(player).toHaveAttribute('data-action-dock-visible', 'true')
       await expectDefaultNoticePosition()
     }
@@ -75,7 +83,7 @@ test.describe('mobile SponsorBlock', () => {
     for (const mode of ['fullwindow', 'fullscreen']) {
       if (mode === 'fullscreen') await setPlayerFullscreen(page, true)
       else await page.locator('body').press('s')
-      await player.hover()
+      await showControls()
       await expect(player).toHaveAttribute('data-action-dock-visible', 'true')
       await expect.poll(async () => {
         const noticeBox = await notice.boundingBox()
