@@ -365,6 +365,8 @@ let selectionAnchorId = null
 const DRAG_THRESHOLD_PX = 5
 const DRAG_AUTO_SCROLL_EDGE_PX = 48
 const DRAG_AUTO_SCROLL_PX_PER_MS = 0.6
+// Follow wall-clock time on slow frames, but limit the jump after a stall.
+const DRAG_AUTO_SCROLL_MAX_FRAME_MS = 100
 const SETTLE_DURATION_MS = 180
 const REORDER_STATE_UPDATE_TIMEOUT_MS = 300
 
@@ -619,7 +621,8 @@ function startDragAutoScroll() {
       return
     }
 
-    const step = speed * DRAG_AUTO_SCROLL_PX_PER_MS * Math.max(0, Math.min(time - previousTime, 32))
+    const elapsed = Math.max(0, Math.min(time - previousTime, DRAG_AUTO_SCROLL_MAX_FRAME_MS))
+    const step = speed * DRAG_AUTO_SCROLL_PX_PER_MS * elapsed
     previousTime = time
     if (vertical.value) {
       container.scrollTop += step
@@ -638,14 +641,29 @@ function startDragAutoScroll() {
  * pointer nears or passes that edge
  */
 function getDragAutoScrollSpeed() {
-  if (!dragSession?.started) return 0
+  const container = dropZoneRef.value
+  if (!dragSession?.started || !container) return 0
 
-  const { pointerCurrent, viewportStart, viewportEnd } = dragSession
-  const edge = Math.min(DRAG_AUTO_SCROLL_EDGE_PX, (viewportEnd - viewportStart) / 4)
+  const {
+    pointerCurrent, viewportStart, viewportEnd,
+    rects, groupStartIndex, groupEndIndex
+  } = dragSession
+  const viewportSize = viewportEnd - viewportStart
+  const edge = Math.min(DRAG_AUTO_SCROLL_EDGE_PX, viewportSize / 4)
+  // Stop once the dragged tabs' pinned or unpinned group is fully visible at
+  // that end, since they cannot move past it.
+  const groupRects = [rects[groupStartIndex], rects[groupEndIndex]]
+  const groupStart = Math.min(...groupRects.map(rect => rect.start))
+  const groupEnd = Math.max(...groupRects.map(rect => rect.start + rect.size))
+  const scroll = containerScrollPosition(container)
   if (pointerCurrent < viewportStart + edge) {
-    return -Math.min(1, (viewportStart + edge - pointerCurrent) / edge)
+    return groupStart < scroll
+      ? -Math.min(1, (viewportStart + edge - pointerCurrent) / edge)
+      : 0
   }
-  return Math.max(0, Math.min(1, (pointerCurrent - viewportEnd + edge) / edge))
+  return groupEnd > scroll + viewportSize
+    ? Math.max(0, Math.min(1, (pointerCurrent - viewportEnd + edge) / edge))
+    : 0
 }
 
 function scheduleDragPositionUpdate() {

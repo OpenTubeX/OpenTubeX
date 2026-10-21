@@ -13,14 +13,14 @@ const source = component.slice(
 )
 const scrollHandler = component.match(/function handleScroll\(\) \{[\s\S]*?\n\}/)[0]
 
-function createDragHarness({ vertical = false, count = 100 } = {}) {
+function createDragHarness({ vertical = false, count = 100, pinnedCount = 0 } = {}) {
   const frames = new Map()
   let frameId = 0
   const timers = new Map()
   let timerId = 0
   const calls = { orders: 0, offsets: 0, updates: 0 }
   let now = 0
-  const tabs = ref(Array.from({ length: count }, (_, index) => ({ id: `tab-${index}` })))
+  const tabs = ref(Array.from({ length: count }, (_, index) => ({ id: `tab-${index}`, isPinned: index < pinnedCount })))
 
   class TabElement {
     constructor(index) { this.index = index; this.dataset = { reorderId: `tab-${index}` } }
@@ -161,8 +161,10 @@ test('scrolls toward the end the dragged pointer is held near in both layouts', 
     harness.flushFrame(20)
     assertScroll(0.5 * 0.6 * 20, 'scrolls slower halfway into the edge')
     harness.move(1100)
-    harness.flushFrame(100)
-    assertScroll(6 + 0.6 * 32, 'scrolls at full speed past the edge and caps long frames')
+    harness.flushFrame(50)
+    assertScroll(6 + 0.6 * 50, 'scrolls at full speed past the edge')
+    harness.flushFrame(1000)
+    assertScroll(36 + 0.6 * 100, 'limits the jump after a stalled frame')
 
     harness.move(500)
     harness.flushFrame()
@@ -174,5 +176,26 @@ test('scrolls toward the end the dragged pointer is held near in both layouts', 
 
     harness.api.handleDragPointerUp()
     assert.equal(harness.frames.size, 0, 'release stops scrolling')
+  }
+})
+
+test('stops autoscrolling once the dragged tab group is visible at that end', () => {
+  for (const vertical of [false, true]) {
+    const harness = createDragHarness({ vertical, pinnedCount: 3 })
+    const axis = vertical ? 'scrollTop' : 'scrollLeft'
+
+    harness.move(1100)
+    harness.flushFrame()
+    assert.equal(harness.container[axis], 0, 'the pinned group already ends inside the list')
+    assert.equal(harness.frames.size, 0)
+
+    harness.container[axis] = 200
+    harness.move(-20)
+    harness.flushFrame(10)
+    assert.ok(Math.abs(harness.container[axis] - (200 - 0.6 * 10)) < 1e-9, 'still scrolls back to hidden pinned tabs')
+    harness.container[axis] = 0
+    harness.flushFrame()
+    assert.equal(harness.container[axis], 0)
+    assert.equal(harness.frames.size, 0, 'stops at the start of the pinned group')
   }
 })
