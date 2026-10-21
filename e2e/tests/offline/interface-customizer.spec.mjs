@@ -46,13 +46,20 @@ test.describe('interface customizer', () => {
     await expect.poll(() => topBar.evaluate(bar => (
       bar.querySelector('.previewSearch').getBoundingClientRect().left - bar.querySelector('.previewLogo').getBoundingClientRect().right
     )), { message: 'gap between the logo and the search bar' }).toBeGreaterThan(0)
-    // The real header shows a 25px icon beside a 100px wordmark.
-    await expect.poll(() => customizer.locator('.previewLogo').evaluate(logo => logo.getBoundingClientRect().width)).toBeCloseTo(130, 0)
+    // The preview scales a typical window down to fit, so measure in its own pixels.
+    const designWidth = element => element.getBoundingClientRect().width / Number(getComputedStyle(element.closest('.previewWindow')).zoom)
+    await expect.poll(() => customizer.locator('.previewWindow').evaluate(element => Number(getComputedStyle(element).zoom))).toBeLessThan(1)
+    // The real header shows a 25px icon beside a 100px wordmark and a search bar up to 440px wide.
+    await expect.poll(() => customizer.locator('.previewLogo').evaluate(designWidth)).toBeCloseTo(130, 0)
+    await expect.poll(() => customizer.locator('.previewSearch').evaluate(designWidth)).toBeCloseTo(440, 0)
 
-    // Narrow previews fall back to a layout that still fits every item,
-    // including widths just below what the centered layout needs.
+    // Without zoom support, narrow previews fall back to a layout that still
+    // fits every item, including widths just below what the centered layout needs.
     for (const width of [440, 430, 400, 340]) {
-      await customizer.locator('.previewWindow').evaluate((element, value) => { element.style.inlineSize = value }, `${width}px`)
+      await customizer.locator('.previewWindow').evaluate((element, value) => {
+        element.style.zoom = '1'
+        element.style.inlineSize = value
+      }, `${width}px`)
       await expect.poll(() => topBar.evaluate(bar => {
         const contentEnd = bar.getBoundingClientRect().right - Number.parseFloat(getComputedStyle(bar).paddingRight)
         const profile = bar.querySelector('.previewProfile').getBoundingClientRect()

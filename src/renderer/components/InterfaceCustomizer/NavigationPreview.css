@@ -1,5 +1,6 @@
 .navigationPreview {
   block-size: 100%;
+  container-type: inline-size;
   display: flex;
   justify-content: center;
   user-select: none;
@@ -17,6 +18,12 @@
   flex-direction: column;
   inline-size: 100%;
   overflow: hidden;
+}
+
+/* Show the desktop layout at a typical window width, scaled down to fit,
+   so the header and rail keep the real app's proportions. */
+.desktop .previewWindow {
+  zoom: min(1, calc(100cqi / 1000px));
 }
 
 .mobile .previewWindow {
