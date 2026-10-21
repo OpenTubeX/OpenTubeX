@@ -5617,11 +5617,9 @@ export default defineComponent({
         '.shaka-controls-button-panel, .shaka-settings-menu, .shaka-context-menu'
       )
       if (!interactiveTarget && isCapacitorMobilePlayer()) {
-        const bounds = container.value?.getBoundingClientRect()
-        const relativeX = bounds?.width > 0 ? (event.clientX - bounds.left) / bounds.width : 0.5
         // Keep side double-tap seeking, but replace center double-tap
         // fullscreen with the vertical phone gesture.
-        if (relativeX <= 0.35 || relativeX >= 0.65) {
+        if (getMobileTapDirection(event.clientX) !== 0) {
           return
         }
       } else if (!interactiveTarget) {
@@ -5731,6 +5729,7 @@ export default defineComponent({
       consumeMobileTitleClickSuppression,
       dismissMobileMiniPlayer,
       finishMobileFullscreenGesture,
+      getMobileTapDirection,
       handleMobilePlayerSurfaceClick,
       handleMobilePlayerTouchEnd,
       mobileFullscreenSwipeSettling,

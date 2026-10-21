@@ -45,6 +45,34 @@ async function expectActionsFitPlayer(player) {
   }
 }
 
+/**
+ * Reads the queue dock header, which must stay one row with every shown part
+ * inside it. Its clear label hides before the count.
+ */
+function readQueueHeader(queue) {
+  return queue.locator('.queueHeader').evaluate(element => {
+    const header = element.getBoundingClientRect()
+    const center = header.top + header.height / 2
+    const label = element.querySelector('.queueLabel')
+    const text = document.createRange()
+    text.selectNodeContents(label)
+    const clearLabel = element.querySelector('.clearQueueLabel').checkVisibility()
+    const count = element.querySelector('.queueCount').checkVisibility()
+    const parts = [...element.querySelectorAll('.queueTitle, .queueCount, .queueHeaderAction, .fullscreenDockClose')]
+    return {
+      oneRow: Math.round(header.height) === 52 && parts.filter(part => part.checkVisibility()).every(part => {
+        const bounds = part.getBoundingClientRect()
+        return bounds.left >= header.left - 1 && bounds.right <= header.right + 1 &&
+          Math.abs(bounds.top + bounds.height / 2 - center) <= 1
+      }),
+      hideOrder: !clearLabel || count,
+      titleTruncated: text.getBoundingClientRect().width - label.getBoundingClientRect().width >= 0.001,
+      clearLabel,
+      count,
+    }
+  })
+}
+
 async function expectUnifiedDockHeader(dock, headerSelector) {
   await expect.poll(() => dock.evaluate((element, selector) => {
     const header = element.querySelector(selector)
@@ -223,15 +251,7 @@ for (const { uiScale, iconPack, colorScheme } of [
         await playlist.press('Escape')
         await expect(playlist).toHaveCount(0)
         await expectActionsFitPlayer(player)
-        await expect.poll(() => queue.locator('.queueHeader').evaluate(element => {
-          const bounds = element.getBoundingClientRect()
-          const title = element.querySelector('.queueTitle').getBoundingClientRect()
-          const count = element.querySelector('.queueCount').getBoundingClientRect()
-          return Array.from(element.children).every(child => {
-            const childBounds = child.getBoundingClientRect()
-            return childBounds.left >= bounds.left - 1 && childBounds.right <= bounds.right + 1
-          }) && count.left >= title.right && Math.abs(count.top + count.height / 2 - title.top - title.height / 2) <= 1
-        })).toBe(true)
+        await expect.poll(() => readQueueHeader(queue)).toMatchObject({ oneRow: true, hideOrder: true, titleTruncated: false })
         await expectValidScroll(queueScroller, '.queueItemsContent')
         await setWindowSize(app, page, { width: 1360, height: 850 })
         await expectValidScroll(queueScroller, '.queueItemsContent')
@@ -471,3 +491,83 @@ for (const { uiScale, iconPack, colorScheme } of [
     })
   })
 }
+
+test.describe('fullscreen queue header', () => {
+  test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
+
+  test('hides the clear label, then the count, to stay one row', { tag: '@scale' }, async ({ app, page, uiScale }) => {
+    await mockPlayableWatchPage(app, page)
+    const video = await openMockedVideo(page)
+    await page.evaluate(() => {
+      for (let index = 0; index < 3; index++) {
+        window.$store.commit('addVideoToWatchQueue', {
+          video: { videoId: `queued0000${index}`, title: `Queued video ${index + 1}`, author: 'Queue channel' }
+        })
+      }
+    })
+    await video.evaluate(element => element.pause())
+    await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setMinimumSize(0, 0))
+    await setWindowSize(app, page, { width: 1360, height: 420 })
+    const player = page.locator('.ftVideoPlayer')
+    await page.locator('body').press('s')
+    await expect(player).toHaveClass(/fullWindow/)
+    const watch = await page.evaluateHandle(findWatchComponent)
+    try {
+      await watch.evaluate(component => component.proxy.$refs.player.setFullscreenQueue(true))
+      const queue = player.locator('.fullscreenQueueOverlay.open')
+      await expect(queue).toBeVisible()
+      await expect.poll(() => readQueueHeader(queue)).toEqual({
+        oneRow: true, hideOrder: true, titleTruncated: false, clearLabel: true, count: true
+      })
+
+      // The narrowest landscape dock keeps the title by dropping the clear label.
+      await setWindowSize(app, page, { width: 650, height: 430 })
+      await expect.poll(() => readQueueHeader(queue)).toMatchObject({
+        oneRow: true, hideOrder: true, titleTruncated: false, clearLabel: false
+      })
+      const clear = queue.getByRole('button', { name: 'Clear Queue', exact: true })
+      await expect(clear).toHaveAttribute('title', 'Clear Queue')
+      const closeBox = await queue.getByRole('button', { name: 'Close', exact: true }).boundingBox()
+      for (const action of [clear, queue.getByRole('button', { name: 'Save Queue to Playlist', exact: true })]) {
+        const box = await action.boundingBox()
+        expect(box.width).toBeCloseTo(closeBox.width, 0)
+        expect(box.height).toBeCloseTo(closeBox.height, 0)
+      }
+
+      // Hiding the save action leaves room for the count again.
+      await setWindowSize(app, page, { width: Math.round(760 * uiScale / 100), height: 440 })
+      await expect.poll(() => readQueueHeader(queue)).toMatchObject({ clearLabel: false, count: false })
+      await page.evaluate(() => window.$store.dispatch('updateHidePlaylists', true))
+      await expect.poll(() => readQueueHeader(queue)).toMatchObject({ oneRow: true, titleTruncated: false, count: true })
+
+      // Font changes resize the title without resizing the header. A wider
+      // copy of the bundled font refits once it loads, and switching back
+      // refits without any font loading.
+      await page.evaluate(() => {
+        const rule = [...document.styleSheets].flatMap(sheet => [...sheet.cssRules])
+          .find(rule => rule instanceof CSSFontFaceRule && /geist-latin-wght/.test(rule.style.getPropertyValue('src')))
+        const path = rule.style.getPropertyValue('src').match(/url\("?([^")]+)"?\)/)[1]
+        const url = new URL(path, rule.parentStyleSheet.href ?? document.baseURI)
+        document.fonts.add(new FontFace('Wide Late', `url(${url})`, { sizeAdjust: '150%', weight: '100 900' }))
+        return window.$store.dispatch('updateAppFont', 'Wide Late')
+      })
+      await expect.poll(() => readQueueHeader(queue)).toMatchObject({ oneRow: true, titleTruncated: false, count: false })
+      await page.evaluate(() => window.$store.dispatch('updateAppFont', 'Geist Variable'))
+      await expect.poll(() => readQueueHeader(queue)).toMatchObject({ oneRow: true, titleTruncated: false, count: true })
+
+      await page.evaluate(() => window.$store.dispatch('updateHidePlaylists', false))
+      await expect.poll(() => readQueueHeader(queue)).toMatchObject({ count: false })
+
+      // Longer translations fit again after a locale change.
+      await setWindowSize(app, page, { width: 1360, height: 450 })
+      await expect.poll(() => readQueueHeader(queue)).toMatchObject({ clearLabel: true, count: true })
+      await page.evaluate(() => window.$store.dispatch('updateCurrentLocale', 'de-DE'))
+      await expect(queue.locator('.queueLabel')).toHaveText('Warteschlange')
+      await expect.poll(() => readQueueHeader(queue)).toMatchObject({
+        oneRow: true, hideOrder: true, titleTruncated: false, clearLabel: false
+      })
+    } finally {
+      await watch.dispose()
+    }
+  })
+})
