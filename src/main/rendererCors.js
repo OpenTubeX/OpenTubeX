@@ -6,7 +6,7 @@ import { isOpenTubeXUrl } from './utils.js'
  * protections or granting the same access to embedded pages and sandboxes.
  */
 export class RendererCors {
-  /** @type {Map<number, {frame: import('electron').WebFrameMain, origin: string, authenticated: boolean, method: string | null, headers: string | null}>} */
+  /** @type {Map<number, {frame: import('electron').WebFrameMain, origin: string, authenticated: boolean, method: string | null, headers: string | null, redirectUrl?: string}>} */
   requests = new Map()
 
   /**
@@ -25,8 +25,11 @@ export class RendererCors {
     const frameUrl = new URL(frame.url)
     const appOrigin = `${frameUrl.protocol}//${frameUrl.host}`
     // Chromium changes Origin to null on a cross-origin redirect. Only accept
-    // that for a request already authorized for this exact frame.
-    const redirected = origin === 'null' && this.requests.get(id)?.frame === frame
+    // that for a request already authorized for this exact frame, or for the
+    // preflight Chromium sends to its redirect target under a new request ID.
+    const redirected = origin === 'null' && (this.requests.get(id)?.frame === frame ||
+      (details.method === 'OPTIONS' && [...this.requests.values()]
+        .some(request => request.frame === frame && request.redirectUrl === details.url)))
     if (origin !== appOrigin && !redirected) {
       this.requests.delete(id)
       return
@@ -77,6 +80,12 @@ export class RendererCors {
     }
 
     return { responseHeaders }
+  }
+
+  /** @param {import('electron').OnBeforeRedirectListenerDetails} details */
+  rememberRedirect({ id, redirectURL }) {
+    const request = this.requests.get(id)
+    if (request) request.redirectUrl = redirectURL
   }
 
   /** @param {{id: number}} details */

@@ -103,6 +103,43 @@ test('accepts opaque redirect origins only for existing app requests and prevent
   assert.deepEqual(policy.allowResponse(details), {})
 })
 
+test('answers the preflight for the redirect target of an app request only', () => {
+  const redirectURL = 'https://www.google.com/sorry/index'
+  function redirectPreflight(change = () => {}) {
+    const { policy, details } = fixture()
+    policy.rememberRequest(details)
+    policy.rememberRedirect({ id: details.id, redirectURL })
+    // Chromium preflights the redirect target under a new request ID.
+    const target = {
+      ...details,
+      id: 2,
+      url: redirectURL,
+      method: 'OPTIONS',
+      requestHeaders: { Origin: 'null', 'Access-Control-Request-Method': 'GET', 'Access-Control-Request-Headers': 'x-cookie' }
+    }
+    change(target, policy, details)
+    policy.rememberRequest(target)
+    return policy.allowResponse(target)
+  }
+
+  const result = redirectPreflight()
+  assert.equal(result.statusLine, 'HTTP/1.1 204 No Content')
+  assert.deepEqual(result.responseHeaders['access-control-allow-origin'], ['null'])
+  assert.deepEqual(result.responseHeaders['access-control-allow-headers'], ['x-cookie'])
+
+  for (const change of [
+    target => { target.url = 'https://foreign.example/' },
+    target => { target.method = 'GET' },
+    target => {
+      target.frame = { url: 'app://bundle/index.html' }
+      target.webContents = { mainFrame: target.frame }
+    },
+    (_target, policy, details) => { policy.forgetRequest(details) },
+  ]) {
+    assert.deepEqual(redirectPreflight(change), {})
+  }
+})
+
 test('retains cookie removal performed by the privacy hook', () => {
   const { policy, details } = fixture()
   policy.rememberRequest(details)

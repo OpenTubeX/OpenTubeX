@@ -2511,6 +2511,9 @@ function runApp() {
       // eslint-disable-next-line n/no-callback-literal
       callback({ responseHeaders, ...rendererCors.allowResponse(details) })
     })
+    session.defaultSession.webRequest.onBeforeRedirect(httpRequestFilter, details => {
+      rendererCors.rememberRedirect(details)
+    })
     session.defaultSession.webRequest.onCompleted(httpRequestFilter, details => {
       rendererCors.forgetRequest(details)
       storyboardRequestIds.delete(details.id)
