@@ -46,7 +46,8 @@ installViewTransitions(router)
 
 const tabNavigation = initializeTabNavigationService(router, store)
 
-observeAndroidNetworkMetered(metered => { networkMetered.value = metered }).catch(error => {
+// Read the initial state before a restored Watch page picks its starting quality.
+const networkMeteredReady = observeAndroidNetworkMetered(metered => { networkMetered.value = metered }).catch(error => {
   console.error('Failed to observe metered networks:', error)
 })
 
@@ -57,7 +58,7 @@ const dynamicColorsReady = process.env.IS_CAPACITOR
     })
   : Promise.resolve()
 
-Promise.all([router.isReady(), dynamicColorsReady]).then(async () => {
+Promise.all([router.isReady(), dynamicColorsReady, networkMeteredReady]).then(async () => {
   if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
     try {
       const { waitForDatastores } = await import('../datastores/index')
