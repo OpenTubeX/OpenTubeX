@@ -40,20 +40,20 @@ public class MobileAppearanceSettingsTest {
                 String control = "document.querySelector('.settingsContent [data-setting-key=updateRelativeTimestamps]')";
                 awaitCondition(view, "!!" + control);
                 for (int scale : new int[] {100, 125, 150}) {
-                    evaluate(view, """
+                    evaluate(view, String.format("""
                         (() => {
                             const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
                             store.commit('setShowPerformanceImpactIndicators', false);
                             store.commit('setUiScale', %d);
                         })()
-                        """.formatted(scale));
+                        """, scale));
                     awaitCondition(view, "Math.abs(window.visualViewport.scale - " + scale / 100.0 + ") < 0.01 && !" +
                         control + ".querySelector('.performanceImpact')");
                     double originalWidth = json(view, "({width: " + control +
                         ".querySelector('.switch-label-text').getBoundingClientRect().width})").getDouble("width");
                     evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setShowPerformanceImpactIndicators', true)");
                     awaitCondition(view, "!!" + control + ".querySelector('.performanceImpact')");
-                    JSONObject layout = json(view, """
+                    JSONObject layout = json(view, String.format("""
                         (() => {
                             const element = %s;
                             const text = element.querySelector('.switch-label-text');
@@ -62,17 +62,15 @@ public class MobileAppearanceSettingsTest {
                             range.selectNodeContents(text);
                             const textBottom = Math.max(...Array.from(range.getClientRects(), rect => rect.bottom));
                             const bounds = badge.getBoundingClientRect();
-                            const label = text;
-                            const knob = getComputedStyle(label, '::after');
+                            const thumb = text.querySelector('.switch-thumb').getBoundingClientRect();
                             const textBounds = text.getBoundingClientRect();
-                            const knobCenter = label.getBoundingClientRect().top + parseFloat(knob.top) +
-                                new DOMMatrix(knob.transform).m42 + parseFloat(knob.height) / 2;
+                            const knobCenter = thumb.top + thumb.height / 2;
                             return {switchCenterOffset: Math.abs(knobCenter - textBounds.top - textBounds.height / 2), width: text.getBoundingClientRect().width, textBottom,
                                 badgeTop: bounds.top, badgeRight: bounds.right,
                                 helpLeft: element.querySelector('.tooltip').getBoundingClientRect().left,
                                 helpBottom: element.querySelector('.tooltip').getBoundingClientRect().bottom};
                         })()
-                        """.formatted(control));
+                        """, control));
                     assertTrue("The label retains its width at " + scale + "%: " + layout,
                         layout.getDouble("width") >= originalWidth - 1);
                     assertTrue("The badge wraps below the text at " + scale + "%: " + layout,
@@ -585,8 +583,12 @@ public class MobileAppearanceSettingsTest {
             awaitCondition(view, "!document.querySelector('.tutorialOverlay')");
             try {
                 prepare(view);
-                evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$router.push('/userplaylists')");
-                awaitCondition(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$route.path === '/userplaylists'");
+                // Earlier tests can leave the restored tab on the fixture page, so open a different one.
+                String app = "document.querySelector('#app').__vue_app__.config.globalProperties";
+                String target = evaluate(view, app + ".$store.getters.getPresentedTab.history[0].route.path === " +
+                    "'/userplaylists' ? '/history' : '/userplaylists'");
+                evaluate(view, app + ".$router.push(" + target + ")");
+                awaitCondition(view, app + ".$route.path === " + target);
                 assertEquals("Phone history arrows are replaced by the tab overview", "true", evaluate(view,
                     "document.querySelector('.navBackButton').getBoundingClientRect().width === 0 && " +
                     "document.querySelector('.navForwardButton').getBoundingClientRect().width === 0"));
@@ -685,7 +687,8 @@ public class MobileAppearanceSettingsTest {
                 evaluate(view, "document.querySelector('.profileTrigger').click()");
                 awaitCondition(view, "!!document.querySelector('.quickSettingsContent select')");
                 if (android.os.Build.VERSION.SDK_INT < 31) {
-                    assertEquals("Dynamic option is absent on older Android", "false", evaluate(view,
+                    // Without a wallpaper palette, Dynamic colors follows the selected accent.
+                    assertEquals("Dynamic option remains available on older Android", "true", evaluate(view,
                         "!!document.querySelector('.quickSettingsContent option[value=dynamic]')"));
                     return;
                 }

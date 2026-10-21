@@ -50,7 +50,7 @@ public class WebViewScreenshotTest {
             awaitCondition(webView, "!!document.querySelector('.downloadPathInputs input') && !document.querySelector('.settings-window-enter-active')");
             for (String layout : new String[] {"phone", "tablet"}) {
                 for (int scale : new int[] {100, 95}) {
-                    evaluate(webView, """
+                    evaluate(webView, String.format("""
                         (async () => {
                             window.__materialSizingReady = false;
                             const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
@@ -58,7 +58,7 @@ public class WebViewScreenshotTest {
                             await store.dispatch('updateUiScale', %d);
                             requestAnimationFrame(() => requestAnimationFrame(() => { window.__materialSizingReady = true; }));
                         })()
-                        """.formatted(layout, scale));
+                        """, layout, scale));
                     awaitCondition(webView, "window.__materialSizingReady");
                     JSONObject geometry = new JSONObject((String) new JSONTokener(evaluate(webView, """
                         JSON.stringify((() => {
@@ -66,7 +66,7 @@ public class WebViewScreenshotTest {
                             const select = document.querySelector('.downloadQueueInputs .select-text');
                             const label = document.querySelector('[data-setting-key="enableDownloads"] .switch-label');
                             const track = getComputedStyle(label.querySelector('.switch-label-text'), '::before');
-                            const thumb = getComputedStyle(label.querySelector('.switch-label-text'), '::after');
+                            const thumb = getComputedStyle(label.querySelector('.switch-thumb'));
                             const hint = input.closest('.ft-input-component').querySelector('.supportingText');
                             return {
                                 inputHeight: parseFloat(getComputedStyle(input).height),
