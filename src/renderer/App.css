@@ -1069,8 +1069,8 @@
 
 /* These touch targets open app menus; Safari's selection/callout competes
    with the hold gesture, including on descendants of a nonselectable tab. */
-.app.capacitorTabs :deep(a[href], .ft-list-video, .ft-list-playlist, [data-subscription-feed-tab], [data-new-feed-tab], .capacitorTabletTabTarget),
-.app.capacitorTabs :deep(:is(a[href], .ft-list-video, .ft-list-playlist, [data-subscription-feed-tab], [data-new-feed-tab], .capacitorTabletTabTarget) *) {
+.app.capacitorTabs :deep(a[href], .ft-list-video, .ft-list-playlist, [data-hold-menu], [data-subscription-feed-tab], [data-new-feed-tab], .capacitorTabletTabTarget),
+.app.capacitorTabs :deep(:is(a[href], .ft-list-video, .ft-list-playlist, [data-hold-menu], [data-subscription-feed-tab], [data-new-feed-tab], .capacitorTabletTabTarget) *) {
   -webkit-touch-callout: none;
 
   /* Safari still requires this prefix for touch selection suppression. */

@@ -21,6 +21,7 @@
       type="button"
       class="profileTrigger"
       data-tutorial="quick-settings"
+      data-hold-menu
       :aria-label="triggerLabel"
       :title="triggerLabel"
       :aria-expanded="menuOpen"
