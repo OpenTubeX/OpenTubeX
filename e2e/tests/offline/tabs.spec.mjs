@@ -1319,8 +1319,11 @@ test.describe('tab bar', () => {
       await expect.poll(tabOrder).toEqual([...originalIds.slice(1), originalIds[0]])
       await expect(page.locator('.tab.dragging, .tab.settling')).toHaveCount(0)
 
+      // The list still scrolls to its start, past the pinned tab, when the tab cannot pass it.
+      await page.evaluate(tabId => window.ftElectron.tabs.setPinned(tabId, true), originalIds[1])
+      await expect(tabs.first()).toHaveClass(/pinned/)
       await dragToEdge(page.locator(`.tab[data-tab-id="${originalIds[0]}"]`), false)
-      await expect.poll(tabOrder).toEqual(originalIds)
+      await expect.poll(tabOrder).toEqual([originalIds[1], originalIds[0], ...originalIds.slice(2)])
     })
   }
 

@@ -13,7 +13,7 @@ const source = component.slice(
 )
 const scrollHandler = component.match(/function handleScroll\(\) \{[\s\S]*?\n\}/)[0]
 
-function createDragHarness({ vertical = false, count = 100, pinnedCount = 0 } = {}) {
+function createDragHarness({ vertical = false, rtl = false, count = 100, pinnedCount = 0, sourceIndex = 0 } = {}) {
   const frames = new Map()
   let frameId = 0
   const timers = new Map()
@@ -26,7 +26,9 @@ function createDragHarness({ vertical = false, count = 100, pinnedCount = 0 } = 
     constructor(index) { this.index = index; this.dataset = { reorderId: `tab-${index}` } }
     closest(selector) { return selector.includes('tabBarReorderItem') ? this : null }
     getBoundingClientRect() {
-      return { left: vertical ? 0 : this.index * 102.5, top: vertical ? this.index * 102.5 : 0, width: 100.5, height: 100.5 }
+      // Right-to-left tabs start at the right edge of the 1000 px list, which scrolls toward negative offsets.
+      const position = rtl ? 1000 - 100.5 - this.index * 102.5 : this.index * 102.5
+      return { left: vertical ? 0 : position, top: vertical ? position : 0, width: 100.5, height: 100.5 }
     }
   }
   const elements = tabs.value.map((_, index) => new TabElement(index))
@@ -69,7 +71,7 @@ function createDragHarness({ vertical = false, count = 100, pinnedCount = 0 } = 
     clientX: vertical ? 50 : position, clientY: vertical ? position : 50,
     preventDefault() {}
   })
-  api.handleTabContainerPointerDown(event(50.25))
+  api.handleTabContainerPointerDown(event(50.25, elements[sourceIndex]))
   calls.orders = calls.offsets = calls.updates = 0
 
   return {
@@ -198,4 +200,42 @@ test('stops autoscrolling once the dragged tab group is visible at that end', ()
     assert.equal(harness.container[axis], 0)
     assert.equal(harness.frames.size, 0, 'stops at the start of the pinned group')
   }
+})
+
+test('scrolls past pinned tabs to the start while the grabbed unpinned tab stays visible', () => {
+  for (const vertical of [false, true]) {
+    // 12 pinned tabs leave no room for the grabbed tab at the start, so it stops at the pinned boundary.
+    for (const [pinnedCount, stopScroll] of [[2, 0], [12, 12 * 102.5]]) {
+      const harness = createDragHarness({ vertical, pinnedCount, sourceIndex: 50 })
+      const axis = vertical ? 'scrollTop' : 'scrollLeft'
+
+      harness.container[axis] = stopScroll + 100
+      harness.move(-20)
+      harness.flushFrame(10)
+      assert.ok(
+        Math.abs(harness.container[axis] - (stopScroll + 100 - 0.6 * 10)) < 1e-9,
+        `scrolls past the start of the unpinned group: ${harness.container[axis]}`
+      )
+      harness.container[axis] = stopScroll
+      harness.flushFrame()
+      assert.equal(harness.container[axis], stopScroll)
+      assert.equal(harness.frames.size, 0, `stops at ${stopScroll} with ${pinnedCount} pinned tabs`)
+    }
+  }
+})
+
+test('autoscrolls a right-to-left tab bar toward both ends', () => {
+  const harness = createDragHarness({ rtl: true, pinnedCount: 2, sourceIndex: 50 })
+
+  harness.move(-20)
+  harness.flushFrame(10)
+  assert.ok(Math.abs(harness.container.scrollLeft + 0.6 * 10) < 1e-9, `scrolls left toward the last tab: ${harness.container.scrollLeft}`)
+
+  harness.container.scrollLeft = -300
+  harness.move(1100)
+  harness.flushFrame(10)
+  assert.ok(Math.abs(harness.container.scrollLeft + 300 - 0.6 * 10) < 1e-9, `scrolls right past the pinned tabs: ${harness.container.scrollLeft}`)
+  harness.container.scrollLeft = 0
+  harness.flushFrame()
+  assert.equal(harness.frames.size, 0, 'stops at the start of the list')
 })
