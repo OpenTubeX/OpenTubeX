@@ -2,7 +2,7 @@ import { chmod, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { IpcChannels } from '../../../src/constants.js'
-import { test, expect, sel, goTo, goToSettingsSection, setWindowSize, readDatastore } from '../../helpers/app.mjs'
+import { test, expect, sel, goTo, goToSettingsSection, openPlaylistMenuItem, setWindowSize, readDatastore } from '../../helpers/app.mjs'
 import { DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
 
 const seededPremiereStart = Date.now() + 86_400_000
@@ -186,15 +186,14 @@ test.describe('seeded playlists', () => {
 
     await goTo(page, 'userplaylists')
     await page.getByText('My seeded playlist').click()
-    await page.getByTitle('Preload all videos').click()
+    await (await openPlaylistMenuItem(page, 'Preload all videos')).click()
 
     await expect.poll(() => app.electronApp.evaluate(
       () => [...new Set(globalThis.__ytDlpPreloadVideoIds)]
     )).toEqual(['ccccccccccc'])
 
-    const pendingButton = page.getByTitle('Preloading all videos...')
-    await expect(pendingButton).toHaveAttribute('aria-disabled', 'true')
-    await expect(pendingButton.locator('.ft-icon--spin')).toBeVisible()
+    await expect(await openPlaylistMenuItem(page, 'Preloading all videos...')).toBeDisabled()
+    await page.keyboard.press('Escape')
 
     const progressToast = page.getByTestId('progress-toast')
     await expect(progressToast).toContainText('Preloading videos: 0 of 2')
@@ -212,7 +211,7 @@ test.describe('seeded playlists', () => {
       'Preloaded 0 of 2 videos. 2 could not be preloaded.'
     )).toBeVisible()
     await expect(progressToast).toHaveCount(0)
-    await expect(page.getByTitle('Preload all videos')).toHaveAttribute('aria-disabled', 'false')
+    await expect(await openPlaylistMenuItem(page, 'Preload all videos')).toBeEnabled()
   })
 
   test('recovers full playlist metadata after repeated partial yt-dlp timeouts', async ({ app, page }) => {
@@ -257,10 +256,10 @@ test.describe('seeded playlists', () => {
 
     await goTo(page, 'userplaylists')
     await page.getByText('My seeded playlist').click()
-    await page.getByTitle('Preload all videos').click()
+    await (await openPlaylistMenuItem(page, 'Preload all videos')).click()
 
     await expect(page.getByText('Preloaded videos: 2.')).toBeVisible()
-    await expect(page.getByTitle('All playlist videos are already preloaded')).toHaveAttribute('aria-disabled', 'true')
+    await expect(await openPlaylistMenuItem(page, 'All playlist videos are already preloaded')).toBeDisabled()
     expect(Number(await readFile(callsFile, 'utf8'))).toBe(7)
     const entries = JSON.parse(await readFile(path.join(app.userDataDir, 'yt-dlp-playback-cache.json'), 'utf8'))
     expect(entries).toHaveLength(2)
@@ -309,22 +308,22 @@ test.describe('seeded playlists', () => {
 
     await goTo(page, 'userplaylists')
     await page.getByText('My seeded playlist').click()
-    await page.getByTitle('Preload all videos').click()
+    await (await openPlaylistMenuItem(page, 'Preload all videos')).click()
 
     await expect(page.getByText('Preloaded videos: 2.')).toBeVisible()
-    const completedButton = page.getByTitle('All playlist videos are already preloaded')
-    await expect(completedButton).toHaveAttribute('aria-disabled', 'true')
-    await expect(completedButton.locator('.ft-icon--spin')).toHaveCount(0)
+    await expect(await openPlaylistMenuItem(page, 'All playlist videos are already preloaded')).toBeDisabled()
+    await page.keyboard.press('Escape')
     await expect(page.getByTestId('progress-toast')).toHaveCount(0)
 
     await goTo(page, 'userplaylists')
     await page.getByText('My seeded playlist').click()
-    await expect(page.getByTitle('All playlist videos are already preloaded')).toHaveAttribute('aria-disabled', 'true')
+    await expect(await openPlaylistMenuItem(page, 'All playlist videos are already preloaded')).toBeDisabled()
+    await page.keyboard.press('Escape')
 
     await app.electronApp.evaluate(({ BrowserWindow }, channel) => {
       BrowserWindow.getAllWindows()[0].webContents.send(channel)
     }, IpcChannels.YT_DLP_BINARY_UPDATED)
-    await expect(page.getByTitle('Preload all videos')).toHaveAttribute('aria-disabled', 'false')
+    await expect(await openPlaylistMenuItem(page, 'Preload all videos')).toBeEnabled()
   })
 
   test('releases stale preload UI when switching playlists', async ({ app, page }) => {
@@ -346,7 +345,7 @@ test.describe('seeded playlists', () => {
 
     await goTo(page, 'userplaylists')
     await page.getByText('My seeded playlist').click()
-    await page.getByTitle('Preload all videos').click()
+    await (await openPlaylistMenuItem(page, 'Preload all videos')).click()
 
     await expect.poll(() => app.electronApp.evaluate(
       () => [...new Set(globalThis.__ytDlpPreloadVideoIds)]
@@ -359,8 +358,8 @@ test.describe('seeded playlists', () => {
     await expect(page.getByRole('heading', { name: 'Secondary preload playlist' })).toBeVisible()
     await expect(page.getByTestId('progress-toast')).toHaveCount(0)
 
-    const secondaryPreloadButton = page.getByTitle('Preload all videos')
-    await expect(secondaryPreloadButton).toHaveAttribute('aria-disabled', 'false')
+    const secondaryPreloadButton = await openPlaylistMenuItem(page, 'Preload all videos')
+    await expect(secondaryPreloadButton).toBeEnabled()
     await secondaryPreloadButton.click()
     await expect(page.getByTestId('progress-toast')).toContainText('Preloading videos: 0 of 1')
 
@@ -445,7 +444,7 @@ test.describe('seeded playlists', () => {
     await page.getByTitle('Edit Playlist Info').click()
     await page.locator('.playlistStats input').fill('Renamed seeded playlist')
     await page.locator('.descriptionInput input').fill('Updated through E2E')
-    await page.getByTitle('Save Changes').click()
+    await page.getByRole('button', { name: 'Save Changes' }).click()
 
     await expect(page.locator('.playlistTitle')).toHaveText('Renamed seeded playlist')
     await expect(page.locator('.playlistDescription')).toHaveText('Updated through E2E')
@@ -455,7 +454,7 @@ test.describe('seeded playlists', () => {
     await page.getByText('Renamed seeded playlist').click()
     await expect(page.locator('.playlistDescription')).toHaveText('Updated through E2E')
 
-    await page.getByTitle('Delete Playlist').click()
+    await (await openPlaylistMenuItem(page, 'Delete Playlist')).click()
     await page.getByRole('button', { name: 'Yes, Delete' }).click()
     await expect(page).toHaveURL(/#\/userplaylists\/?$/)
     await expect(page.locator(sel.activeTab).locator('[data-icon="bookmark"]')).toBeVisible()
@@ -477,15 +476,15 @@ test.describe('seeded playlists', () => {
     await expect(page.locator('.customEmojiPlaceholder')).toHaveCSS('filter', 'grayscale(1)')
     await page.getByLabel('Custom emoji').fill('❤️‍🔥')
     await expect(page.locator('.customEmojiPlaceholder')).toHaveCount(0)
-    await page.getByTitle('Save Changes').click()
+    await page.getByRole('button', { name: 'Save Changes' }).click()
 
-    const quickBookmarkButton = page.getByTitle('Quick Bookmark Enabled')
-    await expect(quickBookmarkButton.locator('.ft-custom-icon__emoji')).toHaveText('❤️‍🔥')
+    const quickBookmarkItem = await openPlaylistMenuItem(page, 'Quick Bookmark Enabled')
+    await expect(quickBookmarkItem.locator('.ft-custom-icon__emoji')).toHaveText('❤️‍🔥')
 
     ;({ page } = await app.relaunch())
     await goTo(page, 'userplaylists')
     await page.getByText('Favorites').click()
-    await expect(page.getByTitle('Quick Bookmark Enabled').locator('.ft-custom-icon__emoji')).toHaveText('❤️‍🔥')
+    await expect((await openPlaylistMenuItem(page, 'Quick Bookmark Enabled')).locator('.ft-custom-icon__emoji')).toHaveText('❤️‍🔥')
   })
 })
 
@@ -546,14 +545,14 @@ test.describe('playlist cleanup', () => {
     await goTo(page, 'userplaylists')
     await page.getByRole('link', { name: 'Cleanup test', exact: true }).click()
 
-    await page.getByTitle('Remove Unavailable Videos').click()
+    await (await openPlaylistMenuItem(page, 'Remove Unavailable Videos')).click()
     const dialog = page.getByRole('dialog')
     await expect(dialog).toContainText('Found: 2')
     await expect(dialog).toContainText('Could not check: 1')
     await dialog.getByRole('button', { name: 'Yes, Delete' }).click()
     await expect(page.getByText('dead0000000')).toHaveCount(0)
 
-    await page.getByTitle('Remove Watched Videos').click()
+    await (await openPlaylistMenuItem(page, 'Remove Watched Videos')).click()
     await expect(dialog).toContainText('remove 1 watched video')
     await dialog.getByRole('button', { name: 'Yes, Delete' }).click()
     await expect(page.getByText('live0000000')).toHaveCount(0)
@@ -585,7 +584,7 @@ test.describe('playlist cleanup', () => {
     await page.getByRole('link', { name: 'Cleanup test', exact: true }).click()
     await dispatchStoreAction(page, 'updateBackendPreference', 'local')
 
-    await page.getByTitle('Remove Unavailable Videos').click()
+    await (await openPlaylistMenuItem(page, 'Remove Unavailable Videos')).click()
     const dialog = page.getByRole('dialog')
     await expect(dialog).toContainText('Found: 2')
     await expect(dialog).toContainText('Could not check: 1')
@@ -808,8 +807,9 @@ test.describe('custom playlists overview order', () => {
     async function togglePin(name, action) {
       await goTo(page, 'userplaylists')
       await page.getByRole('link', { name: `Overview ${name}` }).first().click()
-      await page.getByRole('button', { name: action }).click()
-      await expect(page.getByRole('button', { name: action === 'Pin to Navigation' ? 'Unpin from Navigation' : 'Pin to Navigation' })).toBeVisible()
+      await (await openPlaylistMenuItem(page, action)).click()
+      await expect(await openPlaylistMenuItem(page, action === 'Pin to Navigation' ? 'Unpin from Navigation' : 'Pin to Navigation')).toBeVisible()
+      await page.keyboard.press('Escape')
     }
 
     await expect(pinned).toHaveCount(0)

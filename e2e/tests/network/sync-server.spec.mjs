@@ -951,7 +951,7 @@ test.describe('OpenTubeX sync server', () => {
           await picker.getByRole('button', { name: 'Restore default thumbnail' }).click()
         }
         const value = file ? await picker.locator('img:not(.retryImagePlaceholder)').getAttribute('src') : ''
-        await clientPage.getByTitle('Save Changes').click()
+        await clientPage.getByRole('button', { name: 'Save Changes' }).click()
         await expect(picker).toHaveCount(0)
         return value
       }

@@ -1,4 +1,4 @@
-import { test, expect, goTo, goToSettingsSection } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, openPlaylistMenuItem } from '../../helpers/app.mjs'
 import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 import { IpcChannels } from '../../../src/constants.js'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
@@ -597,7 +597,7 @@ test('shows the default profile icon for an undecodable custom image', async ({ 
 test('shows an image icon for an undecodable quick bookmark image', async ({ page }, testInfo) => {
   await goTo(page, 'userplaylists')
   await page.getByText('Favorites', { exact: true }).click()
-  const bookmark = page.getByTitle('Quick Bookmark Enabled')
+  const bookmark = await openPlaylistMenuItem(page, 'Quick Bookmark Enabled')
   for (const pack of ['material', 'remix']) {
     await page.evaluate(pack => window.$store.dispatch('updateIconPack', pack), pack)
     await expect(bookmark.locator('img')).toBeHidden()
@@ -610,7 +610,7 @@ test('shows an image icon for an undecodable quick bookmark image', async ({ pag
 test('reveals cached custom bookmark images before the next painted frame', async ({ page }) => {
   await goTo(page, 'userplaylists')
   await page.getByText('Favorites', { exact: true }).click()
-  const bookmark = page.getByTitle('Quick Bookmark Enabled')
+  const bookmark = await openPlaylistMenuItem(page, 'Quick Bookmark Enabled')
   const src = await page.evaluate(async () => {
     const canvas = document.createElement('canvas')
     canvas.width = canvas.height = 24
@@ -624,7 +624,7 @@ test('reveals cached custom bookmark images before the next painted frame', asyn
     return src
   })
   for (const pack of ['material', 'remix']) {
-    const painted = await bookmark.evaluate(async (button, { src, pack }) => {
+    const painted = await bookmark.evaluate(async (item, { src, pack }) => {
       const store = window.$store
       await store.dispatch('updateIconPack', pack)
       const playlist = store.getters.getPlaylist('favorites')
@@ -632,12 +632,12 @@ test('reveals cached custom bookmark images before the next painted frame', asyn
       await new Promise(resolve => requestAnimationFrame(resolve))
       playlist.quickBookmarkIcon = { type: 'image', value: src }
       return new Promise(resolve => requestAnimationFrame(() => {
-        const image = button.querySelector('img')
+        const image = item.querySelector('img')
         if (!image) {
           resolve({ missingImage: true })
           return
         }
-        resolve({ complete: image.complete, visibility: getComputedStyle(image).visibility, placeholder: !!button.querySelector('.customImagePlaceholder') })
+        resolve({ complete: image.complete, visibility: getComputedStyle(image).visibility, placeholder: !!item.querySelector('.customImagePlaceholder') })
       }))
     }, { src, pack })
     expect(painted).toEqual({ complete: true, visibility: 'visible', placeholder: false })

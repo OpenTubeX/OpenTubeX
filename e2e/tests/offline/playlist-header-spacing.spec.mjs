@@ -28,7 +28,7 @@ for (const playlistViewType of ['grid', 'list']) {
         if (description) {
           await page.getByTitle('Edit Playlist Info').click()
           await page.locator('.descriptionInput input').fill(description)
-          await page.getByTitle('Save Changes').click()
+          await page.getByRole('button', { name: 'Save Changes' }).click()
           await expect(page.locator('.playlistDescription')).toHaveText(description)
         }
         for (const width of [1600, 700, 375]) {

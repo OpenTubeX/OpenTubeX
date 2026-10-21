@@ -1,6 +1,6 @@
 import path from 'node:path'
 
-import { test, expect, goTo, goToSettingsSection, repoRoot } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, openPlaylistMenuItem, repoRoot } from '../../helpers/app.mjs'
 
 async function resize(app, page, width, uiScale) {
   await app.electronApp.evaluate(({ BrowserWindow }, { width, uiScale }) => {
@@ -131,7 +131,7 @@ test.describe('select spacing', { tag: '@scale' }, () => {
     test('preserves the gap between sort controls and the playlist list', async ({ app, page, uiScale }, testInfo) => {
       await goTo(page, 'userplaylists')
       await page.getByRole('link', { name: 'Spacing source', exact: true }).click()
-      await page.getByTitle('Copy Playlist', { exact: true }).click()
+      await (await openPlaylistMenuItem(page, 'Copy Playlist')).click()
       const dialog = page.getByRole('dialog').filter({ has: page.locator('.playlists-container') })
       await expect(dialog.locator('.optionsRow')).toBeVisible()
       for (const width of [1600, 375, 812]) {

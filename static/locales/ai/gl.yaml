@@ -194,6 +194,8 @@ Feed:
   Cancel Refresh: Cancelar a actualización
   Next Auto Refresh: 'Seguinte actualización automática: {date}'
 User Playlists:
+  Save: "Gardar"
+  Edit: "Editar"
   This playlist is private or does not exist.: "Esta lista de reprodución é privada ou non existe."
   Pin to Navigation: "Fixar na navegación"
   Unpin from Navigation: "Deixar de fixar na navegación"

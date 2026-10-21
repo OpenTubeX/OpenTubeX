@@ -196,6 +196,8 @@ Feed:
   Cancel Refresh: Annuller opdatering
   Next Auto Refresh: 'Næste automatiske opdatering: {date}'
 User Playlists:
+  Save: "Gem"
+  Edit: "Rediger"
   This playlist is private or does not exist.: "Denne playliste er privat eller findes ikke."
   Pin to Navigation: "Fastgør til navigation"
   Unpin from Navigation: "Frigør fra navigation"

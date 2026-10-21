@@ -194,6 +194,8 @@ Feed:
   Cancel Refresh: ביטול הרענון
   Next Auto Refresh: 'הרענון האוטומטי הבא: {date}'
 User Playlists:
+  Save: "שמירה"
+  Edit: "עריכה"
   This playlist is private or does not exist.: "פלייליסט זה פרטי או שאינו קיים."
   Pin to Navigation: "הצמדה לניווט"
   Unpin from Navigation: "ביטול הצמדה מהניווט"

@@ -194,6 +194,8 @@ Feed:
   Cancel Refresh: Hủy làm mới
   Next Auto Refresh: 'Lần tự động làm mới tiếp theo: {date}'
 User Playlists:
+  Save: "Lưu"
+  Edit: "Chỉnh sửa"
   This playlist is private or does not exist.: "Danh sách phát này ở chế độ riêng tư hoặc không tồn tại."
   Pin to Navigation: "Ghim vào thanh điều hướng"
   Unpin from Navigation: "Bỏ ghim khỏi thanh điều hướng"

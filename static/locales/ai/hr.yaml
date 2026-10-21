@@ -194,6 +194,8 @@ Feed:
   Cancel Refresh: Otkaži osvježavanje
   Next Auto Refresh: 'Sljedeće automatsko osvježavanje: {date}'
 User Playlists:
+  Save: "Spremi"
+  Edit: "Uredi"
   This playlist is private or does not exist.: "Ovaj popis za reprodukciju je privatan ili ne postoji."
   Pin to Navigation: "Prikvači na navigaciju"
   Unpin from Navigation: "Otkvači s navigacije"

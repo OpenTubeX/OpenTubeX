@@ -192,6 +192,8 @@ Feed:
   Cancel Refresh: Zrušiť obnovenie
   Next Auto Refresh: 'Ďalšie automatické obnovenie: {date}'
 User Playlists:
+  Save: "Uložiť"
+  Edit: "Upraviť"
   This playlist is private or does not exist.: "Tento playlist je súkromný alebo neexistuje."
   Pin to Navigation: "Pripnúť do navigácie"
   Unpin from Navigation: "Odopnúť z navigácie"

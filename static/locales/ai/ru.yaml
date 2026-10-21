@@ -167,6 +167,8 @@ Feed:
   Cancel Refresh: Отменить обновление
   Next Auto Refresh: 'Следующее автоматическое обновление: {date}'
 User Playlists:
+  Save: "Сохранить"
+  Edit: "Изменить"
   This playlist is private or does not exist.: "Этот плейлист закрыт или не существует."
   Pin to Navigation: "Закрепить в навигации"
   Unpin from Navigation: "Открепить от навигации"

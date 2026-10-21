@@ -61,7 +61,7 @@ test('large-library search, metadata edits and bulk operations work with a throt
     })
     await page.getByTitle('Edit Playlist Info').click()
     await page.locator('.playlistStats input').fill('Renamed large library')
-    await page.getByTitle('Save Changes').click()
+    await page.getByRole('button', { name: 'Save Changes' }).click()
     await expect(page.locator('.playlistTitle')).toHaveText('Renamed large library')
     expect(await page.evaluate(() => {
       const store = window.$store

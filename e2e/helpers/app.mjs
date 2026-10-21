@@ -646,6 +646,17 @@ export async function goTo(page, route) {
   await expect(page).toHaveURL(new RegExp(`#/${route}`))
 }
 
+/**
+ * Opens the More menu of the visible playlist header.
+ * @param {import('@playwright/test').Page} page
+ * @param {string} name matched case-insensitively, as tests run in both en-US and en-GB
+ * @returns {Promise<import('@playwright/test').Locator>} the menu item with this name
+ */
+export async function openPlaylistMenuItem(page, name) {
+  await page.locator('.playlistOptions').filter({ visible: true }).getByRole('button', { name: 'More', exact: true }).click()
+  return page.getByRole('menu').getByRole('menuitem', { name })
+}
+
 const SETTINGS_CATEGORY_BY_LEGACY_SECTION = {
   theme: 'appearance',
   player: 'playback',

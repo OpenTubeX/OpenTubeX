@@ -192,6 +192,8 @@ Feed:
   Cancel Refresh: Ακύρωση ανανέωσης
   Next Auto Refresh: 'Επόμενη αυτόματη ανανέωση: {date}'
 User Playlists:
+  Save: "Αποθήκευση"
+  Edit: "Επεξεργασία"
   This playlist is private or does not exist.: "Αυτή η λίστα αναπαραγωγής είναι ιδιωτική ή δεν υπάρχει."
   Pin to Navigation: "Καρφίτσωμα στην πλοήγηση"
   Unpin from Navigation: "Ξεκαρφίτσωμα από την πλοήγηση"

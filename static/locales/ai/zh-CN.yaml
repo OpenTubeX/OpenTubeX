@@ -192,6 +192,8 @@ Feed:
   Cancel Refresh: 取消刷新
   Next Auto Refresh: '下次自动刷新：{date}'
 User Playlists:
+  Save: "保存"
+  Edit: "编辑"
   Pin to Navigation: "固定到导航栏"
   Unpin from Navigation: "从导航栏取消固定"
   Reorder Hint: 拖动或使用方向键重新排序

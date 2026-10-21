@@ -194,6 +194,8 @@ Feed:
   Cancel Refresh: إلغاء التحديث
   Next Auto Refresh: 'التحديث التلقائي التالي: {date}'
 User Playlists:
+  Save: "حفظ"
+  Edit: "تعديل"
   This playlist is private or does not exist.: "قائمة التشغيل هذه خاصة أو غير موجودة."
   Pin to Navigation: "تثبيت في شريط التنقل"
   Unpin from Navigation: "إلغاء التثبيت من شريط التنقل"

@@ -241,6 +241,8 @@ Feed:
   Next Auto Refresh: 'Propera actualització automàtica: {date}'
   Refresh Feed: Actualitza {subscriptionName}
 User Playlists:
+  Save: "Desa"
+  Edit: "Edita"
   This playlist is private or does not exist.: "Aquesta llista de reproducció és privada o no existeix."
   Pin to Navigation: "Fixa a la navegació"
   Unpin from Navigation: "Deixa de fixar a la navegació"

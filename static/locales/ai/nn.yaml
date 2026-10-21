@@ -192,6 +192,8 @@ Feed:
   Cancel Refresh: Avbryt oppdateringa
   Next Auto Refresh: 'Neste automatiske oppdatering: {date}'
 User Playlists:
+  Save: "Lagre"
+  Edit: "Rediger"
   This playlist is private or does not exist.: "Denne spelelista er privat eller finst ikkje."
   Pin to Navigation: "Fest til navigasjonen"
   Unpin from Navigation: "Løys frå navigasjonen"

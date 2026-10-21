@@ -70,7 +70,7 @@ test.describe('playlist description', { tag: '@scale' }, () => {
     await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
     await page.getByTitle('Edit Playlist Info').click()
     await page.locator('.descriptionInput input').fill('Short description')
-    await page.getByTitle('Save Changes').click()
+    await page.getByRole('button', { name: 'Save Changes' }).click()
     await expect(scroller).toHaveText('Short description')
     await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
     await expect.poll(() => scroller.evaluate(element => element.scrollHeight - element.clientHeight)).toBeLessThanOrEqual(1)

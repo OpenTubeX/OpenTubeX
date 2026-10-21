@@ -192,6 +192,8 @@ Feed:
   Cancel Refresh: 更新をキャンセル
   Next Auto Refresh: '次回の自動更新: {date}'
 User Playlists:
+  Save: "保存"
+  Edit: "編集"
   This playlist is private or does not exist.: "この再生リストは非公開か、存在しません。"
   Pin to Navigation: "ナビゲーションに固定"
   Unpin from Navigation: "ナビゲーションから固定解除"

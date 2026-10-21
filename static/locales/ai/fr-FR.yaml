@@ -192,6 +192,8 @@ Feed:
   Cancel Refresh: Annuler l’actualisation
   Next Auto Refresh: 'Prochaine actualisation automatique : {date}'
 User Playlists:
+  Save: "Enregistrer"
+  Edit: "Modifier"
   Pin to Navigation: "Épingler à la navigation"
   Unpin from Navigation: "Retirer de la navigation"
   Reorder Hint: Faites glisser ou utilisez les touches fléchées pour réorganiser
