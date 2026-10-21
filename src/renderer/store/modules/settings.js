@@ -28,6 +28,7 @@ import { SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY } from '../../helpers/subscripti
 import { CUSTOM_THEMES_SYNC_KEY } from '../../../customTheme.js'
 import { normalizeQuickSettings } from '../../helpers/quickSettings.js'
 import { normalizeFullscreenActions } from '../../helpers/fullscreenActions.js'
+import { normalizeControlBarButtons } from '../../helpers/controlBarButtons.js'
 import { createOptimisticSettingUpdater, createSettingUpdateQueue } from '../../helpers/settingUpdateQueue.js'
 import { mergeSubscriptionSeenVideos } from '../../../subscriptionSeenVideos.js'
 import { mergeSubscriptionSeenPosts } from '../../../subscriptionSeenPosts.js'
@@ -453,6 +454,7 @@ const customGetters = {
   getUseVoiceOverTranslation: (state) => !process.env.IS_IOS && state.useVoiceOverTranslation,
 
   getFullscreenActions: (state) => normalizeFullscreenActions(state.fullscreenActions),
+  getControlBarButtons: (state) => normalizeControlBarButtons(state.controlBarButtons),
   getQuickSettings: (state) => normalizeQuickSettings(state.quickSettings),
 
   getNavigationItems: (state) => normalizeNavigationItems(state.navigationItems),
@@ -646,6 +648,12 @@ const customActions = {
     state,
     'fullscreenActions',
     normalizeFullscreenActions(value)
+  ),
+  updateControlBarButtons: ({ commit, state }, value) => updateOrderedSetting(
+    commit,
+    state,
+    'controlBarButtons',
+    normalizeControlBarButtons(value)
   ),
   updateQuickSettings: ({ commit, state }, value) => updateOrderedSetting(
     commit,

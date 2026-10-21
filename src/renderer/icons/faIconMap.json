@@ -47,6 +47,10 @@
     "ri": "external-link-line",
     "material": "open-in-new-rounded"
   },
+  "autoplay": {
+    "ri": "skip-forward-line",
+    "material": "autoplay"
+  },
   "back-to-tab": {
     "ri": "arrow-go-back-line",
     "material": "back-to-tab-rounded"
@@ -158,6 +162,10 @@
   "copy": {
     "ri": "file-copy-2-line",
     "material": "content-copy-outline"
+  },
+  "control-bar": {
+    "ri": "layout-bottom-2-line",
+    "material": "call-to-action-outline-rounded"
   },
   "cookie": {
     "ri": "cookie-line",
@@ -286,6 +294,14 @@
   "forward-fast": {
     "ri": "speed-line",
     "material": "fast-forward-outline"
+  },
+  "full-window": {
+    "ri": "expand-diagonal-line",
+    "material": "open-in-full-rounded"
+  },
+  "fullscreen": {
+    "ri": "fullscreen-line",
+    "material": "fullscreen-rounded"
   },
   "gamepad": {
     "ri": "gamepad-line",
@@ -446,6 +462,10 @@
     "ri": "gallery-line",
     "material": "perm-media-outline"
   },
+  "picture-in-picture": {
+    "ri": "picture-in-picture-line",
+    "material": "pip-rounded"
+  },
   "play": {
     "ri": "play-line",
     "material": "play-arrow-rounded"
@@ -600,6 +620,10 @@
   "table-columns": {
     "ri": "layout-column-line",
     "material": "view-column-outline-rounded"
+  },
+  "theatre-mode": {
+    "ri": "rectangle-line",
+    "material": "rectangle-outline-rounded"
   },
   "thumbs-down": {
     "ri": "thumb-down-line",

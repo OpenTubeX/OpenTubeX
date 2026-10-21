@@ -378,6 +378,10 @@ Settings:
     Automatic unloading help: "Iškrauti seniausias fonines korteles, kad būtų atlaisvinta atmintis. Aktyvios ir turinį leidžiančios kortelės lieka įkeltos."
     Memory threshold help: "Atvaizdavimo proceso atminties ribos procentas, o ne visos sistemos RAM."
   Navigation and Controls: "Naršymas ir valdikliai"
+  Control Bar:
+    Title: "Valdymo juosta"
+    Customize: "Tinkinti valdymo juostą"
+    Add Button: "Pridėti mygtuką"
   Fullscreen Actions:
     Recommended Videos: "Rekomenduojami vaizdo įrašai"
     Title: "Viso ekrano veiksmai"

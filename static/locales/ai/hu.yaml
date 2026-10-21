@@ -268,6 +268,10 @@ Settings:
     Confirm Password: "Jelszó megerősítése"
     Passwords Do Not Match: "A jelszavak nem egyeznek."
   Navigation and Controls: "Navigáció és vezérlők"
+  Control Bar:
+    Title: "Vezérlősáv"
+    Customize: "Vezérlősáv testreszabása"
+    Add Button: "Gomb hozzáadása"
   Fullscreen Actions:
     Recommended Videos: "Ajánlott videók"
     Title: "Teljes képernyős műveletek"

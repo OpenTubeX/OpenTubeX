@@ -3,6 +3,7 @@ import { test, expect, openInterfaceCustomizer } from '../../helpers/app.mjs'
 test.describe('touch customization', { tag: '@scale' }, () => {
   for (const { name, rowSelector, idAttribute, handleSelector = '.dragHandle' } of [
     { name: 'fullscreen actions', rowSelector: '.selectedAction', idAttribute: 'data-fullscreen-action-id' },
+    { name: 'control bar', rowSelector: '.selectedAction', idAttribute: 'data-control-bar-button-id' },
     { name: 'navigation', rowSelector: '.selectedItem', idAttribute: 'data-navigation-item-id' },
     { name: 'quick settings', rowSelector: '.selectedSection', idAttribute: 'data-section-id', handleSelector: ':scope > .sectionHeader .dragHandle' },
   ]) {

@@ -146,6 +146,46 @@ test.describe('interface customizer', () => {
     await expect(customizer.locator('.previewFullscreenActions')).toHaveCount(0)
   })
 
+  test('previews the control bar order and moves removed buttons into the player menu', async ({ page }) => {
+    const customizer = await openInterfaceCustomizer(page, 'control bar')
+    const preview = customizer.locator('.playerPreview')
+    const previewIds = () => preview.locator('.previewRightGroup [data-preview-control]').evaluateAll(elements => (
+      elements.map(element => element.dataset.previewControl).filter(id => id !== 'screenshot')
+    ))
+    const editorIds = () => customizer.locator('.selectedAction').evaluateAll(elements => (
+      elements.map(element => element.dataset.controlBarButtonId)
+    ))
+    const menuIds = () => preview.locator('[data-preview-overflow-item]').evaluateAll(elements => (
+      elements.map(element => element.dataset.previewOverflowItem)
+    ))
+    const row = id => customizer.locator(`[data-control-bar-button-id="${id}"]`)
+
+    await expect.poll(editorIds).toEqual(['autoplay', 'captions', 'menu', 'pictureInPicture', 'theatreMode', 'fullWindow', 'fullscreen'])
+    await expect.poll(previewIds).toEqual(await editorIds())
+    // The player menu holds every other control, so it cannot be removed.
+    await expect(row('menu').getByRole('button', { name: /^Remove / })).toBeDisabled()
+
+    await row('fullscreen').getByRole('button', { name: /^Move .* up$/ }).click()
+    for (const id of ['autoplay', 'pictureInPicture', 'theatreMode']) {
+      await row(id).getByRole('button', { name: /^Remove / }).click()
+    }
+    await expect.poll(previewIds).toEqual(['captions', 'menu', 'fullscreen', 'fullWindow'])
+
+    await customizer.getByRole('tab', { name: 'Player menu', exact: true }).click()
+    await expect.poll(async () => {
+      const ids = await menuIds()
+      return [ids[ids.indexOf('sleepTimer') + 1], ...ids.slice(-2)]
+    }).toEqual(['autoplay', 'pictureInPicture', 'theatreMode'])
+
+    await customizer.getByRole('button', { name: 'Add button', exact: true }).click()
+    const picker = customizer.getByRole('menu', { name: 'Add button', exact: true })
+    await picker.getByRole('menuitem', { name: 'Autoplay', exact: true }).click()
+    await picker.getByRole('menuitem').first().press('Escape')
+    await expect(preview.locator('[data-preview-overflow-item="autoplay"]')).toHaveCount(0)
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getControlBarButtons))
+      .toEqual(['captions', 'menu', 'fullscreen', 'fullWindow', 'autoplay'])
+  })
+
   test('opens the matching tab from settings search', async ({ page }) => {
     await goTo(page, 'settings')
     await page.getByRole('searchbox', { name: 'Search settings' }).fill('Add action')

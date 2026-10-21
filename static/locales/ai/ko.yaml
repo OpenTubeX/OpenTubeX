@@ -357,6 +357,10 @@ Settings:
     Confirm Password: "비밀번호 확인"
     Passwords Do Not Match: "비밀번호가 일치하지 않습니다."
   Navigation and Controls: "탐색 및 컨트롤"
+  Control Bar:
+    Title: "컨트롤 바"
+    Customize: "컨트롤 바 사용자 지정"
+    Add Button: "버튼 추가"
   Fullscreen Actions:
     Recommended Videos: "추천 동영상"
     Title: "전체 화면 작업"

@@ -270,6 +270,10 @@ Settings:
     Confirm Password: "Potvrdite lozinku"
     Passwords Do Not Match: "Lozinke se ne podudaraju."
   Navigation and Controls: "Navigacija i kontrole"
+  Control Bar:
+    Title: "Upravljačka traka"
+    Customize: "Prilagodi upravljačku traku"
+    Add Button: "Dodaj gumb"
   Fullscreen Actions:
     Recommended Videos: "Preporučeni videozapisi"
     Title: "Radnje na cijelom zaslonu"

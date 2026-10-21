@@ -270,6 +270,10 @@ Settings:
     Confirm Password: "Şifrəni təsdiqləyin"
     Passwords Do Not Match: "Şifrələr uyğun gəlmir."
   Navigation and Controls: "Naviqasiya və idarəetmə elementləri"
+  Control Bar:
+    Title: "İdarəetmə paneli"
+    Customize: "İdarəetmə panelini fərdiləşdir"
+    Add Button: "Düymə əlavə et"
   Fullscreen Actions:
     Recommended Videos: "Tövsiyə olunan videolar"
     Title: "Tam ekran əməliyyatları"

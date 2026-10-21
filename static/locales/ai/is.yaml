@@ -270,6 +270,10 @@ Settings:
     Confirm Password: "Staðfesta lykilorð"
     Passwords Do Not Match: "Lykilorðin passa ekki saman."
   Navigation and Controls: "Leiðsögn og stjórntæki"
+  Control Bar:
+    Title: "Stjórnstika"
+    Customize: "Sérsníða stjórnstiku"
+    Add Button: "Bæta við hnappi"
   Fullscreen Actions:
     Recommended Videos: "Ráðlögð myndbönd"
     Title: "Aðgerðir á öllum skjánum"

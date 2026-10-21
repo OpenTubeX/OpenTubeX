@@ -275,6 +275,10 @@ Settings:
     Confirm Password: "கடவுச்சொல்லை உறுதிப்படுத்தவும்"
     Passwords Do Not Match: "கடவுச்சொற்கள் பொருந்தவில்லை."
   Navigation and Controls: "வழிசெலுத்தல் மற்றும் கட்டுப்பாடுகள்"
+  Control Bar:
+    Title: "கட்டுப்பாட்டுப் பட்டை"
+    Customize: "கட்டுப்பாட்டுப் பட்டையைத் தனிப்பயனாக்கு"
+    Add Button: "பொத்தானைச் சேர்"
   Fullscreen Actions:
     Recommended Videos: "பரிந்துரைக்கப்பட்ட காணொளிகள்"
     Title: "முழுத்திரைச் செயல்கள்"

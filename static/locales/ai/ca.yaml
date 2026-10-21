@@ -396,6 +396,10 @@ Settings:
     Automatic unloading help: "Descarrega les pestanyes en segon pla més antigues per alliberar memòria. Les pestanyes actives i en reproducció es mantenen carregades."
     Memory threshold help: "Percentatge del límit de memòria del renderitzador, no de la RAM total del sistema."
   Navigation and Controls: "Navegació i controls"
+  Control Bar:
+    Title: "Barra de control"
+    Customize: "Personalitza la barra de control"
+    Add Button: "Afegeix un botó"
   Fullscreen Actions:
     Recommended Videos: "Vídeos recomanats"
     Title: "Accions de pantalla completa"

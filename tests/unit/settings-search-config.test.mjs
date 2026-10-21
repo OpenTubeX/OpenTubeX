@@ -533,6 +533,8 @@ test('settings search retains the subpage containing each control', () => {
     ['appearance', 'Add item', 'customize-interface', 'navigation'],
     ['appearance', 'Customize navigation', 'customize-interface', 'navigation'],
     ['appearance', 'Add setting', 'customize-interface', 'quickSettings'],
+    ['appearance', 'Add button', 'customize-interface', 'controlBar'],
+    ['appearance', 'Customize control bar', 'customize-interface', 'controlBar'],
     ['appearance', 'Add action', 'customize-interface', 'fullscreenActions'],
     ['appearance', 'Customize interface', undefined, undefined],
     ['playback', 'Add Playback Speed', 'quick-playback-speed', undefined],

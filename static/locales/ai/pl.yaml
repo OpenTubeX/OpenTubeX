@@ -106,6 +106,10 @@ Settings:
     Confirm Password: "Potwierdź hasło"
     Passwords Do Not Match: "Hasła nie są zgodne."
   Navigation and Controls: "Nawigacja i elementy sterujące"
+  Control Bar:
+    Title: "Pasek sterowania"
+    Customize: "Dostosuj pasek sterowania"
+    Add Button: "Dodaj przycisk"
   Fullscreen Actions:
     Recommended Videos: "Polecane filmy"
     Title: "Działania na pełnym ekranie"

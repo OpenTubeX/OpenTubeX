@@ -12,6 +12,7 @@ import { DEFAULT_YT_DLP_PRELOAD_CONCURRENCY, DEFAULT_YT_DLP_PRELOAD_COUNT } from
 import { DEFAULT_HOME_SECTION_LAYOUT } from './renderer/helpers/homeSections.js'
 import { DEFAULT_QUICK_SETTINGS } from './renderer/helpers/quickSettings.js'
 import { DEFAULT_FULLSCREEN_ACTIONS } from './renderer/helpers/fullscreenActions.js'
+import { DEFAULT_CONTROL_BAR_BUTTONS } from './renderer/helpers/controlBarButtons.js'
 import { DEFAULT_NAVIGATION_ITEMS } from './navigationItems.js'
 
 /** Preserve the landing-page default used before Home was introduced. */
@@ -240,6 +241,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     playlistGridColumns: 0,
     quickSettings: [...DEFAULT_QUICK_SETTINGS],
     fullscreenActions: [...DEFAULT_FULLSCREEN_ACTIONS],
+    controlBarButtons: [...DEFAULT_CONTROL_BAR_BUTTONS],
     navigationItems: [...DEFAULT_NAVIGATION_ITEMS],
     maxVideoPlaybackRate: 3,
     onlyShowLatestFromChannel: false,

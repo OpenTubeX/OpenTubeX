@@ -6,6 +6,7 @@ export const DEVICE_LOCAL_SETTING_KEYS = new Set([
   'autoUpdateChannelVolumes',
   'channelVolumes',
   'continuePlaybackWhenScreenIsLocked',
+  'controlBarButtons',
   'defaultVolume',
   'displayVideoPlayButton',
   'enableClosedAppSubscriptionRefresh',

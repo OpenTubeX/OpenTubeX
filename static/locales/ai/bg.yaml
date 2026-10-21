@@ -270,6 +270,10 @@ Settings:
     Confirm Password: "Потвърдете паролата"
     Passwords Do Not Match: "Паролите не съвпадат."
   Navigation and Controls: "Навигация и контроли"
+  Control Bar:
+    Title: "Лента за управление"
+    Customize: "Персонализиране на лентата за управление"
+    Add Button: "Добавяне на бутон"
   Fullscreen Actions:
     Recommended Videos: "Препоръчани видеоклипове"
     Title: "Действия на цял екран"

@@ -272,6 +272,10 @@ Settings:
     Confirm Password: "Confirmar palavra-passe"
     Passwords Do Not Match: "As palavras-passe não coincidem."
   Navigation and Controls: "Navegação e controlos"
+  Control Bar:
+    Title: "Barra de controlos"
+    Customize: "Personalizar barra de controlos"
+    Add Button: "Adicionar botão"
   Fullscreen Actions:
     Recommended Videos: "Vídeos recomendados"
     Title: "Ações de ecrã inteiro"

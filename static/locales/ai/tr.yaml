@@ -267,6 +267,10 @@ Settings:
     Confirm Password: "Parolayı doğrulayın"
     Passwords Do Not Match: "Parolalar eşleşmiyor."
   Navigation and Controls: "Gezinme ve kontroller"
+  Control Bar:
+    Title: "Kontrol çubuğu"
+    Customize: "Kontrol çubuğunu özelleştir"
+    Add Button: "Düğme ekle"
   Fullscreen Actions:
     Recommended Videos: "Önerilen videolar"
     Title: "Tam ekran eylemleri"

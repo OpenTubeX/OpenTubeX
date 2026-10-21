@@ -267,6 +267,10 @@ Settings:
     Confirm Password: "确认密码"
     Passwords Do Not Match: "密码不匹配。"
   Navigation and Controls: "导航与控件"
+  Control Bar:
+    Title: "控制栏"
+    Customize: "自定义控制栏"
+    Add Button: "添加按钮"
   Fullscreen Actions:
     Recommended Videos: "推荐视频"
     Title: "全屏操作"

@@ -278,6 +278,10 @@ Settings:
     Confirm Password: "Потврдите лозинку"
     Passwords Do Not Match: "Лозинке се не подударају."
   Navigation and Controls: "Навигација и контроле"
+  Control Bar:
+    Title: "Трака за контролу"
+    Customize: "Прилагоди траку за контролу"
+    Add Button: "Додај дугме"
   Fullscreen Actions:
     Recommended Videos: "Препоручени видео-снимци"
     Title: "Радње на целом екрану"

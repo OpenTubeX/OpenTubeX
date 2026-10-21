@@ -121,6 +121,12 @@ export const SETTINGS_SEARCH_SOURCES = {
     key: 'Settings.Interface Customizer',
     include: new Set(['Customize Interface'])
   }, {
+    type: 'control-bar',
+    key: 'Settings.Control Bar',
+    include: new Set(['Title', 'Customize', 'Add Button']),
+    subpage: 'customize-interface',
+    subpageTab: 'controlBar'
+  }, {
     type: 'fullscreen-actions',
     key: 'Settings.Fullscreen Actions',
     include: new Set(['Title', 'Customize', 'Add Action', 'Quick Bookmark']),
