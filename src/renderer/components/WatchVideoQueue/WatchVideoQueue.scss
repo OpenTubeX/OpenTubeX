@@ -183,6 +183,11 @@
   container-name: queue;
   container-type: inline-size;
 
+  /* Space the header actions like the comments dock does. */
+  .queueHeader.fullscreenDockHeader {
+    gap: 4px;
+  }
+
   .queueHeading {
     display: flex;
     align-items: center;
@@ -192,6 +197,7 @@
 
   .queueTitle {
     min-inline-size: 0;
+    max-inline-size: 100%;
   }
 
   .queueTitleIcon {
@@ -209,15 +215,41 @@
   }
 
   .queueHeaderAction {
+    flex-shrink: 0;
+    min-inline-size: 36px;
+    min-block-size: 36px;
     padding: 6px;
     border-radius: 6px;
     color: inherit;
     font-size: 13px;
+    white-space: nowrap;
 
     &:hover,
     &:focus-visible {
       background-color: rgb(255 255 255 / 20%);
     }
+  }
+
+  .saveQueue {
+    justify-content: center;
+  }
+
+  /* Without the clear label, both actions match the close button. */
+  .queueHeader:is([data-compact='1'], [data-compact='2']) .queueHeaderAction {
+    justify-content: center;
+    inline-size: 36px;
+    block-size: 36px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 18px;
+  }
+
+  .queueHeader:is([data-compact='1'], [data-compact='2']) .clearQueueLabel {
+    display: none;
+  }
+
+  .queueHeader[data-compact='2'] .queueCount {
+    display: none;
   }
 
   .queueItems {
@@ -234,33 +266,6 @@
 
   .queueThumbnail {
     inline-size: 64px;
-  }
-}
-
-@container queue (width <= 320px) {
-  .fullscreenQueue .queueHeader.fullscreenDockHeader {
-    flex: 0 0 auto;
-    min-block-size: 52px;
-    flex-wrap: wrap;
-    gap: 0 8px;
-    padding-block: 0;
-  }
-
-  .fullscreenQueue .queueHeading {
-    flex: 1 1 100%;
-  }
-
-  /* Keep both rows within the collapsed dock's 60px height, including its borders. */
-  .fullscreenQueue .queueTitle {
-    line-height: 20px;
-  }
-
-  .fullscreenQueue .queueHeaderAction {
-    min-block-size: 36px;
-  }
-
-  .fullscreenQueue .queueHeading + .queueHeaderAction {
-    margin-inline-start: auto;
   }
 }
 
@@ -316,22 +321,6 @@
   .fullscreenQueue .queueHeading,
   .fullscreenQueue .queueTitle {
     gap: 4px;
-  }
-
-  .fullscreenQueue .clearQueue {
-    flex: 1 1 0;
-    min-inline-size: 0;
-  }
-
-  .fullscreenQueue .clearQueueIcon {
-    flex-shrink: 0;
-  }
-
-  .fullscreenQueue .clearQueueLabel {
-    min-inline-size: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 
   .fullscreenQueue .queueVideo {

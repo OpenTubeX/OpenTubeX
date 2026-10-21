@@ -183,13 +183,18 @@ for (const { uiScale, colorScheme } of [{ uiScale: 175, colorScheme: 'light' }, 
         await actions.getByRole('button', { name: 'Queue', exact: true }).click()
         await setWindowSize(app, page, { width: 340, height: 384 })
         await watch.evaluate(component => component.proxy.$store.dispatch('updateCurrentLocale', 'de-DE'))
-        await expect(queue.locator('.clearQueueLabel')).toHaveText('Warteschlange leeren')
+        await expect(queue.locator('.queueLabel')).toHaveText('Warteschlange')
         await expectDockInsidePlayer(queue, 'Schließen')
+        // A long translation hides the clear label instead of wrapping the header.
+        await expect(queue.locator('.clearQueueLabel')).toBeHidden()
         await expect.poll(() => queue.evaluate(element => {
-          const label = element.querySelector('.clearQueueLabel').getBoundingClientRect()
+          const clear = element.querySelector('.clearQueue').getBoundingClientRect()
           const close = element.querySelector('.fullscreenDockClose').getBoundingClientRect()
-          return label.right <= close.left
+          const title = element.querySelector('.queueTitle').getBoundingClientRect()
+          return clear.right <= close.left && Math.abs(clear.top + clear.height / 2 - close.top - close.height / 2) <= 1 &&
+            title.right <= clear.left
         })).toBe(true)
+        await expect(queue.getByRole('button', { name: 'Warteschlange leeren', exact: true })).toBeVisible()
         await queue.getByRole('button', { name: 'Schließen', exact: true }).click()
       } finally {
         await watch.dispose()

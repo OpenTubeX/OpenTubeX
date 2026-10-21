@@ -8,6 +8,7 @@
       :disabled="!phonePanelHeader"
     >
       <header
+        ref="queueHeader"
         class="queueHeader"
         :class="{ fullscreenDockHeader: fullscreenOverlay }"
       >
@@ -19,7 +20,10 @@
               :icon="['fas', 'queue']"
               aria-hidden="true"
             />
-            <span class="queueLabel">{{ t('Video.Queue') }}</span>
+            <span
+              ref="queueLabel"
+              class="queueLabel"
+            >{{ t('Video.Queue') }}</span>
           </h3>
           <span class="queueCount">
             {{ t('Video.Queue Video Count', { count: items.length }, items.length) }}
@@ -189,7 +193,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { inject, computed, nextTick, ref, useId, useTemplateRef } from 'vue'
+import { inject, computed, nextTick, onBeforeUnmount, ref, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { useOrderedItemDrag } from '../../composables/useOrderedItemDrag'
@@ -201,9 +205,9 @@ import store from '../../store/index'
 import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 
 const phonePanelHeader = inject('phonePanelHeader', null)
-defineProps({ fullscreenOverlay: { type: Boolean, default: false } })
+const props = defineProps({ fullscreenOverlay: { type: Boolean, default: false } })
 const emit = defineEmits(['pause-player', 'close'])
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const items = computed(() => store.getters.getWatchQueue)
 const backendPreference = computed(() => store.getters.getBackendPreference)
@@ -229,6 +233,44 @@ function restoreScrollTop(position) {
 }
 
 defineExpose({ getScrollTop, restoreScrollTop })
+
+const queueHeader = useTemplateRef('queueHeader')
+const queueLabel = useTemplateRef('queueLabel')
+
+// Keep the fullscreen dock header in one row like the other docks: hide the
+// clear label, then the count, before the title has to truncate.
+function fitHeader() {
+  const header = queueHeader.value
+  const label = queueLabel.value
+  if (!header || !label) return
+  if (!props.fullscreenOverlay) {
+    delete header.dataset.compact
+    return
+  }
+  // Compare unrounded widths, as a fractional overflow already shows an
+  // ellipsis. The tolerance only absorbs float noise from zoom and transforms;
+  // a real overflow is at least one layout unit (1/64 device pixel).
+  const text = document.createRange()
+  text.selectNodeContents(label)
+  let titleWidth = -1
+  for (let level = 0; level <= 2; level++) {
+    header.dataset.compact = String(level)
+    const width = label.getBoundingClientRect().width
+    if (text.getBoundingClientRect().width - width < 0.001) return
+    // A count below the title, as in portrait sheets, takes no room from it.
+    if (level === 2 && width - titleWidth < 0.001) header.dataset.compact = '1'
+    titleWidth = width
+  }
+}
+
+// Only the header is observed, as fitting it never changes its own size.
+const headerResizeObserver = new ResizeObserver(fitHeader)
+watch(queueHeader, (header, previous) => {
+  if (previous) headerResizeObserver.unobserve(previous)
+  if (header) headerResizeObserver.observe(header)
+})
+watch([() => props.fullscreenOverlay, () => items.value.length, locale], fitHeader, { flush: 'post' })
+onBeforeUnmount(() => headerResizeObserver.disconnect())
 
 const {
   draggedItemId: pointerDraggedId, dropTarget,
