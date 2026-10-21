@@ -286,6 +286,10 @@ Settings:
     Confirm Password: "Пацвердзіце пароль"
     Passwords Do Not Match: "Паролі не супадаюць."
   Navigation and Controls: "Навігацыя і элементы кіравання"
+  Control Bar:
+    Title: "Панэль кіравання"
+    Customize: "Наладзіць панэль кіравання"
+    Add Button: "Дадаць кнопку"
   Fullscreen Actions:
     Recommended Videos: "Рэкамендаваныя відэа"
     Title: "Дзеянні ў поўнаэкранным рэжыме"

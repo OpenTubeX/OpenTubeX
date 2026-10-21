@@ -1,14 +1,14 @@
 <template>
   <div
     ref="actionListRef"
-    class="fullscreenActionsControls"
+    class="actionListControls"
   >
     <div
       ref="itemPickerAnchorRef"
       class="itemPickerAnchor"
     >
       <FtButton
-        :label="t('Settings.Fullscreen Actions.Add Action')"
+        :label="addLabel"
         :icon="['fas', 'plus']"
         aria-haspopup="menu"
         :aria-expanded="itemPickerOpen"
@@ -23,7 +23,7 @@
         data-settings-escape-scope
         role="menu"
         tabindex="-1"
-        :aria-label="t('Settings.Fullscreen Actions.Add Action')"
+        :aria-label="addLabel"
         @keydown.esc.stop="closeItemPicker(true)"
         @keydown.down.prevent="focusAdjacentPickerItem($event, 1)"
         @keydown.up.prevent="focusAdjacentPickerItem($event, -1)"
@@ -65,21 +65,21 @@
     <FtButton
       :label="t('KeyboardShortcutPrompt.Reset to Defaults')"
       :icon="['fas', 'undo']"
-      :disabled="isDefaultActions"
+      :disabled="isDefaultItems"
       theme="secondary"
       @click="resetItems"
     />
   </div>
 
   <ul
-    v-if="selectedActions.length > 0"
+    v-if="selectedItems.length > 0"
     class="selectedActions"
   >
     <li
-      v-for="(item, index) in selectedActions"
+      v-for="(item, index) in selectedItems"
       :key="item.id"
       class="selectedAction"
-      :data-fullscreen-action-id="item.id"
+      v-bind="{ [itemIdAttribute]: item.id }"
       :class="{ dragging: draggedItemId === item.id }"
       :style="rowStyle(item.id)"
     >
@@ -114,7 +114,7 @@
         <FtIconButton
           class="itemAction"
           :title="t('Home Page.Move section down', { section: item.label })"
-          :disabled="index === selectedActions.length - 1"
+          :disabled="index === selectedItems.length - 1"
           :icon="['fas', 'arrow-down']"
           :use-shadow="false"
           theme="base"
@@ -123,6 +123,7 @@
         <FtIconButton
           class="itemAction"
           :title="`${t('Search Bar.Remove')} ${item.label}`"
+          :disabled="item.required"
           :icon="['fas', 'xmark']"
           :use-shadow="false"
           theme="base"
@@ -140,10 +141,10 @@
     {{ reorderStatus }}
   </p>
   <p
-    v-if="selectedActions.length === 0"
+    v-if="selectedItems.length === 0"
     class="emptyState"
   >
-    {{ t('Settings.Fullscreen Actions.Empty') }}
+    {{ emptyLabel }}
   </p>
 </template>
 
@@ -155,21 +156,51 @@ import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
 
-import store from '../../store/index'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { listenForOutsidePress } from '../../helpers/outsidePress'
 import { useOrderedItemReorder } from '../../composables/useOrderedItemReorder'
 import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
 import { moveItemByVisibleOffset } from '../../../orderedItems'
-import {
-  DEFAULT_FULLSCREEN_ACTIONS,
-  FULLSCREEN_ACTION_DEFINITIONS,
-} from '../../helpers/fullscreenActions'
+
+const props = defineProps({
+  /** Every item that can be selected: `{ id, labelKey, icon, required? }`. Required items cannot be removed. */
+  definitions: {
+    type: Array,
+    required: true
+  },
+  /** The selected item IDs in their current order. */
+  items: {
+    type: Array,
+    required: true
+  },
+  defaultItems: {
+    type: Array,
+    required: true
+  },
+  /** Saves the new selection and resolves to whether that succeeded. */
+  updateItems: {
+    type: Function,
+    required: true
+  },
+  /** The data attribute that identifies each row, e.g. `data-fullscreen-action-id`. */
+  itemIdAttribute: {
+    type: String,
+    required: true
+  },
+  addLabel: {
+    type: String,
+    required: true
+  },
+  emptyLabel: {
+    type: String,
+    default: ''
+  }
+})
 
 const { locale, t } = useI18n()
 const itemPickerOpen = ref(false)
 const reorderStatus = ref('')
-const itemPickerId = `fullscreen-action-picker-${useId().replaceAll(':', '')}`
+const itemPickerId = `action-picker-${useId().replaceAll(':', '')}`
 const itemPickerAnchorRef = useTemplateRef('itemPickerAnchorRef')
 const itemPickerListRef = useTemplateRef('itemPickerListRef')
 const itemPickerContentRef = useTemplateRef('itemPickerContentRef')
@@ -178,23 +209,23 @@ let itemPickerResizeObserver = null
 let actionResizeObserver = null
 const settingsOverlayActive = useSettingsOverlay(closeItemPicker)
 
-const catalog = computed(() => FULLSCREEN_ACTION_DEFINITIONS
+const catalog = computed(() => props.definitions
   .map(item => ({
     ...item,
     // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
     label: t(item.labelKey),
   })))
 const catalogById = computed(() => new Map(catalog.value.map(item => [item.id, item])))
-const fullscreenActions = computed(() => store.getters.getFullscreenActions)
-const isDefaultActions = computed(() => (
-  fullscreenActions.value.length === DEFAULT_FULLSCREEN_ACTIONS.length &&
-  fullscreenActions.value.every((id, index) => id === DEFAULT_FULLSCREEN_ACTIONS[index])
+const items = computed(() => props.items)
+const isDefaultItems = computed(() => (
+  items.value.length === props.defaultItems.length &&
+  items.value.every((id, index) => id === props.defaultItems[index])
 ))
-const selectedActions = computed(() => fullscreenActions.value
+const selectedItems = computed(() => items.value
   .map(id => catalogById.value.get(id))
   .filter(item => item != null))
 const availableItems = computed(() => catalog.value
-  .filter(item => !fullscreenActions.value.includes(item.id))
+  .filter(item => !items.value.includes(item.id))
   .toSorted((left, right) => left.label.localeCompare(right.label, locale.value)))
 
 async function toggleItemPicker() {
@@ -281,14 +312,10 @@ onBeforeUnmount(() => {
   stopOutsidePress?.()
 })
 
-function updateItems(items) {
-  return store.dispatch('updateFullscreenActions', items)
-}
-
 async function addItem(itemId) {
   if (!availableItems.value.some(item => item.id === itemId)) return
 
-  await updateItems([...fullscreenActions.value, itemId])
+  await props.updateItems([...items.value, itemId])
   await nextTick()
   clampItemPickerScroll()
   const nextOption = itemPickerListRef.value?.querySelector('.itemPickerOption')
@@ -300,7 +327,7 @@ async function addItem(itemId) {
 }
 
 function removeItem(itemId) {
-  return updateItems(fullscreenActions.value.filter(id => id !== itemId))
+  return props.updateItems(items.value.filter(id => id !== itemId))
 }
 
 function announceItemMoved(itemId, position) {
@@ -308,22 +335,22 @@ function announceItemMoved(itemId, position) {
   reorderStatus.value = t('Home Page.Section moved', {
     section: item?.label ?? itemId,
     position: position + 1,
-    total: fullscreenActions.value.length,
+    total: items.value.length,
   })
 }
 
 function moveItem(itemId, offset) {
-  const visibleItems = selectedActions.value.map(item => item.id)
+  const visibleItems = selectedItems.value.map(item => item.id)
   const targetIndex = visibleItems.indexOf(itemId) + offset
   const reordered = moveItemByVisibleOffset(
-    fullscreenActions.value,
+    items.value,
     visibleItems,
     itemId,
     offset
   )
-  if (reordered === fullscreenActions.value) return
+  if (reordered === items.value) return
 
-  updateItems(reordered)
+  props.updateItems(reordered)
   announceItemMoved(itemId, targetIndex)
 }
 
@@ -335,20 +362,20 @@ const {
   endPointerDrag,
   cancelPointerDrag,
 } = useOrderedItemReorder({
-  items: fullscreenActions,
+  items,
   rowSelector: '.selectedAction',
-  itemIdAttribute: 'data-fullscreen-action-id',
-  updateItems,
+  itemIdAttribute: props.itemIdAttribute,
+  updateItems: props.updateItems,
   announceMoved: announceItemMoved,
 })
 
 function resetItems() {
-  return updateItems([...DEFAULT_FULLSCREEN_ACTIONS])
+  return props.updateItems([...props.defaultItems])
 }
 </script>
 
 <style scoped>
-.fullscreenActionsControls {
+.actionListControls {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;

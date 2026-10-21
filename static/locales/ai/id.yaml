@@ -268,6 +268,10 @@ Settings:
     Confirm Password: "Konfirmasi kata sandi"
     Passwords Do Not Match: "Kata sandi tidak cocok."
   Navigation and Controls: "Navigasi dan kontrol"
+  Control Bar:
+    Title: "Bilah kontrol"
+    Customize: "Sesuaikan bilah kontrol"
+    Add Button: "Tambahkan tombol"
   Fullscreen Actions:
     Recommended Videos: "Video yang direkomendasikan"
     Title: "Tindakan layar penuh"

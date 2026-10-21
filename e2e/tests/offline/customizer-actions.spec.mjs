@@ -23,6 +23,7 @@ for (const { uiScale, width, iconPack, colorScheme } of [
       { subpage: 'quick-settings', tab: 'quick settings', rowSelector: '.selectedSetting' },
       { subpage: 'navigation', tab: 'navigation', rowSelector: '.selectedItem' },
       { subpage: 'fullscreen-actions', tab: 'fullscreen actions', rowSelector: '.selectedAction' },
+      { subpage: 'control-bar', tab: 'control bar', rowSelector: '.selectedAction' },
     ]) {
       test(`keeps ${subpage} hover and focus backgrounds circular`, async ({ app, page }) => {
         await setWindowSize(app, page, { width, height: 800 })

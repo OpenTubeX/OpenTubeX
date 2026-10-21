@@ -272,6 +272,10 @@ Settings:
     Confirm Password: "Wachtwoord bevestigen"
     Passwords Do Not Match: "De wachtwoorden komen niet overeen."
   Navigation and Controls: "Navigatie en bediening"
+  Control Bar:
+    Title: "Bedieningsbalk"
+    Customize: "Bedieningsbalk aanpassen"
+    Add Button: "Knop toevoegen"
   Fullscreen Actions:
     Recommended Videos: "Aanbevolen video’s"
     Title: "Acties op volledig scherm"

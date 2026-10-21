@@ -120,7 +120,25 @@
             <NavigationCustomizer v-if="activeTabId === 'navigation'" />
             <QuickSettingsCustomizer v-else-if="activeTabId === 'quickSettings'" />
             <PlayerAppearanceEditor v-else-if="activeTabId === 'player'" />
-            <FullscreenActionsCustomizer v-else />
+            <ActionListCustomizer
+              v-else-if="activeTabId === 'controlBar'"
+              :definitions="controlBarButtonDefinitions"
+              :items="store.getters.getControlBarButtons"
+              :default-items="DEFAULT_CONTROL_BAR_BUTTONS"
+              :update-items="items => store.dispatch('updateControlBarButtons', items)"
+              item-id-attribute="data-control-bar-button-id"
+              :add-label="t('Settings.Control Bar.Add Button')"
+            />
+            <ActionListCustomizer
+              v-else
+              :definitions="FULLSCREEN_ACTION_DEFINITIONS"
+              :items="store.getters.getFullscreenActions"
+              :default-items="DEFAULT_FULLSCREEN_ACTIONS"
+              :update-items="items => store.dispatch('updateFullscreenActions', items)"
+              item-id-attribute="data-fullscreen-action-id"
+              :add-label="t('Settings.Fullscreen Actions.Add Action')"
+              :empty-label="t('Settings.Fullscreen Actions.Empty')"
+            />
           </div>
         </div>
       </div>
@@ -133,25 +151,29 @@ import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, useId, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import ActionListCustomizer from '../ActionListCustomizer/ActionListCustomizer.vue'
 import FtButton from '../FtButton/FtButton.vue'
 import FtQuickSettingsMenu from '../FtQuickSettingsMenu/FtQuickSettingsMenu.vue'
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
 import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 import FtTabs from '../FtTabs/FtTabs.vue'
-import FullscreenActionsCustomizer from '../FullscreenActionsCustomizer/FullscreenActionsCustomizer.vue'
 import NavigationCustomizer from '../NavigationCustomizer/NavigationCustomizer.vue'
 import QuickSettingsCustomizer from '../QuickSettingsCustomizer/QuickSettingsCustomizer.vue'
 import NavigationPreview from './NavigationPreview.vue'
 import PlayerAppearanceEditor from './PlayerAppearanceEditor.vue'
 import PlayerPreview from './PlayerPreview.vue'
 
+import store from '../../store/index'
+import { getControlBarButtonDefinitions, DEFAULT_CONTROL_BAR_BUTTONS } from '../../helpers/controlBarButtons'
+import { DEFAULT_FULLSCREEN_ACTIONS, FULLSCREEN_ACTION_DEFINITIONS } from '../../helpers/fullscreenActions'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 
 const { t } = useI18n()
 const idPrefix = `interface-customizer-${useId().replaceAll(':', '')}`
 const open = ref(false)
 const activeTabId = ref('navigation')
+const controlBarButtonDefinitions = getControlBarButtonDefinitions()
 
 // The side navigation switches to the bottom bar at this width.
 const mobileNavigationLayout = window.matchMedia('(max-width: 680px)')
@@ -165,6 +187,8 @@ onMounted(() => mobileNavigationLayout.addEventListener('change', handleMobileNa
 onBeforeUnmount(() => mobileNavigationLayout.removeEventListener('change', handleMobileNavigationLayoutChange))
 
 const tabs = computed(() => {
+  const playingMode = { id: 'window', icon: ['fas', 'play'], label: t('Settings.Interface Customizer.Playing') }
+  const menuMode = { id: 'menu', icon: ['fas', 'gear'], label: t('Settings.Interface Customizer.Player Menu') }
   const fullscreenModes = [
     { id: 'fullscreen', icon: ['fas', 'expand'], label: t('Settings.Interface Customizer.Fullscreen') },
     { id: 'paused', icon: ['fas', 'pause'], label: t('Settings.Interface Customizer.Paused') },
@@ -194,11 +218,16 @@ const tabs = computed(() => {
       icon: ['fas', 'circle-play'],
       label: t('Settings.Interface Customizer.Player'),
       syncKey: null,
-      previewModes: [
-        { id: 'window', icon: ['fas', 'play'], label: t('Settings.Interface Customizer.Playing') },
-        { id: 'menu', icon: ['fas', 'gear'], label: t('Settings.Interface Customizer.Player Menu') },
-        ...fullscreenModes,
-      ],
+      previewModes: [playingMode, menuMode, ...fullscreenModes],
+    },
+    {
+      id: 'controlBar',
+      icon: ['fas', 'control-bar'],
+      label: t('Settings.Control Bar.Title'),
+      // Each device keeps its own control bar, so this tab offers no sync toggle.
+      syncKey: null,
+      // Buttons removed from the control bar move into the player menu.
+      previewModes: [playingMode, menuMode],
     },
     {
       id: 'fullscreenActions',

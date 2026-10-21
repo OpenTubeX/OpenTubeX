@@ -4202,18 +4202,23 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   );
 }
 
-.ftVideoPlayer:fullscreen :deep(.shaka-fullscreen-button),
+/*
+  The control bar ends with the last visible button the user kept. Theatre and
+  full window buttons are hidden in fullscreen, and theatre mode in full window.
+*/
+/* stylelint-disable selector-max-compound-selectors */
+.ftVideoPlayer:fullscreen :deep(.shaka-controls-button-panel > button:not(:has(~ button:not(.shaka-hidden, [data-ft-control-hidden], .theatre-button, .full-window-button)))),
 .ftVideoPlayer:fullscreen :deep(.shaka-controls-button-panel > .shaka-play-button:first-child),
-.ftVideoPlayer.fullWindow :deep(.shaka-fullscreen-button),
+.ftVideoPlayer.fullWindow :deep(.shaka-controls-button-panel > button:not(:has(~ button:not(.shaka-hidden, [data-ft-control-hidden], .theatre-button)))),
 .ftVideoPlayer.fullWindow :deep(.shaka-controls-button-panel > .shaka-play-button:first-child) {
   position: relative;
   overflow: visible;
 }
 
 .ftVideoPlayer:fullscreen :deep(.shaka-controls-button-panel > .shaka-play-button:first-child)::before,
-.ftVideoPlayer:fullscreen :deep(.shaka-fullscreen-button)::before,
+.ftVideoPlayer:fullscreen :deep(.shaka-controls-button-panel > button:not(:has(~ button:not(.shaka-hidden, [data-ft-control-hidden], .theatre-button, .full-window-button))))::before,
 .ftVideoPlayer.fullWindow :deep(.shaka-controls-button-panel > .shaka-play-button:first-child)::before,
-.ftVideoPlayer.fullWindow :deep(.shaka-fullscreen-button)::before {
+.ftVideoPlayer.fullWindow :deep(.shaka-controls-button-panel > button:not(:has(~ button:not(.shaka-hidden, [data-ft-control-hidden], .theatre-button))))::before {
   /*
     Shaka keeps the bottom controls at 98% width, so the outer edges can reach
     the container click handler instead of the nearest edge button.
@@ -4227,10 +4232,11 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   inset: -8px -8px -8px -2vw;
 }
 
-.ftVideoPlayer:fullscreen :deep(.shaka-fullscreen-button)::before,
-.ftVideoPlayer.fullWindow :deep(.shaka-fullscreen-button)::before {
+.ftVideoPlayer:fullscreen :deep(.shaka-controls-button-panel > button:not(:has(~ button:not(.shaka-hidden, [data-ft-control-hidden], .theatre-button, .full-window-button))))::before,
+.ftVideoPlayer.fullWindow :deep(.shaka-controls-button-panel > button:not(:has(~ button:not(.shaka-hidden, [data-ft-control-hidden], .theatre-button))))::before {
   inset: -8px -2vw -8px -8px;
 }
+/* stylelint-enable selector-max-compound-selectors */
 
 :deep(.shaka-controls-container[shown='true'] > .playerFullscreenTitleOverlay) {
   opacity: 1;

@@ -372,6 +372,10 @@ Settings:
     Resolution: Auflösung
     Loop: Endlosschleife
     Off: Aus
+  Control Bar:
+    Title: "Steuerleiste"
+    Customize: "Steuerleiste anpassen"
+    Add Button: "Schaltfläche hinzufügen"
   Fullscreen Actions:
     Recommended Videos: "Empfohlene Videos"
     Title: "Vollbildaktionen"

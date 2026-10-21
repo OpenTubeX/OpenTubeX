@@ -272,6 +272,10 @@ Settings:
     Confirm Password: "אישור הסיסמה"
     Passwords Do Not Match: "הסיסמאות אינן תואמות."
   Navigation and Controls: "ניווט ופקדים"
+  Control Bar:
+    Title: "סרגל הבקרה"
+    Customize: "התאמה אישית של סרגל הבקרה"
+    Add Button: "הוספת לחצן"
   Fullscreen Actions:
     Recommended Videos: "סרטונים מומלצים"
     Title: "פעולות במסך מלא"

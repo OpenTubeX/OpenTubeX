@@ -268,6 +268,10 @@ Settings:
     Confirm Password: "Potvrďte heslo"
     Passwords Do Not Match: "Heslá sa nezhodujú."
   Navigation and Controls: "Navigácia a ovládacie prvky"
+  Control Bar:
+    Title: "Ovládací panel"
+    Customize: "Prispôsobiť ovládací panel"
+    Add Button: "Pridať tlačidlo"
   Fullscreen Actions:
     Recommended Videos: "Odporúčané videá"
     Title: "Akcie na celej obrazovke"

@@ -268,6 +268,10 @@ Settings:
     Confirm Password: "Cadarnhau cyfrinair"
     Passwords Do Not Match: "Nid yw’r cyfrineiriau’n cyfateb."
   Navigation and Controls: "Llywio a rheolyddion"
+  Control Bar:
+    Title: "Bar rheoli"
+    Customize: "Addasu'r bar rheoli"
+    Add Button: "Ychwanegu botwm"
   Fullscreen Actions:
     Recommended Videos: "Fideos a argymhellir"
     Title: "Gweithredoedd sgrin lawn"

@@ -70,7 +70,17 @@ export class TheatreModeButton extends shaka.ui.Element {
       this.updateLocalisedStrings_()
     })
 
+    if (this.isSubMenu) {
+      this.eventManager.listen(this.controls, 'submenuopen', () => this.updateVisibility_())
+      this.eventManager.listen(this.controls, 'submenuclose', () => this.updateVisibility_())
+    }
+
     this.updateLocalisedStrings_()
+  }
+
+  /** @private */
+  updateVisibility_() {
+    this.button_.classList.toggle('shaka-hidden', this.isSubMenuOpened)
   }
 
   /** @private */

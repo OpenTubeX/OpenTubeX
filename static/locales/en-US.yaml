@@ -563,6 +563,10 @@ Settings:
     Resolution: Resolution
     Loop: Loop
     Off: Off
+  Control Bar:
+    Title: "Control bar"
+    Customize: "Customize control bar"
+    Add Button: "Add button"
   Fullscreen Actions:
     Recommended Videos: "Recommended videos"
     Title: "Fullscreen actions"

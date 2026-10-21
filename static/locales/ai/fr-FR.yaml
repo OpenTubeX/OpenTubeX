@@ -267,6 +267,10 @@ Settings:
     Confirm Password: "Confirmer le mot de passe"
     Passwords Do Not Match: "Les mots de passe ne correspondent pas."
   Navigation and Controls: "Navigation et commandes"
+  Control Bar:
+    Title: "Barre de commandes"
+    Customize: "Personnaliser la barre de commandes"
+    Add Button: "Ajouter un bouton"
   Fullscreen Actions:
     Recommended Videos: "Vidéos recommandées"
     Title: "Actions en plein écran"

@@ -272,6 +272,10 @@ Settings:
     Confirm Password: "Xác nhận mật khẩu"
     Passwords Do Not Match: "Mật khẩu không khớp."
   Navigation and Controls: "Điều hướng và điều khiển"
+  Control Bar:
+    Title: "Thanh điều khiển"
+    Customize: "Tùy chỉnh thanh điều khiển"
+    Add Button: "Thêm nút"
   Fullscreen Actions:
     Recommended Videos: "Video được đề xuất"
     Title: "Thao tác toàn màn hình"

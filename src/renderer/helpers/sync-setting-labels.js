@@ -219,6 +219,7 @@ export const SYNC_SETTING_LABELS = {
   quickBookmarkTargetPlaylistId: 'User Playlists.Quick Bookmark Icon',
   quickPlaybackSpeedBarOptions: 'Settings.Player Settings.Quick Playback Speed Bar Manager',
   fullscreenActions: 'Settings.Fullscreen Actions.Title',
+  controlBarButtons: 'Settings.Control Bar.Title',
   quickSettings: 'Settings.Quick Settings.Quick Settings',
   recommendationExploration: 'Home Page.Discovery',
   reducedMotion: 'Settings.General Settings.Reduced Motion.Reduced Motion',

@@ -272,6 +272,10 @@ Settings:
     Confirm Password: "Vahvista salasana"
     Passwords Do Not Match: "Salasanat eivät täsmää."
   Navigation and Controls: "Navigointi ja säätimet"
+  Control Bar:
+    Title: "Ohjauspalkki"
+    Customize: "Mukauta ohjauspalkkia"
+    Add Button: "Lisää painike"
   Fullscreen Actions:
     Recommended Videos: "Suositellut videot"
     Title: "Koko näytön toiminnot"

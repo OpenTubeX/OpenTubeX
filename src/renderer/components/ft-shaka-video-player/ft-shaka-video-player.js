@@ -23,6 +23,7 @@ import { createPopularityPath, isMostReplayed } from '../../helpers/player/video
 
 import store from '../../store/index'
 import { getAvailableFullscreenActions } from '../../helpers/fullscreenActions'
+import { DEFAULT_CONTROL_BAR_BUTTONS, getControlBarButtonDefinitions } from '../../helpers/controlBarButtons'
 import { getSubtitleRequestUrl } from '../../helpers/player/subtitleCookies'
 import { enableTwitchTsVideoGap } from '../../helpers/player/twitchTsVideoGap'
 import LightsOffOverlay from './LightsOffOverlay.vue'
@@ -5157,6 +5158,17 @@ export default defineComponent({
       const pictureInPictureElement = process.env.IS_CAPACITOR && !process.env.IS_IOS
         ? 'ft_android_picture_in_picture'
         : 'picture_in_picture'
+      const controlBarElements = {
+        autoplay: 'ft_autoplay_toggle',
+        captions: 'ft_caption_toggle',
+        menu: 'overflow_menu',
+        pictureInPicture: pictureInPictureElement,
+        theatreMode: 'ft_theatre_mode',
+        fullWindow: 'ft_full_window',
+        fullscreen: 'fullscreen',
+      }
+      // Shorts keep their own top controls, which rely on the default buttons.
+      const controlBarButtons = props.shortsPlayer ? DEFAULT_CONTROL_BAR_BUTTONS : store.getters.getControlBarButtons
 
       // Shorts always use their custom top controls and hide Shaka's standard
       // control panel. Keep every applicable action in the overflow menu even
@@ -5193,14 +5205,13 @@ export default defineComponent({
 
         elementList = uiConfig.overflowMenuButtons
 
+        // The overflow menu above already holds the other buttons.
+        const compactButtons = ['captions', 'menu', 'fullscreen', ...(mobile && !props.shortsPlayer ? ['pictureInPicture'] : [])]
         uiConfig.controlPanelElements.push(
           ...((props.shortsPlayer || mobile) && useQuickPlaybackSpeedBar.value && showPlaybackRateControls
             ? ['ft_quick_playback_rate_bar']
             : []),
-          'ft_caption_toggle',
-          ...(mobile && !props.shortsPlayer ? [pictureInPictureElement] : []),
-          'overflow_menu',
-          'fullscreen'
+          ...controlBarButtons.filter(id => compactButtons.includes(id)).map(id => controlBarElements[id])
         )
       } else {
         uiConfig.controlPanelElements.push(
@@ -5211,14 +5222,14 @@ export default defineComponent({
           'ft_sponsorblock_cancel',
           'ft_sponsorblock_end',
           'ft_screenshot',
-          'ft_autoplay_toggle',
-          'ft_caption_toggle',
-          'overflow_menu',
-          pictureInPictureElement,
-          'ft_theatre_mode',
-          ...(!process.env.IS_CAPACITOR ? ['ft_full_window'] : []),
-          'fullscreen'
+          ...controlBarButtons.map(id => controlBarElements[id])
         )
+
+        // Buttons removed from the control bar stay available in the overflow menu.
+        // The captions menu replaces the caption toggle; fullscreen has no menu entry.
+        const removedButtons = new Set(getControlBarButtonDefinitions()
+          .map(({ id }) => id)
+          .filter(id => !controlBarButtons.includes(id)))
 
         // Keep related settings together before the one-click actions.
         uiConfig.overflowMenuButtons.push(
@@ -5227,6 +5238,7 @@ export default defineComponent({
           ...(showPlaybackRateControls ? ['playback_rate'] : []),
           props.format === 'legacy' ? 'ft_legacy_quality' : 'quality',
           'ft_sleep_timer',
+          ...(removedButtons.has('autoplay') ? ['ft_autoplay_toggle'] : []),
           'ft_skip_silence',
           'ft_voice_over_translation',
           'ft_music_visualizer',
@@ -5237,6 +5249,9 @@ export default defineComponent({
           'ft_volume_boost',
           'ft_loop',
           'ft_ab_repeat',
+          ...['pictureInPicture', 'theatreMode', 'fullWindow']
+            .filter(id => removedButtons.has(id))
+            .map(id => controlBarElements[id]),
           'recenter_vr',
           'toggle_stereoscopic',
         )
@@ -5264,10 +5279,12 @@ export default defineComponent({
       // Keep the control mounted when a panel can make theatre mode available.
       if (!props.liveChatAvailable && !props.theatrePossible && props.chapters.length === 0 && (props.externalUrl || !useSponsorBlock.value)) {
         removeFromArrayIfExists(uiConfig.controlPanelElements, 'ft_theatre_mode')
+        removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_theatre_mode')
       }
 
       if (!props.autoplayPossible) {
-        removeFromArrayIfExists(elementList, 'ft_autoplay_toggle')
+        removeFromArrayIfExists(uiConfig.controlPanelElements, 'ft_autoplay_toggle')
+        removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_autoplay_toggle')
       }
 
       if (props.format === 'audio') {

@@ -106,30 +106,26 @@
             >
               <PreviewIcon :path="PlayerIcons.PHOTO_CAMERA_FILLED" />
             </span>
-            <span class="previewAutoplayToggle">
-              <PreviewIcon :path="PlayerIcons.PAUSE_CIRCLE_FILLED" />
-            </span>
-            <span class="previewIconButton">
-              <PreviewIcon :path="SHAKA_PREVIEW_ICONS.CLOSED_CAPTIONS" />
-            </span>
-            <span
-              class="previewIconButton"
-              :class="{ open: state === 'menu' }"
+            <template
+              v-for="button in controlBarButtons"
+              :key="button.id"
             >
-              <PreviewIcon :path="SHAKA_PREVIEW_ICONS.OPEN_OVERFLOW" />
-            </span>
-            <span class="previewIconButton">
-              <PreviewIcon :path="PlayerIcons.RECTANGLE_DEFAULT" />
-            </span>
-            <span
-              v-if="!fullscreen && !IS_CAPACITOR"
-              class="previewIconButton"
-            >
-              <PreviewIcon :path="PlayerIcons.OPEN_IN_FULL_FILLED" />
-            </span>
-            <span class="previewIconButton">
-              <PreviewIcon :path="fullscreen ? SHAKA_PREVIEW_ICONS.EXIT_FULLSCREEN : SHAKA_PREVIEW_ICONS.FULLSCREEN" />
-            </span>
+              <span
+                v-if="button.id === 'autoplay'"
+                class="previewAutoplayToggle"
+                :data-preview-control="button.id"
+              >
+                <PreviewIcon :path="PlayerIcons.PAUSE_CIRCLE_FILLED" />
+              </span>
+              <span
+                v-else
+                class="previewIconButton"
+                :class="{ open: button.id === 'menu' && state === 'menu' }"
+                :data-preview-control="button.id"
+              >
+                <PreviewIcon :path="button.path" />
+              </span>
+            </template>
           </span>
         </div>
       </div>
@@ -144,6 +140,7 @@ import { useI18n } from 'vue-i18n'
 
 import store from '../../store/index'
 import { PlayerIcons, ZOOM_IN_ICON_VIEWBOX } from '../../../constants'
+import { getControlBarButtonDefinitions } from '../../helpers/controlBarButtons'
 import { FULLSCREEN_ACTION_DEFINITIONS } from '../../helpers/fullscreenActions'
 import { getQuickPlaybackRateLabel } from '../../helpers/player/quickPlaybackRateLabel'
 import { AB_REPEAT_PREVIEW_ICON, SHAKA_PREVIEW_ICONS } from './playerPreviewIcons'
@@ -193,6 +190,40 @@ const quickPlaybackRates = computed(() => {
   return options.map(option => ({ ...option, label: getQuickPlaybackRateLabel(option.speed, option.name, t) }))
 })
 
+const CONTROL_BAR_ICONS = {
+  autoplay: PlayerIcons.PAUSE_CIRCLE_FILLED,
+  captions: SHAKA_PREVIEW_ICONS.CLOSED_CAPTIONS,
+  menu: SHAKA_PREVIEW_ICONS.OPEN_OVERFLOW,
+  pictureInPicture: SHAKA_PREVIEW_ICONS.PICTURE_IN_PICTURE,
+  theatreMode: PlayerIcons.RECTANGLE_DEFAULT,
+  fullWindow: PlayerIcons.OPEN_IN_FULL_FILLED,
+}
+
+const controlBarButtons = computed(() => store.getters.getControlBarButtons
+  // Like the player, fullscreen hides the theatre mode and full window buttons.
+  .filter(id => !fullscreen.value || (id !== 'theatreMode' && id !== 'fullWindow'))
+  .map(id => ({
+    id,
+    path: id === 'fullscreen'
+      ? (fullscreen.value ? SHAKA_PREVIEW_ICONS.EXIT_FULLSCREEN : SHAKA_PREVIEW_ICONS.FULLSCREEN)
+      : CONTROL_BAR_ICONS[id],
+  })))
+
+// Buttons removed from the control bar move into the player menu, except for
+// captions, which already have their own menu entry, and fullscreen.
+const removedControlBarButtons = computed(() => {
+  const selected = store.getters.getControlBarButtons
+  return getControlBarButtonDefinitions()
+    .filter(({ id }) => !selected.includes(id) && id !== 'captions' && id !== 'fullscreen')
+    .map(({ id, labelKey }) => ({
+      id,
+      path: CONTROL_BAR_ICONS[id],
+      // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
+      label: t(labelKey),
+      value: id === 'pictureInPicture' ? '' : t('Settings.Interface Customizer.Off'),
+    }))
+})
+
 const fullscreenActions = computed(() => {
   const definitions = new Map(FULLSCREEN_ACTION_DEFINITIONS.map(action => [action.id, action]))
   return store.getters.getFullscreenActions.map(id => ({
@@ -205,10 +236,12 @@ const fullscreenActions = computed(() => {
 // Mirrors the desktop overflow menu of a regular video with the current settings.
 const overflowItems = computed(() => {
   const off = t('Settings.Interface Customizer.Off')
+  const removed = removedControlBarButtons.value
   return [
     { id: 'playbackRate', path: SHAKA_PREVIEW_ICONS.PLAYBACK_RATE, label: t('Settings.Player Settings.Playback Speed'), value: '1x' },
     { id: 'quality', path: SHAKA_PREVIEW_ICONS.RESOLUTION, label: t('Settings.Interface Customizer.Resolution'), value: '1080p' },
     { id: 'sleepTimer', path: PlayerIcons.TIMER_FILLED, label: t('Video.Player.Sleep Timer.Sleep Timer'), value: off },
+    ...removed.filter(item => item.id === 'autoplay'),
     store.getters.getShowSkipSilenceButton && !process.env.IS_IOS && { id: 'skipSilence', path: PlayerIcons.SKIP_NEXT_FILLED, label: t('Settings.Player Settings.Skip Silence'), value: off },
     store.getters.getShowMusicModeToggle && { id: 'musicMode', icon: ['fas', 'headphones'], label: t('Video.Player.Music Mode'), value: off },
     { id: 'ambientMode', path: PlayerIcons.LIGHT_MODE_FILLED, label: t('Global.Ambient Mode'), value: off },
@@ -217,6 +250,7 @@ const overflowItems = computed(() => {
     store.getters.getShowVolumeBoostToggle && !process.env.IS_IOS && { id: 'volumeBoost', icon: ['fas', 'volume-high'], label: t('Video.Player.Volume Boost.Volume Boost'), value: off },
     { id: 'loop', path: SHAKA_PREVIEW_ICONS.LOOP, label: t('Settings.Interface Customizer.Loop'), value: off },
     !store.getters.getDisableAbRepeat && { id: 'abRepeat', path: AB_REPEAT_PREVIEW_ICON.path, viewBox: AB_REPEAT_PREVIEW_ICON.viewBox, label: t('Video.Player.A-B Repeat.Set Repeat Start'), value: off },
+    ...removed.filter(item => item.id !== 'autoplay'),
   ].filter(Boolean)
 })
 </script>

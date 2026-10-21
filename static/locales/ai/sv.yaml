@@ -270,6 +270,10 @@ Settings:
     Confirm Password: "Bekräfta lösenord"
     Passwords Do Not Match: "Lösenorden matchar inte."
   Navigation and Controls: "Navigering och kontroller"
+  Control Bar:
+    Title: "Kontrollfält"
+    Customize: "Anpassa kontrollfältet"
+    Add Button: "Lägg till knapp"
   Fullscreen Actions:
     Recommended Videos: "Rekommenderade videor"
     Title: "Fullskärmsåtgärder"

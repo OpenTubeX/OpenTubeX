@@ -272,6 +272,10 @@ Settings:
     Confirm Password: "Confirmar contrasinal"
     Passwords Do Not Match: "Os contrasinais non coinciden."
   Navigation and Controls: "Navegación e controis"
+  Control Bar:
+    Title: "Barra de controis"
+    Customize: "Personalizar a barra de controis"
+    Add Button: "Engadir botón"
   Fullscreen Actions:
     Recommended Videos: "Vídeos recomendados"
     Title: "Accións de pantalla completa"

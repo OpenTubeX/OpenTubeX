@@ -287,6 +287,10 @@ Settings:
     Confirm Password: "تأیید گذرواژه"
     Passwords Do Not Match: "گذرواژه‌ها مطابقت ندارند."
   Navigation and Controls: "پیمایش و کنترل‌ها"
+  Control Bar:
+    Title: "نوار کنترل"
+    Customize: "سفارشی‌سازی نوار کنترل"
+    Add Button: "افزودن دکمه"
   Fullscreen Actions:
     Recommended Videos: "ویدیوهای پیشنهادی"
     Title: "اقدامات تمام‌صفحه"

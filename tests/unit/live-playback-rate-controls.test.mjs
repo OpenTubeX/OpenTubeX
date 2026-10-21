@@ -3,6 +3,8 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 
+import { DEFAULT_CONTROL_BAR_BUTTONS, getControlBarButtonDefinitions } from '../../src/renderer/helpers/controlBarButtons.js'
+
 const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
 function computedSource(name) {
   const start = source.indexOf(`    const ${name} = computed(() => {`)
@@ -19,6 +21,9 @@ function controls(props, overflow = false, quickBar = true, playerIsLive = props
     onlyUseOverFlowMenu: { value: overflow },
     useQuickPlaybackSpeedBar: { value: quickBar },
     isCapacitorMobilePlayer: () => false,
+    store: { getters: { getControlBarButtons: DEFAULT_CONTROL_BAR_BUTTONS } },
+    DEFAULT_CONTROL_BAR_BUTTONS,
+    getControlBarButtonDefinitions,
     getBigButtons: () => [],
     TrackLabelFormat: {},
     volumeBoostPossible: false,

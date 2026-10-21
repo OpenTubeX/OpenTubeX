@@ -286,6 +286,10 @@ Settings:
     Automatic unloading help: "Descarga las pestañas en segundo plano más antiguas para liberar memoria. Las pestañas activas y en reproducción permanecen cargadas."
     Memory threshold help: "Porcentaje del límite de memoria del renderizador, no de la RAM total del sistema."
   Navigation and Controls: "Navegación y controles"
+  Control Bar:
+    Title: "Barra de controles"
+    Customize: "Personalizar la barra de controles"
+    Add Button: "Añadir botón"
   Fullscreen Actions:
     Recommended Videos: "Videos recomendados"
     Title: "Acciones de pantalla completa"
