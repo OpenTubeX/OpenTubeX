@@ -9993,7 +9993,7 @@ export default defineComponent({
         if (userSelected && selectionPlaybackState === null) {
           // A video still waiting for autoplay counts as playing.
           const awaitingAutoplay = mediaElement.autoplay && mediaElement.played.length === 0 &&
-            mediaElement.readyState < HTMLMediaElement.HAVE_ENOUGH_DATA
+            !initialAutoplayCanceled && mediaElement.readyState < HTMLMediaElement.HAVE_ENOUGH_DATA
           selectionPlaybackState = {
             wasPaused: mediaElement.paused && !awaitingAutoplay,
             autoplay: mediaElement.autoplay
