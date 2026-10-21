@@ -752,6 +752,7 @@ import { tabRuntimeRegistry } from './tabs/TabRuntimeRegistry'
 import { getTabAvatarUrl, getTabPageIcon, getTabPreviewFallbackUrl } from './tabs/tabPreview'
 import { preloadResolvedRoute, preloadUtilityRoutes } from './router/index'
 import { installRoutePreloadIntent } from './helpers/routePreloadIntent'
+import { getTabsKeptLoaded } from './tabs/TabResidency'
 import { initializeCapacitorPullToRefresh } from './helpers/capacitorPullToRefresh'
 import { startMemoryPressureMonitor } from './helpers/memoryPressure'
 
@@ -1724,7 +1725,7 @@ onMounted(async () => {
         memoryThreshold: store.getters.getAutoUnloadMemoryThreshold,
         tabPercentage: store.getters.getAutoUnloadTabPercentage
       }),
-      unloadTabs: window.ftElectron.tabs.unloadLeastRecentlyUsed,
+      unloadTabs: percentage => window.ftElectron.tabs.unloadLeastRecentlyUsed(percentage, getTabsKeptLoaded()),
       notify: count => showToast({
         message: t('Tabs Unloaded To Free Memory', { count }, count),
         icon: ['fas', 'memory']

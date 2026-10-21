@@ -2,6 +2,7 @@ import {
   ANDROID_MEDIA_SESSION_ACTIONS,
   updateAndroidMediaSession,
 } from '../helpers/androidMediaSession.js'
+import { keepTabLoaded } from './TabResidency.js'
 
 const MEDIA_SESSION_ACTIONS = [
   ...ANDROID_MEDIA_SESSION_ACTIONS,
@@ -194,10 +195,12 @@ export const tabMediaCoordinator = {
   setMiniPlayer(tabId, active) {
     if (active) {
       if (!mediaByTabId.has(tabId)) return
+      keepTabLoaded(miniPlayerTabId, 'miniPlayer', false)
       miniPlayerTabId = tabId
     } else if (miniPlayerTabId === tabId) {
       miniPlayerTabId = null
     }
+    keepTabLoaded(tabId, 'miniPlayer', active && miniPlayerTabId === tabId)
     applyOwner()
   },
 
@@ -206,10 +209,12 @@ export const tabMediaCoordinator = {
       if (!mediaByTabId.has(tabId)) {
         return
       }
+      keepTabLoaded(pictureInPictureTabId, 'pictureInPicture', false)
       pictureInPictureTabId = tabId
     } else if (pictureInPictureTabId === tabId) {
       pictureInPictureTabId = null
     }
+    keepTabLoaded(tabId, 'pictureInPicture', active && pictureInPictureTabId === tabId)
     applyOwner()
   },
 
@@ -297,9 +302,11 @@ export const tabMediaCoordinator = {
     mediaByTabId.delete(tabId)
     if (pictureInPictureTabId === tabId) {
       pictureInPictureTabId = null
+      keepTabLoaded(tabId, 'pictureInPicture', false)
     }
     if (miniPlayerTabId === tabId) {
       miniPlayerTabId = null
+      keepTabLoaded(tabId, 'miniPlayer', false)
     }
     if (ownerTabId === tabId) {
       ownerTabId = null

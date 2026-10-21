@@ -130,6 +130,7 @@ import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../
 import { useI18n } from 'vue-i18n'
 import { useTabAvatar, useTabContext, useTabTitle } from '../../tabs/TabContext'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
+import { keepTabLoaded } from '../../tabs/TabResidency'
 import { useTabToast } from '../../composables/useTabToast'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { areCommentsAvailable } from './watchComments'
@@ -570,6 +571,9 @@ export default defineComponent({
     }
   },
   computed: {
+    castingActive() {
+      return this.chromecastActive || this.dlnaCastActive
+    },
     phonePanelsEnabled() {
       return this.phoneLayout && !this.customShortsPlayerActive && !this.fullscreenMetadataOpen &&
         !this.fullscreenCommentsOpen && !this.fullscreenTranscriptOpen && !this.fullscreenLiveChatOpen
@@ -1310,6 +1314,10 @@ export default defineComponent({
     }
   },
   watch: {
+    castingActive(active) {
+      // Unloading this tab under memory pressure would stop the cast.
+      keepTabLoaded(this.tabId, 'casting', active)
+    },
     // Ambient light extends past the layout, so the app clips its overflow.
     ambientModeActive: {
       handler(active) {
@@ -1515,6 +1523,7 @@ export default defineComponent({
     if (isOverlayScrollTopOutOfBounds(rail, contentEnd)) clampOverlayScrollTop(rail, contentEnd)
   },
   beforeUnmount: function () {
+    keepTabLoaded(this.tabId, 'casting', false)
     this.releaseAmbientModeClass?.()
     this.releaseAmbientModeClass = null
     connectionEvents.removeEventListener('change', this.handleDownloadConnectionChange)

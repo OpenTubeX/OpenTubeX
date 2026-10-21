@@ -1712,14 +1712,17 @@ export class TabManager {
 
   /**
    * Frees renderer memory before it runs out by unloading a percentage of the oldest
-   * loaded background tabs. The selected tab and playing tabs stay loaded.
+   * loaded background tabs. The selected tab, playing tabs and the tabs the
+   * renderer still needs stay loaded.
    * @param {number} [percentage]
+   * @param {string[]} [keptTabIds] tabs whose unloading would interrupt the user
    * @returns {Promise<number>} The number of unloaded tabs
    */
-  async unloadLeastRecentlyUsedTabs(percentage = 50) {
+  async unloadLeastRecentlyUsedTabs(percentage = 50, keptTabIds = []) {
     if (!Number.isFinite(percentage) || percentage < 10 || percentage > 100) percentage = 50
+    const kept = new Set(Array.isArray(keptTabIds) ? keptTabIds : [])
     const candidates = [...this.tabs.values()]
-      .filter(tab => tab.loadState === 'loaded' && !tab.isPlaying &&
+      .filter(tab => tab.loadState === 'loaded' && !tab.isPlaying && !kept.has(tab.id) &&
         tab.id !== this.activeTabId && tab.id !== this.presentedTabId)
       .sort((a, b) => a.lastActiveAt - b.lastActiveAt)
     const tabIds = candidates.slice(0, Math.ceil(candidates.length * percentage / 100)).map(tab => tab.id)
