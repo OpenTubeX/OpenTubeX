@@ -581,6 +581,10 @@ test('a page keeps its media session metadata when the retained mini player in i
   tabMediaCoordinator.setMetadata('shared-tab', { title: 'External media' }, 'external')
   assert.deepEqual(metadata, { title: 'External media' })
 
+  // A metadata update from the retained mini player keeps its lower priority.
+  tabMediaCoordinator.setMetadata('shared-tab', { title: 'Next YouTube video' }, 'watch')
+  assert.deepEqual(metadata, { title: 'External media' })
+
   tabMediaCoordinator.setMetadata('shared-tab', null, 'watch')
   assert.deepEqual(metadata, { title: 'External media' })
 
@@ -589,7 +593,7 @@ test('a page keeps its media session metadata when the retained mini player in i
   assert.deepEqual(metadata, { title: 'YouTube video' })
 })
 
-test('closing one player keeps the media actions of another player in the same tab', t => {
+test('a player keeps its media actions when another player in the same tab reconfigures or closes', t => {
   const descriptors = ['navigator', 'window'].map(key => [key, Object.getOwnPropertyDescriptor(globalThis, key)])
   Object.defineProperty(globalThis, 'navigator', { configurable: true, value: {} })
   Object.defineProperty(globalThis, 'window', { configurable: true, value: {} })
@@ -607,11 +611,11 @@ test('closing one player keeps the media actions of another player in the same t
   tabMediaCoordinator.setActionHandlers('two-player-tab', 'player-external', { pause: () => pauses.push('external') })
   tabMediaCoordinator.dispatchAction('pause', {}, 'two-player-tab')
 
-  // Shaka reconfiguring a player registers its handlers again, which takes over.
+  // Shaka reconfiguring the mini player registers its handlers again.
   tabMediaCoordinator.setActionHandlers('two-player-tab', 'player-mini', { pause: () => pauses.push('mini') })
   tabMediaCoordinator.dispatchAction('pause', {}, 'two-player-tab')
 
   tabMediaCoordinator.setActionHandlers('two-player-tab', 'player-mini', {})
   tabMediaCoordinator.dispatchAction('pause', {}, 'two-player-tab')
-  assert.deepEqual(pauses, ['external', 'mini', 'external'])
+  assert.deepEqual(pauses, ['external', 'external', 'external'])
 })

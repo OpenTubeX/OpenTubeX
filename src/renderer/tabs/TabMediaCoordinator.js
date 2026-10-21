@@ -240,10 +240,11 @@ export const tabMediaCoordinator = {
     }
 
     // A tab can show another page's media next to its retained mini player.
-    // The newest metadata wins, and clearing it restores the previous one.
-    entry.metadataSources.delete(source)
+    // The page that registered last wins, and clearing it restores the other.
     if (metadata != null) {
       entry.metadataSources.set(source, metadata)
+    } else {
+      entry.metadataSources.delete(source)
     }
     entry.metadata = Array.from(entry.metadataSources.values()).at(-1) ?? null
     applyOwner()
@@ -288,11 +289,10 @@ export const tabMediaCoordinator = {
       return
     }
 
-    // The newest registration wins, and removing it restores the handlers of
-    // another player in the same tab, like a retained mini player.
-    entry.actionHandlerSources.delete(source)
     if (actionHandlers && Object.keys(actionHandlers).length > 0) {
       entry.actionHandlerSources.set(source, actionHandlers)
+    } else {
+      entry.actionHandlerSources.delete(source)
     }
     applyOwner()
   },
