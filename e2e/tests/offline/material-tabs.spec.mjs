@@ -7,13 +7,14 @@ test('highlight capture resolves when its transition is canceled', async ({ page
   await goToSettingsSection(page, 'data')
   const tab = page.getByRole('tab', { name: 'Storage', exact: true })
   await tab.evaluate(element => {
-    function cancelHighlight(event) {
-      if (event.target !== element || event.propertyName !== 'opacity' || event.pseudoElement !== '::before') return
-      element.removeEventListener('transitionrun', cancelHighlight)
-      element.getAnimations({ subtree: true }).filter(animation => animation instanceof CSSTransition && animation.transitionProperty === 'opacity' && animation.effect.target === element && animation.effect.pseudoElement === '::before')
-        .forEach(animation => animation.cancel())
-    }
-    element.addEventListener('transitionrun', cancelHighlight)
+    // Observers run in creation order: cancel the fade after the helper captured it, before it starts.
+    const observer = new MutationObserver(() => {
+      observer.disconnect()
+      queueMicrotask(() => element.getAnimations({ subtree: true })
+        .filter(animation => animation instanceof CSSTransition && animation.transitionProperty === 'opacity' && animation.effect.target === element && animation.effect.pseudoElement === '::before')
+        .forEach(animation => animation.cancel()))
+    })
+    observer.observe(element, { attributeFilter: ['aria-selected'] })
   })
   expect(await selectTabWithHighlightAnimation(tab)).toBeNull()
 })

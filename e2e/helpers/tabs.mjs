@@ -29,30 +29,33 @@ export function tabHighlightAnimations(tab) {
     .map(animation => ({ property: animation.transitionProperty, playbackRate: animation.playbackRate, duration: animation.effect.getTiming().duration }))
 }
 
-/** Capture the transition at selection time, even if the test driver is busy. */
+/**
+ * Capture the fade as soon as the selection renders. A busy renderer can
+ * finish it before the next frame dispatches transitionrun.
+ */
 export async function selectTabWithHighlightAnimation(tab, key = null) {
   return tab.evaluate((element, key) => new Promise(resolve => {
+    const observer = new MutationObserver(onSelection)
     const timeout = setTimeout(() => {
-      element.removeEventListener('transitionrun', onTransition)
+      observer.disconnect()
       resolve(null)
     }, 5000)
-    function onTransition(event) {
-      if (event.target !== element || event.propertyName !== 'opacity' || event.pseudoElement !== '::before') return
+    // Mutation callbacks run right after Vue's update, before the fade can advance.
+    async function onSelection() {
+      if (element.getAttribute('aria-selected') !== 'true') return
+      observer.disconnect()
       clearTimeout(timeout)
-      element.removeEventListener('transitionrun', onTransition)
-      requestAnimationFrame(async () => {
-        const animation = element.getAnimations({ subtree: true }).find(animation =>
-          animation instanceof CSSTransition && animation.transitionProperty === 'opacity' && animation.effect.target === element && animation.effect.pseudoElement === '::before')
-        if (!animation) { resolve(null); return }
-        try {
-          await animation.ready
-          resolve({ property: animation.transitionProperty, playbackRate: animation.playbackRate, duration: animation.effect.getTiming().duration })
-        } catch {
-          resolve(null)
-        }
-      })
+      const animation = element.getAnimations({ subtree: true }).find(animation =>
+        animation instanceof CSSTransition && animation.transitionProperty === 'opacity' && animation.effect.target === element && animation.effect.pseudoElement === '::before')
+      if (!animation) { resolve(null); return }
+      try {
+        await animation.ready
+        resolve({ property: animation.transitionProperty, playbackRate: animation.playbackRate, duration: animation.effect.getTiming().duration })
+      } catch {
+        resolve(null)
+      }
     }
-    element.addEventListener('transitionrun', onTransition)
+    observer.observe(element, { attributeFilter: ['aria-selected'] })
     if (key === null) element.click()
     else element.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }))
   }), key)
