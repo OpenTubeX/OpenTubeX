@@ -2266,14 +2266,16 @@ async function importChannelPlaybackSpeeds() {
         const currentSpeeds = parseChannelPreferences(store.getters.getChannelPlaybackSpeeds, 'channelPlaybackSpeeds')
         const value = JSON.stringify({ ...currentSpeeds, ...speeds })
         await store.dispatch('updateChannelPlaybackSpeeds', value)
+        let saved = store.getters.getChannelPlaybackSpeeds === value
+        // The imported speeds would otherwise not be applied
+        if (saved && !store.getters.getRememberPlaybackSpeedPerChannel) {
+          await store.dispatch('updateRememberPlaybackSpeedPerChannel', true)
+          saved = store.getters.getRememberPlaybackSpeedPerChannel
+        }
         // The store only logs failed updates
-        if (store.getters.getChannelPlaybackSpeeds !== value) {
+        if (!saved) {
           showToast({ message: t('Channel.Failed to save subscription settings'), icon: ['fas', 'circle-exclamation'] })
           return
-        }
-        // The imported speeds would otherwise not be applied
-        if (!store.getters.getRememberPlaybackSpeedPerChannel) {
-          await store.dispatch('updateRememberPlaybackSpeedPerChannel', true)
         }
         showToast({
           message: t('Settings.Data Settings.Channel playback speeds imported', { count }, count),

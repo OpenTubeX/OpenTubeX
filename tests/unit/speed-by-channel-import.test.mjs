@@ -87,7 +87,7 @@ const importer = dataSettings.slice(
   dataSettings.indexOf('// #endregion channel playback speeds')
 )
 
-async function importFile(values, { saveFails = false } = {}) {
+async function importFile(values, { failingSettings = [] } = {}) {
   const settings = { channelPlaybackSpeeds: '{}', rememberPlaybackSpeedPerChannel: false }
   const toasts = []
   const run = vm.runInNewContext(`${importer}\nimportChannelPlaybackSpeeds`, {
@@ -108,7 +108,8 @@ async function importFile(values, { saveFails = false } = {}) {
       },
       // Like the settings store, a failed update is only logged
       dispatch: async (action, value) => {
-        if (!saveFails) settings[action[6].toLowerCase() + action.slice(7)] = value
+        const setting = action[6].toLowerCase() + action.slice(7)
+        if (!failingSettings.includes(setting)) settings[setting] = value
       },
     },
     showToast: toast => toasts.push(toast.message),
@@ -131,8 +132,15 @@ test('saves the imported speeds and applies them', async () => {
 })
 
 test('reports a failed save instead of a successful import', async () => {
-  const { settings, toasts } = await importFile({ [CHANNEL_ID]: 1.5 }, { saveFails: true })
+  const speeds = await importFile({ [CHANNEL_ID]: 1.5 }, { failingSettings: ['channelPlaybackSpeeds'] })
+  // Per-channel speeds stay off when there's nothing new to apply
+  assert.deepEqual(speeds.settings, { channelPlaybackSpeeds: '{}', rememberPlaybackSpeedPerChannel: false })
+  assert.deepEqual(speeds.toasts, ['Channel.Failed to save subscription settings'])
 
-  assert.deepEqual(settings, { channelPlaybackSpeeds: '{}', rememberPlaybackSpeedPerChannel: false })
-  assert.deepEqual(toasts, ['Channel.Failed to save subscription settings'])
+  const remember = await importFile({ [CHANNEL_ID]: 1.5 }, { failingSettings: ['rememberPlaybackSpeedPerChannel'] })
+  assert.deepEqual(remember.settings, {
+    channelPlaybackSpeeds: JSON.stringify({ [CHANNEL_ID]: 1.5 }),
+    rememberPlaybackSpeedPerChannel: false,
+  })
+  assert.deepEqual(remember.toasts, ['Channel.Failed to save subscription settings'])
 })
