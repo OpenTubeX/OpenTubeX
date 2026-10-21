@@ -1622,6 +1622,8 @@ export default defineComponent({
       return JSON.stringify([
         backend,
         usesInvidiousApi(backend) ? this.apiServerUrl : '',
+        // Proxying decides whether the stream URLs point at the server or at YouTube
+        backend === 'yattee' && this.$store.getters.getYatteeProxyVideos,
         backend === 'local' && process.env.IS_CAPACITOR && this.isYtDlpPlaybackRequested(),
         videoId,
       ])

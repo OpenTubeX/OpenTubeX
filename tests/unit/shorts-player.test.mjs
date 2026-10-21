@@ -159,6 +159,7 @@ for (const backend of ['local', 'invidious', 'yattee']) {
     })
     const watch = {
       ...methods, backendPreference: backend, apiServerUrl: 'https://first.example',
+      $store: { getters: { getYatteeProxyVideos: true } },
       isYtDlpPlaybackRequested: () => false, shortsPlaybackCache: new ShortsPlaybackCache(),
     }
     const first = watch.getShortsVideoInformation('short')
@@ -173,6 +174,23 @@ for (const backend of ['local', 'invidious', 'yattee']) {
     }
   })
 }
+
+test('preloaded Yattee Shorts are fetched again after proxying is turned on', async () => {
+  const calls = []
+  const methods = vm.runInNewContext(`({${extractionSource}})`, {
+    process: { env: { IS_CAPACITOR: false } }, usesInvidiousApi,
+    invidiousGetVideoInformation: async id => { calls.push(id); return { id } },
+  })
+  const getters = { getYatteeProxyVideos: false }
+  const watch = {
+    ...methods, backendPreference: 'yattee', apiServerUrl: 'https://yattee.example', $store: { getters },
+    isYtDlpPlaybackRequested: () => false, shortsPlaybackCache: new ShortsPlaybackCache(),
+  }
+  await watch.getShortsVideoInformation('short')
+  getters.getYatteeProxyVideos = true
+  await watch.getShortsVideoInformation('short')
+  assert.equal(calls.length, 2, 'direct stream URLs must not be reused once proxying is on')
+})
 
 test('an Invidious preload error is retried when the Short is opened', async () => {
   let calls = 0
