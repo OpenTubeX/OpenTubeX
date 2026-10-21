@@ -764,7 +764,9 @@ test.describe('tab bar', () => {
 
     const tab = page.locator(`.tab[data-tab-id="${watchTab.id}"]`)
     await expect(tab.locator('.tabLoadingLine')).toBeVisible()
-    await expect(tab.locator('.tabLoadingLine')).toHaveCount(0)
+    // A cold watch page parses the player script before it finishes loading,
+    // which takes longer than the default timeout on a busy machine.
+    await expect(tab.locator('.tabLoadingLine')).toHaveCount(0, { timeout: 30_000 })
     await expect.poll(() => page.evaluate(tabId => (
       window.__watchTabIconStates.some(state => state.id === tabId && !state.loading && state.avatar)
     ), watchTab.id)).toBe(true)
