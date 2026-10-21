@@ -50,6 +50,9 @@ export class YtDlpPlaybackSourceCache {
     this.now = now
     /** @type {Map<string, { cacheKey: string, source: import('./ytDlpPlayback').YtDlpPlaybackSource }>} */
     this.sources = new Map()
+    // When the earliest cached source stops being usable. Removing entries
+    // can leave it early, which only causes an extra sweep.
+    this.nextExpiry = Infinity
   }
 
   /**
@@ -93,17 +96,24 @@ export class YtDlpPlaybackSourceCache {
 
     this.sources.delete(videoId)
     // Reading a source drops it once expired, but a large playlist preload
-    // would otherwise keep every unread one in memory for the session.
+    // would otherwise keep every unread one in memory for the session. Sweep
+    // only once a source may have expired, so writes stay cheap.
     const now = this.now()
-    for (const [cachedVideoId, entry] of this.sources) {
-      if (!isYtDlpPlaybackSourceCacheable(entry.source, now, this.expiryMarginMs)) {
-        this.sources.delete(cachedVideoId)
+    if (now >= this.nextExpiry) {
+      this.nextExpiry = Infinity
+      for (const [cachedVideoId, entry] of this.sources) {
+        if (isYtDlpPlaybackSourceCacheable(entry.source, now, this.expiryMarginMs)) {
+          this.nextExpiry = Math.min(this.nextExpiry, entry.source.expiryDate.getTime() - this.expiryMarginMs)
+        } else {
+          this.sources.delete(cachedVideoId)
+        }
       }
     }
     while (this.sources.size >= this.maxEntries) {
       this.sources.delete(this.sources.keys().next().value)
     }
     this.sources.set(videoId, { cacheKey, source })
+    this.nextExpiry = Math.min(this.nextExpiry, source.expiryDate.getTime() - this.expiryMarginMs)
     return true
   }
 

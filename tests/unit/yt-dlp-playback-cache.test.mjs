@@ -179,3 +179,26 @@ test('drops expired sources that were never read again when caching another one'
 
   assert.deepEqual([...cache.sources.keys()], ['video'])
 })
+
+test('caching a large playlist preload does not recheck every source on each write', () => {
+  let now = 1000000
+  let expiryReads = 0
+  class CountedDate extends Date {
+    getTime() {
+      expiryReads++
+      return super.getTime()
+    }
+  }
+  const cache = new YtDlpPlaybackSourceCache({ expiryMarginMs: 0, now: () => now })
+  cache.ensureCapacity(5000)
+  for (let index = 0; index < 5000; index++) {
+    cache.set(`preloaded-${index}`, 'settings', source(new CountedDate(now + 60_000 + index)))
+  }
+  assert.ok(expiryReads < 5 * 5000, `${expiryReads} expiry reads`)
+
+  // Once a source expires, the next write removes it.
+  now += 60_000
+  cache.set('video', 'settings', source(new Date(now + 60_000)))
+  assert.equal(cache.sources.has('preloaded-0'), false)
+  assert.equal(cache.sources.has('preloaded-1'), true)
+})
