@@ -1,15 +1,13 @@
 import shaka from 'shaka-player'
-import { watch } from 'vue'
+import { h, render, watch } from 'vue'
+import { Icon } from '@iconify/vue/offline'
 
 import i18n from '../../../i18n/index'
 import { PlayerIcons } from '../../../../constants'
+import { currentIconPack } from '../../../icons/iconPackState'
+import { resolveIconifyId } from '../../../icons/resolveIconifyId'
 import { formatDurationAsTimestamp } from '../../../helpers/utils'
 import { scheduleOverflowMenuScrollClamp } from './overflowMenu'
-
-export const SEEK_HISTORY_ICON = Object.freeze({
-  path: 'M12 21q-3.15 0-5.575-1.912T3.275 14.2q-.1-.375.15-.687t.675-.363q.4-.05.725.15t.45.6q.6 2.25 2.475 3.675T12 19q2.925 0 4.963-2.037T19 12t-2.037-4.962T12 5q-1.725 0-3.225.8T6.25 8H8q.425 0 .713.288T9 9t-.288.713T8 10H4q-.425 0-.712-.288T3 9V5q0-.425.288-.712T4 4t.713.288T5 5v1.35q1.275-1.6 3.113-2.475T12 3q1.875 0 3.513.713t2.85 1.924t1.925 2.85T21 12t-.712 3.513t-1.925 2.85t-2.85 1.925T12 21m1-9.4l2.5 2.5q.275.275.275.7t-.275.7t-.7.275t-.7-.275l-2.8-2.8q-.15-.15-.225-.337T11 11.975V8q0-.425.288-.712T12 7t.713.288T13 8z',
-  viewBox: '0 0 24 24',
-})
 
 export class SeekHistoryMenu extends shaka.ui.SettingsMenu {
   /**
@@ -20,7 +18,14 @@ export class SeekHistoryMenu extends shaka.ui.SettingsMenu {
    * @param {shaka.ui.Controls} controls
    */
   constructor(history, chapters, events, parent, controls) {
-    super(parent, controls, SEEK_HISTORY_ICON)
+    super(parent, controls)
+
+    /** @private Follows the selected icon pack */
+    this.stopIconWatch_ = watch(currentIconPack, () => {
+      const svg = this.icon.getSvgElement()
+      svg.setAttribute('viewBox', '0 0 24 24')
+      render(h(Icon, { icon: resolveIconifyId('history'), width: 24, height: 24 }), svg)
+    }, { immediate: true })
 
     this.button.classList.add('seek-history-button', 'shaka-tooltip-status')
     this.menu.classList.add('seek-history-menu')
@@ -68,6 +73,8 @@ export class SeekHistoryMenu extends shaka.ui.SettingsMenu {
 
   release() {
     this.stopHistoryWatch_()
+    this.stopIconWatch_()
+    render(null, this.icon.getSvgElement())
     super.release()
   }
 

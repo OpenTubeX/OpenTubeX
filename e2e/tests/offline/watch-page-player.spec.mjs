@@ -1323,6 +1323,13 @@ test.describe('with seek history enabled', () => {
     await openOverflowMenu()
     await expect(seekHistoryButton).toBeVisible()
     await expect(seekHistoryButton).toHaveAccessibleName('Seek history')
+    // The icon follows the selected icon pack.
+    const seekHistoryIcon = seekHistoryButton.locator(':scope > svg')
+    await expect(seekHistoryIcon.locator('path')).not.toHaveCount(0)
+    const materialIcon = await seekHistoryIcon.innerHTML()
+    await page.evaluate(() => window.$store.dispatch('updateIconPack', 'remix'))
+    await expect.poll(() => seekHistoryIcon.innerHTML()).not.toBe(materialIcon)
+    await expect(seekHistoryIcon.locator('path')).not.toHaveCount(0)
     await expect(seekHistoryButton.locator('.shaka-current-selection-span')).toHaveText('2 positions')
     await seekHistoryButton.click()
     await expect(entries).toHaveText(['0:27 · Ending', '0:01 · Opening'])
