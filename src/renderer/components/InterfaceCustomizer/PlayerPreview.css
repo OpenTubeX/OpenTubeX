@@ -188,24 +188,36 @@
 
 /* Like the real speed bar, give up space to the other controls and clip. */
 .previewRateBar {
+  background: linear-gradient(145deg, rgb(255 255 255 / 12%), rgb(255 255 255 / 3%)), var(--pill-color);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 28%), inset 0 1px rgb(255 255 255 / 24%), inset 0 0 0 1px rgb(255 255 255 / 16%), inset 0 -2px 8px rgb(0 0 0 / 22%);
   flex-shrink: 1;
-  gap: calc(2 * var(--u));
+  gap: calc(3 * var(--u));
   min-inline-size: 0;
   overflow: hidden;
-  padding-inline: calc(4 * var(--u));
+  padding-inline: calc(6 * var(--u));
 }
 
 .previewRate {
+  align-items: center;
+  background: rgb(0 0 0 / 22%);
+  block-size: calc(26 * var(--u));
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: calc(999px * var(--ui-roundness));
+  box-sizing: border-box;
+  color: rgb(255 255 255 / 92%);
+  display: flex;
   flex-shrink: 0;
+  font-size: calc(10 * var(--u));
+  font-weight: 600;
+  line-height: 1;
+  padding-inline: calc(6 * var(--u));
   white-space: nowrap;
-  border-radius: calc(13 * var(--u) * var(--ui-roundness));
-  font-weight: 500;
-  padding-block: calc(4 * var(--u));
-  padding-inline: calc(8 * var(--u));
 }
 
 .previewRate.active {
-  background-color: rgb(255 255 255 / 22%);
+  background: color-mix(in srgb, var(--primary-color) 32%, transparent);
+  border-color: var(--primary-color);
+  color: #fff;
 }
 
 .previewRightGroup {
@@ -226,30 +238,22 @@
   background-color: rgb(255 255 255 / 14%);
 }
 
+/* The real switch in its off state. */
 .previewAutoplayToggle {
   align-items: center;
-  background-color: rgb(255 255 255 / 30%);
-  block-size: calc(16 * var(--u));
-  border-radius: calc(8 * var(--u));
-  display: flex;
-  inline-size: calc(34 * var(--u));
-  margin-inline: calc(6 * var(--u));
-}
-
-.previewAutoplayKnob {
-  align-items: center;
-  background-color: #fff;
+  background-color: rgb(255 255 255 / 28%);
   block-size: calc(18 * var(--u));
-  border-radius: 50%;
-  color: #555;
+  border-radius: calc(9 * var(--u));
+  box-sizing: border-box;
   display: flex;
-  inline-size: calc(18 * var(--u));
-  justify-content: center;
+  inline-size: calc(36 * var(--u));
+  margin-inline: calc(6 * var(--u));
+  padding: calc(1 * var(--u));
 }
 
-.previewAutoplayKnob .previewIcon {
-  block-size: 70%;
-  inline-size: 70%;
+.previewAutoplayToggle .previewIcon {
+  block-size: calc(16 * var(--u));
+  inline-size: calc(16 * var(--u));
 }
 
 .previewOverflowMenu {

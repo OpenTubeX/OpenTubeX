@@ -34,6 +34,29 @@ test.describe('interface customizer', () => {
     await expect(customizer.getByRole('tab', { name: 'Mobile', exact: true })).toHaveAttribute('aria-selected', 'true')
   })
 
+  test('lays out the navigation preview header like the real top navigation', { tag: '@scale' }, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 1400, height: 800 })
+    const customizer = await openInterfaceCustomizer(page, 'navigation')
+    const topBar = customizer.locator('.previewTopBar')
+    await expect.poll(() => topBar.evaluate(bar => {
+      const bounds = bar.getBoundingClientRect()
+      const search = bar.querySelector('.previewSearch').getBoundingClientRect()
+      return Math.abs((search.left + search.right) / 2 - (bounds.left + bounds.right) / 2)
+    }), { message: 'search bar offset from the header center' }).toBeLessThan(1)
+    await expect.poll(() => topBar.evaluate(bar => (
+      bar.querySelector('.previewSearch').getBoundingClientRect().left - bar.querySelector('.previewLogo').getBoundingClientRect().right
+    )), { message: 'gap between the logo and the search bar' }).toBeGreaterThan(0)
+    // The real header shows a 25px icon beside a 100px wordmark.
+    await expect.poll(() => customizer.locator('.previewLogo').evaluate(logo => logo.getBoundingClientRect().width)).toBeCloseTo(130, 0)
+  })
+
+  test('starts the navigation preview on the mobile layout in narrow windows', async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 420, height: 760 })
+    const customizer = await openInterfaceCustomizer(page, 'navigation')
+    await expect(customizer.getByRole('tab', { name: 'Mobile', exact: true })).toHaveAttribute('aria-selected', 'true')
+    await expect(customizer.locator('.navigationPreview')).toHaveClass(/mobile/)
+  })
+
   test('renders the real quick settings menu as its preview', async ({ page }) => {
     const customizer = await openInterfaceCustomizer(page, 'quick settings')
     const preview = customizer.locator('.quickSettingsPreview .quickSettingsMenu')

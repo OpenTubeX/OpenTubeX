@@ -153,6 +153,9 @@ const idPrefix = `interface-customizer-${useId().replaceAll(':', '')}`
 const open = ref(false)
 const activeTabId = ref('navigation')
 
+// The side navigation switches to the bottom bar at this width.
+const mobileNavigationLayout = window.matchMedia('(max-width: 680px)')
+
 const tabs = computed(() => {
   const fullscreenModes = [
     { id: 'fullscreen', icon: ['fas', 'expand'], label: t('Settings.Interface Customizer.Fullscreen') },
@@ -168,6 +171,8 @@ const tabs = computed(() => {
         { id: 'desktop', icon: ['fas', 'display'], label: t('Settings.Interface Customizer.Desktop') },
         { id: 'mobile', icon: ['fas', 'smartphone'], label: t('Settings.Interface Customizer.Mobile') },
       ],
+      // Start with the layout the app is currently using.
+      defaultPreviewMode: mobileNavigationLayout.matches ? 'mobile' : 'desktop',
     },
     {
       id: 'quickSettings',
@@ -201,7 +206,8 @@ const activeTab = computed(() => tabs.value.find(tab => tab.id === activeTabId.v
 
 // Each tab remembers the preview state last chosen for it.
 const previewModes = reactive({})
-const activePreviewMode = computed(() => previewModes[activeTabId.value] ?? activeTab.value.previewModes[0]?.id)
+const activePreviewMode = computed(() => previewModes[activeTabId.value] ??
+  activeTab.value.defaultPreviewMode ?? activeTab.value.previewModes[0]?.id)
 
 const editorScrollRef = useTemplateRef('editorScrollRef')
 // Each tab returns to the editor position it was left at.

@@ -32,7 +32,23 @@
   display: flex;
   flex-shrink: 0;
   gap: 16px;
-  padding-inline: 16px 12px;
+  padding-inline: 16px;
+}
+
+/* Center the search bar like the real top navigation, shrinking it so
+   both sides fit the menu icon and logo. */
+.desktop .previewTopBar {
+  --preview-header-side: calc(20px + 16px + 130px);
+
+  display: grid;
+  grid-template-columns: minmax(var(--preview-header-side), 1fr) minmax(36px, 440px) minmax(var(--preview-header-side), 1fr);
+}
+
+.previewTopBarStart {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  min-inline-size: 0;
 }
 
 .previewTopBarIcon {
@@ -40,9 +56,10 @@
 }
 
 .previewLogo {
-  block-size: 24px;
+  /* Matches the real header's 25px icon and 100px wordmark. */
+  block-size: auto;
   flex-shrink: 0;
-  inline-size: auto;
+  inline-size: 130px;
 }
 
 .previewSearch {
@@ -52,9 +69,7 @@
   border-radius: calc(18px * var(--ui-roundness));
   color: var(--secondary-text-color);
   display: flex;
-  flex: 1 1 auto;
   justify-content: flex-end;
-  max-inline-size: 360px;
   min-inline-size: 36px;
   padding-inline: 12px;
   box-sizing: border-box;
@@ -62,7 +77,6 @@
 
 .mobile .previewSearch {
   background: none;
-  flex: 0 0 auto;
   margin-inline-start: auto;
   padding: 0;
 }
@@ -76,6 +90,7 @@
   font-size: 18px;
   inline-size: 36px;
   justify-content: center;
+  justify-self: end;
   margin-inline-start: auto;
   overflow: hidden;
 }
