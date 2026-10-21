@@ -102,7 +102,7 @@
 
             <!-- eslint-disable vuejs-accessibility/mouse-events-have-key-events, vuejs-accessibility/click-events-have-key-events -->
             <div
-              v-if="!playlistCollapsed && !shuffleEnabled && !reversePlaylist"
+              v-if="!playlistCollapsed"
               class="playlistProgressBarContainer"
               @mouseenter="showProgressBarPreview = true"
               @mouseleave="showProgressBarPreview = false"

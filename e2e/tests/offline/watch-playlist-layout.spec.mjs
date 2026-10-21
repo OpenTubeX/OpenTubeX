@@ -248,6 +248,32 @@ test('portrait playlist opens below the video and clamps after resize and remova
   await expect(page.locator('.watchVideoPlaylist .playlistProgressBarContainer')).toBeVisible()
 })
 
+test('shuffled and reversed playlists keep the progress bar between the counter and buttons', { tag: '@scale' }, async ({ app, page }) => {
+  const watch = await openPlaylist(app, page)
+  const panel = page.locator('.watchVideoPlaylist').filter({ visible: true })
+  const shuffle = panel.getByRole('button', { name: 'Shuffle Playlist' })
+  const reverse = panel.getByRole('button', { name: 'Reverse Playlist' })
+  const expectControlsBelowCounter = async () => {
+    await expect(panel.locator('.playlistProgressBarContainer')).toBeVisible()
+    await expect.poll(() => panel.evaluate(element => {
+      const counter = element.querySelector('.playlistIndex label').getBoundingClientRect()
+      const bar = element.querySelector('.playlistProgressBar').getBoundingClientRect()
+      const buttons = [...element.querySelectorAll('.playlistButtons .playlistButton')]
+        .map(button => button.getBoundingClientRect())
+      return bar.top >= counter.bottom - 0.5 && buttons.every(button => button.top >= bar.bottom - 0.5)
+    })).toBe(true)
+  }
+
+  await shuffle.click()
+  await expect(shuffle).toHaveAttribute('aria-pressed', 'true')
+  await expectControlsBelowCounter()
+  await shuffle.click()
+  await reverse.click()
+  await expect(reverse).toHaveAttribute('aria-pressed', 'true')
+  await expectControlsBelowCounter()
+  await watch.dispose()
+})
+
 test('keyboard moves watch playlist videos to the top and bottom', async ({ app, page }) => {
   const watch = await openPlaylist(app, page)
   const titles = page.locator('.watchVideoPlaylist .playlistItem .h3Title')
