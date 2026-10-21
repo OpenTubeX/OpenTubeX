@@ -79,6 +79,7 @@ export class AudioTrackSelection extends shaka.ui.SettingsMenu {
     menu.appendChild(backButton)
 
     let count = 0
+    let languageDisplayNames
 
     for (const track of tracks) {
       const button = document.createElement('button')
@@ -89,7 +90,12 @@ export class AudioTrackSelection extends shaka.ui.SettingsMenu {
       const span = document.createElement('span')
       button.appendChild(span)
 
-      span.textContent = track.label || new Intl.DisplayNames('en', { type: 'language', languageDisplay: 'standard' }).of(track.language)
+      if (track.label) {
+        span.textContent = track.label
+      } else {
+        languageDisplayNames ??= new Intl.DisplayNames('en', { type: 'language', languageDisplay: 'standard' })
+        span.textContent = languageDisplayNames.of(track.language)
+      }
 
       if (track.active) {
         button.appendChild(this._checkmarkIcon)

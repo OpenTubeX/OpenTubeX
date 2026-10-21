@@ -4,8 +4,14 @@ import { selectSponsorBlockFullVideoLabel } from './player/sponsorBlockFullVideo
 
 const SPONSOR_BLOCK_ID_CHARSET = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
 const SPONSOR_BLOCK_USER_ID_LENGTH = 30
+// Each entry covers every video sharing a hash prefix, so cards with the same
+// prefix and remounted cards reuse one response.
 const SPONSOR_BLOCK_VIDEO_LABEL_CACHE_SIZE = 256
+/** @type {Map<string, Promise<{ videoID: string, segments: object[] }[]>>} */
 const sponsorBlockVideoLabelCache = new Map()
+const VIDEO_HASH_CACHE_SIZE = 1024
+/** @type {Map<string, Promise<string>>} */
+const videoHashCache = new Map()
 
 function generateSponsorBlockUserId() {
   const randomValues = new Uint32Array(SPONSOR_BLOCK_USER_ID_LENGTH)
@@ -16,7 +22,28 @@ function generateSponsorBlockUserId() {
   }).join('')
 }
 
-async function getVideoHash(videoId) {
+/**
+ * SponsorBlock and DeArrow look videos up by the same hash prefix and list
+ * cards request both, so the digest only runs once per video.
+ * @param {string} videoId
+ * @returns {Promise<string>}
+ */
+function getVideoHash(videoId) {
+  let hash = videoHashCache.get(videoId)
+
+  if (!hash) {
+    hash = digestVideoHash(videoId)
+
+    if (videoHashCache.size >= VIDEO_HASH_CACHE_SIZE) {
+      videoHashCache.delete(videoHashCache.keys().next().value)
+    }
+    videoHashCache.set(videoId, hash)
+  }
+
+  return hash
+}
+
+async function digestVideoHash(videoId) {
   const videoIdBuffer = new TextEncoder().encode(videoId)
 
   const hashBuffer = await crypto.subtle.digest('SHA-256', videoIdBuffer)
@@ -109,43 +136,41 @@ export async function sponsorBlockSkipSegments(videoId, categories, actionTypes 
  */
 export async function getSponsorBlockVideoLabel(videoId) {
   const sponsorBlockUrl = store.getters.getSponsorBlockUrl
-  const cacheKey = `${sponsorBlockUrl}:${videoId}`
-  const cachedLabel = sponsorBlockVideoLabelCache.get(cacheKey)
+  const videoIdHashPrefix = await getVideoHash(videoId)
+  const cacheKey = `${sponsorBlockUrl}:${videoIdHashPrefix}`
+  let results = sponsorBlockVideoLabelCache.get(cacheKey)
 
-  if (cachedLabel) {
-    return cachedLabel
-  }
-
-  const request = (async () => {
-    const videoIdHashPrefix = await getVideoHash(videoId)
+  if (!results) {
     const requestUrl = `${sponsorBlockUrl}/api/videoLabels/${videoIdHashPrefix}`
 
-    try {
-      const response = await fetch(requestUrl)
-      if (response.status === 404) {
-        return null
-      }
+    results = (async () => {
+      try {
+        const response = await fetch(requestUrl)
+        // 404 means that no video with this hash prefix has labels
+        if (response.status === 404) {
+          return []
+        }
 
-      if (!response.ok) {
-        throw new Error(await response.text())
-      }
+        if (!response.ok) {
+          throw new Error(await response.text())
+        }
 
-      const results = await response.json()
-      const segments = results.find(result => result.videoID === videoId)?.segments ?? []
-      return selectSponsorBlockFullVideoLabel(segments)
-    } catch (error) {
-      sponsorBlockVideoLabelCache.delete(cacheKey)
-      console.error('failed to fetch SponsorBlock video label', requestUrl, error)
-      throw error
+        return await response.json()
+      } catch (error) {
+        sponsorBlockVideoLabelCache.delete(cacheKey)
+        console.error('failed to fetch SponsorBlock video label', requestUrl, error)
+        throw error
+      }
+    })()
+
+    if (sponsorBlockVideoLabelCache.size >= SPONSOR_BLOCK_VIDEO_LABEL_CACHE_SIZE) {
+      sponsorBlockVideoLabelCache.delete(sponsorBlockVideoLabelCache.keys().next().value)
     }
-  })()
-
-  if (sponsorBlockVideoLabelCache.size >= SPONSOR_BLOCK_VIDEO_LABEL_CACHE_SIZE) {
-    sponsorBlockVideoLabelCache.delete(sponsorBlockVideoLabelCache.keys().next().value)
+    sponsorBlockVideoLabelCache.set(cacheKey, results)
   }
-  sponsorBlockVideoLabelCache.set(cacheKey, request)
 
-  return request
+  const segments = (await results).find(result => result.videoID === videoId)?.segments ?? []
+  return selectSponsorBlockFullVideoLabel(segments)
 }
 
 /** @type {Map<string, Promise<object | undefined>>} */

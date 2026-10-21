@@ -2,9 +2,7 @@
   <div
     v-if="showResult"
     ref="shell"
-    v-observe-visibility="(windowed && !deferWindowing) || windowItemObserved || visible ? false : {
-      callback: onVisibilityChanged
-    }"
+    v-first-visible="(windowed && !deferWindowing) || windowItemObserved || visible ? false : onFirstVisible"
     :style="!visible && shellHeight ? { blockSize: `${shellHeight}px` } : undefined"
     :class="{
       grid: layout === 'grid',
@@ -77,7 +75,7 @@
 <script setup>
 import { computed, onBeforeUnmount, reactive, ref, useTemplateRef, watch } from 'vue'
 import { observeWindowedListItem, WINDOWED_LIST_OVERSCAN_PX } from '../../helpers/windowedList.js'
-import { ObserveVisibility as vObserveVisibility } from 'vue-observe-visibility'
+import { vFirstVisible } from '../../helpers/firstVisible'
 
 import { usePlaylistDrag } from '../../composables/usePlaylistDrag'
 
@@ -374,13 +372,8 @@ if (windowed) {
   onBeforeUnmount(() => windowItem?.dispose())
 }
 
-/**
- * @param {boolean} isVisible
- */
-function onVisibilityChanged(isVisible) {
-  if (isVisible) {
-    visible.value = isVisible
-  }
+function onFirstVisible() {
+  visible.value = true
 }
 
 /**

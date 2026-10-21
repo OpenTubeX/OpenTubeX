@@ -123,8 +123,12 @@ function checkCachedImage({ el: image }) {
     if (image.loading !== 'lazy' || imageIsVisible) startLoadingTimeout()
     else if (!visibilityObserver) {
       visibilityObserver = new IntersectionObserver(entries => {
-        imageIsVisible = entries.some(entry => entry.isIntersecting)
-        if (imageIsVisible) startLoadingTimeout()
+        if (!entries.some(entry => entry.isIntersecting)) return
+        // The first sighting is all the deadline needs. Observers kept alive
+        // for every loaded avatar made each rendered frame more expensive.
+        imageIsVisible = true
+        stopVisibilityObserver()
+        startLoadingTimeout()
       })
       visibilityObserver.observe(image)
     }
@@ -137,6 +141,11 @@ function checkCachedImage({ el: image }) {
   }
 }
 
+function stopVisibilityObserver() {
+  visibilityObserver?.disconnect()
+  visibilityObserver = undefined
+}
+
 function resetSource(src, isFallback = false) {
   cancelNativeRecovery()
   clearTimeout(retryTimeoutId)
@@ -145,6 +154,9 @@ function resetSource(src, isFallback = false) {
   hasRetried = false
   retryPending = false
   currentSource = src
+  // A replaced lazy source gets its deadline once it is seen, like the first one.
+  imageIsVisible = false
+  stopVisibilityObserver()
   hasLoaded.value = false
   clearTimeout(skeletonTimeoutId)
   skeletonTimeoutId = undefined
@@ -186,6 +198,7 @@ function handleImageLoad(event) {
   }
   clearTimeout(skeletonTimeoutId)
   cancelNativeRecovery()
+  stopVisibilityObserver()
   clearTimeout(retryTimeoutId)
   retryTimeoutId = undefined
   retryPending = false
@@ -285,7 +298,7 @@ function scheduleBrowserRetry() {
 onBeforeUnmount(() => {
   sourceVersion++
   cancelNativeRecovery()
-  visibilityObserver?.disconnect()
+  stopVisibilityObserver()
   clearTimeout(retryTimeoutId)
   clearTimeout(skeletonTimeoutId)
 })

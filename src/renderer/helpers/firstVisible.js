@@ -3,6 +3,7 @@
 // hidden tabs and closed sheets made scrolling and animations expensive.
 const callbacks = new WeakMap()
 let observer = null
+let observedCount = 0
 
 function getObserver() {
   observer ??= new IntersectionObserver(entries => {
@@ -17,7 +18,13 @@ function getObserver() {
 }
 
 function stop(element) {
-  if (callbacks.delete(element)) observer.unobserve(element)
+  if (!callbacks.delete(element)) return
+  observer.unobserve(element)
+  // Release the observer while nothing waits to become visible.
+  if (--observedCount === 0) {
+    observer.disconnect()
+    observer = null
+  }
 }
 
 function update(element, callback) {
@@ -25,7 +32,10 @@ function update(element, callback) {
     stop(element)
     return
   }
-  if (!callbacks.has(element)) getObserver().observe(element)
+  if (!callbacks.has(element)) {
+    getObserver().observe(element)
+    observedCount++
+  }
   callbacks.set(element, callback)
 }
 

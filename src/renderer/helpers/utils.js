@@ -1010,13 +1010,29 @@ export function toDistractionFreeTitle(title, minUpperCase = 3) {
     .replace(reg, x => capitalizedWord(x.toLowerCase()))
 }
 
+// Constructing Intl formatters is expensive and some of them are used once per list item,
+// so cache them per locale + options
+
+/** @type {Map<string, Intl.NumberFormat>} */
+const numberFormatCache = new Map()
+
 /**
  * @param {number} number
  * @param {Intl.NumberFormatOptions?} options
  * @returns {string}
  */
 export function formatNumber(number, options = undefined) {
-  return Intl.NumberFormat([i18n.global.locale.value, 'en'], options).format(number)
+  const locale = i18n.global.locale.value
+  // Sorted keys give equivalent option objects the same formatter.
+  const key = options ? `${locale}|${JSON.stringify(options, Object.keys(options).sort())}` : locale
+  let formatter = numberFormatCache.get(key)
+
+  if (!formatter) {
+    formatter = new Intl.NumberFormat([locale, 'en'], options)
+    numberFormatCache.set(key, formatter)
+  }
+
+  return formatter.format(number)
 }
 
 /**
@@ -1040,9 +1056,6 @@ export function getTodayDateStrLocalTimezone() {
   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString
   return timeNowStr.split('T')[0]
 }
-
-// Constructing Intl formatters is expensive and some of them are used once per list item,
-// so cache them per locale + options
 
 /** @type {Map<string, Intl.RelativeTimeFormat>} */
 const relativeTimeFormatCache = new Map()

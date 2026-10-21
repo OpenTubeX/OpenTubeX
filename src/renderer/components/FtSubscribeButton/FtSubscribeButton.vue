@@ -350,7 +350,7 @@ const hideChannelSubscriptions = computed(() => {
 })
 
 const subscribedText = computed(() => {
-  let subscribedValue = (isProfileSubscribed(activeProfile.value) ? t('Channel.Unsubscribe') : t('Channel.Subscribe'))
+  let subscribedValue = (isSubscribed.value ? t('Channel.Unsubscribe') : t('Channel.Subscribe'))
   if (props.subscriptionCountText !== '' && !hideChannelSubscriptions.value) {
     subscribedValue += ' ' + props.subscriptionCountText
   }
@@ -468,7 +468,9 @@ watch(isProfileDropdownOpen, async (open) => {
   clampScroll()
 })
 
-const isSubscribed = computed(() => isProfileSubscribed(activeProfile.value))
+// The store caches one id set per active profile, so the subscribed channels
+// page does not scan the subscriptions once per button.
+const isSubscribed = computed(() => store.getters.getActiveSubscribedChannelIdSet.has(props.channelId))
 const restrictedPlaybackConfigured = computed(() => (
   hasConfiguredRestrictedPlaybackAuthentication(store.getters)
 ))

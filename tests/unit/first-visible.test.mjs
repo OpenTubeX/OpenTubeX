@@ -14,6 +14,7 @@ globalThis.IntersectionObserver = class {
 
   observe(element) { this.observed.add(element) }
   unobserve(element) { this.observed.delete(element) }
+  disconnect() { this.observed.clear() }
 }
 
 test('lazy rows share one observer and stop observing after their first intersection', () => {

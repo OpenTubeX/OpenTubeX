@@ -1,8 +1,6 @@
 <template>
   <div
-    v-observe-visibility="visible ? false : {
-      callback: onVisibilityChanged
-    }"
+    v-first-visible="visible ? false : onFirstVisible"
     :style="{ display }"
   >
     <FtListVideo
@@ -34,7 +32,7 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue'
-import { ObserveVisibility as vObserveVisibility } from 'vue-observe-visibility'
+import { vFirstVisible } from '../helpers/firstVisible'
 
 import FtListVideo from './FtListVideo/FtListVideo.vue'
 
@@ -166,14 +164,11 @@ watch(
   }
 )
 
-/**
- * @param {boolean} isVisible
- */
-function onVisibilityChanged(isVisible) {
-  if (isVisible && shouldBeVisible.value) {
+function onFirstVisible() {
+  if (shouldBeVisible.value) {
     loadedByVisibilityObserver.value = true
-    visible.value = isVisible
-  } else if (isVisible) {
+    visible.value = true
+  } else {
     display.value = 'none'
   }
 }

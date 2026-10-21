@@ -40,6 +40,11 @@ const getters = {
     return mainProfile.subscriptions.reduce((set, channel) => set.add(channel.id), new Set())
   },
 
+  /** Lets every subscribe button answer membership without scanning the active profile */
+  getActiveSubscribedChannelIdSet: (state, getters) => {
+    return getters.getActiveProfile.subscriptions.reduce((set, channel) => set.add(channel.id), new Set())
+  },
+
   /** Cached subscription details, so channel ids can be resolved to names without a network request */
   getSubscribedChannelsById: (state) => {
     // The all channels profile is always the first profile in the array
