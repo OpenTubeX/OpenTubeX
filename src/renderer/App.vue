@@ -579,6 +579,7 @@
 import { useBottomSheetDismiss } from './composables/useBottomSheetDismiss'
 import { installIosContextMenu } from './helpers/iosContextMenu'
 import '@fontsource-variable/geist'
+import '@fontsource-variable/google-sans'
 import '@fontsource-variable/figtree'
 import '@fontsource-variable/source-sans-3'
 import '@fontsource-variable/ibm-plex-sans'

@@ -30,6 +30,7 @@ updates:
       - dependency-name: "@capawesome/capacitor-volume"
       - dependency-name: "@fontsource-variable/figtree"
       - dependency-name: "@fontsource-variable/geist"
+      - dependency-name: "@fontsource-variable/google-sans"
       - dependency-name: "@fontsource-variable/ibm-plex-sans"
       - dependency-name: "@fontsource-variable/inter"
       - dependency-name: "@fontsource-variable/manrope"
