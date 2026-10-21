@@ -407,6 +407,7 @@ const suppressTransitions = ref(false)
  * @property {boolean} started
  * @property {boolean} moved
  * @property {number} draggedOffset
+ * @property {number} draggedSize
  * @property {boolean} deferPositionUpdates
  */
 
@@ -430,6 +431,19 @@ function pointerAxisPosition(event) {
  */
 function containerScrollPosition(container) {
   return vertical.value ? container.scrollTop : container.scrollLeft
+}
+
+/**
+ * @param {{start: number, size: number}} first
+ * @param {{start: number, size: number}} last
+ * @returns {[number, number]} the start and end of the span both rects cover
+ * in either text direction
+ */
+function getRectSpan(first, last) {
+  return [
+    Math.min(first.start, last.start),
+    Math.max(first.start + first.size, last.start + last.size)
+  ]
 }
 
 /**
@@ -507,6 +521,7 @@ function handleTabContainerPointerDown(event) {
   const groupEndIndex = isSourcePinned ? pinnedCount - 1 : tabsList.length - 1
   const firstDraggedRect = draggedRects[0]
   const lastDraggedRect = draggedRects[draggedRects.length - 1]
+  const [draggedStart, draggedEnd] = getRectSpan(firstDraggedRect, lastDraggedRect)
 
   dragSession = {
     tabId,
@@ -533,6 +548,7 @@ function handleTabContainerPointerDown(event) {
     started: false,
     moved: false,
     draggedOffset: 0,
+    draggedSize: draggedEnd - draggedStart,
     deferPositionUpdates: interruptedSettle
   }
   const currentDragSession = dragSession
@@ -646,25 +662,24 @@ function getDragAutoScrollSpeed() {
 
   const {
     pointerCurrent, viewportStart, viewportEnd,
-    rects, sourceIndex, groupEndIndex, minOffset
+    rects, groupStartIndex, groupEndIndex, draggedSize
   } = dragSession
   const viewportSize = viewportEnd - viewportStart
   const edge = Math.min(DRAG_AUTO_SCROLL_EDGE_PX, viewportSize / 4)
   const scroll = containerScrollPosition(container)
+  const [listStart, listEnd] = getRectSpan(rects[0], rects[rects.length - 1])
+  const [groupStart, groupEnd] = getRectSpan(rects[groupStartIndex], rects[groupEndIndex])
+  // Scroll to that end of the list, past the other pin group, if the dragged
+  // tabs held at their group's boundary stay in view there. Otherwise stop
+  // once that boundary is visible, since they cannot move past it.
   if (pointerCurrent < viewportStart + edge) {
-    // Scroll to the start of the list, past any pinned tabs before an
-    // unpinned drag, unless the grabbed tab held at the start of its group
-    // would leave the other end.
-    const sourceRect = rects[sourceIndex]
-    const minScroll = Math.max(0, sourceRect.start + minOffset + sourceRect.size - viewportSize)
-    return scroll > minScroll
+    const target = groupStart + draggedSize <= listStart + viewportSize ? listStart : groupStart
+    return target < scroll
       ? -Math.min(1, (viewportStart + edge - pointerCurrent) / edge)
       : 0
   }
-  // Stop once the end of the dragged tabs' group is visible, so a pinned tab
-  // held at the pinned boundary does not scroll out of view.
-  const groupEnd = rects[groupEndIndex].start + rects[groupEndIndex].size
-  return groupEnd > scroll + viewportSize
+  const target = groupEnd - draggedSize >= listEnd - viewportSize ? listEnd : groupEnd
+  return target > scroll + viewportSize
     ? Math.max(0, Math.min(1, (pointerCurrent - viewportEnd + edge) / edge))
     : 0
 }
