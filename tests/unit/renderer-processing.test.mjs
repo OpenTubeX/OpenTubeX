@@ -614,8 +614,10 @@ test('datastore writes reach the main process in call order while large payloads
   ]
   await new Promise(resolve => setTimeout(resolve, 10))
   assert.deepEqual(sent, [], 'later writes wait for the large playlist')
+  const allSent = context.playlists.sent().then(() => sent.length)
   finishSerializing()
   await Promise.all(writes)
+  assert.equal(await allSent, 3, 'sent() waits for every earlier request')
   assert.deepEqual(sent, [['upsert', 'string'], ['upsertVideo', 'object'], ['upsert', 'object']])
 
   sent.length = 0

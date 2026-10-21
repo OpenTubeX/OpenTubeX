@@ -98,6 +98,7 @@ import { supportsNativeNotifications } from './nativeNotifications'
 import { getTrayMenuIcon } from './trayMenuIcons'
 import { createScheduledBackups } from './scheduledBackups'
 import { createBackupArchiveFactory } from './backupArchive'
+import { createDatastoreRequestTracker } from './datastoreRequests'
 
 function getSystemAccentColor() {
   try {
@@ -1882,9 +1883,22 @@ function runApp() {
   })
   // Builds archives in a worker from read-only database snapshots, so neither
   // this process nor the renderer stalls on large libraries.
+  // The worker reads from its own connection, so an archive includes a write
+  // only once its request has finished.
+  const datastoreRequests = createDatastoreRequestTracker()
+  /**
+   * @param {string} channel
+   * @param {(event: import('electron').IpcMainInvokeEvent, request: { action: number, data: unknown }) => Promise<unknown>} handler
+   */
+  function handleDatastoreRequests(channel, handler) {
+    ipcMain.handle(channel, (event, request) => datastoreRequests.track(handler(event, request)))
+  }
   const createBackupArchive = createBackupArchiveFactory(userDataPath,
     path.join(__dirname, process.env.NODE_ENV === 'development' ? '../../dist/backupArchiveWorker.js' : 'backupArchiveWorker.js'), {
-      waitForDatastores,
+      waitForDatastores: async () => {
+        await waitForDatastores()
+        await datastoreRequests.settled()
+      },
       settings: baseHandlers.settings,
       watchStats: baseHandlers.watchStats,
     })
@@ -5411,7 +5425,7 @@ function runApp() {
   // *********** //
 
   // Settings
-  ipcMain.handle(IpcChannels.DB_SETTINGS, async (event, { action, data }) => {
+  handleDatastoreRequests(IpcChannels.DB_SETTINGS, async (event, { action, data }) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
@@ -5539,7 +5553,7 @@ function runApp() {
 
   // *********** //
   // History
-  ipcMain.handle(IpcChannels.DB_HISTORY, async (event, { action, data }) => {
+  handleDatastoreRequests(IpcChannels.DB_HISTORY, async (event, { action, data }) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
@@ -5687,7 +5701,7 @@ function runApp() {
 
   // *********** //
   // Recommendation learning
-  ipcMain.handle(IpcChannels.DB_RECOMMENDATIONS, async (event, { action, data }) => {
+  handleDatastoreRequests(IpcChannels.DB_RECOMMENDATIONS, async (event, { action, data }) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) return
     let result
     if (action === DBActions.GENERAL.FIND) result = await baseHandlers.recommendations.find()
@@ -5700,7 +5714,7 @@ function runApp() {
   })
 
   // Watch Stats
-  ipcMain.handle(IpcChannels.DB_WATCH_STATS, async (event, { action, data }) => {
+  handleDatastoreRequests(IpcChannels.DB_WATCH_STATS, async (event, { action, data }) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
@@ -5765,7 +5779,7 @@ function runApp() {
 
   // *********** //
   // Profiles
-  ipcMain.handle(IpcChannels.DB_PROFILES, async (event, { action, data }) => {
+  handleDatastoreRequests(IpcChannels.DB_PROFILES, async (event, { action, data }) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
@@ -5868,7 +5882,7 @@ function runApp() {
   // As such, only the currently used actions have synchronization implemented
   // The remaining should have it implemented only when playlists
   // get fully implemented into the app
-  ipcMain.handle(IpcChannels.DB_PLAYLISTS, async (event, { action, data }) => {
+  handleDatastoreRequests(IpcChannels.DB_PLAYLISTS, async (event, { action, data }) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
@@ -6002,7 +6016,7 @@ function runApp() {
 
   // ************** //
   // Search History
-  ipcMain.handle(IpcChannels.DB_SEARCH_HISTORY, async (event, { action, data }) => {
+  handleDatastoreRequests(IpcChannels.DB_SEARCH_HISTORY, async (event, { action, data }) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
@@ -6061,7 +6075,7 @@ function runApp() {
 
   // *********** //
   // Profiles
-  ipcMain.handle(IpcChannels.DB_SUBSCRIPTION_CACHE, async (event, { action, data }) => {
+  handleDatastoreRequests(IpcChannels.DB_SUBSCRIPTION_CACHE, async (event, { action, data }) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }

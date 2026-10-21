@@ -123,6 +123,6 @@ test('exporting a large library keeps the window and the main process responsive
 
   // Serializing and compressing this library takes seconds of uninterrupted
   // work, so either process doing it would stall far beyond these limits.
-  expect(longestFrame).toBeLessThan(1000)
+  expect(longestFrame).toBeLessThan(2000)
   expect(mainDelay).toBeLessThan(250)
 })

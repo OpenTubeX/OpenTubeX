@@ -448,8 +448,10 @@ async function exportUnifiedBackup() {
       `opentubex-backup-${getTodayDateStrLocalTimezone()}.zip`, async () => {
         if (process.env.IS_ELECTRON) {
           // The main process reads and compresses the library in a worker
-          // instead of copying it into this window.
+          // instead of copying it into this window. Writes still being
+          // prepared here are sent first, so the archive includes them.
           const settings = selected.includes('settings') ? deepCopy(transferableSettings.value) : undefined
+          await Promise.all([DBHistoryHandlers.sent(), DBPlaylistHandlers.sent()])
           return new Blob([await window.ftElectron.createBackupArchive(selected, settings)], { type: 'application/zip' })
         }
         const readers = {

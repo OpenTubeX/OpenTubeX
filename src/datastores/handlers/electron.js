@@ -25,7 +25,7 @@ const LARGE_PLAYLIST_VIDEO_COUNT = 1000
  */
 function createOrderedSender(send) {
   let previous = Promise.resolve()
-  return (action, data, { inWorker = false, beforeSend } = {}) => {
+  const sender = (action, data, { inWorker = false, beforeSend } = {}) => {
     const payload = inWorker ? runBackgroundJob('stringify', { value: data }) : toPlain(data)
     const sent = Promise.all([previous, payload]).then(([, value]) => {
       beforeSend?.()
@@ -34,6 +34,9 @@ function createOrderedSender(send) {
     previous = sent.then(() => {}, () => {})
     return sent.then(({ response }) => response)
   }
+  /** Resolves once every request made so far has been sent. */
+  sender.sent = () => previous
+  return sender
 }
 
 const dbSettings = (action, data) => window.ftElectron.dbSettings(action, toPlain(data))
@@ -75,6 +78,10 @@ class Settings {
 }
 
 class History {
+  static sent() {
+    return dbHistory.sent()
+  }
+
   static updateSubscriptionState(update) {
     return dbHistory(DBActions.HISTORY.UPDATE_SUBSCRIPTION_STATE, update)
   }
@@ -232,6 +239,10 @@ class Playlists {
 
   static find() {
     return dbPlaylists(DBActions.GENERAL.FIND)
+  }
+
+  static sent() {
+    return dbPlaylists.sent()
   }
 
   static upsert(playlist) {

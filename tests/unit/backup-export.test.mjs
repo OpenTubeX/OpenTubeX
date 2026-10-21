@@ -8,9 +8,13 @@ const utils = await readFile(new URL('../../src/renderer/helpers/utils.js', impo
 const functions = ['exportUnifiedBackup', 'promptAndWriteToFile'].map(name => component.match(new RegExp(`async function ${name}\\([\\s\\S]*?^\\}`, 'm'))[0])
 const writer = utils.match(/export async function writeFileWithPicker\([\s\S]*?^\}/m)[0].replace('export ', '')
 
-function loadExport({ cancel = false, sections = ['settings', 'profiles', 'playlists', 'history', 'searchHistory', 'watchStats'], fail = false, electron = false } = {}) {
+function loadExport({ cancel = false, sections = ['settings', 'profiles', 'playlists', 'history', 'searchHistory', 'watchStats'], fail = false, electron = false, unsentWrites = 0 } = {}) {
   let active = true
   const events = []
+  const sendWrites = name => new Promise(resolve => setImmediate(() => {
+    if (unsentWrites > 0) events.push(`sent ${name} writes`)
+    resolve()
+  }))
   const toasts = []
   const read = () => new Promise(resolve => setImmediate(() => {
     active = false
@@ -47,8 +51,9 @@ function loadExport({ cancel = false, sections = ['settings', 'profiles', 'playl
     selectedExportSections: { value: sections },
     transferableSettings: { value: {} },
     DBProfileHandlers: { find: read },
-    DBPlaylistHandlers: { find: read },
-    DBHistoryHandlers: { find: read },
+    // Writes still being serialized in this window are sent before the archive.
+    DBPlaylistHandlers: { find: read, sent: () => sendWrites('playlist') },
+    DBHistoryHandlers: { find: read, sent: () => sendWrites('history') },
     DBSearchHistoryHandlers: { find: read },
     DBWatchStatsHandlers: { find: read, getHistoricalAdjustment: read },
     deepCopy: value => value,
@@ -100,6 +105,15 @@ for (const electron of [false, true]) {
     assert.deepEqual(state.toasts, ['Settings.Data Settings.Unable to write file: Error: Backup archive is too large'])
   })
 }
+
+test('desktop export sends pending history and playlist writes before reading the library', async () => {
+  const state = loadExport({ electron: true, unsentWrites: 1 })
+  await state.exportBackup()
+  const archived = state.events.findIndex(Array.isArray)
+  assert.ok(state.events.indexOf('sent history writes') < archived)
+  assert.ok(state.events.indexOf('sent playlist writes') < archived)
+  assert.ok(state.events.indexOf('sent history writes') > 0)
+})
 
 test('desktop export passes the current settings when they are selected', async () => {
   const state = loadExport({ sections: ['settings', 'history'], electron: true })
