@@ -284,6 +284,7 @@ Settings:
     Language and Region: 语言和地区
     All Settings: 所有设置
     Profile Selector Hint: 也可以右键单击配置文件图标来切换配置文件
+    Profile Selector Touch Hint: 也可以长按配置文件图标来切换配置文件
   Categories:
     General Description: 语言、启动、标签页和应用行为
     Appearance: 外观
@@ -1264,6 +1265,7 @@ Tutorial:
   Quick Settings:
     Title: 按您的喜好设置
     Description: 选择主题和默认视频画质。您可以随时在配置文件菜单中更改这些选项和其他偏好设置，也可以右键单击该菜单来切换配置文件。
+    Touch Description: 选择主题和默认视频画质。您可以随时在配置文件菜单中更改这些选项和其他偏好设置，也可以长按该菜单来切换配置文件。
   Import Data:
     Title: 导入您的数据
     Description: 您可以从其他受支持的应用或备份中导入订阅、历史记录、播放列表、搜索历史记录或设置。

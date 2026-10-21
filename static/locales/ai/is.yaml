@@ -287,6 +287,7 @@ Settings:
     Language and Region: Tungumál og svæði
     All Settings: Allar stillingar
     Profile Selector Hint: Þú getur einnig hægrismellt á tákn notandasniðsins til að skipta um snið
+    Profile Selector Touch Hint: Þú getur einnig haldið fingri á tákni notandasniðsins til að skipta um snið
   Categories:
     General Description: Tungumál, ræsing, flipar og hegðun forrits
     Appearance: Útlit
@@ -1273,6 +1274,7 @@ Tutorial:
   Quick Settings:
     Title: Stilltu að þínum þörfum
     Description: Veldu þema og sjálfgefin myndgæði. Þú getur breytt þessu og öðrum kjörstillingum hvenær sem er í valmynd notandasniðsins eða hægrismellt á það til að skipta um notandasnið.
+    Touch Description: Veldu þema og sjálfgefin myndgæði. Þú getur breytt þessu og öðrum kjörstillingum hvenær sem er í valmynd notandasniðsins eða haldið fingri á því til að skipta um notandasnið.
   Import Data:
     Title: Flyttu gögnin þín með þér
     Description: Þú getur flutt inn áskriftir, áhorfsferil, spilunarlista, leitarferil eða stillingar úr öðru studdu forriti eða öryggisafriti.

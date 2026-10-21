@@ -1573,6 +1573,7 @@ Settings:
     Language and Region: Sprache und Region
     All Settings: Alle Einstellungen
     Profile Selector Hint: Du kannst auch mit der rechten Maustaste auf das Profilsymbol klicken, um das Profil zu wechseln
+    Profile Selector Touch Hint: Du kannst auch lange auf das Profilsymbol tippen, um das Profil zu wechseln
   Highlight Changed Settings: Von den Standardwerten abweichende Einstellungen hervorheben
   Reset Setting to Default: Diese Einstellung auf den Standardwert zurücksetzen
   Performance Impact:
@@ -3332,6 +3333,9 @@ Tutorial:
     Description: >-
       Wähle ein Farbschema und die Standardqualität für Videos. Diese und weitere Einstellungen kannst du jederzeit
       über dein Profilmenü ändern. Mit einem Rechtsklick auf dein Profil gelangst du direkt zur Profilauswahl.
+    Touch Description: >-
+      Wähle ein Farbschema und die Standardqualität für Videos. Diese und weitere Einstellungen kannst du jederzeit
+      über dein Profilmenü ändern. Wenn du lange auf dein Profil tippst, gelangst du direkt zur Profilauswahl.
   Import Data:
     Title: Nimm deine Daten mit
     Description: Importiere bei Bedarf Abos, Verlauf, Playlists, Suchverlauf oder Einstellungen aus einer anderen unterstützten Anwendung oder Sicherung.

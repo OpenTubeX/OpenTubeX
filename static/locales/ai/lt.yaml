@@ -395,6 +395,7 @@ Settings:
     Language and Region: Kalba ir regionas
     All Settings: Visi nustatymai
     Profile Selector Hint: Profilį taip pat galite perjungti dešiniuoju pelės mygtuku spustelėję profilio piktogramą
+    Profile Selector Touch Hint: Profilį taip pat galite perjungti ilgai paspaudę profilio piktogramą
   Categories:
     General Description: Kalba, paleidimas, kortelės ir programos veikimas
     Appearance: Išvaizda
@@ -1537,6 +1538,7 @@ Tutorial:
   Quick Settings:
     Title: Pritaikykite sau
     Description: Pasirinkite apipavidalinimą ir numatytąją vaizdo įrašų kokybę. Šias ir kitas nuostatas bet kada pakeisite profilio meniu, o spustelėję jį dešiniuoju pelės mygtuku galėsite perjungti profilį.
+    Touch Description: Pasirinkite apipavidalinimą ir numatytąją vaizdo įrašų kokybę. Šias ir kitas nuostatas bet kada pakeisite profilio meniu, o ilgai jį paspaudę galėsite perjungti profilį.
   Import Data:
     Title: Perkelkite savo duomenis
     Description: Jei norite, importuokite prenumeratas, istoriją, grojaraščius, paieškos istoriją arba nustatymus iš kitos palaikomos programėlės ar atsarginės kopijos.

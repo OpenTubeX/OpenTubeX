@@ -374,6 +374,7 @@ Settings:
     Language and Region: 언어 및 지역
     All Settings: 모든 설정
     Profile Selector Hint: 프로필 아이콘을 마우스 오른쪽 버튼으로 클릭해도 프로필을 전환할 수 있습니다
+    Profile Selector Touch Hint: 프로필 아이콘을 길게 눌러도 프로필을 전환할 수 있습니다
   Categories:
     General Description: 언어, 시작, 탭 및 앱 동작
     Appearance: 모양
@@ -1516,6 +1517,7 @@ Tutorial:
   Quick Settings:
     Title: 나에게 맞게 설정
     Description: 테마와 기본 동영상 화질을 선택하세요. 프로필 메뉴에서 언제든지 이 설정과 다른 환경 설정을 변경하거나 마우스 오른쪽 버튼으로 클릭하여 프로필을 전환할 수 있습니다.
+    Touch Description: 테마와 기본 동영상 화질을 선택하세요. 프로필 메뉴에서 언제든지 이 설정과 다른 환경 설정을 변경하거나 길게 눌러 프로필을 전환할 수 있습니다.
   Import Data:
     Title: 기존 데이터 가져오기
     Description: 지원되는 다른 앱이나 백업에서 구독, 시청 기록, 재생목록, 검색 기록 또는 설정을 가져올 수 있습니다.

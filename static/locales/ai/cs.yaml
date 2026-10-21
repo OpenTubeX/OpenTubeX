@@ -285,6 +285,7 @@ Settings:
     Language and Region: Jazyk a oblast
     All Settings: Všechna nastavení
     Profile Selector Hint: Profil můžete přepnout také kliknutím pravým tlačítkem na ikonu profilu
+    Profile Selector Touch Hint: Profil můžete přepnout také podržením prstu na ikoně profilu
   Categories:
     General Description: Jazyk, spuštění, karty a chování aplikace
     Appearance: Vzhled
@@ -1265,6 +1266,7 @@ Tutorial:
   Quick Settings:
     Title: Přizpůsobte si aplikaci
     Description: Zvolte motiv a výchozí kvalitu videa. Tyto i další předvolby můžete kdykoli změnit v nabídce profilu. Kliknutím pravým tlačítkem můžete přepnout profil.
+    Touch Description: Zvolte motiv a výchozí kvalitu videa. Tyto i další předvolby můžete kdykoli změnit v nabídce profilu. Podržením prstu na profilu můžete přepnout profil.
   Import Data:
     Title: Importujte svá data
     Description: Volitelně můžete importovat odběry, historii, playlisty, historii vyhledávání nebo nastavení z jiné podporované aplikace či zálohy.

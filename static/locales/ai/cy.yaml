@@ -285,6 +285,7 @@ Settings:
     Language and Region: Iaith a rhanbarth
     All Settings: Pob gosodiad
     Profile Selector Hint: Gallwch hefyd dde-glicio eicon y proffil i newid proffil
+    Profile Selector Touch Hint: Gallwch hefyd dapio a dal eicon y proffil i newid proffil
   Categories:
     General Description: Iaith, cychwyn, tabiau ac ymddygiad yr ap
     Appearance: Golwg
@@ -1269,6 +1270,7 @@ Tutorial:
   Quick Settings:
     Title: Addasu OpenTubeX
     Description: Dewiswch thema ac ansawdd fideo rhagosodedig. Gallwch newid y dewisiadau hyn a rhai eraill o ddewislen eich proffil unrhyw bryd, neu dde-glicio'r ddewislen i newid proffil.
+    Touch Description: Dewiswch thema ac ansawdd fideo rhagosodedig. Gallwch newid y dewisiadau hyn a rhai eraill o ddewislen eich proffil unrhyw bryd, neu dapio a dal y ddewislen i newid proffil.
   Import Data:
     Title: Mewnforio eich data
     Description: Gallwch fewnforio tanysgrifiadau, hanes, rhestrau chwarae, hanes chwilio neu osodiadau o ap arall a gynhelir neu o gopi wrth gefn.

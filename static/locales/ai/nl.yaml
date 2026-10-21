@@ -289,6 +289,7 @@ Settings:
     Language and Region: Taal en regio
     All Settings: Alle instellingen
     Profile Selector Hint: Je kunt ook met de rechtermuisknop op het profielpictogram klikken om van profiel te wisselen
+    Profile Selector Touch Hint: Je kunt ook lang op het profielpictogram drukken om van profiel te wisselen
   Categories:
     General Description: Taal, opstarten, tabbladen en appgedrag
     Appearance: Uiterlijk
@@ -1296,6 +1297,7 @@ Tutorial:
   Quick Settings:
     Title: Pas OpenTubeX aan
     Description: Kies een thema en standaardvideokwaliteit. Wijzig deze en andere voorkeuren wanneer je wilt via je profielmenu of klik erop met de rechtermuisknop om van profiel te wisselen.
+    Touch Description: Kies een thema en standaardvideokwaliteit. Wijzig deze en andere voorkeuren wanneer je wilt via je profielmenu of druk er lang op om van profiel te wisselen.
   Import Data:
     Title: Neem je gegevens mee
     Description: Importeer desgewenst abonnementen, geschiedenis, afspeellijsten, zoekgeschiedenis of instellingen uit een andere ondersteunde app of back-up.

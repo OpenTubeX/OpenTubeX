@@ -289,6 +289,7 @@ Settings:
     Language and Region: Kieli ja alue
     All Settings: Kaikki asetukset
     Profile Selector Hint: Voit vaihtaa profiilia myös napsauttamalla profiilikuvaketta hiiren kakkospainikkeella
+    Profile Selector Touch Hint: Voit vaihtaa profiilia myös painamalla profiilikuvaketta pitkään
   Categories:
     General Description: Kieli, käynnistys, välilehdet ja sovelluksen toiminta
     Appearance: Ulkoasu
@@ -1296,6 +1297,7 @@ Tutorial:
   Quick Settings:
     Title: Tee sovelluksesta omasi
     Description: Valitse teema ja videon oletuslaatu. Voit muuttaa näitä ja muita asetuksia milloin tahansa profiilivalikosta tai vaihtaa profiilia napsauttamalla valikkoa hiiren kakkospainikkeella.
+    Touch Description: Valitse teema ja videon oletuslaatu. Voit muuttaa näitä ja muita asetuksia milloin tahansa profiilivalikosta tai vaihtaa profiilia painamalla valikkoa pitkään.
   Import Data:
     Title: Tuo tietosi mukanasi
     Description: Voit halutessasi tuoda tilaukset, historian, soittolistat, hakuhistorian tai asetukset toisesta tuetusta sovelluksesta tai varmuuskopiosta.

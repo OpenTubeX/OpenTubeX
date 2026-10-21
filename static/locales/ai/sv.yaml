@@ -287,6 +287,7 @@ Settings:
     Language and Region: Språk och region
     All Settings: Alla inställningar
     Profile Selector Hint: Du kan även högerklicka på profilikonen för att byta profil
+    Profile Selector Touch Hint: Du kan även trycka länge på profilikonen för att byta profil
   Categories:
     General Description: Språk, start, flikar och appbeteende
     Appearance: Utseende
@@ -1271,6 +1272,7 @@ Tutorial:
   Quick Settings:
     Title: Anpassa appen
     Description: Välj tema och standardkvalitet för video. Du kan när som helst ändra dessa och andra inställningar från profilmenyn eller högerklicka på den för att byta profil.
+    Touch Description: Välj tema och standardkvalitet för video. Du kan när som helst ändra dessa och andra inställningar från profilmenyn eller trycka länge på den för att byta profil.
   Import Data:
     Title: Ta med dina data
     Description: Du kan importera prenumerationer, historik, spellistor, sökhistorik eller inställningar från en annan app eller säkerhetskopia som stöds.

@@ -582,6 +582,7 @@ Settings:
     Language and Region: Language and region
     All Settings: All settings
     Profile Selector Hint: You can also right-click the profile icon to switch profiles
+    Profile Selector Touch Hint: You can also tap and hold the profile icon to switch profiles
   Categories:
     General Description: Language, startup, tabs, and app behavior
     Appearance: Appearance
@@ -1975,6 +1976,7 @@ Tutorial:
   Quick Settings:
     Title: Make it yours
     Description: Choose a theme and default video quality. Change these and other preferences from your profile menu at any time, or right-click it to switch profiles.
+    Touch Description: Choose a theme and default video quality. Change these and other preferences from your profile menu at any time, or tap and hold it to switch profiles.
   Import Data:
     Title: Bring your data with you
     Description: Optionally import subscriptions, history, playlists, search history, or settings from another supported app or backup.

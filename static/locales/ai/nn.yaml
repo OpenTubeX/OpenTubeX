@@ -298,6 +298,7 @@ Settings:
     Language and Region: Språk og region
     All Settings: Alle innstillingar
     Profile Selector Hint: Du kan òg høgreklikke på profilikonet for å byte profil
+    Profile Selector Touch Hint: Du kan òg trykke lenge på profilikonet for å byte profil
   Categories:
     General Description: Språk, oppstart, faner og appåtferd
     Appearance: Utsjånad
@@ -1440,6 +1441,7 @@ Tutorial:
   Quick Settings:
     Title: Gjer OpenTubeX til din eigen
     Description: Vel eit tema og standard videokvalitet. Du kan når som helst endra desse og andre innstillingar i profilmenyen, eller høgreklikka på han for å byta profil.
+    Touch Description: Vel eit tema og standard videokvalitet. Du kan når som helst endra desse og andre innstillingar i profilmenyen, eller trykkja lenge på han for å byta profil.
   Import Data:
     Title: Ta med deg dataa dine
     Description: Du kan importera abonnement, historikk, spelelister, søkjehistorikk eller innstillingar frå ein annan støtta app eller ei tryggleikskopi.

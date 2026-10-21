@@ -229,7 +229,7 @@ const steps = computed(() => [
   {
     icon: ['fas', 'sliders-h'],
     title: t('Tutorial.Quick Settings.Title'),
-    description: t('Tutorial.Quick Settings.Description'),
+    description: process.env.IS_CAPACITOR ? t('Tutorial.Quick Settings.Touch Description') : t('Tutorial.Quick Settings.Description'),
     target: '[data-tutorial="quick-settings"]',
     showAppearanceSelects: true
   },

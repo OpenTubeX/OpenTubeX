@@ -285,6 +285,7 @@ Settings:
     Language and Region: Nyelv és régió
     All Settings: Minden beállítás
     Profile Selector Hint: A profilok között a profilikonra jobb gombbal kattintva is válthat
+    Profile Selector Touch Hint: A profilok között a profilikon hosszú megnyomásával is válthat
   Categories:
     General Description: Nyelv, indítás, lapok és az alkalmazás működése
     Appearance: Megjelenés
@@ -1265,6 +1266,7 @@ Tutorial:
   Quick Settings:
     Title: Szabja személyre
     Description: Válasszon témát és alapértelmezett videóminőséget. Ezeket és más beállításokat bármikor módosíthatja a profilmenüben, a profilok közötti váltáshoz pedig kattintson rá jobb gombbal.
+    Touch Description: Válasszon témát és alapértelmezett videóminőséget. Ezeket és más beállításokat bármikor módosíthatja a profilmenüben, a profilok közötti váltáshoz pedig nyomja meg hosszan.
   Import Data:
     Title: Hozza magával az adatait
     Description: Igény szerint importálhat feliratkozásokat, előzményeket, lejátszási listákat, keresési előzményeket vagy beállításokat egy másik támogatott alkalmazásból vagy biztonsági másolatból.

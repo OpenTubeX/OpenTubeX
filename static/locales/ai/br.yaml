@@ -285,6 +285,7 @@ Settings:
     Language and Region: "Yezh ha rannvro"
     All Settings: "An holl arventennoù"
     Profile Selector Hint: "Gallout a rit ivez klikañ a-zehou war arlun ar profil evit cheñch profil"
+    Profile Selector Touch Hint: Gallout a rit ivez pouezañ hir war arlun ar profil evit cheñch profil
   Categories:
     General Description: "Yezh, loc'hañ, ivinelloù hag emzalc'h an arload"
     Appearance: "Neuz"
@@ -1265,6 +1266,7 @@ Tutorial:
   Quick Settings:
     Title: "Personelait an arload"
     Description: "Dibabit un neuz hag ur berzhded video dre ziouer. Gallout a rit kemmañ ar gwellvezioù-mañ hag ar re all eus lañser ho profil, pe klikañ a-zehou warnañ evit cheñch profil."
+    Touch Description: Dibabit un neuz hag ur berzhded video dre ziouer. Gallout a rit kemmañ ar gwellvezioù-mañ hag ar re all eus lañser ho profil, pe pouezañ hir warnañ evit cheñch profil.
   Import Data:
     Title: "Enporzhiañ ho roadennoù"
     Description: "Gallout a rit enporzhiañ koumanantoù, istor, rolloù-videoioù, istor enklask pe arventennoù eus un arload skoret all pe un eiladenn-gwarediñ."

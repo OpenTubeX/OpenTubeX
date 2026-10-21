@@ -285,6 +285,7 @@ Settings:
     Language and Region: Keel ja piirkond
     All Settings: Kõik seaded
     Profile Selector Hint: Profiili vahetamiseks võib profiiliikoonil ka paremklõpsata
+    Profile Selector Touch Hint: Profiili vahetamiseks võib profiiliikoonile ka pikalt vajutada
   Categories:
     General Description: Keel, käivitamine, vahekaardid ja rakenduse käitumine
     Appearance: Välimus
@@ -1265,6 +1266,7 @@ Tutorial:
   Quick Settings:
     Title: Kohandage rakendus endale sobivaks
     Description: Valige kujundus ja video vaikekvaliteet. Neid ja muid eelistusi saate igal ajal profiilimenüüs muuta. Profiili vahetamiseks paremklõpsake oma profiili.
+    Touch Description: Valige kujundus ja video vaikekvaliteet. Neid ja muid eelistusi saate igal ajal profiilimenüüs muuta. Profiili vahetamiseks vajutage pikalt oma profiilile.
   Import Data:
     Title: Võtke oma andmed kaasa
     Description: Soovi korral importige tellimused, ajalugu, esitusloendid, otsinguajalugu või seaded teisest toetatud rakendusest või varukoopiast.

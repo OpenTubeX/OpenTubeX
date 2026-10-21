@@ -284,6 +284,7 @@ Settings:
     Language and Region: 語言與地區
     All Settings: 所有設定
     Profile Selector Hint: 您也可以在個人檔案圖示上按一下滑鼠右鍵來切換個人檔案
+    Profile Selector Touch Hint: 您也可以長按個人檔案圖示來切換個人檔案
   Categories:
     General Description: 語言、啟動、分頁與應用程式行為
     Appearance: 外觀
@@ -1264,6 +1265,7 @@ Tutorial:
   Quick Settings:
     Title: 打造個人風格
     Description: 選擇佈景主題與預設影片畫質。您隨時可以在個人檔案選單中變更這些及其他偏好設定，也可以按滑鼠右鍵切換個人檔案。
+    Touch Description: 選擇佈景主題與預設影片畫質。您隨時可以在個人檔案選單中變更這些及其他偏好設定，也可以長按來切換個人檔案。
   Import Data:
     Title: 帶著您的資料一起使用
     Description: 您可以選擇從其他支援的應用程式或備份匯入訂閱內容、觀看紀錄、播放清單、搜尋紀錄或設定。
