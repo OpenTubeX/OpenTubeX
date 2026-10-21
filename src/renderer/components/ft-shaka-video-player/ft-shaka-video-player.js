@@ -1798,6 +1798,12 @@ export default defineComponent({
     let secondaryCaptionCues = []
     /** @type {AbortController | null} */
     let secondaryCaptionAbortController = null
+    /**
+     * The language the user picked while its settings write is still pending. The store
+     * commits the setting only after the write, but text track changes read it back right away.
+     * @type {string | null}
+     */
+    let pendingSecondaryCaptionLocale = null
     // Follows Shaka's caption area, which makes room for the visible controls and the fullscreen side dock
     const secondaryCaptionsBox = ref({})
     /** @type {ResizeObserver | null} */
@@ -9024,8 +9030,13 @@ export default defineComponent({
       updateSecondaryCaptionText()
 
       const language = caption?.language ?? ''
-      if (remember && language !== store.getters.getSecondaryCaptionLocale) {
-        store.dispatch('updateSecondaryCaptionLocale', language)
+      if (remember && language !== getRememberedSecondaryCaptionLocale()) {
+        pendingSecondaryCaptionLocale = language
+        store.dispatch('updateSecondaryCaptionLocale', language).finally(() => {
+          if (pendingSecondaryCaptionLocale === language) {
+            pendingSecondaryCaptionLocale = null
+          }
+        })
       }
 
       if (!caption) {
@@ -9071,11 +9082,16 @@ export default defineComponent({
       }
     }
 
+    /** @returns {string} the language of the remembered secondary captions, or an empty string */
+    function getRememberedSecondaryCaptionLocale() {
+      return pendingSecondaryCaptionLocale ?? store.getters.getSecondaryCaptionLocale
+    }
+
     /**
      * Loads the remembered secondary captions once the main captions are shown for a video.
      */
     function restoreSecondaryCaption() {
-      const language = store.getters.getSecondaryCaptionLocale
+      const language = getRememberedSecondaryCaptionLocale()
       const activeTrack = player?.getTextTracks().find(track => track.active)
 
       if (!language || !activeTrack || player.isLive() || (secondaryCaption && props.captions.includes(secondaryCaption))) {
