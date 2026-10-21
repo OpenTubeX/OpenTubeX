@@ -8,7 +8,8 @@ test.use({
 
 test('every portrait full-window dock uses the shared sheet', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page, { captionText: 'Transcript line' })
-  await openMockedVideo(page)
+  // A slow run must not reach the end of the demo video and advance the queue.
+  await (await openMockedVideo(page)).evaluate(element => element.pause())
   await setWindowSize(app, page, { width: 420, height: 800 })
   const watch = await page.evaluateHandle(findWatchComponent)
   const player = page.locator('.ftVideoPlayer')
@@ -58,7 +59,9 @@ test('every portrait full-window dock uses the shared sheet', async ({ app, page
 
 test('portrait fullscreen docks use bottom panels and return to side docks in landscape', { tag: '@scale' }, async ({ app, page }, testInfo) => {
   await mockPlayableWatchPage(app, page)
-  await openMockedVideo(page)
+  // A slow run must not reach the end of the demo video, which advances the
+  // queue and reopens its dock collapsed.
+  await (await openMockedVideo(page)).evaluate(element => element.pause())
   await setWindowSize(app, page, { width: 420, height: 800 })
   await setPlayerFullscreen(page, true)
   const watch = await page.evaluateHandle(findWatchComponent)
