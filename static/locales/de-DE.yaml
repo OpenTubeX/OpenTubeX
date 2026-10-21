@@ -1262,6 +1262,13 @@ Settings:
     Import history formats: 'Unterstützte Formate: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube backup (.json)'
     Import playlists formats: 'Unterstützte Formate: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Unterstützte Formate: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Channel playback speeds: Kanal-Wiedergabegeschwindigkeiten
+    Import channel playback speeds: Kanal-Wiedergabegeschwindigkeiten importieren
+    Channel playback speeds file: Datei mit Kanal-Wiedergabegeschwindigkeiten
+    Import channel playback speeds formats: 'Unterstützte Formate: Speicher des Userscripts {script} (.json)'
+    Invalid channel playback speeds file: In dieser Datei wurden keine Kanal-Wiedergabegeschwindigkeiten gefunden
+    Channel playback speeds imported: 'Wiedergabegeschwindigkeit von {count} Kanal importiert | Wiedergabegeschwindigkeiten von {count} Kanälen importiert'
+    Channels not found: '{count} Kanal wurde nicht gefunden | {count} Kanäle wurden nicht gefunden'
     Setting object has insufficient data, skipping item: Das Objekt enthält unzureichende Daten, Element wird übersprungen
   Distraction Free Settings:
     AI Video Summaries: KI-Videozusammenfassungen

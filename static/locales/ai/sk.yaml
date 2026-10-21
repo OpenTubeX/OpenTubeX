@@ -1024,6 +1024,13 @@ Settings:
     Import history formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), záloha LibreTube (.json)'
     Import playlists formats: 'Podporované formáty: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Channel playback speeds: "Rýchlosti prehrávania kanálov"
+    Import channel playback speeds: "Importovať rýchlosti prehrávania kanálov"
+    Channel playback speeds file: "Súbor rýchlostí prehrávania kanálov"
+    Import channel playback speeds formats: "Podporované formáty: údaje používateľského skriptu {script} (.json)"
+    Invalid channel playback speeds file: "V tomto súbore sa nenašli žiadne rýchlosti prehrávania kanálov"
+    Channel playback speeds imported: "Importovala sa rýchlosť prehrávania {count} kanála | Importovali sa rýchlosti prehrávania {count} kanálov | Importovali sa rýchlosti prehrávania {count} kanálov"
+    Channels not found: "{count} kanál sa nepodarilo nájsť | {count} kanály sa nepodarilo nájsť | {count} kanálov sa nepodarilo nájsť"
   Sync Settings:
     Revoke Session Tabs Warning: "Synchronizované sady kariet tohto zariadenia budú tiež odstránené."
     Revoke Session Partial Failure: "Synchronizované súpravy kariet boli odstránené, ale odobratie prístupu sa nepodarilo potvrdiť. Skúste prístup odobrať znova."

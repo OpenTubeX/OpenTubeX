@@ -1030,6 +1030,13 @@ Settings:
     Import history formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), öryggisafrit LibreTube (.json)'
     Import playlists formats: 'Studd snið: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Channel playback speeds: "Spilunarhraði rása"
+    Import channel playback speeds: "Flytja inn spilunarhraða rása"
+    Channel playback speeds file: "Skrá með spilunarhraða rása"
+    Import channel playback speeds formats: "Studd snið: geymsla notandaskriftunnar {script} (.json)"
+    Invalid channel playback speeds file: "Enginn spilunarhraði rása fannst í þessari skrá"
+    Channel playback speeds imported: "Flutti inn spilunarhraða {count} rásar | Flutti inn spilunarhraða {count} rása"
+    Channels not found: "{count} rás fannst ekki | {count} rásir fundust ekki"
   Sync Settings:
     Revoke Session Tabs Warning: "Samstilltum flipasöfnum þessa tækis verður einnig eytt."
     Revoke Session Partial Failure: "Samstilltum flipasöfnum var eytt, en ekki var hægt að staðfesta afturköllun aðgangs. Reyndu aftur að afturkalla aðgang."

@@ -1024,6 +1024,13 @@ Settings:
     Import history formats: "Mentrezhioù skoret: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), gwaredadenn LibreTube (.json)"
     Import playlists formats: "Mentrezhioù skoret: OpenTubeX / FreeTube (.db)"
     Import search history formats: "Mentrezhioù skoret: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)"
+    Channel playback speeds: "Tizhoù lenn ar chadennoù"
+    Import channel playback speeds: "Enporzhiañ tizhoù lenn ar chadennoù"
+    Channel playback speeds file: "Restr tizhoù lenn ar chadennoù"
+    Import channel playback speeds formats: "Mentrezhioù skoret: stokadur ar skript implijer {script} (.json)"
+    Invalid channel playback speeds file: "N'eus bet kavet tizh lenn chadenn ebet er restr-mañ"
+    Channel playback speeds imported: "Enporzhiet eo bet tizh lenn {count} chadenn | Enporzhiet eo bet tizhoù lenn {count} chadenn | Enporzhiet eo bet tizhoù lenn {count} chadenn | Enporzhiet eo bet tizhoù lenn {count} chadenn | Enporzhiet eo bet tizhoù lenn {count} chadenn"
+    Channels not found: "N'eus ket bet gallet kavout {count} chadenn | N'eus ket bet gallet kavout {count} chadenn | N'eus ket bet gallet kavout {count} chadenn | N'eus ket bet gallet kavout {count} chadenn | N'eus ket bet gallet kavout {count} chadenn"
   Sync Settings:
     Revoke Session Tabs Warning: "Holladoù ivinelloù sinkronizet an trevnad-mañ a vo diverket ivez."
     Revoke Session Partial Failure: "Dilamet eo bet ar strolladoù ivinelloù goubredet, met n'eo ket bet kadarnaet torriñ ar moned. Klaskit en-dro torriñ ar moned."

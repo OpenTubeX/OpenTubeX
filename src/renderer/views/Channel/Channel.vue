@@ -335,7 +335,6 @@ import {
   getInvidiousChannelCourses,
   getInvidiousChannelShorts,
   getInvidiousChannelVideos,
-  invidiousGetChannelId,
   invidiousGetChannelInfo,
   invidiousGetCommunityPosts,
   searchInvidiousChannel,
@@ -343,7 +342,6 @@ import {
 } from '../../helpers/api/invidious'
 import {
   getLocalChannel,
-  getLocalChannelId,
   getLocalArtistTopicChannelReleases,
   parseLocalChannelHeader,
   parseLocalChannelShorts,
@@ -358,6 +356,7 @@ import {
   parseLocalPlaylistVideos,
   parseChannelHomeTab
 } from '../../helpers/api/local'
+import { resolveChannelId } from '../../helpers/channels'
 import { useTabAvatar, useTabContext, useTabTitle } from '../../tabs/TabContext'
 import { setChannelShortsNavigationContext } from '../../helpers/player/shorts'
 import {
@@ -756,13 +755,7 @@ onBeforeUnmount(() => {
  */
 async function resolveChannelUrl(url, tab = undefined) {
   const expectedRouteGeneration = channelRouteGeneration
-  let id
-
-  if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
-    id = await invidiousGetChannelId(url)
-  } else {
-    id = await getLocalChannelId(url)
-  }
+  let id = await resolveChannelId(url, backendPreference.value)
 
   // The tab moved on while the URL was resolving; replacing the route now
   // would yank the user back to this channel.

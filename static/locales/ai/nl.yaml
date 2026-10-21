@@ -1048,6 +1048,13 @@ Settings:
     Import history formats: 'Ondersteunde indelingen: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube-back-up (.json)'
     Import playlists formats: 'Ondersteunde indelingen: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Ondersteunde indelingen: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Channel playback speeds: "Afspeelsnelheden per kanaal"
+    Import channel playback speeds: "Afspeelsnelheden per kanaal importeren"
+    Channel playback speeds file: "Bestand met afspeelsnelheden per kanaal"
+    Import channel playback speeds formats: "Ondersteunde indelingen: opslag van het userscript {script} (.json)"
+    Invalid channel playback speeds file: "Er zijn geen afspeelsnelheden per kanaal gevonden in dit bestand"
+    Channel playback speeds imported: "Afspeelsnelheid van {count} kanaal geïmporteerd | Afspeelsnelheden van {count} kanalen geïmporteerd"
+    Channels not found: "{count} kanaal kon niet worden gevonden | {count} kanalen konden niet worden gevonden"
   Sync Settings:
     Revoke Session Tabs Warning: "De gesynchroniseerde tabbladsets van dit apparaat worden ook verwijderd."
     Revoke Session Partial Failure: "Gesynchroniseerde tabbladsets zijn verwijderd, maar het intrekken kon niet worden bevestigd. Probeer de toegang opnieuw in te trekken."

@@ -8,6 +8,10 @@
   flex: 1;
 }
 
+.advancedDataSettings {
+  margin-block-start: 24px;
+}
+
 .importFormatsHint {
   color: var(--secondary-text-color);
   font-size: 0.9em;

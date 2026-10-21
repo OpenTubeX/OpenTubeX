@@ -1028,6 +1028,13 @@ Settings:
     Import history formats: 'Поддържани формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), резервно копие на LibreTube (.json)'
     Import playlists formats: 'Поддържани формати: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Поддържани формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Channel playback speeds: "Скорости на възпроизвеждане за канали"
+    Import channel playback speeds: "Внасяне на скорости на възпроизвеждане за канали"
+    Channel playback speeds file: "Файл със скорости на възпроизвеждане за канали"
+    Import channel playback speeds formats: "Поддържани формати: хранилище на потребителския скрипт {script} (.json)"
+    Invalid channel playback speeds file: "В този файл не са открити скорости на възпроизвеждане за канали"
+    Channel playback speeds imported: "Внесена е скоростта на възпроизвеждане на {count} канал | Внесени са скоростите на възпроизвеждане на {count} канала"
+    Channels not found: "{count} канал не може да бъде намерен | {count} канала не могат да бъдат намерени"
   Sync Settings:
     Revoke Session Tabs Warning: "Синхронизираните набори от раздели на това устройство също ще бъдат изтрити."
     Revoke Session Partial Failure: "Синхронизираните набори от раздели бяха изтрити, но отнемането на достъпа не можа да бъде потвърдено. Опитайте отново да отнемете достъпа."

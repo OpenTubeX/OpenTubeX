@@ -1035,6 +1035,13 @@ Settings:
     Import history formats: 'Formate acceptate: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), copie de rezervă LibreTube (.json)'
     Import playlists formats: 'Formate acceptate: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Formate acceptate: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Channel playback speeds: "Viteze de redare ale canalelor"
+    Import channel playback speeds: "Importă vitezele de redare ale canalelor"
+    Channel playback speeds file: "Fișier cu vitezele de redare ale canalelor"
+    Import channel playback speeds formats: "Formate acceptate: datele scriptului de utilizator {script} (.json)"
+    Invalid channel playback speeds file: "Nu s-au găsit viteze de redare ale canalelor în acest fișier"
+    Channel playback speeds imported: "A fost importată viteza de redare pentru {count} canal | Au fost importate vitezele de redare pentru {count} canale | Au fost importate vitezele de redare pentru {count} de canale"
+    Channels not found: "{count} canal nu a putut fi găsit | {count} canale nu au putut fi găsite | {count} de canale nu au putut fi găsite"
   Sync Settings:
     Revoke Session Tabs Warning: "Seturile de file sincronizate ale acestui dispozitiv vor fi și ele șterse."
     Revoke Session Partial Failure: "Seturile de file sincronizate au fost șterse, dar revocarea nu a putut fi confirmată. Încercați din nou să revocați accesul."

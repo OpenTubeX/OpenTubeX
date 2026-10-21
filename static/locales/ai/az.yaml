@@ -1027,6 +1027,13 @@ Settings:
     Import history formats: 'Dəstəklənən formatlar: OpenTubeX (.db), YouTube Takeout (.json), LibreTube ehtiyat nüsxəsi (.json)'
     Import playlists formats: 'Dəstəklənən formatlar: OpenTubeX (.db)'
     Import search history formats: 'Dəstəklənən formatlar: OpenTubeX (.db), YouTube Takeout (.json)'
+    Channel playback speeds: "Kanal oynatma sürətləri"
+    Import channel playback speeds: "Kanal oynatma sürətlərini idxal et"
+    Channel playback speeds file: "Kanal oynatma sürətləri faylı"
+    Import channel playback speeds formats: "Dəstəklənən formatlar: {script} istifadəçi skriptinin yaddaşı (.json)"
+    Invalid channel playback speeds file: "Bu faylda kanal oynatma sürəti tapılmadı"
+    Channel playback speeds imported: "{count} kanalın oynatma sürəti idxal edildi | {count} kanalın oynatma sürətləri idxal edildi"
+    Channels not found: "{count} kanal tapılmadı | {count} kanal tapılmadı"
   Sync Settings:
     Revoke Session Tabs Warning: "Bu cihazın sinxronlaşdırılmış vərəq dəstləri də silinəcək."
     Revoke Session Partial Failure: "Sinxronlaşdırılmış vərəq dəstləri silindi, lakin girişin ləğvi təsdiqlənmədi. Girişi ləğv etmək üçün yenidən cəhd edin."

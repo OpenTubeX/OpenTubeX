@@ -1072,6 +1072,13 @@ Settings:
     Import history formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)، پشتیبان LibreTube (.json)'
     Import playlists formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)'
+    Channel playback speeds: "سرعت‌های پخش کانال‌ها"
+    Import channel playback speeds: "وارد کردن سرعت‌های پخش کانال‌ها"
+    Channel playback speeds file: "فایل سرعت‌های پخش کانال‌ها"
+    Import channel playback speeds formats: "قالب‌های پشتیبانی‌شده: داده‌های ذخیره‌شده اسکریپت کاربری {script} (.json)"
+    Invalid channel playback speeds file: "هیچ سرعت پخش کانالی در این فایل پیدا نشد"
+    Channel playback speeds imported: "سرعت پخش {count} کانال وارد شد | سرعت پخش {count} کانال وارد شد"
+    Channels not found: "{count} کانال پیدا نشد | {count} کانال پیدا نشد"
   Sync Settings:
     Revoke Session Tabs Warning: "مجموعه‌های برگهٔ همگام‌شدهٔ این دستگاه نیز حذف خواهند شد."
     Revoke Session Partial Failure: "مجموعه‌های زبانهٔ همگام‌شده حذف شدند، اما لغو دسترسی تأیید نشد. برای لغو دسترسی دوباره تلاش کنید."
