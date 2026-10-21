@@ -644,12 +644,10 @@ test.describe('settings', () => {
       await expect(utilityWindow).toBeVisible()
       await expect(utilityWindow.getByRole('button', { name: /Minimi[sz]e/ })).toHaveCount(0)
       await utilityWindow.getByRole('button', { name: 'Close' }).click()
-      // The header buttons wait for the window to morph back into its button.
-      await expect(utilityWindow).toBeHidden()
     }
   })
 
-  test('morphs header Downloads and Settings windows out of and back into their buttons', async ({ page }) => {
+  test('morphs header Downloads and Settings windows out of and back into their buttons', { tag: '@scale' }, async ({ page }) => {
     await page.evaluate(async () => {
       await window.$store.dispatch('updateMoveDownloadsToAppHeader', true)
       await window.$store.dispatch('updateMoveSettingsToAppHeader', true)
@@ -670,6 +668,8 @@ test.describe('settings', () => {
       }
     })
     const morphs = () => page.evaluate(() => window.utilityWindowMorphs)
+    // Measure in the same CSS pixels as the recorded window bounds.
+    const measure = locator => locator.evaluate(element => element.getBoundingClientRect().toJSON())
     /** Checks that the collapsed end of the morph covers the button. */
     async function expectMorph(morph, button, closing) {
       for (const keyframe of morph.keyframes) {
@@ -681,7 +681,7 @@ test.describe('settings', () => {
       expect(collapsed.opacity).toBe(0)
       const [x, y, scale] = collapsed.transform.match(/^translate\((\S+)px, (\S+)px\) scale\((\S+)\)$/).slice(1).map(Number)
       const { bounds } = morph
-      const box = await button.boundingBox()
+      const box = await measure(button)
       expect(bounds.x + bounds.width / 2 + x).toBeCloseTo(box.x + box.width / 2, 0)
       expect(bounds.y + bounds.height / 2 + y).toBeCloseTo(box.y + box.height / 2, 0)
       expect(bounds.width * scale).toBeCloseTo(box.width, 0)
@@ -690,13 +690,13 @@ test.describe('settings', () => {
     for (const [icon, windowName] of [['downloads', 'Downloads'], ['settings', 'Settings']]) {
       await page.evaluate(() => { window.utilityWindowMorphs = [] })
       const button = page.locator(`.topNav [data-settings-window-icon="${icon}"]`)
-      const buttonBox = await button.boundingBox()
+      const buttonBox = await measure(button)
       await button.click()
       const utilityWindow = page.getByRole('dialog', { name: windowName, exact: true })
       await expect(utilityWindow).toBeVisible()
       await expect.poll(async () => (await morphs()).length).toBe(1)
       await expectMorph((await morphs())[0], button, false)
-      expect(await button.boundingBox()).toEqual(buttonBox)
+      expect(await measure(button)).toEqual(buttonBox)
 
       await utilityWindow.getByRole('button', { name: 'Close', exact: true }).click()
       await expect(utilityWindow).toBeHidden()
@@ -718,7 +718,7 @@ test.describe('settings', () => {
     const minimizedButton = page.locator('.minimizedUtilityButton')
     await expect.poll(async () => (await morphs()).length).toBe(1)
     await expectMorph((await morphs())[0], minimizedButton, true)
-    const minimizedBox = await minimizedButton.boundingBox()
+    const minimizedBox = await measure(minimizedButton)
     await minimizedButton.click()
     await expect(settingsWindow).toBeVisible()
     await expect.poll(async () => (await morphs()).length).toBe(2)
@@ -728,6 +728,24 @@ test.describe('settings', () => {
     expect(restore.bounds.y + restore.bounds.height / 2 + restoreY).toBeCloseTo(minimizedBox.y + minimizedBox.height / 2, 0)
     await expect(minimizedButton).toHaveCount(0)
     expect(await page.evaluate(() => window.viewTransitions)).toBe(0)
+  })
+
+  test('opens a header window requested while another one morphs closed', async ({ page }) => {
+    await page.evaluate(async () => {
+      const store = window.$store
+      await store.dispatch('updateMoveDownloadsToAppHeader', true)
+      await store.dispatch('updateMoveSettingsToAppHeader', true)
+      await store.dispatch('showSettingsWindow')
+    })
+    await expect(page.getByRole('dialog', { name: 'Settings', exact: true })).toBeVisible()
+    await page.evaluate(() => {
+      const store = window.$store
+      store.dispatch('closeSettingsWindowToIcon')
+      store.dispatch('openSettingsWindowFromIcon', 'downloads')
+    })
+    await expect(page.getByRole('dialog', { name: 'Downloads', exact: true })).toBeVisible()
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getSettingsWindowMorphing)).toBe(false)
+    await expect(page.getByRole('dialog', { name: 'Downloads', exact: true })).toBeVisible()
   })
 
   test('keeps the Settings scroll position when it morphs into and out of its header button', { tag: '@scale' }, async ({ page }) => {

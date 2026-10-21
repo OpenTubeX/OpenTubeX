@@ -1,5 +1,3 @@
-import { nextTick } from 'vue'
-
 import i18n from '../../i18n/index'
 
 import { checkYoutubeChannelId } from '../../helpers/channels'
@@ -25,15 +23,20 @@ import {
 const CHANNEL_THUMBNAIL_CACHE_LIMIT = 200
 const VIDEO_AVATAR_CACHE_LIMIT = 200
 
-async function morphSettingsWindow(commit, update, getButton) {
-  commit('setSettingsWindowMorphing', true)
-  // The window transition must switch to the morph hooks before the update.
-  await nextTick()
-  try {
-    await morphUtilityWindow(update, getButton)
-  } finally {
-    commit('setSettingsWindowMorphing', false)
-  }
+let settingsWindowMorph = Promise.resolve()
+
+function morphSettingsWindow(commit, update, getButton) {
+  settingsWindowMorph = morphUtilityWindow(update, getButton, morphing => {
+    commit('setSettingsWindowMorphing', morphing)
+  })
+  return settingsWindowMorph
+}
+
+// The page stays interactive during a morph, so retry requests made meanwhile
+// once it finishes instead of dropping them.
+async function afterSettingsWindowMorph(state, retry) {
+  while (state.settingsWindowMorphing) await settingsWindowMorph.catch(() => {})
+  return retry()
 }
 
 function getSettingsWindowIconButton(view) {
@@ -457,7 +460,9 @@ const actions = {
 
   // Morphs out of the app header button for the view when the window is closed
   openSettingsWindowFromIcon ({ state, commit, dispatch }, view = null) {
-    if (state.settingsWindowMorphing) return
+    if (state.settingsWindowMorphing) {
+      return afterSettingsWindowMorph(state, () => dispatch('openSettingsWindowFromIcon', view))
+    }
     if (state.settingsWindowOpen || state.settingsWindowMinimized) {
       return dispatch('showSettingsWindow', view)
     }
@@ -472,7 +477,9 @@ const actions = {
 
   // Morphs back into the app header button for the current view if it is shown
   closeSettingsWindowToIcon ({ state, commit, dispatch }) {
-    if (state.settingsWindowMorphing) return
+    if (state.settingsWindowMorphing) {
+      return afterSettingsWindowMorph(state, () => dispatch('closeSettingsWindowToIcon'))
+    }
     const view = state.settingsWindowView
     if (!state.settingsWindowOpen || !getSettingsWindowIconButton(view)?.getClientRects().length) {
       return dispatch('hideSettingsWindow')
@@ -484,16 +491,22 @@ const actions = {
     }, () => getSettingsWindowIconButton(view))
   },
 
-  minimizeSettingsWindow ({ state, commit }) {
-    if (!state.settingsWindowOpen || state.settingsWindowMorphing) return
+  minimizeSettingsWindow ({ state, commit, dispatch }) {
+    if (state.settingsWindowMorphing) {
+      return afterSettingsWindowMorph(state, () => dispatch('minimizeSettingsWindow'))
+    }
+    if (!state.settingsWindowOpen) return
     return morphSettingsWindow(commit, () => {
       commit('setSettingsWindowOpen', false)
       commit('setSettingsWindowMinimized', true)
     }, getMinimizedSettingsWindowButton)
   },
 
-  restoreSettingsWindow ({ state, commit }) {
-    if (!state.settingsWindowMinimized || state.settingsWindowMorphing) return
+  restoreSettingsWindow ({ state, commit, dispatch }) {
+    if (state.settingsWindowMorphing) {
+      return afterSettingsWindowMorph(state, () => dispatch('restoreSettingsWindow'))
+    }
+    if (!state.settingsWindowMinimized) return
     return morphSettingsWindow(commit, () => {
       commit('setSettingsWindowMinimized', false)
       commit('setSettingsWindowOpen', true)
