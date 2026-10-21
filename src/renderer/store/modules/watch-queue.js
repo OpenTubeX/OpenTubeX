@@ -67,7 +67,7 @@ export function persistWatchQueue(store, storage, sharedQueue) {
         let payload = mutation.payload
         if (mutation.type === 'addVideoToWatchQueue') {
           payload = { ...payload, queueItemId: items[payload.playNext ? 0 : items.length - 1].queueItemId }
-        } else if (mutation.type === 'addVideosToWatchQueue') {
+        } else if (mutation.type === 'addVideosToWatchQueue' && !payload.queueItemIds) {
           payload = { ...payload, queueItemIds: items.slice(items.length - payload.videos.length).map(item => item.queueItemId) }
         }
         updateSharedQueue(JSON.parse(JSON.stringify({ type: mutation.type, payload })))

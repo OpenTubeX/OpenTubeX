@@ -810,10 +810,16 @@ async function toggleCopyVideosPrompt() {
 async function addPlaylistToQueue() {
   if (snapshotPending.value) return
   // Queue user playlists in their displayed sort order.
-  const snapshot = isUserPlaylist.value ? { videos: props.sortedVideos } : await loadSnapshot(props.id)
-  if (!snapshot?.videos.length) return
+  let videos = props.sortedVideos
+  if (!isUserPlaylist.value) {
+    const snapshot = await loadSnapshot(props.id)
+    // Leaving the playlist while it loads cancels the action.
+    if (!snapshot || snapshotController.signal.aborted) return
+    videos = snapshot.videos
+  }
+  if (videos.length === 0) return
 
-  store.commit('addVideosToWatchQueue', { videos: deepCopy(snapshot.videos) })
+  store.commit('addVideosToWatchQueue', { videos: deepCopy(videos) })
   showToast({ message: t('Playlist.Playlist Added to Queue'), icon: ['fas', 'queue'] })
 }
 

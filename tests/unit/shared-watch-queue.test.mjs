@@ -206,6 +206,20 @@ test('a playlist batch is one shared write whose item IDs match in every window'
   assert.deepEqual(await windows.restored(), ['queued', 'one', 'three'])
 })
 
+test('a batch with caller IDs skips queued IDs identically in every window', async () => {
+  const windows = sharedWindows()
+  const first = windows.window()
+  const second = windows.window()
+  await settle()
+  addVideo(first, 'queued')
+  const queuedId = first.getters.getWatchQueue[0].queueItemId
+  first.commit('addVideosToWatchQueue', { videos: [{ videoId: 'new' }, { videoId: 'again' }], queueItemIds: ['new-id', queuedId] })
+  await settle()
+  assert.deepEqual(await windows.restored(), ['queued', 'new'])
+  windows.deliverUpdates()
+  for (const store of [first, second]) assert.deepEqual(store.getters.getWatchQueue.map(item => item.videoId), ['queued', 'new'])
+})
+
 test('the desktop queue persists to disk before replying and restores download routes', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'opentubex-queue-test-'))
   try {
