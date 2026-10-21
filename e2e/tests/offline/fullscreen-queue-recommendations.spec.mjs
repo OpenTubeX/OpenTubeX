@@ -495,7 +495,7 @@ for (const { uiScale, iconPack, colorScheme } of [
 test.describe('fullscreen queue header', () => {
   test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
 
-  test('hides the clear label, then the count, to stay one row', { tag: '@scale' }, async ({ app, page }) => {
+  test('hides the clear label, then the count, to stay one row', { tag: '@scale' }, async ({ app, page, uiScale }) => {
     await mockPlayableWatchPage(app, page)
     const video = await openMockedVideo(page)
     await page.evaluate(() => {
@@ -521,7 +521,7 @@ test.describe('fullscreen queue header', () => {
       })
 
       // The narrowest landscape dock keeps the title by dropping the clear label.
-      await setWindowSize(app, page, { width: 650, height: 422 })
+      await setWindowSize(app, page, { width: 650, height: 430 })
       await expect.poll(() => readQueueHeader(queue)).toMatchObject({
         oneRow: true, hideOrder: true, titleTruncated: false, clearLabel: false
       })
@@ -534,8 +534,16 @@ test.describe('fullscreen queue header', () => {
         expect(box.height).toBeCloseTo(closeBox.height, 0)
       }
 
+      // Hiding the save action leaves room for the count again.
+      await setWindowSize(app, page, { width: Math.round(760 * uiScale / 100), height: 440 })
+      await expect.poll(() => readQueueHeader(queue)).toMatchObject({ clearLabel: false, count: false })
+      await page.evaluate(() => window.$store.dispatch('updateHidePlaylists', true))
+      await expect.poll(() => readQueueHeader(queue)).toMatchObject({ oneRow: true, titleTruncated: false, count: true })
+      await page.evaluate(() => window.$store.dispatch('updateHidePlaylists', false))
+      await expect.poll(() => readQueueHeader(queue)).toMatchObject({ count: false })
+
       // Longer translations fit again after a locale change.
-      await setWindowSize(app, page, { width: 1360, height: 424 })
+      await setWindowSize(app, page, { width: 1360, height: 450 })
       await expect.poll(() => readQueueHeader(queue)).toMatchObject({ clearLabel: true, count: true })
       await page.evaluate(() => window.$store.dispatch('updateCurrentLocale', 'de-DE'))
       await expect(queue.locator('.queueLabel')).toHaveText('Warteschlange')
