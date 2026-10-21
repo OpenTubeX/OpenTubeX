@@ -259,7 +259,7 @@ export async function invidiousGetChannelInfo(channelId) {
   })
 
   if (isYatteeBackend()) {
-    const channel = normalizeYatteeChannel(channelInfo)
+    const channel = normalizeYatteeChannel(channelInfo, getCurrentInstanceUrl())
     yatteeChannelNames.set(channel.authorId, channel.author)
     return channel
   }

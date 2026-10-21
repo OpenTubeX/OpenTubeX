@@ -179,6 +179,18 @@ test('channel search results move the handle and subscriber count into place', (
   assert.equal(normalizeYatteeSearchItem(videoItem), videoItem)
 })
 
+test('channel avatars and banners point at the configured server', () => {
+  const channel = normalizeYatteeChannel({
+    authorId: 'UC123',
+    author: 'Channel',
+    authorThumbnails: [{ url: 'http://127.0.0.1:8085/api/v1/channels/UC123/avatar/176.jpg', width: 176, height: 176 }],
+    authorBanners: [{ url: '//yt3.googleusercontent.com/banner', width: 1060, height: 175 }]
+  }, 'https://yattee.example')
+
+  assert.equal(channel.authorThumbnails[0].url, 'https://yattee.example/api/v1/channels/UC123/avatar/176.jpg')
+  assert.equal(channel.authorBanners[0].url, 'https://yt3.googleusercontent.com/banner')
+})
+
 test('channels list only the tabs the server implements', () => {
   const channel = normalizeYatteeChannel({ authorId: 'UC123', author: 'Channel', description: 'a\nb' })
 
@@ -275,6 +287,7 @@ test('channel tab videos get the channel name from the channel page or the subsc
     invidiousAPICall: async () => ({ authorId: 'UCvisited', author: 'Visited channel' }),
     normalizeYatteeChannel,
     fillYatteeVideoAuthors,
+    getCurrentInstanceUrl: () => 'https://yattee.example',
   }
   const { getInvidiousChannelShorts, invidiousGetChannelInfo } = vm.runInNewContext(
     `${extract('function isYatteeBackend()', '\n/**\n * @param {string} feature')}
