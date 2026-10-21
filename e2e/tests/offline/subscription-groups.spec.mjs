@@ -194,6 +194,10 @@ test.describe('editing subscription groups', () => {
     await page.keyboard.press('ArrowRight')
     await expect(groups(page).getByRole('tab', { name: 'All' })).toBeFocused()
     await expect(feedVideo(page, 'Beta Channel upload')).toBeVisible()
+
+    // Alt+Left and Alt+Right stay with back and forward navigation
+    await groups(page).getByRole('tab', { name: 'All' }).dispatchEvent('keydown', { key: 'ArrowRight', altKey: true })
+    await expect(groups(page).getByRole('tab', { name: 'All' })).toHaveAttribute('aria-selected', 'true')
   })
 
   test('adds a channel to a group from its subscription settings', async ({ page }) => {
@@ -213,6 +217,31 @@ test.describe('editing subscription groups', () => {
     await expect(music).toHaveAttribute('aria-checked', 'false')
     await expect.poll(async () => (await storedGroups(page)).find(group => group.id === 'music').channelIds)
       .toEqual([ALPHA, GAMMA, 'UCnotsubscribedhere00000'])
+  })
+})
+
+test.describe('subscription groups with automatic fetching', () => {
+  test.use({
+    seed: seed({
+      fetchSubscriptionsAutomatically: true,
+      subscriptionGroups: [{ id: 'empty', name: 'Empty', channelIds: [] }]
+    })
+  })
+
+  test('selecting a group without channels does not refresh the whole profile', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getSubscriptionFeedRefreshInProgress)).toBe(false)
+    await page.evaluate(() => {
+      window.subscriptionRefreshStarted = false
+      window.$store.watch(
+        (_state, getters) => getters.getSubscriptionFeedRefreshInProgress,
+        inProgress => { if (inProgress) window.subscriptionRefreshStarted = true }
+      )
+    })
+
+    await groups(page).getByRole('tab', { name: 'Empty' }).click()
+    await expect(page.getByText('This group has no channels in the current profile.')).toBeVisible()
+    expect(await page.evaluate(() => window.subscriptionRefreshStarted)).toBe(false)
   })
 })
 

@@ -18,7 +18,7 @@
         :tabindex="activeGroupId === tab.id ? 0 : -1"
         :data-subscription-group="tab.id ?? ''"
         @click="selectGroup(tab.id)"
-        @keydown.left.right.home.end.prevent="switchGroup($event, tab.id)"
+        @keydown.left.right.home.end="switchGroup($event, tab.id)"
       >
         <span
           class="groupName"
@@ -122,6 +122,10 @@ function selectGroup(groupId) {
  * @param {string | null} focusedGroupId
  */
 function switchGroup(event, focusedGroupId) {
+  // Alt+Left and Alt+Right navigate back and forward
+  if (event.altKey) return
+  event.preventDefault()
+
   const ids = tabs.value.map(tab => tab.id)
   let index = ids.indexOf(focusedGroupId)
   // The tabs follow the reading direction, so left points back in RTL.

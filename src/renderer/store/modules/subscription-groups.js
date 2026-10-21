@@ -9,8 +9,30 @@ import {
 // The selected group is a view preference of this device, so it is not synced.
 const ACTIVE_GROUP_STORAGE_KEY = 'Subscriptions/activeGroup'
 
+// Blocked site storage throws, which must not break loading the store.
+function readActiveGroupId() {
+  try {
+    return localStorage.getItem(ACTIVE_GROUP_STORAGE_KEY)
+  } catch (error) {
+    console.error(`Failed to read ${ACTIVE_GROUP_STORAGE_KEY}`, error)
+    return null
+  }
+}
+
+function saveActiveGroupId(groupId) {
+  try {
+    if (groupId === null) {
+      localStorage.removeItem(ACTIVE_GROUP_STORAGE_KEY)
+    } else {
+      localStorage.setItem(ACTIVE_GROUP_STORAGE_KEY, groupId)
+    }
+  } catch (error) {
+    console.error(`Failed to save ${ACTIVE_GROUP_STORAGE_KEY}`, error)
+  }
+}
+
 const state = {
-  activeSubscriptionGroupId: localStorage.getItem(ACTIVE_GROUP_STORAGE_KEY)
+  activeSubscriptionGroupId: readActiveGroupId()
 }
 
 const getters = {
@@ -83,11 +105,7 @@ const actions = {
 const mutations = {
   setActiveSubscriptionGroupId(state, groupId) {
     state.activeSubscriptionGroupId = groupId
-    if (groupId === null) {
-      localStorage.removeItem(ACTIVE_GROUP_STORAGE_KEY)
-    } else {
-      localStorage.setItem(ACTIVE_GROUP_STORAGE_KEY, groupId)
-    }
+    saveActiveGroupId(groupId)
   },
 }
 
