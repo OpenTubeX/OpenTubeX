@@ -135,6 +135,7 @@ import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { areCommentsAvailable } from './watchComments'
 import { formatDateTime } from '../../helpers/dateFormat'
 import { getVideoPopularity } from '../../helpers/player/videoPopularity'
+import { createWatchTimeTracker } from '../../helpers/watchTimeTracker'
 
 /**
  * @typedef {{
@@ -560,13 +561,9 @@ export default defineComponent({
       /** @type {number|null} */
       sabrErrorRecoveryLastSeconds: null,
       sabrErrorRecoveryPlayedSeconds: 0,
-      /** @type {number|null} */
-      watchTimeLastTick: null,
       recommendationPlaybackSample: null,
       recommendationWatchSession: null,
       recommendationLoadRetryAt: 0,
-      /** @type {Record<string, number>} */
-      pendingWatchTimeByDate: {},
       historyLastTouchedAt: 0,
       /** @type {Set<string>} videos whose watched mark is still being written */
       watchedMarkPendingVideoIds: new Set(),
@@ -1425,7 +1422,7 @@ export default defineComponent({
     },
     enableWatchStats(enabled) {
       if (!enabled) {
-        this.clearPendingWatchTime()
+        this.watchTimeTracker.clear()
       }
     },
     enableVideoMetadataCache(enabled) {
@@ -1437,11 +1434,11 @@ export default defineComponent({
     },
     rememberHistory(enabled) {
       if (!enabled) {
-        this.clearPendingWatchTime()
+        this.watchTimeTracker.clear()
       }
     },
     watchStatsResetVersion() {
-      this.clearPendingWatchTime()
+      this.watchTimeTracker.clear()
     },
     canSkipToNextVideo() {
       this.syncMediaSessionSkipHandlers()
@@ -1465,6 +1462,10 @@ export default defineComponent({
     },
   },
   created: function () {
+    this.watchTimeTracker = createWatchTimeTracker(
+      () => this.rememberHistory && this.enableWatchStats && !this.isPlaybackPaused() && !this.chromecastStatus?.buffering,
+      (date, seconds) => this.$store.dispatch('recordWatchTime', { date, seconds })
+    )
     retainIosMediaSources(() => this.legacyFormats.map(format => format.url))
     this.theatreModeAnimations = []
     this.videoId = this.tabRoute.params.id
@@ -4650,7 +4651,7 @@ export default defineComponent({
      */
     updateCurrentChapter: function (currentSeconds) {
       this.trackRecommendationWatch(currentSeconds)
-      this.trackWatchTime()
+      this.watchTimeTracker.track()
       this.markAsWatchedIfFinished(currentSeconds)
       this.keepHistoryEntryAlive(currentSeconds)
 
@@ -4917,7 +4918,6 @@ export default defineComponent({
         this.resumePlaybackAfterSabrReload = false
         this.suppressAutoplayAfterSabrReload = true
       }
-      this.watchTimeLastTick = null
       this.flushWatchTime()
       this.handleWatchProgressAutoSaveWhenProgressEnabled()
     },
@@ -4962,10 +4962,6 @@ export default defineComponent({
 
       this.shortsCompletionBlockedBySeek = true
       this.shortsPlaybackAfterSeekSeconds = 0
-    },
-    clearPendingWatchTime() {
-      this.watchTimeLastTick = null
-      this.pendingWatchTimeByDate = {}
     },
     trackRecommendationWatch(time) {
       if (!this.rememberHistory || !this.$store.getters.getEnableHomeRecommendations || this.isLoading || !this.$refs.player?.hasLoaded) {
@@ -5019,50 +5015,8 @@ export default defineComponent({
         console.error('Could not save recommendation learning', error)
       }
     },
-    trackWatchTime() {
-      if (!this.rememberHistory || !this.enableWatchStats || this.isPlaybackPaused() || this.chromecastStatus?.buffering) {
-        this.watchTimeLastTick = null
-        return
-      }
-
-      const now = Date.now()
-      if (this.watchTimeLastTick !== null) {
-        const elapsed = now - this.watchTimeLastTick
-
-        // Ignore suspended or heavily delayed timers instead of counting idle time.
-        if (elapsed > 0 && elapsed <= 5000) {
-          const watchedAt = new Date(now)
-          const date = [
-            watchedAt.getFullYear(),
-            String(watchedAt.getMonth() + 1).padStart(2, '0'),
-            String(watchedAt.getDate()).padStart(2, '0'),
-          ].join('-')
-
-          this.pendingWatchTimeByDate[date] = (this.pendingWatchTimeByDate[date] ?? 0) + elapsed
-        }
-      }
-
-      this.watchTimeLastTick = now
-
-      const pendingMilliseconds = Object.values(this.pendingWatchTimeByDate)
-        .reduce((total, milliseconds) => total + milliseconds, 0)
-
-      if (pendingMilliseconds >= 10000) {
-        this.flushWatchTime()
-      }
-    },
     async flushWatchTime() {
-      const learning = this.flushRecommendationWatch()
-      this.watchTimeLastTick = null
-      const pending = this.pendingWatchTimeByDate
-      this.pendingWatchTimeByDate = {}
-
-      await Promise.all([learning, ...Object.entries(pending).map(([date, milliseconds]) => {
-        return this.$store.dispatch('recordWatchTime', {
-          date,
-          seconds: milliseconds / 1000,
-        })
-      })])
+      await Promise.all([this.flushRecommendationWatch(), this.watchTimeTracker.flush()])
     },
     /**
      * Whether this tab is currently the presented one. Without a logical-tab

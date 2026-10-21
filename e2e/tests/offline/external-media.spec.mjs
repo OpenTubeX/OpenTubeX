@@ -359,6 +359,27 @@ test('external media saves on pause in semi-auto mode without periodically savin
   await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeCloseTo(pausedTime, 1)
 })
 
+test('external media playback counts towards watch stats only while they are enabled', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  const watchedSeconds = () => page.evaluate(() => Object.values(window.$store.getters.getWatchSecondsByDate)
+    .reduce((total, seconds) => total + seconds, 0))
+  await prepareTwitchYtDlp(app, page, mediaUrl, false)
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  const video = await waitForPlayback(page)
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(3)
+  await video.evaluate(element => element.pause())
+  await expect.poll(watchedSeconds).toBeGreaterThan(2)
+
+  const recorded = await watchedSeconds()
+  await page.evaluate(() => window.$store.dispatch('updateEnableWatchStats', false))
+  const resumedAt = await video.evaluate(element => { element.play(); return element.currentTime })
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(resumedAt + 2)
+  await video.evaluate(element => element.pause())
+  expect(await watchedSeconds()).toBe(recorded)
+})
+
 test('external media keeps background pause and completion positions after switching tabs', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
   const mediaUrl = 'https://www.twitch.tv/videos/123456789'
