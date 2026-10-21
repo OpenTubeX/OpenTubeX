@@ -3407,15 +3407,22 @@ function runApp() {
           newWindow.close()
         }
       })
-    } else if (customTitleBar && process.platform === 'win32') {
+    } else if (customTitleBar) {
       // The renderer reports the colors and height of the bar under the
-      // window controls whenever its theme or layout changes.
+      // window controls whenever its theme, layout or UI scale changes.
       newWindow.webContents.ipc.on(IpcChannels.SET_TITLE_BAR_OVERLAY, (event, overlay) => {
         if (!isOpenTubeXUrl(event.senderFrame.url) || newWindow.isDestroyed()) return
         const { color, symbolColor, height } = overlay ?? {}
         if (typeof color !== 'string' || typeof symbolColor !== 'string' ||
           !Number.isFinite(height) || height <= 0) return
-        newWindow.setTitleBarOverlay({ color, symbolColor, height: Math.round(height) })
+        if (process.platform === 'darwin') {
+          // The overlay spans the traffic lights' 16 px tall frames and their
+          // margins, so equal margins center them in the bar at its scaled
+          // height. 7 px is the system's horizontal margin.
+          newWindow.setWindowButtonPosition({ x: 7, y: Math.max(0, Math.round((height - 16) / 2)) })
+        } else {
+          newWindow.setTitleBarOverlay({ color, symbolColor, height: Math.round(height) })
+        }
       })
     }
 

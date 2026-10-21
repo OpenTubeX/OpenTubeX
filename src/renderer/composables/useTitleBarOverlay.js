@@ -42,8 +42,8 @@ function findBarUnderControls() {
  * @param {import('vue').WatchSource} layout changes that can move the bar under the controls
  */
 export function useTitleBarOverlay(layout) {
-  // Only Windows draws overlay controls in colors the app picks.
-  if (!process.env.IS_ELECTRON || process.platform !== 'win32' || !window.ftElectron.customTitleBar) return
+  // Linux draws its own controls. macOS only takes the height from this.
+  if (!process.env.IS_ELECTRON || process.platform === 'linux' || !window.ftElectron.customTitleBar) return
 
   const context = new OffscreenCanvas(1, 1).getContext('2d', { willReadFrequently: true })
   let frame = 0
