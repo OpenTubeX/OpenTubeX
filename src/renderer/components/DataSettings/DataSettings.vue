@@ -2273,14 +2273,14 @@ async function importChannelPlaybackSpeeds() {
           saved = store.getters.getRememberPlaybackSpeedPerChannel
         }
         // The store only logs failed updates
-        if (!saved) {
+        if (saved) {
+          showToast({
+            message: t('Settings.Data Settings.Channel playback speeds imported', { count }, count),
+            icon: ['fas', 'gauge'],
+          })
+        } else {
           showToast({ message: t('Channel.Failed to save subscription settings'), icon: ['fas', 'circle-exclamation'] })
-          return
         }
-        showToast({
-          message: t('Settings.Data Settings.Channel playback speeds imported', { count }, count),
-          icon: ['fas', 'gauge'],
-        })
       }
 
       if (notFound.length > 0) {
