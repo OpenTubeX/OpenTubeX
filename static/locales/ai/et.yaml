@@ -2221,3 +2221,14 @@ Home Widgets:
   Search: "Otsi"
   Subscriptions: "Tellimused"
   Watch Later: "Vaata hiljem"
+Subscription Groups:
+  Groups: Rühmad
+  All: Kõik
+  New Group: Uus rühm
+  Edit Group: Muuda rühma
+  Group Name: Rühma nimi
+  Create: Loo
+  Save: Salvesta
+  Delete Group: Kustuta rühm
+  Delete Prompt: Kas kustutada rühm „{groupName}“? Selle kanalite tellimused jäävad alles.
+  Empty Group: Selles rühmas pole praeguse profiili kanaleid.

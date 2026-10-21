@@ -31,6 +31,12 @@
         {{ $t("Subscriptions['Your Subscription list is currently empty. Start adding subscriptions to see them here.']") }}
       </p>
       <p
+        v-else-if="activeGroupIsEmpty"
+        class="message"
+      >
+        {{ $t('Subscription Groups.Empty Group') }}
+      </p>
+      <p
         v-else-if="onlyShowNew"
         class="message"
       >
@@ -204,6 +210,10 @@ const activeVideoList = computed(() => {
 
 const activeProfileHasSubscriptions = computed(() => {
   return store.getters.getActiveProfile.subscriptions.length > 0
+})
+
+const activeGroupIsEmpty = computed(() => {
+  return store.getters.getActiveSubscriptionGroup !== null && store.getters.getActiveGroupSubscriptions.length === 0
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */

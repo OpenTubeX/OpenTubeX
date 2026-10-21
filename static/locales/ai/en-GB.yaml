@@ -2208,3 +2208,14 @@ Home Widgets:
   Search: "Search"
   Subscriptions: "Subscriptions"
   Watch Later: "Watch Later"
+Subscription Groups:
+  Groups: Groups
+  All: All
+  New Group: New Group
+  Edit Group: Edit Group
+  Group Name: Group name
+  Create: Create
+  Save: Save
+  Delete Group: Delete Group
+  Delete Prompt: Delete the group ‘{groupName}’? Its channels stay subscribed.
+  Empty Group: This group has no channels in the current profile.

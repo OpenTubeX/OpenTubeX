@@ -2218,3 +2218,14 @@ Home Widgets:
   Search: "Hľadať"
   Subscriptions: "Odbery"
   Watch Later: "Pozrieť neskôr"
+Subscription Groups:
+  Groups: Skupiny
+  All: Všetko
+  New Group: Nová skupina
+  Edit Group: Upraviť skupinu
+  Group Name: Názov skupiny
+  Create: Vytvoriť
+  Save: Uložiť
+  Delete Group: Vymazať skupinu
+  Delete Prompt: Vymazať skupinu "{groupName}"? Odbery jej kanálov zostanú zachované.
+  Empty Group: Táto skupina neobsahuje žiadne kanály z aktuálneho profilu.

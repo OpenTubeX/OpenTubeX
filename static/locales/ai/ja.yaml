@@ -2218,3 +2218,14 @@ Home Widgets:
   Search: "検索"
   Subscriptions: "登録チャンネル"
   Watch Later: "後で見る"
+Subscription Groups:
+  Groups: グループ
+  All: すべて
+  New Group: 新しいグループ
+  Edit Group: グループの編集
+  Group Name: グループ名
+  Create: 作成
+  Save: 保存
+  Delete Group: グループの削除
+  Delete Prompt: グループ「{groupName}」を削除しますか？グループ内のチャンネルの登録は解除されません。
+  Empty Group: このグループには、現在のプロファイルのチャンネルがありません。

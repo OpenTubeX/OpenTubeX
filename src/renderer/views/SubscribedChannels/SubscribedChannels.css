@@ -12,6 +12,25 @@
   justify-content: space-between;
 }
 
+.controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 16px;
+}
+
+.channelSearch {
+  --input-bottom-spacing: 0;
+}
+
+.sortSelect {
+  margin-block: 0;
+}
+
+.groupBar {
+  margin-block-start: 16px;
+}
+
 .message {
   color: var(--tertiary-text-color);
 }
@@ -29,12 +48,49 @@
 }
 
 .channel {
+  position: relative;
   min-inline-size: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   row-gap: 0.75rem;
   padding: 0.5rem;
+  border-radius: calc(12px * var(--ui-roundness));
+}
+
+.channel.reorderable {
+  cursor: grab;
+}
+
+.channel.draggedChannel {
+  opacity: 0.5;
+}
+
+.channelMove-move {
+  transition: transform 200ms ease;
+}
+
+.grabBar {
+  position: absolute;
+  inset-block-start: 0.25rem;
+  inset-inline-start: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 36px;
+  min-block-size: 36px;
+  border-radius: 50%;
+  color: var(--tertiary-text-color);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.grabBar:hover,
+.grabBar:focus-visible {
+  background-color: var(--side-nav-hover-color);
+  color: var(--primary-text-color);
 }
 
 .thumbnailContainer {
@@ -92,6 +148,11 @@
 @media only screen and (width <= 680px) {
   .card {
     inline-size: 100%;
+  }
+
+  .controls {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 16px;
   }
 
   .channels {

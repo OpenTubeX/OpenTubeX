@@ -2241,3 +2241,14 @@ Home Widgets:
   Search: "Sök"
   Subscriptions: "Prenumerationer"
   Watch Later: "Titta senare"
+Subscription Groups:
+  Groups: Grupper
+  All: Alla
+  New Group: Ny grupp
+  Edit Group: Redigera grupp
+  Group Name: Gruppnamn
+  Create: Skapa
+  Save: Spara
+  Delete Group: Ta bort grupp
+  Delete Prompt: Vill du ta bort gruppen ”{groupName}”? Du fortsätter att prenumerera på dess kanaler.
+  Empty Group: Den här gruppen har inga kanaler från den aktuella profilen.

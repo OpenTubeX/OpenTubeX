@@ -57,7 +57,7 @@ const subscriptionCacheReady = computed(() => store.getters.getSubscriptionCache
 const fetchSubscriptionsAutomatically = computed(() => store.getters.getFetchSubscriptionsAutomatically)
 
 const activeSubscriptionList = computed(() => (
-  getSubscriptionsForFeed(store.getters.getActiveProfile.subscriptions, 'shorts')
+  getSubscriptionsForFeed(store.getters.getActiveGroupSubscriptions, 'shorts')
 ))
 
 const cacheEntriesForAllActiveProfileChannels = computed(() => {

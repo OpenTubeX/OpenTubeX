@@ -2220,3 +2220,14 @@ Home Widgets:
   Search: "搜尋"
   Subscriptions: "訂閱"
   Watch Later: "稍後觀看"
+Subscription Groups:
+  Groups: 群組
+  All: 全部
+  New Group: 新增群組
+  Edit Group: 編輯群組
+  Group Name: 群組名稱
+  Create: 建立
+  Save: 儲存
+  Delete Group: 刪除群組
+  Delete Prompt: 要刪除群組「{groupName}」嗎？其中的頻道仍會保持訂閱。
+  Empty Group: 此群組沒有目前設定檔中的頻道。

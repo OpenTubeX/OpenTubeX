@@ -339,8 +339,20 @@ export const SYNC_SETTING_LABELS = {
   sponsorBlockUserId: 'Settings.SponsorBlock Settings.SponsorBlock Private User ID (optional)',
   startupBehavior: 'Settings.General Settings.Startup Behavior.Startup Behavior',
   statsWeekStartsOn: 'Settings.Privacy Settings.Week Starts On',
+  subscribedChannelsCustomOrder: [
+    'Channels.Title',
+    'Playlist.Sort By.Custom'
+  ],
+  subscribedChannelsSortBy: [
+    'Channels.Title',
+    'Global.Sort By'
+  ],
   subscriptionChannelSettings: 'Channel.Subscription settings',
   subscriptionFeedAutoRefreshInterval: 'Settings.Subscription Settings.Videos Auto Refresh Interval',
+  subscriptionGroups: [
+    'Subscriptions.Subscriptions',
+    'Subscription Groups.Groups'
+  ],
   subscriptionLiveAutoRefreshInterval: 'Settings.Subscription Settings.Live Auto Refresh Interval',
   subscriptionPostsAutoRefreshInterval: 'Settings.Subscription Settings.Posts Auto Refresh Interval',
   subscriptionShortsAutoRefreshInterval: 'Settings.Subscription Settings.Shorts Auto Refresh Interval',

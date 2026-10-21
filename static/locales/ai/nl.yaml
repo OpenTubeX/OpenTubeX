@@ -2281,3 +2281,14 @@ Home Widgets:
   Search: "Zoeken"
   Subscriptions: "Abonnementen"
   Watch Later: "Later bekijken"
+Subscription Groups:
+  Groups: Groepen
+  All: Alles
+  New Group: Nieuwe groep
+  Edit Group: Groep bewerken
+  Group Name: Groepsnaam
+  Create: Aanmaken
+  Save: Opslaan
+  Delete Group: Groep verwijderen
+  Delete Prompt: Groep ‘{groupName}’ verwijderen? U blijft geabonneerd op de kanalen in deze groep.
+  Empty Group: Deze groep bevat geen kanalen uit het huidige profiel.

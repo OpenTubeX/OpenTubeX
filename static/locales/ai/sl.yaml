@@ -2815,3 +2815,14 @@ Home Widgets:
   Search: "Iskanje"
   Subscriptions: "Naročnine"
   Watch Later: "Za poznejši ogled"
+Subscription Groups:
+  Groups: Skupine
+  All: Vse
+  New Group: Nova skupina
+  Edit Group: Uredi skupino
+  Group Name: Ime skupine
+  Create: Ustvari
+  Save: Shrani
+  Delete Group: Izbriši skupino
+  Delete Prompt: Ali želite izbrisati skupino "{groupName}"? Naročnine na njene kanale bodo ohranjene.
+  Empty Group: Ta skupina nima kanalov iz trenutnega profila.

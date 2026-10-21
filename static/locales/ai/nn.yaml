@@ -2612,3 +2612,14 @@ Home Widgets:
   Search: "Søkje"
   Subscriptions: "Abonnement"
   Watch Later: "Sjå seinare"
+Subscription Groups:
+  Groups: Grupper
+  All: Alle
+  New Group: Ny gruppe
+  Edit Group: Rediger gruppe
+  Group Name: Gruppenamn
+  Create: Opprett
+  Save: Lagre
+  Delete Group: Fjern gruppe
+  Delete Prompt: Fjerne gruppa "{groupName}"? Abonnementa dine på kanalane i gruppa blir behaldne.
+  Empty Group: Denne gruppa har ingen kanalar frå den gjeldande profilen.

@@ -336,6 +336,17 @@ Channels:
   Count: '1 channel found. | {number} channels found.'
   Empty: Your channel list is currently empty.
   Unsubscribe Prompt: Are you sure you want to unsubscribe from "{channelName}"?
+Subscription Groups:
+  Groups: Groups
+  All: All
+  New Group: New Group
+  Edit Group: Edit Group
+  Group Name: Group Name
+  Create: Create
+  Save: Save
+  Delete Group: Delete Group
+  Delete Prompt: Delete the group "{groupName}"? Its channels stay subscribed.
+  Empty Group: This group has no channels in the current profile.
 Trending:
   Trending: Trending
   Gaming: Gaming

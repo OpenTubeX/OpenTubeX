@@ -2307,3 +2307,14 @@ Home Widgets:
   Search: "Søg"
   Subscriptions: "Abonnementer"
   Watch Later: "Se senere"
+Subscription Groups:
+  Groups: Grupper
+  All: Alle
+  New Group: Ny gruppe
+  Edit Group: Rediger gruppe
+  Group Name: Gruppenavn
+  Create: Opret
+  Save: Gem
+  Delete Group: Slet gruppe
+  Delete Prompt: Slet gruppen "{groupName}"? Du forbliver abonneret på dens kanaler.
+  Empty Group: Denne gruppe har ingen kanaler fra den aktuelle profil.

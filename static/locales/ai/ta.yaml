@@ -2273,3 +2273,14 @@ Home Widgets:
   Search: "தேடு"
   Subscriptions: "சந்தாக்கள்"
   Watch Later: "பின்னர் பார்க்க"
+Subscription Groups:
+  Groups: குழுக்கள்
+  All: அனைத்தும்
+  New Group: புதிய குழு
+  Edit Group: குழுவைத் திருத்து
+  Group Name: குழுப் பெயர்
+  Create: உருவாக்கு
+  Save: சேமி
+  Delete Group: குழுவை நீக்கு
+  Delete Prompt: '"{groupName}" குழுவை நீக்கவா? அதிலுள்ள சேனல்களுக்கான சந்தாக்கள் தொடரும்.'
+  Empty Group: இந்தக் குழுவில் தற்போதைய சுயவிவரத்தின் சேனல்கள் எதுவும் இல்லை.

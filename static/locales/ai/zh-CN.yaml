@@ -2217,3 +2217,14 @@ Home Widgets:
   Search: "搜索"
   Subscriptions: "订阅"
   Watch Later: "稍后观看"
+Subscription Groups:
+  Groups: 分组
+  All: 全部
+  New Group: 新建分组
+  Edit Group: 编辑分组
+  Group Name: 分组名称
+  Create: 创建
+  Save: 保存
+  Delete Group: 删除分组
+  Delete Prompt: 要删除分组“{groupName}”吗？其中的频道仍会保持订阅。
+  Empty Group: 此分组中没有当前配置文件的频道。

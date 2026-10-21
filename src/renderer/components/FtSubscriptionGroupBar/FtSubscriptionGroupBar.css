@@ -1,0 +1,43 @@
+/* The groups and actions wrap as one row of chips. */
+.subscriptionGroupBar {
+  --material-tab-min-height: 36px;
+  --material-tab-padding-inline: 14px;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  min-inline-size: 0;
+
+  /* Replaces the tab list's own stacking context for the selection highlight. */
+  isolation: isolate;
+}
+
+.groupTabs {
+  display: contents;
+}
+
+.groupTabs[role='tablist'] .groupTab[role='tab'] {
+  max-inline-size: min(16rem, 100%);
+  border: 1px solid var(--divider-color);
+}
+
+.groupTabs[role='tablist'] .groupTab[role='tab'][aria-selected='true'] {
+  border-color: transparent;
+}
+
+.groupName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.groupActions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.newGroupButton {
+  margin: 0;
+}

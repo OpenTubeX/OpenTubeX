@@ -70,7 +70,7 @@ const fetchSubscriptionsAutomatically = computed(() => store.getters.getFetchSub
 const useRssFeeds = computed(() => store.getters.getUseRssFeeds)
 
 const activeSubscriptionList = computed(() => (
-  getSubscriptionsForFeed(store.getters.getActiveProfile.subscriptions, 'posts')
+  getSubscriptionsForFeed(store.getters.getActiveGroupSubscriptions, 'posts')
 ))
 
 const cacheEntriesForAllActiveProfileChannels = computed(() => {

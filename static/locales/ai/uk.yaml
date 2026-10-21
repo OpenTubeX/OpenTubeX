@@ -2263,3 +2263,14 @@ Home Widgets:
   Search: "Пошук"
   Subscriptions: "Підписки"
   Watch Later: "Переглянути пізніше"
+Subscription Groups:
+  Groups: Групи
+  All: Усі
+  New Group: Нова група
+  Edit Group: Редагувати групу
+  Group Name: Назва групи
+  Create: Створити
+  Save: Зберегти
+  Delete Group: Видалити групу
+  Delete Prompt: Видалити групу «{groupName}»? Підписки на її канали збережуться.
+  Empty Group: У цій групі немає каналів із поточного профілю.

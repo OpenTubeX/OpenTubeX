@@ -2260,3 +2260,14 @@ Home Widgets:
   Search: "Tìm kiếm"
   Subscriptions: "Đăng ký"
   Watch Later: "Xem sau"
+Subscription Groups:
+  Groups: Nhóm
+  All: Tất cả
+  New Group: Nhóm mới
+  Edit Group: Chỉnh sửa nhóm
+  Group Name: Tên nhóm
+  Create: Tạo
+  Save: Lưu
+  Delete Group: Xóa nhóm
+  Delete Prompt: Xóa nhóm "{groupName}"? Bạn vẫn tiếp tục đăng ký các kênh trong nhóm.
+  Empty Group: Nhóm này không có kênh nào trong hồ sơ hiện tại.

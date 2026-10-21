@@ -2268,3 +2268,14 @@ Home Widgets:
   Search: "Căutare"
   Subscriptions: "Abonamente"
   Watch Later: "Vizionează mai târziu"
+Subscription Groups:
+  Groups: Grupuri
+  All: Toate
+  New Group: Grup nou
+  Edit Group: Editare grup
+  Group Name: Numele grupului
+  Create: Creați
+  Save: Salvează
+  Delete Group: Ștergeți grupul
+  Delete Prompt: Ștergeți grupul "{groupName}"? Abonamentele la canalele sale vor fi păstrate.
+  Empty Group: Acest grup nu conține canale din profilul curent.

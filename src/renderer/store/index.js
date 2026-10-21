@@ -11,6 +11,7 @@ import profiles from './modules/profiles'
 import settings, { isSettingSyncEnabled, isSettingSyncable } from './modules/settings'
 import searchHistory from './modules/search-history'
 import subscriptionCache from './modules/subscription-cache'
+import subscriptionGroups from './modules/subscription-groups'
 import utils from './modules/utils'
 import player from './modules/player'
 import tabs from './modules/tabs'
@@ -110,6 +111,7 @@ export default createStore({
     settings,
     searchHistory,
     subscriptionCache,
+    subscriptionGroups,
     utils,
     player,
     tabs,

@@ -2245,3 +2245,14 @@ Home Widgets:
   Search: "Leita"
   Subscriptions: "Áskriftir"
   Watch Later: "Horfa síðar"
+Subscription Groups:
+  Groups: Hópar
+  All: Allt
+  New Group: Nýr hópur
+  Edit Group: Breyta hópi
+  Group Name: Heiti hóps
+  Create: Búa til
+  Save: Vista
+  Delete Group: Eyða hópi
+  Delete Prompt: Eyða hópnum "{groupName}"? Þú verður áfram áskrifandi að rásum hans.
+  Empty Group: Þessi hópur inniheldur engar rásir úr núverandi notkunarsniði.

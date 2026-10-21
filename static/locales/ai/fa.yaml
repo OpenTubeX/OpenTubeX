@@ -2307,3 +2307,14 @@ Home Widgets:
   Search: "جستجو"
   Subscriptions: "دنبال کرده ها"
   Watch Later: "تماشا در آینده"
+Subscription Groups:
+  Groups: گروه‌ها
+  All: همه
+  New Group: گروه جدید
+  Edit Group: ویرایش گروه
+  Group Name: نام گروه
+  Create: ایجاد
+  Save: ذخیره
+  Delete Group: حذف گروه
+  Delete Prompt: گروه «{groupName}» حذف شود؟ اشتراک شما در کانال‌های آن حفظ می‌شود.
+  Empty Group: این گروه هیچ کانالی از نمایهٔ فعلی ندارد.

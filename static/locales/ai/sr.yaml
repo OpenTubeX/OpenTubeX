@@ -2298,3 +2298,14 @@ Home Widgets:
   Search: "Претрага"
   Subscriptions: "Праћења"
   Watch Later: "Погледај касније"
+Subscription Groups:
+  Groups: Групе
+  All: Све
+  New Group: Нова група
+  Edit Group: Измени групу
+  Group Name: Назив групе
+  Create: Направи
+  Save: Сачувај
+  Delete Group: Избриши групу
+  Delete Prompt: Избрисати групу „{groupName}“? Наставићете да пратите њене канале.
+  Empty Group: Ова група нема канале из тренутног профила.

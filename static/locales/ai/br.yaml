@@ -2227,3 +2227,14 @@ Home Widgets:
   Search: "Klask"
   Subscriptions: "Koumanantoù"
   Watch Later: "Da sellet diwezhatoc'h"
+Subscription Groups:
+  Groups: Strolladoù
+  All: An holl
+  New Group: Strollad nevez
+  Edit Group: Kemmañ ar strollad
+  Group Name: Anv ar strollad
+  Create: Krouiñ
+  Save: Enrollañ
+  Delete Group: Dilemel ar strollad
+  Delete Prompt: Dilemel ar strollad "{groupName}" ? Ar chadennoù ennañ a chomo koumanantet.
+  Empty Group: N'eus chadenn ebet eus ar profil red er strollad-mañ.

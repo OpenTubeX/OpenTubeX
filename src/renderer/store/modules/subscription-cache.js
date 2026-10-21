@@ -99,7 +99,7 @@ const getters = {
     const now = Date.now()
     let nextPremiereTimestamp = null
     const cache = getters.getVideoCache
-    const videos = getSubscriptionsForFeed(getters.getActiveProfile.subscriptions, 'videos').flatMap(channel => {
+    const videos = getSubscriptionsForFeed(getters.getActiveGroupSubscriptions, 'videos').flatMap(channel => {
       const entry = cache[channel.id]
       if (entry == null) return []
       const entries = entry.videos ?? []

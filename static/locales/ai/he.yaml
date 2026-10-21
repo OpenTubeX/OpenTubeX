@@ -2272,3 +2272,14 @@ Home Widgets:
   Search: "חיפוש"
   Subscriptions: "מינויים"
   Watch Later: "לצפייה בהמשך"
+Subscription Groups:
+  Groups: קבוצות
+  All: הכול
+  New Group: קבוצה חדשה
+  Edit Group: עריכת קבוצה
+  Group Name: שם הקבוצה
+  Create: יצירה
+  Save: שמירה
+  Delete Group: מחיקת קבוצה
+  Delete Prompt: למחוק את הקבוצה „{groupName}”? המינויים לערוצים שבה יישמרו.
+  Empty Group: בקבוצה זו אין ערוצים מהפרופיל הנוכחי.

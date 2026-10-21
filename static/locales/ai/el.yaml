@@ -2246,3 +2246,14 @@ Home Widgets:
   Search: "Αναζήτηση"
   Subscriptions: "Συνδρομές"
   Watch Later: "Παρακολούθηση αργότερα"
+Subscription Groups:
+  Groups: Ομάδες
+  All: Όλα
+  New Group: Νέα ομάδα
+  Edit Group: Επεξεργασία ομάδας
+  Group Name: Όνομα ομάδας
+  Create: Δημιουργία
+  Save: Αποθήκευση
+  Delete Group: Διαγραφή ομάδας
+  Delete Prompt: Διαγραφή της ομάδας "{groupName}"; Οι εγγραφές στα κανάλια της θα διατηρηθούν.
+  Empty Group: Αυτή η ομάδα δεν περιέχει κανάλια από το τρέχον προφίλ.

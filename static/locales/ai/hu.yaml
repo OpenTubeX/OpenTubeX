@@ -2219,3 +2219,14 @@ Home Widgets:
   Search: "Keresés"
   Subscriptions: "Feliratkozások"
   Watch Later: "Megnézendő"
+Subscription Groups:
+  Groups: Csoportok
+  All: Összes
+  New Group: Új csoport
+  Edit Group: Csoport szerkesztése
+  Group Name: Csoportnév
+  Create: Létrehozás
+  Save: Mentés
+  Delete Group: Csoport törlése
+  Delete Prompt: Törli a(z) „{groupName}” csoportot? A csatornáira való feliratkozások megmaradnak.
+  Empty Group: Ebben a csoportban nincsenek csatornák a jelenlegi profilból.

@@ -2225,3 +2225,14 @@ Home Widgets:
   Search: "Buscar"
   Subscriptions: "Suscripciones"
   Watch Later: "Ver más tarde"
+Subscription Groups:
+  Groups: Grupos
+  All: Todos
+  New Group: Nuevo grupo
+  Edit Group: Editar grupo
+  Group Name: Nombre del grupo
+  Create: Crear
+  Save: Guardar
+  Delete Group: Eliminar grupo
+  Delete Prompt: ¿Eliminar el grupo «{groupName}»? Las suscripciones a sus canales se mantienen.
+  Empty Group: Este grupo no tiene canales del perfil actual.

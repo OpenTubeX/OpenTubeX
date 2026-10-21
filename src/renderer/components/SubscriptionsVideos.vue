@@ -72,7 +72,7 @@ const fetchSubscriptionsAutomatically = computed(() => store.getters.getFetchSub
 const showScheduledLiveStreamsFirst = computed(() => store.getters.getShowScheduledLiveStreamsFirst)
 
 const activeSubscriptionList = computed(() => (
-  getSubscriptionsForFeed(store.getters.getActiveProfile.subscriptions, 'videos')
+  getSubscriptionsForFeed(store.getters.getActiveGroupSubscriptions, 'videos')
 ))
 
 const cacheEntriesForAllActiveProfileChannels = computed(() => {
