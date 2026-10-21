@@ -48,6 +48,19 @@ test.describe('interface customizer', () => {
     )), { message: 'gap between the logo and the search bar' }).toBeGreaterThan(0)
     // The real header shows a 25px icon beside a 100px wordmark.
     await expect.poll(() => customizer.locator('.previewLogo').evaluate(logo => logo.getBoundingClientRect().width)).toBeCloseTo(130, 0)
+
+    // Narrow previews fall back to a layout that still fits every item,
+    // including widths just below what the centered layout needs.
+    for (const width of [440, 430, 400, 340]) {
+      await customizer.locator('.previewWindow').evaluate((element, value) => { element.style.inlineSize = value }, `${width}px`)
+      await expect.poll(() => topBar.evaluate(bar => {
+        const contentEnd = bar.getBoundingClientRect().right - Number.parseFloat(getComputedStyle(bar).paddingRight)
+        const profile = bar.querySelector('.previewProfile').getBoundingClientRect()
+        const search = bar.querySelector('.previewSearch').getBoundingClientRect()
+        const logo = bar.querySelector('.previewLogo').getBoundingClientRect()
+        return profile.right <= contentEnd + 0.5 && search.left >= logo.right && profile.left >= search.right
+      }), { message: `desktop header items fit without overlapping at ${width}px` }).toBe(true)
+    }
   })
 
   test('starts the navigation preview on the layout the window uses', { tag: '@scale' }, async ({ app, page }) => {
@@ -60,16 +73,6 @@ test.describe('interface customizer', () => {
     await setWindowSize(app, page, { width: 420, height: 760 })
     await expect(mobileTab).toHaveAttribute('aria-selected', 'true')
     await expect(customizer.locator('.navigationPreview')).toHaveClass(/mobile/)
-
-    // The desktop header still fits a preview this narrow.
-    await customizer.getByRole('tab', { name: 'Desktop', exact: true }).click()
-    await expect.poll(() => customizer.locator('.previewTopBar').evaluate(bar => {
-      const bounds = bar.closest('.previewWindow').getBoundingClientRect()
-      const profile = bar.querySelector('.previewProfile').getBoundingClientRect()
-      const search = bar.querySelector('.previewSearch').getBoundingClientRect()
-      const logo = bar.querySelector('.previewLogo').getBoundingClientRect()
-      return profile.right <= bounds.right + 0.5 && search.left >= logo.right && profile.left >= search.right
-    }), { message: 'desktop header items fit without overlapping' }).toBe(true)
   })
 
   test('renders the real quick settings menu as its preview', async ({ page }) => {

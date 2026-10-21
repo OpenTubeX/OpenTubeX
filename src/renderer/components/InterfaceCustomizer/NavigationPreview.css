@@ -45,8 +45,9 @@
   grid-template-columns: minmax(var(--preview-header-side), 1fr) minmax(36px, 440px) minmax(var(--preview-header-side), 1fr);
 }
 
-/* Without room for equal sides, let the search bar take the remaining space. */
-@container (width < 400px) {
+/* Without room for equal sides, let the search bar take the remaining space.
+   The grid needs both sides, the search bar minimum, two gaps and the padding. */
+@container (width < 432px) {
   .desktop .previewTopBar {
     display: flex;
   }
