@@ -224,7 +224,8 @@ test('cancels folder selection without enabling backups and keeps controls usabl
   const section = await goToSettingsSection(app.page, 'data')
   const controls = section.locator('.scheduledBackups')
   await expect(section.locator('.dataStoragePanel > .scheduledBackups')).toBeVisible()
-  await expect(section.locator('.dataStoragePanel > .scheduledBackups ~ *')).toHaveCount(0)
+  // Only the Advanced section follows the scheduled backups
+  await expect(section.locator('.dataStoragePanel > .scheduledBackups ~ *')).toHaveClass([/\badvancedDataSettings\b/])
   await expect(controls.getByRole('heading', { name: 'Scheduled backups', level: 3 })).toBeVisible()
   await expect(controls.locator('.select-icon')).toHaveCount(2)
   await stubBackupFolder(app.electronApp)
