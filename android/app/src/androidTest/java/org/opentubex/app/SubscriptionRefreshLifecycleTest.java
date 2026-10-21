@@ -7,6 +7,8 @@ import static org.junit.Assert.assertTrue;
 
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.hardware.display.DisplayManager;
 import android.webkit.WebView;
@@ -51,6 +53,57 @@ public class SubscriptionRefreshLifecycleTest {
         await("offscreen refresh display released", () ->
             Arrays.stream(context.getSystemService(DisplayManager.class).getDisplays())
                 .noneMatch(display -> display.getName().equals("OpenTubeX subscription refresh")));
+    }
+
+    @Test
+    public void rejectedBackgroundServiceStartKeepsRefreshUsable() throws Exception {
+        assertRejectedServiceStart(true);
+    }
+
+    @Test
+    public void rejectedServiceStartWhenAppHidesKeepsRefreshUsable() throws Exception {
+        assertRejectedServiceStart(false);
+    }
+
+    private void assertRejectedServiceStart(boolean startsHidden) throws Exception {
+        RuntimeException denied = android.os.Build.VERSION.SDK_INT >= 31
+            ? new android.app.ForegroundServiceStartNotAllowedException("Background start denied")
+            : new IllegalStateException("Background start denied");
+        for (RuntimeException rejection : new RuntimeException[] { denied, new SecurityException("Service permission denied") }) {
+            boolean wasVisible = AppVisibility.isVisible();
+            String token = "rejected-service-start";
+            int[] attempts = {0};
+            Context rejectingContext = new ContextWrapper(context) {
+                @Override
+                public ComponentName startForegroundService(Intent service) {
+                    assertEquals(SubscriptionRefreshService.class.getName(), service.getComponent().getClassName());
+                    attempts[0]++;
+                    throw rejection;
+                }
+            };
+            try {
+                AppVisibility.setVisible(!startsHidden);
+                assertTrue(SubscriptionRefreshWorker.start(rejectingContext, token, "Refreshing subscriptions", "Cancel"));
+                if (!startsHidden) {
+                    AppVisibility.setVisible(false);
+                    SubscriptionRefreshWorker.onAppVisibilityChanged(rejectingContext);
+                }
+                assertEquals(1, attempts[0]);
+                assertTrue("rejection preserves active ownership", SubscriptionRefreshCoordinator.isCurrent(token));
+                await("fallback notification appears", this::hasRefreshNotification);
+                assertTrue(SubscriptionRefreshWorker.update(rejectingContext, token, 42));
+                await("fallback notification follows progress", () -> Arrays.stream(
+                    context.getSystemService(NotificationManager.class).getActiveNotifications())
+                    .anyMatch(notification -> notification.getId() == SubscriptionRefreshNotification.NOTIFICATION_ID &&
+                        "42%".contentEquals(notification.getNotification().extras.getCharSequence(android.app.Notification.EXTRA_TEXT, ""))));
+                assertTrue(SubscriptionRefreshWorker.cancel(rejectingContext, token));
+                assertFalse(SubscriptionRefreshCoordinator.isActive());
+                await("cancellation clears fallback notification", () -> !hasRefreshNotification());
+            } finally {
+                SubscriptionRefreshWorker.finish(context, token);
+                AppVisibility.setVisible(wasVisible);
+            }
+        }
     }
 
     @Test

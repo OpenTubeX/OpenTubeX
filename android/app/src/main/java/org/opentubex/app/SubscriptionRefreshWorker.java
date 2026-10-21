@@ -71,7 +71,12 @@ public final class SubscriptionRefreshWorker extends Worker {
             SubscriptionRefreshState.Snapshot state = rendererSnapshot();
             service.putExtra("token", state.token).putExtra("title", state.title)
                 .putExtra("cancelLabel", state.cancelLabel);
-            ContextCompat.startForegroundService(context, service);
+            try {
+                ContextCompat.startForegroundService(context, service);
+            } catch (IllegalStateException | SecurityException error) {
+                Log.w(LOG_TAG, "Unable to start subscription refresh service", error);
+                publishNotification(context, state);
+            }
         }
     }
 
