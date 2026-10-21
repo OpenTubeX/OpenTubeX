@@ -152,9 +152,19 @@ test.describe('settings', () => {
 
     await profileButton.click()
     await expect(settingsButton).toBeVisible()
+    // The leave animation can finish before a polling assertion sees it.
+    await page.locator('.settingsWindow').evaluate((element) => {
+      window.__settingsWindowLeaveAnimated = false
+      new MutationObserver((_mutations, observer) => {
+        if (element.classList.contains('settings-window-leave-active')) {
+          window.__settingsWindowLeaveAnimated = true
+          observer.disconnect()
+        }
+      }).observe(element, { attributeFilter: ['class'] })
+    })
     await settingsButton.click()
-    await expect(page.locator('.settingsWindow')).toHaveClass(/settings-window-leave-active/)
     await expect(page.locator('.settingsWindow')).toBeHidden()
+    expect(await page.evaluate(() => window.__settingsWindowLeaveAnimated)).toBe(true)
   })
 
   test('lets clicks through to the page while closing', async ({ page }) => {
