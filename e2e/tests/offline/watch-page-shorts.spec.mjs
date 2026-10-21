@@ -122,8 +122,8 @@ test.describe('Shorts transcript navigation', () => {
     await expect(channelRow.locator('.notificationBell')).toBeVisible()
     await channelRow.locator('.profileDropdownToggle').click()
     const dropdown = page.locator('.profileDropdown')
-    await expect(dropdown.locator('.feedTypePreference')).toHaveCount(4)
-    await page.keyboard.press('Escape')
+    await expect(dropdown.getByRole('checkbox')).toHaveCount(4)
+    await dropdown.press('Escape')
     await expect(dropdown).toBeHidden()
 
     await setPlayerFullscreen(page, true)
