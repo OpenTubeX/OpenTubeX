@@ -192,13 +192,22 @@ const getters = {
   })),
 }
 
+let parsedSnapshot = { value: undefined, snapshot: {} }
+
+/**
+ * The snapshot holds a baseline for every synced history entry and is read
+ * by each sync. Parse an unchanged value only once. Callers receive a copy of
+ * its top level, as they replace or delete collections but never edit them.
+ */
 function parseSnapshot(value) {
-  try {
-    const snapshot = JSON.parse(value)
-    return snapshot && typeof snapshot === 'object' ? snapshot : {}
-  } catch {
-    return {}
+  if (value !== parsedSnapshot.value) {
+    let snapshot
+    try {
+      snapshot = JSON.parse(value)
+    } catch {}
+    parsedSnapshot = { value, snapshot: snapshot && typeof snapshot === 'object' ? snapshot : {} }
   }
+  return { ...parsedSnapshot.snapshot }
 }
 
 async function clearUnsupportedWatchStats({ commit, dispatch, rootState }, snapshotValue = rootState.settings.syncServerSnapshot) {
@@ -327,7 +336,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         const updated = await runBackgroundJob('updateHistorySnapshot', { snapshot, ...changes })
         if (!sameAccount()) return
         if (snapshot !== rootState.settings.syncServerSnapshot) continue
-        await dispatch('updateSyncServerSnapshot', updated, { root: true })
+        if (updated !== snapshot) await dispatch('updateSyncServerSnapshot', updated, { root: true })
         return
       }
     },
@@ -758,8 +767,10 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       const lastSyncAt = Date.now()
       const snapshot = await runBackgroundJob('stringify', { value: next })
       assertSyncStillActive()
+      // Saving the snapshot writes and broadcasts it to every window. Skip that
+      // when this sync confirmed the saved baseline.
       await Promise.all([
-        dispatch('updateSyncServerSnapshot', snapshot, { root: true }),
+        snapshot !== rootState.settings.syncServerSnapshot && dispatch('updateSyncServerSnapshot', snapshot, { root: true }),
         dispatch('updateSyncServerLastSyncAt', lastSyncAt, { root: true }),
       ])
     })

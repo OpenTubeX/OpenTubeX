@@ -484,3 +484,14 @@ test('sync snapshots store cover fingerprints and still merge cover edits', asyn
   assert.equal(store.state.playlists.playlists[0].customThumbnail, remote)
   assert.equal(next.cover.metadata.custom_thumbnail, context.thumbnailFingerprint(remote))
 })
+
+test('history merges report whether the saved baseline changed', () => {
+  const remote = { video: { id: 'video', title: 'Video', duration: 120, upload_date: 1, uploader: { id: 'channel', name: 'Channel' } }, metadata: { added_date: 5, watched_state: 'watching', position_millis: 10_000 } }
+  const local = { videoId: 'video', title: 'Video', authorId: 'channel', author: 'Channel', timeWatched: 5, watchProgress: 10, lengthSeconds: 120 }
+  const first = mergeHistory({ localHistory: [local], remoteHistory: [remote] })
+  assert.equal(first.baselineChanged, true)
+  assert.equal(mergeHistory({ localHistory: [local], remoteHistory: [remote], previous: first.next }).baselineChanged, false)
+  assert.equal(mergeHistory({ localHistory: [local], remoteHistory: [remote], previous: ['video'] }).baselineChanged, true, 'legacy ID-only baselines gain watch state')
+  assert.equal(mergeHistory({ localHistory: [{ ...local, timeWatched: 6, watchProgress: 20 }], remoteHistory: [remote], previous: first.next }).baselineChanged, true)
+  assert.equal(mergeHistory({ localHistory: [], remoteHistory: [], previous: first.next, options: { allowDataLoss: true } }).baselineChanged, true)
+})

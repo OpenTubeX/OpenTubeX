@@ -310,7 +310,15 @@ export function mergeHistory({ localHistory, remoteHistory, previous = {}, ackno
     }
   }
 
-  return { next, historyToUpload, remoteDeletions, insertions: localInsertions, updates: localUpdates, deletions: localDeletions }
+  // Saving the baseline rewrites the whole sync snapshot, so callers skip it
+  // when the merge confirmed the saved one.
+  const baselineChanged = Array.isArray(previous) || previousStates.size !== mergedIds.size ||
+    Object.entries(next).some(([id, metadata]) => {
+      const saved = previousStates.get(id)
+      return !saved || !historyStateEquals({ metadata }, { metadata: saved })
+    })
+
+  return { next, baselineChanged, historyToUpload, remoteDeletions, insertions: localInsertions, updates: localUpdates, deletions: localDeletions }
 }
 
 export function applyRemoteHistoryChanges({ history, upserts, deletions }) {
