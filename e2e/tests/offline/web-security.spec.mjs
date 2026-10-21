@@ -53,7 +53,16 @@ const server = createServer(async (request, response) => {
 })
 
 test.use({
-  launchArgs: ['--host-resolver-rules=MAP *.otx-test.invalid 127.0.0.1', '--no-proxy-server']
+  launchArgs: ['--host-resolver-rules=MAP *.otx-test.invalid 127.0.0.1', '--no-proxy-server'],
+  // beforeEach removes the fixture's connectivity check route, so a check
+  // would reach the internet.
+  seed: { settings: { internetConnectivityChecks: false } }
+})
+
+test.beforeEach(async ({ page }) => {
+  // Playwright answers CORS preflights itself while any route is active. Let
+  // them reach the app's CORS policy and the server instead.
+  await page.context().unrouteAll()
 })
 
 test.beforeAll(async () => {
@@ -116,6 +125,12 @@ test('preserves app API requests, redirects, HTTP errors, ranges and image pixel
     })
     const media = await fetch(`${url}/media`, { headers: { Range: 'bytes=2-5' } })
     const redirected = await fetch(`${url}/redirect`)
+    // A non-safelisted header makes Chromium preflight the redirect target
+    // again, like YouTube's redirect of the watch page to a captcha.
+    const preflightedRedirect = await fetch(`${url}/redirect`, {
+      headers: { 'X-Fixture': 'preflight' },
+      signal: AbortSignal.timeout(10000)
+    })
     const unauthorized = await fetch(`${url}/unauthorized`)
     const image = new Image()
     image.crossOrigin = 'anonymous'
@@ -130,6 +145,7 @@ test('preserves app API requests, redirects, HTTP errors, ranges and image pixel
       responseHeader: response.headers.get('X-Response-Fixture'),
       media: { status: media.status, range: media.headers.get('Content-Range'), body: await media.text() },
       redirected: { status: redirected.status, url: redirected.url },
+      preflightedRedirect: { status: preflightedRedirect.status, url: preflightedRedirect.url },
       unauthorized: unauthorized.status,
       pixelReadable: context.getImageData(0, 0, 1, 1).data.length === 4
     }
@@ -139,6 +155,7 @@ test('preserves app API requests, redirects, HTTP errors, ranges and image pixel
     responseHeader: 'visible',
     media: { status: 206, range: 'bytes 2-5/8', body: '2345' },
     redirected: { status: 200, url: `${otherOrigin}/api` },
+    preflightedRedirect: { status: 200, url: `${otherOrigin}/api` },
     unauthorized: 401,
     pixelReadable: true
   })
