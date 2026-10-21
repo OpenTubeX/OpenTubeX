@@ -2876,3 +2876,4 @@ Subscription Groups:
   Delete Group: Suprimeix el grup
   Delete Prompt: Voleu suprimir el grup "{groupName}"? Les subscripcions als seus canals es mantindran.
   Empty Group: Aquest grup no té cap canal del perfil actual.
+  Save Failed: No s'ha pogut desar el grup.

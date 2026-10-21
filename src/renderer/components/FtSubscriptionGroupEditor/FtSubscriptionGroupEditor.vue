@@ -113,6 +113,7 @@ import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import store from '../../store/index'
 
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
+import { showToast } from '../../helpers/utils'
 
 const props = defineProps({
   /** The group to edit, or `null` to create one */
@@ -193,17 +194,25 @@ async function save() {
 
   saving.value = true
   const channelIds = [...selected]
+  let saved
   try {
     if (props.group === null) {
       const id = await store.dispatch('createSubscriptionGroup', { name: trimmedName, channelIds })
-      if (id !== null) store.dispatch('selectSubscriptionGroup', id)
+      saved = id !== null
+      if (saved) store.dispatch('selectSubscriptionGroup', id)
     } else {
-      await store.dispatch('saveSubscriptionGroup', { ...props.group, name: trimmedName, channelIds })
+      saved = await store.dispatch('saveSubscriptionGroup', { ...props.group, name: trimmedName, channelIds })
     }
   } finally {
     saving.value = false
   }
-  close()
+
+  // Keep the edits open to retry, as the failed write was rolled back
+  if (saved) {
+    close()
+  } else {
+    showSaveFailedToast()
+  }
 }
 
 /** @param {'delete' | 'cancel' | null} option */
@@ -211,8 +220,15 @@ async function handleDeletePrompt(option) {
   showDeletePrompt.value = false
   if (option !== 'delete') return
 
-  await store.dispatch('deleteSubscriptionGroup', props.group.id)
-  close()
+  if (await store.dispatch('deleteSubscriptionGroup', props.group.id)) {
+    close()
+  } else {
+    showSaveFailedToast()
+  }
+}
+
+function showSaveFailedToast() {
+  showToast({ message: t('Subscription Groups.Save Failed'), icon: ['fas', 'circle-exclamation'] })
 }
 
 function close() {

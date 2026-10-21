@@ -99,6 +99,49 @@ test.describe('creating subscription groups', () => {
   })
 })
 
+test.describe('saving subscription groups', () => {
+  test.use({ seed: seed() })
+
+  test('keeps the editor open when the group cannot be saved', async ({ page }) => {
+    await page.evaluate(() => {
+      window.$store._actions.updateSubscriptionGroups = [() => Promise.resolve(false)]
+    })
+    await goTo(page, 'subscribedchannels')
+    await page.getByRole('button', { name: 'New Group' }).click()
+
+    const editor = page.getByRole('dialog', { name: 'New Group' })
+    await editor.getByRole('textbox', { name: 'Group Name' }).fill('Music')
+    await editor.getByRole('checkbox', { name: 'Alpha Channel' }).click()
+    await editor.getByRole('button', { name: 'Create', exact: true }).click()
+
+    await expect(page.getByText('The group could not be saved.')).toBeVisible()
+    await expect(editor).toBeVisible()
+    await expect(editor.getByRole('textbox', { name: 'Group Name' })).toHaveValue('Music')
+    await expect(editor.getByRole('checkbox', { name: 'Alpha Channel' })).toHaveAttribute('aria-checked', 'true')
+  })
+
+  test.describe('with an empty profile', () => {
+    test.use({
+      seed: {
+        ...seed(),
+        profiles: [
+          ...seed().profiles,
+          { _id: 'empty-profile', name: 'Empty Profile', bgColor: '#000000', textColor: '#FFFFFF', subscriptions: [] }
+        ]
+      }
+    })
+
+    test('can still create groups from every subscription', async ({ page }) => {
+      await page.evaluate(() => window.$store.dispatch('updateActiveProfile', 'empty-profile'))
+      await goTo(page, 'subscribedchannels')
+      await expect(page.getByText('Your channel list is currently empty.')).toBeVisible()
+      await page.getByRole('button', { name: 'New Group' }).click()
+      await expect(page.getByRole('dialog', { name: 'New Group' }).getByRole('checkbox'))
+        .toHaveText(['Alpha Channel', 'Beta Channel', 'Gamma Channel'])
+    })
+  })
+})
+
 test.describe('picking channels for a group', () => {
   const MANY_CHANNELS = Array.from({ length: 60 }, (_, index) => ({
     id: `UC${String(index).padStart(22, '0')}`,
@@ -124,6 +167,30 @@ test.describe('picking channels for a group', () => {
       scrollTop: element.scrollTop,
       overflows: element.scrollHeight > element.clientHeight + 1
     }))).toEqual({ scrollTop: 0, overflows: false })
+  })
+})
+
+test.describe('custom order across pages', () => {
+  const MANY_CHANNELS = Array.from({ length: 60 }, (_, index) => ({
+    id: `UC${String(index).padStart(22, '0')}`,
+    name: `Channel ${index}`
+  }))
+  test.use({ seed: seed({ subscribedChannelsSortBy: 'custom' }, MANY_CHANNELS) })
+
+  test('keeps a channel moved past the loaded page rendered and focused', async ({ page }) => {
+    await goTo(page, 'subscribedchannels')
+    await expect(channelNames(page)).toHaveCount(50)
+
+    const handle = page.locator('#subscribedChannelsList .channel')
+      .filter({ has: page.locator('.channelName', { hasText: /^\s*Channel 0\s*$/ }) })
+      .getByRole('button', { name: 'Drag or use the arrow keys to reorder' })
+    await handle.focus()
+    await page.keyboard.press('End')
+    await expect(channelNames(page).last()).toHaveText('Channel 0')
+    await expect(handle).toBeFocused()
+    await page.keyboard.press('ArrowUp')
+    await expect(channelNames(page).nth(-2)).toHaveText('Channel 0')
+    await expect(handle).toBeFocused()
   })
 })
 
@@ -193,7 +260,8 @@ test.describe('editing subscription groups', () => {
     await expect(feedVideo(page, 'Beta Channel upload')).toBeVisible()
 
     // Alt+Left and Alt+Right stay with back and forward navigation
-    await groups(page).getByRole('tab', { name: 'All' }).dispatchEvent('keydown', { key: 'ArrowRight', altKey: true })
+    await page.keyboard.press('Alt+ArrowRight')
+    await expect(groups(page).getByRole('tab', { name: 'All' })).toBeFocused()
     await expect(groups(page).getByRole('tab', { name: 'All' })).toHaveAttribute('aria-selected', 'true')
   })
 
@@ -238,6 +306,8 @@ test.describe('subscription groups with automatic fetching', () => {
 
     await groups(page).getByRole('tab', { name: 'Empty' }).click()
     await expect(page.getByText('This group has no channels in the current profile.')).toBeVisible()
+    // A refresh would start from the watchers of this update, before the next frames
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
     expect(await page.evaluate(() => window.subscriptionRefreshStarted)).toBe(false)
   })
 })
@@ -341,7 +411,7 @@ test.describe('subscription group bar layout', () => {
     })
   })
 
-  test('wraps groups and their actions within the bar @scale', async ({ app, page }) => {
+  test('wraps groups and their actions within the bar', { tag: '@scale' }, async ({ app, page }) => {
     await setWindowSize(app, page, { width: 520, height: 820 })
     await goTo(page, 'subscribedchannels')
     await groups(page).getByRole('tab', { name: 'Science' }).click()
@@ -365,5 +435,26 @@ test.describe('subscription group bar layout', () => {
       expect(lastTab.x + lastTab.width + 4 + actions.width).toBeGreaterThan(bar.x + bar.width)
     }
     await expect(page.getByRole('button', { name: 'Edit Group' })).toBeVisible()
+  })
+})
+
+test.describe('subscription group touch targets', () => {
+  test.use({ seed: seed({ subscriptionGroups: [{ id: 'music', name: 'Music', channelIds: [ALPHA] }] }) })
+
+  test('group actions keep touch-sized targets on coarse pointers', { tag: '@scale' }, async ({ page }) => {
+    const session = await page.context().newCDPSession(page)
+    await session.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 })
+    await expect.poll(() => page.evaluate(() => matchMedia('(any-pointer: coarse)').matches)).toBe(true)
+    await goTo(page, 'subscribedchannels')
+    await groups(page).getByRole('tab', { name: 'Music' }).click()
+
+    for (const name of ['Edit Group', 'New Group']) {
+      const button = page.locator('.subscriptionGroupBar').getByRole('button', { name })
+      await expect(button).toBeVisible()
+      const box = await button.boundingBox()
+      expect(box.width).toBeGreaterThanOrEqual(47.75)
+      expect(box.height).toBeGreaterThanOrEqual(47.75)
+    }
+    await session.detach()
   })
 })

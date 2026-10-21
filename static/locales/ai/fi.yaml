@@ -2281,3 +2281,4 @@ Subscription Groups:
   Delete Group: Poista ryhmä
   Delete Prompt: Poistetaanko ryhmä ”{groupName}”? Sen kanavien tilaukset säilyvät.
   Empty Group: Tässä ryhmässä ei ole nykyisen profiilin kanavia.
+  Save Failed: Ryhmää ei voitu tallentaa.

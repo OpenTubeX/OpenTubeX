@@ -2239,3 +2239,4 @@ Subscription Groups:
   Delete Group: Ezabatu taldea
   Delete Prompt: '"{groupName}" taldea ezabatu nahi duzu? Bere kanaletako harpidetzak mantendu egingo dira.'
   Empty Group: Talde honek ez du uneko profileko kanalik.
+  Save Failed: Ezin izan da taldea gorde.

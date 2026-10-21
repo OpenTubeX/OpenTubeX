@@ -2259,3 +2259,4 @@ Subscription Groups:
   Delete Group: Izbriši grupu
   Delete Prompt: Izbrisati grupu „{groupName}”? Pretplate na njezine kanale ostaju.
   Empty Group: Ova grupa nema kanala iz trenutačnog profila.
+  Save Failed: Nije moguće spremiti grupu.

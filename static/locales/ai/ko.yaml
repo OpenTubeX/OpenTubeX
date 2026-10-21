@@ -2684,3 +2684,4 @@ Subscription Groups:
   Delete Group: 그룹 삭제
   Delete Prompt: '"{groupName}" 그룹을 삭제하시겠습니까? 그룹에 속한 채널의 구독은 유지됩니다.'
   Empty Group: 이 그룹에는 현재 프로필의 채널이 없습니다.
+  Save Failed: 그룹을 저장하지 못했습니다.

@@ -1454,3 +1454,4 @@ Subscription Groups:
   Delete Group: Usuń grupę
   Delete Prompt: Usunąć grupę „{groupName}”? Subskrypcje jej kanałów zostaną zachowane.
   Empty Group: Ta grupa nie zawiera kanałów z bieżącego profilu.
+  Save Failed: Nie udało się zapisać grupy.

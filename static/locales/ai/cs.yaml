@@ -2229,3 +2229,4 @@ Subscription Groups:
   Delete Group: Odstranit skupinu
   Delete Prompt: Odstranit skupinu „{groupName}“? Odběry jejích kanálů zůstanou zachovány.
   Empty Group: Tato skupina neobsahuje žádné kanály z aktuálního profilu.
+  Save Failed: Skupinu se nepodařilo uložit.

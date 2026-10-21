@@ -39,7 +39,7 @@
         />
       </div>
       <FtSubscriptionGroupBar
-        v-if="activeProfileSubscriptions.length > 0"
+        v-if="hasSubscriptions"
         class="groupBar"
         panel-id="subscribedChannelsList"
       />
@@ -215,6 +215,10 @@ const activeProfileSubscriptions = computed(() => {
 
 const hasSubscriptionGroups = computed(() => store.getters.getSubscriptionGroupList.length > 0)
 
+// Groups can hold any subscription, even while the active profile is empty.
+// The all channels profile is always the first profile in the array
+const hasSubscriptions = computed(() => store.getters.getProfileList[0].subscriptions.length > 0)
+
 /** @type {import('vue').ComputedRef<string | null>} */
 const activeGroupId = computed(() => {
   return store.getters.getActiveSubscriptionGroup?.id ?? null
@@ -359,6 +363,8 @@ async function moveChannel(channelId, getTargetIndex) {
   if (index === -1 || targetIndex === index || targetIndex < 0 || targetIndex >= visibleIds.length) return
 
   const order = moveItemByVisibleOffset(getFullCustomOrder(), visibleIds, channelId, targetIndex - index)
+  // Keep the moved channel rendered, so its handle keeps focus past the loaded page.
+  channelPage.value = Math.max(channelPage.value, Math.floor(targetIndex / channelsPerPage))
   // Show the move before the setting is saved, so repeated keys build on it.
   tempCustomOrder.value = order
   await store.dispatch('updateSubscribedChannelsCustomOrder', order)

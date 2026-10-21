@@ -2252,3 +2252,4 @@ Subscription Groups:
   Delete Group: Ta bort grupp
   Delete Prompt: Vill du ta bort gruppen ”{groupName}”? Du fortsätter att prenumerera på dess kanaler.
   Empty Group: Den här gruppen har inga kanaler från den aktuella profilen.
+  Save Failed: Det gick inte att spara gruppen.

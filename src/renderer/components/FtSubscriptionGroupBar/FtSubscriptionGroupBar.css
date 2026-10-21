@@ -41,3 +41,10 @@
 .newGroupButton {
   margin: 0;
 }
+
+@media (any-pointer: coarse) {
+  .groupAction :deep(.iconButton) {
+    min-inline-size: var(--phone-touch-target, 48px);
+    min-block-size: var(--phone-touch-target, 48px);
+  }
+}

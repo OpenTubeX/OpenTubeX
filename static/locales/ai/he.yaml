@@ -2283,3 +2283,4 @@ Subscription Groups:
   Delete Group: מחיקת קבוצה
   Delete Prompt: למחוק את הקבוצה „{groupName}”? המינויים לערוצים שבה יישמרו.
   Empty Group: בקבוצה זו אין ערוצים מהפרופיל הנוכחי.
+  Save Failed: לא ניתן לשמור את הקבוצה.

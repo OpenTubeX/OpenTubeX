@@ -2230,3 +2230,4 @@ Subscription Groups:
   Delete Group: Csoport törlése
   Delete Prompt: Törli a(z) „{groupName}” csoportot? A csatornáira való feliratkozások megmaradnak.
   Empty Group: Ebben a csoportban nincsenek csatornák a jelenlegi profilból.
+  Save Failed: Nem sikerült menteni a csoportot.

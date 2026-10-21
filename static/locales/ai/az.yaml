@@ -2239,3 +2239,4 @@ Subscription Groups:
   Delete Group: Qrupu Sil
   Delete Prompt: '"{groupName}" qrupu silinsin? Onun kanallarına abunəliyiniz qalacaq.'
   Empty Group: Bu qrupda cari profilə aid kanal yoxdur.
+  Save Failed: Qrupu yadda saxlamaq mümkün olmadı.
