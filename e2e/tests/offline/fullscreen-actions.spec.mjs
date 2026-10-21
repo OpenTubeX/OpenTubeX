@@ -138,7 +138,9 @@ test.describe('fullscreen action dock spacing', () => {
   })
 
   test('keeps the scrollbar gutter beside actions while the dock scrolls', { tag: '@scale' }, async ({ app, page }) => {
-    await setWindowSize(app, page, { width: 340, height: 380 })
+    // Portrait fullscreen uses a bottom panel, so use a short phone-like landscape window for the side dock to overflow.
+    await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setMinimumSize(0, 0))
+    await setWindowSize(app, page, { width: 400, height: 240 })
     await page.evaluate(() => window.$store.dispatch('updateFullscreenActions', ['comments', 'queue', 'playlist', 'share', 'addToPlaylist', 'quickBookmark', 'download', 'recommendations']))
     await mockPlayableWatchPage(app, page)
     if (await page.getByRole('button', { name: 'Open Search Container', exact: true }).isVisible()) {
