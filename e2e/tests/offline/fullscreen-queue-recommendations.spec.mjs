@@ -539,6 +539,22 @@ test.describe('fullscreen queue header', () => {
       await expect.poll(() => readQueueHeader(queue)).toMatchObject({ clearLabel: false, count: false })
       await page.evaluate(() => window.$store.dispatch('updateHidePlaylists', true))
       await expect.poll(() => readQueueHeader(queue)).toMatchObject({ oneRow: true, titleTruncated: false, count: true })
+
+      // Font changes resize the title without resizing the header. A wider
+      // copy of the bundled font refits once it loads, and switching back
+      // refits without any font loading.
+      await page.evaluate(() => {
+        const rule = [...document.styleSheets].flatMap(sheet => [...sheet.cssRules])
+          .find(rule => rule instanceof CSSFontFaceRule && /geist-latin-wght/.test(rule.style.getPropertyValue('src')))
+        const path = rule.style.getPropertyValue('src').match(/url\("?([^")]+)"?\)/)[1]
+        const url = new URL(path, rule.parentStyleSheet.href ?? document.baseURI)
+        document.fonts.add(new FontFace('Wide Late', `url(${url})`, { sizeAdjust: '150%', weight: '100 900' }))
+        return window.$store.dispatch('updateAppFont', 'Wide Late')
+      })
+      await expect.poll(() => readQueueHeader(queue)).toMatchObject({ oneRow: true, titleTruncated: false, count: false })
+      await page.evaluate(() => window.$store.dispatch('updateAppFont', 'Geist Variable'))
+      await expect.poll(() => readQueueHeader(queue)).toMatchObject({ oneRow: true, titleTruncated: false, count: true })
+
       await page.evaluate(() => window.$store.dispatch('updateHidePlaylists', false))
       await expect.poll(() => readQueueHeader(queue)).toMatchObject({ count: false })
 

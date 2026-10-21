@@ -426,8 +426,15 @@ watch(queueHeader, (header, previous) => {
   if (previous) headerResizeObserver.unobserve(previous)
   if (header) headerResizeObserver.observe(header)
 })
-watch([() => props.fullscreenOverlay, () => items.value.length, showSaveQueue, locale], fitHeader, { flush: 'post' })
-onBeforeUnmount(() => headerResizeObserver.disconnect())
+watch([
+  () => props.fullscreenOverlay, () => items.value.length, showSaveQueue, locale, () => store.getters.getAppFont
+], fitHeader, { flush: 'post' })
+// A web font that finishes loading changes the title width, not the header's.
+document.fonts.addEventListener('loadingdone', fitHeader)
+onBeforeUnmount(() => {
+  headerResizeObserver.disconnect()
+  document.fonts.removeEventListener('loadingdone', fitHeader)
+})
 </script>
 
 <style scoped src="./WatchVideoQueue.scss" lang="scss" />
