@@ -107,9 +107,7 @@
               <PreviewIcon :path="PlayerIcons.PHOTO_CAMERA_FILLED" />
             </span>
             <span class="previewAutoplayToggle">
-              <span class="previewAutoplayKnob">
-                <PreviewIcon :path="SHAKA_PREVIEW_ICONS.PAUSE" />
-              </span>
+              <PreviewIcon :path="PlayerIcons.PAUSE_CIRCLE_FILLED" />
             </span>
             <span class="previewIconButton">
               <PreviewIcon :path="SHAKA_PREVIEW_ICONS.CLOSED_CAPTIONS" />

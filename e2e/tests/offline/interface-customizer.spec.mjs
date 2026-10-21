@@ -34,6 +34,47 @@ test.describe('interface customizer', () => {
     await expect(customizer.getByRole('tab', { name: 'Mobile', exact: true })).toHaveAttribute('aria-selected', 'true')
   })
 
+  test('lays out the navigation preview header like the real top navigation', { tag: '@scale' }, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 1400, height: 800 })
+    const customizer = await openInterfaceCustomizer(page, 'navigation')
+    const topBar = customizer.locator('.previewTopBar')
+    await expect.poll(() => topBar.evaluate(bar => {
+      const bounds = bar.getBoundingClientRect()
+      const search = bar.querySelector('.previewSearch').getBoundingClientRect()
+      return Math.abs((search.left + search.right) / 2 - (bounds.left + bounds.right) / 2)
+    }), { message: 'search bar offset from the header center' }).toBeLessThan(1)
+    await expect.poll(() => topBar.evaluate(bar => (
+      bar.querySelector('.previewSearch').getBoundingClientRect().left - bar.querySelector('.previewLogo').getBoundingClientRect().right
+    )), { message: 'gap between the logo and the search bar' }).toBeGreaterThan(0)
+    // The real header shows a 25px icon beside a 100px wordmark.
+    await expect.poll(() => customizer.locator('.previewLogo').evaluate(logo => logo.getBoundingClientRect().width)).toBeCloseTo(130, 0)
+
+    // Narrow previews fall back to a layout that still fits every item,
+    // including widths just below what the centered layout needs.
+    for (const width of [440, 430, 400, 340]) {
+      await customizer.locator('.previewWindow').evaluate((element, value) => { element.style.inlineSize = value }, `${width}px`)
+      await expect.poll(() => topBar.evaluate(bar => {
+        const contentEnd = bar.getBoundingClientRect().right - Number.parseFloat(getComputedStyle(bar).paddingRight)
+        const profile = bar.querySelector('.previewProfile').getBoundingClientRect()
+        const search = bar.querySelector('.previewSearch').getBoundingClientRect()
+        const logo = bar.querySelector('.previewLogo').getBoundingClientRect()
+        return profile.right <= contentEnd + 0.5 && search.left >= logo.right && profile.left >= search.right
+      }), { message: `desktop header items fit without overlapping at ${width}px` }).toBe(true)
+    }
+  })
+
+  test('starts the navigation preview on the layout the window uses', { tag: '@scale' }, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 1200, height: 800 })
+    const customizer = await openInterfaceCustomizer(page, 'navigation')
+    const mobileTab = customizer.getByRole('tab', { name: 'Mobile', exact: true })
+    await expect(customizer.getByRole('tab', { name: 'Desktop', exact: true })).toHaveAttribute('aria-selected', 'true')
+
+    // Follow the window into the bottom navigation layout while open.
+    await setWindowSize(app, page, { width: 420, height: 760 })
+    await expect(mobileTab).toHaveAttribute('aria-selected', 'true')
+    await expect(customizer.locator('.navigationPreview')).toHaveClass(/mobile/)
+  })
+
   test('renders the real quick settings menu as its preview', async ({ page }) => {
     const customizer = await openInterfaceCustomizer(page, 'quick settings')
     const preview = customizer.locator('.quickSettingsPreview .quickSettingsMenu')

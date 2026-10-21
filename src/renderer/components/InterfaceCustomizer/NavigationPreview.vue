@@ -5,13 +5,15 @@
   >
     <div class="previewWindow">
       <header class="previewTopBar">
-        <FtIcon
-          v-if="layout === 'desktop'"
-          class="previewTopBarIcon"
-          :icon="['fas', 'bars']"
-          aria-hidden="true"
-        />
-        <FtLogoFull class="previewLogo" />
+        <span class="previewTopBarStart">
+          <FtIcon
+            v-if="layout === 'desktop'"
+            class="previewTopBarIcon"
+            :icon="['fas', 'bars']"
+            aria-hidden="true"
+          />
+          <FtLogoFull class="previewLogo" />
+        </span>
         <span class="previewSearch">
           <FtIcon
             :icon="['fas', 'search']"
