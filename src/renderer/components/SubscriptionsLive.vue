@@ -53,7 +53,7 @@ const subscriptionCacheReady = computed(() => store.getters.getSubscriptionCache
 const fetchSubscriptionsAutomatically = computed(() => store.getters.getFetchSubscriptionsAutomatically)
 
 const activeSubscriptionList = computed(() => (
-  getSubscriptionsForFeed(store.getters.getActiveProfile.subscriptions, 'live')
+  getSubscriptionsForFeed(store.getters.getActiveGroupSubscriptions, 'live')
 ))
 
 const cacheEntriesForAllActiveProfileChannels = computed(() => {
@@ -72,10 +72,12 @@ const cacheEntriesForAllActiveProfileChannels = computed(() => {
 })
 
 const videoCacheForAllActiveProfileChannelsPresent = computed(() => {
-  if (
-    cacheEntriesForAllActiveProfileChannels.value.length === 0 ||
-    cacheEntriesForAllActiveProfileChannels.value.length < activeSubscriptionList.value.length
-  ) {
+  // A group can leave no channels for this feed, which has nothing to fetch
+  if (activeSubscriptionList.value.length === 0) {
+    return true
+  }
+
+  if (cacheEntriesForAllActiveProfileChannels.value.length < activeSubscriptionList.value.length) {
     return false
   }
 

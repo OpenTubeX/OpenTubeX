@@ -143,50 +143,93 @@
             </div>
           </div>
           <div
-            v-if="isProfileDropdownEnabled"
+            v-if="isProfileDropdownEnabled || isGroupListEnabled"
             ref="profileDropdownScroller"
             v-overlay-scrollbars
             class="profileDropdownScroller"
           >
-            <ul
-              ref="profileListContent"
-              class="profileList"
-            >
-              <li
-                v-for="(profile, index) in profileDisplayList"
-                :key="index"
-                class="profile"
-                :aria-labelledby="id + '-' + index"
-                :aria-selected="isActiveProfile(profile)"
-                :aria-checked="isProfileSubscribed(profile)"
-                tabindex="0"
-                role="checkbox"
-                @click.stop.prevent="handleSubscription(profile)"
-                @keydown.space.stop.prevent="handleSubscription(profile)"
+            <div ref="profileListContent">
+              <ul
+                v-if="isProfileDropdownEnabled"
+                class="profileList"
               >
-                <FtProfileIcon
-                  class="colorOption"
-                  :profile="profile"
-                  :fallback="profileInitials[profile._id]"
-                />
-                <p
-                  :id="id + '-' + index"
-                  class="profileName"
-                  dir="auto"
+                <li
+                  v-for="(profile, index) in profileDisplayList"
+                  :key="index"
+                  class="profile"
+                  :aria-labelledby="id + '-' + index"
+                  :aria-selected="isActiveProfile(profile)"
+                  :aria-checked="isProfileSubscribed(profile)"
+                  tabindex="0"
+                  role="checkbox"
+                  @click.stop.prevent="handleSubscription(profile)"
+                  @keydown.space.stop.prevent="handleSubscription(profile)"
                 >
-                  {{ profile.name }}
-                </p>
-                <span
-                  class="profileCheck"
-                  aria-hidden="true"
-                >
-                  <FtIcon
-                    v-if="isProfileSubscribed(profile)"
-                    :icon="['fas', 'check']"
+                  <FtProfileIcon
+                    class="colorOption"
+                    :profile="profile"
+                    :fallback="profileInitials[profile._id]"
                   />
-                </span>
-              </li>
-            </ul>
+                  <p
+                    :id="id + '-' + index"
+                    class="profileName"
+                    dir="auto"
+                  >
+                    {{ profile.name }}
+                  </p>
+                  <span
+                    class="profileCheck"
+                    aria-hidden="true"
+                  >
+                    <FtIcon
+                      v-if="isProfileSubscribed(profile)"
+                      :icon="['fas', 'check']"
+                    />
+                  </span>
+                </li>
+              </ul>
+              <div
+                v-if="isGroupListEnabled"
+                role="group"
+                class="groupPreferences"
+                :aria-labelledby="`${id}-groups`"
+              >
+                <p
+                  :id="`${id}-groups`"
+                  class="feedTypePreferencesLabel"
+                >
+                  {{ $t('Subscription Groups.Groups') }}
+                </p>
+                <ul class="profileList">
+                  <li
+                    v-for="group in subscriptionGroups"
+                    :key="group.id"
+                    class="profile groupOption"
+                    :aria-checked="isInGroup(group)"
+                    tabindex="0"
+                    role="checkbox"
+                    @click.stop.prevent="toggleGroup(group)"
+                    @keydown.space.stop.prevent="toggleGroup(group)"
+                  >
+                    <p
+                      class="profileName"
+                      dir="auto"
+                    >
+                      {{ group.name }}
+                    </p>
+                    <span
+                      class="profileCheck"
+                      aria-hidden="true"
+                    >
+                      <FtIcon
+                        v-if="isInGroup(group)"
+                        :icon="['fas', 'check']"
+                      />
+                    </span>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </Transition>
@@ -318,6 +361,30 @@ const isProfileDropdownEnabled = computed(() => {
   return !props.hideProfileDropdownToggle && profileList.value.length > 1
 })
 
+/** @type {import('vue').ComputedRef<import('../../helpers/subscription-groups').SubscriptionGroup[]>} */
+const subscriptionGroups = computed(() => store.getters.getSubscriptionGroupList)
+
+const isGroupListEnabled = computed(() => {
+  return !props.hideProfileDropdownToggle && subscriptionGroups.value.length > 0
+})
+
+/** @param {import('../../helpers/subscription-groups').SubscriptionGroup} group */
+function isInGroup(group) {
+  return group.channelIds.includes(props.channelId)
+}
+
+/** @param {import('../../helpers/subscription-groups').SubscriptionGroup} group */
+async function toggleGroup(group) {
+  const saved = await store.dispatch('setChannelInSubscriptionGroup', {
+    groupId: group.id,
+    channelId: props.channelId,
+    included: !isInGroup(group)
+  })
+  if (!saved) {
+    showToast({ message: t('Subscription Groups.Save Failed'), icon: ['fas', 'circle-exclamation'] })
+  }
+}
+
 const isSubscriptionOptionsEnabled = computed(() => {
   return !props.hideProfileDropdownToggle && isSubscribed.value
 })
@@ -392,7 +459,7 @@ watch(isProfileDropdownOpen, async (open) => {
 
   const scroller = profileDropdownScroller.value
   const content = profileListContent.value
-  if (!isProfileDropdownEnabled.value || !scroller || !content) return
+  if (!scroller || !content) return
 
   const clampScroll = () => clampOverlayScrollTop(scroller, content)
   profileListResizeObserver = new ResizeObserver(clampScroll)
@@ -641,7 +708,7 @@ function handleSubscription(profile) {
     emit('subscribed')
   }
 
-  if (isProfileDropdownEnabled.value && props.openDropdownOnSubscribe && !isProfileDropdownOpen.value) {
+  if ((isProfileDropdownEnabled.value || isGroupListEnabled.value) && props.openDropdownOnSubscribe && !isProfileDropdownOpen.value) {
     toggleProfileDropdown()
   }
 }

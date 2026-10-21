@@ -2217,3 +2217,16 @@ Home Widgets:
   Search: "Ricerca"
   Subscriptions: "Iscrizioni"
   Watch Later: "Guarda più tardi"
+Subscription Groups:
+  Groups: Gruppi
+  All: Tutti
+  New Group: Nuovo gruppo
+  Edit Group: Modifica gruppo
+  Group Name: Nome del gruppo
+  Create: Crea
+  Save: Salva
+  Delete Group: Elimina gruppo
+  Delete Prompt: Eliminare il gruppo "{groupName}"? Le iscrizioni ai suoi canali resteranno attive.
+  Empty Group: Questo gruppo non contiene canali del profilo attuale.
+  Save Failed: Impossibile salvare il gruppo.
+  Delete Failed: Impossibile eliminare il gruppo.

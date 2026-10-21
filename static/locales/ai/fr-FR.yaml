@@ -2216,3 +2216,16 @@ Home Widgets:
   Search: "Rechercher"
   Subscriptions: "Abonnements"
   Watch Later: "À regarder plus tard"
+Subscription Groups:
+  Groups: Groupes
+  All: Tous
+  New Group: Nouveau groupe
+  Edit Group: Modifier le groupe
+  Group Name: Nom du groupe
+  Create: Créer
+  Save: Sauvegarder
+  Delete Group: Supprimer le groupe
+  Delete Prompt: Supprimer le groupe « {groupName} » ? Les abonnements à ses chaînes seront conservés.
+  Empty Group: Ce groupe ne contient aucune chaîne du profil actuel.
+  Save Failed: Impossible d’enregistrer le groupe.
+  Delete Failed: Impossible de supprimer le groupe.

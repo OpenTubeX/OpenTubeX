@@ -2270,3 +2270,16 @@ Home Widgets:
   Search: "Hae"
   Subscriptions: "Tilaukset"
   Watch Later: "Katso myöhemmin"
+Subscription Groups:
+  Groups: Ryhmät
+  All: Kaikki
+  New Group: Uusi ryhmä
+  Edit Group: Muokkaa ryhmää
+  Group Name: Ryhmän nimi
+  Create: Luo
+  Save: Tallenna
+  Delete Group: Poista ryhmä
+  Delete Prompt: Poistetaanko ryhmä ”{groupName}”? Sen kanavien tilaukset säilyvät.
+  Empty Group: Tässä ryhmässä ei ole nykyisen profiilin kanavia.
+  Save Failed: Ryhmää ei voitu tallentaa.
+  Delete Failed: Ryhmää ei voitu poistaa.

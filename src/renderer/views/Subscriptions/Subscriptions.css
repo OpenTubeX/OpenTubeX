@@ -307,6 +307,10 @@
   color: var(--tertiary-text-color);
 }
 
+.subscriptionGroups {
+  margin-block-start: 10px;
+}
+
 .newFeedTab {
   position: relative;
   display: inline-flex;

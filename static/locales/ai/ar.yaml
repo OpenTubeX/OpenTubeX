@@ -2248,3 +2248,16 @@ Home Widgets:
   Search: "بحث"
   Subscriptions: "الاشتراكات"
   Watch Later: "المشاهدة لاحقًا"
+Subscription Groups:
+  Groups: المجموعات
+  All: الكل
+  New Group: مجموعة جديدة
+  Edit Group: تعديل المجموعة
+  Group Name: اسم المجموعة
+  Create: إنشاء
+  Save: حفظ
+  Delete Group: حذف المجموعة
+  Delete Prompt: هل تريد حذف المجموعة "{groupName}"؟ سيبقى اشتراكك في قنواتها.
+  Empty Group: لا تحتوي هذه المجموعة على أي قنوات من الملف الشخصي الحالي.
+  Save Failed: تعذّر حفظ المجموعة.
+  Delete Failed: تعذّر حذف المجموعة.

@@ -2719,3 +2719,16 @@ Home Widgets:
   Search: "Ieškoti"
   Subscriptions: "Prenumeratos"
   Watch Later: "Žiūrėti vėliau"
+Subscription Groups:
+  Groups: Grupės
+  All: Visi
+  New Group: Nauja grupė
+  Edit Group: Redaguoti grupę
+  Group Name: Grupės pavadinimas
+  Create: Sukurti
+  Save: Išsaugoti
+  Delete Group: Ištrinti grupę
+  Delete Prompt: Ištrinti grupę „{groupName}“? Jos kanalų prenumeratos išliks.
+  Empty Group: Šioje grupėje nėra dabartinio profilio kanalų.
+  Save Failed: Nepavyko išsaugoti grupės.
+  Delete Failed: Nepavyko ištrinti grupės.

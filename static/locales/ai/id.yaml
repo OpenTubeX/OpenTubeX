@@ -2234,3 +2234,16 @@ Home Widgets:
   Search: "Cari"
   Subscriptions: "Langganan"
   Watch Later: "Tonton Nanti"
+Subscription Groups:
+  Groups: Grup
+  All: Semua
+  New Group: Grup Baru
+  Edit Group: Sunting Grup
+  Group Name: Nama Grup
+  Create: Buat
+  Save: Simpan
+  Delete Group: Hapus Grup
+  Delete Prompt: Hapus grup "{groupName}"? Anda akan tetap berlangganan kanal di dalamnya.
+  Empty Group: Grup ini tidak memiliki kanal dari profil saat ini.
+  Save Failed: Tidak dapat menyimpan grup.
+  Delete Failed: Tidak dapat menghapus grup.

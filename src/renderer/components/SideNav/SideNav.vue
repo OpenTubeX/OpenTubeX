@@ -205,6 +205,7 @@ import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { createMobileNavigationScroll, mobileNavigationMinimizePreview } from '../../helpers/mobileNavigationScroll'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { sortUserPlaylists } from '../../helpers/playlists'
+import { sortSubscribedChannels } from '../../helpers/subscription-groups'
 
 const { locale, t } = useI18n()
 const appKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
@@ -281,14 +282,19 @@ const activeSubscriptions = computed(() => {
     // so we don't need to download a bigger image (the default is 176x176)
     thumbnail = thumbnail?.replace(/=s\d+/, '=s35')
     if (instanceUrl !== null) thumbnail = youtubeImageUrlToInvidious(thumbnail, instanceUrl)
-    return { id, name, thumbnail, sortKey: name?.toLowerCase() ?? '' }
+    return { id, name, thumbnail }
   })
 
-  const collator = new Intl.Collator(locale.value)
-  subscriptions.sort((a, b) => collator.compare(a.sortKey, b.sortKey))
+  // Follow the order of the Channels page, so it can be arranged there.
+  const sortedSubscriptions = sortSubscribedChannels(
+    subscriptions,
+    store.getters.getSubscribedChannelsSortBy,
+    store.getters.getSubscribedChannelsCustomOrderList,
+    new Intl.Collator([locale.value, 'en'], { sensitivity: 'base', numeric: true })
+  )
 
   const pinnedIds = new Set(store.getters.getPinnedChannels.map(channel => channel.id))
-  return subscriptions.filter(channel => !pinnedIds.has(channel.id))
+  return sortedSubscriptions.filter(channel => !pinnedIds.has(channel.id))
 })
 
 const activeSubscriptionLimit = ref(activeSubscriptionsPerPage)

@@ -282,6 +282,11 @@
             />
           </button>
         </FtTabs>
+        <FtSubscriptionGroupBar
+          v-if="hasSubscriptionGroups"
+          class="subscriptionGroups"
+          panel-id="subscriptionsPanel"
+        />
       </div>
       <KeepAlive>
         <SubscriptionsVideos
@@ -354,6 +359,7 @@ import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
 import FtPrompt from '../../components/FtPrompt/FtPrompt.vue'
 import FtRefreshWidget from '../../components/FtRefreshWidget/FtRefreshWidget.vue'
 import FtSelect from '../../components/FtSelect/FtSelect.vue'
+import FtSubscriptionGroupBar from '../../components/FtSubscriptionGroupBar/FtSubscriptionGroupBar.vue'
 import SubscriptionsNew from '../../components/SubscriptionsNew.vue'
 import SubscriptionsVideos from '../../components/SubscriptionsVideos.vue'
 import SubscriptionsLive from '../../components/SubscriptionsLive.vue'
@@ -567,7 +573,8 @@ async function toggleNewFeedView() {
   resetNewFeedScroll()
 }
 
-const activeSubscriptions = computed(() => store.getters.getActiveProfile.subscriptions)
+const activeSubscriptions = computed(() => store.getters.getActiveGroupSubscriptions)
+const hasSubscriptionGroups = computed(() => store.getters.getSubscriptionGroupList.length > 0)
 
 const activeSubscriptionList = computed(() => {
   const feedType = currentTab.value === 'community'

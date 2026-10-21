@@ -346,6 +346,24 @@
   transition: background 0.2s ease-in;
 }
 
+.profile.groupOption {
+  box-sizing: border-box;
+  grid-template-columns: minmax(0, 1fr) 16px;
+  min-block-size: 40px;
+}
+
+@media (any-pointer: coarse) {
+  .profile.groupOption {
+    min-block-size: 48px;
+  }
+}
+
+.profileList + .groupPreferences {
+  border-block-start: 1px solid var(--divider-color);
+  margin-block-start: 5px;
+  padding-block-start: 5px;
+}
+
 .colorOption {
   inline-size: 32px;
   block-size: 32px;

@@ -2239,3 +2239,16 @@ Home Widgets:
   Search: "Поиск"
   Subscriptions: "Подписки"
   Watch Later: "Смотреть позже"
+Subscription Groups:
+  Groups: Группы
+  All: Все
+  New Group: Новая группа
+  Edit Group: Изменить группу
+  Group Name: Название группы
+  Create: Создать
+  Save: Сохранить
+  Delete Group: Удалить группу
+  Delete Prompt: Удалить группу «{groupName}»? Подписки на её каналы сохранятся.
+  Empty Group: В этой группе нет каналов из текущего профиля.
+  Save Failed: Не удалось сохранить группу.
+  Delete Failed: Не удалось удалить группу.

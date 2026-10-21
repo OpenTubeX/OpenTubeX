@@ -1,0 +1,21 @@
+.editorHeading,
+.selectedCount,
+.message {
+  text-align: center;
+}
+
+.groupNameInput {
+  inline-size: 100%;
+}
+
+.selectedCount {
+  margin-block: 0 8px;
+}
+
+.message {
+  color: var(--tertiary-text-color);
+}
+
+.channelPicker {
+  align-content: flex-start;
+}

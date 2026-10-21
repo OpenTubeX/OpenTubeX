@@ -2673,3 +2673,16 @@ Home Widgets:
   Search: "검색"
   Subscriptions: "구독"
   Watch Later: "나중에 볼 동영상"
+Subscription Groups:
+  Groups: 그룹
+  All: 전체
+  New Group: 새 그룹
+  Edit Group: 그룹 편집
+  Group Name: 그룹 이름
+  Create: 만들기
+  Save: 저장
+  Delete Group: 그룹 삭제
+  Delete Prompt: '"{groupName}" 그룹을 삭제하시겠습니까? 그룹에 속한 채널의 구독은 유지됩니다.'
+  Empty Group: 이 그룹에는 현재 프로필의 채널이 없습니다.
+  Save Failed: 그룹을 저장하지 못했습니다.
+  Delete Failed: 그룹을 삭제하지 못했습니다.

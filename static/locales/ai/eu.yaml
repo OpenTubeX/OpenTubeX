@@ -2228,3 +2228,16 @@ Home Widgets:
   Search: "Bilatu"
   Subscriptions: "Harpidetzak"
   Watch Later: "Ikusi geroago"
+Subscription Groups:
+  Groups: Taldeak
+  All: Guztiak
+  New Group: Talde berria
+  Edit Group: Editatu taldea
+  Group Name: Taldearen izena
+  Create: Sortu
+  Save: Gorde
+  Delete Group: Ezabatu taldea
+  Delete Prompt: '"{groupName}" taldea ezabatu nahi duzu? Bere kanaletako harpidetzak mantendu egingo dira.'
+  Empty Group: Talde honek ez du uneko profileko kanalik.
+  Save Failed: Ezin izan da taldea gorde.
+  Delete Failed: Ezin izan da taldea ezabatu.

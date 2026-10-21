@@ -2246,3 +2246,16 @@ Home Widgets:
   Search: "Chwilio"
   Subscriptions: "Tanysgrifiadau"
   Watch Later: "Gwylio Nes Ymlaen"
+Subscription Groups:
+  Groups: Grwpiau
+  All: Pob un
+  New Group: Grŵp Newydd
+  Edit Group: Golygu Grŵp
+  Group Name: Enw Grŵp
+  Create: Creu
+  Save: Cadw
+  Delete Group: Dileu Grŵp
+  Delete Prompt: Dileu'r grŵp "{groupName}"? Byddwch yn dal i danysgrifio i'w sianeli.
+  Empty Group: Does dim sianeli o'r proffil presennol yn y grŵp hwn.
+  Save Failed: Methu cadw'r grŵp.
+  Delete Failed: Methu dileu'r grŵp.

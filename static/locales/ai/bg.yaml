@@ -2244,3 +2244,16 @@ Home Widgets:
   Search: "Търсене"
   Subscriptions: "Абонаменти"
   Watch Later: "За гледане по-късно"
+Subscription Groups:
+  Groups: Групи
+  All: Всички
+  New Group: Нова група
+  Edit Group: Редактиране на група
+  Group Name: Име на групата
+  Create: Създаване
+  Save: Запазване
+  Delete Group: Изтриване на групата
+  Delete Prompt: Да се изтрие ли групата "{groupName}"? Абонаментите за каналите в нея ще бъдат запазени.
+  Empty Group: Тази група няма канали от текущия профил.
+  Save Failed: Групата не можа да бъде запазена.
+  Delete Failed: Групата не можа да бъде изтрита.

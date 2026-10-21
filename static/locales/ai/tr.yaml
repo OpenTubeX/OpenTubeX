@@ -2218,3 +2218,16 @@ Home Widgets:
   Search: "Ara"
   Subscriptions: "Abonelikler"
   Watch Later: "Daha sonra izle"
+Subscription Groups:
+  Groups: Gruplar
+  All: Tümü
+  New Group: Yeni Grup
+  Edit Group: Grubu Düzenle
+  Group Name: Grup Adı
+  Create: Oluştur
+  Save: Kaydet
+  Delete Group: Grubu Sil
+  Delete Prompt: '"{groupName}" grubu silinsin mi? Gruptaki kanallara aboneliğiniz devam eder.'
+  Empty Group: Bu grupta geçerli profile ait kanal yok.
+  Save Failed: Grup kaydedilemedi.
+  Delete Failed: Grup silinemedi.

@@ -671,6 +671,10 @@ const customActions = {
 
   // Pin toggles build on the previous edit, so commit them before the save finishes.
   updatePinnedPlaylistIds: ({ commit, state }, value) => updateOrderedSetting(commit, state, 'pinnedPlaylistIds', value),
+  updateSubscriptionGroups: ({ commit, state }, value) => updateOrderedSetting(commit, state, 'subscriptionGroups', value),
+  updateSubscribedChannelsCustomOrder: ({ commit, state }, value) => updateOrderedSetting(
+    commit, state, 'subscribedChannelsCustomOrder', value
+  ),
   updatePinnedChannels: async ({ commit, state }, value) => {
     if (!await updateOrderedSetting(commit, state, 'pinnedChannels', value)) return false
     const pinnedIds = new Set(state.pinnedChannels.map(channel => channel.id))

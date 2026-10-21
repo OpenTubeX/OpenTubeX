@@ -8,12 +8,12 @@
       :youtube-style-shorts="youtubeStyleShorts"
     />
     <div
-      v-if="!displayIsLoading && errorChannels.length !== 0"
+      v-if="!displayIsLoading && visibleErrorChannels.length !== 0"
     >
       <h3> {{ $t("Subscriptions.Error Channels") }}</h3>
       <FtFlexBox>
         <FtChannelBubble
-          v-for="channel in errorChannels"
+          v-for="channel in visibleErrorChannels"
           :key="channel.id"
           :channel-name="channel.name"
           :channel-id="channel.id"
@@ -29,6 +29,12 @@
         class="message"
       >
         {{ $t("Subscriptions['Your Subscription list is currently empty. Start adding subscriptions to see them here.']") }}
+      </p>
+      <p
+        v-else-if="activeGroupIsEmpty"
+        class="message"
+      >
+        {{ $t('Subscription Groups.Empty Group') }}
       </p>
       <p
         v-else-if="onlyShowNew"
@@ -204,6 +210,17 @@ const activeVideoList = computed(() => {
 
 const activeProfileHasSubscriptions = computed(() => {
   return store.getters.getActiveProfile.subscriptions.length > 0
+})
+
+// Refreshes cover the whole profile, so only list the errors of the shown channels
+const visibleErrorChannels = computed(() => {
+  if (store.getters.getActiveSubscriptionGroup === null) return props.errorChannels
+  const channelIds = new Set(store.getters.getActiveGroupSubscriptions.map(channel => channel.id))
+  return props.errorChannels.filter(channel => channelIds.has(channel.id))
+})
+
+const activeGroupIsEmpty = computed(() => {
+  return store.getters.getActiveSubscriptionGroup !== null && store.getters.getActiveGroupSubscriptions.length === 0
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */

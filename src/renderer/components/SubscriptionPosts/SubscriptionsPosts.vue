@@ -70,7 +70,7 @@ const fetchSubscriptionsAutomatically = computed(() => store.getters.getFetchSub
 const useRssFeeds = computed(() => store.getters.getUseRssFeeds)
 
 const activeSubscriptionList = computed(() => (
-  getSubscriptionsForFeed(store.getters.getActiveProfile.subscriptions, 'posts')
+  getSubscriptionsForFeed(store.getters.getActiveGroupSubscriptions, 'posts')
 ))
 
 const cacheEntriesForAllActiveProfileChannels = computed(() => {
@@ -89,10 +89,12 @@ const cacheEntriesForAllActiveProfileChannels = computed(() => {
 })
 
 const postCacheForAllActiveProfileChannelsPresent = computed(() => {
-  if (
-    cacheEntriesForAllActiveProfileChannels.value.length === 0 ||
-    cacheEntriesForAllActiveProfileChannels.value.length < activeSubscriptionList.value.length
-  ) {
+  // A group can leave no channels for this feed, which has nothing to fetch
+  if (activeSubscriptionList.value.length === 0) {
+    return true
+  }
+
+  if (cacheEntriesForAllActiveProfileChannels.value.length < activeSubscriptionList.value.length) {
     return false
   }
 

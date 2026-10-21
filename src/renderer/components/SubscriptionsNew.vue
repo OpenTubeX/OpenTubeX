@@ -187,7 +187,7 @@ const forbiddenTitles = computed(() => store.getters.getActiveForbiddenTitles)
 const sortBy = computed(() => {
   return store.getters.getNewSubscriptionFeedSortBy === 'oldest' ? 'oldest' : 'newest'
 })
-const activeSubscriptions = computed(() => store.getters.getActiveProfile.subscriptions)
+const activeSubscriptions = computed(() => store.getters.getActiveGroupSubscriptions)
 const cachedContentDuringRefresh = shallowRef(null)
 let isLargeCachedFeed = false
 const contentOptions = computed(() => ({

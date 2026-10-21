@@ -2248,3 +2248,16 @@ Home Widgets:
   Search: "Pretraži"
   Subscriptions: "Pretplate"
   Watch Later: "Pogledaj kasnije"
+Subscription Groups:
+  Groups: Grupe
+  All: Sve
+  New Group: Nova grupa
+  Edit Group: Uredi grupu
+  Group Name: Naziv grupe
+  Create: Stvori
+  Save: Spremi
+  Delete Group: Izbriši grupu
+  Delete Prompt: Izbrisati grupu „{groupName}”? Pretplate na njezine kanale ostaju.
+  Empty Group: Ova grupa nema kanala iz trenutačnog profila.
+  Save Failed: Nije moguće spremiti grupu.
+  Delete Failed: Nije moguće izbrisati grupu.

@@ -2228,3 +2228,16 @@ Home Widgets:
   Search: "Axtar"
   Subscriptions: "Abunəliklər"
   Watch Later: "Sonra bax"
+Subscription Groups:
+  Groups: Qruplar
+  All: Hamısı
+  New Group: Yeni Qrup
+  Edit Group: Qrupa Düzəliş Et
+  Group Name: Qrup Adı
+  Create: Yarat
+  Save: Saxla
+  Delete Group: Qrupu Sil
+  Delete Prompt: '"{groupName}" qrupu silinsin? Onun kanallarına abunəliyiniz qalacaq.'
+  Empty Group: Bu qrupda cari profilə aid kanal yoxdur.
+  Save Failed: Qrupu yadda saxlamaq mümkün olmadı.
+  Delete Failed: Qrupu silmək mümkün olmadı.
