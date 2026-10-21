@@ -7,6 +7,7 @@ import { activeTab, openMockedVideo, waitForPlayback } from '../../helpers/playe
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { DEMO_MEDIA_PATH, DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
 import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
+import { IpcChannels } from '../../../src/constants.js'
 import { mapExternalPlaybackMetadata } from '../../../src/ytDlpMetadata.js'
 
 async function savedExternalPosition(page, mediaUrl) {
@@ -883,6 +884,14 @@ for (const thumbnail of ['https://static-cdn.jtvnw.net/cf_vods/thumbnail.svg', n
     await page.getByRole('button', { name: 'Hide mini player' }).click()
     await expect(page.locator('.watchVideoInfo')).toHaveCount(0)
     expect(await mediaSession()).toEqual(externalMediaSession)
+
+    // Its media actions must keep controlling the external media too.
+    const video = page.locator(`${activeTab} .externalMediaPlayer video`)
+    await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
+    await app.electronApp.evaluate(({ BrowserWindow }, channel) => {
+      BrowserWindow.getAllWindows()[0].webContents.send(channel, 'pause')
+    }, IpcChannels.TABS_REQUEST_MEDIA_SESSION_ACTION)
+    await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
   })
 }
 

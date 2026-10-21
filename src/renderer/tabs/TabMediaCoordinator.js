@@ -288,10 +288,11 @@ export const tabMediaCoordinator = {
       return
     }
 
+    // The newest registration wins, and removing it restores the handlers of
+    // another player in the same tab, like a retained mini player.
+    entry.actionHandlerSources.delete(source)
     if (actionHandlers && Object.keys(actionHandlers).length > 0) {
       entry.actionHandlerSources.set(source, actionHandlers)
-    } else {
-      entry.actionHandlerSources.delete(source)
     }
     applyOwner()
   },

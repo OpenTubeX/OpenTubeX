@@ -588,3 +588,30 @@ test('a page keeps its media session metadata when the retained mini player in i
   tabMediaCoordinator.setMetadata('shared-tab', null, 'external')
   assert.deepEqual(metadata, { title: 'YouTube video' })
 })
+
+test('closing one player keeps the media actions of another player in the same tab', t => {
+  const descriptors = ['navigator', 'window'].map(key => [key, Object.getOwnPropertyDescriptor(globalThis, key)])
+  Object.defineProperty(globalThis, 'navigator', { configurable: true, value: {} })
+  Object.defineProperty(globalThis, 'window', { configurable: true, value: {} })
+  t.after(() => {
+    tabMediaCoordinator.unregister('two-player-tab')
+    for (const [key, descriptor] of descriptors) {
+      if (descriptor) Object.defineProperty(globalThis, key, descriptor)
+      else delete globalThis[key]
+    }
+  })
+
+  const pauses = []
+  tabMediaCoordinator.setPresented('two-player-tab')
+  tabMediaCoordinator.setActionHandlers('two-player-tab', 'player-mini', { pause: () => pauses.push('mini') })
+  tabMediaCoordinator.setActionHandlers('two-player-tab', 'player-external', { pause: () => pauses.push('external') })
+  tabMediaCoordinator.dispatchAction('pause', {}, 'two-player-tab')
+
+  // Shaka reconfiguring a player registers its handlers again, which takes over.
+  tabMediaCoordinator.setActionHandlers('two-player-tab', 'player-mini', { pause: () => pauses.push('mini') })
+  tabMediaCoordinator.dispatchAction('pause', {}, 'two-player-tab')
+
+  tabMediaCoordinator.setActionHandlers('two-player-tab', 'player-mini', {})
+  tabMediaCoordinator.dispatchAction('pause', {}, 'two-player-tab')
+  assert.deepEqual(pauses, ['external', 'mini', 'external'])
+})
