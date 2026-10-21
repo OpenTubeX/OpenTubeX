@@ -3,7 +3,7 @@ import { sampleColors } from '../../helpers/colors.mjs'
 import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
-import { abortUnmockedRequest, test, expect, sel, goTo, goToSettingsSection, clickSearchCancel } from '../../helpers/app.mjs'
+import { abortUnmockedRequest, test, expect, sel, goTo, goToSettingsSection, clickSearchCancel, setWindowSize } from '../../helpers/app.mjs'
 import {
   encryptSyncServerDeviceInfo,
   randomSyncServerDeviceId,
@@ -1262,6 +1262,65 @@ test.describe('tab bar', () => {
       originalIds[4]
     ])
   })
+
+  for (const position of ['top', 'bottom', 'left', 'right']) {
+    test(`autoscrolls an overflowing tab bar while a tab is dragged to either end at ${position}`, { tag: '@scale' }, async ({ app, page }) => {
+      const vertical = position === 'left' || position === 'right'
+      // Overflow both layouts by a few hundred pixels.
+      const tabCount = vertical ? 25 : 13
+      await setWindowSize(app, page, { width: 800, height: 400 })
+      await page.evaluate(async ({ position, tabCount }) => {
+        window.$store.commit('setTabBarPosition', position)
+        for (let index = 1; index < tabCount; index++) {
+          await window.ftElectron.tabs.create({
+            route: '/history', title: `History ${index}`, makeActive: false, lazyLoad: true
+          })
+        }
+      }, { position, tabCount })
+      const container = page.locator('.tabsContainer')
+      const tabs = page.locator(sel.tabs)
+      await expect(tabs).toHaveCount(tabCount)
+      await expect(container.locator(`:scope > .os-scrollbar-${vertical ? 'vertical' : 'horizontal'}`))
+        .toHaveClass(/os-scrollbar-visible/)
+      const tabOrder = () => tabs.evaluateAll(elements => elements.map(element => element.dataset.tabId))
+      // Integer scroll sizes can differ from the fractional offset at non-100% UI scales.
+      const distanceFromEnd = toEnd => container.evaluate((element, { vertical, toEnd }) => {
+        const content = element.querySelector('.tabsContent')
+        const maximum = vertical
+          ? content.scrollHeight - element.clientHeight
+          : content.scrollWidth - element.clientWidth
+        const offset = vertical ? element.scrollTop : element.scrollLeft
+        return Math.abs((toEnd ? maximum : 0) - offset) * devicePixelRatio
+      }, { vertical, toEnd })
+      const originalIds = await tabOrder()
+      expect(await distanceFromEnd(true)).toBeGreaterThan(200)
+
+      // Hold the dragged tab just inside one end until the list stops scrolling.
+      const dragToEdge = async (tab, toEnd) => {
+        const box = await tab.boundingBox()
+        const bounds = await container.boundingBox()
+        const edge = vertical
+          ? (toEnd ? bounds.y + bounds.height - 4 : bounds.y + 4)
+          : (toEnd ? bounds.x + bounds.width - 4 : bounds.x + 4)
+        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+        await page.mouse.down()
+        await page.mouse.move(
+          vertical ? box.x + box.width / 2 : edge,
+          vertical ? edge : box.y + box.height / 2,
+          { steps: 5 }
+        )
+        await expect.poll(() => distanceFromEnd(toEnd)).toBeLessThanOrEqual(2)
+        await page.mouse.up()
+      }
+
+      await dragToEdge(tabs.first(), true)
+      await expect.poll(tabOrder).toEqual([...originalIds.slice(1), originalIds[0]])
+      await expect(page.locator('.tab.dragging, .tab.settling')).toHaveCount(0)
+
+      await dragToEdge(tabs.last(), false)
+      await expect.poll(tabOrder).toEqual(originalIds)
+    })
+  }
 
   test('batches tab drag rendering on a throttled CPU in both layouts', { tag: '@performance' }, async ({ page }) => {
     await page.evaluate(async () => {

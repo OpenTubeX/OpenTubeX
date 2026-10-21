@@ -19,6 +19,7 @@ function createDragHarness({ vertical = false, count = 100 } = {}) {
   const timers = new Map()
   let timerId = 0
   const calls = { orders: 0, offsets: 0, updates: 0 }
+  let now = 0
   const tabs = ref(Array.from({ length: count }, (_, index) => ({ id: `tab-${index}` })))
 
   class TabElement {
@@ -32,7 +33,7 @@ function createDragHarness({ vertical = false, count = 100 } = {}) {
   const container = {
     scrollLeft: 0, scrollTop: 0,
     querySelectorAll: () => elements,
-    getBoundingClientRect: () => ({ left: 0, top: 0 })
+    getBoundingClientRect: () => ({ left: 0, top: 0, right: 1000, bottom: 1000 })
   }
   const api = vm.runInNewContext(`${source}\n${scrollHandler}\n({
     handleTabContainerPointerDown, handleDragPointerMove, handleDragPointerUp,
@@ -48,7 +49,8 @@ function createDragHarness({ vertical = false, count = 100 } = {}) {
     selectedTabIds: ref(new Set()), closeTooltipsSignal: ref(0),
     dropZoneRef: { value: container },
     buildStripItems: items => items,
-    clearTabSelection() {}, setTabSelection() {},
+    clearTabSelection() {}, setTabSelection() {}, cancelScrollAnimation() {},
+    performance: { now: () => now },
     isElectron: false,
     document: { body: { classList: { add() {}, remove() {} } } },
     window: {
@@ -73,10 +75,11 @@ function createDragHarness({ vertical = false, count = 100 } = {}) {
   return {
     api, calls, frames, container,
     move: position => api.handleDragPointerMove(event(position)),
-    flushFrame() {
+    flushFrame(elapsed = 16) {
+      now += elapsed
       const pending = Array.from(frames.values())
       frames.clear()
-      for (const callback of pending) callback()
+      for (const callback of pending) callback(now)
     }
   }
 }
@@ -138,5 +141,38 @@ test('cancel and listener cleanup discard queued drag work', () => {
     harness.flushFrame()
     assert.equal(harness.frames.size, 0)
     assert.equal(harness.calls.updates, updates)
+  }
+})
+
+test('scrolls toward the end the dragged pointer is held near in both layouts', () => {
+  for (const vertical of [false, true]) {
+    const harness = createDragHarness({ vertical })
+    const axis = vertical ? 'scrollTop' : 'scrollLeft'
+    const assertScroll = (expected, message) => {
+      assert.ok(Math.abs(harness.container[axis] - expected) < 1e-9, `${message}: ${harness.container[axis]}`)
+    }
+
+    harness.move(500)
+    harness.flushFrame()
+    assertScroll(0, 'the middle of the list does not scroll')
+    assert.equal(harness.frames.size, 0)
+
+    harness.move(976)
+    harness.flushFrame(20)
+    assertScroll(0.5 * 0.6 * 20, 'scrolls slower halfway into the edge')
+    harness.move(1100)
+    harness.flushFrame(100)
+    assertScroll(6 + 0.6 * 32, 'scrolls at full speed past the edge and caps long frames')
+
+    harness.move(500)
+    harness.flushFrame()
+    assert.equal(harness.frames.size, 0, 'stops once the pointer leaves the edge')
+    const position = harness.container[axis]
+    harness.move(-20)
+    harness.flushFrame(10)
+    assertScroll(position - 0.6 * 10, 'scrolls back toward the start')
+
+    harness.api.handleDragPointerUp()
+    assert.equal(harness.frames.size, 0, 'release stops scrolling')
   }
 })
