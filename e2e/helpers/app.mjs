@@ -412,6 +412,9 @@ export async function setWindowSize({ electronApp }, page, size) {
     const viewport = await getViewport(page)
     return viewport.width !== before.width && viewport.height !== before.height
   }).toBe(true)
+  // The viewport size changes before the resize event is dispatched on a later frame.
+  // Wait for it so its listeners cannot undo state the caller sets up next.
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
 
   return await getViewport(page)
 }
