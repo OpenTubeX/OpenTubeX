@@ -1034,6 +1034,129 @@ test.describe('additional quick settings', () => {
   })
 })
 
+const EXPANDED_QUICK_SETTINGS = [
+  ['secColor', 'Appearance'],
+  ['reducedMotion', 'Appearance'],
+  ['toastPosition', 'Appearance'],
+  ['hideLabelsSideBar', 'Appearance'],
+  ['useFrostedGlassPlayerUi', 'Appearance'],
+  ['skipUnavailablePlaylistVideos', 'Playback'],
+  ['useCustomShortsPlayer', 'Playback'],
+  ['loopShorts', 'Playback'],
+  ['rememberVolume', 'Playback'],
+  ['enableSkipSilenceByDefault', 'Playback'],
+  ['holdToDoublePlaybackSpeed', 'Playback'],
+  ['useQuickPlaybackSpeedBar', 'Playback'],
+  ['musicVisualizer', 'Playback'],
+  ['aiVideoSummaryMode', 'Content'],
+  ['hideWatchedSubs', 'Content'],
+  ['hideVideoViews', 'Content'],
+  ['hideVideoLikesAndDislikes', 'Content'],
+  ['hideChannelAvatars', 'Content'],
+  ['hideLiveStreams', 'Content'],
+  ['hideUpcomingPremieres', 'Content'],
+  ['hideVideoDescription', 'Content'],
+  ['hideChapters', 'Content'],
+  ['showDistractionFreeTitles', 'Content'],
+  ['useAiSlopList', 'Content'],
+  ['showFamilyFriendlyOnly', 'Content'],
+  ['thumbnailDataSaver', 'Content'],
+  ['hideSubscriptionsLive', 'Content'],
+  ['hideSubscriptionsCommunity', 'Content'],
+  ['fetchSubscriptionsAutomatically', 'Content'],
+  ['useVoiceOverTranslation', 'Language and region'],
+  ['rememberTabNavigationHistory', 'Privacy'],
+  ['backendFallback', 'Advanced'],
+]
+
+test.describe('expanded quick settings catalog', () => {
+  test.use({
+    seed: {
+      settings: {
+        quickSettings: EXPANDED_QUICK_SETTINGS.map(([id]) => id),
+        baseTheme: 'dark',
+        reducedMotion: 'off',
+        currentLocale: 'en-US',
+      },
+    },
+  })
+
+  test('groups the new controls, disables dependent toggles, and persists select changes', async ({ app, page, attachScreenshot }) => {
+    await page.locator('.profileTrigger').click()
+    const menu = page.getByRole('dialog', { name: 'Quick settings' })
+    for (const [id, section] of EXPANDED_QUICK_SETTINGS) {
+      await expect(menu.locator(`[data-setting-id="${id}"]`).locator('..').getByRole('heading'), id).toHaveText(section)
+    }
+
+    const toggle = id => menu.locator(`[data-setting-id="${id}"]`).getByRole('checkbox')
+    const flip = id => menu.locator(`[data-setting-id="${id}"] label.switch-label`).click()
+    await expect(toggle('enableSkipSilenceByDefault')).toBeDisabled()
+    await expect(toggle('loopShorts')).toBeEnabled()
+    await flip('useCustomShortsPlayer')
+    await expect(toggle('loopShorts')).toBeDisabled()
+    await expect(toggle('hideSubscriptionsLive')).toBeEnabled()
+    await flip('hideLiveStreams')
+    await expect(toggle('hideSubscriptionsLive')).toBeDisabled()
+    await expect(toggle('hideSubscriptionsLive')).toBeChecked()
+    await attachScreenshot('subscription controls with the live toggle disabled by Hide Live Streams')
+
+    const choose = async (id, label, option) => {
+      await menu.locator(`[data-setting-id="${id}"]`).getByRole('combobox', { name: label }).click()
+      await page.getByRole('option', { name: option, exact: true }).click()
+    }
+    await choose('reducedMotion', 'Reduced Motion', 'Force on')
+    await expect(page.locator('html')).toHaveAttribute('data-reduced-motion', 'reduce')
+    await choose('toastPosition', 'Toast Position', 'Top right')
+    await choose('aiVideoSummaryMode', 'AI video summaries', 'Expanded')
+    await choose('secColor', 'Secondary Color Theme', 'Green')
+    await menu.locator('[data-setting-id="secColor"]').scrollIntoViewIfNeeded()
+    await attachScreenshot('new appearance and playback controls')
+
+    const expected = {
+      useCustomShortsPlayer: false,
+      hideLiveStreams: true,
+      reducedMotion: 'on',
+      toastPosition: 'top-right',
+      aiVideoSummaryMode: 'expanded',
+      secColor: 'Green',
+    }
+    await expect.poll(() => {
+      const saved = latestSettings(readDatastore(app.userDataDir, 'settings'))
+      return Object.fromEntries(Object.keys(expected).map(id => [id, saved[id]]))
+    }).toEqual(expected)
+
+    ;({ page } = await app.relaunch())
+    await page.locator('.profileTrigger').click()
+    const reopened = page.getByRole('dialog', { name: 'Quick settings' })
+    await expect(reopened.locator('[data-setting-id="loopShorts"]').getByRole('checkbox')).toBeDisabled()
+    await expect(reopened.locator('[data-setting-id="hideSubscriptionsLive"]').getByRole('checkbox')).toBeChecked()
+    await expect(reopened.locator('[data-setting-id="toastPosition"]').getByRole('combobox')).toContainText('Top right')
+    await expect(reopened.locator('[data-setting-id="secColor"]').getByRole('combobox')).toContainText('Green')
+  })
+
+  test('hides the parental control while a settings password locks Settings', async ({ page }) => {
+    await page.evaluate(() => window.$store.dispatch('updateQuickSettings', ['showFamilyFriendlyOnly', 'hideVideoViews']))
+    await page.locator('.profileTrigger').click()
+    const menu = page.getByRole('dialog', { name: 'Quick settings' })
+    await expect(menu.locator('[data-setting-id="showFamilyFriendlyOnly"]')).toBeVisible()
+    await page.evaluate(() => window.$store.dispatch('updateSettingsPassword', 'secret'))
+    await expect(menu.locator('[data-setting-id="showFamilyFriendlyOnly"]')).toHaveCount(0)
+    await expect(menu.locator('[data-setting-id="hideVideoViews"]')).toBeVisible()
+    await page.evaluate(() => window.$store.dispatch('updateSettingsPassword', ''))
+    await expect(menu.locator('[data-setting-id="showFamilyFriendlyOnly"]')).toBeVisible()
+  })
+
+  test('hides the secondary color with the main color for fixed-palette themes', async ({ page }) => {
+    await page.evaluate(() => window.$store.dispatch('updateQuickSettings', ['mainColor', 'secColor']))
+    await page.locator('.profileTrigger').click()
+    const menu = page.getByRole('dialog', { name: 'Quick settings' })
+    await expect(menu.locator('[data-setting-id="secColor"]')).toBeVisible()
+    await page.evaluate(() => window.$store.dispatch('updateBaseTheme', 'materialDark'))
+    await expect(menu.locator('[data-setting-id="mainColor"]')).toHaveCount(0)
+    await expect(menu.locator('[data-setting-id="secColor"]')).toHaveCount(0)
+  })
+})
+
 test.describe('quick playback speed', () => {
   test.use({
     seed: {

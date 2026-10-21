@@ -269,6 +269,19 @@
                       icon-color="var(--primary-color)"
                       @change="updateSetting('MainColor', $event)"
                     />
+                    <FtSelect
+                      v-else-if="setting.id === 'secColor'"
+                      class="quickSelect"
+                      :placeholder="t('Settings.Theme Settings.Secondary Color Theme')"
+                      :value="secColor"
+                      setting-key="secColor"
+                      :select-names="colorNames"
+                      :select-values="COLOR_VALUES"
+                      :option-colors="COLOR_SWATCHES"
+                      :icon="['fas', 'palette']"
+                      icon-color="var(--accent-color)"
+                      @change="updateSetting('SecColor', $event)"
+                    />
                     <div
                       v-else-if="setting.id === 'uiScale'"
                       class="sliderGroup"
@@ -587,6 +600,7 @@ const usesFixedThemePalette = computed(() => hasFixedThemeColors(baseTheme.value
   : baseTheme.value))
 const customThemeEditorOpen = computed(() => store.getters.getCustomThemeEditorOpen)
 const mainColor = computed(() => store.getters.getMainColor)
+const secColor = computed(() => store.getters.getSecColor)
 const mainColorAvailable = computed(() => (
   !customThemeEditorOpen.value &&
   !usesFixedThemePalette.value
@@ -627,9 +641,11 @@ const orderedQuickSettingSections = computed(() => {
   const visibleSettings = quickSettings.value
     .map(settingId => catalogById.get(settingId))
     .filter(setting => setting != null && (
-      (setting.id !== 'mainColor' || mainColorAvailable.value) &&
+      (!['mainColor', 'secColor'].includes(setting.id) || mainColorAvailable.value) &&
       (!['systemLightTheme', 'systemDarkTheme'].includes(setting.id) || baseTheme.value === 'system') &&
-      (setting.id !== 'region' || regionValues.value.length > 0)
+      (setting.id !== 'region' || regionValues.value.length > 0) &&
+      // Parental controls must not bypass the password that locks Settings.
+      (!setting.passwordProtected || store.getters.getSettingsPassword === '')
     ))
 
   return visibleSettings.reduce((sections, setting) => {

@@ -1,8 +1,11 @@
+import { normalizeToastPosition, TOAST_POSITION_VALUES } from '../constants/toastPosition.js'
+
 const CORE_QUICK_SETTINGS = [
   ['baseTheme', 'appearance', 'Settings.Theme Settings.Base Theme.Base Theme', { control: 'select', icon: ['fas', 'palette'] }],
   ['systemLightTheme', 'appearance', 'Settings.Theme Settings.Light Theme', { control: 'select', icon: ['fas', 'sun'] }],
   ['systemDarkTheme', 'appearance', 'Settings.Theme Settings.Dark Theme', { control: 'select', icon: ['fas', 'moon'] }],
   ['mainColor', 'appearance', 'Settings.Theme Settings.Main Color Theme.Main Color Theme', { control: 'select', icon: ['fas', 'palette'] }],
+  ['secColor', 'appearance', 'Settings.Theme Settings.Secondary Color Theme', { control: 'select', icon: ['fas', 'palette'] }],
   ['uiScale', 'appearance', 'Settings.Theme Settings.UI Scale', { control: 'slider', electronOnly: true, capacitorSupported: true, icon: ['fas', 'sliders-h'] }],
   ['thumbnailSize', 'appearance', 'Settings.Theme Settings.Thumbnail Size', { control: 'slider', icon: ['fas', 'photo-film'] }],
   ['playlistThumbnailSize', 'appearance', 'Settings.Theme Settings.Playlist Thumbnail Size', { control: 'slider', icon: ['fas', 'photo-film'] }],
@@ -68,27 +71,104 @@ export const BASIC_QUICK_SETTING_DEFINITIONS = Object.freeze([
     extension: '%',
     icon: ['fas', 'gauge-high'],
   },
+  {
+    id: 'reducedMotion',
+    section: 'appearance',
+    labelKey: 'Settings.General Settings.Reduced Motion.Reduced Motion',
+    control: 'select',
+    values: ['system', 'on', 'off'],
+    optionLabelKeys: [
+      'Settings.General Settings.Reduced Motion.System',
+      'Settings.General Settings.Reduced Motion.Force On',
+      'Settings.General Settings.Reduced Motion.Force Off',
+    ],
+    // The app follows the system preference for any unsupported value
+    effectiveValue: settings => ['on', 'off'].includes(settings.reducedMotion) ? settings.reducedMotion : 'system',
+    icon: ['fas', 'gauge'],
+  },
+  {
+    id: 'toastPosition',
+    section: 'appearance',
+    labelKey: 'Settings.Theme Settings.Toast Position.Toast Position',
+    control: 'select',
+    values: TOAST_POSITION_VALUES,
+    optionLabelKeys: [
+      'Settings.Theme Settings.Toast Position.Bottom Left',
+      'Settings.Theme Settings.Toast Position.Bottom Center',
+      'Settings.Theme Settings.Toast Position.Bottom Right',
+      'Settings.Theme Settings.Toast Position.Top Left',
+      'Settings.Theme Settings.Toast Position.Top Center',
+      'Settings.Theme Settings.Toast Position.Top Right',
+    ],
+    effectiveValue: settings => normalizeToastPosition(settings.toastPosition),
+    icon: ['fas', 'message'],
+  },
+  {
+    id: 'aiVideoSummaryMode',
+    section: 'content',
+    labelKey: 'Settings.Distraction Free Settings.AI Video Summaries',
+    control: 'select',
+    values: ['hide', 'collapsed', 'expanded'],
+    optionLabelKeys: [
+      'Settings.Distraction Free Settings.Hide',
+      'Settings.Distraction Free Settings.Collapsed',
+      'Settings.Distraction Free Settings.Expanded',
+    ],
+    icon: ['fas', 'robot'],
+  },
   ['barColor', 'Settings.Theme Settings.Match Top Bar with Main Color', 'appearance', ['fas', 'palette']],
   ['hideSideBarOnWatchPages', 'Settings.Theme Settings.Hide Side Bar on Watch Pages', 'appearance', ['fas', 'eye-slash']],
   ['alwaysShowScrollbars', 'Settings.Theme Settings.Always Show Scrollbars', 'appearance', ['fas', 'sliders-h']],
   ['showToastTimeoutIndicator', 'Settings.Theme Settings.Show Toast Timeout Indicator', 'appearance', ['fas', 'message']],
+  ['hideLabelsSideBar', 'Settings.Theme Settings.Hide Side Bar Labels', 'appearance', ['fas', 'bars']],
+  ['useFrostedGlassPlayerUi', 'Settings.Theme Settings.Frosted Glass Player UI', 'appearance', ['fas', 'layer-group']],
   ['useSponsorBlock', 'Settings.SponsorBlock Settings.Enable SponsorBlock', 'add-ons', ['fas', 'forward']],
   ['useReturnYouTubeDislikes', 'Settings.Return YouTube Dislike Settings.Enable Return YouTube Dislike', 'add-ons', ['fas', 'thumbs-down']],
   ['rememberHistory', 'Settings.Privacy Settings.Remember History', 'privacy', ['fas', 'history']],
   ['rememberSearchHistory', 'Settings.Privacy Settings.Remember Search History', 'privacy', ['fas', 'search']],
+  ['rememberTabNavigationHistory', 'Settings.General Settings.Remember Tab Navigation History', 'privacy', ['fas', 'clock-rotate-left'], { electronOnly: true, capacitorSupported: true }],
   ['autoplayVideos', 'Settings.Player Settings.Autoplay Videos', 'playback', ['fas', 'play']],
   ['autoplayPlaylists', 'Settings.Player Settings.Autoplay Playlists', 'playback', ['fas', 'list']],
+  ['skipUnavailablePlaylistVideos', 'Settings.Player Settings.Skip Unavailable Playlist Videos', 'playback', ['fas', 'forward-fast']],
+  ['useCustomShortsPlayer', 'Settings.Player Settings.Use YouTube-style Shorts', 'playback', ['fas', 'smartphone']],
+  ['loopShorts', 'Settings.Player Settings.Loop Shorts', 'playback', ['fas', 'replay'], { disabledWhen: settings => !settings.useCustomShortsPlayer }],
+  ['rememberVolume', 'Settings.Player Settings.Remember Volume', 'playback', ['fas', 'volume-high'], { capacitorUnsupported: true }],
+  ['enableSkipSilenceByDefault', 'Settings.Player Settings.Enable Skip Silence by Default', 'playback', ['fas', 'volume-mute'], { iosUnsupported: true, disabledWhen: settings => !settings.showSkipSilenceButton }],
+  ['holdToDoublePlaybackSpeed', 'Settings.Player Settings.Hold to Double Playback Speed', 'playback', ['fas', 'forward']],
+  ['useQuickPlaybackSpeedBar', 'Settings.Player Settings.Use Quick Playback Speed Bar', 'playback', ['fas', 'sliders-h']],
+  ['musicVisualizer', 'Settings.Player Settings.Music Visualizer', 'playback', ['fas', 'music']],
   ['useDeArrowTitles', 'Settings.SponsorBlock Settings.UseDeArrowTitles', 'add-ons', ['fas', 'pen']],
   ['useDeArrowThumbnails', 'Settings.SponsorBlock Settings.UseDeArrowThumbnails', 'add-ons', ['fas', 'photo-film']],
   ['scrollMiniPlayerEnabled', 'Settings.Player Settings.Scroll Mini Player.When Scrolling Down', 'playback', ['fas', 'compress']],
   ['ambientMode', 'Global.Ambient Mode', 'appearance', ['fas', 'palette']],
   ['hideLiveChat', 'Settings.Distraction Free Settings.Hide Live Chat', 'content', ['fas', 'comment']],
   ['hideLiveChatReplay', 'Settings.Distraction Free Settings.Hide Live Chat Replay', 'content', ['fas', 'comment']],
+  ['hideWatchedSubs', 'Settings.Distraction Free Settings.Hide Videos on Watch', 'content', ['fas', 'eye-slash']],
+  ['hideVideoViews', 'Settings.Distraction Free Settings.Hide Video Views', 'content', ['fas', 'eye']],
+  ['hideVideoLikesAndDislikes', 'Settings.Distraction Free Settings.Hide Video Likes And Dislikes', 'content', ['fas', 'thumbs-up']],
+  ['hideChannelAvatars', 'Settings.Distraction Free Settings.Hide Channel Avatars', 'content', ['fas', 'circle-user']],
+  ['hideLiveStreams', 'Settings.Distraction Free Settings.Hide Live Streams', 'content', ['fas', 'tower-broadcast']],
+  ['hideUpcomingPremieres', 'Settings.Distraction Free Settings.Hide Upcoming Premieres', 'content', ['fas', 'calendar-days']],
+  ['hideVideoDescription', 'Settings.Distraction Free Settings.Hide Video Description', 'content', ['fas', 'file-lines']],
+  ['hideChapters', 'Settings.Distraction Free Settings.Hide Chapters', 'content', ['fas', 'bars-progress']],
+  ['showDistractionFreeTitles', 'Settings.Distraction Free Settings.Display Titles Without Excessive Capitalisation', 'content', ['fas', 'font']],
+  ['useAiSlopList', 'Settings.AiSList Settings.Hide AI Slop Channels', 'content', ['fas', 'users-slash'], { electronOnly: true, capacitorSupported: true }],
+  ['showFamilyFriendlyOnly', 'Settings.Parental Control Settings.Show Family Friendly Only', 'content', ['fas', 'shield-halved'], { passwordProtected: true }],
   ['showThumbnailPreviews', 'Settings.General Settings.Show Thumbnail Previews', 'content', ['fas', 'photo-film']],
+  ['thumbnailDataSaver', 'Settings.General Settings.Data Saver Thumbnails', 'content', ['fas', 'images']],
   ['enableCaptionTranslations', 'Settings.Player Settings.Caption Appearance.Enable Translations', 'language', ['fas', 'closed-captioning']],
   ['enableCommentTranslations', 'Settings.General Settings.Comment Translation.Enable', 'language', ['fas', 'language']],
+  ['useVoiceOverTranslation', 'Settings.Player Settings.Voice-over Translation.Enable', 'language', ['fas', 'headphones'], { electronOnly: true, capacitorSupported: true, iosUnsupported: true }],
   ['hideSubscriptionsShorts', 'Settings.Distraction Free Settings.Hide Subscriptions Shorts', 'content', ['fas', 'eye-slash']],
+  ['hideSubscriptionsLive', 'Settings.Distraction Free Settings.Hide Subscriptions Live', 'content', ['fas', 'satellite-dish'], {
+    disabledWhen: settings => settings.hideLiveStreams,
+    // Hide Live Streams also hides live videos in Subscriptions
+    effectiveValue: settings => settings.hideLiveStreams || settings.hideSubscriptionsLive,
+  }],
+  ['hideSubscriptionsCommunity', 'Settings.Distraction Free Settings.Hide Subscriptions Posts', 'content', ['fas', 'bullhorn']],
+  ['fetchSubscriptionsAutomatically', 'Settings.Subscription Settings.Fetch Feed on Startup', 'content', ['fas', 'rss']],
   ['blurThumbnails', 'Settings.General Settings.Blur Thumbnails', 'content', ['fas', 'eye-slash']],
+  ['backendFallback', 'Settings.General Settings.Fallback to Non-Preferred Backend on Failure', 'advanced', ['fas', 'server'], { electronOnly: true, capacitorSupported: true }],
 ].map(definition => Object.freeze(Array.isArray(definition)
   ? {
       id: definition[0],
@@ -96,6 +176,7 @@ export const BASIC_QUICK_SETTING_DEFINITIONS = Object.freeze([
       section: definition[2] ?? 'appearance',
       icon: definition[3],
       control: 'toggle',
+      ...definition[4],
     }
   : definition)))
 
@@ -143,7 +224,8 @@ const SECTION_DEFINITIONS = Object.freeze({
 export function createQuickSettingCatalog(t, usingElectron, isCapacitor = false, isIos = false) {
   return QUICK_SETTING_DEFINITIONS
     .filter(definition => (!definition.electronOnly || usingElectron || (isCapacitor && definition.capacitorSupported)) &&
-      (!definition.iosUnsupported || !isIos))
+      (!definition.iosUnsupported || !isIos) &&
+      (!definition.capacitorUnsupported || !isCapacitor))
     .map(definition => ({
       ...definition,
       // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys

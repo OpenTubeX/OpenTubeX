@@ -111,6 +111,8 @@ test('UI Scale and proxy are available in Android quick settings but not the web
   const web = createQuickSettingSections(key => key, false).flatMap(section => section.settings)
   assert.ok(!web.some(setting => setting.id === 'uiScale'))
   assert.ok(!web.some(setting => setting.id === 'useProxy'))
+  assert.ok(!web.some(setting => setting.id === 'useAiSlopList'))
+  assert.ok(android.some(setting => setting.id === 'useAiSlopList'))
 })
 
 test('iOS quick settings do not offer the unavailable proxy toggle', () => {
@@ -131,4 +133,23 @@ test('adds a setting to its existing category instead of splitting the category'
     normalizeQuickSettings([...DEFAULT_QUICK_SETTINGS, 'iconPack']),
     [...DEFAULT_QUICK_SETTINGS.slice(0, 4), 'iconPack', ...DEFAULT_QUICK_SETTINGS.slice(4)]
   )
+})
+
+test('Android quick settings do not offer Remember Volume, which the mobile player ignores', () => {
+  const android = createQuickSettingSections(key => key, false, true).flatMap(section => section.settings)
+  assert.ok(!android.some(setting => setting.id === 'rememberVolume'))
+  const desktop = createQuickSettingSections(key => key, true).flatMap(section => section.settings)
+  assert.ok(desktop.some(setting => setting.id === 'rememberVolume'))
+})
+
+test('disables quick settings whose parent setting turns them off', () => {
+  const definitions = new Map(QUICK_SETTING_DEFINITIONS.map(setting => [setting.id, setting]))
+  assert.equal(definitions.get('loopShorts').disabledWhen({ useCustomShortsPlayer: false }), true)
+  assert.equal(definitions.get('loopShorts').disabledWhen({ useCustomShortsPlayer: true }), false)
+  assert.equal(definitions.get('hideSubscriptionsLive').disabledWhen({ hideLiveStreams: true }), true)
+  assert.equal(definitions.get('enableSkipSilenceByDefault').disabledWhen({ showSkipSilenceButton: false }), true)
+  assert.equal(definitions.get('hideSubscriptionsLive').effectiveValue({ hideLiveStreams: true, hideSubscriptionsLive: false }), true)
+  assert.equal(definitions.get('toastPosition').effectiveValue({ toastPosition: 'middle' }), 'bottom-left')
+  assert.equal(definitions.get('reducedMotion').effectiveValue({ reducedMotion: 'sometimes' }), 'system')
+  assert.equal(definitions.get('reducedMotion').effectiveValue({ reducedMotion: 'on' }), 'on')
 })
