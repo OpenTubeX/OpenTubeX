@@ -1682,6 +1682,10 @@ Video:
       Error With Details: "Não foi possível transmitir o vídeo: {error}"
       Untrusted Receiver: "O certificado do recetor não é de confiança. Usa um recetor Google Cast autenticado."
     Secondary Captions: Legendas secundárias
+    Subtitle File:
+      Load: "Carregar ficheiro de legendas…"
+      Subtitle Files: "Ficheiros de legendas"
+      Error: "Não foi possível carregar o ficheiro de legendas. Escolha um ficheiro SRT ou WebVTT."
   Station: Estação
   Playlist:
     Unavailable videos are hidden: 1 vídeo indisponível está oculto | {count} vídeos indisponíveis estão ocultos | {count} vídeos indisponíveis estão ocultos

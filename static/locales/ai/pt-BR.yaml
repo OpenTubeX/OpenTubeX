@@ -1651,6 +1651,10 @@ Video:
       Error With Details: "Não foi possível transmitir o vídeo: {error}"
       Untrusted Receiver: "O certificado do receptor não é confiável. Use um receptor Google Cast autenticado."
     Secondary Captions: Legendas secundárias
+    Subtitle File:
+      Load: "Carregar arquivo de legendas…"
+      Subtitle Files: "Arquivos de legendas"
+      Error: "Não foi possível carregar o arquivo de legendas. Escolha um arquivo SRT ou WebVTT."
   External Media:
     Dislikes: "Desgosto | Desgostos | Desgostos"
     Reposts: "Republicação | Republicações | Republicações"

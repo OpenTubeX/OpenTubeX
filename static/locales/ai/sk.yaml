@@ -1650,6 +1650,10 @@ Video:
       Error With Details: "Video sa nepodarilo preniesť: {error}"
       Untrusted Receiver: "Certifikát prijímača nie je dôveryhodný. Použite overený prijímač Google Cast."
     Secondary Captions: Druhé titulky
+    Subtitle File:
+      Load: "Načítať súbor s titulkami…"
+      Subtitle Files: "Súbory s titulkami"
+      Error: "Súbor s titulkami sa nepodarilo načítať. Vyberte súbor SRT alebo WebVTT."
   External Media:
     Dislikes: "Negatívne hodnotenie | Negatívne hodnotenia | Negatívnych hodnotení"
     Reposts: "Opätovné zdieľanie | Opätovné zdieľania | Opätovných zdieľaní"

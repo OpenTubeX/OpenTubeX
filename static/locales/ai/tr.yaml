@@ -1649,6 +1649,10 @@ Video:
       Error With Details: "Video yayınlanamadı: {error}"
       Untrusted Receiver: "Alıcının sertifikasına güvenilmiyor. Kimliği doğrulanmış bir Google Cast alıcısı kullanın."
     Secondary Captions: İkincil altyazılar
+    Subtitle File:
+      Load: "Altyazı dosyası yükle…"
+      Subtitle Files: "Altyazı dosyaları"
+      Error: "Altyazı dosyası yüklenemedi. Bir SRT veya WebVTT dosyası seçin."
   External Media:
     Dislikes: "Beğenmeme | Beğenmeme"
     Reposts: "Repost | Repost"

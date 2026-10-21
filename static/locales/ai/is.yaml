@@ -1672,6 +1672,10 @@ Video:
       Error With Details: "Ekki tókst að senda myndskeiðið: {error}"
       Untrusted Receiver: "Vottorði móttakarans er ekki treyst. Notaðu auðkenndan Google Cast-móttakara."
     Secondary Captions: Aukaskjátextar
+    Subtitle File:
+      Load: "Hlaða inn skjátextaskrá…"
+      Subtitle Files: "Skjátextaskrár"
+      Error: "Ekki tókst að hlaða inn skjátextaskránni. Veldu SRT- eða WebVTT-skrá."
   Playlist:
     Unavailable videos are hidden: 1 ótiltækt myndskeið er falið | {count} ótiltæk myndskeið eru falin
   External Media:

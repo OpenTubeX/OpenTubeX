@@ -2456,6 +2456,10 @@ Video:
       Sample: Captions look like this
     Auto-translate: Auto-translate
     Secondary Captions: Secondary Captions
+    Subtitle File:
+      Load: Load subtitle file…
+      Subtitle Files: Subtitle files
+      Error: Could not load the subtitle file. Choose an SRT or WebVTT file.
     Sleep Timer:
       Sleep Timer: Sleep timer
       Off: 'Off'

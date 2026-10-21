@@ -2031,6 +2031,10 @@ Video:
       Error With Details: "Nepavyko transliuoti vaizdo įrašo: {error}"
       Untrusted Receiver: "Imtuvo sertifikatas nėra patikimas. Naudokite autentifikuotą Google Cast imtuvą."
     Secondary Captions: Antriniai subtitrai
+    Subtitle File:
+      Load: "Įkelti subtitrų failą…"
+      Subtitle Files: "Subtitrų failai"
+      Error: "Nepavyko įkelti subtitrų failo. Pasirinkite SRT arba WebVTT failą."
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Reklamos prieš vaizdo įrašą likęs laikas: {remindingTimeSeconds} s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Likęs SABR delsos laikas: {remindingTimeSeconds} s'

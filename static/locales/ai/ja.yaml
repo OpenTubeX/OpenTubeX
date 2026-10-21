@@ -1650,6 +1650,10 @@ Video:
       Error With Details: "動画をキャストできませんでした: {error}"
       Untrusted Receiver: "受信機の証明書は信頼されていません。認証済みの Google Cast 受信機を使用してください。"
     Secondary Captions: 第 2 字幕
+    Subtitle File:
+      Load: "字幕ファイルを読み込む…"
+      Subtitle Files: "字幕ファイル"
+      Error: "字幕ファイルを読み込めませんでした。SRT または WebVTT ファイルを選択してください。"
   External Media:
     Dislikes: "低評価"
     Reposts: "再投稿"

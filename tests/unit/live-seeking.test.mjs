@@ -196,6 +196,7 @@ test('loading completion consumes a native seek made after canplay', () => {
   Object.assign(state, {
     togglePlaybackRate: null,
     isLive: { value: false },
+    localCaptions: { value: [] },
     restorePendingPlaybackRate() {},
     player: { isLive: () => false, getManifest: () => null }
   })

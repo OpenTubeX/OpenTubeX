@@ -208,3 +208,19 @@ test('iOS can select exported database files whose extension WebKit does not rec
   assert.equal(result.filename, file.name)
   assert.equal(result.content, await file.text())
 })
+
+test('Android can select subtitle files on versions without MIME types for them', async () => {
+  const accepts = []
+  const pick = vm.runInNewContext(`${pickSource}\npickFileWithPicker`, {
+    process: { env: { IS_CAPACITOR: true } },
+    window: { addEventListener() {} },
+    document: { createElement: () => ({
+      files: [{ name: 'movie.srt' }],
+      click() { accepts.push(this.accept); this.onchange() },
+    }) },
+  })
+  assert.equal((await pick('Subtitle files', { 'text/vtt': '.vtt', 'application/x-subrip': '.srt' })).name, 'movie.srt')
+  // Other imports keep filtering by their file types
+  await pick('Backups', { 'application/json': '.json', 'application/zip': '.zip' })
+  assert.deepEqual(accepts, ['', '.json,.zip'])
+})

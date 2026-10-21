@@ -2129,6 +2129,10 @@ Video:
       Error With Details: "No s’ha pogut transmetre el vídeo: {error}"
       Untrusted Receiver: "El certificat del receptor no és de confiança. Fes servir un receptor Google Cast autenticat."
     Secondary Captions: Subtítols secundaris
+    Subtitle File:
+      Load: "Carrega un fitxer de subtítols…"
+      Subtitle Files: "Fitxers de subtítols"
+      Error: "No s'ha pogut carregar el fitxer de subtítols. Trieu un fitxer SRT o WebVTT."
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Temps restant de l''anunci previ: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Temps d''espera de SABR restant: {remindingTimeSeconds}s'

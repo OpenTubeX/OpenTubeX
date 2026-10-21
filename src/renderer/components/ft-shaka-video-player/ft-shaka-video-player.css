@@ -1610,8 +1610,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 */
 :deep(.shaka-sub-menu.ft-menu-grid > button:not(
   .shaka-back-to-overflow-button,
-  .ft-caption-options-button,
-  .ft-caption-timing-button
+  .ft-caption-options-button
 )) {
   flex-wrap: wrap;
   place-content: center;
@@ -4859,58 +4858,71 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 :deep(.ft-caption-timing-controls button > span),
-:deep(.ft-caption-timing-button > span),
 :deep(.ft-caption-timing-menu > button > span) {
   margin-inline-start: 0;
 }
 
-:deep(.ft-caption-timing-button) {
+/* Only cut off in the grid menu, where the labels can't wrap. */
+:deep(.ft-caption-actions > button > span) {
+  overflow: hidden;
+  margin-inline-start: 0;
+  text-align: start;
+  text-overflow: ellipsis;
+}
+
+:deep(.ft-caption-actions) {
+  display: flex;
+  flex-direction: column;
+  border-block-start: 1px solid rgb(255 255 255 / 20%);
+  margin-block-start: 4px;
+}
+
+:deep(.ft-caption-actions > button) {
   box-sizing: border-box;
   justify-content: flex-start;
   gap: 8px;
   inline-size: 100%;
   min-block-size: var(--caption-timing-target-size, 36px);
   padding: 4px 8px;
-  border-block-start: 1px solid rgb(255 255 255 / 20%);
-  margin-block-start: 4px;
   font-size: 13px;
   white-space: normal;
 }
 
 /*
-  The centred options would carry the row into the middle of a submenu that keeps
-  the taller menu height, so it is pinned to the bottom with its space reserved.
+  The centred options would carry the rows into the middle of a submenu that keeps
+  the taller menu height, so they are pinned to the bottom with their space reserved.
 */
-:deep(.shaka-sub-menu.ft-menu-grid:has(> .ft-caption-timing-button)) {
+:deep(.shaka-sub-menu.ft-menu-grid:has(> .ft-caption-actions)) {
   --ft-caption-timing-row-size: var(--caption-timing-target-size, 32px);
 
-  padding-block-end: calc(var(--ft-caption-timing-row-size) + 4px);
+  padding-block-end: calc(var(--ft-caption-actions-size, var(--ft-caption-timing-row-size)) + 4px);
 }
 
-/* Mirrors the header: full width, with its icon below the back arrow. */
-:deep(.shaka-sub-menu.ft-menu-grid > .ft-caption-timing-button) {
+/* Mirrors the header: full width, with the first icon below the back arrow. */
+:deep(.shaka-sub-menu.ft-menu-grid > .ft-caption-actions) {
   position: absolute;
   inset-block-end: 0;
   inset-inline: 0;
+  flex-flow: row wrap;
+  margin: 0;
+}
+
+/* Side by side when both labels fit, otherwise each one takes a full row. */
+:deep(.shaka-sub-menu.ft-menu-grid > .ft-caption-actions > button) {
+  flex: 1 1 auto;
   inline-size: auto;
+  min-inline-size: 0;
   block-size: var(--ft-caption-timing-row-size);
   min-block-size: 0;
   padding-block: 0;
   padding-inline: 10px;
   margin: 0;
-  border-start-start-radius: 0;
-  border-start-end-radius: 0;
-}
-
-:deep(.shaka-sub-menu.ft-menu-grid > .ft-caption-timing-button > span) {
-  overflow: hidden;
-  text-align: start;
-  text-overflow: ellipsis;
+  border-radius: 0;
   white-space: nowrap;
 }
 
 /* Shaka's text-label margin also matches the nested icon wrapper. */
-:deep(.ft-caption-timing-button .ft-icon),
+:deep(.ft-caption-actions .ft-icon),
 :deep(.ft-caption-timing-controls .ft-icon) {
   margin: 0;
 }

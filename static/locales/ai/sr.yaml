@@ -1711,6 +1711,10 @@ Video:
       Error With Details: "Видео није могуће емитовати: {error}"
       Untrusted Receiver: "Сертификат пријемника није поуздан. Користите аутентификован Google Cast пријемник."
     Secondary Captions: Секундарни титлови
+    Subtitle File:
+      Load: "Учитај датотеку титлова…"
+      Subtitle Files: "Датотеке титлова"
+      Error: "Није могуће учитати датотеку титлова. Изаберите SRT или WebVTT датотеку."
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Преостало време уводног огласа: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Преостало време до поновног покушаја SABR-а: {remindingTimeSeconds}s'

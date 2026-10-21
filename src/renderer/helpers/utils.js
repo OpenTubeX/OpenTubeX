@@ -584,17 +584,17 @@ export async function pickFileWithPicker(
   } else {
     /** @type {File|null} */
     const fallbackFile = await new Promise((resolve) => {
-      const joinedExtensions = Object.values(acceptedTypes)
-        .flat()
-        .join(',')
+      const extensions = Object.values(acceptedTypes).flat()
 
       const fileInput = document.createElement('input')
       fileInput.type = 'file'
-      // WebKit's native picker cannot identify our line-delimited JSON .db files.
-      // Let iOS select them; importers still validate the filename and contents.
-      fileInput.accept = process.env.IS_IOS && Object.values(acceptedTypes).flat().includes('.db')
+      // WebKit's native picker cannot identify our line-delimited JSON .db files, and Android 8 has
+      // no MIME types for subtitle files, so its picker would only offer cloud storage for them.
+      // Let them select any file; importers still validate the filename and contents.
+      fileInput.accept = (process.env.IS_IOS && extensions.includes('.db')) ||
+        (process.env.IS_CAPACITOR && extensions.some(extension => extension === '.srt' || extension === '.vtt'))
         ? ''
-        : joinedExtensions
+        : extensions.join(',')
       fileInput.onchange = () => {
         resolve(fileInput.files[0])
         fileInput.onchange = null

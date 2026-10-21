@@ -1685,6 +1685,10 @@ Video:
       Error With Details: "تعذر بث الفيديو: {error}"
       Untrusted Receiver: "شهادة جهاز الاستقبال غير موثوقة. استخدم جهاز استقبال Google Cast مصادقًا عليه."
     Secondary Captions: ترجمات ثانوية
+    Subtitle File:
+      Load: "تحميل ملف ترجمة…"
+      Subtitle Files: "ملفات الترجمة"
+      Error: "تعذّر تحميل ملف الترجمة. اختر ملف SRT أو WebVTT."
   Station: محطة
   Playlist:
     Unavailable videos are hidden: تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء فيديو واحد غير متاح | تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء {count} من مقاطع الفيديو غير المتاحة

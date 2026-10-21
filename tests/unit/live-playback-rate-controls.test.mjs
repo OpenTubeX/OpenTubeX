@@ -18,6 +18,7 @@ function controls(props, overflow = false, quickBar = true, playerIsLive = props
     props: { captions: [], chapters: [], format: 'dash', playbackEngine: 'yt-dlp', manifestMimeType: 'application/dash+xml', ...props },
     process: { env: {} },
     isLive: { value: playerIsLive },
+    localCaptions: { value: [] },
     onlyUseOverFlowMenu: { value: overflow },
     useQuickPlaybackSpeedBar: { value: quickBar },
     isCapacitorMobilePlayer: () => false,

@@ -1652,6 +1652,10 @@ Video:
       Error With Details: "無法投放影片: {error}"
       Untrusted Receiver: "接收裝置的憑證不受信任。請使用經過身分驗證的 Google Cast 接收裝置。"
     Secondary Captions: 第二字幕
+    Subtitle File:
+      Load: "載入字幕檔案…"
+      Subtitle Files: "字幕檔案"
+      Error: "無法載入字幕檔案。請選擇 SRT 或 WebVTT 檔案。"
   External Media:
     Dislikes: "倒讚"
     Reposts: "轉發"

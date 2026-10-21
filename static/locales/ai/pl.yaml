@@ -974,6 +974,10 @@ Video:
       Error With Details: "Nie udało się przesłać filmu: {error}"
       Untrusted Receiver: "Certyfikat odbiornika nie jest zaufany. Użyj uwierzytelnionego odbiornika Google Cast."
     Secondary Captions: Dodatkowe napisy
+    Subtitle File:
+      Load: "Wczytaj plik napisów…"
+      Subtitle Files: "Pliki napisów"
+      Error: "Nie udało się wczytać pliku napisów. Wybierz plik SRT lub WebVTT."
   External Media:
     Dislikes: "Niepolubienie | Niepolubienia | Niepolubień"
     Reposts: "Repost | Reposty | Repostów"

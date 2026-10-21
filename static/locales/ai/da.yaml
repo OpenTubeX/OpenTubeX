@@ -1717,6 +1717,10 @@ Video:
       Error With Details: "Videoen kunne ikke castes: {error}"
       Untrusted Receiver: "Modtagerens certifikat er ikke betroet. Brug en godkendt Google Cast-modtager."
     Secondary Captions: Sekundære undertekster
+    Subtitle File:
+      Load: "Indlæs undertekstfil…"
+      Subtitle Files: "Undertekstfiler"
+      Error: "Undertekstfilen kunne ikke indlæses. Vælg en SRT- eller WebVTT-fil."
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Resterende tid for preroll-annonce: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Resterende SABR-ventetid: {remindingTimeSeconds}s'

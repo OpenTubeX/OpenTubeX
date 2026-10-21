@@ -26,6 +26,7 @@ function createLoad () {
     videoLayoutReady: ref(false),
     pendingMetadataSeek: null,
     isLive: ref(false),
+    localCaptions: ref([]),
     hasMultipleAudioTracks: ref(false),
     togglePlaybackRate: null,
     restoreCaptionIndex: null,

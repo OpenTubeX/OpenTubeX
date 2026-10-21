@@ -1730,6 +1730,10 @@ Video:
       Error With Details: "Не ўдалося трансляваць відэа: {error}"
       Untrusted Receiver: "Сертыфікат прыёмніка не з’яўляецца давераным. Выкарыстоўвайце аўтэнтыфікаваны прыёмнік Google Cast."
     Secondary Captions: Другія субтытры
+    Subtitle File:
+      Load: "Загрузіць файл субтытраў…"
+      Subtitle Files: "Файлы субтытраў"
+      Error: "Не ўдалося загрузіць файл субтытраў. Выберыце файл SRT або WebVTT."
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Да канца рэкламы перад відэа: {remindingTimeSeconds} с'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Да паўторнай спробы SABR: {remindingTimeSeconds} с'

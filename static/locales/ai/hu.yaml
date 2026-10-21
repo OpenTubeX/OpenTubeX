@@ -1650,6 +1650,10 @@ Video:
       Error With Details: "Nem sikerült átküldeni a videót: {error}"
       Untrusted Receiver: "A fogadó tanúsítványa nem megbízható. Használj hitelesített Google Cast fogadót."
     Secondary Captions: Másodlagos feliratok
+    Subtitle File:
+      Load: "Feliratfájl betöltése…"
+      Subtitle Files: "Feliratfájlok"
+      Error: "Nem sikerült betölteni a feliratfájlt. Válasszon SRT vagy WebVTT fájlt."
   External Media:
     Dislikes: "Nemtetszés | Nemtetszés"
     Reposts: "Újbóli bejegyzés | Újbóli bejegyzés"

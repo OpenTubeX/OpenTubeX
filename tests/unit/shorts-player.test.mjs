@@ -480,6 +480,7 @@ for (const paused of [true, false]) {
       videoLayoutReady: ref(false),
       pendingMetadataSeek: null,
       isLive: ref(false),
+      localCaptions: ref([]),
       hasMultipleAudioTracks: ref(false),
       togglePlaybackRate: null,
       restoreCaptionIndex: null,
