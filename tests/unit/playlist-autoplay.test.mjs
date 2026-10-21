@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 import { computed, nextTick, reactive, ref, shallowRef, watch as observe } from 'vue'
+import { usesInvidiousApi } from '../../src/apiBackends.js'
 
 const playlistSource = readFileSync(new URL('../../src/renderer/components/WatchVideoPlaylist/WatchVideoPlaylist.vue', import.meta.url), 'utf8')
 const watchSource = readFileSync(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
@@ -37,7 +38,7 @@ function harness({ laterPageError = null } = {}) {
     isLoading, playlistItems, getPlaylistInfoRun: false,
     playlistTitle: ref(''), playlistTotalVideoCount: ref(0), channelName: ref(''), channelId: ref(''),
     store: { commit() {} }, playlistCacheTabId: 'android-tab',
-    process: { env: { SUPPORTS_LOCAL_API: true } }, backendPreference: ref('local'),
+    process: { env: { SUPPORTS_LOCAL_API: true } }, backendPreference: ref('local'), usesInvidiousApi,
     applyReversePlaylistState: videos => videos.slice(),
     findIndexOfCurrentVideoInPlaylist: videos => videos.findIndex(item => item.videoId === props.videoId),
     getLocalCachedFeedContinuation: () => continuation,

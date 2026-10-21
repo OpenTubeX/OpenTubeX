@@ -54,13 +54,10 @@ import FtRefreshWidget from '../../components/FtRefreshWidget/FtRefreshWidget.vu
 import store from '../../store/index'
 
 import { getInvidiousPopularFeed } from '../../helpers/api/invidious'
-import { getRelativeTimeFromDate, showApiErrorToast } from '../../helpers/utils'
-import { useI18n } from 'vue-i18n'
+import { getInvidiousApiErrorMessage, getRelativeTimeFromDate, showApiErrorToast } from '../../helpers/utils'
 import { KeyboardShortcuts } from '../../../constants'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
-
-const { t } = useI18n()
 
 const isElectron = process.env.IS_ELECTRON
 
@@ -108,7 +105,7 @@ async function fetchPopularInfo() {
     store.commit('setPopularCache', items)
   } catch (err) {
     isLoading.value = false
-    const errorMessage = t('Invidious API Error (Click to copy)')
+    const errorMessage = getInvidiousApiErrorMessage(store.getters.getBackendPreference)
     showApiErrorToast(errorMessage, err)
   }
 }

@@ -111,8 +111,10 @@ import FtElementList from '../../components/FtElementList/FtElementList.vue'
 import FtAutoLoadNextPageWrapper from '../../components/FtAutoLoadNextPageWrapper.vue'
 
 import store from '../../store'
+import { usesInvidiousApi } from '../../../apiBackends'
 
 import {
+  getInvidiousApiErrorMessage,
   showInvidiousFallbackToast,
   searchFiltersMatch,
   showApiErrorToast,
@@ -165,7 +167,7 @@ const exhaustedSearchMessage = computed(() => shownResults.value.length === 0
 /** @type {import('vue').ComputedRef<any[]>} */
 const sessionSearchHistory = computed(() => store.getters.getSessionSearchHistory)
 
-/** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
+/** @type {import('vue').ComputedRef<'local' | 'invidious' | 'yattee'>} */
 const backendPreference = computed(() => store.getters.getBackendPreference)
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -319,6 +321,7 @@ function checkSearchCache(payload) {
         performSearchLocal(payload)
         break
       case 'invidious':
+      case 'yattee':
         performSearchInvidious(payload, { resetSearchPage: true })
         break
     }
@@ -506,11 +509,11 @@ async function performSearchInvidious(payload, options = { resetSearchPage: fals
     if (requestId !== searchRequestId) return
     console.error(err)
 
-    const errorMessage = t('Invidious API Error (Click to copy)')
+    const errorMessage = getInvidiousApiErrorMessage(backendPreference.value)
     showApiErrorToast(errorMessage, err)
 
-    if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showInvidiousFallbackToast()
+    if (process.env.SUPPORTS_LOCAL_API && usesInvidiousApi(backendPreference.value) && backendFallback.value) {
+      showInvidiousFallbackToast(backendPreference.value)
       await performSearchLocal(payload)
     } else {
       isLoading.value = false

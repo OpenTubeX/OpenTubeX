@@ -1,6 +1,7 @@
 import { invidiousGetChannelId, invidiousGetChannelInfo } from './api/invidious'
 import { getLocalChannel, getLocalChannelId, parseLocalChannelHeader } from './api/local'
 import { showInvidiousFallbackToast } from './utils'
+import { usesInvidiousApi } from '../../apiBackends'
 
 /**
  * @param {string} id
@@ -12,7 +13,7 @@ import { showInvidiousFallbackToast } from './utils'
  */
 async function findChannelById(id, backendOptions) {
   try {
-    if (!process.env.SUPPORTS_LOCAL_API || backendOptions.preference === 'invidious') {
+    if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendOptions.preference)) {
       return await invidiousGetChannelInfo(id)
     } else {
       return await getLocalChannel(id)
@@ -23,8 +24,8 @@ async function findChannelById(id, backendOptions) {
       return { invalid: true }
     }
     if (process.env.SUPPORTS_LOCAL_API && backendOptions.fallback) {
-      if (backendOptions.preference === 'invidious') {
-        showInvidiousFallbackToast()
+      if (usesInvidiousApi(backendOptions.preference)) {
+        showInvidiousFallbackToast(backendOptions.preference)
         return await getLocalChannel(id)
       }
       if (backendOptions.preference === 'local') {
@@ -48,7 +49,7 @@ export async function findChannelTagInfo(id, backendOptions) {
   if (!checkYoutubeChannelId(id)) return { invalidId: true }
   try {
     const channel = await findChannelById(id, backendOptions)
-    if (!process.env.SUPPORTS_LOCAL_API || backendOptions.preference === 'invidious') {
+    if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendOptions.preference)) {
       if (channel.invalid) return { invalidId: true }
       return {
         preferredName: channel.author,
@@ -87,7 +88,7 @@ export function checkYoutubeChannelId(id) {
  * @returns {Promise<string | null>}
  */
 export function resolveChannelId(url, backendPreference) {
-  if (!process.env.SUPPORTS_LOCAL_API || backendPreference === 'invidious') {
+  if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendPreference)) {
     return invidiousGetChannelId(url)
   }
 

@@ -88,6 +88,7 @@ import FtButton from '../FtButton/FtButton.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 import store from '../../store'
+import { usesInvidiousApi } from '../../../apiBackends'
 import { getLocalHistoryMetadata } from '../../helpers/api/local'
 import { getInvidiousHistoryMetadata } from '../../helpers/api/invidious'
 import { parseHistoryRepairPlayer } from '../../../historyRepair'
@@ -121,13 +122,13 @@ async function loadVideo(signal) {
     return { ...info, published: info.published * 1000, isLive: info.liveNow }
   }
   const loadLocal = async () => parseHistoryRepairPlayer(await loadMetadata(getLocalHistoryMetadata), props.videoId)
-  const prefersInvidious = store.getters.getBackendPreference === 'invidious'
+  const prefersInvidious = usesInvidiousApi(store.getters.getBackendPreference)
   let info
   try {
     info = await (prefersInvidious ? loadInvidious() : loadLocal())
   } catch (error) {
     if (signal.aborted || !store.getters.getBackendFallback) throw error
-    if (prefersInvidious) showInvidiousFallbackToast()
+    if (prefersInvidious) showInvidiousFallbackToast(store.getters.getBackendPreference)
     info = await (prefersInvidious ? loadLocal() : loadInvidious())
   }
   if (typeof info.title !== 'string' || !info.title.trim()) throw new Error('Video title unavailable')

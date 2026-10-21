@@ -322,7 +322,8 @@ const playlistMetadata = computed(() => {
     thumbnailUrl = props.data.playlistThumbnail
   } else if (typeof props.data.playlistThumbnail === 'string' && props.data.playlistThumbnail !== '') {
     thumbnailUrl = props.data.playlistThumbnail.replace(/(?:mq|hq|sd)default\.(jpg|webp)(?=[?#]|$)/, 'maxresdefault.$1')
-    if (!isPlaylistBookmark.value || backendPreference.value === 'invidious') {
+    // Yattee servers don't proxy images
+    if (backendPreference.value !== 'yattee' && (!isPlaylistBookmark.value || backendPreference.value === 'invidious')) {
       thumbnailUrl = thumbnailUrl.replace('https://i.ytimg.com', currentInvidiousInstanceUrl.value)
     }
   }

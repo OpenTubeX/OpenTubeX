@@ -134,8 +134,8 @@ export function useHomeRecommendations(visible) {
     epoch: store.getters.getRecommendationEpoch,
     backend: store.getters.getBackendPreference,
     fallback: store.getters.getBackendFallback,
-    instance: store.getters.getCurrentInvidiousInstanceUrl,
-    authorization: store.getters.getCurrentInvidiousInstanceAuthorization,
+    instance: store.getters.getApiServerUrl,
+    authorization: store.getters.getApiServerAuthorization,
     familyFriendly: store.getters.getShowFamilyFriendlyOnly,
   }))
   const rankingContext = computed(() => JSON.stringify({
@@ -270,7 +270,7 @@ export function useHomeRecommendations(visible) {
     }
     function withFallback(local, invidious, signal) {
       const directFallback = () => {
-        showInvidiousFallbackToast()
+        showInvidiousFallbackToast(backend)
         return local()
       }
       return fetchRecommendationSource(backend === 'local' ? local : invidious,
@@ -317,8 +317,8 @@ export function useHomeRecommendations(visible) {
     () => store.getters.getRecommendationEpoch,
     () => store.getters.getBackendPreference,
     () => store.getters.getBackendFallback,
-    () => store.getters.getCurrentInvidiousInstanceUrl,
-    () => store.getters.getCurrentInvidiousInstanceAuthorization,
+    () => store.getters.getApiServerUrl,
+    () => store.getters.getApiServerAuthorization,
     () => store.getters.getShowFamilyFriendlyOnly,
   ], () => {
     cachedCandidates = null

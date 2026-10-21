@@ -417,6 +417,25 @@ Settings:
       Grid Columns: 网格列数
       Playlist Grid Columns: 播放列表网格列数
       Auto: 自动
+    Preferred API Backend:
+      Yattee Server: Yattee 服务器
+    Yattee Server:
+      Server URL: Yattee 服务器 URL
+      Username: 用户名
+      Password: 密码
+      Proxy Videos: 通过 Yattee 服务器代理视频
+      Test Connection: 测试连接
+      Testing: 正在测试连接…
+      Connected: 已连接到 Yattee 服务器 {version}
+      Errors:
+        Invalid URL: 请输入以 https:// 或 http:// 开头的服务器 URL。
+        Unreachable: 无法访问服务器。请检查 URL 以及服务器是否正在运行。
+        Media not allowed: '已连接，但服务器不允许此应用加载视频。请在服务器的环境变量中设置 CORS_ORIGINS={origins}。'
+        Not a Yattee server: 服务器已响应，但它不是 Yattee 服务器。
+        Credentials required: 服务器需要用户名和密码。
+        Invalid credentials: 服务器拒绝了用户名或密码。
+        Rate limited: 由于失败尝试次数过多，服务器正在阻止登录。请稍后重试。
+        Server error: 服务器返回了错误（HTTP {status}）。
   Context Menu Search Settings:
     Context Menu Search Settings: 右键菜单搜索
     Description: 选择右键单击所选文本时显示的搜索引擎。搜索结果会在默认浏览器中打开。
@@ -1652,6 +1671,7 @@ Video:
       needs_auth: "需要登录"
       unlisted: "不公开列出的视频"
   Save Queue to Playlist: "将队列保存到播放列表"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: 使用 Yattee 服务器时暂不支持在线聊天。需要直接连接 YouTube。
 Playlist:
   Playlist Already Preloaded: "播放列表中的所有视频均已预加载"
   Playlist Preload Progress: "正在预加载视频：{completed}/{requested}"
@@ -1878,6 +1898,8 @@ Tooltips:
       加载最后使用的标签页会恢复上一个会话，同时打开其他标签页但不加载；点击这些标签页时才会加载。
       以空会话启动会跳过已保存的标签页并打开一个新窗口。
     Remember Tab Navigation History: 保存每个标签页的前进和后退导航历史，并在 OpenTubeX 重新启动时恢复。
+    Yattee Server: OpenTubeX 用于加载视频、频道、播放列表和搜索结果的 yattee-server 实例。用户名和密码仅保存在此设备上。
+    Proxy Videos Through Yattee Server: 通过服务器中转视频和音频流。除非服务器与你使用同一个互联网连接，否则请保持开启，因为 YouTube 只向请求流的地址提供流。缩略图始终直接从 YouTube 加载。
   Proxy Settings:
     IP Block Recovery Script Path: 检测到 IP 被封锁时要运行的脚本文件路径。OpenTubeX 会等待脚本运行完毕，然后重新加载视频。如果启用了备用方案，则仅在备用方案也失败时运行脚本。
   Player Settings:
@@ -2255,3 +2277,15 @@ Subscription Groups:
   Empty Group: 此分组中没有当前配置文件的频道。
   Save Failed: 无法保存分组。
   Delete Failed: 无法删除分组。
+Yattee Server:
+  API Error (Click to copy): Yattee 服务器错误（点击复制）
+  Unsupported page: 使用 Yattee 服务器时无法打开此页面。开启“{fallbackSetting}”即可通过本地 API 加载。
+  Posts unavailable: Yattee 服务器不提供帖子。开启“{fallbackSetting}”即可通过本地 API 加载。
+  Errors:
+    Invalid credentials: Yattee 服务器拒绝了用户名或密码。请在“设置”→“高级”中检查。
+    Rate limited: 由于失败尝试次数过多，Yattee 服务器正在阻止登录。请稍后重试。
+    Streams not relayed: Yattee 服务器未中转此视频的流。通过服务器代理视频时，OpenTubeX 不会直接连接 YouTube。
+    Not configured: 请在“设置”→“高级”中输入你的 Yattee 服务器 URL。
+    HTTPS required: Android 只能播放来自使用 HTTPS 的 Yattee 服务器的视频。
+    Streams unavailable: 无法从 Yattee 服务器加载此视频的流。请使用“设置”→“高级”中的“测试连接”检查服务器。
+Yattee Fallback Warning: 此请求绕过了你配置的 Yattee 服务器，直接连接到 YouTube，从而暴露你的 IP 地址。

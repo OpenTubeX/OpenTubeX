@@ -418,6 +418,25 @@ Settings:
       Grid Columns: Stĺpce mriežky
       Playlist Grid Columns: Stĺpce mriežky playlistov
       Auto: Automaticky
+    Preferred API Backend:
+      Yattee Server: Server Yattee
+    Yattee Server:
+      Server URL: URL servera Yattee
+      Username: Používateľské meno
+      Password: Heslo
+      Proxy Videos: Smerovať videá cez server Yattee
+      Test Connection: Testovať pripojenie
+      Testing: Testuje sa pripojenie…
+      Connected: Pripojené k Yattee Server {version}
+      Errors:
+        Invalid URL: Zadajte adresu URL servera začínajúcu na https:// alebo http://.
+        Unreachable: Server je nedostupný. Skontrolujte adresu URL a to, či server beží.
+        Media not allowed: 'Pripojené, ale server nepovoľuje tejto aplikácii načítavať videá. Nastavte CORS_ORIGINS={origins} v premenných prostredia servera.'
+        Not a Yattee server: Server odpovedal, ale nie je to server Yattee.
+        Credentials required: Server vyžaduje používateľské meno a heslo.
+        Invalid credentials: Server odmietol používateľské meno alebo heslo.
+        Rate limited: Server po príliš mnohých neúspešných pokusoch blokuje prihlásenie. Skúste to znova neskôr.
+        Server error: Server vrátil chybu (HTTP {status}).
   Context Menu Search Settings:
     Context Menu Search Settings: Hľadanie v kontextovej ponuke
     Description: Vyberte vyhľadávače, ktoré sa zobrazia po kliknutí pravým tlačidlom na označený text. Výsledky hľadania sa otvoria v predvolenom prehliadači.
@@ -1653,6 +1672,7 @@ Video:
       needs_auth: "Vyžaduje sa prihlásenie"
       unlisted: "Neuvedené"
   Save Queue to Playlist: "Uložiť poradie do playlistu"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Živý chat momentálne nie je podporovaný so serverom Yattee. Vyžaduje sa priame spojenie s YouTube.
 Playlist:
   Playlist Already Preloaded: "Všetky videá v playliste sú už predbežne načítané"
   Playlist Preload Progress: "Predbežné načítavanie videí: {completed} z {requested}"
@@ -1879,6 +1899,8 @@ Tooltips:
       Možnosť Načítať naposledy aktívnu kartu obnoví predchádzajúcu reláciu. Ostatné karty otvorí, ale ponechá ich uvoľnené, kým na ne nekliknete.
       Možnosť Začať s prázdnou reláciou preskočí uložené karty a otvorí nové prázdne okno.
     Remember Tab Navigation History: História prechádzania späť a dopredu sa pre každú kartu uloží a obnoví po opätovnom spustení OpenTubeX.
+    Yattee Server: Inštancia yattee-server, z ktorej OpenTubeX načítava videá, kanály, playlisty a výsledky vyhľadávania. Používateľské meno a heslo sa ukladajú iba v tomto zariadení.
+    Proxy Videos Through Yattee Server: Smeruje video a zvukové streamy cez server. Nechajte túto možnosť zapnutú, pokiaľ server nepoužíva rovnaké internetové pripojenie ako vy, pretože YouTube poskytuje streamy iba adrese, ktorá si ich vyžiadala. Náhľady sa vždy načítavajú priamo z YouTube.
   Proxy Settings:
     IP Block Recovery Script Path: Cesta k súboru skriptu, ktorý sa spustí po zistení zablokovania IP adresy. OpenTubeX počká na jeho dokončenie a potom znova načíta video. Ak je zapnutý záložný backend, skript sa spustí až po jeho zlyhaní.
   Player Settings:
@@ -2256,3 +2278,15 @@ Subscription Groups:
   Empty Group: Táto skupina neobsahuje žiadne kanály z aktuálneho profilu.
   Save Failed: Skupinu sa nepodarilo uložiť.
   Delete Failed: Skupinu sa nepodarilo vymazať.
+Yattee Server:
+  API Error (Click to copy): Chyba servera Yattee (kliknite pre kopírovanie)
+  Unsupported page: Táto stránka nie je so serverom Yattee dostupná. Zapnite možnosť „{fallbackSetting}“, aby sa načítala pomocou lokálneho API.
+  Posts unavailable: Servery Yattee neposkytujú príspevky. Zapnite možnosť „{fallbackSetting}“, aby sa načítali pomocou lokálneho API.
+  Errors:
+    Invalid credentials: Server Yattee odmietol používateľské meno alebo heslo. Skontrolujte ich v časti Nastavenia → Rozšírené.
+    Rate limited: Server Yattee po príliš mnohých neúspešných pokusoch blokuje prihlásenie. Skúste to znova neskôr.
+    Streams not relayed: Server Yattee nesprostredkoval streamy tohto videa. Kým sú videá smerované cez server, OpenTubeX sa k YouTube nepripája priamo.
+    Not configured: Zadajte adresu URL svojho servera Yattee v časti Nastavenia → Rozšírené.
+    HTTPS required: Android dokáže prehrávať videá iba zo serverov Yattee, ktoré používajú HTTPS.
+    Streams unavailable: Streamy tohto videa sa nepodarilo načítať zo servera Yattee. Server skontrolujte pomocou „Testovať pripojenie“ v časti Nastavenia → Rozšírené.
+Yattee Fallback Warning: Táto požiadavka obchádza nastavený server Yattee a pripája sa priamo k YouTube, čím odhaľuje vašu IP adresu.

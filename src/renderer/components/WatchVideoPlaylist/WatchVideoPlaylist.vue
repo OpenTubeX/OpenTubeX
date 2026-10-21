@@ -285,8 +285,9 @@ import FtListVideoNumbered from '../FtListVideoNumbered/FtListVideoNumbered.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 
 import store from '../../store/index'
+import { usesInvidiousApi } from '../../../apiBackends'
 
-import { showInvidiousFallbackToast, deepCopy, extractNumberFromString, getVideoThumbnailUrl, showApiErrorToast, showToast, throttle } from '../../helpers/utils'
+import { getInvidiousApiErrorMessage, showInvidiousFallbackToast, deepCopy, extractNumberFromString, getVideoThumbnailUrl, showApiErrorToast, showToast, throttle } from '../../helpers/utils'
 import {
   getLocalCachedFeedContinuation,
   getLocalPlaylist,
@@ -385,7 +386,7 @@ onBeforeUnmount(() => { playlistLoadGeneration += 1 })
 let previewAnimationFrame = null
 let previewPointerClientX = 0
 
-/** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
+/** @type {import('vue').ComputedRef<'local' | 'invidious' | 'yattee'>} */
 const backendPreference = computed(() => store.getters.getBackendPreference)
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -674,7 +675,7 @@ watch(() => props.playlistId, () => {
 
   if (cachedPlaylist?.id === props.playlistId) {
     loadCachedPlaylistInformation(cachedPlaylist)
-  } else if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
+  } else if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendPreference.value)) {
     getPlaylistInformationInvidious()
   } else {
     getPlaylistInformationLocal()
@@ -733,7 +734,7 @@ function getPlaylistInfoWithDelay() {
 
   if (selectedUserPlaylist.value != null) {
     parseUserPlaylist(selectedUserPlaylist.value)
-  } else if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
+  } else if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendPreference.value)) {
     getPlaylistInformationInvidious()
   } else {
     getPlaylistInformationLocal()
@@ -1108,7 +1109,7 @@ async function loadCachedPlaylistInformation(cachedPlaylist) {
   channelName.value = cachedPlaylist.channelName
   channelId.value = cachedPlaylist.channelId
 
-  hasUnloadedPlaylistVideos.value = process.env.SUPPORTS_LOCAL_API && backendPreference.value !== 'invidious' && cachedPlaylist.continuationData !== null
+  hasUnloadedPlaylistVideos.value = process.env.SUPPORTS_LOCAL_API && !usesInvidiousApi(backendPreference.value) && cachedPlaylist.continuationData !== null
   isFetchingPlaylistContinuation.value = hasUnloadedPlaylistVideos.value
 
   // Playback must not wait for later pages when the next video is already cached.
@@ -1220,10 +1221,10 @@ async function getPlaylistInformationInvidious() {
   } catch (err) {
     if (generation !== playlistLoadGeneration) return
     console.error(err)
-    const errorMessage = t('Invidious API Error (Click to copy)')
+    const errorMessage = getInvidiousApiErrorMessage(backendPreference.value)
     showApiErrorToast(errorMessage, err)
-    if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showInvidiousFallbackToast()
+    if (process.env.SUPPORTS_LOCAL_API && usesInvidiousApi(backendPreference.value) && backendFallback.value) {
+      showInvidiousFallbackToast(backendPreference.value)
       getPlaylistInformationLocal()
     } else {
       isLoading.value = false

@@ -670,7 +670,7 @@ import {
   shouldUseProgressToast,
 } from './helpers/progressPresentation'
 import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog } from './helpers/releaseUpdates'
-import { copyToClipboard, isUnloadedBackgroundTabClick, openExternalLink, openInternalPath, shareLink, showApiErrorToast, showToast } from './helpers/utils'
+import { copyToClipboard, getInvidiousApiErrorMessage, isUnloadedBackgroundTabClick, openExternalLink, openInternalPath, shareLink, showApiErrorToast, showToast } from './helpers/utils'
 import { getChannelLinkDetails, getChannelLinkMenuItems } from './helpers/channel-context-menu'
 import { openNotificationSettings } from './helpers/capacitorUi'
 import { initializeCapacitorLiveReminderActions } from './helpers/liveReminders'
@@ -1282,6 +1282,16 @@ watch(isKeyboardShortcutPromptShown, shown => {
   settingsSearchTarget.value = null
   store.commit('setSettingsWindowSection', null)
 }, { flush: 'sync' })
+if (process.env.IS_ELECTRON) {
+  // The main process adds the credentials to player, caption and image requests.
+  watch(() => [store.getters.getApiServerAuthorization, store.getters.getApiServerUrl], ([authorization, url]) => {
+    if (authorization) {
+      window.ftElectron.setInvidiousAuthorization(authorization, url)
+    } else {
+      window.ftElectron.clearInvidiousAuthorization()
+    }
+  }, { immediate: true, flush: 'sync' })
+}
 const subscriptionAutoRefreshTimers = {
   videos: null,
   shorts: null,
@@ -2189,9 +2199,12 @@ const androidSubscriptionRefreshConfiguration = computed(() => {
       live: subscriptionLiveAutoRefreshInterval.value,
       posts: subscriptionPostsAutoRefreshInterval.value
     },
-    hiddenFeedTypes: hiddenSubscriptionFeedTypes.value,
-    instanceUrl: store.getters.getCurrentInvidiousInstanceUrl,
-    authorization: store.getters.getCurrentInvidiousInstanceAuthorization,
+    // Yattee servers have no posts, so only the local API fallback can refresh them
+    hiddenFeedTypes: store.getters.getBackendPreference === 'yattee' && !store.getters.getBackendFallback
+      ? [...new Set([...hiddenSubscriptionFeedTypes.value, 'posts'])]
+      : hiddenSubscriptionFeedTypes.value,
+    instanceUrl: store.getters.getApiServerUrl,
+    authorization: store.getters.getApiServerAuthorization,
     titles: Object.fromEntries(subscriptionAutoRefreshTabs.map(tab => [
       tab,
       getSubscriptionRefreshNotificationTitle(tab)
@@ -2927,7 +2940,7 @@ async function importAndroidSubscriptionRefreshResults() {
       ) {
         const diagnostic = formatRequestDiagnostic(result.diagnostic)
         console.error(`Closed-app subscription refresh request failed: ${diagnostic}`)
-        showApiErrorToast(store.getters.getBackendPreference === 'local' ? t('Local API Error (Click to copy)') : t('Invidious API Error (Click to copy)'), diagnostic)
+        showApiErrorToast(store.getters.getBackendPreference === 'local' ? t('Local API Error (Click to copy)') : getInvidiousApiErrorMessage(store.getters.getBackendPreference), diagnostic)
       }
 
       await acknowledgeAndroidSubscriptionRefreshResult(result.id)

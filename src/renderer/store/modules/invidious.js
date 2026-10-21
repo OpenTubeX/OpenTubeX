@@ -1,4 +1,5 @@
 import { base64EncodeUtf8, createWebURL, fetchWithTimeout, randomArrayItem } from '../../helpers/utils'
+import { createYatteeAuthorization, normalizeYatteeServerUrl } from '../../helpers/api/yattee'
 
 const state = {
   currentInvidiousInstance: '',
@@ -22,6 +23,20 @@ const getters = {
 
   getInvidiousInstancesList(state) {
     return state.invidiousInstancesList
+  },
+
+  /** The server that Invidious-compatible API requests go to. */
+  getApiServerUrl(state, _getters, rootState) {
+    return rootState.settings.backendPreference === 'yattee'
+      ? normalizeYatteeServerUrl(rootState.settings.yatteeServerUrl)
+      : state.currentInvidiousInstanceUrl
+  },
+
+  getApiServerAuthorization(state, _getters, rootState) {
+    const { backendPreference, yatteeUsername, yatteePassword } = rootState.settings
+    return backendPreference === 'yattee'
+      ? createYatteeAuthorization(yatteeUsername, yatteePassword)
+      : state.currentInvidiousInstanceAuthorization
   }
 }
 
@@ -103,14 +118,6 @@ const mutations = {
     }
 
     state.currentInvidiousInstanceUrl = instanceUrl
-
-    if (process.env.IS_ELECTRON) {
-      if (authorization) {
-        window.ftElectron.setInvidiousAuthorization(authorization, instanceUrl)
-      } else {
-        window.ftElectron.clearInvidiousAuthorization()
-      }
-    }
   },
 
   setInvidiousInstancesList(state, value) {

@@ -434,6 +434,25 @@ Settings:
       Grid Columns: ستون‌های شبکه
       Playlist Grid Columns: ستون‌های شبکهٔ فهرست‌های پخش
       Auto: خودکار
+    Preferred API Backend:
+      Yattee Server: سرور Yattee
+    Yattee Server:
+      Server URL: نشانی سرور Yattee
+      Username: نام کاربری
+      Password: رمز عبور
+      Proxy Videos: پروکسی ویدیوها از طریق سرور Yattee
+      Test Connection: آزمایش اتصال
+      Testing: در حال آزمایش اتصال…
+      Connected: متصل به سرور Yattee {version}
+      Errors:
+        Invalid URL: نشانی سرور را وارد کنید؛ باید با https:// یا http:// شروع شود.
+        Unreachable: دسترسی به سرور ممکن نشد. نشانی را بررسی کنید و مطمئن شوید سرور در حال اجراست.
+        Media not allowed: 'اتصال برقرار شد، اما سرور به این برنامه اجازهٔ بارگذاری ویدیوها را نمی‌دهد. CORS_ORIGINS={origins} را در متغیرهای محیطی سرور تنظیم کنید.'
+        Not a Yattee server: سرور پاسخ داد، اما سرور Yattee نیست.
+        Credentials required: سرور به نام کاربری و رمز عبور نیاز دارد.
+        Invalid credentials: سرور نام کاربری یا رمز عبور را نپذیرفت.
+        Rate limited: سرور پس از تلاش‌های ناموفق زیاد، ورود را مسدود کرده است. بعداً دوباره تلاش کنید.
+        Server error: سرور خطا برگرداند (HTTP {status}).
   Context Menu Search Settings:
     Context Menu Search Settings: جست‌وجوی منوی زمینه
     Description: موتورهای جست‌وجویی را انتخاب کنید که با کلیک راست روی متن انتخاب‌شده نمایش داده می‌شوند. جست‌وجوها در مرورگر پیش‌فرض شما باز می‌شوند.
@@ -1734,6 +1753,7 @@ Video:
       unlisted: "بدون لیست"
   How this was made: این چگونه ساخته شده است
   Save Queue to Playlist: "ذخیرهٔ صف در فهرست پخش"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: گفتگوی زنده در حال حاضر با سرور Yattee پشتیبانی نمی‌شود. اتصال مستقیم به YouTube مورد نیاز است.
 Playlist:
   Playlist Already Preloaded: "همه ویدیوهای فهرست پخش از قبل پیش‌بارگذاری شده‌اند"
   Playlist Preload Progress: "در حال پیش‌بارگذاری ویدیوها: {completed} از {requested}"
@@ -1966,6 +1986,8 @@ Tooltips:
       «بارگیری آخرین زبانه فعال» نشست قبلی را با زبانه‌های دیگر به‌صورت باز اما بارگیری‌نشده بازیابی می‌کند؛ با کلیک روی آن‌ها بارگیری می‌شوند.
       «شروع با نشست خالی» زبانه‌های ذخیره‌شده را نادیده می‌گیرد و پنجره‌ای تازه باز می‌کند.
     Remember Tab Navigation History: سابقه پیمایش عقب و جلوی هر زبانه ذخیره می‌شود و با راه‌اندازی دوباره OpenTubeX بازیابی می‌شود.
+    Yattee Server: نمونهٔ yattee-server که OpenTubeX ویدیوها، کانال‌ها، لیست‌های پخش و نتایج جستجو را از آن بارگذاری می‌کند. نام کاربری و رمز عبور فقط روی همین دستگاه ذخیره می‌شوند.
+    Proxy Videos Through Yattee Server: جریان‌های ویدیو و صدا را از طریق سرور منتقل می‌کند. این گزینه را روشن نگه دارید، مگر اینکه سرور از همان اتصال اینترنت شما استفاده کند؛ زیرا YouTube جریان‌ها را فقط به نشانی‌ای می‌فرستد که آن‌ها را درخواست کرده است. تصاویر بندانگشتی همیشه مستقیماً از YouTube بارگذاری می‌شوند.
   Proxy Settings:
     IP Block Recovery Script Path: مسیر فایل اسکریپتی که هنگام شناسایی مسدودشدن IP اجرا می‌شود. OpenTubeX تا پایان آن منتظر می‌ماند و سپس ویدیو را دوباره بارگیری می‌کند. اگر روش جایگزین فعال باشد، اسکریپت فقط در صورت شکست آن نیز اجرا می‌شود.
   Player Settings:
@@ -2344,3 +2366,15 @@ Subscription Groups:
   Empty Group: این گروه هیچ کانالی از نمایهٔ فعلی ندارد.
   Save Failed: گروه ذخیره نشد.
   Delete Failed: گروه حذف نشد.
+Yattee Server:
+  API Error (Click to copy): خطای سرور Yattee (برای کپی کلیک کنید)
+  Unsupported page: این صفحه با سرور Yattee در دسترس نیست. برای بارگذاری آن با API محلی، «{fallbackSetting}» را روشن کنید.
+  Posts unavailable: سرورهای Yattee پست‌ها را ارائه نمی‌دهند. برای بارگذاری آن‌ها با API محلی، «{fallbackSetting}» را روشن کنید.
+  Errors:
+    Invalid credentials: سرور Yattee نام کاربری یا رمز عبور را نپذیرفت. آن‌ها را در تنظیمات → پیشرفته بررسی کنید.
+    Rate limited: سرور Yattee پس از تلاش‌های ناموفق زیاد، ورود را مسدود کرده است. بعداً دوباره تلاش کنید.
+    Streams not relayed: سرور Yattee جریان‌های این ویدیو را منتقل نکرد. تا وقتی ویدیوها از طریق سرور پروکسی می‌شوند، OpenTubeX مستقیماً به YouTube وصل نمی‌شود.
+    Not configured: نشانی سرور Yattee خود را در تنظیمات → پیشرفته وارد کنید.
+    HTTPS required: Android فقط می‌تواند ویدیوها را از سرورهای Yattee که از HTTPS استفاده می‌کنند پخش کند.
+    Streams unavailable: بارگیری جریان‌های این ویدیو از سرور Yattee ممکن نشد. برای بررسی سرور از «آزمایش اتصال» در تنظیمات → پیشرفته استفاده کنید.
+Yattee Fallback Warning: این درخواست سرور Yattee پیکربندی‌شدهٔ شما را دور می‌زند و مستقیماً به YouTube وصل می‌شود و نشانی IP شما را آشکار می‌کند.

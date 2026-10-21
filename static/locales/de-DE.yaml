@@ -456,6 +456,7 @@ Settings:
       Preferred API Backend: Bevorzugtes API-Backend
       Local API: Lokale API
       Invidious API: Invidious-API
+      Yattee Server: "Yattee-Server"
     Video View Type:
       Video View Type: Videoübersicht
       Grid: Raster
@@ -480,6 +481,23 @@ Settings:
         #! List countries
     Check for Updates: Auf Updates prüfen
     View all Invidious instance information: Alle Informationen zur Invidious-Instanz anzeigen
+    Yattee Server:
+      Server URL: "URL des Yattee-Servers"
+      Username: "Benutzername"
+      Password: "Passwort"
+      Proxy Videos: "Videos über den Yattee-Server leiten"
+      Test Connection: "Verbindung testen"
+      Testing: "Verbindung wird getestet…"
+      Connected: "Verbunden mit Yattee Server {version}"
+      Errors:
+        Invalid URL: "Gib die URL des Servers ein, beginnend mit https:// oder http://."
+        Unreachable: "Der Server ist nicht erreichbar. Prüfe die URL und ob der Server läuft."
+        Media not allowed: "Verbunden, aber der Server erlaubt dieser App nicht, Videos zu laden. Setze CORS_ORIGINS={origins} in der Umgebung des Servers."
+        Not a Yattee server: "Der Server hat geantwortet, ist aber kein Yattee-Server."
+        Credentials required: "Der Server erfordert einen Benutzernamen und ein Passwort."
+        Invalid credentials: "Der Server hat den Benutzernamen oder das Passwort abgelehnt."
+        Rate limited: "Der Server blockiert Anmeldungen nach zu vielen Fehlversuchen. Versuche es später erneut."
+        Server error: "Der Server hat einen Fehler gemeldet (HTTP {status})."
     System Default: Systemvorgabe
     Comment Translation:
       Title: Kommentarübersetzungen
@@ -1986,6 +2004,7 @@ Video:
   Live Chat is currently not supported in this build.: Live-Chat wird in diesem Build derzeit nicht unterstützt.
   Live chat is enabled. Chat messages will appear here once sent.: Live-Chat ist aktiviert. Chat-Nachrichten werden hier angezeigt, sobald sie gesendet wurden.
   'Live Chat is currently not supported with the Invidious API. A direct connection to YouTube is required.': Live-Chat wird von der Invidious-API derzeit nicht unterstützt. Eine direkte Verbindung zu YouTube ist erforderlich.
+  'Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.': "Live-Chat wird mit dem Yattee-Server derzeit nicht unterstützt. Eine direkte Verbindung zu YouTube ist erforderlich."
   Published:
     In less than a minute: In weniger als einer Minute
   Published on: Veröffentlicht am
@@ -2524,6 +2543,17 @@ Up Next: Nächster Titel
 # Toast Messages
 Local API Error (Click to copy): Lokaler API-Fehler (Zum Kopieren anklicken)
 Invidious API Error (Click to copy): Invidious-API-Fehler (Zum Kopieren anklicken)
+Yattee Server:
+  API Error (Click to copy): "Yattee-Server-Fehler (Zum Kopieren anklicken)"
+  Errors:
+    Invalid credentials: "Der Yattee-Server hat den Benutzernamen oder das Passwort abgelehnt. Prüfe sie unter Einstellungen → Erweitert."
+    Rate limited: "Der Yattee-Server blockiert Anmeldungen nach zu vielen Fehlversuchen. Versuche es später erneut."
+    Streams not relayed: "Der Yattee-Server hat die Streams dieses Videos nicht weitergeleitet. Solange Videos über den Server geleitet werden, verbindet sich OpenTubeX nicht direkt mit YouTube."
+    Not configured: "Gib die URL deines Yattee-Servers unter Einstellungen → Erweitert ein."
+    HTTPS required: "Android kann nur Videos von Yattee-Servern abspielen, die HTTPS verwenden."
+    Streams unavailable: "Die Streams dieses Videos konnten nicht vom Yattee-Server geladen werden. Prüfe den Server mit „Verbindung testen“ unter Einstellungen → Erweitert."
+  Unsupported page: "Diese Seite ist mit dem Yattee-Server nicht verfügbar. Aktiviere „{fallbackSetting}“, um sie mit der lokalen API zu laden."
+  Posts unavailable: "Yattee-Server stellen keine Beiträge bereit. Aktiviere „{fallbackSetting}“, um sie mit der lokalen API zu laden."
 Falling back to Invidious API: Es wird auf die Invidious-API zurückgegriffen
 Falling back to Local API: Es wird auf die lokale API zurückgegriffen
 This video is unavailable because of missing formats. This can happen due to country unavailability.: Dieses Video ist aufgrund fehlender Formate nicht verfügbar. Zugriffsbeschränkungen im Land kann dafür der Grund sein.
@@ -2615,6 +2645,8 @@ See changes and update: Änderungen ansehen und aktualisieren
 Dismiss: Ausblenden
 Tooltips:
   General Settings:
+    Yattee Server: "Die yattee-server-Instanz, von der OpenTubeX Videos, Kanäle, Wiedergabelisten und Suchergebnisse lädt. Benutzername und Passwort werden nur auf diesem Gerät gespeichert."
+    Proxy Videos Through Yattee Server: "Leitet Video- und Audiostreams über den Server. Lass dies aktiviert, außer der Server nutzt deine Internetverbindung, denn YouTube liefert Streams nur an die Adresse aus, die sie angefordert hat. Vorschaubilder werden immer direkt von YouTube geladen."
     Enable Tabs: "Die aktuelle Seite bleibt geöffnet. Andere Tabs bleiben bis zum Neustart der App erhalten; aktiviere Tabs erneut, um sie wiederherzustellen."
     Data Saver Thumbnails: "Verwendet Vorschaubilder mit geringerer Auflösung, um den Datenverbrauch zu reduzieren."
     Use AI Translation Completions: Füllt Lücken in den von Menschen erstellten Übersetzungen mit KI-generiertem Text. Menschliche Übersetzungen haben immer Vorrang.
@@ -3454,4 +3486,5 @@ Mobile Navigation:
 Installer:
   Create Desktop Shortcut: Desktop-Verknüpfung erstellen
 Invidious Fallback Warning: "Diese Anfrage umgeht deine konfigurierte Invidious-Instanz und verbindet sich direkt mit YouTube. Dabei wird deine IP-Adresse offengelegt."
+Yattee Fallback Warning: "Diese Anfrage umgeht deinen konfigurierten Yattee-Server und verbindet sich direkt mit YouTube. Dabei wird deine IP-Adresse offengelegt."
 Automatically unloaded to free memory: "Automatisch entladen, um Speicher freizugeben"

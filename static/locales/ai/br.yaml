@@ -418,6 +418,25 @@ Settings:
       Grid Columns: Bannoù ar gael
       Playlist Grid Columns: Bannoù gael ar rolloù-lenn
       Auto: Emgefreek
+    Preferred API Backend:
+      Yattee Server: Servijer Yattee
+    Yattee Server:
+      Server URL: URL ar servijer Yattee
+      Username: Anv implijer
+      Password: Ger-tremen
+      Proxy Videos: Proksi video dre ar servijer Yattee
+      Test Connection: Amprouiñ ar c'hennask
+      Testing: Oc'h amprouiñ ar c'hennask…
+      Connected: Kennasket ouzh Yattee Server {version}
+      Errors:
+        Invalid URL: Roit URL ar servijer, o kregiñ gant https:// pe http://.
+        Unreachable: N'eus ket bet gallet tizhout ar servijer. Gwiriit an URL ha gwelit hag-eñ emañ ar servijer o vont en-dro.
+        Media not allowed: 'Kennasket, met ne aotre ket ar servijer an arload-mañ da gargañ videoioù. Lakait CORS_ORIGINS={origins} e endro ar servijer.'
+        Not a Yattee server: Respontet en deus ar servijer, met n'eo ket ur servijer Yattee.
+        Credentials required: Ezhomm en deus ar servijer eus un anv implijer hag ur ger-tremen.
+        Invalid credentials: Nac'het en deus ar servijer an anv implijer pe ar ger-tremen.
+        Rate limited: Stankañ a ra ar servijer ar c'hennaskadennoù goude re a daolioù-esae c'hwitet. Klaskit en-dro diwezhatoc'h.
+        Server error: Distroet en deus ar servijer ur fazi (HTTP {status}).
   Context Menu Search Settings:
     Context Menu Search Settings: "Klask diwar ar roll lañser"
     Description: "Dibabit ar c'hefluskerioù enklask a vo diskouezet pa glikot a-zehou war destenn diuzet. Digoret e vo an enklaskoù en ho merdeer dre ziouer."
@@ -1662,6 +1681,7 @@ Video:
       needs_auth: "Ret eo kevreañ"
       unlisted: "Anlistennet"
   Save Queue to Playlist: "Enrollañ al lost en ur roll-videoioù"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: N'eo ket skoret ar flapañ war-eeun gant ar servijer Yattee evit poent. Ret eo bezañ kennasket war-eeun ouzh YouTube.
 Playlist:
   Playlist Already Preloaded: "Karget eo bet holl videoioù ar roll-lenn en a-raok"
   Playlist Preload Progress: "O kargañ videoioù en a-raok: {completed} diwar {requested}"
@@ -1888,6 +1908,8 @@ Tooltips:
       Kargañ an ivinell oberiant diwezhañ a assav an estez kent gant an ivinelloù all digor met diskarget; karget e vezont pa glikit warno.
       Loc'hañ gant un estez goullo a laosk an ivinelloù enrollet a-gostez hag a zigor ur prenestr nevez.
     Remember Tab Navigation History: "Enrollet ha graet e vez assav eus istor merdeiñ war-raok ha war-gil pep ivinell pa vez adloc'het OpenTubeX."
+    Yattee Server: An istañs yattee-server a vez implijet gant OpenTubeX evit kargañ videoioù, chadennoù, rolloù videoioù ha disoc'hoù klask. Ne vez enrollet an anv implijer hag ar ger-tremen nemet war an trevnad-mañ.
+    Proxy Videos Through Yattee Server: Treuzkas a ra ar gwazhioù video ha son dre ar servijer. Lezit an dra-se gweredekaet nemet ma implij ar servijer an hevelep kennask internet ha c'hwi, rak YouTube ne gas ar gwazhioù nemet d'ar chomlec'h en deus o goulennet. Ar skeudennoùigoù a vez karget war-eeun diouzh YouTube bepred.
   Proxy Settings:
     IP Block Recovery Script Path: "Hent ar restr skript da erounit pa vez dinoet ur stankadur IP. Gortoz a ra OpenTubeX ma vo echu, hag adkargañ a ra ar video. Ma vez gweredekaet an diskoulm erlec'hiañ ne vez erounit ar skript nemet pa c'hwit an diskoulm-se ivez."
   Player Settings:
@@ -2265,3 +2287,15 @@ Subscription Groups:
   Empty Group: N'eus chadenn ebet eus ar profil red er strollad-mañ.
   Save Failed: N'eus ket bet gallet enrollañ ar strollad.
   Delete Failed: N'eus ket bet gallet dilemel ar strollad.
+Yattee Server:
+  API Error (Click to copy): Fazi gant ar servijer Yattee (Klikit evit eilañ)
+  Unsupported page: "N'eo ket hegerz ar bajenn-mañ gant ar servijer Yattee. Gweredekait «\_{fallbackSetting}\_» evit he c'hargañ gant an API lec'hel."
+  Posts unavailable: "Ne bourchas ket ar servijerioù Yattee pennadoù. Gweredekait «\_{fallbackSetting}\_» evit o c'hargañ gant an API lec'hel."
+  Errors:
+    Invalid credentials: Nac'het en deus ar servijer Yattee an anv implijer pe ar ger-tremen. Gwiriit anezho en Arventennoù → Araokaet.
+    Rate limited: Stankañ a ra ar servijer Yattee ar c'hennaskadennoù goude re a daolioù-esae c'hwitet. Klaskit en-dro diwezhatoc'h.
+    Streams not relayed: N'en deus ket treuzkaset ar servijer Yattee gwazhioù ar video-mañ. E-pad ma vez kaset ar videoioù dre ar servijer, ne gennask ket OpenTubeX war-eeun ouzh YouTube.
+    Not configured: Roit URL ho servijer Yattee en Arventennoù → Araokaet.
+    HTTPS required: Ne c'hall Android lenn videoioù nemet eus servijerioù Yattee a implij HTTPS.
+    Streams unavailable: N'haller ket kargañ froudoù ar video-mañ eus ar servijer Yattee. Implijit « Amprouiñ ar c'hennask » en Arventennoù → Araokaet evit gwiriañ ar servijer.
+Yattee Fallback Warning: An azgoulenn-mañ a dremen heb ho servijer Yattee kefluniet hag a gennask war-eeun ouzh YouTube, o tiskouez ho chomlec'h IP.

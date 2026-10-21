@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
+import { usesInvidiousApi } from '../../src/apiBackends.js'
 
 const readSource = path => readFileSync(new URL(`../../src/renderer/${path}`, import.meta.url), 'utf8')
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
@@ -21,10 +22,11 @@ function playlistLoader({ backend = 'invidious', fallback = true, supportsLocal 
     loadInvidiousPlaylistSnapshot: async () => {
       events.push('invidious')
       if (abort) controller.abort()
-      if (backend === 'invidious' && fail) throw new Error('Invidious failed')
+      if (backend !== 'local' && fail) throw new Error('Invidious failed')
       return 'snapshot'
     },
     showInvidiousFallbackToast: () => events.push('warning'),
+    usesInvidiousApi,
   })
   vm.runInContext(readSource('helpers/api/playlist-snapshot.js'), context)
   return {
@@ -67,6 +69,7 @@ test('channel metadata fallback warns before its direct request', async () => {
     invidiousGetChannelInfo: async () => { throw new Error('Invidious failed') },
     getLocalChannel: async () => { events.push('local'); return {} },
     showInvidiousFallbackToast: () => events.push('warning'),
+    usesInvidiousApi,
   })
   vm.runInContext(readSource('helpers/channels.js'), context)
   await context.findChannelById('channel', { preference: 'invidious', fallback: true })
@@ -84,7 +87,8 @@ for (const metadataOnly of [false, true]) {
       initializeNetworkRecovery: () => ({ ready: Promise.resolve() }),
       getConnectionState: () => 'online',
       invidiousGetVideoInformation: async () => { throw new Error('Invidious failed') },
-      showInvidiousFallbackToast: () => events.push('warning'),
+      showInvidiousFallbackToast: backend => events.push(backend === 'yattee' ? 'yattee warning' : 'warning'),
+      usesInvidiousApi,
       showApiErrorToast() {},
       console: { error() {} },
     })
@@ -101,6 +105,39 @@ for (const metadataOnly of [false, true]) {
   })
 }
 
+test('a Yattee server playlist fallback warns before contacting YouTube directly', async () => {
+  const h = playlistLoader({ backend: 'yattee' })
+  await h.load()
+  assert.deepEqual(h.events, ['invidious', 'warning', 'local'])
+})
+
+test('a Yattee server watch fallback names the Yattee server in its warning', async () => {
+  const source = readSource('views/Watch/Watch.js')
+  const start = source.indexOf('    getVideoInformationInvidious:')
+  const end = source.indexOf('\n    async runIpBlockRecoveryScriptAndReload()', start)
+  const events = []
+  const methods = vm.runInNewContext(`({${source.slice(start, end)}})`, {
+    process: { env: { SUPPORTS_LOCAL_API: true } },
+    initializeNetworkRecovery: () => ({ ready: Promise.resolve() }),
+    getConnectionState: () => 'online',
+    invidiousGetVideoInformation: async () => { throw new Error('Yattee server failed') },
+    showInvidiousFallbackToast: backend => events.push(`${backend} warning`),
+    usesInvidiousApi,
+    showApiErrorToast: message => events.push(message),
+    console: { error() {} },
+  })
+  const watch = {
+    ...methods,
+    tabRoute: { params: { id: 'video' } },
+    backendPreference: 'yattee', backendFallback: true,
+    isCurrentVideoLoad: () => true,
+    t: key => key,
+    getVideoInformationLocal: async () => events.push('local'),
+  }
+  await watch.getVideoInformationInvidious(1)
+  assert.deepEqual(events, ['yattee warning', 'Yattee Server.API Error (Click to copy)', 'local'])
+})
+
 test('privacy warnings broadcast each event with a warning icon and a readable duration', () => {
   const source = readSource('helpers/utils.js')
   const start = source.indexOf('function showInvidiousFallbackToast(')
@@ -112,6 +149,10 @@ test('privacy warnings broadcast each event with a warning icon and a readable d
   })
   vm.runInContext(source.slice(start, end), context)
   context.showInvidiousFallbackToast()
-  context.showInvidiousFallbackToast()
-  assert.deepEqual(notifications, Array(2).fill(['Invidious Fallback Warning', 10000, ['fas', 'triangle-exclamation']]))
+  context.showInvidiousFallbackToast('invidious')
+  context.showInvidiousFallbackToast('yattee')
+  assert.deepEqual(notifications, [
+    ...Array(2).fill(['Invidious Fallback Warning', 10000, ['fas', 'triangle-exclamation']]),
+    ['Yattee Fallback Warning', 10000, ['fas', 'triangle-exclamation']]
+  ])
 })

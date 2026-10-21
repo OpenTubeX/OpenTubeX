@@ -26,7 +26,11 @@
         <p
           class="message"
         >
-          {{ $t("Hashtag.This hashtag does not currently have any videos") }}
+          {{
+            unsupported
+              ? $t('Yattee Server.Unsupported page', { fallbackSetting: $t('Settings.General Settings.Fallback to Non-Preferred Backend on Failure') })
+              : $t("Hashtag.This hashtag does not currently have any videos")
+          }}
         </p>
       </FtFlexBox>
 
@@ -64,10 +68,12 @@ import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtAutoLoadNextPageWrapper from '../../components/FtAutoLoadNextPageWrapper.vue'
 import store from '../../store/index'
+import { usesInvidiousApi } from '../../../apiBackends'
 import { useRoute } from 'vue-router'
 import { getHashtagLocal, parseLocalListVideo } from '../../helpers/api/local'
-import { showInvidiousFallbackToast, showApiErrorToast, showToast } from '../../helpers/utils'
+import { getInvidiousApiErrorMessage, showInvidiousFallbackToast, showApiErrorToast, showToast } from '../../helpers/utils'
 import { getHashtagInvidious } from '../../helpers/api/invidious'
+import { YatteeUnsupportedError } from '../../helpers/api/yattee'
 import { useI18n } from 'vue-i18n'
 import { useTabTitle } from '../../tabs/TabContext'
 const { t } = useI18n()
@@ -84,8 +90,9 @@ const pageNumber = ref(1)
 const isLoading = ref(true)
 const isLoadingMore = ref(false)
 const hasMoreResults = ref(false)
+const unsupported = ref(false)
 
-/** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
+/** @type {import('vue').ComputedRef<'local' | 'invidious' | 'yattee'>} */
 const backendPreference = computed(() => {
   return store.getters.getBackendPreference
 })
@@ -106,6 +113,7 @@ watch(() => route.params.hashtag, () => {
 
 function resetData() {
   isLoading.value = true
+  unsupported.value = false
   hashtag.value = ''
   hashtagContinuationData.value = null
   videos.value = []
@@ -140,13 +148,16 @@ async function getInvidiousHashtag(page = 1) {
     pageNumber.value += 1
   } catch (error) {
     console.error(error)
-    const errorMessage = t('Invidious API Error (Click to copy)')
-    showApiErrorToast(errorMessage, error)
-    if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showInvidiousFallbackToast()
+    const isUnsupported = error instanceof YatteeUnsupportedError
+    if (!isUnsupported) {
+      showApiErrorToast(getInvidiousApiErrorMessage(backendPreference.value), error)
+    }
+    if (process.env.SUPPORTS_LOCAL_API && usesInvidiousApi(backendPreference.value) && backendFallback.value) {
+      showInvidiousFallbackToast(backendPreference.value)
       resetData()
       getLocalHashtag()
     } else {
+      unsupported.value = isUnsupported
       isLoading.value = false
     }
   }

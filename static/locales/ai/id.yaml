@@ -418,6 +418,25 @@ Settings:
       Grid Columns: Kolom kisi
       Playlist Grid Columns: Kolom kisi daftar putar
       Auto: Otomatis
+    Preferred API Backend:
+      Yattee Server: Server Yattee
+    Yattee Server:
+      Server URL: URL server Yattee
+      Username: Nama pengguna
+      Password: Kata sandi
+      Proxy Videos: Proksi video lewat server Yattee
+      Test Connection: Uji Koneksi
+      Testing: Menguji koneksi…
+      Connected: Terhubung ke server Yattee {version}
+      Errors:
+        Invalid URL: Masukkan URL server yang diawali dengan https:// atau http://.
+        Unreachable: Tidak dapat menjangkau server. Periksa URL dan pastikan server sedang berjalan.
+        Media not allowed: 'Terhubung, tetapi server tidak mengizinkan aplikasi ini memuat video. Atur CORS_ORIGINS={origins} di variabel lingkungan server.'
+        Not a Yattee server: Server merespons, tetapi bukan server Yattee.
+        Credentials required: Server memerlukan nama pengguna dan kata sandi.
+        Invalid credentials: Server menolak nama pengguna atau kata sandi.
+        Rate limited: Server memblokir upaya masuk setelah terlalu banyak percobaan yang gagal. Coba lagi nanti.
+        Server error: Server mengembalikan galat (HTTP {status}).
   Context Menu Search Settings:
     Context Menu Search Settings: Pencarian Menu Konteks
     Description: Pilih mesin pencari yang muncul saat Anda mengeklik kanan teks terpilih. Pencarian dibuka di peramban bawaan.
@@ -1669,6 +1688,7 @@ Video:
       unlisted: "Tidak terdaftar"
   How this was made: Bagaimana ini dibuat
   Save Queue to Playlist: "Simpan Antrean ke Daftar Putar"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Obrolan Langsung belum didukung dengan server Yattee. Koneksi langsung dengan YouTube dibutuhkan.
 Playlist:
   Playlist Already Preloaded: "Semua video dalam daftar putar sudah dimuat sebelumnya"
   Playlist Preload Progress: "Memuat video terlebih dahulu: {completed} dari {requested}"
@@ -1895,6 +1915,8 @@ Tooltips:
       Muat tab yang terakhir aktif memulihkan sesi sebelumnya dengan tab lain terbuka tetapi dibongkar dari memori. Tab tersebut dimuat saat Anda mengekliknya.
       Mulai dengan sesi kosong mengabaikan tab tersimpan dan membuka jendela baru.
     Remember Tab Navigation History: Riwayat navigasi mundur dan maju setiap tab disimpan lalu dipulihkan saat OpenTubeX dimulai ulang.
+    Yattee Server: Instans yattee-server tempat OpenTubeX memuat video, kanal, daftar putar, dan hasil pencarian. Nama pengguna dan kata sandi hanya disimpan di perangkat ini.
+    Proxy Videos Through Yattee Server: Meneruskan stream video dan audio melalui server. Biarkan tetap aktif kecuali server menggunakan koneksi internet yang sama dengan Anda, karena YouTube hanya mengirim stream ke alamat yang memintanya. Thumbnail selalu dimuat langsung dari YouTube.
   Proxy Settings:
     IP Block Recovery Script Path: Jalur berkas skrip yang dijalankan saat blokir IP terdeteksi. OpenTubeX menunggu skrip selesai, lalu memuat ulang video. Jika metode cadangan diaktifkan, skrip hanya berjalan ketika metode cadangan juga gagal.
   Player Settings:
@@ -2272,3 +2294,15 @@ Subscription Groups:
   Empty Group: Grup ini tidak memiliki kanal dari profil saat ini.
   Save Failed: Tidak dapat menyimpan grup.
   Delete Failed: Tidak dapat menghapus grup.
+Yattee Server:
+  API Error (Click to copy): Galat Server Yattee (Klik untuk menyalin)
+  Unsupported page: Halaman ini tidak tersedia dengan server Yattee. Aktifkan “{fallbackSetting}” untuk memuatnya dengan API lokal.
+  Posts unavailable: Server Yattee tidak menyediakan postingan. Aktifkan “{fallbackSetting}” untuk memuatnya dengan API lokal.
+  Errors:
+    Invalid credentials: Server Yattee menolak nama pengguna atau kata sandi. Periksa keduanya di Pengaturan → Lanjutan.
+    Rate limited: Server Yattee memblokir upaya masuk setelah terlalu banyak percobaan yang gagal. Coba lagi nanti.
+    Streams not relayed: Server Yattee tidak meneruskan stream video ini. Selama video diproksikan melalui server, OpenTubeX tidak terhubung langsung ke YouTube.
+    Not configured: Masukkan URL server Yattee Anda di Pengaturan → Lanjutan.
+    HTTPS required: Android hanya dapat memutar video dari server Yattee yang menggunakan HTTPS.
+    Streams unavailable: Tidak dapat memuat stream video ini dari server Yattee. Gunakan “Uji Koneksi” di Pengaturan → Lanjutan untuk memeriksa server.
+Yattee Fallback Warning: Permintaan ini melewati server Yattee yang Anda konfigurasi dan terhubung langsung ke YouTube, sehingga mengungkap alamat IP Anda.

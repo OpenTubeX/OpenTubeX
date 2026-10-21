@@ -2,6 +2,7 @@ import { getLocalPlaylist, parseLocalPlaylistVideos } from './local'
 import { invidiousGetPlaylistInfo } from './invidious'
 import { loadInvidiousPlaylistSnapshot, loadLocalPlaylistSnapshot } from '../playlist-snapshot'
 import { showInvidiousFallbackToast } from '../utils'
+import { usesInvidiousApi } from '../../../apiBackends'
 
 export async function getPlaylistSnapshot(id, { backend, fallback, signal }) {
   const loadLocal = () => loadLocalPlaylistSnapshot(id, {
@@ -16,14 +17,14 @@ export async function getPlaylistSnapshot(id, { backend, fallback, signal }) {
     getPlaylist: invidiousGetPlaylistInfo,
     signal,
   })
-  const useLocal = process.env.SUPPORTS_LOCAL_API && backend !== 'invidious'
+  const useLocal = process.env.SUPPORTS_LOCAL_API && !usesInvidiousApi(backend)
   try {
     return await (useLocal ? loadLocal() : loadInvidious())
   } catch (error) {
     signal?.throwIfAborted()
     if (!fallback || (!useLocal && !process.env.SUPPORTS_LOCAL_API)) throw error
     // Restart from page one on the other backend, without mixing snapshots.
-    if (!useLocal) showInvidiousFallbackToast()
+    if (!useLocal) showInvidiousFallbackToast(backend)
     return await (useLocal ? loadInvidious() : loadLocal())
   }
 }

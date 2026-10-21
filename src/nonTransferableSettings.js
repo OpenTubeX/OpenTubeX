@@ -87,4 +87,9 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   'backendFallback',
   'backendPreference',
   'proxyVideos',
+  // Server credentials belong to this device.
+  'yatteeServerUrl',
+  'yatteeUsername',
+  'yatteePassword',
+  'yatteeProxyVideos',
 ])

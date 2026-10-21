@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { usesInvidiousApi } from '../../src/apiBackends.js'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
@@ -148,7 +149,7 @@ function createRefresh(fetch) {
     getSubscriptionCacheReady: true,
     getSubscriptionFeedRefreshInProgress: false,
     getBackendPreference: 'local',
-    getCurrentInvidiousInstanceUrl: 'https://invidious.example',
+    getApiServerUrl: 'https://invidious.example',
     getActiveProfile: { _id: 'profile', subscriptions: [{ id: 'channel' }] },
     getVideoCache: { channel: { videos: [video], timestamp: new Date(1000) } }
   }
@@ -156,6 +157,7 @@ function createRefresh(fetch) {
   const refresh = vm.runInNewContext(`${refreshSource}\nrefreshSubscriptionPremieres`, {
     store: { getters, dispatch: async (action, payload) => writes.push(payload) },
     process: { env: { SUPPORTS_LOCAL_API: true } },
+    usesInvidiousApi,
     AbortSignal,
     RSS_ENRICHMENT_TIMEOUT_MS: 15_000,
     RSS_ENRICHMENT_CONCURRENCY: 3,

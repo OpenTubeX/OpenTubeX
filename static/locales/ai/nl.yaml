@@ -419,6 +419,25 @@ Settings:
       Grid Columns: Rasterkolommen
       Playlist Grid Columns: Rasterkolommen voor afspeellijsten
       Auto: Automatisch
+    Preferred API Backend:
+      Yattee Server: Yattee-server
+    Yattee Server:
+      Server URL: URL van Yattee-server
+      Username: Gebruikersnaam
+      Password: Wachtwoord
+      Proxy Videos: Video's via de Yattee-server afspelen
+      Test Connection: Verbinding testen
+      Testing: Verbinding testen…
+      Connected: Verbonden met Yattee Server {version}
+      Errors:
+        Invalid URL: Voer de URL van de server in, beginnend met https:// of http://.
+        Unreachable: Kan de server niet bereiken. Controleer de URL en of de server actief is.
+        Media not allowed: 'Verbonden, maar de server staat niet toe dat deze app video''s laadt. Stel CORS_ORIGINS={origins} in bij de omgevingsvariabelen van de server.'
+        Not a Yattee server: De server reageerde, maar het is geen Yattee-server.
+        Credentials required: De server vereist een gebruikersnaam en wachtwoord.
+        Invalid credentials: De server heeft de gebruikersnaam of het wachtwoord geweigerd.
+        Rate limited: De server blokkeert aanmeldingen na te veel mislukte pogingen. Probeer het later opnieuw.
+        Server error: De server gaf een fout terug (HTTP {status}).
   Context Menu Search Settings:
     Context Menu Search Settings: Zoeken via contextmenu
     Description: Kies welke zoekmachines verschijnen wanneer je met de rechtermuisknop op geselecteerde tekst klikt. Zoekopdrachten worden in je standaardbrowser geopend.
@@ -1708,6 +1727,7 @@ Video:
       unlisted: "Verborgen"
   How this was made: Hoe dit is gemaakt
   Save Queue to Playlist: "Wachtrij opslaan in afspeellijst"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Livechat wordt momenteel niet ondersteund door de Yattee-server. Een directe verbinding met YouTube is nodig.
 Playlist:
   Playlist Already Preloaded: "Alle video's in de afspeellijst zijn al vooraf geladen"
   Playlist Preload Progress: "Video's vooraf laden: {completed} van {requested}"
@@ -1936,6 +1956,8 @@ Tooltips:
       Laatst actieve tabblad laden herstelt de vorige sessie met de andere tabbladen geopend, maar uit het geheugen verwijderd. Ze worden geladen wanneer je erop klikt.
       Met een lege sessie beginnen slaat de opgeslagen tabbladen over en opent een nieuw venster.
     Remember Tab Navigation History: De navigatiegeschiedenis voor vooruit en achteruit van elk tabblad wordt opgeslagen en hersteld wanneer OpenTubeX opnieuw wordt gestart.
+    Yattee Server: De yattee-server-instantie waarvan OpenTubeX video's, kanalen, afspeellijsten en zoekresultaten laadt. De gebruikersnaam en het wachtwoord worden alleen op dit apparaat opgeslagen.
+    Proxy Videos Through Yattee Server: Stuurt video- en audiostreams door via de server. Laat dit aan, tenzij de server je internetverbinding deelt, want YouTube levert streams alleen aan het adres dat ze heeft opgevraagd. Miniaturen worden altijd rechtstreeks van YouTube geladen.
   Proxy Settings:
     IP Block Recovery Script Path: Pad naar het scriptbestand dat wordt uitgevoerd wanneer een IP-blokkade wordt gedetecteerd. OpenTubeX wacht tot het klaar is en laadt daarna de video opnieuw. Als terugvallen is ingeschakeld, wordt het alleen uitgevoerd wanneer ook dat mislukt.
   Player Settings:
@@ -2318,3 +2340,15 @@ Subscription Groups:
   Empty Group: Deze groep bevat geen kanalen uit het huidige profiel.
   Save Failed: De groep kon niet worden opgeslagen.
   Delete Failed: De groep kon niet worden verwijderd.
+Yattee Server:
+  API Error (Click to copy): Fout in Yattee-server (Klik om te kopiëren)
+  Unsupported page: Deze pagina is niet beschikbaar met de Yattee-server. Schakel ‘{fallbackSetting}’ in om deze met de lokale API te laden.
+  Posts unavailable: Yattee-servers bieden geen berichten. Schakel ‘{fallbackSetting}’ in om ze met de lokale API te laden.
+  Errors:
+    Invalid credentials: De Yattee-server heeft de gebruikersnaam of het wachtwoord geweigerd. Controleer ze via Instellingen → Geavanceerd.
+    Rate limited: De Yattee-server blokkeert aanmeldingen na te veel mislukte pogingen. Probeer het later opnieuw.
+    Streams not relayed: De Yattee-server heeft de streams van deze video niet doorgestuurd. Zolang video's via de server lopen, maakt OpenTubeX geen rechtstreekse verbinding met YouTube.
+    Not configured: Voer de URL van je Yattee-server in via Instellingen → Geavanceerd.
+    HTTPS required: Android kan alleen video's afspelen van Yattee-servers die HTTPS gebruiken.
+    Streams unavailable: De streams van deze video konden niet van de Yattee-server worden geladen. Gebruik ‘Verbinding testen’ via Instellingen → Geavanceerd om de server te controleren.
+Yattee Fallback Warning: Dit verzoek omzeilt je ingestelde Yattee-server en maakt rechtstreeks verbinding met YouTube, waardoor je IP-adres wordt blootgesteld.

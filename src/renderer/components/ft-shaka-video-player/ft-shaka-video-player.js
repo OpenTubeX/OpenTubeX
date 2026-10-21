@@ -23,6 +23,7 @@ import { useI18n } from 'vue-i18n'
 import { createPopularityPath, isMostReplayed } from '../../helpers/player/videoPopularity'
 
 import store from '../../store/index'
+import { usesInvidiousInstance } from '../../../apiBackends'
 import { getAvailableFullscreenActions } from '../../helpers/fullscreenActions'
 import { DEFAULT_CONTROL_BAR_BUTTONS, getControlBarButtonDefinitions } from '../../helpers/controlBarButtons'
 import { getSubtitleRequestUrl } from '../../helpers/player/subtitleCookies'
@@ -5169,7 +5170,7 @@ export default defineComponent({
     // #endregion seek history
 
     const showInvidiousShareOptions = computed(() => {
-      return store.getters.getBackendPreference === 'invidious' || store.getters.getBackendFallback
+      return usesInvidiousInstance(store.getters.getBackendPreference, store.getters.getBackendFallback)
     })
 
     const contextMenuElements = computed(() => {

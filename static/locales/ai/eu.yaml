@@ -418,6 +418,25 @@ Settings:
       Grid Columns: Saretako zutabeak
       Playlist Grid Columns: Erreprodukzio-zerrenden saretako zutabeak
       Auto: Automatikoa
+    Preferred API Backend:
+      Yattee Server: Yattee zerbitzaria
+    Yattee Server:
+      Server URL: Yattee zerbitzariaren URLa
+      Username: Erabiltzaile-izena
+      Password: Pasahitza
+      Proxy Videos: Erabili Yattee zerbitzaria bideoen proxy gisa
+      Test Connection: Probatu konexioa
+      Testing: Konexioa probatzen…
+      Connected: 'Konektatuta: Yattee Server {version}'
+      Errors:
+        Invalid URL: Sartu zerbitzariaren URLa, https:// edo http:// aurrizkiarekin.
+        Unreachable: Ezin izan da zerbitzarira iritsi. Egiaztatu URLa eta zerbitzaria martxan dagoen.
+        Media not allowed: 'Konektatuta, baina zerbitzariak ez dio aplikazio honi bideoak kargatzen uzten. Ezarri CORS_ORIGINS={origins} zerbitzariaren ingurune-aldagaietan.'
+        Not a Yattee server: Zerbitzariak erantzun du, baina ez da Yattee zerbitzaria.
+        Credentials required: Zerbitzariak erabiltzaile-izena eta pasahitza behar ditu.
+        Invalid credentials: Zerbitzariak erabiltzaile-izena edo pasahitza baztertu du.
+        Rate limited: Zerbitzaria saio-hasierak blokeatzen ari da, huts egindako saiakera gehiegi egon direlako. Saiatu berriro geroago.
+        Server error: Zerbitzariak errore bat itzuli du (HTTP {status}).
   Context Menu Search Settings:
     Context Menu Search Settings: Laster-menuko bilaketa
     Description: Aukeratu hautatutako testuan eskuineko klik egitean agertuko diren bilaketa-motorrak. Bilaketak arakatzaile lehenetsian irekiko dira.
@@ -1663,6 +1682,7 @@ Video:
       needs_auth: "Saioa hasi behar da"
       unlisted: "Zerrendatu gabeak"
   Save Queue to Playlist: "Gorde ilara erreprodukzio-zerrendan"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Zuzeneko txata ez da oraingoz onartzen Yattee zerbitzariarekin. Beharrezkoa da YouTubera zuzenean konektatzea.
 Playlist:
   Playlist Already Preloaded: "Erreprodukzio-zerrendako bideo guztiak aurrez kargatuta daude"
   Playlist Preload Progress: "Bideoak aurrez kargatzen: {completed}/{requested}"
@@ -1889,6 +1909,8 @@ Tooltips:
       Kargatu aktibo egon den azken fitxa aukerak aurreko saioa leheneratzen du beste fitxak irekita baina memoriatik kenduta dituela; haietan klik egitean kargatuko dira.
       Hasi saio huts batekin aukerak gordetako fitxak saltatu eta leiho berri bat irekitzen du.
     Remember Tab Navigation History: Fitxa bakoitzaren atzerako eta aurrerako nabigazio-historia gorde eta leheneratzen da OpenTubeX berrabiaraztean.
+    Yattee Server: OpenTubeXk bideoak, kanalak, erreprodukzio-zerrendak eta bilaketa-emaitzak kargatzeko erabiltzen duen yattee-server instantzia. Erabiltzaile-izena eta pasahitza gailu honetan soilik gordetzen dira.
+    Proxy Videos Through Yattee Server: Bideo- eta audio-jarioak zerbitzariaren bidez igortzen ditu. Utzi gaituta, zerbitzariak zure Interneteko konexioa partekatzen ez badu behintzat, YouTubek jarioak eskatu dituen helbideari soilik bidaltzen baitizkio. Miniaturak beti YouTubetik zuzenean kargatzen dira.
   Proxy Settings:
     IP Block Recovery Script Path: IP blokeoa hautematean exekutatuko den script-fitxategiaren bide-izena. OpenTubeX aplikazioak amaitu arte itxaroten du eta gero bideoa berriro kargatzen du. Ordezko motorra gaituta badago, hark ere huts egiten duenean soilik exekutatzen da.
   Player Settings:
@@ -2266,3 +2288,15 @@ Subscription Groups:
   Empty Group: Talde honek ez du uneko profileko kanalik.
   Save Failed: Ezin izan da taldea gorde.
   Delete Failed: Ezin izan da taldea ezabatu.
+Yattee Server:
+  API Error (Click to copy): Yattee zerbitzariak huts egin du (klikatu kopiatzeko)
+  Unsupported page: Orri hau ez dago erabilgarri Yattee zerbitzariarekin. Gaitu «{fallbackSetting}» tokiko APIarekin kargatzeko.
+  Posts unavailable: Yattee zerbitzariek ez dute argitalpenik eskaintzen. Gaitu «{fallbackSetting}» tokiko APIarekin kargatzeko.
+  Errors:
+    Invalid credentials: Yattee zerbitzariak erabiltzaile-izena edo pasahitza baztertu du. Egiaztatu Ezarpenak → Aurreratua atalean.
+    Rate limited: Yattee zerbitzaria saio-hasierak blokeatzen ari da, huts egindako saiakera gehiegi egon direlako. Saiatu berriro geroago.
+    Streams not relayed: Yattee zerbitzariak ez ditu bideo honen jarioak igorri. Bideoak zerbitzariaren bidez igortzen diren bitartean, OpenTubeX ez da YouTubera zuzenean konektatzen.
+    Not configured: Sartu zure Yattee zerbitzariaren URLa Ezarpenak → Aurreratua atalean.
+    HTTPS required: Android-ek HTTPS erabiltzen duten Yattee zerbitzarietako bideoak soilik erreproduzi ditzake.
+    Streams unavailable: Ezin izan dira bideo honen jarioak Yattee zerbitzaritik kargatu. Erabili «Probatu konexioa» Ezarpenak → Aurreratua atalean zerbitzaria egiaztatzeko.
+Yattee Fallback Warning: Eskaera honek konfiguratutako Yattee zerbitzaria saihesten du eta zuzenean YouTubera konektatzen da, zure IP helbidea agerian utziz.

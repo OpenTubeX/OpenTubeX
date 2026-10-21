@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { usesInvidiousApi } from '../../src/apiBackends.js'
 import test from 'node:test'
 import { readFile } from 'node:fs/promises'
 import vm from 'node:vm'
@@ -75,7 +76,7 @@ for (const failure of [
   test(`resolved local Shorts failure ${JSON.stringify(failure)} is not reused during recovery`, async () => {
     let calls = 0
     const methods = vm.runInNewContext(`({${extractionSource}})`, {
-      process: { env: { IS_CAPACITOR: false } },
+      process: { env: { IS_CAPACITOR: false } }, usesInvidiousApi,
       getLocalVideoInfo: async () => {
         calls++
         return calls === 1
@@ -142,11 +143,11 @@ for (const shorts of [false, true]) {
   })
 }
 
-for (const backend of ['local', 'invidious']) {
+for (const backend of ['local', 'invidious', 'yattee']) {
   test(`Shorts ${backend} extraction shares requests and uses the matching backend`, async () => {
     const calls = []
     const methods = vm.runInNewContext(`({${extractionSource}})`, {
-      process: { env: { IS_CAPACITOR: false } },
+      process: { env: { IS_CAPACITOR: false } }, usesInvidiousApi,
       getLocalVideoInfo: async (id, options) => {
         calls.push(['local', id, options.shouldGeneratePoToken()])
         return { id }
@@ -157,18 +158,18 @@ for (const backend of ['local', 'invidious']) {
       },
     })
     const watch = {
-      ...methods, backendPreference: backend, currentInvidiousInstanceUrl: 'https://first.example',
+      ...methods, backendPreference: backend, apiServerUrl: 'https://first.example',
       isYtDlpPlaybackRequested: () => false, shortsPlaybackCache: new ShortsPlaybackCache(),
     }
     const first = watch.getShortsVideoInformation('short')
     assert.equal(watch.getShortsVideoInformation('short'), first)
     assert.deepEqual(await first, { id: 'short' })
-    assert.deepEqual(calls, backend === 'local' ? [['local', 'short', true]] : [['invidious', 'short']])
+    assert.deepEqual(calls, backend === 'local' ? [['local', 'short', true]] : [['invidious', 'short']], 'Yattee servers use the Invidious API')
 
-    if (backend === 'invidious') {
-      watch.currentInvidiousInstanceUrl = 'https://second.example'
+    if (backend !== 'local') {
+      watch.apiServerUrl = 'https://second.example'
       await watch.getShortsVideoInformation('short')
-      assert.equal(calls.length, 2, 'changing instance requires fresh stream URLs')
+      assert.equal(calls.length, 2, 'changing the server requires fresh stream URLs')
     }
   })
 }
@@ -176,11 +177,11 @@ for (const backend of ['local', 'invidious']) {
 test('an Invidious preload error is retried when the Short is opened', async () => {
   let calls = 0
   const methods = vm.runInNewContext(`({${extractionSource}})`, {
-    process: { env: { IS_CAPACITOR: false } },
+    process: { env: { IS_CAPACITOR: false } }, usesInvidiousApi,
     invidiousGetVideoInformation: async () => ++calls === 1 ? { error: 'unavailable' } : { ready: true },
   })
   const watch = {
-    ...methods, backendPreference: 'invidious', currentInvidiousInstanceUrl: 'https://first.example',
+    ...methods, backendPreference: 'invidious', apiServerUrl: 'https://first.example',
     isYtDlpPlaybackRequested: () => false, shortsPlaybackCache: new ShortsPlaybackCache(),
   }
   await assert.rejects(watch.getShortsVideoInformation('short'), /unavailable/)

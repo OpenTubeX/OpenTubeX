@@ -403,6 +403,25 @@ Settings:
       Grid Columns: Grid Columns
       Playlist Grid Columns: Playlist Grid Columns
       Auto: Auto
+    Preferred API Backend:
+      Yattee Server: Yattee Server
+    Yattee Server:
+      Server URL: Yattee server URL
+      Username: Username
+      Password: Password
+      Proxy Videos: Proxy videos through the Yattee server
+      Test Connection: Test Connection
+      Testing: Testing the connection…
+      Connected: Connected to Yattee Server {version}
+      Errors:
+        Invalid URL: Enter the server URL, starting with https:// or http://.
+        Unreachable: Could not reach the server. Check the URL and whether the server is running.
+        Media not allowed: 'Connected, but the server does not allow this app to load videos. Set CORS_ORIGINS={origins} in the server''s environment.'
+        Not a Yattee server: The server responded, but it is not a Yattee server.
+        Credentials required: The server requires a username and password.
+        Invalid credentials: The server rejected the username or password.
+        Rate limited: The server is blocking sign-ins after too many failed attempts. Try again later.
+        Server error: The server returned an error (HTTP {status}).
   Context Menu Search Settings:
     Context Menu Search Settings: Context Menu Search
     Description: Choose which search engines appear when you right-click selected text. Searches open in your default browser.
@@ -1640,6 +1659,7 @@ Video:
       unlisted: Unlisted
   How this was made: How this was made
   Save Queue to Playlist: "Save queue to playlist"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.
 Playlist:
   Playlist Already Preloaded: "All playlist videos are already preloaded"
   Playlist Preload Progress: "Preloading videos: {completed} of {requested}"
@@ -1868,6 +1888,8 @@ Tooltips:
       Load last active tab restores the previous session with the other tabs opened but unloaded; they load when you click them.
       Start with an empty session skips the saved tabs and opens a fresh window.
     Remember Tab Navigation History: Each tab's back and forward navigation history is saved and restored when OpenTubeX restarts.
+    Yattee Server: The yattee-server instance that OpenTubeX loads videos, channels, playlists and search results from. The username and password are only stored on this device.
+    Proxy Videos Through Yattee Server: Relays video and audio streams through the server. Leave this on unless the server shares your internet connection, because YouTube only serves streams to the address that requested them. Thumbnails always load directly from YouTube.
   Proxy Settings:
     IP Block Recovery Script Path: Script file path to run when an IP block is detected. OpenTubeX waits for it to finish, then reloads the video. If fallback is enabled, it runs only when fallback also fails.
   Player Settings:
@@ -2245,3 +2267,15 @@ Subscription Groups:
   Empty Group: This group has no channels in the current profile.
   Save Failed: The group could not be saved.
   Delete Failed: The group could not be deleted.
+Yattee Server:
+  API Error (Click to copy): Yattee Server Error (Click to copy)
+  Unsupported page: This page is not available with the Yattee server. Turn on ‘{fallbackSetting}’ to load it with the local API.
+  Posts unavailable: Yattee servers do not provide posts. Turn on ‘{fallbackSetting}’ to load them with the local API.
+  Errors:
+    Invalid credentials: The Yattee server rejected the username or password. Check them in Settings → Advanced.
+    Rate limited: The Yattee server is blocking sign-ins after too many failed attempts. Try again later.
+    Streams not relayed: The Yattee server did not relay the streams of this video. While videos are proxied through the server, OpenTubeX does not connect to YouTube directly.
+    Not configured: Enter the URL of your Yattee server in Settings → Advanced.
+    HTTPS required: Android can only play videos from Yattee servers that use HTTPS.
+    Streams unavailable: Could not load the streams of this video from the Yattee server. Use Test Connection in Settings → Advanced to check the server.
+Yattee Fallback Warning: This request bypasses your configured Yattee server and connects directly to YouTube, exposing your IP address.

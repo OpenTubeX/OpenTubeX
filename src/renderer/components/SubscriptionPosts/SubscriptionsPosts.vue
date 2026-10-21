@@ -10,6 +10,12 @@
       })
     }}
   </p>
+  <p
+    v-if="postsUnavailable"
+    class="message"
+  >
+    {{ t('Yattee Server.Posts unavailable', { fallbackSetting: t('Settings.General Settings.Fallback to Non-Preferred Backend on Failure') }) }}
+  </p>
   <SubscriptionsTabUi
     ref="tabUi"
     :is-loading="isLoading"
@@ -68,6 +74,10 @@ const fetchSubscriptionsAutomatically = computed(() => store.getters.getFetchSub
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const useRssFeeds = computed(() => store.getters.getUseRssFeeds)
+
+// Yattee servers have no posts, only the local API fallback can load them
+const postsUnavailable = computed(() => store.getters.getBackendPreference === 'yattee' &&
+  !(process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback))
 
 const activeSubscriptionList = computed(() => (
   getSubscriptionsForFeed(store.getters.getActiveGroupSubscriptions, 'posts')

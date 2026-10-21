@@ -509,6 +509,7 @@ import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDown
 import { vSaferHtml } from '../../directives/vSaferHtml.js'
 
 import store from '../../store/index'
+import { usesInvidiousInstance } from '../../../apiBackends'
 
 import {
   copyToClipboard,
@@ -1014,7 +1015,7 @@ const playlistSharable = computed(() => {
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */
-const showInvidiousShareOptions = computed(() => backendPreference.value === 'invidious' || store.getters.getBackendFallback)
+const showInvidiousShareOptions = computed(() => usesInvidiousInstance(backendPreference.value, store.getters.getBackendFallback))
 
 const { hideSubscriptionFeedType, hideSubscriptionFeedTypeOption } = useHideSubscriptionFeedType(() => channelId.value)
 

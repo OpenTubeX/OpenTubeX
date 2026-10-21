@@ -95,6 +95,15 @@
         @change="updateProxyVideos"
       />
       <FtToggleSwitch
+        v-if="mode === 'providers' && backendPreference === 'yattee'"
+        :label="t('Settings.General Settings.Yattee Server.Proxy Videos')"
+        :compact="true"
+        :default-value="yatteeProxyVideos"
+        setting-key="yatteeProxyVideos"
+        :tooltip="t('Tooltips.General Settings.Proxy Videos Through Yattee Server')"
+        @change="updateYatteeProxyVideos"
+      />
+      <FtToggleSwitch
         v-if="mode === 'general'"
         :label="t('Settings.General Settings.Update Relative Timestamps')"
         :tooltip="t('Tooltips.General Settings.Update Relative Timestamps')"
@@ -432,7 +441,7 @@
       />
     </FtSliderGrid>
     <div
-      v-if="mode === 'providers' && (backendPreference === 'invidious' || backendFallback)"
+      v-if="mode === 'providers' && usesInvidiousInstance(backendPreference, backendFallback)"
     >
       <FtFlexBox class="settingsFlexStart460px">
         <FtInput
@@ -484,6 +493,63 @@
         />
       </FtFlexBox>
     </div>
+    <div
+      v-if="mode === 'providers' && backendPreference === 'yattee'"
+    >
+      <FtFlexBox class="settingsFlexStart460px">
+        <FtInput
+          :icon="['fas', 'link']"
+          :label="t('Settings.General Settings.Yattee Server.Server URL')"
+          placeholder="https://yattee.example"
+          :show-action-button="false"
+          :show-label="true"
+          :value="yatteeServerUrl"
+          setting-key="yatteeServerUrl"
+          :tooltip="t('Tooltips.General Settings.Yattee Server')"
+          @input="handleYatteeServerUrlInput"
+          @keydown.enter="testYatteeConnection"
+        />
+      </FtFlexBox>
+      <FtFlexBox>
+        <FtInput
+          :icon="['fas', 'circle-user']"
+          :label="t('Settings.General Settings.Yattee Server.Username')"
+          :show-action-button="false"
+          :show-label="true"
+          :value="yatteeUsername"
+          setting-key="yatteeUsername"
+          @input="handleYatteeUsernameInput"
+          @keydown.enter="testYatteeConnection"
+        />
+        <FtInput
+          :icon="['fas', 'lock']"
+          :label="t('Settings.General Settings.Yattee Server.Password')"
+          :placeholder="t('Form Inputs.Enter Password Hint')"
+          :show-action-button="false"
+          :show-label="true"
+          :value="yatteePassword"
+          input-type="password"
+          setting-key="yatteePassword"
+          @input="handleYatteePasswordInput"
+          @keydown.enter="testYatteeConnection"
+        />
+      </FtFlexBox>
+      <FtFlexBox>
+        <FtButton
+          :label="t('Settings.General Settings.Yattee Server.Test Connection')"
+          :icon="['fas', 'flask']"
+          :disabled="yatteeConnectionTesting"
+          @click="testYatteeConnection"
+        />
+      </FtFlexBox>
+      <p
+        v-if="yatteeConnectionStatus !== ''"
+        class="center"
+        role="status"
+      >
+        {{ yatteeConnectionStatus }}
+      </p>
+    </div>
     <FtFlexBox
       v-if="mode === 'general' && (USING_ELECTRON || IS_CAPACITOR)"
       class="confirmations"
@@ -500,7 +566,7 @@
 
 <script setup>
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
-import { computed, onBeforeUnmount } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
@@ -523,6 +589,9 @@ import { debounce, randomArrayItem, showToast } from '../../helpers/utils'
 import { translateWindowTitle } from '../../helpers/strings'
 import { initializePlatformInfo, supportsAutoPictureInPictureMinimize } from '../../helpers/platform'
 import { filterAvailableNavigationItems } from '../../../navigationAvailability'
+import { usesInvidiousInstance } from '../../../apiBackends'
+import { checkYatteeServer, createYatteeAuthorization, normalizeYatteeServerUrl } from '../../helpers/api/yattee'
+import { capacitorHttpFetch } from '../../helpers/api/capacitor-http'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { useThumbnailSizeSlider } from '../../composables/useThumbnailSizeSlider'
 import { MIN_THUMBNAIL_SIZE, THUMBNAIL_SIZE_STEP } from '../../constants/thumbnailSize'
@@ -738,34 +807,130 @@ function updateRelativeTimestampsSetting(value) {
 }
 
 const BACKEND_VALUES = process.env.SUPPORTS_LOCAL_API
-  ? ['invidious', 'local']
-  : ['invidious']
+  ? ['invidious', 'yattee', 'local']
+  : ['invidious', 'yattee']
 
 const backendNames = computed(() => {
+  const names = [
+    t('Settings.General Settings.Preferred API Backend.Invidious API'),
+    t('Settings.General Settings.Preferred API Backend.Yattee Server')
+  ]
+
   if (process.env.SUPPORTS_LOCAL_API) {
-    return [
-      t('Settings.General Settings.Preferred API Backend.Invidious API'),
-      t('Settings.General Settings.Preferred API Backend.Local API')
-    ]
-  } else {
-    return [
-      t('Settings.General Settings.Preferred API Backend.Invidious API')
-    ]
+    names.push(t('Settings.General Settings.Preferred API Backend.Local API'))
   }
+
+  return names
 })
 
-/** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
+/** @type {import('vue').ComputedRef<'local' | 'invidious' | 'yattee'>} */
 const backendPreference = computed(() => store.getters.getBackendPreference)
 
 const showProxyVideosAsDisabled = computed(() => {
-  return backendPreference.value !== 'invidious' && !backendFallback.value
+  return !usesInvidiousInstance(backendPreference.value, backendFallback.value)
 })
 
 /**
- * @param {'local' | 'invidious'} value
+ * @param {'local' | 'invidious' | 'yattee'} value
  */
 function updateBackendPreference(value) {
   store.dispatch('updateBackendPreference', value)
+}
+
+// The connection test uses what was typed, even if the settings haven't been saved yet
+const yatteeServerUrl = ref(store.getters.getYatteeServerUrl)
+const yatteeUsername = ref(store.getters.getYatteeUsername)
+const yatteePassword = ref(store.getters.getYatteePassword)
+watch(() => store.getters.getYatteeServerUrl, value => { yatteeServerUrl.value = value })
+watch(() => store.getters.getYatteeUsername, value => { yatteeUsername.value = value })
+watch(() => store.getters.getYatteePassword, value => { yatteePassword.value = value })
+const yatteeProxyVideos = computed(() => store.getters.getYatteeProxyVideos)
+
+const yatteeConnectionTesting = ref(false)
+const yatteeConnectionStatus = ref('')
+
+/**
+ * @param {string} value
+ */
+function handleYatteeServerUrlInput(value) {
+  yatteeServerUrl.value = value.trim()
+  yatteeConnectionStatus.value = ''
+  store.dispatch('updateYatteeServerUrl', yatteeServerUrl.value)
+}
+
+/**
+ * @param {string} value
+ */
+function handleYatteeUsernameInput(value) {
+  yatteeUsername.value = value
+  yatteeConnectionStatus.value = ''
+  store.dispatch('updateYatteeUsername', value)
+}
+
+/**
+ * @param {string} value
+ */
+function handleYatteePasswordInput(value) {
+  yatteePassword.value = value
+  yatteeConnectionStatus.value = ''
+  store.dispatch('updateYatteePassword', value)
+}
+
+/**
+ * @param {boolean} value
+ */
+function updateYatteeProxyVideos(value) {
+  store.dispatch('updateYatteeProxyVideos', value)
+}
+
+async function testYatteeConnection() {
+  if (yatteeConnectionTesting.value) return
+
+  yatteeConnectionTesting.value = true
+  yatteeConnectionStatus.value = t('Settings.General Settings.Yattee Server.Testing')
+
+  try {
+    const result = await checkYatteeServer(
+      normalizeYatteeServerUrl(yatteeServerUrl.value),
+      createYatteeAuthorization(yatteeUsername.value, yatteePassword.value),
+      // Like the API requests, the check uses native HTTP on mobile, but the player uses the WebView
+      IS_CAPACITOR
+        ? { fetch: (url, init) => capacitorHttpFetch(url, { ...init, allowHttp: true }), mediaFetch: fetch, requireHttps: !IS_IOS }
+        : undefined
+    )
+
+    yatteeConnectionStatus.value = result.ok
+      ? t('Settings.General Settings.Yattee Server.Connected', { version: result.version ?? '' }).trim()
+      : getYatteeConnectionErrorMessage(result)
+  } finally {
+    yatteeConnectionTesting.value = false
+  }
+}
+
+/**
+ * @param {{ error: import('../../helpers/api/yattee').YatteeConnectionError, status?: number }} result
+ */
+function getYatteeConnectionErrorMessage({ error, status }) {
+  switch (error) {
+    case 'invalid-url':
+      return t('Settings.General Settings.Yattee Server.Errors.Invalid URL')
+    case 'unreachable':
+      return t('Settings.General Settings.Yattee Server.Errors.Unreachable')
+    case 'cors':
+      return t('Settings.General Settings.Yattee Server.Errors.Media not allowed', { origins: 'https://localhost,capacitor://localhost' })
+    case 'https-required':
+      return t('Yattee Server.Errors.HTTPS required')
+    case 'not-yattee':
+      return t('Settings.General Settings.Yattee Server.Errors.Not a Yattee server')
+    case 'credentials-required':
+      return t('Settings.General Settings.Yattee Server.Errors.Credentials required')
+    case 'invalid-credentials':
+      return t('Settings.General Settings.Yattee Server.Errors.Invalid credentials')
+    case 'rate-limited':
+      return t('Settings.General Settings.Yattee Server.Errors.Rate limited')
+    default:
+      return t('Settings.General Settings.Yattee Server.Errors.Server error', { status })
+  }
 }
 
 const navigationItems = computed(() => store.getters.getNavigationItems)

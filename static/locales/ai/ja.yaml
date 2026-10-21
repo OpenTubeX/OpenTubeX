@@ -418,6 +418,25 @@ Settings:
       Grid Columns: グリッドの列数
       Playlist Grid Columns: 再生リストのグリッドの列数
       Auto: 自動
+    Preferred API Backend:
+      Yattee Server: Yattee Server
+    Yattee Server:
+      Server URL: Yattee サーバーの URL
+      Username: ユーザー名
+      Password: パスワード
+      Proxy Videos: 動画を Yattee サーバーを経由して取得
+      Test Connection: 接続テスト
+      Testing: 接続をテストしています…
+      Connected: Yattee Server {version} に接続しました
+      Errors:
+        Invalid URL: https:// または http:// で始まるサーバーの URL を入力してください。
+        Unreachable: サーバーに接続できませんでした。URL と、サーバーが稼働しているかを確認してください。
+        Media not allowed: '接続しましたが、サーバーがこのアプリによる動画の読み込みを許可していません。サーバーの環境変数で CORS_ORIGINS={origins} を設定してください。'
+        Not a Yattee server: サーバーから応答はありましたが、Yattee サーバーではありません。
+        Credentials required: このサーバーにはユーザー名とパスワードが必要です。
+        Invalid credentials: サーバーがユーザー名またはパスワードを拒否しました。
+        Rate limited: ログインの失敗回数が多すぎるため、サーバーがログインをブロックしています。しばらくしてから再試行してください。
+        Server error: サーバーがエラーを返しました（HTTP {status}）。
   Context Menu Search Settings:
     Context Menu Search Settings: コンテキストメニュー検索
     Description: 選択したテキストを右クリックしたときに表示する検索エンジンを選択します。検索結果は既定のブラウザーで開きます。
@@ -1653,6 +1672,7 @@ Video:
       needs_auth: "サインインが必要です"
       unlisted: "限定公開"
   Save Queue to Playlist: "キューを再生リストに保存"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: 現在、ライブチャットは Yattee サーバーでは未対応です。直接 YouTube への接続が必要です。
 Playlist:
   Playlist Already Preloaded: "プレイリストのすべての動画は先読み済みです"
   Playlist Preload Progress: "動画を先読み中: {requested} 本中 {completed} 本"
@@ -1879,6 +1899,8 @@ Tooltips:
       「最後に使用したタブを読み込む」は、ほかのタブを開いた状態でメモリから解放して前回のセッションを復元します。クリックすると読み込まれます。
       「空のセッションで開始」は保存済みのタブを復元せず、新しいウィンドウを開きます。
     Remember Tab Navigation History: 各タブの「戻る」と「進む」の履歴を保存し、OpenTubeXの再起動時に復元します。
+    Yattee Server: OpenTubeX が動画、チャンネル、再生リスト、検索結果を読み込む yattee-server インスタンスです。ユーザー名とパスワードはこのデバイスにのみ保存されます。
+    Proxy Videos Through Yattee Server: 動画と音声のストリームをサーバー経由で中継します。YouTube はリクエスト元のアドレスにのみストリームを提供するため、サーバーとインターネット接続を共有している場合を除き、オンのままにしてください。サムネイルは常に YouTube から直接読み込まれます。
   Proxy Settings:
     IP Block Recovery Script Path: IPブロックを検出したときに実行するスクリプトファイルのパスです。OpenTubeXは処理の完了を待ってから動画を再読み込みします。フォールバックが有効な場合は、フォールバックにも失敗したときだけ実行します。
   Player Settings:
@@ -2256,3 +2278,15 @@ Subscription Groups:
   Empty Group: このグループには、現在のプロファイルのチャンネルがありません。
   Save Failed: グループを保存できませんでした。
   Delete Failed: グループを削除できませんでした。
+Yattee Server:
+  API Error (Click to copy): Yattee Server エラー（クリックしてコピー）
+  Unsupported page: このページは Yattee サーバーでは利用できません。内部 API で読み込むには「{fallbackSetting}」をオンにしてください。
+  Posts unavailable: Yattee サーバーは投稿を提供していません。内部 API で読み込むには「{fallbackSetting}」をオンにしてください。
+  Errors:
+    Invalid credentials: Yattee サーバーがユーザー名またはパスワードを拒否しました。「設定」→「詳細設定」で確認してください。
+    Rate limited: ログインの失敗回数が多すぎるため、Yattee サーバーがログインをブロックしています。しばらくしてから再試行してください。
+    Streams not relayed: Yattee サーバーがこの動画のストリームを中継しませんでした。動画をサーバー経由で取得している間、OpenTubeX は YouTube に直接接続しません。
+    Not configured: 「設定」→「詳細設定」で Yattee サーバーの URL を入力してください。
+    HTTPS required: Android では、HTTPS を使用する Yattee サーバーの動画しか再生できません。
+    Streams unavailable: この動画のストリームを Yattee サーバーから読み込めませんでした。「設定」→「詳細設定」の「接続テスト」でサーバーを確認してください。
+Yattee Fallback Warning: このリクエストは設定した Yattee サーバーを経由せず、YouTube に直接接続するため、IP アドレスが公開されます。

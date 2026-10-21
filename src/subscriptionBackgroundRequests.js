@@ -18,6 +18,9 @@ export function createBackgroundSubscriptionRequests({ backend = 'local', useRss
     const invidiousRss = { format: 'rss', url: `${instance}/feed/playlist/%PLAYLIST%`, authorization }
     const local = feed === 'posts' ? [localApi] : feed === 'shorts' ? (useRss ? [localRss, localPlaylist, localApi] : [localApi, localPlaylist, localRss]) : [...(useRss ? [localRss, localApi] : [localApi, localRss]), ...(feed === 'videos' ? [localPlaylist] : [])]
     const invidious = feed === 'posts' ? [invidiousApi] : (useRss ? [invidiousRss, invidiousApi] : [invidiousApi, invidiousRss])
+    // Yattee servers have neither RSS feeds nor posts
+    const yattee = feed === 'posts' ? [] : [invidiousApi]
+    if (backend === 'yattee') return [feed, [...yattee, ...(fallback ? local : [])]]
     return [feed, backend === 'invidious' ? [...invidious, ...(fallback ? local : [])] : [...local, ...(fallback ? invidious : [])]]
   }))
 }

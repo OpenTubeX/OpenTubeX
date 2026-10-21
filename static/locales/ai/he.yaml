@@ -419,6 +419,25 @@ Settings:
       Grid Columns: עמודות רשת
       Playlist Grid Columns: עמודות רשת של רשימות השמעה
       Auto: אוטומטי
+    Preferred API Backend:
+      Yattee Server: שרת Yattee
+    Yattee Server:
+      Server URL: כתובת שרת Yattee
+      Username: שם משתמש
+      Password: סיסמה
+      Proxy Videos: שימוש במתווך לניגון סרטונים דרך שרת Yattee
+      Test Connection: בדיקת החיבור
+      Testing: החיבור נבדק…
+      Connected: מחובר לשרת Yattee {version}
+      Errors:
+        Invalid URL: יש להזין כתובת שרת שמתחילה ב־https:// או ב־http://.
+        Unreachable: לא ניתן להגיע לשרת. יש לבדוק את הכתובת ולוודא שהשרת פועל.
+        Media not allowed: 'החיבור הצליח, אבל השרת אינו מתיר ליישום הזה לטעון סרטונים. יש להגדיר CORS_ORIGINS={origins} במשתני הסביבה של השרת.'
+        Not a Yattee server: השרת הגיב, אבל הוא אינו שרת Yattee.
+        Credentials required: השרת דורש שם משתמש וסיסמה.
+        Invalid credentials: השרת דחה את שם המשתמש או את הסיסמה.
+        Rate limited: השרת חוסם כניסות לאחר יותר מדי ניסיונות כושלים. יש לנסות שוב מאוחר יותר.
+        Server error: השרת החזיר שגיאה (HTTP {status}).
   Context Menu Search Settings:
     Context Menu Search Settings: חיפוש מתפריט ההקשר
     Description: יש לבחור אילו מנועי חיפוש יופיעו בלחיצה ימנית על טקסט מסומן. החיפושים ייפתחו בדפדפן ברירת המחדל.
@@ -1699,6 +1718,7 @@ Video:
       unlisted: "לא מופיע"
   How this was made: איך זה נוצר
   Save Queue to Playlist: "שמירת התור ברשימת נגינה"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: הצ׳אט החי כרגע לא נתמך בשרת Yattee. דרוש חיבור ישיר ל־YouTube.
 Playlist:
   Playlist Already Preloaded: "כל סרטוני הפלייליסט כבר נטענו מראש"
   Playlist Preload Progress: "טוען סרטונים מראש: {completed} מתוך {requested}"
@@ -1927,6 +1947,8 @@ Tooltips:
       טעינת הכרטיסייה הפעילה האחרונה משחזרת את ההפעלה הקודמת כשהכרטיסיות האחרות פתוחות אך לא טעונות; לחיצה עליהן תטען אותן.
       התחלה בהפעלה ריקה מדלגת על הכרטיסיות השמורות ופותחת חלון חדש.
     Remember Tab Navigation History: היסטוריית הניווט קדימה ואחורה של כל כרטיסייה נשמרת ומשוחזרת בעת הפעלה מחדש של OpenTubeX.
+    Yattee Server: עותק yattee-server שממנו OpenTubeX טוען סרטונים, ערוצים, רשימות נגינה ותוצאות חיפוש. שם המשתמש והסיסמה נשמרים במכשיר זה בלבד.
+    Proxy Videos Through Yattee Server: מעביר את סטרימי הווידאו והשמע דרך השרת. מומלץ להשאיר אפשרות זו פעילה, אלא אם השרת חולק את חיבור האינטרנט שלך, כי YouTube מגיש סטרימים רק לכתובת שביקשה אותם. תמונות ממוזערות נטענות תמיד ישירות מ־YouTube.
   Proxy Settings:
     IP Block Recovery Script Path: נתיב לקובץ סקריפט שיופעל כשמזוהה חסימה של כתובת IP. OpenTubeX ממתין לסיום הסקריפט ואז טוען מחדש את הסרטון. אם החלופה מופעלת, הסקריפט יופעל רק אם גם החלופה נכשלת.
   Player Settings:
@@ -2309,3 +2331,15 @@ Subscription Groups:
   Empty Group: בקבוצה זו אין ערוצים מהפרופיל הנוכחי.
   Save Failed: לא ניתן לשמור את הקבוצה.
   Delete Failed: לא ניתן למחוק את הקבוצה.
+Yattee Server:
+  API Error (Click to copy): בעיה בשרת Yattee (יש ללחוץ להעתקה)
+  Unsupported page: עמוד זה אינו זמין עם שרת Yattee. יש להפעיל את „{fallbackSetting}” כדי לטעון אותו באמצעות ה־API המקומי.
+  Posts unavailable: שרתי Yattee אינם מספקים פוסטים. יש להפעיל את „{fallbackSetting}” כדי לטעון אותם באמצעות ה־API המקומי.
+  Errors:
+    Invalid credentials: שרת Yattee דחה את שם המשתמש או את הסיסמה. יש לבדוק אותם בהגדרות → מתקדם.
+    Rate limited: שרת Yattee חוסם כניסות לאחר יותר מדי ניסיונות כושלים. יש לנסות שוב מאוחר יותר.
+    Streams not relayed: שרת Yattee לא העביר את הסטרימים של הסרטון הזה. כל עוד הסרטונים מועברים דרך השרת, OpenTubeX לא מתחבר ישירות ל־YouTube.
+    Not configured: יש להזין את כתובת שרת Yattee שלך בהגדרות → מתקדם.
+    HTTPS required: Android יכול להפעיל רק סרטונים משרתי Yattee שמשתמשים ב־HTTPS.
+    Streams unavailable: לא ניתן לטעון את הזרמים של הסרטון הזה משרת Yattee. יש להשתמש ב„בדיקת החיבור” בהגדרות → מתקדם כדי לבדוק את השרת.
+Yattee Fallback Warning: בקשה זו עוקפת את שרת Yattee שהגדרת ומתחברת ישירות ל־YouTube, תוך חשיפת כתובת ה־IP שלך.

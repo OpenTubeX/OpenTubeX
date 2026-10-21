@@ -155,7 +155,7 @@ function secondsToVttTimestamp(seconds) {
  * video by id. Returns null when thumbnails are hidden, so callers can omit the
  * image entirely rather than showing a meaningless placeholder.
  * @param {string} videoId
- * @param {'local' | 'invidious'} backendPreference
+ * @param {'local' | 'invidious' | 'yattee'} backendPreference
  * @param {string} currentInvidiousInstanceUrl
  * @param {'' | 'hidden' | 'start' | 'middle' | 'end'} thumbnailPreference
  * @param {boolean} portrait
@@ -187,7 +187,7 @@ export function getVideoThumbnailUrl(videoId, backendPreference, currentInvidiou
  * the player poster. YouTube's selected portrait image wins for the default
  * preference; explicit frame preferences still use their generated URLs.
  * @param {{ videoId: string, thumbnailUrl?: string, lowResolutionThumbnailUrl?: string } | null | undefined} video
- * @param {'local' | 'invidious'} backendPreference
+ * @param {'local' | 'invidious' | 'yattee'} backendPreference
  * @param {string} currentInvidiousInstanceUrl
  * @param {'' | 'hidden' | 'start' | 'middle' | 'end'} thumbnailPreference
  * @param {boolean} dataSaver
@@ -286,9 +286,25 @@ export function showToast(message, time = null, action = null, abortSignal = nul
   return detail.control
 }
 
-/** Announce every direct retry, including requests made by background tabs. */
-export function showInvidiousFallbackToast() {
-  showToastOnAllTabs(i18n.global.t('Invidious Fallback Warning'), 10000, ['fas', 'triangle-exclamation'])
+/**
+ * @param {string} backend the preferred backend
+ * @returns {string} the label for errors of the Invidious-compatible API
+ */
+export function getInvidiousApiErrorMessage(backend) {
+  return backend === 'yattee'
+    ? i18n.global.t('Yattee Server.API Error (Click to copy)')
+    : i18n.global.t('Invidious API Error (Click to copy)')
+}
+
+/**
+ * Announce every direct retry, including requests made by background tabs.
+ * @param {string} [backend] the preferred backend that failed
+ */
+export function showInvidiousFallbackToast(backend = 'invidious') {
+  const message = backend === 'yattee'
+    ? i18n.global.t('Yattee Fallback Warning')
+    : i18n.global.t('Invidious Fallback Warning')
+  showToastOnAllTabs(message, 10000, ['fas', 'triangle-exclamation'])
 }
 
 /**

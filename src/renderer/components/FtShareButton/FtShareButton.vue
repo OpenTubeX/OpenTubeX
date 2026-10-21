@@ -180,6 +180,7 @@ import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtButton from '../FtButton/FtButton.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../store/index'
+import { usesInvidiousInstance } from '../../../apiBackends'
 
 const { t } = useI18n()
 const canShare = process.env.IS_CAPACITOR || (process.env.IS_ELECTRON && ['darwin', 'win32'].includes(process.platform))
@@ -265,7 +266,7 @@ const currentInvidiousInstanceUrl = computed(() => {
 })
 
 const showInvidiousOptions = computed(() => {
-  return store.getters.getBackendPreference === 'invidious' || store.getters.getBackendFallback
+  return usesInvidiousInstance(store.getters.getBackendPreference, store.getters.getBackendFallback)
 })
 
 const selectedUserPlaylist = computed(() => {

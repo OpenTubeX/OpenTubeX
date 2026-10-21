@@ -202,11 +202,12 @@ export function parseStreamByteRanges(buffer, isWebm) {
 /**
  * @param {string} url
  * @param {boolean} isWebm
+ * @param {boolean} [useRangeHeader] for proxies that don't forward YouTube's range parameter
  * @returns {Promise<StreamByteRanges | null>}
  */
-export async function probeStreamByteRanges(url, isWebm) {
+export async function probeStreamByteRanges(url, isWebm, useRangeHeader = false) {
   let requestedBytes = INITIAL_PROBE_BYTES
-  const nativeMedia = url.startsWith('capacitor://localhost/_opentubex_media/')
+  const sendRangeHeader = useRangeHeader || url.startsWith('capacitor://localhost/_opentubex_media/')
 
   for (let attempt = 0; attempt < MAX_PROBE_ATTEMPTS; attempt++) {
     // YouTube's own range parameter is used instead of a Range header,
@@ -215,9 +216,9 @@ export async function probeStreamByteRanges(url, isWebm) {
     // Every format is probed at once, so a request that never completes would
     // stall the whole extraction rather than just dropping this one format.
     const end = requestedBytes - 1
-    const response = await fetch(nativeMedia ? url : `${url}&range=0-${end}`, {
+    const response = await fetch(sendRangeHeader ? url : `${url}&range=0-${end}`, {
       signal: AbortSignal.timeout(PROBE_TIMEOUT),
-      ...(nativeMedia ? { headers: { Range: `bytes=0-${end}` } } : {})
+      ...(sendRangeHeader ? { headers: { Range: `bytes=0-${end}` } } : {})
     })
 
     if (!response.ok) {

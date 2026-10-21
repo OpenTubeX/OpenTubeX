@@ -415,6 +415,25 @@ Settings:
       Grid Columns: "Colofnau'r grid"
       Playlist Grid Columns: Colofnau grid rhestri chwarae
       Auto: Awtomatig
+    Preferred API Backend:
+      Yattee Server: Gweinydd Yattee
+    Yattee Server:
+      Server URL: URL gweinydd Yattee
+      Username: Enw defnyddiwr
+      Password: Cyfrinair
+      Proxy Videos: Dirprwyo fideos drwy'r gweinydd Yattee
+      Test Connection: Profi'r Cysylltiad
+      Testing: Wrthi'n profi'r cysylltiad…
+      Connected: Wedi cysylltu â Yattee Server {version}
+      Errors:
+        Invalid URL: Rhowch URL y gweinydd, gan ddechrau gyda https:// neu http://.
+        Unreachable: Methu cyrraedd y gweinydd. Gwiriwch yr URL ac a yw'r gweinydd yn rhedeg.
+        Media not allowed: 'Wedi cysylltu, ond nid yw''r gweinydd yn caniatáu i''r ap hwn lwytho fideos. Gosodwch CORS_ORIGINS={origins} yn newidynnau amgylchedd y gweinydd.'
+        Not a Yattee server: Ymatebodd y gweinydd, ond nid gweinydd Yattee ydyw.
+        Credentials required: Mae'r gweinydd angen enw defnyddiwr a chyfrinair.
+        Invalid credentials: Gwrthododd y gweinydd yr enw defnyddiwr neu'r cyfrinair.
+        Rate limited: Mae'r gweinydd yn rhwystro mewngofnodi ar ôl gormod o ymdrechion aflwyddiannus. Rhowch gynnig arall arni nes ymlaen.
+        Server error: Dychwelodd y gweinydd wall (HTTP {status}).
   Context Menu Search Settings:
     Context Menu Search Settings: Chwilio o'r ddewislen cyd-destun
     Description: Dewiswch pa beiriannau chwilio sy'n ymddangos pan fyddwch yn de-glicio testun a ddewiswyd. Mae chwiliadau'n agor yn eich porwr rhagosodedig.
@@ -1677,6 +1696,7 @@ Video:
       unlisted: "Heb ei restru"
   How this was made: Sut cafodd hwn ei wneud
   Save Queue to Playlist: "Cadw'r ciw mewn rhestr chwarae"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Nid yw Sgwrsio Byw yn cael ei gefnogi gan y gweinydd Yattee ar hyn o bryd. Mae angen cysylltiad uniongyrchol â YouTube.
 Playlist:
   Playlist Already Preloaded: "Mae holl fideos y rhestr chwarae eisoes wedi'u rhaglwytho"
   Playlist Preload Progress: "Yn rhaglwytho fideos: {completed} o {requested}"
@@ -1905,6 +1925,8 @@ Tooltips:
       Mae Llwytho'r tab a oedd yn weithredol ddiwethaf yn adfer y sesiwn flaenorol gyda'r tabiau eraill ar agor ond wedi'u dadlwytho; byddant yn llwytho pan fyddwch yn clicio arnynt.
       Mae Cychwyn â sesiwn wag yn hepgor y tabiau a gadwyd ac yn agor ffenestr newydd.
     Remember Tab Navigation History: Caiff hanes llywio yn ôl ac ymlaen pob tab ei gadw a'i adfer pan fydd OpenTubeX yn ailgychwyn.
+    Yattee Server: Yr enghraifft yattee-server y mae OpenTubeX yn llwytho fideos, sianeli, rhestrau chwarae a chanlyniadau chwilio ohoni. Dim ond ar y ddyfais hon y caiff yr enw defnyddiwr a'r cyfrinair eu storio.
+    Proxy Videos Through Yattee Server: Yn trosglwyddo ffrydiau fideo a sain drwy'r gweinydd. Gadewch hwn ymlaen oni bai bod y gweinydd yn rhannu eich cysylltiad rhyngrwyd, oherwydd dim ond i'r cyfeiriad a ofynnodd amdanynt y mae YouTube yn gweini ffrydiau. Mae lluniau bach bob amser yn llwytho'n uniongyrchol o YouTube.
   Proxy Settings:
     IP Block Recovery Script Path: Llwybr y ffeil sgript i'w rhedeg pan ganfyddir rhwystr IP. Mae OpenTubeX yn aros iddi orffen, yna'n ail-lwytho'r fideo. Os yw'r darparwr wrth gefn wedi'i alluogi, dim ond pan fydd y darparwr hwnnw hefyd yn methu y bydd y sgript yn rhedeg.
   Player Settings:
@@ -2283,3 +2305,15 @@ Subscription Groups:
   Empty Group: Does dim sianeli o'r proffil presennol yn y grŵp hwn.
   Save Failed: Methu cadw'r grŵp.
   Delete Failed: Methu dileu'r grŵp.
+Yattee Server:
+  API Error (Click to copy): Gwall Gweinydd Yattee (Cliciwch i'w gopïo)
+  Unsupported page: Nid yw'r dudalen hon ar gael gyda'r gweinydd Yattee. Trowch “{fallbackSetting}” ymlaen i'w llwytho gyda'r API lleol.
+  Posts unavailable: Nid yw gweinyddion Yattee yn darparu postiadau. Trowch “{fallbackSetting}” ymlaen i'w llwytho gyda'r API lleol.
+  Errors:
+    Invalid credentials: Gwrthododd y gweinydd Yattee yr enw defnyddiwr neu'r cyfrinair. Gwiriwch nhw yn Gosodiadau → Uwch.
+    Rate limited: Mae'r gweinydd Yattee yn rhwystro mewngofnodi ar ôl gormod o ymdrechion aflwyddiannus. Rhowch gynnig arall arni nes ymlaen.
+    Streams not relayed: Ni wnaeth y gweinydd Yattee drosglwyddo ffrydiau'r fideo hwn. Tra bo fideos yn cael eu dirprwyo drwy'r gweinydd, nid yw OpenTubeX yn cysylltu'n uniongyrchol â YouTube.
+    Not configured: Rhowch URL eich gweinydd Yattee yn Gosodiadau → Uwch.
+    HTTPS required: Dim ond fideos o weinyddion Yattee sy'n defnyddio HTTPS y gall Android eu chwarae.
+    Streams unavailable: Methu llwytho ffrydiau'r fideo hwn o'r gweinydd Yattee. Defnyddiwch “Profi'r Cysylltiad” yn Gosodiadau → Uwch i wirio'r gweinydd.
+Yattee Fallback Warning: Mae'r cais hwn yn osgoi'r gweinydd Yattee rydych wedi'i ffurfweddu ac yn cysylltu'n uniongyrchol â YouTube, gan ddatgelu eich cyfeiriad IP.

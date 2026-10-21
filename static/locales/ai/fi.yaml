@@ -419,6 +419,25 @@ Settings:
       Grid Columns: Ruudukon sarakkeet
       Playlist Grid Columns: Soittolistojen ruudukon sarakkeet
       Auto: Automaattinen
+    Preferred API Backend:
+      Yattee Server: Yattee-palvelin
+    Yattee Server:
+      Server URL: Yattee-palvelimen URL
+      Username: Käyttäjänimi
+      Password: Salasana
+      Proxy Videos: Välitä videot Yattee-palvelimen kautta
+      Test Connection: Testaa yhteys
+      Testing: Testataan yhteyttä…
+      Connected: Yhdistetty Yattee-palvelimeen {version}
+      Errors:
+        Invalid URL: Anna palvelimen URL-osoite, jonka alussa on https:// tai http://.
+        Unreachable: Palvelimeen ei saatu yhteyttä. Tarkista URL-osoite ja että palvelin on käynnissä.
+        Media not allowed: 'Yhdistetty, mutta palvelin ei salli tämän sovelluksen ladata videoita. Aseta CORS_ORIGINS={origins} palvelimen ympäristömuuttujiin.'
+        Not a Yattee server: Palvelin vastasi, mutta se ei ole Yattee-palvelin.
+        Credentials required: Palvelin vaatii käyttäjänimen ja salasanan.
+        Invalid credentials: Palvelin hylkäsi käyttäjänimen tai salasanan.
+        Rate limited: Palvelin estää kirjautumiset liian monen epäonnistuneen yrityksen vuoksi. Yritä myöhemmin uudelleen.
+        Server error: Palvelin palautti virheen (HTTP {status}).
   Context Menu Search Settings:
     Context Menu Search Settings: Pikavalikon haku
     Description: Valitse hakukoneet, jotka näkyvät, kun napsautat valittua tekstiä hiiren kakkospainikkeella. Haut avautuvat oletusselaimessasi.
@@ -1697,6 +1716,7 @@ Video:
       unlisted: "Listaamaton"
   How this was made: Miten tämä tehtiin
   Save Queue to Playlist: "Tallenna jono soittolistalle"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Live-keskustelua ei tällä hetkellä tueta Yattee-palvelimen kanssa. Suora yhteys YouTubeen vaaditaan.
 Playlist:
   Playlist Already Preloaded: "Kaikki soittolistan videot on jo esiladattu"
   Playlist Preload Progress: "Esiladataan videoita: {completed}/{requested}"
@@ -1925,6 +1945,8 @@ Tooltips:
       Viimeksi aktiivisen välilehden lataaminen palauttaa edellisen istunnon niin, että muut välilehdet avataan mutta jätetään lataamatta. Ne latautuvat, kun niitä napsautetaan.
       Tyhjän istunnon aloittaminen ohittaa tallennetut välilehdet ja avaa uuden ikkunan.
     Remember Tab Navigation History: Kunkin välilehden taakse- ja eteenpäin siirtymisen historia tallennetaan ja palautetaan, kun OpenTubeX käynnistyy uudelleen.
+    Yattee Server: yattee-server-instanssi, josta OpenTubeX lataa videot, kanavat, soittolistat ja hakutulokset. Käyttäjänimi ja salasana tallennetaan vain tälle laitteelle.
+    Proxy Videos Through Yattee Server: Välittää video- ja äänivirrat palvelimen kautta. Pidä tämä päällä, ellei palvelin käytä samaa internetyhteyttä kuin sinä, sillä YouTube toimittaa mediavirrat vain osoitteeseen, joka pyysi niitä. Pikkukuvat ladataan aina suoraan YouTubesta.
   Proxy Settings:
     IP Block Recovery Script Path: Komentosarjatiedosto, joka suoritetaan IP-eston havaitsemisen jälkeen. OpenTubeX odottaa suorituksen päättymistä ja lataa sitten videon uudelleen. Jos varamenetelmä on käytössä, komentosarja suoritetaan vain, jos myös varamenetelmä epäonnistuu.
   Player Settings:
@@ -2307,3 +2329,15 @@ Subscription Groups:
   Empty Group: Tässä ryhmässä ei ole nykyisen profiilin kanavia.
   Save Failed: Ryhmää ei voitu tallentaa.
   Delete Failed: Ryhmää ei voitu poistaa.
+Yattee Server:
+  API Error (Click to copy): Yattee-palvelimen virhe (Kopioi napsauttamalla)
+  Unsupported page: Tämä sivu ei ole käytettävissä Yattee-palvelimen kanssa. Ota käyttöön ”{fallbackSetting}”, niin sivu ladataan paikallisella API:lla.
+  Posts unavailable: Yattee-palvelimet eivät tarjoa postauksia. Ota käyttöön ”{fallbackSetting}”, niin postaukset ladataan paikallisella API:lla.
+  Errors:
+    Invalid credentials: Yattee-palvelin hylkäsi käyttäjänimen tai salasanan. Tarkista ne kohdassa Asetukset → Lisäasetukset.
+    Rate limited: Yattee-palvelin estää kirjautumiset liian monen epäonnistuneen yrityksen vuoksi. Yritä myöhemmin uudelleen.
+    Streams not relayed: Yattee-palvelin ei välittänyt tämän videon mediavirtoja. Kun videot välitetään palvelimen kautta, OpenTubeX ei muodosta suoraa yhteyttä YouTubeen.
+    Not configured: Anna Yattee-palvelimesi URL-osoite kohdassa Asetukset → Lisäasetukset.
+    HTTPS required: Android voi toistaa videoita vain Yattee-palvelimilta, jotka käyttävät HTTPS:ää.
+    Streams unavailable: Tämän videon striimejä ei voitu ladata Yattee-palvelimelta. Tarkista palvelin toiminnolla ”Testaa yhteys” kohdassa Asetukset → Lisäasetukset.
+Yattee Fallback Warning: Tämä pyyntö ohittaa määrittämäsi Yattee-palvelimen ja muodostaa yhteyden suoraan YouTubeen paljastaen IP-osoitteesi.

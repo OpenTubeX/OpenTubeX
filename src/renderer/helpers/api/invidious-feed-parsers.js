@@ -1,6 +1,10 @@
 import { calculatePublishedDate } from '../feed-metadata.js'
 
-export function createInvidiousFeedParsers(instanceUrl) {
+/**
+ * @param {() => string} instanceUrl
+ * @param {() => boolean} proxyImages whether the server proxies YouTube's images, Yattee servers don't
+ */
+export function createInvidiousFeedParsers(instanceUrl, proxyImages = () => true) {
   /**
    * @returns {string}
    */
@@ -18,12 +22,16 @@ export function createInvidiousFeedParsers(instanceUrl) {
       return null
     }
 
-    if (currentInstance === null) {
-      currentInstance = getCurrentInstanceUrl()
-    }
     // Can be prefixed with `https://` or `//` (protocol relative)
     if (url.startsWith('//')) {
       url = 'https:' + url
+    }
+
+    if (currentInstance === null) {
+      if (!proxyImages()) {
+        return url
+      }
+      currentInstance = getCurrentInstanceUrl()
     }
     const newUrl = `${currentInstance}/ggpht`
     return url.replace('https://yt3.ggpht.com', newUrl)

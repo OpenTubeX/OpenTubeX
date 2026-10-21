@@ -552,6 +552,25 @@ Settings:
       Grid Columns: Columnes de la quadrícula
       Playlist Grid Columns: Columnes de la quadrícula de llistes
       Auto: Automàtic
+    Preferred API Backend:
+      Yattee Server: Servidor Yattee
+    Yattee Server:
+      Server URL: URL del servidor Yattee
+      Username: Nom d'usuari
+      Password: Contrasenya
+      Proxy Videos: Fes servir el servidor Yattee com a intermediari per als vídeos
+      Test Connection: Prova la connexió
+      Testing: S'està provant la connexió…
+      Connected: Connectat a Yattee Server {version}
+      Errors:
+        Invalid URL: Introduïu l'URL del servidor, començant per https:// o http://.
+        Unreachable: No s'ha pogut contactar amb el servidor. Comproveu l'URL i que el servidor estigui en funcionament.
+        Media not allowed: 'Connectat, però el servidor no permet que aquesta aplicació carregui vídeos. Definiu CORS_ORIGINS={origins} a les variables d''entorn del servidor.'
+        Not a Yattee server: El servidor ha respost, però no és un servidor Yattee.
+        Credentials required: El servidor requereix un nom d'usuari i una contrasenya.
+        Invalid credentials: El servidor ha rebutjat el nom d'usuari o la contrasenya.
+        Rate limited: El servidor bloqueja els inicis de sessió després de massa intents fallits. Torneu-ho a provar més tard.
+        Server error: El servidor ha retornat un error (HTTP {status}).
   Context Menu Search Settings:
     Context Menu Search Settings: Cerca al menú contextual
     Description: Trieu quins motors de cerca apareixen en fer clic dret al text seleccionat. Les cerques s'obren al navegador predeterminat.
@@ -2139,6 +2158,7 @@ Video:
       unlisted: "Ocult"
   How this was made: Com s’ha fet
   Save Queue to Playlist: "Desa la cua en una llista de reproducció"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: El xat en directe no està actualment suportat pel servidor Yattee. Es requereix una connexió directa a YouTube.
 Playlist:
   Playlist Already Preloaded: "Tots els vídeos de la llista ja estan precarregats"
   Playlist Preload Progress: "S'estan precarregant vídeos: {completed} de {requested}"
@@ -2420,6 +2440,8 @@ Tooltips:
       De manera predeterminada, l'OpenTubeX obrirà l'enllaç al navegador predeterminat.
     Open Deep Links In New Window: Els URL passats a l'OpenTubeX, per exemple mitjançant extensions de redirecció del navegador o arguments de la línia d'ordres, s'obren en una finestra nova.
     Remember Tab Navigation History: L'historial de navegació enrere i endavant de cada pestanya es desa i es restaura en reiniciar l'OpenTubeX.
+    Yattee Server: La instància de yattee-server des de la qual l'OpenTubeX carrega vídeos, canals, llistes de reproducció i resultats de cerca. El nom d'usuari i la contrasenya només es desen en aquest dispositiu.
+    Proxy Videos Through Yattee Server: Retransmet els fluxos de vídeo i àudio a través del servidor. Deixeu-ho activat tret que el servidor comparteixi la vostra connexió a Internet, perquè YouTube només serveix els fluxos a l'adreça que els ha sol·licitat. Les miniatures sempre es carreguen directament de YouTube.
   Proxy Settings:
     IP Block Recovery Script Path: Camí de l'script que s'executa quan es detecta un bloqueig d'IP. L'OpenTubeX espera que acabi i després torna a carregar el vídeo. Si l'alternativa està activada, només s'executa quan també falla.
   Player Settings:
@@ -2902,3 +2924,15 @@ Subscription Groups:
   Empty Group: Aquest grup no té cap canal del perfil actual.
   Save Failed: No s'ha pogut desar el grup.
   Delete Failed: No s'ha pogut suprimir el grup.
+Yattee Server:
+  API Error (Click to copy): S'ha produït un error en el servidor Yattee (feu clic per copiar-lo)
+  Unsupported page: Aquesta pàgina no està disponible amb el servidor Yattee. Activeu «{fallbackSetting}» per carregar-la amb l'API local.
+  Posts unavailable: Els servidors Yattee no proporcionen publicacions. Activeu «{fallbackSetting}» per carregar-les amb l'API local.
+  Errors:
+    Invalid credentials: El servidor Yattee ha rebutjat el nom d'usuari o la contrasenya. Comproveu-los a Configuració → Avançat.
+    Rate limited: El servidor Yattee bloqueja els inicis de sessió després de massa intents fallits. Torneu-ho a provar més tard.
+    Streams not relayed: El servidor Yattee no ha retransmès els fluxos d'aquest vídeo. Mentre els vídeos passin pel servidor com a intermediari, l'OpenTubeX no es connecta directament a YouTube.
+    Not configured: Introduïu l'URL del vostre servidor Yattee a Configuració → Avançat.
+    HTTPS required: Android només pot reproduir vídeos de servidors Yattee que utilitzin HTTPS.
+    Streams unavailable: No s'han pogut carregar els fluxos d'aquest vídeo des del servidor Yattee. Feu servir «Prova la connexió» a Configuració → Avançat per comprovar el servidor.
+Yattee Fallback Warning: Aquesta sol·licitud omet el servidor Yattee que heu configurat i es connecta directament a YouTube, exposant la vostra adreça IP.

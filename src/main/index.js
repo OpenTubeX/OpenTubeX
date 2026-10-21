@@ -67,6 +67,7 @@ import { expandMultipleOnlyPluralMessages, selectPluralForm } from '../renderer/
 import { composeLocaleMessages } from '../localeComposition'
 import { buildProxyUrl, DEFAULT_PROXY_SETTINGS, isNonPublicNetworkAddress, isOpenTubeXUrl } from './utils'
 import { isInvidiousInstanceUrl } from './invidiousAuthorization'
+import { usesInvidiousApi, usesInvidiousInstance } from '../apiBackends'
 import { RendererCors } from './rendererCors'
 import { TabManager } from './tabs/TabManager'
 import { tabPreviewStorage } from './tabs/TabPreviewStorage'
@@ -1521,7 +1522,7 @@ function runApp() {
         },
         {
           label: contextMenuLabel('Copy Invidious Link'),
-          visible: visible && isInAppUrl && (backendPreference === 'invidious' || backendFallback),
+          visible: visible && isInAppUrl && usesInvidiousInstance(backendPreference, backendFallback),
           click: () => {
             copy(transformOpenTubeXRouteUrl(urlParts[1], false))
           }
@@ -6683,7 +6684,7 @@ function runApp() {
             },
             type: 'normal'
           },
-          (backendFallback || backendPreference === 'invidious') && {
+          (backendFallback || usesInvidiousApi(backendPreference)) && {
             label: 'Most Popular',
             click: (_menuItem, browserWindow, _event) => {
               navigateTo('/popular', browserWindow)

@@ -417,6 +417,25 @@ Settings:
       Grid Columns: Izgara sütunları
       Playlist Grid Columns: Oynatma listesi ızgara sütunları
       Auto: Otomatik
+    Preferred API Backend:
+      Yattee Server: Yattee Sunucusu
+    Yattee Server:
+      Server URL: Yattee sunucusu URL'si
+      Username: Kullanıcı adı
+      Password: Parola
+      Proxy Videos: Videoları Yattee sunucusu üzerinden aktar
+      Test Connection: Bağlantıyı Test Et
+      Testing: Bağlantı test ediliyor…
+      Connected: Yattee Sunucusu {version} ile bağlantı kuruldu
+      Errors:
+        Invalid URL: https:// veya http:// ile başlayan sunucu URL'sini girin.
+        Unreachable: Sunucuya ulaşılamadı. URL'yi ve sunucunun çalışıp çalışmadığını denetleyin.
+        Media not allowed: 'Bağlantı kuruldu ancak sunucu bu uygulamanın video yüklemesine izin vermiyor. Sunucunun ortam değişkenlerinde CORS_ORIGINS={origins} değerini ayarlayın.'
+        Not a Yattee server: Sunucu yanıt verdi ancak bir Yattee sunucusu değil.
+        Credentials required: Sunucu kullanıcı adı ve parola gerektiriyor.
+        Invalid credentials: Sunucu kullanıcı adını veya parolayı reddetti.
+        Rate limited: Sunucu, çok fazla başarısız denemenin ardından oturum açmayı engelliyor. Daha sonra tekrar deneyin.
+        Server error: Sunucu bir hata döndürdü (HTTP {status}).
   Context Menu Search Settings:
     Context Menu Search Settings: Bağlam Menüsü Araması
     Description: Seçili metne sağ tıkladığınızda görünecek arama motorlarını seçin. Aramalar varsayılan tarayıcınızda açılır.
@@ -1652,6 +1671,7 @@ Video:
       needs_auth: "Oturum açma gerekli"
       unlisted: "Listelenmemiş"
   Save Queue to Playlist: "Kuyruğu Oynatma Listesine Kaydet"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Canlı Sohbet şu anda Yattee sunucusu ile desteklenmemektedir. YouTube ile doğrudan bağlantı gerekli.
 Playlist:
   Playlist Already Preloaded: "Oynatma listesindeki tüm videolar zaten önceden yüklendi"
   Playlist Preload Progress: "Videolar önceden yükleniyor: {completed}/{requested}"
@@ -1879,6 +1899,8 @@ Tooltips:
       Son etkin sekmeyi yükle, önceki oturumu diğer sekmeler açık ama bellekten kaldırılmış hâlde geri yükler. Tıkladığınızda yüklenirler.
       Boş bir oturumla başla, kayıtlı sekmeleri atlayıp yeni bir pencere açar.
     Remember Tab Navigation History: Her sekmenin geri ve ileri gezinme geçmişi kaydedilir ve OpenTubeX yeniden başlatıldığında geri yüklenir.
+    Yattee Server: OpenTubeX'un videoları, kanalları, oynatma listelerini ve arama sonuçlarını yüklediği yattee-server örneği. Kullanıcı adı ve parola yalnızca bu cihazda saklanır.
+    Proxy Videos Through Yattee Server: Video ve ses akışlarını sunucu üzerinden aktarır. Sunucu sizinle aynı internet bağlantısını kullanmıyorsa bunu açık bırakın, çünkü YouTube akışları yalnızca onları isteyen adrese sunar. Önizleme görselleri her zaman doğrudan YouTube'dan yüklenir.
   Proxy Settings:
     IP Block Recovery Script Path: IP engeli algılandığında çalıştırılacak betik dosyasının yolu. OpenTubeX betiğin tamamlanmasını bekler ve videoyu yeniden yükler. Yedek arka uç etkinse yalnızca yedek arka uç da başarısız olduğunda çalışır.
   Player Settings:
@@ -2256,3 +2278,15 @@ Subscription Groups:
   Empty Group: Bu grupta geçerli profile ait kanal yok.
   Save Failed: Grup kaydedilemedi.
   Delete Failed: Grup silinemedi.
+Yattee Server:
+  API Error (Click to copy): Yattee Sunucusu Hatası (Kopyalamak için tıklayın)
+  Unsupported page: Bu sayfa Yattee sunucusu ile kullanılamıyor. Yerel API ile yüklemek için “{fallbackSetting}” ayarını açın.
+  Posts unavailable: Yattee sunucuları gönderi sağlamaz. Gönderileri yerel API ile yüklemek için “{fallbackSetting}” ayarını açın.
+  Errors:
+    Invalid credentials: Yattee sunucusu kullanıcı adını veya parolayı reddetti. Bunları Ayarlar → Gelişmiş bölümünde denetleyin.
+    Rate limited: Yattee sunucusu, çok fazla başarısız denemenin ardından oturum açmayı engelliyor. Daha sonra tekrar deneyin.
+    Streams not relayed: Yattee sunucusu bu videonun akışlarını aktarmadı. Videolar sunucu üzerinden aktarılırken OpenTubeX doğrudan YouTube'a bağlanmaz.
+    Not configured: Yattee sunucunuzun URL'sini Ayarlar → Gelişmiş bölümünde girin.
+    HTTPS required: Android yalnızca HTTPS kullanan Yattee sunucularındaki videoları oynatabilir.
+    Streams unavailable: Bu videonun akışları Yattee sunucusundan yüklenemedi. Sunucuyu denetlemek için Ayarlar → Gelişmiş bölümündeki “Bağlantıyı Test Et” düğmesini kullanın.
+Yattee Fallback Warning: Bu istek, yapılandırdığınız Yattee sunucusunu atlayarak doğrudan YouTube'a bağlanır ve IP adresinizi açığa çıkarır.
