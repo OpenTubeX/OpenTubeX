@@ -49,7 +49,7 @@ import { reportSubscriptionUploads } from './uploadNotifications'
 import { extractAssignedJsonObject } from './assigned-json'
 import { getInvidiousSubscriptionPremiereUpdate, getLocalSubscriptionPremiereUpdate, shouldRefreshSubscriptionPremiere } from './subscription-premieres'
 import { shouldShowProgressStartToast } from './progressPresentation'
-import { finishAndroidSubscriptionRefresh, isAndroidSubscriptionRefreshActive } from './androidSubscriptionRefresh'
+import { cancelAndroidSubscriptionRefresh, finishAndroidSubscriptionRefresh, isAndroidSubscriptionRefreshActive } from './androidSubscriptionRefresh'
 import { isRecoverableNetworkError } from './networkRecovery'
 import { createSubscriptionNetworkRecovery, SubscriptionNetworkError } from './subscriptionNetworkRecovery'
 import { buildRequestDiagnostic, formatRequestDiagnostic } from './api/requestDiagnostics'
@@ -166,6 +166,15 @@ function markActiveSubscriptionRefreshCancelled() {
  */
 export function requestSubscriptionRefreshCancellation() {
   cancelSubscriptionRefresh()
+
+  if (process.env.IS_CAPACITOR) {
+    cancelAndroidSubscriptionRefresh()
+    if (!activeRefresh && store.getters.getSubscriptionFeedRefreshInProgress) {
+      window.dispatchEvent(new CustomEvent(SUBSCRIPTION_REFRESH_CANCELLED_EVENT, {
+        detail: { tab: store.getters.getSubscriptionFeedRefreshTab, profileId: store.getters.getActiveProfile._id }
+      }))
+    }
+  }
 
   if (process.env.IS_ELECTRON) {
     window.ftElectron.subscriptionAutoRefresh.cancel()
@@ -313,7 +322,7 @@ function setSubscriptionRefreshProgress(percentage) {
  * instead of waiting for the whole refresh to finish.
  * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
  */
-function notifySubscriptionChannelRefreshed(tab) {
+export function notifySubscriptionChannelRefreshed(tab) {
   window.dispatchEvent(new CustomEvent(SUBSCRIPTION_REFRESH_CHANNEL_EVENT, {
     detail: { tab }
   }))

@@ -73,19 +73,22 @@ public class SubscriptionRefreshLifecycleTest {
                     // A rejected overlapping start must not lose ownership of the first refresh.
                     assertFalse(start(plugin).getBool("acquired"));
                 });
-                await("foreground notification appears", this::hasRefreshNotification);
+                assertFalse("visible refresh has no notification", hasRefreshNotification());
                 assertTrue(SubscriptionRefreshWorker.update(context, token.get(), 12));
 
                 scenario.moveToState(Lifecycle.State.CREATED);
+                await("background notification appears", this::hasRefreshNotification);
                 assertTrue(SubscriptionRefreshCoordinator.isCurrent(token.get()));
                 assertTrue(hasRefreshNotification());
                 assertTrue(SubscriptionRefreshWorker.update(context, token.get(), 13));
 
                 scenario.moveToState(Lifecycle.State.RESUMED);
+                await("returning to app hides notification", () -> !hasRefreshNotification());
+                assertTrue("return preserves refresh", SubscriptionRefreshCoordinator.isActive());
                 scenario.onActivity(MainActivity::finishAndRemoveTask);
                 await("activity destroyed", () -> scenario.getState() == Lifecycle.State.DESTROYED);
                 assertTrue("refresh continues after recents dismissal", SubscriptionRefreshCoordinator.isActive());
-                assertTrue(hasRefreshNotification());
+                await("removed task notification appears", this::hasRefreshNotification);
                 assertTrue(SubscriptionRefreshWorker.update(context, token.get(), 14));
                 assertEquals("42", javascript(webView.get(), "21 * 2"));
 
@@ -120,6 +123,46 @@ public class SubscriptionRefreshLifecycleTest {
                 if (retained.get() != null) {
                     await("retained renderer cleaned up", () -> !retained.get().isRendererRetained());
                 }
+            }
+        }
+    }
+
+    @Test
+    public void reopenedActivityReadsAndCancelsRetainedRefreshWithoutNotification() throws Exception {
+        AtomicReference<SubscriptionRefreshPlugin> retained = new AtomicReference<>();
+        AtomicReference<String> token = new AtomicReference<>();
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            try {
+                scenario.onActivity(activity -> {
+                    activity.getBridge().getWebView().loadUrl("about:blank");
+                    retained.set(plugin(activity));
+                    token.set(start(retained.get()).getString("token"));
+                    assertTrue(SubscriptionRefreshWorker.update(context, token.get(), 42));
+                    activity.finishAndRemoveTask();
+                });
+                await("activity destroyed", () -> scenario.getState() == Lifecycle.State.DESTROYED);
+                await("background notification appears", this::hasRefreshNotification);
+                try (ActivityScenario<MainActivity> reopened = ActivityScenario.launch(MainActivity.class)) {
+                    reopened.onActivity(activity -> {
+                        activity.getBridge().getWebView().loadUrl("about:blank");
+                        SubscriptionRefreshPlugin plugin = plugin(activity);
+                        AtomicReference<JSObject> state = new AtomicReference<>();
+                        plugin.getState(new PluginCall(null, "SubscriptionRefresh", "test", "getState", new JSObject()) {
+                            @Override public void resolve(JSObject response) { state.set(response); }
+                        });
+                        assertTrue(state.get().getBool("inProgress"));
+                        assertFalse(state.get().getBool("ownedByRenderer"));
+                        assertEquals("videos", state.get().getString("tab"));
+                        assertEquals(Integer.valueOf(42), state.get().getInteger("percentage"));
+                    });
+                    await("reopening hides notification", () -> !hasRefreshNotification());
+                    assertTrue("refresh still runs", SubscriptionRefreshCoordinator.isCurrent(token.get()));
+                    reopened.onActivity(activity -> plugin(activity).cancel(emptyCall("cancel", new JSObject())));
+                    await("cancellation releases old renderer", () -> !retained.get().isRendererRetained());
+                    assertFalse(SubscriptionRefreshCoordinator.isActive());
+                }
+            } finally {
+                if (token.get() != null) SubscriptionRefreshWorker.finish(context, token.get());
             }
         }
     }
@@ -218,7 +261,7 @@ public class SubscriptionRefreshLifecycleTest {
                 awaitJavascript(view.get(), "typeof window.refreshToken", "\"string\"");
                 token = new org.json.JSONArray("[" + javascript(view.get(), "window.refreshToken") + "]").getString(0);
                 assertTrue("refresh request started", requested.await(10, TimeUnit.SECONDS));
-                await("foreground notification appears", this::hasRefreshNotification);
+                assertFalse("visible refresh has no notification", hasRefreshNotification());
                 switch (lifecycle) {
                     case OPEN -> {}
                     case BACKGROUND -> scenario.moveToState(Lifecycle.State.CREATED);
@@ -405,7 +448,7 @@ public class SubscriptionRefreshLifecycleTest {
                     retained.set(plugin(activity));
                     token.set(start(retained.get()).getString("token"));
                 });
-                await("foreground notification appears", this::hasRefreshNotification);
+                assertFalse("visible refresh has no notification", hasRefreshNotification());
                 scenario.onActivity(MainActivity::finishAndRemoveTask);
                 await("activity destroyed", () -> scenario.getState() == Lifecycle.State.DESTROYED);
                 synchronized (retained.get()) {
@@ -447,7 +490,7 @@ public class SubscriptionRefreshLifecycleTest {
                     beginBatch(retained.get());
                     token.set(start(retained.get()).getString("token"));
                 });
-                await("foreground notification appears", this::hasRefreshNotification);
+                assertFalse("visible refresh has no notification", hasRefreshNotification());
                 finishFeed(retained.get(), token.get());
                 scenario.onActivity(MainActivity::finishAndRemoveTask);
                 await("activity destroyed", () -> scenario.getState() == Lifecycle.State.DESTROYED);
@@ -544,6 +587,7 @@ public class SubscriptionRefreshLifecycleTest {
         AtomicReference<JSObject> result = new AtomicReference<>();
         JSObject data = new JSObject();
         data.put("title", "Refreshing subscription videos");
+        data.put("tab", "videos");
         data.put("cancelLabel", "Cancel refresh");
         plugin.start(new PluginCall(null, "SubscriptionRefresh", "test", "start", data) {
             @Override

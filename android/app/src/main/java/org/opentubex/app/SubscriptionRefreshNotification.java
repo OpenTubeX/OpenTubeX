@@ -5,12 +5,10 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ServiceInfo;
 import android.graphics.Color;
 import android.os.Build;
 
 import androidx.annotation.RequiresApi;
-import androidx.work.ForegroundInfo;
 
 final class SubscriptionRefreshNotification {
     static final String CHANNEL_ID = OpenTubeXNotificationChannels.SUBSCRIPTION_REFRESH_ID;
@@ -60,24 +58,6 @@ final class SubscriptionRefreshNotification {
         }
 
         return builder.build();
-    }
-
-    static ForegroundInfo foregroundInfo(
-        Context context,
-        String token,
-        String title,
-        String cancelLabel,
-        int progress
-    ) {
-        Notification notification = build(context, token, title, cancelLabel, progress);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            return new ForegroundInfo(
-                NOTIFICATION_ID,
-                notification,
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
-            );
-        }
-        return new ForegroundInfo(NOTIFICATION_ID, notification);
     }
 
     @RequiresApi(36)

@@ -2,7 +2,6 @@ package org.opentubex.app;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 
 final class SubscriptionRefreshState {
@@ -26,7 +25,6 @@ final class SubscriptionRefreshState {
     private int progress;
     private final SubscriptionRefreshNotificationProgress notificationProgress =
         new SubscriptionRefreshNotificationProgress();
-    private CountDownLatch completion = new CountDownLatch(0);
     private final List<Consumer<Boolean>> activeListeners = new ArrayList<>();
 
     synchronized void observeActive(Consumer<Boolean> listener) {
@@ -39,13 +37,11 @@ final class SubscriptionRefreshState {
     }
 
     synchronized void begin(String nextToken, String nextTitle, String nextCancelLabel) {
-        completion.countDown();
         token = nextToken;
         title = nextTitle;
         cancelLabel = nextCancelLabel;
         progress = 0;
         notificationProgress.reset();
-        completion = new CountDownLatch(1);
         for (Consumer<Boolean> listener : new ArrayList<>(activeListeners)) listener.accept(true);
     }
 
@@ -55,7 +51,6 @@ final class SubscriptionRefreshState {
         cancelLabel = nextCancelLabel;
         progress = 0;
         notificationProgress.reset();
-        // Keep the worker's completion latch while advancing the batch.
         return snapshot(expectedToken);
     }
 
@@ -75,15 +70,6 @@ final class SubscriptionRefreshState {
         return new Snapshot(token, title, cancelLabel, progress);
     }
 
-    void awaitCompletion(String expectedToken) throws InterruptedException {
-        CountDownLatch activeCompletion;
-        synchronized (this) {
-            if (!isCurrent(expectedToken)) return;
-            activeCompletion = completion;
-        }
-        activeCompletion.await();
-    }
-
     synchronized boolean finish(String expectedToken) {
         if (!isCurrent(expectedToken)) return false;
         token = null;
@@ -91,7 +77,6 @@ final class SubscriptionRefreshState {
         cancelLabel = null;
         progress = 0;
         notificationProgress.reset();
-        completion.countDown();
         for (Consumer<Boolean> listener : new ArrayList<>(activeListeners)) listener.accept(false);
         return true;
     }
