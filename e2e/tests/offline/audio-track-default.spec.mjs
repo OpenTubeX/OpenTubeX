@@ -65,6 +65,10 @@ ${media}
       await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
       await page.locator(sel.searchInput).press('Enter')
       const player = page.locator(`${activeTab} .ftVideoPlayer`)
+      // A cold watch page parses the player script before it applies the
+      // yt-dlp source and mounts the player, which takes longer than the
+      // default timeout on a busy machine.
+      await expect(player.locator('video')).toBeAttached({ timeout: 30_000 })
       await expect.poll(() => player.locator('video').evaluate(video => video.readyState)).toBeGreaterThanOrEqual(2)
       await expect.poll(() => player.evaluate(element => {
         const shakaPlayer = element.ui?.getControls().getPlayer()
