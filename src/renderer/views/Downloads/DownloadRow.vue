@@ -1,178 +1,209 @@
 <template>
-  <article class="downloadRow">
-    <div class="downloadMain">
-      <FtRetryImage
-        :src="download.thumbnail || thumbnailPlaceholder"
-        class="downloadThumbnail"
-        alt=""
-      />
-      <div class="downloadDetails">
-        <h3
-          dir="auto"
-          :title="download.title"
-        >
-          {{ download.title }}
-        </h3>
-        <p
-          v-if="download.status === 'completed' && channelName"
-          class="downloadChannel"
-          dir="auto"
-        >
-          {{ channelName }}
-        </p>
-        <p
-          v-if="statusText"
-          class="downloadStatus"
-          :aria-hidden="inProgress ? 'true' : undefined"
-        >
-          {{ statusText }}
-        </p>
-        <p
-          v-if="availabilityText"
-          class="downloadAvailability"
-          :class="{ missing: download.availability === 'missing' }"
-        >
-          {{ availabilityText }}
-        </p>
-        <div
-          v-if="inProgress"
-          class="progressTrack"
-          role="progressbar"
-          :aria-label="download.title || t('Downloads.Downloading')"
-          :aria-valuenow="download.status === 'downloading' ? progressPercentage : undefined"
-          :aria-valuetext="statusText"
-          aria-valuemin="0"
-          aria-valuemax="100"
-        >
-          <div
-            class="progressFill"
-            :class="{ indeterminate: download.status !== 'downloading' }"
-            :style="{ transform: `scaleX(${progressPercentage / 100})` }"
-            aria-hidden="true"
-          />
-        </div>
-        <p
-          v-if="compactSummary"
-          class="downloadSummary"
-        >
-          {{ compactSummary }}
-        </p>
-        <p
-          v-if="spaceWarningText"
-          class="downloadSpaceWarning"
-        >
-          {{ spaceWarningText }}
-        </p>
-        <p
-          v-if="errorText"
-          class="downloadError"
-          dir="auto"
-        >
-          {{ errorText }}
-        </p>
-        <DownloadFailureHint v-if="download.status === 'failed'" />
-      </div>
-    </div>
-    <div class="downloadActions">
-      <FtIconButton
-        v-if="controllable"
-        :title="paused ? t('Downloads.Resume Download') : t('Downloads.Pause Download')"
-        :icon="['fas', paused ? 'play' : 'pause']"
-        theme="primary"
-        @click="paused ? emit('resume') : emit('pause')"
-      />
-      <FtIconButton
-        v-else-if="canRetry && !canPlay"
-        :title="t('Downloads.Retry Download')"
-        :icon="['fas', 'sync']"
-        theme="primary"
-        :disabled="retrying"
-        @click="emit('retry')"
-      />
-      <FtIconButton
-        v-else-if="canPlay"
-        :title="t('Downloads.Play Download')"
-        :icon="['fas', 'play']"
-        theme="primary"
-        @click="emit('play')"
-      />
-      <FtIconButton
-        ref="menuButton"
-        :title="t('Video.More Options')"
-        :icon="['fas', 'ellipsis-v']"
-        theme="base-no-default"
-        :use-shadow="false"
-        @click="openMenu"
-      />
-    </div>
-    <FtPrompt
-      v-if="showDetails"
-      :label="t('Channel.About.Details')"
-      autosize
-      fixed-layout
-      @click="showDetails = false"
+  <div
+    class="videoSwipeFrame"
+    :class="{
+      thumbnailSwipeEnabled,
+      videoSwipeActive: thumbnailSwipe,
+      videoSwipeDragging: thumbnailSwipe && !thumbnailSwipe.settling,
+    }"
+    :style="{
+      '--video-swipe-offset': `${thumbnailSwipe?.offset ?? 0}px`,
+      '--video-swipe-progress': thumbnailSwipe?.progress ?? 0,
+    }"
+    @pointerdown="startThumbnailSwipe"
+    @pointermove="moveThumbnailSwipe"
+    @pointerup="finishThumbnailSwipe"
+    @pointercancel="abortThumbnailSwipe"
+    @lostpointercapture.self="abortThumbnailSwipe"
+  >
+    <div
+      v-if="thumbnailSwipe"
+      :key="thumbnailSwipe.direction"
+      class="thumbnailSwipeFeedback"
+      :class="{
+        thumbnailSwipeReady: thumbnailSwipe.progress === 1,
+        thumbnailSwipeLeft: thumbnailSwipe.direction === 'left',
+      }"
+      :title="thumbnailSwipe.action.label"
+      aria-hidden="true"
     >
-      <div class="downloadMetadata">
+      <FtIcon :icon="thumbnailSwipe.action.icon" />
+    </div>
+    <article class="downloadRow">
+      <div class="downloadMain">
         <FtRetryImage
           :src="download.thumbnail || thumbnailPlaceholder"
           class="downloadThumbnail"
           alt=""
         />
-        <h3 dir="auto">
-          {{ download.title }}
-        </h3>
-        <p
-          v-if="channelName"
-          dir="auto"
-        >
-          {{ channelName }}
-        </p>
-        <p
-          v-if="summary"
-          class="downloadSummary"
-        >
-          {{ summary }}
-        </p>
-        <p
-          v-if="download.titleTruncated"
-          class="downloadWarning"
-        >
-          <FtIcon
-            :icon="['fas', 'triangle-exclamation']"
-            aria-hidden="true"
-          />
-          {{ t('Downloads.File Name Shortened') }}
-        </p>
-        <ul
-          v-if="destinations.length > 0"
-          class="destinationList"
-        >
-          <li
-            v-for="destination in destinations"
-            :key="destination"
-            class="destination"
+        <div class="downloadDetails">
+          <h3
             dir="auto"
-            :title="destination"
+            :title="download.title"
           >
-            {{ destination }}
-          </li>
-          <li
-            v-if="hiddenDestinationCount > 0"
-            class="destination"
+            {{ download.title }}
+          </h3>
+          <p
+            v-if="download.status === 'completed' && channelName"
+            class="downloadChannel"
+            dir="auto"
           >
-            {{ t('Downloads.More Files', { count: hiddenDestinationCount }, hiddenDestinationCount) }}
-          </li>
-        </ul>
+            {{ channelName }}
+          </p>
+          <p
+            v-if="statusText"
+            class="downloadStatus"
+            :aria-hidden="inProgress ? 'true' : undefined"
+          >
+            {{ statusText }}
+          </p>
+          <p
+            v-if="availabilityText"
+            class="downloadAvailability"
+            :class="{ missing: download.availability === 'missing' }"
+          >
+            {{ availabilityText }}
+          </p>
+          <div
+            v-if="inProgress"
+            class="progressTrack"
+            role="progressbar"
+            :aria-label="download.title || t('Downloads.Downloading')"
+            :aria-valuenow="download.status === 'downloading' ? progressPercentage : undefined"
+            :aria-valuetext="statusText"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          >
+            <div
+              class="progressFill"
+              :class="{ indeterminate: download.status !== 'downloading' }"
+              :style="{ transform: `scaleX(${progressPercentage / 100})` }"
+              aria-hidden="true"
+            />
+          </div>
+          <p
+            v-if="compactSummary"
+            class="downloadSummary"
+          >
+            {{ compactSummary }}
+          </p>
+          <p
+            v-if="spaceWarningText"
+            class="downloadSpaceWarning"
+          >
+            {{ spaceWarningText }}
+          </p>
+          <p
+            v-if="errorText"
+            class="downloadError"
+            dir="auto"
+          >
+            {{ errorText }}
+          </p>
+          <DownloadFailureHint v-if="download.status === 'failed'" />
+        </div>
       </div>
-      <template #footer>
-        <FtButton
-          :label="t('Close')"
-          :icon="['fas', 'xmark']"
-          @click="showDetails = false"
+      <div class="downloadActions">
+        <FtIconButton
+          v-if="controllable"
+          :title="paused ? t('Downloads.Resume Download') : t('Downloads.Pause Download')"
+          :icon="['fas', paused ? 'play' : 'pause']"
+          theme="primary"
+          @click="paused ? emit('resume') : emit('pause')"
         />
-      </template>
-    </FtPrompt>
-  </article>
+        <FtIconButton
+          v-else-if="canRetry && !canPlay"
+          :title="t('Downloads.Retry Download')"
+          :icon="['fas', 'sync']"
+          theme="primary"
+          :disabled="retrying"
+          @click="emit('retry')"
+        />
+        <FtIconButton
+          v-else-if="canPlay"
+          :title="t('Downloads.Play Download')"
+          :icon="['fas', 'play']"
+          theme="primary"
+          @click="emit('play')"
+        />
+        <FtIconButton
+          ref="menuButton"
+          :title="t('Video.More Options')"
+          :icon="['fas', 'ellipsis-v']"
+          theme="base-no-default"
+          :use-shadow="false"
+          @click="openMenu"
+        />
+      </div>
+      <FtPrompt
+        v-if="showDetails"
+        :label="t('Channel.About.Details')"
+        autosize
+        fixed-layout
+        @click="showDetails = false"
+      >
+        <div class="downloadMetadata">
+          <FtRetryImage
+            :src="download.thumbnail || thumbnailPlaceholder"
+            class="downloadThumbnail"
+            alt=""
+          />
+          <h3 dir="auto">
+            {{ download.title }}
+          </h3>
+          <p
+            v-if="channelName"
+            dir="auto"
+          >
+            {{ channelName }}
+          </p>
+          <p
+            v-if="summary"
+            class="downloadSummary"
+          >
+            {{ summary }}
+          </p>
+          <p
+            v-if="download.titleTruncated"
+            class="downloadWarning"
+          >
+            <FtIcon
+              :icon="['fas', 'triangle-exclamation']"
+              aria-hidden="true"
+            />
+            {{ t('Downloads.File Name Shortened') }}
+          </p>
+          <ul
+            v-if="destinations.length > 0"
+            class="destinationList"
+          >
+            <li
+              v-for="destination in destinations"
+              :key="destination"
+              class="destination"
+              dir="auto"
+              :title="destination"
+            >
+              {{ destination }}
+            </li>
+            <li
+              v-if="hiddenDestinationCount > 0"
+              class="destination"
+            >
+              {{ t('Downloads.More Files', { count: hiddenDestinationCount }, hiddenDestinationCount) }}
+            </li>
+          </ul>
+        </div>
+        <template #footer>
+          <FtButton
+            :label="t('Close')"
+            :icon="['fas', 'xmark']"
+            @click="showDetails = false"
+          />
+        </template>
+      </FtPrompt>
+    </article>
+  </div>
 </template>
 
 <script setup>
@@ -183,8 +214,15 @@ import FtRetryImage from '../../components/FtRetryImage.vue'
 import { displayAndroidPath } from '../../helpers/androidStorage'
 import { ytDlp } from '../../helpers/ytDlp'
 import { FtIcon } from '@opentubex/icons'
-import { computed, onBeforeUnmount, ref, useTemplateRef } from 'vue'
+import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
+import { useStore } from 'vuex'
+import { useThumbnailSwipe } from '../../composables/useThumbnailSwipe'
+import { queueSwipeAction, downloadSwipeAction } from '../../helpers/videoSwipeActions'
+import { isHistoryEntryWatched } from '../../helpers/history'
+import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
+import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
+import { lightHaptic } from '../../helpers/mobileHaptics'
 import { useI18n } from 'vue-i18n'
 import DownloadFailureHint from '../../components/DownloadFailureHint/DownloadFailureHint.vue'
 import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
@@ -192,7 +230,7 @@ import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 import { downloadTemplateName } from '../../helpers/downloadTemplates'
 import { formatBytes } from '../../helpers/fileSize'
 import { downloadErrorMessage } from '../../helpers/downloadErrors'
-import { isDownloadPlaybackSupported, isPlayableDownloadFile } from '../../helpers/downloadPlayback'
+import { isDownloadPlaybackSupported, isPlayableDownloadFile, downloadQueueVideos } from '../../helpers/downloadPlayback'
 
 // keeps a playlist download from filling the page with one line per video
 const MAX_VISIBLE_DESTINATIONS = 3
@@ -204,7 +242,7 @@ const props = defineProps({
   canMoveEarlier: { type: Boolean, default: false },
   canMoveLater: { type: Boolean, default: false }
 })
-const emit = defineEmits(['clear', 'move', 'open', 'pause', 'play', 'queue', 'remove', 'resume', 'retry'])
+const emit = defineEmits(['clear', 'move', 'open', 'pause', 'play', 'queue', 'queue-next', 'remove', 'resume', 'retry'])
 const IS_IOS = !!process.env.IS_IOS
 const { t } = useI18n()
 const showDetails = ref(false)
@@ -246,6 +284,71 @@ function closeMenu() {
 }
 useSettingsOverlay(closeMenu)
 onBeforeUnmount(closeMenu)
+const store = useStore()
+
+function getThumbnailSwipeAction(direction) {
+  const actionId = direction === 'left' ? store.getters.getThumbnailLeftSwipeAction : store.getters.getThumbnailRightSwipeAction
+  if (actionId === 'download') {
+    if (!controllable.value && !canAccessFiles.value) return null
+    return downloadSwipeAction(props.download, {
+      t, cancel: cancelDownload, remove: () => emit('remove'),
+    })
+  }
+  if (!canPlay.value) return null
+  const videos = downloadQueueVideos(props.download)
+  if (['addToQueue', 'playNext'].includes(actionId) && !IS_IOS) {
+    return queueSwipeAction(actionId, videos, store.getters.getWatchQueue, {
+      t, commit: store.commit, add: next => next ? emit('queue-next') : emit('queue'),
+    })
+  }
+  if (!['history', 'markAsFullySeen'].includes(actionId) || videos.length === 0) return null
+  const entries = videos.map(video => {
+    const file = props.download.files.find(file => file.videoId === video.videoId)
+    const history = store.getters.getHistoryCacheById[video.videoId]
+    const entry = { ...video, ...history, lengthSeconds: file.duration ?? history?.lengthSeconds }
+    delete entry.route
+    return entry
+  })
+  const watched = entries.every(isHistoryEntryWatched)
+  const fully = actionId === 'markAsFullySeen'
+  if (!watched && fully && entries.some(video => !Number.isFinite(video.lengthSeconds) || video.lengthSeconds <= 0)) return null
+  return {
+    label: watched ? t('Video.Unmark As Watched') : fully ? t('Video.Mark As Fully Watched') : t('Video.Mark As Watched'),
+    icon: ['fas', watched ? 'eye-slash' : fully ? 'flag-checkered' : 'eye'],
+    run: async () => {
+      for (const video of entries) {
+        if (watched && store.getters.getWatchedPercentageThreshold === 0) {
+          await store.dispatch('removeFromHistory', video.videoId)
+        } else {
+          await store.dispatch('updateHistory', {
+            ...video,
+            isWatched: !watched,
+            type: 'video',
+            watchProgress: !watched && fully ? video.lengthSeconds : video.watchProgress ?? 0,
+            timeWatched: video.timeWatched ?? Date.now(),
+          })
+        }
+      }
+    },
+  }
+}
+
+const {
+  enabled: thumbnailSwipeEnabled, swipe: thumbnailSwipe,
+  startSwipe: startThumbnailSwipe, moveSwipe: moveThumbnailSwipe,
+  finishSwipe: finishThumbnailSwipe, abortSwipe: abortThumbnailSwipe, cancelSwipe: cancelThumbnailSwipe,
+} = useThumbnailSwipe({
+  getAction: getThumbnailSwipeAction,
+  cancelHold: () => {},
+  suppressClick: () => {},
+  getSettleDuration: () => isReducedMotionEnabled() ? 0 : 200 / getAnimationSpeedMultiplier(store.getters.getAnimationSpeed),
+  onCommit: action => {
+    lightHaptic()
+    action.run()
+  },
+})
+watch([() => props.download.id, () => store.getters.getThumbnailLeftSwipeAction, () => store.getters.getThumbnailRightSwipeAction], cancelThumbnailSwipe)
+
 const inProgress = computed(() => ['preparing', 'downloading', 'processing'].includes(props.download.status))
 const progressPercentage = computed(() => (
   Number.isFinite(props.download.percent)
@@ -382,3 +485,5 @@ function cancelDownload() {
 </script>
 
 <style scoped src="./Downloads.css" />
+
+<style scoped lang="scss" src="../../components/thumbnailSwipe.scss" />

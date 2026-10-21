@@ -16,7 +16,7 @@ function gesture(actions = { left: { label: 'Left' }, right: { label: 'Right' } 
   const event = (x, y = 0, overrides = {}) => ({
     pointerType: 'touch', isPrimary: true, pointerId: 1, clientX: x, clientY: y,
     target: { closest: () => false },
-    currentTarget: { getBoundingClientRect: () => ({ width: 240 }), setPointerCapture() {} },
+    currentTarget: { contains: () => true, getBoundingClientRect: () => ({ width: 240 }), setPointerCapture() {} },
     stopPropagation() {}, ...overrides,
   })
   const run = (positions, finish = 'finishSwipe') => {
@@ -128,6 +128,7 @@ test('thumbnail shortcuts preserve action availability and reuse the existing ha
   const history = { actionId: 'history', enabled: true, run() {} }
   const unavailableDownload = { actionId: 'download', enabled: false, run() {} }
   const context = {
+    supportsYtDlp: false,
     store: { getters: { getThumbnailLeftSwipeAction: 'history', getThumbnailRightSwipeAction: 'addToPlaylist' } },
     mobileThumbnailActions: { value: [playlist] },
     videoContextMenuItems: { value: [history, unavailableDownload] },
@@ -149,6 +150,7 @@ test('adding to a playlist becomes removal only in an editable playlist context'
   const add = { actionId: 'addToPlaylist', label: 'Add', run() {} }
   const remove = { actionId: 'removeFromPlaylist', label: 'Remove', icon: ['fas', 'trash'], run() {} }
   const context = {
+    supportsYtDlp: false,
     store: { getters: { getThumbnailLeftSwipeAction: 'addToPlaylist', getThumbnailRightSwipeAction: 'addToPlaylist' } },
     mobileThumbnailActions: { value: [add, remove] },
     videoContextMenuItems: { value: [] },
@@ -173,6 +175,7 @@ test('bookmarking becomes removal only in the bookmark playlist', () => {
   const remove = { actionId: 'removeFromPlaylist', label: 'Remove', run() {} }
   const bookmarks = { _id: 'bookmarks' }
   const context = {
+    supportsYtDlp: false,
     store: { getters: { getThumbnailLeftSwipeAction: 'quickBookmark', getThumbnailRightSwipeAction: 'quickBookmark' } },
     mobileThumbnailActions: { value: [bookmark, remove] },
     videoContextMenuItems: { value: [] },
@@ -197,6 +200,7 @@ test('bookmarking becomes removal only in the bookmark playlist', () => {
 test('copy shortcuts resolve existing submenu actions for Invidious sharing and public playlists', () => {
   const copy = { actionId: 'copyYoutube', run() {} }
   const context = {
+    supportsYtDlp: false,
     store: { getters: { getThumbnailLeftSwipeAction: 'copyYoutube', getThumbnailRightSwipeAction: 'copyYoutube' } },
     mobileThumbnailActions: { value: [] },
     videoContextMenuItems: { value: [{ label: 'Copy Link', submenu: [copy, { actionId: 'copyYoutubeWithoutPlaylist', run() {} }] }] },
@@ -208,4 +212,23 @@ test('copy shortcuts resolve existing submenu actions for Invidious sharing and 
   assert.equal(context.resolve('right'), copy)
   copy.enabled = false
   assert.equal(context.resolve('left'), null)
+})
+
+test('swipes work inside a containing dialog while nested controls stay excluded', () => {
+  const { swipe, calls, event } = gesture()
+  const parentDialog = {}
+  const start = event(0, 0, { target: { closest: () => parentDialog } })
+  start.currentTarget.contains = node => node !== parentDialog
+  swipe.startSwipe(start)
+  swipe.finishSwipe(event(-100))
+  assert.ok(calls.includes('Left'))
+  calls.length = 0
+  const button = {}
+  const nestedStart = event(0, 0, { target: { closest: () => button } })
+  nestedStart.currentTarget.contains = node => node === button
+  swipe.startSwipe(nestedStart)
+  swipe.moveSwipe(event(-100))
+  swipe.finishSwipe(event(-100))
+  assert.equal(swipe.swipe.value, null)
+  assert.deepEqual(calls, [])
 })

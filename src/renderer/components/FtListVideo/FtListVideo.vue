@@ -443,6 +443,16 @@
       force-sheet
       @closed="mobilePlaylistPickerOpen = false"
     />
+    <FtPrompt
+      v-if="pendingSwipeRemoval"
+      autosize
+      is-first-option-destructive
+      :label="t('Downloads.Remove File Confirmation')"
+      :extra-labels="[IS_CAPACITOR ? t('Downloads.Remove File Permanently Warning', { title: pendingSwipeRemoval.title }) : t('Downloads.Remove File Warning', { title: pendingSwipeRemoval.title })]"
+      :option-names="[t('Downloads.Remove File'), t('Cancel')]"
+      :option-values="['remove', 'cancel']"
+      @click="removeSwipeDownload"
+    />
     <WatchVideoDownloadPrompt
       v-if="enableDownloads && showDownloadPrompt"
       :video-id="id"
@@ -463,6 +473,10 @@ import { useContextMenuHold } from '../../composables/useContextMenuHold'
 import { lightHaptic } from '../../helpers/mobileHaptics'
 import { PHONE_LAYOUT_QUERY, usePhoneLayout } from '../../composables/usePhoneLayout'
 import FtRetryImage from '../FtRetryImage.vue'
+import FtPrompt from '../FtPrompt/FtPrompt.vue'
+import { ytDlp } from '../../helpers/ytDlp'
+import { refreshDownloadRecords } from '../../helpers/downloadPlayback'
+import { queueSwipeAction, findSwipeDownload, downloadSwipeAction } from '../../helpers/videoSwipeActions'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
 import { computed, inject, onBeforeUnmount, onMounted, ref, toRef, useTemplateRef, watch } from 'vue'
@@ -667,6 +681,8 @@ const isAiSlopWarned = computed(() => isOnAiSlopList(store.getters.getAiSlopWarn
 const isUpcoming = ref(false)
 const isStation = ref(false)
 const showDownloadPrompt = ref(false)
+const pendingSwipeRemoval = ref(null)
+const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
 
 watch(enableDownloads, (enabled) => {
@@ -1424,11 +1440,37 @@ const openMobileContextActions = inject('openMobileContextActions')
 
 const { startMenuHold, moveMenuHold, cancelMenuHold, suppressMenuHoldClick } = useContextMenuHold(openVideoContextMenu)
 
+async function removeSwipeDownload(option) {
+  const download = pendingSwipeRemoval.value
+  pendingSwipeRemoval.value = null
+  if (option !== 'remove' || !download) return
+  if (await ytDlp.ytDlpRemoveDownload(download.id)) {
+    store.commit('removeYtDlpDownload', download.id)
+  } else {
+    await refreshDownloadRecords(ytDlp, store)
+    showToast({ message: t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] })
+  }
+}
+
 function getThumbnailSwipeAction(direction) {
   let actionId = direction === 'left'
     ? store.getters.getThumbnailLeftSwipeAction
     : store.getters.getThumbnailRightSwipeAction
   if (actionId === 'disabled') return null
+  if (actionId === 'markAsFullySeen' && canMarkAsWatched.value && isWatched.value) actionId = 'history'
+  if (actionId === 'addToQueue' || actionId === 'playNext') {
+    return queueSwipeAction(actionId, [{ ...props.data, videoId: id.value }], store.getters.getWatchQueue, {
+      t, commit: store.commit, add: addToWatchQueue,
+    })
+  }
+  if (actionId === 'download' && supportsYtDlp && enableDownloads.value) {
+    const reverse = downloadSwipeAction(findSwipeDownload(store.getters.getYtDlpDownloads, id.value), {
+      t,
+      cancel: download => ytDlp.ytDlpCancelDownload(download.id),
+      remove: download => { pendingSwipeRemoval.value = download },
+    })
+    if (reverse) return reverse
+  }
   // In the bookmark playlist, the bookmark shortcut removes the swiped entry.
   const isQuickBookmarkPlaylist = () => selectedUserPlaylist.value != null &&
     selectedUserPlaylist.value._id === quickBookmarkPlaylist.value?._id

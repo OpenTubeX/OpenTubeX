@@ -1,8 +1,12 @@
+import { tmpdir } from 'node:os'
+import path from 'node:path'
 import { mkdir } from 'node:fs/promises'
 import { test } from 'node:test'
 import { chromium, expect } from '@playwright/test'
 import { goTo } from '../../e2e/helpers/app.mjs'
-import { SWIPE_VIDEO, verifyThumbnailSwipes, verifyPlaylistSwipeRemoval, verifyCopySwipe, verifySwipeDownloadAvailability } from '../../e2e/helpers/thumbnail-swipe.mjs'
+import { SWIPE_VIDEO, verifyThumbnailSwipes, verifyPlaylistSwipeRemoval, verifyCopySwipe, verifySwipeDownloadAvailability, verifyReverseSwipes } from '../../e2e/helpers/thumbnail-swipe.mjs'
+
+const evidenceDir = process.env.SWIPE_EVIDENCE_DIR || path.join(tmpdir(), 'opentubex-swipe-evidence')
 
 // Acquire the emulator's lab lock, install a current debug APK, forward its
 // WebView socket, and set ANDROID_CDP_URL to run this acceptance test.
@@ -31,6 +35,7 @@ test('Android thumbnail swipes use video actions and preserve mobile navigation'
         EnableDownloads: true,
         ReducedMotion: 'off',
         BackendFallback: true,
+        WatchedPercentageThreshold: 90,
       }
       const settings = Object.fromEntries(Object.keys(values).map(key => [key, store.getters['get' + key]]))
       const history = JSON.parse(JSON.stringify(store.getters.getHistoryCacheSorted))
@@ -45,11 +50,11 @@ test('Android thumbnail swipes use video actions and preserve mobile navigation'
     }, SWIPE_VIDEO)
     await expect(page.locator('.ft-list-video .title').first()).toContainText(SWIPE_VIDEO.title)
     await verifyCopySwipe(page, session, () => page.evaluate(async () => (await window.Capacitor.Plugins.Clipboard.read()).value))
-    await mkdir('/tmp/opentubex-swipe-evidence', { recursive: true })
-    await verifyThumbnailSwipes(page, session, name => page.screenshot({ path: `/tmp/opentubex-swipe-evidence/android-${name.replaceAll(' ', '-')}.png` }))
+    await mkdir(evidenceDir, { recursive: true })
+    await verifyThumbnailSwipes(page, session, name => page.screenshot({ path: `${evidenceDir}/android-${name.replaceAll(' ', '-')}.png` }))
     await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'on'))
     await expect(page.locator('html')).toHaveAttribute('data-reduced-motion', 'reduce')
-    await verifyThumbnailSwipes(page, session, name => page.screenshot({ path: `/tmp/opentubex-swipe-evidence/android-reduced-motion-${name.replaceAll(' ', '-')}.png` }))
+    await verifyThumbnailSwipes(page, session, name => page.screenshot({ path: `${evidenceDir}/android-reduced-motion-${name.replaceAll(' ', '-')}.png` }))
 
     await goTo(page, 'settings')
     const left = page.getByRole('combobox', { name: 'Swipe left on thumbnails', exact: true })
@@ -66,18 +71,20 @@ test('Android thumbnail swipes use video actions and preserve mobile navigation'
     await page.getByRole('option', { name: 'Disabled', exact: true }).click()
     await expect(left.locator('..').locator('select')).toHaveValue('history')
     await expect(right.locator('..').locator('select')).toHaveValue('disabled')
-    await page.screenshot({ path: '/tmp/opentubex-swipe-evidence/android-settings.png' })
+    await page.screenshot({ path: path.join(evidenceDir, 'android-settings.png') })
     await page.locator('.settingsWindow').getByRole('button', { name: 'Close', exact: true }).click()
     await expect(page.locator('.settingsWindow')).toHaveCount(0)
     await expect(page).toHaveURL(/#\/history/)
-    await verifyPlaylistSwipeRemoval(page, session, name => page.screenshot({ path: `/tmp/opentubex-swipe-evidence/android-${name.replaceAll(' ', '-')}.png` }))
+    await verifyPlaylistSwipeRemoval(page, session, name => page.screenshot({ path: `${evidenceDir}/android-${name.replaceAll(' ', '-')}.png` }))
+    await page.evaluate(video => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHistory', video), SWIPE_VIDEO)
+    await verifyReverseSwipes(page, session, page.locator('.ft-list-video .videoThumbnail').first(), name => page.screenshot({ path: path.join(evidenceDir, `android-${name.replaceAll(' ', '-')}.png`) }))
   } finally {
     if (saved) {
       await page.evaluate(async saved => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
         for (const [key, value] of Object.entries(saved.settings)) await store.dispatch('update' + key, value)
-        store.commit('setHistoryCacheSorted', saved.history)
-        store.commit('setHistoryCacheById', Object.fromEntries(saved.history.map(item => [item.videoId, item])))
+        const restored = await store.dispatch('overwriteHistory', saved.history.map(record => [record.videoId, record]))
+        if (!restored) throw new Error('Could not restore history after the swipe test')
         store.commit('clearWatchQueue')
         for (const video of saved.queue) store.commit('addVideoToWatchQueue', { video })
         location.hash = saved.route
