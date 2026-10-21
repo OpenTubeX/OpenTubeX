@@ -688,6 +688,7 @@ Settings:
     Show Skip Silence Toggle: Sýna rofa fyrir að sleppa þögn
     Enable Skip Silence by Default: Sleppa þögn sjálfgefið
     Enable Video Zoom: Virkja aðdrátt í myndbandi
+    Enable Seek History: Virkja stökkferil
     Voice-over Translation:
       Title: Talsetningarþýðing
       Attribution: (með tækni frá Yandex)
@@ -1500,6 +1501,11 @@ Video:
       End Before Start: Punktur B verður að vera á eftir punkti A.
       Outside Duration: Tímamerkið verður að vera innan myndbandsins.
       Cleared: A-B-endurtekning hreinsuð
+    Seek History:
+      Seek History: Stökkferill
+      Positions: '{count} staðsetning | {count} staðsetningar'
+      Nothing to undo: Ekkert til að afturkalla
+      Nothing to redo: Ekkert til að endurtaka
     Zoom:
       Zoom: Aðdráttur
       'Off': 'Slökkt'
@@ -1911,6 +1917,7 @@ Tooltips:
     Show Skip Silence Toggle: Sýnir rofa til að sleppa þögnum í stillingavalmynd spilarans.
     Enable Skip Silence by Default: Sleppir þögnum sjálfgefið í nýjum flipum. Breyting í einum flipa hefur ekki áhrif á aðra flipa.
     Enable Video Zoom: Sýnir aðdráttarstillingu í stillingavalmynd spilarans og virkjar flýtilykla og hliðrunarstjórnun fyrir hana.
+    Enable Seek History: Man hvaðan þú stökkst í hverju myndbandi þar til forritinu er lokað. Sýnir stökkferilinn í stillingavalmynd spilarans og virkjar flýtilykla hans.
     Voice-over Translation: Sendir auðkenni og lengd myndbandsins ásamt völdu tungumáli til óopinberrar talsetningarþjónustu Yandex þegar beðið er um þýðingu. Sjálfgefið er slökkt á þessu.
     Hold to Double Playback Speed: Haltu bilstönginni eða vinstri músarhnappi niðri yfir spilaranum til að tvöfalda núverandi spilunarhraða tímabundið.
     Ambient Mode: Blandar litum myndbandsins inn í svæðið umhverfis spilarann.
@@ -2001,6 +2008,8 @@ KeyboardShortcutPrompt:
   Video Zoom In: Auka aðdrátt á myndbandi
   Video Zoom Out: Minnka aðdrátt á myndbandi
   Tab Switcher: Flipaskiptir
+  Undo Seek: Afturkalla síðasta stökk
+  Redo Seek: Endurtaka afturkallað stökk
 CommandPalette:
   Title: Skipanaspjald
   Open: Opna skipanaspjald

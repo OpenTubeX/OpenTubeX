@@ -700,6 +700,7 @@ Settings:
     Show Skip Silence Toggle: Vis knappen Spring stilhed over
     Enable Skip Silence by Default: Slå Spring stilhed over til som standard
     Enable Video Zoom: Slå videozoom til
+    Enable Seek History: Slå spolehistorik til
     Voice-over Translation:
       Title: Voiceoveroversættelse
       Attribution: (leveret af Yandex)
@@ -1545,6 +1546,11 @@ Video:
       End Before Start: Punkt B skal være efter punkt A.
       Outside Duration: Tidsstemplet skal ligge inden for videoen.
       Cleared: A-B-gentagelsen er ryddet
+    Seek History:
+      Seek History: Spolehistorik
+      Positions: '{count} position | {count} positioner'
+      Nothing to undo: Intet at fortryde
+      Nothing to redo: Intet at gentage
     Zoom:
       Zoom: Zoom
       'Off': 'Fra'
@@ -1966,6 +1972,7 @@ Tooltips:
     Show Skip Silence Toggle: Viser en til/fra-knap til at springe stilhed over i afspillerens indstillingsmenu.
     Enable Skip Silence by Default: Slår overspringning af stilhed til for nye faner. En ændring i én fane påvirker ikke andre faner.
     Enable Video Zoom: Viser zoomknappen i afspillerens indstillingsmenu og slår dens tastaturgenveje og panoreringsknapper til.
+    Enable Seek History: Husker, hvor du sprang fra i hver video, indtil appen lukkes. Viser listen med spolehistorik i afspillerens indstillingsmenu og slår dens tastaturgenveje til.
     Voice-over Translation: Sender videoens id, varighed og valgte sprog til Yandex' uofficielle tjeneste til voiceoveroversættelse, når du anmoder om en oversættelse. Funktionen er som standard slået fra.
     Hold to Double Playback Speed: Hold mellemrumstasten eller venstre museknap nede over afspilleren for midlertidigt at fordoble den aktuelle afspilningshastighed.
     Ambient Mode: Blander videoens farver ind i området omkring afspilleren.
@@ -2061,6 +2068,8 @@ KeyboardShortcutPrompt:
   Tab Switcher: Faneskifter
   Skip to Next Video: Spring til den næste video i en playliste eller den næste anbefalede video
   Skip to Previous Video: Spring til den forrige video i en playliste
+  Undo Seek: Fortryd det seneste spring
+  Redo Seek: Gentag et fortrudt spring
 CommandPalette:
   Title: Kommandopalet
   Open: Åbn kommandopalet

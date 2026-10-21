@@ -683,6 +683,7 @@ Settings:
     Show Skip Silence Toggle: Sessizliği Atlama Düğmesini Göster
     Enable Skip Silence by Default: Sessizliği Atlamayı Varsayılan Olarak Etkinleştir
     Enable Video Zoom: Video Yakınlaştırmayı Etkinleştir
+    Enable Seek History: Atlama Geçmişini Etkinleştir
     Voice-over Translation:
       Title: Seslendirme çevirisi
       Attribution: (Yandex tarafından desteklenmektedir)
@@ -1477,6 +1478,11 @@ Video:
       End Before Start: B noktası A noktasından sonra olmalıdır.
       Outside Duration: Zaman damgası video içinde olmalıdır.
       Cleared: A-B tekrarı temizlendi
+    Seek History:
+      Seek History: Atlama geçmişi
+      Positions: '{count} konum | {count} konum'
+      Nothing to undo: Geri alınacak bir şey yok
+      Nothing to redo: Yinelenecek bir şey yok
     Zoom:
       Zoom: Yakınlaştırma
       'Off': Kapalı
@@ -1886,6 +1892,7 @@ Tooltips:
     Show Skip Silence Toggle: Oynatıcının ayarlar menüsünde sessizliği atmak için açma ve kapatma düğmesi gösterir.
     Enable Skip Silence by Default: Yeni sekmelerde sessizliği atlamayı etkinleştirir. Bir sekmede değiştirilmesi diğer sekmeleri etkilemez.
     Enable Video Zoom: Oynatıcının ayarlar menüsünde Yakınlaştırma denetimini gösterir; klavye kısayollarını ve kaydırma denetimlerini etkinleştirir.
+    Enable Seek History: Uygulama kapanana kadar her videoda nereden atladığınızı hatırlar. Oynatıcının ayarlar menüsünde atlama geçmişi listesini gösterir ve klavye kısayollarını etkinleştirir.
     Voice-over Translation: Çeviri istediğinizde video kimliğini, süresini ve seçili dili resmî olmayan Yandex seslendirme çevirisi hizmetine gönderir. Varsayılan olarak devre dışıdır.
     Hold to Double Playback Speed: Geçerli oynatma hızını geçici olarak ikiye katlamak için oynatıcının üzerindeyken Boşluk tuşunu veya sol fare düğmesini basılı tutun.
     Ambient Mode: Videonun renklerini oynatıcının çevresindeki alana yayar.
@@ -1974,6 +1981,8 @@ KeyboardShortcutPrompt:
   Video Zoom In: Videoyu yakınlaştır
   Video Zoom Out: Videoyu uzaklaştır
   Tab Switcher: Sekme değiştirici
+  Undo Seek: Son atlamayı geri al
+  Redo Seek: Geri alınan atlamayı yinele
 CommandPalette:
   Title: Komut paleti
   Open: Komut paletini aç

@@ -684,6 +684,7 @@ Settings:
     Show Skip Silence Toggle: Erakutsi isiluneak saltatzeko etengailua
     Enable Skip Silence by Default: Gaitu isiluneak saltatzea modu lehenetsian
     Enable Video Zoom: Gaitu bideoaren zooma
+    Enable Seek History: Gaitu jauzien historia
     Voice-over Translation:
       Title: Ahots bidezko itzulpena
       Attribution: (Yandexek eskainia)
@@ -1488,6 +1489,11 @@ Video:
       End Before Start: B puntuak A puntuaren ondoren egon behar du.
       Outside Duration: Denbora-markak bideoaren barruan egon behar du.
       Cleared: A-B errepikapena garbitu da
+    Seek History:
+      Seek History: Jauzien historia
+      Positions: '{count} posizio | {count} posizio'
+      Nothing to undo: Ez dago desegiteko ezer
+      Nothing to redo: Ez dago berregiteko ezer
     Zoom:
       Zoom: Zooma
       'Off': 'Desaktibatuta'
@@ -1896,6 +1902,7 @@ Tooltips:
     Show Skip Silence Toggle: Isiluneak saltatzea aktibatzeko edo desaktibatzeko etengailua erakusten du erreproduzigailuaren ezarpen-menuan.
     Enable Skip Silence by Default: Isiluneak saltatzea gaitzen du fitxa berrietarako. Fitxa batean aldatzeak ez die beste fitxei eragiten.
     Enable Video Zoom: Zoom kontrola erakusten du erreproduzigailuaren ezarpen-menuan eta teklatuko lasterbideak eta desplazamendu-kontrolak gaitzen ditu.
+    Enable Seek History: Bideo bakoitzean nondik egin duzun jauzi gogoratzen du aplikazioa itxi arte. Jauzien historiaren zerrenda erakusten du erreproduzigailuaren ezarpenen menuan eta haren laster-teklak gaitzen ditu.
     Voice-over Translation: Itzulpena eskatzean bideoaren IDa, iraupena eta hautatutako hizkuntza bidaltzen dizkio Yandexen ahots bidezko itzulpen-zerbitzu ez-ofizialari. Modu lehenetsian desgaituta dago.
     Hold to Double Playback Speed: Eduki sakatuta zuriune-barra edo saguaren ezkerreko botoia erreproduzigailuaren gainean uneko erreprodukzio-abiadura aldi baterako bikoizteko.
     Ambient Mode: Bideoaren koloreak erreproduzigailuaren inguruan hedatzen ditu.
@@ -1984,6 +1991,8 @@ KeyboardShortcutPrompt:
   Video Zoom In: Handiagotu bideoa
   Video Zoom Out: Txikiagotu bideoa
   Tab Switcher: Fitxa-aldatzailea
+  Undo Seek: Desegin azken jauzia
+  Redo Seek: Berregin desegindako jauzia
 CommandPalette:
   Title: Komando-paleta
   Open: Ireki komando-paleta

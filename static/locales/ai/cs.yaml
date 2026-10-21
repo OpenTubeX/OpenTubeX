@@ -684,6 +684,7 @@ Settings:
     Show Skip Silence Toggle: Zobrazovat přepínač přeskakování ticha
     Enable Skip Silence by Default: Ve výchozím nastavení přeskakovat ticho
     Enable Video Zoom: Povolit přiblížení videa
+    Enable Seek History: Povolit historii přeskoků
     Voice-over Translation:
       Title: Překlad dabingu
       Attribution: (používá Yandex)
@@ -1478,6 +1479,11 @@ Video:
       End Before Start: Bod B musí být za bodem A.
       Outside Duration: Časová značka musí být v rámci videa.
       Cleared: Opakování A-B bylo vymazáno
+    Seek History:
+      Seek History: Historie přeskoků
+      Positions: '{count} pozice | {count} pozice | {count} pozic'
+      Nothing to undo: Není co vrátit zpět
+      Nothing to redo: Není co znovu provést
     Zoom:
       Zoom: Přiblížení
       'Off': 'Vypnuto'
@@ -1886,6 +1892,7 @@ Tooltips:
     Show Skip Silence Toggle: Zobrazí v nabídce nastavení přehrávače přepínač přeskakování ticha.
     Enable Skip Silence by Default: Zapne přeskakování ticha pro nové karty. Změna na jedné kartě neovlivní ostatní karty.
     Enable Video Zoom: Zobrazí v nabídce nastavení přehrávače ovládání přiblížení a zapne jeho klávesové zkratky a posouvání obrazu.
+    Enable Seek History: Pamatuje si, odkud jste v každém videu přeskočili, dokud aplikaci nezavřete. Zobrazí seznam historie přeskoků v nabídce nastavení přehrávače a povolí její klávesové zkratky.
     Voice-over Translation: Při požadavku na překlad odešle ID videa, délku a vybraný jazyk neoficiální službě Yandex pro překlad dabingu. Ve výchozím nastavení je vypnuto.
     Hold to Double Playback Speed: Podržením mezerníku nebo levého tlačítka myši nad přehrávačem dočasně zdvojnásobíte aktuální rychlost přehrávání.
     Ambient Mode: Rozšíří barvy videa do prostoru kolem přehrávače.
@@ -1974,6 +1981,8 @@ KeyboardShortcutPrompt:
   Video Zoom In: Přiblížit video
   Video Zoom Out: Oddálit video
   Tab Switcher: Přepínač karet
+  Undo Seek: Vrátit poslední přeskok zpět
+  Redo Seek: Znovu provést vrácený přeskok
 CommandPalette:
   Title: Paleta příkazů
   Open: Otevřít paletu příkazů

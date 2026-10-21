@@ -683,6 +683,7 @@ Settings:
     Show Skip Silence Toggle: Vis bryteren for å hoppe over stillhet
     Enable Skip Silence by Default: Hopp over stillhet som standard
     Enable Video Zoom: Slå på videozoom
+    Enable Seek History: Slå på hopphistorikk
     Voice-over Translation:
       Title: Taleoversettelse
       Attribution: (levert av Yandex)
@@ -1482,6 +1483,11 @@ Video:
       End Before Start: Punkt B må være etter punkt A.
       Outside Duration: Tidsstempelet må være innenfor videoen.
       Cleared: A-B-gjentakelsen er fjernet
+    Seek History:
+      Seek History: Hopphistorikk
+      Positions: '{count} posisjon | {count} posisjoner'
+      Nothing to undo: Ingenting å angre
+      Nothing to redo: Ingenting å gjøre om
     Zoom:
       Zoom: Forstørring
       'Off': 'Av'
@@ -1890,6 +1896,7 @@ Tooltips:
     Show Skip Silence Toggle: Viser en bryter for å hoppe over stillhet i innstillingsmenyen til spilleren.
     Enable Skip Silence by Default: Hopper over stillhet som standard i nye faner. Endring i én fane påvirker ikke andre faner.
     Enable Video Zoom: Viser zoomkontrollen i innstillingsmenyen til spilleren og slår på hurtigtastene og panoreringskontrollene.
+    Enable Seek History: Husker hvor du hoppet fra i hver video til appen lukkes. Viser hopphistorikklisten i avspillerens innstillingsmeny og slår på hurtigtastene for den.
     Voice-over Translation: Sender video-ID-en, varigheten og valgt språk til Yandex' uoffisielle tjeneste for taleoversettelse når du ber om en oversettelse. Slått av som standard.
     Hold to Double Playback Speed: Hold inne mellomromstasten eller venstre museknapp over spilleren for å doble avspillingshastigheten midlertidig.
     Ambient Mode: Blander fargene i videoen inn i området rundt spilleren.
@@ -1978,6 +1985,8 @@ KeyboardShortcutPrompt:
   Video Zoom In: Zoom inn i videoen
   Video Zoom Out: Zoom ut av videoen
   Tab Switcher: Fanebytter
+  Undo Seek: Angre siste hopp
+  Redo Seek: Gjør om et angret hopp
 CommandPalette:
   Title: Kommandopalett
   Open: Åpne kommandopaletten

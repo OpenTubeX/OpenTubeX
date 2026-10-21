@@ -20,6 +20,8 @@ for (const locale of ['en-US', 'de-DE']) {
       ['NAVIGATE_TO_SETTINGS', 'KeyboardShortcutPrompt.Navigate to Settings'],
       ['PICTURE_IN_PICTURE', 'KeyboardShortcutPrompt.Picture in Picture'],
       ['SET_AB_REPEAT_START', 'KeyboardShortcutPrompt.Set A-B Repeat Point A'],
+      ['UNDO_SEEK', 'KeyboardShortcutPrompt.Undo Seek'],
+      ['REDO_SEEK', 'KeyboardShortcutPrompt.Redo Seek'],
       ['TOGGLE_SKIP_SILENCE', 'KeyboardShortcutPrompt.Toggle Skip Silence'],
       ['FULLWINDOW', 'KeyboardShortcutPrompt.Full Window'],
     ]) assert.equal(labels.get(code), translate(key))

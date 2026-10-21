@@ -14,6 +14,7 @@ import { normalizeTabBarPosition } from '../../constants/tabBarPosition'
 import { setReducedMotionPreference } from '../../helpers/reducedMotion'
 import { setAnimationSpeed } from '../../helpers/animationSpeed'
 import { normalizeYouTubeCaptionLanguageCode } from '../../helpers/player/youtubeCaptionLanguages'
+import { clearSeekHistories } from '../../helpers/player/seekHistory'
 import { currentIconPack, isIconPack, setIconPack } from '../../icons/iconPackState'
 import { resolveBaseTheme, resolveSystemTheme } from '../../../appearanceSettings.js'
 import { resolveColor } from '../../helpers/colors.js'
@@ -231,6 +232,13 @@ const sideEffectHandlers = {
     // Turning the toggle back on must not resume an earlier boost
     if (!value) {
       commit('clearTabVolumeBoosts')
+    }
+  },
+
+  enableSeekHistory: (_store, value) => {
+    // Turning seek history back on must not bring back earlier positions
+    if (!value) {
+      clearSeekHistories()
     }
   },
 

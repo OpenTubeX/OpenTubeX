@@ -1003,6 +1003,7 @@ Settings:
     Use YouTube-style Shorts: Shorts im YouTube-Stil verwenden
     Loop Shorts: Shorts wiederholen
     Enable Video Zoom: Videozoom aktivieren
+    Enable Seek History: Sprungverlauf aktivieren
     Voice-over Translation:
       Title: Voice-over-Übersetzung
       Attribution: (bereitgestellt von Yandex)
@@ -2104,6 +2105,11 @@ Video:
       End Before Start: Punkt B muss nach Punkt A liegen.
       Outside Duration: Der Zeitstempel muss innerhalb des Videos liegen.
       Cleared: A-B-Wiederholung gelöscht
+    Seek History:
+      Seek History: Sprungverlauf
+      Positions: '{count} Position | {count} Positionen'
+      Nothing to undo: Nichts zum Rückgängigmachen
+      Nothing to redo: Nichts zum Wiederherstellen
     Audio Tracks: Audiospuren
     Up next in {seconds}: Als Nächstes in {seconds}
     Play now: Jetzt abspielen
@@ -2670,6 +2676,9 @@ Tooltips:
     Enable Video Zoom: >-
       Zeigt die Zoomsteuerung im Einstellungsmenü des Players an und aktiviert die zugehörigen Tastenkürzel und
       Schwenksteuerungen.
+    Enable Seek History: >-
+      Merkt sich bis zum Schließen der App, von wo du in jedem Video weggesprungen bist. Zeigt den Sprungverlauf im
+      Einstellungsmenü des Players an und aktiviert die zugehörigen Tastenkürzel.
     Continue Playback When Screen Is Locked: >-
       Spielt Audio im Hintergrund weiter und stellt Android-Mediensteuerungen bereit. Deaktiviere diese Option, um die
       Wiedergabe anzuhalten, sobald die App nicht mehr sichtbar ist.
@@ -2918,6 +2927,8 @@ KeyboardShortcutPrompt:
   Clear A-B Repeat: A-B-Wiederholung löschen
   End: Zum Ende des Videos springen
   Home: Zum Anfang des Videos springen
+  Undo Seek: Letzten Sprung rückgängig machen
+  Redo Seek: Rückgängig gemachten Sprung wiederherstellen
   Skip to Next Video: Zum nächsten Video in der Playlist bzw. nächsten empfohlenen Video springen
   Skip to Previous Video: Zum vorherigen Video in der Playlist springen
   Toggle Normal Playback Speed: Zwischen 1x Wiedergabegeschwindigkeit und der vorherigen Geschwindigkeit wechseln

@@ -374,6 +374,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     videoPlaybackRateInterval: 0.25,
     rememberVolume: true,
     enableVideoZoom: true,
+    enableSeekHistory: false,
     showLightsOffToggle: false,
     showVolumeBoostToggle: false,
     showSkipSilenceButton: false,

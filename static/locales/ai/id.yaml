@@ -684,6 +684,7 @@ Settings:
     Show Skip Silence Toggle: Tampilkan Tombol Lewati Bagian Hening
     Enable Skip Silence by Default: Aktifkan Lewati Bagian Hening Secara Bawaan
     Enable Video Zoom: Aktifkan Zoom Video
+    Enable Seek History: Aktifkan Riwayat Lompatan
     Voice-over Translation:
       Title: Terjemahan sulih suara
       Attribution: (didukung oleh Yandex)
@@ -1490,6 +1491,11 @@ Video:
       End Before Start: Titik B harus setelah titik A.
       Outside Duration: Stempel waktu harus berada dalam durasi video.
       Cleared: Pengulangan A-B dihapus
+    Seek History:
+      Seek History: Riwayat lompatan
+      Positions: '{count} posisi'
+      Nothing to undo: Tidak ada yang bisa diurungkan
+      Nothing to redo: Tidak ada yang bisa diulangi
     Zoom:
       Zoom: Zoom
       'Off': 'Nonaktif'
@@ -1902,6 +1908,7 @@ Tooltips:
     Show Skip Silence Toggle: Menampilkan tombol aktif/nonaktif untuk melewati bagian hening dalam menu pengaturan pemutar.
     Enable Skip Silence by Default: Mengaktifkan fitur lewati bagian hening untuk tab baru. Mengubahnya di satu tab tidak memengaruhi tab lain.
     Enable Video Zoom: Menampilkan kontrol Zoom dalam menu pengaturan pemutar dan mengaktifkan pintasan papan ketik serta kontrol gesernya.
+    Enable Seek History: Mengingat posisi tempat Anda melompat di setiap video hingga aplikasi ditutup. Menampilkan daftar riwayat lompatan di menu pengaturan pemutar dan mengaktifkan pintasan keyboard-nya.
     Voice-over Translation: Mengirim ID video, durasi, dan bahasa yang dipilih ke layanan tidak resmi terjemahan sulih suara Yandex saat Anda meminta terjemahan. Nonaktif secara bawaan.
     Hold to Double Playback Speed: Tahan tombol Spasi atau tombol kiri tetikus di atas pemutar untuk menggandakan sementara kecepatan pemutaran saat ini.
     Ambient Mode: Memadukan warna video dengan area di sekitar pemutar.
@@ -1990,6 +1997,8 @@ KeyboardShortcutPrompt:
   Video Zoom In: Perbesar video
   Video Zoom Out: Perkecil video
   Tab Switcher: Pengalih tab
+  Undo Seek: Urungkan lompatan terakhir
+  Redo Seek: Ulangi lompatan yang diurungkan
 CommandPalette:
   Title: Palet perintah
   Open: Buka palet perintah

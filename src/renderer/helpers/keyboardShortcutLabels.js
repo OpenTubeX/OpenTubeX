@@ -71,6 +71,8 @@ export function getKeyboardShortcutLabelMappings(t, isCapacitor = false) {
     [t('KeyboardShortcutPrompt.Clear A-B Repeat'), ['CLEAR_AB_REPEAT']],
     [t('KeyboardShortcutPrompt.Home'), ['HOME']],
     [t('KeyboardShortcutPrompt.End'), ['END']],
+    [t('KeyboardShortcutPrompt.Undo Seek'), ['UNDO_SEEK']],
+    [t('KeyboardShortcutPrompt.Redo Seek'), ['REDO_SEEK']],
     [t('KeyboardShortcutPrompt.Skip by Tenths'), ['SKIP_N_TENTHS']],
     [t('KeyboardShortcutPrompt.Last Chapter'), ['LAST_CHAPTER']],
     [t('KeyboardShortcutPrompt.Next Chapter'), ['NEXT_CHAPTER']],

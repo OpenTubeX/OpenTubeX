@@ -689,6 +689,7 @@ Settings:
     Show Skip Silence Toggle: إظهار تخطي تبديل الصمت
     Enable Skip Silence by Default: تمكين تخطي الصمت بشكل افتراضي
     Enable Video Zoom: تمكين تكبير الفيديو
+    Enable Seek History: تمكين سجل التنقل
     Voice-over Translation:
       Title: الترجمة الصوتية
       Attribution: (مدعوم من ياندكس)
@@ -1513,6 +1514,11 @@ Video:
       End Before Start: يجب أن تكون النقطة B بعد النقطة A.
       Outside Duration: يجب أن يكون الطابع الزمني ضمن مدة الفيديو.
       Cleared: تم مسح تكرار A-B
+    Seek History:
+      Seek History: سجل التنقل
+      Positions: '{count} موضع | {count} موضع | {count} موضعان | {count} مواضع | {count} موضعًا | {count} موضع'
+      Nothing to undo: لا يوجد ما يمكن التراجع عنه
+      Nothing to redo: لا يوجد ما يمكن إعادته
     Zoom:
       Zoom: تكبير
       Off: عن
@@ -1916,6 +1922,7 @@ Tooltips:
     Show Skip Silence Toggle: يعرض مفتاح تشغيل/إيقاف لتخطي الصمت في قائمة إعدادات المشغل.
     Enable Skip Silence by Default: تمكن الصمت تخطي علامات التبويب الجديدة. ولا يؤثر تغييره في علامة تبويب واحدة على علامات التبويب الأخرى.
     Enable Video Zoom: يعرض عنصر التحكم في التكبير/التصغير في قائمة إعدادات المشغل ويمكّن اختصارات لوحة المفاتيح وعناصر التحكم في التحريك.
+    Enable Seek History: يتذكر المواضع التي انتقلت منها في كل فيديو حتى إغلاق التطبيق. يعرض قائمة سجل التنقل في قائمة إعدادات المشغل ويفعّل اختصارات لوحة المفاتيح الخاصة بها.
     Voice-over Translation: يرسل معرف الفيديو ومدته واللغة المحددة إلى خدمة الترجمة الصوتية غير الرسمية لـ Yandex عندما تطلب ترجمة. معطل افتراضيا.
     Hold to Double Playback Speed: اضغط باستمرار على مفتاح المسافة أو زر الماوس الأيسر فوق المشغل لمضاعفة سرعة التشغيل الحالية بشكل مؤقت.
     Ambient Mode: يمزج ألوان الفيديو في المنطقة المحيطة بالمشغل.
@@ -2002,6 +2009,8 @@ KeyboardShortcutPrompt:
   Video Zoom In: تكبير الفيديو
   Video Zoom Out: تصغير الفيديو
   Tab Switcher: مبدل علامات التبويب
+  Undo Seek: التراجع عن آخر انتقال
+  Redo Seek: إعادة الانتقال الذي تم التراجع عنه
 CommandPalette:
   Title: لوحة الأوامر
   Open: افتح لوحة الأوامر

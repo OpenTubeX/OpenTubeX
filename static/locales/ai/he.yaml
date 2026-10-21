@@ -689,6 +689,7 @@ Settings:
     Show Skip Silence Toggle: הצגת מתג לדילוג על קטעים שקטים
     Enable Skip Silence by Default: הפעלת דילוג על קטעים שקטים כברירת מחדל
     Enable Video Zoom: הפעלת הגדלת וידאו
+    Enable Seek History: הפעלת היסטוריית קפיצות
     Voice-over Translation:
       Title: תרגום קולי
       Attribution: (מופעל על ידי Yandex)
@@ -1520,6 +1521,11 @@ Video:
       End Before Start: נקודה B חייבת להיות אחרי נקודה A.
       Outside Duration: חותמת הזמן חייבת להיות בתוך הסרטון.
       Cleared: החזרה A-B נוקתה
+    Seek History:
+      Seek History: היסטוריית קפיצות
+      Positions: '{count} מיקום | {count} מיקומים | {count} מיקומים'
+      Nothing to undo: אין מה לבטל
+      Nothing to redo: אין מה לבצע מחדש
     Zoom:
       Zoom: תקריב
       'Off': 'כבוי'
@@ -1934,6 +1940,7 @@ Tooltips:
     Show Skip Silence Toggle: הצגת מתג להפעלה ולכיבוי של דילוג על שקט בתפריט ההגדרות של הנגן.
     Enable Skip Silence by Default: הפעלת דילוג על שקט בכרטיסיות חדשות. שינוי האפשרות בכרטיסייה אחת אינו משפיע על האחרות.
     Enable Video Zoom: הצגת פקד התקריב בתפריט ההגדרות של הנגן והפעלת קיצורי המקלדת ופקדי ההזזה שלו.
+    Enable Seek History: זוכר מאיפה קפצת בכל סרטון עד לסגירת האפליקציה. מציג את רשימת היסטוריית הקפיצות בתפריט ההגדרות של הנגן ומפעיל את קיצורי המקלדת שלה.
     Voice-over Translation: שליחת מזהה הסרטון, משך הסרטון והשפה שנבחרה לשירות התרגום הקולי הלא רשמי של Yandex בעת בקשת תרגום. האפשרות מושבתת כברירת מחדל.
     Hold to Double Playback Speed: יש להחזיק את מקש הרווח או את לחצן העכבר השמאלי מעל הנגן כדי להכפיל זמנית את מהירות ההפעלה הנוכחית.
     Ambient Mode: מיזוג צבעי הסרטון באזור שסביב הנגן.
@@ -2026,6 +2033,8 @@ KeyboardShortcutPrompt:
   Video Zoom In: התקרבות בווידאו
   Video Zoom Out: התרחקות מהווידאו
   Tab Switcher: בורר לשוניות
+  Undo Seek: ביטול הקפיצה האחרונה
+  Redo Seek: ביצוע מחדש של קפיצה שבוטלה
 CommandPalette:
   Title: לוח הפקודות
   Open: פתיחת לוח הפקודות

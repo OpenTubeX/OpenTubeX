@@ -707,6 +707,7 @@ Settings:
     Show Skip Silence Toggle: نمایش کلید ردکردن سکوت
     Enable Skip Silence by Default: فعال‌کردن پیش‌فرض ردکردن سکوت
     Enable Video Zoom: فعال‌کردن بزرگ‌نمایی ویدیو
+    Enable Seek History: فعال‌کردن تاریخچهٔ پرش‌ها
     Voice-over Translation:
       Title: ترجمهٔ صوتی
       Attribution: (با پشتیبانی Yandex)
@@ -1552,6 +1553,11 @@ Video:
       End Before Start: نقطهٔ B باید پس از نقطهٔ A باشد.
       Outside Duration: برچسب زمانی باید در محدودهٔ ویدیو باشد.
       Cleared: تکرار A-B پاک شد
+    Seek History:
+      Seek History: تاریخچهٔ پرش‌ها
+      Positions: '{count} موقعیت | {count} موقعیت'
+      Nothing to undo: چیزی برای واگرد وجود ندارد
+      Nothing to redo: چیزی برای ازنو وجود ندارد
     Zoom:
       Zoom: بزرگ‌نمایی
       'Off': 'خاموش'
@@ -1973,6 +1979,7 @@ Tooltips:
     Show Skip Silence Toggle: کلید روشن/خاموشِ ردکردن سکوت را در منوی تنظیمات پخش‌کننده نشان می‌دهد.
     Enable Skip Silence by Default: ردکردن سکوت را برای زبانه‌های جدید فعال می‌کند. تغییر آن در یک زبانه بر زبانه‌های دیگر اثری ندارد.
     Enable Video Zoom: کنترل بزرگ‌نمایی را در منوی تنظیمات پخش‌کننده نشان می‌دهد و میان‌برهای صفحه‌کلید و کنترل‌های جابه‌جایی آن را فعال می‌کند.
+    Enable Seek History: تا زمان بسته شدن برنامه، به خاطر می‌سپارد در هر ویدیو از کجا پرش کرده‌اید. فهرست تاریخچهٔ پرش‌ها را در منوی تنظیمات پخش‌کننده نشان می‌دهد و میان‌برهای صفحه‌کلید آن را فعال می‌کند.
     Voice-over Translation: هنگام درخواست ترجمه، شناسه ویدیو، مدت‌زمان و زبان انتخابی را به سرویس غیررسمی ترجمه صوتی Yandex می‌فرستد. به‌طور پیش‌فرض غیرفعال است.
     Hold to Double Playback Speed: برای دو برابرکردن موقت سرعت پخش فعلی، کلید فاصله یا دکمه چپ ماوس را روی پخش‌کننده نگه دارید.
     Ambient Mode: رنگ‌های ویدیو را در فضای اطراف پخش‌کننده پخش می‌کند.
@@ -2065,6 +2072,8 @@ KeyboardShortcutPrompt:
   Video Zoom In: بزرگ‌نمایی ویدیو
   Video Zoom Out: کوچک‌نمایی ویدیو
   Tab Switcher: تعویض‌کننده زبانه
+  Undo Seek: واگرد آخرین پرش
+  Redo Seek: ازنو انجام دادن پرش واگردشده
 CommandPalette:
   Title: پالت فرمان
   Open: بازکردن پالت فرمان

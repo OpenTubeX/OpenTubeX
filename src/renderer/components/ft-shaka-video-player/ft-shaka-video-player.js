@@ -55,6 +55,7 @@ import { SkipSilenceButton } from './player-components/SkipSilenceButton'
 import { LevelSelection } from './player-components/LevelSelection'
 import { VoiceOverTranslationButton } from './player-components/VoiceOverTranslationButton'
 import { SleepTimer } from './player-components/SleepTimer'
+import { SeekHistoryMenu } from './player-components/SeekHistoryMenu'
 import { ShortsVideoInfoButton } from './player-components/ShortsVideoInfoButton'
 import { SponsorBlockCancelButton } from './player-components/SponsorBlockCancelButton'
 import { SponsorBlockClearButton } from './player-components/SponsorBlockClearButton'
@@ -151,6 +152,14 @@ import {
   isCompleteAbRepeatRange,
   validateAbRepeatRange,
 } from '../../helpers/player/abRepeat'
+import {
+  SEEK_HISTORY_MIN_JUMP_SECONDS,
+  getSeekHistory,
+  recordSeekHistoryJump,
+  setSeekHistory,
+  stepSeekHistoryBack,
+  stepSeekHistoryForward,
+} from '../../helpers/player/seekHistory'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
 import { getSponsorBlockContributionStats, voteOnSponsorBlockSegment } from '../../helpers/sponsorblock'
 import { getSponsorBlockCategoryVoteOptions } from '../../helpers/player/sponsorBlockCategories'
@@ -194,6 +203,8 @@ const SPONSORBLOCK_TERMINAL_OUTRO_TOLERANCE_SECONDS = 1
 const AB_REPEAT_MIN_RANGE_SECONDS = 0.05
 const AB_REPEAT_BOUNDARY_TOLERANCE_SECONDS = 0.012
 const AB_REPEAT_VALUE_CHANGE_ICON = AB_REPEAT_ICON
+/** Seeks closer together than this, such as repeated arrow key presses, form one jump. */
+const SEEK_HISTORY_JUMP_WINDOW_MS = 1000
 const SPONSORBLOCK_NOT_FOUND_REFETCH_RECENT_VIDEO_AGE_MS = 24 * 60 * 60 * 1000
 const SPONSORBLOCK_NOT_FOUND_REFETCH_MIN_DELAY_MS = 10000
 const SPONSORBLOCK_NOT_FOUND_REFETCH_MAX_DELAY_MS = 40000
@@ -5080,6 +5091,85 @@ export default defineComponent({
 
     // #endregion A-B repeat
 
+    // #region seek history
+
+    const seekHistoryEnabled = computed(() => store.getters.getEnableSeekHistory)
+    const seekHistoryAvailable = computed(() => seekHistoryEnabled.value && seekingIsPossible.value && !isLive.value && !props.shortsPlayer)
+    const seekHistoryKey = computed(() => props.videoId || props.externalUrl)
+    const seekHistory = shallowRef(getSeekHistory(seekHistoryKey.value))
+    const seekHistoryChapters = computed(() => props.chapters)
+
+    /**
+     * The jump in progress, so that dragging the seek bar or pressing an arrow
+     * key repeatedly leaves the starting position only once.
+     * @type {{ from: number, recorded: boolean, lastAt: number } | null}
+     */
+    let seekHistoryJump = null
+
+    // Turning the setting off clears the stored histories.
+    watch([seekHistoryKey, seekHistoryEnabled], ([key]) => {
+      seekHistory.value = getSeekHistory(key)
+      seekHistoryJump = null
+    })
+
+    /** @param {import('../../helpers/player/seekHistory').SeekHistory} history */
+    function updateSeekHistory(history) {
+      seekHistory.value = history
+      if (seekHistoryKey.value) setSeekHistory(seekHistoryKey.value, history)
+    }
+
+    /** @param {number} target */
+    function noteSeekHistoryJump(target) {
+      const videoElement = video.value
+      if (!seekHistoryAvailable.value || !videoElement || !Number.isFinite(target)) return
+
+      const now = performance.now()
+      // Holding the seek bar still while dragging continues the same jump.
+      if (seekHistoryJump === null ||
+        (now - seekHistoryJump.lastAt > SEEK_HISTORY_JUMP_WINDOW_MS && !ui?.getControls().isSeeking())) {
+        seekHistoryJump = { from: videoElement.currentTime, recorded: false, lastAt: now }
+      }
+      seekHistoryJump.lastAt = now
+
+      if (!seekHistoryJump.recorded && Math.abs(target - seekHistoryJump.from) >= SEEK_HISTORY_MIN_JUMP_SECONDS) {
+        seekHistoryJump.recorded = true
+        updateSeekHistory(recordSeekHistoryJump(seekHistory.value, seekHistoryJump.from))
+      }
+    }
+
+    /** @param {'back' | 'forward'} direction */
+    function stepSeekHistory(direction) {
+      const back = direction === 'back'
+      const icon = back ? 'undo' : 'redo'
+      const step = back
+        ? stepSeekHistoryBack(seekHistory.value, video.value.currentTime)
+        : stepSeekHistoryForward(seekHistory.value, video.value.currentTime)
+
+      if (!step) {
+        showValueChange(
+          back ? t('Video.Player.Seek History.Nothing to undo') : t('Video.Player.Seek History.Nothing to redo'),
+          icon,
+          !back
+        )
+        return
+      }
+
+      updateSeekHistory(step.history)
+      seekHistoryJump = null
+      setCurrentTime(step.target, false)
+      showValueChange(formatDurationAsTimestamp(step.target), icon, !back)
+    }
+
+    /** @param {CustomEvent<number>} event */
+    function selectSeekHistoryEntry(event) {
+      if (!canSeek()) return
+      // Returning to an entry is a jump of its own, so it can be undone.
+      seekHistoryJump = null
+      setCurrentTime(event.detail)
+    }
+
+    // #endregion seek history
+
     const showInvidiousShareOptions = computed(() => {
       return store.getters.getBackendPreference === 'invidious' || store.getters.getBackendFallback
     })
@@ -5189,6 +5279,7 @@ export default defineComponent({
           'captions',
           'ft_audio_tracks',
           'ft_sleep_timer',
+          'ft_seek_history',
           ...(!props.shortsPlayer ? ['ft_autoplay_toggle'] : []),
           ...(props.chapters.length > 0 ? ['ft_chapters'] : []),
           'ft_skip_silence',
@@ -5244,6 +5335,7 @@ export default defineComponent({
           props.format === 'legacy' ? 'ft_legacy_quality' : 'quality',
           'ft_sleep_timer',
           ...(removedButtons.has('autoplay') ? ['ft_autoplay_toggle'] : []),
+          'ft_seek_history',
           'ft_skip_silence',
           'ft_voice_over_translation',
           'ft_music_visualizer',
@@ -5336,6 +5428,10 @@ export default defineComponent({
 
       if (isLive.value || disableAbRepeat.value) {
         removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_ab_repeat')
+      }
+
+      if (!seekHistoryAvailable.value) {
+        removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_seek_history')
       }
 
       if (!useVrMode.value) {
@@ -6144,6 +6240,7 @@ export default defineComponent({
       // action must supersede a chapter seek queued before metadata was ready.
       if (event.type === 'mousedown') seekBarMouseDown = true
       if (event.type === 'mousedown' || event.type === 'touchstart') {
+        seekHistoryJump = null
         // Shaka pauses while scrubbing, which cancels native autoplay before
         // the first frame. Remember that intent until the interaction ends.
         resumeAutoplayAfterSeek = video.value.autoplay && !videoLayoutReady.value && !initialAutoplayCanceled
@@ -7522,7 +7619,7 @@ export default defineComponent({
       if (pendingMetadataSeek !== null) {
         // Restoring an existing seek must preserve its accumulated OSD feedback.
         if (seekingIsPossible.value) {
-          rememberSeekPosition(pendingMetadataSeek)
+          rememberSeekPosition(pendingMetadataSeek, false)
           video.value.currentTime = pendingMetadataSeek
         }
         pendingMetadataSeek = null
@@ -10240,6 +10337,19 @@ export default defineComponent({
       registerOwnElement(shakaOverflowMenu, 'ft_sleep_timer', new SleepTimerFactory())
     }
 
+    function registerSeekHistoryMenu() {
+      events.addEventListener('seekHistorySelect', selectSeekHistoryEntry)
+
+      /** @implements {shaka.extern.IUIElement.Factory} */
+      class SeekHistoryMenuFactory {
+        create(rootElement, controls) {
+          return new SeekHistoryMenu(seekHistory, seekHistoryChapters, events, rootElement, controls)
+        }
+      }
+
+      registerOwnElement(shakaOverflowMenu, 'ft_seek_history', new SeekHistoryMenuFactory())
+    }
+
     /** @type {(() => void) | null} */
     let removeAbRepeatContext = null
     /** @type {(() => void) | null} */
@@ -11690,6 +11800,13 @@ export default defineComponent({
             showOverlayControls()
           }
           break
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.UNDO_SEEK):
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.REDO_SEEK):
+          if (seekHistoryAvailable.value && canSeek()) {
+            event.preventDefault()
+            stepSeekHistory(matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.UNDO_SEEK) ? 'back' : 'forward')
+          }
+          break
         case matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.TAKE_SCREENSHOT):
           if (enableScreenshot.value && props.format !== 'audio') {
             event.preventDefault()
@@ -12421,6 +12538,7 @@ export default defineComponent({
       registerSkipSilenceButton()
       registerVoiceOverTranslationButton()
       registerSleepTimer()
+      registerSeekHistoryMenu()
       registerAbRepeatControl()
 
       registerTheatreModeButton()
@@ -13377,12 +13495,13 @@ export default defineComponent({
 
     /**
      * @param {number} time
+     * @param {boolean} [recordSeekHistory] Whether leaving the current position adds to the seek history
      */
-    function setCurrentTime(time) {
+    function setCurrentTime(time, recordSeekHistory = true) {
       if (!seekingIsPossible.value) return
       endSeekTarget = null
       accumulatedSeekSeconds = 0
-      rememberSeekPosition(time)
+      rememberSeekPosition(time, recordSeekHistory)
       video.value.currentTime = time
     }
 
@@ -13394,9 +13513,12 @@ export default defineComponent({
     }
 
     /**
+     * Call before a user's seek to `time` is applied.
      * @param {number} time
+     * @param {boolean} [recordSeekHistory] Whether leaving the current position adds to the seek history
      */
-    function rememberSeekPosition(time) {
+    function rememberSeekPosition(time, recordSeekHistory = true) {
+      if (recordSeekHistory) noteSeekHistoryJump(time)
       // Explicit seeks supersede earlier end intent, even at its backoff position.
       endSeekTarget = null
       // Shaka temporarily pauses while scrubbing. Retain a requested end only

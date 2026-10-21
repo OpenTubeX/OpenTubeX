@@ -873,6 +873,7 @@ Settings:
     Show Skip Silence Toggle: Rodyti tylos praleidimo jungiklį
     Enable Skip Silence by Default: Įjungti tylos praleidimą pagal numatytuosius nustatymus
     Enable Video Zoom: Leisti didinti vaizdo įrašą
+    Enable Seek History: Įjungti peršokimų istoriją
     Voice-over Translation:
       Title: Vertimas balsu
       Attribution: (teikia Yandex)
@@ -1831,6 +1832,11 @@ Video:
       End Before Start: Taškas B turi būti po taško A.
       Outside Duration: Laiko žyma turi būti vaizdo įrašo ribose.
       Cleared: A–B kartojimas išvalytas
+    Seek History:
+      Seek History: Peršokimų istorija
+      Positions: '{count} vieta | {count} vietos | {count} vietų'
+      Nothing to undo: Nėra ką atšaukti
+      Nothing to redo: Nėra ką pakartoti
     Zoom:
       Zoom: Mastelis
       'Off': 'Išjungta'
@@ -2302,6 +2308,7 @@ Tooltips:
     Show Skip Silence Toggle: Leistuvo nustatymų meniu rodo tylos praleidimo įjungimo ir išjungimo jungiklį.
     Enable Skip Silence by Default: Naujose kortelėse įjungia tylos praleidimą. Pakeitimas vienoje kortelėje neturi įtakos kitoms kortelėms.
     Enable Video Zoom: Leistuvo nustatymų meniu rodo mastelio valdiklį ir įjungia jo sparčiuosius klavišus bei slinkimo valdiklius.
+    Enable Seek History: Iki programos uždarymo įsimena, iš kur peršokote kiekviename vaizdo įraše. Rodo peršokimų istorijos sąrašą grotuvo nustatymų meniu ir įjungia jos sparčiuosius klavišus.
     Voice-over Translation: Paprašius vertimo siunčia vaizdo įrašo ID, trukmę ir pasirinktą kalbą neoficialiai Yandex vertimo užkadriniu balsu paslaugai. Pagal numatymą išjungta.
     Hold to Double Playback Speed: Laikykite tarpo klavišą arba kairįjį pelės mygtuką virš leistuvo, kad laikinai padvigubintumėte dabartinį atkūrimo greitį.
     Ambient Mode: Sulieja vaizdo įrašo spalvas su sritimi aplink leistuvą.
@@ -2477,6 +2484,8 @@ KeyboardShortcutPrompt:
   End: Pereiti į vaizdo įrašo pabaigą
   Skip to Next Video: Pereiti prie kito vaizdo įrašo grojaraštyje arba prie kito rekomenduojamo vaizdo įrašo
   Skip to Previous Video: Pereiti prie ankstesnio vaizdo įrašo grojaraštyje
+  Undo Seek: Atšaukti paskutinį peršokimą
+  Redo Seek: Pakartoti atšauktą peršokimą
 CommandPalette:
   Title: Komandų paletė
   Open: Atverti komandų paletę

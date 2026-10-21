@@ -684,6 +684,7 @@ Settings:
     Show Skip Silence Toggle: Zobraziť prepínač preskakovania ticha
     Enable Skip Silence by Default: Predvolene zapnúť preskakovanie ticha
     Enable Video Zoom: Zapnúť priblíženie videa
+    Enable Seek History: Zapnúť históriu posunov
     Voice-over Translation:
       Title: Preklad hlasového komentára
       Attribution: (technológiu poskytuje Yandex)
@@ -1478,6 +1479,11 @@ Video:
       End Before Start: Bod B musí byť za bodom A.
       Outside Duration: Časová značka musí byť v rámci videa.
       Cleared: Opakovanie A-B bolo vymazané
+    Seek History:
+      Seek History: História posunov
+      Positions: '{count} pozícia | {count} pozície | {count} pozícií'
+      Nothing to undo: Nie je čo vrátiť späť
+      Nothing to redo: Nie je čo zopakovať
     Zoom:
       Zoom: Priblíženie
       'Off': 'Vypnuté'
@@ -1886,6 +1892,7 @@ Tooltips:
     Show Skip Silence Toggle: V ponuke nastavení prehrávača zobrazí prepínač preskakovania ticha.
     Enable Skip Silence by Default: Zapne preskakovanie ticha na nových kartách. Zmena na jednej karte neovplyvní ostatné karty.
     Enable Video Zoom: V ponuke nastavení prehrávača zobrazí ovládací prvok Priblíženie a zapne jeho klávesové skratky a ovládanie posúvania obrazu.
+    Enable Seek History: Pamätá si, odkiaľ ste v každom videu preskočili, kým sa aplikácia nezavrie. Zobrazí zoznam histórie posunov v ponuke nastavení prehrávača a zapne jej klávesové skratky.
     Voice-over Translation: Po vyžiadaní prekladu odošle ID videa, jeho trvanie a vybraný jazyk neoficiálnej službe Yandex na preklad hlasového komentára. Predvolene je táto možnosť vypnutá.
     Hold to Double Playback Speed: Podržaním medzerníka alebo ľavého tlačidla myši nad prehrávačom dočasne zdvojnásobíte aktuálnu rýchlosť prehrávania.
     Ambient Mode: Rozšíri farby videa do oblasti okolo prehrávača.
@@ -1974,6 +1981,8 @@ KeyboardShortcutPrompt:
   Video Zoom In: Priblížiť video
   Video Zoom Out: Oddialiť video
   Tab Switcher: Prepínač kariet
+  Undo Seek: Vrátiť späť posledný posun
+  Redo Seek: Zopakovať vrátený posun
 CommandPalette:
   Title: Paleta príkazov
   Open: Otvoriť paletu príkazov

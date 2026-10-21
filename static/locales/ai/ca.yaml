@@ -909,6 +909,7 @@ Settings:
     Show Skip Silence Toggle: Mostra el commutador per ometre silencis
     Enable Skip Silence by Default: Omet els silencis de manera predeterminada
     Enable Video Zoom: Activa el zoom del vídeo
+    Enable Seek History: Activa l'historial de salts
     Voice-over Translation:
       Title: Traducció de veu en off
       Attribution: (amb tecnologia de Yandex)
@@ -1929,6 +1930,11 @@ Video:
       End Before Start: El punt B ha de ser posterior al punt A.
       Outside Duration: La marca de temps ha d'estar dins del vídeo.
       Cleared: S'ha esborrat la repetició A-B
+    Seek History:
+      Seek History: Historial de salts
+      Positions: '{count} posició | {count} de posicions | {count} posicions'
+      Nothing to undo: No hi ha res per desfer
+      Nothing to redo: No hi ha res per refer
     Zoom:
       Zoom: Zoom
       'Off': Desactivat
@@ -2431,6 +2437,7 @@ Tooltips:
     Show Skip Silence Toggle: Mostra un commutador per ometre silencis al menú de configuració del reproductor.
     Enable Skip Silence by Default: Activa l'omissió de silencis a les pestanyes noves. Canviar-ho en una pestanya no afecta les altres.
     Enable Video Zoom: Mostra el control de zoom al menú de configuració del reproductor i n'activa les dreceres de teclat i els controls de panoràmica.
+    Enable Seek History: Recorda des d'on has saltat en cada vídeo fins que es tanca l'aplicació. Mostra la llista de l'historial de salts al menú de configuració del reproductor i activa les seves dreceres de teclat.
     Voice-over Translation: Envia l'ID, la durada i la llengua seleccionada del vídeo al servei no oficial de traducció de veu en off de Yandex quan sol·liciteu una traducció. Està desactivat de manera predeterminada.
     Hold to Double Playback Speed: Manteniu premuda la barra espaiadora o el botó esquerre del ratolí sobre el reproductor per duplicar temporalment la velocitat de reproducció actual.
     Ambient Mode: Barreja els colors del vídeo amb l'àrea que envolta el reproductor.
@@ -2629,6 +2636,8 @@ KeyboardShortcutPrompt:
   End: Salta al final del vídeo
   Skip to Next Video: Salta al vídeo següent d'una llista de reproducció o al vídeo recomanat següent
   Skip to Previous Video: Salta al vídeo anterior d'una llista de reproducció
+  Undo Seek: Desfés l'últim salt
+  Redo Seek: Refés un salt desfet
 CommandPalette:
   Title: Paleta d'ordres
   Open: Obre la paleta d'ordres

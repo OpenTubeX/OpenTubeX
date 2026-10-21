@@ -689,6 +689,7 @@ Settings:
     Show Skip Silence Toggle: Amosar o botón para saltar os silencios
     Enable Skip Silence by Default: Activar de maneira predeterminada o salto de silencios
     Enable Video Zoom: Activar a ampliación do vídeo
+    Enable Seek History: Activar o historial de saltos
     Voice-over Translation:
       Title: Tradución de voz
       Attribution: (con tecnoloxía de Yandex)
@@ -1522,6 +1523,11 @@ Video:
       End Before Start: O punto B debe estar despois do punto A.
       Outside Duration: A marca de tempo debe estar dentro do vídeo.
       Cleared: Limpouse a repetición A-B
+    Seek History:
+      Seek History: Historial de saltos
+      Positions: '{count} posición | {count} posicións'
+      Nothing to undo: Non hai nada que desfacer
+      Nothing to redo: Non hai nada que refacer
     Zoom:
       Zoom: Ampliación
       'Off': 'Desactivada'
@@ -1936,6 +1942,7 @@ Tooltips:
     Show Skip Silence Toggle: Amosa un interruptor para saltar os silencios no menú de configuración do reprodutor.
     Enable Skip Silence by Default: Activa o salto de silencios nas lapelas novas. Cambialo nunha lapela non afecta ás demais.
     Enable Video Zoom: Amosa o control de ampliación no menú de configuración do reprodutor e activa os seus atallos de teclado e controis de desprazamento.
+    Enable Seek History: Lembra desde onde saltaches en cada vídeo ata que se peche a aplicación. Mostra a lista do historial de saltos no menú de configuración do reprodutor e activa os seus atallos de teclado.
     Voice-over Translation: Ao solicitar unha tradución, envía o ID, a duración e o idioma seleccionado do vídeo ao servizo non oficial de tradución de voz de Yandex. Está desactivado de maneira predeterminada.
     Hold to Double Playback Speed: Mantén premida a barra espazadora ou o botón esquerdo do rato sobre o reprodutor para duplicar temporalmente a velocidade de reprodución actual.
     Ambient Mode: Mestura as cores do vídeo coa zona que rodea o reprodutor.
@@ -2026,6 +2033,8 @@ KeyboardShortcutPrompt:
   Video Zoom In: Ampliar o vídeo
   Video Zoom Out: Reducir o vídeo
   Tab Switcher: Selector de lapelas
+  Undo Seek: Desfacer o último salto
+  Redo Seek: Refacer un salto desfeito
 CommandPalette:
   Title: Paleta de ordes
   Open: Abrir a paleta de ordes
