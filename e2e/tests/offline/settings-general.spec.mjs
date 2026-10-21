@@ -147,8 +147,12 @@ test.describe('settings', () => {
     })
 
     await proxy.locator('label.switch-label').filter({ hasText: 'Enable Tor / Proxy' }).click()
+    const testProxy = proxy.getByRole('button', { name: 'Test Proxy', exact: true })
+    // The recovery script input already exists, so measuring it before the
+    // proxy fields render would return its collapsed position.
+    await expect(testProxy).toBeVisible()
     const [testProxyBox, recoveryScriptBox] = await Promise.all([
-      proxy.getByRole('button', { name: 'Test Proxy', exact: true }).boundingBox(),
+      testProxy.boundingBox(),
       proxy.getByLabel('IP block recovery script').boundingBox()
     ])
 
