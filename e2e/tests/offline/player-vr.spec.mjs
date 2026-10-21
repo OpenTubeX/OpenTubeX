@@ -293,12 +293,14 @@ test('uses panoramic HLS for a YouTube mesh video', async ({ app, page }) => {
   const video = page.locator('.ftVideoPlayer video').first()
   await expect(video).toBeVisible()
   await expect(page.locator('.ftVideoPlayer .vrCanvas')).toBeVisible()
-  expect(await video.evaluate(element => element.ui.getConfiguration().displayInVrMode)).toBe(true)
+  // The mocked manifest never finishes loading. The player applies UI changes
+  // made while it loads, such as VR mode after the switch to HLS, once loaded.
+  await watch.evaluate(view => { view.$refs.player.hasLoaded = true })
+  await expect.poll(() => video.evaluate(element => element.ui.getConfiguration().displayInVrMode)).toBe(true)
   expect(await app.electronApp.evaluate(() =>
     globalThis.__vrCacheKeys.some(cacheKey => JSON.parse(cacheKey).at(-1) === 'vr-hls'))).toBe(true)
 
   const surface = page.locator('.ftVideoPlayer .shaka-controls-container')
-  await watch.evaluate(view => { view.$refs.player.hasLoaded = true })
   await surface.evaluate(element => {
     const shakaPlayer = element.closest('.ftVideoPlayer').querySelector('video').ui.getControls().getPlayer()
     window.__vrTrickPlayCalls = []
