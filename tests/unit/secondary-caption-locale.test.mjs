@@ -8,10 +8,14 @@ const source = await readFile(new URL('../../src/renderer/components/ft-shaka-vi
 const start = source.indexOf('    async function selectSecondaryCaption(')
 const end = source.indexOf('    function isShownAsMainCaption(')
 assert.ok(start > 0 && end > start)
+assert.ok(source.includes('\nlet pendingSecondaryCaptionLocale = null\n'), 'The pending choice is shared by every player instance')
 
 const GERMAN = { url: 'https://captions.example/de', label: 'German', language: 'de', mimeType: 'text/vtt' }
 
-/** The settings store commits a setting only once its write has finished. */
+/**
+ * Players share the module state, like instances of the component. The settings
+ * store commits a setting only once its write has finished.
+ */
 function fixture (storedLocale) {
   const writes = []
   const store = {
@@ -26,19 +30,21 @@ function fixture (storedLocale) {
     props: { captions: [GERMAN] }
   })
   vm.runInContext(`
-    let secondaryCaption = null
-    let secondaryCaptionCues = []
-    let secondaryCaptionAbortController = null
     let pendingSecondaryCaptionLocale = null
-    function updateSecondaryCaptionText () {}
-    function isShownAsMainCaption (caption, activeTrack) {
-      return activeTrack?.language === caption.language && activeTrack.label === caption.label
+    globalThis.createPlayer = () => {
+      let secondaryCaption = null
+      let secondaryCaptionCues = []
+      let secondaryCaptionAbortController = null
+      function updateSecondaryCaptionText () {}
+      function isShownAsMainCaption (caption, activeTrack) {
+        return activeTrack?.language === caption.language && activeTrack.label === caption.label
+      }
+      ${source.slice(start, end)}
+      return { selectSecondaryCaption, restoreSecondaryCaption, current: () => secondaryCaption }
     }
-    ${source.slice(start, end)}
-    globalThis.api = { selectSecondaryCaption, restoreSecondaryCaption, current: () => secondaryCaption }
   `, context)
   return {
-    ...context.api,
+    createPlayer: context.createPlayer,
     stored: () => storedLocale,
     async finishWrites () {
       for (const write of writes.splice(0)) write()
@@ -48,7 +54,8 @@ function fixture (storedLocale) {
 }
 
 test('secondary captions turned off stay off while the setting is still being written', async () => {
-  const captions = fixture('de')
+  const settings = fixture('de')
+  const captions = settings.createPlayer()
   captions.restoreSecondaryCaption()
   assert.equal(captions.current()?.language, 'de')
 
@@ -58,14 +65,30 @@ test('secondary captions turned off stay off while the setting is still being wr
   captions.restoreSecondaryCaption()
   assert.equal(captions.current(), null)
 
-  await captions.finishWrites()
-  assert.equal(captions.stored(), '')
+  await settings.finishWrites()
+  assert.equal(settings.stored(), '')
   captions.restoreSecondaryCaption()
   assert.equal(captions.current(), null)
 })
 
+test('a player that replaces another one keeps a choice that is still being written', async () => {
+  const settings = fixture('de')
+  const previous = settings.createPlayer()
+  previous.restoreSecondaryCaption()
+  await previous.selectSecondaryCaption(null)
+
+  const replacement = settings.createPlayer()
+  replacement.restoreSecondaryCaption()
+  assert.equal(replacement.current(), null)
+
+  await settings.finishWrites()
+  replacement.restoreSecondaryCaption()
+  assert.equal(replacement.current(), null)
+})
+
 test('a language picked again before its write finished is restored and remembered', async () => {
-  const captions = fixture('de')
+  const settings = fixture('de')
+  const captions = settings.createPlayer()
   await captions.selectSecondaryCaption(null)
   // Loading the picked captions never finishes here, like a slow network
   captions.selectSecondaryCaption(GERMAN)
@@ -74,8 +97,8 @@ test('a language picked again before its write finished is restored and remember
   assert.equal(captions.current(), null)
 
   captions.selectSecondaryCaption(GERMAN)
-  await captions.finishWrites()
-  assert.equal(captions.stored(), 'de')
+  await settings.finishWrites()
+  assert.equal(settings.stored(), 'de')
   captions.restoreSecondaryCaption()
   assert.equal(captions.current()?.language, 'de')
 })

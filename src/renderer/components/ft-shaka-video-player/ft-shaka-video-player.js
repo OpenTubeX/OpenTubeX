@@ -296,6 +296,14 @@ const shakaControlKeysToShortcuts = {
 /** @type {Map<string, string>} */
 const LOCALE_MAPPINGS = new Map(process.env.SHAKA_LOCALE_MAPPINGS)
 
+/**
+ * The secondary caption language the user picked while its settings write is still pending.
+ * The store commits the setting only after the write, but text track changes, in this player
+ * or in one that replaces it, read it back right away. Shared, so a replacement player sees it too.
+ * @type {string | null}
+ */
+let pendingSecondaryCaptionLocale = null
+
 export default defineComponent({
   name: 'FtShakaVideoPlayer',
   components: {
@@ -1798,12 +1806,6 @@ export default defineComponent({
     let secondaryCaptionCues = []
     /** @type {AbortController | null} */
     let secondaryCaptionAbortController = null
-    /**
-     * The language the user picked while its settings write is still pending. The store
-     * commits the setting only after the write, but text track changes read it back right away.
-     * @type {string | null}
-     */
-    let pendingSecondaryCaptionLocale = null
     // Follows Shaka's caption area, which makes room for the visible controls and the fullscreen side dock
     const secondaryCaptionsBox = ref({})
     /** @type {ResizeObserver | null} */
