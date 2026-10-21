@@ -132,7 +132,7 @@ test.describe('Shorts transcript navigation', () => {
     await fullscreenRow.locator('.profileDropdownToggle').click()
     const fullscreenDropdown = page.locator(':fullscreen .profileDropdown')
     await expect(fullscreenDropdown).toBeVisible()
-    const shortsFeedType = fullscreenDropdown.getByRole('checkbox', { name: 'Shorts' })
+    const shortsFeedType = fullscreenDropdown.getByRole('checkbox', { name: 'Shorts', exact: true })
     await expect(shortsFeedType).toHaveAttribute('aria-checked', 'true')
     await shortsFeedType.click()
     await expect(shortsFeedType).toHaveAttribute('aria-checked', 'false')
