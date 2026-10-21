@@ -1,5 +1,11 @@
 import assert from 'node:assert/strict'
+import { Buffer } from 'node:buffer'
+import { createHash } from 'node:crypto'
+import { mkdtemp, readFile, rename, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import test from 'node:test'
+import { compileFunction } from 'node:vm'
 
 import {
   getEarliestYtDlpFormatExpiry,
@@ -201,4 +207,82 @@ test('caching a large playlist preload does not recheck every source on each wri
   cache.set('video', 'settings', source(new Date(now + 60_000)))
   assert.equal(cache.sources.has('preloaded-0'), false)
   assert.equal(cache.sources.has('preloaded-1'), true)
+})
+
+async function loadPersistentCache (directory, stringified) {
+  const source = (await readFile(new URL('../../src/main/ytDlpPlaybackCache.js', import.meta.url), 'utf8'))
+    .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
+    .replace(/^export (?=(async )?function)/gm, '')
+  const dependencies = {
+    app: { getPath: () => directory },
+    Buffer,
+    createHash,
+    readFile,
+    rename,
+    rm,
+    writeFile,
+    join,
+    settings: { _findOne: async () => ({ value: DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB }) },
+    DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB,
+    normalizeYtDlpPlaybackCacheMaxEntrySize,
+    TabManager: { getOpenVideoIds: () => new Set() },
+    isOpenTubeXUrl: () => true,
+    // Counts serialized entries; the whole-file write passes an array.
+    JSON: { parse: JSON.parse, stringify: value => { if (!Array.isArray(value)) stringified.push(value.videoId); return JSON.stringify(value) } },
+  }
+  return compileFunction(`${source}\nreturn { handleYtDlpPlaybackCacheGet, handleYtDlpPlaybackCacheSet, applyYtDlpPlaybackCacheSettings }`, Object.keys(dependencies))(...Object.values(dependencies))
+}
+
+test('persistent cache entries are measured once and stored in the same file format', async t => {
+  const directory = await mkdtemp(join(tmpdir(), 'opentubex-ytdlp-cache-'))
+  t.after(() => rm(directory, { recursive: true, force: true }))
+  const event = { senderFrame: { url: 'app://bundle/index.html' } }
+  const playbackSource = { manifestSrc: 'data:application/dash+xml;base64,PE1QRD4=', manifestMimeType: 'application/dash+xml', legacyFormats: [], title: null, isLive: false }
+  const expiryTime = Date.now() + 60 * 60 * 1000
+  const stringified = []
+  const cache = await loadPersistentCache(directory, stringified)
+  await cache.applyYtDlpPlaybackCacheSettings()
+  assert.equal(await cache.handleYtDlpPlaybackCacheSet(event, 'aaaaaaaaaaa', 'key', expiryTime, playbackSource), true)
+  assert.equal(await cache.handleYtDlpPlaybackCacheSet(event, 'bbbbbbbbbbb', 'key', expiryTime, playbackSource), true)
+  assert.deepEqual(stringified, ['aaaaaaaaaaa', 'bbbbbbbbbbb'], 'each new entry is serialized once to measure it')
+  await cache.applyYtDlpPlaybackCacheSettings()
+  assert.equal(stringified.length, 2, 'revalidating stored entries reuses their sizes')
+
+  const stored = JSON.parse(await readFile(join(directory, 'yt-dlp-playback-cache.json'), 'utf8'))
+  assert.deepEqual(stored.map(entry => Object.keys(entry)), [['videoId', 'cacheKeyHash', 'expiryTime', 'source'], ['videoId', 'cacheKeyHash', 'expiryTime', 'source']])
+
+  const reloaded = []
+  const restarted = await loadPersistentCache(directory, reloaded)
+  await restarted.applyYtDlpPlaybackCacheSettings()
+  assert.deepEqual(reloaded, ['aaaaaaaaaaa', 'bbbbbbbbbbb'], 'loading measures each stored entry once')
+  assert.equal((await restarted.handleYtDlpPlaybackCacheGet(event, 'aaaaaaaaaaa', 'key')).source.manifestSrc, playbackSource.manifestSrc)
+  assert.equal(reloaded.length, 2)
+})
+
+test('playback does not wait for the persistent cache write and still reports failures', async () => {
+  const code = await readFile(new URL('../../src/renderer/helpers/player/ytDlpPlayback.js', import.meta.url), 'utf8')
+  const start = code.indexOf('async function cacheYtDlpPlaybackSource(')
+  const functionSource = code.slice(start, code.indexOf('\n}\n', start) + 2)
+  const writes = []
+  const warnings = []
+  let rejectWrite
+  const dependencies = {
+    playbackSourceCache: { set: () => false },
+    notifyPlaybackSourceCacheChanged: () => {},
+    ytDlp: { ytDlpPlaybackCacheSet: (...args) => { writes.push(args); return new Promise((resolve, reject) => { rejectWrite = reject }) } },
+    console: { warn: (...args) => warnings.push(args) },
+  }
+  const cacheSource = compileFunction(`${functionSource}\nreturn cacheYtDlpPlaybackSource`, Object.keys(dependencies))(...Object.values(dependencies))
+  const expiryDate = new Date(Date.now() + 60 * 60 * 1000)
+  const settled = await Promise.race([
+    cacheSource('aaaaaaaaaaa', 'key', { isLive: false, expiryDate }).then(() => true),
+    new Promise(resolve => setImmediate(() => resolve(false))),
+  ])
+  assert.equal(settled, true, 'the source is returned while the write is still pending')
+  assert.equal(writes.length, 1)
+  assert.deepEqual(writes[0].slice(0, 3), ['aaaaaaaaaaa', 'key', expiryDate.getTime()])
+  rejectWrite(new Error('Disk full'))
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(warnings.length, 1)
+  assert.equal(warnings[0][1].message, 'Disk full')
 })
