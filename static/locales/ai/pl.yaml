@@ -74,6 +74,8 @@ Trending:
   Unsupported Backend: Popularne treści wymagają lokalnego API. Wybierz lokalne API lub włącz zapasowy backend.
 Most Popular Feed Empty: Kanał „Najpopularniejsze” tej instancji Invidious jest pusty.
 User Playlists:
+  Save: "Zapisz"
+  Edit: "Edytuj"
   This playlist is private or does not exist.: "Ta playlista jest prywatna lub nie istnieje."
   Pin to Navigation: "Przypnij do nawigacji"
   Unpin from Navigation: "Odepnij od nawigacji"

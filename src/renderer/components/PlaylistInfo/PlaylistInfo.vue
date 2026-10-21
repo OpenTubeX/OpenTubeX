@@ -158,152 +158,110 @@
 
       <div class="playlistOptionsAndSearch">
         <div class="playlistOptions">
-          <FtIconButton
-            v-if="editMode"
-            :title="$t('User Playlists.Save Changes')"
-            :disabled="playlistPersistenceDisabled"
-            :icon="['fas', 'save']"
-            theme="secondary"
-            @click="savePlaylistInfo"
-          />
-          <FtIconButton
-            v-if="editMode"
-            :title="$t('User Playlists.Cancel')"
-            :icon="['fas', 'times']"
-            theme="secondary"
-            @click="exitEditMode"
-          />
-          <FtIconButton
-            v-if="!editMode && isUserPlaylist"
-            :title="markedAsQuickBookmarkTarget ? $t('User Playlists.Quick Bookmark Enabled') : $t('User Playlists.Enable Quick Bookmark With This Playlist')"
-            :icon="markedAsQuickBookmarkTarget ? quickBookmarkIcon : ['far', 'bookmark']"
-            :disabled="markedAsQuickBookmarkTarget"
-            :theme="markedAsQuickBookmarkTarget ? 'secondary' : 'base-no-default'"
-            @disabled-click="handleQuickBookmarkEnabledDisabledClick"
-            @click="enableQuickBookmarkForThisPlaylist"
-          />
-          <FtIconButton
-            v-if="!editMode && isUserPlaylist"
-            :title="isPinnedToNavigation ? $t('User Playlists.Unpin from Navigation') : $t('User Playlists.Pin to Navigation')"
-            :icon="['fas', isPinnedToNavigation ? 'thumbtack-slash' : 'thumbtack']"
-            :aria-pressed="isPinnedToNavigation"
-            :theme="isPinnedToNavigation ? 'secondary' : 'base-no-default'"
-            @click="togglePinnedToNavigation"
-          />
-          <FtIconButton
-            v-if="!editMode && isUserPlaylist"
-            :title="$t('User Playlists.Edit Playlist Info')"
-            :icon="['fas', 'edit']"
-            theme="secondary"
-            @click="enterEditMode"
-          />
-          <FtIconButton
-            v-if="!editMode && !isUserPlaylist && showPlaylists"
-            :title="isPlaylistBookmarked ? $t('User Playlists.Remove Saved Playlist') : $t('User Playlists.Save Playlist')"
-            :icon="isPlaylistBookmarked ? ['fas', 'bookmark'] : ['far', 'bookmark']"
-            :aria-pressed="isPlaylistBookmarked"
-            :disabled="playlistBookmarkPending"
-            :theme="isPlaylistBookmarked ? 'secondary' : 'base-no-default'"
-            @click="emit('toggle-playlist-bookmark')"
-          />
-          <FtIconButton
-            v-if="videoCount > 0 && !editMode"
-            :title="t('Playlist.Add Playlist to Queue')"
-            :icon="snapshotPending ? ['fas', 'sync'] : ['fas', 'add-to-queue']"
-            :disabled="snapshotPending"
-            :spin="snapshotPending"
-            :aria-busy="snapshotPending"
-            theme="secondary"
-            @click="addPlaylistToQueue"
-          />
-          <FtIconButton
-            v-if="videoCount > 0 && showPlaylists && !editMode"
-            :title="$t('User Playlists.Copy Playlist')"
-            :icon="snapshotPending ? ['fas', 'sync'] : ['fas', 'copy']"
-            :disabled="snapshotPending"
-            :spin="snapshotPending"
-            :aria-busy="snapshotPending"
-            theme="secondary"
-            @click="toggleCopyVideosPrompt"
-          />
-          <FtIconButton
-            v-if="!editMode && isUserPlaylist && selectedUserPlaylist?.sourcePlaylistId"
-            :title="t('User Playlists.Add Missing Videos')"
-            :icon="snapshotPending ? ['fas', 'sync'] : ['fas', 'playlist-merge']"
-            :disabled="snapshotPending"
-            :spin="snapshotPending"
-            :aria-busy="snapshotPending"
-            theme="secondary"
-            @click="addMissingVideos"
-          />
-          <FtIconButton
-            v-if="exportPlaylistButtonVisible"
-            :title="$t('User Playlists.Export Playlist')"
-            :icon="['fas', 'file-export']"
-            theme="secondary"
-            @click="showExportPrompt = true"
-          />
-          <FtIconButton
-            v-if="supportsYtDlp && enableDownloads && !editMode && videoCount > 0"
-            :title="t('Downloads.Download Playlist')"
-            :icon="['fas', 'download']"
-            theme="secondary"
-            @click="showDownloadPrompt = true"
-          />
-          <FtIconButton
-            v-if="preloadAvailable && !editMode && videoCount > 0"
-            :title="preloadPending
-              ? t('Playlist.Preloading Playlist')
-              : preloadComplete
-                ? t('Playlist.Playlist Already Preloaded')
-                : t('Playlist.Preload Playlist')"
-            :icon="['fas', 'forward']"
-            :disabled="preloadPending || preloadComplete"
-            :spin="preloadPending"
-            theme="secondary"
-            @click="emit('preload-playlist')"
-          />
-          <FtIconButton
-            v-if="!editMode && userPlaylistDuplicateItemCount > 0"
-            :title="$t('User Playlists.Remove Duplicate Videos')"
-            :icon="['fas', 'users-slash']"
-            theme="destructive"
-            @click="showRemoveDuplicateVideosPrompt = true"
-          />
-          <FtIconButton
-            v-if="!editMode && userPlaylistAnyVideoWatched"
-            :title="$t('User Playlists.Remove Watched Videos')"
-            :icon="['fas', 'eye-slash']"
-            theme="destructive"
-            @click="showRemoveVideosOnWatchPrompt = true"
-          />
-          <FtIconButton
-            v-if="!editMode && isUserPlaylist && videoCount > 0"
-            :title="deadVideoScanRunning
-              ? `${t('User Playlists.Cancel')} (${deadVideoProgress.checked}/${deadVideoProgress.total})`
-              : t('User Playlists.Remove Unavailable Videos')"
-            :icon="deadVideoScanRunning ? ['fas', 'sync'] : ['fas', 'link-slash']"
-            :spin="deadVideoScanRunning"
-            :aria-busy="deadVideoScanRunning"
-            theme="destructive"
-            @click="deadVideoScanRunning ? deadVideoScanController?.abort() : scanDeadVideos()"
-          />
-          <FtIconButton
-            v-if="deletePlaylistButtonVisible"
-            :disabled="markedAsQuickBookmarkTarget"
-            :title="!markedAsQuickBookmarkTarget ? $t('User Playlists.Delete Playlist') : playlistDeletionDisabledLabel"
-            :icon="['fas', 'trash']"
-            theme="destructive"
-            @disabled-click="handlePlaylistDeleteDisabledClick"
-            @click="showDeletePlaylistPrompt = true"
-          />
-          <FtShareButton
-            v-if="sharePlaylistButtonVisible"
-            :id="id"
-            class="sharePlaylistIcon"
-            :dropdown-position-y="description ? 'top' : 'bottom'"
-            share-target-type="Playlist"
-          />
+          <template v-if="editMode">
+            <FtButton
+              class="actionButton"
+              :label="t('User Playlists.Save Changes')"
+              :icon="['fas', 'save']"
+              :disabled="playlistPersistenceDisabled"
+              theme="secondary"
+              variant="filled"
+              @click="savePlaylistInfo"
+            />
+            <FtButton
+              class="actionButton"
+              :label="t('User Playlists.Cancel')"
+              :icon="['fas', 'times']"
+              theme="secondary"
+              variant="outlined"
+              @click="exitEditMode"
+            />
+          </template>
+          <template v-else>
+            <FtButton
+              v-if="isUserPlaylist"
+              class="actionButton"
+              :title="t('User Playlists.Edit Playlist Info')"
+              :label="t('User Playlists.Edit')"
+              :icon="['fas', 'edit']"
+              theme="secondary"
+              @click="enterEditMode"
+            />
+            <FtButton
+              v-else-if="showPlaylists"
+              class="actionButton"
+              :title="isPlaylistBookmarked ? t('User Playlists.Remove Saved Playlist') : t('User Playlists.Save Playlist')"
+              :label="t('User Playlists.Save')"
+              :icon="isPlaylistBookmarked ? ['fas', 'bookmark'] : ['far', 'bookmark']"
+              :selected="isPlaylistBookmarked"
+              :disabled="playlistBookmarkPending"
+              theme="secondary"
+              @click="emit('toggle-playlist-bookmark')"
+            />
+            <FtButton
+              v-if="videoCount > 0"
+              class="actionButton"
+              :title="t('Playlist.Add Playlist to Queue')"
+              :disabled="snapshotPending"
+              :aria-busy="queueSnapshotPending"
+              theme="secondary"
+              @click="addPlaylistToQueue"
+            >
+              <FtIcon
+                :icon="queueSnapshotPending ? ['fas', 'sync'] : ['fas', 'add-to-queue']"
+                :spin="queueSnapshotPending"
+                aria-hidden="true"
+              />
+              {{ t('Video.Add to Queue') }}
+            </FtButton>
+            <FtButton
+              v-if="supportsYtDlp && enableDownloads && videoCount > 0"
+              class="actionButton"
+              :title="t('Downloads.Download Playlist')"
+              :label="t('Downloads.Download')"
+              :icon="['fas', 'download']"
+              theme="secondary"
+              @click="showDownloadPrompt = true"
+            />
+            <FtButton
+              v-if="deadVideoScanRunning"
+              class="actionButton"
+              aria-busy="true"
+              theme="secondary"
+              @click="deadVideoScanController?.abort()"
+            >
+              <FtIcon
+                :icon="['fas', 'sync']"
+                spin
+                aria-hidden="true"
+              />
+              {{ `${t('User Playlists.Cancel')} (${deadVideoProgress.checked}/${deadVideoProgress.total})` }}
+            </FtButton>
+            <FtShareButton
+              v-if="sharePlaylistButtonVisible"
+              :id="id"
+              class="sharePlaylistIcon"
+              :dropdown-position-y="description ? 'top' : 'bottom'"
+              share-target-type="Playlist"
+            />
+            <FtButton
+              v-if="moreMenuItems.some(item => item.type !== 'separator')"
+              ref="moreOptionsButton"
+              class="actionButton"
+              :title="t('Video.More Options')"
+              aria-haspopup="menu"
+              :aria-busy="menuSnapshotPending"
+              theme="secondary"
+              @click="openMoreOptionsMenu"
+            >
+              <FtIcon
+                :icon="menuSnapshotPending ? ['fas', 'sync'] : ['fas', 'ellipsis-h']"
+                :spin="menuSnapshotPending"
+                aria-hidden="true"
+              />
+              {{ t('More') }}
+            </FtButton>
+          </template>
         </div>
         <div
           v-if="searchVideoModeAllowed"
@@ -387,9 +345,10 @@ import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import { FtIcon } from '@opentubex/icons'
 
+import FtButton from '../FtButton/FtButton.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
-import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
@@ -671,14 +630,6 @@ const userPlaylistDuplicateItemCount = computed(() => {
   return selectedUserPlaylist.value.videos.length - userPlaylistUniqueVideosCount.value
 })
 
-const exportPlaylistButtonVisible = computed(() => {
-  return isUserPlaylist.value && !editMode.value && props.videoCount > 0
-})
-
-const deletePlaylistButtonVisible = computed(() => {
-  return isUserPlaylist.value && !editMode.value && !selectedUserPlaylist.value.protected
-})
-
 const sharePlaylistButtonVisible = computed(() => {
   return !isUserPlaylist.value && !hideSharingActions.value
 })
@@ -687,6 +638,7 @@ const sharePlaylistButtonVisible = computed(() => {
 const quickBookmarkPlaylist = computed(() => {
   return store.getters.getQuickBookmarkPlaylist
 })
+
 const quickBookmarkIcon = computed(() => store.getters.getQuickBookmarkIcon)
 
 const markedAsQuickBookmarkTarget = computed(() => {
@@ -704,8 +656,91 @@ function togglePinnedToNavigation() {
     : [...pinnedPlaylistIds.value, props.id])
 }
 
-const playlistDeletionDisabledLabel = computed(() => {
-  return t('User Playlists["Cannot delete the quick bookmark target playlist."]')
+const SEPARATOR = { type: 'separator' }
+
+/**
+ * Less frequent actions for the overflow menu, grouped by separators. The menu
+ * drops leading, trailing, and repeated separators.
+ * @type {import('vue').ComputedRef<object[]>}
+ */
+const moreMenuItems = computed(() => {
+  const items = []
+  const hasVideos = props.videoCount > 0
+
+  if (isUserPlaylist.value) {
+    items.push({
+      label: isPinnedToNavigation.value ? t('User Playlists.Unpin from Navigation') : t('User Playlists.Pin to Navigation'),
+      icon: ['fas', isPinnedToNavigation.value ? 'thumbtack-slash' : 'thumbtack'],
+      run: togglePinnedToNavigation,
+    }, {
+      label: markedAsQuickBookmarkTarget.value ? t('User Playlists.Quick Bookmark Enabled') : t('User Playlists.Enable Quick Bookmark With This Playlist'),
+      icon: markedAsQuickBookmarkTarget.value ? quickBookmarkIcon.value : ['far', 'bookmark'],
+      enabled: !markedAsQuickBookmarkTarget.value,
+      run: enableQuickBookmarkForThisPlaylist,
+    }, SEPARATOR)
+  }
+
+  if (hasVideos && showPlaylists.value) {
+    items.push({ label: t('User Playlists.Copy Playlist'), icon: ['fas', 'copy'], enabled: !snapshotPending.value, run: toggleCopyVideosPrompt })
+  }
+  if (isUserPlaylist.value && selectedUserPlaylist.value?.sourcePlaylistId) {
+    items.push({ label: t('User Playlists.Add Missing Videos'), icon: ['fas', 'playlist-merge'], enabled: !snapshotPending.value, run: addMissingVideos })
+  }
+  if (isUserPlaylist.value && hasVideos) {
+    items.push({ label: t('User Playlists.Export Playlist'), icon: ['fas', 'file-export'], run: () => { showExportPrompt.value = true } })
+  }
+  if (props.preloadAvailable && hasVideos) {
+    items.push({
+      label: props.preloadPending
+        ? t('Playlist.Preloading Playlist')
+        : props.preloadComplete
+          ? t('Playlist.Playlist Already Preloaded')
+          : t('Playlist.Preload Playlist'),
+      icon: ['fas', 'forward'],
+      enabled: !props.preloadPending && !props.preloadComplete,
+      run: () => emit('preload-playlist'),
+    })
+  }
+  items.push(SEPARATOR)
+
+  if (userPlaylistDuplicateItemCount.value > 0) {
+    items.push({ label: t('User Playlists.Remove Duplicate Videos'), icon: ['fas', 'users-slash'], run: () => { showRemoveDuplicateVideosPrompt.value = true } })
+  }
+  if (userPlaylistAnyVideoWatched.value) {
+    items.push({ label: t('User Playlists.Remove Watched Videos'), icon: ['fas', 'eye-slash'], run: () => { showRemoveVideosOnWatchPrompt.value = true } })
+  }
+  // While the scan runs, its progress and cancel button are in the action row.
+  if (isUserPlaylist.value && hasVideos && !deadVideoScanRunning.value) {
+    items.push({ label: t('User Playlists.Remove Unavailable Videos'), icon: ['fas', 'link-slash'], run: scanDeadVideos })
+  }
+  items.push(SEPARATOR)
+
+  if (isUserPlaylist.value && !selectedUserPlaylist.value.protected) {
+    items.push({
+      // The quick bookmark target cannot be deleted, so explain why in place of the label.
+      label: markedAsQuickBookmarkTarget.value ? t('User Playlists["Cannot delete the quick bookmark target playlist."]') : t('User Playlists.Delete Playlist'),
+      icon: ['fas', 'trash'],
+      enabled: !markedAsQuickBookmarkTarget.value,
+      run: () => { showDeletePlaylistPrompt.value = true },
+    })
+  }
+
+  return items.map(item => ({ enabled: true, ...item }))
+})
+
+const moreOptionsButton = useTemplateRef('moreOptionsButton')
+
+function openMoreOptionsMenu() {
+  const button = moreOptionsButton.value.$el
+  button.focus({ preventScroll: true })
+  const bounds = button.getBoundingClientRect()
+  window.dispatchEvent(new CustomEvent('opentubex:context-menu', {
+    detail: { x: document.body.dir === 'rtl' ? bounds.right : bounds.left, y: bounds.bottom, items: moreMenuItems }
+  }))
+}
+
+onBeforeUnmount(() => {
+  window.dispatchEvent(new CustomEvent('opentubex:close-context-menu', { detail: moreMenuItems }))
 })
 
 const inputPlaylistNameBlank = computed(() => newTitle.value.trim() === '')
@@ -758,6 +793,9 @@ function handlePlaylistNameInput(input) {
 }
 
 const snapshotPending = ref(false)
+// Copying and adding missing videos start from the menu, so the More button shows their progress.
+const queueSnapshotPending = ref(false)
+const menuSnapshotPending = computed(() => snapshotPending.value && !queueSnapshotPending.value)
 let snapshotController
 
 function cancelSnapshot() {
@@ -812,7 +850,9 @@ async function addPlaylistToQueue() {
   // Queue user playlists in their displayed sort order.
   let videos = props.sortedVideos
   if (!isUserPlaylist.value) {
+    queueSnapshotPending.value = true
     const snapshot = await loadSnapshot(props.id)
+    queueSnapshotPending.value = false
     // Leaving the playlist while it loads cancels the action.
     if (!snapshot || snapshotController.signal.aborted) return
     videos = snapshot.videos
@@ -900,17 +940,6 @@ function enterEditMode() {
   nextTick(() => {
     playlistTitleInput.value.focus()
   })
-}
-
-function handleQuickBookmarkEnabledDisabledClick() {
-  showToast({
-    message: t('User Playlists.SinglePlaylistView.Toast["This playlist is already being used for quick bookmark."]'),
-    icon: ['fas', 'bookmark'],
-  })
-}
-
-function handlePlaylistDeleteDisabledClick() {
-  showToast({ message: playlistDeletionDisabledLabel.value, icon: ['fas', 'circle-exclamation'] })
 }
 
 const EXPORT_VALUES = [

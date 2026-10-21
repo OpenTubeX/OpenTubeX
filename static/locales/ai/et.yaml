@@ -192,6 +192,8 @@ Feed:
   Cancel Refresh: Tühista värskendamine
   Next Auto Refresh: 'Järgmine automaatne värskendamine: {date}'
 User Playlists:
+  Save: "Salvesta"
+  Edit: "Muuda"
   This playlist is private or does not exist.: "See esitusloend on privaatne või seda pole olemas."
   Pin to Navigation: "Kinnita navigeerimisribale"
   Unpin from Navigation: "Eemalda navigeerimisribalt"

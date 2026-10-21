@@ -192,6 +192,8 @@ Feed:
   Cancel Refresh: 取消重新整理
   Next Auto Refresh: '下次自動重新整理：{date}'
 User Playlists:
+  Save: "儲存"
+  Edit: "編輯"
   Pin to Navigation: "釘選到導覽列"
   Unpin from Navigation: "從導覽列取消釘選"
   Reorder Hint: 拖曳或使用方向鍵重新排序

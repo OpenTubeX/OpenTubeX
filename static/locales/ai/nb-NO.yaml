@@ -192,6 +192,8 @@ Feed:
   Cancel Refresh: Avbryt oppdatering
   Next Auto Refresh: 'Neste automatiske oppdatering: {date}'
 User Playlists:
+  Save: "Lagre"
+  Edit: "Rediger"
   Pin to Navigation: "Fest til navigasjonen"
   Unpin from Navigation: "Løsne fra navigasjonen"
   Reorder Hint: Dra eller bruk piltastene for å endre rekkefølgen

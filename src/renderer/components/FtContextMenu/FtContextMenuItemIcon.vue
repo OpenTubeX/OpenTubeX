@@ -44,7 +44,7 @@ const props = defineProps({
     required: true
   },
   icon: {
-    type: Array,
+    type: [Array, Object],
     required: true
   },
   iconClass: {

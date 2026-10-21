@@ -206,6 +206,8 @@ Feed:
   Cancel Refresh: لغو تازه‌سازی
   Next Auto Refresh: 'تازه‌سازی خودکار بعدی: {date}'
 User Playlists:
+  Save: "ذخیره"
+  Edit: "ویرایش"
   This playlist is private or does not exist.: "این فهرست پخش خصوصی است یا وجود ندارد."
   Pin to Navigation: "سنجاق کردن به ناوبری"
   Unpin from Navigation: "برداشتن سنجاق از ناوبری"

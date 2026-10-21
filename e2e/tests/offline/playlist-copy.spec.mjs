@@ -1,4 +1,4 @@
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { test, expect, goTo, openPlaylistMenuItem } from '../../helpers/app.mjs'
 
 test.use({
   seed: {
@@ -63,7 +63,7 @@ test('forks a complete saved playlist and refreshes its editable local snapshot 
   await page.getByRole('link', { name: 'Source playlist', exact: true }).click()
   await expect(page.getByText('Fork video 101', { exact: true })).toHaveCount(0)
 
-  await page.getByTitle('Copy Playlist', { exact: true }).click()
+  await (await openPlaylistMenuItem(page, 'Copy Playlist')).click()
   const addDialog = page.getByRole('dialog').filter({ hasText: 'Select a playlist to add your 102 videos to' })
   await expect(addDialog).toBeVisible()
   await addDialog.getByRole('button', { name: 'Create New Playlist', exact: true }).click()
@@ -81,7 +81,7 @@ test('forks a complete saved playlist and refreshes its editable local snapshot 
 
   await openPlaylist(page, `/playlist/${copy._id}?playlistType=user`)
   await page.getByTitle('Edit Playlist Info', { exact: true }).click()
-  await page.getByTitle('Save Changes', { exact: true }).click()
+  await page.getByRole('button', { name: 'Save Changes' }).click()
   await expect(page.getByRole('link', { name: 'Source playlist', exact: true })).toBeVisible()
   // Exercise the normal local editing actions, preserving a custom order and an added video.
   await page.evaluate(async id => {
@@ -100,20 +100,22 @@ test('forks a complete saved playlist and refreshes its editable local snapshot 
   await mock(page)
   await openPlaylist(page, `/playlist/${copy._id}?playlistType=user`)
   failRefresh = true
-  await page.getByTitle('Add missing videos from source playlist', { exact: true }).filter({ visible: true }).click()
+  await (await openPlaylistMenuItem(page, 'Add missing videos from source playlist')).click()
   await expect(page.getByText('This playlist could not be loaded.', { exact: true })).toBeVisible()
   expect((await getCopy(page)).videos.map(video => video.videoId)).toEqual(editedIds)
   failRefresh = false
-  await page.getByTitle('Add missing videos from source playlist', { exact: true }).filter({ visible: true }).click()
+  await (await openPlaylistMenuItem(page, 'Add missing videos from source playlist')).click()
   await expect.poll(async () => (await getCopy(page)).videos.map(video => video.videoId))
     .toEqual([...editedIds, video(102).videoId])
-  await page.getByTitle('Add missing videos from source playlist', { exact: true }).filter({ visible: true }).click()
-  await expect(page.getByTitle('Add missing videos from source playlist', { exact: true }).filter({ visible: true })).toBeEnabled()
+  await (await openPlaylistMenuItem(page, 'Add missing videos from source playlist')).click()
+  await expect(await openPlaylistMenuItem(page, 'Add missing videos from source playlist')).toBeEnabled()
+  await page.keyboard.press('Escape')
   expect((await getCopy(page)).videos.map(video => video.videoId)).toEqual([...editedIds, video(102).videoId])
   await page.screenshot({ path: test.info().outputPath('playlist-copy-desktop.png') })
   await page.setViewportSize({ width: 375, height: 812 })
   await expect(page.getByRole('link', { name: 'Source playlist', exact: true })).toBeVisible()
-  await expect(page.getByTitle('Add missing videos from source playlist', { exact: true }).filter({ visible: true })).toBeInViewport()
+  await expect(await openPlaylistMenuItem(page, 'Add missing videos from source playlist')).toBeInViewport()
+  await page.keyboard.press('Escape')
   await page.screenshot({ path: test.info().outputPath('playlist-copy-mobile.png') })
 })
 
@@ -125,13 +127,13 @@ test('a failed copy leaves no partial prompt and can be retried', async ({ page 
     return route.fulfill({ json: response(pageNumber ? [video(100), video(101)] : Array.from({ length: 100 }, (_, index) => video(index))) })
   })
   await openPlaylist(page)
-  await page.getByTitle('Copy Playlist', { exact: true }).click()
+  await (await openPlaylistMenuItem(page, 'Copy Playlist')).click()
   await expect(page.getByText('This playlist could not be loaded.', { exact: true })).toBeVisible()
   await expect(page.getByRole('dialog')).toHaveCount(0)
   expect(await getCopy(page)).toBeUndefined()
 
   fail = false
-  await page.getByTitle('Copy Playlist', { exact: true }).click()
+  await (await openPlaylistMenuItem(page, 'Copy Playlist')).click()
   await expect(page.getByRole('dialog')).toContainText('Select a playlist to add your 102 videos to')
 })
 
@@ -150,11 +152,12 @@ test('copying stays busy during pagination and navigation cancels the pending di
     }
   })
   await openPlaylist(page)
-  const copyButton = page.getByTitle('Copy Playlist', { exact: true })
-  await copyButton.click()
+  await (await openPlaylistMenuItem(page, 'Copy Playlist')).click()
   await continuationStarted
-  await expect(copyButton).toBeDisabled()
-  await expect(copyButton.locator('..')).toHaveAttribute('aria-busy', 'true')
+  await expect(page.locator('.playlistOptions').filter({ visible: true }).getByRole('button', { name: 'More', exact: true }))
+    .toHaveAttribute('aria-busy', 'true')
+  await expect(await openPlaylistMenuItem(page, 'Copy Playlist')).toBeDisabled()
+  await page.keyboard.press('Escape')
   await expect(page.getByRole('dialog')).toHaveCount(0)
   await goTo(page, 'userplaylists')
   const finished = page.waitForResponse(response => response.url().includes('/playlists/fork-source?') && response.url().includes('page=2'))

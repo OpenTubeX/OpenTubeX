@@ -1,4 +1,4 @@
-import { sel } from '../../helpers/app.mjs'
+import { openPlaylistMenuItem, sel } from '../../helpers/app.mjs'
 import { test, expect, setPlayerFullscreen } from '../../helpers/innertube.mjs'
 import { findWatchComponent, openVideoOrSkip, waitForPlaybackOrSkip } from '../../helpers/player.mjs'
 
@@ -71,11 +71,16 @@ async function openFullscreenPlaylistVideo(page, { enableQuickBookmark = false }
   await page.getByRole('link', { name: FULLSCREEN_PLAYLIST.playlistName }).first().click()
   await expect(page).toHaveURL(new RegExp(`#\\/playlist\\/${FULLSCREEN_PLAYLIST_ID}`))
   if (enableQuickBookmark) {
-    const enableButton = page.getByTitle('Enable Quick Bookmark With This Playlist')
-    if (await enableButton.isVisible()) {
-      await enableButton.click()
+    const enableItem = await openPlaylistMenuItem(page, 'Enable Quick Bookmark With This Playlist')
+    const enabledItem = page.getByRole('menu').getByRole('menuitem', { name: 'Quick Bookmark Enabled' })
+    // Wait for either state before branching, isVisible() does not retry.
+    await expect(enableItem.or(enabledItem).first()).toBeVisible()
+    if (await enableItem.isVisible()) {
+      await enableItem.click()
+      await openPlaylistMenuItem(page, 'Quick Bookmark Enabled')
     }
-    await expect(page.getByTitle('Quick Bookmark Enabled')).toBeVisible()
+    await expect(enabledItem).toBeVisible()
+    await page.keyboard.press('Escape')
   }
   await page.getByRole('link', { name: FULLSCREEN_PLAYLIST.videos[0].title }).first().click()
   await expect(page).toHaveURL(

@@ -192,6 +192,8 @@ Feed:
   Cancel Refresh: Batalkan pembaruan
   Next Auto Refresh: 'Pembaruan otomatis berikutnya: {date}'
 User Playlists:
+  Save: "Simpan"
+  Edit: "Sunting"
   This playlist is private or does not exist.: "Daftar putar ini bersifat pribadi atau tidak ada."
   Pin to Navigation: "Sematkan ke Navigasi"
   Unpin from Navigation: "Lepas Sematan dari Navigasi"

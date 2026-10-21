@@ -194,6 +194,8 @@ Feed:
   Cancel Refresh: Отмени обновяването
   Next Auto Refresh: 'Следващо автоматично обновяване: {date}'
 User Playlists:
+  Save: "Запази"
+  Edit: "Редактирай"
   This playlist is private or does not exist.: "Този плейлист е частен или не съществува."
   Pin to Navigation: "Закачване в навигацията"
   Unpin from Navigation: "Откачване от навигацията"

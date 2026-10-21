@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { test, expect, goTo, goToSettingsSection, readDatastore } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, openPlaylistMenuItem, readDatastore } from '../../helpers/app.mjs'
 import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 
 const playlistId = 'custom-thumbnail-playlist'
@@ -70,7 +70,7 @@ test('selects, replaces and restores a thumbnail across restarts', async ({ app,
   })
   expect(await preview(page).evaluate(image => [image.naturalWidth, image.naturalHeight]))
     .toEqual([1280, 720])
-  await page.getByTitle('Save Changes').click()
+  await page.getByRole('button', { name: 'Save Changes' }).click()
   await expect(headerImage(page)).toHaveAttribute('src', original)
 
   // Full playlist exports retain the portable image, not a local path.
@@ -82,7 +82,7 @@ test('selects, replaces and restores a thumbnail across restarts', async ({ app,
       }),
     })
   })
-  await page.getByTitle('Export This Playlist', { exact: true }).click()
+  await (await openPlaylistMenuItem(page, 'Export This Playlist')).click()
   await page.getByRole('button', { name: 'Export OpenTubeX (.db)', exact: true }).click()
   await expect.poll(() => page.evaluate(() => JSON.parse(window.__exportedPlaylist || '{}').customThumbnail)).toBe(original)
 
@@ -99,12 +99,12 @@ test('selects, replaces and restores a thumbnail across restarts', async ({ app,
   await page.getByTitle('Edit Playlist Info').click()
   const replacement = await setImage(page, replacementFile)
   expect(replacement).not.toBe(original)
-  await page.getByTitle('Save Changes').click()
+  await page.getByRole('button', { name: 'Save Changes' }).click()
   await expect(headerImage(page)).toHaveAttribute('src', replacement)
   await page.getByTitle('Edit Playlist Info').click()
   await picker(page).getByRole('button', { name: 'Restore default thumbnail' }).click()
   await expect(preview(page)).toHaveAttribute('src', /\/vi\/ccccccccccc\/mq1.jpg/)
-  await page.getByTitle('Save Changes').click()
+  await page.getByRole('button', { name: 'Save Changes' }).click()
   await expect(headerImage(page)).toHaveAttribute('src', /\/vi\/ccccccccccc\/mq1.jpg/)
 
   ;({ page } = await app.relaunch())
@@ -123,7 +123,7 @@ for (const entry of ['playlist header', 'playlist card']) {
     await page.getByTitle('Edit Playlist Info').click()
     const custom = await setImage(page)
     expect(custom.length).toBeGreaterThan(2048)
-    await page.getByTitle('Save Changes').click()
+    await page.getByRole('button', { name: 'Save Changes' }).click()
     await expect(headerImage(page)).toHaveAttribute('src', custom)
     await app.electronApp.evaluate(({ ipcMain }) => {
       globalThis.thumbnailDownloadPayloads = []
@@ -159,17 +159,17 @@ test('cancelling edits and invalid images keep the saved thumbnail', async ({ pa
   await openPlaylist(page)
   await page.getByTitle('Edit Playlist Info').click()
   const original = await setImage(page)
-  await page.getByTitle('Save Changes').click()
+  await page.getByRole('button', { name: 'Save Changes' }).click()
   await page.getByTitle('Edit Playlist Info').click()
   await picker(page).locator('input[type="file"]').setInputFiles({ name: 'broken.png', mimeType: 'image/png', buffer: Buffer.from('not an image') })
   await expect(page.getByText('The selected image could not be loaded')).toBeVisible()
   await expect(preview(page)).toHaveAttribute('src', original)
   await picker(page).getByRole('button', { name: 'Restore default thumbnail' }).click()
-  await page.getByTitle('Cancel', { exact: true }).click()
+  await page.locator('.playlistOptions').getByRole('button', { name: 'Cancel', exact: true }).click()
   await expect(headerImage(page)).toHaveAttribute('src', original)
   await page.getByTitle('Edit Playlist Info').click()
   await setImage(page, replacementFile)
-  await page.getByTitle('Cancel', { exact: true }).click()
+  await page.locator('.playlistOptions').getByRole('button', { name: 'Cancel', exact: true }).click()
   await expect(headerImage(page)).toHaveAttribute('src', original)
 })
 
@@ -185,12 +185,12 @@ test('disables saving while an image loads and discards a cancelled selection', 
   })
   await picker(page).locator('input[type="file"]').setInputFiles(imageFile)
   await expect(picker(page)).toHaveAttribute('aria-busy', 'true')
-  await expect(page.getByTitle('Save Changes')).toHaveAttribute('aria-disabled', 'true')
-  await page.getByTitle('Cancel', { exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Save Changes' })).toBeDisabled()
+  await page.locator('.playlistOptions').getByRole('button', { name: 'Cancel', exact: true }).click()
   await page.getByTitle('Edit Playlist Info').click()
   await page.evaluate(() => window.__finishThumbnailDecode())
   await expect(preview(page)).toHaveAttribute('src', /\/vi\/ccccccccccc\//)
-  await expect(page.getByTitle('Save Changes')).toHaveAttribute('aria-disabled', 'false')
+  await expect(page.getByRole('button', { name: 'Save Changes' })).toBeEnabled()
 })
 
 test('a failed save keeps the selected image available for retry', async ({ page }) => {
@@ -208,13 +208,13 @@ test('a failed save keeps the selected image available for retry', async ({ page
       return dispatch(action, payload)
     }
   })
-  await page.getByTitle('Save Changes').click()
+  await page.getByRole('button', { name: 'Save Changes' }).click()
   await expect(page.getByText('There was an issue with updating this playlist.')).toBeVisible()
   await expect(preview(page)).toHaveAttribute('src', custom)
   // A hovered toast pauses its timeout; move away before retrying the covered button.
   await page.mouse.move(0, 0)
   await expect(page.getByText('There was an issue with updating this playlist.')).not.toBeVisible()
-  await page.getByTitle('Save Changes').click()
+  await page.getByRole('button', { name: 'Save Changes' }).click()
   await expect(headerImage(page)).toHaveAttribute('src', custom)
 })
 
@@ -222,7 +222,7 @@ test('playlist imports restore thumbnails for existing and new playlists', async
   await openPlaylist(page)
   await page.getByTitle('Edit Playlist Info').click()
   const custom = await setImage(page)
-  await page.getByTitle('Save Changes').click()
+  await page.getByRole('button', { name: 'Save Changes' }).click()
   // The export below must contain the saved thumbnail.
   await expect.poll(() => page.evaluate(id => window.$store.getters.getPlaylist(id).customThumbnail, playlistId)).toBe(custom)
   await page.evaluate(() => {
@@ -248,7 +248,7 @@ test('playlist imports reject malformed and oversized data and resize oversized 
   await openPlaylist(page)
   await page.getByTitle('Edit Playlist Info').click()
   const custom = await setImage(page)
-  await page.getByTitle('Save Changes').click()
+  await page.getByRole('button', { name: 'Save Changes' }).click()
   const section = await goToSettingsSection(page, 'data')
   async function importThumbnail(thumbnail) {
     await page.evaluate(thumbnail => {
@@ -289,7 +289,7 @@ test('empty playlists show custom thumbnails and honor hidden and blurred prefer
   await openPlaylist(page)
   await page.getByTitle('Edit Playlist Info').click()
   const custom = await setImage(page)
-  await page.getByTitle('Save Changes').click()
+  await page.getByRole('button', { name: 'Save Changes' }).click()
   await expect(headerImage(page)).toHaveAttribute('src', custom)
   await dispatch(page, 'updateBlurThumbnails', true)
   await expect(headerImage(page)).toHaveClass(/blur/)
@@ -320,7 +320,7 @@ test('empty playlists show custom thumbnails and honor hidden and blurred prefer
   await page.getByRole('link', { name: 'Weekend walks', exact: true }).click()
   await page.getByTitle('Edit Playlist Info').click()
   await picker(page).getByRole('button', { name: 'Restore default thumbnail' }).click()
-  await page.getByTitle('Save Changes').click()
+  await page.getByRole('button', { name: 'Save Changes' }).click()
   await expect(headerImage(page)).toHaveAttribute('src', /thumbnail_placeholder/)
 })
 
@@ -328,7 +328,7 @@ test('Home recent playlist cards use custom covers for populated and empty playl
   await openPlaylist(page)
   await page.getByTitle('Edit Playlist Info').click()
   const custom = await setImage(page)
-  await page.getByTitle('Save Changes').click()
+  await page.getByRole('button', { name: 'Save Changes' }).click()
   await goTo(page, 'home')
   const card = page.locator('[data-home-section="playlists"]').getByRole('link', { name: /Weekend walks/ })
   const image = card.locator('img:not(.retryImagePlaceholder)')
@@ -355,7 +355,7 @@ test('the single-video playlist menu uses custom covers for populated and empty 
   await openPlaylist(page)
   await page.getByTitle('Edit Playlist Info').click()
   const custom = await setImage(page)
-  await page.getByTitle('Save Changes').click()
+  await page.getByRole('button', { name: 'Save Changes' }).click()
   await page.locator('.playlistItemsCard .ft-list-video').first().hover()
   await page.locator('.playlistItemsCard .addToPlaylistIcon .iconButton').first().click()
   const menu = page.locator('.addToPlaylistDropdown')
@@ -424,8 +424,8 @@ test('thumbnail controls fit list and grid layouts', { tag: '@scale' }, async ({
       expect(overflow.left).toBeGreaterThanOrEqual(0)
       expect(overflow.right).toBeLessThanOrEqual(overflow.width)
       expect(overflow.overflow).toBeLessThanOrEqual(1)
-      await page.getByTitle('Save Changes').scrollIntoViewIfNeeded()
-      await expect(page.getByTitle('Save Changes')).toBeInViewport()
+      await page.getByRole('button', { name: 'Save Changes' }).scrollIntoViewIfNeeded()
+      await expect(page.getByRole('button', { name: 'Save Changes' })).toBeInViewport()
     }
   }
   if (uiScale === 100) {
@@ -436,7 +436,7 @@ test('thumbnail controls fit list and grid layouts', { tag: '@scale' }, async ({
       await picker(page).screenshot({ path: testInfo.outputPath(`playlist-thumbnail-${colorScheme}.png`) })
     }
   }
-  await page.getByTitle('Save Changes').click()
+  await page.getByRole('button', { name: 'Save Changes' }).click()
   await expect(picker(page)).toHaveCount(0)
   await expect.poll(() => page.evaluate(() => {
     const root = document.documentElement

@@ -223,6 +223,8 @@ Feed:
   Next Auto Refresh: 'Kitas automatinis atnaujinimas: {date}'
   Refresh Feed: Atnaujinti {subscriptionName}
 User Playlists:
+  Save: "Išsaugoti"
+  Edit: "Redaguoti"
   This playlist is private or does not exist.: "Šis grojaraštis yra privatus arba neegzistuoja."
   Pin to Navigation: "Prisegti prie naršymo"
   Unpin from Navigation: "Atsegti nuo naršymo"

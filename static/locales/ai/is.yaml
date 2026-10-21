@@ -194,6 +194,8 @@ Feed:
   Cancel Refresh: Hætta við endurnýjun
   Next Auto Refresh: 'Næsta sjálfvirka endurnýjun: {date}'
 User Playlists:
+  Save: "Vista"
+  Edit: "Breyta"
   This playlist is private or does not exist.: "Þessi spilunarlisti er lokaður eða er ekki til."
   Pin to Navigation: "Festa við valmynd"
   Unpin from Navigation: "Losa úr valmynd"

@@ -194,6 +194,8 @@ Feed:
   Cancel Refresh: Peruuta päivitys
   Next Auto Refresh: 'Seuraava automaattinen päivitys: {date}'
 User Playlists:
+  Save: "Tallenna"
+  Edit: "Muokkaa"
   This playlist is private or does not exist.: "Tämä soittolista on yksityinen tai sitä ei ole olemassa."
   Pin to Navigation: "Kiinnitä navigointiin"
   Unpin from Navigation: "Irrota navigoinnista"

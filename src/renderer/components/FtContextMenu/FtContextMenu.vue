@@ -329,7 +329,8 @@ const itemIcons = {
 const colorLabels = new Set(['Default', 'Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple', 'Pink'])
 
 function getItemIcon(item, parentLabel = '') {
-  if (Array.isArray(item.icon)) return item.icon
+  // Arrays are registry icons; other objects are custom icons such as quick bookmark emoji.
+  if (item.icon != null && typeof item.icon === 'object') return item.icon
   if (colorLabels.has(item.label)) return ['fas', 'circle']
   if (item.label === 'To Beginning') return ['fas', verticalTabLayout.value ? 'arrow-up' : 'arrow-left']
   if (item.label === 'To End') return ['fas', verticalTabLayout.value ? 'arrow-down' : 'arrow-right']

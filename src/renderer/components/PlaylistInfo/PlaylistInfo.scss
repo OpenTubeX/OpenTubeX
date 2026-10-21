@@ -95,8 +95,13 @@
 .playlistOptions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
   justify-content: flex-end;
+
+  .actionButton {
+    margin: 0;
+  }
 }
 
 .searchInputsRow {

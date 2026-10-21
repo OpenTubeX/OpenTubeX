@@ -1,4 +1,4 @@
-import { test, expect, goTo, goToSettingsSection } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, openPlaylistMenuItem } from '../../helpers/app.mjs'
 
 const playlistId = 'insertion-order'
 const label = 'Add new videos to the top (custom order)'
@@ -46,7 +46,7 @@ test('saves a per-playlist top insertion preference across restarts, preserves b
   await toggle.press('Space')
   await expect(toggle).not.toBeChecked()
   await page.getByText(label, { exact: true }).click()
-  await page.getByTitle('Cancel', { exact: true }).click()
+  await page.locator('.playlistOptions').getByRole('button', { name: 'Cancel', exact: true }).click()
   await page.getByTitle('Edit Playlist Info', { exact: true }).click()
   await expect(toggle).not.toBeChecked()
   await page.getByText(label, { exact: true }).click()
@@ -58,7 +58,7 @@ test('saves a per-playlist top insertion preference across restarts, preserves b
     animations: 'disabled',
     clip: { x: bounds.x, y: bounds.y, width: bounds.width, height: 200 },
   })
-  await page.getByTitle('Save Changes', { exact: true }).click()
+  await page.getByRole('button', { name: 'Save Changes' }).click()
   expect(await videoIds(page)).toEqual(['aaaaaaaaaaa', 'bbbbbbbbbbb'])
 
   await add(page, 'addVideo', [video('ccccccccccc', 'Newly saved video')])
@@ -85,7 +85,7 @@ test('saves a per-playlist top insertion preference across restarts, preserves b
   await page.getByTitle('Edit Playlist Info', { exact: true }).click()
   await expect(page.getByRole('checkbox', { name: label, exact: true })).toBeChecked()
   await page.getByText(label, { exact: true }).click()
-  await page.getByTitle('Save Changes', { exact: true }).click()
+  await page.getByRole('button', { name: 'Save Changes' }).click()
   await add(page, 'addVideo', [video('hhhhhhhhhhh', 'Appended video')])
   expect(await videoIds(page)).toEqual(['ddddddddddd', 'eeeeeeeeeee', 'ccccccccccc', 'aaaaaaaaaaa', 'bbbbbbbbbbb', 'hhhhhhhhhhh'])
 })
@@ -141,13 +141,14 @@ test('source refresh prepends missing videos in source order without adding dupl
   }, playlistId)
   await page.getByTitle('Edit Playlist Info', { exact: true }).click()
   await page.getByText(label, { exact: true }).click()
-  await page.getByTitle('Save Changes', { exact: true }).click()
-  const refresh = page.getByTitle('Add missing videos from source playlist', { exact: true }).filter({ visible: true })
-  await refresh.click()
+  await page.getByRole('button', { name: 'Save Changes' }).click()
+  await (await openPlaylistMenuItem(page, 'Add missing videos from source playlist')).click()
   await expect.poll(() => videoIds(page)).toEqual(['ccccccccccc', 'ddddddddddd', 'aaaaaaaaaaa', 'bbbbbbbbbbb'])
+  const refresh = await openPlaylistMenuItem(page, 'Add missing videos from source playlist')
   await expect(refresh).toBeEnabled()
   await refresh.click()
-  await expect(refresh).toBeEnabled()
+  await expect(await openPlaylistMenuItem(page, 'Add missing videos from source playlist')).toBeEnabled()
+  await page.keyboard.press('Escape')
   expect(await videoIds(page)).toEqual(['ccccccccccc', 'ddddddddddd', 'aaaaaaaaaaa', 'bbbbbbbbbbb'])
 })
 

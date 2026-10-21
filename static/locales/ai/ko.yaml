@@ -203,6 +203,8 @@ Feed:
   Cancel Refresh: 새로 고침 취소
   Next Auto Refresh: '다음 자동 새로 고침: {date}'
 User Playlists:
+  Save: "저장"
+  Edit: "편집"
   This playlist is private or does not exist.: "이 재생목록은 비공개이거나 존재하지 않습니다."
   Pin to Navigation: "탐색 메뉴에 고정"
   Unpin from Navigation: "탐색 메뉴에서 고정 해제"

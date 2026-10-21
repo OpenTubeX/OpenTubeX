@@ -194,6 +194,8 @@ Feed:
   Cancel Refresh: Vernieuwen annuleren
   Next Auto Refresh: 'Volgende automatische vernieuwing: {date}'
 User Playlists:
+  Save: "Opslaan"
+  Edit: "Bewerken"
   This playlist is private or does not exist.: "Deze afspeellijst is privé of bestaat niet."
   Pin to Navigation: "Vastmaken aan navigatie"
   Unpin from Navigation: "Losmaken van navigatie"
