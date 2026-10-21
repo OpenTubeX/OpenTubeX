@@ -170,18 +170,20 @@ test('Distraction Free hides repeat stats immediately without disabling looping 
 })
 
 for (const mode of ['scrolling', 'another tab']) {
-  test(`repeat stats hide in the mini player while viewing ${mode} and return with their totals`, async ({ app, page }) => {
+  test(`repeat stats hide in the mini player while viewing ${mode} and return with their totals`, { tag: '@scale' }, async ({ app, page }) => {
     const video = await openVideo(app, page)
     await toggleLoop(page)
     const stats = page.locator('.repeatStats')
     const player = page.locator('.ftVideoPlayer')
-    await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
     await video.evaluate(element => element.play())
     await expect(stats.locator('.repeatStatsTime')).not.toHaveText('0:00')
     const spent = await stats.locator('.repeatStatsTime').textContent()
 
+    const infoTop = () => page.locator('.infoArea').evaluate(element => element.getBoundingClientRect().top + window.scrollY)
+    let inlineInfoTop = null
     if (mode === 'scrolling') {
       await video.evaluate(element => element.pause())
+      inlineInfoTop = await infoTop()
       await player.evaluate(element => {
         window.scrollTo(0, window.scrollY + element.getBoundingClientRect().bottom)
       })
@@ -192,7 +194,12 @@ for (const mode of ['scrolling', 'another tab']) {
       await expect(page.locator('#cross-tab-mini-player-layer .ftVideoPlayer')).toBeVisible()
     }
     await expect(player).toHaveClass(/scrollMiniPlayer/)
-    await expect(stats).toHaveCount(0)
+    await expect(stats).toBeHidden()
+    if (inlineInfoTop !== null) {
+      // Hiding the stats must not pull the page below the player up, or a
+      // click that scrolled the player away could release on another element.
+      expect(Math.abs(await infoTop() - inlineInfoTop)).toBeLessThan(1)
+    }
 
     await player.locator('video').evaluate(element => element.pause())
     if (mode === 'another tab') await page.locator('.tabBar .tab').first().click()

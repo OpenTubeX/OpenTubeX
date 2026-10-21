@@ -1848,8 +1848,9 @@
     <!-- eslint-enable vue/html-indent -->
     <section
       v-if="repeatStats.active && !shortsPlayer && !hideRepeatStats && !fullWindowEnabled && !isFullscreen &&
-        !scrollMiniPlayerActive && !scrollMiniPlayerDetached"
+        !scrollMiniPlayerDetached"
       class="repeatStats"
+      :class="{ scrollMiniHidden: scrollMiniPlayerActive }"
       :aria-label="$t('Video.Player.Repeat Stats.Repeat Stats')"
     >
       <span class="repeatStatsMode">

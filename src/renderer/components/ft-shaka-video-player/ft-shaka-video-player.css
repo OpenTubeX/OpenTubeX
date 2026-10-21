@@ -5254,6 +5254,12 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   font-variant-numeric: tabular-nums;
 }
 
+/* Keep the stats in the flow below the scroll mini player's placeholder, so
+   the page below does not jump when the player pops out or returns. */
+.repeatStats.scrollMiniHidden {
+  visibility: hidden;
+}
+
 .repeatStatsMode,
 .repeatStatsValues,
 .repeatStatsValues > div {
