@@ -81,6 +81,43 @@
                   />
                   <span class="navLabel">{{ item.label }}</span>
                 </router-link>
+                <template v-if="pinnedItems.length > 0">
+                  <hr
+                    v-if="items.length > 0"
+                    class="moreOptionDivider"
+                  >
+                  <component
+                    :is="item.path ? 'router-link' : 'span'"
+                    v-for="item in pinnedItems"
+                    :key="item.key"
+                    class="navOption"
+                    :class="{ disabledNavOption: !item.path }"
+                    :title="item.label"
+                    :to="item.path ? { path: item.path, query: item.query } : undefined"
+                    @click="closeMenu"
+                  >
+                    <FtRetryImage
+                      v-if="item.thumbnail != null"
+                      :fallback-icon="item.icon"
+                      class="navIcon pinnedThumbnail"
+                      :class="{ playlistThumbnail: item.playlist, blur: item.blur }"
+                      height="32"
+                      width="32"
+                      loading="lazy"
+                      :src="item.thumbnail"
+                    />
+                    <FtIcon
+                      v-else
+                      :icon="item.icon"
+                      class="navIcon"
+                      aria-hidden="true"
+                    />
+                    <span
+                      class="navLabel"
+                      dir="auto"
+                    >{{ item.label }}</span>
+                  </component>
+                </template>
               </div>
             </div>
           </div>
@@ -96,6 +133,7 @@ import { computed, ref, nextTick, watch, onMounted, onBeforeUnmount, useId, useT
 import { useRoute, useRouter } from 'vue-router'
 
 import store from '../../store/index'
+import FtRetryImage from '../FtRetryImage.vue'
 import NavLabel from '../SideNav/NavLabel.vue'
 import { useBottomSheetDismiss } from '../../composables/useBottomSheetDismiss'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
@@ -106,6 +144,10 @@ const props = defineProps({
   items: {
     type: Array,
     required: true,
+  },
+  pinnedItems: {
+    type: Array,
+    default: () => [],
   },
 })
 
@@ -149,7 +191,8 @@ function releaseMenu() {
   locked = false
   nextTick(() => previousFocus?.focus({ preventScroll: true }))
 }
-const overflowRouteActive = computed(() => props.items.some(item => route.path === `/${item.id}`))
+const overflowRouteActive = computed(() => props.items.some(item => route.path === `/${item.id}`) ||
+  props.pinnedItems.some(({ path }) => path != null && (route.path === path || route.path.startsWith(`${path}/`))))
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideLabelsSideBar = computed(() => {

@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { test, expect, latestSettings, readDatastore, goTo, waitForAppReady } from '../../helpers/app.mjs'
+import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 
 test.use({
   seed: {
@@ -219,3 +220,82 @@ for (const saved of [true, false]) {
     if (!saved) await expect(pin).toBeVisible()
   })
 }
+
+test('lists pinned playlists and channels in the mobile More sheet', { tag: '@scale' }, async ({ page }, testInfo) => {
+  const id = 'UCaaaaaaaaaaaaaaaaaaaaaa'
+  await page.setViewportSize({ width: 375, height: 812 })
+  const nav = page.locator('.sideNav')
+  const more = nav.getByRole('button', { name: 'More', exact: true })
+  const primaryLinks = () => nav.locator('.inner > .navOption:visible').evaluateAll(links => links.map(link => link.getAttribute('href')))
+  const items = ['home', 'subscriptions', 'userplaylists', 'history', 'subscribedchannels']
+  await page.evaluate(items => window.$store.commit('setNavigationItems', items), items)
+  await expect.poll(primaryLinks).toEqual(items.map(item => `#/${item}`))
+  await expect(more).toHaveCount(0)
+
+  await page.route('https://invidious.test/vi/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
+  await page.evaluate(async id => {
+    const store = window.$store
+    await store.dispatch('addPlaylist', {
+      _id: 'pinned-mobile',
+      playlistName: 'Pinned playlist',
+      description: '',
+      videos: [{ videoId: 'aaaaaaaaaaa', playlistItemId: 'pinned-mobile-video', title: 'Video', author: 'Channel', lengthSeconds: 120, type: 'video' }]
+    })
+    await store.dispatch('updatePinnedPlaylistIds', ['pinned-mobile'])
+    await store.dispatch('updatePinnedChannels', [{ id, name: 'Channel', thumbnail: `https://yt3.googleusercontent.com/${id}=s176` }])
+  }, id)
+  // More takes the fifth slot so the pins have somewhere to go.
+  await expect.poll(primaryLinks).toEqual(items.slice(0, 4).map(item => `#/${item}`))
+  await expect(nav.locator('.pinnedPlaylists, .pinnedChannels')).toHaveCount(2)
+  await expect(nav.locator('.pinnedPlaylists, .pinnedChannels').first()).toBeHidden()
+  await more.click()
+  const sheet = page.locator('.moreOptionContainer')
+  const sheetLinks = () => sheet.locator('.navOption').evaluateAll(links => links.map(link => link.getAttribute('href')))
+  await expect.poll(sheetLinks).toEqual(['#/subscribedchannels', '#/playlist/pinned-mobile?playlistType=user', `#/channel/${id}`])
+  await expect(sheet.locator('.moreOptionDivider')).toBeVisible()
+  const avatar = sheet.locator(`a[href="#/channel/${id}"] img`)
+  await expect(avatar).toHaveAttribute('src', `https://invidious.test/ggpht/${id}=s35`)
+  const playlistThumbnail = sheet.locator('a[href^="#/playlist/"] img')
+  await expect(playlistThumbnail).toHaveAttribute('src', 'https://invidious.test/vi/aaaaaaaaaaa/maxresdefault.jpg')
+  for (const image of [avatar, playlistThumbnail]) {
+    await expect.poll(() => image.evaluate(element => element.complete && element.naturalWidth > 0)).toBe(true)
+  }
+  // Thumbnails keep labels and rows aligned with the destinations above them.
+  const rows = await sheet.locator('.navOption').evaluateAll(links => links.map(link => ({
+    height: link.getBoundingClientRect().height,
+    labelStart: link.querySelector('.navLabel').getBoundingClientRect().left
+  })))
+  for (const row of rows) {
+    expect(Math.abs(row.height - rows[0].height)).toBeLessThanOrEqual(1)
+    expect(Math.abs(row.labelStart - rows[0].labelStart)).toBeLessThanOrEqual(1)
+  }
+  await page.mouse.move(0, 0)
+  await page.screenshot({ path: testInfo.outputPath('mobile-pins.png'), animations: 'disabled' })
+
+  await sheet.getByRole('link', { name: 'Pinned playlist', exact: true }).click()
+  await expect(sheet).toHaveCount(0)
+  await expect(page).toHaveURL(/#\/playlist\/pinned-mobile\?playlistType=user$/)
+  await expect(more).toHaveClass(/router-link-active/)
+  await more.click()
+  await sheet.getByRole('link', { name: 'Channel', exact: true }).click()
+  await expect(sheet).toHaveCount(0)
+  await expect(page).toHaveURL(new RegExp(`#/channel/${id}`))
+  await expect(more).toHaveClass(/router-link-active/)
+
+  await page.evaluate(() => window.$store.dispatch('updateDisableChannelLinks', true))
+  await expect(more).not.toHaveClass(/router-link-active/)
+  await more.click()
+  const disabledChannel = sheet.locator('.navOption').last()
+  await expect(disabledChannel).toHaveText('Channel')
+  await expect(disabledChannel).not.toHaveAttribute('href')
+  await expect(disabledChannel).toHaveCSS('pointer-events', 'none')
+  await page.keyboard.press('Escape')
+  await expect(sheet).toHaveCount(0)
+
+  await page.evaluate(async () => {
+    await window.$store.dispatch('updatePinnedPlaylistIds', [])
+    await window.$store.dispatch('updatePinnedChannels', [])
+  })
+  await expect(more).toHaveCount(0)
+  await expect.poll(primaryLinks).toEqual(items.map(item => `#/${item}`))
+})

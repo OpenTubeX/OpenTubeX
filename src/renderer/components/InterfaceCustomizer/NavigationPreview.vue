@@ -102,7 +102,7 @@
           <span class="previewNavLabel">{{ item.shortLabel }}</span>
         </div>
         <div
-          v-if="mobileOverflowCount > 0"
+          v-if="showMobileMore"
           class="previewNavItem"
           data-preview-navigation-item="more"
         >
@@ -172,8 +172,14 @@ const items = computed(() => filterAvailableNavigationItems(store.getters.getNav
     shortLabel: t(`Mobile Navigation.${item.id}`),
   })))
 
-const mobilePrimaryItems = computed(() => items.value.length > 5 ? items.value.slice(0, 4) : items.value)
-const mobileOverflowCount = computed(() => items.value.length - mobilePrimaryItems.value.length)
+// Like the side navigation, pins move the fifth destination into More.
+const hasPins = computed(() => {
+  if (store.getters.getPinnedChannels.length > 0) return true
+  const pinnedIds = new Set(store.getters.getPinnedPlaylistIds)
+  return pinnedIds.size > 0 && store.getters.getAllPlaylists.some(playlist => pinnedIds.has(playlist._id))
+})
+const showMobileMore = computed(() => items.value.length > 5 || hasPins.value)
+const mobilePrimaryItems = computed(() => showMobileMore.value ? items.value.slice(0, 4) : items.value)
 
 const channels = computed(() => {
   // Load thumbnails through the selected backend, like the side navigation.

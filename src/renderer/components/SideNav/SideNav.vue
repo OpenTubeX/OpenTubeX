@@ -38,8 +38,9 @@
         />
       </router-link>
       <SideNavMoreOptions
-        v-if="mobileOverflowItems.length > 0"
+        v-if="showMobileMore"
         :items="mobileOverflowItems"
+        :pinned-items="mobilePinnedItems"
         :class="{ compactLabels: compactNavigationLabels }"
       />
       <hr>
@@ -369,11 +370,33 @@ const visibleNavigationItems = computed(() => filterAvailableNavigationItems(
   .map(id => navigationCatalog.value.get(id))
   .filter(item => item != null))
 
-const mobilePrimaryItems = computed(() => visibleNavigationItems.value.length > 5
+// The bottom bar has no room for pins, so More lists them below its destinations.
+const mobilePinnedItems = computed(() => [
+  ...pinnedPlaylists.value.map(playlist => ({
+    key: `playlist-${playlist._id}`,
+    path: `/playlist/${playlist._id}`,
+    query: { playlistType: 'user' },
+    label: playlist.playlistName,
+    thumbnail: pinnedPlaylistThumbnail(playlist),
+    icon: ['fas', 'list'],
+    playlist: true,
+    blur: blurThumbnails.value,
+  })),
+  ...pinnedChannels.value.map(channel => ({
+    key: `channel-${channel.id}`,
+    path: enableChannelLinks.value ? `/channel/${channel.id}` : null,
+    label: channel.name,
+    thumbnail: channel.thumbnail,
+    icon: ['fas', 'circle-user'],
+  })),
+])
+
+const showMobileMore = computed(() => visibleNavigationItems.value.length > 5 || mobilePinnedItems.value.length > 0)
+const mobilePrimaryItems = computed(() => showMobileMore.value
   ? visibleNavigationItems.value.slice(0, 4)
   : visibleNavigationItems.value)
 const mobilePrimaryItemIds = computed(() => new Set(mobilePrimaryItems.value.map(({ id }) => id)))
-const mobileOverflowItems = computed(() => visibleNavigationItems.value.length > 5
+const mobileOverflowItems = computed(() => showMobileMore.value
   ? visibleNavigationItems.value.slice(4)
   : [])
 
