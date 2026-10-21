@@ -611,6 +611,7 @@ Settings:
     Loaded Tab Icons With Failures: S'han carregat {loaded} icones de pestanya; no se n'han pogut carregar {failed}
     Show Tab Previews: Mostra les previsualitzacions de les pestanyes
     Use Fixed Tab Width: Utilitza una amplada fixa de pestanya en el mode horitzontal
+    Use Custom Title Bar: Utilitza una barra de títol personalitzada
     Tab Width: Amplada de les pestanyes
     Tab Layout:
       Tab Layout: Disposició de les pestanyes
@@ -2525,6 +2526,7 @@ Tooltips:
     Always Show Scrollbars: Manté les barres de desplaçament sempre visibles. Si es desactiva, s'esvaeixen poc després que deixeu de moure el ratolí i reapareixen quan el torneu a moure.
     Scroll Speed: Canvia la distància de desplaçament dels gestos de roda del ratolí i del ratolí tàctil.
     Use Fixed Tab Width: Dóna la mateixa amplada a totes les pestanyes de la barra horitzontal en lloc d'ajustar-les al títol.
+    Use Custom Title Bar: Substitueix la barra de títol del sistema per la barra de pestanyes, o per la navegació superior quan les pestanyes no són a dalt, per estalviar espai vertical. Els controls de la finestra apareixen a la cantonada d'aquesta barra.
     Use Grid Player Menu: Organitza el menú de configuració del reproductor de vídeo com una quadrícula de rajoles en lloc d'una llista de files.
   Experimental Settings:
     Replace HTTP Cache: Desactiva la memòria cau HTTP al disc d'Electron i activa una memòria cau d'imatges personalitzada a la memòria. Augmentarà l'ús de RAM.

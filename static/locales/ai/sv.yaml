@@ -491,6 +491,7 @@ Settings:
     Loaded Tab Icons With Failures: Läste in {loaded} flikikoner. {failed} kunde inte läsas in
     Show Tab Previews: Visa förhandsgranskning av flikar
     Use Fixed Tab Width: Använd fast flikbredd i vågrätt läge
+    Use Custom Title Bar: Använd anpassad namnlist
     Tab Width: Flikbredd
     Tab Layout:
       Tab Layout: Fliklayout
@@ -1987,6 +1988,7 @@ Tooltips:
     Always Show Scrollbars: Håller rullningslisterna synliga hela tiden. När funktionen är inaktiverad tonas de bort en kort stund efter att du slutat röra musen och visas igen så snart du rör den.
     Scroll Speed: Ändrar hur långt mushjulets och pekplattans rullgester rullar.
     Use Fixed Tab Width: Ger alla flikar i det vågräta flikfältet samma bredd i stället för att anpassa bredden efter titeln.
+    Use Custom Title Bar: Ersätter systemets namnlist med flikfältet, eller med den övre navigeringen när flikarna inte är högst upp, för att spara vertikalt utrymme. Fönsterknapparna visas i hörnet av det fältet.
     Use Grid Player Menu: Ordnar videospelarens inställningsmeny som ett rutnät med rutor i stället för en lista med rader.
   Experimental Settings:
     Disable Hardware Acceleration: Inaktiverar GPU-maskinvaruacceleration. Kan lösa grafikproblem, men kommer troligen att försämra prestandan.

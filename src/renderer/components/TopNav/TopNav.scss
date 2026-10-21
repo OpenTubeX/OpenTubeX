@@ -64,6 +64,19 @@
   grid-template-columns: minmax(0, 1fr) min(440px, max(0px, calc(100% - 2 * var(--header-side-space)))) minmax(0, 1fr);
 }
 
+/* The window controls sit at physical window edges. */
+/* stylelint-disable liberty/use-logical-spec */
+.app.customTitleBar:not(.topTabs, .verticalTabsLeft) .topNavInner {
+  box-sizing: border-box;
+  padding-left: var(--title-bar-inset-left);
+}
+
+.app.customTitleBar:not(.topTabs, .verticalTabsRight) .topNavInner {
+  box-sizing: border-box;
+  padding-right: var(--title-bar-inset-right);
+}
+/* stylelint-enable liberty/use-logical-spec */
+
 .phoneLayout .logoText {
   display: none;
 }
@@ -673,5 +686,14 @@
 
   .syncIndicator :deep(.ft-icon__glyph) {
     animation: none;
+  }
+}
+
+/* Without top tabs, the navigation replaces the system title bar. */
+.app.customTitleBar:not(.topTabs) .topNav {
+  -webkit-app-region: drag;
+
+  .topNavInner > * > * {
+    -webkit-app-region: no-drag;
   }
 }

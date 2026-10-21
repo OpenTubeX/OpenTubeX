@@ -493,6 +493,7 @@ Settings:
     Loaded Tab Icons With Failures: Cargáronse {loaded} iconas de lapela; non se puideron cargar {failed}
     Show Tab Previews: Amosar previsualizacións das lapelas
     Use Fixed Tab Width: Usar unha largura fixa das lapelas no modo horizontal
+    Use Custom Title Bar: Usar unha barra de título personalizada
     Tab Width: Largura das lapelas
     Tab Layout:
       Tab Layout: Disposición das lapelas
@@ -2018,6 +2019,7 @@ Tooltips:
     Always Show Scrollbars: Mantén as barras de desprazamento visibles en todo momento. Se se desactiva, esvaecen pouco despois de deixar de mover o rato e reaparecen en canto volves movelo.
     Scroll Speed: Cambia a distancia de desprazamento dos xestos da roda do rato e do panel táctil.
     Use Fixed Tab Width: Dálles a todas as lapelas da barra horizontal a mesma largura en lugar de adaptar o tamaño ao título.
+    Use Custom Title Bar: Substitúe a barra de título do sistema pola barra de lapelas, ou pola navegación superior cando as lapelas non están arriba, para aforrar espazo vertical. Os controis da xanela aparecen na esquina desa barra.
     Use Grid Player Menu: Organiza o menú de configuración do reprodutor de vídeo como unha grade de bloques en lugar dunha lista de filas.
   Experimental Settings:
     Disable Hardware Acceleration: Desactiva a aceleración por hardware da GPU. Pode resolver problemas gráficos, pero probablemente reducirá o rendemento.

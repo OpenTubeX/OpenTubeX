@@ -124,6 +124,39 @@ export default {
     systemAccentColor: process.argv.find(argument => argument.startsWith('--system-accent-color='))?.slice('--system-accent-color='.length),
     hideSplash: process.argv.includes('--hide-startup-splash=true')
   },
+  customTitleBar: process.argv.includes('--custom-title-bar=true'),
+  /**
+   * @param {{ color: string, symbolColor: string, height: number }} overlay height in CSS pixels
+   */
+  setTitleBarOverlay: ({ color, symbolColor, height }) => {
+    ipcRenderer.send(IpcChannels.SET_TITLE_BAR_OVERLAY, {
+      color,
+      symbolColor,
+      height: height * webFrame.getZoomFactor()
+    })
+  },
+  /** Window controls the renderer draws with the custom title bar on Linux. */
+  windowControls: {
+    /** Plasma's Breeze decoration, or Adwaita for GNOME and other desktops */
+    style: /(^|:)KDE(:|$)/i.test(process.env.XDG_CURRENT_DESKTOP ?? '') ? 'breeze' : 'adwaita',
+    /**
+     * @returns {Promise<{ layout: string, maximized: boolean, fullScreen: boolean }>}
+     */
+    getState: () => ipcRenderer.invoke(IpcChannels.WINDOW_CONTROLS_GET),
+    /**
+     * @param {(state: { layout: string, maximized: boolean, fullScreen: boolean }) => void} handler
+     * @returns {() => void} unsubscribe
+     */
+    onState: handler => {
+      const listener = (_event, state) => handler(state)
+      ipcRenderer.on(IpcChannels.WINDOW_CONTROLS_STATE, listener)
+      return () => ipcRenderer.removeListener(IpcChannels.WINDOW_CONTROLS_STATE, listener)
+    },
+    /**
+     * @param {'minimize' | 'maximize' | 'close'} action
+     */
+    run: action => ipcRenderer.send(IpcChannels.WINDOW_CONTROL_ACTION, action)
+  },
   isFlatpak: process.env.FLATPAK_ID !== undefined,
   /**
    * @returns {{ usedHeapSize: number, heapSizeLimit: number }} V8 heap usage of this renderer in KB

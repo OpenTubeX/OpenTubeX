@@ -476,6 +476,7 @@ Settings:
     Loaded Tab Icons With Failures: Loaded {loaded} tab icons; {failed} could not be loaded
     Show Tab Previews: Show Tab Previews
     Use Fixed Tab Width: Use Fixed Tab Width in Horizontal Mode
+    Use Custom Title Bar: Use Custom Title Bar
     Tab Width: Tab Width
     Tab Layout:
       Tab Layout: Tab Layout
@@ -1956,6 +1957,7 @@ Tooltips:
     Always Show Scrollbars: Keeps the scrollbars visible at all times. When disabled, they fade out shortly after you stop moving the mouse and reappear as soon as you move it again.
     Scroll Speed: Changes how far mouse-wheel and touchpad wheel gestures scroll.
     Use Fixed Tab Width: Gives every tab in the horizontal tab bar the same width instead of sizing them to their title.
+    Use Custom Title Bar: Replaces the system title bar with the tab bar, or with the top navigation when tabs are not at the top, to save vertical space. The window controls appear in the corner of that bar.
     Use Grid Player Menu: Arranges the video player's settings menu as a grid of tiles instead of a list of rows.
   Experimental Settings:
     Disable Hardware Acceleration: Disables GPU hardware acceleration. May fix graphical issues, but will probably perform worse.

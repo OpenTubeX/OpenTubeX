@@ -492,6 +492,7 @@ Settings:
     Loaded Tab Icons With Failures: Berhasil memuat {loaded} ikon tab; {failed} tidak dapat dimuat
     Show Tab Previews: Tampilkan Pratinjau Tab
     Use Fixed Tab Width: Gunakan Lebar Tab Tetap dalam Mode Horizontal
+    Use Custom Title Bar: Gunakan Bilah Judul Kustom
     Tab Width: Lebar Tab
     Tab Layout:
       Tab Layout: Tata Letak Tab
@@ -1984,6 +1985,7 @@ Tooltips:
     Always Show Scrollbars: Mempertahankan bilah gulir agar selalu terlihat. Jika dinonaktifkan, bilah memudar sesaat setelah Anda berhenti menggerakkan tetikus dan muncul kembali begitu tetikus digerakkan.
     Scroll Speed: Mengubah jarak gulir gestur roda tetikus dan panel sentuh.
     Use Fixed Tab Width: Memberi setiap tab pada bilah tab horizontal lebar yang sama, bukan menyesuaikan lebar dengan judulnya.
+    Use Custom Title Bar: Mengganti bilah judul sistem dengan bilah tab, atau dengan navigasi atas saat tab tidak berada di atas, untuk menghemat ruang vertikal. Kontrol jendela muncul di sudut bilah tersebut.
     Use Grid Player Menu: Menyusun menu pengaturan pemutar video sebagai kisi ubin, bukan daftar baris.
 The playlist is at the beginning. Enable loop to continue playing: Daftar putar berada di awal. Aktifkan pengulangan untuk melanjutkan pemutaran
 External link opening has been disabled in Settings → Privacy: Pembukaan tautan eksternal telah dinonaktifkan di Pengaturan → Privasi

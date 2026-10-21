@@ -492,6 +492,7 @@ Settings:
     Loaded Tab Icons With Failures: Načteno ikon karet {loaded}, nepodařilo se načíst {failed}
     Show Tab Previews: Zobrazovat náhledy karet
     Use Fixed Tab Width: Používat v režimu vodorovných karet pevnou šířku
+    Use Custom Title Bar: Používat vlastní záhlaví okna
     Tab Width: Šířka karty
     Tab Layout:
       Tab Layout: Rozvržení karet
@@ -1968,6 +1969,7 @@ Tooltips:
     Always Show Scrollbars: Ponechá posuvníky stále viditelné. Pokud je funkce vypnutá, krátce po zastavení pohybu myši zmizí a při dalším pohybu se znovu zobrazí.
     Scroll Speed: Mění vzdálenost posunu kolečkem myši a gesty kolečka touchpadu.
     Use Fixed Tab Width: Nastaví všem kartám na vodorovném panelu stejnou šířku místo šířky podle názvu.
+    Use Custom Title Bar: Nahradí systémové záhlaví okna panelem karet, nebo horní navigací, pokud karty nejsou nahoře, a ušetří tak svislý prostor. Ovládací prvky okna se zobrazí v rohu tohoto panelu.
     Use Grid Player Menu: Uspořádá nabídku nastavení přehrávače videa do mřížky dlaždic místo seznamu řádků.
 The playlist is at the beginning. Enable loop to continue playing: Playlist je na začátku. Chcete-li pokračovat v přehrávání, zapněte opakování
 External link opening has been disabled in Settings → Privacy: Otevírání externích odkazů bylo zakázáno v Nastavení → Soukromí

@@ -491,6 +491,7 @@ Settings:
     Loaded Tab Icons With Failures: '{loaded} sekme simgesi yüklendi; {failed} simge yüklenemedi'
     Show Tab Previews: Sekme Önizlemelerini Göster
     Use Fixed Tab Width: Yatay Modda Sabit Sekme Genişliği Kullan
+    Use Custom Title Bar: Özel Başlık Çubuğu Kullan
     Tab Width: Sekme Genişliği
     Tab Layout:
       Tab Layout: Sekme Düzeni
@@ -1968,6 +1969,7 @@ Tooltips:
     Always Show Scrollbars: Kaydırma çubuklarını her zaman görünür tutar. Devre dışı bırakıldığında fareyi hareket ettirmeyi bıraktıktan kısa süre sonra kaybolur ve yeniden hareket ettirdiğinizde görünür.
     Scroll Speed: Fare tekerleği ve dokunmatik yüzey kaydırma hareketlerinin ne kadar uzağa kaydıracağını değiştirir.
     Use Fixed Tab Width: Yatay sekme çubuğundaki her sekmeye başlığına göre boyut vermek yerine aynı genişliği verir.
+    Use Custom Title Bar: Dikey alandan tasarruf etmek için sistem başlık çubuğunu sekme çubuğuyla, sekmeler üstte değilse üst gezinme çubuğuyla değiştirir. Pencere denetimleri bu çubuğun köşesinde görünür.
     Use Grid Player Menu: Video oynatıcısının ayarlar menüsünü satır listesi yerine döşeme ızgarası olarak düzenler.
 The playlist is at the beginning. Enable loop to continue playing: Oynatma listesinin başındasınız. Oynatmaya devam etmek için döngüyü etkinleştirin
 External link opening has been disabled in Settings → Privacy: Harici bağlantıları açma, Ayarlar → Gizlilik bölümünde devre dışı bırakıldı

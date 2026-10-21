@@ -207,8 +207,8 @@
         v-if="usingElectron"
         :label="$t('Settings.Theme Settings.Disable Smooth Scrolling')"
         compact
-        :default-value="disableSmoothScrollingToggleValue"
-        @change="handleRestartPrompt"
+        :default-value="restartSettingValues.disableSmoothScrolling"
+        @change="requestRestart('disableSmoothScrolling', $event)"
       />
       <FtToggleSwitch
         :label="$t('Settings.Theme Settings.Always Show Scrollbars')"
@@ -306,6 +306,15 @@
         setting-key="useFixedTabWidth"
         :disabled="!store.getters.getTabsEnabled"
         @change="updateUseFixedTabWidth"
+      />
+      <FtToggleSwitch
+        v-if="usingElectron"
+        :label="$t('Settings.Theme Settings.Use Custom Title Bar')"
+        :tooltip="$t('Tooltips.Theme Settings.Use Custom Title Bar')"
+        compact
+        :default-value="restartSettingValues.customTitleBar"
+        setting-key="customTitleBar"
+        @change="requestRestart('customTitleBar', $event)"
       />
       <FtToggleSwitch
         v-if="!IS_CAPACITOR"
@@ -426,12 +435,12 @@
       />
     </FtSliderGrid>
     <FtPrompt
-      v-if="showRestartPrompt"
+      v-if="restartPromptSetting !== null"
       autosize
       :label="$t('Settings[\'The app needs to restart for changes to take effect. Restart and apply change?\']')"
       :option-names="restartPromptNames"
       :option-values="RESTART_PROMPT_VALUES"
-      @click="handleSmoothScrolling"
+      @click="handleRestartPrompt"
     />
   </FtSettingsSection>
   <InterfaceCustomizer />
@@ -443,7 +452,7 @@ import { MATERIAL_THEME_VALUES } from '../../materialTheme.js'
 import { androidDynamicColors } from '../helpers/dynamicColors.js'
 import AppIconSettings from './AppIconSettings.vue'
 import TrayIconSettings from './TrayIconSettings.vue'
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtSettingsSection from './FtSettingsSection/FtSettingsSection.vue'
@@ -1023,33 +1032,38 @@ const restartPromptNames = computed(() => [
   t('Cancel')
 ])
 
-/** @type {import('vue').Ref<boolean>} */
-const disableSmoothScrollingToggleValue = ref(store.getters.getDisableSmoothScrolling)
-const showRestartPrompt = ref(false)
+/** Settings that only take effect after the app restarts. */
+const restartSettingValues = reactive({
+  disableSmoothScrolling: store.getters.getDisableSmoothScrolling,
+  customTitleBar: store.getters.getCustomTitleBar
+})
+/** @type {import('vue').Ref<'disableSmoothScrolling' | 'customTitleBar' | null>} */
+const restartPromptSetting = ref(null)
 
 /**
+ * @param {'disableSmoothScrolling' | 'customTitleBar'} setting
  * @param {boolean} value
  */
-function handleRestartPrompt(value) {
-  disableSmoothScrollingToggleValue.value = value
-  showRestartPrompt.value = true
+function requestRestart(setting, value) {
+  restartSettingValues[setting] = value
+  restartPromptSetting.value = setting
 }
 
 /**
  * @param {'restart' | 'cancel' | null} value
  */
-function handleSmoothScrolling(value) {
-  showRestartPrompt.value = false
+function handleRestartPrompt(value) {
+  const setting = restartPromptSetting.value
+  restartPromptSetting.value = null
 
   if (value === null || value === 'cancel') {
-    disableSmoothScrollingToggleValue.value = !disableSmoothScrollingToggleValue.value
+    restartSettingValues[setting] = !restartSettingValues[setting]
     return
   }
 
   if (process.env.IS_ELECTRON) {
-    store.dispatch('updateDisableSmoothScrolling',
-      disableSmoothScrollingToggleValue.value
-    ).then(() => {
+    const action = `update${setting[0].toUpperCase()}${setting.slice(1)}`
+    store.dispatch(action, restartSettingValues[setting]).then(() => {
       window.ftElectron.relaunch()
     })
   }

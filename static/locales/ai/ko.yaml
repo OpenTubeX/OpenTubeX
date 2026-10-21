@@ -572,6 +572,7 @@ Settings:
     Loaded Tab Icons With Failures: 탭 아이콘 {loaded}개를 불러왔으며 {failed}개는 불러오지 못했습니다
     Show Tab Previews: 탭 미리보기 표시
     Use Fixed Tab Width: 가로 모드에서 고정 탭 너비 사용
+    Use Custom Title Bar: 사용자 지정 제목 표시줄 사용
     Tab Width: 탭 너비
     Tab Layout:
       Tab Layout: 탭 레이아웃
@@ -2352,6 +2353,7 @@ Tooltips:
     Always Show Scrollbars: 스크롤바를 항상 표시합니다. 비활성화하면 마우스 움직임을 멈춘 직후 서서히 사라지고 다시 움직이면 즉시 나타납니다.
     Scroll Speed: 마우스 휠 및 터치패드 휠 동작의 스크롤 거리를 변경합니다.
     Use Fixed Tab Width: 가로 탭 표시줄의 각 탭 너비를 제목에 맞추는 대신 모두 같은 너비로 설정합니다.
+    Use Custom Title Bar: 세로 공간을 절약하기 위해 시스템 제목 표시줄을 탭 표시줄로 바꾸거나, 탭이 위쪽에 있지 않을 때는 상단 탐색 영역으로 바꿉니다. 창 제어 버튼은 해당 표시줄의 모서리에 표시됩니다.
     Use Grid Player Menu: 동영상 플레이어의 설정 메뉴를 행 목록 대신 타일 격자로 배치합니다.
   Experimental Settings:
     Replace HTTP Cache: Electron의 디스크 기반 HTTP 캐시를 비활성화하고 사용자 지정 메모리 내 이미지 캐시를 활성화합니다. RAM 사용량이 늘어납니다.

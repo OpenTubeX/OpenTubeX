@@ -491,6 +491,7 @@ Settings:
     Loaded Tab Icons With Failures: 已加载 {loaded} 个标签页图标，另有 {failed} 个无法加载
     Show Tab Previews: 显示标签页预览
     Use Fixed Tab Width: 在水平模式下使用固定标签页宽度
+    Use Custom Title Bar: 使用自定义标题栏
     Tab Width: 标签页宽度
     Tab Layout:
       Tab Layout: 标签页布局
@@ -1967,6 +1968,7 @@ Tooltips:
     Always Show Scrollbars: 始终显示滚动条。禁用后，停止移动鼠标不久，滚动条便会淡出；再次移动鼠标时会立即重新出现。
     Scroll Speed: 更改鼠标滚轮和触控板滚轮手势的滚动距离。
     Use Fixed Tab Width: 让水平标签栏中的所有标签页宽度相同，而不是根据标题调整宽度。
+    Use Custom Title Bar: 用标签栏（标签页不在顶部时则用顶部导航栏）替换系统标题栏，以节省垂直空间。窗口控制按钮会显示在该栏的角落。
     Use Grid Player Menu: 将视频播放器的设置菜单排列为磁贴网格，而不是行列表。
 The playlist is at the beginning. Enable loop to continue playing: 播放列表已到开头。启用循环可继续播放
 External link opening has been disabled in Settings → Privacy: 已在“设置”→“隐私”中禁用打开外部链接

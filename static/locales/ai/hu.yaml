@@ -492,6 +492,7 @@ Settings:
     Loaded Tab Icons With Failures: Betöltve {loaded} lapikon; {failed} nem tölthető be
     Show Tab Previews: Lapelőnézetek megjelenítése
     Use Fixed Tab Width: Rögzített lapszélesség vízszintes módban
+    Use Custom Title Bar: Egyéni címsor használata
     Tab Width: Lapszélesség
     Tab Layout:
       Tab Layout: Lapok elrendezése
@@ -1969,6 +1970,7 @@ Tooltips:
     Always Show Scrollbars: A görgetősávok állandó megjelenítése. Kikapcsolva röviddel az egér mozgatásának befejezése után elhalványulnak, és az egér újbóli megmozdításakor ismét megjelennek.
     Scroll Speed: Megváltoztatja, hogy az egérgörgő és az érintőpad kézmozdulatai milyen messzire görgessenek.
     Use Fixed Tab Width: Minden lap azonos szélességű lesz a vízszintes lapsávon, a címükhöz igazodó méretezés helyett.
+    Use Custom Title Bar: A rendszer címsorát a lapsávra cseréli, vagy a felső navigációra, ha a lapok nincsenek felül, így függőleges helyet takarít meg. Az ablakvezérlők a sáv sarkában jelennek meg.
     Use Grid Player Menu: A videólejátszó beállítási menüjének elrendezése csempékből álló rácsként, sorok listája helyett.
 The playlist is at the beginning. Enable loop to continue playing: A lejátszási lista elején jár. Kapcsolja be az ismétlést a lejátszás folytatásához
 External link opening has been disabled in Settings → Privacy: A külső hivatkozások megnyitása ki van kapcsolva a Beállítások → Adatvédelem menüben

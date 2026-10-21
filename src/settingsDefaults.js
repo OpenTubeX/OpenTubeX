@@ -237,6 +237,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     tabLoadingIndicator: 'bar',
     updateRelativeTimestamps: true,
     tabBarPosition: 'top',
+    customTitleBar: false,
     verticalTabBarWidth: 220,
     useFixedTabWidth: false,
     fixedTabWidth: DEFAULT_FIXED_TAB_WIDTH,

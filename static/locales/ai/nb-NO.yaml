@@ -491,6 +491,7 @@ Settings:
     Loaded Tab Icons With Failures: Lastet inn {loaded} faneikoner; {failed} kunne ikke lastes inn
     Show Tab Previews: Vis forhåndsvisninger av faner
     Use Fixed Tab Width: Bruk fast fanebredde i vannrett modus
+    Use Custom Title Bar: Bruk egendefinert tittellinje
     Tab Width: Fanebredde
     Tab Layout:
       Tab Layout: Faneoppsett
@@ -1972,6 +1973,7 @@ Tooltips:
     Always Show Scrollbars: Holder rullefeltene synlige hele tiden. Når dette er slått av, tones de ut kort tid etter at du slutter å bevege musen, og vises igjen så snart du beveger den.
     Scroll Speed: Endrer hvor langt musehjul- og styreflatebevegelser ruller.
     Use Fixed Tab Width: Gir alle faner i det vannrette fanefeltet samme bredde i stedet for å tilpasse bredden etter tittelen.
+    Use Custom Title Bar: Erstatter systemets tittellinje med fanelinjen, eller med den øverste navigasjonen når fanene ikke er øverst, for å spare loddrett plass. Vindusknappene vises i hjørnet av den linjen.
     Use Grid Player Menu: Ordner innstillingsmenyen til videospilleren som et rutenett med fliser i stedet for en liste med rader.
 The playlist is at the beginning. Enable loop to continue playing: Spillelisten er ved begynnelsen. Slå på gjentakelse for å fortsette avspillingen
 External link opening has been disabled in Settings → Privacy: Åpning av eksterne lenker er slått av under Innstillinger → Personvern

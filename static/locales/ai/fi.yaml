@@ -493,6 +493,7 @@ Settings:
     Loaded Tab Icons With Failures: Ladattiin {loaded} välilehtikuvaketta; {failed} kuvaketta ei voitu ladata
     Show Tab Previews: Näytä välilehtien esikatselut
     Use Fixed Tab Width: Käytä vaakasuuntaisessa tilassa kiinteälevyisiä välilehtiä
+    Use Custom Title Bar: Käytä mukautettua otsikkopalkkia
     Tab Width: Välilehden leveys
     Tab Layout:
       Tab Layout: Välilehtien asettelu
@@ -2014,6 +2015,7 @@ Tooltips:
     Always Show Scrollbars: Pitää vierityspalkit aina näkyvissä. Kun asetus on poistettu käytöstä, ne häipyvät pian hiiren liikkeen pysähdyttyä ja tulevat uudelleen näkyviin heti, kun hiirtä liikutetaan.
     Scroll Speed: Muuttaa hiiren rullan ja kosketuslevyn vierityseleiden vieritysmatkaa.
     Use Fixed Tab Width: Tekee vaakasuuntaisen välilehtipalkin kaikista välilehdistä yhtä leveitä sen sijaan, että leveys määräytyisi nimen mukaan.
+    Use Custom Title Bar: Korvaa järjestelmän otsikkopalkin välilehtipalkilla tai yläreunan navigoinnilla, kun välilehdet eivät ole ylhäällä, jotta pystysuuntaista tilaa säästyy. Ikkunan hallintapainikkeet näkyvät kyseisen palkin kulmassa.
     Use Grid Player Menu: Järjestää videosoittimen asetusvalikon ruudukoksi riviluettelon sijaan.
   Experimental Settings:
     Disable Hardware Acceleration: Poistaa GPU:n laitteistokiihdytyksen käytöstä. Saattaa korjata grafiikkaongelmia, mutta todennäköisesti heikentää suorituskykyä.

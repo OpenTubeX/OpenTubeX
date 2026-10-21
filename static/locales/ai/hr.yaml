@@ -491,6 +491,7 @@ Settings:
     Loaded Tab Icons With Failures: Uspješno učitane ikone kartica ({loaded}); neuspjela učitavanja ({failed})
     Show Tab Previews: Prikaži pretpreglede kartica
     Use Fixed Tab Width: Koristi fiksnu širinu kartica u vodoravnom načinu
+    Use Custom Title Bar: Koristi prilagođenu naslovnu traku
     Tab Width: Širina kartice
     Tab Layout:
       Tab Layout: Raspored kartica
@@ -1994,6 +1995,7 @@ Tooltips:
     Always Show Scrollbars: Drži klizne trake uvijek vidljivima. Kada je isključeno, nestaju ubrzo nakon što prestanete pomicati miš i ponovno se pojavljuju čim ga pomaknete.
     Scroll Speed: Mijenja udaljenost pomicanja gestama kotačića miša i dodirne pločice.
     Use Fixed Tab Width: Daje svim karticama na vodoravnoj traci kartica jednaku širinu umjesto da se širina prilagođava njihovim naslovima.
+    Use Custom Title Bar: Zamjenjuje naslovnu traku sustava trakom kartica ili gornjom navigacijom kada kartice nisu na vrhu kako bi se uštedio okomiti prostor. Kontrole prozora prikazuju se u kutu te trake.
     Use Grid Player Menu: Raspoređuje izbornik postavki reproduktora videozapisa kao mrežu pločica umjesto popisa redaka.
   Experimental Settings:
     Disable Hardware Acceleration: Onemogućuje hardversko ubrzanje GPU-a. Može riješiti grafičke probleme, ali će vjerojatno smanjiti performanse.

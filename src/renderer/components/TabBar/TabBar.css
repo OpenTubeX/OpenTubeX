@@ -325,3 +325,34 @@
   right: calc(var(--vertical-tab-bar-width, 220px) - 2.5px);
 }
 /* stylelint-enable liberty/use-logical-spec */
+
+/* ===== Custom title bar: the bar replaces the system title bar ===== */
+
+/* These insets follow the window controls' physical edges. */
+/* stylelint-disable liberty/use-logical-spec */
+:global(.app.customTitleBar .tabBar.position-top) {
+  padding-left: max(var(--tab-bar-inline-padding), var(--title-bar-inset-left));
+  padding-right: max(var(--tab-bar-inline-padding), var(--title-bar-inset-right));
+}
+
+/* Keep tabs clear of window controls in the column's top corner. Multiplying
+   the inset turns any overlap into the full controls height via min(). */
+:global(.app.customTitleBar .tabBar.vertical.position-left) {
+  padding-top: calc(4px + min(var(--title-bar-inset-left) * 1000, var(--title-bar-controls-height)));
+}
+
+:global(.app.customTitleBar .tabBar.vertical.position-right) {
+  padding-top: calc(4px + min(var(--title-bar-inset-right) * 1000, var(--title-bar-controls-height)));
+}
+/* stylelint-enable liberty/use-logical-spec */
+
+/* Empty space around the tabs moves the window, like a browser's tab strip. */
+:global(.app.customTitleBar .tabBar.position-top),
+:global(.app.customTitleBar .tabBar.position-top :is(.tabsViewport, .tabsContainer)),
+:global(.app.customTitleBar .tabBar.vertical) {
+  -webkit-app-region: drag;
+}
+
+:global(.app.customTitleBar .tabBar :is(.tabBarReorderItem, .os-scrollbar)) {
+  -webkit-app-region: no-drag;
+}

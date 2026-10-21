@@ -16,6 +16,7 @@ test('platform-specific settings stay local to every device', () => {
     'channelVolumes',
     'continuePlaybackWhenScreenIsLocked',
     'controlBarButtons',
+    'customTitleBar',
     'defaultVolume',
     'displayVideoPlayButton',
     'enableClosedAppSubscriptionRefresh',

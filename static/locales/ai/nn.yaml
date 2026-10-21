@@ -496,6 +496,7 @@ Settings:
     Loaded Tab Icons With Failures: Lasta inn {loaded} faneikon; {failed} kunne ikkje lastast inn
     Show Tab Previews: Vis førehandsvisingar av faner
     Use Fixed Tab Width: Bruk fast fanebreidd i vassrett modus
+    Use Custom Title Bar: Bruk eigendefinert tittellinje
     Tab Width: Fanebreidd
     Tab Layout:
       Tab Layout: Faneoppsett
@@ -2281,6 +2282,7 @@ Tooltips:
     Always Show Scrollbars: Held rullefelta synlege heile tida. Når dette er slått av, tonar dei ut kort tid etter at du sluttar å flytte musa, og kjem fram att så snart du flyttar henne.
     Scroll Speed: Endrar kor langt musehjul- og styreflaterørsler rullar.
     Use Fixed Tab Width: Gjev alle fanene i den vassrette fanelinja same breidd i staden for å tilpasse breidda til tittelen.
+    Use Custom Title Bar: Byter ut tittellinja til systemet med fanelinja, eller med den øvste navigasjonen når fanene ikkje er øvst, for å spare loddrett plass. Vindaugsknappane blir viste i hjørnet av den linja.
     Use Grid Player Menu: Ordnar innstillingsmenyen til videospelaren som eit rutenett med felt i staden for ei liste med rader.
   SponsorBlock Settings:
     UseDeArrowTitles: Byt ut videotitlar med titlar som brukarar har sendt inn til DeArrow.

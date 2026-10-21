@@ -493,6 +493,7 @@ Settings:
     Loaded Tab Icons With Failures: '{loaded} tabbladpictogrammen geladen; {failed} konden niet worden geladen'
     Show Tab Previews: Voorbeelden van tabbladen tonen
     Use Fixed Tab Width: Vaste tabbladbreedte gebruiken in horizontale modus
+    Use Custom Title Bar: Aangepaste titelbalk gebruiken
     Tab Width: Tabbladbreedte
     Tab Layout:
       Tab Layout: Tabbladindeling
@@ -2025,6 +2026,7 @@ Tooltips:
     Always Show Scrollbars: Houdt de schuifbalken altijd zichtbaar. Als dit is uitgeschakeld, verdwijnen ze kort nadat je stopt met het bewegen van de muis en verschijnen ze weer zodra je de muis beweegt.
     Scroll Speed: Wijzigt hoe ver muiswiel- en touchpadbewegingen scrollen.
     Use Fixed Tab Width: Geeft elk tabblad in de horizontale tabbladbalk dezelfde breedte in plaats van de breedte aan de titel aan te passen.
+    Use Custom Title Bar: Vervangt de titelbalk van het systeem door de tabbladbalk, of door de bovenste navigatie als de tabbladen niet bovenaan staan, om verticale ruimte te besparen. De vensterknoppen verschijnen in de hoek van die balk.
     Use Grid Player Menu: Rangschikt het instellingenmenu van de videospeler als een raster met tegels in plaats van een lijst met rijen.
   Experimental Settings:
     Disable Hardware Acceleration: Schakelt GPU-hardwareversnelling uit. Kan grafische problemen oplossen, maar zal waarschijnlijk de prestaties verminderen.
