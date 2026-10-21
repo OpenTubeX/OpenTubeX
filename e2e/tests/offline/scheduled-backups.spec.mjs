@@ -19,6 +19,8 @@ test.describe('complete scheduled archives', () => {
   })
 
   test('creates complete scheduled backups without sync and preserves the schedule after restart', async ({ app }, testInfo) => {
+    // Launches the app three times and archives a large settings section each time
+    test.slow()
     const directory = await mkdtemp(path.join(tmpdir(), 'opentubex-scheduled-backups-'))
     try {
       const { page, electronApp } = app
