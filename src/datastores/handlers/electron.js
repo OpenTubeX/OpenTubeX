@@ -14,8 +14,30 @@ function toPlain(data) {
   return data === undefined ? undefined : JSON.parse(JSON.stringify(data))
 }
 
+// Copying more videos than this across the context bridge blocks the window
+// noticeably, so they are serialized in a worker first.
+const LARGE_PLAYLIST_VIDEO_COUNT = 1000
+
+/**
+ * Sends requests in call order, even while an earlier large payload is still
+ * being serialized in a worker, so it cannot overwrite a later write.
+ * @param {(action: string, data: unknown) => Promise<unknown>} send
+ */
+function createOrderedSender(send) {
+  let previous = Promise.resolve()
+  return (action, data, { inWorker = false, beforeSend } = {}) => {
+    const payload = inWorker ? runBackgroundJob('stringify', { value: data }) : toPlain(data)
+    const sent = Promise.all([previous, payload]).then(([, value]) => {
+      beforeSend?.()
+      return { response: send(action, value) }
+    })
+    previous = sent.then(() => {}, () => {})
+    return sent.then(({ response }) => response)
+  }
+}
+
 const dbSettings = (action, data) => window.ftElectron.dbSettings(action, toPlain(data))
-const dbHistory = (action, data) => window.ftElectron.dbHistory(action, toPlain(data))
+const dbHistory = createOrderedSender((action, data) => window.ftElectron.dbHistory(action, data))
 const dbWatchStats = (action, data) => window.ftElectron.dbWatchStats(action, toPlain(data))
 const dbRecommendations = (action, data) => window.ftElectron.dbRecommendations(action, toPlain(data))
 
@@ -26,7 +48,7 @@ export const recommendations = {
   reset: () => dbRecommendations(DBActions.GENERAL.DELETE_ALL),
 }
 const dbProfiles = (action, data) => window.ftElectron.dbProfiles(action, toPlain(data))
-const dbPlaylists = (action, data) => window.ftElectron.dbPlaylists(action, toPlain(data))
+const dbPlaylists = createOrderedSender((action, data) => window.ftElectron.dbPlaylists(action, data))
 const dbSearchHistory = (action, data) => window.ftElectron.dbSearchHistory(action, toPlain(data))
 const dbSubscriptionCache = (action, data) => window.ftElectron.dbSubscriptionCache(action, toPlain(data))
 
@@ -66,14 +88,14 @@ class History {
   }
 
   static overwrite(records) {
-    return dbHistory(DBActions.GENERAL.OVERWRITE, records)
+    // Imports replace the whole history, which would block this window for
+    // seconds while crossing the context bridge.
+    return dbHistory(DBActions.GENERAL.OVERWRITE, records, { inWorker: true })
   }
 
-  static async applySyncChanges(changes, assertActive) {
+  static applySyncChanges(changes, assertActive) {
     // Large object graphs also block while crossing Electron's context bridge.
-    const serialized = await runBackgroundJob('stringify', { value: changes })
-    assertActive?.()
-    return window.ftElectron.dbHistory(DBActions.HISTORY.APPLY_SYNC_CHANGES, serialized)
+    return dbHistory(DBActions.HISTORY.APPLY_SYNC_CHANGES, changes, { inWorker: true, beforeSend: assertActive })
   }
 
   static updateWatchProgress(videoId, watchProgress) {
@@ -91,11 +113,11 @@ class History {
   }
 
   static unsetLastViewedPlaylistForVideos(videoIds, lastViewedPlaylistId) {
-    return window.ftElectron.dbHistory(DBActions.HISTORY.UNSET_PLAYLIST_FOR_VIDEOS, { videoIds, lastViewedPlaylistId })
+    return dbHistory(DBActions.HISTORY.UNSET_PLAYLIST_FOR_VIDEOS, { videoIds, lastViewedPlaylistId })
   }
 
   static unsetLastViewedPlaylists(lastViewedPlaylistIds) {
-    return window.ftElectron.dbHistory(DBActions.HISTORY.UNSET_PLAYLISTS, lastViewedPlaylistIds)
+    return dbHistory(DBActions.HISTORY.UNSET_PLAYLISTS, lastViewedPlaylistIds)
   }
 
   static delete(videoId) {
@@ -213,7 +235,9 @@ class Playlists {
   }
 
   static upsert(playlist) {
-    return dbPlaylists(DBActions.GENERAL.UPSERT, playlist)
+    return dbPlaylists(DBActions.GENERAL.UPSERT, playlist, {
+      inWorker: playlist.videos?.length > LARGE_PLAYLIST_VIDEO_COUNT
+    })
   }
 
   static upsertVideoByPlaylistId(_id, lastUpdatedAt, videoData) {

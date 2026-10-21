@@ -15,11 +15,25 @@ export function mergeBackupProfile(current, imported) {
 export function mergeBackupPlaylist(current, imported) {
   if (!current) return imported
   const videos = [...current.videos]
+  // Indexed, as comparing every imported video with every saved one takes
+  // minutes for playlists with tens of thousands of videos.
+  const playlistItemIds = new Set()
+  const timesAddedByVideoId = new Map()
+  const add = (video) => {
+    if (video.playlistItemId != null) playlistItemIds.add(video.playlistItemId)
+    const timesAdded = timesAddedByVideoId.get(video.videoId)
+    if (timesAdded) timesAdded.add(video.timeAdded)
+    else timesAddedByVideoId.set(video.videoId, new Set([video.timeAdded]))
+  }
+  videos.forEach(add)
   for (const video of imported.videos) {
-    const exists = videos.some(saved => video.playlistItemId != null
-      ? saved.playlistItemId === video.playlistItemId
-      : saved.videoId === video.videoId && saved.timeAdded === video.timeAdded)
-    if (!exists) videos.push(video)
+    const exists = video.playlistItemId != null
+      ? playlistItemIds.has(video.playlistItemId)
+      : timesAddedByVideoId.get(video.videoId)?.has(video.timeAdded) === true
+    if (!exists) {
+      videos.push(video)
+      add(video)
+    }
   }
   return { ...current, ...imported, protected: current.protected, videos }
 }

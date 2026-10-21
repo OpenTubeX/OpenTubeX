@@ -413,6 +413,25 @@ test('operations through an asynchronous driver run one at a time', async (t) =>
   assert.equal((await store.findAsync({ _id: 'x' })).length, 1)
 })
 
+test('removing every document deletes members without reading any document', async (t) => {
+  const driver = createNodeSqliteDriver(':memory:')
+  const statements = []
+  const store = new SqliteDatastore({ driver: slowDriver(driver, executed => statements.push(...executed.map(([sql]) => sql))), childField: 'videos' })
+  t.after(() => driver.close())
+  await store.insertAsync([{ _id: 'p', videos: [video('a'), video('b')] }, { _id: 'q' }])
+
+  statements.length = 0
+  assert.equal(await store.removeAsync({}, { multi: true }), 2)
+  assert.equal(statements.some(sql => sql.startsWith('SELECT id, data')), false)
+  assert.deepEqual(await store.findAsync({}), [])
+  assert.deepEqual(await driver.execute([['SELECT count(*) FROM children']]), [[[0]]])
+
+  // Without multi, NeDB removes only the first match.
+  await store.insertAsync([{ _id: 'r' }, { _id: 's' }])
+  assert.equal(await store.removeAsync({}), 1)
+  assert.equal((await store.findAsync({})).length, 1)
+})
+
 test('reassembled playlists keep their key order for snapshot comparisons', async (t) => {
   const store = memory(t, { childField: 'videos' })
   await store.insertAsync({ _id: 'p', playlistName: 'A', videos: [video('a')], protected: true })

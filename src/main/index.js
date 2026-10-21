@@ -5578,6 +5578,7 @@ function runApp() {
           return null
 
         case DBActions.GENERAL.OVERWRITE:
+          if (typeof data === 'string') data = JSON.parse(data)
           await baseHandlers.history.overwrite(data)
           syncOtherWindows(
             IpcChannels.SYNC_HISTORY,
@@ -5887,6 +5888,7 @@ function runApp() {
           return await baseHandlers.playlists.find()
 
         case DBActions.GENERAL.UPSERT:
+          if (typeof data === 'string') data = JSON.parse(data)
           await baseHandlers.playlists.upsert(data)
           syncOtherWindows(
             IpcChannels.SYNC_PLAYLISTS,
