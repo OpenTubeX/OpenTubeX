@@ -118,6 +118,8 @@ test.describe('Shorts transcript navigation', () => {
     const video = await waitForPlayback(page)
     await video.evaluate(element => element.pause())
     const channelRow = page.locator('.shortsChannelRow')
+    // The mocked Short belongs to the fixture video's channel, not the seeded one.
+    await expect(channelRow.locator('.subscribeButton')).toHaveText(/^Subscribe\b/)
     await channelRow.locator('.subscribeButton').click()
     await expect(channelRow.locator('.notificationBell')).toBeVisible()
     await channelRow.locator('.profileDropdownToggle').click()
@@ -141,6 +143,16 @@ test.describe('Shorts transcript navigation', () => {
 
     // Leaving fullscreen must not strand the dropdown inside the player.
     await page.evaluate(() => document.exitFullscreen())
+    await expect(page.locator('.profileDropdown')).toBeHidden()
+
+    // Leaving full window hides the overlay button, so its dropdown must close too.
+    const player = page.locator('.ftVideoPlayer.shortsPlayer')
+    await page.keyboard.press('s')
+    await expect(player).toHaveClass(/fullWindow/)
+    await player.locator('.shortsFullscreenChannelRow .profileDropdownToggle').click()
+    await expect(page.locator('.profileDropdown')).toBeVisible()
+    await page.keyboard.press('s')
+    await expect(player).not.toHaveClass(/fullWindow/)
     await expect(page.locator('.profileDropdown')).toBeHidden()
   })
 

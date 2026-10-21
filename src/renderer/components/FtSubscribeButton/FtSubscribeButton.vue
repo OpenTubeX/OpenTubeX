@@ -465,6 +465,13 @@ function positionProfileDropdown() {
   const trigger = buttonList.value
   if (dropdown === null || trigger === null) return
 
+  // A hidden trigger, such as the Shorts overlay after leaving full window,
+  // leaves nothing to anchor to.
+  if (trigger.getClientRects().length === 0) {
+    isProfileDropdownOpen.value = false
+    return
+  }
+
   const viewportMargin = 8
   const gap = 4
   const triggerRect = trigger.getBoundingClientRect()
