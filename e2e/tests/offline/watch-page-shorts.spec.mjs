@@ -1,4 +1,4 @@
-import { sel, setWindowSize, test, expect } from '../../helpers/app.mjs'
+import { sel, setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
 import { waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 import { WATCH_PAGE_SEED } from '../../helpers/watch-page.mjs'
@@ -109,6 +109,51 @@ test.describe('Shorts transcript navigation', () => {
     await expect(volume.locator('.shortsVolumeSlider')).toBeVisible()
     await page.keyboard.press('Escape')
     await expect(player).not.toHaveClass(/fullWindow/)
+  })
+
+  test('offers subscription notifications and settings for Shorts channels', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.locator(sel.searchInput).fill(`https://www.youtube.com/shorts/${CAPTIONED_SHORT_IDS[0]}`)
+    await page.locator(sel.searchInput).press('Enter')
+    const video = await waitForPlayback(page)
+    await video.evaluate(element => element.pause())
+    const channelRow = page.locator('.shortsChannelRow')
+    // The mocked Short belongs to the fixture video's channel, not the seeded one.
+    await expect(channelRow.locator('.subscribeButton')).toHaveText(/^Subscribe\b/)
+    await channelRow.locator('.subscribeButton').click()
+    await expect(channelRow.locator('.notificationBell')).toBeVisible()
+    await channelRow.locator('.profileDropdownToggle').click()
+    const dropdown = page.locator('.profileDropdown')
+    await expect(dropdown.getByRole('checkbox')).toHaveCount(4)
+    await dropdown.press('Escape')
+    await expect(dropdown).toBeHidden()
+
+    await setPlayerFullscreen(page, true)
+    const fullscreenRow = page.locator(':fullscreen .shortsFullscreenChannelRow')
+    await expect(fullscreenRow.locator('.notificationBell')).toBeVisible()
+    await fullscreenRow.locator('.profileDropdownToggle').click()
+    const fullscreenDropdown = page.locator(':fullscreen .profileDropdown')
+    await expect(fullscreenDropdown).toBeVisible()
+    const shortsFeedType = fullscreenDropdown.getByRole('checkbox', { name: 'Shorts', exact: true })
+    await expect(shortsFeedType).toHaveAttribute('aria-checked', 'true')
+    await shortsFeedType.click()
+    await expect(shortsFeedType).toHaveAttribute('aria-checked', 'false')
+    await expect(fullscreenDropdown).toBeVisible()
+    expect(await video.evaluate(element => element.paused)).toBe(true)
+
+    // Leaving fullscreen must not strand the dropdown inside the player.
+    await page.evaluate(() => document.exitFullscreen())
+    await expect(page.locator('.profileDropdown')).toBeHidden()
+
+    // Leaving full window hides the overlay button, so its dropdown must close too.
+    const player = page.locator('.ftVideoPlayer.shortsPlayer')
+    await page.keyboard.press('s')
+    await expect(player).toHaveClass(/fullWindow/)
+    await player.locator('.shortsFullscreenChannelRow .profileDropdownToggle').click()
+    await expect(page.locator('.profileDropdown')).toBeVisible()
+    await page.keyboard.press('s')
+    await expect(player).not.toHaveClass(/fullWindow/)
+    await expect(page.locator('.profileDropdown')).toBeHidden()
   })
 
   test('Shorts information panels contain wheel input with and without overflow', { tag: '@scale' }, async ({ app, page }) => {

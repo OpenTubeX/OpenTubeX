@@ -268,7 +268,6 @@
                       :channel-name="channelName"
                       :channel-thumbnail="channelThumbnail"
                       :subscription-count-text="channelSubscriptionCountText"
-                      :hide-profile-dropdown-toggle="true"
                     />
                   </div>
                   <h1 class="shortsFullscreenTitle">
@@ -455,7 +454,6 @@
                 :channel-name="channelName"
                 :channel-thumbnail="channelThumbnail"
                 :subscription-count-text="channelSubscriptionCountText"
-                :hide-profile-dropdown-toggle="true"
               />
             </div>
           </template>
