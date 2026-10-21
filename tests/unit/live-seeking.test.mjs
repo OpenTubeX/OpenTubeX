@@ -126,6 +126,18 @@ test('absolute seeking still works for ordinary videos and yt-dlp DVR', () => {
   }
 })
 
+test('adds only the viewer\'s own seeks to the seek history', () => {
+  const { state, setCurrentTime } = absoluteSeekFixture({ isLive: false })
+  const noted = []
+  state.noteSeekHistoryJump = time => noted.push(time)
+
+  // Restoring a position, such as after casting, is not a jump.
+  setCurrentTime(20)
+  setCurrentTime(25, true)
+  state.handlers.seekto({ seekTime: 2 })
+  assert.deepEqual(noted, [25, 2])
+})
+
 test('retains the latest absolute seek before metadata, including zero', () => {
   const { state, setCurrentTime } = absoluteSeekFixture({ isLive: false })
   state.video.value.readyState = 0

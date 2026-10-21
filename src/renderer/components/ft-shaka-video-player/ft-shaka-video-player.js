@@ -5156,7 +5156,7 @@ export default defineComponent({
 
       updateSeekHistory(step.history)
       seekHistoryJump = null
-      setCurrentTime(step.target, false)
+      setCurrentTime(step.target)
       showValueChange(formatDurationAsTimestamp(step.target), icon, !back)
     }
 
@@ -5165,7 +5165,7 @@ export default defineComponent({
       if (!canSeek()) return
       // Returning to an entry is a jump of its own, so it can be undone.
       seekHistoryJump = null
-      setCurrentTime(event.detail)
+      setCurrentTime(event.detail, true)
     }
 
     // #endregion seek history
@@ -5615,7 +5615,7 @@ export default defineComponent({
      * @param {number} startSeconds
      */
     function selectOverlayChapter(startSeconds) {
-      setCurrentTime(startSeconds)
+      setCurrentTime(startSeconds, true)
     }
 
     /**
@@ -6245,7 +6245,7 @@ export default defineComponent({
         // the first frame. Remember that intent until the interaction ends.
         resumeAutoplayAfterSeek = video.value.autoplay && !videoLayoutReady.value && !initialAutoplayCanceled
       }
-      rememberSeekPosition(Number(event.target.value))
+      rememberSeekPosition(Number(event.target.value), true)
       if (event.type === 'touchend' || event.type === 'touchcancel' || event.type === 'blur') {
         seekBarMouseDown = false
         restoreSeekAutoplay()
@@ -6255,7 +6255,7 @@ export default defineComponent({
     function handleSeekBarMouseChange(event) {
       if (!seekBarMouseDown) return
       if (event.type === 'mouseup') seekBarMouseDown = false
-      rememberSeekPosition(ui.getControls().getDisplayTime())
+      rememberSeekPosition(ui.getControls().getDisplayTime(), true)
       if (event.type === 'mouseup') restoreSeekAutoplay()
     }
 
@@ -7292,7 +7292,7 @@ export default defineComponent({
           const videoElement = video.value
           if (!videoElement || !canSeek() || !Number.isFinite(details.seekTime)) return
           accumulatedSeekSeconds = 0
-          rememberSeekPosition(details.seekTime)
+          rememberSeekPosition(details.seekTime, true)
           if (details.fastSeek === true && typeof videoElement.fastSeek === 'function') {
             videoElement.fastSeek(details.seekTime)
           } else {
@@ -7619,7 +7619,7 @@ export default defineComponent({
       if (pendingMetadataSeek !== null) {
         // Restoring an existing seek must preserve its accumulated OSD feedback.
         if (seekingIsPossible.value) {
-          rememberSeekPosition(pendingMetadataSeek, false)
+          rememberSeekPosition(pendingMetadataSeek)
           video.value.currentTime = pendingMetadataSeek
         }
         pendingMetadataSeek = null
@@ -11235,17 +11235,17 @@ export default defineComponent({
       const newTime = currentTime + seconds
 
       if (newTime < seekRange.start) {
-        rememberSeekPosition(seekRange.start)
+        rememberSeekPosition(seekRange.start, true)
         video_.currentTime = seekRange.start
       } else if (newTime > seekRange.end) {
         if (isLive.value) {
           player.goToLive()
         } else {
-          rememberSeekPosition(seekRange.end)
+          rememberSeekPosition(seekRange.end, true)
           video_.currentTime = seekRange.end
         }
       } else {
-        rememberSeekPosition(newTime)
+        rememberSeekPosition(newTime, true)
         video_.currentTime = newTime
       }
       if (showPopUp) {
@@ -11696,14 +11696,14 @@ export default defineComponent({
         case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.LAST_CHAPTER):
           if (canSeek() && props.chapters.length > 0 && props.currentChapterIndex > 0) {
             event.preventDefault()
-            setCurrentTime(props.chapters[props.currentChapterIndex - 1].startSeconds)
+            setCurrentTime(props.chapters[props.currentChapterIndex - 1].startSeconds, true)
             showOverlayControls()
           }
           break
         case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.NEXT_CHAPTER):
           if (canSeek() && props.chapters.length > 0 && props.currentChapterIndex < props.chapters.length - 1) {
             event.preventDefault()
-            setCurrentTime(props.chapters[props.currentChapterIndex + 1].startSeconds)
+            setCurrentTime(props.chapters[props.currentChapterIndex + 1].startSeconds, true)
             showOverlayControls()
           }
           break
@@ -11743,7 +11743,7 @@ export default defineComponent({
             const length = seekRange.end - seekRange.start
             const percentage = parseInt(event.key) / 10
 
-            setCurrentTime(seekRange.start + (length * percentage))
+            setCurrentTime(seekRange.start + (length * percentage), true)
             showOverlayControls()
           }
           break
@@ -11776,7 +11776,7 @@ export default defineComponent({
             event.preventDefault()
             // use seek range instead of duration so that it works for live streams too
             const seekRange = player.seekRange()
-            setCurrentTime(seekRange.start)
+            setCurrentTime(seekRange.start, true)
             showOverlayControls()
           }
           break
@@ -11787,7 +11787,7 @@ export default defineComponent({
             // use seek range instead of duration so that it works for live streams too
             const seekRange = player.seekRange()
             const wasPaused = video_.paused
-            setCurrentTime(seekRange.end)
+            setCurrentTime(seekRange.end, true)
             if (wasPaused && !isLive.value && !video_.loop &&
                 !(abRepeatEnabled.value && hasValidAbRepeatRange())) {
               // Paused seeks need not fire ended, and Shaka can back off from
@@ -13495,9 +13495,9 @@ export default defineComponent({
 
     /**
      * @param {number} time
-     * @param {boolean} [recordSeekHistory] Whether leaving the current position adds to the seek history
+     * @param {boolean} [recordSeekHistory] Whether this is the viewer's own seek, so leaving the current position adds to the seek history
      */
-    function setCurrentTime(time, recordSeekHistory = true) {
+    function setCurrentTime(time, recordSeekHistory = false) {
       if (!seekingIsPossible.value) return
       endSeekTarget = null
       accumulatedSeekSeconds = 0
@@ -13515,9 +13515,9 @@ export default defineComponent({
     /**
      * Call before a user's seek to `time` is applied.
      * @param {number} time
-     * @param {boolean} [recordSeekHistory] Whether leaving the current position adds to the seek history
+     * @param {boolean} [recordSeekHistory] Whether this is the viewer's own seek, so leaving the current position adds to the seek history
      */
-    function rememberSeekPosition(time, recordSeekHistory = true) {
+    function rememberSeekPosition(time, recordSeekHistory = false) {
       if (recordSeekHistory) noteSeekHistoryJump(time)
       // Explicit seeks supersede earlier end intent, even at its backoff position.
       endSeekTarget = null
