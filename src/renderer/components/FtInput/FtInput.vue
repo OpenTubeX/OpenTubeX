@@ -127,8 +127,9 @@
       >
         <!-- eslint-disable vuejs-accessibility/click-events-have-key-events -->
         <li
-          v-for="(entry, index) in visibleDataList"
+          v-for="(entry, index) in renderedDataList"
           :key="index"
+          v-first-visible="index === renderedDataList.length - 1 && index < visibleDataList.length - 1 ? renderMoreRows : false"
           :class="{ hover: searchState.selectedOption === index }"
           @mouseenter="searchState.selectedOption = index"
           @mouseleave="resetSelectedOption"
@@ -199,6 +200,7 @@ import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettin
 
 import store from '../../store/index'
 
+import { vFirstVisible } from '../../helpers/firstVisible'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { isKeyboardEventKeyPrintableChar, isNullOrEmpty } from '../../helpers/strings'
 import { getInputTextAscentOffset } from './inputTextMetrics'
@@ -371,6 +373,18 @@ const searchState = reactive({
 })
 const visibleDataList = ref(props.dataList)
 const visibleDataListIndexes = ref(props.dataList.map((_, index) => index))
+
+// Search history can hold thousands of entries. Render them in batches as the
+// list is scrolled to its last rendered row.
+const ROW_BATCH_SIZE = 40
+const renderedRowCount = ref(ROW_BATCH_SIZE)
+const renderedDataList = computed(() => visibleDataList.value.length > renderedRowCount.value
+  ? visibleDataList.value.slice(0, renderedRowCount.value)
+  : visibleDataList.value)
+
+function renderMoreRows() {
+  renderedRowCount.value += ROW_BATCH_SIZE
+}
 const removeButtonSelectedIndex = ref(-1)
 const removalMade = ref(false)
 const actionButtonIconName = shallowRef(props.forceActionButtonIconName ?? ['fas', 'search'])
@@ -734,6 +748,11 @@ function updateSelectedOptionIndex(index) {
     searchState.selectedOption = -1
   }
 
+  // Keyboard selection can move past the rendered rows, e.g. wrapping to the last entry.
+  if (searchState.selectedOption >= renderedRowCount.value) {
+    renderedRowCount.value = searchState.selectedOption + 1
+  }
+
   // Update displayed value
   searchState.keyboardSelectedOptionIndex = searchState.selectedOption
 }
@@ -774,7 +793,10 @@ function handleFocus() {
 }
 
 async function updateVisibleDataList(preserveSelectionAfterRemoval = false) {
-  if (optionsList.value != null) {
+  // Restoring and clamping the offset force layouts. A list at its start has
+  // no offset to reset, so typing into it skips both.
+  const wasScrolled = optionsList.value != null && optionsList.value.scrollTop !== 0
+  if (wasScrolled) {
     restoreOverlayScrollTop(optionsList.value, 0)
   }
 
@@ -799,7 +821,13 @@ async function updateVisibleDataList(preserveSelectionAfterRemoval = false) {
     searchState.keyboardSelectedOptionIndex = -1
   }
 
+  if (!preserveSelectionAfterRemoval) {
+    renderedRowCount.value = ROW_BATCH_SIZE
+  }
+
   removalMade.value = false
+
+  if (!wasScrolled) return
 
   await nextTick()
   const list = optionsList.value

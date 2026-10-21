@@ -267,7 +267,7 @@
 <script setup>
 import { syncProgressLabel } from '../../helpers/syncProgressLabel'
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowReactive, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -282,7 +282,7 @@ import { usesInvidiousApi } from '../../../apiBackends'
 import { getConfiguredKeyboardShortcuts, SEARCH_RESULTS_DISPLAY_LIMIT } from '../../../constants'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
 import { getSearchFilterTabId, getSearchHistoryEntryQuery } from '../../../search-history'
-import { isUnloadedBackgroundTabClick, localizeAndAddKeyboardShortcutToActionTitle, openInternalPath, showInvidiousFallbackToast } from '../../helpers/utils'
+import { CHANNEL_HANDLE_REGEX, isUnloadedBackgroundTabClick, localizeAndAddKeyboardShortcutToActionTitle, openInternalPath, showInvidiousFallbackToast } from '../../helpers/utils'
 import { translateWindowTitle } from '../../helpers/strings'
 import { getLocalSearchSuggestions } from '../../helpers/api/local'
 import { getInvidiousSearchSuggestions } from '../../helpers/api/invidious'
@@ -655,13 +655,12 @@ const activeDataList = computed(() => {
 
 const searchHistoryEntriesCount = computed(() => activeSearchHistoryEntries.value.length)
 
-const searchResultHrefs = shallowRef([])
-
+// The getters run only for the rows FtInput renders.
 const activeDataListProperties = computed(() => {
   const properties = []
 
   for (let i = 0; i < activeDataList.value.length; i++) {
-    const href = searchResultHrefs.value[i]
+    const queryText = activeDataList.value[i]
     const searchHistoryEntry = activeSearchHistoryEntries.value[i]
 
     properties.push(i < searchHistoryEntriesCount.value
@@ -670,11 +669,17 @@ const activeDataListProperties = computed(() => {
           isRemoveable: true,
           isSearchHistory: true,
           iconName: 'clock-rotate-left',
-          href,
-          displayText: getSearchHistoryEntryDisplayText(searchHistoryEntry),
-          ariaLabel: getSearchHistoryEntryDisplayText(searchHistoryEntry),
+          get href() { return getSearchResultHref(queryText, searchHistoryEntry.searchSettings) },
+          get displayText() { return getSearchHistoryEntryDisplayText(searchHistoryEntry) },
+          get ariaLabel() { return getSearchHistoryEntryDisplayText(searchHistoryEntry) },
         }
-      : { isLink: true, isRemoveable: false, isSearchHistory: false, iconName: 'magnifying-glass', href }
+      : {
+          isLink: true,
+          isRemoveable: false,
+          isSearchHistory: false,
+          iconName: 'magnifying-glass',
+          get href() { return getSearchResultHref(queryText) },
+        }
     )
   }
 
@@ -814,6 +819,8 @@ if (usesLogicalTabs) {
  */
 async function getSearchDestination(rawQueryText, selectedSearchSettings = null) {
   const queryText = rawQueryText.trim()
+  if (isPlainSearchText(queryText)) return getTextSearchDestination(queryText, selectedSearchSettings)
+
   if (supportsYtDlp && shouldOpenExternalMediaUrl(queryText, store.getters.getCurrentInvidiousInstanceUrl)) {
     return {
       path: '/external-media',
@@ -886,35 +893,91 @@ async function getSearchDestination(rawQueryText, selectedSearchSettings = null)
           searchQueryText: queryText
         }
       }
-      const settings = selectedSearchSettings ?? searchSettings.value
-      return {
-        path: `/search/${encodeURIComponent(queryText)}`,
-        query: {
-          prioritize: settings.prioritize,
-          time: settings.time,
-          type: settings.type,
-          duration: settings.duration,
-          features: [...settings.features],
-        },
-        searchQueryText: queryText
-      }
+      return getTextSearchDestination(queryText, selectedSearchSettings)
     }
   }
 }
 
-let searchHrefRequestId = 0
-watch([activeDataList, activeSearchHistoryEntries, searchSettings], async ([dataList, searchHistoryEntries]) => {
-  const requestId = ++searchHrefRequestId
-  const hrefs = await Promise.all(dataList.map(async (queryText, index) => {
-    const searchHistoryEntry = searchHistoryEntries[index] ?? null
-    const destination = await getSearchDestination(queryText, searchHistoryEntry?.searchSettings)
-    return router.resolve({ path: destination.path, query: destination.query }).href
-  }))
-
-  if (requestId === searchHrefRequestId) {
-    searchResultHrefs.value = hrefs
+/**
+ * @param {string} queryText
+ * @param {object | null} selectedSearchSettings
+ */
+function getTextSearchDestination(queryText, selectedSearchSettings) {
+  const settings = selectedSearchSettings ?? searchSettings.value
+  return {
+    path: `/search/${encodeURIComponent(queryText)}`,
+    query: {
+      prioritize: settings.prioritize,
+      time: settings.time,
+      type: settings.type,
+      duration: settings.duration,
+      features: [...settings.features],
+    },
+    searchQueryText: queryText
   }
-}, { deep: true, immediate: true })
+}
+
+/**
+ * URLs need a scheme separator, and handles are the only scheme-less text
+ * treated as one. Anything else is searched without the URL parsing in
+ * `getYoutubeUrlInfo`, which throws twice for plain text.
+ * @param {string} queryText trimmed text
+ */
+function isPlainSearchText(queryText) {
+  return !queryText.includes(':') && !CHANNEL_HANDLE_REGEX.test(queryText)
+}
+
+// Links are resolved only for the rows FtInput renders, as the complete search
+// history can have thousands of entries. URL entries resolve asynchronously.
+let searchResultHrefs = new Map()
+const resolvedUrlHrefs = shallowReactive(new Map())
+let pendingUrlHrefs = new Set()
+const searchHrefGeneration = ref(0)
+
+watch(searchSettings, () => {
+  searchHrefGeneration.value++
+  searchResultHrefs = new Map()
+  pendingUrlHrefs = new Set()
+  resolvedUrlHrefs.clear()
+}, { deep: true })
+
+/**
+ * @param {string} rawQueryText
+ * @param {object | null} selectedSearchSettings
+ * @returns {string | undefined}
+ */
+function getSearchResultHref(rawQueryText, selectedSearchSettings = null) {
+  // Read during render, so changed search filters re-render the links.
+  const generation = searchHrefGeneration.value
+  const key = JSON.stringify([rawQueryText, selectedSearchSettings])
+  const cachedHref = searchResultHrefs.get(key)
+  if (cachedHref !== undefined) return cachedHref
+
+  const queryText = rawQueryText.trim()
+  if (isPlainSearchText(queryText)) {
+    const destination = getTextSearchDestination(queryText, selectedSearchSettings)
+    const href = router.resolve({ path: destination.path, query: destination.query }).href
+    // Typed suggestions add entries for as long as the app runs.
+    if (searchResultHrefs.size >= 1000) searchResultHrefs.clear()
+    searchResultHrefs.set(key, href)
+    return href
+  }
+
+  const href = resolvedUrlHrefs.get(key)
+  if (href === undefined && !pendingUrlHrefs.has(key)) {
+    pendingUrlHrefs.add(key)
+    getSearchDestination(rawQueryText, selectedSearchSettings).then(destination => {
+      if (generation === searchHrefGeneration.value) {
+        resolvedUrlHrefs.set(key, router.resolve({ path: destination.path, query: destination.query }).href)
+      }
+    }).catch(error => {
+      console.error(error)
+    }).finally(() => {
+      if (generation === searchHrefGeneration.value) pendingUrlHrefs.delete(key)
+    })
+  }
+  return href
+}
 
 /**
  * @param {string} queryText
