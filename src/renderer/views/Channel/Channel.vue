@@ -29,7 +29,7 @@
       class="card channelContent"
     >
       <ChannelAbout
-        v-if="currentTab === 'about'"
+        v-if="currentTab === 'about' && !isElementListLoading"
         id="aboutPanel"
         role="tabpanel"
         aria-labelledby="aboutTab"
@@ -388,6 +388,11 @@ let channelInstance = null
 /** @type {'local' | 'invidious' | ''} */
 let apiUsed = ''
 let mayContainContentFromOtherChannels = false
+// Every tab is its own request, so a tab's content is fetched the first time it is shown.
+const loadedTabs = new Set()
+/** @type {Map<string, Promise<void>>} Tab loads that have not finished yet */
+const pendingTabs = new Map()
+let channelLoaded = false
 
 const isLoading = ref(true)
 const elementListLoadingTabs = ref({})
@@ -666,6 +671,9 @@ watch(route, () => {
   apiUsed = ''
   channelInstance = null
   mayContainContentFromOtherChannels = false
+  loadedTabs.clear()
+  pendingTabs.clear()
+  channelLoaded = false
   isArtistTopicChannel.value = false
   videoContinuationData.value = null
   shortContinuationData.value = null
@@ -811,7 +819,15 @@ function updateChannelDetails({ channelId, channelName, channelThumbnailUrl }) {
 }
 
 async function getChannelLocal() {
+  // Tab requests from an earlier load, such as one falling back to another
+  // backend, must not land in this one.
+  channelRouteGeneration += 1
+  // Those requests stop without clearing their loading state.
+  elementListLoadingTabs.value = {}
   apiUsed = 'local'
+  loadedTabs.clear()
+  pendingTabs.clear()
+  channelLoaded = false
   isLoading.value = true
   const expectedId = id.value
   const expectedRouteGeneration = channelRouteGeneration
@@ -898,9 +914,8 @@ async function getChannelLocal() {
 
     updateChannelDetails({ channelThumbnailUrl, channelName: channelName_, channelId })
 
-    if (channelInstance.has_about) {
-      getChannelAboutLocal()
-    } else {
+    if (!channelInstance.has_about) {
+      loadedTabs.add('about')
       description.value = ''
       viewCount.value = null
       videoCount.value = null
@@ -917,48 +932,39 @@ async function getChannelLocal() {
       }
       // we still parse the home page so we can set related channels
       getChannelHomeLocal()
+      loadedTabs.add('home')
     }
 
     if (channelInstance.has_videos || isArtistTopicChannel.value) {
       tabs.push('videos')
-      getChannelVideosLocal()
     }
 
     if (!hideChannelShorts.value && channelInstance.has_shorts) {
       tabs.push('shorts')
-      getChannelShortsLocal()
     }
 
     if (channelInstance.has_live_streams) {
       tabs.push('live')
-      getChannelLiveLocal()
     }
 
     if (!hideChannelPodcasts.value && channelInstance.has_podcasts) {
       tabs.push('podcasts')
-      getChannelPodcastsLocal()
     }
 
     if (!hideChannelReleases.value && (channelInstance.has_releases || isArtistTopicChannel.value)) {
       tabs.push('releases')
-      getChannelReleasesLocal()
     }
 
     if (!hideChannelCourses.value && channelInstance.has_courses) {
       tabs.push('courses')
-      getChannelCoursesLocal()
     }
 
-    if (!hideChannelPlaylists.value) {
-      if (channelInstance.has_playlists) {
-        tabs.push('playlists')
-        getChannelPlaylistsLocal()
-      }
+    if (!hideChannelPlaylists.value && channelInstance.has_playlists) {
+      tabs.push('playlists')
     }
 
     if (!hideChannelCommunity.value && channelInstance.has_community) {
       tabs.push('community')
-      getCommunityPostsLocal()
     }
 
     channelTabs.value = SUPPORTED_CHANNEL_TABS.filter(tab => {
@@ -967,6 +973,9 @@ async function getChannelLocal() {
 
     currentTab.value = currentOrFirstTab(route.params.currentTab)
     showSearchBar.value = channelInstance.has_search
+
+    channelLoaded = true
+    fetchTab(currentTab.value)
 
     isLoading.value = false
   } catch (err) {
@@ -991,6 +1000,7 @@ async function getChannelAboutLocal() {
   const expectedId = id.value
   const expectedRouteGeneration = channelRouteGeneration
   const isCurrentRoute = () => expectedId === id.value && expectedRouteGeneration === channelRouteGeneration
+  setElementListLoading('about', true)
 
   try {
     await ensureChannelInstance()
@@ -999,6 +1009,7 @@ async function getChannelAboutLocal() {
     const about = await channelInstance.getAbout()
     if (!isCurrentRoute()) return
 
+    setElementListLoading('about', false)
     links.value = getChannelAboutLinks(about)
 
     if (about.is(YTNodes.ChannelAboutFullMetadata)) {
@@ -1028,6 +1039,7 @@ async function getChannelAboutLocal() {
   } catch (err) {
     if (!isCurrentRoute()) return
 
+    setElementListLoading('about', false)
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
@@ -1115,15 +1127,25 @@ function getChannelHomeLocal() {
 }
 
 async function getChannelInfoInvidious() {
+  // Tab requests from an earlier load, such as the local one falling back to
+  // this backend, must not land in this one.
+  channelRouteGeneration += 1
+  // Those requests stop without clearing their loading state.
+  elementListLoadingTabs.value = {}
   isLoading.value = true
   apiUsed = 'invidious'
+  loadedTabs.clear()
+  pendingTabs.clear()
+  channelLoaded = false
   channelInstance = null
 
   const expectedId = id.value
+  const expectedRouteGeneration = channelRouteGeneration
+  const isCurrentLoad = () => expectedId === id.value && expectedRouteGeneration === channelRouteGeneration
   try {
     const response = await invidiousGetChannelInfo(id.value)
 
-    if (expectedId !== id.value) {
+    if (!isCurrentLoad()) {
       return
     }
 
@@ -1167,41 +1189,13 @@ async function getChannelInfoInvidious() {
     })
 
     currentTab.value = currentOrFirstTab(route.params.currentTab)
-
-    if (response.tabs.includes('videos')) {
-      channelInvidiousVideos()
-    }
-
-    if (!hideChannelShorts.value && response.tabs.includes('shorts')) {
-      channelInvidiousShorts()
-    }
-
-    if (response.tabs.includes('live')) {
-      channelInvidiousLive()
-    }
-
-    if (!hideChannelPodcasts.value && response.tabs.includes('podcasts')) {
-      channelInvidiousPodcasts()
-    }
-
-    if (!hideChannelReleases.value && response.tabs.includes('releases')) {
-      channelInvidiousReleases()
-    }
-
-    if (!hideChannelCourses.value && response.tabs.includes('courses')) {
-      channelInvidiousCourses()
-    }
-
-    if (!hideChannelPlaylists.value && response.tabs.includes('playlists')) {
-      getPlaylistsInvidious()
-    }
-
-    if (!hideChannelCommunity.value && response.tabs.includes('community')) {
-      getCommunityPostsInvidious()
-    }
+    channelLoaded = true
+    fetchTab(currentTab.value)
 
     isLoading.value = false
   } catch (err) {
+    // A newer load owns the page now; its own errors and fallbacks apply.
+    if (!isCurrentLoad()) return
     setErrorMessage(err)
     console.error(err)
 
@@ -1231,18 +1225,11 @@ const filteredVideos = computed(() => {
 })
 
 const filteredShorts = computed(() => {
-  let shorts
   if (hideWatchedSubs.value) {
-    shorts = filterWatchedArray(latestShorts.value)
+    return filterWatchedArray(latestShorts.value)
   } else {
-    shorts = latestShorts.value
+    return latestShorts.value
   }
-
-  return shorts.map(video => ({
-    ...video,
-    shortSource: 'channel',
-    shortChannelId: id.value,
-  }))
 })
 
 const filteredLive = computed(() => {
@@ -1435,6 +1422,20 @@ watch(filteredShorts, shorts => {
   setChannelShortsNavigationContext(id.value, shorts)
 }, { immediate: true })
 
+/**
+ * Stamps the shorts player context once per fetch, so filtering the list later does not copy every short.
+ * @template {object[]} T
+ * @param {T} shorts
+ * @returns {T}
+ */
+function withChannelShortsContext(shorts) {
+  for (const short of shorts) {
+    short.shortSource = 'channel'
+    short.shortChannelId = id.value
+  }
+  return shorts
+}
+
 watch(shortSortBy, () => {
   if (!autoRefreshOnSortByChangeEnabled) { return }
 
@@ -1479,7 +1480,7 @@ async function getChannelShortsLocal() {
       parsedShorts = parseLocalChannelShorts(shortsTab.videos, id.value, channelName.value)
     }
 
-    latestShorts.value = parsedShorts
+    latestShorts.value = withChannelShortsContext(parsedShorts)
     shortContinuationData.value = shortsTab.has_continuation ? shortsTab : null
     setElementListLoading('shorts', false)
 
@@ -1524,7 +1525,7 @@ async function getChannelShortsLocalMore() {
       parsedShorts = parseLocalChannelShorts(continuation.videos, id.value, channelName.value)
     }
 
-    latestShorts.value = latestShorts.value.concat(parsedShorts)
+    latestShorts.value = latestShorts.value.concat(withChannelShortsContext(parsedShorts))
     shortContinuationData.value = continuation.has_continuation ? continuation : null
   } catch (err) {
     if (!isCurrentRequest()) return
@@ -1553,6 +1554,7 @@ async function channelInvidiousShorts(sortByChanged = false) {
   try {
     const response = await getInvidiousChannelShorts(id.value, shortSortBy.value, shortContinuationData.value)
     if (!isCurrentRequest()) return
+    withChannelShortsContext(response.videos)
     if (more) {
       latestShorts.value = latestShorts.value.concat(response.videos)
     } else {
@@ -2299,7 +2301,8 @@ async function getCommunityPostsInvidious() {
 
     if (process.env.SUPPORTS_LOCAL_API && usesInvidiousApi(backendPreference.value) && backendFallback.value) {
       showInvidiousFallbackToast(backendPreference.value)
-      getCommunityPostsLocal()
+      // Returned, so the community tab stays pending until the fallback finishes.
+      return getCommunityPostsLocal()
     }
   }
 }
@@ -2770,10 +2773,63 @@ function handlePanelTabNavigation(event) {
   handleTabChange(visibleTabs[nextIndex], false)
 }
 
+const localTabLoaders = {
+  about: getChannelAboutLocal,
+  videos: getChannelVideosLocal,
+  shorts: getChannelShortsLocal,
+  live: getChannelLiveLocal,
+  podcasts: getChannelPodcastsLocal,
+  releases: getChannelReleasesLocal,
+  courses: getChannelCoursesLocal,
+  playlists: getChannelPlaylistsLocal,
+  community: getCommunityPostsLocal,
+}
+
+const invidiousTabLoaders = {
+  videos: channelInvidiousVideos,
+  shorts: channelInvidiousShorts,
+  live: channelInvidiousLive,
+  podcasts: channelInvidiousPodcasts,
+  releases: channelInvidiousReleases,
+  courses: channelInvidiousCourses,
+  playlists: getPlaylistsInvidious,
+  community: getCommunityPostsInvidious,
+}
+
+/**
+ * Fetches a tab's content the first time it is shown. While the channel itself
+ * is still loading, the load fetches whichever tab is current once it finishes.
+ * @param {string} tab
+ */
+function fetchTab(tab) {
+  if (!channelLoaded || loadedTabs.has(tab)) return
+
+  const loaders = process.env.SUPPORTS_LOCAL_API && apiUsed === 'local' ? localTabLoaders : invidiousTabLoaders
+  if (!Object.hasOwn(loaders, tab)) return
+
+  loadedTabs.add(tab)
+  const load = Promise.resolve(loaders[tab]()).finally(() => {
+    if (pendingTabs.get(tab) === load) pendingTabs.delete(tab)
+  })
+  pendingTabs.set(tab, load)
+}
+
+/**
+ * A loaded tab has content to cache. A pending one caches its own content when
+ * it finishes, so subscribing meanwhile must not cache its list.
+ * @param {string} tab
+ */
+function hasFetchedTab(tab) {
+  // Sort changes reload a tab without going through fetchTab, so also skip
+  // tabs whose list is still loading.
+  return loadedTabs.has(tab) && !pendingTabs.has(tab) && !elementListLoadingTabs.value[tab]
+}
+
 function changeTab(tab, moveFocus = true) {
   // `newTabNode` can be `null` when `tab` === "search"
   const newTabNode = document.getElementById(`${tab}Tab`)
   currentTab.value = tab
+  fetchTab(tab)
 
   if (moveFocus && newTabNode != null) {
     newTabNode.focus()
@@ -2783,24 +2839,29 @@ function changeTab(tab, moveFocus = true) {
 function handleSubscription() {
   // We can't cache the shorts data as YouTube doesn't return published dates on the shorts channel tab
 
-  if (videoSortBy.value === 'newest') {
+  // Tabs that were never shown, or are still loading, have nothing fetched to
+  // cache. As in the tab loaders, an empty list (such as after a failed load)
+  // never replaces the cached feed.
+  if (videoSortBy.value === 'newest' && hasFetchedTab('videos') && latestVideos.value.length > 0) {
     store.dispatch('updateSubscriptionVideosCacheByChannel', {
       channelId: id.value,
       videos: latestVideos.value
     })
   }
 
-  if (liveSortBy.value === 'newest') {
+  if (liveSortBy.value === 'newest' && hasFetchedTab('live') && latestLive.value.length > 0) {
     store.dispatch('updateSubscriptionLiveCacheByChannel', {
       channelId: id.value,
       videos: latestLive.value
     })
   }
 
-  store.dispatch('updateSubscriptionPostsCacheByChannel', {
-    channelId: id.value,
-    posts: latestCommunityPosts.value
-  })
+  if (hasFetchedTab('community') && latestCommunityPosts.value.length > 0) {
+    store.dispatch('updateSubscriptionPostsCacheByChannel', {
+      channelId: id.value,
+      posts: latestCommunityPosts.value
+    })
+  }
 }
 
 function filterWatchedArray(videos) {
