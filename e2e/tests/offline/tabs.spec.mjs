@@ -1293,7 +1293,7 @@ test.describe('tab bar', () => {
         return Math.abs((toEnd ? maximum : 0) - offset) * devicePixelRatio
       }, { vertical, toEnd })
       const originalIds = await tabOrder()
-      expect(await distanceFromEnd(true)).toBeGreaterThan(200)
+      await expect.poll(() => distanceFromEnd(true)).toBeGreaterThan(200)
 
       // Hold the dragged tab just inside one end until the list stops scrolling.
       const dragToEdge = async (tab, toEnd) => {
@@ -1319,7 +1319,7 @@ test.describe('tab bar', () => {
       await expect.poll(tabOrder).toEqual([...originalIds.slice(1), originalIds[0]])
       await expect(page.locator('.tab.dragging, .tab.settling')).toHaveCount(0)
 
-      await dragToEdge(tabs.last(), false)
+      await dragToEdge(page.locator(`.tab[data-tab-id="${originalIds[0]}"]`), false)
       await expect.poll(tabOrder).toEqual(originalIds)
     })
   }
