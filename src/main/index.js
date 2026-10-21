@@ -2204,18 +2204,16 @@ function runApp() {
   app.on('ready', async (_, __) => {
     scheduledBackupTimer = setInterval(checkScheduledBackup, 60_000)
     checkScheduledBackup()
-    try {
-      await applyYtDlpPlaybackCacheSettings()
-    } catch (error) {
+    // None of these gate the first window: the playback cache and download
+    // list handlers wait for their own setup, and the tray and dock menus are
+    // rebuilt once the translations are loaded.
+    applyYtDlpPlaybackCacheSettings().catch(error => {
       console.warn('Could not apply the yt-dlp playback cache settings', error)
-    }
-    try {
-      await restoreYtDlpDownloadQueue()
-    } catch (error) {
+    })
+    restoreYtDlpDownloadQueue().catch(error => {
       console.warn('Could not restore the download queue', error)
-    }
-    {
-      const t = await createMainTranslator()
+    })
+    createMainTranslator().then(t => {
       trayTranslate = t
       dockMediaLabels = {
         previous: t('Video.Previous'),
@@ -2225,7 +2223,9 @@ function runApp() {
         newWindow: t('New Window')
       }
       updateDockMenu()
-    }
+    }).catch(error => {
+      console.warn('Could not load the tray translations', error)
+    })
 
     if (process.env.NODE_ENV === 'production') {
       protocol.handle('app', async (request) => {

@@ -171,6 +171,7 @@ export async function handleYtDlpPlaybackCacheGet(event, videoId, cacheKey) {
     !VIDEO_ID_REGEX.test(videoId) ||
     !isValidCacheKey(cacheKey)
   ) return null
+  await settingsApplied.catch(() => {})
   if (!cacheEnabled) return null
 
   await loadEntries()
@@ -196,6 +197,7 @@ export async function handleYtDlpPlaybackCacheSet(event, videoId, cacheKey, expi
     !VIDEO_ID_REGEX.test(videoId) ||
     !isValidCacheKey(cacheKey)
   ) return false
+  await settingsApplied.catch(() => {})
   if (!cacheEnabled) return false
 
   const entry = {
@@ -266,7 +268,16 @@ export async function clearYtDlpPlaybackCache() {
   await writeQueue
 }
 
-export async function applyYtDlpPlaybackCacheSettings() {
+// Startup applies the settings without waiting, so the handlers wait for them
+// instead of serving entries the user disabled.
+let settingsApplied = Promise.resolve()
+
+export function applyYtDlpPlaybackCacheSettings() {
+  settingsApplied = applySettings()
+  return settingsApplied
+}
+
+async function applySettings() {
   const maxEntrySizeSetting = await settings._findOne('ytDlpPlaybackCacheMaxEntrySize')
   const maxEntrySize = normalizeYtDlpPlaybackCacheMaxEntrySize(maxEntrySizeSetting?.value)
 
