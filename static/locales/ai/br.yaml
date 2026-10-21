@@ -257,6 +257,9 @@ History:
   Custom: "Personelaet"
   History Older Than Days Removed: "Dilamet eo bet an istor sellout koshoc'h eget 1 devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} zevezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh."
 Settings:
+  Experimental Settings:
+    Preferred Video Codec: Kodek video gwellañ karet
+    Codec Description: Ar mod emgefreek a ro lañs d'an digodañ dre beriant. Ar c'hemmoù a vo arloet d'ar video da-heul. Dibab ur c'hodek a c'hall bevenniñ an diarunusted; kodekoù all a vez implijet ma n'int ket hegerz. VP9 a vez hepkoret evit VR abalamour d'ur fazi lenn er merdeer.
   Tab Unloading:
     Automatically unload tabs: "Diskargañ an ivinelloù ent emgefre"
     Memory threshold: "Treuzoù ar vemor"

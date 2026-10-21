@@ -1251,6 +1251,8 @@ Settings:
   Search Settings: Procurar nas definições
   No Settings Found: Nenhuma definição encontrada
   Experimental Settings:
+    Preferred Video Codec: Codec de vídeo preferido
+    Codec Description: O modo automático prefere a descodificação por hardware. As alterações aplicam-se ao próximo vídeo. A preferência de codec pode limitar as resoluções; os codecs indisponíveis são substituídos. O VP9 é evitado em VR devido a um erro de reprodução do navegador.
     Disable Hardware Acceleration: Desativar aceleração por hardware
   Interface Customizer:
     Customize Interface: "Personalizar interface"

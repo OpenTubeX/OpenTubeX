@@ -95,6 +95,9 @@ User Playlists:
   Playlist Thumbnail: "Miniatura playlisty"
   Restore Default Thumbnail: "Przywróć domyślną miniaturę"
 Settings:
+  Experimental Settings:
+    Preferred Video Codec: Preferowany kodek wideo
+    Codec Description: Tryb automatyczny preferuje dekodowanie sprzętowe. Zmiany dotyczą następnego filmu. Wybór kodeka może ograniczyć rozdzielczości; niedostępne kodeki są zastępowane. VP9 jest pomijany w VR z powodu błędu odtwarzania w przeglądarce.
   Tab Unloading:
     Automatically unload tabs: "Automatycznie zwalniaj karty z pamięci"
     Memory threshold: "Próg pamięci"

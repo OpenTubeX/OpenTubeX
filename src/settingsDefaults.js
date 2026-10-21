@@ -79,6 +79,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     defaultInterval: 5,
     defaultPlayback: 1,
     defaultProfile: MAIN_PROFILE_ID,
+    preferredVideoCodec: 'auto',
     defaultQuality: '720',
     defaultSkipInterval: 5,
     seekIntervalMultiplyByPlaybackRate: false,

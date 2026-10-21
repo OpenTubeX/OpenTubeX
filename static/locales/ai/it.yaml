@@ -256,6 +256,9 @@ History:
   Custom: Personalizzato
   History Older Than Days Removed: La cronologia di visione più vecchia di 1 giorno è stata rimossa | La cronologia di visione più vecchia di {days} giorni è stata rimossa | La cronologia di visione più vecchia di {days} giorni è stata rimossa
 Settings:
+  Experimental Settings:
+    Preferred Video Codec: Codec video preferito
+    Codec Description: La modalità automatica preferisce la decodifica hardware. Le modifiche si applicano al prossimo video. La preferenza del codec può limitare le risoluzioni; i codec non disponibili vengono sostituiti. VP9 viene evitato per la VR a causa di un errore di riproduzione del browser.
   Tab Unloading:
     Automatically unload tabs: "Scarica automaticamente le schede"
     Memory threshold: "Soglia di memoria"

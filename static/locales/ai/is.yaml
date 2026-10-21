@@ -259,6 +259,9 @@ History:
   Custom: Sérsniðið
   History Older Than Days Removed: Áhorfsferli eldri en 1 dags hefur verið eytt | Áhorfsferli eldri en {days} daga hefur verið eytt
 Settings:
+  Experimental Settings:
+    Preferred Video Codec: Valinn myndmerkjakóði
+    Codec Description: Sjálfvirkt val kýs vélbúnaðarafkóðun. Breytingar gilda frá næsta myndskeiði. Val á merkjakóða getur takmarkað upplausnir; ótiltækir merkjakóðar eru leystir af hólmi. VP9 er ekki notað fyrir VR vegna spilunarvillu í vafranum.
   Tab Unloading:
     Automatically unload tabs: "Losa flipa sjálfkrafa úr minni"
     Memory threshold: "Minnisþröskuldur"

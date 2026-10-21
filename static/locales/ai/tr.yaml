@@ -256,6 +256,9 @@ History:
   Custom: Özel
   History Older Than Days Removed: 1 günden eski izleme geçmişi kaldırıldı | {days} günden eski izleme geçmişi kaldırıldı
 Settings:
+  Experimental Settings:
+    Preferred Video Codec: Tercih edilen video codec'i
+    Codec Description: Otomatik mod donanım çözmeyi tercih eder. Değişiklikler sonraki videoya uygulanır. Codec tercihi çözünürlükleri sınırlayabilir; kullanılamayan codec'ler değiştirilir. Tarayıcı oynatma hatası nedeniyle VR için VP9 kullanılmaz.
   Tab Unloading:
     Automatically unload tabs: "Sekmeleri otomatik olarak bellekten kaldır"
     Memory threshold: "Bellek eşiği"

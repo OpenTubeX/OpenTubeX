@@ -256,6 +256,9 @@ History:
   Custom: 自定义
   History Older Than Days Removed: 已删除 {days} 天前的观看历史记录
 Settings:
+  Experimental Settings:
+    Preferred Video Codec: 首选视频编解码器
+    Codec Description: 自动模式优先使用硬件解码。更改对下一个视频生效。指定编解码器可能限制可用分辨率；不可用时会使用其他编解码器。由于浏览器播放错误，VR 视频避免使用 VP9。
   Tab Unloading:
     Automatically unload tabs: "自动卸载标签页"
     Memory threshold: "内存阈值"

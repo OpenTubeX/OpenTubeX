@@ -1258,6 +1258,8 @@ Settings:
   Search Settings: חיפוש בהגדרות
   No Settings Found: לא נמצאו הגדרות
   Experimental Settings:
+    Preferred Video Codec: מקודד וידאו מועדף
+    Codec Description: המצב האוטומטי מעדיף פענוח בחומרה. השינויים חלים על הסרטון הבא. העדפת מקודד עשויה להגביל רזולוציות; מקודדים שאינם זמינים מוחלפים. VP9 אינו משמש ל-VR בגלל שגיאת הפעלה בדפדפן.
     Disable Hardware Acceleration: השבתת האצת חומרה
   Interface Customizer:
     Customize Interface: "התאמת הממשק"

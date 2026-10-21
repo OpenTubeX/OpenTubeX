@@ -257,6 +257,9 @@ History:
   Custom: Vlastné
   History Older Than Days Removed: História sledovania staršia ako 1 deň bola odstránená | História sledovania staršia ako {days} dni bola odstránená | História sledovania staršia ako {days} dní bola odstránená
 Settings:
+  Experimental Settings:
+    Preferred Video Codec: Preferovaný videokodek
+    Codec Description: Automatický režim uprednostňuje hardvérové dekódovanie. Zmeny platia pre ďalšie video. Preferencia kodeku môže obmedziť rozlíšenia; nedostupné kodeky sa nahradia. VP9 sa pre VR nepoužíva pre chybu prehrávania v prehliadači.
   Tab Unloading:
     Automatically unload tabs: "Automaticky uvoľňovať karty z pamäte"
     Memory threshold: "Prah pamäte"

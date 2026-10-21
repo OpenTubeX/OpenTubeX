@@ -1236,6 +1236,8 @@ Settings:
   Search Settings: Postavke pretraživanja
   No Settings Found: Nisu pronađene postavke
   Experimental Settings:
+    Preferred Video Codec: Preferirani videokodek
+    Codec Description: Automatski način preferira hardversko dekodiranje. Promjene vrijede za sljedeći video. Odabir kodeka može ograničiti rezolucije; nedostupni kodeci zamjenjuju se. VP9 se izbjegava za VR zbog pogreške reprodukcije u pregledniku.
     Disable Hardware Acceleration: Onemogući hardversko ubrzanje
   Interface Customizer:
     Customize Interface: "Prilagodi sučelje"

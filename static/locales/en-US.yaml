@@ -1940,6 +1940,8 @@ Settings:
     Hide Search Bar: Hide Search Bar
     Disable Channel Links: Disable Channel Links
   Experimental Settings:
+    Preferred Video Codec: Preferred video codec
+    Codec Description: Auto prefers hardware decoding. Changes apply to the next video. A codec preference may limit resolutions; unavailable codecs fall back. VP9 is avoided for VR because of a browser playback error.
     Experimental Settings: Experimental
     Warning: These settings are experimental, they may cause crashes while enabled. Making backups is highly recommended. Use at your own risk!
     Replace HTTP Cache: Replace HTTP Cache

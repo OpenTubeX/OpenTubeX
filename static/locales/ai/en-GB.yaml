@@ -1212,6 +1212,8 @@ Settings:
   Search Settings: Search settings
   No Settings Found: No settings found
   Experimental Settings:
+    Preferred Video Codec: Preferred video codec
+    Codec Description: Auto prefers hardware decoding. Changes apply to the next video. A codec preference may limit resolutions; unavailable codecs fall back. VP9 is avoided for VR because of a browser playback error.
     Disable Hardware Acceleration: Disable Hardware Acceleration
   Interface Customizer:
     Customize Interface: "Customise interface"

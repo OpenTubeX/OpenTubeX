@@ -257,6 +257,9 @@ History:
   Custom: Kohandatud
   History Older Than Days Removed: Ühest päevast vanem vaatamisajalugu on eemaldatud | {days} päevast vanem vaatamisajalugu on eemaldatud
 Settings:
+  Experimental Settings:
+    Preferred Video Codec: Eelistatud videokoodek
+    Codec Description: Automaatrežiim eelistab riistvaralist dekodeerimist. Muudatused rakenduvad järgmisele videole. Koodeki eelistus võib eraldusvõimeid piirata; puuduvad koodekid asendatakse. VP9 välditakse VR-i puhul brauseri taasesitusvea tõttu.
   Tab Unloading:
     Automatically unload tabs: "Vabasta vahelehed automaatselt mälust"
     Memory threshold: "Mälulävi"

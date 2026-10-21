@@ -1258,6 +1258,8 @@ Settings:
   Search Settings: Hae asetuksista
   No Settings Found: Asetuksia ei löytynyt
   Experimental Settings:
+    Preferred Video Codec: Ensisijainen videokoodekki
+    Codec Description: Automaattinen valinta suosii laitteistopurkua. Muutokset koskevat seuraavaa videota. Koodekkivalinta voi rajoittaa tarkkuuksia; puuttuvat koodekit korvataan. VP9:ää vältetään VR-videoissa selaimen toistovirheen vuoksi.
     Disable Hardware Acceleration: Poista laitteistokiihdytys käytöstä
   Interface Customizer:
     Customize Interface: "Mukauta käyttöliittymää"

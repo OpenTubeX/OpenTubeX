@@ -1228,6 +1228,8 @@ Settings:
   Search Settings: Поиск настроек
   No Settings Found: Настройки не найдены
   Experimental Settings:
+    Preferred Video Codec: Предпочтительный видеокодек
+    Codec Description: Автоматический режим предпочитает аппаратное декодирование. Изменения действуют со следующего видео. Выбор кодека может ограничить разрешения; недоступные кодеки заменяются. VP9 не используется для VR из-за ошибки воспроизведения в браузере.
     Disable Hardware Acceleration: Отключить аппаратное ускорение
   Interface Customizer:
     Customize Interface: "Настроить интерфейс"

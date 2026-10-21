@@ -256,6 +256,9 @@ History:
   Custom: 自訂
   History Older Than Days Removed: 已移除超過 {days} 天的觀看記錄
 Settings:
+  Experimental Settings:
+    Preferred Video Codec: 偏好的影片編解碼器
+    Codec Description: 自動模式優先使用硬體解碼。變更從下一部影片生效。指定編解碼器可能限制可用解析度；無法使用時會改用其他編解碼器。由於瀏覽器播放錯誤，VR 影片避免使用 VP9。
   Tab Unloading:
     Automatically unload tabs: "自動卸載分頁"
     Memory threshold: "記憶體閾值"

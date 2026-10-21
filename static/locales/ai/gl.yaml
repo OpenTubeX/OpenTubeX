@@ -1253,6 +1253,8 @@ Settings:
   Search Settings: Buscar na configuración
   No Settings Found: Non se atopou ningún axuste
   Experimental Settings:
+    Preferred Video Codec: Códec de vídeo preferido
+    Codec Description: O modo automático prefire a descodificación por hardware. Os cambios aplícanse ao seguinte vídeo. A preferencia de códec pode limitar as resolucións; os códecs non dispoñibles substitúense. Evítase VP9 para VR por un erro de reprodución do navegador.
     Disable Hardware Acceleration: Desactivar a aceleración por hardware
   Interface Customizer:
     Customize Interface: "Personalizar a interface"

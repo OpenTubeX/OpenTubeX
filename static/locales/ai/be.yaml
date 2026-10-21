@@ -1285,6 +1285,8 @@ Settings:
   Search Settings: Налады пошуку
   No Settings Found: Налады не знойдзены
   Experimental Settings:
+    Preferred Video Codec: Пераважны відэакодэк
+    Codec Description: Аўтаматычны рэжым аддае перавагу апаратнаму дэкадаванню. Змены дзейнічаюць з наступнага відэа. Выбар кодэка можа абмежаваць разрозненні; недаступныя кодэкі замяняюцца. VP9 не выкарыстоўваецца для VR праз памылку прайгравання ў браўзеры.
     Disable Hardware Acceleration: Адключыць апаратнае паскарэнне
   Interface Customizer:
     Customize Interface: "Наладзіць інтэрфейс"

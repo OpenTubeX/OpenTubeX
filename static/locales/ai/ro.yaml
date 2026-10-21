@@ -1247,6 +1247,8 @@ Settings:
   Search Settings: Caută în setări
   No Settings Found: Nu s-au găsit setări
   Experimental Settings:
+    Preferred Video Codec: Codec video preferat
+    Codec Description: Modul automat preferă decodarea hardware. Modificările se aplică următorului videoclip. Preferința de codec poate limita rezoluțiile; codecurile indisponibile sunt înlocuite. VP9 este evitat pentru VR din cauza unei erori de redare a browserului.
     Disable Hardware Acceleration: Dezactivează accelerarea hardware
   Interface Customizer:
     Customize Interface: "Personalizează interfața"

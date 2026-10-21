@@ -11,6 +11,7 @@ import FtMobileSheet from '../FtMobileSheet/FtMobileSheet.vue'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import SponsorBlockSegmentEditor from '../WatchVideoSponsorBlock/SponsorBlockSegmentEditor.vue'
 import shaka from 'shaka-player'
+import { getVideoCodecPreferences } from '../../helpers/player/videoCodecPreference'
 import { registerPlugin } from '@capacitor/core'
 import { bindAndroidMediaErrors } from '../../helpers/player/androidMediaErrors'
 import { bindAndroidFullscreen } from '../../helpers/player/androidFullscreen'
@@ -4039,7 +4040,9 @@ export default defineComponent({
         // Electron doesn't like YouTube's vp9 VR video streams and throws:
         // "CHUNK_DEMUXER_ERROR_APPEND_FAILED: Projection element is incomplete; ProjectionPoseYaw required."
         // So use the AV1 and h264 codecs instead which it doesn't reject
-        preferredVideoCodecs: typeof props.vrProjection === 'string' ? ['av01', 'avc1'] : []
+        preferredVideo: getVideoCodecPreferences(
+          store.getters.getPreferredVideoCodec, typeof props.vrProjection === 'string'
+        )
       }
     }
 
@@ -5419,9 +5422,8 @@ export default defineComponent({
           // Paused media needs a visible way to resume on both desktop and touch devices.
           showUIOnPaused: true,
           // YouTube offers the same resolutions in several codecs, which shaka-player lists
-          // separately, so the codec is what tells those entries apart. The built-in engine
-          // keeps distinguishing them by their bitrate, the way it did before.
-          showVideoCodec: props.playbackEngine === 'yt-dlp',
+          // separately, so show the codec for both playback engines.
+          showVideoCodec: true,
           volumeBarColors: {
             level: 'var(--primary-color)'
           },

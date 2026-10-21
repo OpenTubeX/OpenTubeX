@@ -1279,6 +1279,8 @@ Settings:
   Search Settings: Søgeindstillinger
   No Settings Found: Ingen indstillinger fundet
   Experimental Settings:
+    Preferred Video Codec: Foretrukket videocodec
+    Codec Description: Automatisk foretrækker hardwareafkodning. Ændringer gælder fra næste video. Et codecvalg kan begrænse opløsninger; utilgængelige codecs erstattes. VP9 undgås til VR på grund af en afspilningsfejl i browseren.
     Disable Hardware Acceleration: Deaktiver hardwareacceleration
   Interface Customizer:
     Customize Interface: "Tilpas brugerflade"

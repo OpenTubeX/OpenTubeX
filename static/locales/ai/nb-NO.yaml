@@ -256,6 +256,9 @@ History:
   Custom: Egendefinert
   History Older Than Days Removed: Seerlogg eldre enn 1 dag er fjernet | Seerlogg eldre enn {days} dager er fjernet
 Settings:
+  Experimental Settings:
+    Preferred Video Codec: Foretrukket videokodek
+    Codec Description: Automatisk foretrekker maskinvaredekoding. Endringer gjelder fra neste video. Et kodekvalg kan begrense oppløsninger; utilgjengelige kodeker erstattes. VP9 unngås for VR på grunn av en avspillingsfeil i nettleseren.
   Tab Unloading:
     Automatically unload tabs: "Last ut faner automatisk"
     Memory threshold: "Minneterskel"

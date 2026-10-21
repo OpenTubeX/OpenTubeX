@@ -257,6 +257,9 @@ History:
   Custom: Egyéni
   History Older Than Days Removed: Az 1 napnál régebbi megtekintési előzmények eltávolítva | A(z) {days} napnál régebbi megtekintési előzmények eltávolítva
 Settings:
+  Experimental Settings:
+    Preferred Video Codec: Előnyben részesített videokodek
+    Codec Description: Az automatikus mód a hardveres dekódolást részesíti előnyben. A változások a következő videóra érvényesek. A kodekválasztás korlátozhatja a felbontásokat; a nem elérhető kodekeket másik helyettesíti. A VP9 VR esetén böngészős lejátszási hiba miatt mellőzve van.
   Tab Unloading:
     Automatically unload tabs: "Lapok automatikus kiürítése"
     Memory threshold: "Memóriaküszöb"

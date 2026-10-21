@@ -1231,6 +1231,8 @@ Settings:
   Search Settings: Gosodiadau chwilio
   No Settings Found: Ni chanfuwyd unrhyw osodiadau
   Experimental Settings:
+    Preferred Video Codec: Codec fideo dewisol
+    Codec Description: Mae'r modd awtomatig yn ffafrio datgodio caledwedd. Mae newidiadau'n berthnasol i'r fideo nesaf. Gall dewis codec gyfyngu ar gydraniadau; defnyddir dewisiadau eraill os nad yw codec ar gael. Osgoir VP9 ar gyfer VR oherwydd gwall chwarae yn y porwr.
     Disable Hardware Acceleration: Analluogi cyflymiad caledwedd
   Interface Customizer:
     Customize Interface: "Addasu'r rhyngwyneb"
