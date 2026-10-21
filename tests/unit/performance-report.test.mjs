@@ -21,6 +21,7 @@ function sample (overrides = {}) {
     largeFeedScrollLongestFrameMs: 20,
     largeFeedScrollElapsedMs: 1000,
     largeFeedScrollTaskMs: 30,
+    hoveredWatchNavigationElapsedMs: 300,
     navigationHeapGrowthMiB: 6.5,
     playbackStartElapsedMs: 1000,
     playbackStartLongestFrameMs: 50,

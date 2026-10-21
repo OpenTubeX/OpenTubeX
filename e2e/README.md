@@ -186,8 +186,8 @@ Neither the performance project nor the paired comparison retries.
 ## Performance comparison
 
 The pull-request performance workflow builds the base and candidate commits,
-then measures startup, large cached subscriptions, navigation, scrolling, and local playback against both builds on one
-runner. It alternates between builds, discards two warm-ups per build, and
+then measures startup, large cached subscriptions, navigation, scrolling, opening a hovered video, and local playback
+against both builds on one runner. It alternates between builds, discards two warm-ups per build, and
 compares the median of seven samples. A single pull-request comment and the
 Actions summary show the comparison, and the raw samples are uploaded as
 `performance-results.json`.

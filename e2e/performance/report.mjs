@@ -132,6 +132,14 @@ export const performanceMetrics = [
     optional: true
   },
   {
+    key: 'hoveredWatchNavigationElapsedMs',
+    label: 'Watch navigation after hovering a video',
+    unit: 'ms',
+    absoluteLimit: 2_000,
+    relativeLimit: 1.15,
+    minimumDelta: 100
+  },
+  {
     key: 'navigationHeapGrowthMiB',
     label: 'Renderer heap growth after 10 navigation cycles',
     unit: 'MiB',
