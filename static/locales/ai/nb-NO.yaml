@@ -1634,6 +1634,7 @@ Video:
       subscriber_only: "Kun abonnenter"
       needs_auth: "Pålogging kreves"
       unlisted: "Ikke oppført"
+  Save Queue to Playlist: "Lagre kø i spilleliste"
 Playlist:
   Playlist Already Preloaded: "Alle videoene i spillelisten er allerede forhåndslastet"
   Playlist Preload Progress: "Forhåndslaster videoer: {completed} av {requested}"
@@ -1643,6 +1644,8 @@ Playlist:
   Playlist Preload Complete: "Forhåndslastede videoer: {count}."
   Playlist Preload Partial: "Forhåndslastet {preloaded} av {requested} videoer. {failed} kunne ikke forhåndslastes."
   Playlist Preload Pagination Failed: "Hele spillelisten kunne ikke lastes, så forhåndslastingen ble avbrutt."
+  Add Playlist to Queue: "Legg spilleliste i kø"
+  Playlist Added to Queue: "Spillelisten er lagt i køen"
 Change Format:
   yt-dlp Error Template: "yt-dlp kunne ikke hente strømmene: {error}"
   Local Video File: Lokal videofil

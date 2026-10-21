@@ -1655,6 +1655,7 @@ Video:
       needs_auth: "Innskráning er nauðsynleg"
       unlisted: "Óskráð"
   How this was made: Hvernig þetta var gert
+  Save Queue to Playlist: "Vista biðröð í spilunarlista"
 Playlist:
   Playlist Already Preloaded: "Öll myndskeið spilunarlistans eru þegar forhlaðin"
   Playlist Preload Progress: "Forhleðsla myndskeiða: {completed} af {requested}"
@@ -1664,6 +1665,8 @@ Playlist:
   Playlist Preload Complete: "Forhlaðin myndskeið: {count}."
   Playlist Preload Partial: "Forhlóð {preloaded} af {requested} myndskeiðum. Ekki tókst að forhlaða {failed}."
   Playlist Preload Pagination Failed: "Ekki tókst að hlaða allan spilunarlistann og forhleðslu var hætt."
+  Add Playlist to Queue: "Bæta spilunarlista í biðröð"
+  Playlist Added to Queue: "Spilunarlista bætt í biðröð"
 Change Format:
   yt-dlp Error Template: "yt-dlp gat ekki sótt streymið: {error}"
   Local Video File: Staðbundin myndbandsskrá

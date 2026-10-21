@@ -248,3 +248,49 @@ for (const clearAll of [false, true]) {
     await expect(page.locator('dialog[open]')).toHaveCount(0)
   })
 }
+
+test('saves the queue to a new playlist and appends a playlist to the queue in its displayed order', async ({ page }) => {
+  const queuedVideo = (videoId, title) => ({
+    videoId, title, author: 'Queue Test Channel', authorId: 'UC-queue-test-channel', lengthSeconds: 60,
+  })
+  const addToQueue = videos => page.evaluate(videos => {
+    for (const video of videos) window.$store.commit('addVideoToWatchQueue', { video })
+  }, videos)
+  await goTo(page, 'history')
+  // Local playlists only hold YouTube videos, so other queued media is not saved.
+  await addToQueue([{ videoId: 'external-clip', title: 'External clip' }])
+  await page.locator('a.title').filter({ hasText: /Current video/ }).click()
+  const queue = page.locator('.watchQueue')
+  const saveButton = queue.getByRole('button', { name: 'Save Queue to Playlist', exact: true })
+  await expect(queue.locator('.queueVideoTitle')).toHaveText(['External clip'])
+  await expect(saveButton).toHaveCount(0)
+
+  await addToQueue([queuedVideo('queueVideoA', 'Saved video A'), queuedVideo('queueVideoB', 'Saved video B'), queuedVideo('queueVideoC', 'Saved video C')])
+  const queuedTitles = ['External clip', 'Saved video A', 'Saved video B', 'Saved video C']
+  await expect(queue.locator('.queueVideoTitle')).toHaveText(queuedTitles)
+  await saveButton.click()
+  const addDialog = page.getByRole('dialog').filter({ hasText: 'Select a playlist to add your 3 videos to' })
+  await expect(addDialog).toBeVisible()
+  await addDialog.getByRole('button', { name: /^Create new playlist$/i }).click()
+  const createDialog = page.getByRole('dialog').filter({ has: page.locator('.playlistNameInput') })
+  await createDialog.locator('input').fill('Saved queue')
+  await createDialog.getByRole('button', { name: 'Create', exact: true }).click()
+  await addDialog.getByRole('button', { name: 'Save', exact: true }).click()
+
+  const getPlaylist = () => page.evaluate(() => window.$store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'Saved queue'))
+  const savedIds = ['queueVideoA', 'queueVideoB', 'queueVideoC']
+  await expect.poll(async () => (await getPlaylist())?.videos.map(video => video.videoId)).toEqual(savedIds)
+  const playlist = await getPlaylist()
+  expect(playlist.videos[0]).toMatchObject(queuedVideo('queueVideoA', 'Saved video A'))
+  for (const video of playlist.videos) expect(video).not.toHaveProperty('queueItemId')
+  await expect(queue.locator('.queueVideoTitle')).toHaveText(queuedTitles)
+
+  await page.evaluate(() => window.$store.dispatch('updateUserPlaylistSortOrder', 'video_title_descending'))
+  const tab = await page.evaluate(route => window.ftElectron.tabs.create({ route, makeActive: false }), `/playlist/${playlist._id}?playlistType=user`)
+  await page.locator(`.tab[data-tab-id="${tab.id}"]`).click()
+  await page.getByTitle('Add Playlist to Queue', { exact: true }).filter({ visible: true }).click()
+  await expect(page.getByText('Playlist added to queue', { exact: true })).toBeVisible()
+  expect(await page.evaluate(() => window.$store.getters.getWatchQueue.map(item => item.title)))
+    .toEqual([...queuedTitles, 'Saved video C', 'Saved video B', 'Saved video A'])
+  expect((await getPlaylist()).videos.map(video => video.videoId)).toEqual(savedIds)
+})

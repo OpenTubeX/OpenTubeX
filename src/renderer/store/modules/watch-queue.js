@@ -63,9 +63,13 @@ export function persistWatchQueue(store, storage, sharedQueue) {
     if (!PERSISTED_MUTATIONS.has(mutation.type)) return
     try {
       if (sharedQueue) {
-        const payload = mutation.type === 'addVideoToWatchQueue'
-          ? { ...mutation.payload, queueItemId: state.watchQueue.items[mutation.payload.playNext ? 0 : state.watchQueue.items.length - 1].queueItemId }
-          : mutation.payload
+        const { items } = state.watchQueue
+        let payload = mutation.payload
+        if (mutation.type === 'addVideoToWatchQueue') {
+          payload = { ...payload, queueItemId: items[payload.playNext ? 0 : items.length - 1].queueItemId }
+        } else if (mutation.type === 'addVideosToWatchQueue' && !payload.queueItemIds) {
+          payload = { ...payload, queueItemIds: items.slice(items.length - payload.videos.length).map(item => item.queueItemId) }
+        }
         updateSharedQueue(JSON.parse(JSON.stringify({ type: mutation.type, payload })))
         return
       }

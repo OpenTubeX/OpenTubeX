@@ -1667,6 +1667,7 @@ Video:
       needs_auth: "Yêu cầu đăng nhập"
       unlisted: "Không liệt kê"
   How this was made: Nội dung này được tạo ra như thế nào
+  Save Queue to Playlist: "Lưu hàng đợi vào danh sách phát"
 Playlist:
   Playlist Already Preloaded: "Tất cả video trong danh sách phát đã được tải trước"
   Playlist Preload Progress: "Đang tải trước video: {completed}/{requested}"
@@ -1677,6 +1678,8 @@ Playlist:
   Playlist Preload Partial: "Đã tải trước {preloaded}/{requested} video. Không thể tải trước {failed} video."
   Playlist Preload Pagination Failed: "Không thể tải toàn bộ danh sách phát nên đã hủy tải trước."
   Unavailable videos are hidden: Các video không có sẵn đã bị ẩn
+  Add Playlist to Queue: "Thêm danh sách phát vào hàng đợi"
+  Playlist Added to Queue: "Đã thêm danh sách phát vào hàng đợi"
 Change Format:
   yt-dlp Error Template: "yt-dlp không thể cung cấp các luồng: {error}"
   Local Video File: Tệp video cục bộ

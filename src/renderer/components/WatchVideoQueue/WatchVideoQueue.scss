@@ -43,7 +43,7 @@
   white-space: nowrap;
 }
 
-.clearQueue {
+.queueHeaderAction {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -208,7 +208,7 @@
     white-space: nowrap;
   }
 
-  .clearQueue {
+  .queueHeaderAction {
     padding: 6px;
     border-radius: 6px;
     color: inherit;
@@ -255,8 +255,11 @@
     line-height: 20px;
   }
 
-  .fullscreenQueue .clearQueue {
+  .fullscreenQueue .queueHeaderAction {
     min-block-size: 36px;
+  }
+
+  .fullscreenQueue .queueHeading + .queueHeaderAction {
     margin-inline-start: auto;
   }
 }
@@ -294,8 +297,13 @@
     line-clamp: 3;
   }
 
-  .clearQueue {
+  .queueHeaderAction {
     min-block-size: var(--phone-touch-target, 48px);
+  }
+
+  .saveQueue {
+    justify-content: center;
+    min-inline-size: var(--phone-touch-target, 48px);
   }
 }
 

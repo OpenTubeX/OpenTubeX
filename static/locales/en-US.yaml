@@ -2161,6 +2161,7 @@ Video:
   Added to Play Next: Video will play next
   Added to Queue: Video added to queue
   Clear Queue: Clear Queue
+  Save Queue to Playlist: Save Queue to Playlist
   Queue Video Count: '{count} video | {count} videos'
   Remove from Queue: 'Remove {title} from queue'
   Drag to Reorder Queue: 'Drag {title} to reorder queue'
@@ -2609,6 +2610,8 @@ Playlist:
   Playlist: Playlist
   Close Playlist: Close Playlist
   View Full Playlist: View Full Playlist
+  Add Playlist to Queue: Add Playlist to Queue
+  Playlist Added to Queue: Playlist added to queue
   Preload Playlist: Preload all videos
   Preloading Playlist: Preloading all videos...
   Playlist Already Preloaded: All playlist videos are already preloaded

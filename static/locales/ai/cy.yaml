@@ -1655,6 +1655,7 @@ Video:
       needs_auth: "Angen mewngofnodi"
       unlisted: "Heb ei restru"
   How this was made: Sut cafodd hwn ei wneud
+  Save Queue to Playlist: "Cadw'r ciw mewn rhestr chwarae"
 Playlist:
   Playlist Already Preloaded: "Mae holl fideos y rhestr chwarae eisoes wedi'u rhaglwytho"
   Playlist Preload Progress: "Yn rhaglwytho fideos: {completed} o {requested}"
@@ -1665,6 +1666,8 @@ Playlist:
   Playlist Preload Partial: "Rhaglwythwyd {preloaded} o {requested} fideo. Methodd {failed}."
   Playlist Preload Pagination Failed: "Ni ellid llwytho’r rhestr chwarae gyfan, felly canslwyd y rhaglwytho."
   Unavailable videos are hidden: Mae fideos nad ydynt ar gael wedi'u cuddio
+  Add Playlist to Queue: "Ychwanegu'r rhestr chwarae at y ciw"
+  Playlist Added to Queue: "Wedi ychwanegu'r rhestr chwarae at y ciw"
 Change Format:
   yt-dlp Error Template: "Ni allai yt-dlp ddarparu’r ffrydiau: {error}"
   Local Video File: Ffeil fideo leol

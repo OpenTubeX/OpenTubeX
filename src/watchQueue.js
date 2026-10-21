@@ -1,5 +1,6 @@
 export const PERSISTED_MUTATIONS = new Set([
   'addVideoToWatchQueue',
+  'addVideosToWatchQueue',
   'removeVideoFromWatchQueue',
   'moveVideoInWatchQueue',
   'clearWatchQueue',
@@ -47,6 +48,14 @@ export const watchQueueMutations = {
     } else {
       state.items.push(item)
     }
+  },
+
+  // Appends many videos as one persisted operation, e.g. a whole playlist.
+  addVideosToWatchQueue(state, { videos, queueItemIds = videos.map(() => createQueueItemId()) }) {
+    const existingIds = new Set(state.items.map(item => item.queueItemId))
+    state.items.push(...videos
+      .map((video, index) => ({ ...video, queueItemId: queueItemIds[index] }))
+      .filter(item => !existingIds.has(item.queueItemId)))
   },
 
   removeVideoFromWatchQueue(state, queueItemId) {

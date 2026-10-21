@@ -1640,6 +1640,7 @@ Video:
       subscriber_only: "Harpidedunentzat bakarrik"
       needs_auth: "Saioa hasi behar da"
       unlisted: "Zerrendatu gabeak"
+  Save Queue to Playlist: "Gorde ilara erreprodukzio-zerrendan"
 Playlist:
   Playlist Already Preloaded: "Erreprodukzio-zerrendako bideo guztiak aurrez kargatuta daude"
   Playlist Preload Progress: "Bideoak aurrez kargatzen: {completed}/{requested}"
@@ -1649,6 +1650,8 @@ Playlist:
   Playlist Preload Complete: "Aurrekargatutako bideoak: {count}."
   Playlist Preload Partial: "{requested} bideotatik {preloaded} aurrekargatu dira. {failed} ezin izan dira aurrekargatu."
   Playlist Preload Pagination Failed: "Ezin izan da erreprodukzio-zerrenda osoa kargatu; aurrekarga bertan behera utzi da."
+  Add Playlist to Queue: "Gehitu erreprodukzio-zerrenda ilarara"
+  Playlist Added to Queue: "Erreprodukzio-zerrenda ilarara gehitu da"
 Change Format:
   yt-dlp Error Template: "yt-dlp-k ezin izan ditu korronteak eman: {error}"
   Local Video File: Bideo-fitxategi lokala

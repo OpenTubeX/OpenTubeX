@@ -1682,6 +1682,7 @@ Video:
       needs_auth: "உள்நுழைவு தேவை"
       unlisted: "பட்டியலிடப்படாதது"
   How this was made: இது எப்படி உருவாக்கப்பட்டது
+  Save Queue to Playlist: "வரிசையை பிளேலிச்ட்டில் சேமி"
 Playlist:
   Playlist Already Preloaded: "பிளேலிஸ்ட்டின் அனைத்து காணொளிகளும் ஏற்கனவே முன்பே ஏற்றப்பட்டுள்ளன"
   Playlist Preload Progress: "காணொளிகளை முன்பே ஏற்றுகிறது: {requested} இல் {completed}"
@@ -1692,6 +1693,8 @@ Playlist:
   Playlist Preload Partial: "{requested} காணொளிகளில் {preloaded} முன்பே ஏற்றப்பட்டன. {failed} ஏற்ற முடியவில்லை."
   Playlist Preload Pagination Failed: "முழு இயக்கப்பட்டியலை ஏற்ற முடியாததால் முன்பே ஏற்றுவது நிறுத்தப்பட்டது."
   Unavailable videos are hidden: கிடைக்காத காணொளிகள் மறைக்கப்பட்டுள்ளன
+  Add Playlist to Queue: "பிளேலிச்ட்டை வரிசையில் சேர்"
+  Playlist Added to Queue: "பிளேலிச்ட் வரிசையில் சேர்க்கப்பட்டது"
 Change Format:
   yt-dlp Error Template: "yt-dlp ஸ்ட்ரீம்களை வழங்க முடியவில்லை: {error}"
   Local Video File: உள்ளகக் காணொளிக் கோப்பு

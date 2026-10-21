@@ -1985,6 +1985,7 @@ Video:
       needs_auth: "로그인 필요"
       unlisted: "일부 공개"
   How this was made: 제작 방식
+  Save Queue to Playlist: "대기열을 재생목록에 저장"
 Playlist:
   Playlist Already Preloaded: "재생목록의 모든 동영상을 이미 미리 불러왔습니다"
   Playlist Preload Progress: "동영상 미리 불러오는 중: {requested}개 중 {completed}개"
@@ -2007,6 +2008,8 @@ Playlist:
   Playlist Preload Partial: "동영상 {requested}개 중 {preloaded}개를 미리 불러왔습니다. {failed}개는 실패했습니다."
   Playlist Preload Pagination Failed: "재생목록 전체를 불러오지 못해 미리 불러오기를 취소했습니다."
   Unavailable videos are hidden: 사용할 수 없는 동영상은 숨겨집니다
+  Add Playlist to Queue: "재생목록을 대기열에 추가"
+  Playlist Added to Queue: "재생목록을 대기열에 추가했습니다"
 Change Format:
   yt-dlp Error Template: "yt-dlp에서 스트림을 가져오지 못했습니다: {error}"
   Local Video File: 로컬 동영상 파일

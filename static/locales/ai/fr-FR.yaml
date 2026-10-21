@@ -1628,6 +1628,7 @@ Video:
       subscriber_only: "Abonnés uniquement"
       needs_auth: "Connexion requise"
       unlisted: "Non répertorié"
+  Save Queue to Playlist: "Enregistrer la file d’attente dans une playlist"
 Playlist:
   Playlist Already Preloaded: "Toutes les vidéos de la playlist sont déjà préchargées"
   Playlist Preload Progress: "Préchargement des vidéos : {completed} sur {requested}"
@@ -1637,6 +1638,8 @@ Playlist:
   Playlist Preload Complete: "Vidéos préchargées : {count}."
   Playlist Preload Partial: "{preloaded} vidéos sur {requested} ont été préchargées. Échec pour {failed}."
   Playlist Preload Pagination Failed: "La playlist complète n’a pas pu être chargée, le préchargement a donc été annulé."
+  Add Playlist to Queue: "Ajouter la playlist à la file d’attente"
+  Playlist Added to Queue: "Playlist ajoutée à la file d’attente"
 Change Format:
   yt-dlp Error Template: "yt-dlp n’a pas pu fournir les flux : {error}"
   Local Video File: Fichier vidéo local

@@ -1681,6 +1681,7 @@ Video:
       needs_auth: "É necessário iniciar sessão"
       unlisted: "Não listado"
   How this was made: Como isto foi feito
+  Save Queue to Playlist: "Guardar fila numa lista de reprodução"
 Playlist:
   Playlist Already Preloaded: "Todos os vídeos da lista já estão pré-carregados"
   Playlist Preload Progress: "A pré-carregar vídeos: {completed} de {requested}"
@@ -1691,6 +1692,8 @@ Playlist:
   Playlist Preload Partial: "Foram pré-carregados {preloaded} de {requested} vídeos. Não foi possível pré-carregar {failed}."
   Playlist Preload Pagination Failed: "Não foi possível carregar a lista completa, por isso o pré-carregamento foi cancelado."
   Unavailable videos are hidden: Os vídeos indisponíveis estão ocultos
+  Add Playlist to Queue: "Adicionar lista de reprodução à fila"
+  Playlist Added to Queue: "Lista de reprodução adicionada à fila"
 Change Format:
   yt-dlp Error Template: "O yt-dlp não conseguiu fornecer os fluxos: {error}"
   Local Video File: Ficheiro de vídeo local

@@ -1645,6 +1645,7 @@ Video:
       needs_auth: "Требуется вход"
       unlisted: "Отсутствует в списках"
   How this was made: Как это было создано
+  Save Queue to Playlist: "Сохранить очередь в плейлист"
 Playlist:
   Playlist Already Preloaded: "Все видео из плейлиста уже предварительно загружены"
   Playlist Preload Progress: "Предварительная загрузка видео: {completed} из {requested}"
@@ -1655,6 +1656,8 @@ Playlist:
   Playlist Preload Partial: "Предзагружено {preloaded} из {requested} видео. Не удалось загрузить {failed}."
   Playlist Preload Pagination Failed: "Не удалось загрузить весь плейлист, поэтому предзагрузка отменена."
   Unavailable videos are hidden: Недоступные видео скрыты
+  Add Playlist to Queue: "Добавить плейлист в очередь"
+  Playlist Added to Queue: "Плейлист добавлен в очередь"
 Change Format:
   yt-dlp Error Template: "yt-dlp не смог получить потоки: {error}"
   Local Video File: Локальный видеофайл

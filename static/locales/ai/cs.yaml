@@ -1630,6 +1630,7 @@ Video:
       subscriber_only: "Pouze předplatitelé"
       needs_auth: "Je vyžadováno přihlášení"
       unlisted: "Neveřejné"
+  Save Queue to Playlist: "Uložit frontu do playlistu"
 Playlist:
   Playlist Already Preloaded: "Všechna videa v playlistu jsou již přednačtena"
   Playlist Preload Progress: "Přednačítání videí: {completed} z {requested}"
@@ -1639,6 +1640,8 @@ Playlist:
   Playlist Preload Complete: "Přednačtená videa: {count}."
   Playlist Preload Partial: "Přednačteno {preloaded} z {requested} videí. {failed} se nepodařilo přednačíst."
   Playlist Preload Pagination Failed: "Celý playlist se nepodařilo načíst, přednačítání bylo zrušeno."
+  Add Playlist to Queue: "Přidat playlist do fronty"
+  Playlist Added to Queue: "Playlist byl přidán do fronty"
 Change Format:
   yt-dlp Error Template: "yt-dlp nemohl poskytnout streamy: {error}"
   Local Video File: Místní soubor videa

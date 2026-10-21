@@ -1705,6 +1705,7 @@ Video:
       needs_auth: "Log ind er påkrævet"
       unlisted: "Ikke opført"
   How this was made: Sådan blev dette lavet
+  Save Queue to Playlist: "Gem kø i playliste"
 Playlist:
   Playlist Already Preloaded: "Alle videoer i playlisten er allerede forudindlæst"
   Playlist Preload Progress: "Forudindlæser videoer: {completed} af {requested}"
@@ -1715,6 +1716,8 @@ Playlist:
   Playlist Preload Partial: "Forudindlæste {preloaded} af {requested} videoer. {failed} kunne ikke forudindlæses."
   Playlist Preload Pagination Failed: "Hele afspilningslisten kunne ikke indlæses, så forudindlæsningen blev annulleret."
   Unavailable videos are hidden: Utilgængelige videoer er skjult
+  Add Playlist to Queue: "Føj playliste til kø"
+  Playlist Added to Queue: "Playlisten er føjet til køen"
 Change Format:
   yt-dlp Error Template: "yt-dlp kunne ikke levere streamene: {error}"
   Local Video File: Lokal videofil

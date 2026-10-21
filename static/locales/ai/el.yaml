@@ -1653,6 +1653,7 @@ Video:
       needs_auth: "Απαιτείται σύνδεση"
       unlisted: "Μη καταχωρημένο"
   How this was made: Πώς δημιουργήθηκε αυτό
+  Save Queue to Playlist: "Αποθήκευση ουράς αναπαραγωγής σε λίστα αναπαραγωγής"
 Playlist:
   Playlist Already Preloaded: "Όλα τα βίντεο της λίστας αναπαραγωγής έχουν ήδη προφορτωθεί"
   Playlist Preload Progress: "Προφόρτωση βίντεο: {completed} από {requested}"
@@ -1663,6 +1664,8 @@ Playlist:
   Playlist Preload Partial: "Προφορτώθηκαν {preloaded} από {requested} βίντεο. Απέτυχαν {failed}."
   Playlist Preload Pagination Failed: "Δεν ήταν δυνατή η φόρτωση ολόκληρης της λίστας, οπότε η προφόρτωση ακυρώθηκε."
   Unavailable videos are hidden: Τα μη διαθέσιμα βίντεο είναι κρυμμένα
+  Add Playlist to Queue: "Προσθήκη λίστας αναπαραγωγής στην ουρά αναπαραγωγής"
+  Playlist Added to Queue: "Η λίστα αναπαραγωγής προστέθηκε στην ουρά αναπαραγωγής"
 Change Format:
   yt-dlp Error Template: "Το yt-dlp δεν μπόρεσε να παρέχει τις ροές: {error}"
   Local Video File: Τοπικό αρχείο βίντεο

@@ -1629,6 +1629,7 @@ Video:
       subscriber_only: "Sadece aboneler"
       needs_auth: "Oturum açma gerekli"
       unlisted: "Listelenmemiş"
+  Save Queue to Playlist: "Kuyruğu Oynatma Listesine Kaydet"
 Playlist:
   Playlist Already Preloaded: "Oynatma listesindeki tüm videolar zaten önceden yüklendi"
   Playlist Preload Progress: "Videolar önceden yükleniyor: {completed}/{requested}"
@@ -1638,6 +1639,8 @@ Playlist:
   Playlist Preload Complete: "Önceden yüklenen videolar: {count}."
   Playlist Preload Partial: "{requested} videodan {preloaded} tanesi önceden yüklendi. {failed} tanesi yüklenemedi."
   Playlist Preload Pagination Failed: "Oynatma listesinin tamamı yüklenemediği için önceden yükleme iptal edildi."
+  Add Playlist to Queue: "Oynatma Listesini Kuyruğa Ekle"
+  Playlist Added to Queue: "Oynatma listesi kuyruğa eklendi"
 Change Format:
   yt-dlp Error Template: "yt-dlp akışları sağlayamadı: {error}"
   Local Video File: Yerel video dosyası

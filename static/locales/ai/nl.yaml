@@ -1686,6 +1686,7 @@ Video:
       needs_auth: "Inloggen vereist"
       unlisted: "Verborgen"
   How this was made: Hoe dit is gemaakt
+  Save Queue to Playlist: "Wachtrij opslaan in afspeellijst"
 Playlist:
   Playlist Already Preloaded: "Alle video's in de afspeellijst zijn al vooraf geladen"
   Playlist Preload Progress: "Video's vooraf laden: {completed} van {requested}"
@@ -1696,6 +1697,8 @@ Playlist:
   Playlist Preload Partial: "{preloaded} van {requested} video’s vooraf geladen. {failed} konden niet worden geladen."
   Playlist Preload Pagination Failed: "De volledige afspeellijst kon niet worden geladen. Vooraf laden is geannuleerd."
   Unavailable videos are hidden: Niet-beschikbare video's zijn verborgen
+  Add Playlist to Queue: "Afspeellijst aan wachtrij toevoegen"
+  Playlist Added to Queue: "Afspeellijst aan wachtrij toegevoegd"
 Change Format:
   yt-dlp Error Template: "yt-dlp kon de streams niet leveren: {error}"
   Local Video File: Lokaal videobestand

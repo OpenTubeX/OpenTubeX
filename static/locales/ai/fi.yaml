@@ -1675,6 +1675,7 @@ Video:
       needs_auth: "Kirjautuminen vaaditaan"
       unlisted: "Listaamaton"
   How this was made: Miten tämä tehtiin
+  Save Queue to Playlist: "Tallenna jono soittolistalle"
 Playlist:
   Playlist Already Preloaded: "Kaikki soittolistan videot on jo esiladattu"
   Playlist Preload Progress: "Esiladataan videoita: {completed}/{requested}"
@@ -1685,6 +1686,8 @@ Playlist:
   Playlist Preload Partial: "Esiladattiin {preloaded}/{requested} videota. {failed} videon esilataus epäonnistui."
   Playlist Preload Pagination Failed: "Koko soittolistaa ei voitu ladata, joten esilataus peruttiin."
   Unavailable videos are hidden: Videot, jotka eivät ole saatavilla, on piilotettu
+  Add Playlist to Queue: "Lisää soittolista jonoon"
+  Playlist Added to Queue: "Soittolista lisättiin jonoon"
 Change Format:
   yt-dlp Error Template: "yt-dlp ei voinut toimittaa suoratoistovirtoja: {error}"
   Local Video File: Paikallinen videotiedosto

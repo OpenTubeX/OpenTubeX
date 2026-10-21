@@ -207,6 +207,16 @@
             @click="emit('toggle-playlist-bookmark')"
           />
           <FtIconButton
+            v-if="videoCount > 0 && !editMode"
+            :title="t('Playlist.Add Playlist to Queue')"
+            :icon="snapshotPending ? ['fas', 'sync'] : ['fas', 'add-to-queue']"
+            :disabled="snapshotPending"
+            :spin="snapshotPending"
+            :aria-busy="snapshotPending"
+            theme="secondary"
+            @click="addPlaylistToQueue"
+          />
+          <FtIconButton
             v-if="videoCount > 0 && showPlaylists && !editMode"
             :title="$t('User Playlists.Copy Playlist')"
             :icon="snapshotPending ? ['fas', 'sync'] : ['fas', 'copy']"
@@ -795,6 +805,22 @@ async function toggleCopyVideosPrompt() {
     videos: snapshot.videos,
     newPlaylistDefaultProperties: defaults,
   })
+}
+
+async function addPlaylistToQueue() {
+  if (snapshotPending.value) return
+  // Queue user playlists in their displayed sort order.
+  let videos = props.sortedVideos
+  if (!isUserPlaylist.value) {
+    const snapshot = await loadSnapshot(props.id)
+    // Leaving the playlist while it loads cancels the action.
+    if (!snapshot || snapshotController.signal.aborted) return
+    videos = snapshot.videos
+  }
+  if (videos.length === 0) return
+
+  store.commit('addVideosToWatchQueue', { videos: deepCopy(videos) })
+  showToast({ message: t('Playlist.Playlist Added to Queue'), icon: ['fas', 'queue'] })
 }
 
 async function addMissingVideos() {

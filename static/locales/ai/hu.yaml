@@ -1630,6 +1630,7 @@ Video:
       subscriber_only: "Csak előfizetők"
       needs_auth: "Bejelentkezés szükséges"
       unlisted: "Listázatlan"
+  Save Queue to Playlist: "Lejátszási sor mentése lejátszási listába"
 Playlist:
   Playlist Already Preloaded: "A lejátszási lista összes videója már elő van töltve"
   Playlist Preload Progress: "Videók előtöltése: {completed}/{requested}"
@@ -1639,6 +1640,8 @@ Playlist:
   Playlist Preload Complete: "Előtöltött videók: {count}."
   Playlist Preload Partial: "{requested} videóból {preloaded} előtöltve. {failed} előtöltése sikertelen."
   Playlist Preload Pagination Failed: "A teljes lejátszási lista nem tölthető be, ezért az előtöltés megszakadt."
+  Add Playlist to Queue: "Lejátszási lista hozzáadása a lejátszási sorhoz"
+  Playlist Added to Queue: "A lejátszási lista hozzáadva a lejátszási sorhoz"
 Change Format:
   yt-dlp Error Template: "A yt-dlp nem tudta biztosítani az adatfolyamokat: {error}"
   Local Video File: Helyi videófájl

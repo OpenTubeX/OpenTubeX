@@ -1632,6 +1632,7 @@ Video:
       subscriber_only: "Ainult tellijad"
       needs_auth: "Vajalik on sisselogimine"
       unlisted: "Registriväline"
+  Save Queue to Playlist: "Salvesta esitusjärjekord esitusloendisse"
 Playlist:
   Playlist Already Preloaded: "Kõik esitusloendi videod on juba eellaaditud"
   Playlist Preload Progress: "Videote eellaadimine: {completed}/{requested}"
@@ -1641,6 +1642,8 @@ Playlist:
   Playlist Preload Complete: "Eellaaditud videoid: {count}."
   Playlist Preload Partial: "Eellaaditi {preloaded}/{requested} videot. {failed} eellaadimine nurjus."
   Playlist Preload Pagination Failed: "Tervet esitusloendit ei saanud laadida, seega eellaadimine tühistati."
+  Add Playlist to Queue: "Lisa esitusloend esitusjärjekorda"
+  Playlist Added to Queue: "Esitusloend lisati esitusjärjekorda"
 Change Format:
   yt-dlp Error Template: "yt-dlp ei saanud vooge hankida: {error}"
   Local Video File: Kohalik videofail

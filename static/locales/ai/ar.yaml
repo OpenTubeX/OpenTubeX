@@ -1670,6 +1670,7 @@ Video:
       needs_auth: "يلزم تسجيل الدخول"
       unlisted: "غير مدرج"
   How this was made: كيف تم صنع هذا
+  Save Queue to Playlist: "حفظ قائمة الانتظار في قائمة تشغيل"
 Playlist:
   Playlist Already Preloaded: "تم تحميل جميع فيديوهات قائمة التشغيل مسبقًا بالفعل"
   Playlist Preload Progress: "جارٍ تحميل الفيديوهات مسبقًا: {completed} من {requested}"
@@ -1680,6 +1681,8 @@ Playlist:
   Playlist Preload Partial: "تم تحميل {preloaded} من أصل {requested} فيديو مسبقًا. تعذر تحميل {failed}."
   Playlist Preload Pagination Failed: "تعذر تحميل قائمة التشغيل كاملة، لذا أُلغي التحميل المسبق."
   Unavailable videos are hidden: مقاطع الفيديو غير المتاحة مخفية
+  Add Playlist to Queue: "إضافة قائمة التشغيل إلى قائمة الانتظار"
+  Playlist Added to Queue: "تمت إضافة قائمة التشغيل إلى قائمة الانتظار"
 Change Format:
   yt-dlp Error Template: "تعذّر على yt-dlp توفير التدفقات: {error}"
   Local Video File: ملف فيديو محلي

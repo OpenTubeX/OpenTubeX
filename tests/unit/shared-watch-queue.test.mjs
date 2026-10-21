@@ -14,8 +14,10 @@ function sharedWindows() {
   const update = createSharedWatchQueue(storage)
   const listeners = []
   const snapshots = []
+  const requests = []
   const adapter = {
     async update(request) {
+      if (request.type) requests.push(request.type)
       const snapshot = await update(request)
       if (request.type) snapshots.push(snapshot)
       return snapshot
@@ -26,6 +28,7 @@ function sharedWindows() {
     window: () => createStore({ modules: { watchQueue }, plugins: [store => persistWatchQueue(store, null, adapter)] }),
     restored: async () => (await createSharedWatchQueue(storage)({})).items.map(item => item.videoId),
     deliverUpdates: () => snapshots.splice(0).forEach(snapshot => listeners.forEach(listener => listener(structuredClone(snapshot)))),
+    requests,
   }
 }
 
@@ -183,6 +186,38 @@ test('additions from two stale windows both persist and delayed events cannot ro
   assert.deepEqual(await windows.restored(), [])
   windows.deliverUpdates()
   for (const store of [first, second]) assert.equal(store.getters.getWatchQueueLength, 0)
+})
+
+test('a playlist batch is one shared write whose item IDs match in every window', async () => {
+  const windows = sharedWindows()
+  const first = windows.window()
+  const second = windows.window()
+  await settle()
+  addVideo(first, 'queued')
+  first.commit('addVideosToWatchQueue', { videos: ['one', 'two', 'three'].map(videoId => ({ videoId, title: videoId })) })
+  const pendingIds = first.getters.getWatchQueue.map(item => item.queueItemId)
+  await settle()
+  assert.deepEqual(windows.requests, ['addVideoToWatchQueue', 'addVideosToWatchQueue'])
+  assert.deepEqual(await windows.restored(), ['queued', 'one', 'two', 'three'])
+  windows.deliverUpdates()
+  for (const store of [first, second]) assert.deepEqual(store.getters.getWatchQueue.map(item => item.queueItemId), pendingIds)
+  second.commit('removeVideoFromWatchQueue', second.getters.getWatchQueue[2].queueItemId)
+  await settle()
+  assert.deepEqual(await windows.restored(), ['queued', 'one', 'three'])
+})
+
+test('a batch with caller IDs skips queued IDs identically in every window', async () => {
+  const windows = sharedWindows()
+  const first = windows.window()
+  const second = windows.window()
+  await settle()
+  addVideo(first, 'queued')
+  const queuedId = first.getters.getWatchQueue[0].queueItemId
+  first.commit('addVideosToWatchQueue', { videos: [{ videoId: 'new' }, { videoId: 'again' }], queueItemIds: ['new-id', queuedId] })
+  await settle()
+  assert.deepEqual(await windows.restored(), ['queued', 'new'])
+  windows.deliverUpdates()
+  for (const store of [first, second]) assert.deepEqual(store.getters.getWatchQueue.map(item => item.videoId), ['queued', 'new'])
 })
 
 test('the desktop queue persists to disk before replying and restores download routes', async () => {

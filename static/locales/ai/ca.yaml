@@ -2117,6 +2117,7 @@ Video:
       needs_auth: "L'inici de sessió és obligatori"
       unlisted: "Ocult"
   How this was made: Com s’ha fet
+  Save Queue to Playlist: "Desa la cua en una llista de reproducció"
 Playlist:
   Playlist Already Preloaded: "Tots els vídeos de la llista ja estan precarregats"
   Playlist Preload Progress: "S'estan precarregant vídeos: {completed} de {requested}"
@@ -2140,6 +2141,8 @@ Playlist:
   Playlist Preload Partial: "S’han precarregat {preloaded} de {requested} vídeos. No se n’han pogut precarregar {failed}."
   Playlist Preload Pagination Failed: "No s’ha pogut carregar la llista sencera i s’ha cancel·lat la precàrrega."
   Unavailable videos are hidden: Els vídeos no disponibles estan ocults
+  Add Playlist to Queue: "Afegeix la llista de reproducció a la cua"
+  Playlist Added to Queue: "S'ha afegit la llista de reproducció a la cua"
 Change Format:
   yt-dlp Error Template: "yt-dlp no ha pogut proporcionar els fluxos: {error}"
   Local Video File: Fitxer de vídeo local

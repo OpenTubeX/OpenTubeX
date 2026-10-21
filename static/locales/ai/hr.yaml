@@ -1655,6 +1655,7 @@ Video:
       needs_auth: "Potrebna je prijava"
       unlisted: "Nije javno navedeno"
   How this was made: Kako je ovo izrađeno
+  Save Queue to Playlist: "Spremi red čekanja u zbirku"
 Playlist:
   Playlist Already Preloaded: "Svi videozapisi na popisu već su predučitani"
   Playlist Preload Progress: "Predučitavanje videozapisa: {completed} od {requested}"
@@ -1665,6 +1666,8 @@ Playlist:
   Playlist Preload Partial: "Predučitano je {preloaded} od {requested} videozapisa. Predučitavanje {failed} videozapisa nije uspjelo."
   Playlist Preload Pagination Failed: "Cijeli popis nije se mogao učitati pa je predučitavanje otkazano."
   Unavailable videos are hidden: Nedostupni videozapisi su skriveni
+  Add Playlist to Queue: "Dodaj zbirku u red čekanja"
+  Playlist Added to Queue: "Zbirka je dodana u red čekanja"
 Change Format:
   yt-dlp Error Template: "yt-dlp nije mogao pružiti streamove: {error}"
   Local Video File: Lokalna videodatoteka

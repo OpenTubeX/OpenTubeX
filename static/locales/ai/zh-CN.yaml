@@ -1629,6 +1629,7 @@ Video:
       subscriber_only: "仅限订阅者"
       needs_auth: "需要登录"
       unlisted: "不公开列出的视频"
+  Save Queue to Playlist: "将队列保存到播放列表"
 Playlist:
   Playlist Already Preloaded: "播放列表中的所有视频均已预加载"
   Playlist Preload Progress: "正在预加载视频：{completed}/{requested}"
@@ -1638,6 +1639,8 @@ Playlist:
   Playlist Preload Complete: "已预加载视频：{count}。"
   Playlist Preload Partial: "已预加载 {requested} 个视频中的 {preloaded} 个，{failed} 个未能预加载。"
   Playlist Preload Pagination Failed: "无法加载完整播放列表，已取消预加载。"
+  Add Playlist to Queue: "将播放列表添加到队列"
+  Playlist Added to Queue: "播放列表已添加到队列"
 Change Format:
   yt-dlp Error Template: "yt-dlp 无法提供流：{error}"
   Local Video File: 本地视频文件

@@ -1679,6 +1679,7 @@ Video:
       needs_auth: "Requírese inicio de sesión"
       unlisted: "Non listado"
   How this was made: Como se fixo
+  Save Queue to Playlist: "Gardar a cola nunha lista de reprodución"
 Playlist:
   Playlist Already Preloaded: "Todos os vídeos da lista xa están precargados"
   Playlist Preload Progress: "Precargando vídeos: {completed} de {requested}"
@@ -1689,6 +1690,8 @@ Playlist:
   Playlist Preload Partial: "Precargáronse {preloaded} de {requested} vídeos. Non se puideron precargar {failed}."
   Playlist Preload Pagination Failed: "Non se puido cargar a lista completa, polo que se cancelou a precarga."
   Unavailable videos are hidden: Os vídeos non dispoñibles están ocultos
+  Add Playlist to Queue: "Engadir a lista de reprodución á cola"
+  Playlist Added to Queue: "Engadiuse a lista de reprodución á cola"
 Change Format:
   yt-dlp Error Template: "yt-dlp non puido proporcionar os fluxos: {error}"
   Local Video File: Ficheiro de vídeo local
