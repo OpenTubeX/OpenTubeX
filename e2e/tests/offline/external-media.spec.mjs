@@ -851,6 +851,41 @@ test('offers download options for external media with the watch page button styl
   await expect(page.getByRole('dialog', { name: 'A Twitch broadcast' })).toBeVisible()
 })
 
+for (const thumbnail of ['https://static-cdn.jtvnw.net/cf_vods/thumbnail.svg', null]) {
+  test(`external media ${thumbnail ? 'with' : 'without'} a thumbnail replaces the previous video's media session artwork`, async ({ app, page }) => {
+    test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+    const mediaSession = () => page.evaluate(() => {
+      const metadata = navigator.mediaSession.metadata
+      return metadata && { title: metadata.title, artist: metadata.artist, artwork: metadata.artwork.map(image => image.src) }
+    })
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await expect.poll(mediaSession).toMatchObject({ artwork: [expect.stringContaining('jNQXAC9IVRw')] })
+
+    const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+    if (thumbnail) await page.route(thumbnail, route => fulfillVisualFixture(route, 'video-thumbnail'))
+    await prepareTwitchYtDlp(app, page, mediaUrl, false, '', [], 30, { artists: ['Example Artist'], thumbnail })
+    await page.locator(sel.searchInput).fill(mediaUrl)
+    await page.locator(sel.searchInput).press('Enter')
+    await waitForPlayback(page)
+    // Chromium never clears the MPRIS artwork on Linux, so media without a
+    // thumbnail needs the app icon to replace the previous video's thumbnail.
+    const artwork = thumbnail ?? (process.platform === 'linux' ? expect.stringMatching(/^data:image\/png;base64,/) : null)
+    const externalMediaSession = {
+      title: 'A Twitch broadcast',
+      artist: 'Example Artist',
+      artwork: artwork ? [artwork] : []
+    }
+    await expect.poll(mediaSession).toEqual(externalMediaSession)
+
+    // The YouTube video stays in the tab as a mini player. Closing it must not
+    // clear the external media's metadata.
+    await page.getByRole('button', { name: 'Hide mini player' }).click()
+    await expect(page.locator('.watchVideoInfo')).toHaveCount(0)
+    expect(await mediaSession()).toEqual(externalMediaSession)
+  })
+}
+
 test('external media cards are separated on phone layouts', { tag: '@scale' }, async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
   const mediaUrl = 'https://www.twitch.tv/videos/123456789'

@@ -554,3 +554,37 @@ test('clearing calls from unmounting children do not re-register a closed tab', 
   tabMediaCoordinator.setPlaybackState('other-tab', 'playing')
   assert.equal(tabMediaCoordinator.isRegistered('closed-tab'), false)
 })
+
+test('a page keeps its media session metadata when the retained mini player in its tab clears its own', t => {
+  const descriptors = ['navigator', 'window'].map(key => [key, Object.getOwnPropertyDescriptor(globalThis, key)])
+  let metadata = null
+  Object.defineProperty(globalThis, 'navigator', {
+    configurable: true,
+    value: { mediaSession: {
+      set metadata(value) { metadata = value },
+      set playbackState(value) {},
+      setActionHandler() {},
+      setPositionState() {},
+    } },
+  })
+  Object.defineProperty(globalThis, 'window', { configurable: true, value: {} })
+  t.after(() => {
+    tabMediaCoordinator.unregister('shared-tab')
+    for (const [key, descriptor] of descriptors) {
+      if (descriptor) Object.defineProperty(globalThis, key, descriptor)
+      else delete globalThis[key]
+    }
+  })
+
+  tabMediaCoordinator.setPresented('shared-tab')
+  tabMediaCoordinator.setMetadata('shared-tab', { title: 'YouTube video' }, 'watch')
+  tabMediaCoordinator.setMetadata('shared-tab', { title: 'External media' }, 'external')
+  assert.deepEqual(metadata, { title: 'External media' })
+
+  tabMediaCoordinator.setMetadata('shared-tab', null, 'watch')
+  assert.deepEqual(metadata, { title: 'External media' })
+
+  tabMediaCoordinator.setMetadata('shared-tab', { title: 'YouTube video' }, 'watch')
+  tabMediaCoordinator.setMetadata('shared-tab', null, 'external')
+  assert.deepEqual(metadata, { title: 'YouTube video' })
+})

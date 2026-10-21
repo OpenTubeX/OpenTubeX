@@ -33,6 +33,7 @@ function getEntry(tabId, create = true) {
       playbackState: 'none',
       lastPlayedAt: 0,
       metadata: null,
+      metadataSources: new Map(),
       positionState: null,
       actionHandlerSources: new Map()
     }
@@ -229,7 +230,7 @@ export const tabMediaCoordinator = {
     applyPowerSaveState()
   },
 
-  setMetadata(tabId, metadata) {
+  setMetadata(tabId, metadata, source = 'default') {
     const entry = getEntry(tabId, metadata != null)
     if (!entry) {
       return
@@ -238,7 +239,13 @@ export const tabMediaCoordinator = {
       presentedTabId = tabId
     }
 
-    entry.metadata = metadata
+    // A tab can show another page's media next to its retained mini player.
+    // The newest metadata wins, and clearing it restores the previous one.
+    entry.metadataSources.delete(source)
+    if (metadata != null) {
+      entry.metadataSources.set(source, metadata)
+    }
+    entry.metadata = Array.from(entry.metadataSources.values()).at(-1) ?? null
     applyOwner()
   },
 

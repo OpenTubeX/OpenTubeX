@@ -103,10 +103,18 @@ const config = {
       },
       {
         test: /\.(png|jpe?g|gif|tif?f|bmp|webp|svg)(\?.*)?$/,
-        type: 'asset/resource',
-        generator: {
-          filename: 'imgs/[name][ext]'
-        }
+        oneOf: [
+          {
+            resourceQuery: /inline/,
+            type: 'asset/inline'
+          },
+          {
+            type: 'asset/resource',
+            generator: {
+              filename: 'imgs/[name][ext]'
+            }
+          }
+        ]
       },
       {
         test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,

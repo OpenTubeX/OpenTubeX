@@ -356,6 +356,7 @@ import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import { buildChaptersVttFile, formatDurationAsTimestamp, formatViewCount, getRelativeTimeFromDate } from '../../helpers/utils'
 import { formatDate } from '../../helpers/dateFormat'
+import { useMediaSessionMetadata } from '../../composables/useMediaSessionMetadata'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { isExternalMediaUrl } from '../../helpers/externalMediaUrl'
 import { getExternalMediaPosition, saveExternalMediaPosition } from '../../helpers/externalMediaPosition'
@@ -550,6 +551,9 @@ const chaptersSrc = computed(() => chapters.value.some(chapter => chapter.endSec
   : '')
 const creatorName = computed(() => info.value?.channel || info.value?.uploader || '')
 const musicPlayerArtist = computed(() => metadata.value.artists?.join(', ') || creatorName.value)
+useMediaSessionMetadata(() => source.value && !errorMessage.value
+  ? { title: info.value.title ?? '', artist: musicPlayerArtist.value, artworkSrc: thumbnail.value }
+  : null)
 const creatorUrl = computed(() => safeWebUrl(info.value?.channel ? info.value.channelUrl : info.value?.uploaderUrl))
 const creatorAvatarUrl = computed(() => safeWebUrl(info.value?.channel ? info.value.channelThumbnail : info.value?.uploaderThumbnail))
 const hideSharingActions = computed(() => store.getters.getHideSharingActions)
