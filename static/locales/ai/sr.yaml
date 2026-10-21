@@ -2310,3 +2310,4 @@ Subscription Groups:
   Delete Prompt: Избрисати групу „{groupName}“? Наставићете да пратите њене канале.
   Empty Group: Ова група нема канале из тренутног профила.
   Save Failed: Није могуће сачувати групу.
+  Delete Failed: Није могуће избрисати групу.

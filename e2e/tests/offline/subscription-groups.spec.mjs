@@ -149,7 +149,7 @@ test.describe('picking channels for a group', () => {
   }))
   test.use({ seed: seed({}, MANY_CHANNELS) })
 
-  test('keeps the channel picker scroll range valid while searching', async ({ page }) => {
+  test('keeps the channel picker scroll range valid while searching', { tag: '@scale' }, async ({ page }) => {
     await goTo(page, 'subscribedchannels')
     await page.getByRole('button', { name: 'New Group' }).click()
 
@@ -241,6 +241,24 @@ test.describe('editing subscription groups', () => {
     await expect(groups(page).getByRole('tab')).toHaveText(['All', 'Empty'])
     await expect(groups(page).getByRole('tab', { name: 'All' })).toHaveAttribute('aria-selected', 'true')
     await expect(channelNames(page)).toHaveText(['Alpha Channel', 'Beta Channel', 'Gamma Channel'])
+  })
+
+  test('keeps the editor open when the group cannot be deleted', async ({ page }) => {
+    await page.evaluate(() => {
+      window.$store._actions.updateSubscriptionGroups = [() => Promise.resolve(false)]
+    })
+    await goTo(page, 'subscribedchannels')
+    await groups(page).getByRole('tab', { name: 'Music' }).click()
+    await page.getByRole('button', { name: 'Edit Group' }).click()
+
+    const editor = page.getByRole('dialog', { name: 'Edit Group' })
+    await editor.getByRole('button', { name: 'Delete Group' }).click()
+    await page.getByRole('dialog', { name: 'Delete the group "Music"? Its channels stay subscribed.' })
+      .getByRole('button', { name: 'Yes, Delete' }).click()
+
+    await expect(page.getByText('The group could not be deleted.')).toBeVisible()
+    await expect(editor).toBeVisible()
+    await expect(groups(page).getByRole('tab', { name: 'Music' })).toHaveAttribute('aria-selected', 'true')
   })
 
   test('switches groups with the arrow keys', async ({ page }) => {

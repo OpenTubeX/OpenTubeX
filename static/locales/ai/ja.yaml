@@ -2230,3 +2230,4 @@ Subscription Groups:
   Delete Prompt: グループ「{groupName}」を削除しますか？グループ内のチャンネルの登録は解除されません。
   Empty Group: このグループには、現在のプロファイルのチャンネルがありません。
   Save Failed: グループを保存できませんでした。
+  Delete Failed: グループを削除できませんでした。

@@ -2246,3 +2246,4 @@ Subscription Groups:
   Delete Prompt: Hapus grup "{groupName}"? Anda akan tetap berlangganan kanal di dalamnya.
   Empty Group: Grup ini tidak memiliki kanal dari profil saat ini.
   Save Failed: Tidak dapat menyimpan grup.
+  Delete Failed: Tidak dapat menghapus grup.

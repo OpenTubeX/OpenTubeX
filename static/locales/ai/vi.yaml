@@ -2272,3 +2272,4 @@ Subscription Groups:
   Delete Prompt: Xóa nhóm "{groupName}"? Bạn vẫn tiếp tục đăng ký các kênh trong nhóm.
   Empty Group: Nhóm này không có kênh nào trong hồ sơ hiện tại.
   Save Failed: Không thể lưu nhóm.
+  Delete Failed: Không thể xóa nhóm.

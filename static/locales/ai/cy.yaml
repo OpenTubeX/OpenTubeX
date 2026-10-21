@@ -2258,3 +2258,4 @@ Subscription Groups:
   Delete Prompt: Dileu'r grŵp "{groupName}"? Byddwch yn dal i danysgrifio i'w sianeli.
   Empty Group: Does dim sianeli o'r proffil presennol yn y grŵp hwn.
   Save Failed: Methu cadw'r grŵp.
+  Delete Failed: Methu dileu'r grŵp.

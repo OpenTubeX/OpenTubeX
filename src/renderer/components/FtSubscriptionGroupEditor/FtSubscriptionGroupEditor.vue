@@ -223,7 +223,7 @@ async function handleDeletePrompt(option) {
   if (await store.dispatch('deleteSubscriptionGroup', props.group.id)) {
     close()
   } else {
-    showSaveFailedToast()
+    showToast({ message: t('Subscription Groups.Delete Failed'), icon: ['fas', 'circle-exclamation'] })
   }
 }
 

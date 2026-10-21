@@ -2319,3 +2319,4 @@ Subscription Groups:
   Delete Prompt: Slet gruppen "{groupName}"? Du forbliver abonneret på dens kanaler.
   Empty Group: Denne gruppe har ingen kanaler fra den aktuelle profil.
   Save Failed: Gruppen kunne ikke gemmes.
+  Delete Failed: Gruppen kunne ikke slettes.

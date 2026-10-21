@@ -2230,3 +2230,4 @@ Subscription Groups:
   Delete Prompt: '"{groupName}" grubu silinsin mi? Gruptaki kanallara aboneliğiniz devam eder.'
   Empty Group: Bu grupta geçerli profile ait kanal yok.
   Save Failed: Grup kaydedilemedi.
+  Delete Failed: Grup silinemedi.

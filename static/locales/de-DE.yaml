@@ -2764,6 +2764,7 @@ Subscription Groups:
   Delete Prompt: Gruppe „{groupName}“ löschen? Ihre Kanäle bleiben abonniert.
   Empty Group: Diese Gruppe enthält keine Kanäle aus dem aktuellen Profil.
   Save Failed: Die Gruppe konnte nicht gespeichert werden.
+  Delete Failed: Die Gruppe konnte nicht gelöscht werden.
 Clipboard:
   Copy failed: Kopieren in die Zwischenablage fehlgeschlagen
   Cannot access clipboard without a secure connection: Zugriff auf die Zwischenablage ist ohne sichere Verbindung nicht möglich

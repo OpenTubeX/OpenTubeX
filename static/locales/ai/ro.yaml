@@ -2280,3 +2280,4 @@ Subscription Groups:
   Delete Prompt: Ștergeți grupul "{groupName}"? Abonamentele la canalele sale vor fi păstrate.
   Empty Group: Acest grup nu conține canale din profilul curent.
   Save Failed: Grupul nu a putut fi salvat.
+  Delete Failed: Grupul nu a putut fi șters.

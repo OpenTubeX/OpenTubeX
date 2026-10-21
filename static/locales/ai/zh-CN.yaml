@@ -2229,3 +2229,4 @@ Subscription Groups:
   Delete Prompt: 要删除分组“{groupName}”吗？其中的频道仍会保持订阅。
   Empty Group: 此分组中没有当前配置文件的频道。
   Save Failed: 无法保存分组。
+  Delete Failed: 无法删除分组。

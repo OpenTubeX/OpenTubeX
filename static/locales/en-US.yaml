@@ -348,6 +348,7 @@ Subscription Groups:
   Delete Prompt: Delete the group "{groupName}"? Its channels stay subscribed.
   Empty Group: This group has no channels in the current profile.
   Save Failed: The group could not be saved.
+  Delete Failed: The group could not be deleted.
 Trending:
   Trending: Trending
   Gaming: Gaming

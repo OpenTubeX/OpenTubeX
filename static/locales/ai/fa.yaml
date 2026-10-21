@@ -2319,3 +2319,4 @@ Subscription Groups:
   Delete Prompt: گروه «{groupName}» حذف شود؟ اشتراک شما در کانال‌های آن حفظ می‌شود.
   Empty Group: این گروه هیچ کانالی از نمایهٔ فعلی ندارد.
   Save Failed: گروه ذخیره نشد.
+  Delete Failed: گروه حذف نشد.

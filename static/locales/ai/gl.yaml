@@ -2284,3 +2284,4 @@ Subscription Groups:
   Delete Prompt: Queres eliminar o grupo "{groupName}"? As subscricións ás súas canles mantéñense.
   Empty Group: Este grupo non ten canles do perfil actual.
   Save Failed: Non se puido gardar o grupo.
+  Delete Failed: Non se puido eliminar o grupo.

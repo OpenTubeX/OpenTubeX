@@ -2233,3 +2233,4 @@ Subscription Groups:
   Delete Prompt: Kas kustutada rühm „{groupName}“? Selle kanalite tellimused jäävad alles.
   Empty Group: Selles rühmas pole praeguse profiili kanaleid.
   Save Failed: Rühma ei õnnestunud salvestada.
+  Delete Failed: Rühma ei õnnestunud kustutada.

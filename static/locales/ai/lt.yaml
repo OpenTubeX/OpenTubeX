@@ -2731,3 +2731,4 @@ Subscription Groups:
   Delete Prompt: Ištrinti grupę „{groupName}“? Jos kanalų prenumeratos išliks.
   Empty Group: Šioje grupėje nėra dabartinio profilio kanalų.
   Save Failed: Nepavyko išsaugoti grupės.
+  Delete Failed: Nepavyko ištrinti grupės.

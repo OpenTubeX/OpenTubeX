@@ -2257,3 +2257,4 @@ Subscription Groups:
   Delete Prompt: Eyða hópnum "{groupName}"? Þú verður áfram áskrifandi að rásum hans.
   Empty Group: Þessi hópur inniheldur engar rásir úr núverandi notkunarsniði.
   Save Failed: Ekki tókst að vista hópinn.
+  Delete Failed: Ekki tókst að eyða hópnum.

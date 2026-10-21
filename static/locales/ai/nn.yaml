@@ -2624,3 +2624,4 @@ Subscription Groups:
   Delete Prompt: Fjerne gruppa "{groupName}"? Abonnementa dine på kanalane i gruppa blir behaldne.
   Empty Group: Denne gruppa har ingen kanalar frå den gjeldande profilen.
   Save Failed: Klarte ikkje å lagre gruppa.
+  Delete Failed: Klarte ikkje å fjerne gruppa.

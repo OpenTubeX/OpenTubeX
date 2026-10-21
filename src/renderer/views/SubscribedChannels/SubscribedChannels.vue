@@ -83,7 +83,10 @@
               :title="$t('User Playlists.Reorder Hint')"
               aria-keyshortcuts="ArrowUp ArrowDown Home End"
             >
-              <FtIcon :icon="['fas', 'grip']" />
+              <FtIcon
+                :icon="['fas', 'grip']"
+                aria-hidden="true"
+              />
             </div>
             <component
               :is="enableChannelLinks ? 'router-link' : 'span'"

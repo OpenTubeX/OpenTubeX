@@ -2275,3 +2275,4 @@ Subscription Groups:
   Delete Prompt: Видалити групу «{groupName}»? Підписки на її канали збережуться.
   Empty Group: У цій групі немає каналів із поточного профілю.
   Save Failed: Не вдалося зберегти групу.
+  Delete Failed: Не вдалося видалити групу.
