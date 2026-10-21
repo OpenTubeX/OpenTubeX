@@ -24,7 +24,6 @@
   border-radius: calc(12px * var(--ui-roundness));
   color: #fff;
   container-type: inline-size;
-  font-size: calc(13 * var(--u));
   inline-size: min(100cqi, 100cqb * var(--preview-aspect-ratio));
   overflow: hidden;
   position: relative;
@@ -176,7 +175,9 @@
   justify-content: center;
 }
 
+/* Size text inside the player: on the player itself, cqi resolves against the stage. */
 .previewTextPill {
+  font-size: calc(13 * var(--u));
   font-weight: 500;
   padding-inline: calc(12 * var(--u));
   white-space: nowrap;

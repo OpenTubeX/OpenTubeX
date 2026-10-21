@@ -297,6 +297,25 @@ test.describe('interface customizer', () => {
       }
     }
   })
+
+  test('scales preview text with the player when the stage is wider', { tag: '@scale' }, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 420, height: 760 })
+    const customizer = await openInterfaceCustomizer(page, 'player')
+    await customizer.getByRole('tab', { name: 'Player menu', exact: true }).click()
+    // Font sizes in the player's 800px design units.
+    const sizes = await customizer.locator('.previewStage').evaluate(stage => {
+      const player = stage.querySelector('.previewPlayer').getBoundingClientRect()
+      const designSize = selector => parseFloat(getComputedStyle(stage.querySelector(selector)).fontSize) * 800 / player.width
+      return {
+        stageIsWider: stage.getBoundingClientRect().width > player.width + 1,
+        time: designSize('.previewTextPill'),
+        menuLabel: designSize('.previewOverflowLabel'),
+      }
+    })
+    expect(sizes.stageIsWider).toBe(true)
+    expect(sizes.time).toBeCloseTo(13, 1)
+    expect(sizes.menuLabel).toBeCloseTo(11, 1)
+  })
 })
 
 test.describe('interface customizer with Invidious', () => {
