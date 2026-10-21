@@ -422,7 +422,7 @@ test('only offers members-only controls when yt-dlp playback cookies are configu
 
   await expect(page.getByRole('checkbox', { name: 'Members only' })).toHaveCount(0)
 
-  await page.locator('.settingsWindow').getByRole('button', { name: 'Close' }).click()
+  await page.locator('.settingsWindow').getByRole('button', { name: 'Close', exact: true }).click()
   await goTo(page, 'subscribedchannels')
   const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
   await alpha.getByRole('button', { name: 'Subscription settings' }).click()
