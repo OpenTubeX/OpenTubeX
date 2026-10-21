@@ -698,7 +698,8 @@ import {
 } from './helpers/androidSubscriptionRefreshData'
 import { hasConfiguredRestrictedPlaybackAuthentication, shouldHideMembersOnlyContent } from './helpers/restricted-playback'
 import { normalizeLocalSubscriptionFeed } from './helpers/api/local'
-import { normalizeInvidiousSubscriptionFeed } from './helpers/api/invidious'
+import { invidiousGetVideoInformation, normalizeInvidiousSubscriptionFeed } from './helpers/api/invidious'
+import { fillYatteeShortDates } from './helpers/api/yattee'
 import { classifyRequestFailure, formatRequestDiagnostic } from './helpers/api/requestDiagnostics'
 import { reconcileFetchedSubscriptionEntries } from './helpers/subscription-entries'
 import { parseSubscriptionRss } from './helpers/api/feed-rss'
@@ -2994,7 +2995,12 @@ async function reconcileAndroidSubscriptionRefreshChannelResult(result) {
       }
     }
   }
-  if (feedType === 'shorts') entries = await enrichSubscriptionShortDates(entries, result.channelId)
+  if (feedType === 'shorts') {
+    // Yattee Shorts are dated through the server like in foreground refreshes, not by YouTube
+    entries = store.getters.getBackendPreference === 'yattee' && !result.payload?.backgroundFormat?.startsWith('local')
+      ? await fillYatteeShortDates(entries, previousCache?.[config.entriesKey], invidiousGetVideoInformation)
+      : await enrichSubscriptionShortDates(entries, result.channelId)
+  }
   entries = await enrichSubscriptionRssEntries(entries)
   const reconciledEntries = reconcileFetchedSubscriptionEntries(
     entries,

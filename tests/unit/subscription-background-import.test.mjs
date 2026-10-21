@@ -3,6 +3,8 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 
+import { fillYatteeShortDates } from '../../src/renderer/helpers/api/yattee.js'
+
 const source = readFileSync(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
 function section(start, end) {
   let offset = source.indexOf(start)
@@ -108,6 +110,40 @@ test('background playlist imports restore missing authors and keep explicit byli
   assert.ok(saved.every(video => video.published === 123456))
 })
 
+
+test('background Yattee Shorts are dated through the server instead of YouTube', async () => {
+  const cache = { UCchannel: { videos: [{ videoId: 'known', published: 1000 }] } }
+  const lookups = []
+  let saved
+  const context = vm.createContext({
+    console, Date,
+    store: {
+      getters: {
+        getBackendPreference: 'yattee',
+        getSubscribedChannelIdSet: new Set(['UCchannel']),
+        getSubscribedChannelsById: new Map([['UCchannel', { id: 'UCchannel', name: 'Subscribed creator' }]])
+      },
+      dispatch: async (_action, value) => { saved = value.videos; cache.UCchannel = value; return true }
+    },
+    getAndroidSubscriptionCacheConfig: () => ({ getCache: () => cache, entriesKey: 'videos', idKey: 'videoId', action: 'save' }),
+    shouldHideMembersOnlyContent: () => false,
+    enrichSubscriptionRssEntries: async entries => entries,
+    enrichSubscriptionShortDates: async () => { throw new Error('YouTube must not be contacted') },
+    fillYatteeShortDates,
+    invidiousGetVideoInformation: async videoId => { lookups.push(videoId); return { published: 2 } },
+    reconcileFetchedSubscriptionEntries: entries => entries
+  })
+  vm.runInContext(section('async function reconcileAndroidSubscriptionRefreshChannelResult', 'function getAndroidSubscriptionCacheConfig'), context)
+  await context.reconcileAndroidSubscriptionRefreshChannelResult({
+    channelId: 'UCchannel', feedType: 'shorts', timestamp: Date.now(),
+    payload: { backgroundFormat: 'entries', entries: [
+      { videoId: 'known', author: 'Subscribed creator', authorId: 'UCchannel' },
+      { videoId: 'new', author: 'Subscribed creator', authorId: 'UCchannel' }
+    ] }
+  })
+  assert.deepEqual(saved.map(video => video.published), [1000, 2000])
+  assert.deepEqual(lookups, ['new'])
+})
 
 test('separate Electron renderers serialize background result imports', async () => {
   let finish
