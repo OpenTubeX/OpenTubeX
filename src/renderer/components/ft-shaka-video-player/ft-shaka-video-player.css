@@ -1659,15 +1659,21 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   -webkit-line-clamp: 2;
 }
 
-/* Keep room for Shaka's superscript badge even when the label needs two lines. */
+/* Codec and bitrate labels need more room than the other menu options. */
 :deep(.shaka-sub-menu.ft-menu-grid > button.explicit-resolution) {
   flex-wrap: nowrap;
   align-items: center;
+  inline-size: 140px;
+  max-inline-size: 100%;
 }
 
 :deep(.shaka-sub-menu.ft-menu-grid > button.explicit-resolution > span) {
+  display: block;
   flex: 0 1 auto;
   min-inline-size: 0;
+  overflow-wrap: anywhere;
+  line-clamp: unset;
+  -webkit-line-clamp: unset;
 }
 
 :deep(.shaka-sub-menu.ft-menu-grid > button.explicit-resolution > .shaka-quality-mark) {
