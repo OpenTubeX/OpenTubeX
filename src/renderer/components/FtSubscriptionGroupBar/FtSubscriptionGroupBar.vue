@@ -144,7 +144,7 @@ function switchGroup(event, focusedGroupId) {
   const groupId = ids[index]
   selectGroup(groupId)
   nextTick(() => tabRefs.get(groupId)?.focus())
-  store.commit('setOutlinesHidden', false)
+  store.dispatch('showOutlines')
 }
 
 const editorOpen = ref(false)

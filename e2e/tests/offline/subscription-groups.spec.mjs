@@ -97,19 +97,16 @@ test.describe('creating subscription groups', () => {
     await expect(groups(page).getByRole('tab', { name: 'Music' })).toHaveAttribute('aria-selected', 'true')
     await expect(feedVideo(page, 'Beta Channel upload')).toBeHidden()
   })
+})
+
+test.describe('picking channels for a group', () => {
+  const MANY_CHANNELS = Array.from({ length: 60 }, (_, index) => ({
+    id: `UC${String(index).padStart(22, '0')}`,
+    name: `Channel ${index}`
+  }))
+  test.use({ seed: seed({}, MANY_CHANNELS) })
 
   test('keeps the channel picker scroll range valid while searching', async ({ page }) => {
-    const manyChannels = Array.from({ length: 60 }, (_, index) => ({
-      id: `UC${String(index).padStart(22, '0')}`,
-      name: `Channel ${index}`,
-      thumbnail: ''
-    }))
-    await page.evaluate(subscriptions => {
-      window.$store.commit('setProfileList', [{
-        ...window.$store.getters.getProfileList[0],
-        subscriptions
-      }])
-    }, manyChannels)
     await goTo(page, 'subscribedchannels')
     await page.getByRole('button', { name: 'New Group' }).click()
 
@@ -349,9 +346,13 @@ test.describe('subscription group bar layout', () => {
     await goTo(page, 'subscribedchannels')
     await groups(page).getByRole('tab', { name: 'Science' }).click()
 
-    const bar = await page.locator('.subscriptionGroupBar').boundingBox()
+    const barLocator = page.locator('.subscriptionGroupBar')
+    const actionsLocator = barLocator.locator('.groupActions')
+    await expect(barLocator).toBeVisible()
+    await expect(actionsLocator).toBeVisible()
+    const bar = await barLocator.boundingBox()
     const tabs = await groups(page).getByRole('tab').evaluateAll(elements => elements.map(element => element.getBoundingClientRect().toJSON()))
-    const actions = await page.locator('.subscriptionGroupBar .groupActions').boundingBox()
+    const actions = await actionsLocator.boundingBox()
     const lastTab = tabs.at(-1)
     expect(lastTab.y).toBeGreaterThan(tabs[0].y + tabs[0].height)
     for (const box of [...tabs, actions]) {
