@@ -1,5 +1,5 @@
 import { test, expect, goToSettingsSection, setPlayerFullscreen } from '../../helpers/app.mjs'
-import { openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
+import { clickFullscreenAction, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 import { writeFile } from 'node:fs/promises'
 
@@ -112,14 +112,10 @@ test.describe('outlined focus borders', { tag: '@scale' }, () => {
           // The player animates into full window. A click while the actions are
           // still moving can land on the action bar instead of the toggle.
           await expect(player).not.toHaveClass(/presentationModeChanging/)
-          // The pointer stays where the full-window button was, which can be the
-          // seek bar now. Its hover lowers the action bar below the controls.
-          await player.hover({ position: { x: 20, y: 20 } })
         }
-        // The pointer can rest on a Shaka control after the layout change, which
-        // puts the action dock behind the controls until the pointer moves away.
-        await player.hover({ position: { x: 20, y: 20 } })
-        await player.locator('.fullscreenTranscriptToggle').click()
+        // The pointer can rest on the seek bar or a Shaka control after the
+        // layout change, which puts the action dock behind the controls.
+        await clickFullscreenAction(player, '.fullscreenTranscriptToggle')
         await expect(player.locator('.fullscreenTranscriptOverlay.open')).toBeVisible()
       }
       const card = page.locator('.transcriptCard')

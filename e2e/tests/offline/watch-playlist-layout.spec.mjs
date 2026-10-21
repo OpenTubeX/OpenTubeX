@@ -1,5 +1,5 @@
 import { test, expect, goTo, setPlayerFullscreen, setWindowSize } from '../../helpers/app.mjs'
-import { waitForPlayback } from '../../helpers/player.mjs'
+import { clickFullscreenAction, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 async function expectValidScrollRange(scroller) {
@@ -307,15 +307,13 @@ test('playlist channel separator follows the counter', { tag: '@scale' }, async 
 
 test('landscape fullscreen playlist shows more videos and keeps controls outside the scroller', { tag: '@scale' }, async ({ app, page, attachScreenshot, uiScale }) => {
   await openPlaylist(app, page)
+  // A slow run must not reach the end of the 30-second demo video, and the
+  // player keeps its controls shown while paused.
+  await page.locator('.ftVideoPlayer video').evaluate(element => element.pause())
   await setWindowSize(app, page, { width: 960, height: 440 })
   await page.setViewportSize({ width: Math.round(960 * uiScale / 100), height: Math.round(440 * uiScale / 100) })
   await setPlayerFullscreen(page, true)
-  // The action pill only takes pointer events while Shaka's controls are
-  // shown, and they auto-hide after a few idle seconds.
-  const player = page.locator('.ftVideoPlayer')
-  await player.hover({ position: { x: 20, y: 20 } })
-  await expect(player.locator('.shaka-controls-container')).toHaveAttribute('shown', 'true')
-  await page.locator('.fullscreenPlaylistToggle').click()
+  await clickFullscreenAction(page.locator('.ftVideoPlayer'), '.fullscreenPlaylistToggle')
   const dock = page.locator('.fullscreenPlaylistTarget')
   await expect(dock.locator('.playlistItemsWrapper')).toBeVisible()
   await expect(dock.locator('.playlistProgressBarContainer')).toBeHidden()
@@ -400,10 +398,7 @@ test.describe('long watch playlist', () => {
     await setWindowSize(app, page, { width: 1000, height: 700 })
     await page.setViewportSize({ width: Math.round(1000 * uiScale / 100), height: Math.round(700 * uiScale / 100) })
     await setPlayerFullscreen(page, true)
-    const player = page.locator('.ftVideoPlayer')
-    await player.hover({ position: { x: 20, y: 20 } })
-    await expect(player.locator('.shaka-controls-container')).toHaveAttribute('shown', 'true')
-    await page.locator('.fullscreenPlaylistToggle').click()
+    await clickFullscreenAction(page.locator('.ftVideoPlayer'), '.fullscreenPlaylistToggle')
     const list = page.locator('.fullscreenPlaylistTarget .playlistItemsWrapper')
     await expect(list).toBeVisible()
 

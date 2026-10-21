@@ -157,6 +157,25 @@ export async function waitForPlayback(page) {
 }
 
 /**
+ * Clicks an action in the fullscreen or full-window action pill.
+ *
+ * The pill only takes the pointer while Shaka's controls are shown, and it
+ * drops below them while the seek bar or a control button is hovered, for
+ * example right after clicking the full-window button. Playwright does not
+ * move the pointer while another element intercepts a click, so move it to
+ * the player's corner first, which also reveals the controls. Pause playback
+ * beforehand: while playing, the controls hide again after a few idle seconds.
+ *
+ * @param {import('@playwright/test').Locator} player the `.ftVideoPlayer`
+ * @param {string} action selector of the action button
+ */
+export async function clickFullscreenAction(player, action) {
+  await player.hover({ position: { x: 20, y: 20 } })
+  await expect(player.locator('.shaka-controls-container')).toHaveAttribute('shown', 'true')
+  await player.locator(action).click()
+}
+
+/**
  * Waits for playback to start in the active tab and returns the video
  * locator. If YouTube blocks media streaming from this IP (common on CI
  * runners and VPNs), the test is skipped with a clear reason instead of
