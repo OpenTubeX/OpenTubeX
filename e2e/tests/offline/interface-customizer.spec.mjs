@@ -50,11 +50,26 @@ test.describe('interface customizer', () => {
     await expect.poll(() => customizer.locator('.previewLogo').evaluate(logo => logo.getBoundingClientRect().width)).toBeCloseTo(130, 0)
   })
 
-  test('starts the navigation preview on the mobile layout in narrow windows', async ({ app, page }) => {
-    await setWindowSize(app, page, { width: 420, height: 760 })
+  test('starts the navigation preview on the layout the window uses', { tag: '@scale' }, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 1200, height: 800 })
     const customizer = await openInterfaceCustomizer(page, 'navigation')
-    await expect(customizer.getByRole('tab', { name: 'Mobile', exact: true })).toHaveAttribute('aria-selected', 'true')
+    const mobileTab = customizer.getByRole('tab', { name: 'Mobile', exact: true })
+    await expect(customizer.getByRole('tab', { name: 'Desktop', exact: true })).toHaveAttribute('aria-selected', 'true')
+
+    // Follow the window into the bottom navigation layout while open.
+    await setWindowSize(app, page, { width: 420, height: 760 })
+    await expect(mobileTab).toHaveAttribute('aria-selected', 'true')
     await expect(customizer.locator('.navigationPreview')).toHaveClass(/mobile/)
+
+    // The desktop header still fits a preview this narrow.
+    await customizer.getByRole('tab', { name: 'Desktop', exact: true }).click()
+    await expect.poll(() => customizer.locator('.previewTopBar').evaluate(bar => {
+      const bounds = bar.closest('.previewWindow').getBoundingClientRect()
+      const profile = bar.querySelector('.previewProfile').getBoundingClientRect()
+      const search = bar.querySelector('.previewSearch').getBoundingClientRect()
+      const logo = bar.querySelector('.previewLogo').getBoundingClientRect()
+      return profile.right <= bounds.right + 0.5 && search.left >= logo.right && profile.left >= search.right
+    }), { message: 'desktop header items fit without overlapping' }).toBe(true)
   })
 
   test('renders the real quick settings menu as its preview', async ({ page }) => {

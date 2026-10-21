@@ -12,6 +12,7 @@
   border-radius: calc(12px * var(--ui-roundness));
   box-sizing: border-box;
   color: var(--primary-text-color);
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   inline-size: 100%;
@@ -42,6 +43,17 @@
 
   display: grid;
   grid-template-columns: minmax(var(--preview-header-side), 1fr) minmax(36px, 440px) minmax(var(--preview-header-side), 1fr);
+}
+
+/* Without room for equal sides, let the search bar take the remaining space. */
+@container (width < 400px) {
+  .desktop .previewTopBar {
+    display: flex;
+  }
+
+  .desktop .previewSearch {
+    flex: 1 1 auto;
+  }
 }
 
 .previewTopBarStart {

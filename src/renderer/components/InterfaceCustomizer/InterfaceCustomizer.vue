@@ -130,7 +130,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, reactive, ref, useId, useTemplateRef } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, useId, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
@@ -155,6 +155,14 @@ const activeTabId = ref('navigation')
 
 // The side navigation switches to the bottom bar at this width.
 const mobileNavigationLayout = window.matchMedia('(max-width: 680px)')
+const usesMobileNavigation = ref(mobileNavigationLayout.matches)
+
+function handleMobileNavigationLayoutChange(event) {
+  usesMobileNavigation.value = event.matches
+}
+
+onMounted(() => mobileNavigationLayout.addEventListener('change', handleMobileNavigationLayoutChange))
+onBeforeUnmount(() => mobileNavigationLayout.removeEventListener('change', handleMobileNavigationLayoutChange))
 
 const tabs = computed(() => {
   const fullscreenModes = [
@@ -172,7 +180,7 @@ const tabs = computed(() => {
         { id: 'mobile', icon: ['fas', 'smartphone'], label: t('Settings.Interface Customizer.Mobile') },
       ],
       // Start with the layout the app is currently using.
-      defaultPreviewMode: mobileNavigationLayout.matches ? 'mobile' : 'desktop',
+      defaultPreviewMode: usesMobileNavigation.value ? 'mobile' : 'desktop',
     },
     {
       id: 'quickSettings',
