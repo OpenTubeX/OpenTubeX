@@ -5096,7 +5096,8 @@ export default defineComponent({
     const seekHistoryEnabled = computed(() => store.getters.getEnableSeekHistory)
     const seekHistoryAvailable = computed(() => seekHistoryEnabled.value && seekingIsPossible.value && !isLive.value && !props.shortsPlayer)
     const seekHistoryKey = computed(() => props.videoId || props.externalUrl)
-    const seekHistory = shallowRef(getSeekHistory(seekHistoryKey.value))
+    // Players showing the same video share its history.
+    const seekHistory = computed(() => getSeekHistory(seekHistoryKey.value))
     const seekHistoryChapters = computed(() => props.chapters)
 
     /**
@@ -5106,15 +5107,12 @@ export default defineComponent({
      */
     let seekHistoryJump = null
 
-    // Turning the setting off clears the stored histories.
-    watch([seekHistoryKey, seekHistoryEnabled], ([key]) => {
-      seekHistory.value = getSeekHistory(key)
+    watch([seekHistoryKey, seekHistoryEnabled], () => {
       seekHistoryJump = null
     })
 
     /** @param {import('../../helpers/player/seekHistory').SeekHistory} history */
     function updateSeekHistory(history) {
-      seekHistory.value = history
       if (seekHistoryKey.value) setSeekHistory(seekHistoryKey.value, history)
     }
 
@@ -5124,9 +5122,9 @@ export default defineComponent({
       if (!seekHistoryAvailable.value || !videoElement || !Number.isFinite(target)) return
 
       const now = performance.now()
-      // Holding the seek bar still while dragging continues the same jump.
+      // Holding a seek bar still while dragging continues the same jump.
       if (seekHistoryJump === null ||
-        (now - seekHistoryJump.lastAt > SEEK_HISTORY_JUMP_WINDOW_MS && !ui?.getControls().isSeeking())) {
+        (now - seekHistoryJump.lastAt > SEEK_HISTORY_JUMP_WINDOW_MS && !ui?.getControls().isSeeking() && !mobileMiniBarSeeking.value)) {
         seekHistoryJump = { from: videoElement.currentTime, recorded: false, lastAt: now }
       }
       seekHistoryJump.lastAt = now
@@ -8012,6 +8010,7 @@ export default defineComponent({
     function startMobileMiniBarSeek(event) {
       if (mobileMiniBarSeekDisabled.value || !event.isPrimary || event.button !== 0) return
       mobileMiniBarSeeking.value = true
+      seekHistoryJump = null
       event.currentTarget.setPointerCapture(event.pointerId)
     }
 

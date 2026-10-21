@@ -1,3 +1,5 @@
+import { shallowReactive } from 'vue'
+
 /**
  * The places a viewer jumped away from in a video, so that a misclicked seek
  * never loses their position. Like an editor's jump list, stepping back and
@@ -25,10 +27,11 @@ export const EMPTY_SEEK_HISTORY = Object.freeze({ positions: Object.freeze([]), 
 
 /**
  * Histories last for the app session, so they survive player reloads and
- * reopening a video.
+ * reopening a video. They are reactive so that every player showing a video
+ * follows changes made in another.
  * @type {Map<string, SeekHistory>}
  */
-const histories = new Map()
+const histories = shallowReactive(new Map())
 
 /**
  * @param {string} key

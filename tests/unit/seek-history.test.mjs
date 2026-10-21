@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
+import { computed } from 'vue'
 
 import {
   EMPTY_SEEK_HISTORY,
@@ -90,12 +91,25 @@ test('stores histories per video', () => {
   assert.equal(getSeekHistory('second-video'), EMPTY_SEEK_HISTORY)
 })
 
+test('shares a video\'s history between the players showing it', () => {
+  const first = computed(() => getSeekHistory('shared-video'))
+  const second = computed(() => getSeekHistory('shared-video'))
+  assert.equal(second.value, EMPTY_SEEK_HISTORY)
+
+  setSeekHistory('shared-video', recordSeekHistoryJump(first.value, 30))
+  setSeekHistory('shared-video', recordSeekHistoryJump(second.value, 300))
+  assert.deepEqual(first.value.positions, [30, 300])
+  clearSeekHistories()
+  assert.equal(second.value, EMPTY_SEEK_HISTORY)
+})
+
 const playerSource = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
 
 function recorder() {
   const state = {
     now: 0,
     dragging: false,
+    mobileMiniBarSeeking: { value: false },
     performance: { now: () => state.now },
     ui: { getControls: () => ({ isSeeking: () => state.dragging }) },
     video: { value: { currentTime: 100 } },
@@ -106,7 +120,7 @@ function recorder() {
     SEEK_HISTORY_JUMP_WINDOW_MS: 1000,
     SEEK_HISTORY_MIN_JUMP_SECONDS,
     recordSeekHistoryJump,
-    setSeekHistory() {},
+    setSeekHistory(_key, history) { state.seekHistory.value = history },
   }
   const functions = ['updateSeekHistory', 'noteSeekHistoryJump'].map(name => {
     const match = playerSource.match(new RegExp(`    function ${name}\\([^]*?\\n    }`))
@@ -145,6 +159,16 @@ test('holding the seek bar still continues the same jump', () => {
   seek(105)
   seek(150, 3000)
   state.dragging = false
+  assert.deepEqual(positions(), [100])
+})
+
+test('holding the mobile mini bar still continues the same jump', () => {
+  const { state, seek, positions } = recorder()
+
+  state.mobileMiniBarSeeking.value = true
+  seek(105)
+  seek(150, 3000)
+  state.mobileMiniBarSeeking.value = false
   assert.deepEqual(positions(), [100])
 })
 
