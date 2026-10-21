@@ -29,6 +29,9 @@ body {
   --border-color: var(--tertiary-text-color);
   --divider-color: color-mix(in srgb, var(--border-color) 45%, transparent);
   --subtle-surface-color: var(--tertiary-text-color);
+
+  /* Themes whose page background matches the tab strip set a visible fill. */
+  --inactive-tab-color: var(--bg-color);
   --watched-thumbnail-overlay-color: rgb(from var(--bg-color) r g b / 70%);
   --dropdown-item-hover-color: var(--scrollbar-color-hover);
   --dropdown-item-hover-text-color: var(--scrollbar-text-color-hover);
@@ -353,6 +356,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --side-nav-color: #121212;
   --side-nav-hover-color: #272727;
   --side-nav-active-color: #3a3a3a;
+  --inactive-tab-color: #272727;
   --search-bar-color: #181818;
   --settings-search-bar-color: var(--card-bg-color);
   --logo-icon: url('../../_icons/iconWhiteSmall.svg');
@@ -373,6 +377,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --side-nav-color: #000;
   --side-nav-hover-color: #212121;
   --side-nav-active-color: #303030;
+  --inactive-tab-color: #1a1a1a;
   --search-bar-color: #262626;
   --logo-icon: url('../../_icons/iconWhiteSmall.svg');
   --logo-text: url('../../_icons/textWhiteSmall.svg');
@@ -462,6 +467,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --side-nav-hover-text-color: #000;
   --side-nav-active-color: #959595;
   --side-nav-active-text-color: #000;
+  --inactive-tab-color: #bc156c;
   --search-bar-color: #9c2d5d;
   --logo-icon: url('../../_icons/iconWhiteSmall.svg');
   --logo-text: url('../../_icons/textWhiteSmall.svg');
@@ -749,6 +755,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --side-nav-color: #eee8ce;
   --side-nav-hover-color: #d5cfb5;
   --side-nav-active-color: #d5cfb5;
+  --inactive-tab-color: #e5dfc5;
   --search-bar-color: #eae4ca;
   --logo-icon: url('../../_icons/iconEverforestDarkLowSmall.svg');
   --logo-text: url('../../_icons/textEverforestDarkLowSmall.svg');
@@ -3074,6 +3081,7 @@ body .os-scrollbar.app-scrollbar-idle:not(:hover) {
   --card-bg-color: #12120f;
   --side-nav-hover-color: #1d1d1a;
   --side-nav-active-color: #242421;
+  --inactive-tab-color: #1d1d1a;
   --primary-color: #8a9a7b;
   --primary-color-hover: #96a488;
   --primary-color-active: #a1ae95;
@@ -3116,6 +3124,7 @@ body .os-scrollbar.app-scrollbar-idle:not(:hover) {
   --card-bg-color: #10141c;
   --side-nav-hover-color: #1a1e25;
   --side-nav-active-color: #22252b;
+  --inactive-tab-color: #1a1e25;
   --primary-color: #e6b450;
   --primary-color-hover: #e8bc62;
   --primary-color-active: #ebc373;
@@ -3158,6 +3167,7 @@ body .os-scrollbar.app-scrollbar-idle:not(:hover) {
   --card-bg-color: #fcfcfc;
   --side-nav-hover-color: #f2f3f3;
   --side-nav-active-color: #ececed;
+  --inactive-tab-color: #f2f3f3;
   --primary-color: #8f590e;
   --primary-color-hover: #81500d;
   --primary-color-active: #72470b;
@@ -3240,6 +3250,7 @@ body .os-scrollbar.app-scrollbar-idle:not(:hover) {
   --toggle-thumb-icon-color: var(--md-sys-color-surface-container-highest);
   --settings-changed-color: var(--md-sys-color-primary);
   --settings-section-bg-color: var(--md-sys-color-surface-container-low);
+  --inactive-tab-color: var(--md-sys-color-surface-container-high);
 
   .topNavBarColor .logo :is(.logoIcon, .logoText) {
     background-color: var(--text-with-main-color);

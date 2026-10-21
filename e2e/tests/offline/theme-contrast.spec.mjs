@@ -2,6 +2,7 @@ import { test, expect, goToSettingsSection, setPlayerFullscreen } from '../../he
 import { sampleColors } from '../../helpers/colors.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
+import { BUILTIN_BASE_THEME_VALUES } from '../../../src/constants.js'
 
 /** Text color and background composited over ancestors, including color(srgb ...) values. */
 function renderedColors(locator) {
@@ -366,5 +367,31 @@ test.describe('bright main color toggle contrast', () => {
     const surface = await renderedColors(page.locator('.settingsHeaderActions'))
     expect(contrastRatio(enabled.foreground, enabled.background), 'enabled icon').toBeGreaterThanOrEqual(3)
     expect(contrastRatio(enabled.background, surface.background), 'enabled container').toBeGreaterThanOrEqual(1.2)
+  })
+})
+
+test.describe('browser tab contrast', () => {
+  test.use({ seed: { settings: { currentLocale: 'en-US' } } })
+
+  test('inactive tabs stand out from the vertical tab strip in every built-in theme', async ({ page, attachScreenshot }) => {
+    await page.evaluate(() => window.ftElectron.tabs.create({ route: '/history', title: 'History', makeActive: false, lazyLoad: true }))
+    const tabBar = page.locator('.tabBar')
+    await expect(tabBar.locator('.tab')).toHaveCount(2)
+    // The vertical strip has no neighboring chrome to outline the tabs.
+    await page.evaluate(() => window.$store.commit('setTabBarPosition', 'left'))
+    await expect(tabBar).toHaveClass(/vertical/)
+    await page.mouse.move(600, 400)
+    for (const theme of BUILTIN_BASE_THEME_VALUES.filter(theme => theme !== 'system')) {
+      await page.evaluate(async theme => {
+        await window.$store.dispatch('updateBaseTheme', theme)
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+      }, theme)
+      const [strip, inactive, active] = await Promise.all([
+        tabBar, tabBar.locator('.tab:not(.active)'), tabBar.locator('.tab.active'),
+      ].map(element => renderedColors(element).then(({ background }) => background)))
+      expect.soft(contrastRatio(inactive, strip), `${theme} inactive tab on the strip`).toBeGreaterThanOrEqual(1.05)
+      expect.soft(contrastRatio(active, inactive), `${theme} active tab beside an inactive tab`).toBeGreaterThanOrEqual(1.05)
+      if (['black', 'materialDark', 'materialBlack'].includes(theme)) await attachScreenshot(`${theme} vertical tabs`)
+    }
   })
 })
