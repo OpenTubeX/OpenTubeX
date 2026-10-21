@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
 import test from 'node:test'
+import vm from 'node:vm'
 import { parseSpeedByChannelValues, resolveSpeedByChannelValues } from '../../src/renderer/helpers/speed-by-channel-import.js'
 
 const CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
@@ -77,4 +79,60 @@ test('matches names from older versions against the subscriptions', async () => 
 
   assert.deepEqual(speeds, { [CHANNEL_ID]: 1.5, [OTHER_CHANNEL_ID]: 1.25 })
   assert.deepEqual(notFound, ['Shared', 'Unknown'])
+})
+
+const dataSettings = await readFile(new URL('../../src/renderer/components/DataSettings/DataSettings.vue', import.meta.url), 'utf8')
+const importer = dataSettings.slice(
+  dataSettings.indexOf('const channelPlaybackSpeedsBusy'),
+  dataSettings.indexOf('// #endregion channel playback speeds')
+)
+
+async function importFile(values, { saveFails = false } = {}) {
+  const settings = { channelPlaybackSpeeds: '{}', rememberPlaybackSpeedPerChannel: false }
+  const toasts = []
+  const run = vm.runInNewContext(`${importer}\nimportChannelPlaybackSpeeds`, {
+    ref: value => ({ value }),
+    readFileWithPicker: async () => ({ content: JSON.stringify(values) }),
+    parseImportedJson: content => JSON.parse(content),
+    parseSpeedByChannelValues,
+    resolveSpeedByChannelValues,
+    parseChannelPreferences: value => JSON.parse(value),
+    resolveChannelId: async () => null,
+    runWithDataImportProgress: callback => callback({ update() {} }),
+    primaryProfile: { value: { subscriptions: [] } },
+    store: {
+      getters: {
+        get getChannelPlaybackSpeeds() { return settings.channelPlaybackSpeeds },
+        get getRememberPlaybackSpeedPerChannel() { return settings.rememberPlaybackSpeedPerChannel },
+        getBackendPreference: 'local',
+      },
+      // Like the settings store, a failed update is only logged
+      dispatch: async (action, value) => {
+        if (!saveFails) settings[action[6].toLowerCase() + action.slice(7)] = value
+      },
+    },
+    showToast: toast => toasts.push(toast.message),
+    t: (key, named) => named ? `${key}: ${named.count}` : key,
+    IMPORT_DIRECTORY_ID: 'test',
+    START_IN_DIRECTORY: 'downloads',
+  })
+  await run()
+  return { settings, toasts }
+}
+
+test('saves the imported speeds and applies them', async () => {
+  const { settings, toasts } = await importFile({ [CHANNEL_ID]: 1.5 })
+
+  assert.deepEqual(settings, {
+    channelPlaybackSpeeds: JSON.stringify({ [CHANNEL_ID]: 1.5 }),
+    rememberPlaybackSpeedPerChannel: true,
+  })
+  assert.deepEqual(toasts, ['Settings.Data Settings.Channel playback speeds imported: 1'])
+})
+
+test('reports a failed save instead of a successful import', async () => {
+  const { settings, toasts } = await importFile({ [CHANNEL_ID]: 1.5 }, { saveFails: true })
+
+  assert.deepEqual(settings, { channelPlaybackSpeeds: '{}', rememberPlaybackSpeedPerChannel: false })
+  assert.deepEqual(toasts, ['Channel.Failed to save subscription settings'])
 })
