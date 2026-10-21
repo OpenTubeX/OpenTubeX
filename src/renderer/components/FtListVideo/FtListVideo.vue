@@ -297,19 +297,35 @@
             <span
               v-if="!isLive && !isUpcoming && !isPremium && !isStation && !hideViews && viewCount != null"
               class="viewCount"
-            >{{ t('Global.Counts.View Count', { count: parsedViewCount }, viewCount) }}</span>
+            ><FtIcon
+              :icon="['fas', 'eye']"
+              class="statIcon"
+              aria-hidden="true"
+            />{{ t('Global.Counts.View Count', { count: parsedViewCount }, viewCount) }}</span>
             <span
               v-if="displayedUploadedTime !== '' && !isLive && !isStation"
               class="uploadedTime"
-            >{{ displayedUploadedTime }}</span>
+            ><FtIcon
+              :icon="['fas', 'clock']"
+              class="statIcon"
+              aria-hidden="true"
+            />{{ displayedUploadedTime }}</span>
             <span
               v-if="subscriptionHiddenVideoCount > 0"
               class="subscriptionHiddenVideoCount"
-            >{{ t('Channel.More videos hidden', { count: subscriptionHiddenVideoCount }, subscriptionHiddenVideoCount) }}</span>
+            ><FtIcon
+              :icon="['fas', 'eye-slash']"
+              class="statIcon"
+              aria-hidden="true"
+            />{{ t('Channel.More videos hidden', { count: subscriptionHiddenVideoCount }, subscriptionHiddenVideoCount) }}</span>
             <span
               v-if="(isLive || isStation) && !hideViews"
               class="viewCount"
-            >{{ t('Global.Counts.Watching Count', { count: parsedViewCount }, viewCount) }}</span>
+            ><FtIcon
+              :icon="['fas', 'users']"
+              class="statIcon"
+              aria-hidden="true"
+            />{{ t('Global.Counts.Watching Count', { count: parsedViewCount }, viewCount) }}</span>
           </FtInlineMetadata>
         </div>
         <FtCollaboratorsPrompt

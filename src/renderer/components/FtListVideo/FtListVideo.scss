@@ -187,3 +187,33 @@
 .ft-list-video .videoThumbnail .playlistIcons.mobileThumbnailActions {
   display: none;
 }
+
+// Icons label each statistic, so the dot separators are not needed.
+.ft-list-video .info .infoLine .videoInfo {
+  column-gap: 1em;
+
+  > span::before {
+    content: none;
+  }
+}
+
+.statIcon {
+  margin-inline-end: 0.4em;
+  opacity: 0.8;
+}
+
+// Keep the channel on its own line and group the views and date below it.
+// The compact watch page playlist keeps everything on one line.
+.ft-list-video:not(.watchPlaylistItem) .info .infoLine {
+  align-items: flex-start;
+  flex-direction: column;
+  row-gap: 2px;
+
+  .videoInfo {
+    overflow-x: clip;
+  }
+
+  .channelName + .videoInfo::before {
+    content: none;
+  }
+}

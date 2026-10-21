@@ -293,6 +293,21 @@ test('keyboard moves watch playlist videos to the top and bottom', async ({ app,
   await watch.dispose()
 })
 
+test('playlist items keep the channel and labeled upload time on one row', { tag: '@scale' }, async ({ app, page }) => {
+  const watch = await openPlaylist(app, page)
+  const infoLine = page.locator('.watchVideoPlaylist').filter({ visible: true }).locator('.playlistItem .infoLine').first()
+  await expect(infoLine.locator('.uploadedTime .statIcon')).toBeVisible()
+  expect(await infoLine.evaluate(element => {
+    const channel = element.querySelector('.channelName').getBoundingClientRect()
+    const uploaded = element.querySelector('.uploadedTime').getBoundingClientRect()
+    return {
+      sameRow: Math.abs((channel.top + channel.bottom) / 2 - (uploaded.top + uploaded.bottom) / 2) <= 1,
+      afterChannel: uploaded.left > channel.right
+    }
+  })).toEqual({ sameRow: true, afterChannel: true })
+  await watch.dispose()
+})
+
 test('playlist channel separator follows the counter', { tag: '@scale' }, async ({ app, page, uiScale }) => {
   const watch = await openPlaylist(app, page)
   await watch.evaluate(async (vm, items) => {
