@@ -2326,6 +2326,7 @@ export default defineComponent({
       this.loadingTheatreMode = this.useTheatreMode
       preserveTitle ||= this.preserveTitleOnNextReload
       this.preserveTitleOnNextReload = false
+      const videoInfoPrefetch = this.prefetchLocalVideoInfo(loadGeneration, requestedVideoId)
 
       try {
         this.saveShortsPlaybackPosition()
@@ -2397,7 +2398,7 @@ export default defineComponent({
 
       switch (this.backendPreference) {
         case 'local':
-          await this.getVideoInformationLocal(loadGeneration)
+          await this.getVideoInformationLocal(loadGeneration, false, videoInfoPrefetch)
           break
         case 'invidious':
         case 'yattee':
@@ -3378,7 +3379,34 @@ export default defineComponent({
       }
     },
 
-    getVideoInformationLocal: async function (loadGeneration = ++this.videoLoadGeneration, metadataOnly = false) {
+    /**
+     * Requests the next video while the previous one saves its progress and
+     * destroys its player. Shorts may use their own extraction, so they wait.
+     * @param {number} loadGeneration
+     * @param {string} videoId
+     */
+    prefetchLocalVideoInfo: function (loadGeneration, videoId) {
+      if (this.backendPreference !== 'local' || this.tabRoute.query.short === 'true') return null
+
+      const prefetch = initializeNetworkRecovery().ready.then(() => (
+        this.isCurrentVideoLoad(loadGeneration, videoId) && getConnectionState() !== 'offline'
+          ? getLocalVideoInfo(videoId, {
+              // As in getVideoInformationLocal, but the previous video's engine
+              // fallback is only reset once its player is gone. Until then, a
+              // different video uses the engine setting without that fallback.
+              shouldGeneratePoToken: () => this.isCurrentVideoLoad(loadGeneration, videoId) &&
+                (!process.env.IS_CAPACITOR || !(videoId === this.videoId
+                  ? this.isYtDlpPlaybackRequested()
+                  : supportsYtDlp && this.videoPlaybackEngine === 'yt-dlp'))
+            })
+          : null
+      ))
+      // A superseded load never awaits its prefetch.
+      prefetch.catch(() => {})
+      return prefetch
+    },
+
+    getVideoInformationLocal: async function (loadGeneration = ++this.videoLoadGeneration, metadataOnly = false, videoInfoPrefetch = null) {
       if (this.firstLoad && !metadataOnly) {
         this.isLoading = true
       }
@@ -3397,14 +3425,15 @@ export default defineComponent({
         const shortsExtractionKey = this.customShortsPlayerActive && !metadataOnly
           ? this.getShortsExtractionKey(videoId, 'local')
           : null
-        const videoInfo = await (this.customShortsPlayerActive && !metadataOnly
-          ? this.getShortsVideoInformation(videoId, 'local')
-          : getLocalVideoInfo(videoId, {
+        const videoInfo = this.customShortsPlayerActive && !metadataOnly
+          ? await this.getShortsVideoInformation(videoId, 'local')
+          // A failed prefetch is retried here, like one that never started.
+          : (await videoInfoPrefetch?.catch(() => null)) ?? await getLocalVideoInfo(videoId, {
               // Metadata extraction can outlive a playback engine switch. Decide
               // when the token is needed, after the preceding network requests.
               shouldGeneratePoToken: () => this.isCurrentVideoLoad(loadGeneration, videoId) &&
                 (!process.env.IS_CAPACITOR || !this.isYtDlpPlaybackRequested())
-            }))
+            })
         if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
 
         const {

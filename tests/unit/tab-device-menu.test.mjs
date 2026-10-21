@@ -105,7 +105,7 @@ for (const sameVideo of [false, true]) {
     const watch = {
       tabId: 'first', videoId: 'jNQXAC9IVRw', videoLoadGeneration: 0,
       tabRoute: { params: { id: nextId } },
-      saveShortsPlaybackPosition() {}, handleRouteChange: () => routeChange,
+      saveShortsPlaybackPosition() {}, prefetchLocalVideoInfo: () => null, handleRouteChange: () => routeChange,
       isCurrentVideoLoad: () => false,
       $store: { commit(action, { tabId, value }) {
         assert.equal(action, 'setCurrentWatchTimestamp')
