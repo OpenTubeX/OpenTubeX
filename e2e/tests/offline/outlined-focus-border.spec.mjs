@@ -109,6 +109,9 @@ test.describe('outlined focus borders', { tag: '@scale' }, () => {
           await player.hover({ position: { x: 20, y: 20 } })
           await player.locator('.full-window-button').click()
           await expect(player).toHaveClass(/fullWindow/)
+          // The player animates into full window. A click while the actions are
+          // still moving can land on the action bar instead of the toggle.
+          await expect(player).not.toHaveClass(/presentationModeChanging/)
         }
         await player.locator('.fullscreenTranscriptToggle').click()
         await expect(player.locator('.fullscreenTranscriptOverlay.open')).toBeVisible()

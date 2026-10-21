@@ -1886,6 +1886,8 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await player.locator('.ftVideoPlayer').click({ position: { x: 20, y: 20 } })
   await page.keyboard.press('s')
   await expect(player.locator('.ftVideoPlayer')).toHaveClass(/fullWindow/)
+  // Wait for the full-window animation so the click cannot miss a moving action.
+  await expect(player.locator('.ftVideoPlayer')).not.toHaveClass(/presentationModeChanging/)
   await expect(player.locator('.fullscreenMetadataOverlay.open')).toHaveCount(0)
   await player.locator('.fullscreenShareAction').getByRole('button', { name: 'Share Video' }).click()
   const fullscreenShareDialog = page.getByRole('dialog', { name: 'Share Video' })
