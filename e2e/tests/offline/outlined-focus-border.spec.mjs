@@ -113,6 +113,9 @@ test.describe('outlined focus borders', { tag: '@scale' }, () => {
           // still moving can land on the action bar instead of the toggle.
           await expect(player).not.toHaveClass(/presentationModeChanging/)
         }
+        // The pointer can rest on a Shaka control after the layout change, which
+        // puts the action dock behind the controls until the pointer moves away.
+        await player.hover({ position: { x: 20, y: 20 } })
         await player.locator('.fullscreenTranscriptToggle').click()
         await expect(player.locator('.fullscreenTranscriptOverlay.open')).toBeVisible()
       }
