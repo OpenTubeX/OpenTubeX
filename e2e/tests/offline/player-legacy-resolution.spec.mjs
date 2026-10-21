@@ -28,8 +28,9 @@ function routeTwoLegacyFormats(page) {
 /**
  * Selects 240p and waits until the new source could have started through the autoplay attribute.
  * @param {import('@playwright/test').Page} page
+ * @param {() => Promise<void>} [duringLoad] runs after the selection, before waiting for the new source
  */
-async function selectLowerResolution(page) {
+async function selectLowerResolution(page, duringLoad) {
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
   const video = player.locator('video')
   await player.evaluate(element => {
@@ -43,6 +44,7 @@ async function selectLowerResolution(page) {
   await player.getByRole('button', { name: 'More settings', exact: true }).click()
   await player.locator('.legacy-quality-button').click()
   await player.locator('.legacy-qualities').getByRole('button', { name: '240p', exact: true }).click()
+  await duringLoad?.()
   await expect.poll(() => page.evaluate(() => window.resolutionLoaded)).toBe(true)
   await expect.poll(() => video.evaluate(element => element.readyState)).toBe(4)
   await video.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
@@ -66,6 +68,30 @@ test.describe('legacy resolution changes', () => {
     expect(await video.evaluate(element => ({ paused: element.paused, playEvents: element.playEvents })))
       .toEqual({ paused: true, playEvents: 0 })
     expect(await video.evaluate(element => element.autoplay)).toBe(true)
+  })
+
+  test('play a paused video that is played while the new resolution loads', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await routeTwoLegacyFormats(page)
+    const video = await openMockedVideo(page)
+    await video.evaluate(element => element.pause())
+    let releaseMedia
+    const mediaReady = new Promise(resolve => { releaseMedia = resolve })
+    let mediaRequested
+    const requested = new Promise(resolve => { mediaRequested = resolve })
+    await page.route(/googlevideo\.com\/videoplayback.*res=240/, async route => {
+      mediaRequested()
+      await mediaReady
+      await route.fallback()
+    })
+
+    await selectLowerResolution(page, async () => {
+      await requested
+      await video.evaluate(element => { element.play().catch(() => {}) })
+      releaseMedia()
+    })
+
+    await expect.poll(() => video.evaluate(element => !element.paused && element.currentTime > 0)).toBe(true)
   })
 })
 

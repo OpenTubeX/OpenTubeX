@@ -9975,7 +9975,7 @@ export default defineComponent({
        * Loading a new source pauses the media element, and its autoplay
        * attribute then starts it again. Keep the state from before the first
        * pending user selection, as a newer one finds the element paused.
-       * @type {{ wasPaused: boolean, autoplay: boolean } | null}
+       * @type {{ wasPaused: boolean, autoplay: boolean, trackPlayback: () => void } | null}
        */
       let selectionPlaybackState = null
 
@@ -9994,10 +9994,16 @@ export default defineComponent({
           // A video still waiting for autoplay counts as playing.
           const awaitingAutoplay = mediaElement.autoplay && mediaElement.played.length === 0 &&
             !initialAutoplayCanceled && mediaElement.readyState < HTMLMediaElement.HAVE_ENOUGH_DATA
-          selectionPlaybackState = {
+          const state = {
             wasPaused: mediaElement.paused && !awaitingAutoplay,
-            autoplay: mediaElement.autoplay
+            autoplay: mediaElement.autoplay,
+            // Playing or pausing while the selection is pending replaces that state. Loading the
+            // new source pauses the element without a pause event, so this only sees other changes.
+            trackPlayback: () => { state.wasPaused = mediaElement.paused }
           }
+          mediaElement.addEventListener('play', state.trackPlayback)
+          mediaElement.addEventListener('pause', state.trackPlayback)
+          selectionPlaybackState = state
         }
 
         queuePlaybackRateRestore(playbackRate)
@@ -10044,8 +10050,10 @@ export default defineComponent({
           return
         }
 
-        const { wasPaused, autoplay } = selectionPlaybackState
+        const { wasPaused, autoplay, trackPlayback } = selectionPlaybackState
         selectionPlaybackState = null
+        mediaElement.removeEventListener('play', trackPlayback)
+        mediaElement.removeEventListener('pause', trackPlayback)
 
         if (loaded) {
           // Pausing also keeps the restored autoplay attribute from starting the new source.
