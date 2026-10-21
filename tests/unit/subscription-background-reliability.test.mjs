@@ -129,14 +129,28 @@ test('the upload channel set reaches the worker and is restored after a crash', 
     await service.configureUploads(uploads)
     assert.equal(children.length, 0, 'The configuration alone does not start a worker')
     await service.configure({ enabled: true, profiles: [], intervals: {} })
-    assert.deepEqual(children[0].messages.slice(0, 3).map(message => message.method), ['configure', 'configureUploads', 'background'])
-    assert.equal(children[0].messages[1].value, uploads)
+    assert.deepEqual(children[0].messages.slice(0, 3).map(message => message.method), ['configureUploads', 'configure', 'background'])
+    assert.equal(children[0].messages[0].value, uploads)
     await service.configureUploads({ enabled: false })
     assert.equal(children[0].messages.at(-1).method, 'configureUploads')
     children[0].emit('exit')
     await service.next()
-    assert.deepEqual(children[1].messages.slice(0, 3).map(message => message.method), ['configure', 'configureUploads', 'background'])
-    assert.deepEqual(children[1].messages[1].value, { enabled: false })
+    assert.deepEqual(children[1].messages.slice(0, 3).map(message => message.method), ['configureUploads', 'configure', 'background'])
+    assert.deepEqual(children[1].messages[0].value, { enabled: false })
+  } finally { service.stop() }
+})
+
+test('a worker started by feed processing before the scheduler configuration still gets the upload channels', async () => {
+  const { service, children } = await serviceFixture()
+  try {
+    const uploads = { enabled: true, channels: { UCtest: { feedTypes: ['videos'] } } }
+    await service.configureUploads(uploads)
+    await service.processFeed({ format: 'rss', text: '<feed/>' })
+    assert.deepEqual(children[0].messages.map(message => message.method), ['configureUploads', 'processFeed'])
+    assert.equal(children[0].messages[0].value, uploads)
+    await service.configure({ enabled: true, profiles: [], intervals: {} })
+    assert.deepEqual(children[0].messages.slice(2).map(message => message.method), ['configure', 'background'])
+    assert.equal(children.length, 1)
   } finally { service.stop() }
 })
 

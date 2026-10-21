@@ -64,12 +64,12 @@ export function createSubscriptionBackgroundService(userDataPath, { onUploads } 
       else operation?.resolve(message.value)
     })
     child.once('exit', () => releaseWorker(child))
-    // Every replacement must restore its scheduler, regardless of which call started it.
-    ready = configuration
-      ? send('configure', configuration)
-          .then(() => uploads && send('configureUploads', uploads))
-          .then(() => send('background', background && configuration.enabled && net.isOnline()))
-      : Promise.resolve()
+    // Every replacement must restore its scheduler and the upload channels,
+    // regardless of which call started it.
+    ready = Promise.resolve()
+      .then(() => uploads && send('configureUploads', uploads))
+      .then(() => configuration && send('configure', configuration))
+      .then(() => configuration && send('background', background && configuration.enabled && net.isOnline()))
     ready = ready.catch(error => {
       if (worker === child) stopWorker()
       throw error
