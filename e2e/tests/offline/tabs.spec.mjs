@@ -46,7 +46,14 @@ async function delayTabReorders(app, delayMs = 1000) {
     const [listener] = ipcMain.listeners(channel)
     ipcMain.removeListener(channel, listener)
     ipcMain.on(channel, (event, ...args) => {
-      setTimeout(() => listener(event, ...args), delay)
+      setTimeout(() => {
+        // Electron never delivers messages from a destroyed sender. A reorder
+        // still pending at teardown would otherwise throw in the main process,
+        // and its error dialog keeps the app from quitting.
+        if (!event.sender.isDestroyed()) {
+          listener(event, ...args)
+        }
+      }, delay)
     })
   }, delayMs)
 }
@@ -526,6 +533,13 @@ test.describe('tab bar', () => {
       }), route)
       const tab = page.locator(`.tab[data-tab-id="${subscriptionsTab.id}"]`)
       await expect(tab).not.toHaveClass(/unloaded|loading/)
+      // Subscription tabs never show the loading class, so wait for the page's
+      // own loader to settle. Its final update would otherwise clear the
+      // loading state set below.
+      await expect.poll(() => page.evaluate(id => {
+        const tab = window.$store.getters.getTabById(id)
+        return tab.loadState === 'loaded' && !tab.isLoading
+      }, subscriptionsTab.id)).toBe(true)
       await page.evaluate(id => window.ftElectron.tabs.setLoading(true, id), subscriptionsTab.id)
       await expect.poll(() => page.evaluate(id => (
         window.$store.getters.getTabById(id).isLoading
@@ -1537,6 +1551,18 @@ test.describe('tab bar', () => {
       }))
       window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0 }))
     })
+    // The drop commits after its settle animation. Open the intervening tab
+    // only once the four-tab reorder is pending; a tab arriving earlier joins
+    // the reorder instead of invalidating it.
+    await expect.poll(() => page.evaluate(() => window.$store.state.tabs.pendingTabOrder), {
+      // The order stays pending only until the delayed reorder is answered.
+      intervals: [100]
+    }).toEqual([
+      originalIds[3],
+      originalIds[0],
+      originalIds[1],
+      originalIds[2]
+    ])
 
     await page.evaluate(openerTabId => window.ftElectron.tabs.create({
       route: '/history',
