@@ -427,3 +427,22 @@ test('applying a seed after an interrupted drag lets presets update the custom s
   await section.locator('.materialColorSwatches').getByRole('button', { name: 'Blue', exact: true }).click()
   await expect(section.locator('.materialCustomColor')).toHaveCSS('background-color', 'rgb(66, 133, 244)')
 })
+
+test('an interrupted drag does not overwrite a newer seed from elsewhere', async ({ page }) => {
+  const section = await goToSettingsSection(page, 'theme')
+  await section.locator('.materialCustomSwatch .colorFieldTrigger').click()
+  const picker = page.getByRole('dialog', { name: 'Material accent color' })
+  const bounds = await picker.getByRole('slider', { name: 'Saturation and brightness' }).boundingBox()
+  // Pressing previews the color immediately and starts the preview timer.
+  await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
+  await page.mouse.down()
+  const seed = await page.evaluate(async () => {
+    // Cancel the drag without a change event, then sync a seed before the preview timer runs.
+    window.dispatchEvent(new Event('blur'))
+    await window.$store.dispatch('updateMaterialSeedColor', '#4285f4')
+    await new Promise(resolve => setTimeout(resolve, 300))
+    return window.$store.getters.getMaterialSeedColor
+  })
+  await page.mouse.up()
+  expect(seed).toBe('#4285f4')
+})
