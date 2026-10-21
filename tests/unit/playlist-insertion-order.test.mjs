@@ -91,6 +91,23 @@ test('retries after concurrent removal and preference changes without restoring 
   assert.equal(saved.addVideosToTop, false)
 })
 
+test('a concurrent reorder stamped in the same millisecond is detected', async () => {
+  const { db, Playlists } = await fixture(false)
+  await db.playlists.updateAsync({ _id: 'custom' }, { $set: { lastUpdatedAt: 15 } })
+  const update = db.playlists.updateAsync.bind(db.playlists)
+  let intercepted = false
+  db.playlists.updateAsync = async (query, changes, options) => {
+    if (!intercepted && query.$where) {
+      intercepted = true
+      await update({ _id: 'custom' }, { $set: { videos: [{ videoId: 'second' }, { videoId: 'first', title: 'Renamed' }], lastUpdatedAt: 15 } })
+    }
+    return update(query, changes, options)
+  }
+  await Playlists.upsertVideoByPlaylistId('custom', 20, { videoId: 'new' })
+  const saved = await db.playlists.findOneAsync({ _id: 'custom' })
+  assert.deepEqual(saved.videos, [{ videoId: 'second' }, { videoId: 'first', title: 'Renamed' }, { videoId: 'new' }])
+})
+
 test('a concurrent edit that keeps the video count is detected by its timestamp', async () => {
   const { db, Playlists } = await fixture(false)
   const update = db.playlists.updateAsync.bind(db.playlists)
