@@ -514,6 +514,7 @@ test('mobile Watch return preview stays at the final viewport position while bro
     previewStyle,
     watchRoot: { value: { style: {}, firstElementChild: { style: {} } } },
     updatePreviewPosition() {},
+    ResizeObserver: class { observe() {} },
     document: { querySelector: () => ({}) },
     window: { scrollX: 0, scrollY: 300, innerHeight: 800, addEventListener() {} }
   })
@@ -538,6 +539,7 @@ for (const right of [false, true]) {
         watchRoot: { value: { style: {}, firstElementChild: { style: {} } } },
         store: { getters: { getHideSideBarOnWatchPages: hiddenOnWatch } },
         updatePreviewPosition() {},
+        ResizeObserver: class { observe() {} },
         document: { querySelector: selector => selector === '.app > .sideNav'
           ? { getBoundingClientRect: () => ({ left: right ? 800 : 0, width: 200 }) } : null },
         window: { scrollX: 0, scrollY: 0, innerWidth: 1000, innerHeight: 450, addEventListener() {} }

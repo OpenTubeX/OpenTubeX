@@ -3230,6 +3230,47 @@ test.describe('playback when navigating away', () => {
     expect(await video.evaluate((element, original) => element === original, originalVideo)).toBe(true)
     await expect(page.locator('.tabBar .tab')).toHaveText(title)
   })
+
+  test('keeps the returning Watch preview in place while the sidebar hides', { tag: '@scale' }, async ({ app, page }) => {
+    await openDemoVideo({ app, page })
+    const player = page.locator('.ftVideoPlayer')
+    await page.getByRole('link', { name: 'Go to Subscriptions', exact: true }).click()
+    await expect(page).toHaveURL(/#\/subscriptions$/)
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+    await page.evaluate(() => {
+      document.documentElement.dataset.reducedMotion = 'no-preference'
+      // Like a channel's video grid, this page's height depends on its width,
+      // so hiding the sidebar on Watch moves the retained Watch host below it.
+      const grid = document.createElement('div')
+      grid.style.aspectRatio = '1'
+      document.querySelector('.tabContent[aria-hidden="false"] > .routerView').append(grid)
+      const preview = document.querySelector('.tabContent[aria-hidden="false"] .watchPreviewHost > div')
+      window.watchPreviewRects = []
+      // Intersection runs after layout and resize observers, so it reports the
+      // preview geometry of painted frames rather than intermediate layouts.
+      window.watchPreviewObserver = new IntersectionObserver(entries => {
+        for (const { boundingClientRect: { left, top, width } } of entries) {
+          if (width > 0) window.watchPreviewRects.push({ left, top })
+        }
+      }, { threshold: Array.from({ length: 101 }, (_, index) => index / 100) })
+      window.watchPreviewObserver.observe(preview)
+    })
+    await player.locator('.scrollMiniScrollTop').click()
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+    await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+    await expect(page.locator('.watchDragPreview')).toHaveCount(0)
+    const { rects, final } = await page.evaluate(() => {
+      const observer = window.watchPreviewObserver
+      observer.disconnect()
+      const rects = [...window.watchPreviewRects, ...observer.takeRecords().map(entry => entry.boundingClientRect)]
+      const { left, top } = document.querySelector('.tabContent[aria-hidden="false"] .watchPreviewHost > div').getBoundingClientRect()
+      return { rects, final: { left, top } }
+    })
+    expect(rects.length).toBeGreaterThan(0)
+    const displaced = rects.filter(rect => Math.abs(rect.left - final.left) > 1 || Math.abs(rect.top - final.top) > 1)
+    expect(displaced, 'the browsing page must not show around the preview').toEqual([])
+  })
 })
 
 test.describe('navigation playback lifecycle', () => {
