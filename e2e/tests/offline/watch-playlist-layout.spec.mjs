@@ -390,7 +390,11 @@ test.describe('long watch playlist', () => {
     await goTo(page, 'userplaylists')
     await page.getByText('Long test playlist', { exact: true }).click()
     await page.getByText('Long playlist video 1', { exact: true }).click()
-    await waitForPlayback(page)
+    // A slow run must not reach the end of the 30-second demo video. The
+    // playlist would advance, and the next video's player leaves fullscreen
+    // and closes the dock until it restores them. Paused, Shaka also keeps
+    // its controls shown, so the action pill cannot stop taking clicks.
+    await (await waitForPlayback(page)).evaluate(element => element.pause())
 
     // Landscape above the 600px height breakpoint, then only the height changes.
     await setWindowSize(app, page, { width: 1000, height: 700 })
@@ -403,15 +407,17 @@ test.describe('long watch playlist', () => {
     const list = page.locator('.fullscreenPlaylistTarget .playlistItemsWrapper')
     await expect(list).toBeVisible()
 
-    const shellCount = () => list.evaluate(element => [...element.querySelectorAll(':scope > .playlistItem')]
-      .filter(row => !row.querySelector('.ft-list-video') && row.style.blockSize).length)
-    // NaN until a row mounts, which fails both height comparisons below.
+    const shellHeights = () => list.evaluate(element => [...element.querySelectorAll(':scope > .playlistItem')]
+      .filter(row => !row.querySelector('.ft-list-video') && row.style.blockSize)
+      .map(row => Number.parseFloat(row.style.blockSize)))
+    // NaN until a row mounts or while the list is hidden, which fails both
+    // height comparisons below.
     const rowHeight = () => list.evaluate(element => element.querySelector(':scope > .playlistItem:has(.ft-list-video)')
-      ?.getBoundingClientRect().height ?? Number.NaN)
+      ?.getBoundingClientRect().height || Number.NaN)
     // Scroll to the end so rows near the top become measured shells.
     await expect.poll(async () => {
       await list.evaluate(element => { element.scrollTop = element.scrollHeight })
-      return shellCount()
+      return (await shellHeights()).length
     }).toBeGreaterThan(20)
     // Rows near the end mount from an intersection observer after the scroll.
     let tallRow
@@ -421,6 +427,11 @@ test.describe('long watch playlist', () => {
     await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setBounds({ width: 1000, height: 440 }))
     await page.setViewportSize({ width: Math.round(1000 * uiScale / 100), height: Math.round(440 * uiScale / 100) })
     await expect.poll(rowHeight).toBeLessThan(tallRow - 1)
+    // Distant shells are rebuilt two per frame. A loaded renderer can leave
+    // more time between frames than between polls, so wait for the rebuilt
+    // heights rather than for a stable range. Stale shells keep the tall height.
+    await expect.poll(async () => (await shellHeights()).filter(height => height > tallRow - 1).length,
+      { timeout: 30_000 }).toBe(0)
     await list.evaluate(element => { element.scrollTop = element.scrollHeight })
     // At fractional UI scales the offset snaps to device pixels and scrollHeight
     // rounds, so the end may sit up to about a pixel past the last row. Stale
@@ -434,13 +445,7 @@ test.describe('long watch playlist', () => {
 
     // Stale shells would change the range once the rows near the top mount again.
     const range = () => list.evaluate(element => element.scrollHeight)
-    let settled = 0
-    await expect.poll(async () => {
-      const current = await range()
-      const stable = Math.abs(current - settled) <= 1
-      settled = current
-      return stable
-    }).toBe(true)
+    const settled = await range()
     await list.evaluate(element => { element.scrollTop = 0 })
     await expect(list.locator(':scope > .playlistItem').first().locator('.ft-list-video')).toBeVisible()
     await expect.poll(async () => Math.abs(await range() - settled)).toBeLessThanOrEqual(1)
