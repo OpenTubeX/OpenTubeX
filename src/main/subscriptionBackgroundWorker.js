@@ -28,12 +28,19 @@ function fetchText(request, signal) {
   })
 }
 
+/**
+ * Channels with upload notifications turned on, by ID, each with its feed types.
+ * Other channels' feeds are not reported, as the notifier would discard them.
+ * @type {Record<string, { feedTypes: string[] }> | null}
+ */
+let uploadChannels = null
+
 const scheduler = createSubscriptionBackgroundScheduler({
   fetchChannel: async (configuration, feed, channel, signal) => {
     const payload = await fetchBackgroundSubscriptionChannel(configuration, feed, channel, signal, fetchText, async payload => ({
       backgroundFormat: 'entries', entries: await parseAndEnrichBackgroundFeed(payload, feed, channel, configuration.instanceUrl, fetchText, signal)
     }))
-    if (payload?.backgroundFormat === 'entries') {
+    if (payload?.backgroundFormat === 'entries' && uploadChannels?.[channel]?.feedTypes.includes(feed)) {
       process.parentPort.postMessage({ type: 'uploads', channelId: channel, feedType: feed, entries: normalizeUploadEntries(payload.entries) })
     }
     return payload
@@ -50,6 +57,7 @@ const methods = {
     await results.retain(configuration)
     configurationJson = encoded
   },
+  configureUploads(value) { uploadChannels = value?.enabled === true ? value.channels : null },
   async background(value) { await scheduler.setBackground(value); tick() },
   completed({ profileId, feedType, timestamp }) { scheduler.completed(profileId, feedType, timestamp) },
   next: () => results.next(),

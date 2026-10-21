@@ -13,6 +13,7 @@ import {
   takeVisibleUploads
 } from '../../src/newUploadNotifications.js'
 import { createUploadNotifier } from '../../src/main/uploadNotifications.js'
+import vm from 'node:vm'
 
 const NOW = Date.UTC(2026, 9, 19)
 const HOUR = 3_600_000
@@ -289,4 +290,32 @@ test('ended streams from the live feed are not announced as live', async () => {
   } finally {
     await rm(directory, { recursive: true, force: true })
   }
+})
+
+test('the renderer reports only feeds with notifications turned on', async () => {
+  const source = await readFile(new URL('../../src/renderer/helpers/uploadNotifications.js', import.meta.url), 'utf8')
+  const reported = []
+  const context = vm.createContext({
+    process: { env: { IS_ELECTRON: true } },
+    store: { getters: { getEnableUploadNotifications: true } },
+    normalizeUploadEntries,
+    window: {
+      ftElectron: {
+        subscriptionAutoRefresh: {
+          configureUploadNotifications: async () => {},
+          observeUploads: async value => { reported.push(`${value.channelId}/${value.feedType}`) }
+        }
+      }
+    },
+    console
+  })
+  vm.runInContext(source.replace(/^import .*\n/gm, '').replace(/^export /gm, ''), context)
+  context.reportSubscriptionUploads('UCa', 'videos', [])
+  await context.configureUploadNotifications({ enabled: true, channels: { UCa: { feedTypes: ['videos'] } } })
+  context.reportSubscriptionUploads('UCa', 'videos', [])
+  context.reportSubscriptionUploads('UCa', 'shorts', [])
+  context.reportSubscriptionUploads('UCb', 'videos', [])
+  await context.configureUploadNotifications({ enabled: false })
+  context.reportSubscriptionUploads('UCa', 'videos', [])
+  assert.deepEqual(reported, ['UCa/videos'])
 })
