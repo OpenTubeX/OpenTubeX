@@ -159,70 +159,34 @@ test.describe('Invidious search video avatars', () => {
     const infoLine = page.locator('.ft-list-video').filter({
       has: page.getByRole('heading', { name: 'First avatar search result' })
     }).locator('.infoLine')
+    // Short channel names still get their own line, so every card shares one layout.
     expect(await infoLine.evaluate(element => {
-      const textBounds = (selector) => {
-        const range = document.createRange()
-        range.selectNodeContents(element.querySelector(selector))
-        return range.getBoundingClientRect()
-      }
-      const channelBounds = textBounds('.channelNameText')
-      const channelCenter = (channelBounds.top + channelBounds.bottom) / 2
+      const channel = element.querySelector('.channelName').getBoundingClientRect()
       const details = element.querySelector('.videoInfo')
-      const detailBounds = details.getBoundingClientRect()
-      const separator = getComputedStyle(details, '::before')
-      const separatorCenter = detailBounds.top + Number.parseFloat(separator.insetBlockStart)
+      const view = element.querySelector('.viewCount').getBoundingClientRect()
+      const uploaded = element.querySelector('.uploadedTime').getBoundingClientRect()
 
       return {
-        metadataAligned: Math.max(...['.viewCount', '.uploadedTime'].map(selector => {
-          const bounds = textBounds(selector)
-          return Math.abs(channelCenter - (bounds.top + bounds.bottom) / 2)
-        })) <= 0.5,
-        separatorIsVisible: separator.content === '""' &&
-          getComputedStyle(details).overflowX === 'visible' &&
-          detailBounds.left + Number.parseFloat(separator.insetInlineStart) >
-            element.querySelector('.channelName').getBoundingClientRect().right,
-        separatorAligned: Math.abs(channelCenter - separatorCenter) <= 0.5
+        detailsBelowChannel: view.top >= channel.bottom - 0.5,
+        detailsShareRow: Math.abs(view.top - uploaded.top) <= 0.5,
+        detailsAlignedWithChannel: Math.abs(details.getBoundingClientRect().left - channel.left) <= 0.5,
+        separators: [details, ...details.children].map(child => getComputedStyle(child, '::before').content)
       }
     })).toEqual({
-      metadataAligned: true,
-      separatorAligned: true,
-      separatorIsVisible: true,
+      detailsBelowChannel: true,
+      detailsShareRow: true,
+      detailsAlignedWithChannel: true,
+      separators: ['none', 'none', 'none']
     })
+    for (const stat of ['.viewCount', '.uploadedTime']) {
+      const icon = infoLine.locator(`${stat} .statIcon`)
+      await expect(icon).toBeVisible()
+      await expect(icon).toHaveAttribute('aria-hidden', 'true')
+    }
+    await expect(infoLine.locator('.viewCount')).toHaveText('1 view')
     expect(channelRequests).toBe(1)
 
-    await infoLine.evaluate(element => {
-      const channelWidth = element.querySelector('.channelName').getBoundingClientRect().width
-      const detailsWidth = element.querySelector('.videoInfo').getBoundingClientRect().width
-      element.style.flex = 'none'
-      element.style.inlineSize = `${Math.ceil(Math.max(channelWidth, detailsWidth))}px`
-    })
-    await expect.poll(() => infoLine.evaluate(element => {
-      const channelTop = element.querySelector('.channelName').getBoundingClientRect().top
-      const viewTop = element.querySelector('.viewCount').getBoundingClientRect().top
-      const uploadedTop = element.querySelector('.uploadedTime').getBoundingClientRect().top
-
-      return {
-        detailsShareRow: Math.abs(viewTop - uploadedTop) <= 0.5,
-        detailsStartNewRow: viewTop > channelTop + 0.5
-      }
-    })).toEqual({
-      detailsShareRow: true,
-      detailsStartNewRow: true
-    })
-    expect(await infoLine.locator('.viewCount').textContent()).not.toMatch(/^\s*•/)
-    expect(await infoLine.evaluate(element => {
-      const details = element.querySelector('.videoInfo')
-      const lineBounds = element.getBoundingClientRect()
-      const detailBounds = details.getBoundingClientRect()
-      const separator = getComputedStyle(details, '::before')
-
-      return separator.content === '""' &&
-        separator.backgroundColor === getComputedStyle(details).color &&
-        getComputedStyle(element).overflowX === 'clip' &&
-        detailBounds.left + Number.parseFloat(separator.insetInlineStart) < lineBounds.left
-    })).toBe(true)
-
-    // Force the metadata itself to wrap and check the outer clipping boundary.
+    // Narrow cards wrap the upload time below the view count, still without separators.
     for (const zoom of [1, 0.95, 1.25]) {
       await infoLine.evaluate((element, zoom) => {
         element.style.inlineSize = '110px'
@@ -230,14 +194,8 @@ test.describe('Invidious search video avatars', () => {
       }, zoom)
       expect(await infoLine.evaluate(element => {
         const view = element.querySelector('.viewCount').getBoundingClientRect()
-        const uploaded = element.querySelector('.uploadedTime')
-        const bounds = uploaded.getBoundingClientRect()
-        const dot = getComputedStyle(uploaded, '::before')
-        const line = getComputedStyle(element)
-        const zoom = Number.parseFloat(line.zoom)
-        const dotEnd = bounds.left + (Number.parseFloat(dot.insetInlineStart) + Number.parseFloat(dot.width)) * zoom
-        const clipStart = element.getBoundingClientRect().left - Number.parseFloat(line.overflowClipMargin) * zoom
-        return bounds.top > view.top && line.overflowX === 'clip' && dotEnd < clipStart
+        const uploaded = element.querySelector('.uploadedTime').getBoundingClientRect()
+        return uploaded.top > view.top && Math.abs(uploaded.left - view.left) <= 0.5
       })).toBe(true)
     }
   })
