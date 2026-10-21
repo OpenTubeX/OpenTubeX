@@ -118,11 +118,11 @@ function emitDraftColor() {
 }
 function previewDraftColor() {
   emitDraftColor()
-  // Compare with the previewed draft so external seed changes are not overwritten.
   const previewedDraft = draftColor.value
   previewTimeout = setTimeout(() => {
     previewTimeout = null
-    if (draftColor.value !== previewedDraft) previewDraftColor()
+    // A seed changed elsewhere since this preview is newer than a draft left by an interrupted drag.
+    if (props.modelValue === previewedDraft && draftColor.value !== previewedDraft) previewDraftColor()
   }, PREVIEW_INTERVAL_MS)
 }
 function flushCustomColor() {
