@@ -45,3 +45,11 @@ test('refreshes game names and preserves ordinary names in a mixed search batch'
   const subscriptions = refreshSubscriptions([game, channel], 'entire_app')
   assert.deepEqual(subscriptions.map(({ name }) => name), ['Example Game', 'Saved Name'])
 })
+
+test('refreshes channel names from results without avatars', () => {
+  // Yattee servers can return channels without avatars
+  const result = { type: 'channel', id: 'UCbbbbbbbbbbbbbbbbbbbbbb', authorId: 'UCbbbbbbbbbbbbbbbbbbbbbb', author: 'Yattee Channel', authorThumbnails: [] }
+  const [subscription] = refreshSubscriptions([result], 'disabled')
+  assert.equal(subscription.name, 'Yattee Channel')
+  assert.equal(subscription.thumbnail, '')
+})

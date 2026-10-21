@@ -54,3 +54,15 @@ test('reads the Invidious channel when the local lookup falls back to Invidious'
     { preferredName: 'Invidious name', icon: 'https://invidious.example/avatar' }
   )
 })
+
+test('keeps the channel name when the channel has no avatar', async () => {
+  const findChannelTagInfo = loadFindChannelTagInfo({
+    invidious: () => Promise.resolve({ author: 'Yattee name', authorThumbnails: [] }),
+    local: () => Promise.reject(new Error('unexpected')),
+  })
+
+  assert.deepEqual(
+    { ...await findChannelTagInfo(CHANNEL_ID, { preference: 'yattee', fallback: false }) },
+    { preferredName: 'Yattee name', icon: '' }
+  )
+})

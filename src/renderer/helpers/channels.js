@@ -52,7 +52,8 @@ export async function findChannelTagInfo(id, backendOptions) {
     if (fromInvidiousApi) {
       return {
         preferredName: channel.author,
-        icon: channel.authorThumbnails[0].url
+        // Yattee servers can return channels without avatars
+        icon: channel.authorThumbnails[0]?.url ?? ''
       }
     } else {
       if (channel.alert) return { invalidId: true }

@@ -607,7 +607,8 @@ function updateSubscriptionDetails(results) {
       channels.push({
         channelId: result.authorId,
         channelName: result.author,
-        channelThumbnailUrl: result.authorThumbnails[0].url.replace(/^\/\//, 'https://')
+        // Yattee servers can return channels without avatars
+        channelThumbnailUrl: result.authorThumbnails[0]?.url.replace(/^\/\//, 'https://')
       })
     }
   }
