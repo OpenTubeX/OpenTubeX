@@ -103,6 +103,9 @@ test.describe('phone UI', () => {
     for (let index = 0; index < 2; index++) {
       await sheet.getByRole('button', { name: 'Move Queue item 0 up' }).click()
     }
+    // The rows slide into their new places, so measure the grip once they're there
+    await expect(sheet.locator('.queueItem').first()).toContainText('Queue item 0')
+    await expect.poll(() => sheet.locator('.queueItem').evaluateAll(rows => rows.some(row => row.getAnimations().length > 0))).toBe(false)
     const gripBox = await sheet.locator('.queueDragHandle').first().boundingBox()
     const queueBox = await sheet.locator('.queueItems').boundingBox()
     const x = gripBox.x + gripBox.width / 2
