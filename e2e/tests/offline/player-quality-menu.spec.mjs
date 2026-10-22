@@ -215,6 +215,21 @@ for (const usePlayerMenuGrid of [true, false]) {
       }).toBe(true)
       await dialog.screenshot({ path: testInfo.outputPath('phone.png') })
 
+      // Leaving the phone layout restores the regular placement
+      await dialog.locator('.phonePlayerOptionsClose').click()
+      await expect(dialog).toHaveCount(0)
+      expect(await codecs.evaluate(element => element.style.marginBlock)).toBe('')
+      await setWindowSize(app, page, { width: 1280, height: 800 })
+      await openMenu()
+      const menuBox = await menu.boundingBox()
+      const desktopSwitcher = await codecs.boundingBox()
+      if (usePlayerMenuGrid) {
+        expect(desktopSwitcher.y - menuBox.y).toBeLessThan(10)
+      } else {
+        expect(desktopSwitcher.y - menuBox.y).toBeGreaterThan(20)
+      }
+      await page.keyboard.press('Escape')
+
       await player.evaluate((element, tracks) => {
         const shakaPlayer = element.ui.getControls().getPlayer()
         shakaPlayer.getVideoTracks = () => tracks

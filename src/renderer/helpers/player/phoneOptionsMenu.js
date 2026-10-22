@@ -106,6 +106,7 @@ export function setupPhoneOptionsMenu(menu, controls, t) {
     } else if (!open && dialog.open) {
       dialog.close()
       updateHeader(null)
+      updateHeaderAction(null)
       parent.append(menu)
       activeView = null
       const trigger = parent.querySelector('.shaka-overflow-menu-button')
@@ -196,6 +197,7 @@ export function setupPhoneOptionsMenu(menu, controls, t) {
     query.removeEventListener('change', schedule)
     window.removeEventListener('resize', schedule)
     updateHeader(null)
+    updateHeaderAction(null)
     if (dialog.contains(menu)) {
       if (parent.querySelector(':scope > .shaka-overflow-menu')) menu.remove()
       else parent.append(menu)
