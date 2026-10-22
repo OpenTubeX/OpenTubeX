@@ -369,6 +369,33 @@ test('side swipe adjustments keep hidden controls hidden', t => {
   assert.equal(attributes.has('shown'), true, 'Other touch movement still reveals the controls')
 })
 
+test('a second touch that cancels an adjustment reveals controls only when it moves', t => {
+  for (const moves of [false, true]) {
+    const { controls, attributes } = createShakaControls()
+    const { gestures: g, event, calls, container } = fixture(t, { controls, fullscreenSwipe: false })
+    container.addEventListener('touchmove', event => g.handleMobilePlayerTouchMove(event))
+    for (const type of ['touchmove', 'touchend']) {
+      container.addEventListener(type, event => controls.onMouseMove_(event))
+    }
+    t.mock.timers.enable({ apis: ['setTimeout'] })
+    g.startMobileFullscreenGesture(event(50))
+    assert.equal(g.moveMobileFullscreenGesture(event(50, 49.75)), true)
+    container.dispatchEvent(new Event('touchmove'))
+    g.startMobileFullscreenGesture(event(370, 150, { pointerId: 2, isPrimary: false }))
+    assert.deepEqual(calls, [['begin', 'brightness'], ['update', 0.5], 'cancel'])
+    if (moves) container.dispatchEvent(new Event('touchmove'))
+    const touchEnd = event(370, 150, { timeStamp: performance.now() })
+    g.handleMobilePlayerTouchEnd(touchEnd)
+    assert.equal(touchEnd.prevented, true)
+    assert.equal(attributes.has('shown'), moves)
+    // Shaka saw the movement, so it still needs the touch end to fade again.
+    t.mock.timers.tick(3000)
+    t.mock.timers.tick(500)
+    assert.equal(attributes.has('shown'), false, 'Controls must not stay visible')
+    t.mock.timers.reset()
+  }
+})
+
 test('horizontal movement never becomes an adjustment later in the same gesture', t => {
   const { gestures: g, event, calls } = fixture(t)
   g.startMobileFullscreenGesture(event())

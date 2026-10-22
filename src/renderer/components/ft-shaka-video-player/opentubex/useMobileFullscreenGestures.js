@@ -525,7 +525,10 @@ export function useMobileFullscreenGestures({
     if (mobileFullscreenGesture?.minimizing) miniPlayerDrag.finish(false)
     if (mobileFullscreenGesture?.adjusting || mobileFullscreenGesture?.dismissing || mobileFullscreenGesture?.seeking) {
       if (mobileFullscreenGesture.seeking) mobileSeekTouchCancelled = true
-      if (mobileFullscreenGesture.adjusting) adjustments.cancel()
+      if (mobileFullscreenGesture.adjusting) {
+        adjustments.cancel()
+        mobileAdjustmentTouchEnd = true
+      }
       mobilePlayerSuppressClickUntil = performance.now() + 350
       mobileSurfaceSuppressTouchEndUntil = performance.now() + 350
       mobileControlSuppressClickUntil = performance.now() + 350
@@ -623,7 +626,11 @@ export function useMobileFullscreenGestures({
   // Shaka reveals its controls for any touch movement over the player. A side
   // swipe adjustment shows only its own indicator instead.
   function handleMobilePlayerTouchMove(event) {
-    if (!mobileFullscreenGesture || mobileFullscreenGesture.action === 'disabled' || mobileFullscreenGesture.seeking) return
+    if (!mobileFullscreenGesture || mobileFullscreenGesture.action === 'disabled' || mobileFullscreenGesture.seeking) {
+      // This movement stops Shaka's idle timer, so its touch end must restart it.
+      mobileAdjustmentTouchEnd = false
+      return
+    }
     event.stopImmediatePropagation()
   }
 
