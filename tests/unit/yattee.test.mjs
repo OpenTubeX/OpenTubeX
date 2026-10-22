@@ -7,6 +7,7 @@ import {
   YATTEE_CHANNEL_TABS,
   checkYatteeServer,
   createYatteeAuthorization,
+  createYatteeResponseError,
   fillYatteeShortDates,
   fillYatteeVideoAuthors,
   getYatteeStoryboard,
@@ -328,4 +329,17 @@ test('Shorts dates come from earlier refreshes and lookups of new Shorts only', 
 
   const failing = async () => { throw new Error('offline') }
   assert.deepEqual(await fillYatteeShortDates([{ videoId: 'new' }], cached, failing), [{ videoId: 'new' }])
+
+  // Multiplying a missing date would date the Short to 1970
+  assert.deepEqual(await fillYatteeShortDates([{ videoId: 'new' }], cached, async () => ({ published: null })), [{ videoId: 'new' }])
+})
+
+test('response errors keep the details of validation errors', () => {
+  // FastAPI reports validation errors as a list
+  const detail = [{ loc: ['query', 'page'], msg: 'Input should be a valid integer', type: 'int_parsing' }]
+  const error = createYatteeResponseError({ status: 422 }, { detail })
+  assert.equal(error.message, JSON.stringify(detail))
+  assert.equal(error.status, 422)
+  assert.equal(createYatteeResponseError({ status: 404 }, { detail: 'Video not found' }).message, 'Video not found')
+  assert.equal(createYatteeResponseError({ status: 502 }, null).message, 'HTTP 502')
 })

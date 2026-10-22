@@ -260,8 +260,8 @@ export async function fillYatteeShortDates(shorts, cachedShorts, getVideo) {
     let published = cachedDates.get(short.videoId)
     if (!cachedDates.has(short.videoId)) {
       try {
-        // The server reports seconds
-        published = (await getVideo(short.videoId)).published * 1000
+        const seconds = (await getVideo(short.videoId)).published
+        if (Number.isFinite(seconds)) published = seconds * 1000
       } catch { }
     }
     return Number.isFinite(published) ? { ...short, published } : short
@@ -347,7 +347,13 @@ export function normalizeYatteeSuggestions(response, query) {
  * @returns {Error}
  */
 export function createYatteeResponseError(response, body) {
-  const detail = typeof body?.detail === 'string' ? body.detail : (body?.error ?? `HTTP ${response.status}`)
+  let detail = body?.error ?? `HTTP ${response.status}`
+  if (typeof body?.detail === 'string') {
+    detail = body.detail
+  } else if (body?.detail != null) {
+    // FastAPI reports validation errors as a list
+    detail = JSON.stringify(body.detail)
+  }
   const error = new Error(detail)
   error.status = response.status
   return error

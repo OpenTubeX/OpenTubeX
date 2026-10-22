@@ -183,6 +183,23 @@ test('plays relayed DASH streams through the Yattee server without contacting Yo
   expect(youtubeRequests).toEqual([])
 })
 
+test('plays muxed streams when the server has no adaptive streams', async ({ page }) => {
+  await page.route(`${SERVER}/api/v1/videos/**`, route => route.fulfill({
+    json: {
+      ...videoResponse,
+      adaptiveFormats: [],
+      formatStreams: [{ url: relayUrl('video'), itag: '18', type: 'video/webm; codecs="vp9"', quality: 'medium', container: 'webm', resolution: '360p', width: 640, height: 360 }]
+    }
+  }))
+  await page.route(`${SERVER}/api/v1/comments/**`, route => route.fulfill({ json: { comments: [], continuation: null } }))
+  await page.route(`${SERVER}/proxy/relay?**`, async route => fulfillRange(route, await media.video))
+
+  await page.locator(sel.searchInput).fill(`https://www.youtube.com/watch?v=${VIDEO_ID}`)
+  await page.locator(sel.searchInput).press('Enter')
+  await waitForPlayback(page)
+  await expect(page.locator(`${activeTab} .errorContainer`)).toHaveCount(0)
+})
+
 test('reports rejected credentials when loading a video', async ({ page }) => {
   await page.route(`${SERVER}/api/v1/videos/**`, route => route.fulfill({ status: 401, json: { detail: 'Invalid credentials' } }))
 

@@ -6521,7 +6521,8 @@ export default defineComponent({
     createInvidiousDashManifest: async function (result) {
       if (this.backendPreference === 'yattee') {
         const manifest = await createYatteeDashManifest(result.adaptiveFormats, result.lengthSeconds, this.apiServerUrl)
-        if (manifest === null) {
+        // Without adaptive streams, the muxed streams can still play
+        if (manifest === null && this.legacyFormats.length === 0) {
           throw new Error(this.t('Yattee Server.Errors.Streams unavailable'))
         }
         return manifest
