@@ -1168,3 +1168,45 @@ Screenshot Clipboard Success: Captura de tela salva na área de transferência
 Screenshot Clipboard Error: Falha ao copiar captura de tela para área de transferência
 SponsorBlock Disabled on Channel: SponsorBlock desativado em {channel}
 SponsorBlock Enabled on Channel: SponsorBlock ativado para {channel}
+Color Picker:
+  Opacity: Opacidade
+  Hex Color: Cor Hexadecimal
+  Apply Color: Aplicar
+  Reset Color: Restaurar
+  Copy Color: Copiar
+  Copy From Another Color: Copiar de outra cor
+  Color Copied: Cor copiada
+  Invalid Color: Insira uma cor hexadecimal válida
+  Saturation and Brightness: Saturação e brilho
+New Tab: Nova Aba
+Maximize: Maximizar
+Restore: Restaurar
+Close Tab: Fechar Aba
+Close Confirmation:
+  Title: Sair do OpenTubeX?
+  Message: Você tem certeza que deseja sair do OpenTubeX?
+  Hide Window: Ocultar Janela
+  Quit: Sair
+  Never Ask Again: Não pergunte novamente
+Older Version Changes:
+  Title: Alterações em relação a uma versão anterior
+  Message: As alterações que você fez em uma versão anterior do OpenTubeX foram aplicadas à sua biblioteca.
+  Detail: Se um item foi alterado em ambas as versões, a alteração da versão mais antiga foi mantida. Um backup da sua biblioteca, referente a um momento anterior, encontra-se na pasta do seu perfil.
+Library Format Changed:
+  Title: Biblioteca movida para um novo formato
+  Message: Sua biblioteca agora utiliza um novo formato de armazenamento.
+  Detail: Versões anteriores do OpenTubeX ainda conseguem abrir sua biblioteca, mas a exibem como ela estava antes desta atualização. As alterações feitas em uma versão anterior são incorporadas novamente quando você retorna a esta versão.
+Close Window Confirmation:
+  Title: Fechar Janela?
+  Message: Esta janela contém {count} abas. Você tem certeza que deseja fechá-la?
+  Close Window: Fechar Janela
+Confirmations:
+  Never Ask Again: Nunca perguntar novamente
+Close Multiple Tabs Confirmation:
+  Title: Fechar múltiplas abas?
+  Message: Isso fechará {count} abas.
+  Close Tabs: Fechar {count} Abas
+Load Multiple Tabs Confirmation:
+  Title: Carregar múltiplas abas?
+  Message: Isto irá carregar {count} Abas.
+  Load Tabs: Carregar {count} Abas
