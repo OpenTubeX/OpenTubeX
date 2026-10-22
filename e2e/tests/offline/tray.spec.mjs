@@ -258,6 +258,20 @@ test('closing the final tab still exits with close-to-tray enabled', async ({ ap
   await closed
 })
 
+test('closing the final tab still exits while background refresh runs without a close prompt', async ({ app, page }) => {
+  await setting(page, 'updateConfirmCloseApp', false)
+  await setting(page, 'updateEnableClosedAppSubscriptionRefresh', true)
+  const closed = app.electronApp.waitForEvent('close')
+  // The app menu closes the emptied window without marking it confirmed.
+  await app.electronApp.evaluate(({ BrowserWindow, Menu }) => {
+    const item = Menu.getApplicationMenu().items
+      .flatMap(menuItem => menuItem.submenu?.items ?? [])
+      .find(menuItem => menuItem.label === 'Close Tab')
+    item.click(undefined, BrowserWindow.getAllWindows()[0])
+  })
+  await closed
+})
+
 test('explicit tray Close closes the window even with close-to-tray enabled', async ({ app, page }) => {
   await captureTray(app, page)
   await setting(page, 'updateHideToTrayOnClose', true)

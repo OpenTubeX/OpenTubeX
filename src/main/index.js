@@ -3512,8 +3512,9 @@ function runApp() {
           (wasLastWindow || tabManager.tabs.size > 1)) {
         event.preventDefault()
 
-        // An explicit tray Close still quits instead of hiding the window again.
-        const hideWithoutPrompt = keepRefreshingInBackground && !trayClosingWindowIds.has(newWindow.id)
+        // An explicit tray Close or closing the last tab still quits instead of hiding the window.
+        const hideWithoutPrompt = keepRefreshingInBackground &&
+          !trayClosingWindowIds.has(newWindow.id) && tabManager.tabs.size > 0
         let quitsApp = wasLastWindow
         let confirmed = quitsApp
           ? await confirmCloseApp(newWindow, keepRefreshingInBackground, hideWithoutPrompt)
