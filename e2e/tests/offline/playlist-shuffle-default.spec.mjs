@@ -87,6 +87,17 @@ test('a playlist set to shuffle by default starts shuffled from a random video',
 
   // Reopening the page picks the random start when the playlist loads.
   await openPlaylist(page)
+  await expect(thumbnailLink(page)).toHaveAttribute('href', new RegExp(`/watch/${videos.at(-1).videoId}\\?`))
+  // A removal that can still be undone must not become the random start.
+  const lastVideo = page.locator('.ft-list-video').filter({ has: page.getByText(videos.at(-1).title, { exact: true }) })
+  await lastVideo.hover()
+  await lastVideo.getByTitle('Remove from Playlist').click()
+  const undo = page.getByText('Video has been removed. Click here to undo.', { exact: true })
+  await expect(undo).toBeVisible()
+  // Check within the five-second undo window, before the removal is saved.
+  await expect(thumbnailLink(page)).toHaveAttribute('href', new RegExp(`/watch/${videos.at(-2).videoId}\\?`), { timeout: 2000 })
+  await undo.click()
+  await expect(thumbnailLink(page)).toHaveAttribute('href', new RegExp(`/watch/${videos.at(-1).videoId}\\?`))
   const shuffle = await playFromThumbnail(page, videos.at(-1).videoId)
   await expect(shuffle).toHaveAttribute('aria-pressed', 'true')
   await attachScreenshot('playlist-shuffle-default-watch')
