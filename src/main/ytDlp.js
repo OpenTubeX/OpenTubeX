@@ -18,6 +18,7 @@ import { buildProxyUrl, isOpenTubeXUrl } from './utils'
 import { TabManager } from './tabs/TabManager'
 import { IpcChannels } from '../constants'
 import { getMatchingDownloadValidators, getYtDlpAssetName } from './ytDlpAsset'
+import { verifyYtDlpReleaseAsset } from './ytDlpSignature'
 import { buildYtDlpStoryboardVtt } from './ytDlpStoryboard'
 import { downloadYtDlpSubtitle } from './ytDlpSubtitle'
 import { isYouTubeSubtitleUrl } from '../youtubeSubtitle'
@@ -1018,6 +1019,18 @@ async function downloadFile(url, onProgress, onDownloadStart, validators) {
 }
 
 /**
+ * @param {string} url
+ * @returns {Promise<Buffer>}
+ */
+async function fetchBuffer(url) {
+  const response = await net.fetch(url)
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}`)
+  }
+  return Buffer.from(await response.arrayBuffer())
+}
+
+/**
  * Checks a managed download without transferring its payload.
  * A missing validator means there is no trustworthy installed-release baseline.
  * @param {string} url
@@ -1280,7 +1293,8 @@ async function downloadManagedYtDlp(onProgress, onDownloadStart) {
   const configuredChannel = (await settings._findOne('ytDlpChannel'))?.value
   const channel = Object.hasOwn(YT_DLP_RELEASE_REPOSITORIES, configuredChannel) ? configuredChannel : 'stable'
   const assetName = getYtDlpAssetName(process.platform, process.arch)
-  const source = `https://github.com/${YT_DLP_RELEASE_REPOSITORIES[channel]}/releases/latest/download/${assetName}`
+  const releaseUrl = `https://github.com/${YT_DLP_RELEASE_REPOSITORIES[channel]}/releases/latest/download`
+  const source = `${releaseUrl}/${assetName}`
 
   const managedPath = getManagedBinaryPath('yt-dlp')
   let download
@@ -1294,6 +1308,11 @@ async function downloadManagedYtDlp(onProgress, onDownloadStart) {
     )
 
     if (download.data !== null) {
+      const [checksums, signature] = await Promise.all([
+        fetchBuffer(`${releaseUrl}/SHA2-256SUMS`),
+        fetchBuffer(`${releaseUrl}/SHA2-256SUMS.sig`)
+      ])
+      verifyYtDlpReleaseAsset(download.data, assetName, checksums, signature)
       await installBinary(download.data, managedPath)
     }
   } catch (error) {
