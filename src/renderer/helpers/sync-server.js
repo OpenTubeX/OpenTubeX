@@ -54,7 +54,11 @@ import {
 const LEGACY_HISTORY_PAGE_SIZE = 50
 const BULK_SYNC_CHUNK_SIZE = 100
 const LEGACY_SYNC_CONCURRENCY = 4
-const REQUEST_TIMEOUT_MS = 20_000
+// The server may wait up to 30 seconds each for a database connection and a
+// SQLite lock under load, so leave room for that plus a slow transfer.
+const REQUEST_TIMEOUT_MS = 60_000
+// The server holds /changes open for 25 seconds before rereading the cursor.
+const CHANGES_WAIT_TIMEOUT_MS = 25_000 + REQUEST_TIMEOUT_MS
 const MAX_ENCRYPTED_SYNC_TIMEOUT_MS = 5 * 60 * 1000
 
 function syncServerFetch(input, init, timeoutMs) {
@@ -326,7 +330,7 @@ export class SyncServerClient {
   }
 
   waitForSyncChanges(cursor) {
-    return this.request(`/v1/encrypted_sync/changes?since=${encodeURIComponent(cursor)}`, { timeoutMs: 35000 })
+    return this.request(`/v1/encrypted_sync/changes?since=${encodeURIComponent(cursor)}`, { timeoutMs: CHANGES_WAIT_TIMEOUT_MS })
   }
 
   getSyncEvents(since = '') {

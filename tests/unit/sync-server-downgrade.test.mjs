@@ -358,10 +358,10 @@ test('encrypted activity downloads can outlast the ordinary request timeout', as
   const events = Array.from({ length: 81 }, (_, index) => ({ id: String(index), payload: 'encrypted activity' }))
   const f = fixture({}, {
     // Scale deadlines to keep the regression fast: the response takes the
-    // equivalent of 50 seconds, longer than the ordinary 20-second timeout.
+    // equivalent of 90 seconds, longer than the ordinary 60-second timeout.
     timer: (callback, delay) => setTimeout(callback, delay / 1000),
     respond: (_url, options) => new Promise((resolve, reject) => {
-      const response = setTimeout(() => resolve(events), 50)
+      const response = setTimeout(() => resolve(events), 90)
       options.signal.addEventListener('abort', () => {
         clearTimeout(response)
         reject(new DOMException('Aborted', 'AbortError'))

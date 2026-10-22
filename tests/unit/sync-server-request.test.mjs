@@ -99,7 +99,8 @@ for (const [operation, run] of [
 }
 
 for (const [operation, run, timeoutMs] of [
-  ['health check', client => client.health(), 20_000],
+  ['health check', client => client.health(), 60_000],
+  ['change wait', client => client.waitForSyncChanges(''), 85_000],
   ['collection download', client => client.getEncryptedSyncCollection('history'), 300_000],
   ['activity download', client => client.getSyncEvents(), 300_000],
   ['small collection upload', client => client.putEncryptedSyncCollection('history', 1, 'encrypted'), 300_000],
