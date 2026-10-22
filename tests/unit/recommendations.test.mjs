@@ -129,6 +129,17 @@ test('diversity caps channels and suppresses duplicate titles across channels', 
   assert.equal(result.filter(video => video.authorId === 'linux').length, 3)
   assert.equal(result.filter(video => video.authorId === 'second').length, 3)
 })
+test('appended recommendations count the shown feed toward channel caps and duplicate titles', () => {
+  const history = [watched('seed'), watched('second-seed', { authorId: 'second' })]
+  const kept = [...Array.from({ length: 3 }, (_, i) => video(`shown${i}`, { title: '', authorId: 'linux' })), video('shown-title')]
+  const candidates = [
+    ...Array.from({ length: 4 }, (_, i) => video(`linux${i}`, { title: '', authorId: 'linux' })),
+    ...Array.from({ length: 2 }, (_, i) => video(`second${i}`, { title: '', authorId: 'second' })),
+    video('duplicate', { authorId: 'second' }),
+  ]
+  assert.deepEqual(ids(rank(candidates, history, { kept, limit: 24 })).sort(), ['second0', 'second1'])
+  assert.equal(rank(candidates, history, { kept, limit: kept.length + 1 }).length, 1)
+})
 test('exploration rewards relevant unfamiliar channels without admitting unrelated content', () => {
   const history = [watched('seed')]
   const candidate = video('discovery')

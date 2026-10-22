@@ -57,9 +57,9 @@ function createFeed({ records = [], candidates = [], playlists = [], settings = 
     isVideoHiddenByPreferences,
     shouldHideMembersOnlyContent: (membersOnly, getters) => shouldHideMembersOnlyContent(membersOnly, getters, true),
     buildRecommendationProfileAsync: async (...args) => { work.profiles++; return buildProfile(...args) },
-    rankRecommendationCandidatesAsync: async (videos, profile, { limit }) => {
+    rankRecommendationCandidatesAsync: async (videos, profile, { limit, kept = [] }) => {
       work.rankings++
-      return videos.slice(0, limit).map(video => ({ video, reason: { type: 'topic', text: 'Linux' } }))
+      return videos.slice(0, limit - kept.length).map(video => ({ video, reason: { type: 'topic', text: 'Linux' } }))
     },
     collectRecommendationCandidates: async () => { work.requests++; return { videos: candidates, failedSources: 0 } },
     requestAnimationFrame: callback => setTimeout(callback, 0),
@@ -105,6 +105,21 @@ test('revisiting Home restores the completed feed immediately without fetching o
     assert.equal(second.feed.recommendations.value.length, 24)
   } finally {
     second.stop()
+  }
+})
+
+test('loading more appends below the shown feed and fills slots of shown videos watched since', async () => {
+  const { feed, getters, stop } = createFeed({ candidates: Array.from({ length: 60 }, (_, index) => ({ videoId: `candidate-${index}` })) })
+  try {
+    await waitForFeed(feed)
+    const shown = feed.recommendations.value.map(video => video.videoId)
+    getters.getHistoryCacheById = { [shown[0]]: {}, [shown[5]]: {} }
+    await feed.loadMore()
+    const loaded = feed.recommendations.value.map(video => video.videoId)
+    assert.equal(loaded.length, 48)
+    assert.deepEqual(loaded.slice(0, 22), shown.filter(id => !getters.getHistoryCacheById[id]))
+  } finally {
+    stop()
   }
 })
 

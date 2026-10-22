@@ -112,11 +112,12 @@ export function useHomeRecommendations(visible) {
         ? { ...record, impressions: record.impressions?.slice(0, -1) }
         : record]))
     }
+    kept = kept.filter(video => !store.getters.getHistoryCacheById[video.videoId])
     const keptIds = new Set(kept.map(video => video.videoId))
     const pool = candidates.filter(video => !keptIds.has(video.videoId) && isVisible(video) &&
       !store.getters.getHistoryCacheById[video.videoId])
     const result = await rankRecommendationCandidatesAsync(pool, learned,
-      { limit: limit - kept.length, exploration: exploration.value }, isCancelled)
+      { limit, exploration: exploration.value, kept }, isCancelled)
     if (!result || isCancelled()) return
     // History can change while ranking yields to the event loop.
     ranked.value = [...kept, ...result.map(item => ({ ...item.video, recommendationReason: item.reason }))]
