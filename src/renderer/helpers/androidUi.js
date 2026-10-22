@@ -299,9 +299,14 @@ export function getAndroidDeviceArchitecture() {
  */
 export async function observeAndroidNetworkMetered(callback) {
   if (!AndroidUi) return
-  await AndroidUi.addListener('networkMeteredChange', ({ metered }) => callback(metered))
+  let changed = false
+  await AndroidUi.addListener('networkMeteredChange', ({ metered }) => {
+    changed = true
+    callback(metered)
+  })
   const { metered } = await AndroidUi.getNetworkMetered()
-  callback(metered)
+  // A change that arrived in the meantime may be newer than this reading.
+  if (!changed) callback(metered)
 }
 
 export function setAndroidPictureInPictureDocumentState(active, { transitioning = false, layout = null } = {}) {
