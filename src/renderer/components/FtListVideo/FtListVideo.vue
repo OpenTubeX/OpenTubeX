@@ -498,7 +498,7 @@ import { PHONE_LAYOUT_QUERY, usePhoneLayout } from '../../composables/usePhoneLa
 import FtRetryImage from '../FtRetryImage.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import { ytDlp } from '../../helpers/ytDlp'
-import { refreshDownloadRecords } from '../../helpers/downloadPlayback'
+import { cardDownloadId, playDownloadedFile, refreshDownloadRecords } from '../../helpers/downloadPlayback'
 import { queueSwipeAction, findSwipeDownload, downloadSwipeAction } from '../../helpers/videoSwipeActions'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
@@ -712,6 +712,8 @@ const enableDownloads = computed(() => store.getters.getEnableDownloads)
 const localDownloadId = computed(() => supportsYtDlp && enableDownloads.value
   ? store.getters.getLocalPlaybackDownloadIds.get(id.value)
   : undefined)
+
+const linkDownloadId = computed(() => cardDownloadId(store.getters.getYtDlpDownloads, id.value, props.downloadId, localDownloadId.value))
 
 watch(enableDownloads, (enabled) => {
   if (!enabled) showDownloadPrompt.value = false
@@ -1915,10 +1917,8 @@ const watchPageLinkQuery = computed(() => {
     query.playlistItemId = playlistItemIdFinal.value
   }
 
-  if (props.downloadId) {
-    query.downloadId = props.downloadId
-  } else if (localDownloadId.value !== undefined) {
-    query.downloadId = String(localDownloadId.value)
+  if (linkDownloadId.value) {
+    query.downloadId = linkDownloadId.value
   }
 
   if (typeof props.data.isShort === 'boolean') {
@@ -1985,6 +1985,17 @@ async function handleWatchPageLinkClick(event) {
   if (externalPlayerIsDefaultViewingMode.value) {
     event?.preventDefault()
     openInExternalPlayer()
+    return
+  }
+
+  if (process.env.IS_IOS && localDownloadId.value !== undefined && event?.type === 'click') {
+    event.preventDefault()
+    await playDownloadedFile(localDownloadId.value, { videoId: id.value }, {
+      refreshDownloads: () => refreshDownloadRecords(ytDlp, store),
+      playNative: (downloadId, path) => ytDlp.ytDlpPlayDownload(downloadId, path),
+      navigate: () => {},
+      fileNotFound: () => showToast({ message: t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] })
+    })
     return
   }
 

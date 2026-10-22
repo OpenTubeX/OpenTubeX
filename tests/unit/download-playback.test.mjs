@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { downloadQueueVideos, isDownloadPlaybackSupported, localPlaybackDownloadIds, playDownloadedFile, refreshDownloadRecords } from '../../src/renderer/helpers/downloadPlayback.js'
+import { cardDownloadId, downloadQueueVideos, isDownloadPlaybackSupported, localPlaybackDownloadIds, playDownloadedFile, refreshDownloadRecords } from '../../src/renderer/helpers/downloadPlayback.js'
 
 test('queues a downloaded video with its saved-file route and metadata', () => {
   const [video] = downloadQueueVideos({
@@ -133,4 +133,23 @@ test('maps each downloaded video to its newest playable download, preferring vid
     6: { id: 6, status: 'completed', mode: 'subtitles', files: [file('subtitles')] },
     7: { id: 7, status: 'completed', mode: 'video', retryPayload: { externalUrl: 'https://vimeo.com/123' }, files: [file('external')] },
   })].toSorted(), [['audio', 2], ['both', 1], ['older', 3]])
+})
+
+test('opens a card with its own download unless the inherited playlist download contains it', t => {
+  const previous = process.env.IS_IOS
+  t.after(() => {
+    if (previous === undefined) delete process.env.IS_IOS
+    else process.env.IS_IOS = previous
+  })
+  delete process.env.IS_IOS
+  const downloads = {
+    1: { id: 1, files: [{ videoId: 'first', path: '/downloads/first.webm' }, { videoId: 'gone', path: '/downloads/gone.webm', available: false }] },
+  }
+  assert.equal(cardDownloadId(downloads, 'first', '1', 2), '1')
+  assert.equal(cardDownloadId(downloads, 'second', '1', 2), '2')
+  assert.equal(cardDownloadId(downloads, 'gone', '1', 2), '2')
+  assert.equal(cardDownloadId(downloads, 'second', '1', undefined), '1')
+  assert.equal(cardDownloadId(downloads, 'second', '', undefined), '')
+  process.env.IS_IOS = 'true'
+  assert.equal(cardDownloadId(downloads, 'second', '', 2), '')
 })

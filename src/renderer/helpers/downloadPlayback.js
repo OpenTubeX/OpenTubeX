@@ -62,6 +62,18 @@ export function localPlaybackDownloadIds(downloads) {
   return new Map([...best].map(([videoId, download]) => [videoId, download.id]))
 }
 
+/**
+ * Picks the download a video card opens. The watch page playlist passes its
+ * current download to every item, so that one only wins when it contains the
+ * video. iOS plays downloads natively from the card instead of the watch page.
+ */
+export function cardDownloadId(downloads, videoId, inheritedId, localId) {
+  if (inheritedId && downloads[inheritedId]?.files?.some(file => file.videoId === videoId && isPlayableDownloadFile(file))) {
+    return inheritedId
+  }
+  return localId !== undefined && !process.env.IS_IOS ? String(localId) : inheritedId
+}
+
 export function downloadFileTitle(download, file) {
   return file.title || (download.videoId && download.videoId === file.videoId ? download.title : '') ||
     file.path?.split(/[/\\]/).at(-1)?.replace(/\.[^.]+$/, '') || file.videoId
