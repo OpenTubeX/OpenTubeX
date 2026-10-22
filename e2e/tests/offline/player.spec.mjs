@@ -295,6 +295,15 @@ test('uses one playing interface hide delay in portrait, landscape, fullscreen a
   await page.evaluate(async () => {
     const store = window.$store
     await store.dispatch('updatePlayingInterfaceHideDelay', 0.5)
+    // Timed in the page, as the test's own steps can take longer than the delay on a busy machine
+    window.lastMouseMoveAt = 0
+    window.controlsHiddenAt = 0
+    document.addEventListener('mousemove', () => { window.lastMouseMoveAt = performance.now() }, true)
+    new MutationObserver(records => {
+      if (records.some(record => record.target.matches('.shaka-controls-container') && record.target.getAttribute('shown') !== 'true')) {
+        window.controlsHiddenAt = performance.now()
+      }
+    }).observe(document.body, { subtree: true, attributeFilter: ['shown'] })
   })
 
   for (const mode of ['portrait', 'landscape', 'fullWindow', 'fullscreen']) {
@@ -308,10 +317,12 @@ test('uses one playing interface hide delay in portrait, landscape, fullscreen a
     await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
     await expect(controls).toHaveAttribute('shown', 'true')
     await expect(player).not.toHaveClass(/no-cursor/)
-    await page.waitForTimeout(250)
-    await expect(controls).toHaveAttribute('shown', 'true')
+    await page.evaluate(() => { window.controlsHiddenAt = 0 })
     await expect(controls).not.toHaveAttribute('shown', 'true', { timeout: 2000 })
     await expect(player).toHaveClass(/no-cursor/)
+    // Not before the delay since the last movement. Timers don't fire early, so
+    // this holds however slow the machine is (1 ms for timer rounding).
+    expect(await page.evaluate(() => window.controlsHiddenAt - window.lastMouseMoveAt)).toBeGreaterThanOrEqual(499)
 
     if (mode === 'fullWindow') await page.locator('body').press('s')
     if (mode === 'fullscreen') await setPlayerFullscreen(page, false)
