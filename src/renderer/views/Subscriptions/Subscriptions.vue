@@ -25,7 +25,7 @@
         >
           <h2 class="pageTitle">
             <FtIcon
-              :icon="['fas', 'rss']"
+              :icon="['fas', 'subscriptions']"
               class="subscriptionIcon"
             />
             {{ $t("Subscriptions.Subscriptions") }}

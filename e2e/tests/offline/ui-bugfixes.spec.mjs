@@ -484,7 +484,7 @@ for (const iconPack of ['material', 'remix']) {
     const organizer = page.locator('.capacitorPhoneTabDialog')
     await organizer.getByRole('tab', { name: 'Tabs from other devices' }).click()
     const row = title => organizer.getByRole('button', { name: title, exact: true })
-    for (const [title, icon] of [['History', 'clock-rotate-left'], ['Subscriptions', 'rss'], ['Broken avatar', 'clapperboard'], ['Unknown page', 'display']]) {
+    for (const [title, icon] of [['History', 'clock-rotate-left'], ['Subscriptions', 'subscriptions'], ['Broken avatar', 'clapperboard'], ['Unknown page', 'display']]) {
       const glyph = row(title).locator(`[data-icon="${icon}"]`)
       await expect(glyph).toBeVisible()
       await expect(glyph).toHaveAttribute('data-icon-pack', iconPack)

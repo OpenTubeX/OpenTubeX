@@ -542,6 +542,10 @@
     "ri": "rss-line",
     "material": "rss-feed-rounded"
   },
+  "subscriptions": {
+    "ri": "folder-video-line",
+    "material": "subscriptions-outline-rounded"
+  },
   "satellite-dish": {
     "ri": "broadcast-line",
     "material": "satellite-alt-outline"

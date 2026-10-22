@@ -1,6 +1,6 @@
 export const NAVIGATION_ITEM_DEFINITIONS = Object.freeze([
   { id: 'home', labelKey: 'Home Page.Home', icon: ['fas', 'house'] },
-  { id: 'subscriptions', labelKey: 'Subscriptions.Subscriptions', icon: ['fas', 'rss'] },
+  { id: 'subscriptions', labelKey: 'Subscriptions.Subscriptions', icon: ['fas', 'subscriptions'] },
   { id: 'userplaylists', labelKey: 'Playlists', icon: ['fas', 'bookmark'] },
   { id: 'history', labelKey: 'History.History', icon: ['fas', 'history'] },
   { id: 'subscribedchannels', labelKey: 'Channels.Channels', icon: ['fas', 'user-check'] },

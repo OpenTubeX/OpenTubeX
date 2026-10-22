@@ -299,7 +299,7 @@ test.describe('tab bar', () => {
     await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/active/)
     await expect(page.locator(sel.tabs).nth(1)).toContainText('Subscriptions')
     await expect(page.locator(sel.tabs).nth(1)).not.toContainText('/subscriptions')
-    await expect(page.locator(sel.tabs).nth(1).locator('[data-icon="rss"]')).toBeVisible()
+    await expect(page.locator(sel.tabs).nth(1).locator('[data-icon="subscriptions"]')).toBeVisible()
   })
 
   test('Ctrl+T selects and presents the new tab before main receives mount readiness', async ({ app, page }) => {
@@ -487,7 +487,7 @@ test.describe('tab bar', () => {
     const routeBeforeOpening = page.url()
     await goTo(page, 'settings')
     await expect(page.locator(`${sel.activeTab} .tabLoadingLine`)).toHaveCount(0)
-    await expect(page.locator(sel.activeTab).locator('[data-icon="rss"]')).toBeVisible()
+    await expect(page.locator(sel.activeTab).locator('[data-icon="subscriptions"]')).toBeVisible()
     await expect(page.locator('.settingsWindow')).toHaveCount(1)
     await expect(page.locator('.settingsWindow .settingsMenu')).toBeVisible()
 
@@ -498,7 +498,7 @@ test.describe('tab bar', () => {
     await expect(downloadsWindow.locator('.settingsMenu')).toBeHidden()
     await expect(downloadsWindow.locator('.settingsDownloadsPage')).toBeVisible()
     await expect(page.locator('.settingsWindow')).toHaveCount(1)
-    await expect(page.locator(sel.activeTab).locator('[data-icon="rss"]')).toBeVisible()
+    await expect(page.locator(sel.activeTab).locator('[data-icon="subscriptions"]')).toBeVisible()
     expect(page.url()).toBe(routeBeforeOpening)
 
     await downloadsWindow.locator('.settingsCloseButton').click()

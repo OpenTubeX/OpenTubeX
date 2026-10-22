@@ -513,7 +513,7 @@ test.describe('tab group previews', () => {
     ])
     await expect(tooltip.locator('.tabTooltipPreview img').first()).toHaveAttribute('src', /^data:image\/jpeg/)
     await expect(tooltip.locator('.tabTooltipPreviewFallback')).toHaveCount(3)
-    await expect(tooltip.locator('.tabTooltipGridTitleIcon[data-icon="rss"]')).toHaveCount(1)
+    await expect(tooltip.locator('.tabTooltipGridTitleIcon[data-icon="subscriptions"]')).toHaveCount(1)
     await expect(tooltip.locator('.tabTooltipGridTitleIcon[data-icon="clock-rotate-left"]')).toHaveCount(3)
     await expect(trigger).toHaveAttribute('aria-describedby', await tooltip.getAttribute('id'))
 

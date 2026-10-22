@@ -706,7 +706,7 @@ function handleSubscription(profile) {
       profileIds
     })
 
-    showToast({ message: t('Channel.Added channel to your subscriptions'), icon: ['fas', 'rss'] })
+    showToast({ message: t('Channel.Added channel to your subscriptions'), icon: ['fas', 'subscriptions'] })
     emit('subscribed')
   }
 

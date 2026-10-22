@@ -641,7 +641,7 @@ async function importSelectedTakeoutData() {
           return true
         })
         await store.dispatch('updateProfile', { ...deepCopy(primaryProfile.value), subscriptions: [...deepCopy(primaryProfile.value.subscriptions), ...additions] })
-        showToast({ message: t('Settings.Data Settings.All subscriptions have been successfully imported'), icon: ['fas', 'rss'] })
+        showToast({ message: t('Settings.Data Settings.All subscriptions have been successfully imported'), icon: ['fas', 'subscriptions'] })
       } else if (entry.type === 'history') {
         await importYouTubeWatchHistory(JSON.parse(entry.content))
       } else if (entry.type === 'searchHistory') {
@@ -1029,7 +1029,7 @@ function importFreeTubeSubscriptions(profileRecords) {
 
   showToast({
     message: t('Settings.Data Settings.All subscriptions and profiles have been successfully imported'),
-    icon: ['fas', 'rss'],
+    icon: ['fas', 'subscriptions'],
   })
 }
 
@@ -1074,7 +1074,7 @@ function importCsvYouTubeSubscriptions(textDecode) { // first row = header, last
     await store.dispatch('updateProfile', primaryProfile.value)
     showToast({
       message: t('Settings.Data Settings.All subscriptions have been successfully imported'),
-      icon: ['fas', 'rss'],
+      icon: ['fas', 'subscriptions'],
     })
   })
 }
@@ -1114,7 +1114,7 @@ function importYouTubeSubscriptions(textDecode) {
     await store.dispatch('updateProfile', primaryProfile.value)
     showToast({
       message: t('Settings.Data Settings.All subscriptions have been successfully imported'),
-      icon: ['fas', 'rss'],
+      icon: ['fas', 'subscriptions'],
     })
   })
 }
@@ -1192,7 +1192,7 @@ function importOpmlYouTubeSubscriptions(data) {
     await store.dispatch('updateProfile', primaryProfile.value)
     showToast({
       message: t('Settings.Data Settings.All subscriptions have been successfully imported'),
-      icon: ['fas', 'rss'],
+      icon: ['fas', 'subscriptions'],
     })
   })
 }
@@ -1231,7 +1231,7 @@ function mergeSubscriptionsIntoPrimaryProfile(subscriptions) {
     store.dispatch('updateProfile', primaryProfile.value)
     showToast({
       message: t('Settings.Data Settings.All subscriptions have been successfully imported'),
-      icon: ['fas', 'rss'],
+      icon: ['fas', 'subscriptions'],
     })
   })
 }

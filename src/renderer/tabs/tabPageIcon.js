@@ -1,6 +1,6 @@
 const PAGE_ICONS = [
   [/^\/home(?:\/|$)/, ['fas', 'house']],
-  [/^\/$|^\/subscriptions(?:\/|$)/, ['fas', 'rss']],
+  [/^\/$|^\/subscriptions(?:\/|$)/, ['fas', 'subscriptions']],
   [/^\/subscribedchannels(?:\/|$)/, ['fas', 'user-check']],
   [/^\/trending(?:\/|$)/, ['fas', 'fire']],
   [/^\/popular(?:\/|$)/, ['fas', 'users']],

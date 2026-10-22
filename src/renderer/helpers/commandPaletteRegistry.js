@@ -229,7 +229,7 @@ export function createCommandPaletteRegistry(context) {
 function addNavigationCommands(commands, context) {
   const { t, groups, navigate, routePath, goHistory, store, isElectron, routeAvailable, supportsLocalApi } = context
   const navigationCommands = [
-    ['subscriptions', '/subscriptions', 'Subscriptions.Subscriptions', ['home', 'feed'], ['fas', 'rss']],
+    ['subscriptions', '/subscriptions', 'Subscriptions.Subscriptions', ['home', 'feed'], ['fas', 'subscriptions']],
     ['channels', '/subscribedchannels', 'Channels.Channels', ['subscriptions', 'channel list'], ['fas', 'user-check']],
     ['trending', '/trending', 'Trending.Trending', ['discover'], ['fas', 'fire']],
     ['popular', '/popular', 'Most Popular', ['popular videos'], ['fas', 'users']],
