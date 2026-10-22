@@ -795,6 +795,48 @@ function updateNotifications(enabled) {
   persistChannelSettings({
     notificationFeedTypes: enabled ? feedTypes.value.map(feedType => feedType.id) : []
   })
+  showNotificationsToast(enabled)
+}
+
+/** @type {AbortController | null} */
+let notificationsToastController = null
+
+/**
+ * The bell only changes its icon, so confirm what it did and point out when
+ * the global setting keeps notifications from showing.
+ * @param {boolean} enabled
+ */
+function showNotificationsToast(enabled) {
+  notificationsToastController?.abort()
+  notificationsToastController = new AbortController()
+  const channelName = props.channelName
+
+  if (!enabled) {
+    showToast({
+      message: t('Channel.Upload Notifications Off', { channelName }),
+      icon: ['fas', 'bell-slash'],
+      abortSignal: notificationsToastController.signal
+    })
+  } else if (store.getters.getEnableUploadNotifications) {
+    showToast({
+      message: t('Channel.Upload Notifications On', { channelName }),
+      icon: ['fas', 'bell'],
+      abortSignal: notificationsToastController.signal
+    })
+  } else {
+    showToast({
+      message: t('Channel.Upload Notifications Disabled In Settings', { channelName }),
+      icon: ['fas', 'bell'],
+      time: 10000,
+      abortSignal: notificationsToastController.signal,
+      buttons: [{
+        label: t('Channel.Turn On Upload Notifications'),
+        icon: ['fas', 'bell'],
+        primary: true,
+        action: () => store.dispatch('updateEnableUploadNotifications', true)
+      }]
+    })
+  }
 }
 
 /**

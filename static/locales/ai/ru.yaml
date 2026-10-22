@@ -1361,6 +1361,10 @@ Channel:
   More videos hidden: '+{count} ещё | +{count} ещё | +{count} ещё'
   Show in subscription feed: Показывать в ленте подписок
   Notify about new uploads: Уведомлять о новом контенте
+  Upload Notifications On: "Вы будете получать уведомления о новом контенте {channelName} при обновлении подписок"
+  Upload Notifications Off: "Вы не будете получать уведомления о новом контенте {channelName}"
+  Upload Notifications Disabled In Settings: "Уведомления для {channelName} включены, но уведомления о новом контенте отключены в настройках"
+  Turn On Upload Notifications: "Включить"
   Channel Name Unavailable: Название канала недоступно
   Search Result Types: Типы результатов поиска
   All Results: Все

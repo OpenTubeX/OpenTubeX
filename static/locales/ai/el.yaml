@@ -1369,6 +1369,10 @@ Channel:
   More videos hidden: '+{count} ακόμη | +{count} ακόμη'
   Show in subscription feed: Εμφάνιση στη ροή συνδρομών
   Notify about new uploads: Ειδοποίηση για νέες μεταφορτώσεις
+  Upload Notifications On: "Θα ειδοποιείστε για νέες μεταφορτώσεις από το {channelName} όταν ανανεώνονται οι συνδρομές σας"
+  Upload Notifications Off: "Δεν θα ειδοποιείστε για νέες μεταφορτώσεις από το {channelName}"
+  Upload Notifications Disabled In Settings: "Οι ειδοποιήσεις για το {channelName} είναι ενεργές, αλλά οι ειδοποιήσεις για νέες μεταφορτώσεις είναι απενεργοποιημένες στις ρυθμίσεις σας"
+  Turn On Upload Notifications: "Ενεργοποίηση"
   Channel Name Unavailable: Το όνομα καναλιού δεν είναι διαθέσιμο
   Search Result Types: Τύποι αποτελεσμάτων αναζήτησης
   All Results: Όλα

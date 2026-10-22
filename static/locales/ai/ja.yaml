@@ -1359,6 +1359,10 @@ Channel:
   More videos hidden: '他{count}件'
   Show in subscription feed: 登録チャンネルフィードに表示
   Notify about new uploads: 新着アップロードを通知
+  Upload Notifications On: "登録チャンネルの更新時に {channelName} の新着アップロードを通知します"
+  Upload Notifications Off: "{channelName} の新着アップロードは通知されません"
+  Upload Notifications Disabled In Settings: "{channelName} の通知はオンですが、新着アップロードの通知は設定でオフになっています"
+  Turn On Upload Notifications: "オンにする"
   Channel Name Unavailable: チャンネル名を取得できません
   Search Result Types: 検索結果の種類
   All Results: すべて

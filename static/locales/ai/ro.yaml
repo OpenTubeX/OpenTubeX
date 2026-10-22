@@ -1383,6 +1383,10 @@ Channel:
   More videos hidden: '+{count} în plus | +{count} în plus | +{count} în plus'
   Show in subscription feed: Afișează în fluxul de abonamente
   Notify about new uploads: Notifică despre încărcări noi
+  Upload Notifications On: "Vei fi notificat despre încărcările noi de la {channelName} când abonamentele tale se reîmprospătează"
+  Upload Notifications Off: "Nu vei mai fi notificat despre încărcările noi de la {channelName}"
+  Upload Notifications Disabled In Settings: "Notificările pentru {channelName} sunt activate, dar notificările despre încărcări noi sunt dezactivate în setări"
+  Turn On Upload Notifications: "Activează"
   Channel Name Unavailable: Numele canalului nu este disponibil
   Search Result Types: Tipuri de rezultate ale căutării
   All Results: Toate

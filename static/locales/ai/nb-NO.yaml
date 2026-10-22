@@ -1358,6 +1358,10 @@ Channel:
   More videos hidden: '+{count} til | +{count} til'
   Show in subscription feed: Vis i abonnementsfeeden
   Notify about new uploads: Varsle om nye opplastinger
+  Upload Notifications On: "Du blir varslet om nye opplastinger fra {channelName} når abonnementene dine oppdateres"
+  Upload Notifications Off: "Du blir ikke varslet om nye opplastinger fra {channelName}"
+  Upload Notifications Disabled In Settings: "Varsler for {channelName} er slått på, men varsler om nye opplastinger er slått av i innstillingene dine"
+  Turn On Upload Notifications: "Slå på"
   Channel Name Unavailable: Kanalnavnet er ikke tilgjengelig
   Search Result Types: Typer søkeresultater
   All Results: Alle

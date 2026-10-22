@@ -1727,6 +1727,10 @@ Channel:
   More videos hidden: '+{count} més | +{count} més | +{count} més'
   Show in subscription feed: Mostra al canal de subscripcions
   Notify about new uploads: Notifica les pujades noves
+  Upload Notifications On: "Rebràs notificacions de les pujades noves de {channelName} quan s'actualitzin les subscripcions"
+  Upload Notifications Off: "No rebràs notificacions de les pujades noves de {channelName}"
+  Upload Notifications Disabled In Settings: "Les notificacions de {channelName} estan activades, però les notificacions de pujades noves estan desactivades a la configuració"
+  Turn On Upload Notifications: "Activa"
   Channel Name Unavailable: El nom del canal no està disponible
   Search Result Types: Tipus de resultats de cerca
   All Results: Tot

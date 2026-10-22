@@ -1391,6 +1391,10 @@ Channel:
   More videos hidden: '+{count} lisää | +{count} lisää'
   Show in subscription feed: Näytä tilaussyötteessä
   Notify about new uploads: Ilmoita uusista latauksista
+  Upload Notifications On: "Saat ilmoituksen kanavan {channelName} uusista latauksista, kun tilaukset päivittyvät"
+  Upload Notifications Off: "Et saa ilmoituksia kanavan {channelName} uusista latauksista"
+  Upload Notifications Disabled In Settings: "Kanavan {channelName} ilmoitukset ovat päällä, mutta uusien latausten ilmoitukset on poistettu käytöstä asetuksissa"
+  Turn On Upload Notifications: "Ota käyttöön"
   Channel Name Unavailable: Kanavan nimeä ei ole saatavilla
   Search Result Types: Hakutulosten tyypit
   All Results: Kaikki

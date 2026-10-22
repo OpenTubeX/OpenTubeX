@@ -1358,6 +1358,10 @@ Channel:
   More videos hidden: '另有 {count} 部'
   Show in subscription feed: 在訂閱動態中顯示
   Notify about new uploads: 新上傳通知
+  Upload Notifications On: "訂閱重新整理時，你將收到 {channelName} 的新上傳通知"
+  Upload Notifications Off: "你將不再收到 {channelName} 的新上傳通知"
+  Upload Notifications Disabled In Settings: "{channelName} 的通知已開啟，但新上傳通知已在設定中關閉"
+  Turn On Upload Notifications: "開啟"
   Channel Name Unavailable: 無法取得頻道名稱
   Search Result Types: 搜尋結果類型
   All Results: 全部

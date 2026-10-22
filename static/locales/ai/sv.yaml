@@ -1366,6 +1366,10 @@ Channel:
   More videos hidden: '+{count} till | +{count} till'
   Show in subscription feed: Visa i prenumerationsflödet
   Notify about new uploads: Avisera om nya uppladdningar
+  Upload Notifications On: "Du aviseras om nya uppladdningar från {channelName} när dina prenumerationer uppdateras"
+  Upload Notifications Off: "Du aviseras inte om nya uppladdningar från {channelName}"
+  Upload Notifications Disabled In Settings: "Aviseringar för {channelName} är på, men aviseringar om nya uppladdningar är avstängda i dina inställningar"
+  Turn On Upload Notifications: "Slå på"
   Channel Name Unavailable: Kanalnamnet är inte tillgängligt
   Search Result Types: Typer av sökresultat
   All Results: Alla

@@ -1362,6 +1362,10 @@ Channel:
   More videos hidden: +{count} daha çox | +{count} daha çox
   Show in subscription feed: Abunəlik lentində göstər
   Notify about new uploads: Yeni yükləmələr barədə bildiriş göndər
+  Upload Notifications On: "Abunəlikləriniz yeniləndikdə {channelName} kanalının yeni yükləmələri barədə bildiriş alacaqsınız"
+  Upload Notifications Off: "{channelName} kanalının yeni yükləmələri barədə bildiriş almayacaqsınız"
+  Upload Notifications Disabled In Settings: "{channelName} üçün bildirişlər aktivdir, lakin yeni yükləmə bildirişləri ayarlarınızda deaktivdir"
+  Turn On Upload Notifications: "Aktivləşdir"
   Channel Name Unavailable: Kanal adı mövcud deyil
   Search Result Types: Axtarış nəticələrinin növləri
   All Results: Hamısı

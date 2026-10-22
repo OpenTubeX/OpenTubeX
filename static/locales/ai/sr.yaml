@@ -1411,6 +1411,10 @@ Channel:
   More videos hidden: '+{count} још | +{count} још | +{count} још'
   Show in subscription feed: Прикажи у фиду претплата
   Notify about new uploads: Обавештавај о новим отпремањима
+  Upload Notifications On: "Бићете обавештени о новим отпремањима канала {channelName} када се претплате освеже"
+  Upload Notifications Off: "Нећете бити обавештени о новим отпремањима канала {channelName}"
+  Upload Notifications Disabled In Settings: "Обавештења за {channelName} су укључена, али су обавештења о новим отпремањима искључена у подешавањима"
+  Turn On Upload Notifications: "Укључи"
   Channel Name Unavailable: Назив канала није доступан
   Search Result Types: Врсте резултата претраге
   All Results: Све

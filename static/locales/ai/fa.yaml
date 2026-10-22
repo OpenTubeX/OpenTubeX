@@ -1418,6 +1418,10 @@ Channel:
   More videos hidden: '+{count} ویدیوی دیگر | +{count} ویدیوی دیگر'
   Show in subscription feed: نمایش در خوراک اشتراک‌ها
   Notify about new uploads: اعلان برای بارگذاری‌های جدید
+  Upload Notifications On: "هنگام به‌روزرسانی اشتراک‌ها، درباره بارگذاری‌های جدید {channelName} به شما اطلاع داده می‌شود"
+  Upload Notifications Off: "درباره بارگذاری‌های جدید {channelName} به شما اطلاع داده نمی‌شود"
+  Upload Notifications Disabled In Settings: "اعلان‌های {channelName} روشن است، اما اعلان بارگذاری‌های جدید در تنظیمات شما خاموش است"
+  Turn On Upload Notifications: "روشن کردن"
   Channel Name Unavailable: نام کانال در دسترس نیست
   Search Result Types: انواع نتایج جست‌وجو
   All Results: همه
