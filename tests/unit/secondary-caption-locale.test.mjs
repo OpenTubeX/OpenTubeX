@@ -8,19 +8,28 @@ const source = await readFile(new URL('../../src/renderer/components/ft-shaka-vi
 const start = source.indexOf('    async function selectSecondaryCaption(')
 const end = source.indexOf('    function isShownAsMainCaption(')
 assert.ok(start > 0 && end > start)
-assert.ok(source.includes('\nlet pendingSecondaryCaptionLocale = null\n'), 'The pending choice is shared by every player instance')
+assert.ok(source.includes('\nlet pendingSecondaryCaptionLocale = null\n') && source.includes('\nlet secondaryCaptionLocalePicks = 0\n'), 'The pending choice is shared by every player instance')
 
 const GERMAN = { url: 'https://captions.example/de', label: 'German', language: 'de', mimeType: 'text/vtt' }
 
 /**
  * Players share the module state, like instances of the component. The settings
- * store commits a setting only once its write has finished.
+ * store commits a setting only once its write has finished, and skips the commit
+ * when a newer value has been queued in the meantime.
  */
 function fixture (storedLocale) {
   const writes = []
+  let latest = null
   const store = {
     getters: { get getSecondaryCaptionLocale () { return storedLocale } },
-    dispatch: (action, value) => new Promise(resolve => writes.push(() => { storedLocale = value; resolve() }))
+    dispatch: (action, value) => new Promise(resolve => {
+      const write = () => {
+        if (latest === write) storedLocale = value
+        resolve()
+      }
+      latest = write
+      writes.push(write)
+    })
   }
   const context = vm.createContext({
     store, findCaptionByLocale, AbortController, console,
@@ -31,6 +40,7 @@ function fixture (storedLocale) {
   })
   vm.runInContext(`
     let pendingSecondaryCaptionLocale = null
+    let secondaryCaptionLocalePicks = 0
     globalThis.createPlayer = () => {
       let secondaryCaption = null
       let secondaryCaptionCues = []
@@ -46,8 +56,8 @@ function fixture (storedLocale) {
   return {
     createPlayer: context.createPlayer,
     stored: () => storedLocale,
-    async finishWrites () {
-      for (const write of writes.splice(0)) write()
+    async finishWrites (count = writes.length) {
+      for (const write of writes.splice(0, count)) write()
       await new Promise(resolve => setImmediate(resolve))
     }
   }
@@ -84,6 +94,26 @@ test('a player that replaces another one keeps a choice that is still being writ
   await settings.finishWrites()
   replacement.restoreSecondaryCaption()
   assert.equal(replacement.current(), null)
+})
+
+test('an earlier write of the same choice settling first does not end a later pending pick', async () => {
+  const settings = fixture('de')
+  const captions = settings.createPlayer()
+  await captions.selectSecondaryCaption(null)
+  // Loading the picked captions never finishes here, like a slow network
+  captions.selectSecondaryCaption(GERMAN)
+  await captions.selectSecondaryCaption(null)
+
+  // The first "off" write settles, but the store skips its commit as newer picks are queued
+  await settings.finishWrites(1)
+  assert.equal(settings.stored(), 'de')
+  captions.restoreSecondaryCaption()
+  assert.equal(captions.current(), null)
+
+  await settings.finishWrites()
+  assert.equal(settings.stored(), '')
+  captions.restoreSecondaryCaption()
+  assert.equal(captions.current(), null)
 })
 
 test('a language picked again before its write finished is restored and remembered', async () => {

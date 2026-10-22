@@ -303,6 +303,9 @@ const LOCALE_MAPPINGS = new Map(process.env.SHAKA_LOCALE_MAPPINGS)
  * @type {string | null}
  */
 let pendingSecondaryCaptionLocale = null
+// Counts the picks, so an earlier write that settles late cannot clear a later pending pick,
+// even one of the same language. The settings store skips the commit of a superseded write.
+let secondaryCaptionLocalePicks = 0
 
 export default defineComponent({
   name: 'FtShakaVideoPlayer',
@@ -9033,9 +9036,10 @@ export default defineComponent({
 
       const language = caption?.language ?? ''
       if (remember && language !== getRememberedSecondaryCaptionLocale()) {
+        const pick = ++secondaryCaptionLocalePicks
         pendingSecondaryCaptionLocale = language
         store.dispatch('updateSecondaryCaptionLocale', language).finally(() => {
-          if (pendingSecondaryCaptionLocale === language) {
+          if (secondaryCaptionLocalePicks === pick) {
             pendingSecondaryCaptionLocale = null
           }
         })
