@@ -50,6 +50,7 @@ const previewStyle = shallowRef(null)
 let previewScroll = null
 let previewOrigin = null
 let previewViewport = null
+let previewResizeObserver = null
 let previewRestoring = false
 let previewReady = null
 let previewInterrupted = false
@@ -200,7 +201,8 @@ function beginRestorePreview() {
   const parentBounds = previewHost.value.getBoundingClientRect()
   // The retained Watch host follows the browsing page in document flow. Use
   // the tab's origin so a tall page cannot send the returning video offscreen.
-  const targetBounds = previewHost.value.closest('.tabContent')?.getBoundingClientRect() ?? parentBounds
+  const tabContent = previewHost.value.closest('.tabContent')
+  const targetBounds = tabContent?.getBoundingClientRect() ?? parentBounds
   let targetLeft = targetBounds.left
   let targetWidth = targetBounds.width
   if (window.innerWidth > 680 && store.getters.getHideSideBarOnWatchPages &&
@@ -231,6 +233,11 @@ function beginRestorePreview() {
   watchRoot.value.firstElementChild.style.opacity = '0'
   previewActive.value = true
   window.addEventListener('scroll', updatePreviewPosition, { passive: true })
+  // The Watch route hides the sidebar after this tab commits it, and the
+  // browsing page reflows to the new width. Both move the host, so re-anchor
+  // the preview before that layout is painted.
+  previewResizeObserver = new ResizeObserver(updatePreviewPosition)
+  previewResizeObserver.observe(tabContent ?? previewHost.value)
   return true
 }
 
@@ -335,6 +342,8 @@ function clearMinimizePreview() {
   watchRoot.value?.style.removeProperty('opacity')
   watchRoot.value?.firstElementChild?.style.removeProperty('opacity')
   window.removeEventListener('scroll', updatePreviewPosition)
+  previewResizeObserver?.disconnect()
+  previewResizeObserver = null
   if (watchScroll) {
     return nextTick(() => {
       if (!disposed && isWatchRoute.value && props.presented && !previewActive.value) window.scrollTo({ ...watchScroll, behavior: 'instant' })

@@ -36,6 +36,7 @@ function mountWatch(t, { tab = null, paused = false, hasLoaded = true, mounted =
   const hostBounds = { left: 0, top: 60.25, width: 412.25 }
   const tabBounds = { left: 0, top: 60.25, width: 412.25 }
   const listeners = new Map()
+  const resizeObservers = new Set()
   let savedBrowsingScroll = null
   const viewport = {
     scrollX: 0, scrollY: 20, innerHeight: 800,
@@ -65,6 +66,11 @@ function mountWatch(t, { tab = null, paused = false, hasLoaded = true, mounted =
     computed, nextTick, reactive, ref, shallowRef, watch,
     mobileNavigationMinimizePreview,
     window: viewport,
+    ResizeObserver: class {
+      constructor(callback) { this.callback = callback }
+      observe() { resizeObservers.add(this) }
+      disconnect() { resizeObservers.delete(this) }
+    },
     document: { querySelector: selector => ['.app.capacitorTabs', '.app.capacitorPhoneLayout'].includes(selector) && mobile ? {} : null },
     isReducedMotionEnabled: () => true,
     defineProps: () => props,
@@ -96,7 +102,7 @@ function mountWatch(t, { tab = null, paused = false, hasLoaded = true, mounted =
     scope.stop()
   })
   return {
-    scrollCommits, mobileNavigationMinimizePreview, unmount, props, getters, provides, lifecycle, previewRoot, previewStyle, hostBounds, tabBounds, viewport, listeners, titles, updateTitle,
+    scrollCommits, mobileNavigationMinimizePreview, unmount, props, getters, provides, lifecycle, previewRoot, previewStyle, hostBounds, tabBounds, viewport, listeners, resizeObservers, titles, updateTitle,
     disposals: () => disposals,
     savedBrowsingScroll: () => savedBrowsingScroll,
     navigate
@@ -527,6 +533,29 @@ test('restore preview stays at the visible tab origin while browsing scroll rese
   mounted.viewport.scrollTo({ left: 0, top: 0, behavior: 'instant' })
   mounted.listeners.get('scroll')()
   assert.equal(mounted.previewRoot.getBoundingClientRect().top, 80.25)
+})
+
+test('restore preview stays at the tab origin while Watch hides the sidebar', async t => {
+  const mounted = mountWatch(t)
+  const navigation = mounted.provides.get('navigation')
+  await navigation.minimize()
+  mounted.viewport.scrollY = 0
+  mounted.hostBounds.top = 1600.75
+  mounted.previewRoot.getBoundingClientRect = () => ({
+    left: mounted.hostBounds.left + Number.parseFloat(mounted.previewRoot.style.left),
+    top: mounted.hostBounds.top + Number.parseFloat(mounted.previewRoot.style.top),
+    width: mounted.tabBounds.width
+  })
+  navigation.beginRestorePreview()
+  Object.assign(mounted.previewRoot.style, mounted.previewStyle.value)
+  // The wider tab reflows the browsing page, which moves the host below it.
+  mounted.hostBounds.left -= 94
+  mounted.hostBounds.top -= 317.5
+  for (const observer of mounted.resizeObservers) observer.callback()
+  assert.equal(mounted.previewRoot.getBoundingClientRect().left, 0)
+  assert.equal(mounted.previewRoot.getBoundingClientRect().top, 60.25)
+  navigation.clearMinimizePreview()
+  assert.equal(mounted.resizeObservers.size, 0)
 })
 
 for (const commit of [false, true]) {
