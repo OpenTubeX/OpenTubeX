@@ -225,6 +225,10 @@ test.describe('video context menu', () => {
         await expect(menu).toBeVisible({ timeout: 3000 })
         await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
         await expect(page).toHaveURL(/#\/history/)
+        // The sheet slides in, so measure it only after its enter animation ends.
+        await menu.evaluate(element => Promise.all([element, element.parentElement]
+          .flatMap(node => node.getAnimations())
+          .map(animation => animation.finished)))
         const actions = menu.getByRole('menuitem').filter({ visible: true })
         await expect(page.locator('.contextMenu')).toHaveCount(0)
         for (const name of ['Play Next', 'Add to Queue', 'Mark As Watched', 'Remove From History', 'Copy Link']) {
