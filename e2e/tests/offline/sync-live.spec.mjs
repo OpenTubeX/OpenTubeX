@@ -170,8 +170,6 @@ for (const iconPack of ['material', 'remix']) {
     test.use({
       seed: {
         settings: {
-          rememberPlaybackSpeedPerChannel: true,
-          rememberVideoQualityPerChannel: true,
           iconPack,
           syncServerEnabled: false,
           syncServerAutoSync: false,
@@ -374,17 +372,9 @@ for (const iconPack of ['material', 'remix']) {
       await expect.poll(() => page.evaluate(() => !!document.activeElement?.closest('.settingsWindow'))).toBe(true)
       await goToSettingsSection(page, 'sync')
       await sync.locator('.activityList').getByRole('button', {
-        name: 'Enable Playback Speed · Automatically update when changing via player options', exact: true
+        name: 'Automatically save playback speed changes', exact: true
       }).click()
-      const autoUpdateHighlight = page.locator('.switch-ctn.settingsSearchTarget')
-      await expect(autoUpdateHighlight).toContainText('Automatically update when changing via player options')
-      await expect(autoUpdateHighlight.locator('..')).toContainText('Enable Playback Speed')
-      await page.locator('[data-setting-key="rememberPlaybackSpeedPerChannel"] input').press('Space')
-      await goToSettingsSection(page, 'sync')
-      await sync.locator('.activityList').getByRole('button', {
-        name: 'Enable Playback Speed · Automatically update when changing via player options', exact: true
-      }).click()
-      await expect(page.locator('.switch-ctn.settingsSearchTarget')).toContainText('Enable Playback Speed')
+      await expect(page.locator('.switch-ctn.settingsSearchTarget')).toContainText('Automatically save playback speed changes')
 
       await page.getByRole('dialog', { name: 'Settings', exact: true }).getByRole('button', { name: 'Close', exact: true }).click()
       await goTo(page, 'history')

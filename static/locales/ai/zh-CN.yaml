@@ -755,13 +755,10 @@ Settings:
   Channel Settings:
     Channel Settings: 频道设置
     Channel Settings Description: 分别记住观看各频道时选择的设置，以便下次观看该频道的视频时再次应用。
-    Enable Playback Speed: 记住播放速度
-    Enable Video Quality: 记住视频画质
-    Enable Subtitles State: 记住字幕开关状态
-    Enable Volume: 记住音量
-    Auto Update: 通过播放器选项更改时自动更新
-    Auto Update Subtitles: 切换字幕状态时自动更新
-    Auto Update Volume: 每次更改音量时自动更新
+    Auto Save Playback Speed: 自动保存播放速度更改
+    Auto Save Video Quality: 自动保存视频画质更改
+    Auto Save Subtitles State: 自动保存字幕开关状态更改
+    Auto Save Volume: 自动保存音量更改
     Manage Saved Channels: 管理已保存的频道（{channelCount}）
     Saved Channels: 已保存的频道设置
     Enable Saved Channel Settings Sync: 同步已保存的频道设置
@@ -773,7 +770,6 @@ Settings:
     Forget Value: 清除此设置
     Add Setting: 为该频道记住其他设置
     Add Subscribed Channel: 添加已订阅的频道
-    Enable Setting Before Adding Channel: 添加频道前，请先在播放设置中启用至少一项频道设置
     Video Quality: 视频画质
     Subtitles Enabled: 字幕已启用
     Volume: 音量

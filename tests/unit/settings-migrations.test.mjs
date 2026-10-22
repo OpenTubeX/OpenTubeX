@@ -83,6 +83,18 @@ test('prefers the current Downloads placement preference', () => {
   })
 })
 
+test('drops the removed per-channel enable switches', () => {
+  assert.deepEqual(migrateLegacySettings({
+    rememberPlaybackSpeedPerChannel: true,
+    rememberVideoQualityPerChannel: false,
+    rememberSubtitlesStatePerChannel: true,
+    rememberVolumePerChannel: false,
+    autoUpdateChannelVolumes: true,
+  }), {
+    autoUpdateChannelVolumes: true,
+  })
+})
+
 test('migrates the legacy AI video summary visibility preference', () => {
   assert.deepEqual(migrateLegacySettings({ hideAiVideoSummaries: true }), {
     aiVideoSummaryMode: 'hide',

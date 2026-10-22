@@ -1078,13 +1078,6 @@ Settings:
   Channel Settings:
     Channel Settings: Ustawienia kanału
     Channel Settings Description: Zapamiętuje ustawienia wybrane podczas oglądania każdego kanału osobno, dzięki czemu zostaną one zastosowane ponownie przy następnym oglądaniu danego kanału.
-    Enable Playback Speed: Zapamiętywanie prędkości odtwarzania
-    Enable Video Quality: Zapamiętywanie rozdzielczości wideo
-    Enable Subtitles State: Zapamiętywanie ustawień napisów
-    Enable Volume: Zapamiętywanie głośności
-    Auto Update: Automatyczna aktualizacja po zmianie za pomocą opcji odtwarzacza
-    Auto Update Subtitles: Automatyczna aktualizacja po przełączeniu
-    Auto Update Volume: Automatyczna aktualizacja przy każdej zmianie głośności
     Manage Saved Channels: Zarządzaj zapisanymi kanałami ({channelCount})
     Saved Channels: Zapisane ustawienia kanału
     Enable Saved Channel Settings Sync: Synchronizuj zapisane ustawienia kanału

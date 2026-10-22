@@ -769,13 +769,10 @@ Settings:
   Channel Settings:
     Channel Settings: Kanava-asetukset
     Channel Settings Description: Muista katselun aikana valitsemasi asetukset kanavakohtaisesti, jotta niitä käytetään uudelleen, kun katsot seuraavan kerran saman kanavan videota.
-    Enable Playback Speed: Muista toistonopeus
-    Enable Video Quality: Muista videon laatu
-    Enable Subtitles State: Muista tekstityksen tila
-    Enable Volume: Muista äänenvoimakkuus
-    Auto Update: Päivitä automaattisesti, kun asetusta muutetaan soittimessa
-    Auto Update Subtitles: Päivitä automaattisesti, kun tekstitys otetaan käyttöön tai poistetaan käytöstä
-    Auto Update Volume: Päivitä automaattisesti äänenvoimakkuutta muutettaessa
+    Auto Save Playback Speed: Tallenna toistonopeuden muutokset automaattisesti
+    Auto Save Video Quality: Tallenna videon laadun muutokset automaattisesti
+    Auto Save Subtitles State: Tallenna tekstityksen tilan muutokset automaattisesti
+    Auto Save Volume: Tallenna äänenvoimakkuuden muutokset automaattisesti
     Manage Saved Channels: Hallitse tallennettuja kanavia ({channelCount})
     Saved Channels: Tallennetut kanava-asetukset
     Enable Saved Channel Settings Sync: Synkronoi tallennetut kanava-asetukset
@@ -787,7 +784,6 @@ Settings:
     Forget Value: Poista tämä asetus
     Add Setting: Muista toinen asetus tälle kanavalle
     Add Subscribed Channel: Lisää tilattu kanava
-    Enable Setting Before Adding Channel: Ota ennen kanavan lisäämistä käyttöön vähintään yksi kanava-asetus toistoasetuksissa
     Video Quality: Videon laatu
     Subtitles Enabled: Tekstitys käytössä
     Volume: Äänenvoimakkuus

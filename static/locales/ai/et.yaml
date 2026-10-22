@@ -756,13 +756,10 @@ Settings:
   Channel Settings:
     Channel Settings: Kanali seaded
     Channel Settings Description: Jäta iga kanali jaoks eraldi meelde vaatamise ajal valitud seaded, et need rakenduksid uuesti, kui vaatad järgmisel korral selle kanali videot.
-    Enable Playback Speed: Salvesta esituskiirus
-    Enable Video Quality: Salvesta video kvaliteet
-    Enable Subtitles State: Salvesta subtiitrite olek
-    Enable Volume: Salvesta helitugevus
-    Auto Update: Uuenda automaatselt pleieri valikute muutmisel
-    Auto Update Subtitles: Uuenda lülitamisel automaatselt
-    Auto Update Volume: Uuenda helitugevuse muutmisel automaatselt
+    Auto Save Playback Speed: Salvesta esituskiiruse muudatused automaatselt
+    Auto Save Video Quality: Salvesta videokvaliteedi muudatused automaatselt
+    Auto Save Subtitles State: Salvesta subtiitrite oleku muudatused automaatselt
+    Auto Save Volume: Salvesta helitugevuse muudatused automaatselt
     Manage Saved Channels: Halda salvestatud kanaleid ({channelCount})
     Saved Channels: Salvestatud kanaliseaded
     Enable Saved Channel Settings Sync: Sünkrooni salvestatud kanaliseaded
@@ -774,7 +771,6 @@ Settings:
     Forget Value: Unusta see seade
     Add Setting: Jäta selle kanali jaoks meelde veel üks seade
     Add Subscribed Channel: Lisa tellitud kanal
-    Enable Setting Before Adding Channel: Enne kanali lisamist luba taasesituse seadetes vähemalt üks kanaliseade
     Video Quality: Video kvaliteet
     Subtitles Enabled: Subtiitrid lubatud
     Volume: Helitugevus

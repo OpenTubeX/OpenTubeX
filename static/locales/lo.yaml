@@ -930,13 +930,6 @@ Settings:
   Channel Settings:
     Channel Settings: ການຕັ້ງຄ່າຊ່ອງ
     Channel Settings Description: ຈົດຈຳການຕັ້ງຄ່າທີ່ທ່ານເລືອກໃນຂະນະທີ່ເບິ່ງແຕ່ລະຊ່ອງແຍກກັນ ເພື່ອໃຫ້ມີຜົນໃນຄັ້ງຖັດໄປທີ່ທ່ານເບິ່ງວິດີໂອຈາກຊ່ອງນັ້ນ.
-    Enable Playback Speed: ເປີດໃຊ້ຄວາມໄວໃນການຫຼິ້ນ
-    Enable Video Quality: ເປີດໃຊ້ຄຸນນະພາບວິດີໂອ
-    Enable Subtitles State: ເປີດໃຊ້ສະຖານະຄຳບັນຍາຍ
-    Enable Volume: ເປີດໃຊ້ລະດັບສຽງ
-    Auto Update: ອັບເດດອັດຕະໂນມັດເມື່ອມີການປ່ຽນແປງຜ່ານຕົວເລືອກເຄື່ອງຫຼິ້ນ
-    Auto Update Subtitles: ອັບເດດອັດຕະໂນມັດເມື່ອມີການເປີດ-ປິດ
-    Auto Update Volume: ອັບເດດອັດຕະໂນມັດທຸກຄັ້ງທີ່ທ່ານປ່ຽນລະດັບສຽງ
     Manage Saved Channels: ຈັດການຊ່ອງທີ່ບັນທຶກໄວ້ ({channelCount})
     Saved Channels: ການຕັ້ງຄ່າຊ່ອງທີ່ບັນທຶກໄວ້
     Enable Saved Channel Settings Sync: ຊິງຄ໌ການຕັ້ງຄ່າຊ່ອງທີ່ບັນທຶກໄວ້

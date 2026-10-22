@@ -1648,13 +1648,10 @@ Settings:
     Channel Settings Description: >-
       Die beim Ansehen gewählten Einstellungen für jeden Kanal einzeln speichern, damit sie beim nächsten Video dieses
       Kanals erneut angewendet werden.
-    Enable Playback Speed: Wiedergabegeschwindigkeit aktivieren
-    Enable Video Quality: Videoqualität aktivieren
-    Enable Subtitles State: Untertitelstatus aktivieren
-    Enable Volume: Lautstärke aktivieren
-    Auto Update: Bei Änderungen über die Wiedergabeoptionen automatisch aktualisieren
-    Auto Update Subtitles: Beim Umschalten automatisch aktualisieren
-    Auto Update Volume: Bei jeder Lautstärkeänderung automatisch aktualisieren
+    Auto Save Playback Speed: Änderungen der Wiedergabegeschwindigkeit automatisch speichern
+    Auto Save Video Quality: Änderungen der Videoqualität automatisch speichern
+    Auto Save Subtitles State: Änderungen des Untertitelstatus automatisch speichern
+    Auto Save Volume: Lautstärkeänderungen automatisch speichern
     Manage Saved Channels: Gespeicherte Kanäle verwalten ({channelCount})
     Saved Channels: Gespeicherte Kanaleinstellungen
     Enable Saved Channel Settings Sync: Gespeicherte Kanaleinstellungen synchronisieren
@@ -1666,7 +1663,6 @@ Settings:
     Forget Value: Diese Einstellung vergessen
     Add Setting: Eine weitere Einstellung für diesen Kanal speichern
     Add Subscribed Channel: Abonnierten Kanal hinzufügen
-    Enable Setting Before Adding Channel: Aktiviere in den Wiedergabeeinstellungen mindestens eine Kanaleinstellung, bevor du einen Kanal hinzufügst
     Video Quality: Videoqualität
     Subtitles Enabled: Untertitel aktiviert
     Volume: Lautstärke

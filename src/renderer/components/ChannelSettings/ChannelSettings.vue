@@ -6,28 +6,15 @@
       {{ t('Settings.Channel Settings.Channel Settings Description') }}
     </p>
     <div class="preferenceToggles">
-      <div
-        v-for="preference in preferences"
+      <FtToggleSwitch
+        v-for="preference in PREFERENCES"
         :key="preference.type"
-        class="preferenceToggle"
-      >
-        <FtToggleSwitch
-          :label="preference.rememberLabel"
-          :compact="true"
-          :default-value="settings[preference.rememberKey]"
-          :setting-key="preference.rememberKey"
-          @change="value => updateSetting(preference.rememberKey, value)"
-        />
-        <FtToggleSwitch
-          v-if="settings[preference.rememberKey]"
-          class="autoUpdateToggle"
-          :label="preference.autoUpdateLabel"
-          :compact="true"
-          :default-value="settings[preference.autoUpdateKey]"
-          :setting-key="preference.autoUpdateKey"
-          @change="value => updateSetting(preference.autoUpdateKey, value)"
-        />
-      </div>
+        :label="autoUpdateLabels[preference.type]"
+        :compact="true"
+        :default-value="settings[preference.autoUpdateKey]"
+        :setting-key="preference.autoUpdateKey"
+        @change="value => updateSetting(preference.autoUpdateKey, value)"
+      />
     </div>
     <FtFlexBox>
       <div class="manageButton">
@@ -237,7 +224,6 @@
               {{ t('Settings.Channel Settings.Add Subscribed Channel') }}
             </h2>
             <FtInput
-              v-if="enabledPreferences.length > 0"
               ref="addChannelSearch"
               class="addSubscribedChannelSearch"
               input-type="search"
@@ -252,61 +238,53 @@
         </template>
         <div class="addSubscribedChannelPicker">
           <p
-            v-if="enabledPreferences.length === 0"
+            v-if="visibleAvailableSubscriptions.length === 0"
             class="addSubscribedChannelEmptyState"
           >
-            {{ t('Settings.Channel Settings.Enable Setting Before Adding Channel') }}
+            {{ t('Settings.Channel Settings.No Matching Channels') }}
           </p>
-          <template v-else>
-            <p
-              v-if="visibleAvailableSubscriptions.length === 0"
-              class="addSubscribedChannelEmptyState"
+          <ul
+            v-else
+            class="addSubscribedChannelList"
+          >
+            <li
+              v-for="channel in visibleAvailableSubscriptions"
+              :key="channel.id"
             >
-              {{ t('Settings.Channel Settings.No Matching Channels') }}
-            </p>
-            <ul
-              v-else
-              class="addSubscribedChannelList"
-            >
-              <li
-                v-for="channel in visibleAvailableSubscriptions"
-                :key="channel.id"
+              <button
+                type="button"
+                class="addSubscribedChannelOption"
+                :disabled="addingSubscribedChannel"
+                @click="addSubscribedChannel(channel.id)"
               >
-                <button
-                  type="button"
-                  class="addSubscribedChannelOption"
-                  :disabled="addingSubscribedChannel"
-                  @click="addSubscribedChannel(channel.id)"
+                <FtRetryImage
+                  v-if="channel.thumbnail"
+                  :fallback-icon="['fas', 'circle-user']"
+                  class="channelThumbnail"
+                  :src="channel.thumbnail"
+                  alt=""
+                />
+                <span
+                  v-else
+                  class="channelThumbnail channelThumbnailPlaceholder"
+                  aria-hidden="true"
                 >
-                  <FtRetryImage
-                    v-if="channel.thumbnail"
-                    :fallback-icon="['fas', 'circle-user']"
-                    class="channelThumbnail"
-                    :src="channel.thumbnail"
-                    alt=""
-                  />
-                  <span
-                    v-else
-                    class="channelThumbnail channelThumbnailPlaceholder"
-                    aria-hidden="true"
-                  >
-                    <FtIcon :icon="['fas', 'circle-user']" />
-                  </span>
-                  <span
-                    class="addSubscribedChannelName"
-                    dir="auto"
-                  >
-                    {{ channel.name }}
-                  </span>
-                  <FtIcon
-                    class="addSubscribedChannelIcon"
-                    :icon="['fas', 'plus']"
-                    aria-hidden="true"
-                  />
-                </button>
-              </li>
-            </ul>
-          </template>
+                  <FtIcon :icon="['fas', 'circle-user']" />
+                </span>
+                <span
+                  class="addSubscribedChannelName"
+                  dir="auto"
+                >
+                  {{ channel.name }}
+                </span>
+                <FtIcon
+                  class="addSubscribedChannelIcon"
+                  :icon="['fas', 'plus']"
+                  aria-hidden="true"
+                />
+              </button>
+            </li>
+          </ul>
         </div>
         <template #footer>
           <FtFlexBox>
@@ -393,18 +371,11 @@ const qualityNames = computed(() => [
   ...(autoQualityAvailable.value ? [t('Settings.Player Settings.Default Quality.Auto')] : [])
 ])
 
-const rememberLabels = computed(() => ({
-  playbackSpeed: t('Settings.Channel Settings.Enable Playback Speed'),
-  videoQuality: t('Settings.Channel Settings.Enable Video Quality'),
-  subtitlesState: t('Settings.Channel Settings.Enable Subtitles State'),
-  volume: t('Settings.Channel Settings.Enable Volume')
-}))
-
 const autoUpdateLabels = computed(() => ({
-  playbackSpeed: t('Settings.Channel Settings.Auto Update'),
-  videoQuality: t('Settings.Channel Settings.Auto Update'),
-  subtitlesState: t('Settings.Channel Settings.Auto Update Subtitles'),
-  volume: t('Settings.Channel Settings.Auto Update Volume')
+  playbackSpeed: t('Settings.Channel Settings.Auto Save Playback Speed'),
+  videoQuality: t('Settings.Channel Settings.Auto Save Video Quality'),
+  subtitlesState: t('Settings.Channel Settings.Auto Save Subtitles State'),
+  volume: t('Settings.Channel Settings.Auto Save Volume')
 }))
 
 /** Shared between the rows in a channel's card and the menu for adding one */
@@ -421,12 +392,6 @@ const preferenceLabels = computed(() => ({
   subtitlesState: t('Settings.Channel Settings.Subtitles Enabled'),
   volume: t('Settings.Channel Settings.Volume')
 }))
-
-const preferences = computed(() => PREFERENCES.map(preference => ({
-  ...preference,
-  rememberLabel: rememberLabels.value[preference.type],
-  autoUpdateLabel: autoUpdateLabels.value[preference.type]
-})))
 
 const settings = computed(() => store.state.settings)
 const savedChannelSyncEnableLabel = computed(() => (
@@ -465,7 +430,7 @@ const pendingPreferenceInitializations = new Map()
 const addChannelSearch = useTemplateRef('addChannelSearch')
 
 watch(showAddChannelPrompt, async (open) => {
-  if (!open || enabledPreferences.value.length === 0) {
+  if (!open) {
     return
   }
 
@@ -540,7 +505,7 @@ const collator = computed(() => new Intl.Collator([locale.value, 'en'], { sensit
 
 /**
  * Every channel that has at least one remembered value, along with the types
- * that are enabled globally but not remembered for it yet.
+ * that are not remembered for it yet.
  * @type {import('vue').ComputedRef<{
  *   id: string,
  *   name: string,
@@ -589,9 +554,8 @@ const channelEntries = computed(() => {
         label: preferenceLabels.value[type]
       }))
 
-    // Types that are enabled globally but not remembered for this channel yet
     const addableOptions = PREFERENCES
-      .filter(({ type, rememberKey }) => !values.has(type) && settings.value[rememberKey])
+      .filter(({ type }) => !values.has(type))
       .map(({ type }) => ({
         label: preferenceLabels.value[type],
         value: type,
@@ -609,10 +573,6 @@ const channelEntries = computed(() => {
 
   return entries.sort((a, b) => collator.value.compare(a.name, b.name))
 })
-
-const enabledPreferences = computed(() => (
-  PREFERENCES.filter(({ rememberKey }) => settings.value[rememberKey])
-))
 
 /** Subscriptions that do not have any saved channel preference yet. */
 const availableSubscriptions = computed(() => {
@@ -743,16 +703,16 @@ function defaultPreferenceValue(type) {
 }
 
 /**
- * Creates a saved channel entry with the global defaults for every enabled
+ * Creates a saved channel entry with the global defaults for every
  * per-channel preference.
  * @param {string} channelId
  */
 async function addSubscribedChannel(channelId) {
-  if (enabledPreferences.value.length === 0 || addingSubscribedChannel.value) {
+  if (addingSubscribedChannel.value) {
     return
   }
 
-  const preferencesToAdd = enabledPreferences.value.map(({ type }) => ({
+  const preferencesToAdd = PREFERENCES.map(({ type }) => ({
     type,
     initialValue: defaultPreferenceValue(type)
   }))

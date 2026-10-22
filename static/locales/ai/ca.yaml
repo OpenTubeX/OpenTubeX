@@ -1000,13 +1000,10 @@ Settings:
   Channel Settings:
     Channel Settings: Configuració dels canals
     Channel Settings Description: Recorda per separat la configuració que trieu mentre mireu cada canal, per tornar-la a aplicar la propera vegada que mireu un dels seus vídeos.
-    Enable Playback Speed: Activa la velocitat de reproducció
-    Enable Video Quality: Activa la qualitat del vídeo
-    Enable Subtitles State: Activa l'estat dels subtítols
-    Enable Volume: Activa el volum
-    Auto Update: Actualitza automàticament en canviar-ho des de les opcions del reproductor
-    Auto Update Subtitles: Actualitza automàticament en commutar-los
-    Auto Update Volume: Actualitza automàticament cada vegada que canvieu el volum
+    Auto Save Playback Speed: Desa automàticament els canvis de velocitat de reproducció
+    Auto Save Video Quality: Desa automàticament els canvis de qualitat del vídeo
+    Auto Save Subtitles State: "Desa automàticament els canvis d'estat dels subtítols"
+    Auto Save Volume: Desa automàticament els canvis de volum
     Manage Saved Channels: Gestiona els canals desats ({channelCount})
     Saved Channels: Configuració desada dels canals
     Enable Saved Channel Settings Sync: Sincronitza la configuració desada dels canals
@@ -1018,7 +1015,6 @@ Settings:
     Forget Value: Oblida aquesta opció
     Add Setting: Recorda una altra opció per a aquest canal
     Add Subscribed Channel: Afegeix un canal subscrit
-    Enable Setting Before Adding Channel: Activa almenys un paràmetre de canal a la configuració de reproducció abans d'afegir un canal
     Video Quality: Qualitat del vídeo
     Subtitles Enabled: Subtítols activats
     Volume: Volum

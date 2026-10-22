@@ -119,5 +119,15 @@ export function migrateLegacySettings(settings) {
     delete migratedSettings.hideAiVideoSummaries
   }
 
+  // Saved channel settings are always applied now
+  for (const key of [
+    'rememberPlaybackSpeedPerChannel',
+    'rememberVideoQualityPerChannel',
+    'rememberSubtitlesStatePerChannel',
+    'rememberVolumePerChannel',
+  ]) {
+    delete migratedSettings[key]
+  }
+
   return migratedSettings
 }

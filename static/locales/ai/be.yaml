@@ -787,13 +787,10 @@ Settings:
   Channel Settings:
     Channel Settings: Налады каналаў
     Channel Settings Description: Запамінаць асобныя налады, абраныя падчас прагляду кожнага канала, і ўжываць іх пры наступным праглядзе відэа з гэтага канала.
-    Enable Playback Speed: Запамінаць хуткасць прайгравання
-    Enable Video Quality: Запамінаць якасць відэа
-    Enable Subtitles State: Запамінаць стан субцітраў
-    Enable Volume: Запамінаць гучнасць
-    Auto Update: Аўтаматычна абнаўляць пасля змены ў параметрах прайгравальніка
-    Auto Update Subtitles: Аўтаматычна абнаўляць пры пераключэнні
-    Auto Update Volume: Аўтаматычна абнаўляць пры кожнай змене гучнасці
+    Auto Save Playback Speed: Аўтаматычна захоўваць змены хуткасці прайгравання
+    Auto Save Video Quality: Аўтаматычна захоўваць змены якасці відэа
+    Auto Save Subtitles State: Аўтаматычна захоўваць змены стану субцітраў
+    Auto Save Volume: Аўтаматычна захоўваць змены гучнасці
     Manage Saved Channels: Кіраванне захаванымі каналамі ({channelCount})
     Saved Channels: Захаваныя налады каналаў
     Enable Saved Channel Settings Sync: Сінхранізаваць захаваныя налады каналаў
@@ -805,7 +802,6 @@ Settings:
     Forget Value: Забыць гэту наладу
     Add Setting: Запомніць яшчэ адну наладу для гэтага канала
     Add Subscribed Channel: Дадаць канал з падпісак
-    Enable Setting Before Adding Channel: Перад даданнем канала ўключыце хаця б адну наладу канала ў наладах прайгравання
     Video Quality: Якасць відэа
     Subtitles Enabled: Субцітры ўключаныя
     Volume: Гучнасць

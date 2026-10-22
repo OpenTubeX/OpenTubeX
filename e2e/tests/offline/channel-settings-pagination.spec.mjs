@@ -17,8 +17,7 @@ function channelSettingsSeed(count, uiScale) {
       channelPlaybackSpeeds: values(1.25),
       channelVideoQualities: values('720'),
       channelSubtitlesStates: values(true),
-      channelVolumes: values(0.5),
-      rememberPlaybackSpeedPerChannel: true
+      channelVolumes: values(0.5)
     },
     profiles: [{ _id: 'allChannels', name: 'All Channels', subscriptions: subscriptions.slice(0, count + 1).map(channel => ({ ...channel })) }]
   }

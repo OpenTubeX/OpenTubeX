@@ -87,7 +87,7 @@ for (const protectedSettings of [false, true]) {
 test.describe('protected settings subpage reopening', () => {
   test.use({
     seed: {
-      settings: { settingsPassword, rememberPlaybackSpeedPerChannel: true },
+      settings: { settingsPassword },
       profiles: [{
         _id: 'allChannels',
         name: 'All Channels',
@@ -188,7 +188,6 @@ test.describe('protected settings subpage reopening', () => {
         await page.evaluate(() => {
           const store = window.$store
           store.commit('setChannelPlaybackSpeeds', JSON.stringify({ UCaaaaaaaaaaaaaaaaaaaaaa: 1.5 }))
-          store.commit('setRememberVolumePerChannel', true)
         })
         const playback = await goToSettingsSection(page, 'playback')
         await playback.getByRole('button', { name: /^Manage Saved Channels/ }).click()

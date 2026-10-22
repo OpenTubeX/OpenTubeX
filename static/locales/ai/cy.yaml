@@ -756,13 +756,10 @@ Settings:
   Channel Settings:
     Channel Settings: Gosodiadau sianeli
     Channel Settings Description: Cofiwch y gosodiadau a ddewiswch wrth wylio ar gyfer pob sianel ar wahân, fel eu bod yn cael eu gosod eto y tro nesaf y byddwch yn gwylio un o'i fideos.
-    Enable Playback Speed: Galluogi cyflymder chwarae
-    Enable Video Quality: Galluogi ansawdd fideo
-    Enable Subtitles State: Galluogi cyflwr isdeitlau
-    Enable Volume: Galluogi lefel y sain
-    Auto Update: Diweddaru'n awtomatig wrth newid drwy ddewisiadau'r chwaraewr
-    Auto Update Subtitles: Diweddaru'n awtomatig wrth doglo
-    Auto Update Volume: Diweddaru'n awtomatig pryd bynnag y byddwch yn newid lefel y sain
+    Auto Save Playback Speed: "Cadw newidiadau i'r cyflymder chwarae'n awtomatig"
+    Auto Save Video Quality: "Cadw newidiadau i ansawdd y fideo'n awtomatig"
+    Auto Save Subtitles State: "Cadw newidiadau i gyflwr yr isdeitlau'n awtomatig"
+    Auto Save Volume: Cadw newidiadau i lefel y sain yn awtomatig
     Manage Saved Channels: Rheoli sianeli a gadwyd ({channelCount})
     Saved Channels: Gosodiadau sianeli a gadwyd
     Enable Saved Channel Settings Sync: Cysoni gosodiadau sianeli a gadwyd
@@ -774,7 +771,6 @@ Settings:
     Forget Value: Anghofio'r gosodiad hwn
     Add Setting: Cofio gosodiad arall ar gyfer y sianel hon
     Add Subscribed Channel: Ychwanegu sianel rydych wedi tanysgrifio iddi
-    Enable Setting Before Adding Channel: Galluogwch o leiaf un gosodiad sianel yn y gosodiadau chwarae cyn ychwanegu sianel
     Video Quality: Ansawdd fideo
     Subtitles Enabled: Isdeitlau wedi'u galluogi
     Volume: Lefel y sain

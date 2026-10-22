@@ -756,13 +756,10 @@ Settings:
   Channel Settings:
     Channel Settings: Kanalen ezarpenak
     Channel Settings Description: Gogoratu kanal bakoitzerako bideoak ikustean aukeratutako ezarpenak, kanal horretako beste bideo bat ikusten duzunean berriro aplikatzeko.
-    Enable Playback Speed: Gaitu erreprodukzio-abiadura
-    Enable Video Quality: Gaitu bideo-kalitatea
-    Enable Subtitles State: Gaitu azpitituluen egoera
-    Enable Volume: Gaitu bolumena
-    Auto Update: Eguneratu automatikoki erreproduzigailuaren aukeretatik aldatzean
-    Auto Update Subtitles: Eguneratu automatikoki aktibatzean edo desaktibatzean
-    Auto Update Volume: Eguneratu automatikoki bolumena aldatzen duzun bakoitzean
+    Auto Save Playback Speed: Gorde automatikoki erreprodukzio-abiaduraren aldaketak
+    Auto Save Video Quality: Gorde automatikoki bideo-kalitatearen aldaketak
+    Auto Save Subtitles State: Gorde automatikoki azpitituluen egoeraren aldaketak
+    Auto Save Volume: Gorde automatikoki bolumenaren aldaketak
     Manage Saved Channels: Kudeatu gordetako kanalak ({channelCount})
     Saved Channels: Gordetako kanalen ezarpenak
     Enable Saved Channel Settings Sync: Sinkronizatu gordetako kanalen ezarpenak
@@ -774,7 +771,6 @@ Settings:
     Forget Value: Ahaztu ezarpen hau
     Add Setting: Gogoratu beste ezarpen bat kanal honetarako
     Add Subscribed Channel: Gehitu harpidetutako kanal bat
-    Enable Setting Before Adding Channel: Gaitu gutxienez kanal-ezarpen bat erreprodukzio-ezarpenetan kanal bat gehitu aurretik
     Video Quality: Bideo-kalitatea
     Subtitles Enabled: Azpitituluak gaituta
     Volume: Bolumena

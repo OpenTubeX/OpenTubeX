@@ -756,13 +756,10 @@ Settings:
   Channel Settings:
     Channel Settings: Nastavení kanálů
     Channel Settings Description: Zapamatuje nastavení zvolená při sledování pro každý kanál zvlášť a znovu je použije při příštím sledování některého z jeho videí.
-    Enable Playback Speed: Pamatovat si rychlost přehrávání
-    Enable Video Quality: Pamatovat si kvalitu videa
-    Enable Subtitles State: Pamatovat si stav titulků
-    Enable Volume: Pamatovat si hlasitost
-    Auto Update: Automaticky aktualizovat při změně v možnostech přehrávače
-    Auto Update Subtitles: Automaticky aktualizovat při přepnutí
-    Auto Update Volume: Automaticky aktualizovat při každé změně hlasitosti
+    Auto Save Playback Speed: Automaticky ukládat změny rychlosti přehrávání
+    Auto Save Video Quality: Automaticky ukládat změny kvality videa
+    Auto Save Subtitles State: Automaticky ukládat změny stavu titulků
+    Auto Save Volume: Automaticky ukládat změny hlasitosti
     Manage Saved Channels: Spravovat uložené kanály ({channelCount})
     Saved Channels: Uložená nastavení kanálů
     Enable Saved Channel Settings Sync: Synchronizovat uložená nastavení kanálů
@@ -774,7 +771,6 @@ Settings:
     Forget Value: Zapomenout toto nastavení
     Add Setting: Zapamatovat si pro tento kanál další nastavení
     Add Subscribed Channel: Přidat odebíraný kanál
-    Enable Setting Before Adding Channel: Před přidáním kanálu povolte alespoň jedno nastavení kanálu v nastavení přehrávání
     Video Quality: Kvalita videa
     Subtitles Enabled: Titulky zapnuté
     Volume: Hlasitost

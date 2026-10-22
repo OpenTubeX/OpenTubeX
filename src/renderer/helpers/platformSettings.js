@@ -26,7 +26,6 @@ export const DEVICE_LOCAL_SETTING_KEYS = new Set([
   'mobileRightSwipeAction',
   'rememberTabNavigationHistory',
   'rememberVolume',
-  'rememberVolumePerChannel',
   'rotateFullscreenToLandscape',
   'scrollMiniPlayerOnAllTabs',
   'showMobileSeekPreview',

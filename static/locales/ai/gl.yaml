@@ -764,13 +764,10 @@ Settings:
   Channel Settings:
     Channel Settings: Configuración das canles
     Channel Settings Description: Lembrar por separado os axustes escollidos mentres ves vídeos de cada canle para aplicalos de novo a próxima vez que vexas un dos seus vídeos.
-    Enable Playback Speed: Activar a velocidade de reprodución
-    Enable Video Quality: Activar a calidade do vídeo
-    Enable Subtitles State: Activar o estado dos subtítulos
-    Enable Volume: Activar o volume
-    Auto Update: Actualizar automaticamente ao cambiar as opcións do reprodutor
-    Auto Update Subtitles: Actualizar automaticamente ao cambiar o estado
-    Auto Update Volume: Actualizar automaticamente cada vez que cambies o volume
+    Auto Save Playback Speed: Gardar automaticamente os cambios de velocidade de reprodución
+    Auto Save Video Quality: Gardar automaticamente os cambios de calidade do vídeo
+    Auto Save Subtitles State: Gardar automaticamente os cambios de estado dos subtítulos
+    Auto Save Volume: Gardar automaticamente os cambios de volume
     Manage Saved Channels: Xestionar as canles gardadas ({channelCount})
     Saved Channels: Configuración gardada das canles
     Enable Saved Channel Settings Sync: Sincronizar a configuración gardada das canles
@@ -782,7 +779,6 @@ Settings:
     Forget Value: Esquecer este axuste
     Add Setting: Lembrar outro axuste para esta canle
     Add Subscribed Channel: Engadir unha canle subscrita
-    Enable Setting Before Adding Channel: Activa polo menos unha configuración de canle nos axustes de reprodución antes de engadir unha canle
     Video Quality: Calidade do vídeo
     Subtitles Enabled: Subtítulos activados
     Volume: Volume

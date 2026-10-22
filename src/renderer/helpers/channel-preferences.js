@@ -6,7 +6,6 @@ import { checkYoutubeChannelId, findChannelTagInfo } from './channels'
  * @type {readonly {
  *   type: 'playbackSpeed' | 'videoQuality' | 'subtitlesState' | 'volume',
  *   valuesKey: string,
- *   rememberKey: string,
  *   autoUpdateKey: string
  * }[]}
  */
@@ -14,25 +13,21 @@ export const CHANNEL_PREFERENCE_TYPES = Object.freeze([
   {
     type: 'playbackSpeed',
     valuesKey: 'channelPlaybackSpeeds',
-    rememberKey: 'rememberPlaybackSpeedPerChannel',
     autoUpdateKey: 'autoUpdateChannelPlaybackSpeeds'
   },
   {
     type: 'videoQuality',
     valuesKey: 'channelVideoQualities',
-    rememberKey: 'rememberVideoQualityPerChannel',
     autoUpdateKey: 'autoUpdateChannelVideoQualities'
   },
   {
     type: 'subtitlesState',
     valuesKey: 'channelSubtitlesStates',
-    rememberKey: 'rememberSubtitlesStatePerChannel',
     autoUpdateKey: 'autoUpdateChannelSubtitlesStates'
   },
   {
     type: 'volume',
     valuesKey: 'channelVolumes',
-    rememberKey: 'rememberVolumePerChannel',
     autoUpdateKey: 'autoUpdateChannelVolumes'
   }
 ])

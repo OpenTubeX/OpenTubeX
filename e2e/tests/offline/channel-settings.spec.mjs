@@ -25,8 +25,6 @@ test.use({
       }),
       defaultPlayback: 1.25,
       defaultVolume: 0.4,
-      rememberPlaybackSpeedPerChannel: true,
-      rememberVolumePerChannel: true,
       syncServerSettingsExcluded: ['channelPlaybackSpeeds'],
       syncServerAutoSync: false,
       syncServerEnabled: false,
@@ -156,7 +154,7 @@ test.describe('channel settings', () => {
     await picker.getByRole('button', { name: NEW_CHANNEL_NAME, exact: true }).click()
     const newChannel = settingsWindow.locator('.channelEntry', { hasText: NEW_CHANNEL_NAME })
     await expect(newChannel).toBeVisible()
-    await expect(newChannel.locator('.channelPreference')).toHaveCount(2)
+    await expect(newChannel.locator('.channelPreference')).toHaveCount(4)
 
     await expect.poll(() => page.evaluate(channelId => {
       const settings = window.$store.state.settings
@@ -294,36 +292,6 @@ test.describe('channel settings', () => {
       existingChannel: 1.75,
       newChannel: 1.25
     })
-  })
-
-  test('points to Playback settings when channel settings are disabled', async ({ page }) => {
-    await page.evaluate(async () => {
-      const store = window.$store
-      await Promise.all([
-        store.dispatch('updateRememberPlaybackSpeedPerChannel', false),
-        store.dispatch('updateRememberVideoQualityPerChannel', false),
-        store.dispatch('updateRememberSubtitlesStatePerChannel', false),
-        store.dispatch('updateRememberVolumePerChannel', false)
-      ])
-    })
-
-    await goToSettingsSection(page, 'playback')
-    await page.getByRole('button', { name: 'Manage Saved Channels (1)' }).click()
-    await page.getByRole('button', { name: 'Add subscribed channel' }).click()
-
-    const picker = page.getByRole('dialog', { name: 'Add subscribed channel' })
-    const message = picker.getByText(
-      'Enable at least one channel setting in Playback settings before adding a channel'
-    )
-    await expect(message).toBeVisible()
-
-    const [pickerBox, messageBox] = await Promise.all([
-      picker.boundingBox(),
-      message.boundingBox()
-    ])
-    expect(Math.abs(
-      pickerBox.x + pickerBox.width / 2 - (messageBox.x + messageBox.width / 2)
-    )).toBeLessThanOrEqual(1)
   })
 
   test('saved channels are not links when channel links are disabled', async ({ page }) => {

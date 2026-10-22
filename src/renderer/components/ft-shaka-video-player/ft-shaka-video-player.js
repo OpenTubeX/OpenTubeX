@@ -1622,7 +1622,7 @@ export default defineComponent({
      * @returns {boolean | null}
      */
     function getSavedChannelSubtitlesState() {
-      if (!store.getters.getRememberSubtitlesStatePerChannel || props.channelId === '') {
+      if (props.channelId === '') {
         return null
       }
 
@@ -2066,17 +2066,12 @@ export default defineComponent({
       return store.getters.getRememberVolume
     })
 
-    /** @type {import('vue').ComputedRef<boolean>} */
-    const rememberVolumePerChannel = computed(() => {
-      return store.getters.getRememberVolumePerChannel
-    })
-
     /**
      * The volume that was saved for this video's channel, if there is one.
      * @type {import('vue').ComputedRef<number | null>}
      */
     const savedChannelVolume = computed(() => {
-      if (!rememberVolumePerChannel.value || props.channelId === '') {
+      if (props.channelId === '') {
         return null
       }
 
@@ -2100,11 +2095,6 @@ export default defineComponent({
     /** @type {import('vue').ComputedRef<string>} */
     const channelPlaybackSpeeds = computed(() => {
       return store.getters.getChannelPlaybackSpeeds
-    })
-
-    /** @type {import('vue').ComputedRef<boolean>} */
-    const rememberPlaybackSpeedPerChannel = computed(() => {
-      return store.getters.getRememberPlaybackSpeedPerChannel
     })
 
     /** @type {import('vue').ComputedRef<boolean>} */
@@ -2142,7 +2132,7 @@ export default defineComponent({
 
     /** @type {import('vue').ComputedRef<number | null>} */
     const savedChannelPlaybackRate = computed(() => {
-      if (!rememberPlaybackSpeedPerChannel.value || props.channelId === '') {
+      if (props.channelId === '') {
         return null
       }
 
@@ -2167,9 +2157,7 @@ export default defineComponent({
 
     /** @type {import('vue').ComputedRef<boolean>} */
     const canManuallySaveChannelPlaybackRate = computed(() => {
-      return rememberPlaybackSpeedPerChannel.value &&
-        !autoUpdateChannelPlaybackSpeeds.value &&
-        props.channelId !== ''
+      return !autoUpdateChannelPlaybackSpeeds.value && props.channelId !== ''
     })
 
     const videoPlaybackRateInterval = computed(() => {
@@ -6846,7 +6834,6 @@ export default defineComponent({
     watch(
       [
         useQuickPlaybackSpeedBar,
-        rememberPlaybackSpeedPerChannel,
         autoUpdateChannelPlaybackSpeeds,
         savedChannelPlaybackRate,
         quickPlaybackSpeedBarOptions,

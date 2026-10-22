@@ -10,7 +10,6 @@ const musicModeSeed = {
     quickSettings: ['musicMode', 'defaultPlayback', 'baseTheme'],
     playNextVideo: false,
     hideRecommendedVideos: false,
-    rememberPlaybackSpeedPerChannel: true,
     autoUpdateChannelPlaybackSpeeds: false,
     useCustomShortsPlayer: true,
     baseTheme: 'system',

@@ -764,13 +764,10 @@ Settings:
   Channel Settings:
     Channel Settings: Cài đặt kênh
     Channel Settings Description: Ghi nhớ riêng các cài đặt bạn chọn khi xem từng kênh để áp dụng lại vào lần sau khi bạn xem video của kênh đó.
-    Enable Playback Speed: Ghi nhớ tốc độ phát
-    Enable Video Quality: Ghi nhớ chất lượng video
-    Enable Subtitles State: Ghi nhớ trạng thái phụ đề
-    Enable Volume: Ghi nhớ âm lượng
-    Auto Update: Tự động cập nhật khi thay đổi trong tùy chọn trình phát
-    Auto Update Subtitles: Tự động cập nhật khi bật hoặc tắt
-    Auto Update Volume: Tự động cập nhật mỗi khi bạn thay đổi âm lượng
+    Auto Save Playback Speed: Tự động lưu thay đổi tốc độ phát
+    Auto Save Video Quality: Tự động lưu thay đổi chất lượng video
+    Auto Save Subtitles State: Tự động lưu thay đổi trạng thái phụ đề
+    Auto Save Volume: Tự động lưu thay đổi âm lượng
     Manage Saved Channels: Quản lý kênh đã lưu ({channelCount})
     Saved Channels: Cài đặt kênh đã lưu
     Enable Saved Channel Settings Sync: Đồng bộ cài đặt kênh đã lưu
@@ -782,7 +779,6 @@ Settings:
     Forget Value: Xóa cài đặt này
     Add Setting: Ghi nhớ thêm một cài đặt cho kênh này
     Add Subscribed Channel: Thêm kênh đã đăng ký
-    Enable Setting Before Adding Channel: Bật ít nhất một cài đặt kênh trong phần cài đặt phát trước khi thêm kênh
     Video Quality: Chất lượng video
     Subtitles Enabled: Đã bật phụ đề
     Volume: Âm lượng

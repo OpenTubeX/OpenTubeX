@@ -7,8 +7,7 @@ const IMPORTED_ID = 'UCcccccccccccccccccccccc'
 test.use({
   seed: {
     settings: {
-      channelPlaybackSpeeds: JSON.stringify({ [SUBSCRIBED_ID]: 1, [SAVED_ID]: 1.25 }),
-      rememberPlaybackSpeedPerChannel: false
+      channelPlaybackSpeeds: JSON.stringify({ [SUBSCRIBED_ID]: 1, [SAVED_ID]: 1.25 })
     },
     profiles: [{
       _id: 'allChannels',
@@ -47,11 +46,8 @@ async function importButton(page) {
   return advancedSection.getByRole('button', { name: 'Import channel playback speeds', exact: true })
 }
 
-function readChannelSpeedSettings(page) {
-  return page.evaluate(() => ({
-    speeds: JSON.parse(window.$store.getters.getChannelPlaybackSpeeds),
-    remember: window.$store.getters.getRememberPlaybackSpeedPerChannel
-  }))
+function readChannelSpeeds(page) {
+  return page.evaluate(() => JSON.parse(window.$store.getters.getChannelPlaybackSpeeds))
 }
 
 test('imports the channel playback speeds of the Youtube Speed By Channel userscript', async ({ page }) => {
@@ -71,9 +67,8 @@ test('imports the channel playback speeds of the Youtube Speed By Channel usersc
 
   await expect(page.locator('.toast', { hasText: 'Imported the playback speeds of 2 channels' })).toBeVisible()
   await expect(page.locator('.toast', { hasText: '1 channel could not be found' })).toBeVisible()
-  await expect.poll(() => readChannelSpeedSettings(page)).toEqual({
-    speeds: { [SUBSCRIBED_ID]: 2, [SAVED_ID]: 1.25, [IMPORTED_ID]: 1.75 },
-    remember: true
+  await expect.poll(() => readChannelSpeeds(page)).toEqual({
+    [SUBSCRIBED_ID]: 2, [SAVED_ID]: 1.25, [IMPORTED_ID]: 1.75
   })
 })
 
@@ -84,8 +79,5 @@ test('reports files without channel playback speeds', async ({ page }) => {
   await button.click()
 
   await expect(page.locator('.toast', { hasText: 'No channel playback speeds were found in this file' })).toBeVisible()
-  expect(await readChannelSpeedSettings(page)).toEqual({
-    speeds: { [SUBSCRIBED_ID]: 1, [SAVED_ID]: 1.25 },
-    remember: false
-  })
+  expect(await readChannelSpeeds(page)).toEqual({ [SUBSCRIBED_ID]: 1, [SAVED_ID]: 1.25 })
 })

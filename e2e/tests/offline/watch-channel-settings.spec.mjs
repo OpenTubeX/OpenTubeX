@@ -7,10 +7,6 @@ test.use({
     settings: {
       videoPlaybackEngine: 'built-in',
       ytDlpPlaybackEngineDefaultMigration: true,
-      rememberPlaybackSpeedPerChannel: true,
-      rememberVideoQualityPerChannel: true,
-      rememberSubtitlesStatePerChannel: true,
-      rememberVolumePerChannel: true,
       autoUpdateChannelPlaybackSpeeds: false,
       autoUpdateChannelVideoQualities: false,
       autoUpdateChannelSubtitlesStates: false,
@@ -75,8 +71,8 @@ test('removes each saved channel override from the watch popover without changin
   expect(await video.evaluate(video => ({ speed: video.playbackRate, volume: video.volume }))).toEqual(before)
   await page.keyboard.press('Escape')
   await view.evaluate(async view => {
-    for (const setting of ['VideoQuality', 'SubtitlesState', 'Volume']) {
-      await view.$store.dispatch(`updateRemember${setting}PerChannel`, false)
+    for (const setting of ['VideoQualities', 'SubtitlesStates', 'Volumes']) {
+      await view.$store.dispatch(`updateAutoUpdateChannel${setting}`, true)
     }
   })
   await page.locator(`${activeTab} .watchVideoInfo`).getByRole('button', { name: 'Save channel setting…', exact: true }).click()

@@ -246,14 +246,6 @@ test.describe('watch page', () => {
     await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
 
     const watchComponent = await page.evaluateHandle(findWatchComponent)
-    await watchComponent.evaluate(async (component) => {
-      await Promise.all([
-        component.proxy.$store.dispatch('updateRememberPlaybackSpeedPerChannel', true),
-        component.proxy.$store.dispatch('updateRememberVideoQualityPerChannel', true),
-      ])
-      await component.proxy.$nextTick()
-    })
-
     const player = page.locator('.ftVideoPlayer.shortsPlayer')
     const moreOptions = player.getByRole('button', { name: 'More Options' })
     const overflowMenu = player.locator('.shaka-overflow-menu')
