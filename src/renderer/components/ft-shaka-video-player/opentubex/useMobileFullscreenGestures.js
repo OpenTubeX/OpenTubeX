@@ -68,7 +68,8 @@ export function useMobileFullscreenGestures({
   let mobilePlayerSuppressClickUntil = 0
   let mobileControlSuppressClickUntil = 0
   let mobileSurfaceSuppressTouchEndUntil = 0
-  let mobileSeekTouchCancelled = false
+  let mobileAdjustmentTouchEnd = false
+  let mobileGestureTouchCancelled = false
   let mobileTitleSuppressClickUntil = 0
   /** @type {{ pointerId: number, startX: number, startY: number, startTime: number, blocked: boolean } | null} */
   let mobileFullscreenTitleGesture = null
@@ -111,7 +112,7 @@ export function useMobileFullscreenGestures({
       return
     }
 
-    mobileSeekTouchCancelled = false
+    mobileGestureTouchCancelled = false
 
     const previousTitleTap = lastMobileFullscreenTitleTap
     const blocksPreviousTitleTap = previousTitleTap !== null &&
@@ -143,6 +144,7 @@ export function useMobileFullscreenGestures({
     mobileFullscreenSwipeOffset.value = 0
     mobileControlSuppressClickUntil = 0
     mobileSurfaceSuppressTouchEndUntil = 0
+    mobileAdjustmentTouchEnd = false
 
     const bounds = getSurfaceBounds()
     const tapDirection = getMobileTapDirection(event.clientX, bounds)
@@ -381,6 +383,7 @@ export function useMobileFullscreenGestures({
       if (container?.hasPointerCapture(event.pointerId)) container.releasePointerCapture(event.pointerId)
       mobilePlayerSuppressClickUntil = performance.now() + 350
       mobileSurfaceSuppressTouchEndUntil = performance.now() + 350
+      mobileAdjustmentTouchEnd = true
       mobileControlSuppressClickUntil = performance.now() + 350
       event.preventDefault()
       event.stopImmediatePropagation()
@@ -521,8 +524,11 @@ export function useMobileFullscreenGestures({
     const wasActive = mobileFullscreenGesture !== null || mobileFullscreenSwiping.value
     if (mobileFullscreenGesture?.minimizing) miniPlayerDrag.finish(false)
     if (mobileFullscreenGesture?.adjusting || mobileFullscreenGesture?.dismissing || mobileFullscreenGesture?.seeking) {
-      if (mobileFullscreenGesture.seeking) mobileSeekTouchCancelled = true
-      if (mobileFullscreenGesture.adjusting) adjustments.cancel()
+      if (mobileFullscreenGesture.seeking || mobileFullscreenGesture.adjusting) mobileGestureTouchCancelled = true
+      if (mobileFullscreenGesture.adjusting) {
+        adjustments.cancel()
+        mobileAdjustmentTouchEnd = true
+      }
       mobilePlayerSuppressClickUntil = performance.now() + 350
       mobileSurfaceSuppressTouchEndUntil = performance.now() + 350
       mobileControlSuppressClickUntil = performance.now() + 350
@@ -617,24 +623,41 @@ export function useMobileFullscreenGestures({
     mobileSeekFeedbackTimer = window.setTimeout(clearMobileSeekFeedback, 500)
   }
 
+  // Shaka reveals its controls for any touch movement over the player. A side
+  // swipe adjustment shows only its own indicator instead.
+  function handleMobilePlayerTouchMove(event) {
+    if (!mobileFullscreenGesture || mobileFullscreenGesture.action === 'disabled' || mobileFullscreenGesture.seeking) {
+      // This movement stops Shaka's idle timer, so its touch end must restart it.
+      mobileAdjustmentTouchEnd = false
+      return
+    }
+    event.stopImmediatePropagation()
+  }
+
   function handleMobilePlayerTouchEnd(event) {
     // Compare the input time so a busy main thread cannot let the touchend of
     // an already handled tap reach Shaka's own surface toggle.
     if (
       !isCapacitorMobilePlayer() ||
-      (!mobileSeekTouchCancelled && event.timeStamp >= mobileSurfaceSuppressTouchEndUntil)
+      (!mobileGestureTouchCancelled && event.timeStamp >= mobileSurfaceSuppressTouchEndUntil)
     ) {
       return
     }
 
     mobileSurfaceSuppressTouchEndUntil = 0
-    if (mobileSeekTouchCancelled) {
-      mobileSeekTouchCancelled = event.touches?.length > 0
+    const adjustmentTouchEnd = mobileAdjustmentTouchEnd
+    if (mobileGestureTouchCancelled) {
+      mobileGestureTouchCancelled = event.touches?.length > 0
       mobilePlayerSuppressClickUntil = performance.now() + 350
       mobileControlSuppressClickUntil = performance.now() + 350
     }
+    // Fingers that remain after a canceled adjustment still end it.
+    mobileAdjustmentTouchEnd = adjustmentTouchEnd && mobileGestureTouchCancelled
     event.preventDefault()
     event.stopImmediatePropagation()
+    // An adjustment never let Shaka see its touchmoves, so the idle timer is
+    // still running and notifying Shaka would reveal the controls.
+    if (adjustmentTouchEnd) return
     // Shaka's surface-tap handler is on the child controls container. Notify
     // only the player container so its touchmove-stopped idle timer resumes.
     getContainer()?.dispatchEvent(new Event('touchend'))
@@ -682,6 +705,7 @@ export function useMobileFullscreenGestures({
     mobileSeekPreview.value = null
     mobilePlayerSuppressClickUntil = 0
     mobileSurfaceSuppressTouchEndUntil = 0
+    mobileAdjustmentTouchEnd = false
     mobileTitleSuppressClickUntil = 0
     mobileFullscreenTitleGesture = null
     lastMobileFullscreenTitleTap = null
@@ -695,6 +719,7 @@ export function useMobileFullscreenGestures({
     getMobileTapDirection,
     handleMobilePlayerSurfaceClick,
     handleMobilePlayerTouchEnd,
+    handleMobilePlayerTouchMove,
     mobileFullscreenSwipeSettling,
     mobileFullscreenSwipeStyle,
     mobileFullscreenSwiping,
