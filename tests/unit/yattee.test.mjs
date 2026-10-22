@@ -251,6 +251,10 @@ test('connection checks report actionable failures', async () => {
   const silent = (_url, { signal }) => new Promise((_resolve, reject) => signal?.addEventListener('abort', () => reject(signal.reason)))
   const pending = new Promise(resolve => setTimeout(() => resolve('still testing'), 1000))
   assert.deepEqual(await Promise.race([checkYatteeServer(server, null, { fetch: silent, timeout: 10 }), pending]), { ok: false, error: 'unreachable' })
+
+  // A slow media check is not a CORS problem
+  const reachable = async () => Response.json({ name: 'Yattee Server', version: '1.0.9' })
+  assert.deepEqual(await checkYatteeServer(server, null, { fetch: reachable, mediaFetch: silent, timeout: 10 }), { ok: false, error: 'unreachable' })
   assert.deepEqual(await checkYatteeServer(server, null, respond(200, { name: 'yattee-server' })), { ok: false, error: 'credentials-required' })
   assert.deepEqual(await checkYatteeServer(server, 'Basic x', respond(401, { detail: 'Invalid credentials' })), { ok: false, error: 'invalid-credentials', status: 401 })
   assert.deepEqual(await checkYatteeServer(server, 'Basic x', respond(429, { detail: 'Too many' })), { ok: false, error: 'rate-limited', status: 429 })

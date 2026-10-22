@@ -411,8 +411,9 @@ export async function checkYatteeServer(serverUrl, authorization, { fetch: fetch
   if (mediaFetch) {
     try {
       await mediaFetch(`${serverUrl}/health`, { cache: 'no-store', signal: AbortSignal.timeout(timeout) })
-    } catch {
-      return { ok: false, error: 'cors' }
+    } catch (error) {
+      // A slow server is not a CORS problem
+      return { ok: false, error: error?.name === 'TimeoutError' ? 'unreachable' : 'cors' }
     }
   }
 
