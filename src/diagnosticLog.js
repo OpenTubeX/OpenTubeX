@@ -12,7 +12,10 @@ const REDACTED = '<redacted>'
 
 const SENSITIVE_KEY = /^(?:authorization|cookies?|set-cookie|password|passphrase|secret|signature|sig|sapisid|visitor[_-]?(?:data|id)|.*(?:token|secret|password|api[_-]?key|cookie)s?)$/i
 const SENSITIVE_ASSIGNMENT = /(["']?)\b(authorization|cookies?|set-cookie|password|passphrase|secret|sapisid|visitor[_-]?(?:data|id)|[\w-]*(?:token|secret|password|api[_-]?key))\1(\s*[:=]\s*)(?:"[^"]*"|'[^']*'|[^\s,;&}\]]+)/gi
-const URL_PATTERN = /\b(?:https?|wss?|file):\/\/[^\s"'<>()[\]{}]+/gi
+// Brackets are valid URL characters (IPv6 hosts, `filters[]=` queries), so a
+// match only ends at whitespace or quotes and loses unbalanced closers later
+const URL_PATTERN = /\b(?:https?|wss?|file):\/\/[^\s"'<>]+/gi
+const CLOSING_BRACKETS = { ')': '(', ']': '[', '}': '{' }
 const IPV4_PATTERN = /(?<![\d.])(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)(?![\d.])/g
 const IPV6_PATTERN = /(?<![\w:])(?:(?:[\da-f]{1,4}:){3,7}[\da-f]{1,4}|(?:[\da-f]{1,4}:){1,6}:(?:[\da-f]{1,4}(?::[\da-f]{1,4})*)?)(?![\w:])/gi
 const EMAIL_PATTERN = /\b[\w.+-]+@[\w-]+(?:\.[\w-]+)+\b/g
@@ -22,10 +25,25 @@ const GOOGLEVIDEO_NODE_PATTERN = /\brr\d+---sn-[\da-z-]+\.googlevideo\.com\b/gi
 // Long opaque path segments are usually tokens, signatures or session IDs
 const OPAQUE_PATH_SEGMENT = /^[\w%=.~-]{40,}$/
 
+function countOf(text, character) {
+  return text.split(character).length - 1
+}
+
 function redactUrl(match) {
-  // Keep sentence punctuation that the URL pattern swallowed
-  const trailing = /[.,;:!?]+$/.exec(match)?.[0] ?? ''
-  const value = trailing ? match.slice(0, -trailing.length) : match
+  // Keep sentence punctuation and closing brackets that surround the URL
+  let value = match
+  for (;;) {
+    const last = value.at(-1)
+    if (
+      '.,;:!?'.includes(last) ||
+      (last in CLOSING_BRACKETS && countOf(value, last) > countOf(value, CLOSING_BRACKETS[last]))
+    ) {
+      value = value.slice(0, -1)
+    } else {
+      break
+    }
+  }
+  const trailing = match.slice(value.length)
   let url
   try {
     url = new URL(value)

@@ -20,6 +20,10 @@ test('URLs keep their origin and path but lose parameters and opaque segments', 
     'https://www.youtube.com/api/manifest/dash/<redacted>/source/youtube'
   )
   assert.equal(redactDiagnosticText('http://localhost:9050/'), 'http://localhost:9050/')
+  assert.equal(
+    redactDiagnosticText('see (https://example.com/a?filters[]=private&q=(secret)) and [https://[2001:db8::5]/watch?account=alice].'),
+    'see (https://example.com/a?<redacted>) and [https://[<ip>]/watch?<redacted>].'
+  )
 })
 
 test('credentials and identifying values are removed from text', () => {
