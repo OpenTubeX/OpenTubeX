@@ -1555,12 +1555,31 @@ test.describe('quick settings menu', () => {
     await page.getByRole('dialog', { name: 'Quick settings' }).getByRole('button', { name: 'About' }).click()
 
     const aboutWindow = page.getByRole('dialog', { name: 'About' })
-    await aboutWindow.locator('.settingsCloseButton').click()
-
-    await expect(aboutWindow).toHaveClass(/settings-window-leave-active/)
     await expect(aboutWindow.locator('.settingsBreadcrumb')).toContainText('About')
-    await expect(aboutWindow.locator('.settingsMenu')).toHaveCount(0)
+
+    // The 160 ms leave animation can end between separate assertions on a busy
+    // runner, so record the leaving window after every DOM change instead.
+    await page.evaluate(() => {
+      window.aboutLeaveStates = []
+      new MutationObserver(() => {
+        const leaving = document.querySelector('.settingsWindow.settings-window-leave-active')
+        if (leaving !== null) {
+          window.aboutLeaveStates.push({
+            breadcrumb: leaving.querySelector('.settingsBreadcrumb')?.textContent ?? '',
+            hasMenu: leaving.querySelector('.settingsMenu') !== null
+          })
+        }
+      }).observe(document.body, { subtree: true, childList: true, attributes: true, characterData: true })
+    })
+    await aboutWindow.locator('.settingsCloseButton').click()
     await expect(aboutWindow).toBeHidden()
+
+    const states = await page.evaluate(() => window.aboutLeaveStates)
+    expect(states.length).toBeGreaterThan(0)
+    for (const state of states) {
+      expect(state.breadcrumb).toContain('About')
+      expect(state.hasMenu).toBe(false)
+    }
   })
 })
 
