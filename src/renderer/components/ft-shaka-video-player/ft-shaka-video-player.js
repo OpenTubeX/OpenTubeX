@@ -9971,6 +9971,13 @@ export default defineComponent({
 
     function registerLegacyQualitySelection() {
       let selectionGeneration = 0
+      /**
+       * Loading a new source pauses the media element, and its autoplay
+       * attribute then starts it again. Keep the state from before the first
+       * pending user selection, as a newer one finds the element paused.
+       * @type {{ wasPaused: boolean, autoplay: boolean, trackPlayback: () => void } | null}
+       */
+      let selectionPlaybackState = null
 
       events.addEventListener('setLegacyFormat', async (/** @type {CustomEvent} */ event) => {
         const currentSelectionGeneration = ++selectionGeneration
@@ -9981,6 +9988,23 @@ export default defineComponent({
           restoreCaptionIndex: restoreCaptionIndex_ = null,
           userSelected = false
         } = event.detail
+        const mediaElement = video.value
+
+        if (userSelected && selectionPlaybackState === null) {
+          // A video still waiting for autoplay counts as playing.
+          const awaitingAutoplay = mediaElement.autoplay && mediaElement.played.length === 0 &&
+            !initialAutoplayCanceled && mediaElement.readyState < HTMLMediaElement.HAVE_ENOUGH_DATA
+          const state = {
+            wasPaused: mediaElement.paused && !awaitingAutoplay,
+            autoplay: mediaElement.autoplay,
+            // Playing or pausing while the selection is pending replaces that state. Loading the
+            // new source pauses the element without a pause event, so this only sees other changes.
+            trackPlayback: () => { state.wasPaused = mediaElement.paused }
+          }
+          mediaElement.addEventListener('play', state.trackPlayback)
+          mediaElement.addEventListener('pause', state.trackPlayback)
+          selectionPlaybackState = state
+        }
 
         queuePlaybackRateRestore(playbackRate)
 
@@ -10000,6 +10024,7 @@ export default defineComponent({
           emit('video-quality-user-set', quality)
         }
 
+        let loaded = false
         try {
           const isAvailable = await waitForYtDlpFormatAvailability(format)
 
@@ -10011,10 +10036,35 @@ export default defineComponent({
             throw new Error('yt-dlp format availability delay is too long')
           }
 
+          if (selectionPlaybackState?.wasPaused) {
+            mediaElement.autoplay = false
+          }
+
           await loadPlaybackSource(format.url, playbackPosition, format.mimeType)
+          loaded = true
         } catch (error) {
           handleError(error, 'setLegacyFormat', event.detail)
         }
+
+        if (currentSelectionGeneration !== selectionGeneration || selectionPlaybackState === null) {
+          return
+        }
+
+        const { wasPaused, autoplay, trackPlayback } = selectionPlaybackState
+        selectionPlaybackState = null
+        mediaElement.removeEventListener('play', trackPlayback)
+        mediaElement.removeEventListener('pause', trackPlayback)
+
+        if (loaded) {
+          // Pausing also keeps the restored autoplay attribute from starting the new source.
+          if (wasPaused) {
+            mediaElement.pause()
+          } else {
+            mediaElement.play().catch(() => {})
+          }
+        }
+
+        mediaElement.autoplay = autoplay
       })
 
       /**
