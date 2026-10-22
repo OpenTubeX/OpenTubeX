@@ -86,6 +86,12 @@ const groups = computed(() => [
         tooltip: t('Tooltips.Player Settings.Enable Video Zoom'),
       },
       {
+        key: 'enableSeekHistory',
+        action: 'updateEnableSeekHistory',
+        label: t('Settings.Player Settings.Enable Seek History'),
+        tooltip: t('Tooltips.Player Settings.Enable Seek History'),
+      },
+      {
         key: 'disableAbRepeat',
         action: 'updateDisableAbRepeat',
         label: t('Settings.Distraction Free Settings.Disable A-B Repeat'),

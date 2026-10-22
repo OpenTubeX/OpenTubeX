@@ -852,6 +852,7 @@ Settings:
     Show Skip Silence Toggle: 무음 구간 건너뛰기 전환 버튼 표시
     Enable Skip Silence by Default: 무음 구간 건너뛰기를 기본으로 활성화
     Enable Video Zoom: 동영상 확대/축소 활성화
+    Enable Seek History: 탐색 기록 활성화
     Voice-over Translation:
       Title: 음성 번역
       Attribution: Yandex 제공
@@ -1797,6 +1798,11 @@ Video:
       End Before Start: B 지점은 A 지점 뒤에 있어야 합니다.
       Outside Duration: 타임스탬프는 동영상 재생 시간 내에 있어야 합니다.
       Cleared: A-B 반복을 지웠습니다
+    Seek History:
+      Seek History: 탐색 기록
+      Positions: 위치 {count}개
+      Nothing to undo: 실행 취소할 항목이 없습니다
+      Nothing to redo: 다시 실행할 항목이 없습니다
     Zoom:
       Zoom: 확대/축소
       'Off': 끄기
@@ -2265,6 +2271,7 @@ Tooltips:
     Show Skip Silence Toggle: 플레이어 설정 메뉴에 무음 구간 건너뛰기 켜기/끄기 전환 버튼을 표시합니다.
     Enable Skip Silence by Default: 새 탭에서 무음 구간 건너뛰기를 활성화합니다. 한 탭에서 변경해도 다른 탭에는 영향을 주지 않습니다.
     Enable Video Zoom: 플레이어 설정 메뉴에 확대/축소 컨트롤을 표시하고 키보드 단축키와 화면 이동 컨트롤을 활성화합니다.
+    Enable Seek History: 앱을 닫을 때까지 각 동영상에서 이동하기 전의 위치를 기억합니다. 플레이어 설정 메뉴에 탐색 기록 목록을 표시하고 관련 키보드 단축키를 활성화합니다.
     Voice-over Translation: 번역을 요청하면 동영상 ID, 재생 시간 및 선택한 언어를 비공식 Yandex 음성 번역 서비스로 전송합니다. 기본적으로 비활성화되어 있습니다.
     Hold to Double Playback Speed: 플레이어 위에서 스페이스바 또는 마우스 왼쪽 버튼을 길게 누르면 현재 재생 속도가 일시적으로 두 배가 됩니다.
     Ambient Mode: 동영상 색상을 플레이어 주변 영역에 혼합합니다.
@@ -2431,6 +2438,8 @@ KeyboardShortcutPrompt:
   End: 동영상 끝으로 이동
   Skip to Next Video: 재생목록의 다음 동영상 또는 다음 추천 동영상으로 건너뛰기
   Skip to Previous Video: 재생목록의 이전 동영상으로 건너뛰기
+  Undo Seek: 마지막 탐색 실행 취소
+  Redo Seek: 실행 취소한 탐색 다시 실행
 CommandPalette:
   Title: 명령 팔레트
   Open: 명령 팔레트 열기

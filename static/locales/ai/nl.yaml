@@ -689,6 +689,7 @@ Settings:
     Show Skip Silence Toggle: Schakelaar voor stiltes overslaan tonen
     Enable Skip Silence by Default: Stiltes standaard overslaan
     Enable Video Zoom: Videozoom inschakelen
+    Enable Seek History: Spoelgeschiedenis inschakelen
     Voice-over Translation:
       Title: Voice-oververtaling
       Attribution: (mogelijk gemaakt door Yandex)
@@ -1526,6 +1527,11 @@ Video:
       End Before Start: Punt B moet na punt A liggen.
       Outside Duration: Het tijdstip moet binnen de duur van de video liggen.
       Cleared: A-B-herhaling gewist
+    Seek History:
+      Seek History: Spoelgeschiedenis
+      Positions: '{count} positie | {count} posities'
+      Nothing to undo: Niets om ongedaan te maken
+      Nothing to redo: Niets om opnieuw uit te voeren
     Zoom:
       Zoom: Zoom
       'Off': Uit
@@ -1943,6 +1949,7 @@ Tooltips:
     Show Skip Silence Toggle: Toont in het instellingenmenu van de speler een aan-uitschakelaar om stiltes over te slaan.
     Enable Skip Silence by Default: Schakelt het overslaan van stiltes in voor nieuwe tabbladen. Een wijziging in één tabblad heeft geen invloed op andere tabbladen.
     Enable Video Zoom: Toont de zoombediening in het instellingenmenu van de speler en schakelt de bijbehorende sneltoetsen en bediening voor verschuiven in.
+    Enable Seek History: Onthoudt vanaf waar je in elke video bent gesprongen totdat de app wordt gesloten. Toont de lijst met de spoelgeschiedenis in het instellingenmenu van de speler en schakelt de bijbehorende sneltoetsen in.
     Voice-over Translation: Stuurt de video-ID, duur en geselecteerde taal naar de onofficiële voice-oververtaaldienst van Yandex wanneer je om een vertaling vraagt. Standaard uitgeschakeld.
     Hold to Double Playback Speed: Houd de spatiebalk of linkermuisknop boven de speler ingedrukt om de huidige afspeelsnelheid tijdelijk te verdubbelen.
     Ambient Mode: Laat de kleuren van de video overvloeien in het gebied rond de speler.
@@ -2035,6 +2042,8 @@ KeyboardShortcutPrompt:
   Video Zoom In: Inzoomen op de video
   Video Zoom Out: Uitzoomen op de video
   Tab Switcher: Tabbladwisselaar
+  Undo Seek: Laatste sprong ongedaan maken
+  Redo Seek: Ongedaan gemaakte sprong opnieuw uitvoeren
 CommandPalette:
   Title: Opdrachtpalet
   Open: Opdrachtpalet openen

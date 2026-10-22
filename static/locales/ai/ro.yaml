@@ -683,6 +683,7 @@ Settings:
     Show Skip Silence Toggle: Afișează comutatorul pentru omiterea liniștii
     Enable Skip Silence by Default: Activează implicit omiterea liniștii
     Enable Video Zoom: Activează mărirea videoclipului
+    Enable Seek History: Activează istoricul salturilor
     Voice-over Translation:
       Title: Traducere vocală
       Attribution: (oferită de Yandex)
@@ -1511,6 +1512,11 @@ Video:
       End Before Start: Punctul B trebuie să fie după punctul A.
       Outside Duration: Momentul trebuie să se încadreze în durata videoclipului.
       Cleared: Repetarea A-B a fost ștearsă
+    Seek History:
+      Seek History: Istoricul salturilor
+      Positions: '{count} poziție | {count} poziții | {count} de poziții'
+      Nothing to undo: Nu există nimic de anulat
+      Nothing to redo: Nu există nimic de refăcut
     Zoom:
       Zoom: Zoom
       'Off': 'Dezactivat'
@@ -1932,6 +1938,7 @@ Tooltips:
     Show Skip Silence Toggle: Afișează un comutator de activare și dezactivare pentru omiterea liniștii în meniul de setări al playerului.
     Enable Skip Silence by Default: Activează omiterea liniștii pentru filele noi. Modificarea într-o filă nu afectează celelalte file.
     Enable Video Zoom: Afișează comanda Zoom în meniul de setări al playerului și activează comenzile rapide de la tastatură și comenzile de panoramare.
+    Enable Seek History: Reține de unde ai sărit în fiecare videoclip până la închiderea aplicației. Afișează lista istoricului salturilor în meniul de setări al playerului și activează comenzile rapide de la tastatură ale acestuia.
     Voice-over Translation: Trimite ID-ul videoclipului, durata și limba selectată serviciului neoficial Yandex de traducere vocală atunci când solicitați o traducere. Opțiunea este dezactivată implicit.
     Hold to Double Playback Speed: Țineți apăsată bara de spațiu sau butonul stâng al mouse-ului deasupra playerului pentru a dubla temporar viteza de redare curentă.
     Ambient Mode: Îmbină culorile videoclipului cu zona din jurul playerului.
@@ -2024,6 +2031,8 @@ KeyboardShortcutPrompt:
   Video Zoom In: Mărește videoclipul
   Video Zoom Out: Micșorează videoclipul
   Tab Switcher: Comutator de file
+  Undo Seek: Anulați ultimul salt
+  Redo Seek: Refaceți un salt anulat
 CommandPalette:
   Title: Paletă de comenzi
   Open: Deschide paleta de comenzi

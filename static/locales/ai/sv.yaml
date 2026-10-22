@@ -683,6 +683,7 @@ Settings:
     Show Skip Silence Toggle: Visa reglage för att hoppa över tystnad
     Enable Skip Silence by Default: Hoppa över tystnad som standard
     Enable Video Zoom: Aktivera videozoom
+    Enable Seek History: Aktivera hopphistorik
     Voice-over Translation:
       Title: Dubbningsöversättning
       Attribution: (drivs av Yandex)
@@ -1491,6 +1492,11 @@ Video:
       End Before Start: Punkt B måste vara efter punkt A.
       Outside Duration: Tidsstämpeln måste vara inom videon.
       Cleared: A-B-upprepningen rensades
+    Seek History:
+      Seek History: Hopphistorik
+      Positions: '{count} position | {count} positioner'
+      Nothing to undo: Inget att ångra
+      Nothing to redo: Inget att göra om
     Zoom:
       Zoom: Zoom
       'Off': 'Av'
@@ -1905,6 +1911,7 @@ Tooltips:
     Show Skip Silence Toggle: Visar ett på/av-reglage för att hoppa över tystnad i spelarens inställningsmeny.
     Enable Skip Silence by Default: Aktiverar överhoppning av tystnad för nya flikar. En ändring i en flik påverkar inte andra flikar.
     Enable Video Zoom: Visar zoomkontrollen i spelarens inställningsmeny och aktiverar dess kortkommandon och panoreringskontroller.
+    Enable Seek History: Kommer ihåg var du hoppade ifrån i varje video tills appen stängs. Visar hopphistoriklistan i spelarens inställningsmeny och aktiverar dess kortkommandon.
     Voice-over Translation: Skickar videons ID, längd och valt språk till Yandex inofficiella tjänst för dubbningsöversättning när du begär en översättning. Funktionen är inaktiverad som standard.
     Hold to Double Playback Speed: Håll ned mellanslagstangenten eller vänster musknapp över spelaren för att tillfälligt dubbla den aktuella uppspelningshastigheten.
     Ambient Mode: Tonar ut videons färger i området runt spelaren.
@@ -1995,6 +2002,8 @@ KeyboardShortcutPrompt:
   Video Zoom In: Zooma in i videon
   Video Zoom Out: Zooma ut ur videon
   Tab Switcher: Flikväxlare
+  Undo Seek: Ångra det senaste hoppet
+  Redo Seek: Gör om ett ångrat hopp
 CommandPalette:
   Title: Kommandopalett
   Open: Öppna kommandopaletten

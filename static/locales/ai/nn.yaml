@@ -776,6 +776,7 @@ Settings:
     Show Skip Silence Toggle: Vis brytar for å hoppe over stille parti
     Enable Skip Silence by Default: Hopp over stille parti som standard
     Enable Video Zoom: Slå på videozoom
+    Enable Seek History: Slå på hopphistorikk
     Voice-over Translation:
       Title: Taleomsetjing
       Attribution: (levert av Yandex)
@@ -1726,6 +1727,11 @@ Video:
       End Before Start: Punkt B må vere etter punkt A.
       Outside Duration: Tidsstempelet må vere innanfor videoen.
       Cleared: A-B-gjentakinga er fjerna
+    Seek History:
+      Seek History: Hopphistorikk
+      Positions: '{count} posisjon | {count} posisjonar'
+      Nothing to undo: Ingenting å angre
+      Nothing to redo: Ingenting å gjere om
     Zoom:
       Zoom: Forstørring
       'Off': 'Av'
@@ -2194,6 +2200,7 @@ Tooltips:
     Show Skip Silence Toggle: Viser ein av/på-brytar for å hoppe over stille parti i innstillingsmenyen til spelaren.
     Enable Skip Silence by Default: Hoppar som standard over stille parti i nye faner. Endringar i éi fane påverkar ikkje andre faner.
     Enable Video Zoom: Viser zoomkontrollen i innstillingsmenyen til spelaren og slår på hurtigtastane og panoreringskontrollane.
+    Enable Seek History: Hugsar kvar du hoppa frå i kvar video til appen vert lukka. Viser hopphistorikklista i innstillingsmenyen til avspelaren og slår på snøggtastane for ho.
     Voice-over Translation: Sender video-ID-en, lengda og det valde språket til den uoffisielle Yandex-tenesta for stemmeomsetjing når du ber om ei omsetjing. Av som standard.
     Hold to Double Playback Speed: Hald inne mellomromstasten eller venstre museknapp over spelaren for å doble den gjeldande avspelingsfarten mellombels.
     Ambient Mode: Tonar videofargane inn i området rundt spelaren.
@@ -2367,6 +2374,8 @@ KeyboardShortcutPrompt:
   End: Gå til slutten av videoen
   Skip to Next Video: Hopp til neste video i ei speleliste eller den neste tilrådde videoen
   Skip to Previous Video: Hopp til førre video i ei speleliste
+  Undo Seek: Angre siste hopp
+  Redo Seek: Gjer om eit angra hopp
 CommandPalette:
   Title: Kommandopalett
   Open: Opne kommandopaletten

@@ -689,6 +689,7 @@ Settings:
     Show Skip Silence Toggle: Hiện nút bật/tắt bỏ qua đoạn im lặng
     Enable Skip Silence by Default: Bật bỏ qua đoạn im lặng theo mặc định
     Enable Video Zoom: Bật thu phóng video
+    Enable Seek History: Bật lịch sử tua
     Voice-over Translation:
       Title: Dịch lồng tiếng
       Attribution: (do Yandex cung cấp)
@@ -1510,6 +1511,11 @@ Video:
       End Before Start: Điểm B phải nằm sau điểm A.
       Outside Duration: Dấu thời gian phải nằm trong thời lượng video.
       Cleared: Đã xóa lặp A-B
+    Seek History:
+      Seek History: Lịch sử tua
+      Positions: '{count} vị trí'
+      Nothing to undo: Không có gì để hoàn tác
+      Nothing to redo: Không có gì để làm lại
     Zoom:
       Zoom: Thu phóng
       'Off': 'Tắt'
@@ -1924,6 +1930,7 @@ Tooltips:
     Show Skip Silence Toggle: Hiện nút bật/tắt bỏ qua đoạn im lặng trong menu cài đặt của trình phát.
     Enable Skip Silence by Default: Bật bỏ qua đoạn im lặng cho thẻ mới. Thay đổi trong một thẻ không ảnh hưởng đến thẻ khác.
     Enable Video Zoom: Hiện điều khiển Thu phóng trong menu cài đặt của trình phát và bật các phím tắt cùng điều khiển di chuyển khung hình.
+    Enable Seek History: Ghi nhớ vị trí bạn đã tua đi trong mỗi video cho đến khi đóng ứng dụng. Hiển thị danh sách lịch sử tua trong menu cài đặt của trình phát và bật các phím tắt của tính năng này.
     Voice-over Translation: Gửi ID video, thời lượng và ngôn ngữ đã chọn đến dịch vụ dịch lồng tiếng Yandex không chính thức khi bạn yêu cầu dịch. Tính năng này mặc định tắt.
     Hold to Double Playback Speed: Giữ phím cách hoặc nút chuột trái trên trình phát để tạm thời tăng gấp đôi tốc độ phát hiện tại.
     Ambient Mode: Hòa màu của video vào khu vực quanh trình phát.
@@ -2014,6 +2021,8 @@ KeyboardShortcutPrompt:
   Video Zoom In: Phóng to video
   Video Zoom Out: Thu nhỏ video
   Tab Switcher: Trình chuyển thẻ
+  Undo Seek: Hoàn tác lần tua gần nhất
+  Redo Seek: Làm lại lần tua đã hoàn tác
 CommandPalette:
   Title: Bảng lệnh
   Open: Mở bảng lệnh

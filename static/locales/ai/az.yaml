@@ -690,6 +690,7 @@ Settings:
     Show Skip Silence Toggle: Səssiz hissələri keçmə düyməsini göstər
     Enable Skip Silence by Default: Səssiz hissələri keçməni ilkin olaraq aktivləşdir
     Enable Video Zoom: Videonun yaxınlaşdırılmasını aktivləşdir
+    Enable Seek History: Keçid tarixçəsini aktivləşdir
     Continue Playback When Screen Is Locked: Ekran kilidləndikdə oynatmağa davam et
     Voice-over Translation:
       Title: Səsli tərcümə
@@ -1490,6 +1491,11 @@ Video:
       End Before Start: B nöqtəsi A nöqtəsindən sonra olmalıdır.
       Outside Duration: Vaxt göstəricisi videonun müddəti daxilində olmalıdır.
       Cleared: A-B təkrarı təmizləndi
+    Seek History:
+      Seek History: Keçid tarixçəsi
+      Positions: '{count} mövqe | {count} mövqe'
+      Nothing to undo: Geri qaytarılacaq heç nə yoxdur
+      Nothing to redo: Təkrarlanacaq heç nə yoxdur
     Zoom:
       Zoom: Miqyas
       'Off': 'Bağlı'
@@ -1898,6 +1904,7 @@ Tooltips:
     Show Skip Silence Toggle: Oynadıcının tənzimləmələr menyusunda səssiz hissələri keçməyi açıb-bağlayan keçid göstərir.
     Enable Skip Silence by Default: Yeni vərəqlərdə səssiz hissələrin keçilməsini aktivləşdirir. Bir vərəqdə dəyişdirilməsi digər vərəqlərə təsir etmir.
     Enable Video Zoom: Oynadıcının tənzimləmələr menyusunda miqyas idarəsini göstərir və onun klaviatura qısayollarını və görüntünü sürüşdürmə idarələrini aktivləşdirir.
+    Enable Seek History: Tətbiq bağlanana qədər hər videoda haradan keçid etdiyinizi yadda saxlayır. Pleyerin parametrlər menyusunda keçid tarixçəsi siyahısını göstərir və onun klaviatura qısayollarını aktivləşdirir.
     Continue Playback When Screen Is Locked: Səsi arxa planda oynatmağa davam edir və Android media idarələrini təmin edir. Tətbiq artıq görünmədikdə oynatmanı dayandırmaq üçün bunu bağlayın.
     Voice-over Translation: Tərcümə istədiyinizdə videonun ID-sini, müddətini və seçilmiş dili qeyri-rəsmi Yandex səsli tərcümə xidmətinə göndərir. İlkin olaraq bağlıdır.
     Hold to Double Playback Speed: Cari oynatma sürətini müvəqqəti ikiqat artırmaq üçün oynadıcı üzərində Boşluq düyməsini və ya siçanın sol düyməsini basıb saxlayın.
@@ -1987,6 +1994,8 @@ KeyboardShortcutPrompt:
   Video Zoom In: Videonu yaxınlaşdır
   Video Zoom Out: Videonu uzaqlaşdır
   Tab Switcher: Vərəq dəyişdiricisi
+  Undo Seek: Son keçidi geri qaytar
+  Redo Seek: Geri qaytarılmış keçidi təkrarla
 CommandPalette:
   Title: Əmr palitrası
   Open: Əmr palitrasını aç

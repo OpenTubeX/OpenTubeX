@@ -235,7 +235,7 @@ test.describe('Shorts transcript navigation', () => {
     expect(bounds).not.toBeNull()
     expect(bounds.width).toBeLessThanOrEqual(shortsBounds.width + 1)
 
-    await page.locator('.settingsWindow').getByRole('button', { name: 'Close' }).click()
+    await page.locator('.settingsWindow').getByRole('button', { name: 'Close', exact: true }).click()
     await expect(page).toHaveURL(new RegExp(CAPTIONED_SHORT_IDS[0]))
     await page.locator('.shortsNavigationButton').last().evaluate(element => element.click())
     await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${CAPTIONED_SHORT_IDS[1]}\\?short=true`))

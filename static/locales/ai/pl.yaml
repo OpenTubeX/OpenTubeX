@@ -308,6 +308,7 @@ Settings:
       Bundled Fonts: Dołączone czcionki
       System Fonts: Czcionki systemowe
   Player Settings:
+    Enable Seek History: Włącz historię przewijania
     Show Music Mode Toggle: "Pokaż przełącznik trybu muzyki"
     Enable DLNA Casting: "Włącz przesyłanie DLNA"
     Skip Unavailable Playlist Videos: "Pomijaj niedostępne filmy na playlistach"
@@ -876,6 +877,11 @@ Video:
       End Before Start: Punkt B musi znajdować się po punkcie A.
       Outside Duration: Znacznik czasu musi mieścić się w czasie trwania filmu.
       Cleared: Wyczyszczono powtarzanie A-B
+    Seek History:
+      Seek History: Historia przewijania
+      Positions: '{count} pozycja | {count} pozycje | {count} pozycji'
+      Nothing to undo: Nie ma nic do cofnięcia
+      Nothing to redo: Nie ma nic do ponowienia
     Zoom:
       Zoom: Powiększenie
       'Off': 'Wyłączone'
@@ -1115,6 +1121,7 @@ Tooltips:
     Loop Shorts: Po włączeniu Shorts są automatycznie odtwarzane od początku. Po wyłączeniu zatrzymują się na końcu i wyświetlają przycisk ponownego odtwarzania.
     Enable Skip Silence by Default: Włącza pomijanie ciszy na nowych kartach. Zmiana na jednej karcie nie wpływa na pozostałe.
     Enable Video Zoom: Wyświetla opcję powiększenia w menu ustawień odtwarzacza oraz włącza jej skróty klawiszowe i sterowanie przesuwaniem obrazu.
+    Enable Seek History: Zapamiętuje, skąd przeskoczono w każdym filmie, do czasu zamknięcia aplikacji. Wyświetla listę historii przewijania w menu ustawień odtwarzacza i włącza jej skróty klawiszowe.
     Voice-over Translation: Po wybraniu tłumaczenia wysyła identyfikator i czas trwania filmu oraz wybrany język do nieoficjalnej usługi tłumaczenia lektorskiego Yandex. Funkcja jest domyślnie wyłączona.
     Parallel Segment Loading: |
       Liczba segmentów obrazu i dźwięku wczytywanych jednocześnie przed odtwarzaniem.
@@ -1160,6 +1167,8 @@ KeyboardShortcutPrompt:
   Clear A-B Repeat: Wyczyść powtarzanie A-B
   Video Zoom In: Powiększ film
   Video Zoom Out: Pomniejsz film
+  Undo Seek: Cofnij ostatnie przewinięcie
+  Redo Seek: Ponów cofnięte przewinięcie
 CommandPalette:
   Title: Paleta poleceń
   Open: Otwórz paletę poleceń

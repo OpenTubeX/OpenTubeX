@@ -1681,6 +1681,13 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   flex: 0 0 auto;
 }
 
+/* Long chapter titles would otherwise widen the menu beyond the player. */
+:deep(.seek-history-menu:not(.ft-menu-grid) > .seek-history-entry > span) {
+  overflow: hidden;
+  max-inline-size: 30em;
+  text-overflow: ellipsis;
+}
+
 :deep(.ab-repeat-button[aria-pressed='true'] .shaka-ui-icon) {
   color: var(--primary-color);
 }

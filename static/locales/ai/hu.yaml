@@ -684,6 +684,7 @@ Settings:
     Show Skip Silence Toggle: Csendátugrás kapcsolójának megjelenítése
     Enable Skip Silence by Default: Csendátugrás alapértelmezett engedélyezése
     Enable Video Zoom: Videónagyítás engedélyezése
+    Enable Seek History: Ugrási előzmények engedélyezése
     Voice-over Translation:
       Title: Szinkronfordítás
       Attribution: (a Yandex szolgáltatásával)
@@ -1478,6 +1479,11 @@ Video:
       End Before Start: A B pontnak az A pont után kell lennie.
       Outside Duration: Az időbélyegnek a videón belül kell lennie.
       Cleared: A-B ismétlés törölve
+    Seek History:
+      Seek History: Ugrási előzmények
+      Positions: '{count} pozíció | {count} pozíció'
+      Nothing to undo: Nincs mit visszavonni
+      Nothing to redo: Nincs mit újra végrehajtani
     Zoom:
       Zoom: Nagyítás
       'Off': 'Ki'
@@ -1887,6 +1893,7 @@ Tooltips:
     Show Skip Silence Toggle: A csend átugrására szolgáló kapcsoló megjelenítése a lejátszó beállítási menüjében.
     Enable Skip Silence by Default: A csend átugrásának engedélyezése az új lapokon. Az egyik lapon végzett módosítás nincs hatással a többi lapra.
     Enable Video Zoom: A nagyítási vezérlő megjelenítése a lejátszó beállítási menüjében, valamint a hozzá tartozó billentyűparancsok és pásztázási vezérlők engedélyezése.
+    Enable Seek History: Az alkalmazás bezárásáig megjegyzi, honnan ugrott el az egyes videókban. Megjeleníti az ugrási előzmények listáját a lejátszó beállítások menüjében, és engedélyezi a hozzá tartozó billentyűparancsokat.
     Voice-over Translation: Fordítás kérésekor elküldi a videó azonosítóját, hosszát és a kiválasztott nyelvet a Yandex nem hivatalos szinkronfordítási szolgáltatásának. Alapértelmezés szerint ki van kapcsolva.
     Hold to Double Playback Speed: Tartsa lenyomva a szóközbillentyűt vagy a bal egérgombot a lejátszó fölött az aktuális lejátszási sebesség ideiglenes megduplázásához.
     Ambient Mode: A videó színeinek kiterjesztése a lejátszó körüli területre.
@@ -1975,6 +1982,8 @@ KeyboardShortcutPrompt:
   Video Zoom In: Videó nagyítása
   Video Zoom Out: Videó kicsinyítése
   Tab Switcher: Lapváltó
+  Undo Seek: Az utolsó ugrás visszavonása
+  Redo Seek: Egy visszavont ugrás újbóli végrehajtása
 CommandPalette:
   Title: Parancspaletta
   Open: Parancspaletta megnyitása

@@ -684,6 +684,7 @@ Settings:
     Show Skip Silence Toggle: Mostrar el interruptor para omitir silencios
     Enable Skip Silence by Default: Activar la omisión de silencios de forma predeterminada
     Enable Video Zoom: Activar el zoom del vídeo
+    Enable Seek History: Activar el historial de saltos
     Voice-over Translation:
       Title: Traducción por voz superpuesta
       Attribution: (con tecnología de Yandex)
@@ -1484,6 +1485,11 @@ Video:
       End Before Start: El punto B debe estar después del punto A.
       Outside Duration: La marca de tiempo debe estar dentro del vídeo.
       Cleared: Repetición A-B borrada
+    Seek History:
+      Seek History: Historial de saltos
+      Positions: '{count} posición | {count} de posiciones | {count} posiciones'
+      Nothing to undo: No hay nada que deshacer
+      Nothing to redo: No hay nada que rehacer
     Zoom:
       Zoom: Zoom
       'Off': Desactivado
@@ -1893,6 +1899,7 @@ Tooltips:
     Show Skip Silence Toggle: Muestra un interruptor para omitir silencios en el menú de ajustes del reproductor.
     Enable Skip Silence by Default: Activa la omisión de silencios en las pestañas nuevas. Cambiarla en una pestaña no afecta a las demás.
     Enable Video Zoom: Muestra el control Zoom en el menú de ajustes del reproductor y activa sus atajos de teclado y controles de desplazamiento.
+    Enable Seek History: Recuerda desde dónde has saltado en cada vídeo hasta que se cierre la aplicación. Muestra la lista del historial de saltos en el menú de ajustes del reproductor y activa sus atajos de teclado.
     Voice-over Translation: Cuando solicitas una traducción, envía el ID, la duración y el idioma seleccionado del vídeo al servicio no oficial de traducción por voz superpuesta de Yandex. Está desactivado de forma predeterminada.
     Hold to Double Playback Speed: Mantén pulsada la barra espaciadora o el botón izquierdo del ratón sobre el reproductor para duplicar temporalmente la velocidad de reproducción actual.
     Ambient Mode: Mezcla los colores del vídeo con el área que rodea al reproductor.
@@ -1981,6 +1988,8 @@ KeyboardShortcutPrompt:
   Video Zoom In: Acercar el vídeo
   Video Zoom Out: Alejar el vídeo
   Tab Switcher: Selector de pestañas
+  Undo Seek: Deshacer el último salto
+  Redo Seek: Rehacer un salto deshecho
 CommandPalette:
   Title: Paleta de comandos
   Open: Abrir paleta de comandos

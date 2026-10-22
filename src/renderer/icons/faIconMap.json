@@ -510,6 +510,10 @@
     "ri": "forbid-2-line",
     "material": "disabled-by-default-outline"
   },
+  "redo": {
+    "ri": "arrow-go-forward-line",
+    "material": "redo-rounded"
+  },
   "retweet": {
     "ri": "repeat-line",
     "material": "repeat-rounded"

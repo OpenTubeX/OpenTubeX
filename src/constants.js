@@ -437,6 +437,8 @@ const DefaultKeyboardShortcuts = {
       NEXT_FRAME: '.',
       HOME: 'home',
       END: 'end',
+      UNDO_SEEK: 'ctrl+z',
+      REDO_SEEK: 'ctrl+shift+z',
       SKIP_TO_NEXT: 'shift+n',
       SKIP_TO_PREV: 'shift+p'
     }

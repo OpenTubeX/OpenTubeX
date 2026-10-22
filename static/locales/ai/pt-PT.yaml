@@ -689,6 +689,7 @@ Settings:
     Show Skip Silence Toggle: Mostrar botão para saltar silêncio
     Enable Skip Silence by Default: Ativar «Saltar silêncio» por predefinição
     Enable Video Zoom: Ativar ampliação do vídeo
+    Enable Seek History: Ativar histórico de saltos
     Voice-over Translation:
       Title: Tradução de voz
       Attribution: (fornecida pela Yandex)
@@ -1510,6 +1511,11 @@ Video:
       End Before Start: O ponto B tem de estar depois do ponto A.
       Outside Duration: A marca temporal tem de estar dentro da duração do vídeo.
       Cleared: Repetição A-B limpa
+    Seek History:
+      Seek History: Histórico de saltos
+      Positions: '{count} posição | {count} de posições | {count} posições'
+      Nothing to undo: Nada para anular
+      Nothing to redo: Nada para refazer
     Zoom:
       Zoom: Ampliação
       'Off': Desativada
@@ -1923,6 +1929,7 @@ Tooltips:
     Show Skip Silence Toggle: Mostra no menu de definições do reprodutor um botão para ativar ou desativar o avanço sobre períodos de silêncio.
     Enable Skip Silence by Default: Ativa o avanço sobre períodos de silêncio nos novos separadores. Alterar esta opção num separador não afeta os restantes.
     Enable Video Zoom: Mostra o controlo de ampliação no menu de definições do reprodutor e ativa os respetivos atalhos de teclado e controlos de deslocação.
+    Enable Seek History: Memoriza de onde saltou em cada vídeo até a aplicação ser fechada. Mostra a lista do histórico de saltos no menu de definições do reprodutor e ativa os respetivos atalhos de teclado.
     Voice-over Translation: Quando solicita uma tradução, envia o ID e a duração do vídeo e o idioma selecionado para o serviço não oficial de tradução por voz da Yandex. Está desativado por predefinição.
     Hold to Double Playback Speed: Mantenha premida a barra de espaços ou o botão esquerdo do rato sobre o reprodutor para duplicar temporariamente a velocidade de reprodução atual.
     Ambient Mode: Mistura as cores do vídeo com a área em redor do reprodutor.
@@ -2013,6 +2020,8 @@ KeyboardShortcutPrompt:
   Video Zoom In: Ampliar o vídeo
   Video Zoom Out: Reduzir o vídeo
   Tab Switcher: Seletor de separadores
+  Undo Seek: Anular o último salto
+  Redo Seek: Refazer um salto anulado
 CommandPalette:
   Title: Paleta de comandos
   Open: Abrir paleta de comandos

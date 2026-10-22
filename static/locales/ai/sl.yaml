@@ -886,6 +886,7 @@ Settings:
     Show Skip Silence Toggle: Prikaži stikalo za preskok tišine
     Enable Skip Silence by Default: Privzeto omogoči preskok tišine
     Enable Video Zoom: Omogoči povečavo videoposnetka
+    Enable Seek History: Omogoči zgodovino skokov
     Voice-over Translation:
       Title: Glasovni prevod
       Attribution: (zagotavlja Yandex)
@@ -1907,6 +1908,11 @@ Video:
       End Before Start: Točka B mora biti za točko A.
       Outside Duration: Časovni žig mora biti znotraj videoposnetka.
       Cleared: Ponavljanje A-B je počiščeno
+    Seek History:
+      Seek History: Zgodovina skokov
+      Positions: '{count} položaj | {count} položaja | {count} položaji | {count} položajev'
+      Nothing to undo: Ni česa razveljaviti
+      Nothing to redo: Ni česa uveljaviti znova
     Zoom:
       Zoom: Povečava
       'Off': 'Izklopljeno'
@@ -2391,6 +2397,7 @@ Tooltips:
     Show Skip Silence Toggle: V meniju nastavitev predvajalnika prikaže stikalo za vklop ali izklop preskakovanja tišine.
     Enable Skip Silence by Default: Omogoči preskakovanje tišine za nove zavihke. Sprememba v enem zavihku ne vpliva na druge.
     Enable Video Zoom: V meniju nastavitev predvajalnika prikaže kontrolnik za povečavo ter omogoči njegove bližnjice na tipkovnici in kontrolnike za pomikanje.
+    Enable Seek History: Do zaprtja aplikacije si zapomni, od kod ste skočili v vsakem videoposnetku. Prikaže seznam zgodovine skokov v meniju nastavitev predvajalnika in omogoči njene bližnjice na tipkovnici.
     Voice-over Translation: Ob zahtevi za prevod pošlje ID videoposnetka, trajanje in izbrani jezik neuradni Yandexovi storitvi za glasovni prevod. Privzeto je onemogočeno.
     Hold to Double Playback Speed: Pridržite preslednico ali levi miškin gumb nad predvajalnikom, da začasno podvojite trenutno hitrost predvajanja.
     Ambient Mode: Barve videoposnetka prelije v območje okoli predvajalnika.
@@ -2577,6 +2584,8 @@ KeyboardShortcutPrompt:
   End: Skoči na konec videoposnetka
   Skip to Next Video: Skoči na naslednji videoposnetek na seznamu predvajanja ali naslednji priporočeni videoposnetek
   Skip to Previous Video: Skoči na prejšnji videoposnetek na seznamu predvajanja
+  Undo Seek: Razveljavi zadnji skok
+  Redo Seek: Znova uveljavi razveljavljeni skok
 CommandPalette:
   Title: Paleta ukazov
   Open: Odpri paleto ukazov

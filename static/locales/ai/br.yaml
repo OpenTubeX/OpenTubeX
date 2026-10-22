@@ -684,6 +684,7 @@ Settings:
     Show Skip Silence Toggle: "Diskouez an afell da lammat dre ar sioulder"
     Enable Skip Silence by Default: "Gweredekaat al lamm dre ar sioulder dre ziouer"
     Enable Video Zoom: "Gweredekaat zoum ar video"
+    Enable Seek History: Gweredekaat roll istor al lammoù
     Voice-over Translation:
       Title: "Treiñ ar vouezh"
       Attribution: "(kaset en-dro gant Yandex)"
@@ -1487,6 +1488,11 @@ Video:
       End Before Start: "Ret eo d'ar poent B bezañ goude ar poent A."
       Outside Duration: "Ret eo d'ar merk-amzer bezañ e-barzh ar video."
       Cleared: "Skarzhet eo bet an adlenn A-B"
+    Seek History:
+      Seek History: Roll istor al lammoù
+      Positions: '{count} lec''hiadur | {count} lec''hiadur | {count} lec''hiadur | {count} a lec''hiadurioù | {count} lec''hiadur'
+      Nothing to undo: Netra da zizober
+      Nothing to redo: Netra da adober
     Zoom:
       Zoom: "Zoum"
       'Off': "Lazhet"
@@ -1895,6 +1901,7 @@ Tooltips:
     Show Skip Silence Toggle: "Diskouez un afell enaouiñ pe lazhañ al lamm dre ar sioulder e lañser arventennoù al lenner."
     Enable Skip Silence by Default: "Gweredekaat al lamm dre ar sioulder evit an ivinelloù nevez. Kemmañ anezhañ en un ivinell ne cheñch ket an ivinelloù all."
     Enable Video Zoom: "Diskouez ar reoler Zoum e lañser arventennoù al lenner ha gweredekaat e verradennoù klavier hag e reolerezhioù zilec'hiañ."
+    Enable Seek History: Derc'hel a ra soñj eus al lec'hioù ma oac'h lammet diouto e pep video betek ma vez serret an arload. Diskouez a ra roll istor al lammoù e lañser arventennoù al lenner hag e weredeka e berradennoù klavier.
     Voice-over Translation: "Kas naoudi ar video, e badelezh hag ar yezh diuzet da wazerezh troidigezh ar vouezh dieub Yandex pa c'houlennit un droidigezh. Diweredekaet eo dre ziouer."
     Hold to Double Playback Speed: "Dalc'hit ar varrenn esaouiñ pe bouton kleiz al logodenn war al lenner evit daougementiñ an tizh lenn bremanel evit ur pennad."
     Ambient Mode: "Meskañ livioù ar video gant an takad tro-dro d'al lenner."
@@ -1983,6 +1990,8 @@ KeyboardShortcutPrompt:
   Video Zoom In: "Brasaat ar video"
   Video Zoom Out: "Bihanaat ar video"
   Tab Switcher: "Cheñcher ivinelloù"
+  Undo Seek: Dizober al lamm diwezhañ
+  Redo Seek: Adober ul lamm dizobereet
 CommandPalette:
   Title: "Paled arc'hadoù"
   Open: "Digeriñ ar baled arc'hadoù"

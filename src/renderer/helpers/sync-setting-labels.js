@@ -100,6 +100,7 @@ export const SYNC_SETTING_LABELS = {
   enablePullToRefresh: 'Settings.General Settings.Swipe to refresh',
   enableScreenshot: 'Settings.Player Settings.Screenshot.Enable',
   enableSearchSuggestions: 'Settings.General Settings.Enable Search Suggestions',
+  enableSeekHistory: 'Settings.Player Settings.Enable Seek History',
   enableSkipSilenceByDefault: 'Settings.Player Settings.Enable Skip Silence by Default',
   enableSubtitlesByDefault: 'Settings.Player Settings.Turn on Subtitles by Default',
   enableVideoMetadataCache: 'Settings.Privacy Settings.Cache Video Metadata',

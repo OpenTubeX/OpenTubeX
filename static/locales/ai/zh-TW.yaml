@@ -683,6 +683,7 @@ Settings:
     Show Skip Silence Toggle: 顯示「跳過靜音片段」切換開關
     Enable Skip Silence by Default: 預設啟用跳過靜音片段
     Enable Video Zoom: 啟用影片縮放
+    Enable Seek History: 啟用跳轉紀錄
     Voice-over Translation:
       Title: 配音翻譯
       Attribution: （由 Yandex 提供技術支援）
@@ -1480,6 +1481,11 @@ Video:
       End Before Start: 點 B 必須位於點 A 之後。
       Outside Duration: 時間戳記必須在影片時長範圍內。
       Cleared: 已清除 A-B 循環
+    Seek History:
+      Seek History: 跳轉紀錄
+      Positions: '{count} 個位置'
+      Nothing to undo: 沒有可復原的操作
+      Nothing to redo: 沒有可重做的操作
     Zoom:
       Zoom: 縮放
       'Off': '關閉'
@@ -1888,6 +1894,7 @@ Tooltips:
     Show Skip Silence Toggle: 在播放器的設定選單中顯示略過靜音的開關。
     Enable Skip Silence by Default: 新分頁預設啟用略過靜音。在一個分頁中變更此設定不會影響其他分頁。
     Enable Video Zoom: 在播放器的設定選單中顯示縮放控制項，並啟用其鍵盤快捷鍵與平移控制項。
+    Enable Seek History: 在應用程式關閉前記住你在每部影片中從哪裡跳轉。在播放器設定選單中顯示跳轉紀錄清單，並啟用其鍵盤快速鍵。
     Voice-over Translation: 當您要求翻譯時，將影片 ID、長度與所選語言傳送至非官方 Yandex 語音翻譯服務。預設為停用。
     Hold to Double Playback Speed: 在播放器上按住空白鍵或滑鼠左鍵，即可暫時將目前的播放速度加倍。
     Ambient Mode: 將影片色彩融合至播放器周圍區域。
@@ -1976,6 +1983,8 @@ KeyboardShortcutPrompt:
   Video Zoom In: 放大影片
   Video Zoom Out: 縮小影片
   Tab Switcher: 分頁切換器
+  Undo Seek: 復原上一次跳轉
+  Redo Seek: 重做已復原的跳轉
 CommandPalette:
   Title: 命令選擇區
   Open: 開啟命令選擇區

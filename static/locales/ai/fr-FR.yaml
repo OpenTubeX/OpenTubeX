@@ -683,6 +683,7 @@ Settings:
     Show Skip Silence Toggle: Afficher le bouton d’activation des silences ignorés
     Enable Skip Silence by Default: Ignorer les silences par défaut
     Enable Video Zoom: Activer le zoom vidéo
+    Enable Seek History: Activer l'historique des sauts
     Voice-over Translation:
       Title: Traduction vocale
       Attribution: (par Yandex)
@@ -1476,6 +1477,11 @@ Video:
       End Before Start: Le point B doit se trouver après le point A.
       Outside Duration: L’horodatage doit se trouver dans la vidéo.
       Cleared: Répétition A-B effacée
+    Seek History:
+      Seek History: Historique des sauts
+      Positions: '{count} position | {count} de positions | {count} positions'
+      Nothing to undo: Rien à annuler
+      Nothing to redo: Rien à rétablir
     Zoom:
       Zoom: Zoom
       'Off': 'Désactivé'
@@ -1884,6 +1890,7 @@ Tooltips:
     Show Skip Silence Toggle: Affiche un bouton pour activer ou désactiver les silences ignorés dans le menu des paramètres du lecteur.
     Enable Skip Silence by Default: Active les silences ignorés pour les nouveaux onglets. Toute modification dans un onglet reste sans effet sur les autres.
     Enable Video Zoom: Affiche la commande Zoom dans le menu des paramètres du lecteur et active ses raccourcis clavier ainsi que ses commandes de déplacement.
+    Enable Seek History: Mémorise les endroits d'où vous avez sauté dans chaque vidéo jusqu'à la fermeture de l'application. Affiche la liste de l'historique des sauts dans le menu des paramètres du lecteur et active ses raccourcis clavier.
     Voice-over Translation: Envoie l’identifiant de la vidéo, sa durée et la langue sélectionnée au service non officiel de traduction vocale Yandex lorsque vous demandez une traduction. Cette option est désactivée par défaut.
     Hold to Double Playback Speed: Maintenez la barre d’espace ou le bouton gauche de la souris sur le lecteur pour doubler temporairement la vitesse de lecture actuelle.
     Ambient Mode: Diffuse les couleurs de la vidéo dans la zone qui entoure le lecteur.
@@ -1972,6 +1979,8 @@ KeyboardShortcutPrompt:
   Video Zoom In: Zoomer dans la vidéo
   Video Zoom Out: Dézoomer dans la vidéo
   Tab Switcher: Sélecteur d’onglets
+  Undo Seek: Annuler le dernier saut
+  Redo Seek: Rétablir un saut annulé
 CommandPalette:
   Title: Palette de commandes
   Open: Ouvrir la palette de commandes

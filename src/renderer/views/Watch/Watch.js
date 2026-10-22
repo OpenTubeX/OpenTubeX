@@ -2774,7 +2774,7 @@ export default defineComponent({
       const player = this.$refs.player
 
       if (!this.isLoading && player?.hasLoaded) {
-        player.setCurrentTime(timestamp)
+        player.setCurrentTime(timestamp, true)
       }
     },
 
@@ -3177,7 +3177,7 @@ export default defineComponent({
       const player = this.$refs.player
 
       if (!this.isLoading && player?.hasLoaded) {
-        player.setCurrentTime(timestamp)
+        player.setCurrentTime(timestamp, true)
 
         if (player.isPaused()) {
           player.play()

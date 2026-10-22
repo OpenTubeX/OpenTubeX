@@ -799,7 +799,7 @@ function handlePlaybackStopped() {
   watchTimeTracker.flush()
   savePosition()
 }
-function seekTo(seconds) { player.value?.setCurrentTime(seconds) }
+function seekTo(seconds) { player.value?.setCurrentTime(seconds, true) }
 function copyChapterTimestamp(seconds) { player.value?.copyChapterTimestamp(seconds) }
 
 function handlePlayerError(error) {

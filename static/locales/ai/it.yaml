@@ -683,6 +683,7 @@ Settings:
     Show Skip Silence Toggle: Mostra interruttore Salta silenzi
     Enable Skip Silence by Default: Abilita Salta silenzi per impostazione predefinita
     Enable Video Zoom: Abilita zoom del video
+    Enable Seek History: Abilita cronologia dei salti
     Voice-over Translation:
       Title: Traduzione vocale
       Attribution: (fornita da Yandex)
@@ -1477,6 +1478,11 @@ Video:
       End Before Start: Il punto B deve essere successivo al punto A.
       Outside Duration: Il timestamp deve essere compreso nella durata del video.
       Cleared: Ripetizione A-B cancellata
+    Seek History:
+      Seek History: Cronologia dei salti
+      Positions: '{count} posizione | {count} di posizioni | {count} posizioni'
+      Nothing to undo: Niente da annullare
+      Nothing to redo: Niente da ripetere
     Zoom:
       Zoom: Zoom
       'Off': 'Disattivato'
@@ -1885,6 +1891,7 @@ Tooltips:
     Show Skip Silence Toggle: Mostra nel menu delle impostazioni del lettore un interruttore per attivare o disattivare il salto dei silenzi.
     Enable Skip Silence by Default: Abilita il salto dei silenzi nelle nuove schede. La modifica in una scheda non influisce sulle altre.
     Enable Video Zoom: Mostra il controllo Zoom nel menu delle impostazioni del lettore e abilita le relative scorciatoie da tastiera e i controlli di panoramica.
+    Enable Seek History: Ricorda da dove sei saltato in ogni video fino alla chiusura dell'app. Mostra l'elenco della cronologia dei salti nel menu delle impostazioni del lettore e abilita le relative scorciatoie da tastiera.
     Voice-over Translation: Quando richiedi una traduzione, invia l'ID e la durata del video e la lingua selezionata al servizio non ufficiale di traduzione vocale Yandex. Disabilitato per impostazione predefinita.
     Hold to Double Playback Speed: Tieni premuta la barra spaziatrice o il pulsante sinistro del mouse sul lettore per raddoppiare temporaneamente la velocità di riproduzione corrente.
     Ambient Mode: Sfuma i colori del video nell'area circostante il lettore.
@@ -1973,6 +1980,8 @@ KeyboardShortcutPrompt:
   Video Zoom In: Ingrandisci il video
   Video Zoom Out: Riduci il video
   Tab Switcher: Selettore delle schede
+  Undo Seek: Annulla l'ultimo salto
+  Redo Seek: Ripeti un salto annullato
 CommandPalette:
   Title: Tavolozza dei comandi
   Open: Apri tavolozza dei comandi

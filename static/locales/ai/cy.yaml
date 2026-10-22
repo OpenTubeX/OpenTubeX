@@ -681,6 +681,7 @@ Settings:
     Show Skip Silence Toggle: Dangos y togl hepgor distawrwydd
     Enable Skip Silence by Default: Galluogi hepgor distawrwydd yn ddiofyn
     Enable Video Zoom: Galluogi chwyddo fideo
+    Enable Seek History: Galluogi hanes neidio
     Voice-over Translation:
       Title: Cyfieithu troslais
       Attribution: (wedi'i bweru gan Yandex)
@@ -1498,6 +1499,11 @@ Video:
       End Before Start: Rhaid i bwynt B fod ar ôl pwynt A.
       Outside Duration: Rhaid i'r stamp amser fod o fewn y fideo.
       Cleared: Wedi clirio ailadrodd A-B
+    Seek History:
+      Seek History: Hanes neidio
+      Positions: '{count} safle | {count} safle | {count} safle | {count} safle | {count} safle | {count} safle'
+      Nothing to undo: Dim i'w ddadwneud
+      Nothing to redo: Dim i'w ail-wneud
     Zoom:
       Zoom: Chwyddo
       'Off': 'I ffwrdd'
@@ -1912,6 +1918,7 @@ Tooltips:
     Show Skip Silence Toggle: Mae'n dangos togl ymlaen/i ffwrdd ar gyfer hepgor distawrwydd yn newislen gosodiadau'r chwaraewr.
     Enable Skip Silence by Default: Mae'n galluogi hepgor distawrwydd ar gyfer tabiau newydd. Nid yw ei newid mewn un tab yn effeithio ar dabiau eraill.
     Enable Video Zoom: Mae'n dangos y rheolydd Chwyddo yn newislen gosodiadau'r chwaraewr ac yn galluogi ei lwybrau byr bysellfwrdd a'i reolyddion padellu.
+    Enable Seek History: Yn cofio o ble y neidioch chi ym mhob fideo nes i'r ap gau. Yn dangos y rhestr hanes neidio yn newislen gosodiadau'r chwaraewr ac yn galluogi ei llwybrau byr bysellfwrdd.
     Voice-over Translation: Mae'n anfon ID, hyd ac iaith ddewisol y fideo i wasanaeth cyfieithu troslais answyddogol Yandex pan fyddwch yn gofyn am gyfieithiad. Mae wedi'i analluogi yn ddiofyn.
     Hold to Double Playback Speed: Daliwch y bylchwr neu fotwm chwith y llygoden dros y chwaraewr i ddyblu'r cyflymder chwarae presennol dros dro.
     Ambient Mode: Mae'n cyfuno lliwiau'r fideo â'r ardal o amgylch y chwaraewr.
@@ -2002,6 +2009,8 @@ KeyboardShortcutPrompt:
   Video Zoom In: Chwyddo i mewn i'r fideo
   Video Zoom Out: Chwyddo allan o'r fideo
   Tab Switcher: Newidiwr tabiau
+  Undo Seek: Dadwneud y naid olaf
+  Redo Seek: Ail-wneud naid a ddadwnaed
 CommandPalette:
   Title: Palet gorchmynion
   Open: Agor y palet gorchmynion

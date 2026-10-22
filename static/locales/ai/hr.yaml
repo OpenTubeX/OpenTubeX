@@ -683,6 +683,7 @@ Settings:
     Show Skip Silence Toggle: Prikaži prekidač za preskakanje tišine
     Enable Skip Silence by Default: Zadano omogući preskakanje tišine
     Enable Video Zoom: Omogući zumiranje videozapisa
+    Enable Seek History: Omogući povijest premotavanja
     Voice-over Translation:
       Title: Glasovni prijevod
       Attribution: (pokreće Yandex)
@@ -1498,6 +1499,11 @@ Video:
       End Before Start: Točka B mora biti nakon točke A.
       Outside Duration: Vremenska oznaka mora biti unutar videozapisa.
       Cleared: A-B ponavljanje je očišćeno
+    Seek History:
+      Seek History: Povijest premotavanja
+      Positions: '{count} položaj | {count} položaja | {count} položaja'
+      Nothing to undo: Nema ništa za poništavanje
+      Nothing to redo: Nema ništa za ponavljanje
     Zoom:
       Zoom: Zumiranje
       'Off': 'Isključeno'
@@ -1912,6 +1918,7 @@ Tooltips:
     Show Skip Silence Toggle: Prikazuje prekidač za preskakanje tišine u izborniku postavki reproduktora.
     Enable Skip Silence by Default: Omogućuje preskakanje tišine za nove kartice. Promjena na jednoj kartici ne utječe na ostale.
     Enable Video Zoom: Prikazuje kontrolu Zumiranje u izborniku postavki reproduktora te omogućuje njezine tipkovne prečace i kontrole pomicanja.
+    Enable Seek History: Pamti odakle ste premotali u svakom videozapisu dok se aplikacija ne zatvori. Prikazuje popis povijesti premotavanja u izborniku postavki reproduktora i omogućuje njegove tipkovničke prečace.
     Voice-over Translation: Pri zahtjevu za prijevod šalje ID videozapisa, trajanje i odabrani jezik neslužbenoj Yandexovoj usluzi glasovnog prijevoda. Prema zadanim je postavkama isključena.
     Hold to Double Playback Speed: Držite razmaknicu ili lijevu tipku miša iznad reproduktora kako biste privremeno udvostručili trenutačnu brzinu reprodukcije.
     Ambient Mode: Stapa boje videozapisa s područjem oko reproduktora.
@@ -2002,6 +2009,8 @@ KeyboardShortcutPrompt:
   Video Zoom In: Povećaj videozapis
   Video Zoom Out: Smanji videozapis
   Tab Switcher: Prebacivanje kartica
+  Undo Seek: Poništi posljednje premotavanje
+  Redo Seek: Ponovi poništeno premotavanje
 CommandPalette:
   Title: Paleta naredbi
   Open: Otvori paletu naredbi

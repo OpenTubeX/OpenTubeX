@@ -684,6 +684,7 @@ Settings:
     Show Skip Silence Toggle: Kuva vaikuse vahelejätmise lüliti
     Enable Skip Silence by Default: Luba vaikuse vahelejätmine vaikimisi
     Enable Video Zoom: Luba video suurendamine
+    Enable Seek History: Luba kerimisajalugu
     Voice-over Translation:
       Title: Pealelugemisega tõlge
       Attribution: (Yandexi toel)
@@ -1480,6 +1481,11 @@ Video:
       End Before Start: Punkt B peab olema pärast punkti A.
       Outside Duration: Ajatempel peab jääma video kestuse piiresse.
       Cleared: A-B-kordus tühjendatud
+    Seek History:
+      Seek History: Kerimisajalugu
+      Positions: '{count} asukoht | {count} asukohta'
+      Nothing to undo: Pole midagi tagasi võtta
+      Nothing to redo: Pole midagi uuesti teha
     Zoom:
       Zoom: Suurendus
       'Off': 'Väljas'
@@ -1889,6 +1895,7 @@ Tooltips:
     Show Skip Silence Toggle: Kuvab pleieri seadete menüüs vaikuse vahelejätmise lüliti.
     Enable Skip Silence by Default: Lubab uutel vahelehtedel vaikuse vahelejätmise. Selle muutmine ühel vahelehel ei mõjuta teisi vahelehti.
     Enable Video Zoom: Kuvab pleieri seadete menüüs suumi juhtelemendi ning lubab selle kiirklahvid ja panoraamimise juhtelemendid.
+    Enable Seek History: Jätab meelde, kust sa igas videos edasi hüppasid, kuni rakendus suletakse. Näitab kerimisajaloo loendit pleieri seadete menüüs ja lubab selle kiirklahvid.
     Voice-over Translation: Tõlkepäringu tegemisel saadab video ID, kestuse ja valitud keele mitteametlikule Yandexi pealelugemise tõlketeenusele. Vaikimisi välja lülitatud.
     Hold to Double Playback Speed: Praeguse esituskiiruse ajutiseks kahekordistamiseks hoia pleieri kohal all tühikuklahvi või hiire vasakut nuppu.
     Ambient Mode: Sulandab video värvid pleieri ümbrusega.
@@ -1977,6 +1984,8 @@ KeyboardShortcutPrompt:
   Video Zoom In: Suurenda videot
   Video Zoom Out: Vähenda videot
   Tab Switcher: Vahelehtede vahetaja
+  Undo Seek: Võta viimane kerimine tagasi
+  Redo Seek: Tee tagasi võetud kerimine uuesti
 CommandPalette:
   Title: Käsupalett
   Open: Ava käsupalett

@@ -684,6 +684,7 @@ Settings:
     Show Skip Silence Toggle: 無音スキップの切り替えを表示
     Enable Skip Silence by Default: 無音スキップを既定で有効化
     Enable Video Zoom: 動画のズームを有効化
+    Enable Seek History: シーク履歴を有効化
     Voice-over Translation:
       Title: 吹き替え翻訳
       Attribution: （Yandex提供）
@@ -1478,6 +1479,11 @@ Video:
       End Before Start: ポイントBはポイントAより後に設定してください。
       Outside Duration: タイムスタンプは動画の再生時間内に設定してください。
       Cleared: A-Bリピートを消去しました
+    Seek History:
+      Seek History: シーク履歴
+      Positions: '{count} 件の位置'
+      Nothing to undo: 元に戻す操作はありません
+      Nothing to redo: やり直す操作はありません
     Zoom:
       Zoom: ズーム
       'Off': 'オフ'
@@ -1886,6 +1892,7 @@ Tooltips:
     Show Skip Silence Toggle: プレーヤーの設定メニューに、無音スキップのオンとオフを切り替える項目を表示します。
     Enable Skip Silence by Default: 新しいタブで無音スキップを有効にします。あるタブで変更しても、ほかのタブには影響しません。
     Enable Video Zoom: プレーヤーの設定メニューにズーム操作を表示し、キーボードショートカットとパン操作を有効にします。
+    Enable Seek History: アプリを閉じるまで、各動画でどこからジャンプしたかを記憶します。プレーヤーの設定メニューにシーク履歴の一覧を表示し、キーボードショートカットを有効にします。
     Voice-over Translation: 翻訳を要求すると、動画ID、長さ、選択した言語を非公式のYandex吹き替え翻訳サービスへ送信します。既定では無効です。
     Hold to Double Playback Speed: プレーヤー上でスペースキーまたはマウスの左ボタンを長押しすると、一時的に現在の2倍の速度で再生します。
     Ambient Mode: 動画の色をプレーヤー周辺の領域になじませます。
@@ -1974,6 +1981,8 @@ KeyboardShortcutPrompt:
   Video Zoom In: 動画を拡大
   Video Zoom Out: 動画を縮小
   Tab Switcher: タブ切り替え
+  Undo Seek: 最後のシークを元に戻す
+  Redo Seek: 元に戻したシークをやり直す
 CommandPalette:
   Title: コマンドパレット
   Open: コマンドパレットを開く

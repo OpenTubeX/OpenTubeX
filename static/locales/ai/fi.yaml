@@ -689,6 +689,7 @@ Settings:
     Show Skip Silence Toggle: Näytä hiljaisuuden ohituksen kytkin
     Enable Skip Silence by Default: Ota hiljaisuuden ohitus oletuksena käyttöön
     Enable Video Zoom: Ota videon zoomaus käyttöön
+    Enable Seek History: Ota siirtymähistoria käyttöön
     Voice-over Translation:
       Title: Päällepuhuttu käännös
       Attribution: (Yandexin tarjoama)
@@ -1518,6 +1519,11 @@ Video:
       End Before Start: Pisteen B on oltava pisteen A jälkeen.
       Outside Duration: Aikaleiman on oltava videon sisällä.
       Cleared: A-B-toisto tyhjennetty
+    Seek History:
+      Seek History: Siirtymähistoria
+      Positions: '{count} kohta | {count} kohtaa'
+      Nothing to undo: Ei mitään kumottavaa
+      Nothing to redo: Ei mitään uudelleen tehtävää
     Zoom:
       Zoom: Zoomaus
       'Off': 'Pois käytöstä'
@@ -1932,6 +1938,7 @@ Tooltips:
     Show Skip Silence Toggle: Näyttää hiljaisuuden ohittamisen käyttöönottokytkimen soittimen asetusvalikossa.
     Enable Skip Silence by Default: Ottaa hiljaisuuden ohittamisen käyttöön uusissa välilehdissä. Asetuksen muuttaminen yhdellä välilehdellä ei vaikuta muihin välilehtiin.
     Enable Video Zoom: Näyttää zoomaussäätimen soittimen asetusvalikossa ja ottaa sen pikanäppäimet sekä panorointisäätimet käyttöön.
+    Enable Seek History: Muistaa, mistä kohdasta siirryit kussakin videossa, kunnes sovellus suljetaan. Näyttää siirtymähistorian luettelon soittimen asetusvalikossa ja ottaa sen pikanäppäimet käyttöön.
     Voice-over Translation: Lähettää videon tunnuksen, keston ja valitun kielen epäviralliseen Yandexin selostuskäännöspalveluun, kun pyydät käännöstä. Oletusarvoisesti pois käytöstä.
     Hold to Double Playback Speed: Voit kaksinkertaistaa nykyisen toistonopeuden tilapäisesti pitämällä välilyöntiä tai soittimen päällä olevaa hiiren ykköspainiketta painettuna.
     Ambient Mode: Sulauttaa videon värit soitinta ympäröivään alueeseen.
@@ -2024,6 +2031,8 @@ KeyboardShortcutPrompt:
   Video Zoom In: Lähennä videota
   Video Zoom Out: Loitonna videota
   Tab Switcher: Välilehtivalitsin
+  Undo Seek: Kumoa viimeisin siirtymä
+  Redo Seek: Tee kumottu siirtymä uudelleen
 CommandPalette:
   Title: Komentopaletti
   Open: Avaa komentopaletti

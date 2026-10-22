@@ -24,6 +24,7 @@ function fixture(t, { time = 50, live = false } = {}) {
     invertValueChangeContentOrder: { value: false },
     valueChangeTimeout: null,
     showOverlayControls() {},
+    noteSeekHistoryJump() {},
     setTimeout,
     clearTimeout,
   }

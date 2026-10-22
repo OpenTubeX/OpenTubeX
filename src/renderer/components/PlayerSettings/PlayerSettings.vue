@@ -95,6 +95,14 @@
         @change="updateEnableVideoZoom"
       />
       <FtToggleSwitch
+        :label="t('Settings.Player Settings.Enable Seek History')"
+        :compact="true"
+        :default-value="store.getters.getEnableSeekHistory"
+        setting-key="enableSeekHistory"
+        :tooltip="t('Tooltips.Player Settings.Enable Seek History')"
+        @change="store.dispatch('updateEnableSeekHistory', $event)"
+      />
+      <FtToggleSwitch
         :label="t('Settings.Player Settings.Hold to Double Playback Speed')"
         :compact="true"
         :default-value="holdToDoublePlaybackSpeed"

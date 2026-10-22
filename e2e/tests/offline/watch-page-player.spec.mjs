@@ -1223,6 +1223,178 @@ test.describe('with A-B repeat disabled', () => {
   })
 })
 
+test('keeps no seek history until it is turned on and forgets it when turned off', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  const currentTime = () => video.evaluate(element => element.currentTime)
+  const seekHistoryButton = player.locator('.shaka-overflow-menu .seek-history-button')
+  const setSeekHistoryEnabled = enabled => page.evaluate(value => window.$store.dispatch('updateEnableSeekHistory', value), enabled)
+  const jump = async () => {
+    await video.evaluate((element) => {
+      element.pause()
+      element.currentTime = 1
+    })
+    await page.evaluate(() => document.activeElement?.blur())
+    await page.keyboard.press('9')
+    await expect.poll(currentTime).toBeCloseTo(27, 1)
+  }
+  const openOverflowMenu = async () => {
+    await player.hover()
+    await player.getByRole('button', { name: 'More settings' }).click({ force: true })
+    await expect(player.locator('.shaka-overflow-menu:not(.shaka-hidden)')).toBeVisible()
+  }
+
+  await jump()
+  await page.keyboard.press('Control+z')
+  await openOverflowMenu()
+  await expect(seekHistoryButton).toHaveCount(0)
+  expect(await currentTime()).toBeCloseTo(27, 1)
+  await page.keyboard.press('Escape')
+
+  await setSeekHistoryEnabled(true)
+  await expect(seekHistoryButton).toHaveCount(1)
+  await jump()
+  await openOverflowMenu()
+  await expect(seekHistoryButton.locator('.shaka-current-selection-span')).toHaveText('1 position')
+  await page.keyboard.press('Escape')
+
+  await setSeekHistoryEnabled(false)
+  await expect(seekHistoryButton).toHaveCount(0)
+  await setSeekHistoryEnabled(true)
+  await expect(seekHistoryButton).toHaveCount(1)
+  await openOverflowMenu()
+  await expect(seekHistoryButton).toBeHidden()
+})
+
+test.describe('with seek history enabled', () => {
+  test.use({
+    seed: {
+      settings: {
+        ...WATCH_PAGE_SEED,
+        enableSeekHistory: true
+      }
+    }
+  })
+
+  test('returns to the positions left by seeking through the seek history', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    const video = await openMockedVideo(page)
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    const currentTime = () => video.evaluate(element => element.currentTime)
+    const popup = player.locator('.valueChangePopup')
+    const seekHistoryButton = player.locator('.shaka-overflow-menu .seek-history-button')
+    const entries = player.locator('.seek-history-menu .seek-history-entry')
+    const openOverflowMenu = async () => {
+      await player.hover()
+      await player.getByRole('button', { name: 'More settings' }).click({ force: true })
+    }
+
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    await watchComponent.evaluate(async (component) => {
+      component.proxy.videoChapters = [
+        { title: 'Opening', startSeconds: 0, endSeconds: 15 },
+        { title: 'Ending', startSeconds: 15, endSeconds: 30 },
+      ]
+      await component.proxy.$nextTick()
+    })
+    await watchComponent.dispose()
+
+    // Seeks the user didn't make, such as resuming playback, aren't jumps.
+    await video.evaluate((element) => {
+      element.pause()
+      element.currentTime = 1
+    })
+    await openOverflowMenu()
+    await expect(player.locator('.shaka-overflow-menu:not(.shaka-hidden)')).toBeVisible()
+    await expect(seekHistoryButton).toBeHidden()
+    await page.keyboard.press('Escape')
+
+    await page.keyboard.press('9')
+    await expect.poll(currentTime).toBeCloseTo(27, 1)
+
+    await player.hover()
+    const seekBarBounds = await player.locator('.shaka-seek-bar').boundingBox()
+    await page.mouse.click(seekBarBounds.x + seekBarBounds.width * 0.1, seekBarBounds.y + seekBarBounds.height / 2)
+    await expect.poll(currentTime).toBeLessThan(6)
+    const clickedTime = await currentTime()
+    const clickedTimestamp = `0:0${Math.floor(clickedTime)}`
+
+    await openOverflowMenu()
+    await expect(seekHistoryButton).toBeVisible()
+    await expect(seekHistoryButton).toHaveAccessibleName('Seek history')
+    // The icon follows the selected icon pack.
+    const seekHistoryIcon = seekHistoryButton.locator(':scope > svg')
+    await expect(seekHistoryIcon.locator('path')).not.toHaveCount(0)
+    const materialIcon = await seekHistoryIcon.innerHTML()
+    await page.evaluate(() => window.$store.dispatch('updateIconPack', 'remix'))
+    await expect.poll(() => seekHistoryIcon.innerHTML()).not.toBe(materialIcon)
+    await expect(seekHistoryIcon.locator('path')).not.toHaveCount(0)
+    await expect(seekHistoryButton.locator('.shaka-current-selection-span')).toHaveText('2 positions')
+    await seekHistoryButton.click()
+    await expect(entries).toHaveText(['0:27 · Ending', '0:01 · Opening'])
+    await entries.first().click()
+    await expect.poll(currentTime).toBeCloseTo(27, 1)
+    await page.keyboard.press('Escape')
+
+    // Leaving the clicked position replaces the nearby 0:01 entry.
+    await openOverflowMenu()
+    await seekHistoryButton.click()
+    await expect(entries).toHaveText([`${clickedTimestamp} · Opening`, '0:27 · Ending'])
+    await page.keyboard.press('Escape')
+
+    // Returning to an entry is undone like any other jump.
+    // The popup closes after two seconds, so check it before polling the time.
+    await page.keyboard.press('Control+z')
+    await expect(popup).toContainText(clickedTimestamp)
+    await expect.poll(currentTime).toBeCloseTo(clickedTime, 1)
+    await page.keyboard.press('Control+z')
+    await expect(popup).toContainText('Nothing to undo')
+    await expect.poll(currentTime).toBeCloseTo(clickedTime, 1)
+
+    await page.keyboard.press('Control+Shift+z')
+    await expect(popup).toContainText('0:27')
+    await expect.poll(currentTime).toBeCloseTo(27, 1)
+    await page.keyboard.press('Control+Shift+z')
+    await expect(popup).toContainText('Nothing to redo')
+    await expect.poll(currentTime).toBeCloseTo(27, 1)
+
+    await openOverflowMenu()
+    await seekHistoryButton.click()
+    await expect(entries).toHaveText(['0:27 · Ending', `${clickedTimestamp} · Opening`])
+    await expect(entries.first()).toHaveAttribute('aria-selected', 'true')
+  })
+
+  test('keeps a seek history for each video until the app closes', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    const video = await openMockedVideo(page)
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    const seekHistoryButton = player.locator('.shaka-overflow-menu .seek-history-button')
+    const openOverflowMenu = async () => {
+      await player.hover()
+      await player.getByRole('button', { name: 'More settings' }).click({ force: true })
+      await expect(player.locator('.shaka-overflow-menu:not(.shaka-hidden)')).toBeVisible()
+    }
+
+    await video.evaluate((element) => {
+      element.pause()
+      element.currentTime = 1
+    })
+    await page.evaluate(() => document.activeElement?.blur())
+    await page.keyboard.press('9')
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(27, 1)
+
+    await openMockedVideo(page, 'aqz-KE-bpKQ')
+    await openOverflowMenu()
+    await expect(seekHistoryButton).toBeHidden()
+    await page.keyboard.press('Escape')
+
+    await openMockedVideo(page)
+    await openOverflowMenu()
+    await expect(seekHistoryButton.locator('.shaka-current-selection-span')).toHaveText('1 position')
+  })
+})
+
 test('mobile skip buttons flank the centered play button', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
