@@ -713,7 +713,9 @@ const localDownloadId = computed(() => supportsYtDlp && enableDownloads.value
   ? store.getters.getLocalPlaybackDownloadIds.get(id.value)
   : undefined)
 
-const linkDownloadId = computed(() => cardDownloadId(store.getters.getYtDlpDownloads, id.value, props.downloadId, localDownloadId.value))
+const cardDownload = computed(() => cardDownloadId(store.getters.getYtDlpDownloads, id.value, props.downloadId, localDownloadId.value))
+// iOS plays downloads natively from the card click instead of on the watch page.
+const linkDownloadId = computed(() => process.env.IS_IOS ? props.downloadId : cardDownload.value)
 
 watch(enableDownloads, (enabled) => {
   if (!enabled) showDownloadPrompt.value = false
@@ -1990,7 +1992,7 @@ async function handleWatchPageLinkClick(event) {
 
   if (process.env.IS_IOS && localDownloadId.value !== undefined && event?.type === 'click') {
     event.preventDefault()
-    await playDownloadedFile(localDownloadId.value, { videoId: id.value }, {
+    await playDownloadedFile(Number(cardDownload.value), { videoId: id.value }, {
       refreshDownloads: () => refreshDownloadRecords(ytDlp, store),
       playNative: (downloadId, path) => ytDlp.ytDlpPlayDownload(downloadId, path),
       navigate: () => {},

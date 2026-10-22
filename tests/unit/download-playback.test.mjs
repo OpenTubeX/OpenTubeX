@@ -135,13 +135,7 @@ test('maps each downloaded video to its newest playable download, preferring vid
   })].toSorted(), [['audio', 2], ['both', 1], ['older', 3]])
 })
 
-test('opens a card with its own download unless the inherited playlist download contains it', t => {
-  const previous = process.env.IS_IOS
-  t.after(() => {
-    if (previous === undefined) delete process.env.IS_IOS
-    else process.env.IS_IOS = previous
-  })
-  delete process.env.IS_IOS
+test('opens a card with its own download unless the inherited playlist download contains it', () => {
   const downloads = {
     1: { id: 1, files: [{ videoId: 'first', path: '/downloads/first.webm' }, { videoId: 'gone', path: '/downloads/gone.webm', available: false }] },
   }
@@ -150,6 +144,4 @@ test('opens a card with its own download unless the inherited playlist download 
   assert.equal(cardDownloadId(downloads, 'gone', '1', 2), '2')
   assert.equal(cardDownloadId(downloads, 'second', '1', undefined), '1')
   assert.equal(cardDownloadId(downloads, 'second', '', undefined), '')
-  process.env.IS_IOS = 'true'
-  assert.equal(cardDownloadId(downloads, 'second', '', 2), '')
 })
