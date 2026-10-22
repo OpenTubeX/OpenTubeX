@@ -124,7 +124,7 @@ import { getDefaultAudioVariants } from '../../helpers/player/defaultAudioTrack'
 import { MUSIC_MEDIA_TYPE } from '../../helpers/player/musicMediaType'
 import { resolveSegmentPrefetchLimit } from '../../helpers/player/segmentPrefetch'
 import { AUTO_QUALITY_FALLBACK, streamsSupportAutoQuality } from '../../helpers/player/autoQuality'
-import { limitQualityOnMeteredNetwork } from '../../helpers/player/meteredNetworkQuality'
+import { getMeteredAutoQualityMaxPixels, limitQualityOnMeteredNetwork } from '../../helpers/player/meteredNetworkQuality'
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
 import { prepareGoogleVideoRequest } from '../../helpers/player/playbackRequestPolicy'
 import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../helpers/player/volume-storage'
@@ -1952,11 +1952,6 @@ export default defineComponent({
       events.dispatchEvent(new CustomEvent('timeDisplaySettingsChanged'))
     })
 
-    /** @type {import('vue').ComputedRef<string>} */
-    const defaultQualitySetting = computed(() => {
-      return limitQualityOnMeteredNetwork(store.getters.getDefaultQuality, store.getters.getMeteredNetworkQualityLimit)
-    })
-
     /**
      * The numeric quality to start with. Auto is handled separately by
      * `preferAutoQuality`, so that the quality selection code paths, which all
@@ -1964,9 +1959,12 @@ export default defineComponent({
      * @type {import('vue').ComputedRef<number>}
      */
     const defaultQuality = computed(() => {
-      const value = defaultQualitySetting.value
+      const value = store.getters.getDefaultQuality
 
-      return parseInt(value === 'auto' ? AUTO_QUALITY_FALLBACK : value)
+      return parseInt(limitQualityOnMeteredNetwork(
+        value === 'auto' ? AUTO_QUALITY_FALLBACK : value,
+        store.getters.getMeteredNetworkQualityLimit
+      ))
     })
 
     /** @type {import('vue').ComputedRef<number>} */
@@ -1988,7 +1986,7 @@ export default defineComponent({
       // Only fall back to the setting when no quality was passed in,
       // e.g. before the watch page has resolved a channel specific one
       return Number.isNaN(Number.parseInt(props.currentVideoQuality)) &&
-        defaultQualitySetting.value === 'auto'
+        store.getters.getDefaultQuality === 'auto'
     })
 
     /** @type {import('vue').ComputedRef<boolean>} */
@@ -4023,8 +4021,11 @@ export default defineComponent({
         abr: {
           enabled: useAutoQuality,
 
-          // This only affects the "auto" quality, users can still manually select whatever quality they want.
-          restrictToElementSize: true
+          // These only affect the "auto" quality, users can still manually select whatever quality they want.
+          restrictToElementSize: true,
+          restrictions: {
+            maxPixels: getMeteredAutoQualityMaxPixels(store.getters.getMeteredNetworkQualityLimit)
+          }
         },
 
         // Prioritise variants that are predicted to play:
