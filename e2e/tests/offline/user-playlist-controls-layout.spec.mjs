@@ -37,8 +37,11 @@ test('playlist controls match History spacing and align the switch with sorting'
         const sortTop = Math.min(sort.top, sortLabel.top)
         const results = card.querySelector('.autoGrid').getBoundingClientRect()
         const stacked = getComputedStyle(element).gridTemplateRows.split(' ').length === 2
+        const actions = card.querySelector('.headingActions').getBoundingClientRect()
+        const cardTop = card.getBoundingClientRect().top
         return {
           searchAbove: Math.min(search.top, searchLabel.top) - headingBottom,
+          aroundActions: [actions.top - cardTop, Math.min(search.top, searchLabel.top) - actions.bottom],
           gaps: stacked
             ? [toggleTop - search.bottom, sortTop - toggleBottom, results.top - sort.bottom]
             : [Math.min(toggleTop, sortTop) - search.bottom, results.top - Math.max(sort.bottom, toggleBottom)],
@@ -46,7 +49,9 @@ test('playlist controls match History spacing and align the switch with sorting'
           centerDifference: Math.abs((text.top + text.bottom) / 2 - (sortTop + sort.bottom) / 2),
         }
       })
-      expect(geometry.searchAbove).toBeCloseTo(20, 0)
+      expect(geometry.searchAbove).toBeCloseTo(11, 0)
+      // Beside the title, the actions are as far from the search as from the top of the card
+      if (width === 1500) expect(geometry.aroundActions[1]).toBeCloseTo(geometry.aroundActions[0], 0)
       expect(geometry.gaps).toEqual(Array(geometry.stacked ? 3 : 2).fill(expect.closeTo(20, 0)))
       if (!geometry.stacked) expect(geometry.centerDifference).toBeLessThanOrEqual(1)
     }).toPass({ timeout: 2000 })

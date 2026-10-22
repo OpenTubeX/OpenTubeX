@@ -1,5 +1,12 @@
 .card {
   --playlist-control-gap: 20px;
+
+  /*
+    As far below the heading as its content is from the top of the card (its
+    padding and the title offset), so the actions have the same space above and
+    below them.
+  */
+  --playlist-heading-gap: calc(3px + var(--page-title-offset));
   --playlist-field-label-outset: 7px;
 
   position: relative;
@@ -52,11 +59,11 @@
 .playlistSearch {
   --input-bottom-spacing: 0;
 
-  margin-block: var(--playlist-control-gap);
+  margin-block: var(--playlist-heading-gap) var(--playlist-control-gap);
 }
 
 .playlistSearch.outlined {
-  margin-block-start: calc(var(--playlist-control-gap) + var(--playlist-field-label-outset));
+  margin-block-start: calc(var(--playlist-heading-gap) + var(--playlist-field-label-outset));
 }
 
 @media only screen and (width <= 800px) {
