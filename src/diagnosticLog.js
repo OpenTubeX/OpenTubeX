@@ -22,7 +22,7 @@ const SENSITIVE_ASSIGNMENT = /(["']?)(?<![\w-])(authorization|cookies?|set-cooki
 const URL_PATTERN = /\b(?:https?|wss?|file):\/\/[^\s"'<>]+/gi
 const CLOSING_BRACKETS = { ')': '(', ']': '[', '}': '{' }
 const IPV4_PATTERN = /(?<![\d.])(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)(?![\d.])/g
-const IPV6_PATTERN = /(?<![\w:])(?:(?:[\da-f]{1,4}:){3,7}[\da-f]{1,4}|(?:[\da-f]{1,4}:){1,6}:(?:[\da-f]{1,4}(?::[\da-f]{1,4})*)?)(?![\w:])/gi
+const IPV6_PATTERN = /(?<![\w:])(?:(?:[\da-f]{1,4}:){3,7}[\da-f]{1,4}|(?:[\da-f]{1,4}:){1,6}:(?:[\da-f]{1,4}(?::[\da-f]{1,4})*)?|::[\da-f]{1,4}(?::[\da-f]{1,4}){0,6})(?![\w:])/gi
 const EMAIL_PATTERN = /(?<![\w.+-])[\w.+-]+@[\w-]+(?:\.[\w-]+)+\b/g
 const HOME_DIRECTORY_PATTERN = /(\/home\/|\/Users\/|[A-Z]:\\{1,2}Users\\{1,2})[^/\\\s"']+/gi
 // googlevideo hosts name the CDN node closest to the user

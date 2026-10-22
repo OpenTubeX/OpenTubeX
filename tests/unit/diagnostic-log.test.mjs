@@ -43,6 +43,14 @@ test('credentials and identifying values are removed from text', () => {
   assert.ok(text.includes('/home/<user>/.local/bin/yt-dlp'))
 })
 
+test('IPv6 addresses that start with compressed zero groups are redacted', () => {
+  assert.equal(
+    redactDiagnosticText('from ::2, ::abcd:1234 and ::ffff:c000:280 via ::1 in Foo::abc'),
+    'from <ip>, <ip> and <ip> via ::1 in Foo::abc'
+  )
+  assert.equal(redactDiagnosticText('https://[::ffff:c000:280]/a?b=c'), 'https://[<ip>]/a?<redacted>')
+})
+
 test('versions, durations and timestamps are not mistaken for addresses', () => {
   const text = 'Chromium 138.0.7204.100 at 1:02:03, built 2026-10-22T10:20:30.000Z'
   assert.equal(redactDiagnosticText(text), text)
