@@ -396,6 +396,25 @@ test('a second touch that cancels an adjustment reveals controls only when it mo
   }
 })
 
+test('a canceled adjustment suppresses touch ends until every finger lifts', t => {
+  let now = 1000
+  t.mock.method(performance, 'now', () => now)
+  const { controls, attributes } = createShakaControls()
+  const { gestures: g, event, container } = fixture(t, { controls, fullscreenSwipe: false })
+  container.addEventListener('touchend', event => controls.onMouseMove_(event))
+  g.startMobileFullscreenGesture(event(50))
+  assert.equal(g.moveMobileFullscreenGesture(event(50, 49.75)), true)
+  g.startMobileFullscreenGesture(event(370, 150, { pointerId: 2, isPrimary: false }))
+  const secondTouchEnd = event(370, 150, { timeStamp: now, touches: [{}] })
+  g.handleMobilePlayerTouchEnd(secondTouchEnd)
+  now += 1000
+  const firstTouchEnd = event(50, 49.75, { timeStamp: now, touches: [] })
+  g.handleMobilePlayerTouchEnd(firstTouchEnd)
+  assert.equal(secondTouchEnd.prevented, true)
+  assert.equal(firstTouchEnd.prevented, true, 'The adjusting finger must not reach Shaka after the window')
+  assert.equal(attributes.has('shown'), false)
+})
+
 test('horizontal movement never becomes an adjustment later in the same gesture', t => {
   const { gestures: g, event, calls } = fixture(t)
   g.startMobileFullscreenGesture(event())
