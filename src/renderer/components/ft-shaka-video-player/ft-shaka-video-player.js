@@ -6549,8 +6549,29 @@ export default defineComponent({
 
       overflowMenuTitleFrame = requestAnimationFrame(() => {
         overflowMenuTitleFrame = null
+        updateQualityTileSize(menu)
         updateOverflowMenuLabelTitles(menu)
       })
+    }
+
+    /**
+     * Size the quality tiles to the longest label, so they stay one size without
+     * reserving room for codec and bitrate labels that the video doesn't have.
+     *
+     * @param {HTMLElement} menu
+     */
+    function updateQualityTileSize(menu) {
+      if (!menu.isConnected || !isActiveTab.value || menu.classList.contains('shaka-hidden')) {
+        return
+      }
+      for (const submenu of menu.querySelectorAll('.shaka-sub-menu.ft-menu-grid:not(.shaka-hidden):has(> .explicit-resolution)')) {
+        submenu.style.removeProperty('--ft-quality-tile-size')
+        let size = 0
+        for (const tile of submenu.querySelectorAll(':scope > .explicit-resolution')) {
+          size = Math.max(size, Math.ceil(tile.getBoundingClientRect().width))
+        }
+        submenu.style.setProperty('--ft-quality-tile-size', `${size}px`)
+      }
     }
 
     /**
