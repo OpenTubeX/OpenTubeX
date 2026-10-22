@@ -15,7 +15,8 @@
         :class="{
           singleRow: headerFitsOneRow,
           scrollHidden: headerScrollHidden,
-          tabbedNewFeed: currentTab === 'new' && newFeedView === 'tabbed'
+          tabbedNewFeed: currentTab === 'new' && newFeedView === 'tabbed',
+          groupsBesideNewFeedTabs
         }"
         @focusin="resetHeaderScrollVisibility"
       >
@@ -247,6 +248,7 @@
         </div>
         <FtTabs
           v-if="currentTab === 'new' && newFeedView === 'tabbed'"
+          ref="newFeedTabsRef"
           class="newFeedTabs"
           role="tablist"
           :aria-label="$t('Subscriptions.New Content Tabs')"
@@ -284,6 +286,7 @@
         </FtTabs>
         <FtSubscriptionGroupBar
           v-if="hasSubscriptionGroups"
+          ref="subscriptionGroupsRef"
           class="subscriptionGroups"
           panel-id="subscriptionsPanel"
         />
@@ -1340,6 +1343,55 @@ function updateHeaderFitsOneRow() {
   headerFitsOneRow.value = requiredWidth <= contentBoxWidth(row)
 }
 
+const newFeedTabsRef = useTemplateRef('newFeedTabsRef')
+const subscriptionGroupsRef = useTemplateRef('subscriptionGroupsRef')
+/** @type {import('vue').Ref<boolean>} */
+const groupsBesideNewFeedTabs = ref(false)
+
+/**
+ * The group chips and actions, which the group bar wraps as one row. Its tab
+ * list doesn't generate a box of its own.
+ * @param {HTMLElement} bar
+ */
+function groupBarItems(bar) {
+  return Array.from(bar.children)
+    .flatMap(child => getComputedStyle(child).display === 'contents' ? Array.from(child.children) : [child])
+    .filter(child => child.getClientRects().length > 0 && !['absolute', 'fixed'].includes(getComputedStyle(child).position))
+}
+
+/**
+ * The groups share the row of the New feed's tabs while they fit onto one line
+ * beside them, without moving the tabs off the center of the header.
+ */
+function updateGroupsBesideNewFeedTabs() {
+  const header = headerRef.value
+  const tabs = newFeedTabsRef.value?.$el
+  const bar = subscriptionGroupsRef.value?.$el
+
+  if (
+    !(header instanceof HTMLElement) ||
+    !(tabs instanceof HTMLElement) ||
+    !(bar instanceof HTMLElement) ||
+    header.getClientRects().length === 0
+  ) {
+    groupsBesideNewFeedTabs.value = false
+    return
+  }
+
+  const items = groupBarItems(bar)
+  const itemGap = Number.parseFloat(getComputedStyle(bar).columnGap) || 0
+  const groupsWidth = items.reduce((total, item) => total + item.getBoundingClientRect().width, 0) +
+    itemGap * Math.max(items.length - 1, 0)
+  const columnGap = Number.parseFloat(getComputedStyle(header).getPropertyValue('--new-feed-groups-gap')) || 0
+
+  groupsBesideNewFeedTabs.value = groupsWidth + columnGap <= (contentBoxWidth(header) - singleLineWidth(tabs)) / 2
+}
+
+function updateHeaderLayout() {
+  updateHeaderFitsOneRow()
+  updateGroupsBesideNewFeedTabs()
+}
+
 function observeHeaderRow() {
   const row = headerRowRef.value
 
@@ -1369,15 +1421,39 @@ function observeHeaderRow() {
   for (const child of tabsContainerRef.value?.$el?.children ?? []) {
     headerResizeObserver.observe(child)
   }
+
+  // The header for the space beside the New feed's tabs
+  if (headerRef.value instanceof HTMLElement) {
+    headerResizeObserver.observe(headerRef.value)
+  }
+
+  for (const child of newFeedTabsRef.value?.$el?.children ?? []) {
+    headerResizeObserver.observe(child)
+  }
+
+  const groupBar = subscriptionGroupsRef.value?.$el
+  if (groupBar instanceof HTMLElement) {
+    for (const item of groupBarItems(groupBar)) {
+      headerResizeObserver.observe(item)
+    }
+  }
 }
 
 // Which elements exist changes with the panel (the refresh widget is only
-// rendered once it is mounted) and with the Mark all as seen button
-watch([currentTabPanel, currentTabHasNewContent, headerFitsOneRow], () => {
+// rendered once it is mounted), with the Mark all as seen button, the New feed's
+// view and the groups
+watch([
+  currentTabPanel,
+  currentTabHasNewContent,
+  headerFitsOneRow,
+  newFeedView,
+  visibleNewFeedTabs,
+  () => store.getters.getSubscriptionGroupList
+], () => {
   const restoreFocus = headerRowRef.value?.querySelector('.markAllSeenButton') === document.activeElement
   nextTick(() => {
     observeHeaderRow()
-    updateHeaderFitsOneRow()
+    updateHeaderLayout()
     // Moving the button between rows must preserve keyboard focus.
     if (restoreFocus) {
       headerRowRef.value?.querySelector('.markAllSeenButton')?.focus({ preventScroll: true })
@@ -1390,13 +1466,13 @@ const tabsContainerRef = useTemplateRef('tabsContainerRef')
 onMounted(() => {
   if (typeof ResizeObserver === 'function') {
     headerResizeObserver = new ResizeObserver(() => {
-      updateHeaderFitsOneRow()
+      updateHeaderLayout()
     })
     observeHeaderRow()
   }
 
   nextTick(() => {
-    updateHeaderFitsOneRow()
+    updateHeaderLayout()
   })
 })
 
