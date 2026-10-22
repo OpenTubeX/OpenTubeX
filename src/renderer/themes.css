@@ -2614,8 +2614,8 @@ body .os-scrollbar.app-scrollbar-idle:not(:hover) {
   animation: ft-shimmer 1.4s ease infinite;
 }
 
-.ft-shimmer:not([data-shimmer-visible]),
-:root[data-shimmer-hidden] .ft-shimmer {
+.ft-shimmer:not([data-shimmer-visible])::before,
+:root[data-shimmer-hidden] .ft-shimmer::before {
   animation-play-state: paused;
 }
 
