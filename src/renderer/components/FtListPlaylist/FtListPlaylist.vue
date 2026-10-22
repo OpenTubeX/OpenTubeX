@@ -135,6 +135,7 @@ import store from '../../store/index'
 
 import { useResultChannelAvatar } from '../../composables/useResultChannelAvatar'
 import { copyToClipboard, openInternalPath, showToast } from '../../helpers/utils'
+import { openButtonMenu } from '../../helpers/buttonMenu'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
 const props = defineProps({
@@ -217,12 +218,7 @@ const { startMenuHold, moveMenuHold, cancelMenuHold, suppressMenuHoldClick } = u
 
 function openPlaylistOptionsMenu() {
   cancelMenuHold()
-  const button = menuButton.value.$el.querySelector('button')
-  button.focus({ preventScroll: true })
-  const bounds = button.getBoundingClientRect()
-  window.dispatchEvent(new CustomEvent('opentubex:context-menu', {
-    detail: { x: document.body.dir === 'rtl' ? bounds.right : bounds.left, y: bounds.bottom, items: playlistMenuItems }
-  }))
+  openButtonMenu(menuButton.value.$el.querySelector('button'), playlistMenuItems)
 }
 function openPlaylistContextMenu(event) {
   if (event.target.closest('.channelName, [role="dialog"], [role="menu"], .iconDropdown')) return

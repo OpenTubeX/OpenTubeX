@@ -376,6 +376,7 @@ import { getInvidiousPlaylistAvailability } from '../../helpers/api/invidious'
 import { findDeadPlaylistItems, isUnavailableInvidiousResponse, isUnavailablePlayerResponse } from '../../helpers/playlist-dead-videos'
 import { isHistoryEntryWatched } from '../../helpers/history'
 import { getQuickBookmarkIconValue } from '../../helpers/quickBookmarkIcons'
+import { openButtonMenu } from '../../helpers/buttonMenu'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
 const props = defineProps({
@@ -732,12 +733,7 @@ const moreMenuItems = computed(() => {
 const moreOptionsButton = useTemplateRef('moreOptionsButton')
 
 function openMoreOptionsMenu() {
-  const button = moreOptionsButton.value.$el
-  button.focus({ preventScroll: true })
-  const bounds = button.getBoundingClientRect()
-  window.dispatchEvent(new CustomEvent('opentubex:context-menu', {
-    detail: { x: document.body.dir === 'rtl' ? bounds.right : bounds.left, y: bounds.bottom, items: moreMenuItems }
-  }))
+  openButtonMenu(moreOptionsButton.value.$el, moreMenuItems)
 }
 
 onBeforeUnmount(() => {
