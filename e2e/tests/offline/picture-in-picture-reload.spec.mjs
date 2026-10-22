@@ -1,6 +1,6 @@
 import { test, expect, setPlayerFullscreen } from '../../helpers/app.mjs'
 import { activeTab, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
-import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
+import { mockPlayableWatchPage, reloadWatchView, watchViewHandle } from '../../helpers/watch.mjs'
 
 test.use({
   seed: {
@@ -69,7 +69,7 @@ test('restores automatic Picture-in-Picture across a video reload', async ({ app
   await expect.poll(() => pictureInPictureActive(page)).toBe(true)
 
   const watchView = await watchViewHandle(page)
-  await watchView.evaluate(view => view.reloadView())
+  await reloadWatchView(watchView)
   await expect.poll(() => pictureInPictureActive(page)).toBe(true)
 
   await setMinimized(app, false)
@@ -86,7 +86,7 @@ test('clears a detached PiP owner when mounting a replacement player', async ({ 
   await expect.poll(() => page.evaluate(() => document.pictureInPictureElement?.isConnected)).toBe(false)
 
   const watchView = await watchViewHandle(page)
-  await watchView.evaluate(view => view.reloadView())
+  await reloadWatchView(watchView)
   await expect.poll(() => pictureInPictureActive(page)).toBe(false)
   await setPlayerFullscreen(page, true)
   await setPlayerFullscreen(page, false)
@@ -102,7 +102,7 @@ test('restores user-opened Picture-in-Picture across a video reload', async ({ a
   await expect.poll(() => pictureInPictureActive(page)).toBe(true)
 
   const watchView = await watchViewHandle(page)
-  await watchView.evaluate(view => view.reloadView())
+  await reloadWatchView(watchView)
   const replacementVideo = await waitForPlayback(page)
   await expect.poll(() => replacementVideo.evaluate(
     element => document.pictureInPictureElement === element
@@ -130,7 +130,7 @@ test('does not transfer Picture-in-Picture from another tab during reload', asyn
   const secondTabId = await page.locator(activeTab).getAttribute('data-tab-id')
 
   const watchView = await watchViewHandle(page, secondTabId)
-  await watchView.evaluate(view => view.reloadView())
+  await reloadWatchView(watchView)
   await waitForPlayback(page)
 
   const originalVideo = page.locator(`.tabContent[data-tab-id="${firstTabId}"] video`)

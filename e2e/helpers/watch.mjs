@@ -3,6 +3,8 @@ import { readFile, readdir } from 'node:fs/promises'
 import path from 'node:path'
 import { gunzipSync } from 'node:zlib'
 
+import { expect } from '@playwright/test'
+
 import { abortUnmockedRequest, repoRoot } from './app.mjs'
 import { fixtureKey, SHARED_PLAYER_SCRIPT } from './innertube.mjs'
 import { DEMO_MEDIA_DURATION_SECONDS, demoPlayerResponse, routeDemoMedia, routeIframeApi, routeWatchPageHtml, stubPoToken } from './media.mjs'
@@ -382,6 +384,31 @@ export function mockUnplayableWatchPage(app, page) {
 /** @see mockWatchPage */
 export function mockPlayableWatchPage(app, page, options = {}) {
   return mockWatchPage(app, page, { ...options, playable: true })
+}
+
+/**
+ * Reloads a Watch view and waits for the reload to settle.
+ *
+ * DevTools tracks a promise returned to `evaluate()` only weakly, so awaiting
+ * `reloadView()` there can fail with "Resulting promise was garbage collected"
+ * even after the reload finished. The page records the outcome instead, and a
+ * reload that never settles still fails the poll.
+ *
+ * @param {import('@playwright/test').JSHandle} watchView from {@link watchViewHandle}
+ */
+export async function reloadWatchView(watchView) {
+  await watchView.evaluate(view => {
+    window.__e2eWatchReload = 'pending'
+    view.reloadView().then(
+      () => { window.__e2eWatchReload = 'done' },
+      error => { window.__e2eWatchReload = `failed: ${error?.stack ?? error}` }
+    )
+  })
+  await expect.poll(
+    () => watchView.evaluate(() => window.__e2eWatchReload),
+    { message: 'waiting for the watch view to reload' }
+  ).not.toBe('pending')
+  expect(await watchView.evaluate(() => window.__e2eWatchReload)).toBe('done')
 }
 
 /**
