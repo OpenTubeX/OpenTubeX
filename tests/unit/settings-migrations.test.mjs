@@ -83,15 +83,44 @@ test('prefers the current Downloads placement preference', () => {
   })
 })
 
-test('drops the removed per-channel enable switches', () => {
+test('drops the removed per-channel enable switches and the automatic saving they disabled', () => {
   assert.deepEqual(migrateLegacySettings({
     rememberPlaybackSpeedPerChannel: true,
+    autoUpdateChannelPlaybackSpeeds: true,
     rememberVideoQualityPerChannel: false,
+    autoUpdateChannelVideoQualities: true,
     rememberSubtitlesStatePerChannel: true,
     rememberVolumePerChannel: false,
-    autoUpdateChannelVolumes: true,
+    autoUpdateChannelVolumes: false,
   }), {
-    autoUpdateChannelVolumes: true,
+    autoUpdateChannelPlaybackSpeeds: true,
+    autoUpdateChannelVideoQualities: false,
+    autoUpdateChannelVolumes: false,
+  })
+  // Exports without the former switches keep their automatic saving choice
+  assert.deepEqual(migrateLegacySettings({ autoUpdateChannelVolumes: true }), { autoUpdateChannelVolumes: true })
+})
+
+test('turns off stored automatic saving that a disabled per-channel switch kept inactive', async () => {
+  const settings = new Datastore()
+  await settings.insertAsync([
+    { _id: 'rememberPlaybackSpeedPerChannel', value: false },
+    { _id: 'autoUpdateChannelPlaybackSpeeds', value: true },
+    { _id: 'rememberVideoQualityPerChannel', value: true },
+    { _id: 'autoUpdateChannelVideoQualities', value: true },
+    { _id: 'rememberVolumePerChannel', value: false },
+    { _id: 'autoUpdateChannelSubtitlesStates', value: true },
+  ])
+
+  await migrateStoredSettings(settings)
+  // A second run must not touch automatic saving that was turned on after the upgrade
+  await migrateStoredSettings(settings)
+
+  const stored = Object.fromEntries((await settings.findAsync({})).map(({ _id, value }) => [_id, value]))
+  assert.deepEqual(stored, {
+    autoUpdateChannelPlaybackSpeeds: false,
+    autoUpdateChannelVideoQualities: true,
+    autoUpdateChannelSubtitlesStates: true,
   })
 })
 
