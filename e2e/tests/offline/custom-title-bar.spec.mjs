@@ -77,6 +77,8 @@ test.describe('with a custom title bar', () => {
     const controls = page.locator('.windowControl')
     await expect(controls).toHaveCount(names.length)
     expect(await controls.evaluateAll(buttons => buttons.map(button => button.classList[1]))).toEqual(names)
+    // Keyboard users reach the controls like any other button.
+    expect(await controls.evaluateAll(buttons => buttons.every(button => button.tabIndex === 0))).toBe(true)
 
     // A virtual display has no window manager to change the window's state,
     // so record the calls and report the states as one would.

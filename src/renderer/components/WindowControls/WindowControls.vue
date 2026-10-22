@@ -12,7 +12,6 @@
         v-for="control in buttons[side]"
         :key="control"
         type="button"
-        tabindex="-1"
         class="windowControl"
         :class="control"
         :aria-label="labels[control]"
