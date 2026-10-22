@@ -105,7 +105,7 @@
           />
         </RouterLink>
         <div
-          v-if="isLive || isUpcoming || isStation || (displayDuration !== '' && displayDuration !== '0:00')"
+          v-if="isLive || isUpcoming || isStation || localDownloadId !== undefined || (displayDuration !== '' && displayDuration !== '0:00')"
           class="videoDuration"
           :class="{
             live: isLive || isStation,
@@ -117,7 +117,14 @@
             :icon="['fa', 'tower-broadcast']"
             class="subscriptionIcon"
           />
-          {{ displayDurationLabel }}
+          <FtIcon
+            v-if="localDownloadId !== undefined"
+            :icon="['fas', 'circle-down']"
+            class="downloadedIcon"
+            role="img"
+            :aria-label="t('Downloads.Downloaded')"
+          />
+          {{ displayDurationLabel === '0:00' ? '' : displayDurationLabel }}
         </div>
         <div
           v-if="useSponsorBlock && sponsorBlockFullVideoCategory"
@@ -701,6 +708,10 @@ const showDownloadPrompt = ref(false)
 const pendingSwipeRemoval = ref(null)
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
+
+const localDownloadId = computed(() => supportsYtDlp && enableDownloads.value
+  ? store.getters.getLocalPlaybackDownloadIds.get(id.value)
+  : undefined)
 
 watch(enableDownloads, (enabled) => {
   if (!enabled) showDownloadPrompt.value = false
@@ -1906,6 +1917,8 @@ const watchPageLinkQuery = computed(() => {
 
   if (props.downloadId) {
     query.downloadId = props.downloadId
+  } else if (localDownloadId.value !== undefined) {
+    query.downloadId = String(localDownloadId.value)
   }
 
   if (typeof props.data.isShort === 'boolean') {

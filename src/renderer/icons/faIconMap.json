@@ -111,6 +111,10 @@
     "ri": "circle-line",
     "material": "circle-outline"
   },
+  "circle-down": {
+    "ri": "arrow-down-circle-fill",
+    "material": "download-for-offline-rounded"
+  },
   "circle-exclamation": {
     "ri": "error-warning-line",
     "material": "error-outline"

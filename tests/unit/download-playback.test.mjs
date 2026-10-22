@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { downloadQueueVideos, isDownloadPlaybackSupported, playDownloadedFile, refreshDownloadRecords } from '../../src/renderer/helpers/downloadPlayback.js'
+import { downloadQueueVideos, isDownloadPlaybackSupported, localPlaybackDownloadIds, playDownloadedFile, refreshDownloadRecords } from '../../src/renderer/helpers/downloadPlayback.js'
 
 test('queues a downloaded video with its saved-file route and metadata', () => {
   const [video] = downloadQueueVideos({
@@ -120,4 +120,17 @@ test('preserves the selected path when a download repeats a video ID', async () 
     fileNotFound: () => assert.fail('The selected file exists'),
   })
   assert.equal(route.query.downloadFilePath, files[1].path)
+})
+
+test('maps each downloaded video to its newest playable download, preferring video files', () => {
+  const file = (videoId, extra = {}) => ({ videoId, path: `/downloads/${videoId}`, ...extra })
+  assert.deepEqual([...localPlaybackDownloadIds({
+    1: { id: 1, status: 'completed', mode: 'video', files: [file('both'), file('older')] },
+    2: { id: 2, status: 'completed', mode: 'audio', files: [file('both'), file('audio')] },
+    3: { id: 3, status: 'completed', mode: 'video', files: [file('older')] },
+    4: { id: 4, status: 'completed', mode: 'video', files: [file('missing', { available: false }), { path: '/downloads/subtitles.vtt' }] },
+    5: { id: 5, status: 'downloading', mode: 'video', files: [file('active')] },
+    6: { id: 6, status: 'completed', mode: 'subtitles', files: [file('subtitles')] },
+    7: { id: 7, status: 'completed', mode: 'video', retryPayload: { externalUrl: 'https://vimeo.com/123' }, files: [file('external')] },
+  })].toSorted(), [['audio', 2], ['both', 1], ['older', 3]])
 })

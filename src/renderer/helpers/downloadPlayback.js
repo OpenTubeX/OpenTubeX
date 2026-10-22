@@ -41,6 +41,27 @@ export function isPlayableDownloadFile(file) {
     (!process.env.IS_IOS || IOS_PLAYABLE_EXTENSIONS.has(file.extension?.toLowerCase()))
 }
 
+/**
+ * Maps each video ID to the download that plays it locally, preferring video
+ * files over audio and newer downloads over older ones.
+ * @returns {Map<string, number>}
+ */
+export function localPlaybackDownloadIds(downloads) {
+  const best = new Map()
+  for (const download of Object.values(downloads)) {
+    if (!isDownloadPlaybackSupported(download)) continue
+    for (const file of download.files ?? []) {
+      if (!file.videoId || !isPlayableDownloadFile(file)) continue
+      const current = best.get(file.videoId)
+      if (current === undefined || (download.mode === 'video') > (current.mode === 'video') ||
+        (download.mode === current.mode && download.id > current.id)) {
+        best.set(file.videoId, download)
+      }
+    }
+  }
+  return new Map([...best].map(([videoId, download]) => [videoId, download.id]))
+}
+
 export function downloadFileTitle(download, file) {
   return file.title || (download.videoId && download.videoId === file.videoId ? download.title : '') ||
     file.path?.split(/[/\\]/).at(-1)?.replace(/\.[^.]+$/, '') || file.videoId
