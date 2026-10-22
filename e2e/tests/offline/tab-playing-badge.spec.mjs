@@ -46,6 +46,9 @@ for (const iconPack of ['material', 'remix']) {
 
       await page.evaluate(id => window.ftElectron.tabs.setPinned(id, true), ids[0])
       await expect(tabs[0]).toHaveClass(/pinned/)
+      await expect(tabs[0].locator('.tabIconContainer .pinBadge')).toBeVisible()
+      await expect(tabs[0].locator('.pinIcon')).toHaveCount(1)
+      await expect(tabs[1].locator('.pinIcon')).toHaveCount(0)
       await page.evaluate(async id => {
         const group = await window.ftElectron.tabs.createGroup({ name: 'Music', color: 'blue' })
         await window.ftElectron.tabs.setGroup([id], group.id)
@@ -66,7 +69,13 @@ for (const iconPack of ['material', 'remix']) {
             const corner = element.classList.contains('pinned')
               ? badge.left < icon.left && badge.right > icon.left && badge.right < icon.right
               : badge.left > icon.left && badge.left < icon.right && badge.right > icon.right
-            return corner &&
+            const pin = element.querySelector('.pinBadge')?.getBoundingClientRect()
+            const pinCorner = !element.classList.contains('pinned') || (
+              pin.left > icon.left && pin.left < icon.right && pin.right > icon.right &&
+              pin.top > icon.top && pin.top < icon.bottom && pin.bottom > icon.bottom &&
+              pin.right <= title.left && pin.bottom <= bounds.bottom
+            )
+            return corner && pinCorner &&
               badge.top > icon.top && badge.top < icon.bottom && badge.bottom > icon.bottom &&
               badge.left >= bounds.left && badge.right <= title.left && badge.bottom <= bounds.bottom &&
               badge.right <= close.left
@@ -116,6 +125,8 @@ for (const iconPack of ['material', 'remix']) {
         await expect(tab.locator('.playingIcon')).toBeVisible()
         await expect(tab.locator('.playingBadge')).toHaveCount(0)
       }
+      await expect(tabs[0].locator('.pinIcon')).toBeVisible()
+      await expect(tabs[0].locator('.pinBadge')).toHaveCount(0)
     })
   })
 }
