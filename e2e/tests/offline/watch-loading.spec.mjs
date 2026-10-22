@@ -140,7 +140,11 @@ for (const backend of ['local', 'invidious']) {
         await expect.poll(() => watch.evaluate(vm => vm.videoChapters.map(chapter => chapter.title)))
           .toEqual(['Late community chapter'])
         await expect(page.locator('.chapterMarker')).toHaveCount(1)
-        await expect(page.locator('.ft-chapters-button').first()).toBeVisible()
+        const chaptersButton = page.locator('.ft-chapters-button').first()
+        await expect(chaptersButton).toBeVisible()
+        // Chapter thumbnails download storyboard sheets, so they wait for a chapter list to open.
+        expect(await watch.evaluate(vm => vm.videoChapterThumbnails.filter(thumbnail => thumbnail?.url))).toEqual([])
+        await chaptersButton.click()
         await expect.poll(() => watch.evaluate(vm => vm.videoChapterThumbnails.map(thumbnail => thumbnail?.url)))
           .toEqual(['https://images.test/chapter.jpg'])
         await watch.dispose()

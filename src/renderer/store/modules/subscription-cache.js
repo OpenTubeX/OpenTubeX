@@ -9,36 +9,6 @@ import { getSubscriptionsForFeed } from '../../helpers/subscription-channels'
 import { updateVideoListAfterProcessing } from '../../helpers/subscriptions'
 import { forgetAndroidSubscriptionRefreshFingerprints } from '../../helpers/androidSubscriptionRefresh'
 
-const MAX_CONCURRENT_CACHE_WRITES = 8
-
-/**
- * NeDB serializes writes internally, and Electron adds an IPC round-trip for
- * each one. Keep a small worker pool instead of creating hundreds of concurrent
- * promises for large subscription profiles.
- * @template T
- * @param {(() => Promise<T>)[]} writes
- * @returns {Promise<T[]>}
- */
-async function runSubscriptionCacheWrites(writes) {
-  if (writes.length === 0) {
-    return []
-  }
-
-  /** @type {T[]} */
-  const results = new Array(writes.length)
-  let nextWriteIndex = 0
-  const workerCount = Math.min(MAX_CONCURRENT_CACHE_WRITES, writes.length)
-
-  await Promise.all(Array.from({ length: workerCount }, async () => {
-    while (nextWriteIndex < writes.length) {
-      const writeIndex = nextWriteIndex++
-      results[writeIndex] = await writes[writeIndex]()
-    }
-  }))
-
-  return results
-}
-
 /**
  * Electron datastore payloads are converted to plain JSON before crossing IPC,
  * which serializes dates as ISO strings.
@@ -277,7 +247,7 @@ const actions = {
       }
     }
 
-    const writes = []
+    const marks = []
     const seenVideos = []
     const seenPosts = []
 
@@ -311,27 +281,25 @@ const actions = {
         }))
         if (seenEntries.length === 0) continue
 
-        writes.push(async () => {
-          try {
-            await DBSubscriptionCacheHandlers.markEntriesAsSeen(channelId, feedTab, seenEntries)
-            if (feedTab !== 'posts') {
-              seenVideos.push(...seenEntries.map(({ videoId, isMembersOnly }) => ({ videoId, isMembersOnly })))
-            } else {
-              seenPosts.push(...seenEntries.map(({ postId }) => ({ postId })))
-            }
-            return { tab: feedTab, channelId, entries: seenEntries }
-          } catch (errMessage) {
-            console.error(errMessage)
-            return null
-          }
-        })
+        marks.push({ tab: feedTab, channelId, entries: seenEntries })
+        if (feedTab !== 'posts') {
+          seenVideos.push(...seenEntries.map(({ videoId, isMembersOnly }) => ({ videoId, isMembersOnly })))
+        } else {
+          seenPosts.push(...seenEntries.map(({ postId }) => ({ postId })))
+        }
       }
     }
 
-    // Updating every successful cache entry in one mutation gives Vue one
-    // render, so all cards leave together regardless of feed size.
-    commit('markSubscriptionEntriesAsSeenInCache', (await runSubscriptionCacheWrites(writes))
-      .filter(cacheEntry => cacheEntry != null))
+    if (marks.length === 0) return
+    // One write stores every channel in one transaction, and one mutation
+    // gives Vue one render, so all cards leave together regardless of feed size.
+    try {
+      await DBSubscriptionCacheHandlers.markEntriesAsSeenMany(marks)
+    } catch (errMessage) {
+      console.error(errMessage)
+      return
+    }
+    commit('markSubscriptionEntriesAsSeenInCache', marks)
     if (seenVideos.length > 0) {
       await dispatch('mergeSubscriptionSeenVideos', { videos: seenVideos }).catch(error => console.error(error))
     }
@@ -356,7 +324,7 @@ const actions = {
       }
     ]
 
-    const writes = []
+    const marks = []
     const seenVideos = []
     for (const { cache, tab } of cacheConfigs) {
       for (const [channelId, cacheEntry] of Object.entries(toRaw(cache))) {
@@ -368,22 +336,19 @@ const actions = {
         }
 
         const seenEntries = [{ videoId, isMembersOnly: entry.isMembersOnly === true, isNewInSubscriptionFeed: false }]
-
-        writes.push(async () => {
-          try {
-            await DBSubscriptionCacheHandlers.markEntriesAsSeen(channelId, tab, seenEntries)
-            seenVideos.push({ videoId, isMembersOnly: seenEntries[0].isMembersOnly })
-            commit('markSubscriptionEntriesAsSeenInCache', [{ tab, channelId, entries: seenEntries }])
-          } catch (errMessage) {
-            console.error(errMessage)
-          }
-        })
+        marks.push({ tab, channelId, entries: seenEntries })
+        seenVideos.push({ videoId, isMembersOnly: seenEntries[0].isMembersOnly })
       }
     }
-    await runSubscriptionCacheWrites(writes)
-    if (seenVideos.length > 0) {
-      await dispatch('mergeSubscriptionSeenVideos', { videos: seenVideos }).catch(error => console.error(error))
+    if (marks.length === 0) return
+    try {
+      await DBSubscriptionCacheHandlers.markEntriesAsSeenMany(marks)
+    } catch (errMessage) {
+      console.error(errMessage)
+      return
     }
+    commit('markSubscriptionEntriesAsSeenInCache', marks)
+    await dispatch('mergeSubscriptionSeenVideos', { videos: seenVideos }).catch(error => console.error(error))
   },
 
   async markSubscriptionVideoAsUnseen({ dispatch, state }, videoId) {
@@ -399,8 +364,7 @@ const actions = {
   },
 
   async markSubscriptionPostAsSeen({ commit, dispatch, state, rootGetters }, postId) {
-    const writes = []
-    let marked = false
+    const marks = []
     const cache = applySubscriptionSeenPostsToCache(state.postsCache, rootGetters?.getSubscriptionSeenPosts)
     for (const [channelId, cacheEntry] of Object.entries(cache)) {
       const entry = cacheEntry?.posts?.find(post => post.postId === postId)
@@ -408,22 +372,17 @@ const actions = {
         continue
       }
 
-      const seenEntries = [{ postId, isNewInSubscriptionFeed: false }]
-
-      writes.push(async () => {
-        try {
-          await DBSubscriptionCacheHandlers.markEntriesAsSeen(channelId, 'posts', seenEntries)
-          marked = true
-          commit('markSubscriptionEntriesAsSeenInCache', [{ tab: 'posts', channelId, entries: seenEntries }])
-        } catch (errMessage) {
-          console.error(errMessage)
-        }
-      })
+      marks.push({ tab: 'posts', channelId, entries: [{ postId, isNewInSubscriptionFeed: false }] })
     }
-    await runSubscriptionCacheWrites(writes)
-    if (marked) {
-      await dispatch('mergeSubscriptionSeenPosts', { posts: [{ postId }] }).catch(error => console.error(error))
+    if (marks.length === 0) return
+    try {
+      await DBSubscriptionCacheHandlers.markEntriesAsSeenMany(marks)
+    } catch (errMessage) {
+      console.error(errMessage)
+      return
     }
+    commit('markSubscriptionEntriesAsSeenInCache', marks)
+    await dispatch('mergeSubscriptionSeenPosts', { posts: [{ postId }] }).catch(error => console.error(error))
   },
 
   async clearSubscriptionsCacheForManyChannels({ commit }, channelIds) {

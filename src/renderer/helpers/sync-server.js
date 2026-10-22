@@ -1035,7 +1035,7 @@ export async function syncHistory(client, store, previous = {}, options = {}) {
       if (store.state.history.historyRevision !== revision) continue
       throw error
     }
-    const { next, historyToUpload, remoteDeletions, insertions, updates, deletions } = merged
+    const { next, baselineChanged, historyToUpload, remoteDeletions, insertions, updates, deletions } = merged
     let completed = false
     try {
       if (!legacy) {
@@ -1078,7 +1078,8 @@ export async function syncHistory(client, store, previous = {}, options = {}) {
       // Legacy requests already changed the server even if a later write,
       // local application, or collection fails. Encrypted adapter writes only
       // change its in-memory document and must wait for the actual upload.
-      if (legacy && (completed || acknowledgedUpserts.size || acknowledgedDeletions.size)) {
+      const acknowledged = acknowledgedUpserts.size > 0 || acknowledgedDeletions.size > 0
+      if (legacy && ((completed && baselineChanged) || acknowledged)) {
         await store.persistHistorySyncBaseline?.({
           previous,
           acknowledged: { upserts: Array.from(acknowledgedUpserts), deletions: Array.from(acknowledgedDeletions) },

@@ -94,11 +94,19 @@ export async function removeChannelPreference(store, channelId, type) {
 /**
  * Resolved channels are shared between the components that show them and
  * kept for the lifetime of the session, so that reopening the manager doesn't refetch them.
- * @type {Map<string, ChannelInfo>}
+ * Channels that don't exist are kept as `null`, so their results don't retry.
+ * @type {Map<string, ChannelInfo | null>}
  */
 const resolvedChannels = new Map()
-/** @type {Map<string, Promise<ChannelInfo | null>>} */
+/** @type {Map<string, { request: Promise<ChannelInfo | null>, wanted: (() => boolean)[] }>} */
 const pendingChannels = new Map()
+// Result lists ask for every unknown author they show. Keep those requests from
+// competing with the page's own requests. Other callers ask for one channel and
+// skip the queue, so slow result lookups cannot hold them up.
+const MAX_CONCURRENT_CHANNEL_REQUESTS = 4
+let activeChannelRequests = 0
+/** @type {{ start: (started: boolean) => void, isWanted: () => boolean }[]} */
+const queuedChannelRequests = []
 
 /**
  * Resolves a channel id to a name and avatar without a network request, if possible.
@@ -120,23 +128,30 @@ export function getCachedChannelInfo(channelId, subscriptionsById) {
  * Fetches the name and avatar of a channel that isn't known locally and caches them for the session.
  * @param {string} channelId
  * @param {{ preference: string, fallback: boolean }} backendOptions
+ * @param {{ throttle?: boolean, isWanted?: () => boolean }} [options] `throttle` queues result list
+ *   lookups behind each other. A queued lookup that no caller wants anymore is dropped and resolves `null`.
  * @returns {Promise<ChannelInfo | null>} `null` when the channel couldn't be resolved
  */
-export async function fetchChannelInfo(channelId, backendOptions) {
+export async function fetchChannelInfo(channelId, backendOptions, { throttle = false, isWanted = () => true } = {}) {
   if (resolvedChannels.has(channelId)) {
     return resolvedChannels.get(channelId)
   }
 
-  if (pendingChannels.has(channelId)) {
-    return await pendingChannels.get(channelId)
+  const pending = pendingChannels.get(channelId)
+  if (pending) {
+    pending.wanted.push(isWanted)
+    return await pending.request
   }
 
   if (!checkYoutubeChannelId(channelId)) {
     return null
   }
 
-  const request = resolveChannelInfo(channelId, backendOptions)
-  pendingChannels.set(channelId, request)
+  const wanted = [isWanted]
+  const request = throttle
+    ? runChannelRequest(() => resolveChannelInfo(channelId, backendOptions), () => wanted.some(check => check()))
+    : resolveChannelInfo(channelId, backendOptions)
+  pendingChannels.set(channelId, { request, wanted })
 
   try {
     return await request
@@ -145,10 +160,46 @@ export async function fetchChannelInfo(channelId, backendOptions) {
   }
 }
 
+/**
+ * @template T
+ * @param {() => Promise<T>} task
+ * @param {() => boolean} isWanted checked before a queued task starts
+ * @returns {Promise<T | null>}
+ */
+async function runChannelRequest(task, isWanted) {
+  if (activeChannelRequests < MAX_CONCURRENT_CHANNEL_REQUESTS) {
+    activeChannelRequests++
+  } else if (!await new Promise(resolve => queuedChannelRequests.push({ start: resolve, isWanted }))) {
+    return null
+  }
+  try {
+    return await task()
+  } finally {
+    releaseChannelRequestSlot()
+  }
+}
+
+function releaseChannelRequestSlot() {
+  // Hand the slot to the next wanted request, so no new request can take it
+  // first. Lookups for results that are gone are dropped without a request.
+  let next
+  while ((next = queuedChannelRequests.shift())) {
+    if (next.isWanted()) {
+      next.start(true)
+      return
+    }
+    next.start(false)
+  }
+  activeChannelRequests--
+}
+
 async function resolveChannelInfo(channelId, backendOptions) {
   try {
     const { preferredName, icon, invalidId } = await findChannelTagInfo(channelId, backendOptions)
 
+    if (invalidId) {
+      resolvedChannels.set(channelId, null)
+    }
     if (invalidId || !preferredName) {
       return null
     }

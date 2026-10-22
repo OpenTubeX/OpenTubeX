@@ -124,8 +124,8 @@ test('mark all limits cache and durable marks to IDs captured before an animatio
     entries.push({ [idKey]: `arrived-${tab}`, isNewInSubscriptionFeed: true })
   }
   const writes = []
-  fixture.handlers.markEntriesAsSeen = async (channelId, tab, entries) => {
-    writes.push([channelId, tab, structuredClone(entries)])
+  fixture.handlers.markEntriesAsSeenMany = async marks => {
+    for (const { channelId, tab, entries } of marks) writes.push([channelId, tab, structuredClone(entries)])
   }
   await fixture.actions.markSubscriptionEntriesAsSeen(fixture.context, {
     tabs: Object.keys(entriesByTab), channelIds: ['channel'], entriesByTab,
@@ -159,7 +159,7 @@ test('mark all leaves newly public uploads new when their captured membership ch
     fixture.state[cacheKey].channel.videos[0].isMembersOnly = false
   }
   let writes = 0
-  fixture.handlers.markEntriesAsSeen = async () => { writes++ }
+  fixture.handlers.markEntriesAsSeenMany = async marks => { writes += marks.length }
   await fixture.actions.markSubscriptionEntriesAsSeen(fixture.context, {
     tabs: Object.keys(entriesByTab), channelIds: ['channel'], entriesByTab,
   })
@@ -190,7 +190,7 @@ function cacheFixture(applied = true, logger = console) {
     ...seenVideos,
     ...feedState,
     DBSubscriptionCacheHandlers: {
-      markEntriesAsSeen: async () => {},
+      markEntriesAsSeenMany: async () => {},
       updateVideosByChannelId: async () => applied,
       updateShortsByChannelId: async () => applied,
       updateLiveStreamsByChannelId: async () => applied,
@@ -237,7 +237,7 @@ test('marking a subscription video as seen records it for history sync without w
 
 test('failed seen writes do not record seen videos', async () => {
   const fixture = cacheFixture(true, { error() {} })
-  fixture.handlers.markEntriesAsSeen = async () => { throw new Error('Disk failure') }
+  fixture.handlers.markEntriesAsSeenMany = async () => { throw new Error('Disk failure') }
   await fixture.actions.markSubscriptionVideoAsSeen(fixture.context, 'videoCache')
   await fixture.actions.markSubscriptionEntriesAsSeen(fixture.context, {
     tabs: ['videos', 'shorts', 'live'], channelIds: ['channel'],
@@ -660,4 +660,22 @@ test('a later seen action prevents an old reverse mark from clearing watched his
   assert.equal(document.history[0].metadata.position_millis, 123000)
   assert.equal(document.seenVideos[0].seenAt, 3000)
   assert.equal(document.seenVideos[0].unseenAt, 2000)
+})
+
+test('marking one video seen reads history for that video only until the list is full', async () => {
+  const marks = count => Array.from({ length: count }, (_, index) => ({ videoId: `stored-${index}`, seenAt: 1000 + index }))
+  for (const [stored, expected] of [[300, 1], [seenData.MAX_SUBSCRIPTION_SEEN_VIDEOS, seenData.MAX_SUBSCRIPTION_SEEN_VIDEOS + 1]]) {
+    const { db, Settings } = await settingsFixture()
+    await db.settings.insertAsync({ _id: 'subscriptionSeenVideos', value: JSON.stringify(marks(stored)) })
+    let queried = 0
+    const find = db.history.findAsync.bind(db.history)
+    db.history.findAsync = (query, projection) => {
+      queried += query.videoId.$in.length
+      return find(query, projection)
+    }
+    await Settings.mergeSeenVideos({ videos: [{ videoId: 'clicked' }] })
+    assert.equal(queried, expected)
+    assert.ok(JSON.parse(await db.settings.findOneAsync({ _id: 'subscriptionSeenVideos' }).then(saved => saved.value))
+      .some(entry => entry.videoId === 'clicked'))
+  }
 })

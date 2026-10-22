@@ -117,16 +117,18 @@ async function cacheYtDlpPlaybackSource(videoId, cacheKey, source) {
   }
   if (source.expiryDate === null) return
 
-  try {
-    await ytDlp.ytDlpPlaybackCacheSet(
+  // Playback does not wait for the main process to serialize and write the
+  // cache file. The in-memory cache above already serves this source.
+  Promise.resolve()
+    .then(() => ytDlp.ytDlpPlaybackCacheSet(
       videoId,
       cacheKey,
       source.expiryDate.getTime(),
       source
-    )
-  } catch (error) {
-    console.warn('Could not save the persistent yt-dlp playback cache', error)
-  }
+    ))
+    .catch(error => {
+      console.warn('Could not save the persistent yt-dlp playback cache', error)
+    })
 }
 
 /**

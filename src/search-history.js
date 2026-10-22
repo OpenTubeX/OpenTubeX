@@ -80,9 +80,12 @@ export function getSearchHistoryEntryId(query, searchSettings) {
  */
 export function resolveSearchHistoryEntry(entry, existingEntries) {
   const normalizedEntry = normalizeSearchHistoryEntry(entry)
+  const entryQuery = getSearchHistoryEntryQuery(normalizedEntry)
   const entryKey = getSearchHistoryEntryKeyFromEntry(normalizedEntry)
+  // Only entries with the same query need their full key built.
   const existingEntry = existingEntries.find(candidate => {
-    return getSearchHistoryEntryKeyFromEntry(candidate) === entryKey
+    return getSearchHistoryEntryQuery(candidate) === entryQuery &&
+      getSearchHistoryEntryKeyFromEntry(candidate) === entryKey
   })
 
   return {

@@ -320,6 +320,59 @@ for (const transition of ['concurrent snapshot', 'disabled', 'new token', 'new p
   })
 }
 
+test('an unchanged history baseline is not saved or broadcast again', async () => {
+  const metadata = { added_date: 1, watched_state: 'watching', position_millis: 15_000 }
+  const remote = [{ video: { id: 'kept', title: 'kept', duration: 120, uploader: { id: 'channel', name: 'Channel' } }, metadata }]
+  const jobs = []
+  const f = fixture({
+    syncServerPrivacyMode: 'legacy', syncServerPrivacyKey: '', syncServerSyncHistory: true, syncServerSyncSubscriptions: false,
+  }, {
+    backgroundJob: (operation, input) => { jobs.push(operation); return runBackgroundJob(operation, input) },
+    respond: url => {
+      const path = new URL(url).pathname
+      if (path === '/health') return { capabilities: { bulk_sync: 1 } }
+      if (path === '/v1/watch_history/') return remote
+    },
+  })
+  const record = { videoId: 'kept', title: 'kept', authorId: 'channel', author: 'Channel', timeWatched: 1, watchProgress: 15, lengthSeconds: 120 }
+  f.context.rootState.history = { historyCacheSorted: [record], historyRevision: 0 }
+  await f.actions.syncWithSyncServer(f.context)
+  const saved = f.settings.syncServerSnapshot
+  assert.deepEqual(JSON.parse(saved).history, { kept: metadata })
+  f.dispatched.length = 0
+  jobs.length = 0
+  await f.actions.syncWithSyncServer(f.context)
+  assert.equal(f.dispatched.some(([action]) => action === 'updateSyncServerSnapshot'), false)
+  assert.equal(jobs.includes('updateHistorySnapshot'), false)
+  assert.equal(f.settings.syncServerSnapshot, saved)
+  assert.ok(f.dispatched.some(([action]) => action === 'updateSyncServerLastSyncAt'))
+
+  f.context.rootState.history.historyCacheSorted = [{ ...record, timeWatched: 2, watchProgress: 30 }]
+  f.context.rootState.history.historyRevision++
+  f.dispatched.length = 0
+  await f.actions.syncWithSyncServer(f.context)
+  assert.deepEqual(JSON.parse(f.settings.syncServerSnapshot).history.kept, { added_date: 2, watched_state: 'watching', position_millis: 30_000 })
+})
+
+test('repeated reads of the same sync snapshot parse it once and return independent copies', () => {
+  const start = storeSource.indexOf('let parsedSnapshot')
+  const parseSource = storeSource.slice(start, storeSource.indexOf('\nasync function clearUnsupportedWatchStats', start))
+  let parses = 0
+  const parseSnapshot = vm.runInNewContext(`${parseSource}\nparseSnapshot`, {
+    JSON: { parse: value => { parses++; return JSON.parse(value) } },
+  })
+  const value = JSON.stringify({ history: { video: { added_date: 1 } }, watchStats: [] })
+  const first = parseSnapshot(value)
+  delete first.watchStats
+  const second = parseSnapshot(value)
+  assert.equal(parses, 1)
+  assert.deepEqual(Object.keys(second), ['history', 'watchStats'])
+  assert.equal(second.history, first.history)
+  assert.deepEqual({ ...parseSnapshot('{"history":{}}') }, { history: {} })
+  assert.deepEqual({ ...parseSnapshot('invalid') }, {})
+  assert.equal(parses, 3)
+})
+
 for (const refreshAction of ['refreshSyncServerEvents', 'refreshSyncServerDevices']) {
   for (const cached of [false, true]) {
   test(`${cached ? 'cached' : 'completed'} library sync does not wait for ${refreshAction}`, async () => {

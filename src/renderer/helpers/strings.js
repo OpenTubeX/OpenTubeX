@@ -62,6 +62,10 @@ export function translateWindowTitle(title) {
   return i18n.global.t(translationKey)
 }
 
+// Constructing Intl.Segmenter is expensive and this runs once per avatar fallback.
+/** @type {Map<string, Intl.Segmenter>} */
+const graphemeSegmenterCache = new Map()
+
 /**
  * Returns the first user-perceived character,
  * respecting language specific rules and
@@ -76,7 +80,12 @@ export function getFirstCharacter(text, locale) {
     return ''
   }
 
-  const segmenter = new Intl.Segmenter([locale, 'en'], { granularity: 'grapheme' })
+  let segmenter = graphemeSegmenterCache.get(locale)
+
+  if (!segmenter) {
+    segmenter = new Intl.Segmenter([locale, 'en'], { granularity: 'grapheme' })
+    graphemeSegmenterCache.set(locale, segmenter)
+  }
 
   // Use iterator directly as we only need the first segment
   const firstSegment = segmenter.segment(text)[Symbol.iterator]().next().value

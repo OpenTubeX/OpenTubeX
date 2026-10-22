@@ -3,6 +3,8 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 import Datastore from '@seald-io/nedb'
+import { SqliteDatastore } from '../../src/datastores/sqlite.js'
+import { createNodeSqliteDriver } from '../../src/datastores/sqliteNode.js'
 import { DBActions, IpcChannels, PlaylistVideoAddResult, SyncEvents } from '../../src/constants.js'
 import { incrementPlaylistVideoCounts } from '../../src/renderer/helpers/playlist-video-counts.js'
 
@@ -29,9 +31,11 @@ function storeActions(handlers) {
   })
 }
 
+const loadPlaylists = db => vm.runInNewContext(source.slice(source.indexOf('class Playlists {'), source.indexOf('\nclass SearchHistory {')) + '\nPlaylists', { db, PlaylistVideoAddResult })
+
 async function fixture(addVideosToTop) {
   const db = { playlists: new Datastore({ inMemoryOnly: true }) }
-  const Playlists = vm.runInNewContext(source.slice(source.indexOf('class Playlists {'), source.indexOf('\nclass SearchHistory {')) + '\nPlaylists', { db, PlaylistVideoAddResult })
+  const Playlists = loadPlaylists(db)
   const playlist = { _id: 'custom', videos: [{ videoId: 'first' }, { videoId: 'second' }], ...(addVideosToTop === undefined ? {} : { addVideosToTop }) }
   await db.playlists.insertAsync(playlist)
   return { db, Playlists, state: { playlists: [playlist], playlistVideoCounts: new Map([['first', 1], ['second', 1]]) } }
@@ -97,7 +101,8 @@ test('a concurrent reorder stamped in the same millisecond is detected', async (
   const update = db.playlists.updateAsync.bind(db.playlists)
   let intercepted = false
   db.playlists.updateAsync = async (query, changes, options) => {
-    if (!intercepted && query.$where) {
+    // Prepending compares the list; appending checks the timestamp.
+    if (!intercepted && (query.$where || changes.$push)) {
       intercepted = true
       await update({ _id: 'custom' }, { $set: { videos: [{ videoId: 'second' }, { videoId: 'first', title: 'Renamed' }], lastUpdatedAt: 15 } })
     }
@@ -113,7 +118,8 @@ test('a concurrent edit that keeps the video count is detected by its timestamp'
   const update = db.playlists.updateAsync.bind(db.playlists)
   let intercepted = false
   db.playlists.updateAsync = async (query, changes, options) => {
-    if (!intercepted && query.$where) {
+    // Prepending compares the list; appending checks the timestamp.
+    if (!intercepted && (query.$where || changes.$push)) {
       intercepted = true
       await update({ _id: 'custom' }, { $set: { videos: [{ videoId: 'second' }, { videoId: 'first' }], lastUpdatedAt: 15 } })
     }
@@ -368,4 +374,49 @@ test('an insertion retry does not overwrite a newer playlist timestamp', async (
   }
   await Playlists.upsertVideoByPlaylistId('custom', 30, { videoId: 'new' })
   assert.equal((await db.playlists.findOneAsync({ _id: 'custom' })).lastUpdatedAt, 100)
+})
+
+test('adding one video to a large playlist appends one row without rewriting or comparing existing entries', async t => {
+  const driver = createNodeSqliteDriver(':memory:')
+  t.after(() => driver.close())
+  const statements = []
+  const playlists = new SqliteDatastore({
+    childField: 'videos',
+    driver: { ...driver, execute (list, transaction) { statements.push(...list.map(([sql]) => sql)); return driver.execute(list, transaction) } },
+  })
+  const Playlists = loadPlaylists({ playlists })
+  const videos = Array.from({ length: 2000 }, (_, index) => ({ videoId: `video-${index}`, playlistItemId: `item-${index}`, title: `Video ${index}` }))
+  await playlists.insertAsync({ _id: 'large', playlistName: 'Large', videos, lastUpdatedAt: 1 })
+  statements.length = 0
+  const result = await Playlists.upsertVideoByPlaylistId('large', 10, { videoId: 'new', playlistItemId: 'item-new' })
+  assert.equal(result.status, PlaylistVideoAddResult.ADDED)
+  assert.equal(result.lastUpdatedAt, 10)
+  const count = sql => statements.filter(statement => statement.startsWith(sql)).length
+  assert.equal(count('INSERT INTO children'), 1, 'only the new entry is serialized and written')
+  assert.equal(count('DELETE FROM children'), 0)
+  assert.equal(count('SELECT pos, data FROM children'), 0, 'stored entries are not compared with a rewritten list')
+  assert.equal(count('SELECT parent, data FROM children'), 1, 'stored entries are read once, for the duplicate check')
+  const saved = await playlists.findOneAsync({ _id: 'large' })
+  assert.equal(saved.videos.length, 2001)
+  assert.equal(saved.videos.at(-1).videoId, 'new')
+  assert.equal(saved.lastUpdatedAt, 10)
+  assert.equal((await Playlists.upsertVideoByPlaylistId('large', 20, { videoId: 'new' })).status, PlaylistVideoAddResult.ALREADY_PRESENT)
+})
+
+test('an appended video is checked again when another write changes the playlist first', async () => {
+  const { db, Playlists } = await fixture(false)
+  const update = db.playlists.updateAsync.bind(db.playlists)
+  let intercepted = false
+  db.playlists.updateAsync = async (query, changes, options) => {
+    if (!intercepted && changes.$push) {
+      intercepted = true
+      await update({ _id: 'custom' }, { $push: { videos: { videoId: 'new', playlistItemId: 'synced' } }, $set: { lastUpdatedAt: 100, playlistName: 'Renamed' } })
+    }
+    return update(query, changes, options)
+  }
+  assert.equal((await Playlists.upsertVideoByPlaylistId('custom', 30, { videoId: 'new' })).status, PlaylistVideoAddResult.ALREADY_PRESENT)
+  const saved = await db.playlists.findOneAsync({ _id: 'custom' })
+  assert.deepEqual(Array.from(saved.videos, v => v.videoId), ['first', 'second', 'new'])
+  assert.equal(saved.playlistName, 'Renamed')
+  assert.equal(saved.lastUpdatedAt, 100)
 })

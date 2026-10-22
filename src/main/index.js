@@ -2204,18 +2204,16 @@ function runApp() {
   app.on('ready', async (_, __) => {
     scheduledBackupTimer = setInterval(checkScheduledBackup, 60_000)
     checkScheduledBackup()
-    try {
-      await applyYtDlpPlaybackCacheSettings()
-    } catch (error) {
+    // None of these gate the first window: the playback cache and download
+    // list handlers wait for their own setup, and the tray and dock menus are
+    // rebuilt once the translations are loaded.
+    applyYtDlpPlaybackCacheSettings().catch(error => {
       console.warn('Could not apply the yt-dlp playback cache settings', error)
-    }
-    try {
-      await restoreYtDlpDownloadQueue()
-    } catch (error) {
+    })
+    restoreYtDlpDownloadQueue().catch(error => {
       console.warn('Could not restore the download queue', error)
-    }
-    {
-      const t = await createMainTranslator()
+    })
+    createMainTranslator().then(t => {
       trayTranslate = t
       dockMediaLabels = {
         previous: t('Video.Previous'),
@@ -2225,7 +2223,9 @@ function runApp() {
         newWindow: t('New Window')
       }
       updateDockMenu()
-    }
+    }).catch(error => {
+      console.warn('Could not load the tray translations', error)
+    })
 
     if (process.env.NODE_ENV === 'production') {
       protocol.handle('app', async (request) => {
@@ -6193,6 +6193,28 @@ function runApp() {
             { event: SyncEvents.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN, data }
           )
           return null
+
+        case DBActions.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN_MANY:
+          await baseHandlers.subscriptionCache.markEntriesAsSeenMany(data)
+          syncOtherWindows(
+            IpcChannels.SYNC_SUBSCRIPTION_CACHE,
+            event,
+            { event: SyncEvents.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN_MANY, data }
+          )
+          return null
+
+        case DBActions.SUBSCRIPTION_CACHE.UPDATE_FEEDS: {
+          const applied = await baseHandlers.subscriptionCache.updateFeeds(data)
+          const updates = data.filter((_, index) => applied[index])
+          if (updates.length > 0) {
+            syncOtherWindows(
+              IpcChannels.SYNC_SUBSCRIPTION_CACHE,
+              event,
+              { event: SyncEvents.SUBSCRIPTION_CACHE.UPDATE_FEEDS, data: updates }
+            )
+          }
+          return applied
+        }
 
         case DBActions.SUBSCRIPTION_CACHE.UPDATE_LIVE_STREAMS_BY_CHANNEL:
           if (!await baseHandlers.subscriptionCache.updateLiveStreamsByChannelId(data.channelId, data.entries, data.timestamp)) return false

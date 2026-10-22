@@ -1,4 +1,5 @@
 import { test, expect, latestSettings, readDatastore, openInterfaceCustomizer } from '../../helpers/app.mjs'
+import { DBActions } from '../../../src/constants.js'
 import { decryptSyncDocument, encryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
 
 test('encrypted subscription retries retain concurrent remote edits', async ({ page }) => {
@@ -247,7 +248,7 @@ test('failed Home re-addition redirects when removal was already persisted', asy
   await expect.poll(() => page.evaluate(() => window.$router.currentRoute.value.path)).not.toBe('/home')
 })
 
-test('queued bulk seen writes and their final mutation retain the original snapshot', async ({ app, page }) => {
+test('a bulk seen write and its final mutation keep feeds refreshed while it was pending', async ({ app, page }) => {
   await page.evaluate(async () => {
     const store = window.$store
     for (let i = 0; i < 9; i++) {
@@ -258,42 +259,40 @@ test('queued bulk seen writes and their final mutation retain the original snaps
       })
     }
   })
-  await app.electronApp.evaluate(({ ipcMain }) => {
+  await app.electronApp.evaluate(({ ipcMain }, markEntriesAsSeenMany) => {
     const original = ipcMain._invokeHandlers.get('db-subscription-cache')
-    let seenRequests = 0
-    globalThis.blockedSeenWrites = []
-    globalThis.finishedSeenWrites = 0
+    globalThis.seenRequests = []
     ipcMain.removeHandler('db-subscription-cache')
     ipcMain.handle('db-subscription-cache', async (event, request) => {
-      const seen = request.data?.channelId?.startsWith('audit-bulk-') && request.data.entries?.every(entry => entry.isNewInSubscriptionFeed === false)
-      if (seen && ++seenRequests <= 8) {
-        await new Promise(resolve => globalThis.blockedSeenWrites.push(resolve))
+      const seen = request.action === markEntriesAsSeenMany
+      if (seen) {
+        globalThis.seenRequests.push(request.data.map(mark => mark.channelId))
+        await new Promise(resolve => { globalThis.releaseSeenWrite = resolve })
       }
-      const result = await original(event, request)
-      if (seen) globalThis.finishedSeenWrites++
-      return result
+      return original(event, request)
     })
-  })
+  }, DBActions.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN_MANY)
   await page.evaluate(() => {
     const store = window.$store
     window.bulkSeenWrite = store.dispatch('markSubscriptionEntriesAsSeen', {
       tab: 'videos', channelIds: Array.from({ length: 9 }, (_, i) => `audit-bulk-${i}`),
     })
   })
-  await expect.poll(() => app.electronApp.evaluate(() => globalThis.blockedSeenWrites.length)).toBe(8)
-  const refresh = id => page.evaluate(id => window.$store.dispatch('updateSubscriptionVideosCacheByChannel', {
-    channelId: `audit-bulk-${id}`,
-    timestamp: new Date(2000),
-    videos: [{ videoId: 'new', isNewInSubscriptionFeed: true }],
-  }), id)
-  // The ninth write has not started; it must not borrow the new timestamp.
-  await refresh(8)
-  await app.electronApp.evaluate(() => globalThis.blockedSeenWrites.shift()())
-  await expect.poll(() => app.electronApp.evaluate(() => globalThis.finishedSeenWrites)).toBeGreaterThan(0)
-  // The first write has finished, but the final bulk mutation is still pending.
-  await refresh(0)
-  await app.electronApp.evaluate(() => globalThis.blockedSeenWrites.splice(0).forEach(resolve => resolve()))
-  await page.evaluate(() => window.bulkSeenWrite)
+  // Every channel is marked in one write.
+  await expect.poll(() => app.electronApp.evaluate(() => globalThis.seenRequests)).toEqual([
+    Array.from({ length: 9 }, (_, i) => `audit-bulk-${i}`),
+  ])
+  // Refreshes made while the seen write is pending must keep their new entries.
+  // Cache requests reach the main process in order, so they wait for it.
+  await page.evaluate(() => {
+    window.pendingRefreshes = Promise.all([0, 8].map(id => window.$store.dispatch('updateSubscriptionVideosCacheByChannel', {
+      channelId: `audit-bulk-${id}`,
+      timestamp: new Date(2000),
+      videos: [{ videoId: 'new', isNewInSubscriptionFeed: true }],
+    })))
+  })
+  await app.electronApp.evaluate(() => globalThis.releaseSeenWrite())
+  await page.evaluate(() => Promise.all([window.bulkSeenWrite, window.pendingRefreshes]))
   const records = (readDatastore(app.userDataDir, 'subscription-cache'))
     .trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
   for (const id of [0, 8]) {

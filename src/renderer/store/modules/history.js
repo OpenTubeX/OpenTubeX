@@ -267,8 +267,8 @@ const mutations = {
 
       // Watched-status and other metadata-only updates keep their current position.
       // A newer timeWatched means the video was watched again and should become the
-      // most recent history entry.
-      if (record.timeWatched === currentRecord.timeWatched) {
+      // most recent history entry, which the playing video usually already is.
+      if (i === 0 || record.timeWatched === currentRecord.timeWatched) {
         state.historyCacheSorted.splice(i, 1, record)
         state.historyCacheById[record.videoId] = record
         return

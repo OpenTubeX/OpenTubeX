@@ -542,3 +542,36 @@ test('existing NeDB handler tests pass against SQLite', async () => {
   ].map(name => `tests/unit/${name}.test.mjs`)
   await promisify(execFile)(process.execPath, ['--import', './tests/helpers/nedb-as-sqlite.mjs', '--test', ...files], { maxBuffer: 64 * 1024 * 1024 })
 })
+
+test('replaceManyAsync writes every document in one transaction', async (t) => {
+  const store = memory(t)
+  const transactions = []
+  const execute = store.driver.execute
+  store.driver = {
+    ...store.driver,
+    execute (statements, transaction) {
+      if (transaction) transactions.push(statements.length)
+      return execute(statements, transaction)
+    }
+  }
+  await store.insertAsync({ _id: 'kept', videos: ['old'], shorts: ['short'] })
+  transactions.length = 0
+  await store.replaceManyAsync([
+    { _id: 'kept', videos: ['new'], shorts: ['short'] },
+    { _id: 'added', videos: ['first'] },
+  ])
+  assert.deepEqual(transactions, [2])
+  assert.deepEqual(await store.findAsync({}).sort({ _id: 1 }), [
+    { _id: 'added', videos: ['first'] },
+    { _id: 'kept', videos: ['new'], shorts: ['short'] },
+  ])
+})
+
+test('only the rebuildable subscription cache skips the disk sync of each commit', async (t) => {
+  const dir = await directory(t)
+  for (const [name, synchronous] of [['subscription-cache', 1], ['history', 2]]) {
+    const driver = createNodeSqliteDriver(join(dir, `${name}.sqlite`))
+    t.after(() => driver.close())
+    assert.equal((await driver.execute([['PRAGMA synchronous']]))[0][0][0], synchronous, name)
+  }
+})

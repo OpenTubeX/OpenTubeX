@@ -82,3 +82,16 @@ test('playback saves leave the history entries revision unchanged', () => {
   store.commit('upsertToHistoryCache', { ...entries[1], isWatched: true })
   assert.deepEqual(revisions(), [revision + 3, entriesRevision + 1])
 })
+
+test('a newer watch time for the newest entry updates it in place', () => {
+  const store = fixture()
+  const entries = [video('newest'), video('older')]
+  store.commit('setHistoryCacheSorted', entries)
+  store.commit('setHistoryCacheById', Object.fromEntries(entries.map(entry => [entry.videoId, entry])))
+  const sorted = toRaw(store.state.history.historyCacheSorted)
+  store.commit('upsertToHistoryCache', { ...entries[0], timeWatched: 2000 })
+  assert.equal(toRaw(store.state.history.historyCacheSorted), sorted)
+  assert.deepEqual(sorted.map(entry => [entry.videoId, entry.timeWatched]), [['newest', 2000], ['older', 1000]])
+  store.commit('upsertToHistoryCache', { ...entries[1], timeWatched: 3000 })
+  assert.deepEqual(toRaw(store.state.history.historyCacheSorted).map(entry => entry.videoId), ['older', 'newest'])
+})

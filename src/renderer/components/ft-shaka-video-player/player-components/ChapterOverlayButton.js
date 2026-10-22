@@ -6,16 +6,20 @@ import i18n from '../../../i18n/index'
 export class ChapterOverlayButton extends shaka.ui.Element {
   /**
    * @param {import('vue').ComputedRef<string>} currentChapterTitle
+   * @param {import('vue').ComputedRef<boolean>} chaptersAvailable
    * @param {boolean} overlayOpen
    * @param {EventTarget} events
    * @param {HTMLElement} parent
    * @param {shaka.ui.Controls} controls
    */
-  constructor(currentChapterTitle, overlayOpen, events, parent, controls) {
+  constructor(currentChapterTitle, chaptersAvailable, overlayOpen, events, parent, controls) {
     super(parent, controls)
 
     /** @private */
     this.currentChapterTitle_ = currentChapterTitle
+
+    /** @private */
+    this.chaptersAvailable_ = chaptersAvailable
 
     /** @private */
     this.overlayOpen_ = overlayOpen
@@ -91,11 +95,20 @@ export class ChapterOverlayButton extends shaka.ui.Element {
       this.updateLocalisedStrings_()
     })
 
+    // The control stays registered for every video so chapters loading later
+    // do not rebuild the player controls; it only hides without chapters.
+    /** @private */
+    this.stopChaptersAvailableWatch_ = watch(this.chaptersAvailable_, () => {
+      this.updateVisibility_()
+    })
+
     this.updateLocalisedStrings_()
+    this.updateVisibility_()
   }
 
   release() {
     this.stopCurrentChapterTitleWatch_()
+    this.stopChaptersAvailableWatch_()
     super.release()
   }
 
@@ -116,6 +129,6 @@ export class ChapterOverlayButton extends shaka.ui.Element {
 
   /** @private */
   updateVisibility_() {
-    this.button_.classList.toggle('shaka-hidden', this.isSubMenuOpened)
+    this.button_.classList.toggle('shaka-hidden', !this.chaptersAvailable_.value || this.isSubMenuOpened)
   }
 }

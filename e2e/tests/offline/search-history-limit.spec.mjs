@@ -106,3 +106,48 @@ test('removing a saved search resets the scrolled list to its rendered start', a
     scrollTop: 0,
   })
 })
+
+test.describe('a long search history', () => {
+  const longEntries = Array.from({ length: 100 }, (_, index) => ({
+    _id: `long search ${String(index + 1).padStart(3, '0')}`,
+    lastUpdatedAt: now - index
+  }))
+
+  test.use({
+    seed: {
+      settings: { enableSearchSuggestions: false },
+      searchHistory: longEntries
+    }
+  })
+
+  test('renders saved searches as the list is scrolled', async ({ page }) => {
+    await page.locator(sel.searchInput).click()
+
+    const list = page.locator('.topNav .searchContainer .options .list')
+    const suggestions = list.locator('li')
+    await expect(suggestions).toHaveCount(40)
+
+    await expect.poll(async () => {
+      await list.evaluate(element => { element.scrollTop = element.scrollHeight })
+      return suggestions.count()
+    }).toBe(longEntries.length)
+    await expect(suggestions.last()).toContainText(longEntries.at(-1)._id)
+    await expect(suggestions.last().locator('.optionWrapper')).toHaveAttribute('href', /#\/search\/long%20search%20100/)
+  })
+
+  test('keyboard navigation reaches entries that are not rendered yet', async ({ page }) => {
+    const input = page.locator(sel.searchInput)
+    await input.click()
+
+    const suggestions = page.locator('.topNav .searchContainer .options .list li')
+    await expect(suggestions).toHaveCount(40)
+
+    await input.press('ArrowUp')
+    await expect(input).toHaveValue(longEntries.at(-1)._id)
+    await expect(suggestions).toHaveCount(longEntries.length)
+    await expect(suggestions.last()).toHaveClass(/hover/)
+
+    await input.press('Enter')
+    await expect(page).toHaveURL(/#\/search\/long%20search%20100/)
+  })
+})

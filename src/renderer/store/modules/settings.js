@@ -429,6 +429,13 @@ export function getSyncableSettingKeys(settings) {
   ))
 }
 
+const SUBSCRIPTION_FEED_CACHE_MUTATIONS = {
+  videos: 'updateVideoCacheByChannel',
+  shorts: 'updateShortsCacheByChannel',
+  liveStreams: 'updateLiveCacheByChannel',
+  communityPosts: 'updatePostsCacheByChannel',
+}
+
 let settingSyncTimestampWrite = Promise.resolve()
 
 function recordSettingSyncTimestamp(commit, settings, settingId) {
@@ -1345,6 +1352,16 @@ const customActions = {
         switch (event) {
           case SyncEvents.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN:
             commit('markSubscriptionEntriesAsSeenInCache', [data])
+            break
+
+          case SyncEvents.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN_MANY:
+            commit('markSubscriptionEntriesAsSeenInCache', data)
+            break
+
+          case SyncEvents.SUBSCRIPTION_CACHE.UPDATE_FEEDS:
+            for (const update of data) {
+              commit(SUBSCRIPTION_FEED_CACHE_MUTATIONS[update.field], update)
+            }
             break
 
           case SyncEvents.SUBSCRIPTION_CACHE.UPDATE_VIDEOS_BY_CHANNEL:
