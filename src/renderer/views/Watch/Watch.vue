@@ -927,8 +927,6 @@
               ref="chromecast"
               :key="`cast-${videoId}`"
               :video-id="videoId"
-              theme="base-no-default"
-              :use-shadow="false"
               :google-cast-enabled="supportsChromecast && $store.getters.getShowChromecastButton"
               :dlna-enabled="$store.getters.getShowDlnaCastButton"
               :google-cast-active="chromecastActive"
