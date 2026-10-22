@@ -41,6 +41,13 @@ async function chooseVideoOption (page, title, option) {
   await page.getByRole('menuitem', { name: option }).click()
 }
 
+// Main applies queue requests in order, so this resolves once the page's
+// earlier queue changes are saved and a restart cannot drop them.
+async function relaunchAfterQueueSaved (app, page) {
+  await page.evaluate(() => window.ftElectron.watchQueue.update({}))
+  return app.relaunch()
+}
+
 test('manages the queue from video menus and the watch sidebar', async ({ page }) => {
   await goTo(page, 'history')
 
@@ -181,7 +188,7 @@ test('restores the remaining queue in order after restarting and keeps clearing 
   await page.locator('.queueItem').filter({ hasText: 'Queue video two' })
     .getByRole('button', { name: 'Reorder Queue video two' }).press('ArrowUp')
 
-  ;({ page } = await app.relaunch())
+  ;({ page } = await relaunchAfterQueueSaved(app, page))
   let queue = page.locator('.watchQueue')
   await expect(queue.locator('.queueVideoTitle')).toHaveText([
     'Queue video three', 'Queue video two', 'Queue video one'
@@ -197,14 +204,14 @@ test('restores the remaining queue in order after restarting and keeps clearing 
   await queue.locator('.queueVideo').first().click()
   await expect(queue.locator('.queueVideoTitle')).toHaveText(['Queue video two', 'Queue video two'])
 
-  ;({ page } = await app.relaunch())
+  ;({ page } = await relaunchAfterQueueSaved(app, page))
   queue = page.locator('.watchQueue')
   await expect(queue.locator('.queueVideoTitle')).toHaveText(['Queue video two', 'Queue video two'])
   await queue.getByRole('button', { name: 'Remove Queue video two from queue' }).last().click()
   await expect(queue.locator('.queueVideoTitle')).toHaveText(['Queue video two'])
   await queue.getByRole('button', { name: 'Clear Queue' }).click()
 
-  ;({ page } = await app.relaunch())
+  ;({ page } = await relaunchAfterQueueSaved(app, page))
   await expect(page.locator('.watchQueue')).toBeHidden()
   expect(await page.evaluate(() => window.$store.getters.getWatchQueueLength)).toBe(0)
 })
