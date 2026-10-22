@@ -41,6 +41,13 @@ async function openCaptionsMenu(page) {
   return captionsMenu
 }
 
+/** @param {import('@playwright/test').Locator} locator */
+async function getVisibleBounds(locator) {
+  const bounds = await locator.boundingBox()
+  expect(bounds, `Expected visible bounds for ${locator}`).not.toBeNull()
+  return bounds
+}
+
 /**
  * Checks that the file and timing rows span the captions menu below its options,
  * either side by side or stacked, and returns whether they are side by side.
@@ -50,11 +57,11 @@ async function checkActionRows(captionsMenu) {
   const actions = captionsMenu.locator(':scope > .ft-caption-actions')
   const [menu, row, load, timing] = await Promise.all([
     captionsMenu, actions, actions.locator('.ft-caption-load-file-button'), actions.locator('.ft-caption-timing-button'),
-  ].map(locator => locator.boundingBox()))
+  ].map(getVisibleBounds))
   expect(row.width).toBeGreaterThanOrEqual(menu.width - 16)
   const choices = captionsMenu.locator(':scope > button:not(.shaka-back-to-overflow-button, .ft-caption-options-button)')
   for (const choice of await choices.all()) {
-    const bounds = await choice.boundingBox()
+    const bounds = await getVisibleBounds(choice)
     expect(bounds.y + bounds.height).toBeLessThanOrEqual(row.y + 1)
   }
   for (const button of [load, timing]) {
@@ -100,8 +107,8 @@ for (const usePlayerMenuGrid of [true, false]) {
       const loadButton = captionsMenu.getByRole('button', { name: 'Load subtitle file…', exact: true })
       // Side by side next to the timing row in the grid menu, which is wide enough for both labels
       expect(await checkActionRows(captionsMenu)).toBe(usePlayerMenuGrid)
-      const iconBounds = await loadButton.locator('.ft-icon__glyph').boundingBox()
-      const labelBounds = await loadButton.locator(':scope > span:last-child').boundingBox()
+      const iconBounds = await getVisibleBounds(loadButton.locator('.ft-icon__glyph'))
+      const labelBounds = await getVisibleBounds(loadButton.locator(':scope > span:last-child'))
       expect(iconBounds.x + iconBounds.width).toBeLessThan(labelBounds.x)
       await captionsMenu.screenshot({ path: testInfo.outputPath('captions-menu-without-tracks.png') })
 
