@@ -36,6 +36,7 @@ import { mergeSubscriptionSeenPosts } from '../../../subscriptionSeenPosts.js'
 import { filterAvailableNavigationItems } from '../../../navigationAvailability.js'
 import { navigationItemsFromLegacySettings, normalizeNavigationItems } from '../../../navigationItems.js'
 import { migrateStoredAiVideoSummarySetting, migrateSyncServerUrl } from '../../helpers/settings-migrations.js'
+import { setDiagnosticLogging } from '../../helpers/diagnostics.js'
 export { NON_TRANSFERABLE_SETTINGS } from '../../../nonTransferableSettings.js'
 
 const CHANNEL_SETTINGS_SYNC_MIGRATION_SETTING = 'channelSettingsSyncMigration'
@@ -207,6 +208,10 @@ const state = createDefaultSettings({
 export const DEFAULT_SETTINGS = Object.freeze(structuredClone(state))
 
 const sideEffectHandlers = {
+  diagnosticLogging: (_store, value) => {
+    setDiagnosticLogging(value === true)
+  },
+
   useAiSlopList: ({ dispatch }, value) => {
     // The list only matches local API results and the web build hides the setting,
     // so a value synced from another platform must not download anything there

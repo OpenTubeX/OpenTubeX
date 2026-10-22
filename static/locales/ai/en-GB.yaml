@@ -260,6 +260,18 @@ History:
   Custom: Custom
   History Older Than Days Removed: Watch history older than 1 day has been removed | Watch history older than {days} days has been removed
 Settings:
+  Diagnostics:
+    Diagnostics: Diagnostics
+    Description: While diagnostic logging is on, OpenTubeX keeps recent log messages in memory so you can attach them to bug reports. It never saves or sends them on its own, and turning logging off deletes them. Reports leave out cookies, tokens, IP addresses and URL parameters, but they can include IDs of videos you played, so check a report before you share it.
+    Enable Logging: Enable diagnostic logging
+    Copy Report: Copy report
+    Save Report: Save report
+    Clear Log: Clear log
+    Report Copied: Diagnostic report copied
+    Report Saved: Diagnostic report saved
+    Report File: Diagnostic report
+    Save Failed: Unable to save the diagnostic report
+    Log Cleared Message: Diagnostic log cleared
   Tab Unloading:
     Automatically unload tabs: "Automatically unload tabs"
     Memory threshold: "Memory threshold"

@@ -259,6 +259,18 @@ History:
   Custom: Vlastní
   History Older Than Days Removed: Historie sledování starší než 1 den byla odstraněna | Historie sledování starší než {days} dny byla odstraněna | Historie sledování starší než {days} dní byla odstraněna
 Settings:
+  Diagnostics:
+    Diagnostics: Diagnostika
+    Description: Když je diagnostický protokol zapnutý, OpenTubeX uchovává nedávné zprávy protokolu v paměti, abyste je mohli přiložit k hlášení chyb. Nikdy je sám neukládá ani neodesílá a vypnutím protokolu se smažou. Hlášení neobsahují soubory cookie, tokeny, IP adresy ani parametry URL, mohou však obsahovat ID přehraných videí, proto hlášení před sdílením zkontrolujte.
+    Enable Logging: Zapnout diagnostický protokol
+    Copy Report: Kopírovat hlášení
+    Save Report: Uložit hlášení
+    Clear Log: Vymazat protokol
+    Report Copied: Diagnostické hlášení zkopírováno
+    Report Saved: Diagnostické hlášení uloženo
+    Report File: Diagnostické hlášení
+    Save Failed: Diagnostické hlášení nelze uložit
+    Log Cleared Message: Diagnostický protokol vymazán
   Tab Unloading:
     Automatically unload tabs: "Automaticky uvolňovat karty z paměti"
     Memory threshold: "Práh paměti"

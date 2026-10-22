@@ -6080,6 +6080,7 @@ export default defineComponent({
 
         this.playbackEngineFallbackAttemptedForCurrentVideo = true
         this.playbackEngineFallbackTarget = 'built-in'
+        console.warn(`Switching stream extraction to built-in for ${videoId} after ${reason}`)
 
         if (this.$refs.player) {
           await this.destroyPlayer()
@@ -6122,6 +6123,7 @@ export default defineComponent({
 
       this.playbackEngineFallbackAttemptedForCurrentVideo = true
       this.playbackEngineFallbackTarget = 'yt-dlp'
+      console.warn(`Switching stream extraction to yt-dlp for ${videoId} after ${reason}`)
 
       if (this.$refs.player) {
         await this.destroyPlayer()

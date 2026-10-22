@@ -46,6 +46,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     scrollSpeed: DEFAULT_SCROLL_SPEED,
     avoidTranslation: 'disabled',
     backendFallback: false,
+    diagnosticLogging: false,
     backendPreference: !supportsLocalApi ? 'invidious' : 'local',
     yatteeServerUrl: '',
     yatteeUsername: '',

@@ -259,6 +259,18 @@ History:
   Custom: Egyéni
   History Older Than Days Removed: Az 1 napnál régebbi megtekintési előzmények eltávolítva | A(z) {days} napnál régebbi megtekintési előzmények eltávolítva
 Settings:
+  Diagnostics:
+    Diagnostics: Diagnosztika
+    Description: Amíg a diagnosztikai naplózás be van kapcsolva, az OpenTubeX a legutóbbi naplóüzeneteket a memóriában tartja, hogy hibajelentésekhez csatolhasd őket. Soha nem menti és nem küldi el őket magától, a naplózás kikapcsolása pedig törli őket. A jelentések nem tartalmaznak sütiket, tokeneket, IP-címeket és URL-paramétereket, de tartalmazhatják a lejátszott videók azonosítóit, ezért megosztás előtt ellenőrizd a jelentést.
+    Enable Logging: Diagnosztikai naplózás bekapcsolása
+    Copy Report: Jelentés másolása
+    Save Report: Jelentés mentése
+    Clear Log: Napló törlése
+    Report Copied: Diagnosztikai jelentés másolva
+    Report Saved: Diagnosztikai jelentés mentve
+    Report File: Diagnosztikai jelentés
+    Save Failed: Nem sikerült menteni a diagnosztikai jelentést
+    Log Cleared Message: Diagnosztikai napló törölve
   Tab Unloading:
     Automatically unload tabs: "Lapok automatikus kiürítése"
     Memory threshold: "Memóriaküszöb"

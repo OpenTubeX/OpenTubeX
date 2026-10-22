@@ -263,6 +263,18 @@ History:
   Custom: Tùy chỉnh
   History Older Than Days Removed: Đã xóa lịch sử xem cũ hơn {days} ngày
 Settings:
+  Diagnostics:
+    Diagnostics: Chẩn đoán
+    Description: Khi nhật ký chẩn đoán đang bật, OpenTubeX giữ các thông báo nhật ký gần đây trong bộ nhớ để bạn có thể đính kèm chúng vào báo cáo lỗi. Ứng dụng không bao giờ tự lưu hay gửi chúng, và tắt nhật ký sẽ xóa chúng. Báo cáo bỏ qua cookie, token, địa chỉ IP và tham số URL, nhưng có thể chứa ID của các video bạn đã phát, vì vậy hãy kiểm tra báo cáo trước khi chia sẻ.
+    Enable Logging: Bật nhật ký chẩn đoán
+    Copy Report: Sao chép báo cáo
+    Save Report: Lưu báo cáo
+    Clear Log: Xóa nhật ký
+    Report Copied: Đã sao chép báo cáo chẩn đoán
+    Report Saved: Đã lưu báo cáo chẩn đoán
+    Report File: Báo cáo chẩn đoán
+    Save Failed: Không thể lưu báo cáo chẩn đoán
+    Log Cleared Message: Đã xóa nhật ký chẩn đoán
   Tab Unloading:
     Automatically unload tabs: "Tự động dỡ tải thẻ"
     Memory threshold: "Ngưỡng bộ nhớ"

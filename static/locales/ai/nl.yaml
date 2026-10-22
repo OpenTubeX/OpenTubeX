@@ -263,6 +263,18 @@ History:
   Custom: Aangepast
   History Older Than Days Removed: Kijkgeschiedenis ouder dan 1 dag is verwijderd | Kijkgeschiedenis ouder dan {days} dagen is verwijderd
 Settings:
+  Diagnostics:
+    Diagnostics: Diagnostiek
+    Description: Zolang het diagnoselogboek is ingeschakeld, bewaart OpenTubeX recente logberichten in het geheugen zodat je ze aan bugrapporten kunt toevoegen. Het slaat ze nooit uit zichzelf op en verstuurt ze nooit, en als je het logboek uitschakelt, worden ze verwijderd. Rapporten laten cookies, tokens, IP-adressen en URL-parameters weg, maar kunnen ID's bevatten van video's die je hebt afgespeeld, dus controleer een rapport voordat je het deelt.
+    Enable Logging: Diagnoselogboek inschakelen
+    Copy Report: Rapport kopiëren
+    Save Report: Rapport opslaan
+    Clear Log: Log wissen
+    Report Copied: Diagnoserapport gekopieerd
+    Report Saved: Diagnoserapport opgeslagen
+    Report File: Diagnoserapport
+    Save Failed: Kan het diagnoserapport niet opslaan
+    Log Cleared Message: Diagnoselog gewist
   Tab Unloading:
     Automatically unload tabs: "Tabbladen automatisch ontladen"
     Memory threshold: "Geheugendrempel"

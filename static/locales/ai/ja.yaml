@@ -259,6 +259,18 @@ History:
   Custom: カスタム
   History Older Than Days Removed: '{days}日より古い視聴履歴を削除しました'
 Settings:
+  Diagnostics:
+    Diagnostics: 診断
+    Description: 診断ログが有効な間、OpenTubeX は最近のログメッセージをメモリに保持し、バグ報告に添付できるようにします。自動で保存や送信をすることはなく、ログを無効にすると削除されます。レポートには Cookie、トークン、IP アドレス、URL パラメーターは含まれませんが、再生した動画の ID が含まれる場合があるため、共有する前にレポートを確認してください。
+    Enable Logging: 診断ログを有効にする
+    Copy Report: レポートをコピー
+    Save Report: レポートを保存
+    Clear Log: ログを消去
+    Report Copied: 診断レポートをコピーしました
+    Report Saved: 診断レポートを保存しました
+    Report File: 診断レポート
+    Save Failed: 診断レポートを保存できませんでした
+    Log Cleared Message: 診断ログを消去しました
   Tab Unloading:
     Automatically unload tabs: "タブを自動的にアンロード"
     Memory threshold: "メモリのしきい値"

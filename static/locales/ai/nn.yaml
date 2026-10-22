@@ -272,6 +272,18 @@ History:
   Custom: Eigendefinert
   History Older Than Days Removed: Sjåhistorikk eldre enn 1 dag er fjerna | Sjåhistorikk eldre enn {days} dagar er fjerna
 Settings:
+  Diagnostics:
+    Diagnostics: Diagnostikk
+    Description: Medan diagnoseloggen er på, held OpenTubeX nylege loggmeldingar i minnet slik at du kan leggje dei ved feilrapportar. Det lagrar eller sender dei aldri av seg sjølv, og når du slår av loggen, vert dei sletta. Rapportar utelèt informasjonskapslar, token, IP-adresser og URL-parametrar, men dei kan innehalde ID-ar for videoar du har spelt av, så sjekk ein rapport før du deler han.
+    Enable Logging: Slå på diagnoselogg
+    Copy Report: Kopier rapport
+    Save Report: Lagre rapport
+    Clear Log: Tøm logg
+    Report Copied: Diagnoserapport kopiert
+    Report Saved: Diagnoserapport lagra
+    Report File: Diagnoserapport
+    Save Failed: Kunne ikkje lagre diagnoserapporten
+    Log Cleared Message: Diagnoselogg tømd
   Tab Unloading:
     Automatically unload tabs: "Last ut faner automatisk"
     Memory threshold: "Minneterskel"

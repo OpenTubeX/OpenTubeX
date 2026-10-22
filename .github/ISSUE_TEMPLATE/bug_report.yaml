@@ -158,6 +158,12 @@ body:
       required: false
   - type: textarea
     attributes:
+      label: Diagnostic report
+      description: |
+        Open Settings > Advanced > Diagnostics, turn on "Enable diagnostic logging", reproduce the bug, then save or copy the report.
+        Attach the file or paste the report here. Check it for anything you do not want to share before posting.
+  - type: textarea
+    attributes:
       label: Additional Information
       description: |
         Add additional information here.

@@ -259,6 +259,18 @@ History:
   Custom: Personalizat
   History Older Than Days Removed: Istoricul vizionărilor mai vechi de 1 zi a fost șters | Istoricul vizionărilor mai vechi de {days} zile a fost șters | Istoricul vizionărilor mai vechi de {days} de zile a fost șters
 Settings:
+  Diagnostics:
+    Diagnostics: Diagnosticare
+    Description: Cât timp jurnalul de diagnosticare este activ, OpenTubeX păstrează în memorie mesajele recente din jurnal, ca să le poți atașa la rapoartele de erori. Nu le salvează și nu le trimite niciodată de la sine, iar dezactivarea jurnalului le șterge. Rapoartele omit cookie-urile, tokenurile, adresele IP și parametrii URL, dar pot include ID-urile videoclipurilor redate, așa că verifică un raport înainte de a-l distribui.
+    Enable Logging: Activează jurnalul de diagnosticare
+    Copy Report: Copiază raportul
+    Save Report: Salvează raportul
+    Clear Log: Golește jurnalul
+    Report Copied: Raportul de diagnosticare a fost copiat
+    Report Saved: Raportul de diagnosticare a fost salvat
+    Report File: Raport de diagnosticare
+    Save Failed: Raportul de diagnosticare nu a putut fi salvat
+    Log Cleared Message: Jurnalul de diagnosticare a fost golit
   Tab Unloading:
     Automatically unload tabs: "Eliberează automat filele din memorie"
     Memory threshold: "Prag de memorie"

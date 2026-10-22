@@ -259,6 +259,18 @@ History:
   Custom: "Personelaet"
   History Older Than Days Removed: "Dilamet eo bet an istor sellout koshoc'h eget 1 devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} zevezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh."
 Settings:
+  Diagnostics:
+    Diagnostics: Diagnoz
+    Description: E-pad ma vez gweredekaet an deizlevr diagnoz, OpenTubeX a vir ar c'hemennadennoù deizlevr nevez er memor evit ma c'hallfec'h o stagañ ouzh danevelloù fazioù. Biskoazh ne enrollo na ne gaso anezho e-unan, ha diweredekaat an deizlevr a ziverk anezho. An danevelloù n'int ket enno toupinoù, jedouerioù, chomlec'hioù IP na arventennoù URL, met gallout a reont kaout IDoù ar videoioù ho peus lennet, setu gwiriit an danevell a-raok he rannañ.
+    Enable Logging: Gweredekaat an deizlevr diagnoz
+    Copy Report: Eilañ an danevell
+    Save Report: Enrollañ an danevell
+    Clear Log: Skarzhañ an deizlevr
+    Report Copied: Danevell diagnoz eilet
+    Report Saved: Danevell diagnoz enrollet
+    Report File: Danevell diagnoz
+    Save Failed: N'haller ket enrollañ an danevell diagnoz
+    Log Cleared Message: Deizlevr diagnoz skarzhet
   Tab Unloading:
     Automatically unload tabs: "Diskargañ an ivinelloù ent emgefre"
     Memory threshold: "Treuzoù ar vemor"

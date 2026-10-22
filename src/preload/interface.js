@@ -187,6 +187,27 @@ export default {
   },
 
   /**
+   * @param {{ time: number, level: string, message: string }} entry
+   */
+  addDiagnosticLogEntry: (entry) => {
+    ipcRenderer.send(IpcChannels.DIAGNOSTIC_LOG_ADD, entry)
+  },
+
+  /**
+   * @returns {Promise<{ time: number, level: string, source: string, message: string }[]>}
+   */
+  getDiagnosticLog: () => {
+    return ipcRenderer.invoke(IpcChannels.DIAGNOSTIC_LOG_GET)
+  },
+
+  /**
+   * @returns {Promise<void>}
+   */
+  clearDiagnosticLog: () => {
+    return ipcRenderer.invoke(IpcChannels.DIAGNOSTIC_LOG_CLEAR)
+  },
+
+  /**
    * @param {string} title
    * @param {string} tabId
    */

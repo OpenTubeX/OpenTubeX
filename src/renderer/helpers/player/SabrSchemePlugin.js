@@ -350,6 +350,11 @@ async function doRequest(
       // Fire fake reload event due to detecting retry loop
       currentState.sabrStreamState.playerReloadRequested = true
       if (!currentState.abortController.signal.aborted) {
+        console.warn(
+          'Reloading the SABR stream after a retry loop.\n' +
+          `Backoffs: ${currentState.cumulativeBackOffRequested} (${currentState.cumulativeBackOffTimeMs} ms)\n` +
+          `Next request policy retries: ${currentState.cumulativeRetryDueToNextRequestPolicy}`
+        )
         currentState.abortController.abort()
         currentState.eventEmitter.emit('reload')
       }
@@ -534,6 +539,7 @@ async function doRequest(
             // Whole video cannot be played
             currentState.sabrStreamState.playerReloadRequested = true
             if (!currentState.abortController.signal.aborted) {
+              console.warn('Reloading the SABR stream because YouTube requested it')
               currentState.abortController.abort()
               currentState.eventEmitter.emit('reload')
             }

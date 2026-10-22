@@ -373,6 +373,18 @@ History:
   Custom: Pasirinktinai
   History Older Than Days Removed: Pašalinti senesni nei 1 dienos žiūrėjimo istorijos įrašai | Pašalinti senesni nei {days} dienų žiūrėjimo istorijos įrašai | Pašalinti senesni nei {days} dienų žiūrėjimo istorijos įrašai
 Settings:
+  Diagnostics:
+    Diagnostics: Diagnostika
+    Description: Kol diagnostikos žurnalas įjungtas, OpenTubeX laiko naujausius žurnalo pranešimus atmintyje, kad galėtumėte juos pridėti prie pranešimų apie klaidas. Jis niekada jų neišsaugo ir nesiunčia pats, o išjungus žurnalą jie ištrinami. Ataskaitose nėra slapukų, prieigos raktų, IP adresų ir URL parametrų, tačiau jose gali būti jūsų paleistų vaizdo įrašų ID, todėl prieš dalindamiesi ataskaita ją peržiūrėkite.
+    Enable Logging: Įjungti diagnostikos žurnalą
+    Copy Report: Kopijuoti ataskaitą
+    Save Report: Išsaugoti ataskaitą
+    Clear Log: Išvalyti žurnalą
+    Report Copied: Diagnostikos ataskaita nukopijuota
+    Report Saved: Diagnostikos ataskaita išsaugota
+    Report File: Diagnostikos ataskaita
+    Save Failed: Nepavyko išsaugoti diagnostikos ataskaitos
+    Log Cleared Message: Diagnostikos žurnalas išvalytas
   Tab Unloading:
     Automatically unload tabs: "Automatiškai iškrauti korteles"
     Memory threshold: "Atminties slenkstis"
