@@ -125,7 +125,7 @@ export class QualitySelection extends shaka.ui.ResolutionSelection {
       span.textContent = this.getLabel_(track, codecTracks, showFrameRate)
       button.appendChild(span)
 
-      const mark = this.getQualityMark_(track)
+      const mark = getQualityMark(track, this.controls.getConfig().qualityMarks)
       if (mark !== '') {
         const markElement = document.createElement('sup')
         markElement.classList.add('shaka-quality-mark')
@@ -257,27 +257,6 @@ export class QualitySelection extends shaka.ui.ResolutionSelection {
 
     return label
   }
-
-  /**
-   * @private
-   * @param {shaka.extern.VideoTrack} track
-   * @returns {string}
-   */
-  getQualityMark_({ width, height }) {
-    if (!width || !height) {
-      return ''
-    }
-    let [longSide, shortSide] = height > width ? [height, width] : [width, height]
-    if (longSide / shortSide > 16 / 9) {
-      shortSide = Math.round(longSide * 9 / 16)
-    }
-    const qualityMarks = this.controls.getConfig().qualityMarks
-    if (shortSide >= 8640) return `${shortSide}p`
-    for (const threshold of [4320, 2160, 1440, 1080, 720]) {
-      if (shortSide >= threshold) return qualityMarks[threshold]
-    }
-    return ''
-  }
 }
 
 /**
@@ -288,4 +267,26 @@ function formatBandwidth(bandwidth) {
   return bandwidth >= 1e6
     ? `${(bandwidth / 1e6).toFixed(1).replace('.0', '')} Mbps`
     : `${Math.floor(bandwidth / 1e3)} Kbps`
+}
+
+/**
+ * Shaka's HD and 4K marks. Not a method, as the debug build of Shaka calls its
+ * own private `getQualityMark_` with different arguments.
+ * @param {shaka.extern.VideoTrack} track
+ * @param {Record<string, string>} qualityMarks
+ * @returns {string}
+ */
+function getQualityMark({ width, height }, qualityMarks) {
+  if (!width || !height) {
+    return ''
+  }
+  let [longSide, shortSide] = height > width ? [height, width] : [width, height]
+  if (longSide / shortSide > 16 / 9) {
+    shortSide = Math.round(longSide * 9 / 16)
+  }
+  if (shortSide >= 8640) return `${shortSide}p`
+  for (const threshold of [4320, 2160, 1440, 1080, 720]) {
+    if (shortSide >= threshold) return qualityMarks[threshold]
+  }
+  return ''
 }
