@@ -16,7 +16,6 @@ test.describe('select spacing', { tag: '@scale' }, () => {
         baseTheme: 'dark',
         currentLocale: 'en-US',
         enableDownloads: true,
-        rememberVideoQualityPerChannel: true,
         channelVideoQualities: JSON.stringify({ UCaaaaaaaaaaaaaaaaaaaaaa: '720' })
       },
       downloads: [{

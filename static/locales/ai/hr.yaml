@@ -758,13 +758,10 @@ Settings:
   Channel Settings:
     Channel Settings: Postavke kanala
     Channel Settings Description: Postavke koje odaberete tijekom gledanja pamte se zasebno za svaki kanal kako bi se ponovno primijenile kada sljedeći put gledate neki njegov videozapis.
-    Enable Playback Speed: Omogući brzinu reprodukcije
-    Enable Video Quality: Omogući kvalitetu videozapisa
-    Enable Subtitles State: Omogući pamćenje stanja titlova
-    Enable Volume: Omogući glasnoću
-    Auto Update: Automatski ažuriraj pri promjeni u postavkama reproduktora
-    Auto Update Subtitles: Automatski ažuriraj pri uključivanju ili isključivanju
-    Auto Update Volume: Automatski ažuriraj pri svakoj promjeni glasnoće
+    Auto Save Playback Speed: Automatski spremi promjene brzine reprodukcije
+    Auto Save Video Quality: Automatski spremi promjene kvalitete videa
+    Auto Save Subtitles State: Automatski spremi promjene stanja titlova
+    Auto Save Volume: Automatski spremi promjene glasnoće
     Manage Saved Channels: Upravljaj spremljenim kanalima ({channelCount})
     Saved Channels: Spremljene postavke kanala
     Enable Saved Channel Settings Sync: Sinkroniziraj spremljene postavke kanala
@@ -776,7 +773,6 @@ Settings:
     Forget Value: Zaboravi ovu postavku
     Add Setting: Zapamti još jednu postavku za ovaj kanal
     Add Subscribed Channel: Dodaj kanal na koji ste pretplaćeni
-    Enable Setting Before Adding Channel: Prije dodavanja kanala omogućite barem jednu postavku kanala u postavkama reprodukcije
     Video Quality: Kvaliteta videozapisa
     Subtitles Enabled: Titlovi su omogućeni
     Volume: Glasnoća

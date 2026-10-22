@@ -758,13 +758,10 @@ Settings:
   Channel Settings:
     Channel Settings: Setări pentru canale
     Channel Settings Description: Rețineți separat pentru fiecare canal setările alese în timpul vizionării, pentru a fi aplicate din nou când vizionați alt videoclip al canalului.
-    Enable Playback Speed: Activează viteza de redare
-    Enable Video Quality: Activează calitatea videoclipului
-    Enable Subtitles State: Activează starea subtitrărilor
-    Enable Volume: Activează volumul
-    Auto Update: Actualizează automat la modificarea din opțiunile playerului
-    Auto Update Subtitles: Actualizează automat la comutare
-    Auto Update Volume: Actualizează automat la fiecare modificare a volumului
+    Auto Save Playback Speed: Salvează automat modificările vitezei de redare
+    Auto Save Video Quality: Salvează automat modificările calității video
+    Auto Save Subtitles State: Salvează automat modificările stării subtitrărilor
+    Auto Save Volume: Salvează automat modificările volumului
     Manage Saved Channels: Gestionează canalele salvate ({channelCount})
     Saved Channels: Setări salvate pentru canale
     Enable Saved Channel Settings Sync: Sincronizează setările salvate pentru canale
@@ -776,7 +773,6 @@ Settings:
     Forget Value: Uită această setare
     Add Setting: Reține altă setare pentru acest canal
     Add Subscribed Channel: Adaugă canal abonat
-    Enable Setting Before Adding Channel: Activează cel puțin o setare de canal în setările de redare înainte de a adăuga un canal
     Video Quality: Calitate video
     Subtitles Enabled: Subtitrări activate
     Volume: Volum

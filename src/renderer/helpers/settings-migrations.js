@@ -1,5 +1,7 @@
 import { navigationItemsFromLegacySettings } from '../../navigationItems.js'
 
+import { FORMER_CHANNEL_SETTING_SWITCHES } from '../../datastores/settingsMigrations.js'
+
 export function migrateSyncServerUrl(value) {
   if (typeof value !== 'string') return value
   try {
@@ -117,6 +119,16 @@ export function migrateLegacySettings(settings) {
         : 'collapsed'
     }
     delete migratedSettings.hideAiVideoSummaries
+  }
+
+  // Saved channel settings are always applied now. Automatic saving only ran
+  // while its former switch was on, so it stays off for switches that were off.
+  for (const [rememberKey, autoUpdateKey] of FORMER_CHANNEL_SETTING_SWITCHES) {
+    if (!Object.hasOwn(migratedSettings, rememberKey)) continue
+    if (migratedSettings[rememberKey] !== true && migratedSettings[autoUpdateKey] === true) {
+      migratedSettings[autoUpdateKey] = false
+    }
+    delete migratedSettings[rememberKey]
   }
 
   return migratedSettings

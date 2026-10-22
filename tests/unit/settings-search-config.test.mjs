@@ -334,7 +334,7 @@ test('mobile playback search excludes settings that have no Capacitor behavior',
   assert.ok(!labels.has('Remember Volume'))
   assert.ok(!labels.has('Default Volume'))
   assert.ok(!labels.has('Display Play Button In Video Player'))
-  assert.ok(!labels.has('Enable Volume'))
+  assert.ok(!labels.has('Automatically save volume changes'))
   assert.ok(!labels.has('Volume'))
   assert.ok(!desktopLabels.has('Rotate wide videos to landscape in fullscreen'))
   assert.ok(!desktopLabels.has('Swipe up or down to enter or exit fullscreen'))

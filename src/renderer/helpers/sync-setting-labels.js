@@ -14,22 +14,10 @@ export const SYNC_SETTING_LABELS = {
   appFont: 'Settings.Theme Settings.Font.App Font',
   autoOpenChapters: 'Settings.Player Settings.Automatically Open Chapters',
   autoPictureInPictureTriggers: 'Settings.Player Settings.Auto Picture in Picture.Auto Picture in Picture',
-  autoUpdateChannelPlaybackSpeeds: [
-    'Settings.Channel Settings.Enable Playback Speed',
-    'Settings.Channel Settings.Auto Update'
-  ],
-  autoUpdateChannelSubtitlesStates: [
-    'Settings.Channel Settings.Enable Subtitles State',
-    'Settings.Channel Settings.Auto Update Subtitles'
-  ],
-  autoUpdateChannelVideoQualities: [
-    'Settings.Channel Settings.Enable Video Quality',
-    'Settings.Channel Settings.Auto Update'
-  ],
-  autoUpdateChannelVolumes: [
-    'Settings.Channel Settings.Enable Volume',
-    'Settings.Channel Settings.Auto Update Volume'
-  ],
+  autoUpdateChannelPlaybackSpeeds: 'Settings.Channel Settings.Auto Save Playback Speed',
+  autoUpdateChannelSubtitlesStates: 'Settings.Channel Settings.Auto Save Subtitles State',
+  autoUpdateChannelVideoQualities: 'Settings.Channel Settings.Auto Save Video Quality',
+  autoUpdateChannelVolumes: 'Settings.Channel Settings.Auto Save Volume',
   autoplayPlaylists: 'Settings.Player Settings.Autoplay Playlists',
   skipUnavailablePlaylistVideos: 'Settings.Player Settings.Skip Unavailable Playlist Videos',
   autoplayVideos: 'Settings.Player Settings.Autoplay Videos',
@@ -44,19 +32,19 @@ export const SYNC_SETTING_LABELS = {
   alwaysShowMobileSearchBar: 'Settings.Theme Settings.Always Show Mobile Search Bar',
   channelPlaybackSpeeds: [
     'Settings.Channel Settings.Saved Channels',
-    'Settings.Channel Settings.Enable Playback Speed'
+    'Settings.Player Settings.Playback Speed'
   ],
   channelSubtitlesStates: [
     'Settings.Channel Settings.Saved Channels',
-    'Settings.Channel Settings.Enable Subtitles State'
+    'Settings.Channel Settings.Subtitles Enabled'
   ],
   channelVideoQualities: [
     'Settings.Channel Settings.Saved Channels',
-    'Settings.Channel Settings.Enable Video Quality'
+    'Settings.Channel Settings.Video Quality'
   ],
   channelVolumes: [
     'Settings.Channel Settings.Saved Channels',
-    'Settings.Channel Settings.Enable Volume'
+    'Settings.Channel Settings.Volume'
   ],
   channelsHidden: 'Settings.Distraction Free Settings.Hide Channels',
   enableBlockLists: 'Settings.Distraction Free Settings.Enable Block Lists',
@@ -228,25 +216,9 @@ export const SYNC_SETTING_LABELS = {
   reducedMotion: 'Settings.General Settings.Reduced Motion.Reduced Motion',
   region: 'Settings.General Settings.Region for Trending',
   rememberHistory: 'Settings.Privacy Settings.Remember History',
-  rememberPlaybackSpeedPerChannel: [
-    'Settings.Channel Settings.Channel Settings',
-    'Settings.Channel Settings.Enable Playback Speed'
-  ],
   rememberSearchHistory: 'Settings.Privacy Settings.Remember Search History',
-  rememberSubtitlesStatePerChannel: [
-    'Settings.Channel Settings.Channel Settings',
-    'Settings.Channel Settings.Enable Subtitles State'
-  ],
   rememberTabNavigationHistory: 'Settings.General Settings.Remember Tab Navigation History',
-  rememberVideoQualityPerChannel: [
-    'Settings.Channel Settings.Channel Settings',
-    'Settings.Channel Settings.Enable Video Quality'
-  ],
   rememberVolume: 'Settings.Player Settings.Remember Volume',
-  rememberVolumePerChannel: [
-    'Settings.Channel Settings.Channel Settings',
-    'Settings.Channel Settings.Enable Volume'
-  ],
   returnYouTubeDislikesUrl: 'Settings.Return YouTube Dislike Settings.Return YouTube Dislike Url',
   rotateFullscreenToLandscape: 'Settings.Player Settings.Rotate Wide Videos to Landscape in Fullscreen',
   saveVideoHistoryWithLastViewedPlaylist: 'Settings.Privacy Settings.Save Watched Videos With Last Viewed Playlist',

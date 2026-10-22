@@ -755,13 +755,10 @@ Settings:
   Channel Settings:
     Channel Settings: 頻道設定
     Channel Settings Description: 為各頻道分別記住觀看時選擇的設定，下次觀看該頻道的影片時便會再次套用。
-    Enable Playback Speed: 啟用播放速度
-    Enable Video Quality: 啟用影片畫質
-    Enable Subtitles State: 啟用字幕狀態
-    Enable Volume: 啟用音量
-    Auto Update: 透過播放器選項變更時自動更新
-    Auto Update Subtitles: 切換時自動更新
-    Auto Update Volume: 每次調整音量時自動更新
+    Auto Save Playback Speed: 自動儲存播放速度變更
+    Auto Save Video Quality: 自動儲存影片畫質變更
+    Auto Save Subtitles State: 自動儲存字幕狀態變更
+    Auto Save Volume: 自動儲存音量變更
     Manage Saved Channels: 管理已儲存的頻道（{channelCount}）
     Saved Channels: 已儲存的頻道設定
     Enable Saved Channel Settings Sync: 同步已儲存的頻道設定
@@ -773,7 +770,6 @@ Settings:
     Forget Value: 清除這項設定
     Add Setting: 為這個頻道記住另一項設定
     Add Subscribed Channel: 新增已訂閱的頻道
-    Enable Setting Before Adding Channel: 新增頻道前，請先在播放設定中啟用至少一項頻道設定
     Video Quality: 影片畫質
     Subtitles Enabled: 字幕已啟用
     Volume: 音量

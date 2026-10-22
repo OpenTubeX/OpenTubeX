@@ -771,13 +771,10 @@ Settings:
   Channel Settings:
     Channel Settings: Definições dos canais
     Channel Settings Description: Memorizar individualmente para cada canal as definições escolhidas durante a visualização, para que sejam aplicadas quando voltar a ver um dos seus vídeos.
-    Enable Playback Speed: Ativar velocidade de reprodução
-    Enable Video Quality: Ativar qualidade do vídeo
-    Enable Subtitles State: Ativar estado das legendas
-    Enable Volume: Ativar volume
-    Auto Update: Atualizar automaticamente ao alterar nas opções do leitor
-    Auto Update Subtitles: Atualizar automaticamente ao ativar ou desativar
-    Auto Update Volume: Atualizar automaticamente sempre que alterar o volume
+    Auto Save Playback Speed: Guardar automaticamente as alterações da velocidade de reprodução
+    Auto Save Video Quality: Guardar automaticamente as alterações da qualidade do vídeo
+    Auto Save Subtitles State: Guardar automaticamente as alterações do estado das legendas
+    Auto Save Volume: Guardar automaticamente as alterações do volume
     Manage Saved Channels: Gerir canais guardados ({channelCount})
     Saved Channels: Definições de canais guardadas
     Enable Saved Channel Settings Sync: Sincronizar definições de canais guardadas
@@ -789,7 +786,6 @@ Settings:
     Forget Value: Esquecer esta definição
     Add Setting: Memorizar outra definição para este canal
     Add Subscribed Channel: Adicionar canal subscrito
-    Enable Setting Before Adding Channel: Ative pelo menos uma definição de canal nas definições de reprodução antes de adicionar um canal
     Video Quality: Qualidade do vídeo
     Subtitles Enabled: Legendas ativadas
     Volume: Volume

@@ -756,13 +756,10 @@ Settings:
   Channel Settings:
     Channel Settings: "Arventennoù ar chadennoù"
     Channel Settings Description: "Derc'hel soñj, evit pep chadenn, eus an arventennoù a zibabit pa sellit. Arloet e vint en-dro ar wech da-heul ma sellot ouzh unan eus he videoioù."
-    Enable Playback Speed: "Gweredekaat an tizh lenn"
-    Enable Video Quality: "Gweredekaat perzhded ar video"
-    Enable Subtitles State: "Gweredekaat stad an istitloù"
-    Enable Volume: "Gweredekaat live ar son"
-    Auto Update: "Hizivaat ent emgefreek pa vez kemmet dre zibarzhioù al lenner"
-    Auto Update Subtitles: "Hizivaat ent emgefreek pa vez lakaet pe lamet an istitloù"
-    Auto Update Volume: "Hizivaat ent emgefreek bep tro ma kemmit live ar son"
+    Auto Save Playback Speed: "Enrollañ ent emgefreek ar c'hemmoù d'an tizh lenn"
+    Auto Save Video Quality: "Enrollañ ent emgefreek ar c'hemmoù d'ar perzhded video"
+    Auto Save Subtitles State: "Enrollañ ent emgefreek ar c'hemmoù da stad an istitloù"
+    Auto Save Volume: "Enrollañ ent emgefreek ar c'hemmoù da live ar son"
     Manage Saved Channels: "Merañ ar chadennoù enrollet ({channelCount})"
     Saved Channels: "Arventennoù ar chadennoù enrollet"
     Enable Saved Channel Settings Sync: "Goubredañ arventennoù ar chadennoù enrollet"
@@ -774,7 +771,6 @@ Settings:
     Forget Value: "Ankouaat an arventenn-mañ"
     Add Setting: "Derc'hel soñj eus un arventenn all evit ar chadenn-mañ"
     Add Subscribed Channel: Ouzhpennañ ur chadenn koumanantet
-    Enable Setting Before Adding Channel: Gweredekaat da nebeutañ un arventenn chadenn en arventennoù lenn a-raok ouzhpennañ ur chadenn
     Video Quality: "Perzhded ar video"
     Subtitles Enabled: "Istitloù gweredekaet"
     Volume: "Live ar son"

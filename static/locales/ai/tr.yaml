@@ -755,13 +755,10 @@ Settings:
   Channel Settings:
     Channel Settings: Kanal Ayarları
     Channel Settings Description: İzlerken seçtiğiniz ayarları her kanal için ayrı ayrı hatırlayarak kanalın bir sonraki videosunda yeniden uygular.
-    Enable Playback Speed: Oynatma Hızını Etkinleştir
-    Enable Video Quality: Video Kalitesini Etkinleştir
-    Enable Subtitles State: Alt Yazı Durumunu Etkinleştir
-    Enable Volume: Ses Düzeyini Etkinleştir
-    Auto Update: Oynatıcı seçeneklerinden değiştirildiğinde otomatik güncelle
-    Auto Update Subtitles: Açılıp kapatıldığında otomatik güncelle
-    Auto Update Volume: Ses düzeyini her değiştirdiğinizde otomatik güncelle
+    Auto Save Playback Speed: Oynatma hızı değişikliklerini otomatik kaydet
+    Auto Save Video Quality: Video kalitesi değişikliklerini otomatik kaydet
+    Auto Save Subtitles State: Alt yazı durumu değişikliklerini otomatik kaydet
+    Auto Save Volume: Ses düzeyi değişikliklerini otomatik kaydet
     Manage Saved Channels: 'Kayıtlı Kanalları Yönet ({channelCount})'
     Saved Channels: Kayıtlı Kanal Ayarları
     Enable Saved Channel Settings Sync: Kayıtlı kanal ayarlarını eşitle
@@ -773,7 +770,6 @@ Settings:
     Forget Value: Bu ayarı unut
     Add Setting: Bu kanal için başka bir ayarı hatırla
     Add Subscribed Channel: Abone olunan kanalı ekle
-    Enable Setting Before Adding Channel: Kanal eklemeden önce Oynatma ayarlarında en az bir kanal ayarını etkinleştirin
     Video Quality: Video Kalitesi
     Subtitles Enabled: Alt Yazılar Etkin
     Volume: Ses Düzeyi

@@ -359,7 +359,6 @@ test.describe('desktop quick playback speed bar', () => {
       await page.evaluate(async presets => {
         const store = window.$store
         await store.dispatch('updateQuickPlaybackSpeedBarOptions', JSON.stringify(presets))
-        await store.dispatch('updateRememberPlaybackSpeedPerChannel', true)
         await store.dispatch('updateAutoUpdateChannelPlaybackSpeeds', false)
         await store.dispatch('updateCurrentLocale', 'de-DE')
       }, overflowingPresets.map(preset => ({ ...preset, name: `Playback speed ${preset.speed}` })))
@@ -383,7 +382,7 @@ test.describe('desktop quick playback speed bar', () => {
           } else if (change === 'locale') {
             await store.dispatch('updateCurrentLocale', 'en-US')
           } else {
-            await store.dispatch('updateRememberPlaybackSpeedPerChannel', false)
+            await store.dispatch('updateAutoUpdateChannelPlaybackSpeeds', true)
           }
         }, { change, presets: overflowingPresets })
       }

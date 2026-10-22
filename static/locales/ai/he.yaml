@@ -769,13 +769,10 @@ Settings:
   Channel Settings:
     Channel Settings: הגדרות ערוץ
     Channel Settings Description: שמירת ההגדרות שנבחרו בזמן צפייה לכל ערוץ בנפרד, כדי שיוחלו שוב בצפייה הבאה באחד מסרטוניו.
-    Enable Playback Speed: הפעלת מהירות הפעלה
-    Enable Video Quality: הפעלת איכות וידאו
-    Enable Subtitles State: הפעלת מצב כתוביות
-    Enable Volume: הפעלת עוצמת קול
-    Auto Update: עדכון אוטומטי בעת שינוי דרך אפשרויות הנגן
-    Auto Update Subtitles: עדכון אוטומטי בעת הפעלה או כיבוי
-    Auto Update Volume: עדכון אוטומטי בכל שינוי בעוצמת הקול
+    Auto Save Playback Speed: שמירה אוטומטית של שינויים במהירות ההפעלה
+    Auto Save Video Quality: שמירה אוטומטית של שינויים באיכות הווידאו
+    Auto Save Subtitles State: שמירה אוטומטית של שינויים במצב הכתוביות
+    Auto Save Volume: שמירה אוטומטית של שינויים בעוצמת הקול
     Manage Saved Channels: ניהול ערוצים שמורים ({channelCount})
     Saved Channels: הגדרות ערוצים שמורות
     Enable Saved Channel Settings Sync: סנכרון הגדרות ערוצים שמורות
@@ -787,7 +784,6 @@ Settings:
     Forget Value: הסרת הגדרה זו
     Add Setting: שמירת הגדרה נוספת לערוץ זה
     Add Subscribed Channel: הוספת ערוץ שנרשמת אליו
-    Enable Setting Before Adding Channel: יש להפעיל לפחות הגדרת ערוץ אחת בהגדרות ההפעלה לפני הוספת ערוץ
     Video Quality: איכות וידאו
     Subtitles Enabled: הכתוביות מופעלות
     Volume: עוצמת קול

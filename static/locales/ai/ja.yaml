@@ -756,13 +756,10 @@ Settings:
   Channel Settings:
     Channel Settings: チャンネル設定
     Channel Settings Description: 視聴中に選んだ設定をチャンネルごとに記憶し、次回そのチャンネルの動画を見るときに再度適用します。
-    Enable Playback Speed: 再生速度を有効化
-    Enable Video Quality: 動画品質を有効化
-    Enable Subtitles State: 字幕の状態を有効化
-    Enable Volume: 音量を有効化
-    Auto Update: プレーヤーのオプションで変更したときに自動更新
-    Auto Update Subtitles: 字幕を切り替えたときに自動更新
-    Auto Update Volume: 音量を変更したときに自動更新
+    Auto Save Playback Speed: 再生速度の変更を自動的に保存
+    Auto Save Video Quality: 画質の変更を自動的に保存
+    Auto Save Subtitles State: 字幕の状態の変更を自動的に保存
+    Auto Save Volume: 音量の変更を自動的に保存
     Manage Saved Channels: 保存済みチャンネルを管理（{channelCount}件）
     Saved Channels: 保存済みのチャンネル設定
     Enable Saved Channel Settings Sync: 保存済みのチャンネル設定を同期
@@ -774,7 +771,6 @@ Settings:
     Forget Value: この設定を削除
     Add Setting: このチャンネルで別の設定を記憶
     Add Subscribed Channel: 登録チャンネルを追加
-    Enable Setting Before Adding Channel: チャンネルを追加する前に、再生設定でチャンネル設定を1つ以上有効にしてください
     Video Quality: 動画品質
     Subtitles Enabled: 字幕を有効化
     Volume: 音量

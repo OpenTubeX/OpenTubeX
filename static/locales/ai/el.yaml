@@ -758,13 +758,10 @@ Settings:
   Channel Settings:
     Channel Settings: Ρυθμίσεις καναλιών
     Channel Settings Description: Απομνημόνευση των ρυθμίσεων που επιλέγετε κατά την παρακολούθηση, ξεχωριστά για κάθε κανάλι, ώστε να εφαρμόζονται ξανά την επόμενη φορά που θα παρακολουθήσετε κάποιο βίντεό του.
-    Enable Playback Speed: Ενεργοποίηση ταχύτητας αναπαραγωγής
-    Enable Video Quality: Ενεργοποίηση ποιότητας βίντεο
-    Enable Subtitles State: Ενεργοποίηση κατάστασης υποτίτλων
-    Enable Volume: Ενεργοποίηση έντασης ήχου
-    Auto Update: Αυτόματη ενημέρωση όταν αλλάζει από τις επιλογές του προγράμματος αναπαραγωγής
-    Auto Update Subtitles: Αυτόματη ενημέρωση κατά την εναλλαγή
-    Auto Update Volume: Αυτόματη ενημέρωση κάθε φορά που αλλάζετε την ένταση ήχου
+    Auto Save Playback Speed: Αυτόματη αποθήκευση αλλαγών ταχύτητας αναπαραγωγής
+    Auto Save Video Quality: Αυτόματη αποθήκευση αλλαγών ποιότητας βίντεο
+    Auto Save Subtitles State: Αυτόματη αποθήκευση αλλαγών κατάστασης υποτίτλων
+    Auto Save Volume: Αυτόματη αποθήκευση αλλαγών έντασης ήχου
     Manage Saved Channels: Διαχείριση αποθηκευμένων καναλιών ({channelCount})
     Saved Channels: Αποθηκευμένες ρυθμίσεις καναλιών
     Enable Saved Channel Settings Sync: Συγχρονισμός αποθηκευμένων ρυθμίσεων καναλιών
@@ -776,7 +773,6 @@ Settings:
     Forget Value: Διαγραφή αυτής της ρύθμισης
     Add Setting: Απομνημόνευση άλλης ρύθμισης για αυτό το κανάλι
     Add Subscribed Channel: Προσθήκη εγγεγραμμένου καναλιού
-    Enable Setting Before Adding Channel: Ενεργοποιήστε τουλάχιστον μία ρύθμιση καναλιού στις ρυθμίσεις αναπαραγωγής πριν προσθέσετε ένα κανάλι
     Video Quality: Ποιότητα βίντεο
     Subtitles Enabled: Υπότιτλοι ενεργοποιημένοι
     Volume: Ένταση ήχου

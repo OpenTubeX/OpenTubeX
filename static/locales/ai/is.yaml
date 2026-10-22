@@ -760,13 +760,10 @@ Settings:
   Channel Settings:
     Channel Settings: Rásarstillingar
     Channel Settings Description: Muna stillingarnar sem þú velur við áhorf fyrir hverja rás, svo þær verði notaðar aftur næst þegar þú horfir á myndband frá henni.
-    Enable Playback Speed: Muna spilunarhraða
-    Enable Video Quality: Muna myndgæði
-    Enable Subtitles State: Muna stöðu skjátexta
-    Enable Volume: Muna hljóðstyrk
-    Auto Update: Uppfæra sjálfkrafa þegar breytt er í valkostum spilarans
-    Auto Update Subtitles: Uppfæra sjálfkrafa þegar kveikt eða slökkt er
-    Auto Update Volume: Uppfæra sjálfkrafa í hvert sinn sem hljóðstyrk er breytt
+    Auto Save Playback Speed: Vista breytingar á spilunarhraða sjálfkrafa
+    Auto Save Video Quality: Vista breytingar á myndgæðum sjálfkrafa
+    Auto Save Subtitles State: Vista breytingar á stöðu skjátexta sjálfkrafa
+    Auto Save Volume: Vista breytingar á hljóðstyrk sjálfkrafa
     Manage Saved Channels: Stjórna vistuðum rásum ({channelCount})
     Saved Channels: Vistaðar rásarstillingar
     Enable Saved Channel Settings Sync: Samstilla vistaðar rásarstillingar
@@ -778,7 +775,6 @@ Settings:
     Forget Value: Gleyma þessari stillingu
     Add Setting: Muna aðra stillingu fyrir þessa rás
     Add Subscribed Channel: Bæta við áskriftarrás
-    Enable Setting Before Adding Channel: Virkjaðu að minnsta kosti eina rásarstillingu í spilunarstillingum áður en þú bætir við rás
     Video Quality: Myndgæði
     Subtitles Enabled: Skjátextar virkir
     Volume: Hljóðstyrkur

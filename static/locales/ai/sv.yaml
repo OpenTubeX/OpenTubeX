@@ -758,13 +758,10 @@ Settings:
   Channel Settings:
     Channel Settings: Kanalinställningar
     Channel Settings Description: Kom ihåg inställningarna du väljer när du tittar för varje enskild kanal och använd dem nästa gång du tittar på en av kanalens videor.
-    Enable Playback Speed: Aktivera uppspelningshastighet
-    Enable Video Quality: Aktivera videokvalitet
-    Enable Subtitles State: Aktivera undertextläge
-    Enable Volume: Aktivera volym
-    Auto Update: Uppdatera automatiskt vid ändringar i spelaralternativen
-    Auto Update Subtitles: Uppdatera automatiskt när undertexter slås på eller av
-    Auto Update Volume: Uppdatera automatiskt när du ändrar volymen
+    Auto Save Playback Speed: Spara ändringar av uppspelningshastigheten automatiskt
+    Auto Save Video Quality: Spara ändringar av videokvaliteten automatiskt
+    Auto Save Subtitles State: Spara ändringar av undertextläget automatiskt
+    Auto Save Volume: Spara ändringar av volymen automatiskt
     Manage Saved Channels: Hantera sparade kanaler ({channelCount})
     Saved Channels: Sparade kanalinställningar
     Enable Saved Channel Settings Sync: Synkronisera sparade kanalinställningar
@@ -776,7 +773,6 @@ Settings:
     Forget Value: Glöm den här inställningen
     Add Setting: Kom ihåg en annan inställning för den här kanalen
     Add Subscribed Channel: Lägg till kanal du prenumererar på
-    Enable Setting Before Adding Channel: Aktivera minst en kanalinställning i uppspelningsinställningarna innan du lägger till en kanal
     Video Quality: Videokvalitet
     Subtitles Enabled: Undertexter aktiverade
     Volume: Volym

@@ -261,7 +261,9 @@ test.describe('Shorts transcript navigation', () => {
     const opacity = () => controlPanel.evaluate(element => Number(getComputedStyle(element).opacity))
 
     await expect(playbackRateBar).toHaveCount(1)
-    await expect(playbackRateBar.getByRole('button')).toHaveCount(9)
+    // Nine speeds plus the action that saves the current speed for the channel
+    await expect(playbackRateBar.getByRole('button')).toHaveCount(10)
+    await expect(playbackRateBar.locator('.ft-quick-playback-rate-save')).toBeVisible()
 
     const playerBounds = await player.boundingBox()
     expect(playerBounds).not.toBeNull()

@@ -377,8 +377,11 @@ Settings:
     Show Swipe to Seek Preview: Pokazuj podgląd podczas przewijania przesunięciem
     Enable Google Cast: "Włącz Google Cast"
   Channel Settings:
+    Auto Save Playback Speed: Automatycznie zapisuj zmiany prędkości odtwarzania
+    Auto Save Video Quality: Automatycznie zapisuj zmiany rozdzielczości wideo
+    Auto Save Subtitles State: Automatycznie zapisuj zmiany stanu napisów
+    Auto Save Volume: Automatycznie zapisuj zmiany głośności
     Add Subscribed Channel: Dodaj subskrybowany kanał
-    Enable Setting Before Adding Channel: Przed dodaniem kanału włącz co najmniej jedno ustawienie kanału w ustawieniach odtwarzania
   Download Settings:
     Concurrent Downloads: Jednoczesne pobieranie
     Bandwidth Limit: Limit przepustowości (KiB/s)

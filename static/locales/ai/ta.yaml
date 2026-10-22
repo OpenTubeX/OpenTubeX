@@ -770,13 +770,10 @@ Settings:
   Channel Settings:
     Channel Settings: சேனல் அமைப்புகள்
     Channel Settings Description: ஒவ்வொரு சேனலையும் பார்க்கும்போது தேர்ந்தெடுக்கும் அமைப்புகளைத் தனித்தனியாக நினைவில் கொண்டு, அதன் காணொளியை அடுத்த முறை பார்க்கும்போது மீண்டும் பயன்படுத்தும்.
-    Enable Playback Speed: இயக்க வேகத்தை இயக்கு
-    Enable Video Quality: காணொளித் தரத்தை இயக்கு
-    Enable Subtitles State: துணைத்தலைப்பு நிலையை இயக்கு
-    Enable Volume: ஒலியளவை இயக்கு
-    Auto Update: இயக்கி விருப்பங்கள் மூலம் மாற்றும்போது தானாகப் புதுப்பி
-    Auto Update Subtitles: நிலைமாற்றும்போது தானாகப் புதுப்பி
-    Auto Update Volume: ஒலியளவை மாற்றும்போதெல்லாம் தானாகப் புதுப்பி
+    Auto Save Playback Speed: இயக்க வேக மாற்றங்களைத் தானாகச் சேமி
+    Auto Save Video Quality: வீடியோ தர மாற்றங்களைத் தானாகச் சேமி
+    Auto Save Subtitles State: துணைத்தலைப்பு நிலை மாற்றங்களைத் தானாகச் சேமி
+    Auto Save Volume: ஒலியளவு மாற்றங்களைத் தானாகச் சேமி
     Manage Saved Channels: சேமித்த சேனல்களை நிர்வகி ({channelCount})
     Saved Channels: சேமித்த சேனல் அமைப்புகள்
     Enable Saved Channel Settings Sync: சேமித்த சேனல் அமைப்புகளை ஒத்திசை
@@ -788,7 +785,6 @@ Settings:
     Forget Value: இந்த அமைப்பை மற
     Add Setting: இந்தச் சேனலுக்கான மற்றொரு அமைப்பை நினைவில் கொள்
     Add Subscribed Channel: குழுசேர்ந்த சேனலைச் சேர்
-    Enable Setting Before Adding Channel: சேனலைச் சேர்ப்பதற்கு முன் பிளேபேக் அமைப்புகளில் குறைந்தது ஒரு சேனல் அமைப்பையாவது இயக்கு
     Video Quality: காணொளித் தரம்
     Subtitles Enabled: துணைத்தலைப்புகள் இயக்கப்பட்டுள்ளன
     Volume: ஒலியளவு

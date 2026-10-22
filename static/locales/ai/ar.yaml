@@ -764,13 +764,10 @@ Settings:
   Channel Settings:
     Channel Settings: إعدادات القناة
     Channel Settings Description: تذكر الإعدادات التي تختارها أثناء المشاهدة لكل قناة على حدة، بحيث يتم تطبيقها مرة أخرى في المرة التالية التي تشاهد فيها أحد مقاطع الفيديو الخاصة بها.
-    Enable Playback Speed: تمكين سرعة التشغيل
-    Enable Video Quality: تمكين جودة الفيديو
-    Enable Subtitles State: تمكين حالة الترجمة
-    Enable Volume: تمكين مستوى الصوت
-    Auto Update: يتم التحديث تلقائيًا عند التغيير عبر خيارات المشغل
-    Auto Update Subtitles: التحديث تلقائيًا عند التبديل
-    Auto Update Volume: يتم التحديث تلقائيًا كلما قمت بتغيير مستوى الصوت
+    Auto Save Playback Speed: حفظ تغييرات سرعة التشغيل تلقائيًا
+    Auto Save Video Quality: حفظ تغييرات جودة الفيديو تلقائيًا
+    Auto Save Subtitles State: حفظ تغييرات حالة الترجمة تلقائيًا
+    Auto Save Volume: حفظ تغييرات مستوى الصوت تلقائيًا
     Manage Saved Channels: إدارة القنوات المحفوظة ({channelCount})
     Saved Channels: إعدادات القناة المحفوظة
     Enable Saved Channel Settings Sync: مزامنة إعدادات القناة المحفوظة
@@ -782,7 +779,6 @@ Settings:
     Forget Value: نسيان هذا الإعداد
     Add Setting: تذكر إعدادًا آخر لهذه القناة
     Add Subscribed Channel: إضافة قناة مشترك بها
-    Enable Setting Before Adding Channel: فعّل إعداد قناة واحدًا على الأقل في إعدادات التشغيل قبل إضافة قناة
     Video Quality: جودة الفيديو
     Subtitles Enabled: تم تمكين الترجمات
     Volume: مستوى الصوت

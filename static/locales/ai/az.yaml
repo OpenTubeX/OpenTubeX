@@ -758,13 +758,10 @@ Settings:
   Channel Settings:
     Channel Settings: Kanal tənzimləmələri
     Channel Settings Description: Baxış zamanı seçdiyiniz tənzimləmələri hər kanal üçün ayrıca yadda saxlayın ki, həmin kanalın növbəti videosuna baxanda yenidən tətbiq edilsin.
-    Enable Playback Speed: Oynatma sürətini aktivləşdir
-    Enable Video Quality: Video keyfiyyətini aktivləşdir
-    Enable Subtitles State: Titr vəziyyətini aktivləşdir
-    Enable Volume: Səs səviyyəsini aktivləşdir
-    Auto Update: Oynadıcı seçimləri ilə dəyişdirildikdə avtomatik yenilə
-    Auto Update Subtitles: Dəyişdirildikdə avtomatik yenilə
-    Auto Update Volume: Səs səviyyəsini hər dəyişdirdikdə avtomatik yenilə
+    Auto Save Playback Speed: Oynatma sürəti dəyişikliklərini avtomatik yadda saxla
+    Auto Save Video Quality: Video keyfiyyəti dəyişikliklərini avtomatik yadda saxla
+    Auto Save Subtitles State: Titr vəziyyəti dəyişikliklərini avtomatik yadda saxla
+    Auto Save Volume: Səs səviyyəsi dəyişikliklərini avtomatik yadda saxla
     Manage Saved Channels: Saxlanılmış kanalları idarə et ({channelCount})
     Saved Channels: Saxlanılmış kanal tənzimləmələri
     Enable Saved Channel Settings Sync: Saxlanılmış kanal tənzimləmələrini sinxronlaşdır
@@ -776,7 +773,6 @@ Settings:
     Forget Value: Bu tənzimləməni unut
     Add Setting: Bu kanal üçün başqa tənzimləməni yadda saxla
     Add Subscribed Channel: Abunə olunan kanal əlavə et
-    Enable Setting Before Adding Channel: Kanal əlavə etməzdən əvvəl oxutma tənzimləmələrində ən azı bir kanal tənzimləməsini aktivləşdirin
     Video Quality: Video keyfiyyəti
     Subtitles Enabled: Titrlər aktivdir
     Volume: Səs səviyyəsi

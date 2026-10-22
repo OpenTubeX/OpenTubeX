@@ -842,9 +842,6 @@ function saveWatchedProgressManually() {
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
-const rememberPlaybackSpeedPerChannel = computed(() => store.getters.getRememberPlaybackSpeedPerChannel)
-
-/** @type {import('vue').ComputedRef<boolean>} */
 const autoUpdateChannelPlaybackSpeeds = computed(() => store.getters.getAutoUpdateChannelPlaybackSpeeds)
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -852,31 +849,24 @@ const useQuickPlaybackSpeedBar = computed(() => store.getters.getUseQuickPlaybac
 
 const showSaveChannelPlaybackSpeedButton = computed(() => {
   return !props.isUpcoming &&
-    rememberPlaybackSpeedPerChannel.value &&
     !autoUpdateChannelPlaybackSpeeds.value &&
     !useQuickPlaybackSpeedBar.value
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */
-const rememberVideoQualityPerChannel = computed(() => store.getters.getRememberVideoQualityPerChannel)
-
-/** @type {import('vue').ComputedRef<boolean>} */
 const autoUpdateChannelVideoQualities = computed(() => store.getters.getAutoUpdateChannelVideoQualities)
 
 const showSaveChannelVideoQualityButton = computed(() => {
-  return !props.isUpcoming && rememberVideoQualityPerChannel.value && !autoUpdateChannelVideoQualities.value
+  return !props.isUpcoming && !autoUpdateChannelVideoQualities.value
 })
 
 const showSaveChannelSubtitlesStateButton = computed(() => {
-  return !props.isUpcoming &&
-    store.getters.getRememberSubtitlesStatePerChannel &&
-    !store.getters.getAutoUpdateChannelSubtitlesStates
+  return !props.isUpcoming && !store.getters.getAutoUpdateChannelSubtitlesStates
 })
 
 const showSaveChannelVolumeButton = computed(() => {
   return !process.env.IS_CAPACITOR &&
     !props.isUpcoming &&
-    store.getters.getRememberVolumePerChannel &&
     !store.getters.getAutoUpdateChannelVolumes
 })
 
@@ -959,7 +949,7 @@ const channelSettingSaveActions = computed(() => [
     ['fas', 'closed-captioning']),
   createChannelSettingSaveAction('volume', showSaveChannelVolumeButton.value,
     t('Video.Save Channel Volume'), t('Settings.Channel Settings.Volume'), ['fas', 'volume-high'])
-].filter(action => action.visible))
+].filter(action => action.visible && props.channelId !== ''))
 
 /**
  * @param {'playbackSpeed'|'videoQuality'|'subtitlesState'|'volume'} setting

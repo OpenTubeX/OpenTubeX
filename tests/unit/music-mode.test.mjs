@@ -66,7 +66,6 @@ test('music mode ignores cached progress when navigating between Shorts', () => 
 test('music mode overrides global, channel, and recovery speeds without changing saved preferences', () => {
   const settings = {
     getDefaultPlayback: 2,
-    getRememberPlaybackSpeedPerChannel: true,
     getChannelPlaybackSpeeds: '{"channel":2.5}',
   }
   const watch = {

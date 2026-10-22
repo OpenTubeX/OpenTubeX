@@ -787,13 +787,10 @@ Settings:
   Channel Settings:
     Channel Settings: تنظیمات کانال
     Channel Settings Description: تنظیمات انتخابی هنگام تماشای هر کانال را جداگانه به‌خاطر بسپار تا دفعهٔ بعد برای ویدیوهای آن دوباره اعمال شوند.
-    Enable Playback Speed: فعال‌کردن سرعت پخش
-    Enable Video Quality: فعال‌کردن کیفیت ویدیو
-    Enable Subtitles State: فعال‌کردن وضعیت زیرنویس
-    Enable Volume: فعال‌کردن بلندی صدا
-    Auto Update: به‌روزرسانی خودکار هنگام تغییر از گزینه‌های پخش‌کننده
-    Auto Update Subtitles: به‌روزرسانی خودکار هنگام تغییر وضعیت
-    Auto Update Volume: به‌روزرسانی خودکار با هر تغییر بلندی صدا
+    Auto Save Playback Speed: ذخیرهٔ خودکار تغییرات سرعت پخش
+    Auto Save Video Quality: ذخیرهٔ خودکار تغییرات کیفیت ویدیو
+    Auto Save Subtitles State: ذخیرهٔ خودکار تغییرات وضعیت زیرنویس
+    Auto Save Volume: ذخیرهٔ خودکار تغییرات بلندی صدا
     Manage Saved Channels: مدیریت کانال‌های ذخیره‌شده ({channelCount})
     Saved Channels: تنظیمات ذخیره‌شدهٔ کانال‌ها
     Enable Saved Channel Settings Sync: همگام‌سازی تنظیمات ذخیره‌شدهٔ کانال‌ها
@@ -805,7 +802,6 @@ Settings:
     Forget Value: فراموش‌کردن این تنظیم
     Add Setting: به‌خاطر سپردن تنظیمی دیگر برای این کانال
     Add Subscribed Channel: افزودن کانال مشترک‌شده
-    Enable Setting Before Adding Channel: پیش از افزودن کانال، حداقل یکی از تنظیمات کانال را در تنظیمات پخش فعال کنید
     Video Quality: کیفیت ویدیو
     Subtitles Enabled: زیرنویس فعال است
     Volume: بلندی صدا

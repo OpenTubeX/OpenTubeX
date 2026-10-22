@@ -953,13 +953,10 @@ Settings:
   Channel Settings:
     Channel Settings: Kanalo nustatymai
     Channel Settings Description: Atskirai įsiminti kiekvienam kanalui žiūrint pasirinktus nustatymus, kad jie vėl būtų pritaikyti kitą kartą žiūrint vieną iš jo vaizdo įrašų.
-    Enable Playback Speed: Įsiminti atkūrimo greitį
-    Enable Video Quality: Įsiminti vaizdo kokybę
-    Enable Subtitles State: Įsiminti subtitrų būseną
-    Enable Volume: Įsiminti garsumą
-    Auto Update: Automatiškai atnaujinti pakeitus leistuvo parinktyse
-    Auto Update Subtitles: Automatiškai atnaujinti perjungus
-    Auto Update Volume: Automatiškai atnaujinti pakeitus garsumą
+    Auto Save Playback Speed: Automatiškai išsaugoti atkūrimo greičio pakeitimus
+    Auto Save Video Quality: Automatiškai išsaugoti vaizdo kokybės pakeitimus
+    Auto Save Subtitles State: Automatiškai išsaugoti subtitrų būsenos pakeitimus
+    Auto Save Volume: Automatiškai išsaugoti garsumo pakeitimus
     Manage Saved Channels: Tvarkyti išsaugotus kanalus ({channelCount})
     Saved Channels: Išsaugoti kanalų nustatymai
     Enable Saved Channel Settings Sync: Sinchronizuoti išsaugotus kanalų nustatymus
@@ -971,7 +968,6 @@ Settings:
     Forget Value: Pamiršti šį nustatymą
     Add Setting: Įsiminti kitą šio kanalo nustatymą
     Add Subscribed Channel: Pridėti prenumeruojamą kanalą
-    Enable Setting Before Adding Channel: Prieš pridėdami kanalą, atkūrimo nustatymuose įjunkite bent vieną kanalo nustatymą
     Video Quality: Vaizdo kokybė
     Subtitles Enabled: Subtitrai įjungti
     Volume: Garsumas

@@ -1,3 +1,14 @@
+/**
+ * The removed per-channel Enable switches, each with the automatic saving
+ * switch that only took effect while it was on.
+ */
+export const FORMER_CHANNEL_SETTING_SWITCHES = Object.freeze([
+  ['rememberPlaybackSpeedPerChannel', 'autoUpdateChannelPlaybackSpeeds'],
+  ['rememberVideoQualityPerChannel', 'autoUpdateChannelVideoQualities'],
+  ['rememberSubtitlesStatePerChannel', 'autoUpdateChannelSubtitlesStates'],
+  ['rememberVolumePerChannel', 'autoUpdateChannelVolumes'],
+])
+
 /** Apply the stored setting migrations shared by manual and scheduled backups. */
 export async function migrateStoredSettings(datastore) {
   const save = (key, value) => datastore.updateAsync({ _id: key }, { _id: key, value }, { upsert: true })
@@ -7,6 +18,7 @@ export async function migrateStoredSettings(datastore) {
       $in: [
         'currentLocale', 'externalPlayerCustomArgs', 'defaultTheatreMode', 'saveWatchedProgress',
         'watchedProgressSavingMode', 'screenshotAskPath',
+        ...FORMER_CHANNEL_SETTING_SWITCHES.flat(),
       ]
     }
   })).map(setting => [setting._id, setting]))
@@ -63,5 +75,17 @@ export async function migrateStoredSettings(datastore) {
   if (screenshotAskPath) {
     await save('screenshotMode', screenshotAskPath.value ? 'prompt_folder' : 'default_folder')
     await datastore.removeAsync({ _id: 'screenshotAskPath' })
+  }
+
+  // Saved channel settings no longer have their own Enable switches. Automatic saving
+  // only ran while its switch was on, so turn it off where the switch was off.
+  for (const [rememberKey, autoUpdateKey] of FORMER_CHANNEL_SETTING_SWITCHES) {
+    const remember = stored.get(rememberKey)
+    if (!remember) continue
+
+    if (remember.value !== true && stored.get(autoUpdateKey)?.value === true) {
+      await save(autoUpdateKey, false)
+    }
+    await datastore.removeAsync({ _id: rememberKey })
   }
 }

@@ -88,7 +88,7 @@ const importer = dataSettings.slice(
 )
 
 async function importFile(values, { failingSettings = [] } = {}) {
-  const settings = { channelPlaybackSpeeds: '{}', rememberPlaybackSpeedPerChannel: false }
+  const settings = { channelPlaybackSpeeds: '{}' }
   const toasts = []
   const run = vm.runInNewContext(`${importer}\nimportChannelPlaybackSpeeds`, {
     ref: value => ({ value }),
@@ -103,7 +103,6 @@ async function importFile(values, { failingSettings = [] } = {}) {
     store: {
       getters: {
         get getChannelPlaybackSpeeds() { return settings.channelPlaybackSpeeds },
-        get getRememberPlaybackSpeedPerChannel() { return settings.rememberPlaybackSpeedPerChannel },
         getBackendPreference: 'local',
       },
       // Like the settings store, a failed update is only logged
@@ -121,29 +120,21 @@ async function importFile(values, { failingSettings = [] } = {}) {
   return { settings, toasts }
 }
 
-test('saves the imported speeds and applies them', async () => {
+test('saves the imported speeds', async () => {
   const { settings, toasts } = await importFile({ [CHANNEL_ID]: 1.5 })
 
-  assert.deepEqual(settings, {
-    channelPlaybackSpeeds: JSON.stringify({ [CHANNEL_ID]: 1.5 }),
-    rememberPlaybackSpeedPerChannel: true,
-  })
+  assert.deepEqual(settings, { channelPlaybackSpeeds: JSON.stringify({ [CHANNEL_ID]: 1.5 }) })
   assert.deepEqual(toasts, ['Settings.Data Settings.Channel playback speeds imported: 1'])
 })
 
 test('reports a failed save instead of a successful import', async () => {
-  const speeds = await importFile({ [CHANNEL_ID]: 1.5 }, { failingSettings: ['channelPlaybackSpeeds'] })
-  // Per-channel speeds stay off when there's nothing new to apply
-  assert.deepEqual(speeds.settings, { channelPlaybackSpeeds: '{}', rememberPlaybackSpeedPerChannel: false })
-  assert.deepEqual(speeds.toasts, ['Channel.Failed to save subscription settings'])
-
-  const remember = await importFile({ [CHANNEL_ID]: 1.5, Unknown: 2 }, { failingSettings: ['rememberPlaybackSpeedPerChannel'] })
-  assert.deepEqual(remember.settings, {
-    channelPlaybackSpeeds: JSON.stringify({ [CHANNEL_ID]: 1.5 }),
-    rememberPlaybackSpeedPerChannel: false,
-  })
+  const { settings, toasts } = await importFile(
+    { [CHANNEL_ID]: 1.5, Unknown: 2 },
+    { failingSettings: ['channelPlaybackSpeeds'] }
+  )
+  assert.deepEqual(settings, { channelPlaybackSpeeds: '{}' })
   // Channels that weren't found are reported either way
-  assert.deepEqual(remember.toasts, [
+  assert.deepEqual(toasts, [
     'Channel.Failed to save subscription settings',
     'Settings.Data Settings.Channels not found: 1',
   ])

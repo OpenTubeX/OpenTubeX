@@ -756,13 +756,10 @@ Settings:
   Channel Settings:
     Channel Settings: Csatornabeállítások
     Channel Settings Description: Csatornánként megjegyzi a videónézés közben kiválasztott beállításokat, és a csatorna következő videójánál újra alkalmazza őket.
-    Enable Playback Speed: Lejátszási sebesség engedélyezése
-    Enable Video Quality: Videóminőség engedélyezése
-    Enable Subtitles State: Feliratok állapotának engedélyezése
-    Enable Volume: Hangerő engedélyezése
-    Auto Update: Automatikus frissítés a lejátszó beállításainak módosításakor
-    Auto Update Subtitles: Automatikus frissítés átkapcsoláskor
-    Auto Update Volume: Automatikus frissítés a hangerő módosításakor
+    Auto Save Playback Speed: Lejátszási sebesség módosításainak automatikus mentése
+    Auto Save Video Quality: Videóminőség módosításainak automatikus mentése
+    Auto Save Subtitles State: Feliratállapot módosításainak automatikus mentése
+    Auto Save Volume: Hangerő módosításainak automatikus mentése
     Manage Saved Channels: Mentett csatornák kezelése ({channelCount})
     Saved Channels: Mentett csatornabeállítások
     Enable Saved Channel Settings Sync: Mentett csatornabeállítások szinkronizálása
@@ -774,7 +771,6 @@ Settings:
     Forget Value: Beállítás elfelejtése
     Add Setting: További beállítás megjegyzése ennél a csatornánál
     Add Subscribed Channel: Feliratkozott csatorna hozzáadása
-    Enable Setting Before Adding Channel: Csatorna hozzáadása előtt engedélyezz legalább egy csatornabeállítást a lejátszási beállításokban
     Video Quality: Videóminőség
     Subtitles Enabled: Feliratok engedélyezve
     Volume: Hangerő

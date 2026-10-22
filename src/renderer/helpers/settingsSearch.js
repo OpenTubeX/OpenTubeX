@@ -298,25 +298,15 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
   }
 
   if (sectionType === 'channel') {
-    if (isCapacitor && ['Enable Volume', 'Auto Update Volume', 'Volume'].includes(group)) {
+    if (isCapacitor && group === 'Auto Save Volume') {
       return false
-    }
-    if (group === 'Auto Update') {
-      return store.getters.getRememberPlaybackSpeedPerChannel ||
-        store.getters.getRememberVideoQualityPerChannel
-    }
-    if (group === 'Auto Update Subtitles') {
-      return store.getters.getRememberSubtitlesStatePerChannel
-    }
-    if (group === 'Auto Update Volume') {
-      return store.getters.getRememberVolumePerChannel
     }
     return [
       'Channel Settings',
-      'Enable Playback Speed',
-      'Enable Video Quality',
-      'Enable Subtitles State',
-      'Enable Volume'
+      'Auto Save Playback Speed',
+      'Auto Save Video Quality',
+      'Auto Save Subtitles State',
+      'Auto Save Volume'
     ].includes(group)
   }
 

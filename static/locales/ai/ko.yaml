@@ -932,13 +932,10 @@ Settings:
   Channel Settings:
     Channel Settings: 채널 설정
     Channel Settings Description: 채널마다 시청 중 선택한 설정을 기억하고, 다음에 해당 채널의 동영상을 시청할 때 다시 적용합니다.
-    Enable Playback Speed: 재생 속도 활성화
-    Enable Video Quality: 동영상 화질 활성화
-    Enable Subtitles State: 자막 상태 활성화
-    Enable Volume: 음량 활성화
-    Auto Update: 플레이어 옵션으로 변경할 때 자동 업데이트
-    Auto Update Subtitles: 자막을 켜거나 끌 때 자동 업데이트
-    Auto Update Volume: 음량을 변경할 때마다 자동 업데이트
+    Auto Save Playback Speed: 재생 속도 변경 사항 자동 저장
+    Auto Save Video Quality: 동영상 화질 변경 사항 자동 저장
+    Auto Save Subtitles State: 자막 상태 변경 사항 자동 저장
+    Auto Save Volume: 음량 변경 사항 자동 저장
     Manage Saved Channels: '저장된 채널 관리 ({channelCount})'
     Saved Channels: 저장된 채널 설정
     Enable Saved Channel Settings Sync: 저장된 채널 설정 동기화
@@ -950,7 +947,6 @@ Settings:
     Forget Value: 이 설정 삭제
     Add Setting: 이 채널에 다른 설정 저장
     Add Subscribed Channel: 구독 채널 추가
-    Enable Setting Before Adding Channel: 채널을 추가하기 전에 재생 설정에서 채널 설정을 하나 이상 활성화하세요
     Video Quality: 동영상 화질
     Subtitles Enabled: 자막 활성화됨
     Volume: 음량
