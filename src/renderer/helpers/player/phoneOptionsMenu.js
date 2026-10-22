@@ -117,11 +117,12 @@ export function setupPhoneOptionsMenu(menu, controls, t) {
     const submenu = visibleSubmenu()
     const view = submenu ?? menu
     updateHeader(submenu)
-    updateHeaderAction(submenu)
     if (view !== activeView) {
       activeView = view
       restoreOverlayScrollTop(menu, 0)
     }
+    // Measured once the new view starts at the top
+    updateHeaderAction(submenu)
     const end = [...view.children].filter(child => child.getClientRects().length > 0 && !child.classList.contains('os-scrollbar')).at(-1)
     clampOverlayScrollTop(menu, end ?? view)
   }

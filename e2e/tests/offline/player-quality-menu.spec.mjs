@@ -229,7 +229,7 @@ for (const usePlayerMenuGrid of [true, false]) {
       // the grid as far from the options as those are from the end of the menu
       await menu.locator('.shaka-back-to-overflow-button > span').evaluate(span => { span.textContent = 'Resolution '.repeat(3).trim() })
       await expect(dialog).not.toHaveAttribute('data-header-action')
-      await expect.poll(async () => {
+      const spacingIsEven = async () => {
         const headerBounds = await header.boundingBox()
         const menuBounds = await dialog.locator(':scope > .shaka-overflow-menu').boundingBox()
         const switcher = await codecs.boundingBox()
@@ -239,8 +239,20 @@ for (const usePlayerMenuGrid of [true, false]) {
         const between = firstTile.y - (switcher.y + switcher.height)
         const end = menuBounds.y + menuBounds.height - (lastTile.y + lastTile.height)
         return above > 0 && Math.abs(above - between) < 1 && (!usePlayerMenuGrid || Math.abs(above - end) < 1)
-      }).toBe(true)
+      }
+      await expect.poll(spacingIsEven).toBe(true)
       await dialog.screenshot({ path: testInfo.outputPath('phone.png') })
+
+      // Opening the submenu from a scrolled menu measures it from the top. At 95%
+      // the menu fits without scrolling, which leaves the same expectation.
+      await header.click()
+      // Too wide to fit beside the title at any UI scale
+      await page.addStyleTag({ content: '.phonePlayerOptions .ft-quality-codecs > button { padding-inline: 40px !important; }' })
+      const overflowMenu = dialog.locator(':scope > .shaka-overflow-menu')
+      await overflowMenu.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await dialog.locator('.shaka-resolution-button').evaluate(button => button.click())
+      await expect(dialog).not.toHaveAttribute('data-header-action')
+      await expect.poll(spacingIsEven).toBe(true)
 
       // Leaving the phone layout restores the regular placement
       await dialog.locator('.phonePlayerOptionsClose').click()
