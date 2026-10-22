@@ -15,6 +15,18 @@ test('accepts a genuine yt-dlp signature and then compares the asset checksum', 
   )
 })
 
+test('rejects a release signed before the installed one', () => {
+  // the fixture signature was created at 1792619636 (2026-10-21)
+  assert.throws(
+    () => verifyYtDlpReleaseAsset(Buffer.from('not yt-dlp'), 'yt-dlp_linux', checksums, signature, 1792619636),
+    /does not match its signed checksum/
+  )
+  assert.throws(
+    () => verifyYtDlpReleaseAsset(Buffer.from('not yt-dlp'), 'yt-dlp_linux', checksums, signature, 1792619637),
+    /older than the installed one/
+  )
+})
+
 test('rejects a checksum file that differs from the signed one', () => {
   const tampered = Buffer.from(checksums.toString('utf8').replace(/^[\da-f]{64}(?=  yt-dlp_linux$)/m, '0'.repeat(64)))
   assert.notDeepEqual(tampered, checksums)

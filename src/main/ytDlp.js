@@ -954,6 +954,7 @@ async function getFfprobeVersion(executable, signal) {
  * @property {string | null} lastModified
  * @property {string} [source]
  * @property {'stable' | 'nightly' | 'master'} [channel]
+ * @property {number} [signedAt] when yt-dlp signed the installed release, in seconds
  */
 
 /**
@@ -1329,19 +1330,17 @@ async function downloadManagedYtDlp(onProgress, onDownloadStart) {
     // fetch the binary and its signed checksums from the same release,
     // even if a newer one is published in between
     const releaseUrl = await getLatestReleaseDownloadUrl(repository)
-    download = await downloadFile(
-      `${releaseUrl}/${assetName}`,
-      onProgress,
-      onDownloadStart,
-      await readDownloadValidators(managedPath, source, channel)
-    )
+    const validators = await readDownloadValidators(managedPath, source, channel)
+    download = await downloadFile(`${releaseUrl}/${assetName}`, onProgress, onDownloadStart, validators)
 
     if (download.data !== null) {
       const [checksums, signature] = await Promise.all([
         fetchBuffer(`${releaseUrl}/SHA2-256SUMS`),
         fetchBuffer(`${releaseUrl}/SHA2-256SUMS.sig`)
       ])
-      verifyYtDlpReleaseAsset(download.data, assetName, checksums, signature)
+      download.validators.signedAt = verifyYtDlpReleaseAsset(
+        download.data, assetName, checksums, signature, validators?.signedAt
+      )
       await installBinary(download.data, managedPath)
     }
   } catch (error) {

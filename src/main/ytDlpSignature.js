@@ -24,12 +24,35 @@ yBLX8nz7CF/vRiOyZJP82Y0CAwEAAQ==
 const OPENPGP_HASH_ALGORITHMS = { 8: 'sha256', 10: 'sha512' }
 
 /**
+ * Reads the signature creation time, which RFC 4880 requires in the hashed subpackets.
+ * @param {Buffer} subpackets
+ * @returns {number | null} seconds since the Unix epoch
+ */
+function getSignatureCreationTime(subpackets) {
+  let offset = 0
+  while (offset < subpackets.length) {
+    let length = subpackets[offset++]
+    if (length === 255) {
+      length = subpackets.readUInt32BE(offset)
+      offset += 4
+    } else if (length >= 192) {
+      length = ((length - 192) << 8) + subpackets[offset++] + 192
+    }
+    if ((subpackets[offset] & 0x7f) === 2 && length === 5) {
+      return subpackets.readUInt32BE(offset + 1)
+    }
+    offset += length
+  }
+  return null
+}
+
+/**
  * Verifies a detached binary OpenPGP v4 RSA signature (RFC 4880 section 5.2.4).
  * Anything else is rejected rather than parsed.
  * @param {Buffer} data
  * @param {Buffer} signature
  * @param {import('node:crypto').KeyObject} key
- * @returns {boolean}
+ * @returns {number | null} the signed creation time of a valid signature
  */
 function verifyOpenPgpSignature(data, signature, key) {
   try {
@@ -38,12 +61,12 @@ function verifyOpenPgpSignature(data, signature, key) {
     let length
 
     if ((header & 0x80) === 0) {
-      return false
+      return null
     }
 
     if (header & 0x40) {
       if ((header & 0x3f) !== 2) {
-        return false
+        return null
       }
       const first = signature[offset++]
       if (first < 192) {
@@ -54,15 +77,15 @@ function verifyOpenPgpSignature(data, signature, key) {
         length = signature.readUInt32BE(offset)
         offset += 4
       } else {
-        return false
+        return null
       }
     } else {
       if (((header >> 2) & 0x0f) !== 2) {
-        return false
+        return null
       }
       const lengthBytes = [1, 2, 4][header & 0x03]
       if (lengthBytes === undefined) {
-        return false
+        return null
       }
       length = signature.readUIntBE(offset, lengthBytes)
       offset += lengthBytes
@@ -73,7 +96,7 @@ function verifyOpenPgpSignature(data, signature, key) {
 
     // a single version 4, binary document signature made with RSA
     if (body.length !== length || body[0] !== 4 || body[1] !== 0x00 || body[2] !== 1 || hashAlgorithm === undefined) {
-      return false
+      return null
     }
 
     const hashedLength = 6 + body.readUInt16BE(4)
@@ -85,37 +108,45 @@ function verifyOpenPgpSignature(data, signature, key) {
     const value = body.subarray(mpiOffset + 2, mpiOffset + 2 + mpiBytes)
 
     if (value.length !== mpiBytes || mpiOffset + 2 + mpiBytes !== body.length || mpiBytes > modulusBytes) {
-      return false
+      return null
     }
 
     const trailer = Buffer.alloc(6)
     trailer.writeUInt16BE(0x04ff, 0)
     trailer.writeUInt32BE(hashedLength, 2)
 
-    return verify(
+    const signedAt = getSignatureCreationTime(body.subarray(6, hashedLength))
+    const valid = verify(
       hashAlgorithm,
       Buffer.concat([data, body.subarray(0, hashedLength), trailer]),
       key,
       // OpenPGP strips leading zero bytes from the MPI
       Buffer.concat([Buffer.alloc(modulusBytes - mpiBytes), value])
     )
+    return valid ? signedAt : null
   } catch {
-    return false
+    return null
   }
 }
 
 /**
  * Checks a downloaded yt-dlp release asset against the release's SHA2-256SUMS
  * file and its signature, so a compromised connection cannot substitute the
- * executable.
+ * executable or roll it back to an older signed release.
  * @param {Buffer} data
  * @param {string} assetName
  * @param {Buffer} checksums
  * @param {Buffer} signature
+ * @param {number} [minimumSignedAt] signing time of the installed release, in seconds
+ * @returns {number} signing time of the downloaded release, in seconds
  */
-export function verifyYtDlpReleaseAsset(data, assetName, checksums, signature) {
-  if (!verifyOpenPgpSignature(checksums, signature, YT_DLP_SIGNING_KEY)) {
+export function verifyYtDlpReleaseAsset(data, assetName, checksums, signature, minimumSignedAt = 0) {
+  const signedAt = verifyOpenPgpSignature(checksums, signature, YT_DLP_SIGNING_KEY)
+  if (signedAt === null) {
     throw new Error('The yt-dlp checksum file is not signed by the yt-dlp release key')
+  }
+  if (signedAt < minimumSignedAt) {
+    throw new Error('The downloaded yt-dlp release is older than the installed one')
   }
 
   const expected = checksums.toString('utf8').split('\n')
@@ -130,4 +161,6 @@ export function verifyYtDlpReleaseAsset(data, assetName, checksums, signature) {
   if (createHash('sha256').update(data).digest('hex') !== expected) {
     throw new Error('The downloaded yt-dlp binary does not match its signed checksum')
   }
+
+  return signedAt
 }

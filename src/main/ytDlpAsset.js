@@ -24,7 +24,7 @@ export function getYtDlpAssetName(platform, arch) {
  * @param {object} validators
  * @param {string} source
  * @param {'stable' | 'nightly' | 'master'} [channel]
- * @returns {{ etag: string | null, lastModified: string | null } | null}
+ * @returns {{ etag: string | null, lastModified: string | null, signedAt?: number } | null}
  */
 export function getMatchingDownloadValidators(validators, source, channel) {
   if (validators === null || validators.source !== source ||
@@ -34,6 +34,7 @@ export function getMatchingDownloadValidators(validators, source, channel) {
 
   return {
     etag: typeof validators.etag === 'string' ? validators.etag : null,
-    lastModified: typeof validators.lastModified === 'string' ? validators.lastModified : null
+    lastModified: typeof validators.lastModified === 'string' ? validators.lastModified : null,
+    ...(Number.isFinite(validators.signedAt) ? { signedAt: validators.signedAt } : {})
   }
 }
