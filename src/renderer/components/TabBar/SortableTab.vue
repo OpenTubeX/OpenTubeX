@@ -456,7 +456,7 @@ watch(tabAvatarUrl, (avatarUrl) => {
 
 .pinIcon {
   font-size: 8px;
-  color: var(--tab-accent-color, var(--secondary-text-color));
+  color: var(--tab-accent-color, var(--primary-text-color));
   flex-shrink: 0;
 }
 
@@ -491,10 +491,6 @@ watch(tabAvatarUrl, (avatarUrl) => {
   inline-size: 12px;
   block-size: 12px;
   font-size: 10px;
-}
-
-.pinBadge {
-  color: var(--tab-accent-color, var(--primary-text-color));
 }
 
 .tab.pinned .playingBadge {
