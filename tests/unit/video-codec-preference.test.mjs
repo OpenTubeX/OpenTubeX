@@ -99,3 +99,19 @@ test('Auto prefers hardware decoding over a lower-bitrate software codec reporte
   shaka.util.StreamUtils.chooseCodecsAndFilterManifest(software, [], [], preferredVideoDecodingAttributes, [])
   assert.ok(software.variants.length > 0)
 })
+
+for (const powerEfficient of [true, false]) {
+  test(`Auto uses smoothness to break ties when powerEfficient is ${powerEfficient}`, () => {
+    const variants = [
+      { codec: 'av01.0.09M.08', bitrate: 1270300, smooth: false },
+      { codec: 'vp9', bitrate: 1914862, smooth: true }
+    ].map((format, id) => ({
+      video: { id, codecs: format.codec, bandwidth: format.bitrate, width: 1920, height: 1080, frameRate: 60 },
+      decodingInfos: [{ supported: true, smooth: format.smooth, powerEfficient }]
+    }))
+    const manifest = { variants, textStreams: [] }
+    shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest, [], [], preferredVideoDecodingAttributes, [])
+    assert.equal(manifest.variants.length, 1)
+    assert.equal(manifest.variants[0].video.codecs, 'vp9')
+  })
+}

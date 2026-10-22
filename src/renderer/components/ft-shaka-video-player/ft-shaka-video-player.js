@@ -4045,8 +4045,8 @@ export default defineComponent({
           }
         },
 
-        // Prefer hardware decoding; predicted smoothness can otherwise tie with
-        // power efficiency and let a software-decoded codec win on bandwidth.
+        // Prefer hardware decoding, then predicted smoothness. Equal weights can
+        // otherwise let a software-decoded codec win on bandwidth.
         preferredDecodingAttributes: format === 'dash' ? preferredVideoDecodingAttributes : [],
 
         // Prefer the main audio before codec/channel preferences. If there is

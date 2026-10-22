@@ -1,7 +1,8 @@
-// Shaka counts matching attributes equally. Chromium can report software AV1 as
-// smooth and hardware VP9 as not smooth, so including both creates a tie that
-// lets lower-bandwidth software decoding win. Prefer hardware decoding alone.
-export const preferredVideoDecodingAttributes = ['powerEfficient']
+// Shaka counts matching entries, so repeat powerEfficient intentionally to give
+// hardware decoding two points and smoothness one. This keeps software AV1 from
+// tying with hardware VP9 while preserving smoothness as the tie-breaker when
+// both codecs use hardware decoding, or neither does.
+export const preferredVideoDecodingAttributes = ['powerEfficient', 'powerEfficient', 'smooth']
 
 /**
  * Shaka filters the manifest by codec prefix before applying exact-match video
