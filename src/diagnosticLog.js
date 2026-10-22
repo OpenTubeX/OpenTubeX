@@ -4,6 +4,9 @@
 export const DIAGNOSTIC_LOG_LEVELS = ['debug', 'log', 'info', 'warn', 'error']
 export const DIAGNOSTIC_LOG_LIMIT = 500
 export const DIAGNOSTIC_ENTRY_MAX_LENGTH = 4000
+// Redaction runs on the thread that logged, so it only sees what can be kept
+// plus room for redactions that shorten the text
+const REDACTION_INPUT_MAX_LENGTH = DIAGNOSTIC_ENTRY_MAX_LENGTH * 2
 
 const MAX_DEPTH = 4
 const MAX_ITEMS = 25
@@ -11,39 +14,42 @@ const MAX_STRING_LENGTH = 2000
 const REDACTED = '<redacted>'
 
 const SENSITIVE_KEY = /^(?:authorization|cookies?|set-cookie|password|passphrase|secret|signature|sig|sapisid|visitor[_-]?(?:data|id)|.*(?:token|secret|password|api[_-]?key|cookie)s?)$/i
-const SENSITIVE_ASSIGNMENT = /(["']?)\b(authorization|cookies?|set-cookie|password|passphrase|secret|sapisid|visitor[_-]?(?:data|id)|[\w-]*(?:token|secret|password|api[_-]?key))\1(\s*[:=]\s*)(?:"[^"]*"|'[^']*'|[^\s,;&}\]]+)/gi
+// Names only start where a run of name characters starts. Starting inside a
+// long hyphenated run would retry the run from every position.
+const SENSITIVE_ASSIGNMENT = /(["']?)(?<![\w-])(authorization|cookies?|set-cookie|password|passphrase|secret|sapisid|visitor[_-]?(?:data|id)|[\w-]*(?:token|secret|password|api[_-]?key))\1(\s*[:=]\s*)(?:"[^"]*"|'[^']*'|[^\s,;&}\]]+)/gi
 // Brackets are valid URL characters (IPv6 hosts, `filters[]=` queries), so a
 // match only ends at whitespace or quotes and loses unbalanced closers later
 const URL_PATTERN = /\b(?:https?|wss?|file):\/\/[^\s"'<>]+/gi
 const CLOSING_BRACKETS = { ')': '(', ']': '[', '}': '{' }
 const IPV4_PATTERN = /(?<![\d.])(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)(?![\d.])/g
 const IPV6_PATTERN = /(?<![\w:])(?:(?:[\da-f]{1,4}:){3,7}[\da-f]{1,4}|(?:[\da-f]{1,4}:){1,6}:(?:[\da-f]{1,4}(?::[\da-f]{1,4})*)?)(?![\w:])/gi
-const EMAIL_PATTERN = /\b[\w.+-]+@[\w-]+(?:\.[\w-]+)+\b/g
+const EMAIL_PATTERN = /(?<![\w.+-])[\w.+-]+@[\w-]+(?:\.[\w-]+)+\b/g
 const HOME_DIRECTORY_PATTERN = /(\/home\/|\/Users\/|[A-Z]:\\{1,2}Users\\{1,2})[^/\\\s"']+/gi
 // googlevideo hosts name the CDN node closest to the user
 const GOOGLEVIDEO_NODE_PATTERN = /\brr\d+---sn-[\da-z-]+\.googlevideo\.com\b/gi
 // Long opaque path segments are usually tokens, signatures or session IDs
 const OPAQUE_PATH_SEGMENT = /^[\w%=.~-]{40,}$/
 
-function countOf(text, character) {
-  return text.split(character).length - 1
-}
-
 function redactUrl(match) {
   // Keep sentence punctuation and closing brackets that surround the URL
-  let value = match
+  const counts = {}
+  for (const character of match) {
+    if ('()[]{}'.includes(character)) counts[character] = (counts[character] ?? 0) + 1
+  }
+  let end = match.length
   for (;;) {
-    const last = value.at(-1)
-    if (
-      '.,;:!?'.includes(last) ||
-      (last in CLOSING_BRACKETS && countOf(value, last) > countOf(value, CLOSING_BRACKETS[last]))
-    ) {
-      value = value.slice(0, -1)
+    const last = match[end - 1]
+    if ('.,;:!?'.includes(last)) {
+      end--
+    } else if (last in CLOSING_BRACKETS && counts[last] > (counts[CLOSING_BRACKETS[last]] ?? 0)) {
+      counts[last]--
+      end--
     } else {
       break
     }
   }
-  const trailing = match.slice(value.length)
+  const value = match.slice(0, end)
+  const trailing = match.slice(end)
   let url
   try {
     url = new URL(value)
@@ -168,7 +174,12 @@ export function formatDiagnosticMessage(args) {
     }))
   }
   parts.push(...values.map(value => serialize(value, 0, new WeakSet())))
-  return truncate(redactDiagnosticText(parts.join(' ')), DIAGNOSTIC_ENTRY_MAX_LENGTH)
+  const text = parts.join(' ')
+  const redacted = redactDiagnosticText(text.slice(0, REDACTION_INPUT_MAX_LENGTH))
+  const omitted = Math.max(0, redacted.length - DIAGNOSTIC_ENTRY_MAX_LENGTH) + Math.max(0, text.length - REDACTION_INPUT_MAX_LENGTH)
+  return omitted > 0
+    ? `${redacted.slice(0, DIAGNOSTIC_ENTRY_MAX_LENGTH)}… (${omitted} more characters)`
+    : redacted
 }
 
 /**
