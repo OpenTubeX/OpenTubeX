@@ -1,6 +1,11 @@
 <template>
   <div>
     <FtLoader v-if="isLoading" />
+    <FtCard v-else-if="unsupported">
+      <p class="message">
+        {{ $t('Yattee Server.Unsupported page', { fallbackSetting: $t('Settings.General Settings.Fallback to Non-Preferred Backend on Failure') }) }}
+      </p>
+    </FtCard>
     <template
       v-else
     >
@@ -37,10 +42,12 @@ import FtLoader from '../components/FtLoader/FtLoader.vue'
 import CommentSection from '../components/CommentSection/CommentSection.vue'
 
 import store from '../store/index'
+import { usesInvidiousApi } from '../../apiBackends'
 
 import { getInvidiousCommunityPost } from '../helpers/api/invidious'
+import { YatteeUnsupportedError } from '../helpers/api/yattee'
 import { getLocalCommunityPost } from '../helpers/api/local'
-import { showInvidiousFallbackToast, showApiErrorToast, showToast } from '../helpers/utils'
+import { getInvidiousApiErrorMessage, showInvidiousFallbackToast, showApiErrorToast, showToast } from '../helpers/utils'
 import { useTabTitle } from '../tabs/TabContext'
 
 const { t } = useI18n()
@@ -53,8 +60,9 @@ const id = ref('')
 const authorId = ref('')
 const post = shallowRef(null)
 const isLoading = ref(true)
+const unsupported = ref(false)
 
-/** @type {import('vue').ComputedRef<'invidious' | 'local'>} */
+/** @type {import('vue').ComputedRef<'local' | 'invidious' | 'yattee'>} */
 const backendPreference = computed(() => {
   return store.getters.getBackendPreference
 })
@@ -78,8 +86,9 @@ async function loadPost() {
   authorId.value = route.query.authorId
   post.value = null
   isLoading.value = true
+  unsupported.value = false
 
-  if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
+  if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendPreference.value)) {
     await loadDataInvidiousAsync()
   } else {
     await loadDataLocalAsync()
@@ -130,13 +139,16 @@ async function loadDataInvidiousAsync() {
     updateTitleAndRoute()
   } catch (error) {
     console.error(error)
-    const errorMessage = t('Invidious API Error (Click to copy)')
-    showApiErrorToast(errorMessage, error)
+    const isUnsupported = error instanceof YatteeUnsupportedError
+    if (!isUnsupported) {
+      showApiErrorToast(getInvidiousApiErrorMessage(backendPreference.value), error)
+    }
 
-    if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showInvidiousFallbackToast()
+    if (process.env.SUPPORTS_LOCAL_API && usesInvidiousApi(backendPreference.value) && backendFallback.value) {
+      showInvidiousFallbackToast(backendPreference.value)
       await loadDataLocalAsync()
     } else {
+      unsupported.value = isUnsupported
       isLoading.value = false
     }
   }

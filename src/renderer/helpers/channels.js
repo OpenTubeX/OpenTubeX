@@ -1,38 +1,35 @@
 import { invidiousGetChannelId, invidiousGetChannelInfo } from './api/invidious'
 import { getLocalChannel, getLocalChannelId, parseLocalChannelHeader } from './api/local'
 import { showInvidiousFallbackToast } from './utils'
+import { usesInvidiousApi } from '../../apiBackends'
 
 /**
  * @param {string} id
  * @param {{
  *   preference: string,
  *   fallback: boolean,
- *   invalid: boolean,
  * }} backendOptions
+ * @returns {Promise<{ channel: any, fromInvidiousApi: boolean } | { invalid: true }>}
  */
 async function findChannelById(id, backendOptions) {
+  const preferInvidiousApi = !process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendOptions.preference)
   try {
-    if (!process.env.SUPPORTS_LOCAL_API || backendOptions.preference === 'invidious') {
-      return await invidiousGetChannelInfo(id)
-    } else {
-      return await getLocalChannel(id)
-    }
+    return preferInvidiousApi
+      ? { channel: await invidiousGetChannelInfo(id), fromInvidiousApi: true }
+      : { channel: await getLocalChannel(id), fromInvidiousApi: false }
   } catch (err) {
     // don't bother with fallback if channel doesn't exist
     if (err.message && err.message === 'This channel does not exist.') {
       return { invalid: true }
     }
-    if (process.env.SUPPORTS_LOCAL_API && backendOptions.fallback) {
-      if (backendOptions.preference === 'invidious') {
-        showInvidiousFallbackToast()
-        return await getLocalChannel(id)
-      }
-      if (backendOptions.preference === 'local') {
-        return await invidiousGetChannelInfo(id)
-      }
-    } else {
+    if (!process.env.SUPPORTS_LOCAL_API || !backendOptions.fallback) {
       throw err
     }
+    if (preferInvidiousApi) {
+      showInvidiousFallbackToast(backendOptions.preference)
+      return { channel: await getLocalChannel(id), fromInvidiousApi: false }
+    }
+    return { channel: await invidiousGetChannelInfo(id), fromInvidiousApi: true }
   }
 }
 
@@ -47,12 +44,16 @@ async function findChannelById(id, backendOptions) {
 export async function findChannelTagInfo(id, backendOptions) {
   if (!checkYoutubeChannelId(id)) return { invalidId: true }
   try {
-    const channel = await findChannelById(id, backendOptions)
-    if (!process.env.SUPPORTS_LOCAL_API || backendOptions.preference === 'invidious') {
-      if (channel.invalid) return { invalidId: true }
+    const result = await findChannelById(id, backendOptions)
+    if (result.invalid) return { invalidId: true }
+
+    // Parse the response of the backend that answered, which differs from the preferred one after a fallback
+    const { channel, fromInvidiousApi } = result
+    if (fromInvidiousApi) {
       return {
         preferredName: channel.author,
-        icon: channel.authorThumbnails[0].url
+        // Yattee servers can return channels without avatars
+        icon: channel.authorThumbnails[0]?.url ?? ''
       }
     } else {
       if (channel.alert) return { invalidId: true }
@@ -87,7 +88,7 @@ export function checkYoutubeChannelId(id) {
  * @returns {Promise<string | null>}
  */
 export function resolveChannelId(url, backendPreference) {
-  if (!process.env.SUPPORTS_LOCAL_API || backendPreference === 'invidious') {
+  if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendPreference)) {
     return invidiousGetChannelId(url)
   }
 

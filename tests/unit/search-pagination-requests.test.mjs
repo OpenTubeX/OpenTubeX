@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { usesInvidiousApi } from '../../src/apiBackends.js'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
@@ -91,6 +92,8 @@ function createSearch (backend) {
     showApiErrorToast: (...args) => notices.push(args),
     showToast: message => notices.push(message),
     showInvidiousFallbackToast: () => notices.push('direct fallback warning'),
+    getInvidiousApiErrorMessage: () => 'Invidious API Error (Click to copy)',
+    usesInvidiousApi,
     t: text => text,
     console: { error: error => errors.push(error) },
     process: { env: { SUPPORTS_LOCAL_API: true } }

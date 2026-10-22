@@ -196,6 +196,25 @@ Settings:
       Grid Columns: Kolumny siatki
       Playlist Grid Columns: Kolumny siatki playlist
       Auto: Automatycznie
+    Preferred API Backend:
+      Yattee Server: Serwer Yattee
+    Yattee Server:
+      Server URL: Adres URL serwera Yattee
+      Username: Nazwa użytkownika
+      Password: Hasło
+      Proxy Videos: Przesyłaj filmy przez serwer Yattee
+      Test Connection: Sprawdź połączenie
+      Testing: Sprawdzanie połączenia…
+      Connected: Połączono z Yattee Server {version}
+      Errors:
+        Invalid URL: Wpisz adres URL serwera zaczynający się od https:// lub http://.
+        Unreachable: Nie można połączyć się z serwerem. Sprawdź adres URL i to, czy serwer działa.
+        Media not allowed: 'Połączono, ale serwer nie pozwala tej aplikacji wczytywać filmów. Ustaw CORS_ORIGINS={origins} w zmiennych środowiskowych serwera.'
+        Not a Yattee server: Serwer odpowiedział, ale nie jest serwerem Yattee.
+        Credentials required: Serwer wymaga nazwy użytkownika i hasła.
+        Invalid credentials: Serwer odrzucił nazwę użytkownika lub hasło.
+        Rate limited: Serwer blokuje logowanie po zbyt wielu nieudanych próbach. Spróbuj ponownie później.
+        Server error: Serwer zwrócił błąd (HTTP {status}).
   Theme Settings:
     Material Accent Color: "Kolor akcentu Material"
     Material Wallpaper Colors: "Kolory tapety"
@@ -977,6 +996,7 @@ Video:
       needs_auth: "Wymagane logowanie"
       unlisted: "Niepubliczny"
   Save Queue to Playlist: "Zapisz kolejkę na playliście"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Czat na żywo nie jest obecnie obsługiwany przez serwer Yattee. Konieczne jest połączenie bezpośrednie z YouTube.
 Change Format:
   yt-dlp Error Template: "yt-dlp nie mógł dostarczyć strumieni: {error}"
   Local Video File: Lokalny plik filmu
@@ -1115,6 +1135,8 @@ Tooltips:
       Uruchamianie filmów za pomocą yt-dlp może trwać dłużej.
       Wbudowany mechanizm nie obsługuje przewijania transmisji na żywo ani premier.
     Show Thumbnail Previews: Pokazuje animowany podgląd po najechaniu na miniaturę filmu.
+    Yattee Server: Instancja yattee-server, z której OpenTubeX wczytuje filmy, kanały, playlisty i wyniki wyszukiwania. Nazwa użytkownika i hasło są przechowywane wyłącznie na tym urządzeniu.
+    Proxy Videos Through Yattee Server: Przesyła strumienie wideo i audio przez serwer. Pozostaw tę opcję włączoną, chyba że serwer korzysta z tego samego połączenia internetowego co Ty, ponieważ YouTube udostępnia strumienie tylko adresowi, który o nie poprosił. Miniatury są zawsze wczytywane bezpośrednio z YouTube.
   Player Settings:
     Continue Playback When Screen Is Locked: 'Utrzymuje odtwarzanie dźwięku w tle i udostępnia elementy sterowania multimediami Androida. Wyłącz, aby wstrzymywać odtwarzanie, gdy aplikacja nie jest już widoczna.'
     Use YouTube-style Shorts: Wyświetla Shorts w pionowej siatce na stronach subskrypcji i kanałów oraz używa odtwarzacza Shorts w stylu YouTube.
@@ -1481,3 +1503,15 @@ Subscription Groups:
   Empty Group: Ta grupa nie zawiera kanałów z bieżącego profilu.
   Save Failed: Nie udało się zapisać grupy.
   Delete Failed: Nie udało się usunąć grupy.
+Yattee Server:
+  API Error (Click to copy): Błąd serwera Yattee (kliknij, by skopiować)
+  Unsupported page: Ta strona nie jest dostępna z serwerem Yattee. Włącz opcję „{fallbackSetting}”, aby wczytać ją za pomocą lokalnego API.
+  Posts unavailable: Serwery Yattee nie udostępniają wpisów. Włącz opcję „{fallbackSetting}”, aby wczytać je za pomocą lokalnego API.
+  Errors:
+    Invalid credentials: Serwer Yattee odrzucił nazwę użytkownika lub hasło. Sprawdź je w sekcji Ustawienia → Zaawansowane.
+    Rate limited: Serwer Yattee blokuje logowanie po zbyt wielu nieudanych próbach. Spróbuj ponownie później.
+    Streams not relayed: Serwer Yattee nie przekazał strumieni tego filmu. Gdy filmy są przesyłane przez serwer, OpenTubeX nie łączy się bezpośrednio z YouTube.
+    Not configured: Wpisz adres URL swojego serwera Yattee w sekcji Ustawienia → Zaawansowane.
+    HTTPS required: Android może odtwarzać filmy tylko z serwerów Yattee korzystających z HTTPS.
+    Streams unavailable: Nie udało się wczytać strumieni tego filmu z serwera Yattee. Sprawdź serwer przyciskiem „Sprawdź połączenie” w sekcji Ustawienia → Zaawansowane.
+Yattee Fallback Warning: To żądanie pomija skonfigurowany serwer Yattee i łączy się bezpośrednio z YouTube, ujawniając Twój adres IP.

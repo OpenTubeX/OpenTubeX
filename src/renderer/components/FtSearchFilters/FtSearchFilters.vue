@@ -53,6 +53,7 @@
         class="searchRadio"
       />
       <FtCheckboxList
+        v-if="supportsFeatureFilters"
         v-model="featuresValue"
         :title="$t('Search Filters.Features.Features')"
         :labels="featureLabels"
@@ -191,6 +192,9 @@ const featureLabels = computed(() => [
 ])
 
 const searchSettings = store.getters.getSearchSettings(tabId)
+
+// Yattee servers ignore the feature filters
+const supportsFeatureFilters = computed(() => store.getters.getBackendPreference !== 'yattee')
 
 /** @type {import('vue').Ref<'relevance' | 'popularity'>} */
 const prioritizeValue = ref(searchSettings.prioritize)

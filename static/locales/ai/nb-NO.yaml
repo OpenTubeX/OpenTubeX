@@ -417,6 +417,25 @@ Settings:
       Grid Columns: Rutenettkolonner
       Playlist Grid Columns: Rutenettkolonner for spillelister
       Auto: Automatisk
+    Preferred API Backend:
+      Yattee Server: Yattee-tjener
+    Yattee Server:
+      Server URL: URL til Yattee-tjener
+      Username: Brukernavn
+      Password: Passord
+      Proxy Videos: Hent videoer gjennom Yattee-tjeneren
+      Test Connection: Test tilkobling
+      Testing: Tester tilkoblingen…
+      Connected: Koblet til Yattee Server {version}
+      Errors:
+        Invalid URL: Skriv inn URL-en til tjeneren. Den må begynne med https:// eller http://.
+        Unreachable: Fikk ikke kontakt med tjeneren. Kontroller URL-en og at tjeneren kjører.
+        Media not allowed: 'Koblet til, men tjeneren tillater ikke denne appen å laste inn videoer. Angi CORS_ORIGINS={origins} i tjenerens miljøvariabler.'
+        Not a Yattee server: Tjeneren svarte, men det er ikke en Yattee-tjener.
+        Credentials required: Tjeneren krever brukernavn og passord.
+        Invalid credentials: Tjeneren avviste brukernavnet eller passordet.
+        Rate limited: Tjeneren blokkerer pålogginger etter for mange mislykkede forsøk. Prøv igjen senere.
+        Server error: Tjeneren returnerte en feil (HTTP {status}).
   Context Menu Search Settings:
     Context Menu Search Settings: Søk fra hurtigmenyen
     Description: Velg hvilke søkemotorer som vises når du høyreklikker på merket tekst. Søk åpnes i standardnettleseren din.
@@ -1657,6 +1676,7 @@ Video:
       needs_auth: "Pålogging kreves"
       unlisted: "Ikke oppført"
   Save Queue to Playlist: "Lagre kø i spilleliste"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Direktechat støttes for tiden ikke med Yattee-tjeneren. Direkte tilkobling til YouTube kreves.
 Playlist:
   Playlist Already Preloaded: "Alle videoene i spillelisten er allerede forhåndslastet"
   Playlist Preload Progress: "Forhåndslaster videoer: {completed} av {requested}"
@@ -1883,6 +1903,8 @@ Tooltips:
       Last inn sist aktive fane gjenoppretter forrige økt med de andre fanene åpne, men ikke innlastet. De lastes inn når du klikker på dem.
       Start med en tom økt hopper over de lagrede fanene og åpner et nytt vindu.
     Remember Tab Navigation History: Navigeringshistorikken fremover og bakover lagres for hver fane og gjenopprettes når OpenTubeX starter på nytt.
+    Yattee Server: Instansen av yattee-server som OpenTubeX laster inn videoer, kanaler, spillelister og søkeresultater fra. Brukernavnet og passordet lagres bare på denne enheten.
+    Proxy Videos Through Yattee Server: Videresender video- og lydstrømmer gjennom tjeneren. La dette være på med mindre tjeneren deler internettforbindelsen din, fordi YouTube bare leverer strømmer til adressen som ba om dem. Miniatyrbilder lastes alltid direkte fra YouTube.
   Proxy Settings:
     IP Block Recovery Script Path: Filbane til skriptet som skal kjøres når en IP-blokkering oppdages. OpenTubeX venter til det er ferdig og laster deretter inn videoen på nytt. Hvis reserveløsning er slått på, kjøres skriptet bare når også reserveløsningen mislykkes.
   Player Settings:
@@ -2259,3 +2281,15 @@ Subscription Groups:
   Empty Group: Denne gruppen har ingen kanaler fra den gjeldende profilen.
   Save Failed: Kunne ikke lagre gruppen.
   Delete Failed: Kunne ikke slette gruppen.
+Yattee Server:
+  API Error (Click to copy): Yattee-tjenerfeil (Klikk her for å kopiere)
+  Unsupported page: Denne siden er ikke tilgjengelig med Yattee-tjeneren. Slå på «{fallbackSetting}» for å laste den inn med det lokale API-et.
+  Posts unavailable: Yattee-tjenere tilbyr ikke innlegg. Slå på «{fallbackSetting}» for å laste dem inn med det lokale API-et.
+  Errors:
+    Invalid credentials: Yattee-tjeneren avviste brukernavnet eller passordet. Kontroller dem under Innstillinger → Avansert.
+    Rate limited: Yattee-tjeneren blokkerer pålogginger etter for mange mislykkede forsøk. Prøv igjen senere.
+    Streams not relayed: Yattee-tjeneren videresendte ikke strømmene til denne videoen. Når videoer går gjennom tjeneren, kobler ikke OpenTubeX direkte til YouTube.
+    Not configured: Skriv inn URL-en til Yattee-tjeneren din under Innstillinger → Avansert.
+    HTTPS required: Android kan bare spille av videoer fra Yattee-tjenere som bruker HTTPS.
+    Streams unavailable: Kunne ikke laste inn strømmene til denne videoen fra Yattee-tjeneren. Bruk «Test tilkobling» under Innstillinger → Avansert for å kontrollere tjeneren.
+Yattee Fallback Warning: Denne forespørselen omgår den konfigurerte Yattee-tjeneren din og kobler direkte til YouTube, noe som avslører IP-adressen din.

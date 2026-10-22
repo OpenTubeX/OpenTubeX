@@ -1,5 +1,6 @@
 import { computed, reactive, ref } from 'vue'
 import store from '../store'
+import { usesInvidiousApi } from '../../apiBackends'
 import { HistoryRepairUnavailableError, parseHistoryRepairPlayer, parseHistoryRepairYtDlp, repairHistory } from '../../historyRepair'
 import { ytDlp } from './ytDlp'
 import { getLocalHistoryMetadata } from './api/local'
@@ -49,7 +50,7 @@ export async function fetchRepairMetadata(videoId, signal, useCookies) {
     }
   }
   const timeoutSignal = AbortSignal.any([signal, AbortSignal.timeout(20_000)])
-  if (!process.env.SUPPORTS_LOCAL_API || store.getters.getBackendPreference === 'invidious') {
+  if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(store.getters.getBackendPreference)) {
     const info = await getInvidiousHistoryMetadata(videoId, timeoutSignal)
     if (info?.error || info?.videoId !== videoId) throw new HistoryRepairUnavailableError('Video metadata unavailable')
     return {

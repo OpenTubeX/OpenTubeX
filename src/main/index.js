@@ -67,6 +67,8 @@ import { expandMultipleOnlyPluralMessages, selectPluralForm } from '../renderer/
 import { composeLocaleMessages } from '../localeComposition'
 import { buildProxyUrl, DEFAULT_PROXY_SETTINGS, isNonPublicNetworkAddress, isOpenTubeXUrl } from './utils'
 import { isInvidiousInstanceUrl } from './invidiousAuthorization'
+import { normalizeYatteeServerUrl } from '../renderer/helpers/api/yattee'
+import { usesInvidiousApi, usesInvidiousInstance } from '../apiBackends'
 import { RendererCors } from './rendererCors'
 import { TabManager } from './tabs/TabManager'
 import { tabPreviewStorage } from './tabs/TabPreviewStorage'
@@ -1522,7 +1524,7 @@ function runApp() {
         },
         {
           label: contextMenuLabel('Copy Invidious Link'),
-          visible: visible && isInAppUrl && (backendPreference === 'invidious' || backendFallback),
+          visible: visible && isInAppUrl && usesInvidiousInstance(backendPreference, backendFallback),
           click: () => {
             copy(transformOpenTubeXRouteUrl(urlParts[1], false))
           }
@@ -3976,7 +3978,7 @@ function runApp() {
 
     let allowedPrivateOrigin = null
     try {
-      const configuredInstance = (await baseHandlers.settings._findOne('defaultInvidiousInstance'))?.value
+      const configuredInstance = await getConfiguredApiServerUrl()
       if (typeof configuredInstance === 'string' && configuredInstance !== '') {
         allowedPrivateOrigin = new URL(configuredInstance).origin
       }
@@ -4859,11 +4861,11 @@ function runApp() {
   })
 
   ipcMain.on(IpcChannels.OPEN_IN_EXTERNAL_PLAYER, handleOpenInExternalPlayer)
-  /** Relays may reach a non-public address only for the user's Invidious instance, after native consent. */
+  /** Relays may reach a non-public address only for the user's Invidious instance or Yattee server, after native consent. */
   const createMediaAddressResolver = async (sender, isDlna) => {
     let privateInstance = null
     try {
-      const configuredInstance = (await baseHandlers.settings._findOne('defaultInvidiousInstance'))?.value
+      const configuredInstance = await getConfiguredApiServerUrl()
       if (typeof configuredInstance === 'string' && configuredInstance !== '') {
         const instance = new URL(configuredInstance)
         if (['http:', 'https:'].includes(instance.protocol)) {
@@ -4896,6 +4898,13 @@ function runApp() {
     const resolveAddresses = url => resolveCastMediaAddresses(url, authorizePrivateUrl,
       hostname => session.defaultSession.resolveHost(hostname, { cacheUsage: 'disallowed' }))
     return { privateInstance, resolveAddresses }
+  }
+  /** The API server the user configured, which may run on a private network */
+  async function getConfiguredApiServerUrl() {
+    if ((await baseHandlers.settings._findOne('backendPreference'))?.value === 'yattee') {
+      return normalizeYatteeServerUrl((await baseHandlers.settings._findOne('yatteeServerUrl'))?.value)
+    }
+    return (await baseHandlers.settings._findOne('defaultInvidiousInstance'))?.value
   }
   ipcMain.handle(IpcChannels.DLNA_DISCOVER, event => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) return []
@@ -6711,7 +6720,7 @@ function runApp() {
             },
             type: 'normal'
           },
-          (backendFallback || backendPreference === 'invidious') && {
+          (backendFallback || usesInvidiousApi(backendPreference)) && {
             label: 'Most Popular',
             click: (_menuItem, browserWindow, _event) => {
               navigateTo('/popular', browserWindow)

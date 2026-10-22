@@ -34,6 +34,25 @@ test('fallback tries the other backend only when enabled and does not leak autho
   assert.equal(urls.length, 3)
 })
 
+test('Yattee servers are only asked for API feeds, never RSS or posts', () => {
+  const plan = feeds => Object.fromEntries(Object.entries(feeds).map(([feed, requests]) => [feed, requests.map(request => request.format)]))
+  const options = { backend: 'yattee', useRss: true, instanceUrl: 'https://yattee.example/', authorization: 'Basic secret' }
+
+  const requests = createBackgroundSubscriptionRequests(options)
+  assert.deepEqual(plan(requests), { videos: ['invidious'], shorts: ['invidious'], live: ['invidious'], posts: [] })
+  assert.deepEqual(requests.live[0], { format: 'invidious', url: 'https://yattee.example/api/v1/channels/%CHANNEL%/streams', authorization: 'Basic secret' })
+
+  const withFallback = createBackgroundSubscriptionRequests({ ...options, fallback: true })
+  assert.deepEqual(plan(withFallback), {
+    videos: ['invidious', 'rss', 'local', 'localPlaylist'],
+    shorts: ['invidious', 'rss', 'localPlaylist', 'local'],
+    live: ['invidious', 'rss', 'local'],
+    posts: ['local']
+  })
+  // The RSS fallbacks are YouTube's own feeds
+  assert.ok(Object.values(withFallback).flat().every(request => request.format !== 'rss' || request.url.startsWith('https://www.youtube.com/')))
+})
+
 test('malformed responses try the next source instead of saving an empty successful feed', async () => {
   const requests = createBackgroundSubscriptionRequests({ backend: 'local' })
   await assert.rejects(fetchBackgroundSubscriptionChannel({ requests }, 'videos', 'UCtest', new AbortController().signal, async () => '<html>error</html>'))

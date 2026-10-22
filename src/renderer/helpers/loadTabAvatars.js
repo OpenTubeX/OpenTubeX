@@ -58,19 +58,18 @@ async function resolveLocalAvatarUrl(path) {
 }
 
 async function resolveInvidiousAvatarUrl(path) {
-  const instanceUrl = store.getters.getCurrentInvidiousInstanceUrl
   const channelId = path.match(/^\/channel\/([^/]+)/)?.[1]
   if (channelId) {
     const channel = await invidiousGetChannelInfo(channelId)
     const thumbnail = channel.authorThumbnails?.at(-1)?.url
-    return thumbnail ? youtubeImageUrlToInvidious(thumbnail, instanceUrl) : null
+    return thumbnail ? youtubeImageUrlToInvidious(thumbnail) : null
   }
 
   const videoId = path.match(/^\/watch\/([^/]+)/)?.[1]
   if (videoId) {
     const video = await invidiousGetVideoInformation(videoId)
     const thumbnail = video.authorThumbnails?.at(-1)?.url
-    return thumbnail ? youtubeImageUrlToInvidious(thumbnail, instanceUrl) : null
+    return thumbnail ? youtubeImageUrlToInvidious(thumbnail) : null
   }
 
   return null
@@ -96,7 +95,7 @@ async function loadTabAvatar(tab) {
   }
 
   if (avatarBytes == null && store.getters.getBackendFallback) {
-    if (!useLocalApi) showInvidiousFallbackToast()
+    if (!useLocalApi) showInvidiousFallbackToast(store.getters.getBackendPreference)
     avatarBytes = await fetchAvatarBytes(routePath, !useLocalApi)
   }
   if (avatarBytes == null) return false

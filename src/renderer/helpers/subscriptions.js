@@ -4,12 +4,16 @@ import { parseSubscriptionRss, parseRssUpcomingInfo, isRssUpcomingPremiereCandid
 import { shallowReactive } from 'vue'
 import { subscriptionRefreshErrors } from './subscriptionRefreshErrors'
 import store from '../store/index'
+import { usesInvidiousApi } from '../../apiBackends'
 import {
   getInvidiousChannelLive,
+  getInvidiousChannelShorts,
   getInvidiousChannelVideos,
   invidiousFetch,
-  invidiousGetCommunityPosts
+  invidiousGetCommunityPosts,
+  invidiousGetVideoInformation
 } from './api/invidious'
+import { fillYatteeShortDates } from './api/yattee'
 import {
   getLocalChannel,
   getLocalChannelCommunity,
@@ -21,6 +25,7 @@ import {
   parseLocalPlaylistVideos
 } from './api/local'
 import {
+  getInvidiousApiErrorMessage,
   showInvidiousFallbackToast,
   getChannelPlaylistId,
   showApiErrorToast,
@@ -102,8 +107,8 @@ export async function refreshSubscriptionPremieres(isActive) {
       try {
         const options = { signal: AbortSignal.timeout(RSS_ENRICHMENT_TIMEOUT_MS) }
         let update
-        if (!process.env.SUPPORTS_LOCAL_API || store.getters.getBackendPreference === 'invidious') {
-          const url = `${store.getters.getCurrentInvidiousInstanceUrl}/api/v1/videos/${encodeURIComponent(video.videoId)}`
+        if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(store.getters.getBackendPreference)) {
+          const url = `${store.getters.getApiServerUrl}/api/v1/videos/${encodeURIComponent(video.videoId)}`
           const response = await invidiousFetch(url, options.signal)
           if (!response.ok) return
           update = getInvidiousSubscriptionPremiereUpdate(await response.json(), video.videoId)
@@ -373,7 +378,7 @@ async function fetchSubscriptionsConcurrently(channels, fetchChannel) {
         if (activeRefresh?.networkRecovery) {
           const preferredBackend = store.getters.getBackendPreference
           await activeRefresh.networkRecovery.run(useFallback => {
-            if (useFallback && preferredBackend === 'invidious') showInvidiousFallbackToast()
+            if (useFallback && usesInvidiousApi(preferredBackend)) showInvidiousFallbackToast(preferredBackend)
             return fetchChannel(channel, useFallback ? (preferredBackend === 'local' ? 'invidious' : 'local') : preferredBackend)
           })
         } else {
@@ -800,8 +805,8 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
     const fetchChannel = async (channel, backend = store.getters.getBackendPreference) => {
       let videos, name, thumbnailUrl
 
-      if (!process.env.SUPPORTS_LOCAL_API || backend === 'invidious') {
-        if (useRss) {
+      if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backend)) {
+        if (useRss && hasInvidiousRssFeeds()) {
           ({ videos, name, thumbnailUrl } = await getChannelVideosInvidiousRSS(channel, t, errorChannels))
         } else {
           ({ videos, name, thumbnailUrl } = await getChannelVideosInvidiousScraper(channel, t, errorChannels))
@@ -908,8 +913,10 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
     await fetchSubscriptionsConcurrently(subscriptionList, async (channel, backend = store.getters.getBackendPreference) => {
       let videos, name
 
-      if (!process.env.SUPPORTS_LOCAL_API || backend === 'invidious') {
-        ({ videos, name } = await getChannelShortsInvidious(channel, t, errorChannels))
+      if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backend)) {
+        ({ videos, name } = hasInvidiousRssFeeds()
+          ? await getChannelShortsInvidious(channel, t, errorChannels)
+          : await getChannelShortsYattee(channel, t, errorChannels))
       } else {
         ({ videos, name } = await getChannelShortsLocal(channel, t, errorChannels))
       }
@@ -1002,8 +1009,8 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
     const fetchChannel = async (channel, backend = store.getters.getBackendPreference) => {
       let videos, name, thumbnailUrl
 
-      if (!process.env.SUPPORTS_LOCAL_API || backend === 'invidious') {
-        if (useRss) {
+      if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backend)) {
+        if (useRss && hasInvidiousRssFeeds()) {
           ({ videos, name, thumbnailUrl } = await getChannelLiveInvidiousRSS(channel, t, errorChannels))
         } else {
           ({ videos, name, thumbnailUrl } = await getChannelLiveInvidious(channel, t, errorChannels))
@@ -1095,6 +1102,15 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
     return []
   }
 
+  // Yattee servers have no posts, so only the local API fallback can load them
+  if (store.getters.getBackendPreference === 'yattee') {
+    if (!process.env.SUPPORTS_LOCAL_API || !store.getters.getBackendFallback) {
+      completeSubscriptionRefresh('posts', activeProfile._id)
+      return []
+    }
+    showInvidiousFallbackToast('yattee')
+  }
+
   store.commit('setSubscriptionFeedRefreshInProgress', true)
   setSubscriptionRefreshProgress(0)
 
@@ -1109,7 +1125,10 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
     const processChannel = async (channel, backend = store.getters.getBackendPreference) => {
       let posts
 
-      if (!process.env.SUPPORTS_LOCAL_API || backend === 'invidious') {
+      if (backend === 'yattee') {
+        // Yattee servers have no posts, so only the fallback can load them
+        posts = await getChannelPostsLocal(channel, t, errorChannels)
+      } else if (!process.env.SUPPORTS_LOCAL_API || backend === 'invidious') {
         posts = await getChannelPostsInvidious(channel, t, errorChannels)
       } else {
         posts = await getChannelPostsLocal(channel, t, errorChannels)
@@ -1213,7 +1232,7 @@ async function getChannelPostsInvidious(channel, t, errorChannels) {
       store.getters.getBackendPreference === 'invidious' &&
       store.getters.getBackendFallback
     ) {
-      showInvidiousFallbackToast()
+      showInvidiousFallbackToast('invidious')
       return await getChannelPostsLocal(channel, t, errorChannels)
     }
 
@@ -1316,7 +1335,7 @@ async function getChannelVideosInvidiousScraper(channel, t, errorChannels, faile
     let name
 
     if (result.videos.length > 0) {
-      name = result.videos.find(video => video.type === 'video' && video.author).author
+      name = result.videos.find(video => video.type === 'video' && video.author)?.author
     }
 
     return {
@@ -1324,17 +1343,26 @@ async function getChannelVideosInvidiousScraper(channel, t, errorChannels, faile
       videos: result.videos
     }
   } catch (err) {
-    handleSubscriptionFetchError(channel, err, t('Invidious API Error (Click to copy)'), {
+    handleSubscriptionFetchError(channel, err, getInvidiousApiErrorMessage(store.getters.getBackendPreference), {
       category: 'subscription videos',
       backend: 'Invidious API'
     })
+
+    if (!hasInvidiousRssFeeds()) {
+      if (process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
+        showInvidiousFallbackToast('yattee')
+        // Skips the local API's own fallback to Invidious
+        return await getChannelVideosLocalScraper(channel, t, errorChannels, 2)
+      }
+      return { videos: null }
+    }
 
     switch (failedAttempts) {
       case 0:
         return await getChannelVideosInvidiousRSS(channel, t, errorChannels, failedAttempts + 1)
       case 1:
         if (process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
-          showInvidiousFallbackToast()
+          showInvidiousFallbackToast('invidious')
           return await getChannelVideosLocalScraper(channel, t, errorChannels, failedAttempts + 1)
         }
         return { videos: null }
@@ -1385,7 +1413,7 @@ async function getChannelVideosInvidiousRSS(channel, t, errorChannels, failedAtt
         return await getChannelVideosInvidiousScraper(channel, t, errorChannels, failedAttempts + 1)
       case 1:
         if (process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
-          showInvidiousFallbackToast()
+          showInvidiousFallbackToast('invidious')
           return await getChannelVideosLocalRSS(channel, t, errorChannels, failedAttempts + 1)
         }
         return { videos: null }
@@ -1492,6 +1520,31 @@ async function getLocalShortThumbnailEntries(playlistId) {
   }
 }
 
+/** Yattee servers have no RSS feeds, so their API is used instead. */
+function hasInvidiousRssFeeds() {
+  return store.getters.getBackendPreference !== 'yattee'
+}
+
+async function getChannelShortsYattee(channel, t, errorChannels) {
+  try {
+    const result = await getInvidiousChannelShorts(channel.id)
+    return { videos: await fillYatteeShortDates(result.videos, store.getters.getShortsCache[channel.id]?.videos, invidiousGetVideoInformation) }
+  } catch (err) {
+    handleSubscriptionFetchError(channel, err, getInvidiousApiErrorMessage('yattee'), {
+      category: 'subscription Shorts',
+      backend: 'Yattee API'
+    })
+
+    if (process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
+      showInvidiousFallbackToast('yattee')
+      // Skips the local API's own fallback to Invidious
+      return await getChannelShortsLocal(channel, t, errorChannels, 1)
+    }
+
+    return { videos: null }
+  }
+}
+
 async function getChannelShortsInvidious(channel, t, errorChannels, failedAttempts = 0) {
   const playlistId = getChannelPlaylistId(channel.id, 'shorts', 'newest')
   const feedUrl = `${store.getters.getCurrentInvidiousInstanceUrl}/feed/playlist/${playlistId}`
@@ -1529,7 +1582,7 @@ async function getChannelShortsInvidious(channel, t, errorChannels, failedAttemp
     })
 
     if (failedAttempts === 0 && process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
-      showInvidiousFallbackToast()
+      showInvidiousFallbackToast('invidious')
       return await getChannelShortsLocal(channel, t, errorChannels, failedAttempts + 1)
     }
 
@@ -1616,7 +1669,7 @@ async function getChannelLiveInvidious(channel, t, errorChannels, failedAttempts
     let name
 
     if (result.videos.length > 0) {
-      name = result.videos.find(video => video.type === 'video' && video.author).author
+      name = result.videos.find(video => video.type === 'video' && video.author)?.author
     }
 
     return {
@@ -1624,17 +1677,26 @@ async function getChannelLiveInvidious(channel, t, errorChannels, failedAttempts
       videos: result.videos
     }
   } catch (err) {
-    handleSubscriptionFetchError(channel, err, t('Invidious API Error (Click to copy)'), {
+    handleSubscriptionFetchError(channel, err, getInvidiousApiErrorMessage(store.getters.getBackendPreference), {
       category: 'subscription live streams',
       backend: 'Invidious API'
     })
+
+    if (!hasInvidiousRssFeeds()) {
+      if (process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
+        showInvidiousFallbackToast('yattee')
+        // Skips the local API's own fallback to Invidious
+        return await getChannelLiveLocal(channel, t, errorChannels, 2)
+      }
+      return { videos: null }
+    }
 
     switch (failedAttempts) {
       case 0:
         return await getChannelLiveInvidiousRSS(channel, t, errorChannels, failedAttempts + 1)
       case 1:
         if (process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
-          showInvidiousFallbackToast()
+          showInvidiousFallbackToast('invidious')
           return await getChannelLiveLocal(channel, t, errorChannels, failedAttempts + 1)
         }
         return { videos: null }
@@ -1685,7 +1747,7 @@ async function getChannelLiveInvidiousRSS(channel, t, errorChannels, failedAttem
         return await getChannelLiveInvidious(channel, t, errorChannels, failedAttempts + 1)
       case 1:
         if (process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
-          showInvidiousFallbackToast()
+          showInvidiousFallbackToast('invidious')
           return await getChannelLiveLocalRSS(channel, t, errorChannels, failedAttempts + 1)
         }
         return { videos: null }

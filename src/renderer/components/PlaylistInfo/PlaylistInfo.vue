@@ -358,6 +358,7 @@ import FtShareButton from '../FtShareButton/FtShareButton.vue'
 import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 
 import store from '../../store/index'
+import { usesInvidiousApi } from '../../../apiBackends'
 
 import {
   ctrlFHandler,
@@ -549,7 +550,7 @@ const thumbnailPreference = computed(() => store.getters.getThumbnailPreference)
 /** @type {import('vue').ComputedRef<boolean>} */
 const blurThumbnails = computed(() => store.getters.getBlurThumbnails)
 
-/** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
+/** @type {import('vue').ComputedRef<'local' | 'invidious' | 'yattee'>} */
 const backendPreference = computed(() => store.getters.getBackendPreference)
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -1134,7 +1135,7 @@ async function scanDeadVideos() {
   deadVideoScanRunning.value = true
   deadVideoProgress.value = { checked: 0, total: new Set(videos.map(video => video.videoId)).size, uncertain: 0 }
   try {
-    const useLocal = process.env.SUPPORTS_LOCAL_API && store.getters.getBackendPreference !== 'invidious'
+    const useLocal = process.env.SUPPORTS_LOCAL_API && !usesInvidiousApi(store.getters.getBackendPreference)
     const checkLocal = useLocal ? await createLocalPlaylistAvailabilityChecker(signal) : null
     const result = await findDeadPlaylistItems(videos, async (videoId, scanSignal) => {
       const timeoutSignal = AbortSignal.any([scanSignal, AbortSignal.timeout(20_000)])

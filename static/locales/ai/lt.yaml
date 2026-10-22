@@ -534,6 +534,25 @@ Settings:
       Grid Columns: Tinklelio stulpeliai
       Playlist Grid Columns: Grojaraščių tinklelio stulpeliai
       Auto: Automatiškai
+    Preferred API Backend:
+      Yattee Server: Yattee serveris
+    Yattee Server:
+      Server URL: Yattee serverio URL
+      Username: Naudotojo vardas
+      Password: Slaptažodis
+      Proxy Videos: Perduoti vaizdo įrašus per Yattee serverį
+      Test Connection: Tikrinti ryšį
+      Testing: Tikrinamas ryšys…
+      Connected: Prisijungta prie Yattee Server {version}
+      Errors:
+        Invalid URL: Įveskite serverio URL, prasidedantį https:// arba http://.
+        Unreachable: Nepavyko pasiekti serverio. Patikrinkite URL ir ar serveris veikia.
+        Media not allowed: 'Prisijungta, bet serveris neleidžia šiai programai įkelti vaizdo įrašų. Nustatykite CORS_ORIGINS={origins} serverio aplinkos kintamuosiuose.'
+        Not a Yattee server: Serveris atsakė, bet tai nėra Yattee serveris.
+        Credentials required: Serveriui reikia naudotojo vardo ir slaptažodžio.
+        Invalid credentials: Serveris atmetė naudotojo vardą arba slaptažodį.
+        Rate limited: Serveris blokuoja prisijungimus po per daug nesėkmingų bandymų. Bandykite vėliau.
+        Server error: Serveris grąžino klaidą (HTTP {status}).
   Context Menu Search Settings:
     Context Menu Search Settings: Paieška kontekstiniame meniu
     Description: Pasirinkite paieškos sistemas, rodomas spustelėjus pažymėtą tekstą dešiniuoju pelės mygtuku. Paieškos rezultatai atveriami numatytojoje naršyklėje.
@@ -2041,6 +2060,7 @@ Video:
       unlisted: "Neįtrauktas į sąrašą"
   How this was made: Kaip tai buvo sukurta
   Save Queue to Playlist: "Išsaugoti eilę grojaraštyje"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Tiesioginė diskusija šiuo metu nepalaikoma naudojant Yattee serverį. Būtinas tiesioginis ryšys su YouTube.
 Playlist:
   Playlist Already Preloaded: "Visi grojaraščio vaizdo įrašai jau įkelti iš anksto"
   Playlist Preload Progress: "Vaizdo įrašų išankstinis įkėlimas: {completed} iš {requested}"
@@ -2294,6 +2314,8 @@ Tooltips:
       Pradėti tuščią seansą neatkuria išsaugotų kortelių ir atveria naują langą.
     Open Deep Links In New Window: OpenTubeX perduoti URL, pavyzdžiui, iš naršyklės peradresavimo plėtinių ar komandų eilutės argumentų, atveriami naujame lange.
     Remember Tab Navigation History: Kiekvienos kortelės naršymo pirmyn ir atgal istorija išsaugoma ir atkuriama iš naujo paleidus OpenTubeX.
+    Yattee Server: Tai yattee-server egzempliorius, iš kurio OpenTubeX įkelia vaizdo įrašus, kanalus, grojaraščius ir paieškos rezultatus. Naudotojo vardas ir slaptažodis saugomi tik šiame įrenginyje.
+    Proxy Videos Through Yattee Server: Perduoda vaizdo ir garso srautus per serverį. Palikite įjungtą, nebent serveris naudoja tą patį interneto ryšį kaip jūs, nes YouTube srautus teikia tik tam adresui, iš kurio jų buvo užklausta. Miniatiūros visada įkeliamos tiesiai iš YouTube.
   Proxy Settings:
     IP Block Recovery Script Path: Scenarijaus failo, paleidžiamo aptikus IP blokavimą, kelias. OpenTubeX laukia, kol jis bus baigtas, tada iš naujo įkelia vaizdo įrašą. Jei įjungtas atsarginis būdas, scenarijus paleidžiamas tik tada, kai nepavyksta ir atsarginis būdas.
   Player Settings:
@@ -2756,3 +2778,15 @@ Subscription Groups:
   Empty Group: Šioje grupėje nėra dabartinio profilio kanalų.
   Save Failed: Nepavyko išsaugoti grupės.
   Delete Failed: Nepavyko ištrinti grupės.
+Yattee Server:
+  API Error (Click to copy): Yattee serverio klaida (spustelėkite, jei norite kopijuoti)
+  Unsupported page: Šis puslapis nepasiekiamas naudojant Yattee serverį. Įjunkite „{fallbackSetting}“, kad jį įkeltumėte naudodami vietinį API.
+  Posts unavailable: Yattee serveriai neteikia įrašų. Įjunkite „{fallbackSetting}“, kad juos įkeltumėte naudodami vietinį API.
+  Errors:
+    Invalid credentials: Yattee serveris atmetė naudotojo vardą arba slaptažodį. Patikrinkite juos dalyje Nustatymai → Išplėstiniai.
+    Rate limited: Yattee serveris blokuoja prisijungimus po per daug nesėkmingų bandymų. Bandykite vėliau.
+    Streams not relayed: Yattee serveris neperdavė šio vaizdo įrašo srautų. Kol vaizdo įrašai perduodami per serverį, OpenTubeX tiesiogiai neprisijungia prie YouTube.
+    Not configured: Įveskite savo Yattee serverio URL dalyje Nustatymai → Išplėstiniai.
+    HTTPS required: Android gali leisti vaizdo įrašus tik iš Yattee serverių, kurie naudoja HTTPS.
+    Streams unavailable: Nepavyko įkelti šio vaizdo įrašo srautų iš Yattee serverio. Patikrinkite serverį mygtuku „Tikrinti ryšį“ dalyje Nustatymai → Išplėstiniai.
+Yattee Fallback Warning: Ši užklausa apeina jūsų sukonfigūruotą Yattee serverį ir jungiasi tiesiogiai prie YouTube, atskleisdama jūsų IP adresą.

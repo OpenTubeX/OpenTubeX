@@ -425,6 +425,25 @@ Settings:
       Grid Columns: Колоне мреже
       Playlist Grid Columns: Колоне мреже плејлиста
       Auto: Аутоматски
+    Preferred API Backend:
+      Yattee Server: Yattee сервер
+    Yattee Server:
+      Server URL: URL Yattee сервера
+      Username: Корисничко име
+      Password: Лозинка
+      Proxy Videos: Проксирај видео снимке преко Yattee сервера
+      Test Connection: Тестирај везу
+      Testing: Тестирање везе…
+      Connected: Повезано са Yattee сервером {version}
+      Errors:
+        Invalid URL: Унесите URL сервера који почиње са https:// или http://.
+        Unreachable: Сервер није доступан. Проверите URL и да ли сервер ради.
+        Media not allowed: 'Повезано, али сервер не дозвољава овој апликацији да учитава видео снимке. Подесите CORS_ORIGINS={origins} у променљивама окружења сервера.'
+        Not a Yattee server: Сервер је одговорио, али није Yattee сервер.
+        Credentials required: Сервер захтева корисничко име и лозинку.
+        Invalid credentials: Сервер је одбио корисничко име или лозинку.
+        Rate limited: Сервер блокира пријављивање након превише неуспелих покушаја. Покушајте поново касније.
+        Server error: Сервер је вратио грешку (HTTP {status}).
   Context Menu Search Settings:
     Context Menu Search Settings: Претрага из контекстног менија
     Description: Изаберите претраживаче који се приказују када кликнете десним тастером на изабрани текст. Претраге се отварају у подразумеваном прегледачу.
@@ -1721,6 +1740,7 @@ Video:
       unlisted: "Није на листи"
   How this was made: Како је ово направљено
   Save Queue to Playlist: "Сачувај ред за репродукцију у плејлисту"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Ћаскање уживо тренутно није подржано са Yattee сервером. Потребна је директна веза са YouTube-ом.
 Playlist:
   Playlist Already Preloaded: "Сви видео снимци са плејлисте су већ претходно учитани"
   Playlist Preload Progress: "Претходно учитавање видео снимака: {completed} од {requested}"
@@ -1953,6 +1973,8 @@ Tooltips:
       „Учитај последњу активну картицу“ враћа претходну сесију са осталим отвореним, али неучитаним картицама; учитавају се када кликнете на њих.
       „Почни са празном сесијом“ прескаче сачуване картице и отвара нов прозор.
     Remember Tab Navigation History: Историја кретања уназад и унапред за сваку картицу се чува и враћа када се OpenTubeX поново покрене.
+    Yattee Server: yattee-server инстанца са које OpenTubeX учитава видео снимке, канале, плејлисте и резултате претраге. Корисничко име и лозинка се чувају само на овом уређају.
+    Proxy Videos Through Yattee Server: Преусмерава видео и аудио стримове преко сервера. Оставите ово укључено осим ако сервер не користи исту интернет везу као ви, јер YouTube испоручује стримове само адреси која их је затражила. Сличице се увек учитавају директно са YouTube-а.
   Proxy Settings:
     IP Block Recovery Script Path: Путања до датотеке скрипте која се покреће када се открије блокада IP адресе. OpenTubeX чека да се скрипта заврши, па поново учитава видео-снимак. Ако је резервни начин укључен, скрипта се покреће само ако и он не успе.
   Player Settings:
@@ -2335,3 +2357,15 @@ Subscription Groups:
   Empty Group: Ова група нема канале из тренутног профила.
   Save Failed: Није могуће сачувати групу.
   Delete Failed: Није могуће избрисати групу.
+Yattee Server:
+  API Error (Click to copy): Грешка Yattee сервера (Кликнути за копирање)
+  Unsupported page: Ова страница није доступна са Yattee сервером. Укључите „{fallbackSetting}“ да бисте је учитали помоћу локалног API-ја.
+  Posts unavailable: Yattee сервери не пружају објаве. Укључите „{fallbackSetting}“ да бисте их учитали помоћу локалног API-ја.
+  Errors:
+    Invalid credentials: Yattee сервер је одбио корисничко име или лозинку. Проверите их у одељку Подешавања → Напредно.
+    Rate limited: Yattee сервер блокира пријављивање након превише неуспелих покушаја. Покушајте поново касније.
+    Streams not relayed: Yattee сервер није проследио стримове овог видео снимка. Док се видео снимци проксирају преко сервера, OpenTubeX се не повезује директно са YouTube-ом.
+    Not configured: Унесите URL свог Yattee сервера у одељку Подешавања → Напредно.
+    HTTPS required: Android може да репродукује видео снимке само са Yattee сервера који користе HTTPS.
+    Streams unavailable: Није могуће учитати стримове овог видео-снимка са Yattee сервера. Проверите сервер помоћу „Тестирај везу“ у одељку Подешавања → Напредно.
+Yattee Fallback Warning: Овај захтев заобилази подешени Yattee сервер и повезује се директно са YouTube-ом, откривајући вашу IP адресу.

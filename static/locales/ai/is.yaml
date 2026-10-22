@@ -420,6 +420,25 @@ Settings:
       Grid Columns: Dálkar hnitanets
       Playlist Grid Columns: Dálkar hnitanets spilunarlista
       Auto: Sjálfvirkt
+    Preferred API Backend:
+      Yattee Server: Yattee-netþjónn
+    Yattee Server:
+      Server URL: Slóð Yattee-netþjóns
+      Username: Notandanafn
+      Password: Lykilorð
+      Proxy Videos: Beina myndskeiðum í gegnum Yattee-netþjóninn
+      Test Connection: Prófa tengingu
+      Testing: Prófa tenginguna…
+      Connected: Tengt við Yattee Server {version}
+      Errors:
+        Invalid URL: Sláðu inn slóð netþjónsins. Hún verður að byrja á https:// eða http://.
+        Unreachable: Ekki náðist í netþjóninn. Athugaðu slóðina og hvort netþjónninn sé í gangi.
+        Media not allowed: 'Tengt, en netþjónninn leyfir þessu forriti ekki að hlaða inn myndskeiðum. Stilltu CORS_ORIGINS={origins} í umhverfisbreytum netþjónsins.'
+        Not a Yattee server: Netþjónninn svaraði en hann er ekki Yattee-netþjónn.
+        Credentials required: Netþjónninn krefst notandanafns og lykilorðs.
+        Invalid credentials: Netþjónninn hafnaði notandanafninu eða lykilorðinu.
+        Rate limited: Netþjónninn lokar á innskráningar eftir of margar misheppnaðar tilraunir. Reyndu aftur síðar.
+        Server error: Netþjónninn skilaði villu (HTTP {status}).
   Context Menu Search Settings:
     Context Menu Search Settings: Leit í samhengisvalmynd
     Description: Veldu hvaða leitarvélar birtast þegar þú hægrismellir á valinn texta. Leitin opnast í sjálfgefna vafranum þínum.
@@ -1678,6 +1697,7 @@ Video:
       unlisted: "Óskráð"
   How this was made: Hvernig þetta var gert
   Save Queue to Playlist: "Vista biðröð í spilunarlista"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Spjall í beinni er ekki stutt með Yattee-netþjóninum. Nauðsynlegt er að vera með beina tengingu við YouTube.
 Playlist:
   Playlist Already Preloaded: "Öll myndskeið spilunarlistans eru þegar forhlaðin"
   Playlist Preload Progress: "Forhleðsla myndskeiða: {completed} af {requested}"
@@ -1904,6 +1924,8 @@ Tooltips:
       Valkosturinn Hlaða inn síðasta virka flipa endurheimtir fyrri setu með hina flipana opna en ekki í minni. Þeir hlaðast inn þegar smellt er á þá.
       Valkosturinn Hefja tóma setu sleppir vistuðum flipum og opnar nýjan glugga.
     Remember Tab Navigation History: Ferill fyrir aftur- og áframflakk hvers flipa er vistaður og endurheimtur þegar OpenTubeX er endurræst.
+    Yattee Server: Tilvik yattee-server sem OpenTubeX sækir myndskeið, rásir, spilunarlista og leitarniðurstöður frá. Notandanafnið og lykilorðið eru aðeins geymd á þessu tæki.
+    Proxy Videos Through Yattee Server: Beinir mynd- og hljóðstreymum í gegnum netþjóninn. Hafðu kveikt á þessu nema netþjónninn deili nettengingunni þinni, því YouTube afhendir streymi aðeins því vistfangi sem bað um þau. Smámyndir hlaðast alltaf beint frá YouTube.
   Proxy Settings:
     IP Block Recovery Script Path: Slóð að skriftuskrá sem keyra skal þegar vart verður við að IP-tölu hafi verið lokað. OpenTubeX bíður eftir að keyrslu ljúki og endurhleður síðan myndbandinu. Ef varaleið er virk er skriftan aðeins keyrð þegar varaleiðin bregst einnig.
   Player Settings:
@@ -2283,3 +2305,15 @@ Subscription Groups:
   Empty Group: Þessi hópur inniheldur engar rásir úr núverandi notkunarsniði.
   Save Failed: Ekki tókst að vista hópinn.
   Delete Failed: Ekki tókst að eyða hópnum.
+Yattee Server:
+  API Error (Click to copy): Villa í Yattee-netþjóni (smella til að afrita)
+  Unsupported page: Þessi síða er ekki tiltæk með Yattee-netþjóninum. Kveiktu á „{fallbackSetting}“ til að sækja hana með staðværa API-kerfisviðmótinu.
+  Posts unavailable: Yattee-netþjónar bjóða ekki upp á færslur. Kveiktu á „{fallbackSetting}“ til að sækja þær með staðværa API-kerfisviðmótinu.
+  Errors:
+    Invalid credentials: Yattee-netþjónninn hafnaði notandanafninu eða lykilorðinu. Athugaðu þau í Stillingar → Ítarlegt.
+    Rate limited: Yattee-netþjónninn lokar á innskráningar eftir of margar misheppnaðar tilraunir. Reyndu aftur síðar.
+    Streams not relayed: Yattee-netþjónninn miðlaði ekki streymum þessa myndskeiðs. Á meðan myndskeiðum er beint í gegnum netþjóninn tengist OpenTubeX ekki beint við YouTube.
+    Not configured: Sláðu inn slóð Yattee-netþjónsins þíns í Stillingar → Ítarlegt.
+    HTTPS required: Android getur aðeins spilað myndskeið frá Yattee-netþjónum sem nota HTTPS.
+    Streams unavailable: Ekki tókst að hlaða streymum þessa myndskeiðs frá Yattee-netþjóninum. Notaðu „Prófa tengingu“ í Stillingar → Ítarlegt til að athuga netþjóninn.
+Yattee Fallback Warning: Þessi beiðni fer fram hjá Yattee-netþjóninum sem þú stilltir og tengist beint við YouTube, sem afhjúpar IP-töluna þína.

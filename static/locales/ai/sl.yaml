@@ -544,6 +544,25 @@ Settings:
       Grid Columns: Stolpci mreže
       Playlist Grid Columns: Stolpci mreže seznamov predvajanja
       Auto: Samodejno
+    Preferred API Backend:
+      Yattee Server: Strežnik Yattee
+    Yattee Server:
+      Server URL: URL strežnika Yattee
+      Username: Uporabniško ime
+      Password: Geslo
+      Proxy Videos: Posreduj videoposnetke prek strežnika Yattee
+      Test Connection: Preizkusi povezavo
+      Testing: Preizkušanje povezave …
+      Connected: Povezano z Yattee Server {version}
+      Errors:
+        Invalid URL: Vnesite URL strežnika, ki se začne s https:// ali http://.
+        Unreachable: Strežnika ni mogoče doseči. Preverite URL in ali strežnik deluje.
+        Media not allowed: 'Povezano, vendar strežnik tej aplikaciji ne dovoli nalaganja videoposnetkov. Nastavite CORS_ORIGINS={origins} v okoljskih spremenljivkah strežnika.'
+        Not a Yattee server: Strežnik se je odzval, vendar ni strežnik Yattee.
+        Credentials required: Strežnik zahteva uporabniško ime in geslo.
+        Invalid credentials: Strežnik je zavrnil uporabniško ime ali geslo.
+        Rate limited: Strežnik po preveč neuspešnih poskusih blokira prijave. Poskusite znova pozneje.
+        Server error: Strežnik je vrnil napako (HTTP {status}).
   Context Menu Search Settings:
     Context Menu Search Settings: Iskanje v kontekstnem meniju
     Description: Izberite iskalnike, ki se prikažejo, ko z desno tipko miške kliknete izbrano besedilo. Iskanja se odprejo v privzetem brskalniku.
@@ -2117,6 +2136,7 @@ Video:
       unlisted: "Ni na seznamu"
   How this was made: Kako je bilo to ustvarjeno
   Save Queue to Playlist: "Shrani čakalno vrsto na seznam predvajanja"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Klepet v živo trenutno ni podprt s strežnikom Yattee. Potrebna je neposredna povezava z YouTubom.
 Playlist:
   Playlist Already Preloaded: "Vsi videoposnetki na seznamu so že prednaloženi"
   Playlist Preload Progress: "Prednalaganje videoposnetkov: {completed} od {requested}"
@@ -2381,6 +2401,8 @@ Tooltips:
       OpenTubeX bo kliknjeno povezavo privzeto odprl v vašem privzetem brskalniku.
     Open Deep Links In New Window: Naslovi URL, posredovani aplikaciji OpenTubeX, na primer s preusmeritvenimi razširitvami brskalnika ali argumenti ukazne vrstice, se odprejo v novem oknu.
     Remember Tab Navigation History: Zgodovina pomikanja nazaj in naprej se za vsak zavihek shrani ter obnovi ob ponovnem zagonu aplikacije OpenTubeX.
+    Yattee Server: Primerek yattee-server, iz katerega OpenTubeX nalaga videoposnetke, kanale, sezname predvajanja in rezultate iskanja. Uporabniško ime in geslo sta shranjena samo v tej napravi.
+    Proxy Videos Through Yattee Server: Video in zvočne tokove posreduje prek strežnika. To možnost pustite vklopljeno, razen če strežnik uporablja isto internetno povezavo kot vi, saj YouTube tokove pošilja samo naslovu, ki jih je zahteval. Sličice se vedno naložijo neposredno z YouTuba.
   Proxy Settings:
     IP Block Recovery Script Path: Pot do skriptne datoteke, ki se zažene ob zaznani blokadi naslova IP. OpenTubeX počaka, da se izvajanje konča, nato znova naloži videoposnetek. Če je omogočen nadomestni način, se skript zažene le, kadar tudi ta ne uspe.
   Player Settings:
@@ -2852,3 +2874,15 @@ Subscription Groups:
   Empty Group: Ta skupina nima kanalov iz trenutnega profila.
   Save Failed: Skupine ni bilo mogoče shraniti.
   Delete Failed: Skupine ni bilo mogoče izbrisati.
+Yattee Server:
+  API Error (Click to copy): Napaka strežnika Yattee (kliknite za kopiranje)
+  Unsupported page: Ta stran s strežnikom Yattee ni na voljo. Vklopite nastavitev »{fallbackSetting}«, da jo naložite z lokalnim APV.
+  Posts unavailable: Strežniki Yattee ne zagotavljajo objav. Vklopite nastavitev »{fallbackSetting}«, da jih naložite z lokalnim APV.
+  Errors:
+    Invalid credentials: Strežnik Yattee je zavrnil uporabniško ime ali geslo. Preverite ju v razdelku Nastavitve → Napredno.
+    Rate limited: Strežnik Yattee po preveč neuspešnih poskusih blokira prijave. Poskusite znova pozneje.
+    Streams not relayed: Strežnik Yattee ni posredoval tokov tega videoposnetka. Dokler se videoposnetki posredujejo prek strežnika, se OpenTubeX ne poveže neposredno z YouTubom.
+    Not configured: Vnesite URL svojega strežnika Yattee v razdelku Nastavitve → Napredno.
+    HTTPS required: Android lahko predvaja videoposnetke samo s strežnikov Yattee, ki uporabljajo HTTPS.
+    Streams unavailable: Pretokov tega videoposnetka ni bilo mogoče naložiti s strežnika Yattee. Strežnik preverite z »Preizkusi povezavo« v razdelku Nastavitve → Napredno.
+Yattee Fallback Warning: Ta zahteva zaobide nastavljeni strežnik Yattee in se poveže neposredno z YouTubom ter razkrije vaš naslov IP.

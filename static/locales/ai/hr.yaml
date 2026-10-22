@@ -417,6 +417,25 @@ Settings:
       Grid Columns: Stupci rešetke
       Playlist Grid Columns: Stupci rešetke popisa za reprodukciju
       Auto: Automatski
+    Preferred API Backend:
+      Yattee Server: Yattee poslužitelj
+    Yattee Server:
+      Server URL: URL Yattee poslužitelja
+      Username: Korisničko ime
+      Password: Lozinka
+      Proxy Videos: Koristi Yattee poslužitelj kao proxy videa
+      Test Connection: Testiraj vezu
+      Testing: Testiranje veze…
+      Connected: Povezano s Yattee poslužiteljem {version}
+      Errors:
+        Invalid URL: Unesite URL poslužitelja koji počinje s https:// ili http://.
+        Unreachable: Poslužitelj nije dostupan. Provjerite URL i radi li poslužitelj.
+        Media not allowed: 'Povezano, ali poslužitelj ne dopušta ovoj aplikaciji učitavanje videa. Postavite CORS_ORIGINS={origins} u varijablama okruženja poslužitelja.'
+        Not a Yattee server: Poslužitelj je odgovorio, ali nije Yattee poslužitelj.
+        Credentials required: Poslužitelj zahtijeva korisničko ime i lozinku.
+        Invalid credentials: Poslužitelj je odbio korisničko ime ili lozinku.
+        Rate limited: Poslužitelj blokira prijave nakon previše neuspjelih pokušaja. Pokušajte ponovno kasnije.
+        Server error: Poslužitelj je vratio grešku (HTTP {status}).
   Context Menu Search Settings:
     Context Menu Search Settings: Pretraživanje iz kontekstnog izbornika
     Description: Odaberite tražilice koje se prikazuju kada desnom tipkom miša kliknete odabrani tekst. Pretraživanja se otvaraju u zadanom pregledniku.
@@ -1677,6 +1696,7 @@ Video:
       unlisted: "Nije javno navedeno"
   How this was made: Kako je ovo izrađeno
   Save Queue to Playlist: "Spremi red čekanja u zbirku"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Razgovor uživo trenutačno nije podržan s Yattee poslužiteljem. Potrebna je izravna veza s YouTubeom.
 Playlist:
   Playlist Already Preloaded: "Svi videozapisi na popisu već su predučitani"
   Playlist Preload Progress: "Predučitavanje videozapisa: {completed} od {requested}"
@@ -1905,6 +1925,8 @@ Tooltips:
       Mogućnost "Učitaj posljednju aktivnu karticu" vraća prethodnu sesiju s ostalim otvorenim, ali neučitanim karticama; učitat će se kada ih kliknete.
       Mogućnost "Pokreni s praznom sesijom" preskače spremljene kartice i otvara novi prozor.
     Remember Tab Navigation History: Povijest kretanja unatrag i naprijed sprema se za svaku karticu i vraća pri ponovnom pokretanju aplikacije OpenTubeX.
+    Yattee Server: yattee-server instanca iz koje OpenTubeX učitava videa, kanale, zbirke i rezultate pretraživanja. Korisničko ime i lozinka spremaju se samo na ovom uređaju.
+    Proxy Videos Through Yattee Server: Prosljeđuje video i audio tokove putem poslužitelja. Ostavite ovo uključeno, osim ako poslužitelj dijeli vašu internetsku vezu, jer YouTube šalje tokove samo na adresu koja ih je zatražila. Minijature se uvijek učitavaju izravno s YouTubea.
   Proxy Settings:
     IP Block Recovery Script Path: Putanja datoteke skripte koja se pokreće kada se otkrije blokada IP adrese. OpenTubeX čeka da završi, a zatim ponovno učitava videozapis. Ako je pričuvna metoda omogućena, skripta se pokreće samo ako ni pričuvna metoda ne uspije.
   Player Settings:
@@ -2285,3 +2307,15 @@ Subscription Groups:
   Empty Group: Ova grupa nema kanala iz trenutačnog profila.
   Save Failed: Nije moguće spremiti grupu.
   Delete Failed: Nije moguće izbrisati grupu.
+Yattee Server:
+  API Error (Click to copy): Greška Yattee poslužitelja (pritisni za kopiranje)
+  Unsupported page: Ova stranica nije dostupna s Yattee poslužiteljem. Uključite „{fallbackSetting}” kako biste je učitali lokalnim sučeljem.
+  Posts unavailable: Yattee poslužitelji ne pružaju objave. Uključite „{fallbackSetting}” kako biste ih učitali lokalnim sučeljem.
+  Errors:
+    Invalid credentials: Yattee poslužitelj je odbio korisničko ime ili lozinku. Provjerite ih u odjeljku Postavke → Napredno.
+    Rate limited: Yattee poslužitelj blokira prijave nakon previše neuspjelih pokušaja. Pokušajte ponovno kasnije.
+    Streams not relayed: Yattee poslužitelj nije proslijedio tokove ovog videa. Dok se videa prosljeđuju putem poslužitelja, OpenTubeX se ne povezuje izravno s YouTubeom.
+    Not configured: Unesite URL svog Yattee poslužitelja u odjeljku Postavke → Napredno.
+    HTTPS required: Android može reproducirati videa samo s Yattee poslužitelja koji koriste HTTPS.
+    Streams unavailable: Streamove ovog videozapisa nije moguće učitati s Yattee poslužitelja. Provjerite poslužitelj pomoću „Testiraj vezu” u odjeljku Postavke → Napredno.
+Yattee Fallback Warning: Ovaj zahtjev zaobilazi postavljeni Yattee poslužitelj i povezuje se izravno s YouTubeom, otkrivajući vašu IP adresu.

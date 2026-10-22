@@ -417,6 +417,25 @@ Settings:
       Grid Columns: Colonnes de la grille
       Playlist Grid Columns: Colonnes de la grille des playlists
       Auto: Automatique
+    Preferred API Backend:
+      Yattee Server: Serveur Yattee
+    Yattee Server:
+      Server URL: URL du serveur Yattee
+      Username: Nom d’utilisateur
+      Password: Mot de passe
+      Proxy Videos: Proxy vidéo via le serveur Yattee
+      Test Connection: Tester la connexion
+      Testing: Test de la connexion…
+      Connected: Connecté au serveur Yattee {version}
+      Errors:
+        Invalid URL: Saisissez l’URL du serveur, en commençant par https:// ou http://.
+        Unreachable: Impossible de joindre le serveur. Vérifiez l’URL et assurez-vous que le serveur est en marche.
+        Media not allowed: 'Connecté, mais le serveur n’autorise pas cette application à charger des vidéos. Définissez CORS_ORIGINS={origins} dans les variables d’environnement du serveur.'
+        Not a Yattee server: Le serveur a répondu, mais ce n’est pas un serveur Yattee.
+        Credentials required: Le serveur exige un nom d’utilisateur et un mot de passe.
+        Invalid credentials: Le serveur a refusé le nom d’utilisateur ou le mot de passe.
+        Rate limited: Le serveur bloque les connexions après trop de tentatives échouées. Réessayez plus tard.
+        Server error: Le serveur a renvoyé une erreur (HTTP {status}).
   Context Menu Search Settings:
     Context Menu Search Settings: Recherche du menu contextuel
     Description: Choisissez les moteurs de recherche proposés lorsque vous faites un clic droit sur du texte sélectionné. Les recherches s’ouvrent dans votre navigateur par défaut.
@@ -1651,6 +1670,7 @@ Video:
       needs_auth: "Connexion requise"
       unlisted: "Non répertorié"
   Save Queue to Playlist: "Enregistrer la file d’attente dans une playlist"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Le chat en direct n’est actuellement pas pris en charge avec le serveur Yattee. Une connexion directe à YouTube est requise.
 Playlist:
   Playlist Already Preloaded: "Toutes les vidéos de la playlist sont déjà préchargées"
   Playlist Preload Progress: "Préchargement des vidéos : {completed} sur {requested}"
@@ -1877,6 +1897,8 @@ Tooltips:
       Charger le dernier onglet actif restaure la session précédente en ouvrant les autres onglets sans les charger ; ils se chargent lorsque vous cliquez dessus.
       Démarrer avec une session vide ignore les onglets enregistrés et ouvre une nouvelle fenêtre.
     Remember Tab Navigation History: L’historique de navigation avant et arrière de chaque onglet est enregistré et restauré au redémarrage d’OpenTubeX.
+    Yattee Server: L’instance yattee-server à partir de laquelle OpenTubeX charge les vidéos, les chaînes, les playlists et les résultats de recherche. Le nom d’utilisateur et le mot de passe sont stockés uniquement sur cet appareil.
+    Proxy Videos Through Yattee Server: Fait transiter les flux vidéo et audio par le serveur. Laissez cette option activée, sauf si le serveur partage votre connexion Internet, car YouTube ne fournit les flux qu’à l’adresse qui les a demandés. Les miniatures sont toujours chargées directement depuis YouTube.
   Proxy Settings:
     IP Block Recovery Script Path: Chemin du script à exécuter lorsqu’un blocage d’IP est détecté. OpenTubeX attend la fin de son exécution, puis recharge la vidéo. Si le recours à une autre source est activé, le script ne s’exécute que si cette solution échoue également.
   Player Settings:
@@ -2254,3 +2276,15 @@ Subscription Groups:
   Empty Group: Ce groupe ne contient aucune chaîne du profil actuel.
   Save Failed: Impossible d’enregistrer le groupe.
   Delete Failed: Impossible de supprimer le groupe.
+Yattee Server:
+  API Error (Click to copy): Erreur du serveur Yattee (Cliquez pour copier)
+  Unsupported page: Cette page n’est pas disponible avec le serveur Yattee. Activez « {fallbackSetting} » pour la charger avec l’API locale.
+  Posts unavailable: Les serveurs Yattee ne fournissent pas les posts. Activez « {fallbackSetting} » pour les charger avec l’API locale.
+  Errors:
+    Invalid credentials: Le serveur Yattee a refusé le nom d’utilisateur ou le mot de passe. Vérifiez-les dans Paramètres → Avancé.
+    Rate limited: Le serveur Yattee bloque les connexions après trop de tentatives échouées. Réessayez plus tard.
+    Streams not relayed: Le serveur Yattee n’a pas relayé les flux de cette vidéo. Tant que les vidéos transitent par le serveur, OpenTubeX ne se connecte pas directement à YouTube.
+    Not configured: Saisissez l’URL de votre serveur Yattee dans Paramètres → Avancé.
+    HTTPS required: Android ne peut lire que les vidéos provenant de serveurs Yattee qui utilisent HTTPS.
+    Streams unavailable: Impossible de charger les flux de cette vidéo depuis le serveur Yattee. Utilisez « Tester la connexion » dans Paramètres → Avancé pour vérifier le serveur.
+Yattee Fallback Warning: Cette requête contourne votre serveur Yattee configuré et se connecte directement à YouTube, exposant votre adresse IP.

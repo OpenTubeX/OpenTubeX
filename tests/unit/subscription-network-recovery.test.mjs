@@ -17,6 +17,7 @@ import { buildRequestDiagnostic, classifyRequestFailure, formatRequestDiagnostic
 import { getSubscriptionsForFeed } from '../../src/renderer/helpers/subscription-channels.js'
 import { extractAssignedJsonObject } from '../../src/renderer/helpers/assigned-json.js'
 import { getSubscriptionVideoSortTimestamp, updateUpcomingPremiereState, reconcileFetchedSubscriptionEntries } from '../../src/renderer/helpers/subscription-entries.js'
+import { usesInvidiousApi } from '../../src/apiBackends.js'
 
 const { parseLocalChannelShorts, parseLocalPlaylistVideos } = createLocalFeedParsers(() => false)
 
@@ -94,6 +95,8 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
     getChannelPlaylistId: id => id,
     showApiErrorToast: (...args) => toasts.push(args),
     showInvidiousFallbackToast: () => warnings.push('direct fallback warning'),
+    usesInvidiousApi,
+    getInvidiousApiErrorMessage: () => 'Invidious API Error (Click to copy)',
     copyToClipboard: text => copied.push(text),
     showToast: (...args) => {
       toasts.push(args)
@@ -110,6 +113,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
     getLocalChannelLiveStreams: async url => { if (scraperError) throw scraperError; return fetchLocal(url) },
     getInvidiousChannelVideos: async url => { if (scraperError) throw scraperError; return fetchInvidious(url) },
     getInvidiousChannelLive: async url => { if (scraperError) throw scraperError; return fetchInvidious(url) },
+    getInvidiousChannelShorts: async url => { if (scraperError) throw scraperError; return fetchInvidious(url) },
     getLocalChannelCommunity: async id => (await fetchLocal(id)).posts,
     invidiousGetCommunityPosts: fetchInvidious,
     getLocalChannel: async () => channelInfo,

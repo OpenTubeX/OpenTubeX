@@ -717,6 +717,7 @@ Settings:
       Preferred API Backend: Preferred API Backend
       Local API: Local API
       Invidious API: Invidious API
+      Yattee Server: "Yattee Server"
     Video View Type:
       Video View Type: Video View Type
       Grid: Grid
@@ -750,6 +751,23 @@ Settings:
     Set Current Instance as Default: Set Current Instance as Default
     Clear Default Instance: Clear Default Instance
     View all Invidious instance information: View all Invidious instance information
+    Yattee Server:
+      Server URL: "Yattee server URL"
+      Username: "Username"
+      Password: "Password"
+      Proxy Videos: "Proxy videos through the Yattee server"
+      Test Connection: "Test Connection"
+      Testing: "Testing the connection…"
+      Connected: "Connected to Yattee Server {version}"
+      Errors:
+        Invalid URL: "Enter the server URL, starting with https:// or http://."
+        Unreachable: "Could not reach the server. Check the URL and whether the server is running."
+        Media not allowed: "Connected, but the server does not allow this app to load videos. Set CORS_ORIGINS={origins} in the server's environment."
+        Not a Yattee server: "The server responded, but it is not a Yattee server."
+        Credentials required: "The server requires a username and password."
+        Invalid credentials: "The server rejected the username or password."
+        Rate limited: "The server is blocking sign-ins after too many failed attempts. Try again later."
+        Server error: "The server returned an error (HTTP {status})."
     Region for Trending: Region for Trending
     #! List countries
     External Link Handling:
@@ -2353,6 +2371,7 @@ Video:
   'Live Chat is currently not supported with the Invidious API. A direct connection to YouTube is required.': Live
     Chat is currently not supported with the Invidious API.  A direct connection to
     YouTube is required.
+  'Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.': "Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required."
   'Live Chat is unavailable for this stream. It may have been disabled by the uploader.': 'Live Chat is unavailable for this stream. It may have been disabled by the uploader.'
   Show Super Chat Comment: Show Super Chat Comment
   Scroll to Bottom: Scroll to Bottom
@@ -2930,6 +2949,8 @@ Description:
 #Tooltips
 Tooltips:
   General Settings:
+    Yattee Server: "The yattee-server instance that OpenTubeX loads videos, channels, playlists and search results from. The username and password are only stored on this device."
+    Proxy Videos Through Yattee Server: "Relays video and audio streams through the server. Leave this on unless the server shares your internet connection, because YouTube only serves streams to the address that requested them. Thumbnails always load directly from YouTube."
     Enable Tabs: "Keeps the current page open. Other tabs are kept until the app restarts; enable tabs again to restore them."
     Data Saver Thumbnails: "Use lower-resolution thumbnails to reduce data usage."
     Use AI Translation Completions: Fill gaps in human translations with AI-generated text. Human translations always take priority.
@@ -3082,6 +3103,17 @@ Tooltips:
 # Toast Messages
 Local API Error (Click to copy): Local API Error (Click to copy)
 Invidious API Error (Click to copy): Invidious API Error (Click to copy)
+Yattee Server:
+  API Error (Click to copy): "Yattee Server Error (Click to copy)"
+  Errors:
+    Invalid credentials: "The Yattee server rejected the username or password. Check them in Settings → Advanced."
+    Rate limited: "The Yattee server is blocking sign-ins after too many failed attempts. Try again later."
+    Streams not relayed: "The Yattee server did not relay the streams of this video. While videos are proxied through the server, OpenTubeX does not connect to YouTube directly."
+    Not configured: "Enter the URL of your Yattee server in Settings → Advanced."
+    HTTPS required: "Android can only play videos from Yattee servers that use HTTPS."
+    Streams unavailable: "Could not load the streams of this video from the Yattee server. Use Test Connection in Settings → Advanced to check the server."
+  Unsupported page: "This page is not available with the Yattee server. Turn on “{fallbackSetting}” to load it with the local API."
+  Posts unavailable: "Yattee servers do not provide posts. Turn on “{fallbackSetting}” to load them with the local API."
 Falling back to Invidious API: Falling back to Invidious API
 Falling back to Local API: Falling back to Local API
 This video is unavailable because of missing formats. This can happen due to country unavailability.: This
@@ -3473,4 +3505,5 @@ Mobile Navigation:
 Installer:
   Create Desktop Shortcut: Create a desktop shortcut
 Invidious Fallback Warning: "This request bypasses your configured Invidious instance and connects directly to YouTube, exposing your IP address."
+Yattee Fallback Warning: "This request bypasses your configured Yattee server and connects directly to YouTube, exposing your IP address."
 Automatically unloaded to free memory: "Automatically unloaded to free memory"

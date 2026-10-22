@@ -434,6 +434,25 @@ Settings:
       Grid Columns: Слупкі сеткі
       Playlist Grid Columns: Слупкі сеткі плэйлістоў
       Auto: Аўтаматычна
+    Preferred API Backend:
+      Yattee Server: Сервер Yattee
+    Yattee Server:
+      Server URL: URL сервера Yattee
+      Username: Імя карыстальніка
+      Password: Пароль
+      Proxy Videos: Перадаваць відэа праз сервер Yattee
+      Test Connection: Праверыць злучэнне
+      Testing: Праверка злучэння…
+      Connected: Падключана да Yattee Server {version}
+      Errors:
+        Invalid URL: Увядзіце URL сервера, які пачынаецца з https:// або http://.
+        Unreachable: Не ўдалося злучыцца з серверам. Праверце URL і ці працуе сервер.
+        Media not allowed: 'Падключана, але сервер не дазваляе гэтай праграме загружаць відэа. Задайце CORS_ORIGINS={origins} у зменных асяроддзя сервера.'
+        Not a Yattee server: Сервер адказаў, але гэта не сервер Yattee.
+        Credentials required: Сервер патрабуе імя карыстальніка і пароль.
+        Invalid credentials: Сервер адхіліў імя карыстальніка або пароль.
+        Rate limited: Сервер блакуе ўваход пасля занадта вялікай колькасці няўдалых спроб. Паўтарыце спробу пазней.
+        Server error: Сервер вярнуў памылку (HTTP {status}).
   Context Menu Search Settings:
     Context Menu Search Settings: Пошук з кантэкстнага меню
     Description: Выберыце пошукавыя сістэмы, якія будуць паказвацца пасля націскання правай кнопкай мышы на вылучаным тэксце. Вынікі адкрываюцца ў прадвызначаным браўзеры.
@@ -1740,6 +1759,7 @@ Video:
       unlisted: "Не ў спісе"
   How this was made: Як гэта было зроблена
   Save Queue to Playlist: "Захаваць чаргу ў плэй-ліст"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Жывы чат зараз не падтрымліваецца серверам Yattee. Патрабуецца прамое падключэнне да YouTube.
 Playlist:
   Playlist Already Preloaded: "Усе відэа плэйліста ўжо папярэдне загружаны"
   Playlist Preload Progress: "Папярэдняя загрузка відэа: {completed} з {requested}"
@@ -1972,6 +1992,8 @@ Tooltips:
       «Загрузіць апошнюю актыўную ўкладку» аднаўляе папярэдні сеанс, адкрываючы астатнія ўкладкі выгружанымі; яны загрузяцца, калі вы на іх націснеце.
       «Пачаць з пустога сеанса» прапускае захаваныя ўкладкі і адкрывае новае акно.
     Remember Tab Navigation History: Гісторыя пераходаў назад і наперад у кожнай укладцы захоўваецца і аднаўляецца пасля перазапуску OpenTubeX.
+    Yattee Server: Экзэмпляр yattee-server, з якога OpenTubeX загружае відэа, каналы, плэй-лісты і вынікі пошуку. Імя карыстальніка і пароль захоўваюцца толькі на гэтай прыладзе.
+    Proxy Videos Through Yattee Server: Перадае відэа- і аўдыяструмені праз сервер. Пакіньце гэта ўключаным, калі толькі сервер не карыстаецца тым жа інтэрнэт-злучэннем, што і вы, бо YouTube аддае струмені толькі на адрас, які іх запытаў. Эскізы заўсёды загружаюцца непасрэдна з YouTube.
   Proxy Settings:
     IP Block Recovery Script Path: Шлях да файла сцэнарыя, які запускаецца пры выяўленні блакавання IP. OpenTubeX чакае яго завяршэння, а потым перазагружае відэа. Калі ўключаны рэзервовы метад, сцэнарый запускаецца толькі тады, калі гэты метад таксама не спрацаваў.
   Player Settings:
@@ -2353,3 +2375,15 @@ Subscription Groups:
   Empty Group: У гэтай групе няма каналаў з бягучага профілю.
   Save Failed: Не ўдалося захаваць групу.
   Delete Failed: Не ўдалося выдаліць групу.
+Yattee Server:
+  API Error (Click to copy): Памылка сервера Yattee (Націсніце, каб скапіяваць)
+  Unsupported page: Гэтая старонка недаступная з серверам Yattee. Уключыце «{fallbackSetting}», каб загрузіць яе праз лакальны API.
+  Posts unavailable: Серверы Yattee не падаюць публікацыі. Уключыце «{fallbackSetting}», каб загрузіць іх праз лакальны API.
+  Errors:
+    Invalid credentials: Сервер Yattee адхіліў імя карыстальніка або пароль. Праверце іх у раздзеле «Налады» → «Пашыраныя».
+    Rate limited: Сервер Yattee блакуе ўваход пасля занадта вялікай колькасці няўдалых спроб. Паўтарыце спробу пазней.
+    Streams not relayed: Сервер Yattee не перадаў струмені гэтага відэа. Пакуль відэа перадаюцца праз сервер, OpenTubeX не падключаецца да YouTube напрамую.
+    Not configured: Увядзіце URL вашага сервера Yattee у раздзеле «Налады» → «Пашыраныя».
+    HTTPS required: Android можа прайграваць відэа толькі з сервераў Yattee, якія выкарыстоўваюць HTTPS.
+    Streams unavailable: Не ўдалося загрузіць патокі гэтага відэа з сервера Yattee. Праверце сервер кнопкай «Праверыць злучэнне» ў раздзеле «Налады» → «Пашыраныя».
+Yattee Fallback Warning: Гэты запыт абыходзіць наладжаны вамі сервер Yattee і падключаецца непасрэдна да YouTube, раскрываючы ваш IP-адрас.

@@ -419,6 +419,25 @@ Settings:
       Grid Columns: Số cột lưới
       Playlist Grid Columns: Số cột lưới danh sách phát
       Auto: Tự động
+    Preferred API Backend:
+      Yattee Server: Máy chủ Yattee
+    Yattee Server:
+      Server URL: URL máy chủ Yattee
+      Username: Tên người dùng
+      Password: Mật khẩu
+      Proxy Videos: Proxy video qua máy chủ Yattee
+      Test Connection: Kiểm tra kết nối
+      Testing: Đang kiểm tra kết nối…
+      Connected: Đã kết nối với máy chủ Yattee {version}
+      Errors:
+        Invalid URL: Nhập URL máy chủ, bắt đầu bằng https:// hoặc http://.
+        Unreachable: Không thể kết nối tới máy chủ. Hãy kiểm tra URL và xem máy chủ có đang chạy không.
+        Media not allowed: 'Đã kết nối nhưng máy chủ không cho phép ứng dụng này tải video. Hãy đặt CORS_ORIGINS={origins} trong biến môi trường của máy chủ.'
+        Not a Yattee server: Máy chủ đã phản hồi nhưng đây không phải là máy chủ Yattee.
+        Credentials required: Máy chủ yêu cầu tên người dùng và mật khẩu.
+        Invalid credentials: Máy chủ đã từ chối tên người dùng hoặc mật khẩu.
+        Rate limited: Máy chủ đang chặn đăng nhập do có quá nhiều lần thử không thành công. Vui lòng thử lại sau.
+        Server error: Máy chủ trả về lỗi (HTTP {status}).
   Context Menu Search Settings:
     Context Menu Search Settings: Tìm kiếm trong menu ngữ cảnh
     Description: Chọn công cụ tìm kiếm xuất hiện khi bạn nhấp chuột phải vào văn bản đã chọn. Kết quả tìm kiếm sẽ mở trong trình duyệt mặc định.
@@ -1689,6 +1708,7 @@ Video:
       unlisted: "Không liệt kê"
   How this was made: Nội dung này được tạo ra như thế nào
   Save Queue to Playlist: "Lưu hàng đợi vào danh sách phát"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Chat trực tiếp hiện không được hỗ trợ với máy chủ Yattee. Cần có kết nối trực tiếp đến YouTube.
 Playlist:
   Playlist Already Preloaded: "Tất cả video trong danh sách phát đã được tải trước"
   Playlist Preload Progress: "Đang tải trước video: {completed}/{requested}"
@@ -1917,6 +1937,8 @@ Tooltips:
       Tải thẻ hoạt động gần nhất sẽ khôi phục phiên trước với các thẻ khác được mở nhưng chưa tải; chúng sẽ tải khi bạn nhấp vào.
       Bắt đầu với phiên trống sẽ bỏ qua các thẻ đã lưu và mở một cửa sổ mới.
     Remember Tab Navigation History: Lịch sử điều hướng tới và lui của từng thẻ sẽ được lưu và khôi phục khi OpenTubeX khởi động lại.
+    Yattee Server: Máy chủ yattee-server mà OpenTubeX dùng để tải video, kênh, danh sách phát và kết quả tìm kiếm. Tên người dùng và mật khẩu chỉ được lưu trên thiết bị này.
+    Proxy Videos Through Yattee Server: Chuyển tiếp luồng video và âm thanh qua máy chủ. Hãy giữ tùy chọn này bật, trừ khi máy chủ dùng chung kết nối Internet với bạn, vì YouTube chỉ cung cấp luồng cho địa chỉ đã yêu cầu chúng. Ảnh xem trước luôn được tải trực tiếp từ YouTube.
   Proxy Settings:
     IP Block Recovery Script Path: Đường dẫn tệp tập lệnh sẽ chạy khi phát hiện bị chặn IP. OpenTubeX chờ tập lệnh chạy xong rồi tải lại video. Nếu bật phương án dự phòng, tập lệnh chỉ chạy khi phương án đó cũng thất bại.
   Player Settings:
@@ -2297,3 +2319,15 @@ Subscription Groups:
   Empty Group: Nhóm này không có kênh nào trong hồ sơ hiện tại.
   Save Failed: Không thể lưu nhóm.
   Delete Failed: Không thể xóa nhóm.
+Yattee Server:
+  API Error (Click to copy): Lỗi máy chủ Yattee (Nhấn để copy)
+  Unsupported page: Trang này không khả dụng với máy chủ Yattee. Hãy bật “{fallbackSetting}” để tải trang bằng API cục bộ.
+  Posts unavailable: Máy chủ Yattee không cung cấp bài đăng. Hãy bật “{fallbackSetting}” để tải bài đăng bằng API cục bộ.
+  Errors:
+    Invalid credentials: Máy chủ Yattee đã từ chối tên người dùng hoặc mật khẩu. Hãy kiểm tra lại trong Cài đặt → Nâng cao.
+    Rate limited: Máy chủ Yattee đang chặn đăng nhập do có quá nhiều lần thử không thành công. Vui lòng thử lại sau.
+    Streams not relayed: Máy chủ Yattee không chuyển tiếp luồng của video này. Khi video được proxy qua máy chủ, OpenTubeX không kết nối trực tiếp với YouTube.
+    Not configured: Nhập URL máy chủ Yattee của bạn trong Cài đặt → Nâng cao.
+    HTTPS required: Android chỉ có thể phát video từ các máy chủ Yattee sử dụng HTTPS.
+    Streams unavailable: Không thể tải luồng của video này từ máy chủ Yattee. Hãy dùng “Kiểm tra kết nối” trong Cài đặt → Nâng cao để kiểm tra máy chủ.
+Yattee Fallback Warning: Yêu cầu này bỏ qua máy chủ Yattee bạn đã cấu hình và kết nối trực tiếp đến YouTube, làm lộ địa chỉ IP của bạn.

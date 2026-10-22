@@ -195,6 +195,7 @@ import { useHideSubscriptionFeedType } from '../../composables/useHideSubscripti
 import { vSaferHtml } from '../../directives/vSaferHtml.js'
 
 import store from '../../store/index'
+import { usesInvidiousApi } from '../../../apiBackends'
 
 import {
   createWebURL,
@@ -288,7 +289,7 @@ function handleOptionsClick(option) {
   }
 }
 
-/** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
+/** @type {import('vue').ComputedRef<'local' | 'invidious' | 'yattee'>} */
 const backendPreference = computed(() => {
   return store.getters.getBackendPreference
 })
@@ -338,7 +339,7 @@ function parseCommunityData() {
 
     authorThumbnail = 'https://yt3.ggpht.com/ytc/AAUvwnjm-0qglHJkAHqLFsCQQO97G7cCNDuDLldsrn25Lg=s88-c-k-c0x00ffffff-no-rj'
 
-    if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
+    if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendPreference.value)) {
       authorThumbnail = youtubeImageUrlToInvidious(authorThumbnail)
     }
 
@@ -356,7 +357,7 @@ function parseCommunityData() {
 
   authorThumbnail = getBestQualityImage(props.data.authorThumbnails)
 
-  if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
+  if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendPreference.value)) {
     authorThumbnail = youtubeImageUrlToInvidious(authorThumbnail)
   } else if (authorThumbnail.startsWith('//')) {
     authorThumbnail = 'https:' + authorThumbnail

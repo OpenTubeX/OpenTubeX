@@ -418,6 +418,25 @@ Settings:
       Grid Columns: Rácsoszlopok
       Playlist Grid Columns: Lejátszási listák rácsoszlopai
       Auto: Automatikus
+    Preferred API Backend:
+      Yattee Server: Yattee-kiszolgáló
+    Yattee Server:
+      Server URL: Yattee-kiszolgáló URL-je
+      Username: Felhasználónév
+      Password: Jelszó
+      Proxy Videos: Videók közvetítése a Yattee-kiszolgálón keresztül
+      Test Connection: Kapcsolat tesztelése
+      Testing: Kapcsolat tesztelése…
+      Connected: 'Csatlakozva: Yattee-kiszolgáló {version}'
+      Errors:
+        Invalid URL: Adja meg a kiszolgáló URL-jét https:// vagy http:// előtaggal.
+        Unreachable: A kiszolgáló nem érhető el. Ellenőrizze az URL-t, és hogy fut-e a kiszolgáló.
+        Media not allowed: 'Csatlakozva, de a kiszolgáló nem engedélyezi, hogy ez az alkalmazás videókat töltsön be. Állítsa be a CORS_ORIGINS={origins} értéket a kiszolgáló környezeti változóiban.'
+        Not a Yattee server: A kiszolgáló válaszolt, de nem Yattee-kiszolgáló.
+        Credentials required: A kiszolgáló felhasználónevet és jelszót kér.
+        Invalid credentials: A kiszolgáló elutasította a felhasználónevet vagy a jelszót.
+        Rate limited: A kiszolgáló túl sok sikertelen próbálkozás miatt blokkolja a bejelentkezéseket. Próbálja újra később.
+        Server error: A kiszolgáló hibát adott vissza (HTTP {status}).
   Context Menu Search Settings:
     Context Menu Search Settings: Keresés a helyi menüből
     Description: Válassza ki, mely keresőmotorok jelenjenek meg a kijelölt szövegre jobb gombbal kattintva. A keresések az alapértelmezett böngészőben nyílnak meg.
@@ -1653,6 +1672,7 @@ Video:
       needs_auth: "Bejelentkezés szükséges"
       unlisted: "Listázatlan"
   Save Queue to Playlist: "Lejátszási sor mentése lejátszási listába"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Az élő csevegést jelenleg nem támogatja a Yattee-kiszolgáló. Közvetlen kapcsolat szükséges a YouTube-hoz.
 Playlist:
   Playlist Already Preloaded: "A lejátszási lista összes videója már elő van töltve"
   Playlist Preload Progress: "Videók előtöltése: {completed}/{requested}"
@@ -1880,6 +1900,8 @@ Tooltips:
       A legutóbb aktív lap betöltése visszaállítja az előző munkamenetet, a többi lapot pedig nyitva, de betöltetlenül hagyja; azok kattintáskor töltődnek be.
       Az üres munkamenet indítása kihagyja a mentett lapokat, és új ablakot nyit.
     Remember Tab Navigation History: Az egyes lapok vissza- és előrelépési előzményeinek mentése, majd visszaállítása az OpenTubeX újraindításakor.
+    Yattee Server: Az a yattee-server-példány, amelyről az OpenTubeX a videókat, csatornákat, lejátszási listákat és keresési találatokat tölti be. A felhasználónév és a jelszó csak ezen az eszközön tárolódik.
+    Proxy Videos Through Yattee Server: A videó- és hangadatfolyamokat a kiszolgálón keresztül továbbítja. Hagyja bekapcsolva, kivéve ha a kiszolgáló ugyanazt az internetkapcsolatot használja, mint Ön, mert a YouTube csak annak a címnek küldi az adatfolyamokat, amely kérte őket. A bélyegképek mindig közvetlenül a YouTube-ról töltődnek be.
   Proxy Settings:
     IP Block Recovery Script Path: Az IP-cím letiltásának észlelésekor futtatandó parancsfájl elérési útja. Az OpenTubeX megvárja a befejezését, majd újratölti a videót. Ha a tartalék módszer engedélyezett, csak akkor fut le, ha az is sikertelen.
   Player Settings:
@@ -2257,3 +2279,15 @@ Subscription Groups:
   Empty Group: Ebben a csoportban nincsenek csatornák a jelenlegi profilból.
   Save Failed: Nem sikerült menteni a csoportot.
   Delete Failed: Nem sikerült törölni a csoportot.
+Yattee Server:
+  API Error (Click to copy): Yattee-kiszolgáló hiba (Kattintson a másoláshoz)
+  Unsupported page: Ez az oldal nem érhető el a Yattee-kiszolgálóval. Kapcsolja be a(z) „{fallbackSetting}” beállítást, hogy a helyi API-val töltődjön be.
+  Posts unavailable: A Yattee-kiszolgálók nem biztosítanak bejegyzéseket. Kapcsolja be a(z) „{fallbackSetting}” beállítást, hogy a helyi API-val töltődjenek be.
+  Errors:
+    Invalid credentials: A Yattee-kiszolgáló elutasította a felhasználónevet vagy a jelszót. Ellenőrizze őket a Beállítások → Speciális menüben.
+    Rate limited: A Yattee-kiszolgáló túl sok sikertelen próbálkozás miatt blokkolja a bejelentkezéseket. Próbálja újra később.
+    Streams not relayed: A Yattee-kiszolgáló nem továbbította ennek a videónak az adatfolyamait. Amíg a videók a kiszolgálón keresztül érkeznek, az OpenTubeX nem kapcsolódik közvetlenül a YouTube-hoz.
+    Not configured: Adja meg Yattee-kiszolgálója URL-jét a Beállítások → Speciális menüben.
+    HTTPS required: Az Android csak HTTPS-t használó Yattee-kiszolgálókról tud videókat lejátszani.
+    Streams unavailable: A videó streamjeit nem sikerült betölteni a Yattee-kiszolgálóról. Ellenőrizze a kiszolgálót a Beállítások → Speciális menü „Kapcsolat tesztelése” gombjával.
+Yattee Fallback Warning: Ez a kérés megkerüli a beállított Yattee-kiszolgálót, és közvetlenül a YouTube-hoz csatlakozik, felfedve az IP-címét.

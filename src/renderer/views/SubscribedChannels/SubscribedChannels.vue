@@ -518,6 +518,8 @@ function updateThumbnail(channel) {
         channelThumbnailUrl = thumbnailURL(parseLocalChannelHeader(response).thumbnailUrl)
       } else {
         const response = await invidiousGetChannelInfo(channel.id)
+        // Yattee servers can return channels without avatars
+        if (response.authorThumbnails.length === 0) return
         channelThumbnailUrl = thumbnailURL(response.authorThumbnails[0].url)
       }
       store.dispatch('updateSubscriptionDetails', {

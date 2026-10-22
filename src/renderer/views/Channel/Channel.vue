@@ -316,8 +316,10 @@ import FtSelect from '../../components/FtSelect/FtSelect.vue'
 import FtButton from '../../components/FtButton/FtButton.vue'
 
 import store from '../../store/index'
+import { usesInvidiousApi } from '../../../apiBackends'
 
 import {
+  getInvidiousApiErrorMessage,
   showInvidiousFallbackToast,
   extractNumberFromString,
   getChannelPlaylistId,
@@ -506,7 +508,7 @@ const channelTabs = shallowRef([
   'about'
 ])
 
-/** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
+/** @type {import('vue').ComputedRef<'local' | 'invidious' | 'yattee'>} */
 const backendPreference = computed(() => store.getters.getBackendPreference)
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -514,11 +516,6 @@ const backendFallback = computed(() => store.getters.getBackendFallback)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const showFamilyFriendlyOnly = computed(() => store.getters.getShowFamilyFriendlyOnly)
-
-/** @type {import('vue').ComputedRef<string>} */
-const currentInvidiousInstanceUrl = computed(() => {
-  return store.getters.getCurrentInvidiousInstanceUrl
-})
 
 const activeProfile = computed(() => store.getters.getActiveProfile)
 
@@ -679,10 +676,12 @@ watch(route, () => {
   searchContinuationData.value = null
   communityContinuationData.value = null
   showSearchBar.value = true
-  showVideoSortBy.value = true
-  showShortSortBy.value = true
-  showLiveSortBy.value = true
-  showPlaylistSortBy.value = true
+  // Yattee servers ignore the sort order of channel tabs
+  const sortable = backendPreference.value !== 'yattee'
+  showVideoSortBy.value = sortable
+  showShortSortBy.value = sortable
+  showLiveSortBy.value = sortable
+  showPlaylistSortBy.value = sortable
 
   currentTab.value = currentOrFirstTab(route.params.currentTab)
 
@@ -696,7 +695,7 @@ watch(route, () => {
   errorMessage.value = ''
 
   // Re-enable auto refresh on sort value change AFTER update done
-  if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
+  if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendPreference.value)) {
     getChannelInfoInvidious().finally(() => {
       autoRefreshOnSortByChangeEnabled = true
     })
@@ -726,7 +725,7 @@ onMounted(async () => {
   }
 
   // Enable auto refresh on sort value change AFTER initial update done
-  if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
+  if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendPreference.value)) {
     await getChannelInfoInvidious().finally(() => {
       autoRefreshOnSortByChangeEnabled = true
     })
@@ -1135,7 +1134,7 @@ async function getChannelInfoInvidious() {
     isFamilyFriendly.value = response.isFamilyFriendly
     subCount.value = response.subCount
     const thumbnail = response.authorThumbnails.at(-1)?.url ?? null
-    thumbnailUrl.value = youtubeImageUrlToInvidious(thumbnail, currentInvidiousInstanceUrl.value)
+    thumbnailUrl.value = youtubeImageUrlToInvidious(thumbnail)
     updateChannelDetails({ channelThumbnailUrl: thumbnail, channelName: channelName_, channelId })
     description.value = autolinker.link(response.description)
     links.value = []
@@ -1148,12 +1147,12 @@ async function getChannelInfoInvidious() {
       return {
         name: channel.author,
         id: channel.authorId,
-        thumbnailUrl: youtubeImageUrlToInvidious(thumbnailUrl, currentInvidiousInstanceUrl.value)
+        thumbnailUrl: youtubeImageUrlToInvidious(thumbnailUrl)
       }
     })
 
     if (Array.isArray(response.authorBanners) && response.authorBanners.length > 0) {
-      bannerUrl.value = youtubeImageUrlToInvidious(response.authorBanners[0].url, currentInvidiousInstanceUrl.value)
+      bannerUrl.value = youtubeImageUrlToInvidious(response.authorBanners[0].url)
     } else {
       bannerUrl.value = null
     }
@@ -1206,11 +1205,11 @@ async function getChannelInfoInvidious() {
     setErrorMessage(err)
     console.error(err)
 
-    const errorMessage = t('Invidious API Error (Click to copy)')
+    const errorMessage = getInvidiousApiErrorMessage(backendPreference.value)
     showApiErrorToast(errorMessage, err)
 
-    if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showInvidiousFallbackToast()
+    if (process.env.SUPPORTS_LOCAL_API && usesInvidiousApi(backendPreference.value) && backendFallback.value) {
+      showInvidiousFallbackToast(backendPreference.value)
       getChannelLocal()
     } else {
       isLoading.value = false
@@ -1422,7 +1421,7 @@ async function channelInvidiousVideos(sortByChanged = false) {
     }
     setElementListLoading('videos', false)
     console.error(err)
-    const errorMessage = t('Invidious API Error (Click to copy)')
+    const errorMessage = getInvidiousApiErrorMessage(backendPreference.value)
     showApiErrorToast(errorMessage, err)
   }
 }
@@ -1576,7 +1575,7 @@ async function channelInvidiousShorts(sortByChanged = false) {
     if (!isCurrentRequest()) return
     setElementListLoading('shorts', false)
     console.error(err)
-    const errorMessage = t('Invidious API Error (Click to copy)')
+    const errorMessage = getInvidiousApiErrorMessage(backendPreference.value)
     showApiErrorToast(errorMessage, err)
   }
 }
@@ -1713,7 +1712,7 @@ async function channelInvidiousLive(sortByChanged) {
     if (!isCurrentRequest()) return
     setElementListLoading('live', false)
     console.error(err)
-    const errorMessage = t('Invidious API Error (Click to copy)')
+    const errorMessage = getInvidiousApiErrorMessage(backendPreference.value)
     showApiErrorToast(errorMessage, err)
   }
 }
@@ -1834,10 +1833,10 @@ async function getPlaylistsInvidious() {
     if (!isCurrentRequest()) return
     setElementListLoading('playlists', false)
     console.error(err)
-    const errorMessage = t('Invidious API Error (Click to copy)')
+    const errorMessage = getInvidiousApiErrorMessage(backendPreference.value)
     showApiErrorToast(errorMessage, err)
-    if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showInvidiousFallbackToast()
+    if (process.env.SUPPORTS_LOCAL_API && usesInvidiousApi(backendPreference.value) && backendFallback.value) {
+      showInvidiousFallbackToast(backendPreference.value)
       getChannelPlaylistsLocal()
     } else {
       isLoading.value = false
@@ -1857,7 +1856,7 @@ async function getPlaylistsInvidiousMore() {
     if (!isCurrentRequest()) return
     console.error(err)
 
-    const errorMessage = t('Invidious API Error (Click to copy)')
+    const errorMessage = getInvidiousApiErrorMessage(backendPreference.value)
     showApiErrorToast(errorMessage, err)
   }
 }
@@ -1957,10 +1956,10 @@ async function channelInvidiousReleases() {
     if (!isCurrentRequest()) return
     setElementListLoading('releases', false)
     console.error(err)
-    const errorMessage = t('Invidious API Error (Click to copy)')
+    const errorMessage = getInvidiousApiErrorMessage(backendPreference.value)
     showApiErrorToast(errorMessage, err)
-    if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showInvidiousFallbackToast()
+    if (process.env.SUPPORTS_LOCAL_API && usesInvidiousApi(backendPreference.value) && backendFallback.value) {
+      showInvidiousFallbackToast(backendPreference.value)
       getChannelReleasesLocal()
     } else {
       isLoading.value = false
@@ -1979,7 +1978,7 @@ async function channelInvidiousReleasesMore() {
   } catch (err) {
     if (!isCurrentRequest()) return
     console.error(err)
-    const errorMessage = t('Invidious API Error (Click to copy)')
+    const errorMessage = getInvidiousApiErrorMessage(backendPreference.value)
     showApiErrorToast(errorMessage, err)
   }
 }
@@ -2054,11 +2053,11 @@ async function channelInvidiousPodcasts() {
     setElementListLoading('podcasts', false)
     console.error(err)
 
-    const errorMessage = t('Invidious API Error (Click to copy)')
+    const errorMessage = getInvidiousApiErrorMessage(backendPreference.value)
     showApiErrorToast(errorMessage, err)
 
-    if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showInvidiousFallbackToast()
+    if (process.env.SUPPORTS_LOCAL_API && usesInvidiousApi(backendPreference.value) && backendFallback.value) {
+      showInvidiousFallbackToast(backendPreference.value)
       getChannelPodcastsLocal()
     } else {
       isLoading.value = false
@@ -2077,7 +2076,7 @@ async function channelInvidiousPodcastsMore() {
   } catch (err) {
     if (!isCurrentRequest()) return
     console.error(err)
-    const errorMessage = t('Invidious API Error (Click to copy)')
+    const errorMessage = getInvidiousApiErrorMessage(backendPreference.value)
     showApiErrorToast(errorMessage, err)
   }
 }
@@ -2154,11 +2153,11 @@ async function channelInvidiousCourses() {
     setElementListLoading('courses', false)
     console.error(err)
 
-    const errorMessage = t('Invidious API Error (Click to copy)')
+    const errorMessage = getInvidiousApiErrorMessage(backendPreference.value)
     showApiErrorToast(errorMessage, err)
 
-    if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showInvidiousFallbackToast()
+    if (process.env.SUPPORTS_LOCAL_API && usesInvidiousApi(backendPreference.value) && backendFallback.value) {
+      showInvidiousFallbackToast(backendPreference.value)
       getChannelCoursesLocal()
     } else {
       isLoading.value = false
@@ -2177,7 +2176,7 @@ async function channelInvidiousCoursesMore() {
   } catch (err) {
     if (!isCurrentRequest()) return
     console.error(err)
-    const errorMessage = t('Invidious API Error (Click to copy)')
+    const errorMessage = getInvidiousApiErrorMessage(backendPreference.value)
     showApiErrorToast(errorMessage, err)
   }
 }
@@ -2295,11 +2294,11 @@ async function getCommunityPostsInvidious() {
     setElementListLoading('community', false)
     console.error(err)
 
-    const errorMessage = t('Invidious API Error (Click to copy)')
+    const errorMessage = getInvidiousApiErrorMessage(backendPreference.value)
     showApiErrorToast(errorMessage, err)
 
-    if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showInvidiousFallbackToast()
+    if (process.env.SUPPORTS_LOCAL_API && usesInvidiousApi(backendPreference.value) && backendFallback.value) {
+      showInvidiousFallbackToast(backendPreference.value)
       getCommunityPostsLocal()
     }
   }
@@ -2448,11 +2447,11 @@ async function searchChannelInvidious() {
     if (!isCurrentRequest()) return
     console.error(err)
 
-    const errorMessage = t('Invidious API Error (Click to copy)')
+    const errorMessage = getInvidiousApiErrorMessage(backendPreference.value)
     showApiErrorToast(errorMessage, err)
 
-    if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showInvidiousFallbackToast()
+    if (process.env.SUPPORTS_LOCAL_API && usesInvidiousApi(backendPreference.value) && backendFallback.value) {
+      showInvidiousFallbackToast(backendPreference.value)
       searchChannelLocal()
     } else {
       isSearchTabLoading.value = false

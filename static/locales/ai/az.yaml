@@ -420,6 +420,25 @@ Settings:
       Grid Columns: Şəbəkə sütunları
       Playlist Grid Columns: Pleylist şəbəkə sütunları
       Auto: Avtomatik
+    Preferred API Backend:
+      Yattee Server: Yattee Serveri
+    Yattee Server:
+      Server URL: Yattee server URL-i
+      Username: İstifadəçi adı
+      Password: Parol
+      Proxy Videos: Videoları Yattee serveri vasitəsilə proksilə
+      Test Connection: Bağlantını yoxla
+      Testing: Bağlantı yoxlanılır…
+      Connected: Yattee Server {version} ilə bağlantı quruldu
+      Errors:
+        Invalid URL: https:// və ya http:// ilə başlayan server URL-ini daxil edin.
+        Unreachable: Serverə qoşulmaq mümkün olmadı. URL-i və serverin işlədiyini yoxlayın.
+        Media not allowed: 'Bağlantı quruldu, lakin server bu tətbiqə videoları yükləməyə icazə vermir. Serverin mühit dəyişənlərində CORS_ORIGINS={origins} təyin edin.'
+        Not a Yattee server: Server cavab verdi, lakin bu, Yattee serveri deyil.
+        Credentials required: Server istifadəçi adı və parol tələb edir.
+        Invalid credentials: Server istifadəçi adını və ya parolu rədd etdi.
+        Rate limited: Çoxlu uğursuz cəhddən sonra server girişləri bloklayır. Bir az sonra yenidən cəhd edin.
+        Server error: Server xəta qaytardı (HTTP {status}).
   Context Menu Search Settings:
     Context Menu Search Settings: Kontekst menyusunda axtarış
     Description: Seçilmiş mətnə sağ kliklədikdə görünəcək axtarış sistemlərini seçin. Axtarışlar ilkin brauzerinizdə açılır.
@@ -1665,6 +1684,7 @@ Video:
       needs_auth: "Daxil olmaq tələb olunur"
       unlisted: "Siyahıda olmayan"
   Save Queue to Playlist: "Növbəni pleylistdə saxla"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Canlı Söhbət hazırda Yattee serveri ilə dəstəklənmir. YouTube-a birbaşa bağlantı tələb olunur.
 Playlist:
   Close Playlist: Pleylisti bağla
   Preload Playlist: Bütün videoları öncədən yüklə
@@ -1892,6 +1912,8 @@ Tooltips:
       Son aktiv vərəqni yüklə seçimi əvvəlki sessiyanı bərpa edir, digər vərəqlər açıq, lakin yaddaşdan boşaldılmış qalır; onların üzərinə kliklədikdə yüklənirlər.
       Boş sessiya ilə başla seçimi saxlanmış vərəqləri keçərək yeni pəncərə açır.
     Remember Tab Navigation History: Hər vərəqnin geri və irəli keçid tarixçəsi saxlanır və OpenTubeX yenidən başladıqda bərpa olunur.
+    Yattee Server: OpenTubeX-un videoları, kanalları, pleylistləri və axtarış nəticələrini yüklədiyi yattee-server instansiyası. İstifadəçi adı və parol yalnız bu cihazda saxlanılır.
+    Proxy Videos Through Yattee Server: Video və audio axınlarını server vasitəsilə ötürür. Server sizinlə eyni internet bağlantısından istifadə etmirsə, bunu aktiv saxlayın, çünki YouTube axınları yalnız onları sorğulayan ünvana təqdim edir. Miniatürlər həmişə birbaşa YouTube-dan yüklənir.
   Proxy Settings:
     IP Block Recovery Script Path: IP bloklanması aşkarlandıqda icra ediləcək skript faylının yolu. OpenTubeX onun bitməsini gözləyir, sonra videonu yenidən yükləyir. Ehtiyat mənbəyə keçid aktivdirsə, skript yalnız həmin keçid də uğursuz olduqda icra edilir.
   Player Settings:
@@ -2266,3 +2288,15 @@ Subscription Groups:
   Empty Group: Bu qrupda cari profilə aid kanal yoxdur.
   Save Failed: Qrupu yadda saxlamaq mümkün olmadı.
   Delete Failed: Qrupu silmək mümkün olmadı.
+Yattee Server:
+  API Error (Click to copy): Yattee Server Xətası (Köçürmək üçün kliklə)
+  Unsupported page: Bu səhifə Yattee serveri ilə əlçatan deyil. Onu yerli API ilə yükləmək üçün “{fallbackSetting}” seçimini aktiv edin.
+  Posts unavailable: Yattee serverləri postlar təqdim etmir. Onları yerli API ilə yükləmək üçün “{fallbackSetting}” seçimini aktiv edin.
+  Errors:
+    Invalid credentials: Yattee serveri istifadəçi adını və ya parolu rədd etdi. Onları Tənzimləmələr → Qabaqcıl bölməsində yoxlayın.
+    Rate limited: Çoxlu uğursuz cəhddən sonra Yattee serveri girişləri bloklayır. Bir az sonra yenidən cəhd edin.
+    Streams not relayed: Yattee serveri bu videonun axınlarını ötürmədi. Videolar server vasitəsilə proksiləndikdə OpenTubeX YouTube-a birbaşa qoşulmur.
+    Not configured: Yattee serverinizin URL-ini Tənzimləmələr → Qabaqcıl bölməsində daxil edin.
+    HTTPS required: Android yalnız HTTPS istifadə edən Yattee serverlərindəki videoları oynada bilər.
+    Streams unavailable: Bu videonun axınları Yattee serverindən yüklənə bilmədi. Serveri yoxlamaq üçün Tənzimləmələr → Qabaqcıl bölməsində “Bağlantını yoxla” düyməsindən istifadə edin.
+Yattee Fallback Warning: Bu sorğu konfiqurasiya etdiyiniz Yattee serverindən yan keçərək birbaşa YouTube-a qoşulur və IP ünvanınızı açıqlayır.

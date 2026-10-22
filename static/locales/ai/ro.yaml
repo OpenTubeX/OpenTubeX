@@ -415,6 +415,25 @@ Settings:
       Grid Columns: Coloanele grilei
       Playlist Grid Columns: Coloanele grilei de playlisturi
       Auto: Automat
+    Preferred API Backend:
+      Yattee Server: Server Yattee
+    Yattee Server:
+      Server URL: URL-ul serverului Yattee
+      Username: Nume de utilizator
+      Password: Parolă
+      Proxy Videos: Redirecționează videoclipurile prin serverul Yattee
+      Test Connection: Testați conexiunea
+      Testing: Se testează conexiunea…
+      Connected: Conectat la Yattee Server {version}
+      Errors:
+        Invalid URL: Introduceți URL-ul serverului, care începe cu https:// sau http://.
+        Unreachable: Serverul nu a putut fi accesat. Verificați URL-ul și dacă serverul rulează.
+        Media not allowed: 'Conectat, dar serverul nu permite acestei aplicații să încarce videoclipuri. Setați CORS_ORIGINS={origins} în variabilele de mediu ale serverului.'
+        Not a Yattee server: Serverul a răspuns, dar nu este un server Yattee.
+        Credentials required: Serverul necesită un nume de utilizator și o parolă.
+        Invalid credentials: Serverul a respins numele de utilizator sau parola.
+        Rate limited: Serverul blochează autentificările după prea multe încercări eșuate. Încercați din nou mai târziu.
+        Server error: Serverul a returnat o eroare (HTTP {status}).
   Context Menu Search Settings:
     Context Menu Search Settings: Căutare din meniul contextual
     Description: Alegeți motoarele de căutare care apar când faceți clic dreapta pe textul selectat. Căutările se deschid în browserul implicit.
@@ -1693,6 +1712,7 @@ Video:
       unlisted: "Nelistat"
   How this was made: Cum a fost creat
   Save Queue to Playlist: "Salvează coada într-o listă de redare"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Chatul în direct nu este acceptat în prezent cu serverul Yattee. Este necesară o conexiune directă la YouTube.
 Playlist:
   Playlist Already Preloaded: "Toate videoclipurile din lista de redare sunt deja preîncărcate"
   Playlist Preload Progress: "Se preîncarcă videoclipurile: {completed} din {requested}"
@@ -1925,6 +1945,8 @@ Tooltips:
       „Încarcă ultima filă activă” restaurează sesiunea anterioară cu celelalte file deschise, dar descărcate din memorie; acestea se încarcă atunci când faceți clic pe ele.
       „Pornește cu o sesiune goală” omite filele salvate și deschide o fereastră nouă.
     Remember Tab Navigation History: Istoricul navigării înapoi și înainte al fiecărei file este salvat și restaurat la repornirea OpenTubeX.
+    Yattee Server: Instanța yattee-server din care OpenTubeX încarcă videoclipuri, canale, liste de redare și rezultate ale căutării. Numele de utilizator și parola sunt stocate doar pe acest dispozitiv.
+    Proxy Videos Through Yattee Server: Transmite fluxurile video și audio prin server. Lăsați opțiunea activată, cu excepția cazului în care serverul folosește aceeași conexiune la internet ca dvs., deoarece YouTube livrează fluxurile doar adresei care le-a solicitat. Miniaturile se încarcă întotdeauna direct de pe YouTube.
   Proxy Settings:
     IP Block Recovery Script Path: Calea fișierului script care se rulează când este detectată blocarea IP-ului. OpenTubeX așteaptă finalizarea acestuia, apoi reîncarcă videoclipul. Dacă este activată sursa de rezervă, scriptul rulează numai când și aceasta eșuează.
   Player Settings:
@@ -2305,3 +2327,15 @@ Subscription Groups:
   Empty Group: Acest grup nu conține canale din profilul curent.
   Save Failed: Grupul nu a putut fi salvat.
   Delete Failed: Grupul nu a putut fi șters.
+Yattee Server:
+  API Error (Click to copy): Eroare server Yattee (Faceți clic pentru a copia)
+  Unsupported page: Această pagină nu este disponibilă cu serverul Yattee. Activați „{fallbackSetting}” pentru a o încărca prin API-ul local.
+  Posts unavailable: Serverele Yattee nu oferă postări. Activați „{fallbackSetting}” pentru a le încărca prin API-ul local.
+  Errors:
+    Invalid credentials: Serverul Yattee a respins numele de utilizator sau parola. Verificați-le în Setări → Avansat.
+    Rate limited: Serverul Yattee blochează autentificările după prea multe încercări eșuate. Încercați din nou mai târziu.
+    Streams not relayed: Serverul Yattee nu a transmis fluxurile acestui videoclip. Cât timp videoclipurile trec prin server, OpenTubeX nu se conectează direct la YouTube.
+    Not configured: Introduceți URL-ul serverului dvs. Yattee în Setări → Avansat.
+    HTTPS required: Android poate reda videoclipuri doar de pe servere Yattee care folosesc HTTPS.
+    Streams unavailable: Fluxurile acestui videoclip nu au putut fi încărcate de pe serverul Yattee. Folosiți „Testați conexiunea” în Setări → Avansat pentru a verifica serverul.
+Yattee Fallback Warning: Această cerere ocolește serverul Yattee configurat și se conectează direct la YouTube, expunându-vă adresa IP.

@@ -1,7 +1,9 @@
+import { usesInvidiousApi } from './apiBackends.js'
+
 /**
  * @param {object} options
  * @param {boolean} options.supportsLocalApi
- * @param {'local' | 'invidious'} options.backendPreference
+ * @param {'local' | 'invidious' | 'yattee'} options.backendPreference
  * @param {boolean} options.backendFallback
  * @returns {boolean}
  */
@@ -11,12 +13,12 @@ export function isTrendingAvailable({ supportsLocalApi, backendPreference, backe
 
 /**
  * @param {object} options
- * @param {'local' | 'invidious'} options.backendPreference
+ * @param {'local' | 'invidious' | 'yattee'} options.backendPreference
  * @param {boolean} options.backendFallback
  * @returns {boolean}
  */
 export function isMostPopularAvailable({ backendPreference, backendFallback }) {
-  return backendFallback || backendPreference === 'invidious'
+  return backendFallback || usesInvidiousApi(backendPreference)
 }
 
 /**
@@ -26,7 +28,7 @@ export function isMostPopularAvailable({ backendPreference, backendFallback }) {
  * @param {string[]} items
  * @param {object} options
  * @param {boolean} options.supportsLocalApi
- * @param {'local' | 'invidious'} options.backendPreference
+ * @param {'local' | 'invidious' | 'yattee'} options.backendPreference
  * @param {boolean} options.backendFallback
  * @param {boolean} options.showWatchStats
  * @returns {string[]}

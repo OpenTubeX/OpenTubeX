@@ -55,7 +55,8 @@ const GENERAL_PROVIDER_KEYS = new Set([
   'Set Current Instance as Default',
   'Stream Extraction Method',
   'The currently set default instance is {instance}',
-  'View all Invidious instance information'
+  'View all Invidious instance information',
+  'Yattee Server'
 ])
 
 const WATCH_STATISTICS_KEYS = new Set(['Enable Watch Statistics', 'Week Starts On'])
@@ -299,6 +300,7 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
     'Avoid translation': ['Avoid translation'],
     'Comment Translation': ['Title', 'Enable', 'Never Translate'],
     'Preferred API Backend': ['Preferred API Backend'],
+    'Yattee Server': ['Server URL', 'Username', 'Password', 'Proxy Videos', 'Test Connection'],
     'Playlist View Type': ['Playlist View Type'],
     'Video View Type': ['Video View Type'],
     'Grid Columns': ['Grid Columns', 'Playlist Grid Columns'],

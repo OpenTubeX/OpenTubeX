@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import { compileFunction } from 'node:vm'
+import { usesInvidiousApi } from '../../src/apiBackends.js'
 import { extractSharedYoutubeLink } from '../../src/renderer/helpers/sharedYoutubeLink.js'
 import { parseHistoryRepairPlayer } from '../../src/historyRepair.js'
 
@@ -179,11 +180,11 @@ function videoActions({ backend = 'local', fallback = false, local, invidious, t
     dispatch: async (...args) => calls.push(args),
     commit: (...args) => calls.push(args)
   }
-  const add = compileFunction(`${actions}\nreturn addVideo`, ['props', 'store', 'controller', 'loading', 'failed', 'getLocalHistoryMetadata', 'getInvidiousHistoryMetadata', 'parseHistoryRepairPlayer', 'emit', 'showToast', 't', 'console', 'AbortSignal', 'showInvidiousFallbackToast'])(
+  const add = compileFunction(`${actions}\nreturn addVideo`, ['props', 'store', 'controller', 'loading', 'failed', 'getLocalHistoryMetadata', 'getInvidiousHistoryMetadata', 'parseHistoryRepairPlayer', 'emit', 'showToast', 't', 'console', 'AbortSignal', 'showInvidiousFallbackToast', 'usesInvidiousApi'])(
     { videoId: id }, store, controller, loading, failed,
     local ?? (async () => ({ videoDetails: { videoId: id, title: video.title, author: video.author, channelId: video.authorId, lengthSeconds: '120' } })),
     invidious ?? (async () => video), parseHistoryRepairPlayer,
-    event => emitted.push(event), () => {}, key => key, { error() {} }, { any: AbortSignal.any, timeout }, () => warnings.push('direct')
+    event => emitted.push(event), () => {}, key => key, { error() {} }, { any: AbortSignal.any, timeout }, () => warnings.push('direct'), usesInvidiousApi
   )
   return { add, calls, emitted, failed, loading, controller, warnings }
 }

@@ -36,7 +36,7 @@
             @toggle-timestamps="toggleTimestampCommentsFilter"
           />
           <button
-            v-if="showSortBy && !commentsDisabled"
+            v-if="canSortComments && !commentsDisabled"
             type="button"
             class="fullscreenCommentAction"
             :class="{ active: sortMenuOpen }"
@@ -113,13 +113,13 @@
       </h3>
       <div
         class="commentHeaderActions"
-        :class="{ commentHeaderActionsEmpty: !showSortBy }"
+        :class="{ commentHeaderActionsEmpty: !canSortComments }"
       >
         <CommentFilterMenu
           v-if="canUseCommentTools"
           ref="commentFilterMenu"
           :open="commentFilterMenuOpen"
-          :aligned="showSortBy"
+          :aligned="canSortComments"
           :channel-thumbnail="channelThumbnail"
           :creator-comments-only="creatorCommentsOnly"
           :timestamp-comments-only="timestampCommentsOnly"
@@ -137,11 +137,11 @@
           :padding="8"
           :use-shadow="false"
           class="reloadComments"
-          :class="{ reloadCommentsAligned: showSortBy }"
+          :class="{ reloadCommentsAligned: canSortComments }"
           @click="reloadCommentData"
         />
         <FtSelect
-          v-if="showSortBy"
+          v-if="canSortComments"
           :disabled="offline"
           :placeholder="$t('Global.Sort By')"
           :value="currentSortValue"
@@ -575,7 +575,7 @@
             @click="reloadCommentData"
           />
           <FtSelect
-            v-if="showSortBy"
+            v-if="canSortComments"
             :placeholder="$t('Global.Sort By')"
             :value="currentSortValue"
             :select-names="sortNames"
@@ -639,8 +639,9 @@ import FtTimestampCatcher from '../FtTimestampCatcher.vue'
 import CommentImageAttachment from './CommentImageAttachment.vue'
 
 import store from '../../store/index'
+import { usesInvidiousApi } from '../../../apiBackends'
 
-import { showInvidiousFallbackToast, copyToClipboard, formatViewCount, getRelativeTimeFromDate, showApiErrorToast, showToast } from '../../helpers/utils'
+import { getInvidiousApiErrorMessage, showInvidiousFallbackToast, copyToClipboard, formatViewCount, getRelativeTimeFromDate, showApiErrorToast, showToast } from '../../helpers/utils'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import {
   getCommentReplyAccessibleLabel,
@@ -1257,10 +1258,13 @@ function buildReplyTree(comment) {
 /** @type {import('youtubei.js').YT.Comments | undefined} */
 let localCommentsInstance
 
-/** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
+/** @type {import('vue').ComputedRef<'local' | 'invidious' | 'yattee'>} */
 const backendPreference = computed(() => {
   return store.getters.getBackendPreference
 })
+
+// Yattee servers always return the top comments
+const canSortComments = computed(() => props.showSortBy && backendPreference.value !== 'yattee')
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const backendFallback = computed(() => {
@@ -1602,7 +1606,7 @@ function getCommentData({ preserveSort = false } = {}) {
   isLoading.value = true
   areCommentsDisabled.value = false
 
-  const useInvidious = !process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious'
+  const useInvidious = !process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendPreference.value)
 
   if (useInvidious) {
     if (!props.isPostComments) {
@@ -2113,11 +2117,11 @@ async function getCommentDataInvidious() {
     // endregion No comment detection
 
     console.error(err)
-    const errorMessage = t('Invidious API Error (Click to copy)')
+    const errorMessage = getInvidiousApiErrorMessage(backendPreference.value)
     showApiErrorToast(errorMessage, err)
 
-    if (process.env.SUPPORTS_LOCAL_API && backendFallback.value && backendPreference.value === 'invidious') {
-      showInvidiousFallbackToast()
+    if (process.env.SUPPORTS_LOCAL_API && backendFallback.value && usesInvidiousApi(backendPreference.value)) {
+      showInvidiousFallbackToast(backendPreference.value)
       return getCommentDataLocal()
     } else {
       isLoading.value = false
@@ -2185,7 +2189,7 @@ async function getCommentRepliesInvidious(
     }
 
     console.error(error)
-    const errorMessage = t('Invidious API Error (Click to copy)')
+    const errorMessage = getInvidiousApiErrorMessage(backendPreference.value)
     showApiErrorToast(errorMessage, error)
     isLoading.value = false
   }
@@ -2215,11 +2219,11 @@ function getPostCommentsInvidious() {
     showComments.value = true
   }).catch((err) => {
     console.error(err)
-    const errorMessage = t('Invidious API Error (Click to copy)')
+    const errorMessage = getInvidiousApiErrorMessage(backendPreference.value)
     showApiErrorToast(errorMessage, err)
 
-    if (process.env.SUPPORTS_LOCAL_API && backendFallback.value && backendPreference.value === 'invidious') {
-      showInvidiousFallbackToast()
+    if (process.env.SUPPORTS_LOCAL_API && backendFallback.value && usesInvidiousApi(backendPreference.value)) {
+      showInvidiousFallbackToast(backendPreference.value)
       return getCommentDataLocal()
     } else {
       isLoading.value = false
@@ -2270,7 +2274,7 @@ async function getPostCommentRepliesInvidious(index) {
     }
 
     console.error(error)
-    const errorMessage = t('Invidious API Error (Click to copy)')
+    const errorMessage = getInvidiousApiErrorMessage(backendPreference.value)
     showApiErrorToast(errorMessage, error)
     isLoading.value = false
   }

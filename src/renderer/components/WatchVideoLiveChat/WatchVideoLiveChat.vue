@@ -586,7 +586,7 @@ const superChat = ref({
   }
 })
 
-/** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
+/** @type {import('vue').ComputedRef<'local' | 'invidious' | 'yattee'>} */
 const backendPreference = computed(() => store.getters.getBackendPreference)
 /** @type {import('vue').ComputedRef<boolean>} */
 const backendFallback = computed(() => store.getters.getBackendFallback)
@@ -669,12 +669,15 @@ function initializeLiveChat() {
       }
       break
     case 'invidious':
+    case 'yattee':
       if (backendFallback.value) {
-        showInvidiousFallbackToast()
+        showInvidiousFallbackToast(backendPreference.value)
         getLiveChatLocal()
       } else {
         hasError.value = true
-        errorMessage.value = t('Video["Live Chat is currently not supported with the Invidious API. A direct connection to YouTube is required."]')
+        errorMessage.value = backendPreference.value === 'yattee'
+          ? t('Video["Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required."]')
+          : t('Video["Live Chat is currently not supported with the Invidious API. A direct connection to YouTube is required."]')
         showEnableChat.value = true
         isLoading.value = false
       }
@@ -683,7 +686,7 @@ function initializeLiveChat() {
 }
 
 function enableLiveChat() {
-  if (backendPreference.value === 'invidious') showInvidiousFallbackToast()
+  if (backendPreference.value !== 'local') showInvidiousFallbackToast(backendPreference.value)
   hasError.value = false
   showEnableChat.value = false
   isLoading.value = true
@@ -692,7 +695,18 @@ function enableLiveChat() {
 }
 
 async function getLiveChatLocal() {
-  const videoInfo = await getLocalVideoInfo(props.videoId)
+  let videoInfo
+  try {
+    videoInfo = await getLocalVideoInfo(props.videoId)
+  } catch (error) {
+    if (!isUnmounted) {
+      console.error(error)
+      errorMessage.value = `[${error.name}] ${error.message}`
+      hasError.value = true
+      isLoading.value = false
+    }
+    return
+  }
 
   // The component tears down while this request is pending when the video
   // changes or the chat closes; starting a chat now would poll forever.

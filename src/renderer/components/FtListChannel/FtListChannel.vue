@@ -122,11 +122,6 @@ const props = defineProps({
   }
 })
 
-/** @type {import('vue').ComputedRef<string>} */
-const currentInvidiousInstanceUrl = computed(() => {
-  return store.getters.getCurrentInvidiousInstanceUrl
-})
-
 /** @type {import('vue').ComputedRef<'grid' | 'list'>} */
 const listType = computed(() => {
   return store.getters.getListType
@@ -252,7 +247,7 @@ function parseInvidiousData() {
   /** @type {string | null} */
   const thumbnailUrl = props.data.authorThumbnails.at(-1)?.url ?? null
 
-  thumbnail = youtubeImageUrlToInvidious(thumbnailUrl, currentInvidiousInstanceUrl.value)
+  thumbnail = youtubeImageUrlToInvidious(thumbnailUrl)
 
   name.value = props.data.author
   id = props.data.authorId

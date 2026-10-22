@@ -13,6 +13,18 @@ import { FormatUtils, Misc, Player } from 'youtubei.js'
 import { ensureAndroidLocalNetworkAccess } from '../androidLocalNetwork.js'
 import { createAbortError } from './requestErrors.js'
 import { waitForRequest } from './requestWait.js'
+import {
+  YatteeUnsupportedError,
+  createYatteeResponseError,
+  fillYatteeVideoAuthors,
+  normalizeYatteeChannel,
+  normalizeYatteeComments,
+  normalizeYatteePlaylist,
+  normalizeYatteeSearchItem,
+  normalizeYatteeSuggestions,
+  normalizeYatteeVideo
+} from './yattee.js'
+import i18n from '../../i18n/index'
 
 const {
   normalizeInvidiousSubscriptionFeed,
@@ -23,8 +35,47 @@ const {
   normalizeOneInvidiousVideoAttributes,
   setMultiplePublishedTimestamps,
   setPublishedTimestamp
-} = createInvidiousFeedParsers(() => store.getters.getCurrentInvidiousInstanceUrl)
+} = createInvidiousFeedParsers(() => store.getters.getApiServerUrl, () => !isYatteeBackend())
 export { normalizeInvidiousSubscriptionFeed, youtubeImageUrlToInvidious }
+
+function isYatteeBackend() {
+  return store.getters.getBackendPreference === 'yattee'
+}
+
+/** Yattee channel tabs leave out the channel name, so it comes from a loaded channel page or the subscriptions. */
+const yatteeChannelNames = new Map()
+
+/**
+ * @param {string} channelId
+ */
+function getYatteeChannelName(channelId) {
+  return yatteeChannelNames.get(channelId) ??
+    store.getters.getProfileList[0]?.subscriptions.find(channel => channel.id === channelId)?.name ?? ''
+}
+
+/**
+ * @param {string} feature
+ */
+function assertSupportedByYattee(feature) {
+  if (isYatteeBackend()) {
+    throw new YatteeUnsupportedError(feature)
+  }
+}
+
+/**
+ * @param {Response} response
+ */
+async function createYatteeApiError(response) {
+  const error = createYatteeResponseError(response, await response.json().catch(() => null))
+
+  if (response.status === 401) {
+    error.message = i18n.global.t('Yattee Server.Errors.Invalid credentials')
+  } else if (response.status === 429) {
+    error.message = i18n.global.t('Yattee Server.Errors.Rate limited')
+  }
+
+  return error
+}
 
 /** @typedef {{url: string, width: number, height: number}} InvidiousImageObject */
 /** @typedef {{quality: string, url: string, width: number, height: number}} InvidiousThumbnailObject */
@@ -53,8 +104,19 @@ export function getProxyUrl(uri) {
  * @param {AbortSignal} [signal]
  */
 export async function invidiousFetch(url, signal) {
-  const authorization = store.getters.getCurrentInvidiousInstanceAuthorization
+  const authorization = store.getters.getApiServerAuthorization
   const requestUrl = String(url)
+  // Yattee servers reject CORS preflights without credentials, which prevents
+  // authenticated requests from the WebView
+  if (process.env.IS_CAPACITOR && isYatteeBackend()) {
+    const { capacitorHttpFetch } = await import('./capacitor-http')
+    return await capacitorHttpFetch(requestUrl, {
+      signal,
+      allowHttp: true,
+      ...(authorization ? { headers: { Authorization: authorization } } : {})
+    })
+  }
+
   if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
     if (signal?.aborted) throw createAbortError()
     await waitForRequest(ensureAndroidLocalNetworkAccess({ url: requestUrl }), signal)
@@ -75,10 +137,23 @@ export async function invidiousFetch(url, signal) {
 }
 
 function invidiousAPICall({ resource, id = '', params = {}, doLogError = true, subResource = '', signal }) {
+  if (isYatteeBackend() && getCurrentInstanceUrl() === '') {
+    return Promise.reject(new Error(i18n.global.t('Yattee Server.Errors.Not configured')))
+  }
+
   return new Promise((resolve, reject) => {
-    const requestUrl = getCurrentInstanceUrl() + '/api/v1/' + resource + '/' + id + (!isNullOrEmpty(subResource) ? `/${subResource}` : '') + '?' + new URLSearchParams(params).toString()
+    // Yattee servers redirect paths with a trailing slash, using the wrong scheme behind TLS proxies
+    const path = isYatteeBackend() && id === '' ? resource : resource + '/' + id
+    const requestUrl = getCurrentInstanceUrl() + '/api/v1/' + path + (!isNullOrEmpty(subResource) ? `/${subResource}` : '') + '?' + new URLSearchParams(params).toString()
     invidiousFetch(requestUrl, signal)
-      .then((response) => response.json())
+      .then(async (response) => {
+        // Yattee servers report errors with HTTP status codes and a `detail` message
+        if (!response.ok && isYatteeBackend()) {
+          throw await createYatteeApiError(response)
+        }
+
+        return response.json()
+      })
       .then((json) => {
         if (json.error !== undefined) {
           // community is empty, no need to display error.
@@ -117,6 +192,10 @@ async function resolveUrl(url) {
  * @returns {Promise<string?>} channel ID
  */
 export async function invidiousGetChannelId(url) {
+  if (isYatteeBackend()) {
+    return await yatteeGetChannelId(url)
+  }
+
   try {
     const response = await resolveUrl(url)
 
@@ -125,6 +204,27 @@ export async function invidiousGetChannelId(url) {
     } else {
       return null
     }
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Yattee servers can't resolve URLs, but they look channels up by their handles.
+ * @param {string} url
+ * @returns {Promise<string?>} channel ID
+ */
+async function yatteeGetChannelId(url) {
+  try {
+    const { pathname } = new URL(url)
+    const channelId = /^\/channel\/(UC[\w-]{22})(?:\/|$)/.exec(pathname)?.[1]
+    if (channelId) return channelId
+
+    const handle = /^\/(@[^/]+)(?:\/|$)/.exec(pathname)?.[1]
+    if (!handle) return null
+
+    const channel = await invidiousAPICall({ resource: 'channels', id: decodeURIComponent(handle), doLogError: false })
+    return channel.authorId ?? null
   } catch {
     return null
   }
@@ -158,6 +258,12 @@ export async function invidiousGetChannelInfo(channelId) {
     id: channelId,
   })
 
+  if (isYatteeBackend()) {
+    const channel = normalizeYatteeChannel(channelInfo, getCurrentInstanceUrl())
+    yatteeChannelNames.set(channel.authorId, channel.author)
+    return channel
+  }
+
   channelInfo.tabs = channelInfo.tabs.map(tab => {
     if (tab === 'streams') return 'live'
     if (tab === 'posts') return 'community'
@@ -176,6 +282,10 @@ export async function invidiousGetChannelInfo(channelId) {
  */
 async function getInvidiousChannelTab(tab, channelId, continuation, sortBy, signal) {
   const params = {}
+
+  if (isYatteeBackend() && !['videos', 'shorts', 'streams', 'playlists'].includes(tab)) {
+    throw new YatteeUnsupportedError(`the ${tab} channel tab`)
+  }
 
   if (continuation) {
     params.continuation = continuation
@@ -204,6 +314,9 @@ export async function getInvidiousChannelVideos(channelId, sortBy, continuation,
   /** @type {{continuation: string?, videos: InvidiousVideoType[]}}  */
   const response = await getInvidiousChannelTab('videos', channelId, continuation, sortBy, signal)
 
+  if (isYatteeBackend()) {
+    fillYatteeVideoAuthors(response.videos, channelId, getYatteeChannelName(channelId))
+  }
   normalizeManyInvidiousVideosAttributes(response.videos, channelId)
   setMultiplePublishedTimestamps(response.videos)
   if (enrichPublicationDates) {
@@ -225,6 +338,10 @@ export async function getInvidiousChannelShorts(channelId, sortBy, continuation)
   /** @type {{continuation: string?, videos: InvidiousVideoType[]}}  */
   const response = await getInvidiousChannelTab('shorts', channelId, continuation, sortBy)
 
+  if (isYatteeBackend()) {
+    fillYatteeVideoAuthors(response.videos, channelId, getYatteeChannelName(channelId))
+  }
+
   // workaround for Invidious sending incorrect information
   // https://github.com/iv-org/invidious/issues/3801
   response.videos.forEach(video => {
@@ -245,6 +362,10 @@ export async function getInvidiousChannelShorts(channelId, sortBy, continuation)
 export async function getInvidiousChannelLive(channelId, sortBy, continuation, signal) {
   /** @type {{continuation: string?, videos: InvidiousVideoType[]}}  */
   const response = await getInvidiousChannelTab('streams', channelId, continuation, sortBy, signal)
+
+  if (isYatteeBackend()) {
+    fillYatteeVideoAuthors(response.videos, channelId, getYatteeChannelName(channelId))
+  }
 
   normalizeManyInvidiousVideosAttributes(response.videos, channelId)
   setMultiplePublishedTimestamps(response.videos)
@@ -310,7 +431,7 @@ export async function getInvidiousChannelCourses(channelId, continuation) {
  */
 export async function searchInvidiousChannel(channelId, query, page) {
   /** @type {(InvidiousVideoType | InvidiousPlaylistObject)[]} */
-  const response = await invidiousAPICall({
+  let response = await invidiousAPICall({
     resource: 'channels',
     id: channelId,
     subResource: 'search',
@@ -319,6 +440,11 @@ export async function searchInvidiousChannel(channelId, query, page) {
       page
     }
   })
+
+  // Yattee servers wrap the results like the channel tabs do
+  if (isYatteeBackend() && !Array.isArray(response)) {
+    response = fillYatteeVideoAuthors(response.videos ?? [], channelId, getYatteeChannelName(channelId))
+  }
 
   response.forEach((item) => {
     if (item.type === 'video') {
@@ -358,6 +484,10 @@ export async function searchInvidiousChannel(channelId, query, page) {
  * }>}
  */
 export async function invidiousGetPlaylistInfo(playlistId, page) {
+  if (isYatteeBackend()) {
+    return await yatteeGetPlaylistInfo(playlistId, page)
+  }
+
   const playlist = await invidiousAPICall({
     resource: 'playlists',
     id: playlistId,
@@ -381,6 +511,28 @@ export async function invidiousGetPlaylistInfo(playlistId, page) {
       updated: null,
     })
   }
+  normalizeManyInvidiousVideosAttributes(playlist.videos)
+  setMultiplePublishedTimestamps(playlist.videos)
+
+  return playlist
+}
+
+/**
+ * The first page of a Yattee server playlist already contains all of its videos.
+ * @param {string} playlistId
+ * @param {number} [page]
+ */
+async function yatteeGetPlaylistInfo(playlistId, page) {
+  if (page != null && page > 1) {
+    return { playlistId, videos: [], pageVideoCount: 0 }
+  }
+
+  const playlist = normalizeYatteePlaylist(await invidiousAPICall({ resource: 'playlists', id: playlistId }))
+
+  playlist.videos = filterUnavailableInvidiousPlaylistVideos(playlist.videos)
+  playlist.pageVideoCount = playlist.videos.length
+  // YouTube's count includes the unavailable videos that the server leaves out
+  playlist.videoCount = playlist.videos.length
   normalizeManyInvidiousVideosAttributes(playlist.videos)
   setMultiplePublishedTimestamps(playlist.videos)
 
@@ -527,6 +679,18 @@ export async function getInvidiousRelatedVideos(videoId, signal) {
  * }>}
  */
 export async function invidiousGetVideoInformation(videoId) {
+  if (isYatteeBackend()) {
+    const proxyVideos = store.getters.getYatteeProxyVideos
+    const response = await invidiousAPICall({
+      resource: 'videos',
+      id: videoId,
+      params: { proxy: String(proxyVideos) },
+    })
+    const video = normalizeYatteeVideo(response, getCurrentInstanceUrl(), proxyVideos)
+    video.musicMediaType = classifyInvidiousMusicMediaType(video)
+    return video
+  }
+
   const video = await invidiousAPICall({
     resource: 'videos',
     id: videoId,
@@ -573,6 +737,9 @@ export async function invidiousGetComments({ id, nextPageToken = '', sortNewest 
 
   /** @type {InvidiousCommentResponse} */
   const response = await invidiousAPICall(payload)
+  if (isYatteeBackend()) {
+    normalizeYatteeComments(response)
+  }
 
   const commentData = parseInvidiousCommentData(response)
 
@@ -589,6 +756,9 @@ export async function invidiousGetCommentReplies({ id, replyToken }) {
   }
 
   const response = await invidiousAPICall(payload)
+  if (isYatteeBackend()) {
+    normalizeYatteeComments(response)
+  }
   return { commentData: parseInvidiousCommentData(response), continuation: response.continuation ?? null }
 }
 
@@ -598,7 +768,7 @@ export async function invidiousGetCommentReplies({ id, replyToken }) {
  * @returns {Promise<{ query: string, suggestions: string[]}>}
  */
 export async function getInvidiousSearchSuggestions(query, signal) {
-  return await invidiousAPICall({
+  const response = await invidiousAPICall({
     resource: 'search/suggestions',
     signal,
     id: '',
@@ -606,6 +776,8 @@ export async function getInvidiousSearchSuggestions(query, signal) {
       q: query
     }
   })
+
+  return isYatteeBackend() ? normalizeYatteeSuggestions(response, query) : response
 }
 
 /**
@@ -682,6 +854,10 @@ export async function getInvidiousSearchResults(query, page, searchSettings, sig
     return item.type === 'video' || item.type === 'channel' || item.type === 'playlist' || item.type === 'hashtag'
   })
 
+  if (isYatteeBackend()) {
+    results = results.map(normalizeYatteeSearchItem)
+  }
+
   results.forEach((item) => {
     if (item.type === 'video') {
       normalizeOneInvidiousVideoAttributes(item)
@@ -733,6 +909,7 @@ function parseInvidiousCommentData(response) {
 }
 
 export async function invidiousGetCommunityPosts(channelId, continuation = null, signal) {
+  assertSupportedByYattee('posts')
   const payload = {
     resource: 'channels',
     id: channelId,
@@ -751,6 +928,7 @@ export async function invidiousGetCommunityPosts(channelId, continuation = null,
 }
 
 export async function getInvidiousCommunityPost(postId, authorId = null) {
+  assertSupportedByYattee('posts')
   const payload = {
     resource: 'post',
     id: postId,
@@ -773,6 +951,7 @@ export async function getInvidiousCommunityPost(postId, authorId = null) {
 }
 
 export async function getInvidiousCommunityPostComments({ postId, authorId }) {
+  assertSupportedByYattee('posts')
   const payload = {
     resource: 'post',
     id: postId,
@@ -789,6 +968,7 @@ export async function getInvidiousCommunityPostComments({ postId, authorId }) {
 }
 
 export async function getInvidiousCommunityPostCommentReplies({ postId, replyToken, authorId }) {
+  assertSupportedByYattee('posts')
   const payload = {
     resource: 'post',
     id: postId,
@@ -808,6 +988,7 @@ export async function getInvidiousCommunityPostCommentReplies({ postId, replyTok
  * @param {number} page
  */
 export async function getHashtagInvidious(hashtag, page = 1) {
+  assertSupportedByYattee('hashtags')
   /** @type {{results: InvidiousVideoType[]}} */
   const response = await invidiousAPICall({
     resource: 'hashtag',
@@ -947,5 +1128,10 @@ export async function getInvidiousPlaylistAvailability(videoId, signal) {
   if (!response.ok && ![403, 404, 410].includes(response.status)) {
     throw new Error(`Availability check failed with HTTP ${response.status}`)
   }
-  return await response.json()
+  const json = await response.json()
+  // Yattee servers pass yt-dlp's error message on as `detail`
+  if (isYatteeBackend() && typeof json.detail === 'string') {
+    json.error ??= json.detail
+  }
+  return json
 }

@@ -258,6 +258,7 @@ import FtAutoLoadNextPageWrapper from '../../components/FtAutoLoadNextPageWrappe
 import AutoScrollWrapper from '../../components/AutoScrollWrapper/AutoScrollWrapper.vue'
 
 import store from '../../store/index'
+import { usesInvidiousApi } from '../../../apiBackends'
 import { getThumbnailListStyles } from '../../constants/thumbnailSize'
 import { thumbnailSizeSettingKey } from '../../composables/useThumbnailSizeSlider'
 
@@ -388,7 +389,7 @@ let playlistPreloadRun = null
 let undoToastAbortController = null
 let removePendingVideosAfterDrag = false
 
-/** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
+/** @type {import('vue').ComputedRef<'local' | 'invidious' | 'yattee'>} */
 const backendPreference = computed(() => store.getters.getBackendPreference)
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -848,7 +849,7 @@ function getPlaylistInfo() {
       })
     }
   } else {
-    if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
+    if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendPreference.value)) {
       return getPlaylistInvidious()
     } else {
       return getPlaylistLocal()
@@ -996,7 +997,7 @@ async function getPlaylistInvidious() {
     videoCount.value = result.videoCount
     channelName.value = result.author
     const authorThumbnail = result.authorThumbnails.at(-1)?.url ?? null
-    channelThumbnail.value = youtubeImageUrlToInvidious(authorThumbnail, currentInvidiousInstanceUrl.value)
+    channelThumbnail.value = youtubeImageUrlToInvidious(authorThumbnail)
     channelId.value = result.authorId
     infoSource.value = 'invidious'
 
@@ -1035,8 +1036,8 @@ async function getPlaylistInvidious() {
       return
     }
 
-    if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showInvidiousFallbackToast()
+    if (process.env.SUPPORTS_LOCAL_API && usesInvidiousApi(backendPreference.value) && backendFallback.value) {
+      showInvidiousFallbackToast(backendPreference.value)
       return getPlaylistLocal()
     } else {
       updatePageTitle()

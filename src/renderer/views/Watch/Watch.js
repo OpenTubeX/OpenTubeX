@@ -113,6 +113,9 @@ import {
   selectYtDlpPreloadVideoIds,
 } from '../../helpers/player/ytDlpPlaybackPreload'
 import { getMusicTrackArtist, MUSIC_MEDIA_TYPE } from '../../helpers/player/musicMediaType'
+import { getYatteeStoryboard, getYatteeStreamExpiry, isYatteeServerPlayableOnAndroid } from '../../helpers/api/yattee'
+import { createYatteeDashManifest } from '../../helpers/player/yatteePlayback'
+import { usesInvidiousApi } from '../../../apiBackends'
 import { getCompatibleAdaptiveFormats } from '../../helpers/player/compatibleAdaptiveFormats'
 import { getLiveDvrWindowSeconds } from '../../helpers/player/liveManifest'
 import { selectSponsorBlockFullVideoLabel } from '../../helpers/player/sponsorBlockFullVideo'
@@ -754,6 +757,9 @@ export default defineComponent({
     currentInvidiousInstanceUrl: function () {
       return this.$store.getters.getCurrentInvidiousInstanceUrl
     },
+    apiServerUrl: function () {
+      return this.$store.getters.getApiServerUrl
+    },
     proxyVideos: function () {
       return this.$store.getters.getProxyVideos
     },
@@ -889,7 +895,7 @@ export default defineComponent({
         this.videoId,
         this.shortsPlaybackWindow,
         this.backendPreference,
-        this.currentInvidiousInstanceUrl,
+        this.apiServerUrl,
         this.videoPlaybackEngine,
         this.playbackEngineFallbackTarget,
         this.ytDlpPlaybackCacheKey,
@@ -1583,7 +1589,7 @@ export default defineComponent({
       if (detail !== 'offline' && this.downloadedPlaybackWithoutMetadata && !this.downloadedMetadataLoading) {
         this.downloadedMetadataLoading = true
         const loadGeneration = ++this.videoLoadGeneration
-        const load = !process.env.SUPPORTS_LOCAL_API || this.backendPreference === 'invidious'
+        const load = !process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(this.backendPreference)
           ? this.getVideoInformationInvidious(loadGeneration, true)
           : this.getVideoInformationLocal(loadGeneration, true)
         Promise.resolve(load).finally(() => {
@@ -1624,7 +1630,9 @@ export default defineComponent({
     getShortsExtractionKey(videoId, backend = this.backendPreference) {
       return JSON.stringify([
         backend,
-        backend === 'invidious' ? this.currentInvidiousInstanceUrl : '',
+        usesInvidiousApi(backend) ? this.apiServerUrl : '',
+        // Proxying decides whether the stream URLs point at the server or at YouTube
+        backend === 'yattee' && this.$store.getters.getYatteeProxyVideos,
         backend === 'local' && process.env.IS_CAPACITOR && this.isYtDlpPlaybackRequested(),
         videoId,
       ])
@@ -1633,7 +1641,7 @@ export default defineComponent({
       const useYtDlp = this.isYtDlpPlaybackRequested()
       const key = this.getShortsExtractionKey(videoId, backend)
       return this.shortsPlaybackCache.get(key, () => {
-        if (backend === 'invidious') {
+        if (usesInvidiousApi(backend)) {
           return invidiousGetVideoInformation(videoId).then(result => {
             if (result.error) throw new Error(result.error)
             return result
@@ -2391,6 +2399,7 @@ export default defineComponent({
           await this.getVideoInformationLocal(loadGeneration)
           break
         case 'invidious':
+        case 'yattee':
           this.getVideoInformationInvidious(loadGeneration)
           break
       }
@@ -2730,7 +2739,7 @@ export default defineComponent({
       this.setViewingModeOnFirstLoad()
 
       const loadGeneration = ++this.videoLoadGeneration
-      if (!process.env.SUPPORTS_LOCAL_API || this.backendPreference === 'invidious') {
+      if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(this.backendPreference)) {
         this.getVideoInformationInvidious(loadGeneration)
       } else {
         this.getVideoInformationLocal(loadGeneration)
@@ -4155,12 +4164,15 @@ export default defineComponent({
         // The shared network queue resumes this request when connectivity returns.
       }
 
+      // Also used as the fallback of the local API, which always falls back to Invidious
+      const isYattee = this.backendPreference === 'yattee'
+      const apiBackend = isYattee ? 'yattee' : 'invidious'
       const shortsExtractionKey = this.customShortsPlayerActive && !metadataOnly
-        ? this.getShortsExtractionKey(videoId, 'invidious')
+        ? this.getShortsExtractionKey(videoId, apiBackend)
         : null
       let backendFailed = false
       return (this.customShortsPlayerActive && !metadataOnly
-        ? this.getShortsVideoInformation(videoId, 'invidious')
+        ? this.getShortsVideoInformation(videoId, apiBackend)
         : invidiousGetVideoInformation(videoId))
         .then(async result => {
           if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
@@ -4202,7 +4214,7 @@ export default defineComponent({
           this.channelName = result.author
           this.channelCollaborators = []
           const channelThumb = result.authorThumbnails.at(-1)
-          this.channelThumbnail = channelThumb ? youtubeImageUrlToInvidious(channelThumb.url, this.currentInvidiousInstanceUrl) : ''
+          this.channelThumbnail = channelThumb ? youtubeImageUrlToInvidious(channelThumb.url) : ''
           this.$store.commit('setVideoAvatar', {
             videoId: this.videoId,
             avatar: this.channelThumbnail
@@ -4244,29 +4256,40 @@ export default defineComponent({
 
           this.captions = sortCaptions(result.captions.map(caption => {
             return {
-              url: this.currentInvidiousInstanceUrl + caption.url,
+              // Yattee servers return absolute URLs
+              url: isYattee ? caption.url : this.currentInvidiousInstanceUrl + caption.url,
               label: caption.label,
               language: caption.language_code,
               mimeType: 'text/vtt'
             }
           }), this.preferredCaptionLocale)
 
-          if (!this.isLive && !this.isPostLiveDvr) {
+          if (isYattee) {
+            // Yattee servers don't proxy images, so they come from YouTube like with the local API
+            const storyboard = this.isLive || this.isPostLiveDvr ? null : getYatteeStoryboard(result.storyboards)
+            this.videoStoryboardSrc = storyboard
+              ? `data:text/vtt;charset=utf-8,${encodeURIComponent(buildVTTFileLocally(storyboard, result.lengthSeconds))}`
+              : null
+          } else if (!this.isLive && !this.isPostLiveDvr) {
             this.videoStoryboardSrc = `${this.currentInvidiousInstanceUrl}/api/v1/storyboards/${this.videoId}?height=90`
           }
 
+          const thumbnailOrigin = isYattee ? 'https://i.ytimg.com' : this.currentInvidiousInstanceUrl
           switch (this.thumbnailPreference) {
             case 'start':
-              this.thumbnail = `${this.currentInvidiousInstanceUrl}/vi/${this.videoId}/maxres1.jpg`
+              this.thumbnail = `${thumbnailOrigin}/vi/${this.videoId}/maxres1.jpg`
               break
             case 'middle':
-              this.thumbnail = `${this.currentInvidiousInstanceUrl}/vi/${this.videoId}/maxres2.jpg`
+              this.thumbnail = `${thumbnailOrigin}/vi/${this.videoId}/maxres2.jpg`
               break
             case 'end':
-              this.thumbnail = `${this.currentInvidiousInstanceUrl}/vi/${this.videoId}/maxres3.jpg`
+              this.thumbnail = `${thumbnailOrigin}/vi/${this.videoId}/maxres3.jpg`
               break
             default:
-              this.thumbnail = new URL(result.videoThumbnails[0].url, this.currentInvidiousInstanceUrl).toString()
+              this.thumbnail = isYattee
+                ? [...result.videoThumbnails].sort((a, b) => (b.width ?? 0) - (a.width ?? 0))[0]?.url ??
+                  `https://i.ytimg.com/vi/${this.videoId}/hqdefault.jpg`
+                : new URL(result.videoThumbnails[0].url, this.currentInvidiousInstanceUrl).toString()
               break
           }
 
@@ -4286,6 +4309,10 @@ export default defineComponent({
           this.videoChapters = chapters
           this.videoChaptersKind = 'chapters'
 
+          if (isYattee && !metadataOnly && process.env.IS_CAPACITOR && !process.env.IS_IOS && !isYatteeServerPlayableOnAndroid(this.apiServerUrl)) {
+            throw new Error(this.t('Yattee Server.Errors.HTTPS required'))
+          }
+
           if (!metadataOnly && (this.isLive || this.isPostLiveDvr)) {
             // The live DASH manifest is currently unusable as it returns 403s after 1 minute of playback
             // so we have to use the HLS one for now.
@@ -4296,11 +4323,18 @@ export default defineComponent({
             // // https://github.com/iv-org/invidious/pull/4589
             // if (this.proxyVideos) {
 
-            this.streamingDataExpiryDate = this.extractExpiryDateFromStreamingUrl(result.adaptiveFormats[0].url)
-
             let hlsManifestUrl = result.hlsUrl
 
-            if (this.proxyVideos) {
+            if (isYattee) {
+              if (!hlsManifestUrl) {
+                throw this.createYatteeMissingStreamsError()
+              }
+              this.streamingDataExpiryDate = getYatteeStreamExpiry(hlsManifestUrl)
+            } else {
+              this.streamingDataExpiryDate = this.extractExpiryDateFromStreamingUrl(result.adaptiveFormats[0].url)
+            }
+
+            if (this.proxyVideos && !isYattee) {
               const url = new URL(hlsManifestUrl)
               url.searchParams.set('local', 'true')
               hlsManifestUrl = url.toString()
@@ -4327,11 +4361,19 @@ export default defineComponent({
             this.videoLengthSeconds = result.lengthSeconds
 
             if (!metadataOnly) {
-              this.streamingDataExpiryDate = this.extractExpiryDateFromStreamingUrl(result.adaptiveFormats[0].url)
+              if (isYattee) {
+                if (result.adaptiveFormats.length === 0 && result.formatStreams.length === 0) {
+                  throw this.createYatteeMissingStreamsError()
+                }
+                this.streamingDataExpiryDate = getYatteeStreamExpiry((result.adaptiveFormats[0] ?? result.formatStreams[0]).url)
+              } else {
+                this.streamingDataExpiryDate = this.extractExpiryDateFromStreamingUrl(result.adaptiveFormats[0].url)
+              }
 
               this.legacyFormats = result.formatStreams.map(mapInvidiousLegacyFormat)
 
-              if (!process.env.SUPPORTS_LOCAL_API || this.proxyVideos) {
+              // The streams of Yattee servers are already relayed when proxying is enabled
+              if (!isYattee && (!process.env.SUPPORTS_LOCAL_API || this.proxyVideos)) {
                 this.legacyFormats.forEach(format => {
                   format.url = getProxyUrl(format.url)
                 })
@@ -4406,8 +4448,8 @@ export default defineComponent({
         .catch(async err => {
           backendFailed = true
           if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
-          const canFallback = process.env.SUPPORTS_LOCAL_API && this.backendPreference === 'invidious' && this.backendFallback
-          if (canFallback) showInvidiousFallbackToast()
+          const canFallback = process.env.SUPPORTS_LOCAL_API && usesInvidiousApi(this.backendPreference) && this.backendFallback
+          if (canFallback) showInvidiousFallbackToast(this.backendPreference)
           if (metadataOnly) {
             if (canFallback) return this.getVideoInformationLocal(loadGeneration, true)
             console.error('Could not restore downloaded video metadata', err)
@@ -4416,7 +4458,7 @@ export default defineComponent({
 
           console.error(err)
           if (canFallback) {
-            const errorMessage = this.t('Invidious API Error (Click to copy)')
+            const errorMessage = isYattee ? this.t('Yattee Server.API Error (Click to copy)') : this.t('Invidious API Error (Click to copy)')
             showApiErrorToast(errorMessage, err, this.showTabToast)
             this.getVideoInformationLocal(loadGeneration)
           } else {
@@ -6478,7 +6520,23 @@ export default defineComponent({
       return `data:${MANIFEST_TYPE_SABR},${encodeURIComponent(JSON.stringify(sabrManifest))}`
     },
 
+    createYatteeMissingStreamsError: function () {
+      // Only blame relaying when the server was asked to relay the streams
+      return new Error(this.$store.getters.getYatteeProxyVideos
+        ? this.t('Yattee Server.Errors.Streams not relayed')
+        : this.t('Yattee Server.Errors.Streams unavailable'))
+    },
+
     createInvidiousDashManifest: async function (result) {
+      if (this.backendPreference === 'yattee') {
+        const manifest = await createYatteeDashManifest(result.adaptiveFormats, result.lengthSeconds, this.apiServerUrl)
+        // Without adaptive streams, the muxed streams can still play
+        if (manifest === null && this.legacyFormats.length === 0) {
+          throw new Error(this.t('Yattee Server.Errors.Streams unavailable'))
+        }
+        return manifest
+      }
+
       let url = `${this.currentInvidiousInstanceUrl}/api/manifest/dash/id/${this.videoId}`
 
       // If we are in Electron,

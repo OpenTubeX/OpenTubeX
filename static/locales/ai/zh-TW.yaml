@@ -417,6 +417,25 @@ Settings:
       Grid Columns: 網格欄數
       Playlist Grid Columns: 播放清單網格欄數
       Auto: 自動
+    Preferred API Backend:
+      Yattee Server: Yattee 伺服器
+    Yattee Server:
+      Server URL: Yattee 伺服器 URL
+      Username: 使用者名稱
+      Password: 密碼
+      Proxy Videos: 透過 Yattee 伺服器代理影片
+      Test Connection: 測試連線
+      Testing: 正在測試連線…
+      Connected: 已連線至 Yattee 伺服器 {version}
+      Errors:
+        Invalid URL: 請輸入以 https:// 或 http:// 開頭的伺服器 URL。
+        Unreachable: 無法連線至伺服器。請檢查 URL 以及伺服器是否正在執行。
+        Media not allowed: '已連線，但伺服器不允許此應用程式載入影片。請在伺服器的環境變數中設定 CORS_ORIGINS={origins}。'
+        Not a Yattee server: 伺服器已回應，但它不是 Yattee 伺服器。
+        Credentials required: 伺服器需要使用者名稱和密碼。
+        Invalid credentials: 伺服器拒絕了使用者名稱或密碼。
+        Rate limited: 由於失敗次數過多，伺服器正在封鎖登入。請稍後再試。
+        Server error: 伺服器傳回錯誤（HTTP {status}）。
   Context Menu Search Settings:
     Context Menu Search Settings: 內容選單搜尋
     Description: 選擇在已選取文字上按一下滑鼠右鍵時顯示的搜尋引擎。搜尋結果會在預設瀏覽器中開啟。
@@ -1655,6 +1674,7 @@ Video:
       needs_auth: "需要登入"
       unlisted: "未公開"
   Save Queue to Playlist: "將佇列儲存至播放清單"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: 使用 Yattee 伺服器時目前不支援直播聊天室。需要直接連線至 YouTube。
 Playlist:
   Playlist Already Preloaded: "播放清單中的所有影片均已預載"
   Playlist Preload Progress: "正在預載影片：{completed}/{requested}"
@@ -1881,6 +1901,8 @@ Tooltips:
       載入上次使用的分頁會還原前一個工作階段，其他分頁會保持開啟但尚未載入，點選時才會載入。
       以空白工作階段啟動會略過已儲存的分頁並開啟全新視窗。
     Remember Tab Navigation History: 儲存每個分頁的上一頁與下一頁瀏覽記錄，並在 OpenTubeX 重新啟動時還原。
+    Yattee Server: OpenTubeX 用來載入影片、頻道、播放清單和搜尋結果的 yattee-server 站台。使用者名稱和密碼只會儲存在此裝置上。
+    Proxy Videos Through Yattee Server: 透過伺服器轉送影片和音訊串流。除非伺服器與您使用同一個網際網路連線，否則請保持開啟，因為 YouTube 只會將串流提供給提出要求的位址。縮圖一律直接從 YouTube 載入。
   Proxy Settings:
     IP Block Recovery Script Path: 偵測到 IP 封鎖時要執行的指令碼檔案路徑。OpenTubeX 會等候指令碼執行完畢，再重新載入影片。若已啟用備援功能，則僅在備援也失敗時執行。
   Player Settings:
@@ -2258,3 +2280,15 @@ Subscription Groups:
   Empty Group: 此群組沒有目前設定檔中的頻道。
   Save Failed: 無法儲存群組。
   Delete Failed: 無法刪除群組。
+Yattee Server:
+  API Error (Click to copy): Yattee 伺服器錯誤（點擊複製）
+  Unsupported page: 使用 Yattee 伺服器時無法開啟此頁面。請開啟「{fallbackSetting}」以透過本機 API 載入。
+  Posts unavailable: Yattee 伺服器不提供貼文。請開啟「{fallbackSetting}」以透過本機 API 載入。
+  Errors:
+    Invalid credentials: Yattee 伺服器拒絕了使用者名稱或密碼。請在「設定」→「進階」中檢查。
+    Rate limited: 由於失敗次數過多，Yattee 伺服器正在封鎖登入。請稍後再試。
+    Streams not relayed: Yattee 伺服器未轉送此影片的串流。透過伺服器代理影片時，OpenTubeX 不會直接連線至 YouTube。
+    Not configured: 請在「設定」→「進階」中輸入您的 Yattee 伺服器 URL。
+    HTTPS required: Android 只能播放來自使用 HTTPS 的 Yattee 伺服器的影片。
+    Streams unavailable: 無法從 Yattee 伺服器載入此影片的串流。請使用「設定」→「進階」中的「測試連線」檢查伺服器。
+Yattee Fallback Warning: 此請求繞過了您設定的 Yattee 伺服器，直接連線至 YouTube，因而暴露您的 IP 位址。

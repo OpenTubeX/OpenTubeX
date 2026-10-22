@@ -277,6 +277,7 @@ import FtQuickSettingsMenu from '../FtQuickSettingsMenu/FtQuickSettingsMenu.vue'
 import CapacitorPhoneTabSwitcher from '../TabBar/CapacitorPhoneTabSwitcher.vue'
 
 import store from '../../store/index'
+import { usesInvidiousApi } from '../../../apiBackends'
 
 import { getConfiguredKeyboardShortcuts, SEARCH_RESULTS_DISPLAY_LIMIT } from '../../../constants'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
@@ -1021,7 +1022,7 @@ function getSearchSuggestionsDebounce(query) {
   suggestionTimeout = setTimeout(() => loadSearchSuggestions(query.trim(), controller), 200)
 }
 
-/** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
+/** @type {import('vue').ComputedRef<'local' | 'invidious' | 'yattee'>} */
 const backendPreference = computed(() => store.getters.getBackendPreference)
 /** @type {import('vue').ComputedRef<boolean>} */
 const backendFallback = computed(() => store.getters.getBackendFallback)
@@ -1041,12 +1042,12 @@ async function loadSearchSuggestions(query, controller) {
   if (signal.aborted) return
   try {
     let suggestions
-    if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
+    if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendPreference.value)) {
       try {
         suggestions = (await getInvidiousSearchSuggestions(query, signal)).suggestions
       } catch (error) {
         if (signal.aborted || !process.env.SUPPORTS_LOCAL_API || !backendFallback.value) throw error
-        showInvidiousFallbackToast()
+        showInvidiousFallbackToast(backendPreference.value)
         suggestions = await getLocalSearchSuggestions(query, signal)
       }
     } else {

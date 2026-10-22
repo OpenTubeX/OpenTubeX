@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 import { computed, nextTick, reactive, ref, shallowRef, watch as observe } from 'vue'
+import { usesInvidiousApi } from '../../src/apiBackends.js'
 
 const playlistSource = readFileSync(new URL('../../src/renderer/components/WatchVideoPlaylist/WatchVideoPlaylist.vue', import.meta.url), 'utf8')
 const watchSource = readFileSync(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
@@ -13,7 +14,7 @@ function extractSourceBetweenMarkers(source, start, end) {
   return source.slice(from, to)
 }
 
-function harness({ laterPageError = null } = {}) {
+function harness({ laterPageError = null, backend = 'local' } = {}) {
   const items = [{ videoId: 'first', title: 'First video' }, { videoId: 'second', title: 'Second video' }]
   const playlistItems = shallowRef([])
   const randomizedPlaylistItems = shallowRef([])
@@ -37,7 +38,7 @@ function harness({ laterPageError = null } = {}) {
     isLoading, playlistItems, getPlaylistInfoRun: false,
     playlistTitle: ref(''), playlistTotalVideoCount: ref(0), channelName: ref(''), channelId: ref(''),
     store: { commit() {} }, playlistCacheTabId: 'android-tab',
-    process: { env: { SUPPORTS_LOCAL_API: true } }, backendPreference: ref('local'),
+    process: { env: { SUPPORTS_LOCAL_API: true } }, backendPreference: ref(backend), usesInvidiousApi,
     applyReversePlaylistState: videos => videos.slice(),
     findIndexOfCurrentVideoInPlaylist: videos => videos.findIndex(item => item.videoId === props.videoId),
     getLocalCachedFeedContinuation: () => continuation,
@@ -107,6 +108,14 @@ test('YouTube playlist autoplay uses cached next videos while a later page is lo
   await loading
   assert.deepEqual(state.playlistItems.value.map(video => video.videoId), ['first', 'second', 'third'])
   assert.deepEqual(state.items.map(video => video.videoId), ['first', 'second'])
+})
+
+test('a playlist that the local API fallback loaded keeps loading later pages with another backend selected', async () => {
+  const state = harness({ backend: 'yattee' })
+  const loading = state.load()
+  state.finishContinuation({ items: [{ videoId: 'third' }] })
+  await loading
+  assert.deepEqual(state.playlistItems.value.map(video => video.videoId), ['first', 'second', 'third'])
 })
 
 test('a later continuation failure preserves pages already loaded for autoplay', async () => {

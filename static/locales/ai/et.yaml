@@ -418,6 +418,25 @@ Settings:
       Grid Columns: Ruudustiku veerud
       Playlist Grid Columns: Esitusloendite ruudustiku veerud
       Auto: Automaatne
+    Preferred API Backend:
+      Yattee Server: Yattee server
+    Yattee Server:
+      Server URL: Yattee serveri URL
+      Username: Kasutajanimi
+      Password: Salasõna
+      Proxy Videos: Puhverda videosid Yattee serveri kaudu
+      Test Connection: Testi ühendust
+      Testing: Testin ühendust…
+      Connected: 'Ühendus loodud: Yattee Server {version}'
+      Errors:
+        Invalid URL: Sisesta serveri URL koos eesliitega https:// või http://.
+        Unreachable: Serveriga ei õnnestunud ühendust saada. Kontrolli URL-i ja seda, kas server töötab.
+        Media not allowed: 'Ühendus loodud, kuid server ei luba sellel rakendusel videoid laadida. Määra serveri keskkonnamuutujates CORS_ORIGINS={origins}.'
+        Not a Yattee server: Server vastas, aga see pole Yattee server.
+        Credentials required: Server nõuab kasutajanime ja salasõna.
+        Invalid credentials: Server lükkas kasutajanime või salasõna tagasi.
+        Rate limited: Liiga paljude ebaõnnestunud katsete tõttu blokeerib server sisselogimised. Proovi hiljem uuesti.
+        Server error: Server tagastas vea (HTTP {status}).
   Context Menu Search Settings:
     Context Menu Search Settings: Kontekstimenüü otsing
     Description: Valige otsingumootorid, mis kuvatakse valitud tekstil paremklõpsamisel. Otsingud avanevad vaikebrauseris.
@@ -1655,6 +1674,7 @@ Video:
       needs_auth: "Vajalik on sisselogimine"
       unlisted: "Registriväline"
   Save Queue to Playlist: "Salvesta esitusjärjekord esitusloendisse"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: Kui kasutad Yattee serverit, siis reaalajas vestlus hetkel ei ole toetatud. Selleks on vajalik otseliidestus YouTube'iga.
 Playlist:
   Playlist Already Preloaded: "Kõik esitusloendi videod on juba eellaaditud"
   Playlist Preload Progress: "Videote eellaadimine: {completed}/{requested}"
@@ -1882,6 +1902,8 @@ Tooltips:
       Viimati aktiivse vahelehe laadimine taastab eelmise seansi nii, et teised vahelehed on avatud, kuid laadimata; need laaditakse klõpsamisel.
       Tühja seansiga alustamine jätab salvestatud vahelehed vahele ja avab uue akna.
     Remember Tab Navigation History: Iga vahelehe edasi- ja tagasiliikumise ajalugu salvestatakse ning taastatakse OpenTubeX-i taaskäivitamisel.
+    Yattee Server: Server, millel töötab yattee-server ja kust OpenTubeX laadib videoid, kanaleid, esitusloendeid ja otsingutulemusi. Kasutajanimi ja salasõna salvestatakse ainult selles seadmes.
+    Proxy Videos Through Yattee Server: Edastab video- ja helivood serveri kaudu. Jäta see sisse lülitatuks, kui server just ei kasuta sinuga sama internetiühendust, sest YouTube edastab vooge ainult aadressile, mis neid küsis. Pisipildid laaditakse alati otse YouTube'ist.
   Proxy Settings:
     IP Block Recovery Script Path: Skriptifaili asukoht, mida kasutatakse IP-blokeeringu tuvastamisel. OpenTubeX ootab skripti lõppemist ja laadib seejärel video uuesti. Kui varumeetod on lubatud, käivitatakse skript ainult siis, kui ka varumeetod nurjub.
   Player Settings:
@@ -2259,3 +2281,15 @@ Subscription Groups:
   Empty Group: Selles rühmas pole praeguse profiili kanaleid.
   Save Failed: Rühma ei õnnestunud salvestada.
   Delete Failed: Rühma ei õnnestunud kustutada.
+Yattee Server:
+  API Error (Click to copy): Yattee serveri viga (kopeerimiseks klõpsi)
+  Unsupported page: See leht pole Yattee serveriga saadaval. Lülita sisse „{fallbackSetting}“, et laadida see kohaliku API kaudu.
+  Posts unavailable: Yattee serverid ei paku postitusi. Lülita sisse „{fallbackSetting}“, et laadida need kohaliku API kaudu.
+  Errors:
+    Invalid credentials: Yattee server lükkas kasutajanime või salasõna tagasi. Kontrolli neid jaotises Seadistused → Täpsemad seaded.
+    Rate limited: Liiga paljude ebaõnnestunud katsete tõttu blokeerib Yattee server sisselogimised. Proovi hiljem uuesti.
+    Streams not relayed: Yattee server ei edastanud selle video vooge. Kuni videod puhverdatakse serveri kaudu, ei loo OpenTubeX otseühendust YouTube'iga.
+    Not configured: Sisesta oma Yattee serveri URL jaotises Seadistused → Täpsemad seaded.
+    HTTPS required: Android saab esitada videoid ainult Yattee serveritest, mis kasutavad HTTPS-i.
+    Streams unavailable: Selle video vooge ei õnnestunud Yattee serverist laadida. Kontrolli serverit nupuga „Testi ühendust“ jaotises Seadistused → Täpsemad seaded.
+Yattee Fallback Warning: See päring läheb sinu seadistatud Yattee serverist mööda ja ühendub otse YouTube'iga, avaldades sinu IP-aadressi.

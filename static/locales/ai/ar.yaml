@@ -419,6 +419,25 @@ Settings:
       Grid Columns: أعمدة الشبكة
       Playlist Grid Columns: أعمدة شبكة قوائم التشغيل
       Auto: تلقائي
+    Preferred API Backend:
+      Yattee Server: خادم Yattee
+    Yattee Server:
+      Server URL: رابط خادم Yattee
+      Username: اسم المستخدم
+      Password: كلمة المرور
+      Proxy Videos: استخدم خادم Yattee كوسيط للفيديوهات
+      Test Connection: اختبار الاتصال
+      Testing: جارٍ اختبار الاتصال…
+      Connected: تم الاتصال بـ Yattee Server {version}
+      Errors:
+        Invalid URL: أدخل رابط الخادم بحيث يبدأ بـ https:// أو http://.
+        Unreachable: تعذّر الوصول إلى الخادم. تحقق من الرابط ومن أن الخادم يعمل.
+        Media not allowed: 'تم الاتصال، لكن الخادم لا يسمح لهذا التطبيق بتحميل الفيديوهات. اضبط CORS_ORIGINS={origins} في متغيرات بيئة الخادم.'
+        Not a Yattee server: استجاب الخادم، لكنه ليس خادم Yattee.
+        Credentials required: يتطلب الخادم اسم مستخدم وكلمة مرور.
+        Invalid credentials: رفض الخادم اسم المستخدم أو كلمة المرور.
+        Rate limited: يحظر الخادم تسجيل الدخول بعد محاولات فاشلة كثيرة. حاول مرة أخرى لاحقًا.
+        Server error: أعاد الخادم خطأً (HTTP {status}).
   Context Menu Search Settings:
     Context Menu Search Settings: البحث في قائمة السياق
     Description: اختر محركات البحث التي تظهر عند النقر بزر الماوس الأيمن فوق النص المحدد. عمليات البحث مفتوحة في المتصفح الافتراضي الخاص بك.
@@ -1692,6 +1711,7 @@ Video:
       unlisted: "غير مدرج"
   How this was made: كيف تم صنع هذا
   Save Queue to Playlist: "حفظ قائمة الانتظار في قائمة تشغيل"
+  Live Chat is currently not supported with the Yattee server. A direct connection to YouTube is required.: المحادثة المباشرة غير مدعومة حالياً مع خادم Yattee. يلزم الاتصال المباشر بـ YouTube.
 Playlist:
   Playlist Already Preloaded: "تم تحميل جميع فيديوهات قائمة التشغيل مسبقًا بالفعل"
   Playlist Preload Progress: "جارٍ تحميل الفيديوهات مسبقًا: {completed} من {requested}"
@@ -1909,6 +1929,8 @@ Tooltips:
     Show Thumbnail Previews: عرض معاينات متحركة عند المرور فوق الصور المصغرة للفيديو.
     Startup Behavior: "اختر ما يفعله OpenTubeX عند بدء تشغيله.\nيؤدي تحميل جميع علامات التبويب إلى استعادة كل علامة تبويب محفوظة على الفور، لكن علامات تبويب الخلفية لن تقوم بتشغيل مقاطع الفيديو تلقائيًا.\nيؤدي تحميل علامات التبويب المحملة مسبقًا إلى إعادة تحميل علامات التبويب التي تم تحميلها عند إغلاق OpenTubeX ويحافظ على إلغاء تحميل علامات التبويب الأخرى.\nيؤدي تحميل آخر علامة تبويب نشطة إلى استعادة الجلسة السابقة مع فتح علامات التبويب الأخرى ولكن بدون تحميلها؛ يتم تحميلها عند النقر فوقها.\nالبدء بجلسة فارغة يتخطى علامات التبويب المحفوظة ويفتح نافذة جديدة."
     Remember Tab Navigation History: يتم حفظ سجل التنقل ذهابًا وإيابًا لكل علامة تبويب واستعادته عند إعادة تشغيل OpenTubeX.
+    Yattee Server: مثيل yattee-server الذي يحمّل منه OpenTubeX الفيديوهات والقنوات وقوائم التشغيل ونتائج البحث. يُخزَّن اسم المستخدم وكلمة المرور على هذا الجهاز فقط.
+    Proxy Videos Through Yattee Server: يمرّر تدفقات الفيديو والصوت عبر الخادم. أبقِ هذا الخيار مفعّلًا ما لم يكن الخادم يستخدم اتصالك بالإنترنت نفسه، لأن YouTube لا يقدّم التدفقات إلا للعنوان الذي طلبها. تُحمَّل الصور المصغّرة دائمًا مباشرةً من YouTube.
   Proxy Settings:
     IP Block Recovery Script Path: مسار ملف البرنامج النصي الذي سيتم تشغيله عند اكتشاف حظر IP. ينتظر OpenTubeX انتهاء الفيديو، ثم يعيد تحميله. إذا تم تمكين الإجراء الاحتياطي، فسيتم تشغيله فقط عند فشل الإجراء الاحتياطي أيضًا.
   Player Settings:
@@ -2285,3 +2307,15 @@ Subscription Groups:
   Empty Group: لا تحتوي هذه المجموعة على أي قنوات من الملف الشخصي الحالي.
   Save Failed: تعذّر حفظ المجموعة.
   Delete Failed: تعذّر حذف المجموعة.
+Yattee Server:
+  API Error (Click to copy): خطأ خادم Yattee (انقر للنسخ)
+  Unsupported page: هذه الصفحة غير متاحة مع خادم Yattee. فعّل «{fallbackSetting}» لتحميلها باستخدام الواجهة البرمجية المحلية.
+  Posts unavailable: لا توفّر خوادم Yattee المنشورات. فعّل «{fallbackSetting}» لتحميلها باستخدام الواجهة البرمجية المحلية.
+  Errors:
+    Invalid credentials: رفض خادم Yattee اسم المستخدم أو كلمة المرور. تحقق منهما في الإعدادات → متقدم.
+    Rate limited: يحظر خادم Yattee تسجيل الدخول بعد محاولات فاشلة كثيرة. حاول مرة أخرى لاحقًا.
+    Streams not relayed: لم يمرّر خادم Yattee تدفقات هذا الفيديو. عندما تمرّ الفيديوهات عبر الخادم كوسيط، لا يتصل OpenTubeX بـ YouTube مباشرةً.
+    Not configured: أدخل رابط خادم Yattee الخاص بك في الإعدادات → متقدم.
+    HTTPS required: لا يمكن لنظام Android تشغيل الفيديوهات إلا من خوادم Yattee التي تستخدم HTTPS.
+    Streams unavailable: تعذّر تحميل بثوث هذا الفيديو من خادم Yattee. استخدم «اختبار الاتصال» في الإعدادات → متقدم للتحقق من الخادم.
+Yattee Fallback Warning: يتجاوز هذا الطلب خادم Yattee الذي أعددته ويتصل مباشرةً بـ YouTube، مما يكشف عنوان IP الخاص بك.

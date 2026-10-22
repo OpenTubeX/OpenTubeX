@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { usesInvidiousApi } from '../../src/apiBackends.js'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
@@ -29,6 +30,7 @@ for (const backend of ['local', 'invidious']) {
         getLocalVideoInfo: request,
         invidiousGetVideoInformation: request,
         process: { env: { SUPPORTS_LOCAL_API: true } },
+        usesInvidiousApi,
         console: { error() {} },
       })
       const watch = {

@@ -1,4 +1,5 @@
 import { customThemeIdFromValue } from '../../customTheme.js'
+import { usesInvidiousInstance } from '../../apiBackends.js'
 
 import {
   SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS,
@@ -134,8 +135,11 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     'Set Current Instance as Default',
     'Clear Default Instance'
   ].includes(group)) {
-    return store.getters.getBackendPreference === 'invidious' ||
-      store.getters.getBackendFallback
+    return usesInvidiousInstance(store.getters.getBackendPreference, store.getters.getBackendFallback)
+  }
+
+  if (sectionType === 'general' && group === 'Yattee Server') {
+    return store.getters.getBackendPreference === 'yattee'
   }
 
   if (sectionType === 'general') {
