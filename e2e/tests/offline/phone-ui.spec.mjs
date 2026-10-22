@@ -46,6 +46,25 @@ test.describe('phone UI', () => {
     await expect(page).toHaveURL(/watch/)
   })
 
+  test('two quick Escapes leave a submenu and then close the player options', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await setWindowSize(app, page, { width: 360, height: 760 })
+    const player = page.locator('.ftVideoPlayer')
+    await player.hover()
+    await player.locator('.shaka-overflow-menu-button').click({ force: true })
+    const dialog = player.locator('.phonePlayerOptions[open]')
+    await dialog.locator('.shaka-playbackrate-button').click()
+    await expect(dialog.locator(':scope > .shaka-back-to-overflow-button')).toBeVisible()
+    // Both within one frame, before the dialog updates its header
+    await dialog.evaluate(element => {
+      for (let press = 0; press < 2; press++) {
+        element.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }))
+      }
+    })
+    await expect(dialog).toHaveCount(0)
+  })
+
   test('searches a language picker without closing quick settings', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
     await setWindowSize(app, page, { width: 360, height: 760 })
     await page.locator('.profileTrigger').click()

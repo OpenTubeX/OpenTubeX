@@ -1663,14 +1663,11 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   -webkit-line-clamp: 2;
 }
 
-/*
-  Codec and bitrate labels can need more room than the other menu options, so
-  the tiles take the width of the longest label (`updateQualityTileSize`).
-*/
+/* Bitrate labels can need more room than the other menu options, so each tile grows to fit its label. */
 :deep(.shaka-sub-menu.ft-menu-grid > button.explicit-resolution) {
   flex-wrap: nowrap;
   align-items: center;
-  inline-size: var(--ft-quality-tile-size, max-content);
+  inline-size: max-content;
   min-inline-size: 90px;
   max-inline-size: 100%;
   padding-inline: 12px;
@@ -1687,6 +1684,89 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 :deep(.shaka-sub-menu.ft-menu-grid > button.explicit-resolution > .shaka-quality-mark) {
   flex: 0 0 auto;
+}
+
+/* Picks the codec whose resolutions the quality menu lists. */
+:deep(.ft-quality-codecs) {
+  display: flex;
+  align-self: center;
+  gap: 2px;
+  padding: 2px;
+  margin-block: 4px;
+  border-radius: calc(999px * var(--ui-roundness));
+  background: rgb(255 255 255 / 10%);
+}
+
+:deep(.shaka-overflow-menu .ft-quality-codecs > button) {
+  min-block-size: 24px;
+  padding: 0 10px;
+  border-radius: inherit;
+  font-size: 12px;
+}
+
+:deep(.shaka-overflow-menu .ft-quality-codecs > button[aria-pressed='true']) {
+  background: color-mix(in srgb, var(--primary-color) 48%, transparent);
+}
+
+/* Sits in the header, at the end opposite the back button. */
+:deep(.shaka-sub-menu.ft-menu-grid > .ft-quality-codecs) {
+  position: absolute;
+  inset-block-start: calc((var(--ft-submenu-header-size) - 28px) / 2);
+  inset-inline-end: 6px;
+  z-index: 1;
+  margin: 0;
+}
+
+/* A centred title would run into the codecs, so it follows the back icon. */
+:deep(.shaka-sub-menu.ft-menu-grid:has(> .ft-quality-codecs) > .shaka-back-to-overflow-button) {
+  justify-content: flex-start;
+  padding-inline-start: 40px;
+}
+
+/*
+  The phone layout shows the header above the menu. When the codecs don't fit
+  beside its title, they get a row of their own, as far from the header as from
+  the options. The grid shares its free space evenly around both instead
+  (`setupPhoneOptionsMenu`), which needs them at the top to start from.
+*/
+:deep(.phonePlayerOptions .ft-quality-codecs) {
+  gap: 0;
+  padding: 0;
+  margin-block: 0 8px;
+  background: none;
+}
+
+/* Together with the gap between the tiles */
+:deep(.phonePlayerOptions .ft-menu-grid > .ft-quality-codecs) {
+  position: static;
+  flex: 1 0 100%;
+  justify-content: center;
+  margin-block-end: 4px;
+}
+
+:deep(.phonePlayerOptions:not([data-header-action]) .ft-menu-grid:has(> .ft-quality-codecs)) {
+  align-content: flex-start;
+}
+
+/* A full-width row can't have the pill background, so the buttons form the pill instead. */
+:deep(.phonePlayerOptions .ft-quality-codecs > button) {
+  min-block-size: 36px;
+  padding-inline: 16px;
+  border-radius: 0;
+}
+
+:deep(.phonePlayerOptions .ft-quality-codecs > button:not([aria-pressed='true'])) {
+  background: rgb(255 255 255 / 10%);
+}
+
+:deep(.phonePlayerOptions .ft-quality-codecs > button:first-child) {
+  border-start-start-radius: calc(999px * var(--ui-roundness));
+  border-end-start-radius: calc(999px * var(--ui-roundness));
+}
+
+:deep(.phonePlayerOptions .ft-quality-codecs > button:last-child) {
+  border-start-end-radius: calc(999px * var(--ui-roundness));
+  border-end-end-radius: calc(999px * var(--ui-roundness));
 }
 
 /* Long chapter titles would otherwise widen the menu beyond the player. */
@@ -6485,7 +6565,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   inset-inline: 0 var(--phone-touch-target, 48px);
   flex: none;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   min-block-size: var(--phone-touch-target, 48px);
   margin: 0;
   padding-block: 8px;
@@ -6493,6 +6573,28 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   border: 0;
   background: transparent;
   color: inherit;
+}
+
+/* The header shows a copy of the open submenu's back button (`setupPhoneOptionsMenu`). */
+:deep(.phonePlayerOptions .shaka-overflow-menu .shaka-back-to-overflow-button) {
+  display: none;
+}
+
+/*
+  A submenu's action sits in the header while it fits (`setupPhoneOptionsMenu`).
+  Layout containment makes the dialog its containing block, so the action stays
+  in place while the menu scrolls, whatever filters the dialog's style uses.
+*/
+:deep(.phonePlayerOptions[data-header-action]) {
+  contain: layout;
+}
+
+:deep(.phonePlayerOptions[data-header-action] .ft-submenu-header-action) {
+  position: fixed;
+  inset-block-start: calc((var(--phone-touch-target, 48px) - 36px) / 2);
+  inset-inline-end: var(--phone-touch-target, 48px);
+  z-index: 1;
+  margin: 0;
 }
 
 :deep(.phonePlayerOptions .shaka-sub-menu.ft-menu-grid) {
@@ -6521,6 +6623,10 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 .ftVideoPlayer:is(:fullscreen, .fullWindow) :deep(.phonePlayerOptions > :is(.phonePlayerOptionsClose, .shaka-back-to-overflow-button)) {
   inset-block-start: var(--safe-area-inset-top, env(safe-area-inset-top, 0));
+}
+
+.ftVideoPlayer:is(:fullscreen, .fullWindow) :deep(.phonePlayerOptions[data-header-action] .ft-submenu-header-action) {
+  inset-block-start: calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + (var(--phone-touch-target, 48px) - 36px) / 2);
 }
 
 :deep(.phonePlayerOptions > .shaka-overflow-menu.ft-menu-grid:has(.shaka-sub-menu:not(.shaka-hidden))) {
