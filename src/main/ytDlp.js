@@ -1031,6 +1031,18 @@ async function fetchBuffer(url) {
 }
 
 /**
+ * @param {string} repository
+ * @returns {Promise<string>}
+ */
+async function getLatestReleaseDownloadUrl(repository) {
+  const { tag_name: tag } = JSON.parse((await fetchBuffer(`https://api.github.com/repos/${repository}/releases/latest`)).toString('utf8'))
+  if (typeof tag !== 'string' || tag === '') {
+    throw new Error(`Could not find the latest ${repository} release`)
+  }
+  return `https://github.com/${repository}/releases/download/${encodeURIComponent(tag)}`
+}
+
+/**
  * Checks a managed download without transferring its payload.
  * A missing validator means there is no trustworthy installed-release baseline.
  * @param {string} url
@@ -1293,15 +1305,18 @@ async function downloadManagedYtDlp(onProgress, onDownloadStart) {
   const configuredChannel = (await settings._findOne('ytDlpChannel'))?.value
   const channel = Object.hasOwn(YT_DLP_RELEASE_REPOSITORIES, configuredChannel) ? configuredChannel : 'stable'
   const assetName = getYtDlpAssetName(process.platform, process.arch)
-  const releaseUrl = `https://github.com/${YT_DLP_RELEASE_REPOSITORIES[channel]}/releases/latest/download`
-  const source = `${releaseUrl}/${assetName}`
+  const repository = YT_DLP_RELEASE_REPOSITORIES[channel]
+  const source = `https://github.com/${repository}/releases/latest/download/${assetName}`
 
   const managedPath = getManagedBinaryPath('yt-dlp')
   let download
 
   try {
+    // fetch the binary and its signed checksums from the same release,
+    // even if a newer one is published in between
+    const releaseUrl = await getLatestReleaseDownloadUrl(repository)
     download = await downloadFile(
-      source,
+      `${releaseUrl}/${assetName}`,
       onProgress,
       onDownloadStart,
       await readDownloadValidators(managedPath, source, channel)
