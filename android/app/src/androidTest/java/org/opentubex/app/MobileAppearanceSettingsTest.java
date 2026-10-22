@@ -89,6 +89,39 @@ public class MobileAppearanceSettingsTest {
     }
 
     @Test
+    public void playerMenuPreviewKeepsItsScaledTextSize() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            WebView view = webView(scenario);
+            try {
+                evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow')");
+                for (String target : new String[] {
+                    ".settingsMenu [data-section=appearance]",
+                    "[data-settings-subpage=customize-interface]",
+                    ".interfaceCustomizer [data-settings-subpage-tab=player]",
+                    ".interfaceCustomizer [data-preview-mode=menu]",
+                }) {
+                    awaitCondition(view, "!!document.querySelector('" + target + "')");
+                    evaluate(view, "document.querySelector('" + target + "').click()");
+                }
+                awaitCondition(view, "!!document.querySelector('.previewOverflowLabel')");
+                // The preview scales an 800px wide player down to the phone, which
+                // puts its text below WebView's default 8px minimum font size.
+                JSONObject sizes = json(view, """
+                    (() => ({
+                        expected: 11 * document.querySelector('.previewPlayer').getBoundingClientRect().width / 800,
+                        actual: parseFloat(getComputedStyle(document.querySelector('.previewOverflowLabel')).fontSize),
+                    }))()
+                    """);
+                assertTrue("The preview text is smaller than 8px: " + sizes, sizes.getDouble("expected") < 8);
+                assertEquals("The player menu preview keeps its scaled text size", sizes.getDouble("expected"),
+                    sizes.getDouble("actual"), 0.1);
+            } finally {
+                evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setSettingsWindowOpen', false)");
+            }
+        }
+    }
+
+    @Test
     public void pinchGesturesKeepTheConfiguredUiScale() throws Exception {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             WebView view = webView(scenario);

@@ -34,26 +34,35 @@
         v-if="state === 'menu'"
         class="previewOverflowMenu"
       >
-        <span
-          v-for="item in overflowItems"
-          :key="item.id"
-          class="previewOverflowItem"
-          :data-preview-overflow-item="item.id"
-        >
-          <PreviewIcon
-            v-if="item.path"
-            :path="item.path"
-            :view-box="item.viewBox"
-          />
-          <FtIcon
-            v-else
-            class="previewOverflowFtIcon"
-            :icon="item.icon"
-            aria-hidden="true"
-          />
-          <span class="previewOverflowLabel">{{ item.label }}</span>
-          <span class="previewOverflowValue">{{ item.value }}</span>
+        <span class="previewOverflowClose">
+          <PreviewIcon :path="SHAKA_PREVIEW_ICONS.CLOSE" />
         </span>
+        <div
+          ref="overflowGrid"
+          v-overlay-scrollbars
+          class="previewOverflowGrid"
+        >
+          <span
+            v-for="item in overflowItems"
+            :key="item.id"
+            class="previewOverflowItem"
+            :data-preview-overflow-item="item.id"
+          >
+            <PreviewIcon
+              v-if="item.path"
+              :path="item.path"
+              :view-box="item.viewBox"
+            />
+            <FtIcon
+              v-else
+              class="previewOverflowFtIcon"
+              :icon="item.icon"
+              aria-hidden="true"
+            />
+            <span class="previewOverflowLabel">{{ item.label }}</span>
+            <span class="previewOverflowValue">{{ item.value }}</span>
+          </span>
+        </div>
       </div>
       <div
         v-if="fullscreen && fullscreenActions.length > 0"
@@ -135,12 +144,13 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, h } from 'vue'
+import { computed, h, onBeforeUnmount, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import store from '../../store/index'
 import { PlayerIcons, ZOOM_IN_ICON_VIEWBOX } from '../../../constants'
 import { getControlBarButtonDefinitions } from '../../helpers/controlBarButtons'
+import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { FULLSCREEN_ACTION_DEFINITIONS } from '../../helpers/fullscreenActions'
 import { getQuickPlaybackRateLabel } from '../../helpers/player/quickPlaybackRateLabel'
 import { AB_REPEAT_PREVIEW_ICON, SHAKA_PREVIEW_ICONS } from './playerPreviewIcons'
@@ -254,6 +264,22 @@ const overflowItems = computed(() => {
     ...removed.filter(item => item.id !== 'autoplay'),
   ].filter(Boolean)
 })
+
+// The phone layout scrolls the tiles. Fewer tiles or a smaller player can leave
+// the offset past the new end, which the scrolling element doesn't clamp itself.
+const overflowGrid = useTemplateRef('overflowGrid')
+function clampOverflowGrid() {
+  const grid = overflowGrid.value
+  if (grid) clampOverlayScrollTop(grid, [...grid.querySelectorAll('.previewOverflowItem')].at(-1) ?? null)
+}
+let overflowGridObserver = null
+watch(overflowGrid, grid => {
+  overflowGridObserver?.disconnect()
+  overflowGridObserver = grid ? new ResizeObserver(clampOverflowGrid) : null
+  overflowGridObserver?.observe(grid)
+})
+watch(overflowItems, clampOverflowGrid, { flush: 'post' })
+onBeforeUnmount(() => overflowGridObserver?.disconnect())
 </script>
 
 <style scoped src="./PlayerPreview.css" />

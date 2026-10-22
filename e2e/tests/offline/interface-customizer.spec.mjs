@@ -1,4 +1,4 @@
-import { test, expect, goTo, openInterfaceCustomizer, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, expectScrollAtRenderedEnd, goTo, openInterfaceCustomizer, setWindowSize } from '../../helpers/app.mjs'
 
 test.describe('interface customizer', () => {
   test('previews navigation changes on desktop and mobile layouts', async ({ page }) => {
@@ -296,6 +296,88 @@ test.describe('interface customizer', () => {
         }), { message: `${mode} controls past the player edge at ${size.width}px` }).toEqual([])
       }
     }
+  })
+
+  test('scales preview text with the player when the stage is wider', { tag: '@scale' }, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 420, height: 760 })
+    const customizer = await openInterfaceCustomizer(page, 'player')
+    await customizer.getByRole('tab', { name: 'Player menu', exact: true }).click()
+    // Font sizes in the player's 800px design units.
+    const sizes = await customizer.locator('.previewStage').evaluate(stage => {
+      const player = stage.querySelector('.previewPlayer').getBoundingClientRect()
+      const designSize = selector => parseFloat(getComputedStyle(stage.querySelector(selector)).fontSize) * 800 / player.width
+      return {
+        stageIsWider: stage.getBoundingClientRect().width > player.width + 1,
+        time: designSize('.previewTextPill'),
+        menuLabel: designSize('.previewOverflowLabel'),
+      }
+    })
+    expect(sizes.stageIsWider).toBe(true)
+    expect(sizes.time).toBeCloseTo(13, 1)
+    // The phone layout sizes its menu like an 11px label on a 360px wide player.
+    expect(sizes.menuLabel).toBeCloseTo(11 * 800 / 360, 1)
+  })
+
+  test('shows the player menu preview over the whole player in the phone layout', { tag: '@scale' }, async ({ app, page }) => {
+    const customizer = await openInterfaceCustomizer(page, 'player')
+    await customizer.getByRole('tab', { name: 'Player menu', exact: true }).click()
+    const close = customizer.locator('.previewOverflowClose')
+    const menuCoversPlayer = () => customizer.locator('.previewPlayer').evaluate(player => {
+      const bounds = player.getBoundingClientRect()
+      const menu = player.querySelector('.previewOverflowMenu').getBoundingClientRect()
+      return ['left', 'top', 'right', 'bottom'].every(side => Math.abs(menu[side] - bounds[side]) < 0.5)
+    })
+    await expect.poll(menuCoversPlayer).toBe(false)
+    await expect(close).toBeHidden()
+
+    // Like the real player, the phone layout opens its menu over the whole player.
+    await setWindowSize(app, page, { width: 360, height: 760 })
+    await expect.poll(menuCoversPlayer).toBe(true)
+    await expect(close).toBeVisible()
+    await expect.poll(() => customizer.locator('.previewOverflowGrid').evaluate(grid => (
+      getComputedStyle(grid).gridTemplateColumns.split(' ').length
+    ))).toBe(4)
+  })
+
+  test('scrolls the phone player menu preview and clamps it when its range shrinks', { tag: '@scale' }, async ({ app, page }) => {
+    const toggles = ['ShowSkipSilenceButton', 'ShowMusicModeToggle', 'ShowLightsOffToggle', 'ShowVolumeBoostToggle']
+    const setToggles = value => page.evaluate(async ({ toggles, value }) => {
+      for (const toggle of toggles) await window.$store.dispatch(`update${toggle}`, value)
+    }, { toggles, value })
+    await setWindowSize(app, page, { width: 360, height: 760 })
+    const customizer = await openInterfaceCustomizer(page, 'player')
+    await setToggles(true)
+    await customizer.getByRole('tab', { name: 'Player menu', exact: true }).click()
+    const grid = customizer.locator('.previewOverflowGrid')
+    const expectScrollbarToMatchRange = () => expect.poll(() => grid.evaluate(element => {
+      const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+      if (element.scrollHeight - element.clientHeight <= 1) {
+        return !scrollbar.classList.contains('os-scrollbar-visible') || scrollbar.classList.contains('os-scrollbar-unusable')
+      }
+      const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
+      const handle = scrollbar.querySelector('.os-scrollbar-handle').getBoundingClientRect()
+      return getComputedStyle(scrollbar).visibility === 'visible' && handle.width >= 1 &&
+        Math.abs(handle.bottom - track.bottom) <= 2
+    })).toBe(true)
+    const scrollToEnd = async () => {
+      await grid.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expectScrollAtRenderedEnd(grid)
+      await expectScrollbarToMatchRange()
+    }
+
+    // Like the player's phone menu, the tiles that don't fit scroll into view.
+    await expect.poll(() => grid.evaluate(element => element.scrollHeight - element.clientHeight)).toBeGreaterThan(1)
+    await scrollToEnd()
+
+    await setToggles(false)
+    await expectScrollAtRenderedEnd(grid)
+    await expectScrollbarToMatchRange()
+
+    await setToggles(true)
+    await scrollToEnd()
+    await setWindowSize(app, page, { width: 380, height: 640 })
+    await expectScrollAtRenderedEnd(grid)
+    await expectScrollbarToMatchRange()
   })
 })
 
