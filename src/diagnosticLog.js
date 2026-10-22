@@ -117,29 +117,17 @@ function serialize(value, depth, seen) {
     if (value instanceof Error) {
       // Stacks are only useful at the top level; nested errors keep their message
       const header = depth === 0 && value.stack?.includes(value.message) ? value.stack : `${value.name}: ${value.message}`
-      const details = Object.keys(value).filter(key => key !== 'stack' && key !== 'message')
-      if (value.cause !== undefined && !details.includes('cause')) details.push('cause')
-      if (details.length === 0 || depth >= MAX_DEPTH) return header
-      return `${header} ${serializeEntries(details.map(key => [key, value[key]]), depth, seen, '{', '}')}`
+      if (depth >= MAX_DEPTH) return header
+      const { entries, total } = ownEntries(value, ['stack', 'message'])
+      if (value.cause !== undefined && !Object.hasOwn(value, 'cause') && entries.length < MAX_ITEMS) entries.push(['cause', value.cause])
+      if (entries.length === 0) return header
+      return `${header} ${serializeEntries(entries, depth, seen, '{', '}', Math.max(total, entries.length))}`
     }
     if (depth >= MAX_DEPTH) return Array.isArray(value) ? '[Array]' : '[Object]'
     if (Array.isArray(value)) return serializeList(value, depth, seen)
-    // Only read the items that are kept, so huge collections and objects
-    // with expensive getters cost no more than small ones
     if (value instanceof Map) return `Map(${value.size}) ${serializeEntries(firstItems(value), depth, seen, '{', '}', value.size)}`
     if (value instanceof Set) return `Set(${value.size}) ${serializeList(firstItems(value), depth, seen, value.size)}`
-    const entries = []
-    let total = 0
-    for (const key in value) {
-      if (!Object.hasOwn(value, key)) continue
-      // An unknown total is reported as more without counting the rest
-      if (entries.length === MAX_ITEMS) {
-        total = Infinity
-        break
-      }
-      entries.push([key, value[key]])
-      total++
-    }
+    const { entries, total } = ownEntries(value)
     const name = value.constructor?.name
     const prefix = name && name !== 'Object' ? `${name} ` : ''
     return `${prefix}${serializeEntries(entries, depth, seen, '{', '}', total)}`
@@ -148,6 +136,19 @@ function serialize(value, depth, seen) {
   } finally {
     seen.delete(value)
   }
+}
+
+// Only read the items that are kept, so huge collections and objects with
+// expensive getters cost no more than small ones
+function ownEntries(value, skippedKeys = []) {
+  const entries = []
+  for (const key in value) {
+    if (!Object.hasOwn(value, key) || skippedKeys.includes(key)) continue
+    // An unknown total is reported as more without counting the rest
+    if (entries.length === MAX_ITEMS) return { entries, total: Infinity }
+    entries.push([key, value[key]])
+  }
+  return { entries, total: entries.length }
 }
 
 function firstItems(iterable) {

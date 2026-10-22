@@ -85,6 +85,14 @@ test('collections are only read as far as the serialized items', () => {
   assert.match(formatDiagnosticMessage([object]), /^\{key0: 0, .*key24: 24, … more\}$/)
   assert.equal(reads, 25)
 
+  reads = 0
+  const error = new Error('Payload failed')
+  for (let index = 0; index < 1000; index++) {
+    Object.defineProperty(error, `key${index}`, { enumerable: true, get: () => { reads++; return index } })
+  }
+  assert.match(formatDiagnosticMessage(['x', error]), /key24: 24, … more\}$/)
+  assert.equal(reads, 25)
+
   let iterated = 0
   class CountingSet extends Set {
     * [Symbol.iterator] () {
