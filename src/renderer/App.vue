@@ -1353,7 +1353,7 @@ let removeOpenTabOrganizerListener = null
 let removeAndroidSubscriptionRefreshCancelledListener = null
 let androidSubscriptionRefreshStateTimer = null
 let androidExternalRefreshProgress = null
-let androidExternalRefreshReloadTime = 0
+let androidExternalRefreshReloadTime = null
 let androidSubscriptionRefreshStateVersion = 0
 let removeGamepadNavigation = () => {}
 /** @type {number|null} */
@@ -2511,10 +2511,12 @@ async function synchronizeSubscriptionRefreshInProgress() {
         // A retained renderer writes directly to the shared cache rather than
         // the scheduled worker's result queue. Limit full cache/feed rebuilds
         // while progress moves, then flush the remaining writes on completion.
+        // The first native read also catches writes after the startup cache load.
         const progress = state.rendererActive ? `${state.tab}:${state.percentage}` : null
-        if (progress !== androidExternalRefreshProgress &&
-          (progress === null || androidExternalRefreshProgress === null ||
-            performance.now() - androidExternalRefreshReloadTime >= 5000)) {
+        if (androidExternalRefreshReloadTime === null ||
+          (progress !== androidExternalRefreshProgress &&
+            (progress === null || androidExternalRefreshProgress === null ||
+              performance.now() - androidExternalRefreshReloadTime >= 5000))) {
           await store.dispatch('grabAllSubscriptions')
           androidExternalRefreshProgress = progress
           androidExternalRefreshReloadTime = performance.now()
@@ -2810,9 +2812,13 @@ function handleSubscriptionRefreshCancelled(event) {
   if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
     // A reopened renderer has no local refresh promise to reschedule. Move its
     // overdue timer now so cancelling native work does not immediately restart it.
-    const timestamp = isSubscriptionTabAutoRefreshEnabled(tab)
-      ? Date.now() + getSubscriptionTabAutoRefreshInterval(tab)
-      : null
+    const storedTimestamp = getStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab)
+    const now = Date.now()
+    const timestamp = !isSubscriptionTabAutoRefreshEnabled(tab)
+      ? null
+      : storedTimestamp === null || storedTimestamp <= now
+        ? now + getSubscriptionTabAutoRefreshInterval(tab)
+        : storedTimestamp
     setStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab, timestamp)
     scheduleSubscriptionTabAutoRefresh(tab, profileId, timestamp)
   }

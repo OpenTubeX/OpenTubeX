@@ -35,6 +35,15 @@ public class SubscriptionRefreshUiTest {
 
     @Test
     public void notificationCancellationPostponesScheduledRefreshWithoutLocalOwner() throws Exception {
+        checkNotificationCancellationDeadline(false);
+    }
+
+    @Test
+    public void notificationCancellationPreservesFutureRefreshDeadline() throws Exception {
+        checkNotificationCancellationDeadline(true);
+    }
+
+    private void checkNotificationCancellationDeadline(boolean futureDeadline) throws Exception {
         String token = "scheduled-notification-cancel-ui-test";
         assertTrue(SubscriptionRefreshCoordinator.begin(token));
         SubscriptionRefreshCoordinator.update(token, "videos", 42);
@@ -55,9 +64,10 @@ public class SubscriptionRefreshUiTest {
                     store.commit('setHideSubscriptionsVideos', false);
                     store.commit('setSubscriptionFeedAutoRefreshInterval', '60000');
                     """.replace("%s", STORE));
-                // Let setting watchers finish before making the stored deadline overdue.
+                // Let setting watchers finish before setting the cancellation deadline.
                 await(view, STORE + ".getters.getSubscriptionFeedNextAutoRefreshTimestamp > Date.now()");
-                evaluate(view, "window.__cancelStarted = Date.now(); localStorage.setItem(window.__cancelDeadlineKey, String(Date.now() - 1000))");
+                evaluate(view, "window.__cancelStarted = Date.now(); window.__cancelExpectedDeadline = Date.now() + " +
+                    (futureDeadline ? "120000" : "-1000") + "; localStorage.setItem(window.__cancelDeadlineKey, String(window.__cancelExpectedDeadline))");
                 // ActivityScenario.moveToState waits for UI idle, which an animated
                 // progress toast need not reach on older WebViews. Use the OS flow.
                 assertTrue(InstrumentationRegistry.getInstrumentation().getUiAutomation()
@@ -70,7 +80,8 @@ public class SubscriptionRefreshUiTest {
                 context.startActivity(new Intent(context, MainActivity.class)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP));
                 awaitVisibility(true);
-                await(view, "Number(localStorage.getItem(window.__cancelDeadlineKey)) >= window.__cancelStarted + 60000");
+                await(view, "Number(localStorage.getItem(window.__cancelDeadlineKey)) " +
+                    (futureDeadline ? "=== window.__cancelExpectedDeadline" : ">= window.__cancelStarted + 60000"));
                 assertTrue("notification cancels the scheduled native owner", SubscriptionRefreshCoordinator.isCancelled(token));
                 SubscriptionRefreshCoordinator.finish(token);
                 evaluate(view, "document.dispatchEvent(new Event('visibilitychange'))");
