@@ -34,6 +34,7 @@ import org.junit.runner.RunWith;
 import java.util.Arrays;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
+import java.lang.reflect.Method;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -63,6 +64,69 @@ public class SubscriptionRefreshLifecycleTest {
     @Test
     public void rejectedServiceStartWhenAppHidesKeepsRefreshUsable() throws Exception {
         assertRejectedServiceStart(false);
+    }
+
+    @Test
+    public void scheduledNotificationReturnsWhenAppHidesWithoutAnotherProgressUpdate() throws Exception {
+        String token = "scheduled-notification-visibility";
+        boolean wasVisible = AppVisibility.isVisible();
+        Context scheduledContext = new ContextWrapper(context) {
+            @Override
+            public ComponentName startForegroundService(Intent service) {
+                throw new AssertionError("scheduled work must keep its regular notification");
+            }
+        };
+        try {
+            assertTrue(SubscriptionRefreshCoordinator.begin(token));
+            SubscriptionRefreshCoordinator.update(token, "shorts", 42);
+            AppVisibility.setVisible(false);
+            publishScheduledNotification(scheduledContext, token, 42);
+            await("scheduled notification initially appears", this::hasRefreshNotification);
+
+            AppVisibility.setVisible(true);
+            SubscriptionRefreshWorker.onAppVisibilityChanged(scheduledContext);
+            await("opening the app hides the scheduled notification", () -> !hasRefreshNotification());
+            AppVisibility.setVisible(false);
+            SubscriptionRefreshWorker.onAppVisibilityChanged(scheduledContext);
+            await("hiding the app immediately restores the scheduled notification", this::hasRefreshNotification);
+
+            AppVisibility.setVisible(true);
+            SubscriptionRefreshWorker.onAppVisibilityChanged(scheduledContext);
+            await("reopening hides the restored notification", () -> !hasRefreshNotification());
+            publishScheduledNotification(scheduledContext, token, 73);
+            assertFalse("progress updates remain silent in the app", hasRefreshNotification());
+            assertFalse("scheduled work has no renderer owner", SubscriptionRefreshWorker.isRendererActive(token));
+            AppVisibility.setVisible(false);
+            SubscriptionRefreshWorker.onAppVisibilityChanged(scheduledContext);
+            await("latest progress is restored without another network result", () -> Arrays.stream(
+                context.getSystemService(NotificationManager.class).getActiveNotifications())
+                .anyMatch(notification -> notification.getId() == SubscriptionRefreshNotification.NOTIFICATION_ID &&
+                    "73%".contentEquals(notification.getNotification().extras.getCharSequence(android.app.Notification.EXTRA_TEXT, ""))));
+            android.app.Notification notification = Arrays.stream(context.getSystemService(NotificationManager.class).getActiveNotifications())
+                .filter(item -> item.getId() == SubscriptionRefreshNotification.NOTIFICATION_ID)
+                .findFirst().get().getNotification();
+            assertEquals("Refreshing scheduled shorts", notification.extras.getCharSequence(android.app.Notification.EXTRA_TITLE));
+            assertEquals("Stop scheduled refresh", notification.actions[0].title);
+            notification.actions[0].actionIntent.send();
+            await("restored Cancel action reaches the scheduled worker", () -> SubscriptionRefreshCoordinator.isCancelled(token));
+            SubscriptionRefreshWorker.onAppVisibilityChanged(scheduledContext);
+            await("cancelled work cannot restore its notification", () -> !hasRefreshNotification());
+            SubscriptionRefreshWorker.completeWorker(scheduledContext, token);
+            SubscriptionRefreshWorker.onAppVisibilityChanged(scheduledContext);
+            assertFalse("finished work cannot restore its notification", hasRefreshNotification());
+        } finally {
+            SubscriptionRefreshWorker.completeWorker(context, token);
+            AppVisibility.setVisible(wasVisible);
+        }
+    }
+
+    private static void publishScheduledNotification(Context context, String token, int progress) throws Exception {
+        // Exercise the worker's actual publication path without a network request.
+        Method publish = SubscriptionRefreshWorker.class.getDeclaredMethod(
+            "publishNotification", Context.class, SubscriptionRefreshState.Snapshot.class);
+        publish.setAccessible(true);
+        publish.invoke(null, context, new SubscriptionRefreshState.Snapshot(
+            token, "Refreshing scheduled shorts", "Stop scheduled refresh", progress));
     }
 
     private void assertRejectedServiceStart(boolean startsHidden) throws Exception {

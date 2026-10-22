@@ -28,6 +28,9 @@ public final class SubscriptionRefreshWorker extends Worker {
     static final String FEED_TYPE_INPUT = "feedType";
     private static final long MAXIMUM_BATCH_MILLIS = 5 * 60 * 1000;
     private static final SubscriptionRefreshState STATE = new SubscriptionRefreshState();
+    // Scheduled workers have no renderer state, but still need their last
+    // progress and notification labels when the app returns to the background.
+    private static SubscriptionRefreshState.Snapshot lastNotificationSnapshot;
 
     static boolean isRendererActive(String token) {
         return STATE.snapshot(token) != null;
@@ -77,6 +80,8 @@ public final class SubscriptionRefreshWorker extends Worker {
                 Log.w(LOG_TAG, "Unable to start subscription refresh service", error);
                 publishNotification(context, state);
             }
+        } else if (lastNotificationSnapshot != null) {
+            publishNotification(context, lastNotificationSnapshot);
         }
     }
 
@@ -102,6 +107,7 @@ public final class SubscriptionRefreshWorker extends Worker {
         if (!SubscriptionRefreshCoordinator.isCurrent(snapshot.token) ||
             SubscriptionRefreshCoordinator.isCancelled(snapshot.token)) return;
         SubscriptionRefreshCoordinator.setProgress(snapshot.token, snapshot.progress);
+        lastNotificationSnapshot = snapshot;
         if (AppVisibility.isVisible()) return;
         context.getSystemService(NotificationManager.class).notify(
             SubscriptionRefreshNotification.NOTIFICATION_ID,
@@ -117,7 +123,7 @@ public final class SubscriptionRefreshWorker extends Worker {
 
     static synchronized boolean finish(Context context, String token) {
         boolean finished = STATE.finish(token);
-        SubscriptionRefreshCoordinator.finish(token);
+        if (SubscriptionRefreshCoordinator.finish(token)) lastNotificationSnapshot = null;
         if (finished) {
             NotificationManager notifications = context.getSystemService(NotificationManager.class);
             notifications.cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);
@@ -130,6 +136,7 @@ public final class SubscriptionRefreshWorker extends Worker {
         boolean cancelled = SubscriptionRefreshCoordinator.cancel(token);
         if (STATE.finish(token)) SubscriptionRefreshCoordinator.finish(token);
         if (cancelled) {
+            lastNotificationSnapshot = null;
             SubscriptionRefreshService.stopIfStarted(context);
             context.getSystemService(NotificationManager.class)
                 .cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);
@@ -147,6 +154,7 @@ public final class SubscriptionRefreshWorker extends Worker {
     static synchronized void completeWorker(Context context, String token) {
         STATE.finish(token);
         if (SubscriptionRefreshCoordinator.finish(token)) {
+            lastNotificationSnapshot = null;
             SubscriptionRefreshService.stopIfStarted(context);
             context.getSystemService(NotificationManager.class)
                 .cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);
