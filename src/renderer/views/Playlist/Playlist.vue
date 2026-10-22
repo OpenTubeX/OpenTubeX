@@ -298,6 +298,7 @@ import { buildYtDlpPlaybackCacheKey, preloadYtDlpPlaybackSources } from '../../h
 import { startProgressBarOperation } from '../../helpers/progressBar'
 import { MOBILE_WIDTH_THRESHOLD, PLAYLIST_HEIGHT_COMPACT_THRESHOLD } from '../../../constants'
 import { useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
+import { keepTabLoaded } from '../../tabs/TabResidency'
 import { useTabToast } from '../../composables/useTabToast'
 
 provide(thumbnailSizeSettingKey, 'playlistThumbnailSize')
@@ -364,6 +365,9 @@ const nextInvidiousPlaylistPage = ref(null)
 const isLoadingMore = ref(false)
 const nextPageError = ref('')
 const playlistInEditMode = ref(false)
+// Unloading the tab under memory pressure would discard unsaved edits.
+watch(playlistInEditMode, editing => keepTabLoaded(tabId, 'unsavedEdits', editing))
+onBeforeUnmount(() => keepTabLoaded(tabId, 'unsavedEdits', false))
 const compactLayout = ref(false)
 let alreadyShownNotice = false
 let fetchedLocalPlaylistItemCount = 0

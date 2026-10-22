@@ -587,3 +587,47 @@ test('cancelling sync during history serialization prevents the database write',
     jobs.dispose()
   }
 })
+
+test('datastore writes reach the main process in call order while large payloads are serialized', async () => {
+  const handlers = await readFile(new URL('../../src/datastores/handlers/electron.js', import.meta.url), 'utf8')
+  let finishSerializing
+  const sent = []
+  const context = vm.createContext({
+    DBActions: { GENERAL: { UPSERT: 'upsert', OVERWRITE: 'overwrite' }, PLAYLISTS: { UPSERT_VIDEO: 'upsertVideo' }, HISTORY: { UPDATE_WATCH_PROGRESS: 'progress' } },
+    runBackgroundJob: (operation, { value }) => new Promise(resolve => {
+      finishSerializing = () => resolve(JSON.stringify(value))
+    }),
+    window: { ftElectron: {
+      dbPlaylists: async (action, value) => { sent.push([action, typeof value]) },
+      dbHistory: async (action, value) => { sent.push([action, typeof value]) },
+    } },
+  })
+  vm.runInContext(handlers.replace(/^import .+\n/gm, '').replace(/export \{[\s\S]*?\}\n/g, '')
+    .replace('export const recommendations', 'const recommendations') +
+    '\nglobalThis.history = History\nglobalThis.playlists = Playlists', context)
+
+  const videos = Array.from({ length: 2000 }, (_, index) => ({ videoId: `video-${index}` }))
+  const writes = [
+    context.playlists.upsert({ _id: 'large', videos }),
+    context.playlists.upsertVideoByPlaylistId('large', 1, { videoId: 'added' }),
+    context.playlists.upsert({ _id: 'small', videos: [] }),
+  ]
+  await new Promise(resolve => setTimeout(resolve, 10))
+  assert.deepEqual(sent, [], 'later writes wait for the large playlist')
+  const allSent = context.playlists.sent().then(() => sent.length)
+  finishSerializing()
+  await Promise.all(writes)
+  assert.equal(await allSent, 3, 'sent() waits for every earlier request')
+  assert.deepEqual(sent, [['upsert', 'string'], ['upsertVideo', 'object'], ['upsert', 'object']])
+
+  sent.length = 0
+  const history = [
+    context.history.overwrite([{ videoId: 'imported' }]),
+    context.history.updateWatchProgress('imported', 10),
+  ]
+  await new Promise(resolve => setTimeout(resolve, 10))
+  assert.deepEqual(sent, [])
+  finishSerializing()
+  await Promise.all(history)
+  assert.deepEqual(sent, [['overwrite', 'string'], ['progress', 'object']])
+})

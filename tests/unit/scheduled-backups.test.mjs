@@ -730,3 +730,29 @@ test('scheduled archives normalize legacy settings and exclude internal window b
     assert.equal(Object.hasOwn(backup.data.settings, key), false, key)
   }
 })
+
+test('archives only the selected sections, with the settings the app provides', async t => {
+  const state = await setup(t)
+  const createArchive = createBackupArchiveFactory(state.profileDirectory, workerPath, state.initialization)
+  const settings = { autoplayVideos: true, landingPage: 'history' }
+
+  const archive = await createArchive({ sections: ['settings', 'history', 'unknown'], settings })
+
+  const backup = await readUnifiedBackup(new Blob([archive]))
+  assert.deepEqual(backup.data, { settings, history: expectedData.history })
+})
+
+test('archives only the newest record of a video that is stored twice', async t => {
+  const state = await setup(t)
+  const history = createDesktopDatastore(path.join(state.profileDirectory, 'history.sqlite'))
+  try {
+    await history.insertAsync({ ...data.history[0], _id: 'duplicate-video', timeWatched: 2, watchProgress: 60 })
+  } finally {
+    await history.driver.close()
+  }
+  const createArchive = createBackupArchiveFactory(state.profileDirectory, workerPath, state.initialization)
+
+  const backup = await readUnifiedBackup(new Blob([await createArchive({ sections: ['history'] })]))
+
+  assert.deepEqual(backup.data.history.map(record => [record._id, record.timeWatched]), [['duplicate-video', 2]])
+})

@@ -37,6 +37,9 @@ const SQL = {
   insertChild: 'INSERT INTO children (parent, pos, data) VALUES (?, ?, ?)',
   removeChild: 'DELETE FROM children WHERE parent = ? AND pos = ?',
   removeChildren: 'DELETE FROM children WHERE parent = ?',
+  count: 'SELECT count(*) FROM docs',
+  removeAll: 'DELETE FROM docs',
+  removeAllChildren: 'DELETE FROM children',
   getMeta: 'SELECT value FROM meta WHERE key = ?',
   setMeta: 'INSERT INTO meta (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = excluded.value',
   setBase: 'INSERT INTO legacy_base (id, hash) VALUES (?, ?) ON CONFLICT (id) DO UPDATE SET hash = excluded.hash',
@@ -549,6 +552,12 @@ export class SqliteDatastore {
 
   removeAsync(query, options = {}) {
     return this._exclusive(async () => {
+      // Everything matches an empty query, so skip reading every document.
+      if (options.multi === true && Object.keys(query).length === 0) {
+        const [[count]] = await this._query(SQL.count)
+        await this._execute([[SQL.removeAll], [SQL.removeAllChildren]], true)
+        return count
+      }
       const matches = await this._matches(query, Boolean(this.childField) && references(query, this.childField), options.multi === true)
       await this._execute(matches.flatMap(({ id }) => [[SQL.remove, [id]], [SQL.removeChildren, [id]]]), true)
       return matches.length

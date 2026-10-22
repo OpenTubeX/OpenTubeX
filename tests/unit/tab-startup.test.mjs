@@ -925,6 +925,22 @@ test('memory pressure unloads the older half of idle background tabs', async t =
   )
 })
 
+test('memory pressure keeps the tabs the renderer still needs loaded', async t => {
+  const manager = createManager(t)
+  manager.createTab({ route: '/history' })
+  presentActive(manager)
+  const tabs = []
+  for (let index = 0; index < 4; index++) {
+    const tab = await manager.createTabWithPreference({ route: `/channel/${index}`, makeActive: false })
+    manager.markTabMounted(tab.id, tab.mountRevision)
+    tab.lastActiveAt = index
+    tabs.push(tab)
+  }
+
+  assert.equal(await manager.unloadLeastRecentlyUsedTabs(100, [tabs[0].id, tabs[2].id, 'missing']), 2)
+  assert.deepEqual(tabs.map(tab => tab.loadState), ['loaded', 'unloaded', 'loaded', 'unloaded'])
+})
+
 test('a renderer crash unloads every background tab, including playing ones', async t => {
   const manager = createManager(t)
   const selected = manager.createTab({ route: '/history' })

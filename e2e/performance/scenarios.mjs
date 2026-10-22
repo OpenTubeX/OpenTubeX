@@ -9,6 +9,8 @@ const actionTimeoutMs = 30_000
 const navigationCycles = 10
 const scrollFrames = 60
 const playbackCycles = 5
+// Deliberate clicks typically follow a pointer rest of a few hundred milliseconds.
+const hoverRestMs = 300
 
 export function mockPerformanceServices(page) {
   return page.route(/^https?:\/\//, route => {
@@ -165,6 +167,37 @@ export async function measureLargeFeedScroll(page) {
   }
 }
 
+// The first Watch navigation of a window includes loading its code, unless
+// resting the pointer on the link already loaded it.
+async function measureHoveredWatchNavigation(page) {
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
+  const link = page.locator('.tabContent[aria-hidden="false"] .ft-list-video a.title').first()
+  await link.hover()
+  await page.waitForTimeout(hoverRestMs)
+
+  const elapsed = await page.evaluate(({ actionTimeoutMs }) => new Promise((resolve, reject) => {
+    const link = document.querySelector('.tabContent[aria-hidden="false"] .ft-list-video a.title')
+    const startedAt = performance.now()
+    const timeout = setTimeout(() => reject(new Error('Watch did not mount within the performance timeout')), actionTimeoutMs)
+    const sampleFrame = (timestamp) => {
+      if (document.querySelector('.tabContent[aria-hidden="false"] .videoLayout')) {
+        clearTimeout(timeout)
+        resolve(timestamp - startedAt)
+        return
+      }
+      requestAnimationFrame(sampleFrame)
+    }
+    link.click()
+    requestAnimationFrame(sampleFrame)
+  }), { actionTimeoutMs })
+
+  await expect(page).toHaveURL(/#\/watch\//)
+  // The side navigation is out of view on the watch page.
+  await page.locator(sel.backButton).click()
+  await expect(page).toHaveURL(/#\/subscriptions/)
+  return elapsed
+}
+
 async function collectRendererHeapAfterGcKiB(page) {
   const session = await page.context().newCDPSession(page)
   try {
@@ -316,6 +349,7 @@ export async function runPerformanceScenarios({ electronApp, page }, startup, ap
   const channelSearch = await measureChannelSearch(page)
   const subscriptionSwitches = await runLargeSubscriptionsBenchmark(page)
   const scroll = await measureLargeFeedScroll(page)
+  const hoveredWatchNavigationElapsedMs = await measureHoveredWatchNavigation(page)
   const navigationHeapGrowthMiB = await measureNavigationHeapGrowth(page)
   const playbackStart = await measurePlaybackStart(electronApp, page)
   const playbackHeapGrowthMiB = await measurePlaybackHeapGrowth(page)
@@ -330,6 +364,7 @@ export async function runPerformanceScenarios({ electronApp, page }, startup, ap
     largeFeedScrollLongestFrameMs: scroll.longestFrame,
     largeFeedScrollElapsedMs: scroll.elapsed,
     largeFeedScrollTaskMs: scroll.taskMs,
+    hoveredWatchNavigationElapsedMs,
     navigationHeapGrowthMiB,
     playbackStartElapsedMs: playbackStart.elapsed,
     playbackStartLongestFrameMs: playbackStart.longestFrame,

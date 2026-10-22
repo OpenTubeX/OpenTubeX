@@ -18,12 +18,28 @@ const AsyncRouteLoadingIndicator = {
 const routePreloaders = new WeakMap()
 
 function createAsyncRoute(loader) {
+  // Preloads and mounts share one request. A failed one is not kept, so the
+  // next attempt loads again.
+  let request = null
+  const load = () => {
+    request ??= loader().catch((error) => {
+      request = null
+      throw error
+    })
+    return request
+  }
   const component = defineAsyncComponent({
-    loader,
+    loader: load,
     loadingComponent: AsyncRouteLoadingIndicator,
     delay: 0
   })
-  routePreloaders.set(component, () => loader().then(() => undefined))
+  // Resolving the wrapper itself lets later mounts render the view in the same
+  // frame instead of a placeholder first, which a view transition would
+  // capture. Vue keeps a rejected request of its own, so it only runs after a
+  // successful load.
+  routePreloaders.set(component, () => load()
+    .then(() => component.__asyncLoader?.())
+    .then(() => undefined))
   return component
 }
 

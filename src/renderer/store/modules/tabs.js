@@ -311,15 +311,18 @@ const mutations = {
 }
 
 const actions = {
-  async initializeTabs({ commit }) {
+  async initializeTabs({ commit, state }) {
     if (!process.env.IS_ELECTRON) return () => {}
 
-    const removeStateListener = window.ftElectron.tabs.onStateUpdated((newState) => {
-      commit('setTabsState', newState)
-    })
+    const applyState = (tabState) => {
+      commit('setTabsState', tabState)
+      // Caches kept by other modules for closed tabs are no longer reachable.
+      commit('pruneTabCaches', new Set(state.tabs.map(tab => tab.id)))
+    }
+    const removeStateListener = window.ftElectron.tabs.onStateUpdated(applyState)
     const tabState = await window.ftElectron.tabs.getState()
     if (tabState) {
-      commit('setTabsState', tabState)
+      applyState(tabState)
     }
 
     return () => {

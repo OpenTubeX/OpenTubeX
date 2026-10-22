@@ -128,3 +128,39 @@ test('older backups cannot reduce watch progress or daily watch time', () => {
   assert.deepEqual(mergeBackupWatchStatsRecord(currentStats, olderStats), currentStats)
   assert.deepEqual(mergeBackupWatchStatsRecord(olderStats, currentStats), currentStats)
 })
+
+test('merges playlist videos like comparing each with every saved one', () => {
+  // The previous quadratic merge, kept as the reference behavior.
+  const reference = (current, imported) => {
+    const videos = [...current.videos]
+    for (const video of imported.videos) {
+      const exists = videos.some(saved => video.playlistItemId != null
+        ? saved.playlistItemId === video.playlistItemId
+        : saved.videoId === video.videoId && saved.timeAdded === video.timeAdded)
+      if (!exists) videos.push(video)
+    }
+    return videos
+  }
+  let seed = 7
+  const random = (limit) => {
+    seed = (seed * 1103515245 + 12345) % 2147483648
+    return seed % limit
+  }
+  const video = () => ({
+    videoId: `video${random(20)}`,
+    timeAdded: random(4),
+    ...(random(3) === 0 ? {} : { playlistItemId: `item${random(30)}` })
+  })
+  for (let run = 0; run < 50; run++) {
+    const current = { _id: 'playlist', videos: Array.from({ length: random(40) }, video) }
+    const imported = { _id: 'playlist', videos: Array.from({ length: random(40) }, video) }
+    assert.deepEqual(mergeBackupPlaylist(current, imported).videos, reference(current, imported))
+  }
+
+  const large = count => ({
+    _id: 'large',
+    videos: Array.from({ length: count }, (_, index) => ({ videoId: `video${index}`, timeAdded: index, playlistItemId: `item${index}` }))
+  })
+  const merged = mergeBackupPlaylist(large(20_000), { ...large(20_000), videos: large(30_000).videos.slice(10_000) })
+  assert.equal(merged.videos.length, 30_000)
+})

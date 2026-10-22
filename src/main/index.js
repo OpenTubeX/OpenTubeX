@@ -98,6 +98,7 @@ import { supportsNativeNotifications } from './nativeNotifications'
 import { getTrayMenuIcon } from './trayMenuIcons'
 import { createScheduledBackups } from './scheduledBackups'
 import { createBackupArchiveFactory } from './backupArchive'
+import { createDatastoreRequestTracker } from './datastoreRequests'
 
 function getSystemAccentColor() {
   try {
@@ -1880,18 +1881,34 @@ function runApp() {
   const backgroundSubscriptions = createSubscriptionBackgroundService(userDataPath, {
     onUploads: value => uploadNotifier.observe(value).catch(() => {})
   })
+  // Builds archives in a worker from read-only database snapshots, so neither
+  // this process nor the renderer stalls on large libraries.
+  // The worker reads from its own connection, so an archive includes a write
+  // only once its request has finished.
+  const datastoreRequests = createDatastoreRequestTracker()
+  /**
+   * @param {string} channel
+   * @param {(event: import('electron').IpcMainInvokeEvent, request: { action: number, data: unknown }) => Promise<unknown>} handler
+   */
+  function handleDatastoreRequests(channel, handler) {
+    ipcMain.handle(channel, (event, request) => datastoreRequests.track(handler(event, request)))
+  }
+  const createBackupArchive = createBackupArchiveFactory(userDataPath,
+    path.join(__dirname, process.env.NODE_ENV === 'development' ? '../../dist/backupArchiveWorker.js' : 'backupArchiveWorker.js'), {
+      waitForDatastores: async () => {
+        await waitForDatastores()
+        await datastoreRequests.settled()
+      },
+      settings: baseHandlers.settings,
+      watchStats: baseHandlers.watchStats,
+    })
   const scheduledBackups = createScheduledBackups({
     async readConfiguration() {
       const keys = ['scheduledBackupEnabled', 'scheduledBackupFolderPath', 'scheduledBackupInterval', 'scheduledBackupKeepCount', 'scheduledBackupStatus']
       const [enabled, directory, interval, keepCount, status] = await Promise.all(keys.map(async key => (await baseHandlers.settings._findOne(key))?.value))
       return { enabled, directory, interval: interval ?? 7, keepCount: keepCount ?? 5, status }
     },
-    createArchive: createBackupArchiveFactory(userDataPath,
-      path.join(__dirname, process.env.NODE_ENV === 'development' ? '../../dist/backupArchiveWorker.js' : 'backupArchiveWorker.js'), {
-        waitForDatastores,
-        settings: baseHandlers.settings,
-        watchStats: baseHandlers.watchStats,
-      }),
+    createArchive: () => createBackupArchive(),
     saveStatus: status => updateSettingFromMain('scheduledBackupStatus', status),
   })
   function checkScheduledBackup() {
@@ -4387,6 +4404,15 @@ function runApp() {
     })
   })
 
+  ipcMain.handle(IpcChannels.CREATE_BACKUP_ARCHIVE, async (event, sections, settings) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) return null
+    if (!Array.isArray(sections) || sections.some(section => typeof section !== 'string') ||
+      (settings !== undefined && (settings === null || typeof settings !== 'object' || Array.isArray(settings)))) {
+      throw new TypeError('Invalid backup sections or settings')
+    }
+    return createBackupArchive({ sections, settings })
+  })
+
   ipcMain.handle(IpcChannels.CHOOSE_SCHEDULED_BACKUP_FOLDER, async (event) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) return
     const currentPath = (await baseHandlers.settings._findOne('scheduledBackupFolderPath'))?.value
@@ -5402,7 +5428,7 @@ function runApp() {
   // *********** //
 
   // Settings
-  ipcMain.handle(IpcChannels.DB_SETTINGS, async (event, { action, data }) => {
+  handleDatastoreRequests(IpcChannels.DB_SETTINGS, async (event, { action, data }) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
@@ -5530,7 +5556,7 @@ function runApp() {
 
   // *********** //
   // History
-  ipcMain.handle(IpcChannels.DB_HISTORY, async (event, { action, data }) => {
+  handleDatastoreRequests(IpcChannels.DB_HISTORY, async (event, { action, data }) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
@@ -5569,6 +5595,7 @@ function runApp() {
           return null
 
         case DBActions.GENERAL.OVERWRITE:
+          if (typeof data === 'string') data = JSON.parse(data)
           await baseHandlers.history.overwrite(data)
           syncOtherWindows(
             IpcChannels.SYNC_HISTORY,
@@ -5677,7 +5704,7 @@ function runApp() {
 
   // *********** //
   // Recommendation learning
-  ipcMain.handle(IpcChannels.DB_RECOMMENDATIONS, async (event, { action, data }) => {
+  handleDatastoreRequests(IpcChannels.DB_RECOMMENDATIONS, async (event, { action, data }) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) return
     let result
     if (action === DBActions.GENERAL.FIND) result = await baseHandlers.recommendations.find()
@@ -5690,7 +5717,7 @@ function runApp() {
   })
 
   // Watch Stats
-  ipcMain.handle(IpcChannels.DB_WATCH_STATS, async (event, { action, data }) => {
+  handleDatastoreRequests(IpcChannels.DB_WATCH_STATS, async (event, { action, data }) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
@@ -5755,7 +5782,7 @@ function runApp() {
 
   // *********** //
   // Profiles
-  ipcMain.handle(IpcChannels.DB_PROFILES, async (event, { action, data }) => {
+  handleDatastoreRequests(IpcChannels.DB_PROFILES, async (event, { action, data }) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
@@ -5858,7 +5885,7 @@ function runApp() {
   // As such, only the currently used actions have synchronization implemented
   // The remaining should have it implemented only when playlists
   // get fully implemented into the app
-  ipcMain.handle(IpcChannels.DB_PLAYLISTS, async (event, { action, data }) => {
+  handleDatastoreRequests(IpcChannels.DB_PLAYLISTS, async (event, { action, data }) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
@@ -5878,6 +5905,7 @@ function runApp() {
           return await baseHandlers.playlists.find()
 
         case DBActions.GENERAL.UPSERT:
+          if (typeof data === 'string') data = JSON.parse(data)
           await baseHandlers.playlists.upsert(data)
           syncOtherWindows(
             IpcChannels.SYNC_PLAYLISTS,
@@ -5991,7 +6019,7 @@ function runApp() {
 
   // ************** //
   // Search History
-  ipcMain.handle(IpcChannels.DB_SEARCH_HISTORY, async (event, { action, data }) => {
+  handleDatastoreRequests(IpcChannels.DB_SEARCH_HISTORY, async (event, { action, data }) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
@@ -6050,7 +6078,7 @@ function runApp() {
 
   // *********** //
   // Profiles
-  ipcMain.handle(IpcChannels.DB_SUBSCRIPTION_CACHE, async (event, { action, data }) => {
+  handleDatastoreRequests(IpcChannels.DB_SUBSCRIPTION_CACHE, async (event, { action, data }) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }

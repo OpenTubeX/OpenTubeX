@@ -41,3 +41,43 @@ test('already stale images are not added to the cache', () => {
   assert.equal(cache.has('https://example.com/stale'), false)
   assert.equal(cache.has('https://example.com/invalid'), false)
 })
+
+test('evicts the least recently used images beyond the byte budget', () => {
+  const cache = new ImageCache(10)
+  cache.add('https://example.com/a', 'image/png', Buffer.alloc(4), now + 1000)
+  cache.add('https://example.com/b', 'image/png', Buffer.alloc(4), now + 1000)
+  // Reading an image makes it the most recently used one.
+  cache.get('https://example.com/a')
+  cache.add('https://example.com/c', 'image/png', Buffer.alloc(4), now + 1000)
+
+  assert.equal(cache.has('https://example.com/a'), true)
+  assert.equal(cache.has('https://example.com/b'), false)
+  assert.equal(cache.has('https://example.com/c'), true)
+  assert.equal(cache._bytes, 8)
+
+  // Replacing an image counts only its new size.
+  cache.add('https://example.com/c', 'image/png', Buffer.alloc(6), now + 1000)
+  assert.equal(cache._bytes, 10)
+  assert.equal(cache.has('https://example.com/a'), true)
+})
+
+test('does not cache images larger than the whole budget', () => {
+  const cache = new ImageCache(10)
+  cache.add('https://example.com/a', 'image/png', Buffer.alloc(4), now + 1000)
+  cache.add('https://example.com/large', 'image/png', Buffer.alloc(11), now + 1000)
+
+  assert.equal(cache.has('https://example.com/large'), false)
+  assert.equal(cache.has('https://example.com/a'), true)
+  assert.equal(cache._bytes, 4)
+})
+
+test('expired images are not served before the periodic cleanup', (t) => {
+  t.mock.timers.enable({ apis: ['Date'], now: now * 1000 })
+  const cache = new ImageCache(10)
+  cache.add('https://example.com/a', 'image/png', Buffer.alloc(4), now + 60)
+  assert.equal(cache.has('https://example.com/a'), true)
+
+  t.mock.timers.tick(60_000)
+  assert.equal(cache.has('https://example.com/a'), false)
+  assert.equal(cache._bytes, 0)
+})

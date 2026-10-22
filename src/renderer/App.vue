@@ -751,6 +751,8 @@ import { tabMediaCoordinator } from './tabs/TabMediaCoordinator'
 import { tabRuntimeRegistry } from './tabs/TabRuntimeRegistry'
 import { getTabAvatarUrl, getTabPageIcon, getTabPreviewFallbackUrl } from './tabs/tabPreview'
 import { preloadResolvedRoute, preloadUtilityRoutes } from './router/index'
+import { installRoutePreloadIntent } from './helpers/routePreloadIntent'
+import { getTabsKeptLoaded } from './tabs/TabResidency'
 import { initializeCapacitorPullToRefresh } from './helpers/capacitorPullToRefresh'
 import { startMemoryPressureMonitor } from './helpers/memoryPressure'
 
@@ -1307,6 +1309,7 @@ let removeReloadRequestListener = null
 let removeConfirmMultipleTabsActionListener = null
 let removeLibraryNoticesListener = null
 let removeOpenUrlListener = null
+let removeRoutePreloadIntent = null
 let removeCapacitorIntegrationListeners = null
 let removeAndroidIncomingShare = null
 let capacitorPullToRefreshSetup = null
@@ -1722,7 +1725,7 @@ onMounted(async () => {
         memoryThreshold: store.getters.getAutoUnloadMemoryThreshold,
         tabPercentage: store.getters.getAutoUnloadTabPercentage
       }),
-      unloadTabs: window.ftElectron.tabs.unloadLeastRecentlyUsed,
+      unloadTabs: percentage => window.ftElectron.tabs.unloadLeastRecentlyUsed(percentage, getTabsKeptLoaded()),
       notify: count => showToast({
         message: t('Tabs Unloaded To Free Memory', { count }, count),
         icon: ['fas', 'memory']
@@ -1835,6 +1838,9 @@ onMounted(async () => {
     // channel, playlist or hashtag in it
     document.addEventListener('click', handleClick)
     document.addEventListener('auxclick', handleAuxClick)
+    removeRoutePreloadIntent = installRoutePreloadIntent({
+      preload: path => preloadResolvedRoute(router.resolve(path))
+    })
 
     if (process.env.IS_ELECTRON) {
       store.dispatch('setupListenersToSyncWindows')
@@ -2052,6 +2058,7 @@ onBeforeUnmount(() => {
   removeConfirmMultipleTabsActionListener?.()
   removeLibraryNoticesListener?.()
   removeOpenUrlListener?.()
+  removeRoutePreloadIntent?.()
   removeCapacitorIntegrationListeners?.()
   removeAndroidIncomingShare?.()
   capacitorPullToRefreshSetup?.then(remove => remove?.())
