@@ -113,7 +113,13 @@ test('the bell confirms each change with a toast that replaces the previous one'
   await expect(onToast).toBeVisible()
   await bell.click()
   await expect(offToast).toBeVisible()
-  await expect(onToast).toHaveCount(0)
+  // Well below the toast's own 3 seconds, so only replacement can remove it.
+  await expect(onToast).toHaveCount(0, { timeout: 1000 })
+
+  // Bells of other channels replace it too.
+  await page.locator('.channel', { hasText: 'Beta Channel' }).getByRole('button', { name: 'Notify about new uploads', exact: true }).click()
+  await expect(page.locator('.toast', { hasText: "You'll be notified about new uploads from Beta Channel when your subscriptions refresh" })).toBeVisible()
+  await expect(offToast).toHaveCount(0, { timeout: 1000 })
 })
 
 test.describe('with upload notifications turned off in settings', () => {

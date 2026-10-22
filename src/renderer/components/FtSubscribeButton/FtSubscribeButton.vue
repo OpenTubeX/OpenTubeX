@@ -791,15 +791,12 @@ function updateFeedType(feedType, enabled, key = 'feedTypes') {
  * Turning notifications on starts with every feed type.
  * @param {boolean} enabled
  */
-function updateNotifications(enabled) {
-  persistChannelSettings({
+async function updateNotifications(enabled) {
+  const saved = await persistChannelSettings({
     notificationFeedTypes: enabled ? feedTypes.value.map(feedType => feedType.id) : []
   })
-  showNotificationsToast(enabled)
+  if (saved) showNotificationsToast(enabled)
 }
-
-/** @type {AbortController | null} */
-let notificationsToastController = null
 
 /**
  * The bell only changes its icon, so confirm what it did and point out when
@@ -857,6 +854,7 @@ function updateShowMembersOnly(value) {
 
 /**
  * @param {{feedTypes?: string[], notificationFeedTypes?: string[], dailyVideoLimit?: number|null|undefined, showMembersOnly?: boolean}} patch
+ * @returns {Promise<boolean>} whether the settings were saved
  */
 function persistChannelSettings(patch) {
   const settings = {
@@ -865,7 +863,7 @@ function persistChannelSettings(patch) {
   }
   const updateSequence = ++channelSettingsUpdateSequence
   optimisticChannelSettings.value = settings
-  if (!isSubscribed.value) return
+  if (!isSubscribed.value) return Promise.resolve(false)
 
   channelSettingsUpdateQueue = channelSettingsUpdateQueue.then(async () => {
     let saved = false
@@ -887,7 +885,9 @@ function persistChannelSettings(patch) {
         })
       }
     }
+    return saved
   })
+  return channelSettingsUpdateQueue
 }
 
 /**
@@ -950,6 +950,14 @@ function isProfileSubscribed(profile) {
 
   return profile.subscriptions.some((channel) => channel.id === channelId)
 }
+</script>
+
+<script>
+/**
+ * Shared by every subscribe button so a bell toast replaces the one from another channel.
+ * @type {AbortController | null}
+ */
+let notificationsToastController = null
 </script>
 
 <style scoped src="./FtSubscribeButton.css" />
