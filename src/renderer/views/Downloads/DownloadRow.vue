@@ -29,7 +29,10 @@
     >
       <FtIcon :icon="thumbnailSwipe.action.icon" />
     </div>
-    <article class="downloadRow">
+    <article
+      class="downloadRow"
+      :class="{ compact: COMPACT }"
+    >
       <div class="downloadMain">
         <FtRetryImage
           :src="download.thumbnail || thumbnailPlaceholder"
@@ -79,10 +82,10 @@
             />
           </div>
           <p
-            v-if="compactSummary"
+            v-if="COMPACT ? compactSummary : summary"
             class="downloadSummary"
           >
-            {{ compactSummary }}
+            {{ COMPACT ? compactSummary : summary }}
           </p>
           <p
             v-if="spaceWarningText"
@@ -97,10 +100,43 @@
           >
             {{ errorText }}
           </p>
+          <p
+            v-if="!COMPACT && download.titleTruncated"
+            class="downloadWarning"
+          >
+            <FtIcon
+              :icon="['fas', 'triangle-exclamation']"
+              aria-hidden="true"
+            />
+            {{ t('Downloads.File Name Shortened') }}
+          </p>
           <DownloadFailureHint v-if="download.status === 'failed'" />
+          <ul
+            v-if="!COMPACT && destinations.length > 0"
+            class="destinationList"
+          >
+            <li
+              v-for="destination in destinations"
+              :key="destination"
+              class="destination"
+              dir="auto"
+              :title="destination"
+            >
+              {{ destination }}
+            </li>
+            <li
+              v-if="hiddenDestinationCount > 0"
+              class="destination"
+            >
+              {{ t('Downloads.More Files', { count: hiddenDestinationCount }, hiddenDestinationCount) }}
+            </li>
+          </ul>
         </div>
       </div>
-      <div class="downloadActions">
+      <div
+        v-if="COMPACT"
+        class="downloadActions"
+      >
         <FtIconButton
           v-if="controllable"
           :title="paused ? t('Downloads.Resume Download') : t('Downloads.Pause Download')"
@@ -131,6 +167,93 @@
           :use-shadow="false"
           @click="openMenu"
         />
+      </div>
+      <div
+        v-else
+        class="downloadActions"
+      >
+        <template v-if="controllable">
+          <FtIconButton
+            v-if="queuePending"
+            :title="t('Downloads.Move Earlier')"
+            :icon="['fas', 'arrow-up']"
+            theme="secondary"
+            :disabled="!canMoveEarlier"
+            @click="emit('move', -1)"
+          />
+          <FtIconButton
+            v-if="queuePending"
+            :title="t('Downloads.Move Later')"
+            :icon="['fas', 'arrow-down']"
+            theme="secondary"
+            :disabled="!canMoveLater"
+            @click="emit('move', 1)"
+          />
+          <FtIconButton
+            v-if="paused"
+            :title="t('Downloads.Resume Download')"
+            :icon="['fas', 'play']"
+            theme="primary"
+            @click="emit('resume')"
+          />
+          <FtIconButton
+            v-else
+            :title="t('Downloads.Pause Download')"
+            :icon="['fas', 'pause']"
+            theme="secondary"
+            @click="emit('pause')"
+          />
+          <FtIconButton
+            :title="t('Downloads.Cancel Download')"
+            :icon="['fas', 'times']"
+            theme="destructive"
+            @click="cancelDownload"
+          />
+        </template>
+        <template v-else>
+          <FtIconButton
+            v-if="canRetry"
+            :title="t('Downloads.Retry Download')"
+            :icon="['fas', 'sync']"
+            theme="primary"
+            :disabled="retrying"
+            @click="emit('retry')"
+          />
+          <FtIconButton
+            v-if="canPlay"
+            :title="t('Downloads.Play Download')"
+            :icon="['fas', 'play']"
+            theme="primary"
+            @click="emit('play')"
+          />
+          <FtIconButton
+            v-if="canPlay && !IS_IOS"
+            :title="t('Video.Add to Queue')"
+            :icon="['fas', 'add-to-queue']"
+            theme="secondary"
+            @click="emit('queue')"
+          />
+          <FtIconButton
+            v-if="canAccessFiles"
+            :title="t('Downloads.Show in Folder')"
+            :icon="['fas', 'folder-open']"
+            theme="secondary"
+            @click="emit('open')"
+          />
+          <FtIconButton
+            v-if="canAccessFiles"
+            :title="t('Downloads.Remove File')"
+            :icon="['fas', 'trash']"
+            theme="destructive"
+            @click="emit('remove')"
+          />
+          <FtIconButton
+            :title="t('Downloads.Clear From List')"
+            :icon="['fas', 'times']"
+            theme="secondary"
+            @click="emit('clear')"
+          />
+        </template>
       </div>
       <FtPrompt
         v-if="showDetails"
@@ -245,6 +368,8 @@ const props = defineProps({
 })
 const emit = defineEmits(['clear', 'move', 'open', 'pause', 'play', 'queue', 'queue-next', 'remove', 'resume', 'retry'])
 const IS_IOS = !!process.env.IS_IOS
+// desktop keeps the full rows; phones get compact rows with an actions menu
+const COMPACT = !!process.env.IS_CAPACITOR
 const { t } = useI18n()
 const showDetails = ref(false)
 const menuButton = useTemplateRef('menuButton')

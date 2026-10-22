@@ -1,4 +1,3 @@
-import { chooseDownloadAction, openDownloadMenu } from '../../helpers/downloads.mjs'
 import { chmod, readFile, readdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
@@ -152,12 +151,13 @@ test('controls queue order, running jobs, bandwidth, and retry-all', async ({ ap
   const canceled = page.locator('.downloadRow').filter({ hasText: 'Canceled download' })
   await expect(first).toContainText('Preparing…')
   await expect(second).toContainText(/Queued, position/)
-  await chooseDownloadAction(page, moved, 'Move earlier')
-  await expect(moved).toContainText('Queued, position 1')
-  await expect((await openDownloadMenu(page, second)).getByRole('menuitem', { name: 'Move later', exact: true })).toBeVisible()
-  await page.keyboard.press('Escape')
-  await chooseDownloadAction(page, canceled, 'Cancel Download')
-  await expect(page.getByRole('heading', { name: 'Canceled', exact: true })).toBeVisible()
+  await clickUntil(page, moved.getByTitle('Move earlier'), async () => (
+    (await moved.textContent()).includes('Queued, position 1')
+  ))
+  await expect(second.getByTitle('Move later')).toBeVisible()
+  await clickUntil(page, canceled.getByTitle('Cancel Download'), () => (
+    page.getByRole('heading', { name: 'Canceled', exact: true }).isVisible()
+  ))
   await expect(canceled).not.toContainText('Download canceled')
 
   await clickUntil(page, page.getByRole('button', { name: 'Pause all' }), async () => (
@@ -175,10 +175,11 @@ test('controls queue order, running jobs, bandwidth, and retry-all', async ({ ap
     (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
   ), submittedWhilePaused.id)).toBe('paused')
   const submittedWhilePausedRow = page.locator('.downloadRow').filter({ hasText: 'Submitted while paused' })
-  await chooseDownloadAction(page, submittedWhilePausedRow, 'Cancel Download')
-  await expect.poll(() => page.evaluate(async id => (
-    (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
-  ), submittedWhilePaused.id)).toBe('cancelled')
+  await clickUntil(page, submittedWhilePausedRow.getByTitle('Cancel Download'), async () => (
+    (await page.evaluate(async id => (
+      (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
+    ), submittedWhilePaused.id)) === 'cancelled'
+  ))
   await clickUntil(page, page.getByRole('button', { name: 'Resume all' }), async () => (
     (await first.textContent()).includes('Preparing…')
   ))
@@ -522,8 +523,7 @@ test('shows preparation and processing without a stale percentage or ETA', async
   await expect(progress).not.toHaveAttribute('aria-valuenow')
   await expect(row.locator('.progressFill')).toHaveClass(/indeterminate/)
   await expect(row.getByTitle('Pause Download')).toBeVisible()
-  await expect((await openDownloadMenu(page, row)).getByRole('menuitem', { name: 'Cancel Download', exact: true })).toBeVisible()
-  await page.keyboard.press('Escape')
+  await expect(row.getByTitle('Cancel Download')).toBeVisible()
   await row.screenshot({ path: test.info().outputPath('preparing.png') })
   await writeFile(transfer, '')
   await expect(row).toContainText('97.3%')

@@ -99,15 +99,15 @@
 .downloadRow {
   background: var(--side-nav-color);
   border-radius: calc(8px * var(--ui-roundness));
-  gap: 12px;
+  gap: 20px;
   justify-content: space-between;
-  margin-block: 8px;
-  padding: 12px;
+  margin-block: 10px;
+  padding: 16px;
 }
 
 .downloadMain {
   flex: 1 1 auto;
-  gap: 12px;
+  gap: 16px;
   min-inline-size: 0;
 }
 
@@ -115,8 +115,22 @@
   aspect-ratio: 16 / 9;
   border-radius: calc(6px * var(--ui-roundness));
   flex: none;
-  inline-size: 96px;
+  inline-size: 144px;
   object-fit: cover;
+}
+
+.compact.downloadRow {
+  gap: 12px;
+  margin-block: 8px;
+  padding: 12px;
+}
+
+.compact .downloadMain {
+  gap: 12px;
+}
+
+.compact .downloadThumbnail {
+  inline-size: 96px;
 }
 
 .downloadDetails {
@@ -181,6 +195,10 @@
 
 .downloadActions {
   flex: none;
+  gap: 6px;
+}
+
+.compact .downloadActions {
   gap: 4px;
 }
 
@@ -236,7 +254,21 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .downloadRow:not(.compact) {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .downloadRow:not(.compact) .downloadActions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
   .downloadThumbnail {
+    inline-size: 112px;
+  }
+
+  .compact .downloadThumbnail {
     inline-size: 80px;
   }
 }
@@ -246,17 +278,28 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .downloadRow {
+  .compact.downloadRow {
     gap: 4px;
     padding: 8px;
   }
 
-  .downloadMain {
+  .compact .downloadMain {
     gap: 8px;
   }
 
+  .downloadRow:not(.compact) .downloadMain {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .downloadThumbnail {
+    inline-size: min(180px, 100%);
+    margin-inline: auto;
+  }
+
+  .compact .downloadThumbnail {
     inline-size: 64px;
+    margin-inline: 0;
   }
 }
 

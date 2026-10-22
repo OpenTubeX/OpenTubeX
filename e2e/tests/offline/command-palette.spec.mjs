@@ -1,5 +1,4 @@
 import { test, expect, goTo, setWindowSize } from '../../helpers/app.mjs'
-import { chooseDownloadAction } from '../../helpers/downloads.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchHistoryEntry } from '../../helpers/watch.mjs'
 import { DEMO_MEDIA_PATH } from '../../helpers/media.mjs'
@@ -803,7 +802,7 @@ test.describe('download files sharing a video ID', () => {
   test('a queued duplicate retains its file identity when selected in the palette', async ({ page }) => {
     await goTo(page, 'downloads')
     const row = page.locator('.downloadRow').filter({ has: page.getByRole('heading', { name: 'Repeated playlist video', exact: true }) })
-    await chooseDownloadAction(page, row, 'Add to Queue')
+    await row.getByRole('button', { name: 'Add to Queue', exact: true }).click()
     await page.getByRole('dialog', { name: 'Downloads', exact: true }).getByRole('button', { name: 'Close', exact: true }).click()
     await page.keyboard.press('Control+k')
     await page.getByRole('combobox', { name: 'Search commands' }).fill('Later local take')

@@ -1,4 +1,3 @@
-import { chooseDownloadAction } from '../../helpers/downloads.mjs'
 import { test, expect } from '../../helpers/app.mjs'
 
 for (const { width, height, uiScale } of [
@@ -131,7 +130,7 @@ for (const prompt of ['Add download', 'Download options', 'Remove file']) {
         sizeBytes: 100,
         files: []
       }))
-      await chooseDownloadAction(page, dialog.locator('.downloadRow'), 'Remove File')
+      await dialog.getByTitle('Remove File', { exact: true }).click()
     } else {
       await dialog.getByRole('button', { name: 'Add download', exact: true }).click()
       if (prompt === 'Download options') {
