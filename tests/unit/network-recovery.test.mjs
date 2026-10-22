@@ -239,6 +239,28 @@ test('the connection timeout stops after headers and does not abort streaming vi
   assert.equal(await response.text(), 'media')
 })
 
+test('a held long poll with its own deadline neither times out early nor blocks its origin', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  let pollSignal
+  const app = await loadAppNetwork(t, async (input, init) => {
+    if (!String(input).endsWith('/changes')) return new Response('ok')
+    pollSignal = init.signal
+    return new Promise((resolve, reject) => init.signal.addEventListener('abort', () => reject(init.signal.reason)))
+  })
+  const controller = new AbortController()
+  t.after(app.recovery.delegateRequests(controller.signal, { ownDeadline: true }))
+  const poll = app.window.fetch('https://sync.example/changes', { signal: controller.signal })
+  const rejected = assert.rejects(poll, { name: 'AbortError' })
+  await flush()
+  t.mock.timers.tick(60000)
+  await flush()
+  assert.equal(pollSignal.aborted, false)
+  assert.equal(await (await app.window.fetch('https://sync.example/history')).text(), 'ok')
+  controller.abort()
+  await rejected
+  assert.equal(app.recovery.state, 'online')
+})
+
 test('Electron route failures recover while the OS still reports online', async t => {
   t.mock.timers.enable({ apis: ['setTimeout'] })
   let fail = true

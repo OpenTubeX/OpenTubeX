@@ -5,7 +5,7 @@ import { readFile } from 'node:fs/promises'
 import vm from 'node:vm'
 import { setImmediate as nextEventLoopTurn } from 'node:timers/promises'
 
-import { withNetworkRecovery } from '../../src/renderer/helpers/networkRecovery.js'
+import { delegateRequests, withNetworkRecovery } from '../../src/renderer/helpers/networkRecovery.js'
 import { applySyncServerUserAgent } from '../../src/syncServerUserAgent.js'
 import { createSyncServerRequestHeaders } from '../../src/renderer/helpers/sync-server-request.js'
 import * as errors from '../../src/renderer/helpers/sync-server-errors.js'
@@ -16,6 +16,7 @@ async function loadClient(env, version, requests, nativeRequest, browserRequest,
   const context = vm.createContext({
     runBackgroundJob,
     ...errors,
+    delegateRequests,
     withNetworkRecovery,
     process: { env },
     packageDetails: { version },

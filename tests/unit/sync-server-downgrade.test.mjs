@@ -82,6 +82,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     isValidSyncServerDeviceId,
     applySyncServerUserAgent: headers => headers,
     capacitorHttpFetch: (url, options) => common.fetch(url, options),
+    delegateRequests: () => () => {},
     ...subscriptionSettingsSync,
     ...errors,
     showToast: options => notifications.push(options),

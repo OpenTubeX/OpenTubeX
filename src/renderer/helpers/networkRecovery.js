@@ -22,7 +22,7 @@ export function createNetworkRecovery({ eventTarget, isOnline, visibilityTarget,
   }
   const shutdown = new AbortController()
   const origins = new Map()
-  const delegatedSignals = new WeakSet()
+  const delegatedSignals = new WeakMap()
   let state
   let restoredTimer
   let online = isOnline()
@@ -159,11 +159,14 @@ export function createNetworkRecovery({ eventTarget, isOnline, visibilityTarget,
     checkConnection: () => connectivity?.check() ?? Promise.resolve(online),
     // A whole-operation retry can own its transport calls, including backend
     // fallback. Those calls must not wait in a second, nested recovery queue.
-    delegateRequests(signal) {
-      delegatedSignals.add(signal)
+    // Callers that also set their own deadline, such as long polls, skip the
+    // default wait for response headers.
+    delegateRequests(signal, { ownDeadline = false } = {}) {
+      delegatedSignals.set(signal, ownDeadline)
       return () => delegatedSignals.delete(signal)
     },
     ownsRequests(signal) { return delegatedSignals.has(signal) },
+    ownsDeadline(signal) { return delegatedSignals.get(signal) === true },
     get state() { return state },
     dispose() {
       shutdown.abort()
@@ -178,6 +181,11 @@ export function createNetworkRecovery({ eventTarget, isOnline, visibilityTarget,
 let appRecovery
 export const connectionEvents = new EventTarget()
 export function getConnectionState() { return appRecovery?.state ?? 'online' }
+
+/** Lets a caller with its own retries handle a request's failures outside the recovery queue. */
+export function delegateRequests(signal, options) {
+  return appRecovery?.delegateRequests(signal, options) ?? (() => {})
+}
 
 export function initializeNetworkRecovery({ checkInternet, internetChecksEnabled } = {}) {
   if (!appRecovery) {
@@ -237,6 +245,7 @@ export function installNetworkFetch({ corsDisabled = false, checkInternet = fals
     internetChecksEnabled
   })
   window.fetch = async (input, init) => withNetworkRecovery(input, init, async signal => {
+    if (signal && appRecovery.ownsDeadline(signal)) return fetch(input instanceof Request ? input.clone() : input, init)
     // A fetch can stall while the OS still reports online. Bound the wait for
     // response headers; media response bodies keep their streaming behavior.
     const timeout = new AbortController()

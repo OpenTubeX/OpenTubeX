@@ -43,6 +43,7 @@ import { isValidSyncServerDeviceId } from './sync-server-sessions'
 import { areSyncSettingValuesEqual, mergeSettingEntry, resolveMergedThemeEntry } from './sync-settings-conflict'
 import { getCapacitorTabService } from '../tabs/CapacitorTabService'
 import { capacitorHttpFetch } from './api/capacitor-http'
+import { delegateRequests } from './networkRecovery'
 
 import {
   SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY,
@@ -128,6 +129,10 @@ export class SyncServerClient {
     if (this.cancelled) throw new SyncServerCancelledError()
     const controller = new AbortController()
     this.requestControllers.add(controller)
+    // Sync retries and times out its own requests. In the app's recovery queue,
+    // a long poll held past its header timeout would mark the server as failed
+    // and delay every other sync request until the poll itself timed out.
+    const releaseRequest = delegateRequests(controller.signal, { ownDeadline: true })
     const timeout = setTimeout(() => controller.abort(), timeoutMs)
     const headers = createSyncServerRequestHeaders({
       hasBody: options.body != null,
@@ -174,6 +179,7 @@ export class SyncServerClient {
     } finally {
       clearTimeout(timeout)
       this.requestControllers.delete(controller)
+      releaseRequest()
     }
   }
 
