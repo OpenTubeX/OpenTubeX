@@ -1223,7 +1223,8 @@ onBeforeUnmount(() => {
   color: var(--primary-text-color);
 }
 
-.externalMediaActions .toolbarActive :deep(.iconButton) {
+.externalMediaActions .toolbarActive :deep(.iconButton),
+.externalMediaActions .toolbarActive :deep(.iconButton:not(.disabled):is(:hover, :focus-visible, .pressed)) {
   color: var(--accent-color);
 }
 
