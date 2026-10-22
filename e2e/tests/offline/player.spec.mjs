@@ -3247,25 +3247,28 @@ test.describe('playback when navigating away', () => {
       document.querySelector('.tabContent[aria-hidden="false"] > .routerView').append(grid)
       const preview = document.querySelector('.tabContent[aria-hidden="false"] .watchPreviewHost > div')
       window.watchPreviewRects = []
-      // Intersection runs after layout and resize observers, so it reports the
-      // preview geometry of painted frames rather than intermediate layouts.
-      window.watchPreviewObserver = new IntersectionObserver(entries => {
-        for (const { boundingClientRect: { left, top, width } } of entries) {
+      // Measure every frame after its resize observers, which run in creation
+      // order after layout. A fresh observer therefore sees the preview after
+      // the app re-anchors it, while animation frame callbacks run too early.
+      const samplePreview = () => {
+        const observer = new ResizeObserver(() => {
+          observer.disconnect()
+          const { left, top, width } = preview.getBoundingClientRect()
           if (width > 0) window.watchPreviewRects.push({ left, top })
-        }
-      }, { threshold: Array.from({ length: 101 }, (_, index) => index / 100) })
-      window.watchPreviewObserver.observe(preview)
+        })
+        observer.observe(document.documentElement)
+        window.watchPreviewFrame = requestAnimationFrame(samplePreview)
+      }
+      window.watchPreviewFrame = requestAnimationFrame(samplePreview)
     })
     await player.locator('.scrollMiniScrollTop').click()
     await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
     await expect(player).not.toHaveClass(/scrollMiniPlayer/)
     await expect(page.locator('.watchDragPreview')).toHaveCount(0)
     const { rects, final } = await page.evaluate(() => {
-      const observer = window.watchPreviewObserver
-      observer.disconnect()
-      const rects = [...window.watchPreviewRects, ...observer.takeRecords().map(entry => entry.boundingClientRect)]
+      cancelAnimationFrame(window.watchPreviewFrame)
       const { left, top } = document.querySelector('.tabContent[aria-hidden="false"] .watchPreviewHost > div').getBoundingClientRect()
-      return { rects, final: { left, top } }
+      return { rects: window.watchPreviewRects, final: { left, top } }
     })
     expect(rects.length).toBeGreaterThan(0)
     const displaced = rects.filter(rect => Math.abs(rect.left - final.left) > 1 || Math.abs(rect.top - final.top) > 1)
