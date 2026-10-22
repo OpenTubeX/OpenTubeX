@@ -1031,15 +1031,29 @@ async function fetchBuffer(url) {
 }
 
 /**
+ * Reads the tag from the `releases/latest` redirect, which unlike GitHub's
+ * REST API has no 60 requests per hour limit for unauthenticated clients.
  * @param {string} repository
  * @returns {Promise<string>}
  */
-async function getLatestReleaseDownloadUrl(repository) {
-  const { tag_name: tag } = JSON.parse((await fetchBuffer(`https://api.github.com/repos/${repository}/releases/latest`)).toString('utf8'))
-  if (typeof tag !== 'string' || tag === '') {
-    throw new Error(`Could not find the latest ${repository} release`)
-  }
-  return `https://github.com/${repository}/releases/download/${encodeURIComponent(tag)}`
+function getLatestReleaseDownloadUrl(repository) {
+  return new Promise((resolve, reject) => {
+    const failure = new Error(`Could not find the latest ${repository} release`)
+    // Not following the redirect cancels it, so the release page is never downloaded
+    const request = net.request({ url: `https://github.com/${repository}/releases/latest`, method: 'HEAD', redirect: 'manual' })
+    request.on('redirect', (statusCode, method, redirectUrl) => {
+      const prefix = `https://github.com/${repository}/releases/tag/`
+      const tag = redirectUrl.startsWith(prefix) ? redirectUrl.slice(prefix.length) : ''
+      if (/^[\w.-]+$/.test(tag)) {
+        resolve(`https://github.com/${repository}/releases/download/${tag}`)
+      } else {
+        reject(failure)
+      }
+    })
+    request.on('response', () => reject(failure))
+    request.on('error', reject)
+    request.end()
+  })
 }
 
 /**
