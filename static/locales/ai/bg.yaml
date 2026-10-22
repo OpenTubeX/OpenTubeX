@@ -201,6 +201,7 @@ User Playlists:
   Unpin from Navigation: "Откачване от навигацията"
   Reorder Hint: Плъзнете или използвайте клавишите със стрелки, за да пренаредите
   Add new videos to the top (custom order): "Добавяне на нови видеоклипове най-отгоре (персонализиран ред)"
+  Shuffle videos by default: "Разбъркване на видеоклиповете по подразбиране"
   Repair Playlists: Поправка на плейлистите
   Repair Description: Възстановете липсващите данни за видеоклиповете след импортиране на ZIP от YouTube Takeout. Редът в плейлистите остава непроменен.
   Remove Unavailable Videos: "Премахване на недостъпни видеоклипове"

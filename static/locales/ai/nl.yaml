@@ -201,6 +201,7 @@ User Playlists:
   Unpin from Navigation: "Losmaken van navigatie"
   Reorder Hint: Sleep of gebruik de pijltjestoetsen om de volgorde te wijzigen
   Add new videos to the top (custom order): "Nieuwe video’s bovenaan toevoegen (aangepaste volgorde)"
+  Shuffle videos by default: "Video’s standaard in willekeurige volgorde afspelen"
   Repair Playlists: Afspeellijsten herstellen
   Repair Description: Herstel ontbrekende videogegevens na het importeren van een YouTube Takeout-ZIP. De volgorde van video's in afspeellijsten blijft gelijk.
   Remove Unavailable Videos: "Verwijder niet-beschikbare video's"

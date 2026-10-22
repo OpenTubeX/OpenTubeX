@@ -198,6 +198,7 @@ User Playlists:
   Unpin from Navigation: "從導覽列取消釘選"
   Reorder Hint: 拖曳或使用方向鍵重新排序
   Add new videos to the top (custom order): "將新影片加入頂端（自訂順序）"
+  Shuffle videos by default: "預設隨機播放影片"
   Repair Playlists: 修復播放清單
   Repair Description: 匯入 YouTube Takeout ZIP 後還原缺少的影片資訊。播放清單順序保持不變。
   Remove Unavailable Videos: "刪除不可用的影片"

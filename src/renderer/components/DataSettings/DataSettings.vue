@@ -1842,6 +1842,7 @@ async function importPlaylists() {
     'createdAt',
     'customThumbnail',
     'addVideosToTop',
+    'shuffleByDefault',
   ]
 
   const ignoredKeys = [
@@ -1924,7 +1925,7 @@ async function importPlaylists() {
         }
       } else if (!ignoredKeys.includes(key)) {
         // Do nothing for keys to be ignored
-        playlistObject[key] = key === 'addVideosToTop' ? playlistData[key] === true : playlistData[key]
+        playlistObject[key] = key === 'addVideosToTop' || key === 'shuffleByDefault' ? playlistData[key] === true : playlistData[key]
 
         if (requiredKeys.includes(key)) {
           countRequiredKeysPresent++
@@ -2017,6 +2018,7 @@ async function importPlaylists() {
       description: playlistObject.description,
       ...(Object.hasOwn(playlistObject, 'customThumbnail') ? { customThumbnail: playlistObject.customThumbnail } : {}),
       ...(Object.hasOwn(playlistObject, 'addVideosToTop') ? { addVideosToTop: playlistObject.addVideosToTop } : {}),
+      ...(Object.hasOwn(playlistObject, 'shuffleByDefault') ? { shuffleByDefault: playlistObject.shuffleByDefault } : {}),
       videos: orderedVideos
     })
   })

@@ -40,6 +40,8 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
     store: { commit() {} }, playlistCacheTabId: 'android-tab',
     process: { env: { SUPPORTS_LOCAL_API: true } }, backendPreference: ref(backend), usesInvidiousApi,
     applyReversePlaylistState: videos => videos.slice(),
+    // YouTube playlists have no per-playlist shuffle default.
+    applyShuffleByDefault() {},
     findIndexOfCurrentVideoInPlaylist: videos => videos.findIndex(item => item.videoId === props.videoId),
     getLocalCachedFeedContinuation: () => continuation,
     parseLocalPlaylistVideos: videos => videos,

@@ -210,6 +210,7 @@ User Playlists:
   Unpin from Navigation: "탐색 메뉴에서 고정 해제"
   Reorder Hint: 드래그하거나 화살표 키를 사용해 순서 변경
   Add new videos to the top (custom order): "새 동영상을 맨 위에 추가 (사용자 지정 순서)"
+  Shuffle videos by default: "기본적으로 동영상 셔플 재생"
   Repair Playlists: 재생목록 복구
   Repair Description: YouTube Takeout ZIP을 가져온 후 누락된 동영상 정보를 복원합니다. 재생목록 순서는 변경되지 않습니다.
   Remove Unavailable Videos: "사용할 수 없는 동영상 삭제"

@@ -733,12 +733,19 @@ function getPlaylistInfoWithDelay() {
   getPlaylistInfoRun = true
 
   if (selectedUserPlaylist.value != null) {
+    applyShuffleByDefault()
     parseUserPlaylist(selectedUserPlaylist.value)
+    if (shuffleEnabled.value) shufflePlaylistItems()
   } else if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendPreference.value)) {
     getPlaylistInformationInvidious()
   } else {
     getPlaylistInformationLocal()
   }
+}
+
+// Playlists set to shuffle by default start shuffled; the button still turns it off.
+function applyShuffleByDefault() {
+  if (selectedUserPlaylist.value?.shuffleByDefault === true) shuffleEnabled.value = true
 }
 
 function saveScrollState() {
@@ -1103,6 +1110,7 @@ async function loadCachedPlaylistInformation(cachedPlaylist) {
   const generation = playlistLoadGeneration
   getPlaylistInfoRun = true
   store.commit('setCachedPlaylist', { tabId: playlistCacheTabId, value: null })
+  applyShuffleByDefault()
 
   playlistTitle.value = cachedPlaylist.title
   playlistTotalVideoCount.value = cachedPlaylist.totalVideoCount
