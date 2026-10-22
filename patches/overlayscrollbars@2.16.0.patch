@@ -1,5 +1,5 @@
 diff --git a/overlayscrollbars.cjs b/overlayscrollbars.cjs
-index ec871bc71397ef9f5586519c121a65b90907ad9d..29ac22e64eedcf1b26776bad938161dbce196813 100644
+index ec871bc71397ef9f5586519c121a65b90907ad9d..2a1f2f995c409f6cd8621ad2da39c16aca9d2ee0 100644
 --- a/overlayscrollbars.cjs
 +++ b/overlayscrollbars.cjs
 @@ -352,9 +352,11 @@ const getAttr = (t, n) => t && t.getAttribute(n);
@@ -130,7 +130,18 @@ index ec871bc71397ef9f5586519c121a65b90907ad9d..29ac22e64eedcf1b26776bad938161db
          et: concat(v, f || []),
          rt: g,
          it: _,
-@@ -2651,11 +2687,16 @@ const createOverflowUpdateSegment = (t, s) => {
+@@ -2580,7 +2616,9 @@ const createOverflowUpdateSegment = (t, s) => {
+       I: true,
+       A: true
+     });
+-    const i = p(Q, true);
++    // A token in the viewport attribute would let every viewport state change
++    // restyle the whole content through the rule that hides its children.
++    const i = addAttrClass(a, "data-overlayscrollbars-no-content", Q);
+     scrollElementTo(_, {
+       x: 0,
+       y: 0
+@@ -2651,11 +2689,16 @@ const createOverflowUpdateSegment = (t, s) => {
        y: getAxisOverflowStyle(n.y, t.y, n.x, t.x)
      };
    };
@@ -149,7 +160,7 @@ index ec871bc71397ef9f5586519c121a65b90907ad9d..29ac22e64eedcf1b26776bad938161db
    const [O, C] = createCache(S, bind(getFractionalSize, a));
    const [$, D] = createCache(S, bind(T, a));
 diff --git a/overlayscrollbars.cjs.js b/overlayscrollbars.cjs.js
-index ab9d930b11ea64af9a2d5b7315b554db88cd5bbd..ad97bdd9d5de9989d0f8a5633de55b1696eac238 100644
+index ab9d930b11ea64af9a2d5b7315b554db88cd5bbd..298d6f101c820d0e96ddcee98ca15e39be84f175 100644
 --- a/overlayscrollbars.cjs.js
 +++ b/overlayscrollbars.cjs.js
 @@ -352,9 +352,11 @@ const getAttr = (t, n) => t && t.getAttribute(n);
@@ -280,7 +291,18 @@ index ab9d930b11ea64af9a2d5b7315b554db88cd5bbd..ad97bdd9d5de9989d0f8a5633de55b16
          et: concat(v, f || []),
          rt: g,
          it: _,
-@@ -2651,11 +2687,16 @@ const createOverflowUpdateSegment = (t, s) => {
+@@ -2580,7 +2616,9 @@ const createOverflowUpdateSegment = (t, s) => {
+       I: true,
+       A: true
+     });
+-    const i = p(Q, true);
++    // A token in the viewport attribute would let every viewport state change
++    // restyle the whole content through the rule that hides its children.
++    const i = addAttrClass(a, "data-overlayscrollbars-no-content", Q);
+     scrollElementTo(_, {
+       x: 0,
+       y: 0
+@@ -2651,11 +2689,16 @@ const createOverflowUpdateSegment = (t, s) => {
        y: getAxisOverflowStyle(n.y, t.y, n.x, t.x)
      };
    };
@@ -299,7 +321,7 @@ index ab9d930b11ea64af9a2d5b7315b554db88cd5bbd..ad97bdd9d5de9989d0f8a5633de55b16
    const [O, C] = createCache(S, bind(getFractionalSize, a));
    const [$, D] = createCache(S, bind(T, a));
 diff --git a/overlayscrollbars.esm.js b/overlayscrollbars.esm.js
-index b05b8043eba78f20754a14e84daa09ff505e2fbc..63314f3cbf3f73cd4c10cc2716ee548cc0b221c4 100644
+index b05b8043eba78f20754a14e84daa09ff505e2fbc..302d98efad47bd8ba03d151a91f542106d592c6f 100644
 --- a/overlayscrollbars.esm.js
 +++ b/overlayscrollbars.esm.js
 @@ -346,9 +346,11 @@ const getAttr = (t, n) => t && t.getAttribute(n);
@@ -430,7 +452,18 @@ index b05b8043eba78f20754a14e84daa09ff505e2fbc..63314f3cbf3f73cd4c10cc2716ee548c
          et: concat(v, f || []),
          rt: g,
          it: _,
-@@ -2645,11 +2681,16 @@ const createOverflowUpdateSegment = (t, s) => {
+@@ -2574,7 +2610,9 @@ const createOverflowUpdateSegment = (t, s) => {
+       I: true,
+       A: true
+     });
+-    const i = p(Q, true);
++    // A token in the viewport attribute would let every viewport state change
++    // restyle the whole content through the rule that hides its children.
++    const i = addAttrClass(a, "data-overlayscrollbars-no-content", Q);
+     scrollElementTo(_, {
+       x: 0,
+       y: 0
+@@ -2645,11 +2683,16 @@ const createOverflowUpdateSegment = (t, s) => {
        y: getAxisOverflowStyle(n.y, t.y, n.x, t.x)
      };
    };
@@ -449,7 +482,7 @@ index b05b8043eba78f20754a14e84daa09ff505e2fbc..63314f3cbf3f73cd4c10cc2716ee548c
    const [O, C] = createCache(S, bind(getFractionalSize, a));
    const [$, D] = createCache(S, bind(T, a));
 diff --git a/overlayscrollbars.mjs b/overlayscrollbars.mjs
-index ae4c28abc9bbb5a972bdff8889bc552069bcf0fe..143c43ba2870aef2b056fedc7f325660ea999dd2 100644
+index ae4c28abc9bbb5a972bdff8889bc552069bcf0fe..3d644d47983d76fdb07f332ee6c9928a698cfd0c 100644
 --- a/overlayscrollbars.mjs
 +++ b/overlayscrollbars.mjs
 @@ -346,9 +346,11 @@ const getAttr = (t, n) => t && t.getAttribute(n);
@@ -580,7 +613,18 @@ index ae4c28abc9bbb5a972bdff8889bc552069bcf0fe..143c43ba2870aef2b056fedc7f325660
          et: concat(v, f || []),
          rt: g,
          it: _,
-@@ -2645,11 +2681,16 @@ const createOverflowUpdateSegment = (t, s) => {
+@@ -2574,7 +2610,9 @@ const createOverflowUpdateSegment = (t, s) => {
+       I: true,
+       A: true
+     });
+-    const i = p(Q, true);
++    // A token in the viewport attribute would let every viewport state change
++    // restyle the whole content through the rule that hides its children.
++    const i = addAttrClass(a, "data-overlayscrollbars-no-content", Q);
+     scrollElementTo(_, {
+       x: 0,
+       y: 0
+@@ -2645,11 +2683,16 @@ const createOverflowUpdateSegment = (t, s) => {
        y: getAxisOverflowStyle(n.y, t.y, n.x, t.x)
      };
    };
@@ -598,6 +642,82 @@ index ae4c28abc9bbb5a972bdff8889bc552069bcf0fe..143c43ba2870aef2b056fedc7f325660
    };
    const [O, C] = createCache(S, bind(getFractionalSize, a));
    const [$, D] = createCache(S, bind(T, a));
+diff --git a/styles/overlayscrollbars.css b/styles/overlayscrollbars.css
+index 42075604aa3d69383fa3fe5a9bb37c994397d94b..50f46d067aaafeccff4dd9d1047f562bfa515d93 100644
+--- a/styles/overlayscrollbars.css
++++ b/styles/overlayscrollbars.css
+@@ -265,14 +265,29 @@ html[data-overlayscrollbars-body] > body {
+ /**
+  * viewport state modifiers:
+  */
+-[data-overlayscrollbars-viewport~=noContent]:not(#osFakeId) {
++/* Only the viewport reads these. Inherited, any overflow change would restyle
++   the whole content. */
++@property --os-viewport-overflow-x {
++  syntax: "*";
++  inherits: false;
++}
++
++@property --os-viewport-overflow-y {
++  syntax: "*";
++  inherits: false;
++}
++
++/* The content hiding rule ends in a universal selector, so changes to its
++   attribute restyle the whole content. It has its own attribute to leave the
++   frequent viewport state changes cheap. */
++[data-overlayscrollbars-no-content~=noContent]:not(#osFakeId) {
+   font-size: 0 !important;
+   line-height: 0 !important;
+ }
+ 
+-[data-overlayscrollbars-viewport~=noContent]:not(#osFakeId)::before,
+-[data-overlayscrollbars-viewport~=noContent]:not(#osFakeId)::after,
+-[data-overlayscrollbars-viewport~=noContent]:not(#osFakeId) > *:not(#osFakeId) {
++[data-overlayscrollbars-no-content~=noContent]:not(#osFakeId)::before,
++[data-overlayscrollbars-no-content~=noContent]:not(#osFakeId)::after,
++[data-overlayscrollbars-no-content~=noContent]:not(#osFakeId) > *:not(#osFakeId) {
+   display: none !important;
+   position: absolute !important;
+   width: 1px !important;
+diff --git a/styles/overlayscrollbars.scriptingenabled.css b/styles/overlayscrollbars.scriptingenabled.css
+index 30b4c1cc7987814ea34762ae8a0c7d642af25c3d..48c7cb4c372fa335dc8b9b9b59cda8303b6a2758 100644
+--- a/styles/overlayscrollbars.scriptingenabled.css
++++ b/styles/overlayscrollbars.scriptingenabled.css
+@@ -265,14 +265,29 @@ html[data-overlayscrollbars-body] > body {
+ /**
+  * viewport state modifiers:
+  */
+-[data-overlayscrollbars-viewport~=noContent]:not(#osFakeId) {
++/* Only the viewport reads these. Inherited, any overflow change would restyle
++   the whole content. */
++@property --os-viewport-overflow-x {
++  syntax: "*";
++  inherits: false;
++}
++
++@property --os-viewport-overflow-y {
++  syntax: "*";
++  inherits: false;
++}
++
++/* The content hiding rule ends in a universal selector, so changes to its
++   attribute restyle the whole content. It has its own attribute to leave the
++   frequent viewport state changes cheap. */
++[data-overlayscrollbars-no-content~=noContent]:not(#osFakeId) {
+   font-size: 0 !important;
+   line-height: 0 !important;
+ }
+ 
+-[data-overlayscrollbars-viewport~=noContent]:not(#osFakeId)::before,
+-[data-overlayscrollbars-viewport~=noContent]:not(#osFakeId)::after,
+-[data-overlayscrollbars-viewport~=noContent]:not(#osFakeId) > *:not(#osFakeId) {
++[data-overlayscrollbars-no-content~=noContent]:not(#osFakeId)::before,
++[data-overlayscrollbars-no-content~=noContent]:not(#osFakeId)::after,
++[data-overlayscrollbars-no-content~=noContent]:not(#osFakeId) > *:not(#osFakeId) {
+   display: none !important;
+   position: absolute !important;
+   width: 1px !important;
 diff --git a/types/overlayscrollbars.d.ts b/types/overlayscrollbars.d.ts
 index 54a8dfca0bb83b797115e340308d4702bec05fe2..73f28b0a0ac3c063682f4b1833540887812810c4 100644
 --- a/types/overlayscrollbars.d.ts
