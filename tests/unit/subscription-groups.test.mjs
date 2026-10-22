@@ -71,3 +71,23 @@ test('moving a channel within a group keeps hidden channels in place', () => {
   assert.deepEqual(moveItemByVisibleOffset(order, visible, 'UCc', -1), ['UCa', 'UChidden', 'UCc', 'UCb'])
   assert.deepEqual(moveItemByVisibleOffset(order, visible, 'UCa', 1), ['UChidden', 'UCb', 'UCa', 'UCc'])
 })
+
+test('saving a group that another device deleted meanwhile keeps the edits', async () => {
+  const { readFile } = await import('node:fs/promises')
+  const vm = await import('node:vm')
+  const source = await readFile(new URL('../../src/renderer/store/modules/subscription-groups.js', import.meta.url), 'utf8')
+  const start = source.indexOf('  saveSubscriptionGroup(')
+  const end = source.indexOf('\n  },\n', start) + 5
+  const { saveSubscriptionGroup } = vm.runInNewContext(`({${source.slice(start, end)}})`)
+  const save = (list, group) => {
+    let written = null
+    saveSubscriptionGroup({ getters: { getSubscriptionGroupList: list }, dispatch: (action, value) => { written = value; return true } }, group)
+    return JSON.parse(JSON.stringify(written))
+  }
+
+  const music = { id: 'music', name: 'Music', channelIds: ['UCa'] }
+  const news = { id: 'news', name: 'News', channelIds: ['UCb'] }
+  const edited = { ...music, name: 'Songs', channelIds: ['UCa', 'UCc'] }
+  assert.deepEqual(save([music, news], edited), [edited, news])
+  assert.deepEqual(save([news], edited), [news, edited])
+})

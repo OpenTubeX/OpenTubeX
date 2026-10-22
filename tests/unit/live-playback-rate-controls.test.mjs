@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 
-import { DEFAULT_CONTROL_BAR_BUTTONS, getControlBarButtonDefinitions } from '../../src/renderer/helpers/controlBarButtons.js'
+import { DEFAULT_CONTROL_BAR_BUTTONS, getRemovedControlBarButtons } from '../../src/renderer/helpers/controlBarButtons.js'
 
 const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
 function computedSource(name) {
@@ -23,7 +23,7 @@ function controls(props, overflow = false, quickBar = true, playerIsLive = props
     isCapacitorMobilePlayer: () => false,
     store: { getters: { getControlBarButtons: DEFAULT_CONTROL_BAR_BUTTONS } },
     DEFAULT_CONTROL_BAR_BUTTONS,
-    getControlBarButtonDefinitions,
+    getRemovedControlBarButtons,
     getBigButtons: () => [],
     TrackLabelFormat: {},
     volumeBoostPossible: false,

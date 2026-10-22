@@ -76,9 +76,12 @@ const actions = {
 
   /** @param {import('../../helpers/subscription-groups').SubscriptionGroup} group */
   saveSubscriptionGroup({ dispatch, getters }, group) {
-    return dispatch('updateSubscriptionGroups', getters.getSubscriptionGroupList.map(existing => {
-      return existing.id === group.id ? group : existing
-    }))
+    const groups = getters.getSubscriptionGroupList
+    // Another device can delete the group while it is being edited. Saving then
+    // restores it with the edits, as it also replaces changes made meanwhile.
+    return dispatch('updateSubscriptionGroups', groups.some(existing => existing.id === group.id)
+      ? groups.map(existing => existing.id === group.id ? group : existing)
+      : [...groups, group])
   },
 
   async deleteSubscriptionGroup({ commit, dispatch, getters, state }, groupId) {

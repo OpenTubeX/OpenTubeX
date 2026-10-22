@@ -149,7 +149,7 @@ import { useI18n } from 'vue-i18n'
 
 import store from '../../store/index'
 import { PlayerIcons, ZOOM_IN_ICON_VIEWBOX } from '../../../constants'
-import { getControlBarButtonDefinitions } from '../../helpers/controlBarButtons'
+import { CONTROL_BAR_BUTTON_DEFINITIONS, getPreviewMenuControlBarButtons } from '../../helpers/controlBarButtons'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { FULLSCREEN_ACTION_DEFINITIONS } from '../../helpers/fullscreenActions'
 import { getQuickPlaybackRateLabel } from '../../helpers/player/quickPlaybackRateLabel'
@@ -219,12 +219,11 @@ const controlBarButtons = computed(() => store.getters.getControlBarButtons
       : CONTROL_BAR_ICONS[id],
   })))
 
-// Buttons removed from the control bar move into the player menu, except for
-// captions, which already have their own menu entry, and fullscreen.
+// Buttons removed from the control bar move into the player menu
 const removedControlBarButtons = computed(() => {
-  const selected = store.getters.getControlBarButtons
-  return getControlBarButtonDefinitions()
-    .filter(({ id }) => !selected.includes(id) && id !== 'captions' && id !== 'fullscreen')
+  const removed = getPreviewMenuControlBarButtons(store.getters.getControlBarButtons)
+  return CONTROL_BAR_BUTTON_DEFINITIONS
+    .filter(({ id }) => removed.includes(id))
     .map(({ id, labelKey }) => ({
       id,
       path: CONTROL_BAR_ICONS[id],

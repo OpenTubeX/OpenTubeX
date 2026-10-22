@@ -200,6 +200,38 @@ test('plays muxed streams when the server has no adaptive streams', async ({ pag
   await expect(page.locator(`${activeTab} .errorContainer`)).toHaveCount(0)
 })
 
+test.describe('with the Invidious proxy setting also turned on', () => {
+  test.use({ seed: { settings: { ...SETTINGS, proxyVideos: true } } })
+
+  test('probes the relayed VR manifest without Invidious parameters', async ({ page }) => {
+    const manifestRequests = []
+    await page.route(`${SERVER}/api/v1/videos/**`, route => route.fulfill({
+      json: {
+        ...videoResponse,
+        hlsUrl: `${INTERNAL_ORIGIN}/proxy/relay?url=vr-hls&sig=signature&exp=4102444800`,
+        adaptiveFormats: videoResponse.adaptiveFormats.map(format => format.itag === '248' ? { ...format, projectionType: 'MESH' } : format)
+      }
+    }))
+    await page.route(`${SERVER}/api/v1/comments/**`, route => route.fulfill({ json: { comments: [], continuation: null } }))
+    await page.route(`${SERVER}/proxy/relay?**`, async route => {
+      const url = new URL(route.request().url())
+      if (url.searchParams.get('url') === 'vr-hls') {
+        manifestRequests.push(url)
+        return route.fulfill({ status: 404 })
+      }
+      const upstream = new URL(url.searchParams.get('url'))
+      return fulfillRange(route, await media[upstream.searchParams.get('itag') === '248' ? 'video' : 'audio'])
+    })
+
+    await page.locator(sel.searchInput).fill(`https://www.youtube.com/watch?v=${VIDEO_ID}`)
+    await page.locator(sel.searchInput).press('Enter')
+    await expect.poll(() => manifestRequests.length).toBeGreaterThan(0)
+    // The server signs the relay URL, so it must reach the server unchanged
+    expect(manifestRequests[0].searchParams.has('local')).toBe(false)
+    expect(manifestRequests[0].searchParams.get('sig')).toBe('signature')
+  })
+})
+
 test('reports rejected credentials when loading a video', async ({ page }) => {
   await page.route(`${SERVER}/api/v1/videos/**`, route => route.fulfill({ status: 401, json: { detail: 'Invalid credentials' } }))
 

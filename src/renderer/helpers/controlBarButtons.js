@@ -30,6 +30,34 @@ export function getDefaultControlBarButtons(mobile = IS_MOBILE) {
 export const DEFAULT_CONTROL_BAR_BUTTONS = Object.freeze(getDefaultControlBarButtons())
 
 /**
+ * Buttons of the full control bar that are not on it, which the player menu
+ * offers instead. Capacitor tablets and TVs also use the full control bar,
+ * although their customizer only offers the compact buttons, so the
+ * desktop-only buttons that they support stay reachable this way.
+ * @param {string[]} controlBarButtons
+ * @param {boolean} capacitor
+ */
+export function getRemovedControlBarButtons(controlBarButtons, capacitor = IS_MOBILE) {
+  return getControlBarButtonDefinitions(false)
+    .map(({ id }) => id)
+    .filter(id => !controlBarButtons.includes(id) && !(capacitor && id === 'fullWindow'))
+}
+
+/**
+ * Removed control bar buttons that the Interface Customizer previews in the
+ * player menu, in their definition order. Captions have their own menu entry,
+ * and fullscreen has none. On Capacitor, phones use the compact menu, which
+ * always has autoplay but no theatre mode, and tablets and TVs only show theatre
+ * mode in wide players, so the preview leaves it out there.
+ * @param {string[]} controlBarButtons
+ * @param {boolean} capacitor
+ */
+export function getPreviewMenuControlBarButtons(controlBarButtons, capacitor = IS_MOBILE) {
+  return getRemovedControlBarButtons(controlBarButtons, capacitor)
+    .filter(id => id !== 'captions' && id !== 'fullscreen' && !(capacitor && id === 'theatreMode'))
+}
+
+/**
  * Removes unknown and duplicate buttons while preserving the selected order.
  * The player menu holds every other control, so it is always kept.
  * @param {unknown} value
