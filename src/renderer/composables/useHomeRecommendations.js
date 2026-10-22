@@ -99,7 +99,7 @@ export function useHomeRecommendations(visible) {
       records: snapshots.records, favorites: snapshots.favorites, saved: snapshots.saved, subscriptions: subscriptions.value, round,
     }, isCancelled)
   }
-  async function rerank(profile = null) {
+  async function rerank(profile = null, kept = []) {
     if (!visible.value || !enabled.value) return
     const currentRanking = ++rankingGeneration
     const isCancelled = () => currentRanking !== rankingGeneration
@@ -112,12 +112,15 @@ export function useHomeRecommendations(visible) {
         ? { ...record, impressions: record.impressions?.slice(0, -1) }
         : record]))
     }
-    const result = await rankRecommendationCandidatesAsync(candidates.filter(video => isVisible(video) &&
-      !store.getters.getHistoryCacheById[video.videoId]), learned, { limit, exploration: exploration.value }, isCancelled)
+    const keptIds = new Set(kept.map(video => video.videoId))
+    const pool = candidates.filter(video => !keptIds.has(video.videoId) && isVisible(video) &&
+      !store.getters.getHistoryCacheById[video.videoId])
+    const result = await rankRecommendationCandidatesAsync(pool, learned,
+      { limit: limit - kept.length, exploration: exploration.value }, isCancelled)
     if (!result || isCancelled()) return
     // History can change while ranking yields to the event loop.
-    ranked.value = result.filter(item => !store.getters.getHistoryCacheById[item.video.videoId])
-      .map(item => ({ ...item.video, recommendationReason: item.reason }))
+    ranked.value = [...kept, ...result.map(item => ({ ...item.video, recommendationReason: item.reason }))]
+      .filter(video => !store.getters.getHistoryCacheById[video.videoId])
   }
   const sourceIdentity = videos => videos.map(video => [video.videoId, video.timeWatched, video.title])
   // This identifies reusable candidates when opening Home, not a reason to
@@ -250,7 +253,8 @@ export function useHomeRecommendations(visible) {
     // cards while the user is choosing a video.
     candidates = mergeRecommendationCandidates([...candidates, ...result.videos]).slice(0, 1600)
     const visibilityChange = nextVisibilityChange()
-    await rerank(learned)
+    // Loading more appends below the shown cards instead of reshuffling them.
+    await rerank(learned, append ? ranked.value : [])
     if (generation !== requestGeneration) return
     initialized = true
     hasError.value = result.failedSources > 0

@@ -540,7 +540,8 @@ test('keeps the loaded feed stable while loading more and when cancelling that l
   const titles = section.locator('.ft-list-video .title')
   const originalTitles = await titles.allTextContents()
   const homeTabId = await page.locator('.tab.active').getAttribute('data-tab-id')
-  backend.searchVideos = [video('recextra001', 'Linux desktop extra suggestions', DISCOVERY_CHANNEL_ID)]
+  // A strongly matching video would rank first; Load more must still append it.
+  backend.searchVideos = [video('recextra001', 'Linux desktop customization extra suggestions')]
   let release = backend.holdResponses('search')
   try {
     const requestCount = backend.requests.length
@@ -550,7 +551,7 @@ test('keeps the loaded feed stable while loading more and when cancelling that l
     await expect(titles).toHaveText(originalTitles)
     release()
     await backend.settled()
-    await expect(section.locator('a.title').filter({ hasText: /Linux desktop extra suggestions/ })).toBeVisible()
+    await expect(titles).toHaveText([...originalTitles, /Linux desktop customization extra suggestions/])
     const loadedTitles = await titles.allTextContents()
 
     release = backend.holdResponses()
