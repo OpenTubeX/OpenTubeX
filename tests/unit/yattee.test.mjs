@@ -331,11 +331,16 @@ test('Shorts dates come from earlier refreshes and lookups of new Shorts only', 
   ])
   assert.deepEqual(lookups, ['new'])
 
+  // Failed lookups are retried on the next refresh
   const failing = async () => { throw new Error('offline') }
-  assert.deepEqual(await fillYatteeShortDates([{ videoId: 'new' }], cached, failing), [{ videoId: 'new' }])
-
+  const unresolved = { videoId: 'new', isYatteePublicationDateMissing: true }
+  assert.deepEqual(await fillYatteeShortDates([{ videoId: 'new' }], cached, failing), [unresolved])
   // Multiplying a missing date would date the Short to 1970
-  assert.deepEqual(await fillYatteeShortDates([{ videoId: 'new' }], cached, async () => ({ published: null })), [{ videoId: 'new' }])
+  assert.deepEqual(await fillYatteeShortDates([{ videoId: 'new' }], cached, async () => ({ published: null })), [unresolved])
+
+  lookups.length = 0
+  assert.deepEqual(await fillYatteeShortDates([{ videoId: 'new' }], [unresolved], getVideo), [{ videoId: 'new', published: 1_700_000_000_000 }])
+  assert.deepEqual(lookups, ['new'])
 })
 
 test('response errors keep the details of validation errors', () => {

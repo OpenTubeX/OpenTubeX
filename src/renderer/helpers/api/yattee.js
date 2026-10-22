@@ -245,26 +245,28 @@ export function fillYatteeVideoAuthors(videos, channelId, channelName = '') {
  * Yattee servers return Shorts without the publication dates that subscriptions need
  * for their order and New badges. Dates come from earlier refreshes, and only Shorts
  * that appeared since then are looked up, because each lookup makes the server
- * extract the whole video.
- * @param {{ videoId: string, published?: number }[]} shorts
- * @param {{ videoId: string, published?: number }[] | undefined} cachedShorts the channel's Shorts from the previous refresh
+ * extract the whole video. Failed lookups are marked, so the next refresh retries them.
+ * @param {{ videoId: string, published?: number, isYatteePublicationDateMissing?: boolean }[]} shorts
+ * @param {{ videoId: string, published?: number, isYatteePublicationDateMissing?: boolean }[] | undefined} cachedShorts the channel's Shorts from the previous refresh
  * @param {(videoId: string) => Promise<{ published?: number }>} getVideo
  */
 export async function fillYatteeShortDates(shorts, cachedShorts, getVideo) {
   if (!cachedShorts) return shorts
 
-  const cachedDates = new Map(cachedShorts.map(short => [short.videoId, short.published]))
+  const cached = new Map(cachedShorts.map(short => [short.videoId, short]))
   return await mapConcurrently(shorts, 3, async short => {
     if (Number.isFinite(short.published)) return short
 
-    let published = cachedDates.get(short.videoId)
-    if (!cachedDates.has(short.videoId)) {
-      try {
-        const seconds = (await getVideo(short.videoId)).published
-        if (Number.isFinite(seconds)) published = seconds * 1000
-      } catch { }
+    const cachedShort = cached.get(short.videoId)
+    if (cachedShort && !cachedShort.isYatteePublicationDateMissing) {
+      return Number.isFinite(cachedShort.published) ? { ...short, published: cachedShort.published } : short
     }
-    return Number.isFinite(published) ? { ...short, published } : short
+
+    try {
+      const seconds = (await getVideo(short.videoId)).published
+      if (Number.isFinite(seconds)) return { ...short, published: seconds * 1000 }
+    } catch { }
+    return { ...short, isYatteePublicationDateMissing: true }
   })
 }
 
