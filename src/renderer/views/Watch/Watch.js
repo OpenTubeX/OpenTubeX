@@ -4422,7 +4422,8 @@ export default defineComponent({
               if (this.vrProjection === 'MESH' && result.hlsUrl && !this.isYtDlpPlaybackRequested()) {
                 const switchGeneration = this.playbackEngineSwitchGeneration
                 let url = result.hlsUrl
-                if (this.proxyVideos) {
+                // Invidious only: Yattee relays its own signed URLs
+                if (this.proxyVideos && !isYattee) {
                   const proxyUrl = new URL(url)
                   proxyUrl.searchParams.set('local', 'true')
                   url = proxyUrl.toString()
