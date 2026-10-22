@@ -2,6 +2,7 @@ import { readdir, stat } from 'node:fs/promises'
 import path from 'node:path'
 
 import { abortUnmockedRequest, expect, goTo, sel } from '../helpers/app.mjs'
+import { routeWatchPageHtml } from '../helpers/media.mjs'
 import { mockPlayableWatchPage } from '../helpers/watch.mjs'
 import { runLargeSubscriptionsBenchmark } from './subscriptions.mjs'
 
@@ -12,8 +13,8 @@ const playbackCycles = 5
 // Deliberate clicks typically follow a pointer rest of a few hundred milliseconds.
 const hoverRestMs = 300
 
-export function mockPerformanceServices(page) {
-  return page.route(/^https?:\/\//, route => {
+export async function mockPerformanceServices(page) {
+  await page.route(/^https?:\/\//, route => {
     // Aborting unrelated channel/trending requests marks the shared YouTube
     // origin unavailable and makes later mocked playback wait in retry backoff.
     if (new URL(route.request().url()).hostname === 'www.youtube.com') {
@@ -21,6 +22,9 @@ export function mockPerformanceServices(page) {
     }
     return abortUnmockedRequest(route)
   })
+  // After one failed watch page, the app loads videos through the YouTube home
+  // page for the rest of the session, which the mocked playback does not serve.
+  await routeWatchPageHtml(page)
 }
 
 function measureRendererAction(page, scenario) {

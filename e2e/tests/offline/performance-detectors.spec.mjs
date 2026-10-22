@@ -1,4 +1,4 @@
-import { test, expect, abortUnmockedRequest, goTo } from '../../helpers/app.mjs'
+import { test, expect, abortUnmockedRequest, goTo, sel } from '../../helpers/app.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { measureLargeFeedScroll, measurePlaybackHeapGrowth, mockPerformanceServices } from '../../performance/scenarios.mjs'
 import { largeSubscriptionsSeed } from '../../performance/subscriptions.mjs'
@@ -28,6 +28,24 @@ test('unmocked performance services do not put later playback into network backo
     }
   })
   expect(result).toEqual({ status: 404 })
+})
+
+test('a video opened under unmocked performance services leaves later playback working', { tag: '@performance' }, async ({ app, page }) => {
+  await mockPerformanceServices(page)
+  // As in the hovered Watch navigation, open a video without playback mocks.
+  await page.locator('.tabContent[aria-hidden="false"] .ft-list-video a.title').first().click()
+  await expect(page.locator('.tabContent[aria-hidden="false"] .errorMessage')).toBeVisible()
+  await page.locator(sel.backButton).click()
+  await expect(page).toHaveURL(/#\/subscriptions/)
+
+  await mockPlayableWatchPage(app, page)
+  await page.unroute(/^https?:\/\//, abortUnmockedRequest)
+  await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+  await expect.poll(() => page.locator('.tabContent[aria-hidden="false"] video').evaluateAll(videos => videos.some(video =>
+    !video.paused && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA
+  )), { timeout: 30_000 }).toBe(true)
 })
 
 function sample(overrides) {
