@@ -9,7 +9,7 @@ const source = await readFile(new URL('../../src/main/windowButtonLayout.js', im
 function fixture () {
   const timers = []
   const connections = []
-  const portal = { available: false, layout: 'close,minimize,maximize:', handlers: [], busAddress: true, gate: null }
+  const portal = { available: false, layout: 'close,minimize,maximize:', handlers: [], busAddress: true, gate: null, readGate: null }
   const dbus = {
     sessionBus () {
       if (!portal.busAddress) throw new Error('unknown bus address')
@@ -23,7 +23,7 @@ function fixture () {
             if (!portal.available) throw new Error('org.freedesktop.portal.Desktop was not provided by any .service files')
             return {
               on: (name, handler) => portal.handlers.push(handler),
-              ReadOne: async () => portal.layout
+              ReadOne: async () => { const layout = portal.layout; await portal.readGate; return layout }
             }
           }
         })
@@ -105,4 +105,35 @@ test('windows get the default layout while a retry waits for the portal', async 
   answer()
   await flush()
   assert.equal(await layout.getWindowButtonLayout(), 'close,minimize,maximize:')
+})
+
+test('a change signalled while the first read is pending wins over the read', async () => {
+  const layout = fixture()
+  layout.portal.available = true
+  let answer
+  layout.portal.readGate = new Promise(resolve => { answer = resolve })
+  const first = layout.getWindowButtonLayout()
+  await flush()
+  layout.portal.handlers[0]('org.gnome.desktop.wm.preferences', 'button-layout', 'close:')
+  answer()
+  assert.equal(await first, 'close:')
+  assert.equal(await layout.getWindowButtonLayout(), 'close:')
+})
+
+test('a retry does not overwrite a newer layout signalled during its read', async () => {
+  const layout = fixture()
+  const published = []
+  layout.onWindowButtonLayoutChanged(value => published.push(value))
+  await layout.getWindowButtonLayout()
+
+  layout.portal.available = true
+  let answer
+  layout.portal.readGate = new Promise(resolve => { answer = resolve })
+  layout.timers.shift().callback()
+  await flush()
+  layout.portal.handlers[0]('org.gnome.desktop.wm.preferences', 'button-layout', 'close:')
+  answer()
+  await flush()
+  assert.deepEqual(published, ['close:'])
+  assert.equal(await layout.getWindowButtonLayout(), 'close:')
 })

@@ -29,6 +29,8 @@ function publish(layout) {
  */
 async function readButtonLayout() {
   let bus = null
+  /** @type {string | null} */
+  let changedLayout = null
   try {
     // Throws synchronously without a session bus address
     bus = dbus.sessionBus({ timeout: 2_000 })
@@ -37,10 +39,12 @@ async function readButtonLayout() {
       .getInterface('/org/freedesktop/portal/desktop', 'org.freedesktop.portal.Settings')
     settings.on('SettingChanged', (namespace, key, value) => {
       if (namespace !== SETTINGS_NAMESPACE || key !== SETTINGS_KEY || typeof value !== 'string') return
+      changedLayout = value
       publish(value)
     })
     const layout = await settings.ReadOne(SETTINGS_NAMESPACE, SETTINGS_KEY)
-    return typeof layout === 'string' ? layout : DEFAULT_BUTTON_LAYOUT
+    // The portal can signal a change before it answers the read, so the signal is newer
+    return changedLayout ?? (typeof layout === 'string' ? layout : DEFAULT_BUTTON_LAYOUT)
   } catch {
     // A retry connects and subscribes again
     bus?.connection.end()
@@ -53,8 +57,10 @@ async function readButtonLayout() {
 
 async function retryButtonLayout() {
   // Requests keep the cached default while the retry waits for D-Bus
+  const cachedLayout = buttonLayout
   const layout = await readButtonLayout()
-  if (layout !== DEFAULT_BUTTON_LAYOUT) publish(layout)
+  // A change signal during the read has already published the newer layout
+  if (layout !== DEFAULT_BUTTON_LAYOUT && buttonLayout === cachedLayout) publish(layout)
 }
 
 /** @returns {Promise<string>} */
