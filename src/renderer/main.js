@@ -46,10 +46,15 @@ installViewTransitions(router)
 
 const tabNavigation = initializeTabNavigationService(router, store)
 
-// Read the initial state before a restored Watch page picks its starting quality.
-const networkMeteredReady = observeAndroidNetworkMetered(metered => { networkMetered.value = metered }).catch(error => {
-  console.error('Failed to observe metered networks:', error)
-})
+// Read the initial state before a restored Watch page picks its starting quality,
+// but don't let a missing answer prevent the application from mounting.
+let networkMeteredTimeout
+const networkMeteredReady = Promise.race([
+  observeAndroidNetworkMetered(metered => { networkMetered.value = metered }).catch(error => {
+    console.error('Failed to observe metered networks:', error)
+  }),
+  new Promise(resolve => { networkMeteredTimeout = setTimeout(resolve, 1500) }),
+]).finally(() => clearTimeout(networkMeteredTimeout))
 
 // Resolve native colors before App applies its first theme and system-bar style.
 const dynamicColorsReady = process.env.IS_CAPACITOR
