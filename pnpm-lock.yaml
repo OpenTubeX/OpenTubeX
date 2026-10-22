@@ -20,7 +20,7 @@ patchedDependencies:
   '@material/material-color-utilities@0.4.0': b1ce5dea9a31733ac3ddd4b236a80185e050df5f98e48bb7fd93f8ccf3f58378
   '@sqlite.org/sqlite-wasm@3.53.4-build2': 579d3e536bc0f7ef69623a576db802fe6dc8d02cfb6d6f085f190534a88941a7
   '@vue/runtime-dom@3.5.44': c83073332910a00ffdd4471e0a1d9e44607292ac7992016492fbd5a237ba37fd
-  overlayscrollbars@2.16.0: 5cf83e67b2d20d5556131f278ab8fdeece199eafcfcaf6b838b0e949366d2281
+  overlayscrollbars@2.16.0: 9a3cd83cba852554004ae8b64ca0710ed81bd0c0b2d42ecceedf3e2e25127ef3
   shaka-player@5.1.12: cf2e5c9a138eec272ac8db5df51977f756e60fed28f24946e54c67fe0e465724
   vue-sonner@2.0.9: 34b2065fecd4314653c24cdfc38ff5f2910def4942ed265ec374d66c0e5c0940
   youtubei.js@18.2.0: 6b1778abfed6e4ceddb70ca09ccf77c0150faa1b13d5c37886eb0cd4003f2080
@@ -157,7 +157,7 @@ importers:
         version: 18.1.1
       overlayscrollbars:
         specifier: ^2.16.0
-        version: 2.16.0(patch_hash=5cf83e67b2d20d5556131f278ab8fdeece199eafcfcaf6b838b0e949366d2281)
+        version: 2.16.0(patch_hash=9a3cd83cba852554004ae8b64ca0710ed81bd0c0b2d42ecceedf3e2e25127ef3)
       process:
         specifier: ^0.11.10
         version: 0.11.10
@@ -9297,7 +9297,7 @@ snapshots:
       type-check: 0.4.0
       word-wrap: 1.2.5
 
-  overlayscrollbars@2.16.0(patch_hash=5cf83e67b2d20d5556131f278ab8fdeece199eafcfcaf6b838b0e949366d2281): {}
+  overlayscrollbars@2.16.0(patch_hash=9a3cd83cba852554004ae8b64ca0710ed81bd0c0b2d42ecceedf3e2e25127ef3): {}
 
   p-cancelable@2.1.1: {}
 

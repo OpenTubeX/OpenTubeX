@@ -1,3 +1,21 @@
+/* FtAutoGrid writes these to the grid whenever its width changes, such as on
+   every frame of the side navigation animation. Only the grid reads them;
+   inherited, each write would restyle every card. */
+@property --thumbnail-grid-size {
+  syntax: '*';
+  inherits: false;
+}
+
+@property --thumbnail-grid-stretch {
+  syntax: '*';
+  inherits: false;
+}
+
+@property --shorts-thumbnail-grid-min-size {
+  syntax: '*';
+  inherits: false;
+}
+
 .grid {
   display: grid;
   gap: 8px;
