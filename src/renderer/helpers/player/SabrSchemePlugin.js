@@ -227,8 +227,8 @@ function createRecoverableNetworkError(code, ...args) {
  * @param {{ status?: number, receivedBytes?: number, expectedBytes?: number }} details
  */
 function warnSabrRequestFailure(operationInputs, currentState, reason, details = {}) {
-  // Requests still running when the player reloads abort with errors too
-  if (currentState.sabrStreamState.playerReloadRequested) return
+  // A request that requests a reload aborts itself, which is not a failure
+  if (currentState.sabrStreamState.playerReloadRequested && currentState.abortController.signal.aborted) return
 
   const facts = []
   if (details.status !== undefined) facts.push(`HTTP ${details.status}`)
@@ -385,6 +385,8 @@ async function doRequest(
       }
     }
 
+    // Redirects and retry policies send a new request; time each one separately
+    currentState.startedAtMs = Date.now()
     const sabrURL = new URL(currentState.sabrStreamState.sabrUrl)
     sabrURL.searchParams.set('rn', String(currentState.sabrStreamState.requestNumber++))
     if (process.env.IS_CAPACITOR) {
@@ -590,7 +592,11 @@ async function doRequest(
     if (currentState.abortStatus.cancelled) {
       throw createRecoverableNetworkError(ShakaError.Code.OPERATION_ABORTED, operationInputs.uri, operationInputs.requestType)
     } else if (currentState.abortStatus.timedOut) {
-      warnSabrRequestFailure(operationInputs, currentState, 'timed out', { receivedBytes: receivedMediaLength, expectedBytes: expectedMediaLength })
+      warnSabrRequestFailure(operationInputs, currentState, 'timed out', {
+        status: response?.status,
+        receivedBytes: receivedMediaLength,
+        expectedBytes: expectedMediaLength,
+      })
       throw createRecoverableNetworkError(ShakaError.Code.TIMEOUT, operationInputs.uri, operationInputs.requestType)
     } else if (!currentState.abortStatus.finished) {
       warnSabrRequestFailure(operationInputs, currentState, `connection error: ${error?.message ?? error}`, {
@@ -605,7 +611,11 @@ async function doRequest(
   if (currentState.abortStatus.cancelled) {
     throw createRecoverableNetworkError(ShakaError.Code.OPERATION_ABORTED, operationInputs.uri, operationInputs.requestType)
   } else if (currentState.abortStatus.timedOut) {
-    warnSabrRequestFailure(operationInputs, currentState, 'timed out', { receivedBytes: receivedMediaLength, expectedBytes: expectedMediaLength })
+    warnSabrRequestFailure(operationInputs, currentState, 'timed out', {
+      status: response?.status,
+      receivedBytes: receivedMediaLength,
+      expectedBytes: expectedMediaLength,
+    })
     throw createRecoverableNetworkError(ShakaError.Code.TIMEOUT, operationInputs.uri, operationInputs.requestType)
   }
 

@@ -91,6 +91,40 @@ test('logs each truncated SABR attempt with the bytes that arrived', async () =>
   transport.cleanup()
 })
 
+test('a reload request logs concurrent failures but not its own abort', async () => {
+  const warnings = []
+  let releaseTruncated
+  const { createSabrTransport } = load(async url => {
+    const buffer = new CompositeBuffer([])
+    const writer = new UmpWriter(buffer)
+    if (new URL(url).searchParams.get('rn') === '0') {
+      await new Promise(resolve => { releaseTruncated = resolve })
+      writer.write(protos.UMPPartId.MEDIA_HEADER, protos.MediaHeader.encode({
+        headerId: 1, formatId: audioFormatId, sequenceNumber: 1, contentLength: 3,
+      }).finish())
+      writer.write(protos.UMPPartId.MEDIA, Uint8Array.of(1, 1))
+    } else {
+      writer.write(protos.UMPPartId.RELOAD_PLAYER_RESPONSE, protos.ReloadPlaybackContext.encode({ reloadPlaybackParams: { token: 'x' } }).finish())
+    }
+    return new Response(utils.concatenateChunks(buffer.chunks))
+  }, { console: { ...console, warn: message => warnings.push(message) } })
+  const transport = createSabrTransport(sabrData, () => context)
+  let reloads = 0
+  transport.onReloadOnce(() => reloads++)
+  const truncatedUri = 'sabr1:audio?formatId=140-123-&sq=1'
+  const truncated = transport.request(truncatedUri, request(truncatedUri), 1).promise
+  const reloadUri = 'sabr1:audio?formatId=140-123-&sq=2'
+  await assert.rejects(transport.request(reloadUri, request(reloadUri), 1).promise)
+  assert.equal(reloads, 1)
+  const failures = () => warnings.filter(warning => warning.startsWith('SABR request '))
+  assert.deepEqual(failures(), [], 'the reloading request must not report its own abort')
+  releaseTruncated()
+  await assert.rejects(truncated, error => error.code === ShakaError.Code.HTTP_ERROR)
+  assert.equal(failures().length, 1)
+  assert.match(failures()[0], /^SABR request sabr1:audio\?formatId=140-123-&sq=1 failed: response ended before MEDIA_END/)
+  transport.cleanup()
+})
+
 test('rejects media bytes when the SABR header declares zero content length', async () => {
   const { createSabrTransport } = load(async () => response([1], false, audioFormatId, 0))
   const transport = createSabrTransport(sabrData, () => context)
