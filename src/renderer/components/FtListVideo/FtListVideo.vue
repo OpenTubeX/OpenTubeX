@@ -105,7 +105,7 @@
           />
         </RouterLink>
         <div
-          v-if="isLive || isUpcoming || isStation || (displayDuration !== '' && displayDuration !== '0:00')"
+          v-if="isLive || isUpcoming || isStation || localDownloadId !== undefined || (displayDuration !== '' && displayDuration !== '0:00')"
           class="videoDuration"
           :class="{
             live: isLive || isStation,
@@ -117,7 +117,14 @@
             :icon="['fa', 'tower-broadcast']"
             class="subscriptionIcon"
           />
-          {{ displayDurationLabel }}
+          <FtIcon
+            v-if="localDownloadId !== undefined"
+            :icon="['fas', 'circle-down']"
+            class="downloadedIcon"
+            role="img"
+            :aria-label="t('Downloads.Downloaded')"
+          />
+          {{ displayDurationLabel === '0:00' ? '' : displayDurationLabel }}
         </div>
         <div
           v-if="useSponsorBlock && sponsorBlockFullVideoCategory"
@@ -491,7 +498,7 @@ import { PHONE_LAYOUT_QUERY, usePhoneLayout } from '../../composables/usePhoneLa
 import FtRetryImage from '../FtRetryImage.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import { ytDlp } from '../../helpers/ytDlp'
-import { refreshDownloadRecords } from '../../helpers/downloadPlayback'
+import { cardDownloadId, playDownloadedFile, refreshDownloadRecords } from '../../helpers/downloadPlayback'
 import { queueSwipeAction, findSwipeDownload, downloadSwipeAction } from '../../helpers/videoSwipeActions'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
@@ -701,6 +708,14 @@ const showDownloadPrompt = ref(false)
 const pendingSwipeRemoval = ref(null)
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
+
+const localDownloadId = computed(() => supportsYtDlp && enableDownloads.value
+  ? store.getters.getLocalPlaybackDownloadIds.get(id.value)
+  : undefined)
+
+const cardDownload = computed(() => cardDownloadId(store.getters.getYtDlpDownloads, id.value, props.downloadId, localDownloadId.value))
+// iOS plays downloads natively from the card click instead of on the watch page.
+const linkDownloadId = computed(() => process.env.IS_IOS ? props.downloadId : cardDownload.value)
 
 watch(enableDownloads, (enabled) => {
   if (!enabled) showDownloadPrompt.value = false
@@ -1904,8 +1919,8 @@ const watchPageLinkQuery = computed(() => {
     query.playlistItemId = playlistItemIdFinal.value
   }
 
-  if (props.downloadId) {
-    query.downloadId = props.downloadId
+  if (linkDownloadId.value) {
+    query.downloadId = linkDownloadId.value
   }
 
   if (typeof props.data.isShort === 'boolean') {
@@ -1972,6 +1987,17 @@ async function handleWatchPageLinkClick(event) {
   if (externalPlayerIsDefaultViewingMode.value) {
     event?.preventDefault()
     openInExternalPlayer()
+    return
+  }
+
+  if (process.env.IS_IOS && localDownloadId.value !== undefined && event?.type === 'click') {
+    event.preventDefault()
+    await playDownloadedFile(Number(cardDownload.value), { videoId: id.value }, {
+      refreshDownloads: () => refreshDownloadRecords(ytDlp, store),
+      playNative: (downloadId, path) => ytDlp.ytDlpPlayDownload(downloadId, path),
+      navigate: () => {},
+      fileNotFound: () => showToast({ message: t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] })
+    })
     return
   }
 

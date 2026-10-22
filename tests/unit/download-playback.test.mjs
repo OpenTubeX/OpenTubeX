@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { downloadQueueVideos, isDownloadPlaybackSupported, playDownloadedFile, refreshDownloadRecords } from '../../src/renderer/helpers/downloadPlayback.js'
+import { cardDownloadId, downloadQueueVideos, isDownloadPlaybackSupported, localPlaybackDownloadIds, playDownloadedFile, refreshDownloadRecords } from '../../src/renderer/helpers/downloadPlayback.js'
 
 test('queues a downloaded video with its saved-file route and metadata', () => {
   const [video] = downloadQueueVideos({
@@ -120,4 +120,29 @@ test('preserves the selected path when a download repeats a video ID', async () 
     fileNotFound: () => assert.fail('The selected file exists'),
   })
   assert.equal(route.query.downloadFilePath, files[1].path)
+})
+
+test('maps each downloaded video to its newest playable download, preferring video files', () => {
+  const file = (videoId, extra = {}) => ({ videoId, path: `/downloads/${videoId}.webm`, ...extra })
+  assert.deepEqual([...localPlaybackDownloadIds({
+    1: { id: 1, status: 'completed', mode: 'video', files: [file('both'), file('older')] },
+    2: { id: 2, status: 'completed', mode: 'audio', files: [file('both'), file('audio')] },
+    3: { id: 3, status: 'completed', mode: 'video', files: [file('older')] },
+    4: { id: 4, status: 'completed', mode: 'video', files: [file('missing', { available: false }), { path: '/downloads/subtitles.vtt' }] },
+    5: { id: 5, status: 'downloading', mode: 'video', files: [file('active')] },
+    6: { id: 6, status: 'completed', mode: 'subtitles', files: [file('subtitles')] },
+    7: { id: 7, status: 'completed', mode: 'video', retryPayload: { externalUrl: 'https://vimeo.com/123' }, files: [file('external')] },
+    8: { id: 8, status: 'completed', mode: 'video', files: [file('avi', { path: '/downloads/avi.avi' }), file('upper', { path: '/downloads/upper.MKV' })] },
+  })].toSorted(), [['audio', 2], ['both', 1], ['older', 3], ['upper', 8]])
+})
+
+test('opens a card with its own download unless the inherited playlist download contains it', () => {
+  const downloads = {
+    1: { id: 1, files: [{ videoId: 'first', path: '/downloads/first.webm' }, { videoId: 'gone', path: '/downloads/gone.webm', available: false }] },
+  }
+  assert.equal(cardDownloadId(downloads, 'first', '1', 2), '1')
+  assert.equal(cardDownloadId(downloads, 'second', '1', 2), '2')
+  assert.equal(cardDownloadId(downloads, 'gone', '1', 2), '2')
+  assert.equal(cardDownloadId(downloads, 'second', '1', undefined), '1')
+  assert.equal(cardDownloadId(downloads, 'second', '', undefined), '')
 })

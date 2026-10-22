@@ -1,3 +1,4 @@
+import { DOWNLOADED_MEDIA_MIME_TYPES } from '../../constants.js'
 import { isYouTubeMediaUrl } from './externalMediaUrl.js'
 
 const IOS_PLAYABLE_EXTENSIONS = new Set(['mp4', 'm4a', 'mp3', 'mov', 'aac'])
@@ -39,6 +40,41 @@ export async function playDownloadedFile(downloadId, selectedFile, { refreshDown
 export function isPlayableDownloadFile(file) {
   return file.available !== false &&
     (!process.env.IS_IOS || IOS_PLAYABLE_EXTENSIONS.has(file.extension?.toLowerCase()))
+}
+
+/**
+ * Maps each video ID to the download that plays it locally, preferring video
+ * files over audio and newer downloads over older ones.
+ * @returns {Map<string, number>}
+ */
+export function localPlaybackDownloadIds(downloads) {
+  const best = new Map()
+  for (const download of Object.values(downloads)) {
+    if (!isDownloadPlaybackSupported(download)) continue
+    for (const file of download.files ?? []) {
+      const extension = file.extension ?? file.path?.split('.').at(-1)?.toLowerCase() ?? ''
+      // The watch page only plays formats it has a MIME type for.
+      if (!file.videoId || !isPlayableDownloadFile(file) || !DOWNLOADED_MEDIA_MIME_TYPES[extension]) continue
+      const current = best.get(file.videoId)
+      if (current === undefined || (download.mode === 'video') > (current.mode === 'video') ||
+        (download.mode === current.mode && download.id > current.id)) {
+        best.set(file.videoId, download)
+      }
+    }
+  }
+  return new Map([...best].map(([videoId, download]) => [videoId, download.id]))
+}
+
+/**
+ * Picks the download a video card opens. The watch page playlist passes its
+ * current download to every item, so that one only wins when it contains the
+ * video.
+ */
+export function cardDownloadId(downloads, videoId, inheritedId, localId) {
+  if (inheritedId && downloads[inheritedId]?.files?.some(file => file.videoId === videoId && isPlayableDownloadFile(file))) {
+    return inheritedId
+  }
+  return localId !== undefined ? String(localId) : inheritedId
 }
 
 export function downloadFileTitle(download, file) {

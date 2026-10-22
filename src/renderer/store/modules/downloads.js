@@ -1,3 +1,5 @@
+import { localPlaybackDownloadIds } from '../../helpers/downloadPlayback.js'
+
 // replace with a Map after the Pinia migration
 const state = {
   ytDlpDownloads: {}
@@ -6,6 +8,10 @@ const state = {
 const getters = {
   getYtDlpDownloads(state) {
     return state.ytDlpDownloads
+  },
+
+  getLocalPlaybackDownloadIds(state) {
+    return localPlaybackDownloadIds(state.ytDlpDownloads)
   }
 }
 
