@@ -3679,7 +3679,7 @@ test.describe('tab switcher', () => {
       await openTabSwitcher(page)
       await expect(page.locator('.tabSwitcherItem .tabSwitcherTitleIcon')).toHaveCount(2)
       await expect(page.locator('.tabSwitcherItem .tabSwitcherTitleIcon').first())
-        .toHaveAttribute('data-icon', 'rss')
+        .toHaveAttribute('data-icon', 'subscriptions')
     } finally {
       await page.keyboard.up('Control')
     }
