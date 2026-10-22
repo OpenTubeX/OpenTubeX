@@ -328,6 +328,7 @@ Settings:
       Network: netwerk
       Disk: schijf
   General Settings:
+    Preferred Video Codec: Voorkeursvideocodec
     Automatically switch stream extraction methods: "Automatisch wisselen van streamextractiemethode"
     Enable Tabs: "Tabbladen inschakelen"
     Thumbnail Swipe Gestures:
@@ -1285,8 +1286,6 @@ Settings:
   Search Settings: Instellingen zoeken
   No Settings Found: Geen instellingen gevonden
   Experimental Settings:
-    Preferred Video Codec: Voorkeursvideocodec
-    Codec Description: Automatisch geeft de voorkeur aan hardwaredecodering. Wijzigingen gelden vanaf de volgende video. Een codecvoorkeur kan resoluties beperken; niet-beschikbare codecs worden vervangen. VP9 wordt vermeden voor VR vanwege een afspeelfout in de browser.
     Disable Hardware Acceleration: Hardwareversnelling uitschakelen
   Interface Customizer:
     Customize Interface: "Interface aanpassen"
@@ -1940,6 +1939,7 @@ Description:
   Games: Games
 Tooltips:
   General Settings:
+    Preferred Video Codec: Automatisch geeft de voorkeur aan hardwaredecodering. Wijzigingen gelden vanaf de volgende video. Een codecvoorkeur kan resoluties beperken; niet-beschikbare codecs worden vervangen.
     Automatically switch stream extraction methods: "Probeer yt-dlp als de ingebouwde afspeelengine faalt, of de ingebouwde afspeelengine als yt-dlp faalt."
     Enable Tabs: "Houdt de huidige pagina open. Andere tabbladen blijven bewaard totdat de app opnieuw wordt gestart; schakel tabbladen weer in om ze te herstellen."
     Data Saver Thumbnails: "Gebruik miniaturen met een lagere resolutie om het dataverbruik te verminderen."

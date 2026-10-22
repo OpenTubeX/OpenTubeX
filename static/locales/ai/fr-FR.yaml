@@ -258,9 +258,6 @@ History:
   Custom: Personnalisé
   History Older Than Days Removed: L’historique de visionnage datant de plus de 1 jour a été supprimé | L’historique de visionnage datant de plus de {days} jours a été supprimé | L’historique de visionnage datant de plus de {days} jours a été supprimé
 Settings:
-  Experimental Settings:
-    Preferred Video Codec: Codec vidéo préféré
-    Codec Description: Le mode automatique privilégie le décodage matériel. Les changements s'appliquent à la prochaine vidéo. Le choix du codec peut limiter les résolutions ; les codecs indisponibles sont remplacés. VP9 est évité pour la VR à cause d'une erreur de lecture du navigateur.
   Tab Unloading:
     Automatically unload tabs: "Décharger automatiquement les onglets"
     Memory threshold: "Seuil de mémoire"
@@ -326,6 +323,7 @@ Settings:
       Network: le réseau
       Disk: le disque
   General Settings:
+    Preferred Video Codec: Codec vidéo préféré
     Automatically switch stream extraction methods: "Changer automatiquement de méthode d’extraction des flux"
     Enable Tabs: "Activer les onglets"
     Thumbnail Swipe Gestures:
@@ -1881,6 +1879,7 @@ Description:
   Games: Jeux
 Tooltips:
   General Settings:
+    Preferred Video Codec: Le mode automatique privilégie le décodage matériel. Les changements s'appliquent à la prochaine vidéo. Le choix du codec peut limiter les résolutions ; les codecs indisponibles sont remplacés.
     Automatically switch stream extraction methods: "Essayer yt-dlp si la lecture intégrée échoue, ou la lecture intégrée si yt-dlp échoue."
     Enable Tabs: "Garde la page actuelle ouverte. Les autres onglets sont conservés jusqu’au redémarrage de l’application ; réactivez les onglets pour les restaurer."
     Data Saver Thumbnails: "Utiliser des miniatures de résolution inférieure pour réduire la consommation de données."

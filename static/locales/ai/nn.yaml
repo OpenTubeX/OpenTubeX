@@ -338,6 +338,7 @@ Settings:
       Disk: disk
   Return to Settings Menu: Tilbake til innstillingsmenyen
   General Settings:
+    Preferred Video Codec: Føretrekt videokodek
     Automatically switch stream extraction methods: "Byt automatisk mellom metodar for straumuttrekk"
     Enable Tabs: "Slå på faner"
     Thumbnail Swipe Gestures:
@@ -1429,8 +1430,6 @@ Settings:
   Search Settings: Innstillingar for søk
   No Settings Found: Fann ingen innstillingar
   Experimental Settings:
-    Preferred Video Codec: Føretrekt videokodek
-    Codec Description: Automatisk føretrekkjer maskinvaredekoding. Endringar gjeld frå neste video. Eit kodekval kan avgrense oppløysingar; utilgjengelege kodekar blir erstatta. VP9 blir unngått for VR på grunn av ein avspelingsfeil i nettlesaren.
     Disable Hardware Acceleration: Slå av maskinvareakselerasjon
   Interface Customizer:
     Customize Interface: "Tilpass grensesnitt"
@@ -2190,6 +2189,7 @@ Description:
   Games: Spel
 Tooltips:
   General Settings:
+    Preferred Video Codec: Automatisk føretrekkjer maskinvaredekoding. Endringar gjeld frå neste video. Eit kodekval kan avgrense oppløysingar; utilgjengelege kodekar blir erstatta.
     Automatically switch stream extraction methods: "Prøv yt-dlp dersom innebygd avspeling mislukkast, eller innebygd avspeling dersom yt-dlp mislukkast."
     Enable Tabs: "Held den gjeldande sida open. Andre faner vert tekne vare på til appen vert starta på nytt; slå på faner igjen for å gjenopprette dei."
     Data Saver Thumbnails: "Bruk miniatyrbilete med lågare oppløysing for å redusere databruken."

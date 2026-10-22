@@ -12,6 +12,7 @@ import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import SponsorBlockSegmentEditor from '../WatchVideoSponsorBlock/SponsorBlockSegmentEditor.vue'
 import shaka from 'shaka-player'
 import { getVideoCodecPreferences } from '../../helpers/player/videoCodecPreference'
+import { voidWebmProjection } from '../../helpers/player/webmProjection'
 import { registerPlugin } from '@capacitor/core'
 import { bindAndroidMediaErrors } from '../../helpers/player/androidMediaErrors'
 import { bindAndroidFullscreen } from '../../helpers/player/androidFullscreen'
@@ -1791,6 +1792,11 @@ export default defineComponent({
       if (type === RequestType.SEGMENT) {
         silenceSkipping.handleSegmentResponse(response, context)
       }
+    }
+
+    /** @type {shaka.extern.ResponseFilter} */
+    function webmProjectionResponseFilter(type, response) {
+      if (type === RequestType.SEGMENT && response.data) voidWebmProjection(response.data)
     }
 
     /** @type {shaka.extern.ResponseFilter} */
@@ -4056,12 +4062,7 @@ export default defineComponent({
           subtitleDelay: usesNativeCaptionTracks() ? 0 : captionTimingOffset,
         },
 
-        // Electron doesn't like YouTube's vp9 VR video streams and throws:
-        // "CHUNK_DEMUXER_ERROR_APPEND_FAILED: Projection element is incomplete; ProjectionPoseYaw required."
-        // So use the AV1 and h264 codecs instead which it doesn't reject
-        preferredVideo: getVideoCodecPreferences(
-          store.getters.getPreferredVideoCodec, typeof props.vrProjection === 'string'
-        )
+        preferredVideo: getVideoCodecPreferences(store.getters.getPreferredVideoCodec)
       }
     }
 
@@ -12565,6 +12566,8 @@ export default defineComponent({
       }
       player.getNetworkingEngine().registerRequestFilter(silenceSkippingRequestFilter)
       player.getNetworkingEngine().registerResponseFilter(silenceSkippingResponseFilter)
+      // Runs after the other filters so it sees the final segment data, including redirects
+      player.getNetworkingEngine().registerResponseFilter(webmProjectionResponseFilter)
 
       await setLocale(locale.value)
 

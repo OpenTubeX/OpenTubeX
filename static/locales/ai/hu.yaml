@@ -259,9 +259,6 @@ History:
   Custom: Egyéni
   History Older Than Days Removed: Az 1 napnál régebbi megtekintési előzmények eltávolítva | A(z) {days} napnál régebbi megtekintési előzmények eltávolítva
 Settings:
-  Experimental Settings:
-    Preferred Video Codec: Előnyben részesített videokodek
-    Codec Description: Az automatikus mód a hardveres dekódolást részesíti előnyben. A változások a következő videóra érvényesek. A kodekválasztás korlátozhatja a felbontásokat; a nem elérhető kodekeket másik helyettesíti. A VP9 VR esetén böngészős lejátszási hiba miatt mellőzve van.
   Tab Unloading:
     Automatically unload tabs: "Lapok automatikus kiürítése"
     Memory threshold: "Memóriaküszöb"
@@ -327,6 +324,7 @@ Settings:
       Network: hálózat
       Disk: lemez
   General Settings:
+    Preferred Video Codec: Előnyben részesített videokodek
     Automatically switch stream extraction methods: "Adatfolyam-kinyerési módszerek automatikus váltása"
     Enable Tabs: "Lapok engedélyezése"
     Thumbnail Swipe Gestures:
@@ -1884,6 +1882,7 @@ Description:
   Games: Játékok
 Tooltips:
   General Settings:
+    Preferred Video Codec: Az automatikus mód a hardveres dekódolást részesíti előnyben. A változások a következő videóra érvényesek. A kodekválasztás korlátozhatja a felbontásokat; a nem elérhető kodekeket másik helyettesíti.
     Automatically switch stream extraction methods: "A yt-dlp kipróbálása, ha a beépített lejátszás sikertelen, vagy a beépített lejátszás kipróbálása, ha a yt-dlp sikertelen."
     Enable Tabs: "Nyitva tartja az aktuális oldalt. A többi lap az alkalmazás újraindításáig megmarad; visszaállításukhoz engedélyezd újra a lapokat."
     Data Saver Thumbnails: "Alacsonyabb felbontású bélyegképek használata az adatforgalom csökkentéséhez."

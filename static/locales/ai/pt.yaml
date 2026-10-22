@@ -328,6 +328,7 @@ Settings:
       Network: rede
       Disk: disco
   General Settings:
+    Preferred Video Codec: Codec de vídeo preferido
     Automatically switch stream extraction methods: "Alternar automaticamente os métodos de extração de fluxos"
     Enable Tabs: "Ativar separadores"
     Thumbnail Swipe Gestures:
@@ -1287,8 +1288,6 @@ Settings:
   Search Settings: Procurar nas definições
   No Settings Found: Nenhuma definição encontrada
   Experimental Settings:
-    Preferred Video Codec: Codec de vídeo preferido
-    Codec Description: O modo automático prefere a descodificação por hardware. As alterações aplicam-se ao próximo vídeo. A preferência de codec pode limitar as resoluções; os codecs indisponíveis são substituídos. O VP9 é evitado em VR devido a um erro de reprodução do navegador.
     Disable Hardware Acceleration: Desativar aceleração por hardware
   Interface Customizer:
     Customize Interface: "Personalizar interface"
@@ -1935,6 +1934,7 @@ Description:
   Games: Jogos
 Tooltips:
   General Settings:
+    Preferred Video Codec: O modo automático prefere a descodificação por hardware. As alterações aplicam-se ao próximo vídeo. A preferência de codec pode limitar as resoluções; os codecs indisponíveis são substituídos.
     Automatically switch stream extraction methods: "Tentar yt-dlp se a reprodução integrada falhar, ou a reprodução integrada se yt-dlp falhar."
     Enable Tabs: "Mantém a página atual aberta. Os outros separadores são guardados até reiniciar a aplicação; volte a ativar os separadores para os restaurar."
     Data Saver Thumbnails: "Utilizar miniaturas de menor resolução para reduzir o consumo de dados."

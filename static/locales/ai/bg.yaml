@@ -326,6 +326,7 @@ Settings:
       Network: мрежата
       Disk: диска
   General Settings:
+    Preferred Video Codec: Предпочитан видео кодек
     Automatically switch stream extraction methods: "Автоматично превключване на методите за извличане на потоци"
     Enable Tabs: "Включване на разделите"
     Thumbnail Swipe Gestures:
@@ -1263,8 +1264,6 @@ Settings:
   Search Settings: Настройки за търсене
   No Settings Found: Няма намерени настройки
   Experimental Settings:
-    Preferred Video Codec: Предпочитан видео кодек
-    Codec Description: Автоматичният режим предпочита хардуерно декодиране. Промените важат за следващото видео. Изборът на кодек може да ограничи резолюциите; недостъпните кодеци се заменят. VP9 се избягва за VR поради грешка при възпроизвеждане в браузъра.
     Disable Hardware Acceleration: Изключване на хардуерното ускорение
   Interface Customizer:
     Customize Interface: "Персонализиране на интерфейса"
@@ -1905,6 +1904,7 @@ Description:
   Games: Игри
 Tooltips:
   General Settings:
+    Preferred Video Codec: Автоматичният режим предпочита хардуерно декодиране. Промените важат за следващото видео. Изборът на кодек може да ограничи резолюциите; недостъпните кодеци се заменят.
     Automatically switch stream extraction methods: "Опитайте yt-dlp, ако вграденото възпроизвеждане не успее, или вграденото възпроизвеждане, ако yt-dlp не успее."
     Enable Tabs: "Текущата страница остава отворена. Другите раздели се запазват до рестартиране на приложението; включете разделите отново, за да ги възстановите."
     Data Saver Thumbnails: "Използвайте миниатюри с по-ниска разделителна способност, за да намалите потреблението на данни."

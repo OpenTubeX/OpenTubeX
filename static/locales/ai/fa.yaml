@@ -343,6 +343,7 @@ Settings:
       Network: شبکه
       Disk: دیسک
   General Settings:
+    Preferred Video Codec: کدک ویدیویی ترجیحی
     Automatically switch stream extraction methods: "تغییر خودکار روش‌های استخراج جریان"
     Enable Tabs: "فعال‌سازی زبانه‌ها"
     Thumbnail Swipe Gestures:
@@ -1309,8 +1310,6 @@ Settings:
   Search Settings: جست‌وجوی تنظیمات
   No Settings Found: تنظیمی پیدا نشد
   Experimental Settings:
-    Preferred Video Codec: کدک ویدیویی ترجیحی
-    Codec Description: حالت خودکار رمزگشایی سخت‌افزاری را ترجیح می‌دهد. تغییرات از ویدیوی بعدی اعمال می‌شوند. ترجیح کدک ممکن است وضوح‌ها را محدود کند؛ کدک‌های ناموجود جایگزین می‌شوند. به‌دلیل خطای پخش مرورگر، برای واقعیت مجازی از VP9 استفاده نمی‌شود.
     Disable Hardware Acceleration: غیرفعال کردن شتاب‌دهی سخت‌افزاری
   Interface Customizer:
     Customize Interface: "سفارشی‌سازی رابط"
@@ -1970,6 +1969,7 @@ Description:
   Games: بازی‌ها
 Tooltips:
   General Settings:
+    Preferred Video Codec: حالت خودکار رمزگشایی سخت‌افزاری را ترجیح می‌دهد. تغییرات از ویدیوی بعدی اعمال می‌شوند. ترجیح کدک ممکن است وضوح‌ها را محدود کند؛ کدک‌های ناموجود جایگزین می‌شوند.
     Automatically switch stream extraction methods: "اگر پخش داخلی ناموفق بود، yt-dlp را امتحان کنید و اگر yt-dlp ناموفق بود، پخش داخلی را امتحان کنید."
     Enable Tabs: "صفحهٔ فعلی باز می‌ماند. زبانه‌های دیگر تا راه‌اندازی مجدد برنامه نگه داشته می‌شوند؛ برای بازیابی آن‌ها، زبانه‌ها را دوباره فعال کنید."
     Data Saver Thumbnails: "برای کاهش مصرف داده از تصاویر بندانگشتی با وضوح پایین‌تر استفاده کنید."

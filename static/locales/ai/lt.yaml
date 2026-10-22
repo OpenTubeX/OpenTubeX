@@ -435,6 +435,7 @@ Settings:
       Disk: disko
   Return to Settings Menu: Grįžti į nustatymų meniu
   General Settings:
+    Preferred Video Codec: Pageidaujamas vaizdo kodekas
     Automatically switch stream extraction methods: "Automatiškai keisti srauto išgavimo metodus"
     Enable Tabs: "Įjungti skirtukus"
     Thumbnail Swipe Gestures:
@@ -1526,8 +1527,6 @@ Settings:
     Set Password: Nustatyti slaptažodį
     Remove Password: Pašalinti slaptažodį
   Experimental Settings:
-    Preferred Video Codec: Pageidaujamas vaizdo kodekas
-    Codec Description: Automatinis režimas teikia pirmenybę aparatiniam dekodavimui. Pakeitimai taikomi kitam vaizdo įrašui. Kodeko pasirinkimas gali riboti raišką; nepasiekiami kodekai pakeičiami. VP9 nenaudojamas VR dėl naršyklės atkūrimo klaidos.
     Disable Hardware Acceleration: Išjungti aparatinį spartinimą
   Interface Customizer:
     Customize Interface: "Tinkinti sąsają"
@@ -2297,6 +2296,7 @@ Description:
   Games: Žaidimai
 Tooltips:
   General Settings:
+    Preferred Video Codec: Automatinis režimas teikia pirmenybę aparatiniam dekodavimui. Pakeitimai taikomi kitam vaizdo įrašui. Kodeko pasirinkimas gali riboti raišką; nepasiekiami kodekai pakeičiami.
     Automatically switch stream extraction methods: "Bandyti yt-dlp, jei integruotas atkūrimas nepavyksta, arba integruotą atkūrimą, jei yt-dlp nepavyksta."
     Enable Tabs: "Dabartinis puslapis lieka atvertas. Kitos kortelės išsaugomos iki programos paleidimo iš naujo; vėl įjunkite korteles, kad jas atkurtumėte."
     Data Saver Thumbnails: "Naudoti mažesnės raiškos miniatiūras, kad sumažėtų duomenų naudojimas."

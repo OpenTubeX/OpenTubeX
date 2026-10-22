@@ -328,6 +328,7 @@ Settings:
       Network: rede
       Disk: disco
   General Settings:
+    Preferred Video Codec: Códec de vídeo preferido
     Automatically switch stream extraction methods: "Cambiar automaticamente os métodos de extracción de fluxos"
     Enable Tabs: "Activar as lapelas"
     Thumbnail Swipe Gestures:
@@ -1280,8 +1281,6 @@ Settings:
   Search Settings: Buscar na configuración
   No Settings Found: Non se atopou ningún axuste
   Experimental Settings:
-    Preferred Video Codec: Códec de vídeo preferido
-    Codec Description: O modo automático prefire a descodificación por hardware. Os cambios aplícanse ao seguinte vídeo. A preferencia de códec pode limitar as resolucións; os códecs non dispoñibles substitúense. Evítase VP9 para VR por un erro de reprodución do navegador.
     Disable Hardware Acceleration: Desactivar a aceleración por hardware
   Interface Customizer:
     Customize Interface: "Personalizar a interface"
@@ -1933,6 +1932,7 @@ Description:
   Games: Xogos
 Tooltips:
   General Settings:
+    Preferred Video Codec: O modo automático prefire a descodificación por hardware. Os cambios aplícanse ao seguinte vídeo. A preferencia de códec pode limitar as resolucións; os códecs non dispoñibles substitúense.
     Automatically switch stream extraction methods: "Probar yt-dlp se falla a reprodución integrada, ou a reprodución integrada se falla yt-dlp."
     Enable Tabs: "Mantén aberta a páxina actual. As outras lapelas consérvanse ata reiniciar a aplicación; activa de novo as lapelas para restauralas."
     Data Saver Thumbnails: "Usar miniaturas de menor resolución para reducir o consumo de datos."

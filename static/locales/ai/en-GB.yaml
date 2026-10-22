@@ -323,6 +323,7 @@ Settings:
       Network: network
       Disk: disk
   General Settings:
+    Preferred Video Codec: Preferred video codec
     Automatically switch stream extraction methods: "Automatically switch stream extraction methods"
     Enable Tabs: "Enable Tabs"
     Thumbnail Swipe Gestures:
@@ -1239,8 +1240,6 @@ Settings:
   Search Settings: Search settings
   No Settings Found: No settings found
   Experimental Settings:
-    Preferred Video Codec: Preferred video codec
-    Codec Description: Auto prefers hardware decoding. Changes apply to the next video. A codec preference may limit resolutions; unavailable codecs fall back. VP9 is avoided for VR because of a browser playback error.
     Disable Hardware Acceleration: Disable Hardware Acceleration
   Interface Customizer:
     Customize Interface: "Customise interface"
@@ -1872,6 +1871,7 @@ Description:
   Games: Games
 Tooltips:
   General Settings:
+    Preferred Video Codec: Auto prefers hardware decoding. Changes apply to the next video. A codec preference may limit resolutions; unavailable codecs fall back.
     Automatically switch stream extraction methods: "Try yt-dlp if built-in playback fails, or built-in playback if yt-dlp fails."
     Enable Tabs: "Keeps the current page open. Other tabs are kept until the app restarts; enable tabs again to restore them."
     Data Saver Thumbnails: "Use lower-resolution thumbnails to reduce data usage."

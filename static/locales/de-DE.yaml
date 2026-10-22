@@ -407,6 +407,7 @@ Settings:
     Advanced Description: Anbieter, externe Anwendungen und Netzwerk
     Alternative providers: Video- und Metadatenanbieter
   General Settings:
+    Preferred Video Codec: Bevorzugter Videocodec
     Enable Tabs: "Tabs aktivieren"
     Thumbnail Swipe Gestures:
       Left: Auf Vorschaubildern nach links wischen
@@ -1562,8 +1563,6 @@ Settings:
     Hide Uploader on Watch page: Uploader auf der Videoseite ausblenden
     Disable Channel Links: Kanal-Links deaktivieren
   Experimental Settings:
-    Preferred Video Codec: Bevorzugter Videocodec
-    Codec Description: Auto bevorzugt Hardware-Decodierung. Änderungen gelten ab dem nächsten Video. Eine Codec-Präferenz kann Auflösungen einschränken; nicht verfügbare Codecs werden ersetzt. VP9 wird bei VR wegen eines Wiedergabefehlers im Browser vermieden.
     Experimental Settings: Experimentell
     Warning: Diese Einstellungen sind experimentell und können zu Abstürzen führen, wenn sie aktiviert sind. Es wird dringend empfohlen, Backups zu erstellen. Verwendung auf eigene Gefahr!
     Replace HTTP Cache: HTTP-Cache ersetzen
@@ -2650,6 +2649,7 @@ See changes and update: Änderungen ansehen und aktualisieren
 Dismiss: Ausblenden
 Tooltips:
   General Settings:
+    Preferred Video Codec: Auto bevorzugt Hardware-Decodierung. Änderungen gelten ab dem nächsten Video. Eine Codec-Präferenz kann Auflösungen einschränken; nicht verfügbare Codecs werden ersetzt.
     Yattee Server: "Die yattee-server-Instanz, von der OpenTubeX Videos, Kanäle, Wiedergabelisten und Suchergebnisse lädt. Benutzername und Passwort werden nur auf diesem Gerät gespeichert."
     Proxy Videos Through Yattee Server: "Leitet Video- und Audiostreams über den Server. Lass dies aktiviert, außer der Server nutzt deine Internetverbindung, denn YouTube liefert Streams nur an die Adresse aus, die sie angefordert hat. Vorschaubilder werden immer direkt von YouTube geladen."
     Enable Tabs: "Die aktuelle Seite bleibt geöffnet. Andere Tabs bleiben bis zum Neustart der App erhalten; aktiviere Tabs erneut, um sie wiederherzustellen."

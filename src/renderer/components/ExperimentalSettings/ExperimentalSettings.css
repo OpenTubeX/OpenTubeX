@@ -3,12 +3,3 @@
   font-weight: bold;
   padding-inline: 4%;
 }
-
-.codec-description {
-  margin-inline: 4%;
-  line-height: 1.5;
-}
-
-.codec-select {
-  inline-size: min(100%, 360px);
-}

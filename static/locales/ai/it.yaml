@@ -258,9 +258,6 @@ History:
   Custom: Personalizzato
   History Older Than Days Removed: La cronologia di visione più vecchia di 1 giorno è stata rimossa | La cronologia di visione più vecchia di {days} giorni è stata rimossa | La cronologia di visione più vecchia di {days} giorni è stata rimossa
 Settings:
-  Experimental Settings:
-    Preferred Video Codec: Codec video preferito
-    Codec Description: La modalità automatica preferisce la decodifica hardware. Le modifiche si applicano al prossimo video. La preferenza del codec può limitare le risoluzioni; i codec non disponibili vengono sostituiti. VP9 viene evitato per la VR a causa di un errore di riproduzione del browser.
   Tab Unloading:
     Automatically unload tabs: "Scarica automaticamente le schede"
     Memory threshold: "Soglia di memoria"
@@ -326,6 +323,7 @@ Settings:
       Network: rete
       Disk: disco
   General Settings:
+    Preferred Video Codec: Codec video preferito
     Automatically switch stream extraction methods: "Cambia automaticamente i metodi di estrazione dei flussi"
     Enable Tabs: "Abilita schede"
     Thumbnail Swipe Gestures:
@@ -1882,6 +1880,7 @@ Description:
   Games: Giochi
 Tooltips:
   General Settings:
+    Preferred Video Codec: La modalità automatica preferisce la decodifica hardware. Le modifiche si applicano al prossimo video. La preferenza del codec può limitare le risoluzioni; i codec non disponibili vengono sostituiti.
     Automatically switch stream extraction methods: "Prova yt-dlp se la riproduzione integrata non riesce, o la riproduzione integrata se yt-dlp non riesce."
     Enable Tabs: "Mantiene aperta la pagina attuale. Le altre schede vengono conservate fino al riavvio dell’app; riattiva le schede per ripristinarle."
     Data Saver Thumbnails: "Usa miniature a risoluzione inferiore per ridurre il consumo di dati."

@@ -328,6 +328,7 @@ Settings:
       Network: רשת
       Disk: כונן
   General Settings:
+    Preferred Video Codec: מקודד וידאו מועדף
     Automatically switch stream extraction methods: "החלפה אוטומטית בין שיטות חילוץ זרמים"
     Enable Tabs: "הפעלת לשוניות"
     Thumbnail Swipe Gestures:
@@ -1285,8 +1286,6 @@ Settings:
   Search Settings: חיפוש בהגדרות
   No Settings Found: לא נמצאו הגדרות
   Experimental Settings:
-    Preferred Video Codec: מקודד וידאו מועדף
-    Codec Description: המצב האוטומטי מעדיף פענוח בחומרה. השינויים חלים על הסרטון הבא. העדפת מקודד עשויה להגביל רזולוציות; מקודדים שאינם זמינים מוחלפים. VP9 אינו משמש ל-VR בגלל שגיאת הפעלה בדפדפן.
     Disable Hardware Acceleration: השבתת האצת חומרה
   Interface Customizer:
     Customize Interface: "התאמת הממשק"
@@ -1931,6 +1930,7 @@ Description:
   Games: משחקים
 Tooltips:
   General Settings:
+    Preferred Video Codec: המצב האוטומטי מעדיף פענוח בחומרה. השינויים חלים על הסרטון הבא. העדפת מקודד עשויה להגביל רזולוציות; מקודדים שאינם זמינים מוחלפים.
     Automatically switch stream extraction methods: "לנסות את yt-dlp אם הניגון המובנה נכשל, או את הניגון המובנה אם yt-dlp נכשל."
     Enable Tabs: "העמוד הנוכחי נשאר פתוח. הלשוניות האחרות נשמרות עד להפעלה מחדש של היישום; יש להפעיל שוב לשוניות כדי לשחזר אותן."
     Data Saver Thumbnails: "שימוש בתמונות ממוזערות ברזולוציה נמוכה יותר להפחתת השימוש בנתונים."

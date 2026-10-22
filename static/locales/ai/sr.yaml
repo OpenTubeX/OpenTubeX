@@ -334,6 +334,7 @@ Settings:
       Network: мрежа
       Disk: диск
   General Settings:
+    Preferred Video Codec: Жељени видео кодек
     Automatically switch stream extraction methods: "Аутоматски мењај методе издвајања стримова"
     Enable Tabs: "Омогући картице"
     Thumbnail Swipe Gestures:
@@ -1302,8 +1303,6 @@ Settings:
   Search Settings: Подешавања претраге
   No Settings Found: Нису пронађена подешавања
   Experimental Settings:
-    Preferred Video Codec: Жељени видео кодек
-    Codec Description: Аутоматски режим даје предност хардверском декодирању. Промене важе за следећи видео. Избор кодека може ограничити резолуције; недоступни кодеци се замењују. VP9 се избегава за VR због грешке репродукције у прегледачу.
     Disable Hardware Acceleration: Онемогући хардверско убрзање
   Interface Customizer:
     Customize Interface: "Прилагоди интерфејс"
@@ -1957,6 +1956,7 @@ Description:
   Games: Игре
 Tooltips:
   General Settings:
+    Preferred Video Codec: Аутоматски режим даје предност хардверском декодирању. Промене важе за следећи видео. Избор кодека може ограничити резолуције; недоступни кодеци се замењују.
     Automatically switch stream extraction methods: "Покушај са yt-dlp ако уграђена репродукција не успе или са уграђеном репродукцијом ако yt-dlp не успе."
     Enable Tabs: "Тренутна страница остаје отворена. Остале картице се чувају до поновног покретања апликације; поново омогућите картице да бисте их вратили."
     Data Saver Thumbnails: "Користите сличице ниже резолуције да бисте смањили потрошњу података."
