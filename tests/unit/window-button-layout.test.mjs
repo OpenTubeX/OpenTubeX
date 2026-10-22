@@ -9,15 +9,17 @@ const source = await readFile(new URL('../../src/main/windowButtonLayout.js', im
 function fixture () {
   const timers = []
   const connections = []
-  const portal = { available: false, layout: 'close,minimize,maximize:', handlers: [] }
+  const portal = { available: false, layout: 'close,minimize,maximize:', handlers: [], busAddress: true, gate: null }
   const dbus = {
     sessionBus () {
+      if (!portal.busAddress) throw new Error('unknown bus address')
       const connection = { ended: false, on () {}, end () { this.ended = true } }
       connections.push(connection)
       return {
         connection,
         getService: () => ({
           getInterface: async () => {
+            await portal.gate
             if (!portal.available) throw new Error('org.freedesktop.portal.Desktop was not provided by any .service files')
             return {
               on: (name, handler) => portal.handlers.push(handler),
@@ -78,4 +80,29 @@ test('without a portal, retries stop and the default layout stays', async () => 
   assert.deepEqual(published, [])
   assert.equal(await layout.getWindowButtonLayout(), ':minimize,maximize,close')
   assert.ok(layout.connections.every(connection => connection.ended))
+})
+
+test('a session without a D-Bus address keeps the default layout', async () => {
+  const layout = fixture()
+  layout.portal.busAddress = false
+  assert.equal(await layout.getWindowButtonLayout(), ':minimize,maximize,close')
+  assert.equal(layout.timers.length, 1)
+})
+
+test('windows get the default layout while a retry waits for the portal', async () => {
+  const layout = fixture()
+  await layout.getWindowButtonLayout()
+  let answer
+  layout.portal.gate = new Promise(resolve => { answer = resolve })
+  layout.timers.shift().callback()
+
+  let resolved = null
+  layout.getWindowButtonLayout().then(value => { resolved = value })
+  await flush()
+  assert.equal(resolved, ':minimize,maximize,close')
+
+  layout.portal.available = true
+  answer()
+  await flush()
+  assert.equal(await layout.getWindowButtonLayout(), 'close,minimize,maximize:')
 })

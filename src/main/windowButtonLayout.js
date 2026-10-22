@@ -28,9 +28,11 @@ function publish(layout) {
  * @returns {Promise<string>}
  */
 async function readButtonLayout() {
-  const bus = dbus.sessionBus({ timeout: 2_000 })
-  bus.connection.on('error', () => {})
+  let bus = null
   try {
+    // Throws synchronously without a session bus address
+    bus = dbus.sessionBus({ timeout: 2_000 })
+    bus.connection.on('error', () => {})
     const settings = await bus.getService('org.freedesktop.portal.Desktop')
       .getInterface('/org/freedesktop/portal/desktop', 'org.freedesktop.portal.Settings')
     settings.on('SettingChanged', (namespace, key, value) => {
@@ -41,7 +43,7 @@ async function readButtonLayout() {
     return typeof layout === 'string' ? layout : DEFAULT_BUTTON_LAYOUT
   } catch {
     // A retry connects and subscribes again
-    bus.connection.end()
+    bus?.connection.end()
     if (failedReads < RETRY_DELAYS.length) {
       setTimeout(retryButtonLayout, RETRY_DELAYS[failedReads++]).unref?.()
     }
@@ -50,9 +52,8 @@ async function readButtonLayout() {
 }
 
 async function retryButtonLayout() {
-  buttonLayout = readButtonLayout()
-  const layout = await buttonLayout
-  // Windows show the default until then
+  // Requests keep the cached default while the retry waits for D-Bus
+  const layout = await readButtonLayout()
   if (layout !== DEFAULT_BUTTON_LAYOUT) publish(layout)
 }
 
