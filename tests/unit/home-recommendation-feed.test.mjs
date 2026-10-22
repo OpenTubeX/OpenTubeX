@@ -57,9 +57,10 @@ function createFeed({ records = [], candidates = [], playlists = [], settings = 
     isVideoHiddenByPreferences,
     shouldHideMembersOnlyContent: (membersOnly, getters) => shouldHideMembersOnlyContent(membersOnly, getters, true),
     buildRecommendationProfileAsync: async (...args) => { work.profiles++; return buildProfile(...args) },
-    rankRecommendationCandidatesAsync: async (videos, profile, { limit }) => {
+    rankRecommendationCandidatesAsync: async (videos, profile, { limit, kept = [] }) => {
       work.rankings++
-      return videos.slice(0, limit).map(video => ({ video, reason: { type: 'topic', text: 'Linux' } }))
+      const keptIds = new Set(kept.map(video => video.videoId))
+      return videos.filter(video => !keptIds.has(video.videoId)).slice(0, limit - kept.length).map(video => ({ video, reason: { type: 'topic', text: 'Linux' } }))
     },
     collectRecommendationCandidates: async () => { work.requests++; return { videos: candidates, failedSources: 0 } },
     requestAnimationFrame: callback => setTimeout(callback, 0),
@@ -105,6 +106,24 @@ test('revisiting Home restores the completed feed immediately without fetching o
     assert.equal(second.feed.recommendations.value.length, 24)
   } finally {
     second.stop()
+  }
+})
+
+test('loading more appends below the shown feed and fills slots of shown videos watched or hidden since', async () => {
+  const { feed, getters, state, stop } = createFeed({
+    candidates: Array.from({ length: 60 }, (_, index) => ({ videoId: `candidate-${index}`, authorId: `channel-${index}` })),
+  })
+  try {
+    await waitForFeed(feed)
+    const shown = feed.recommendations.value
+    getters.getHistoryCacheById = { [shown[0].videoId]: {}, [shown[5].videoId]: {} }
+    state.recommendations.recommendationRecords[shown[1].videoId] = { ...shown[1], feedback: 'blockChannel' }
+    await feed.loadMore()
+    const loaded = feed.recommendations.value.map(video => video.videoId)
+    assert.equal(loaded.length, 48)
+    assert.deepEqual(loaded.slice(0, 21), shown.map(video => video.videoId).filter((id, index) => ![0, 1, 5].includes(index)))
+  } finally {
+    stop()
   }
 })
 

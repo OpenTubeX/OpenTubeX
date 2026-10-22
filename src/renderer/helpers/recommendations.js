@@ -302,11 +302,14 @@ function * scoreRecommendationCandidateSteps(candidates, profile, { exploration 
   return [...scored.values()].sort((a, b) => b.score - a.score || tie(a.video.videoId, b.video.videoId))
 }
 
-function * diversifyRecommendationSteps(scored, { limit = 24, exploration = 0.2 } = {}) {
+// Kept items are already shown; they count toward the limit and diversity but are not returned.
+function * diversifyRecommendationSteps(scored, { limit = 24, exploration = 0.2, kept = [] } = {}) {
   limit = Math.floor(number(limit))
-  const pool = [...scored]
-  const selected = []
+  const keptIds = new Set(kept.map(item => item.video.videoId))
+  const pool = scored.filter(item => !keptIds.has(item.video.videoId))
+  const selected = [...kept]
   const channelCounts = new Map()
+  for (const item of kept) channelCounts.set(id(item.video.authorId), (channelCounts.get(id(item.video.authorId)) ?? 0) + 1)
   while (selected.length < limit && pool.length) {
     const wantsDiscovery = exploration > 0 && selected.length > 0 && selected.filter(item => item.discovery).length < Math.floor((selected.length + 1) * exploration)
     let bestIndex = -1
@@ -328,7 +331,15 @@ function * diversifyRecommendationSteps(scored, { limit = 24, exploration = 0.2 
     const channel = id(item.video.authorId)
     channelCounts.set(channel, (channelCounts.get(channel) ?? 0) + 1)
   }
-  return selected
+  return selected.slice(kept.length)
+}
+
+function keptRecommendationItems(videos = [], profile) {
+  return videos.map(video => ({
+    video,
+    vector: profile.vectorFor(video),
+    discovery: !profile.channelWeights.get(id(video.authorId)) && !profile.subscriptions.has(video.authorId),
+  }))
 }
 
 export function buildRecommendationProfile(history, options) {
@@ -349,10 +360,11 @@ export function diversifyRecommendations(scored, options) {
 
 export async function rankRecommendationCandidatesAsync(candidates, profile, options, isCancelled) {
   const scored = await runCooperatively(scoreRecommendationCandidateSteps(candidates, profile, options), isCancelled)
-  return scored && runCooperatively(diversifyRecommendationSteps(scored, options), isCancelled)
+  return scored && runCooperatively(diversifyRecommendationSteps(scored, { ...options, kept: keptRecommendationItems(options?.kept, profile) }), isCancelled)
 }
 
 export function rankRecommendations(candidates, history, options = {}) {
   const profile = buildRecommendationProfile(history, options)
-  return diversifyRecommendations(scoreRecommendationCandidates(candidates, profile, options), options).map(item => item.video)
+  return diversifyRecommendations(scoreRecommendationCandidates(candidates, profile, options), { ...options, kept: keptRecommendationItems(options.kept, profile) })
+    .map(item => item.video)
 }
