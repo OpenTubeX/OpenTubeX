@@ -26,13 +26,13 @@
         @mousedown.middle.prevent
         @auxclick.prevent="handleAuxClick"
       >
-        <FtIcon
-          v-if="tab.isPinned"
-          :icon="['fas', 'thumbtack']"
-          class="pinBadge"
-          aria-hidden="true"
-        />
         <span class="tabTitle">
+          <FtIcon
+            v-if="tab.isPinned && !showIconContainer"
+            :icon="['fas', 'thumbtack']"
+            class="pinIcon"
+            aria-hidden="true"
+          />
           <FtIcon
             v-if="group"
             :icon="['fas', group.icon || 'layer-group']"
@@ -45,7 +45,7 @@
             aria-hidden="true"
           />
           <span
-            v-else-if="showIcon && (usableTabAvatarUrl || tabPageIcon)"
+            v-else-if="showIconContainer"
             class="tabIconContainer"
           >
             <FtRetryImage
@@ -73,6 +73,12 @@
               v-else-if="tab.automaticallyUnloaded"
               :icon="['fas', 'memory']"
               class="autoUnloadIcon playingBadge"
+              aria-hidden="true"
+            />
+            <FtIcon
+              v-if="tab.isPinned"
+              :icon="['fas', 'thumbtack']"
+              class="pinIcon pinBadge"
               aria-hidden="true"
             />
           </span>
@@ -245,6 +251,9 @@ const usableTabAvatarUrl = computed(() => {
   return avatarUrl !== failedAvatarUrl.value ? avatarUrl : null
 })
 const tabPageIcon = computed(() => getTabPageIcon(props.tab))
+const showIconContainer = computed(() => (
+  !showLoadingDot.value && props.showIcon && !!(usableTabAvatarUrl.value || tabPageIcon.value)
+))
 
 function handleAvatarError() {
   failedAvatarUrl.value = usableTabAvatarUrl.value
@@ -445,19 +454,10 @@ watch(tabAvatarUrl, (avatarUrl) => {
   opacity: 0.8;
 }
 
-.tab.pinned .tabTitle {
-  padding-inline-start: 9px;
-}
-
-.pinBadge {
-  position: absolute;
-  inset-block-start: 50%;
-  inset-inline-start: 5px;
-  transform: translateY(-50%);
+.pinIcon {
   font-size: 8px;
   color: var(--tab-accent-color, var(--secondary-text-color));
-  opacity: 0.92;
-  pointer-events: none;
+  flex-shrink: 0;
 }
 
 .autoUnloadIcon {
@@ -472,7 +472,8 @@ watch(tabAvatarUrl, (avatarUrl) => {
   flex-shrink: 0;
 }
 
-.playingBadge {
+.playingBadge,
+.pinBadge {
   position: absolute;
   inset-inline-end: -3px;
   inset-block-end: -2px;
@@ -490,6 +491,10 @@ watch(tabAvatarUrl, (avatarUrl) => {
   inline-size: 12px;
   block-size: 12px;
   font-size: 10px;
+}
+
+.pinBadge {
+  color: var(--tab-accent-color, var(--primary-text-color));
 }
 
 .tab.pinned .playingBadge {
