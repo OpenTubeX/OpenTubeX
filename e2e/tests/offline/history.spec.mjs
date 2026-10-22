@@ -1645,6 +1645,20 @@ test.describe('lazy history channel picker', () => {
     await expect(options).toHaveCount(200)
   })
 
+  test('keeps loading pages when the list jumps to its new end as soon as a page loads', async ({ page }) => {
+    await goTo(page, 'history')
+    const dropdown = await openChannelPicker(page)
+    const options = dropdown.getByRole('option')
+    await expect(options).toHaveCount(100)
+    // Scrolling to the end again before the next frame, like dragging the scrollbar
+    // to the end, leaves the end of the list in view across the page load.
+    await dropdown.evaluate(menu => {
+      new MutationObserver(() => { menu.scrollTop = menu.scrollHeight }).observe(menu, { childList: true })
+      menu.scrollTop = menu.scrollHeight
+    })
+    await expect(options).toHaveCount(channelNames.length + 1)
+  })
+
   test('resets the scrolled picker when it crosses the phone layout breakpoint @scale', async ({ page }) => {
     await page.setViewportSize({ width: 400, height: 800 })
     await goTo(page, 'history')

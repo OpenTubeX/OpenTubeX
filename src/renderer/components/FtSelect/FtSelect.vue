@@ -168,9 +168,12 @@
           @mousedown="handleDropdownMouseDown"
           @keydown="handlePickerKeydown"
         >
+          <!-- A new sentinel per page gets a fresh intersection check, so a list that
+               still shows it after loading a page loads the next one too -->
           <li
             v-if="lazyOptions && windowStart > 0"
             ref="loadPreviousSentinel"
+            :key="`load-previous:${windowStart}`"
             class="selectLoadMore"
             role="presentation"
           />
@@ -238,6 +241,7 @@
           <li
             v-if="lazyOptions && renderLimit < filteredOptions.length"
             ref="loadMoreSentinel"
+            :key="`load-more:${renderLimit}`"
             class="selectLoadMore"
             role="presentation"
           />
