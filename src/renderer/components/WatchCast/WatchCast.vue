@@ -35,6 +35,8 @@
     :class="{ chromecastControl: googleCastEnabled, dlnaCastControl: !googleCastEnabled && dlnaEnabled }"
     :title="menuTitle"
     :icon="['fas', 'cast']"
+    theme="base-no-default"
+    :use-shadow="false"
     :aria-pressed="Boolean(googleCast?.castId || dlna?.castId)"
     :force-dropdown="true"
     :disabled="protocolDisabled(selectedProtocol)"

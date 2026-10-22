@@ -23,6 +23,10 @@
   gap: 10px;
 }
 
+.videoButtons {
+  flex-wrap: wrap;
+}
+
 .videoBadges {
   display: flex;
   flex-wrap: wrap;
@@ -154,25 +158,89 @@
 
 .videoOptions {
   display: flex;
-  gap: 4px;
+  align-items: center;
+  gap: 2px;
+  padding: 5px;
+  border-radius: calc(16px * var(--ui-roundness));
+  background-color: var(--secondary-card-bg-color);
+  backdrop-filter: var(--secondary-card-bg-blur, none);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 30%);
+}
+
+.videoOptions:not(:has(> .videoOptionsMobileRow:not(:empty))) {
+  display: none;
+}
+
+/* Last resort when even the icon-only toolbar is wider than the card */
+.videoOptions.compact {
+  flex-wrap: wrap;
 }
 
 .videoOptionsMobileRow {
   display: flex;
-  gap: 4px;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 2px;
+}
+
+.videoOptionsMobileRow:empty {
+  display: none;
+}
+
+.videoOptionsMobileRow:not(:empty) + .videoOptionsMobileRow:not(:empty)::before {
+  content: '';
+  inline-size: 1px;
+  block-size: 22px;
+  margin-inline: 5px;
+  background-color: var(--scrollbar-color);
+}
+
+.videoOptions :deep(.iconButton) {
+  position: relative;
+  border-radius: calc(11px * var(--ui-roundness));
+  color: var(--tertiary-text-color);
+}
+
+.videoOptions :deep(.iconButton:not(.disabled):is(:hover, :focus-visible, .pressed)) {
+  color: var(--primary-text-color);
+}
+
+.videoOptions .toolbarActive :deep(.iconButton),
+.videoOptions .toolbarActive :deep(.iconButton:not(.disabled):is(:hover, :focus-visible, .pressed)) {
+  color: var(--accent-color);
+}
+
+.videoOptions .toolbarActive :deep(.iconButton)::after {
+  content: '';
+  position: absolute;
+  inset-block-end: 4px;
+  inset-inline-start: calc(50% - 2px);
+  inline-size: 4px;
+  block-size: 4px;
+  border-radius: 50%;
+  background-color: currentcolor;
+}
+
+.videoOptions .downloadButton {
+  min-block-size: 40px;
+  margin: 0;
+  margin-inline-start: 4px;
+  padding-inline: 12px 14px;
+}
+
+.videoOptions.compact .downloadButton {
+  min-inline-size: 40px;
+  padding-inline: 9px;
+}
+
+.videoOptions.compact .downloadLabel {
+  display: none;
 }
 
 .initialCursor {
   cursor: initial;
 }
 
-@media screen and (width <= 730px) {
-  .videoButtons {
-    flex-direction: column;
-    align-items: flex-start;
-    margin-block-start: 10px;
-  }
-}
 
 @media screen and (width <= 460px) {
   .datePublishedAndViewCount {
@@ -185,12 +253,6 @@
 }
 
 @media screen and (width <= 380px) {
-  .videoOptions {
-    flex-direction: column;
-    align-items: flex-start;
-    margin-block-start: 10px;
-  }
-
   .videoOptionsMobileRow :deep(.iconDropdown) {
     inset-inline: 0 auto;
   }
