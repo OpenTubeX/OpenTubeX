@@ -231,6 +231,7 @@ import { downloadTemplateName } from '../../helpers/downloadTemplates'
 import { formatBytes } from '../../helpers/fileSize'
 import { downloadErrorMessage } from '../../helpers/downloadErrors'
 import { isDownloadPlaybackSupported, isPlayableDownloadFile, downloadQueueVideos } from '../../helpers/downloadPlayback'
+import { openButtonMenu } from '../../helpers/buttonMenu'
 
 // keeps a playlist download from filling the page with one line per video
 const MAX_VISIBLE_DESTINATIONS = 3
@@ -272,12 +273,7 @@ const menuItems = computed(() => {
   return items.map(item => ({ enabled: true, ...item }))
 })
 function openMenu() {
-  const button = menuButton.value.$el.querySelector('button')
-  button.focus({ preventScroll: true })
-  const bounds = button.getBoundingClientRect()
-  window.dispatchEvent(new CustomEvent('opentubex:context-menu', {
-    detail: { x: document.body.dir === 'rtl' ? bounds.right : bounds.left, y: bounds.bottom, items: menuItems, touchFriendly: true }
-  }))
+  openButtonMenu(menuButton.value.$el.querySelector('button'), menuItems)
 }
 function closeMenu() {
   window.dispatchEvent(new CustomEvent('opentubex:close-context-menu', { detail: menuItems }))
