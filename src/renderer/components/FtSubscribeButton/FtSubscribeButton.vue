@@ -76,15 +76,17 @@
         >
           <div class="feedTypePreferences">
             <div
+              v-for="group in feedTypeGroups"
+              :key="group.key"
               role="group"
               class="feedTypePreferenceGroup"
-              :aria-labelledby="`${id}-feed-types`"
+              :aria-labelledby="`${id}-${group.key}`"
             >
               <p
-                :id="`${id}-feed-types`"
+                :id="`${id}-${group.key}`"
                 class="feedTypePreferencesLabel"
               >
-                {{ $t('Channel.Show in subscription feed') }}
+                {{ group.label }}
               </p>
               <div class="feedTypePreferenceGrid">
                 <button
@@ -93,8 +95,9 @@
                   type="button"
                   class="feedTypePreference"
                   role="checkbox"
-                  :aria-checked="enabledFeedTypes.has(feedType.id)"
-                  @click="updateFeedType(feedType.id, !enabledFeedTypes.has(feedType.id))"
+                  :aria-checked="isFeedTypeChecked(feedType.id, group.key)"
+                  :disabled="group.key === 'notificationFeedTypes' && !isFeedTypeChecked(feedType.id)"
+                  @click="updateFeedType(feedType.id, !isFeedTypeChecked(feedType.id, group.key), group.key)"
                 >
                   <span
                     class="feedTypePreferenceIcon"
@@ -108,7 +111,7 @@
                     aria-hidden="true"
                   >
                     <FtIcon
-                      v-if="enabledFeedTypes.has(feedType.id)"
+                      v-if="isFeedTypeChecked(feedType.id, group.key)"
                       :icon="['fas', 'check']"
                     />
                   </span>
@@ -485,7 +488,12 @@ const optimisticChannelSettings = ref(null)
 const activeChannelSettings = computed(() => (
   optimisticChannelSettings.value ?? storedChannelSettings.value
 ))
-const enabledFeedTypes = computed(() => new Set(activeChannelSettings.value.feedTypes))
+const feedTypeGroups = computed(() => [
+  { key: 'feedTypes', label: t('Channel.Show in subscription feed') },
+  ...(isNotificationBellEnabled.value && notificationsEnabled.value
+    ? [{ key: 'notificationFeedTypes', label: t('Channel.Notify about new uploads') }]
+    : [])
+])
 const notificationsEnabled = computed(() => activeChannelSettings.value.notificationFeedTypes.length > 0)
 const dailyVideoLimitValue = computed(() => (
   formatSubscriptionDailyVideoLimit(activeChannelSettings.value.dailyVideoLimit)
@@ -733,13 +741,25 @@ function closeProfileDropdown() {
 }
 
 /**
+ * Only fetched feed types can notify.
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} feedType
+ * @param {'feedTypes' | 'notificationFeedTypes'} [key]
+ */
+function isFeedTypeChecked(feedType, key = 'feedTypes') {
+  const { feedTypes, notificationFeedTypes } = activeChannelSettings.value
+  return feedTypes.includes(feedType) &&
+    (key === 'feedTypes' || notificationFeedTypes.includes(feedType))
+}
+
+/**
  * @param {'videos' | 'shorts' | 'live' | 'posts'} feedType
  * @param {boolean} enabled
+ * @param {'feedTypes' | 'notificationFeedTypes'} [key]
  */
-function updateFeedType(feedType, enabled) {
+function updateFeedType(feedType, enabled, key = 'feedTypes') {
   persistChannelSettings({
-    feedTypes: getUpdatedSubscriptionFeedTypes(
-      activeChannelSettings.value.feedTypes,
+    [key]: getUpdatedSubscriptionFeedTypes(
+      activeChannelSettings.value[key],
       feedType,
       enabled
     )
