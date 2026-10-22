@@ -122,7 +122,16 @@ test.describe('compact downloads', { tag: '@scale' }, () => {
       await expect(row.getByRole('button')).toHaveCount(2)
       await expect(row).not.toContainText('Research')
       expect(await row.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
-      expect((await row.boundingBox()).height).toBeLessThan(150)
+      const heading = row.getByRole('heading')
+      expect(await heading.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+      if (width < 600) {
+        // the long title wraps instead of being cut off with an ellipsis
+        expect(await heading.evaluate((element) => {
+          const range = document.createRange()
+          range.selectNodeContents(element)
+          return range.getClientRects().length
+        })).toBeGreaterThan(1)
+      }
       const details = row.getByRole('button', { name: 'More options', exact: true })
       await details.focus()
       await expect(details).toBeFocused()
@@ -137,6 +146,12 @@ test.describe('compact downloads', { tag: '@scale' }, () => {
       await expect(dialog.locator('.destination')).toHaveText(mediaPath)
       await expect(dialog.locator('.downloadWarning')).toBeVisible()
       expect(await dialog.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+      const dialogBounds = await dialog.boundingBox()
+      const dialogCenter = dialogBounds.x + dialogBounds.width / 2
+      for (const centered of [dialog.locator('.downloadMetadata'), dialog.locator('.downloadThumbnail'), dialog.getByRole('button', { name: 'Close', exact: true })]) {
+        const bounds = await centered.boundingBox()
+        expect(Math.abs(bounds.x + bounds.width / 2 - dialogCenter)).toBeLessThanOrEqual(1)
+      }
       await dialog.screenshot({ path: testInfo.outputPath('download-details.png') })
       await dialog.getByRole('button', { name: 'Close', exact: true }).click()
       await expect(dialog).toHaveCount(0)

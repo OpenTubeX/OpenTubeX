@@ -124,7 +124,10 @@
   min-inline-size: 0;
 }
 
-.downloadDetails h3,
+.downloadDetails h3 {
+  overflow-wrap: anywhere;
+}
+
 .downloadChannel {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -267,7 +270,9 @@
 
 .downloadMetadata {
   inline-size: min(480px, 65vw);
+  margin-inline: auto;
   overflow-wrap: anywhere;
+  text-align: center;
 }
 
 .downloadMetadata h3 {
@@ -275,5 +280,7 @@
 }
 
 .downloadMetadata .downloadThumbnail {
+  display: block;
   inline-size: 144px;
+  margin-inline: auto;
 }

@@ -37,10 +37,7 @@
           alt=""
         />
         <div class="downloadDetails">
-          <h3
-            dir="auto"
-            :title="download.title"
-          >
+          <h3 dir="auto">
             {{ download.title }}
           </h3>
           <p
@@ -195,11 +192,13 @@
           </ul>
         </div>
         <template #footer>
-          <FtButton
-            :label="t('Close')"
-            :icon="['fas', 'xmark']"
-            @click="showDetails = false"
-          />
+          <FtFlexBox>
+            <FtButton
+              :label="t('Close')"
+              :icon="['fas', 'xmark']"
+              @click="showDetails = false"
+            />
+          </FtFlexBox>
         </template>
       </FtPrompt>
     </article>
@@ -208,6 +207,7 @@
 
 <script setup>
 import FtButton from '../../components/FtButton/FtButton.vue'
+import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
 import FtPrompt from '../../components/FtPrompt/FtPrompt.vue'
 import { downloadFormats } from '../../helpers/downloadFilters'
 import FtRetryImage from '../../components/FtRetryImage.vue'
