@@ -7,6 +7,8 @@ import { PlayerIcons } from '../../../../constants'
 const CODEC_ORDER = ['av01', 'vp09', 'avc1', 'hvc1']
 const CODEC_ALIASES = { avc3: 'avc1', hev1: 'hvc1', vp9: 'vp09' }
 const CODEC_NAMES = { av01: 'AV1', vp09: 'VP9', avc1: 'H.264', hvc1: 'HEVC' }
+/** The codecs that Shaka labels as Dolby Vision */
+const DOLBY_VISION_CODECS = ['dvh1', 'dvhe', 'dvav', 'dva1', 'dav1', 'dvc1', 'dvi1']
 
 /**
  * @param {string | null} codecs
@@ -233,14 +235,19 @@ export class QualitySelection extends shaka.ui.ResolutionSelection {
       return track.bandwidth ? formatBandwidth(track.bandwidth) : 'Unknown'
     }
 
-    const [width, height] = track.height > track.width ? [track.height, track.width] : [track.width, track.height]
+    // Only video with square pixels is portrait when it's taller than wide
+    const [width, height] = track.height > track.width && hasSquarePixels(track)
+      ? [track.height, track.width]
+      : [track.width, track.height]
     let label = `${width / height > 16 / 9 ? Math.round(width * 9 / 16) : height}p`
 
     const frameRate = Math.round(track.frameRate ?? 0)
     if (showFrameRate && frameRate > 30) {
       label += frameRate
     }
-    if (track.hdr === 'PQ' || track.hdr === 'HLG') {
+    if (DOLBY_VISION_CODECS.includes(getCodecFamily(track.codecs))) {
+      label += ' Dolby Vision'
+    } else if (track.hdr === 'PQ' || track.hdr === 'HLG') {
       label += ' HDR'
     }
     if (track.videoLayout?.includes('CH-STEREO')) {
@@ -257,6 +264,18 @@ export class QualitySelection extends shaka.ui.ResolutionSelection {
 
     return label
   }
+}
+
+/**
+ * @param {shaka.extern.VideoTrack} track
+ * @returns {boolean}
+ */
+function hasSquarePixels({ pixelAspectRatio }) {
+  if (!pixelAspectRatio) {
+    return true
+  }
+  const [x, y = 1] = pixelAspectRatio.split(':').map(Number)
+  return x === y
 }
 
 /**

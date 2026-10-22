@@ -110,6 +110,30 @@ for (const usePlayerMenuGrid of [true, false]) {
       await expect(dialog.locator('.shaka-resolution-button')).toBeVisible()
     })
 
+    test('labels Dolby Vision and non-square pixels like Shaka', async ({ app, page }) => {
+      await openAdaptiveVideo(app, page)
+      const player = page.locator(`${activeTab} .ftVideoPlayer`)
+      await player.evaluate(element => {
+        const shakaPlayer = element.ui.getControls().getPlayer()
+        shakaPlayer.getVideoTracks = () => [
+          { id: 1, codecs: 'avc1.64002a', width: 1920, height: 1080, frameRate: 30, bandwidth: 4e6, active: true },
+          { id: 2, codecs: 'dvh1.05.06', width: 3840, height: 2160, frameRate: 30, bandwidth: 20e6, hdr: 'PQ' },
+          // Displayed as 1920x1080, so it's not portrait video
+          { id: 3, codecs: 'vp09.00.40.08', width: 960, height: 1080, frameRate: 30, bandwidth: 2e6, pixelAspectRatio: '2:1' },
+        ].map(track => ({ hdr: 'SDR', roles: [], videoLayout: null, active: false, ...track }))
+        shakaPlayer.dispatchEvent({ type: 'trackschanged' })
+      })
+      const menu = player.locator('.shaka-resolutions')
+      const codecs = menu.locator('.ft-quality-codecs')
+      await player.hover()
+      await player.locator('.shaka-overflow-menu-button').click()
+      await player.locator('.shaka-resolution-button').click()
+      await codecs.getByRole('button', { name: 'DVH1' }).click()
+      await expect(menu.locator('.explicit-resolution > span')).toHaveText(['2160p Dolby Vision'])
+      await codecs.getByRole('button', { name: 'VP9' }).click()
+      await expect(menu.locator('.explicit-resolution > span')).toHaveText(['1080p'])
+    })
+
     test('lists the resolutions of the codec picked in the header', async ({ app, page }, testInfo) => {
       await openAdaptiveVideo(app, page)
       const player = page.locator(`${activeTab} .ftVideoPlayer`)
