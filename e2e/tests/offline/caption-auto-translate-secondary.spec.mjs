@@ -182,6 +182,12 @@ test.describe('secondary captions', () => {
     const tilesCenterY = (firstBounds.y + lastBounds.y + lastBounds.height) / 2
     expect(Math.abs(tilesCenterY - (optionsBounds.y + optionsBounds.height / 2))).toBeLessThan(2)
     await attachScreenshot('secondary captions menu')
+
+    // Like in Shaka's submenus, a click beside the options goes back
+    await options.click({ position: { x: 2, y: 2 } })
+    await expect(secondaryMenu).toBeHidden()
+    await expect(captionsMenu).toBeVisible()
+    await captionsMenu.getByRole('button', { name: 'Secondary Captions' }).click()
     await options.getByRole('button', { name: 'German', exact: true }).click()
     await expect(captionsMenu).toBeVisible()
     await expect(secondaryCaption).toHaveText('Original caption (de)')

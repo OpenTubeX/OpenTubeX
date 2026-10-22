@@ -275,11 +275,26 @@ export class CaptionSelection extends shaka.ui.TextSelection {
       })
     })
 
-    this.eventManager.listen(backButton, 'click', () => {
+    const goBack = () => {
       this.setMenuDisplay_(menu, false)
       this.setMenuDisplay_(this.menu, true)
       button.focus({ preventScroll: true })
       this.resetMenuScroll_(this.menu.parentElement)
+    }
+    this.eventManager.listen(backButton, 'click', goBack)
+
+    // Like Shaka's submenus, a click on empty space goes back. A press that
+    // starts on the scrollbar ends in a click on the options when dragged.
+    let pressTarget = null
+    this.eventManager.listen(menu, 'pointerdown', (event) => {
+      pressTarget = event.target
+    })
+    this.eventManager.listen(menu, 'click', (event) => {
+      const targets = [event.target, pressTarget]
+      pressTarget = null
+      if (!targets.some(target => target?.closest('button, .os-scrollbar'))) {
+        goBack()
+      }
     })
 
     return optionsMenu
