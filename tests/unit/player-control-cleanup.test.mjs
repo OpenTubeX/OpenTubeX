@@ -29,7 +29,7 @@ for (const players of [1, 2]) {
     }
     const liveCustomControlPlayers = new Set([reRegisterOwnElements])
     if (players === 2) liveCustomControlPlayers.add(restoreSurvivor)
-    const defaultCaptionSelectionFactory = { create() {} }
+    const defaultShakaElementFactories = new Map([['captions', { create() {} }], ['quality', { create() {} }]])
     const context = vm.createContext({
       removeAbRepeatContext: null,
       removeLoopButtonContext: null,
@@ -38,8 +38,8 @@ for (const players of [1, 2]) {
       registeredCustomControls: true,
       liveCustomControlPlayers,
       reRegisterOwnElements,
-      defaultCaptionSelectionFactory,
-      ownElementRegistrations: ['captions', 'ft_lights_off', 'ft_chapters'].map(name => [registry, name, factory]),
+      defaultShakaElementFactories,
+      ownElementRegistrations: ['captions', 'quality', 'ft_lights_off', 'ft_chapters'].map(name => [registry, name, factory]),
       ownBigElementRegistrations: ['ft_skip_previous', 'ft_skip_next'].map(name => [name, factory]),
       shakaControls: registry,
       shakaOverflowMenu: registry,
@@ -51,7 +51,11 @@ for (const players of [1, 2]) {
     assert.equal(bigEntries.get('ft_skip_previous'), players === 1 ? null : survivingFactory)
     assert.equal(bigEntries.get('ft_skip_next'), players === 1 ? null : survivingFactory)
     assert.equal(liveCustomControlPlayers.size, players - 1)
-    if (players === 1) assert.equal(entries.get('captions'), defaultCaptionSelectionFactory)
+    if (players === 1) {
+      // Shaka's default layout includes these, so they get Shaka's own controls back
+      assert.equal(entries.get('captions'), defaultShakaElementFactories.get('captions'))
+      assert.equal(entries.get('quality'), defaultShakaElementFactories.get('quality'))
+    }
     vm.runInContext('cleanUpCustomPlayerControls()', context)
     assert.equal(liveCustomControlPlayers.size, players - 1, 'repeated teardown must preserve survivors')
   })

@@ -260,13 +260,15 @@ const PLAY_MORPH_PATH = 'M8 6 11.5 8.1 11.5 15.9 8 18ZM11.5 8.1 18 12 18 12 11.5
 const liveCustomControlPlayers = new Set()
 let configuringCustomPlayerControls = false
 
-class DefaultCaptionSelectionFactory {
-  create(rootElement, controls) {
-    return new shaka.ui.TextSelection(rootElement, controls)
-  }
-}
-
-const defaultCaptionSelectionFactory = new DefaultCaptionSelectionFactory()
+/**
+ * Shaka's own controls that the player replaces, restored once no player needs
+ * the replacements, as Shaka's default layout includes them.
+ * @type {Map<string, shaka.extern.IUIElement.Factory>}
+ */
+const defaultShakaElementFactories = new Map([
+  ['captions', { create: (rootElement, controls) => new shaka.ui.TextSelection(rootElement, controls) }],
+  ['quality', { create: (rootElement, controls) => new shaka.ui.ResolutionSelection(rootElement, controls) }],
+])
 
 const RequestType = shaka.net.NetworkingEngine.RequestType
 const AdvancedRequestType = shaka.net.NetworkingEngine.AdvancedRequestType
@@ -10871,7 +10873,7 @@ export default defineComponent({
 
       // Clear exactly what this instance registered, including optional controls.
       for (const [registry, name] of ownElementRegistrations) {
-        registry.registerElement(name, name === 'captions' ? defaultCaptionSelectionFactory : null)
+        registry.registerElement(name, defaultShakaElementFactories.get(name) ?? null)
       }
       for (const [name] of ownBigElementRegistrations) {
         shakaControls.registerBigElement(name, null)
