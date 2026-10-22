@@ -4,6 +4,7 @@ import {
   goTo,
   goToSettingsSection,
   readDatastore,
+  setWindowSize,
 } from '../../helpers/app.mjs'
 
 const CHANNEL_ID = `UC${'0'.repeat(22)}`
@@ -37,6 +38,12 @@ test('the bell is off per channel until turned on, which selects every type', as
   await goTo(page, 'subscribedchannels')
   const bell = page.locator('.channel', { hasText: 'Alpha Channel' }).getByRole('button', { name: 'Notify about new uploads', exact: true })
   await expect(bell).toHaveAttribute('aria-pressed', 'false')
+  // Like the settings page, the popover lists notified types only while notifications are on.
+  await page.locator('.channel', { hasText: 'Alpha Channel' }).getByRole('button', { name: 'Subscription settings', exact: true }).click()
+  const popover = page.locator('.profileDropdown')
+  const popoverNotifications = popover.getByRole('group', { name: 'Notify about new uploads', exact: true })
+  await expect(popover).toBeVisible()
+  await expect(popoverNotifications).toHaveCount(0)
   await bell.click()
   await expect(bell).toHaveAttribute('aria-pressed', 'true')
   await expect.poll(() => readNotificationTypes(app.userDataDir)).toStrictEqual({
@@ -44,20 +51,25 @@ test('the bell is off per channel until turned on, which selects every type', as
     'Beta Channel': undefined
   })
 
-  // The popover keeps feed settings only.
-  await page.locator('.channel', { hasText: 'Alpha Channel' }).getByRole('button', { name: 'Subscription settings', exact: true }).click()
-  await expect(page.locator('.profileDropdown')).toBeVisible()
-  await expect(page.locator('.profileDropdown').getByText('Notify about new uploads')).toHaveCount(0)
+  await expect(popover).toBeVisible()
+  await popoverNotifications.getByRole('checkbox', { name: 'Shorts' }).click()
+  await expect.poll(() => readNotificationTypes(app.userDataDir)).toStrictEqual({
+    'Alpha Channel': ['videos', 'live', 'posts'],
+    'Beta Channel': undefined
+  })
+  const popoverLive = popoverNotifications.getByRole('checkbox', { name: 'Live' })
+  await popover.getByRole('group', { name: 'Show in subscription feed', exact: true }).getByRole('checkbox', { name: 'Live' }).click()
+  await expect(popoverLive).toBeDisabled()
+  await expect(popoverLive).toHaveAttribute('aria-checked', 'false')
+  await popover.getByRole('group', { name: 'Show in subscription feed', exact: true }).getByRole('checkbox', { name: 'Live' }).click()
+  await expect(popoverLive).toBeEnabled()
+  await expect(popoverLive).toHaveAttribute('aria-checked', 'true')
   await page.keyboard.press('Escape')
 
   const settings = await goToSettingsSection(page, 'subscription')
   await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
   const alpha = page.getByRole('group', { name: 'Alpha Channel' })
-  await alpha.getByRole('group', { name: 'Notify about new uploads' }).getByRole('checkbox', { name: 'Shorts' }).click()
-  await expect.poll(() => readNotificationTypes(app.userDataDir)).toStrictEqual({
-    'Alpha Channel': ['videos', 'live', 'posts'],
-    'Beta Channel': undefined
-  })
+  await expect(alpha.getByRole('group', { name: 'Notify about new uploads' }).getByRole('checkbox', { name: 'Shorts' })).toHaveAttribute('aria-checked', 'false')
   // Feed types hidden from the subscription feed are not fetched, so they cannot notify.
   const liveNotification = alpha.getByRole('group', { name: 'Notify about new uploads' }).getByRole('checkbox', { name: 'Live' })
   await alpha.getByRole('group', { name: 'Show in subscription feed', exact: true }).getByRole('checkbox', { name: 'Live' }).click()
@@ -100,6 +112,28 @@ test.describe('with a channel notification turned on', () => {
     }
   })
 
+  test('the bell turns off once no shown type notifies', async ({ app, page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await goTo(page, 'subscribedchannels')
+    const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
+    const bell = alpha.getByRole('button', { name: 'Notify about new uploads', exact: true })
+    await alpha.getByRole('button', { name: 'Subscription settings', exact: true }).click()
+    const popover = page.locator('.profileDropdown')
+    const notifications = popover.getByRole('group', { name: 'Notify about new uploads', exact: true })
+    const feedLive = popover.getByRole('group', { name: 'Show in subscription feed', exact: true }).getByRole('checkbox', { name: 'Live' })
+
+    await feedLive.click()
+    await notifications.getByRole('checkbox', { name: 'Videos' }).click()
+    await expect(bell).toHaveAttribute('aria-pressed', 'false')
+    await expect(notifications).toHaveCount(0)
+    await expect(popover).toBeVisible()
+    // The hidden type keeps its choice for when it is shown again.
+    await expect.poll(() => readNotificationTypes(app.userDataDir)['Alpha Channel']).toStrictEqual(['live'])
+    await feedLive.click()
+    await expect(bell).toHaveAttribute('aria-pressed', 'true')
+    await expect(notifications.getByRole('checkbox', { name: 'Live' })).toHaveAttribute('aria-checked', 'true')
+  })
+
   test('refresh results notify only about new uploads of turned-on channels and types', async ({ app, page }) => {
     await app.electronApp.evaluate(({ Notification }) => {
       globalThis.shownUploadNotifications = []
@@ -137,5 +171,48 @@ test.describe('with a channel notification turned on', () => {
       { title: 'New video from Alpha Channel', body: `Upload probe${attempt}` },
       { title: 'New video from Alpha Channel', body: 'Upload b' }
     ])
+  })
+})
+
+test.describe('in a short window', () => {
+  test.use({
+    seed: {
+      settings: { currentLocale: 'en-US', fetchSubscriptionsAutomatically: false },
+      profiles: [
+        ...profile([{ id: CHANNEL_ID, name: 'Alpha Channel', thumbnail: '', notificationFeedTypes: ['videos', 'shorts', 'live', 'posts'] }]),
+        ...['Profile 1', 'Profile 2', 'Profile 3'].map((name, index) => ({
+          _id: `profile-${index}`, name, bgColor: '#000000', textColor: '#FFFFFF', subscriptions: []
+        }))
+      ]
+    }
+  })
+
+  test('the popover keeps every preference reachable and its scroll range valid', { tag: '@scale' }, async ({ app, page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await setWindowSize(app, page, { width: 1000, height: 380 })
+    await goTo(page, 'subscribedchannels')
+    await page.locator('.channel', { hasText: 'Alpha Channel' }).getByRole('button', { name: 'Subscription settings', exact: true }).click()
+    const popover = page.locator('.profileDropdown')
+    await expect(popover).toHaveClass(/profileDropdownPositioned/)
+    const preferences = popover.locator('.feedTypePreferences')
+    await expect(preferences).toHaveAttribute('data-overlayscrollbars-viewport')
+    // The profile list keeps at least one row.
+    expect((await popover.locator('.profileDropdownScroller').boundingBox()).height).toBeGreaterThanOrEqual(45.5)
+
+    await preferences.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => preferences.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    const limit = popover.getByRole('combobox', { name: 'Videos per day' })
+    const [limitBox, preferencesBox] = await Promise.all([limit.boundingBox(), preferences.boundingBox()])
+    expect(limitBox.y + limitBox.height).toBeLessThanOrEqual(preferencesBox.y + preferencesBox.height + 0.5)
+
+    // The bell hides the notification group while the preferences stay scrolled to the bottom.
+    await page.locator('.channel', { hasText: 'Alpha Channel' }).getByRole('button', { name: 'Notify about new uploads', exact: true }).click()
+    await expect(popover.getByRole('group', { name: 'Notify about new uploads', exact: true })).toHaveCount(0)
+    const scrollbar = preferences.locator(':scope > .os-scrollbar-vertical')
+    await expect.poll(() => preferences.evaluate(element => (
+      element.scrollTop <= Math.max(0, element.scrollHeight - element.clientHeight) + 1
+    ))).toBe(true)
+    const overflows = await preferences.evaluate(element => element.scrollHeight > element.clientHeight + 1)
+    await expect(scrollbar).toHaveClass(overflows ? /^(?!.*os-scrollbar-unusable)/ : /os-scrollbar-unusable/)
   })
 })

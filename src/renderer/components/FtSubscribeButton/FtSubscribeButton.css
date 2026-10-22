@@ -189,7 +189,7 @@
   flex-direction: column;
   font-size: 14px;
   inline-size: min(240px, calc(100vw - 16px));
-  max-block-size: min(420px, 70vh);
+  max-block-size: min(540px, 70vh);
   overflow: hidden;
   padding: 5px;
   position: fixed;
@@ -217,6 +217,8 @@
 }
 
 .feedTypePreferences {
+  min-block-size: 0;
+  overflow-y: auto;
   padding-block-end: 5px;
 }
 
@@ -264,6 +266,17 @@
 .feedTypePreference:focus-visible {
   outline: 2px solid var(--primary-color);
   outline-offset: -2px;
+}
+
+.feedTypePreference:disabled {
+  background-color: transparent;
+  color: inherit;
+  cursor: default;
+  opacity: 0.5;
+}
+
+.feedTypePreferenceGroup + .feedTypePreferenceGroup {
+  margin-block-start: 3px;
 }
 
 .secondaryPreferences {
@@ -316,8 +329,10 @@
   padding: 0;
 }
 
+/* The profile list gives up its space first and keeps at least one row. */
 .profileDropdownScroller {
-  min-block-size: 0;
+  flex-shrink: 1000;
+  min-block-size: 46px;
   overflow-y: auto;
 }
 

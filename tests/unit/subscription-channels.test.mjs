@@ -10,6 +10,7 @@ import {
   getSubscriptionsForFeed,
   getUpdatedSubscriptionFeedTypes,
   getValidSubscriptionChannels,
+  hasSubscriptionNotifications,
   isMembersOnlySubscriptionVideoVisible,
   isSubscriptionFeedTypeEnabled,
   normalizeSubscriptionChannelSettings,
@@ -68,6 +69,12 @@ test('shares normalized channel-setting values between settings interfaces', () 
     getSubscriptionDailyVideoLimitOptions(translate).map(option => option.value),
     ['global', 'unlimited', ...Array.from({ length: 30 }, (_, index) => String(index + 1))]
   )
+})
+
+test('only counts notifications for types shown in the subscription feed', () => {
+  assert.equal(hasSubscriptionNotifications({ feedTypes: ['videos'], notificationFeedTypes: [] }), false)
+  assert.equal(hasSubscriptionNotifications({ feedTypes: ['videos'], notificationFeedTypes: ['posts'] }), false)
+  assert.equal(hasSubscriptionNotifications({ feedTypes: ['videos', 'posts'], notificationFeedTypes: ['posts'] }), true)
 })
 
 test('keeps every feed enabled for existing subscriptions', () => {

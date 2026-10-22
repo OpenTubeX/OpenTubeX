@@ -74,71 +74,80 @@
           @focusout="handleProfileDropdownFocusOut"
           @keydown.esc.stop.prevent="closeProfileDropdown"
         >
-          <div class="feedTypePreferences">
-            <div
-              role="group"
-              class="feedTypePreferenceGroup"
-              :aria-labelledby="`${id}-feed-types`"
-            >
-              <p
-                :id="`${id}-feed-types`"
-                class="feedTypePreferencesLabel"
-              >
-                {{ $t('Channel.Show in subscription feed') }}
-              </p>
-              <div class="feedTypePreferenceGrid">
-                <button
-                  v-for="feedType in feedTypes"
-                  :key="feedType.id"
-                  type="button"
-                  class="feedTypePreference"
-                  role="checkbox"
-                  :aria-checked="enabledFeedTypes.has(feedType.id)"
-                  @click="updateFeedType(feedType.id, !enabledFeedTypes.has(feedType.id))"
-                >
-                  <span
-                    class="feedTypePreferenceIcon"
-                    aria-hidden="true"
-                  >
-                    <FtIcon :icon="feedType.icon" />
-                  </span>
-                  <span>{{ feedType.label }}</span>
-                  <span
-                    class="feedTypePreferenceCheck"
-                    aria-hidden="true"
-                  >
-                    <FtIcon
-                      v-if="enabledFeedTypes.has(feedType.id)"
-                      :icon="['fas', 'check']"
-                    />
-                  </span>
-                </button>
-              </div>
-            </div>
-            <div class="secondaryPreferences">
+          <div
+            ref="preferencesScroller"
+            v-overlay-scrollbars
+            class="feedTypePreferences"
+          >
+            <div ref="preferencesContent">
               <div
-                v-if="restrictedPlaybackConfigured"
-                class="membersOnlyPreference"
+                v-for="group in feedTypeGroups"
+                :key="group.key"
+                role="group"
+                class="feedTypePreferenceGroup"
+                :aria-labelledby="`${id}-${group.key}`"
               >
-                <FtToggleSwitch
-                  :label="$t('Search Listing.Label.Members Only')"
-                  :default-value="activeChannelSettings.showMembersOnly"
-                  compact
-                  controlled
-                  @change="updateShowMembersOnly"
-                />
+                <p
+                  :id="`${id}-${group.key}`"
+                  class="feedTypePreferencesLabel"
+                >
+                  {{ group.label }}
+                </p>
+                <div class="feedTypePreferenceGrid">
+                  <button
+                    v-for="feedType in feedTypes"
+                    :key="feedType.id"
+                    type="button"
+                    class="feedTypePreference"
+                    role="checkbox"
+                    :aria-checked="isFeedTypeChecked(feedType.id, group.key)"
+                    :disabled="group.key === 'notificationFeedTypes' && !isFeedTypeChecked(feedType.id)"
+                    @click="updateFeedType(feedType.id, !isFeedTypeChecked(feedType.id, group.key), group.key)"
+                  >
+                    <span
+                      class="feedTypePreferenceIcon"
+                      aria-hidden="true"
+                    >
+                      <FtIcon :icon="feedType.icon" />
+                    </span>
+                    <span>{{ feedType.label }}</span>
+                    <span
+                      class="feedTypePreferenceCheck"
+                      aria-hidden="true"
+                    >
+                      <FtIcon
+                        v-if="isFeedTypeChecked(feedType.id, group.key)"
+                        :icon="['fas', 'check']"
+                      />
+                    </span>
+                  </button>
+                </div>
               </div>
-              <div class="dailyVideoLimitPreference">
-                <FtSelect
-                  class="dailyVideoLimitSelect"
-                  :value="dailyVideoLimitValue"
-                  :placeholder="$t('Channel.Videos per day')"
-                  :select-names="dailyVideoLimitNames"
-                  :select-values="dailyVideoLimitValues"
-                  :icon="['fas', 'clock']"
-                  :dropdown-z-index="1002"
-                  @change="updateDailyVideoLimit"
-                />
+              <div class="secondaryPreferences">
+                <div
+                  v-if="restrictedPlaybackConfigured"
+                  class="membersOnlyPreference"
+                >
+                  <FtToggleSwitch
+                    :label="$t('Search Listing.Label.Members Only')"
+                    :default-value="activeChannelSettings.showMembersOnly"
+                    compact
+                    controlled
+                    @change="updateShowMembersOnly"
+                  />
+                </div>
+                <div class="dailyVideoLimitPreference">
+                  <FtSelect
+                    class="dailyVideoLimitSelect"
+                    :value="dailyVideoLimitValue"
+                    :placeholder="$t('Channel.Videos per day')"
+                    :select-names="dailyVideoLimitNames"
+                    :select-values="dailyVideoLimitValues"
+                    :icon="['fas', 'clock']"
+                    :dropdown-z-index="1002"
+                    @change="updateDailyVideoLimit"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -262,6 +271,7 @@ import {
   getSubscriptionDailyVideoLimitOptions,
   getSubscriptionFeedTypeOptions,
   getUpdatedSubscriptionFeedTypes,
+  hasSubscriptionNotifications,
   normalizeSubscriptionChannelSettings,
   parseSubscriptionDailyVideoLimit
 } from '../../helpers/subscription-channels'
@@ -401,6 +411,8 @@ const profileDropdownTarget = shallowRef(document.body)
 const buttonList = useTemplateRef('buttonList')
 const profileDropdown = useTemplateRef('profileDropdown')
 useAnchoredViewportBounds(buttonList, profileDropdown, isProfileDropdownOpen)
+const preferencesScroller = useTemplateRef('preferencesScroller')
+const preferencesContent = useTemplateRef('preferencesContent')
 const profileDropdownScroller = useTemplateRef('profileDropdownScroller')
 const profileListContent = useTemplateRef('profileListContent')
 const profileDropdownStyle = ref({ left: '8px', top: '8px' })
@@ -410,7 +422,7 @@ const profileDropdownOpensAbove = ref(false)
 /** @type {import('vue').ShallowRef<Profile | null>} */
 const showUnsubscribePopupForProfile = shallowRef(null)
 
-let profileListResizeObserver = null
+let scrollAreaResizeObserver = null
 let profileListObservationGeneration = 0
 let profileDropdownPositionMutationObserver = null
 let profileDropdownPositionResizeObserver = null
@@ -418,7 +430,7 @@ let profileDropdownPositionFrame = null
 
 watch(isProfileDropdownOpen, async (open) => {
   const generation = ++profileListObservationGeneration
-  stopObservingProfileList()
+  stopObservingScrollAreas()
   removeProfileDropdownPositionTracking()
   if (!open) return
 
@@ -457,14 +469,19 @@ watch(isProfileDropdownOpen, async (open) => {
   window.addEventListener('resize', scheduleProfileDropdownPositionUpdate)
   document.addEventListener('fullscreenchange', closeProfileDropdownOnFullscreenChange)
 
-  const scroller = profileDropdownScroller.value
-  const content = profileListContent.value
-  if (!scroller || !content) return
-
-  const clampScroll = () => clampOverlayScrollTop(scroller, content)
-  profileListResizeObserver = new ResizeObserver(clampScroll)
-  profileListResizeObserver.observe(scroller)
-  profileListResizeObserver.observe(content)
+  // Both sections shrink in short windows; hiding or removing rows shortens them.
+  const scrollAreas = [
+    [preferencesScroller.value, preferencesContent.value],
+    [profileDropdownScroller.value, profileListContent.value]
+  ].filter(([scroller, content]) => scroller && content)
+  const clampScroll = () => {
+    for (const [scroller, content] of scrollAreas) clampOverlayScrollTop(scroller, content)
+  }
+  scrollAreaResizeObserver = new ResizeObserver(clampScroll)
+  for (const [scroller, content] of scrollAreas) {
+    scrollAreaResizeObserver.observe(scroller)
+    scrollAreaResizeObserver.observe(content)
+  }
   clampScroll()
 })
 
@@ -487,8 +504,13 @@ const optimisticChannelSettings = ref(null)
 const activeChannelSettings = computed(() => (
   optimisticChannelSettings.value ?? storedChannelSettings.value
 ))
-const enabledFeedTypes = computed(() => new Set(activeChannelSettings.value.feedTypes))
-const notificationsEnabled = computed(() => activeChannelSettings.value.notificationFeedTypes.length > 0)
+const feedTypeGroups = computed(() => [
+  { key: 'feedTypes', label: t('Channel.Show in subscription feed') },
+  ...(isNotificationBellEnabled.value && notificationsEnabled.value
+    ? [{ key: 'notificationFeedTypes', label: t('Channel.Notify about new uploads') }]
+    : [])
+])
+const notificationsEnabled = computed(() => hasSubscriptionNotifications(activeChannelSettings.value))
 const dailyVideoLimitValue = computed(() => (
   formatSubscriptionDailyVideoLimit(activeChannelSettings.value.dailyVideoLimit)
 ))
@@ -520,13 +542,13 @@ watch(isSubscribed, (subscribed) => {
 onBeforeUnmount(() => {
   clearTimeout(justToggledTimeoutId)
   profileListObservationGeneration += 1
-  stopObservingProfileList()
+  stopObservingScrollAreas()
   removeProfileDropdownPositionTracking()
 })
 
-function stopObservingProfileList() {
-  profileListResizeObserver?.disconnect()
-  profileListResizeObserver = null
+function stopObservingScrollAreas() {
+  scrollAreaResizeObserver?.disconnect()
+  scrollAreaResizeObserver = null
 }
 
 function positionProfileDropdown() {
@@ -735,17 +757,34 @@ function closeProfileDropdown() {
 }
 
 /**
+ * Only fetched feed types can notify.
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} feedType
+ * @param {'feedTypes' | 'notificationFeedTypes'} [key]
+ */
+function isFeedTypeChecked(feedType, key = 'feedTypes') {
+  const { feedTypes, notificationFeedTypes } = activeChannelSettings.value
+  return feedTypes.includes(feedType) &&
+    (key === 'feedTypes' || notificationFeedTypes.includes(feedType))
+}
+
+/**
  * @param {'videos' | 'shorts' | 'live' | 'posts'} feedType
  * @param {boolean} enabled
+ * @param {'feedTypes' | 'notificationFeedTypes'} [key]
  */
-function updateFeedType(feedType, enabled) {
-  persistChannelSettings({
-    feedTypes: getUpdatedSubscriptionFeedTypes(
-      activeChannelSettings.value.feedTypes,
+function updateFeedType(feedType, enabled, key = 'feedTypes') {
+  const patch = {
+    [key]: getUpdatedSubscriptionFeedTypes(
+      activeChannelSettings.value[key],
       feedType,
       enabled
     )
-  })
+  }
+  // The notification group hides with its focused checkbox, which would close the dropdown.
+  if (key === 'notificationFeedTypes' && !hasSubscriptionNotifications({ ...activeChannelSettings.value, ...patch })) {
+    profileDropdown.value?.focus({ preventScroll: true })
+  }
+  persistChannelSettings(patch)
 }
 
 /**
