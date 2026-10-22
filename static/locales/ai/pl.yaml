@@ -97,9 +97,6 @@ User Playlists:
   Playlist Thumbnail: "Miniatura playlisty"
   Restore Default Thumbnail: "Przywróć domyślną miniaturę"
 Settings:
-  Experimental Settings:
-    Preferred Video Codec: Preferowany kodek wideo
-    Codec Description: Tryb automatyczny preferuje dekodowanie sprzętowe. Zmiany dotyczą następnego filmu. Wybór kodeka może ograniczyć rozdzielczości; niedostępne kodeki są zastępowane. VP9 jest pomijany w VR z powodu błędu odtwarzania w przeglądarce.
   Tab Unloading:
     Automatically unload tabs: "Automatycznie zwalniaj karty z pamięci"
     Memory threshold: "Próg pamięci"
@@ -145,6 +142,7 @@ Settings:
     Advanced Description: Dostawcy, aplikacje zewnętrzne i sieć
     Alternative providers: Dostawcy filmów i metadanych
   General Settings:
+    Preferred Video Codec: Preferowany kodek wideo
     Automatically switch stream extraction methods: "Automatycznie przełączaj metody wyodrębniania strumieni"
     Enable Tabs: "Włącz karty"
     Thumbnail Swipe Gestures:
@@ -1130,6 +1128,7 @@ Description:
   Games: Gry
 Tooltips:
   General Settings:
+    Preferred Video Codec: Tryb automatyczny preferuje dekodowanie sprzętowe. Zmiany dotyczą następnego filmu. Wybór kodeka może ograniczyć rozdzielczości; niedostępne kodeki są zastępowane.
     Automatically switch stream extraction methods: "Wypróbuj yt-dlp, jeśli wbudowane odtwarzanie się nie powiedzie, lub wbudowane odtwarzanie, jeśli yt-dlp się nie powiedzie."
     Enable Tabs: "Bieżąca strona pozostaje otwarta. Pozostałe karty są zachowywane do ponownego uruchomienia aplikacji; włącz karty ponownie, aby je przywrócić."
     Data Saver Thumbnails: "Używaj miniatur o niższej rozdzielczości, aby zmniejszyć zużycie danych."

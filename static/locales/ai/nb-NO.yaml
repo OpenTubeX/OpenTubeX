@@ -258,9 +258,6 @@ History:
   Custom: Egendefinert
   History Older Than Days Removed: Seerlogg eldre enn 1 dag er fjernet | Seerlogg eldre enn {days} dager er fjernet
 Settings:
-  Experimental Settings:
-    Preferred Video Codec: Foretrukket videokodek
-    Codec Description: Automatisk foretrekker maskinvaredekoding. Endringer gjelder fra neste video. Et kodekvalg kan begrense oppløsninger; utilgjengelige kodeker erstattes. VP9 unngås for VR på grunn av en avspillingsfeil i nettleseren.
   Tab Unloading:
     Automatically unload tabs: "Last ut faner automatisk"
     Memory threshold: "Minneterskel"
@@ -326,6 +323,7 @@ Settings:
       Network: nettverk
       Disk: disk
   General Settings:
+    Preferred Video Codec: Foretrukket videokodek
     Automatically switch stream extraction methods: "Bytt automatisk mellom metoder for strømuttrekk"
     Enable Tabs: "Aktiver faner"
     Thumbnail Swipe Gestures:
@@ -1887,6 +1885,7 @@ Description:
   Games: Spill
 Tooltips:
   General Settings:
+    Preferred Video Codec: Automatisk foretrekker maskinvaredekoding. Endringer gjelder fra neste video. Et kodekvalg kan begrense oppløsninger; utilgjengelige kodeker erstattes.
     Automatically switch stream extraction methods: "Prøv yt-dlp hvis innebygd avspilling mislykkes, eller innebygd avspilling hvis yt-dlp mislykkes."
     Enable Tabs: "Holder den gjeldende siden åpen. Andre faner beholdes til appen startes på nytt; aktiver faner igjen for å gjenopprette dem."
     Data Saver Thumbnails: "Bruk miniatyrbilder med lavere oppløsning for å redusere databruken."

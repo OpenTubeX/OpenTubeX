@@ -328,6 +328,7 @@ Settings:
       Network: شبكة
       Disk: القرص
   General Settings:
+    Preferred Video Codec: ترميز الفيديو المفضل
     Automatically switch stream extraction methods: "تبديل طرق استخراج الدفق تلقائيًا"
     Enable Tabs: "تفعيل علامات التبويب"
     Thumbnail Swipe Gestures:
@@ -1280,8 +1281,6 @@ Settings:
   Search Settings: إعدادات البحث
   No Settings Found: لم يتم العثور على إعدادات
   Experimental Settings:
-    Preferred Video Codec: ترميز الفيديو المفضل
-    Codec Description: يفضل الوضع التلقائي فك الترميز بالأجهزة. تسري التغييرات على الفيديو التالي. قد يحد تفضيل ترميز من الدقات؛ تُستخدم بدائل للترميزات غير المتاحة. يُتجنب VP9 في الواقع الافتراضي بسبب خطأ تشغيل في المتصفح.
     Disable Hardware Acceleration: تعطيل تسريع الأجهزة
   Interface Customizer:
     Customize Interface: "تخصيص الواجهة"
@@ -1924,6 +1923,7 @@ Description:
   Games: ألعاب
 Tooltips:
   General Settings:
+    Preferred Video Codec: يفضل الوضع التلقائي فك الترميز بالأجهزة. تسري التغييرات على الفيديو التالي. قد يحد تفضيل ترميز من الدقات؛ تُستخدم بدائل للترميزات غير المتاحة.
     Automatically switch stream extraction methods: "جرّب yt-dlp إذا فشل التشغيل المدمج، أو التشغيل المدمج إذا فشل yt-dlp."
     Enable Tabs: "تبقى الصفحة الحالية مفتوحة. تُحفظ علامات التبويب الأخرى حتى إعادة تشغيل التطبيق؛ فعّل علامات التبويب مجددًا لاستعادتها."
     Data Saver Thumbnails: "استخدم صورًا مصغرة بدقة أقل لتقليل استهلاك البيانات."

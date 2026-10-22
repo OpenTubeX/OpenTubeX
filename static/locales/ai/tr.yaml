@@ -258,9 +258,6 @@ History:
   Custom: Özel
   History Older Than Days Removed: 1 günden eski izleme geçmişi kaldırıldı | {days} günden eski izleme geçmişi kaldırıldı
 Settings:
-  Experimental Settings:
-    Preferred Video Codec: Tercih edilen video codec'i
-    Codec Description: Otomatik mod donanım çözmeyi tercih eder. Değişiklikler sonraki videoya uygulanır. Codec tercihi çözünürlükleri sınırlayabilir; kullanılamayan codec'ler değiştirilir. Tarayıcı oynatma hatası nedeniyle VR için VP9 kullanılmaz.
   Tab Unloading:
     Automatically unload tabs: "Sekmeleri otomatik olarak bellekten kaldır"
     Memory threshold: "Bellek eşiği"
@@ -326,6 +323,7 @@ Settings:
       Network: ağ
       Disk: disk
   General Settings:
+    Preferred Video Codec: Tercih edilen video codec'i
     Automatically switch stream extraction methods: "Akış çıkarma yöntemlerini otomatik değiştir"
     Enable Tabs: "Sekmeleri Etkinleştir"
     Thumbnail Swipe Gestures:
@@ -1883,6 +1881,7 @@ Description:
   Games: Oyunlar
 Tooltips:
   General Settings:
+    Preferred Video Codec: Otomatik mod donanım çözmeyi tercih eder. Değişiklikler sonraki videoya uygulanır. Codec tercihi çözünürlükleri sınırlayabilir; kullanılamayan codec'ler değiştirilir.
     Automatically switch stream extraction methods: "Yerleşik oynatma başarısız olursa yt-dlp’yi, yt-dlp başarısız olursa yerleşik oynatmayı dene."
     Enable Tabs: "Geçerli sayfa açık kalır. Diğer sekmeler uygulama yeniden başlatılana kadar saklanır; onları geri yüklemek için sekmeleri yeniden etkinleştirin."
     Data Saver Thumbnails: "Veri kullanımını azaltmak için daha düşük çözünürlüklü küçük resimler kullanın."

@@ -259,9 +259,6 @@ History:
   Custom: Personalizado
   History Older Than Days Removed: Foi removido o histórico de reprodução com mais de 1 dia | Foi removido o histórico de reprodução com mais de {days} dias | Foi removido o histórico de reprodução com mais de {days} dias
 Settings:
-  Experimental Settings:
-    Preferred Video Codec: Codec de vídeo preferido
-    Codec Description: O modo automático prefere a decodificação por hardware. As alterações valem para o próximo vídeo. A preferência de codec pode limitar as resoluções; codecs indisponíveis são substituídos. O VP9 é evitado em VR devido a um erro de reprodução do navegador.
   Tab Unloading:
     Automatically unload tabs: "Descarregar abas automaticamente"
     Memory threshold: "Limite de memória"
@@ -327,6 +324,7 @@ Settings:
       Network: rede
       Disk: disco
   General Settings:
+    Preferred Video Codec: Codec de vídeo preferido
     Automatically switch stream extraction methods: "Alternar automaticamente os métodos de extração de streams"
     Enable Tabs: "Ativar abas"
     Thumbnail Swipe Gestures:
@@ -1884,6 +1882,7 @@ Description:
   Games: Jogos
 Tooltips:
   General Settings:
+    Preferred Video Codec: O modo automático prefere a decodificação por hardware. As alterações valem para o próximo vídeo. A preferência de codec pode limitar as resoluções; codecs indisponíveis são substituídos.
     Automatically switch stream extraction methods: "Tentar yt-dlp se a reprodução integrada falhar, ou a reprodução integrada se yt-dlp falhar."
     Enable Tabs: "Mantém a página atual aberta. As outras abas são mantidas até reiniciar o aplicativo; ative as abas novamente para restaurá-las."
     Data Saver Thumbnails: "Use miniaturas de menor resolução para reduzir o consumo de dados."

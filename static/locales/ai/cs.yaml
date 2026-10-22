@@ -259,9 +259,6 @@ History:
   Custom: Vlastní
   History Older Than Days Removed: Historie sledování starší než 1 den byla odstraněna | Historie sledování starší než {days} dny byla odstraněna | Historie sledování starší než {days} dní byla odstraněna
 Settings:
-  Experimental Settings:
-    Preferred Video Codec: Preferovaný videokodek
-    Codec Description: Automatický režim upřednostňuje hardwarové dekódování. Změny platí pro další video. Preference kodeku může omezit rozlišení; nedostupné kodeky se nahradí. VP9 se pro VR nepoužívá kvůli chybě přehrávání v prohlížeči.
   Tab Unloading:
     Automatically unload tabs: "Automaticky uvolňovat karty z paměti"
     Memory threshold: "Práh paměti"
@@ -327,6 +324,7 @@ Settings:
       Network: sítě
       Disk: disku
   General Settings:
+    Preferred Video Codec: Preferovaný videokodek
     Automatically switch stream extraction methods: "Automaticky přepínat metody extrakce streamů"
     Enable Tabs: "Povolit karty"
     Thumbnail Swipe Gestures:
@@ -1883,6 +1881,7 @@ Description:
   Games: Hry
 Tooltips:
   General Settings:
+    Preferred Video Codec: Automatický režim upřednostňuje hardwarové dekódování. Změny platí pro další video. Preference kodeku může omezit rozlišení; nedostupné kodeky se nahradí.
     Automatically switch stream extraction methods: "Vyzkoušet yt-dlp, pokud selže vestavěné přehrávání, nebo vestavěné přehrávání, pokud selže yt-dlp."
     Enable Tabs: "Aktuální stránka zůstane otevřená. Ostatní karty se uchovají do restartu aplikace; znovu karty povolte, chcete-li je obnovit."
     Data Saver Thumbnails: "Používat náhledy s nižším rozlišením pro snížení spotřeby dat."

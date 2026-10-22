@@ -4,7 +4,9 @@ import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 test('codec preference defaults to auto and persists independently of quality', { tag: '@scale' }, async ({ page, attachScreenshot }) => {
   await goToSettingsSection(page, 'advanced')
-  const select = page.locator('.select').filter({ hasText: 'Preferred video codec' }).locator('select')
+  const section = page.locator('.settingsSection').filter({ hasText: 'Video and metadata providers' })
+  const field = section.locator('.select').filter({ hasText: 'Preferred video codec' })
+  const select = field.locator('select')
   await expect(select).toHaveValue('auto')
   await expect(select.locator('option')).toHaveText(['Auto', 'AV1', 'VP9', 'H.264'])
   const quality = await page.evaluate(() => window.$store.getters.getDefaultQuality)
@@ -14,11 +16,14 @@ test('codec preference defaults to auto and persists independently of quality', 
   await goToSettingsSection(page, 'advanced')
   await expect(select).toHaveValue('vp9')
   expect(await page.evaluate(() => window.$store.getters.getDefaultQuality)).toBe(quality)
-  await expect(page.getByText('Auto prefers hardware decoding.', { exact: false })).toBeVisible()
+  await expect(page.locator('.settingsSection').filter({ hasText: 'Experimental' }).getByText('Preferred video codec')).toHaveCount(0)
   await select.scrollIntoViewIfNeeded()
   await expect(select).toBeInViewport()
+  await field.locator('.selectTooltip .button').focus()
+  await expect(page.locator('body > [role="tooltip"]').filter({ visible: true }))
+    .toHaveText('Auto prefers hardware decoding. Changes apply to the next video. A codec preference may limit resolutions; unavailable codecs fall back.')
   await page.locator('.settingsWindow').evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
-  await attachScreenshot('experimental-codec-preference')
+  await attachScreenshot('advanced-codec-preference')
 })
 
 for (const preference of ['auto', 'vp9']) {

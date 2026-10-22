@@ -328,6 +328,7 @@ Settings:
       Network: verkko
       Disk: levytila
   General Settings:
+    Preferred Video Codec: Ensisijainen videokoodekki
     Automatically switch stream extraction methods: "Vaihda suoratoiston poimintamenetelmiä automaattisesti"
     Enable Tabs: "Ota välilehdet käyttöön"
     Thumbnail Swipe Gestures:
@@ -1285,8 +1286,6 @@ Settings:
   Search Settings: Hae asetuksista
   No Settings Found: Asetuksia ei löytynyt
   Experimental Settings:
-    Preferred Video Codec: Ensisijainen videokoodekki
-    Codec Description: Automaattinen valinta suosii laitteistopurkua. Muutokset koskevat seuraavaa videota. Koodekkivalinta voi rajoittaa tarkkuuksia; puuttuvat koodekit korvataan. VP9:ää vältetään VR-videoissa selaimen toistovirheen vuoksi.
     Disable Hardware Acceleration: Poista laitteistokiihdytys käytöstä
   Interface Customizer:
     Customize Interface: "Mukauta käyttöliittymää"
@@ -1929,6 +1928,7 @@ Description:
   Games: Pelit
 Tooltips:
   General Settings:
+    Preferred Video Codec: Automaattinen valinta suosii laitteistopurkua. Muutokset koskevat seuraavaa videota. Koodekkivalinta voi rajoittaa tarkkuuksia; puuttuvat koodekit korvataan.
     Automatically switch stream extraction methods: "Kokeile yt-dlp:tä, jos sisäänrakennettu toisto epäonnistuu, tai sisäänrakennettua toistoa, jos yt-dlp epäonnistuu."
     Enable Tabs: "Pitää nykyisen sivun auki. Muut välilehdet säilyvät sovelluksen uudelleenkäynnistykseen asti; ota välilehdet uudelleen käyttöön palauttaaksesi ne."
     Data Saver Thumbnails: "Käytä pienemmän tarkkuuden pikkukuvia datankäytön vähentämiseksi."

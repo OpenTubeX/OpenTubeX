@@ -301,6 +301,7 @@ Settings:
       Network: сеть
       Disk: диск
   General Settings:
+    Preferred Video Codec: Предпочтительный видеокодек
     Automatically switch stream extraction methods: "Автоматически переключать методы извлечения потока"
     Enable Tabs: "Включить вкладки"
     Thumbnail Swipe Gestures:
@@ -1255,8 +1256,6 @@ Settings:
   Search Settings: Поиск настроек
   No Settings Found: Настройки не найдены
   Experimental Settings:
-    Preferred Video Codec: Предпочтительный видеокодек
-    Codec Description: Автоматический режим предпочитает аппаратное декодирование. Изменения действуют со следующего видео. Выбор кодека может ограничить разрешения; недоступные кодеки заменяются. VP9 не используется для VR из-за ошибки воспроизведения в браузере.
     Disable Hardware Acceleration: Отключить аппаратное ускорение
   Interface Customizer:
     Customize Interface: "Настроить интерфейс"
@@ -1899,6 +1898,7 @@ Description:
   Games: Игры
 Tooltips:
   General Settings:
+    Preferred Video Codec: Автоматический режим предпочитает аппаратное декодирование. Изменения действуют со следующего видео. Выбор кодека может ограничить разрешения; недоступные кодеки заменяются.
     Automatically switch stream extraction methods: "Попробовать yt-dlp, если встроенное воспроизведение не работает, или встроенное воспроизведение, если yt-dlp не работает."
     Enable Tabs: "Текущая страница остаётся открытой. Другие вкладки сохраняются до перезапуска приложения; включите вкладки снова, чтобы восстановить их."
     Data Saver Thumbnails: "Использовать миниатюры меньшего разрешения для снижения расхода трафика."

@@ -259,9 +259,6 @@ History:
   Custom: カスタム
   History Older Than Days Removed: '{days}日より古い視聴履歴を削除しました'
 Settings:
-  Experimental Settings:
-    Preferred Video Codec: 優先する動画コーデック
-    Codec Description: 自動ではハードウェアデコードを優先します。変更は次の動画に適用されます。コーデックの指定により解像度が制限される場合があり、利用できない場合は別のコーデックを使用します。VRではブラウザーの再生エラーを避けるためVP9を使用しません。
   Tab Unloading:
     Automatically unload tabs: "タブを自動的にアンロード"
     Memory threshold: "メモリのしきい値"
@@ -327,6 +324,7 @@ Settings:
       Network: ネットワーク
       Disk: ディスク
   General Settings:
+    Preferred Video Codec: 優先する動画コーデック
     Automatically switch stream extraction methods: "ストリーム抽出方式を自動的に切り替える"
     Enable Tabs: "タブを有効にする"
     Thumbnail Swipe Gestures:
@@ -1883,6 +1881,7 @@ Description:
   Games: ゲーム
 Tooltips:
   General Settings:
+    Preferred Video Codec: 自動ではハードウェアデコードを優先します。変更は次の動画に適用されます。コーデックの指定により解像度が制限される場合があり、利用できない場合は別のコーデックを使用します。
     Automatically switch stream extraction methods: "内蔵エンジンで再生できない場合はyt-dlpを、yt-dlpで再生できない場合は内蔵エンジンを試します。"
     Enable Tabs: "現在のページは開いたままになります。他のタブはアプリを再起動するまで保持されます。タブを再度有効にすると復元できます。"
     Data Saver Thumbnails: "低解像度のサムネイルを使用してデータ使用量を減らします。"

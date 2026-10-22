@@ -445,6 +445,7 @@ Settings:
       Disk: disk
   Return to Settings Menu: Nazaj v meni z nastavitvami
   General Settings:
+    Preferred Video Codec: Prednostni video kodek
     Automatically switch stream extraction methods: "Samodejno preklapljaj metode pridobivanja tokov"
     Enable Tabs: "Omogoči zavihke"
     Thumbnail Swipe Gestures:
@@ -1561,8 +1562,6 @@ Settings:
     Hide Search Bar: Skrij iskalno vrstico
     Disable Channel Links: Onemogoči povezave do kanalov
   Experimental Settings:
-    Preferred Video Codec: Prednostni video kodek
-    Codec Description: Samodejni način daje prednost strojnemu dekodiranju. Spremembe veljajo za naslednji video. Izbira kodeka lahko omeji ločljivosti; nedostopni kodeki se nadomestijo. VP9 se za VR ne uporablja zaradi napake predvajanja v brskalniku.
     Experimental Settings: Poskusno
     Warning: Te nastavitve so poskusne in lahko povzročijo sesutje aplikacije. Močno priporočamo izdelavo varnostnih kopij. Uporabljate jih na lastno odgovornost!
     Replace HTTP Cache: Zamenjaj predpomnilnik HTTP
@@ -2377,6 +2376,7 @@ Description:
   Games: Igre
 Tooltips:
   General Settings:
+    Preferred Video Codec: Samodejni način daje prednost strojnemu dekodiranju. Spremembe veljajo za naslednji video. Izbira kodeka lahko omeji ločljivosti; nedostopni kodeki se nadomestijo.
     Automatically switch stream extraction methods: "Poskusi yt-dlp, če vgrajeno predvajanje ne uspe, ali vgrajeno predvajanje, če yt-dlp ne uspe."
     Enable Tabs: "Trenutna stran ostane odprta. Drugi zavihki se ohranijo do ponovnega zagona aplikacije; znova omogočite zavihke, da jih obnovite."
     Data Saver Thumbnails: "Uporabite sličice z nižjo ločljivostjo za zmanjšanje porabe podatkov."

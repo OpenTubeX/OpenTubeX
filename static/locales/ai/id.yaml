@@ -259,9 +259,6 @@ History:
   Custom: Khusus
   History Older Than Days Removed: Riwayat tontonan yang lebih lama dari {days} hari telah dihapus
 Settings:
-  Experimental Settings:
-    Preferred Video Codec: Codec video pilihan
-    Codec Description: Mode otomatis mengutamakan dekode perangkat keras. Perubahan berlaku untuk video berikutnya. Pilihan codec dapat membatasi resolusi; codec yang tidak tersedia diganti. VP9 dihindari untuk VR karena kesalahan pemutaran browser.
   Tab Unloading:
     Automatically unload tabs: "Bongkar tab secara otomatis"
     Memory threshold: "Ambang memori"
@@ -327,6 +324,7 @@ Settings:
       Network: jaringan
       Disk: disk
   General Settings:
+    Preferred Video Codec: Codec video pilihan
     Automatically switch stream extraction methods: "Ganti metode ekstraksi stream secara otomatis"
     Enable Tabs: "Aktifkan Tab"
     Thumbnail Swipe Gestures:
@@ -1899,6 +1897,7 @@ Description:
   Games: Gim
 Tooltips:
   General Settings:
+    Preferred Video Codec: Mode otomatis mengutamakan dekode perangkat keras. Perubahan berlaku untuk video berikutnya. Pilihan codec dapat membatasi resolusi; codec yang tidak tersedia diganti.
     Automatically switch stream extraction methods: "Coba yt-dlp jika pemutaran bawaan gagal, atau pemutaran bawaan jika yt-dlp gagal."
     Enable Tabs: "Halaman saat ini tetap terbuka. Tab lain disimpan hingga aplikasi dimulai ulang; aktifkan tab lagi untuk memulihkannya."
     Data Saver Thumbnails: "Gunakan thumbnail beresolusi lebih rendah untuk mengurangi penggunaan data."

@@ -259,9 +259,6 @@ History:
   Custom: Pertsonalizatua
   History Older Than Days Removed: Egun 1 baino zaharragoa den ikustaldi-historia kendu da | {days} egun baino zaharragoa den ikustaldi-historia kendu da
 Settings:
-  Experimental Settings:
-    Preferred Video Codec: Hobetsitako bideo-kodeka
-    Codec Description: Modu automatikoak hardware bidezko deskodetzea hobesten du. Aldaketak hurrengo bideoan aplikatzen dira. Kodek-hobespenak bereizmenak muga ditzake; erabilgarri ez dauden kodekak ordezten dira. VP9 saihesten da VR-n, nabigatzailearen erreprodukzio-errore batengatik.
   Tab Unloading:
     Automatically unload tabs: "Deskargatu fitxak automatikoki"
     Memory threshold: "Memoriaren atalasea"
@@ -327,6 +324,7 @@ Settings:
       Network: sarea
       Disk: diskoa
   General Settings:
+    Preferred Video Codec: Hobetsitako bideo-kodeka
     Automatically switch stream extraction methods: "Aldatu automatikoki korronteak erauzteko metodoak"
     Enable Tabs: "Gaitu fitxak"
     Thumbnail Swipe Gestures:
@@ -1893,6 +1891,7 @@ Description:
   Games: Jokoak
 Tooltips:
   General Settings:
+    Preferred Video Codec: Modu automatikoak hardware bidezko deskodetzea hobesten du. Aldaketak hurrengo bideoan aplikatzen dira. Kodek-hobespenak bereizmenak muga ditzake; erabilgarri ez dauden kodekak ordezten dira.
     Automatically switch stream extraction methods: "Probatu yt-dlp erreprodukzio integratuak huts egiten badu, edo erreprodukzio integratua yt-dlp-k huts egiten badu."
     Enable Tabs: "Uneko orria irekita mantentzen du. Beste fitxak aplikazioa berrabiarazi arte gordetzen dira; gaitu fitxak berriro berreskuratzeko."
     Data Saver Thumbnails: "Erabili bereizmen txikiagoko miniaturak datuen erabilera murrizteko."

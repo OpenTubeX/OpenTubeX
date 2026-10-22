@@ -77,6 +77,10 @@
   inset-inline-end: 10px;
 }
 
+.codecSelect {
+  inline-size: min(100%, 360px);
+}
+
 .switchGrid {
   row-gap: 0;
 }

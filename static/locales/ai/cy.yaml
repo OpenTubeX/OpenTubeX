@@ -324,6 +324,7 @@ Settings:
       Network: rhwydwaith
       Disk: disg
   General Settings:
+    Preferred Video Codec: Codec fideo dewisol
     Automatically switch stream extraction methods: "Newid dulliau echdynnu ffrydiau yn awtomatig"
     Enable Tabs: "Galluogi tabiau"
     Thumbnail Swipe Gestures:
@@ -1258,8 +1259,6 @@ Settings:
   Search Settings: Gosodiadau chwilio
   No Settings Found: Ni chanfuwyd unrhyw osodiadau
   Experimental Settings:
-    Preferred Video Codec: Codec fideo dewisol
-    Codec Description: Mae'r modd awtomatig yn ffafrio datgodio caledwedd. Mae newidiadau'n berthnasol i'r fideo nesaf. Gall dewis codec gyfyngu ar gydraniadau; defnyddir dewisiadau eraill os nad yw codec ar gael. Osgoir VP9 ar gyfer VR oherwydd gwall chwarae yn y porwr.
     Disable Hardware Acceleration: Analluogi cyflymiad caledwedd
   Interface Customizer:
     Customize Interface: "Addasu'r rhyngwyneb"
@@ -1909,6 +1908,7 @@ Description:
   Games: Gemau
 Tooltips:
   General Settings:
+    Preferred Video Codec: Mae'r modd awtomatig yn ffafrio datgodio caledwedd. Mae newidiadau'n berthnasol i'r fideo nesaf. Gall dewis codec gyfyngu ar gydraniadau; defnyddir dewisiadau eraill os nad yw codec ar gael.
     Automatically switch stream extraction methods: "Rhoi cynnig ar yt-dlp os bydd y chwarae mewnol yn methu, neu ar y chwarae mewnol os bydd yt-dlp yn methu."
     Enable Tabs: "Mae’r dudalen bresennol yn aros ar agor. Cedwir tabiau eraill nes i’r ap ailgychwyn; galluogwch dabiau eto i’w hadfer."
     Data Saver Thumbnails: "Defnyddiwch fân-luniau cydraniad is i leihau defnydd data."

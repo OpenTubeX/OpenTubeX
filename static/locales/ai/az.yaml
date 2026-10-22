@@ -261,9 +261,6 @@ History:
   Custom: Fərdi
   History Older Than Days Removed: 1 gündən köhnə baxış tarixçəsi silindi | {days} gündən köhnə baxış tarixçəsi silindi
 Settings:
-  Experimental Settings:
-    Preferred Video Codec: Üstünlük verilən video kodeki
-    Codec Description: Avtomatik rejim aparat dekodlaşdırmasına üstünlük verir. Dəyişikliklər növbəti videoya tətbiq olunur. Kodek seçimi təsvir ölçülərini məhdudlaşdıra bilər; mövcud olmayan kodeklər əvəzlənir. Brauzerdəki oxutma xətasına görə VR üçün VP9 istifadə edilmir.
   Tab Unloading:
     Automatically unload tabs: "Vərəqləri avtomatik yaddaşdan çıxar"
     Memory threshold: "Yaddaş həddi"
@@ -329,6 +326,7 @@ Settings:
       Network: şəbəkə
       Disk: disk
   General Settings:
+    Preferred Video Codec: Üstünlük verilən video kodeki
     Automatically switch stream extraction methods: "Axın çıxarma üsullarını avtomatik dəyiş"
     Enable Tabs: "Vərəqləri aktivləşdir"
     Thumbnail Swipe Gestures:
@@ -1896,6 +1894,7 @@ Description:
   Games: Oyunlar
 Tooltips:
   General Settings:
+    Preferred Video Codec: Avtomatik rejim aparat dekodlaşdırmasına üstünlük verir. Dəyişikliklər növbəti videoya tətbiq olunur. Kodek seçimi təsvir ölçülərini məhdudlaşdıra bilər; mövcud olmayan kodeklər əvəzlənir.
     Automatically switch stream extraction methods: "Daxili oxutma uğursuz olarsa yt-dlp-ni, yt-dlp uğursuz olarsa daxili oxutmanı sınayın."
     Enable Tabs: "Cari səhifə açıq qalır. Digər vərəqlər tətbiq yenidən başladılana qədər saxlanılır; onları bərpa etmək üçün vərəqləri yenidən aktivləşdirin."
     Data Saver Thumbnails: "Verilən istifadəsini azaltmaq üçün daha aşağı keyfiyyətli miniatürlərdən istifadə edin."

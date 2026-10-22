@@ -624,6 +624,7 @@ Settings:
   The app needs to restart for changes to take effect. Restart and apply change?: The
     app needs to restart for changes to take effect. Restart and apply change?
   General Settings:
+    Preferred Video Codec: Preferred video codec
     Enable Tabs: "Enable Tabs"
     Thumbnail Swipe Gestures:
       Left: Swipe left on thumbnails
@@ -1966,8 +1967,6 @@ Settings:
     Hide Search Bar: Hide Search Bar
     Disable Channel Links: Disable Channel Links
   Experimental Settings:
-    Preferred Video Codec: Preferred video codec
-    Codec Description: Auto prefers hardware decoding. Changes apply to the next video. A codec preference may limit resolutions; unavailable codecs fall back. VP9 is avoided for VR because of a browser playback error.
     Experimental Settings: Experimental
     Warning: These settings are experimental, they may cause crashes while enabled. Making backups is highly recommended. Use at your own risk!
     Replace HTTP Cache: Replace HTTP Cache
@@ -2954,6 +2953,7 @@ Description:
 #Tooltips
 Tooltips:
   General Settings:
+    Preferred Video Codec: Auto prefers hardware decoding. Changes apply to the next video. A codec preference may limit resolutions; unavailable codecs fall back.
     Yattee Server: "The yattee-server instance that OpenTubeX loads videos, channels, playlists and search results from. The username and password are only stored on this device."
     Proxy Videos Through Yattee Server: "Relays video and audio streams through the server. Leave this on unless the server shares your internet connection, because YouTube only serves streams to the address that requested them. Thumbnails always load directly from YouTube."
     Enable Tabs: "Keeps the current page open. Other tabs are kept until the app restarts; enable tabs again to restore them."

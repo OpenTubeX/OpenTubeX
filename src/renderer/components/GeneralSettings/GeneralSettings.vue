@@ -414,6 +414,19 @@
         @change="updateRegion"
       />
     </div>
+    <FtFlexBox v-if="mode === 'providers' && USING_ELECTRON">
+      <FtSelect
+        class="codecSelect"
+        :placeholder="t('Settings.General Settings.Preferred Video Codec')"
+        :value="store.getters.getPreferredVideoCodec"
+        setting-key="preferredVideoCodec"
+        :select-names="[t('Settings.Player Settings.Default Quality.Auto'), 'AV1', 'VP9', 'H.264']"
+        :select-values="['auto', 'av1', 'vp9', 'h264']"
+        :tooltip="t('Tooltips.General Settings.Preferred Video Codec')"
+        :icon="['fas', 'file-video']"
+        @change="store.dispatch('updatePreferredVideoCodec', $event)"
+      />
+    </FtFlexBox>
     <FtSliderGrid v-if="mode === 'appearance'">
       <FtSlider
         :label="t('Settings.Theme Settings.Thumbnail Size')"
