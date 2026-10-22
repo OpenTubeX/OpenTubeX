@@ -117,13 +117,13 @@ test('a hidden renderer does not poll or import another workers results', async 
   assert.equal(app.timers.size, 0)
 })
 
-test('cancelling native work from a reopened renderer postpones its overdue refresh', async () => {
+async function setupCancellation() {
   const events = []
   const window = new EventTarget()
   const calls = []
   const context = vm.createContext({
     process: { env: { IS_CAPACITOR: true } }, window, CustomEvent,
-    cancelSubscriptionRefresh() {}, cancelAndroidSubscriptionRefresh: () => calls.push('cancel'),
+    cancelAndroidSubscriptionRefresh: () => calls.push('cancel'),
     activeRefresh: null, cancelCount: 1,
     store: { getters: { getSubscriptionFeedRefreshInProgress: true, getSubscriptionFeedRefreshTab: 'videos', getActiveProfile: { _id: 'all' } } },
     localStorage: { setItem() {} },
@@ -136,15 +136,34 @@ test('cancelling native work from a reopened renderer postpones its overdue refr
     scheduleSubscriptionTabAutoRefresh: (...args) => events.push(args),
   })
   const subscriptions = await readFile(new URL('../../src/renderer/helpers/subscriptions.js', import.meta.url), 'utf8')
+  const localCancellationStart = subscriptions.indexOf('export function cancelSubscriptionRefresh()')
+  vm.runInContext(subscriptions.slice(localCancellationStart, subscriptions.indexOf('\n/**', localCancellationStart)).replace('export ', ''), context)
   const cancellationStart = subscriptions.indexOf('export function requestSubscriptionRefreshCancellation()')
   vm.runInContext(subscriptions.slice(cancellationStart, subscriptions.indexOf('\n/**', cancellationStart)).replace('export ', ''), context)
   const handlerStart = source.indexOf('function handleSubscriptionRefreshCancelled(event)')
   vm.runInContext(source.slice(handlerStart, source.indexOf('\n/**', handlerStart)), context)
   window.addEventListener('cancelled', event => context.handleSubscriptionRefreshCancelled(event))
+  return { context, calls, events }
+}
+
+test('cancelling native work from a reopened renderer postpones its overdue refresh', async () => {
+  const { context, calls, events } = await setupCancellation()
   const before = Date.now()
   context.requestSubscriptionRefreshCancellation()
   assert.deepEqual(calls, ['cancel'])
   assert.equal(events.length, 2)
+  assert.deepEqual(events[0].slice(0, 2), ['all', 'videos'])
+  assert.ok(events[0][2] >= before + 60000)
+  assert.deepEqual(events[1], ['videos', 'all', events[0][2]])
+})
+
+test('notification cancellation postpones native work without sending another native cancel request', async () => {
+  const { context, calls, events } = await setupCancellation()
+  const before = Date.now()
+  // This is the callback registered with addAndroidSubscriptionRefreshCancelledListener.
+  context.cancelSubscriptionRefresh()
+  assert.deepEqual(calls, [], 'the native cancellation must not recursively request cancellation')
+  assert.equal(events.length, 2, 'the native notification must advance the overdue deadline and timer')
   assert.deepEqual(events[0].slice(0, 2), ['all', 'videos'])
   assert.ok(events[0][2] >= before + 60000)
   assert.deepEqual(events[1], ['videos', 'all', events[0][2]])

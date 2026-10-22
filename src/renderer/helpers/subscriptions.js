@@ -145,6 +145,13 @@ export async function refreshSubscriptionPremieres(isActive) {
 export function cancelSubscriptionRefresh() {
   cancelCount++
   markActiveSubscriptionRefreshCancelled()
+  // Native notifications also use this path, without requesting cancellation
+  // again. A reopened renderer still needs to postpone its automatic refresh.
+  if (process.env.IS_CAPACITOR && !activeRefresh && store.getters.getSubscriptionFeedRefreshInProgress) {
+    window.dispatchEvent(new CustomEvent(SUBSCRIPTION_REFRESH_CANCELLED_EVENT, {
+      detail: { tab: store.getters.getSubscriptionFeedRefreshTab, profileId: store.getters.getActiveProfile._id }
+    }))
+  }
 }
 
 function markActiveSubscriptionRefreshCancelled() {
@@ -169,11 +176,6 @@ export function requestSubscriptionRefreshCancellation() {
 
   if (process.env.IS_CAPACITOR) {
     cancelAndroidSubscriptionRefresh()
-    if (!activeRefresh && store.getters.getSubscriptionFeedRefreshInProgress) {
-      window.dispatchEvent(new CustomEvent(SUBSCRIPTION_REFRESH_CANCELLED_EVENT, {
-        detail: { tab: store.getters.getSubscriptionFeedRefreshTab, profileId: store.getters.getActiveProfile._id }
-      }))
-    }
   }
 
   if (process.env.IS_ELECTRON) {

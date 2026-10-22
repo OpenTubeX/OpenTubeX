@@ -4,8 +4,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import android.accessibilityservice.AccessibilityService;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.Intent;
 import android.webkit.WebView;
 
 import androidx.test.core.app.ActivityScenario;
@@ -29,6 +32,69 @@ import java.util.concurrent.atomic.AtomicReference;
 public class SubscriptionRefreshUiTest {
     private final Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
     private static final String STORE = "document.querySelector('#app').__vue_app__.config.globalProperties.$store";
+
+    @Test
+    public void notificationCancellationPostponesScheduledRefreshWithoutLocalOwner() throws Exception {
+        String token = "scheduled-notification-cancel-ui-test";
+        assertTrue(SubscriptionRefreshCoordinator.begin(token));
+        SubscriptionRefreshCoordinator.update(token, "videos", 42);
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            AtomicReference<WebView> reference = new AtomicReference<>();
+            scenario.onActivity(activity -> reference.set(activity.getBridge().getWebView()));
+            WebView view = reference.get();
+            try {
+                await(view, "!!document.querySelector('.app') && " + STORE + ".getters.getSubscriptionCacheReady && " +
+                    STORE + ".getters.getSubscriptionFeedRefreshProgress === 42");
+                evaluate(view, """
+                    const store = %s;
+                    window.__cancelInterval = store.getters.getSubscriptionFeedAutoRefreshInterval;
+                    window.__cancelHidden = store.getters.getHideSubscriptionsVideos;
+                    window.__cancelDeadlineKey = 'opentubex.subscriptionAutoRefresh.deadline.' +
+                        encodeURIComponent(store.getters.getActiveProfile._id) + '/videos';
+                    window.__cancelDeadline = localStorage.getItem(window.__cancelDeadlineKey);
+                    store.commit('setHideSubscriptionsVideos', false);
+                    store.commit('setSubscriptionFeedAutoRefreshInterval', '60000');
+                    """.replace("%s", STORE));
+                // Let setting watchers finish before making the stored deadline overdue.
+                await(view, STORE + ".getters.getSubscriptionFeedNextAutoRefreshTimestamp > Date.now()");
+                evaluate(view, "window.__cancelStarted = Date.now(); localStorage.setItem(window.__cancelDeadlineKey, String(Date.now() - 1000))");
+                // ActivityScenario.moveToState waits for UI idle, which an animated
+                // progress toast need not reach on older WebViews. Use the OS flow.
+                assertTrue(InstrumentationRegistry.getInstrumentation().getUiAutomation()
+                    .performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME));
+                awaitVisibility(false);
+                Notification notification = SubscriptionRefreshNotification.build(
+                    context, token, "Refreshing subscriptions", "Cancel", 42);
+                context.getSystemService(NotificationManager.class).notify(SubscriptionRefreshNotification.NOTIFICATION_ID, notification);
+                notification.actions[0].actionIntent.send();
+                context.startActivity(new Intent(context, MainActivity.class)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP));
+                awaitVisibility(true);
+                await(view, "Number(localStorage.getItem(window.__cancelDeadlineKey)) >= window.__cancelStarted + 60000");
+                assertTrue("notification cancels the scheduled native owner", SubscriptionRefreshCoordinator.isCancelled(token));
+                SubscriptionRefreshCoordinator.finish(token);
+                evaluate(view, "document.dispatchEvent(new Event('visibilitychange'))");
+                await(view, "!" + STORE + ".getters.getSubscriptionFeedRefreshInProgress && " +
+                    STORE + ".getters.getSubscriptionFeedNextAutoRefreshTimestamp > Date.now()");
+                assertFalse("foreground reconciliation must not restart cancelled work", SubscriptionRefreshCoordinator.isActive());
+            } finally {
+                SubscriptionRefreshCoordinator.finish(token);
+                evaluate(view, """
+                    window.__cancelCleaned = false;
+                    %s.commit('setSubscriptionFeedAutoRefreshInterval', window.__cancelInterval);
+                    %s.commit('setHideSubscriptionsVideos', window.__cancelHidden);
+                    setTimeout(() => {
+                        if (window.__cancelDeadline === null) localStorage.removeItem(window.__cancelDeadlineKey);
+                        else localStorage.setItem(window.__cancelDeadlineKey, window.__cancelDeadline);
+                        window.__cancelCleaned = true;
+                    }, 0);
+                    """.replace("%s", STORE));
+                await(view, "window.__cancelCleaned");
+            }
+        } finally {
+            SubscriptionRefreshCoordinator.finish(token);
+        }
+    }
 
     @Test
     public void externalRendererProgressLimitsCacheReloadsAndFlushesOnCompletion() throws Exception {
@@ -151,6 +217,14 @@ public class SubscriptionRefreshUiTest {
         } finally {
             SubscriptionRefreshCoordinator.finish(token);
         }
+    }
+
+    private static void awaitVisibility(boolean visible) throws Exception {
+        long deadline = android.os.SystemClock.elapsedRealtime() + 5000;
+        while (AppVisibility.isVisible() != visible && android.os.SystemClock.elapsedRealtime() < deadline) {
+            Thread.sleep(50);
+        }
+        assertEquals("app visibility follows the OS action", visible, AppVisibility.isVisible());
     }
 
     private static void await(WebView view, String expression) throws Exception {
