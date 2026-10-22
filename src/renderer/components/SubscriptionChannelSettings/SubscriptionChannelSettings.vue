@@ -293,13 +293,13 @@
             >
               <FtToggleSwitch
                 :label="t('Channel.Notify about new uploads')"
-                :default-value="channelSettings(channel).notificationFeedTypes.length > 0"
+                :default-value="hasSubscriptionNotifications(channelSettings(channel))"
                 compact
                 controlled
                 @change="value => updateNotifications(channel, value)"
               />
               <div
-                v-if="channelSettings(channel).notificationFeedTypes.length > 0"
+                v-if="hasSubscriptionNotifications(channelSettings(channel))"
                 class="feedTypeOptions"
                 role="group"
                 :aria-label="t('Channel.Notify about new uploads')"
@@ -404,6 +404,7 @@ import {
   getSubscriptionDailyVideoLimitOptions,
   getSubscriptionFeedTypeOptions,
   getUpdatedSubscriptionFeedTypes,
+  hasSubscriptionNotifications,
   normalizeSubscriptionChannelSettings,
   parseSubscriptionDailyVideoLimit,
   SUBSCRIPTION_FEED_TYPES
@@ -629,7 +630,7 @@ const selectedFeedTypeStates = computed(() => Object.fromEntries(
   feedTypes.value.map(({ id }) => [id, selectedFeedTypeState(id)])
 ))
 const selectedNotificationState = computed(() => selectedState(channel => (
-  channelSettings(channel).notificationFeedTypes.length > 0
+  hasSubscriptionNotifications(channelSettings(channel))
 )))
 const selectedNotificationFeedTypeStates = computed(() => Object.fromEntries(
   feedTypes.value.map(({ id }) => [id, selectedFeedTypeState(id, 'notificationFeedTypes')])
@@ -654,7 +655,7 @@ function updateSelectedFeedType(feedType, key = 'feedTypes') {
 function updateSelectedNotifications() {
   const enabled = selectedNotificationState.value !== true
   persistChannelSettingsUpdates(selectedChannels.value
-    .filter(channel => (channelSettings(channel).notificationFeedTypes.length > 0) !== enabled)
+    .filter(channel => (hasSubscriptionNotifications(channelSettings(channel))) !== enabled)
     .map(channel => ({ channel, patch: { notificationFeedTypes: enabled ? [...SUBSCRIPTION_FEED_TYPES] : [] } })))
 }
 

@@ -271,6 +271,7 @@ import {
   getSubscriptionDailyVideoLimitOptions,
   getSubscriptionFeedTypeOptions,
   getUpdatedSubscriptionFeedTypes,
+  hasSubscriptionNotifications,
   normalizeSubscriptionChannelSettings,
   parseSubscriptionDailyVideoLimit
 } from '../../helpers/subscription-channels'
@@ -507,7 +508,7 @@ const feedTypeGroups = computed(() => [
     ? [{ key: 'notificationFeedTypes', label: t('Channel.Notify about new uploads') }]
     : [])
 ])
-const notificationsEnabled = computed(() => activeChannelSettings.value.notificationFeedTypes.length > 0)
+const notificationsEnabled = computed(() => hasSubscriptionNotifications(activeChannelSettings.value))
 const dailyVideoLimitValue = computed(() => (
   formatSubscriptionDailyVideoLimit(activeChannelSettings.value.dailyVideoLimit)
 ))
@@ -770,13 +771,18 @@ function isFeedTypeChecked(feedType, key = 'feedTypes') {
  * @param {'feedTypes' | 'notificationFeedTypes'} [key]
  */
 function updateFeedType(feedType, enabled, key = 'feedTypes') {
-  persistChannelSettings({
+  const patch = {
     [key]: getUpdatedSubscriptionFeedTypes(
       activeChannelSettings.value[key],
       feedType,
       enabled
     )
-  })
+  }
+  // The notification group hides with its focused checkbox, which would close the dropdown.
+  if (key === 'notificationFeedTypes' && !hasSubscriptionNotifications({ ...activeChannelSettings.value, ...patch })) {
+    profileDropdown.value?.focus({ preventScroll: true })
+  }
+  persistChannelSettings(patch)
 }
 
 /**

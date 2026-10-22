@@ -51,6 +51,14 @@ export function normalizeSubscriptionChannelSettings(channel) {
 }
 
 /**
+ * Hidden feed types are not fetched, so only shown types can notify.
+ * @param {{ feedTypes: string[], notificationFeedTypes: string[] }} settings
+ */
+export function hasSubscriptionNotifications(settings) {
+  return settings.notificationFeedTypes.some(feedType => settings.feedTypes.includes(feedType))
+}
+
+/**
  * Copies saved preferences without replacing refreshed channel metadata.
  * Missing fields in the saved channel reset their corresponding overrides.
  * @param {object} channel

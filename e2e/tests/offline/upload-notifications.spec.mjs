@@ -112,6 +112,28 @@ test.describe('with a channel notification turned on', () => {
     }
   })
 
+  test('the bell turns off once no shown type notifies', async ({ app, page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await goTo(page, 'subscribedchannels')
+    const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
+    const bell = alpha.getByRole('button', { name: 'Notify about new uploads', exact: true })
+    await alpha.getByRole('button', { name: 'Subscription settings', exact: true }).click()
+    const popover = page.locator('.profileDropdown')
+    const notifications = popover.getByRole('group', { name: 'Notify about new uploads', exact: true })
+    const feedLive = popover.getByRole('group', { name: 'Show in subscription feed', exact: true }).getByRole('checkbox', { name: 'Live' })
+
+    await feedLive.click()
+    await notifications.getByRole('checkbox', { name: 'Videos' }).click()
+    await expect(bell).toHaveAttribute('aria-pressed', 'false')
+    await expect(notifications).toHaveCount(0)
+    await expect(popover).toBeVisible()
+    // The hidden type keeps its choice for when it is shown again.
+    await expect.poll(() => readNotificationTypes(app.userDataDir)['Alpha Channel']).toStrictEqual(['live'])
+    await feedLive.click()
+    await expect(bell).toHaveAttribute('aria-pressed', 'true')
+    await expect(notifications.getByRole('checkbox', { name: 'Live' })).toHaveAttribute('aria-checked', 'true')
+  })
+
   test('refresh results notify only about new uploads of turned-on channels and types', async ({ app, page }) => {
     await app.electronApp.evaluate(({ Notification }) => {
       globalThis.shownUploadNotifications = []
