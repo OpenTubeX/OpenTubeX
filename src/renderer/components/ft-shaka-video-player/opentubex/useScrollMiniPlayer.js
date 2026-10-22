@@ -523,10 +523,13 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
       const y = (to.top - from.y) * progress
       const scaleX = 1 + (to.width / from.width - 1) * progress
       const scaleY = 1 + (to.height / from.height - 1) * progress
-      const roundness = Math.min(1, (restoring ? 1 - progress : progress) * 5)
+      const docked = restoring ? 1 - progress : progress
+      const radius = `(var(--inline-player-radius) * ${1 - docked} + var(--scroll-mini-player-radius) * ${docked})`
       const style = container.value.style
       style.transform = `translate(${x}px, ${y}px) scale(${scaleX}, ${scaleY})`
-      style.borderRadius = `calc(10px * var(--ui-roundness) * ${roundness})`
+      // The scale also scales the corners. Divide it out, so they keep their
+      // on-screen size and land exactly on the inline or mini player's radius.
+      style.borderRadius = `calc(${radius} / ${scaleX}) / calc(${radius} / ${scaleY})`
     }
   }
 

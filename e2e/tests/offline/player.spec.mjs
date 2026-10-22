@@ -3274,6 +3274,60 @@ test.describe('playback when navigating away', () => {
     const displaced = rects.filter(rect => Math.abs(rect.left - final.left) > 1 || Math.abs(rect.top - final.top) > 1)
     expect(displaced, 'the browsing page must not show around the preview').toEqual([])
   })
+
+  test('keeps the returning video corners between the mini and inline radii', { tag: '@scale' }, async ({ app, page }) => {
+    await openDemoVideo({ app, page })
+    const player = page.locator('.ftVideoPlayer')
+    const inlineRadius = await player.evaluate(element => Number.parseFloat(getComputedStyle(element).borderTopLeftRadius))
+    await page.getByRole('link', { name: 'Go to Subscriptions', exact: true }).click()
+    await expect(page).toHaveURL(/#\/subscriptions$/)
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+    const miniRadius = await player.evaluate(element => Number.parseFloat(getComputedStyle(element).borderTopLeftRadius))
+    await page.evaluate(() => window.$store.dispatch('updateAnimationSpeed', 25))
+    await player.evaluate(element => {
+      document.documentElement.dataset.reducedMotion = 'no-preference'
+      const video = element.querySelector('video')
+      // The morph scales the player, which scales its radii too. Compare the
+      // corners as they appear on screen.
+      const screenRadius = (target, scaleX, scaleY) => {
+        const [x, y = x] = getComputedStyle(target).borderTopLeftRadius.split(' ').map(Number.parseFloat)
+        return { x: x * scaleX, y: y * scaleY }
+      }
+      window.miniRestoreCorners = []
+      const sample = () => {
+        if (!element.isConnected) return
+        if (element.hasAttribute('data-inline-mini-drag')) {
+          const bounds = element.getBoundingClientRect()
+          const scaleX = bounds.width / element.offsetWidth
+          const scaleY = bounds.height / element.offsetHeight
+          window.miniRestoreCorners.push({
+            player: screenRadius(element, scaleX, scaleY),
+            video: screenRadius(video, scaleX, scaleY)
+          })
+        }
+        window.miniRestoreCornerFrame = requestAnimationFrame(sample)
+      }
+      sample()
+    })
+    await player.locator('.scrollMiniScrollTop').click()
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+    await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+    await expect(player).not.toHaveAttribute('data-inline-mini-drag')
+    const corners = await page.evaluate(() => {
+      cancelAnimationFrame(window.miniRestoreCornerFrame)
+      return window.miniRestoreCorners
+    })
+    expect(corners.length).toBeGreaterThan(2)
+    const minimum = Math.min(miniRadius, inlineRadius) - 0.5
+    const maximum = Math.max(miniRadius, inlineRadius) + 0.5
+    const outOfRange = corners.filter(({ player }) => [player.x, player.y].some(radius => radius < minimum || radius > maximum))
+    expect(outOfRange, 'the player corners stay between the mini and inline radii').toEqual([])
+    // A rounder video would uncover the player's black background in the corners.
+    const exposed = corners.filter(({ player, video }) => video.x > player.x + 0.5 || video.y > player.y + 0.5)
+    expect(exposed, 'the video follows the player corners').toEqual([])
+    expect(await player.evaluate(element => Number.parseFloat(getComputedStyle(element).borderTopLeftRadius))).toBeCloseTo(inlineRadius, 1)
+  })
 })
 
 test.describe('navigation playback lifecycle', () => {
