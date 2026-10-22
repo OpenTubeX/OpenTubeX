@@ -270,6 +270,44 @@ test('shows age-restricted and unlisted badges below the video title', async ({ 
   expect(badgeBounds.y).toBeGreaterThanOrEqual(titleBounds.y + titleBounds.height)
 })
 
+for (const blur of [false, true]) {
+  test(`paints the toolbar's Save to dropdown above the cards below it${blur ? ' with blurred cards' : ''}`, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    if (blur) {
+      // Custom theme blurs give the cards and the toolbar backdrop filters,
+      // which make them stacking contexts
+      await page.evaluate(() => {
+        document.body.style.setProperty('--card-bg-blur', 'blur(8px)')
+        document.body.style.setProperty('--secondary-card-bg-blur', 'blur(8px)')
+      })
+    }
+
+    const videoInfo = page.locator('.infoArea .watchVideoInfo')
+    await videoInfo.locator('.videoOptions').evaluate(element => element.scrollIntoView({ block: 'start' }))
+    await videoInfo.locator('.videoOptions').getByRole('button', { name: 'Add to playlist', exact: true }).click()
+    const dropdown = videoInfo.locator('.iconDropdown:has(.addToPlaylistDropdown)')
+    await expect(dropdown.locator('.playlistRow').first()).toBeVisible()
+
+    const hits = await dropdown.evaluate((element) => {
+      const rect = element.getBoundingClientRect()
+      const card = element.closest('.watchVideoInfo').getBoundingClientRect()
+      const missed = []
+      for (let y = rect.top + 4; y < rect.bottom - 4; y += 16) {
+        for (const x of [rect.left + 8, rect.left + rect.width / 2, rect.right - 8]) {
+          if (!element.contains(document.elementFromPoint(x, y))) {
+            missed.push({ x, y, hit: document.elementFromPoint(x, y)?.className })
+          }
+        }
+      }
+      return { extendsPastCard: rect.bottom > card.bottom + 50, missed }
+    })
+    // Only meaningful when the dropdown reaches into the cards below the video info
+    expect(hits.extendsPastCard).toBe(true)
+    expect(hits.missed).toEqual([])
+  })
+}
+
 test('keeps watch metadata and comment filters inside a narrow viewport', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
