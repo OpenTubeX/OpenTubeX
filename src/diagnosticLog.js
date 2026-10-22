@@ -17,7 +17,7 @@ const SENSITIVE_KEY = /^(?:authorization|cookies?|set-cookie|password|passphrase
 // Names only start where a run of name characters starts. Starting inside a
 // long hyphenated run would retry the run from every position. Quotes may be
 // escaped by up to three levels of JSON nested in logged strings.
-const SENSITIVE_ASSIGNMENT = /(\\{0,3}["']?)(?<![\w-])(authorization|cookies?|set-cookie|password|passphrase|secret|sapisid|visitor[_-]?(?:data|id)|[\w-]*(?:token|secret|password|api[_-]?key))\1(\s*[:=]\s*)(?:\\{1,3}"[^"]*"|"[^"]*"|'[^']*'|[^\s,;&}\]]+)/gi
+const SENSITIVE_ASSIGNMENT = /(\\{0,3}["']?)(?<![\w-])(authorization|cookies?|set-cookie|password|passphrase|secret|signature|sig|sapisid|visitor[_-]?(?:data|id)|[\w-]*(?:token|secret|password|api[_-]?key))\1(\s*[:=]\s*)(?:\\{1,3}"[^"]*"|"[^"]*"|'[^']*'|[^\s,;&}\]]+)/gi
 // Brackets are valid URL characters (IPv6 hosts, `filters[]=` queries), so a
 // match only ends at whitespace or quotes and loses unbalanced closers later
 const URL_PATTERN = /\b(?:https?|wss?|file):\/\/[^\s"'<>]+/gi

@@ -33,10 +33,11 @@ test('credentials and identifying values are removed from text', () => {
     '{"poToken":"MnQ3abc","visitorData":"Cgt4"} token=xyz',
     'from 203.0.113.9 and 2001:db8:85a3::8a2e:370:7334 via 127.0.0.1',
     'mail someone@example.com',
+    'request failed: sig=secret-sig and signature: secret-signature',
     'yt-dlp at /home/alice/.local/bin/yt-dlp and C:\\Users\\Bob\\yt-dlp.exe',
   ].join('\n'))
 
-  for (const secret of ['SID=abc', 'secret-value', 'MnQ3abc', 'Cgt4', 'xyz', '203.0.113.9', '2001:db8', 'someone@', 'alice', 'Bob']) {
+  for (const secret of ['SID=abc', 'secret-sig', 'secret-signature', 'secret-value', 'MnQ3abc', 'Cgt4', 'xyz', '203.0.113.9', '2001:db8', 'someone@', 'alice', 'Bob']) {
     assert.ok(!text.includes(secret), `${secret} is still in:\n${text}`)
   }
   assert.ok(text.includes('127.0.0.1'))
