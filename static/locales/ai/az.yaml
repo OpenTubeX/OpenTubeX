@@ -261,6 +261,18 @@ History:
   Custom: Fərdi
   History Older Than Days Removed: 1 gündən köhnə baxış tarixçəsi silindi | {days} gündən köhnə baxış tarixçəsi silindi
 Settings:
+  Diagnostics:
+    Diagnostics: Diaqnostika
+    Description: Diaqnostika jurnalı aktiv olduqda OpenTubeX son jurnal mesajlarını yaddaşda saxlayır ki, onları xəta hesabatlarına əlavə edə biləsiniz. Onları heç vaxt özbaşına saxlamır və ya göndərmir, jurnalı söndürdükdə isə onlar silinir. Hesabatlara kukilər, tokenlər, IP ünvanları və URL parametrləri daxil edilmir, lakin oynatdığınız videoların ID-ləri ola bilər, ona görə də hesabatı paylaşmazdan əvvəl yoxlayın.
+    Enable Logging: Diaqnostika jurnalını aktivləşdir
+    Copy Report: Hesabatı kopyala
+    Save Report: Hesabatı saxla
+    Clear Log: Jurnalı təmizlə
+    Report Copied: Diaqnostika hesabatı kopyalandı
+    Report Saved: Diaqnostika hesabatı saxlanıldı
+    Report File: Diaqnostika hesabatı
+    Save Failed: Diaqnostika hesabatını saxlamaq mümkün olmadı
+    Log Cleared Message: Diaqnostika jurnalı təmizləndi
   Tab Unloading:
     Automatically unload tabs: "Vərəqləri avtomatik yaddaşdan çıxar"
     Memory threshold: "Yaddaş həddi"

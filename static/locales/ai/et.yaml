@@ -259,6 +259,18 @@ History:
   Custom: Kohandatud
   History Older Than Days Removed: Ühest päevast vanem vaatamisajalugu on eemaldatud | {days} päevast vanem vaatamisajalugu on eemaldatud
 Settings:
+  Diagnostics:
+    Diagnostics: Diagnostika
+    Description: Kui diagnostikalogi on sisse lülitatud, hoiab OpenTubeX viimaseid logisõnumeid mälus, et saaksid need veateadetele lisada. See ei salvesta ega saada neid kunagi ise ning logi väljalülitamine kustutab need. Aruanded jätavad välja küpsised, märgid, IP-aadressid ja URL-i parameetrid, kuid võivad sisaldada esitatud videote ID-sid, seega kontrolli aruannet enne jagamist.
+    Enable Logging: Luba diagnostikalogi
+    Copy Report: Kopeeri aruanne
+    Save Report: Salvesta aruanne
+    Clear Log: Tühjenda logi
+    Report Copied: Diagnostikaaruanne kopeeritud
+    Report Saved: Diagnostikaaruanne salvestatud
+    Report File: Diagnostikaaruanne
+    Save Failed: Diagnostikaaruannet ei saanud salvestada
+    Log Cleared Message: Diagnostikalogi tühjendatud
   Tab Unloading:
     Automatically unload tabs: "Vabasta vahelehed automaatselt mälust"
     Memory threshold: "Mälulävi"

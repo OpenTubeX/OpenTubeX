@@ -263,6 +263,18 @@ History:
   Custom: Mukautettu
   History Older Than Days Removed: Yli päivän vanha katseluhistoria on poistettu | Yli {days} päivää vanha katseluhistoria on poistettu
 Settings:
+  Diagnostics:
+    Diagnostics: Vianmääritys
+    Description: Kun vianmääritysloki on käytössä, OpenTubeX säilyttää viimeisimmät lokiviestit muistissa, jotta voit liittää ne virheraportteihin. Se ei koskaan tallenna tai lähetä niitä itsestään, ja lokin poistaminen käytöstä poistaa ne. Raportit jättävät pois evästeet, tunnukset, IP-osoitteet ja URL-parametrit, mutta ne voivat sisältää toistamiesi videoiden tunnuksia, joten tarkista raportti ennen kuin jaat sen.
+    Enable Logging: Ota vianmääritysloki käyttöön
+    Copy Report: Kopioi raportti
+    Save Report: Tallenna raportti
+    Clear Log: Tyhjennä loki
+    Report Copied: Vianmääritysraportti kopioitu
+    Report Saved: Vianmääritysraportti tallennettu
+    Report File: Vianmääritysraportti
+    Save Failed: Vianmääritysraporttia ei voitu tallentaa
+    Log Cleared Message: Vianmääritysloki tyhjennetty
   Tab Unloading:
     Automatically unload tabs: "Poista välilehdet muistista automaattisesti"
     Memory threshold: "Muistikynnys"

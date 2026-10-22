@@ -258,6 +258,18 @@ History:
   Custom: 自定义
   History Older Than Days Removed: 已删除 {days} 天前的观看历史记录
 Settings:
+  Diagnostics:
+    Diagnostics: 诊断
+    Description: 启用诊断日志后，OpenTubeX 会在内存中保留最近的日志消息，方便你将其附加到错误报告中。它绝不会自行保存或发送这些消息，关闭日志会将其删除。报告不包含 Cookie、令牌、IP 地址和 URL 参数，但可能包含你播放过的视频 ID，因此分享前请检查报告。
+    Enable Logging: 启用诊断日志
+    Copy Report: 复制报告
+    Save Report: 保存报告
+    Clear Log: 清除日志
+    Report Copied: 已复制诊断报告
+    Report Saved: 已保存诊断报告
+    Report File: 诊断报告
+    Save Failed: 无法保存诊断报告
+    Log Cleared Message: 已清除诊断日志
   Tab Unloading:
     Automatically unload tabs: "自动卸载标签页"
     Memory threshold: "内存阈值"

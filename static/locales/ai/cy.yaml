@@ -259,6 +259,18 @@ History:
   Custom: Personol
   History Older Than Days Removed: Mae hanes gwylio sy'n hŷn na {days} o ddiwrnodau wedi'i ddileu | Mae hanes gwylio sy'n hŷn nag 1 diwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} ddiwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} diwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} diwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} o ddiwrnodau wedi'i ddileu
 Settings:
+  Diagnostics:
+    Diagnostics: Diagnosteg
+    Description: Tra bo'r log diagnostig ymlaen, mae OpenTubeX yn cadw negeseuon log diweddar yn y cof fel y gallwch eu hatodi i adroddiadau bygiau. Nid yw byth yn eu cadw na'u hanfon ar ei ben ei hun, ac mae diffodd y log yn eu dileu. Mae adroddiadau'n hepgor cwcis, tocynnau, cyfeiriadau IP a pharamedrau URL, ond gallant gynnwys IDs fideos rydych wedi'u chwarae, felly gwiriwch adroddiad cyn ei rannu.
+    Enable Logging: Galluogi log diagnostig
+    Copy Report: Copïo adroddiad
+    Save Report: Cadw adroddiad
+    Clear Log: Clirio log
+    Report Copied: Copïwyd yr adroddiad diagnostig
+    Report Saved: Cadwyd yr adroddiad diagnostig
+    Report File: Adroddiad diagnostig
+    Save Failed: Methu cadw'r adroddiad diagnostig
+    Log Cleared Message: Cliriwyd y log diagnostig
   Tab Unloading:
     Automatically unload tabs: "Dadlwytho tabiau yn awtomatig"
     Memory threshold: "Trothwy cof"

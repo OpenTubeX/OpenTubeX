@@ -1971,6 +1971,18 @@ Settings:
     Warning: These settings are experimental, they may cause crashes while enabled. Making backups is highly recommended. Use at your own risk!
     Replace HTTP Cache: Replace HTTP Cache
     Disable Hardware Acceleration: Disable Hardware Acceleration
+  Diagnostics:
+    Diagnostics: Diagnostics
+    Description: While diagnostic logging is on, OpenTubeX keeps recent log messages in memory so you can attach them to bug reports. It never saves or sends them on its own, and turning logging off deletes them. Reports leave out cookies, tokens, IP addresses and URL parameters, but they can include IDs of videos you played, so check a report before you share it.
+    Enable Logging: Enable diagnostic logging
+    Copy Report: Copy report
+    Save Report: Save report
+    Clear Log: Clear log
+    Report Copied: Diagnostic report copied
+    Report Saved: Diagnostic report saved
+    Report File: Diagnostic report
+    Save Failed: Unable to save the diagnostic report
+    Log Cleared Message: Diagnostic log cleared
   Password Dialog:
     Password: Password
     Enter Password To Unlock: Enter password to unlock settings

@@ -1567,6 +1567,18 @@ Settings:
     Warning: Diese Einstellungen sind experimentell und können zu Abstürzen führen, wenn sie aktiviert sind. Es wird dringend empfohlen, Backups zu erstellen. Verwendung auf eigene Gefahr!
     Replace HTTP Cache: HTTP-Cache ersetzen
     Disable Hardware Acceleration: Hardwarebeschleunigung deaktivieren
+  Diagnostics:
+    Diagnostics: Diagnose
+    Description: Solange die Diagnoseprotokollierung aktiv ist, behält OpenTubeX aktuelle Protokollmeldungen im Arbeitsspeicher, damit du sie an Fehlerberichte anhängen kannst. Es speichert oder sendet sie nie von selbst, und beim Deaktivieren werden sie gelöscht. Berichte lassen Cookies, Tokens, IP-Adressen und URL-Parameter weg, können aber IDs abgespielter Videos enthalten. Prüfe einen Bericht deshalb, bevor du ihn teilst.
+    Enable Logging: Diagnoseprotokollierung aktivieren
+    Copy Report: Bericht kopieren
+    Save Report: Bericht speichern
+    Clear Log: Protokoll leeren
+    Report Copied: Diagnosebericht kopiert
+    Report Saved: Diagnosebericht gespeichert
+    Report File: Diagnosebericht
+    Save Failed: Diagnosebericht konnte nicht gespeichert werden
+    Log Cleared Message: Diagnoseprotokoll geleert
   Password Dialog:
     Password: Passwort
     Enter Password To Unlock: Passwort eingeben, um die Einstellungen zu entsperren

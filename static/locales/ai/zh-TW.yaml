@@ -258,6 +258,18 @@ History:
   Custom: 自訂
   History Older Than Days Removed: 已移除超過 {days} 天的觀看記錄
 Settings:
+  Diagnostics:
+    Diagnostics: 診斷
+    Description: 啟用診斷記錄後，OpenTubeX 會在記憶體中保留最近的記錄訊息，方便你將其附加到錯誤回報中。它絕不會自行儲存或傳送這些訊息，關閉記錄會將其刪除。報告不包含 Cookie、權杖、IP 位址和 URL 參數，但可能包含你播放過的影片 ID，因此分享前請檢查報告。
+    Enable Logging: 啟用診斷記錄
+    Copy Report: 複製報告
+    Save Report: 儲存報告
+    Clear Log: 清除記錄
+    Report Copied: 已複製診斷報告
+    Report Saved: 已儲存診斷報告
+    Report File: 診斷報告
+    Save Failed: 無法儲存診斷報告
+    Log Cleared Message: 已清除診斷記錄
   Tab Unloading:
     Automatically unload tabs: "自動卸載分頁"
     Memory threshold: "記憶體閾值"

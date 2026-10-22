@@ -348,6 +348,18 @@ History:
   Custom: 사용자 지정
   History Older Than Days Removed: '{days}일보다 오래된 시청 기록을 제거했습니다'
 Settings:
+  Diagnostics:
+    Diagnostics: 진단
+    Description: 진단 로그가 켜져 있는 동안 OpenTubeX는 최근 로그 메시지를 메모리에 보관하여 버그 보고서에 첨부할 수 있게 합니다. 스스로 저장하거나 전송하지 않으며, 로그를 끄면 삭제됩니다. 보고서에는 쿠키, 토큰, IP 주소, URL 매개변수가 포함되지 않지만 재생한 동영상의 ID가 포함될 수 있으므로 공유하기 전에 보고서를 확인하세요.
+    Enable Logging: 진단 로그 사용
+    Copy Report: 보고서 복사
+    Save Report: 보고서 저장
+    Clear Log: 로그 지우기
+    Report Copied: 진단 보고서를 복사했습니다
+    Report Saved: 진단 보고서를 저장했습니다
+    Report File: 진단 보고서
+    Save Failed: 진단 보고서를 저장할 수 없습니다
+    Log Cleared Message: 진단 로그를 지웠습니다
   Tab Unloading:
     Automatically unload tabs: "자동으로 탭 언로드"
     Memory threshold: "메모리 임계값"

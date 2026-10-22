@@ -102,6 +102,7 @@ import { createScheduledBackups } from './scheduledBackups'
 import { createBackupArchiveFactory } from './backupArchive'
 import { createDatastoreRequestTracker } from './datastoreRequests'
 import { getWindowButtonLayout, onWindowButtonLayoutChanged } from './windowButtonLayout'
+import { setDiagnosticLogging, setupDiagnosticLogIpc } from './diagnosticLog'
 
 function getSystemAccentColor() {
   try {
@@ -4424,6 +4425,11 @@ function runApp() {
     }
   })
 
+  setupDiagnosticLogIpc()
+  baseHandlers.settings._findOne('diagnosticLogging').then((setting) => {
+    setDiagnosticLogging(setting?.value === true)
+  }).catch(error => console.error('Failed to read the diagnostic logging setting', error))
+
   ipcMain.handle(IpcChannels.GET_DEVICE_INFO, async (event) => {
     if (isOpenTubeXUrl(event.senderFrame.url)) {
       const linuxDistribution = process.platform === 'linux'
@@ -5579,6 +5585,9 @@ function runApp() {
               break
             case 'tabCloseFocus':
               TabManager.setTabCloseFocus(data.value)
+              break
+            case 'diagnosticLogging':
+              setDiagnosticLogging(data.value === true)
               break
             case 'showSkipSilenceButton':
               TabManager.setShowSkipSilenceButton(data.value)

@@ -261,6 +261,18 @@ History:
   Custom: Prilagođeno
   History Older Than Days Removed: Uklonjena je povijest gledanja starija od 1 dana | Uklonjena je povijest gledanja starija od {days} dana | Uklonjena je povijest gledanja starija od {days} dana
 Settings:
+  Diagnostics:
+    Diagnostics: Dijagnostika
+    Description: Dok je dijagnostički zapisnik uključen, OpenTubeX čuva nedavne poruke zapisnika u memoriji kako biste ih mogli priložiti izvješćima o greškama. Nikad ih ne sprema niti šalje sam, a isključivanje zapisnika ih briše. Izvješća izostavljaju kolačiće, tokene, IP adrese i URL parametre, ali mogu sadržavati ID-ove videozapisa koje ste reproducirali, stoga provjerite izvješće prije dijeljenja.
+    Enable Logging: Omogući dijagnostički zapisnik
+    Copy Report: Kopiraj izvješće
+    Save Report: Spremi izvješće
+    Clear Log: Očisti zapisnik
+    Report Copied: Dijagnostičko izvješće kopirano
+    Report Saved: Dijagnostičko izvješće spremljeno
+    Report File: Dijagnostičko izvješće
+    Save Failed: Nije moguće spremiti dijagnostičko izvješće
+    Log Cleared Message: Dijagnostički zapisnik očišćen
   Tab Unloading:
     Automatically unload tabs: "Automatski ukloni kartice iz memorije"
     Memory threshold: "Prag memorije"

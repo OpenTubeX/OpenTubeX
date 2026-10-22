@@ -6,12 +6,14 @@
     <ExternalSoftwareSettings v-if="USING_ELECTRON || (IS_CAPACITOR && supportsYtDlp)" />
     <ProxySettings v-if="USING_ELECTRON || IS_CAPACITOR" />
     <ExperimentalSettings v-if="USING_ELECTRON" />
+    <DiagnosticsSettings />
   </div>
 </template>
 
 <script setup>
 import TabUnloadingSettings from '../TabUnloadingSettings.vue'
 import ExperimentalSettings from '../ExperimentalSettings/ExperimentalSettings.vue'
+import DiagnosticsSettings from '../DiagnosticsSettings/DiagnosticsSettings.vue'
 import ExternalPlayerSettings from '../ExternalPlayerSettings.vue'
 import ExternalSoftwareSettings from '../ExternalSoftwareSettings.vue'
 import GeneralSettings from '../GeneralSettings/GeneralSettings.vue'

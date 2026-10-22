@@ -644,3 +644,19 @@ test('settings search lists background subscription features only where they run
     }
   }
 })
+
+test('diagnostics actions are searchable on every platform', () => {
+  for (const [usingElectron, isCapacitor] of [[true, false], [false, true], [false, false]]) {
+    const labels = createSettingsSearchIndex({
+      sections: [{ type: 'advanced', title: 'Advanced', description: '' }],
+      tm: path => getAtPath(locale, path),
+      store: { getters: {} },
+      usingElectron,
+      isCapacitor,
+    }).get('advanced').map(({ label }) => label)
+    for (const label of ['Diagnostics', 'Enable diagnostic logging', 'Copy report', 'Save report', 'Clear log']) {
+      assert.ok(labels.includes(label), label)
+    }
+    assert.ok(!labels.includes(locale.Settings.Diagnostics['Report Copied']))
+  }
+})

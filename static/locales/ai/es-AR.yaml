@@ -281,6 +281,18 @@ History:
   Custom: Personalizado
   History Older Than Days Removed: Se ha eliminado el historial de reproducción de más de 1 día | Se ha eliminado el historial de reproducción de más de {days} días | Se ha eliminado el historial de reproducción de más de {days} días
 Settings:
+  Diagnostics:
+    Diagnostics: Diagnóstico
+    Description: Mientras el registro de diagnóstico está activado, OpenTubeX guarda los mensajes de registro recientes en la memoria para que puedas adjuntarlos a reportes de errores. Nunca los guarda ni los envía por su cuenta, y desactivar el registro los elimina. Los reportes omiten cookies, tokens, direcciones IP y parámetros de URL, pero pueden incluir los ID de los videos que reprodujiste, así que revisá el reporte antes de compartirlo.
+    Enable Logging: Activar el registro de diagnóstico
+    Copy Report: Copiar reporte
+    Save Report: Guardar reporte
+    Clear Log: Borrar registro
+    Report Copied: Reporte de diagnóstico copiado
+    Report Saved: Reporte de diagnóstico guardado
+    Report File: Reporte de diagnóstico
+    Save Failed: No se pudo guardar el reporte de diagnóstico
+    Log Cleared Message: Registro de diagnóstico borrado
   Tab Unloading:
     Automatically unload tabs: "Descargar pestañas automáticamente"
     Memory threshold: "Umbral de memoria"

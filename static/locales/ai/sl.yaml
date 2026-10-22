@@ -383,6 +383,18 @@ History:
   Custom: Po meri
   History Older Than Days Removed: Zgodovina ogledov, starejša od 1 dneva, je odstranjena | Zgodovina ogledov, starejša od {days} dni, je odstranjena | Zgodovina ogledov, starejša od {days} dni, je odstranjena | Zgodovina ogledov, starejša od {days} dni, je odstranjena
 Settings:
+  Diagnostics:
+    Diagnostics: Diagnostika
+    Description: Dokler je diagnostični dnevnik vklopljen, OpenTubeX hrani nedavna sporočila dnevnika v pomnilniku, da jih lahko priložite poročilom o napakah. Nikoli jih ne shrani ali pošlje sam, izklop dnevnika pa jih izbriše. Poročila izpustijo piškotke, žetone, naslove IP in parametre URL, vendar lahko vsebujejo ID-je predvajanih videoposnetkov, zato poročilo pred deljenjem preglejte.
+    Enable Logging: Omogoči diagnostični dnevnik
+    Copy Report: Kopiraj poročilo
+    Save Report: Shrani poročilo
+    Clear Log: Počisti dnevnik
+    Report Copied: Diagnostično poročilo kopirano
+    Report Saved: Diagnostično poročilo shranjeno
+    Report File: Diagnostično poročilo
+    Save Failed: Diagnostičnega poročila ni bilo mogoče shraniti
+    Log Cleared Message: Diagnostični dnevnik počiščen
   Tab Unloading:
     Automatically unload tabs: "Samodejno razloži zavihke"
     Memory threshold: "Prag pomnilnika"

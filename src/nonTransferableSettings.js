@@ -10,6 +10,8 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   'scheduledBackupStatus',
   // Installed fonts are specific to the current operating system.
   'appFont',
+  // Diagnostic logging is for troubleshooting this device.
+  'diagnosticLogging',
   /* Depends on process.env.IS_ELECTRON */
   // ProxySettings
   'useProxy',

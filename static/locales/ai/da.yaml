@@ -270,6 +270,18 @@ History:
   Custom: Brugerdefineret
   History Older Than Days Removed: Visningshistorik, der er ældre end 1 dag, er blevet slettet | Visningshistorik, der er ældre end {days} dage, er blevet slettet
 Settings:
+  Diagnostics:
+    Diagnostics: Diagnostik
+    Description: Mens diagnosticeringsloggen er slået til, gemmer OpenTubeX de seneste logbeskeder i hukommelsen, så du kan vedhæfte dem til fejlrapporter. Det gemmer eller sender dem aldrig af sig selv, og når du slår loggen fra, slettes de. Rapporter udelader cookies, tokens, IP-adresser og URL-parametre, men de kan indeholde id'er for videoer, du har afspillet, så tjek en rapport, før du deler den.
+    Enable Logging: Aktivér diagnosticeringslog
+    Copy Report: Kopiér rapport
+    Save Report: Gem rapport
+    Clear Log: Ryd log
+    Report Copied: Diagnosticeringsrapport kopieret
+    Report Saved: Diagnosticeringsrapport gemt
+    Report File: Diagnosticeringsrapport
+    Save Failed: Diagnosticeringsrapporten kunne ikke gemmes
+    Log Cleared Message: Diagnosticeringslog ryddet
   Tab Unloading:
     Automatically unload tabs: "Aflæs automatisk faner"
     Memory threshold: "Hukommelsestærskel"

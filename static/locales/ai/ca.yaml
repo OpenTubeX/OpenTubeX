@@ -391,6 +391,18 @@ History:
   Custom: Personalitzat
   History Older Than Days Removed: S'ha suprimit l'historial de reproducció anterior a 1 dia | S'ha suprimit l'historial de reproducció anterior a {days} dies | S'ha suprimit l'historial de reproducció anterior a {days} dies
 Settings:
+  Diagnostics:
+    Diagnostics: Diagnòstic
+    Description: Mentre el registre de diagnòstic està activat, OpenTubeX conserva els missatges de registre recents a la memòria perquè els pugueu adjuntar als informes d'errors. Mai no els desa ni els envia pel seu compte, i desactivar el registre els elimina. Els informes ometen galetes, testimonis, adreces IP i paràmetres d'URL, però poden incloure identificadors dels vídeos que heu reproduït, així que reviseu l'informe abans de compartir-lo.
+    Enable Logging: Activa el registre de diagnòstic
+    Copy Report: Copia l'informe
+    Save Report: Desa l'informe
+    Clear Log: Esborra el registre
+    Report Copied: S'ha copiat l'informe de diagnòstic
+    Report Saved: S'ha desat l'informe de diagnòstic
+    Report File: Informe de diagnòstic
+    Save Failed: No s'ha pogut desar l'informe de diagnòstic
+    Log Cleared Message: S'ha esborrat el registre de diagnòstic
   Tab Unloading:
     Automatically unload tabs: "Descarrega les pestanyes automàticament"
     Memory threshold: "Llindar de memòria"

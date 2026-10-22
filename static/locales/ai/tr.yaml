@@ -258,6 +258,18 @@ History:
   Custom: Özel
   History Older Than Days Removed: 1 günden eski izleme geçmişi kaldırıldı | {days} günden eski izleme geçmişi kaldırıldı
 Settings:
+  Diagnostics:
+    Diagnostics: Tanılama
+    Description: Tanılama günlüğü açıkken OpenTubeX, hata raporlarına ekleyebilmeniz için son günlük iletilerini bellekte tutar. Bunları hiçbir zaman kendiliğinden kaydetmez veya göndermez ve günlüğü kapatmak bunları siler. Raporlar çerezleri, belirteçleri, IP adreslerini ve URL parametrelerini içermez, ancak oynattığınız videoların kimliklerini içerebilir; bu yüzden paylaşmadan önce raporu kontrol edin.
+    Enable Logging: Tanılama günlüğünü etkinleştir
+    Copy Report: Raporu kopyala
+    Save Report: Raporu kaydet
+    Clear Log: Günlüğü temizle
+    Report Copied: Tanılama raporu kopyalandı
+    Report Saved: Tanılama raporu kaydedildi
+    Report File: Tanılama raporu
+    Save Failed: Tanılama raporu kaydedilemedi
+    Log Cleared Message: Tanılama günlüğü temizlendi
   Tab Unloading:
     Automatically unload tabs: "Sekmeleri otomatik olarak bellekten kaldır"
     Memory threshold: "Bellek eşiği"

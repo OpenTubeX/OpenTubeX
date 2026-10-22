@@ -259,6 +259,18 @@ History:
   Custom: Pertsonalizatua
   History Older Than Days Removed: Egun 1 baino zaharragoa den ikustaldi-historia kendu da | {days} egun baino zaharragoa den ikustaldi-historia kendu da
 Settings:
+  Diagnostics:
+    Diagnostics: Diagnostikoa
+    Description: Diagnostiko-erregistroa aktibatuta dagoen bitartean, OpenTubeX-ek azken erregistro-mezuak memorian gordetzen ditu, akats-txostenei erantsi ahal izateko. Ez ditu inoiz bere kabuz gordetzen edo bidaltzen, eta erregistroa desaktibatzean ezabatu egiten dira. Txostenek ez dituzte cookieak, tokenak, IP helbideak eta URL parametroak barne hartzen, baina erreproduzitu dituzun bideoen IDak izan ditzakete; beraz, berrikusi txostena partekatu aurretik.
+    Enable Logging: Gaitu diagnostiko-erregistroa
+    Copy Report: Kopiatu txostena
+    Save Report: Gorde txostena
+    Clear Log: Garbitu erregistroa
+    Report Copied: Diagnostiko-txostena kopiatu da
+    Report Saved: Diagnostiko-txostena gorde da
+    Report File: Diagnostiko-txostena
+    Save Failed: Ezin izan da diagnostiko-txostena gorde
+    Log Cleared Message: Diagnostiko-erregistroa garbitu da
   Tab Unloading:
     Automatically unload tabs: "Deskargatu fitxak automatikoki"
     Memory threshold: "Memoriaren atalasea"

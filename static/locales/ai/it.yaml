@@ -258,6 +258,18 @@ History:
   Custom: Personalizzato
   History Older Than Days Removed: La cronologia di visione più vecchia di 1 giorno è stata rimossa | La cronologia di visione più vecchia di {days} giorni è stata rimossa | La cronologia di visione più vecchia di {days} giorni è stata rimossa
 Settings:
+  Diagnostics:
+    Diagnostics: Diagnostica
+    Description: Finché il log diagnostico è attivo, OpenTubeX conserva in memoria i messaggi di log recenti per consentirti di allegarli alle segnalazioni di bug. Non li salva né li invia mai di sua iniziativa, e disattivare il log li elimina. I rapporti escludono cookie, token, indirizzi IP e parametri URL, ma possono contenere gli ID dei video che hai riprodotto, quindi controlla un rapporto prima di condividerlo.
+    Enable Logging: Attiva il log diagnostico
+    Copy Report: Copia rapporto
+    Save Report: Salva rapporto
+    Clear Log: Cancella log
+    Report Copied: Rapporto diagnostico copiato
+    Report Saved: Rapporto diagnostico salvato
+    Report File: Rapporto diagnostico
+    Save Failed: Impossibile salvare il rapporto diagnostico
+    Log Cleared Message: Log diagnostico cancellato
   Tab Unloading:
     Automatically unload tabs: "Scarica automaticamente le schede"
     Memory threshold: "Soglia di memoria"

@@ -269,6 +269,10 @@ export const SETTINGS_SEARCH_SOURCES = {
     type: 'experimental',
     key: 'Settings.Experimental Settings',
     electronOnly: true
+  }, {
+    type: 'diagnostics',
+    key: 'Settings.Diagnostics',
+    include: new Set(['Diagnostics', 'Enable Logging', 'Copy Report', 'Save Report', 'Clear Log'])
   }]
 }
 

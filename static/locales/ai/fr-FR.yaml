@@ -258,6 +258,18 @@ History:
   Custom: Personnalisé
   History Older Than Days Removed: L’historique de visionnage datant de plus de 1 jour a été supprimé | L’historique de visionnage datant de plus de {days} jours a été supprimé | L’historique de visionnage datant de plus de {days} jours a été supprimé
 Settings:
+  Diagnostics:
+    Diagnostics: Diagnostic
+    Description: Tant que le journal de diagnostic est activé, OpenTubeX conserve les messages de journal récents en mémoire pour que vous puissiez les joindre à vos rapports de bogue. Il ne les enregistre ni ne les envoie jamais de lui-même, et désactiver le journal les supprime. Les rapports excluent les cookies, les jetons, les adresses IP et les paramètres d'URL, mais ils peuvent contenir les identifiants des vidéos que vous avez lues ; vérifiez donc un rapport avant de le partager.
+    Enable Logging: Activer le journal de diagnostic
+    Copy Report: Copier le rapport
+    Save Report: Enregistrer le rapport
+    Clear Log: Effacer le journal
+    Report Copied: Rapport de diagnostic copié
+    Report Saved: Rapport de diagnostic enregistré
+    Report File: Rapport de diagnostic
+    Save Failed: Impossible d'enregistrer le rapport de diagnostic
+    Log Cleared Message: Journal de diagnostic effacé
   Tab Unloading:
     Automatically unload tabs: "Décharger automatiquement les onglets"
     Memory threshold: "Seuil de mémoire"

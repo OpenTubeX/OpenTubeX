@@ -259,6 +259,18 @@ History:
   Custom: Personalizado
   History Older Than Days Removed: Foi removido o histórico de reprodução com mais de 1 dia | Foi removido o histórico de reprodução com mais de {days} dias | Foi removido o histórico de reprodução com mais de {days} dias
 Settings:
+  Diagnostics:
+    Diagnostics: Diagnóstico
+    Description: Enquanto o log de diagnóstico estiver ativado, o OpenTubeX mantém as mensagens de log recentes na memória para que você possa anexá-las a relatórios de bugs. Ele nunca as salva nem as envia por conta própria, e desativar o log as apaga. Os relatórios omitem cookies, tokens, endereços IP e parâmetros de URL, mas podem incluir os IDs dos vídeos que você reproduziu, então confira o relatório antes de compartilhá-lo.
+    Enable Logging: Ativar log de diagnóstico
+    Copy Report: Copiar relatório
+    Save Report: Salvar relatório
+    Clear Log: Limpar log
+    Report Copied: Relatório de diagnóstico copiado
+    Report Saved: Relatório de diagnóstico salvo
+    Report File: Relatório de diagnóstico
+    Save Failed: Não foi possível salvar o relatório de diagnóstico
+    Log Cleared Message: Log de diagnóstico limpo
   Tab Unloading:
     Automatically unload tabs: "Descarregar abas automaticamente"
     Memory threshold: "Limite de memória"

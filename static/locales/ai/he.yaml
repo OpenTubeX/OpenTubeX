@@ -263,6 +263,18 @@ History:
   Custom: בהתאמה אישית
   History Older Than Days Removed: היסטוריית צפייה מלפני יותר מ־1 יום נמחקה | היסטוריית צפייה מלפני יותר מ־{days} ימים נמחקה | היסטוריית צפייה מלפני יותר מ־{days} ימים נמחקה
 Settings:
+  Diagnostics:
+    Diagnostics: אבחון
+    Description: כל עוד יומן האבחון פועל, OpenTubeX שומר הודעות יומן אחרונות בזיכרון כדי שתוכלו לצרף אותן לדיווחי באגים. הוא אף פעם לא שומר או שולח אותן מעצמו, וכיבוי היומן מוחק אותן. הדוחות אינם כוללים קובצי Cookie, אסימונים, כתובות IP ופרמטרים של כתובות URL, אך הם עשויים לכלול מזהים של סרטונים שניגנתם, לכן בדקו דוח לפני שתשתפו אותו.
+    Enable Logging: הפעלת יומן אבחון
+    Copy Report: העתקת הדוח
+    Save Report: שמירת הדוח
+    Clear Log: ניקוי היומן
+    Report Copied: דוח האבחון הועתק
+    Report Saved: דוח האבחון נשמר
+    Report File: דוח אבחון
+    Save Failed: לא ניתן לשמור את דוח האבחון
+    Log Cleared Message: יומן האבחון נוקה
   Tab Unloading:
     Automatically unload tabs: "פריקת לשוניות אוטומטית"
     Memory threshold: "סף זיכרון"

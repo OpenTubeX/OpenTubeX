@@ -259,6 +259,18 @@ History:
   Custom: Khusus
   History Older Than Days Removed: Riwayat tontonan yang lebih lama dari {days} hari telah dihapus
 Settings:
+  Diagnostics:
+    Diagnostics: Diagnostik
+    Description: Selama log diagnostik aktif, OpenTubeX menyimpan pesan log terbaru di memori agar Anda dapat melampirkannya ke laporan bug. Aplikasi ini tidak pernah menyimpan atau mengirimnya sendiri, dan menonaktifkan log akan menghapusnya. Laporan tidak menyertakan cookie, token, alamat IP, dan parameter URL, tetapi dapat berisi ID video yang Anda putar, jadi periksa laporan sebelum membagikannya.
+    Enable Logging: Aktifkan log diagnostik
+    Copy Report: Salin laporan
+    Save Report: Simpan laporan
+    Clear Log: Hapus log
+    Report Copied: Laporan diagnostik disalin
+    Report Saved: Laporan diagnostik disimpan
+    Report File: Laporan diagnostik
+    Save Failed: Tidak dapat menyimpan laporan diagnostik
+    Log Cleared Message: Log diagnostik dihapus
   Tab Unloading:
     Automatically unload tabs: "Bongkar tab secara otomatis"
     Memory threshold: "Ambang memori"

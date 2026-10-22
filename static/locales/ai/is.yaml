@@ -261,6 +261,18 @@ History:
   Custom: Sérsniðið
   History Older Than Days Removed: Áhorfsferli eldri en 1 dags hefur verið eytt | Áhorfsferli eldri en {days} daga hefur verið eytt
 Settings:
+  Diagnostics:
+    Diagnostics: Greining
+    Description: Á meðan greiningarannáll er virkur geymir OpenTubeX nýleg annálaskilaboð í minni svo þú getir hengt þau við villutilkynningar. Það vistar þau aldrei né sendir að eigin frumkvæði og ef slökkt er á annálnum er þeim eytt. Skýrslur sleppa vafrakökum, tókum, IP-tölum og URL-færibreytum, en þær geta innihaldið auðkenni myndskeiða sem þú spilaðir, svo farðu yfir skýrslu áður en þú deilir henni.
+    Enable Logging: Virkja greiningarannál
+    Copy Report: Afrita skýrslu
+    Save Report: Vista skýrslu
+    Clear Log: Hreinsa annál
+    Report Copied: Greiningarskýrsla afrituð
+    Report Saved: Greiningarskýrsla vistuð
+    Report File: Greiningarskýrsla
+    Save Failed: Ekki tókst að vista greiningarskýrsluna
+    Log Cleared Message: Greiningarannáll hreinsaður
   Tab Unloading:
     Automatically unload tabs: "Losa flipa sjálfkrafa úr minni"
     Memory threshold: "Minnisþröskuldur"

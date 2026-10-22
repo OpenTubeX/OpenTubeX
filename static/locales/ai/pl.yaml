@@ -97,6 +97,18 @@ User Playlists:
   Playlist Thumbnail: "Miniatura playlisty"
   Restore Default Thumbnail: "Przywróć domyślną miniaturę"
 Settings:
+  Diagnostics:
+    Diagnostics: Diagnostyka
+    Description: Gdy dziennik diagnostyczny jest włączony, OpenTubeX przechowuje ostatnie komunikaty dziennika w pamięci, aby można je było dołączyć do zgłoszeń błędów. Nigdy nie zapisuje ani nie wysyła ich samodzielnie, a wyłączenie dziennika je usuwa. Raporty pomijają pliki cookie, tokeny, adresy IP i parametry adresów URL, ale mogą zawierać identyfikatory odtwarzanych filmów, więc sprawdź raport przed udostępnieniem.
+    Enable Logging: Włącz dziennik diagnostyczny
+    Copy Report: Kopiuj raport
+    Save Report: Zapisz raport
+    Clear Log: Wyczyść dziennik
+    Report Copied: Skopiowano raport diagnostyczny
+    Report Saved: Zapisano raport diagnostyczny
+    Report File: Raport diagnostyczny
+    Save Failed: Nie można zapisać raportu diagnostycznego
+    Log Cleared Message: Wyczyszczono dziennik diagnostyczny
   Tab Unloading:
     Automatically unload tabs: "Automatycznie zwalniaj karty z pamięci"
     Memory threshold: "Próg pamięci"

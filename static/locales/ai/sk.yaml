@@ -259,6 +259,18 @@ History:
   Custom: Vlastné
   History Older Than Days Removed: História sledovania staršia ako 1 deň bola odstránená | História sledovania staršia ako {days} dni bola odstránená | História sledovania staršia ako {days} dní bola odstránená
 Settings:
+  Diagnostics:
+    Diagnostics: Diagnostika
+    Description: Kým je diagnostický denník zapnutý, OpenTubeX uchováva nedávne správy denníka v pamäti, aby ste ich mohli priložiť k hláseniam chýb. Nikdy ich sám neukladá ani neodosiela a vypnutím denníka sa vymažú. Hlásenia vynechávajú súbory cookie, tokeny, IP adresy a parametre URL, môžu však obsahovať ID prehratých videí, preto hlásenie pred zdieľaním skontrolujte.
+    Enable Logging: Zapnúť diagnostický denník
+    Copy Report: Kopírovať hlásenie
+    Save Report: Uložiť hlásenie
+    Clear Log: Vymazať denník
+    Report Copied: Diagnostické hlásenie skopírované
+    Report Saved: Diagnostické hlásenie uložené
+    Report File: Diagnostické hlásenie
+    Save Failed: Diagnostické hlásenie sa nepodarilo uložiť
+    Log Cleared Message: Diagnostický denník vymazaný
   Tab Unloading:
     Automatically unload tabs: "Automaticky uvoľňovať karty z pamäte"
     Memory threshold: "Prah pamäte"
