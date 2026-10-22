@@ -207,11 +207,12 @@ test.describe('local subtitle files', () => {
 
     // Reloading the same source in the current player
     const watchView = await watchViewHandle(page)
+    let oldVideo
     try {
-      const oldVideo = await video.elementHandle()
+      oldVideo = await video.elementHandle()
       await watchView.evaluate(view => { view.playbackSourceKey++ })
       await expect.poll(() => textTracks(video)).toEqual(expectedTracks)
-      expect(await oldVideo.evaluate((before, after) => before === after, await video.elementHandle())).toBe(true)
+      expect(await video.evaluate((element, before) => element === before, oldVideo)).toBe(true)
       await pauseAt(video, 6)
       await expect(caption).toHaveText('Fixed file')
 
@@ -225,8 +226,8 @@ test.describe('local subtitle files', () => {
       await expect.poll(() => textTracks(video).catch(() => [])).toEqual(expectedTracks)
       await pauseAt(video, 6)
       await expect(caption).toHaveText('Fixed file')
-      await oldVideo.dispose()
     } finally {
+      await oldVideo?.dispose()
       await watchView.dispose()
     }
 
