@@ -26,7 +26,7 @@ import { createPopularityPath, isMostReplayed } from '../../helpers/player/video
 import store from '../../store/index'
 import { usesInvidiousInstance } from '../../../apiBackends'
 import { getAvailableFullscreenActions } from '../../helpers/fullscreenActions'
-import { DEFAULT_CONTROL_BAR_BUTTONS, getControlBarButtonDefinitions } from '../../helpers/controlBarButtons'
+import { DEFAULT_CONTROL_BAR_BUTTONS, getRemovedControlBarButtons } from '../../helpers/controlBarButtons'
 import { getSubtitleRequestUrl } from '../../helpers/player/subtitleCookies'
 import { enableTwitchTsVideoGap } from '../../helpers/player/twitchTsVideoGap'
 import LightsOffOverlay from './LightsOffOverlay.vue'
@@ -5374,9 +5374,7 @@ export default defineComponent({
 
         // Buttons removed from the control bar stay available in the overflow menu.
         // The captions menu replaces the caption toggle; fullscreen has no menu entry.
-        const removedButtons = new Set(getControlBarButtonDefinitions()
-          .map(({ id }) => id)
-          .filter(id => !controlBarButtons.includes(id)))
+        const removedButtons = new Set(getRemovedControlBarButtons(controlBarButtons))
 
         // Keep related settings together before the one-click actions.
         uiConfig.overflowMenuButtons.push(

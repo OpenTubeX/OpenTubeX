@@ -30,6 +30,20 @@ export function getDefaultControlBarButtons(mobile = IS_MOBILE) {
 export const DEFAULT_CONTROL_BAR_BUTTONS = Object.freeze(getDefaultControlBarButtons())
 
 /**
+ * Buttons of the full control bar that are not on it, which the player menu
+ * offers instead. Capacitor tablets and TVs also use the full control bar,
+ * although their customizer only offers the compact buttons, so the
+ * desktop-only buttons that they support stay reachable this way.
+ * @param {string[]} controlBarButtons
+ * @param {boolean} capacitor
+ */
+export function getRemovedControlBarButtons(controlBarButtons, capacitor = IS_MOBILE) {
+  return getControlBarButtonDefinitions(false)
+    .map(({ id }) => id)
+    .filter(id => !controlBarButtons.includes(id) && !(capacitor && id === 'fullWindow'))
+}
+
+/**
  * Removes unknown and duplicate buttons while preserving the selected order.
  * The player menu holds every other control, so it is always kept.
  * @param {unknown} value

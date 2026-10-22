@@ -7,6 +7,7 @@ import {
   CONTROL_BAR_BUTTON_DEFINITIONS,
   getControlBarButtonDefinitions,
   getDefaultControlBarButtons,
+  getRemovedControlBarButtons,
   normalizeControlBarButtons,
 } from '../../src/renderer/helpers/controlBarButtons.js'
 
@@ -27,6 +28,14 @@ test('mobile only offers the buttons of its compact control bar', () => {
   assert.deepEqual(getControlBarButtonDefinitions(true).map(({ id }) => id), ['captions', 'menu', 'pictureInPicture', 'fullscreen'])
   assert.deepEqual(getControlBarButtonDefinitions(false).map(({ id }) => id), CONTROL_BAR_BUTTON_DEFINITIONS.map(({ id }) => id))
   assert.deepEqual(normalizeControlBarButtons(['fullscreen', 'theatreMode', 'menu', 'autoplay'], true), ['fullscreen', 'menu'])
+})
+
+test('the player menu offers the buttons that are not on the full control bar', () => {
+  assert.deepEqual(getRemovedControlBarButtons(getDefaultControlBarButtons(false), false), [])
+  assert.deepEqual(getRemovedControlBarButtons(['captions', 'menu', 'fullscreen'], false), ['autoplay', 'pictureInPicture', 'theatreMode', 'fullWindow'])
+  // Capacitor tablets and TVs use the full control bar with the compact buttons,
+  // and have no full-window mode
+  assert.deepEqual(getRemovedControlBarButtons(getDefaultControlBarButtons(true), true), ['autoplay', 'theatreMode'])
 })
 
 test('keeps a custom order, discards invalid entries and always keeps the menu', () => {
