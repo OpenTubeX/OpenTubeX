@@ -90,9 +90,17 @@ export function setupPhoneOptionsMenu(menu, controls, t) {
     update()
   }
 
+  // The header is updated on the next frame, so a second Back before then must
+  // look at the submenus themselves.
+  function openBackButton() {
+    return visibleSubmenu()?.querySelector('.shaka-back-to-overflow-button') ?? null
+  }
+
   function goBack() {
-    if (headerSource) headerSource.click()
+    const button = openBackButton()
+    if (button) button.click()
     else dismiss()
+    schedule()
   }
 
   function update() {
@@ -151,7 +159,7 @@ export function setupPhoneOptionsMenu(menu, controls, t) {
     if (header?.contains(event.target)) {
       event.stopPropagation()
       // Shaka handles Back through the submenu's bubbling click listener.
-      headerSource.click()
+      openBackButton()?.click()
       schedule()
     }
   }, true)
