@@ -123,7 +123,7 @@ test('preserves the selected path when a download repeats a video ID', async () 
 })
 
 test('maps each downloaded video to its newest playable download, preferring video files', () => {
-  const file = (videoId, extra = {}) => ({ videoId, path: `/downloads/${videoId}`, ...extra })
+  const file = (videoId, extra = {}) => ({ videoId, path: `/downloads/${videoId}.webm`, ...extra })
   assert.deepEqual([...localPlaybackDownloadIds({
     1: { id: 1, status: 'completed', mode: 'video', files: [file('both'), file('older')] },
     2: { id: 2, status: 'completed', mode: 'audio', files: [file('both'), file('audio')] },
@@ -132,7 +132,8 @@ test('maps each downloaded video to its newest playable download, preferring vid
     5: { id: 5, status: 'downloading', mode: 'video', files: [file('active')] },
     6: { id: 6, status: 'completed', mode: 'subtitles', files: [file('subtitles')] },
     7: { id: 7, status: 'completed', mode: 'video', retryPayload: { externalUrl: 'https://vimeo.com/123' }, files: [file('external')] },
-  })].toSorted(), [['audio', 2], ['both', 1], ['older', 3]])
+    8: { id: 8, status: 'completed', mode: 'video', files: [file('avi', { path: '/downloads/avi.avi' }), file('upper', { path: '/downloads/upper.MKV' })] },
+  })].toSorted(), [['audio', 2], ['both', 1], ['older', 3], ['upper', 8]])
 })
 
 test('opens a card with its own download unless the inherited playlist download contains it', () => {

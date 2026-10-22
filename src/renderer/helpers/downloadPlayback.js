@@ -1,3 +1,4 @@
+import { DOWNLOADED_MEDIA_MIME_TYPES } from '../../constants.js'
 import { isYouTubeMediaUrl } from './externalMediaUrl.js'
 
 const IOS_PLAYABLE_EXTENSIONS = new Set(['mp4', 'm4a', 'mp3', 'mov', 'aac'])
@@ -51,7 +52,9 @@ export function localPlaybackDownloadIds(downloads) {
   for (const download of Object.values(downloads)) {
     if (!isDownloadPlaybackSupported(download)) continue
     for (const file of download.files ?? []) {
-      if (!file.videoId || !isPlayableDownloadFile(file)) continue
+      const extension = file.extension ?? file.path?.split('.').at(-1)?.toLowerCase() ?? ''
+      // The watch page only plays formats it has a MIME type for.
+      if (!file.videoId || !isPlayableDownloadFile(file) || !DOWNLOADED_MEDIA_MIME_TYPES[extension]) continue
       const current = best.get(file.videoId)
       if (current === undefined || (download.mode === 'video') > (current.mode === 'video') ||
         (download.mode === current.mode && download.id > current.id)) {
