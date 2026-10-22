@@ -1934,7 +1934,9 @@ function runApp() {
         return backgroundSubscriptions.next()
       case 'acknowledge': return backgroundSubscriptions.acknowledge(value)
       case 'completed': return backgroundSubscriptions.completed(value)
-      case 'configureUploadNotifications': return uploadNotifier.configure(value)
+      case 'configureUploadNotifications':
+        await uploadNotifier.configure(value)
+        return backgroundSubscriptions.configureUploads(value)
       case 'observeUploads': return uploadNotifier.observe(value)
     }
   })

@@ -935,6 +935,31 @@ class Playlists {
     })
   }
 
+  /**
+   * Whether two video lists hold the same entries in the same order. Compares
+   * the flat entry fields directly, so a concurrent edit is detected without
+   * serializing every video, even one stamped in the same millisecond.
+   * @param {object[]} videos
+   * @param {object[]} others
+   */
+  static _sameVideoEntries(videos, others) {
+    if (videos.length !== others.length) return false
+    for (let index = 0; index < videos.length; index++) {
+      const video = videos[index]
+      const other = others[index]
+      const keys = Object.keys(video)
+      if (keys.length !== Object.keys(other).length) return false
+      for (const key of keys) {
+        const value = video[key]
+        const otherValue = other[key]
+        if (value === otherValue) continue
+        if (typeof value !== 'object' || value === null || typeof otherValue !== 'object' || otherValue === null) return false
+        if (JSON.stringify(value) !== JSON.stringify(otherValue)) return false
+      }
+    }
+    return true
+  }
+
   static async _insertVideos(_id, lastUpdatedAt, videos, deduplicate) {
     // NeDB cannot prepend atomically. Retry if another window changes the
     // videos or insertion preference between reading and saving them.
@@ -952,14 +977,14 @@ class Playlists {
         if (inserted.length === 0) return { status: PlaylistVideoAddResult.ALREADY_PRESENT }
       }
 
-      const snapshot = JSON.stringify(playlist.videos)
       const addVideosToTop = playlist.addVideosToTop === true
       const updatedAt = Math.max(playlist.lastUpdatedAt || 0, lastUpdatedAt)
       const { numAffected } = await db.playlists.updateAsync(
         {
           _id,
           $where() {
-            return JSON.stringify(this.videos) === snapshot && (this.addVideosToTop === true) === addVideosToTop && this.lastUpdatedAt === playlist.lastUpdatedAt
+            return this.lastUpdatedAt === playlist.lastUpdatedAt && (this.addVideosToTop === true) === addVideosToTop &&
+              Playlists._sameVideoEntries(this.videos, playlist.videos)
           }
         },
         {

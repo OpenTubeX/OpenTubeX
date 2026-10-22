@@ -9,6 +9,7 @@ export function createSubscriptionBackgroundService(userDataPath, { onUploads } 
   let ready = null
   let sequence = 0
   let configuration = null
+  let uploads = null
   let background = false
   let processingIdleTimer = null
   let stopped = false
@@ -63,10 +64,12 @@ export function createSubscriptionBackgroundService(userDataPath, { onUploads } 
       else operation?.resolve(message.value)
     })
     child.once('exit', () => releaseWorker(child))
-    // Every replacement must restore its scheduler, regardless of which call started it.
-    ready = configuration
-      ? send('configure', configuration).then(() => send('background', background && configuration.enabled && net.isOnline()))
-      : Promise.resolve()
+    // Every replacement must restore its scheduler and the upload channels,
+    // regardless of which call started it.
+    ready = Promise.resolve()
+      .then(() => uploads && send('configureUploads', uploads))
+      .then(() => configuration && send('configure', configuration))
+      .then(() => configuration && send('background', background && configuration.enabled && net.isOnline()))
     ready = ready.catch(error => {
       if (worker === child) stopWorker()
       throw error
@@ -136,6 +139,11 @@ export function createSubscriptionBackgroundService(userDataPath, { onUploads } 
       await call('configure', value)
       await call('background', background && value.enabled && net.isOnline())
       if (configuration === value && !value.enabled && pending.size === 0) stopWorker()
+    },
+    /** Tells the worker which channels' uploads to report; the notifier's configuration. */
+    async configureUploads(value) {
+      uploads = value
+      if (worker) await call('configureUploads', value)
     },
     async setBackground(value) { background = value; if (worker) await call('background', value && configuration?.enabled === true && net.isOnline()) },
     completed(value) { return worker ? call('completed', value) : Promise.resolve() },

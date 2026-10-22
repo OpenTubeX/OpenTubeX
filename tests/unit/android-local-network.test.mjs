@@ -60,14 +60,39 @@ test('localized permission denials never enter network recovery', async () => {
   })
 })
 
-test('public networking and older Android versions skip the permission prompt', async () => {
-  let received
+test('public networking skips the permission prompt', async () => {
+  const received = []
   const access = fixture({
-    checkAccess: async options => { received = options; return { required: false } },
+    // Android 17 without the permission: only a check with a host can answer "not required"
+    checkAccess: async options => { received.push(options); return { required: options.url === undefined } },
     requestPermissions: () => { assert.fail('No permission prompt is needed') },
   })
   await access({ url: 'https://www.youtube.com' })
-  assert.equal(received.url, 'https://www.youtube.com')
+  await access({ url: 'https://www.youtube.com/feed' })
+  assert.deepEqual(received.map(options => options.url), [undefined, 'https://www.youtube.com', 'https://www.youtube.com/feed'])
+})
+
+test('older Android versions ask the bridge once for all requests', async () => {
+  let checks = 0
+  const access = fixture({
+    checkAccess: async () => { checks++; return { required: false } },
+    requestPermissions: () => { assert.fail('No permission prompt is needed') },
+  })
+  await Promise.all([access({ url: 'https://www.youtube.com' }), access({ url: 'http://192.168.1.2' })])
+  await access()
+  assert.equal(checks, 1)
+})
+
+test('a granted permission ends the bridge checks', async () => {
+  let checks = 0
+  const access = fixture({
+    checkAccess: async () => { checks++; return { required: true } },
+    requestPermissions: async () => ({ localNetwork: 'granted' }),
+  })
+  await access({ url: 'http://192.168.1.2' })
+  assert.equal(checks, 2)
+  await access({ url: 'http://192.168.1.3' })
+  assert.equal(checks, 2)
 })
 
 test('background permission checks do not open another system prompt after denial', async () => {

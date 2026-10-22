@@ -341,21 +341,39 @@ const tabOrganizerTooltip = computed(() => {
 })
 
 const tabBarRef = useTemplateRef('tabBarRef')
-// The app makes room for a visible horizontal scrollbar, which OverlayScrollbars toggles.
-const horizontalScrollbarVisible = ref(false)
-watch(tabBarRef, (element, _previous, onCleanup) => {
-  const update = () => {
-    horizontalScrollbarVisible.value = element?.querySelector('.os-scrollbar-horizontal.os-scrollbar-visible') != null
-  }
-  update()
-  if (!element) return
-  const observer = new MutationObserver(update)
-  observer.observe(element, { subtree: true, childList: true, attributes: true, attributeFilter: ['class'] })
-  onCleanup(() => observer.disconnect())
-}, { immediate: true, flush: 'sync' })
-useRootClass('appTabBarScrollbar', horizontalScrollbarVisible)
 const tabsContentRef = useTemplateRef('tabsContentRef')
 const dropZoneRef = useTemplateRef('dropZoneRef')
+// The app makes room for a visible horizontal scrollbar, which OverlayScrollbars
+// toggles through the class of the scrollbar it adds to the container. Only
+// that class and the container's own children are watched, so the tabs' class
+// changes, which are frequent while loading, playing and dragging, cost nothing.
+const horizontalScrollbarVisible = ref(false)
+watch(dropZoneRef, (container, _previous, onCleanup) => {
+  /** @type {Element | null} */
+  let scrollbar = null
+  const update = () => {
+    horizontalScrollbarVisible.value = scrollbar?.classList.contains('os-scrollbar-visible') === true
+  }
+  const scrollbarObserver = new MutationObserver(update)
+  const locate = () => {
+    const found = container?.querySelector(':scope > .os-scrollbar-horizontal') ?? null
+    if (found !== scrollbar) {
+      scrollbar = found
+      scrollbarObserver.disconnect()
+      if (scrollbar) scrollbarObserver.observe(scrollbar, { attributes: true, attributeFilter: ['class'] })
+    }
+    update()
+  }
+  locate()
+  if (!container) return
+  const childrenObserver = new MutationObserver(locate)
+  childrenObserver.observe(container, { childList: true })
+  onCleanup(() => {
+    childrenObserver.disconnect()
+    scrollbarObserver.disconnect()
+  })
+}, { immediate: true, flush: 'sync' })
+useRootClass('appTabBarScrollbar', horizontalScrollbarVisible)
 const closeTooltipsSignal = ref(0)
 const selectedTabIds = computed(() => new Set(store.getters.getSelectedTabIds))
 /** @type {string | null} */

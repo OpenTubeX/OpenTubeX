@@ -91,6 +91,46 @@ function isModifierUpdate(update) {
   return Object.keys(update).some(key => key.startsWith('$'))
 }
 
+/**
+ * Statements that turn the stored members into `serialized`, keeping the
+ * members that still surround the edit. Only the rows between the longest
+ * common prefix and suffix are removed, and the new members between them go
+ * into the positions that frees. A prepend therefore writes only the new
+ * members, below the first stored position, and a swap or removal only the
+ * rows it touches. When there is no room between the kept rows, the suffix
+ * is rewritten after the new members instead.
+ *
+ * @param {unknown} id
+ * @param {[number, string][]} stored rows of `SQL.children`, ordered by position
+ * @param {string[]} serialized
+ */
+function memberDiffStatements(id, stored, serialized) {
+  let prefix = 0
+  while (prefix < stored.length && prefix < serialized.length && stored[prefix][1] === serialized[prefix]) prefix++
+  let suffix = 0
+  while (
+    suffix < stored.length - prefix && suffix < serialized.length - prefix &&
+    stored[stored.length - 1 - suffix][1] === serialized[serialized.length - 1 - suffix]
+  ) suffix++
+
+  const statements = []
+  for (const [pos] of stored.slice(prefix, stored.length - suffix)) statements.push([SQL.removeChild, [id, pos]])
+
+  let inserted = serialized.slice(prefix, serialized.length - suffix)
+  let position
+  if (prefix === 0 && suffix > 0) {
+    position = stored[stored.length - suffix][0] - inserted.length
+  } else {
+    position = prefix > 0 ? stored[prefix - 1][0] + 1 : 0
+    if (suffix > 0 && stored[stored.length - suffix][0] - position < inserted.length) {
+      for (const [pos] of stored.slice(stored.length - suffix)) statements.push([SQL.removeChild, [id, pos]])
+      inserted = serialized.slice(prefix)
+    }
+  }
+  for (const child of inserted) statements.push([SQL.insertChild, [id, position++, child]])
+  return statements
+}
+
 function uniqueViolation(key) {
   const error = new Error(`Can't insert key ${key}, it violates the unique constraint`)
   error.errorType = 'uniqueViolated'
@@ -445,24 +485,12 @@ export class SqliteDatastore {
     if (!this.childField || !childrenChanged) return statements
 
     const serialized = (children ?? []).map(child => model.serialize(child))
-    let position = 0
     if (childrenChanged === 'append') {
-      position = (await this._query(SQL.nextChild, [id]))[0][0]
-    } else {
-      // Keep stored members that remain in order, delete the others, and
-      // append the remainder. Adding or removing members writes only those.
-      let next = 0
-      for (const [pos, stored] of await this._query(SQL.children, [id])) {
-        if (next < serialized.length && stored === serialized[next]) {
-          next++
-          position = pos + 1
-        } else {
-          statements.push([SQL.removeChild, [id, pos]])
-        }
-      }
-      serialized.splice(0, next)
+      let position = (await this._query(SQL.nextChild, [id]))[0][0]
+      for (const child of serialized) statements.push([SQL.insertChild, [id, position++, child]])
+      return statements
     }
-    for (const child of serialized) statements.push([SQL.insertChild, [id, position++, child]])
+    statements.push(...memberDiffStatements(id, await this._query(SQL.children, [id]), serialized))
     return statements
   }
 

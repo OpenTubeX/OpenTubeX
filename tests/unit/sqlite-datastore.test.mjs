@@ -396,6 +396,48 @@ test('playlist edits write only the rows they change', async (t) => {
   assert.deepEqual(saved.videos, [...videos.filter(entry => entry.videoId !== 'v5'), video('new')])
 })
 
+test('array edits write only the members they add, remove or move', async (t) => {
+  const store = memory(t, { childField: 'videos' })
+  const videos = Array.from({ length: 6 }, (_, index) => video(`v${index}`))
+  await store.insertAsync({ _id: 'p', videos })
+  const totalChanges = async () => (await store.driver.execute([['SELECT total_changes()']]))[0][0][0]
+  const changes = async operation => {
+    const before = await totalChanges()
+    await operation()
+    return await totalChanges() - before
+  }
+  const saved = async () => (await store.findOneAsync({ _id: 'p' })).videos
+  const set = videos => store.updateAsync({ _id: 'p' }, { $set: { videos } })
+
+  // Adding to the top writes the document and the new member only
+  let expected = [video('top'), ...videos]
+  assert.equal(await changes(() => set(expected)), 2)
+  assert.deepEqual(await saved(), expected)
+
+  // Swapping neighbours rewrites just those two rows
+  expected = [expected[0], expected[2], expected[1], ...expected.slice(3)]
+  assert.equal(await changes(() => set(expected)), 5)
+  assert.deepEqual(await saved(), expected)
+
+  // Removing from the middle deletes one row
+  expected = expected.filter(entry => entry.videoId !== 'v3')
+  assert.equal(await changes(() => set(expected)), 2)
+  assert.deepEqual(await saved(), expected)
+
+  // An insertion fits into the position that removal freed
+  expected = [...expected.slice(0, 4), video('mid'), ...expected.slice(4)]
+  assert.equal(await changes(() => set(expected)), 2)
+  assert.deepEqual(await saved(), expected)
+
+  // Without a free position the members after the insertion move along
+  expected = [...expected.slice(0, 4), video('mid-2'), ...expected.slice(4)]
+  assert.equal(await changes(() => set(expected)), 8)
+  assert.deepEqual(await saved(), expected)
+
+  await store.updateAsync({ _id: 'p' }, { $push: { videos: video('last') } })
+  assert.deepEqual(await saved(), [...expected, video('last')])
+})
+
 test('operations through an asynchronous driver run one at a time', async (t) => {
   const store = new SqliteDatastore({ driver: slowDriver(createNodeSqliteDriver(':memory:')), childField: 'videos' })
   t.after(() => store.driver.close())

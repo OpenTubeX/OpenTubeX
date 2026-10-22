@@ -53,6 +53,7 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import store from '../../store/index'
+import { formatShortDateTime } from '../../helpers/dateFormat'
 import { showToast } from '../../helpers/utils'
 import FtButton from '../FtButton/FtButton.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
@@ -71,7 +72,9 @@ const status = computed(() => {
   return value?.directory === directory.value ? value : {}
 })
 const lastBackup = computed(() => status.value.lastBackupAt
-  ? t('Settings.Data Settings.Last scheduled backup', { date: new Date(status.value.lastBackupAt).toLocaleString(locale.value) })
+  ? t('Settings.Data Settings.Last scheduled backup', {
+      date: formatShortDateTime(status.value.lastBackupAt, locale.value, store.getters.getDateFormat, store.getters.getTimeFormat)
+    })
   : t('Settings.Data Settings.No scheduled backup yet'))
 
 async function update(key, value) {

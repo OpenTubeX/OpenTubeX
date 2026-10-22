@@ -311,6 +311,17 @@ const shakaControlKeysToShortcuts = {
 /** @type {Map<string, string>} */
 const LOCALE_MAPPINGS = new Map(process.env.SHAKA_LOCALE_MAPPINGS)
 
+/**
+ * The secondary caption language the user picked while its settings write is still pending.
+ * The store commits the setting only after the write, but text track changes, in this player
+ * or in one that replaces it, read it back right away. Shared, so a replacement player sees it too.
+ * @type {string | null}
+ */
+let pendingSecondaryCaptionLocale = null
+// Counts the picks, so an earlier write that settles late cannot clear a later pending pick,
+// even one of the same language. The settings store skips the commit of a superseded write.
+let secondaryCaptionLocalePicks = 0
+
 export default defineComponent({
   name: 'FtShakaVideoPlayer',
   components: {
@@ -9148,8 +9159,14 @@ export default defineComponent({
       updateSecondaryCaptionText()
 
       const language = caption?.language ?? ''
-      if (remember && language !== store.getters.getSecondaryCaptionLocale) {
-        store.dispatch('updateSecondaryCaptionLocale', language)
+      if (remember && language !== getRememberedSecondaryCaptionLocale()) {
+        const pick = ++secondaryCaptionLocalePicks
+        pendingSecondaryCaptionLocale = language
+        store.dispatch('updateSecondaryCaptionLocale', language).finally(() => {
+          if (secondaryCaptionLocalePicks === pick) {
+            pendingSecondaryCaptionLocale = null
+          }
+        })
       }
 
       if (!caption) {
@@ -9195,11 +9212,16 @@ export default defineComponent({
       }
     }
 
+    /** @returns {string} the language of the remembered secondary captions, or an empty string */
+    function getRememberedSecondaryCaptionLocale() {
+      return pendingSecondaryCaptionLocale ?? store.getters.getSecondaryCaptionLocale
+    }
+
     /**
      * Loads the remembered secondary captions once the main captions are shown for a video.
      */
     function restoreSecondaryCaption() {
-      const language = store.getters.getSecondaryCaptionLocale
+      const language = getRememberedSecondaryCaptionLocale()
       const activeTrack = player?.getTextTracks().find(track => track.active)
 
       if (!language || !activeTrack || player.isLive() || (secondaryCaption && props.captions.includes(secondaryCaption))) {

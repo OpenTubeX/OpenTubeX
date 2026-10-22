@@ -122,6 +122,63 @@ test('draining results after a worker crash restores configuration before any co
   } finally { service.stop() }
 })
 
+test('the upload channel set reaches the worker and is restored after a crash', async () => {
+  const { service, children } = await serviceFixture()
+  try {
+    const uploads = { enabled: true, channels: { UCtest: { feedTypes: ['videos'] } } }
+    await service.configureUploads(uploads)
+    assert.equal(children.length, 0, 'The configuration alone does not start a worker')
+    await service.configure({ enabled: true, profiles: [], intervals: {} })
+    assert.deepEqual(children[0].messages.slice(0, 3).map(message => message.method), ['configureUploads', 'configure', 'background'])
+    assert.equal(children[0].messages[0].value, uploads)
+    await service.configureUploads({ enabled: false })
+    assert.equal(children[0].messages.at(-1).method, 'configureUploads')
+    children[0].emit('exit')
+    await service.next()
+    assert.deepEqual(children[1].messages.slice(0, 3).map(message => message.method), ['configureUploads', 'configure', 'background'])
+    assert.deepEqual(children[1].messages[0].value, { enabled: false })
+  } finally { service.stop() }
+})
+
+test('a worker started by feed processing before the scheduler configuration still gets the upload channels', async () => {
+  const { service, children } = await serviceFixture()
+  try {
+    const uploads = { enabled: true, channels: { UCtest: { feedTypes: ['videos'] } } }
+    await service.configureUploads(uploads)
+    await service.processFeed({ format: 'rss', text: '<feed/>' })
+    assert.deepEqual(children[0].messages.map(message => message.method), ['configureUploads', 'processFeed'])
+    assert.equal(children[0].messages[0].value, uploads)
+    await service.configure({ enabled: true, profiles: [], intervals: {} })
+    assert.deepEqual(children[0].messages.slice(2).map(message => message.method), ['configure', 'background'])
+    assert.equal(children.length, 1)
+  } finally { service.stop() }
+})
+
+test('the worker reports uploads only for feeds with notifications turned on', async () => {
+  const source = await readFile(new URL('../../src/main/subscriptionBackgroundWorker.js', import.meta.url), 'utf8')
+  const messages = []
+  let options
+  const context = vm.createContext({
+    process: { parentPort: { postMessage: message => messages.push(message) } },
+    createSubscriptionBackgroundScheduler: value => { options = value; return {} },
+    fetchBackgroundSubscriptionChannel: async (configuration, feed, channel, signal, fetchText, parse) => parse('<feed/>'),
+    parseAndEnrichBackgroundFeed: async () => [{ id: 'video' }],
+    normalizeUploadEntries: entries => entries,
+    results: {}, processSubscriptionFeed() {}, fetchText() {}, JSON
+  })
+  vm.runInContext(source.slice(source.indexOf('let uploadChannels'), source.indexOf('\nfunction tick()')) + '\nglobalThis.methods = methods', context)
+  const fetch = (feed = 'videos') => options.fetchChannel({ instanceUrl: '' }, feed, 'UCtest', null)
+  await fetch()
+  context.methods.configureUploads({ enabled: true, channels: { UCtest: { feedTypes: ['videos'] } } })
+  await fetch('shorts')
+  assert.equal(messages.length, 0)
+  await fetch()
+  assert.deepEqual(messages.map(message => [message.type, message.channelId, message.feedType, message.entries.length]), [['uploads', 'UCtest', 'videos', 1]])
+  context.methods.configureUploads({ enabled: false })
+  await fetch()
+  assert.equal(messages.length, 1)
+})
+
 test('an already-aborted worker fetch rejects without sending an HTTP request', async () => {
   const source = await readFile(new URL('../../src/main/subscriptionBackgroundWorker.js', import.meta.url), 'utf8')
   const messages = []
