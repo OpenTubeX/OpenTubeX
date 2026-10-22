@@ -228,6 +228,9 @@ test.describe('Shorts transcript navigation', () => {
       .filter({ hasText: 'Use YouTube-style Shorts' })
       .click()
     await expect(toggle).not.toBeChecked()
+    // The checkbox changes before the queued setting write commits. The next
+    // video snapshots the store preference, so wait for that value too.
+    await expect.poll(() => page.evaluate(() => window.$store.getters.getUseCustomShortsPlayer)).toBe(false)
     await expect(page).toHaveURL(new RegExp(CAPTIONED_SHORT_IDS[0]))
     await expect(player).toHaveClass(/shortsPlayer/)
 
