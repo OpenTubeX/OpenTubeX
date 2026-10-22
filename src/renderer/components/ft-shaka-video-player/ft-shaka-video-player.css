@@ -11,6 +11,10 @@
   /* Width reserved for a docked side panel (chapters / fullscreen comments). */
   --side-panel-width: min(clamp(260px, 40%, 440px), 100%);
 
+  /* The mini player's morph blends between these corners. */
+  --inline-player-radius: calc(12px * var(--ui-roundness));
+  --scroll-mini-player-radius: calc(10px * var(--ui-roundness));
+
   display: flex;
   position: relative;
   font-family: var(--app-font-family);
@@ -38,7 +42,7 @@
 }
 
 .ftVideoPlayer:not(:fullscreen, .fullWindow) {
-  border-radius: calc(12px * var(--ui-roundness));
+  border-radius: var(--inline-player-radius);
 }
 
 /* Shaka sizes its center button as a percentage of the player width, which
@@ -5364,13 +5368,9 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   isolation: isolate;
 }
 
-.ftVideoPlayer[data-inline-mini-drag] > .player {
-  border-radius: inherit;
-}
-
 .ftVideoPlayer.scrollMiniPlayer {
   box-shadow: 0 8px 28px rgb(0 0 0 / 45%);
-  border-radius: calc(10px * var(--ui-roundness));
+  border-radius: var(--scroll-mini-player-radius);
 
   /* The mini player floats over the page, so nothing of it may be painted outside its frame. */
   overflow: clip;
@@ -5394,7 +5394,13 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 .ftVideoPlayer.scrollMiniPlayer > .player,
 .ftVideoPlayer.scrollMiniPlayer > .vrCanvas {
-  border-radius: calc(10px * var(--ui-roundness));
+  border-radius: var(--scroll-mini-player-radius);
+}
+
+/* Follow the morph's scale-compensated corners. A larger, scaled radius would
+   uncover the player's black background. */
+.ftVideoPlayer[data-inline-mini-drag] > :is(.player, .vrCanvas) {
+  border-radius: inherit;
 }
 
 .ftVideoPlayer.scrollMiniPlayer.shortsPlayer > .shortsTopControls,
