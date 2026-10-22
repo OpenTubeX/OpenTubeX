@@ -18,6 +18,24 @@ async function openPhoneVideo(app, page) {
   return button
 }
 
+/**
+ * An installed clock follows real time, so the rotation can be partway through
+ * its interval by the time a test advances the clock. Pause the clock and
+ * advance to the next rotation, then to the first comment, so the next
+ * rotation is due exactly five seconds later.
+ */
+async function alignRotationOnFirstComment(page, activeDot) {
+  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000))
+  const shown = await activeDot()
+  for (let step = 0; step < 6 && await activeDot() === shown; step++) {
+    await page.clock.fastForward(1000)
+  }
+  for (let step = 0; step < 5 && await activeDot() !== 0; step++) {
+    await page.clock.fastForward(5000)
+  }
+  expect(await activeDot()).toBe(0)
+}
+
 test('phone comment previews keep rotating while comments open and after focus returns on close', async ({ app, page }) => {
   await page.clock.install()
   const button = await openPhoneVideo(app, page)
@@ -62,8 +80,12 @@ test('phone comment preview rotates the first five comments and opens the commen
   await expect(open).toHaveAccessibleDescription(`${comments[0].author} ${comments[0].text.replaceAll(/\s+/g, ' ').trim()}`)
   await open.focus()
   await open.blur()
+  await alignRotationOnFirstComment(page, activeDot)
   await page.clock.fastForward(4000)
   await expect.poll(activeDot).toBe(0)
+  // Preview transitions need the clock. Each fastForward below still fires the
+  // rotation once, as the assertions between them take far less than five seconds.
+  await page.clock.resume()
   for (const index of [1, 2, 3, 4, 0]) {
     await page.clock.fastForward(index === 1 ? 1000 : 5000)
     await expect.poll(activeDot).toBe(index)
