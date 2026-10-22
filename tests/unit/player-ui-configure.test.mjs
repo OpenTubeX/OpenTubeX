@@ -4,7 +4,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 import { computed, nextTick, reactive, ref, watch } from 'vue'
 
-import { DEFAULT_CONTROL_BAR_BUTTONS, getControlBarButtonDefinitions } from '../../src/renderer/helpers/controlBarButtons.js'
+import { DEFAULT_CONTROL_BAR_BUTTONS, getRemovedControlBarButtons } from '../../src/renderer/helpers/controlBarButtons.js'
 
 const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
 
@@ -56,7 +56,7 @@ function setupPlayer({ theatrePossible = true, useSponsorBlock = true } = {}) {
     },
     isCapacitorMobilePlayer: () => false,
     DEFAULT_CONTROL_BAR_BUTTONS,
-    getControlBarButtonDefinitions,
+    getRemovedControlBarButtons,
     store: { getters: { getControlBarButtons: DEFAULT_CONTROL_BAR_BUTTONS } },
     isLive: ref(false),
     onlyUseOverFlowMenu: ref(false),
