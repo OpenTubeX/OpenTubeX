@@ -1663,14 +1663,11 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   -webkit-line-clamp: 2;
 }
 
-/*
-  Codec and bitrate labels can need more room than the other menu options, so
-  the tiles take the width of the longest label (`updateQualityTileSize`).
-*/
+/* Bitrate labels can need more room than the other menu options, so each tile grows to fit its label. */
 :deep(.shaka-sub-menu.ft-menu-grid > button.explicit-resolution) {
   flex-wrap: nowrap;
   align-items: center;
-  inline-size: var(--ft-quality-tile-size, max-content);
+  inline-size: max-content;
   min-inline-size: 90px;
   max-inline-size: 100%;
   padding-inline: 12px;

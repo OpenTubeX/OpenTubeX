@@ -111,7 +111,7 @@ test.describe('resolution badges', { tag: '@scale' }, () => {
     }
   })
 
-  test('quality tiles are one size and only as wide as the longest label', async ({ app, page }) => {
+  test('quality tiles grow to fit their own label', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     const video = await openMockedVideo(page)
     await video.evaluate(element => element.pause())
@@ -127,10 +127,11 @@ test.describe('resolution badges', { tag: '@scale' }, () => {
     await showResolutionTiles(menu, [['1080p60', 'HD'], ['720p', ''], ['144p', '']])
     await expect.poll(async () => (await tileWidths(menu)).every(width => Math.abs(width - 90) < 1)).toBe(true)
 
-    await showResolutionTiles(menu, [['1080p60 HDR VP9', 'HD'], ['720p', ''], ['144p', '']])
+    // Only a label that needs the room widens its tile
+    await showResolutionTiles(menu, [['1080p60 (12.5 Mbps)', 'HD'], ['720p', ''], ['144p', '']])
     await expect.poll(async () => {
-      const widths = await tileWidths(menu)
-      return widths.every(width => Math.abs(width - widths[0]) < 1) && widths[0] > 100
+      const [wide, ...short] = await tileWidths(menu)
+      return wide > 100 && short.every(width => Math.abs(width - 90) < 1)
     }).toBe(true)
   })
 })
