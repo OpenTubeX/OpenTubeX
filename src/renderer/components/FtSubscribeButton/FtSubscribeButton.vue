@@ -792,10 +792,12 @@ function updateFeedType(feedType, enabled, key = 'feedTypes') {
  * @param {boolean} enabled
  */
 async function updateNotifications(enabled) {
+  // Saves of different channels run independently, so only the latest click confirms.
+  const click = ++latestBellClick
   const saved = await persistChannelSettings({
     notificationFeedTypes: enabled ? feedTypes.value.map(feedType => feedType.id) : []
   })
-  if (saved) showNotificationsToast(enabled)
+  if (saved && click === latestBellClick) showNotificationsToast(enabled)
 }
 
 /**
@@ -953,10 +955,9 @@ function isProfileSubscribed(profile) {
 </script>
 
 <script>
-/**
- * Shared by every subscribe button so a bell toast replaces the one from another channel.
- * @type {AbortController | null}
- */
+// Shared by every subscribe button so bell feedback follows the latest click on any channel.
+let latestBellClick = 0
+/** @type {AbortController | null} */
 let notificationsToastController = null
 </script>
 
