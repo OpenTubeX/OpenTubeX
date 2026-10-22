@@ -117,9 +117,11 @@ test('background playlist imports restore missing authors and keep explicit byli
 test('background Yattee Shorts are dated through the server instead of YouTube', async () => {
   const cache = { UCchannel: { videos: [{ videoId: 'known', published: 1000 }] } }
   const lookups = []
+  const published = []
   let saved
   const context = vm.createContext({
     console, Date,
+    notifySubscriptionChannelRefreshed: tab => published.push(tab),
     store: {
       getters: {
         getBackendPreference: 'yattee',
@@ -146,6 +148,7 @@ test('background Yattee Shorts are dated through the server instead of YouTube',
   })
   assert.deepEqual(saved.map(video => video.published), [1000, 2000])
   assert.deepEqual(lookups, ['new'])
+  assert.deepEqual(published, ['shorts'])
 })
 
 test('separate Electron renderers serialize background result imports', async () => {
