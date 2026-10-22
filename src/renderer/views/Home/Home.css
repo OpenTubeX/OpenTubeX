@@ -96,7 +96,6 @@
   margin-inline: 0;
 }
 
-.homeHeading,
 .sectionHeading {
   display: flex;
   align-items: center;
@@ -104,8 +103,22 @@
   gap: 16px;
 }
 
+/* The button shares the title's line, and the description runs below both */
 .homeHeading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 16px;
   padding-block-start: var(--page-title-offset);
+}
+
+.homeHeading p {
+  grid-column: 1 / -1;
+}
+
+.homeHeading :deep(.btn) {
+  grid-area: 1 / 2;
+  margin-block: 0;
 }
 
 .sectionHeading :deep(h2) {
@@ -439,11 +452,13 @@
 
 @media only screen and (width <= 520px) {
   .homeHeading {
-    align-items: flex-start;
-    flex-direction: column;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .homeHeading :deep(.btn) {
+    grid-area: auto;
+    justify-self: start;
+    margin-block-start: 16px;
     margin-inline: 0;
   }
 

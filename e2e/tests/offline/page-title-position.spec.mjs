@@ -99,6 +99,19 @@ test.describe('main page titles', { tag: '@scale' }, () => {
     })
   }
 
+  test('centers the Home Customize button on the title line', async ({ app, page, uiScale }) => {
+    await openPage(app, page, uiScale, 'home', DESKTOP)
+
+    const centers = await page.evaluate(() => {
+      const center = rect => rect.top + rect.height / 2
+      return {
+        title: center(document.querySelector('.homeHeading .pageTitle').getBoundingClientRect()),
+        button: center(document.querySelector('.homeHeading .btn').getBoundingClientRect())
+      }
+    })
+    expect(centers.button).toBeCloseTo(centers.title, 0)
+  })
+
   test('keeps the phone subscription tabs clear of the title', async ({ app, page, uiScale }) => {
     await openPage(app, page, uiScale, 'subscriptions', PHONE)
 
