@@ -42,9 +42,9 @@ function voidProjections(bytes, start, end, depth) {
     const dataOffset = sizeOffset + sizeLength
     if (sizeLength > 8 || dataOffset > end) break
 
-    const size = readUint(bytes, sizeOffset, sizeLength) - 2 ** (7 * sizeLength)
-    // All size bits set means unknown size, which extends to the end of the parent
-    const unknownSize = size === 2 ** (7 * sizeLength) - 1
+    const size = readVintValue(bytes, sizeOffset, sizeLength)
+    const unknownSize = isUnknownSize(bytes, sizeOffset, sizeLength)
+    // Unknown sizes, and sizes past the buffer (including inexact ones above 2^53), end with the parent
     const dataEnd = unknownSize ? end : Math.min(dataOffset + size, end)
 
     if (depth === PROJECTION_PARENT_IDS.length && id === PROJECTION_ID && sizeLength < 8 && !unknownSize) {
@@ -80,6 +80,32 @@ function readUint(bytes, offset, length) {
   let value = 0
   for (let i = 0; i < length; i++) value = value * 256 + bytes[offset + i]
   return value
+}
+
+/**
+ * Removes the length marker before accumulating, so 8-byte sizes below 2^53 stay exact.
+ * @param {Uint8Array} bytes
+ * @param {number} offset
+ * @param {number} length
+ */
+function readVintValue(bytes, offset, length) {
+  let value = bytes[offset] & (0xFF >> length)
+  for (let i = 1; i < length; i++) value = value * 256 + bytes[offset + i]
+  return value
+}
+
+/**
+ * All value bits set means the size is unknown.
+ * @param {Uint8Array} bytes
+ * @param {number} offset
+ * @param {number} length
+ */
+function isUnknownSize(bytes, offset, length) {
+  if ((bytes[offset] & (0xFF >> length)) !== 0xFF >> length) return false
+  for (let i = 1; i < length; i++) {
+    if (bytes[offset + i] !== 0xFF) return false
+  }
+  return true
 }
 
 /**

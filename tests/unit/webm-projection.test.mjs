@@ -60,3 +60,23 @@ test('leaves rectangular WebM and other containers untouched', () => {
     assert.deepEqual(copy, data)
   }
 })
+
+test('reads 8-byte placeholder sizes of the Projection parents exactly', () => {
+  /**
+   * @param {number[]} data
+   */
+  const size8 = data => `01${data.length.toString(16).padStart(14, '0')}`
+
+  // Padding the audio track covers every size modulo 16
+  for (let padding = 0; padding < 16; padding++) {
+    const audioData = [...element('d7', [1]), ...element('86', [...Buffer.from('A_OPUS')]), ...element('ec', Array(padding).fill(0))]
+    const videoData = [...element('b0', [0x01, 0x00]), ...projection]
+    const videoTrackData = [...element('d7', [2]), ...element('e0', videoData, size8(videoData))]
+    const tracksData = [...element('ae', audioData, size8(audioData)), ...element('ae', videoTrackData, size8(videoTrackData))]
+    const data = Uint8Array.from([
+      ...ebmlHeader,
+      ...element('18538067', element('1654ae6b', tracksData, size8(tracksData)), '01ffffffffffffff')
+    ])
+    assert.equal(voidWebmProjection(data), true, `padding ${padding}`)
+  }
+})
