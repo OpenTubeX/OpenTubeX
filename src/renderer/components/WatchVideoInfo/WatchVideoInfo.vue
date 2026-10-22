@@ -77,7 +77,10 @@
         :dislike-count="useReturnYoutubeDislikes ? dislikeCount : null"
       />
     </div>
-    <div class="videoButtons">
+    <div
+      ref="videoButtons"
+      class="videoButtons"
+    >
       <div
         class="profileRow"
       >
@@ -160,14 +163,19 @@
           @close="showCollaboratorsPrompt = false"
         />
       </div>
-      <div class="videoOptions">
+      <div
+        ref="videoOptions"
+        class="videoOptions"
+        :class="{ compact: optionsCompact }"
+      >
         <span class="videoOptionsMobileRow">
           <slot name="cast-action" />
           <FtIconButton
             v-if="showPlaylists && !isUpcoming && !hidePlaylistActions"
             :title="t('User Playlists.Add to Playlist')"
             :icon="isInAnyPlaylist ? ['fac', 'playlist-check'] : ['fac', 'playlist-add']"
-            theme="base"
+            theme="base-no-default"
+            :use-shadow="false"
             force-dropdown
             mobile-sheet
           >
@@ -182,12 +190,15 @@
               bookmarked: isInQuickBookmarkPlaylist,
             }"
             :theme="quickBookmarkIconTheme"
+            :use-shadow="false"
             @click="toggleQuickBookmarked"
           />
           <FtIconButton
             v-if="canSaveWatchedProgress && watchedProgressSavingInSemiAutoMode"
             :title="t('Video.Save Watched Progress')"
             :icon="['fas', 'bars-progress']"
+            theme="base-no-default"
+            :use-shadow="false"
             @click="saveWatchedProgressManually"
           />
           <FtIconButton
@@ -196,6 +207,8 @@
             :title="t('Video.Save Channel Setting')"
             :icon="['fas', 'floppy-disk']"
             :overlay-icon="channelSettingSaveActions.some(action => action.saved) ? ['fas', 'check'] : null"
+            theme="base-no-default"
+            :use-shadow="false"
             :dropdown-portal="channelSettingDropdownPortal"
             dropdown-class="channelSettingsDropdown"
             dropdown-position-x="left"
@@ -233,14 +246,18 @@
             v-if="useSponsorBlock && !isUpcoming && !hideFullscreenDockActions"
             :title="sponsorBlockInfoTitle"
             :icon="['fas', 'shield-halved']"
-            :theme="sponsorBlockPanelOpen ? 'secondary' : 'base'"
+            :class="{ toolbarActive: sponsorBlockPanelOpen }"
+            theme="base-no-default"
+            :use-shadow="false"
             @click="emit('toggle-sponsorblock-info')"
           />
           <FtIconButton
             v-if="liveChatAvailable && !hideFullscreenDockActions"
             :title="liveChatToggleTitle"
             :icon="['fas', 'message']"
-            :theme="liveChatOpen ? 'secondary' : 'base'"
+            :class="{ toolbarActive: liveChatOpen }"
+            theme="base-no-default"
+            :use-shadow="false"
             :aria-pressed="liveChatOpen"
             @click="emit('toggle-live-chat')"
           />
@@ -248,36 +265,35 @@
             v-if="transcriptAvailable && !isLive && !isUpcoming && !hideFullscreenDockActions"
             :title="transcriptOpen ? t('Video.Transcript.Hide') : t('Video.Transcript.Show')"
             :icon="['fas', 'file-lines']"
-            :theme="transcriptOpen ? 'secondary' : 'base'"
+            :class="{ toolbarActive: transcriptOpen }"
+            theme="base-no-default"
+            :use-shadow="false"
             @click="emit('toggle-transcript')"
           />
           <FtIconButton
             v-if="metadataHistory"
             :title="t('Settings.Privacy Settings.Cache Video Metadata')"
             :icon="['fas', 'clock-rotate-left']"
+            theme="base-no-default"
+            :use-shadow="false"
             @click="showMetadataHistory = true"
           />
         </span>
         <span class="videoOptionsMobileRow">
           <FtIconButton
-            v-if="!offline && supportsYtDlp && enableDownloads && !isUpcoming"
-            :title="t('Downloads.Download Video')"
-            :icon="['fas', 'download']"
-            theme="secondary"
-            @click="emit('open-download')"
-          />
-          <FtIconButton
             v-if="!offline && USING_ELECTRON && externalPlayer !== ''"
             :title="t('Video.External Player.OpenInTemplate', { externalPlayer })"
             :icon="['fas', 'external-link-alt']"
-            theme="secondary"
+            theme="base-no-default"
+            :use-shadow="false"
             @click="handleExternalPlayer"
           />
           <FtIconButton
             v-if="!isUpcoming && (!offline || localPlaybackDownloads.length > 0)"
             :title="t('Change Format.Change Media Formats')"
-            theme="secondary"
             :icon="['fas', 'file-video']"
+            theme="base-no-default"
+            :use-shadow="false"
             @click="openFormatPrompt"
           />
           <FtShareButton
@@ -285,7 +301,24 @@
             :id="id"
             :get-timestamp="getTimestamp"
             :playlist-id="playlistId"
+            theme="base-no-default"
+            :use-shadow="false"
           />
+          <FtButton
+            v-if="!offline && supportsYtDlp && enableDownloads && !isUpcoming"
+            class="downloadButton"
+            :title="t('Downloads.Download Video')"
+            :aria-label="t('Downloads.Download Video')"
+            :icon="['fas', 'download']"
+            theme="secondary"
+            variant="filled"
+            shape="square"
+            @click="emit('open-download')"
+          >
+            <template #label>
+              <span class="downloadLabel">{{ t('Downloads.Download') }}</span>
+            </template>
+          </FtButton>
         </span>
       </div>
     </div>
@@ -322,10 +355,11 @@ import FtRetryImage from '../FtRetryImage.vue'
 import { ytDlp } from '../../helpers/ytDlp'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
-import { computed, ref, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtAddToPlaylistDropdown from '../FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
+import FtButton from '../FtButton/FtButton.vue'
 import FtInlineMetadata from '../FtInlineMetadata/FtInlineMetadata.vue'
 import FtCard from '../ft-card/ft-card.vue'
 import FtCollaboratorsPrompt from '../FtCollaboratorsPrompt/FtCollaboratorsPrompt.vue'
@@ -599,6 +633,57 @@ const relativeTimeNow = useRelativeTimeClock()
 const showCollaboratorsPrompt = ref(false)
 const showFormatPrompt = ref(false)
 const showMetadataHistory = ref(false)
+
+const videoButtons = useTemplateRef('videoButtons')
+const videoOptions = useTemplateRef('videoOptions')
+const optionsCompact = ref(false)
+let labeledDownloadWidth = 0
+let optionsLayoutFrame = null
+
+/**
+ * Hides the Download label when the toolbar with the label would be wider than
+ * the card. CSS cannot measure how wide the toolbar would be with the label
+ * shown once it is hidden.
+ */
+function updateOptionsLayout() {
+  const row = videoButtons.value
+  const toolbar = videoOptions.value
+  if (!row || !toolbar || row.clientWidth === 0) { return }
+
+  const download = toolbar.querySelector('.downloadButton')
+  const downloadWidth = download?.getBoundingClientRect().width ?? 0
+  if (!optionsCompact.value) {
+    labeledDownloadWidth = downloadWidth
+  }
+
+  const style = getComputedStyle(toolbar)
+  const groups = [...toolbar.children].filter(group => group.getClientRects().length > 0)
+  const contentWidth = groups.reduce((width, group) => width + group.getBoundingClientRect().width, 0) +
+    parseFloat(style.columnGap) * Math.max(groups.length - 1, 0) +
+    parseFloat(style.paddingInlineStart) + parseFloat(style.paddingInlineEnd)
+
+  optionsCompact.value = contentWidth - downloadWidth + labeledDownloadWidth > row.clientWidth + 0.5
+}
+
+function scheduleOptionsLayout() {
+  cancelAnimationFrame(optionsLayoutFrame)
+  optionsLayoutFrame = requestAnimationFrame(updateOptionsLayout)
+}
+
+const optionsResizeObserver = new ResizeObserver(scheduleOptionsLayout)
+
+onMounted(() => {
+  optionsResizeObserver.observe(videoButtons.value)
+  for (const group of videoOptions.value.children) {
+    optionsResizeObserver.observe(group)
+  }
+  updateOptionsLayout()
+})
+
+onBeforeUnmount(() => {
+  optionsResizeObserver.disconnect()
+  cancelAnimationFrame(optionsLayoutFrame)
+})
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
 
 const liveChatToggleTitle = computed(() => {
@@ -1005,7 +1090,7 @@ const quickBookmarkIconText = computed(() => {
     : t('User Playlists.Add to Favorites', translationProperties)
 })
 
-const quickBookmarkIconTheme = computed(() => isInQuickBookmarkPlaylist.value ? 'base favorite' : 'base')
+const quickBookmarkIconTheme = computed(() => isInQuickBookmarkPlaylist.value ? 'base-no-default favorite' : 'base-no-default')
 
 function toggleQuickBookmarked() {
   if (!isQuickBookmarkEnabled.value) {

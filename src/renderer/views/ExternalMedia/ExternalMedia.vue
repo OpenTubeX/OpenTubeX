@@ -215,17 +215,12 @@
               >{{ hostname }}</a>
               <div class="externalMediaActions">
                 <FtIconButton
-                  v-if="enableDownloads && source && !source.twitchSubOnlyVod"
-                  :title="t('Downloads.Download Video')"
-                  :icon="['fas', 'download']"
-                  theme="secondary"
-                  @click="showDownloadPrompt = true"
-                />
-                <FtIconButton
                   v-if="chatAvailable"
                   :title="chatToggleTitle"
                   :icon="['fas', 'message']"
-                  :theme="chatOpen ? 'secondary' : 'base'"
+                  :class="{ toolbarActive: chatOpen }"
+                  theme="base-no-default"
+                  :use-shadow="false"
                   :aria-pressed="chatOpen"
                   @click="toggleChat"
                 />
@@ -233,6 +228,20 @@
                   v-if="!hideSharingActions"
                   id=""
                   :external-url="mediaUrl"
+                  theme="base-no-default"
+                  :use-shadow="false"
+                />
+                <FtButton
+                  v-if="enableDownloads && source && !source.twitchSubOnlyVod"
+                  class="downloadButton"
+                  :title="t('Downloads.Download Video')"
+                  :aria-label="t('Downloads.Download Video')"
+                  :label="t('Downloads.Download')"
+                  :icon="['fas', 'download']"
+                  theme="secondary"
+                  variant="filled"
+                  shape="square"
+                  @click="showDownloadPrompt = true"
                 />
               </div>
             </div>
@@ -1191,8 +1200,49 @@ onBeforeUnmount(() => {
   align-items: center;
   display: flex;
   flex: 0 0 auto;
-  gap: 4px;
+  gap: 2px;
   margin-inline-start: auto;
+  padding: 5px;
+  border-radius: calc(16px * var(--ui-roundness));
+  background-color: var(--secondary-card-bg-color);
+  backdrop-filter: var(--secondary-card-bg-blur, none);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 30%);
+}
+
+.externalMediaActions:empty {
+  display: none;
+}
+
+.externalMediaActions :deep(.iconButton) {
+  position: relative;
+  border-radius: calc(11px * var(--ui-roundness));
+  color: var(--tertiary-text-color);
+}
+
+.externalMediaActions :deep(.iconButton:not(.disabled):is(:hover, :focus-visible, .pressed)) {
+  color: var(--primary-text-color);
+}
+
+.externalMediaActions .toolbarActive :deep(.iconButton) {
+  color: var(--accent-color);
+}
+
+.externalMediaActions .toolbarActive :deep(.iconButton)::after {
+  content: '';
+  position: absolute;
+  inset-block-end: 4px;
+  inset-inline-start: calc(50% - 2px);
+  inline-size: 4px;
+  block-size: 4px;
+  border-radius: 50%;
+  background-color: currentcolor;
+}
+
+.externalMediaActions .downloadButton {
+  min-block-size: 40px;
+  margin: 0;
+  margin-inline-start: 4px;
+  padding-inline: 12px 14px;
 }
 
 .externalMediaCreatorProfile {
