@@ -124,12 +124,25 @@ function serialize(value, depth, seen) {
     }
     if (depth >= MAX_DEPTH) return Array.isArray(value) ? '[Array]' : '[Object]'
     if (Array.isArray(value)) return serializeList(value, depth, seen)
-    if (value instanceof Map) return `Map(${value.size}) ${serializeEntries([...value].slice(0, MAX_ITEMS), depth, seen, '{', '}', value.size)}`
-    if (value instanceof Set) return `Set(${value.size}) ${serializeList([...value], depth, seen)}`
-    const entries = Object.entries(value)
+    // Only read the items that are kept, so huge collections and objects
+    // with expensive getters cost no more than small ones
+    if (value instanceof Map) return `Map(${value.size}) ${serializeEntries(firstItems(value), depth, seen, '{', '}', value.size)}`
+    if (value instanceof Set) return `Set(${value.size}) ${serializeList(firstItems(value), depth, seen, value.size)}`
+    const entries = []
+    let total = 0
+    for (const key in value) {
+      if (!Object.hasOwn(value, key)) continue
+      // An unknown total is reported as more without counting the rest
+      if (entries.length === MAX_ITEMS) {
+        total = Infinity
+        break
+      }
+      entries.push([key, value[key]])
+      total++
+    }
     const name = value.constructor?.name
     const prefix = name && name !== 'Object' ? `${name} ` : ''
-    return `${prefix}${serializeEntries(entries.slice(0, MAX_ITEMS), depth, seen, '{', '}', entries.length)}`
+    return `${prefix}${serializeEntries(entries, depth, seen, '{', '}', total)}`
   } catch {
     return '[Unserializable]'
   } finally {
@@ -137,9 +150,23 @@ function serialize(value, depth, seen) {
   }
 }
 
-function serializeList(items, depth, seen) {
+function firstItems(iterable) {
+  const items = []
+  for (const item of iterable) {
+    if (items.length === MAX_ITEMS) break
+    items.push(item)
+  }
+  return items
+}
+
+function moreItems(total, shown) {
+  if (total <= shown) return []
+  return [total === Infinity ? '… more' : `… ${total - shown} more`]
+}
+
+function serializeList(items, depth, seen, total = items.length) {
   const values = items.slice(0, MAX_ITEMS).map(item => serialize(item, depth + 1, seen))
-  if (items.length > MAX_ITEMS) values.push(`… ${items.length - MAX_ITEMS} more`)
+  values.push(...moreItems(total, values.length))
   return `[${values.join(', ')}]`
 }
 
@@ -148,7 +175,7 @@ function serializeEntries(entries, depth, seen, open, close, total = entries.len
     const name = typeof key === 'string' ? key : serialize(key, depth + 1, seen)
     return `${name}: ${SENSITIVE_KEY.test(name) ? REDACTED : serialize(child, depth + 1, seen)}`
   })
-  if (total > entries.length) values.push(`… ${total - entries.length} more`)
+  values.push(...moreItems(total, entries.length))
   return `${open}${values.join(', ')}${close}`
 }
 

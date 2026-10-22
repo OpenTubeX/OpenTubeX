@@ -76,6 +76,30 @@ test('format substitutions, circular values and long messages are handled', () =
   assert.ok(formatDiagnosticMessage(['x'.repeat(DIAGNOSTIC_ENTRY_MAX_LENGTH + 10)]).endsWith('… (10 more characters)'))
 })
 
+test('collections are only read as far as the serialized items', () => {
+  let reads = 0
+  const object = {}
+  for (let index = 0; index < 1000; index++) {
+    Object.defineProperty(object, `key${index}`, { enumerable: true, get: () => { reads++; return index } })
+  }
+  assert.match(formatDiagnosticMessage([object]), /^\{key0: 0, .*key24: 24, … more\}$/)
+  assert.equal(reads, 25)
+
+  let iterated = 0
+  class CountingSet extends Set {
+    * [Symbol.iterator] () {
+      for (const item of super.values()) {
+        iterated++
+        yield item
+      }
+    }
+  }
+  const set = new CountingSet(Array.from({ length: 1000 }, (_, index) => index))
+  assert.match(formatDiagnosticMessage([set]), /^Set\(1000\) \[0, .*24, … 975 more\]$/)
+  assert.ok(iterated <= 26, `iterated ${iterated} items`)
+  assert.match(formatDiagnosticMessage([new Map([['a', 1], ['b', 2]])]), /^Map\(2\) \{a: 1, b: 2\}$/)
+})
+
 test('the log keeps only the newest entries', () => {
   const log = createDiagnosticLog(2)
   for (const message of ['a', 'b', 'c']) log.add({ time: 0, level: 'log', source: 'main', message })
