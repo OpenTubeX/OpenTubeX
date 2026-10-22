@@ -2835,7 +2835,16 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   flex-direction: column;
   gap: 10px;
   max-height: min(45vh, 360px);
+
+  /* Span the menu's end padding so the scrollbar rests at the panel edge. */
+  margin-inline-end: -12px;
+  padding-inline-end: 12px;
   overflow: hidden auto;
+}
+
+/* Reserve the scrollbar gutter only while the list actually scrolls. */
+.sponsorBlockSubmissionSegments:has(> .os-scrollbar-vertical:not(.os-scrollbar-unusable)) {
+  padding-inline-end: calc(var(--scrollbar-track-width) + 4px);
 }
 
 .sponsorBlockDraftSegment {
