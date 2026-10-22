@@ -58,6 +58,7 @@ const ShakaError = shaka.util.Error
  * @property {number} cumulativeBackOffTimeMs
  * @property {number} cumulativeBackOffRequested
  * @property {number} cumulativeRetryDueToNextRequestPolicy
+ * @property {number} startedAtMs
  */
 /**
  * @typedef SabrStreamState
@@ -214,6 +215,30 @@ function createCacheResponse(uri, request, data) {
  */
 function createRecoverableNetworkError(code, ...args) {
   return new ShakaError(ShakaError.Severity.RECOVERABLE, ShakaError.Category.NETWORK, code, ...args)
+}
+
+/**
+ * Shaka retries a failed segment without reporting the attempts, so diagnostic
+ * reports would only show the final error. Log each attempt with how much of
+ * the segment arrived and how long it took.
+ * @param {OperationInputs} operationInputs
+ * @param {CurrentState} currentState
+ * @param {string} reason
+ * @param {{ status?: number, receivedBytes?: number, expectedBytes?: number }} details
+ */
+function warnSabrRequestFailure(operationInputs, currentState, reason, details = {}) {
+  // Requests still running when the player reloads abort with errors too
+  if (currentState.sabrStreamState.playerReloadRequested) return
+
+  const facts = []
+  if (details.status !== undefined) facts.push(`HTTP ${details.status}`)
+  if (details.receivedBytes !== undefined) {
+    facts.push(details.expectedBytes === undefined
+      ? `received ${details.receivedBytes} media bytes`
+      : `received ${details.receivedBytes} of ${details.expectedBytes} media bytes`)
+  }
+  facts.push(`after ${Date.now() - currentState.startedAtMs} ms`)
+  console.warn(`SABR request ${operationInputs.uri} failed: ${reason} (${facts.join(', ')})`)
 }
 
 /**
@@ -565,8 +590,14 @@ async function doRequest(
     if (currentState.abortStatus.cancelled) {
       throw createRecoverableNetworkError(ShakaError.Code.OPERATION_ABORTED, operationInputs.uri, operationInputs.requestType)
     } else if (currentState.abortStatus.timedOut) {
+      warnSabrRequestFailure(operationInputs, currentState, 'timed out', { receivedBytes: receivedMediaLength, expectedBytes: expectedMediaLength })
       throw createRecoverableNetworkError(ShakaError.Code.TIMEOUT, operationInputs.uri, operationInputs.requestType)
     } else if (!currentState.abortStatus.finished) {
+      warnSabrRequestFailure(operationInputs, currentState, `connection error: ${error?.message ?? error}`, {
+        status: response?.status,
+        receivedBytes: receivedMediaLength,
+        expectedBytes: expectedMediaLength,
+      })
       throw createRecoverableNetworkError(ShakaError.Code.HTTP_ERROR, operationInputs.uri, error, operationInputs.requestType)
     }
   }
@@ -574,10 +605,12 @@ async function doRequest(
   if (currentState.abortStatus.cancelled) {
     throw createRecoverableNetworkError(ShakaError.Code.OPERATION_ABORTED, operationInputs.uri, operationInputs.requestType)
   } else if (currentState.abortStatus.timedOut) {
+    warnSabrRequestFailure(operationInputs, currentState, 'timed out', { receivedBytes: receivedMediaLength, expectedBytes: expectedMediaLength })
     throw createRecoverableNetworkError(ShakaError.Code.TIMEOUT, operationInputs.uri, operationInputs.requestType)
   }
 
   if (!response.ok) {
+    warnSabrRequestFailure(operationInputs, currentState, 'bad HTTP status', { status: response.status })
     const severity = response.status === 401 || response.status === 403
       ? ShakaError.Severity.CRITICAL
       : ShakaError.Severity.RECOVERABLE
@@ -619,6 +652,7 @@ async function doRequest(
       originalRequest: operationInputs.request,
     }
   } else if (invalidPoToken) {
+    warnSabrRequestFailure(operationInputs, currentState, 'invalid PO token', { status: response.status })
     throw new ShakaError(
       ShakaError.Severity.CRITICAL,
       ShakaError.Category.NETWORK,
@@ -628,6 +662,11 @@ async function doRequest(
       operationInputs.requestType,
     )
   } else if (error) {
+    warnSabrRequestFailure(operationInputs, currentState, error, {
+      status: response.status,
+      receivedBytes: receivedMediaLength,
+      expectedBytes: expectedMediaLength,
+    })
     throw createRecoverableNetworkError(
       ShakaError.Code.HTTP_ERROR,
       operationInputs.uri,
@@ -635,6 +674,11 @@ async function doRequest(
       operationInputs.requestType,
     )
   } else if (responseDataChunks.length > 0 && !segmentComplete) {
+    warnSabrRequestFailure(operationInputs, currentState, 'response ended before MEDIA_END', {
+      status: response.status,
+      receivedBytes: receivedMediaLength,
+      expectedBytes: expectedMediaLength,
+    })
     throw createRecoverableNetworkError(
       ShakaError.Code.HTTP_ERROR,
       operationInputs.uri,
@@ -682,6 +726,7 @@ async function doRequest(
     currentState.abortStatus.finished = false
     return doRequest(operationInputs, currentState)
   } else {
+    warnSabrRequestFailure(operationInputs, currentState, 'empty response', { status: response.status })
     throw createRecoverableNetworkError(
       ShakaError.Code.HTTP_ERROR,
       operationInputs.uri,
@@ -949,6 +994,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
       cumulativeBackOffTimeMs: 0,
       cumulativeBackOffRequested: 0,
       cumulativeRetryDueToNextRequestPolicy: 0,
+      startedAtMs: Date.now(),
     }
 
     const pendingRequest = doRequest(opInputs, currentState)

@@ -67,6 +67,30 @@ test('rejects a SABR segment shorter than its declared content length', async ()
   transport.cleanup()
 })
 
+test('logs each truncated SABR attempt with the bytes that arrived', async () => {
+  const warnings = []
+  const { createSabrTransport } = load(async () => {
+    const buffer = new CompositeBuffer([])
+    const writer = new UmpWriter(buffer)
+    writer.write(protos.UMPPartId.MEDIA_HEADER, protos.MediaHeader.encode({
+      headerId: 1, formatId: audioFormatId, sequenceNumber: 1, contentLength: 3,
+    }).finish())
+    writer.write(protos.UMPPartId.MEDIA, Uint8Array.of(1, 1, 2))
+    return new Response(utils.concatenateChunks(buffer.chunks))
+  }, { console: { ...console, warn: message => warnings.push(message) } })
+  const transport = createSabrTransport(sabrData, () => context)
+  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+  for (let attempt = 0; attempt < 2; attempt++) {
+    await assert.rejects(transport.request(uri, request(uri), 1).promise,
+      error => error.code === ShakaError.Code.HTTP_ERROR)
+  }
+  assert.equal(warnings.length, 2)
+  for (const warning of warnings) {
+    assert.match(warning, /^SABR request sabr1:audio\?formatId=140-123-&sq=1 failed: response ended before MEDIA_END \(HTTP 200, received 2 of 3 media bytes, after \d+ ms\)$/)
+  }
+  transport.cleanup()
+})
+
 test('rejects media bytes when the SABR header declares zero content length', async () => {
   const { createSabrTransport } = load(async () => response([1], false, audioFormatId, 0))
   const transport = createSabrTransport(sabrData, () => context)

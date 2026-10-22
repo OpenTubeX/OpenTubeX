@@ -162,6 +162,8 @@ for (const reloadRequest of [false, true]) {
     await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
     const watchView = await watchViewHandle(page)
     await watchView.evaluate(view => view.$store.dispatch('updatePlaybackEngineFallback', false))
+    const messages = []
+    page.on('console', message => messages.push(message.text()))
 
     const result = await driveWatchView(page, Array.from({ length: 4 }, () => (
       reloadRequest ? { reloadRequest: true } : { error: true }
@@ -171,6 +173,16 @@ for (const reloadRequest of [false, true]) {
     expect(result.activePlaybackEngine).toBe('built-in')
     expect(result.playbackEngineFallbackAttempted).toBe(false)
     expect(result.errorMessage).toContain('Unable to recover the video stream')
+
+    // Diagnostic reports must show each reload against the limits and why recovery stopped
+    await expect.poll(() => messages.filter(message => /SABR|Showing error/.test(message))).toEqual([
+      ...Array.from({ length: MAX_SABR_ERROR_RECOVERIES }, (_, index) => expect.stringMatching(new RegExp(
+        `^${result.reloads[index]} for jNQXAC9IVRw at \\d+s and [\\d.]+x speed\\. Reload ${index + 1} of ${MAX_SABR_ERROR_RECOVERIES} ` +
+        `since playback last settled, ${index + 1} of ${MAX_SABR_ERROR_RECOVERIES_PER_VIDEO} for this video$`
+      ))),
+      `Not reloading the SABR stream for jNQXAC9IVRw after ${MAX_SABR_ERROR_RECOVERIES} reloads since playback last settled and ${MAX_SABR_ERROR_RECOVERIES} for this video`,
+      `Showing error for jNQXAC9IVRw: ${result.errorMessage}`,
+    ])
   })
 }
 
