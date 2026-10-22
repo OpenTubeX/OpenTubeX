@@ -2,15 +2,12 @@ package org.opentubex.app;
 
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.SystemClock;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
-import androidx.work.Data;
-import androidx.work.ExistingWorkPolicy;
-import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkManager;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
@@ -28,11 +25,12 @@ import java.util.function.Consumer;
 
 public final class SubscriptionRefreshWorker extends Worker {
     private static final String LOG_TAG = "OpenTubeXFetch";
-    private static final String UNIQUE_WORK_NAME = "subscription-refresh";
-    private static final String TOKEN_INPUT = "token";
     static final String FEED_TYPE_INPUT = "feedType";
     private static final long MAXIMUM_BATCH_MILLIS = 5 * 60 * 1000;
     private static final SubscriptionRefreshState STATE = new SubscriptionRefreshState();
+    // Scheduled workers have no renderer state, but still need their last
+    // progress and notification labels when the app returns to the background.
+    private static SubscriptionRefreshState.Snapshot lastNotificationSnapshot;
 
     static boolean isRendererActive(String token) {
         return STATE.snapshot(token) != null;
@@ -58,19 +56,33 @@ public final class SubscriptionRefreshWorker extends Worker {
     static synchronized boolean start(Context context, String token, String title, String cancelLabel) {
         if (!SubscriptionRefreshCoordinator.begin(token)) return false;
         STATE.begin(token, title, cancelLabel);
-        Data input = new Data.Builder()
-            .putString(TOKEN_INPUT, token)
-            .putString("cancelLabel", cancelLabel)
-            .build();
-        OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(SubscriptionRefreshWorker.class)
-            .setInputData(input)
-            .build();
-        WorkManager.getInstance(context).enqueueUniqueWork(
-            UNIQUE_WORK_NAME,
-            ExistingWorkPolicy.REPLACE,
-            request
-        );
+        onAppVisibilityChanged(context);
         return true;
+    }
+
+    static synchronized SubscriptionRefreshState.Snapshot rendererSnapshot() {
+        return STATE.snapshot(SubscriptionRefreshCoordinator.snapshot().token());
+    }
+
+    static synchronized void onAppVisibilityChanged(Context context) {
+        Intent service = new Intent(context, SubscriptionRefreshService.class);
+        if (AppVisibility.isVisible()) {
+            SubscriptionRefreshService.stopIfStarted(context);
+            context.getSystemService(NotificationManager.class)
+                .cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);
+        } else if (rendererSnapshot() != null) {
+            SubscriptionRefreshState.Snapshot state = rendererSnapshot();
+            service.putExtra("token", state.token).putExtra("title", state.title)
+                .putExtra("cancelLabel", state.cancelLabel);
+            try {
+                ContextCompat.startForegroundService(context, service);
+            } catch (IllegalStateException | SecurityException error) {
+                Log.w(LOG_TAG, "Unable to start subscription refresh service", error);
+                publishNotification(context, state);
+            }
+        } else if (lastNotificationSnapshot != null) {
+            publishNotification(context, lastNotificationSnapshot);
+        }
     }
 
     // Keep notification publication and cancellation in one critical section.
@@ -85,6 +97,7 @@ public final class SubscriptionRefreshWorker extends Worker {
     static synchronized boolean update(Context context, String token, int progress) {
         if (!STATE.update(token, progress)) return false;
         SubscriptionRefreshState.Snapshot snapshot = STATE.takeNotificationSnapshot(token);
+        SubscriptionRefreshCoordinator.setProgress(token, progress);
         if (snapshot == null) return true;
         publishNotification(context, snapshot);
         return true;
@@ -93,6 +106,9 @@ public final class SubscriptionRefreshWorker extends Worker {
     private static synchronized void publishNotification(Context context, SubscriptionRefreshState.Snapshot snapshot) {
         if (!SubscriptionRefreshCoordinator.isCurrent(snapshot.token) ||
             SubscriptionRefreshCoordinator.isCancelled(snapshot.token)) return;
+        SubscriptionRefreshCoordinator.setProgress(snapshot.token, snapshot.progress);
+        lastNotificationSnapshot = snapshot;
+        if (AppVisibility.isVisible()) return;
         context.getSystemService(NotificationManager.class).notify(
             SubscriptionRefreshNotification.NOTIFICATION_ID,
             SubscriptionRefreshNotification.build(
@@ -107,22 +123,21 @@ public final class SubscriptionRefreshWorker extends Worker {
 
     static synchronized boolean finish(Context context, String token) {
         boolean finished = STATE.finish(token);
-        SubscriptionRefreshCoordinator.finish(token);
+        if (SubscriptionRefreshCoordinator.finish(token)) lastNotificationSnapshot = null;
         if (finished) {
             NotificationManager notifications = context.getSystemService(NotificationManager.class);
             notifications.cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);
-            WorkManager.getInstance(context).cancelUniqueWork(UNIQUE_WORK_NAME).getResult().addListener(
-                () -> dismissInactiveNotification(context),
-                ContextCompat.getMainExecutor(context)
-            );
+            SubscriptionRefreshService.stopIfStarted(context);
         }
         return finished;
     }
 
     static synchronized boolean cancel(Context context, String token) {
         boolean cancelled = SubscriptionRefreshCoordinator.cancel(token);
-        STATE.finish(token);
+        if (STATE.finish(token)) SubscriptionRefreshCoordinator.finish(token);
         if (cancelled) {
+            lastNotificationSnapshot = null;
+            SubscriptionRefreshService.stopIfStarted(context);
             context.getSystemService(NotificationManager.class)
                 .cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);
         }
@@ -139,6 +154,8 @@ public final class SubscriptionRefreshWorker extends Worker {
     static synchronized void completeWorker(Context context, String token) {
         STATE.finish(token);
         if (SubscriptionRefreshCoordinator.finish(token)) {
+            lastNotificationSnapshot = null;
+            SubscriptionRefreshService.stopIfStarted(context);
             context.getSystemService(NotificationManager.class)
                 .cancel(SubscriptionRefreshNotification.NOTIFICATION_ID);
         }
@@ -147,36 +164,7 @@ public final class SubscriptionRefreshWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        String token = getInputData().getString(TOKEN_INPUT);
-        if (token == null) return doScheduledWork();
-
-        return doRendererWork(token);
-    }
-
-    private Result doRendererWork(String token) {
-        SubscriptionRefreshState.Snapshot snapshot = STATE.snapshot(token);
-        if (snapshot == null || !SubscriptionRefreshCoordinator.isCurrent(token)) return Result.success();
-        String cancelLabel = getInputData().getString("cancelLabel");
-        if (cancelLabel == null) cancelLabel = "Cancel";
-
-        try {
-            setForegroundAsync(SubscriptionRefreshNotification.foregroundInfo(
-                getApplicationContext(),
-                token,
-                snapshot.title,
-                cancelLabel,
-                snapshot.progress
-            )).get();
-            STATE.awaitCompletion(token);
-            return Result.success();
-        } catch (InterruptedException error) {
-            Thread.currentThread().interrupt();
-            return Result.failure();
-        } catch (Exception error) {
-            return Result.failure();
-        } finally {
-            completeWorker(getApplicationContext(), token);
-        }
+        return doScheduledWork();
     }
 
     private Result doScheduledWork() {
@@ -197,6 +185,7 @@ public final class SubscriptionRefreshWorker extends Worker {
         String token = UUID.randomUUID().toString();
         if (!SubscriptionRefreshCoordinator.begin(token)) return Result.retry();
 
+        SubscriptionRefreshCoordinator.update(token, feedType, 0);
         int completed = 0;
         int failed = 0;
         Set<String> failedProfileIds = new LinkedHashSet<>();

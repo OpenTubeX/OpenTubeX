@@ -691,6 +691,7 @@ import {
   acknowledgeAndroidSubscriptionRefreshResult,
   addAndroidSubscriptionRefreshCancelledListener,
   configureAndroidSubscriptionRefresh,
+  getAndroidSubscriptionRefreshState,
   getNextAndroidSubscriptionRefreshResult,
   requestAndroidSubscriptionRefreshNotificationPermission,
   startAndroidSubscriptionRefresh,
@@ -716,7 +717,7 @@ import {
   enrichSubscriptionRssEntries,
   enrichSubscriptionShortDates,
   cancelSubscriptionRefresh,
-  requestSubscriptionRefreshCancellation,
+  notifySubscriptionChannelRefreshed,
   refreshSubscriptionLiveFromRemote,
   refreshSubscriptionPostsFromRemote,
   refreshSubscriptionShortsFromRemote,
@@ -1350,6 +1351,10 @@ let removeYtDlpBinaryUpdatedListener = null
 let removeAndroidYtDlpSettingsListener = null
 let removeOpenTabOrganizerListener = null
 let removeAndroidSubscriptionRefreshCancelledListener = null
+let androidSubscriptionRefreshStateTimer = null
+let androidExternalRefreshProgress = null
+let androidExternalRefreshReloadTime = null
+let androidSubscriptionRefreshStateVersion = 0
 let removeGamepadNavigation = () => {}
 /** @type {number|null} */
 let utilityRoutePreloadId = null
@@ -1902,7 +1907,7 @@ onMounted(async () => {
 
     if (isCapacitor) {
       removeAndroidSubscriptionRefreshCancelledListener =
-        await addAndroidSubscriptionRefreshCancelledListener(requestSubscriptionRefreshCancellation)
+        await addAndroidSubscriptionRefreshCancelledListener(cancelSubscriptionRefresh)
     }
 
     await nextTick()
@@ -2098,6 +2103,8 @@ onBeforeUnmount(() => {
   removeAndroidYtDlpSettingsListener?.()
   removeOpenTabOrganizerListener?.()
   removeAndroidSubscriptionRefreshCancelledListener?.()
+  clearTimeout(androidSubscriptionRefreshStateTimer)
+  androidSubscriptionRefreshStateVersion++
 })
 
 watch([activeTabId, selectionRevision], ([tabId, revision]) => {
@@ -2485,10 +2492,41 @@ async function handleSubscriptionAutoRefreshVisibilityChange() {
 }
 
 async function synchronizeSubscriptionRefreshInProgress() {
+  const version = ++androidSubscriptionRefreshStateVersion
+  clearTimeout(androidSubscriptionRefreshStateTimer)
+  androidSubscriptionRefreshStateTimer = null
   try {
     let state
     if (process.env.IS_ELECTRON) {
       state = await window.ftElectron.subscriptionAutoRefresh.isInProgress()
+    } else if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
+      state = await getAndroidSubscriptionRefreshState()
+      if (version !== androidSubscriptionRefreshStateVersion) return
+      // This renderer already publishes its own start/progress/finish events.
+      // In particular, an idle Refresh All batch must not block its next feed.
+      if (state.ownedByRenderer) return
+      applySubscriptionAutoRefreshState(state)
+      if (subscriptionCacheReady.value && !isAppHidden()) {
+        await reconcileAndroidSubscriptionRefreshResults()
+        // A retained renderer writes directly to the shared cache rather than
+        // the scheduled worker's result queue. Limit full cache/feed rebuilds
+        // while progress moves, then flush the remaining writes on completion.
+        // The first native read also catches writes after the startup cache load.
+        const progress = state.rendererActive ? `${state.tab}:${state.percentage}` : null
+        if (androidExternalRefreshReloadTime === null ||
+          (progress !== androidExternalRefreshProgress &&
+            (progress === null || androidExternalRefreshProgress === null ||
+              performance.now() - androidExternalRefreshReloadTime >= 5000))) {
+          await store.dispatch('grabAllSubscriptions')
+          androidExternalRefreshProgress = progress
+          androidExternalRefreshReloadTime = performance.now()
+          for (const tab of subscriptionAutoRefreshTabs) notifySubscriptionChannelRefreshed(tab)
+        }
+      }
+      if (version === androidSubscriptionRefreshStateVersion && state.inProgress && !isAppHidden()) {
+        androidSubscriptionRefreshStateTimer = setTimeout(synchronizeSubscriptionRefreshInProgress, 1000)
+      }
+      return
     } else if (navigator.locks) {
       const { held } = await navigator.locks.query()
       const inProgress = held.some(lock => lock.name === SUBSCRIPTION_REFRESH_LOCK_NAME)
@@ -2513,6 +2551,9 @@ async function synchronizeSubscriptionRefreshInProgress() {
     applySubscriptionAutoRefreshState(state)
   } catch {
     // Live start/finish events still keep the common path synchronized.
+    if (process.env.IS_CAPACITOR && !process.env.IS_IOS && version === androidSubscriptionRefreshStateVersion && !isAppHidden()) {
+      androidSubscriptionRefreshStateTimer = setTimeout(synchronizeSubscriptionRefreshInProgress, 1000)
+    }
   }
 }
 
@@ -2768,6 +2809,19 @@ function handleSubscriptionRefreshCancelled(event) {
   }
 
   cancelledSubscriptionAutoRefreshKeys.add(`${profileId}:${tab}`)
+  if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
+    // A reopened renderer has no local refresh promise to reschedule. Move its
+    // overdue timer now so cancelling native work does not immediately restart it.
+    const storedTimestamp = getStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab)
+    const now = Date.now()
+    const timestamp = !isSubscriptionTabAutoRefreshEnabled(tab)
+      ? null
+      : storedTimestamp === null || storedTimestamp <= now
+        ? now + getSubscriptionTabAutoRefreshInterval(tab)
+        : storedTimestamp
+    setStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab, timestamp)
+    scheduleSubscriptionTabAutoRefresh(tab, profileId, timestamp)
+  }
 }
 
 /**
@@ -2815,7 +2869,8 @@ async function handleSubscriptionRefreshStarted(event) {
     const { acquired, notificationsDenied } = await startAndroidSubscriptionRefresh(
       event.detail.refreshId,
       getSubscriptionRefreshNotificationTitle(event.detail.tab),
-      t('Feed.Cancel Refresh')
+      t('Feed.Cancel Refresh'),
+      event.detail.tab
     )
     if (!isCurrentStart()) return
     if (notificationsDenied) showAndroidSubscriptionRefreshNotificationWarning()
@@ -3049,6 +3104,7 @@ async function reconcileAndroidSubscriptionRefreshChannelResult(result) {
   if (!(committedTimestamp instanceof Date) || committedTimestamp.getTime() < timestamp.getTime()) {
     throw new Error(`The ${feedType} cache write did not complete`)
   }
+  notifySubscriptionChannelRefreshed(feedType)
 }
 
 function getAndroidSubscriptionCacheConfig(feedType) {
@@ -3096,6 +3152,10 @@ function handleSubscriptionAutoRefreshStorage(event) {
   }
 
   if (!process.env.IS_ELECTRON && event.key === SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY) {
+    if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
+      synchronizeSubscriptionRefreshInProgress()
+      return
+    }
     const state = getSubscriptionRefreshProgressState(event.newValue)
     applySubscriptionAutoRefreshState({
       inProgress: state !== null,

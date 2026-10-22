@@ -73,10 +73,12 @@ test('an imported background completion prevents an unnecessary foreground refre
 })
 
 test('background playlist imports restore missing authors and keep explicit bylines', async () => {
+  const published = []
   const cache = { UCchannel: { videos: [{ videoId: 'missing', thumbnailUrl: 'https://images.example/portrait.jpg' }] } }
   let saved
   const context = vm.createContext({
     console, Date,
+    notifySubscriptionChannelRefreshed: tab => published.push(tab),
     store: {
       getters: {
         getSubscribedChannelIdSet: new Set(['UCchannel']),
@@ -108,15 +110,18 @@ test('background playlist imports restore missing authors and keep explicit byli
   assert.equal(saved[2].authorId, 'UCexplicit')
   assert.ok(saved.every(video => video.isShort))
   assert.ok(saved.every(video => video.published === 123456))
+  assert.deepEqual(published, ['shorts'], 'publish imported videos while the native refresh is still active')
 })
 
 
 test('background Yattee Shorts are dated through the server instead of YouTube', async () => {
   const cache = { UCchannel: { videos: [{ videoId: 'known', published: 1000 }] } }
   const lookups = []
+  const published = []
   let saved
   const context = vm.createContext({
     console, Date,
+    notifySubscriptionChannelRefreshed: tab => published.push(tab),
     store: {
       getters: {
         getBackendPreference: 'yattee',
@@ -143,6 +148,7 @@ test('background Yattee Shorts are dated through the server instead of YouTube',
   })
   assert.deepEqual(saved.map(video => video.published), [1000, 2000])
   assert.deepEqual(lookups, ['new'])
+  assert.deepEqual(published, ['shorts'])
 })
 
 test('separate Electron renderers serialize background result imports', async () => {

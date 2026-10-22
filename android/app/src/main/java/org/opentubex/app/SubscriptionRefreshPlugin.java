@@ -47,7 +47,7 @@ public class SubscriptionRefreshPlugin extends Plugin {
         return true;
     }
 
-    // The foreground worker keeps the process alive. Retain its JS executor too,
+    // The background service keeps the process alive. Retain its JS executor too,
     // since Capacitor normally destroys it with the recents task.
     synchronized boolean retainRenderer() {
         if (!SubscriptionRefreshWorker.isRendererActive(rendererToken)) return false;
@@ -136,6 +136,7 @@ public class SubscriptionRefreshPlugin extends Plugin {
             : SubscriptionRefreshWorker.start(getContext(), token, title, cancelLabel);
         if (acquired) waitingForNextFeed = false;
         if (acquired) rendererToken = token;
+        if (acquired) SubscriptionRefreshCoordinator.update(token, call.getString("tab"), 0);
         JSObject result = new JSObject();
         result.put("token", token);
         result.put("acquired", acquired);
@@ -217,11 +218,34 @@ public class SubscriptionRefreshPlugin extends Plugin {
     public synchronized void isActive(PluginCall call) {
         JSObject response = new JSObject();
         // Only this batch's renderer may start its next feed. Reopened activities
-        // and scheduled workers continue to see the foreground worker as busy.
+        // and scheduled workers continue to see the background refresh as busy.
         boolean ownsIdleBatch = batchActive && waitingForNextFeed &&
             SubscriptionRefreshWorker.isRendererActive(rendererToken);
         response.put("active", SubscriptionRefreshCoordinator.isActive() && !ownsIdleBatch);
         call.resolve(response);
+    }
+
+    @PluginMethod
+    public synchronized void getState(PluginCall call) {
+        SubscriptionRefreshCoordinator.Snapshot state = SubscriptionRefreshCoordinator.snapshot();
+        JSObject response = new JSObject();
+        response.put("inProgress", state.token() != null);
+        response.put("percentage", state.percentage());
+        response.put("tab", state.tab());
+        response.put("ownedByRenderer", state.token() != null && state.token().equals(rendererToken));
+        response.put("rendererActive", SubscriptionRefreshWorker.isRendererActive(state.token()));
+        call.resolve(response);
+    }
+
+    @PluginMethod
+    public void cancel(PluginCall call) {
+        SubscriptionRefreshCoordinator.Snapshot state = SubscriptionRefreshCoordinator.snapshot();
+        if (state.token() != null && !SubscriptionRefreshCoordinator.isCancelled(state.token())) {
+            new SubscriptionRefreshCancelReceiver().onReceive(getContext(),
+                new Intent(SubscriptionRefreshCancelReceiver.ACTION_CANCEL)
+                    .putExtra(SubscriptionRefreshCancelReceiver.TOKEN_EXTRA, state.token()));
+        }
+        call.resolve();
     }
 
     @PluginMethod

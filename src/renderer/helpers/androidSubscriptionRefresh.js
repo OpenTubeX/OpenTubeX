@@ -22,7 +22,7 @@ export async function requestAndroidSubscriptionRefreshNotificationPermission() 
   }
 }
 
-export async function startAndroidSubscriptionRefresh(refreshId, title, cancelLabel) {
+export async function startAndroidSubscriptionRefresh(refreshId, title, cancelLabel, tab) {
   if (!SubscriptionRefresh) return { acquired: true, notificationsDenied: false }
 
   let notificationsDenied = false
@@ -32,7 +32,7 @@ export async function startAndroidSubscriptionRefresh(refreshId, title, cancelLa
       : Promise.resolve(batchNotificationsDenied))
       .then(denied => {
         notificationsDenied = denied
-        return SubscriptionRefresh.start({ title, cancelLabel })
+        return SubscriptionRefresh.start({ title, cancelLabel, tab })
       })
       .then(({ token, acquired }) => acquired ? token : null)
       .catch(error => {
@@ -86,6 +86,18 @@ export async function isAndroidSubscriptionRefreshActive() {
   if (!SubscriptionRefresh) return false
   const { active } = await SubscriptionRefresh.isActive()
   return active === true
+}
+
+export function getAndroidSubscriptionRefreshState() {
+  if (!SubscriptionRefresh) return Promise.resolve(null)
+  return SubscriptionRefresh.getState()
+}
+
+export function cancelAndroidSubscriptionRefresh() {
+  if (!SubscriptionRefresh) return
+  SubscriptionRefresh.cancel().catch(error => {
+    console.error('Failed to cancel Android subscription refresh', error)
+  })
 }
 
 export async function getNextAndroidSubscriptionRefreshResult() {

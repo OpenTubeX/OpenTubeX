@@ -47,11 +47,13 @@ public class MainActivity extends BridgeActivity {
     public void onStart() {
         super.onStart();
         AppVisibility.setVisible(true);
+        SubscriptionRefreshWorker.onAppVisibilityChanged(this);
     }
 
     @Override
     public void onStop() {
         AppVisibility.setVisible(false);
+        SubscriptionRefreshWorker.onAppVisibilityChanged(this);
         super.onStop();
     }
 
