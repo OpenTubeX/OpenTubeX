@@ -115,10 +115,27 @@ test('mobile startup survives unavailable or corrupt appearance storage', async 
     assert.doesNotThrow(() => vm.runInNewContext(script, {
       window: {},
       localStorage: { getItem },
-      document: { documentElement: {} },
+      document: { documentElement: {}, getElementById: () => ({ setAttribute: () => {} }) },
       requestAnimationFrame: callback => { painted = true; callback() }
     }))
     assert.ok(painted)
+  }
+})
+
+test('mobile splash keeps its progress bar still only until the appearance is cached', async () => {
+  const script = await readFile(new URL('../../src/renderer/startup/boot.js', import.meta.url), 'utf8')
+  for (const cached of [null, JSON.stringify({ light: { background: '#f1f1f1', dark: false }, hideSplash: false })]) {
+    const attributes = new Set()
+    vm.runInNewContext(script, {
+      window: { matchMedia: () => ({ matches: false }) },
+      localStorage: { getItem: () => cached },
+      document: {
+        documentElement: { style: { setProperty: () => {} } },
+        getElementById: () => ({ setAttribute: name => attributes.add(name) })
+      },
+      requestAnimationFrame: () => {}
+    })
+    assert.equal(attributes.has('data-first-launch'), cached === null)
   }
 })
 
@@ -236,10 +253,10 @@ test('Capacitor waits for data, tab presentation, and route content before revea
   assert.equal(reveals, 1)
 })
 
-test('Android splash keeps its progress bar still so bridge calls are not delayed by redraws', () => {
+test('Android splash keeps its progress bar still on first launch so bridge calls are not delayed by redraws', () => {
   const getStartupSplash = createRequire(import.meta.url)('../../_scripts/startupSplash.js')
-  // An unconditional rule after the reduced-motion media query.
-  const stillBar = /\.startupProgress \{ animation: none; transform: translateX\(-35%\); \}\s*$/
+  // A rule outside the reduced-motion media query that applies only to the first launch.
+  const stillBar = /\.startupSplash\[data-first-launch\] \.startupProgress \{ animation: none; transform: translateX\(-35%\); \}\s*$/
   assert.doesNotMatch(getStartupSplash().styles, stillBar, 'Electron and iOS keep the animated bar')
   assert.match(getStartupSplash({ staticProgress: true }).styles, stillBar)
 })

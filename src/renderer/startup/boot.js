@@ -3,13 +3,16 @@
 (() => {
   let appearance = window.ftElectron?.startupAppearance
   if (!window.ftElectron) {
+    let cached
     try {
-      const cached = JSON.parse(localStorage.getItem('opentubex-startup-appearance'))
+      cached = JSON.parse(localStorage.getItem('opentubex-startup-appearance'))
       const mode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
       appearance = { ...cached?.[mode], hideSplash: cached?.hideSplash }
     } catch {
       // Storage can be unavailable or corrupt; keep the default splash.
     }
+    // Android keeps the progress bar still until settings have been saved once.
+    if (!cached) document.getElementById('startup-splash')?.setAttribute('data-first-launch', '')
   }
   const root = document.documentElement
   if (appearance?.background) {
