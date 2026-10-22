@@ -271,7 +271,7 @@ test('shows age-restricted and unlisted badges below the video title', async ({ 
 })
 
 for (const blur of [false, true]) {
-  test(`paints the toolbar's Save to dropdown above the cards below it${blur ? ' with blurred cards' : ''}`, async ({ app, page }) => {
+  test(`paints the toolbar's Save to dropdown above the cards below it${blur ? ' with blurred cards' : ''}`, { tag: '@scale' }, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
     if (blur) {
