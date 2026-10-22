@@ -352,8 +352,26 @@
     grid-auto-rows: calc(68 * var(--p));
     grid-template-columns: repeat(auto-fit, minmax(calc(70 * var(--p)), 1fr));
     min-block-size: 0;
-    overflow: hidden;
+    overflow-y: auto;
     padding: calc(8 * var(--p));
+  }
+
+  /* Like the player's, the always dark menu keeps its scrollbar visible to
+     advertise the remaining tiles. Size it like the default 6px thumb, which
+     fills its track. The track is a size container, so 100cqi is that thumb. */
+  .previewOverflowGrid > :deep(.os-scrollbar) {
+    --os-handle-bg: rgb(255 255 255 / 40%);
+    --os-handle-border-radius: calc(100cqi * var(--ui-roundness));
+    --os-handle-perpendicular-size: 100%;
+    --os-padding-axis: calc(2 * var(--p));
+    --os-padding-perpendicular: calc(2 * var(--p));
+    --os-size: calc(10 * var(--p));
+  }
+
+  .previewOverflowGrid > :deep(.os-scrollbar-visible),
+  .previewOverflowGrid > :deep(.os-scrollbar-visible.app-scrollbar-idle) {
+    opacity: 1;
+    visibility: visible;
   }
 
   .previewOverflowItem {
