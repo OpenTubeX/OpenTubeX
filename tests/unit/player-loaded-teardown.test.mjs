@@ -10,6 +10,11 @@ const handleLoadedSource = playerSource.slice(
   playerSource.indexOf('    async function unloadForFormatSwitch() {')
 )
 
+const wrapSelectionSource = playerSource.slice(
+  playerSource.indexOf('    function wrapTextTrackSelection() {'),
+  playerSource.indexOf('    const playerWidth = computed(')
+)
+
 function createLoad () {
   let releaseCaption
   const calls = []
@@ -89,4 +94,32 @@ test('only the latest load on the same player finishes setup', async () => {
   load.releases[1]()
   await second
   assert.deepEqual(load.calls, ['loadChapterThumbnails', 'getTextTracks'])
+})
+
+test('a caption the user picks while the tracks load is not replaced by the restored one', async () => {
+  const load = createLoad()
+  const tracks = [{ id: 1, label: 'English', active: true }, { id: 2, label: 'movie.srt', active: false }]
+  const selected = []
+  Object.assign(load.player, {
+    getTextTracks: () => tracks,
+    getConfiguration: () => ({ preferredText: [] }),
+    configure() {},
+    selectTextTrack: track => selected.push(track?.label ?? null),
+  })
+  // A format switch restores the caption that was on before it
+  Object.assign(load.context, {
+    restoreCaptionIndex: 0,
+    initialCaption: null,
+    lastSelectedCaptionTrack: null,
+    findMatchingTextTrack: () => null,
+    clearDisplayedCaptions() {},
+    rememberAutoTranslatedCaption() {},
+  })
+  vm.runInContext(`${wrapSelectionSource}\nwrapTextTrackSelection()`, load.context)
+
+  const loading = load.start()
+  load.player.selectTextTrack(tracks[1])
+  load.releaseCaption()
+  await loading
+  assert.deepEqual(selected, [null, 'movie.srt'])
 })

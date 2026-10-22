@@ -8297,6 +8297,9 @@ export default defineComponent({
         const activeTextTrack = player.getTextTracks().find(textTrack => textTrack.active)
 
         if (isUserAction) {
+          // A caption chosen while the tracks are still being added must not be replaced by the restored one
+          restoreCaptionIndex = null
+
           // For videos played from a URL, Shaka applies the preferred captions only after the first frame
           // has loaded, if no captions are on by then. Drop the preference so it can't undo the user's choice.
           if (player.getConfiguration().preferredText.length > 0) {
