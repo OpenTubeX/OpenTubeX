@@ -638,6 +638,10 @@ Settings:
         Destructive pressed: "Ober distrujus pouezet"
         Text and icons on destructive actions: "Testenn hag arlunioù war an oberoù distrujus"
   Player Settings:
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "Bevenn ar galite war ar rouedadoù muzuliet"
+      No Limit: "Bevenn ebet"
+      Tooltip: "War ar roadennoù hezoug hag ar rouedadoù muzuliet all e krog ar videoioù gant ar galite-mañ pe unan izeloc'h. Gallout a rit dibab ur galite uheloc'h el lenner c'hoazh."
     Show Music Mode Toggle: "Diskouez ar bouton mod sonerezh"
     Enable DLNA Casting: "Gweredekaat skignañ DLNA"
     Skip Unavailable Playlist Videos: "Tremen ar videoioù dizimplij er rolloù lenn"

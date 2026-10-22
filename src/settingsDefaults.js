@@ -85,6 +85,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     defaultProfile: MAIN_PROFILE_ID,
     preferredVideoCodec: 'auto',
     defaultQuality: '720',
+    meteredNetworkQualityLimit: 'none',
     defaultSkipInterval: 5,
     seekIntervalMultiplyByPlaybackRate: false,
     // How many segments per stream shaka-player downloads in parallel ahead of the playhead

@@ -574,6 +574,10 @@
     "ri": "shield-half-line",
     "material": "shield-half-outline"
   },
+  "signal": {
+    "ri": "signal-cellular-3-line",
+    "material": "signal-cellular-alt-rounded"
+  },
   "slash": {
     "ri": "subtract-line",
     "material": "block"

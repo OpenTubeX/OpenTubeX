@@ -638,6 +638,10 @@ Settings:
         Destructive pressed: 破壊的な操作の押下時
         Text and icons on destructive actions: 破壊的な操作上のテキストとアイコン
   Player Settings:
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "従量制ネットワークでの画質上限"
+      No Limit: "上限なし"
+      Tooltip: "モバイルデータやその他の従量制ネットワークでは、動画はこの画質以下で再生を開始します。プレーヤーでより高い画質を選ぶこともできます。"
     Show Music Mode Toggle: "音楽モードの切り替えを表示"
     Enable DLNA Casting: "DLNAキャストを有効にする"
     Skip Unavailable Playlist Videos: "再生リスト内の視聴できない動画をスキップ"

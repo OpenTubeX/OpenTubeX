@@ -328,6 +328,10 @@ Settings:
       System Fonts: Czcionki systemowe
   Player Settings:
     Enable Seek History: Włącz historię przewijania
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "Limit jakości w sieciach z pomiarem użycia danych"
+      No Limit: "Bez limitu"
+      Tooltip: "W mobilnej transmisji danych i innych sieciach z pomiarem użycia danych filmy zaczynają się w tej lub niższej jakości. Nadal możesz wybrać wyższą jakość w odtwarzaczu."
     Show Music Mode Toggle: "Pokaż przełącznik trybu muzyki"
     Enable DLNA Casting: "Włącz przesyłanie DLNA"
     Skip Unavailable Playlist Videos: "Pomijaj niedostępne filmy na playlistach"

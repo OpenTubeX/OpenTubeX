@@ -637,6 +637,10 @@ Settings:
         Destructive pressed: 危險操作的按下狀態
         Text and icons on destructive actions: 危險操作上的文字與圖示
   Player Settings:
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "計量付費網路的畫質上限"
+      No Limit: "無上限"
+      Tooltip: "使用行動數據和其他計量付費網路時，影片會以此畫質或更低的畫質開始播放。您仍可在播放器中選擇更高的畫質。"
     Show Music Mode Toggle: "顯示音樂模式開關"
     Enable DLNA Casting: "啟用 DLNA 投放"
     Skip Unavailable Playlist Videos: "略過播放清單中無法播放的影片"

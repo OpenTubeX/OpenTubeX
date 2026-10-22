@@ -796,6 +796,10 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "종량제 네트워크 화질 제한"
+      No Limit: "제한 없음"
+      Tooltip: "모바일 데이터 및 기타 종량제 네트워크에서는 동영상이 이 화질 이하로 시작됩니다. 플레이어에서 더 높은 화질을 선택할 수도 있습니다."
     Show Music Mode Toggle: "음악 모드 전환 표시"
     Enable DLNA Casting: "DLNA 전송 활성화"
     Skip Unavailable Playlist Videos: "재생목록에서 볼 수 없는 동영상 건너뛰기"

@@ -639,6 +639,10 @@ Settings:
         Destructive pressed: الضغط المدمر
         Text and icons on destructive actions: النص والأيقونات على الإجراءات المدمرة
   Player Settings:
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "حد الجودة على الشبكات المحدودة"
+      No Limit: "بلا حد"
+      Tooltip: "على بيانات الجوال والشبكات المحدودة الأخرى، تبدأ الفيديوهات بهذه الجودة أو أقل. يمكنك مع ذلك اختيار جودة أعلى في المشغل."
     Show Music Mode Toggle: "إظهار مفتاح وضع الموسيقى"
     Enable DLNA Casting: "تفعيل البث عبر DLNA"
     Skip Unavailable Playlist Videos: "تخطي الفيديوهات غير المتاحة في قوائم التشغيل"

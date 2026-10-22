@@ -639,6 +639,10 @@ Settings:
         Destructive pressed: Thao tác xóa khi nhấn
         Text and icons on destructive actions: Chữ và biểu tượng trên thao tác xóa
   Player Settings:
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "Giới hạn chất lượng trên mạng đo lưu lượng"
+      No Limit: "Không giới hạn"
+      Tooltip: "Trên dữ liệu di động và các mạng đo lưu lượng khác, video bắt đầu ở chất lượng này hoặc thấp hơn. Bạn vẫn có thể chọn chất lượng cao hơn trong trình phát."
     Show Music Mode Toggle: "Hiển thị nút chuyển chế độ nhạc"
     Enable DLNA Casting: "Bật truyền phát DLNA"
     Skip Unavailable Playlist Videos: "Bỏ qua video không khả dụng trong danh sách phát"

@@ -1233,6 +1233,10 @@ Settings:
       1440p: 1440p
       4k: 4k
       8k: 8k
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: Quality Limit on Metered Networks
+      No Limit: No Limit
+      Tooltip: On mobile data and other metered networks, videos start at this quality or lower. You can still choose a higher quality in the player.
     Screenshot:
       Enable: Enable Screenshot
       Mode: Screenshot Mode

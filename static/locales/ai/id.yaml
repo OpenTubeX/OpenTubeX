@@ -638,6 +638,10 @@ Settings:
         Destructive pressed: Tindakan destruktif saat ditekan
         Text and icons on destructive actions: Teks dan ikon pada tindakan destruktif
   Player Settings:
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "Batas Kualitas di Jaringan Terukur"
+      No Limit: "Tanpa Batas"
+      Tooltip: "Pada data seluler dan jaringan terukur lainnya, video dimulai dengan kualitas ini atau lebih rendah. Anda tetap dapat memilih kualitas yang lebih tinggi di pemutar."
     Show Music Mode Toggle: "Tampilkan tombol mode musik"
     Enable DLNA Casting: "Aktifkan transmisi DLNA"
     Skip Unavailable Playlist Videos: "Lewati video yang tidak tersedia dalam daftar putar"

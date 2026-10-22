@@ -612,6 +612,10 @@ Settings:
         Destructive pressed: Опасное действие при нажатии
         Text and icons on destructive actions: Текст и значки опасных действий
   Player Settings:
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "Ограничение качества в лимитных сетях"
+      No Limit: "Без ограничения"
+      Tooltip: "В мобильной сети и других лимитных сетях видео начинаются в этом или более низком качестве. В проигрывателе по-прежнему можно выбрать более высокое качество."
     Show Music Mode Toggle: "Показывать переключатель музыкального режима"
     Enable DLNA Casting: "Включить трансляцию DLNA"
     Skip Unavailable Playlist Videos: "Пропускать недоступные видео в плейлистах"

@@ -640,6 +640,10 @@ Settings:
         Destructive pressed: Eyðandi aðgerð þegar ýtt er
         Text and icons on destructive actions: Texti og tákn á eyðandi aðgerðum
   Player Settings:
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "Gæðamörk á mældum netum"
+      No Limit: "Engin mörk"
+      Tooltip: "Á farsímagögnum og öðrum mældum netum byrja myndskeið í þessum gæðum eða lægri. Þú getur samt valið meiri gæði í spilaranum."
     Show Music Mode Toggle: "Sýna rofa fyrir tónlistarham"
     Enable DLNA Casting: "Virkja DLNA-streymi"
     Skip Unavailable Playlist Videos: "Sleppa óaðgengilegum myndskeiðum í spilunarlistum"

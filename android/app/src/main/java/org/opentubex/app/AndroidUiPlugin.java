@@ -10,6 +10,9 @@ import android.graphics.Rect;
 import android.content.res.Configuration;
 import android.hardware.input.InputManager;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.os.Build;
 import android.util.Rational;
 import android.view.InputDevice;
@@ -39,6 +42,29 @@ public class AndroidUiPlugin extends Plugin {
     private OrientationEventListener deviceRotationListener;
     private boolean deviceRotationEnabled;
     private Boolean deviceLandscape;
+    private ConnectivityManager.NetworkCallback networkMeteredCallback;
+    private Boolean networkMetered;
+
+    @Override
+    public void load() {
+        // Capability updates repeat for signal changes, so only report metered changes.
+        networkMeteredCallback = new ConnectivityManager.NetworkCallback() {
+            @Override
+            public void onCapabilitiesChanged(Network network, NetworkCapabilities capabilities) {
+                boolean metered = !capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
+                if (Boolean.valueOf(metered).equals(networkMetered)) return;
+                networkMetered = metered;
+                notifyListeners("networkMeteredChange", new JSObject().put("metered", metered));
+            }
+        };
+        getContext().getSystemService(ConnectivityManager.class).registerDefaultNetworkCallback(networkMeteredCallback);
+    }
+
+    @PluginMethod
+    public void getNetworkMetered(PluginCall call) {
+        boolean metered = getContext().getSystemService(ConnectivityManager.class).isActiveNetworkMetered();
+        call.resolve(new JSObject().put("metered", metered));
+    }
 
     @PluginMethod
     public void setDeviceRotationEnabled(PluginCall call) {
@@ -427,6 +453,7 @@ public class AndroidUiPlugin extends Plugin {
     protected void handleOnDestroy() {
         if (deviceRotationListener != null) deviceRotationListener.disable();
         if (pictureInPictureSurface != null) pictureInPictureSurface.clear();
+        getContext().getSystemService(ConnectivityManager.class).unregisterNetworkCallback(networkMeteredCallback);
         super.handleOnDestroy();
     }
 

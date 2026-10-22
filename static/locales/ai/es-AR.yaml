@@ -707,6 +707,10 @@ Settings:
       Everforest Light Blue: Everforest Claro Azul
       Everforest Light Purple: Everforest Claro Morado
   Player Settings:
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "Límite de calidad en redes con medición"
+      No Limit: "Sin límite"
+      Tooltip: "Con datos móviles y otras redes con medición, los videos empiezan con esta calidad o una inferior. Igual podés elegir una calidad más alta en el reproductor."
     Show Music Mode Toggle: "Mostrar el interruptor del modo de música"
     Enable DLNA Casting: "Activar la transmisión DLNA"
     Skip Unavailable Playlist Videos: "Omitir videos no disponibles en listas de reproducción"

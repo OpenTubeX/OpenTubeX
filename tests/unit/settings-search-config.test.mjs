@@ -134,6 +134,20 @@ test('fullscreen rotation lock override is searchable only on Android', () => {
   }
 })
 
+test('metered network quality limit is searchable only on Android', () => {
+  for (const [isCapacitor, isIos] of [[true, false], [true, true], [false, false]]) {
+    const entries = createSettingsSearchIndex({
+      sections: [{ type: 'playback', title: 'Playback', description: '' }],
+      tm: path => getAtPath(locale, path),
+      store: { getters: {} },
+      isCapacitor,
+      isIos,
+      usingElectron: !isCapacitor,
+    }).get('playback')
+    assert.equal(entries.some(({ label }) => label === 'Quality Limit on Metered Networks'), isCapacitor && !isIos)
+  }
+})
+
 test('mobile general settings search includes swipe to refresh and omits desktop thumbnail actions', () => {
   for (const [isCapacitor, phoneLayout] of [[true, false], [false, false], [false, true]]) {
     const entries = createSettingsSearchIndex({

@@ -949,6 +949,10 @@ Settings:
       1440p: 1440p
       4k: 4k
       8k: 8k
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: Qualitätsgrenze in getakteten Netzwerken
+      No Limit: Keine Begrenzung
+      Tooltip: Im Mobilfunknetz und in anderen getakteten Netzwerken starten Videos höchstens in dieser Qualität. Im Player kannst du weiterhin eine höhere Qualität wählen.
     Next Video Interval: Countdown für Automatische Wiedergabe
     Display Play Button In Video Player: Wiedergabetaste im Video-Player anzeigen
     Scroll Volume Over Video Player: Lautstärke durch Scrollen ändern

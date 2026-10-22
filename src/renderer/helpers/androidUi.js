@@ -293,6 +293,22 @@ export function getAndroidDeviceArchitecture() {
   return AndroidUi?.getDeviceArchitecture() ?? Promise.resolve({ architecture: '' })
 }
 
+/**
+ * Reports whether the active network is metered, now and whenever that changes.
+ * @param {(metered: boolean) => void} callback
+ */
+export async function observeAndroidNetworkMetered(callback) {
+  if (!AndroidUi) return
+  let changed = false
+  await AndroidUi.addListener('networkMeteredChange', ({ metered }) => {
+    changed = true
+    callback(metered)
+  })
+  const { metered } = await AndroidUi.getNetworkMetered()
+  // A change that arrived in the meantime may be newer than this reading.
+  if (!changed) callback(metered)
+}
+
 export function setAndroidPictureInPictureDocumentState(active, { transitioning = false, layout = null } = {}) {
   const classes = document.body.classList
   stopPictureInPictureTransition?.()

@@ -374,7 +374,10 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     return false
   }
 
-  if (sectionType === 'player' && group === 'Ignore System Rotation Lock for Fullscreen') {
+  if (sectionType === 'player' && [
+    'Ignore System Rotation Lock for Fullscreen',
+    'Quality Limit on Metered Networks',
+  ].includes(group)) {
     return isCapacitor && !isIos
   }
 

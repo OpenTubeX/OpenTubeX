@@ -650,6 +650,10 @@ Settings:
       Catppuccin Latte Mauve: Catppuccin Latte Mauve
       Catppuccin Latte Red: Catppuccin Latte Red
   Player Settings:
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "Kvalitetsgrænse på netværk med datamåling"
+      No Limit: "Ingen grænse"
+      Tooltip: "På mobildata og andre netværk med datamåling starter videoer i denne kvalitet eller lavere. Du kan stadig vælge en højere kvalitet i afspilleren."
     Show Music Mode Toggle: "Vis kontakt til musiktilstand"
     Enable DLNA Casting: "Aktivér DLNA-casting"
     Skip Unavailable Playlist Videos: "Spring utilgængelige videoer over i afspilningslister"

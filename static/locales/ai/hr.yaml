@@ -637,6 +637,10 @@ Settings:
         Destructive pressed: Pritisnuta destruktivna radnja
         Text and icons on destructive actions: Tekst i ikone na destruktivnim radnjama
   Player Settings:
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "Najveća kvaliteta na mrežama s ograničenjem podataka"
+      No Limit: "Bez ograničenja"
+      Tooltip: "Na mobilnim podacima i drugim mrežama s ograničenjem podataka videozapisi počinju u ovoj ili nižoj kvaliteti. U playeru i dalje možete odabrati višu kvalitetu."
     Show Music Mode Toggle: "Prikaži prekidač glazbenog načina"
     Enable DLNA Casting: "Omogući DLNA emitiranje"
     Skip Unavailable Playlist Videos: "Preskoči nedostupne videozapise na popisima za reprodukciju"

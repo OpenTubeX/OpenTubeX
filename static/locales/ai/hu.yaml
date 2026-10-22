@@ -638,6 +638,10 @@ Settings:
         Destructive pressed: Törlő művelet lenyomáskor
         Text and icons on destructive actions: Törlő műveletek szövege és ikonjai
   Player Settings:
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "Felbontáskorlát forgalomkorlátos hálózatokon"
+      No Limit: "Nincs korlát"
+      Tooltip: "Mobilinterneten és más forgalomkorlátos hálózatokon a videók ezen a felbontáson vagy alacsonyabbon indulnak. A lejátszóban továbbra is választhat magasabb felbontást."
     Show Music Mode Toggle: "Zenei mód kapcsolójának megjelenítése"
     Enable DLNA Casting: "DLNA-átküldés engedélyezése"
     Skip Unavailable Playlist Videos: "Nem elérhető videók kihagyása a lejátszási listákban"

@@ -124,6 +124,7 @@ import { getDefaultAudioVariants } from '../../helpers/player/defaultAudioTrack'
 import { MUSIC_MEDIA_TYPE } from '../../helpers/player/musicMediaType'
 import { resolveSegmentPrefetchLimit } from '../../helpers/player/segmentPrefetch'
 import { AUTO_QUALITY_FALLBACK, streamsSupportAutoQuality } from '../../helpers/player/autoQuality'
+import { getMeteredAutoQualityMaxPixels, limitQualityOnMeteredNetwork } from '../../helpers/player/meteredNetworkQuality'
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
 import { prepareGoogleVideoRequest } from '../../helpers/player/playbackRequestPolicy'
 import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../helpers/player/volume-storage'
@@ -1960,7 +1961,10 @@ export default defineComponent({
     const defaultQuality = computed(() => {
       const value = store.getters.getDefaultQuality
 
-      return parseInt(value === 'auto' ? AUTO_QUALITY_FALLBACK : value)
+      return parseInt(limitQualityOnMeteredNetwork(
+        value === 'auto' ? AUTO_QUALITY_FALLBACK : value,
+        store.getters.getMeteredNetworkQualityLimit
+      ))
     })
 
     /** @type {import('vue').ComputedRef<number>} */
@@ -4017,8 +4021,11 @@ export default defineComponent({
         abr: {
           enabled: useAutoQuality,
 
-          // This only affects the "auto" quality, users can still manually select whatever quality they want.
-          restrictToElementSize: true
+          // These only affect the "auto" quality, users can still manually select whatever quality they want.
+          restrictToElementSize: true,
+          restrictions: {
+            maxPixels: getMeteredAutoQualityMaxPixels(store.getters.getMeteredNetworkQualityLimit)
+          }
         },
 
         // Prioritise variants that are predicted to play:

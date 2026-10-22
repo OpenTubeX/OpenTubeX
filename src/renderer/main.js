@@ -12,6 +12,8 @@ import { installViewTransitions } from './helpers/viewTransitions'
 import { initializeAppScrollbars, overlayScrollbarsDirective } from './helpers/overlayScrollbars'
 import { releaseAutomaticDownloadSchedule } from './helpers/automaticDownloads'
 import { initializeAndroidDynamicColors } from './helpers/dynamicColors'
+import { observeAndroidNetworkMetered } from './helpers/androidUi'
+import { networkMetered } from './helpers/player/meteredNetworkQuality'
 // import the styles
 import 'overlayscrollbars/styles/overlayscrollbars.css'
 // Only the positioning and stacking rules are used, FtToast supplies the design
@@ -44,6 +46,16 @@ installViewTransitions(router)
 
 const tabNavigation = initializeTabNavigationService(router, store)
 
+// Read the initial state before a restored Watch page picks its starting quality,
+// but don't let a missing answer prevent the application from mounting.
+let networkMeteredTimeout
+const networkMeteredReady = Promise.race([
+  observeAndroidNetworkMetered(metered => { networkMetered.value = metered }).catch(error => {
+    console.error('Failed to observe metered networks:', error)
+  }),
+  new Promise(resolve => { networkMeteredTimeout = setTimeout(resolve, 1500) }),
+]).finally(() => clearTimeout(networkMeteredTimeout))
+
 // Resolve native colors before App applies its first theme and system-bar style.
 const dynamicColorsReady = process.env.IS_CAPACITOR
   ? initializeAndroidDynamicColors().catch(error => {
@@ -51,7 +63,7 @@ const dynamicColorsReady = process.env.IS_CAPACITOR
     })
   : Promise.resolve()
 
-Promise.all([router.isReady(), dynamicColorsReady]).then(async () => {
+Promise.all([router.isReady(), dynamicColorsReady, networkMeteredReady]).then(async () => {
   if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
     try {
       const { waitForDatastores } = await import('../datastores/index')

@@ -325,6 +325,7 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
     'Swipe Gestures': ['Left', 'Right', 'Fullscreen Brightness'],
     'Default Video Format': ['Default Video Format'],
     'Default Quality': ['Default Quality'],
+    'Quality Limit on Metered Networks': ['Quality Limit on Metered Networks'],
     'Screenshot.Modes': []
   },
   channel: {

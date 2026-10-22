@@ -180,6 +180,7 @@ export const SYNC_SETTING_LABELS = {
   loopShorts: 'Settings.Player Settings.Loop Shorts',
   mainColor: 'Settings.Theme Settings.Main Color Theme.Main Color Theme',
   maxVideoPlaybackRate: 'Settings.Player Settings.Max Video Playback Rate',
+  meteredNetworkQualityLimit: 'Settings.Player Settings.Quality Limit on Metered Networks.Quality Limit on Metered Networks',
   mobileFullscreenBrightness: 'Settings.Player Settings.Swipe Gestures.Fullscreen Brightness',
   mobileLeftSwipeAction: 'Settings.Player Settings.Swipe Gestures.Left',
   mobileRightSwipeAction: 'Settings.Player Settings.Swipe Gestures.Right',
@@ -443,6 +444,9 @@ const baseThemes = {
     [value, `${theme}Base Theme.${BUILTIN_BASE_THEME_TRANSLATION_KEYS[index]}`])),
 }
 
+const qualities = Object.fromEntries(['2160', '1440', '1080', '720', '480', '360', '240', '144'].map(value =>
+  [value, `${player}Default Quality.${value === '2160' ? '4k' : `${value}p`}`]))
+
 // Match the choices shown in Settings so saved choice codes remain readable in activity.
 export const SYNC_SETTING_VALUE_LABELS = {
   aiVideoSummaryMode: { hide: 'Settings.Distraction Free Settings.Hide', collapsed: 'Settings.Distraction Free Settings.Collapsed', expanded: 'Settings.Distraction Free Settings.Expanded' },
@@ -453,8 +457,7 @@ export const SYNC_SETTING_VALUE_LABELS = {
   capacitorLayoutMode: { auto: `${general}Mobile Layout.Automatic`, phone: `${general}Mobile Layout.Phone`, tablet: `${general}Mobile Layout.Tablet` },
   currentLocale: { system: `${general}System Default` },
   dateFormat: { locale: `${general}Language Default` },
-  defaultQuality: Object.fromEntries(['2160', '1440', '1080', '720', '480', '360', '240', '144', 'auto'].map(value =>
-    [value, `${player}Default Quality.${value === '2160' ? '4k' : value === 'auto' ? 'Auto' : `${value}p`}`])),
+  defaultQuality: { ...qualities, auto: `${player}Default Quality.Auto` },
   defaultVideoFormat: { dash: `${player}Default Video Format.Dash Formats`, legacy: `${player}Default Video Format.Legacy Formats`, audio: `${player}Default Video Format.Audio Formats` },
   defaultViewingMode: {
     default: `${general}Thumbnail Preference.Default`,
@@ -488,6 +491,7 @@ export const SYNC_SETTING_VALUE_LABELS = {
   },
   gridColumns: { 0: `${general}Grid Columns.Auto` },
   listType: { grid: `${general}Video View Type.Grid`, fullWidth: `${general}Video View Type.Full Width`, list: `${general}Video View Type.List` },
+  meteredNetworkQualityLimit: { none: `${player}Quality Limit on Metered Networks.No Limit`, ...qualities },
   mobileLeftSwipeAction: { disabled: `${player}Swipe Gestures.Disabled`, brightness: `${player}Swipe Gestures.Brightness`, volume: `${player}Swipe Gestures.Volume`, speed: `${player}Playback Speed` },
   mobileRightSwipeAction: { disabled: `${player}Swipe Gestures.Disabled`, brightness: `${player}Swipe Gestures.Brightness`, volume: `${player}Swipe Gestures.Volume`, speed: `${player}Playback Speed` },
   newSubscriptionFeedSortBy: { newest: 'Subscriptions.Newest First', oldest: 'Subscriptions.Oldest First' },

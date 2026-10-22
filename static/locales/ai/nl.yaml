@@ -639,6 +639,10 @@ Settings:
         Destructive pressed: Verwijderactie bij indrukken
         Text and icons on destructive actions: Tekst en pictogrammen bij verwijderacties
   Player Settings:
+    Quality Limit on Metered Networks:
+      Quality Limit on Metered Networks: "Maximale kwaliteit op netwerken met datalimiet"
+      No Limit: "Geen limiet"
+      Tooltip: "Op mobiele data en andere netwerken met een datalimiet starten video's in deze kwaliteit of lager. Je kunt in de speler nog steeds een hogere kwaliteit kiezen."
     Show Music Mode Toggle: "Schakelaar voor muziekmodus tonen"
     Enable DLNA Casting: "DLNA-casting inschakelen"
     Skip Unavailable Playlist Videos: "Niet-beschikbare video's in afspeellijsten overslaan"
