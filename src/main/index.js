@@ -703,11 +703,19 @@ function runApp() {
 
   /**
    * @param {import('electron').BrowserWindow | null | undefined} browserWindow
+   * @param {boolean} [allowHideWindow]
+   * @param {boolean} [hideWithoutPrompt] Hide the window instead of quitting when the user skips the prompt.
    * @returns {Promise<boolean>}
    */
-  async function confirmCloseApp(browserWindow, allowHideWindow = false) {
-    if (isQuitting || isQuitConfirmed || !await getConfirmCloseApp()) {
+  async function confirmCloseApp(browserWindow, allowHideWindow = false, hideWithoutPrompt = false) {
+    if (isQuitting || isQuitConfirmed) {
       return true
+    }
+
+    if (!await getConfirmCloseApp()) {
+      if (!hideWithoutPrompt) return true
+      hideWindowToTray(browserWindow)
+      return false
     }
 
     if (quitPromptInProgress) {
@@ -751,6 +759,10 @@ function runApp() {
           await updateSettingFromMain('confirmCloseApp', false)
         } catch (error) {
           console.error('Failed to disable the app close confirmation:', error)
+        }
+        if (hideWithoutPrompt) {
+          hideWindowToTray(browserWindow)
+          return false
         }
         isQuitConfirmed = true
         return true
@@ -3501,14 +3513,17 @@ function runApp() {
           (wasLastWindow || tabManager.tabs.size > 1)) {
         event.preventDefault()
 
+        // An explicit tray Close or closing the last tab still quits instead of hiding the window.
+        const hideWithoutPrompt = keepRefreshingInBackground &&
+          !trayClosingWindowIds.has(newWindow.id) && tabManager.tabs.size > 0
         let quitsApp = wasLastWindow
         let confirmed = quitsApp
-          ? await confirmCloseApp(newWindow, keepRefreshingInBackground)
+          ? await confirmCloseApp(newWindow, keepRefreshingInBackground, hideWithoutPrompt)
           : await confirmCloseWindowWithMultipleTabs(newWindow, tabManager.tabs.size)
         const openWindowCount = BrowserWindow.getAllWindows()
           .filter(window => !closingWindowIds.has(window.id)).length
         if (confirmed && !wasLastWindow && openWindowCount === 1) {
-          confirmed = await confirmCloseApp(newWindow, keepRefreshingInBackground)
+          confirmed = await confirmCloseApp(newWindow, keepRefreshingInBackground, hideWithoutPrompt)
           quitsApp = confirmed
         }
         if (confirmed && quitsApp) {

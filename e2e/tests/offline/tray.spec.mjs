@@ -1,4 +1,4 @@
-import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
+import { test, expect, goToSettingsSection, openNewWindowFromTabBar, waitForAppReady } from '../../helpers/app.mjs'
 
 async function setting(page, name, value) {
   await page.evaluate(async ({ name, value }) => {
@@ -187,6 +187,35 @@ test('closing the last window confirms quitting when close-to-tray is disabled',
   await closed
 })
 
+test('closing the last window hides it while background refresh runs without a close prompt', async ({ app, page }) => {
+  await captureTray(app, page)
+  await setting(page, 'updateConfirmCloseApp', false)
+  await setting(page, 'updateHideToTrayOnClose', false)
+  await setting(page, 'updateConfirmCloseWindowWithMultipleTabs', false)
+  await setting(page, 'updateEnableClosedAppSubscriptionRefresh', true)
+
+  // Other windows still close.
+  const secondWindow = await openNewWindowFromTabBar(app, page)
+  await waitForAppReady(secondWindow)
+  await secondWindow.locator('.newTabButton').click()
+  await expect.poll(() => secondWindow.evaluate(async () => (
+    (await window.ftElectron.tabs.getState()).tabs.length
+  ))).toBe(2)
+  const secondClosed = secondWindow.waitForEvent('close')
+  await secondWindow.evaluate(() => window.close())
+  await secondClosed
+  await expect.poll(() => app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().length)).toBe(1)
+
+  await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].close())
+  await expect.poll(() => windowVisible(app)).toBe(false)
+  expect(await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().length)).toBe(1)
+
+  // An explicit tray Close still quits.
+  const closed = app.electronApp.waitForEvent('close')
+  await app.electronApp.evaluate(() => globalThis.testTrayMenu.items[0].submenu.items.find(item => item.label === 'Close').click())
+  await closed
+})
+
 test('native minimize hides to tray and the tray restores the window', async ({ app, page }) => {
   await captureTray(app, page)
   await setting(page, 'updateHideToTrayOnMinimize', true)
@@ -225,6 +254,20 @@ test('closing the final tab still exits with close-to-tray enabled', async ({ ap
   await page.evaluate(() => {
     const store = window.$store
     window.ftElectron.tabs.close(store.state.tabs.tabs[0].id)
+  })
+  await closed
+})
+
+test('closing the final tab still exits while background refresh runs without a close prompt', async ({ app, page }) => {
+  await setting(page, 'updateConfirmCloseApp', false)
+  await setting(page, 'updateEnableClosedAppSubscriptionRefresh', true)
+  const closed = app.electronApp.waitForEvent('close')
+  // The app menu closes the emptied window without marking it confirmed.
+  await app.electronApp.evaluate(({ BrowserWindow, Menu }) => {
+    const item = Menu.getApplicationMenu().items
+      .flatMap(menuItem => menuItem.submenu?.items ?? [])
+      .find(menuItem => menuItem.label === 'Close Tab')
+    item.click(undefined, BrowserWindow.getAllWindows()[0])
   })
   await closed
 })
