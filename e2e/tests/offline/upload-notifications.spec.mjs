@@ -4,6 +4,7 @@ import {
   goTo,
   goToSettingsSection,
   readDatastore,
+  setWindowSize,
 } from '../../helpers/app.mjs'
 
 const CHANNEL_ID = `UC${'0'.repeat(22)}`
@@ -148,5 +149,48 @@ test.describe('with a channel notification turned on', () => {
       { title: 'New video from Alpha Channel', body: `Upload probe${attempt}` },
       { title: 'New video from Alpha Channel', body: 'Upload b' }
     ])
+  })
+})
+
+test.describe('in a short window', () => {
+  test.use({
+    seed: {
+      settings: { currentLocale: 'en-US', fetchSubscriptionsAutomatically: false },
+      profiles: [
+        ...profile([{ id: CHANNEL_ID, name: 'Alpha Channel', thumbnail: '', notificationFeedTypes: ['videos', 'shorts', 'live', 'posts'] }]),
+        ...['Profile 1', 'Profile 2', 'Profile 3'].map((name, index) => ({
+          _id: `profile-${index}`, name, bgColor: '#000000', textColor: '#FFFFFF', subscriptions: []
+        }))
+      ]
+    }
+  })
+
+  test('the popover keeps every preference reachable and its scroll range valid', { tag: '@scale' }, async ({ app, page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await setWindowSize(app, page, { width: 1000, height: 380 })
+    await goTo(page, 'subscribedchannels')
+    await page.locator('.channel', { hasText: 'Alpha Channel' }).getByRole('button', { name: 'Subscription settings', exact: true }).click()
+    const popover = page.locator('.profileDropdown')
+    await expect(popover).toHaveClass(/profileDropdownPositioned/)
+    const preferences = popover.locator('.feedTypePreferences')
+    await expect(preferences).toHaveAttribute('data-overlayscrollbars-viewport')
+    // The profile list keeps at least one row.
+    expect((await popover.locator('.profileDropdownScroller').boundingBox()).height).toBeGreaterThanOrEqual(45.5)
+
+    await preferences.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => preferences.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    const limit = popover.getByRole('combobox', { name: 'Videos per day' })
+    const [limitBox, preferencesBox] = await Promise.all([limit.boundingBox(), preferences.boundingBox()])
+    expect(limitBox.y + limitBox.height).toBeLessThanOrEqual(preferencesBox.y + preferencesBox.height + 0.5)
+
+    // The bell hides the notification group while the preferences stay scrolled to the bottom.
+    await page.locator('.channel', { hasText: 'Alpha Channel' }).getByRole('button', { name: 'Notify about new uploads', exact: true }).click()
+    await expect(popover.getByRole('group', { name: 'Notify about new uploads', exact: true })).toHaveCount(0)
+    const scrollbar = preferences.locator(':scope > .os-scrollbar-vertical')
+    await expect.poll(() => preferences.evaluate(element => (
+      element.scrollTop <= Math.max(0, element.scrollHeight - element.clientHeight) + 1
+    ))).toBe(true)
+    const overflows = await preferences.evaluate(element => element.scrollHeight > element.clientHeight + 1)
+    await expect(scrollbar).toHaveClass(overflows ? /^(?!.*os-scrollbar-unusable)/ : /os-scrollbar-unusable/)
   })
 })

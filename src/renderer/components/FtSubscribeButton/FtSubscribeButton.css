@@ -217,6 +217,8 @@
 }
 
 .feedTypePreferences {
+  min-block-size: 0;
+  overflow-y: auto;
   padding-block-end: 5px;
 }
 
@@ -327,8 +329,10 @@
   padding: 0;
 }
 
+/* The profile list gives up its space first and keeps at least one row. */
 .profileDropdownScroller {
-  min-block-size: 0;
+  flex-shrink: 1000;
+  min-block-size: 46px;
   overflow-y: auto;
 }
 
