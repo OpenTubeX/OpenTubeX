@@ -281,6 +281,71 @@ for (const usePlayerMenuGrid of [true, false]) {
   })
 }
 
+test.describe('grid submenu headers', { tag: '@scale' }, () => {
+  test.use({
+    seed: {
+      settings: {
+        videoPlaybackEngine: 'yt-dlp',
+        ytDlpPlaybackEngineDefaultMigration: true,
+        defaultVideoFormat: 'dash',
+        defaultQuality: 'auto',
+        usePlayerMenuGrid: true,
+        useSponsorBlock: false,
+        playNextVideo: false,
+        fetchSubscriptionsAutomatically: false,
+      }
+    }
+  })
+
+  test('center their title vertically in the header', async ({ app, page }, testInfo) => {
+    await openAdaptiveVideo(app, page)
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    await player.evaluate((element, tracks) => {
+      const shakaPlayer = element.ui.getControls().getPlayer()
+      shakaPlayer.getVideoTracks = () => tracks.map(track => ({ ...track, active: track.id === 8, roles: [], hdr: 'SDR', videoLayout: null }))
+      shakaPlayer.dispatchEvent({ type: 'trackschanged' })
+    }, TRACKS)
+    const overflowMenu = player.locator('.shaka-overflow-menu')
+
+    /** @param {import('@playwright/test').Locator} submenu */
+    const expectCenteredTitle = async (submenu, { centeredInline = true } = {}) => {
+      const menu = await overflowMenu.boundingBox()
+      const header = await submenu.locator(':scope > .shaka-back-to-overflow-button').boundingBox()
+      const title = await submenu.locator(':scope > .shaka-back-to-overflow-button > span').boundingBox()
+      // Between the top of the menu and the divider at the bottom of the header
+      const divider = header.y + header.height - 1
+      expect(Math.abs(title.y + title.height / 2 - (menu.y + divider) / 2)).toBeLessThan(1)
+      if (centeredInline) {
+        expect(Math.abs(title.x + title.width / 2 - (menu.x + menu.width / 2))).toBeLessThan(1)
+      }
+    }
+
+    await player.hover()
+    await player.locator('.shaka-overflow-menu-button').click()
+    await player.locator('.shaka-playbackrate-button').click()
+    const speeds = player.locator('.shaka-playback-rates')
+    await expect(speeds).toBeVisible()
+    await expectCenteredTitle(speeds)
+    await speeds.screenshot({ path: testInfo.outputPath('speed.png') })
+
+    await speeds.locator(':scope > .shaka-back-to-overflow-button').click()
+    await player.locator('.shaka-resolution-button').click()
+    const resolutions = player.locator('.shaka-resolutions')
+    const codecs = resolutions.locator('.ft-quality-codecs')
+    await expect(codecs.getByRole('button')).toHaveText(['AV1', 'VP9', 'H.264'])
+    // Beside the codecs, the title follows the back icon
+    await expectCenteredTitle(resolutions, { centeredInline: false })
+    const header = await resolutions.locator(':scope > .shaka-back-to-overflow-button').boundingBox()
+    const title = await resolutions.locator(':scope > .shaka-back-to-overflow-button > span').boundingBox()
+    const switcher = await codecs.boundingBox()
+    expect(title.x - header.x).toBeLessThan(64)
+    expect(title.x + title.width).toBeLessThanOrEqual(switcher.x)
+    // The codecs share the title's center line
+    expect(Math.abs(switcher.y + switcher.height / 2 - (title.y + title.height / 2))).toBeLessThan(1)
+    await resolutions.screenshot({ path: testInfo.outputPath('resolution.png') })
+  })
+})
+
 test.describe('quality codecs with classic controls', () => {
   test.use({
     seed: {
