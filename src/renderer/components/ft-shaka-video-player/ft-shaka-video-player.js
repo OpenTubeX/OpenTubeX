@@ -11,7 +11,7 @@ import FtMobileSheet from '../FtMobileSheet/FtMobileSheet.vue'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import SponsorBlockSegmentEditor from '../WatchVideoSponsorBlock/SponsorBlockSegmentEditor.vue'
 import shaka from 'shaka-player'
-import { getVideoCodecPreferences } from '../../helpers/player/videoCodecPreference'
+import { getVideoCodecPreferences, preferredVideoDecodingAttributes } from '../../helpers/player/videoCodecPreference'
 import { voidWebmProjection } from '../../helpers/player/webmProjection'
 import { registerPlugin } from '@capacitor/core'
 import { bindAndroidMediaErrors } from '../../helpers/player/androidMediaErrors'
@@ -4045,11 +4045,9 @@ export default defineComponent({
           }
         },
 
-        // Prioritise variants that are predicted to play:
-        // - `smooth`: without dropping frames
-        // - `powerEfficient` the spec is quite vague but in Chromium it should prioritise hardware decoding when available
-        // https://developer.mozilla.org/en-US/docs/Web/API/MediaCapabilities/decodingInfo
-        preferredDecodingAttributes: format === 'dash' ? ['smooth', 'powerEfficient'] : [],
+        // Prefer hardware decoding; predicted smoothness can otherwise tie with
+        // power efficiency and let a software-decoded codec win on bandwidth.
+        preferredDecodingAttributes: format === 'dash' ? preferredVideoDecodingAttributes : [],
 
         // Prefer the main audio before codec/channel preferences. If there is
         // no main role, Shaka falls back to the manifest's primary track.

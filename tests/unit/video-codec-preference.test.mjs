@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
 import { runInNewContext } from 'node:vm'
-import { getVideoCodecPreferences } from '../../src/renderer/helpers/player/videoCodecPreference.js'
+import { getVideoCodecPreferences, preferredVideoDecodingAttributes } from '../../src/renderer/helpers/player/videoCodecPreference.js'
 
 test('automatic selection leaves all supported codecs available for hardware selection', () => {
   assert.deepEqual(getVideoCodecPreferences('auto'), [{ codec: '', hdrLevel: 'AUTO' }])
@@ -62,4 +62,40 @@ test('full codec identifiers retain HDR filtering after manifest codec selection
       assert.ok(selected.every(variant => variant.video.codecs.startsWith(prefix)))
     }
   }
+})
+
+shaka.log = { debug() {} }
+shaka.polyfill = { register: install => install() }
+for (const file of ['multi_map', 'mime_utils']) {
+  const polyfill = file === 'multi_map'
+    ? readFileSync(new URL('../../node_modules/shaka-player/lib/polyfill/map.js', import.meta.url), 'utf8')
+    : ''
+  runInNewContext(polyfill + readFileSync(new URL(`../../node_modules/shaka-player/lib/util/${file}.js`, import.meta.url), 'utf8'), {
+    shaka, goog: { provide() {}, require() {}, requireType() {} }
+  })
+}
+
+test('Auto prefers hardware decoding over a lower-bitrate software codec reported smooth', () => {
+  const variants = [
+    { codec: 'av01.0.09M.08', bitrate: 1270300, smooth: true, powerEfficient: false },
+    { codec: 'vp9', bitrate: 1914862, smooth: false, powerEfficient: true },
+    { codec: 'avc1.64002A', bitrate: 3819357, smooth: false, powerEfficient: true }
+  ].map((format, id) => ({
+    video: { id, codecs: format.codec, bandwidth: format.bitrate, width: 1920, height: 1080, frameRate: 60 },
+    decodingInfos: [{ supported: true, smooth: format.smooth, powerEfficient: format.powerEfficient }]
+  }))
+  const manifest = { variants, textStreams: [] }
+  shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest, [], [], preferredVideoDecodingAttributes, [])
+  assert.equal(manifest.variants.length, 1)
+  assert.equal(manifest.variants[0].video.codecs, 'vp9')
+
+  // An explicit preference still wins, and software-only devices remain playable.
+  const explicit = { variants, textStreams: [] }
+  shaka.util.StreamUtils.chooseCodecsAndFilterManifest(explicit, ['av01'], [], preferredVideoDecodingAttributes, [])
+  assert.equal(explicit.variants[0].video.codecs, 'av01.0.09M.08')
+  const software = { variants: variants.map(variant => ({
+    ...variant, decodingInfos: [{ supported: true, smooth: true, powerEfficient: false }]
+  })), textStreams: [] }
+  shaka.util.StreamUtils.chooseCodecsAndFilterManifest(software, [], [], preferredVideoDecodingAttributes, [])
+  assert.ok(software.variants.length > 0)
 })
