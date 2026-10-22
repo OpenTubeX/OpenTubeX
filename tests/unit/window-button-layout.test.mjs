@@ -9,7 +9,7 @@ const source = await readFile(new URL('../../src/main/windowButtonLayout.js', im
 function fixture () {
   const timers = []
   const connections = []
-  const portal = { available: false, layout: 'close,minimize,maximize:', handlers: [], busAddress: true, gate: null, readGate: null }
+  const portal = { available: false, layout: 'close,minimize,maximize:', handlers: [], busAddress: true, gate: null, readGate: null, readError: null }
   const dbus = {
     sessionBus () {
       if (!portal.busAddress) throw new Error('unknown bus address')
@@ -23,7 +23,7 @@ function fixture () {
             if (!portal.available) throw new Error('org.freedesktop.portal.Desktop was not provided by any .service files')
             return {
               on: (name, handler) => portal.handlers.push(handler),
-              ReadOne: async () => { const layout = portal.layout; await portal.readGate; return layout }
+              ReadOne: async () => { const layout = portal.layout; await portal.readGate; if (portal.readError) throw portal.readError; return layout }
             }
           }
         })
@@ -136,4 +136,20 @@ test('a retry does not overwrite a newer layout signalled during its read', asyn
   await flush()
   assert.deepEqual(published, ['close:'])
   assert.equal(await layout.getWindowButtonLayout(), 'close:')
+})
+
+test('a change signalled before the read fails is kept', async () => {
+  const layout = fixture()
+  layout.portal.available = true
+  layout.portal.readError = new Error('Timeout')
+  let answer
+  layout.portal.readGate = new Promise(resolve => { answer = resolve })
+  const first = layout.getWindowButtonLayout()
+  await flush()
+  layout.portal.handlers[0]('org.gnome.desktop.wm.preferences', 'button-layout', 'close:')
+  answer()
+  assert.equal(await first, 'close:')
+  assert.equal(await layout.getWindowButtonLayout(), 'close:')
+  assert.equal(layout.connections[0].ended, true)
+  assert.equal(layout.timers.length, 1)
 })

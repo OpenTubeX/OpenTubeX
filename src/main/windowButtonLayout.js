@@ -51,7 +51,8 @@ async function readButtonLayout() {
     if (failedReads < RETRY_DELAYS.length) {
       setTimeout(retryButtonLayout, RETRY_DELAYS[failedReads++]).unref?.()
     }
-    return DEFAULT_BUTTON_LAYOUT
+    // A layout signalled before the read failed is still newer than the default
+    return changedLayout ?? DEFAULT_BUTTON_LAYOUT
   }
 }
 
