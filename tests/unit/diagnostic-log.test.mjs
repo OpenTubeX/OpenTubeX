@@ -69,6 +69,15 @@ test('console arguments are serialized with errors, nested data and sensitive ke
   assert.ok(message.includes('Uint8Array(512)'))
 })
 
+test('credentials inside nested JSON strings are redacted', () => {
+  const nested = formatDiagnosticMessage(['failed', { body: '{"token":"abc def","id":7}' }])
+  assert.ok(!/abc|def/.test(nested), nested)
+  assert.ok(nested.includes('\\"id\\":7'), nested)
+
+  const doublyNested = formatDiagnosticMessage(['failed', { body: JSON.stringify({ data: JSON.stringify({ poToken: 'ghi jkl' }) }) }])
+  assert.ok(!/ghi|jkl/.test(doublyNested), doublyNested)
+})
+
 test('values logged after a credential label are redacted', () => {
   assert.equal(formatDiagnosticMessage(['Cookie', 'SID=abc; HSID=def']), 'Cookie <redacted>')
   assert.equal(formatDiagnosticMessage(['poToken:', 'MnQ3abc', 'kept']), 'poToken: <redacted> kept')
