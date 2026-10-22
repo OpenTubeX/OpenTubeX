@@ -250,6 +250,9 @@ export class QualitySelection extends shaka.ui.ResolutionSelection {
     } else if (track.hdr === 'PQ' || track.hdr === 'HLG') {
       label += ' HDR'
     }
+    if (getCodecFamily(track.codecs) === 'lvc1') {
+      label += ' LCEVC'
+    }
     if (track.videoLayout?.includes('CH-STEREO')) {
       label += ' 3D'
     }

@@ -110,7 +110,7 @@ for (const usePlayerMenuGrid of [true, false]) {
       await expect(dialog.locator('.shaka-resolution-button')).toBeVisible()
     })
 
-    test('labels Dolby Vision and non-square pixels like Shaka', async ({ app, page }) => {
+    test('labels Dolby Vision, LCEVC and non-square pixels like Shaka', async ({ app, page }) => {
       await openAdaptiveVideo(app, page)
       const player = page.locator(`${activeTab} .ftVideoPlayer`)
       await player.evaluate(element => {
@@ -120,6 +120,7 @@ for (const usePlayerMenuGrid of [true, false]) {
           { id: 2, codecs: 'dvh1.05.06', width: 3840, height: 2160, frameRate: 30, bandwidth: 20e6, hdr: 'PQ' },
           // Displayed as 1920x1080, so it's not portrait video
           { id: 3, codecs: 'vp09.00.40.08', width: 960, height: 1080, frameRate: 30, bandwidth: 2e6, pixelAspectRatio: '2:1' },
+          { id: 4, codecs: 'lvc1.vvi1.01', width: 1280, height: 720, frameRate: 30, bandwidth: 1e6 },
         ].map(track => ({ hdr: 'SDR', roles: [], videoLayout: null, active: false, ...track }))
         shakaPlayer.dispatchEvent({ type: 'trackschanged' })
       })
@@ -132,6 +133,8 @@ for (const usePlayerMenuGrid of [true, false]) {
       await expect(menu.locator('.explicit-resolution > span')).toHaveText(['2160p Dolby Vision'])
       await codecs.getByRole('button', { name: 'VP9' }).click()
       await expect(menu.locator('.explicit-resolution > span')).toHaveText(['1080p'])
+      await codecs.getByRole('button', { name: 'LVC1' }).click()
+      await expect(menu.locator('.explicit-resolution > span')).toHaveText(['720p LCEVC'])
     })
 
     test('lists the resolutions of the codec picked in the header', async ({ app, page }, testInfo) => {
@@ -265,3 +268,43 @@ for (const usePlayerMenuGrid of [true, false]) {
     })
   })
 }
+
+test.describe('quality codecs with classic controls', () => {
+  test.use({
+    seed: {
+      settings: {
+        videoPlaybackEngine: 'yt-dlp',
+        ytDlpPlaybackEngineDefaultMigration: true,
+        defaultVideoFormat: 'dash',
+        defaultQuality: 'auto',
+        useFrostedGlassPlayerUi: false,
+        useSponsorBlock: false,
+        playNextVideo: false,
+        fetchSubscriptionsAutomatically: false,
+      }
+    }
+  })
+
+  test('keeps the codecs in the phone header without the frosted dialog', async ({ app, page }) => {
+    await openAdaptiveVideo(app, page)
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    await expect(player).toHaveClass(/\bclassicPlayerControls\b/)
+    await player.evaluate((element, tracks) => {
+      const shakaPlayer = element.ui.getControls().getPlayer()
+      shakaPlayer.getVideoTracks = () => tracks.map(track => ({ ...track, active: track.id === 8, roles: [], hdr: 'SDR', videoLayout: null }))
+      shakaPlayer.dispatchEvent({ type: 'trackschanged' })
+    }, TRACKS)
+    await setWindowSize(app, page, { width: 450, height: 700 })
+    await player.hover()
+    await player.locator('.shaka-overflow-menu-button').click({ force: true })
+    const dialog = player.locator('.phonePlayerOptions[open]')
+    await dialog.locator('.shaka-resolution-button').click()
+    await expect(dialog).toHaveAttribute('data-header-action', '')
+    const header = await dialog.locator(':scope > .shaka-back-to-overflow-button').boundingBox()
+    // Away from the top of the window, where the viewport would place it
+    expect(header.y).toBeGreaterThan(20)
+    const switcher = await dialog.locator('.ft-quality-codecs').boundingBox()
+    expect(switcher.y).toBeGreaterThanOrEqual(header.y)
+    expect(switcher.y + switcher.height).toBeLessThanOrEqual(header.y + header.height)
+  })
+})

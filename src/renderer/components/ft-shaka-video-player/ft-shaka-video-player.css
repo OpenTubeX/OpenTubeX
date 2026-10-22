@@ -6573,9 +6573,13 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 /*
   A submenu's action sits in the header while it fits (`setupPhoneOptionsMenu`).
-  The dialog's backdrop filter makes it the containing block, so the action
-  stays in place while the menu scrolls.
+  Layout containment makes the dialog its containing block, so the action stays
+  in place while the menu scrolls, whatever filters the dialog's style uses.
 */
+:deep(.phonePlayerOptions[data-header-action]) {
+  contain: layout;
+}
+
 :deep(.phonePlayerOptions[data-header-action] .ft-submenu-header-action) {
   position: fixed;
   inset-block-start: calc((var(--phone-touch-target, 48px) - 36px) / 2);
