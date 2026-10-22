@@ -61,6 +61,14 @@ test('console arguments are serialized with errors, nested data and sensitive ke
   assert.ok(message.includes('Uint8Array(512)'))
 })
 
+test('values logged after a credential label are redacted', () => {
+  assert.equal(formatDiagnosticMessage(['Cookie', 'SID=abc; HSID=def']), 'Cookie <redacted>')
+  assert.equal(formatDiagnosticMessage(['poToken:', 'MnQ3abc', 'kept']), 'poToken: <redacted> kept')
+  assert.equal(formatDiagnosticMessage(['Using token %s for %s', 'abc123', 'web']), 'Using token <redacted> for web')
+  // Ordinary messages that mention a credential keep their details
+  assert.equal(formatDiagnosticMessage(['Failed to refresh after a token change', 'reason']), 'Failed to refresh after a token change reason')
+})
+
 test('format substitutions, circular values and long messages are handled', () => {
   const value = { name: 'loop' }
   value.self = value

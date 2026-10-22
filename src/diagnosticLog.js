@@ -152,6 +152,11 @@ function serializeEntries(entries, depth, seen, open, close, total = entries.len
   return `${open}${values.join(', ')}${close}`
 }
 
+function endsWithSensitiveLabel(text) {
+  const label = /([\w-]+)\s*[:=]?\s*$/.exec(text)?.[1]
+  return label !== undefined && SENSITIVE_KEY.test(label)
+}
+
 /**
  * Formats console arguments like the console does, including `%s`-style
  * substitutions, and redacts the result.
@@ -163,17 +168,24 @@ export function formatDiagnosticMessage(args) {
   const parts = []
   if (typeof values[0] === 'string' && values[0].includes('%')) {
     const format = values.shift()
-    parts.push(format.replaceAll(/%([sdifoOc%])/g, (match, type) => {
+    parts.push(format.replaceAll(/%([sdifoOc%])/g, (match, type, offset) => {
       if (type === '%') return '%'
       if (values.length === 0) return match
       const value = values.shift()
       if (type === 'c') return ''
+      // `console.log('Using token %s', token)`
+      if (endsWithSensitiveLabel(format.slice(Math.max(0, offset - 100), offset))) return REDACTED
       if (type === 'd' || type === 'i') return String(Number.parseInt(value))
       if (type === 'f') return String(Number(value))
       return serialize(value, type === 's' ? 0 : 1, new WeakSet())
     }))
   }
-  parts.push(...values.map(value => serialize(value, 0, new WeakSet())))
+  // `console.log('Cookie', document.cookie)`
+  let afterLabel = false
+  for (const value of values) {
+    parts.push(afterLabel ? REDACTED : serialize(value, 0, new WeakSet()))
+    afterLabel = typeof value === 'string' && value.length <= 100 && /^\s*[\w-]+\s*[:=]?\s*$/.test(value) && endsWithSensitiveLabel(value)
+  }
   const text = parts.join(' ')
   const redacted = redactDiagnosticText(text.slice(0, REDACTION_INPUT_MAX_LENGTH))
   const omitted = Math.max(0, redacted.length - DIAGNOSTIC_ENTRY_MAX_LENGTH) + Math.max(0, text.length - REDACTION_INPUT_MAX_LENGTH)
