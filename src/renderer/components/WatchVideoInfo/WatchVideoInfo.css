@@ -114,6 +114,7 @@
   color: inherit;
   cursor: pointer;
   display: block;
+  font-weight: 500;
   margin-inline-start: 6px;
   margin-block-end: 3px;
   position: relative;

@@ -212,6 +212,10 @@
     overflow-x: clip;
   }
 
+  .channelName {
+    font-weight: 500;
+  }
+
   .channelName + .videoInfo::before {
     content: none;
   }
