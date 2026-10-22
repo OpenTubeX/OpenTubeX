@@ -1,5 +1,4 @@
 .card {
-  --subscriptions-header-gap: 8px;
   --subscriptions-header-padding-block-end: 12px;
   --subscriptions-top-bar-block-size: 60px;
 
@@ -20,7 +19,7 @@
   inset-block-start: var(--subscriptions-top-bar-block-size);
   z-index: 3;
   margin-inline: -16px;
-  padding-block: calc(3px + var(--subscriptions-header-gap)) var(--subscriptions-header-padding-block-end);
+  padding-block: var(--page-title-offset) var(--subscriptions-header-padding-block-end);
   padding-inline: 16px;
   border-start-start-radius: calc(8px * var(--ui-roundness));
   border-start-end-radius: calc(8px * var(--ui-roundness));
@@ -57,13 +56,6 @@
   padding-block-end: var(--subscriptions-header-padding-block-end);
   padding-inline: 16px;
   border-block-end: 1px solid var(--primary-shadow-color);
-}
-
-.pageTitle {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0;
 }
 
 .markAllSeenButton {

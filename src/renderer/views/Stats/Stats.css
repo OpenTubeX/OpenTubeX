@@ -24,11 +24,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-block: 16px 20px;
-}
-
-.statsHeader h2 {
-  margin: 0;
+  margin-block-end: 12px;
+  padding-block-start: var(--page-title-offset);
 }
 
 .deviceSegments {

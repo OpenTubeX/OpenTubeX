@@ -6,6 +6,7 @@
       <div class="headingRow">
         <h2
           ref="historyHeading"
+          class="pageTitle"
           tabindex="-1"
         >
           <FtIcon

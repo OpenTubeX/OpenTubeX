@@ -7,7 +7,7 @@
     <FtCard class="homeIntro">
       <div class="homeHeading">
         <div>
-          <h1>
+          <h1 class="pageTitle">
             <FtIcon
               :icon="['fas', 'house']"
               class="headingIcon"

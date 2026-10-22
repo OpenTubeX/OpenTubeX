@@ -104,7 +104,10 @@
   gap: 16px;
 }
 
-.homeHeading h1,
+.homeHeading {
+  padding-block-start: var(--page-title-offset);
+}
+
 .sectionHeading :deep(h2) {
   display: flex;
   align-items: center;

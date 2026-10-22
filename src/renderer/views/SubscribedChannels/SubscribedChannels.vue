@@ -2,7 +2,7 @@
   <div>
     <ft-card class="card">
       <div class="heading">
-        <h2>
+        <h2 class="pageTitle">
           <FtIcon
             :icon="['fas', 'user-check']"
             class="headingIcon"

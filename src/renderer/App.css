@@ -38,6 +38,15 @@
   touch-action: manipulation;
 }
 
+:global(.pageTitle) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-block-size: var(--page-title-line-size);
+  margin: 0;
+  font-size: 1.5em;
+}
+
 :global(body) {
   /* stylelint-disable-next-line length-zero-no-unit */
   --horizontal-tab-scrollbar-space: 0px;
@@ -62,6 +71,11 @@
   /* stylelint-disable-next-line length-zero-no-unit */
   --mobile-progress-bar-space: 0px;
   --top-nav-sticky-offset: calc(var(--app-safe-area-inset-top) + var(--top-nav-height));
+
+  /* Main pages share their title position, so it stays in place when switching
+     between them. Controls beside a title center on its line. */
+  --page-title-offset: 8px;
+  --page-title-line-size: 48px;
 
   box-sizing: border-box;
   display: flex;
