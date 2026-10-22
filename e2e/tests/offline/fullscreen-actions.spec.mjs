@@ -30,6 +30,9 @@ for (const { uiScale, width, height, colorScheme } of [
       await page.getByRole('button', { name: 'Move Comments up', exact: true }).click()
       const selectedIds = () => rows.evaluateAll(elements => elements.map(element => element.dataset.fullscreenActionId))
       await expect.poll(selectedIds).toEqual(['comments', 'share'])
+      // The new order shows before it's saved. Saving it again finishes after
+      // the queued saves, so the reload reads it back.
+      await page.evaluate(() => window.$store.dispatch('updateFullscreenActions', window.$store.getters.getFullscreenActions))
       await page.reload()
       await openInterfaceCustomizer(page, 'fullscreen actions')
       await expect.poll(selectedIds).toEqual(['comments', 'share'])
