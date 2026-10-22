@@ -18,6 +18,7 @@ import { buildProxyUrl, isOpenTubeXUrl } from './utils'
 import { TabManager } from './tabs/TabManager'
 import { IpcChannels } from '../constants'
 import { getMatchingDownloadValidators, getYtDlpAssetName } from './ytDlpAsset'
+import { verifyYtDlpReleaseAsset } from './ytDlpSignature'
 import { buildYtDlpStoryboardVtt } from './ytDlpStoryboard'
 import { downloadYtDlpSubtitle } from './ytDlpSubtitle'
 import { isYouTubeSubtitleUrl } from '../youtubeSubtitle'
@@ -953,6 +954,7 @@ async function getFfprobeVersion(executable, signal) {
  * @property {string | null} lastModified
  * @property {string} [source]
  * @property {'stable' | 'nightly' | 'master'} [channel]
+ * @property {number} [signedAt] when yt-dlp signed the installed release, in seconds
  */
 
 /**
@@ -1015,6 +1017,44 @@ async function downloadFile(url, onProgress, onDownloadStart, validators) {
       lastModified: response.headers.get('last-modified')
     }
   }
+}
+
+/**
+ * @param {string} url
+ * @returns {Promise<Buffer>}
+ */
+async function fetchBuffer(url) {
+  const response = await net.fetch(url)
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}`)
+  }
+  return Buffer.from(await response.arrayBuffer())
+}
+
+/**
+ * Reads the tag from the `releases/latest` redirect, which unlike GitHub's
+ * REST API has no 60 requests per hour limit for unauthenticated clients.
+ * @param {string} repository
+ * @returns {Promise<string>}
+ */
+function getLatestReleaseDownloadUrl(repository) {
+  return new Promise((resolve, reject) => {
+    const failure = new Error(`Could not find the latest ${repository} release`)
+    // Not following the redirect cancels it, so the release page is never downloaded
+    const request = net.request({ url: `https://github.com/${repository}/releases/latest`, method: 'HEAD', redirect: 'manual' })
+    request.on('redirect', (statusCode, method, redirectUrl) => {
+      const prefix = `https://github.com/${repository}/releases/tag/`
+      const tag = redirectUrl.startsWith(prefix) ? redirectUrl.slice(prefix.length) : ''
+      if (/^[\w.-]+$/.test(tag)) {
+        resolve(`https://github.com/${repository}/releases/download/${tag}`)
+      } else {
+        reject(failure)
+      }
+    })
+    request.on('response', () => reject(failure))
+    request.on('error', reject)
+    request.end()
+  })
 }
 
 /**
@@ -1280,20 +1320,27 @@ async function downloadManagedYtDlp(onProgress, onDownloadStart) {
   const configuredChannel = (await settings._findOne('ytDlpChannel'))?.value
   const channel = Object.hasOwn(YT_DLP_RELEASE_REPOSITORIES, configuredChannel) ? configuredChannel : 'stable'
   const assetName = getYtDlpAssetName(process.platform, process.arch)
-  const source = `https://github.com/${YT_DLP_RELEASE_REPOSITORIES[channel]}/releases/latest/download/${assetName}`
+  const repository = YT_DLP_RELEASE_REPOSITORIES[channel]
+  const source = `https://github.com/${repository}/releases/latest/download/${assetName}`
 
   const managedPath = getManagedBinaryPath('yt-dlp')
   let download
 
   try {
-    download = await downloadFile(
-      source,
-      onProgress,
-      onDownloadStart,
-      await readDownloadValidators(managedPath, source, channel)
-    )
+    // fetch the binary and its signed checksums from the same release,
+    // even if a newer one is published in between
+    const releaseUrl = await getLatestReleaseDownloadUrl(repository)
+    const validators = await readDownloadValidators(managedPath, source, channel)
+    download = await downloadFile(`${releaseUrl}/${assetName}`, onProgress, onDownloadStart, validators)
 
     if (download.data !== null) {
+      const [checksums, signature] = await Promise.all([
+        fetchBuffer(`${releaseUrl}/SHA2-256SUMS`),
+        fetchBuffer(`${releaseUrl}/SHA2-256SUMS.sig`)
+      ])
+      download.validators.signedAt = verifyYtDlpReleaseAsset(
+        download.data, assetName, checksums, signature, validators?.signedAt
+      )
       await installBinary(download.data, managedPath)
     }
   } catch (error) {

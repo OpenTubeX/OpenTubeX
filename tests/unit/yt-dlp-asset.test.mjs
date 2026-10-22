@@ -28,4 +28,9 @@ test('only reuses download validators for the selected asset and channel', () =>
   assert.equal(getMatchingDownloadValidators(validators, `${genericSource}_linux_aarch64`, 'stable'), null)
   assert.equal(getMatchingDownloadValidators(validators, genericSource, 'nightly'), null)
   assert.equal(getMatchingDownloadValidators({ ...validators, source: undefined }, genericSource, 'stable'), null)
+  assert.deepEqual(getMatchingDownloadValidators({ ...validators, signedAt: 1792619636 }, genericSource, 'stable'), {
+    etag: 'etag',
+    lastModified: 'date',
+    signedAt: 1792619636
+  })
 })
