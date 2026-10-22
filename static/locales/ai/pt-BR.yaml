@@ -1,43 +1,12 @@
 # Optional AI-generated translations for keys missing from ../pt-BR.yaml.
 Color Picker:
   Hue: Matiz
-  Opacity: Opacidade
   Backdrop Blur: Desfocagem do fundo
-  Hex Color: Cor hexadecimal
-  Apply Color: Aplicar
-  Reset Color: Redefinir
-  Copy Color: Copiar
-  Copy From Another Color: Copiar de outra cor
-  Color Copied: Cor copiada
-  Invalid Color: Insira uma cor hexadecimal válida
   Clipboard Unavailable: Área de download indisponível
-  Saturation and Brightness: Saturação e luminosidade
-New Tab: Nova guia
-Maximize: Maximizar
-Restore: Restaurar
-Close Tab: Fechar guia
 Close Confirmation:
   Background Sync Warning: Sair interromperá a atualização de inscrições em segundo plano.
-  Hide Window: Ocultar janela
-  Title: Sair do OpenTubeX?
-  Message: Tem certeza de que deseja sair do OpenTubeX?
-  Quit: Sair
-  Never Ask Again: Não voltar a perguntar
-Close Window Confirmation:
-  Title: Fechar a janela?
-  Message: Esta janela contém {count} guia. Tem certeza de que deseja fechá-la? | Esta janela contém {count} guias. Tem certeza de que deseja fechá-la?
-  Close Window: Fechar janela
 Confirmations:
-  Never Ask Again: Não voltar a perguntar
   Settings Hint: Pode reativar esta confirmação em Configurações → Geral → Confirmar antes de…
-Close Multiple Tabs Confirmation:
-  Title: Fechar várias guias?
-  Message: Esta ação fechará {count} guia. | Esta ação fechará {count} guias.
-  Close Tabs: Fechar {count} guia | Fechar {count} guias
-Load Multiple Tabs Confirmation:
-  Title: Carregar várias guias?
-  Message: Esta ação carregará {count} guia. | Esta ação carregará {count} guias.
-  Load Tabs: Carregar {count} guia | Carregar {count} guias
 Unload Multiple Tabs Confirmation:
   Title: Baixar várias guias da memória?
   Message: Esta ação baixará {count} guia da memória. | Esta ação baixará {count} guias da memória.
@@ -2264,14 +2233,6 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Criar um atalho na área de trabalho
-Older Version Changes:
-  Title: "Alterações de uma versão anterior"
-  Message: "As alterações que você fez em uma versão anterior do OpenTubeX foram aplicadas à sua biblioteca."
-  Detail: "Se um item foi alterado nas duas versões, a alteração da versão anterior foi mantida. Um backup da sua biblioteca anterior está na pasta do seu perfil."
-Library Format Changed:
-  Title: "Biblioteca transferida para um novo formato"
-  Message: "Sua biblioteca agora usa um novo formato de armazenamento."
-  Detail: "Versões anteriores do OpenTubeX ainda podem abrir sua biblioteca, mas a mostram como estava antes desta atualização. As alterações que você fizer em uma versão anterior são adicionadas quando você voltar a esta versão."
 Invidious Fallback Warning: "Esta solicitação ignora a instância do Invidious configurada e se conecta diretamente ao YouTube, expondo seu endereço IP."
 Automatically unloaded to free memory: "Descarregada automaticamente para liberar memória"
 Home Widgets:
