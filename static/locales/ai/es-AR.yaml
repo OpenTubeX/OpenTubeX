@@ -493,6 +493,7 @@ Settings:
     Loaded Tab Icons With Failures: Se han cargado {loaded} iconos de pestañas; no se pudieron cargar {failed}
     Show Tab Previews: Mostrar vistas previas de las pestañas
     Use Fixed Tab Width: Usar un ancho fijo para las pestañas en modo horizontal
+    Use Custom Title Bar: Usar barra de título personalizada
     Tab Width: Ancho de las pestañas
     Tab Layout:
       Tab Layout: Disposición de las pestañas
@@ -2432,6 +2433,7 @@ Tooltips:
     Always Show Scrollbars: Mantiene las barras de desplazamiento visibles en todo momento. Si se desactiva, desaparecen poco después de dejar de mover el mouse y reaparecen en cuanto vuelves a moverlo.
     Scroll Speed: Cambia la distancia de desplazamiento de los gestos de rueda del mouse y del panel táctil.
     Use Fixed Tab Width: Asigna el mismo ancho a todas las pestañas de la barra horizontal en lugar de adaptarlo a su título.
+    Use Custom Title Bar: Reemplaza la barra de título del sistema por la barra de pestañas, o por la navegación superior cuando las pestañas no están arriba, para ahorrar espacio vertical. Los controles de la ventana aparecen en la esquina de esa barra.
     Use Grid Player Menu: Organiza el menú de ajustes del reproductor de video como una cuadrícula de mosaicos en lugar de una lista de filas.
   Experimental Settings:
     Replace HTTP Cache: Desactiva la caché HTTP basada en Electron disk y habilite una caché para la imagen en la memoria personalizada. Esto aumentará el uso de la memoria RAM.

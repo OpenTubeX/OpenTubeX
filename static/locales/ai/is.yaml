@@ -494,6 +494,7 @@ Settings:
     Loaded Tab Icons With Failures: Hlaðið inn {loaded} flipatáknum; ekki tókst að hlaða inn {failed}
     Show Tab Previews: Sýna forskoðun flipa
     Use Fixed Tab Width: Nota fasta flipabreidd í láréttri stöðu
+    Use Custom Title Bar: Nota sérsniðna titilstiku
     Tab Width: Flipabreidd
     Tab Layout:
       Tab Layout: Staðsetning flipa
@@ -1993,6 +1994,7 @@ Tooltips:
     Always Show Scrollbars: Heldur skrunstikum alltaf sýnilegum. Ef slökkt er á þessu dofna þær stuttu eftir að músin hættir að hreyfast og birtast aftur um leið og hún er hreyfð.
     Scroll Speed: Breytir hversu langt er skrunað með músarhjóli og snertifleti.
     Use Fixed Tab Width: Gefur öllum flipum á láréttu flipastikunni sömu breidd í stað þess að laga breidd þeirra að titlinum.
+    Use Custom Title Bar: Skiptir titilstiku kerfisins út fyrir flipastikuna, eða efri leiðsögnina þegar fliparnir eru ekki efst, til að spara lóðrétt pláss. Gluggahnapparnir birtast í horni þeirrar stiku.
     Use Grid Player Menu: Raðar stillingavalmynd myndbandsspilarans í reitanet í stað raðalista.
   Experimental Settings:
     Disable Hardware Acceleration: Slekkur á vélbúnaðarhröðun skjákorts. Getur lagað myndrænar villur, en mun líklega draga úr afköstum.

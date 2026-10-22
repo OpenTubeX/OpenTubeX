@@ -492,6 +492,7 @@ Settings:
     Loaded Tab Icons With Failures: タブアイコンを{loaded}件読み込みました。{failed}件は読み込めませんでした
     Show Tab Previews: タブのプレビューを表示
     Use Fixed Tab Width: 横表示でタブの幅を固定
+    Use Custom Title Bar: カスタムタイトルバーを使用
     Tab Width: タブの幅
     Tab Layout:
       Tab Layout: タブの配置
@@ -1968,6 +1969,7 @@ Tooltips:
     Always Show Scrollbars: スクロールバーを常に表示します。無効にすると、マウスを止めてから少し後に消え、再び動かすとすぐに表示されます。
     Scroll Speed: マウスホイールとタッチパッドのホイール操作によるスクロール距離を変更します。
     Use Fixed Tab Width: 横型タブバーの各タブを、タイトルに合わせた幅ではなく同じ幅にします。
+    Use Custom Title Bar: 縦方向のスペースを節約するため、システムのタイトルバーをタブバー（タブが上部にない場合は上部ナビゲーション）に置き換えます。ウィンドウ操作ボタンはそのバーの隅に表示されます。
     Use Grid Player Menu: 動画プレーヤーの設定メニューを行の一覧ではなく、タイル状のグリッドに配置します。
 The playlist is at the beginning. Enable loop to continue playing: プレイリストの先頭です。続けて再生するにはループを有効にしてください
 External link opening has been disabled in Settings → Privacy: 「設定」→「プライバシー」で外部リンクを開く機能が無効になっています

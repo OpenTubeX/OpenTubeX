@@ -491,6 +491,7 @@ Settings:
     Loaded Tab Icons With Failures: Caricate {loaded} icone delle schede; impossibile caricarne {failed}
     Show Tab Previews: Mostra anteprime delle schede
     Use Fixed Tab Width: Usa una larghezza fissa per le schede in modalità orizzontale
+    Use Custom Title Bar: Usa una barra del titolo personalizzata
     Tab Width: Larghezza delle schede
     Tab Layout:
       Tab Layout: Disposizione delle schede
@@ -1967,6 +1968,7 @@ Tooltips:
     Always Show Scrollbars: Mantiene le barre di scorrimento sempre visibili. Se disabilitato, scompaiono poco dopo che smetti di muovere il mouse e riappaiono non appena lo muovi di nuovo.
     Scroll Speed: Modifica la distanza di scorrimento dei gesti della rotellina del mouse e del touchpad.
     Use Fixed Tab Width: Assegna la stessa larghezza a tutte le schede nella barra orizzontale, invece di adattarle al titolo.
+    Use Custom Title Bar: Sostituisce la barra del titolo di sistema con la barra delle schede, o con la navigazione superiore quando le schede non sono in alto, per risparmiare spazio verticale. I controlli della finestra compaiono nell'angolo di quella barra.
     Use Grid Player Menu: Dispone il menu delle impostazioni del lettore video come una griglia di riquadri invece di un elenco di righe.
 The playlist is at the beginning. Enable loop to continue playing: La playlist è all'inizio. Abilita la ripetizione per continuare la riproduzione
 External link opening has been disabled in Settings → Privacy: L'apertura dei link esterni è stata disabilitata in Impostazioni → Privacy

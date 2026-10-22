@@ -486,6 +486,7 @@ Settings:
     Loaded Tab Icons With Failures: Indlæste {loaded} faneikoner. {failed} kunne ikke indlæses
     Show Tab Previews: Vis forhåndsvisninger af faner
     Use Fixed Tab Width: Brug fast fanebredde i vandret tilstand
+    Use Custom Title Bar: Brug tilpasset titellinje
     Tab Width: Fanebredde
     Tab Layout:
       Tab Layout: Fanelayout
@@ -2049,6 +2050,7 @@ Tooltips:
     Always Show Scrollbars: Holder rullebjælkerne synlige hele tiden. Når funktionen er slået fra, toner de ud, kort efter at du holder op med at bevæge musen, og vises igen, så snart du bevæger den.
     Scroll Speed: Ændrer, hvor langt musehjulets og pegefeltets hjulbevægelser ruller.
     Use Fixed Tab Width: Giver alle faner i den vandrette fanelinje samme bredde i stedet for at tilpasse dem efter titlen.
+    Use Custom Title Bar: Erstatter systemets titellinje med fanelinjen eller med den øverste navigation, når fanerne ikke er øverst, for at spare lodret plads. Vinduesknapperne vises i hjørnet af den linje.
     Use Grid Player Menu: Arrangerer videoafspillerens indstillingsmenu som et gitter af felter i stedet for en liste med rækker.
   Experimental Settings:
     Disable Hardware Acceleration: Deaktiverer GPU-hardwareacceleration. Kan løse grafikproblemer, men vil sandsynligvis forringe ydeevnen.

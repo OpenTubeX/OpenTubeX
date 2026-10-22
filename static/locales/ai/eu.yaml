@@ -492,6 +492,7 @@ Settings:
     Loaded Tab Icons With Failures: Fitxen {loaded} ikono kargatu dira; ezin izan dira {failed} kargatu
     Show Tab Previews: Erakutsi fitxen aurrebistak
     Use Fixed Tab Width: Erabili fitxa-zabalera finkoa modu horizontalean
+    Use Custom Title Bar: Erabili izenburu-barra pertsonalizatua
     Tab Width: Fitxen zabalera
     Tab Layout:
       Tab Layout: Fitxen diseinua
@@ -1978,6 +1979,7 @@ Tooltips:
     Always Show Scrollbars: Korritze-barrak ikusgai mantentzen ditu beti. Desgaituta dagoenean, sagua mugitzeari utzi eta handik gutxira desagertzen dira, eta berriro mugitu bezain laster agertzen.
     Scroll Speed: Saguaren gurpileko eta ukipen-paneleko keinuek zenbat korritzen duten aldatzen du.
     Use Fixed Tab Width: Fitxa horizontalen barrako fitxa guztiei zabalera bera ematen die, izenburuaren arabera tamainatu beharrean.
+    Use Custom Title Bar: Sistemaren izenburu-barra fitxa-barrarekin ordezkatzen du, edo goiko nabigazioarekin fitxak goian ez daudenean, espazio bertikala aurrezteko. Leihoaren kontrolak barra horren izkinan agertzen dira.
     Use Grid Player Menu: Erreproduzigailuaren ezarpen-menua lauzaz osatutako sareta batean antolatzen du, errenkada-zerrenda baten ordez.
 The playlist is at the beginning. Enable loop to continue playing: Erreprodukzio-zerrenda hasieran dago. Gaitu begizta erreproduzitzen jarraitzeko
 External link opening has been disabled in Settings → Privacy: Kanpoko estekak irekitzea desgaitu da Ezarpenak → Pribatutasuna atalean

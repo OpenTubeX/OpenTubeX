@@ -492,6 +492,7 @@ Settings:
     Loaded Tab Icons With Failures: "Karget ez eus bet {loaded} arlun ivinell; n'eus ket bet gallet kargañ {failed} anezho"
     Show Tab Previews: "Diskouez rakwelioù an ivinelloù"
     Use Fixed Tab Width: "Implijout ul ledander ivinell digemm er mod a-blaen"
+    Use Custom Title Bar: Implijout ur varrenn-ditl personelaet
     Tab Width: "Ledander an ivinelloù"
     Tab Layout:
       Tab Layout: "Aozadur an ivinelloù"
@@ -1977,6 +1978,7 @@ Tooltips:
     Always Show Scrollbars: "Derc'hel ar barrennoù dibunañ gwelus bepred. Pa vez diweredekaet e steuziont nebeut goude ma paouezit da zilec'hiañ al logodenn hag e tistroont kerkent ha ma tilec'hiit anezhi en-dro."
     Scroll Speed: "Kemmañ ar pellder dibunañ gant rod al logodenn ha jestroù rod ar c'horreenn-stok."
     Use Fixed Tab Width: "Reiñ ar memes ledander da bep ivinell er varrenn ivinelloù a-blaen e-lec'h azasaat anezho diouzh o zitl."
+    Use Custom Title Bar: Erlec'hiañ a ra barrenn-ditl ar reizhiad gant barrenn an ivinelloù, pe gant ar merdeiñ uhel pa n'emañ ket an ivinelloù e krec'h, evit espern lec'h a-serzh. Boutonoù ar prenestr a zeu war wel e korn ar varrenn-se.
     Use Grid Player Menu: "Aozadur lañser arventennoù al lenner video evel ur gael karrelloù e-lec'h ur roll linennoù."
 The playlist is at the beginning. Enable loop to continue playing: "Ar roll-videoioù zo en e zerou. Gweredekait al lenn en ur voul evit kenderc'hel da lenn"
 External link opening has been disabled in Settings → Privacy: "Diweredekaet eo bet digeriñ al liammoù diavaez en Arventennoù → Prevezded"

@@ -603,6 +603,7 @@ Settings:
     Loaded Tab Icons With Failures: Naloženih je bilo {loaded} ikon zavihkov; {failed} jih ni bilo mogoče naložiti
     Show Tab Previews: Prikaži predoglede zavihkov
     Use Fixed Tab Width: V vodoravnem načinu uporabi stalno širino zavihkov
+    Use Custom Title Bar: Uporabi prilagojeno naslovno vrstico
     Tab Width: Širina zavihka
     Tab Layout:
       Tab Layout: Razporeditev zavihkov
@@ -2484,6 +2485,7 @@ Tooltips:
     Always Show Scrollbars: Drsniki so vedno vidni. Če je ta možnost onemogočena, izginejo kmalu po tem, ko nehate premikati miško, in se znova prikažejo, ko jo premaknete.
     Scroll Speed: Spremeni razdaljo pomikanja z gibi kolesca miške in sledilne ploščice.
     Use Fixed Tab Width: Vsi zavihki v vodoravni vrstici imajo enako širino, namesto da bi se prilagajali naslovu.
+    Use Custom Title Bar: Sistemsko naslovno vrstico nadomesti z vrstico z zavihki ali z zgornjo navigacijo, kadar zavihki niso na vrhu, da prihrani navpični prostor. Gumbi za upravljanje okna se prikažejo v kotu te vrstice.
     Use Grid Player Menu: Meni z nastavitvami predvajalnika videoposnetkov je razporejen v mrežo ploščic namesto v seznam vrstic.
   Experimental Settings:
     Replace HTTP Cache: Onemogoči Electronov predpomnilnik HTTP na disku in omogoči prilagojen predpomnilnik slik v pomnilniku. Poraba pomnilnika RAM bo večja.

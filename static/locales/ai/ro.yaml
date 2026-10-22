@@ -489,6 +489,7 @@ Settings:
     Loaded Tab Icons With Failures: S-au încărcat {loaded} pictograme de filă; {failed} nu au putut fi încărcate
     Show Tab Previews: Afișează previzualizările filelor
     Use Fixed Tab Width: Folosește o lățime fixă a filelor în modul orizontal
+    Use Custom Title Bar: Folosește o bară de titlu personalizată
     Tab Width: Lățimea filelor
     Tab Layout:
       Tab Layout: Aranjarea filelor
@@ -2014,6 +2015,7 @@ Tooltips:
     Always Show Scrollbars: Păstrează barele de derulare vizibile permanent. Când opțiunea este dezactivată, acestea dispar treptat la scurt timp după ce opriți mișcarea mouse-ului și reapar imediat ce îl mișcați din nou.
     Scroll Speed: Modifică distanța de derulare a gesturilor rotiței mouse-ului și ale touchpadului.
     Use Fixed Tab Width: Atribuie aceeași lățime fiecărei file din bara de file orizontală, în loc să o dimensioneze după titlu.
+    Use Custom Title Bar: Înlocuiește bara de titlu a sistemului cu bara de file sau, când filele nu sunt sus, cu navigarea de sus, pentru a economisi spațiu vertical. Butoanele de control ale ferestrei apar în colțul acelei bare.
     Use Grid Player Menu: Aranjează meniul de setări al playerului video ca o grilă de dale, în locul unei liste de rânduri.
   Experimental Settings:
     Disable Hardware Acceleration: Dezactivează accelerarea hardware a GPU-ului. Poate rezolva problemele grafice, dar probabil va reduce performanța.

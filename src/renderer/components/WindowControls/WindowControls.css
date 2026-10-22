@@ -1,0 +1,130 @@
+/* The desktop's button layout places the controls at physical window edges. */
+/* stylelint-disable liberty/use-logical-spec */
+.windowControls {
+  position: fixed;
+  top: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  gap: var(--window-control-gap);
+  box-sizing: border-box;
+  block-size: var(--top-nav-height, 60px);
+  padding-inline: var(--window-control-edge);
+  color: var(--primary-text-color);
+  -webkit-app-region: drag;
+}
+
+.windowControls.left {
+  left: 0;
+}
+
+.windowControls.right {
+  right: 0;
+}
+/* stylelint-enable liberty/use-logical-spec */
+
+/* Controls over a tab bar take its height; over the top navigation, its own. */
+.app.topTabs .windowControls,
+.app.verticalTabsLeft .windowControls.left,
+.app.verticalTabsRight .windowControls.right {
+  block-size: 32px;
+}
+
+.app:not(.topTabs, .verticalTabsLeft):has(.topNav.topNavBarColor) .windowControls.left,
+.app:not(.topTabs, .verticalTabsRight):has(.topNav.topNavBarColor) .windowControls.right {
+  color: var(--text-with-main-color);
+}
+
+.windowControl {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  inline-size: var(--window-control-size);
+  block-size: var(--window-control-size);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: default;
+  -webkit-app-region: no-drag;
+}
+
+.windowControl svg {
+  overflow: visible;
+}
+
+.glyph {
+  fill: none;
+  stroke: currentcolor;
+}
+
+/* ===== Adwaita ===== */
+
+.adwaita .windowControl {
+  border-radius: 50%;
+  background-color: color-mix(in srgb, currentcolor 10%, transparent);
+}
+
+.adwaita .windowControl:hover {
+  background-color: color-mix(in srgb, currentcolor 15%, transparent);
+}
+
+.adwaita .windowControl:active {
+  background-color: color-mix(in srgb, currentcolor 30%, transparent);
+}
+
+.adwaita .windowControl svg {
+  inline-size: 16px;
+  block-size: 16px;
+}
+
+.adwaita .glyph {
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ===== Breeze ===== */
+
+.breeze .windowControl svg {
+  inline-size: 18px;
+  block-size: 18px;
+}
+
+.breeze :is(.glyph, .maskGlyph) {
+  stroke-width: 1.1;
+}
+
+.breeze .maskGlyph {
+  fill: none;
+  stroke: #000;
+}
+
+.breeze .hoverCircle {
+  fill: currentcolor;
+  opacity: 0;
+}
+
+.breeze .windowControl:hover .hoverCircle {
+  opacity: 1;
+}
+
+.breeze .windowControl:active .hoverCircle {
+  opacity: 0.7;
+}
+
+.breeze .close:hover .hoverCircle {
+  fill: #da4453;
+}
+
+.breeze .close:hover .glyph {
+  stroke: #fcfcfc;
+}
+
+.breeze .windowControl:not(.close):hover .glyph {
+  visibility: hidden;
+}
+
+.inactive .windowControl:not(:hover) {
+  opacity: 0.6;
+}

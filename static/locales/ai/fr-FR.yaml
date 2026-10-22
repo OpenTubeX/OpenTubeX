@@ -491,6 +491,7 @@ Settings:
     Loaded Tab Icons With Failures: '{loaded} icônes d’onglets chargées ; {failed} n’ont pas pu être chargées'
     Show Tab Previews: Afficher l’aperçu des onglets
     Use Fixed Tab Width: Utiliser une largeur d’onglet fixe en mode horizontal
+    Use Custom Title Bar: Utiliser une barre de titre personnalisée
     Tab Width: Largeur des onglets
     Tab Layout:
       Tab Layout: Disposition des onglets
@@ -1966,6 +1967,7 @@ Tooltips:
     Always Show Scrollbars: Maintient les barres de défilement visibles en permanence. Lorsque cette option est désactivée, elles disparaissent peu après l’arrêt du mouvement de la souris et réapparaissent dès que vous la déplacez.
     Scroll Speed: Modifie la distance de défilement des gestes de la molette de la souris et du pavé tactile.
     Use Fixed Tab Width: Attribue la même largeur à tous les onglets de la barre horizontale au lieu d’adapter leur taille à leur titre.
+    Use Custom Title Bar: Remplace la barre de titre du système par la barre d’onglets, ou par la navigation supérieure lorsque les onglets ne sont pas en haut, afin de gagner de l’espace vertical. Les commandes de la fenêtre apparaissent dans le coin de cette barre.
     Use Grid Player Menu: Organise le menu des paramètres du lecteur vidéo sous forme de grille de vignettes au lieu d’une liste de lignes.
 The playlist is at the beginning. Enable loop to continue playing: La playlist est au début. Activez la lecture en boucle pour continuer
 External link opening has been disabled in Settings → Privacy: L’ouverture des liens externes a été désactivée dans Paramètres → Confidentialité

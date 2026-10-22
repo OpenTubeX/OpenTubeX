@@ -493,6 +493,7 @@ Settings:
     Loaded Tab Icons With Failures: Đã tải {loaded} biểu tượng thẻ; không thể tải {failed} biểu tượng
     Show Tab Previews: Hiện bản xem trước thẻ
     Use Fixed Tab Width: Dùng chiều rộng thẻ cố định ở chế độ ngang
+    Use Custom Title Bar: Dùng thanh tiêu đề tùy chỉnh
     Tab Width: Chiều rộng thẻ
     Tab Layout:
       Tab Layout: Bố cục thẻ
@@ -2006,6 +2007,7 @@ Tooltips:
     Always Show Scrollbars: Luôn giữ thanh cuộn hiển thị. Khi tắt, thanh cuộn mờ dần ngay sau khi bạn ngừng di chuyển chuột và xuất hiện lại khi bạn di chuyển chuột.
     Scroll Speed: Thay đổi khoảng cách cuộn của cử chỉ con lăn chuột và con lăn bàn di chuột.
     Use Fixed Tab Width: Đặt cùng chiều rộng cho mọi thẻ trên thanh thẻ ngang thay vì điều chỉnh theo tiêu đề.
+    Use Custom Title Bar: Thay thanh tiêu đề của hệ thống bằng thanh thẻ, hoặc bằng thanh điều hướng trên cùng khi các thẻ không ở trên cùng, để tiết kiệm không gian theo chiều dọc. Các nút điều khiển cửa sổ xuất hiện ở góc của thanh đó.
     Use Grid Player Menu: Sắp xếp menu cài đặt của trình phát video thành lưới ô thay vì danh sách hàng.
   Experimental Settings:
     Disable Hardware Acceleration: Tắt tăng tốc phần cứng GPU. Có thể khắc phục sự cố đồ họa, nhưng có thể làm giảm hiệu suất.

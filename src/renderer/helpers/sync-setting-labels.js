@@ -72,6 +72,7 @@ export const SYNC_SETTING_LABELS = {
   continuePlaybackWhenScreenIsLocked: 'Settings.Player Settings.Continue Playback When Screen Is Locked',
   currentLocale: 'Settings.General Settings.Locale Preference',
   customThemes: 'Settings.Theme Settings.Custom Theme.Custom Theme Creator',
+  customTitleBar: 'Settings.Theme Settings.Use Custom Title Bar',
   dateFormat: 'Settings.General Settings.Date Format',
   deArrowThumbnailGeneratorUrl: "Settings.SponsorBlock Settings['DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)']",
   defaultAutoplayInterruptionIntervalHours: 'Settings.Player Settings.Autoplay Interruption Timer',

@@ -593,6 +593,7 @@ Settings:
     Loaded Tab Icons With Failures: Įkelta {loaded} skirtukų piktogramų; {failed} įkelti nepavyko
     Show Tab Previews: Rodyti skirtukų peržiūras
     Use Fixed Tab Width: Horizontaliuoju režimu naudoti fiksuotą skirtukų plotį
+    Use Custom Title Bar: Naudoti tinkintą pavadinimo juostą
     Tab Width: Skirtuko plotis
     Tab Layout:
       Tab Layout: Skirtukų išdėstymas
@@ -2390,6 +2391,7 @@ Tooltips:
     Always Show Scrollbars: Slinkties juostos visada lieka matomos. Išjungus jos netrukus išblėsta nustojus judinti pelę ir vėl pasirodo vos ją pajudinus.
     Scroll Speed: Keičia, kiek paslenka pelės ratuko ir jutiklinio kilimėlio slinkimo gestai.
     Use Fixed Tab Width: Visoms horizontaliosios kortelių juostos kortelėms nustato vienodą plotį, užuot pritaikius jį prie pavadinimo.
+    Use Custom Title Bar: Pakeičia sistemos pavadinimo juostą kortelių juosta arba, kai kortelės nėra viršuje, viršutine naršymo juosta, kad būtų sutaupyta vertikalios vietos. Lango valdikliai rodomi tos juostos kampe.
     Use Grid Player Menu: Vaizdo leistuvo nustatymų meniu elementus išdėsto plytelių tinkleliu, o ne eilučių sąrašu.
   SponsorBlock Settings:
     UseDeArrowTitles: Vaizdo įrašų pavadinimus pakeisti naudotojų pateiktais DeArrow pavadinimais.

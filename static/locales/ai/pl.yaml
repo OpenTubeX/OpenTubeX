@@ -216,6 +216,7 @@ Settings:
         Rate limited: Serwer blokuje logowanie po zbyt wielu nieudanych próbach. Spróbuj ponownie później.
         Server error: Serwer zwrócił błąd (HTTP {status}).
   Theme Settings:
+    Use Custom Title Bar: Użyj niestandardowego paska tytułu
     Material Accent Color: "Kolor akcentu Material"
     Material Wallpaper Colors: "Kolory tapety"
     Tab Loading Indicator:
@@ -1183,6 +1184,7 @@ Tooltips:
     Show Progress as Notification: Zamiast ogólnego paska postępu wyświetla stałe powiadomienie z bieżącym postępem operacji w tle, takich jak odświeżanie subskrypcji i pobieranie zarządzanych narzędzi.
     Scroll Speed: Zmienia odległość przewijania gestami kółka myszy i panelu dotykowego.
     Use Fixed Tab Width: Nadaje wszystkim kartom na poziomym pasku jednakową szerokość zamiast dopasowywać ją do tytułu.
+    Use Custom Title Bar: Zastępuje systemowy pasek tytułu paskiem kart lub, gdy karty nie są u góry, górną nawigacją, aby zaoszczędzić miejsce w pionie. Przyciski sterowania oknem pojawiają się w rogu tego paska.
     Use Grid Player Menu: Układa menu ustawień odtwarzacza filmu w siatkę kafelków zamiast listy wierszy.
 The playlist is at the beginning. Enable loop to continue playing: Playlista jest na początku. Włącz zapętlanie, aby kontynuować odtwarzanie
 External link opening has been disabled in Settings → Privacy: Otwieranie zewnętrznych odnośników wyłączono w sekcji Ustawienia → Prywatność

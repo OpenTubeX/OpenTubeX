@@ -101,6 +101,7 @@ import { getTrayMenuIcon } from './trayMenuIcons'
 import { createScheduledBackups } from './scheduledBackups'
 import { createBackupArchiveFactory } from './backupArchive'
 import { createDatastoreRequestTracker } from './datastoreRequests'
+import { getWindowButtonLayout, onWindowButtonLayoutChanged } from './windowButtonLayout'
 
 function getSystemAccentColor() {
   try {
@@ -3129,6 +3130,9 @@ function runApp() {
     }
 
     const hideStartupSplash = (await baseHandlers.settings._findOne('hideStartupSplash'))?.value === true
+    // The renderer draws its tab bar or top navigation where the system title
+    // bar would be, leaving only the window controls overlay.
+    const customTitleBar = (await baseHandlers.settings._findOne('customTitleBar'))?.value === true
 
     const newWindow = new BrowserWindow({
       // The initial HTML paints a splash before the shared renderer boots.
@@ -3138,6 +3142,24 @@ function runApp() {
         ? path.join(__dirname, '../../_icons/iconColor.png')
         : path.join(__dirname, '../_icons/iconColor.png'),
       autoHideMenuBar: true,
+      ...customTitleBar
+        ? {
+            titleBarStyle: 'hidden',
+            // Linux draws the controls in the renderer to match the desktop's
+            // decorations, which the overlay's generic buttons don't follow.
+            ...process.platform === 'linux'
+              ? {}
+              : {
+                  titleBarOverlay: process.platform === 'darwin'
+                    ? true
+                    : {
+                        color: windowBackground,
+                        symbolColor: nativeTheme.shouldUseDarkColors ? '#ffffff' : '#000000',
+                        height: 32
+                      }
+                }
+          }
+        : {},
       // useContentSize: true,
       webPreferences: {
         backgroundThrottling: false,
@@ -3145,7 +3167,8 @@ function runApp() {
           `--startup-background=${windowBackground}`,
           `--startup-dark=${nativeTheme.shouldUseDarkColors}`,
           `--system-accent-color=${getSystemAccentColor() ?? ''}`,
-          `--hide-startup-splash=${hideStartupSplash}`
+          `--hide-startup-splash=${hideStartupSplash}`,
+          `--custom-title-bar=${customTitleBar}`
         ],
         preload: process.env.NODE_ENV === 'development'
           ? path.resolve(__dirname, '../../dist/preload.js')
@@ -3347,6 +3370,60 @@ function runApp() {
       if (process.env.NODE_ENV === 'development') {
         newWindow.webContents.openDevTools({ activate: false })
       }
+    }
+
+    if (customTitleBar && process.platform === 'linux') {
+      const getWindowControlsState = async () => ({
+        layout: await getWindowButtonLayout(),
+        maximized: newWindow.isMaximized(),
+        fullScreen: newWindow.isFullScreen()
+      })
+      const sendWindowControlsState = async () => {
+        const state = await getWindowControlsState()
+        if (!newWindow.isDestroyed() && !newWindow.webContents.isDestroyed()) {
+          newWindow.webContents.send(IpcChannels.WINDOW_CONTROLS_STATE, state)
+        }
+      }
+      for (const event of ['maximize', 'unmaximize', 'enter-full-screen', 'leave-full-screen']) {
+        newWindow.on(event, sendWindowControlsState)
+      }
+      newWindow.once('closed', onWindowButtonLayoutChanged(sendWindowControlsState))
+
+      newWindow.webContents.ipc.handle(IpcChannels.WINDOW_CONTROLS_GET, (event) => {
+        if (!isOpenTubeXUrl(event.senderFrame.url)) return null
+        return getWindowControlsState()
+      })
+      newWindow.webContents.ipc.on(IpcChannels.WINDOW_CONTROL_ACTION, (event, action) => {
+        if (!isOpenTubeXUrl(event.senderFrame.url) || newWindow.isDestroyed()) return
+        if (action === 'minimize') {
+          newWindow.minimize()
+        } else if (action === 'maximize') {
+          if (newWindow.isMaximized()) {
+            newWindow.unmaximize()
+          } else {
+            newWindow.maximize()
+          }
+        } else if (action === 'close') {
+          newWindow.close()
+        }
+      })
+    } else if (customTitleBar) {
+      // The renderer reports the colors and height of the bar under the
+      // window controls whenever its theme, layout or UI scale changes.
+      newWindow.webContents.ipc.on(IpcChannels.SET_TITLE_BAR_OVERLAY, (event, overlay) => {
+        if (!isOpenTubeXUrl(event.senderFrame.url) || newWindow.isDestroyed()) return
+        const { color, symbolColor, height } = overlay ?? {}
+        if (typeof color !== 'string' || typeof symbolColor !== 'string' ||
+          !Number.isFinite(height) || height <= 0) return
+        if (process.platform === 'darwin') {
+          // The overlay spans the traffic lights' 16 px tall frames and their
+          // margins, so equal margins center them in the bar at its scaled
+          // height. 7 px is the system's horizontal margin.
+          newWindow.setWindowButtonPosition({ x: 7, y: Math.max(0, Math.round((height - 16) / 2)) })
+        } else {
+          newWindow.setTitleBarOverlay({ color, symbolColor, height: Math.round(height) })
+        }
+      })
     }
 
     newWindow.once('ready-to-show', showWindow)

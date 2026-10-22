@@ -3350,3 +3350,33 @@ body .os-scrollbar.app-scrollbar-idle:not(:hover) {
   font-weight: normal;
   line-height: 16px;
 }
+
+/* A drag region swallows clicks even where another element is painted above
+   it, so everything that can float over the title bar opts out explicitly. */
+:is(
+  .prompt,
+  .mobileSheet,
+  .dropdownLayer,
+  .iconDropdown,
+  .selectDropdown,
+  .profileDropdown,
+  .colorPickerPopover,
+  .contextMenu,
+  .submenu,
+  .commandPaletteBackdrop,
+  .tabOrganizerBackdrop,
+  .tutorialOverlay,
+  .tutorialHighlight,
+  .tutorialCard,
+  .moreOptionBackdrop,
+  .sideNavBackdrop,
+  .findbar,
+  .settingsWindow,
+  .toast-holder,
+  .progress-toast-holder,
+  .connection-status-holder,
+  .fullWindow,
+  .lightsOffOverlay
+) {
+  -webkit-app-region: no-drag;
+}

@@ -492,6 +492,7 @@ Settings:
     Loaded Tab Icons With Failures: Laaditi {loaded} vahekaardiikooni; {failed} ikooni laadimine nurjus
     Show Tab Previews: Kuva vahekaartide eelvaated
     Use Fixed Tab Width: Kasuta rõhtrežiimis vahekaartide kindlat laiust
+    Use Custom Title Bar: Kasuta kohandatud tiitliriba
     Tab Width: Vahekaardi laius
     Tab Layout:
       Tab Layout: Vahekaartide paigutus
@@ -1971,6 +1972,7 @@ Tooltips:
     Always Show Scrollbars: Hoiab kerimisribad alati nähtaval. Kui see on välja lülitatud, kaovad need veidi pärast hiire liigutamise lõpetamist ja ilmuvad uuesti kohe, kui hiirt taas liigutad.
     Scroll Speed: Muudab hiireratta ja puuteplaadi kerimisliigutuste vahemaad.
     Use Fixed Tab Width: Annab horisontaalsel vaheleheribal igale vahelehele pealkirjast sõltumata sama laiuse.
+    Use Custom Title Bar: Asendab süsteemi tiitliriba vahekaardiribaga või ülemise navigeerimisega, kui vahekaardid pole üleval, et säästa vertikaalset ruumi. Akna juhtnupud kuvatakse selle riba nurgas.
     Use Grid Player Menu: Paigutab videopleieri seadete menüü ridade loendi asemel paanide ruudustikuna.
 The playlist is at the beginning. Enable loop to continue playing: Esitusloend on alguses. Esitamise jätkamiseks luba kordus
 External link opening has been disabled in Settings → Privacy: Väliste linkide avamine on jaotises Seaded → Privaatsus keelatud

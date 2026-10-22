@@ -1097,3 +1097,16 @@
 .libraryNoticeText {
   text-align: center;
 }
+
+/* ===== Custom title bar ===== */
+
+/* Space the window controls overlay takes from each physical window edge. The
+   environment variables are missing while the overlay is hidden, such as in
+   fullscreen. */
+/* stylelint-disable length-zero-no-unit -- calc() needs units in the fallbacks */
+.app.customTitleBar {
+  --title-bar-inset-left: env(titlebar-area-x, 0px);
+  --title-bar-inset-right: calc(100vw - env(titlebar-area-x, 0px) - env(titlebar-area-width, 100vw));
+  --title-bar-controls-height: env(titlebar-area-height, 0px);
+}
+/* stylelint-enable length-zero-no-unit */

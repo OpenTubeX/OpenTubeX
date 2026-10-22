@@ -17,6 +17,7 @@
       verticalTabsRight: tabBarPosition === 'right',
       bottomTabs: isElectron && tabBarPosition === 'bottom',
       topTabs: (isElectron && tabBarPosition === 'top') || showTabletTabStrip,
+      customTitleBar: hasCustomTitleBar,
       watchSideNavOverlay: useWatchSideNavOverlay,
       watchSideNavTransitionDisabled
     }, `tabBar-${tabBarPosition}`]"
@@ -24,6 +25,10 @@
   >
     <TabBar
       :inert="isAnyPromptOpen"
+    />
+    <WindowControls
+      v-if="hasLinuxWindowControls"
+      @insets="windowControlsInsets = $event"
     />
     <CapacitorTabletTabBar
       v-if="isCapacitor && store.getters.getTabsEnabled"
@@ -606,6 +611,7 @@ import { clampOverlayScrollTop, restoreOverlayScrollTop } from './helpers/overla
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef, unref, useId, useTemplateRef, watch } from 'vue'
 import { useScrollClamp } from './composables/useScrollClamp'
 import { usePhoneLayout } from './composables/usePhoneLayout'
+import { useTitleBarOverlay } from './composables/useTitleBarOverlay'
 import { useI18n } from 'vue-i18n'
 import { routerKey, useRoute, useRouter } from 'vue-router'
 
@@ -613,6 +619,7 @@ import FtFlexBox from './components/ft-flex-box/ft-flex-box.vue'
 import TopNav from './components/TopNav/TopNav.vue'
 import SideNav from './components/SideNav/SideNav.vue'
 import TabBar from './components/TabBar/TabBar.vue'
+import WindowControls from './components/WindowControls/WindowControls.vue'
 import CapacitorTabletTabBar from './components/TabBar/CapacitorTabletTabBar.vue'
 import TabContent from './components/TabContent/TabContent.vue'
 import FtPrompt from './components/FtPrompt/FtPrompt.vue'
@@ -988,6 +995,12 @@ const tabBarPosition = computed(() => isElectron
   ? normalizeTabBarPosition(store.getters.getTabBarPosition)
   : 'top')
 const useVerticalTabBar = computed(() => isElectron && isVerticalTabBarPosition(tabBarPosition.value))
+// Fixed when the window is created, so a changed setting waits for a restart.
+const hasCustomTitleBar = isElectron && window.ftElectron.customTitleBar
+// Linux has no native window controls overlay, so the renderer draws them.
+const hasLinuxWindowControls = hasCustomTitleBar && process.platform === 'linux'
+/** @type {import('vue').Ref<{ left: number, right: number } | null>} */
+const windowControlsInsets = ref(null)
 const tabletTabStripQuery = window.matchMedia('(min-width: 768px)')
 const automaticTabletTabStrip = ref(tabletTabStripQuery.matches)
 const capacitorLayoutMode = computed(() => store.getters.getCapacitorLayoutMode)
@@ -1003,6 +1016,11 @@ const appStyle = computed(() => {
     style['--vertical-tab-bar-width'] = `${store.getters.getVerticalTabBarWidth}px`
   }
   if (showTabletTabStrip.value) style['--top-tab-bar-height'] = '48px'
+  if (windowControlsInsets.value) {
+    style['--title-bar-inset-left'] = `${windowControlsInsets.value.left}px`
+    style['--title-bar-inset-right'] = `${windowControlsInsets.value.right}px`
+    style['--title-bar-controls-height'] = '32px'
+  }
 
   return Object.keys(style).length > 0 ? style : undefined
 })
@@ -1155,6 +1173,7 @@ const dataReady = ref(false)
 watch(useTemplateRef('appRoot'), (app, _previous, onCleanup) => {
   if (app) onCleanup(mirrorAppState(app))
 }, { flush: 'sync' })
+useTitleBarOverlay(() => [dataReady.value, tabBarPosition.value])
 const subscriptionCacheReady = computed(() => store.getters.getSubscriptionCacheReady)
 const showTutorial = ref(false)
 const findbarVisible = ref(false)

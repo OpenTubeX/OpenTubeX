@@ -479,6 +479,7 @@ Settings:
     Loaded Tab Icons With Failures: "{loaded} vərəq nişanı yükləndi; {failed} nişan yüklənə bilmədi"
     Show Tab Previews: Vərəq önizləmələrini göstər
     Use Fixed Tab Width: Üfüqi rejimdə sabit vərəq enindən istifadə et
+    Use Custom Title Bar: Fərdi başlıq zolağından istifadə et
     Tab Width: Vərəqin eni
     Tab Layout:
       Tab Layout: Vərəqlərin düzülüşü
@@ -1981,6 +1982,7 @@ Tooltips:
     Always Show Scrollbars: Sürüşdürmə zolaqlarını həmişə görünən saxlayır. Bağlandıqda, siçanı hərəkət etdirməyi dayandırdıqdan az sonra solub yox olur və onu yenidən hərəkət etdirən kimi görünürlər.
     Scroll Speed: Siçan çarxı və toxunma paneli jestlərinin səhifəni nə qədər sürüşdürdüyünü dəyişir.
     Use Fixed Tab Width: Üfüqi vərəq zolağında bütün vərəqlərin enini başlıqlarına görə dəyişmək əvəzinə eyni edir.
+    Use Custom Title Bar: Şaquli yerə qənaət etmək üçün sistemin başlıq zolağını vərəq paneli ilə, vərəqlər yuxarıda olmadıqda isə yuxarı naviqasiya ilə əvəz edir. Pəncərə idarəetmə düymələri həmin panelin küncündə görünür.
     Use Grid Player Menu: Video oynadıcısının tənzimləmələr menyusunu sətir siyahısı əvəzinə plitələr toru kimi düzür.
 The playlist is at the beginning. Enable loop to continue playing: Pleylist başlanğıcdadır. Oynatmağa davam etmək üçün təkrarlanmanı aktivləşdir
 External link opening has been disabled in Settings → Privacy: Xarici linklərin açılması Tənzimləmələr → Məxfilik bölməsində bağlanıb

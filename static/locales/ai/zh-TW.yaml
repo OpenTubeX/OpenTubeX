@@ -491,6 +491,7 @@ Settings:
     Loaded Tab Icons With Failures: 已載入 {loaded} 個頁籤圖示；有 {failed} 個無法載入
     Show Tab Previews: 顯示頁籤預覽
     Use Fixed Tab Width: 在水平模式中使用固定頁籤寬度
+    Use Custom Title Bar: 使用自訂標題列
     Tab Width: 頁籤寬度
     Tab Layout:
       Tab Layout: 頁籤排列方式
@@ -1970,6 +1971,7 @@ Tooltips:
     Always Show Scrollbars: 讓捲動軸隨時保持顯示。停用後，停止移動滑鼠不久便會淡出，再次移動滑鼠時則會立即顯示。
     Scroll Speed: 變更滑鼠滾輪和觸控板滾輪手勢的捲動距離。
     Use Fixed Tab Width: 水平分頁列中的每個分頁使用相同寬度，而不依標題調整寬度。
+    Use Custom Title Bar: 以分頁列（分頁不在頂端時則為頂端導覽列）取代系統標題列，以節省垂直空間。視窗控制按鈕會顯示在該列的角落。
     Use Grid Player Menu: 將影片播放器的設定選單排列成格狀方塊，而非逐列清單。
 The playlist is at the beginning. Enable loop to continue playing: 播放清單已在開頭。啟用循環播放即可繼續播放
 External link opening has been disabled in Settings → Privacy: 已在「設定」→「隱私權」中停用開啟外部連結

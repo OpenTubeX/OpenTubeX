@@ -489,6 +489,7 @@ Settings:
     Loaded Tab Icons With Failures: Wedi llwytho {loaded} o eiconau tabiau; nid oedd modd llwytho {failed}
     Show Tab Previews: Dangos rhagolygon tabiau
     Use Fixed Tab Width: Defnyddio lled tab sefydlog yn y modd llorweddol
+    Use Custom Title Bar: Defnyddio bar teitl personol
     Tab Width: Lled tabiau
     Tab Layout:
       Tab Layout: Cynllun tabiau
@@ -1994,6 +1995,7 @@ Tooltips:
     Always Show Scrollbars: Mae'n cadw'r bariau sgrolio'n weladwy bob amser. Pan fydd wedi'i analluogi, maent yn pylu ychydig ar ôl i chi roi'r gorau i symud y llygoden ac yn ailymddangos cyn gynted ag y byddwch yn ei symud eto.
     Scroll Speed: Newid pa mor bell mae ystumiau olwyn llygoden ac olwyn pad cyffwrdd yn sgrolio.
     Use Fixed Tab Width: Mae'n rhoi'r un lled i bob tab yn y bar tabiau llorweddol yn lle eu meintio yn ôl eu teitl.
+    Use Custom Title Bar: Mae'n disodli bar teitl y system â'r bar tabiau, neu â'r llywio uchaf pan nad yw'r tabiau ar y brig, i arbed lle fertigol. Mae rheolyddion y ffenestr yn ymddangos yng nghornel y bar hwnnw.
     Use Grid Player Menu: Mae'n trefnu dewislen gosodiadau'r chwaraewr fideo fel grid o deils yn lle rhestr o resi.
   Experimental Settings:
     Disable Hardware Acceleration: Yn analluogi cyflymiad caledwedd y GPU. Gall ddatrys problemau graffeg, ond mae'n debygol o leihau perfformiad.
