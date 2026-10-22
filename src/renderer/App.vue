@@ -1353,6 +1353,7 @@ let removeOpenTabOrganizerListener = null
 let removeAndroidSubscriptionRefreshCancelledListener = null
 let androidSubscriptionRefreshStateTimer = null
 let androidExternalRefreshProgress = null
+let androidExternalRefreshReloadTime = 0
 let androidSubscriptionRefreshStateVersion = 0
 let removeGamepadNavigation = () => {}
 /** @type {number|null} */
@@ -2508,12 +2509,15 @@ async function synchronizeSubscriptionRefreshInProgress() {
       if (subscriptionCacheReady.value && !isAppHidden()) {
         await reconcileAndroidSubscriptionRefreshResults()
         // A retained renderer writes directly to the shared cache rather than
-        // the scheduled worker's result queue. Reload when its progress moves,
-        // including once after completion, to show those writes in this WebView.
+        // the scheduled worker's result queue. Limit full cache/feed rebuilds
+        // while progress moves, then flush the remaining writes on completion.
         const progress = state.rendererActive ? `${state.tab}:${state.percentage}` : null
-        if (progress !== androidExternalRefreshProgress) {
-          androidExternalRefreshProgress = progress
+        if (progress !== androidExternalRefreshProgress &&
+          (progress === null || androidExternalRefreshProgress === null ||
+            performance.now() - androidExternalRefreshReloadTime >= 5000)) {
           await store.dispatch('grabAllSubscriptions')
+          androidExternalRefreshProgress = progress
+          androidExternalRefreshReloadTime = performance.now()
           for (const tab of subscriptionAutoRefreshTabs) notifySubscriptionChannelRefreshed(tab)
         }
       }

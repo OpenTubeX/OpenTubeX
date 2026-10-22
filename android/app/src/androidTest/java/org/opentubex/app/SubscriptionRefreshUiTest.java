@@ -31,6 +31,44 @@ public class SubscriptionRefreshUiTest {
     private static final String STORE = "document.querySelector('#app').__vue_app__.config.globalProperties.$store";
 
     @Test
+    public void externalRendererProgressLimitsCacheReloadsAndFlushesOnCompletion() throws Exception {
+        String token = "retained-ui-throttle-test";
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            AtomicReference<WebView> reference = new AtomicReference<>();
+            scenario.onActivity(activity -> reference.set(activity.getBridge().getWebView()));
+            WebView view = reference.get();
+            await(view, "!!document.querySelector('.app') && " + STORE + ".getters.getSubscriptionCacheReady");
+            evaluate(view, """
+                window.__refreshReloadTimes = [];
+                window.__stopRefreshReloadCount = %s.subscribeAction(action => {
+                    if (action.type === 'grabAllSubscriptions') window.__refreshReloadTimes.push(performance.now());
+                });
+                """.replace("%s", STORE));
+            try {
+                // Native ownership belongs to another renderer, not this WebView's plugin.
+                assertTrue(SubscriptionRefreshWorker.start(context, token, "Refreshing subscriptions", "Cancel"));
+                SubscriptionRefreshCoordinator.update(token, "videos", 0);
+                evaluate(view, "document.dispatchEvent(new Event('visibilitychange'))");
+                await(view, "window.__refreshReloadTimes.length === 1");
+                for (int progress = 1; progress <= 12; progress++) {
+                    SubscriptionRefreshCoordinator.setProgress(token, progress);
+                    await(view, STORE + ".getters.getSubscriptionFeedRefreshProgress === " + progress);
+                }
+                assertEquals("cache reloads are spaced five seconds apart", "true", evaluate(view,
+                    "window.__refreshReloadTimes.slice(1).every((time, index) => time - window.__refreshReloadTimes[index] >= 5000)"));
+                int reloads = Integer.parseInt(evaluate(view, "window.__refreshReloadTimes.length"));
+                assertTrue("long refresh still imports intermediate cache writes", reloads >= 2);
+                SubscriptionRefreshWorker.finish(context, token);
+                await(view, "!" + STORE + ".getters.getSubscriptionFeedRefreshInProgress && window.__refreshReloadTimes.length === " + (reloads + 1));
+                android.util.Log.i("RefreshUiTest", "12 live progress updates, " + reloads + " cache reloads plus one completion reload");
+            } finally {
+                SubscriptionRefreshWorker.finish(context, token);
+                evaluate(view, "window.__stopRefreshReloadCount?.()");
+            }
+        }
+    }
+
+    @Test
     public void reopenedUiFollowsNativeRefreshAndImportsVideosBeforeCompletion() throws Exception {
         String token = "scheduled-ui-test";
         String channelId = "UC-refresh-ui-test";

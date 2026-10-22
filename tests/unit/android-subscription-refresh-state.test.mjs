@@ -11,7 +11,10 @@ function setup(state, hidden = false) {
   const shown = []
   const timers = new Map()
   const calls = []
+  const notifications = []
+  let now = 0
   const context = vm.createContext({
+    performance: { now: () => now },
     process: { env: { IS_CAPACITOR: true } },
     navigator: { locks: { query() { assert.fail('Android must use native ownership') } } },
     getAndroidSubscriptionRefreshState: async () => state,
@@ -21,15 +24,20 @@ function setup(state, hidden = false) {
     clearTimeout: id => timers.delete(id),
     androidSubscriptionRefreshStateTimer: null,
     androidExternalRefreshProgress: null,
+    androidExternalRefreshReloadTime: 0,
     androidSubscriptionRefreshStateVersion: 0,
     subscriptionAutoRefreshTabs: ['videos', 'shorts', 'live', 'posts'],
-    notifySubscriptionChannelRefreshed: () => {},
+    notifySubscriptionChannelRefreshed: tab => notifications.push(tab),
     subscriptionCacheReady: { value: true },
     reconcileAndroidSubscriptionRefreshResults: async () => { calls.push('import') },
     store: { dispatch: async action => { calls.push(action) } },
   })
   vm.runInContext(synchronize, context)
-  return { shown, timers, calls, synchronize: () => context.synchronizeSubscriptionRefreshInProgress() }
+  return {
+    shown, timers, calls, notifications,
+    advance: milliseconds => { now += milliseconds },
+    synchronize: () => context.synchronizeSubscriptionRefreshInProgress(),
+  }
 }
 
 test('reopening Android follows native progress and imports videos before the worker finishes', async () => {
@@ -63,6 +71,7 @@ test('retained renderer cache writes become visible during refresh and after com
   await app.synchronize()
   assert.deepEqual(app.calls, ['import', 'grabAllSubscriptions', 'import'])
   state.percentage = 50
+  app.advance(5000)
   await app.synchronize()
   assert.equal(app.calls.at(-1), 'grabAllSubscriptions')
   state.inProgress = false
@@ -70,6 +79,27 @@ test('retained renderer cache writes become visible during refresh and after com
   await app.synchronize()
   assert.equal(app.calls.at(-1), 'grabAllSubscriptions')
   assert.equal(app.shown.at(-1).inProgress, false)
+})
+
+test('frequent retained renderer progress reloads the cache at most every five seconds and immediately on completion', async () => {
+  const state = { inProgress: true, percentage: 0, tab: 'videos', ownedByRenderer: false, rendererActive: true }
+  const app = setup(state)
+  for (let percentage = 0; percentage < 60; percentage++) {
+    if (percentage > 0) app.advance(1000)
+    state.percentage = percentage
+    await app.synchronize()
+    assert.equal(app.shown.at(-1).percentage, percentage, 'progress stays live between cache reloads')
+  }
+  assert.equal(app.calls.filter(call => call === 'grabAllSubscriptions').length, 12)
+  assert.equal(app.notifications.length, 12 * 4, 'feed rebuilds share the cache reload limit')
+
+  state.inProgress = false
+  state.rendererActive = false
+  await app.synchronize()
+  assert.equal(app.calls.filter(call => call === 'grabAllSubscriptions').length, 13, 'completion flushes the last writes')
+  assert.equal(app.notifications.length, 13 * 4)
+  await app.synchronize()
+  assert.equal(app.calls.filter(call => call === 'grabAllSubscriptions').length, 13, 'completion is imported once')
 })
 
 test('an owned Refresh All batch keeps its renderer events and next-feed startup', async () => {
