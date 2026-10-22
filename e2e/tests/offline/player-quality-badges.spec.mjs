@@ -2,6 +2,37 @@ import { test, expect, setWindowSize } from '../../helpers/app.mjs'
 import { activeTab, openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
+/**
+ * The demo media has legacy formats without badges. Replace them with Shaka's
+ * adaptive-resolution markup to exercise the actual submenu styles.
+ *
+ * @param {import('@playwright/test').Locator} menu
+ * @param {[string, string][]} options
+ */
+async function showResolutionTiles(menu, options) {
+  await menu.evaluate((element, options) => {
+    element.querySelectorAll('button:not(.shaka-back-to-overflow-button)').forEach(button => button.remove())
+    for (const [label, mark] of options) {
+      const button = document.createElement('button')
+      button.className = 'explicit-resolution'
+      const span = document.createElement('span')
+      span.textContent = label
+      if (label.endsWith('VP9')) span.classList.add('shaka-chosen-item')
+      const badge = document.createElement('sup')
+      badge.className = 'shaka-quality-mark'
+      badge.textContent = mark
+      button.append(span, badge)
+      element.append(button)
+    }
+  }, options)
+}
+
+/** @param {import('@playwright/test').Locator} menu */
+function tileWidths(menu) {
+  return menu.locator('.explicit-resolution')
+    .evaluateAll(buttons => buttons.map(button => button.getBoundingClientRect().width))
+}
+
 test.describe('resolution badges', { tag: '@scale' }, () => {
   test.use({
     launchArgs: ['--disable-gpu'],
@@ -35,31 +66,15 @@ test.describe('resolution badges', { tag: '@scale' }, () => {
       await page.locator('.shaka-overflow-menu .legacy-quality-button').click()
       const menu = page.locator('.legacy-qualities')
       await expect(menu).toBeVisible()
-      // The demo media has legacy formats without badges. Add Shaka's
-      // adaptive-resolution markup to exercise the actual submenu styles.
-      await menu.evaluate(element => {
-        element.querySelectorAll('button:not(.shaka-back-to-overflow-button)').forEach(button => button.remove())
-        for (const [label, mark] of [
-          ['1080p', 'HD'],
-          ['720p60', 'HD'],
-          ['2160p60', '4K'],
-          ['1080p (12.5 Mbps)', 'HD'],
-          ['1080p60 (1.5 Mbps) VP9', 'HD'],
-          ['1080p60 (12.5 Mbps) AV01', 'HD'],
-          ['2160p60 HDR (25 Mbps) AVC', '4K'],
-        ]) {
-          const button = document.createElement('button')
-          button.className = 'explicit-resolution'
-          const span = document.createElement('span')
-          span.textContent = label
-          if (label.endsWith('VP9')) span.classList.add('shaka-chosen-item')
-          const badge = document.createElement('sup')
-          badge.className = 'shaka-quality-mark'
-          badge.textContent = mark
-          button.append(span, badge)
-          element.append(button)
-        }
-      })
+      await showResolutionTiles(menu, [
+        ['1080p', 'HD'],
+        ['720p60', 'HD'],
+        ['2160p60', '4K'],
+        ['1080p (12.5 Mbps)', 'HD'],
+        ['1080p60 (1.5 Mbps) VP9', 'HD'],
+        ['1080p60 (12.5 Mbps) AV01', 'HD'],
+        ['2160p60 HDR (25 Mbps) AVC', '4K'],
+      ])
 
       for (const button of await menu.locator('.explicit-resolution').all()) {
         const geometry = await button.evaluate(element => {
@@ -94,5 +109,28 @@ test.describe('resolution badges', { tag: '@scale' }, () => {
       }
       await page.keyboard.press('Escape')
     }
+  })
+
+  test('quality tiles are one size and only as wide as the longest label', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    const video = await openMockedVideo(page)
+    await video.evaluate(element => element.pause())
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+    await setWindowSize(app, page, { width: 1280, height: 800 })
+    await player.hover()
+    await player.getByRole('button', { name: 'More settings' }).click()
+    await page.locator('.shaka-overflow-menu .legacy-quality-button').click()
+    const menu = page.locator('.legacy-qualities')
+    await expect(menu).toBeVisible()
+
+    await showResolutionTiles(menu, [['1080p60', 'HD'], ['720p', ''], ['144p', '']])
+    await expect.poll(async () => (await tileWidths(menu)).every(width => Math.abs(width - 90) < 1)).toBe(true)
+
+    await showResolutionTiles(menu, [['1080p60 HDR VP9', 'HD'], ['720p', ''], ['144p', '']])
+    await expect.poll(async () => {
+      const widths = await tileWidths(menu)
+      return widths.every(width => Math.abs(width - widths[0]) < 1) && widths[0] > 100
+    }).toBe(true)
   })
 })
