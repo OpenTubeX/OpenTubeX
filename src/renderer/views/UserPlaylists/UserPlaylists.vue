@@ -7,7 +7,7 @@
         <div class="headingRow">
           <h2
             ref="playlistHeading"
-            class="headingText"
+            class="pageTitle headingText"
             tabindex="-1"
           >
             <FtIcon

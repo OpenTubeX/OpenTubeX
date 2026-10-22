@@ -6,16 +6,14 @@
   >
     <FtCard class="homeIntro">
       <div class="homeHeading">
-        <div>
-          <h1>
-            <FtIcon
-              :icon="['fas', 'house']"
-              class="headingIcon"
-            />
-            {{ t('Home Page.Home') }}
-          </h1>
-          <p>{{ t('Home Page.Description') }}</p>
-        </div>
+        <h1 class="pageTitle">
+          <FtIcon
+            :icon="['fas', 'house']"
+            class="headingIcon"
+          />
+          {{ t('Home Page.Home') }}
+        </h1>
+        <p>{{ t('Home Page.Description') }}</p>
         <FtButton
           :label="customizing ? t('Home Page.Done') : t('Home Page.Customize')"
           :icon="customizing ? ['fas', 'check'] : ['fas', 'sliders-h']"

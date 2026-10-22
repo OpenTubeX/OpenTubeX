@@ -15,11 +15,10 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding-block-start: var(--playlist-control-gap);
+  padding-block-start: var(--page-title-offset);
 }
 
 .headingText {
-  margin-block: 0;
   min-inline-size: 0;
   overflow-wrap: anywhere;
 }

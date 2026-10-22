@@ -1,5 +1,4 @@
 .card {
-  --trending-header-gap: 8px;
   --trending-top-bar-block-size: 60px;
 
   box-sizing: border-box;
@@ -19,7 +18,7 @@
   inset-block-start: var(--trending-top-bar-block-size);
   z-index: 3;
   margin-inline: -16px;
-  padding-block: calc(3px + var(--trending-header-gap)) 12px;
+  padding-block: var(--page-title-offset) 12px;
   padding-inline: 16px;
   border-start-start-radius: calc(8px * var(--ui-roundness));
   border-start-end-radius: calc(8px * var(--ui-roundness));
@@ -36,13 +35,6 @@
   justify-content: space-between;
   gap: 12px 20px;
   flex-wrap: wrap;
-}
-
-.pageTitle {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0;
 }
 
 .pageTitle .trendingIcon {

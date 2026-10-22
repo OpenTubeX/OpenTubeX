@@ -2,7 +2,7 @@
   <div>
     <FtCard class="statsPage">
       <div class="statsHeader">
-        <h2>
+        <h2 class="pageTitle">
           <FtIcon
             :icon="['fas', 'chart-line']"
             class="headingIcon"
