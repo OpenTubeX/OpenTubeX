@@ -91,6 +91,42 @@
   color: var(--secondary-text-color);
 }
 
+/* Thumbnails overflow the icon box, keeping labels and row heights aligned. */
+.moreOptionContainer .pinnedThumbnail {
+  inline-size: 32px;
+  block-size: 32px;
+  margin: -4px;
+  border-radius: 50%;
+}
+
+.moreOptionContainer .pinnedThumbnail :deep(.ft-icon__glyph) {
+  block-size: 100%;
+  inline-size: 100%;
+  scale: 1;
+}
+
+.moreOptionContainer .pinnedThumbnail.playlistThumbnail {
+  border-radius: calc(8px * var(--ui-roundness));
+  object-fit: cover;
+}
+
+.moreOptionContainer .pinnedThumbnail.playlistThumbnail.blur {
+  clip-path: inset(0 round calc(8px * var(--ui-roundness)));
+  filter: blur(5px);
+}
+
+.moreOptionDivider {
+  block-size: 1px;
+  margin-block: 8px;
+  margin-inline: 8px;
+  border: 0;
+  background-color: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
+}
+
+.disabledNavOption {
+  pointer-events: none;
+}
+
 .moreOptionContainer .navLabel {
   inline-size: auto;
   margin: 0;

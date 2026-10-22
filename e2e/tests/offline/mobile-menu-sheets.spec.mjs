@@ -184,7 +184,7 @@ test('mobile sheet remains tappable with reduced motion enabled', async ({ page 
   await expect(page).toHaveURL(/#\/subscribedchannels/)
 })
 
-test('More sheet clamps bottom scrolling after resize and removing navigation entries', async ({ page }) => {
+test('More sheet clamps bottom scrolling after resize and removing navigation entries or pins', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 })
   await page.locator('.moreOptionNav').click()
   const menu = page.locator('.moreOptionContainer')
@@ -212,6 +212,13 @@ test('More sheet clamps bottom scrolling after resize and removing navigation en
     const store = window.$store
     store.commit('setNavigationItems', store.getters.getNavigationItems.filter(id => id !== 'stats'))
   })
+  await clamped()
+  // Sync can also remove pins while the sheet lists them.
+  await page.evaluate(() => window.$store.dispatch('updatePinnedChannels', ['a', 'b', 'c'].map(letter => (
+    { id: `UC${letter.repeat(22)}`, name: `Channel ${letter}`, thumbnail: null }
+  ))))
+  await bottom()
+  await page.evaluate(() => window.$store.dispatch('updatePinnedChannels', []))
   await clamped()
   await page.keyboard.press('Escape')
   await expect(menu).toHaveCount(0)

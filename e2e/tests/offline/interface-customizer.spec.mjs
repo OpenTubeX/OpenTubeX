@@ -24,6 +24,12 @@ test.describe('interface customizer', () => {
     const mobileItems = preview.locator('.previewBottomBar [data-preview-navigation-item]')
     await expect(mobileItems).toHaveCount(5)
     await expect(mobileItems.last()).toHaveAttribute('data-preview-navigation-item', 'more')
+    // Pins live in More, so it replaces the fifth destination even without overflow.
+    const fiveItems = ['home', 'subscriptions', 'userplaylists', 'history', 'subscribedchannels']
+    await page.evaluate(items => window.$store.commit('setNavigationItems', items), fiveItems)
+    await expect.poll(previewIds).toEqual(fiveItems)
+    await page.evaluate(() => window.$store.dispatch('updatePinnedChannels', [{ id: 'UCaaaaaaaaaaaaaaaaaaaaaa', name: 'Channel', thumbnail: null }]))
+    await expect.poll(previewIds).toEqual([...fiveItems.slice(0, 4), 'more'])
     await customizer.locator('label.switch-label').filter({ hasText: 'Compact navigation bar' }).click()
     await expect(preview).toHaveClass(/compactLabels/)
     await expect(mobileItems.first().locator('.previewNavLabel')).toBeHidden()
