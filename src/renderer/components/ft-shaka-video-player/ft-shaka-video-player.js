@@ -48,6 +48,7 @@ import { CopyVideoUrlButton, setCopyVideoUrlContext } from './player-components/
 import { FullWindowButton } from './player-components/FullWindowButton'
 import { AndroidPictureInPictureButton } from './player-components/AndroidPictureInPictureButton'
 import { LegacyQualitySelection } from './player-components/LegacyQualitySelection'
+import { QualitySelection } from './player-components/QualitySelection'
 import { LoopButton, setLoopButtonContext } from './player-components/LoopButton'
 import { MusicVisualizerButton } from './player-components/MusicVisualizerButton'
 import { QuickPlaybackRateBar, setQuickPlaybackRateBarContext } from './player-components/QuickPlaybackRateBar'
@@ -9094,6 +9095,18 @@ export default defineComponent({
       registerOwnElement(shakaOverflowMenu, 'ft_audio_tracks', new AudioTrackSelectionFactory())
     }
 
+    function registerQualitySelection() {
+      /** @implements {shaka.extern.IUIElement.Factory} */
+      class QualitySelectionFactory {
+        create(rootElement, controls) {
+          return new QualitySelection(events, rootElement, controls)
+        }
+      }
+
+      registerOwnElement(shakaControls, 'quality', new QualitySelectionFactory())
+      registerOwnElement(shakaOverflowMenu, 'quality', new QualitySelectionFactory())
+    }
+
     function registerCaptionSelection() {
       /** @implements {shaka.extern.IUIElement.Factory} */
       class CaptionSelectionFactory {
@@ -12513,24 +12526,19 @@ export default defineComponent({
       if (!isActiveTab.value || !(target instanceof Element) || !container.value?.contains(target)) {
         return
       }
-      const resolutionsContainer = target.closest('.shaka-resolutions')
+      // The codec switcher only changes which resolutions are listed
+      if (target.closest('.shaka-resolutions :is(.explicit-resolution, .shaka-enable-abr-button)')) {
+        setTimeout(() => {
+          if (!player || player.getConfiguration().abr.enabled) {
+            return
+          }
 
-      if (resolutionsContainer) {
-        const button = target.closest('button')
+          const quality = getActiveVariantQuality()
 
-        if (button && !button.classList.contains('shaka-back-to-overflow-button')) {
-          setTimeout(() => {
-            if (!player || player.getConfiguration().abr.enabled) {
-              return
-            }
-
-            const quality = getActiveVariantQuality()
-
-            if (quality !== null) {
-              emit('video-quality-user-set', quality)
-            }
-          }, 50)
-        }
+          if (quality !== null) {
+            emit('video-quality-user-set', quality)
+          }
+        }, 50)
       }
     }
 
@@ -12688,6 +12696,7 @@ export default defineComponent({
 
       registerScreenshotButton()
       registerAudioTrackSelection()
+      registerQualitySelection()
       registerCaptionSelection()
       registerCaptionToggleButton()
       registerChapterOverlayButton()

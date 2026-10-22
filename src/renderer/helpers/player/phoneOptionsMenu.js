@@ -21,13 +21,62 @@ export function setupPhoneOptionsMenu(menu, controls, t) {
   let frame = null
   let activeView = null
   let previousFocus = null
-  let headerButton = null
-  let headerParent = null
+  // Shaka rebuilds submenus around their back button, so it stays in place and
+  // the dialog's header shows a copy of it.
+  let headerSource = null
+  let headerSnapshot = ''
+  let header = null
 
-  function restoreHeader() {
-    if (headerButton && headerParent) headerParent.prepend(headerButton)
-    headerButton = null
-    headerParent = null
+  function updateHeader(submenu) {
+    const source = submenu?.querySelector('.shaka-back-to-overflow-button') ?? null
+    const snapshot = source?.outerHTML ?? ''
+    if (source === headerSource && snapshot === headerSnapshot) return
+    headerSource = source
+    headerSnapshot = snapshot
+    header?.remove()
+    header = source?.cloneNode(true) ?? null
+    if (header) dialog.prepend(header)
+  }
+
+  // A submenu's header action, which stays in the submenu for the same reason,
+  // is positioned into the header while it fits beside the title.
+  let spacedAction = null
+
+  function updateHeaderAction(submenu) {
+    const action = header && submenu?.querySelector(':scope > .ft-submenu-header-action')
+    if (spacedAction) spacedAction.style.marginBlock = ''
+    spacedAction = null
+    dialog.toggleAttribute('data-header-action', Boolean(action))
+    if (!action) return
+    const range = document.createRange()
+    range.selectNodeContents(header)
+    const title = range.getBoundingClientRect()
+    const bounds = action.getBoundingClientRect()
+    const gap = 8
+    if (title.right + gap > bounds.left && bounds.right + gap > title.left) {
+      dialog.removeAttribute('data-header-action')
+      if (submenu.classList.contains('ft-menu-grid')) spaceAroundAction(submenu, action)
+    }
+  }
+
+  // The grid's options are centred, so share the free space evenly above the
+  // action, between it and the options, and below them.
+  function spaceAroundAction(submenu, action) {
+    const options = [...submenu.children]
+      .filter(child => child !== action && child.getClientRects().length > 0)
+      .map(child => child.getBoundingClientRect())
+    if (options.length === 0) return
+    const top = header.getBoundingClientRect().bottom
+    const bottom = menu.getBoundingClientRect().bottom
+    const optionsTop = Math.min(...options.map(option => option.top))
+    const optionsBottom = Math.max(...options.map(option => option.bottom))
+    const bounds = action.getBoundingClientRect()
+    const space = (bottom - top - bounds.height - (optionsBottom - optionsTop)) / 3
+    // Without room to spare, the menu scrolls and keeps the default spacing
+    if (space <= 0) return
+    const rowGap = parseFloat(getComputedStyle(submenu).rowGap) || 0
+    action.style.marginBlock = `${top + space - bounds.top}px ${space - rowGap}px`
+    spacedAction = action
   }
 
   function visibleSubmenu() {
@@ -42,9 +91,7 @@ export function setupPhoneOptionsMenu(menu, controls, t) {
   }
 
   function goBack() {
-    const submenu = visibleSubmenu()
-    const button = headerButton ?? submenu?.querySelector('.shaka-back-to-overflow-button')
-    if (button) button.click()
+    if (headerSource) headerSource.click()
     else dismiss()
   }
 
@@ -58,7 +105,7 @@ export function setupPhoneOptionsMenu(menu, controls, t) {
       close.focus({ preventScroll: true })
     } else if (!open && dialog.open) {
       dialog.close()
-      restoreHeader()
+      updateHeader(null)
       parent.append(menu)
       activeView = null
       const trigger = parent.querySelector('.shaka-overflow-menu-button')
@@ -68,13 +115,9 @@ export function setupPhoneOptionsMenu(menu, controls, t) {
     if (!open) return
     const submenu = visibleSubmenu()
     const view = submenu ?? menu
+    updateHeader(submenu)
+    updateHeaderAction(submenu)
     if (view !== activeView) {
-      restoreHeader()
-      headerButton = submenu?.querySelector('.shaka-back-to-overflow-button') ?? null
-      if (headerButton) {
-        headerParent = headerButton.parentElement
-        dialog.prepend(headerButton)
-      }
       activeView = view
       restoreOverlayScrollTop(menu, 0)
     }
@@ -103,16 +146,11 @@ export function setupPhoneOptionsMenu(menu, controls, t) {
   document.addEventListener('pointerup', finishOutsidePointer, true)
   document.addEventListener('pointercancel', cancelOutsidePointer, true)
   dialog.addEventListener('click', event => {
-    if (headerButton?.contains(event.target)) {
-      event.preventDefault()
+    if (header?.contains(event.target)) {
       event.stopPropagation()
-      const button = headerButton
       // Shaka handles Back through the submenu's bubbling click listener.
-      restoreHeader()
-      queueMicrotask(() => {
-        button.click()
-        schedule()
-      })
+      headerSource.click()
+      schedule()
     }
   }, true)
   dialog.addEventListener('click', event => {
@@ -157,7 +195,7 @@ export function setupPhoneOptionsMenu(menu, controls, t) {
     cancelAnimationFrame(frame)
     query.removeEventListener('change', schedule)
     window.removeEventListener('resize', schedule)
-    restoreHeader()
+    updateHeader(null)
     if (dialog.contains(menu)) {
       if (parent.querySelector(':scope > .shaka-overflow-menu')) menu.remove()
       else parent.append(menu)

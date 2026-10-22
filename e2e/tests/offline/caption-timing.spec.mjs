@@ -220,9 +220,10 @@ for (const usePlayerMenuGrid of [true, false]) {
         expect(inputBounds.x).toBeGreaterThanOrEqual(bounds.x - 1)
         expect(inputBounds.x + inputBounds.width).toBeLessThanOrEqual(bounds.x + bounds.width + 1)
         await expect.poll(() => scroller.evaluate(validTimingScroll)).toBe(true)
-        // The phone dialog lifts the submenu header above its own viewport.
+        // The phone dialog shows the submenu header above its own viewport.
         const headerBounds = await getVisibleBounds(menu.locator(':scope > .shaka-back-to-overflow-button')
-          .or(player.locator('.phonePlayerOptions[open] > .shaka-back-to-overflow-button')))
+          .or(player.locator('.phonePlayerOptions[open] > .shaka-back-to-overflow-button'))
+          .filter({ visible: true }))
         const scrollBounds = await getVisibleBounds(scroller)
         expect(scrollBounds.y).toBeGreaterThanOrEqual(headerBounds.y + headerBounds.height - 1)
         await menu.getByRole('button', { name: 'Later', exact: true }).click()
