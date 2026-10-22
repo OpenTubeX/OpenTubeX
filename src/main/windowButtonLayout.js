@@ -25,7 +25,7 @@ function publish(layout) {
  * Reads the title bar button layout in GTK's format, such as
  * `close,minimize,maximize:`. The XDG settings portal provides it on GNOME and
  * translates KWin's button settings on Plasma, inside Flatpak too.
- * @returns {Promise<string>}
+ * @returns {Promise<string | null>} null when the portal provided no layout
  */
 async function readButtonLayout() {
   let bus = null
@@ -51,22 +51,22 @@ async function readButtonLayout() {
     if (failedReads < RETRY_DELAYS.length) {
       setTimeout(retryButtonLayout, RETRY_DELAYS[failedReads++]).unref?.()
     }
-    // A layout signalled before the read failed is still newer than the default
-    return changedLayout ?? DEFAULT_BUTTON_LAYOUT
+    // A layout signalled before the read failed is still the newest one
+    return changedLayout
   }
 }
 
 async function retryButtonLayout() {
-  // Requests keep the cached default while the retry waits for D-Bus
+  // Requests keep the cached layout while the retry waits for D-Bus
   const cachedLayout = buttonLayout
   const layout = await readButtonLayout()
   // A change signal during the read has already published the newer layout
-  if (layout !== DEFAULT_BUTTON_LAYOUT && buttonLayout === cachedLayout) publish(layout)
+  if (layout !== null && buttonLayout === cachedLayout) publish(layout)
 }
 
 /** @returns {Promise<string>} */
 export function getWindowButtonLayout() {
-  buttonLayout ??= readButtonLayout()
+  buttonLayout ??= readButtonLayout().then(layout => layout ?? DEFAULT_BUTTON_LAYOUT)
   return buttonLayout
 }
 

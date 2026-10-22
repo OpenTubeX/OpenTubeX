@@ -153,3 +153,27 @@ test('a change signalled before the read fails is kept', async () => {
   assert.equal(layout.connections[0].ended, true)
   assert.equal(layout.timers.length, 1)
 })
+
+test('a retry applies a layout reset to the default after a signalled change', async () => {
+  const layout = fixture()
+  const published = []
+  layout.onWindowButtonLayoutChanged(value => published.push(value))
+  layout.portal.available = true
+  layout.portal.readError = new Error('Timeout')
+  let answer
+  layout.portal.readGate = new Promise(resolve => { answer = resolve })
+  const first = layout.getWindowButtonLayout()
+  await flush()
+  layout.portal.handlers[0]('org.gnome.desktop.wm.preferences', 'button-layout', 'close:')
+  answer()
+  assert.equal(await first, 'close:')
+
+  // The user resets the layout before the retry reads it
+  layout.portal.readError = null
+  layout.portal.readGate = null
+  layout.portal.layout = ':minimize,maximize,close'
+  layout.timers.shift().callback()
+  await flush()
+  assert.deepEqual(published, ['close:', ':minimize,maximize,close'])
+  assert.equal(await layout.getWindowButtonLayout(), ':minimize,maximize,close')
+})
