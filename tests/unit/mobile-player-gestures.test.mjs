@@ -257,9 +257,8 @@ test('rejected fullscreen entry is handled', async t => {
   assert.equal(console.warn.mock.callCount(), 1)
 })
 
-test('fullscreen swipe controls auto-hide after the configured delay despite suppressed touchend', async t => {
-  // Exercise Shaka's real touch/mouse and opacity methods. touchmove stops its
-  // idle timer, while the app consumes touchend to prevent a second surface tap.
+// Exercise Shaka's real touch/mouse and opacity methods.
+function createShakaControls() {
   const source = readFileSync(new URL('../../node_modules/shaka-player/ui/controls.js', import.meta.url), 'utf8')
   const shaka = { ui: {}, util: { FakeEventTarget: class {} } }
   vm.runInNewContext(source.slice(source.indexOf('shaka.ui.Controls = class'), source.indexOf('\n};') + 3), {
@@ -297,6 +296,13 @@ test('fullscreen swipe controls auto-hide after the configured delay despite sup
     fadeControlsTimer_: timer(() => attributes.delete('shown')),
     mouseStillTimer_: timer(() => controls.onMouseStill_()),
   })
+  return { controls, attributes }
+}
+
+test('fullscreen swipe controls auto-hide after the configured delay despite suppressed touchend', async t => {
+  // touchmove stops Shaka's idle timer, while the app consumes touchend to
+  // prevent a second surface tap.
+  const { controls, attributes } = createShakaControls()
   let fullscreen = false
   const { gestures: g, event, container, paint } = fixture(t, {
     controls,
@@ -334,6 +340,33 @@ test('fullscreen swipe controls auto-hide after the configured delay despite sup
   t.mock.timers.tick(1)
   t.mock.timers.tick(500)
   assert.equal(attributes.has('shown'), false, 'Controls must hide without another tap')
+})
+
+test('side swipe adjustments keep hidden controls hidden', t => {
+  const { controls, attributes } = createShakaControls()
+  const { gestures: g, event, calls, container } = fixture(t, { controls, fullscreenSwipe: false })
+  container.addEventListener('touchmove', event => g.handleMobilePlayerTouchMove(event))
+  for (const type of ['touchmove', 'touchend']) {
+    container.addEventListener(type, event => controls.onMouseMove_(event))
+  }
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  for (const [x, action] of [[50, 'brightness'], [370, 'volume']]) {
+    calls.length = 0
+    g.startMobileFullscreenGesture(event(x))
+    // Shaka reveals its controls for every touchmove, including those within
+    // the slop before the swipe locks.
+    container.dispatchEvent(new Event('touchmove'))
+    assert.equal(g.moveMobileFullscreenGesture(event(x, 49.75)), true)
+    container.dispatchEvent(new Event('touchmove'))
+    g.finishMobileFullscreenGesture(event(x, 49.75))
+    const touchEnd = event(x, 49.75, { timeStamp: performance.now() })
+    g.handleMobilePlayerTouchEnd(touchEnd)
+    assert.equal(touchEnd.prevented, true)
+    assert.deepEqual(calls, [['begin', action], ['update', 0.5], 'finish'])
+    assert.equal(attributes.has('shown'), false, `A ${action} swipe must not reveal the controls`)
+  }
+  container.dispatchEvent(new Event('touchmove'))
+  assert.equal(attributes.has('shown'), true, 'Other touch movement still reveals the controls')
 })
 
 test('horizontal movement never becomes an adjustment later in the same gesture', t => {

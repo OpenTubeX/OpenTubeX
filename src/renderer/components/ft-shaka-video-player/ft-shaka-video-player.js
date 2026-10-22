@@ -5856,7 +5856,7 @@ export default defineComponent({
       },
       async write(action, value) {
         if (action === 'speed') {
-          applyPlaybackRate(value)
+          applyPlaybackRate(value, false)
         } else if (action === 'brightness') {
           const { ScreenBrightness } = await import('@capacitor-community/screen-brightness')
           await ScreenBrightness.setBrightness({ brightness: value })
@@ -5871,7 +5871,7 @@ export default defineComponent({
         const label = action === 'brightness'
           ? t('Settings.Player Settings.Swipe Gestures.Brightness')
           : t('Settings.Player Settings.Swipe Gestures.Volume')
-        showValueChange(`${label}: ${Math.round(value * 100)}%`, action === 'brightness' ? 'sun' : 'volume-high')
+        showValueChange(`${label}: ${Math.round(value * 100)}%`, action === 'brightness' ? 'sun' : 'volume-high', false, 0, false)
       },
       onError(error) {
         console.error('Mobile player adjustment failed', error)
@@ -5887,6 +5887,7 @@ export default defineComponent({
       getMobileTapDirection,
       handleMobilePlayerSurfaceClick,
       handleMobilePlayerTouchEnd,
+      handleMobilePlayerTouchMove,
       mobileFullscreenSwipeSettling,
       mobileFullscreenSwipeStyle,
       mobileFullscreenSwiping,
@@ -11315,8 +11316,9 @@ export default defineComponent({
 
     /**
      * @param {number} rate
+     * @param {boolean} revealControls Whether the change should reveal the player controls
      */
-    function applyPlaybackRate(rate) {
+    function applyPlaybackRate(rate, revealControls = true) {
       const newPlaybackRateString = rate.toFixed(2)
       const newPlaybackRate = parseFloat(newPlaybackRateString)
 
@@ -11324,7 +11326,7 @@ export default defineComponent({
       // The provided playback rate (0.05) is not in the supported playback range.
       if (newPlaybackRate > 0.07 && newPlaybackRate <= maxVideoPlaybackRate.value) {
         setPlaybackRate(newPlaybackRate)
-        showValueChange(`${newPlaybackRateString}x`, 'gauge')
+        showValueChange(`${newPlaybackRateString}x`, 'gauge', false, 0, revealControls)
       }
     }
 
@@ -14216,6 +14218,7 @@ export default defineComponent({
       handleVideoZoomPointerUp,
       handleVideoZoomPointerCancel,
       handleMobilePlayerTouchEnd,
+      handleMobilePlayerTouchMove,
 
       valueChangeMessage,
       valueChangeIcons,

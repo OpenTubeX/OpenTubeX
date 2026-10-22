@@ -136,6 +136,7 @@
       @pointerenter="handleVideoZoomPointerEnter"
       @pointerleave="handleVideoZoomPointerLeave"
       @pointerdown.capture="handleVideoZoomPointerDown"
+      @touchmove.capture="handleMobilePlayerTouchMove"
       @touchend.capture="handlePlayerTouchEnd"
       @focusin="handlePlayerFocusIn"
       @focusout="handleScrollMiniPlayerLeave"
