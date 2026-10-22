@@ -305,7 +305,8 @@ function * scoreRecommendationCandidateSteps(candidates, profile, { exploration 
 // Kept items are already shown; they count toward the limit and diversity but are not returned.
 function * diversifyRecommendationSteps(scored, { limit = 24, exploration = 0.2, kept = [] } = {}) {
   limit = Math.floor(number(limit))
-  const pool = [...scored]
+  const keptIds = new Set(kept.map(item => item.video.videoId))
+  const pool = scored.filter(item => !keptIds.has(item.video.videoId))
   const selected = [...kept]
   const channelCounts = new Map()
   for (const item of kept) channelCounts.set(id(item.video.authorId), (channelCounts.get(id(item.video.authorId)) ?? 0) + 1)
@@ -359,7 +360,7 @@ export function diversifyRecommendations(scored, options) {
 
 export async function rankRecommendationCandidatesAsync(candidates, profile, options, isCancelled) {
   const scored = await runCooperatively(scoreRecommendationCandidateSteps(candidates, profile, options), isCancelled)
-  return scored && runCooperatively(diversifyRecommendationSteps(scored, { ...options, kept: keptRecommendationItems(options.kept, profile) }), isCancelled)
+  return scored && runCooperatively(diversifyRecommendationSteps(scored, { ...options, kept: keptRecommendationItems(options?.kept, profile) }), isCancelled)
 }
 
 export function rankRecommendations(candidates, history, options = {}) {

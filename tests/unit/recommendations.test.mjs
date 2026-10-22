@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { buildRecommendationProfile, rankRecommendations, scoreRecommendationCandidates, recommendationTokens } from '../../src/renderer/helpers/recommendations.js'
+import { buildRecommendationProfile, rankRecommendationCandidatesAsync, rankRecommendations, scoreRecommendationCandidates, recommendationTokens } from '../../src/renderer/helpers/recommendations.js'
 const DAY = 86400000
 const now = Date.UTC(2026, 8, 6)
 const watched = (videoId, extra = {}) => ({ videoId, title: 'Linux desktop customization', authorId: 'linux', author: 'Linux channel', lengthSeconds: 600, watchProgress: 500, timeWatched: now, type: 'video', ...extra })
@@ -131,14 +131,18 @@ test('diversity caps channels and suppresses duplicate titles across channels', 
 })
 test('appended recommendations count the shown feed toward channel caps and duplicate titles', () => {
   const history = [watched('seed'), watched('second-seed', { authorId: 'second' })]
-  const kept = [...Array.from({ length: 3 }, (_, i) => video(`shown${i}`, { title: '', authorId: 'linux' })), video('shown-title')]
+  const kept = [...Array.from({ length: 3 }, (_, i) => video(`shown${i}`, { title: '', authorId: 'linux' })), video('shown-title'), video('shown-short', { title: 'Linux', authorId: 'third' })]
   const candidates = [
+    kept[4],
     ...Array.from({ length: 4 }, (_, i) => video(`linux${i}`, { title: '', authorId: 'linux' })),
     ...Array.from({ length: 2 }, (_, i) => video(`second${i}`, { title: '', authorId: 'second' })),
     video('duplicate', { authorId: 'second' }),
   ]
   assert.deepEqual(ids(rank(candidates, history, { kept, limit: 24 })).sort(), ['second0', 'second1'])
   assert.equal(rank(candidates, history, { kept, limit: kept.length + 1 }).length, 1)
+})
+test('async ranking accepts omitted options', async () => {
+  assert.deepEqual(await rankRecommendationCandidatesAsync([], profile([watched('seed')])), [])
 })
 test('exploration rewards relevant unfamiliar channels without admitting unrelated content', () => {
   const history = [watched('seed')]

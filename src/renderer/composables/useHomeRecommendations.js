@@ -52,10 +52,7 @@ export function useHomeRecommendations(visible) {
   const blockedChannelIds = computed(() => new Set(records.value
     .filter(record => record.feedback === 'blockChannel').map(record => record.authorId)))
   const visibleRanked = computed(previous => {
-    const videos = ranked.value.filter(video => {
-      const record = store.state.recommendations.recommendationRecords[video.videoId]
-      return isVisible(video) && record?.feedback !== 'blockChannel' && !blockedChannelIds.value.has(video.authorId)
-    })
+    const videos = ranked.value.filter(isShown)
     // Impression updates replace feedback records without changing the feed.
     // Retain its identity so they cannot rerender every card and shelf.
     return previous && videos.length === previous.length && videos.every((video, index) => video === previous[index])
@@ -67,6 +64,10 @@ export function useHomeRecommendations(visible) {
     (hasSeeds.value || visibleRanked.value.length > 0))
   const recommendations = computed(() => enabled.value && hasHistory.value ? visibleRanked.value : [])
 
+  function isShown(video) {
+    const record = store.state.recommendations.recommendationRecords[video.videoId]
+    return isVisible(video) && record?.feedback !== 'blockChannel' && !blockedChannelIds.value.has(video.authorId)
+  }
   function isVisible(video) {
     return video != null && typeof video === 'object' &&
       !shouldHideMembersOnlyContent(video.isMembersOnly, store.getters) &&
@@ -112,12 +113,10 @@ export function useHomeRecommendations(visible) {
         ? { ...record, impressions: record.impressions?.slice(0, -1) }
         : record]))
     }
-    kept = kept.filter(video => !store.getters.getHistoryCacheById[video.videoId])
-    const keptIds = new Set(kept.map(video => video.videoId))
-    const pool = candidates.filter(video => !keptIds.has(video.videoId) && isVisible(video) &&
-      !store.getters.getHistoryCacheById[video.videoId])
-    const result = await rankRecommendationCandidatesAsync(pool, learned,
-      { limit, exploration: exploration.value, kept }, isCancelled)
+    // Hidden or watched cards would otherwise take slots and diversity from the new ones.
+    kept = kept.filter(video => isShown(video) && !store.getters.getHistoryCacheById[video.videoId])
+    const result = await rankRecommendationCandidatesAsync(candidates.filter(video => isShown(video) &&
+      !store.getters.getHistoryCacheById[video.videoId]), learned, { limit, exploration: exploration.value, kept }, isCancelled)
     if (!result || isCancelled()) return
     // History can change while ranking yields to the event loop.
     ranked.value = [...kept, ...result.map(item => ({ ...item.video, recommendationReason: item.reason }))]
