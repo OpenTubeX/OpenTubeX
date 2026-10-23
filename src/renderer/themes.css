@@ -51,7 +51,6 @@ body {
 
   /* divider */
 
-  --primary-input-color: rgb(0 0 0 / 50%);
   --link-color: var(--accent-color);
   --link-visited-color: var(--accent-color-visited);
   --instance-menu-color: var(--search-bar-color);
@@ -70,16 +69,11 @@ body {
   --logo-tertiary-color: var(--primary-text-color);
   --logo-pressed-color: var(--logo-tertiary-color);
 
-  /* Neutral headers use the base theme's interaction colors;
-     colored headers use the primary palette. */
+  /* Headers use the base theme's interaction colors. */
   --header-button-hover-color: var(--side-nav-hover-color);
   --header-button-hover-text-color: var(--side-nav-hover-text-color);
   --header-button-pressed-color: var(--side-nav-active-color);
   --header-button-pressed-text-color: var(--side-nav-active-text-color);
-  --colored-header-button-hover-color: var(--primary-color-hover);
-  --colored-header-button-hover-text-color: var(--text-with-main-color);
-  --colored-header-button-pressed-color: var(--primary-color-active);
-  --colored-header-button-pressed-text-color: var(--text-with-main-color);
 
   /* Enabled toggles are filled so they stay distinct from neutral hover and focus colors. */
   --selected-container-color: var(--primary-color);
@@ -191,10 +185,9 @@ input[type='search']::-webkit-search-cancel-button:active {
 
 /*************** RULE TWEAKS ***************/
 
-/* Default sidenav hover text color and primary input color not needed to be changed for most themes */
+/* Default sidenav hover text color not needed to be changed for most themes */
 /* stylelint-disable-next-line selector-no-qualifying-type */
 body:not(.hotPink) {
-  --primary-input-color: rgb(0 0 0 / 50%);
   --side-nav-hover-text-color: var(--primary-text-color);
 }
 
@@ -793,8 +786,6 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainTeal,
 .mainGreen {
   --text-with-main-color: #fff;
-  --logo-icon-bar-color: url('../../_icons/iconWhiteSmall.svg');
-  --logo-text-bar-color: url('../../_icons/textWhiteSmall.svg');
 }
 
 /* light primary theme colors */
@@ -805,8 +796,6 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainOrange,
 .mainDeepOrange {
   --text-with-main-color: #000;
-  --logo-icon-bar-color: url('../../_icons/iconBlackSmall.svg');
-  --logo-text-bar-color: url('../../_icons/textBlackSmall.svg');
 }
 
 .mainRed {
@@ -926,8 +915,6 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --primary-color-hover: var(--macchiato-color-hover);
   --primary-color-active: var(--macchiato-color-active);
   --text-with-main-color: #24273a;
-  --logo-icon-bar-color: url('../../_icons/iconBlackSmall.svg');
-  --logo-text-bar-color: url('../../_icons/textBlackSmall.svg');
 }
 
 :is(.mainCatppuccinMacchiatoRosewater, .secCatppuccinMacchiatoRosewater) {
@@ -1043,8 +1030,6 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainCatppuccinMochaBlue,
 .mainCatppuccinMochaLavender {
   --text-with-main-color: #1e1e2e;
-  --logo-icon-bar-color: url('../../_icons/iconCatppuccinMochaDarkSmall.svg');
-  --logo-text-bar-color: url('../../_icons/textCatppuccinMochaDarkSmall.svg');
 }
 
 .mainCatppuccinMochaRosewater {
@@ -1137,15 +1122,11 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainDraculaRed,
 .mainDraculaYellow {
   --text-with-main-color: #282a36;
-  --logo-icon-bar-color: url('../../_icons/iconDraculaDarkSmall.svg');
-  --logo-text-bar-color: url('../../_icons/textDraculaDarkSmall.svg');
 }
 
 .mainDraculaPink,
 .mainDraculaPurple {
   --text-with-main-color: #f8f8f2;
-  --logo-icon-bar-color: url('../../_icons/iconDraculaLightSmall.svg');
-  --logo-text-bar-color: url('../../_icons/textDraculaLightSmall.svg');
 }
 
 .mainDraculaCyan {
@@ -1197,15 +1178,11 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainSolarizedViolet,
 .mainSolarizedGreen {
   --text-with-main-color: #fdf6e3;
-  --logo-icon-bar-color: url('../../_icons/iconDraculaLightSmall.svg');
-  --logo-text-bar-color: url('../../_icons/textDraculaLightSmall.svg');
 }
 
 .mainSolarizedBlue,
 .mainSolarizedCyan {
   --text-with-main-color: #000;
-  --logo-icon-bar-color: url('../../_icons/iconDraculaDarkSmall.svg');
-  --logo-text-bar-color: url('../../_icons/textDraculaDarkSmall.svg');
 }
 
 .mainSolarizedYellow {
@@ -1321,8 +1298,6 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainGruvboxLightBlue,
 .mainGruvboxLightPurple {
   --text-with-main-color: #fbf1c7;
-  --logo-icon-bar-color: url('../../_icons/iconGruvboxLightSmall.svg');
-  --logo-text-bar-color: url('../../_icons/textGruvboxLightSmall.svg');
 }
 
 
@@ -1331,15 +1306,11 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainGruvboxDarkAqua,
 .mainGruvboxDarkOrange {
   --text-with-main-color: #3c3836;
-  --logo-icon-bar-color: url('../../_icons/iconGruvboxDarkSmall.svg');
-  --logo-text-bar-color: url('../../_icons/textGruvboxDarkSmall.svg');
 }
 
 .mainGruvboxDarkBlue,
 .mainGruvboxDarkPurple {
   --text-with-main-color: #1d2021;
-  --logo-icon-bar-color: url('../../_icons/iconGruvboxDarkSmall.svg');
-  --logo-text-bar-color: url('../../_icons/textGruvboxDarkSmall.svg');
 }
 
 .mainCatppuccinFrappeRosewater,
@@ -1357,8 +1328,6 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainCatppuccinFrappeBlue,
 .mainCatppuccinFrappeLavender {
   --text-with-main-color: #24273a;
-  --logo-icon-bar-color: url('../../_icons/iconCatppuccinFrappeDarkSmall.svg');
-  --logo-text-bar-color: url('../../_icons/textCatppuccinFrappeDarkSmall.svg');
 }
 
 .mainCatppuccinFrappeRosewater {
@@ -1460,8 +1429,6 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainEverforestLightBlue,
 .mainEverforestLightPurple {
   --text-with-main-color: #1e2326;
-  --logo-icon-bar-color: url('../../_icons/iconEverforestDarkHardSmall.svg');
-  --logo-text-bar-color: url('../../_icons/textEverforestDarkHardSmall.svg');
 }
 
 .mainEverforestDarkRed {
@@ -1551,8 +1518,6 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .mainCatppuccinLatteMauve,
 .mainCatppuccinLatteRed {
   --text-with-main-color: #fff;
-  --logo-icon-bar-color: url('../../_icons/iconCatppuccinLatteLightSmall.svg');
-  --logo-text-bar-color: url('../../_icons/textCatppuccinLatteLightSmall.svg');
 }
 
 .mainCatppuccinLatteMauve {
@@ -2760,14 +2725,6 @@ body .os-scrollbar.app-scrollbar-idle:not(:hover) {
 }
 
 
-:is(.openTubeXLight, .openTubeXDark) .topNavBarColor {
-  --logo-primary-color: var(--text-with-main-color);
-  --logo-secondary-color: var(--text-with-main-color);
-  --logo-tertiary-color: var(--text-with-main-color);
-  --logo-pressed-color: var(--text-with-main-color);
-}
-
-
 /* Adapted palettes: https://github.com/folke/tokyonight.nvim,
    https://github.com/rose-pine/neovim, https://github.com/rebelot/kanagawa.nvim,
    https://github.com/ayu-theme/ayu-colors, https://github.com/joshdick/onedark.vim,
@@ -2828,10 +2785,6 @@ body .os-scrollbar.app-scrollbar-idle:not(:hover) {
   --header-button-hover-color: var(--side-nav-hover-color);
   --header-button-hover-text-color: var(--primary-text-color);
   --header-button-pressed-text-color: var(--primary-text-color);
-  --colored-header-button-hover-color: var(--primary-color-hover);
-  --colored-header-button-hover-text-color: var(--text-with-main-color);
-  --colored-header-button-pressed-color: var(--primary-color-active);
-  --colored-header-button-pressed-text-color: var(--text-with-main-color);
   --logo-icon: url('../../_icons/iconWhiteSmall.svg');
   --logo-text: url('../../_icons/textWhiteSmall.svg');
 
@@ -2842,7 +2795,7 @@ body .os-scrollbar.app-scrollbar-idle:not(:hover) {
     outline-offset: -2px;
   }
 
-  /* Tint the existing logo for neutral and colored headers. */
+  /* Tint the existing logo for the header. */
   .topNav .logoIcon,
   .topNav .logoText {
     /* stylelint-disable-next-line declaration-no-important */
@@ -2862,37 +2815,14 @@ body .os-scrollbar.app-scrollbar-idle:not(:hover) {
     mask-size: 100px;
   }
 
-  .topNavBarColor :is(.logoIcon, .logoText) {
-    background-color: var(--text-with-main-color);
-  }
-
-  .forceTextColor {
-    --primary-input-color: #20232b;
-  }
-
   .ft-input-component .ft-input::placeholder {
     color: var(--tertiary-text-color);
     opacity: 1;
   }
 
-  .forceTextColor .ft-input::placeholder {
-    color: #eee;
-  }
-
-  .topNav.topNavBarColor .navFilterButton:not(:hover, :active) {
-    color: #eee;
-  }
-
   .btn:focus-visible {
     outline-color: currentcolor;
-  }
-
-  /* Search fields retain a dark fill in colored headers, while hovered
-     search actions use the preset's primary fill and its paired text. */
-  .forceTextColor .inputAction.enabled:is(:hover, :active) {
-    color: var(--text-with-main-color);
-  }
-}
+  }}
 
 .tokyoNightNight {
   --primary-text-color: #c0caf5;
@@ -3240,10 +3170,6 @@ body .os-scrollbar.app-scrollbar-idle:not(:hover) {
   --settings-section-bg-color: var(--md-sys-color-surface-container-low);
   --inactive-tab-color: var(--md-sys-color-surface-container-high);
 
-  .topNavBarColor .logo :is(.logoIcon, .logoText) {
-    background-color: var(--text-with-main-color);
-  }
-
   .settingsWindow {
     background-color: var(--bg-color);
     border-radius: calc(28px * var(--ui-roundness));
@@ -3294,22 +3220,6 @@ body .os-scrollbar.app-scrollbar-idle:not(:hover) {
   .colorPickerPopover input::placeholder {
     color: var(--tertiary-text-color);
     opacity: 1;
-  }
-
-  .forceTextColor .ft-input::placeholder {
-    color: #eee;
-  }
-
-  .forceTextColor .inputAction.enabled:is(:hover, :active) {
-    color: var(--text-with-main-color);
-  }
-
-  .topNav.topNavBarColor .navFilterButton:not(:hover, :active) {
-    color: #eee;
-  }
-
-  .topNav.topNavBarColor .pinnedSearchTrigger:not(:hover, :focus-visible, :active) {
-    color: #eee;
   }
 
   .ft-input-component .list {

@@ -182,13 +182,6 @@
         @change="store.dispatch('updateAlwaysShowMobileSearchBar', $event)"
       />
       <FtToggleSwitch
-        :label="$t('Settings.Theme Settings.Match Top Bar with Main Color')"
-        compact
-        :default-value="barColor"
-        setting-key="barColor"
-        @change="updateBarColor"
-      />
-      <FtToggleSwitch
         :label="$t('Settings.Theme Settings.Expand Side Bar by Default')"
         compact
         :default-value="expandSideBar"
@@ -614,18 +607,6 @@ async function loadSystemFonts() {
     })
 
   await systemFontsPromise
-}
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const barColor = computed(() => {
-  return store.getters.getBarColor
-})
-
-/**
- * @param {boolean} value
- */
-function updateBarColor(value) {
-  store.dispatch('updateBarColor', value)
 }
 
 /** @type {import('vue').ComputedRef<string>} */

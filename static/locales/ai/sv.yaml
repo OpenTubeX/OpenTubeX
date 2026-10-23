@@ -627,14 +627,9 @@ Settings:
         Header button hover and focus text and icons: Text och ikoner för huvudknapp vid hovring och fokus
         Header button pressed background: Bakgrund för nedtryckt huvudknapp
         Header button pressed text and icons: Text och ikoner för nedtryckt huvudknapp
-        Colored header button hover and focus background: Bakgrund för färgad huvudknapp vid hovring och fokus
-        Colored header button hover and focus text and icons: Text och ikoner för färgad huvudknapp vid hovring och fokus
-        Colored header button pressed background: Bakgrund för nedtryckt färgad huvudknapp
-        Colored header button pressed text and icons: Text och ikoner för nedtryckt färgad huvudknapp
         Search and dropdown background: Bakgrund för sökning och listrutor
         Settings search background: Bakgrund för inställningssökning
         Instance menu: Instansmeny
-        Input background: Inmatningsbakgrund
         Shadow color: Skuggfärg
         Primary controls and highlights: Primära kontroller och markeringar
         Primary control hover and focus: Primär kontroll vid hovring och fokus

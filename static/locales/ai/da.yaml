@@ -623,14 +623,9 @@ Settings:
         Header button hover and focus text and icons: Tekst og ikoner på toplinjeknap ved markør og fokus
         Header button pressed background: Baggrund for toplinjeknap ved tryk
         Header button pressed text and icons: Tekst og ikoner på toplinjeknap ved tryk
-        Colored header button hover and focus background: Baggrund for farvet toplinjeknap ved markør og fokus
-        Colored header button hover and focus text and icons: Tekst og ikoner på farvet toplinjeknap ved markør og fokus
-        Colored header button pressed background: Baggrund for farvet toplinjeknap ved tryk
-        Colored header button pressed text and icons: Tekst og ikoner på farvet toplinjeknap ved tryk
         Search and dropdown background: Baggrund for søgning og rullemenuer
         Settings search background: Baggrund for søgning i indstillinger
         Instance menu: Instansmenu
-        Input background: Inputbaggrund
         Shadow color: Skyggefarve
         Primary controls and highlights: Primære betjeningselementer og fremhævninger
         Primary control hover and focus: Primært betjeningselement ved markør og fokus

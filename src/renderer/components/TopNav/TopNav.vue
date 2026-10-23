@@ -2,7 +2,7 @@
   <nav
     ref="header"
     class="topNav"
-    :class="{ topNavBarColor: barColor, compactLogo, phoneLayout, phoneSearchOpen: phoneLayout && showSearchContainer, phoneSearchPinned }"
+    :class="{ compactLogo, phoneLayout, phoneSearchOpen: phoneLayout && showSearchContainer, phoneSearchPinned }"
     :style="{ '--header-side-space': `${headerSideSpace}px` }"
     @keydown.esc="closePhoneSearch"
   >
@@ -415,7 +415,6 @@ const useWatchSideNavOverlay = computed(() => {
 /** @type {import('vue').ComputedRef<boolean>} */
 const enableSearchSuggestions = computed(() => store.getters.getEnableSearchSuggestions)
 /** @type {import('vue').ComputedRef<string>} */
-const barColor = computed(() => store.getters.getBarColor)
 const expandCollapseSideBarLabel = computed(() => {
   return store.getters.getIsSideNavOpen ? t('Compact side navigation') : t('Expand side navigation')
 })

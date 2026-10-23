@@ -630,14 +630,9 @@ Settings:
         Header button hover and focus text and icons: متن و نمادهای دکمهٔ سربرگ هنگام اشاره و تمرکز
         Header button pressed background: پس‌زمینهٔ دکمهٔ سربرگ هنگام فشردن
         Header button pressed text and icons: متن و نمادهای دکمهٔ سربرگ هنگام فشردن
-        Colored header button hover and focus background: پس‌زمینهٔ دکمهٔ رنگی سربرگ هنگام اشاره و تمرکز
-        Colored header button hover and focus text and icons: متن و نمادهای دکمهٔ رنگی سربرگ هنگام اشاره و تمرکز
-        Colored header button pressed background: پس‌زمینهٔ دکمهٔ رنگی سربرگ هنگام فشردن
-        Colored header button pressed text and icons: متن و نمادهای دکمهٔ رنگی سربرگ هنگام فشردن
         Search and dropdown background: پس‌زمینهٔ جست‌وجو و فهرست بازشو
         Settings search background: پس‌زمینهٔ جست‌وجوی تنظیمات
         Instance menu: منوی نمونه
-        Input background: پس‌زمینهٔ ورودی
         Shadow color: رنگ سایه
         Primary controls and highlights: کنترل‌ها و برجسته‌سازی‌های اصلی
         Primary control hover and focus: کنترل اصلی هنگام اشاره و تمرکز

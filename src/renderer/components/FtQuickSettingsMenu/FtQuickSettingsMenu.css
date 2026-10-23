@@ -39,11 +39,6 @@
   pointer-events: none;
 }
 
-:global(.topNavBarColor .musicModeIndicator) {
-  background-color: var(--primary-color);
-  color: var(--text-with-main-color);
-}
-
 .profileTrigger:hover,
 .profileTrigger:focus-visible {
   box-shadow: 0 0 0 2px var(--side-nav-hover-color);

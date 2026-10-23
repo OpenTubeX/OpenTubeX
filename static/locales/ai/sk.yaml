@@ -625,14 +625,9 @@ Settings:
         Header button hover and focus text and icons: Text a ikony tlačidla hlavičky po umiestnení kurzora alebo zameraní
         Header button pressed background: Pozadie tlačidla hlavičky pri stlačení
         Header button pressed text and icons: Text a ikony tlačidla hlavičky pri stlačení
-        Colored header button hover and focus background: Pozadie farebného tlačidla hlavičky po umiestnení kurzora alebo zameraní
-        Colored header button hover and focus text and icons: Text a ikony farebného tlačidla hlavičky po umiestnení kurzora alebo zameraní
-        Colored header button pressed background: Pozadie farebného tlačidla hlavičky pri stlačení
-        Colored header button pressed text and icons: Text a ikony farebného tlačidla hlavičky pri stlačení
         Search and dropdown background: Pozadie hľadania a rozbaľovacej ponuky
         Settings search background: Pozadie hľadania v nastaveniach
         Instance menu: Ponuka inštancie
-        Input background: Pozadie vstupného poľa
         Shadow color: Farba tieňa
         Primary controls and highlights: Hlavné ovládacie prvky a zvýraznenia
         Primary control hover and focus: Hlavný ovládací prvok po umiestnení kurzora alebo zameraní

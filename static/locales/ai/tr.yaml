@@ -624,14 +624,9 @@ Settings:
         Header button hover and focus text and icons: Başlık düğmesi üzerine gelme ve odak metni ile simgeleri
         Header button pressed background: Basılı başlık düğmesi arka planı
         Header button pressed text and icons: Basılı başlık düğmesi metni ve simgeleri
-        Colored header button hover and focus background: Renkli başlık düğmesi üzerine gelme ve odak arka planı
-        Colored header button hover and focus text and icons: Renkli başlık düğmesi üzerine gelme ve odak metni ile simgeleri
-        Colored header button pressed background: Basılı renkli başlık düğmesi arka planı
-        Colored header button pressed text and icons: Basılı renkli başlık düğmesi metni ve simgeleri
         Search and dropdown background: Arama ve açılır menü arka planı
         Settings search background: Ayar arama arka planı
         Instance menu: Örnek menüsü
-        Input background: Giriş arka planı
         Shadow color: Gölge rengi
         Primary controls and highlights: Birincil denetimler ve vurgular
         Primary control hover and focus: Birincil denetim üzerine gelme ve odak

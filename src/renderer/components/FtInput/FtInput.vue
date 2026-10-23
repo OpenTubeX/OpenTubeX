@@ -4,7 +4,6 @@
     class="ft-input-component"
     :class="{
       search: isSearch,
-      forceTextColor,
       showActionButton,
       showPasswordToggle: inputType === 'password',
       floatingLabel: showLabel,
@@ -392,8 +391,6 @@ const actionButtonIconName = shallowRef(props.forceActionButtonIconName ?? ['fas
 const showOptions = computed(() => {
   return (inputData.value !== '' || props.showDataWhenEmpty) && visibleDataList.value.length > 0 && searchState.showOptions
 })
-
-const forceTextColor = computed(() => props.isSearch && store.getters.getBarColor)
 
 const searchStateKeyboardSelectedOptionValue = computed(() => {
   return searchState.keyboardSelectedOptionIndex === -1

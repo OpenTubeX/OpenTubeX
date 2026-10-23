@@ -624,14 +624,9 @@ Settings:
         Header button hover and focus text and icons: Testo e icone dei pulsanti dell'intestazione al passaggio del puntatore e con lo stato attivo
         Header button pressed background: Sfondo dei pulsanti dell'intestazione premuti
         Header button pressed text and icons: Testo e icone dei pulsanti dell'intestazione premuti
-        Colored header button hover and focus background: Sfondo dei pulsanti colorati dell'intestazione al passaggio del puntatore e con lo stato attivo
-        Colored header button hover and focus text and icons: Testo e icone dei pulsanti colorati dell'intestazione al passaggio del puntatore e con lo stato attivo
-        Colored header button pressed background: Sfondo dei pulsanti colorati dell'intestazione premuti
-        Colored header button pressed text and icons: Testo e icone dei pulsanti colorati dell'intestazione premuti
         Search and dropdown background: Sfondo della ricerca e dei menu a discesa
         Settings search background: Sfondo della ricerca nelle impostazioni
         Instance menu: Menu delle istanze
-        Input background: Sfondo dei campi di immissione
         Shadow color: Colore delle ombre
         Primary controls and highlights: Controlli ed evidenziazioni principali
         Primary control hover and focus: Controlli principali al passaggio del puntatore e con lo stato attivo

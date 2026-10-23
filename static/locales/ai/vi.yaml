@@ -629,14 +629,9 @@ Settings:
         Header button hover and focus text and icons: Chữ và biểu tượng nút đầu trang khi di chuột và lấy nét
         Header button pressed background: Nền nút đầu trang khi nhấn
         Header button pressed text and icons: Chữ và biểu tượng nút đầu trang khi nhấn
-        Colored header button hover and focus background: Nền nút đầu trang có màu khi di chuột và lấy nét
-        Colored header button hover and focus text and icons: Chữ và biểu tượng nút đầu trang có màu khi di chuột và lấy nét
-        Colored header button pressed background: Nền nút đầu trang có màu khi nhấn
-        Colored header button pressed text and icons: Chữ và biểu tượng nút đầu trang có màu khi nhấn
         Search and dropdown background: Nền tìm kiếm và danh sách thả xuống
         Settings search background: Nền tìm kiếm cài đặt
         Instance menu: Menu máy chủ
-        Input background: Nền ô nhập
         Shadow color: Màu bóng
         Primary controls and highlights: Điều khiển chính và phần đánh dấu
         Primary control hover and focus: Điều khiển chính khi di chuột và lấy nét

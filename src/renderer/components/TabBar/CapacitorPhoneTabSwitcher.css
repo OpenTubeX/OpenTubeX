@@ -47,16 +47,6 @@
   outline-offset: -3px;
 }
 
-:global(.topNavBarColor) .capacitorPhoneTabSwitcherButton {
-  color: var(--text-with-main-color);
-}
-
-:global(.topNavBarColor) .capacitorPhoneTabSwitcherButton:hover,
-:global(.topNavBarColor) .capacitorPhoneTabSwitcherButton:active {
-  color: var(--colored-header-button-hover-text-color);
-  background-color: var(--colored-header-button-hover-color);
-}
-
 .capacitorPhoneTabCount {
   position: absolute;
   inset-block-start: 3px;

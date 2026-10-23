@@ -629,14 +629,9 @@ Settings:
         Header button hover and focus text and icons: טקסט וסמלים של כפתור כותרת במעבר עכבר ובמיקוד
         Header button pressed background: רקע כפתור כותרת בלחיצה
         Header button pressed text and icons: טקסט וסמלים של כפתור כותרת בלחיצה
-        Colored header button hover and focus background: רקע כפתור כותרת צבעוני במעבר עכבר ובמיקוד
-        Colored header button hover and focus text and icons: טקסט וסמלים של כפתור כותרת צבעוני במעבר עכבר ובמיקוד
-        Colored header button pressed background: רקע כפתור כותרת צבעוני בלחיצה
-        Colored header button pressed text and icons: טקסט וסמלים של כפתור כותרת צבעוני בלחיצה
         Search and dropdown background: רקע חיפוש ורשימה נפתחת
         Settings search background: רקע חיפוש בהגדרות
         Instance menu: תפריט מופע
-        Input background: רקע שדה קלט
         Shadow color: צבע צל
         Primary controls and highlights: פקדים והדגשות ראשיים
         Primary control hover and focus: פקד ראשי במעבר עכבר ובמיקוד

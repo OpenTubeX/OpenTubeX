@@ -1,12 +1,3 @@
-@mixin top-nav-is-colored {
-  @at-root {
-    .topNavBarColor &,
-    .topNavBarColor#{&} {
-      @content;
-    }
-  }
-}
-
 .topNav {
   background-color: var(--card-bg-color);
   box-shadow: none;
@@ -36,10 +27,6 @@
       /* An upward finger movement scrolls down; downward pulls open tabs. */
       touch-action: pan-down;
     }
-  }
-
-  @include top-nav-is-colored {
-    background-color: var(--primary-color);
   }
 
   @media only screen and (width <= 680px) {
@@ -189,22 +176,6 @@
   inline-size: 1em;
 }
 
-.topNavBarColor .navButton,
-.topNavBarColor :deep(.ftIconButton:not(.arrowDisabled) .iconButton) {
-  color: var(--text-with-main-color);
-
-  &:hover {
-    background-color: var(--colored-header-button-hover-color);
-    color: var(--colored-header-button-hover-text-color);
-  }
-
-  &:active {
-    background-color: var(--colored-header-button-pressed-color);
-    color: var(--colored-header-button-pressed-text-color);
-  }
-}
-
-
 .navFilterButton {
   $effect-distance: 20px;
 
@@ -224,11 +195,6 @@
     /* stylelint-disable-next-line declaration-property-value-no-unknown */
     box-shadow: 0 0 $effect-distance var(--primary-color);
     color: var(--primary-color);
-
-    @include top-nav-is-colored {
-      box-shadow: 0 0 $effect-distance var(--text-with-main-color);
-      color: var(--text-with-main-color);
-    }
   }
 }
 
@@ -262,19 +228,11 @@
       background-color: var(--header-button-hover-color);
       color: var(--header-button-hover-text-color);
       transition: background 0.2s ease-in;
-
-      @include top-nav-is-colored {
-        background-color: var(--colored-header-button-hover-color);
-      }
     }
 
     &:active {
       background-color: var(--header-button-pressed-color);
       transition: background 0.2s ease-in;
-
-      @include top-nav-is-colored {
-        background-color: var(--colored-header-button-pressed-color);
-      }
     }
 
     .logoIcon {
@@ -284,10 +242,6 @@
       background-size: 25px;
       block-size: 25px;
       inline-size: 25px;
-
-      @include top-nav-is-colored {
-        background-image: var(--logo-icon-bar-color);
-      }
     }
 
     .logoText {
@@ -303,10 +257,6 @@
 
       @media only screen and (width <= 680px) {
         display: none;
-      }
-
-      @include top-nav-is-colored {
-        background-image: var(--logo-text-bar-color);
       }
     }
   }
@@ -386,11 +336,6 @@
     text-align: start;
     cursor: pointer;
 
-    @include top-nav-is-colored {
-      background-color: var(--primary-input-color);
-      color: var(--text-with-main-color);
-    }
-
     &:hover,
     &:focus-visible {
       background-color: var(--header-button-hover-color);
@@ -439,10 +384,6 @@
       background-color: var(--search-bar-color);
       border-radius: calc(24px * var(--ui-roundness));
       box-shadow: inset 0 0 0 1px var(--input-border-color, transparent);
-
-      @include top-nav-is-colored {
-        background-color: var(--primary-input-color);
-      }
     }
 
     .closeMobileSearch {
@@ -668,10 +609,6 @@
 
 .syncIndicator :deep(.ft-icon__glyph) {
   animation: sync-rotation 2s linear infinite;
-}
-
-.topNavBarColor .syncIndicator {
-  color: var(--text-with-main-color);
 }
 
 @keyframes sync-rotation {

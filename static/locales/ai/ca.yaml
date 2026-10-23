@@ -764,14 +764,9 @@ Settings:
         Header button hover and focus text and icons: Text i icones d'un botó de capçalera en passar-hi per sobre o enfocar-lo
         Header button pressed background: Fons d'un botó de capçalera en prémer
         Header button pressed text and icons: Text i icones d'un botó de capçalera en prémer
-        Colored header button hover and focus background: Fons d'un botó de capçalera acolorit en passar-hi per sobre o enfocar-lo
-        Colored header button hover and focus text and icons: Text i icones d'un botó de capçalera acolorit en passar-hi per sobre o enfocar-lo
-        Colored header button pressed background: Fons d'un botó de capçalera acolorit en prémer
-        Colored header button pressed text and icons: Text i icones d'un botó de capçalera acolorit en prémer
         Search and dropdown background: Fons de la cerca i dels desplegables
         Settings search background: Fons de la cerca de configuració
         Instance menu: Menú d'instàncies
-        Input background: Fons dels camps d'entrada
         Shadow color: Color de l'ombra
         Primary controls and highlights: Controls i ressaltats principals
         Primary control hover and focus: Control principal en passar-hi per sobre o enfocar-lo

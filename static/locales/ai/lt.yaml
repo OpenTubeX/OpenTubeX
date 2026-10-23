@@ -744,14 +744,9 @@ Settings:
         Header button hover and focus text and icons: Antraštės mygtuko tekstas ir piktogramos užvedus žymeklį arba sufokusavus
         Header button pressed background: Antraštės mygtuko fonas paspaudus
         Header button pressed text and icons: Antraštės mygtuko tekstas ir piktogramos paspaudus
-        Colored header button hover and focus background: Spalvoto antraštės mygtuko fonas užvedus žymeklį arba sufokusavus
-        Colored header button hover and focus text and icons: Spalvoto antraštės mygtuko tekstas ir piktogramos užvedus žymeklį arba sufokusavus
-        Colored header button pressed background: Spalvoto antraštės mygtuko fonas paspaudus
-        Colored header button pressed text and icons: Spalvoto antraštės mygtuko tekstas ir piktogramos paspaudus
         Search and dropdown background: Paieškos ir išskleidžiamojo sąrašo fonas
         Settings search background: Nustatymų paieškos fonas
         Instance menu: Serverio meniu
-        Input background: Įvesties lauko fonas
         Shadow color: Šešėlio spalva
         Primary controls and highlights: Pagrindiniai valdikliai ir paryškinimai
         Primary control hover and focus: Pagrindinis valdiklis užvedus žymeklį arba sufokusavus

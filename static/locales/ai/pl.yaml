@@ -312,14 +312,9 @@ Settings:
         Header button hover and focus text and icons: Tekst i ikony przycisku nagłówka po najechaniu lub zaznaczeniu
         Header button pressed background: Tło przycisku nagłówka po naciśnięciu
         Header button pressed text and icons: Tekst i ikony przycisku nagłówka po naciśnięciu
-        Colored header button hover and focus background: Tło kolorowego przycisku nagłówka po najechaniu lub zaznaczeniu
-        Colored header button hover and focus text and icons: Tekst i ikony kolorowego przycisku nagłówka po najechaniu lub zaznaczeniu
-        Colored header button pressed background: Tło kolorowego przycisku nagłówka po naciśnięciu
-        Colored header button pressed text and icons: Tekst i ikony kolorowego przycisku nagłówka po naciśnięciu
         Search and dropdown background: Tło wyszukiwania i list rozwijanych
         Settings search background: Tło wyszukiwania ustawień
         Instance menu: Menu instancji
-        Input background: Tło pola wprowadzania
         Shadow color: Kolor cienia
         Primary controls and highlights: Główne elementy sterujące i wyróżnienia
         Primary control hover and focus: Główny element sterujący po najechaniu lub zaznaczeniu

@@ -629,14 +629,9 @@ Settings:
         Header button hover and focus text and icons: قم بتمرير زر الرأس والتركيز على النص والأيقونات
         Header button pressed background: تم الضغط على زر الرأس في الخلفية
         Header button pressed text and icons: ضغط زر الرأس على النص والأيقونات
-        Colored header button hover and focus background: زر رأس ملون يحوم ويركز على الخلفية
-        Colored header button hover and focus text and icons: زر الرأس الملون يحوم ويركز على النص والأيقونات
-        Colored header button pressed background: ضغط زر الرأس الملون على الخلفية
-        Colored header button pressed text and icons: ضغط زر الرأس الملون على النص والأيقونات
         Search and dropdown background: البحث والخلفية المنسدلة
         Settings search background: إعدادات خلفية البحث
         Instance menu: قائمة المثيل
-        Input background: خلفية الإدخال
         Shadow color: لون الظل
         Primary controls and highlights: الضوابط الأساسية ويسلط الضوء
         Primary control hover and focus: تحوم السيطرة الأساسية والتركيز

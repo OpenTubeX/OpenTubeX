@@ -64,7 +64,8 @@ export const CUSTOM_THEME_COLORS = Object.freeze([
 ])
 
 const LEGACY_UNUSED_CUSTOM_THEME_COLOR_KEYS = new Set([
-  'instanceMenu', 'accentVisited', 'scrollbarTextHover'
+  'instanceMenu', 'accentVisited', 'scrollbarTextHover', 'primaryInput',
+  'coloredHeaderHover', 'coloredHeaderHoverText', 'coloredHeaderPressed', 'coloredHeaderPressedText'
 ])
 export const CUSTOM_THEME_EDITABLE_COLORS = Object.freeze(
   CUSTOM_THEME_COLORS.filter(([key]) => !LEGACY_UNUSED_CUSTOM_THEME_COLOR_KEYS.has(key))

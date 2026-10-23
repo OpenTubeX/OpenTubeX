@@ -627,14 +627,9 @@ Settings:
         Header button hover and focus text and icons: Текст и икони на бутон в заглавната лента при посочване и фокусиране
         Header button pressed background: Фон на бутон в заглавната лента при натискане
         Header button pressed text and icons: Текст и икони на бутон в заглавната лента при натискане
-        Colored header button hover and focus background: Фон на цветен бутон в заглавната лента при посочване и фокусиране
-        Colored header button hover and focus text and icons: Текст и икони на цветен бутон в заглавната лента при посочване и фокусиране
-        Colored header button pressed background: Фон на цветен бутон в заглавната лента при натискане
-        Colored header button pressed text and icons: Текст и икони на цветен бутон в заглавната лента при натискане
         Search and dropdown background: Фон на търсенето и падащите списъци
         Settings search background: Фон на търсенето в настройките
         Instance menu: Меню за инстанция
-        Input background: Фон на полетата за въвеждане
         Shadow color: Цвят на сенките
         Primary controls and highlights: Основни контроли и акценти
         Primary control hover and focus: Основна контрола при посочване и фокусиране

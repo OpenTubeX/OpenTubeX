@@ -627,14 +627,9 @@ Settings:
         Header button hover and focus text and icons: Başlıq düyməsinin üzərində göstərici olduqda və fokuslandıqda mətn və nişanlar
         Header button pressed background: Başlıq düyməsi basıldıqda fon
         Header button pressed text and icons: Başlıq düyməsi basıldıqda mətn və nişanlar
-        Colored header button hover and focus background: Rəngli başlıq düyməsinin üzərində göstərici olduqda və fokuslandıqda fon
-        Colored header button hover and focus text and icons: Rəngli başlıq düyməsinin üzərində göstərici olduqda və fokuslandıqda mətn və nişanlar
-        Colored header button pressed background: Rəngli başlıq düyməsi basıldıqda fon
-        Colored header button pressed text and icons: Rəngli başlıq düyməsi basıldıqda mətn və nişanlar
         Search and dropdown background: Axtarış və açılan menyu fonu
         Settings search background: Tənzimləmələr axtarışının fonu
         Instance menu: Server menyusu
-        Input background: Giriş sahəsinin fonu
         Shadow color: Kölgə rəngi
         Primary controls and highlights: Əsas idarəetmə elementləri və vurğular
         Primary control hover and focus: Əsas idarəetmə elementinin üzərində göstərici olduqda və fokuslandıqda

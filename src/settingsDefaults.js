@@ -52,7 +52,6 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     yatteeUsername: '',
     yatteePassword: '',
     yatteeProxyVideos: true,
-    barColor: false,
     checkForUpdates: true,
     internetConnectivityChecks: true,
     capacitorLayoutMode: 'auto',

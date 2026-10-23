@@ -207,9 +207,7 @@ let colorPreviewTimer = null
 const BASE_THEME_VALUES = BUILTIN_BASE_THEME_VALUES.slice(1)
 const MAIN_COLOR_KEYS = [
   'primary', 'primaryHover', 'primaryActive', 'textWithPrimary',
-  'selectionBackground', 'selectionText',
-  'coloredHeaderHover', 'coloredHeaderHoverText',
-  'coloredHeaderPressed', 'coloredHeaderPressedText'
+  'selectionBackground', 'selectionText'
 ]
 const SECONDARY_COLOR_KEYS = [
   'accent', 'accentHover', 'accentActive', 'accentLight', 'accentVisited',

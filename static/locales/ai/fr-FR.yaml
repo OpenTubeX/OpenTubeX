@@ -624,14 +624,9 @@ Settings:
         Header button hover and focus text and icons: Texte et icônes des boutons d’en-tête au survol et à la sélection
         Header button pressed background: Arrière-plan des boutons d’en-tête à l’appui
         Header button pressed text and icons: Texte et icônes des boutons d’en-tête à l’appui
-        Colored header button hover and focus background: Arrière-plan des boutons d’en-tête colorés au survol et à la sélection
-        Colored header button hover and focus text and icons: Texte et icônes des boutons d’en-tête colorés au survol et à la sélection
-        Colored header button pressed background: Arrière-plan des boutons d’en-tête colorés à l’appui
-        Colored header button pressed text and icons: Texte et icônes des boutons d’en-tête colorés à l’appui
         Search and dropdown background: Arrière-plan de la recherche et des listes déroulantes
         Settings search background: Arrière-plan de la recherche dans les paramètres
         Instance menu: Menu des instances
-        Input background: Arrière-plan des champs de saisie
         Shadow color: Couleur des ombres
         Primary controls and highlights: Commandes principales et éléments mis en évidence
         Primary control hover and focus: Commandes principales au survol et à la sélection

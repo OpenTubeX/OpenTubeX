@@ -625,14 +625,9 @@ Settings:
         Header button hover and focus text and icons: ヘッダーボタンのホバー・フォーカス時のテキストとアイコン
         Header button pressed background: ヘッダーボタンの押下時の背景
         Header button pressed text and icons: ヘッダーボタンの押下時のテキストとアイコン
-        Colored header button hover and focus background: カラーヘッダーボタンのホバー・フォーカス背景
-        Colored header button hover and focus text and icons: カラーヘッダーボタンのホバー・フォーカス時のテキストとアイコン
-        Colored header button pressed background: カラーヘッダーボタンの押下時の背景
-        Colored header button pressed text and icons: カラーヘッダーボタンの押下時のテキストとアイコン
         Search and dropdown background: 検索とドロップダウンの背景
         Settings search background: 設定検索の背景
         Instance menu: インスタンスメニュー
-        Input background: 入力欄の背景
         Shadow color: 影の色
         Primary controls and highlights: メイン操作と強調表示
         Primary control hover and focus: メイン操作のホバー・フォーカス時

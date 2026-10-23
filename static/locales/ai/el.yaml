@@ -625,14 +625,9 @@ Settings:
         Header button hover and focus text and icons: Κείμενο και εικονίδια κουμπιού κεφαλίδας κατά την κατάδειξη και την εστίαση
         Header button pressed background: Φόντο κουμπιού κεφαλίδας κατά το πάτημα
         Header button pressed text and icons: Κείμενο και εικονίδια κουμπιού κεφαλίδας κατά το πάτημα
-        Colored header button hover and focus background: Φόντο έγχρωμου κουμπιού κεφαλίδας κατά την κατάδειξη και την εστίαση
-        Colored header button hover and focus text and icons: Κείμενο και εικονίδια έγχρωμου κουμπιού κεφαλίδας κατά την κατάδειξη και την εστίαση
-        Colored header button pressed background: Φόντο έγχρωμου κουμπιού κεφαλίδας κατά το πάτημα
-        Colored header button pressed text and icons: Κείμενο και εικονίδια έγχρωμου κουμπιού κεφαλίδας κατά το πάτημα
         Search and dropdown background: Φόντο αναζήτησης και αναπτυσσόμενων μενού
         Settings search background: Φόντο αναζήτησης ρυθμίσεων
         Instance menu: Μενού στιγμιοτύπων
-        Input background: Φόντο πεδίων εισαγωγής
         Shadow color: Χρώμα σκιάς
         Primary controls and highlights: Κύρια στοιχεία ελέγχου και επισημάνσεις
         Primary control hover and focus: Κύριο στοιχείο ελέγχου κατά την κατάδειξη και την εστίαση

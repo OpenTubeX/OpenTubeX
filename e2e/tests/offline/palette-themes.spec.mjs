@@ -57,8 +57,6 @@ async function expectPaletteContrast(page) {
       'dropdown-item-hover-color', 'dropdown-item-hover-text-color',
       'header-button-hover-color', 'header-button-hover-text-color',
       'header-button-pressed-color', 'header-button-pressed-text-color',
-      'colored-header-button-hover-color', 'colored-header-button-hover-text-color',
-      'colored-header-button-pressed-color', 'colored-header-button-pressed-text-color',
       'scrollbar-color', 'scrollbar-color-hover', 'scrollbar-color-active',
       'input-border-color', 'slider-track-color',
       'toggle-track-color', 'toggle-thumb-color', 'toggle-checked-track-color', 'toggle-checked-thumb-color',
@@ -108,8 +106,6 @@ async function expectPaletteContrast(page) {
     ['dropdown-item-hover-text-color', ['dropdown-item-hover-color']],
     ['header-button-hover-text-color', ['header-button-hover-color']],
     ['header-button-pressed-text-color', ['header-button-pressed-color']],
-    ['colored-header-button-hover-text-color', ['colored-header-button-hover-color']],
-    ['colored-header-button-pressed-text-color', ['colored-header-button-pressed-color']],
   ]) {
     for (const background of backgrounds) check(foreground, background)
   }
@@ -136,7 +132,7 @@ for (const [index, theme] of [...PALETTE_BASE_THEMES, 'catppuccinMacchiato'].ent
       }
     })
 
-    test('keeps text, controls and both headers readable', async ({ page, app }, testInfo) => {
+    test('keeps text, controls and the header readable', async ({ page, app }, testInfo) => {
       await goToSettingsSection(page, 'theme')
       await expect(page.getByRole('combobox', { name: /^Base theme/i })).toHaveText(names[index])
       await expect(page.getByRole('combobox', { name: /Main colou?r theme/i })).toBeEnabled({ enabled: theme === 'catppuccinMacchiato' })
@@ -176,7 +172,7 @@ for (const [index, theme] of [...PALETTE_BASE_THEMES, 'catppuccinMacchiato'].ent
       await expectElementContrast(option)
       await page.keyboard.press('Escape')
 
-      const toggle = page.getByRole('checkbox', { name: /Match top bar with main color/i })
+      const toggle = page.getByRole('checkbox', { name: /Show toast timeout indicator/i })
       const label = toggle.locator('..').locator('.switch-label')
       await label.scrollIntoViewIfNeeded()
       for (const checked of [false, true]) {
@@ -204,43 +200,37 @@ for (const [index, theme] of [...PALETTE_BASE_THEMES, 'catppuccinMacchiato'].ent
         }
       }
       await page.locator('.settingsCloseButton').click()
-      for (const colored of [false, true]) {
-        await page.evaluate(async colored => {
-          const store = window.$store
-          await store.dispatch('updateBarColor', colored)
-        }, colored)
-        await expectElementContrast(page.locator('.topNav .menuButton'), 3)
-        const search = page.locator('.topNav .ft-input')
-        await expectElementContrast(search, 4.5, '::placeholder')
-        const filter = page.locator('.topNav .navFilterButton')
-        // The absolutely positioned filter sits over its sibling input,
-        // whose fill is absent from the button's ancestor backgrounds.
-        const inputBackground = await search.evaluate(element => {
-          const color = getComputedStyle(element).backgroundColor
-          return color.match(/[\d.]+/g).slice(0, 3).map(Number)
-            .map(value => color.startsWith('color(srgb ') ? value * 255 : value)
+      await expectElementContrast(page.locator('.topNav .menuButton'), 3)
+      const search = page.locator('.topNav .ft-input')
+      await expectElementContrast(search, 4.5, '::placeholder')
+      const filter = page.locator('.topNav .navFilterButton')
+      // The absolutely positioned filter sits over its sibling input,
+      // whose fill is absent from the button's ancestor backgrounds.
+      const inputBackground = await search.evaluate(element => {
+        const color = getComputedStyle(element).backgroundColor
+        return color.match(/[\d.]+/g).slice(0, 3).map(Number)
+          .map(value => color.startsWith('color(srgb ') ? value * 255 : value)
+      })
+      await expectElementContrast(filter, 3, null, inputBackground)
+      await filter.hover()
+      await expectElementContrast(filter, 3, null, inputBackground)
+      await page.mouse.move(0, 0)
+      await search.fill('Contrast check')
+      await expectElementContrast(search)
+      const action = page.locator('.topNav .inputAction.enabled')
+      await expectElementContrast(action, 3, null, inputBackground)
+      await action.hover()
+      await expectElementContrast(action, 3, null, inputBackground)
+      await page.mouse.down()
+      await expectElementContrast(action, 3, null, inputBackground)
+      await page.mouse.move(0, 0)
+      await page.mouse.up()
+      await expectElementContrast(action, 3, null, inputBackground)
+      await search.fill('')
+      if (scale === 100) {
+        await testInfo.attach(`${theme}-header`, {
+          body: await page.screenshot({ animations: 'disabled' }), contentType: 'image/png',
         })
-        await expectElementContrast(filter, 3, null, inputBackground)
-        await filter.hover()
-        await expectElementContrast(filter, 3, null, inputBackground)
-        await page.mouse.move(0, 0)
-        await search.fill('Contrast check')
-        await expectElementContrast(search)
-        const action = page.locator('.topNav .inputAction.enabled')
-        await expectElementContrast(action, 3, null, inputBackground)
-        await action.hover()
-        await expectElementContrast(action, 3, null, inputBackground)
-        await page.mouse.down()
-        await expectElementContrast(action, 3, null, inputBackground)
-        await page.mouse.move(0, 0)
-        await page.mouse.up()
-        await expectElementContrast(action, 3, null, inputBackground)
-        await search.fill('')
-        if (scale === 100) {
-          await testInfo.attach(`${theme}-${colored ? 'colored' : 'neutral'}-header`, {
-            body: await page.screenshot({ animations: 'disabled' }), contentType: 'image/png',
-          })
-        }
       }
     })
   })
