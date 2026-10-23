@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
-import { nextTick } from 'vue'
+import { computed, effectScope, nextTick, reactive, watch } from 'vue'
 import { createMemoryHistory, createRouter, START_LOCATION } from 'vue-router'
 import { createStore } from 'vuex'
 import { getFixedInternalRouteTitle } from '../../src/internalRoutes.js'
@@ -17,6 +17,27 @@ const navigationSource = readFileSync(new URL('../../src/renderer/tabs/TabNaviga
   .replace(/^import[\s\S]*?from ['"][^'"]+['"]\n/gm, '')
   .replace(/^export default .*$/gm, '')
   .replace(/^export /gm, '')
+const contextSource = readFileSync(new URL('../../src/renderer/tabs/TabContext.js', import.meta.url), 'utf8')
+  .replace(/^import .*\n/gm, '')
+  .replace(/^export /gm, '')
+
+function mountBrowsingTitle(t, store, navigation, fullPath = '/channel/UC-test') {
+  const route = reactive(navigation.resolve(fullPath))
+  const unmount = []
+  const scope = effectScope()
+  const setTitle = scope.run(() => vm.runInNewContext(`${contextSource}; useTabTitle()`, {
+    computed, watch,
+    inject: key => key === 'tabRoute' ? route : key.description === 'logical-tab-id' ? 'tab' : null,
+    onBeforeUnmount: callback => unmount.push(callback),
+    process: { env: { IS_ELECTRON: true } },
+    store, getTabNavigationService: () => navigation,
+  }))
+  t.after(() => {
+    unmount.forEach(callback => callback())
+    scope.stop()
+  })
+  return { route, setTitle }
+}
 
 function setup() {
   const packageDetails = { productName: 'OpenTubeX' }
@@ -87,6 +108,50 @@ test('fresh channel navigation uses its own placeholder and can publish a new na
   assert.equal(tab().contentTitle, 'Another channel')
 })
 
+test('a channel finishing behind Watch cannot replace the video tab title or history', async t => {
+  const { store, navigation, tab } = setup()
+  const channel = mountBrowsingTitle(t, store, navigation)
+  await navigation.push('tab', { path: '/watch/video', state: { tabTitle: 'Test video' } })
+  channel.setTitle('Test channel')
+  assert.equal(tab().contentTitle, 'Test video')
+  assert.equal(tab().history[tab().historyIndex].title, 'Test video')
+  await navigation.push('tab', '/channel/UC-test')
+  assert.equal(tab().contentTitle, 'Test channel', 'the late channel title is available when reopened')
+  await navigation.back('tab')
+  assert.equal(tab().contentTitle, 'Test video', 'returning to the video preserves its history title')
+})
+
+test('reopening the retained channel restores its loaded name instead of its URL', async t => {
+  const { store, navigation, tab } = setup()
+  const channel = mountBrowsingTitle(t, store, navigation)
+  channel.setTitle('Test channel')
+  await navigation.push('tab', { path: '/watch/video', state: { tabTitle: 'Test video' } })
+  await navigation.push('tab', '/channel/UC-test')
+  assert.equal(tab().contentTitle, 'Test channel')
+  assert.equal(tab().history[tab().historyIndex].title, 'Test channel')
+})
+
+test('an inactive tab still receives the title for its current browsing page', t => {
+  const { store, navigation, tab } = setup()
+  const channel = mountBrowsingTitle(t, store, navigation)
+  assert.notEqual(store.getters.getPresentedTabId, 'tab')
+  channel.setTitle('Updated channel name')
+  assert.equal(tab().contentTitle, 'Updated channel name')
+})
+
+test('a retained channel title cannot carry over to a different channel', async t => {
+  const { store, navigation, tab } = setup()
+  const channel = mountBrowsingTitle(t, store, navigation)
+  channel.setTitle('Test channel')
+  await navigation.push('tab', { path: '/watch/video', state: { tabTitle: 'Test video' } })
+  await navigation.push('tab', '/channel/UC-other')
+  Object.assign(channel.route, navigation.resolve('/channel/UC-other'))
+  await nextTick()
+  assert.equal(tab().contentTitle, '/channel/UC-other', 'the new channel waits for its own metadata')
+  channel.setTitle('Another channel')
+  assert.equal(tab().contentTitle, 'Another channel')
+})
+
 for (const mode of ['push', 'replace']) {
   test(`${mode} to the same restored external URL preserves its resolved title and history`, async () => {
     const { store, navigation } = setup()
@@ -105,3 +170,17 @@ for (const mode of ['push', 'replace']) {
     assert.equal(changed.history.length, 2)
   })
 }
+
+test('a restored external media page can publish its title despite different URL encodings', t => {
+  const { store, navigation } = setup()
+  const query = { url: 'https://www.twitch.tv/videos/123456789' }
+  const fullPath = `/external-media?${new URLSearchParams(query)}`
+  store.commit('setTabsState', { tabs: [] })
+  store.commit('setTabsState', { tabs: [{
+    id: 'tab', route: { path: '/external-media', query, fullPath },
+    title: fullPath, loadState: 'loaded'
+  }] })
+  const media = mountBrowsingTitle(t, store, navigation, fullPath)
+  media.setTitle('A Twitch broadcast')
+  assert.equal(store.getters.getTabById('tab').contentTitle, 'A Twitch broadcast')
+})
