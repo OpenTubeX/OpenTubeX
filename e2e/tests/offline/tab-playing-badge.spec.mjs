@@ -54,6 +54,8 @@ for (const iconPack of ['material', 'remix']) {
         await window.ftElectron.tabs.setGroup([id], group.id)
       }, ids[0])
       await expect(tabs[0].locator('.groupBadge')).toBeVisible()
+      const playingColor = await tabs[0].locator('.playingBadge').evaluate(icon => getComputedStyle(icon).color)
+      await expect(tabs[0].locator('.pinBadge')).toHaveCSS('color', playingColor)
       for (const position of ['top', 'bottom', 'left', 'right']) {
         await page.evaluate(position => window.$store.dispatch('updateTabBarPosition', position), position)
         await tabs[0].hover()

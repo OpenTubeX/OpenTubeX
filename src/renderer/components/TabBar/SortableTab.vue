@@ -454,18 +454,13 @@ watch(tabAvatarUrl, (avatarUrl) => {
   opacity: 0.8;
 }
 
-.pinIcon {
-  font-size: 8px;
-  color: var(--tab-accent-color, var(--primary-text-color));
-  flex-shrink: 0;
-}
-
 .autoUnloadIcon {
   font-size: 12px;
   color: var(--primary-text-color);
   flex-shrink: 0;
 }
 
+.pinIcon,
 .playingIcon {
   font-size: 8px;
   color: var(--accent-color, var(--primary-text-color));
