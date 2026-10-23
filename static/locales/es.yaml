@@ -1199,6 +1199,8 @@ Library Format Changed:
   Detail: Las versiones anteriores de OpenTubeX todavía pueden abrir tu biblioteca, pero la muestran como estaba antes de esta actualización. Los cambios que hagas en una versión anterior se añaden cuando vuelvas a esta versión.
 Close Window Confirmation:
   Message: Esta ventana contiene {count} pestañas. ¿Seguro que quieres cerrarla? | Esta ventana contiene {count} pestañas. ¿Seguro que quieres cerrarla?
+  Title: ¿Cerrar ventana?
+  Close Window: Cerrar ventana
 Confirmations:
   Never Ask Again: No volver a preguntar
   Settings Hint: Puedes volver a activar esta confirmación en Ajustes → General → Confirmar antes de…
