@@ -1278,7 +1278,7 @@
           </div>
         </div>
         <div
-          v-for="{ uuid, translatedCategory, color, unskipped, isHighlight } in skippedSponsorBlockSegments"
+          v-for="{ uuid, translatedCategory, colors, unskipped, isHighlight } in skippedSponsorBlockSegments"
           :key="uuid"
           class="skippedSegment"
           :class="{ editing: sponsorBlockToastEditingUuid === uuid }"
@@ -1290,11 +1290,15 @@
         >
           <div class="skippedSegmentHeader">
             <div class="skippedSegmentTitle">
-              <ft-icon
-                class="skippedSegmentShield"
-                :icon="['fas', 'shield-halved']"
-                :style="{ color }"
-              />
+              <span class="skippedSegmentShields">
+                <ft-icon
+                  v-for="(color, index) in colors"
+                  :key="index"
+                  class="skippedSegmentShield"
+                  :icon="['fas', 'shield-halved']"
+                  :style="{ color }"
+                />
+              </span>
               <span class="skippedSegmentText">
                 {{ getSponsorBlockToastLabel(uuid, translatedCategory, isHighlight) }}
               </span>

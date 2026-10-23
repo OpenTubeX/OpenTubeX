@@ -415,6 +415,50 @@ test.describe('watch page', () => {
     await toast.getByRole('button', { name: 'Reskip' }).click()
     await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(20)
     expect(await toast.count()).toBe(1)
+    await expect(toast.locator('.skippedSegmentShield')).toHaveCount(1)
+  })
+
+  test('stacks a shield per category in a grouped SponsorBlock skip toast @scale', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    const segments = [['selfpromo', [10, 12]], ['sponsor', [12, 20]]].map(([category, segment]) => ({
+      UUID: `grouped-${category}`,
+      actionType: 'skip',
+      category,
+      description: '',
+      locked: 0,
+      segment,
+      videoDuration: 30,
+      votes: 1
+    }))
+    await page.route('**/api/skipSegments/**', route => route.fulfill({
+      body: JSON.stringify([{ videoID: 'jNQXAC9IVRw', segments }]),
+      contentType: 'application/json'
+    }))
+    await page.evaluate(() => {
+      const store = window.$store
+      store.commit('setUseSponsorBlock', true)
+      store.commit('setSponsorBlockSelfPromo', { color: '#123456', skip: 'autoSkip' })
+      store.commit('setSponsorBlockSponsor', { color: '#654321', skip: 'autoSkip' })
+    })
+    await openMockedVideo(page)
+
+    const video = page.locator('.ftVideoPlayer video')
+    await video.evaluate(element => {
+      element.pause()
+      element.currentTime = 10.2
+      element.dispatchEvent(new Event('timeupdate'))
+    })
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(20)
+
+    const toast = page.locator('.skippedSegment').filter({ hasText: 'Unpaid/Self Promotion and Sponsor Skipped' })
+    const shields = toast.locator('.skippedSegmentShield')
+    await expect(shields).toHaveCount(2)
+    await expect(shields.nth(0)).toHaveCSS('color', 'rgb(18, 52, 86)')
+    await expect(shields.nth(1)).toHaveCSS('color', 'rgb(101, 67, 33)')
+
+    const [first, second] = await shields.evaluateAll(elements => elements.map(element => element.getBoundingClientRect().toJSON()))
+    expect(second.left).toBeGreaterThan(first.left)
+    expect(second.left).toBeLessThan(first.right)
   })
 
   test('dismisses a SponsorBlock prompt when playback ends', async ({ app, page }) => {
