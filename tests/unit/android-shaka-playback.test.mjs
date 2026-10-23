@@ -3,6 +3,7 @@ import test from 'node:test'
 import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
 import * as Vue from 'vue'
+import { androidRotationFullscreenHandoffs, releaseAndroidRotationFullscreenHandoff } from '../../src/renderer/helpers/player/androidFullscreen.js'
 
 const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
 const template = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.vue', import.meta.url), 'utf8')
@@ -98,13 +99,33 @@ test('Android fullscreen button delegates orientation sequencing to the adapter'
   assert.deepEqual(calls, ['finish-exit', 'fullscreen'], 'Clear a pending exit before delegating to the fullscreen adapter')
 })
 
+function createPopoverHost() {
+  return {
+    isConnected: true,
+    open: false,
+    setAttribute() {},
+    removeAttribute() {},
+    showPopover() { this.open = true },
+    hidePopover() { this.open = false },
+    matches() { return this.open },
+  }
+}
+
+function createRotationObserver() {
+  const callbacks = new Set()
+  const observe = callback => {
+    callbacks.add(callback)
+    return () => callbacks.delete(callback)
+  }
+  return Object.assign(observe, { callbacks, emit: landscape => [...callbacks].forEach(callback => callback(landscape)) })
+}
+
 function androidRotationHarness(overrides = {}) {
   const start = source.indexOf('    let androidRotationFullscreen = false')
   const end = source.indexOf('\n    let stopAndroidRotation', start)
   assert.ok(start !== -1 && end !== -1, 'Android must handle display rotation without requiring a fullscreen user gesture')
 
   const calls = []
-  let popoverOpen = false
   const fullWindowEnabled = { value: false }
   const context = {
     fullWindowEnabled,
@@ -112,13 +133,11 @@ function androidRotationHarness(overrides = {}) {
     video: { value: { readyState: 4 } },
     ui: { getControls: () => ({}) },
     fullWindowListenerReady: true,
-    androidFullscreenHost: {
-      setAttribute: () => {},
-      removeAttribute: () => {},
-      showPopover: () => { popoverOpen = true },
-      hidePopover: () => { popoverOpen = false },
-      matches: () => popoverOpen,
-    },
+    androidFullscreenHost: createPopoverHost(),
+    androidRotationFullscreenHandoffs: new WeakMap(),
+    observeAndroidDisplayRotation: createRotationObserver(),
+    observeAndroidDeviceRotation: createRotationObserver(),
+    startInFullwindow: false,
     events: { dispatchEvent: event => {
       fullWindowEnabled.value = event.detail
       calls.push(event.detail)
@@ -134,11 +153,12 @@ function androidRotationHarness(overrides = {}) {
     enterFullscreenOnDisplayRotate: { value: true },
     fullscreenRotationIgnoresSystemLock: { value: false },
     scrollMiniPlayerActive: { value: false },
-    props: { format: 'legacy', shortsPlayer: false },
+    props: { format: 'legacy', shortsPlayer: false, startInFullwindow: false },
     ...overrides,
   }
-  const handlers = vm.runInNewContext(`${source.slice(start, end)}\n({ handleAndroidRotation, exitAndroidRotationFullscreen })`, context)
-  return { calls, context, handlers, isPopoverOpen: () => popoverOpen }
+  const handlers = vm.runInNewContext(`${source.slice(start, end)}
+({ handleAndroidRotation, exitAndroidRotationFullscreen, handOffAndroidRotationFullscreen, adoptAndroidRotationFullscreen })`, context)
+  return { calls, context, handlers, isPopoverOpen: () => context.androidFullscreenHost.open }
 }
 
 test('Android opens fullscreen after manual display rotation without overriding the system orientation', () => {
@@ -239,6 +259,76 @@ test('Android does not force landscape when the fullscreen view fails to open', 
   assert.equal(calls.includes('navigation:false'), false)
   assert.equal(isPopoverOpen(), false)
 })
+
+function rotationReplacementHarness(overrides = {}) {
+  const shared = {
+    androidFullscreenHost: createPopoverHost(),
+    androidRotationFullscreenHandoffs,
+    observeAndroidDisplayRotation: createRotationObserver(),
+    observeAndroidDeviceRotation: createRotationObserver(),
+    fullscreenRotationIgnoresSystemLock: { value: true },
+  }
+  const previous = androidRotationHarness(shared)
+  const next = androidRotationHarness({
+    ...shared,
+    props: { format: 'legacy', shortsPlayer: false, startInFullwindow: true },
+    ...overrides,
+  })
+  previous.handlers.handleAndroidRotation(true)
+  previous.handlers.handOffAndroidRotationFullscreen()
+  previous.handlers.exitAndroidRotationFullscreen()
+  return { previous, next, shared }
+}
+
+test('Android keeps rotation fullscreen when Watch replaces the player for the next video', () => {
+  const { previous, next, shared } = rotationReplacementHarness()
+  assert.equal(previous.isPopoverOpen(), true)
+  assert.equal(previous.calls.includes('orientation:false'), false, 'Keep landscape while the next video loads')
+  assert.equal(previous.calls.includes('navigation:true'), false)
+
+  next.handlers.adoptAndroidRotationFullscreen()
+  assert.equal(shared.observeAndroidDeviceRotation.callbacks.size, 0, 'Release the handoff rotation observer')
+  next.handlers.handleAndroidRotation(false)
+  assert.equal(next.isPopoverOpen(), false)
+  assert.deepEqual(next.calls, ['orientation:false', 'navigation:true'], 'The next player restores the system orientation policy')
+})
+
+test('Android adopts handed-off rotation fullscreen only once the next player handles rotation', () => {
+  // Device rotation events do not repeat, so the handoff must keep observing portrait until then.
+  assert.match(source, /adoptAndroidRotationFullscreen\(\)\n\s*fullWindowListenerReady = true/)
+})
+
+test('Android ends a handed-off rotation fullscreen on portrait before the next player mounts', () => {
+  const { previous, next, shared } = rotationReplacementHarness()
+  shared.observeAndroidDeviceRotation.emit(false)
+  assert.equal(previous.isPopoverOpen(), false)
+  assert.deepEqual(previous.calls.slice(-2), ['orientation:false', 'navigation:true'])
+  next.context.startInFullwindow = true
+  next.handlers.adoptAndroidRotationFullscreen()
+  assert.equal(next.context.startInFullwindow, false, 'Do not restore full window in portrait')
+  next.handlers.handleAndroidRotation(false)
+  assert.deepEqual(next.calls, [], 'The next player must not adopt a released fullscreen')
+})
+
+test('Android ends a handed-off rotation fullscreen when Watch closes', () => {
+  const { previous, shared } = rotationReplacementHarness()
+  releaseAndroidRotationFullscreenHandoff(shared.androidFullscreenHost)
+  assert.equal(previous.isPopoverOpen(), false)
+  assert.deepEqual(previous.calls.slice(-2), ['orientation:false', 'navigation:true'])
+  assert.equal(shared.observeAndroidDeviceRotation.callbacks.size, 0)
+})
+
+for (const [state, overrides] of [
+  ['without restored full window', { props: { format: 'legacy', shortsPlayer: false, startInFullwindow: false } }],
+  ['for a Shorts player', { props: { format: 'legacy', shortsPlayer: true, startInFullwindow: true } }],
+]) {
+  test(`Android does not hand rotation fullscreen to a replacement player ${state}`, () => {
+    const { previous, next } = rotationReplacementHarness(overrides)
+    next.handlers.adoptAndroidRotationFullscreen()
+    assert.equal(previous.isPopoverOpen(), false)
+    assert.deepEqual(previous.calls.slice(-2), ['orientation:false', 'navigation:true'])
+  })
+}
 
 test('Android selects physical sensing only for the opt-in and releases subscriptions on preference or tab changes', () => {
   const start = source.indexOf('    let stopAndroidRotation')

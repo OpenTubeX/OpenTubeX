@@ -15,7 +15,7 @@ import { getVideoCodecPreferences, preferredVideoDecodingAttributes } from '../.
 import { voidWebmProjection } from '../../helpers/player/webmProjection'
 import { registerPlugin } from '@capacitor/core'
 import { bindAndroidMediaErrors } from '../../helpers/player/androidMediaErrors'
-import { bindAndroidFullscreen } from '../../helpers/player/androidFullscreen'
+import { androidRotationFullscreenHandoffs, bindAndroidFullscreen } from '../../helpers/player/androidFullscreen'
 import { bindIosFullscreen } from '../../helpers/player/iosFullscreen'
 import { bindIosNativeCaptions } from '../../helpers/player/iosNativeCaptions'
 import { bindNativeCaptionTiming } from '../../helpers/player/nativeCaptionTiming'
@@ -8160,6 +8160,50 @@ export default defineComponent({
       syncAndroidStatusBarVisibility()
     }
 
+    // Keep rotation fullscreen while Watch loads the next video. Until another
+    // player adopts it, portrait or closing Watch still ends it.
+    function handOffAndroidRotationFullscreen() {
+      const host = androidFullscreenHost
+      if (!androidRotationFullscreen || !host?.isConnected) return
+      androidRotationFullscreen = false
+      const handoff = {
+        orientationLocked: androidRotationOrientationLocked,
+        released: false,
+        release() {
+          if (handoff.released) return
+          handoff.released = true
+          handoff.stopRotation()
+          if (handoff.orientationLocked) setLandscapeOrientation(false).catch(() => {})
+          if (host.matches(':popover-open')) host.hidePopover()
+          host.removeAttribute('popover')
+          setAndroidNavigationBarVisible(true).catch(() => {})
+        },
+      }
+      androidRotationFullscreenHandoffs.set(host, handoff)
+      handoff.stopRotation = (fullscreenRotationIgnoresSystemLock.value ? observeAndroidDeviceRotation : observeAndroidDisplayRotation)(landscape => {
+        if (!landscape) handoff.release()
+      })
+    }
+
+    function adoptAndroidRotationFullscreen() {
+      const handoff = androidRotationFullscreenHandoffs.get(androidFullscreenHost)
+      if (!handoff) return
+      androidRotationFullscreenHandoffs.delete(androidFullscreenHost)
+      // Portrait already ended this fullscreen while the video loaded.
+      if (handoff.released) {
+        startInFullwindow = false
+        return
+      }
+      if (!props.startInFullwindow || props.shortsPlayer || !isActiveTab.value) {
+        handoff.release()
+        return
+      }
+      handoff.stopRotation()
+      androidRotationFullscreen = true
+      androidRotationOrientationLocked = handoff.orientationLocked
+      syncAndroidStatusBarVisibility()
+    }
+
     let stopAndroidRotation = () => {}
     watch([enterFullscreenOnDisplayRotate, isActiveTab, fullscreenRotationIgnoresSystemLock], ([enabled, active, ignoreLock]) => {
       stopAndroidRotation()
@@ -8169,6 +8213,7 @@ export default defineComponent({
         : () => {}
     }, { immediate: true })
     onBeforeUnmount(() => {
+      handOffAndroidRotationFullscreen()
       stopAndroidRotation()
       exitAndroidRotationFullscreen()
       androidFullscreenHost?.removeEventListener('toggle', handleAndroidRotationPopoverToggle)
@@ -10174,6 +10219,8 @@ export default defineComponent({
         })
       })
 
+      // The handoff keeps watching for portrait until this player can handle rotation.
+      adoptAndroidRotationFullscreen()
       fullWindowListenerReady = true
       applyPendingPresentationModes()
 

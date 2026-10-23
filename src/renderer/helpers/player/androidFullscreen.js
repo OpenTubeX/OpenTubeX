@@ -31,3 +31,12 @@ export function bindAndroidFullscreen(controls, { isActive, prepareEnter, finish
     restore()
   }
 }
+
+// Watch keeps its fullscreen host while it replaces the player for another
+// video. Android rotation fullscreen passes from one player to the next here.
+export const androidRotationFullscreenHandoffs = new WeakMap()
+
+/** Ends rotation fullscreen that no player adopted before Watch closed. */
+export function releaseAndroidRotationFullscreenHandoff(host) {
+  androidRotationFullscreenHandoffs.get(host)?.release()
+}
