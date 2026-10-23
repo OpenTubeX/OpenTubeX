@@ -171,7 +171,7 @@ for (const mode of ['push', 'replace']) {
   })
 }
 
-test('a restored external media page can publish its title despite different URL encodings', t => {
+test('a restored external media page can publish its title despite different URL encodings', async t => {
   const { store, navigation } = setup()
   const query = { url: 'https://www.twitch.tv/videos/123456789' }
   const fullPath = `/external-media?${new URLSearchParams(query)}`
@@ -182,5 +182,16 @@ test('a restored external media page can publish its title despite different URL
   }] })
   const media = mountBrowsingTitle(t, store, navigation, fullPath)
   media.setTitle('A Twitch broadcast')
+  assert.equal(store.getters.getTabById('tab').contentTitle, 'A Twitch broadcast')
+
+  // TabContent updates the retained browsing route before the title's post
+  // watcher runs, including when equivalent URLs use different encodings.
+  const stop = watch(() => store.getters.getTabById('tab').route.fullPath, path => {
+    if (!path.startsWith('/watch/')) Object.assign(media.route, navigation.resolve(path))
+  })
+  t.after(stop)
+  await navigation.push('tab', { path: '/watch/video', state: { tabTitle: 'Test video' } })
+  await navigation.push('tab', { path: '/external-media', query })
+  assert.notEqual(media.route.fullPath, fullPath, 'the router and saved URL use different encodings')
   assert.equal(store.getters.getTabById('tab').contentTitle, 'A Twitch broadcast')
 })

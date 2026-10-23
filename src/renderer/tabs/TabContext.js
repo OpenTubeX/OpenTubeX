@@ -25,11 +25,14 @@ export function useTabTitle() {
   const route = inject('tabRoute', null)
   // Browsing pages stay mounted behind Watch. Their late metadata and locale
   // updates belong to that page, rather than the video currently in the tab.
-  const isCurrentBrowsingRoute = !watchNavigation && tabId && route
+  const browsingRouteKey = !watchNavigation && tabId && route
+    ? computed(() => getTabNavigationService().resolve(route).fullPath)
+    : null
+  const isCurrentBrowsingRoute = browsingRouteKey
     ? computed(() => {
         const tab = store.getters.getTabById(tabId)
         const navigation = getTabNavigationService()
-        return tab && navigation.resolve(tab.route).fullPath === navigation.resolve(route).fullPath
+        return tab && navigation.resolve(tab.route).fullPath === browsingRouteKey.value
       })
     : null
   let isMounted = true
@@ -37,7 +40,7 @@ export function useTabTitle() {
 
   if (isCurrentBrowsingRoute) {
     watch(isCurrentBrowsingRoute, current => {
-      if (current && browsingTitle?.fullPath === route.fullPath) {
+      if (current && browsingTitle?.fullPath === browsingRouteKey.value) {
         publishTitle(browsingTitle.title, browsingTitle.options)
       }
     }, { flush: 'post' })
@@ -69,7 +72,7 @@ export function useTabTitle() {
 
   return (title, options) => {
     if (isCurrentBrowsingRoute) {
-      browsingTitle = { title, options, fullPath: route.fullPath }
+      browsingTitle = { title, options, fullPath: browsingRouteKey.value }
       if (!isCurrentBrowsingRoute.value) return
     }
     publishTitle(title, options)
