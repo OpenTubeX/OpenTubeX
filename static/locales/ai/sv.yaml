@@ -760,6 +760,7 @@ Settings:
   Channel Settings:
     Channel Settings: Kanalinställningar
     Channel Settings Description: Kom ihåg inställningarna du väljer när du tittar för varje enskild kanal och använd dem nästa gång du tittar på en av kanalens videor.
+    Enable Channel Playback Settings: Aktivera uppspelningsinställningar per kanal
     Auto Save Playback Speed: Spara ändringar av uppspelningshastigheten automatiskt
     Auto Save Video Quality: Spara ändringar av videokvaliteten automatiskt
     Auto Save Subtitles State: Spara ändringar av undertextläget automatiskt

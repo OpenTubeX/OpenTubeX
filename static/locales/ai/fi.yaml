@@ -771,6 +771,7 @@ Settings:
   Channel Settings:
     Channel Settings: Kanava-asetukset
     Channel Settings Description: Muista katselun aikana valitsemasi asetukset kanavakohtaisesti, jotta niitä käytetään uudelleen, kun katsot seuraavan kerran saman kanavan videota.
+    Enable Channel Playback Settings: Ota kanavakohtaiset toistoasetukset käyttöön
     Auto Save Playback Speed: Tallenna toistonopeuden muutokset automaattisesti
     Auto Save Video Quality: Tallenna videon laadun muutokset automaattisesti
     Auto Save Subtitles State: Tallenna tekstityksen tilan muutokset automaattisesti

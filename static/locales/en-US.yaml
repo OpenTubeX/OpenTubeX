@@ -1266,6 +1266,7 @@ Settings:
   Channel Settings:
     Channel Settings: Channel Settings
     Channel Settings Description: Remember the settings you pick while watching for each channel individually, so they are applied again the next time you watch one of its videos.
+    Enable Channel Playback Settings: Enable channel playback settings
     Auto Save Playback Speed: Automatically save playback speed changes
     Auto Save Video Quality: Automatically save video quality changes
     Auto Save Subtitles State: Automatically save subtitle state changes

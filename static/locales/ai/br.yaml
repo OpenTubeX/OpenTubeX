@@ -758,6 +758,7 @@ Settings:
   Channel Settings:
     Channel Settings: "Arventennoù ar chadennoù"
     Channel Settings Description: "Derc'hel soñj, evit pep chadenn, eus an arventennoù a zibabit pa sellit. Arloet e vint en-dro ar wech da-heul ma sellot ouzh unan eus he videoioù."
+    Enable Channel Playback Settings: "Gweredekaat arventennoù al lenn evit ar chadennoù"
     Auto Save Playback Speed: "Enrollañ ent emgefreek ar c'hemmoù d'an tizh lenn"
     Auto Save Video Quality: "Enrollañ ent emgefreek ar c'hemmoù d'ar perzhded video"
     Auto Save Subtitles State: "Enrollañ ent emgefreek ar c'hemmoù da stad an istitloù"

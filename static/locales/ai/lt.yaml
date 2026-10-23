@@ -955,6 +955,7 @@ Settings:
   Channel Settings:
     Channel Settings: Kanalo nustatymai
     Channel Settings Description: Atskirai įsiminti kiekvienam kanalui žiūrint pasirinktus nustatymus, kad jie vėl būtų pritaikyti kitą kartą žiūrint vieną iš jo vaizdo įrašų.
+    Enable Channel Playback Settings: Įjungti kanalų atkūrimo nustatymus
     Auto Save Playback Speed: Automatiškai išsaugoti atkūrimo greičio pakeitimus
     Auto Save Video Quality: Automatiškai išsaugoti vaizdo kokybės pakeitimus
     Auto Save Subtitles State: Automatiškai išsaugoti subtitrų būsenos pakeitimus

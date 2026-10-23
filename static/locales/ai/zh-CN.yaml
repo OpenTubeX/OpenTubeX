@@ -757,6 +757,7 @@ Settings:
   Channel Settings:
     Channel Settings: 频道设置
     Channel Settings Description: 分别记住观看各频道时选择的设置，以便下次观看该频道的视频时再次应用。
+    Enable Channel Playback Settings: 启用频道播放设置
     Auto Save Playback Speed: 自动保存播放速度更改
     Auto Save Video Quality: 自动保存视频画质更改
     Auto Save Subtitles State: 自动保存字幕开关状态更改

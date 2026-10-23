@@ -395,6 +395,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     voiceOverTranslationOriginalVolume: 10,
     holdToDoublePlaybackSpeed: true,
     keyboardShortcuts: '{}',
+    enableChannelSettings: true,
     autoUpdateChannelPlaybackSpeeds: false,
     channelPlaybackSpeeds: '{}',
     useQuickPlaybackSpeedBar: false,

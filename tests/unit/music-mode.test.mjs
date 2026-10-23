@@ -67,6 +67,7 @@ test('music mode overrides global, channel, and recovery speeds without changing
   const settings = {
     getDefaultPlayback: 2,
     getChannelPlaybackSpeeds: '{"channel":2.5}',
+    getEnableChannelSettings: true,
   }
   const watch = {
     musicMode: true, channelId: 'channel', isMusicVideo: false,
@@ -78,6 +79,9 @@ test('music mode overrides global, channel, and recovery speeds without changing
   watch.sabrReloadState = null
   initializePlaybackRate.call(watch)
   assert.equal(watch.currentPlaybackRate, 2.5)
+  settings.getEnableChannelSettings = false
+  initializePlaybackRate.call(watch)
+  assert.equal(watch.currentPlaybackRate, 2)
   assert.equal(settings.getDefaultPlayback, 2)
   assert.equal(settings.getChannelPlaybackSpeeds, '{"channel":2.5}')
 })

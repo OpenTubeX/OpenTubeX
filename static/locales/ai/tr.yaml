@@ -757,6 +757,7 @@ Settings:
   Channel Settings:
     Channel Settings: Kanal Ayarları
     Channel Settings Description: İzlerken seçtiğiniz ayarları her kanal için ayrı ayrı hatırlayarak kanalın bir sonraki videosunda yeniden uygular.
+    Enable Channel Playback Settings: Kanal oynatma ayarlarını etkinleştir
     Auto Save Playback Speed: Oynatma hızı değişikliklerini otomatik kaydet
     Auto Save Video Quality: Video kalitesi değişikliklerini otomatik kaydet
     Auto Save Subtitles State: Alt yazı durumu değişikliklerini otomatik kaydet

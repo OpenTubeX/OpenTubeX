@@ -122,3 +122,41 @@ test('hides the channel setting menu when the video has no channel', async ({ ap
   await view.evaluate(view => { view.channelId = '' })
   await expect(saveButton).toHaveCount(0)
 })
+
+test('ignores saved channel settings while channel playback settings are off', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  // The channels of the two mocked videos opened below
+  const channelIds = ['UC-test-channel-id', 'UC4QobU6STFB0P71PMvOGN5A']
+  const forChannels = value => JSON.stringify(Object.fromEntries(channelIds.map(id => [id, value])))
+  await page.evaluate(async (values) => {
+    const store = window.$store
+    await store.dispatch('updateEnableChannelSettings', false)
+    await store.dispatch('updateAutoUpdateChannelPlaybackSpeeds', true)
+    for (const [key, value] of Object.entries(values)) {
+      await store.dispatch(`update${key}`, value)
+    }
+  }, {
+    ChannelPlaybackSpeeds: forChannels(1.5),
+    ChannelVolumes: forChannels(0.2),
+    ChannelVideoQualities: forChannels('360'),
+    ChannelSubtitlesStates: forChannels(true)
+  })
+  const video = await openMockedVideo(page)
+  expect(await video.evaluate(video => ({ speed: video.playbackRate, volume: video.volume })))
+    .toEqual({ speed: 1, volume: 1 })
+  const saveButton = page.locator(`${activeTab} .watchVideoInfo`).getByRole('button', { name: 'Save channel setting…', exact: true })
+  await expect(saveButton).toHaveCount(0)
+
+  const view = await watchViewHandle(page)
+  await expect.poll(() => view.evaluate(view => view.currentSubtitlesState)).toBe(false)
+  expect(await view.evaluate(view => view.currentVideoQuality === view.getDefaultVideoQuality())).toBe(true)
+  await view.evaluate(view => view.handlePlaybackRateUserSet(2))
+  expect((await savedValues(page))[0]).toEqual(JSON.parse(forChannels(1.5)))
+
+  await page.evaluate(() => window.$store.dispatch('updateEnableChannelSettings', true))
+  await expect(saveButton).toBeVisible()
+  // Saved values apply again once the switch is back on
+  const nextVideo = await openMockedVideo(page, 'aqz-KE-bpKQ')
+  await expect.poll(() => nextVideo.evaluate(video => ({ speed: video.playbackRate, volume: video.volume })))
+    .toEqual({ speed: 1.5, volume: 0.2 })
+})

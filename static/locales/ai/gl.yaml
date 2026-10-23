@@ -766,6 +766,7 @@ Settings:
   Channel Settings:
     Channel Settings: Configuración das canles
     Channel Settings Description: Lembrar por separado os axustes escollidos mentres ves vídeos de cada canle para aplicalos de novo a próxima vez que vexas un dos seus vídeos.
+    Enable Channel Playback Settings: Activar a configuración de reprodución por canle
     Auto Save Playback Speed: Gardar automaticamente os cambios de velocidade de reprodución
     Auto Save Video Quality: Gardar automaticamente os cambios de calidade do vídeo
     Auto Save Subtitles State: Gardar automaticamente os cambios de estado dos subtítulos

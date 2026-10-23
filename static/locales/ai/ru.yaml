@@ -741,6 +741,7 @@ Settings:
   Channel Settings:
     Channel Settings: Настройки каналов
     Channel Settings Description: Запоминать выбранные при просмотре настройки отдельно для каждого канала и применять их снова при следующем просмотре видео с этого канала.
+    Enable Channel Playback Settings: Включить настройки воспроизведения для каналов
     Auto Save Playback Speed: Автоматически сохранять изменения скорости воспроизведения
     Auto Save Video Quality: Автоматически сохранять изменения качества видео
     Auto Save Subtitles State: Автоматически сохранять изменения состояния субтитров

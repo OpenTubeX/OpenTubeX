@@ -934,6 +934,7 @@ Settings:
   Channel Settings:
     Channel Settings: 채널 설정
     Channel Settings Description: 채널마다 시청 중 선택한 설정을 기억하고, 다음에 해당 채널의 동영상을 시청할 때 다시 적용합니다.
+    Enable Channel Playback Settings: 채널별 재생 설정 사용
     Auto Save Playback Speed: 재생 속도 변경 사항 자동 저장
     Auto Save Video Quality: 동영상 화질 변경 사항 자동 저장
     Auto Save Subtitles State: 자막 상태 변경 사항 자동 저장

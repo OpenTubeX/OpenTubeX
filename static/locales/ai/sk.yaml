@@ -758,6 +758,7 @@ Settings:
   Channel Settings:
     Channel Settings: Nastavenia kanálov
     Channel Settings Description: Nastavenia, ktoré vyberiete pri sledovaní, sa zapamätajú pre každý kanál samostatne a znova sa použijú pri ďalšom sledovaní jeho videa.
+    Enable Channel Playback Settings: Povoliť nastavenia prehrávania pre kanály
     Auto Save Playback Speed: Automaticky ukladať zmeny rýchlosti prehrávania
     Auto Save Video Quality: Automaticky ukladať zmeny kvality videa
     Auto Save Subtitles State: Automaticky ukladať zmeny stavu titulkov

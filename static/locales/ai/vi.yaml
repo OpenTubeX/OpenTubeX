@@ -766,6 +766,7 @@ Settings:
   Channel Settings:
     Channel Settings: Cài đặt kênh
     Channel Settings Description: Ghi nhớ riêng các cài đặt bạn chọn khi xem từng kênh để áp dụng lại vào lần sau khi bạn xem video của kênh đó.
+    Enable Channel Playback Settings: Bật cài đặt phát theo kênh
     Auto Save Playback Speed: Tự động lưu thay đổi tốc độ phát
     Auto Save Video Quality: Tự động lưu thay đổi chất lượng video
     Auto Save Subtitles State: Tự động lưu thay đổi trạng thái phụ đề

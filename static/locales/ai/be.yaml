@@ -789,6 +789,7 @@ Settings:
   Channel Settings:
     Channel Settings: Налады каналаў
     Channel Settings Description: Запамінаць асобныя налады, абраныя падчас прагляду кожнага канала, і ўжываць іх пры наступным праглядзе відэа з гэтага канала.
+    Enable Channel Playback Settings: Уключыць налады прайгравання для каналаў
     Auto Save Playback Speed: Аўтаматычна захоўваць змены хуткасці прайгравання
     Auto Save Video Quality: Аўтаматычна захоўваць змены якасці відэа
     Auto Save Subtitles State: Аўтаматычна захоўваць змены стану субцітраў

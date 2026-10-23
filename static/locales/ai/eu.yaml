@@ -758,6 +758,7 @@ Settings:
   Channel Settings:
     Channel Settings: Kanalen ezarpenak
     Channel Settings Description: Gogoratu kanal bakoitzerako bideoak ikustean aukeratutako ezarpenak, kanal horretako beste bideo bat ikusten duzunean berriro aplikatzeko.
+    Enable Channel Playback Settings: Gaitu kanalen erreprodukzio-ezarpenak
     Auto Save Playback Speed: Gorde automatikoki erreprodukzio-abiaduraren aldaketak
     Auto Save Video Quality: Gorde automatikoki bideo-kalitatearen aldaketak
     Auto Save Subtitles State: Gorde automatikoki azpitituluen egoeraren aldaketak

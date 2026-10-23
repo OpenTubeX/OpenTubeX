@@ -771,6 +771,7 @@ Settings:
   Channel Settings:
     Channel Settings: Kanaalinstellingen
     Channel Settings Description: Onthoud de instellingen die je tijdens het kijken kiest afzonderlijk voor elk kanaal, zodat ze weer worden toegepast wanneer je een andere video van dat kanaal bekijkt.
+    Enable Channel Playback Settings: Afspeelinstellingen per kanaal inschakelen
     Auto Save Playback Speed: Wijzigingen in afspeelsnelheid automatisch opslaan
     Auto Save Video Quality: Wijzigingen in videokwaliteit automatisch opslaan
     Auto Save Subtitles State: Wijzigingen in ondertitelingsstatus automatisch opslaan

@@ -758,6 +758,7 @@ Settings:
   Channel Settings:
     Channel Settings: Gosodiadau sianeli
     Channel Settings Description: Cofiwch y gosodiadau a ddewiswch wrth wylio ar gyfer pob sianel ar wahân, fel eu bod yn cael eu gosod eto y tro nesaf y byddwch yn gwylio un o'i fideos.
+    Enable Channel Playback Settings: Galluogi gosodiadau chwarae sianeli
     Auto Save Playback Speed: "Cadw newidiadau i'r cyflymder chwarae'n awtomatig"
     Auto Save Video Quality: "Cadw newidiadau i ansawdd y fideo'n awtomatig"
     Auto Save Subtitles State: "Cadw newidiadau i gyflwr yr isdeitlau'n awtomatig"

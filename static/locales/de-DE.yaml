@@ -1650,6 +1650,7 @@ Settings:
     Channel Settings Description: >-
       Die beim Ansehen gewählten Einstellungen für jeden Kanal einzeln speichern, damit sie beim nächsten Video dieses
       Kanals erneut angewendet werden.
+    Enable Channel Playback Settings: Kanal-Wiedergabeeinstellungen aktivieren
     Auto Save Playback Speed: Änderungen der Wiedergabegeschwindigkeit automatisch speichern
     Auto Save Video Quality: Änderungen der Videoqualität automatisch speichern
     Auto Save Subtitles State: Änderungen des Untertitelstatus automatisch speichern
