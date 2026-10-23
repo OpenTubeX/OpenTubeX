@@ -4,8 +4,9 @@
 
 Requests such as "implement issue #X" authorize local changes, not a PR. Open a PR only when the user explicitly requests or approves one for that repository. Approval for an application PR does not authorize a website PR, or vice versa.
 
-- When creating a PR, copy the linked issue's milestone. If it has none, assign the open milestone with the lowest version in its title: query open milestones with `gh api --paginate` and compare titles by numeric version order (1.10 after 1.9), not alphabetically or by milestone number. Pass the exact title to `gh pr create --milestone` or `gh pr edit --milestone`. If no version milestone is open, report that instead of creating one.
-- When creating a PR, adding a closing issue link, or changing the PR's milestone, assign the PR's milestone to every issue the PR closes that has none, immediately, even while the PR is open. Keep existing issue milestones and verify the assignments on GitHub.
+- Give a milestone only to PRs that fix user-facing bugs or add user-facing features. Leave all other PRs without one, including upstream merges and syncs, CI, dependency, test, and documentation changes, and minor changes users won't notice.
+- For a PR that needs a milestone, copy the linked issue's milestone. If it has none, assign the open milestone with the lowest version in its title: query open milestones with `gh api --paginate` and compare titles by numeric version order (1.10 after 1.9), not alphabetically or by milestone number. Pass the exact title to `gh pr create --milestone` or `gh pr edit --milestone`. If no version milestone is open, report that instead of creating one.
+- When a PR with a milestone is created, gains a closing issue link, or changes milestone, assign its milestone to every issue it closes that has none, immediately, even while the PR is open. Keep existing issue milestones and verify the assignments on GitHub.
 - Follow `.github/PULL_REQUEST_TEMPLATE.md` for release-note screenshots and recordings.
 
 ## Documentation

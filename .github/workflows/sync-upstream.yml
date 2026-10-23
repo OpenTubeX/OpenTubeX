@@ -42,18 +42,6 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.UPSTREAM_SYNC_TOKEN }}
 
-      - name: Select release milestone
-        id: milestone
-        run: |
-          milestone=$(gh api --paginate "repos/$GITHUB_REPOSITORY/milestones?state=open&per_page=100" |
-            jq -s '[.[][] | select(.title | test("[0-9]+\\.[0-9]+"))] |
-              sort_by(.title | capture("(?<version>[0-9]+(?:\\.[0-9]+)+)").version |
-                split(".") | map(tonumber)) | .[0].number // empty')
-          echo "number=$milestone" >> "$GITHUB_OUTPUT"
-          if [[ -z "$milestone" ]]; then
-            echo "No open version milestone is available for the upstream PR." >> "$GITHUB_STEP_SUMMARY"
-          fi
-
       - name: Prepare upstream pull request branch
         run: |
           git fetch --no-tags https://github.com/FreeTubeApp/FreeTube.git development
@@ -70,7 +58,6 @@ jobs:
           base: development
           branch: upstream-sync
           delete-branch: true
-          milestone: ${{ steps.milestone.outputs.number }}
           title: "chore: sync development from FreeTubeApp/FreeTube"
           body: |
             Sync [FreeTubeApp/FreeTube:development](https://github.com/FreeTubeApp/FreeTube/tree/development) into `development`.
