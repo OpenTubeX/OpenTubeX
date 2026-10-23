@@ -14034,6 +14034,7 @@ export default defineComponent({
       closedCaptionsOutlinedIcon: CLOSED_CAPTIONS_OUTLINED,
       closedCaptionsFilledIcon: shaka.ui.Enums.MaterialDesignSVGIcons.CLOSED_CAPTIONS,
       showPoster,
+      pictureInPictureActive,
       showEndedScreen,
       useFrostedGlassPlayerUi,
       endedRecommendations,
