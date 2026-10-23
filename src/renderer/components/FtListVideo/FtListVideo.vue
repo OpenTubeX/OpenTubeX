@@ -2008,13 +2008,19 @@ async function handleWatchPageLinkClick(event) {
 
   if (process.env.IS_IOS && localDownloadId.value !== undefined && event?.type === 'click') {
     event.preventDefault()
-    if (plainLeftClick) emit('open-video')
+    if (plainLeftClick) emit('pause-player')
+    let played = true
     await playDownloadedFile(Number(cardDownload.value), { videoId: id.value }, {
       refreshDownloads: () => refreshDownloadRecords(ytDlp, store),
       playNative: (downloadId, path) => ytDlp.ytDlpPlayDownload(downloadId, path),
       navigate: () => {},
-      fileNotFound: () => showToast({ message: t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] })
+      fileNotFound: () => {
+        played = false
+        showToast({ message: t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] })
+      }
     })
+    // A file that could not play stays wherever it was listed, such as the queue.
+    if (played && plainLeftClick) emit('open-video')
     return
   }
 
