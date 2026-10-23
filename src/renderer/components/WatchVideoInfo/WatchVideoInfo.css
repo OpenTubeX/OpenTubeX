@@ -167,6 +167,17 @@
   box-shadow: 0 1px 3px rgb(0 0 0 / 30%);
 }
 
+/*
+  Blurred theme cards give the card and the toolbar backdrop filters, which
+  make them stacking contexts. Lift both while a dropdown is open, or the cards
+  below would paint over it.
+*/
+.watchVideoInfo:has(.iconDropdown),
+.videoOptions:has(.iconDropdown) {
+  position: relative;
+  z-index: 1;
+}
+
 .videoOptions:not(:has(> .videoOptionsMobileRow:not(:empty))) {
   display: none;
 }
