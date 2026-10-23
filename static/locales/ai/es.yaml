@@ -1,46 +1,5 @@
 # Optional AI-generated translations for keys missing from ../es.yaml.
-Color Picker:
-  Hue: Tono
-  Opacity: Opacidad
-  Backdrop Blur: Desenfoque del fondo
-  Hex Color: Color hexadecimal
-  Apply Color: Aplicar
-  Reset Color: Restablecer
-  Copy Color: Copiar
-  Copy From Another Color: Copiar de otro color
-  Color Copied: Color copiado
-  Invalid Color: Introduce un color hexadecimal válido
-  Clipboard Unavailable: Portapapeles no disponible
-  Saturation and Brightness: Saturación y brillo
-New Tab: Nueva pestaña
-Maximize: Maximizar
-Restore: Restaurar
-Close Tab: Cerrar pestaña
-Close Confirmation:
-  Background Sync Warning: Al salir, se detendrán las actualizaciones de suscripciones en segundo plano.
-  Hide Window: Ocultar ventana
-  Title: ¿Salir de OpenTubeX?
-  Message: ¿Seguro que quieres salir de OpenTubeX?
-  Quit: Salir
-  Never Ask Again: No volver a preguntar
-Close Window Confirmation:
-  Title: ¿Cerrar la ventana?
-  Message: Esta ventana contiene {count} pestañas. ¿Seguro que quieres cerrarla? | Esta ventana contiene {count} pestañas. ¿Seguro que quieres cerrarla?
-  Close Window: Cerrar ventana
-Confirmations:
-  Never Ask Again: No volver a preguntar
-  Settings Hint: Puedes volver a activar esta confirmación en Ajustes → General → Confirmar antes de…
-Close Multiple Tabs Confirmation:
-  Title: ¿Cerrar varias pestañas?
-  Message: Se cerrarán {count} pestañas. | Se cerrarán {count} pestañas.
-  Close Tabs: Cerrar {count} pestañas | Cerrar {count} pestañas
-Load Multiple Tabs Confirmation:
-  Title: ¿Cargar varias pestañas?
-  Message: Se cargarán {count} pestañas. | Se cargarán {count} pestañas.
-  Load Tabs: Cargar {count} pestañas | Cargar {count} pestañas
 Unload Multiple Tabs Confirmation:
-  Title: ¿Descargar varias pestañas de la memoria?
-  Message: Se descargarán {count} pestañas de la memoria. | Se descargarán {count} pestañas de la memoria.
   Unload Tabs: Descargar {count} pestañas de la memoria | Descargar {count} pestañas de la memoria
 Tabs Unloaded To Free Memory: Para liberar memoria, se ha descargado {count} pestaña que no has usado recientemente | Para liberar memoria, se han descargado {count} de pestañas que no has usado recientemente | Para liberar memoria, se han descargado {count} pestañas que no has usado recientemente
 Use Vertical Tabs: Usar pestañas verticales
@@ -2279,14 +2238,6 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Crear un acceso directo en el escritorio
-Older Version Changes:
-  Title: "Cambios de una versión anterior"
-  Message: "Los cambios que hiciste en una versión anterior de OpenTubeX se han aplicado a tu biblioteca."
-  Detail: "Si un elemento se cambió en ambas versiones, se ha conservado el cambio de la versión anterior. Hay una copia de seguridad de tu biblioteca anterior en la carpeta de tu perfil."
-Library Format Changed:
-  Title: "La biblioteca se ha trasladado a un formato nuevo"
-  Message: "Tu biblioteca ahora usa un formato de almacenamiento nuevo."
-  Detail: "Las versiones anteriores de OpenTubeX todavía pueden abrir tu biblioteca, pero la muestran como estaba antes de esta actualización. Los cambios que hagas en una versión anterior se añaden cuando vuelvas a esta versión."
 Invidious Fallback Warning: "Esta solicitud omite la instancia de Invidious que has configurado y se conecta directamente a YouTube, exponiendo tu dirección IP."
 Automatically unloaded to free memory: "Descargada automáticamente para liberar memoria"
 Home Widgets:
