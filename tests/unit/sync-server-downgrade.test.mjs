@@ -1846,7 +1846,7 @@ test('an explicit activity refresh still downloads when a concurrent background 
 })
 
 
-test('a new live device message is delivered after an older activity response finishes', async () => {
+test('a new live device message is delivered after an older activity response finishes', { timeout: 10_000 }, async () => {
   const recipient = 'test-device'
   let releaseOldResponse
   const oldResponse = new Promise(resolve => { releaseOldResponse = resolve })
@@ -1854,6 +1854,8 @@ test('a new live device message is delivered after an older activity response fi
   const started = new Promise(resolve => { firstStarted = resolve })
   let notified
   const notification = new Promise(resolve => { notified = resolve })
+  let syncFinished
+  const synced = new Promise(resolve => { syncFinished = resolve })
   let downloads = 0
   const opened = []
   const f = fixture({ syncServerDeviceId: recipient }, {
@@ -1886,25 +1888,22 @@ test('a new live device message is delivered after an older activity response fi
     expiresAt: Date.now() + 60000,
   }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt)
   const dispatch = f.context.dispatch
-  f.context.dispatch = (action, value) => action === 'refreshSyncServerEvents'
-    ? f.actions.refreshSyncServerEvents(f.context, value)
-    : dispatch(action, value)
+  f.context.dispatch = async (action, value) => {
+    if (action === 'refreshSyncServerEvents') return f.actions.refreshSyncServerEvents(f.context, value)
+    const result = await dispatch(action, value)
+    if (action === 'syncWithSyncServer') syncFinished()
+    return result
+  }
   const refreshing = f.actions.refreshSyncServerEvents(f.context)
   await started
   const listening = f.actions.startSyncServerLive(f.context)
   try {
     await notification
-    const deadline = Date.now() + 1000
-    while (f.context.state.syncServerStatus !== 'success' && Date.now() < deadline) {
-      await new Promise(resolve => setImmediate(resolve))
-    }
+    await synced
     assert.equal(f.context.state.syncServerStatus, 'success')
     releaseOldResponse()
     await refreshing
-    const deliveryDeadline = Date.now() + 5000
-    while (opened.length === 0 && Date.now() < deliveryDeadline) {
-      await new Promise(resolve => setTimeout(resolve, 10))
-    }
+    await listening
     assert.deepEqual(opened, ['/watch/jNQXAC9IVRw?timestamp=12'])
     assert.equal(downloads, 2)
   } finally {
