@@ -23,7 +23,31 @@ permissions: {}
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+  resolve-target:
+    name: Resolve release target
+    runs-on: ubuntu-latest
+
+    outputs:
+      sha: ${{ steps.target.outputs.sha }}
+
+    permissions:
+      contents: read
+
+    # Build the commit the draft release targets, not the branch tip at dispatch time.
+    steps:
+    - name: Resolve release target commit
+      id: target
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_ID: ${{ inputs.releaseId }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        sha="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .target_commitish)"
+        echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
   build:
+    needs: resolve-target
 
     permissions:
       contents: write
@@ -75,6 +99,7 @@ jobs:
       with:
         fetch-depth: 0
         persist-credentials: false
+        ref: ${{ needs.resolve-target.outputs.sha }}
 
     # Do not restore the pnpm cache, to avoid cache poisoning affecting releases
     - name: Use Node.js ${{ matrix.node-version }}
@@ -401,9 +426,12 @@ jobs:
 
   ios:
     name: Build iOS IPA
+    needs: resolve-target
     permissions:
       contents: read
     uses: ./.github/workflows/package-ios.yml
+    with:
+      ref: ${{ needs.resolve-target.outputs.sha }}
 
   upload-ios:
     name: Attach iOS IPA to release

@@ -7,6 +7,10 @@ on:
         description: Include the development or RC build number in the version
         type: boolean
         default: false
+      ref:
+        description: Commit to build (defaults to the triggering ref)
+        type: string
+        default: ''
     outputs:
       artifact-name:
         description: Unsigned IPA artifact and filename
@@ -30,6 +34,7 @@ jobs:
       with:
         fetch-depth: 0
         persist-credentials: false
+        ref: ${{ inputs.ref }}
     - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
       with:
         node-version: 24.x
