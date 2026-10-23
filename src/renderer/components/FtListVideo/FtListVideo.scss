@@ -220,3 +220,8 @@
     content: none;
   }
 }
+
+// When the compact line wraps, space its rows like the column above.
+.ft-list-video.watchPlaylistItem .info .infoLine {
+  row-gap: 5px;
+}
