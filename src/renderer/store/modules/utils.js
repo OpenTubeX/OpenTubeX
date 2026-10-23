@@ -13,7 +13,7 @@ import {
   loadLegacyChannelThumbnailCache,
   loadLegacyVideoAvatarCache,
 } from '../../helpers/channelThumbnailStorage'
-import { morphUtilityWindow } from '../../helpers/utilityWindowMorph'
+import { getSettingsWindowIconButton, morphUtilityWindow } from '../../helpers/utilityWindowMorph'
 import { getSearchFilterTabId } from '../../../search-history'
 import {
   mergeYouTubeCaptionLanguageCodes,
@@ -37,11 +37,6 @@ function morphSettingsWindow(commit, update, getButton) {
 async function afterSettingsWindowMorph(state, retry) {
   while (state.settingsWindowMorphing) await settingsWindowMorph.catch(() => {})
   return retry()
-}
-
-function getSettingsWindowIconButton(view) {
-  if (view === 'about') return null
-  return document.querySelector(`[data-settings-window-icon="${view === 'downloads' ? 'downloads' : 'settings'}"]`)
 }
 
 function getMinimizedSettingsWindowButton() {

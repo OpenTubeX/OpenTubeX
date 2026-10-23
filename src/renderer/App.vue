@@ -663,7 +663,7 @@ import { hasVisibleGamepadLayer, initializeGamepadNavigation } from './helpers/g
 import { initializeAndroidBack } from './helpers/androidBack'
 import { getAndroidBackPlayer, getAndroidBackSheet } from './helpers/androidBackGesture'
 import { createAndroidBackDialogPreview } from './helpers/androidBackDialog'
-import { getUtilityWindowMorphHooks } from './helpers/utilityWindowMorph'
+import { getSettingsWindowIconButton, getUtilityWindowCloseKeyframes, getUtilityWindowMorphHooks } from './helpers/utilityWindowMorph'
 import { keyboardEventInitFromShortcut, OPEN_COMMAND_PALETTE_EVENT } from './helpers/commandPalette'
 import { createCommandPaletteRegistry } from './helpers/commandPaletteRegistry'
 import {
@@ -3936,9 +3936,15 @@ function getAndroidBackPreview() {
     const content = nested
       ? dialog.querySelector('.settingsContent') ?? dialog
       : dialog
-    return createAndroidBackDialogPreview(content, handleAndroidBack, () =>
+    const isAvailable = () =>
       content.isConnected && dialog.hasAttribute('data-android-back-nested') === nested &&
-      getAndroidBackTarget().closest?.('.settingsWindow, .prompt, dialog[open]') === dialog)
+      getAndroidBackTarget().closest?.('.settingsWindow, .prompt, dialog[open]') === dialog
+    if (!nested && dialog.matches('.settingsWindow')) {
+      // The gesture plays the morph into the header button, so closing must not replay it.
+      return createAndroidBackDialogPreview(dialog, () => store.dispatch('hideSettingsWindow'), isAvailable, element =>
+        getUtilityWindowCloseKeyframes(element, getSettingsWindowIconButton(store.getters.getSettingsWindowView)))
+    }
+    return createAndroidBackDialogPreview(content, handleAndroidBack, isAvailable)
   }
   const tabOverlay = target.closest?.('.capacitorPhoneTabOverlay')
   if (tabOverlay) {
