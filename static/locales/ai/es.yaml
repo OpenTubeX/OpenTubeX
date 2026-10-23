@@ -1376,8 +1376,6 @@ Video:
   Mark As Fully Watched: Marcar como visto por completo
   AI-generated video summary: "Resumen del vídeo generado por IA"
   Quality and accuracy may vary: "La calidad y la precisión pueden variar"
-  Move Queue Item Up: "Subir {title}"
-  Move Queue Item Down: "Bajar {title}"
   Includes paid promotion: Incluye promoción pagada
   Age Restricted Badge: Restricción de edad
   Music Video Badge: Vídeo musical
@@ -1389,6 +1387,7 @@ Video:
   Clear Queue: Vaciar cola
   Queue Video Count: '{count} vídeo | {count} vídeos | {count} vídeos'
   Remove from Queue: Quitar {title} de la cola
+  Remove Video from Queue: Quitar de la cola
   Drag to Reorder Queue: Arrastra {title} para reordenar la cola
   Reorder Queue Item: Reordenar {title}
   Reorder Queue Item Instructions: Usa las teclas de flecha arriba y abajo para mover este vídeo en la cola.

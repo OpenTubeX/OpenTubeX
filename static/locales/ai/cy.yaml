@@ -1379,8 +1379,6 @@ Video:
   Mark As Fully Watched: Marcio fel wedi ei wylio yn llawn
   AI-generated video summary: "Crynodeb fideo wedi'i gynhyrchu gan AI"
   Quality and accuracy may vary: "Gall ansawdd a chywirdeb amrywio"
-  Move Queue Item Up: "Symud {title} i fyny"
-  Move Queue Item Down: "Symud {title} i lawr"
   Includes paid promotion: Yn cynnwys hyrwyddiad taledig
   Age Restricted Badge: Cyfyngiad oedran
   Music Video Badge: Fideo cerddoriaeth
@@ -1392,6 +1390,7 @@ Video:
   Clear Queue: Clirio'r ciw
   Queue Video Count: '{count} o fideos | {count} fideo | {count} fideo | {count} fideo | {count} fideo | {count} o fideos'
   Remove from Queue: Tynnu {title} o'r ciw
+  Remove Video from Queue: 'Tynnu o''r ciw'
   Drag to Reorder Queue: Llusgo {title} i aildrefnu'r ciw
   Reorder Queue Item: Aildrefnu {title}
   Reorder Queue Item Instructions: Defnyddiwch y bysellau Saeth i Fyny a Saeth i Lawr i symud y fideo hwn yn y ciw.

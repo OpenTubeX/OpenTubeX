@@ -1427,8 +1427,6 @@ Video:
   Mark As Fully Watched: Означи као одгледано до краја
   AI-generated video summary: "Сажетак видеа генерисан вештачком интелигенцијом"
   Quality and accuracy may vary: "Квалитет и тачност могу да варирају"
-  Move Queue Item Up: "Помери {title} нагоре"
-  Move Queue Item Down: "Помери {title} надоле"
   Includes paid promotion: Садржи плаћену промоцију
   Age Restricted Badge: Ограничено према узрасту
   Music Video Badge: Музички спот
@@ -1440,6 +1438,7 @@ Video:
   Clear Queue: Очисти ред за репродукцију
   Queue Video Count: '{count} видео-снимак | {count} видео-снимка | {count} видео-снимака'
   Remove from Queue: Уклони {title} из реда за репродукцију
+  Remove Video from Queue: Уклони из реда за репродукцију
   Drag to Reorder Queue: Превуците {title} да бисте променили редослед
   Reorder Queue Item: Промени положај ставке {title}
   Reorder Queue Item Instructions: Померајте овај видео-снимак у реду тастерима са стрелицама нагоре и надоле.

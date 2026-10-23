@@ -1399,8 +1399,6 @@ Video:
   Mark As Fully Watched: Marcar como visto na íntegra
   AI-generated video summary: "Resumo do vídeo gerado por IA"
   Quality and accuracy may vary: "A qualidade e a precisão podem variar"
-  Move Queue Item Up: "Mover {title} para cima"
-  Move Queue Item Down: "Mover {title} para baixo"
   Includes paid promotion: Inclui promoção paga
   Age Restricted Badge: Restrição de idade
   Music Video Badge: Videoclipe
@@ -1412,6 +1410,7 @@ Video:
   Clear Queue: Limpar fila
   Queue Video Count: '{count} vídeo | {count} vídeos | {count} vídeos'
   Remove from Queue: Remover {title} da fila
+  Remove Video from Queue: Remover da fila
   Drag to Reorder Queue: Arraste {title} para reordenar a fila
   Reorder Queue Item: Reordenar {title}
   Reorder Queue Item Instructions: Use as teclas de seta para cima e para baixo para mover este vídeo na fila.

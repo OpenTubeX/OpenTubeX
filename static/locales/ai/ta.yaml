@@ -1408,8 +1408,6 @@ Video:
   Mark As Fully Watched: முழுமையாகப் பார்த்ததாகக் குறி
   AI-generated video summary: "AI உருவாக்கிய காணொளிச் சுருக்கம்"
   Quality and accuracy may vary: "தரமும் துல்லியமும் மாறுபடலாம்"
-  Move Queue Item Up: "{title} ஐ மேலே நகர்த்து"
-  Move Queue Item Down: "{title} ஐ கீழே நகர்த்து"
   Includes paid promotion: கட்டண விளம்பரம் உள்ளது
   Age Restricted Badge: வயது வரம்புள்ளது
   Music Video Badge: இசை வீடியோ
@@ -1421,6 +1419,7 @@ Video:
   Clear Queue: வரிசையை அழி
   Queue Video Count: '{count} காணொளி | {count} காணொளிகள்'
   Remove from Queue: வரிசையிலிருந்து {title}-ஐ அகற்று
+  Remove Video from Queue: வரிசையிலிருந்து அகற்று
   Drag to Reorder Queue: வரிசையை மறுவரிசைப்படுத்த {title}-ஐ இழுக்கவும்
   Reorder Queue Item: '{title}-ஐ மறுவரிசைப்படுத்து'
   Reorder Queue Item Instructions: வரிசையில் இந்தக் காணொளியை நகர்த்த மேல் மற்றும் கீழ் அம்புக்குறி விசைகளைப் பயன்படுத்தவும்.

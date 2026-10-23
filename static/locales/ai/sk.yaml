@@ -1372,8 +1372,6 @@ Video:
   Mark As Fully Watched: Označiť ako úplne pozreté
   AI-generated video summary: "Zhrnutie videa vytvorené AI"
   Quality and accuracy may vary: "Kvalita a presnosť sa môžu líšiť"
-  Move Queue Item Up: "Posunúť video {title} nahor"
-  Move Queue Item Down: "Posunúť video {title} nadol"
   Includes paid promotion: Obsahuje platenú propagáciu
   Age Restricted Badge: Vekovo obmedzené
   Music Video Badge: Hudobné video
@@ -1385,6 +1383,7 @@ Video:
   Clear Queue: Vymazať poradie
   Queue Video Count: '{count} video | {count} videá | {count} videí'
   Remove from Queue: Odstrániť {title} z poradia
+  Remove Video from Queue: Odstrániť z poradia
   Drag to Reorder Queue: Potiahnutím položky {title} zmeniť poradie
   Reorder Queue Item: Zmeniť poradie položky {title}
   Reorder Queue Item Instructions: Video v poradí presuniete klávesmi so šípkou nahor a nadol.

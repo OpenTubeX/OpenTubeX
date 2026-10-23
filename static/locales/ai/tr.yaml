@@ -1371,8 +1371,6 @@ Video:
   Mark As Fully Watched: Tamamı izlendi olarak işaretle
   AI-generated video summary: "Yapay zekâ tarafından oluşturulan video özeti"
   Quality and accuracy may vary: "Kalite ve doğruluk değişebilir"
-  Move Queue Item Up: "{title} videosunu yukarı taşı"
-  Move Queue Item Down: "{title} videosunu aşağı taşı"
   Includes paid promotion: Ücretli tanıtım içeriyor
   Age Restricted Badge: Yaş kısıtlamalı
   Music Video Badge: Müzik videosu
@@ -1384,6 +1382,7 @@ Video:
   Clear Queue: Kuyruğu Temizle
   Queue Video Count: '{count} video | {count} video'
   Remove from Queue: '{title} videosunu kuyruktan kaldır'
+  Remove Video from Queue: Kuyruktan kaldır
   Drag to Reorder Queue: Kuyruğu yeniden sıralamak için {title} videosunu sürükleyin
   Reorder Queue Item: '{title} videosunu yeniden sırala'
   Reorder Queue Item Instructions: Bu videoyu kuyrukta taşımak için Yukarı ve Aşağı Ok tuşlarını kullanın.

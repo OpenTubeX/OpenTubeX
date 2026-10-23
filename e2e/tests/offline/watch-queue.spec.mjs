@@ -26,10 +26,10 @@ const now = Date.now()
 test.use({
   seed: {
     history: [
-      historyEntry('queuevideo01', 'Queue video one', now - 1000),
-      historyEntry('queuevideo02', 'Queue video two', now - 2000),
-      historyEntry('queuevideo03', 'Queue video three', now - 3000),
-      historyEntry('currentvid01', 'Current video', now - 4000)
+      historyEntry('queuevideo1', 'Queue video one', now - 1000),
+      historyEntry('queuevideo2', 'Queue video two', now - 2000),
+      historyEntry('queuevideo3', 'Queue video three', now - 3000),
+      historyEntry('currentvid1', 'Current video', now - 4000)
     ]
   }
 })
@@ -39,6 +39,11 @@ async function chooseVideoOption (page, title, option) {
   await video.hover()
   await video.locator('.title').click({ button: 'right' })
   await page.getByRole('menuitem', { name: option }).click()
+}
+
+async function chooseQueueItemOption (page, item, option) {
+  await item.getByRole('button', { name: 'More options', exact: true }).click()
+  await page.getByRole('menuitem', { name: option, exact: true }).click()
 }
 
 // Main applies queue requests in order, so this resolves once the page's
@@ -60,7 +65,7 @@ test('manages the queue from video menus and the watch sidebar', async ({ page }
   const queue = page.locator('.watchQueue')
   await expect(queue).toBeVisible()
   await expect(queue.locator('.queueDragHandle svg')).toHaveCount(3)
-  await expect(queue.locator('.queueVideoTitle')).toHaveText([
+  await expect(queue.locator('.queueItem h3')).toHaveText([
     'Queue video three',
     'Queue video one',
     'Queue video two'
@@ -70,6 +75,11 @@ test('manages the queue from video menus and the watch sidebar', async ({ page }
   const queueItem = title => queueItems.filter({ hasText: title })
   const reorderButton = title => queueItem(title).getByRole('button', { name: `Reorder ${title}` })
   const moveStatus = queue.locator('[role="status"]')
+
+  // Queued videos show the same duration and metadata as playlist items.
+  await expect(queueItem('Queue video one').locator('.videoDuration')).toHaveText('1:00')
+  await expect(queueItem('Queue video one').locator('.viewCount')).toHaveText('100 views')
+  await expect(queueItem('Queue video one').locator('.uploadedTime')).toBeVisible()
 
   await expect(moveStatus).toHaveCount(1)
   await expect(moveStatus).toHaveAttribute('aria-live', 'polite')
@@ -87,11 +97,24 @@ test('manages the queue from video menus and the watch sidebar', async ({ page }
 
   const draggedItem = reorderButton('Queue video three')
   await expect(draggedItem).toHaveAttribute('title', 'Drag Queue video three to reorder queue')
-  const dataTransfer = await page.evaluateHandle(() => new DataTransfer())
-  await draggedItem.dispatchEvent('dragstart', { dataTransfer })
-  await queueItem('Queue video two').dispatchEvent('drop', { dataTransfer })
-  await draggedItem.dispatchEvent('dragend', { dataTransfer })
-  await expect(queue.locator('.queueVideoTitle')).toHaveText([
+  // Like tabs, the dragged row follows the pointer on one axis and pushes the others aside.
+  const draggedRow = queueItem('Queue video three')
+  const rowBounds = await draggedRow.boundingBox()
+  const lastBounds = await queueItem('Queue video two').boundingBox()
+  const handleBounds = await draggedItem.boundingBox()
+  const startX = handleBounds.x + handleBounds.width / 2
+  const startY = handleBounds.y + handleBounds.height / 2
+  // Hovering waits until the queue toasts no longer cover the handle.
+  await draggedItem.hover()
+  await page.mouse.down()
+  await page.mouse.move(startX + 80, startY + lastBounds.y + lastBounds.height - rowBounds.y - rowBounds.height, { steps: 10 })
+  await expect.poll(() => draggedRow.evaluate(element => element.getBoundingClientRect().x)).toBeCloseTo(rowBounds.x, 1)
+  for (const title of ['Queue video one', 'Queue video two']) {
+    await expect.poll(() => queueItem(title).evaluate(element => new DOMMatrix(getComputedStyle(element).transform).m42))
+      .toBeLessThan(-rowBounds.height / 2)
+  }
+  await page.mouse.up()
+  await expect(queue.locator('.queueItem h3')).toHaveText([
     'Queue video one',
     'Queue video two',
     'Queue video three'
@@ -99,7 +122,7 @@ test('manages the queue from video menus and the watch sidebar', async ({ page }
 
   const firstReorderButton = reorderButton('Queue video one')
   await firstReorderButton.press('ArrowUp')
-  await expect(queue.locator('.queueVideoTitle')).toHaveText([
+  await expect(queue.locator('.queueItem h3')).toHaveText([
     'Queue video one',
     'Queue video two',
     'Queue video three'
@@ -111,7 +134,7 @@ test('manages the queue from video menus and the watch sidebar', async ({ page }
 
   const thirdReorderButton = reorderButton('Queue video three')
   await thirdReorderButton.press('ArrowDown')
-  await expect(queue.locator('.queueVideoTitle')).toHaveText([
+  await expect(queue.locator('.queueItem h3')).toHaveText([
     'Queue video one',
     'Queue video two',
     'Queue video three'
@@ -122,7 +145,7 @@ test('manages the queue from video menus and the watch sidebar', async ({ page }
   )
 
   await thirdReorderButton.press('ArrowUp')
-  await expect(queue.locator('.queueVideoTitle')).toHaveText([
+  await expect(queue.locator('.queueItem h3')).toHaveText([
     'Queue video one',
     'Queue video three',
     'Queue video two'
@@ -133,7 +156,7 @@ test('manages the queue from video menus and the watch sidebar', async ({ page }
   await expect(moveStatus).toHaveText('Moved Queue video three to position 2 of 3.')
 
   await page.keyboard.press('ArrowDown')
-  await expect(queue.locator('.queueVideoTitle')).toHaveText([
+  await expect(queue.locator('.queueItem h3')).toHaveText([
     'Queue video one',
     'Queue video two',
     'Queue video three'
@@ -142,8 +165,19 @@ test('manages the queue from video menus and the watch sidebar', async ({ page }
   await expect(thirdReorderButton).toBeFocused()
   await expect(moveStatus).toHaveText('Moved Queue video three to position 3 of 3.')
 
-  await queue.getByRole('button', { name: 'Remove Queue video three from queue' }).click()
-  await expect(queue.locator('.queueVideoTitle')).toHaveText([
+  // The item menu offers the same moves without dragging.
+  await queueItem('Queue video three').getByRole('button', { name: 'More options', exact: true }).click()
+  await expect(page.getByRole('menuitem', { name: /^Move video down$/i })).toBeDisabled()
+  await page.getByRole('menuitem', { name: /^Move video up$/i }).click()
+  await expect(queue.locator('.queueItem h3')).toHaveText([
+    'Queue video one',
+    'Queue video three',
+    'Queue video two'
+  ])
+  await expect(moveStatus).toHaveText('Moved Queue video three to position 2 of 3.')
+
+  await chooseQueueItemOption(page, queueItem('Queue video three'), 'Remove from Queue')
+  await expect(queue.locator('.queueItem h3')).toHaveText([
     'Queue video one',
     'Queue video two'
   ])
@@ -190,7 +224,7 @@ test('restores the remaining queue in order after restarting and keeps clearing 
 
   ;({ page } = await relaunchAfterQueueSaved(app, page))
   let queue = page.locator('.watchQueue')
-  await expect(queue.locator('.queueVideoTitle')).toHaveText([
+  await expect(queue.locator('.queueItem h3')).toHaveText([
     'Queue video three', 'Queue video two', 'Queue video one'
   ])
 
@@ -200,15 +234,15 @@ test('restores the remaining queue in order after restarting and keeps clearing 
   await chooseVideoOption(page, 'Queue video two', 'Add to Queue')
   await page.locator('a.title').filter({ hasText: /Current video/ }).click()
   await expect(queue.locator('.queueItem')).toHaveCount(4)
-  await queue.getByRole('button', { name: 'Remove Queue video one from queue' }).click()
-  await queue.locator('.queueVideo').first().click()
-  await expect(queue.locator('.queueVideoTitle')).toHaveText(['Queue video two', 'Queue video two'])
+  await chooseQueueItemOption(page, queue.locator('.queueItem').filter({ hasText: 'Queue video one' }), 'Remove from Queue')
+  await queue.locator('.queueItem h3').first().click()
+  await expect(queue.locator('.queueItem h3')).toHaveText(['Queue video two', 'Queue video two'])
 
   ;({ page } = await relaunchAfterQueueSaved(app, page))
   queue = page.locator('.watchQueue')
-  await expect(queue.locator('.queueVideoTitle')).toHaveText(['Queue video two', 'Queue video two'])
-  await queue.getByRole('button', { name: 'Remove Queue video two from queue' }).last().click()
-  await expect(queue.locator('.queueVideoTitle')).toHaveText(['Queue video two'])
+  await expect(queue.locator('.queueItem h3')).toHaveText(['Queue video two', 'Queue video two'])
+  await chooseQueueItemOption(page, queue.locator('.queueItem').filter({ hasText: 'Queue video two' }).last(), 'Remove from Queue')
+  await expect(queue.locator('.queueItem h3')).toHaveText(['Queue video two'])
   await queue.getByRole('button', { name: 'Clear Queue' }).click()
 
   ;({ page } = await relaunchAfterQueueSaved(app, page))
@@ -228,7 +262,7 @@ test('shares queue changes across windows without restoring cleared items', asyn
   await page.locator('a.title').filter({ hasText: /Current video/ }).click()
   await second.locator('a.title').filter({ hasText: /Current video/ }).click()
   for (const window of [page, second]) {
-    await expect(window.locator('.queueVideoTitle')).toHaveText(['Queue video two'])
+    await expect(window.locator('.queueItem h3')).toHaveText(['Queue video two'])
   }
   // Updates issued together by different renderers must both be saved.
   await Promise.all([page, second].map((window, index) => window.evaluate(videoId => {
@@ -238,8 +272,8 @@ test('shares queue changes across windows without restoring cleared items', asyn
   await second.close()
   ;({ page } = await app.relaunch())
   await expect(page.locator('.queueItem')).toHaveCount(3)
-  await expect(page.locator('.queueVideoTitle').first()).toHaveText('Queue video two')
-  expect(await page.locator('.queueVideoTitle').allTextContents()).toEqual(expect.arrayContaining(['concurrent-0', 'concurrent-1']))
+  await expect(page.locator('.queueItem h3').first()).toHaveText('Queue video two')
+  expect(await page.locator('.queueItem h3').allTextContents()).toEqual(expect.arrayContaining(['concurrent-0', 'concurrent-1']))
 })
 
 for (const clearAll of [false, true]) {
@@ -251,7 +285,11 @@ for (const clearAll of [false, true]) {
     await page.getByRole('button', { name: 'Queue Queue video one', exact: true }).click()
     const panel = page.getByRole('dialog').filter({ has: page.locator('.watchQueue') })
     await expect(panel).toBeVisible()
-    await panel.getByRole('button', { name: clearAll ? 'Clear Queue' : 'Remove Queue video one from queue', exact: true }).click()
+    if (clearAll) {
+      await panel.getByRole('button', { name: 'Clear Queue', exact: true }).click()
+    } else {
+      await chooseQueueItemOption(page, panel.locator('.queueItem').filter({ hasText: 'Queue video one' }), 'Remove from Queue')
+    }
     await expect(page.locator('dialog[open]')).toHaveCount(0)
   })
 }
@@ -269,12 +307,14 @@ test('saves the queue to a new playlist and appends a playlist to the queue in i
   await page.locator('a.title').filter({ hasText: /Current video/ }).click()
   const queue = page.locator('.watchQueue')
   const saveButton = queue.getByRole('button', { name: 'Save Queue to Playlist', exact: true })
-  await expect(queue.locator('.queueVideoTitle')).toHaveText(['External clip'])
+  await expect(queue.locator('.queueItem h3')).toHaveText(['External clip'])
+  await expect(queue.locator('.ft-list-video')).toHaveCount(0)
   await expect(saveButton).toHaveCount(0)
 
-  await addToQueue([queuedVideo('queueVideoA', 'Saved video A'), queuedVideo('queueVideoB', 'Saved video B'), queuedVideo('queueVideoC', 'Saved video C')])
+  await addToQueue([queuedVideo('queueVideoA', 'Saved video A'), queuedVideo('queueVideoB', 'Saved video B'), { ...queuedVideo('queueVideoC', 'Saved video C'), isMusic: true }])
   const queuedTitles = ['External clip', 'Saved video A', 'Saved video B', 'Saved video C']
-  await expect(queue.locator('.queueVideoTitle')).toHaveText(queuedTitles)
+  await expect(queue.locator('.queueItem h3')).toHaveText(queuedTitles)
+  await expect(queue.locator('.queueItem').filter({ hasText: 'Saved video C' }).locator('.videoDuration').getByRole('img', { name: 'Music video' })).toBeVisible()
   await saveButton.click()
   const addDialog = page.getByRole('dialog').filter({ hasText: 'Select a playlist to add your 3 videos to' })
   await expect(addDialog).toBeVisible()
@@ -290,7 +330,7 @@ test('saves the queue to a new playlist and appends a playlist to the queue in i
   const playlist = await getPlaylist()
   expect(playlist.videos[0]).toMatchObject(queuedVideo('queueVideoA', 'Saved video A'))
   for (const video of playlist.videos) expect(video).not.toHaveProperty('queueItemId')
-  await expect(queue.locator('.queueVideoTitle')).toHaveText(queuedTitles)
+  await expect(queue.locator('.queueItem h3')).toHaveText(queuedTitles)
 
   await page.evaluate(() => window.$store.dispatch('updateUserPlaylistSortOrder', 'video_title_descending'))
   const tab = await page.evaluate(route => window.ftElectron.tabs.create({ route, makeActive: false }), `/playlist/${playlist._id}?playlistType=user`)

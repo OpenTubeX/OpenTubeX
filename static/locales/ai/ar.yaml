@@ -1402,8 +1402,6 @@ Video:
   Mark As Fully Watched: وضع علامة على أنه تمت مشاهدته بالكامل
   AI-generated video summary: "ملخص فيديو تم إنشاؤه بالذكاء الاصطناعي"
   Quality and accuracy may vary: "قد تختلف الجودة والدقة"
-  Move Queue Item Up: "نقل {title} لأعلى"
-  Move Queue Item Down: "نقل {title} لأسفل"
   Includes paid promotion: يشمل الترويج المدفوع
   Age Restricted Badge: العمر مقيد
   Music Video Badge: فيديو موسيقي
@@ -1415,6 +1413,7 @@ Video:
   Clear Queue: مسح قائمة الانتظار
   Queue Video Count: 'لا توجد فيديوهات ({count}) | فيديو واحد ({count}) | فيديوهان ({count}) | {count} فيديوهات | {count} فيديو | {count} فيديو'
   Remove from Queue: قم بإزالة {title} من قائمة الانتظار
+  Remove Video from Queue: إزالة من قائمة الانتظار
   Drag to Reorder Queue: اسحب {title} لإعادة ترتيب قائمة الانتظار
   Reorder Queue Item: إعادة الطلب {title}
   Reorder Queue Item Instructions: استخدم مفاتيح الأسهم لأعلى ولأسفل لنقل هذا الفيديو في قائمة الانتظار.

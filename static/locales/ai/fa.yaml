@@ -1434,8 +1434,6 @@ Video:
   Mark As Fully Watched: علامت‌گذاری به‌عنوان کاملاً دیده‌شده
   AI-generated video summary: "خلاصهٔ تولیدشده با هوش مصنوعی از ویدیو"
   Quality and accuracy may vary: "کیفیت و دقت ممکن است متفاوت باشد"
-  Move Queue Item Up: "انتقال {title} به بالا"
-  Move Queue Item Down: "انتقال {title} به پایین"
   Includes paid promotion: دارای تبلیغ پولی
   Age Restricted Badge: دارای محدودیت سنی
   Music Video Badge: ویدیوی موسیقی
@@ -1447,6 +1445,7 @@ Video:
   Clear Queue: پاک‌کردن صف
   Queue Video Count: '{count} ویدیو | {count} ویدیو'
   Remove from Queue: حذف {title} از صف
+  Remove Video from Queue: حذف از صف
   Drag to Reorder Queue: برای تغییر ترتیب صف، {title} را بکشید
   Reorder Queue Item: تغییر ترتیب {title}
   Reorder Queue Item Instructions: برای جابه‌جایی این ویدیو در صف، از کلیدهای جهت بالا و پایین استفاده کنید.

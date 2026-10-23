@@ -1372,8 +1372,6 @@ Video:
   Mark As Fully Watched: Megjelölés teljesen megtekintettként
   AI-generated video summary: "MI által készített videóösszefoglaló"
   Quality and accuracy may vary: "A minőség és a pontosság változó lehet"
-  Move Queue Item Up: "{title} feljebb mozgatása"
-  Move Queue Item Down: "{title} lejjebb mozgatása"
   Includes paid promotion: Fizetett promóciót tartalmaz
   Age Restricted Badge: Korhatáros
   Music Video Badge: Zenei videó
@@ -1385,6 +1383,7 @@ Video:
   Clear Queue: Lejátszási sor törlése
   Queue Video Count: '{count} videó | {count} videó'
   Remove from Queue: A(z) {title} eltávolítása a lejátszási sorból
+  Remove Video from Queue: Eltávolítás a lejátszási sorból
   Drag to Reorder Queue: Húzza el a(z) {title} elemet a sorrend módosításához
   Reorder Queue Item: A(z) {title} átrendezése
   Reorder Queue Item Instructions: A Fel és Le nyílbillentyűkkel helyezheti át ezt a videót a lejátszási sorban.

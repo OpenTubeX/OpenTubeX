@@ -1402,8 +1402,6 @@ Video:
   Mark As Fully Watched: Позначити як повністю переглянуте
   AI-generated video summary: "Підсумок відео, створений ШІ"
   Quality and accuracy may vary: "Якість і точність можуть відрізнятися"
-  Move Queue Item Up: "Перемістити {title} вгору"
-  Move Queue Item Down: "Перемістити {title} вниз"
   Includes paid promotion: Містить платну рекламу
   Age Restricted Badge: Вікове обмеження
   Music Video Badge: Музичне відео
@@ -1415,6 +1413,7 @@ Video:
   Clear Queue: Очистити чергу
   Queue Video Count: '{count} відео | {count} відео | {count} відео'
   Remove from Queue: Вилучити {title} із черги
+  Remove Video from Queue: Вилучити з черги
   Drag to Reorder Queue: Перетягніть {title}, щоб змінити порядок у черзі
   Reorder Queue Item: Змінити позицію {title}
   Reorder Queue Item Instructions: Використовуйте клавіші зі стрілками вгору та вниз, щоб перемістити це відео в черзі.

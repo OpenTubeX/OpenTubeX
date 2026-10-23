@@ -1360,8 +1360,6 @@ Video:
   Mark As Fully Watched: Mark As Fully Watched
   AI-generated video summary: "AI-generated video summary"
   Quality and accuracy may vary: "Quality and accuracy may vary"
-  Move Queue Item Up: "Move {title} up"
-  Move Queue Item Down: "Move {title} down"
   Includes paid promotion: Includes paid promotion
   Age Restricted Badge: Age restricted
   Music Video Badge: Music video
@@ -1373,6 +1371,7 @@ Video:
   Clear Queue: Clear Queue
   Queue Video Count: "{count} video | {count} videos"
   Remove from Queue: Remove {title} from queue
+  Remove Video from Queue: Remove from Queue
   Drag to Reorder Queue: Drag {title} to reorder queue
   Reorder Queue Item: Reorder {title}
   Reorder Queue Item Instructions: Use the Up and Down Arrow keys to move this video in the queue.

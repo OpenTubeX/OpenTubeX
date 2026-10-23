@@ -651,6 +651,7 @@ const emit = defineEmits([
   'move-video-to-the-bottom',
   'move-video-to-the-top',
   'move-video-up',
+  'open-video',
   'pause-player',
   'remove-from-playlist'
 ])
@@ -1947,7 +1948,8 @@ const watchPageLinkQuery = computed(() => {
     }
   }
 
-  return query
+  // Queued downloads link to the exact file they were queued from
+  return { ...query, ...props.data.route?.query }
 })
 
 const watchVideoRouterLink = computed(() => ({
@@ -2060,6 +2062,7 @@ async function handleWatchPageLinkClick(event) {
 
   // Plain left click navigates in this tab: morph the thumbnail into the player
   if (event?.button === 0 && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {
+    emit('open-video')
     requestWatchPageViewTransition(event.currentTarget, {
       isShort: props.data.isShort === true && store.getters.getUseCustomShortsPlayer,
       allowVisiblePlayer: props.appearance === 'recommendation'

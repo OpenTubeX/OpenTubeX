@@ -1370,8 +1370,6 @@ Video:
   Mark As Fully Watched: Marquer comme entièrement vue
   AI-generated video summary: "Résumé vidéo généré par l’IA"
   Quality and accuracy may vary: "La qualité et la précision peuvent varier"
-  Move Queue Item Up: "Déplacer {title} vers le haut"
-  Move Queue Item Down: "Déplacer {title} vers le bas"
   Includes paid promotion: Contient une promotion rémunérée
   Age Restricted Badge: Soumise à une limite d’âge
   Music Video Badge: Clip musical
@@ -1383,6 +1381,7 @@ Video:
   Clear Queue: Vider la file d’attente
   Queue Video Count: '{count} vidéo | {count} vidéos | {count} vidéos'
   Remove from Queue: Retirer {title} de la file d’attente
+  Remove Video from Queue: Retirer de la file d’attente
   Drag to Reorder Queue: Faire glisser {title} pour réorganiser la file d’attente
   Reorder Queue Item: Réorganiser {title}
   Reorder Queue Item Instructions: Utilisez les touches fléchées Haut et Bas pour déplacer cette vidéo dans la file d’attente.

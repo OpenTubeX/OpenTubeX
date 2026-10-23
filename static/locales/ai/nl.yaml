@@ -1410,8 +1410,6 @@ Video:
   Mark As Fully Watched: Markeren als volledig bekeken
   AI-generated video summary: "Door AI gegenereerde videosamenvatting"
   Quality and accuracy may vary: "Kwaliteit en nauwkeurigheid kunnen variëren"
-  Move Queue Item Up: "Verplaats {title} omhoog"
-  Move Queue Item Down: "Verplaats {title} omlaag"
   Includes paid promotion: Bevat betaalde promotie
   Age Restricted Badge: Leeftijdsbeperking
   Music Video Badge: Muziekvideo
@@ -1423,6 +1421,7 @@ Video:
   Clear Queue: Wachtrij wissen
   Queue Video Count: '{count} video | {count} video''s'
   Remove from Queue: '{title} uit wachtrij verwijderen'
+  Remove Video from Queue: Uit wachtrij verwijderen
   Drag to Reorder Queue: Sleep {title} om de wachtrij te ordenen
   Reorder Queue Item: '{title} verplaatsen'
   Reorder Queue Item Instructions: Gebruik de pijltoetsen omhoog en omlaag om deze video in de wachtrij te verplaatsen.

@@ -1384,8 +1384,6 @@ Video:
   Mark As Fully Watched: Označi kao pogledano do kraja
   AI-generated video summary: "Sažetak videozapisa generiran umjetnom inteligencijom"
   Quality and accuracy may vary: "Kvaliteta i točnost mogu varirati"
-  Move Queue Item Up: "Pomakni {title} gore"
-  Move Queue Item Down: "Pomakni {title} dolje"
   Includes paid promotion: Sadržava plaćenu promociju
   Age Restricted Badge: Dobno ograničeno
   Music Video Badge: Glazbeni video
@@ -1397,6 +1395,7 @@ Video:
   Clear Queue: Očisti red čekanja
   Queue Video Count: '{count} videozapis | {count} videozapisa | {count} videozapisa'
   Remove from Queue: Ukloni {title} iz reda čekanja
+  Remove Video from Queue: Ukloni iz reda čekanja
   Drag to Reorder Queue: Povucite {title} da biste promijenili redoslijed u redu čekanja
   Reorder Queue Item: Promijeni redoslijed stavke {title}
   Reorder Queue Item Instructions: Tipkama sa strelicama gore i dolje pomaknite ovaj videozapis u redu čekanja.

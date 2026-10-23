@@ -1372,8 +1372,6 @@ Video:
   Mark As Fully Watched: Markatu osorik ikusita bezala
   AI-generated video summary: "AAk sortutako bideo-laburpena"
   Quality and accuracy may vary: "Kalitatea eta zehaztasuna alda daitezke"
-  Move Queue Item Up: "Eraman {title} gora"
-  Move Queue Item Down: "Eraman {title} behera"
   Includes paid promotion: Ordainpeko sustapena du
   Age Restricted Badge: Adin-muga du
   Music Video Badge: Musika-bideoa
@@ -1385,6 +1383,7 @@ Video:
   Clear Queue: Garbitu ilara
   Queue Video Count: 'Bideo {count} | {count} bideo'
   Remove from Queue: Kendu {title} ilaratik
+  Remove Video from Queue: Kendu ilaratik
   Drag to Reorder Queue: Arrastatu {title} ilara berrantolatzeko
   Reorder Queue Item: Berrantolatu {title}
   Reorder Queue Item Instructions: Erabili gora eta behera gezi-teklak bideo hau ilaran mugitzeko.

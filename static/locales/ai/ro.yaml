@@ -1399,8 +1399,6 @@ Video:
   Mark As Fully Watched: Marchează ca vizionat integral
   AI-generated video summary: "Rezumat video generat de IA"
   Quality and accuracy may vary: "Calitatea și precizia pot varia"
-  Move Queue Item Up: "Mută {title} în sus"
-  Move Queue Item Down: "Mută {title} în jos"
   Includes paid promotion: Include promovare plătită
   Age Restricted Badge: Restricționat în funcție de vârstă
   Music Video Badge: Videoclip muzical
@@ -1412,6 +1410,7 @@ Video:
   Clear Queue: Golește coada
   Queue Video Count: '{count} videoclip | {count} videoclipuri | {count} de videoclipuri'
   Remove from Queue: Elimină {title} din coadă
+  Remove Video from Queue: Elimină din coadă
   Drag to Reorder Queue: Trageți {title} pentru a reordona coada
   Reorder Queue Item: Reordonează {title}
   Reorder Queue Item Instructions: Folosiți tastele săgeată în sus și în jos pentru a muta acest videoclip în coadă.
