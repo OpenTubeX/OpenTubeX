@@ -224,10 +224,13 @@ for (const mode of ['combined', 'merged', 'fallback', 'late-failure', 'pending-e
       ipcMain.removeHandler('dlna-recover')
       ipcMain.handle('dlna-recover', (_event, castId, payload) => {
         globalThis.__dlnaCalls.push({ action: 'stop', castId }, { action: 'start', payload })
+        // Recovery stops the failed cast, which clears its failure.
+        if (castId === globalThis.__dlnaFailedCastId) globalThis.__dlnaFailedCastId = null
         return { castId: 'recovered-cast', deviceName: 'Living room TV' }
       })
       ipcMain.removeHandler('dlna-has-failed')
-      ipcMain.handle('dlna-has-failed', () => globalThis.__dlnaFailed ?? false)
+      // Like the main process, report a failure only for the cast that failed.
+      ipcMain.handle('dlna-has-failed', (_event, castId) => castId === globalThis.__dlnaFailedCastId)
       ipcMain.handle('dlna-discover', () => [{ id: 'living-room', name: 'Living room TV' }])
       ipcMain.handle('dlna-start', async (_event, payload) => {
         globalThis.__dlnaCalls.push({ action: 'start', payload })
@@ -301,9 +304,8 @@ for (const mode of ['combined', 'merged', 'fallback', 'late-failure', 'pending-e
       expect(await app.electronApp.evaluate(() => globalThis.__dlnaExtractionCalls)).toBe(1)
     }
     if (lateFailure) {
-      await app.electronApp.evaluate(() => { globalThis.__dlnaFailed = true })
+      await app.electronApp.evaluate(() => { globalThis.__dlnaFailedCastId = 'test-cast' })
       await expect.poll(() => app.electronApp.evaluate(() => globalThis.__dlnaCalls.filter(call => call.action === 'start').length)).toBe(2)
-      await app.electronApp.evaluate(() => { globalThis.__dlnaFailed = false })
     }
     const calls = await app.electronApp.evaluate(() => globalThis.__dlnaCalls)
     expect(calls[0].action).toBe('start')
