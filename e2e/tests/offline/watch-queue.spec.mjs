@@ -1,3 +1,6 @@
+import { readFile, writeFile } from 'node:fs/promises'
+import path from 'node:path'
+
 import { test, expect, goTo, setWindowSize, openNewWindowFromTabBar, waitForAppReady } from '../../helpers/app.mjs'
 
 test.describe.configure({ timeout: 120_000 })
@@ -340,4 +343,39 @@ test('saves the queue to a new playlist and appends a playlist to the queue in i
   expect(await page.evaluate(() => window.$store.getters.getWatchQueue.map(item => item.title)))
     .toEqual([...queuedTitles, 'Saved video C', 'Saved video B', 'Saved video A'])
   expect((await getPlaylist()).videos.map(video => video.videoId)).toEqual(savedIds)
+})
+
+test('removes a queued video that a click opens in the default external player', async ({ app, page }) => {
+  await goTo(page, 'history')
+  await page.evaluate(videos => {
+    for (const video of videos) window.$store.commit('addVideoToWatchQueue', { video })
+  }, [
+    { videoId: 'externalQ01', title: 'External player video', author: 'Queue Test Channel', lengthSeconds: 60 },
+    { videoId: 'externalQ02', title: 'Next queued video', author: 'Queue Test Channel', lengthSeconds: 60 },
+  ])
+  await page.locator('a.title').filter({ hasText: /Current video/ }).click()
+  const queue = page.locator('.watchQueue')
+  await expect(queue.locator('.queueItem')).toHaveCount(2)
+
+  const executable = path.join(app.userDataDir, 'capture-player-arguments.mjs')
+  const capturedArguments = path.join(app.userDataDir, 'player-arguments.json')
+  await writeFile(executable, "import { writeFileSync } from 'node:fs'\nwriteFileSync(process.argv[2], JSON.stringify(process.argv.slice(3)))\n")
+  await page.evaluate(async ({ executable, capturedArguments, nodePath }) => {
+    const store = window.$store
+    await store.dispatch('updateExternalPlayer', 'mpv')
+    await store.dispatch('updateDefaultViewingMode', 'external_player')
+    await store.dispatch('updateExternalPlayerExecutable', nodePath)
+    await store.dispatch('updateExternalPlayerCustomArgs', JSON.stringify([executable, capturedArguments]))
+  }, { executable, capturedArguments, nodePath: process.execPath })
+
+  await queue.locator('.queueItem a.title').filter({ hasText: 'External player video' }).click()
+  await expect.poll(async () => {
+    try {
+      return JSON.parse(await readFile(capturedArguments, 'utf8')).at(-1)
+    } catch (error) {
+      if (error.code === 'ENOENT') return null
+      throw error
+    }
+  }).toBe('https://www.youtube.com/watch?v=externalQ01')
+  await expect(queue.locator('.queueItem h3')).toHaveText(['Next queued video'])
 })
