@@ -48,6 +48,7 @@ export const SYNC_SETTING_LABELS = {
   ],
   channelsHidden: 'Settings.Distraction Free Settings.Hide Channels',
   enableBlockLists: 'Settings.Distraction Free Settings.Enable Block Lists',
+  enableChannelSettings: 'Settings.Channel Settings.Enable Channel Playback Settings',
   checkForUpdates: 'Settings.General Settings.Check for Updates',
   commentTranslationIgnoredLanguages: 'Settings.General Settings.Comment Translation.Never Translate',
   compactNavigationLabels: 'Settings.General Settings.Navigation.Compact Tab Labels',

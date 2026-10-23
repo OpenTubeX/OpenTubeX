@@ -758,6 +758,7 @@ Settings:
   Channel Settings:
     Channel Settings: チャンネル設定
     Channel Settings Description: 視聴中に選んだ設定をチャンネルごとに記憶し、次回そのチャンネルの動画を見るときに再度適用します。
+    Enable Channel Playback Settings: チャンネルごとの再生設定を有効にする
     Auto Save Playback Speed: 再生速度の変更を自動的に保存
     Auto Save Video Quality: 画質の変更を自動的に保存
     Auto Save Subtitles State: 字幕の状態の変更を自動的に保存

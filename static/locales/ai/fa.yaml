@@ -789,6 +789,7 @@ Settings:
   Channel Settings:
     Channel Settings: تنظیمات کانال
     Channel Settings Description: تنظیمات انتخابی هنگام تماشای هر کانال را جداگانه به‌خاطر بسپار تا دفعهٔ بعد برای ویدیوهای آن دوباره اعمال شوند.
+    Enable Channel Playback Settings: فعال‌سازی تنظیمات پخش کانال
     Auto Save Playback Speed: ذخیرهٔ خودکار تغییرات سرعت پخش
     Auto Save Video Quality: ذخیرهٔ خودکار تغییرات کیفیت ویدیو
     Auto Save Subtitles State: ذخیرهٔ خودکار تغییرات وضعیت زیرنویس

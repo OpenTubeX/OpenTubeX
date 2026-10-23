@@ -301,8 +301,10 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     if (isCapacitor && group === 'Auto Save Volume') {
       return false
     }
-    return [
-      'Channel Settings',
+    if (['Channel Settings', 'Enable Channel Playback Settings'].includes(group)) {
+      return true
+    }
+    return store.getters.getEnableChannelSettings && [
       'Auto Save Playback Speed',
       'Auto Save Video Quality',
       'Auto Save Subtitles State',

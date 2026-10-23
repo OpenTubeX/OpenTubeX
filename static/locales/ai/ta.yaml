@@ -772,6 +772,7 @@ Settings:
   Channel Settings:
     Channel Settings: சேனல் அமைப்புகள்
     Channel Settings Description: ஒவ்வொரு சேனலையும் பார்க்கும்போது தேர்ந்தெடுக்கும் அமைப்புகளைத் தனித்தனியாக நினைவில் கொண்டு, அதன் காணொளியை அடுத்த முறை பார்க்கும்போது மீண்டும் பயன்படுத்தும்.
+    Enable Channel Playback Settings: சேனல் இயக்க அமைப்புகளை இயக்கு
     Auto Save Playback Speed: இயக்க வேக மாற்றங்களைத் தானாகச் சேமி
     Auto Save Video Quality: வீடியோ தர மாற்றங்களைத் தானாகச் சேமி
     Auto Save Subtitles State: துணைத்தலைப்பு நிலை மாற்றங்களைத் தானாகச் சேமி

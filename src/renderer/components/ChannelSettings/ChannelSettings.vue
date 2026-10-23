@@ -5,7 +5,19 @@
     <p class="sectionDescription">
       {{ t('Settings.Channel Settings.Channel Settings Description') }}
     </p>
-    <div class="preferenceToggles">
+    <div class="enableChannelSettingsToggle">
+      <FtToggleSwitch
+        :label="t('Settings.Channel Settings.Enable Channel Playback Settings')"
+        :compact="true"
+        :default-value="settings.enableChannelSettings"
+        setting-key="enableChannelSettings"
+        @change="value => updateSetting('enableChannelSettings', value)"
+      />
+    </div>
+    <div
+      v-if="settings.enableChannelSettings"
+      class="preferenceToggles"
+    >
       <FtToggleSwitch
         v-for="preference in PREFERENCES"
         :key="preference.type"

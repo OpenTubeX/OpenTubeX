@@ -122,3 +122,26 @@ test('hides the channel setting menu when the video has no channel', async ({ ap
   await view.evaluate(view => { view.channelId = '' })
   await expect(saveButton).toHaveCount(0)
 })
+
+test('ignores saved channel settings while channel playback settings are off', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await page.evaluate(async () => {
+    const store = window.$store
+    await store.dispatch('updateEnableChannelSettings', false)
+    await store.dispatch('updateAutoUpdateChannelPlaybackSpeeds', true)
+    await store.dispatch('updateChannelPlaybackSpeeds', JSON.stringify({ 'UC-test-channel-id': 1.5 }))
+    await store.dispatch('updateChannelVolumes', JSON.stringify({ 'UC-test-channel-id': 0.2 }))
+  })
+  const video = await openMockedVideo(page)
+  expect(await video.evaluate(video => ({ speed: video.playbackRate, volume: video.volume })))
+    .toEqual({ speed: 1, volume: 1 })
+  const saveButton = page.locator(`${activeTab} .watchVideoInfo`).getByRole('button', { name: 'Save channel setting…', exact: true })
+  await expect(saveButton).toHaveCount(0)
+
+  const view = await watchViewHandle(page)
+  await view.evaluate(view => view.handlePlaybackRateUserSet(2))
+  expect((await savedValues(page))[0]).toEqual({ 'UC-test-channel-id': 1.5 })
+
+  await page.evaluate(() => window.$store.dispatch('updateEnableChannelSettings', true))
+  await expect(saveButton).toBeVisible()
+})

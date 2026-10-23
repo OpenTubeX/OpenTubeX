@@ -758,6 +758,7 @@ Settings:
   Channel Settings:
     Channel Settings: Kanali seaded
     Channel Settings Description: Jäta iga kanali jaoks eraldi meelde vaatamise ajal valitud seaded, et need rakenduksid uuesti, kui vaatad järgmisel korral selle kanali videot.
+    Enable Channel Playback Settings: Luba kanalipõhised esitusseaded
     Auto Save Playback Speed: Salvesta esituskiiruse muudatused automaatselt
     Auto Save Video Quality: Salvesta videokvaliteedi muudatused automaatselt
     Auto Save Subtitles State: Salvesta subtiitrite oleku muudatused automaatselt

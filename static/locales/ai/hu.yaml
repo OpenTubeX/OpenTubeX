@@ -758,6 +758,7 @@ Settings:
   Channel Settings:
     Channel Settings: Csatornabeállítások
     Channel Settings Description: Csatornánként megjegyzi a videónézés közben kiválasztott beállításokat, és a csatorna következő videójánál újra alkalmazza őket.
+    Enable Channel Playback Settings: Csatornánkénti lejátszási beállítások engedélyezése
     Auto Save Playback Speed: Lejátszási sebesség módosításainak automatikus mentése
     Auto Save Video Quality: Videóminőség módosításainak automatikus mentése
     Auto Save Subtitles State: Feliratállapot módosításainak automatikus mentése

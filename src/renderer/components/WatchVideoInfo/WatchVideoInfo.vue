@@ -949,7 +949,7 @@ const channelSettingSaveActions = computed(() => [
     ['fas', 'closed-captioning']),
   createChannelSettingSaveAction('volume', showSaveChannelVolumeButton.value,
     t('Video.Save Channel Volume'), t('Settings.Channel Settings.Volume'), ['fas', 'volume-high'])
-].filter(action => action.visible && props.channelId !== ''))
+].filter(action => action.visible && store.getters.getEnableChannelSettings && props.channelId !== ''))
 
 /**
  * @param {'playbackSpeed'|'videoQuality'|'subtitlesState'|'volume'} setting

@@ -335,6 +335,7 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
   channel: {
     '': [
       'Channel Settings',
+      'Enable Channel Playback Settings',
       'Auto Save Playback Speed',
       'Auto Save Video Quality',
       'Auto Save Subtitles State',

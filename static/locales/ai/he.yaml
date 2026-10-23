@@ -771,6 +771,7 @@ Settings:
   Channel Settings:
     Channel Settings: הגדרות ערוץ
     Channel Settings Description: שמירת ההגדרות שנבחרו בזמן צפייה לכל ערוץ בנפרד, כדי שיוחלו שוב בצפייה הבאה באחד מסרטוניו.
+    Enable Channel Playback Settings: הפעלת הגדרות הפעלה לפי ערוץ
     Auto Save Playback Speed: שמירה אוטומטית של שינויים במהירות ההפעלה
     Auto Save Video Quality: שמירה אוטומטית של שינויים באיכות הווידאו
     Auto Save Subtitles State: שמירה אוטומטית של שינויים במצב הכתוביות

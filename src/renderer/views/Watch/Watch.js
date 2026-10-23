@@ -6840,7 +6840,7 @@ export default defineComponent({
     },
 
     handlePlaybackRateUserSet(newRate) {
-      if (!this.$store.getters.getAutoUpdateChannelPlaybackSpeeds || !this.channelId) {
+      if (!this.$store.getters.getEnableChannelSettings || !this.$store.getters.getAutoUpdateChannelPlaybackSpeeds || !this.channelId) {
         return
       }
 
@@ -6851,7 +6851,7 @@ export default defineComponent({
      * @param {string} newQuality
      */
     handleVideoQualityUserSet(newQuality) {
-      if (!this.$store.getters.getAutoUpdateChannelVideoQualities || !this.channelId) {
+      if (!this.$store.getters.getEnableChannelSettings || !this.$store.getters.getAutoUpdateChannelVideoQualities || !this.channelId) {
         return
       }
 
@@ -6864,7 +6864,7 @@ export default defineComponent({
     handleSubtitlesStateUserSet(enabled) {
       this.currentSubtitlesState = enabled
 
-      if (!this.$store.getters.getAutoUpdateChannelSubtitlesStates || !this.channelId) {
+      if (!this.$store.getters.getEnableChannelSettings || !this.$store.getters.getAutoUpdateChannelSubtitlesStates || !this.channelId) {
         return
       }
 
@@ -6884,7 +6884,7 @@ export default defineComponent({
     handleVolumeUserSet(volume) {
       this.currentVolume = volume
 
-      if (!this.$store.getters.getAutoUpdateChannelVolumes || !this.channelId) {
+      if (!this.$store.getters.getEnableChannelSettings || !this.$store.getters.getAutoUpdateChannelVolumes || !this.channelId) {
         return
       }
 
@@ -6992,7 +6992,7 @@ export default defineComponent({
         return
       }
 
-      if (this.channelId) {
+      if (this.channelId && this.$store.getters.getEnableChannelSettings) {
         try {
           const channelSpeeds = JSON.parse(this.$store.getters.getChannelPlaybackSpeeds || '{}')
           if (channelSpeeds[this.channelId] !== undefined) {
@@ -7013,7 +7013,7 @@ export default defineComponent({
       }
 
       let quality = this.getDefaultVideoQuality()
-      if (this.channelId) {
+      if (this.channelId && this.$store.getters.getEnableChannelSettings) {
         try {
           const channelQualities = JSON.parse(this.$store.getters.getChannelVideoQualities || '{}')
           if (channelQualities[this.channelId] !== undefined) {

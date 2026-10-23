@@ -758,6 +758,7 @@ Settings:
   Channel Settings:
     Channel Settings: Pengaturan Saluran
     Channel Settings Description: Ingat pengaturan yang Anda pilih saat menonton untuk setiap saluran, lalu terapkan lagi saat Anda menonton video saluran tersebut berikutnya.
+    Enable Channel Playback Settings: Aktifkan pengaturan pemutaran saluran
     Auto Save Playback Speed: Simpan perubahan kecepatan pemutaran secara otomatis
     Auto Save Video Quality: Simpan perubahan kualitas video secara otomatis
     Auto Save Subtitles State: Simpan perubahan status takarir secara otomatis

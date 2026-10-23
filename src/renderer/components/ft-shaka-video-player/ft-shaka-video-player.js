@@ -1630,7 +1630,7 @@ export default defineComponent({
      * @returns {boolean | null}
      */
     function getSavedChannelSubtitlesState() {
-      if (props.channelId === '') {
+      if (!store.getters.getEnableChannelSettings || props.channelId === '') {
         return null
       }
 
@@ -2074,12 +2074,17 @@ export default defineComponent({
       return store.getters.getRememberVolume
     })
 
+    /** @type {import('vue').ComputedRef<boolean>} */
+    const enableChannelSettings = computed(() => {
+      return store.getters.getEnableChannelSettings
+    })
+
     /**
      * The volume that was saved for this video's channel, if there is one.
      * @type {import('vue').ComputedRef<number | null>}
      */
     const savedChannelVolume = computed(() => {
-      if (props.channelId === '') {
+      if (!enableChannelSettings.value || props.channelId === '') {
         return null
       }
 
@@ -2140,7 +2145,7 @@ export default defineComponent({
 
     /** @type {import('vue').ComputedRef<number | null>} */
     const savedChannelPlaybackRate = computed(() => {
-      if (props.channelId === '') {
+      if (!enableChannelSettings.value || props.channelId === '') {
         return null
       }
 
@@ -2165,7 +2170,7 @@ export default defineComponent({
 
     /** @type {import('vue').ComputedRef<boolean>} */
     const canManuallySaveChannelPlaybackRate = computed(() => {
-      return !autoUpdateChannelPlaybackSpeeds.value && props.channelId !== ''
+      return enableChannelSettings.value && !autoUpdateChannelPlaybackSpeeds.value && props.channelId !== ''
     })
 
     const videoPlaybackRateInterval = computed(() => {
@@ -6853,6 +6858,7 @@ export default defineComponent({
     watch(
       [
         useQuickPlaybackSpeedBar,
+        enableChannelSettings,
         autoUpdateChannelPlaybackSpeeds,
         savedChannelPlaybackRate,
         quickPlaybackSpeedBarOptions,

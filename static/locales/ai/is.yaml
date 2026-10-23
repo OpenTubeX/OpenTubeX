@@ -762,6 +762,7 @@ Settings:
   Channel Settings:
     Channel Settings: Rásarstillingar
     Channel Settings Description: Muna stillingarnar sem þú velur við áhorf fyrir hverja rás, svo þær verði notaðar aftur næst þegar þú horfir á myndband frá henni.
+    Enable Channel Playback Settings: Virkja spilunarstillingar fyrir rásir
     Auto Save Playback Speed: Vista breytingar á spilunarhraða sjálfkrafa
     Auto Save Video Quality: Vista breytingar á myndgæðum sjálfkrafa
     Auto Save Subtitles State: Vista breytingar á stöðu skjátexta sjálfkrafa

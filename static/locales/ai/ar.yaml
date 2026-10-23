@@ -766,6 +766,7 @@ Settings:
   Channel Settings:
     Channel Settings: إعدادات القناة
     Channel Settings Description: تذكر الإعدادات التي تختارها أثناء المشاهدة لكل قناة على حدة، بحيث يتم تطبيقها مرة أخرى في المرة التالية التي تشاهد فيها أحد مقاطع الفيديو الخاصة بها.
+    Enable Channel Playback Settings: تفعيل إعدادات التشغيل الخاصة بالقنوات
     Auto Save Playback Speed: حفظ تغييرات سرعة التشغيل تلقائيًا
     Auto Save Video Quality: حفظ تغييرات جودة الفيديو تلقائيًا
     Auto Save Subtitles State: حفظ تغييرات حالة الترجمة تلقائيًا
