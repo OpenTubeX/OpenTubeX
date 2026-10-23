@@ -158,7 +158,7 @@ test.describe('secondary captions', () => {
 
     const captionsMenu = await openCaptionsMenu(page)
     await attachScreenshot('captions menu')
-    await captionsMenu.getByRole('button', { name: 'Secondary Captions' }).click()
+    await captionsMenu.getByRole('button', { name: 'Secondary Captions', exact: true }).click()
     const secondaryMenu = player.locator('.ft-caption-secondary-menu')
     const options = secondaryMenu.locator('.ft-caption-secondary-options')
     await expect(options.getByRole('button', { name: 'Off', exact: true })).toHaveAttribute('aria-selected', 'true')
@@ -206,7 +206,7 @@ test.describe('secondary captions', () => {
     await expect(appearanceMenu).toBeHidden()
     await expect(captionsMenu).toBeVisible()
 
-    await captionsMenu.getByRole('button', { name: 'Secondary Captions' }).click()
+    await captionsMenu.getByRole('button', { name: 'Secondary Captions', exact: true }).click()
     await options.getByRole('button', { name: 'German', exact: true }).click()
     await expect(captionsMenu).toBeVisible()
     await expect(secondaryCaption).toHaveText('Original caption (de)')
@@ -234,7 +234,7 @@ test.describe('secondary captions', () => {
     await expect(secondaryCaption).toHaveText('Original caption (de)')
 
     const nextCaptionsMenu = await openCaptionsMenu(page)
-    await nextCaptionsMenu.getByRole('button', { name: 'Secondary Captions' }).click()
+    await nextCaptionsMenu.getByRole('button', { name: 'Secondary Captions', exact: true }).click()
     await expect(options.getByRole('button', { name: 'German', exact: true })).toHaveAttribute('aria-selected', 'true')
     await options.getByRole('button', { name: 'Off', exact: true }).click()
     await expect(secondaryCaption).toHaveCount(0)
@@ -251,7 +251,7 @@ test.describe('secondary captions beside a translation', () => {
     await expect.poll(() => activeTextTrack(video)).toBe('English (auto-generated)')
 
     const captionsMenu = await openCaptionsMenu(page)
-    const secondaryButton = captionsMenu.getByRole('button', { name: 'Secondary Captions' })
+    const secondaryButton = captionsMenu.getByRole('button', { name: 'Secondary Captions', exact: true })
     await expect(secondaryButton).toHaveCount(0)
 
     await captionsMenu.getByRole('button', { name: 'Auto-translate' }).click()
