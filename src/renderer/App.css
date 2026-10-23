@@ -486,7 +486,7 @@
    covering the preview until the route changes. Phone layouts keep their bottom
    navigation and lower mini player layer above the route. */
 @media only screen and (width > 680px) {
-  .app:not(.capacitorPhoneLayout) > :deep(.routerView:has(.watchRestorePreview)) {
+  :global(:root.appWatchRestorePreview:not(.appPhoneLayout) .app > .routerView) {
     position: relative;
     z-index: 3;
   }

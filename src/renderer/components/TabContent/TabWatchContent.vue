@@ -7,7 +7,7 @@
     <div
       v-show="isWatchRoute || previewStyle"
       ref="watchRoot"
-      :class="{ watchDragPreview: previewStyle, watchRestorePreview: previewStyle && previewRestoring }"
+      :class="{ watchDragPreview: previewStyle, watchRestorePreview: restorePreviewShown }"
       :style="previewStyle"
       :inert="!isWatchRoute"
       :aria-hidden="String(!isWatchRoute)"
@@ -32,6 +32,7 @@ import { tabLifecycleService } from '../../tabs/TabLifecycleService'
 import { tabLifecycleKey, tabPresentedKey, watchNavigationKey } from '../../tabs/TabContext'
 import { mobileNavigationMinimizePreview } from '../../helpers/mobileNavigationScroll'
 import { getPreviousBrowsingRoute } from '../../tabs/playerDockDestination'
+import { useRootClass } from '../../helpers/rootClasses'
 
 const props = defineProps({
   tabId: { type: String, required: true },
@@ -52,6 +53,10 @@ let previewOrigin = null
 let previewViewport = null
 let previewResizeObserver = null
 let previewRestoring = false
+// Each preview sets previewRestoring before it shows previewStyle.
+const restorePreviewShown = computed(() => Boolean(previewStyle.value) && previewRestoring)
+// App lifts the route above the sidebar while the preview covers it.
+useRootClass('appWatchRestorePreview', restorePreviewShown)
 let previewReady = null
 let previewInterrupted = false
 let previewHistoryEntry = null

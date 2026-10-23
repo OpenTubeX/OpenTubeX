@@ -3287,8 +3287,9 @@ test.describe('playback when navigating away', () => {
   })
 
   /**
-   * Returns what each frame of the returning Watch preview paints at the
-   * center of the navigation.
+   * Expands the mini player with motion enabled and hit tests the center of
+   * the navigation on every frame of the returning Watch preview. Returns
+   * whether the preview, the navigation or something else is topmost there.
    * @param {import('@playwright/test').Page} page
    * @param {import('@playwright/test').Locator} player
    */
