@@ -35,3 +35,14 @@ export class AutoQualityAbrManager extends shaka.abr.SimpleAbrManager {
     return super.setVariants(autoVariants, isLowLatency)
   }
 }
+
+/**
+ * Without `changeType`, Shaka only lets ABR switch between variants in the
+ * codec of the first one, so it has to keep choosing the codecs itself. Mirrors
+ * Shaka's default device check, which isn't exported.
+ * @returns {boolean}
+ */
+export function supportsSmoothCodecSwitching() {
+  const sourceBuffer = window.ManagedSourceBuffer ?? window.SourceBuffer
+  return typeof sourceBuffer?.prototype?.changeType === 'function'
+}

@@ -448,4 +448,17 @@ test.describe('default quality with a preferred codec', () => {
       return element.ui.getControls().getPlayer().getVariantTracks().find(track => track.active)?.videoCodec
     })).toBe('avc1.42c00d')
   })
+
+  test('lets Shaka choose the codecs without smooth codec switching', async ({ app, page }) => {
+    // Shaka then limits automatic quality to the codec of the first variant
+    await page.evaluate(() => {
+      delete SourceBuffer.prototype.changeType
+      delete window.ManagedSourceBuffer
+    })
+    await openAdaptiveVideo(app, page, ['av01.0.04M.08', 'avc1.42c00d'])
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    await expect.poll(() => player.evaluate(element => {
+      return element.ui.getControls().getPlayer().getVariantTracks().find(track => track.active)?.videoCodec
+    })).toBe('avc1.42c00d')
+  })
 })

@@ -12,7 +12,7 @@ import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import SponsorBlockSegmentEditor from '../WatchVideoSponsorBlock/SponsorBlockSegmentEditor.vue'
 import shaka from 'shaka-player'
 import { getCodecPrefixes, getVideoCodecPreferences, preferredVideoDecodingAttributes } from '../../helpers/player/videoCodecPreference'
-import { AutoQualityAbrManager } from '../../helpers/player/AutoQualityAbrManager'
+import { AutoQualityAbrManager, supportsSmoothCodecSwitching } from '../../helpers/player/AutoQualityAbrManager'
 import { voidWebmProjection } from '../../helpers/player/webmProjection'
 import { registerPlugin } from '@capacitor/core'
 import { bindAndroidMediaErrors } from '../../helpers/player/androidMediaErrors'
@@ -4083,7 +4083,7 @@ export default defineComponent({
           bufferBehind: 300,
           segmentPrefetchLimit: segmentPrefetchLimit.value,
           // Keep every codec selectable, automatic quality chooses them itself
-          dontChooseCodecs: true
+          dontChooseCodecs: supportsSmoothCodecSwitching()
         },
         manifest: {
           disableVideo: format === 'audio',
