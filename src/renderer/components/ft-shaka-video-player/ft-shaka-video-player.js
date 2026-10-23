@@ -2391,7 +2391,7 @@ export default defineComponent({
     /**
      * Yes a map would be much more suitable for this (unlike objects they retain the order that items were inserted),
      * but Vue 2 doesn't support reactivity on Maps, so we have to use an array instead
-     * @type {import('vue').Ref<{uuid: string, translatedCategory: string, color: string, timeoutId: ReturnType<typeof setTimeout>|0, hideAt: number|null, hideRemainingMs: number, unskipped: boolean, countdownPaused: boolean, isHighlight: boolean, isMute: boolean, unskipTime: number|null}[]>}
+     * @type {import('vue').Ref<{uuid: string, translatedCategory: string, colors: string[], timeoutId: ReturnType<typeof setTimeout>|0, hideAt: number|null, hideRemainingMs: number, unskipped: boolean, countdownPaused: boolean, isHighlight: boolean, isMute: boolean, unskipTime: number|null}[]>}
      */
     const skippedSponsorBlockSegments = ref([])
     const sponsorBlockToastEditingUuid = ref(null)
@@ -2955,9 +2955,18 @@ export default defineComponent({
     }
 
     /**
-     * @param {{ uuid: string, groupUuids?: string[], translatedCategory: string, color: string, isHighlight?: boolean, unskipTime?: number }} toast
+     * One color per distinct category, in the order the categories are listed in the toast.
+     * @param {{ category: SponsorBlockCategory }[]} segments
+     * @returns {string[]}
      */
-    function upsertSkippedSponsorBlockToast({ uuid, groupUuids = [uuid], translatedCategory, color, isHighlight = false, unskipTime }) {
+    function getSponsorBlockToastColors(segments) {
+      return [...new Set(segments.map(({ category }) => category))].map(getSponsorBlockToastColor)
+    }
+
+    /**
+     * @param {{ uuid: string, groupUuids?: string[], translatedCategory: string, colors: string[], isHighlight?: boolean, unskipTime?: number }} toast
+     */
+    function upsertSkippedSponsorBlockToast({ uuid, groupUuids = [uuid], translatedCategory, colors, isHighlight = false, unskipTime }) {
       const hideAt = Date.now() + sponsorBlockSkippedToastDurationMs.value
 
       // segments skipped together share one toast, so replace older toasts for any of them
@@ -2971,7 +2980,7 @@ export default defineComponent({
         clearTimeout(existingSkip.timeoutId)
         existingSkip.groupUuids = groupUuids
         existingSkip.translatedCategory = translatedCategory
-        existingSkip.color = color
+        existingSkip.colors = colors
         existingSkip.unskipped = false
         existingSkip.hideRemainingMs = sponsorBlockSkippedToastDurationMs.value
         existingSkip.isHighlight = isHighlight
@@ -2994,7 +3003,7 @@ export default defineComponent({
         uuid,
         groupUuids,
         translatedCategory,
-        color,
+        colors,
         unskipped: false,
         hideAt,
         hideRemainingMs: sponsorBlockSkippedToastDurationMs.value,
@@ -3017,7 +3026,7 @@ export default defineComponent({
       if (existingToast) {
         clearTimeout(existingToast.timeoutId)
         existingToast.translatedCategory = translatedCategory
-        existingToast.color = color
+        existingToast.colors = [color]
         existingToast.unskipped = !(video.value?.muted ?? true)
         existingToast.hideAt = null
         existingToast.hideRemainingMs = 0
@@ -3032,7 +3041,7 @@ export default defineComponent({
       skippedSponsorBlockSegments.value.push({
         uuid,
         translatedCategory,
-        color,
+        colors: [color],
         unskipped: !(video.value?.muted ?? true),
         hideAt: null,
         hideRemainingMs: 0,
@@ -3083,7 +3092,7 @@ export default defineComponent({
       }
 
       toast.translatedCategory = formatSponsorBlockToastCategories(toastSegments)
-      toast.color = getSponsorBlockToastColor(toastSegments[0].category)
+      toast.colors = getSponsorBlockToastColors(toastSegments)
       // an unskipped group stays unskipped until playback passes its remaining segments,
       // keeping the original start so playback before them doesn't count as leaving the group
       const previousRange = toastSegments.map(segment => sponsorBlockDoNotSkipSegments.get(segment.uuid)).find(Boolean)
@@ -3333,7 +3342,7 @@ export default defineComponent({
         upsertSkippedSponsorBlockToast({
           uuid,
           translatedCategory: translateSponsorBlockCategory(segment.category),
-          color: getSponsorBlockToastColor(segment.category)
+          colors: [getSponsorBlockToastColor(segment.category)]
         })
       }
 
@@ -3361,7 +3370,7 @@ export default defineComponent({
         upsertSkippedSponsorBlockToast({
           uuid: segment.uuid,
           translatedCategory: translateSponsorBlockCategory(segment.category),
-          color: getSponsorBlockToastColor(segment.category),
+          colors: [getSponsorBlockToastColor(segment.category)],
           isHighlight: true,
           unskipTime
         })
@@ -3670,7 +3679,7 @@ export default defineComponent({
           uuid: skippedSegments[0].uuid,
           groupUuids: skippedSegments.map(({ uuid }) => uuid),
           translatedCategory: formatSponsorBlockToastCategories(skippedSegments),
-          color: getSponsorBlockToastColor(skippedSegments[0].category)
+          colors: getSponsorBlockToastColors(skippedSegments)
         })
       }
     }
@@ -3989,7 +3998,7 @@ export default defineComponent({
           uuid,
           groupUuids: toastEntry.groupUuids,
           translatedCategory: toastEntry.translatedCategory,
-          color: toastEntry.color
+          colors: toastEntry.colors
         })
       }
 
