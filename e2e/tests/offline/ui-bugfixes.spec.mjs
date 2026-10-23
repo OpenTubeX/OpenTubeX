@@ -1871,6 +1871,8 @@ test.describe('thumbnail watched progress', () => {
     await expect(thumbnail).toHaveCSS('border-radius', '16px')
     await expect(progress).toBeVisible()
     const progressPath = progress.locator('.embeddedProgressPath')
+    // The path starts from a placeholder size until its resize observer reports the thumbnail.
+    await expect(progressPath).toHaveAttribute('d', /A 14\.5 14\.5/)
     const progressGeometry = await progressPath.evaluate(element => {
       const line = getComputedStyle(element)
       return {
