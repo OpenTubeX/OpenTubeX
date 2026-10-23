@@ -532,7 +532,11 @@ const playlistPageLinkTo = computed(() => ({
 /** @type {import('vue').ComputedRef<string>} */
 const userPlaylistSortOrder = computed(() => store.getters.getUserPlaylistSortOrder)
 
-const sortOrder = computed(() => isUserPlaylist.value ? userPlaylistSortOrder.value : SORT_BY_VALUES.Custom)
+// Playlists without their own sort order follow the setting
+const sortOrder = computed(() => {
+  if (!isUserPlaylist.value) { return SORT_BY_VALUES.Custom }
+  return selectedUserPlaylist.value?.sortOrder ?? userPlaylistSortOrder.value
+})
 
 const isSortOrderCustom = computed(() => sortOrder.value === SORT_BY_VALUES.Custom)
 
@@ -601,6 +605,11 @@ watch(selectedUserPlaylistVideoCount, () => {
 watch(selectedUserPlaylistLastUpdatedAt, () => {
   // Re-fetch from local store when current user playlist updated
   parseUserPlaylist(selectedUserPlaylist.value)
+})
+
+watch([() => props.playlistId, sortOrder], ([id], [oldId]) => {
+  // Re-sort when the playlist page changes the sort order. Switching playlists loads them separately.
+  if (id === oldId && selectedUserPlaylist.value != null) parseUserPlaylist(selectedUserPlaylist.value)
 })
 
 watch(() => props.videoId, (newId, oldId) => {

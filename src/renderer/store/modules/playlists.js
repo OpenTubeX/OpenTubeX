@@ -268,6 +268,18 @@ const actions = {
     }
   },
 
+  async updatePlaylistSortOrder({ commit }, { _id, sortOrder }) {
+    // Sorting is a view preference, so it leaves `lastUpdatedAt` alone
+    const playlist = { _id, sortOrder }
+
+    try {
+      await DBPlaylistHandlers.upsert(playlist)
+      commit('upsertPlaylistToList', playlist)
+    } catch (errMessage) {
+      console.error(errMessage)
+    }
+  },
+
   addVideo({ commit }, payload) {
     const { _id, videoData } = payload
     const pendingKey = `${_id}:${videoData.videoId}`

@@ -351,7 +351,7 @@ import {
   showToast,
   writeFileWithPicker,
 } from '../../helpers/utils'
-import { processToBeAddedPlaylistVideo } from '../../helpers/playlists'
+import { processToBeAddedPlaylistVideo, SORT_BY_VALUES } from '../../helpers/playlists'
 import { normalizePlaylistThumbnail } from '../../helpers/playlist-thumbnails'
 import {
   convertLibreTubeSubscriptions,
@@ -1843,6 +1843,7 @@ async function importPlaylists() {
     'customThumbnail',
     'addVideosToTop',
     'shuffleByDefault',
+    'sortOrder',
   ]
 
   const ignoredKeys = [
@@ -1922,6 +1923,10 @@ async function importPlaylists() {
 
         if (requiredKeys.includes(key)) {
           countRequiredKeysPresent++
+        }
+      } else if (key === 'sortOrder') {
+        if (Object.values(SORT_BY_VALUES).includes(playlistData.sortOrder)) {
+          playlistObject.sortOrder = playlistData.sortOrder
         }
       } else if (!ignoredKeys.includes(key)) {
         // Do nothing for keys to be ignored
@@ -2019,6 +2024,7 @@ async function importPlaylists() {
       ...(Object.hasOwn(playlistObject, 'customThumbnail') ? { customThumbnail: playlistObject.customThumbnail } : {}),
       ...(Object.hasOwn(playlistObject, 'addVideosToTop') ? { addVideosToTop: playlistObject.addVideosToTop } : {}),
       ...(Object.hasOwn(playlistObject, 'shuffleByDefault') ? { shuffleByDefault: playlistObject.shuffleByDefault } : {}),
+      ...(Object.hasOwn(playlistObject, 'sortOrder') ? { sortOrder: playlistObject.sortOrder } : {}),
       videos: orderedVideos
     })
   })

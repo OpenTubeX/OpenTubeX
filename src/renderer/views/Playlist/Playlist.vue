@@ -111,7 +111,7 @@
           :select-values="SORT_BY_SELECT_VALUES"
           :placeholder="t('Global.Sort By')"
           :icon="sortOrderIcon"
-          @change="updateUserPlaylistSortOrder"
+          @change="updatePlaylistSortOrder"
         />
         <AutoScrollWrapper
           v-if="visiblePlaylistItems.length > 0"
@@ -451,7 +451,11 @@ const thumbnailPreference = computed(() => store.getters.getThumbnailPreference)
 /** @type {import('vue').ComputedRef<string>} */
 const userPlaylistSortOrder = computed(() => store.getters.getUserPlaylistSortOrder)
 
-const sortOrder = computed(() => isUserPlaylistRequested.value ? userPlaylistSortOrder.value : SORT_BY_VALUES.Custom)
+// Playlists without their own sort order follow the setting
+const sortOrder = computed(() => {
+  if (!isUserPlaylistRequested.value) { return SORT_BY_VALUES.Custom }
+  return selectedUserPlaylist.value?.sortOrder ?? userPlaylistSortOrder.value
+})
 
 const playlistId = computed(() => route.params.id)
 
@@ -798,8 +802,8 @@ const sortBySelectNames = computed(() => {
 /**
  * @param {string} value
  */
-function updateUserPlaylistSortOrder(value) {
-  store.dispatch('updateUserPlaylistSortOrder', value)
+function updatePlaylistSortOrder(value) {
+  store.dispatch('updatePlaylistSortOrder', { _id: playlistId.value, sortOrder: value })
 }
 
 /** @type {import('vue').ComputedRef<number>} */
