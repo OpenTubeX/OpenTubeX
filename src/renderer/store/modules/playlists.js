@@ -268,16 +268,13 @@ const actions = {
     }
   },
 
-  async updatePlaylistSortOrder({ state, commit }, { _id, sortOrder }) {
-    // Another window may have deleted it, so do not recreate a partial playlist
-    if (!state.playlists.some(playlist => playlist._id === _id)) return
-
+  async updatePlaylistSortOrder({ commit }, { _id, sortOrder }) {
     // Sorting is a view preference, so it leaves `lastUpdatedAt` alone
-    const playlist = { _id, sortOrder }
-
     try {
-      await DBPlaylistHandlers.upsert(playlist)
-      commit('upsertPlaylistToList', playlist)
+      // Another window may have deleted the playlist, which must stay deleted
+      if (await DBPlaylistHandlers.updateSortOrder(_id, sortOrder)) {
+        commit('upsertPlaylistToList', { _id, sortOrder })
+      }
     } catch (errMessage) {
       console.error(errMessage)
     }

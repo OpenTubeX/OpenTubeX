@@ -835,6 +835,12 @@ class Playlists {
     return db.playlists.updateAsync({ _id: playlist._id }, { $set: playlist }, { upsert: true })
   }
 
+  /** Unlike `upsert`, this never recreates a playlist that was deleted */
+  static async updateSortOrder(_id, sortOrder) {
+    const { numAffected } = await db.playlists.updateAsync({ _id }, { $set: { sortOrder } }, { upsert: false })
+    return numAffected > 0
+  }
+
   static async upsertIfUnchanged(playlist, previous) {
     const snapshot = JSON.stringify(previous)
     const { numAffected } = await db.playlists.updateAsync(

@@ -70,7 +70,11 @@ test('each playlist keeps its own sort order across restarts', async ({ app, pag
   await expect(titles(page)).toHaveText(customTitles)
   await expect(page.locator('.sortSelect select')).toHaveValue('custom')
 
+  // A playlist deleted in another window is not recreated from its sort order.
+  await page.evaluate(() => window.$store.dispatch('updatePlaylistSortOrder', { _id: 'deleted', sortOrder: 'custom' }))
+
   page = (await app.relaunch()).page
+  expect(await page.evaluate(() => window.$store.getters.getAllPlaylists.map(playlist => playlist._id))).not.toContain('deleted')
   await openPlaylist(page, 'Sorted mix')
   await expect(page.locator('.sortSelect select')).toHaveValue('video_title_ascending')
   await expect(titles(page)).toHaveText(ascendingTitles)

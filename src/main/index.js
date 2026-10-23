@@ -6034,6 +6034,14 @@ function runApp() {
           return saved
         }
 
+        case DBActions.PLAYLISTS.UPDATE_SORT_ORDER: {
+          const saved = await baseHandlers.playlists.updateSortOrder(data._id, data.sortOrder)
+          if (saved) {
+            syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: SyncEvents.GENERAL.UPSERT, data })
+          }
+          return saved
+        }
+
         case DBActions.PLAYLISTS.REPAIR_METADATA:
           return await baseHandlers.playlists.repairMetadata(data, update => {
             syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: SyncEvents.PLAYLISTS.REPAIR_METADATA, data: update })
