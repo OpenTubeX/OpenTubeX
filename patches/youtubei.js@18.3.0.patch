@@ -1,6 +1,6 @@
 diff --git a/dist/src/parser/classes/CommentFilterContextView.d.ts b/dist/src/parser/classes/CommentFilterContextView.d.ts
 new file mode 100644
-index 0000000..38ae8fb
+index 0000000000000000000000000000000000000000..38ae8fba7c1c76c25f316b3b989e65694a8ba096
 --- /dev/null
 +++ b/dist/src/parser/classes/CommentFilterContextView.d.ts
 @@ -0,0 +1,8 @@
@@ -14,7 +14,7 @@ index 0000000..38ae8fb
 +}
 diff --git a/dist/src/parser/classes/CommentFilterContextView.js b/dist/src/parser/classes/CommentFilterContextView.js
 new file mode 100644
-index 0000000..25d0c68
+index 0000000000000000000000000000000000000000..25d0c68d41f6253b8442c0ed9067bf126c965e18
 --- /dev/null
 +++ b/dist/src/parser/classes/CommentFilterContextView.js
 @@ -0,0 +1,10 @@
@@ -30,7 +30,7 @@ index 0000000..25d0c68
 +}
 diff --git a/dist/src/parser/classes/ContentLoading.d.ts b/dist/src/parser/classes/ContentLoading.d.ts
 new file mode 100644
-index 0000000..ba9d9c0
+index 0000000000000000000000000000000000000000..ba9d9c00d7d88de7d36e3714bfdbd8269ae7d656
 --- /dev/null
 +++ b/dist/src/parser/classes/ContentLoading.d.ts
 @@ -0,0 +1,8 @@
@@ -44,7 +44,7 @@ index 0000000..ba9d9c0
 +}
 diff --git a/dist/src/parser/classes/ContentLoading.js b/dist/src/parser/classes/ContentLoading.js
 new file mode 100644
-index 0000000..0823bb6
+index 0000000000000000000000000000000000000000..0823bb69830d316d06a5d4c82904e8a0239c945a
 --- /dev/null
 +++ b/dist/src/parser/classes/ContentLoading.js
 @@ -0,0 +1,10 @@
@@ -59,7 +59,7 @@ index 0000000..0823bb6
 +    }
 +}
 diff --git a/dist/src/parser/classes/EngagementPanelSectionList.d.ts b/dist/src/parser/classes/EngagementPanelSectionList.d.ts
-index f9a57b0..7781e54 100644
+index f9a57b0fe2835c9929d0b94c9c69be7d2fd8a0b6..7781e54b6e0246083d23510fd503d8933fcbfcde 100644
 --- a/dist/src/parser/classes/EngagementPanelSectionList.d.ts
 +++ b/dist/src/parser/classes/EngagementPanelSectionList.d.ts
 @@ -9,10 +9,11 @@ import ProductList from './ProductList.js';
@@ -76,7 +76,7 @@ index f9a57b0..7781e54 100644
      panel_identifier?: string;
      identifier?: {
 diff --git a/dist/src/parser/classes/EngagementPanelSectionList.js b/dist/src/parser/classes/EngagementPanelSectionList.js
-index 66690de..df9ebfe 100644
+index 66690decd06b861f47529a511960365e6fb672c3..df9ebfe1a3e03c66e8c0cbd1f7ed5acd5c7027ac 100644
 --- a/dist/src/parser/classes/EngagementPanelSectionList.js
 +++ b/dist/src/parser/classes/EngagementPanelSectionList.js
 @@ -9,6 +9,7 @@ import ProductList from './ProductList.js';
@@ -96,8 +96,19 @@ index 66690de..df9ebfe 100644
          ]);
          this.panel_identifier = data.panelIdentifier;
          if ('identifier' in data) {
+diff --git a/dist/src/parser/classes/MenuCustomIconItem.js b/dist/src/parser/classes/MenuCustomIconItem.js
+index 8fcd5ecef6871bd8455f282783b47e052b8542fa..80cff0a5a1706146816b434137948494d8268e27 100644
+--- a/dist/src/parser/classes/MenuCustomIconItem.js
++++ b/dist/src/parser/classes/MenuCustomIconItem.js
+@@ -1,5 +1,6 @@
+ import { YTNode } from '../helpers.js';
+ import NavigationEndpoint from './NavigationEndpoint.js';
++import Text from './misc/Text.js';
+ export default class MenuCustomIconItem extends YTNode {
+     static type = 'MenuCustomIconItem';
+     action_text;
 diff --git a/dist/src/parser/classes/RecognitionShelf.js b/dist/src/parser/classes/RecognitionShelf.js
-index 1c35823..44cfd97 100644
+index 1c3582365177b9703a0eefa7d099ec24bf5728a1..44cfd978478531eb1975ba6c54b6033056668767 100644
 --- a/dist/src/parser/classes/RecognitionShelf.js
 +++ b/dist/src/parser/classes/RecognitionShelf.js
 @@ -14,7 +14,7 @@ export default class RecognitionShelf extends YTNode {
@@ -111,7 +122,7 @@ index 1c35823..44cfd97 100644
      }
 diff --git a/dist/src/parser/classes/ShoppingContentLineItemView.d.ts b/dist/src/parser/classes/ShoppingContentLineItemView.d.ts
 new file mode 100644
-index 0000000..68ec941
+index 0000000000000000000000000000000000000000..68ec9419255f0e7d5d6f2d128bbda93027e4d95e
 --- /dev/null
 +++ b/dist/src/parser/classes/ShoppingContentLineItemView.d.ts
 @@ -0,0 +1,10 @@
@@ -127,7 +138,7 @@ index 0000000..68ec941
 +}
 diff --git a/dist/src/parser/classes/ShoppingContentLineItemView.js b/dist/src/parser/classes/ShoppingContentLineItemView.js
 new file mode 100644
-index 0000000..7650338
+index 0000000000000000000000000000000000000000..7650338f64fde687ddbf4ad9b231a9374a8b05a2
 --- /dev/null
 +++ b/dist/src/parser/classes/ShoppingContentLineItemView.js
 @@ -0,0 +1,16 @@
@@ -149,7 +160,7 @@ index 0000000..7650338
 +}
 diff --git a/dist/src/parser/classes/ShoppingContentLineView.d.ts b/dist/src/parser/classes/ShoppingContentLineView.d.ts
 new file mode 100644
-index 0000000..c42fca3
+index 0000000000000000000000000000000000000000..c42fca30e494fdd075f4460c6dfe9b5ade29d1fa
 --- /dev/null
 +++ b/dist/src/parser/classes/ShoppingContentLineView.d.ts
 @@ -0,0 +1,11 @@
@@ -166,7 +177,7 @@ index 0000000..c42fca3
 +}
 diff --git a/dist/src/parser/classes/ShoppingContentLineView.js b/dist/src/parser/classes/ShoppingContentLineView.js
 new file mode 100644
-index 0000000..96b6d82
+index 0000000000000000000000000000000000000000..96b6d82506cf02a46d95eb417a9f912a55a11202
 --- /dev/null
 +++ b/dist/src/parser/classes/ShoppingContentLineView.js
 @@ -0,0 +1,19 @@
@@ -191,7 +202,7 @@ index 0000000..96b6d82
 +}
 diff --git a/dist/src/parser/classes/ShoppingTimelyShelfContentView.d.ts b/dist/src/parser/classes/ShoppingTimelyShelfContentView.d.ts
 new file mode 100644
-index 0000000..198de1e
+index 0000000000000000000000000000000000000000..198de1e2bf8f82ddefc543a4d38afa532b08d626
 --- /dev/null
 +++ b/dist/src/parser/classes/ShoppingTimelyShelfContentView.d.ts
 @@ -0,0 +1,16 @@
@@ -213,7 +224,7 @@ index 0000000..198de1e
 +}
 diff --git a/dist/src/parser/classes/ShoppingTimelyShelfContentView.js b/dist/src/parser/classes/ShoppingTimelyShelfContentView.js
 new file mode 100644
-index 0000000..105c3ee
+index 0000000000000000000000000000000000000000..105c3ee763bcd9281c1b66740fa1848676657c43
 --- /dev/null
 +++ b/dist/src/parser/classes/ShoppingTimelyShelfContentView.js
 @@ -0,0 +1,27 @@
@@ -246,7 +257,7 @@ index 0000000..105c3ee
 +}
 diff --git a/dist/src/parser/classes/ShoppingTimelyShelfView.d.ts b/dist/src/parser/classes/ShoppingTimelyShelfView.d.ts
 new file mode 100644
-index 0000000..e6c682a
+index 0000000000000000000000000000000000000000..e6c682a8ec8c43773c5d9a50d645b5e449d33e60
 --- /dev/null
 +++ b/dist/src/parser/classes/ShoppingTimelyShelfView.d.ts
 @@ -0,0 +1,28 @@
@@ -280,7 +291,7 @@ index 0000000..e6c682a
 +}
 diff --git a/dist/src/parser/classes/ShoppingTimelyShelfView.js b/dist/src/parser/classes/ShoppingTimelyShelfView.js
 new file mode 100644
-index 0000000..45748bd
+index 0000000000000000000000000000000000000000..45748bdbfe50e166f9044b0cbbb9467faad8938c
 --- /dev/null
 +++ b/dist/src/parser/classes/ShoppingTimelyShelfView.js
 @@ -0,0 +1,32 @@
@@ -317,7 +328,7 @@ index 0000000..45748bd
 +    }
 +}
 diff --git a/dist/src/parser/classes/StructuredDescriptionContent.d.ts b/dist/src/parser/classes/StructuredDescriptionContent.d.ts
-index 759dc05..14c0596 100644
+index 759dc05e2e4d88abe80b6835cc180b3cad36ccf3..14c05967e3aee32d4f5319e26710e2d04116b6b9 100644
 --- a/dist/src/parser/classes/StructuredDescriptionContent.d.ts
 +++ b/dist/src/parser/classes/StructuredDescriptionContent.d.ts
 @@ -18,8 +18,9 @@ import ItemSection from './ItemSection.js';
@@ -332,7 +343,7 @@ index 759dc05..14c0596 100644
      constructor(data: RawNode);
  }
 diff --git a/dist/src/parser/classes/StructuredDescriptionContent.js b/dist/src/parser/classes/StructuredDescriptionContent.js
-index 1f30cdb..991ff28 100644
+index 1f30cdbcab0697523647097793661624c31e21d7..991ff2844db7bf6b3e77e6f6c9d532bf20f169c5 100644
 --- a/dist/src/parser/classes/StructuredDescriptionContent.js
 +++ b/dist/src/parser/classes/StructuredDescriptionContent.js
 @@ -18,6 +18,7 @@ import ItemSection from './ItemSection.js';
@@ -353,7 +364,7 @@ index 1f30cdb..991ff28 100644
      }
  }
 diff --git a/dist/src/parser/classes/VideoAttributeView.d.ts b/dist/src/parser/classes/VideoAttributeView.d.ts
-index fe90c6f..f02b34a 100644
+index fe90c6fe53ec4428d9a55c60902da64771541c60..f02b34a6727688b0dc21c800d96277b8151e9272 100644
 --- a/dist/src/parser/classes/VideoAttributeView.d.ts
 +++ b/dist/src/parser/classes/VideoAttributeView.d.ts
 @@ -14,6 +14,7 @@ export default class VideoAttributeView extends YTNode {
@@ -365,7 +376,7 @@ index fe90c6f..f02b34a 100644
      overflow_menu_a11y_label: string;
      constructor(data: RawNode);
 diff --git a/dist/src/parser/classes/VideoAttributeView.js b/dist/src/parser/classes/VideoAttributeView.js
-index f310e85..f1c1acb 100644
+index f310e850d6f41c9e85457d6bfad62c4dc80af605..f1c1acb6b21af0d33cd153b058b3ec0957cc3c1a 100644
 --- a/dist/src/parser/classes/VideoAttributeView.js
 +++ b/dist/src/parser/classes/VideoAttributeView.js
 @@ -12,6 +12,7 @@ export default class VideoAttributeView extends YTNode {
@@ -385,7 +396,7 @@ index f310e85..f1c1acb 100644
          this.overflow_menu_a11y_label = data.overflowMenuA11yLabel;
      }
 diff --git a/dist/src/parser/nodes.d.ts b/dist/src/parser/nodes.d.ts
-index e10e14e..a102639 100644
+index e10e14e8d4f8e84ad3c309dc3b75afd56f0fb07f..a10263982711a9e24d591fdefa5fd3ad83ce9ef3 100644
 --- a/dist/src/parser/nodes.d.ts
 +++ b/dist/src/parser/nodes.d.ts
 @@ -83,6 +83,7 @@ export { default as RunAttestationCommand } from './classes/commands/RunAttestat
@@ -416,7 +427,7 @@ index e10e14e..a102639 100644
  export { default as ShowCustomThumbnail } from './classes/ShowCustomThumbnail.js';
  export { default as ShowingResultsFor } from './classes/ShowingResultsFor.js';
 diff --git a/dist/src/parser/nodes.js b/dist/src/parser/nodes.js
-index 1b6b23b..ab10c47 100644
+index 1b6b23b727521b5cb735a9785ff7bcaf73d82a55..ab10c47043a91e391f05c489b5abb0df288e83f4 100644
 --- a/dist/src/parser/nodes.js
 +++ b/dist/src/parser/nodes.js
 @@ -85,6 +85,7 @@ export { default as RunAttestationCommand } from './classes/commands/RunAttestat
@@ -447,7 +458,7 @@ index 1b6b23b..ab10c47 100644
  export { default as ShowCustomThumbnail } from './classes/ShowCustomThumbnail.js';
  export { default as ShowingResultsFor } from './classes/ShowingResultsFor.js';
 diff --git a/dist/src/parser/youtube/LiveChat.d.ts b/dist/src/parser/youtube/LiveChat.d.ts
-index 1ad3f9c..9ae5489 100644
+index 1ad3f9ca9eaa64816bad08aa5a3f9c7f2445719d..9ae5489273f84978f584ef71c8ee30a4e74f666f 100644
 --- a/dist/src/parser/youtube/LiveChat.d.ts
 +++ b/dist/src/parser/youtube/LiveChat.d.ts
 @@ -54,6 +54,30 @@ export default class LiveChat extends EventEmitter<LiveChatEvents> {
@@ -482,7 +493,7 @@ index 1ad3f9c..9ae5489 100644
       * Sends a message.
       * @param text - Text to send.
 diff --git a/dist/src/parser/youtube/LiveChat.js b/dist/src/parser/youtube/LiveChat.js
-index e2d7e16..ad48beb 100644
+index e2d7e16e7f718f2547cbfa280fa20128d6e7d7eb..ad48beb21ea8426ade2819847ac37fa435631f9e 100644
 --- a/dist/src/parser/youtube/LiveChat.js
 +++ b/dist/src/parser/youtube/LiveChat.js
 @@ -18,8 +18,14 @@ export default class LiveChat extends EventEmitter {
@@ -727,7 +738,7 @@ index e2d7e16..ad48beb 100644
      /**
       * Ensures actions are emitted at the right speed.
 diff --git a/dist/src/utils/ProtoUtils.js b/dist/src/utils/ProtoUtils.js
-index 00a367b..3f4771a 100644
+index 00a367bb12437a8c2b3c0047fe6298960e96a36b..3f4771abb5112856fd77b04bfdb41587ae42e140 100644
 --- a/dist/src/utils/ProtoUtils.js
 +++ b/dist/src/utils/ProtoUtils.js
 @@ -31,7 +31,7 @@ export function encodeCommentActionParams(type, args = {}) {
