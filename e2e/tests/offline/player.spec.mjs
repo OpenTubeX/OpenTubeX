@@ -3286,6 +3286,47 @@ test.describe('playback when navigating away', () => {
     expect(displaced, 'the browsing page must not show around the preview').toEqual([])
   })
 
+  test('covers the sidebar with the returning Watch preview', async ({ app, page }) => {
+    await openDemoVideo({ app, page })
+    const player = page.locator('.ftVideoPlayer')
+    await page.getByRole('link', { name: 'Go to Subscriptions', exact: true }).click()
+    await expect(page).toHaveURL(/#\/subscriptions$/)
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+    await expect(page.locator('.app > .sideNav')).toBeVisible()
+    await page.evaluate(() => {
+      document.documentElement.dataset.reducedMotion = 'no-preference'
+      window.sideNavHits = []
+      const sample = () => {
+        const preview = document.querySelector('.watchRestorePreview')
+        if (preview) {
+          const sideNav = document.querySelector('.app > .sideNav').getBoundingClientRect()
+          // Hit testing skips the inert, pointer-events: none preview. Its
+          // stacking does not, so lift both for this probe only.
+          preview.inert = false
+          preview.style.pointerEvents = 'auto'
+          const hit = document.elementFromPoint(sideNav.left + sideNav.width / 2, (sideNav.top + sideNav.bottom) / 2)
+          preview.inert = true
+          preview.style.removeProperty('pointer-events')
+          window.sideNavHits.push(preview.contains(hit) ? 'preview' : hit?.closest('.sideNav') ? 'sideNav' : 'other')
+        }
+        window.sideNavHitFrame = requestAnimationFrame(sample)
+      }
+      sample()
+    })
+    await player.locator('.scrollMiniScrollTop').click()
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+    await expect(page.locator('.watchDragPreview')).toHaveCount(0)
+    const hits = await page.evaluate(() => {
+      cancelAnimationFrame(window.sideNavHitFrame)
+      return window.sideNavHits
+    })
+    expect(hits.length).toBeGreaterThan(0)
+    // The preview fades in its background over the browsing page. The sidebar
+    // leaves with Watch, so it must fade with that page instead of staying on top.
+    expect(hits.filter(hit => hit === 'sideNav'), 'the sidebar stays below the returning preview').toEqual([])
+  })
+
   test('keeps the returning video corners between the mini and inline radii', { tag: '@scale' }, async ({ app, page }) => {
     await openDemoVideo({ app, page })
     const player = page.locator('.ftVideoPlayer')

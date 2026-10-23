@@ -481,6 +481,14 @@
   z-index: 1;
 }
 
+/* The returning Watch preview already spans the sidebar it will hide. Paint it
+   above the sidebar, so the sidebar fades out with the browsing page instead of
+   covering the preview until the route changes. */
+.app > :deep(.routerView:has(.watchRestorePreview)) {
+  position: relative;
+  z-index: 3;
+}
+
 .app.capacitorTabs > .routerView {
   position: relative;
 }
