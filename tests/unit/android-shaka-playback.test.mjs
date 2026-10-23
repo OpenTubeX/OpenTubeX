@@ -14,6 +14,7 @@ test('Android shows a thumbnail over the video while waiting for playback', () =
   const context = {
     showCountdownOverlay: false,
     showPoster: true,
+    pictureInPictureActive: false,
     showEndedScreen: false,
     audioPlayerMode: false,
     mobileMiniBar: false,
@@ -27,6 +28,9 @@ test('Android shows a thumbnail over the video while waiting for playback', () =
   const hidden = render(context)
   assert.equal(hidden.type, 'div')
   assert.equal(hidden.props['data-visible'], false)
+  context.pictureInPictureActive = true
+  assert.equal(render(context).props['data-visible'], true)
+  context.pictureInPictureActive = false
   context.audioPlayerMode = true
   context.showPoster = true
   assert.equal(render(context).props['data-visible'], false)

@@ -182,6 +182,7 @@ test('shows the poster overlay inline while in Picture-in-Picture', async ({ app
   const video = await openMockedVideo(page)
   const poster = page.locator(`${activeTab} .ftVideoPlayer .countdownPoster`)
 
+  await expect(poster).toBeAttached()
   await expect(poster).toBeHidden()
 
   await video.evaluate(element => element.requestPictureInPicture())
