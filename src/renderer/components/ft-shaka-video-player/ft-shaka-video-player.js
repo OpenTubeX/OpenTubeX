@@ -8003,6 +8003,7 @@ export default defineComponent({
       handleScrollMiniWindowResize,
       handleScrollMiniWindowScroll,
       isNativeFullscreenActive,
+      rememberDockOrigin,
       rememberInlinePlayerLayoutHeight,
       repairScrollMiniPlaceholderHeight,
       scrollMiniAnchor,
@@ -8221,7 +8222,8 @@ export default defineComponent({
     // Refresh once that restoration is complete so an already-active mini player
     // is placed directly at its saved bounds instead of replaying its entrance.
     useTabLifecycle({
-      activate: () => updateScrollMiniPlayer({ animateActivation: false })
+      activate: () => updateScrollMiniPlayer({ animateActivation: false }),
+      deactivate: rememberDockOrigin
     })
 
     const ambientModeVisible = computed(() => {

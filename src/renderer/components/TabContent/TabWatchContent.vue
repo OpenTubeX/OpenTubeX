@@ -7,7 +7,7 @@
     <div
       v-show="isWatchRoute || previewStyle"
       ref="watchRoot"
-      :class="{ watchDragPreview: previewStyle, watchRestorePreview: previewStyle && previewRestoring }"
+      :class="{ watchDragPreview: previewStyle, watchRestorePreview: restorePreviewShown }"
       :style="previewStyle"
       :inert="!isWatchRoute"
       :aria-hidden="String(!isWatchRoute)"
@@ -32,6 +32,7 @@ import { tabLifecycleService } from '../../tabs/TabLifecycleService'
 import { tabLifecycleKey, tabPresentedKey, watchNavigationKey } from '../../tabs/TabContext'
 import { mobileNavigationMinimizePreview } from '../../helpers/mobileNavigationScroll'
 import { getPreviousBrowsingRoute } from '../../tabs/playerDockDestination'
+import { useRootClass } from '../../helpers/rootClasses'
 
 const props = defineProps({
   tabId: { type: String, required: true },
@@ -51,7 +52,10 @@ let previewScroll = null
 let previewOrigin = null
 let previewViewport = null
 let previewResizeObserver = null
-let previewRestoring = false
+const previewRestoring = ref(false)
+const restorePreviewShown = computed(() => Boolean(previewStyle.value) && previewRestoring.value)
+// App lifts the route above the sidebar while the preview covers it.
+useRootClass('appWatchRestorePreview', restorePreviewShown)
 let previewReady = null
 let previewInterrupted = false
 let previewHistoryEntry = null
@@ -157,7 +161,7 @@ async function minimize() {
 
 function beginMinimizePreview() {
   if (previewActive.value) return
-  previewRestoring = false
+  previewRestoring.value = false
   previewInterrupted = false
   if (document.querySelector('.app.capacitorPhoneLayout')) mobileNavigationMinimizePreview.value = props.tabId
   previewViewport = null
@@ -196,7 +200,7 @@ function beginMinimizePreview() {
 
 function beginRestorePreview() {
   if (previewActive.value || !detached.value) return false
-  previewRestoring = true
+  previewRestoring.value = true
   previewScroll = { left: window.scrollX, top: window.scrollY }
   const parentBounds = previewHost.value.getBoundingClientRect()
   // The retained Watch host follows the browsing page in document flow. Use
@@ -244,7 +248,7 @@ function beginRestorePreview() {
 function updatePreviewPosition() {
   const root = watchRoot.value
   if (!root || !previewOrigin) return
-  if (previewRestoring && previewViewport) {
+  if (previewRestoring.value && previewViewport) {
     const bounds = root.getBoundingClientRect()
     root.style.left = `${(Number.parseFloat(root.style.left) || 0) + previewViewport.left - bounds.left}px`
     root.style.top = `${(Number.parseFloat(root.style.top) || 0) + previewViewport.top - bounds.top}px`
@@ -255,16 +259,16 @@ function updatePreviewPosition() {
 }
 
 watch(isWatchRoute, () => {
-  if (!isWatchRoute.value && previewActive.value && !previewRestoring && !minimized.value) clearMinimizePreview()
+  if (!isWatchRoute.value && previewActive.value && !previewRestoring.value && !minimized.value) clearMinimizePreview()
   // The retained Watch host moves when the browsing route is replaced. Keep
   // its visible preview in place until the player returns to its inline layout.
-  if (previewRestoring && previewActive.value) updatePreviewPosition()
+  if (previewRestoring.value && previewActive.value) updatePreviewPosition()
 }, { flush: 'post' })
 
 function updateMinimizePreview(progress) {
   const root = watchRoot.value
   if (!root) return
-  if (!previewRestoring) {
+  if (!previewRestoring.value) {
     root.style.opacity = String(1 - progress)
     return
   }
@@ -276,7 +280,7 @@ function updateMinimizePreview(progress) {
 }
 
 async function finishMinimizePreview(commit) {
-  if (previewRestoring) {
+  if (previewRestoring.value) {
     if (commit && !disposed) {
       const browsingScroll = previewScroll
       window.scrollTo({ left: 0, top: 0, behavior: 'instant' })
@@ -317,7 +321,7 @@ async function finishMinimizePreview(commit) {
 function interruptMinimizePreview() {
   // Our own dock marks minimized before navigating; all other navigation
   // invalidates the pending commit, even while lifecycle work is awaiting.
-  if (previewActive.value && !previewRestoring && !minimized.value) previewInterrupted = true
+  if (previewActive.value && !previewRestoring.value && !minimized.value) previewInterrupted = true
 }
 
 function preservePreviewHistoryScroll() {
@@ -331,7 +335,7 @@ function preservePreviewHistoryScroll() {
 
 function clearMinimizePreview() {
   preservePreviewHistoryScroll()
-  const watchScroll = previewActive.value && !previewRestoring && props.route.fullPath === previewHistoryEntry?.fullPath && props.presented ? previewScroll : null
+  const watchScroll = previewActive.value && !previewRestoring.value && props.route.fullPath === previewHistoryEntry?.fullPath && props.presented ? previewScroll : null
   previewHistoryEntry = null
   previewScroll = null
   previewReady = null

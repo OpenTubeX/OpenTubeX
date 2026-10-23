@@ -481,6 +481,17 @@
   z-index: 1;
 }
 
+/* The returning Watch preview already spans the sidebar it will hide. Paint it
+   above the sidebar, so the sidebar fades out with the browsing page instead of
+   covering the preview until the route changes. Phone layouts keep their bottom
+   navigation and lower mini player layer above the route. */
+@media only screen and (width > 680px) {
+  :global(:root.appWatchRestorePreview:not(.appPhoneLayout) .app > .routerView) {
+    position: relative;
+    z-index: 3;
+  }
+}
+
 .app.capacitorTabs > .routerView {
   position: relative;
 }

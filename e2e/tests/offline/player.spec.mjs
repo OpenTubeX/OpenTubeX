@@ -3136,6 +3136,64 @@ test.describe('skip silence default', () => {
 test.describe('playback when navigating away', () => {
   test.use({ seed: { settings: { ...PLAYER_SEED, keepPlayingOnNavigation: true } } })
 
+  /**
+   * Hides the Watch view with motion enabled and records the player's bounds
+   * on every frame until it has docked.
+   * @param {import('@playwright/test').Page} page
+   * @param {import('@playwright/test').Locator} player
+   * @param {() => Promise<void>} hideWatch
+   */
+  async function sampleDocking(page, player, hideWatch) {
+    await player.evaluate(element => {
+      document.documentElement.dataset.reducedMotion = 'no-preference'
+      window.dockingFrames = []
+      const sample = () => {
+        const { left, top, width, height } = element.getBoundingClientRect()
+        window.dockingFrames.push({ left, top, width, height })
+        window.dockingFrame = requestAnimationFrame(sample)
+      }
+      sample()
+    })
+    await hideWatch()
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+    return await page.evaluate(() => {
+      cancelAnimationFrame(window.dockingFrame)
+      return window.dockingFrames
+    })
+  }
+
+  /** @param {{ left: number, top: number, width: number, height: number }[]} frames */
+  function expectMorphIntoMiniPlayer(frames) {
+    const start = frames[0]
+    const end = frames.at(-1)
+    expect(end.width).toBeLessThan(start.width / 2)
+    const shrinking = frames.filter(frame => frame.width < start.width - 5 && frame.width > end.width + 5)
+    expect(shrinking.length, 'the video visibly shrinks into the mini player').toBeGreaterThan(2)
+    const growing = frames.slice(1).filter((frame, index) => frame.width > frames[index].width + 0.5)
+    expect(growing, 'the video only shrinks while docking').toEqual([])
+  }
+
+  test('morphs the video into the mini player when navigating away', { tag: '@scale' }, async ({ app, page }) => {
+    await openDemoVideo({ app, page })
+    const player = page.locator('.ftVideoPlayer')
+    const frames = await sampleDocking(page, player, async () => {
+      await page.getByRole('link', { name: 'Go to Subscriptions', exact: true }).click()
+      await expect(page).toHaveURL(/#\/subscriptions$/)
+    })
+    expectMorphIntoMiniPlayer(frames)
+  })
+
+  test('morphs the video into the mini player when switching to another tab', { tag: '@scale' }, async ({ app, page }) => {
+    await openDemoVideo({ app, page })
+    const player = page.locator('.ftVideoPlayer')
+    const frames = await sampleDocking(page, player, async () => {
+      await page.locator('.tabBar .newTabButton').click()
+      await expect(page.locator('.tabBar .tab')).toHaveCount(2)
+    })
+    expectMorphIntoMiniPlayer(frames)
+  })
+
   test('keeps the ended mini player visible and replays while browsing', async ({ app, page }) => {
     await openDemoVideo({ app, page })
     const player = page.locator('.ftVideoPlayer')
@@ -3284,6 +3342,74 @@ test.describe('playback when navigating away', () => {
     expect(rects.length).toBeGreaterThan(0)
     const displaced = rects.filter(rect => Math.abs(rect.left - final.left) > 1 || Math.abs(rect.top - final.top) > 1)
     expect(displaced, 'the browsing page must not show around the preview').toEqual([])
+  })
+
+  /**
+   * Expands the mini player with motion enabled and hit tests the center of
+   * the navigation on every frame of the returning Watch preview. Returns
+   * whether the preview, the navigation or something else is topmost there.
+   * @param {import('@playwright/test').Page} page
+   * @param {import('@playwright/test').Locator} player
+   */
+  async function sampleNavigationDuringReturn(page, player) {
+    await page.evaluate(() => {
+      document.documentElement.dataset.reducedMotion = 'no-preference'
+      window.navigationHits = []
+      const sample = () => {
+        const preview = document.querySelector('.watchRestorePreview')
+        if (preview) {
+          const navigation = document.querySelector('.app > .sideNav').getBoundingClientRect()
+          // Hit testing skips the inert, pointer-events: none preview. Its
+          // stacking does not, so lift both for this probe only.
+          preview.inert = false
+          preview.style.pointerEvents = 'auto'
+          const hit = document.elementFromPoint((navigation.left + navigation.right) / 2, (navigation.top + navigation.bottom) / 2)
+          preview.inert = true
+          preview.style.removeProperty('pointer-events')
+          window.navigationHits.push(preview.contains(hit) ? 'preview' : hit?.closest('.sideNav') ? 'navigation' : 'other')
+        }
+        window.navigationHitFrame = requestAnimationFrame(sample)
+      }
+      sample()
+    })
+    await player.locator('.scrollMiniScrollTop').click()
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+    await expect(page.locator('.watchDragPreview')).toHaveCount(0)
+    return await page.evaluate(() => {
+      cancelAnimationFrame(window.navigationHitFrame)
+      return window.navigationHits
+    })
+  }
+
+  test('covers the sidebar with the returning Watch preview', { tag: '@scale' }, async ({ app, page }) => {
+    await openDemoVideo({ app, page })
+    const player = page.locator('.ftVideoPlayer')
+    await page.getByRole('link', { name: 'Go to Subscriptions', exact: true }).click()
+    await expect(page).toHaveURL(/#\/subscriptions$/)
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+    await expect(page.locator('.app > .sideNav')).toBeVisible()
+    const hits = await sampleNavigationDuringReturn(page, player)
+    expect(hits.length).toBeGreaterThan(0)
+    // The preview fades in its background over the browsing page. The sidebar
+    // leaves with Watch, so it must fade with that page instead of staying on top.
+    expect(hits.filter(hit => hit === 'navigation'), 'the sidebar stays below the returning preview').toEqual([])
+  })
+
+  test('keeps the bottom navigation above the returning Watch preview', { tag: '@scale' }, async ({ app, page }) => {
+    await openDemoVideo({ app, page })
+    // The narrow layout hides the search box that opens the video.
+    await setWindowSize(app, page, { width: 600, height: 850 })
+    const player = page.locator('.ftVideoPlayer')
+    await page.getByRole('link', { name: 'Go to Subscriptions', exact: true }).click()
+    await expect(page).toHaveURL(/#\/subscriptions$/)
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+    await expect(page.locator('.app > .sideNav')).toBeVisible()
+    const hits = await sampleNavigationDuringReturn(page, player)
+    expect(hits.length).toBeGreaterThan(0)
+    // Narrow layouts keep their bottom navigation on Watch.
+    expect(hits.filter(hit => hit === 'preview'), 'the bottom navigation stays above the returning preview').toEqual([])
   })
 
   test('keeps the returning video corners between the mini and inline radii', { tag: '@scale' }, async ({ app, page }) => {

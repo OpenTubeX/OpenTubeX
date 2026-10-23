@@ -117,7 +117,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     canShow: () => canShowCrossTabMiniPlayer(),
     hide: () => deactivateScrollMiniPlayer(),
     show: () => {
-      if (!inlineDrag) activateScrollMiniPlayer(false)
+      if (!inlineDrag) dockFromOrigin()
       return scrollMiniPlayerActive.value
     },
   }
@@ -280,6 +280,8 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   let inlineDragFrame = null
   let scrollRestoreDrag = false
   let scrollMiniInlineHold = false
+  /** @type {DOMRect | null} */
+  let dockOrigin = null
 
   function positionMobileMiniBarOverlay(bar) {
     mobileMiniBarOverlayStyle.value = {
@@ -1279,15 +1281,18 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     scrollMiniIntersectionObserver.observe(anchor)
   }
 
-  /** @param {boolean} [animate] */
-  function activateScrollMiniPlayer(animate = true) {
+  /**
+   * @param {boolean} [animate]
+   * @param {DOMRect | null} [origin] where the player was before its view was hidden
+   */
+  function activateScrollMiniPlayer(animate = true, origin = null) {
     if (scrollMiniPlayerActive.value) return
 
     const playerContainer = container.value
     if (!playerContainer) return
     const shouldAnimate = animate && !isReducedMotionEnabled()
-    const previousRect = shouldAnimate ? playerContainer.getBoundingClientRect() : null
-    const previousVideoRect = previousRect ? video.value?.getBoundingClientRect() : null
+    const previousRect = shouldAnimate ? (origin ?? playerContainer.getBoundingClientRect()) : null
+    const previousVideoRect = previousRect && !origin ? video.value?.getBoundingClientRect() : null
 
     const layoutHeight = getScrollMiniPlaceholderLayoutHeight()
     if (layoutHeight < SCROLL_MINI_MIN_INLINE_LAYOUT_HEIGHT) {
@@ -1406,6 +1411,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     // reflow. Measuring before knowing whether the mini player can run at all
     // would do that on every scroll event even with the feature turned off.
     if (!canUseScrollMiniPlayer()) {
+      dockOrigin = null
       if (scrollMiniPlayerActive.value) {
         deactivateScrollMiniPlayer()
       }
@@ -1421,8 +1427,10 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
         syncScrollMiniPlayerState()
         updateScrollMiniDragHandleContrast()
       } else if (canActivateScrollMiniPlayer()) {
-        activateScrollMiniPlayer(false)
+        dockFromOrigin()
       }
+      // The origin only applies to the first docking after its view is hidden.
+      dockOrigin = null
       return
     }
 
@@ -1441,6 +1449,27 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     } else if (ratio < ENTER_MINI_RATIO && !scrollMiniInlineHold && canActivateScrollMiniPlayer()) {
       activateScrollMiniPlayer(animateActivation)
     }
+  }
+
+  /**
+   * Remembers where the inline player is while its Watch view is still shown.
+   * Docking after navigation or a tab switch then morphs from there, like
+   * scrolling past the player does.
+   */
+  function rememberDockOrigin() {
+    dockOrigin = null
+    const element = container.value
+    if (!element || scrollMiniPlayerActive.value || inlineDrag || usesMobileMiniBar() ||
+      fullWindowEnabled.value || isNativeFullscreenActive() || isReducedMotionEnabled()) return
+    const rect = element.getBoundingClientRect()
+    if (rect.width > 0 && rect.bottom > 0 && rect.top < window.innerHeight) dockOrigin = rect
+  }
+
+  // Dock a player whose view was hidden, morphing from its remembered place.
+  function dockFromOrigin() {
+    const origin = dockOrigin
+    dockOrigin = null
+    activateScrollMiniPlayer(origin !== null, origin)
   }
 
   function handleScrollMiniWindowScroll() {
@@ -1927,6 +1956,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   })
 
   watch([isActiveTab, playerSuspended], ([active, suspended]) => {
+    if (active || suspended) dockOrigin = null
     if (inlineDrag && !inlineDrag.finishing && (!active || suspended)) cancelScrollMiniPlayerDrag()
     if (suspended) {
       unregisterCrossTabMiniPlayer(crossTabMiniPlayerCandidate)
@@ -2022,6 +2052,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     handleScrollMiniWindowResize,
     handleScrollMiniWindowScroll,
     isNativeFullscreenActive,
+    rememberDockOrigin,
     rememberInlinePlayerLayoutHeight,
     repairScrollMiniPlaceholderHeight,
     scrollMiniAnchor,

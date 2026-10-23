@@ -37,6 +37,7 @@ function mountWatch(t, { tab = null, paused = false, hasLoaded = true, mounted =
   const tabBounds = { left: 0, top: 60.25, width: 412.25 }
   const listeners = new Map()
   const resizeObservers = new Set()
+  const rootClasses = new Map()
   let savedBrowsingScroll = null
   const viewport = {
     scrollX: 0, scrollY: 20, innerHeight: 800,
@@ -73,6 +74,7 @@ function mountWatch(t, { tab = null, paused = false, hasLoaded = true, mounted =
     },
     document: { querySelector: selector => ['.app.capacitorTabs', '.app.capacitorPhoneLayout'].includes(selector) && mobile ? {} : null },
     isReducedMotionEnabled: () => true,
+    useRootClass: (name, active) => rootClasses.set(name, active),
     defineProps: () => props,
     defineEmits: () => () => {},
     // The native scroll mini player lives outside the watch view's DOM tree.
@@ -102,7 +104,7 @@ function mountWatch(t, { tab = null, paused = false, hasLoaded = true, mounted =
     scope.stop()
   })
   return {
-    scrollCommits, mobileNavigationMinimizePreview, unmount, props, getters, provides, lifecycle, previewRoot, previewStyle, hostBounds, tabBounds, viewport, listeners, resizeObservers, titles, updateTitle,
+    scrollCommits, mobileNavigationMinimizePreview, unmount, props, getters, provides, lifecycle, previewRoot, previewStyle, hostBounds, tabBounds, viewport, listeners, resizeObservers, rootClasses, titles, updateTitle,
     disposals: () => disposals,
     savedBrowsingScroll: () => savedBrowsingScroll,
     navigate
@@ -394,10 +396,13 @@ for (const commit of [false, true]) {
   test(`upward drag reveals retained Watch before release and ${commit ? 'restores' : 'cancels'}`, async t => {
     const mounted = mountWatch(t, { paused: true, enabled: false })
     const navigation = mounted.provides.get('navigation')
+    const restoreRootClass = mounted.rootClasses.get('appWatchRestorePreview')
     navigation.beginMinimizePreview()
+    assert.equal(restoreRootClass.value, false, 'minimizing does not lift the route above the sidebar')
     await navigation.finishMinimizePreview(true)
     navigation.clearMinimizePreview(true)
     assert.equal(navigation.beginRestorePreview(), true)
+    assert.equal(restoreRootClass.value, true)
     assert.equal(mounted.props.route.path, '/history')
     assert.equal(mounted.provides.get('presented').value, true)
     assert.equal(mounted.previewRoot.style.opacity, '0')
@@ -405,6 +410,7 @@ for (const commit of [false, true]) {
     assert.ok(Number(mounted.previewRoot.style.opacity) > 0)
     await navigation.finishMinimizePreview(commit)
     navigation.clearMinimizePreview(!commit)
+    assert.equal(restoreRootClass.value, false)
     assert.equal(mounted.props.route.path, commit ? '/watch/video' : '/history')
     assert.equal(mounted.disposals(), 0)
     assert.equal(mounted.listeners.has('scroll'), false)
