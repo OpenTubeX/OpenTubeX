@@ -104,7 +104,7 @@ test.describe('channel settings', () => {
     }, channelSettingKeys)).toEqual([])
   })
 
-  test('turning off channel playback settings hides the automatic saving switches', async ({ page }) => {
+  test('turning off channel playback settings hides the automatic saving switches', { tag: '@scale' }, async ({ page }) => {
     await goToSettingsSection(page, 'playback')
 
     const section = page.locator('.settingsSection', { hasText: 'Enable channel playback settings' })
