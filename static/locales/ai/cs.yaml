@@ -1355,6 +1355,10 @@ Channel:
   More videos hidden: '+{count} dalších | +{count} dalších | +{count} dalších'
   Show in subscription feed: Zobrazit v odběrech
   Notify about new uploads: Oznamovat nový obsah
+  Upload Notifications On: "Při obnovení odběrů budete upozorněni na nový obsah od {channelName}"
+  Upload Notifications Off: "Nebudete upozorňováni na nový obsah od {channelName}"
+  Upload Notifications Disabled In Settings: "Oznámení pro {channelName} jsou zapnutá, ale oznámení o novém obsahu jsou vypnutá v nastavení"
+  Turn On Upload Notifications: "Zapnout"
   Channel Name Unavailable: Název kanálu není dostupný
   Search Result Types: Typy výsledků hledání
   All Results: Vše

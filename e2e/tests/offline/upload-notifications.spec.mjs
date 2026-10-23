@@ -3,6 +3,7 @@ import {
   expect,
   goTo,
   goToSettingsSection,
+  latestSettings,
   readDatastore,
   setWindowSize,
 } from '../../helpers/app.mjs'
@@ -98,6 +99,45 @@ test('the bell is off per channel until turned on, which selects every type', as
   await expect.poll(() => readNotificationTypes(app.userDataDir)).toStrictEqual({
     'Alpha Channel': ['videos', 'live', 'posts'],
     'Beta Channel': ['videos', 'shorts', 'live']
+  })
+})
+
+test('the bell confirms each change with a toast that replaces the previous one', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await goTo(page, 'subscribedchannels')
+  const bell = page.locator('.channel', { hasText: 'Alpha Channel' }).getByRole('button', { name: 'Notify about new uploads', exact: true })
+  const onToast = page.locator('.toast', { hasText: "You'll be notified about new uploads from Alpha Channel when your subscriptions refresh" })
+  const offToast = page.locator('.toast', { hasText: "You won't be notified about new uploads from Alpha Channel" })
+
+  await bell.click()
+  await expect(onToast).toBeVisible()
+  await bell.click()
+  await expect(offToast).toBeVisible()
+  // Well below the toast's own 3 seconds, so only replacement can remove it.
+  await expect(onToast).toHaveCount(0, { timeout: 1000 })
+
+  // Bells of other channels replace it too.
+  await page.locator('.channel', { hasText: 'Beta Channel' }).getByRole('button', { name: 'Notify about new uploads', exact: true }).click()
+  await expect(page.locator('.toast', { hasText: "You'll be notified about new uploads from Beta Channel when your subscriptions refresh" })).toBeVisible()
+  await expect(offToast).toHaveCount(0, { timeout: 1000 })
+})
+
+test.describe('with upload notifications turned off in settings', () => {
+  test.use({
+    seed: {
+      settings: { currentLocale: 'en-US', fetchSubscriptionsAutomatically: false, enableUploadNotifications: false },
+      profiles: profile([{ id: CHANNEL_ID, name: 'Alpha Channel', thumbnail: '' }])
+    }
+  })
+
+  test('turning on the bell offers to turn on upload notifications', async ({ app, page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await goTo(page, 'subscribedchannels')
+    await page.locator('.channel', { hasText: 'Alpha Channel' }).getByRole('button', { name: 'Notify about new uploads', exact: true }).click()
+    const toast = page.locator('.toast', { hasText: 'Notifications for Alpha Channel are on, but upload notifications are turned off in your settings' })
+    await toast.getByRole('button', { name: 'Turn On', exact: true }).click()
+    await expect.poll(() => latestSettings(readDatastore(app.userDataDir, 'settings')).enableUploadNotifications).toBe(true)
+    await expect(toast).toHaveCount(0)
   })
 })
 

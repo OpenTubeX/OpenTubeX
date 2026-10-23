@@ -1364,6 +1364,10 @@ Channel:
   More videos hidden: '+{count} til viðbótar | +{count} til viðbótar'
   Show in subscription feed: Sýna í áskriftarstraumi
   Notify about new uploads: Tilkynna um nýtt efni
+  Upload Notifications On: "Þú færð tilkynningu um nýtt efni frá {channelName} þegar áskriftir þínar uppfærast"
+  Upload Notifications Off: "Þú færð ekki tilkynningar um nýtt efni frá {channelName}"
+  Upload Notifications Disabled In Settings: "Kveikt er á tilkynningum fyrir {channelName}, en slökkt er á tilkynningum um nýtt efni í stillingunum þínum"
+  Turn On Upload Notifications: "Kveikja"
   Channel Name Unavailable: Heiti rásar er ekki tiltækt
   Search Result Types: Tegundir leitarniðurstaðna
   All Results: Allt

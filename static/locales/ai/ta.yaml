@@ -1388,6 +1388,10 @@ Channel:
   More videos hidden: '+{count} மேலும் | +{count} மேலும்'
   Show in subscription feed: சந்தா ஊட்டத்தில் காட்டு
   Notify about new uploads: புதிய பதிவேற்றங்களைப் பற்றி அறிவி
+  Upload Notifications On: "உங்கள் சந்தாக்கள் புதுப்பிக்கப்படும்போது {channelName} இன் புதிய பதிவேற்றங்கள் பற்றி அறிவிக்கப்படும்"
+  Upload Notifications Off: "{channelName} இன் புதிய பதிவேற்றங்கள் பற்றி அறிவிக்கப்படாது"
+  Upload Notifications Disabled In Settings: "{channelName} க்கான அறிவிப்புகள் இயக்கத்தில் உள்ளன, ஆனால் புதிய பதிவேற்ற அறிவிப்புகள் உங்கள் அமைப்புகளில் முடக்கப்பட்டுள்ளன"
+  Turn On Upload Notifications: "இயக்கு"
   Channel Name Unavailable: சேனல் பெயர் கிடைக்கவில்லை
   Search Result Types: தேடல் முடிவு வகைகள்
   All Results: அனைத்தும்

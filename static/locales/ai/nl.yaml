@@ -1390,6 +1390,10 @@ Channel:
   More videos hidden: '+{count} meer | +{count} meer'
   Show in subscription feed: Tonen in abonnementenfeed
   Notify about new uploads: Melden bij nieuwe uploads
+  Upload Notifications On: "Je krijgt een melding bij nieuwe uploads van {channelName} wanneer je abonnementen worden vernieuwd"
+  Upload Notifications Off: "Je krijgt geen meldingen meer bij nieuwe uploads van {channelName}"
+  Upload Notifications Disabled In Settings: "Meldingen voor {channelName} staan aan, maar meldingen bij nieuwe uploads staan uit in je instellingen"
+  Turn On Upload Notifications: "Inschakelen"
   Channel Name Unavailable: Kanaalnaam niet beschikbaar
   Search Result Types: Typen zoekresultaten
   All Results: Alles

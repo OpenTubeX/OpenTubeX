@@ -1387,6 +1387,10 @@ Channel:
   More videos hidden: '+{count} נוספים | +{count} נוספים | +{count} נוספים'
   Show in subscription feed: הצגה בפיד המינויים
   Notify about new uploads: התראה על העלאות חדשות
+  Upload Notifications On: "תקבל התראות על העלאות חדשות מ־{channelName} כשהמינויים שלך מתרעננים"
+  Upload Notifications Off: "לא תקבל התראות על העלאות חדשות מ־{channelName}"
+  Upload Notifications Disabled In Settings: "ההתראות עבור {channelName} מופעלות, אך התראות על העלאות חדשות כבויות בהגדרות שלך"
+  Turn On Upload Notifications: "הפעלה"
   Channel Name Unavailable: שם הערוץ אינו זמין
   Search Result Types: סוגי תוצאות חיפוש
   All Results: הכול

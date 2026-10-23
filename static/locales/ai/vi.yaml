@@ -1380,6 +1380,10 @@ Channel:
   More videos hidden: '+{count} video khác'
   Show in subscription feed: Hiển thị trong nguồn cấp dữ liệu đăng ký
   Notify about new uploads: Thông báo nội dung mới tải lên
+  Upload Notifications On: "Bạn sẽ được thông báo về nội dung mới của {channelName} khi danh sách đăng ký được làm mới"
+  Upload Notifications Off: "Bạn sẽ không được thông báo về nội dung mới của {channelName}"
+  Upload Notifications Disabled In Settings: "Thông báo cho {channelName} đang bật, nhưng thông báo nội dung mới đang tắt trong cài đặt của bạn"
+  Turn On Upload Notifications: "Bật"
   Channel Name Unavailable: Không có tên kênh
   Search Result Types: Loại kết quả tìm kiếm
   All Results: Tất cả

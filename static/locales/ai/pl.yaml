@@ -810,6 +810,10 @@ Channel:
   More videos hidden: '+{count} więcej | +{count} więcej | +{count} więcej'
   Show in subscription feed: Pokaż w kanale subskrypcji
   Notify about new uploads: Powiadamiaj o nowościach
+  Upload Notifications On: "Otrzymasz powiadomienia o nowościach z kanału {channelName} podczas odświeżania subskrypcji"
+  Upload Notifications Off: "Nie będziesz otrzymywać powiadomień o nowościach z kanału {channelName}"
+  Upload Notifications Disabled In Settings: "Powiadomienia dla kanału {channelName} są włączone, ale powiadomienia o nowościach są wyłączone w ustawieniach"
+  Turn On Upload Notifications: "Włącz"
   Channel Name Unavailable: Nazwa kanału jest niedostępna
   Search Result Types: Typy wyników wyszukiwania
   All Results: Wszystkie

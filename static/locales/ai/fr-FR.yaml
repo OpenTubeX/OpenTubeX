@@ -1353,6 +1353,10 @@ Channel:
   More videos hidden: '+{count} de plus | +{count} de plus | +{count} de plus'
   Show in subscription feed: Afficher dans le flux des abonnements
   Notify about new uploads: Notifier les nouvelles mises en ligne
+  Upload Notifications On: "Vous serez averti des nouvelles mises en ligne de {channelName} lors de l’actualisation de vos abonnements"
+  Upload Notifications Off: "Vous ne serez plus averti des nouvelles mises en ligne de {channelName}"
+  Upload Notifications Disabled In Settings: "Les notifications de {channelName} sont activées, mais les notifications de nouvelles mises en ligne sont désactivées dans vos paramètres"
+  Turn On Upload Notifications: "Activer"
   Channel Name Unavailable: Nom de la chaîne indisponible
   Search Result Types: Types de résultats de recherche
   All Results: Tous

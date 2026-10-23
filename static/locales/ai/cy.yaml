@@ -1360,6 +1360,10 @@ Channel:
   More videos hidden: '+{count} yn rhagor | +{count} yn rhagor | +{count} yn rhagor | +{count} yn rhagor | +{count} yn rhagor | +{count} yn rhagor'
   Show in subscription feed: Dangos yn y ffrwd tanysgrifiadau
   Notify about new uploads: Hysbysu am gynnwys newydd
+  Upload Notifications On: "Byddwch yn cael hysbysiad am gynnwys newydd gan {channelName} pan fydd eich tanysgrifiadau'n adnewyddu"
+  Upload Notifications Off: "Fyddwch chi ddim yn cael hysbysiad am gynnwys newydd gan {channelName}"
+  Upload Notifications Disabled In Settings: "Mae hysbysiadau ar gyfer {channelName} ymlaen, ond mae hysbysiadau am gynnwys newydd wedi'u diffodd yn eich gosodiadau"
+  Turn On Upload Notifications: "Troi Ymlaen"
   Channel Name Unavailable: Nid yw enw'r sianel ar gael
   Search Result Types: Mathau o ganlyniadau chwilio
   All Results: Pob un

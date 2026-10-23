@@ -1382,6 +1382,10 @@ Channel:
   More videos hidden: '+{count} مقاطع فيديو أخرى | +{count} مقطع فيديو آخر | +{count} مقطعا فيديو آخران | +{count} مقاطع فيديو أخرى | +{count} مقطع فيديو آخر | +{count} مقطع فيديو آخر'
   Show in subscription feed: إظهار في موجز الاشتراكات
   Notify about new uploads: الإشعار بالمحتوى الجديد
+  Upload Notifications On: "ستتلقى إشعارًا بالمحتوى الجديد من {channelName} عند تحديث اشتراكاتك"
+  Upload Notifications Off: "لن تتلقى إشعارات بالمحتوى الجديد من {channelName}"
+  Upload Notifications Disabled In Settings: "الإشعارات مفعّلة لـ {channelName}، لكن إشعارات المحتوى الجديد معطّلة في إعداداتك"
+  Turn On Upload Notifications: "تفعيل"
   Channel Name Unavailable: اسم القناة غير متاح
   Search Result Types: أنواع نتائج البحث
   All Results: الجميع

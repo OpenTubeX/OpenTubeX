@@ -1637,6 +1637,10 @@ Channel:
   More videos hidden: '+{count} daugiau | +{count} daugiau | +{count} daugiau'
   Show in subscription feed: Rodyti prenumeratų sraute
   Notify about new uploads: Pranešti apie naujus įkėlimus
+  Upload Notifications On: "Atnaujinus prenumeratas gausite pranešimus apie naujus {channelName} įkėlimus"
+  Upload Notifications Off: "Negausite pranešimų apie naujus {channelName} įkėlimus"
+  Upload Notifications Disabled In Settings: "{channelName} pranešimai įjungti, bet pranešimai apie naujus įkėlimus išjungti nustatymuose"
+  Turn On Upload Notifications: "Įjungti"
   Channel Name Unavailable: Kanalo pavadinimas nepasiekiamas
   Search Result Types: Paieškos rezultatų tipai
   All Results: Visi

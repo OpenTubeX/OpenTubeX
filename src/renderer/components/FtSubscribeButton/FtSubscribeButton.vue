@@ -791,10 +791,51 @@ function updateFeedType(feedType, enabled, key = 'feedTypes') {
  * Turning notifications on starts with every feed type.
  * @param {boolean} enabled
  */
-function updateNotifications(enabled) {
-  persistChannelSettings({
+async function updateNotifications(enabled) {
+  // Saves of different channels run independently, so only the latest click confirms.
+  const click = ++latestBellClick
+  const saved = await persistChannelSettings({
     notificationFeedTypes: enabled ? feedTypes.value.map(feedType => feedType.id) : []
   })
+  if (saved && click === latestBellClick) showNotificationsToast(enabled)
+}
+
+/**
+ * The bell only changes its icon, so confirm what it did and point out when
+ * the global setting keeps notifications from showing.
+ * @param {boolean} enabled
+ */
+function showNotificationsToast(enabled) {
+  notificationsToastController?.abort()
+  notificationsToastController = new AbortController()
+  const channelName = props.channelName
+
+  if (!enabled) {
+    showToast({
+      message: t('Channel.Upload Notifications Off', { channelName }),
+      icon: ['fas', 'bell-slash'],
+      abortSignal: notificationsToastController.signal
+    })
+  } else if (store.getters.getEnableUploadNotifications) {
+    showToast({
+      message: t('Channel.Upload Notifications On', { channelName }),
+      icon: ['fas', 'bell'],
+      abortSignal: notificationsToastController.signal
+    })
+  } else {
+    showToast({
+      message: t('Channel.Upload Notifications Disabled In Settings', { channelName }),
+      icon: ['fas', 'bell'],
+      time: 10000,
+      abortSignal: notificationsToastController.signal,
+      buttons: [{
+        label: t('Channel.Turn On Upload Notifications'),
+        icon: ['fas', 'bell'],
+        primary: true,
+        action: () => store.dispatch('updateEnableUploadNotifications', true)
+      }]
+    })
+  }
 }
 
 /**
@@ -815,6 +856,7 @@ function updateShowMembersOnly(value) {
 
 /**
  * @param {{feedTypes?: string[], notificationFeedTypes?: string[], dailyVideoLimit?: number|null|undefined, showMembersOnly?: boolean}} patch
+ * @returns {Promise<boolean>} whether the settings were saved
  */
 function persistChannelSettings(patch) {
   const settings = {
@@ -823,7 +865,7 @@ function persistChannelSettings(patch) {
   }
   const updateSequence = ++channelSettingsUpdateSequence
   optimisticChannelSettings.value = settings
-  if (!isSubscribed.value) return
+  if (!isSubscribed.value) return Promise.resolve(false)
 
   channelSettingsUpdateQueue = channelSettingsUpdateQueue.then(async () => {
     let saved = false
@@ -845,7 +887,9 @@ function persistChannelSettings(patch) {
         })
       }
     }
+    return saved
   })
+  return channelSettingsUpdateQueue
 }
 
 /**
@@ -908,6 +952,13 @@ function isProfileSubscribed(profile) {
 
   return profile.subscriptions.some((channel) => channel.id === channelId)
 }
+</script>
+
+<script>
+// Shared by every subscribe button so bell feedback follows the latest click on any channel.
+let latestBellClick = 0
+/** @type {AbortController | null} */
+let notificationsToastController = null
 </script>
 
 <style scoped src="./FtSubscribeButton.css" />

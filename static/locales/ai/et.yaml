@@ -1355,6 +1355,10 @@ Channel:
   More videos hidden: '+{count} veel | +{count} veel'
   Show in subscription feed: Kuva tellimuste voos
   Notify about new uploads: Teavita uutest üleslaadimistest
+  Upload Notifications On: "Sind teavitatakse kanali {channelName} uutest üleslaadimistest, kui tellimusi värskendatakse"
+  Upload Notifications Off: "Sind ei teavitata kanali {channelName} uutest üleslaadimistest"
+  Upload Notifications Disabled In Settings: "Kanali {channelName} teavitused on sees, kuid uute üleslaadimiste teavitused on seadetes välja lülitatud"
+  Turn On Upload Notifications: "Lülita sisse"
   Channel Name Unavailable: Kanali nimi pole saadaval
   Search Result Types: Otsingutulemuste tüübid
   All Results: Kõik

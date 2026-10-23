@@ -1354,6 +1354,10 @@ Channel:
   More videos hidden: '+{count} daha | +{count} daha'
   Show in subscription feed: Abonelik akışında göster
   Notify about new uploads: Yeni yüklemeleri bildir
+  Upload Notifications On: "Abonelikleriniz yenilendiğinde {channelName} kanalının yeni yüklemeleri size bildirilecek"
+  Upload Notifications Off: "{channelName} kanalının yeni yüklemeleri size bildirilmeyecek"
+  Upload Notifications Disabled In Settings: "{channelName} için bildirimler açık, ancak yeni yükleme bildirimleri ayarlarınızda kapalı"
+  Turn On Upload Notifications: "Aç"
   Channel Name Unavailable: Kanal adı kullanılamıyor
   Search Result Types: Arama sonucu türleri
   All Results: Tümü

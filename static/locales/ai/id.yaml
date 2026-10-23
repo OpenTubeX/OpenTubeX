@@ -1358,6 +1358,10 @@ Channel:
   More videos hidden: '+{count} lainnya'
   Show in subscription feed: Tampilkan di feed langganan
   Notify about new uploads: Beri notifikasi unggahan baru
+  Upload Notifications On: "Anda akan diberi tahu tentang unggahan baru dari {channelName} saat langganan Anda dimuat ulang"
+  Upload Notifications Off: "Anda tidak akan diberi tahu tentang unggahan baru dari {channelName}"
+  Upload Notifications Disabled In Settings: "Notifikasi untuk {channelName} aktif, tetapi notifikasi unggahan baru dinonaktifkan di pengaturan Anda"
+  Turn On Upload Notifications: "Aktifkan"
   Channel Name Unavailable: Nama saluran tidak tersedia
   Search Result Types: Jenis hasil pencarian
   All Results: Semua

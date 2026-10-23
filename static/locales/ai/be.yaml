@@ -1417,6 +1417,10 @@ Channel:
   More videos hidden: '+{count} яшчэ | +{count} яшчэ | +{count} яшчэ'
   Show in subscription feed: Паказваць у стужцы падпісак
   Notify about new uploads: Апавяшчаць пра новыя загрузкі
+  Upload Notifications On: "Вы будзеце атрымліваць апавяшчэнні пра новыя загрузкі {channelName} пры абнаўленні падпісак"
+  Upload Notifications Off: "Вы не будзеце атрымліваць апавяшчэнні пра новыя загрузкі {channelName}"
+  Upload Notifications Disabled In Settings: "Апавяшчэнні для {channelName} уключаны, але апавяшчэнні пра новыя загрузкі адключаны ў наладах"
+  Turn On Upload Notifications: "Уключыць"
   Channel Name Unavailable: Назва канала недаступная
   Search Result Types: Тыпы вынікаў пошуку
   All Results: Усе

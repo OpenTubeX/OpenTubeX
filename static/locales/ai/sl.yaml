@@ -1691,6 +1691,10 @@ Channel:
   More videos hidden: '+{count} več | +{count} več | +{count} več | +{count} več'
   Show in subscription feed: Prikaži v viru naročnin
   Notify about new uploads: Obveščaj o novi vsebini
+  Upload Notifications On: "Ob osvežitvi naročnin boste obveščeni o novi vsebini kanala {channelName}"
+  Upload Notifications Off: "Ne boste obveščeni o novi vsebini kanala {channelName}"
+  Upload Notifications Disabled In Settings: "Obvestila za {channelName} so vklopljena, vendar so obvestila o novi vsebini izklopljena v nastavitvah"
+  Turn On Upload Notifications: "Vklopi"
   Channel Name Unavailable: Ime kanala ni na voljo
   Search Result Types: Vrste rezultatov iskanja
   All Results: Vsi
