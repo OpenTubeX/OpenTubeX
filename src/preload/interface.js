@@ -135,6 +135,20 @@ export default {
       height: height * webFrame.getZoomFactor()
     })
   },
+  /**
+   * Middle clicks on the custom title bar that the window received instead of
+   * the page, on Windows.
+   * @param {(point: { x: number, y: number }) => void} handler point in CSS pixels
+   * @returns {() => void} unsubscribe
+   */
+  onTitleBarMiddleClick: handler => {
+    const listener = (_event, { x, y }) => {
+      const zoomFactor = webFrame.getZoomFactor()
+      handler({ x: x / zoomFactor, y: y / zoomFactor })
+    }
+    ipcRenderer.on(IpcChannels.TITLE_BAR_MIDDLE_CLICK, listener)
+    return () => ipcRenderer.removeListener(IpcChannels.TITLE_BAR_MIDDLE_CLICK, listener)
+  },
   /** Window controls the renderer draws with the custom title bar on Linux. */
   windowControls: {
     /** Plasma's Breeze decoration, or Adwaita for GNOME and other desktops */

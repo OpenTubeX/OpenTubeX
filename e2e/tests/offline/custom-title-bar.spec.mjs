@@ -1,4 +1,5 @@
-import { test, expect, setWindowSize } from '../../helpers/app.mjs'
+import { IpcChannels } from '../../../src/constants.js'
+import { test, expect, goTo, setWindowSize } from '../../helpers/app.mjs'
 
 /**
  * Measures the space the window controls take at each window edge and the
@@ -150,6 +151,78 @@ test.describe('with a custom title bar', () => {
       const tabsTop = await page.locator('.tabBar .tabsViewport').evaluate(element => element.getBoundingClientRect().top)
       expect(tabsTop).toBeGreaterThanOrEqual(controls[position] > 0 ? controls.height : 0)
     }
+  })
+
+  test('opens a tab for middle clicks the window takes from the empty tab strip @scale', async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 1200, height: 700 })
+    const tabs = page.locator('.tabBar .tab')
+    await expect(tabs).toHaveCount(1)
+
+    // Windows reports middle clicks in drag regions to the window, not the
+    // page, which receives them as points in the window's content area.
+    const middleClick = async (locator, xRatio) => {
+      const box = await locator.boundingBox()
+      await app.electronApp.evaluate(({ BrowserWindow }, { channel, x, y }) => {
+        const { webContents } = BrowserWindow.getAllWindows()[0]
+        const zoomFactor = webContents.getZoomFactor()
+        webContents.send(channel, { x: x * zoomFactor, y: y * zoomFactor })
+      }, {
+        channel: IpcChannels.TITLE_BAR_MIDDLE_CLICK,
+        x: box.x + box.width * xRatio,
+        y: box.y + box.height / 2
+      })
+    }
+
+    await middleClick(page.locator('.tabsContainer'), 0.95)
+    await expect(tabs).toHaveCount(2)
+
+    // Only the empty strip opens tabs, not the tabs or buttons beside it.
+    await middleClick(tabs.first(), 0.5)
+    await middleClick(page.locator('.newTabButton'), 0.5)
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+    await expect(tabs).toHaveCount(2)
+  })
+
+  test('reaches the tabs and buttons from the window\'s top edge @scale', async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 1200, height: 700 })
+    await expect(page.locator('.tabBar .tab')).toHaveCount(1)
+
+    // A maximized window's top edge is the screen's, where a flicked pointer lands.
+    const targets = await page.evaluate(() => {
+      return [...document.querySelectorAll('.tabBar .tab, .newTabButton, .tabOrganizerButton, .windowControl')]
+        .map((element) => {
+          const rect = element.getBoundingClientRect()
+          const hit = document.elementFromPoint(rect.left + rect.width / 2, 0)
+          return {
+            name: element.className,
+            reached: element.contains(hit),
+            region: getComputedStyle(element, '::before').getPropertyValue('-webkit-app-region')
+          }
+        })
+    })
+    expect(targets.length).toBeGreaterThan(2)
+    for (const target of targets) {
+      expect(target, target.name).toEqual({ name: target.name, reached: true, region: 'no-drag' })
+    }
+  })
+
+  test('keeps the maximized settings header clear of the window controls @scale', async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 1200, height: 700 })
+    await goTo(page, 'settings')
+    const settingsWindow = page.getByRole('dialog', { name: 'Settings', exact: true })
+    await settingsWindow.getByRole('button', { name: 'Maximize', exact: true }).click()
+    await expect(settingsWindow).toHaveClass(/maximized/)
+
+    const geometry = await getControlsGeometry(page, '.tabBar')
+    expect(geometry.left + geometry.right).toBeGreaterThan(0)
+    const overlap = await settingsWindow.locator('.settingsWindowHeader > *').evaluateAll(
+      (elements, { left, right }) => elements
+        .map(element => element.getBoundingClientRect())
+        .filter(rect => rect.width > 0)
+        .some(rect => rect.left < left - 0.5 || rect.right > innerWidth - right + 0.5),
+      geometry
+    )
+    expect(overlap).toBe(false)
   })
 
   test('keeps floating layers above the drag region clickable', async ({ page }) => {
