@@ -251,7 +251,8 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
   const context = electronApp.context()
   const startupErrors = []
   // Keep the stack: a bare message such as a JSON syntax error cannot be traced.
-  const recordStartupError = error => startupErrors.push(error.error().stack ?? error.error().message)
+  // Thrown values other than errors, such as events, have an empty stack.
+  const recordStartupError = error => startupErrors.push(error.error().stack || error.error().message)
   context.on('weberror', recordStartupError)
 
   const notifyPhase = async (phase, page) => {
