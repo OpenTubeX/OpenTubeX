@@ -1170,11 +1170,46 @@ Color Picker:
   Backdrop Blur: Desenfoque del fondo
   Hex Color: Color hexadecimal
   Apply Color: Aplicar
-  Reset Color: Reiniciar
+  Reset Color: Restablecer
   Copy Color: Copiar
   Copy From Another Color: Copiar de otro color
+  Color Copied: Color copiado
+  Invalid Color: Introduce un color hexadecimal válido
+  Clipboard Unavailable: Portapapeles no disponible
+  Saturation and Brightness: Saturación y brillo
+  Hue: Tono
 Maximize: Maximizar
 Restore: Restaurar
 Close Confirmation:
   Title: ¿Salir de OpenTubeX?
   Quit: Salir
+  Message: ¿Seguro que quieres salir de OpenTubeX?
+  Background Sync Warning: Al salir, se detendrán las actualizaciones de suscripciones en segundo plano.
+  Hide Window: Ocultar ventana
+  Never Ask Again: No volver a preguntar
+New Tab: Nueva pestaña
+Close Tab: Cerrar pestaña
+Older Version Changes:
+  Title: Cambios de una versión anterior
+  Message: Los cambios que hiciste en una versión anterior de OpenTubeX se han aplicado a tu biblioteca.
+  Detail: Si un elemento se cambió en ambas versiones, se ha conservado el cambio de la versión anterior. Hay una copia de seguridad de tu biblioteca anterior en la carpeta de tu perfil.
+Library Format Changed:
+  Title: La biblioteca se ha trasladado a un formato nuevo
+  Message: Tu biblioteca ahora usa un formato de almacenamiento nuevo.
+  Detail: Las versiones anteriores de OpenTubeX todavía pueden abrir tu biblioteca, pero la muestran como estaba antes de esta actualización. Los cambios que hagas en una versión anterior se añaden cuando vuelvas a esta versión.
+Close Window Confirmation:
+  Message: Esta ventana contiene {count} pestañas. ¿Seguro que quieres cerrarla? | Esta ventana contiene {count} pestañas. ¿Seguro que quieres cerrarla?
+Confirmations:
+  Never Ask Again: No volver a preguntar
+  Settings Hint: Puedes volver a activar esta confirmación en Ajustes → General → Confirmar antes de…
+Close Multiple Tabs Confirmation:
+  Title: ¿Cerrar varias pestañas?
+  Message: Se cerrarán {count} pestañas. | Se cerrarán {count} pestañas.
+  Close Tabs: Cerrar {count} pestañas | Cerrar {count} pestañas
+Load Multiple Tabs Confirmation:
+  Title: ¿Cargar varias pestañas?
+  Message: Se cargarán {count} pestañas. | Se cargarán {count} pestañas.
+  Load Tabs: Cargar {count} pestañas | Cargar {count} pestañas
+Unload Multiple Tabs Confirmation:
+  Title: ¿Descargar varias pestañas de la memoria?
+  Message: Se descargarán {count} pestañas de la memoria. | Se descargarán {count} pestañas de la memoria.
