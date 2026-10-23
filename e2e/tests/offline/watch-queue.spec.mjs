@@ -56,7 +56,7 @@ async function relaunchAfterQueueSaved (app, page) {
   return app.relaunch()
 }
 
-test('manages the queue from video menus and the watch sidebar', async ({ page }) => {
+test('manages the queue from video menus and the watch sidebar', { tag: '@scale' }, async ({ page }) => {
   await goTo(page, 'history')
 
   await chooseVideoOption(page, 'Queue video one', 'Add to Queue')
