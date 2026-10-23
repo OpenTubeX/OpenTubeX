@@ -3144,6 +3144,10 @@ test.describe('playback when navigating away', () => {
    * @param {() => Promise<void>} hideWatch
    */
   async function sampleDocking(page, player, hideWatch) {
+    // Slow the 300 ms morph down. Leaving Watch can block the main thread for
+    // several hundred milliseconds on a loaded machine, which would otherwise
+    // leave too few sampled frames.
+    await page.evaluate(() => window.$store.dispatch('updateAnimationSpeed', 25))
     await player.evaluate(element => {
       document.documentElement.dataset.reducedMotion = 'no-preference'
       window.dockingFrames = []
