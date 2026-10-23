@@ -1252,25 +1252,32 @@ test.describe('watch page', () => {
     const sponsorBlockNotice = page.locator('.skippedSegmentsWrapper')
 
     await expect(actions).toBeVisible()
-    await expect(actions).toHaveCSS('z-index', '2')
+    // The pill stays above side docks (z-index 3) so it remains clickable at
+    // small sizes. SponsorBlock notices are lifted above the visible pill
+    // instead of stacked over it, see sponsorblock-mobile.spec.mjs.
+    await expect(actions).toHaveCSS('z-index', '4')
     await expect(sponsorBlockNotice).toHaveCSS('z-index', '3')
     await shareButton.click()
     const shareDialog = page.getByRole('dialog', { name: 'Share Video' })
     await expect(shareDialog.locator('.iconDropdown')).toBeVisible()
     await expect(shareDialog).toHaveCSS('z-index', '100')
-    await expect(actions).toHaveCSS('z-index', '2')
+    await expect(actions).toHaveCSS('z-index', '4')
     await expect(sponsorBlockNotice).toHaveCSS('z-index', '3')
     await page.keyboard.press('Escape')
     await expect(shareDialog).toHaveCount(0)
     await shareButton.hover()
-    await expect(actions).toHaveCSS('z-index', '2')
+    await expect(actions).toHaveCSS('z-index', '4')
     await actions.getByRole('button', { name: 'Add to playlist' }).click()
-    await expect(actions.locator('.fullscreenPlaylistAction .iconDropdown')).toBeVisible()
-    await expect(actions).toHaveCSS('z-index', '5')
+    // Popovers move into the fullscreen element as a dialog layer, so the
+    // scrollable action pill cannot clip them.
+    const playlistDialog = page.locator('.ftVideoPlayer').getByRole('dialog', { name: 'Add to playlist' })
+    await expect(playlistDialog.locator('.iconDropdown')).toBeVisible()
+    await expect(playlistDialog).toHaveCSS('z-index', '100')
+    await expect(actions).toHaveCSS('z-index', '4')
     await expect(sponsorBlockNotice).toHaveCSS('z-index', '3')
     await page.keyboard.press('Escape')
-    await expect(actions.locator('.fullscreenPlaylistAction .iconDropdown')).toHaveCount(0)
-    await expect(actions).toHaveCSS('z-index', '2')
+    await expect(playlistDialog).toHaveCount(0)
+    await expect(actions).toHaveCSS('z-index', '4')
     await fullscreenButton.hover()
     // The Shaka tooltip is a hover-only ::after pseudo-element whose content is
     // pulled from the button's aria-label. Assert it actually renders (rather
@@ -1376,7 +1383,9 @@ test.describe('watch page', () => {
     await expect(page.locator('.ftVideoPlayer.fullWindow')).toBeVisible()
     await page.locator('.fullscreenPlaylistAction .iconButton').click()
 
-    const popover = page.locator('.fullscreenPlaylistAction .iconDropdown')
+    const popover = page.locator('.ftVideoPlayer.fullWindow')
+      .getByRole('dialog', { name: 'Add to playlist' })
+      .locator('.iconDropdown')
     await expect(popover.locator('.dropdownHeader')).toBeVisible()
     await expect(popover.locator('.playlistRow').first()).toBeVisible()
     // Dismiss the popover before continuing
