@@ -21,16 +21,17 @@ const TRACKS = [
  *
  * @param {{ electronApp: import('@playwright/test').ElectronApplication }} app
  * @param {import('@playwright/test').Page} page
- * @param {string[]} codecs The video codecs that the manifest offers the stream in
+ * @param {(string | [string, string])[]} streams The codecs that the manifest
+ * offers the stream in, optionally with a resolution other than 320x180
  */
-async function openAdaptiveVideo(app, page, codecs = ['avc1.42c00d']) {
+async function openAdaptiveVideo(app, page, streams = ['avc1.42c00d']) {
   await mockPlayableWatchPage(app, page)
   await routePostLiveMedia(page)
   await page.route('https://quality-menu.test/*.m3u8', route => route.fulfill({
     contentType: 'application/x-mpegurl',
     body: route.request().url().endsWith('/master.m3u8')
       ? `#EXTM3U
-${codecs.map((codec, index) => `#EXT-X-STREAM-INF:BANDWIDTH=84000,CODECS="${codec}",RESOLUTION=320x180
+${streams.map(stream => [stream].flat()).map(([codec, resolution = '320x180'], index) => `#EXT-X-STREAM-INF:BANDWIDTH=84000,CODECS="${codec}",RESOLUTION=${resolution}
 video-${index}.m3u8
 `).join('')}`
       : `#EXTM3U
@@ -421,5 +422,30 @@ test.describe('quality codecs from the manifest', () => {
     await expect(codecs.getByRole('button')).toHaveText(['AV1', 'VP9', 'H.264'])
     await expect(codecs.getByRole('button', { name: 'H.264' })).toHaveAttribute('aria-pressed', 'true')
     await player.locator('.shaka-resolutions').screenshot({ path: testInfo.outputPath('codecs.png') })
+  })
+})
+
+test.describe('default quality with a preferred codec', () => {
+  test.use({
+    seed: {
+      settings: {
+        videoPlaybackEngine: 'yt-dlp',
+        ytDlpPlaybackEngineDefaultMigration: true,
+        defaultVideoFormat: 'dash',
+        defaultQuality: '720',
+        preferredVideoCodec: 'h264',
+        useSponsorBlock: false,
+        playNextVideo: false,
+        fetchSubscriptionsAutomatically: false,
+      }
+    }
+  })
+
+  test('falls back to a lower resolution in the preferred codec', async ({ app, page }) => {
+    await openAdaptiveVideo(app, page, ['avc1.42c00d', ['av01.0.04M.08', '1280x720']])
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    await expect.poll(() => player.evaluate(element => {
+      return element.ui.getControls().getPlayer().getVariantTracks().find(track => track.active)?.videoCodec
+    })).toBe('avc1.42c00d')
   })
 })

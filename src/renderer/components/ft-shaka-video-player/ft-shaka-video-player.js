@@ -8769,6 +8769,13 @@ export default defineComponent({
         variants = getDefaultAudioVariants(variants)
       }
 
+      // In the codecs that automatic quality would play, so the preferred codec
+      // can limit the resolution
+      const autoVariants = variants.filter(variant => autoQualityVideoIds.has(variant.videoId))
+      if (autoVariants.length > 0) {
+        variants = autoVariants
+      }
+
       if (variants.length === 0) return
       const isPortrait = variants[0].height > variants[0].width
 
@@ -8787,12 +8794,6 @@ export default defineComponent({
         const lowest = Math.min(...variants.map(variant => variant[dimension]).filter(Number.isFinite))
         matches = variants.filter(variant => variant[dimension] === lowest)
         if (matches.length === 0) matches = [variants[0]]
-      }
-
-      // In the codec that automatic quality would play
-      const autoMatches = matches.filter(variant => autoQualityVideoIds.has(variant.videoId))
-      if (autoMatches.length > 0) {
-        matches = autoMatches
       }
 
       matches.sort((a, b) => isPortrait ? b.width - a.width : b.height - a.height)
