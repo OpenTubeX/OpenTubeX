@@ -1292,8 +1292,8 @@
             <div class="skippedSegmentTitle">
               <span class="skippedSegmentShields">
                 <ft-icon
-                  v-for="color in colors"
-                  :key="color"
+                  v-for="(color, index) in colors"
+                  :key="index"
                   class="skippedSegmentShield"
                   :icon="['fas', 'shield-halved']"
                   :style="{ color }"
