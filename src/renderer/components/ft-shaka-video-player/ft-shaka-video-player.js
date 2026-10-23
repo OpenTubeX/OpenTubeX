@@ -262,6 +262,10 @@ const PLAY_MORPH_PATH = 'M8 6 11.5 8.1 11.5 15.9 8 18ZM11.5 8.1 18 12 18 12 11.5
 const liveCustomControlPlayers = new Set()
 let configuringCustomPlayerControls = false
 
+// Watch keeps its fullscreen host while it replaces the player for another
+// video. Android rotation fullscreen passes from one player to the next here.
+const androidRotationFullscreenHandoffs = new WeakMap()
+
 /**
  * Shaka's own controls that the player replaces, restored once no player needs
  * the replacements, as Shaka's default layout includes them.
@@ -8160,6 +8164,48 @@ export default defineComponent({
       syncAndroidStatusBarVisibility()
     }
 
+    // Keep rotation fullscreen while Watch loads the next video. Until another
+    // player adopts it, portrait or closing Watch still ends it.
+    function handOffAndroidRotationFullscreen() {
+      const host = androidFullscreenHost
+      if (!androidRotationFullscreen || !host?.isConnected) return
+      androidRotationFullscreen = false
+      const handoff = {
+        orientationLocked: androidRotationOrientationLocked,
+        release() {
+          if (androidRotationFullscreenHandoffs.get(host) !== handoff) return
+          androidRotationFullscreenHandoffs.delete(host)
+          handoff.stopRotation()
+          if (handoff.orientationLocked) setLandscapeOrientation(false).catch(() => {})
+          if (host.matches(':popover-open')) host.hidePopover()
+          host.removeAttribute('popover')
+          setAndroidNavigationBarVisible(true).catch(() => {})
+        },
+      }
+      androidRotationFullscreenHandoffs.set(host, handoff)
+      handoff.stopRotation = (fullscreenRotationIgnoresSystemLock.value ? observeAndroidDeviceRotation : observeAndroidDisplayRotation)(landscape => {
+        if (!landscape) handoff.release()
+      })
+      // Closing Watch unmounts this player before detaching the host.
+      queueMicrotask(() => {
+        if (!host.isConnected) handoff.release()
+      })
+    }
+
+    function adoptAndroidRotationFullscreen() {
+      const handoff = androidRotationFullscreenHandoffs.get(androidFullscreenHost)
+      if (!handoff) return
+      if (!props.startInFullwindow || props.shortsPlayer || !isActiveTab.value) {
+        handoff.release()
+        return
+      }
+      androidRotationFullscreenHandoffs.delete(androidFullscreenHost)
+      handoff.stopRotation()
+      androidRotationFullscreen = true
+      androidRotationOrientationLocked = handoff.orientationLocked
+      syncAndroidStatusBarVisibility()
+    }
+
     let stopAndroidRotation = () => {}
     watch([enterFullscreenOnDisplayRotate, isActiveTab, fullscreenRotationIgnoresSystemLock], ([enabled, active, ignoreLock]) => {
       stopAndroidRotation()
@@ -8169,6 +8215,7 @@ export default defineComponent({
         : () => {}
     }, { immediate: true })
     onBeforeUnmount(() => {
+      handOffAndroidRotationFullscreen()
       stopAndroidRotation()
       exitAndroidRotationFullscreen()
       androidFullscreenHost?.removeEventListener('toggle', handleAndroidRotationPopoverToggle)
@@ -12616,6 +12663,7 @@ export default defineComponent({
         // remain mounted while the Shaka player is replaced.
         androidFullscreenHost = container.value.closest('.videoLayout')
         androidFullscreenHost?.addEventListener('toggle', handleAndroidRotationPopoverToggle)
+        adoptAndroidRotationFullscreen()
         androidFullscreenHostActive.value = !!androidFullscreenHost && document.fullscreenElement === androidFullscreenHost
         isFullscreen.value = androidFullscreenHostActive.value
       }
