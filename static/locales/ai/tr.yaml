@@ -1459,6 +1459,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Canlı sohbet tekrarı etkin. Video oynatıldıkça sohbet mesajları burada görünecek.
   Premiere started: İlk gösterim sürüyor. {timeAgo} başladı
   Player:
+    Playing in Picture-in-Picture: Resim içinde resim modunda oynatılıyor
     Caption Timing:
       Adjust Timing: Zamanlamayı ayarla…
       Caption Timing: Altyazı zamanlaması

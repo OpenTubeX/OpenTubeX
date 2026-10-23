@@ -1535,6 +1535,7 @@ Video:
     interaction: یادآوری تعامل
     filler: حاشیه‌روی
   Player:
+    Playing in Picture-in-Picture: در حال پخش در حالت تصویر در تصویر
     Caption Timing:
       Adjust Timing: تنظیم زمان‌بندی…
       Caption Timing: زمان‌بندی زیرنویس

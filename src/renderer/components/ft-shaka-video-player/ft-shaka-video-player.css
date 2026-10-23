@@ -2724,6 +2724,17 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   object-fit: contain;
 }
 
+.pictureInPictureMessage {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  padding: 24px 32px 48px;
+  background: linear-gradient(rgb(0 0 0 / 60%), transparent);
+  color: rgb(255 255 255 / 85%);
+  font-size: 18px;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 70%);
+}
+
 .countdownOverlay {
   position: absolute;
   inset: 0;

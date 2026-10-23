@@ -1890,6 +1890,7 @@ Video:
       shuffling playlists: naključno predvajanje seznamov predvajanja
       looping playlists: ponavljanje seznamov predvajanja
   Player:
+    Playing in Picture-in-Picture: Predvaja se v načinu slika v sliki
     Caption Timing:
       Adjust Timing: Prilagodi čas…
       Caption Timing: Čas podnapisov

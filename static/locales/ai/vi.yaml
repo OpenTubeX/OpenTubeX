@@ -1493,6 +1493,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Đã bật bản phát lại trò chuyện trực tiếp. Tin nhắn trò chuyện sẽ xuất hiện ở đây khi video phát.
   Premiere started: Đang công chiếu. Bắt đầu {timeAgo}
   Player:
+    Playing in Picture-in-Picture: Đang phát ở chế độ hình trong hình
     Caption Timing:
       Adjust Timing: Điều chỉnh thời gian…
       Caption Timing: Thời gian phụ đề

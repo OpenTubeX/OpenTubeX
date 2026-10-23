@@ -1472,6 +1472,7 @@ Video:
   Sponsor Block category:
     hook: Pembuka/Sapaan
   Player:
+    Playing in Picture-in-Picture: Diputar dalam mode Gambar-dalam-Gambar
     Caption Timing:
       Adjust Timing: Sesuaikan waktu…
       Caption Timing: Waktu takarir

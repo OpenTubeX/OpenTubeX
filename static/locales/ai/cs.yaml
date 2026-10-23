@@ -1460,6 +1460,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Záznam živého chatu je zapnutý. Zprávy se zde budou zobrazovat během přehrávání videa.
   Premiere started: Probíhá premiéra. Začala {timeAgo}
   Player:
+    Playing in Picture-in-Picture: Přehrává se v režimu obraz v obraze
     Caption Timing:
       Adjust Timing: Upravit časování…
       Caption Timing: Časování titulků

@@ -1444,6 +1444,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Live chat replay is enabled.  Chat messages will appear here as the video plays.
   Premiere started: Premiere in progress. Started {timeAgo}
   Player:
+    Playing in Picture-in-Picture: Playing in Picture-in-Picture
     Caption Timing:
       Adjust Timing: Adjust timing…
       Caption Timing: Caption timing

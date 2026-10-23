@@ -1460,6 +1460,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Az élő csevegés visszajátszása be van kapcsolva.  A csevegés üzenetei a videó lejátszása közben itt jelennek meg.
   Premiere started: A premier folyamatban van, {timeAgo} kezdődött
   Player:
+    Playing in Picture-in-Picture: Lejátszás kép a képben módban
     Caption Timing:
       Adjust Timing: Időzítés módosítása…
       Caption Timing: Feliratok időzítése

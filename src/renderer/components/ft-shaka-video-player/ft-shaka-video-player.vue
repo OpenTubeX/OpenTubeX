@@ -182,7 +182,8 @@
       <!--
         Keep the decoded poster and its resolution fallback through playback.
         It also fills the inline player during PiP; the native poster attribute
-        can't, as Chromium may stretch it across the PiP surface (#362).
+        can't, as Chromium may stretch it across the PiP surface (#362). The
+        poster covers Chromium's PiP message, so show our own instead.
       -->
       <div
         v-if="thumbnail"
@@ -197,6 +198,12 @@
           :src="thumbnail"
           alt=""
         />
+        <span
+          v-if="pictureInPictureActive && !audioPlayerMode"
+          class="pictureInPictureMessage"
+        >
+          {{ $t('Video.Player.Playing in Picture-in-Picture') }}
+        </span>
       </div>
       <template v-if="showEndedScreen">
         <div

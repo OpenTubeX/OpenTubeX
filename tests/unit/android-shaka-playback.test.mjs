@@ -22,6 +22,7 @@ test('Android shows a thumbnail over the video while waiting for playback', () =
     scrollMiniPlayerDragStyle: null,
     scrollMiniPlayerAnimating: false,
     thumbnail: 'poster.jpg',
+    $t: key => key,
   }
   assert.equal(render(context).type, 'div')
   context.showPoster = false
