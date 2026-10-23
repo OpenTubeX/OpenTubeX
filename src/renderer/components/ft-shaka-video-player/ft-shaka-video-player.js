@@ -615,7 +615,7 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
-    videoGenreIsMusic: {
+    videoIsMusic: {
       type: Boolean,
       default: false
     },
@@ -11009,7 +11009,7 @@ export default defineComponent({
     }
 
     const isMusicVideoDetected = computed(() => {
-      return props.videoGenreIsMusic || hasSponsorBlockMusicOfftopicSegment.value
+      return props.videoIsMusic || hasSponsorBlockMusicOfftopicSegment.value
     })
 
     const shouldUseNormalPlaybackRateByDefault = computed(() => musicMode.value || isLive.value || isMusicVideoDetected.value)

@@ -34,4 +34,4 @@ patchedDependencies:
   overlayscrollbars@2.16.0: patches/overlayscrollbars@2.16.0.patch
   shaka-player@5.1.12: patches/shaka-player@5.1.12.patch
   vue-sonner@2.0.9: patches/vue-sonner@2.0.9.patch
-  youtubei.js@18.2.0: patches/youtubei.js@18.2.0.patch
+  youtubei.js@18.3.0: patches/youtubei.js@18.3.0.patch

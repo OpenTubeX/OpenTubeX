@@ -614,7 +614,8 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         isVr360: video.badges.some(badge => badge.label === '360°'),
         is3d: video.badges.some(badge => badge.label === '3D'),
         hasCaptions: video.has_captions,
-        isMembersOnly
+        isMembersOnly,
+        isMusic: video.thumbnail_overlays?.some(overlay => overlay.is(YTNodes.ThumbnailOverlayTimeStatus) && overlay.icon_type === 'MUSIC') ?? false
       }
     }
   }
@@ -846,7 +847,8 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
           premiereDate,
           isStation,
           isShort: lockupView.content_type === 'SHORT',
-          isMembersOnly: Boolean(isMemberOnly)
+          isMembersOnly: Boolean(isMemberOnly),
+          isMusic: thumbnailBottomOverlayView?.badges.some(badge => badge.icon_name === 'MUSIC') ?? false
         }
       }
       default:

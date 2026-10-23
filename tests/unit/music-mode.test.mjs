@@ -69,7 +69,7 @@ test('music mode overrides global, channel, and recovery speeds without changing
     getChannelPlaybackSpeeds: '{"channel":2.5}',
   }
   const watch = {
-    musicMode: true, channelId: 'channel', videoGenreIsMusic: false,
+    musicMode: true, channelId: 'channel', isMusicVideo: false,
     sabrReloadState: { playbackRate: 3 }, $store: { getters: settings },
   }
   initializePlaybackRate.call(watch)
