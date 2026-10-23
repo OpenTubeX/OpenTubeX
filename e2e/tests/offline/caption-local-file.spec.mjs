@@ -54,14 +54,30 @@ async function getVisibleBounds(locator) {
  * @param {import('@playwright/test').Locator} captionsMenu
  */
 async function checkActionRows(captionsMenu) {
-  const actions = captionsMenu.locator(':scope > .ft-caption-actions')
-  const [menu, row, load, timing] = await Promise.all([
-    captionsMenu, actions, actions.locator('.ft-caption-load-file-button'), actions.locator('.ft-caption-timing-button'),
-  ].map(getVisibleBounds))
+  // Shaka replaces its choices whenever the player reports track or caption
+  // changes, so measure the whole menu at once instead of element by element.
+  const { menu, row, load, timing, choices } = await captionsMenu.evaluate((element) => {
+    const bounds = (target) => {
+      if (!target || target.getClientRects().length === 0) return null
+      const { x, y, width, height } = target.getBoundingClientRect()
+      return { x, y, width, height }
+    }
+    const actions = element.querySelector(':scope > .ft-caption-actions')
+    return {
+      menu: bounds(element),
+      row: bounds(actions),
+      load: bounds(actions?.querySelector('.ft-caption-load-file-button')),
+      timing: bounds(actions?.querySelector('.ft-caption-timing-button')),
+      choices: [...element.querySelectorAll(':scope > button:not(.shaka-back-to-overflow-button, .ft-caption-options-button)')]
+        .map(bounds),
+    }
+  })
+  for (const bounds of [menu, row, load, timing, ...choices]) {
+    expect(bounds).not.toBeNull()
+  }
+  expect(choices.length).toBeGreaterThan(0)
   expect(row.width).toBeGreaterThanOrEqual(menu.width - 16)
-  const choices = captionsMenu.locator(':scope > button:not(.shaka-back-to-overflow-button, .ft-caption-options-button)')
-  for (const choice of await choices.all()) {
-    const bounds = await getVisibleBounds(choice)
+  for (const bounds of choices) {
     expect(bounds.y + bounds.height).toBeLessThanOrEqual(row.y + 1)
   }
   for (const button of [load, timing]) {
