@@ -10219,6 +10219,8 @@ export default defineComponent({
         })
       })
 
+      // The handoff keeps watching for portrait until this player can handle rotation.
+      adoptAndroidRotationFullscreen()
       fullWindowListenerReady = true
       applyPendingPresentationModes()
 
@@ -12661,7 +12663,6 @@ export default defineComponent({
         // remain mounted while the Shaka player is replaced.
         androidFullscreenHost = container.value.closest('.videoLayout')
         androidFullscreenHost?.addEventListener('toggle', handleAndroidRotationPopoverToggle)
-        adoptAndroidRotationFullscreen()
         androidFullscreenHostActive.value = !!androidFullscreenHost && document.fullscreenElement === androidFullscreenHost
         isFullscreen.value = androidFullscreenHostActive.value
       }

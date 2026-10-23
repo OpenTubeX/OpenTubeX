@@ -293,6 +293,11 @@ test('Android keeps rotation fullscreen when Watch replaces the player for the n
   assert.deepEqual(next.calls, ['orientation:false', 'navigation:true'], 'The next player restores the system orientation policy')
 })
 
+test('Android adopts handed-off rotation fullscreen only once the next player handles rotation', () => {
+  // Device rotation events do not repeat, so the handoff must keep observing portrait until then.
+  assert.match(source, /adoptAndroidRotationFullscreen\(\)\n\s*fullWindowListenerReady = true/)
+})
+
 test('Android ends a handed-off rotation fullscreen on portrait before the next player mounts', () => {
   const { previous, next, shared } = rotationReplacementHarness()
   shared.observeAndroidDeviceRotation.emit(false)
