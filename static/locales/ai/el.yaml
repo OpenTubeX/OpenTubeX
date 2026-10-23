@@ -1479,7 +1479,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Η επανάληψη ζωντανής συνομιλίας είναι ενεργοποιημένη. Τα μηνύματα θα εμφανίζονται εδώ κατά την αναπαραγωγή του βίντεο.
   Premiere started: Η πρεμιέρα βρίσκεται σε εξέλιξη. Ξεκίνησε {timeAgo}
   Player:
-    Playing in Picture-in-Picture: Αναπαραγωγή σε λειτουργία εικόνας σε εικόνα
+    Playing in Picture-in-Picture: Αναπαραγωγή σε λειτουργία εικόνας εντός εικόνας
     Caption Timing:
       Adjust Timing: Προσαρμογή χρονισμού…
       Caption Timing: Χρονισμός υποτίτλων
