@@ -131,6 +131,8 @@ test('ignores saved channel settings while channel playback settings are off', a
     await store.dispatch('updateAutoUpdateChannelPlaybackSpeeds', true)
     await store.dispatch('updateChannelPlaybackSpeeds', JSON.stringify({ 'UC-test-channel-id': 1.5 }))
     await store.dispatch('updateChannelVolumes', JSON.stringify({ 'UC-test-channel-id': 0.2 }))
+    await store.dispatch('updateChannelVideoQualities', JSON.stringify({ 'UC-test-channel-id': '360' }))
+    await store.dispatch('updateChannelSubtitlesStates', JSON.stringify({ 'UC-test-channel-id': true }))
   })
   const video = await openMockedVideo(page)
   expect(await video.evaluate(video => ({ speed: video.playbackRate, volume: video.volume })))
@@ -139,6 +141,8 @@ test('ignores saved channel settings while channel playback settings are off', a
   await expect(saveButton).toHaveCount(0)
 
   const view = await watchViewHandle(page)
+  await expect.poll(() => view.evaluate(view => view.currentSubtitlesState)).toBe(false)
+  expect(await view.evaluate(view => view.currentVideoQuality === view.getDefaultVideoQuality())).toBe(true)
   await view.evaluate(view => view.handlePlaybackRateUserSet(2))
   expect((await savedValues(page))[0]).toEqual({ 'UC-test-channel-id': 1.5 })
 

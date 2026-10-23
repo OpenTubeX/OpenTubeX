@@ -108,8 +108,8 @@ test.describe('channel settings', () => {
     await goToSettingsSection(page, 'playback')
 
     const section = page.locator('.settingsSection', { hasText: 'Enable channel playback settings' })
-    const toggle = section.getByRole('checkbox', { name: 'Enable channel playback settings' })
-    const autoSave = section.getByRole('checkbox', { name: 'Automatically save playback speed changes' })
+    const toggle = section.getByRole('checkbox', { name: /^Enable channel playback settings\b/ })
+    const autoSave = section.getByRole('checkbox', { name: /^Automatically save playback speed changes\b/ })
     await expect(toggle).toBeChecked()
     await expect(autoSave).toBeVisible()
 
