@@ -1385,8 +1385,6 @@ Video:
   Mark As Fully Watched: Σήμανση ως πλήρως προβληθέν
   AI-generated video summary: "Σύνοψη βίντεο που δημιουργήθηκε από ΤΝ"
   Quality and accuracy may vary: "Η ποιότητα και η ακρίβεια ενδέχεται να διαφέρουν"
-  Move Queue Item Up: "Μετακίνηση του {title} επάνω"
-  Move Queue Item Down: "Μετακίνηση του {title} κάτω"
   Includes paid promotion: Περιλαμβάνει πληρωμένη προώθηση
   Age Restricted Badge: Περιορισμός ηλικίας
   Music Video Badge: Μουσικό βίντεο
@@ -1398,6 +1396,7 @@ Video:
   Clear Queue: Εκκαθάριση ουράς αναπαραγωγής
   Queue Video Count: '{count} βίντεο | {count} βίντεο'
   Remove from Queue: Αφαίρεση του {title} από την ουρά αναπαραγωγής
+  Remove Video from Queue: Αφαίρεση από την ουρά αναπαραγωγής
   Drag to Reorder Queue: Σύρετε το {title} για να αλλάξετε τη σειρά στην ουρά αναπαραγωγής
   Reorder Queue Item: Αλλαγή σειράς του {title}
   Reorder Queue Item Instructions: Χρησιμοποιήστε τα πλήκτρα επάνω και κάτω βέλους για να μετακινήσετε αυτό το βίντεο στην ουρά αναπαραγωγής.

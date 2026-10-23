@@ -1371,8 +1371,6 @@ Video:
   Mark As Fully Watched: Segna come visto interamente
   AI-generated video summary: "Riepilogo del video generato dall'IA"
   Quality and accuracy may vary: "La qualità e l'accuratezza possono variare"
-  Move Queue Item Up: "Sposta {title} in alto"
-  Move Queue Item Down: "Sposta {title} in basso"
   Includes paid promotion: Include una promozione a pagamento
   Age Restricted Badge: Limiti di età
   Music Video Badge: Video musicale
@@ -1384,6 +1382,7 @@ Video:
   Clear Queue: Svuota coda
   Queue Video Count: '{count} video | {count} video | {count} video'
   Remove from Queue: Rimuovi {title} dalla coda
+  Remove Video from Queue: Rimuovi dalla coda
   Drag to Reorder Queue: Trascina {title} per riordinare la coda
   Reorder Queue Item: Riordina {title}
   Reorder Queue Item Instructions: Usa i tasti Freccia su e Freccia giù per spostare questo video nella coda.

@@ -121,8 +121,9 @@ test('Android customizes fullscreen actions and removes the empty bubble', {
         return childBounds.left >= bounds.left - 1 && childBounds.right <= bounds.right + 1
       })
     })).toBe(true)
-    await queue.getByRole('button', { name: 'Move Queued video 2 up', exact: true }).click()
-    await expect(queue.locator('.queueVideoTitle').first()).toHaveText('Queued video 2')
+    await queue.locator('.queueItem').filter({ has: page.getByRole('heading', { name: 'Queued video 2', exact: true }) }).getByRole('button', { name: 'More Options', exact: true }).click()
+    await page.getByRole('menuitem', { name: /^Move video up$/i }).click()
+    await expect(queue.locator('.queueItem h3').first()).toHaveText('Queued video 2')
     const queueScroller = queue.locator('.queueItems')
     await queueScroller.evaluate(element => { element.scrollTop = element.scrollHeight })
     await expect.poll(() => queueScroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)

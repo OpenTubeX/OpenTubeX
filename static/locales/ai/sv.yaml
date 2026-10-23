@@ -1381,8 +1381,6 @@ Video:
   Mark As Fully Watched: Markera som sedd till slutet
   AI-generated video summary: "AI-genererad videosammanfattning"
   Quality and accuracy may vary: "Kvalitet och noggrannhet kan variera"
-  Move Queue Item Up: "Flytta {title} uppåt"
-  Move Queue Item Down: "Flytta {title} nedåt"
   Includes paid promotion: Innehåller betald marknadsföring
   Age Restricted Badge: Åldersbegränsad
   Music Video Badge: Musikvideo
@@ -1394,6 +1392,7 @@ Video:
   Clear Queue: Rensa kön
   Queue Video Count: '{count} video | {count} videor'
   Remove from Queue: Ta bort {title} från kön
+  Remove Video from Queue: Ta bort från kön
   Drag to Reorder Queue: Dra {title} för att ändra ordning i kön
   Reorder Queue Item: Flytta {title}
   Reorder Queue Item Instructions: Använd uppåt- och nedåtpilarna för att flytta videon i kön.

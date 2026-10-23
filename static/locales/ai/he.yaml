@@ -1407,8 +1407,6 @@ Video:
   Mark As Fully Watched: סימון כנצפה במלואו
   AI-generated video summary: "סיכום סרטון שנוצר באמצעות בינה מלאכותית"
   Quality and accuracy may vary: "האיכות והדיוק עשויים להשתנות"
-  Move Queue Item Up: "העברת {title} למעלה"
-  Move Queue Item Down: "העברת {title} למטה"
   Includes paid promotion: כולל תוכן שיווקי בתשלום
   Age Restricted Badge: מוגבל לפי גיל
   Music Video Badge: קליפ מוזיקלי
@@ -1420,6 +1418,7 @@ Video:
   Clear Queue: ניקוי התור
   Queue Video Count: '{count} סרטון | {count} סרטונים | {count} סרטונים'
   Remove from Queue: הסרת {title} מהתור
+  Remove Video from Queue: הסרה מהתור
   Drag to Reorder Queue: גררו את {title} כדי לשנות את מיקומו בתור
   Reorder Queue Item: שינוי המיקום של {title}
   Reorder Queue Item Instructions: השתמשו במקשי החיצים למעלה ולמטה כדי להזיז את הסרטון בתור.

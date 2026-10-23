@@ -651,6 +651,7 @@ const emit = defineEmits([
   'move-video-to-the-bottom',
   'move-video-to-the-top',
   'move-video-up',
+  'open-video',
   'pause-player',
   'remove-from-playlist'
 ])
@@ -1947,7 +1948,8 @@ const watchPageLinkQuery = computed(() => {
     }
   }
 
-  return query
+  // Queued downloads link to the exact file they were queued from
+  return { ...query, ...props.data.route?.query }
 })
 
 const watchVideoRouterLink = computed(() => ({
@@ -1994,21 +1996,31 @@ async function handleWatchPageLinkClick(event) {
   }
 
   markSubscriptionVideoAsSeen()
+  // Lists such as the queue consume a video that a plain click plays here.
+  const plainLeftClick = event?.button === 0 && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey
 
   if (externalPlayerIsDefaultViewingMode.value) {
     event?.preventDefault()
+    if (plainLeftClick) emit('open-video')
     openInExternalPlayer()
     return
   }
 
   if (process.env.IS_IOS && localDownloadId.value !== undefined && event?.type === 'click') {
     event.preventDefault()
+    if (plainLeftClick) emit('pause-player')
+    let played = true
     await playDownloadedFile(Number(cardDownload.value), { videoId: id.value }, {
       refreshDownloads: () => refreshDownloadRecords(ytDlp, store),
       playNative: (downloadId, path) => ytDlp.ytDlpPlayDownload(downloadId, path),
       navigate: () => {},
-      fileNotFound: () => showToast({ message: t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] })
+      fileNotFound: () => {
+        played = false
+        showToast({ message: t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] })
+      }
     })
+    // A file that could not play stays wherever it was listed, such as the queue.
+    if (played && plainLeftClick) emit('open-video')
     return
   }
 
@@ -2059,7 +2071,8 @@ async function handleWatchPageLinkClick(event) {
   }
 
   // Plain left click navigates in this tab: morph the thumbnail into the player
-  if (event?.button === 0 && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {
+  if (plainLeftClick) {
+    emit('open-video')
     requestWatchPageViewTransition(event.currentTarget, {
       isShort: props.data.isShort === true && store.getters.getUseCustomShortsPlayer,
       allowVisiblePlayer: props.appearance === 'recommendation'

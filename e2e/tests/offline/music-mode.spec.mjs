@@ -94,7 +94,7 @@ for (const source of ['queue click', 'queue end', 'recommendation', 'manual']) {
       await watch.evaluate(view => view.$store.commit('addVideoToWatchQueue', {
         video: { videoId: 'musicvideo1', title: 'Music mode test video' },
       }))
-      if (source === 'queue click') await page.locator('.queueVideo').click()
+      if (source === 'queue click') await page.locator('.queueItem h3').click()
       else await video.evaluate(element => { element.currentTime = element.duration - 0.1; return element.play() })
     } else if (source === 'recommendation') {
       await watch.evaluate(view => {

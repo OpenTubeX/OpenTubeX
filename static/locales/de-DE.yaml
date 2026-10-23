@@ -1963,8 +1963,6 @@ Video:
   Mark As Fully Watched: Als vollständig angesehen markieren
   AI-generated video summary: "KI-generierte Videozusammenfassung"
   Quality and accuracy may vary: "Qualität und Genauigkeit können variieren"
-  Move Queue Item Up: "{title} nach oben verschieben"
-  Move Queue Item Down: "{title} nach unten verschieben"
   Age Restricted Badge: Altersbeschränkt
   Music Video Badge: Musikvideo
   External Media:
@@ -2376,6 +2374,7 @@ Video:
   Save Queue to Playlist: Warteschlange in Playlist speichern
   Queue Video Count: '{count} Video | {count} Videos'
   Remove from Queue: '{title} aus der Warteschlange entfernen'
+  Remove Video from Queue: Aus der Warteschlange entfernen
   Drag to Reorder Queue: Ziehe {title}, um die Warteschlange neu anzuordnen
   Reorder Queue Item: 'Reihenfolge von {title} ändern'
   Reorder Queue Item Instructions: Verwende die Pfeiltasten nach oben und unten, um dieses Video in der Warteschlange zu verschieben.

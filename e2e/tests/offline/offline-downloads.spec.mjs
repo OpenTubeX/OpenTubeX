@@ -124,7 +124,10 @@ for (const mobile of [false, true]) {
 
       if (mobile) await page.getByRole('button', { name: 'Queue Playlist video one', exact: true }).click()
       const queue = page.locator('.watchQueue')
-      await expect(queue.locator('.queueVideoTitle')).toHaveText(['Playlist video one', 'Playlist video two'])
+      await expect(queue.locator('.queueItem h3')).toHaveText(['Playlist video one', 'Playlist video two'])
+      await expect(queue.locator('.queueItem a.title').first()).toHaveAttribute('href', /^#\/watch\/offline0003\?(.+&)?downloadId=3(&|$)/)
+      // Downloads have no duration, so they must not be labelled as live.
+      await expect(queue.locator('.videoDuration.live')).toHaveCount(0)
       await video.evaluate(element => element.dispatchEvent(new Event('ended')))
       await expect(page).toHaveURL(/#\/watch\/offline0003\?downloadId=3/)
       await expect.poll(() => video.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2)

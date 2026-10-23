@@ -381,13 +381,6 @@
   -webkit-line-clamp: 2;
 }
 
-.fullscreenPlaylist .playlistItem :deep(.infoLine) {
-  margin-block-start: 2px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .videoInfo {
   margin-inline-start: 30px;
   position: relative;
@@ -511,10 +504,6 @@
 
   .fullscreenPlaylist .playlistItem :deep(.restArea) {
     line-height: 0;
-  }
-
-  .fullscreenPlaylist .playlistItem :deep(.infoLine) {
-    flex-wrap: nowrap;
   }
 
   .fullscreenPlaylist .playlistItem :deep(.videoIndexArea) {

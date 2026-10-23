@@ -1372,8 +1372,6 @@ Video:
   Mark As Fully Watched: Märgi täielikult vaadatuks
   AI-generated video summary: "Tehisintellekti loodud video kokkuvõte"
   Quality and accuracy may vary: "Kvaliteet ja täpsus võivad erineda"
-  Move Queue Item Up: "Liiguta {title} üles"
-  Move Queue Item Down: "Liiguta {title} alla"
   Includes paid promotion: Sisaldab tasulist reklaami
   Age Restricted Badge: Vanusepiiranguga
   Music Video Badge: Muusikavideo
@@ -1385,6 +1383,7 @@ Video:
   Clear Queue: Tühjenda esitusjärjekord
   Queue Video Count: '{count} video | {count} videot'
   Remove from Queue: Eemalda {title} esitusjärjekorrast
+  Remove Video from Queue: Eemalda esitusjärjekorrast
   Drag to Reorder Queue: Lohista {title} esitusjärjekorras teise kohta
   Reorder Queue Item: Muuda video {title} järjekorda
   Reorder Queue Item Instructions: Selle video liigutamiseks esitusjärjekorras kasutage üles- ja allanoole klahve.

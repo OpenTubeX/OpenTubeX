@@ -76,10 +76,6 @@
   transition: transform 200ms ease;
 }
 
-.queueItem.dragging {
-  opacity: 0.35;
-}
-
 .queueDragHandle {
   touch-action: none;
   display: grid;
@@ -106,18 +102,24 @@
 }
 
 .queueVideo {
-  display: grid;
-  grid-template-columns: 112px minmax(0, 1fr);
-  align-items: center;
-  gap: 8px;
   min-inline-size: 0;
+}
+
+/* Lay out other media like the list items of YouTube videos. */
+.externalQueueVideo {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  padding: 6px;
   color: inherit;
   text-decoration: none;
 }
 
 .queueThumbnail {
   aspect-ratio: 16 / 9;
-  inline-size: 112px;
+  block-size: 75px;
+  border-radius: calc(8px * var(--ui-roundness));
   object-fit: cover;
 }
 
@@ -125,55 +127,20 @@
   display: flex;
   min-inline-size: 0;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
 }
 
-.queueVideoTitle,
-.queueAuthor {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.queueVideoTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: inherit;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
 }
 
 .queueAuthor {
   color: var(--secondary-text-color);
-  font-size: 13px;
-}
-
-.queueActions {
-  display: flex;
-  flex-direction: column;
-
-  button {
-    display: grid;
-    place-items: center;
-    inline-size: 30px;
-    block-size: 30px;
-    border: 0;
-    border-radius: 50%;
-    background: transparent;
-    color: var(--secondary-text-color);
-    cursor: pointer;
-
-    &:hover,
-    &:focus-visible {
-      background-color: var(--side-nav-hover-color);
-      color: var(--primary-text-color);
-    }
-  }
-}
-
-.queueItem.dropBefore {
-  box-shadow: inset 0 3px var(--accent-color);
-}
-
-.queueItem.dropAfter {
-  box-shadow: inset 0 -3px var(--accent-color);
-}
-
-.queueActions button:disabled {
-  opacity: 0.4;
-  cursor: default;
+  font-size: 12px;
 }
 
 .fullscreenQueue {
@@ -260,46 +227,48 @@
     padding-inline-end: calc(var(--scrollbar-track-width) + 4px);
   }
 
-  .queueVideo {
-    grid-template-columns: 64px minmax(0, 1fr);
+  /* Match the fullscreen playlist dock. */
+  .queueVideo :deep(.ft-list-item),
+  .externalQueueVideo {
+    padding-block: 4px;
   }
 
-  .queueThumbnail {
-    inline-size: 64px;
+  .queueVideo :deep(.title),
+  .queueVideoTitle {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+}
+
+@media (orientation: landscape) and (height <= 600px) {
+  /* Match the child card's thumbnail rule so its fixed height cannot win. */
+  /* stylelint-disable-next-line selector-max-compound-selectors */
+  .fullscreenQueue .queueVideo :deep(.ft-list-item .videoThumbnail .thumbnailImage),
+  .fullscreenQueue .queueThumbnail {
+    inline-size: 80px;
+    block-size: 45px;
+  }
+
+  .fullscreenQueue .queueVideo :deep(.info) {
+    min-inline-size: 0;
+  }
+
+  .fullscreenQueue .queueVideo :deep(.restArea) {
+    line-height: 0;
   }
 }
 
 @media (width <= 600px), (pointer: coarse) {
   .queueItem {
-    grid-template-columns: var(--phone-touch-target, 48px) minmax(0, 1fr);
+    grid-template-columns: var(--phone-touch-target, 48px) minmax(0, 1fr) auto;
   }
 
-  .queueActions {
-    flex-direction: row;
-    grid-column: 2;
-    justify-content: flex-end;
-  }
-
-  .queueDragHandle,
-  .queueActions button {
+  .queueDragHandle {
     inline-size: var(--phone-touch-target, 48px);
     block-size: var(--phone-touch-target, 48px);
-  }
-
-  .queueVideo {
-    grid-template-columns: 64px minmax(0, 1fr);
-  }
-
-  .queueThumbnail {
-    inline-size: 64px;
-  }
-
-  .queueVideoTitle {
-    display: -webkit-box;
-    white-space: normal;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
   }
 
   .queueHeaderAction {
@@ -323,17 +292,34 @@
     gap: 4px;
   }
 
+}
+
+/* Narrow docks stack the menu under the handle and the thumbnail above the text. */
+@container queue (width <= 320px) {
+  .fullscreenQueue .queueItem {
+    grid-template-columns: var(--phone-touch-target, 48px) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .fullscreenQueue .queueItemMenu {
+    grid-column: 1;
+  }
+
   .fullscreenQueue .queueVideo {
+    grid-row: span 2;
+  }
+
+  .fullscreenQueue .queueVideo :deep(.ft-list-item) {
+    grid-template: 'thumbnail' auto 'info' auto / minmax(0, 1fr);
+    row-gap: 6px;
+  }
+
+  /* Keep the duration badge on the thumbnail. */
+  .fullscreenQueue .queueVideo :deep(.videoThumbnail) {
+    justify-self: start;
+  }
+
+  .fullscreenQueue .externalQueueVideo {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .fullscreenQueue .queueThumbnail {
-    inline-size: min(64px, 100%);
-  }
-
-  .fullscreenQueue .queueActions {
-    flex-wrap: wrap;
-    grid-column: 1 / -1;
-    justify-content: space-between;
   }
 }

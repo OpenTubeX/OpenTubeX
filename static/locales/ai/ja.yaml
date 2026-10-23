@@ -1372,8 +1372,6 @@ Video:
   Mark As Fully Watched: 最後まで視聴済みにする
   AI-generated video summary: "AI 生成の動画概要"
   Quality and accuracy may vary: "品質と精度は異なる場合があります"
-  Move Queue Item Up: "{title}を上へ移動"
-  Move Queue Item Down: "{title}を下へ移動"
   Includes paid promotion: 有料プロモーションを含みます
   Age Restricted Badge: 年齢制限あり
   Music Video Badge: ミュージックビデオ
@@ -1385,6 +1383,7 @@ Video:
   Clear Queue: キューを消去
   Queue Video Count: '{count}本の動画'
   Remove from Queue: '{title}をキューから削除'
+  Remove Video from Queue: キューから削除
   Drag to Reorder Queue: '{title}をドラッグしてキュー内で並べ替え'
   Reorder Queue Item: '{title}を並べ替え'
   Reorder Queue Item Instructions: 上下の矢印キーでこの動画をキュー内で移動します。

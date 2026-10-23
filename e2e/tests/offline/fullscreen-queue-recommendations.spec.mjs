@@ -228,9 +228,11 @@ for (const { uiScale, iconPack, colorScheme } of [
         await expectUnifiedDockHeader(queue, '.queueHeader')
         await expect(queueScroller).toHaveAttribute('data-overlayscrollbars-viewport')
         await expect(queue.locator('.queueItem')).toHaveCount(20)
-        await queue.getByRole('button', { name: 'Move Queued video 2 up', exact: true }).click()
-        await expect(queue.locator('.queueVideoTitle').first()).toHaveText('Queued video 2')
-        await queue.getByRole('button', { name: 'Remove Queued video 2 from queue', exact: true }).click()
+        await queue.locator('.queueItem').filter({ has: page.getByRole('heading', { name: 'Queued video 2', exact: true }) }).getByRole('button', { name: 'More options', exact: true }).click()
+        await page.getByRole('menuitem', { name: /^Move video up$/i }).click()
+        await expect(queue.locator('.queueItem h3').first()).toHaveText('Queued video 2')
+        await queue.locator('.queueItem').filter({ has: page.getByRole('heading', { name: 'Queued video 2', exact: true }) }).getByRole('button', { name: 'More options', exact: true }).click()
+        await page.getByRole('menuitem', { name: 'Remove from Queue', exact: true }).click()
         await expect(queue.locator('.queueItem')).toHaveCount(19)
         await scrollToBottom(queueScroller)
         await setWindowSize(app, page, { width: 480, height: 400 })
@@ -260,7 +262,7 @@ for (const { uiScale, iconPack, colorScheme } of [
         const expectQueueScrollbarClear = async () => {
           await expect.poll(() => queueScroller.evaluate(element => {
             const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical').getBoundingClientRect()
-            const actions = element.querySelector('.queueActions').getBoundingClientRect()
+            const actions = element.querySelector('.queueItemMenu').getBoundingClientRect()
             return scrollbar.left - actions.right
           })).toBeGreaterThanOrEqual(3)
         }

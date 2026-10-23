@@ -1377,8 +1377,6 @@ Video:
   Mark As Fully Watched: Tandai sebagai sudah ditonton sepenuhnya
   AI-generated video summary: "Ringkasan video buatan AI"
   Quality and accuracy may vary: "Kualitas dan akurasi dapat bervariasi"
-  Move Queue Item Up: "Pindahkan {title} ke atas"
-  Move Queue Item Down: "Pindahkan {title} ke bawah"
   Includes paid promotion: Memuat promosi berbayar
   Age Restricted Badge: Dibatasi usia
   Music Video Badge: Video musik
@@ -1390,6 +1388,7 @@ Video:
   Clear Queue: Kosongkan Antrean
   Queue Video Count: '{count} video'
   Remove from Queue: Hapus {title} dari antrean
+  Remove Video from Queue: Hapus dari antrean
   Drag to Reorder Queue: Seret {title} untuk mengurutkan ulang antrean
   Reorder Queue Item: Urutkan ulang {title}
   Reorder Queue Item Instructions: Gunakan tombol Panah Atas dan Panah Bawah untuk memindahkan video ini dalam antrean.

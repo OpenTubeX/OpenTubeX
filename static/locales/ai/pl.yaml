@@ -822,13 +822,12 @@ Channel:
   Search Result Types: Typy wyników wyszukiwania
   All Results: Wszystkie
 Video:
+  Remove Video from Queue: Usuń z kolejki
   External DRM Protected: "OpenTubeX nie może odtwarzać filmów chronionych przez DRM, ponieważ wymagają one obsługi zastrzeżonych prawnie komponentów o zamkniętym kodzie."
   Invalid Media URL: "Nieprawidłowy adres URL multimediów"
   Mark As Fully Watched: Oznacz jako obejrzany w całości
   AI-generated video summary: "Podsumowanie filmu wygenerowane przez SI"
   Quality and accuracy may vary: "Jakość i dokładność mogą się różnić"
-  Move Queue Item Up: "Przenieś film {title} w górę"
-  Move Queue Item Down: "Przenieś film {title} w dół"
   Includes paid promotion: Zawiera płatną promocję
   Age Restricted Badge: Ograniczenie wiekowe
   Music Video Badge: Teledysk

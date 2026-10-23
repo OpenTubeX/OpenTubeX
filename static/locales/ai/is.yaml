@@ -1383,8 +1383,6 @@ Video:
   Mark As Fully Watched: Merkja sem fullhorft
   AI-generated video summary: "Myndbandsyfirlit búið til með gervigreind"
   Quality and accuracy may vary: "Gæði og nákvæmni geta verið breytileg"
-  Move Queue Item Up: "Færa {title} upp"
-  Move Queue Item Down: "Færa {title} niður"
   Includes paid promotion: Inniheldur greidda kynningu
   Age Restricted Badge: Aldurstakmark
   Music Video Badge: Tónlistarmyndband
@@ -1396,6 +1394,7 @@ Video:
   Clear Queue: Hreinsa biðröð
   Queue Video Count: '{count} myndband | {count} myndbönd'
   Remove from Queue: Fjarlægja {title} úr biðröð
+  Remove Video from Queue: Fjarlægja úr biðröð
   Drag to Reorder Queue: Dragðu {title} til að breyta röðinni
   Reorder Queue Item: Færa {title}
   Reorder Queue Item Instructions: Notaðu upp- og niðurörvarnar til að færa þetta myndband í biðröðinni.

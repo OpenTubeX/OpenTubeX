@@ -1431,8 +1431,6 @@ Video:
   Mark As Fully Watched: Markér som set til ende
   AI-generated video summary: "AI-genereret videoresumé"
   Quality and accuracy may vary: "Kvalitet og nøjagtighed kan variere"
-  Move Queue Item Up: "Flyt {title} op"
-  Move Queue Item Down: "Flyt {title} ned"
   Includes paid promotion: Indeholder betalt promovering
   Age Restricted Badge: Aldersbegrænset
   Music Video Badge: Musikvideo
@@ -1444,6 +1442,7 @@ Video:
   Clear Queue: Ryd kø
   Queue Video Count: '{count} video | {count} videoer'
   Remove from Queue: Fjern {title} fra køen
+  Remove Video from Queue: Fjern fra køen
   Drag to Reorder Queue: Træk {title} for at ændre rækkefølgen i køen
   Reorder Queue Item: Flyt {title}
   Reorder Queue Item Instructions: Brug pil op og pil ned til at flytte denne video i køen.

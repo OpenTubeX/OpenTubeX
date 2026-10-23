@@ -112,6 +112,10 @@ test.describe('phone UI', () => {
     const sheet = page.locator('dialog[open]')
     await expect(sheet.locator('.queueItem')).toHaveCount(12)
     await sheet.evaluate(el => Promise.all(el.getAnimations().map(animation => animation.finished)))
+    const chooseQueueItemOption = async (item, option) => {
+      await item.getByRole('button', { name: 'More options', exact: true }).click()
+      await page.getByRole('menuitem', { name: option }).click()
+    }
     const touch = await page.context().newCDPSession(page)
     const dragStart = await sheet.locator('.queueDragHandle').first().boundingBox()
     const targetBox = await sheet.locator('.queueItem').nth(2).boundingBox()
@@ -120,7 +124,7 @@ test.describe('phone UI', () => {
     await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
     await expect(sheet.locator('.queueItem').nth(2)).toContainText('Queue item 0')
     for (let index = 0; index < 2; index++) {
-      await sheet.getByRole('button', { name: 'Move Queue item 0 up' }).click()
+      await chooseQueueItemOption(sheet.locator('.queueItem').filter({ hasText: 'Queue item 0' }), /^Move video up$/i)
     }
     // The rows slide into their new places, so measure the grip once they're there
     await expect(sheet.locator('.queueItem').first()).toContainText('Queue item 0')
@@ -134,11 +138,11 @@ test.describe('phone UI', () => {
     await expect.poll(() => sheet.locator('.queueItems').evaluate(element => element.scrollTop)).toBeGreaterThan(0)
     await touch.send('Input.dispatchTouchEvent', { type: 'touchCancel', touchPoints: [] })
     await sheet.locator('.queueItems').evaluate(element => { element.scrollTop = 0 })
-    await sheet.locator('.queueItem').first().getByRole('button', { name: 'Move Queue item 0 down' }).click()
+    await chooseQueueItemOption(sheet.locator('.queueItem').first(), /^Move video down$/i)
     await expect(sheet.locator('.queueItem').nth(1)).toContainText('Queue item 0')
     await sheet.locator('.queueItems').evaluate(element => { element.scrollTop = 100000 })
     for (let i = 0; i < 11; i++) {
-      await sheet.locator('.queueItem').last().getByRole('button', { name: /Remove.*Queue/ }).click()
+      await chooseQueueItemOption(sheet.locator('.queueItem').last(), 'Remove from Queue')
     }
     await expectNoScrollbarOverflow(sheet.locator('.queueItems'))
     await sheet.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()

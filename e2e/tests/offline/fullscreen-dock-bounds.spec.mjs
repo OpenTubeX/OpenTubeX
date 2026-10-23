@@ -97,8 +97,8 @@ for (const { uiScale, colorScheme } of [{ uiScale: 175, colorScheme: 'light' }, 
           return element.contains(target)
         })).toBe(true)
         await handle.press('ArrowDown')
-        await expect(queue.locator('.queueVideoTitle').first()).toHaveText('Queued video 2')
-        for (const button of await queue.locator('.queueActions button:not([disabled])').all()) {
+        await expect(queue.locator('.queueItem h3').first()).toHaveText('Queued video 2')
+        for (const button of await queue.locator('.queueItemMenu button').all()) {
           await button.scrollIntoViewIfNeeded()
           await expect.poll(() => button.evaluate(element => {
             const rect = element.getBoundingClientRect()
@@ -107,11 +107,12 @@ for (const { uiScale, colorScheme } of [{ uiScale: 175, colorScheme: 'light' }, 
             return rect.left >= player.left && rect.right <= player.right && element.contains(target)
           })).toBe(true)
         }
-        await queue.getByRole('button', { name: 'Remove Queued video 3 from queue', exact: true }).click()
+        await queue.locator('.queueItem').filter({ has: page.getByRole('heading', { name: 'Queued video 3', exact: true }) }).getByRole('button', { name: 'More options', exact: true }).click()
+        await page.getByRole('menuitem', { name: 'Remove from Queue', exact: true }).click()
         await expect(queue.locator('.queueItem')).toHaveCount(2)
         await expectValidScroll(queue.locator('.queueItems'), '.queueItemsContent')
-        await queue.locator('.queueVideoTitle').first().scrollIntoViewIfNeeded()
-        await expect.poll(() => queue.locator('.queueVideoTitle').first().evaluate(element => {
+        await queue.locator('.queueItem h3').first().scrollIntoViewIfNeeded()
+        await expect.poll(() => queue.locator('.queueItem h3').first().evaluate(element => {
           const rect = element.getBoundingClientRect()
           const player = element.closest('.ftVideoPlayer').getBoundingClientRect()
           return rect.width > 0 && rect.left >= player.left && rect.right <= player.right
