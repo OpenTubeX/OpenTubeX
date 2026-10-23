@@ -23,7 +23,7 @@ patchedDependencies:
   overlayscrollbars@2.16.0: 9a3cd83cba852554004ae8b64ca0710ed81bd0c0b2d42ecceedf3e2e25127ef3
   shaka-player@5.1.12: cf2e5c9a138eec272ac8db5df51977f756e60fed28f24946e54c67fe0e465724
   vue-sonner@2.0.9: 34b2065fecd4314653c24cdfc38ff5f2910def4942ed265ec374d66c0e5c0940
-  youtubei.js@18.3.0: 9fa40cc4038ffd471cd9e05b4a10246dedaa4fc003e75b644bfde7fbfb94f741
+  youtubei.js@18.3.0: adccf4f3de9046bfc908e7418baaf2c6b006c66f808858b839ad740e43ec8d85
 
 importers:
 
@@ -199,7 +199,7 @@ importers:
         version: 4.1.0(vue@3.5.44)
       youtubei.js:
         specifier: ^18.3.0
-        version: 18.3.0(patch_hash=9fa40cc4038ffd471cd9e05b4a10246dedaa4fc003e75b644bfde7fbfb94f741)
+        version: 18.3.0(patch_hash=adccf4f3de9046bfc908e7418baaf2c6b006c66f808858b839ad740e43ec8d85)
     devDependencies:
       '@capacitor/cli':
         specifier: ^8.5.3
@@ -10711,7 +10711,7 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  youtubei.js@18.3.0(patch_hash=9fa40cc4038ffd471cd9e05b4a10246dedaa4fc003e75b644bfde7fbfb94f741):
+  youtubei.js@18.3.0(patch_hash=adccf4f3de9046bfc908e7418baaf2c6b006c66f808858b839ad740e43ec8d85):
     dependencies:
       '@bufbuild/protobuf': 2.14.1
       fflate: 0.8.3

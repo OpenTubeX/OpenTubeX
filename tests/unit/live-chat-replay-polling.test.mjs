@@ -5,7 +5,7 @@ import test from 'node:test'
 import 'youtubei.js'
 
 // Imported by path because youtubei.js doesn't export its internals, and because
-// these cover behaviour that only exists thanks to patches/youtubei.js@18.2.0.patch.
+// these cover behaviour that only exists thanks to patches/youtubei.js@18.3.0.patch.
 import LiveChat from '../../node_modules/youtubei.js/dist/src/parser/youtube/LiveChat.js'
 import { LiveChatContinuation } from '../../node_modules/youtubei.js/dist/src/parser/continuations.js'
 
@@ -29,12 +29,12 @@ function fakeContinuation({ actions = [], continuation = 'NEXT', header = null }
  * deliberately left pointing at the default view even after a switch, which is how
  * the real thing behaves for as long as the initial info isn't refreshed.
  */
-function fakeViewSelector() {
+function fakeViewSelector(selected = 'TOP_CHAT') {
   return {
     view_selector: {
       sub_menu_items: [
-        { title: 'Top chat', selected: true, continuation: 'TOP_CHAT_CONTINUATION' },
-        { title: 'Live chat', selected: false, continuation: 'LIVE_CHAT_CONTINUATION' },
+        { title: 'Top chat', selected: selected === 'TOP_CHAT', continuation: 'TOP_CHAT_CONTINUATION' },
+        { title: 'Live chat', selected: selected === 'LIVE_CHAT', continuation: 'LIVE_CHAT_CONTINUATION' },
       ],
     },
   }
@@ -494,6 +494,55 @@ test('a live chat keeps polling after its view is switched', async (t) => {
   // live chat runs on, so switching has to restart it.
   assert.ok(requests.length > before, `expected a new request, got ${requests.length} vs ${before}`)
   assert.equal(requests[before].args.continuation, 'LIVE_CHAT_CONTINUATION')
+})
+
+test('a chat that opens on its live view reports and leaves that view', async () => {
+  const { liveChat, requests } = createReplay((args, callIndex) => ({
+    continuation_contents: fakeContinuation({
+      continuation: `AFTER_${callIndex}`,
+      header: callIndex === 0 ? fakeViewSelector('LIVE_CHAT') : null,
+    }),
+  }))
+
+  liveChat.start()
+  await flush()
+  assert.equal(liveChat.filter, 'LIVE_CHAT')
+
+  // Switching to the view the chat did not open on must not be mistaken for a no-op.
+  liveChat.setFilter('TOP_CHAT')
+  await liveChat.pollNext()
+  await flush()
+  assert.equal(requests[1].args.continuation, 'TOP_CHAT_CONTINUATION')
+})
+
+test('switching views drops live messages that are still being paced', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const settle = async () => {
+    for (let index = 0; index < 20; index++) await new Promise((resolve) => setImmediate(resolve))
+  }
+  const { liveChat, updates } = createReplay((args, callIndex) => ({
+    continuation_contents: fakeContinuation({
+      continuation: `AFTER_${callIndex}`,
+      header: callIndex === 0 ? fakeViewSelector() : null,
+      // Live chats also poll their metadata, so pick the chat request by its continuation.
+      actions: args.continuation === 'AFTER_0' ? [{ id: 1 }, { id: 2 }, { id: 3 }] : [],
+    }),
+  }), { isReplay: false })
+  t.after(() => liveChat.stop())
+
+  liveChat.start()
+  await settle()
+  // Advance until the paced emission of the three queued messages has begun.
+  for (let elapsed = 0; updates.length === 0 && elapsed < 10_000; elapsed += 100) {
+    t.mock.timers.tick(100)
+    await settle()
+  }
+  assert.deepEqual(updates, [{ id: 1 }])
+
+  liveChat.setFilter('LIVE_CHAT')
+  t.mock.timers.tick(3000)
+  await settle()
+  assert.deepEqual(updates, [{ id: 1 }])
 })
 
 test('the view cannot be switched before the chat has started', () => {

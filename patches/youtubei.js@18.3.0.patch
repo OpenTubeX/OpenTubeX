@@ -493,7 +493,7 @@ index 1ad3f9ca9eaa64816bad08aa5a3f9c7f2445719d..9ae5489273f84978f584ef71c8ee30a4
       * Sends a message.
       * @param text - Text to send.
 diff --git a/dist/src/parser/youtube/LiveChat.js b/dist/src/parser/youtube/LiveChat.js
-index e2d7e16e7f718f2547cbfa280fa20128d6e7d7eb..ad48beb21ea8426ade2819847ac37fa435631f9e 100644
+index e2d7e16e7f718f2547cbfa280fa20128d6e7d7eb..eac5d2902ecd0eaa24cd84b74701a8fcf7451c87 100644
 --- a/dist/src/parser/youtube/LiveChat.js
 +++ b/dist/src/parser/youtube/LiveChat.js
 @@ -18,8 +18,14 @@ export default class LiveChat extends EventEmitter {
@@ -534,7 +534,7 @@ index e2d7e16e7f718f2547cbfa280fa20128d6e7d7eb..ad48beb21ea8426ade2819847ac37fa4
              else {
                  // There are more than 10 actions, emit them asynchronously so we can request the next incremental continuation.
                  this.#emitSmoothedActions(actions);
-@@ -63,54 +62,165 @@ export default class LiveChat extends EventEmitter {
+@@ -63,54 +62,171 @@ export default class LiveChat extends EventEmitter {
          if (!this.running) {
              this.running = true;
              this.#pollLivechat();
@@ -665,6 +665,12 @@ index e2d7e16e7f718f2547cbfa280fa20128d6e7d7eb..ad48beb21ea8426ade2819847ac37fa4
 +                    // Header only exists in the first request, and in the first request after a seek
 +                    if (contents.header) {
 +                        this.initial_info = contents;
++                        // Follow the view YouTube opened the chat on, so setFilter() knows what is shown.
++                        const selected_index = contents.header.view_selector?.sub_menu_items?.findIndex((item) => item.selected);
++                        if (selected_index === 0)
++                            this.#filter = 'TOP_CHAT';
++                        else if (selected_index === 1)
++                            this.#filter = 'LIVE_CHAT';
 +                        this.emit('start', contents);
 +                        poll_again = this.running && !this.is_replay;
 +                    }
@@ -693,9 +699,6 @@ index e2d7e16e7f718f2547cbfa280fa20128d6e7d7eb..ad48beb21ea8426ade2819847ac37fa4
 -                    this.emit('start', contents);
 -                    if (this.running)
 -                        this.#pollLivechat();
--                }
--                else {
--                    this.smoothed_queue.enqueueActionGroup(contents.actions);
 +                catch (err) {
 +                    if (seek_generation !== this.#seek_generation)
 +                        return;
@@ -710,6 +713,9 @@ index e2d7e16e7f718f2547cbfa280fa20128d6e7d7eb..ad48beb21ea8426ade2819847ac37fa4
 +                        return;
 +                    }
                  }
+-                else {
+-                    this.smoothed_queue.enqueueActionGroup(contents.actions);
+-                }
 -                this.#retry_count = 0;
              }
 -            catch (err) {
@@ -737,6 +743,19 @@ index e2d7e16e7f718f2547cbfa280fa20128d6e7d7eb..ad48beb21ea8426ade2819847ac37fa4
      }
      /**
       * Ensures actions are emitted at the right speed.
+@@ -123,8 +239,12 @@ export default class LiveChat extends EventEmitter {
+             delay *= Math.random() + 0.5,
+             delay = Math.min(1E3, delay),
+             delay = Math.max(80, delay)) : delay = 80;
++        // A filter change or seek while waiting means these actions belong to the previous view.
++        const seek_generation = this.#seek_generation;
+         for (const action of action_queue) {
+             await this.#wait(emit_delay_ms);
++            if (seek_generation !== this.#seek_generation)
++                return;
+             this.emit('chat-update', action);
+         }
+     }
 diff --git a/dist/src/utils/ProtoUtils.js b/dist/src/utils/ProtoUtils.js
 index 00a367bb12437a8c2b3c0047fe6298960e96a36b..3f4771abb5112856fd77b04bfdb41587ae42e140 100644
 --- a/dist/src/utils/ProtoUtils.js
