@@ -302,6 +302,7 @@ Settings:
     Language and Region: Langue et région
     All Settings: Tous les paramètres
     Profile Selector Hint: Vous pouvez aussi faire un clic droit sur l’icône du profil pour changer de profil
+    Profile Selector Touch Hint: Vous pouvez aussi appuyer longuement sur l’icône du profil pour changer de profil
   Categories:
     General Description: Langue, démarrage, onglets et comportement de l’application
     Appearance: Apparence
@@ -1304,6 +1305,7 @@ Tutorial:
   Quick Settings:
     Title: Personnalisez l’application
     Description: Choisissez un thème et une qualité vidéo par défaut. Modifiez ces préférences et d’autres à tout moment depuis le menu de votre profil, ou faites un clic droit dessus pour changer de profil.
+    Touch Description: Choisissez un thème et une qualité vidéo par défaut. Modifiez ces préférences et d’autres à tout moment depuis le menu de votre profil, ou appuyez longuement dessus pour changer de profil.
   Import Data:
     Title: Emportez vos données avec vous
     Description: Vous pouvez importer les abonnements, l’historique, les playlists, l’historique de recherche ou les paramètres depuis une autre application compatible ou une sauvegarde.

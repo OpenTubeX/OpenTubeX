@@ -303,6 +303,7 @@ Settings:
     Language and Region: Hizkuntza eta eskualdea
     All Settings: Ezarpen guztiak
     Profile Selector Hint: Profil batetik bestera aldatzeko, eskuineko klik ere egin dezakezu profilaren ikonoan
+    Profile Selector Touch Hint: Profil batetik bestera aldatzeko, profilaren ikonoa sakatuta ere eduki dezakezu
   Categories:
     General Description: Hizkuntza, abioa, fitxak eta aplikazioaren portaera
     Appearance: Itxura
@@ -1305,6 +1306,7 @@ Tutorial:
   Quick Settings:
     Title: Pertsonalizatu aplikazioa
     Description: Aukeratu gai bat eta bideo-kalitate lehenetsia. Aldatu hobespen horiek eta beste batzuk profilaren menutik nahi duzunean, edo egin eskuineko klik menuan profila aldatzeko.
+    Touch Description: Aukeratu gai bat eta bideo-kalitate lehenetsia. Aldatu hobespen horiek eta beste batzuk profilaren menutik nahi duzunean, edo eduki menua sakatuta profila aldatzeko.
   Import Data:
     Title: Inportatu zure datuak
     Description: Nahi izanez gero, inportatu harpidetzak, historia, erreprodukzio-zerrendak, bilaketa-historia edo ezarpenak beste aplikazio bateragarri edo babeskopia batetik.

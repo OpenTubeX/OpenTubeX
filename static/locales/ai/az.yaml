@@ -305,6 +305,7 @@ Settings:
     Language and Region: Dil və bölgə
     All Settings: Bütün tənzimləmələr
     Profile Selector Hint: Profilləri dəyişmək üçün profil nişanına sağ klikləyə də bilərsiniz
+    Profile Selector Touch Hint: Profilləri dəyişmək üçün profil nişanına basıb saxlaya da bilərsiniz
   Categories:
     General Description: Dil, başlanğıc, vərəqlər və tətbiqin davranışı
     Appearance: Görünüş
@@ -1308,6 +1309,7 @@ Tutorial:
   Quick Settings:
     Title: Özünüzə uyğunlaşdırın
     Description: Mövzu və varsayılan video keyfiyyəti seçin. Bu və digər seçimləri istənilən vaxt profil menyusundan dəyişin və ya profilləri dəyişmək üçün ona sağ klikləyin.
+    Touch Description: Mövzu və varsayılan video keyfiyyəti seçin. Bu və digər seçimləri istənilən vaxt profil menyusundan dəyişin və ya profilləri dəyişmək üçün ona basıb saxlayın.
   Import Data:
     Title: Məlumatlarınızı özünüzlə gətirin
     Description: İstəsəniz, abunəlikləri, tarixçəni, pleylistləri, axtarış tarixçəsini və ya tənzimləmələri başqa dəstəklənən tətbiqdən və ya ehtiyat nüsxədən idxal edin.

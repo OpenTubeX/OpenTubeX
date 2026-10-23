@@ -307,6 +307,7 @@ Settings:
     Language and Region: Ngôn ngữ và khu vực
     All Settings: Tất cả cài đặt
     Profile Selector Hint: Bạn cũng có thể nhấp chuột phải vào biểu tượng hồ sơ để chuyển hồ sơ
+    Profile Selector Touch Hint: Bạn cũng có thể nhấn giữ biểu tượng hồ sơ để chuyển hồ sơ
   Categories:
     General Description: Ngôn ngữ, khởi động, thẻ và hoạt động của ứng dụng
     Appearance: Giao diện
@@ -1329,6 +1330,7 @@ Tutorial:
   Quick Settings:
     Title: Tùy chỉnh theo ý bạn
     Description: Chọn chủ đề và chất lượng video mặc định. Bạn có thể đổi các tùy chọn này và tùy chọn khác bất cứ lúc nào trong menu hồ sơ, hoặc nhấp chuột phải vào đó để chuyển hồ sơ.
+    Touch Description: Chọn chủ đề và chất lượng video mặc định. Bạn có thể đổi các tùy chọn này và tùy chọn khác bất cứ lúc nào trong menu hồ sơ, hoặc nhấn giữ vào đó để chuyển hồ sơ.
   Import Data:
     Title: Mang theo dữ liệu của bạn
     Description: Bạn có thể nhập kênh đăng ký, lịch sử, danh sách phát, lịch sử tìm kiếm hoặc cài đặt từ ứng dụng hay bản sao lưu được hỗ trợ khác.

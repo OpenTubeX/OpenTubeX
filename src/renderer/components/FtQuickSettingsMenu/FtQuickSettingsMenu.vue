@@ -21,6 +21,7 @@
       type="button"
       class="profileTrigger"
       data-tutorial="quick-settings"
+      data-hold-menu
       :aria-label="triggerLabel"
       :title="triggerLabel"
       :aria-expanded="menuOpen"
@@ -163,7 +164,7 @@
                 />
                 <span class="profileSummaryText">
                   <strong dir="auto">{{ translateProfileName(activeProfile) }}</strong>
-                  <small>{{ t('Settings.Quick Settings.Profile Selector Hint') }}</small>
+                  <small>{{ IS_CAPACITOR ? t('Settings.Quick Settings.Profile Selector Touch Hint') : t('Settings.Quick Settings.Profile Selector Hint') }}</small>
                 </span>
                 <FtIcon :icon="['fas', 'angle-right']" />
               </button>

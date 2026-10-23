@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { installIosContextMenu } from '../../src/renderer/helpers/iosContextMenu.js'
 
-function fixture(t) {
+function fixture(t, matches = selector => selector.includes('a[href]')) {
   t.mock.timers.enable({ apis: ['setTimeout'] })
   const listeners = new Map()
   const contexts = []
@@ -13,7 +13,7 @@ function fixture(t) {
   }
   const target = {
     isConnected: true,
-    closest(selector) { return selector.includes('a[href]') ? this : null },
+    closest(selector) { return matches(selector) ? this : null },
     contains(element) { return element === this },
     dispatchEvent(event) { contexts.push(event); return true },
   }
@@ -40,6 +40,22 @@ test('a held link or thumbnail opens its existing context menu and suppresses re
   send('pointerdown')
   send('pointerup')
   assert.notEqual(send('click').prevented, true)
+})
+
+test('a held button keeps its native tap', t => {
+  const { contexts, send } = fixture(t, selector => selector.includes('button'))
+  send('pointerdown')
+  t.mock.timers.tick(600)
+  assert.equal(contexts.length, 0)
+})
+
+test('a held button that opts in opens its context menu and suppresses the release tap', t => {
+  const { contexts, send } = fixture(t, selector => selector.includes('button') || selector === '[data-hold-menu]')
+  send('pointerdown')
+  t.mock.timers.tick(500)
+  assert.equal(contexts.length, 1)
+  send('pointerup')
+  assert.equal(send('click').prevented, true)
 })
 
 for (const action of ['pointerup', 'pointercancel', 'scroll', 'pointermove']) {

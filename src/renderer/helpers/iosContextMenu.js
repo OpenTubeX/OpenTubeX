@@ -17,8 +17,10 @@ export function installIosContextMenu(document) {
     cancel()
     openedTarget = null
     if (event.pointerType !== 'touch' || !event.isPrimary || event.button !== 0) return
-    if (event.target.closest?.('button, input, textarea, select, [contenteditable="true"]')) return
-    const target = event.target.closest?.('a[href], .ft-list-video, .ft-list-playlist')
+    // Buttons keep their native tap unless they opt in to a hold menu.
+    const holdMenu = event.target.closest?.('[data-hold-menu]')
+    if (!holdMenu && event.target.closest?.('button, input, textarea, select, [contenteditable="true"]')) return
+    const target = holdMenu ?? event.target.closest?.('a[href], .ft-list-video, .ft-list-playlist')
     if (!target) return
     hold = {
       pointerId: event.pointerId,

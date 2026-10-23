@@ -134,6 +134,7 @@ Settings:
   Quick Settings:
     Customize Quick Settings: Dostosuj szybkie ustawienia
     Add Setting: Dodaj ustawienie
+    Profile Selector Touch Hint: Możesz również przytrzymać ikonę profilu, aby przełączać profile
   Categories:
     General Description: Język, uruchamianie, karty i działanie aplikacji
     Appearance: Wygląd
@@ -761,6 +762,7 @@ Tutorial:
   Quick Settings:
     Title: Dostosuj aplikację
     Description: Wybierz motyw i domyślną jakość filmu. Te i inne ustawienia możesz później zmienić w menu profilu. Kliknij je prawym przyciskiem, aby przełączyć profil.
+    Touch Description: Wybierz motyw i domyślną jakość filmu. Te i inne ustawienia możesz później zmienić w menu profilu. Przytrzymaj je, aby przełączyć profil.
   Import Data:
     Title: Przenieś swoje dane
     Description: Możesz zaimportować subskrypcje, historię, playlisty, historię wyszukiwania lub ustawienia z innej obsługiwanej aplikacji albo kopii zapasowej.

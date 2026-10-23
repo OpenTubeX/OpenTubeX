@@ -303,6 +303,7 @@ Settings:
     Language and Region: Bahasa dan wilayah
     All Settings: Semua pengaturan
     Profile Selector Hint: Anda juga dapat mengeklik kanan ikon profil untuk berganti profil
+    Profile Selector Touch Hint: Anda juga dapat mengetuk lama ikon profil untuk berganti profil
   Categories:
     General Description: Bahasa, proses mulai, tab, dan perilaku aplikasi
     Appearance: Tampilan
@@ -1308,6 +1309,7 @@ Tutorial:
   Quick Settings:
     Title: Sesuaikan dengan kebutuhan Anda
     Description: Pilih tema dan kualitas video bawaan. Ubah preferensi ini dan lainnya kapan saja melalui menu profil, atau klik kanan untuk berganti profil.
+    Touch Description: Pilih tema dan kualitas video bawaan. Ubah preferensi ini dan lainnya kapan saja melalui menu profil, atau ketuk lama untuk berganti profil.
   Import Data:
     Title: Bawa data Anda
     Description: Jika diinginkan, impor langganan, riwayat, daftar putar, riwayat pencarian, atau pengaturan dari aplikasi lain yang didukung atau dari cadangan.

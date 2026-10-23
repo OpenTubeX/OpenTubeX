@@ -303,6 +303,7 @@ Settings:
     Language and Region: 言語と地域
     All Settings: すべての設定
     Profile Selector Hint: プロフィールアイコンを右クリックしてプロフィールを切り替えることもできます
+    Profile Selector Touch Hint: プロフィールアイコンを長押ししてプロフィールを切り替えることもできます
   Categories:
     General Description: 言語、起動、タブ、アプリの動作
     Appearance: 外観
@@ -1305,6 +1306,7 @@ Tutorial:
   Quick Settings:
     Title: 好みに合わせて設定
     Description: テーマと既定の動画品質を選択します。これらの設定はいつでもプロフィールメニューから変更できます。プロフィールを右クリックすると切り替えられます。
+    Touch Description: テーマと既定の動画品質を選択します。これらの設定はいつでもプロフィールメニューから変更できます。プロフィールを長押しすると切り替えられます。
   Import Data:
     Title: データを引き継ぐ
     Description: 対応する別のアプリやバックアップから、登録チャンネル、履歴、プレイリスト、検索履歴、設定を必要に応じてインポートできます。

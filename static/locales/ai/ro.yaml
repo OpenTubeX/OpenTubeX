@@ -303,6 +303,7 @@ Settings:
     Language and Region: Limbă și regiune
     All Settings: Toate setările
     Profile Selector Hint: Puteți schimba profilul și făcând clic dreapta pe pictograma profilului
+    Profile Selector Touch Hint: Puteți schimba profilul și apăsând lung pe pictograma profilului
   Categories:
     General Description: Limbă, pornire, file și comportamentul aplicației
     Appearance: Aspect
@@ -1325,6 +1326,7 @@ Tutorial:
   Quick Settings:
     Title: Personalizați aplicația
     Description: Alegeți o temă și calitatea video implicită. Puteți modifica oricând aceste preferințe și altele din meniul profilului sau puteți face clic dreapta pe el pentru a schimba profilul.
+    Touch Description: Alegeți o temă și calitatea video implicită. Puteți modifica oricând aceste preferințe și altele din meniul profilului sau puteți apăsa lung pe el pentru a schimba profilul.
   Import Data:
     Title: Transferați-vă datele
     Description: Opțional, importați abonamente, istoricul vizionărilor, playlisturi, istoricul căutărilor sau setări din altă aplicație acceptată ori dintr-o copie de rezervă.

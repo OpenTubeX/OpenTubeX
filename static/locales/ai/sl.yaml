@@ -423,6 +423,7 @@ Settings:
     Language and Region: Jezik in regija
     All Settings: Vse nastavitve
     Profile Selector Hint: Profil lahko zamenjate tudi z desnim klikom ikone profila
+    Profile Selector Touch Hint: Profil lahko zamenjate tudi z dolgim pritiskom ikone profila
   Categories:
     General Description: Jezik, zagon, zavihki in delovanje programa
     Appearance: Videz
@@ -1631,6 +1632,7 @@ Tutorial:
   Quick Settings:
     Title: Prilagodite po svoje
     Description: Izberite temo in privzeto kakovost videoposnetkov. Te in druge nastavitve lahko kadar koli spremenite v meniju profila. Z desnim klikom nanj lahko preklopite med profili.
+    Touch Description: Izberite temo in privzeto kakovost videoposnetkov. Te in druge nastavitve lahko kadar koli spremenite v meniju profila. Z dolgim pritiskom nanj lahko preklopite med profili.
   Import Data:
     Title: Prenesite svoje podatke
     Description: Po želji uvozite naročnine, zgodovino, sezname predvajanja, zgodovino iskanja ali nastavitve iz druge podprte aplikacije ali varnostne kopije.

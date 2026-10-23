@@ -272,6 +272,7 @@ Settings:
     Language and Region: Idioma e região
     All Settings: Todas as configurações
     Profile Selector Hint: Também pode clicar com o botão direito no ícone de perfil para mudar de perfil
+    Profile Selector Touch Hint: Você também pode tocar e segurar o ícone de perfil para mudar de perfil
   Categories:
     General Description: Idioma, inicialização, guias e comportamento do aplicativo
     Appearance: Aparência
@@ -1274,6 +1275,7 @@ Tutorial:
   Quick Settings:
     Title: Personalize o aplicativo
     Description: Escolha um tema e a qualidade de vídeo padrão. Altere estas e outras preferências a qualquer momento no menu do perfil ou clique nele com o botão direito do mouse para mudar de perfil.
+    Touch Description: Escolha um tema e a qualidade de vídeo padrão. Altere estas e outras preferências a qualquer momento no menu do perfil ou toque nele e segure para mudar de perfil.
   Import Data:
     Title: Traga os seus dados consigo
     Description: Se desejar, importe inscrições, histórico, listas de reprodução, histórico de pesquisa ou configurações de outro aplicativo compatível ou de uma backup.

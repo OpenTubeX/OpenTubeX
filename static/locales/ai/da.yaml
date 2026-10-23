@@ -314,6 +314,7 @@ Settings:
     Language and Region: Sprog og område
     All Settings: Alle indstillinger
     Profile Selector Hint: Du kan også højreklikke på profilikonet for at skifte profil
+    Profile Selector Touch Hint: Du kan også trykke længe på profilikonet for at skifte profil
   Categories:
     General Description: Sprog, opstart, faner og appadfærd
     Appearance: Udseende
@@ -1357,6 +1358,7 @@ Tutorial:
   Quick Settings:
     Title: Tilpas appen
     Description: Vælg et tema og en standardvideokvalitet. Du kan til enhver tid ændre disse og andre indstillinger i profilmenuen eller højreklikke på den for at skifte profil.
+    Touch Description: Vælg et tema og en standardvideokvalitet. Du kan til enhver tid ændre disse og andre indstillinger i profilmenuen eller trykke længe på den for at skifte profil.
   Import Data:
     Title: Tag dine data med
     Description: Du kan vælge at importere abonnementer, historik, playlister, søgehistorik eller indstillinger fra en anden understøttet app eller sikkerhedskopi.

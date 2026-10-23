@@ -303,6 +303,7 @@ Settings:
     Language and Region: Jazyk a oblasť
     All Settings: Všetky nastavenia
     Profile Selector Hint: Profil môžete prepnúť aj kliknutím pravým tlačidlom na ikonu profilu
+    Profile Selector Touch Hint: Profil môžete prepnúť aj podržaním prsta na ikone profilu
   Categories:
     General Description: Jazyk, spustenie, karty a správanie aplikácie
     Appearance: Vzhľad
@@ -1305,6 +1306,7 @@ Tutorial:
   Quick Settings:
     Title: Prispôsobte si aplikáciu
     Description: Vyberte motív a predvolenú kvalitu videa. Tieto aj ďalšie nastavenia môžete kedykoľvek zmeniť v ponuke profilu. Kliknutím pravým tlačidlom na profil ho môžete prepnúť.
+    Touch Description: Vyberte motív a predvolenú kvalitu videa. Tieto aj ďalšie nastavenia môžete kedykoľvek zmeniť v ponuke profilu. Podržaním prsta na profile ho môžete prepnúť.
   Import Data:
     Title: Importujte svoje údaje
     Description: Voliteľne importujte odbery, históriu, zoznamy videí, históriu hľadania alebo nastavenia z inej podporovanej aplikácie či zálohy.

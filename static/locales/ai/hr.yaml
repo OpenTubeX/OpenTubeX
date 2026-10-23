@@ -305,6 +305,7 @@ Settings:
     Language and Region: Jezik i regija
     All Settings: Sve postavke
     Profile Selector Hint: Profil možete promijeniti i desnim klikom na ikonu profila
+    Profile Selector Touch Hint: Profil možete promijeniti i dugim pritiskom na ikonu profila
   Categories:
     General Description: Jezik, pokretanje, kartice i ponašanje aplikacije
     Appearance: Izgled
@@ -1314,6 +1315,7 @@ Tutorial:
   Quick Settings:
     Title: Prilagodite aplikaciju sebi
     Description: Odaberite temu i zadanu kvalitetu videozapisa. Te i druge postavke možete u bilo kojem trenutku promijeniti u izborniku profila ili ga kliknuti desnom tipkom miša da biste promijenili profil.
+    Touch Description: Odaberite temu i zadanu kvalitetu videozapisa. Te i druge postavke možete u bilo kojem trenutku promijeniti u izborniku profila ili ga dugo pritisnuti da biste promijenili profil.
   Import Data:
     Title: Prenesite svoje podatke
     Description: Po želji uvezite pretplate, povijest, popise za reprodukciju, povijest pretraživanja ili postavke iz druge podržane aplikacije ili sigurnosne kopije.

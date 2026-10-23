@@ -302,6 +302,7 @@ Settings:
     Language and Region: Dil ve bölge
     All Settings: Tüm ayarlar
     Profile Selector Hint: Profil değiştirmek için profil simgesine sağ tıklayabilirsiniz
+    Profile Selector Touch Hint: Profil değiştirmek için profil simgesine uzun da basabilirsiniz
   Categories:
     General Description: Dil, başlangıç, sekmeler ve uygulama davranışı
     Appearance: Görünüm
@@ -1304,6 +1305,7 @@ Tutorial:
   Quick Settings:
     Title: Uygulamayı özelleştirin
     Description: Bir tema ve varsayılan video kalitesi seçin. Bunları ve diğer tercihleri istediğiniz zaman profil menüsünden değiştirebilir, profil değiştirmek için menüye sağ tıklayabilirsiniz.
+    Touch Description: Bir tema ve varsayılan video kalitesi seçin. Bunları ve diğer tercihleri istediğiniz zaman profil menüsünden değiştirebilir, profil değiştirmek için menüye uzun basabilirsiniz.
   Import Data:
     Title: Verilerinizi içe aktarın
     Description: Abonelikleri, geçmişi, oynatma listelerini, arama geçmişini veya ayarları desteklenen başka bir uygulamadan ya da yedekten içe aktarabilirsiniz.
