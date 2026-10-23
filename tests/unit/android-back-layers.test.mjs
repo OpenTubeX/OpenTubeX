@@ -166,6 +166,7 @@ test('the settings window preview follows its close morph and closes without rep
     getBoundingClientRect: () => ({ left: 0, top: 0, width: 400, height: 800 }),
   }
   const dispatched = []
+  const store = { getters: { getSettingsWindowView: 'downloads', getSettingsWindowMorphing: true }, dispatch: action => dispatched.push(action) }
   let created = null
   const getPreview = appFunction('getAndroidBackPreview', {
     ...morph,
@@ -176,12 +177,14 @@ test('the settings window preview follows its close morph and closes without rep
     getAndroidBackSheet: () => null,
     getAndroidBackPopup: () => null,
     handleAndroidBack: () => dispatched.push('Escape'),
-    store: { getters: { getSettingsWindowView: 'downloads' }, dispatch: action => dispatched.push(action) },
+    store,
     createAndroidBackDialogPreview: (element, back, isAvailable, getKeyframes) => {
       created = { element, back, isAvailable, getKeyframes }
       return created
     },
   })
+  assert.equal(getPreview(), null, 'ordinary Back waits for an opening morph before closing')
+  store.getters.getSettingsWindowMorphing = false
   assert.equal(getPreview(), created)
   assert.equal(created.element, settingsWindow)
   assert.equal(created.isAvailable(), true)

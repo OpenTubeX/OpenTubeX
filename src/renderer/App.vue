@@ -3940,6 +3940,8 @@ function getAndroidBackPreview() {
       content.isConnected && dialog.hasAttribute('data-android-back-nested') === nested &&
       getAndroidBackTarget().closest?.('.settingsWindow, .prompt, dialog[open]') === dialog
     if (!nested && dialog.matches('.settingsWindow')) {
+      // An opening morph owns the window. Ordinary Back closes it once the morph ends.
+      if (store.getters.getSettingsWindowMorphing) return null
       // The gesture plays the morph into the header button, so closing must not replay it.
       return createAndroidBackDialogPreview(dialog, () => store.dispatch('hideSettingsWindow'), isAvailable, element =>
         getUtilityWindowCloseKeyframes(element, getSettingsWindowIconButton(store.getters.getSettingsWindowView)))
