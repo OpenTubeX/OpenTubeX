@@ -449,7 +449,6 @@ const hasSidebar = computed(() => Boolean(chatAvailable.value && chatOpen.value)
 const theatreTogglePossible = computed(() => windowWidth.value > 1350 && hasSidebar.value)
 
 function handleChaptersOverlayChange(open) {
-  if (open && !hasSidebar.value && store.getters.getDefaultViewingMode === 'theatre') useTheatreMode.value = true
   showChapters.value = open
 }
 
