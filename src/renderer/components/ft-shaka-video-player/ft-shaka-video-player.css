@@ -1422,6 +1422,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 :deep(.shaka-overflow-menu.ft-menu-grid) {
   /* Height of a submenu's header, which is pinned above its options. */
   --ft-submenu-header-size: 36px;
+  --ft-menu-padding: 6px;
 
   box-sizing: border-box;
   display: grid;
@@ -1436,7 +1437,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   gap: 4px;
   inline-size: min(400px, calc(100% - 24px));
   max-block-size: min(50vh, 340px);
-  padding: 6px;
+  padding: var(--ft-menu-padding);
 }
 
 /* The submenus are rendered inside the menu, so they have to span every column. */
@@ -1580,7 +1581,11 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   padding-block-start: calc(var(--ft-submenu-header-size) + 4px);
 }
 
-/* Taken out of the flow, so that it stays put while the options are centred. */
+/*
+  Taken out of the flow, so that it stays put while the options are centered.
+  The menu's padding above the header looks like part of it, so the same space
+  below its content centers that between the menu's edge and the divider.
+*/
 :deep(.shaka-sub-menu.ft-menu-grid > .shaka-back-to-overflow-button) {
   position: absolute;
   inset-block-start: 0;
@@ -1588,7 +1593,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   box-sizing: border-box;
   justify-content: center;
   block-size: var(--ft-submenu-header-size);
-  padding-block: 0;
+  padding-block: 0 var(--ft-menu-padding);
   margin-block-end: 0;
 }
 
@@ -1605,7 +1610,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 :deep(.shaka-sub-menu.ft-menu-grid > .ft-caption-options-button) {
   align-items: center;
   block-size: var(--ft-submenu-header-size);
-  padding-block: 0 !important;
+  padding-block: 0 var(--ft-menu-padding) !important;
 }
 
 /*
@@ -1710,7 +1715,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 /* Sits in the header, at the end opposite the back button. */
 :deep(.shaka-sub-menu.ft-menu-grid > .ft-quality-codecs) {
   position: absolute;
-  inset-block-start: calc((var(--ft-submenu-header-size) - 28px) / 2);
+  inset-block-start: calc((var(--ft-submenu-header-size) - var(--ft-menu-padding) - 1px - 28px) / 2);
   inset-inline-end: 6px;
   z-index: 1;
   margin: 0;
@@ -1806,7 +1811,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   position: relative;
   justify-content: center;
   block-size: var(--ft-submenu-header-size);
-  padding-block: 0;
+  padding-block: 0 var(--ft-menu-padding);
   margin-block-end: 0;
 }
 
@@ -4896,7 +4901,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   box-sizing: border-box;
   justify-content: center;
   block-size: var(--ft-submenu-header-size);
-  padding-block: 0;
+  padding-block: 0 var(--ft-menu-padding);
   margin-block-end: 0;
 }
 

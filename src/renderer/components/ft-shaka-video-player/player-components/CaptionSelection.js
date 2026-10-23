@@ -16,6 +16,7 @@ import {
   MAX_CAPTION_FONT_SCALE,
   MIN_CAPTION_FONT_SCALE,
 } from '../../../helpers/player/caption-settings'
+import { goBackOnEmptyClicks } from '../../../helpers/player/emptyMenuClicks'
 
 const CAPTION_COLOR_PALETTE = Object.freeze([
   '#ffffff', '#d9d9d9', '#808080', '#000000',
@@ -151,12 +152,21 @@ export class CaptionSelection extends shaka.ui.TextSelection {
       this.appearanceBackButton_.focus()
     })
 
-    this.eventManager.listen(this.appearanceBackButton_, 'click', () => {
+    const closeAppearanceMenu = () => {
       this.closeColorPopover_()
       this.setMenuDisplay_(this.appearanceMenu_, false)
       this.setMenuDisplay_(this.menu, true)
       this.optionsButton_.focus()
-    })
+    }
+    this.eventManager.listen(this.appearanceBackButton_, 'click', closeAppearanceMenu)
+    // With a color popover open, an empty click only closes the popover
+    goBackOnEmptyClicks(this.eventManager, this.appearanceMenu_, () => {
+      if (this.openColorControl_) {
+        this.closeColorPopover_()
+      } else {
+        closeAppearanceMenu()
+      }
+    }, '.ft-caption-appearance-control')
 
     // Not disabled while the file picker is open, Android doesn't report when it gets canceled
     this.eventManager.listen(this.loadFileButton_, 'click', async (event) => {
@@ -275,12 +285,15 @@ export class CaptionSelection extends shaka.ui.TextSelection {
       })
     })
 
-    this.eventManager.listen(backButton, 'click', () => {
+    const goBack = () => {
       this.setMenuDisplay_(menu, false)
       this.setMenuDisplay_(this.menu, true)
       button.focus({ preventScroll: true })
       this.resetMenuScroll_(this.menu.parentElement)
-    })
+    }
+    this.eventManager.listen(backButton, 'click', goBack)
+
+    goBackOnEmptyClicks(this.eventManager, menu, goBack)
 
     return optionsMenu
   }

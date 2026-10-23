@@ -342,6 +342,42 @@ test.describe('subscription groups with automatic fetching', () => {
   })
 })
 
+test.describe('subscription groups in the tabbed New feed', () => {
+  test.use({
+    seed: seed({
+      newSubscriptionFeedView: 'tabbed',
+      subscriptionGroups: [{ id: 'music', name: 'Music', channelIds: [ALPHA] }]
+    })
+  })
+
+  test('share the row of the New feed tabs while they fit beside them @scale', async ({ app, page, attachScreenshot }) => {
+    await setWindowSize(app, page, { width: 1300, height: 820 })
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    const header = page.locator('.subscriptionsHeader')
+    const tabs = page.getByRole('tablist', { name: 'New content tabs' })
+    const groupBar = page.locator('.subscriptionGroups')
+    await expect(groups(page).getByRole('tab')).toHaveText(['All', 'Music'])
+
+    const bounds = () => Promise.all([header, tabs, groupBar].map(locator => locator.boundingBox()))
+    await expect.poll(async () => {
+      const [headerBounds, tabsBounds, groupsBounds] = await bounds()
+      return groupsBounds.x + groupsBounds.width <= tabsBounds.x &&
+        Math.abs(groupsBounds.y + groupsBounds.height / 2 - (tabsBounds.y + tabsBounds.height / 2)) < 1 &&
+        Math.abs(tabsBounds.x + tabsBounds.width / 2 - (headerBounds.x + headerBounds.width / 2)) < 1
+    }).toBe(true)
+    await attachScreenshot('groups beside the New feed tabs')
+
+    // Without room beside the centered tabs, they move below them
+    await setWindowSize(app, page, { width: 760, height: 700 })
+    await expect.poll(async () => {
+      const [, tabsBounds, groupsBounds] = await bounds()
+      return groupsBounds.y >= tabsBounds.y + tabsBounds.height
+    }).toBe(true)
+    await attachScreenshot('groups below the New feed tabs')
+  })
+})
+
 test.describe('custom channel order', () => {
   test.use({
     seed: seed({

@@ -296,7 +296,15 @@ test.describe('watch history', () => {
         const panel = card.querySelector('.historyFilterCard').getBoundingClientRect()
         const results = card.querySelector('.autoGrid').getBoundingClientRect()
         return [Math.min(search.top, searchLabel.top) - headingBottom, toggle.top - search.bottom, panel.top - toggle.bottom, results.top - panel.bottom]
-      })).toEqual(Array(4).fill(expect.closeTo(20, 0)))
+      })).toEqual([expect.closeTo(11, 0), ...Array(3).fill(expect.closeTo(20, 0))])
+      if (width === 1500) {
+        // Beside the title, the actions are as far from the search as from the top of the card
+        await expect.poll(() => page.locator('.card').evaluate(card => {
+          const actions = card.querySelector('.headingActions').getBoundingClientRect()
+          const searchLabel = card.querySelector('.historySearch .selectLabel').getBoundingClientRect()
+          return Math.abs((searchLabel.top - actions.bottom) - (actions.top - card.getBoundingClientRect().top))
+        })).toBeLessThan(1)
+      }
       if (width * 100 / uiScale <= 680) {
         const touchTarget = await page.locator('.toggleOptions .switch-label').boundingBox()
         // Electron zoom can introduce tiny fractions in CSS-pixel bounds.

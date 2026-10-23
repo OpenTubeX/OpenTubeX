@@ -158,7 +158,7 @@ test.describe('secondary captions', () => {
 
     const captionsMenu = await openCaptionsMenu(page)
     await attachScreenshot('captions menu')
-    await captionsMenu.getByRole('button', { name: 'Secondary Captions' }).click()
+    await captionsMenu.getByRole('button', { name: 'Secondary Captions', exact: true }).click()
     const secondaryMenu = player.locator('.ft-caption-secondary-menu')
     const options = secondaryMenu.locator('.ft-caption-secondary-options')
     await expect(options.getByRole('button', { name: 'Off', exact: true })).toHaveAttribute('aria-selected', 'true')
@@ -182,6 +182,31 @@ test.describe('secondary captions', () => {
     const tilesCenterY = (firstBounds.y + lastBounds.y + lastBounds.height) / 2
     expect(Math.abs(tilesCenterY - (optionsBounds.y + optionsBounds.height / 2))).toBeLessThan(2)
     await attachScreenshot('secondary captions menu')
+
+    // Like in Shaka's submenus, a click beside the options goes back
+    await options.click({ position: { x: 2, y: 2 } })
+    await expect(secondaryMenu).toBeHidden()
+    await expect(captionsMenu).toBeVisible()
+
+    // So does a click beside the caption appearance controls, but a click
+    // within a control stays, and one with a color open only closes it
+    await captionsMenu.getByRole('button', { name: 'Options', exact: true }).click()
+    const appearanceMenu = player.locator('.ft-caption-appearance-menu')
+    const appearanceControls = appearanceMenu.locator('.ft-caption-appearance-controls')
+    await expect(appearanceMenu).toBeVisible()
+    await appearanceMenu.locator('label.ft-caption-appearance-control > span').first().click()
+    await expect(appearanceMenu).toBeVisible()
+    await appearanceMenu.locator('.ft-caption-color-control > span').first().click()
+    const colorPopover = appearanceMenu.locator('.ft-caption-color-popover').visible()
+    await expect(colorPopover).toHaveCount(1)
+    await appearanceControls.click({ position: { x: 2, y: 2 } })
+    await expect(colorPopover).toHaveCount(0)
+    await expect(appearanceMenu).toBeVisible()
+    await appearanceControls.click({ position: { x: 2, y: 2 } })
+    await expect(appearanceMenu).toBeHidden()
+    await expect(captionsMenu).toBeVisible()
+
+    await captionsMenu.getByRole('button', { name: 'Secondary Captions', exact: true }).click()
     await options.getByRole('button', { name: 'German', exact: true }).click()
     await expect(captionsMenu).toBeVisible()
     await expect(secondaryCaption).toHaveText('Original caption (de)')
@@ -209,7 +234,7 @@ test.describe('secondary captions', () => {
     await expect(secondaryCaption).toHaveText('Original caption (de)')
 
     const nextCaptionsMenu = await openCaptionsMenu(page)
-    await nextCaptionsMenu.getByRole('button', { name: 'Secondary Captions' }).click()
+    await nextCaptionsMenu.getByRole('button', { name: 'Secondary Captions', exact: true }).click()
     await expect(options.getByRole('button', { name: 'German', exact: true })).toHaveAttribute('aria-selected', 'true')
     await options.getByRole('button', { name: 'Off', exact: true }).click()
     await expect(secondaryCaption).toHaveCount(0)
@@ -226,7 +251,7 @@ test.describe('secondary captions beside a translation', () => {
     await expect.poll(() => activeTextTrack(video)).toBe('English (auto-generated)')
 
     const captionsMenu = await openCaptionsMenu(page)
-    const secondaryButton = captionsMenu.getByRole('button', { name: 'Secondary Captions' })
+    const secondaryButton = captionsMenu.getByRole('button', { name: 'Secondary Captions', exact: true })
     await expect(secondaryButton).toHaveCount(0)
 
     await captionsMenu.getByRole('button', { name: 'Auto-translate' }).click()

@@ -4,6 +4,7 @@ import { FtIcon } from '@opentubex/icons'
 
 import i18n from '../../../i18n/index'
 import { addOverlayScrollbars, clampOverlayScrollTop, removeOverlayScrollbars, restoreOverlayScrollTop } from '../../../helpers/overlayScrollbars'
+import { goBackOnEmptyClicks } from '../../../helpers/player/emptyMenuClicks'
 
 export class CaptionTiming extends shaka.ui.Element {
   /**
@@ -94,11 +95,13 @@ export class CaptionTiming extends shaka.ui.Element {
       })
     })
     this.eventManager.listen(this.menu_, 'click', event => event.stopPropagation())
-    this.eventManager.listen(back.button, 'click', () => {
+    const goBack = () => {
       this.menu_.classList.add('shaka-hidden')
       captionMenu.classList.remove('shaka-hidden')
       this.button.focus({ preventScroll: true })
-    })
+    }
+    this.eventManager.listen(back.button, 'click', goBack)
+    goBackOnEmptyClicks(this.eventManager, this.menu_, goBack)
     this.eventManager.listen(this.controls, 'submenuclose', () => this.menu_.classList.add('shaka-hidden'))
     this.eventManager.listen(this.input_, 'input', () => {
       const offset = this.input_.valueAsNumber

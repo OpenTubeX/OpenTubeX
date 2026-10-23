@@ -1,5 +1,12 @@
 .card {
   --history-control-gap: 20px;
+
+  /*
+    As far below the heading as its content is from the top of the card (its
+    padding and the title offset), so the actions have the same space above and
+    below them.
+  */
+  --history-heading-gap: calc(3px + var(--page-title-offset));
   --history-field-label-outset: 7px;
 
   box-sizing: border-box;
@@ -115,6 +122,14 @@
 
 .historySearch.outlined {
   margin-block-start: calc(var(--history-control-gap) + var(--history-field-label-outset));
+}
+
+.headingRow + .historySearch {
+  margin-block-start: var(--history-heading-gap);
+}
+
+.headingRow + .historySearch.outlined {
+  margin-block-start: calc(var(--history-heading-gap) + var(--history-field-label-outset));
 }
 
 .historyActionButton {
