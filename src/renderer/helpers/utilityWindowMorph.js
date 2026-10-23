@@ -38,6 +38,22 @@ function getCollapsedKeyframe(element, button) {
   return { transform: `translate(${x}px, ${y}px) scale(${button.width / bounds.width})`, opacity: 0 }
 }
 
+/** @param {string | null} view */
+export function getSettingsWindowIconButton(view) {
+  if (view === 'about') return null
+  return document.querySelector(`[data-settings-window-icon="${view === 'downloads' ? 'downloads' : 'settings'}"]`)
+}
+
+/**
+ * Predictive Back follows the path the window takes when it closes to its button.
+ * @param {HTMLElement} element
+ * @param {Element | null} button
+ */
+export function getUtilityWindowCloseKeyframes(element, button) {
+  const { transform, opacity } = getComputedStyle(element)
+  return [{ transform, opacity }, getCollapsedKeyframe(element, getVisibleRect(button))]
+}
+
 /**
  * @param {UtilityWindowMorph} morph
  * @param {HTMLElement} element

@@ -149,3 +149,48 @@ test('Back closes a focused context menu as a popup', () => {
   const getPopup = appFunction('getAndroidBackPopup', { document: {} })
   assert.equal(getPopup({ closest: selector => selector.split(', ').includes('.contextMenu') ? menu : null }), menu)
 })
+
+test('the settings window preview follows its close morph and closes without replaying it', async () => {
+  const morphSource = readFileSync(new URL('../../src/renderer/helpers/utilityWindowMorph.js', import.meta.url), 'utf8')
+    .replace(/^import .*$/gm, '').replace(/^export /gm, '')
+  const button = { getClientRects: () => [{}], getBoundingClientRect: () => ({ left: 300, top: 10, width: 40, height: 40 }) }
+  const morph = vm.runInNewContext(`${morphSource}; ({ getSettingsWindowIconButton, getUtilityWindowCloseKeyframes })`, {
+    document: { querySelector: selector => selector === '[data-settings-window-icon="downloads"]' ? button : null },
+    getComputedStyle: () => ({ transform: 'none', opacity: '1' }),
+  })
+  const settingsWindow = {
+    isConnected: true,
+    matches: selector => selector === '.settingsWindow',
+    hasAttribute: () => false,
+    closest: selector => selector.includes('.settingsWindow') ? settingsWindow : null,
+    getBoundingClientRect: () => ({ left: 0, top: 0, width: 400, height: 800 }),
+  }
+  const dispatched = []
+  const store = { getters: { getSettingsWindowView: 'downloads', getSettingsWindowMorphing: true }, dispatch: action => dispatched.push(action) }
+  let created = null
+  const getPreview = appFunction('getAndroidBackPreview', {
+    ...morph,
+    mobileContextLink: { value: null },
+    mobileContextActions: { value: null },
+    isSideNavBackTarget: () => false,
+    getAndroidBackTarget: () => settingsWindow,
+    getAndroidBackSheet: () => null,
+    getAndroidBackPopup: () => null,
+    handleAndroidBack: () => dispatched.push('Escape'),
+    store,
+    createAndroidBackDialogPreview: (element, back, isAvailable, getKeyframes) => {
+      created = { element, back, isAvailable, getKeyframes }
+      return created
+    },
+  })
+  assert.equal(getPreview(), null, 'ordinary Back waits for an opening morph before closing')
+  store.getters.getSettingsWindowMorphing = false
+  assert.equal(getPreview(), created)
+  assert.equal(created.element, settingsWindow)
+  assert.equal(created.isAvailable(), true)
+  const [from, to] = created.getKeyframes(settingsWindow)
+  assert.deepEqual({ ...from }, { transform: 'none', opacity: '1' })
+  assert.deepEqual({ ...to }, { transform: 'translate(120px, -370px) scale(0.1)', opacity: 0 })
+  await created.back()
+  assert.deepEqual(dispatched, ['hideSettingsWindow'], 'Escape would morph the window into its button again')
+})
