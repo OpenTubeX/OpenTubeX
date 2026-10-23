@@ -3136,6 +3136,64 @@ test.describe('skip silence default', () => {
 test.describe('playback when navigating away', () => {
   test.use({ seed: { settings: { ...PLAYER_SEED, keepPlayingOnNavigation: true } } })
 
+  /**
+   * Hides the Watch view with motion enabled and records the player's bounds
+   * on every frame until it has docked.
+   * @param {import('@playwright/test').Page} page
+   * @param {import('@playwright/test').Locator} player
+   * @param {() => Promise<void>} hideWatch
+   */
+  async function sampleDocking(page, player, hideWatch) {
+    await player.evaluate(element => {
+      document.documentElement.dataset.reducedMotion = 'no-preference'
+      window.dockingFrames = []
+      const sample = () => {
+        const { left, top, width, height } = element.getBoundingClientRect()
+        window.dockingFrames.push({ left, top, width, height })
+        window.dockingFrame = requestAnimationFrame(sample)
+      }
+      sample()
+    })
+    await hideWatch()
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+    return await page.evaluate(() => {
+      cancelAnimationFrame(window.dockingFrame)
+      return window.dockingFrames
+    })
+  }
+
+  /** @param {{ left: number, top: number, width: number, height: number }[]} frames */
+  function expectMorphIntoMiniPlayer(frames) {
+    const start = frames[0]
+    const end = frames.at(-1)
+    expect(end.width).toBeLessThan(start.width / 2)
+    const shrinking = frames.filter(frame => frame.width < start.width - 5 && frame.width > end.width + 5)
+    expect(shrinking.length, 'the video visibly shrinks into the mini player').toBeGreaterThan(2)
+    const growing = frames.slice(1).filter((frame, index) => frame.width > frames[index].width + 0.5)
+    expect(growing, 'the video only shrinks while docking').toEqual([])
+  }
+
+  test('morphs the video into the mini player when navigating away', { tag: '@scale' }, async ({ app, page }) => {
+    await openDemoVideo({ app, page })
+    const player = page.locator('.ftVideoPlayer')
+    const frames = await sampleDocking(page, player, async () => {
+      await page.getByRole('link', { name: 'Go to Subscriptions', exact: true }).click()
+      await expect(page).toHaveURL(/#\/subscriptions$/)
+    })
+    expectMorphIntoMiniPlayer(frames)
+  })
+
+  test('morphs the video into the mini player when switching to another tab', { tag: '@scale' }, async ({ app, page }) => {
+    await openDemoVideo({ app, page })
+    const player = page.locator('.ftVideoPlayer')
+    const frames = await sampleDocking(page, player, async () => {
+      await page.locator('.tabBar .newTabButton').click()
+      await expect(page.locator('.tabBar .tab')).toHaveCount(2)
+    })
+    expectMorphIntoMiniPlayer(frames)
+  })
+
   test('keeps the ended mini player visible and replays while browsing', async ({ app, page }) => {
     await openDemoVideo({ app, page })
     const player = page.locator('.ftVideoPlayer')
