@@ -228,7 +228,7 @@ function createRecoverableNetworkError(code, ...args) {
  */
 function warnSabrRequestFailure(operationInputs, currentState, reason, details = {}) {
   // A request that requests a reload aborts itself, which is not a failure
-  if (currentState.sabrStreamState.playerReloadRequested && currentState.abortController.signal.aborted) return
+  if (currentState.abortStatus.playerReloadRequested) return
 
   const facts = []
   if (details.status !== undefined) facts.push(`HTTP ${details.status}`)
@@ -380,6 +380,7 @@ async function doRequest(
           `Backoffs: ${currentState.cumulativeBackOffRequested} (${currentState.cumulativeBackOffTimeMs} ms)\n` +
           `Next request policy retries: ${currentState.cumulativeRetryDueToNextRequestPolicy}`
         )
+        currentState.abortStatus.playerReloadRequested = true
         currentState.abortController.abort()
         currentState.eventEmitter.emit('reload')
       }
@@ -567,6 +568,7 @@ async function doRequest(
             currentState.sabrStreamState.playerReloadRequested = true
             if (!currentState.abortController.signal.aborted) {
               console.warn('Reloading the SABR stream because YouTube requested it')
+              currentState.abortStatus.playerReloadRequested = true
               currentState.abortController.abort()
               currentState.eventEmitter.emit('reload')
             }
@@ -620,7 +622,11 @@ async function doRequest(
   }
 
   if (!response.ok) {
-    warnSabrRequestFailure(operationInputs, currentState, 'bad HTTP status', { status: response.status })
+    warnSabrRequestFailure(operationInputs, currentState, 'bad HTTP status', {
+      status: response.status,
+      receivedBytes: receivedMediaLength,
+      expectedBytes: expectedMediaLength,
+    })
     const severity = response.status === 401 || response.status === 403
       ? ShakaError.Severity.CRITICAL
       : ShakaError.Severity.RECOVERABLE
@@ -662,7 +668,11 @@ async function doRequest(
       originalRequest: operationInputs.request,
     }
   } else if (invalidPoToken) {
-    warnSabrRequestFailure(operationInputs, currentState, 'invalid PO token', { status: response.status })
+    warnSabrRequestFailure(operationInputs, currentState, 'invalid PO token', {
+      status: response.status,
+      receivedBytes: receivedMediaLength,
+      expectedBytes: expectedMediaLength,
+    })
     throw new ShakaError(
       ShakaError.Severity.CRITICAL,
       ShakaError.Category.NETWORK,
@@ -736,7 +746,11 @@ async function doRequest(
     currentState.abortStatus.finished = false
     return doRequest(operationInputs, currentState)
   } else {
-    warnSabrRequestFailure(operationInputs, currentState, 'empty response', { status: response.status })
+    warnSabrRequestFailure(operationInputs, currentState, 'empty response', {
+      status: response.status,
+      receivedBytes: receivedMediaLength,
+      expectedBytes: expectedMediaLength,
+    })
     throw createRecoverableNetworkError(
       ShakaError.Code.HTTP_ERROR,
       operationInputs.uri,
@@ -976,6 +990,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
     const abortStatus = {
       cancelled: false,
       timedOut: false,
+      playerReloadRequested: false,
       finished: false,
     }
 
