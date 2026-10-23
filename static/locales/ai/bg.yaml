@@ -1680,6 +1680,10 @@ Video:
       Error With Details: "Видеото не можа да се предаде: {error}"
       Untrusted Receiver: "Сертификатът на приемника не е доверен. Използвайте удостоверен приемник Google Cast."
     Secondary Captions: Втори субтитри
+    Subtitle File:
+      Load: "Зареждане на файл със субтитри…"
+      Subtitle Files: "Файлове със субтитри"
+      Error: "Файлът със субтитри не можа да бъде зареден. Изберете файл SRT или WebVTT."
   Station: Станция
   Playlist:
     Unavailable videos are hidden: 1 недостъпен видеоклип е скрит | {count} недостъпни видеоклипа са скрити

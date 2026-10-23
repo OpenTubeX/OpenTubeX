@@ -1663,6 +1663,10 @@ Video:
       Error With Details: "Video se nepodařilo odeslat: {error}"
       Untrusted Receiver: "Certifikát přijímače není důvěryhodný. Použijte ověřený přijímač Google Cast."
     Secondary Captions: Druhé titulky
+    Subtitle File:
+      Load: "Načíst soubor s titulky…"
+      Subtitle Files: "Soubory s titulky"
+      Error: "Soubor s titulky se nepodařilo načíst. Vyberte soubor SRT nebo WebVTT."
   External Media:
     Dislikes: "Dislajk | Dislajky | Dislajků"
     Reposts: "Repost | Reposty | Repostů"

@@ -1665,6 +1665,10 @@ Video:
       Error With Details: "Video edastamine ebaõnnestus: {error}"
       Untrusted Receiver: "Vastuvõtja sertifikaati ei usaldata. Kasuta autenditud Google Casti vastuvõtjat."
     Secondary Captions: Teised subtiitrid
+    Subtitle File:
+      Load: "Laadi subtiitrifail…"
+      Subtitle Files: "Subtiitrifailid"
+      Error: "Subtiitrifaili ei õnnestunud laadida. Vali SRT- või WebVTT-fail."
   External Media:
     Dislikes: "Ei meeldi | Ei meeldi"
     Reposts: "Taaspostitus | Taaspostitused"

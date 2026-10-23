@@ -1712,6 +1712,10 @@ Video:
       Error With Details: "Kan de video niet casten: {error}"
       Untrusted Receiver: "Het certificaat van de ontvanger wordt niet vertrouwd. Gebruik een geauthenticeerde Google Cast-ontvanger."
     Secondary Captions: Tweede ondertiteling
+    Subtitle File:
+      Load: "Ondertitelbestand laden…"
+      Subtitle Files: "Ondertitelbestanden"
+      Error: "Het ondertitelbestand kan niet worden geladen. Kies een SRT- of WebVTT-bestand."
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Resterende tijd van preroll-advertentie: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Resterende SABR-wachttijd: {remindingTimeSeconds}s'

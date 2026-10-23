@@ -1682,6 +1682,10 @@ Video:
       Error With Details: "Δεν ήταν δυνατή η μετάδοση του βίντεο: {error}"
       Untrusted Receiver: "Το πιστοποιητικό του δέκτη δεν είναι έμπιστο. Χρησιμοποιήστε έναν πιστοποιημένο δέκτη Google Cast."
     Secondary Captions: Δευτερεύοντες υπότιτλοι
+    Subtitle File:
+      Load: "Φόρτωση αρχείου υποτίτλων…"
+      Subtitle Files: "Αρχεία υποτίτλων"
+      Error: "Δεν ήταν δυνατή η φόρτωση του αρχείου υποτίτλων. Επιλέξτε ένα αρχείο SRT ή WebVTT."
   Station: Σταθμός
   Playlist:
     Unavailable videos are hidden: 1 μη διαθέσιμο βίντεο είναι κρυμμένο | {count} μη διαθέσιμα βίντεο είναι κρυμμένα

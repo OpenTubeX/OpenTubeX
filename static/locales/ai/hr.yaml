@@ -1684,6 +1684,10 @@ Video:
       Error With Details: "Videozapis nije moguće prenijeti: {error}"
       Untrusted Receiver: "Certifikat prijamnika nije pouzdan. Upotrijebite autentificirani Google Cast prijamnik."
     Secondary Captions: Sekundarni titlovi
+    Subtitle File:
+      Load: "Učitaj datoteku titlova…"
+      Subtitle Files: "Datoteke titlova"
+      Error: "Datoteku titlova nije moguće učitati. Odaberite SRT ili WebVTT datoteku."
   Station: Postaja
   Playlist:
     Unavailable videos are hidden: 1 nedostupan videozapis je skriven | {count} nedostupna videozapisa su skrivena | {count} nedostupnih videozapisa je skriveno

@@ -1709,6 +1709,10 @@ Video:
       Error With Details: "காணொளியை ஒளிபரப்ப முடியவில்லை: {error}"
       Untrusted Receiver: "பெறுநரின் சான்றிதழ் நம்பகமானது அல்ல. அங்கீகரிக்கப்பட்ட Google Cast பெறுநரைப் பயன்படுத்தவும்."
     Secondary Captions: இரண்டாம் வசனங்கள்
+    Subtitle File:
+      Load: "வசனக் கோப்பை ஏற்று…"
+      Subtitle Files: "வசனக் கோப்புகள்"
+      Error: "வசனக் கோப்பை ஏற்ற முடியவில்லை. SRT அல்லது WebVTT கோப்பைத் தேர்ந்தெடுக்கவும்."
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'தொடக்க விளம்பரத்தில் மீதமுள்ள நேரம்: {remindingTimeSeconds}வி.'
   Station: நிலையம்

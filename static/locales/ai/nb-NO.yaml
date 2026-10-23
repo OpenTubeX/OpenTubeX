@@ -1667,6 +1667,10 @@ Video:
       Error With Details: "Kunne ikke strømme videoen: {error}"
       Untrusted Receiver: "Mottakerens sertifikat er ikke klarert. Bruk en autentisert Google Cast-mottaker."
     Secondary Captions: Sekundær teksting
+    Subtitle File:
+      Load: "Last inn undertekstfil…"
+      Subtitle Files: "Undertekstfiler"
+      Error: "Kunne ikke laste inn undertekstfilen. Velg en SRT- eller WebVTT-fil."
   External Media:
     Dislikes: "Misliking | Mislikinger"
     Reposts: "Videredeling | Videredelinger"

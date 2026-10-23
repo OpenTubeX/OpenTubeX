@@ -1672,6 +1672,10 @@ Video:
       Error With Details: "N’eo ket bet gallet skignañ ar video: {error}"
       Untrusted Receiver: "N’eo ket fiziet e testeni ar resever. Implijit ur resever Google Cast dilesaet."
     Secondary Captions: Eil istitloù
+    Subtitle File:
+      Load: "Kargañ ur restr istitloù…"
+      Subtitle Files: "Restroù istitloù"
+      Error: "N'eus ket bet gallet kargañ ar restr istitloù. Dibabit ur restr SRT pe WebVTT."
   External Media:
     Dislikes: "Displijadenn | Displijadennoù | Displijadennoù | Displijadennoù | Displijadennoù"
     Reposts: "Adkasadenn | Adkasadennoù | Adkasadennoù | Adkasadennoù | Adkasadennoù"

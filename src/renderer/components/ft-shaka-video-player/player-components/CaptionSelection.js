@@ -1,4 +1,6 @@
 import shaka from 'shaka-player'
+import { h, render } from 'vue'
+import { FtIcon } from '@opentubex/icons'
 
 import i18n from '../../../i18n/index'
 import { CaptionTiming } from './CaptionTiming'
@@ -38,12 +40,14 @@ export class CaptionSelection extends shaka.ui.TextSelection {
    *   isSelected: (caption: {url: string, label: string, language: string, mimeType: string} | null) => boolean,
    *   select: (caption: {url: string, label: string, language: string, mimeType: string} | null) => Promise<boolean>
    * }} secondary
+   * @param {{isAvailable: () => boolean, load: () => Promise<boolean>}} localFile
    * @param {{getOffset: () => number, setOffset: (offset: number) => void}} timing
    * @param {!HTMLElement} parent
    * @param {!shaka.ui.Controls} controls
    */
-  constructor(events, getSettings, updateSetting, resetSettings, getTranslations, isTranslationSelected, selectTranslation, secondary, timing, parent, controls) {
+  constructor(events, getSettings, updateSetting, resetSettings, getTranslations, isTranslationSelected, selectTranslation, secondary, localFile, timing, parent, controls) {
     super(parent, controls)
+    this.localFile_ = localFile
 
     if (this.isSubMenu) {
       // Shaka rebuilds the language choices and tries to focus a hidden item
@@ -53,7 +57,7 @@ export class CaptionSelection extends shaka.ui.TextSelection {
         this.eventManager.unlisten(controls, type)
         this.eventManager.listen(controls, type, () => {
           this.isSubMenuOpened = opened
-          this.button.classList.toggle('shaka-hidden', opened || this.player.getTextTracks().length === 0)
+          this.updateButtonDisplay_()
           if (opened) {
             this.addCaptionActions_()
           }
@@ -78,6 +82,26 @@ export class CaptionSelection extends shaka.ui.TextSelection {
 
     this.translationMenu_ = this.createOptionsMenu_(parent, 'ft-caption-auto-translate-button', 'ft-caption-translation')
     this.secondaryMenu_ = this.createOptionsMenu_(parent, 'ft-caption-secondary-button', 'ft-caption-secondary')
+
+    this.loadFileButton_ = document.createElement('button')
+    this.loadFileButton_.type = 'button'
+    this.loadFileButton_.classList.add('ft-caption-load-file-button')
+    this.loadFileIcon_ = document.createElement('span')
+    render(h(FtIcon, { icon: 'folder-open', 'aria-hidden': 'true' }), this.loadFileIcon_)
+    this.loadFileLabel_ = document.createElement('span')
+    this.loadFileButton_.append(this.loadFileIcon_, this.loadFileLabel_)
+
+    // The grid menu pins these rows to its bottom and lays them out side by side when both
+    // labels fit, so it reserves however much room they take up.
+    this.actions_ = document.createElement('div')
+    this.actions_.classList.add('ft-caption-actions')
+    this.actionsObserver_ = new ResizeObserver(([entry]) => {
+      const size = entry.borderBoxSize[0].blockSize
+      if (size > 0) {
+        this.menu.style.setProperty('--ft-caption-actions-size', `${size}px`)
+      }
+    })
+    this.actionsObserver_.observe(this.actions_)
 
     this.appearanceMenu_ = document.createElement('div')
     this.appearanceMenu_.classList.add(
@@ -134,6 +158,27 @@ export class CaptionSelection extends shaka.ui.TextSelection {
       this.optionsButton_.focus()
     })
 
+    // Not disabled while the file picker is open, Android doesn't report when it gets canceled
+    this.eventManager.listen(this.loadFileButton_, 'click', async (event) => {
+      event.stopPropagation()
+      if (await this.localFile_.load()) {
+        this.controls.hideSettingsMenus()
+      }
+    })
+
+    // Shaka hides the captions button while a video has no tracks, but a
+    // subtitle file can still be loaded then. These run after Shaka's listeners.
+    this.eventManager.listenMulti(
+      this.player,
+      ['loading', 'loaded', 'unloading', 'textchanged', 'trackschanged'],
+      () => this.updateButtonDisplay_()
+    )
+    this.eventManager.listenMulti(
+      this.localization,
+      [shaka.ui.Localization.LOCALE_UPDATED, shaka.ui.Localization.LOCALE_CHANGED],
+      () => this.updateButtonDisplay_()
+    )
+
     this.eventManager.listen(this.resetButton_, 'click', () => {
       this.closeColorPopover_()
       this.resetSettings_()
@@ -160,10 +205,14 @@ export class CaptionSelection extends shaka.ui.TextSelection {
     this.updateLocalisedStrings_()
     this.updateAppearanceControls_(this.getSettings_())
     this.addCaptionActions_()
+    this.updateButtonDisplay_()
   }
 
   release() {
+    this.actionsObserver_.disconnect()
     this.timing_.release()
+    render(null, this.loadFileIcon_)
+    this.actions_.remove()
     for (const optionsMenu of [this.translationMenu_, this.secondaryMenu_]) {
       cancelAnimationFrame(optionsMenu.overlayFrame)
       removeOverlayScrollbars(optionsMenu.options)
@@ -496,6 +545,7 @@ export class CaptionSelection extends shaka.ui.TextSelection {
 
     this.optionsButton_.textContent = optionsLabel
     this.optionsButton_.ariaLabel = optionsLabel
+    this.loadFileLabel_.textContent = i18n.global.t('Video.Player.Subtitle File.Load')
     for (const [optionsMenu, label] of [
       [this.translationMenu_, i18n.global.t('Video.Player.Auto-translate')],
       [this.secondaryMenu_, i18n.global.t('Video.Player.Secondary Captions')],
@@ -666,9 +716,23 @@ export class CaptionSelection extends shaka.ui.TextSelection {
         this.menu.appendChild(optionsMenu.button)
       }
     }
-    if (this.menu.lastElementChild !== this.timing_.button) {
-      this.menu.appendChild(this.timing_.button)
+    if (!this.localFile_.isAvailable()) {
+      this.loadFileButton_.remove()
+    } else if (!this.actions_.contains(this.loadFileButton_)) {
+      this.actions_.prepend(this.loadFileButton_)
     }
+    if (this.actions_.lastElementChild !== this.timing_.button) {
+      this.actions_.appendChild(this.timing_.button)
+    }
+    if (this.menu.lastElementChild !== this.actions_) {
+      this.menu.appendChild(this.actions_)
+    }
+  }
+
+  /** @private */
+  updateButtonDisplay_() {
+    this.button.classList.toggle('shaka-hidden', Boolean(this.isSubMenuOpened) ||
+      (this.player.getTextTracks().length === 0 && !this.localFile_.isAvailable()))
   }
 
   /** @private */

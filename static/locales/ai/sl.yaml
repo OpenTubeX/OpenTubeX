@@ -2121,6 +2121,10 @@ Video:
       Error With Details: "Videoposnetka ni bilo mogoče predvajati na napravi: {error}"
       Untrusted Receiver: "Potrdilo sprejemnika ni zaupanja vredno. Uporabite preverjen sprejemnik Google Cast."
     Secondary Captions: Sekundarni podnapisi
+    Subtitle File:
+      Load: "Naloži datoteko s podnapisi…"
+      Subtitle Files: "Datoteke s podnapisi"
+      Error: "Datoteke s podnapisi ni bilo mogoče naložiti. Izberite datoteko SRT ali WebVTT."
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Preostali čas oglasa pred videoposnetkom: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Preostali čas zakasnitve SABR: {remindingTimeSeconds}s'

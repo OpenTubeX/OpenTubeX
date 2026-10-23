@@ -7116,6 +7116,7 @@ export default defineComponent({
       this.sabrReloadState = {
         captionIndex: Number.isInteger(payload?.captionIndex) ? payload.captionIndex : null,
         captionTimingOffset: Number.isFinite(payload?.captionTimingOffset) ? payload.captionTimingOffset : 0,
+        localCaptions: Array.isArray(payload?.localCaptions) ? payload.localCaptions : [],
         playbackRate: restoredPlaybackRate,
         videoQuality: this.normalizeVideoQuality(payload?.videoQuality) ||
           this.normalizeVideoQuality(this.currentVideoQuality) || null,

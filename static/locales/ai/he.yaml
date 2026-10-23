@@ -1706,6 +1706,10 @@ Video:
       Error With Details: "לא ניתן לשדר את הסרטון: {error}"
       Untrusted Receiver: "האישור של המקלט אינו מהימן. יש להשתמש במקלט Google Cast מאומת."
     Secondary Captions: כתוביות משניות
+    Subtitle File:
+      Load: "טעינת קובץ כתוביות…"
+      Subtitle Files: "קובצי כתוביות"
+      Error: "לא ניתן לטעון את קובץ הכתוביות. יש לבחור קובץ SRT או WebVTT."
   Station: תחנה
   Playlist:
     Unavailable videos are hidden: סרטון אחד שאינו זמין מוסתר | {count} סרטונים לא זמינים מוסתרים | {count} סרטונים לא זמינים מוסתרים

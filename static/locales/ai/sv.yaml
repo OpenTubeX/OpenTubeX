@@ -1677,6 +1677,10 @@ Video:
       Error With Details: "Det gick inte att casta videon: {error}"
       Untrusted Receiver: "Mottagarens certifikat är inte betrott. Använd en autentiserad Google Cast-mottagare."
     Secondary Captions: Sekundära undertexter
+    Subtitle File:
+      Load: "Läs in undertextfil…"
+      Subtitle Files: "Undertextfiler"
+      Error: "Det gick inte att läsa in undertextfilen. Välj en SRT- eller WebVTT-fil."
   Station: Station
   Playlist:
     Unavailable videos are hidden: 1 otillgänglig video är dold | {count} otillgängliga videor är dolda

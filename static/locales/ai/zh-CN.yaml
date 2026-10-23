@@ -1662,6 +1662,10 @@ Video:
       Error With Details: "无法投放视频: {error}"
       Untrusted Receiver: "接收设备的证书不受信任。请使用经过身份验证的 Google Cast 接收设备。"
     Secondary Captions: 第二字幕
+    Subtitle File:
+      Load: "加载字幕文件…"
+      Subtitle Files: "字幕文件"
+      Error: "无法加载字幕文件。请选择 SRT 或 WebVTT 文件。"
   External Media:
     Dislikes: "点踩"
     Reposts: "转发"

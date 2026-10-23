@@ -2285,6 +2285,10 @@ Video:
       Duration Error: Die Voice-over-Übersetzung ist nur für Videos mit einer Länge von bis zu vier Stunden verfügbar.
     Auto-translate: Automatisch übersetzen
     Secondary Captions: Zweite Untertitel
+    Subtitle File:
+      Load: Untertiteldatei laden…
+      Subtitle Files: Untertiteldateien
+      Error: Die Untertiteldatei konnte nicht geladen werden. Wähle eine SRT- oder WebVTT-Datei aus.
     Zoom:
       Zoom: Zoom
       'Off': Aus

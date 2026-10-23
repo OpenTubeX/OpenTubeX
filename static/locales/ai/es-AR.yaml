@@ -2031,6 +2031,10 @@ Video:
       Error With Details: "No se pudo transmitir el video: {error}"
       Untrusted Receiver: "El certificado del receptor no es de confianza. Usá un receptor Google Cast autenticado."
     Secondary Captions: Subtítulos secundarios
+    Subtitle File:
+      Load: "Cargar archivo de subtítulos…"
+      Subtitle Files: "Archivos de subtítulos"
+      Error: "No se pudo cargar el archivo de subtítulos. Elegí un archivo SRT o WebVTT."
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Tiempo restante previo al anuncio: {remindingTimeSeconds} s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Tiempo restante de retroceso de SABR: {remindingTimeSeconds} s'

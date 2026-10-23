@@ -81,12 +81,14 @@ import {
 } from '../../helpers/player/utils'
 import { findCaptionByLocale, getPreferredCaption } from '../../../captionLanguages'
 import { getActiveCueText } from '../../helpers/player/secondary-captions'
+import { createLocalCaption, LOCAL_CAPTION_FILE_TYPES } from '../../helpers/player/localCaptions'
 import {
   addKeyboardShortcutToActionTitle,
   formatDurationAsTimestamp,
   getCachedOembedTitle,
   getOembedTitle,
   getVideoThumbnailUrl,
+  pickFileWithPicker,
   showToast,
   writeFileWithPicker,
   throttle,
@@ -1515,6 +1517,12 @@ export default defineComponent({
     }
 
     const captionSources = new WeakMap()
+
+    /**
+     * Subtitle files the user loaded for this video, added again whenever the player reloads it.
+     * @type {import('vue').ShallowRef<{ url: string, label: string, language: string, mimeType: string }[]>}
+     */
+    const localCaptions = shallowRef(props.sabrReloadState?.localCaptions ?? [])
 
     function findMatchingTextTrack(textTracks, caption) {
       if (!caption) {
@@ -5286,7 +5294,9 @@ export default defineComponent({
         trackLabelFormat: hasMultipleAudioTracks.value ? TrackLabelFormat.LABEL : TrackLabelFormat.LANGUAGE_ROLE,
         // Only set it to label if we added the captions ourselves,
         // some live streams come with subtitles in the DASH manifest, but without labels
-        textTrackLabelFormat: props.captions.length > 0 ? TrackLabelFormat.LABEL : TrackLabelFormat.LANGUAGE,
+        textTrackLabelFormat: props.captions.length > 0 || localCaptions.value.length > 0
+          ? TrackLabelFormat.LABEL
+          : TrackLabelFormat.LANGUAGE,
         displayInVrMode: useVrMode.value
       }
 
@@ -8335,6 +8345,9 @@ export default defineComponent({
         const activeTextTrack = player.getTextTracks().find(textTrack => textTrack.active)
 
         if (isUserAction) {
+          // A caption chosen while the tracks are still being added must not be replaced by the restored one
+          restoreCaptionIndex = null
+
           // For videos played from a URL, Shaka applies the preferred captions only after the first frame
           // has loaded, if no captions are on by then. Drop the preference so it can't undo the user's choice.
           if (player.getConfiguration().preferredText.length > 0) {
@@ -9110,6 +9123,16 @@ export default defineComponent({
               isSelected: caption => caption === secondaryCaption,
               select: caption => selectSecondaryCaption(caption),
             },
+            {
+              // Shaka can only add text tracks to a loaded video that isn't live
+              isAvailable: () => {
+                const captionPlayer = controls.getPlayer()
+                const loadMode = captionPlayer.getLoadMode()
+                return (loadMode === shaka.Player.LoadMode.MEDIA_SOURCE || loadMode === shaka.Player.LoadMode.SRC_EQUALS) &&
+                  !captionPlayer.isLive()
+              },
+              load: () => loadLocalCaption(controls.getPlayer()),
+            },
             { getOffset: () => captionTimingOffset, setOffset: updateCaptionTiming },
             rootElement,
             controls
@@ -9119,6 +9142,46 @@ export default defineComponent({
 
       registerOwnElement(shakaControls, 'captions', new CaptionSelectionFactory())
       registerOwnElement(shakaOverflowMenu, 'captions', new CaptionSelectionFactory())
+    }
+
+    /**
+     * Lets the user pick an SRT or WebVTT file and shows it as a new caption track.
+     * @param {shaka.Player} captionPlayer
+     * @returns {Promise<boolean>}
+     */
+    async function loadLocalCaption(captionPlayer) {
+      try {
+        const file = await pickFileWithPicker(t('Video.Player.Subtitle File.Subtitle Files'), LOCAL_CAPTION_FILE_TYPES, 'local-captions')
+        if (file === null || captionPlayer !== player) {
+          return false
+        }
+
+        const text = await file.text()
+        const caption = createLocalCaption(file.name, text, captionPlayer.getTextTracks().map(track => track.label))
+        // Check the file now, Shaka would only parse it once the track is shown
+        const cues = caption && shaka.text.TextEngine.findParser(caption.mimeType)().parseMedia(
+          new TextEncoder().encode(text),
+          { periodStart: 0, segmentStart: 0, segmentEnd: Infinity, vttOffset: 0 },
+          caption.url,
+          []
+        )
+        if (!cues?.length) {
+          throw new Error(`${file.name} contains no SRT or WebVTT subtitles`)
+        }
+
+        const track = await addCaptionTrack(caption, captionPlayer)
+        if (captionPlayer !== player) {
+          return false
+        }
+
+        localCaptions.value = [...localCaptions.value, caption]
+        captionPlayer.selectTextTrack(track)
+        return true
+      } catch (error) {
+        console.error('Failed to load the subtitle file', error)
+        showToast({ message: t('Video.Player.Subtitle File.Error'), icon: ['fas', 'circle-exclamation'] })
+        return false
+      }
     }
 
     let captionTranslationSelectionGeneration = 0
@@ -12993,6 +13056,8 @@ export default defineComponent({
     async function handleLoaded() {
       const loadedPlayer = player
       const generation = ++loadGeneration
+      // Files loaded while this runs are already added to the player
+      const reloadedLocalCaptions = localCaptions.value
       hasLoaded.value = true
       // Ideally we would set this in the `streaming` event handler, but for HLS this is only set to true after the loaded event fires.
       isLive.value = player.isLive()
@@ -13100,6 +13165,21 @@ export default defineComponent({
         // catches a teardown that has not nulled the player yet.
         if (player !== loadedPlayer || !hasLoaded.value || generation !== loadGeneration) {
           return
+        }
+      }
+
+      // After the video's own captions, so that a restored caption index still matches the same track
+      if (!isLive.value) {
+        for (const caption of reloadedLocalCaptions) {
+          try {
+            await addCaptionTrack(caption, loadedPlayer)
+          } catch (error) {
+            handleError(error, 'addTextTrackAsync', caption)
+          }
+
+          if (player !== loadedPlayer || !hasLoaded.value || generation !== loadGeneration) {
+            return
+          }
         }
       }
 
@@ -13684,6 +13764,7 @@ export default defineComponent({
         wasPlaying: !video.value?.paused || pendingAutoplay,
         captionIndex: captionIndex >= 0 ? captionIndex : null,
         captionTimingOffset,
+        localCaptions: localCaptions.value,
         playbackRate: getCurrentPlaybackRate(),
         videoQuality: getActiveVariantQuality(),
         loopEnabled: video.value?.loop === true,

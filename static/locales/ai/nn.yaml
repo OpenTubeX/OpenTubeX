@@ -1940,6 +1940,10 @@ Video:
       Error With Details: "Kunne ikkje strøyme videoen: {error}"
       Untrusted Receiver: "Sertifikatet til mottakaren er ikkje tiltrudd. Bruk ein autentisert Google Cast-mottakar."
     Secondary Captions: Sekundær teksting
+    Subtitle File:
+      Load: "Last inn undertekstfil…"
+      Subtitle Files: "Undertekstfiler"
+      Error: "Klarte ikkje å laste inn undertekstfila. Vel ei SRT- eller WebVTT-fil."
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Attverande tid for førehandsannonsen: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Attverande ventetid for SABR: {remindingTimeSeconds}s'

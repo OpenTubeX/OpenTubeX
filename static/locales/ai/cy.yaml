@@ -1684,6 +1684,10 @@ Video:
       Error With Details: "Methu darlledu’r fideo: {error}"
       Untrusted Receiver: "Nid yw tystysgrif y derbynnydd yn ddibynadwy. Defnyddiwch dderbynnydd Google Cast sydd wedi ei ddilysu."
     Secondary Captions: Isdeitlau eilaidd
+    Subtitle File:
+      Load: "Llwytho ffeil isdeitlau…"
+      Subtitle Files: "Ffeiliau isdeitlau"
+      Error: "Methu llwytho'r ffeil isdeitlau. Dewiswch ffeil SRT neu WebVTT."
   Station: Gorsaf
   Playlist:
     Unavailable videos are hidden: Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae 1 fideo nad yw ar gael wedi'i guddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio

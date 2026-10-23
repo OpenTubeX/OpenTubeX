@@ -1699,6 +1699,10 @@ Video:
       Error With Details: "Не вдалося транслювати відео: {error}"
       Untrusted Receiver: "Сертифікат приймача не є довіреним. Використовуйте автентифікований приймач Google Cast."
     Secondary Captions: Додаткові субтитри
+    Subtitle File:
+      Load: "Завантажити файл субтитрів…"
+      Subtitle Files: "Файли субтитрів"
+      Error: "Не вдалося завантажити файл субтитрів. Виберіть файл SRT або WebVTT."
   Station: Станція
   Playlist:
     Unavailable videos are hidden: 1 недоступне відео приховано | {count} недоступні відео приховано | {count} недоступних відео приховано

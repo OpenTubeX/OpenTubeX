@@ -1662,6 +1662,10 @@ Video:
       Error With Details: "Impossibile trasmettere il video: {error}"
       Untrusted Receiver: "Il certificato del ricevitore non è attendibile. Usa un ricevitore Google Cast autenticato."
     Secondary Captions: Sottotitoli secondari
+    Subtitle File:
+      Load: "Carica file di sottotitoli…"
+      Subtitle Files: "File di sottotitoli"
+      Error: "Impossibile caricare il file di sottotitoli. Scegli un file SRT o WebVTT."
   External Media:
     Dislikes: "Non mi piace | Non mi piace | Non mi piace"
     Reposts: "Repost | Repost | Repost"
