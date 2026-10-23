@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
 import { runInNewContext } from 'node:vm'
-import { getVideoCodecPreferences, preferredVideoDecodingAttributes } from '../../src/renderer/helpers/player/videoCodecPreference.js'
+import { chooseAutoVariants, getVideoCodecPreferences, preferredVideoDecodingAttributes } from '../../src/renderer/helpers/player/videoCodecPreference.js'
 
 test('automatic selection leaves all supported codecs available for hardware selection', () => {
   assert.deepEqual(getVideoCodecPreferences('auto'), [{ codec: '', hdrLevel: 'AUTO' }])
@@ -84,20 +84,17 @@ test('Auto prefers hardware decoding over a lower-bitrate software codec reporte
     video: { id, codecs: format.codec, bandwidth: format.bitrate, width: 1920, height: 1080, frameRate: 60 },
     decodingInfos: [{ supported: true, smooth: format.smooth, powerEfficient: format.powerEfficient }]
   }))
-  const manifest = { variants, textStreams: [] }
-  shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest, [], [], preferredVideoDecodingAttributes, [])
-  assert.equal(manifest.variants.length, 1)
-  assert.equal(manifest.variants[0].video.codecs, 'vp9')
+  const chosen = chooseAutoVariants(variants, [], preferredVideoDecodingAttributes)
+  assert.equal(chosen.length, 1)
+  assert.equal(chosen[0].video.codecs, 'vp9')
 
   // An explicit preference still wins, and software-only devices remain playable.
-  const explicit = { variants, textStreams: [] }
-  shaka.util.StreamUtils.chooseCodecsAndFilterManifest(explicit, ['av01'], [], preferredVideoDecodingAttributes, [])
-  assert.equal(explicit.variants[0].video.codecs, 'av01.0.09M.08')
-  const software = { variants: variants.map(variant => ({
+  const explicit = chooseAutoVariants(variants, ['av01'], preferredVideoDecodingAttributes)
+  assert.equal(explicit[0].video.codecs, 'av01.0.09M.08')
+  const software = variants.map(variant => ({
     ...variant, decodingInfos: [{ supported: true, smooth: true, powerEfficient: false }]
-  })), textStreams: [] }
-  shaka.util.StreamUtils.chooseCodecsAndFilterManifest(software, [], [], preferredVideoDecodingAttributes, [])
-  assert.ok(software.variants.length > 0)
+  }))
+  assert.ok(chooseAutoVariants(software, [], preferredVideoDecodingAttributes).length > 0)
 })
 
 for (const powerEfficient of [true, false]) {
@@ -109,9 +106,49 @@ for (const powerEfficient of [true, false]) {
       video: { id, codecs: format.codec, bandwidth: format.bitrate, width: 1920, height: 1080, frameRate: 60 },
       decodingInfos: [{ supported: true, smooth: format.smooth, powerEfficient }]
     }))
-    const manifest = { variants, textStreams: [] }
-    shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest, [], [], preferredVideoDecodingAttributes, [])
-    assert.equal(manifest.variants.length, 1)
-    assert.equal(manifest.variants[0].video.codecs, 'vp9')
+    const chosen = chooseAutoVariants(variants, [], preferredVideoDecodingAttributes)
+    assert.equal(chosen.length, 1)
+    assert.equal(chosen[0].video.codecs, 'vp9')
   })
 }
+
+test('Auto chooses the same variants as Shaka would keep in the manifest', () => {
+  // YouTube-like formats, with AV1, VP9 and H.264 at most resolutions
+  const formats = [
+    ['av01.0.00M.08', 256, 144, 30, 30e3], ['vp9', 256, 144, 30, 60e3], ['avc1.4D400C', 256, 144, 30, 50e3],
+    ['av01.0.04M.08', 854, 480, 30, 120e3], ['vp9', 854, 480, 30, 180e3], ['avc1.4D401F', 854, 480, 30, 300e3],
+    ['av01.0.08M.08', 1280, 720, 60, 250e3], ['vp9', 1280, 720, 60, 400e3], ['avc1.640020', 1280, 720, 60, 800e3],
+    ['vp9', 1280, 720, 30, 350e3], ['avc1.64001F', 1280, 720, 30, 550e3],
+    ['av01.0.09M.08', 1920, 1080, 60, 500e3], ['vp9', 1920, 1080, 60, 650e3], ['avc1.64002A', 1920, 1080, 60, 1.5e6],
+    ['av01.0.13M.08', 3840, 2160, 60, 2.5e6], ['vp9', 3840, 2160, 60, 3.5e6],
+    ['vp09.02.51.10', 3840, 2160, 60, 4e6, 'PQ'],
+  ]
+  /** Decoding attributes by device, e.g. a GPU without AV1 decoding */
+  const devices = {
+    software: () => ({ smooth: true, powerEfficient: false }),
+    noAv1: codecs => ({ smooth: true, powerEfficient: !codecs.startsWith('av01') }),
+    hardware: () => ({ smooth: true, powerEfficient: true }),
+    av1Below4k: (codecs, height) => ({ smooth: height < 2160, powerEfficient: !codecs.startsWith('av01') || height < 2160 }),
+  }
+
+  for (const [device, getDecodingInfo] of Object.entries(devices)) {
+    const variants = formats.map(([codecs, width, height, frameRate, bandwidth, hdr = 'SDR'], id) => ({
+      id,
+      video: { id, codecs, width, height, frameRate, bandwidth, hdr, roles: [] },
+      decodingInfos: [{ supported: true, ...getDecodingInfo(codecs, height) }]
+    }))
+    for (const preference of ['auto', 'av1', 'vp9', 'h264']) {
+      for (const decodingAttributes of [preferredVideoDecodingAttributes, []]) {
+        const codecs = getVideoCodecPreferences(preference).map(entry => entry.codec).filter(Boolean)
+        const manifest = { variants, textStreams: [] }
+        shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest, codecs, [], decodingAttributes, [])
+        assert.deepEqual(
+          chooseAutoVariants(variants, codecs, decodingAttributes).map(variant => variant.id).sort((a, b) => a - b),
+          // Copied out of the VM context, as deepEqual compares prototypes
+          [...manifest.variants].map(variant => variant.id).sort((a, b) => a - b),
+          `${device}, ${preference}, ${decodingAttributes.length > 0 ? 'with' : 'without'} decoding attributes`
+        )
+      }
+    }
+  }
+})

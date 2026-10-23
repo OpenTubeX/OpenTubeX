@@ -21,17 +21,18 @@ const TRACKS = [
  *
  * @param {{ electronApp: import('@playwright/test').ElectronApplication }} app
  * @param {import('@playwright/test').Page} page
+ * @param {string[]} codecs The video codecs that the manifest offers the stream in
  */
-async function openAdaptiveVideo(app, page) {
+async function openAdaptiveVideo(app, page, codecs = ['avc1.42c00d']) {
   await mockPlayableWatchPage(app, page)
   await routePostLiveMedia(page)
   await page.route('https://quality-menu.test/*.m3u8', route => route.fulfill({
     contentType: 'application/x-mpegurl',
     body: route.request().url().endsWith('/master.m3u8')
       ? `#EXTM3U
-#EXT-X-STREAM-INF:BANDWIDTH=84000,CODECS="avc1.42c00d",RESOLUTION=320x180
-video.m3u8
-`
+${codecs.map((codec, index) => `#EXT-X-STREAM-INF:BANDWIDTH=84000,CODECS="${codec}",RESOLUTION=320x180
+video-${index}.m3u8
+`).join('')}`
       : `#EXTM3U
 #EXT-X-TARGETDURATION:2
 #EXT-X-VERSION:7
@@ -389,5 +390,36 @@ test.describe('quality codecs with classic controls', () => {
     const switcher = await dialog.locator('.ft-quality-codecs').boundingBox()
     expect(switcher.y).toBeGreaterThanOrEqual(header.y)
     expect(switcher.y + switcher.height).toBeLessThanOrEqual(header.y + header.height)
+  })
+})
+
+test.describe('quality codecs from the manifest', () => {
+  test.use({
+    seed: {
+      settings: {
+        videoPlaybackEngine: 'yt-dlp',
+        ytDlpPlaybackEngineDefaultMigration: true,
+        defaultVideoFormat: 'dash',
+        defaultQuality: 'auto',
+        // The test stream is H.264, so automatic quality must play it
+        preferredVideoCodec: 'h264',
+        useSponsorBlock: false,
+        playNextVideo: false,
+        fetchSubscriptionsAutomatically: false,
+      }
+    }
+  })
+
+  test('lists codecs that automatic quality would not choose', async ({ app, page }, testInfo) => {
+    // Shaka keeps a single codec per resolution unless the player opts out
+    await openAdaptiveVideo(app, page, ['av01.0.00M.08', 'vp09.00.10.08', 'avc1.42c00d'])
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    await player.hover()
+    await player.locator('.shaka-overflow-menu-button').click()
+    await player.locator('.shaka-resolution-button').click()
+    const codecs = player.locator('.shaka-resolutions .ft-quality-codecs')
+    await expect(codecs.getByRole('button')).toHaveText(['AV1', 'VP9', 'H.264'])
+    await expect(codecs.getByRole('button', { name: 'H.264' })).toHaveAttribute('aria-pressed', 'true')
+    await player.locator('.shaka-resolutions').screenshot({ path: testInfo.outputPath('codecs.png') })
   })
 })

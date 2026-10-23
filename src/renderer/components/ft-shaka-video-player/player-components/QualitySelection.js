@@ -2,22 +2,13 @@ import shaka from 'shaka-player'
 
 import i18n from '../../../i18n/index'
 import { PlayerIcons } from '../../../../constants'
+import { getCodecFamily } from '../../../helpers/player/videoCodecPreference'
 
 /** Same order as the preferred video codec setting */
 const CODEC_ORDER = ['av01', 'vp09', 'avc1', 'hvc1']
-const CODEC_ALIASES = { avc3: 'avc1', hev1: 'hvc1', vp9: 'vp09' }
 const CODEC_NAMES = { av01: 'AV1', vp09: 'VP9', avc1: 'H.264', hvc1: 'HEVC' }
 /** The codecs that Shaka labels as Dolby Vision */
 const DOLBY_VISION_CODECS = ['dvh1', 'dvhe', 'dvav', 'dva1', 'dav1', 'dvc1', 'dvi1']
-
-/**
- * @param {string | null} codecs
- * @returns {string}
- */
-function getCodecFamily(codecs) {
-  const prefix = (codecs ?? '').split('.', 1)[0].toLowerCase()
-  return CODEC_ALIASES[prefix] ?? prefix
-}
 
 /**
  * @param {string[] | null} a
