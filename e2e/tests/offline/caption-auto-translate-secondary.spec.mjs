@@ -197,7 +197,7 @@ test.describe('secondary captions', () => {
     await appearanceMenu.locator('label.ft-caption-appearance-control > span').first().click()
     await expect(appearanceMenu).toBeVisible()
     await appearanceMenu.locator('.ft-caption-color-control > span').first().click()
-    const colorPopover = appearanceMenu.locator('.ft-caption-color-popover:visible')
+    const colorPopover = appearanceMenu.locator('.ft-caption-color-popover').visible()
     await expect(colorPopover).toHaveCount(1)
     await appearanceControls.click({ position: { x: 2, y: 2 } })
     await expect(colorPopover).toHaveCount(0)

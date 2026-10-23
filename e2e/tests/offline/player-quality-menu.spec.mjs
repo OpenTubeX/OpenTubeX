@@ -309,9 +309,15 @@ test.describe('grid submenu headers', { tag: '@scale' }, () => {
 
     /** @param {import('@playwright/test').Locator} submenu */
     const expectCenteredTitle = async (submenu, { centeredInline = true } = {}) => {
-      const menu = await overflowMenu.boundingBox()
-      const header = await submenu.locator(':scope > .shaka-back-to-overflow-button').boundingBox()
-      const title = await submenu.locator(':scope > .shaka-back-to-overflow-button > span').boundingBox()
+      const [menu, header, title] = await Promise.all([
+        overflowMenu,
+        submenu.locator(':scope > .shaka-back-to-overflow-button'),
+        submenu.locator(':scope > .shaka-back-to-overflow-button > span'),
+      ].map(async (locator) => {
+        const bounds = await locator.boundingBox()
+        expect(bounds, `Expected visible bounds for ${locator}`).not.toBeNull()
+        return bounds
+      }))
       // Between the top of the menu and the divider at the bottom of the header
       const divider = header.y + header.height - 1
       expect(Math.abs(title.y + title.height / 2 - (menu.y + divider) / 2)).toBeLessThan(1)
