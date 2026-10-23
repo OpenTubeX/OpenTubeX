@@ -1912,7 +1912,7 @@ Video:
       shuffling playlists: barrejar llistes de reproducció
       looping playlists: reproduir llistes de reproducció en bucle
   Player:
-    Playing in Picture-in-Picture: S'està reproduint en pantalla en pantalla
+    Playing in Picture-in-Picture: S'està reproduint en mode d'imatge sobre imatge
     Caption Timing:
       Adjust Timing: Ajusta el temps…
       Caption Timing: Temps dels subtítols
