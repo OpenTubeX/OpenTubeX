@@ -4097,6 +4097,8 @@ export default defineComponent({
         abrFactory: () => new AutoQualityAbrManager(preferredCodecs, decodingAttributes, (videoIds) => {
           autoQualityVideoIds = videoIds
         }),
+        // Used when Shaka still chooses the codecs, see supportsSmoothCodecSwitching
+        preferredDecodingAttributes: decodingAttributes,
         abr: {
           enabled: useAutoQuality,
 
