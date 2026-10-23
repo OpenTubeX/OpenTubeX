@@ -16,6 +16,7 @@ import {
   MAX_CAPTION_FONT_SCALE,
   MIN_CAPTION_FONT_SCALE,
 } from '../../../helpers/player/caption-settings'
+import { goBackOnEmptyClicks } from '../../../helpers/player/emptyMenuClicks'
 
 const CAPTION_COLOR_PALETTE = Object.freeze([
   '#ffffff', '#d9d9d9', '#808080', '#000000',
@@ -151,12 +152,21 @@ export class CaptionSelection extends shaka.ui.TextSelection {
       this.appearanceBackButton_.focus()
     })
 
-    this.eventManager.listen(this.appearanceBackButton_, 'click', () => {
+    const closeAppearanceMenu = () => {
       this.closeColorPopover_()
       this.setMenuDisplay_(this.appearanceMenu_, false)
       this.setMenuDisplay_(this.menu, true)
       this.optionsButton_.focus()
-    })
+    }
+    this.eventManager.listen(this.appearanceBackButton_, 'click', closeAppearanceMenu)
+    // With a color popover open, an empty click only closes the popover
+    goBackOnEmptyClicks(this.eventManager, this.appearanceMenu_, () => {
+      if (this.openColorControl_) {
+        this.closeColorPopover_()
+      } else {
+        closeAppearanceMenu()
+      }
+    }, '.ft-caption-appearance-control')
 
     // Not disabled while the file picker is open, Android doesn't report when it gets canceled
     this.eventManager.listen(this.loadFileButton_, 'click', async (event) => {
@@ -283,19 +293,7 @@ export class CaptionSelection extends shaka.ui.TextSelection {
     }
     this.eventManager.listen(backButton, 'click', goBack)
 
-    // Like Shaka's submenus, a click on empty space goes back. A press that
-    // starts on the scrollbar ends in a click on the options when dragged.
-    let pressTarget = null
-    this.eventManager.listen(menu, 'pointerdown', (event) => {
-      pressTarget = event.target
-    })
-    this.eventManager.listen(menu, 'click', (event) => {
-      const targets = [event.target, pressTarget]
-      pressTarget = null
-      if (!targets.some(target => target?.closest('button, .os-scrollbar'))) {
-        goBack()
-      }
-    })
+    goBackOnEmptyClicks(this.eventManager, menu, goBack)
 
     return optionsMenu
   }

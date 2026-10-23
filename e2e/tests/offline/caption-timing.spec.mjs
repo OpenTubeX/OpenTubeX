@@ -146,6 +146,12 @@ for (const usePlayerMenuGrid of [true, false]) {
       await input.fill('1.5')
       expect(await video.evaluate(element => element.paused)).toBe(false)
       await video.evaluate(element => element.pause())
+      // Like in Shaka's submenus, a click beside the controls goes back
+      await menu.locator('.ft-caption-timing-content > p').click()
+      await expect(menu).toBeHidden()
+      await expect(languageMenu).toBeVisible()
+      await timingRow.click()
+      await expect(input).toHaveValue('1.5')
       await menu.getByRole('button', { name: 'Back', exact: true }).click()
       const captionsMenu = player.locator('.shaka-text-languages')
       await captionsMenu.getByRole('button', { name: 'Off', exact: true }).click()

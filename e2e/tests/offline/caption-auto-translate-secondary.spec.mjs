@@ -187,6 +187,25 @@ test.describe('secondary captions', () => {
     await options.click({ position: { x: 2, y: 2 } })
     await expect(secondaryMenu).toBeHidden()
     await expect(captionsMenu).toBeVisible()
+
+    // So does a click beside the caption appearance controls, but a click
+    // within a control stays, and one with a color open only closes it
+    await captionsMenu.getByRole('button', { name: 'Options', exact: true }).click()
+    const appearanceMenu = player.locator('.ft-caption-appearance-menu')
+    const appearanceControls = appearanceMenu.locator('.ft-caption-appearance-controls')
+    await expect(appearanceMenu).toBeVisible()
+    await appearanceMenu.locator('label.ft-caption-appearance-control > span').first().click()
+    await expect(appearanceMenu).toBeVisible()
+    await appearanceMenu.locator('.ft-caption-color-control > span').first().click()
+    const colorPopover = appearanceMenu.locator('.ft-caption-color-popover:visible')
+    await expect(colorPopover).toHaveCount(1)
+    await appearanceControls.click({ position: { x: 2, y: 2 } })
+    await expect(colorPopover).toHaveCount(0)
+    await expect(appearanceMenu).toBeVisible()
+    await appearanceControls.click({ position: { x: 2, y: 2 } })
+    await expect(appearanceMenu).toBeHidden()
+    await expect(captionsMenu).toBeVisible()
+
     await captionsMenu.getByRole('button', { name: 'Secondary Captions' }).click()
     await options.getByRole('button', { name: 'German', exact: true }).click()
     await expect(captionsMenu).toBeVisible()
