@@ -418,18 +418,23 @@ export async function normalizeReleaseImage(image, fallbackAlt, loadImage = down
   }
 
   const alt = image.alt || fallbackAlt
-  const height = normalized.some(({ size }) => size.height > MAX_IMAGE_HEIGHT)
-    ? ` height="${MAX_IMAGE_HEIGHT}"`
+  // Limit tall images with a width so browsers derive the height. A fixed height
+  // stretches the image when max-width shrinks it in narrow layouts.
+  const limitedWidth = Math.min(...normalized.map(({ size }) => (
+    Math.floor(size.width * Math.min(1, MAX_IMAGE_HEIGHT / size.height))
+  )))
+  const width = normalized.some(({ size }) => size.height > MAX_IMAGE_HEIGHT)
+    ? ` width="${limitedWidth}"`
     : ''
   const darkUrl = escapeHtmlAttribute(normalized[0].url.href)
 
   if (normalized.length === 2) {
     const lightUrl = escapeHtmlAttribute(normalized[1].url.href)
 
-    return `<picture>\n  <source media="(prefers-color-scheme: dark)" srcset="${darkUrl}">\n  <source media="(prefers-color-scheme: light)" srcset="${lightUrl}">\n  <img src="${darkUrl}" alt="${escapeHtmlAttribute(alt)}"${height}>\n</picture>`
+    return `<picture>\n  <source media="(prefers-color-scheme: dark)" srcset="${darkUrl}">\n  <source media="(prefers-color-scheme: light)" srcset="${lightUrl}">\n  <img src="${darkUrl}" alt="${escapeHtmlAttribute(alt)}"${width}>\n</picture>`
   }
 
-  return `<img src="${darkUrl}" alt="${escapeHtmlAttribute(alt)}"${height}>`
+  return `<img src="${darkUrl}" alt="${escapeHtmlAttribute(alt)}"${width}>`
 }
 
 function gitIsAncestor(ancestor, descendant) {

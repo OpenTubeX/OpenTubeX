@@ -356,15 +356,15 @@ test('image dimensions are read from WebP variants', () => {
   }
 })
 
-test('images taller than 300 pixels receive only a height attribute', async () => {
+test('images taller than 300 pixels receive only a width that keeps their aspect ratio', async () => {
   const result = await normalizeReleaseImage({
-    alt: 'Compact player',
+    alt: 'Subscription groups',
     url: 'https://github.com/user-attachments/assets/example',
-  }, 'Fallback', async () => png(800, 301))
+  }, 'Fallback', async () => png(1376, 402))
 
   assert.equal(
     result,
-    '<img src="https://github.com/user-attachments/assets/example" alt="Compact player" height="300">',
+    '<img src="https://github.com/user-attachments/assets/example" alt="Subscription groups" width="1026">',
   )
 })
 
@@ -386,12 +386,12 @@ test('themed images keep the dark fallback and limit either tall variant', async
     darkUrl: 'https://github.com/OpenTubeX/media/releases/download/attachments/dark.webp',
     lightUrl: 'https://github.com/OpenTubeX/media/releases/download/attachments/light.webp',
     url: 'https://github.com/OpenTubeX/media/releases/download/attachments/dark.webp',
-  }, 'Fallback', async (url) => png(800, url.href.endsWith('light.webp') ? 301 : 300))
+  }, 'Fallback', async (url) => png(800, url.href.endsWith('light.webp') ? 400 : 300))
 
   assert.equal(result, `<picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/OpenTubeX/media/releases/download/attachments/dark.webp">
   <source media="(prefers-color-scheme: light)" srcset="https://github.com/OpenTubeX/media/releases/download/attachments/light.webp">
-  <img src="https://github.com/OpenTubeX/media/releases/download/attachments/dark.webp" alt="Settings" height="300">
+  <img src="https://github.com/OpenTubeX/media/releases/download/attachments/dark.webp" alt="Settings" width="600">
 </picture>`)
 })
 
@@ -466,8 +466,8 @@ ${NOTE_MARKERS}
   assert.equal(result, `## Highlights
 
 - Adds a compact player. (#40, #41, #42)
-  <img src="https://github.com/user-attachments/assets/example" alt="Screenshot" height="300">
-  <img src="https://github.com/user-attachments/assets/second" alt="Settings" height="300">
+  <img src="https://github.com/user-attachments/assets/example" alt="Screenshot" width="400">
+  <img src="https://github.com/user-attachments/assets/second" alt="Settings" width="400">
 
 ## More improvements
 
