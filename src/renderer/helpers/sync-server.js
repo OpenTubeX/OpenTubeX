@@ -28,7 +28,7 @@ import { getSyncableSettingKeys, isSettingSyncEnabled } from '../store/modules/s
 import { deepCopy } from './utils'
 import { replaceCustomThemes } from './customTheme'
 import { repairSystemThemeSettings } from './customThemeSync'
-import { generateRandomUniqueId, SORT_BY_VALUES } from './playlists'
+import { generateRandomUniqueId, isPlaylistSortOrder } from './playlists'
 import { normalizePlaylistThumbnail } from './playlist-thumbnails'
 import {
   getMergedProfileBackground,
@@ -647,9 +647,9 @@ function videoToLocal(video, timeAdded = Date.now()) {
   }
 }
 
-/** `null` follows the default sort order. Unknown values from newer clients do too. */
+/** `null` follows the default sort order. */
 function playlistSortOrder(sortOrder) {
-  return Object.values(SORT_BY_VALUES).includes(sortOrder) ? sortOrder : null
+  return isPlaylistSortOrder(sortOrder) ? sortOrder : null
 }
 
 function playlistMetadataFromLocal(playlist, features) {
@@ -990,6 +990,8 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
     } else if (!isSameLocalPlaylist(local, metadata, mergedVideos)) {
       const saved = await store.dispatch('updatePlaylistFromSync', {
         previous: local,
+        // Sorting is a view preference, so a sort order change alone keeps `lastUpdatedAt`
+        keepLastUpdatedAt: isSameLocalPlaylist({ ...local, sortOrder: metadata.sort_order }, metadata, mergedVideos),
         playlist: {
           ...local,
           playlistName: metadata.title,

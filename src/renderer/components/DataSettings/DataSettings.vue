@@ -351,7 +351,7 @@ import {
   showToast,
   writeFileWithPicker,
 } from '../../helpers/utils'
-import { processToBeAddedPlaylistVideo, SORT_BY_VALUES } from '../../helpers/playlists'
+import { isPlaylistSortOrder, processToBeAddedPlaylistVideo } from '../../helpers/playlists'
 import { normalizePlaylistThumbnail } from '../../helpers/playlist-thumbnails'
 import {
   convertLibreTubeSubscriptions,
@@ -1925,7 +1925,7 @@ async function importPlaylists() {
           countRequiredKeysPresent++
         }
       } else if (key === 'sortOrder') {
-        if (Object.values(SORT_BY_VALUES).includes(playlistData.sortOrder)) {
+        if (isPlaylistSortOrder(playlistData.sortOrder)) {
           playlistObject.sortOrder = playlistData.sortOrder
         }
       } else if (!ignoredKeys.includes(key)) {

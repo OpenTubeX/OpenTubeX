@@ -12,7 +12,7 @@ import * as errors from '../../src/renderer/helpers/sync-server-errors.js'
 import * as bookmarks from '../../src/renderer/helpers/playlist-bookmarks.js'
 import * as profileSync from '../../src/renderer/helpers/profile-sync.js'
 import { EncryptedSyncAdapter, createEmptySyncDocument } from '../../src/renderer/helpers/sync-server-privacy.js'
-import { SORT_BY_VALUES } from '../../src/renderer/helpers/playlists.js'
+import { isPlaylistSortOrder } from '../../src/renderer/helpers/playlists.js'
 
 const source = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
@@ -26,7 +26,7 @@ function playlistBaseline(previous = {}) {
   return { persistPlaylistSyncBaseline, readBaseline: () => JSON.parse(settings.syncServerSnapshot).playlists }
 }
 
-const context = vm.createContext({ DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeSyncIds, syncVideoToRemote, runBackgroundJob, toRaw, MAIN_PROFILE_ID, deepCopy: structuredClone, generateRandomUniqueId: randomUUID, SORT_BY_VALUES, ...errors, ...bookmarks, ...profileSync })
+const context = vm.createContext({ DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeSyncIds, syncVideoToRemote, runBackgroundJob, toRaw, MAIN_PROFILE_ID, deepCopy: structuredClone, generateRandomUniqueId: randomUUID, isPlaylistSortOrder, ...errors, ...bookmarks, ...profileSync })
 vm.runInContext(source
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
   .replace(/^export \{[\s\S]*?\}\n/gm, '')

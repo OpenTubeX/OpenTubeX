@@ -245,8 +245,8 @@ const actions = {
     }
   },
 
-  async updatePlaylistFromSync({ state, commit }, { playlist, previous }) {
-    playlist.lastUpdatedAt = Date.now()
+  async updatePlaylistFromSync({ state, commit }, { playlist, previous, keepLastUpdatedAt = false }) {
+    if (!keepLastUpdatedAt) playlist.lastUpdatedAt = Date.now()
     const saved = await DBPlaylistHandlers.upsertIfUnchanged(playlist, previous)
     if (!saved) return false
     const current = state.playlists.find(item => item._id === playlist._id)
@@ -268,7 +268,10 @@ const actions = {
     }
   },
 
-  async updatePlaylistSortOrder({ commit }, { _id, sortOrder }) {
+  async updatePlaylistSortOrder({ state, commit }, { _id, sortOrder }) {
+    // Another window may have deleted it, so do not recreate a partial playlist
+    if (!state.playlists.some(playlist => playlist._id === _id)) return
+
     // Sorting is a view preference, so it leaves `lastUpdatedAt` alone
     const playlist = { _id, sortOrder }
 

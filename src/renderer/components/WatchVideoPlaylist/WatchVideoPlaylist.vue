@@ -297,7 +297,7 @@ import {
 import { invidiousGetPlaylistInfo } from '../../helpers/api/invidious'
 import { isHistoryEntryWatched } from '../../helpers/history'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
-import { getPlaylistSkipAvailability, getSortedPlaylistItems, SORT_BY_VALUES } from '../../helpers/playlists'
+import { getPlaylistSkipAvailability, getSortedPlaylistItems, isPlaylistSortOrder, SORT_BY_VALUES } from '../../helpers/playlists'
 import { useTabContext } from '../../tabs/TabContext'
 
 const props = defineProps({
@@ -535,7 +535,8 @@ const userPlaylistSortOrder = computed(() => store.getters.getUserPlaylistSortOr
 // Playlists without their own sort order follow the setting
 const sortOrder = computed(() => {
   if (!isUserPlaylist.value) { return SORT_BY_VALUES.Custom }
-  return selectedUserPlaylist.value?.sortOrder ?? userPlaylistSortOrder.value
+  const playlistSortOrder = selectedUserPlaylist.value?.sortOrder
+  return isPlaylistSortOrder(playlistSortOrder) ? playlistSortOrder : userPlaylistSortOrder.value
 })
 
 const isSortOrderCustom = computed(() => sortOrder.value === SORT_BY_VALUES.Custom)

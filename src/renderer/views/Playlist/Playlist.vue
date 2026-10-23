@@ -287,7 +287,7 @@ import {
   canonicalPlaylistThumbnailUrl,
   createPlaylistBookmark,
 } from '../../helpers/playlist-bookmarks'
-import { fillMissingPlaylistVideoDurations, getSortedPlaylistItems, SORT_BY_VALUES } from '../../helpers/playlists'
+import { fillMissingPlaylistVideoDurations, getSortedPlaylistItems, isPlaylistSortOrder, SORT_BY_VALUES } from '../../helpers/playlists'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import {
   getYtDlpPlaybackSource,
@@ -454,7 +454,8 @@ const userPlaylistSortOrder = computed(() => store.getters.getUserPlaylistSortOr
 // Playlists without their own sort order follow the setting
 const sortOrder = computed(() => {
   if (!isUserPlaylistRequested.value) { return SORT_BY_VALUES.Custom }
-  return selectedUserPlaylist.value?.sortOrder ?? userPlaylistSortOrder.value
+  const playlistSortOrder = selectedUserPlaylist.value?.sortOrder
+  return isPlaylistSortOrder(playlistSortOrder) ? playlistSortOrder : userPlaylistSortOrder.value
 })
 
 const playlistId = computed(() => route.params.id)

@@ -9,13 +9,13 @@ import { strToU8, zipSync } from 'fflate'
 import { DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeHistory, mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote } from '../../src/renderer/helpers/sync-history-merge.js'
 import { createEmptySyncDocument, EncryptedSyncAdapter } from '../../src/renderer/helpers/sync-server-privacy.js'
 import { forEachSelectedTakeoutZipEntry, parseTakeoutPlaylistCsv } from '../../src/renderer/helpers/youtube-takeout-zip.js'
-import { SORT_BY_VALUES } from '../../src/renderer/helpers/playlists.js'
+import { isPlaylistSortOrder } from '../../src/renderer/helpers/playlists.js'
 import { historyToRemote as releasedHistoryToRemote, syncPlaylists as syncReleasedPlaylists } from '../helpers/released-sync-playlists.mjs'
 
 const source = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
 const context = vm.createContext({
   DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeSyncIds, syncVideoToRemote,
-  SORT_BY_VALUES,
+  isPlaylistSortOrder,
   generateRandomUniqueId: randomUUID,
   deepCopy: value => JSON.parse(JSON.stringify(value)),
   normalizePlaylistThumbnail: async value => {
@@ -179,10 +179,20 @@ test('playlist sort orders sync between devices and unknown values follow the de
   let secondSnapshot = await context.syncPlaylists(adapter, second)
   assert.equal(second.state.playlists.playlists[0].sortOrder, 'video_title_descending')
 
+  const syncUpdates = []
+  const dispatch = first.dispatch
+  first.dispatch = (action, payload) => {
+    if (action === 'updatePlaylistFromSync') syncUpdates.push(payload.keepLastUpdatedAt)
+    return dispatch(action, payload)
+  }
   second.state.playlists.playlists[0].sortOrder = 'custom'
   secondSnapshot = await context.syncPlaylists(adapter, second, secondSnapshot)
   firstSnapshot = await context.syncPlaylists(adapter, first, firstSnapshot)
   assert.equal(first.state.playlists.playlists[0].sortOrder, 'custom')
+  second.state.playlists.playlists[0].playlistName = 'Renamed'
+  secondSnapshot = await context.syncPlaylists(adapter, second, secondSnapshot)
+  firstSnapshot = await context.syncPlaylists(adapter, first, firstSnapshot)
+  assert.deepEqual(syncUpdates, [true, false], 'only a sort order change keeps the update time')
 
   await adapter.updatePlaylist('sorted', { sort_order: 'sorted_by_a_newer_client' })
   await context.syncPlaylists(adapter, first, firstSnapshot)
