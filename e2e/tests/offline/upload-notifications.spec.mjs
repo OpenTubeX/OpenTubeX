@@ -231,9 +231,15 @@ test.describe('in a short window', () => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await setWindowSize(app, page, { width: 1000, height: 380 })
     await goTo(page, 'subscribedchannels')
-    await page.locator('.channel', { hasText: 'Alpha Channel' }).getByRole('button', { name: 'Subscription settings', exact: true }).click()
+    const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
+    const bell = alpha.getByRole('button', { name: 'Notify about new uploads', exact: true })
+    // The popover fits on neither side of a bell in the middle of this window and
+    // would cover it. At the bottom, the popover opens above and leaves the bell clickable.
+    await bell.evaluate(element => element.scrollIntoView({ block: 'end' }))
+    await alpha.getByRole('button', { name: 'Subscription settings', exact: true }).click()
     const popover = page.locator('.profileDropdown')
     await expect(popover).toHaveClass(/profileDropdownPositioned/)
+    await expect(popover).toHaveClass(/profileDropdownOpensAbove/)
     const preferences = popover.locator('.feedTypePreferences')
     await expect(preferences).toHaveAttribute('data-overlayscrollbars-viewport')
     // The profile list keeps at least one row.
@@ -246,7 +252,7 @@ test.describe('in a short window', () => {
     expect(limitBox.y + limitBox.height).toBeLessThanOrEqual(preferencesBox.y + preferencesBox.height + 0.5)
 
     // The bell hides the notification group while the preferences stay scrolled to the bottom.
-    await page.locator('.channel', { hasText: 'Alpha Channel' }).getByRole('button', { name: 'Notify about new uploads', exact: true }).click()
+    await bell.click()
     await expect(popover.getByRole('group', { name: 'Notify about new uploads', exact: true })).toHaveCount(0)
     const scrollbar = preferences.locator(':scope > .os-scrollbar-vertical')
     await expect.poll(() => preferences.evaluate(element => (
