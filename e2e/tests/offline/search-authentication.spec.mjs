@@ -66,9 +66,11 @@ async function configureCookieSearch(app, mode = 'file', responseDelay = 300) {
   await writeFile(playlistResponse, JSON.stringify({}))
   await writeFile(executable, `#!${process.execPath}
 const fs = require('node:fs')
-// Renamed into place, as tests poll the log and could read a partial write
-fs.writeFileSync(${JSON.stringify(`${log}.tmp`)}, JSON.stringify(process.argv.slice(2)))
-fs.renameSync(${JSON.stringify(`${log}.tmp`)}, ${JSON.stringify(log)})
+// Renamed into place, as tests poll the log and could read a partial write.
+// Concurrent playlist lookups each need their own temporary file.
+const temporaryLog = ${JSON.stringify(log)} + '.' + process.pid + '.tmp'
+fs.writeFileSync(temporaryLog, JSON.stringify(process.argv.slice(2)))
+fs.renameSync(temporaryLog, ${JSON.stringify(log)})
 const response = process.argv.at(-1).includes('/playlist?') ? ${JSON.stringify(playlistResponse)} : ${JSON.stringify(response)}
 function sendResponse() {
   if (fs.existsSync(${JSON.stringify(pendingResponse)})) return setTimeout(sendResponse, 50)
