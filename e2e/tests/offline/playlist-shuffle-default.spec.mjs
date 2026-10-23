@@ -15,6 +15,14 @@ const videos = Array.from({ length: 6 }, (_, index) => ({
   type: 'video',
 }))
 
+const otherPlaylist = {
+  _id: 'in-order',
+  playlistName: 'Podcasts',
+  description: '',
+  protected: false,
+  videos: videos.map((video, index) => ({ ...video, videoId: `inorder000${index}`, playlistItemId: `in-order-item-${index}` })),
+}
+
 test.describe.configure({ timeout: 120_000 })
 
 test.use({
@@ -35,7 +43,7 @@ test.use({
       // Offline, only a local cover renders the clickable header thumbnail.
       customThumbnail: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGNoaGgAAAMEAYFL09IQAAAAAElFTkSuQmCC',
       videos,
-    }, { _id: 'watchLater', playlistName: 'Watch Later', videos: [] }],
+    }, otherPlaylist, { _id: 'watchLater', playlistName: 'Watch Later', videos: [] }],
   },
 })
 
@@ -139,5 +147,30 @@ test('a shuffle by default playlist opened outside its playlist page also starts
   await expect(page.locator('.watchVideoPlaylist .playlistItem')).toHaveCount(videos.length)
   await expect(page.locator('.watchVideoPlaylist').filter({ visible: true }).getByRole('button', { name: 'Shuffle Playlist' }))
     .toHaveAttribute('aria-pressed', 'true')
+  await watch.dispose()
+})
+
+test('a playlist default does not carry shuffle over to the next playlist', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const watch = await watchViewHandle(page)
+  const shuffle = page.locator('.watchVideoPlaylist').filter({ visible: true }).getByRole('button', { name: 'Shuffle Playlist' })
+  await watch.evaluate(async (vm, { id, video }) => {
+    await vm.$store.dispatch('updatePlaylist', { _id: id, shuffleByDefault: true })
+    await vm.tabRouter.push({ path: `/watch/${video.videoId}`, query: { playlistId: id, playlistType: 'user', playlistItemId: video.playlistItemId } })
+  }, { id: playlistId, video: videos[0] })
+  await expect(shuffle).toHaveAttribute('aria-pressed', 'true')
+
+  // The watch view keeps its playlist panel when the next playlist opens from its page.
+  await watch.evaluate(async (vm, playlist) => {
+    vm.$store.commit('setCachedPlaylist', {
+      tabId: vm.tabId ?? 'web',
+      value: { id: playlist._id, title: playlist.playlistName, channelName: '', channelId: '', totalVideoCount: playlist.videos.length, items: playlist.videos, continuationData: null },
+    })
+    const video = playlist.videos[0]
+    await vm.tabRouter.push({ path: `/watch/${video.videoId}`, query: { playlistId: playlist._id, playlistType: 'user', playlistItemId: video.playlistItemId } })
+  }, otherPlaylist)
+  await expect(page.locator('.watchVideoPlaylist .playlistTitle').filter({ visible: true })).toHaveText('Podcasts')
+  await expect(shuffle).toHaveAttribute('aria-pressed', 'false')
   await watch.dispose()
 })

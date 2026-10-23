@@ -669,6 +669,7 @@ watch(() => props.playlistId, () => {
   hasUnloadedPlaylistVideos.value = false
   resetUnavailableSkipChain()
   reversePlaylist.value = storedReversePlaylist.value
+  applyShuffleByDefault()
 
   // A reused watch view must also use the playlist cached by the page that opened it.
   const cachedPlaylist = store.getters.getCachedPlaylist(playlistCacheTabId)
@@ -695,6 +696,7 @@ onMounted(() => {
   const cachedPlaylist = store.getters.getCachedPlaylist(playlistCacheTabId)
 
   if (cachedPlaylist?.id === props.playlistId) {
+    applyShuffleByDefault()
     loadCachedPlaylistInformation(cachedPlaylist)
   } else {
     getPlaylistInfoWithDelay()
@@ -744,8 +746,18 @@ function getPlaylistInfoWithDelay() {
 }
 
 // Playlists set to shuffle by default start shuffled; the button still turns it off.
+// Shuffle the user turned on stays on across playlists, but a playlist's default
+// does not carry over to the next playlist.
+let shuffleFromDefault = false
+
 function applyShuffleByDefault() {
-  if (selectedUserPlaylist.value?.shuffleByDefault === true) shuffleEnabled.value = true
+  if (selectedUserPlaylist.value?.shuffleByDefault === true) {
+    shuffleEnabled.value = true
+    shuffleFromDefault = true
+  } else if (shuffleFromDefault) {
+    shuffleEnabled.value = false
+    shuffleFromDefault = false
+  }
 }
 
 function saveScrollState() {
@@ -784,6 +796,7 @@ function toggleLoop() {
 }
 
 function toggleShuffle() {
+  shuffleFromDefault = false
   if (shuffleEnabled.value) {
     shuffleEnabled.value = false
     showToast({ message: t('Shuffle is now disabled'), icon: ['fas', 'random'] })
@@ -1110,7 +1123,6 @@ async function loadCachedPlaylistInformation(cachedPlaylist) {
   const generation = playlistLoadGeneration
   getPlaylistInfoRun = true
   store.commit('setCachedPlaylist', { tabId: playlistCacheTabId, value: null })
-  applyShuffleByDefault()
 
   playlistTitle.value = cachedPlaylist.title
   playlistTotalVideoCount.value = cachedPlaylist.totalVideoCount
