@@ -179,12 +179,16 @@
         @enterpictureinpicture="handleEnterPictureInPicture"
         @leavepictureinpicture="handleLeavePictureInPicture"
       />
-      <!-- Keep the decoded poster and its resolution fallback through playback. -->
+      <!--
+        Keep the decoded poster and its resolution fallback through playback.
+        It also fills the inline player during PiP; the native poster attribute
+        can't, as Chromium may stretch it across the PiP surface (#362).
+      -->
       <div
         v-if="thumbnail"
         v-show="audioPlayerMode
           ? mobileMiniBar && (scrollMiniPlayerActive || scrollMiniPlayerDragStyle || scrollMiniPlayerAnimating)
-          : showPoster || showCountdownOverlay || showEndedScreen"
+          : showPoster || pictureInPictureActive || showCountdownOverlay || showEndedScreen"
         class="countdownPoster"
         :class="{ endedPoster: !audioPlayerMode && showEndedScreen }"
         aria-hidden="true"
