@@ -44,6 +44,13 @@ jobs:
       run: |
         set -euo pipefail
         sha="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .target_commitish)"
+
+        # A branch or tag name could resolve to a different commit than the release.
+        if [[ ! "$sha" =~ ^[0-9a-f]{40}$ ]]; then
+          echo "The release must target a full commit SHA, not '$sha'." >&2
+          exit 1
+        fi
+
         echo "sha=$sha" >> "$GITHUB_OUTPUT"
 
   build:
