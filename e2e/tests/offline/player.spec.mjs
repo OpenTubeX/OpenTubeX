@@ -1663,10 +1663,14 @@ for (const phone of [true, false]) {
           await touch('touchStart', start)
           await touch('touchMove', { ...start, y: start.y + (fullscreen ? 40 : -40) })
           await expect(player).toHaveClass(/mobileFullscreenSwiping/)
-          await expect.poll(async () => {
-            const [posterBox, videoBox] = await Promise.all([poster.boundingBox(), video.boundingBox()])
-            return Math.abs(posterBox.y - videoBox.y)
-          }, { timeout: 1000 }).toBeLessThan(1)
+          // Measure both in the same frame. The swipe moves them together, so
+          // the poster must not lag behind; a wall-clock poll limit would also
+          // fail a correct probe that a loaded machine answers slowly.
+          const offset = await player.evaluate((element, selector) => Math.abs(
+            element.querySelector(selector).getBoundingClientRect().top -
+              element.querySelector('video').getBoundingClientRect().top
+          ), audio ? '.musicAudioSurface' : '.countdownPoster')
+          expect(offset).toBeLessThan(1)
           const during = await poster.boundingBox()
           expect(fullscreen ? during.y - before.y : before.y - during.y).toBeGreaterThan(8)
           await touch('touchCancel')
