@@ -1496,6 +1496,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Повтор чату наживо ввімкнено.  Повідомлення чату з’являтимуться тут під час відтворення відео.
   Premiere started: Прем’єра триває. Почалася {timeAgo}
   Player:
+    Playing in Picture-in-Picture: Відтворюється в режимі «Картинка в картинці»
     Caption Timing:
       Adjust Timing: Налаштувати синхронізацію…
       Caption Timing: Синхронізація субтитрів

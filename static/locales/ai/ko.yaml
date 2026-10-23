@@ -1780,6 +1780,7 @@ Video:
     Show Original Details: 원본 정보 표시
     Show Modified Details: 수정된 정보 표시
   Player:
+    Playing in Picture-in-Picture: 화면 속 화면 모드에서 재생 중
     Caption Timing:
       Adjust Timing: 타이밍 조정…
       Caption Timing: 자막 타이밍

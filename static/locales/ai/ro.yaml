@@ -1494,6 +1494,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Reluarea chatului în direct este activată. Mesajele vor apărea aici pe măsură ce se redă videoclipul.
   Premiere started: Premiera este în curs. A început {timeAgo}
   Player:
+    Playing in Picture-in-Picture: Se redă în modul imagine în imagine
     Caption Timing:
       Adjust Timing: Ajustează sincronizarea…
       Caption Timing: Sincronizarea subtitrărilor

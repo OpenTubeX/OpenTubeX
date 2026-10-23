@@ -1528,6 +1528,7 @@ Video:
   Sponsor Block category:
     hook: Introduktion/hilsen
   Player:
+    Playing in Picture-in-Picture: Afspilles som billede-i-billede
     Caption Timing:
       Adjust Timing: Juster timing…
       Caption Timing: Underteksttiming

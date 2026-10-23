@@ -1474,6 +1474,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Repris av livechatten är aktiverad. Chattmeddelanden visas här medan videon spelas upp.
   Premiere started: Premiären pågår. Startade {timeAgo}
   Player:
+    Playing in Picture-in-Picture: Spelas upp i bild-i-bild
     Caption Timing:
       Adjust Timing: Justera timing…
       Caption Timing: Undertexttiming

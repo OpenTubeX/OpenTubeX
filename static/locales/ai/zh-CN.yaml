@@ -1459,6 +1459,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: 已启用实时聊天回放。视频播放时，聊天消息会显示在这里。
   Premiere started: 首映正在进行，开始时间：{timeAgo}
   Player:
+    Playing in Picture-in-Picture: 正在以画中画模式播放
     Caption Timing:
       Adjust Timing: 调整时间…
       Caption Timing: 字幕时间

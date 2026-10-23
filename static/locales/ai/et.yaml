@@ -1462,6 +1462,7 @@ Video:
   Sponsor Block category:
     hook: Sissejuhatus/tervitus
   Player:
+    Playing in Picture-in-Picture: Esitatakse pilt-pildis-režiimis
     Caption Timing:
       Adjust Timing: Muuda ajastust…
       Caption Timing: Subtiitrite ajastus

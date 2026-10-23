@@ -181,6 +181,7 @@ test('shows the poster overlay inline while in Picture-in-Picture', async ({ app
   await setFocused(app, page, true)
   const video = await openMockedVideo(page)
   const poster = page.locator(`${activeTab} .ftVideoPlayer .countdownPoster`)
+  const message = poster.locator('.pictureInPictureMessage')
 
   await expect(poster).toBeAttached()
   await expect(poster).toBeHidden()
@@ -188,9 +189,13 @@ test('shows the poster overlay inline while in Picture-in-Picture', async ({ app
   await video.evaluate(element => element.requestPictureInPicture())
   await expect.poll(() => pictureInPictureActive(page)).toBe(true)
   await expect(poster).toBeVisible()
+  // The overlay covers Chromium's own PiP message, so it shows a replacement.
+  await expect(message).toHaveText('Playing in Picture-in-Picture')
+  await expect(poster).toMatchAriaSnapshot('- text: Playing in Picture-in-Picture')
   await expect(video).not.toHaveAttribute('poster')
 
   await page.evaluate(() => document.exitPictureInPicture())
   await expect.poll(() => pictureInPictureActive(page)).toBe(false)
   await expect(poster).toBeHidden()
+  await expect(message).toHaveCount(0)
 })

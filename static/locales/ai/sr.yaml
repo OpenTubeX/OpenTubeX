@@ -1522,6 +1522,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Снимак ћаскања уживо је укључен. Поруке ће се приказивати овде током репродукције видео-снимка.
   Premiere started: Премијера је у току. Почела је {timeAgo}
   Player:
+    Playing in Picture-in-Picture: Репродукује се у режиму слика у слици
     Caption Timing:
       Adjust Timing: Подеси време…
       Caption Timing: Време титлова

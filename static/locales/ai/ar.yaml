@@ -1496,6 +1496,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: تم تمكين إعادة تشغيل الدردشة المباشرة.  ستظهر رسائل الدردشة هنا أثناء تشغيل الفيديو.
   Premiere started: العرض الأول قيد التقدم. بدأ {timeAgo}
   Player:
+    Playing in Picture-in-Picture: يتم التشغيل في وضع صورة داخل صورة
     Caption Timing:
       Adjust Timing: ضبط التوقيت…
       Caption Timing: توقيت الترجمة

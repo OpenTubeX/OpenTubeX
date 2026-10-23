@@ -1504,6 +1504,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: A repetição da conversa em direto está ativada. As mensagens aparecem aqui à medida que o vídeo é reproduzido.
   Premiere started: Estreia em curso. Começou {timeAgo}
   Player:
+    Playing in Picture-in-Picture: A reproduzir em imagem na imagem
     Caption Timing:
       Adjust Timing: Ajustar sincronização…
       Caption Timing: Sincronização das legendas
