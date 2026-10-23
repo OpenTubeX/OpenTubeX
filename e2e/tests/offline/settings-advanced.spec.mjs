@@ -175,6 +175,12 @@ test.describe('settings', () => {
       const tools = advanced.locator('.externalSoftwareTool')
       for (const width of [1000, 400]) {
         await page.setViewportSize({ width, height: 800 })
+        if (width < 760) {
+          // The window maximizes from its resize listener on a later frame, and its
+          // content observer follows. Measuring earlier can straddle the switch.
+          await expect(page.locator('.settingsWindow')).toHaveClass(/\bmaximized\b/)
+          await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+        }
         const [ytDlpBox, ffmpegBox] = await Promise.all([
           tools.nth(0).boundingBox(),
           tools.nth(1).boundingBox()
