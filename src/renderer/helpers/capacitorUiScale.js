@@ -4,7 +4,9 @@ export const CAPACITOR_UI_SCALE_MAX = 150
 /**
  * Resize the layout viewport along with its visual scale, so responsive layouts
  * and native video bounds use the same CSS coordinates. CSS zoom alone leaves
- * media queries and window.innerWidth at the unscaled size.
+ * media queries and window.innerWidth at the unscaled size. Disabling user
+ * scaling pins the page to that scale, since some Android WebViews, such as
+ * Vanadium, still pinch-zoom the page while native WebView zoom is disabled.
  */
 export function createCapacitorUiScale(window, document) {
   const viewport = document.querySelector('meta[name="viewport"]')
@@ -33,7 +35,7 @@ export function createCapacitorUiScale(window, document) {
     if (baseWidth <= 0) return
     const width = Math.max(1, Math.round(baseWidth * 100 / scale))
     const zoom = baseWidth / width
-    const content = `width=${width}, initial-scale=${zoom}, viewport-fit=cover`
+    const content = `width=${width}, initial-scale=${zoom}, user-scalable=no, viewport-fit=cover`
     if (content === lastContent) return
     lastContent = content
     document.documentElement.style.setProperty('--capacitor-ui-scale', String(zoom))
