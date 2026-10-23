@@ -1,0 +1,54 @@
+name: Weblate AI translation cleanup
+
+# Weblate force-pushes weblate-translations from development, dropping earlier
+# cleanup commits, so this reapplies the cleanup after every Weblate push.
+on:
+  pull_request:
+    branches: [ development ]
+    types: [ opened, reopened, synchronize ]
+
+cache-mode: none
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  cleanup:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'weblate-translations'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+        # Commits pushed with GITHUB_TOKEN do not trigger the required checks.
+        token: ${{ secrets.PUSH_TOKEN }}
+
+    - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      with:
+        node-version: 24.x
+        package-manager-cache: false
+
+    - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      with:
+        version: latest-12
+        cache: false
+
+    - run: pnpm install --frozen-lockfile --ignore-scripts
+
+    - run: node _scripts/aiTranslations.mjs cleanup --all --write
+
+    - name: Push cleanup commit
+      run: |
+        if git diff --quiet -- static/locales/ai; then
+          exit 0
+        fi
+        git config user.name 'github-actions[bot]'
+        git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+        git commit -m 'chore(i18n): drop AI entries covered by human translations' -- static/locales/ai
+        # Fails without overwriting if Weblate pushed meanwhile; the newer run retries.
+        git push origin "HEAD:refs/heads/$GITHUB_HEAD_REF"
