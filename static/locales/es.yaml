@@ -1165,3 +1165,16 @@ Screenshot Clipboard Success: Captura de pantalla guardada en el portapapeles
 Screenshot Clipboard Error: Error al copiar la captura de pantalla al portapapeles
 SponsorBlock Enabled on Channel: Se activó SponsorBlock en {channel}
 SponsorBlock Disabled on Channel: Se desactivó SponsorBlock en {channel}
+Color Picker:
+  Opacity: Opacidad
+  Backdrop Blur: Desenfoque del fondo
+  Hex Color: Color hexadecimal
+  Apply Color: Aplicar
+  Reset Color: Reiniciar
+  Copy Color: Copiar
+  Copy From Another Color: Copiar de otro color
+Maximize: Maximizar
+Restore: Restaurar
+Close Confirmation:
+  Title: ¿Salir de OpenTubeX?
+  Quit: Salir
