@@ -425,6 +425,21 @@ test.describe('watch sidebar panels without recommendations', () => {
 
     await expect(layout).toHaveClass(/noSidebar/)
   })
+
+  for (const button of ['Show transcript', 'Open Chapters']) {
+    test(`opens the panel from ${button} beside the video like every other panel`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page, { captionCueSettings: 'align:center' })
+      await openMockedVideo(page)
+
+      const layout = page.locator(`${activeTab} .videoLayout`)
+      await expect(layout).toHaveClass(/noSidebar/)
+
+      await page.locator(`${activeTab} .ftVideoPlayer`).hover()
+      await page.getByRole('button', { name: button, exact: true }).first().click()
+      await expect(layout).not.toHaveClass(/noSidebar/)
+      await expect(layout).not.toHaveClass(/useTheatreMode/)
+    })
+  }
 })
 
 test('chapters stay centered through layout changes until manually scrolled', { tag: '@scale' }, async ({ app, page }) => {

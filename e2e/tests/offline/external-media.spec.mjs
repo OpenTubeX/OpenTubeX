@@ -481,6 +481,33 @@ test('external media honors the hide sidebar on watch pages setting', { tag: '@s
 })
 
 for (const withChat of [false, true]) {
+  test(`the theatre default applies to external media only when it loads${withChat ? ' with chat' : ' without a sidebar'}`, async ({ app, page }) => {
+    test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+    await setWindowSize(app, page, { width: 1800, height: 1000 })
+    await page.evaluate(() => window.$store.dispatch('updateDefaultViewingMode', 'theatre'))
+    const mediaUrl = withChat ? 'https://www.twitch.tv/videos/123456789' : 'https://vimeo.com/123456789'
+    await prepareTwitchYtDlp(app, page, mediaUrl, false, 'A recording with chapters', [
+      { start_time: 0, end_time: 10, title: 'Introduction' },
+      { start_time: 10, end_time: 30, title: 'Main segment' }
+    ])
+    await page.locator(sel.searchInput).fill(mediaUrl)
+    await page.locator(sel.searchInput).press('Enter')
+    await waitForPlayback(page)
+    const externalMedia = page.locator(`${activeTab} .externalMedia`)
+    const player = externalMedia.locator('.externalMediaPlayer')
+    await player.hover()
+    await player.locator('.shaka-controls-button-panel .ft-chapters-button').click()
+    await expect(externalMedia.locator('.externalMediaSidebar .externalMediaChapters')).toBeVisible()
+
+    // Like on the watch page, opening a panel keeps the current layout
+    const layout = externalMedia.locator('.externalMediaLayout')
+    if (withChat) {
+      await expect(layout).toHaveClass(/useTheatreMode/)
+    } else {
+      await expect(layout).not.toHaveClass(/useTheatreMode/)
+    }
+  })
+
   test(`external chapters use the watch sidebar${withChat ? ' alongside chat' : ' without chat'}`, { tag: '@scale' }, async ({ app, page, attachScreenshot, uiScale }, testInfo) => {
     test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
     await setWindowSize(app, page, { width: 1800, height: 1000 })

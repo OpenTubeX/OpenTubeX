@@ -2023,17 +2023,10 @@ export default defineComponent({
       if (this.phonePanelsEnabled) {
         this.mobilePanel = open ? 'chapters' : (this.mobilePanel === 'chapters' ? null : this.mobilePanel)
       }
-      const shouldUseDefaultTheatreMode = open && !this.theatrePossible &&
-        this.defaultViewingMode === 'theatre'
-
       if (!open && this.showSidebarChapters) {
         this.sidebarPanelLeaving = true
       }
       this.showSidebarChapters = open
-
-      if (shouldUseDefaultTheatreMode) {
-        this.useTheatreMode = true
-      }
     },
     handleChapterThumbnailsChange(thumbnails) {
       this.videoChapterThumbnails = thumbnails

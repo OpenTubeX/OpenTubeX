@@ -449,7 +449,6 @@ const hasSidebar = computed(() => Boolean(chatAvailable.value && chatOpen.value)
 const theatreTogglePossible = computed(() => windowWidth.value > 1350 && hasSidebar.value)
 
 function handleChaptersOverlayChange(open) {
-  if (open && !hasSidebar.value && store.getters.getDefaultViewingMode === 'theatre') useTheatreMode.value = true
   showChapters.value = open
 }
 
@@ -876,7 +875,12 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
     if (generation !== loadGeneration) return
     errorMessage.value = error.message
   } finally {
-    if (generation === loadGeneration) loading.value = false
+    if (generation === loadGeneration) {
+      loading.value = false
+      // Like on the watch page, the theatre default only applies to media that
+      // loads with a sidebar, so panels opened later appear beside the video.
+      useTheatreMode.value &&= theatreTogglePossible.value
+    }
   }
 }
 
