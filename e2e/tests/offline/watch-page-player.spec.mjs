@@ -400,7 +400,7 @@ test('right control pill fades with its icons in both directions', async ({ app,
   }
 })
 
-test('iOS inline player fits the picture within its height limit', async ({ app, page }) => {
+test('iOS inline player fits the picture within its height limit', { tag: '@scale' }, async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
   await video.evaluate(element => element.pause())
@@ -408,26 +408,22 @@ test('iOS inline player fits the picture within its height limit', async ({ app,
   await page.locator('.app').evaluate(element => element.classList.add('capacitorTabs'))
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
 
-  for (const zoom of [1, 0.95, 1.25]) {
-    await page.evaluate(value => window.ftElectron.setZoomFactor(value), zoom)
-    for (const size of [{ width: 1080, height: 810 }, { width: 810, height: 1080 }, { width: 450, height: 850 }]) {
-      await setWindowSize(app, page, size)
-      await expect.poll(() => video.evaluate(element => {
-        const bounds = element.getBoundingClientRect()
-        const frame = element.parentElement.getBoundingClientRect()
-        const ratio = element.videoWidth / element.videoHeight
-        const pictureWidth = Math.min(bounds.width, bounds.height * ratio)
-        return {
-          frameFitsPicture: Math.abs(frame.width - pictureWidth) <= 1,
-          contained: frame.left >= -1 && frame.right <= innerWidth + 1,
-          withinHeightLimit: frame.height <= parseFloat(getComputedStyle(element.parentElement).maxBlockSize) + 1,
-          uncropped: getComputedStyle(element).objectFit === 'contain'
-        }
-      })).toEqual({ frameFitsPicture: true, contained: true, withinHeightLimit: true, uncropped: true })
-    }
+  for (const size of [{ width: 1080, height: 810 }, { width: 810, height: 1080 }, { width: 450, height: 850 }]) {
+    await setWindowSize(app, page, size)
+    await expect.poll(() => video.evaluate(element => {
+      const bounds = element.getBoundingClientRect()
+      const frame = element.parentElement.getBoundingClientRect()
+      const ratio = element.videoWidth / element.videoHeight
+      const pictureWidth = Math.min(bounds.width, bounds.height * ratio)
+      return {
+        frameFitsPicture: Math.abs(frame.width - pictureWidth) <= 1,
+        contained: frame.left >= -1 && frame.right <= innerWidth + 1,
+        withinHeightLimit: frame.height <= parseFloat(getComputedStyle(element.parentElement).maxBlockSize) + 1,
+        uncropped: getComputedStyle(element).objectFit === 'contain'
+      }
+    })).toEqual({ frameFitsPicture: true, contained: true, withinHeightLimit: true, uncropped: true })
   }
 
-  await page.evaluate(() => window.ftElectron.setZoomFactor(1))
   await setWindowSize(app, page, { width: 1080, height: 810 })
   for (const [width, height] of [[210, 90], [160, 90]]) {
     await video.evaluate(async (element, { width, height }) => {
