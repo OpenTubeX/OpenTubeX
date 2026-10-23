@@ -1224,7 +1224,7 @@ function getThumbnailSwipeIcon(action) {
     markAsFullySeen: ['fas', 'flag-checkered'],
     quickBookmark: ['fas', 'bookmark'],
     addToQueue: ['fas', 'add-to-queue'],
-    playNext: ['fas', 'step-forward'],
+    playNext: ['fas', 'play-next'],
     copyYoutube: ['fas', 'link'],
     share: ['fas', 'share-alt'],
     download: ['fas', 'download'],

@@ -1,7 +1,7 @@
 {
   "add-to-queue": {
-    "ri": "play-list-2-line",
-    "material": "order-play-outline-rounded"
+    "ri": "order-play-last-line",
+    "material": "low-priority-rounded"
   },
   "angle-down": {
     "ri": "arrow-down-s-line",
@@ -473,6 +473,10 @@
   "play": {
     "ri": "play-line",
     "material": "play-arrow-rounded"
+  },
+  "play-next": {
+    "ri": "order-play-line",
+    "material": "queue-next-rounded"
   },
   "plus": {
     "ri": "add-line",

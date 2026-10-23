@@ -1062,7 +1062,7 @@ const videoMenuOptions = computed(() => {
     {
       label: t('Video.Play Next'),
       value: 'playNext',
-      icon: ['fas', 'step-forward']
+      icon: ['fas', 'play-next']
     },
     {
       label: t('Video.Add to Queue'),

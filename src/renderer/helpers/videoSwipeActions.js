@@ -11,7 +11,7 @@ export function queueSwipeAction(actionId, videos, queue, { t, commit, add }) {
   const remove = actionId === 'playNext' ? matches(queue[0] ?? {}) : queued.length > 0
   return {
     label: remove ? t('Video.Remove from Queue', { title: videos[0].title }) : actionId === 'playNext' ? t('Video.Play Next') : t('Video.Add to Queue'),
-    icon: ['fas', remove ? 'trash' : actionId === 'playNext' ? 'step-forward' : 'add-to-queue'],
+    icon: ['fas', remove ? 'trash' : actionId === 'playNext' ? 'play-next' : 'add-to-queue'],
     run: () => {
       if (remove) {
         for (const item of queued) commit('removeVideoFromWatchQueue', item.queueItemId)
