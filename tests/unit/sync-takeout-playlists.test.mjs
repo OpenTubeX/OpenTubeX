@@ -9,11 +9,13 @@ import { strToU8, zipSync } from 'fflate'
 import { DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeHistory, mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote } from '../../src/renderer/helpers/sync-history-merge.js'
 import { createEmptySyncDocument, EncryptedSyncAdapter } from '../../src/renderer/helpers/sync-server-privacy.js'
 import { forEachSelectedTakeoutZipEntry, parseTakeoutPlaylistCsv } from '../../src/renderer/helpers/youtube-takeout-zip.js'
+import { SORT_BY_VALUES } from '../../src/renderer/helpers/playlists.js'
 import { historyToRemote as releasedHistoryToRemote, syncPlaylists as syncReleasedPlaylists } from '../helpers/released-sync-playlists.mjs'
 
 const source = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
 const context = vm.createContext({
   DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeSyncIds, syncVideoToRemote,
+  SORT_BY_VALUES,
   generateRandomUniqueId: randomUUID,
   deepCopy: value => JSON.parse(JSON.stringify(value)),
   normalizePlaylistThumbnail: async value => {
@@ -44,8 +46,8 @@ function createStore(playlists = []) {
 }
 
 test('concurrent edits merge each playlist metadata field independently', async () => {
-  const original = { playlistName: 'Original title', description: 'Original description', customThumbnail: 'data:image/webp;base64,b3JpZ2luYWw=' }
-  const edits = { playlistName: 'Edited title', description: 'Edited description', customThumbnail: '' }
+  const original = { playlistName: 'Original title', description: 'Original description', customThumbnail: 'data:image/webp;base64,b3JpZ2luYWw=', sortOrder: 'video_title_ascending' }
+  const edits = { playlistName: 'Edited title', description: 'Edited description', customThumbnail: '', sortOrder: 'custom' }
   for (const localField of Object.keys(edits)) {
     for (const remoteField of Object.keys(edits)) {
       const first = createStore([{ _id: 'concurrent', ...original, videos: [] }])
@@ -152,6 +154,49 @@ test('released clients preserve covers through repeated syncs and title edits', 
   upgraded.state.playlists.playlists[0].customThumbnail = ''
   await context.syncPlaylists(adapter, upgraded, upgradedSnapshot)
   assert.equal((await adapter.getPlaylist('mixed')).playlist.custom_thumbnail, null)
+})
+
+test('released clients preserve sort orders through repeated syncs and title edits', async () => {
+  const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
+  const upgraded = createStore([{ _id: 'mixed', playlistName: 'Mixed versions', sortOrder: 'author_ascending', videos: [] }])
+  let upgradedSnapshot = await context.syncPlaylists(adapter, upgraded)
+  const released = createStore()
+  let releasedSnapshot = await syncReleasedPlaylists(adapter, released)
+  released.state.playlists.playlists[0].playlistName = 'Renamed by released client'
+  releasedSnapshot = await syncReleasedPlaylists(adapter, released, releasedSnapshot)
+  await syncReleasedPlaylists(adapter, released, releasedSnapshot)
+  assert.equal((await adapter.getPlaylist('mixed')).playlist.sort_order, 'author_ascending')
+  upgradedSnapshot = await context.syncPlaylists(adapter, upgraded, upgradedSnapshot)
+  assert.equal(upgraded.state.playlists.playlists[0].sortOrder, 'author_ascending')
+  assert.equal(upgraded.state.playlists.playlists[0].playlistName, 'Renamed by released client')
+})
+
+test('playlist sort orders sync between devices and unknown values follow the default', async () => {
+  const first = createStore([{ _id: 'sorted', playlistName: 'Sorted', sortOrder: 'video_title_descending', videos: [] }])
+  const second = createStore()
+  const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
+  let firstSnapshot = await context.syncPlaylists(adapter, first)
+  let secondSnapshot = await context.syncPlaylists(adapter, second)
+  assert.equal(second.state.playlists.playlists[0].sortOrder, 'video_title_descending')
+
+  second.state.playlists.playlists[0].sortOrder = 'custom'
+  secondSnapshot = await context.syncPlaylists(adapter, second, secondSnapshot)
+  firstSnapshot = await context.syncPlaylists(adapter, first, firstSnapshot)
+  assert.equal(first.state.playlists.playlists[0].sortOrder, 'custom')
+
+  await adapter.updatePlaylist('sorted', { sort_order: 'sorted_by_a_newer_client' })
+  await context.syncPlaylists(adapter, first, firstSnapshot)
+  assert.equal(first.state.playlists.playlists[0].sortOrder, null)
+
+  const legacy = new EncryptedSyncAdapter(createEmptySyncDocument())
+  legacy.supportsPlaylistSortOrder = undefined
+  const local = createStore([{ _id: 'legacy', playlistName: 'Legacy server', sortOrder: 'author_ascending', videos: [] }])
+  const previous = await context.syncPlaylists(legacy, local)
+  assert.ok(!Object.hasOwn((await legacy.getPlaylist('legacy')).playlist, 'sort_order'))
+  await legacy.updatePlaylist('legacy', { description: 'Remote description' })
+  await context.syncPlaylists(legacy, local, previous)
+  assert.equal(local.state.playlists.playlists[0].sortOrder, 'author_ascending')
+  assert.equal(local.state.playlists.playlists[0].description, 'Remote description')
 })
 
 test('servers without thumbnail support keep local covers out of synced metadata', async () => {

@@ -107,6 +107,7 @@ export class EncryptedSyncAdapter {
   async getSubscriptions() { return structuredClone(this.document.subscriptions) }
   async supportsBulkSync() { return true }
   async supportsPlaylistThumbnails() { return true }
+  async supportsPlaylistSortOrder() { return true }
   async subscribe(channel) { this.document.subscriptions.push(structuredClone(channel)) }
   async subscribeBulk(channels) { this.document.subscriptions.push(...structuredClone(channels)) }
   async unsubscribe(id) {
