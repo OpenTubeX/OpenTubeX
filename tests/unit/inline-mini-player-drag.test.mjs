@@ -456,7 +456,7 @@ test('Watch return resets browsing scroll before revealing the Watch route', asy
   const tab = { historyIndex: 0, history: [browsingEntry] }
   const isWatchRoute = { value: false }
   await vm.runInNewContext(`${finishSource}\nfinishMinimizePreview(true)`, {
-    previewRestoring: true,
+    previewRestoring: { value: true },
     previewScroll: { left: 0, top: 420 },
     disposed: false,
     navigation: { push: async () => {
@@ -487,7 +487,7 @@ test('failed Watch return keeps the browsing scroll position', async () => {
     scrollTo({ top }) { this.scrollY = top }
   }
   await assert.rejects(vm.runInNewContext(`${finishSource}\nfinishMinimizePreview(true)`, {
-    previewRestoring: true,
+    previewRestoring: { value: true },
     previewScroll: { left: 0, top: 420 },
     disposed: false,
     navigation: { push: async () => { throw new Error('Navigation failed') } },
@@ -509,6 +509,7 @@ test('mobile Watch return preview stays at the final viewport position while bro
   } }
   const started = vm.runInNewContext(`${beginSource}\nbeginRestorePreview()`, {
     previewActive: { value: false },
+    previewRestoring: { value: false },
     detached: { value: true },
     previewHost,
     previewStyle,
@@ -535,7 +536,7 @@ for (const right of [false, true]) {
         closest: () => ({ getBoundingClientRect: () => bounds })
       } }
       const started = vm.runInNewContext(`${beginSource}\nbeginRestorePreview()`, {
-        previewActive: { value: false }, detached: { value: true }, previewHost, previewStyle,
+        previewActive: { value: false }, previewRestoring: { value: false }, detached: { value: true }, previewHost, previewStyle,
         watchRoot: { value: { style: {}, firstElementChild: { style: {} } } },
         store: { getters: { getHideSideBarOnWatchPages: hiddenOnWatch } },
         updatePreviewPosition() {},
