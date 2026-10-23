@@ -67,6 +67,91 @@ test('rejects a SABR segment shorter than its declared content length', async ()
   transport.cleanup()
 })
 
+test('logs each truncated SABR attempt with the bytes that arrived', async () => {
+  const warnings = []
+  const { createSabrTransport } = load(async () => {
+    const buffer = new CompositeBuffer([])
+    const writer = new UmpWriter(buffer)
+    writer.write(protos.UMPPartId.MEDIA_HEADER, protos.MediaHeader.encode({
+      headerId: 1, formatId: audioFormatId, sequenceNumber: 1, contentLength: 3,
+    }).finish())
+    writer.write(protos.UMPPartId.MEDIA, Uint8Array.of(1, 1, 2))
+    return new Response(utils.concatenateChunks(buffer.chunks))
+  }, { console: { ...console, warn: message => warnings.push(message) } })
+  const transport = createSabrTransport(sabrData, () => context)
+  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+  for (let attempt = 0; attempt < 2; attempt++) {
+    await assert.rejects(transport.request(uri, request(uri), 1).promise,
+      error => error.code === ShakaError.Code.HTTP_ERROR)
+  }
+  assert.equal(warnings.length, 2)
+  for (const warning of warnings) {
+    assert.match(warning, /^SABR request sabr1:audio\?formatId=140-123-&sq=1 failed: response ended before MEDIA_END \(HTTP 200, received 2 of 3 media bytes, after \d+ ms\)$/)
+  }
+  transport.cleanup()
+})
+
+test('a reload request logs concurrent failures but not its own abort', async () => {
+  const warnings = []
+  let releaseTruncated
+  const { createSabrTransport } = load(async url => {
+    const buffer = new CompositeBuffer([])
+    const writer = new UmpWriter(buffer)
+    if (new URL(url).searchParams.get('rn') === '0') {
+      await new Promise(resolve => { releaseTruncated = resolve })
+      writer.write(protos.UMPPartId.MEDIA_HEADER, protos.MediaHeader.encode({
+        headerId: 1, formatId: audioFormatId, sequenceNumber: 1, contentLength: 3,
+      }).finish())
+      writer.write(protos.UMPPartId.MEDIA, Uint8Array.of(1, 1))
+    } else {
+      writer.write(protos.UMPPartId.RELOAD_PLAYER_RESPONSE, protos.ReloadPlaybackContext.encode({ reloadPlaybackParams: { token: 'x' } }).finish())
+    }
+    return new Response(utils.concatenateChunks(buffer.chunks))
+  }, { console: { ...console, warn: message => warnings.push(message) } })
+  const transport = createSabrTransport(sabrData, () => context)
+  let reloads = 0
+  transport.onReloadOnce(() => reloads++)
+  const truncatedUri = 'sabr1:audio?formatId=140-123-&sq=1'
+  const truncated = transport.request(truncatedUri, request(truncatedUri), 1).promise
+  const reloadUri = 'sabr1:audio?formatId=140-123-&sq=2'
+  await assert.rejects(transport.request(reloadUri, request(reloadUri), 1).promise)
+  assert.equal(reloads, 1)
+  const failures = () => warnings.filter(warning => warning.startsWith('SABR request '))
+  assert.deepEqual(failures(), [], 'the reloading request must not report its own abort')
+  releaseTruncated()
+  await assert.rejects(truncated, error => error.code === ShakaError.Code.HTTP_ERROR)
+  assert.equal(failures().length, 1)
+  assert.match(failures()[0], /^SABR request sabr1:audio\?formatId=140-123-&sq=1 failed: response ended before MEDIA_END/)
+  transport.cleanup()
+})
+
+test('a request timing out after another requested a reload is still logged', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 0 })
+  const warnings = []
+  const { createSabrTransport } = load(async (url, init) => {
+    if (new URL(url).searchParams.get('rn') === '0') {
+      return new Promise((_resolve, reject) => {
+        init.signal.addEventListener('abort', () => reject(new Error('aborted')))
+      })
+    }
+    const buffer = new CompositeBuffer([])
+    new UmpWriter(buffer).write(protos.UMPPartId.RELOAD_PLAYER_RESPONSE,
+      protos.ReloadPlaybackContext.encode({ reloadPlaybackParams: { token: 'x' } }).finish())
+    return new Response(utils.concatenateChunks(buffer.chunks))
+  }, { Date, console: { ...console, warn: message => warnings.push(message) } })
+  const transport = createSabrTransport(sabrData, () => context)
+  const stalledUri = 'sabr1:audio?formatId=140-123-&sq=1'
+  const stalled = transport.request(stalledUri, request(stalledUri), 1).promise
+  const reloadUri = 'sabr1:audio?formatId=140-123-&sq=2'
+  await assert.rejects(transport.request(reloadUri, request(reloadUri), 1).promise)
+  t.mock.timers.tick(1000)
+  await assert.rejects(stalled)
+  assert.deepEqual(warnings.filter(warning => warning.startsWith('SABR request ')), [
+    'SABR request sabr1:audio?formatId=140-123-&sq=1 failed: timed out (received 0 media bytes, after 1000 ms)',
+  ])
+  transport.cleanup()
+})
+
 test('rejects media bytes when the SABR header declares zero content length', async () => {
   const { createSabrTransport } = load(async () => response([1], false, audioFormatId, 0))
   const transport = createSabrTransport(sabrData, () => context)

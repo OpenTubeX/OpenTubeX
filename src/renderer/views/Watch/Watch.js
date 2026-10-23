@@ -1354,6 +1354,7 @@ export default defineComponent({
     },
     errorMessage(error) {
       if (error) {
+        console.error(`Showing error for ${this.videoId}: ${error}`)
         if (process.env.IS_ELECTRON) {
           window.ftElectron?.tabs?.setPlaybackState('failed', this.tabId)
         }
@@ -4777,6 +4778,7 @@ export default defineComponent({
           this.sabrErrorRecoveryPlayedSeconds += elapsed
 
           if (this.sabrErrorRecoveryPlayedSeconds >= SABR_ERROR_RECOVERY_SETTLE_SECONDS) {
+            console.warn(`SABR stream for ${this.videoId} settled after playing ${SABR_ERROR_RECOVERY_SETTLE_SECONDS}s since its last reload`)
             this.sabrErrorRecoveryAttempts = 0
             this.sabrErrorRecoveryLastSeconds = null
             this.sabrErrorRecoveryPlayedSeconds = 0
@@ -7057,7 +7059,15 @@ export default defineComponent({
     },
 
     async reloadSabrStream(payload, toastMessage) {
-      if (!this.canReloadSabrStream()) { return false }
+      if (!this.canReloadSabrStream()) {
+        if (this.isSabrVideoStream() && !this.isLoading) {
+          console.warn(
+            `Not reloading the SABR stream for ${this.videoId} after ${this.sabrErrorRecoveryAttempts} reloads ` +
+            `since playback last settled and ${this.sabrErrorRecoveriesForCurrentVideo} for this video`
+          )
+        }
+        return false
+      }
 
       // Both critical Shaka errors and SABR's own reload policy mean the
       // current playback session is no longer reusable. Keep them on the same
@@ -7067,6 +7077,12 @@ export default defineComponent({
       this.sabrErrorRecoveriesForCurrentVideo++
       this.sabrErrorRecoveryLastSeconds = this.getTimestamp()
       this.sabrErrorRecoveryPlayedSeconds = 0
+      console.warn(
+        `${toastMessage} for ${this.videoId} at ${this.sabrErrorRecoveryLastSeconds}s and ` +
+        `${payload?.playbackRate ?? this.currentPlaybackRate}x speed. Reload ${this.sabrErrorRecoveryAttempts} of ` +
+        `${MAX_SABR_ERROR_RECOVERIES} since playback last settled, ${this.sabrErrorRecoveriesForCurrentVideo} of ` +
+        `${MAX_SABR_ERROR_RECOVERIES_PER_VIDEO} for this video`
+      )
       try {
         await this.performSabrReload(payload, toastMessage)
       } catch (error) {

@@ -12965,6 +12965,8 @@ export default defineComponent({
         mediaElement.addEventListener('loadedmetadata', restoreNativeStart, { once: true })
       }
       loadingPlayer.addEventListener('canupdatestarttime', prepareStartTime, { once: true })
+      // Diagnostic reports have no other record of which stream each load used
+      console.warn(`Loading video ${props.videoId} from ${props.playbackEngine} extraction: ${props.format} (${mimeType}) at ${Math.round(startTime ?? 0)}s`)
       try {
         await loadingPlayer.load(url, startTime, mimeType)
       } finally {

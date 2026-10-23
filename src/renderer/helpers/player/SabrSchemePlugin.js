@@ -58,6 +58,7 @@ const ShakaError = shaka.util.Error
  * @property {number} cumulativeBackOffTimeMs
  * @property {number} cumulativeBackOffRequested
  * @property {number} cumulativeRetryDueToNextRequestPolicy
+ * @property {number} startedAtMs
  */
 /**
  * @typedef SabrStreamState
@@ -217,6 +218,30 @@ function createRecoverableNetworkError(code, ...args) {
 }
 
 /**
+ * Shaka retries a failed segment without reporting the attempts, so diagnostic
+ * reports would only show the final error. Log each attempt with how much of
+ * the segment arrived and how long it took.
+ * @param {OperationInputs} operationInputs
+ * @param {CurrentState} currentState
+ * @param {string} reason
+ * @param {{ status?: number, receivedBytes?: number, expectedBytes?: number }} details
+ */
+function warnSabrRequestFailure(operationInputs, currentState, reason, details = {}) {
+  // A request that requests a reload aborts itself, which is not a failure
+  if (currentState.abortStatus.playerReloadRequested) return
+
+  const facts = []
+  if (details.status !== undefined) facts.push(`HTTP ${details.status}`)
+  if (details.receivedBytes !== undefined) {
+    facts.push(details.expectedBytes === undefined
+      ? `received ${details.receivedBytes} media bytes`
+      : `received ${details.receivedBytes} of ${details.expectedBytes} media bytes`)
+  }
+  facts.push(`after ${Date.now() - currentState.startedAtMs} ms`)
+  console.warn(`SABR request ${operationInputs.uri} failed: ${reason} (${facts.join(', ')})`)
+}
+
+/**
  * @param {SabrStreamState} sabrStreamState
  */
 function prepareSabrContexts(sabrStreamState) {
@@ -299,6 +324,11 @@ async function doRequest(
 
   let invalidPoToken = false
   let error
+  const warnFailure = (reason) => warnSabrRequestFailure(operationInputs, currentState, reason, {
+    status: response?.status,
+    receivedBytes: receivedMediaLength,
+    expectedBytes: expectedMediaLength,
+  })
 
   if (currentState.sabrStreamState.playerReloadRequested) {
     // Multiple requests might be issued at the same time, other requests should abort themselves once reload requested
@@ -355,11 +385,14 @@ async function doRequest(
           `Backoffs: ${currentState.cumulativeBackOffRequested} (${currentState.cumulativeBackOffTimeMs} ms)\n` +
           `Next request policy retries: ${currentState.cumulativeRetryDueToNextRequestPolicy}`
         )
+        currentState.abortStatus.playerReloadRequested = true
         currentState.abortController.abort()
         currentState.eventEmitter.emit('reload')
       }
     }
 
+    // Redirects and retry policies send a new request; time each one separately
+    currentState.startedAtMs = Date.now()
     const sabrURL = new URL(currentState.sabrStreamState.sabrUrl)
     sabrURL.searchParams.set('rn', String(currentState.sabrStreamState.requestNumber++))
     if (process.env.IS_CAPACITOR) {
@@ -540,6 +573,7 @@ async function doRequest(
             currentState.sabrStreamState.playerReloadRequested = true
             if (!currentState.abortController.signal.aborted) {
               console.warn('Reloading the SABR stream because YouTube requested it')
+              currentState.abortStatus.playerReloadRequested = true
               currentState.abortController.abort()
               currentState.eventEmitter.emit('reload')
             }
@@ -565,8 +599,10 @@ async function doRequest(
     if (currentState.abortStatus.cancelled) {
       throw createRecoverableNetworkError(ShakaError.Code.OPERATION_ABORTED, operationInputs.uri, operationInputs.requestType)
     } else if (currentState.abortStatus.timedOut) {
+      warnFailure('timed out')
       throw createRecoverableNetworkError(ShakaError.Code.TIMEOUT, operationInputs.uri, operationInputs.requestType)
     } else if (!currentState.abortStatus.finished) {
+      warnFailure(`connection error: ${error?.message ?? error}`)
       throw createRecoverableNetworkError(ShakaError.Code.HTTP_ERROR, operationInputs.uri, error, operationInputs.requestType)
     }
   }
@@ -574,10 +610,12 @@ async function doRequest(
   if (currentState.abortStatus.cancelled) {
     throw createRecoverableNetworkError(ShakaError.Code.OPERATION_ABORTED, operationInputs.uri, operationInputs.requestType)
   } else if (currentState.abortStatus.timedOut) {
+    warnFailure('timed out')
     throw createRecoverableNetworkError(ShakaError.Code.TIMEOUT, operationInputs.uri, operationInputs.requestType)
   }
 
   if (!response.ok) {
+    warnFailure('bad HTTP status')
     const severity = response.status === 401 || response.status === 403
       ? ShakaError.Severity.CRITICAL
       : ShakaError.Severity.RECOVERABLE
@@ -619,6 +657,7 @@ async function doRequest(
       originalRequest: operationInputs.request,
     }
   } else if (invalidPoToken) {
+    warnFailure('invalid PO token')
     throw new ShakaError(
       ShakaError.Severity.CRITICAL,
       ShakaError.Category.NETWORK,
@@ -628,6 +667,7 @@ async function doRequest(
       operationInputs.requestType,
     )
   } else if (error) {
+    warnFailure(error)
     throw createRecoverableNetworkError(
       ShakaError.Code.HTTP_ERROR,
       operationInputs.uri,
@@ -635,6 +675,7 @@ async function doRequest(
       operationInputs.requestType,
     )
   } else if (responseDataChunks.length > 0 && !segmentComplete) {
+    warnFailure('response ended before MEDIA_END')
     throw createRecoverableNetworkError(
       ShakaError.Code.HTTP_ERROR,
       operationInputs.uri,
@@ -682,6 +723,7 @@ async function doRequest(
     currentState.abortStatus.finished = false
     return doRequest(operationInputs, currentState)
   } else {
+    warnFailure('empty response')
     throw createRecoverableNetworkError(
       ShakaError.Code.HTTP_ERROR,
       operationInputs.uri,
@@ -921,6 +963,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
     const abortStatus = {
       cancelled: false,
       timedOut: false,
+      playerReloadRequested: false,
       finished: false,
     }
 
@@ -949,6 +992,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
       cumulativeBackOffTimeMs: 0,
       cumulativeBackOffRequested: 0,
       cumulativeRetryDueToNextRequestPolicy: 0,
+      startedAtMs: Date.now(),
     }
 
     const pendingRequest = doRequest(opInputs, currentState)

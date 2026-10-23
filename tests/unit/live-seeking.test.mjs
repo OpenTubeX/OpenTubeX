@@ -325,7 +325,9 @@ for (const userSeek of [false, true]) {
       pendingMetadataSeek: null,
       foregroundLoadAbortController: null,
       process: { env: {} },
-      hasPlaybackPosition: { value: userSeek }
+      hasPlaybackPosition: { value: userSeek },
+      props: { videoId: 'video', playbackEngine: 'built-in', format: 'legacy' },
+      console: { warn() {} }
     })
     await loadPlaybackSource('https://example.com/video', 15, 'video/webm')
     assert.equal(mediaElement.currentTime, userSeek ? 5 : 15)
