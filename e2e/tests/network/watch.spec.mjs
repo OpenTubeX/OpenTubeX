@@ -1334,7 +1334,11 @@ test.describe('watch page', () => {
       await expect(page.locator('.watchVideoPlaylist.resizablePlaylist')).toBeVisible()
 
       await page.locator('.full-window-button').click({ force: true })
-      await page.locator('.fullscreenPlaylistToggle').click({ force: true })
+      await expect(page.locator('.ftVideoPlayer.fullWindow')).toBeVisible()
+      // The player scales into full window for 400ms; a forced click could land on
+      // whatever covers the toggle's animated position by then. Let Playwright wait
+      // for the toggle to settle and receive the click.
+      await page.locator('.fullscreenPlaylistToggle').click()
 
       const dock = page.locator('.fullscreenPlaylistOverlay.open')
       const content = dock.locator('.fullscreenPlaylistContent')
