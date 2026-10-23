@@ -79,6 +79,11 @@ test.describe('channel page', () => {
     await expect(page).toHaveURL(/#\/channel\/UCSMOQeBJ2RAnuFungnQOxLg/)
     await expect(page.getByText('Blender').first()).toBeVisible({ timeout: 30_000 })
     try {
+      // The channel opens on its Home tab and loads other tabs when they are
+      // first opened, so opening Videos starts the held request.
+      await expect(page.getByRole('tab', { name: 'Home' })).toHaveAttribute('aria-selected', 'true')
+      expect(videosRequested).toBe(false)
+      await page.getByRole('tab', { name: 'Videos' }).click()
       await expect.poll(() => videosRequested).toBe(true)
       await page.getByRole('tab', { name: 'Shorts' }).click()
       await expect(page.locator('#shortPanel .ft-list-video').first()).toBeVisible()
@@ -165,6 +170,9 @@ test.describe('channel page', () => {
     await expect(page.locator(sel.activeTab)).toContainText('Blender')
 
     await page.locator(sel.newTabButton).click()
+    // The new tab is selected once main has created it; switching back earlier
+    // would leave it to take over afterwards.
+    await expect(page.locator(sel.activeTab)).not.toContainText('Blender')
     await page.locator(sel.tabs).first().click()
     await expect(page.locator(sel.activeTab)).toContainText('Blender')
     await expect(page.locator(sel.activeTab)).not.toContainText('/channel/')
