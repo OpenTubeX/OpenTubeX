@@ -199,6 +199,7 @@ User Playlists:
   Unpin from Navigation: "Løys frå navigasjonen"
   Reorder Hint: Dra eller bruk piltastane for å endre rekkjefølgja
   Add new videos to the top (custom order): "Legg til nye videoar øvst (eigendefinert rekkjefølgje)"
+  Shuffle videos by default: "Spel av videoar i tilfeldig rekkjefølgje som standard"
   Repair Playlists: Reparer spelelister
   Repair Description: Gjenopprett manglande videodetaljar etter import av ein YouTube Takeout-ZIP. Rekkjefølgja i spelelistene vert ikkje endra.
   Remove Unavailable Videos: "Fjern utilgjengelege videoar"

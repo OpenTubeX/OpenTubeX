@@ -199,6 +199,7 @@ User Playlists:
   Unpin from Navigation: "Rögzítés feloldása a navigációban"
   Reorder Hint: Húzza el, vagy használja a nyílbillentyűket az átrendezéshez
   Add new videos to the top (custom order): "Új videók hozzáadása felülre (egyéni sorrend)"
+  Shuffle videos by default: "Videók alapértelmezetten véletlenszerű sorrendben"
   Repair Playlists: Lejátszási listák javítása
   Repair Description: Állítsa vissza a hiányzó videóadatokat egy YouTube Takeout ZIP importálása után. A listák sorrendje nem változik.
   Remove Unavailable Videos: "Távolítsa el a nem elérhető videókat"

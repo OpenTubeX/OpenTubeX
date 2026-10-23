@@ -198,6 +198,7 @@ User Playlists:
   Unpin from Navigation: "Retirer de la navigation"
   Reorder Hint: Faites glisser ou utilisez les touches fléchées pour réorganiser
   Add new videos to the top (custom order): "Ajouter les nouvelles vidéos en haut (ordre personnalisé)"
+  Shuffle videos by default: "Lire les vidéos en ordre aléatoire par défaut"
   Repair Playlists: Réparer les playlists
   Repair Description: Restaurez les informations vidéo manquantes après l’importation d’un ZIP YouTube Takeout. L’ordre des playlists reste inchangé.
   Remove Unavailable Videos: "Supprimer les vidéos indisponibles"

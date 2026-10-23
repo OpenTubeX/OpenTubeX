@@ -199,6 +199,7 @@ User Playlists:
   Unpin from Navigation: "ナビゲーションから固定解除"
   Reorder Hint: ドラッグするか矢印キーで並べ替え
   Add new videos to the top (custom order): "新しい動画を先頭に追加（カスタム順）"
+  Shuffle videos by default: "デフォルトで動画をシャッフル再生"
   Repair Playlists: プレイリストを修復
   Repair Description: YouTube TakeoutのZIPをインポートした後、欠けている動画情報を復元します。プレイリストの順序は変わりません。
   Remove Unavailable Videos: "利用できない動画を削除する"

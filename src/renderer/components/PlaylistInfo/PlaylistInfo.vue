@@ -10,14 +10,15 @@
       <router-link
         v-if="firstVideoIdExists"
         :to="{
-          path: `/watch/${firstVideoId}`,
+          path: `/watch/${startVideo.videoId}`,
           query: {
             playlistId: id,
             playlistType: videoPlaylistType,
-            playlistItemId: firstVideoPlaylistItemId,
+            playlistItemId: startVideo.playlistItemId,
           },
         }"
         tabindex="-1"
+        @click="pickShuffledStartVideo"
       >
         <FtRetryImage
           :src="thumbnail"
@@ -110,6 +111,12 @@
       :label="$t('User Playlists.Add new videos to the top (custom order)')"
       :default-value="newAddVideosToTop"
       @change="newAddVideosToTop = $event"
+    />
+    <FtToggleSwitch
+      v-if="editMode"
+      :label="t('User Playlists.Shuffle videos by default')"
+      :default-value="newShuffleByDefault"
+      @change="newShuffleByDefault = $event"
     />
     <FtPlaylistThumbnailPicker
       v-if="editMode"
@@ -506,6 +513,7 @@ const showDownloadPrompt = ref(false)
 const newTitle = ref(props.title)
 const newDescription = ref(props.description)
 const newAddVideosToTop = ref(false)
+const newShuffleByDefault = ref(false)
 const newQuickBookmarkIcon = ref('bookmark')
 const newCustomThumbnail = ref('')
 const thumbnailLoading = ref(false)
@@ -607,6 +615,27 @@ const defaultThumbnail = computed(() => {
 
 const isUserPlaylist = computed(() => props.infoSource === 'user')
 const videoPlaylistType = computed(() => isUserPlaylist.value ? 'user' : '')
+
+const shuffledStartVideo = ref(null)
+
+// Playlists that shuffle by default start on a random video instead of the first one.
+// The shown videos exclude removals that can still be undone. Each click picks the
+// next start after the link has navigated, so returning to this page or opening the
+// link again does not repeat the same video.
+function pickShuffledStartVideo() {
+  const videos = isUserPlaylist.value && selectedUserPlaylist.value?.shuffleByDefault === true
+    ? props.videos
+    : []
+  shuffledStartVideo.value = videos.length > 0 ? videos[Math.floor(Math.random() * videos.length)] : null
+}
+
+watch(() => props.videos, pickShuffledStartVideo, { immediate: true })
+watch(() => selectedUserPlaylist.value?.shuffleByDefault, pickShuffledStartVideo)
+
+const startVideo = computed(() => shuffledStartVideo.value ?? {
+  videoId: props.firstVideoId,
+  playlistItemId: props.firstVideoPlaylistItemId,
+})
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const userPlaylistAnyVideoWatched = computed(() => {
@@ -901,6 +930,7 @@ async function savePlaylistInfo() {
     protected: selectedUserPlaylist.value.protected,
     description: newDescription.value,
     addVideosToTop: newAddVideosToTop.value,
+    shuffleByDefault: newShuffleByDefault.value,
     quickBookmarkIcon: newQuickBookmarkIcon.value,
     customThumbnail: newCustomThumbnail.value,
     _id: props.id,
@@ -927,6 +957,7 @@ function enterEditMode() {
   newTitle.value = props.title
   newDescription.value = props.description
   newAddVideosToTop.value = selectedUserPlaylist.value.addVideosToTop === true
+  newShuffleByDefault.value = selectedUserPlaylist.value.shuffleByDefault === true
   newQuickBookmarkIcon.value = getQuickBookmarkIconValue(selectedUserPlaylist.value)
   newCustomThumbnail.value = selectedUserPlaylist.value.customThumbnail || ''
   thumbnailLoading.value = false

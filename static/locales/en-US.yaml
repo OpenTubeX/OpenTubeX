@@ -366,6 +366,7 @@ Feed:
 Playlists: Playlists
 User Playlists:
   Add new videos to the top (custom order): "Add new videos to the top (custom order)"
+  Shuffle videos by default: "Shuffle videos by default"
   Repair Playlists: Repair Playlists
   Repair Description: Restore missing video details after importing a YouTube Takeout ZIP. Playlist order stays unchanged.
   Add Missing Videos: "Add missing videos from source playlist"

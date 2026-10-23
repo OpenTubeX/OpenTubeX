@@ -199,6 +199,7 @@ User Playlists:
   Unpin from Navigation: "Eemalda navigeerimisribalt"
   Reorder Hint: Järjestuse muutmiseks lohista või kasuta nooleklahve
   Add new videos to the top (custom order): "Lisa uued videod algusesse (kohandatud järjestus)"
+  Shuffle videos by default: "Esita videod vaikimisi juhuslikus järjekorras"
   Repair Playlists: Paranda esitusloendeid
   Repair Description: Taasta puuduvad videoandmed pärast YouTube Takeouti ZIP-faili importimist. Esitusloendite järjekord ei muutu.
   Remove Unavailable Videos: "Eemalda kättesaamatud videod"

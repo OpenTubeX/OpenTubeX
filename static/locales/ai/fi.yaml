@@ -201,6 +201,7 @@ User Playlists:
   Unpin from Navigation: "Irrota navigoinnista"
   Reorder Hint: Järjestä uudelleen vetämällä tai nuolinäppäimillä
   Add new videos to the top (custom order): "Lisää uudet videot alkuun (oma järjestys)"
+  Shuffle videos by default: "Toista videot oletuksena satunnaisessa järjestyksessä"
   Repair Playlists: Korjaa soittolistat
   Repair Description: Palauta puuttuvat videotiedot YouTube Takeout -ZIP-tiedoston tuonnin jälkeen. Soittolistojen järjestys ei muutu.
   Remove Unavailable Videos: "Poista videot, jotka eivät ole käytettävissä"

@@ -199,6 +199,7 @@ User Playlists:
   Unpin from Navigation: "Dejar de fijar en la navegación"
   Reorder Hint: Arrastra o usa las teclas de flecha para reordenar
   Add new videos to the top (custom order): "Añadir vídeos nuevos al principio (orden personalizado)"
+  Shuffle videos by default: "Reproducir vídeos en orden aleatorio de forma predeterminada"
   Repair Playlists: Reparar listas de reproducción
   Repair Description: Restaura los datos de vídeo que faltan tras importar un ZIP de YouTube Takeout. El orden de las listas se mantiene.
   Remove Unavailable Videos: "Eliminar vídeos no disponibles"

@@ -81,6 +81,7 @@ User Playlists:
   Unpin from Navigation: "Odepnij od nawigacji"
   Reorder Hint: Przeciągnij lub użyj klawiszy strzałek, aby zmienić kolejność
   Add new videos to the top (custom order): "Dodawaj nowe filmy na początku (kolejność niestandardowa)"
+  Shuffle videos by default: "Domyślnie odtwarzaj filmy losowo"
   Repair Playlists: Napraw playlisty
   Repair Description: Przywróć brakujące dane filmów po zaimportowaniu archiwum ZIP z YouTube Takeout. Kolejność na playlistach pozostaje bez zmian.
   Remove Unavailable Videos: "Usuń niedostępne filmy"
