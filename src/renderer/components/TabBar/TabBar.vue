@@ -1152,11 +1152,18 @@ function handleMiddleClick(event, tabId) {
 }
 
 /**
+ * @param {EventTarget | null} target
+ */
+function isEmptyTabListArea(target) {
+  return target != null && (target === dropZoneRef.value || target === tabsContentRef.value)
+}
+
+/**
  * Prevent the browser's middle-click scrolling mode in the empty tab-list area.
  * @param {MouseEvent} event
  */
 function handleTabListMiddleMouseDown(event) {
-  if (event.target === event.currentTarget || event.target === tabsContentRef.value) {
+  if (isEmptyTabListArea(event.target)) {
     event.preventDefault()
   }
 }
@@ -1166,8 +1173,19 @@ function handleTabListMiddleMouseDown(event) {
  * @param {MouseEvent} event
  */
 function handleTabListAuxClick(event) {
-  if (event.button === 1 && (event.target === event.currentTarget || event.target === tabsContentRef.value)) {
+  if (event.button === 1 && isEmptyTabListArea(event.target)) {
     event.preventDefault()
+    createNewTab()
+  }
+}
+
+/**
+ * The custom title bar makes the empty tab-list area a drag region, whose
+ * clicks reach the window instead of the page.
+ * @param {{ x: number, y: number }} point
+ */
+function handleTitleBarMiddleClick({ x, y }) {
+  if (isEmptyTabListArea(document.elementFromPoint(x, y))) {
     createNewTab()
   }
 }
@@ -1251,6 +1269,7 @@ onMounted(() => {
       closeTooltipsSignal.value++
       clearTabSelection()
     })
+    removeTitleBarMiddleClickListener = window.ftElectron.onTitleBarMiddleClick(handleTitleBarMiddleClick)
   }
 
   nextTick(() => {
@@ -1279,6 +1298,8 @@ onUnmounted(() => {
     updateContextMenuTab({ tabId: null, surface: 'content' })
     removeActiveChangedListener?.()
     removeActiveChangedListener = null
+    removeTitleBarMiddleClickListener?.()
+    removeTitleBarMiddleClickListener = null
   }
 
   cleanupDragListeners()
@@ -1301,6 +1322,7 @@ let scrollTarget = null
 let scrollAnimationId = null
 let resizeObserver = null
 let removeActiveChangedListener = null
+let removeTitleBarMiddleClickListener = null
 
 function animateScroll() {
   const container = dropZoneRef.value

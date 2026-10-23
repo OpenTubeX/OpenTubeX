@@ -46,8 +46,31 @@
   background: none;
   color: inherit;
   cursor: default;
+  position: relative;
   -webkit-app-region: no-drag;
 }
+
+/* In a maximized window, the controls reach the screen's top edge and the
+   outermost one its corner. */
+/* stylelint-disable liberty/use-logical-spec */
+.windowControl::before {
+  content: '';
+  position: absolute;
+  bottom: 50%;
+  left: 0;
+  right: 0;
+  height: var(--top-nav-height, 60px);
+  -webkit-app-region: no-drag;
+}
+
+.windowControls.left .windowControl:first-child::before {
+  left: calc(-1 * var(--window-control-edge));
+}
+
+.windowControls.right .windowControl:last-child::before {
+  right: calc(-1 * var(--window-control-edge));
+}
+/* stylelint-enable liberty/use-logical-spec */
 
 .windowControl svg {
   overflow: visible;

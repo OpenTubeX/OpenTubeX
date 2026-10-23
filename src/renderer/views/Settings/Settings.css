@@ -727,3 +727,12 @@
     background: var(--side-nav-hover-color);
   }
 }
+
+/* The window controls of a custom title bar sit over the maximized header's
+   corners, at physical window edges. */
+/* stylelint-disable liberty/use-logical-spec */
+.app.customTitleBar .settingsWindow.maximized .settingsWindowHeader {
+  padding-left: max(10px, var(--title-bar-inset-left));
+  padding-right: max(10px, var(--title-bar-inset-right));
+}
+/* stylelint-enable liberty/use-logical-spec */

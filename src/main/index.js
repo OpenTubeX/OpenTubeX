@@ -3439,6 +3439,23 @@ function runApp() {
           newWindow.setTitleBarOverlay({ color, symbolColor, height: Math.round(height) })
         }
       })
+
+      if (process.platform === 'win32') {
+        // Windows treats drag regions as the title bar, so their mouse buttons
+        // never reach the page. Forward middle clicks so the empty tab strip
+        // still opens tabs.
+        const WM_NCMBUTTONUP = 0x00A8
+        const HTCAPTION = 2
+        newWindow.hookWindowMessage(WM_NCMBUTTONUP, (wParam, lParam) => {
+          if (wParam.readUInt32LE(0) !== HTCAPTION || newWindow.webContents.isDestroyed()) return
+          const point = screen.screenToDipPoint({ x: lParam.readInt16LE(0), y: lParam.readInt16LE(2) })
+          const bounds = newWindow.getContentBounds()
+          newWindow.webContents.send(IpcChannels.TITLE_BAR_MIDDLE_CLICK, {
+            x: point.x - bounds.x,
+            y: point.y - bounds.y
+          })
+        })
+      }
     }
 
     newWindow.once('ready-to-show', showWindow)

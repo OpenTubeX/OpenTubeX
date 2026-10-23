@@ -356,3 +356,27 @@
 :global(.app.customTitleBar .tabBar :is(.tabBarReorderItem, .os-scrollbar)) {
   -webkit-app-region: no-drag;
 }
+
+/* In a maximized window, flicking the pointer to the screen's top edge reaches
+   the tabs and buttons, like a browser's tab strip. The tab list starts at the
+   window edge so it doesn't clip their hit areas. */
+:global(.app.customTitleBar .tabBar.position-top .tabsViewport) {
+  margin-block-start: -1px;
+}
+
+:global(.app.customTitleBar .tabBar.position-top .tabsContent) {
+  padding-block-start: 1px;
+}
+
+:global(.app.customTitleBar .tabBar.position-top :is(.tabBarReorderItem, .newTabButton, .tabOrganizerButton)) {
+  position: relative;
+}
+
+:global(.app.customTitleBar .tabBar.position-top :is(.tabBarReorderItem, .newTabButton, .tabOrganizerButton)::before) {
+  content: '';
+  position: absolute;
+  inset-block-end: 100%;
+  inset-inline: 0;
+  block-size: 16px;
+  -webkit-app-region: no-drag;
+}

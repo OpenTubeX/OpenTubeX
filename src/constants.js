@@ -24,6 +24,7 @@ const IpcChannels = {
   RELAUNCH_REQUEST: 'relaunch-request',
   SET_WINDOW_TITLE: 'set-window-title',
   SET_TITLE_BAR_OVERLAY: 'set-title-bar-overlay',
+  TITLE_BAR_MIDDLE_CLICK: 'title-bar-middle-click',
   WINDOW_CONTROLS_GET: 'window-controls-get',
   WINDOW_CONTROLS_STATE: 'window-controls-state',
   WINDOW_CONTROL_ACTION: 'window-control-action',
