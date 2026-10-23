@@ -125,11 +125,13 @@ public class MobileAppearanceSettingsTest {
     public void pinchGesturesKeepTheConfiguredUiScale() throws Exception {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             WebView view = webView(scenario);
-            boolean[] builtInZoom = new boolean[1];
+            boolean[] zoomSettings = new boolean[2];
             scenario.onActivity(activity -> {
-                builtInZoom[0] = view.getSettings().getBuiltInZoomControls();
-                // Exercise gesture-enabled WebViews as well as Capacitor's default.
-                // Disabling page zoom must not rely only on the built-in-controls flag.
+                zoomSettings[0] = view.getSettings().supportZoom();
+                zoomSettings[1] = view.getSettings().getBuiltInZoomControls();
+                // Some WebView providers, such as Vanadium, still pinch-zoom the page,
+                // so the viewport must keep the UI scale even with zoom gestures enabled.
+                view.getSettings().setSupportZoom(true);
                 view.getSettings().setBuiltInZoomControls(true);
             });
             try {
@@ -154,7 +156,10 @@ public class MobileAppearanceSettingsTest {
                     }
                 }
             } finally {
-                scenario.onActivity(activity -> view.getSettings().setBuiltInZoomControls(builtInZoom[0]));
+                scenario.onActivity(activity -> {
+                    view.getSettings().setSupportZoom(zoomSettings[0]);
+                    view.getSettings().setBuiltInZoomControls(zoomSettings[1]);
+                });
                 evaluate(view, "document.querySelector('#pinch-test-target')?.remove()");
                 restore(view);
             }
