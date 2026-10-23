@@ -12,6 +12,11 @@ export const SORT_BY_VALUES = {
   Custom: 'custom'
 }
 
+/** Values written by a newer version are not sort orders this one knows. */
+export function isPlaylistSortOrder(value) {
+  return Object.values(SORT_BY_VALUES).includes(value)
+}
+
 export function getSortedPlaylistItems(playlistItems, sortOrder, locale, reversed = false) {
   if (sortOrder === SORT_BY_VALUES.Custom) {
     return reversed ? playlistItems.toReversed() : playlistItems

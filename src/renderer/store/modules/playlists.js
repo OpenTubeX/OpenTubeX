@@ -245,8 +245,8 @@ const actions = {
     }
   },
 
-  async updatePlaylistFromSync({ state, commit }, { playlist, previous }) {
-    playlist.lastUpdatedAt = Date.now()
+  async updatePlaylistFromSync({ state, commit }, { playlist, previous, keepLastUpdatedAt = false }) {
+    if (!keepLastUpdatedAt) playlist.lastUpdatedAt = Date.now()
     const saved = await DBPlaylistHandlers.upsertIfUnchanged(playlist, previous)
     if (!saved) return false
     const current = state.playlists.find(item => item._id === playlist._id)
@@ -263,6 +263,18 @@ const actions = {
     try {
       await DBPlaylistHandlers.upsert(playlist)
       commit('upsertPlaylistToList', playlist)
+    } catch (errMessage) {
+      console.error(errMessage)
+    }
+  },
+
+  async updatePlaylistSortOrder({ commit }, { _id, sortOrder }) {
+    // Sorting is a view preference, so it leaves `lastUpdatedAt` alone
+    try {
+      // Another window may have deleted the playlist, which must stay deleted
+      if (await DBPlaylistHandlers.updateSortOrder(_id, sortOrder)) {
+        commit('upsertPlaylistToList', { _id, sortOrder })
+      }
     } catch (errMessage) {
       console.error(errMessage)
     }

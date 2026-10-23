@@ -229,6 +229,10 @@ class Playlists {
     return dbPlaylists(DBActions.PLAYLISTS.UPSERT_IF_UNCHANGED, { playlist, previous })
   }
 
+  static updateSortOrder(_id, sortOrder) {
+    return dbPlaylists(DBActions.PLAYLISTS.UPDATE_SORT_ORDER, { _id, sortOrder })
+  }
+
   static repairMetadata(payload) {
     return dbPlaylists(DBActions.PLAYLISTS.REPAIR_METADATA, payload)
   }

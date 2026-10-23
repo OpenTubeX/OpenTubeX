@@ -28,7 +28,7 @@ import { getSyncableSettingKeys, isSettingSyncEnabled } from '../store/modules/s
 import { deepCopy } from './utils'
 import { replaceCustomThemes } from './customTheme'
 import { repairSystemThemeSettings } from './customThemeSync'
-import { generateRandomUniqueId } from './playlists'
+import { generateRandomUniqueId, isPlaylistSortOrder } from './playlists'
 import { normalizePlaylistThumbnail } from './playlist-thumbnails'
 import {
   getMergedProfileBackground,
@@ -647,23 +647,30 @@ function videoToLocal(video, timeAdded = Date.now()) {
   }
 }
 
-function playlistMetadataFromLocal(playlist, syncThumbnails) {
+/** `null` follows the default sort order. */
+function playlistSortOrder(sortOrder) {
+  return isPlaylistSortOrder(sortOrder) ? sortOrder : null
+}
+
+function playlistMetadataFromLocal(playlist, features) {
   return {
     id: playlist._id,
     title: playlist.playlistName,
     description: playlist.description || '',
     thumbnail_url: null,
-    ...(syncThumbnails ? { custom_thumbnail: playlist.customThumbnail || null } : {}),
+    ...(features.thumbnails ? { custom_thumbnail: playlist.customThumbnail || null } : {}),
+    ...(features.sortOrder ? { sort_order: playlistSortOrder(playlist.sortOrder) } : {}),
   }
 }
 
-function playlistMetadataFromRemote(playlist, syncThumbnails) {
+function playlistMetadataFromRemote(playlist, features) {
   return {
     id: playlist.id,
     title: playlist.title,
     description: playlist.description || '',
     thumbnail_url: null,
-    ...(syncThumbnails ? { custom_thumbnail: playlist.custom_thumbnail || null } : {}),
+    ...(features.thumbnails ? { custom_thumbnail: playlist.custom_thumbnail || null } : {}),
+    ...(features.sortOrder ? { sort_order: playlistSortOrder(playlist.sort_order) } : {}),
   }
 }
 
@@ -692,18 +699,19 @@ function metadataEquals(first, second) {
   return JSON.stringify(first) === JSON.stringify(second)
 }
 
-function selectPlaylistMetadata(local, remote, previous, syncThumbnails) {
-  if (!local) return playlistMetadataFromRemote(remote, syncThumbnails)
-  if (!remote) return playlistMetadataFromLocal(local, syncThumbnails)
+function selectPlaylistMetadata(local, remote, previous, features) {
+  if (!local) return playlistMetadataFromRemote(remote, features)
+  if (!remote) return playlistMetadataFromLocal(local, features)
 
-  const localMetadata = playlistMetadataFromLocal(local, syncThumbnails)
-  const remoteMetadata = playlistMetadataFromRemote(remote, syncThumbnails)
+  const localMetadata = playlistMetadataFromLocal(local, features)
+  const remoteMetadata = playlistMetadataFromRemote(remote, features)
   if (!previous) return localMetadata
 
-  const previousMetadata = playlistMetadataFromRemote(previous, syncThumbnails)
+  const previousMetadata = playlistMetadataFromRemote(previous, features)
   const localBaseline = playlistBaselineMetadata(localMetadata)
   const merged = { ...localMetadata }
-  for (const field of ['title', 'description', ...(syncThumbnails ? ['custom_thumbnail'] : [])]) {
+  const fields = ['title', 'description', ...(features.thumbnails ? ['custom_thumbnail'] : []), ...(features.sortOrder ? ['sort_order'] : [])]
+  for (const field of fields) {
     if (localBaseline[field] === previousMetadata[field]) {
       merged[field] = remoteMetadata[field]
     }
@@ -715,6 +723,7 @@ function isSameLocalPlaylist(playlist, metadata, videos) {
   return playlist.playlistName === metadata.title &&
     (playlist.description || '') === metadata.description &&
     (!Object.hasOwn(metadata, 'custom_thumbnail') || (playlist.customThumbnail || null) === metadata.custom_thumbnail) &&
+    (!Object.hasOwn(metadata, 'sort_order') || playlistSortOrder(playlist.sortOrder) === metadata.sort_order) &&
     playlist.videos.length === videos.length &&
     playlist.videos.every((video, index) => metadataEquals(video, videos[index]))
 }
@@ -807,7 +816,10 @@ export async function syncPlaylistBookmarks(client, store, previousIds = [], opt
 }
 
 export async function syncPlaylists(client, store, previous = {}, options = {}) {
-  const syncThumbnails = typeof client.supportsPlaylistThumbnails === 'function' && await client.supportsPlaylistThumbnails()
+  const features = {
+    thumbnails: typeof client.supportsPlaylistThumbnails === 'function' && await client.supportsPlaylistThumbnails(),
+    sortOrder: typeof client.supportsPlaylistSortOrder === 'function' && await client.supportsPlaylistSortOrder(),
+  }
   const localPlaylists = deepCopy(store.state.playlists.playlists)
   const localById = mapBy(localPlaylists, playlist => playlist._id)
   const remotePlaylistHeaders = await client.getPlaylists()
@@ -848,8 +860,8 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
   for (const id of mergedIds) {
     let local = localById.get(id)
     let remote = remoteById.get(id)
-    const rawRemoteMetadata = remote ? playlistMetadataFromRemote({ ...remote.playlist, id }, syncThumbnails) : null
-    const metadata = selectPlaylistMetadata(local, rawRemoteMetadata, previous[id]?.metadata, syncThumbnails)
+    const rawRemoteMetadata = remote ? playlistMetadataFromRemote({ ...remote.playlist, id }, features) : null
+    const metadata = selectPlaylistMetadata(local, rawRemoteMetadata, previous[id]?.metadata, features)
     if (metadata.custom_thumbnail) {
       for (const candidate of new Set([metadata.custom_thumbnail, local?.customThumbnail])) {
         if (!candidate) continue
@@ -970,6 +982,7 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
         playlistName: metadata.title,
         description: metadata.description,
         customThumbnail: metadata.custom_thumbnail || '',
+        ...(metadata.sort_order ? { sortOrder: metadata.sort_order } : {}),
         protected: false,
         videos: mergedVideos,
       }
@@ -977,11 +990,14 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
     } else if (!isSameLocalPlaylist(local, metadata, mergedVideos)) {
       const saved = await store.dispatch('updatePlaylistFromSync', {
         previous: local,
+        // Sorting is a view preference, so a sort order change alone keeps `lastUpdatedAt`
+        keepLastUpdatedAt: isSameLocalPlaylist({ ...local, sortOrder: metadata.sort_order }, metadata, mergedVideos),
         playlist: {
           ...local,
           playlistName: metadata.title,
           description: metadata.description,
-          ...(syncThumbnails ? { customThumbnail: metadata.custom_thumbnail || '' } : {}),
+          ...(features.thumbnails ? { customThumbnail: metadata.custom_thumbnail || '' } : {}),
+          ...(features.sortOrder ? { sortOrder: metadata.sort_order } : {}),
           videos: mergedVideos,
         },
       })
