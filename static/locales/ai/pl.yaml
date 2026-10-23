@@ -830,6 +830,7 @@ Video:
   Move Queue Item Down: "Przenieś film {title} w dół"
   Includes paid promotion: Zawiera płatną promocję
   Age Restricted Badge: Ograniczenie wiekowe
+  Music Video Badge: Teledysk
   Reorder Queue Item: Zmień położenie {title}
   Reorder Queue Item Instructions: Użyj strzałek w górę i w dół, aby przenieść ten film w kolejce.
   Queue Item Moved: Film {title} przeniesiono na pozycję {position} z {total}.

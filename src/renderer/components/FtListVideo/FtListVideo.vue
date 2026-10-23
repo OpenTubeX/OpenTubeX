@@ -124,6 +124,12 @@
             role="img"
             :aria-label="t('Downloads.Downloaded')"
           />
+          <FtIcon
+            v-if="isMusic"
+            :icon="['fas', 'music']"
+            role="img"
+            :aria-label="t('Video.Music Video Badge')"
+          />
           {{ displayDurationLabel === '0:00' ? '' : displayDurationLabel }}
         </div>
         <div
@@ -700,6 +706,7 @@ const isVr360 = ref(false)
 const is3D = ref(false)
 const hasCaptions = ref(false)
 const isMembersOnly = ref(false)
+const isMusic = ref(false)
 /** Channels on the AiSList warnlist are labelled instead of being hidden */
 const isAiSlopWarned = computed(() => isOnAiSlopList(store.getters.getAiSlopWarnedChannels, props.data))
 const isUpcoming = ref(false)
@@ -1927,6 +1934,10 @@ const watchPageLinkQuery = computed(() => {
     query.short = String(props.data.isShort)
   }
 
+  if (props.data.isMusic === true) {
+    query.musicVideo = 'true'
+  }
+
   if (props.data.isShort === true) {
     if (props.data.shortSource === 'channel' && props.data.shortChannelId) {
       query.shortSource = 'channel'
@@ -2305,6 +2316,7 @@ function parseVideoData() {
   is3D.value = props.data.is3d
   hasCaptions.value = props.data.hasCaptions
   isMembersOnly.value = props.data.isMembersOnly === true
+  isMusic.value = props.data.isMusic === true
   isPremium.value = props.data.premium || false
   viewCount.value = props.data.viewCount
   updateUploadedTime()

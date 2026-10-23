@@ -173,7 +173,7 @@
               :is-upcoming="isUpcoming"
               :transcript-open="phonePanelsEnabled ? mobilePanel === 'transcript' : showTranscript"
               :sponsor-block-info-open="showSidebarSponsorBlock"
-              :video-genre-is-music="videoGenreIsMusic"
+              :video-is-music="isMusicVideo"
               :current-playback-rate="currentPlaybackRate"
               :current-video-quality="currentVideoQuality"
               :delay-load-until-unix="adEndTimeUnixMs"

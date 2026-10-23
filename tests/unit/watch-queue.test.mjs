@@ -153,11 +153,12 @@ test('reorders, removes, and clears queued videos', () => {
 for (const route of [undefined, { path: '/watch/saved', query: { downloadId: '42' } }]) {
   test(`queue advancement ${route ? 'preserves the downloaded file route' : 'opens online videos normally'}`, async () => {
     const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
-    const { playNextQueuedVideo: playNext, watchRouteWithoutTimestamp } = watchMethods(source, ['playNextQueuedVideo', 'watchRouteWithoutTimestamp'])
+    const { playNextQueuedVideo: playNext, watchRouteWithoutTimestamp, watchRouteForVideo } = watchMethods(source, ['playNextQueuedVideo', 'watchRouteWithoutTimestamp', 'watchRouteForVideo'])
     const navigations = []
     const removed = []
     const watch = {
       watchRouteWithoutTimestamp,
+      watchRouteForVideo,
       nextQueuedVideo: { videoId: 'saved', queueItemId: 1, route },
       $store: { commit: (name, id) => removed.push([name, id]) },
       tabRoute: { fullPath: '/watch/previous' },

@@ -210,7 +210,7 @@
               v-for="recommendation in endedRecommendations"
               :key="recommendation.videoId"
               class="endedRecommendation"
-              :to="{ path: `/watch/${recommendation.videoId}` }"
+              :to="{ path: `/watch/${recommendation.videoId}`, query: recommendation.isMusic === true ? { musicVideo: 'true' } : undefined }"
               :title="recommendation.title"
               :aria-label="recommendation.title"
             >

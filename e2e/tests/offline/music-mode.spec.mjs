@@ -89,7 +89,7 @@ for (const source of ['queue click', 'queue end', 'recommendation', 'manual']) {
     await page.locator('a.title').filter({ hasText: watchHistoryEntry.title }).first().click()
     const video = await expectPlayback(page, 0, 1)
     const watch = await watchViewHandle(page)
-    expect(await watch.evaluate(view => view.videoGenreIsMusic)).toBe(false)
+    expect(await watch.evaluate(view => view.isMusicVideo)).toBe(false)
     if (source.startsWith('queue')) {
       await watch.evaluate(view => view.$store.commit('addVideoToWatchQueue', {
         video: { videoId: 'musicvideo1', title: 'Music mode test video' },

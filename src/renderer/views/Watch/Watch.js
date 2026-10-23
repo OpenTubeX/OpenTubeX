@@ -585,6 +585,10 @@ export default defineComponent({
     shortsPhonePanelsEnabled() {
       return this.phoneLayout && this.portraitLayout && this.customShortsPlayerActive
     },
+    isMusicVideo: function () {
+      // Lists pass on YouTube's music badge, which also covers music videos outside the Music category
+      return this.videoGenreIsMusic || this.tabRoute.query.musicVideo === 'true'
+    },
     musicPlayerArtist: function () {
       return this.musicMediaType === MUSIC_MEDIA_TYPE.AUDIO_TRACK
         ? getMusicTrackArtist(this.channelName)
@@ -5628,9 +5632,19 @@ export default defineComponent({
       }
     },
 
+    /**
+     * @param {{ videoId: string, isMusic?: boolean }} video
+     */
+    watchRouteForVideo: function (video) {
+      return {
+        path: `/watch/${video.videoId}`,
+        ...(video.isMusic === true ? { query: { musicVideo: 'true' } } : {})
+      }
+    },
+
     playNextVideoNow: function (forcePlayback = true) {
       const player = this.$refs.player
-      const nextVideoId = this.autoplayCountdown?.video?.videoId ?? this.nextRecommendedVideo?.videoId
+      const nextVideo = this.autoplayCountdown?.video ?? this.nextRecommendedVideo
 
       this.abortAutoplayCountdown(true)
 
@@ -5640,10 +5654,8 @@ export default defineComponent({
 
       if (this.watchingPlaylist) {
         this.$refs.watchVideoPlaylist?.playNextVideo()
-      } else if (!this.isOffline && nextVideoId) {
-        this.tabRouter.push({
-          path: `/watch/${nextVideoId}`
-        })
+      } else if (!this.isOffline && nextVideo?.videoId) {
+        this.tabRouter.push(this.watchRouteForVideo(nextVideo))
         showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'step-forward'] })
       }
     },
@@ -5657,9 +5669,7 @@ export default defineComponent({
       if (this.watchingPlaylist) {
         this.$refs.watchVideoPlaylist?.playNextVideo()
       } else if (!this.hideRecommendedVideos && this.nextRecommendedVideo) {
-        this.tabRouter.push({
-          path: `/watch/${this.nextRecommendedVideo.videoId}`
-        })
+        this.tabRouter.push(this.watchRouteForVideo(this.nextRecommendedVideo))
         showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'step-forward'] })
       }
     },
@@ -5671,7 +5681,7 @@ export default defineComponent({
       }
 
       this.$store.commit('removeVideoFromWatchQueue', nextVideo.queueItemId)
-      const route = nextVideo.route ?? { path: `/watch/${nextVideo.videoId}` }
+      const route = nextVideo.route ?? this.watchRouteForVideo(nextVideo)
       const nextFullPath = this.tabRouter.resolve(route).fullPath
       if (
         this.watchRouteWithoutTimestamp(nextFullPath) ===
@@ -5913,7 +5923,7 @@ export default defineComponent({
               const sessionExpired = new Date() > this.streamingDataExpiryDate
               const specificError = sessionExpired
                 ? '[BAD_HTTP_STATUS: 403] YouTube watch session expired. Please reopen this video.'
-                : this.videoGenreIsMusic
+                : this.isMusicVideo
                   ? '[BAD_HTTP_STATUS: 403] Potential causes: IP block, streaming URL deciphering failed or music video geo-block'
                   : '[BAD_HTTP_STATUS: 403] Potential causes: IP block or streaming URL deciphering failed'
 
@@ -6977,7 +6987,7 @@ export default defineComponent({
         return
       }
 
-      if (this.videoGenreIsMusic) {
+      if (this.isMusicVideo) {
         this.currentPlaybackRate = 1
         return
       }
