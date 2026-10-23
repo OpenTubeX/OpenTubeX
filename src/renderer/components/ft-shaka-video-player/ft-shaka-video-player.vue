@@ -183,7 +183,8 @@
         Keep the decoded poster and its resolution fallback through playback.
         It also fills the inline player during PiP; the native poster attribute
         can't, as Chromium may stretch it across the PiP surface (#362). The
-        poster covers Chromium's PiP message, so show our own instead.
+        poster covers Chromium's PiP message, so show our own instead. The
+        image is decorative, so only that message reaches assistive technology.
       -->
       <div
         v-if="thumbnail"
@@ -192,7 +193,6 @@
           : showPoster || pictureInPictureActive || showCountdownOverlay || showEndedScreen"
         class="countdownPoster"
         :class="{ endedPoster: !audioPlayerMode && showEndedScreen }"
-        aria-hidden="true"
       >
         <FtRetryImage
           :src="thumbnail"

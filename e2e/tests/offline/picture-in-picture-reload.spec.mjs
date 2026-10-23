@@ -191,6 +191,7 @@ test('shows the poster overlay inline while in Picture-in-Picture', async ({ app
   await expect(poster).toBeVisible()
   // The overlay covers Chromium's own PiP message, so it shows a replacement.
   await expect(message).toHaveText('Playing in Picture-in-Picture')
+  await expect(poster).toMatchAriaSnapshot('- text: Playing in Picture-in-Picture')
   await expect(video).not.toHaveAttribute('poster')
 
   await page.evaluate(() => document.exitPictureInPicture())
