@@ -3,6 +3,7 @@ import test from 'node:test'
 import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
 import * as Vue from 'vue'
+import { androidRotationFullscreenHandoffs, releaseAndroidRotationFullscreenHandoff } from '../../src/renderer/helpers/player/androidFullscreen.js'
 
 const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
 const template = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.vue', import.meta.url), 'utf8')
@@ -136,7 +137,7 @@ function androidRotationHarness(overrides = {}) {
     androidRotationFullscreenHandoffs: new WeakMap(),
     observeAndroidDisplayRotation: createRotationObserver(),
     observeAndroidDeviceRotation: createRotationObserver(),
-    queueMicrotask,
+    startInFullwindow: false,
     events: { dispatchEvent: event => {
       fullWindowEnabled.value = event.detail
       calls.push(event.detail)
@@ -262,7 +263,7 @@ test('Android does not force landscape when the fullscreen view fails to open', 
 function rotationReplacementHarness(overrides = {}) {
   const shared = {
     androidFullscreenHost: createPopoverHost(),
-    androidRotationFullscreenHandoffs: new WeakMap(),
+    androidRotationFullscreenHandoffs,
     observeAndroidDisplayRotation: createRotationObserver(),
     observeAndroidDeviceRotation: createRotationObserver(),
     fullscreenRotationIgnoresSystemLock: { value: true },
@@ -297,15 +298,16 @@ test('Android ends a handed-off rotation fullscreen on portrait before the next 
   shared.observeAndroidDeviceRotation.emit(false)
   assert.equal(previous.isPopoverOpen(), false)
   assert.deepEqual(previous.calls.slice(-2), ['orientation:false', 'navigation:true'])
+  next.context.startInFullwindow = true
   next.handlers.adoptAndroidRotationFullscreen()
+  assert.equal(next.context.startInFullwindow, false, 'Do not restore full window in portrait')
   next.handlers.handleAndroidRotation(false)
   assert.deepEqual(next.calls, [], 'The next player must not adopt a released fullscreen')
 })
 
-test('Android ends a handed-off rotation fullscreen when Watch closes', async () => {
+test('Android ends a handed-off rotation fullscreen when Watch closes', () => {
   const { previous, shared } = rotationReplacementHarness()
-  shared.androidFullscreenHost.isConnected = false
-  await Promise.resolve()
+  releaseAndroidRotationFullscreenHandoff(shared.androidFullscreenHost)
   assert.equal(previous.isPopoverOpen(), false)
   assert.deepEqual(previous.calls.slice(-2), ['orientation:false', 'navigation:true'])
   assert.equal(shared.observeAndroidDeviceRotation.callbacks.size, 0)

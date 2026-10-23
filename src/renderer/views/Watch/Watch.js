@@ -8,6 +8,7 @@ import { connectionEvents, initializeNetworkRecovery, getConnectionState } from 
 import { ytDlp } from '../../helpers/ytDlp'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { probeHlsManifest } from '../../helpers/player/hlsManifest'
+import { releaseAndroidRotationFullscreenHandoff } from '../../helpers/player/androidFullscreen'
 import { sampleRecommendationPlayback } from '../../../recommendation-learning'
 import { defineComponent, markRaw, shallowRef } from 'vue'
 import { Capacitor } from '@capacitor/core'
@@ -1563,6 +1564,10 @@ export default defineComponent({
     if (!lifecycleHandledDisposal) {
       this.cleanupWatchRuntime()
     }
+  },
+  unmounted: function () {
+    // The player hands Android rotation fullscreen over during unmount.
+    releaseAndroidRotationFullscreenHandoff(this.$el)
   },
   methods: {
     openPhonePanel(panel) {

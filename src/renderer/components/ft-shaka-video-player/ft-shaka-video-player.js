@@ -15,7 +15,7 @@ import { getVideoCodecPreferences, preferredVideoDecodingAttributes } from '../.
 import { voidWebmProjection } from '../../helpers/player/webmProjection'
 import { registerPlugin } from '@capacitor/core'
 import { bindAndroidMediaErrors } from '../../helpers/player/androidMediaErrors'
-import { bindAndroidFullscreen } from '../../helpers/player/androidFullscreen'
+import { androidRotationFullscreenHandoffs, bindAndroidFullscreen } from '../../helpers/player/androidFullscreen'
 import { bindIosFullscreen } from '../../helpers/player/iosFullscreen'
 import { bindIosNativeCaptions } from '../../helpers/player/iosNativeCaptions'
 import { bindNativeCaptionTiming } from '../../helpers/player/nativeCaptionTiming'
@@ -261,10 +261,6 @@ const PLAY_MORPH_PATH = 'M8 6 11.5 8.1 11.5 15.9 8 18ZM11.5 8.1 18 12 18 12 11.5
 // The process-global registries must not retain factories from disposed players.
 const liveCustomControlPlayers = new Set()
 let configuringCustomPlayerControls = false
-
-// Watch keeps its fullscreen host while it replaces the player for another
-// video. Android rotation fullscreen passes from one player to the next here.
-const androidRotationFullscreenHandoffs = new WeakMap()
 
 /**
  * Shaka's own controls that the player replaces, restored once no player needs
@@ -8172,9 +8168,10 @@ export default defineComponent({
       androidRotationFullscreen = false
       const handoff = {
         orientationLocked: androidRotationOrientationLocked,
+        released: false,
         release() {
-          if (androidRotationFullscreenHandoffs.get(host) !== handoff) return
-          androidRotationFullscreenHandoffs.delete(host)
+          if (handoff.released) return
+          handoff.released = true
           handoff.stopRotation()
           if (handoff.orientationLocked) setLandscapeOrientation(false).catch(() => {})
           if (host.matches(':popover-open')) host.hidePopover()
@@ -8186,20 +8183,21 @@ export default defineComponent({
       handoff.stopRotation = (fullscreenRotationIgnoresSystemLock.value ? observeAndroidDeviceRotation : observeAndroidDisplayRotation)(landscape => {
         if (!landscape) handoff.release()
       })
-      // Closing Watch unmounts this player before detaching the host.
-      queueMicrotask(() => {
-        if (!host.isConnected) handoff.release()
-      })
     }
 
     function adoptAndroidRotationFullscreen() {
       const handoff = androidRotationFullscreenHandoffs.get(androidFullscreenHost)
       if (!handoff) return
+      androidRotationFullscreenHandoffs.delete(androidFullscreenHost)
+      // Portrait already ended this fullscreen while the video loaded.
+      if (handoff.released) {
+        startInFullwindow = false
+        return
+      }
       if (!props.startInFullwindow || props.shortsPlayer || !isActiveTab.value) {
         handoff.release()
         return
       }
-      androidRotationFullscreenHandoffs.delete(androidFullscreenHost)
       handoff.stopRotation()
       androidRotationFullscreen = true
       androidRotationOrientationLocked = handoff.orientationLocked
