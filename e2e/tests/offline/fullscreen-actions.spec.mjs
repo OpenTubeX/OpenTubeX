@@ -166,3 +166,28 @@ test.describe('fullscreen action dock spacing', () => {
     })).toBe(true)
   })
 })
+
+test.describe('fullscreen action dock layering', () => {
+  test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true, fullscreenActions: ['addToPlaylist'] } } })
+
+  test('drops behind the seek preview and opens its popover outside the dock', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await setPlayerFullscreen(page, true)
+    const player = page.locator('.ftVideoPlayer')
+    await player.locator('video').evaluate(element => element.pause())
+    const dock = player.locator('.fullscreenActions')
+    await expect(dock).toBeVisible()
+    await expect(dock).toHaveCSS('z-index', '4')
+
+    await player.hover({ position: { x: 20, y: 20 } })
+    await player.locator('.shaka-seek-bar-container').hover()
+    await expect(dock).toHaveCSS('z-index', '0')
+    await player.hover({ position: { x: 20, y: 20 } })
+    await expect(dock).toHaveCSS('z-index', '4')
+
+    await dock.getByRole('button', { name: 'Add to playlist', exact: true }).click()
+    await expect(player.getByRole('dialog', { name: 'Add to playlist' })).toBeVisible()
+    await expect(dock.locator('.iconDropdown')).toHaveCount(0)
+  })
+})
