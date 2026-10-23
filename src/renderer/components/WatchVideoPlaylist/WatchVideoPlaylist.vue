@@ -752,8 +752,10 @@ let shuffleFromDefault = false
 
 function applyShuffleByDefault() {
   if (selectedUserPlaylist.value?.shuffleByDefault === true) {
-    shuffleEnabled.value = true
-    shuffleFromDefault = true
+    if (!shuffleEnabled.value) {
+      shuffleEnabled.value = true
+      shuffleFromDefault = true
+    }
   } else if (shuffleFromDefault) {
     shuffleEnabled.value = false
     shuffleFromDefault = false

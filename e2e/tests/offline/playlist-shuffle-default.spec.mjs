@@ -154,23 +154,34 @@ test('a playlist default does not carry shuffle over to the next playlist', asyn
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
   const watch = await watchViewHandle(page)
-  const shuffle = page.locator('.watchVideoPlaylist').filter({ visible: true }).getByRole('button', { name: 'Shuffle Playlist' })
-  await watch.evaluate(async (vm, { id, video }) => {
-    await vm.$store.dispatch('updatePlaylist', { _id: id, shuffleByDefault: true })
-    await vm.tabRouter.push({ path: `/watch/${video.videoId}`, query: { playlistId: id, playlistType: 'user', playlistItemId: video.playlistItemId } })
-  }, { id: playlistId, video: videos[0] })
-  await expect(shuffle).toHaveAttribute('aria-pressed', 'true')
+  const panel = page.locator('.watchVideoPlaylist').filter({ visible: true })
+  const shuffle = panel.getByRole('button', { name: 'Shuffle Playlist' })
+  const seeded = { _id: playlistId, playlistName: 'Music mix', videos }
+  // The watch view keeps its playlist panel when another playlist opens from its page.
+  const switchTo = async (playlist) => {
+    await watch.evaluate(async (vm, playlist) => {
+      vm.$store.commit('setCachedPlaylist', {
+        tabId: vm.tabId ?? 'web',
+        value: { id: playlist._id, title: playlist.playlistName, channelName: '', channelId: '', totalVideoCount: playlist.videos.length, items: playlist.videos, continuationData: null },
+      })
+      const video = playlist.videos[0]
+      await vm.tabRouter.push({ path: `/watch/${video.videoId}`, query: { playlistId: playlist._id, playlistType: 'user', playlistItemId: video.playlistItemId } })
+    }, playlist)
+    await expect(panel.locator('.playlistTitle')).toHaveText(playlist.playlistName)
+  }
 
-  // The watch view keeps its playlist panel when the next playlist opens from its page.
-  await watch.evaluate(async (vm, playlist) => {
-    vm.$store.commit('setCachedPlaylist', {
-      tabId: vm.tabId ?? 'web',
-      value: { id: playlist._id, title: playlist.playlistName, channelName: '', channelId: '', totalVideoCount: playlist.videos.length, items: playlist.videos, continuationData: null },
-    })
-    const video = playlist.videos[0]
-    await vm.tabRouter.push({ path: `/watch/${video.videoId}`, query: { playlistId: playlist._id, playlistType: 'user', playlistItemId: video.playlistItemId } })
-  }, otherPlaylist)
-  await expect(page.locator('.watchVideoPlaylist .playlistTitle').filter({ visible: true })).toHaveText('Podcasts')
+  await watch.evaluate(vm => vm.$store.dispatch('updatePlaylist', { _id: 'shuffle-default', shuffleByDefault: true }))
+  await switchTo(seeded)
+  await expect(shuffle).toHaveAttribute('aria-pressed', 'true')
+  await switchTo(otherPlaylist)
   await expect(shuffle).toHaveAttribute('aria-pressed', 'false')
+
+  // Shuffle turned on with the button stays on, even through a playlist with the default.
+  await shuffle.click()
+  await expect(shuffle).toHaveAttribute('aria-pressed', 'true')
+  await switchTo(seeded)
+  await expect(shuffle).toHaveAttribute('aria-pressed', 'true')
+  await switchTo(otherPlaylist)
+  await expect(shuffle).toHaveAttribute('aria-pressed', 'true')
   await watch.dispose()
 })

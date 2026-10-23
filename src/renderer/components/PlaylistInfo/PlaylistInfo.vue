@@ -619,7 +619,9 @@ const videoPlaylistType = computed(() => isUserPlaylist.value ? 'user' : '')
 const shuffledStartVideo = ref(null)
 
 // Playlists that shuffle by default start on a random video instead of the first one.
-// The shown videos exclude removals that can still be undone.
+// The shown videos exclude removals that can still be undone. Each click picks the
+// next start after the link has navigated, so returning to this page or opening the
+// link again does not repeat the same video.
 function pickShuffledStartVideo() {
   const videos = isUserPlaylist.value && selectedUserPlaylist.value?.shuffleByDefault === true
     ? props.videos
