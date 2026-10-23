@@ -56,6 +56,40 @@ async function relaunchAfterQueueSaved (app, page) {
   return app.relaunch()
 }
 
+test('dragging the bottom queue item follows the pointer upward', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
+  await setWindowSize(app, page, { width: 1500, height: 1100 })
+  await page.evaluate(() => window.$store.dispatch('updateHideRecommendedVideos', true))
+  await goTo(page, 'history')
+  await page.evaluate(() => {
+    for (const [videoId, title] of [['queuevideo1', 'Queue video one'], ['queuevideo2', 'Queue video two']]) {
+      window.$store.commit('addVideoToWatchQueue', { video: { videoId, title, author: 'Queue Test Channel', lengthSeconds: 60 } })
+    }
+  })
+  await page.locator('a.title').filter({ hasText: /Current video/ }).click()
+  const queue = page.locator('.watchQueue')
+  const bottom = queue.locator('.queueItem').filter({ hasText: 'Queue video two' })
+  const top = queue.locator('.queueItem').filter({ hasText: 'Queue video one' })
+  const handle = bottom.locator('.queueDragHandle')
+  await handle.hover()
+  await expect(top).toHaveCSS('transform', 'none')
+  await expect(bottom).toHaveCSS('transform', 'none')
+  const bottomBounds = await bottom.boundingBox()
+  const topBounds = await top.boundingBox()
+  const handleBounds = await handle.boundingBox()
+  const x = handleBounds.x + handleBounds.width / 2
+  const y = handleBounds.y + handleBounds.height / 2
+  const distance = bottomBounds.y - topBounds.y
+  await page.mouse.down()
+  await page.mouse.move(x, y - distance, { steps: 10 })
+  await expect(bottom).toHaveClass(/dragging/)
+  await expect.poll(() => bottom.evaluate(element => element.getBoundingClientRect().y)).toBeCloseTo(topBounds.y, 0)
+  await expect.poll(() => top.evaluate(element => element.getBoundingClientRect().y)).toBeCloseTo(bottomBounds.y, 0)
+  await attachScreenshot('bottom-queue-item-dragged-up')
+  await page.mouse.up()
+  await expect(queue.locator('.queueItem h3')).toHaveText(['Queue video two', 'Queue video one'])
+  await expect(bottom).not.toHaveClass(/dragging/)
+})
+
 test('manages the queue from video menus and the watch sidebar', { tag: '@scale' }, async ({ page }) => {
   await goTo(page, 'history')
 
