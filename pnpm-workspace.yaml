@@ -18,6 +18,7 @@ minimumReleaseAgeExclude:
   - electron@43.8.3
   - eslint-plugin-jsdoc@65.3.12
   - postcss@8.5.31
+  - serialize-javascript@7.1.4
   - '@vot.js/core@3.2.0'
   - '@vot.js/shared@3.2.0'
 
