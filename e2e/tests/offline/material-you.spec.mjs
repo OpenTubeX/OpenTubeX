@@ -1,4 +1,4 @@
-import { test, expect, goToSettingsSection, setWindowSize, waitForAppReady, expectScrollAtRenderedEnd } from '../../helpers/app.mjs'
+import { test, expect, goToSettingsSection, setWindowSize, waitForAppReady, expectScrollAtRenderedEnd, readDatastore, latestSettings } from '../../helpers/app.mjs'
 import { sampleColors } from '../../helpers/colors.mjs'
 import { materialColorScheme, materialSeedPalette } from '../../../src/materialTheme.js'
 
@@ -388,7 +388,7 @@ test('Material seed picker fits narrow portrait and landscape layouts', async ({
   }
 })
 
-test('Material preset swatches preview palettes and persist the selected seed', async ({ page }) => {
+test('Material preset swatches preview palettes and persist the selected seed', async ({ app, page }) => {
   const section = await goToSettingsSection(page, 'theme')
   const swatches = section.locator('.materialColorSwatches > button')
   await expect(swatches).toHaveCount(8)
@@ -401,10 +401,15 @@ test('Material preset swatches preview palettes and persist the selected seed', 
     expect(colors.seed).toMatch(/^#[a-f0-9]{6}$/)
     expect(colors.palette).toMatch(/^#[a-f0-9]{6}$/)
   }
+  // Observe Indigo on disk so the final check cannot match the earlier Blue selection.
+  const savedSeed = () => latestSettings(readDatastore(app.userDataDir, 'settings')).materialSeedColor
+  await expect.poll(savedSeed).toBe('#3f51b5')
   const blue = section.locator('.materialColorSwatches').getByRole('button', { name: 'Blue', exact: true })
   await blue.focus()
   await blue.press('Space')
   await expect(blue).toHaveAttribute('aria-pressed', 'true')
+  // The swatch is optimistic; reload only after its queued write reaches disk.
+  await expect.poll(savedSeed).toBe('#4285f4')
   await page.reload()
   await goToSettingsSection(page, 'theme')
   await expect(blue).toHaveAttribute('aria-pressed', 'true')
