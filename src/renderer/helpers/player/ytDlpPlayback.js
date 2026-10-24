@@ -1085,6 +1085,10 @@ async function loadYtDlpPlaybackSource(
     return limitedLiveSource
   }
 
+  if (flatVrSource !== null && !flatVrSource.incomplete && incompleteSource?.vrProjection !== 'EQUIRECTANGULAR') {
+    return flatVrSource
+  }
+
   if (incompleteSource !== null) {
     return incompleteSource
   }

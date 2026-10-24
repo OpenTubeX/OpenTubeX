@@ -13,7 +13,7 @@ const code = (await readFile(new URL('../../src/renderer/helpers/player/ytDlpPla
   .replace(/^import .+$/gm, '')
   .replace(/^export /gm, '')
 
-function playbackLoader({ timeoutAttempts = Infinity, timeoutFormatId = '137', probeError = new DOMException('signal timed out', 'TimeoutError'), panorama = false, legacyProbeGate } = {}) {
+function playbackLoader({ timeoutAttempts = Infinity, timeoutFormatId = '137', probeError = new DOMException('signal timed out', 'TimeoutError'), panorama = false, hlsProbeResult = () => true, legacyProbeGate } = {}) {
   const extractions = []
   const saved = []
   const hlsProbes = []
@@ -62,7 +62,7 @@ function playbackLoader({ timeoutAttempts = Infinity, timeoutFormatId = '137', p
     waitForYtDlpFormatAvailability,
     probeYtDlpHlsManifest: async url => {
       hlsProbes.push(url)
-      return true
+      return hlsProbeResult(hlsProbes.length)
     },
   }
   function checkProbe(url) {
@@ -140,6 +140,37 @@ test('preserves a panoramic fallback when legacy format probes keep timing out',
   assert.equal(source.manifestSrc, 'https://media.test/panorama.m3u8?expire=4102444800')
   assert.equal(source.incomplete, true)
   assert.equal(saved.length, 0)
+  assert.equal(hlsProbes.length, 3)
+})
+
+test('returns a recovered complete DASH source when panoramic HLS remains unavailable', async () => {
+  const { getSource, extractions, hlsProbes } = playbackLoader({
+    panorama: true,
+    timeoutAttempts: 1,
+    hlsProbeResult: () => false,
+  })
+  const source = await getSource('video000001')
+
+  assert.equal(source.incomplete, false)
+  assert.equal(source.vrProjection, 'MESH')
+  assert.match(decodeURIComponent(source.manifestSrc), /height="1080"/)
+  assert.equal(extractions.length, 3)
+  assert.equal(hlsProbes.length, 3)
+})
+
+test('prefers an incomplete panorama to a later complete flat DASH fallback', async () => {
+  const { getSource, extractions, hlsProbes } = playbackLoader({
+    panorama: true,
+    timeoutFormatId: '18',
+    timeoutAttempts: 1,
+    hlsProbeResult: attempt => attempt === 1,
+  })
+  const source = await getSource('video000001')
+
+  assert.equal(source.incomplete, true)
+  assert.equal(source.vrProjection, 'EQUIRECTANGULAR')
+  assert.equal(source.manifestSrc, 'https://media.test/panorama.m3u8?expire=4102444800')
+  assert.equal(extractions.length, 3)
   assert.equal(hlsProbes.length, 3)
 })
 
