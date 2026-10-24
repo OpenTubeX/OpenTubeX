@@ -18,7 +18,8 @@ import shaka from 'shaka-player'
 import {
   createAbandonedSabrResponse,
   extractRawProtobufField,
-  parseSabrFormatId
+  parseSabrFormatId,
+  readCompleteUmpParts
 } from './sabrProtocol'
 
 const AbortableOperation = shaka.util.AbortableOperation
@@ -428,7 +429,7 @@ async function doRequest(
         chunkedDataBuffer = new CompositeBuffer([readObj.value])
       }
 
-      const remainingData = new UmpReader(chunkedDataBuffer).read((part) => {
+      const remainingData = readCompleteUmpParts(chunkedDataBuffer, (part) => {
         // MEDIA_END completes this request and aborts its response. A WebView
         // can deliver later parts in the same chunk; ignore them just as we
         // ignore later chunks, so they cannot change another loader's backoff.
@@ -597,11 +598,7 @@ async function doRequest(
       })
 
       if (!currentState.abortStatus.finished) {
-        if (remainingData) {
-          chunkedDataBuffer = remainingData.data
-        } else {
-          chunkedDataBuffer = null
-        }
+        chunkedDataBuffer = remainingData
 
         readObj = await reader.read()
       }

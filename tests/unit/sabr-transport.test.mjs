@@ -49,6 +49,72 @@ for (const headerId of [130, 256]) test(`reads SABR media header ID ${headerId} 
   transport.cleanup()
 })
 
+test('complete SABR media survives every network chunk boundary', async t => {
+  const bytes = new Uint8Array(await response([1, 2, 3]).arrayBuffer())
+  for (let split = 1; split < bytes.length; split++) {
+    await t.test(`split at byte ${split}`, async t => {
+      const { createSabrTransport } = load(async () => new Response(new ReadableStream({
+        start(controller) {
+          controller.enqueue(bytes.slice(0, split))
+          controller.enqueue(bytes.slice(split))
+          controller.close()
+        }
+      })))
+      const transport = createSabrTransport(sabrData, () => context)
+      t.after(() => transport.cleanup())
+      const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+      const segment = await transport.request(uri, request(uri), 1).promise
+      assert.deepEqual([...segment.data], [1, 2, 3])
+    })
+  }
+})
+
+test('split MEDIA headers retain all media bytes across retries', async t => {
+  const buffer = new CompositeBuffer([])
+  const writer = new UmpWriter(buffer)
+  writer.write(protos.UMPPartId.MEDIA_HEADER, protos.MediaHeader.encode({
+    headerId: 1, formatId: videoFormatId, sequenceNumber: 745, contentLength: 6,
+  }).finish())
+  writer.write(protos.UMPPartId.MEDIA, Uint8Array.of(1, 1, 2, 3, 4))
+  const boundary = buffer.getLength() + 1
+  writer.write(protos.UMPPartId.MEDIA, Uint8Array.of(1, 5, 6))
+  writer.write(protos.UMPPartId.MEDIA_END, Uint8Array.of(1))
+  const bytes = utils.concatenateChunks(buffer.chunks)
+  const warnings = []
+  const { createSabrTransport } = load(async () => new Response(new ReadableStream({
+    start(controller) {
+      controller.enqueue(bytes.slice(0, boundary))
+      controller.enqueue(bytes.slice(boundary))
+      controller.close()
+    }
+  })), { console: { ...console, warn: message => warnings.push(message) } })
+  const transport = createSabrTransport(sabrData, () => context)
+  t.after(() => transport.cleanup())
+  const uri = 'sabr1:video?formatId=137-456-&resolution=1080&startTimeMs=3906000&sq=745'
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const segment = await transport.request(uri, request(uri), 1).promise
+    assert.deepEqual([...segment.data], [1, 2, 3, 4, 5, 6])
+  }
+  assert.deepEqual(warnings, [])
+})
+
+test('SABR headers and media can arrive one byte at a time', async t => {
+  // Both the MEDIA size and its header ID need multiple UMP varint bytes.
+  const data = Array.from({ length: 256 }, (_, i) => i)
+  const bytes = new Uint8Array(await response(data, false, audioFormatId, data.length, 256).arrayBuffer())
+  const { createSabrTransport } = load(async () => new Response(new ReadableStream({
+    start(controller) {
+      for (const byte of bytes) controller.enqueue(Uint8Array.of(byte))
+      controller.close()
+    }
+  })))
+  const transport = createSabrTransport(sabrData, () => context)
+  t.after(() => transport.cleanup())
+  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+  const segment = await transport.request(uri, request(uri), 1).promise
+  assert.deepEqual([...segment.data], data)
+})
+
 test('rejects a SABR segment shorter than its declared content length', async () => {
   let calls = 0
   const { createSabrTransport } = load(async () => {

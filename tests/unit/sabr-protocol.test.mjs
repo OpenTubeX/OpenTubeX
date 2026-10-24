@@ -1,11 +1,32 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { CompositeBuffer, UmpWriter } from 'googlevideo/ump'
+import { concatenateChunks } from 'googlevideo/utils'
 
 import {
   createAbandonedSabrResponse,
   extractRawProtobufField,
-  parseSabrFormatId
+  parseSabrFormatId,
+  readCompleteUmpParts
 } from '../../src/renderer/helpers/player/sabrProtocol.js'
+
+test('retains split UMP types and emits empty parts exactly once', () => {
+  const encoded = new CompositeBuffer([])
+  const writer = new UmpWriter(encoded)
+  writer.write(300, new Uint8Array())
+  writer.write(301, Uint8Array.of(1, 2))
+  let pending = null
+  const parts = []
+  for (const byte of concatenateChunks(encoded.chunks)) {
+    pending ??= new CompositeBuffer([])
+    pending.append(Uint8Array.of(byte))
+    pending = readCompleteUmpParts(pending, part => {
+      parts.push([part.type, [...concatenateChunks(part.data.chunks)]])
+    })
+  }
+  assert.deepEqual(parts, [[300, []], [301, [1, 2]]])
+  assert.equal(pending, null)
+})
 
 test('preserves hyphens inside SABR format xtags', () => {
   assert.deepEqual(
