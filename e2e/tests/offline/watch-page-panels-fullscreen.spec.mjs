@@ -898,7 +898,9 @@ test.describe('fullscreen playlist dock', () => {
 
     const item = page.locator('.watchVideoPlaylist .playlistItem').first()
     await item.locator('.videoThumbnail').hover()
-    await expect(item.locator('.trashIcon')).toHaveCount(1)
+    await expect(item.locator('.trashIcon')).toHaveCount(0)
+    await item.locator('.playlistItemMenu button').click()
+    await expect(page.getByRole('menuitem', { name: 'Remove from playlist', exact: true })).toHaveCount(1)
     await expect(item.locator('.quickBookmarkVideoIcon')).toHaveCount(0)
   })
 

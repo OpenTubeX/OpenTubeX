@@ -523,7 +523,7 @@
   }
 
   .fullscreenPlaylist .playlistItem :deep(.restArea) {
-    line-height: 0;
+    display: none;
   }
 
   .fullscreenPlaylist .playlistItem :deep(.videoIndexArea) {

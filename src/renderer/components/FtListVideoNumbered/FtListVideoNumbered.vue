@@ -241,9 +241,14 @@ function openPlaylistItemMenu() {
   openButtonMenu(playlistItemMenuButton.value.$el.querySelector('button'), playlistItemMenuItems)
 }
 
-onBeforeUnmount(() => {
+function closePlaylistItemMenu() {
   window.dispatchEvent(new CustomEvent('opentubex:close-context-menu', { detail: playlistItemMenuItems }))
+}
+
+watch(visible, isVisible => {
+  if (!isVisible) closePlaylistItemMenu()
 })
+onBeforeUnmount(closePlaylistItemMenu)
 
 const canBecomeDraggable = computed(() => inUserPlaylist && props.isSortOrderCustom && (props.canMoveVideoUp || props.canMoveVideoDown))
 const { dragVideo, moveDraggedVideo, afterDrag, pointerDragging, startPointerDrag, moveWithKeyboard } = usePlaylistDrag(emit)

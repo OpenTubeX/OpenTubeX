@@ -391,7 +391,7 @@ const playlistVideos = computed(() => items.value
     authorId: item.authorId,
     lengthSeconds: item.lengthSeconds ?? '',
     published: item.published,
-    viewCount: item.viewCount,
+    ...(item.viewCount != null ? { viewCount: item.viewCount } : {}),
     premiereDate: item.premiereDate,
     premiereTimestamp: item.premiereTimestamp,
     isMembersOnly: item.isMembersOnly,

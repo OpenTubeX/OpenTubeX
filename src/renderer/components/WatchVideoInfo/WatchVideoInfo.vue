@@ -1042,7 +1042,7 @@ const addToPlaylistVideoData = computed(() => ({
   authorId: props.channelId,
   lengthSeconds: props.lengthSeconds,
   published: props.published,
-  viewCount: props.viewCount,
+  ...(props.viewCount != null ? { viewCount: props.viewCount } : {}),
   premiereDate: props.premiereDate
 }))
 
@@ -1103,7 +1103,7 @@ async function addToQuickBookmarkPlaylist() {
     authorId: props.channelId,
     lengthSeconds: props.lengthSeconds,
     published: props.published,
-    viewCount: props.viewCount,
+    ...(props.viewCount != null ? { viewCount: props.viewCount } : {}),
     premiereDate: props.premiereDate
   }
 

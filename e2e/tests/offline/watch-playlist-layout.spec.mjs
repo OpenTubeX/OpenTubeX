@@ -28,7 +28,7 @@ const videos = Array.from({ length: 12 }, (_, index) => ({
   author: 'Test channel',
   authorId: 'UC-test-channel-id',
   lengthSeconds: 120,
-  ...(index === 11 ? {} : { viewCount: 12345 }),
+  ...(index === 11 ? {} : { viewCount: index === 10 ? null : index === 9 ? 0 : 12345 }),
   published: Date.now() - 86400000,
   timeAdded: Date.now() + index,
   playlistItemId: `layout-item-${index}`,
@@ -379,8 +379,21 @@ test('playlist saves retain available view counts across restart', async ({ app,
   await rows.nth(2).locator('.addToPlaylistIcon button').click()
   await page.getByRole('option').filter({ hasText: 'Saved counts' }).click()
   await expect.poll(() => page.evaluate(() => window.$store.getters.getPlaylist('saved-counts').videos.map(video => video.viewCount))).toEqual([12345, 12345])
+  await page.keyboard.press('Escape')
+  for (const index of [9, 10, 11]) {
+    await rows.nth(index).hover()
+    await rows.nth(index).locator('.quickBookmarkVideoIcon button').click()
+  }
+  const counts = target => target.evaluate(() => window.$store?.getters.getPlaylist('saved-counts')?.videos.map(video => ({
+    hasCount: Object.hasOwn(video, 'viewCount'), count: video.viewCount ?? null
+  })))
+  const expected = [
+    { hasCount: true, count: 12345 }, { hasCount: true, count: 12345 },
+    { hasCount: true, count: 0 }, { hasCount: false, count: null }, { hasCount: false, count: null }
+  ]
+  await expect.poll(() => counts(page)).toEqual(expected)
   const restarted = await app.relaunch()
-  await expect.poll(() => restarted.page.evaluate(() => window.$store?.getters.getPlaylist('saved-counts')?.videos.map(video => video.viewCount))).toEqual([12345, 12345])
+  await expect.poll(() => counts(restarted.page)).toEqual(expected)
 })
 
 test('playlist metadata groups views and upload time below the channel', { tag: '@scale' }, async ({ app, page }) => {
@@ -514,6 +527,21 @@ test.describe('long watch playlist', () => {
         lastUpdatedAt: Date.now()
       }]
     }
+  })
+
+  test('closes a row menu when scrolling releases its row', { tag: '@scale' }, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await goTo(page, 'userplaylists')
+    await page.getByText('Long test playlist', { exact: true }).click()
+    await page.getByText('Long playlist video 1', { exact: true }).click()
+    await (await waitForPlayback(page)).evaluate(element => element.pause())
+    const list = page.locator('.watchVideoPlaylist .playlistItemsWrapper')
+    const row = list.locator(':scope > .playlistItem').first()
+    await row.locator('.playlistItemMenu button').click()
+    await expect(page.getByRole('menuitem', { name: 'Remove from playlist', exact: true })).toBeVisible()
+    await list.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect(row.locator('.ft-list-video')).toHaveCount(0)
+    await expect(page.getByRole('menuitem', { name: 'Remove from playlist', exact: true })).toHaveCount(0)
   })
 
   test('remeasures released rows when a height-only breakpoint restyles the fullscreen playlist', { tag: '@scale' }, async ({ app, page, uiScale }) => {
