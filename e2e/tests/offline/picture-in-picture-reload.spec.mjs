@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url'
 import { test, expect, setPlayerFullscreen } from '../../helpers/app.mjs'
 import { activeTab, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, reloadWatchView, watchViewHandle } from '../../helpers/watch.mjs'
@@ -176,8 +177,12 @@ test.describe('after default Picture-in-Picture startup', () => {
 // The native poster attribute stays removed during playback because Chromium
 // can stretch it across the compositor surface when entering PiP (#362). The
 // inline player shows the DOM poster overlay instead while PiP is active.
-test('shows the poster overlay inline while in Picture-in-Picture', async ({ app, page }) => {
+test('shows the poster overlay inline while in Picture-in-Picture', async ({ app, page, attachScreenshot }) => {
   await mockPlayableWatchPage(app, page)
+  await page.route('https://i.ytimg.com/**', route => route.fulfill({
+    path: fileURLToPath(new URL('../../fixtures/media/video-thumbnail.svg', import.meta.url)),
+    contentType: 'image/svg+xml'
+  }))
   await setFocused(app, page, true)
   const video = await openMockedVideo(page)
   const poster = page.locator(`${activeTab} .ftVideoPlayer .countdownPoster`)
@@ -185,17 +190,22 @@ test('shows the poster overlay inline while in Picture-in-Picture', async ({ app
 
   await expect(poster).toBeAttached()
   await expect(poster).toBeHidden()
+  const image = poster.locator('img:not(.retryImagePlaceholder)')
+  await expect(image).toHaveCSS('opacity', '1')
 
   await video.evaluate(element => element.requestPictureInPicture())
   await expect.poll(() => pictureInPictureActive(page)).toBe(true)
   await expect(poster).toBeVisible()
+  await expect(image).toHaveCSS('opacity', '0.35')
   // The overlay covers Chromium's own PiP message, so it shows a replacement.
   await expect(message).toHaveText('Playing in Picture-in-Picture')
   await expect(poster).toMatchAriaSnapshot('- text: Playing in Picture-in-Picture')
   await expect(video).not.toHaveAttribute('poster')
+  await attachScreenshot('picture-in-picture poster')
 
   await page.evaluate(() => document.exitPictureInPicture())
   await expect.poll(() => pictureInPictureActive(page)).toBe(false)
   await expect(poster).toBeHidden()
   await expect(message).toHaveCount(0)
+  await expect(image).toHaveCSS('opacity', '1')
 })
