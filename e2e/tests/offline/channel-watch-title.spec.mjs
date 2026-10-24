@@ -4,6 +4,7 @@ import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 const CHANNEL_ID = 'UC4QobU6STFB0P71PMvOGN5A'
 const CHANNEL_PATH = `/channel/${CHANNEL_ID}`
+const CHANNEL_API_PATH = `/api/v1/channels/${CHANNEL_ID}`
 const VIDEO_TITLE = 'Me at the zoo'
 
 test.use({
@@ -23,16 +24,15 @@ test.use({
 for (const delayed of [false, true]) {
   test(`retained channel titles stay with their page when loaded ${delayed ? 'behind' : 'before'} Watch`, async ({ app, page }, testInfo) => {
     await mockPlayableWatchPage(app, page)
-    const started = Promise.withResolvers()
     const released = Promise.withResolvers()
     let channelRequests = 0
-    await page.route('https://invidious.test/api/v1/channels/**', async route => {
-      if (new URL(route.request().url()).pathname.split('/')[5]) {
+    await page.route(url => url.origin === 'https://invidious.test' &&
+      (url.pathname === CHANNEL_API_PATH || url.pathname === `${CHANNEL_API_PATH}/videos`), async route => {
+      if (new URL(route.request().url()).pathname === `${CHANNEL_API_PATH}/videos`) {
         await route.fulfill({ json: { videos: [], continuation: null } })
         return
       }
       channelRequests++
-      started.resolve()
       if (delayed) await released.promise
       await route.fulfill({
         json: {
@@ -51,15 +51,17 @@ for (const delayed of [false, true]) {
     })
     const tab = await page.evaluate(route => window.ftElectron.tabs.create({ route, makeActive: true }), CHANNEL_PATH)
     const tabTitle = page.locator(`.tab[data-tab-id="${tab.id}"] .tabTitleText`)
-    await started.promise
+    await expect.poll(() => channelRequests, { message: 'waiting for the channel info request' }).toBe(1)
     if (!delayed) await expect(tabTitle).toHaveText('jawed')
 
     // Load the video with the local fixture while the retained channel keeps
     // its original request and component instance.
     await page.evaluate(() => window.$store.commit('setBackendPreference', 'local'))
     const video = await openMockedVideo(page)
-    await video.evaluate(element => { element.pause() })
-    const originalVideo = await video.elementHandle()
+    await video.evaluate(element => {
+      element.pause()
+      element.dataset.retainedTitleTest = 'original'
+    })
     await expect(page.locator('.videoTitle:visible')).toHaveText(VIDEO_TITLE)
     await expect(tabTitle).toHaveText(VIDEO_TITLE)
     released.resolve()
@@ -82,16 +84,15 @@ for (const delayed of [false, true]) {
     await page.locator(sel.backButton).click()
     await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw$/)
     await expect(tabTitle).toHaveText(VIDEO_TITLE)
-    expect(await originalVideo.evaluate(element => element.isConnected)).toBe(true)
+    await expect(video).toHaveAttribute('data-retained-title-test', 'original')
     await page.screenshot({ path: testInfo.outputPath('video-title.png') })
-    await originalVideo.dispose()
   })
 }
 
 test('an old post response cannot replace the retained post or its title behind Watch', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await page.evaluate(() => window.$store.commit('setHideComments', true))
-  const oldRequest = Promise.withResolvers()
+  let oldRequest
   const response = id => ({
     comments: [{
       commentId: `post-${id}`,
@@ -106,7 +107,7 @@ test('an old post response cannot replace the retained post or its title behind 
   })
   await page.route('https://invidious.test/api/v1/post/**', route => {
     if (new URL(route.request().url()).pathname.endsWith('/post-A')) {
-      oldRequest.resolve(route)
+      oldRequest = route
       return
     }
     return route.fulfill({ json: response('B') })
@@ -114,7 +115,7 @@ test('an old post response cannot replace the retained post or its title behind 
   const tab = await page.evaluate(() => window.ftElectron.tabs.create({
     route: '/post/post-A', query: { authorId: 'author-A' }, makeActive: true
   }))
-  const pending = await oldRequest.promise
+  await expect.poll(() => Boolean(oldRequest), { message: 'waiting for the Post A request' }).toBe(true)
   await page.locator(sel.searchInput).fill('https://www.youtube.com/post/post-B?ucid=author-B')
   await page.locator(sel.searchInput).press('Enter')
   await expect(page).toHaveURL(/#\/post\/post-B\?authorId=author-B$/)
@@ -126,7 +127,7 @@ test('an old post response cannot replace the retained post or its title behind 
   const video = await openMockedVideo(page)
   await video.evaluate(element => { element.pause() })
   await expect(page.locator('.videoTitle:visible')).toHaveText(VIDEO_TITLE)
-  await pending.fulfill({ json: response('A') })
+  await oldRequest.fulfill({ json: response('A') })
   // The old API response must finish processing before returning to Post B.
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
   await expect(page.locator('.browsingBehindWatch').getByText('Post B content', { exact: true })).toHaveCount(1)
