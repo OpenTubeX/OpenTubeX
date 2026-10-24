@@ -1085,6 +1085,8 @@ async function loadYtDlpPlaybackSource(
     return limitedLiveSource
   }
 
+  // Prefer a complete flat source to an incomplete one. An available panorama
+  // keeps priority even when some formats are missing.
   if (flatVrSource !== null && incompleteSource?.vrProjection !== 'EQUIRECTANGULAR') {
     return flatVrSource
   }
