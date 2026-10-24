@@ -1996,10 +1996,10 @@ test.describe('list video actions', () => {
       return favorites?.videos?.map((entry) => entry.videoId)
     }).toEqual(['eeeeeeeeeee'])
 
-    // Playlist entries must not carry the attributes the store strips
+    // Save available view counts while omitting descriptions.
     const saved = (await readPlaylist(app, 'favorites')).videos[0]
     expect(saved).not.toHaveProperty('description')
-    expect(saved).not.toHaveProperty('viewCount')
+    expect(saved).toHaveProperty('viewCount', 1234)
 
     // Clicking it again removes the video
     await favoritesRow.click()
