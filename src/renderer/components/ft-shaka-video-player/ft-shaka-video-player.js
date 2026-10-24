@@ -8063,6 +8063,7 @@ export default defineComponent({
       fullWindowEnabled,
       inlineSixteenByNine: computed(() => audioPlayerMode.value || forceAspectRatio.value || (!props.shortsPlayer && !videoLayoutReady.value)),
       getUi: () => ui,
+      getSeekRange: () => hasLoaded.value ? player?.seekRange() : null,
       isActiveTab,
       isPlayerSuspended: shortsNavigationSuspended,
       pictureInPictureActive,
@@ -13062,7 +13063,8 @@ export default defineComponent({
         mediaElement.currentTime = startTime
       }
       const prepareStartTime = () => {
-        if (loadingPlayer.getManifest() !== null) return
+        // Native playback still reports NOT_LOADED at this event.
+        if (loadingPlayer.getManifestType() !== null) return
         // Native playback otherwise restores saved progress on canplay, after
         // a user may have sought. Restore it at metadata readiness instead.
         loadingPlayer.updateStartTime(null)
@@ -13171,7 +13173,7 @@ export default defineComponent({
       const mediaElement = video.value
       // Native HLS can emit canplay before Shaka finishes loading its tracks.
       // Seeks already applied in that interval must not survive to a later rebuffer.
-      if (videoLayoutReady.value && player.getManifest() === null && mediaElement.readyState >= 3) pendingMetadataSeek = null
+      if (videoLayoutReady.value && player.getManifestType() === null && mediaElement.readyState >= 3) pendingMetadataSeek = null
       // Background tabs may finish loading without emitting play or pause.
       shortsPaused.value = mediaElement.paused
       if (process.env.IS_ELECTRON && !mediaElement.autoplay && mediaElement.paused) {

@@ -183,30 +183,39 @@ test('consumes the startup seek even when canplay precedes Shaka loaded', () => 
   assert.equal(state.video.value.currentTime, 20)
 })
 
-test('loading completion consumes a native seek made after canplay', () => {
-  const { state, setCurrentTime, handleCanPlay } = absoluteSeekFixture({ isLive: false })
-  state.hasLoaded.value = false
-  state.video.value.readyState = 4
-  handleCanPlay()
-  setCurrentTime(5)
-  assert.equal(state.pendingMetadataSeek, 5)
-  state.video.value.currentTime = 6
-  const loadedStart = source.indexOf('    async function handleLoaded() {')
-  const loadedEnd = source.indexOf('      // Background tabs', loadedStart)
-  Object.assign(state, {
-    togglePlaybackRate: null,
-    isLive: { value: false },
-    localCaptions: { value: [] },
-    restorePendingPlaybackRate() {},
-    player: { isLive: () => false, getManifest: () => null }
+for (const manifestType of [null, 'DASH']) {
+  test(`loading completion only consumes a native seek made after canplay with manifestType=${manifestType}`, () => {
+    const { state, setCurrentTime, handleCanPlay } = absoluteSeekFixture({ isLive: false })
+    state.hasLoaded.value = false
+    state.video.value.readyState = 4
+    handleCanPlay()
+    setCurrentTime(5)
+    assert.equal(state.pendingMetadataSeek, 5)
+    state.video.value.currentTime = 6
+    const loadedStart = source.indexOf('    async function handleLoaded() {')
+    const loadedEnd = source.indexOf('      // Background tabs', loadedStart)
+    let manifestReads = 0
+    Object.assign(state, {
+      togglePlaybackRate: null,
+      isLive: { value: false },
+      localCaptions: { value: [] },
+      restorePendingPlaybackRate() {},
+      player: {
+        isLive: () => false,
+        getManifestType: () => manifestType,
+        getManifest: () => { manifestReads++; return manifestType === null ? null : {} }
+      }
+    })
+    vm.runInNewContext(`${source.slice(loadedStart, loadedEnd)}\n    }\nhandleLoaded()`, state)
+    assert.equal(manifestReads, 0, 'playback detection must not use the deprecated manifest getter')
+    assert.equal(state.pendingMetadataSeek, manifestType === null ? null : 5)
+    if (manifestType !== null) return
+    assert.equal(state.video.value.currentTime, 6)
+    state.video.value.currentTime = 20
+    handleCanPlay()
+    assert.equal(state.video.value.currentTime, 20)
   })
-  vm.runInNewContext(`${source.slice(loadedStart, loadedEnd)}\n    }\nhandleLoaded()`, state)
-  assert.equal(state.pendingMetadataSeek, null)
-  assert.equal(state.video.value.currentTime, 6)
-  state.video.value.currentTime = 20
-  handleCanPlay()
-  assert.equal(state.video.value.currentTime, 20)
-})
+}
 
 test('retains a queued seek when a timeline pointer interaction is canceled', () => {
   const { state, setCurrentTime, handleSeekBarInput } = absoluteSeekFixture({ isLive: false })
@@ -305,31 +314,40 @@ for (const action of ['chapter', 'media session', 'timeline']) {
   })
 }
 
-for (const userSeek of [false, true]) {
-  test(`native metadata restores saved progress after autoplay begins with userSeek=${userSeek}`, async () => {
-    const mediaElement = new EventTarget()
-    mediaElement.currentTime = userSeek ? 5 : 0.002
-    mediaElement.seeking = userSeek
-    const player = new EventTarget()
-    player.getManifest = () => null
-    player.updateStartTime = () => {}
-    player.load = async () => {
-      player.dispatchEvent(new Event('canupdatestarttime'))
-      mediaElement.dispatchEvent(new Event('loadedmetadata'))
-    }
-    const match = source.match(/    async function loadPlaybackSource\([^]*?\n    }/)
-    assert.ok(match)
-    const loadPlaybackSource = vm.runInNewContext(`${match[0]}\nloadPlaybackSource`, {
-      player,
-      video: { value: mediaElement },
-      pendingMetadataSeek: null,
-      foregroundLoadAbortController: null,
-      process: { env: {} },
-      hasPlaybackPosition: { value: userSeek },
-      props: { videoId: 'video', playbackEngine: 'built-in', format: 'legacy' },
-      console: { warn() {} }
+for (const manifestType of [null, 'DASH', 'HLS', 'SABR']) {
+  for (const userSeek of [false, true]) {
+    test(`metadata restores saved progress only for native playback with manifestType=${manifestType}, userSeek=${userSeek}`, async () => {
+      const mediaElement = new EventTarget()
+      mediaElement.currentTime = userSeek ? 5 : 0.002
+      mediaElement.seeking = userSeek
+      const player = new EventTarget()
+      let manifestReads = 0
+      const startTimeUpdates = []
+      player.getManifest = () => { manifestReads++; return manifestType === null ? null : {} }
+      player.getManifestType = () => manifestType
+      // Native playback is still NOT_LOADED when canupdatestarttime fires.
+      player.getLoadMode = () => manifestType === null ? 1 : 2
+      player.updateStartTime = value => startTimeUpdates.push(value)
+      player.load = async () => {
+        player.dispatchEvent(new Event('canupdatestarttime'))
+        mediaElement.dispatchEvent(new Event('loadedmetadata'))
+      }
+      const match = source.match(/    async function loadPlaybackSource\([^]*?\n    }/)
+      assert.ok(match)
+      const loadPlaybackSource = vm.runInNewContext(`${match[0]}\nloadPlaybackSource`, {
+        player,
+        video: { value: mediaElement },
+        pendingMetadataSeek: null,
+        foregroundLoadAbortController: null,
+        process: { env: {} },
+        hasPlaybackPosition: { value: userSeek },
+        props: { videoId: 'video', playbackEngine: 'built-in', format: 'legacy' },
+        console: { warn() {} }
+      })
+      await loadPlaybackSource('https://example.com/video', 15, 'video/webm')
+      assert.equal(manifestReads, 0, 'playback detection must not use the deprecated manifest getter')
+      assert.deepEqual(startTimeUpdates, manifestType === null ? [null] : [])
+      assert.equal(mediaElement.currentTime, userSeek ? 5 : manifestType === null ? 15 : 0.002)
     })
-    await loadPlaybackSource('https://example.com/video', 15, 'video/webm')
-    assert.equal(mediaElement.currentTime, userSeek ? 5 : 15)
-  })
+  }
 }

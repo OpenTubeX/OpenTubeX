@@ -24,6 +24,14 @@ async function savedProgress(app) {
     .filter(record => record.videoId === 'jNQXAC9IVRw').at(-1)?.watchProgress
 }
 
+function collectManifestWarnings(page) {
+  const warnings = []
+  page.on('console', message => {
+    if (message.text().includes('internal Manifest structure')) warnings.push(message.text())
+  })
+  return warnings
+}
+
 for (const phase of ['metadata pending', 'media pending', 'first loaded data']) {
   test(`preserves the resume position when leaving with ${phase}`, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
@@ -315,6 +323,7 @@ for (const action of ['chapter', 'timeline', 'first timeline', 'mouse timeline',
 }
 
 test('native audio loading preserves a seek made during buffering', async ({ app, page }) => {
+  const manifestWarnings = collectManifestWarnings(page)
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
   // A restored position can be positive before the initial source plays.
@@ -336,10 +345,12 @@ test('native audio loading preserves a seek made during buffering', async ({ app
   const firstPosition = await page.evaluate(() => window.firstPlaybackPosition)
   expect(firstPosition).toBeGreaterThanOrEqual(5)
   expect(firstPosition).toBeLessThan(6)
+  expect(manifestWarnings).toEqual([])
 })
 
 for (const action of ['chapter', 'timeline']) {
   test(`starts DASH at a ${action} seek made while loading`, async ({ app, page }) => {
+    const manifestWarnings = collectManifestWarnings(page)
     await mockPlayableWatchPage(app, page)
     const video = await openMockedVideo(page)
     await video.evaluate(element => element.pause())
@@ -374,7 +385,7 @@ for (const action of ['chapter', 'timeline']) {
         view.activeFormat = 'dash'
       }, manifest)
       await requested
-      await expect.poll(() => page.locator('.ftVideoPlayer').evaluate(element => element.ui?.getControls().getPlayer().getManifest() != null)).toBe(true)
+      await expect.poll(() => page.locator('.ftVideoPlayer').evaluate(element => element.ui?.getControls().getPlayer().getManifestType() != null)).toBe(true)
       await watch.evaluate((component, action) => {
         const video = component.proxy.$el.querySelector('video')
         window.firstPlaybackPosition = null
@@ -399,6 +410,7 @@ for (const action of ['chapter', 'timeline']) {
       const firstPosition = await page.evaluate(() => window.firstPlaybackPosition)
       expect(firstPosition).toBeGreaterThanOrEqual(15)
       expect(firstPosition).toBeLessThan(16)
+      expect(manifestWarnings).toEqual([])
     } finally {
       release()
     }
