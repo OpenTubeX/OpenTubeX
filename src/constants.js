@@ -432,6 +432,7 @@ const DefaultKeyboardShortcuts = {
     },
     PLAYBACK: {
       PLAY: 'k',
+      PLAY_ALT: 'space',
       LARGE_REWIND: 'j',
       LARGE_FAST_FORWARD: 'l',
       SMALL_REWIND: 'arrowleft',
@@ -456,6 +457,13 @@ const DefaultKeyboardShortcuts = {
       REDO_SEEK: 'ctrl+shift+z',
       SKIP_TO_NEXT: 'shift+n',
       SKIP_TO_PREV: 'shift+p'
+    },
+    SPONSORBLOCK: {
+      START_SPONSORBLOCK_SEGMENT: ';',
+      END_SPONSORBLOCK_SEGMENT: ';',
+      OPEN_SPONSORBLOCK_SUBMISSION_MENU: "'",
+      CANCEL_SPONSORBLOCK_SEGMENT: '',
+      CLEAR_SPONSORBLOCK_SEGMENTS: '',
     }
   },
 }
@@ -467,6 +475,7 @@ const NonEditableKeyboardShortcutPaths = new Set([
   'APP.GENERAL.FIND_PREVIOUS_ALT_ENTER',
   'APP.GENERAL.NEXT_TAB',
   'APP.GENERAL.PREV_TAB',
+  'VIDEO_PLAYER.PLAYBACK.PLAY_ALT',
 ])
 
 const KeyboardShortcuts = getConfiguredKeyboardShortcuts()

@@ -65,6 +65,7 @@ test('context-dependent shortcuts are shown as non-editable', async ({ page }) =
     'APP.GENERAL.FIND_PREVIOUS_ALT_ENTER',
     'APP.GENERAL.NEXT_TAB',
     'APP.GENERAL.PREV_TAB',
+    'VIDEO_PLAYER.PLAYBACK.PLAY_ALT',
   ]
 
   for (const path of reservedPaths) {

@@ -11908,6 +11908,27 @@ export default defineComponent({
         return
       }
 
+      if (!store.getters.isAnyPromptOpen && !store.getters.getSettingsWindowOpen &&
+        !sponsorBlockSubmissionPending.value) {
+        const shortcuts = KeyboardShortcuts.VIDEO_PLAYER.SPONSORBLOCK
+        const submissionActions = [
+          [shortcuts.START_SPONSORBLOCK_SEGMENT, 'start', 'startSponsorBlockSegment'],
+          [shortcuts.END_SPONSORBLOCK_SEGMENT, 'end', 'endSponsorBlockSegment'],
+          [shortcuts.OPEN_SPONSORBLOCK_SUBMISSION_MENU, 'menu', 'toggleSponsorBlockSubmissionMenu'],
+          [shortcuts.CANCEL_SPONSORBLOCK_SEGMENT, 'cancel', 'cancelSponsorBlockSegment'],
+          [shortcuts.CLEAR_SPONSORBLOCK_SEGMENTS, 'clear', 'clearSponsorBlockSegments'],
+        ]
+        const action = submissionActions.find(([shortcut, button]) =>
+          matches(shortcut) && sponsorBlockSubmissionVisibleButtons.value.includes(button))
+        if (action) {
+          event.preventDefault()
+          if (!event.repeat) {
+            events.dispatchEvent(new CustomEvent(action[2]))
+          }
+          return
+        }
+      }
+
       if (event.key === 'Enter' && toggleActiveSponsorBlockSkipState()) {
         event.preventDefault()
         return

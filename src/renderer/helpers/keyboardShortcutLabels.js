@@ -57,7 +57,7 @@ export function getKeyboardShortcutLabelMappings(t, isCapacitor = false) {
     [t('KeyboardShortcutPrompt.Video Zoom Out'), ['VIDEO_ZOOM_OUT']],
     [t('KeyboardShortcutPrompt.Stats'), ['STATS']],
 
-    [t('KeyboardShortcutPrompt.Play'), ['PLAY']],
+    [t('KeyboardShortcutPrompt.Play'), ['PLAY', 'PLAY_ALT']],
     [t('KeyboardShortcutPrompt.Large Rewind'), ['LARGE_REWIND']],
     [t('KeyboardShortcutPrompt.Large Fast Forward'), ['LARGE_FAST_FORWARD']],
     [t('KeyboardShortcutPrompt.Small Rewind'), ['SMALL_REWIND']],
@@ -80,5 +80,11 @@ export function getKeyboardShortcutLabelMappings(t, isCapacitor = false) {
     [t('KeyboardShortcutPrompt.Next Frame'), ['NEXT_FRAME']],
     [t('KeyboardShortcutPrompt.Skip to Next Video'), ['SKIP_TO_NEXT']],
     [t('KeyboardShortcutPrompt.Skip to Previous Video'), ['SKIP_TO_PREV']],
+
+    [t('Video.Player.SponsorBlock.StartSegmentNow'), ['START_SPONSORBLOCK_SEGMENT']],
+    [t('Video.Player.SponsorBlock.SetSegmentEndNow'), ['END_SPONSORBLOCK_SEGMENT']],
+    [t('Video.Player.SponsorBlock.OpenSubmissionMenu'), ['OPEN_SPONSORBLOCK_SUBMISSION_MENU']],
+    [t('Video.Player.SponsorBlock.CancelCurrentSegment'), ['CANCEL_SPONSORBLOCK_SEGMENT']],
+    [t('Video.Player.SponsorBlock.ClearSegments'), ['CLEAR_SPONSORBLOCK_SEGMENTS']],
   ]
 }

@@ -1,5 +1,5 @@
 const MODIFIER_KEYS = new Set(['Alt', 'AltGraph', 'Control', 'Meta', 'Shift'])
-const IMPLICIT_SHIFT_KEYS = new Set(['!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', 'plus', ':', '<', '>', '?', '@', '^', '_', '{', '|', '}'])
+const IMPLICIT_SHIFT_KEYS = new Set(['!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', 'plus', ':', ';', '<', '>', '?', '@', '^', '_', '{', '|', '}'])
 
 /**
  * @param {KeyboardEvent} event
