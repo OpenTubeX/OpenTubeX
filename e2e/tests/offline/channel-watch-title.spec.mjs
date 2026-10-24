@@ -4,6 +4,7 @@ import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 const CHANNEL_ID = 'UC4QobU6STFB0P71PMvOGN5A'
 const CHANNEL_PATH = `/channel/${CHANNEL_ID}`
+const VIDEO_TITLE = 'Me at the zoo'
 
 test.use({
   seed: {
@@ -59,17 +60,17 @@ for (const delayed of [false, true]) {
     const video = await openMockedVideo(page)
     await video.evaluate(element => { element.pause() })
     const originalVideo = await video.elementHandle()
-    const videoTitle = await page.locator('.videoTitle:visible').textContent()
-    await expect(tabTitle).toHaveText(videoTitle.trim())
+    await expect(page.locator('.videoTitle:visible')).toHaveText(VIDEO_TITLE)
+    await expect(tabTitle).toHaveText(VIDEO_TITLE)
     released.resolve()
     await expect(page.locator('.browsingBehindWatch .channelDetails .name')).toHaveText('jawed')
     // Flush the channel's loading/title watchers and metadata IPC.
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
-    await expect(tabTitle).toHaveText(videoTitle.trim())
+    await expect(tabTitle).toHaveText(VIDEO_TITLE)
     await expect.poll(() => page.evaluate(id => {
       const tab = window.$store.getters.getTabById(id)
       return tab.history[tab.historyIndex].title
-    }, tab.id)).toBe(videoTitle.trim())
+    }, tab.id)).toBe(VIDEO_TITLE)
 
     await page.locator(`.watchVideoInfo:visible a.channelName[href="#${CHANNEL_PATH}"]`).click()
     await expect(page).toHaveURL(new RegExp(`#${CHANNEL_PATH}$`))
@@ -80,7 +81,7 @@ for (const delayed of [false, true]) {
 
     await page.locator(sel.backButton).click()
     await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw$/)
-    await expect(tabTitle).toHaveText(videoTitle.trim())
+    await expect(tabTitle).toHaveText(VIDEO_TITLE)
     expect(await originalVideo.evaluate(element => element.isConnected)).toBe(true)
     await page.screenshot({ path: testInfo.outputPath('video-title.png') })
     await originalVideo.dispose()
@@ -124,12 +125,12 @@ test('an old post response cannot replace the retained post or its title behind 
   await page.evaluate(() => window.$store.commit('setBackendPreference', 'local'))
   const video = await openMockedVideo(page)
   await video.evaluate(element => { element.pause() })
-  const videoTitle = (await page.locator('.videoTitle:visible').textContent()).trim()
+  await expect(page.locator('.videoTitle:visible')).toHaveText(VIDEO_TITLE)
   await pending.fulfill({ json: response('A') })
   // The old API response must finish processing before returning to Post B.
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
   await expect(page.locator('.browsingBehindWatch').getByText('Post B content', { exact: true })).toHaveCount(1)
-  await expect(tabTitle).toHaveText(videoTitle)
+  await expect(tabTitle).toHaveText(VIDEO_TITLE)
   await page.locator(sel.backButton).click()
   await expect(page).toHaveURL(/#\/post\/post-B\?authorId=author-B$/)
   await expect(page.getByText('Post B content', { exact: true })).toBeVisible()
