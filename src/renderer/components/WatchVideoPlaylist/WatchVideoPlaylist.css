@@ -509,6 +509,21 @@
     column-gap: 0.5em;
   }
 
+  .fullscreenPlaylist :deep(.videoThumbnail) {
+    inline-size: 80px;
+    grid-template-columns: max-content minmax(0, 1fr);
+  }
+
+  /* stylelint-disable-next-line selector-max-compound-selectors */
+  .fullscreenPlaylist :deep(.ft-list-item .videoThumbnail > *) {
+    grid-column: 1 / -1;
+  }
+
+  /* stylelint-disable-next-line selector-max-compound-selectors */
+  .fullscreenPlaylist :deep(.ft-list-item .videoThumbnail .playlistIndexBadge) {
+    grid-column: 1;
+  }
+
   /* Match the child card's overlay rule to keep the labels apart. */
   /* stylelint-disable-next-line selector-max-compound-selectors */
   .fullscreenPlaylist :deep(.ft-list-item .videoThumbnail .videoWatched),
@@ -521,8 +536,15 @@
 
   /* stylelint-disable-next-line selector-max-compound-selectors */
   .fullscreenPlaylist :deep(.ft-list-item .videoThumbnail .videoWatched) {
+    grid-column: 2;
     place-self: start end;
+    box-sizing: border-box;
+    min-inline-size: 0;
+    max-inline-size: calc(100% - 4px);
     margin-inline: 0 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .fullscreenPlaylist :deep(.watchPlaylistItem.watched .sponsorBlockVideoLabel) {

@@ -517,6 +517,25 @@ test('landscape fullscreen playlist shows more videos and keeps controls outside
     const index = thumbnail.querySelector('.playlistIndexBadge').getBoundingClientRect()
     return index.right <= watched.left && watched.bottom <= duration.top && watched.top >= bounds.top && duration.bottom <= bounds.bottom
   })).toBe(true)
+  const originalBadges = await watchedThumbnail.evaluate(thumbnail => {
+    const index = thumbnail.querySelector('.playlistIndexBadge')
+    const watched = thumbnail.querySelector('.videoWatched')
+    const original = { index: index.textContent, watched: watched.textContent }
+    index.textContent = '123'
+    watched.textContent = 'Angesehen'
+    return original
+  })
+  await expect.poll(() => watchedThumbnail.evaluate(thumbnail => {
+    const index = thumbnail.querySelector('.playlistIndexBadge').getBoundingClientRect()
+    const watched = thumbnail.querySelector('.videoWatched').getBoundingClientRect()
+    const bounds = thumbnail.getBoundingClientRect()
+    return Math.abs(bounds.width - 80) < 0.1 && index.right <= watched.left && watched.right <= bounds.right && index.left >= bounds.left
+  })).toBe(true)
+  await watchedThumbnail.screenshot({ path: test.info().outputPath('compact-playlist-badges.png') })
+  await watchedThumbnail.evaluate((thumbnail, original) => {
+    thumbnail.querySelector('.playlistIndexBadge').textContent = original.index
+    thumbnail.querySelector('.videoWatched').textContent = original.watched
+  }, originalBadges)
   await watchedThumbnail.evaluate(thumbnail => {
     const label = thumbnail.querySelector('.videoDuration').cloneNode(false)
     label.className = 'sponsorBlockVideoLabel'
