@@ -21,17 +21,19 @@ const TRACKS = [
  *
  * @param {{ electronApp: import('@playwright/test').ElectronApplication }} app
  * @param {import('@playwright/test').Page} page
+ * @param {(string | [string, string])[]} streams The codecs that the manifest
+ * offers the stream in, optionally with a resolution other than 320x180
  */
-async function openAdaptiveVideo(app, page) {
+async function openAdaptiveVideo(app, page, streams = ['avc1.42c00d']) {
   await mockPlayableWatchPage(app, page)
   await routePostLiveMedia(page)
   await page.route('https://quality-menu.test/*.m3u8', route => route.fulfill({
     contentType: 'application/x-mpegurl',
     body: route.request().url().endsWith('/master.m3u8')
       ? `#EXTM3U
-#EXT-X-STREAM-INF:BANDWIDTH=84000,CODECS="avc1.42c00d",RESOLUTION=320x180
-video.m3u8
-`
+${streams.map(stream => [stream].flat()).map(([codec, resolution = '320x180'], index) => `#EXT-X-STREAM-INF:BANDWIDTH=84000,CODECS="${codec}",RESOLUTION=${resolution}
+video-${index}.m3u8
+`).join('')}`
       : `#EXTM3U
 #EXT-X-TARGETDURATION:2
 #EXT-X-VERSION:7
@@ -389,5 +391,74 @@ test.describe('quality codecs with classic controls', () => {
     const switcher = await dialog.locator('.ft-quality-codecs').boundingBox()
     expect(switcher.y).toBeGreaterThanOrEqual(header.y)
     expect(switcher.y + switcher.height).toBeLessThanOrEqual(header.y + header.height)
+  })
+})
+
+test.describe('quality codecs from the manifest', () => {
+  test.use({
+    seed: {
+      settings: {
+        videoPlaybackEngine: 'yt-dlp',
+        ytDlpPlaybackEngineDefaultMigration: true,
+        defaultVideoFormat: 'dash',
+        defaultQuality: 'auto',
+        // The test stream is H.264, so automatic quality must play it
+        preferredVideoCodec: 'h264',
+        useSponsorBlock: false,
+        playNextVideo: false,
+        fetchSubscriptionsAutomatically: false,
+      }
+    }
+  })
+
+  test('lists codecs that automatic quality would not choose', async ({ app, page }, testInfo) => {
+    // Shaka keeps a single codec per resolution unless the player opts out
+    await openAdaptiveVideo(app, page, ['av01.0.00M.08', 'vp09.00.10.08', 'avc1.42c00d'])
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    await player.hover()
+    await player.locator('.shaka-overflow-menu-button').click()
+    await player.locator('.shaka-resolution-button').click()
+    const codecs = player.locator('.shaka-resolutions .ft-quality-codecs')
+    await expect(codecs.getByRole('button')).toHaveText(['AV1', 'VP9', 'H.264'])
+    await expect(codecs.getByRole('button', { name: 'H.264' })).toHaveAttribute('aria-pressed', 'true')
+    await player.locator('.shaka-resolutions').screenshot({ path: testInfo.outputPath('codecs.png') })
+  })
+
+  test('lets Shaka choose the codecs without smooth codec switching', async ({ app, page }) => {
+    // Shaka then limits automatic quality to the codec of the first variant
+    await page.evaluate(() => {
+      delete SourceBuffer.prototype.changeType
+      delete window.ManagedSourceBuffer
+    })
+    await openAdaptiveVideo(app, page, ['av01.0.04M.08', 'avc1.42c00d'])
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    await expect.poll(() => player.evaluate(element => {
+      return element.ui.getControls().getPlayer().getVariantTracks().find(track => track.active)?.videoCodec
+    })).toBe('avc1.42c00d')
+  })
+})
+
+test.describe('default quality with a preferred codec', () => {
+  test.use({
+    seed: {
+      settings: {
+        videoPlaybackEngine: 'yt-dlp',
+        ytDlpPlaybackEngineDefaultMigration: true,
+        defaultVideoFormat: 'dash',
+        defaultQuality: '720',
+        preferredVideoCodec: 'h264',
+        useSponsorBlock: false,
+        playNextVideo: false,
+        fetchSubscriptionsAutomatically: false,
+      }
+    }
+  })
+
+  test('falls back to a lower resolution in the preferred codec', async ({ app, page }) => {
+    await openAdaptiveVideo(app, page, ['avc1.42c00d', ['av01.0.04M.08', '1280x720']])
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    await expect.poll(() => player.evaluate(element => {
+      return element.ui.getControls().getPlayer().getVariantTracks().find(track => track.active)?.videoCodec
+    })).toBe('avc1.42c00d')
   })
 })

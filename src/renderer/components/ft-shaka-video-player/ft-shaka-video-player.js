@@ -11,7 +11,8 @@ import FtMobileSheet from '../FtMobileSheet/FtMobileSheet.vue'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import SponsorBlockSegmentEditor from '../WatchVideoSponsorBlock/SponsorBlockSegmentEditor.vue'
 import shaka from 'shaka-player'
-import { getVideoCodecPreferences, preferredVideoDecodingAttributes } from '../../helpers/player/videoCodecPreference'
+import { getCodecPrefixes, getVideoCodecPreferences, preferredVideoDecodingAttributes } from '../../helpers/player/videoCodecPreference'
+import { AutoQualityAbrManager, supportsSmoothCodecSwitching } from '../../helpers/player/AutoQualityAbrManager'
 import { voidWebmProjection } from '../../helpers/player/webmProjection'
 import { registerPlugin } from '@capacitor/core'
 import { bindAndroidMediaErrors } from '../../helpers/player/androidMediaErrors'
@@ -841,6 +842,9 @@ export default defineComponent({
 
     /** @type {shaka.Player|null} */
     let player = null
+
+    /** The video streams that automatic quality chooses from, see AutoQualityAbrManager */
+    let autoQualityVideoIds = new Set()
 
     /** @type {shaka.ui.Overlay|null} */
     let ui = null
@@ -4065,6 +4069,11 @@ export default defineComponent({
      * @returns {shaka.extern.PlayerConfiguration}
      */
     function getPlayerConfig(format, useAutoQuality = false) {
+      // Prefer hardware decoding, then predicted smoothness. Equal weights can
+      // otherwise let a software-decoded codec win on bandwidth.
+      const decodingAttributes = format === 'dash' ? preferredVideoDecodingAttributes : []
+      const preferredCodecs = getCodecPrefixes(store.getters.getPreferredVideoCodec)
+
       return {
         // YouTube uses these values and they seem to work well in FreeTube too,
         // so we might as well use them
@@ -4072,7 +4081,9 @@ export default defineComponent({
           bufferingGoal: 180,
           rebufferingGoal: 0.02,
           bufferBehind: 300,
-          segmentPrefetchLimit: segmentPrefetchLimit.value
+          segmentPrefetchLimit: segmentPrefetchLimit.value,
+          // Keep every codec selectable, automatic quality chooses them itself
+          dontChooseCodecs: supportsSmoothCodecSwitching()
         },
         manifest: {
           disableVideo: format === 'audio',
@@ -4083,6 +4094,11 @@ export default defineComponent({
             manifestPreprocessorTXml: manifestPreprocessorTXml
           },
         },
+        abrFactory: () => new AutoQualityAbrManager(preferredCodecs, decodingAttributes, (videoIds) => {
+          autoQualityVideoIds = videoIds
+        }),
+        // Used when Shaka still chooses the codecs, see supportsSmoothCodecSwitching
+        preferredDecodingAttributes: decodingAttributes,
         abr: {
           enabled: useAutoQuality,
 
@@ -4092,10 +4108,6 @@ export default defineComponent({
             maxPixels: getMeteredAutoQualityMaxPixels(store.getters.getMeteredNetworkQualityLimit)
           }
         },
-
-        // Prefer hardware decoding, then predicted smoothness. Equal weights can
-        // otherwise let a software-decoded codec win on bandwidth.
-        preferredDecodingAttributes: format === 'dash' ? preferredVideoDecodingAttributes : [],
 
         // Prefer the main audio before codec/channel preferences. If there is
         // no main role, Shaka falls back to the manifest's primary track.
@@ -8757,6 +8769,13 @@ export default defineComponent({
         variants = variants.filter(variant => variant.label === label)
       } else if (hasMultipleAudioTracks.value) {
         variants = getDefaultAudioVariants(variants)
+      }
+
+      // In the codecs that automatic quality would play, so the preferred codec
+      // can limit the resolution
+      const autoVariants = variants.filter(variant => autoQualityVideoIds.has(variant.videoId))
+      if (autoVariants.length > 0) {
+        variants = autoVariants
       }
 
       if (variants.length === 0) return
