@@ -70,6 +70,21 @@ async function openPlaylist(app, page) {
   return watchViewHandle(page)
 }
 
+test('playing playlist omits row numbers and retains reorder controls', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
+  const watch = await openPlaylist(app, page)
+  const panel = page.locator('.watchVideoPlaylist').filter({ visible: true })
+  await expect(panel.locator('.playlistIndex label')).toHaveText('1 / 12')
+  await expect(panel.locator('.videoIndex')).toHaveCount(0)
+  await expect(panel.locator('.videoIndexIcon')).toBeVisible()
+  const secondRow = panel.locator('.playlistItem').nth(1)
+  await expect(secondRow.locator('.grabBar')).toBeVisible()
+  await attachScreenshot('playing-playlist-without-row-numbers')
+  await secondRow.locator('.videoIndexArea').press('ArrowDown')
+  await expect(panel.locator('.playlistItem').nth(2)).toContainText('Playlist video 2')
+  await expect(panel.locator('.playlistIndex label')).toHaveText('1 / 12')
+  await watch.dispose()
+})
+
 test('playlist preview batches pointer measurements', { tag: '@scale' }, async ({ app, page }) => {
   const watch = await openPlaylist(app, page)
   const panel = page.locator('.watchVideoPlaylist').filter({ visible: true })

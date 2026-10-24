@@ -95,6 +95,8 @@ test('loads an Invidious Mix response from the playlist endpoint', async ({ page
   const watchPlaylist = page.locator('.watchVideoPlaylist')
   await expect(watchPlaylist.locator('.playlistItem')).toHaveCount(2)
   await expect(watchPlaylist.locator('.playlistIndex label')).toHaveText('1 / 2')
+  await expect(watchPlaylist.locator('.videoIndex')).toHaveCount(0)
+  await expect(watchPlaylist.locator('.videoIndexIcon')).toHaveCount(1)
 })
 
 test('displays an unknown Mix video count without a negative badge', async ({ page, attachScreenshot }) => {
