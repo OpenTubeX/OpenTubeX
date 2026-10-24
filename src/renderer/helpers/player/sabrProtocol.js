@@ -1,3 +1,37 @@
+import { UmpReader } from 'googlevideo/ump'
+
+// Application safety budget, not a protocol maximum. A response supplies one
+// requested segment; leave ample room for high-bitrate media while bounding
+// retained payloads and the copy used to assemble the completed segment.
+export const MAX_SABR_RESPONSE_BYTES = 128 * 1024 * 1024
+
+/**
+ * Consume complete UMP parts, retaining even a partial type/size header for
+ * the next network chunk. UmpReader.read() only returns a remainder once a
+ * complete header and at least one payload byte have arrived.
+ * @param {import('googlevideo/ump').CompositeBuffer} buffer
+ * @param {(part: import('googlevideo/shared-types').Part) => void} onPart
+ * @returns {import('googlevideo/ump').CompositeBuffer | null}
+ */
+export function readCompleteUmpParts(buffer, onPart) {
+  while (buffer.getLength() > 0) {
+    const reader = new UmpReader(buffer)
+    const [type, sizeOffset] = reader.readVarInt(0)
+    if (type < 0) return buffer
+    const [size, dataOffset] = reader.readVarInt(sizeOffset)
+    if (size < 0) return buffer
+    if (size > MAX_SABR_RESPONSE_BYTES - dataOffset) {
+      throw new Error('SABR part exceeds the response size limit')
+    }
+    if (!buffer.canReadBytes(dataOffset, size)) return buffer
+
+    const { extractedBuffer, remainingBuffer } = buffer.split(dataOffset).remainingBuffer.split(size)
+    onPart({ type, size, data: extractedBuffer })
+    buffer = remainingBuffer
+  }
+  return null
+}
+
 /**
  * Extract a protobuf field without decoding it.
  *

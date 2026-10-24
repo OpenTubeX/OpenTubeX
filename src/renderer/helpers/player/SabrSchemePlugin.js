@@ -18,7 +18,9 @@ import shaka from 'shaka-player'
 import {
   createAbandonedSabrResponse,
   extractRawProtobufField,
-  parseSabrFormatId
+  MAX_SABR_RESPONSE_BYTES,
+  parseSabrFormatId,
+  readCompleteUmpParts
 } from './sabrProtocol'
 
 const AbortableOperation = shaka.util.AbortableOperation
@@ -316,6 +318,7 @@ async function doRequest(
   let response
   /** @type {CompositeBuffer | null} */
   let chunkedDataBuffer = null
+  let receivedResponseBytes = 0
   /** @type {Uint8Array[]} */
   const responseDataChunks = []
   let segmentComplete = false
@@ -422,13 +425,17 @@ async function doRequest(
     let readObj = await reader.read()
 
     while (!readObj.done && !currentState.abortStatus.finished) {
+      receivedResponseBytes += readObj.value.byteLength
+      if (receivedResponseBytes > MAX_SABR_RESPONSE_BYTES) {
+        throw new Error('SABR response exceeds the size limit')
+      }
       if (chunkedDataBuffer) {
         chunkedDataBuffer.append(readObj.value)
       } else {
         chunkedDataBuffer = new CompositeBuffer([readObj.value])
       }
 
-      const remainingData = new UmpReader(chunkedDataBuffer).read((part) => {
+      const remainingData = readCompleteUmpParts(chunkedDataBuffer, (part) => {
         // MEDIA_END completes this request and aborts its response. A WebView
         // can deliver later parts in the same chunk; ignore them just as we
         // ignore later chunks, so they cannot change another loader's backoff.
@@ -597,16 +604,15 @@ async function doRequest(
       })
 
       if (!currentState.abortStatus.finished) {
-        if (remainingData) {
-          chunkedDataBuffer = remainingData.data
-        } else {
-          chunkedDataBuffer = null
-        }
+        chunkedDataBuffer = remainingData
 
         readObj = await reader.read()
       }
     }
   } catch (error) {
+    // A parser rejection must also stop the response body, rather than leave
+    // the network request downloading after Shaka receives the error.
+    currentState.abortController.abort()
     if (currentState.abortStatus.cancelled || currentState.abortStatus.playerReloadRequested) {
       throw createRecoverableNetworkError(ShakaError.Code.OPERATION_ABORTED, operationInputs.uri, operationInputs.requestType)
     } else if (currentState.abortStatus.timedOut) {
