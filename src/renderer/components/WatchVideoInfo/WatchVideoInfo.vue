@@ -1034,8 +1034,7 @@ useMediaSessionMetadata(() => ({
 const showPlaylists = computed(() => !store.getters.getHidePlaylists)
 const isInAnyPlaylist = computed(() => store.getters.getPlaylistVideoCounts.has(props.id))
 
-// `description` and `viewCount` are intentionally left out,
-// the store drops them from playlist entries as undesired attributes
+// Descriptions are omitted from saved playlist entries.
 const addToPlaylistVideoData = computed(() => ({
   videoId: props.id,
   title: props.title,
@@ -1043,6 +1042,7 @@ const addToPlaylistVideoData = computed(() => ({
   authorId: props.channelId,
   lengthSeconds: props.lengthSeconds,
   published: props.published,
+  ...(props.viewCount != null ? { viewCount: props.viewCount } : {}),
   premiereDate: props.premiereDate
 }))
 
@@ -1103,6 +1103,7 @@ async function addToQuickBookmarkPlaylist() {
     authorId: props.channelId,
     lengthSeconds: props.lengthSeconds,
     published: props.published,
+    ...(props.viewCount != null ? { viewCount: props.viewCount } : {}),
     premiereDate: props.premiereDate
   }
 

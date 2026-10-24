@@ -201,7 +201,7 @@
             @click="toggleQuickBookmarked"
           />
           <FtIconButton
-            v-if="inUserPlaylist && canMoveVideoUp"
+            v-if="!hidePlaylistThumbnailActions && inUserPlaylist && canMoveVideoUp"
             :title="t('User Playlists.Move Video Up')"
             :icon="verticalMoveControls ? ['fas', 'arrow-up'] : ['fas', 'arrow-left']"
             class="upArrowIcon"
@@ -210,7 +210,7 @@
             @click="moveVideoUp"
           />
           <FtIconButton
-            v-if="inUserPlaylist && canMoveVideoDown"
+            v-if="!hidePlaylistThumbnailActions && inUserPlaylist && canMoveVideoDown"
             :title="t('User Playlists.Move Video Down')"
             :icon="verticalMoveControls ? ['fas', 'arrow-down'] : ['fas', 'arrow-right']"
             class="downArrowIcon"
@@ -219,7 +219,7 @@
             @click="moveVideoDown"
           />
           <FtIconButton
-            v-if="inUserPlaylist && canRemoveFromPlaylist"
+            v-if="!hidePlaylistThumbnailActions && inUserPlaylist && canRemoveFromPlaylist"
             :title="t('User Playlists.Remove from Playlist')"
             :icon="['fas', 'trash']"
             class="trashIcon"
@@ -622,6 +622,10 @@ const props = defineProps({
   quickBookmarkButtonEnabled: {
     type: Boolean,
     default: true,
+  },
+  hidePlaylistThumbnailActions: {
+    type: Boolean,
+    default: false,
   },
   canMoveVideoUp: {
     type: Boolean,
@@ -2412,8 +2416,7 @@ function removeFromHistory() {
   })
 }
 
-// `description` and `viewCount` are intentionally left out,
-// the store drops them from playlist entries as undesired attributes
+// Descriptions are omitted from saved playlist entries.
 const addToPlaylistVideoData = computed(() => ({
   videoId: id.value,
   title: title.value,
@@ -2421,6 +2424,7 @@ const addToPlaylistVideoData = computed(() => ({
   authorId: channelId.value,
   lengthSeconds: props.data.lengthSeconds,
   published: published.value,
+  ...(viewCount.value != null ? { viewCount: viewCount.value } : {}),
   premiereDate: props.data.premiereDate,
   premiereTimestamp: props.data.premiereTimestamp,
   isMembersOnly: isMembersOnly.value,
@@ -2469,6 +2473,7 @@ async function addToQuickBookmarkPlaylist() {
     authorId: channelId.value,
     lengthSeconds: props.data.lengthSeconds,
     published: published.value,
+    ...(viewCount.value != null ? { viewCount: viewCount.value } : {}),
     premiereDate: props.data.premiereDate,
     premiereTimestamp: props.data.premiereTimestamp,
     isMembersOnly: isMembersOnly.value,

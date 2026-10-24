@@ -28,6 +28,7 @@ const videos = Array.from({ length: 12 }, (_, index) => ({
   author: 'Test channel',
   authorId: 'UC-test-channel-id',
   lengthSeconds: 120,
+  ...(index === 11 ? {} : { viewCount: index === 10 ? null : index === 9 ? 0 : 12345 }),
   published: Date.now() - 86400000,
   timeAdded: Date.now() + index,
   playlistItemId: `layout-item-${index}`,
@@ -43,6 +44,7 @@ test.use({
   seed: {
     settings: {
       animationSpeed: 0,
+      shortenViewCounts: false,
       userPlaylistSortOrder: 'custom',
       videoPlaybackEngine: 'built-in',
       ytDlpPlaybackEngineDefaultMigration: true
@@ -83,6 +85,62 @@ test('playing playlist omits row numbers and retains reorder controls', { tag: '
   await expect(panel.locator('.playlistItem').nth(2)).toContainText('Playlist video 2')
   await expect(panel.locator('.playlistIndex label')).toHaveText('1 / 12')
   await watch.dispose()
+})
+
+test('playlist row menu moves and removes videos while thumbnail shortcuts stay contained', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
+  await openPlaylist(app, page)
+  const item = page.locator('.watchVideoPlaylist .playlistItem').nth(1)
+  const expectContainedActions = async () => {
+    await item.hover()
+    await expect.poll(() => item.evaluate(element => {
+      const image = [...element.querySelectorAll('.thumbnailImage')]
+        .find(image => getComputedStyle(image).visibility !== 'hidden').getBoundingClientRect()
+      const buttons = [...element.querySelectorAll('.playlistIcons button')]
+      return buttons.length > 0 && buttons.every(button => {
+        const bounds = button.getBoundingClientRect()
+        return bounds.left >= image.left - 0.5 && bounds.right <= image.right + 0.5 &&
+        bounds.top >= image.top - 0.5 && bounds.bottom <= image.bottom + 0.5
+      })
+    })).toBe(true)
+  }
+  await expectContainedActions()
+  await page.evaluate(async () => {
+    await window.$store.dispatch('addPlaylist', { _id: 'bookmarks', playlistName: 'Bookmarks', videos: [] })
+    await window.$store.dispatch('updateQuickBookmarkTargetPlaylistId', 'bookmarks')
+    await window.$store.dispatch('updateExtraThumbnailAction', 'history')
+  })
+  await expect(item.locator('.extraThumbnailActionIcon')).toBeVisible()
+  await expect(item.locator('.playlistIcons button')).toHaveCount(3)
+  await expectContainedActions()
+  await item.locator('.addToPlaylistIcon button').click()
+  await expect(page.locator('.addToPlaylistDropdown')).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(item.locator('.upArrowIcon, .downArrowIcon, .trashIcon')).toHaveCount(0)
+  await expect.poll(() => item.evaluate(element => {
+    const menu = element.querySelector('.playlistItemMenu').getBoundingClientRect()
+    const info = element.querySelector('.info').getBoundingClientRect()
+    return menu.left >= info.right - 0.5 && menu.right <= element.getBoundingClientRect().right + 0.5
+  })).toBe(true)
+  await item.locator('.playlistItemMenu button').click()
+  await expect(page.getByRole('menuitem', { name: /^Move video up$/i })).toBeEnabled()
+  await expect(page.getByRole('menuitem', { name: /^Move video down$/i })).toBeEnabled()
+  await page.getByRole('menuitem', { name: /^Move video up$/i }).click()
+  const titles = page.locator('.watchVideoPlaylist .playlistItem .h3Title')
+  await expect(titles.first()).toHaveText('Playlist video 2')
+  const movedItem = page.locator('.watchVideoPlaylist .playlistItem').first()
+  await movedItem.locator('.playlistItemMenu button').click()
+  await expect(page.getByRole('menuitem', { name: /^Move video up$/i })).toBeDisabled()
+  await page.getByRole('menuitem', { name: /^Move video down$/i }).click()
+  await expect(titles.nth(1)).toHaveText('Playlist video 2')
+  await item.locator('.playlistItemMenu button').click()
+  await page.getByRole('menuitem', { name: /^Remove from playlist$/i }).click()
+  await expect(titles).toHaveCount(videos.length - 1)
+  await expect(page.locator('.watchVideoPlaylist .playlistItem').filter({ has: page.getByRole('heading', { name: 'Playlist video 2', exact: true }) })).toHaveCount(0)
+  await expect.poll(() => page.evaluate(() => window.$store.getters.getPlaylist('layout-playlist').videos.some(video => video.title === 'Playlist video 2'))).toBe(false)
+  await item.locator('.playlistItemMenu button').click()
+  await expect(page.getByRole('menuitem', { name: /^Remove from playlist$/i })).toBeVisible()
+  await expect(page.locator('.contextMenu')).toHaveCSS('opacity', '1')
+  await attachScreenshot('playlist row actions menu')
 })
 
 test('playlist preview batches pointer measurements', { tag: '@scale' }, async ({ app, page }) => {
@@ -308,19 +366,83 @@ test('keyboard moves watch playlist videos to the top and bottom', async ({ app,
   await watch.dispose()
 })
 
-test('playlist items keep the channel and labeled upload time on one row', { tag: '@scale' }, async ({ app, page }) => {
-  const watch = await openPlaylist(app, page)
-  const infoLine = page.locator('.watchVideoPlaylist').filter({ visible: true }).locator('.playlistItem .infoLine').first()
+test('playlist saves retain available view counts across restart', async ({ app, page }) => {
+  await openPlaylist(app, page)
+  await page.evaluate(async () => {
+    await window.$store.dispatch('addPlaylist', { _id: 'saved-counts', playlistName: 'Saved counts', videos: [] })
+    await window.$store.dispatch('updateQuickBookmarkTargetPlaylistId', 'saved-counts')
+  })
+  const rows = page.locator('.watchVideoPlaylist .playlistItem')
+  await rows.nth(1).hover()
+  await rows.nth(1).locator('.quickBookmarkVideoIcon button').click()
+  await rows.nth(2).hover()
+  await rows.nth(2).locator('.addToPlaylistIcon button').click()
+  await page.getByRole('option').filter({ hasText: 'Saved counts' }).click()
+  await expect.poll(() => page.evaluate(() => window.$store.getters.getPlaylist('saved-counts').videos.map(video => video.viewCount))).toEqual([12345, 12345])
+  await page.keyboard.press('Escape')
+  for (const index of [9, 10, 11]) {
+    await rows.nth(index).hover()
+    await rows.nth(index).locator('.quickBookmarkVideoIcon button').click()
+  }
+  const counts = target => target.evaluate(() => window.$store?.getters.getPlaylist('saved-counts')?.videos.map(video => ({
+    hasCount: Object.hasOwn(video, 'viewCount'), count: video.viewCount ?? null
+  })))
+  const expected = [
+    { hasCount: true, count: 12345 }, { hasCount: true, count: 12345 },
+    { hasCount: true, count: 0 }, { hasCount: false, count: null }, { hasCount: false, count: null }
+  ]
+  await expect.poll(() => counts(page)).toEqual(expected)
+  const restarted = await app.relaunch()
+  await expect.poll(() => counts(restarted.page)).toEqual(expected)
+})
+
+for (const [layout, count] of [['fullscreen', 12345], ['Shorts', 0]]) {
+  test(`${layout} save controls retain available view counts`, async ({ app, page }) => {
+    const watch = await openPlaylist(app, page)
+    await page.locator('.ftVideoPlayer video').evaluate(video => video.pause())
+    await page.evaluate(async () => {
+      await window.$store.dispatch('addPlaylist', { _id: 'action-counts', playlistName: 'Action counts', videos: [] })
+      await window.$store.dispatch('updateQuickBookmarkTargetPlaylistId', 'action-counts')
+      await window.$store.dispatch('updateFullscreenActions', ['addToPlaylist', 'quickBookmark'])
+    })
+    await watch.evaluate((vm, { layout, count }) => {
+      vm.videoViewCount = count
+      if (layout === 'Shorts') {
+        vm.useCustomShortsPlayerForCurrentVideo = true
+        vm.updateShortsPlayerState(30, [{ width: 360, height: 640 }])
+      }
+    }, { layout, count })
+    if (layout === 'fullscreen') await setPlayerFullscreen(page, true)
+    const controls = page.locator(layout === 'fullscreen' ? '.fullscreenActions' : '.shortsActionRail')
+    const quickBookmark = controls.getByRole('button', { name: /Action counts/ })
+    await quickBookmark.click()
+    const savedCounts = () => page.evaluate(() => window.$store.getters.getPlaylist('action-counts').videos.map(video => video.viewCount))
+    await expect.poll(savedCounts).toEqual([count])
+    await quickBookmark.click()
+    await expect.poll(savedCounts).toEqual([])
+    await controls.getByRole('button', { name: /^Add to playlist$/i }).click()
+    await page.getByRole('option').filter({ hasText: 'Action counts' }).click()
+    await expect.poll(savedCounts).toEqual([count])
+    await watch.dispose()
+    const restarted = await app.relaunch()
+    await expect.poll(() => restarted.page.evaluate(() => window.$store?.getters.getPlaylist('action-counts')?.videos.map(video => video.viewCount))).toEqual([count])
+  })
+}
+
+test('playlist metadata groups views and upload time below the channel', { tag: '@scale' }, async ({ app, page }) => {
+  await openPlaylist(app, page)
+  const infoLine = page.locator('.watchVideoPlaylist .playlistItem .infoLine').first()
+  await expect(page.locator('.watchVideoPlaylist .playlistItem').last().locator('.viewCount')).toHaveCount(0)
+  await expect(infoLine.locator('.viewCount')).toContainText('12,345')
+  await expect(infoLine.locator('.viewCount .statIcon')).toBeVisible()
   await expect(infoLine.locator('.uploadedTime .statIcon')).toBeVisible()
-  expect(await infoLine.evaluate(element => {
+  await expect.poll(() => infoLine.evaluate(element => {
     const channel = element.querySelector('.channelName').getBoundingClientRect()
+    const views = element.querySelector('.viewCount').getBoundingClientRect()
     const uploaded = element.querySelector('.uploadedTime').getBoundingClientRect()
-    return {
-      sameRow: Math.abs((channel.top + channel.bottom) / 2 - (uploaded.top + uploaded.bottom) / 2) <= 1,
-      afterChannel: uploaded.left > channel.right
-    }
-  })).toEqual({ sameRow: true, afterChannel: true })
-  await watch.dispose()
+    const bounds = element.getBoundingClientRect()
+    return { belowChannel: views.top >= channel.bottom && uploaded.top >= channel.bottom, contained: views.right <= bounds.right + 0.5 && uploaded.right <= bounds.right + 0.5 }
+  })).toEqual({ belowChannel: true, contained: true })
 })
 
 test('playlist channel separator follows the counter', { tag: '@scale' }, async ({ app, page, uiScale }) => {
@@ -423,6 +545,7 @@ test.describe('long watch playlist', () => {
     seed: {
       settings: {
         animationSpeed: 0,
+        shortenViewCounts: false,
         userPlaylistSortOrder: 'custom',
         videoPlaybackEngine: 'built-in',
         ytDlpPlaybackEngineDefaultMigration: true
@@ -437,6 +560,21 @@ test.describe('long watch playlist', () => {
         lastUpdatedAt: Date.now()
       }]
     }
+  })
+
+  test('closes a row menu when scrolling releases its row', { tag: '@scale' }, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await goTo(page, 'userplaylists')
+    await page.getByText('Long test playlist', { exact: true }).click()
+    await page.getByText('Long playlist video 1', { exact: true }).click()
+    await (await waitForPlayback(page)).evaluate(element => element.pause())
+    const list = page.locator('.watchVideoPlaylist .playlistItemsWrapper')
+    const row = list.locator(':scope > .playlistItem').first()
+    await row.locator('.playlistItemMenu button').click()
+    await expect(page.getByRole('menuitem', { name: 'Remove from playlist', exact: true })).toBeVisible()
+    await list.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect(row.locator('.ft-list-video')).toHaveCount(0)
+    await expect(page.getByRole('menuitem', { name: 'Remove from playlist', exact: true })).toHaveCount(0)
   })
 
   test('remeasures released rows when a height-only breakpoint restyles the fullscreen playlist', { tag: '@scale' }, async ({ app, page, uiScale }) => {

@@ -71,6 +71,7 @@
         :appearance="appearance"
         :always-show-add-to-playlist-button="alwaysShowAddToPlaylistButton"
         :quick-bookmark-button-enabled="quickBookmarkButtonEnabled"
+        :hide-playlist-thumbnail-actions="showPlaylistItemMenu"
         :can-move-video-up="canMoveVideoUp"
         :can-move-video-down="canMoveVideoDown"
         :can-remove-from-playlist="canRemoveFromPlaylist"
@@ -80,6 +81,17 @@
         @move-video-to-the-top="moveVideoToTheTop"
         @move-video-to-the-bottom="moveVideoToTheBottom"
         @remove-from-playlist="removeFromPlaylist"
+      />
+      <FtIconButton
+        v-if="showPlaylistItemMenu"
+        ref="playlistItemMenuButton"
+        class="playlistItemMenu"
+        :title="t('Video.More Options')"
+        theme="base-no-default"
+        :size="18"
+        :padding="touchLayout ? 15 : 6"
+        :use-shadow="false"
+        @click="openPlaylistItemMenu"
       />
     </template>
   </div>
@@ -95,8 +107,11 @@ import { vFirstVisible } from '../../helpers/firstVisible'
 import { observeNestedWindowedListItem, observeWindowedListItem } from '../../helpers/windowedList'
 import store from '../../store/index'
 import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { openButtonMenu } from '../../helpers/buttonMenu'
+import { usePhoneLayout } from '../../composables/usePhoneLayout'
 
 import FtListVideo from '../FtListVideo/FtListVideo.vue'
+import FtIconButton from '../FtIconButton/FtIconButton.vue'
 
 const props = defineProps({
   data: {
@@ -213,6 +228,28 @@ const downloadAvailable = computed(() => {
 })
 
 const inUserPlaylist = props.playlistType === 'user'
+const showPlaylistItemMenu = computed(() => inUserPlaylist && props.appearance === 'watchPlaylistItem')
+const touchLayout = usePhoneLayout('(width <= 600px), (pointer: coarse)')
+const playlistItemMenuButton = useTemplateRef('playlistItemMenuButton')
+const playlistItemMenuItems = computed(() => [
+  { label: t('User Playlists.Move Video Up'), icon: ['fas', 'arrow-up'], enabled: props.canMoveVideoUp, run: () => moveVideoUp(props.data.videoId, props.playlistItemId) },
+  { label: t('User Playlists.Move Video Down'), icon: ['fas', 'arrow-down'], enabled: props.canMoveVideoDown, run: () => moveVideoDown(props.data.videoId, props.playlistItemId) },
+  { label: t('User Playlists.Remove from Playlist'), icon: ['fas', 'trash'], enabled: props.canRemoveFromPlaylist, run: () => removeFromPlaylist(props.data.videoId, props.playlistItemId) },
+])
+
+function openPlaylistItemMenu() {
+  openButtonMenu(playlistItemMenuButton.value.$el.querySelector('button'), playlistItemMenuItems)
+}
+
+function closePlaylistItemMenu() {
+  window.dispatchEvent(new CustomEvent('opentubex:close-context-menu', { detail: playlistItemMenuItems }))
+}
+
+watch(visible, isVisible => {
+  if (!isVisible) closePlaylistItemMenu()
+})
+onBeforeUnmount(closePlaylistItemMenu)
+
 const canBecomeDraggable = computed(() => inUserPlaylist && props.isSortOrderCustom && (props.canMoveVideoUp || props.canMoveVideoDown))
 const { dragVideo, moveDraggedVideo, afterDrag, pointerDragging, startPointerDrag, moveWithKeyboard } = usePlaylistDrag(emit)
 const draggableEventHandlers = {

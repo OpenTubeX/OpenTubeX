@@ -44,7 +44,6 @@ const UNDESIRED_VIDEO_ATTRIBUTES = [
   'index',
   'liveNow',
   'videoThumbnails',
-  'viewCount',
 ]
 
 /**
@@ -426,7 +425,6 @@ const actions = {
             // Undesired attributes, even with `null` values
             [
               'description',
-              'viewCount',
             ].forEach(attrName => {
               if (typeof v[attrName] !== 'undefined') {
                 delete v[attrName]

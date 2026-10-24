@@ -338,7 +338,7 @@
 
 .playlistItem {
   display: grid;
-  grid-template-columns: fit-content(50px) 1fr;
+  grid-template-columns: fit-content(50px) minmax(0, 1fr) auto;
   align-items: center;
   border-radius: calc(8px * var(--ui-roundness));
   transition: background 0.2s ease-out;
@@ -346,6 +346,15 @@
 
 .playlistItem-move {
   transition: transform 0.2s ease;
+}
+
+.playlistItem :deep(.videoSwipeFrame),
+.playlistItem :deep(.info) {
+  min-inline-size: 0;
+}
+
+.playlistItem :deep(.playlistItemMenu) {
+  margin-inline-end: var(--scrollbar-track-width);
 }
 
 .playlistItem.draggedVideo {
@@ -473,7 +482,7 @@
 
   .fullscreenPlaylist .playlistItem {
     align-items: center;
-    grid-template-columns: 32px minmax(0, 1fr);
+    grid-template-columns: 32px minmax(0, 1fr) auto;
   }
 
   /* Match the child card's thumbnail rule so its fixed height cannot win. */
@@ -487,6 +496,17 @@
   .fullscreenPlaylist .playlistItem :deep(.info) {
     min-inline-size: 0;
     grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  /* stylelint-disable-next-line selector-max-compound-selectors */
+  .fullscreenPlaylist :deep(.ft-list-item .info .infoLine) {
+    font-size: 11px;
+    row-gap: 3px;
+  }
+
+  /* stylelint-disable-next-line selector-max-compound-selectors */
+  .fullscreenPlaylist :deep(.ft-list-item .info .infoLine .videoInfo) {
+    column-gap: 0.5em;
   }
 
   /* Match the child card's overlay rule to keep the labels apart. */
@@ -503,7 +523,7 @@
   }
 
   .fullscreenPlaylist .playlistItem :deep(.restArea) {
-    line-height: 0;
+    display: none;
   }
 
   .fullscreenPlaylist .playlistItem :deep(.videoIndexArea) {

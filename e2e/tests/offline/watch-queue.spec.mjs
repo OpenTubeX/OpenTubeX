@@ -333,7 +333,7 @@ for (const clearAll of [false, true]) {
 
 test('saves the queue to a new playlist and appends a playlist to the queue in its displayed order', async ({ page }) => {
   const queuedVideo = (videoId, title) => ({
-    videoId, title, author: 'Queue Test Channel', authorId: 'UC-queue-test-channel', lengthSeconds: 60,
+    videoId, title, author: 'Queue Test Channel', authorId: 'UC-queue-test-channel', lengthSeconds: 60, viewCount: 100,
   })
   const addToQueue = videos => page.evaluate(videos => {
     for (const video of videos) window.$store.commit('addVideoToWatchQueue', { video })
