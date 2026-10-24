@@ -455,6 +455,11 @@ test.describe('download settings', () => {
     await expectScrollAtRenderedEnd(scroller)
     await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
 
+    // Observe the saved removal so the final check cannot match the earlier rule.
+    await expect.poll(() => page.evaluate(channelId => (
+      JSON.parse(window.$store.getters.getYtDlpAutomaticDownloadRules)[channelId]
+    ), BETA_CHANNEL_ID)).toBeUndefined()
+
     await manager.getByText('Beta Channel', { exact: true }).click()
     await expect(options).toBeVisible()
     await scrollToBottom(scroller)
@@ -464,6 +469,11 @@ test.describe('download settings', () => {
     await expect.poll(() => manager.evaluate(element => element.clientWidth)).toBeGreaterThan(760)
     await expectScrollAtRenderedEnd(scroller)
     await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+
+    // The editor is optimistic; relaunch only after the re-enabled rule is saved.
+    await expect.poll(() => page.evaluate(channelId => (
+      JSON.parse(window.$store.getters.getYtDlpAutomaticDownloadRules)[channelId]
+    ), BETA_CHANNEL_ID)).toEqual(expect.objectContaining({ includeVideos: true }))
 
     const { page: relaunchedPage } = await app.relaunch()
     await goToSettingsSection(relaunchedPage, 'download')
