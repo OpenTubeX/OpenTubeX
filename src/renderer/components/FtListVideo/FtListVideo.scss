@@ -202,8 +202,7 @@
 }
 
 // Keep the channel on its own line and group the views and date below it.
-// The compact watch page playlist keeps everything on one line.
-.ft-list-video:not(.watchPlaylistItem) .info .infoLine {
+.ft-list-video .info .infoLine {
   align-items: flex-start;
   flex-direction: column;
   row-gap: 5px;
@@ -219,9 +218,4 @@
   .channelName + .videoInfo::before {
     content: none;
   }
-}
-
-// When the compact line wraps, space its rows like the column above.
-.ft-list-video.watchPlaylistItem .info .infoLine {
-  row-gap: 5px;
 }

@@ -2416,8 +2416,7 @@ function removeFromHistory() {
   })
 }
 
-// `description` and `viewCount` are intentionally left out,
-// the store drops them from playlist entries as undesired attributes
+// Descriptions are omitted from saved playlist entries.
 const addToPlaylistVideoData = computed(() => ({
   videoId: id.value,
   title: title.value,
@@ -2425,6 +2424,7 @@ const addToPlaylistVideoData = computed(() => ({
   authorId: channelId.value,
   lengthSeconds: props.data.lengthSeconds,
   published: published.value,
+  viewCount: viewCount.value,
   premiereDate: props.data.premiereDate,
   premiereTimestamp: props.data.premiereTimestamp,
   isMembersOnly: isMembersOnly.value,
@@ -2473,6 +2473,7 @@ async function addToQuickBookmarkPlaylist() {
     authorId: channelId.value,
     lengthSeconds: props.data.lengthSeconds,
     published: published.value,
+    viewCount: viewCount.value,
     premiereDate: props.data.premiereDate,
     premiereTimestamp: props.data.premiereTimestamp,
     isMembersOnly: isMembersOnly.value,

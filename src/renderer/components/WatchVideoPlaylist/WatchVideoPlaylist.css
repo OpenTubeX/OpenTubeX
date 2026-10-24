@@ -498,6 +498,17 @@
     grid-template-columns: minmax(0, 1fr) auto;
   }
 
+  /* stylelint-disable-next-line selector-max-compound-selectors */
+  .fullscreenPlaylist :deep(.ft-list-item .info .infoLine) {
+    font-size: 11px;
+    row-gap: 3px;
+  }
+
+  /* stylelint-disable-next-line selector-max-compound-selectors */
+  .fullscreenPlaylist :deep(.ft-list-item .info .infoLine .videoInfo) {
+    column-gap: 0.5em;
+  }
+
   /* Match the child card's overlay rule to keep the labels apart. */
   /* stylelint-disable-next-line selector-max-compound-selectors */
   .fullscreenPlaylist :deep(.ft-list-item .videoThumbnail .videoWatched) {

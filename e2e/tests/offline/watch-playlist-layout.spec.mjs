@@ -28,6 +28,7 @@ const videos = Array.from({ length: 12 }, (_, index) => ({
   author: 'Test channel',
   authorId: 'UC-test-channel-id',
   lengthSeconds: 120,
+  ...(index === 11 ? {} : { viewCount: 12345 }),
   published: Date.now() - 86400000,
   timeAdded: Date.now() + index,
   playlistItemId: `layout-item-${index}`,
@@ -43,6 +44,7 @@ test.use({
   seed: {
     settings: {
       animationSpeed: 0,
+      shortenViewCounts: false,
       userPlaylistSortOrder: 'custom',
       videoPlaybackEngine: 'built-in',
       ytDlpPlaybackEngineDefaultMigration: true
@@ -133,7 +135,7 @@ test('playlist row menu moves and removes videos while thumbnail shortcuts stay 
   await item.locator('.playlistItemMenu button').click()
   await page.getByRole('menuitem', { name: /^Remove from playlist$/i }).click()
   await expect(titles).toHaveCount(videos.length - 1)
-  await expect(titles).not.toContainText(['Playlist video 2'])
+  await expect(page.locator('.watchVideoPlaylist .playlistItem').filter({ has: page.getByRole('heading', { name: 'Playlist video 2', exact: true }) })).toHaveCount(0)
   await expect.poll(() => page.evaluate(() => window.$store.getters.getPlaylist('layout-playlist').videos.some(video => video.title === 'Playlist video 2'))).toBe(false)
   await item.locator('.playlistItemMenu button').click()
   await expect(page.getByRole('menuitem', { name: /^Remove from playlist$/i })).toBeVisible()
@@ -364,19 +366,37 @@ test('keyboard moves watch playlist videos to the top and bottom', async ({ app,
   await watch.dispose()
 })
 
-test('playlist items keep the channel and labeled upload time on one row', { tag: '@scale' }, async ({ app, page }) => {
-  const watch = await openPlaylist(app, page)
-  const infoLine = page.locator('.watchVideoPlaylist').filter({ visible: true }).locator('.playlistItem .infoLine').first()
+test('playlist saves retain available view counts across restart', async ({ app, page }) => {
+  await openPlaylist(app, page)
+  await page.evaluate(async () => {
+    await window.$store.dispatch('addPlaylist', { _id: 'saved-counts', playlistName: 'Saved counts', videos: [] })
+    await window.$store.dispatch('updateQuickBookmarkTargetPlaylistId', 'saved-counts')
+  })
+  const rows = page.locator('.watchVideoPlaylist .playlistItem')
+  await rows.nth(1).hover()
+  await rows.nth(1).locator('.quickBookmarkVideoIcon button').click()
+  await rows.nth(2).hover()
+  await rows.nth(2).locator('.addToPlaylistIcon button').click()
+  await page.getByRole('option').filter({ hasText: 'Saved counts' }).click()
+  await expect.poll(() => page.evaluate(() => window.$store.getters.getPlaylist('saved-counts').videos.map(video => video.viewCount))).toEqual([12345, 12345])
+  const restarted = await app.relaunch()
+  await expect.poll(() => restarted.page.evaluate(() => window.$store?.getters.getPlaylist('saved-counts')?.videos.map(video => video.viewCount))).toEqual([12345, 12345])
+})
+
+test('playlist metadata groups views and upload time below the channel', { tag: '@scale' }, async ({ app, page }) => {
+  await openPlaylist(app, page)
+  const infoLine = page.locator('.watchVideoPlaylist .playlistItem .infoLine').first()
+  await expect(page.locator('.watchVideoPlaylist .playlistItem').last().locator('.viewCount')).toHaveCount(0)
+  await expect(infoLine.locator('.viewCount')).toContainText('12,345')
+  await expect(infoLine.locator('.viewCount .statIcon')).toBeVisible()
   await expect(infoLine.locator('.uploadedTime .statIcon')).toBeVisible()
-  expect(await infoLine.evaluate(element => {
+  await expect.poll(() => infoLine.evaluate(element => {
     const channel = element.querySelector('.channelName').getBoundingClientRect()
+    const views = element.querySelector('.viewCount').getBoundingClientRect()
     const uploaded = element.querySelector('.uploadedTime').getBoundingClientRect()
-    return {
-      sameRow: Math.abs((channel.top + channel.bottom) / 2 - (uploaded.top + uploaded.bottom) / 2) <= 1,
-      afterChannel: uploaded.left > channel.right
-    }
-  })).toEqual({ sameRow: true, afterChannel: true })
-  await watch.dispose()
+    const bounds = element.getBoundingClientRect()
+    return { belowChannel: views.top >= channel.bottom && uploaded.top >= channel.bottom, contained: views.right <= bounds.right + 0.5 && uploaded.right <= bounds.right + 0.5 }
+  })).toEqual({ belowChannel: true, contained: true })
 })
 
 test('playlist channel separator follows the counter', { tag: '@scale' }, async ({ app, page, uiScale }) => {
@@ -479,6 +499,7 @@ test.describe('long watch playlist', () => {
     seed: {
       settings: {
         animationSpeed: 0,
+        shortenViewCounts: false,
         userPlaylistSortOrder: 'custom',
         videoPlaybackEngine: 'built-in',
         ytDlpPlaybackEngineDefaultMigration: true
