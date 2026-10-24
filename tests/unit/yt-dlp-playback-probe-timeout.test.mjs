@@ -13,9 +13,10 @@ const code = (await readFile(new URL('../../src/renderer/helpers/player/ytDlpPla
   .replace(/^import .+$/gm, '')
   .replace(/^export /gm, '')
 
-function playbackLoader({ timeoutAttempts = Infinity, timeoutFormatId = '137', probeError = new DOMException('signal timed out', 'TimeoutError') } = {}) {
+function playbackLoader({ timeoutAttempts = Infinity, timeoutFormatId = '137', probeError = new DOMException('signal timed out', 'TimeoutError'), panorama = false, legacyProbeGate } = {}) {
   const extractions = []
   const saved = []
+  const hlsProbes = []
   const dependencies = {
     ytDlp: {
       ytDlpPlaybackCacheGet: async () => null,
@@ -24,15 +25,17 @@ function playbackLoader({ timeoutAttempts = Infinity, timeoutFormatId = '137', p
         extractions.push(videoId)
         return {
           isLive: false, liveStatus: 'not_live', duration: 60, storyboardVtt: null,
-          hlsManifestUrl: null, incomplete: false,
+          hlsManifestUrl: panorama ? 'https://media.test/panorama.m3u8?expire=4102444800' : null, incomplete: false,
           formats: [
             { formatId: '18', height: 360, vcodec: 'avc1.42001E', acodec: 'mp4a.40.2' },
+            { formatId: '134', height: 360, vcodec: 'avc1.42001E', acodec: 'none' },
             { formatId: '137', height: 1080, vcodec: 'avc1.640028', acodec: 'none' },
             { formatId: '140', height: null, vcodec: 'none', acodec: 'mp4a.40.2' },
           ].map(format => ({
             ...format, protocol: 'https', ext: 'mp4',
             width: format.height === null ? null : format.height * 16 / 9,
             fps: 30, dynamicRange: 'SDR', language: null,
+            formatNote: panorama && format.height !== null ? 'mesh' : null,
             audioSampleRate: 44_100, audioChannels: 2, bitrate: 100_000,
             url: `https://media.test/${videoId}/${format.formatId}?expire=4102444800`,
           })),
@@ -44,6 +47,7 @@ function playbackLoader({ timeoutAttempts = Infinity, timeoutFormatId = '137', p
       return { initRange: { start: 0, end: 99 }, indexRange: { start: 100, end: 199 } }
     },
     fetch: async url => {
+      await legacyProbeGate
       checkProbe(url)
       return { ok: true, body: { cancel: async () => {} } }
     },
@@ -56,6 +60,10 @@ function playbackLoader({ timeoutAttempts = Infinity, timeoutFormatId = '137', p
     getEarliestYtDlpFormatExpiry,
     YtDlpPlaybackSourceCache,
     waitForYtDlpFormatAvailability,
+    probeYtDlpHlsManifest: async url => {
+      hlsProbes.push(url)
+      return true
+    },
   }
   function checkProbe(url) {
     if (url.includes(`/video000001/${timeoutFormatId}?`) && extractions.filter(id => id === 'video000001').length <= timeoutAttempts) {
@@ -63,7 +71,7 @@ function playbackLoader({ timeoutAttempts = Infinity, timeoutFormatId = '137', p
     }
   }
   const getSource = compileFunction(`${code}\nreturn getYtDlpPlaybackSource`, Object.keys(dependencies))(...Object.values(dependencies))
-  return { getSource, extractions, saved }
+  return { getSource, extractions, saved, hlsProbes }
 }
 
 for (const [kind, timeoutFormatId] of [['adaptive', '137'], ['progressive', '18']]) {
@@ -112,4 +120,43 @@ test('reports persistent format timeouts as a preload failure after bounded retr
   assert.deepEqual(result, { requested: 1, preloaded: 0, failed: 1 })
   assert.equal(extractions.length, 9)
   assert.equal(saved.length, 0)
+})
+
+test('keeps a working panoramic HLS source when an unrelated adaptive format probe times out', async () => {
+  const { getSource, hlsProbes } = playbackLoader({ panorama: true })
+  const source = await getSource('video000001')
+
+  assert.equal(source.vrProjection, 'EQUIRECTANGULAR')
+  assert.equal(source.manifestSrc, 'https://media.test/panorama.m3u8?expire=4102444800')
+  assert.equal(source.incomplete, false)
+  assert.equal(hlsProbes.length, 1)
+})
+
+test('preserves a panoramic fallback when legacy format probes keep timing out', async () => {
+  const { getSource, saved, hlsProbes } = playbackLoader({ panorama: true, timeoutFormatId: '18' })
+  const source = await getSource('video000001')
+
+  assert.equal(source.vrProjection, 'EQUIRECTANGULAR')
+  assert.equal(source.manifestSrc, 'https://media.test/panorama.m3u8?expire=4102444800')
+  assert.equal(source.incomplete, true)
+  assert.equal(saved.length, 0)
+  assert.equal(hlsProbes.length, 3)
+})
+
+test('waits for delayed legacy probes before caching an adaptive source', async () => {
+  let releaseProbe
+  const legacyProbeGate = new Promise(resolve => { releaseProbe = resolve })
+  const { getSource, saved, extractions } = playbackLoader({ legacyProbeGate, timeoutFormatId: '18', timeoutAttempts: 1 })
+  let settled = false
+  const pendingSource = getSource('video000001').finally(() => { settled = true })
+
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(settled, false)
+  assert.equal(saved.length, 0)
+  releaseProbe()
+  const source = await pendingSource
+
+  assert.equal(source.incomplete, false)
+  assert.equal(saved.length, 1)
+  assert.equal(extractions.length, 2)
 })

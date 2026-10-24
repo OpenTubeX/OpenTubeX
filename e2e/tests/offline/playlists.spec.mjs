@@ -333,7 +333,7 @@ test.describe('seeded playlists', () => {
       const entries = JSON.parse(await readFile(path.join(app.userDataDir, 'yt-dlp-playback-cache.json'), 'utf8'))
       expect(entries).toHaveLength(2)
       expect(entries.every(entry => !entry.source.incomplete && decodeURIComponent(entry.source.manifestSrc).includes('height="1080"'))).toBe(true)
-    }).toPass()
+    }).toPass({ timeout: 15_000 })
     await attachScreenshot('Playlist preload recovered all formats')
   })
 

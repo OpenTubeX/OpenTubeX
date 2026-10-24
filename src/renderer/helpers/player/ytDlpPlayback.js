@@ -890,11 +890,14 @@ async function loadYtDlpPlaybackSource(
 
     // A renderer probe can omit formats even when yt-dlp's metadata is complete.
     // Keep those sources out of the cache and eligible for playlist recovery.
-    const onProbeTimeout = () => { info.incomplete = true }
+    let adaptiveProbeTimedOut = false
+    let legacyProbeTimedOut = false
     const deferIncompleteSource = (source, playableFormats) => {
-      if (!info.incomplete) return false
+      if (!source.incomplete) return false
       const height = playableFormats.reduce((max, format) => Math.max(max, format.height ?? 0), 0)
-      if (height > incompleteSourceHeight) {
+      const panorama = source.vrProjection === 'EQUIRECTANGULAR'
+      const previousPanorama = incompleteSource?.vrProjection === 'EQUIRECTANGULAR'
+      if ((panorama && !previousPanorama) || (panorama === previousPanorama && height > incompleteSourceHeight)) {
         incompleteSource = source
         incompleteSourceHeight = height
       }
@@ -956,13 +959,13 @@ async function loadYtDlpPlaybackSource(
     const needsPanorama = preferVrHls && !isLive
     const usePanoramicHls = needsPanorama && info.hlsManifestUrl !== null
     const legacyHttpFormats = httpFormats.filter(format => isVideoFormat(format) && isAudioFormat(format))
-    const legacyFormatsPromise = convertLegacyFormats(legacyHttpFormats, onProbeTimeout)
+    const legacyFormatsPromise = convertLegacyFormats(legacyHttpFormats, () => { legacyProbeTimedOut = true })
 
     // live streams are only available as HLS, which is what makes rewinding within
     // the DVR window possible
     if (!isLive) {
       const adaptiveFormats = httpFormats.filter(format => !(isVideoFormat(format) && isAudioFormat(format)))
-      const localFormats = getCompatibleAdaptiveFormats(await convertAdaptiveFormats(adaptiveFormats, info.duration, onProbeTimeout))
+      const localFormats = getCompatibleAdaptiveFormats(await convertAdaptiveFormats(adaptiveFormats, info.duration, () => { adaptiveProbeTimedOut = true }))
 
       if (localFormats.some(format => format.has_video) && localFormats.some(format => format.has_audio)) {
         const manifest = await FormatUtils.toDash({ adaptive_formats: localFormats })
@@ -973,7 +976,7 @@ async function loadYtDlpPlaybackSource(
           manifestMimeType: MANIFEST_TYPE_DASH,
           legacyFormats,
           expiryDate: getEarliestYtDlpFormatExpiry(adaptiveFormats),
-          incomplete: info.incomplete === true,
+          incomplete: info.incomplete === true || adaptiveProbeTimedOut || legacyProbeTimedOut,
           title: info.title,
           isLive: false,
           vrProjection: needsPanorama ? 'MESH' : null,
@@ -987,7 +990,7 @@ async function loadYtDlpPlaybackSource(
           version: info.version
         }
 
-        if (deferIncompleteSource(source, [...localFormats, ...legacyFormats])) continue
+        if (deferIncompleteSource(source, [...localFormats, ...legacyFormats]) && !usePanoramicHls) continue
         if (needsPanorama) {
           flatVrSource = source
         } else {
@@ -1008,7 +1011,7 @@ async function loadYtDlpPlaybackSource(
         expiryDate: getEarliestYtDlpFormatExpiry(
           info.formats.filter(format => format.url !== null)
         ),
-        incomplete: info.incomplete === true,
+        incomplete: info.incomplete === true || legacyProbeTimedOut,
         title: info.title,
         isLive,
         vrProjection: usePanoramicHls ? 'EQUIRECTANGULAR' : null,
@@ -1051,7 +1054,7 @@ async function loadYtDlpPlaybackSource(
           manifestMimeType: MANIFEST_TYPE_DASH,
           legacyFormats,
           expiryDate: getEarliestYtDlpFormatExpiry(legacyHttpFormats),
-          incomplete: info.incomplete === true,
+          incomplete: info.incomplete === true || adaptiveProbeTimedOut || legacyProbeTimedOut,
           title: info.title,
           isLive: false,
           vrProjection: needsPanorama ? 'MESH' : null,
