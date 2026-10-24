@@ -69,6 +69,7 @@ const SCROLL_MINI_RESTORE_SCROLL_STALL_MS = 300
  *   fullWindowEnabled: import('vue').Ref<boolean>,
  *   inlineSixteenByNine: import('vue').ComputedRef<boolean>,
  *   getUi: () => import('shaka-player').ui.Overlay | null,
+ *   getSeekRange: () => { start: number, end: number } | null | undefined,
  *   isActiveTab: import('vue').ComputedRef<boolean>,
  *   isPlayerSuspended?: import('vue').Ref<boolean> | null,
  *   pictureInPictureActive: import('vue').Ref<boolean>,
@@ -77,7 +78,7 @@ const SCROLL_MINI_RESTORE_SCROLL_STALL_MS = 300
  *   video: import('vue').Ref<HTMLVideoElement | null>
  * }} options
  */
-export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindowEnabled, inlineSixteenByNine, getUi, isActiveTab, isPlayerSuspended = null, pictureInPictureActive, props, tabId = null, video }) {
+export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindowEnabled, inlineSixteenByNine, getUi, getSeekRange, isActiveTab, isPlayerSuspended = null, pictureInPictureActive, props, tabId = null, video }) {
   const watchNavigation = inject(watchNavigationKey, null)
   const playerSuspended = computed(() => isPlayerSuspended?.value === true)
   const scrollMiniVideoAspectRatio = ref(DEFAULT_ASPECT_RATIO)
@@ -1188,7 +1189,9 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
 
   function updateMobileMiniBarProgress() {
     const videoElement = video.value
-    const seekRange = getUi()?.getControls()?.getPlayer()?.seekRange()
+    // The controls' cast proxy can outlive its sender during async teardown.
+    // Read the range from the component's loaded player instead.
+    const seekRange = getSeekRange()
     const start = seekRange?.start ?? 0
     const end = seekRange?.end ?? videoElement?.duration
     const duration = end - start
