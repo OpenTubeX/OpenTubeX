@@ -330,6 +330,33 @@ test('server pacing after delivered media does not reload a healthy stream', asy
 })
 
 for (const backoffMs of [100, 10000]) {
+  test(`initialization does not disable startup recovery after ${backoffMs}ms backoffs`, async t => {
+    t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 0 })
+    let calls = 0
+    let reloads = 0
+    const { createSabrTransport } = load(async () => {
+      return ++calls === 1 ? response([1], true, videoFormatId) : policyResponse(backoffMs)
+    }, { Date })
+    const transport = createSabrTransport(sabrData, () => context)
+    t.after(() => transport.cleanup())
+    transport.onReloadOnce(() => reloads++)
+    const video = 'sabr1:video?formatId=137-456-&resolution=1080'
+    const init = `${video}&init`
+    await transport.request(init, request(init), 1).promise
+    const media = `${video}&sq=1`
+    const rejected = assert.rejects(transport.request(media, { uris: [media], retryParameters: { timeout: 60000 } }, 1).promise)
+    const rounds = backoffMs === 100 ? 6 : 2
+    for (let index = 0; index < rounds; index++) {
+      await flushRequests()
+      t.mock.timers.tick(backoffMs)
+    }
+    await flushRequests()
+    t.mock.timers.tick(60000)
+    await rejected
+    assert.equal(calls, rounds + 1)
+    assert.equal(reloads, 1)
+  })
+
   test(`a video stream without media still reloads after bounded ${backoffMs}ms backoffs when audio works`, async t => {
     t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 0 })
     let videoCalls = 0

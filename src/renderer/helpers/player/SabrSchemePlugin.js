@@ -645,7 +645,9 @@ async function doRequest(
   }
 
   if (responseDataChunks.length > 0 && segmentComplete) {
-    currentState.sabrStreamState.deliveredMediaFor.add(operationInputs.streamKind)
+    if (!operationInputs.isInit) {
+      currentState.sabrStreamState.deliveredMediaFor.add(operationInputs.streamKind)
+    }
     if (shouldRetryDueToNextRequestPolicy && nextRequestPlaybackCookieBytes !== undefined) {
       // Policies received before MEDIA_END can establish the session cookie
       // even when this request succeeds. Subsequent audio/video requests must
