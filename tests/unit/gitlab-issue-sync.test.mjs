@@ -517,9 +517,10 @@ test('the privileged workflow job runs only on the canonical default branch', as
   const { runInNewContext } = await import('node:vm')
   const { parse } = await import('yaml')
   const workflow = parse(readFileSync(new URL('../../.github/workflows/gitlab-issue-sync.yml', import.meta.url), 'utf8'))
-  const canRun = (repository, ref, eventName = 'workflow_dispatch') => runInNewContext(workflow.jobs.sync.if, {
-    github: { repository, ref, event_name: eventName, event: { repository: eventName === 'schedule' ? {} : { default_branch: 'development' } } },
+  const canRun = (repository, ref, eventName = 'workflow_dispatch', issue = {}, actor = 'maintainer') => runInNewContext(workflow.jobs.sync.if, {
+    github: { repository, ref, actor, event_name: eventName, event: { repository: eventName === 'schedule' ? {} : { default_branch: 'development' }, issue } },
     format: (template, value) => template.replace('{0}', value),
+    startsWith: (value, prefix) => value?.startsWith(prefix) ?? false,
   })
   assert.equal(canRun('OpenTubeX/OpenTubeX', 'refs/heads/development'), true)
   assert.equal(canRun('OpenTubeX/OpenTubeX', 'refs/heads/feature'), false)
@@ -527,6 +528,24 @@ test('the privileged workflow job runs only on the canonical default branch', as
   assert.equal(canRun('other/fork', 'refs/heads/development'), false)
   assert.equal(canRun('OpenTubeX/OpenTubeX', 'refs/heads/development', 'schedule'), true)
   assert.equal(canRun('other/fork', 'refs/heads/development', 'schedule'), false)
+  const linkedIssue = { user: { login: 'github-actions[bot]' }, body: '<!-- opentubex-sync:issue:1 -->\n\nReport' }
+  for (const eventName of ['issues', 'issue_comment']) {
+    const run = (issue, actor) => canRun('OpenTubeX/OpenTubeX', 'refs/heads/development', eventName, issue, actor)
+    assert.equal(run(linkedIssue), true)
+    assert.equal(run({ ...linkedIssue, pull_request: {} }), false)
+    assert.equal(run({ ...linkedIssue, user: { login: 'reporter' } }), false)
+    assert.equal(run({ ...linkedIssue, body: 'Unlinked issue' }), false)
+    assert.equal(run({ ...linkedIssue, body: null }), false)
+    assert.equal(run(linkedIssue, 'github-actions[bot]'), false)
+    assert.equal(canRun('other/fork', 'refs/heads/development', eventName, linkedIssue), false)
+    assert.equal(canRun('OpenTubeX/OpenTubeX', 'refs/heads/feature', eventName, linkedIssue), false)
+  }
+  assert.deepEqual(workflow.on.issues.types, ['closed', 'reopened'])
+  assert.deepEqual(workflow.on.issue_comment.types, ['created', 'edited'])
+  assert.deepEqual(workflow.on.schedule, [{ cron: '7 * * * *' }])
+  assert.ok(Object.hasOwn(workflow.on, 'workflow_dispatch'))
+  assert.equal(workflow.concurrency.group, 'gitlab-issue-sync')
+  assert.equal(workflow.concurrency['cancel-in-progress'], false)
 })
 
 test('oversized reports and notes fit GitHub limits with attribution and stable truncation notices', async () => {
