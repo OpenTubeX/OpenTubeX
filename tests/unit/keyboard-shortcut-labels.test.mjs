@@ -31,6 +31,7 @@ for (const locale of ['en-US', 'de-DE']) {
       ['CLEAR_SPONSORBLOCK_SEGMENTS', 'Video.Player.SponsorBlock.ClearSegments'],
     ]) assert.equal(labels.get(code), translate(key))
     assert.equal(labels.get('RELOAD_TAB'), labels.get('RELOAD_TAB_ALT'))
+    assert.equal(labels.get('PLAY'), labels.get('PLAY_ALT'))
     assert.equal(getKeyboardShortcutLabelMappings(translate, true).some(([, codes]) => codes.includes('FULLWINDOW')), false)
   })
 }

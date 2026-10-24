@@ -12,7 +12,7 @@ import {
   matchesKeyboardShortcut,
 } from '../../src/renderer/helpers/keyboardShortcuts.js'
 
-test('keeps contextual app shortcuts fixed', () => {
+test('keeps contextual app and playback shortcuts fixed', () => {
   const overrides = {
     APP: {
       GENERAL: {
@@ -23,6 +23,11 @@ test('keeps contextual app shortcuts fixed', () => {
         FIND_PREVIOUS_ALT_ENTER: 'ctrl+up',
         NEXT_TAB: 'alt+arrowright',
         PREV_TAB: 'alt+arrowleft',
+      }
+    },
+    VIDEO_PLAYER: {
+      PLAYBACK: {
+        PLAY_ALT: 'alt+p',
       }
     }
   }
@@ -36,6 +41,7 @@ test('keeps contextual app shortcuts fixed', () => {
   assert.equal(shortcuts.APP.GENERAL.FIND_PREVIOUS_ALT_ENTER, 'shift+enter')
   assert.equal(shortcuts.APP.GENERAL.NEXT_TAB, 'control+tab')
   assert.equal(shortcuts.APP.GENERAL.PREV_TAB, 'control+shift+tab')
+  assert.equal(shortcuts.VIDEO_PLAYER.PLAYBACK.PLAY_ALT, 'space')
   assert.deepEqual(persistedShortcuts, shortcuts)
 
   const sanitizedOverrides = {

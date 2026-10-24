@@ -108,6 +108,35 @@ test('uses the extension defaults to mark both boundaries and toggle the submiss
   await expect(menu).toBeVisible()
 })
 
+test('reserves Space for playback when assigning SponsorBlock shortcuts', async ({ app, page }, testInfo) => {
+  const video = await openVideo(app, page)
+  await page.keyboard.press('Shift+?')
+  await page.locator('.shortcutToolbar').getByRole('searchbox').fill('SponsorBlock')
+  const start = page.locator('[data-shortcut-path="VIDEO_PLAYER.SPONSORBLOCK.START_SPONSORBLOCK_SEGMENT"]')
+  await start.click()
+  await start.press('Space')
+  const conflict = page.locator('.prompt')
+  await expect(conflict).toContainText('Toggle play/pause')
+  await expect(conflict.getByRole('button', { name: 'Reassign', exact: true })).toHaveCount(0)
+  await conflict.locator('.promptCard').screenshot({ path: testInfo.outputPath('reserved-space-conflict.png') })
+  await conflict.getByRole('button', { name: 'Undo', exact: true }).click()
+  await expect(start).toHaveText(';')
+
+  await start.click()
+  await start.press('Enter')
+  await expect(conflict).toBeVisible()
+  await expect(conflict.getByRole('button', { name: 'Reassign', exact: true })).toHaveCount(0)
+  await conflict.getByRole('button', { name: 'Undo', exact: true }).click()
+  await expect(start).toHaveText(';')
+
+  await page.locator('.settingsCloseButton').click()
+  await page.keyboard.press('Space')
+  await expect(video).toHaveJSProperty('paused', false)
+  expect(await drafts(page)).toHaveLength(0)
+  await page.keyboard.press('Space')
+  await expect(video).toHaveJSProperty('paused', true)
+})
+
 test('creates, ends, opens, cancels and clears drafts with configured shortcuts', async ({ app, page }, testInfo) => {
   const video = await openVideo(app, page)
   await assignShortcuts(page)

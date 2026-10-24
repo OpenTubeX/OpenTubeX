@@ -432,6 +432,7 @@ const DefaultKeyboardShortcuts = {
     },
     PLAYBACK: {
       PLAY: 'k',
+      PLAY_ALT: 'space',
       LARGE_REWIND: 'j',
       LARGE_FAST_FORWARD: 'l',
       SMALL_REWIND: 'arrowleft',
@@ -474,6 +475,7 @@ const NonEditableKeyboardShortcutPaths = new Set([
   'APP.GENERAL.FIND_PREVIOUS_ALT_ENTER',
   'APP.GENERAL.NEXT_TAB',
   'APP.GENERAL.PREV_TAB',
+  'VIDEO_PLAYER.PLAYBACK.PLAY_ALT',
 ])
 
 const KeyboardShortcuts = getConfiguredKeyboardShortcuts()
