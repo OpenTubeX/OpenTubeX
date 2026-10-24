@@ -713,3 +713,30 @@ for (const { defaultViewingMode, currentTheatreMode } of [
     })
   })
 }
+
+test('watch toolbar icons use the theme foreground', async ({ app, page, attachScreenshot }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const toolbar = page.locator(`${activeTab} .videoOptions`)
+  await toolbar.scrollIntoViewIfNeeded()
+  await page.mouse.move(0, 0)
+  for (const theme of ['light', 'dark']) {
+    await page.evaluate(value => window.$store.dispatch('updateBaseTheme', value), theme)
+    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+    const foreground = await toolbar.evaluate(element => {
+      const probe = document.createElement('span')
+      probe.style.color = 'var(--primary-text-color)'
+      element.append(probe)
+      const color = getComputedStyle(probe).color
+      probe.remove()
+      return color
+    })
+    const buttons = toolbar.locator('.iconButton:not(.disabled)')
+    expect(await buttons.count()).toBeGreaterThan(0)
+    for (const button of await buttons.all()) {
+      await expect(button).toHaveCSS('color', foreground)
+    }
+    await attachScreenshot(`watch-toolbar-${theme}`)
+    await toolbar.screenshot({ path: test.info().outputPath(`watch-toolbar-${theme}.png`) })
+  }
+})

@@ -126,6 +126,7 @@ $grid-mode-grab-bar-padding: 1em;
     .thumbnailLink,
     .videoWatched,
     .videoDuration,
+    .playlistIndexBadge,
     .externalPlayerIcon,
     .playlistIcons,
     .videoCountContainer,
@@ -157,6 +158,7 @@ $grid-mode-grab-bar-padding: 1em;
     }
 
     .videoWatched,
+    .playlistIndexBadge,
     .videoDuration {
       border-radius: calc(5px * var(--ui-roundness));
       color: var(--primary-text-color);
@@ -178,6 +180,14 @@ $grid-mode-grab-bar-padding: 1em;
         margin-block-end: 4px;
         margin-inline-start: 4px;
       }
+    }
+
+    .playlistIndexBadge {
+      place-self: start start;
+      background-color: var(--card-bg-color);
+      backdrop-filter: var(--card-bg-blur, none);
+      margin: 4px;
+      font-size: 12px;
     }
 
     .videoDuration {

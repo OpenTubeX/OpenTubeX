@@ -72,7 +72,7 @@ async function openPlaylist(app, page) {
   return watchViewHandle(page)
 }
 
-test('playing playlist omits row numbers and retains reorder controls', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
+test('playing playlist shows thumbnail numbers and retains reorder controls', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
   const watch = await openPlaylist(app, page)
   const panel = page.locator('.watchVideoPlaylist').filter({ visible: true })
   await expect(panel.locator('.playlistIndex label')).toHaveText('1 / 12')
@@ -80,9 +80,19 @@ test('playing playlist omits row numbers and retains reorder controls', { tag: '
   await expect(panel.locator('.videoIndexIcon')).toBeVisible()
   const secondRow = panel.locator('.playlistItem').nth(1)
   await expect(secondRow.locator('.grabBar')).toBeVisible()
-  await attachScreenshot('playing-playlist-without-row-numbers')
+  await expect(secondRow.locator('.videoDuration')).toHaveText('2:00')
+  await expect(secondRow.locator('.playlistIndexBadge')).toHaveText('2')
+  await expect.poll(() => secondRow.locator('.videoThumbnail').evaluate(thumbnail => {
+    const bounds = thumbnail.getBoundingClientRect()
+    const index = thumbnail.querySelector('.playlistIndexBadge').getBoundingClientRect()
+    const duration = thumbnail.querySelector('.videoDuration').getBoundingClientRect()
+    return Math.abs(index.left - bounds.left - 4) < 1 && Math.abs(index.top - bounds.top - 4) < 1 && index.bottom <= duration.top
+  })).toBe(true)
+  await attachScreenshot('playing-playlist-thumbnail-numbers')
+  await panel.screenshot({ path: test.info().outputPath('playlist-thumbnail-numbers.png') })
   await secondRow.locator('.videoIndexArea').press('ArrowDown')
   await expect(panel.locator('.playlistItem').nth(2)).toContainText('Playlist video 2')
+  await expect(panel.locator('.playlistItem').nth(2).locator('.playlistIndexBadge')).toHaveText('3')
   await expect(panel.locator('.playlistIndex label')).toHaveText('1 / 12')
   await watch.dispose()
 })
@@ -343,6 +353,8 @@ test('shuffled and reversed playlists keep the progress bar between the counter 
   await shuffle.click()
   await reverse.click()
   await expect(reverse).toHaveAttribute('aria-pressed', 'true')
+  await panel.locator('.playlistItem').first().scrollIntoViewIfNeeded()
+  await expect(panel.locator('.playlistItem').first().locator('.playlistIndexBadge')).toHaveText('12')
   await expectControlsBelowCounter()
   await watch.dispose()
 })
@@ -502,7 +514,8 @@ test('landscape fullscreen playlist shows more videos and keeps controls outside
     const watched = thumbnail.querySelector('.videoWatched').getBoundingClientRect()
     const duration = thumbnail.querySelector('.videoDuration').getBoundingClientRect()
     const bounds = thumbnail.getBoundingClientRect()
-    return watched.bottom <= duration.top && watched.top >= bounds.top && duration.bottom <= bounds.bottom
+    const index = thumbnail.querySelector('.playlistIndexBadge').getBoundingClientRect()
+    return index.right <= watched.left && watched.bottom <= duration.top && watched.top >= bounds.top && duration.bottom <= bounds.bottom
   })).toBe(true)
   await watchedThumbnail.evaluate(thumbnail => {
     const label = thumbnail.querySelector('.videoDuration').cloneNode(false)
@@ -510,6 +523,11 @@ test('landscape fullscreen playlist shows more videos and keeps controls outside
     label.textContent = 'Sponsor'
     thumbnail.append(label)
   })
+  await expect.poll(() => watchedThumbnail.evaluate(thumbnail => {
+    const index = thumbnail.querySelector('.playlistIndexBadge').getBoundingClientRect()
+    const sponsor = thumbnail.querySelector('.sponsorBlockVideoLabel').getBoundingClientRect()
+    return index.bottom <= sponsor.top
+  })).toBe(true)
   await expect.poll(() => watchedThumbnail.evaluate(thumbnail => thumbnail.getBoundingClientRect().height)).toBeLessThanOrEqual(45.1)
   const list = dock.locator('.playlistItemsWrapper')
   await expect.poll(() => list.locator('.playlistItem').evaluateAll(items => {
