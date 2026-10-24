@@ -50,7 +50,7 @@ const ShakaError = shaka.util.Error
  * @type {object}
  * @property {Map<string, Uint8Array>} initDataCache
  * @property {VideoPlaybackAbrRequest} abrRequest
- * @property {RequestInit} requestInit
+ * @property {RequestInit & {body: Uint8Array}} requestInit
  * @property {AbortStatus} abortStatus
  * @property {AbortController} abortController
  * @property {SabrStreamState} sabrStreamState
@@ -58,7 +58,7 @@ const ShakaError = shaka.util.Error
  * @property {?EventEmitterLike} eventEmitter
  * @property {number} cumulativeBackOffTimeMs
  * @property {number} cumulativeBackOffRequested
- * @property {number} cumulativeRetryDueToNextRequestPolicy
+ * @property {number} cumulativeRetries
  * @property {number} startedAtMs
  */
 /**
@@ -386,14 +386,14 @@ async function doRequest(
         shouldReloadDueToBackoffLoop = true
       }
     }
-    if (shouldReloadDueToBackoffLoop || currentState.cumulativeRetryDueToNextRequestPolicy >= 100) {
+    if (shouldReloadDueToBackoffLoop || currentState.cumulativeRetries >= 100) {
       // Fire fake reload event due to detecting retry loop
       currentState.sabrStreamState.playerReloadRequested = true
       if (!currentState.abortController.signal.aborted) {
         console.warn(
           'Reloading the SABR stream after a retry loop.\n' +
           `Backoffs: ${currentState.cumulativeBackOffRequested} (${currentState.cumulativeBackOffTimeMs} ms)\n` +
-          `Next request policy retries: ${currentState.cumulativeRetryDueToNextRequestPolicy}`
+          `Retries: ${currentState.cumulativeRetries}`
         )
         currentState.abortStatus.playerReloadRequested = true
         currentState.abortController.abort()
@@ -699,7 +699,7 @@ async function doRequest(
   } else if (shouldRetry || contextUpdateNeedsRetry) {
     // Context-only handshakes must echo the supplied context, with the same
     // retry limit as policy responses so neither can loop indefinitely.
-    currentState.cumulativeRetryDueToNextRequestPolicy++
+    currentState.cumulativeRetries++
     if (shouldRetryDueToNextRequestPolicy) {
       currentState.sabrStreamState.backoffUntilMs = nextRequestBackoffUntilMs
       if (nextRequestPlaybackCookieBytes !== undefined) {
@@ -721,6 +721,14 @@ async function doRequest(
     } catch (error) {
       console.error('Invalid VideoPlaybackAbrRequest data', currentState.abrRequest)
       throw error
+    }
+
+    const previousBody = currentState.requestInit.body
+    // Context-only handshakes need a changed request to make progress.
+    // Explicit retry policies and redirects still apply to unchanged bodies.
+    if (!shouldRetry && body.length === previousBody.length && body.every((byte, index) => byte === previousBody[index])) {
+      warnFailure('context update did not change the playback request')
+      throw createRecoverableNetworkError(ShakaError.Code.HTTP_ERROR, operationInputs.uri, operationInputs.requestType)
     }
 
     currentState.requestInit = {
@@ -961,7 +969,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
 
     const abortController = new AbortController()
 
-    /** @type {RequestInit} */
+    /** @type {RequestInit & {body: Uint8Array}} */
     const init = {
       body,
       method: 'POST',
@@ -1008,7 +1016,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
       eventEmitter,
       cumulativeBackOffTimeMs: 0,
       cumulativeBackOffRequested: 0,
-      cumulativeRetryDueToNextRequestPolicy: 0,
+      cumulativeRetries: 0,
       startedAtMs: Date.now(),
     }
 

@@ -270,12 +270,12 @@ test('retries a context-only response with the supplied context', async t => {
   assert.deepEqual([...bodies[1].streamerContext.sabrContexts[0].value], [42])
 })
 
-test('activates a retained context when the server changes sendByDefault', async t => {
+for (const withPolicy of [false, true]) test(`activates a retained context when the server changes sendByDefault ${withPolicy ? 'with' : 'without'} a retry policy`, async t => {
   const bodies = []
   const { createSabrTransport } = load(async (_uri, options) => {
     bodies.push(protos.VideoPlaybackAbrRequest.decode(options.body))
-    if (bodies.length === 1) return contextResponse(false, protos.SabrContextWritePolicy.OVERWRITE, true)
-    if (bodies.length === 2) return contextResponse(true, protos.SabrContextWritePolicy.KEEP_EXISTING, true, 99)
+    if (bodies.length === 1) return contextResponse(false, protos.SabrContextWritePolicy.OVERWRITE, withPolicy)
+    if (bodies.length === 2) return contextResponse(true, protos.SabrContextWritePolicy.KEEP_EXISTING, withPolicy, 99)
     return response([1])
   })
   const transport = createSabrTransport(sabrData, () => context)
@@ -288,12 +288,34 @@ test('activates a retained context when the server changes sendByDefault', async
   assert.deepEqual([...bodies[2].streamerContext.sabrContexts[0].value], [42], 'KEEP_EXISTING must retain the original value')
 })
 
-test('bounds context-only retries before requesting a fresh player session', async t => {
+for (const [sendByDefault, writePolicy] of [
+  [true, protos.SabrContextWritePolicy.OVERWRITE],
+  [false, protos.SabrContextWritePolicy.OVERWRITE],
+  [true, protos.SabrContextWritePolicy.KEEP_EXISTING],
+]) test(`stops context-only retries when ${writePolicy === protos.SabrContextWritePolicy.KEEP_EXISTING ? 'KEEP_EXISTING' : 'OVERWRITE'} updates leave the ${sendByDefault ? 'active' : 'inactive'} context unchanged`, async t => {
   let calls = 0
   let reloads = 0
   const { createSabrTransport } = load(async () => {
     calls++
-    return contextResponse(true)
+    return contextResponse(sendByDefault, writePolicy, false,
+      writePolicy === protos.SabrContextWritePolicy.KEEP_EXISTING ? calls : 42)
+  })
+  const transport = createSabrTransport(sabrData, () => context)
+  t.after(() => transport.cleanup())
+  transport.onReloadOnce(() => reloads++)
+  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+  await assert.rejects(transport.request(uri, request(uri), 1).promise,
+    error => error.code === ShakaError.Code.HTTP_ERROR)
+  assert.equal(calls, 2)
+  assert.equal(reloads, 0)
+})
+
+for (const withPolicy of [false, true]) test(`bounds ${withPolicy ? 'explicit policy' : 'changing context-only'} retries before requesting a fresh player session`, async t => {
+  let calls = 0
+  let reloads = 0
+  const { createSabrTransport } = load(async () => {
+    calls++
+    return contextResponse(true, protos.SabrContextWritePolicy.OVERWRITE, withPolicy, withPolicy ? 42 : calls)
   })
   const transport = createSabrTransport(sabrData, () => context)
   t.after(() => transport.cleanup())
