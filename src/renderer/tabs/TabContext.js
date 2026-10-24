@@ -1,4 +1,4 @@
-import { inject, onBeforeUnmount } from 'vue'
+import { computed, inject, onBeforeUnmount, watch } from 'vue'
 
 import store from '../store/index'
 import { getTabNavigationService } from './TabNavigationService'
@@ -22,13 +22,35 @@ export function useTabContext() {
 export function useTabTitle() {
   const { tabId } = useTabContext()
   const watchNavigation = inject(watchNavigationKey, null)
+  const route = inject('tabRoute', null)
+  // Browsing pages stay mounted behind Watch. Their late metadata and locale
+  // updates belong to that page, rather than the video currently in the tab.
+  const browsingRouteKey = !watchNavigation && tabId && route
+    ? computed(() => getTabNavigationService().resolve(route).fullPath)
+    : null
+  const isCurrentBrowsingRoute = browsingRouteKey
+    ? computed(() => {
+        const tab = store.getters.getTabById(tabId)
+        const navigation = getTabNavigationService()
+        return tab && navigation.resolve(tab.route).fullPath === browsingRouteKey.value
+      })
+    : null
   let isMounted = true
+  let browsingTitle = null
+
+  if (isCurrentBrowsingRoute) {
+    watch(isCurrentBrowsingRoute, current => {
+      if (current && browsingTitle?.fullPath === browsingRouteKey.value) {
+        publishTitle(browsingTitle.title, browsingTitle.options)
+      }
+    }, { flush: 'post' })
+  }
 
   onBeforeUnmount(() => {
     isMounted = false
   })
 
-  return (title, options) => {
+  function publishTitle(title, options) {
     if (!isMounted) {
       return
     }
@@ -46,6 +68,14 @@ export function useTabTitle() {
     } else {
       store.commit('setAppTitle', title)
     }
+  }
+
+  return (title, options) => {
+    if (isCurrentBrowsingRoute) {
+      browsingTitle = { title, options, fullPath: browsingRouteKey.value }
+      if (!isCurrentBrowsingRoute.value) return
+    }
+    publishTitle(title, options)
   }
 }
 
