@@ -396,6 +396,39 @@ test('playlist saves retain available view counts across restart', async ({ app,
   await expect.poll(() => counts(restarted.page)).toEqual(expected)
 })
 
+for (const [layout, count] of [['fullscreen', 12345], ['Shorts', 0]]) {
+  test(`${layout} save controls retain available view counts`, async ({ app, page }) => {
+    const watch = await openPlaylist(app, page)
+    await page.locator('.ftVideoPlayer video').evaluate(video => video.pause())
+    await page.evaluate(async () => {
+      await window.$store.dispatch('addPlaylist', { _id: 'action-counts', playlistName: 'Action counts', videos: [] })
+      await window.$store.dispatch('updateQuickBookmarkTargetPlaylistId', 'action-counts')
+      await window.$store.dispatch('updateFullscreenActions', ['addToPlaylist', 'quickBookmark'])
+    })
+    await watch.evaluate((vm, { layout, count }) => {
+      vm.videoViewCount = count
+      if (layout === 'Shorts') {
+        vm.useCustomShortsPlayerForCurrentVideo = true
+        vm.updateShortsPlayerState(30, [{ width: 360, height: 640 }])
+      }
+    }, { layout, count })
+    if (layout === 'fullscreen') await setPlayerFullscreen(page, true)
+    const controls = page.locator(layout === 'fullscreen' ? '.fullscreenActions' : '.shortsActionRail')
+    const quickBookmark = controls.getByRole('button', { name: /Action counts/ })
+    await quickBookmark.click()
+    const savedCounts = () => page.evaluate(() => window.$store.getters.getPlaylist('action-counts').videos.map(video => video.viewCount))
+    await expect.poll(savedCounts).toEqual([count])
+    await quickBookmark.click()
+    await expect.poll(savedCounts).toEqual([])
+    await controls.getByRole('button', { name: /^Add to playlist$/i }).click()
+    await page.getByRole('option').filter({ hasText: 'Action counts' }).click()
+    await expect.poll(savedCounts).toEqual([count])
+    await watch.dispose()
+    const restarted = await app.relaunch()
+    await expect.poll(() => restarted.page.evaluate(() => window.$store?.getters.getPlaylist('action-counts')?.videos.map(video => video.viewCount))).toEqual([count])
+  })
+}
+
 test('playlist metadata groups views and upload time below the channel', { tag: '@scale' }, async ({ app, page }) => {
   await openPlaylist(app, page)
   const infoLine = page.locator('.watchVideoPlaylist .playlistItem .infoLine').first()

@@ -682,8 +682,7 @@ export default defineComponent({
     sponsorBlockFullVideoCategory: function () {
       return selectSponsorBlockFullVideoLabel(this.sponsorBlockInfoSegments)?.category ?? null
     },
-    // `description` and `viewCount` are intentionally left out,
-    // the store drops them from playlist entries as undesired attributes
+    // Descriptions are omitted from saved playlist entries.
     addToPlaylistVideoData: function () {
       return {
         videoId: this.videoId,
@@ -692,6 +691,7 @@ export default defineComponent({
         authorId: this.channelId,
         lengthSeconds: this.videoLengthSeconds,
         published: this.videoPublished,
+        ...(this.videoViewCount != null ? { viewCount: this.videoViewCount } : {}),
         premiereDate: this.premiereDate
       }
     },
@@ -2010,15 +2010,7 @@ export default defineComponent({
 
       const saved = await this.$store.dispatch('addVideo', {
         _id: this.quickBookmarkPlaylist._id,
-        videoData: {
-          videoId: this.videoId,
-          title: this.videoTitle,
-          author: this.channelName,
-          authorId: this.channelId,
-          lengthSeconds: this.videoLengthSeconds,
-          published: this.videoPublished,
-          premiereDate: this.premiereDate
-        }
+        videoData: { ...this.addToPlaylistVideoData }
       })
       showToast({
         message: saved
