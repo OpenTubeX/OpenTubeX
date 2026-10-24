@@ -13,7 +13,7 @@ const code = (await readFile(new URL('../../src/renderer/helpers/player/ytDlpPla
   .replace(/^import .+$/gm, '')
   .replace(/^export /gm, '')
 
-function playbackLoader({ timeoutAttempts = Infinity, timeoutFormatId = '137', probeError = new DOMException('signal timed out', 'TimeoutError'), panorama = false, hlsProbeResult = () => true, legacyProbeGate } = {}) {
+function playbackLoader({ timeoutAttempts = Infinity, timeoutFormatId = '137', probeError = new DOMException('signal timed out', 'TimeoutError'), panorama = false, hlsProbeResult = () => true, incompleteAfterAttempt = Infinity, legacyProbeGate } = {}) {
   const extractions = []
   const saved = []
   const hlsProbes = []
@@ -23,15 +23,16 @@ function playbackLoader({ timeoutAttempts = Infinity, timeoutFormatId = '137', p
       ytDlpPlaybackCacheSet: async (videoId, _key, _expiry, source) => saved.push({ videoId, source }),
       ytDlpGetPlaybackInfo: async videoId => {
         extractions.push(videoId)
+        const incomplete = extractions.filter(id => id === videoId).length > incompleteAfterAttempt
         return {
           isLive: false, liveStatus: 'not_live', duration: 60, storyboardVtt: null,
-          hlsManifestUrl: panorama ? 'https://media.test/panorama.m3u8?expire=4102444800' : null, incomplete: false,
+          hlsManifestUrl: panorama ? 'https://media.test/panorama.m3u8?expire=4102444800' : null, incomplete,
           formats: [
             { formatId: '18', height: 360, vcodec: 'avc1.42001E', acodec: 'mp4a.40.2' },
             { formatId: '134', height: 360, vcodec: 'avc1.42001E', acodec: 'none' },
             { formatId: '137', height: 1080, vcodec: 'avc1.640028', acodec: 'none' },
             { formatId: '140', height: null, vcodec: 'none', acodec: 'mp4a.40.2' },
-          ].map(format => ({
+          ].filter(format => !incomplete || format.formatId !== '137').map(format => ({
             ...format, protocol: 'https', ext: 'mp4',
             width: format.height === null ? null : format.height * 16 / 9,
             fps: 30, dynamicRange: 'SDR', language: null,
@@ -173,6 +174,24 @@ test('prefers an incomplete panorama to a later complete flat DASH fallback', as
   assert.equal(extractions.length, 3)
   assert.equal(hlsProbes.length, 3)
 })
+
+for (const incompleteAfterAttempt of [1, 2]) {
+  test(`keeps complete DASH when extraction becomes incomplete after attempt ${incompleteAfterAttempt}`, async () => {
+    const { getSource, extractions, hlsProbes } = playbackLoader({
+      panorama: true,
+      timeoutAttempts: 0,
+      incompleteAfterAttempt,
+      hlsProbeResult: () => false,
+    })
+    const source = await getSource('video000001')
+
+    assert.equal(source.incomplete, false)
+    assert.equal(source.vrProjection, 'MESH')
+    assert.match(decodeURIComponent(source.manifestSrc), /height="1080"/)
+    assert.equal(extractions.length, 3)
+    assert.equal(hlsProbes.length, 3)
+  })
+}
 
 test('waits for delayed legacy probes before caching an adaptive source', async () => {
   let releaseProbe

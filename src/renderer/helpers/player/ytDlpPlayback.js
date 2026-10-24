@@ -992,7 +992,7 @@ async function loadYtDlpPlaybackSource(
 
         if (deferIncompleteSource(source, [...localFormats, ...legacyFormats]) && !usePanoramicHls) continue
         if (needsPanorama) {
-          flatVrSource = source
+          if (!source.incomplete) flatVrSource = source
         } else {
           await cacheYtDlpPlaybackSource(videoId, effectiveCacheKey, source)
           return source
