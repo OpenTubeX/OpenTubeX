@@ -456,6 +456,13 @@ const DefaultKeyboardShortcuts = {
       REDO_SEEK: 'ctrl+shift+z',
       SKIP_TO_NEXT: 'shift+n',
       SKIP_TO_PREV: 'shift+p'
+    },
+    SPONSORBLOCK: {
+      START_SPONSORBLOCK_SEGMENT: ';',
+      END_SPONSORBLOCK_SEGMENT: ';',
+      OPEN_SPONSORBLOCK_SUBMISSION_MENU: "'",
+      CANCEL_SPONSORBLOCK_SEGMENT: '',
+      CLEAR_SPONSORBLOCK_SEGMENTS: '',
     }
   },
 }

@@ -24,6 +24,11 @@ for (const locale of ['en-US', 'de-DE']) {
       ['REDO_SEEK', 'KeyboardShortcutPrompt.Redo Seek'],
       ['TOGGLE_SKIP_SILENCE', 'KeyboardShortcutPrompt.Toggle Skip Silence'],
       ['FULLWINDOW', 'KeyboardShortcutPrompt.Full Window'],
+      ['START_SPONSORBLOCK_SEGMENT', 'Video.Player.SponsorBlock.StartSegmentNow'],
+      ['END_SPONSORBLOCK_SEGMENT', 'Video.Player.SponsorBlock.SetSegmentEndNow'],
+      ['OPEN_SPONSORBLOCK_SUBMISSION_MENU', 'Video.Player.SponsorBlock.OpenSubmissionMenu'],
+      ['CANCEL_SPONSORBLOCK_SEGMENT', 'Video.Player.SponsorBlock.CancelCurrentSegment'],
+      ['CLEAR_SPONSORBLOCK_SEGMENTS', 'Video.Player.SponsorBlock.ClearSegments'],
     ]) assert.equal(labels.get(code), translate(key))
     assert.equal(labels.get('RELOAD_TAB'), labels.get('RELOAD_TAB_ALT'))
     assert.equal(getKeyboardShortcutLabelMappings(translate, true).some(([, codes]) => codes.includes('FULLWINDOW')), false)

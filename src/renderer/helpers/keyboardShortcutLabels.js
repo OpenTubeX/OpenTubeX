@@ -80,5 +80,11 @@ export function getKeyboardShortcutLabelMappings(t, isCapacitor = false) {
     [t('KeyboardShortcutPrompt.Next Frame'), ['NEXT_FRAME']],
     [t('KeyboardShortcutPrompt.Skip to Next Video'), ['SKIP_TO_NEXT']],
     [t('KeyboardShortcutPrompt.Skip to Previous Video'), ['SKIP_TO_PREV']],
+
+    [t('Video.Player.SponsorBlock.StartSegmentNow'), ['START_SPONSORBLOCK_SEGMENT']],
+    [t('Video.Player.SponsorBlock.SetSegmentEndNow'), ['END_SPONSORBLOCK_SEGMENT']],
+    [t('Video.Player.SponsorBlock.OpenSubmissionMenu'), ['OPEN_SPONSORBLOCK_SUBMISSION_MENU']],
+    [t('Video.Player.SponsorBlock.CancelCurrentSegment'), ['CANCEL_SPONSORBLOCK_SEGMENT']],
+    [t('Video.Player.SponsorBlock.ClearSegments'), ['CLEAR_SPONSORBLOCK_SEGMENTS']],
   ]
 }

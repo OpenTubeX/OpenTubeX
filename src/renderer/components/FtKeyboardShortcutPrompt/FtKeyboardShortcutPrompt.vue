@@ -182,6 +182,8 @@ const { embedded } = defineProps({
   }
 })
 const isMac = process.platform === 'darwin'
+// Only one boundary action is available at a time, so they can share a binding.
+const sponsorBlockBoundaryShortcuts = new Set(['START_SPONSORBLOCK_SEGMENT', 'END_SPONSORBLOCK_SEGMENT'])
 const recordingShortcutPath = ref('')
 const pendingShortcutConflict = ref(null)
 const searchQuery = ref('')
@@ -258,6 +260,11 @@ const playbackPlayerShortcuts = computed(() =>
     ['VIDEO_PLAYER', 'PLAYBACK']
   )
 )
+
+const sponsorBlockShortcuts = computed(() => getLocalizedShortcutNamesAndValues(
+  configuredKeyboardShortcuts.value.VIDEO_PLAYER.SPONSORBLOCK,
+  ['VIDEO_PLAYER', 'SPONSORBLOCK']
+))
 
 const generalAppShortcuts = computed(() => getLocalizedShortcutNamesAndValues(
   configuredKeyboardShortcuts.value.APP.GENERAL,
@@ -348,6 +355,11 @@ const shortcutColumns = computed(() => [
       title: t('KeyboardShortcutPrompt.Sections.App.Search and Page'),
       shortcutDictionary: searchAndPageAppShortcuts.value,
       order: 5
+    },
+    {
+      title: t('Settings.SponsorBlock Settings.SponsorBlock Settings'),
+      shortcutDictionary: sponsorBlockShortcuts.value,
+      order: 7
     }
   ],
   [
@@ -556,6 +568,7 @@ function findShortcutConflicts(binding, shortcut, ignoreDefaultBindings = false)
   return getAllKeyboardShortcutBindings(configuredKeyboardShortcuts.value)
     .filter(candidate =>
       candidate.path !== binding.path &&
+      !(sponsorBlockBoundaryShortcuts.has(binding.code) && sponsorBlockBoundaryShortcuts.has(candidate.code)) &&
       keyboardShortcutsOverlap(candidate.shortcut, shortcut) &&
       (!ignoreDefaultBindings || !keyboardShortcutsOverlap(
         getNestedValue(DefaultKeyboardShortcuts, candidate.path.split('.')),

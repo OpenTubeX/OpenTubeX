@@ -6,6 +6,11 @@ import {
   getConfiguredKeyboardShortcuts,
   sanitizeKeyboardShortcutOverrides,
 } from '../../src/constants.js'
+import {
+  keyboardShortcutFromEvent,
+  keyboardShortcutsOverlap,
+  matchesKeyboardShortcut,
+} from '../../src/renderer/helpers/keyboardShortcuts.js'
 
 test('keeps contextual app shortcuts fixed', () => {
   const overrides = {
@@ -124,4 +129,42 @@ test('allows A-B repeat shortcuts to be configured', () => {
   assert.equal(shortcuts.VIDEO_PLAYER.PLAYBACK.SET_AB_REPEAT_START, 'alt+a')
   assert.equal(shortcuts.VIDEO_PLAYER.PLAYBACK.SET_AB_REPEAT_END, 'alt+b')
   assert.equal(shortcuts.VIDEO_PLAYER.PLAYBACK.CLEAR_AB_REPEAT, '')
+})
+
+test('persists SponsorBlock shortcut assignments and allows clearing them', () => {
+  const overrides = {
+    VIDEO_PLAYER: {
+      SPONSORBLOCK: {
+        START_SPONSORBLOCK_SEGMENT: 'alt+a',
+        END_SPONSORBLOCK_SEGMENT: 'alt+b',
+        OPEN_SPONSORBLOCK_SUBMISSION_MENU: 'alt+s',
+        CANCEL_SPONSORBLOCK_SEGMENT: 'alt+x',
+        CLEAR_SPONSORBLOCK_SEGMENTS: 'alt+c',
+      }
+    }
+  }
+  const sanitized = sanitizeKeyboardShortcutOverrides(JSON.stringify(overrides))
+  assert.deepEqual(getConfiguredKeyboardShortcuts(sanitized).VIDEO_PLAYER.SPONSORBLOCK, overrides.VIDEO_PLAYER.SPONSORBLOCK)
+  assert.equal(getConfiguredKeyboardShortcuts({
+    VIDEO_PLAYER: { SPONSORBLOCK: { START_SPONSORBLOCK_SEGMENT: '' } }
+  }).VIDEO_PLAYER.SPONSORBLOCK.START_SPONSORBLOCK_SEGMENT, '')
+})
+
+test('uses the SponsorBlock extension defaults for segment boundaries and the submission menu', () => {
+  assert.deepEqual(getConfiguredKeyboardShortcuts().VIDEO_PLAYER.SPONSORBLOCK, {
+    START_SPONSORBLOCK_SEGMENT: ';',
+    END_SPONSORBLOCK_SEGMENT: ';',
+    OPEN_SPONSORBLOCK_SUBMISSION_MENU: "'",
+    CANCEL_SPONSORBLOCK_SEGMENT: '',
+    CLEAR_SPONSORBLOCK_SEGMENTS: '',
+  })
+})
+
+test('recognizes semicolons that require Shift on the keyboard layout', () => {
+  const event = { key: ';', code: 'Comma', ctrlKey: false, metaKey: false, altKey: false, shiftKey: true }
+  assert.equal(matchesKeyboardShortcut(event, ';'), true)
+  assert.equal(keyboardShortcutFromEvent(event), ';')
+  assert.equal(keyboardShortcutsOverlap('shift+;', ';'), true)
+  assert.equal(matchesKeyboardShortcut({ ...event, key: ',', shiftKey: false }, ';'), false)
+  assert.equal(matchesKeyboardShortcut({ ...event, ctrlKey: true }, ';'), false)
 })

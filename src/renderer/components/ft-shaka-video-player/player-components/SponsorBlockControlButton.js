@@ -1,7 +1,16 @@
 import shaka from 'shaka-player'
 
-import { SPONSORBLOCK_ICON_VIEWBOX } from '../../../../constants'
+import { KeyboardShortcuts, SPONSORBLOCK_ICON_VIEWBOX } from '../../../../constants'
 import i18n from '../../../i18n/index'
+import { localizeAndAddKeyboardShortcutToActionTitle } from '../../../helpers/utils'
+
+const SHORTCUT_CODES = {
+  start: 'START_SPONSORBLOCK_SEGMENT',
+  end: 'END_SPONSORBLOCK_SEGMENT',
+  menu: 'OPEN_SPONSORBLOCK_SUBMISSION_MENU',
+  cancel: 'CANCEL_SPONSORBLOCK_SEGMENT',
+  clear: 'CLEAR_SPONSORBLOCK_SEGMENTS',
+}
 
 /**
  * @typedef {'start' | 'end' | 'menu' | 'cancel' | 'clear'} SponsorBlockButtonType
@@ -73,8 +82,11 @@ export class SponsorBlockControlButton extends shaka.ui.Element {
 
   /** @private */
   updateLocalisedStrings_() {
-    // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
-    const label = i18n.global.t(this.labelKey_)
+    const label = localizeAndAddKeyboardShortcutToActionTitle(
+      // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
+      i18n.global.t(this.labelKey_),
+      KeyboardShortcuts.VIDEO_PLAYER.SPONSORBLOCK[SHORTCUT_CODES[this.type_]]
+    )
     this.nameSpan_.textContent = this.button_.ariaLabel = label
   }
 
