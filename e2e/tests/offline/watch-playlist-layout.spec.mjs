@@ -85,6 +85,62 @@ test('playing playlist omits row numbers and retains reorder controls', { tag: '
   await watch.dispose()
 })
 
+test('playlist row menu moves and removes videos while thumbnail shortcuts stay contained', { tag: '@scale' }, async ({ app, page, attachScreenshot }) => {
+  await openPlaylist(app, page)
+  const item = page.locator('.watchVideoPlaylist .playlistItem').nth(1)
+  const expectContainedActions = async () => {
+    await item.hover()
+    await expect.poll(() => item.evaluate(element => {
+      const image = [...element.querySelectorAll('.thumbnailImage')]
+        .find(image => getComputedStyle(image).visibility !== 'hidden').getBoundingClientRect()
+      const buttons = [...element.querySelectorAll('.playlistIcons button')]
+      return buttons.length > 0 && buttons.every(button => {
+        const bounds = button.getBoundingClientRect()
+        return bounds.left >= image.left - 0.5 && bounds.right <= image.right + 0.5 &&
+        bounds.top >= image.top - 0.5 && bounds.bottom <= image.bottom + 0.5
+      })
+    })).toBe(true)
+  }
+  await expectContainedActions()
+  await page.evaluate(async () => {
+    await window.$store.dispatch('addPlaylist', { _id: 'bookmarks', playlistName: 'Bookmarks', videos: [] })
+    await window.$store.dispatch('updateQuickBookmarkTargetPlaylistId', 'bookmarks')
+    await window.$store.dispatch('updateExtraThumbnailAction', 'history')
+  })
+  await expect(item.locator('.extraThumbnailActionIcon')).toBeVisible()
+  await expect(item.locator('.playlistIcons button')).toHaveCount(3)
+  await expectContainedActions()
+  await item.locator('.addToPlaylistIcon button').click()
+  await expect(page.locator('.addToPlaylistDropdown')).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(item.locator('.upArrowIcon, .downArrowIcon, .trashIcon')).toHaveCount(0)
+  await expect.poll(() => item.evaluate(element => {
+    const menu = element.querySelector('.playlistItemMenu').getBoundingClientRect()
+    const info = element.querySelector('.info').getBoundingClientRect()
+    return menu.left >= info.right - 0.5 && menu.right <= element.getBoundingClientRect().right + 0.5
+  })).toBe(true)
+  await item.locator('.playlistItemMenu button').click()
+  await expect(page.getByRole('menuitem', { name: /^Move video up$/i })).toBeEnabled()
+  await expect(page.getByRole('menuitem', { name: /^Move video down$/i })).toBeEnabled()
+  await page.getByRole('menuitem', { name: /^Move video up$/i }).click()
+  const titles = page.locator('.watchVideoPlaylist .playlistItem .h3Title')
+  await expect(titles.first()).toHaveText('Playlist video 2')
+  const movedItem = page.locator('.watchVideoPlaylist .playlistItem').first()
+  await movedItem.locator('.playlistItemMenu button').click()
+  await expect(page.getByRole('menuitem', { name: /^Move video up$/i })).toBeDisabled()
+  await page.getByRole('menuitem', { name: /^Move video down$/i }).click()
+  await expect(titles.nth(1)).toHaveText('Playlist video 2')
+  await item.locator('.playlistItemMenu button').click()
+  await page.getByRole('menuitem', { name: /^Remove from playlist$/i }).click()
+  await expect(titles).toHaveCount(videos.length - 1)
+  await expect(titles).not.toContainText(['Playlist video 2'])
+  await expect.poll(() => page.evaluate(() => window.$store.getters.getPlaylist('layout-playlist').videos.some(video => video.title === 'Playlist video 2'))).toBe(false)
+  await item.locator('.playlistItemMenu button').click()
+  await expect(page.getByRole('menuitem', { name: /^Remove from playlist$/i })).toBeVisible()
+  await expect(page.locator('.contextMenu')).toHaveCSS('opacity', '1')
+  await attachScreenshot('playlist row actions menu')
+})
+
 test('playlist preview batches pointer measurements', { tag: '@scale' }, async ({ app, page }) => {
   const watch = await openPlaylist(app, page)
   const panel = page.locator('.watchVideoPlaylist').filter({ visible: true })

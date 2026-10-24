@@ -201,7 +201,7 @@
             @click="toggleQuickBookmarked"
           />
           <FtIconButton
-            v-if="inUserPlaylist && canMoveVideoUp"
+            v-if="!hidePlaylistThumbnailActions && inUserPlaylist && canMoveVideoUp"
             :title="t('User Playlists.Move Video Up')"
             :icon="verticalMoveControls ? ['fas', 'arrow-up'] : ['fas', 'arrow-left']"
             class="upArrowIcon"
@@ -210,7 +210,7 @@
             @click="moveVideoUp"
           />
           <FtIconButton
-            v-if="inUserPlaylist && canMoveVideoDown"
+            v-if="!hidePlaylistThumbnailActions && inUserPlaylist && canMoveVideoDown"
             :title="t('User Playlists.Move Video Down')"
             :icon="verticalMoveControls ? ['fas', 'arrow-down'] : ['fas', 'arrow-right']"
             class="downArrowIcon"
@@ -219,7 +219,7 @@
             @click="moveVideoDown"
           />
           <FtIconButton
-            v-if="inUserPlaylist && canRemoveFromPlaylist"
+            v-if="!hidePlaylistThumbnailActions && inUserPlaylist && canRemoveFromPlaylist"
             :title="t('User Playlists.Remove from Playlist')"
             :icon="['fas', 'trash']"
             class="trashIcon"
@@ -622,6 +622,10 @@ const props = defineProps({
   quickBookmarkButtonEnabled: {
     type: Boolean,
     default: true,
+  },
+  hidePlaylistThumbnailActions: {
+    type: Boolean,
+    default: false,
   },
   canMoveVideoUp: {
     type: Boolean,
