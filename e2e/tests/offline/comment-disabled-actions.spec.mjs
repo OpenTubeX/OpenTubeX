@@ -18,7 +18,8 @@ for (const presentation of ['phone', 'fullscreen']) {
       await (await watchViewHandle(page)).evaluate(view => view.openPhonePanel('comments'))
     } else {
       await setPlayerFullscreen(page, true)
-      await page.locator('.fullscreenCommentsToggle').click({ force: true })
+      await page.locator('.ftVideoPlayer').hover()
+      await page.locator('.fullscreenCommentsToggle').click()
     }
 
     const header = page.locator('.fullscreenCommentHeader')
