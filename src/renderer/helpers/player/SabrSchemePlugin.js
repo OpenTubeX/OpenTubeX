@@ -35,6 +35,7 @@ const ShakaError = shaka.util.Error
  * @property {string} formatIdString
  * @property {boolean} isInit
  * @property {number} sequenceNumber
+ * @property {string} streamKind
  */
 /**
  * @typedef AbortStatus
@@ -49,7 +50,7 @@ const ShakaError = shaka.util.Error
  * @type {object}
  * @property {Map<string, Uint8Array>} initDataCache
  * @property {VideoPlaybackAbrRequest} abrRequest
- * @property {RequestInit} requestInit
+ * @property {RequestInit & {body: Uint8Array}} requestInit
  * @property {AbortStatus} abortStatus
  * @property {AbortController} abortController
  * @property {SabrStreamState} sabrStreamState
@@ -57,7 +58,7 @@ const ShakaError = shaka.util.Error
  * @property {?EventEmitterLike} eventEmitter
  * @property {number} cumulativeBackOffTimeMs
  * @property {number} cumulativeBackOffRequested
- * @property {number} cumulativeRetryDueToNextRequestPolicy
+ * @property {number} cumulativeRetries
  * @property {number} startedAtMs
  */
 /**
@@ -70,6 +71,7 @@ const ShakaError = shaka.util.Error
  * @property {Uint8Array | undefined} playbackCookieBytes
  * @property {boolean} playerReloadRequested
  * @property {number} requestNumber
+ * @property {Set<string>} deliveredMediaFor
  */
 /**
  * @typedef TimeoutController
@@ -81,7 +83,7 @@ const ShakaError = shaka.util.Error
  * @typedef SabrStream
  * @type {object}
  * @property {(cb: ({backoffMs: number}) => void) => void} onBackoffRequested
- * @property {(cb: () => void) => void} onReloadOnce
+ * @property {(cb: (reloadPlaybackContext?: ReloadPlaybackContext) => void) => void} onReloadOnce
  * @property {() => void | undefined} cleanup
  */
 
@@ -89,6 +91,9 @@ const ShakaError = shaka.util.Error
 const PLAYBACK_COOKIE_FIELD_NUMBER = 7
 /** MediaHeader.contentLength, field 14. */
 const MEDIA_CONTENT_LENGTH_FIELD_NUMBER = 14
+
+const BACKOFF_WITHOUT_MEDIA_BUDGET_MS = 20_000
+const BACKOFF_ROUNDS_WITHOUT_MEDIA = 6
 
 /**
  * @param {import('googlevideo/protos').FormatId} formatId
@@ -318,6 +323,7 @@ async function doRequest(
   let receivedMediaLength = 0
   let shouldRetry = false
   let shouldRetryDueToNextRequestPolicy = false
+  let contextUpdateNeedsRetry = false
   let nextRequestBackoffUntilMs = 0
   let nextRequestBackoffTimeMs = 0
   let nextRequestPlaybackCookieBytes
@@ -337,7 +343,9 @@ async function doRequest(
 
   try {
     let shouldReloadDueToBackoffLoop = false
+    let waitedForBackoff = false
     while (currentState.sabrStreamState.backoffUntilMs > Date.now()) {
+      waitedForBackoff = true
       const currentBackoffTimeMs = currentState.sabrStreamState.backoffUntilMs - Date.now()
       currentState.eventEmitter.emit('backoff-requested', { backoffMs: currentBackoffTimeMs })
       // Wait but can be aborted
@@ -363,32 +371,35 @@ async function doRequest(
       currentState.timeoutController?.resetTimeoutOnce()
 
       currentState.cumulativeBackOffTimeMs += currentBackoffTimeMs
+    }
+    if (waitedForBackoff) {
       currentState.cumulativeBackOffRequested++
-      const timeoutMs = operationInputs.request.retryParameters.timeout
-      // Keep these counters request-scoped, matching FreeTube: routine short
-      // backoffs on separate segment requests must not accumulate into a full
-      // player reload.
+      // Pacing is normal once this stream has delivered media. An unstarted
+      // video still needs a bounded recovery even when its audio works. One
+      // long policy, including extensions from another loader, is not a loop.
       if (
-        currentState.cumulativeBackOffRequested >= 3 ||
-        (timeoutMs > 0 && timeoutMs <= currentState.cumulativeBackOffTimeMs)
+        !currentState.sabrStreamState.deliveredMediaFor.has(operationInputs.streamKind) &&
+        (currentState.cumulativeBackOffRequested >= BACKOFF_ROUNDS_WITHOUT_MEDIA ||
+          (currentState.cumulativeBackOffRequested > 1 &&
+            currentState.cumulativeBackOffTimeMs >= BACKOFF_WITHOUT_MEDIA_BUDGET_MS))
       ) {
         shouldReloadDueToBackoffLoop = true
-        break
       }
     }
-    if (shouldReloadDueToBackoffLoop || currentState.cumulativeRetryDueToNextRequestPolicy >= 100) {
+    if (shouldReloadDueToBackoffLoop || currentState.cumulativeRetries >= 100) {
       // Fire fake reload event due to detecting retry loop
       currentState.sabrStreamState.playerReloadRequested = true
       if (!currentState.abortController.signal.aborted) {
         console.warn(
           'Reloading the SABR stream after a retry loop.\n' +
           `Backoffs: ${currentState.cumulativeBackOffRequested} (${currentState.cumulativeBackOffTimeMs} ms)\n` +
-          `Next request policy retries: ${currentState.cumulativeRetryDueToNextRequestPolicy}`
+          `Retries: ${currentState.cumulativeRetries}`
         )
         currentState.abortStatus.playerReloadRequested = true
         currentState.abortController.abort()
         currentState.eventEmitter.emit('reload')
       }
+      throw createRecoverableNetworkError(ShakaError.Code.OPERATION_ABORTED, operationInputs.uri, operationInputs.requestType)
     }
 
     // Redirects and retry policies send a new request; time each one separately
@@ -528,17 +539,17 @@ async function doRequest(
 
             if (sabrContextUpdate.type !== undefined && sabrContextUpdate.value?.length) {
               if (
-                sabrContextUpdate.writePolicy === SabrContextWritePolicy.KEEP_EXISTING &&
-                currentState.sabrStreamState.sabrContexts.has(sabrContextUpdate.type)
+                sabrContextUpdate.writePolicy !== SabrContextWritePolicy.KEEP_EXISTING ||
+                !currentState.sabrStreamState.sabrContexts.has(sabrContextUpdate.type)
               ) {
-                break
+                currentState.sabrStreamState.sabrContexts.set(sabrContextUpdate.type, sabrContextUpdate)
               }
 
-              currentState.sabrStreamState.sabrContexts.set(sabrContextUpdate.type, sabrContextUpdate)
-
+              // Activation applies even when KEEP_EXISTING retains the value.
               if (sabrContextUpdate.sendByDefault) {
                 currentState.sabrStreamState.activeSabrContextTypes.add(sabrContextUpdate.type)
               }
+              contextUpdateNeedsRetry = true
             }
             break
           }
@@ -575,7 +586,7 @@ async function doRequest(
               console.warn('Reloading the SABR stream because YouTube requested it')
               currentState.abortStatus.playerReloadRequested = true
               currentState.abortController.abort()
-              currentState.eventEmitter.emit('reload')
+              currentState.eventEmitter.emit('reload', reloadPlaybackContext)
             }
             break
           }
@@ -596,7 +607,7 @@ async function doRequest(
       }
     }
   } catch (error) {
-    if (currentState.abortStatus.cancelled) {
+    if (currentState.abortStatus.cancelled || currentState.abortStatus.playerReloadRequested) {
       throw createRecoverableNetworkError(ShakaError.Code.OPERATION_ABORTED, operationInputs.uri, operationInputs.requestType)
     } else if (currentState.abortStatus.timedOut) {
       warnFailure('timed out')
@@ -607,7 +618,7 @@ async function doRequest(
     }
   }
 
-  if (currentState.abortStatus.cancelled) {
+  if (currentState.abortStatus.cancelled || currentState.abortStatus.playerReloadRequested) {
     throw createRecoverableNetworkError(ShakaError.Code.OPERATION_ABORTED, operationInputs.uri, operationInputs.requestType)
   } else if (currentState.abortStatus.timedOut) {
     warnFailure('timed out')
@@ -634,6 +645,9 @@ async function doRequest(
   }
 
   if (responseDataChunks.length > 0 && segmentComplete) {
+    if (!operationInputs.isInit) {
+      currentState.sabrStreamState.deliveredMediaFor.add(operationInputs.streamKind)
+    }
     if (shouldRetryDueToNextRequestPolicy && nextRequestPlaybackCookieBytes !== undefined) {
       // Policies received before MEDIA_END can establish the session cookie
       // even when this request succeeds. Subsequent audio/video requests must
@@ -682,7 +696,10 @@ async function doRequest(
       new Error('Incomplete segment, missing MEDIA_END part'),
       operationInputs.requestType,
     )
-  } else if (shouldRetry) {
+  } else if (shouldRetry || contextUpdateNeedsRetry) {
+    // Context-only handshakes must echo the supplied context, with the same
+    // retry limit as policy responses so neither can loop indefinitely.
+    currentState.cumulativeRetries++
     if (shouldRetryDueToNextRequestPolicy) {
       currentState.sabrStreamState.backoffUntilMs = nextRequestBackoffUntilMs
       if (nextRequestPlaybackCookieBytes !== undefined) {
@@ -690,8 +707,6 @@ async function doRequest(
       }
       currentState.abrRequest.streamerContext.playbackCookie = currentState.sabrStreamState.playbackCookieBytes
       currentState.abrRequest.streamerContext.backoffTimeMs = nextRequestBackoffTimeMs
-      // Only count on an actual retry, not a policy after a completed segment.
-      currentState.cumulativeRetryDueToNextRequestPolicy += 1
     }
 
     const { sabrContexts, unsentSabrContexts } = prepareSabrContexts(currentState.sabrStreamState)
@@ -706,6 +721,14 @@ async function doRequest(
     } catch (error) {
       console.error('Invalid VideoPlaybackAbrRequest data', currentState.abrRequest)
       throw error
+    }
+
+    const previousBody = currentState.requestInit.body
+    // Context-only handshakes need a changed request to make progress.
+    // Explicit retry policies and redirects still apply to unchanged bodies.
+    if (!shouldRetry && body.length === previousBody.length && body.every((byte, index) => byte === previousBody[index])) {
+      warnFailure('context update did not change the playback request')
+      throw createRecoverableNetworkError(ShakaError.Code.HTTP_ERROR, operationInputs.uri, operationInputs.requestType)
     }
 
     currentState.requestInit = {
@@ -863,6 +886,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
     playbackCookieBytes: undefined,
     playerReloadRequested: false,
     requestNumber: 0,
+    deliveredMediaFor: new Set(),
   }
 
   const requestSegment = (uri, request, requestType, _progressUpdated, headersReceived = () => {}) => {
@@ -940,11 +964,12 @@ export function createSabrTransport(sabrData, getRequestContext) {
       formatIdString,
       isInit,
       sequenceNumber,
+      streamKind: url.pathname,
     }
 
     const abortController = new AbortController()
 
-    /** @type {RequestInit} */
+    /** @type {RequestInit & {body: Uint8Array}} */
     const init = {
       body,
       method: 'POST',
@@ -991,7 +1016,7 @@ export function createSabrTransport(sabrData, getRequestContext) {
       eventEmitter,
       cumulativeBackOffTimeMs: 0,
       cumulativeBackOffRequested: 0,
-      cumulativeRetryDueToNextRequestPolicy: 0,
+      cumulativeRetries: 0,
       startedAtMs: Date.now(),
     }
 

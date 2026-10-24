@@ -42,6 +42,7 @@ async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
     MANIFEST_TYPE_HLS: 'hls',
     parseLocalVideoCollaborators,
     parseLocalSubscriberCount,
+    window: { innerWidth: options.windowWidth ?? 1000 },
     formatNumber: String,
     showApiErrorToast() {},
     console: { error: error => errors.push(String(error)) },
@@ -51,6 +52,10 @@ async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
   const watch = Object.assign(options.watch ?? {}, {
     restrictedPlaybackError: null,
     createLocalDashManifest: options.createLocalDashManifest ?? (async () => 'manifest'),
+    createLocalStoryboardUrls: storyboard => {
+      assert.ok(storyboard, 'Thumbnail previews must not be generated without a storyboard')
+      return `storyboard:${storyboard.thumbnail_height}`
+    },
     applyDownloadedPlaybackSource: () => false,
     alignActiveFormatWithAvailableSources() {},
     applyYtDlpPlaybackSource() {},
@@ -79,6 +84,18 @@ async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
   assert.equal(completed, true)
   assert.equal(watch.manifestSrc, options.expectedErrorMessage ? undefined : 'manifest')
   return watch
+}
+
+for (const [windowWidth, boards] of [[1000, []], [375, [{ thumbnail_height: 180 }]]]) {
+  test(`loads video streams when no usable storyboard remains at ${windowWidth}px`, async () => {
+    const watch = await loadMetadata({
+      playability_status: { status: 'OK' }, basic_info: { title: 'Ready video', duration: 42 }, page: [],
+      storyboards: { type: 'PlayerStoryboardSpec', boards },
+    }, 'disabled', { windowWidth })
+    assert.equal(watch.videoTitle, 'Ready video')
+    assert.equal(watch.manifestSrc, 'manifest')
+    assert.equal(watch.videoStoryboardSrc, undefined)
+  })
 }
 
 for (const status of ['UNPLAYABLE', 'LOGIN_REQUIRED']) {

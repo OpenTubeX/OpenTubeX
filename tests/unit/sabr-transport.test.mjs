@@ -227,6 +227,188 @@ function policyResponse(backoffTimeMs) {
   return new Response(utils.concatenateChunks(buffer.chunks))
 }
 
+function contextResponse(sendByDefault, writePolicy = protos.SabrContextWritePolicy.OVERWRITE, withPolicy = false, value = 42) {
+  const buffer = new CompositeBuffer([])
+  const writer = new UmpWriter(buffer)
+  writer.write(protos.UMPPartId.SABR_CONTEXT_UPDATE, protos.SabrContextUpdate.encode({
+    type: 1, value: Uint8Array.of(value), sendByDefault, writePolicy,
+  }).finish())
+  if (withPolicy) {
+    writer.write(protos.UMPPartId.NEXT_REQUEST_POLICY,
+      Uint8Array.of(0x08, 0))
+  }
+  return new Response(utils.concatenateChunks(buffer.chunks))
+}
+
+test('forwards the server reload context to the player owner', async t => {
+  const buffer = new CompositeBuffer([])
+  new UmpWriter(buffer).write(protos.UMPPartId.RELOAD_PLAYER_RESPONSE,
+    protos.ReloadPlaybackContext.encode({ reloadPlaybackParams: { token: 'reload-token' } }).finish())
+  const { createSabrTransport } = load(async () => new Response(utils.concatenateChunks(buffer.chunks)))
+  const transport = createSabrTransport(sabrData, () => context)
+  t.after(() => transport.cleanup())
+  let reloadContext
+  transport.onReloadOnce(value => { reloadContext = value })
+  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+  await assert.rejects(transport.request(uri, request(uri), 1).promise)
+  assert.equal(reloadContext?.reloadPlaybackParams?.token, 'reload-token')
+})
+
+test('retries a context-only response with the supplied context', async t => {
+  const bodies = []
+  const { createSabrTransport } = load(async (_uri, options) => {
+    bodies.push(protos.VideoPlaybackAbrRequest.decode(options.body))
+    return bodies.length === 1 ? contextResponse(true) : response([1, 2])
+  })
+  const transport = createSabrTransport(sabrData, () => context)
+  t.after(() => transport.cleanup())
+  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+  const segment = await transport.request(uri, request(uri), 1).promise
+  assert.deepEqual([...segment.data], [1, 2])
+  assert.equal(bodies.length, 2)
+  assert.equal(bodies[1].streamerContext.sabrContexts[0].type, 1)
+  assert.deepEqual([...bodies[1].streamerContext.sabrContexts[0].value], [42])
+})
+
+for (const withPolicy of [false, true]) test(`activates a retained context when the server changes sendByDefault ${withPolicy ? 'with' : 'without'} a retry policy`, async t => {
+  const bodies = []
+  const { createSabrTransport } = load(async (_uri, options) => {
+    bodies.push(protos.VideoPlaybackAbrRequest.decode(options.body))
+    if (bodies.length === 1) return contextResponse(false, protos.SabrContextWritePolicy.OVERWRITE, withPolicy)
+    if (bodies.length === 2) return contextResponse(true, protos.SabrContextWritePolicy.KEEP_EXISTING, withPolicy, 99)
+    return response([1])
+  })
+  const transport = createSabrTransport(sabrData, () => context)
+  t.after(() => transport.cleanup())
+  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+  await transport.request(uri, request(uri), 1).promise
+  assert.deepEqual([...bodies[1].streamerContext.unsentSabrContexts], [1])
+  assert.deepEqual([...bodies[2].streamerContext.unsentSabrContexts], [])
+  assert.equal(bodies[2].streamerContext.sabrContexts[0].type, 1)
+  assert.deepEqual([...bodies[2].streamerContext.sabrContexts[0].value], [42], 'KEEP_EXISTING must retain the original value')
+})
+
+for (const [sendByDefault, writePolicy] of [
+  [true, protos.SabrContextWritePolicy.OVERWRITE],
+  [false, protos.SabrContextWritePolicy.OVERWRITE],
+  [true, protos.SabrContextWritePolicy.KEEP_EXISTING],
+]) test(`stops context-only retries when ${writePolicy === protos.SabrContextWritePolicy.KEEP_EXISTING ? 'KEEP_EXISTING' : 'OVERWRITE'} updates leave the ${sendByDefault ? 'active' : 'inactive'} context unchanged`, async t => {
+  let calls = 0
+  let reloads = 0
+  const { createSabrTransport } = load(async () => {
+    calls++
+    return contextResponse(sendByDefault, writePolicy, false,
+      writePolicy === protos.SabrContextWritePolicy.KEEP_EXISTING ? calls : 42)
+  })
+  const transport = createSabrTransport(sabrData, () => context)
+  t.after(() => transport.cleanup())
+  transport.onReloadOnce(() => reloads++)
+  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+  await assert.rejects(transport.request(uri, request(uri), 1).promise,
+    error => error.code === ShakaError.Code.HTTP_ERROR)
+  assert.equal(calls, 2)
+  assert.equal(reloads, 0)
+})
+
+for (const withPolicy of [false, true]) test(`bounds ${withPolicy ? 'explicit policy' : 'changing context-only'} retries before requesting a fresh player session`, async t => {
+  let calls = 0
+  let reloads = 0
+  const { createSabrTransport } = load(async () => {
+    calls++
+    return contextResponse(true, protos.SabrContextWritePolicy.OVERWRITE, withPolicy, withPolicy ? 42 : calls)
+  })
+  const transport = createSabrTransport(sabrData, () => context)
+  t.after(() => transport.cleanup())
+  transport.onReloadOnce(() => reloads++)
+  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+  await assert.rejects(transport.request(uri, request(uri), 1).promise)
+  assert.equal(calls, 100)
+  assert.equal(reloads, 1)
+})
+
+test('server pacing after delivered media does not reload a healthy stream', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 0 })
+  let calls = 0
+  let reloads = 0
+  const { createSabrTransport } = load(async () => {
+    calls++
+    return calls > 1 && calls < 6 ? policyResponse(100) : response([1])
+  }, { Date })
+  const transport = createSabrTransport(sabrData, () => context)
+  t.after(() => transport.cleanup())
+  transport.onReloadOnce(() => reloads++)
+  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+  await transport.request(uri, request(uri), 1).promise
+  const pending = transport.request(uri, request(uri), 1).promise
+  pending.catch(() => {})
+  for (let index = 0; index < 4; index++) {
+    await flushRequests()
+    t.mock.timers.tick(100)
+  }
+  const segment = await pending
+  assert.deepEqual([...segment.data], [1])
+  assert.equal(calls, 6)
+  assert.equal(reloads, 0)
+})
+
+for (const backoffMs of [100, 10000]) {
+  test(`initialization does not disable startup recovery after ${backoffMs}ms backoffs`, async t => {
+    t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 0 })
+    let calls = 0
+    let reloads = 0
+    const { createSabrTransport } = load(async () => {
+      return ++calls === 1 ? response([1], true, videoFormatId) : policyResponse(backoffMs)
+    }, { Date })
+    const transport = createSabrTransport(sabrData, () => context)
+    t.after(() => transport.cleanup())
+    transport.onReloadOnce(() => reloads++)
+    const video = 'sabr1:video?formatId=137-456-&resolution=1080'
+    const init = `${video}&init`
+    await transport.request(init, request(init), 1).promise
+    const media = `${video}&sq=1`
+    const rejected = assert.rejects(transport.request(media, { uris: [media], retryParameters: { timeout: 60000 } }, 1).promise)
+    const rounds = backoffMs === 100 ? 6 : 2
+    for (let index = 0; index < rounds; index++) {
+      await flushRequests()
+      t.mock.timers.tick(backoffMs)
+    }
+    await flushRequests()
+    t.mock.timers.tick(60000)
+    await rejected
+    assert.equal(calls, rounds + 1)
+    assert.equal(reloads, 1)
+  })
+
+  test(`a video stream without media still reloads after bounded ${backoffMs}ms backoffs when audio works`, async t => {
+    t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 0 })
+    let videoCalls = 0
+    let reloads = 0
+    const { createSabrTransport } = load(async (_uri, options) => {
+      const body = protos.VideoPlaybackAbrRequest.decode(options.body)
+      if (body.clientAbrState.enabledTrackTypesBitfield === 1) return response([1])
+      videoCalls++
+      return policyResponse(backoffMs)
+    }, { Date })
+    const transport = createSabrTransport(sabrData, () => context)
+    t.after(() => transport.cleanup())
+    transport.onReloadOnce(() => reloads++)
+    const audio = 'sabr1:audio?formatId=140-123-&sq=1'
+    await transport.request(audio, request(audio), 1).promise
+    const video = 'sabr1:video?formatId=137-456-&resolution=1080&sq=1'
+    const rejected = assert.rejects(transport.request(video, { uris: [video], retryParameters: { timeout: 60000 } }, 1).promise)
+    const rounds = backoffMs === 100 ? 6 : 2
+    for (let index = 0; index < rounds; index++) {
+      await flushRequests()
+      t.mock.timers.tick(backoffMs)
+    }
+    await flushRequests()
+    t.mock.timers.tick(60000)
+    await rejected
+    assert.equal(videoCalls, rounds)
+    assert.equal(reloads, 1)
+  })
+}
+
 test('resumed audio and video requests retain the playback cookie from a completed init segment', async t => {
   // Include an explicit zero and an unknown field, as in server cookies. The
   // opaque cookie must survive without decoding and re-encoding it.

@@ -7,6 +7,26 @@ import { createLocalFeedParsers } from '../../src/renderer/helpers/api/local-fee
 const fixture = JSON.parse(await readFile(new URL('../../e2e/fixtures/innertube/watch/review-channel-lockup.json', import.meta.url), 'utf8'))
 const { parseLockupView } = createLocalFeedParsers(() => false)
 
+for (const field of ['title', 'metadata']) {
+  test(`preserves a video when its ${field} is missing`, () => {
+    const card = new YTNodes.LockupView(structuredClone(fixture))
+    if (field === 'metadata') delete card.metadata
+    else delete card.metadata.title
+    const video = parseLockupView(card, 'UCfallback', 'Fallback channel')
+    assert.equal(video.videoId, card.content_id)
+    assert.equal(video.title, '')
+  })
+}
+
+for (const contentType of ['VIDEO', 'SHORT', 'STATION']) {
+  test(`drops a ${contentType} card without a video ID`, () => {
+    const card = new YTNodes.LockupView(structuredClone(fixture))
+    card.content_type = contentType
+    delete card.content_id
+    assert.equal(parseLockupView(card), null)
+  })
+}
+
 for (const [label, age] of [
   // YouTube uses abbreviated minute labels with a non-breaking space.
   ['57\u00a0min ago', 57 * 60_000],

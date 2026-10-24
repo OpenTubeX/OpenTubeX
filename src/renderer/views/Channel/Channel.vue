@@ -350,6 +350,7 @@ import {
   parseLocalChannelVideos,
   parseLocalCommunityPosts,
   parseLocalListPlaylist,
+  parseLocalListPlaylists,
   parseLocalListVideo,
   parseLocalSubscriberCount,
   getLocalArtistTopicChannelReleasesContinuation,
@@ -1739,7 +1740,7 @@ watch(playlistSortBy, () => {
 })
 
 function parseChannelPlaylists(playlists) {
-  return playlists.map(playlist => parseLocalListPlaylist(playlist, id.value, channelName.value)).filter(Boolean)
+  return parseLocalListPlaylists(playlists, id.value, channelName.value)
 }
 
 async function getChannelPlaylistsLocal() {
@@ -1889,7 +1890,7 @@ async function getChannelReleasesLocal() {
         return
       }
 
-      latestReleases.value = releaseTab.playlists.map(playlist => parseLocalListPlaylist(playlist, id.value, channelName.value))
+      latestReleases.value = parseChannelPlaylists(releaseTab.playlists)
       releaseContinuationData.value = releaseTab.has_continuation ? releaseTab : null
     }
 
@@ -1932,7 +1933,7 @@ async function getChannelReleasesLocalMore() {
       const continuation = await releaseContinuationData.value.getContinuation()
       if (!isCurrentRequest()) return
 
-      const parsedReleases = continuation.playlists.map(playlist => parseLocalListPlaylist(playlist, id.value, channelName.value))
+      const parsedReleases = parseChannelPlaylists(continuation.playlists)
       latestReleases.value = latestReleases.value.concat(parsedReleases)
       releaseContinuationData.value = continuation.has_continuation ? continuation : null
     }
@@ -2002,7 +2003,7 @@ async function getChannelPodcastsLocal() {
       return
     }
 
-    latestPodcasts.value = podcastTab.playlists.map(playlist => parseLocalListPlaylist(playlist, id.value, channelName.value))
+    latestPodcasts.value = parseChannelPlaylists(podcastTab.playlists)
     podcastContinuationData.value = podcastTab.has_continuation ? podcastTab : null
     setElementListLoading('podcasts', false)
   } catch (err) {
@@ -2029,7 +2030,7 @@ async function getChannelPodcastsLocalMore() {
     const continuation = await podcastContinuationData.value.getContinuation()
     if (!isCurrentRequest()) return
 
-    const parsedPodcasts = continuation.playlists.map(playlist => parseLocalListPlaylist(playlist, id.value, channelName.value))
+    const parsedPodcasts = parseChannelPlaylists(continuation.playlists)
     latestPodcasts.value = latestPodcasts.value.concat(parsedPodcasts)
     podcastContinuationData.value = continuation.has_continuation ? continuation : null
   } catch (err) {
@@ -2100,7 +2101,7 @@ async function getChannelCoursesLocal() {
       return
     }
 
-    latestCourses.value = coursesTab.playlists.map(playlist => parseLocalListPlaylist(playlist, id.value, channelName.value))
+    latestCourses.value = parseChannelPlaylists(coursesTab.playlists)
     coursesContinuationData.value = coursesTab.has_continuation ? coursesTab : null
     setElementListLoading('courses', false)
   } catch (err) {
@@ -2129,7 +2130,7 @@ async function getChannelCoursesLocalMore() {
     const continuation = await coursesContinuationData.value.getContinuation()
     if (!isCurrentRequest()) return
 
-    const parsedCourses = continuation.playlists.map(playlist => parseLocalListPlaylist(playlist, id.value, channelName.value))
+    const parsedCourses = parseChannelPlaylists(continuation.playlists)
     latestCourses.value = latestCourses.value.concat(parsedCourses)
     coursesContinuationData.value = continuation.has_continuation ? continuation : null
   } catch (err) {

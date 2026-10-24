@@ -44,9 +44,10 @@ const {
   parseLocalTextRuns,
   parseLocalListVideo,
   parseLocalListPlaylist,
+  parseLocalListPlaylists,
   parseLocalChannelVideos
 } = createLocalFeedParsers(isMembersOnly => shouldHideMembersOnlyContent(isMembersOnly, store.getters))
-export { normalizeLocalSubscriptionFeed, parseLocalPlaylistVideos, parseLocalPlaylistVideo, parseLocalSubscriberCount, parseLocalChannelHeader, parseLocalChannelShorts, parseShort, parseLocalCommunityPosts, parseLocalTextRuns, parseLocalListVideo, parseLocalListPlaylist, parseLocalChannelVideos }
+export { normalizeLocalSubscriptionFeed, parseLocalPlaylistVideos, parseLocalPlaylistVideo, parseLocalSubscriberCount, parseLocalChannelHeader, parseLocalChannelShorts, parseShort, parseLocalCommunityPosts, parseLocalTextRuns, parseLocalListVideo, parseLocalListPlaylist, parseLocalListPlaylists, parseLocalChannelVideos }
 
 /**
  * Uses native HTTP on Android, where YouTube does not allow WebView CORS access.
@@ -653,7 +654,7 @@ async function getLocalVrHlsManifest(videoId, session, poToken) {
 
 /**
  * @param {string} id
- * @param {{ shouldGeneratePoToken?: () => boolean }} [options]
+ * @param {{ shouldGeneratePoToken?: () => boolean, reloadPlaybackContext?: import('googlevideo/protos').ReloadPlaybackContext }} [options]
  * @returns {Promise<{
  *   info: import('youtubei.js').YT.VideoInfo,
  *   poToken: string | undefined,
@@ -676,7 +677,7 @@ async function getLocalVrHlsManifest(videoId, session, poToken) {
  *   musicMediaType: import('../player/musicMediaType').MusicMediaType
  * }>}
  */
-export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true } = {}) {
+export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true, reloadPlaybackContext } = {}) {
   let responseTime
   let paidPromotionDurationMs = null
   let isPremiere
@@ -787,7 +788,7 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
         throw error
       }
     }
-    const playerResponse = htmlExtracts.playerResponse
+    const playerResponse = htmlExtracts.playerResponse && !reloadPlaybackContext
       ? { data: htmlExtracts.playerResponse }
       : await htmlExtracts.session.actions.execute('/player', {
           videoId: id,
@@ -799,7 +800,8 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
               splay: false,
               lactMilliseconds: '-1',
               signatureTimestamp: player.signature_timestamp
-            }
+            },
+            ...(reloadPlaybackContext && { reloadPlaybackContext })
           },
           serviceIntegrityDimensions: {
             poToken: contentPoToken
@@ -1512,7 +1514,7 @@ export async function getLocalArtistTopicChannelReleases(channel) {
 
   if (!rawEngagementPanel) {
     return {
-      releases: channel.playlists.map(playlist => parseLocalListPlaylist(playlist)),
+      releases: parseLocalListPlaylists(channel.playlists),
       continuationData: null
     }
   }
@@ -1525,7 +1527,7 @@ export async function getLocalArtistTopicChannelReleases(channel) {
 
   if (!continuationItem) {
     return {
-      releases: channel.playlists.map(playlist => parseLocalListPlaylist(playlist)),
+      releases: parseLocalListPlaylists(channel.playlists),
       continuationData: null
     }
   }
@@ -1548,7 +1550,7 @@ export async function getLocalArtistTopicChannelReleasesContinuation(channel, co
   const continuationItem = memo.get('ContinuationItem')?.[0] ?? null
 
   return {
-    releases: playlists ? playlists.map(playlist => parseLocalListPlaylist(playlist)) : [],
+    releases: playlists ? parseLocalListPlaylists(playlists) : [],
     continuationData: continuationItem
   }
 }

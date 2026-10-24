@@ -22,6 +22,7 @@ function deferred() {
 
 function loader({ android = Promise.resolve({ data: {} }), token = Promise.resolve('token'), next = Promise.resolve({ data: {} }), createPlayer = async () => ({ signature_timestamp: 1, decipher: async url => url }), details = {}, embeddedNext = false, embeddedPlayer = true } = {}) {
   const requests = []
+  const playerRequests = []
   const playerResponse = {
     playabilityStatus: { status: 'OK' },
     videoDetails: { videoId: 'testVideo01', title: 'Ready video', lengthSeconds: '30', ...details },
@@ -33,6 +34,7 @@ function loader({ android = Promise.resolve({ data: {} }), token = Promise.resol
       execute(endpoint, options) {
         requests.push(options.client ?? endpoint)
         if (options.client === 'ANDROID') return android
+        if (endpoint === '/player') playerRequests.push(options)
         return endpoint === '/player' ? Promise.resolve({ data: playerResponse }) : next
       }
     }
@@ -64,8 +66,18 @@ function loader({ android = Promise.resolve({ data: {} }), token = Promise.resol
     console,
   }
   const load = compileFunction(`${source.slice(start, end).replace('export ', '')}\nreturn getLocalVideoInfo`, Object.keys(dependencies))(...Object.values(dependencies))
-  return { load, requests, session }
+  return { load, requests, session, playerRequests }
 }
+
+test('SABR reloads bypass the embedded player response and return the server context', async () => {
+  const reloadPlaybackContext = { reloadPlaybackParams: { token: 'reload-token' } }
+  const { load, playerRequests } = loader()
+  await load('testVideo01', { reloadPlaybackContext })
+  assert.equal(playerRequests.length, 1)
+  assert.deepEqual(playerRequests[0].playbackContext.reloadPlaybackContext, reloadPlaybackContext)
+  assert.equal(playerRequests[0].playbackContext.contentPlaybackContext.signatureTimestamp, 1)
+  assert.equal(playerRequests[0].serviceIntegrityDimensions.poToken, 'token')
+})
 
 test('requests watch metadata while the player script is pending', async () => {
   const script = deferred()

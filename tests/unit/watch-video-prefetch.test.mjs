@@ -56,6 +56,23 @@ test('the next video is requested while the previous one is still saving its pro
   await reloading
 })
 
+for (const sameVideo of [true, false]) {
+  test(`SABR reload context ${sameVideo ? 'reaches the prefetch once' : 'does not follow navigation to another video'}`, async () => {
+    const requests = []
+    const options = []
+    const { watch, finish } = watchFor(load(requests, { options }))
+    if (sameVideo) watch.videoId = watch.tabRoute.params.id
+    const context = { reloadPlaybackParams: { token: 'reload-token' } }
+    watch.pendingSabrReloadContext = { videoId: watch.videoId, context }
+    const reloading = watch.reloadView()
+    await new Promise(resolve => setImmediate(resolve))
+    assert.equal(options[0].reloadPlaybackContext, sameVideo ? context : undefined)
+    assert.equal(watch.pendingSabrReloadContext, null)
+    finish()
+    await reloading
+  })
+}
+
 for (const [label, options] of [['Shorts', { short: true }], ['Invidious', { backendPreference: 'invidious' }]]) {
   test(`${label} are not requested early`, async () => {
     const requests = []

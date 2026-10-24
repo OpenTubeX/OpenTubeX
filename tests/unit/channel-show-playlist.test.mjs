@@ -4,7 +4,58 @@ import test from 'node:test'
 import { YTNodes } from 'youtubei.js'
 import { createLocalFeedParsers } from '../../src/renderer/helpers/api/local-feed-parsers.js'
 
-const { parseLocalListPlaylist } = createLocalFeedParsers(() => false)
+const { parseLocalListPlaylist, parseLocalListPlaylists } = createLocalFeedParsers(() => false)
+
+function playlistCard() {
+  return {
+    type: 'LockupView', content_type: 'PLAYLIST', content_id: 'PLexample',
+    metadata: { title: { text: 'Example playlist' } },
+    content_image: { primary_thumbnail: {
+      image: [{ url: 'https://example.com/thumbnail.jpg' }],
+      overlays: [{ is: type => type === YTNodes.ThumbnailOverlayBadgeView, badges: [{ text: '12 videos' }] }],
+    } },
+  }
+}
+
+for (const field of ['title', 'metadata']) {
+  test(`preserves a playlist when its ${field} is missing`, () => {
+    const card = playlistCard()
+    if (field === 'metadata') delete card.metadata
+    else delete card.metadata.title
+    const playlist = parseLocalListPlaylist(card)
+    assert.equal(playlist.playlistId, 'PLexample')
+    assert.equal(playlist.title, '')
+  })
+}
+
+test('drops playlists without IDs and unsupported mixes from a mixed playlist list', () => {
+  const valid = playlistCard()
+  const missingId = { ...playlistCard(), content_id: undefined }
+  const mix = { ...playlistCard(), content_id: 'RDexample' }
+  assert.equal(parseLocalListPlaylist(missingId), null)
+  assert.deepEqual(parseLocalListPlaylists([missingId, mix, valid], 'UCfallback', 'Fallback channel'), [
+    parseLocalListPlaylist(valid, 'UCfallback', 'Fallback channel'),
+  ])
+})
+
+test('parses a GridShow as its episode playlist and preserves the season label', () => {
+  const show = new YTNodes.GridShow({
+    title: { simpleText: 'Example show' },
+    navigationEndpoint: { browseEndpoint: { browseId: 'VLPLexample' } },
+    thumbnailRenderer: { showCustomThumbnailRenderer: {
+      thumbnail: { thumbnails: [{ url: 'https://example.com/show.jpg', width: 1280, height: 720 }] },
+    } },
+    thumbnailOverlays: [{ thumbnailOverlayBottomPanelRenderer: { text: { simpleText: '3 seasons' } } }],
+  })
+  const playlist = parseLocalListPlaylist(show, 'UCfallback', 'Fallback channel')
+  assert.equal(playlist.playlistId, 'PLexample')
+  assert.equal(playlist.title, 'Example show')
+  assert.equal(playlist.thumbnail, 'https://example.com/show.jpg')
+  assert.equal(playlist.channelId, 'UCfallback')
+  assert.equal(playlist.channelName, 'Fallback channel')
+  assert.equal(playlist.itemCountText, '3 seasons')
+  assert.equal(playlist.videoCount, undefined)
+})
 
 test('parses a channel TV show as a playlist with its season count', () => {
   const show = {
