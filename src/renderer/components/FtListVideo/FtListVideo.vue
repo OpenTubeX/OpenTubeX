@@ -105,6 +105,12 @@
           />
         </RouterLink>
         <div
+          v-if="showPlaylistIndex"
+          class="playlistIndexBadge"
+        >
+          {{ playlistIndex + 1 }}
+        </div>
+        <div
           v-if="isLive || isUpcoming || isStation || localDownloadId !== undefined || (displayDuration !== '' && displayDuration !== '0:00')"
           class="videoDuration"
           :class="{
@@ -1844,6 +1850,8 @@ const displayTitle = computed(() => {
     return title_
   }
 })
+
+const showPlaylistIndex = computed(() => props.appearance === 'watchPlaylistItem' && props.playlistIndex !== null)
 
 const displayDuration = computed(() => {
   if (useDeArrowTitles.value && (duration.value === '' || duration.value === '0:00') && deArrowCache.value?.videoDuration) {

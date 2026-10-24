@@ -209,7 +209,7 @@
 .videoOptions :deep(.iconButton) {
   position: relative;
   border-radius: calc(11px * var(--ui-roundness));
-  color: var(--tertiary-text-color);
+  color: var(--primary-text-color);
 }
 
 .videoOptions :deep(.iconButton:not(.disabled):is(:hover, :focus-visible, .pressed)) {
