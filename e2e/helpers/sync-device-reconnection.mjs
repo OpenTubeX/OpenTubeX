@@ -3,7 +3,7 @@ import { expect } from '@playwright/test'
 import { preparePrivacyKey, encryptSyncDocument, decryptSyncDocument } from '../../src/renderer/helpers/sync-server-privacy.js'
 import { normalizeSyncSessionsDocument, removeSyncSession } from '../../src/renderer/helpers/sync-sessions.js'
 import { encryptSyncServerDeviceInfo } from '../../src/renderer/helpers/sync-server-sessions.js'
-import { goToSettingsSection } from './app.mjs'
+import { goToSettingsSection, waitForAppReady } from './app.mjs'
 
 export async function verifySyncDeviceReconnection(page, { conflict = false, phone = false, intentionalDeletion = false, olderLogin = false, pendingRevocation = false, abandonRevocation = false } = {}) {
   await expect(page.locator('.topNav')).toBeVisible({ timeout: 30_000 })
@@ -46,9 +46,13 @@ export async function verifySyncDeviceReconnection(page, { conflict = false, pho
   async function verifyPendingTabSync() {
     const cleaned = structuredClone(document)
     const previousPuts = sessionPuts
-    const originalPages = page.context().pages()
+    let extraPage
     if (!phone) {
+      // Session registration alone does not mean the renderer is ready to close.
+      const newPage = page.context().waitForEvent('page')
       await page.evaluate(() => window.ftElectron.openInNewWindow('/subscriptions'))
+      extraPage = await newPage
+      await waitForAppReady(extraPage)
       await expect.poll(async () => {
         const sessions = await page.evaluate(() => window.ftElectron.tabs.getSyncSessions())
         return sessions.some(session => !sessionIds.includes(session.sessionId))
@@ -67,8 +71,12 @@ export async function verifySyncDeviceReconnection(page, { conflict = false, pho
       expect(document).toEqual(cleaned)
       expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getTabs.length)).toBeGreaterThan(0)
     } finally {
-      for (const extraPage of page.context().pages().filter(candidate => !originalPages.includes(candidate))) {
+      if (extraPage) {
         await extraPage.close()
+        await expect.poll(async () => {
+          const sessions = await page.evaluate(() => window.ftElectron.tabs.getSyncSessions())
+          return sessions.map(session => session.sessionId)
+        }).toEqual(sessionIds)
       }
     }
   }

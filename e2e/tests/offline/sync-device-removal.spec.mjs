@@ -46,7 +46,17 @@ test('desktop upgrade reclaims tabs after an older client signs back in', async 
   await verifySyncDeviceReconnection(page, { olderLogin: true })
 })
 
-test('pending revocation blocks a desktop window opened after cleanup', async ({ page }) => {
+test('pending revocation blocks a desktop window opened after cleanup', async ({ app, page }) => {
+  // Main-process tab sessions exist before Playwright sees the new renderer.
+  // Delay that renderer to exercise cleanup across this startup gap.
+  await app.electronApp.evaluate(({ BrowserWindow }) => {
+    const original = BrowserWindow.prototype.loadURL
+    BrowserWindow.prototype.loadURL = async function (...args) {
+      BrowserWindow.prototype.loadURL = original
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      return original.apply(this, args)
+    }
+  })
   await verifySyncDeviceReconnection(page, { pendingRevocation: true })
 })
 
