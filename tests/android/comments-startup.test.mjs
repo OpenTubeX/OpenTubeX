@@ -21,7 +21,7 @@ test('restored Android Watch tabs retain comment previews and both panel entry p
   try {
     await page.locator('.profileTrigger').waitFor()
     const tutorial = page.locator('.tutorialOverlay')
-    if (await tutorial.isVisible()) await tutorial.locator('.tutorialActions').getByRole('button').last().click()
+    if (await tutorial.isVisible()) await tutorial.getByRole('button', { name: 'Skip', exact: true }).click()
     saved = await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = { StartupBehavior: 'loadLastActiveTab', VideoPlaybackEngine: 'built-in', AutoplayVideos: false,
