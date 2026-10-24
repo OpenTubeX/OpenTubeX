@@ -725,7 +725,7 @@ test.describe('custom playlists overview order', () => {
   })
 
   for (const layout of ['grid', 'list']) {
-    test(`reorders ${layout} playlists by keyboard and drag and drop`, async ({ app, page }) => {
+    test(`reorders ${layout} playlists by keyboard and drag and drop @scale`, async ({ app, page }) => {
       await dispatchStoreAction(page, 'updateListType', layout)
       await goTo(page, 'userplaylists')
 
@@ -756,6 +756,10 @@ test.describe('custom playlists overview order', () => {
       await page.keyboard.press('Home')
       await expect(titles).toHaveText(['Overview C', 'Overview B', 'Overview A'])
 
+      // DOM order updates before the cards finish gliding to their new positions.
+      await expect.poll(() => page.locator('.playlistList').evaluate(list =>
+        list.getAnimations({ subtree: true }).filter(animation => animation.playState === 'running' || animation.pending).length
+      )).toBe(0)
       await handleOf('A').dragTo(handleOf('C'))
       await expect(titles).toHaveText(['Overview A', 'Overview C', 'Overview B'])
       await expect.poll(() => page.evaluate(() => window.$store.getters.getUserPlaylistsCustomOrder))

@@ -33,7 +33,7 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
   const continuation = new Promise((resolve, reject) => { finishContinuation = resolve; failContinuation = reject })
   const context = {
     playlistLoadGeneration: 0,
-    props, randomizedPlaylistItems, shuffleEnabled, loopEnabled,
+    props, randomizedPlaylistItems, shuffleEnabled, loopEnabled, isUserPlaylist: ref(false),
     isFetchingPlaylistContinuation, hasUnloadedPlaylistVideos, computed, watch: observe,
     isLoading, playlistItems, getPlaylistInfoRun: false,
     playlistTitle: ref(''), playlistTotalVideoCount: ref(0), channelName: ref(''), channelId: ref(''),

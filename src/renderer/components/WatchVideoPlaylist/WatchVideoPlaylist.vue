@@ -1147,7 +1147,10 @@ async function loadCachedPlaylistInformation(cachedPlaylist) {
 
   // Playback must not wait for later pages when the next video is already cached.
   const videos = cachedPlaylist.items.slice()
-  playlistItems.value = applyReversePlaylistState(videos.slice())
+  // A sort preference can finish saving after the page cached its previous order.
+  playlistItems.value = isUserPlaylist.value
+    ? getSortedPlaylistItems(videos, sortOrder.value, locale.value, reversePlaylist.value)
+    : applyReversePlaylistState(videos.slice())
   // Shuffle stays enabled across playlists, so rebuild the order from this one.
   if (shuffleEnabled.value) shufflePlaylistItems()
   isLoading.value = false

@@ -93,3 +93,25 @@ test('the watch page playlist follows the playlist sort order', async ({ app, pa
   await page.evaluate(() => window.$store.dispatch('updatePlaylistSortOrder', { _id: 'sorted', sortOrder: 'video_title_descending' }))
   await expect(panelTitles).toHaveText(ascendingTitles.toReversed())
 })
+
+test('the watch page uses a sort preference saved during navigation', async ({ app, page }, testInfo) => {
+  await mockPlayableWatchPage(app, page)
+  await openPlaylist(page, 'Sorted mix')
+  await page.evaluate(() => {
+    const stop = window.$router.beforeResolve(async to => {
+      if (!to.path.startsWith('/watch/')) return
+      stop()
+      // The playlist page has cached its old order, but the preference save
+      // finishes before the watch view is mounted.
+      await window.$store.dispatch('updatePlaylistSortOrder', { _id: 'sorted', sortOrder: 'video_title_ascending' })
+    })
+  })
+  await titles(page).first().click()
+  await waitForPlayback(page)
+
+  await expect(page.locator('.watchVideoPlaylist .playlistItem .h3Title')).toHaveText(ascendingTitles)
+  await testInfo.attach('Sorted watch playlist', {
+    body: await page.locator('.watchVideoPlaylist').screenshot(),
+    contentType: 'image/png',
+  })
+})
