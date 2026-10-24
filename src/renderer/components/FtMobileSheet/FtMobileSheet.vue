@@ -1,6 +1,7 @@
 <template>
   <Teleport
     to=".app"
+    defer
     :disabled="!docked || fullscreen"
   >
     <dialog
