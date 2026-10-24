@@ -1,5 +1,6 @@
 import { goTo, setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
+import { demoPlayerResponse } from '../../helpers/media.mjs'
 import {
   mockPlayableWatchPage,
   mockUnplayableWatchPage,
@@ -16,6 +17,35 @@ test.use({
     history: [{ ...watchHistoryEntry, title: 'SABR test video' }]
   }
 })
+
+for (const position of [0, 5]) {
+  test(`a SABR reload returns the server context to YouTube at ${position}s`, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    const playerRequests = []
+    await page.route('**/youtubei/v1/player**', route => {
+      const body = route.request().postDataJSON()
+      if (body.context?.client?.clientName === 'WEB') playerRequests.push(body)
+      return route.fulfill({ json: demoPlayerResponse(body.videoId) })
+    })
+    const video = await openMockedVideo(page)
+    await video.evaluate(element => element.pause())
+    playerRequests.length = 0
+    const watch = await watchViewHandle(page)
+    const reloadPlaybackContext = { reloadPlaybackParams: { token: 'e2e-reload-token' } }
+    await watch.evaluate(async (view, { position, reloadPlaybackContext }) => {
+      // The demo uses progressive media; exercise the real SABR reload boundary
+      // and let the next metadata request load that same playable demo source.
+      view.isSabrVideoStream = () => true
+      view.getTimestamp = () => position
+      await view.onPlayerReloadRequested({ ...view.$refs.player.getSabrReloadState(), reloadPlaybackContext })
+    }, { position, reloadPlaybackContext })
+    await expect.poll(() => playerRequests.length).toBe(1)
+    expect(playerRequests[0].playbackContext.reloadPlaybackContext).toEqual(reloadPlaybackContext)
+    await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2)
+    await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(element => element.paused)).toBe(true)
+    await expect.poll(() => watch.evaluate(view => view.pendingSabrReloadContext)).toBeNull()
+  })
+}
 
 /**
  * Puts the mounted Watch view into "playing a SABR stream on DASH" state, then

@@ -265,7 +265,16 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
   }
 
   /**
-   * @param {import('youtubei.js').YTNodes.Playlist|import('youtubei.js').YTNodes.GridPlaylist|import('youtubei.js').YTNodes.LockupView} playlist
+   * @param {(YTNodes.Playlist | YTNodes.GridPlaylist | YTNodes.GridShow | YTNodes.LockupView)[]} playlists
+   * @param {string} [channelId]
+   * @param {string} [channelName]
+   */
+  function parseLocalListPlaylists(playlists, channelId = undefined, channelName = undefined) {
+    return playlists.map(playlist => parseLocalListPlaylist(playlist, channelId, channelName)).filter(Boolean)
+  }
+
+  /**
+   * @param {YTNodes.Playlist | YTNodes.GridPlaylist | YTNodes.GridShow | YTNodes.LockupView} playlist
    * @param {string} channelId
    * @param {string} channelName
    */
@@ -299,6 +308,24 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         authorThumbnailUrl: getResultAuthorThumbnailUrl(gridPlaylist),
         videoCount: extractNumberFromString(gridPlaylist.video_count.text),
         isAlbum: gridPlaylist.thumbnail_overlays?.some(overlay => overlay.icon_type === 'MUSIC') ?? false
+      }
+    } else if (playlist.type === 'GridShow') {
+      /** @type {YTNodes.GridShow} */
+      const gridShow = playlist
+      const playlistId = gridShow.endpoint?.payload?.browseId?.replace(/^VL/, '')
+      if (!playlistId) return null
+
+      return {
+        type: 'playlist',
+        dataSource: 'local',
+        title: gridShow.title?.text ?? '',
+        thumbnail: gridShow.thumbnail_renderer?.thumbnail[0]?.url ?? '',
+        playlistId,
+        channelName: gridShow.author?.name && gridShow.author.name !== 'N/A' ? gridShow.author.name : channelName,
+        channelId: gridShow.author?.id && gridShow.author.id !== 'N/A' ? gridShow.author.id : channelId,
+        authorThumbnailUrl: getResultAuthorThumbnailUrl(gridShow),
+        videoCount: undefined,
+        itemCountText: gridShow.thumbnail_overlays[0]?.text?.text ?? '',
       }
     } else {
       let internalChannelName
@@ -676,7 +703,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
 
         // Filter out mixes without playlist pages (we don't support watch page-only mixes)
         // https://wiki.archiveteam.org/index.php/YouTube/Technical_details#Playlists
-        if (playlistId.startsWith('RD') && !playlistId.startsWith('RDCL')) {
+        if (!playlistId || (playlistId.startsWith('RD') && !playlistId.startsWith('RDCL'))) {
           return null
         }
 
@@ -694,7 +721,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
           type: 'playlist',
           dataSource: 'local',
           playlistId,
-          title: lockupView.metadata.title.text,
+          title: lockupView.metadata?.title?.text ?? '',
           thumbnail: lockupView.content_image.primary_thumbnail.image[0].url,
           channelName,
           channelId,
@@ -708,6 +735,8 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
       case 'SHORT':
       case 'STATION':
       case 'VIDEO': {
+        if (!lockupView.content_id) return null
+
         const isStation = lockupView.content_type === 'STATION'
         let publishedText
         let lengthSeconds = ''
@@ -716,8 +745,8 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         let isUpcoming = false
         let premiereDate
 
-        const isMemberOnly = lockupView.metadata.metadata?.metadata_rows.some(row => {
-          return row.badges.some(badge => badge.style === 'BADGE_MEMBERS_ONLY')
+        const isMemberOnly = lockupView.metadata?.metadata?.metadata_rows?.some(row => {
+          return row.badges?.some(badge => badge.style === 'BADGE_MEMBERS_ONLY')
         })
         if (shouldHideMembersOnly(isMemberOnly)) {
           return null
@@ -814,7 +843,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
           }
         }
 
-        const imageEndpoint = lockupView.metadata.image?.renderer_context?.command_context?.on_tap
+        const imageEndpoint = lockupView.metadata?.image?.renderer_context?.command_context?.on_tap
         const imageAuthorId = imageEndpoint?.payload?.browseId
         const author = authorPart?.text ?? channelName ??
           metadataParts.find(part => part.avatar_stack?.text?.text)?.avatar_stack.text.text
@@ -832,7 +861,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
           type: 'video',
           videoId: lockupView.content_id,
           thumbnailPreviewUrl: getThumbnailPreviewUrl(lockupView),
-          title: lockupView.metadata.title.text?.trim(),
+          title: lockupView.metadata?.title?.text?.trim() ?? '',
           author,
           authorId,
           authorHandle,
@@ -1175,6 +1204,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
     parseLocalTextRuns,
     parseLocalListVideo,
     parseLocalListPlaylist,
+    parseLocalListPlaylists,
     parseLocalChannelVideos
   }
 }

@@ -68,6 +68,28 @@ const extractionSource = watchSource.slice(
   watchSource.indexOf('    async preloadShortsPlaybackWindow()')
 )
 
+test('a SABR reload refreshes cached Shorts metadata with the server context', async () => {
+  const requests = []
+  const methods = vm.runInNewContext(`({${extractionSource}})`, {
+    process: { env: {} }, usesInvidiousApi,
+    getLocalVideoInfo: async (_id, options) => {
+      requests.push(options)
+      return { info: { playability_status: { status: 'OK' } }, call: requests.length }
+    },
+  })
+  const watch = {
+    ...methods, backendPreference: 'local', isYtDlpPlaybackRequested: () => false,
+    shortsPlaybackCache: new ShortsPlaybackCache(),
+  }
+  const original = await watch.getShortsVideoInformation('short')
+  const reloadPlaybackContext = { reloadPlaybackParams: { token: 'reload-token' } }
+  const reloaded = await watch.getShortsVideoInformation('short', 'local', reloadPlaybackContext)
+  assert.notEqual(reloaded, original)
+  assert.equal(requests[1].reloadPlaybackContext, reloadPlaybackContext)
+  assert.equal(await watch.getShortsVideoInformation('short'), reloaded)
+  assert.equal(requests.length, 2)
+})
+
 for (const failure of [
   { status: 'OK', watchPageIpBlocked: true },
   { status: 'LOGIN_REQUIRED' },
@@ -294,7 +316,7 @@ for (const wasPlaying of [false, true]) {
     const context = {
       process: { env: { SUPPORTS_LOCAL_API: true } }, props: { shortsPlayer: true, sabrData: {} },
       video: ref(media), shortsNavigationSuspended: ref(false), musicMode: ref(false),
-      suspendedShortsSabrReload: false, suspendedShortsError: null,
+      suspendedShortsSabrReload: null, suspendedShortsError: null,
       sabrStream: null, sabrAbortController: null, playerWidth: 100, playerHeight: 200,
       AbortController: class { abort() { aborted = true } },
       setupSabrScheme: () => ({
@@ -309,17 +331,18 @@ for (const wasPlaying of [false, true]) {
     }
     const suspend = vm.runInNewContext(`${sabrSource}\n${lifecycle}\nsuspendForShortsNavigation`, context)
     suspend()
-    requestReload()
+    const reloadPlaybackContext = { reloadPlaybackParams: { token: 'reload-token' } }
+    requestReload(reloadPlaybackContext)
     assert.equal(aborted, true, 'the failed SABR transport must still be aborted')
     assert.deepEqual(emitted, [], 'inactive recovery must not reload the current Short')
     context.suspendedShortsError = { error: new Error('same aborted SABR request') }
     activate()
     assert.equal(context.shortsNavigationSuspended.value, false)
-    assert.equal(context.suspendedShortsSabrReload, false)
+    assert.equal(context.suspendedShortsSabrReload, null)
     assert.equal(context.suspendedShortsError, null, 'the SABR reload owns recovery of the aborted request')
     assert.equal(emitted.length, 1)
     assert.equal(emitted[0][0], 'player-reload-requested')
-    assert.deepEqual({ ...emitted[0][1] }, { wasPlaying, playbackRate: 2, videoQuality: '144' })
+    assert.deepEqual({ ...emitted[0][1] }, { wasPlaying, playbackRate: 2, videoQuality: '144', reloadPlaybackContext })
   })
 }
 

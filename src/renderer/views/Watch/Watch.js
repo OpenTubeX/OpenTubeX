@@ -310,6 +310,8 @@ export default defineComponent({
       isLiveContent: false,
       isUpcoming: false,
       isPostLiveDvr: false,
+      /** @type {{ videoId: string, context: import('googlevideo/protos').ReloadPlaybackContext } | null} */
+      pendingSabrReloadContext: null,
       isUnlisted: false,
       isShort: false,
       useCustomShortsPlayerForCurrentVideo: false,
@@ -1648,9 +1650,10 @@ export default defineComponent({
         videoId,
       ])
     },
-    getShortsVideoInformation(videoId, backend = this.backendPreference) {
+    getShortsVideoInformation(videoId, backend = this.backendPreference, reloadPlaybackContext = undefined) {
       const useYtDlp = this.isYtDlpPlaybackRequested()
       const key = this.getShortsExtractionKey(videoId, backend)
+      if (reloadPlaybackContext) this.shortsPlaybackCache.delete(key)
       return this.shortsPlaybackCache.get(key, () => {
         if (usesInvidiousApi(backend)) {
           return invidiousGetVideoInformation(videoId).then(result => {
@@ -1659,6 +1662,7 @@ export default defineComponent({
           })
         }
         return getLocalVideoInfo(videoId, {
+          reloadPlaybackContext,
           shouldGeneratePoToken: () => !process.env.IS_CAPACITOR || !useYtDlp
         }).then(result => {
           if (result.watchPageIpBlocked || result.info?.playability_status?.status !== 'OK') {
@@ -2322,6 +2326,10 @@ export default defineComponent({
       const loadGeneration = ++this.videoLoadGeneration
       this.preparingVideoLoadGeneration = loadGeneration
       const requestedVideoId = this.tabRoute.params.id
+      const reloadPlaybackContext = this.pendingSabrReloadContext?.videoId === requestedVideoId
+        ? this.pendingSabrReloadContext.context
+        : undefined
+      this.pendingSabrReloadContext = null
       if (requestedVideoId !== this.videoId) {
         this.$store.commit('setCurrentWatchTimestamp', { tabId: this.tabId, value: null })
       }
@@ -2329,7 +2337,7 @@ export default defineComponent({
       this.loadingTheatreMode = this.useTheatreMode
       preserveTitle ||= this.preserveTitleOnNextReload
       this.preserveTitleOnNextReload = false
-      const videoInfoPrefetch = this.prefetchLocalVideoInfo(loadGeneration, requestedVideoId)
+      const videoInfoPrefetch = this.prefetchLocalVideoInfo(loadGeneration, requestedVideoId, reloadPlaybackContext)
 
       try {
         this.saveShortsPlaybackPosition()
@@ -2401,7 +2409,7 @@ export default defineComponent({
 
       switch (this.backendPreference) {
         case 'local':
-          await this.getVideoInformationLocal(loadGeneration, false, videoInfoPrefetch)
+          await this.getVideoInformationLocal(loadGeneration, false, videoInfoPrefetch, reloadPlaybackContext)
           break
         case 'invidious':
         case 'yattee':
@@ -3387,13 +3395,15 @@ export default defineComponent({
      * destroys its player. Shorts may use their own extraction, so they wait.
      * @param {number} loadGeneration
      * @param {string} videoId
+     * @param {import('googlevideo/protos').ReloadPlaybackContext} [reloadPlaybackContext]
      */
-    prefetchLocalVideoInfo: function (loadGeneration, videoId) {
+    prefetchLocalVideoInfo: function (loadGeneration, videoId, reloadPlaybackContext = undefined) {
       if (this.backendPreference !== 'local' || this.tabRoute.query.short === 'true') return null
 
       const prefetch = initializeNetworkRecovery().ready.then(() => (
         this.isCurrentVideoLoad(loadGeneration, videoId) && getConnectionState() !== 'offline'
           ? getLocalVideoInfo(videoId, {
+              reloadPlaybackContext,
               // As in getVideoInformationLocal, but the previous video's engine
               // fallback is only reset once its player is gone. Until then, a
               // different video uses the engine setting without that fallback.
@@ -3409,7 +3419,7 @@ export default defineComponent({
       return prefetch
     },
 
-    getVideoInformationLocal: async function (loadGeneration = ++this.videoLoadGeneration, metadataOnly = false, videoInfoPrefetch = null) {
+    getVideoInformationLocal: async function (loadGeneration = ++this.videoLoadGeneration, metadataOnly = false, videoInfoPrefetch = null, reloadPlaybackContext = undefined) {
       if (this.firstLoad && !metadataOnly) {
         this.isLoading = true
       }
@@ -3429,9 +3439,10 @@ export default defineComponent({
           ? this.getShortsExtractionKey(videoId, 'local')
           : null
         const videoInfo = this.customShortsPlayerActive && !metadataOnly
-          ? await this.getShortsVideoInformation(videoId, 'local')
+          ? await this.getShortsVideoInformation(videoId, 'local', reloadPlaybackContext)
           // A failed prefetch is retried here, like one that never started.
           : (await videoInfoPrefetch?.catch(() => null)) ?? await getLocalVideoInfo(videoId, {
+              reloadPlaybackContext,
               // Metadata extraction can outlive a playback engine switch. Decide
               // when the token is needed, after the preceding network requests.
               shouldGeneratePoToken: () => this.isCurrentVideoLoad(loadGeneration, videoId) &&
@@ -4017,7 +4028,9 @@ export default defineComponent({
             }
 
             storyboard = source.at(-1)
-            this.videoStoryboardSrc = this.createLocalStoryboardUrls(storyboard)
+            if (storyboard) {
+              this.videoStoryboardSrc = this.createLocalStoryboardUrls(storyboard)
+            }
           }
 
           let vrHlsManifestUrl = null
@@ -7155,6 +7168,9 @@ export default defineComponent({
     },
 
     async performSabrReload(payload, toastMessage) {
+      this.pendingSabrReloadContext = payload?.reloadPlaybackContext
+        ? { videoId: this.videoId, context: payload.reloadPlaybackContext }
+        : null
       this.setPlayerReloadState(payload)
       this.preserveTitleOnNextReload = true
       this.showTabToast({ message: toastMessage, icon: ['fas', 'sync'] })

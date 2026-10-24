@@ -22,6 +22,19 @@ for (const backend of ['local', 'invidious']) {
       }
     })
 
+    if (backend === 'local') {
+      test('starts playback when the storyboard specification has no boards', async ({ app, page }) => {
+        await mockPlayableWatchPage(app, page)
+        await page.route('**/youtubei/v1/player**', route => route.fulfill({
+          json: demoPlayerResponse(videoId, {
+            storyboards: { playerStoryboardSpecRenderer: { spec: '' } },
+          }),
+        }))
+        await openMockedVideo(page)
+        await expect(page.locator('.errorMessage')).not.toBeVisible()
+      })
+    }
+
     test('starts playback while community chapters are pending', async ({ app, page }, testInfo) => {
       await mockPlayableWatchPage(app, page)
       if (backend === 'local') {

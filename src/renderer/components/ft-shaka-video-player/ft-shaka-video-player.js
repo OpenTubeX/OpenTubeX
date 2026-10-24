@@ -734,7 +734,7 @@ export default defineComponent({
     const { tabId, isTabPresented } = useTabContext()
     const shortsNavigationSuspended = ref(false)
     let suspendedShortsError = null
-    let suspendedShortsSabrReload = false
+    let suspendedShortsSabrReload = null
     const playerIsPresented = computed(() => !shortsNavigationSuspended.value && (isTabPresented?.value ?? true))
     const mediaTabId = tabId ?? 'web'
     // A tab can hold a retained mini player next to another player.
@@ -8600,15 +8600,15 @@ export default defineComponent({
       sabrStream.onBackoffRequested(({ backoffMs }) => {
         startSabrBackoffTimer(backoffMs)
       })
-      sabrStream.onReloadOnce(() => {
+      sabrStream.onReloadOnce((reloadPlaybackContext) => {
         sabrAbortController.abort()
         clearSabrBackoffTimer()
         if (shortsNavigationSuspended.value) {
           // The parent handles reloads for the presented Short only.
-          suspendedShortsSabrReload = true
+          suspendedShortsSabrReload = { reloadPlaybackContext }
           return
         }
-        emit('player-reload-requested', getSabrReloadState())
+        emit('player-reload-requested', { ...getSabrReloadState(), reloadPlaybackContext })
       })
     }
 
@@ -13749,10 +13749,11 @@ export default defineComponent({
       }
       registerMediaSessionHandlers()
       if (suspendedShortsSabrReload) {
-        suspendedShortsSabrReload = false
+        const reloadContext = suspendedShortsSabrReload
+        suspendedShortsSabrReload = null
         // An error from the aborted transport is part of this same recovery.
         suspendedShortsError = null
-        emit('player-reload-requested', { ...getSabrReloadState(), wasPlaying: resume })
+        emit('player-reload-requested', { ...getSabrReloadState(), ...reloadContext, wasPlaying: resume })
         return
       }
       if (suspendedShortsError) {
