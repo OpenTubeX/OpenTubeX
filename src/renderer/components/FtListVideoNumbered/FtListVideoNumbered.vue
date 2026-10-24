@@ -44,6 +44,7 @@
           />
 
           <span
+            v-if="showIndex"
             class="videoIndex"
           >
             {{ videoIndex + 1 }}
@@ -177,6 +178,10 @@ const props = defineProps({
   videoIndex: {
     type: Number,
     default: -1
+  },
+  showIndex: {
+    type: Boolean,
+    default: true
   },
   isCurrentVideo: {
     type: Boolean,
