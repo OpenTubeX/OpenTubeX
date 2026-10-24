@@ -1085,7 +1085,7 @@ async function loadYtDlpPlaybackSource(
     return limitedLiveSource
   }
 
-  if (flatVrSource !== null && !flatVrSource.incomplete && incompleteSource?.vrProjection !== 'EQUIRECTANGULAR') {
+  if (flatVrSource !== null && incompleteSource?.vrProjection !== 'EQUIRECTANGULAR') {
     return flatVrSource
   }
 
@@ -1096,8 +1096,6 @@ async function loadYtDlpPlaybackSource(
   if (limitedLiveSource !== null) {
     return limitedLiveSource
   }
-
-  if (flatVrSource !== null) return flatVrSource
 
   cachedSource = playbackSourceCache.get(videoId, effectiveCacheKey)
   if (cachedSource !== null) {
