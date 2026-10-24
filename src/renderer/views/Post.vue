@@ -81,7 +81,10 @@ const subscriptionCacheReady = computed(() => {
   return store.getters.getSubscriptionCacheReady
 })
 
+let postLoadGeneration = 0
+
 async function loadPost() {
+  const generation = ++postLoadGeneration
   id.value = route.params.id
   authorId.value = route.query.authorId
   post.value = null
@@ -89,9 +92,9 @@ async function loadPost() {
   unsupported.value = false
 
   if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendPreference.value)) {
-    await loadDataInvidiousAsync()
+    await loadDataInvidiousAsync(generation)
   } else {
-    await loadDataLocalAsync()
+    await loadDataLocalAsync(generation)
   }
 }
 
@@ -114,30 +117,36 @@ function updateTitleAndRoute() {
   }
 }
 
-async function loadDataLocalAsync() {
+async function loadDataLocalAsync(generation) {
   try {
-    post.value = await getLocalCommunityPost(id.value, authorId.value)
+    const loadedPost = await getLocalCommunityPost(id.value, authorId.value)
+    if (generation !== postLoadGeneration) return
+    post.value = loadedPost
     authorId.value = post.value.authorId
     updateTitleAndRoute()
   } catch (error) {
+    if (generation !== postLoadGeneration) return
     console.error(error)
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, error)
     if (backendPreference.value === 'local' && backendFallback.value) {
       showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
-      await loadDataInvidiousAsync()
+      await loadDataInvidiousAsync(generation)
     } else {
       isLoading.value = false
     }
   }
 }
 
-async function loadDataInvidiousAsync() {
+async function loadDataInvidiousAsync(generation) {
   try {
-    post.value = await getInvidiousCommunityPost(id.value, authorId.value)
+    const loadedPost = await getInvidiousCommunityPost(id.value, authorId.value)
+    if (generation !== postLoadGeneration) return
+    post.value = loadedPost
     authorId.value = post.value.authorId
     updateTitleAndRoute()
   } catch (error) {
+    if (generation !== postLoadGeneration) return
     console.error(error)
     const isUnsupported = error instanceof YatteeUnsupportedError
     if (!isUnsupported) {
@@ -146,7 +155,7 @@ async function loadDataInvidiousAsync() {
 
     if (process.env.SUPPORTS_LOCAL_API && usesInvidiousApi(backendPreference.value) && backendFallback.value) {
       showInvidiousFallbackToast(backendPreference.value)
-      await loadDataLocalAsync()
+      await loadDataLocalAsync(generation)
     } else {
       unsupported.value = isUnsupported
       isLoading.value = false

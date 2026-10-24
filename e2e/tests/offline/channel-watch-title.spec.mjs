@@ -86,3 +86,52 @@ for (const delayed of [false, true]) {
     await originalVideo.dispose()
   })
 }
+
+test('an old post response cannot replace the retained post or its title behind Watch', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await page.evaluate(() => window.$store.commit('setHideComments', true))
+  const oldRequest = Promise.withResolvers()
+  const response = id => ({
+    comments: [{
+      commentId: `post-${id}`,
+      contentHtml: `Post ${id} content`,
+      author: `Author ${id}`,
+      authorId: `author-${id}`,
+      authorThumbnails: [],
+      publishedText: '1 day ago',
+      likeCount: 0,
+      replyCount: 0
+    }]
+  })
+  await page.route('https://invidious.test/api/v1/post/**', route => {
+    if (new URL(route.request().url()).pathname.endsWith('/post-A')) {
+      oldRequest.resolve(route)
+      return
+    }
+    return route.fulfill({ json: response('B') })
+  })
+  const tab = await page.evaluate(() => window.ftElectron.tabs.create({
+    route: '/post/post-A', query: { authorId: 'author-A' }, makeActive: true
+  }))
+  const pending = await oldRequest.promise
+  await page.locator(sel.searchInput).fill('https://www.youtube.com/post/post-B?ucid=author-B')
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page).toHaveURL(/#\/post\/post-B\?authorId=author-B$/)
+  await expect(page.getByText('Post B content', { exact: true })).toBeVisible()
+  const tabTitle = page.locator(`.tab[data-tab-id="${tab.id}"] .tabTitleText`)
+  await expect(tabTitle).toHaveText('Community Post | Author B')
+
+  await page.evaluate(() => window.$store.commit('setBackendPreference', 'local'))
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => { element.pause() })
+  const videoTitle = (await page.locator('.videoTitle:visible').textContent()).trim()
+  await pending.fulfill({ json: response('A') })
+  // The old API response must finish processing before returning to Post B.
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+  await expect(page.locator('.browsingBehindWatch').getByText('Post B content', { exact: true })).toHaveCount(1)
+  await expect(tabTitle).toHaveText(videoTitle)
+  await page.locator(sel.backButton).click()
+  await expect(page).toHaveURL(/#\/post\/post-B\?authorId=author-B$/)
+  await expect(page.getByText('Post B content', { exact: true })).toBeVisible()
+  await expect(tabTitle).toHaveText('Community Post | Author B')
+})
