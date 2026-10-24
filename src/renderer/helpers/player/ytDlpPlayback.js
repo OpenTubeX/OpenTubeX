@@ -575,13 +575,15 @@ function mapYtDlpLegacyFormat(format) {
 /**
  * Checks that a stream or manifest URL is accepted before exposing it to the player.
  * @param {string} url
+ * @param {() => void} [onTimeout]
  */
-async function probeYtDlpUrl(url) {
+async function probeYtDlpUrl(url, onTimeout) {
   try {
     const response = await fetch(url, { signal: AbortSignal.timeout(URL_PROBE_TIMEOUT) })
     await response.body?.cancel()
     return response.ok
-  } catch {
+  } catch (error) {
+    if (error.name === 'TimeoutError') onTimeout?.()
     return false
   }
 }
@@ -624,12 +626,13 @@ export async function checkYtDlpPlaybackUrl(url) {
 
 /**
  * @param {YtDlpPlaybackFormat[]} formats
+ * @param {() => void} [onTimeout]
  */
-async function convertLegacyFormats(formats) {
+async function convertLegacyFormats(formats, onTimeout) {
   const results = await Promise.all(formats.map(async format => {
     if (
       !await waitForYtDlpFormatAvailability(format) ||
-      !await probeYtDlpUrl(format.url)
+      !await probeYtDlpUrl(format.url, onTimeout)
     ) {
       return null
     }
@@ -645,8 +648,9 @@ async function convertLegacyFormats(formats) {
  * that the byte ranges couldn't be determined for.
  * @param {YtDlpPlaybackFormat[]} formats
  * @param {number | null} duration
+ * @param {() => void} [onTimeout]
  */
-async function convertAdaptiveFormats(formats, duration) {
+async function convertAdaptiveFormats(formats, duration, onTimeout) {
   const results = await Promise.all(formats.map(async (format) => {
     try {
       if (!await waitForYtDlpFormatAvailability(format)) {
@@ -657,6 +661,7 @@ async function convertAdaptiveFormats(formats, duration) {
 
       return byteRanges === null ? null : convertYtDlpToLocalFormat(format, byteRanges, duration)
     } catch (error) {
+      if (error.name === 'TimeoutError') onTimeout?.()
       console.error(`Failed to read the byte ranges of yt-dlp format ${format.formatId}`, error)
       return null
     }
@@ -883,6 +888,9 @@ async function loadYtDlpPlaybackSource(
       continue
     }
 
+    // A renderer probe can omit formats even when yt-dlp's metadata is complete.
+    // Keep those sources out of the cache and eligible for playlist recovery.
+    const onProbeTimeout = () => { info.incomplete = true }
     const deferIncompleteSource = (source, playableFormats) => {
       if (!info.incomplete) return false
       const height = playableFormats.reduce((max, format) => Math.max(max, format.height ?? 0), 0)
@@ -948,13 +956,13 @@ async function loadYtDlpPlaybackSource(
     const needsPanorama = preferVrHls && !isLive
     const usePanoramicHls = needsPanorama && info.hlsManifestUrl !== null
     const legacyHttpFormats = httpFormats.filter(format => isVideoFormat(format) && isAudioFormat(format))
-    const legacyFormatsPromise = convertLegacyFormats(legacyHttpFormats)
+    const legacyFormatsPromise = convertLegacyFormats(legacyHttpFormats, onProbeTimeout)
 
     // live streams are only available as HLS, which is what makes rewinding within
     // the DVR window possible
     if (!isLive) {
       const adaptiveFormats = httpFormats.filter(format => !(isVideoFormat(format) && isAudioFormat(format)))
-      const localFormats = getCompatibleAdaptiveFormats(await convertAdaptiveFormats(adaptiveFormats, info.duration))
+      const localFormats = getCompatibleAdaptiveFormats(await convertAdaptiveFormats(adaptiveFormats, info.duration, onProbeTimeout))
 
       if (localFormats.some(format => format.has_video) && localFormats.some(format => format.has_audio)) {
         const manifest = await FormatUtils.toDash({ adaptive_formats: localFormats })

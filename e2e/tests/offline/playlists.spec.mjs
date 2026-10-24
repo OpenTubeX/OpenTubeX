@@ -266,6 +266,77 @@ test.describe('seeded playlists', () => {
     expect(entries.every(entry => entry.source.manifestSrc.includes('/1080.m3u8'))).toBe(true)
   })
 
+  test('retries timed-out stream format probes before completing a playlist preload', async ({ app, page, attachScreenshot }) => {
+    await dispatchStoreAction(page, 'updateYtDlpPreloadConcurrency', 1)
+    await app.electronApp.evaluate(({ ipcMain }, channel) => {
+      globalThis.__ytDlpProbeExtractions = []
+      ipcMain.removeHandler(channel)
+      ipcMain.handle(channel, (_event, videoId) => {
+        globalThis.__ytDlpProbeExtractions.push(videoId)
+        return {
+          isLive: false,
+          liveStatus: 'not_live',
+          hlsManifestUrl: null,
+          duration: 60,
+          storyboardVtt: null,
+          captions: [],
+          captionTranslations: [],
+          title: videoId,
+          version: 'test',
+          incomplete: false,
+          formats: [
+            { formatId: '18', width: 640, height: 360, vcodec: 'avc1.42001E', acodec: 'mp4a.40.2' },
+            { formatId: '137', width: 1920, height: 1080, vcodec: 'avc1.640028', acodec: 'none' },
+            { formatId: '140', width: null, height: null, vcodec: 'none', acodec: 'mp4a.40.2' },
+          ].map(format => ({
+            ...format,
+            protocol: 'https',
+            ext: 'mp4',
+            url: `https://playlist-probe.test/${videoId}/${format.formatId}?expire=4102444800`,
+            fps: 30,
+            bitrate: 100_000,
+            audioSampleRate: 44_100,
+            audioChannels: 2,
+            language: null,
+            dynamicRange: 'SDR',
+            availableAt: null,
+          })),
+        }
+      })
+    }, IpcChannels.YT_DLP_GET_PLAYBACK_INFO)
+    await page.route('https://playlist-probe.test/**', route => route.fulfill({
+      contentType: 'video/mp4',
+      // Minimal moov and sidx boxes provide the DASH initialization and index ranges.
+      body: Buffer.from('000000086d6f6f760000000873696478', 'hex'),
+    }))
+    await page.evaluate(() => {
+      const originalFetch = window.fetch
+      let attempts = 0
+      window.fetch = (input, options) => {
+        if (String(input).includes('playlist-probe.test/ccccccccccc/137?') && ++attempts <= 3) {
+          return Promise.reject(new DOMException('signal timed out', 'TimeoutError'))
+        }
+        return originalFetch(input, options)
+      }
+    })
+
+    await goTo(page, 'userplaylists')
+    await page.getByText('My seeded playlist').click()
+    await (await openPlaylistMenuItem(page, 'Preload all videos')).click()
+
+    await expect(page.getByText('Preloaded videos: 2.')).toBeVisible()
+    await expect(await openPlaylistMenuItem(page, 'All playlist videos are already preloaded')).toBeDisabled()
+    expect(await app.electronApp.evaluate(() => globalThis.__ytDlpProbeExtractions)).toEqual([
+      'ccccccccccc', 'ccccccccccc', 'ccccccccccc', 'ddddddddddd', 'ccccccccccc',
+    ])
+    await expect(async () => {
+      const entries = JSON.parse(await readFile(path.join(app.userDataDir, 'yt-dlp-playback-cache.json'), 'utf8'))
+      expect(entries).toHaveLength(2)
+      expect(entries.every(entry => !entry.source.incomplete && decodeURIComponent(entry.source.manifestSrc).includes('height="1080"'))).toBe(true)
+    }).toPass()
+    await attachScreenshot('Playlist preload recovered all formats')
+  })
+
   test('keeps a successfully preloaded playlist disabled', async ({ app, page }) => {
     await routeDemoMedia(page)
     await app.electronApp.evaluate(({ ipcMain }, { channel, mediaUrl }) => {
