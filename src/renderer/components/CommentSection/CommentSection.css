@@ -107,16 +107,21 @@
   font-size: 18px;
 }
 
-.fullscreenCommentAction:hover,
-.fullscreenCommentAction:focus-visible {
+.fullscreenCommentAction:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.fullscreenCommentAction:where(:enabled):hover,
+.fullscreenCommentAction:where(:enabled):focus-visible {
   background-color: rgb(255 255 255 / 20%);
 }
 
-.fullscreenCommentAction.active {
+.fullscreenCommentAction:where(:enabled).active {
   background-color: rgb(255 255 255 / 34%);
 }
 
-.fullscreenCommentAction.active:is(:hover, :focus-visible) {
+.fullscreenCommentAction:where(:enabled).active:is(:hover, :focus-visible) {
   background-color: rgb(255 255 255 / 42%);
 }
 
