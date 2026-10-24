@@ -30,11 +30,6 @@
   block-size: 32px;
 }
 
-.app:not(.topTabs, .verticalTabsLeft):has(.topNav.topNavBarColor) .windowControls.left,
-.app:not(.topTabs, .verticalTabsRight):has(.topNav.topNavBarColor) .windowControls.right {
-  color: var(--text-with-main-color);
-}
-
 .windowControl {
   display: grid;
   place-items: center;

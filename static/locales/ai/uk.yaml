@@ -629,14 +629,9 @@ Settings:
         Header button hover and focus text and icons: Текст і піктограми кнопки заголовка під вказівником і у фокусі
         Header button pressed background: Тло натиснутої кнопки заголовка
         Header button pressed text and icons: Текст і піктограми натиснутої кнопки заголовка
-        Colored header button hover and focus background: Тло кольорової кнопки заголовка під вказівником і у фокусі
-        Colored header button hover and focus text and icons: Текст і піктограми кольорової кнопки заголовка під вказівником і у фокусі
-        Colored header button pressed background: Тло натиснутої кольорової кнопки заголовка
-        Colored header button pressed text and icons: Текст і піктограми натиснутої кольорової кнопки заголовка
         Search and dropdown background: Тло пошуку й спадних списків
         Settings search background: Тло пошуку в налаштуваннях
         Instance menu: Меню сервера
-        Input background: Тло полів введення
         Shadow color: Колір тіні
         Primary controls and highlights: Основні елементи керування й акценти
         Primary control hover and focus: Основний елемент керування під вказівником і у фокусі

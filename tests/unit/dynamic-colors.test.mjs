@@ -129,7 +129,7 @@ test('Material Black keeps expressive wallpaper neutrals from tinting surfaces',
   const chroma = hex => Hct.fromInt(argbFromHex(hex)).chroma - 1
   assert.equal(colors.background, '#000000')
   assert.equal(colors.sideNav, '#000000')
-  for (const surface of ['cardBackground', 'secondaryCardBackground', 'searchBar', 'instanceMenu', 'primaryInput', 'subtleSurface']) {
+  for (const surface of ['cardBackground', 'secondaryCardBackground', 'searchBar', 'instanceMenu', 'subtleSurface']) {
     assert.ok(chroma(colors[surface]) <= 4, `${surface} stays neutral`)
     assert.ok(Hct.fromInt(argbFromHex(colors[surface])).tone <= 16, `${surface} stays near black`)
   }
@@ -238,13 +238,12 @@ for (const dark of [false, true]) {
       assert.ok(contrast(colors.primaryText, colors[background]) >= 4.5, `Menu text on ${background}`)
     }
     for (const [foreground, backgrounds] of [
-      ['textWithPrimary', ['primary', 'primaryHover', 'primaryActive', 'coloredHeaderHover', 'coloredHeaderPressed']],
+      ['textWithPrimary', ['primary', 'primaryHover', 'primaryActive']],
       ['textWithAccent', ['accent', 'accentHover', 'accentActive', 'accentLight']],
       ['destructiveText', ['destructive', 'destructiveHover', 'destructiveActive']],
     ]) {
       for (const background of backgrounds) assert.ok(contrast(colors[foreground], colors[background]) >= 4.5, `${foreground} on ${background}`)
     }
-    assert.ok(contrast('#eeeeee', colors.primaryInput) >= 4.5, 'Colored header search text')
   })
 }
 
@@ -322,7 +321,7 @@ for (const mode of ['light', 'dark', 'black']) {
         }
       }
       for (const [fg, backgrounds] of [
-        ['textWithPrimary', ['primary', 'primaryHover', 'primaryActive', 'coloredHeaderHover', 'coloredHeaderPressed']],
+        ['textWithPrimary', ['primary', 'primaryHover', 'primaryActive']],
         ['textWithAccent', ['accent', 'accentHover', 'accentActive', 'accentLight']],
         ['destructiveText', ['destructive', 'destructiveHover', 'destructiveActive']],
         ['selectionText', ['selectionBackground']],

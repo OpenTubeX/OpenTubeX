@@ -116,7 +116,6 @@ export const BASIC_QUICK_SETTING_DEFINITIONS = Object.freeze([
     ],
     icon: ['fas', 'robot'],
   },
-  ['barColor', 'Settings.Theme Settings.Match Top Bar with Main Color', 'appearance', ['fas', 'palette']],
   ['hideSideBarOnWatchPages', 'Settings.Theme Settings.Hide Side Bar on Watch Pages', 'appearance', ['fas', 'eye-slash']],
   ['alwaysShowScrollbars', 'Settings.Theme Settings.Always Show Scrollbars', 'appearance', ['fas', 'sliders-h']],
   ['showToastTimeoutIndicator', 'Settings.Theme Settings.Show Toast Timeout Indicator', 'appearance', ['fas', 'message']],

@@ -1060,11 +1060,6 @@ test.describe('custom theme editor', () => {
     await expect(page.locator('body')).toHaveCSS('--bg-color', '#101112')
     await expect(editor.locator('.ftColorPicker').filter({ hasText: 'Logo text' }).locator('code'))
       .toHaveText('#654321')
-    await page.evaluate(() => {
-      const store = window.$store
-      store.commit('setBarColor', true)
-    })
-    await expect(page.locator('.topNav')).toHaveClass(/topNavBarColor/)
     await page.mouse.move(0, 0)
     await expect(page.locator('.topNav .logoIcon')).toHaveCSS('background-image', 'none')
     await expect(page.locator('.topNav .logoText')).toHaveCSS('background-image', 'none')

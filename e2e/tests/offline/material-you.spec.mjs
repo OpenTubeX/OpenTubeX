@@ -6,12 +6,11 @@ const variants = [['materialLight', 'Material Light'], ['materialDark', 'Materia
 
 test.use({ seed: { settings: { currentLocale: 'en-US', baseTheme: 'materialLight', materialSeedColor: '#ffff00' } } })
 
-test('Material colored headers keep pinned and editable mobile search readable', async ({ app, page }, testInfo) => {
+test('Material headers keep pinned and editable mobile search readable', async ({ app, page }, testInfo) => {
   await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setMinimumSize(0, 0))
   await setWindowSize(app, page, { width: 375, height: 812 })
   await page.evaluate(async () => {
     const store = window.$store
-    await store.dispatch('updateBarColor', true)
     await store.dispatch('updateAlwaysShowMobileSearchBar', true)
   })
   for (const [theme] of variants) {

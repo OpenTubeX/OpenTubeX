@@ -124,21 +124,6 @@
   user-select: none;
 }
 
-.forceTextColor .ft-input {
-  color: #eee;
-  background-color: var(--primary-input-color);
-  backdrop-filter: var(--primary-input-blur, none);
-}
-
-.forceTextColor .ft-input:focus {
-  box-shadow: 0 0 1rem 0 var(--primary-input-color);
-  transition: box-shadow 0.2s ease-in-out;
-}
-
-.forceTextColor ::placeholder {
-  color: #eee;
-}
-
 .inputWrapper {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -370,10 +355,6 @@
   font-size: 12px;
 }
 
-.forceTextColor .selectLabel {
-  color: #eee;
-}
-
 .search .ft-input {
   display: block;
   block-size: 45px;
@@ -446,10 +427,6 @@
   display: none;
 }
 
-.forceTextColor .inputAction {
-  color: #eee;
-}
-
 .ft-input-component.showActionButton .ft-input {
   /*
   With arrow present means
@@ -510,18 +487,10 @@
   transition: background 0.2s ease-in;
 }
 
-.forceTextColor .inputAction.enabled:hover {
-  background-color: var(--primary-color-hover);
-}
-
 .inputAction.enabled:active {
   background-color: var(--side-nav-active-color);
   color: var(--side-nav-active-text-color);
   transition: background 0.2s ease-in;
-}
-
-.forceTextColor .inputAction.enabled:active {
-  background-color: var(--primary-color-active);
 }
 
 .list {

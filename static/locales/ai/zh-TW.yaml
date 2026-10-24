@@ -624,14 +624,9 @@ Settings:
         Header button hover and focus text and icons: 標頭按鈕在游標停留與取得焦點時的文字與圖示
         Header button pressed background: 按下標頭按鈕時的背景
         Header button pressed text and icons: 按下標頭按鈕時的文字與圖示
-        Colored header button hover and focus background: 彩色標頭按鈕在游標停留與取得焦點時的背景
-        Colored header button hover and focus text and icons: 彩色標頭按鈕在游標停留與取得焦點時的文字與圖示
-        Colored header button pressed background: 按下彩色標頭按鈕時的背景
-        Colored header button pressed text and icons: 按下彩色標頭按鈕時的文字與圖示
         Search and dropdown background: 搜尋與下拉式選單背景
         Settings search background: 設定搜尋背景
         Instance menu: 執行個體選單
-        Input background: 輸入欄背景
         Shadow color: 陰影色彩
         Primary controls and highlights: 主要控制項與醒目提示
         Primary control hover and focus: 主要控制項的游標停留與焦點狀態

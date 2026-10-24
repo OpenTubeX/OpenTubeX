@@ -800,7 +800,6 @@ Settings:
     Compact Mobile Mini Player: "Compact mobile mini player"
     Always Show Mobile Search Bar: "Always show mobile search bar"
     Theme Settings: Theme
-    Match Top Bar with Main Color: Match Top Bar with Main Color
     Expand Side Bar by Default: Expand Side Bar by Default
     Move Downloads to App Header: Move Downloads to App Header
     Move Settings to App Header: Move Settings to App Header
@@ -968,14 +967,9 @@ Settings:
         Header button hover and focus text and icons: Header button hover and focus text and icons
         Header button pressed background: Header button pressed background
         Header button pressed text and icons: Header button pressed text and icons
-        Colored header button hover and focus background: Colored header button hover and focus background
-        Colored header button hover and focus text and icons: Colored header button hover and focus text and icons
-        Colored header button pressed background: Colored header button pressed background
-        Colored header button pressed text and icons: Colored header button pressed text and icons
         Search and dropdown background: Search and dropdown background
         Settings search background: Settings search background
         Instance menu: Instance menu
-        Input background: Input background
         Shadow color: Shadow color
         Primary controls and highlights: Primary controls and highlights
         Primary control hover and focus: Primary control hover and focus

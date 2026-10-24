@@ -24,7 +24,6 @@ export const SYNC_SETTING_LABELS = {
   avoidTranslation: 'Settings.General Settings.Avoid translation.Avoid translation',
   backendPreference: 'Settings.General Settings.Preferred API Backend.Preferred API Backend',
   backendFallback: 'Settings.General Settings.Fallback to Non-Preferred Backend on Failure',
-  barColor: 'Settings.Theme Settings.Match Top Bar with Main Color',
   materialSeedColor: 'Settings.Theme Settings.Material Accent Color',
   baseTheme: 'Settings.Theme Settings.Base Theme.Base Theme',
   blurThumbnails: 'Settings.General Settings.Blur Thumbnails',

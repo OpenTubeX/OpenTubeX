@@ -629,14 +629,9 @@ Settings:
         Header button hover and focus text and icons: Otsakepainikkeen teksti ja kuvakkeet osoitettaessa ja kohdistettaessa
         Header button pressed background: Otsakepainikkeen tausta painettaessa
         Header button pressed text and icons: Otsakepainikkeen teksti ja kuvakkeet painettaessa
-        Colored header button hover and focus background: Värillisen otsakepainikkeen tausta osoitettaessa ja kohdistettaessa
-        Colored header button hover and focus text and icons: Värillisen otsakepainikkeen teksti ja kuvakkeet osoitettaessa ja kohdistettaessa
-        Colored header button pressed background: Värillisen otsakepainikkeen tausta painettaessa
-        Colored header button pressed text and icons: Värillisen otsakepainikkeen teksti ja kuvakkeet painettaessa
         Search and dropdown background: Haun ja pudotusvalikon tausta
         Settings search background: Asetushaun tausta
         Instance menu: Instanssivalikko
-        Input background: Syöttökentän tausta
         Shadow color: Varjon väri
         Primary controls and highlights: Ensisijaiset säätimet ja korostukset
         Primary control hover and focus: Ensisijainen säädin osoitettaessa ja kohdistettaessa

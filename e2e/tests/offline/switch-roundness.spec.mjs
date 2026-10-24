@@ -43,7 +43,7 @@ test.describe('switch roundness', { tag: '@scale' }, () => {
   test('off and on switch thumbs keep the same size across themes', async ({ app, page, uiScale }, testInfo) => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
     const section = await goToSettingsSection(page, 'theme')
-    const toggle = section.getByRole('checkbox', { name: /Match top bar with main color/i })
+    const toggle = section.getByRole('checkbox', { name: /Show toast timeout indicator/i })
     const label = toggle.locator('..').locator('.switch-label')
 
     for (const width of [1600, 480]) {

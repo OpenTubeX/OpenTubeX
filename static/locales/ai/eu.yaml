@@ -625,14 +625,9 @@ Settings:
         Header button hover and focus text and icons: Goiburuko botoiaren testua eta ikonoak seinalatzean eta fokuratzean
         Header button pressed background: Goiburuko botoiaren atzeko planoa sakatzean
         Header button pressed text and icons: Goiburuko botoiaren testua eta ikonoak sakatzean
-        Colored header button hover and focus background: Goiburuko koloretako botoiaren atzeko planoa seinalatzean eta fokuratzean
-        Colored header button hover and focus text and icons: Goiburuko koloretako botoiaren testua eta ikonoak seinalatzean eta fokuratzean
-        Colored header button pressed background: Goiburuko koloretako botoiaren atzeko planoa sakatzean
-        Colored header button pressed text and icons: Goiburuko koloretako botoiaren testua eta ikonoak sakatzean
         Search and dropdown background: Bilaketaren eta goitibeherako menuaren atzeko planoa
         Settings search background: Ezarpenen bilaketaren atzeko planoa
         Instance menu: Instantzien menua
-        Input background: Sarrera-eremuaren atzeko planoa
         Shadow color: Itzalaren kolorea
         Primary controls and highlights: Kontrol eta nabarmentze nagusiak
         Primary control hover and focus: Kontrol nagusia seinalatzean eta fokuratzean

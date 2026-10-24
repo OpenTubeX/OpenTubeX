@@ -207,9 +207,7 @@ let colorPreviewTimer = null
 const BASE_THEME_VALUES = BUILTIN_BASE_THEME_VALUES.slice(1)
 const MAIN_COLOR_KEYS = [
   'primary', 'primaryHover', 'primaryActive', 'textWithPrimary',
-  'selectionBackground', 'selectionText',
-  'coloredHeaderHover', 'coloredHeaderHoverText',
-  'coloredHeaderPressed', 'coloredHeaderPressedText'
+  'selectionBackground', 'selectionText'
 ]
 const SECONDARY_COLOR_KEYS = [
   'accent', 'accentHover', 'accentActive', 'accentLight', 'accentVisited',
@@ -458,7 +456,10 @@ function copyThemeSources() {
   cancelPendingColorPreviews()
   const sourceColors = readThemeSourceColors()
   themeSourceColors.value = sourceColors
-  draft.colors = { ...sourceColors }
+  draft.colors = {
+    ...draft.colors,
+    ...Object.fromEntries(CUSTOM_THEME_EDITABLE_COLORS.map(([key]) => [key, sourceColors[key]]))
+  }
   draft.blurs = Object.fromEntries(CUSTOM_THEME_BLURS.map(([key]) => [key, 0]))
   draft.isDark = draft.basedOn === 'dynamic'
     ? window.matchMedia('(prefers-color-scheme: dark)').matches

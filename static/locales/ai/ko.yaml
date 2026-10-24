@@ -723,14 +723,9 @@ Settings:
         Header button hover and focus text and icons: 헤더 버튼 마우스 올림 및 포커스 텍스트와 아이콘
         Header button pressed background: 헤더 버튼 누름 배경
         Header button pressed text and icons: 헤더 버튼 누름 텍스트와 아이콘
-        Colored header button hover and focus background: 색상 헤더 버튼 마우스 올림 및 포커스 배경
-        Colored header button hover and focus text and icons: 색상 헤더 버튼 마우스 올림 및 포커스 텍스트와 아이콘
-        Colored header button pressed background: 색상 헤더 버튼 누름 배경
-        Colored header button pressed text and icons: 색상 헤더 버튼 누름 텍스트와 아이콘
         Search and dropdown background: 검색 및 드롭다운 배경
         Settings search background: 설정 검색 배경
         Instance menu: 인스턴스 메뉴
-        Input background: 입력란 배경
         Shadow color: 그림자 색상
         Primary controls and highlights: 기본 컨트롤 및 강조
         Primary control hover and focus: 기본 컨트롤 마우스 올림 및 포커스

@@ -602,14 +602,9 @@ Settings:
         Header button hover and focus text and icons: Текст и значки кнопки заголовка при наведении и фокусе
         Header button pressed background: Фон кнопки заголовка при нажатии
         Header button pressed text and icons: Текст и значки кнопки заголовка при нажатии
-        Colored header button hover and focus background: Фон цветной кнопки заголовка при наведении и фокусе
-        Colored header button hover and focus text and icons: Текст и значки цветной кнопки заголовка при наведении и фокусе
-        Colored header button pressed background: Фон цветной кнопки заголовка при нажатии
-        Colored header button pressed text and icons: Текст и значки цветной кнопки заголовка при нажатии
         Search and dropdown background: Фон поиска и раскрывающихся списков
         Settings search background: Фон поиска по настройкам
         Instance menu: Меню инстанса
-        Input background: Фон полей ввода
         Shadow color: Цвет тени
         Primary controls and highlights: Основные элементы управления и выделения
         Primary control hover and focus: Основной элемент управления при наведении и фокусе

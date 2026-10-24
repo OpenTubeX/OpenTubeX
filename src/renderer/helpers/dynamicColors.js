@@ -59,7 +59,6 @@ export function dynamicThemeColors(palette, dark, black = false) {
     searchBar: roles.surfaceContainerHighest,
     settingsSearchBar: roles.surfaceContainerHighest,
     instanceMenu: roles.surfaceContainerHigh,
-    primaryInput: dark ? roles.surfaceContainerLow : materialColorScheme(palette, true).surfaceContainerLow,
     border: roles.outline,
     subtleSurface: roles.surfaceContainerHighest,
     primary: roles.primary,
@@ -101,10 +100,6 @@ export function dynamicThemeColors(palette, dark, black = false) {
     headerHoverText: roles.onSurface,
     headerPressed: pressed(roles.secondaryContainer, roles.onSecondaryContainer),
     headerPressedText: roles.onSecondaryContainer,
-    coloredHeaderHover: hover(roles.primary, roles.onPrimary),
-    coloredHeaderHoverText: roles.onPrimary,
-    coloredHeaderPressed: pressed(roles.primary, roles.onPrimary),
-    coloredHeaderPressedText: roles.onPrimary,
   }
   return colors
 }

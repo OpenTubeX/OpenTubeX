@@ -121,11 +121,6 @@ test('header sync indicator follows active sync stages, opens sync settings, and
   }).toBe(0)
   await expect(indicator.locator('svg')).toHaveCSS('animation-duration', '2s')
   await expect.poll(() => indicator.locator('svg').evaluate(element => getComputedStyle(element).animationName)).toMatch(/^sync-rotation(?:-|$)/)
-  await page.locator('.topNav').evaluate(element => {
-    element.classList.add('topNavBarColor')
-    element.style.setProperty('--text-with-main-color', 'rgb(12, 34, 56)')
-  })
-  await expect(indicator).toHaveCSS('color', 'rgb(12, 34, 56)')
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await expect.poll(() => indicator.locator('svg').evaluate(element => getComputedStyle(element).animationName)).toBe('none')
   await indicator.focus()

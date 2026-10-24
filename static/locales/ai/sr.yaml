@@ -621,14 +621,9 @@ Settings:
         Header button hover and focus text and icons: Текст и иконе дугмета заглавља при преласку показивачем и фокусу
         Header button pressed background: Позадина дугмета заглавља при притиску
         Header button pressed text and icons: Текст и иконе дугмета заглавља при притиску
-        Colored header button hover and focus background: Позадина обојеног дугмета заглавља при преласку показивачем и фокусу
-        Colored header button hover and focus text and icons: Текст и иконе обојеног дугмета заглавља при преласку показивачем и фокусу
-        Colored header button pressed background: Позадина обојеног дугмета заглавља при притиску
-        Colored header button pressed text and icons: Текст и иконе обојеног дугмета заглавља при притиску
         Search and dropdown background: Позадина претраге и падајућег менија
         Settings search background: Позадина претраге подешавања
         Instance menu: Мени инстанце
-        Input background: Позадина поља за унос
         Shadow color: Боја сенке
         Primary controls and highlights: Примарне контроле и истицања
         Primary control hover and focus: Примарна контрола при преласку показивачем и фокусу

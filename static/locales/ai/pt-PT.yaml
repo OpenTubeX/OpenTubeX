@@ -629,14 +629,9 @@ Settings:
         Header button hover and focus text and icons: Texto e ícones dos botões do cabeçalho ao passar o rato ou focar
         Header button pressed background: Fundo dos botões do cabeçalho ao premir
         Header button pressed text and icons: Texto e ícones dos botões do cabeçalho ao premir
-        Colored header button hover and focus background: Fundo dos botões coloridos do cabeçalho ao passar o rato ou focar
-        Colored header button hover and focus text and icons: Texto e ícones dos botões coloridos do cabeçalho ao passar o rato ou focar
-        Colored header button pressed background: Fundo dos botões coloridos do cabeçalho ao premir
-        Colored header button pressed text and icons: Texto e ícones dos botões coloridos do cabeçalho ao premir
         Search and dropdown background: Fundo da pesquisa e dos menus pendentes
         Settings search background: Fundo da pesquisa nas definições
         Instance menu: Menu de instâncias
-        Input background: Fundo dos campos de entrada
         Shadow color: Cor das sombras
         Primary controls and highlights: Controlos e destaques principais
         Primary control hover and focus: Controlos principais ao passar o rato ou focar

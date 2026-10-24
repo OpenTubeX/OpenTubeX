@@ -625,14 +625,9 @@ Settings:
         Header button hover and focus text and icons: Fejlécgomb szövege és ikonjai rámutatáskor és fókuszban
         Header button pressed background: Fejlécgomb háttere lenyomáskor
         Header button pressed text and icons: Fejlécgomb szövege és ikonjai lenyomáskor
-        Colored header button hover and focus background: Színes fejlécgomb háttere rámutatáskor és fókuszban
-        Colored header button hover and focus text and icons: Színes fejlécgomb szövege és ikonjai rámutatáskor és fókuszban
-        Colored header button pressed background: Színes fejlécgomb háttere lenyomáskor
-        Colored header button pressed text and icons: Színes fejlécgomb szövege és ikonjai lenyomáskor
         Search and dropdown background: Kereső és legördülő lista háttere
         Settings search background: Beállításkereső háttere
         Instance menu: Példánymenü
-        Input background: Beviteli mező háttere
         Shadow color: Árnyék színe
         Primary controls and highlights: Elsődleges vezérlők és kiemelések
         Primary control hover and focus: Elsődleges vezérlő rámutatáskor és fókuszban

@@ -625,14 +625,9 @@ Settings:
         Header button hover and focus text and icons: Päisenupu tekst ja ikoonid kursoriga osutamisel ja fookuses
         Header button pressed background: Päisenupu taust vajutamisel
         Header button pressed text and icons: Päisenupu tekst ja ikoonid vajutamisel
-        Colored header button hover and focus background: Värvilise päisenupu taust kursoriga osutamisel ja fookuses
-        Colored header button hover and focus text and icons: Värvilise päisenupu tekst ja ikoonid kursoriga osutamisel ja fookuses
-        Colored header button pressed background: Värvilise päisenupu taust vajutamisel
-        Colored header button pressed text and icons: Värvilise päisenupu tekst ja ikoonid vajutamisel
         Search and dropdown background: Otsingu ja ripploendi taust
         Settings search background: Seadete otsingu taust
         Instance menu: Eksemplari menüü
-        Input background: Sisestusvälja taust
         Shadow color: Varju värv
         Primary controls and highlights: Põhijuhtelemendid ja esiletõstud
         Primary control hover and focus: Põhijuhtelement kursoriga osutamisel ja fookuses

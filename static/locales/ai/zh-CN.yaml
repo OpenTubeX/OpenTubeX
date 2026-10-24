@@ -624,14 +624,9 @@ Settings:
         Header button hover and focus text and icons: 标题栏按钮悬停和聚焦文本及图标
         Header button pressed background: 标题栏按钮按下背景
         Header button pressed text and icons: 标题栏按钮按下文本及图标
-        Colored header button hover and focus background: 彩色标题栏按钮悬停和聚焦背景
-        Colored header button hover and focus text and icons: 彩色标题栏按钮悬停和聚焦文本及图标
-        Colored header button pressed background: 彩色标题栏按钮按下背景
-        Colored header button pressed text and icons: 彩色标题栏按钮按下文本及图标
         Search and dropdown background: 搜索框和下拉菜单背景
         Settings search background: 设置搜索框背景
         Instance menu: 实例菜单
-        Input background: 输入框背景
         Shadow color: 阴影颜色
         Primary controls and highlights: 主要控件和高亮
         Primary control hover and focus: 主要控件悬停和聚焦状态
