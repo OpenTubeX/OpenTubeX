@@ -115,6 +115,61 @@ test('SABR headers and media can arrive one byte at a time', async t => {
   assert.deepEqual([...segment.data], data)
 })
 
+test('oversized SABR declarations abort the fetch and allow a fresh retry', async t => {
+  const header = new CompositeBuffer([])
+  const writer = new UmpWriter(header)
+  writer.writeVarInt(protos.UMPPartId.MEDIA)
+  writer.writeVarInt(128 * 1024 * 1024 + 1)
+  let signal
+  let calls = 0
+  const { createSabrTransport } = load(async (_url, options) => {
+    if (++calls > 1) return response([1, 2])
+    signal = options.signal
+    return new Response(utils.concatenateChunks(header.chunks))
+  })
+  const transport = createSabrTransport(sabrData, () => context)
+  t.after(() => transport.cleanup())
+  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+  await assert.rejects(transport.request(uri, request(uri), 1).promise,
+    error => error.code === ShakaError.Code.HTTP_ERROR)
+  assert.equal(signal.aborted, true, 'rejecting the part must stop its network response')
+  const result = await transport.request(uri, request(uri), 1).promise
+  assert.deepEqual([...result.data], [1, 2])
+})
+
+for (const media of [false, true]) test(`many ${media ? 'media' : 'unknown'} parts cannot exceed the SABR response budget`, async t => {
+  const buffer = new CompositeBuffer([])
+  const payload = new Uint8Array(1024 * 1024)
+  payload[0] = 1
+  new UmpWriter(buffer).write(media ? protos.UMPPartId.MEDIA : 300, payload)
+  const header = new CompositeBuffer([])
+  new UmpWriter(header).write(protos.UMPPartId.MEDIA_HEADER, protos.MediaHeader.encode({
+    headerId: 1, formatId: audioFormatId, sequenceNumber: 1,
+  }).finish())
+  const chunk = utils.concatenateChunks(buffer.chunks)
+  let reads = 0
+  let signal
+  const { createSabrTransport } = load(async (_url, options) => {
+    signal = options.signal
+    return new Response(new ReadableStream({
+      start(controller) {
+        if (media) controller.enqueue(utils.concatenateChunks(header.chunks))
+      },
+      pull(controller) {
+        if (++reads <= 140) controller.enqueue(chunk)
+        else controller.close()
+      }
+    }, { highWaterMark: 0 }))
+  })
+  const transport = createSabrTransport(sabrData, () => context)
+  t.after(() => transport.cleanup())
+  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+  await assert.rejects(transport.request(uri, { ...request(uri), retryParameters: { timeout: 60000 } }, 1).promise,
+    error => error.code === ShakaError.Code.HTTP_ERROR)
+  assert.equal(reads, 128, 'stop at the budget, without reading the rest of the response')
+  assert.equal(signal.aborted, true)
+})
+
 test('rejects a SABR segment shorter than its declared content length', async () => {
   let calls = 0
   const { createSabrTransport } = load(async () => {

@@ -7,6 +7,7 @@ import {
   createAbandonedSabrResponse,
   extractRawProtobufField,
   parseSabrFormatId,
+  MAX_SABR_RESPONSE_BYTES,
   readCompleteUmpParts
 } from '../../src/renderer/helpers/player/sabrProtocol.js'
 
@@ -26,6 +27,34 @@ test('retains split UMP types and emits empty parts exactly once', () => {
   }
   assert.deepEqual(parts, [[300, []], [301, [1, 2]]])
   assert.equal(pending, null)
+})
+
+test('rejects an oversized UMP declaration before buffering its payload', () => {
+  for (const type of [21, 300]) {
+    const header = new CompositeBuffer([])
+    const writer = new UmpWriter(header)
+    writer.writeVarInt(type)
+    writer.writeVarInt(128 * 1024 * 1024 + 1)
+    const bytes = concatenateChunks(header.chunks)
+    let pending = null
+    for (const byte of bytes.slice(0, -1)) {
+      pending ??= new CompositeBuffer([])
+      pending.append(Uint8Array.of(byte))
+      pending = readCompleteUmpParts(pending, () => assert.fail('no payload received'))
+    }
+    pending.append(bytes.slice(-1))
+    assert.throws(() => readCompleteUmpParts(pending, () => {}), /SABR.*limit/)
+  }
+})
+
+test('accepts a part declaration up to the response budget including its header', () => {
+  const header = new CompositeBuffer([])
+  const writer = new UmpWriter(header)
+  writer.writeVarInt(21)
+  // This size uses four UMP varint bytes plus the one-byte type.
+  writer.writeVarInt(MAX_SABR_RESPONSE_BYTES - 5)
+  assert.equal(header.getLength(), 5)
+  assert.equal(readCompleteUmpParts(header, () => assert.fail('no payload')), header)
 })
 
 test('preserves hyphens inside SABR format xtags', () => {

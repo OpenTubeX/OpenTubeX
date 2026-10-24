@@ -18,6 +18,7 @@ import shaka from 'shaka-player'
 import {
   createAbandonedSabrResponse,
   extractRawProtobufField,
+  MAX_SABR_RESPONSE_BYTES,
   parseSabrFormatId,
   readCompleteUmpParts
 } from './sabrProtocol'
@@ -317,6 +318,7 @@ async function doRequest(
   let response
   /** @type {CompositeBuffer | null} */
   let chunkedDataBuffer = null
+  let receivedResponseBytes = 0
   /** @type {Uint8Array[]} */
   const responseDataChunks = []
   let segmentComplete = false
@@ -423,6 +425,10 @@ async function doRequest(
     let readObj = await reader.read()
 
     while (!readObj.done && !currentState.abortStatus.finished) {
+      receivedResponseBytes += readObj.value.byteLength
+      if (receivedResponseBytes > MAX_SABR_RESPONSE_BYTES) {
+        throw new Error('SABR response exceeds the size limit')
+      }
       if (chunkedDataBuffer) {
         chunkedDataBuffer.append(readObj.value)
       } else {
@@ -604,6 +610,9 @@ async function doRequest(
       }
     }
   } catch (error) {
+    // A parser rejection must also stop the response body, rather than leave
+    // the network request downloading after Shaka receives the error.
+    currentState.abortController.abort()
     if (currentState.abortStatus.cancelled || currentState.abortStatus.playerReloadRequested) {
       throw createRecoverableNetworkError(ShakaError.Code.OPERATION_ABORTED, operationInputs.uri, operationInputs.requestType)
     } else if (currentState.abortStatus.timedOut) {
