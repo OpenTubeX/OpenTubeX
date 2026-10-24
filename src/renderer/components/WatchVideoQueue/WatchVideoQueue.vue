@@ -85,6 +85,7 @@
         name="queueItem"
         tag="ol"
         class="queueItemsContent"
+        :data-skip-move="draggedItemId !== null ? '' : null"
       >
         <li
           v-for="(item, index) in items"
@@ -219,6 +220,7 @@ const queueItemIds = computed(previous => {
   const ids = items.value.map(item => String(item.queueItemId))
   return previous?.length === ids.length && previous.every((id, index) => id === ids[index]) ? previous : ids
 })
+// Suppress TransitionGroup moves while the drag owns the row transforms.
 const {
   draggedItemId, rowStyle,
   startPointerDrag, movePointerDrag, endPointerDrag, cancelPointerDrag,
