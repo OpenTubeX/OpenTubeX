@@ -153,3 +153,32 @@ test('only offers subscription options while subscribed', async ({ page }) => {
   await expect(subscribeButton).not.toHaveClass(/hasProfileDropdownToggle/)
   await expect(dropdown).toHaveCount(0)
 })
+
+test.describe('with subscription groups', () => {
+  test.use({
+    seed: {
+      settings: {
+        backendPreference: 'invidious',
+        defaultInvidiousInstance: INSTANCE_URL,
+        subscriptionGroups: [{ id: 'music', name: 'Music', channelIds: [] }]
+      }
+    }
+  })
+
+  test('keeps the subscription settings closed after subscribing with one profile', async ({ page }) => {
+    await page.route(`${INSTANCE_URL}/api/v1/channels/**`, route => route.fulfill({
+      json: channelResponse()
+    }))
+    await openChannel(page)
+
+    const channel = page.locator('.channelDetails:visible')
+    const subscribeButton = channel.locator('.subscribeButton')
+    await subscribeButton.click()
+    await expect(subscribeButton).toContainText('Unsubscribe')
+    await expect(page.locator('.profileDropdown')).toHaveCount(0)
+
+    // The groups stay one click away in the settings
+    await channel.getByRole('button', { name: 'Subscription settings' }).click()
+    await expect(page.locator('.profileDropdown').getByRole('group', { name: 'Groups' })).toBeVisible()
+  })
+})
