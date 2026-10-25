@@ -25,6 +25,7 @@ test('Android header swipes reveal the next tab at its own scroll position', {
   }
   const tap = async selector => {
     await touch('touchStart', await pointFor(selector))
+    // Give Chromium a real tap duration rather than back-to-back CDP events.
     await page.waitForTimeout(60)
     await touch('touchEnd')
   }
@@ -93,7 +94,7 @@ test('Android header swipes reveal the next tab at its own scroll position', {
           const samples = window.headerSwipeScrollSamples = []
           const record = () => {
             const target = document.querySelector(`.tabContent[data-tab-id="${id}"]`)
-            if (target?.classList.contains('pageSwipeTo') || samples.length) {
+            if (target && (target.classList.contains('pageSwipeTo') || samples.length)) {
               samples.push(target.getBoundingClientRect().top)
             }
             if (window.headerSwipeScrollSamples === samples) requestAnimationFrame(record)
@@ -103,6 +104,7 @@ test('Android header swipes reveal the next tab at its own scroll position', {
         const point = await pointFor('.profileTrigger')
         const width = await page.evaluate(() => document.querySelector('.app > .routerView').getBoundingClientRect().width)
         await touch('touchStart', point)
+        // Pace the moves like a finger so each drag position is painted.
         for (const fraction of [0.15, 0.4, 0.7]) {
           await touch('touchMove', { ...point, x: point.x - width * fraction })
           await page.waitForTimeout(60)
@@ -111,7 +113,9 @@ test('Android header swipes reveal the next tab at its own scroll position', {
         await touch('touchEnd')
         await expect(page.locator('.pageSwipeFrom, .pageSwipeTo')).toHaveCount(0)
         await expect.poll(presented, { message }).toBe(second)
-        await page.waitForTimeout(300)
+        // Keep sampling for several frames after the tab settles.
+        const settledFrames = await page.evaluate(() => window.headerSwipeScrollSamples.length) + 10
+        await expect.poll(() => page.evaluate(() => window.headerSwipeScrollSamples.length)).toBeGreaterThanOrEqual(settledFrames)
         const samples = await page.evaluate(() => {
           const samples = window.headerSwipeScrollSamples
           delete window.headerSwipeScrollSamples
