@@ -1,0 +1,630 @@
+/* stylelint-disable liberty/use-logical-spec */
+
+.ftVideoPlayer:not(.shortsPlayer, .classicPlayerControls) :deep(.shaka-bottom-controls) {
+  padding-block-end: 3px;
+}
+
+.ftVideoPlayer:not(.shortsPlayer, .classicPlayerControls) :deep(.shaka-scrim-container) {
+  background: none;
+}
+
+:deep(.shaka-seek-bar-container) {
+  --ft-seekbar-radius: min(2.5px, calc(2px * var(--ui-roundness)));
+
+  /* Shaka clips the background inside 4px transparent top/bottom borders. */
+  border-radius: var(--ft-seekbar-radius) / calc(4px + var(--ft-seekbar-radius));
+
+  /* Composite Shaka's translucent track colours over a fixed dark surface.
+     Its inline background shorthand otherwise resets this to transparent. */
+  background-color: #181818 !important;
+}
+
+:deep(.shaka-seek-bar-container .shaka-range-element::-webkit-slider-thumb) {
+  box-shadow: 0 1px 3px rgb(0 0 0 / 60%);
+}
+
+:deep(.ft-popularity-graph) {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 100%;
+  width: 100%;
+  height: 40px;
+  fill: rgb(255 255 255 / 40%);
+  pointer-events: none;
+  visibility: hidden;
+  transform-origin: bottom;
+  transform: scaleY(0);
+  transition: transform 180ms ease-out, visibility 0s linear 180ms;
+}
+
+:deep(.shaka-seek-bar-container:hover .ft-popularity-graph) {
+  visibility: visible;
+  transform: scaleY(1);
+  transition-delay: 0s;
+}
+
+:global([data-reduced-motion='reduce'] .ft-popularity-graph) {
+  transition: none;
+}
+
+:deep(.ft-has-popularity .shaka-player-ui-thumbnail-container) {
+  margin-block-end: 40px;
+}
+
+:deep(.shaka-seek-bar-container .shaka-range-element::-moz-range-thumb) {
+  box-shadow: 0 1px 3px rgb(0 0 0 / 60%);
+}
+
+:deep(.shaka-controls-button-panel) {
+  --ft-controls-fade: 1;
+  --ft-control-fade-duration: 600ms;
+  --ft-control-pill-color: rgb(0 0 0 / 28%);
+  --ft-control-pill-size: 34px;
+  --ft-control-pill-radius: calc(var(--ft-control-pill-size) / 2 * var(--ui-roundness));
+  --ft-volume-bar-expanded-width: 100px;
+
+  /* Keep the first controls anchored when even the compact layout cannot fit. */
+  justify-content: flex-start;
+  position: relative;
+  isolation: isolate;
+}
+
+:global(.capacitorTabs .ftVideoPlayer .shaka-controls-button-panel) {
+  --ft-control-pill-size: 40px;
+}
+
+/* Keep the row opaque so its glass can sample the video. Animate each visual
+   layer, rather than an inherited variable that recalculates styles every frame. */
+.ftVideoPlayer:not(.shortsPlayer, .classicPlayerControls) :deep(.shaka-controls-button-panel) {
+  --ft-controls-fade: 1;
+
+  visibility: visible;
+  opacity: 1;
+  transition: visibility 0s;
+}
+
+/* stylelint-disable-next-line selector-max-compound-selectors */
+.ftVideoPlayer:not(.shortsPlayer, .classicPlayerControls) :deep(.shaka-controls-container:not([shown='true'], [casting='true']) .shaka-controls-button-panel) {
+  --ft-controls-fade: 0;
+
+  visibility: hidden;
+  pointer-events: none;
+  transition-delay: var(--ft-control-fade-duration);
+}
+
+/* stylelint-disable-next-line selector-max-compound-selectors */
+.ftVideoPlayer:not(.shortsPlayer, .classicPlayerControls) :deep(.shaka-controls-button-panel:not(.ft-controls-measuring) > :is(button, .ft-volume-control-group, .ft-time-display-group) > :not(.ft-control-glass)) {
+  filter: opacity(var(--ft-controls-fade));
+  transition: filter var(--ft-control-fade-duration) cubic-bezier(0.4, 0, 0.6, 1), var(--ft-control-content-transition, color 0s);
+}
+
+:deep(.shaka-controls-button-panel > button) {
+  /* Draw the pill inside the full-size control target. */
+  border-radius: calc(999px * var(--ui-roundness));
+  background-color: transparent;
+  background-image: none;
+  background-repeat: no-repeat;
+  opacity: 1;
+}
+
+:deep(.shaka-controls-button-panel > :is(button, .ft-volume-control-group, .ft-time-display-group)) {
+  position: relative;
+  isolation: isolate;
+}
+
+:deep(:is(.ft-control-glass, .ft-right-control-glass)) {
+  position: absolute;
+  z-index: -1;
+  inset-block: 50% auto;
+  block-size: var(--ft-control-pill-size);
+  border-radius: var(--ft-control-pill-radius);
+  background: linear-gradient(145deg, rgb(255 255 255 / 8%), rgb(255 255 255 / 2%)), var(--ft-control-pill-color);
+  box-shadow: inset 0 1px rgb(255 255 255 / 14%), inset 0 0 0 1px rgb(255 255 255 / 6%);
+  backdrop-filter: blur(10px) saturate(1.15);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+:deep(.ft-control-glass) {
+  inset-inline: 7px;
+  opacity: var(--ft-controls-fade);
+  transition: opacity var(--ft-control-fade-duration) cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+/* Adjacent icon pills both reserve 7px inside their click targets. Share
+   that transparent space so every visible pill has the same 7px gap. */
+/* stylelint-disable-next-line selector-max-compound-selectors */
+.ftVideoPlayer:not(.classicPlayerControls) :deep(.shaka-controls-button-panel > :is(button, .ft-volume-control-group):not(.shaka-hidden) ~ :is(.shaka-play-button, .ft-shaka-skip-button, .ft-volume-control-group)) {
+  margin-inline-start: -7px;
+}
+
+.ftVideoPlayer:not(.classicPlayerControls) :deep(.shaka-controls-button-panel > :is(.ft-time-display-group, .ft-chapters-button, .ft-shaka-highlight-button, .ft-quick-playback-rate-bar)) {
+  margin-inline: 0 7px;
+}
+
+:deep(.ft-right-control-glass) {
+  z-index: 0;
+  box-sizing: border-box;
+  inset-block: 50% auto;
+  block-size: var(--ft-control-pill-size);
+  padding: 0;
+  border: 0;
+  background: linear-gradient(145deg, rgb(255 255 255 / 12%), rgb(255 255 255 / 3%)), var(--ft-control-pill-color);
+  box-shadow: inset 0 1px rgb(255 255 255 / 20%), inset 0 0 0 1px rgb(255 255 255 / 8%);
+  opacity: var(--ft-controls-fade);
+  transform: translateY(-50%);
+  transition: opacity var(--ft-control-fade-duration) cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+/* stylelint-disable-next-line selector-max-compound-selectors */
+:deep(.shaka-controls-button-panel > :is(button:not(.shaka-spacer ~ button), .ft-volume-control-group, .ft-time-display-group):is(:active, :focus-visible, :has(:focus-visible)) > .ft-control-glass) {
+  background: linear-gradient(rgb(255 255 255 / 12%), rgb(255 255 255 / 12%)), linear-gradient(145deg, rgb(255 255 255 / 8%), rgb(255 255 255 / 2%)), var(--ft-control-pill-color);
+}
+
+@media (hover: hover) {
+  /* stylelint-disable-next-line selector-max-compound-selectors */
+  :deep(.shaka-controls-button-panel > :is(button:not(.shaka-spacer ~ button), .ft-volume-control-group, .ft-time-display-group):hover > .ft-control-glass) {
+    background: linear-gradient(rgb(255 255 255 / 12%), rgb(255 255 255 / 12%)), linear-gradient(145deg, rgb(255 255 255 / 8%), rgb(255 255 255 / 2%)), var(--ft-control-pill-color);
+  }
+}
+
+:deep(.shaka-controls-button-panel > .ft-volume-control-group) {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  box-sizing: border-box;
+  inline-size: auto;
+  block-size: 48px;
+  padding: 0;
+  background-color: transparent;
+  background-position: left 7px center, center, right 7px center;
+  background-repeat: no-repeat;
+  background-size: var(--ft-control-pill-radius) var(--ft-control-pill-size), calc(100% - 48px) var(--ft-control-pill-size), var(--ft-control-pill-radius) var(--ft-control-pill-size);
+  opacity: 1;
+}
+
+:deep(.ft-volume-control-group > .shaka-mute-button) {
+  display: flex;
+  position: relative;
+  flex: 0 0 48px;
+  align-items: center;
+  justify-content: center;
+  inline-size: 48px;
+  block-size: 48px;
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  opacity: 1;
+}
+
+:deep(.ft-volume-control-group:is(:hover, :has(:focus-visible))) {
+  padding-inline-end: 18px;
+}
+
+:deep(.ft-volume-control-group > .shaka-volume-bar-container-allow-hiding) {
+  --ft-control-content-transition: opacity 0s;
+
+  margin-inline: 0;
+  transition: none;
+}
+
+:deep(.ft-volume-control-group:is(:hover, :has(:focus-visible)) > .shaka-volume-bar-container-allow-hiding) {
+  inline-size: var(--ft-volume-bar-expanded-width);
+  opacity: 1;
+  animation: ft-volume-slider-expand 250ms cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+/* Allocate the expanded row once, then reveal the bar and move its neighbours
+   with transforms and clipping instead of resizing layout each frame. */
+:deep(.ft-volume-control-group:is(:hover, :has(:focus-visible)) > .ft-control-glass) {
+  animation: ft-volume-glass-expand 250ms cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+:deep(.ft-volume-control-group:is(:hover, :has(:focus-visible)) ~ :is(.ft-time-display-group, .ft-chapters-button, .ft-shaka-highlight-button, .ft-quick-playback-rate-bar):not(.shaka-spacer ~ *)) {
+  animation: ft-volume-neighbour-slide 250ms cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+@keyframes ft-volume-slider-expand {
+  from {
+    clip-path: inset(-24px 0 -24px 100%);
+    opacity: 0;
+    transform: translateX(calc(0px - var(--ft-volume-bar-expanded-width)));
+  }
+
+  to {
+    clip-path: inset(-24px 0);
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes ft-volume-glass-expand {
+  from {
+    clip-path: inset(0 var(--ft-volume-bar-expanded-width) 0 0 round var(--ft-control-pill-radius));
+  }
+
+  to {
+    clip-path: inset(0 round var(--ft-control-pill-radius));
+  }
+}
+
+@keyframes ft-volume-neighbour-slide {
+  from {
+    transform: translateX(calc(0px - var(--ft-volume-bar-expanded-width)));
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (width <= 474px) {
+  :deep(.shaka-controls-button-panel) {
+    --ft-volume-bar-expanded-width: 50px;
+  }
+}
+
+:deep(.shaka-controls-button-panel > :is(.ft-chapters-button, .ft-shaka-highlight-button) > .ft-control-glass) {
+  inset-inline: 0;
+}
+
+:deep(.shaka-controls-button-panel > .ft-chapters-button.open > .ft-control-glass) {
+  background-color: color-mix(in srgb, var(--ft-chapters-active-color) 18%, var(--ft-control-pill-color));
+  box-shadow: inset 0 1px rgb(255 255 255 / 14%), inset 0 0 0 1px color-mix(in srgb, var(--ft-chapters-active-color) 60%, transparent);
+}
+
+:deep(.shaka-controls-button-panel > .shaka-spacer ~ button) {
+  --ft-control-item-hover-color: transparent;
+
+  z-index: 1;
+  border-radius: 0;
+}
+
+:deep(.shaka-spacer ~ button > .ft-control-glass) {
+  background: linear-gradient(145deg, rgb(255 255 255 / 8%), rgb(255 255 255 / 2%));
+  inset-inline: 0;
+  inset-block: 50% auto;
+  block-size: var(--ft-control-pill-size);
+  opacity: 0;
+  filter: opacity(var(--ft-controls-fade));
+  transform: translateY(-50%);
+  transition: filter var(--ft-control-fade-duration) cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+:deep(.shaka-controls-button-panel > .shaka-spacer ~ button:is(:active, :focus-visible)) {
+  --ft-control-item-hover-color: rgb(255 255 255 / 12%);
+}
+
+:deep(.shaka-spacer ~ button:is(:active, :focus-visible) > .ft-control-glass) {
+  opacity: 1;
+}
+
+@media (hover: hover) {
+  :deep(.shaka-controls-button-panel > .shaka-spacer ~ button:hover) {
+    --ft-control-item-hover-color: rgb(255 255 255 / 12%);
+  }
+
+  :deep(.shaka-spacer ~ button:hover > .ft-control-glass) {
+    opacity: 1;
+  }
+}
+
+:deep(.shaka-playbackrate-button .shaka-current-selection-span) {
+  box-sizing: border-box;
+  inline-size: 6ch;
+  overflow: hidden;
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:deep(.shaka-overflow-menu-button > .shaka-ui-icon) {
+  --ft-control-content-transition: transform 220ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  transform: rotate(0deg);
+  transform-origin: center;
+  transition: transform 220ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.voiceOverTranslationProgress {
+  position: absolute;
+  z-index: 3;
+  inset-block-start: 16px;
+  inset-inline-start: 50%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-inline-size: calc(100% - 32px);
+  padding: 8px 12px;
+  border-radius: calc(8px * var(--ui-roundness));
+  color: #fff;
+  background: rgb(0 0 0 / 75%);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 35%);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.voiceOverTranslationProgressSpinner {
+  flex: 0 0 auto;
+  inline-size: 16px;
+  block-size: 16px;
+  border: 2px solid rgb(255 255 255 / 35%);
+  border-block-start-color: #fff;
+  border-radius: 50%;
+  animation: ft-voice-over-translation-spin 700ms linear infinite;
+}
+
+:deep(.voice-over-translation-loading > .shaka-ui-icon) {
+  animation: ft-voice-over-translation-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes ft-voice-over-translation-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ft-voice-over-translation-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .voiceOverTranslationProgressSpinner,
+  :deep(.voice-over-translation-loading > .shaka-ui-icon) {
+    animation: none;
+  }
+}
+
+:deep(.shaka-controls-container:has(
+  .shaka-overflow-menu:not(.shaka-hidden),
+  .shaka-settings-menu:not(.shaka-hidden),
+  .shaka-sub-menu:not(.shaka-hidden)
+) .shaka-overflow-menu-button > .shaka-ui-icon) {
+  transform: rotate(35deg);
+}
+
+:deep(.caption-toggle-button) {
+  position: relative;
+}
+
+:deep(.caption-toggle-button > .ft-caption-toggle-icon) {
+  --ft-control-content-transition: opacity 160ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  transform: translate(-50%, -50%);
+  transition: opacity 160ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:deep(.caption-toggle-button > .ft-caption-toggle-icon-filled),
+:deep(.caption-toggle-button[aria-pressed='true'] > .ft-caption-toggle-icon-outlined) {
+  opacity: 0;
+}
+
+:deep(.caption-toggle-button[aria-pressed='true'] > .ft-caption-toggle-icon-filled) {
+  opacity: 1;
+}
+
+:deep(.ft-caption-toggle-slash) {
+  --ft-control-content-transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  inline-size: 26px;
+  block-size: 2.5px;
+  border-radius: calc(999px * var(--ui-roundness));
+  background-color: currentcolor;
+  pointer-events: none;
+  transform: translate(-50%, -50%) rotate(45deg) scaleX(1);
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:deep(.caption-toggle-button[aria-pressed='true'] > .ft-caption-toggle-slash) {
+  transform: translate(-50%, -50%) rotate(45deg) scaleX(0);
+}
+
+:deep(.shaka-play-button:has(> .ft-play-pause-morph-icon)) {
+  position: relative;
+}
+
+/* stylelint-disable-next-line selector-max-compound-selectors */
+.ftVideoPlayer:not(.classicPlayerControls) :deep(.shaka-controls-button-panel > .shaka-play-button > .shaka-ui-icon) {
+  font-size: 24px;
+}
+
+:deep(.shaka-play-button:has(> .ft-play-pause-morph-icon) > .shaka-ui-icon:not(.ft-play-pause-morph-icon)) {
+  opacity: 0;
+}
+
+:deep(.shaka-play-button > .ft-play-pause-morph-icon) {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
+/* stylelint-disable-next-line selector-max-compound-selectors */
+.ftVideoPlayer:not(.classicPlayerControls) :deep(.shaka-controls-button-panel > .shaka-play-button > .ft-play-pause-morph-icon) {
+  transform: translate(-50%, -50%);
+}
+
+:deep(
+  .shaka-play-button[data-ft-play-pause-state='replay'] > .shaka-ui-icon:not(.ft-play-pause-morph-icon)
+) {
+  opacity: 1;
+}
+
+:deep(.shaka-play-button[data-ft-play-pause-state='replay'] > .ft-play-pause-morph-icon) {
+  opacity: 0;
+}
+
+:deep(.ft-play-pause-morph-icon > path) {
+  d: path('M8 6 11.5 8.1 11.5 15.9 8 18ZM11.5 8.1 18 12 18 12 11.5 15.9Z');
+  transition: d 180ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:deep(.shaka-play-button[data-ft-play-pause-state='pause'] > .ft-play-pause-morph-icon > path) {
+  d: path('M6.45 5.48 10.15 5.48 10.15 18.52 6.45 18.52ZM13.85 5.48 17.55 5.48 17.55 18.52 13.85 18.52Z');
+}
+
+/* WebKit does not support CSS path morphing. Keep Shaka's stateful icon. */
+@supports not (d: path('M0 0L1 1')) {
+  :deep(.shaka-play-button:has(> .ft-play-pause-morph-icon) > .shaka-ui-icon:not(.ft-play-pause-morph-icon)) {
+    opacity: 1;
+  }
+
+  :deep(.shaka-play-button > .ft-play-pause-morph-icon) {
+    display: none;
+  }
+}
+
+:deep(.shaka-mute-button) {
+  position: relative;
+}
+
+:deep(.shaka-tooltips-on > .ft-volume-control-group > .shaka-mute-button:is(:hover, :focus-visible, :active)::after) {
+  content: attr(aria-label);
+  position: absolute;
+  bottom: 62px;
+  padding: 2px 10px;
+  border-radius: calc(2px * var(--ui-roundness));
+  background: rgb(0 0 0 / 50%);
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-transparency) {
+  :deep(.shaka-tooltips-on > .ft-volume-control-group > .shaka-mute-button:is(:hover, :focus-visible, :active)::after) {
+    background-color: rgb(0 0 0 / 90%);
+  }
+}
+
+:deep(.shaka-tooltips-on > .shaka-mute-button:hover::after),
+:deep(.shaka-tooltips-on > .shaka-mute-button:focus-visible::after),
+:deep(.shaka-tooltips-on > .shaka-mute-button:active::after),
+:deep(.shaka-tooltips-on > .ft-volume-control-group > .shaka-mute-button:hover::after),
+:deep(.shaka-tooltips-on > .ft-volume-control-group > .shaka-mute-button:focus-visible::after),
+:deep(.shaka-tooltips-on > .ft-volume-control-group > .shaka-mute-button:active::after) {
+  left: 0;
+  transform: none;
+}
+
+:deep(.ft-mute-toggle-slash) {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  inline-size: 26px;
+  block-size: 2.5px;
+  border-radius: calc(999px * var(--ui-roundness));
+  background-color: currentcolor;
+  pointer-events: none;
+  transform: translate(-50%, -50%) rotate(45deg) scaleX(0);
+  transition: transform 180ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:deep(.shaka-mute-button[data-ft-muted='true'] > .ft-mute-toggle-slash) {
+  transform: translate(-50%, -50%) rotate(45deg) scaleX(1);
+}
+
+:deep(.shaka-controls-button-panel > .autoplay-toggle) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:deep(.ft-autoplay-switch) {
+  --ft-control-content-transition: background-color 180ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  box-sizing: border-box;
+  inline-size: 36px;
+  block-size: 18px;
+  padding: 1px;
+  border-radius: 999px;
+  background-color: #424242;
+  transition: background-color 180ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:deep(.shaka-controls-button-panel > .autoplay-toggle:not([aria-pressed='true']) > .ft-autoplay-switch) {
+  background-color: rgb(255 255 255 / 28%);
+}
+
+:deep(.ft-autoplay-switch > .ft-autoplay-switch-thumb) {
+  inline-size: 16px;
+  block-size: 16px;
+  padding: 0;
+  color: #fff;
+  transform: translateX(0);
+  transition:
+    color 180ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 180ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:deep(.autoplay-toggle[aria-pressed='true'] > .ft-autoplay-switch) {
+  background-color: #fff;
+}
+
+:deep(.autoplay-toggle[aria-pressed='true'] .ft-autoplay-switch-thumb) {
+  color: #0d0d0d;
+  transform: translateX(18px);
+}
+
+:deep(.autoplay-toggle[aria-pressed='true']:dir(rtl) .ft-autoplay-switch-thumb) {
+  transform: translateX(-18px);
+}
+
+:deep(.shaka-overflow-menu .autoplay-toggle > .ft-autoplay-switch) {
+  margin-inline-end: 14px;
+}
+
+:deep(.shaka-overflow-menu.ft-menu-grid .autoplay-toggle > .ft-autoplay-switch) {
+  margin-inline-end: 0;
+}
+
+:deep(.shaka-overflow-menu .autoplay-toggle .ft-autoplay-switch-thumb) {
+  padding: 0;
+}
+
+:deep(.ft-toggle-state) {
+  display: inline-grid;
+}
+
+:deep(.ft-toggle-state > span) {
+  grid-area: 1 / 1;
+}
+
+:deep(.ft-toggle-state-sizer) {
+  visibility: hidden;
+}
+
+/*
+  Lift the controls container above other overlays while a menu is open. It has
+  to clear the chapters overlay (z-index: 4) too, otherwise the settings/overflow
+  menu (which lives inside the controls container) renders behind it.
+*/
+:deep(.shaka-controls-container:has(
+  .shaka-overflow-menu:not(.shaka-hidden),
+  .shaka-settings-menu:not(.shaka-hidden),
+  .shaka-sub-menu:not(.shaka-hidden),
+  .shaka-context-menu:not(.shaka-hidden)
+)) {
+  z-index: 5;
+}
+
+:deep(.shaka-context-menu) {
+  background-color: rgb(12 12 12 / 52%);
+  backdrop-filter: blur(14px);
+}

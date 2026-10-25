@@ -1,0 +1,323 @@
+/* stylelint-disable liberty/use-logical-spec */
+
+/*
+  While the player switches presentation mode (fullscreen or the animated
+  full window toggle), the side panel transitions would combine with the
+  container resize into odd motion, so they are turned off for the switch.
+  This also removes the chapter panel's slide-out when it moves back to the
+  watch page sidebar on fullscreen/full window exit.
+*/
+.ftVideoPlayer.presentationModeChanging .player,
+.ftVideoPlayer.presentationModeChanging :deep(.shaka-controls-container),
+.ftVideoPlayer.presentationModeChanging :deep(.shaka-spinner-container),
+.ftVideoPlayer.presentationModeChanging .endedScreen,
+.ftVideoPlayer.presentationModeChanging .countdownPoster,
+.ftVideoPlayer.presentationModeChanging .countdownOverlay,
+.ftVideoPlayer.presentationModeChanging :deep(.videoAnnotations),
+.ftVideoPlayer.presentationModeChanging :deep(.shaka-text-container),
+.ftVideoPlayer.presentationModeChanging :deep(.shaka-speech-to-text-container) {
+  transition: none !important;
+}
+
+/*
+  Side panel push: like YouTube, an open dock in fullscreen
+  (or full window) pushes the video and the player controls/captions area
+  aside instead of covering it. Loaded after scrollMiniPlayer.css so the
+  higher-specificity .player rules follow the scroll mini player ones.
+*/
+.ftVideoPlayer:fullscreen.fullscreenDockLayoutOpen :is(.player, .ambientFullscreenCanvas),
+.ftVideoPlayer.fullWindow.fullscreenDockLayoutOpen :is(.player, .ambientFullscreenCanvas) {
+  inline-size: calc(100% - var(--side-panel-width));
+}
+
+.ftVideoPlayer:fullscreen.fullscreenDockLayoutOpen :deep(.shaka-controls-container),
+.ftVideoPlayer.fullWindow.fullscreenDockLayoutOpen :deep(.shaka-controls-container) {
+  inline-size: calc(100% - var(--side-panel-width));
+}
+
+.ftVideoPlayer:fullscreen.fullscreenDockLayoutOpen :is(
+  :deep(.shaka-spinner-container),
+  .endedPoster,
+  .endedScreen,
+  .countdownPoster,
+  .countdownOverlay,
+  :deep(.videoAnnotations),
+  :deep(.shaka-text-container),
+  :deep(.shaka-speech-to-text-container)
+),
+  .ftVideoPlayer.fullWindow.fullscreenDockLayoutOpen :is(
+  :deep(.shaka-spinner-container),
+  .endedPoster,
+  .endedScreen,
+  .countdownPoster,
+  .countdownOverlay,
+  :deep(.videoAnnotations),
+  :deep(.shaka-text-container),
+  :deep(.shaka-speech-to-text-container)
+) {
+  inline-size: auto;
+  inset-inline-end: var(--side-panel-width);
+}
+
+/* Dock pushes reflow once; only the video image and panel slide animate. */
+.ftVideoPlayer:is(:fullscreen, .fullWindow) > .player {
+  transition: transform 200ms ease-out;
+}
+
+.ftVideoPlayer:is(:fullscreen, .fullWindow) :is(
+  .shortsFullscreenMetadata,
+  :deep(.shaka-controls-container),
+  :deep(.shaka-spinner-container),
+  .countdownPoster,
+  .countdownOverlay,
+  :deep(.videoAnnotations),
+  :deep(.shaka-speech-to-text-container)
+) {
+  transition: none;
+}
+
+.ftVideoPlayer.shortsPlayer:is(:fullscreen, .fullWindow) .shortsTopControls {
+  transition: var(--shorts-controls-fade-property, opacity) 600ms cubic-bezier(0.4, 0, 0.6, 1), visibility 0s linear 600ms;
+}
+
+.ftVideoPlayer:is(:fullscreen, .fullWindow) :deep(.shaka-text-container) {
+  transition: bottom cubic-bezier(0.4, 0, 0.6, 1) 0.1s;
+}
+
+/* Panning must track the pointer instead of easing toward it. */
+.ftVideoPlayer.videoZoomPanning > .player {
+  transition: none;
+}
+
+.ftVideoPlayer.videoZoomPinching > .player {
+  transition: none;
+}
+
+.ftVideoPlayer.shortsPlayer:not(:fullscreen, .fullWindow) > .player {
+  position: absolute !important;
+  inset: 0 !important;
+  display: block;
+  box-sizing: border-box;
+  inline-size: 100% !important;
+  min-inline-size: 100%;
+  max-inline-size: 100%;
+  block-size: 100% !important;
+  min-block-size: 100%;
+  max-block-size: 100%;
+  margin: 0 !important;
+  border-radius: inherit;
+  object-fit: cover !important;
+  object-position: center center;
+  transform: none !important;
+  flex: none;
+}
+
+.ftVideoPlayer.shortsPlayer:not(:fullscreen, .fullWindow) > .countdownPoster img {
+  object-fit: cover;
+}
+
+.ftVideoPlayer.scrollMiniPlayer.mobileMiniBar > :is(.player, .countdownPoster, .musicAudioSurface) {
+  position: absolute !important;
+  inset: 7.5px auto auto 10px !important;
+  box-sizing: border-box;
+  inline-size: 80px !important;
+  min-inline-size: 80px;
+  max-inline-size: 80px;
+  block-size: 45px !important;
+  min-block-size: 45px;
+  max-block-size: 45px;
+  margin: 0 !important;
+  border-radius: calc(4px * var(--ui-roundness));
+  background: #000;
+  object-fit: cover !important;
+  transform: none !important;
+}
+
+.ftVideoPlayer.scrollMiniPlayer.mobileMiniBar:not([data-mobile-mini-morph]) > .countdownPoster img {
+  object-fit: cover;
+}
+
+.ftVideoPlayer.mobileMiniBar:not([data-mobile-mini-morph]) .musicAudioContent {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  max-block-size: none;
+  margin: 0;
+}
+
+.ftVideoPlayer.mobileMiniBar:not([data-mobile-mini-morph]) .musicAudioArtwork {
+  inline-size: 100%;
+  block-size: 100%;
+  max-inline-size: none;
+  max-block-size: none;
+  border-radius: 0;
+  object-fit: cover;
+}
+
+.ftVideoPlayer.scrollMiniPlayer.mobileMiniBar.mobileMiniBarCollapsed > :is(.player, .countdownPoster, .musicAudioSurface) {
+  inset: 14px auto auto 8px !important;
+  inline-size: 64px !important;
+  min-inline-size: 64px;
+  max-inline-size: 64px;
+  block-size: 36px !important;
+  min-block-size: 36px;
+  max-block-size: 36px;
+}
+
+.ftVideoPlayer[data-mobile-mini-morph],
+:global(.app.capacitorPhoneLayout .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar[data-mobile-mini-morph]) {
+  position: fixed !important;
+  left: var(--mobile-mini-left) !important;
+  top: var(--mobile-mini-top) !important;
+  bottom: auto !important;
+  width: var(--mobile-mini-width) !important;
+  height: var(--mobile-mini-height) !important;
+  margin: 0 !important;
+  z-index: 150;
+  background: transparent;
+  border-top: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  transform-origin: top left;
+  translate: none !important;
+  transition: none !important;
+  overflow: clip;
+  will-change: transform;
+}
+
+/* The moving video must override every settled player layout. */
+/* stylelint-disable no-descending-specificity */
+.ftVideoPlayer[data-mobile-mini-morph] > .player,
+.ftVideoPlayer[data-mobile-mini-morph] > .countdownPoster,
+.ftVideoPlayer[data-mobile-mini-morph] > .musicAudioSurface,
+:global(.app .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar[data-mobile-mini-morph] > :is(.player, .countdownPoster, .musicAudioSurface)) {
+  position: absolute !important;
+  inset: var(--mobile-mini-video-base-top) auto auto var(--mobile-mini-video-base-left) !important;
+  width: var(--mobile-mini-video-base-width) !important;
+  height: var(--mobile-mini-video-base-height) !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  margin: 0 !important;
+  object-fit: contain !important;
+  transform: scale(var(--mobile-mini-media-scale, 1)) !important;
+  transform-origin: center;
+  transition: none !important;
+}
+/* stylelint-enable no-descending-specificity */
+
+@media (orientation: landscape) and (height <= 600px) {
+  :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:fullscreen, .fullWindow)) {
+    container: shorts-landscape-player / inline-size;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:fullscreen, .fullWindow) > .player),
+  /* stylelint-disable-next-line selector-max-compound-selectors */
+  :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:fullscreen, .fullWindow) > .countdownPoster img) {
+    object-fit: contain !important;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:fullscreen, .fullWindow) .shortsTopControls) {
+    padding-block: 4px;
+    padding-inline: 4px;
+    flex-wrap: wrap;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:fullscreen, .fullWindow) .shortsTopControlsGroup) {
+    gap: 2px;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:fullscreen, .fullWindow) .shortsTopControlsGroup:last-child) {
+    flex: none;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:fullscreen, .fullWindow) .shortsTopControl) {
+    inline-size: 42px;
+    block-size: 42px;
+  }
+
+}
+
+@container shorts-landscape-player (width < 180px) {
+  :global(.shortsTopControls .shortsCaptionsControl) {
+    display: none;
+  }
+}
+
+@container shorts-landscape-player (width < 100px) {
+  :global(.shortsTopControls) {
+    align-items: center;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 2px;
+  }
+
+  :global(.shortsTopControlsGroup) {
+    flex-direction: column;
+    gap: 0;
+  }
+}
+
+@media (orientation: landscape) and (height <= 600px) {
+  :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:fullscreen, .fullWindow) .phonePlayerOptions[open]) {
+    inset-block: 0 auto;
+    inset-inline: calc(100% + 12px) auto;
+    inline-size: min(300px, calc(50vw - 50% - 108px));
+    block-size: 100%;
+    border-radius: calc(12px * var(--ui-roundness));
+  }
+
+  @media (width < 980px) {
+    :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:fullscreen, .fullWindow) .phonePlayerOptions[open]) {
+      inset-inline: 50% auto;
+      inline-size: min(320px, calc(100vw - 48px));
+      transform: translateX(-50%);
+    }
+
+    :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:fullscreen, .fullWindow) .phonePlayerOptions[open]:dir(rtl)) {
+      transform: translateX(50%);
+    }
+  }
+}
+
+.ftVideoPlayer.shortsPlayer:is(:fullscreen, .fullWindow) > .player {
+  object-fit: contain;
+}
+
+/* Android draws fullscreen content behind the system bars. */
+:global(.capacitorTabs .ftVideoPlayer.shortsPlayer:is(:fullscreen, .fullWindow) .shortsTopControls) {
+  padding-block-start: calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + 16px);
+}
+
+/* On a phone the dock already contains the metadata. Reserving another
+   metadata column squeezes the Shorts title into a one-character strip. */
+@media only screen and (width <= 680px) {
+  :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:is(:fullscreen, .fullWindow):is(
+    .fullscreenDockLayoutOpen,
+    .fullscreenMetadataOpen,
+    .fullscreenTranscriptOpen,
+    .fullscreenSponsorBlockOpen,
+    .fullscreenLiveChatOpen,
+    .fullscreenCommentsOpen,
+    .fullscreenPlaylistOpen, .fullscreenQueueOpen, .fullscreenRecommendationsOpen,
+    .chaptersOverlayOpen
+  )) {
+    --shorts-metadata-min-width: 0;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:is(:fullscreen, .fullWindow):is(
+    .fullscreenDockLayoutOpen,
+    .fullscreenMetadataOpen,
+    .fullscreenTranscriptOpen,
+    .fullscreenSponsorBlockOpen,
+    .fullscreenLiveChatOpen,
+    .fullscreenCommentsOpen,
+    .fullscreenPlaylistOpen, .fullscreenQueueOpen, .fullscreenRecommendationsOpen,
+    .chaptersOverlayOpen
+  ) .shortsFullscreenMetadataSide) {
+    display: none;
+  }
+}

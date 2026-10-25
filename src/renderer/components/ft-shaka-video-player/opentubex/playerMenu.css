@@ -1,0 +1,473 @@
+/* stylelint-disable liberty/use-logical-spec */
+
+:deep(.shaka-overflow-menu) {
+  overscroll-behavior: contain;
+}
+
+/* Match the depth of the controls beneath the player menu. */
+.ftVideoPlayer:not(.classicPlayerControls) :deep(.shaka-overflow-menu:not(.phonePlayerOptions > *)) {
+  border-radius: calc(16px * var(--ui-roundness));
+  background: linear-gradient(145deg, rgb(255 255 255 / 12%), rgb(255 255 255 / 3%)), rgb(0 0 0 / 52%);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 32%), inset 0 1px rgb(255 255 255 / 20%), inset 0 0 0 1px rgb(255 255 255 / 8%);
+  backdrop-filter: blur(16px) saturate(1.15);
+}
+
+/*
+  The overflow menu grew a row for every new option, so it ended up taller than
+  most players. Every entry is a tile instead: icon on top, name below it and the
+  current value underneath. The column count follows the menu width, so narrow
+  players (where the whole control bar folds into this menu) get fewer columns.
+*/
+:deep(.shaka-overflow-menu.ft-menu-grid) {
+  /* Height of a submenu's header, which is pinned above its options. */
+  --ft-submenu-header-size: 36px;
+  --ft-menu-padding: 6px;
+
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+
+  /*
+    `1fr` alone squeezes the rows against the menu's max height once there are
+    enough entries, which pushes the labels out of their tiles.
+  */
+  grid-auto-rows: minmax(min-content, 1fr);
+  align-content: start;
+  gap: 4px;
+  inline-size: min(400px, calc(100% - 24px));
+  max-block-size: min(50vh, 340px);
+  padding: var(--ft-menu-padding);
+}
+
+/* The submenus are rendered inside the menu, so they have to span every column. */
+:deep(.shaka-overflow-menu.ft-menu-grid > *) {
+  grid-column: 1 / -1;
+}
+
+/*
+  The menu is always dark, so its overlay scrollbar can't take the app's
+  scrollbar colour, which is dark itself in most themes.
+*/
+:deep(.shaka-overflow-menu > .os-scrollbar) {
+  --os-handle-bg: rgb(255 255 255 / 40%);
+  --os-handle-bg-hover: rgb(255 255 255 / 55%);
+  --os-handle-bg-active: rgb(255 255 255 / 70%);
+}
+
+:deep(.shaka-overflow-menu.ft-menu-grid > button) {
+  grid-column: auto;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  min-block-size: 0;
+  padding: 6px 4px;
+  border-radius: calc(10px * var(--ui-roundness));
+  background: rgb(255 255 255 / 7%);
+  white-space: normal;
+}
+
+:deep(.shaka-overflow-menu.ft-menu-grid > button:hover),
+:deep(.shaka-overflow-menu.ft-menu-grid > button:focus-visible) {
+  background: rgb(255 255 255 / 20%);
+}
+
+/*
+  An active entry is readable at a glance, without going over its value. Toggles
+  say so through `aria-pressed`, expandable entries through `aria-expanded`,
+  and entries that are active without either state mark themselves with
+  `ft-active`.
+*/
+:deep(.shaka-overflow-menu.ft-menu-grid > button[aria-pressed='true']),
+:deep(.shaka-overflow-menu.ft-menu-grid > button[aria-expanded='true']),
+:deep(.shaka-overflow-menu.ft-menu-grid > button.ft-active) {
+  background: color-mix(in srgb, var(--primary-color) 32%, transparent);
+}
+
+:deep(.shaka-overflow-menu.ft-menu-grid > button[aria-pressed='true']:hover),
+:deep(.shaka-overflow-menu.ft-menu-grid > button[aria-expanded='true']:hover),
+:deep(.shaka-overflow-menu.ft-menu-grid > button.ft-active:hover) {
+  background: color-mix(in srgb, var(--primary-color) 48%, transparent);
+}
+
+/* The icon sits above the label instead of next to it. */
+:deep(.shaka-overflow-menu.ft-menu-grid > button > .shaka-ui-icon) {
+  padding-inline-end: 0;
+  font-size: 20px;
+}
+
+:deep(.shaka-overflow-menu.ft-menu-grid > button > .shaka-overflow-button-label) {
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  inline-size: 100%;
+  min-inline-size: 0;
+  padding-inline-end: 0;
+  font-size: 11px;
+  line-height: 1.25;
+  text-align: center;
+
+  /* The chevron of the submenu entries doesn't fit into a tile. */
+  background-image: none;
+}
+
+/* Names that don't fit into a tile get cut off. */
+:deep(.shaka-overflow-menu.ft-menu-grid .shaka-overflow-button-label > span:not(.shaka-current-selection-span)) {
+  display: -webkit-box;
+  overflow: hidden;
+  max-inline-size: 100%;
+  text-align: center;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+}
+
+/* The current value (`On`, `2x`, the chapter title, …) stays on a single line. */
+:deep(.shaka-overflow-menu.ft-menu-grid .shaka-overflow-button-label .shaka-current-selection-span) {
+  max-inline-size: 100%;
+  padding-inline-start: 0;
+  overflow: hidden;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.75;
+}
+
+/* The playback rate reserves room for its widest value, which offsets the tile. */
+:deep(.shaka-overflow-menu.ft-menu-grid .shaka-playbackrate-button .shaka-current-selection-span) {
+  inline-size: auto;
+  text-align: center;
+}
+
+/* Reserve space for HD/4K beside a long resolution or bitrate label. */
+:deep(.shaka-overflow-menu.ft-menu-grid .shaka-overflow-button-label > span:has(.shaka-current-quality-mark)) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+:deep(.shaka-overflow-menu.ft-menu-grid .shaka-resolution-button :is(.shaka-current-selection-span, .shaka-current-auto-quality)) {
+  flex: 0 1 auto;
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:deep(.shaka-overflow-menu.ft-menu-grid .shaka-current-quality-mark) {
+  flex-shrink: 0;
+  align-self: flex-start;
+  block-size: auto;
+  line-height: 6px;
+}
+
+/*
+  The submenus are laid out as tiles too, so that switching between the menu and
+  a submenu doesn't change the shape of the popup. Wrapping flex rather than a
+  grid: the options are all one size, and a row that isn't full stays centred
+  instead of being pushed to one side.
+*/
+:deep(.shaka-sub-menu.ft-menu-grid) {
+  position: relative;
+  flex-flow: row wrap;
+
+  /*
+    The menu keeps its height while a submenu is open, so the options are
+    centred in whatever is left below the header rather than stretched over it.
+  */
+  place-content: center;
+  gap: 4px;
+  padding-block-start: calc(var(--ft-submenu-header-size) + 4px);
+}
+
+/*
+  Taken out of the flow, so that it stays put while the options are centered.
+  The menu's padding above the header looks like part of it, so the same space
+  below its content centers that between the menu's edge and the divider.
+*/
+:deep(.shaka-sub-menu.ft-menu-grid > .shaka-back-to-overflow-button) {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  box-sizing: border-box;
+  justify-content: center;
+  block-size: var(--ft-submenu-header-size);
+  padding-block: 0 var(--ft-menu-padding);
+  margin-block-end: 0;
+}
+
+/* Keep the title centred in the header instead of after the back icon. */
+:deep(.shaka-sub-menu.ft-menu-grid > .shaka-back-to-overflow-button > .shaka-ui-icon),
+:deep(.shaka-overflow-menu.ft-menu-grid .ft-caption-timing-menu .shaka-ui-icon),
+:deep(.shaka-overflow-menu.ft-menu-grid .ft-caption-list-menu .shaka-ui-icon:not(.shaka-chosen-item)) {
+  position: absolute;
+  inset-inline-start: 10px;
+  padding-inline-end: 0;
+}
+
+/* Align the caption Options action with the submenu header beside it. */
+:deep(.shaka-sub-menu.ft-menu-grid > .ft-caption-options-button) {
+  align-items: center;
+  block-size: var(--ft-submenu-header-size);
+  padding-block: 0 var(--ft-menu-padding) !important;
+}
+
+/*
+  The option and its quality mark (`HD`, `4K`) are siblings, so the tile wraps
+  them in a row instead of stacking them.
+*/
+:deep(.shaka-sub-menu.ft-menu-grid > button:not(
+  .shaka-back-to-overflow-button,
+  .ft-caption-options-button
+)) {
+  flex-wrap: wrap;
+  place-content: center;
+  gap: 0 2px;
+
+  /* Room for a name that wraps onto a second line, so every option is one size. */
+  inline-size: 90px;
+  min-block-size: 40px;
+  padding: 6px 4px;
+  border-radius: calc(10px * var(--ui-roundness));
+  font-size: 11px;
+  line-height: 1.25;
+  text-align: center;
+  background: rgb(255 255 255 / 7%);
+  white-space: normal;
+}
+
+:deep(.shaka-sub-menu.ft-menu-grid > button:hover),
+:deep(.shaka-sub-menu.ft-menu-grid > button:focus-visible) {
+  background: rgb(255 255 255 / 20%);
+}
+
+/*
+  The checkmark would make the selected tile taller than the others, so the
+  selection is shown as a highlighted tile instead.
+*/
+:deep(.shaka-sub-menu.ft-menu-grid .shaka-ui-icon.shaka-chosen-item),
+:deep(.ft-caption-list-options.ft-menu-grid .shaka-ui-icon.shaka-chosen-item) {
+  display: none;
+}
+
+:deep(.shaka-sub-menu.ft-menu-grid > button:has(.shaka-chosen-item)),
+:deep(.ft-caption-list-options.ft-menu-grid > button:has(.shaka-chosen-item)) {
+  background: color-mix(in srgb, var(--primary-color) 32%, transparent);
+}
+
+:deep(.shaka-sub-menu.ft-menu-grid > button > span) {
+  display: -webkit-box;
+  overflow: hidden;
+  max-inline-size: 100%;
+  margin-inline-start: 0;
+  text-align: center;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+}
+
+/* Bitrate labels can need more room than the other menu options, so each tile grows to fit its label. */
+:deep(.shaka-sub-menu.ft-menu-grid > button.explicit-resolution) {
+  flex-wrap: nowrap;
+  align-items: center;
+  inline-size: max-content;
+  min-inline-size: 90px;
+  max-inline-size: 100%;
+  padding-inline: 12px;
+}
+
+:deep(.shaka-sub-menu.ft-menu-grid > button.explicit-resolution > span) {
+  display: block;
+  flex: 0 1 auto;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+  line-clamp: unset;
+  -webkit-line-clamp: unset;
+}
+
+:deep(.shaka-sub-menu.ft-menu-grid > button.explicit-resolution > .shaka-quality-mark) {
+  flex: 0 0 auto;
+}
+
+/* Picks the codec whose resolutions the quality menu lists. */
+:deep(.ft-quality-codecs) {
+  display: flex;
+  align-self: center;
+  gap: 2px;
+  padding: 2px;
+  margin-block: 4px;
+  border-radius: calc(999px * var(--ui-roundness));
+  background: rgb(255 255 255 / 10%);
+}
+
+:deep(.shaka-overflow-menu .ft-quality-codecs > button) {
+  min-block-size: 24px;
+  padding: 0 10px;
+  border-radius: inherit;
+  font-size: 12px;
+}
+
+:deep(.shaka-overflow-menu .ft-quality-codecs > button[aria-pressed='true']) {
+  background: color-mix(in srgb, var(--primary-color) 48%, transparent);
+}
+
+/* Sits in the header, at the end opposite the back button. */
+:deep(.shaka-sub-menu.ft-menu-grid > .ft-quality-codecs) {
+  position: absolute;
+  inset-block-start: calc((var(--ft-submenu-header-size) - var(--ft-menu-padding) - 1px - 28px) / 2);
+  inset-inline-end: 6px;
+  z-index: 1;
+  margin: 0;
+}
+
+/* A centred title would run into the codecs, so it follows the back icon. */
+:deep(.shaka-sub-menu.ft-menu-grid:has(> .ft-quality-codecs) > .shaka-back-to-overflow-button) {
+  justify-content: flex-start;
+  padding-inline-start: 40px;
+}
+
+/*
+  The phone layout shows the header above the menu. When the codecs don't fit
+  beside its title, they get a row of their own, as far from the header as from
+  the options. The grid shares its free space evenly around both instead
+  (`setupPhoneOptionsMenu`), which needs them at the top to start from.
+*/
+:deep(.phonePlayerOptions .ft-quality-codecs) {
+  gap: 0;
+  padding: 0;
+  margin-block: 0 8px;
+  background: none;
+}
+
+/* Together with the gap between the tiles */
+:deep(.phonePlayerOptions .ft-menu-grid > .ft-quality-codecs) {
+  position: static;
+  flex: 1 0 100%;
+  justify-content: center;
+  margin-block-end: 4px;
+}
+
+:deep(.phonePlayerOptions:not([data-header-action]) .ft-menu-grid:has(> .ft-quality-codecs)) {
+  align-content: flex-start;
+}
+
+/* A full-width row can't have the pill background, so the buttons form the pill instead. */
+:deep(.phonePlayerOptions .ft-quality-codecs > button) {
+  min-block-size: 36px;
+  padding-inline: 16px;
+  border-radius: 0;
+}
+
+:deep(.phonePlayerOptions .ft-quality-codecs > button:not([aria-pressed='true'])) {
+  background: rgb(255 255 255 / 10%);
+}
+
+:deep(.phonePlayerOptions .ft-quality-codecs > button:first-child) {
+  border-start-start-radius: calc(999px * var(--ui-roundness));
+  border-end-start-radius: calc(999px * var(--ui-roundness));
+}
+
+:deep(.phonePlayerOptions .ft-quality-codecs > button:last-child) {
+  border-start-end-radius: calc(999px * var(--ui-roundness));
+  border-end-end-radius: calc(999px * var(--ui-roundness));
+}
+
+/* Long chapter titles would otherwise widen the menu beyond the player. */
+:deep(.seek-history-menu:not(.ft-menu-grid) > .seek-history-entry > span) {
+  overflow: hidden;
+  max-inline-size: 30em;
+  text-overflow: ellipsis;
+}
+
+:deep(.ab-repeat-button[aria-pressed='true'] .shaka-ui-icon) {
+  color: var(--primary-color);
+}
+
+/* Keep the translation header and scrollbar outside each other's regions. */
+:deep(.shaka-overflow-menu:has(> .ft-caption-list-menu:not(.shaka-hidden))) {
+  overflow: hidden;
+}
+
+:deep(.shaka-overflow-menu:has(> .ft-caption-list-menu:not(.shaka-hidden)) > .os-scrollbar) {
+  display: none;
+}
+
+/* As tall as the other submenus, growing with a long list up to a cap after which the options scroll */
+:deep(.ft-caption-list-menu) {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  max-block-size: min(50vh, 340px);
+  overflow: hidden;
+}
+
+:deep(.ft-caption-list-menu > .shaka-back-to-overflow-button) {
+  flex: 0 0 auto;
+}
+
+/* Centre the title like the headers of the other submenus */
+:deep(.shaka-overflow-menu.ft-menu-grid .ft-caption-list-menu > .shaka-back-to-overflow-button) {
+  position: relative;
+  justify-content: center;
+  block-size: var(--ft-submenu-header-size);
+  padding-block: 0 var(--ft-menu-padding);
+  margin-block-end: 0;
+}
+
+:deep(.ft-caption-list-options) {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+:deep(.ft-caption-list-options > button) {
+  box-sizing: border-box;
+  inline-size: 100%;
+}
+
+:deep(.ft-caption-list-options > .os-scrollbar) {
+  --os-handle-bg: rgb(255 255 255 / 40%);
+  --os-handle-bg-hover: rgb(255 255 255 / 55%);
+  --os-handle-bg-active: rgb(255 255 255 / 70%);
+}
+
+:deep(.ft-caption-list-options.ft-menu-grid) {
+  display: flex;
+  flex-flow: row wrap;
+
+  /* Centred like the other submenus, but a list that scrolls starts at its first option */
+  place-content: safe center;
+  gap: 4px;
+  padding: 4px;
+}
+
+:deep(.ft-caption-list-options.ft-menu-grid > button) {
+  flex-wrap: wrap;
+  place-content: center;
+  inline-size: 90px;
+  min-block-size: 40px;
+  padding: 6px 4px;
+  border-radius: calc(10px * var(--ui-roundness));
+  font-size: 11px;
+  line-height: 1.25;
+  text-align: center;
+  background: rgb(255 255 255 / 7%);
+  white-space: normal;
+}
+
+:deep(.ft-caption-list-options.ft-menu-grid > button:hover),
+:deep(.ft-caption-list-options.ft-menu-grid > button:focus-visible) {
+  background: rgb(255 255 255 / 20%);
+}
+
+:deep(.ft-caption-list-options.ft-menu-grid > button > span) {
+  display: -webkit-box;
+  overflow: hidden;
+  max-inline-size: 100%;
+  margin-inline-start: 0;
+  text-align: center;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+}

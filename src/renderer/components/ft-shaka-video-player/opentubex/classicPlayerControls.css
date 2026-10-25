@@ -1,0 +1,69 @@
+/* The classic option restores the control surfaces used before glass pills. */
+.ftVideoPlayer.classicPlayerControls :deep(:is(.ft-control-glass, .ft-right-control-glass)) {
+  display: none;
+}
+
+.ftVideoPlayer.classicPlayerControls :deep(.shaka-controls-button-panel > :is(button, .ft-volume-control-group, .ft-time-display-group)) {
+  background-color: transparent;
+  background-image: none;
+  border-radius: 0;
+  opacity: 0.9;
+}
+
+.ftVideoPlayer.classicPlayerControls :deep(.shaka-controls-button-panel > :is(button, .ft-volume-control-group, .ft-time-display-group):hover) {
+  opacity: 1;
+}
+
+.ftVideoPlayer.classicPlayerControls :deep(.shaka-controls-button-panel > .ft-chapters-button)::before {
+  position: absolute;
+  inset-block: 8px;
+  inset-inline: 0;
+  border-radius: calc(18px * var(--ui-roundness));
+  background-color: rgb(0 0 0 / 16%);
+  content: '';
+  pointer-events: none;
+}
+
+.ftVideoPlayer.classicPlayerControls :deep(.shaka-controls-button-panel > .ft-chapters-button:is(:hover, :focus-visible))::before {
+  background-color: rgb(255 255 255 / 10%);
+}
+
+.ftVideoPlayer.classicPlayerControls :deep(.shaka-controls-button-panel.ft-controls-compact-chapters > .ft-chapters-button)::before {
+  inset: 6px;
+  border-radius: calc(50% * var(--ui-roundness));
+  background-color: transparent;
+}
+
+.ftVideoPlayer.classicPlayerControls :deep(.shaka-controls-button-panel > .ft-chapters-button.open)::before {
+  background-color: color-mix(in srgb, var(--ft-chapters-active-color) 18%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ft-chapters-active-color) 60%, transparent);
+}
+
+.ftVideoPlayer.classicPlayerControls :deep(.ft-time-display-group) {
+  padding: 0;
+  cursor: default;
+}
+
+.ftVideoPlayer.classicPlayerControls :deep(.ft-quick-playback-rate-bar) {
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  opacity: 1;
+}
+
+.ftVideoPlayer.classicPlayerControls :deep(.shaka-controls-button-panel > .ft-quick-playback-rate-bar) {
+  block-size: 48px;
+  padding-inline: 2px;
+}
+
+.ftVideoPlayer.classicPlayerControls :deep(.phonePlayerOptions[open]) {
+  background: rgb(0 0 0 / 80%);
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+/* Shaka creates this unused ad control alongside the playback time display. */
+:deep(.shaka-ad-info) {
+  display: none !important;
+}

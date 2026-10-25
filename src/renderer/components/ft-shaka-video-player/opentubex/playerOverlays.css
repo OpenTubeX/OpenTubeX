@@ -1,0 +1,201 @@
+/* stylelint-disable liberty/use-logical-spec */
+
+.videoFillZoomEdges {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.videoFillZoomEdge {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+}
+
+.videoFillZoomEdgeTop,
+.videoFillZoomEdgeBottom {
+  inset-inline: 0;
+  block-size: 24px;
+}
+
+.videoFillZoomEdgeLeft,
+.videoFillZoomEdgeRight {
+  inset-block: 0;
+  inline-size: 24px;
+}
+
+.videoFillZoomEdgeTop {
+  inset-block-start: 0;
+  background: linear-gradient(to bottom, rgb(255 255 255 / 65%), transparent);
+}
+
+.videoFillZoomEdgeRight {
+  inset-inline-end: 0;
+  background: linear-gradient(to left, rgb(255 255 255 / 65%), transparent);
+}
+
+.videoFillZoomEdgeBottom {
+  inset-block-end: 0;
+  background: linear-gradient(to top, rgb(255 255 255 / 65%), transparent);
+}
+
+.videoFillZoomEdgeLeft {
+  inset-inline-start: 0;
+  background: linear-gradient(to right, rgb(255 255 255 / 65%), transparent);
+}
+
+.videoFillZoomSnapReady .videoFillZoomEdge {
+  animation: video-fill-zoom-ready 900ms ease-in-out infinite alternate;
+}
+
+@keyframes video-fill-zoom-ready {
+  to {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .videoFillZoomSnapReady .videoFillZoomEdge {
+    animation: none;
+  }
+}
+
+.valueChangeText {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.ftVideoPlayer:is(:fullscreen, .fullWindow) .valueChangePopup {
+  /* Leave room for the fullscreen title and the display cutout. */
+  top: calc(56px + var(--safe-area-inset-top, env(safe-area-inset-top, 0px)));
+}
+
+.valueChangeIcons {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 2px;
+}
+
+.ftVideoPlayer:is(:fullscreen, .fullWindow) .mobileSeekPreview {
+  top: 50%;
+  transform: translate(-50%, -50%);
+  flex-direction: column;
+  font-variant-numeric: tabular-nums;
+  z-index: 4;
+}
+
+.mobileSeekPreviewTime {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mobileSeekThumbnail {
+  width: min(240px, 45vw, calc(30dvh * var(--seek-thumbnail-aspect-ratio)));
+  border-radius: 4px;
+  background-repeat: no-repeat;
+}
+
+.ftVideoPlayer:has(.mobileSeekPreview) :deep(.shaka-big-buttons-container) {
+  visibility: hidden;
+}
+
+.valueChangeCustomIcon {
+  flex: none;
+  width: 1em;
+  height: 1em;
+  fill: currentcolor;
+}
+
+.countdownPoster {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  background: #000;
+  pointer-events: none;
+}
+
+.countdownPoster img,
+.countdownPoster .retryImagePlaceholder {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.endedPoster img,
+.endedPoster .retryImagePlaceholder,
+.countdownPoster:has(> .pictureInPictureMessage) img,
+.countdownPoster:has(> .pictureInPictureMessage) .retryImagePlaceholder {
+  opacity: 0.35;
+}
+
+.pictureInPictureMessage {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  padding: 24px 32px 48px;
+  background: linear-gradient(rgb(0 0 0 / 60%), transparent);
+  color: rgb(255 255 255 / 85%);
+  font-size: 18px;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 70%);
+}
+
+.countdownOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.countdownProgress {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 92px;
+  height: 92px;
+  border: 1px solid rgb(255 255 255 / 22%);
+  border-radius: 50%;
+  background: rgb(0 0 0 / 82%);
+  box-shadow: 0 8px 28px rgb(0 0 0 / 45%);
+  color: #fff;
+}
+
+.countdownRing {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.countdownRingTrack,
+.countdownRingProgress {
+  stroke-width: 4;
+}
+
+.countdownRingTrack {
+  stroke: rgb(255 255 255 / 24%);
+}
+
+.countdownRingProgress {
+  stroke: var(--primary-color);
+}
+
+.countdownTime {
+  position: relative;
+  z-index: 1;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 70%);
+}

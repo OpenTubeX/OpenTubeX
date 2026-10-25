@@ -1,0 +1,817 @@
+/* stylelint-disable liberty/use-logical-spec */
+
+/* Scroll mini player */
+
+.ftVideoPlayerHost {
+  position: relative;
+}
+
+.repeatStats {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+  padding: 12px 16px;
+  background-color: var(--card-bg-color);
+  color: var(--primary-text-color);
+  border-end-start-radius: calc(8px * var(--ui-roundness));
+  border-end-end-radius: calc(8px * var(--ui-roundness));
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Keep the stats in the flow below the scroll mini player's placeholder, so
+   the page below does not jump when the player pops out or returns. */
+.repeatStats.scrollMiniHidden {
+  visibility: hidden;
+}
+
+.repeatStatsMode,
+.repeatStatsValues,
+.repeatStatsValues > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.repeatStatsMode {
+  gap: 8px;
+}
+
+.repeatStatsMode > .ft-icon {
+  color: var(--primary-color);
+}
+
+.repeatStatsValues {
+  gap: 12px 24px;
+  margin: 0;
+}
+
+.repeatStatsValues > div {
+  gap: 6px;
+}
+
+.repeatStatsValues dt {
+  color: var(--secondary-text-color);
+}
+
+.repeatStatsValues dd {
+  order: -1;
+  margin: 0;
+}
+
+.ambientCanvas {
+  position: absolute;
+  inset: -5% -4% -9%;
+  display: block;
+  width: 108%;
+  height: 114%;
+  opacity: 0.42;
+  filter: blur(clamp(24px, 4vw, 52px)) saturate(1.05);
+  pointer-events: none;
+}
+
+.ambientLayoutCanvas {
+  position: absolute;
+  inset: -5% -4% -32%;
+  display: block;
+  width: 108%;
+  height: 137%;
+  opacity: 0.2;
+  filter: blur(clamp(32px, 5vw, 72px)) saturate(1.02);
+  pointer-events: none;
+}
+
+@media only screen and (width >=1351px) {
+  .ftVideoPlayerHost.ambientWideLayout .ambientLayoutCanvas {
+    inset-inline-end: -54%;
+    width: 158%;
+  }
+}
+
+.scrollMiniAnchor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.scrollMiniPlaceholder {
+  position: relative;
+  width: 100%;
+  pointer-events: none;
+}
+
+.ftVideoPlayer[data-inline-mini-drag] {
+  overflow: clip;
+  isolation: isolate;
+}
+
+.ftVideoPlayer.scrollMiniPlayer {
+  box-shadow: 0 8px 28px rgb(0 0 0 / 45%);
+  border-radius: var(--scroll-mini-player-radius);
+
+  /* The mini player floats over the page, so nothing of it may be painted outside its frame. */
+  overflow: clip;
+  touch-action: none;
+  isolation: isolate;
+}
+
+.ftVideoPlayer.scrollMiniPlayerDismissed {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ftVideoPlayer.scrollMiniPlayerAnimating {
+  position: relative;
+  z-index: 150;
+}
+
+.ftVideoPlayer.scrollMiniPlayerAnimating > .player {
+  transition: none !important;
+}
+
+.ftVideoPlayer.scrollMiniPlayer > .player,
+.ftVideoPlayer.scrollMiniPlayer > .vrCanvas {
+  border-radius: var(--scroll-mini-player-radius);
+}
+
+/* Follow the morph's scale-compensated corners. A larger, scaled radius would
+   uncover the player's black background. */
+.ftVideoPlayer[data-inline-mini-drag] > :is(.player, .vrCanvas) {
+  border-radius: inherit;
+}
+
+.ftVideoPlayer.scrollMiniPlayer.shortsPlayer > .shortsTopControls,
+.ftVideoPlayer.scrollMiniPlayer :deep(.shaka-bottom-controls),
+.ftVideoPlayer.scrollMiniPlayer :deep(.shaka-controls-button-panel),
+.ftVideoPlayer.scrollMiniPlayer :deep(.shaka-spinner-container),
+.ftVideoPlayer.scrollMiniPlayer :deep(.shaka-big-buttons-container),
+.ftVideoPlayer.scrollMiniPlayer :deep(.shaka-controls-container) {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+.ftVideoPlayer.scrollMiniPlayer .player {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.ftVideoPlayer.scrollMiniPlayer.mobileMiniBar {
+  box-sizing: border-box;
+
+  /* Let the seek thumb straddle the top edge without clipping its upper half. */
+  overflow-clip-margin: 8px;
+  border-radius: 0;
+  background: var(--card-bg-color);
+  box-shadow: 0 -4px 18px rgb(0 0 0 / 20%);
+  transform: translateY(var(--mobile-mini-dismiss-offset, 0));
+  transition: height var(--mobile-mini-expand-duration, 0ms) ease, top var(--mobile-mini-expand-duration, 0ms) ease, transform var(--mobile-mini-dismiss-duration, 0ms) ease-out;
+}
+
+:global(.app.capacitorPhoneLayout .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar) {
+  top: auto !important;
+  bottom: calc(
+    var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) +
+    var(--connection-progress-inset, 0px) +
+    var(--connection-status-height, 0px)
+  );
+  transition: height var(--mobile-mini-expand-duration, 0ms) ease, translate 280ms cubic-bezier(0.2, 0, 0, 1), transform var(--mobile-mini-dismiss-duration, 0ms) ease-out;
+}
+
+@media (width <= 680px) {
+  :global(.app.capacitorPhoneLayout .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar) {
+    bottom: calc(
+      var(--mobile-nav-height) +
+      var(--connection-progress-inset, 0px) +
+      var(--connection-status-height, 0px)
+    );
+  }
+
+  /* stylelint-disable-next-line selector-max-compound-selectors */
+  :global(.app.capacitorPhoneLayout > .sideNav.scrollHidden:not(:has(:focus-visible)) ~ * .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar) {
+    translate: 0 var(--mobile-nav-height);
+    transition: height var(--mobile-mini-expand-duration, 0ms) ease, translate 220ms cubic-bezier(0.4, 0, 1, 1), transform var(--mobile-mini-dismiss-duration, 0ms) ease-out;
+  }
+}
+
+:global(:root.appMiniBar .app.capacitorTabs > .routerView) {
+  padding-block-end: calc(108px + var(--connection-status-space, 0px));
+}
+
+:global(:root.appMiniBarCompact .app.capacitorTabs > .routerView) {
+  padding-block-end: calc(112px + var(--connection-status-space, 0px));
+}
+
+:global(:root.appMiniBarCollapsed .app.capacitorTabs > .routerView) {
+  padding-block-end: calc(64px + var(--connection-status-space, 0px));
+}
+
+.ftVideoPlayer.mobileMiniBar > :not(.player, .countdownPoster, .musicAudioSurface, .mobileMiniBarOverlay) {
+  display: none !important;
+}
+
+.mobileMiniBarOverlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.mobileMiniBarProgress {
+  position: absolute;
+  z-index: 3;
+  inset: 0 0 auto;
+  block-size: 16px;
+}
+
+.mobileMiniBarProgress::before,
+.mobileMiniBarProgress > div {
+  position: absolute;
+  inset: -1px 0 auto;
+  block-size: 2px;
+  pointer-events: none;
+}
+
+.mobileMiniBarProgress::before {
+  background: color-mix(in srgb, var(--primary-text-color) 20%, var(--card-bg-color));
+  content: '';
+}
+
+.mobileMiniBarProgress > div {
+  background: var(--seekbar-played-color, var(--primary-color));
+  transform-origin: left top;
+}
+
+.mobileMiniBarProgress:has(.mobileMiniBarSeek:enabled:is(.mobileMiniBarSeeking, :focus-visible))::before,
+.mobileMiniBarProgress:has(.mobileMiniBarSeek:enabled:is(.mobileMiniBarSeeking, :focus-visible)) > div {
+  inset-block-start: -3px;
+  block-size: 6px;
+}
+
+.mobileMiniBarSeek {
+  position: absolute;
+  inset: -8px 0 auto;
+  inline-size: 100%;
+  block-size: 16px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  direction: ltr;
+  touch-action: none;
+  pointer-events: auto;
+}
+
+.mobileMiniBarSeek:disabled {
+  pointer-events: none;
+}
+
+.mobileMiniBarSeek::-webkit-slider-runnable-track {
+  block-size: 6px;
+  background: transparent;
+}
+
+.mobileMiniBarSeek::-moz-range-track {
+  block-size: 6px;
+  background: transparent;
+}
+
+.mobileMiniBarSeek::-webkit-slider-thumb {
+  inline-size: 16px;
+  block-size: 16px;
+  margin-block-start: -5px;
+  border: 0;
+  border-radius: 50%;
+  appearance: none;
+  background: var(--seekbar-played-color, var(--primary-color));
+  opacity: 0;
+}
+
+.mobileMiniBarSeek::-moz-range-thumb {
+  inline-size: 16px;
+  block-size: 16px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--seekbar-played-color, var(--primary-color));
+  opacity: 0;
+}
+
+.mobileMiniBarSeek:enabled:is(.mobileMiniBarSeeking, :focus-visible)::-webkit-slider-thumb {
+  opacity: 1;
+}
+
+.mobileMiniBarSeek:enabled:is(.mobileMiniBarSeeking, :focus-visible)::-moz-range-thumb {
+  opacity: 1;
+}
+
+.mobileMiniBarReturn {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.mobileMiniBarMorphOverlay {
+  position: fixed;
+  inset: auto;
+
+  /* Keep the full-width backdrop behind the moving video (z-index: 150). */
+  z-index: 149;
+  pointer-events: none;
+  opacity: 0;
+  will-change: opacity;
+}
+
+.mobileMiniBarRestoring {
+  opacity: 1;
+}
+
+.mobileMiniBarMorphOverlay::before {
+  position: absolute;
+  inset: 0;
+  background: var(--card-bg-color);
+  content: '';
+}
+
+.mobileMiniBarDetails {
+  position: absolute;
+  inset-block: 0 48px;
+  left: 100px;
+  right: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-inline-size: 0;
+  color: var(--primary-text-color);
+  direction: ltr;
+  pointer-events: none;
+}
+
+.mobileMiniBarDismissible .mobileMiniBarDetails {
+  right: 56px;
+}
+
+.mobileMiniBarTitle,
+.mobileMiniBarUploader {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobileMiniBarTitle {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.mobileMiniBarUploader {
+  display: flex;
+  align-items: center;
+  margin-block-start: 2px;
+  color: var(--secondary-text-color);
+  font-size: 12px;
+}
+
+.mobileMiniBarUploader > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobileMiniBarDismiss,
+.mobileMiniBarExpand {
+  position: absolute;
+  z-index: 2;
+  inset-block: 0 48px;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  inline-size: 48px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--primary-text-color);
+  font-size: 24px;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.mobileMiniBarReturn:active {
+  background: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
+}
+
+.mobileMiniBarDismiss:active,
+.mobileMiniBarExpand:active {
+  background: color-mix(in srgb, var(--primary-text-color) 12%, var(--card-bg-color));
+}
+
+.mobileMiniBarPlayback {
+  position: absolute;
+  z-index: 2;
+  inset: auto 0 4px;
+  display: flex;
+  justify-content: center;
+  gap: clamp(0px, calc((100% - 240px) / 4), 8px);
+  block-size: 48px;
+  direction: ltr;
+}
+
+.mobileMiniBarPlayback > button {
+  display: grid;
+  place-items: center;
+  flex: 0 1 48px;
+  inline-size: 48px;
+  block-size: 48px;
+  padding: 0;
+  border: 0;
+  border-radius: calc(24px * var(--ui-roundness));
+  background: transparent;
+  color: var(--primary-text-color);
+  font-size: 24px;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.mobileMiniBarPlayback > .mobileMiniBarPlayPause {
+  background: color-mix(in srgb, var(--primary-text-color) 8%, var(--card-bg-color));
+}
+
+.mobileMiniBarPlayback > button:active {
+  background: color-mix(in srgb, var(--primary-text-color) 12%, var(--card-bg-color));
+}
+
+.mobileMiniBarPlayback > button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.mobileMiniBarCompact {
+  --mobile-mini-expand-duration: 240ms;
+}
+
+:global([data-reduced-motion='reduce'] .mobileMiniBarCompact) {
+  --mobile-mini-expand-duration: 0ms;
+}
+
+.mobileMiniBarChevron {
+  transition: rotate var(--mobile-mini-expand-duration) ease;
+}
+
+.mobileMiniBarExpand[aria-expanded='true'] .mobileMiniBarChevron {
+  rotate: 180deg;
+}
+
+.mobileMiniBarCompact .mobileMiniBarUploader {
+  display: none;
+}
+
+.mobileMiniBarCompact .mobileMiniBarPlayback {
+  inset: 64px 0 auto;
+  transition: top var(--mobile-mini-expand-duration) ease, left var(--mobile-mini-expand-duration) ease, right var(--mobile-mini-expand-duration) ease;
+}
+
+.mobileMiniBarCompact > .mobileMiniBarExpand,
+.mobileMiniBarCompact > .mobileMiniBarDismiss {
+  inset-block: 8px auto;
+  block-size: 48px;
+}
+
+.mobileMiniBarCompact .mobileMiniBarDetails {
+  inset-block: 0 auto;
+  block-size: 64px;
+  transition: left var(--mobile-mini-expand-duration) ease, right var(--mobile-mini-expand-duration) ease;
+  right: 56px;
+}
+
+.mobileMiniBarCompact.mobileMiniBarDismissible .mobileMiniBarDetails {
+  right: 104px;
+}
+
+.mobileMiniBarDismissible .mobileMiniBarExpand {
+  right: 52px;
+}
+
+.mobileMiniBarCompact.mobileMiniBarCollapsed .mobileMiniBarDetails {
+  inset-block: 0;
+  left: 80px;
+  right: 112px;
+}
+
+.mobileMiniBarCollapsed.mobileMiniBarDismissible .mobileMiniBarDetails {
+  right: 160px;
+}
+
+.mobileMiniBarCollapsed > .mobileMiniBarDismiss,
+.mobileMiniBarCollapsed > .mobileMiniBarExpand {
+  inset-block: 8px;
+}
+
+.mobileMiniBarCollapsed .mobileMiniBarPlayback {
+  inset: 8px 56px auto calc(100% - 104px);
+}
+
+.mobileMiniBarCollapsed.mobileMiniBarDismissible .mobileMiniBarPlayback {
+  left: calc(100% - 152px);
+  right: 104px;
+}
+
+.mobileMiniBarMorphOverlay > .mobileMiniBarReturn,
+.mobileMiniBarMorphOverlay > .mobileMiniBarDismiss,
+.mobileMiniBarMorphOverlay > .mobileMiniBarExpand,
+.mobileMiniBarMorphOverlay > .mobileMiniBarPlayback > button {
+  pointer-events: none;
+}
+
+.scrollMiniPlayerControls {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 12;
+}
+
+/* The restore preview scales the whole player from mini to inline size. */
+.ftVideoPlayer[data-inline-mini-drag] > .scrollMiniPlayerControls {
+  visibility: hidden;
+}
+
+.scrollMiniPointerLayer {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  pointer-events: auto;
+  z-index: 0;
+}
+
+.ftVideoPlayer.scrollMiniPlayerStashed {
+  border-radius: calc(18px * var(--ui-roundness));
+}
+
+.ftVideoPlayer.scrollMiniPlayerStashed > :not(.scrollMiniPlayerControls),
+.ftVideoPlayer.scrollMiniPlayerStashed .scrollMiniPlayerControls > :not(.scrollMiniPointerLayer) {
+  pointer-events: none !important;
+}
+
+.ftVideoPlayer.scrollMiniPlayerStashed .scrollMiniPointerLayer {
+  z-index: 20;
+}
+
+.scrollMiniScrollTop,
+.scrollMiniDismiss,
+.scrollMiniPlayPause,
+.scrollMiniVolume,
+.scrollMiniDragHandle,
+.scrollMiniResizeHandle {
+  pointer-events: auto;
+  z-index: 1;
+}
+
+.scrollMiniDragHandle {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 72px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: grab;
+  z-index: 3;
+}
+
+.scrollMiniDragHandle::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 4px;
+  border-radius: calc(999px * var(--ui-roundness));
+  background: rgb(255 255 255 / 70%);
+  box-shadow: 0 0 3px rgb(0 0 0 / 45%);
+}
+
+.scrollMiniDragHandle-onLightBg::after {
+  background: rgb(0 0 0 / 55%);
+  box-shadow: 0 0 3px rgb(255 255 255 / 50%);
+}
+
+.scrollMiniScrollTop,
+.scrollMiniDismiss {
+  position: absolute;
+  top: 8px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 55%);
+  color: #fff;
+  cursor: pointer;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scrollMiniScrollTop {
+  right: 8px;
+}
+
+.scrollMiniScrollTop-detached {
+  right: 44px;
+}
+
+.scrollMiniDismiss {
+  right: 8px;
+}
+
+.scrollMiniScrollTop:hover,
+.scrollMiniDismiss:hover {
+  background: rgb(0 0 0 / 75%);
+}
+
+.scrollMiniPlayPause,
+.scrollMiniDragHandle,
+.scrollMiniResizeHandle {
+  opacity: 1;
+  transition: opacity 0.15s ease;
+}
+
+.scrollMiniPlayPause {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 55%);
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scrollMiniPlayPause.isHidden,
+.scrollMiniDragHandle.isHidden,
+.scrollMiniResizeHandle.isHidden {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease 0.35s;
+}
+
+.scrollMiniPlayPause:hover {
+  background: rgb(0 0 0 / 75%);
+}
+
+.scrollMiniVolume {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 4px 6px;
+  border-radius: calc(999px * var(--ui-roundness));
+  background: rgb(0 0 0 / 55%);
+  color: #fff;
+  z-index: 3;
+}
+
+.scrollMiniVolumeIcon {
+  width: 16px;
+  font-size: 14px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.scrollMiniVolumeTrack {
+  position: relative;
+  width: 0;
+  opacity: 0;
+  padding: 0;
+  margin-block: calc((12px - 4px) / 2);
+  margin-inline: 0;
+  overflow: visible;
+  transition: width 0.18s ease, opacity 0.18s ease, margin 0.18s ease;
+}
+
+.scrollMiniVolume.isExpanded .scrollMiniVolumeTrack {
+  width: 88px;
+  opacity: 1;
+  margin-inline-start: 8px;
+}
+
+.scrollMiniVolumeBar {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  min-width: 88px;
+  height: 40px;
+  margin: 0;
+  top: calc((4px - 40px) / 2);
+}
+
+.scrollMiniResizeHandle {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  z-index: 3;
+
+  --scroll-mini-resize-handle-color: rgb(255 255 255 / 70%);
+}
+
+.scrollMiniResizeHandle-onLightBg {
+  --scroll-mini-resize-handle-color: rgb(0 0 0 / 55%);
+}
+
+.scrollMiniResizeHandle-bottom-left {
+  left: 0;
+  bottom: 0;
+  cursor: nesw-resize;
+  background: linear-gradient(
+    to top right,
+    transparent calc(50% - 1px),
+    var(--scroll-mini-resize-handle-color) calc(50% - 1px),
+    var(--scroll-mini-resize-handle-color) calc(50% + 1px),
+    transparent calc(50% + 1px)
+  );
+  background-position: bottom left;
+}
+
+.scrollMiniResizeHandle-bottom-right {
+  right: 0;
+  bottom: 0;
+  cursor: nwse-resize;
+  background: linear-gradient(
+    to top left,
+    transparent calc(50% - 1px),
+    var(--scroll-mini-resize-handle-color) calc(50% - 1px),
+    var(--scroll-mini-resize-handle-color) calc(50% + 1px),
+    transparent calc(50% + 1px)
+  );
+  background-position: bottom right;
+}
+
+.scrollMiniResizeHandle-top-left {
+  left: 0;
+  top: 0;
+  cursor: nwse-resize;
+  background: linear-gradient(
+    to bottom right,
+    transparent calc(50% - 1px),
+    var(--scroll-mini-resize-handle-color) calc(50% - 1px),
+    var(--scroll-mini-resize-handle-color) calc(50% + 1px),
+    transparent calc(50% + 1px)
+  );
+  background-position: top left;
+}
+
+.scrollMiniResizeHandle-top-right {
+  right: 0;
+  top: 0;
+  cursor: nesw-resize;
+  background: linear-gradient(
+    to bottom left,
+    transparent calc(50% - 1px),
+    var(--scroll-mini-resize-handle-color) calc(50% - 1px),
+    var(--scroll-mini-resize-handle-color) calc(50% + 1px),
+    transparent calc(50% + 1px)
+  );
+  background-position: top right;
+}
+
+/* Enlarge the touch area without enlarging the visible corner grip. */
+@media (pointer: coarse) {
+  .scrollMiniResizeHandle {
+    width: 48px;
+    height: 48px;
+    background-size: 18px 18px;
+    background-repeat: no-repeat;
+  }
+
+  .scrollMiniVolume {
+    z-index: 4;
+  }
+}
+
+:global(body.scroll-mini-player-grabbing),
+:global(body.scroll-mini-player-grabbing *) {
+  cursor: grabbing !important;
+  user-select: none !important;
+}

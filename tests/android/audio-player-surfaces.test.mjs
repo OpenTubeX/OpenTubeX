@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import { after, before, test } from 'node:test'
 import { chromium } from '@playwright/test'
 import { compileStyle } from 'vue/compiler-sfc'
+import { readScopedStyles } from '../helpers/component-styles.mjs'
 
 let browser
 let host
@@ -12,10 +13,13 @@ before(async () => {
     ? await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
     : await chromium.launch({ executablePath: process.env.CHROMIUM_PATH })
   host = process.env.ANDROID_CDP_URL ? browser.contexts()[0].pages()[0] : await browser.newPage()
-  styles = (await Promise.all(['App.css', 'components/ft-shaka-video-player/ft-shaka-video-player.css'].map(async path => {
-    const source = await readFile(new URL(`../../src/renderer/${path}`, import.meta.url), 'utf8')
-    return compileStyle({ source, filename: path, id: 'data-v-audio-test', scoped: true }).code
-  }))).join('\n')
+  const sources = {
+    'App.css': await readFile(new URL('../../src/renderer/App.css', import.meta.url), 'utf8'),
+    'ft-shaka-video-player.css': await readScopedStyles(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.vue', import.meta.url)),
+  }
+  styles = Object.entries(sources)
+    .map(([filename, source]) => compileStyle({ source, filename, id: 'data-v-audio-test', scoped: true }).code)
+    .join('\n')
 })
 after(async () => { await browser?.close() })
 

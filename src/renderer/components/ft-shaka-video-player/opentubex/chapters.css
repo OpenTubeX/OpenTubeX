@@ -1,0 +1,294 @@
+/* stylelint-disable liberty/use-logical-spec */
+
+/*
+  Docked chapters side panel, only shown in fullscreen and full window mode:
+  the video is pushed aside to make room (see the panel push rules in
+  videoLayout.css). Outside of those modes the chapters appear in the watch
+  page sidebar instead. When the comments panel is open too, chapters takes
+  the available height is shared with the other open docks.
+*/
+:deep(.fullscreenDockSheet),
+:is(.chapterOverlay, .fullscreenMetadataOverlay, .fullscreenTranscriptOverlay, .fullscreenSponsorBlockOverlay, .fullscreenLiveChatOverlay, .fullscreenCommentsOverlay, .fullscreenPlaylistOverlay, .fullscreenQueueOverlay, .fullscreenRecommendationsOverlay) {
+  /* Fullscreen docks use the contrast-safe Catppuccin Mocha glass palette in
+     every app theme because their background is the video, not the app page. */
+  --primary-text-color: #cdd6f4;
+  --secondary-text-color: #bac2de;
+  --tertiary-text-color: #a6adc8;
+  --title-color: #cdd6f4;
+  --bg-color: #1e1e2e;
+  --card-bg-color: #181825;
+  --secondary-card-bg-color: #1e1e2e;
+  --scrollbar-color: #313244;
+  --scrollbar-color-hover: #3d4051;
+  --side-nav-color: #181825;
+  --side-nav-hover-color: #11111b;
+  --side-nav-hover-text-color: #cdd6f4;
+  --side-nav-active-color: #11111b;
+  --side-nav-active-text-color: #cdd6f4;
+}
+
+.fullscreenDockResizeHandle {
+  position: absolute;
+  z-index: 5;
+  inset-inline: 10px;
+  inset-block-end: 0;
+  block-size: 10px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: row-resize;
+  touch-action: none;
+}
+
+.fullscreenDockResizeHandle::after {
+  content: '';
+  position: absolute;
+  inset-block-start: 5px;
+  inset-inline-start: 50%;
+  inline-size: 42px;
+  block-size: 3px;
+  background-color: rgb(255 255 255 / 42%);
+  border-radius: calc(999px * var(--ui-roundness));
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition: opacity 150ms ease;
+}
+
+.fullscreenDockResizeHandle:is(:hover, :focus-visible, :active)::after {
+  opacity: 1;
+}
+
+.fullscreenDockReorderable :is(.chapterOverlayHeader, .fullscreenMetadataHeader),
+.fullscreenDockReorderable :deep(.transcriptHeader),
+.fullscreenDockReorderable :deep(.sponsorBlockHeader),
+.fullscreenDockReorderable :deep(.liveChatDockHeader),
+.fullscreenDockReorderable :deep(.fullscreenCommentHeader),
+.fullscreenDockReorderable :deep(.playlistDockHeader),
+.fullscreenDockReorderable :deep(.fullscreenDockHeader) {
+  cursor: grab !important;
+}
+
+/* Dock positions must track the pointer directly while their divider moves. */
+.ftVideoPlayer.fullscreenDockResizing :is(
+  .chapterOverlay,
+  .fullscreenMetadataOverlay,
+  .fullscreenTranscriptOverlay,
+  .fullscreenSponsorBlockOverlay,
+  .fullscreenLiveChatOverlay,
+  .fullscreenCommentsOverlay,
+  .fullscreenPlaylistOverlay,
+  .fullscreenQueueOverlay,
+  .fullscreenRecommendationsOverlay
+) {
+  transition: none !important;
+}
+
+/* Shaka normally hides every cursor after its controls time out. */
+.ftVideoPlayer.fullscreenDockResizing,
+.ftVideoPlayer.fullscreenDockResizing :deep(*) {
+  cursor: row-resize !important;
+}
+
+.ftVideoPlayer.fullscreenDockReordering,
+.ftVideoPlayer.fullscreenDockReordering :deep(*) {
+  cursor: grabbing !important;
+}
+
+.chapterOverlay {
+  position: absolute;
+  z-index: 4;
+  inset-block: 12px;
+  inset-inline-end: 12px;
+  display: flex;
+  flex-direction: column;
+  inline-size: calc(var(--side-panel-width) - 24px);
+  min-block-size: 0;
+  overflow: hidden;
+
+  /* Isolate dock content from the player and neighbouring panels. */
+  contain: layout paint;
+  background-color: rgb(12 12 12 / 62%);
+  border: 1px solid var(--side-nav-hover-color);
+  border-radius: calc(12px * var(--ui-roundness));
+  box-shadow: 0 8px 30px rgb(0 0 0 / 45%);
+  backdrop-filter: blur(14px);
+  color: #fff;
+  user-select: auto;
+  transition: transform 260ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chapter-slide-enter-active,
+.chapter-slide-leave-active {
+  transition: transform 260ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* The docked panel keeps a 12px margin, so slide a bit further to leave no sliver. */
+.chapter-slide-enter-from,
+.chapter-slide-leave-to {
+  transform: translateX(calc(100% + 24px));
+}
+
+.chapter-slide-enter-from:dir(rtl),
+.chapter-slide-leave-to:dir(rtl) {
+  transform: translateX(calc(-100% - 24px));
+}
+
+.chapterOverlayHeader {
+  display: flex;
+  flex: 0 0 52px;
+  align-items: center;
+  justify-content: space-between;
+  padding-inline: 14px 8px;
+  border-block-end: 1px solid rgb(255 255 255 / 10%);
+  background-color: rgb(20 20 20 / 52%);
+}
+
+.chapterOverlayTitle {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  font-size: 18px;
+}
+
+.chapterOverlayTitleIcon {
+  display: block;
+  flex: 0 0 22px;
+  inline-size: 22px;
+  block-size: 22px;
+  fill: currentcolor;
+}
+
+.chapterOverlayClose {
+  display: grid;
+  place-items: center;
+  inline-size: 36px;
+  block-size: 36px;
+  border: 0;
+  border-radius: 50%;
+  background-color: transparent;
+  color: #fff;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.chapterOverlayClose:hover,
+.chapterOverlayClose:focus-visible {
+  background-color: rgb(255 255 255 / 20%);
+}
+
+.chapterOverlay :deep(.chaptersWrapper) {
+  flex: 1;
+  min-block-size: 0;
+}
+
+:deep(.shaka-controls-button-panel > .ft-chapters-button) {
+  --ft-chapters-active-color: var(--seekbar-played-color, var(--primary-color));
+
+  display: flex;
+  position: relative;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  inline-size: auto;
+  max-inline-size: min(260px, 28vw);
+  block-size: 48px;
+  margin-inline: 6px;
+  padding-inline: 12px 9px;
+  border-radius: calc(999px * var(--ui-roundness));
+  background-color: transparent;
+  line-height: 1;
+  interpolate-size: allow-keywords;
+  transition: inline-size 200ms ease, padding-inline 200ms ease, margin-inline 200ms ease;
+}
+
+:deep(.shaka-tooltips-on > .ft-chapters-button:hover::after),
+:deep(.shaka-tooltips-on > .ft-chapters-button:focus-visible::after),
+:deep(.shaka-tooltips-on > .ft-chapters-button:active::after) {
+  left: 50%;
+}
+
+:deep(.ft-chapters-current-title) {
+  flex: 1 1 auto;
+  overflow: hidden;
+  min-inline-size: 0;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:deep(.shaka-controls-button-panel > .ft-chapters-button .ft-chapters-icon) {
+  --ft-control-content-transition: opacity 200ms ease, transform 200ms ease;
+
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  opacity: 0;
+  transform: scale(0.75);
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+:deep(.shaka-controls-button-panel > .ft-chapters-button :is(.ft-chapters-current-title, .ft-chapters-chevron)) {
+  --ft-control-content-transition: opacity 200ms ease, transform 200ms ease;
+
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+:deep(.shaka-controls-button-panel > .ft-chapters-button .ft-chapters-chevron) {
+  --ft-control-content-transition: opacity 200ms ease, transform 200ms ease, rotate 200ms ease;
+
+  transition: var(--ft-control-content-transition);
+}
+
+:deep(.shaka-controls-button-panel.ft-controls-measuring > .ft-chapters-button),
+:deep(.shaka-controls-button-panel.ft-controls-measuring > .ft-chapters-button > *) {
+  transition: none;
+}
+
+:deep(.shaka-controls-button-panel.ft-controls-compact-chapters > .ft-chapters-button) {
+  justify-content: center;
+  inline-size: 48px;
+  block-size: 48px;
+  margin-inline: 0;
+  padding-inline: 2px;
+  border-radius: calc(999px * var(--ui-roundness));
+  background-color: transparent;
+}
+
+:deep(.shaka-controls-button-panel.ft-controls-compact-chapters > .ft-chapters-button .ft-chapters-icon) {
+  opacity: 1;
+  transform: scale(1);
+}
+
+:deep(.shaka-controls-button-panel > .ft-chapters-button.open .ft-chapters-icon) {
+  color: var(--ft-chapters-active-color);
+}
+
+:deep(.shaka-controls-button-panel > .ft-chapters-button.open .ft-chapters-chevron) {
+  rotate: 90deg;
+}
+
+:deep(.shaka-controls-button-panel.ft-controls-compact-chapters > .ft-chapters-button .ft-chapters-current-title),
+:deep(.shaka-controls-button-panel.ft-controls-compact-chapters > .ft-chapters-button .ft-chapters-chevron) {
+  opacity: 0;
+  transform: translateX(-8px);
+}
+
+:deep(.ft-chapters-chevron) {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  inline-size: 12px;
+  block-size: 16px;
+  font-size: 18px;
+  line-height: 16px;
+}
+
+:deep(.shaka-overflow-menu .ft-chapters-current-title),
+:deep(.shaka-overflow-menu .ft-chapters-chevron) {
+  display: none;
+}

@@ -1,0 +1,798 @@
+@media (prefers-reduced-motion: reduce) {
+  :deep(.playerFullscreenTitleOverlay) {
+    transition: opacity cubic-bezier(0.4, 0, 0.6, 1) 0.6s,
+      background-color 150ms ease;
+  }
+}
+
+:deep(.playerFullscreenTitleOverlay:hover),
+:deep(.playerFullscreenTitleOverlay:focus-visible) {
+  background-color: rgb(255 255 255 / 14%);
+}
+
+:deep(.playerFullscreenTitleOverlay:focus-visible) {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+:deep(.playerFullscreenTitleOverlay.passiveTitle) {
+  cursor: default !important;
+  pointer-events: none !important;
+}
+
+.fullscreenActions {
+  --fullscreen-actions-inline-end: 24px;
+  --fullscreen-actions-min-inline-size: 50px;
+  --fullscreen-actions-inset: min(
+    var(--fullscreen-actions-inline-end),
+    calc(100% - var(--fullscreen-actions-min-inline-size) - 4px)
+  );
+
+  display: none;
+  position: absolute;
+  z-index: 4;
+  inset-inline-end: var(--fullscreen-actions-inset);
+  inset-block-end: 82px;
+  box-sizing: border-box;
+  min-inline-size: var(--fullscreen-actions-min-inline-size);
+  max-inline-size: calc(100% - var(--fullscreen-actions-inset) - 4px);
+  min-block-size: 50px;
+  max-block-size: calc(100% - var(--mobile-fullscreen-actions-block-end, 82px) - max(52px, var(--sponsorblock-notice-block-size, 0px) + 16px));
+  align-items: flex-start;
+  padding: 4px;
+  overflow: hidden auto;
+  color: #fff;
+  background-color: rgb(0 0 0 / 25%);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: calc(24px * var(--ui-roundness));
+  box-shadow: 0 2px 8px rgb(0 0 0 / 35%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 600ms cubic-bezier(0.4, 0, 0.6, 1),
+    inset-inline-end 250ms ease;
+}
+
+.fullscreenActionsContent {
+  display: flex;
+  flex: 0 0 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.fullscreenActionsContent > :is(.fullscreenAction, .fullscreenShareAction, .fullscreenPlaylistAction) {
+  flex: 0 0 40px;
+}
+
+.fullscreenAction,
+.fullscreenActions :deep(.fullscreenShareAction > .iconButton),
+.fullscreenActions :deep(.fullscreenPlaylistAction > .iconButton) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 40px;
+  block-size: 40px;
+  padding: 0 !important;
+  color: #fff;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  box-shadow: none;
+  cursor: pointer;
+  font-size: 20px !important;
+  transition: background-color 150ms ease;
+}
+
+.fullscreenAction:hover,
+.fullscreenAction:focus-visible,
+.fullscreenActions :deep(.fullscreenShareAction > .iconButton:hover),
+.fullscreenActions :deep(.fullscreenShareAction > .iconButton:focus-visible),
+.fullscreenActions :deep(.fullscreenShareAction > .iconButton.pressed),
+.fullscreenActions :deep(.fullscreenPlaylistAction > .iconButton:hover),
+.fullscreenActions :deep(.fullscreenPlaylistAction > .iconButton:focus-visible),
+.fullscreenActions :deep(.fullscreenPlaylistAction > .iconButton.pressed) {
+  color: #fff;
+  background-color: rgb(255 255 255 / 18%);
+}
+
+/* An open panel's toggle stays brighter than a hovered or focused one. */
+.fullscreenAction.open,
+.fullscreenActions :deep(.fullscreenPlaylistAction.open > .iconButton) {
+  color: #fff;
+  background-color: rgb(255 255 255 / 34%);
+}
+
+.fullscreenAction.open:is(:hover, :focus-visible),
+.fullscreenActions :deep(.fullscreenPlaylistAction.open > .iconButton:is(:hover, :focus-visible)) {
+  background-color: rgb(255 255 255 / 42%);
+}
+
+.fullscreenAction.fullscreenQuickBookmarkAction.open {
+  color: var(--favorite-icon-color);
+}
+
+.fullscreenAction.fullscreenQuickBookmarkAction.open :deep(.ft-custom-icon) {
+  filter: var(--favorite-icon-filter);
+}
+
+.fullscreenActions:has(:focus-visible) {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Reserve the scrollbar gutter only while the dock actually scrolls. */
+.fullscreenActions:has(> .os-scrollbar-vertical:not(.os-scrollbar-unusable)) {
+  --fullscreen-actions-min-inline-size: calc(54px + var(--scrollbar-track-width));
+
+  padding-inline-end: calc(var(--scrollbar-track-width) + 8px);
+}
+
+/* Suppressed during presentation mode switches; see videoLayout.css. */
+.ftVideoPlayer.presentationModeChanging .fullscreenActions {
+  transition: none !important;
+}
+
+.ftVideoPlayer.presentationModeChanging .skippedSegmentsWrapper {
+  transition: none !important;
+}
+
+.ftVideoPlayer:fullscreen .fullscreenActions,
+.ftVideoPlayer.fullWindow .fullscreenActions {
+  display: flex;
+}
+
+/* Let Shaka's seek preview pass in front of annotations and the fullscreen action pill. */
+.ftVideoPlayer:has(:deep(.shaka-seek-bar-container:hover)) :deep(.shaka-controls-container) {
+  z-index: 3;
+}
+
+.ftVideoPlayer:has(:deep(.shaka-seek-bar-container:hover)) :is(.fullscreenActions, .skippedSegmentsWrapper),
+.ftVideoPlayer:has(:deep(.shaka-controls-button-panel > :is(.shaka-tooltip, .shaka-tooltip-status):is(:hover, :focus-visible, :active))) .fullscreenActions {
+  z-index: 0;
+}
+
+.ftVideoPlayer:fullscreen:has(:deep(.shaka-controls-container[shown='true'])) .fullscreenActions,
+.ftVideoPlayer.fullWindow:has(:deep(.shaka-controls-container[shown='true'])) .fullscreenActions,
+.ftVideoPlayer.shortsPlayer:fullscreen .fullscreenActions,
+.ftVideoPlayer.shortsPlayer.fullWindow .fullscreenActions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Shaka's full-surface tap layers must stay below the app's fullscreen
+   metadata trigger and action dock on touch devices. */
+:global(.capacitorTabs .ftVideoPlayer:is(:fullscreen, .fullWindow) .playerFullscreenTitleOverlay),
+:global(.capacitorTabs .ftVideoPlayer:is(:fullscreen, .fullWindow) .fullscreenActions) {
+  z-index: 7;
+  touch-action: manipulation;
+}
+
+/* Nested Shaka menus occupy the same corner as the phone action dock. */
+:global(.capacitorTabs .ftVideoPlayer:is(:fullscreen, .fullWindow):has(
+  .shaka-settings-menu:not(.shaka-hidden),
+  .shaka-sub-menu:not(.shaka-hidden)
+) .fullscreenActions) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* SponsorBlock notices remain actionable above the mobile action dock. */
+:global(.capacitorTabs .ftVideoPlayer:is(:fullscreen, .fullWindow) .skippedSegmentsWrapper) {
+  z-index: 8;
+}
+
+:global(.capacitorTabs .ftVideoPlayer:is(:fullscreen, .fullWindow)) {
+  --mobile-fullscreen-actions-block-end: calc(
+    82px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))
+  );
+  --mobile-fullscreen-overlay-gap: 8px;
+}
+
+:global(.capacitorTabs .ftVideoPlayer:is(:fullscreen, .fullWindow) > .fullscreenActions) {
+  inset-block-end: var(--mobile-fullscreen-actions-block-end);
+}
+
+/* Keep SponsorBlock notices above the action dock while it is visible. */
+.ftVideoPlayer:is(:fullscreen, .fullWindow) .skippedSegmentsWrapper {
+  max-inline-size: calc(100% - 16px);
+}
+
+.ftVideoPlayer:is(:fullscreen, .fullWindow) .skippedSegment {
+  box-sizing: border-box;
+  max-inline-size: 100%;
+}
+
+.ftVideoPlayer:is(:fullscreen, .fullWindow)[data-action-dock-visible='true'] > .skippedSegmentsWrapper {
+  --sponsorblock-notice-bottom: calc(
+    var(--mobile-fullscreen-actions-block-end, 82px) +
+    var(--mobile-fullscreen-actions-block-size) +
+    var(--mobile-fullscreen-overlay-gap, 8px)
+  );
+}
+
+/* End cards keep their layer and remain tappable away from the controls. */
+:global(.capacitorTabs .ftVideoPlayer .shaka-controls-container) {
+  z-index: auto;
+}
+
+:global(.capacitorTabs .ftVideoPlayer[data-player-controls-shown='true'] :is(
+  .shaka-top-controls,
+  .shaka-bottom-controls,
+  .shaka-big-buttons-container
+)) {
+  z-index: 3;
+}
+
+/* Menus must also clear the raised controls inside the same container. */
+:global(.capacitorTabs :is(
+  .shaka-overflow-menu,
+  .shaka-settings-menu,
+  .shaka-sub-menu,
+  .shaka-context-menu
+)) {
+  z-index: 4;
+}
+
+:global(.capacitorTabs .ftVideoPlayer .shaka-controls-container:has(
+  .shaka-overflow-menu:not(.shaka-hidden),
+  .shaka-settings-menu:not(.shaka-hidden),
+  .shaka-sub-menu:not(.shaka-hidden),
+  .shaka-context-menu:not(.shaka-hidden)
+)) {
+  z-index: 9;
+}
+
+.fullscreenMetadataOverlay,
+.fullscreenTranscriptOverlay,
+.fullscreenSponsorBlockOverlay,
+.fullscreenLiveChatOverlay,
+.fullscreenCommentsOverlay,
+.fullscreenPlaylistOverlay,
+.fullscreenQueueOverlay,
+.fullscreenRecommendationsOverlay {
+  position: absolute;
+  z-index: 3;
+  inset-block: 12px;
+  inset-inline-end: 12px;
+  display: flex;
+  flex-direction: column;
+  inline-size: calc(var(--side-panel-width) - 24px);
+  overflow: hidden;
+  user-select: text;
+  color: #fff;
+  background-color: rgb(12 12 12 / 62%);
+  border: 1px solid var(--side-nav-hover-color);
+  border-radius: calc(12px * var(--ui-roundness));
+  box-shadow: 0 8px 30px rgb(0 0 0 / 45%);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  /* Isolate dock content from the player and neighbouring panels. */
+  contain: layout paint;
+  transform: translateX(calc(100% + 24px));
+  transition: transform 250ms ease, opacity 200ms ease, visibility 0s 250ms;
+}
+
+/*
+  The glass blur lives on a pseudo-element because Chromium does not apply
+  nested backdrop-filters: with the blur on the panel itself, the sort menu's
+  own backdrop-filter inside it would stop working.
+*/
+.fullscreenMetadataOverlay::before,
+.fullscreenTranscriptOverlay::before,
+.fullscreenSponsorBlockOverlay::before,
+.fullscreenLiveChatOverlay::before,
+.fullscreenCommentsOverlay::before,
+.fullscreenPlaylistOverlay::before,
+.fullscreenQueueOverlay::before,
+.fullscreenRecommendationsOverlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  backdrop-filter: blur(14px);
+  pointer-events: none;
+}
+
+/* Suppressed during presentation mode switches; see videoLayout.css. */
+.ftVideoPlayer.presentationModeChanging .fullscreenMetadataOverlay,
+.ftVideoPlayer.presentationModeChanging .fullscreenTranscriptOverlay,
+.ftVideoPlayer.presentationModeChanging .fullscreenSponsorBlockOverlay,
+.ftVideoPlayer.presentationModeChanging .fullscreenLiveChatOverlay,
+.ftVideoPlayer.presentationModeChanging .fullscreenCommentsOverlay,
+.ftVideoPlayer.presentationModeChanging .fullscreenPlaylistOverlay,
+.ftVideoPlayer.presentationModeChanging .fullscreenQueueOverlay,
+.ftVideoPlayer.presentationModeChanging .fullscreenRecommendationsOverlay {
+  transition: none !important;
+}
+
+.ftVideoPlayer.presentationModeChanging .chapterOverlay {
+  transition: none !important;
+}
+
+.fullscreenMetadataOverlay.open,
+.fullscreenTranscriptOverlay.open,
+.fullscreenSponsorBlockOverlay.open,
+.fullscreenLiveChatOverlay.open,
+.fullscreenCommentsOverlay.open,
+.fullscreenPlaylistOverlay.open,
+.fullscreenQueueOverlay.open,
+.fullscreenRecommendationsOverlay.open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(0);
+  transition-delay: 0s;
+}
+
+.ftVideoPlayer.fullscreenCommentsOpen .fullscreenCommentsOverlay :deep(.watchVideo) {
+  flex: 1 1 auto;
+  block-size: 100%;
+  min-block-size: 0;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.ftVideoPlayer.fullscreenLiveChatOpen .fullscreenLiveChatTarget,
+.ftVideoPlayer.fullscreenLiveChatOpen .fullscreenLiveChatTarget :deep(.watchVideoSideBar) {
+  display: flex;
+  flex: 1 1 auto;
+  min-block-size: 0;
+}
+
+.ftVideoPlayer.fullscreenLiveChatOpen .fullscreenLiveChatTarget :deep(.ft-card) {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.fullscreenMetadataHeader,
+.ftVideoPlayer :deep(.fullscreenDockHeader) {
+  display: flex;
+  flex: 0 0 52px;
+  align-items: center;
+  justify-content: space-between;
+  padding-inline: 16px 8px;
+  border-block-end: 1px solid rgb(255 255 255 / 10%);
+  background-color: rgb(20 20 20 / 52%);
+}
+
+.fullscreenMetadataHeader h2,
+.ftVideoPlayer :deep(.fullscreenDockHeader h3) {
+  margin: 0;
+  font-size: 18px;
+}
+
+.fullscreenDockHeading,
+.ftVideoPlayer :deep(.fullscreenDockHeader h3) {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.fullscreenDockHeadingIcon {
+  display: block;
+  flex: 0 0 18px;
+  inline-size: 18px;
+  block-size: 18px;
+}
+
+.fullscreenMetadataClose,
+.ftVideoPlayer :deep(.fullscreenDockClose) {
+  display: grid;
+  place-items: center;
+  inline-size: 36px;
+  block-size: 36px;
+  padding: 0;
+  color: #fff;
+  background-color: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.fullscreenMetadataClose:hover,
+.fullscreenMetadataClose:focus-visible,
+.ftVideoPlayer :deep(.fullscreenDockClose:hover),
+.ftVideoPlayer :deep(.fullscreenDockClose:focus-visible) {
+  background-color: rgb(255 255 255 / 20%);
+}
+
+.fullscreenMetadataTarget {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  isolation: isolate;
+  min-block-size: 0;
+  max-inline-size: 100%;
+  overflow: hidden auto;
+
+  --scrollbar-color: rgb(255 255 255 / 45%);
+  --scrollbar-color-hover: rgb(255 255 255 / 65%);
+}
+
+.fullscreenMetadataTarget > :deep(.os-scrollbar-vertical) {
+  z-index: 2;
+}
+
+.fullscreenMetadataTarget :deep(.watchVideo) {
+  position: relative;
+  z-index: 0;
+  box-sizing: border-box;
+  max-inline-size: 100%;
+  margin: 0;
+  color: #fff;
+  background: transparent;
+  backdrop-filter: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* The rule above makes each card its own stacking context, so an icon button
+   dropdown cannot escape its card no matter how high it reaches and the card
+   after it paints over the dropdown. Lift the card while one is open, the same
+   way the normal layout raises .infoArea. */
+.fullscreenMetadataTarget :deep(.watchVideo:has(.iconDropdown)) {
+  z-index: 1;
+}
+
+/* The dock scrolls vertically, which means it also clips the inline axis, and
+   its buttons sit against the start edge. A dropdown opening towards the start
+   would be cut off by the panel edge (and the video shows through where it is
+   missing), so open them towards the end where the panel has room. */
+.fullscreenMetadataTarget :deep(.iconDropdown.left) {
+  inset-inline: calc(50% - 10px) auto;
+}
+
+.fullscreenMetadataTarget :deep(.watchVideoInfo),
+.fullscreenMetadataTarget :deep(.videoDescription) {
+  flex: 0 0 auto;
+}
+
+.fullscreenMetadataTarget :deep(.watchVideoInfo) {
+  padding-block-end: 4px;
+}
+
+.fullscreenMetadataTarget :deep(.videoDescription),
+.fullscreenMetadataTarget :deep(.descriptionScroll) {
+  overflow: visible;
+  max-block-size: none;
+}
+
+.fullscreenMetadataTarget :deep(.videoMetrics),
+.fullscreenMetadataTarget :deep(.videoButtons) {
+  align-items: flex-start;
+  flex-direction: column;
+  inline-size: 100%;
+}
+
+.fullscreenMetadataTarget :deep(.videoOptions),
+.fullscreenMetadataTarget :deep(.videoOptionsMobileRow) {
+  max-inline-size: 100%;
+  flex-wrap: wrap;
+}
+
+.fullscreenMetadataTarget :deep(.datePublishedAndViewCount),
+.fullscreenMetadataTarget :deep(.profileRow) {
+  max-inline-size: 100%;
+}
+
+.fullscreenMetadataTarget :deep(.datePublishedAndViewCount) {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-items: baseline;
+  align-content: flex-start;
+  gap: 2px 0.75em;
+}
+
+.fullscreenMetadataTarget :deep(.profileRow) {
+  flex-wrap: wrap;
+  margin-block: 6px;
+}
+
+.fullscreenMetadataTarget :deep(.publishedDate),
+.fullscreenMetadataTarget :deep(.videoCategory strong) {
+  white-space: nowrap;
+}
+
+.fullscreenMetadataTarget :deep(.likeBarContainer) {
+  display: flex;
+  justify-content: flex-start;
+  inline-size: 100%;
+}
+
+.fullscreenMetadataTarget :deep(.likeSection) {
+  inline-size: min(210px, 100%);
+  max-inline-size: 100%;
+  margin-inline: 0;
+  text-align: start;
+}
+
+.fullscreenMetadataTarget :deep(.likeCounts) {
+  justify-content: flex-start;
+}
+
+.fullscreenMetadataTarget :deep(.shareButton .iconDropdown) {
+  color: var(--primary-text-color);
+  background-color: rgb(12 12 12 / 62%);
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: calc(10px * var(--ui-roundness));
+  box-shadow: 0 6px 20px rgb(0 0 0 / 35%);
+  backdrop-filter: blur(14px) saturate(1.05);
+}
+
+.fullscreenMetadataTarget :deep(.shareButton .youtubeLogo) {
+  filter: brightness(0) invert(1);
+  opacity: 0.85;
+}
+
+.fullscreenTranscriptTarget,
+.fullscreenSponsorBlockTarget {
+  position: absolute;
+  inset: 0;
+  min-block-size: 0;
+  overflow: hidden;
+}
+
+.fullscreenTranscriptOverlay .fullscreenTranscriptTarget :deep(.watchVideoTranscript),
+.fullscreenSponsorBlockOverlay .fullscreenSponsorBlockTarget :deep(.watchVideoSponsorBlock) {
+  box-sizing: border-box;
+  block-size: 100%;
+  max-block-size: none;
+  margin: 0;
+  overflow: hidden;
+  color: #fff;
+  background: transparent;
+  backdrop-filter: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.fullscreenTranscriptTarget :deep(.watchVideoTranscript) {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.fullscreenTranscriptTarget :deep(.transcriptHeader),
+.fullscreenSponsorBlockTarget :deep(.sponsorBlockHeader) {
+  flex: 0 0 52px;
+  padding-inline: 16px 8px;
+  border-block-end: 1px solid rgb(255 255 255 / 10%);
+  background-color: rgb(20 20 20 / 52%);
+}
+
+.fullscreenTranscriptTarget :deep(.transcriptHeaderAction),
+.fullscreenTranscriptTarget :deep(.transcriptHeaderActions .iconButton),
+.fullscreenSponsorBlockTarget :deep(.sponsorBlockHeaderActions button) {
+  inline-size: 36px;
+  block-size: 36px;
+  padding: 0 !important;
+  color: #fff;
+  background-color: transparent;
+  border-radius: 50%;
+  font-size: 18px !important;
+}
+
+.fullscreenTranscriptTarget :deep(.transcriptHeaderAction:hover),
+.fullscreenTranscriptTarget :deep(.transcriptHeaderAction:focus-visible),
+.fullscreenTranscriptTarget :deep(.transcriptHeaderActions .iconButton:hover),
+.fullscreenTranscriptTarget :deep(.transcriptHeaderActions .iconButton:focus-visible),
+.fullscreenSponsorBlockTarget :deep(.sponsorBlockHeaderActions button:hover:not(:disabled)),
+.fullscreenSponsorBlockTarget :deep(.sponsorBlockHeaderActions button:focus-visible:not(:disabled)) {
+  color: #fff;
+  background-color: rgb(255 255 255 / 20%);
+}
+
+.fullscreenTranscriptTarget :deep(.transcriptHeaderAction.active) {
+  color: #fff;
+  background-color: rgb(255 255 255 / 34%);
+}
+
+.fullscreenTranscriptTarget :deep(.transcriptHeaderAction.active:is(:hover, :focus-visible)) {
+  background-color: rgb(255 255 255 / 42%);
+}
+
+.fullscreenTranscriptTarget :deep(.transcriptControls) {
+  display: flex;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  inline-size: 100%;
+  margin-block: 16px;
+  padding-inline: 16px;
+}
+
+.fullscreenTranscriptTarget :deep(.transcriptControls .ft-input) {
+  color: var(--primary-text-color);
+  background-color: rgb(255 255 255 / 8%);
+}
+
+.fullscreenTranscriptTarget :deep(.transcriptControls .ft-input::placeholder) {
+  color: var(--tertiary-text-color);
+}
+
+.fullscreenTranscriptTarget :deep(.transcriptLanguageMenu) {
+  background-color: rgb(12 12 12 / 62%);
+  border: 1px solid rgb(255 255 255 / 10%);
+  backdrop-filter: blur(14px) saturate(1.05);
+}
+
+.fullscreenTranscriptTarget :deep(.transcriptSegments) {
+  flex: 1 1 auto;
+  max-block-size: none;
+  padding-inline: 8px;
+
+  --scrollbar-color: rgb(255 255 255 / 45%);
+  --scrollbar-color-hover: rgb(255 255 255 / 65%);
+}
+
+.fullscreenSponsorBlockTarget :deep(.sponsorBlockContent) {
+  --scrollbar-color: rgb(255 255 255 / 45%);
+  --scrollbar-color-hover: rgb(255 255 255 / 65%);
+}
+
+:is(
+  .chapterOverlay,
+  .fullscreenMetadataTarget,
+  .fullscreenTranscriptTarget,
+  .fullscreenSponsorBlockTarget,
+  .fullscreenLiveChatTarget,
+  .fullscreenCommentsOverlay
+) :deep(.os-scrollbar-vertical) {
+  --os-padding-axis: 0;
+}
+
+/* Hide the pre-component playlist close control if it survives a hot reload. */
+.fullscreenPlaylistClose {
+  display: none;
+}
+
+
+.fullscreenQueueTarget,
+.fullscreenRecommendationsTarget {
+  position: absolute;
+  inset: 0;
+  min-block-size: 0;
+  overflow: hidden;
+}
+
+:is(.fullscreenQueueTarget, .fullscreenRecommendationsTarget) :deep(.phonePanelHost),
+:is(.fullscreenQueueTarget, .fullscreenRecommendationsTarget) :deep(.panelContent) {
+  block-size: 100%;
+}
+
+.ftVideoPlayer :is(.fullscreenQueueTarget, .fullscreenRecommendationsTarget) :deep(.ft-card) {
+  box-sizing: border-box;
+  block-size: 100%;
+  margin: 0;
+  padding: 0;
+  color: #fff;
+  background: transparent;
+  backdrop-filter: none;
+  border-radius: 0;
+  box-shadow: none;
+
+  --primary-text-color: #fff;
+  --secondary-text-color: rgb(255 255 255 / 70%);
+  --scrollbar-color: rgb(255 255 255 / 45%);
+  --scrollbar-color-hover: rgb(255 255 255 / 65%);
+}
+
+:is(.fullscreenQueueTarget, .fullscreenRecommendationsTarget) :deep(.os-scrollbar-vertical) {
+  --os-padding-axis: 0;
+}
+
+.ftVideoPlayer :deep(.fullscreenDockHeader) {
+  box-sizing: border-box;
+  gap: 8px;
+  padding-block: 0;
+}
+
+.ftVideoPlayer :deep(.fullscreenDockClose) {
+  flex: 0 0 36px;
+}
+
+.fullscreenPlaylistTarget {
+  position: absolute;
+  inset: 0;
+  min-block-size: 0;
+  overflow: hidden;
+}
+
+.fullscreenPlaylistTarget :deep(.watchVideoPlaylist) {
+  box-sizing: border-box;
+  block-size: 100%;
+  margin: 0;
+  padding-block-start: 0;
+  overflow: hidden;
+  color: #fff;
+  background-color: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.fullscreenPlaylistTarget :deep(.playlistItemsWrapper) {
+  block-size: auto;
+  min-block-size: 0;
+  resize: none;
+}
+
+/* Like metadata, a stacked playlist needs a whole-panel scroller when its
+   fixed information block leaves no height for the video list. */
+.ftVideoPlayer.fullscreenPlaylistOpen:is(
+  .fullscreenMetadataOpen,
+  .fullscreenTranscriptOpen,
+  .fullscreenSponsorBlockOpen,
+  .fullscreenLiveChatOpen,
+  .fullscreenCommentsOpen,
+  .chaptersOverlayOpen
+) .fullscreenPlaylistTarget :deep(.fullscreenPlaylistContent) {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.ftVideoPlayer.fullscreenPlaylistOpen:is(
+  .fullscreenMetadataOpen,
+  .fullscreenTranscriptOpen,
+  .fullscreenSponsorBlockOpen,
+  .fullscreenLiveChatOpen,
+  .fullscreenCommentsOpen,
+  .chaptersOverlayOpen
+) .fullscreenPlaylistTarget :deep(.playlistItemsWrapper) {
+  flex: 0 0 auto;
+  block-size: auto;
+  overflow: visible;
+}
+
+/*
+  Ambient glow surface used in fullscreen and full window mode, where the
+  host-level canvases are not visible. It sits behind the video and shines
+  around it and through the translucent side panels. Keeping it active in
+  fullscreen also replaces letterbox and pillarbox bars with the glow.
+*/
+.ambientFullscreenCanvas {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  opacity: 0;
+  filter: blur(clamp(24px, 4vw, 52px)) saturate(1.05);
+  pointer-events: none;
+  transition: opacity 250ms ease;
+}
+
+/* Suppressed during presentation mode switches; see videoLayout.css. */
+.ftVideoPlayer.presentationModeChanging .ambientFullscreenCanvas {
+  transition: none !important;
+}
+
+.ftVideoPlayer.fullWindow .ambientFullscreenCanvas,
+.ftVideoPlayer:fullscreen:is(.fullscreenAmbientBarsVisible, .fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .fullscreenQueueOpen, .fullscreenRecommendationsOpen, .chaptersOverlayOpen) .ambientFullscreenCanvas {
+  opacity: 0.42;
+}
+
+.ftVideoPlayer:is(:fullscreen, .fullWindow) :deep(.shaka-controls-container) {
+  inline-size: 100%;
+  inset-inline: 0 auto;
+}
+
+:deep(.shaka-controls-container) {
+  transition: inline-size 250ms ease;
+}
+
+:deep(.shaka-spinner-container),
+.countdownPoster,
+.countdownOverlay {
+  transition: inset-inline-end 250ms ease;
+}
