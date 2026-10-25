@@ -2103,7 +2103,8 @@ async function getCommentDataInvidious() {
 
     // region No comment detection
     // No comment related info when video info requested earlier in parent component
-    if (err.message.includes('Comments not found')) {
+    // Invidious reports "Comments not found", Yattee servers "Comments are disabled"
+    if (err.message.includes('Comments not found') || err.message.includes('Comments are disabled')) {
       // For videos without any comment (comment disabled?)
       // e.g. https://youtu.be/8NBSwDEf8a8
       commentData.value = []
