@@ -73,7 +73,7 @@ jobs:
 
           image=ghcr.io/pkgforge-dev/archlinux:latest
           images=(.github/workflows/build.yml "$file")
-          if grep -nP "${image//./\\.}(?!@sha256:[0-9a-f]{64}(?![0-9a-f]))" "${images[@]}"; then
+          if grep -nP "${image//./\\.}(?!@sha256:[0-9a-f]{64}(?=\s|$))" "${images[@]}"; then
             echo "::error::Pin every $image reference above by digest."
             exit 1
           fi
