@@ -197,6 +197,20 @@ test.describe('local subtitle files', () => {
     expect(await textTracks(video)).toEqual([])
   })
 
+  test('loads SRT files with dot milliseconds and blank lines containing spaces', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    const video = await openMockedVideo(page)
+    await pauseAt(video, 6)
+    const caption = page.locator(`${activeTab} .ftVideoPlayer .shaka-text-container [translate="no"]`)
+
+    const captionsMenu = await openCaptionsMenu(page)
+    await pickFile(page, 'movie.srt', '1\r\n00:00:05.000 --> 00:00:07.000\r\nFirst cue\r\n \r\n2\r\n00:00:07.000 --> 00:00:09.000\r\nSecond cue\r\n')
+    await captionsMenu.getByRole('button', { name: 'Load subtitle file…', exact: true }).click()
+    await expect(caption).toHaveText('First cue')
+    await pauseAt(video, 8)
+    await expect(caption).toHaveText('Second cue')
+  })
+
   test('keeps loaded files next to the video captions when the player reloads', async ({ app, page }) => {
     // Reloads the player twice
     test.slow()

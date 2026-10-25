@@ -82,7 +82,7 @@ import {
 } from '../../helpers/player/utils'
 import { findCaptionByLocale, getPreferredCaption } from '../../../captionLanguages'
 import { getActiveCueText } from '../../helpers/player/secondary-captions'
-import { createLocalCaption, LOCAL_CAPTION_FILE_TYPES } from '../../helpers/player/localCaptions'
+import { createLocalCaption, LOCAL_CAPTION_FILE_TYPES, normalizeLocalCaptionText } from '../../helpers/player/localCaptions'
 import {
   addKeyboardShortcutToActionTitle,
   formatDurationAsTimestamp,
@@ -9238,7 +9238,7 @@ export default defineComponent({
           return false
         }
 
-        const text = await file.text()
+        const text = normalizeLocalCaptionText(file.name, await file.text())
         const caption = createLocalCaption(file.name, text, captionPlayer.getTextTracks().map(track => track.label))
         // Check the file now, Shaka would only parse it once the track is shown
         const cues = caption && shaka.text.TextEngine.findParser(caption.mimeType)().parseMedia(

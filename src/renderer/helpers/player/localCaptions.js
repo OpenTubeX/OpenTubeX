@@ -11,6 +11,23 @@ const MIME_TYPES_BY_EXTENSION = Object.freeze({
 })
 
 /**
+ * Shaka's SRT parser only reads comma milliseconds and splits cues on empty lines,
+ * other players also accept dot milliseconds and blank lines with spaces.
+ * @param {string} fileName
+ * @param {string} text
+ */
+export function normalizeLocalCaptionText(fileName, text) {
+  if (!fileName.toLowerCase().endsWith('.srt')) {
+    return text
+  }
+
+  return text
+    .replaceAll(/\r\n?/g, '\n')
+    .replaceAll(/^[ \t]+$/gm, '')
+    .replaceAll(/^.*-->.*$/gm, line => line.replaceAll(/(\d+:\d{2})\.(\d+)/g, '$1,$2'))
+}
+
+/**
  * Creates a caption for a subtitle file the user picked, its contents are kept in a data URL so they never leave the device.
  * @param {string} fileName
  * @param {string} text
