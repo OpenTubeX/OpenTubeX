@@ -1,25 +1,15 @@
-import { BrowserWindow, app, nativeImage, shell } from 'electron'
+import { BrowserWindow, app, shell } from 'electron'
 import { randomUUID } from 'crypto'
 import { normalizeTabGroupIcon } from '../../tabGroupIcons.js'
 import { getTabAvatarPath } from '../../tabAvatarRoute.js'
-import {
-  DEFAULT_LANDING_PAGE,
-  IpcChannels,
-  LEGACY_DEFAULT_LANDING_PAGE,
-  resolveLandingPage,
-} from '../../constants.js'
-import {
-  navigationItemsFromLegacySettings,
-  normalizeNavigationItems,
-} from '../../navigationItems.js'
-import { filterAvailableNavigationItems } from '../../navigationAvailability.js'
-import * as baseHandlers from '../../datastores/handlers/base.js'
+import { IpcChannels } from '../../constants.js'
 import { getFixedInternalRouteTitle } from '../../internalRoutes.js'
 import {
   clearTabSession,
   saveTabSession
 } from './TabSessionStore.js'
 import { tabPreviewStorage } from './TabPreviewStorage.js'
+import { TabPreviewController } from './TabPreviewController.js'
 import { TabRendererBridge } from './TabRendererBridge.js'
 import {
   buildReorderedTabMap,
@@ -29,37 +19,41 @@ import {
 } from './tabOrder.js'
 import {
   isTabPreviewDataUrl,
-  normalizeTabPreviewFileName,
-  TAB_PREVIEW_JPEG_QUALITY,
-  tabPreviewBufferToDataUrl
+  normalizeTabPreviewFileName
 } from './tabPreviewCache.js'
 import { isTabActivatable } from './tabAvailability.js'
 import {
-  cropTabPreviewToContent,
-  getTabPreviewTargetSize,
-  measureTabPreviewContentBounds
-} from './tabPreviewGeometry.js'
+  DEFAULT_NEW_TAB_POSITION,
+  getNewTabSkipSilence,
+  getStoredLandingRoute,
+  getStoredNewTabPosition,
+  getStoredRememberTabNavigationHistory,
+  getTabCloseFocus,
+  normalizeNewTabPosition,
+  refreshStoredSkipSilenceSettings,
+  refreshStoredTabCloseFocus,
+  setEnableSkipSilenceByDefault,
+  setShowSkipSilenceButton,
+  setTabCloseFocus
+} from './tabPreferences.js'
+import {
+  cloneRoute,
+  formatDefaultTabTitle,
+  getRouteFromUrl,
+  getVideoIdFromUrl,
+  normalizeRoute,
+  normalizeRoutePath,
+  resolveTabTitle,
+  sanitizeNavigationHistory,
+  stripOneTimeTimestampFromUrl
+} from './tabRoutes.js'
 import { isOpenTubeXUrl } from '../utils.js'
 
 /** @type {Map<number, TabManager>} windowId -> TabManager */
 const tabManagers = new Map()
 
-const DEFAULT_NEW_TAB_POSITION = 'afterCurrentInOrder'
-const VALID_NEW_TAB_POSITIONS = new Set(['end', 'afterCurrent', 'afterCurrentInOrder'])
-const DEFAULT_TAB_CLOSE_FOCUS = 'lastActiveTab'
-const VALID_TAB_CLOSE_FOCUS = new Set(['lastActiveTab', 'previousTab', 'nextTab'])
-// Closing a tab has to pick the replacement synchronously, so the preference is
-// cached here instead of being read from the settings store on every close.
-let tabCloseFocus = DEFAULT_TAB_CLOSE_FOCUS
-// Tab creation is also synchronous after its placement preferences have loaded.
-// Cache whether silence skipping should start enabled for newly-created tabs.
-let enableSkipSilenceByDefault = false
-let showSkipSilenceButton = false
 const VALID_TAB_COLORS = new Set(['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink'])
 const MAX_TAB_GROUP_NAME_LENGTH = 80
-const TAB_PREVIEW_REFRESH_DELAY_MS = 700
-const TAB_PREVIEW_CAPTURE_STYLE_ID = 'opentubex-tab-preview-capture-style'
-const TAB_PREVIEW_CAPTURE_CLASS = 'opentubex-tab-preview-capturing'
 const TAB_TRANSFER_MOUNT_TIMEOUT_MS = 8000
 const STARTUP_TAB_MOUNT_DELAY_MS = 50
 const SESSION_SAVE_DELAY_MS = 250
@@ -68,9 +62,6 @@ const RAPID_TAB_CREATION_BATCH_MAX_DELAY_MS = 100
 const transferringTabIds = new Set()
 const TAB_LOADING_SOURCE_MOUNT = 'mount'
 const TAB_LOADING_SOURCE_RENDERER = 'renderer'
-const MAX_PERSISTED_NAV_HISTORY_ENTRIES = 25
-const MAX_TAB_AVATAR_DOWNLOAD_BYTES = 2 * 1024 * 1024
-const TAB_AVATAR_SIZE = 64
 
 /**
  * @typedef {'unloaded' | 'mounting' | 'loaded' | 'unloading'} TabLoadState
@@ -110,82 +101,17 @@ const TAB_AVATAR_SIZE = 64
  * @property {string | null} groupId
  */
 
-/**
- * @typedef {object} NavigationHistoryEntry
- * @property {ReturnType<typeof normalizeRoute>} route
- * @property {string} title
- * @property {boolean} titlePending
- * @property {{left: number, top: number}} scroll
- */
+/** @typedef {import('./tabRoutes.js').NavigationHistoryEntry} NavigationHistoryEntry */
 
 export class TabManager {
-  /**
-   * @param {unknown} value
-   * @returns {'end' | 'afterCurrent' | 'afterCurrentInOrder'}
-   */
-  static normalizeNewTabPosition(value) {
-    return VALID_NEW_TAB_POSITIONS.has(value)
-      ? value
-      : DEFAULT_NEW_TAB_POSITION
-  }
-
-  /**
-   * @param {unknown} value
-   * @returns {'lastActiveTab' | 'previousTab' | 'nextTab'}
-   */
-  static normalizeTabCloseFocus(value) {
-    return VALID_TAB_CLOSE_FOCUS.has(value)
-      ? value
-      : DEFAULT_TAB_CLOSE_FOCUS
-  }
-
-  /**
-   * @param {unknown} value
-   */
-  static setTabCloseFocus(value) {
-    tabCloseFocus = TabManager.normalizeTabCloseFocus(value)
-  }
-
-  /**
-   * @returns {Promise<void>}
-   */
-  static async refreshStoredTabCloseFocus() {
-    try {
-      TabManager.setTabCloseFocus((await baseHandlers.settings._findOne('tabCloseFocus'))?.value)
-    } catch (error) {
-      console.error('Failed to load tab close focus preference:', error)
-    }
-  }
-
-  /**
-   * @param {unknown} value
-   */
-  static setEnableSkipSilenceByDefault(value) {
-    enableSkipSilenceByDefault = value === true
-  }
-
-  /**
-   * @param {unknown} value
-   */
-  static setShowSkipSilenceButton(value) {
-    showSkipSilenceButton = value === true
-  }
-
-  /**
-   * @returns {Promise<void>}
-   */
-  static async refreshStoredSkipSilenceSettings() {
-    try {
-      const [showButtonSetting, defaultSetting] = await Promise.all([
-        baseHandlers.settings._findOne('showSkipSilenceButton'),
-        baseHandlers.settings._findOne('enableSkipSilenceByDefault')
-      ])
-      TabManager.setShowSkipSilenceButton(showButtonSetting?.value)
-      TabManager.setEnableSkipSilenceByDefault(defaultSetting?.value)
-    } catch (error) {
-      console.error('Failed to load skip silence preferences:', error)
-    }
-  }
+  // Preference entry points for the main process and the tab IPC handlers.
+  static setTabCloseFocus = setTabCloseFocus
+  static refreshStoredTabCloseFocus = refreshStoredTabCloseFocus
+  static setEnableSkipSilenceByDefault = setEnableSkipSilenceByDefault
+  static setShowSkipSilenceButton = setShowSkipSilenceButton
+  static refreshStoredSkipSilenceSettings = refreshStoredSkipSilenceSettings
+  // Called through the class so tests can replace the stored landing page.
+  static getStoredLandingRoute = getStoredLandingRoute
 
   /**
    * @param {unknown} value
@@ -214,167 +140,23 @@ export class TabManager {
   static async clearTabPreviewCache() {
     const states = Array.from(tabManagers.values(), manager => ({
       manager,
-      previewsEnabled: manager._tabPreviewsEnabled,
-      avatarsEnabled: manager._avatarsEnabled
+      previewsEnabled: manager.previews.previewsEnabled,
+      avatarsEnabled: manager.previews.avatarsEnabled
     }))
 
     try {
       await Promise.all(states.map(async ({ manager, previewsEnabled, avatarsEnabled }) => {
-        if (previewsEnabled) await manager.setTabPreviewsEnabled(false)
-        if (avatarsEnabled) await manager.setTabAvatarsEnabled(false)
+        if (previewsEnabled) await manager.previews.setPreviewsEnabled(false)
+        if (avatarsEnabled) await manager.previews.setAvatarsEnabled(false)
       }))
 
       await tabPreviewStorage.prune([])
     } finally {
       await Promise.all(states.map(async ({ manager, previewsEnabled, avatarsEnabled }) => {
-        if (previewsEnabled) await manager.setTabPreviewsEnabled(true)
-        if (avatarsEnabled) await manager.setTabAvatarsEnabled(true)
+        if (previewsEnabled) await manager.previews.setPreviewsEnabled(true)
+        if (avatarsEnabled) await manager.previews.setAvatarsEnabled(true)
       }))
     }
-  }
-
-  /**
-   * @returns {Promise<'end' | 'afterCurrent' | 'afterCurrentInOrder'>}
-   */
-  static async getStoredNewTabPosition() {
-    try {
-      const value = (await baseHandlers.settings._findOne('newTabPosition'))?.value
-      return TabManager.normalizeNewTabPosition(value)
-    } catch (error) {
-      console.error('Failed to load new tab position preference:', error)
-      return DEFAULT_NEW_TAB_POSITION
-    }
-  }
-
-  /**
-   * @returns {Promise<string>}
-   */
-  static async getStoredLandingRoute() {
-    try {
-      const [
-        landingPageSetting,
-        navigationItemsSetting,
-        hideHomeSetting,
-        hidePlaylistsSetting,
-        hidePopularVideosSetting,
-        hideTrendingVideosSetting,
-        backendPreferenceSetting,
-        backendFallbackSetting,
-        rememberHistorySetting,
-        enableWatchStatsSetting,
-      ] = await Promise.all([
-        baseHandlers.settings._findOne('landingPage'),
-        baseHandlers.settings._findOne('navigationItems'),
-        baseHandlers.settings._findOne('hideHome'),
-        baseHandlers.settings._findOne('hidePlaylists'),
-        baseHandlers.settings._findOne('hidePopularVideos'),
-        baseHandlers.settings._findOne('hideTrendingVideos'),
-        baseHandlers.settings._findOne('backendPreference'),
-        baseHandlers.settings._findOne('backendFallback'),
-        baseHandlers.settings._findOne('rememberHistory'),
-        baseHandlers.settings._findOne('enableWatchStats'),
-      ])
-
-      let landingPage = landingPageSetting?.value
-      if (typeof landingPage !== 'string' || landingPage.length === 0) {
-        const [settings, profiles] = await Promise.all([
-          baseHandlers.settings.find(),
-          baseHandlers.profiles.find(),
-        ])
-        landingPage = settings.length > 0 || profiles.length > 0
-          ? LEGACY_DEFAULT_LANDING_PAGE
-          : DEFAULT_LANDING_PAGE
-      }
-
-      const configuredPages = navigationItemsSetting == null
-        ? navigationItemsFromLegacySettings({
-            hideHome: hideHomeSetting?.value,
-            hidePlaylists: hidePlaylistsSetting?.value,
-            hidePopularVideos: hidePopularVideosSetting?.value,
-            hideTrendingVideos: hideTrendingVideosSetting?.value,
-          })
-        : normalizeNavigationItems(navigationItemsSetting.value)
-      const supportsLocalApi = !!process.env.SUPPORTS_LOCAL_API
-      const availablePages = filterAvailableNavigationItems(configuredPages, {
-        supportsLocalApi,
-        backendPreference: backendPreferenceSetting?.value ?? (supportsLocalApi ? 'local' : 'invidious'),
-        backendFallback: backendFallbackSetting?.value === true,
-        showWatchStats: (rememberHistorySetting?.value ?? true) &&
-          (enableWatchStatsSetting?.value ?? true),
-      })
-
-      return normalizeRoutePath(resolveLandingPage(landingPage, availablePages))
-    } catch (error) {
-      console.error('Failed to load landing page preference:', error)
-      return `/${LEGACY_DEFAULT_LANDING_PAGE}`
-    }
-  }
-
-  /**
-   * @returns {Promise<boolean>}
-   */
-  static async getStoredRememberTabNavigationHistory() {
-    try {
-      return (await baseHandlers.settings._findOne('rememberTabNavigationHistory'))?.value === true
-    } catch (error) {
-      console.error('Failed to load tab navigation history preference:', error)
-      return false
-    }
-  }
-
-  /**
-   * Validate and normalize a renderer-provided or persisted back/forward
-   * history so only well-formed entries reach the session store and state
-   * broadcasts. Returns null when there is nothing usable to keep.
-   * @param {unknown} history
-   * @param {unknown} historyIndex
-   * @returns {{history: NavigationHistoryEntry[], historyIndex: number} | null}
-   */
-  static sanitizeNavigationHistory(history, historyIndex) {
-    if (!Array.isArray(history) || history.length === 0) {
-      return null
-    }
-
-    const entries = history
-      .filter(entry => typeof entry?.route?.path === 'string')
-      .map(entry => {
-        const route = normalizeRoute(entry.route)
-        // `oneTimeTimestamp` must not survive persistence (see stripOneTimeTimestampFromUrl)
-        if ('oneTimeTimestamp' in route.query) {
-          delete route.query.oneTimeTimestamp
-        }
-        return {
-          route: normalizeRoute(route),
-          title: typeof entry.title === 'string' ? entry.title : route.fullPath,
-          titlePending: entry.titlePending === true,
-          scroll: {
-            left: Number.isFinite(entry.scroll?.left) ? entry.scroll.left : 0,
-            top: Number.isFinite(entry.scroll?.top) ? entry.scroll.top : 0
-          }
-        }
-      })
-
-    if (entries.length === 0) {
-      return null
-    }
-
-    const removedCount = entries.length - Math.min(entries.length, MAX_PERSISTED_NAV_HISTORY_ENTRIES)
-    const cappedEntries = entries.slice(-MAX_PERSISTED_NAV_HISTORY_ENTRIES)
-    const index = Number.isInteger(historyIndex) ? historyIndex - removedCount : cappedEntries.length - 1
-
-    return {
-      history: cappedEntries,
-      historyIndex: Math.max(0, Math.min(index, cappedEntries.length - 1))
-    }
-  }
-
-  /**
-   * @param {string} url
-   * @returns {string}
-   */
-  static formatDefaultTabTitle(url) {
-    const route = TabManager.getRouteFromUrl(url)
-    return getFixedInternalRouteTitle(route.path) ?? route.fullPath
   }
 
   /**
@@ -382,140 +164,7 @@ export class TabManager {
    * @returns {string}
    */
   static getOpenTubeXRoute(url) {
-    return TabManager.getRouteFromUrl(url).fullPath
-  }
-
-  /**
-   * @param {string} url
-   * @returns {{name: null, path: string, params: Record<string, string>, query: Record<string, string>, hash: string, fullPath: string}}
-   */
-  static getRouteFromUrl(url) {
-    try {
-      const parsed = new URL(url)
-      const rawHash = parsed.hash.startsWith('#') ? parsed.hash.slice(1) : parsed.hash
-      const hashUrl = new URL(rawHash || '/', 'https://opentubex.invalid')
-      return normalizeRoute({
-        path: hashUrl.pathname,
-        query: searchParamsToQuery(hashUrl.searchParams),
-        hash: hashUrl.hash
-      })
-    } catch {
-      return normalizeRoute({ path: '/' })
-    }
-  }
-
-  /**
-   * `oneTimeTimestamp` is only meant to be consumed once by the Watch view
-   * (e.g. after a SABR player reload). If it survives into a persisted tab
-   * session, restoring the tab jumps to the stale reload position instead of
-   * the newer watch progress saved in the history database.
-   * @param {string} url
-   * @returns {string}
-   */
-  static stripOneTimeTimestampFromUrl(url) {
-    if (typeof url !== 'string' || !url.includes('oneTimeTimestamp=')) {
-      return url
-    }
-
-    const hashIndex = url.indexOf('#')
-    if (hashIndex === -1) {
-      return url
-    }
-
-    const route = TabManager.getRouteFromUrl(url)
-    if (!('oneTimeTimestamp' in route.query)) {
-      return url
-    }
-
-    delete route.query.oneTimeTimestamp
-    return url.slice(0, hashIndex + 1) + normalizeRoute(route).fullPath
-  }
-
-  /**
-   * @param {string} url
-   * @returns {string | null}
-   */
-  static getVideoIdFromUrl(url) {
-    const parsed = URL.parse(url)
-    if (parsed == null) {
-      return null
-    }
-
-    const route = parsed.hash.startsWith('#') ? parsed.hash.slice(1) : parsed.hash
-    const appVideoId = route.match(/^\/watch\/(?<videoId>[^/?#]+)/)?.groups?.videoId
-    if (TabManager.isValidVideoId(appVideoId)) {
-      return appVideoId
-    }
-
-    const directVideoId = parsed.searchParams.get('v')
-    if (TabManager.isValidVideoId(directVideoId)) {
-      return directVideoId
-    }
-
-    const pathVideoId = parsed.pathname.match(/^\/(?:shorts|embed|live)\/(?<videoId>[^/?#]+)/)?.groups?.videoId
-    if (TabManager.isValidVideoId(pathVideoId)) {
-      return pathVideoId
-    }
-
-    if (parsed.hostname === 'youtu.be') {
-      const shortUrlVideoId = parsed.pathname.match(/^\/(?<videoId>[^/?#]+)/)?.groups?.videoId
-      if (TabManager.isValidVideoId(shortUrlVideoId)) {
-        return shortUrlVideoId
-      }
-    }
-
-    return null
-  }
-
-  /**
-   * @param {unknown} value
-   * @returns {boolean}
-   */
-  static isValidVideoId(value) {
-    return typeof value === 'string' && /^[\w-]{11}$/.test(value)
-  }
-
-  /**
-   * @param {string} url
-   * @returns {string | null}
-   */
-  static getVideoThumbnailUrl(url) {
-    const videoId = TabManager.getVideoIdFromUrl(url)
-    return videoId == null ? null : `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`
-  }
-
-  /**
-   * @param {string} title
-   * @returns {boolean}
-   */
-  static isGenericTitle(title) {
-    if (typeof title !== 'string') {
-      return true
-    }
-
-    const trimmed = title.trim()
-    return trimmed.length === 0 || trimmed === app.getName()
-  }
-
-  /**
-   * @param {string | undefined} currentTitle
-   * @param {string} newTitle
-   * @returns {string}
-   */
-  static resolveTabTitle(currentTitle, newTitle) {
-    if (typeof newTitle !== 'string') {
-      return currentTitle ?? ''
-    }
-
-    if (
-      TabManager.isGenericTitle(newTitle) &&
-      currentTitle &&
-      !TabManager.isGenericTitle(currentTitle)
-    ) {
-      return currentTitle
-    }
-
-    return newTitle
+    return getRouteFromUrl(url).fullPath
   }
 
   /** @returns {IterableIterator<TabManager>} */
@@ -561,7 +210,7 @@ export class TabManager {
     const videoIds = new Set()
     for (const manager of tabManagers.values()) {
       for (const tab of manager.tabs.values()) {
-        const videoId = TabManager.getVideoIdFromUrl(tab.url)
+        const videoId = getVideoIdFromUrl(tab.url)
         if (videoId !== null) {
           videoIds.add(videoId)
         }
@@ -738,16 +387,7 @@ export class TabManager {
     this._batchedBroadcastPending = false
     this._batchedSessionSavePending = false
     this._rapidTabCreationBatch = null
-    // Serializes preview captures across every tab in this window. Captures share
-    // the window's single renderer, so running two at once would screenshot each
-    // other's content and toggle capture mode out from under one another.
-    /** @type {Promise<void>} */
-    this._previewCaptureLock = Promise.resolve()
-    this._previewCapturePaused = false
-    this._previewCaptureRevision = 0
-    this._tabPreviewsEnabled = true
-    this._tabPreviewTransitionId = 0
-    this._avatarsEnabled = true
+    this.previews = new TabPreviewController(this, () => tabManagers.values())
     /** Tabs whose navigation history the renderer has already been sent. */
     this._historyAnnouncedTabIds = new Set()
     /** @type {Map<string, string | null>} avatar data URL last sent per tab */
@@ -776,7 +416,7 @@ export class TabManager {
       // any still-pending capture timer would keep firing and pin this manager
       // alive after the window is gone. Clear them all before releasing it.
       for (const tab of this.tabs.values()) {
-        this._clearTabPreviewRefresh(tab)
+        this.previews.clearRefresh(tab)
       }
       for (const waiters of this._pendingTabMountWaiters.values()) {
         for (const waiter of waiters) {
@@ -843,7 +483,7 @@ export class TabManager {
    * @returns {boolean}
    */
   applyTabTitle(tab, title) {
-    const nextTitle = TabManager.resolveTabTitle(tab.title, title)
+    const nextTitle = resolveTabTitle(tab.title, title)
     if (nextTitle === tab.title) {
       return false
     }
@@ -864,95 +504,16 @@ export class TabManager {
    * @param {string} routePath
    * @returns {Promise<boolean>}
    */
-  async applyTabAvatar(tab, avatarBytes, routePath) {
-    const matchesRoute = () => getTabAvatarPath(tab.route.path) === getTabAvatarPath(routePath) || tab.route.fullPath === routePath
-    if (!this._avatarsEnabled || !matchesRoute()) {
-      return false
-    }
-
-    try {
-      const sourceBuffer = avatarBytes instanceof ArrayBuffer
-        ? Buffer.from(avatarBytes)
-        : ArrayBuffer.isView(avatarBytes)
-          ? Buffer.from(avatarBytes.buffer, avatarBytes.byteOffset, avatarBytes.byteLength)
-          : null
-      if (sourceBuffer == null) return false
-      if (sourceBuffer.length === 0 || sourceBuffer.length > MAX_TAB_AVATAR_DOWNLOAD_BYTES) {
-        return false
-      }
-
-      let image = nativeImage.createFromBuffer(sourceBuffer)
-      if (image.isEmpty()) {
-        console.warn('Failed to decode tab avatar image data')
-        return false
-      }
-
-      const size = image.getSize()
-      if (size.width > TAB_AVATAR_SIZE || size.height > TAB_AVATAR_SIZE) {
-        const scale = TAB_AVATAR_SIZE / Math.max(size.width, size.height)
-        image = image.resize({
-          width: Math.max(1, Math.round(size.width * scale)),
-          height: Math.max(1, Math.round(size.height * scale)),
-          quality: 'best'
-        })
-      }
-
-      const buffer = image.toJPEG(TAB_PREVIEW_JPEG_QUALITY)
-      if (
-        !this._avatarsEnabled ||
-        !this.tabs.has(tab.id) ||
-        !matchesRoute() ||
-        buffer.length === 0
-      ) {
-        return false
-      }
-
-      const previousFileName = tab.avatarFileName
-      tab.avatarFileName = await tabPreviewStorage.writeAvatar(buffer)
-      if (previousFileName !== tab.avatarFileName) {
-        await this._releaseTabAvatarFile(previousFileName)
-      }
-      if (
-        !this._avatarsEnabled ||
-        !this.tabs.has(tab.id) ||
-        !matchesRoute()
-      ) {
-        const fileName = tab.avatarFileName
-        tab.avatarFileName = null
-        await this._releaseTabAvatarFile(fileName)
-        return false
-      }
-      tab.avatarDataUrl = tabPreviewBufferToDataUrl(buffer)
-      this._broadcastStateUpdate()
-      this._scheduleSessionSave()
-      return true
-    } catch (error) {
-      console.error('Failed to cache tab avatar:', error)
-      return false
-    }
+  applyTabAvatar(tab, avatarBytes, routePath) {
+    return this.previews.applyAvatar(tab, avatarBytes, routePath)
   }
 
   /**
    * @param {boolean} enabled
    * @returns {Promise<void>}
    */
-  async setTabAvatarsEnabled(enabled) {
-    if (this._avatarsEnabled === enabled) return
-
-    this._avatarsEnabled = enabled
-    if (enabled) return
-
-    // Every tab has to let go of its avatar before the first file is released,
-    // or a name shared by two tabs would still look referenced and survive.
-    const fileNames = Array.from(this.tabs.values(), tab => {
-      tab.avatarDataUrl = null
-      const fileName = tab.avatarFileName
-      tab.avatarFileName = null
-      return fileName
-    })
-    await Promise.all(fileNames.map(fileName => this._releaseTabAvatarFile(fileName)))
-    this._broadcastStateUpdate()
-    this._scheduleSessionSave()
+  setTabAvatarsEnabled(enabled) {
+    return this.previews.setAvatarsEnabled(enabled)
   }
 
   /**
@@ -965,7 +526,7 @@ export class TabManager {
     if (url) {
       return {
         url,
-        route: TabManager.getRouteFromUrl(url)
+        route: getRouteFromUrl(url)
       }
     }
 
@@ -1039,7 +600,7 @@ export class TabManager {
       history = null,
       historyIndex = null,
       persistHistory = history != null,
-      skipSilence = showSkipSilenceButton && enableSkipSilenceByDefault,
+      skipSilence = getNewTabSkipSilence(),
       groupId = null,
       openerTabId = this.activeTabId,
       _preferredIndex = null,
@@ -1066,14 +627,14 @@ export class TabManager {
     const restoredPreviewCapturedAt = (restoredPreviewDataUrl != null || restoredPreviewFileName != null) && Number.isFinite(previewCapturedAt)
       ? previewCapturedAt
       : 0
-    const restoredNavigationHistory = TabManager.sanitizeNavigationHistory(history, historyIndex)
+    const restoredNavigationHistory = sanitizeNavigationHistory(history, historyIndex)
 
     /** @type {TabInfo} */
     const tabInfo = {
       id,
       url: location.url,
       route: location.route,
-      title: title || TabManager.formatDefaultTabTitle(location.url),
+      title: title || formatDefaultTabTitle(location.url),
       avatarDataUrl: isTabPreviewDataUrl(avatarDataUrl) ? avatarDataUrl : null,
       avatarFileName: restoredAvatarFileName,
       lastActiveAt: Date.now(),
@@ -1105,7 +666,7 @@ export class TabManager {
     const hasPreferredIndex = Number.isInteger(_preferredIndex) && _preferredIndex >= 0
     let preferredIndex = hasPreferredIndex ? _preferredIndex : this.tabs.size
     if (!hasPreferredIndex) {
-      const normalizedOpenPosition = TabManager.normalizeNewTabPosition(openPosition)
+      const normalizedOpenPosition = normalizeNewTabPosition(openPosition)
       if (normalizedOpenPosition === 'afterCurrent' && this.activeTabId != null) {
         const activeTabIndex = Array.from(this.tabs.keys()).indexOf(this.activeTabId)
         if (activeTabIndex !== -1) {
@@ -1141,8 +702,8 @@ export class TabManager {
    */
   async createTabWithPreference(options = {}) {
     const openPosition = options.openPosition == null
-      ? await TabManager.getStoredNewTabPosition()
-      : TabManager.normalizeNewTabPosition(options.openPosition)
+      ? await getStoredNewTabPosition()
+      : normalizeNewTabPosition(options.openPosition)
     const tabOptions = options.url || options.route
       ? options
       : { ...options, route: await TabManager.getStoredLandingRoute() }
@@ -1441,7 +1002,7 @@ export class TabManager {
     this._finalizeDeferredDisposals(tabId)
 
     const tab = this.tabs.get(tabId)
-    this._scheduleTabPreviewRefresh(tab)
+    this.previews.scheduleRefresh(tab)
     this._broadcastStateUpdate()
   }
 
@@ -1493,6 +1054,7 @@ export class TabManager {
       !this._deferredCloseTabIds.has(candidateId) &&
       !this._deferredUnloadTabIds.has(candidateId)
 
+    const tabCloseFocus = getTabCloseFocus()
     if (tabCloseFocus === 'lastActiveTab') {
       const recentTabId = this.activationHistory.find(id => id !== tabId && this.tabs.has(id) && isSelectable(id))
       return recentTabId ?? nextTabIds.find(isSelectable) ?? previousTabIds.find(isSelectable) ?? null
@@ -1608,7 +1170,7 @@ export class TabManager {
       this.bridge.send(IpcChannels.TABS_EXIT_FULLSCREEN, tabId)
     }
 
-    this._clearTabPreviewRefresh(tab)
+    this.previews.clearRefresh(tab)
     this.closedTabs.push({
       id: randomUUID(),
       url: tab.url,
@@ -1647,7 +1209,7 @@ export class TabManager {
     tabPreviewStorage.remove(tab.previewFileName).catch(error => {
       console.error('Failed to delete closed tab preview:', error)
     })
-    this._releaseTabAvatarFile(tab.avatarFileName).catch(error => {
+    this.previews.releaseAvatarFile(tab.avatarFileName).catch(error => {
       console.error('Failed to delete closed tab avatar:', error)
     })
 
@@ -1829,7 +1391,7 @@ export class TabManager {
       groupId: closedTab.groupId,
       history: closedTab.history,
       historyIndex: closedTab.historyIndex,
-      persistHistory: await TabManager.getStoredRememberTabNavigationHistory(),
+      persistHistory: await getStoredRememberTabNavigationHistory(),
       _preferredIndex: restoreIndex,
       makeActive: true
     })
@@ -2053,7 +1615,7 @@ export class TabManager {
     tab.isLoading = nextLoading
     this._broadcastStateUpdate()
     if (!nextLoading) {
-      this._scheduleTabPreviewRefresh(tab)
+      this.previews.scheduleRefresh(tab)
     }
   }
 
@@ -2073,382 +1635,34 @@ export class TabManager {
   }
 
   /**
-   * @param {TabInfo} tab
-   * @param {number} [delay]
-   */
-  _scheduleTabPreviewRefresh(tab, delay = TAB_PREVIEW_REFRESH_DELAY_MS) {
-    this._clearTabPreviewRefresh(tab)
-    if (!this._tabPreviewsEnabled || this._previewCapturePaused || this.presentedTabId !== tab.id) {
-      return
-    }
-
-    tab.previewCaptureTimeoutId = setTimeout(() => {
-      tab.previewCaptureTimeoutId = null
-      if (this.presentedTabId !== tab.id) {
-        return
-      }
-      if (this._getTabLoadingState(tab)) {
-        this._scheduleTabPreviewRefresh(tab, delay)
-        return
-      }
-      this._refreshTabPreview(tab).catch(error => {
-        console.error('Failed to refresh tab preview:', error)
-      })
-    }, delay)
-  }
-
-  /**
-   * @param {TabInfo} tab
-   */
-  _clearTabPreviewRefresh(tab) {
-    if (tab.previewCaptureTimeoutId != null) {
-      clearTimeout(tab.previewCaptureTimeoutId)
-      tab.previewCaptureTimeoutId = null
-    }
-  }
-
-  /**
-   * Whether any tab, in this window or another one, still shows this avatar.
-   * @param {string} fileName
-   * @param {Set<TabInfo>} [ignoredTabs] tabs that are dropping it right now
-   * @returns {boolean}
-   */
-  _isTabAvatarFileReferenced(fileName, ignoredTabs) {
-    for (const manager of tabManagers.values()) {
-      for (const tab of manager.tabs.values()) {
-        if (ignoredTabs?.has(tab)) continue
-        if (normalizeTabPreviewFileName(tab.avatarFileName) === fileName) {
-          return true
-        }
-      }
-    }
-    return false
-  }
-
-  /**
-   * Deletes a cached avatar once the last tab using it lets go. Avatars are
-   * shared between tabs of the same channel, so unlinking on the first close
-   * would take the file out from under the tabs that are still open.
-   * @param {string | null | undefined} fileName
-   * @param {Set<TabInfo>} [ignoredTabs]
-   * @returns {Promise<void>}
-   */
-  async _releaseTabAvatarFile(fileName, ignoredTabs) {
-    const normalizedFileName = normalizeTabPreviewFileName(fileName)
-    if (
-      normalizedFileName == null ||
-      this._isTabAvatarFileReferenced(normalizedFileName, ignoredTabs)
-    ) {
-      return
-    }
-    await tabPreviewStorage.remove(normalizedFileName)
-  }
-
-  /**
-   * @param {TabInfo} tab
-   * @returns {Promise<string | null>}
-   */
-  async _getCachedTabPreviewDataUrl(tab) {
-    if (typeof tab.previewDataUrl === 'string' && tab.previewDataUrl.length > 0) {
-      return tab.previewDataUrl
-    }
-
-    const dataUrl = await tabPreviewStorage.read(tab.previewFileName)
-    if (dataUrl != null) {
-      tab.previewDataUrl = dataUrl
-    }
-    return dataUrl
-  }
-
-  /**
    * @param {string} tabId
    * @returns {Promise<string | null>}
    */
-  async captureTabPreview(tabId) {
-    if (!this._tabPreviewsEnabled) {
-      return null
-    }
-
-    const tab = this.tabs.get(tabId)
-    if (!tab) {
-      return null
-    }
-
-    const cachedPreview = await this._getCachedTabPreviewDataUrl(tab)
-    if (
-      tab.id !== this.presentedTabId ||
-      this.browserWindow.webContents.isDestroyed() ||
-      this._getTabLoadingState(tab)
-    ) {
-      return cachedPreview ?? TabManager.getVideoThumbnailUrl(tab.url)
-    }
-
-    return await this._refreshTabPreview(tab) ?? cachedPreview ?? TabManager.getVideoThumbnailUrl(tab.url)
+  captureTabPreview(tabId) {
+    return this.previews.capture(tabId)
   }
 
   /**
    * @param {string[]} tabIds
    * @returns {Promise<Record<string, string | null>>}
    */
-  async getCachedTabPreviews(tabIds) {
-    if (!this._tabPreviewsEnabled) {
-      return Object.fromEntries(tabIds.map(tabId => [tabId, null]))
-    }
-
-    const previews = await Promise.all(tabIds.map(async tabId => {
-      const tab = this.tabs.get(tabId)
-      const preview = tab == null
-        ? null
-        : await this._getCachedTabPreviewDataUrl(tab) ?? TabManager.getVideoThumbnailUrl(tab.url)
-      return [tabId, preview]
-    }))
-    return Object.fromEntries(previews)
+  getCachedTabPreviews(tabIds) {
+    return this.previews.getCached(tabIds)
   }
 
   /**
    * @param {boolean} paused
    */
   setPreviewCapturePaused(paused) {
-    if (this._previewCapturePaused === paused) {
-      return
-    }
-
-    this._previewCapturePaused = paused
-    if (paused) {
-      // Invalidate captures even if the switcher closes before their IPC
-      // round-trip returns. Their screenshot may already contain the overlay.
-      this._previewCaptureRevision++
-      for (const tab of this.tabs.values()) {
-        this._clearTabPreviewRefresh(tab)
-      }
-      return
-    }
-
-    const presentedTab = this.presentedTabId == null ? null : this.tabs.get(this.presentedTabId)
-    if (presentedTab != null && !this._getTabLoadingState(presentedTab)) {
-      this._scheduleTabPreviewRefresh(presentedTab)
-    }
+    this.previews.setCapturePaused(paused)
   }
 
   /**
    * @param {boolean} enabled
    * @returns {Promise<void>}
    */
-  async setTabPreviewsEnabled(enabled) {
-    if (this._tabPreviewsEnabled === enabled) return
-
-    const transitionId = ++this._tabPreviewTransitionId
-    this._tabPreviewsEnabled = enabled
-    if (enabled) {
-      const presentedTab = this.presentedTabId == null ? null : this.tabs.get(this.presentedTabId)
-      if (presentedTab != null && !this._getTabLoadingState(presentedTab)) {
-        this._scheduleTabPreviewRefresh(presentedTab)
-      }
-      return
-    }
-
-    for (const tab of this.tabs.values()) {
-      this._clearTabPreviewRefresh(tab)
-    }
-    await Promise.allSettled(Array.from(this.tabs.values(), tab => tab.previewCapturePromise).filter(Boolean))
-    if (transitionId !== this._tabPreviewTransitionId || this._tabPreviewsEnabled) {
-      return
-    }
-
-    const fileNames = Array.from(this.tabs.values(), tab => {
-      tab.previewDataUrl = null
-      tab.previewCapturedAt = 0
-      const fileName = tab.previewFileName
-      tab.previewFileName = null
-      return fileName
-    })
-    await Promise.all(fileNames.map(fileName => tabPreviewStorage.remove(fileName)))
-    if (transitionId !== this._tabPreviewTransitionId || this._tabPreviewsEnabled) {
-      return
-    }
-    this._broadcastStateUpdate()
-    this._scheduleSessionSave()
-  }
-
-  /**
-   * @param {TabInfo} tab
-   * @returns {Promise<string | null>}
-   */
-  async _refreshTabPreview(tab) {
-    if (!this._tabPreviewsEnabled) {
-      return null
-    }
-
-    if (
-      tab.id !== this.presentedTabId ||
-      this.browserWindow.webContents.isDestroyed() ||
-      this._getTabLoadingState(tab)
-    ) {
-      return await this._getCachedTabPreviewDataUrl(tab)
-    }
-
-    if (tab.previewCapturePromise != null) {
-      return tab.previewCapturePromise
-    }
-
-    tab.previewCapturePromise = this._captureTabPreviewSerialized(tab)
-
-    try {
-      return await tab.previewCapturePromise
-    } finally {
-      tab.previewCapturePromise = null
-    }
-  }
-
-  /**
-   * Runs a single preview capture, serialized against every other capture in
-   * this window via {@link _previewCaptureLock}. Only the lock owner toggles
-   * capture mode, and presentation is revalidated across every async hop so a
-   * screenshot of a different tab is never persisted as this tab's preview.
-   * @param {TabInfo} tab
-   * @returns {Promise<string | null>}
-   */
-  async _captureTabPreviewSerialized(tab) {
-    const captureRevision = this._previewCaptureRevision
-    const previousCapture = this._previewCaptureLock
-    /** @type {() => void} */
-    let releaseLock = () => {}
-    this._previewCaptureLock = new Promise(resolve => {
-      releaseLock = resolve
-    })
-    await Promise.all([
-      previousCapture.catch(() => {}),
-      tabPreviewStorage.maintenance,
-    ])
-
-    try {
-      // Presentation and window state may have changed while waiting for the lock.
-      if (
-        !this._tabPreviewsEnabled ||
-        this._previewCapturePaused ||
-        captureRevision !== this._previewCaptureRevision ||
-        tab.id !== this.presentedTabId ||
-        this.browserWindow.webContents.isDestroyed() ||
-        this._getTabLoadingState(tab)
-      ) {
-        return await this._getCachedTabPreviewDataUrl(tab)
-      }
-
-      try {
-        const captureStarted = await this._setTabPreviewCaptureMode(true)
-        if (!captureStarted) {
-          if (captureStarted === false) this._scheduleTabPreviewRefresh(tab)
-          return await this._getCachedTabPreviewDataUrl(tab)
-        }
-        // Entering capture mode awaits an IPC round-trip, during which the main
-        // process stays unblocked and another tab may have been activated. If so,
-        // the renderer is now painting a different tab, so capturing here would
-        // save the wrong content as this tab's preview. Bail out with the cache.
-        if (!this._tabPreviewsEnabled || tab.id !== this.presentedTabId || captureRevision !== this._previewCaptureRevision) {
-          return await this._getCachedTabPreviewDataUrl(tab)
-        }
-        const image = await this.browserWindow.webContents.capturePage()
-        // capturePage awaits another round-trip; the presented tab may have
-        // changed again. Never persist a screenshot captured for a stale tab.
-        if (!this._tabPreviewsEnabled || tab.id !== this.presentedTabId || captureRevision !== this._previewCaptureRevision) {
-          return await this._getCachedTabPreviewDataUrl(tab)
-        }
-        if (image.isEmpty()) {
-          return await this._getCachedTabPreviewDataUrl(tab)
-        }
-
-        const contentBounds = await this._getTabPreviewContentBounds()
-        if (!this._tabPreviewsEnabled || tab.id !== this.presentedTabId || captureRevision !== this._previewCaptureRevision) {
-          return await this._getCachedTabPreviewDataUrl(tab)
-        }
-        const contentImage = contentBounds == null ? image : cropTabPreviewToContent(image, contentBounds)
-        if (contentImage == null || contentImage.isEmpty()) {
-          return await this._getCachedTabPreviewDataUrl(tab)
-        }
-
-        const targetSize = getTabPreviewTargetSize(contentImage.getSize(), contentBounds)
-        const preview = targetSize == null
-          ? contentImage
-          : contentImage.resize({ ...targetSize, quality: 'best' })
-        const previewBuffer = preview.toJPEG(TAB_PREVIEW_JPEG_QUALITY)
-        if (previewBuffer.length === 0) {
-          return await this._getCachedTabPreviewDataUrl(tab)
-        }
-
-        if (!this._tabPreviewsEnabled) {
-          return null
-        }
-
-        const dataUrl = tabPreviewBufferToDataUrl(previewBuffer)
-        tab.previewDataUrl = dataUrl
-        tab.previewCapturedAt = Date.now()
-        tab.previewFileName = await tabPreviewStorage.writePreview(previewBuffer, tab.previewFileName)
-        this._scheduleSessionSave()
-        return dataUrl
-      } catch (error) {
-        console.error('Failed to capture tab preview:', error)
-        return await this._getCachedTabPreviewDataUrl(tab)
-      } finally {
-        await this._setTabPreviewCaptureMode(false)
-      }
-    } finally {
-      releaseLock()
-    }
-  }
-
-  /**
-   * @returns {Promise<import('./tabPreviewGeometry.js').TabPreviewContentBounds | null>}
-   */
-  async _getTabPreviewContentBounds() {
-    try {
-      return await this.browserWindow.webContents.executeJavaScript(
-        `(${measureTabPreviewContentBounds.toString()})(window, document)`,
-        true
-      )
-    } catch {
-      return null
-    }
-  }
-
-  /**
-   * @param {boolean} enabled
-   */
-  async _setTabPreviewCaptureMode(enabled) {
-    if (this.browserWindow.webContents.isDestroyed()) {
-      return
-    }
-
-    const script = enabled
-      ? `
-        (() => {
-          // Interactive preview UI takes priority over background captures.
-          // Reuse the cache while a tooltip or keyboard switcher is visible.
-          if (document.querySelector('[data-tab-preview-preserve-visibility]')) {
-            return false
-          }
-          let style = document.getElementById(${JSON.stringify(TAB_PREVIEW_CAPTURE_STYLE_ID)})
-          if (!style) {
-            style = document.createElement('style')
-            style.id = ${JSON.stringify(TAB_PREVIEW_CAPTURE_STYLE_ID)}
-            style.textContent = 'html.${TAB_PREVIEW_CAPTURE_CLASS} [data-tab-preview-overlay]:not([data-tab-preview-preserve-visibility]) { visibility: hidden !important; }'
-            document.head.appendChild(style)
-          }
-          document.documentElement.classList.add(${JSON.stringify(TAB_PREVIEW_CAPTURE_CLASS)})
-          // Two frames: the first callback runs before the frame that applies
-          // the class is painted, so resolving there can still capture a
-          // visible overlay and put one tab's preview inside another's.
-          return new Promise(resolve => {
-            requestAnimationFrame(() => requestAnimationFrame(() => resolve(true)))
-          })
-        })()
-      `
-      : `document.documentElement.classList.remove(${JSON.stringify(TAB_PREVIEW_CAPTURE_CLASS)})`
-
-    try {
-      return await this.browserWindow.webContents.executeJavaScript(script, true)
-    } catch {
-      // The shared renderer may be navigating or shutting down.
-    }
+  setTabPreviewsEnabled(enabled) {
+    return this.previews.setPreviewsEnabled(enabled)
   }
 
   /**
@@ -2529,7 +1743,7 @@ export class TabManager {
         return true
       }
 
-      await this._refreshTabPreview(tab).catch(error => {
+      await this.previews.refresh(tab).catch(error => {
         console.error('Failed to refresh preview before unloading tab:', error)
       })
 
@@ -2557,7 +1771,7 @@ export class TabManager {
     }
 
     if (tab.id === this.presentedTabId) {
-      await this._refreshTabPreview(tab).catch(error => {
+      await this.previews.refresh(tab).catch(error => {
         console.error('Failed to refresh preview before unloading tab:', error)
       })
     }
@@ -2686,7 +1900,7 @@ export class TabManager {
     const tab = this.tabs.get(tabId)
     if (!tab) return null
 
-    this._clearTabPreviewRefresh(tab)
+    this.previews.clearRefresh(tab)
     const nextTabId = this.activeTabId === tabId
       ? this._getNeighborTabId(tabId)
       : null
@@ -2799,7 +2013,7 @@ export class TabManager {
       return
     }
 
-    this._clearTabPreviewRefresh(tab)
+    this.previews.clearRefresh(tab)
     this.tabs.delete(tabId)
     this._resolveTabMountWaiters(tabId, Number.MAX_SAFE_INTEGER, false)
     if (this.contextMenuTabId === tabId) {
@@ -2826,7 +2040,7 @@ export class TabManager {
       const avatarFileName = tab.avatarFileName
       tab.avatarDataUrl = null
       tab.avatarFileName = null
-      this._releaseTabAvatarFile(avatarFileName).catch(error => {
+      this.previews.releaseAvatarFile(avatarFileName).catch(error => {
         console.error('Failed to delete stale tab avatar:', error)
       })
     }
@@ -2835,7 +2049,7 @@ export class TabManager {
       this._resumeDeferredStartupTabs()
     }
     tab.url = url || this._urlFromRoute(tab.route)
-    this._scheduleTabPreviewRefresh(tab)
+    this.previews.scheduleRefresh(tab)
     this._scheduleSessionSave()
     this._broadcastStateUpdate()
   }
@@ -2852,7 +2066,7 @@ export class TabManager {
     const tab = this.tabs.get(tabId)
     if (!tab) return
 
-    const sanitized = TabManager.sanitizeNavigationHistory(history, historyIndex)
+    const sanitized = sanitizeNavigationHistory(history, historyIndex)
     tab.navigationHistory = sanitized?.history ?? null
     tab.navigationHistoryIndex = sanitized?.historyIndex ?? 0
     if (typeof persistHistory === 'boolean') {
@@ -3003,8 +2217,8 @@ export class TabManager {
       closedTabs: this.closedTabs.toReversed().map(tab => ({
         id: tab.id,
         url: tab.url,
-        route: cloneRoute(TabManager.getRouteFromUrl(tab.url)),
-        title: tab.title ?? TabManager.formatDefaultTabTitle(tab.url),
+        route: cloneRoute(getRouteFromUrl(tab.url)),
+        title: tab.title ?? formatDefaultTabTitle(tab.url),
         isPinned: tab.isPinned === true,
         color: TabManager.normalizeTabColor(tab.color),
         groupId: tab.groupId ?? null
@@ -3165,7 +2379,7 @@ export class TabManager {
       .map(tab => {
         const tabData = {
           id: tab.id,
-          url: TabManager.stripOneTimeTimestampFromUrl(tab.url),
+          url: stripOneTimeTimestampFromUrl(tab.url),
           title: tab.title,
           isPinned: tab.isPinned,
           color: TabManager.normalizeTabColor(tab.color),
@@ -3220,7 +2434,7 @@ export class TabManager {
       .filter(tab => !this._deferredCloseTabIds.has(tab.id))
       .map(tab => ({
         id: tab.id,
-        url: TabManager.stripOneTimeTimestampFromUrl(tab.url),
+        url: stripOneTimeTimestampFromUrl(tab.url),
         title: tab.title,
         isPinned: tab.isPinned || false,
         color: TabManager.normalizeTabColor(tab.color),
@@ -3266,7 +2480,7 @@ export class TabManager {
 
     this._sessionPersistenceDisabled = true
     try {
-      const restoreNavigationHistory = await TabManager.getStoredRememberTabNavigationHistory()
+      const restoreNavigationHistory = await getStoredRememberTabNavigationHistory()
       this._restoreTabGroups(sessionData.groups)
       const previousTabs = this.tabs
       const syncedTabs = new Map()
@@ -3280,19 +2494,19 @@ export class TabManager {
 
         if (tab) {
           removedTabs.delete(tab)
-          const nextUrl = TabManager.stripOneTimeTimestampFromUrl(tabData.url)
+          const nextUrl = stripOneTimeTimestampFromUrl(tabData.url)
           if (tab.url !== nextUrl) {
             const previewFileName = tab.previewFileName
             const avatarFileName = tab.avatarFileName
             tab.url = nextUrl
-            tab.route = TabManager.getRouteFromUrl(nextUrl)
+            tab.route = getRouteFromUrl(nextUrl)
             tab.previewDataUrl = null
             tab.previewCapturedAt = 0
             tab.previewFileName = null
             tab.avatarDataUrl = null
             tab.avatarFileName = null
             const navigationHistory = restoreNavigationHistory
-              ? TabManager.sanitizeNavigationHistory(tabData.history, tabData.historyIndex)
+              ? sanitizeNavigationHistory(tabData.history, tabData.historyIndex)
               : null
             tab.navigationHistory = navigationHistory?.history ?? null
             tab.navigationHistoryIndex = navigationHistory?.historyIndex ?? 0
@@ -3304,7 +2518,7 @@ export class TabManager {
             tabPreviewStorage.remove(previewFileName).catch(error => {
               console.error('Failed to delete stale synced tab preview:', error)
             })
-            this._releaseTabAvatarFile(avatarFileName).catch(error => {
+            this.previews.releaseAvatarFile(avatarFileName).catch(error => {
               console.error('Failed to delete stale synced tab avatar:', error)
             })
           }
@@ -3322,7 +2536,7 @@ export class TabManager {
           // map and restored placement openers below replace that temporary order.
           tab = this.createTab({
             id: syncedId,
-            url: TabManager.stripOneTimeTimestampFromUrl(tabData.url),
+            url: stripOneTimeTimestampFromUrl(tabData.url),
             title: hasSavedTitle ? tabData.title : undefined,
             isPinned: tabData.isPinned === true,
             color: tabData.color,
@@ -3346,7 +2560,7 @@ export class TabManager {
       restoreTabPlacementOpeners(this.tabs, sessionData.tabs)
 
       for (const tab of removedTabs) {
-        this._clearTabPreviewRefresh(tab)
+        this.previews.clearRefresh(tab)
         this._resolveTabMountWaiters(tab.id, Number.MAX_SAFE_INTEGER, false)
         if (this.presentedTabId === tab.id) {
           this.presentedTabId = null
@@ -3354,7 +2568,7 @@ export class TabManager {
         tabPreviewStorage.remove(tab.previewFileName).catch(error => {
           console.error('Failed to delete remotely closed tab preview:', error)
         })
-        this._releaseTabAvatarFile(tab.avatarFileName).catch(error => {
+        this.previews.releaseAvatarFile(tab.avatarFileName).catch(error => {
           console.error('Failed to delete remotely closed tab avatar:', error)
         })
       }
@@ -3421,7 +2635,7 @@ export class TabManager {
     await Promise.all([
       ...clearedTabs.map(tab => tabPreviewStorage.remove(tab.previewFileName)),
       // These tabs are all going away, so none of them counts as a reference
-      ...clearedTabs.map(tab => this._releaseTabAvatarFile(
+      ...clearedTabs.map(tab => this.previews.releaseAvatarFile(
         tab.avatarFileName,
         new Set(clearedTabs)
       ))
@@ -3450,14 +2664,14 @@ export class TabManager {
     if (preserveUpdatedAt) this._sessionPersistenceDisabled = true
 
     try {
-      const restoreNavigationHistory = await TabManager.getStoredRememberTabNavigationHistory()
+      const restoreNavigationHistory = await getStoredRememberTabNavigationHistory()
       this._restoreTabGroups(sessionData.groups)
       const landingRoute = loadLandingPage ? await TabManager.getStoredLandingRoute() : null
       const activeTabData = loadLandingPage
-        ? sessionData.tabs.find(tab => TabManager.getRouteFromUrl(tab.url).path === landingRoute)
+        ? sessionData.tabs.find(tab => getRouteFromUrl(tab.url).path === landingRoute)
         : sessionData.tabs.find(tab => tab.id === sessionData.activeTabId)
       const prioritizeActiveWatchTab = activeTabData != null &&
-        TabManager.getRouteFromUrl(activeTabData.url).path.startsWith('/watch/')
+        getRouteFromUrl(activeTabData.url).path.startsWith('/watch/')
       const deferredStartupTabIds = new Set()
       const avatars = new Map()
       for (const tabData of sessionData.tabs) {
@@ -3489,7 +2703,7 @@ export class TabManager {
           const tab = this.createTab({
             id: typeof tabData.id === 'string' ? tabData.id : undefined,
             // Strip here as well to heal sessions persisted before the strip on save existed
-            url: TabManager.stripOneTimeTimestampFromUrl(tabData.url),
+            url: stripOneTimeTimestampFromUrl(tabData.url),
             title: hasSavedTitle ? tabData.title : undefined,
             avatarDataUrl,
             avatarFileName: avatarDataUrl == null ? null : avatarFileName,
@@ -3567,86 +2781,6 @@ export class TabManager {
     if (!tabId) return
     this.bridge.send(IpcChannels.TABS_GO_HISTORY, { tabId, offset })
   }
-}
-
-/**
- * @param {string} route
- * @returns {string}
- */
-function normalizeRoutePath(route) {
-  if (typeof route !== 'string' || route.trim().length === 0) {
-    return '/'
-  }
-  return route.startsWith('/') ? route : `/${route}`
-}
-
-/**
- * @param {object | undefined | null} query
- * @returns {Record<string, string>}
- */
-/**
- * Convert URLSearchParams into a plain query object, preserving repeated keys as
- * arrays while keeping single occurrences as scalars.
- * @param {URLSearchParams} searchParams
- * @returns {Record<string, string | string[]>}
- */
-function searchParamsToQuery(searchParams) {
-  /** @type {Record<string, string | string[]>} */
-  const query = {}
-  for (const [key, value] of searchParams) {
-    if (key in query) {
-      const existing = query[key]
-      query[key] = Array.isArray(existing) ? [...existing, value] : [existing, value]
-    } else {
-      query[key] = value
-    }
-  }
-  return query
-}
-
-function normalizeQuery(query) {
-  if (!query || typeof query !== 'object') {
-    return {}
-  }
-
-  return Object.fromEntries(
-    Object.entries(query)
-      .filter(([, value]) => value != null)
-      .map(([key, value]) => [key, Array.isArray(value) ? value.map(String) : String(value)])
-  )
-}
-
-/**
- * @param {object} route
- * @returns {{name: string | null, path: string, params: Record<string, string>, query: Record<string, string>, hash: string, fullPath: string}}
- */
-function normalizeRoute(route) {
-  const path = normalizeRoutePath(route?.path)
-  const query = normalizeQuery(route?.query)
-  const hash = typeof route?.hash === 'string' ? route.hash : ''
-  const searchParams = new URLSearchParams()
-  for (const [key, value] of Object.entries(query)) {
-    for (const item of Array.isArray(value) ? value : [value]) {
-      searchParams.append(key, item)
-    }
-  }
-  const search = searchParams.toString()
-  return {
-    name: typeof route?.name === 'string' ? route.name : null,
-    path,
-    params: normalizeQuery(route?.params),
-    query,
-    hash,
-    fullPath: `${path}${search.length > 0 ? `?${search}` : ''}${hash}`
-  }
-}
-
-/**
- * @param {ReturnType<typeof normalizeRoute>} route
- * @returns {ReturnType<typeof normalizeRoute>}
- */
-function cloneRoute(route) {
-  return normalizeRoute(route)
 }
 
 export default TabManager
