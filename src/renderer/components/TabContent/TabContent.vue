@@ -107,7 +107,12 @@ const pageSwipeStyle = computed(() => {
   if (isSwipeFrom.value) return { left: `${props.pageSwipe.offset}px` }
   if (isSwipeTarget.value) {
     const startingEdge = props.pageSwipe.direction
-    return { left: `${props.pageSwipe.offset + startingEdge * props.pageSwipe.width}px`, right: 'auto' }
+    const left = `${props.pageSwipe.offset + startingEdge * props.pageSwipe.width}px`
+    // The document keeps the outgoing tab's scroll position. Offset the
+    // incoming tab so it shows its own, which presentation then restores.
+    if (isPresented.value) return { left, right: 'auto' }
+    const savedTop = initialized.value ? props.tab.history[props.tab.historyIndex]?.scroll?.top ?? 0 : 0
+    return { left, right: 'auto', top: `${props.pageSwipe.scrollTop - savedTop}px` }
   }
   return undefined
 })
