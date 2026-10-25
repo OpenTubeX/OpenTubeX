@@ -198,6 +198,13 @@
   display: none;
 }
 
+/* Let a group that is wider than the card wrap its own buttons */
+.videoOptions.compact .videoOptionsMobileRow {
+  flex-shrink: 1;
+  flex-wrap: wrap;
+  min-inline-size: 0;
+}
+
 .videoOptionsMobileRow:not(:empty) + .videoOptionsMobileRow:not(:empty)::before {
   content: '';
   inline-size: 1px;
@@ -250,6 +257,21 @@
 
 .initialCursor {
   cursor: initial;
+}
+
+@media (pointer: coarse), (width <= 680px) {
+  .videoOptions :deep(.iconButton) {
+    min-inline-size: 48px;
+    min-block-size: 48px;
+  }
+
+  .videoOptions .downloadButton {
+    min-block-size: 48px;
+  }
+
+  .videoOptions.compact .downloadButton {
+    min-inline-size: 48px;
+  }
 }
 
 

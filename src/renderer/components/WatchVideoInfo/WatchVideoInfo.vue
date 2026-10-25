@@ -641,6 +641,30 @@ let labeledDownloadWidth = 0
 let optionsLayoutFrame = null
 
 /**
+ * Width of an action group on one line, including its divider. Compact
+ * toolbars let groups wrap, so their rendered width no longer reflects this.
+ * @param {HTMLElement} group
+ */
+function getUnwrappedGroupWidth(group) {
+  const gap = parseFloat(getComputedStyle(group).columnGap) || 0
+  const items = [...group.children].filter(item => item.getClientRects().length > 0)
+  const divider = getComputedStyle(group, '::before')
+  const dividerWidth = divider.content === 'none'
+    ? 0
+    : parseFloat(divider.inlineSize) + getInlineMargins(divider) + gap
+
+  return items.reduce((width, item) => width + item.getBoundingClientRect().width + getInlineMargins(getComputedStyle(item)), 0) +
+    gap * Math.max(items.length - 1, 0) + dividerWidth
+}
+
+/**
+ * @param {CSSStyleDeclaration} style
+ */
+function getInlineMargins(style) {
+  return parseFloat(style.marginInlineStart) + parseFloat(style.marginInlineEnd)
+}
+
+/**
  * Hides the Download label when the toolbar with the label would be wider than
  * the card. CSS cannot measure how wide the toolbar would be with the label
  * shown once it is hidden.
@@ -658,7 +682,7 @@ function updateOptionsLayout() {
 
   const style = getComputedStyle(toolbar)
   const groups = [...toolbar.children].filter(group => group.getClientRects().length > 0)
-  const contentWidth = groups.reduce((width, group) => width + group.getBoundingClientRect().width, 0) +
+  const contentWidth = groups.reduce((width, group) => width + getUnwrappedGroupWidth(group), 0) +
     parseFloat(style.columnGap) * Math.max(groups.length - 1, 0) +
     parseFloat(style.paddingInlineStart) + parseFloat(style.paddingInlineEnd)
 
