@@ -2,8 +2,26 @@ import { test, expect, expectScrollAtRenderedEnd, goToSettingsSection, latestSet
 import { DEFAULT_QUICK_SETTINGS, normalizeQuickSettings } from '../../../src/renderer/helpers/quickSettings.js'
 import { DEFAULT_CUSTOM_THEME } from '../../../src/customTheme.js'
 
+// Mixes selects, sliders and toggles across every common category. Startup
+// replaces these former defaults when they were saved without changes.
+const FORMER_DEFAULT_QUICK_SETTINGS = [
+  'baseTheme',
+  'mainColor',
+  'uiScale',
+  'thumbnailSize',
+  'defaultQuality',
+  'playNextVideo',
+  'enableSubtitlesByDefault',
+  'listType',
+  'playlistViewType',
+  'hideRecommendedVideos',
+  'hideComments',
+  'currentLocale',
+  'region',
+]
+
 const ALL_QUICK_SETTINGS = [
-  ...DEFAULT_QUICK_SETTINGS,
+  ...FORMER_DEFAULT_QUICK_SETTINGS,
   'useProxy',
 ]
 
@@ -172,7 +190,7 @@ test.describe('desktop quick settings animation', () => {
 })
 
 test.describe('quick settings select interactions', () => {
-  test.use({ seed: { settings: { baseTheme: 'dark', alwaysShowScrollbars: true } } })
+  test.use({ seed: { settings: { baseTheme: 'dark', alwaysShowScrollbars: true, quickSettings: ALL_QUICK_SETTINGS } } })
 
   test('keeps the select and quick settings open while dragging the dropdown scrollbar', { tag: '@scale' }, async ({ page }) => {
     await page.locator('.profileTrigger').click()
@@ -313,7 +331,7 @@ test.describe('compact quick settings', { tag: '@scale' }, () => {
 
 for (const width of [1280, 480]) {
   test.describe(`quick settings heading spacing at ${width}px`, { tag: '@scale' }, () => {
-    const settings = { currentLocale: 'en-US', bounds: { x: 0, y: 0, width, height: 900, maximized: false } }
+    const settings = { currentLocale: 'en-US', quickSettings: ALL_QUICK_SETTINGS, bounds: { x: 0, y: 0, width, height: 900, maximized: false } }
     test.use({ seed: { settings } })
 
     test('keeps the first selects close to their section headings', async ({ page, uiScale }, testInfo) => {
@@ -1658,25 +1676,34 @@ test.describe('customizable quick settings', () => {
     expect(Math.max(...offsets)).toBeLessThanOrEqual(0.5)
   })
 
-  test('starts with the original quick settings', async ({ page }) => {
+  test('starts with the default quick settings', async ({ page }) => {
     await page.locator('.profileTrigger').click()
     const menu = page.getByRole('dialog', { name: 'Quick settings' })
 
     await expect(menu.getByRole('combobox', { name: 'Base Theme' })).toBeVisible()
     await expect(menu.getByRole('slider', { name: 'UI Scale' })).toBeVisible()
-    await expect(menu.getByRole('slider', { name: 'Thumbnail Size' })).toBeVisible()
     await expect(menu.getByRole('combobox', { name: 'Default Quality' })).toBeVisible()
+    await expect(menu.getByRole('slider', { name: 'Default Playback Rate' })).toBeVisible()
     await expect(menu.getByRole('checkbox', { name: 'Autoplay Recommended Videos' })).toBeVisible()
     await expect(menu.getByRole('checkbox', { name: 'Enable Subtitles by Default' })).toBeVisible()
     await expect(menu.getByRole('combobox', { name: 'Video View Type' })).toBeVisible()
     await expect(menu.getByRole('combobox', { name: 'Playlist View Type' })).toBeVisible()
     await expect(menu.getByRole('checkbox', { name: 'Hide Recommended Videos' })).toBeVisible()
     await expect(menu.getByRole('checkbox', { name: 'Hide Comments' })).toBeVisible()
-    await expect(menu.getByRole('combobox', { name: 'Language preference' })).toBeVisible()
-    await expect(menu.getByRole('combobox', { name: 'Region for Trending' })).toBeVisible()
+    await expect(menu.getByRole('checkbox', { name: 'Remember Watch History' })).toBeVisible()
 
+    await expect(menu.getByRole('checkbox', { name: 'Enable SponsorBlock' })).toHaveCount(0)
     await expect(menu.getByRole('checkbox', { name: 'Enable Tor / Proxy' })).toHaveCount(0)
+    await expect(menu.getByRole('combobox', { name: 'Language preference' })).toHaveCount(0)
     await expect(menu.getByRole('button', { name: 'Customize quick settings' })).toHaveCount(0)
+  })
+
+  test.describe('saved former defaults', () => {
+    test.use({ seed: { settings: { quickSettings: FORMER_DEFAULT_QUICK_SETTINGS } } })
+
+    test('switch to the current defaults', async ({ page }) => {
+      await expect.poll(() => page.evaluate(() => window.$store.getters.getQuickSettings)).toEqual(DEFAULT_QUICK_SETTINGS)
+    })
   })
 
   test('adds basic controls from Appearance and resets them', async ({ app, page }) => {
@@ -1757,6 +1784,7 @@ test.describe('customizable quick settings', () => {
   })
 
   test('rearranges categories together and controls within their category', async ({ page, attachScreenshot }) => {
+    await page.evaluate(quickSettings => window.$store.dispatch('updateQuickSettings', quickSettings), FORMER_DEFAULT_QUICK_SETTINGS)
     await openInterfaceCustomizer(page, 'quick settings')
 
     const selectedSettings = page.locator('.selectedSettings')
@@ -1767,7 +1795,7 @@ test.describe('customizable quick settings', () => {
     await expect(page.getByRole('button', { name: 'Move Region for Trending down' })).toBeDisabled()
 
     await page.getByRole('button', { name: 'Move Hide Comments up' }).click()
-    const hideCommentsMovedUp = [...DEFAULT_QUICK_SETTINGS]
+    const hideCommentsMovedUp = [...FORMER_DEFAULT_QUICK_SETTINGS]
     const hideCommentsIndex = hideCommentsMovedUp.indexOf('hideComments')
     hideCommentsMovedUp.splice(hideCommentsIndex, 1)
     hideCommentsMovedUp.splice(hideCommentsIndex - 1, 0, 'hideComments')

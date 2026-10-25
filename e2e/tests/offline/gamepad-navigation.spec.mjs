@@ -302,7 +302,8 @@ test.describe('quick settings changed-setting controls', () => {
       settings: {
         ...PLAYER_SEED,
         highlightChangedSettings: true,
-        thumbnailSize: 110
+        thumbnailSize: 110,
+        quickSettings: ['thumbnailSize']
       }
     }
   })

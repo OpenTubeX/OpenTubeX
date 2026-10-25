@@ -24,6 +24,7 @@ for (const listType of ['grid', 'list']) {
           hideSubscriptionsShorts: false,
           useCustomShortsPlayer: true,
           thumbnailSize: 100,
+          quickSettings: ['thumbnailSize'],
           listType
         },
         profiles: [{

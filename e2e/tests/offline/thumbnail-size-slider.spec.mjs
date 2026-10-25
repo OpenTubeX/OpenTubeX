@@ -20,7 +20,8 @@ test.use({
   seed: {
     settings: {
       fetchSubscriptionsAutomatically: false,
-      thumbnailSize: 100
+      thumbnailSize: 100,
+      quickSettings: ['thumbnailSize']
     },
     profiles: [
       {

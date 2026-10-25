@@ -1,6 +1,7 @@
 import { navigationItemsFromLegacySettings } from '../../navigationItems.js'
+import { DEFAULT_QUICK_SETTINGS } from './quickSettings.js'
 
-import { FORMER_CHANNEL_SETTING_SWITCHES } from '../../datastores/settingsMigrations.js'
+import { FORMER_CHANNEL_SETTING_SWITCHES, isFormerDefaultQuickSettings } from '../../datastores/settingsMigrations.js'
 
 export function migrateSyncServerUrl(value) {
   if (typeof value !== 'string') return value
@@ -129,6 +130,10 @@ export function migrateLegacySettings(settings) {
       migratedSettings[autoUpdateKey] = false
     }
     delete migratedSettings[rememberKey]
+  }
+
+  if (isFormerDefaultQuickSettings(migratedSettings.quickSettings)) {
+    migratedSettings.quickSettings = [...DEFAULT_QUICK_SETTINGS]
   }
 
   return migratedSettings

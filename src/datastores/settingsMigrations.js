@@ -9,6 +9,36 @@ export const FORMER_CHANNEL_SETTING_SWITCHES = Object.freeze([
   ['rememberVolumePerChannel', 'autoUpdateChannelVolumes'],
 ])
 
+/** The Quick Settings defaults before they were reworked. */
+const FORMER_DEFAULT_QUICK_SETTINGS = Object.freeze([
+  'baseTheme',
+  'mainColor',
+  'uiScale',
+  'thumbnailSize',
+  'defaultQuality',
+  'playNextVideo',
+  'enableSubtitlesByDefault',
+  'listType',
+  'playlistViewType',
+  'hideRecommendedVideos',
+  'hideComments',
+  'currentLocale',
+  'region',
+])
+
+/**
+ * Treats saved Quick Settings that exactly match the former defaults as never
+ * customized, so they follow the current defaults. A list deliberately reset or
+ * rearranged back to the former defaults also switches; that list is
+ * indistinguishable from one that was never changed.
+ * @param {unknown} value
+ */
+export function isFormerDefaultQuickSettings(value) {
+  return Array.isArray(value) &&
+    value.length === FORMER_DEFAULT_QUICK_SETTINGS.length &&
+    value.every((id, index) => id === FORMER_DEFAULT_QUICK_SETTINGS[index])
+}
+
 /** Apply the stored setting migrations shared by manual and scheduled backups. */
 export async function migrateStoredSettings(datastore) {
   const save = (key, value) => datastore.updateAsync({ _id: key }, { _id: key, value }, { upsert: true })
@@ -17,7 +47,7 @@ export async function migrateStoredSettings(datastore) {
     _id: {
       $in: [
         'currentLocale', 'externalPlayerCustomArgs', 'defaultTheatreMode', 'saveWatchedProgress',
-        'watchedProgressSavingMode', 'screenshotAskPath',
+        'watchedProgressSavingMode', 'screenshotAskPath', 'quickSettings',
         ...FORMER_CHANNEL_SETTING_SWITCHES.flat(),
       ]
     }
@@ -87,5 +117,9 @@ export async function migrateStoredSettings(datastore) {
       await save(autoUpdateKey, false)
     }
     await datastore.removeAsync({ _id: rememberKey })
+  }
+
+  if (isFormerDefaultQuickSettings(stored.get('quickSettings')?.value)) {
+    await datastore.removeAsync({ _id: 'quickSettings' })
   }
 }

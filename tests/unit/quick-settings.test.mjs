@@ -11,21 +11,19 @@ import {
   QUICK_SETTING_DEFINITIONS,
 } from '../../src/renderer/helpers/quickSettings.js'
 
-test('keeps the original quick settings as defaults', () => {
+test('defaults to settings people change depending on the situation', () => {
   assert.deepEqual(DEFAULT_QUICK_SETTINGS, [
     'baseTheme',
-    'mainColor',
     'uiScale',
-    'thumbnailSize',
     'defaultQuality',
+    'defaultPlayback',
     'playNextVideo',
     'enableSubtitlesByDefault',
     'listType',
     'playlistViewType',
     'hideRecommendedVideos',
     'hideComments',
-    'currentLocale',
-    'region',
+    'rememberHistory',
   ])
 })
 
@@ -131,7 +129,7 @@ test('keeps categories adjacent in first-seen order, preserving order within eac
 test('adds a setting to its existing category instead of splitting the category', () => {
   assert.deepEqual(
     normalizeQuickSettings([...DEFAULT_QUICK_SETTINGS, 'iconPack']),
-    [...DEFAULT_QUICK_SETTINGS.slice(0, 4), 'iconPack', ...DEFAULT_QUICK_SETTINGS.slice(4)]
+    [...DEFAULT_QUICK_SETTINGS.slice(0, 2), 'iconPack', ...DEFAULT_QUICK_SETTINGS.slice(2)]
   )
 })
 
