@@ -153,6 +153,29 @@ test.describe('phone UI', () => {
     await expect(page.locator('dialog[open]')).toHaveCount(0)
   })
 
+  test('keeps the enlarged video actions inside the card on narrow phones', async ({ app, page }) => {
+    await page.evaluate(async () => {
+      await window.$store.dispatch('updateUseSponsorBlock', true)
+      await window.$store.dispatch('updateQuickBookmarkTargetPlaylistId', 'phone-list-0')
+      await window.$store.dispatch('updateShowDlnaCastButton', true)
+    })
+    await mockPlayableWatchPage(app, page, { captionTranslations: true })
+    await openMockedVideo(page)
+    await setWindowSize(app, page, { width: 320, height: 760 })
+    const toolbar = page.locator('.videoOptions')
+    await expect(toolbar).toHaveClass(/\bcompact\b/)
+    await expect.poll(() => toolbar.evaluate(element => {
+      const card = element.closest('.watchVideoInfo')
+      const cardBox = card.getBoundingClientRect()
+      const contentRight = cardBox.right - parseFloat(getComputedStyle(card).paddingInlineEnd)
+      return element.getBoundingClientRect().right <= contentRight + 0.5 &&
+        [...element.querySelectorAll('.iconButton, .downloadButton')].every(button => {
+          const box = button.getBoundingClientRect()
+          return box.width >= 48 && box.height >= 48 && box.right <= contentRight + 0.5
+        })
+    })).toBe(true)
+  })
+
   test('opens chapters and transcript as independent sheets', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page, { captionTranslations: true })
     await openMockedVideo(page)
