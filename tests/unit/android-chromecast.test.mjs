@@ -372,27 +372,34 @@ for (const shared of [false, true]) {
   })
 }
 
-test('Chromecast dispatch uses Android or Electron and safely handles iOS and web', async () => {
+test('Google Cast and FCast dispatch use Android or Electron and safely handle iOS and web', async () => {
   const source = await readFile(new URL('../../src/renderer/helpers/player/chromecast.js', import.meta.url), 'utf8')
-  const expression = source.slice(source.indexOf('export const chromecast =') + 'export const chromecast ='.length)
-  const adapter = compileFunction(`return ${expression}`, ['process', 'window', 'createMobileChromecast', 'registerPlugin'])
+  const dispatch = source.slice(source.indexOf('/** @param {\'chromecast\' | \'fcast\'} name */')).replaceAll('export const ', 'const ')
+  const adapter = compileFunction(`${dispatch}\nreturn { chromecast, fcast }`, ['process', 'window', 'createMobileChromecast', 'createMobileFcast', 'registerPlugin'])
   const native = {}
-  const mobile = {}
+  const registrations = []
+  const mobile = { chromecast: {}, fcast: {} }
   const android = adapter({ env: { IS_CAPACITOR: true, IS_IOS: false, IS_ELECTRON: false } }, undefined,
-    plugin => { assert.equal(plugin, native); return mobile }, name => { assert.equal(name, 'Chromecast'); return native })
-  assert.equal(android, mobile)
-  const calls = []
-  const electron = Object.fromEntries(['discover', 'start', 'status', 'control', 'stop'].map(method => [method, (...args) => { calls.push([method, ...args]); return method }]))
-  const desktop = adapter({ env: { IS_CAPACITOR: false, IS_IOS: false, IS_ELECTRON: true } }, { ftElectron: { chromecast: electron } })
-  for (const method of Object.keys(electron)) assert.equal(await desktop[method]('id', 'seek', 12), method)
-  assert.deepEqual(calls, [['discover'], ['start', 'id', 'seek'], ['status', 'id'], ['control', 'id', 'seek', 12], ['stop', 'id']])
+    plugin => { assert.equal(plugin, native); return mobile.chromecast },
+    plugin => { assert.equal(plugin, native); return mobile.fcast },
+    name => { registrations.push(name); return native })
+  assert.deepEqual(android, mobile)
+  assert.deepEqual(registrations, ['Chromecast'], 'Both protocols share one native plugin registration')
+  for (const protocol of ['chromecast', 'fcast']) {
+    const calls = []
+    const electron = Object.fromEntries(['discover', 'start', 'status', 'control', 'stop'].map(method => [method, (...args) => { calls.push([method, ...args]); return method }]))
+    const desktop = adapter({ env: { IS_CAPACITOR: false, IS_IOS: false, IS_ELECTRON: true } }, { ftElectron: { [protocol]: electron } })[protocol]
+    for (const method of Object.keys(electron)) assert.equal(await desktop[method]('id', 'seek', 12), method)
+    assert.deepEqual(calls, [['discover'], ['start', 'id', 'seek'], ['status', 'id'], ['control', 'id', 'seek', 12], ['stop', 'id']])
+  }
   for (const ios of [true, false]) {
-    const unsupported = adapter({ env: { IS_CAPACITOR: ios, IS_IOS: ios, IS_ELECTRON: false } }, undefined)
-    assert.deepEqual(await unsupported.discover(), [])
-    assert.deepEqual(await unsupported.status('id'), { connected: false })
-    assert.deepEqual(await unsupported.stop('id'), { connected: false })
-    assert.match((await unsupported.start(() => assert.fail('Unsupported platforms must not prepare playback'))).error, /not supported/)
-    assert.match((await unsupported.control('id', 'play')).error, /not supported/)
+    for (const unsupported of Object.values(adapter({ env: { IS_CAPACITOR: ios, IS_IOS: ios, IS_ELECTRON: false } }, undefined))) {
+      assert.deepEqual(await unsupported.discover(), [])
+      assert.deepEqual(await unsupported.status('id'), { connected: false })
+      assert.deepEqual(await unsupported.stop('id'), { connected: false })
+      assert.match((await unsupported.start(() => assert.fail('Unsupported platforms must not prepare playback'))).error, /not supported/)
+      assert.match((await unsupported.control('id', 'play')).error, /not supported/)
+    }
   }
 })
 
@@ -450,4 +457,99 @@ test('Android rewrites DASH templates and HLS child playlists before replying to
     contentType: 'application/x-mpegurl', body: '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=100\nvideo.m3u8' })
   assert.match(fixture.completed[1].body, /http:\/\/192\.168\.1\.2:8000\//)
   assert.ok(fixture.resources.some(resource => resource.contentType === 'application/x-mpegurl' && resource.candidates[0].url === 'https://media.test/video.m3u8'))
+})
+
+const { createMobileFcast } = await import('../../src/renderer/helpers/player/chromecast.js')
+
+/** The Android plugin boundary: framing and TCP stay native, packets cross as JSON. */
+function fcastNativeFixture({ onPlay = fixture => fixture.packet(6, { generationTime: 1, state: 1, time: 12, duration: 120 }) } = {}) {
+  const listeners = new Map()
+  const calls = []
+  const resources = []
+  let castId
+  const fixture = {
+    calls,
+    resources,
+    packets: () => calls.filter(([name]) => name === 'sendPacket').map(([, options]) => [options.opcode, options.body]),
+    async event(value) { await Promise.all([...listeners.get('castEvent') ?? []].map(listener => listener({ castId, ...value }))) },
+    packet(opcode, body) { return fixture.event({ event: 'packet', opcode, ...(body ? { body } : {}) }) },
+    listenerCount() { return [...listeners.values()].reduce((sum, value) => sum + value.size, 0) }
+  }
+  fixture.native = {
+    async addListener(event, callback) {
+      if (!listeners.has(event)) listeners.set(event, new Set())
+      listeners.get(event).add(callback)
+      return { async remove() { listeners.get(event).delete(callback) } }
+    },
+    async discover(options) { calls.push(['discover', options]); return { devices: [{ id: 'Living Room', name: 'Living Room', address: '192.168.1.7', port: 46899 }] } },
+    async connect(options) {
+      calls.push(['connect', options])
+      castId = options.castId
+      // The receiver greets before the connection promise settles.
+      await fixture.packet(11, { version: 3 })
+      return { address: '192.168.1.2' }
+    },
+    async openMedia(options) { calls.push(['openMedia', options]); return { origin: 'http://192.168.1.2:8000' } },
+    async registerResources(options) { calls.push(['registerResources']); resources.push(...options.resources) },
+    async completeManifest() {},
+    async disconnect(options) { calls.push(['disconnect', options]) },
+    async sendPacket(options) {
+      calls.push(['sendPacket', options])
+      if (options.opcode === 1) queueMicrotask(() => onPlay(fixture))
+    }
+  }
+  return fixture
+}
+
+const fcastHandoff = { deviceId: 'Living Room', title: 'Android FCast test', startSeconds: 12, paused: false, playbackRate: 1,
+  source: { url: 'https://media.test/manifest.mpd', contentType: 'application/dash+xml' } }
+
+test('Android FCast plays through the native Cast relay and controls the receiver', async () => {
+  const fixture = fcastNativeFixture()
+  const wake = []
+  const api = createMobileFcast(fixture.native, { acquire() { wake.push('acquire'); return () => wake.push('release') } })
+  assert.deepEqual(await api.discover(), [{ id: 'Living Room', name: 'Living Room' }])
+  const result = await api.start(() => fcastHandoff)
+  assert.ok(result.castId, result.error)
+  assert.equal(result.deviceName, 'Living Room')
+  const [, connect] = fixture.calls.find(([name]) => name === 'connect')
+  assert.deepEqual(fixture.calls.find(([name]) => name === 'discover')[1], { protocol: 'fcast' })
+  assert.equal(connect.protocol, 'fcast')
+  assert.equal(connect.deviceId, 'Living Room')
+  assert.equal(fixture.resources[0].candidates[0].url, fcastHandoff.source.url)
+  // The relay knows the manifest before the receiver can request it.
+  assert.ok(fixture.calls.findIndex(([name]) => name === 'registerResources') < fixture.calls.findIndex(([name, options]) => name === 'sendPacket' && options.opcode === 1))
+  const [[, version], [, initial], [, subscribe], [, play]] = fixture.packets()
+  assert.deepEqual([version, initial, subscribe], [{ version: 3 }, { appName: 'OpenTubeX' }, { event: { type: 1 } }])
+  assert.deepEqual(play, { container: 'application/dash+xml', url: `http://192.168.1.2:8000/${connect.castId}/0/media`, time: 12, speed: 1, metadata: { type: 0, title: 'Android FCast test' } })
+  assert.deepEqual(wake, ['acquire'])
+  assert.equal((await api.control(result.castId, 'pause')).paused, true)
+  assert.deepEqual(wake, ['acquire', 'release'])
+  await fixture.packet(12)
+  assert.deepEqual(fixture.packets().slice(-2), [[2, undefined], [13, undefined]])
+  await fixture.packet(19, { generationTime: 2, event: { type: 1, item: { container: 'application/dash+xml', url: play.url } } })
+  assert.equal((await api.status(result.castId)).ended, true)
+  await api.stop(result.castId)
+  assert.deepEqual(fixture.packets().at(-1), [4, undefined])
+  assert.deepEqual(fixture.calls.at(-1), ['disconnect', { castId: connect.castId }])
+  assert.equal(fixture.listenerCount(), 0)
+})
+
+test('Android FCast keeps native connection codes and ends on a native close', async () => {
+  const fixture = fcastNativeFixture()
+  const connect = fixture.native.connect
+  fixture.native.connect = async () => { throw Object.assign(new Error('FCast receiver did not respond'), { code: 'CAST_TIMEOUT' }) }
+  const api = createMobileFcast(fixture.native, { acquire() { return () => {} } })
+  await api.discover()
+  assert.deepEqual(await api.start(() => fcastHandoff), { error: 'FCast receiver did not respond', errorCode: 'CAST_TIMEOUT' })
+  assert.equal(fixture.listenerCount(), 0)
+  assert.ok(!fixture.calls.some(([name]) => name === 'openMedia'))
+
+  fixture.native.connect = connect
+  const result = await api.start(() => fcastHandoff)
+  assert.ok(result.castId, result.error)
+  await fixture.event({ event: 'closed' })
+  assert.deepEqual(await api.status(result.castId), { connected: false })
+  assert.equal(fixture.listenerCount(), 0)
+  assert.deepEqual(await api.start(() => null), { error: 'Cast cancelled', errorCode: 'CAST_CANCELLED' })
 })

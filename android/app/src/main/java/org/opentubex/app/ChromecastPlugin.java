@@ -13,14 +13,18 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/** Google Cast and FCast sessions; one at a time shares the relay and foreground service. */
 @CapacitorPlugin(name = "Chromecast")
 public final class ChromecastPlugin extends Plugin {
+    // Senders send these FCast opcodes; receiver updates only arrive.
+    private static final java.util.Set<Integer> FCAST_SENDER_OPCODES = java.util.Set.of(1, 2, 3, 4, 5, 8, 11, 12, 13, 14, 17);
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
     private final ExecutorService discoveryWorker = Executors.newSingleThreadExecutor();
     // Receiver LOAD waits on control; its manifest requests must progress independently.
     private final ExecutorService mediaWorker = Executors.newSingleThreadExecutor();
     private final Map<String, JSObject> devices = new ConcurrentHashMap<>();
-    private volatile CastTransport transport;
+    private final Map<String, JSObject> fcastDevices = new ConcurrentHashMap<>();
+    private volatile CastConnection transport;
     private volatile CastMediaServer media;
     private volatile String castId;
     private volatile boolean destroyed;
@@ -29,14 +33,16 @@ public final class ChromecastPlugin extends Plugin {
         return new File(getContext().getApplicationInfo().nativeLibraryDir, "libopentubex_cast.so").getAbsolutePath();
     }
 
+    private static boolean fcast(PluginCall call) { return "fcast".equals(call.getString("protocol")); }
+
     @PluginMethod public void discover(PluginCall call) {
         discoveryWorker.execute(() -> {
             try {
                 if (destroyed) throw new IllegalStateException("Cast plugin closed");
-                JSArray found = CastDiscovery.discover(getContext());
+                JSArray found = CastDiscovery.discover(getContext(), fcast(call));
                 for (int index = 0; index < found.length(); index++) {
                     JSObject device = JSObject.fromJSONObject(found.getJSONObject(index));
-                    devices.put(device.getString("id"), device);
+                    (fcast(call) ? fcastDevices : devices).put(device.getString("id"), device);
                 }
                 call.resolve(new JSObject().put("devices", found));
             } catch (Exception error) { call.reject("Unable to discover Cast devices", error); }
@@ -45,7 +51,7 @@ public final class ChromecastPlugin extends Plugin {
 
     @PluginMethod public void connect(PluginCall call) {
         worker.execute(() -> {
-            JSObject device = devices.get(call.getString("deviceId", ""));
+            JSObject device = (fcast(call) ? fcastDevices : devices).get(call.getString("deviceId", ""));
             String id = call.getString("castId", "");
             if (destroyed || transport != null || device == null || !id.matches("[a-fA-F0-9-]{36}")) {
                 call.reject("Invalid Cast device or another cast is active"); return;
@@ -53,14 +59,24 @@ public final class ChromecastPlugin extends Plugin {
             try {
                 castId = id;
                 peerAddress = device.getString("address");
-                transport = new CastTransport(executable(), device.getString("address"), device.optInt("port"), event -> {
+                java.util.function.Consumer<JSObject> events = event -> {
                     notifyListeners("castEvent", event.put("castId", id));
                     if ("closed".equals(event.getString("event"))) {
                         try { worker.execute(() -> { if (id.equals(castId)) cleanup(); }); }
                         catch (java.util.concurrent.RejectedExecutionException ignored) { /* Destruction already cleans up. */ }
                     }
-                });
-                call.resolve(new JSObject().put("address", transport.connect()));
+                };
+                String address;
+                if (fcast(call)) {
+                    FcastTransport receiver = new FcastTransport(peerAddress, device.optInt("port"), events);
+                    transport = receiver;
+                    address = receiver.connect();
+                } else {
+                    CastTransport sender = new CastTransport(executable(), peerAddress, device.optInt("port"), events);
+                    transport = sender;
+                    address = sender.connect();
+                }
+                call.resolve(new JSObject().put("address", address));
             } catch (Exception error) { cleanup(); rejectTransport(call, "Unable to connect to Cast device", error); }
         });
     }
@@ -80,14 +96,25 @@ public final class ChromecastPlugin extends Plugin {
             String namespace = call.getString("namespace", "");
             String destination = call.getString("destination", "");
             JSObject payload = call.getObject("payload");
-            if (!owns(call) || payload == null || !java.util.Set.of("urn:x-cast:com.google.cast.tp.connection",
+            if (!owns(call) || !(transport instanceof CastTransport sender) || payload == null || !java.util.Set.of("urn:x-cast:com.google.cast.tp.connection",
                 "urn:x-cast:com.google.cast.receiver", "urn:x-cast:com.google.cast.media",
                 "urn:x-cast:com.google.cast.tp.heartbeat").contains(namespace) ||
                 destination.isEmpty() || destination.length() > 256 || payload.toString().length() > 1_000_000) {
                 call.reject("Invalid Cast command"); return;
             }
-            try { call.resolve(transport.send(namespace, destination, payload, call.getBoolean("wait", true))); }
+            try { call.resolve(sender.send(namespace, destination, payload, call.getBoolean("wait", true))); }
             catch (Exception error) { rejectTransport(call, "Cast command failed", error); }
+        });
+    }
+
+    @PluginMethod public void sendPacket(PluginCall call) {
+        worker.execute(() -> {
+            Integer opcode = call.getInt("opcode");
+            if (!owns(call) || !(transport instanceof FcastTransport receiver) || opcode == null || !FCAST_SENDER_OPCODES.contains(opcode)) {
+                call.reject("Invalid FCast packet"); return;
+            }
+            try { receiver.send(opcode, call.getObject("body")); call.resolve(); }
+            catch (Exception error) { rejectTransport(call, "FCast command failed", error); }
         });
     }
 
@@ -141,9 +168,9 @@ public final class ChromecastPlugin extends Plugin {
 
     private void cleanup() {
         String id = castId;
-        CastTransport sender = transport;
+        CastConnection connection = transport;
         transport = null;
-        if (sender != null) sender.close();
+        if (connection != null) connection.close();
         CastMediaServer relay = media;
         media = null;
         if (relay != null) relay.close();
