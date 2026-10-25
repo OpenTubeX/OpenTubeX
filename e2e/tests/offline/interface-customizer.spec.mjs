@@ -159,6 +159,43 @@ test.describe('interface customizer', () => {
     await expect(customizer.locator('.previewFullscreenActions')).toBeVisible()
   })
 
+  test('previews the compact controls and their player menu in the phone layout', { tag: '@scale' }, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 360, height: 760 })
+    await page.evaluate(async () => {
+      await window.$store.dispatch('updateEnableScreenshot', true)
+      await window.$store.dispatch('updateUseQuickPlaybackSpeedBar', true)
+    })
+    const customizer = await openInterfaceCustomizer(page, 'control bar')
+    const preview = customizer.locator('.playerPreview')
+    const modes = () => customizer.locator('.previewModes [role="tab"]').evaluateAll(elements => (
+      elements.map(element => element.dataset.previewMode)
+    ))
+    const previewIds = () => preview.locator('[data-preview-control]').evaluateAll(elements => (
+      elements.map(element => element.dataset.previewControl)
+    ))
+    const menuIds = () => preview.locator('[data-preview-overflow-item]').evaluateAll(elements => (
+      elements.map(element => element.dataset.previewOverflowItem)
+    ))
+
+    // Like the player, the compact control bar keeps captions, the menu and fullscreen.
+    await expect.poll(modes).toEqual(['window', 'menu'])
+    await expect(preview.locator('.previewOverflowMenu')).toHaveCount(0)
+    await expect.poll(previewIds).toEqual(['captions', 'menu', 'fullscreen'])
+
+    await customizer.getByRole('tab', { name: 'Player menu', exact: true }).click()
+    await expect.poll(async () => {
+      const ids = await menuIds()
+      return [...ids.slice(0, 2), ids[ids.indexOf('sleepTimer') + 1], ...ids.slice(-3)]
+    }).toEqual(['quality', 'playbackRate', 'autoplay', 'screenshot', 'pictureInPicture', 'fullWindow'])
+    await expect.poll(menuIds).not.toContain('theatreMode')
+
+    await setWindowSize(app, page, { width: 1200, height: 800 })
+    await expect.poll(modes).toEqual([])
+    // The full control bar returns, with the menu open while playing.
+    await expect(preview.locator('.previewOverflowMenu')).toBeVisible()
+    await expect.poll(previewIds).toEqual(['quickPlaybackSpeedBar', 'screenshot', 'autoplay', 'captions', 'menu', 'pictureInPicture', 'theatreMode', 'fullWindow', 'fullscreen'])
+  })
+
   test('previews the fullscreen action order', async ({ page }) => {
     const customizer = await openInterfaceCustomizer(page, 'fullscreen actions')
     const actions = customizer.locator('.previewFullscreenActions [data-preview-fullscreen-action]')
@@ -300,7 +337,9 @@ test.describe('interface customizer', () => {
     })
     for (const size of [{ width: 1200, height: 800 }, { width: 420, height: 760 }]) {
       if (size.width !== 1200) await setWindowSize(app, page, size)
-      for (const mode of ['Playing', 'Fullscreen', 'Paused']) {
+      // The phone layout previews the player menu separately.
+      const modes = size.width === 1200 ? ['Playing', 'Fullscreen', 'Paused'] : ['Playing', 'Player menu', 'Fullscreen', 'Paused']
+      for (const mode of modes) {
         await customizer.getByRole('tab', { name: mode, exact: true }).click()
         await expect.poll(() => customizer.locator('.previewStage').evaluate(stage => {
           const bounds = stage.getBoundingClientRect()
@@ -325,6 +364,7 @@ test.describe('interface customizer', () => {
   test('scales preview text with the player when the stage is wider', { tag: '@scale' }, async ({ app, page }) => {
     await setWindowSize(app, page, { width: 420, height: 760 })
     const customizer = await openInterfaceCustomizer(page, 'player')
+    await customizer.getByRole('tab', { name: 'Player menu', exact: true }).click()
     // Font sizes in the player's 800px design units.
     const sizes = await customizer.locator('.previewStage').evaluate(stage => {
       const player = stage.querySelector('.previewPlayer').getBoundingClientRect()
@@ -354,6 +394,7 @@ test.describe('interface customizer', () => {
 
     // Like the real player, the phone layout opens its menu over the whole player.
     await setWindowSize(app, page, { width: 360, height: 760 })
+    await customizer.getByRole('tab', { name: 'Player menu', exact: true }).click()
     await expect.poll(menuCoversPlayer).toBe(true)
     await expect(close).toBeVisible()
     await expect.poll(() => customizer.locator('.previewOverflowGrid').evaluate(grid => (
@@ -369,6 +410,7 @@ test.describe('interface customizer', () => {
     await setWindowSize(app, page, { width: 360, height: 760 })
     const customizer = await openInterfaceCustomizer(page, 'player')
     await setToggles(true)
+    await customizer.getByRole('tab', { name: 'Player menu', exact: true }).click()
     const grid = customizer.locator('.previewOverflowGrid')
     const expectScrollbarToMatchRange = () => expect.poll(() => grid.evaluate(element => {
       const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')

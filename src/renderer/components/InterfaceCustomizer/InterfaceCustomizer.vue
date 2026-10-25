@@ -168,12 +168,14 @@ import store from '../../store/index'
 import { getControlBarButtonDefinitions, DEFAULT_CONTROL_BAR_BUTTONS } from '../../helpers/controlBarButtons'
 import { DEFAULT_FULLSCREEN_ACTIONS, FULLSCREEN_ACTION_DEFINITIONS } from '../../helpers/fullscreenActions'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { usePhoneLayout } from '../../composables/usePhoneLayout'
 
 const { t } = useI18n()
 const idPrefix = `interface-customizer-${useId().replaceAll(':', '')}`
 const open = ref(false)
 const activeTabId = ref('navigation')
 const controlBarButtonDefinitions = getControlBarButtonDefinitions()
+const usesPhoneLayout = usePhoneLayout()
 
 // The side navigation switches to the bottom bar at this width.
 const mobileNavigationLayout = window.matchMedia('(max-width: 680px)')
@@ -187,8 +189,11 @@ onMounted(() => mobileNavigationLayout.addEventListener('change', handleMobileNa
 onBeforeUnmount(() => mobileNavigationLayout.removeEventListener('change', handleMobileNavigationLayoutChange))
 
 const tabs = computed(() => {
-  // The playing preview shows the player menu open.
-  const playingMode = { id: 'window', icon: ['fas', 'play'], label: t('Settings.Interface Customizer.Playing') }
+  // Outside the phone layout, the playing preview shows the player menu open.
+  const playingModes = [
+    { id: 'window', icon: ['fas', 'play'], label: t('Settings.Interface Customizer.Playing') },
+    ...(usesPhoneLayout.value ? [{ id: 'menu', icon: ['fas', 'gear'], label: t('Settings.Interface Customizer.Player Menu') }] : []),
+  ]
   const fullscreenMode = { id: 'fullscreen', icon: ['fas', 'expand'], label: t('Settings.Interface Customizer.Fullscreen') }
   const pausedMode = { id: 'paused', icon: ['fas', 'pause'], label: t('Settings.Interface Customizer.Paused') }
   return [
@@ -216,7 +221,7 @@ const tabs = computed(() => {
       icon: ['fas', 'circle-play'],
       label: t('Settings.Interface Customizer.Player'),
       syncKey: null,
-      previewModes: [playingMode, fullscreenMode, pausedMode],
+      previewModes: [...playingModes, fullscreenMode, pausedMode],
     },
     {
       id: 'controlBar',
@@ -225,7 +230,7 @@ const tabs = computed(() => {
       // Each device keeps its own control bar, so this tab offers no sync toggle.
       syncKey: null,
       // Buttons removed from the control bar move into the player menu.
-      previewModes: [playingMode],
+      previewModes: playingModes,
     },
     {
       id: 'fullscreenActions',
@@ -241,8 +246,14 @@ const activeTab = computed(() => tabs.value.find(tab => tab.id === activeTabId.v
 
 // Each tab remembers the preview state last chosen for it.
 const previewModes = reactive({})
-const activePreviewMode = computed(() => previewModes[activeTabId.value] ??
-  activeTab.value.defaultPreviewMode ?? activeTab.value.previewModes[0]?.id)
+// The player menu state only exists in the phone layout.
+const activePreviewMode = computed(() => {
+  const modes = activeTab.value.previewModes
+  const remembered = previewModes[activeTabId.value]
+  return modes.some(mode => mode.id === remembered)
+    ? remembered
+    : activeTab.value.defaultPreviewMode ?? modes[0]?.id
+})
 
 const editorScrollRef = useTemplateRef('editorScrollRef')
 // Each tab returns to the editor position it was left at.
