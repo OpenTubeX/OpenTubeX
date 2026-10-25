@@ -1947,6 +1947,8 @@ Video:
       Error: "Kunne ikkje strøyme videoen"
       Error With Details: "Kunne ikkje strøyme videoen: {error}"
       Untrusted Receiver: "Sertifikatet til mottakaren er ikkje tiltrudd. Bruk ein autentisert Google Cast-mottakar."
+    FCast:
+      Cast: "Cast til ein FCast-mottakar"
     Secondary Captions: Sekundær teksting
     Subtitle File:
       Load: "Last inn undertekstfil…"

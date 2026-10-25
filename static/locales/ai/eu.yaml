@@ -1680,6 +1680,8 @@ Video:
       Error: "Ezin izan da bideoa igorri"
       Error With Details: "Ezin izan da bideoa igorri: {error}"
       Untrusted Receiver: "Hartzailearen ziurtagiria ez da fidagarria. Erabili autentifikatutako Google Cast hartzaile bat."
+    FCast:
+      Cast: "Igorri FCast hartzaile batera"
     Secondary Captions: Bigarren mailako azpitituluak
     Subtitle File:
       Load: "Kargatu azpititulu-fitxategia…"

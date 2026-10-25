@@ -1682,6 +1682,8 @@ Video:
       Error: "Videonu yayımlamaq mümkün olmadı"
       Error With Details: "Videonu yayımlamaq mümkün olmadı: {error}"
       Untrusted Receiver: "Qəbuledicinin sertifikatına etibar edilmir. Təsdiqlənmiş Google Cast qəbuledicisindən istifadə edin."
+    FCast:
+      Cast: "FCast qəbuledicisinə yayımla"
     Secondary Captions: İkinci altyazılar
     Subtitle File:
       Load: "Altyazı faylını yüklə…"

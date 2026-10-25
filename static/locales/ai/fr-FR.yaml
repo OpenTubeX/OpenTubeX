@@ -1668,6 +1668,8 @@ Video:
       Error: "Impossible de diffuser la vidéo"
       Error With Details: "Impossible de diffuser la vidéo: {error}"
       Untrusted Receiver: "Le certificat du récepteur n’est pas fiable. Utilisez un récepteur Google Cast authentifié."
+    FCast:
+      Cast: "Diffuser sur un récepteur FCast"
     Secondary Captions: Sous-titres secondaires
     Subtitle File:
       Load: "Charger un fichier de sous-titres…"

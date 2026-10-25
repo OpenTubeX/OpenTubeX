@@ -10,7 +10,7 @@ import { EventEmitter } from 'node:events'
 test('macOS packaging declares every Bonjour service browsed by the Cast helper', async () => {
   const { default: config } = await import('../../_scripts/ebuilder.config.mjs')
   const helper = await readFile(new URL('../../_scripts/cast-sender/main.go', import.meta.url), 'utf8')
-  const services = [...helper.matchAll(/resolver\.Browse\(ctx, "([^"]+)"/g)].map(match => match[1])
+  const services = [...helper.matchAll(/discover\("(_[\w-]+\._tcp)"/g)].map(match => match[1])
   assert.ok(services.length > 0, 'Must find the native discovery service')
   assert.match(config.mac.extendInfo.NSLocalNetworkUsageDescription, /\S/)
   for (const service of services) {

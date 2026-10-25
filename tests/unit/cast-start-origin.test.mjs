@@ -46,6 +46,8 @@ async function fixture(defaultInstance = 'http://192.168.1.2:3000', settings = {
     getYtDlpExternalStreamHeaders: () => ({}),
     getYtDlpExternalStreamCookieHeader: () => null,
     session: { defaultSession: { getUserAgent: () => 'Cast test', resolveHost: async () => ({ endpoints: [{ address: '192.168.1.10', family: 'ipv4' }] }) } },
+    castManager: () => context.chromecast,
+    fcast: {},
     chromecast: {
       start: async (owner, _payload, getHeaders, resolve, _fetch, onProgress) => {
         resolvers.set(owner, resolve)

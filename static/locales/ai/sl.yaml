@@ -2128,6 +2128,8 @@ Video:
       Error: "Videoposnetka ni bilo mogoče predvajati na napravi"
       Error With Details: "Videoposnetka ni bilo mogoče predvajati na napravi: {error}"
       Untrusted Receiver: "Potrdilo sprejemnika ni zaupanja vredno. Uporabite preverjen sprejemnik Google Cast."
+    FCast:
+      Cast: "Predvajaj na sprejemniku FCast"
     Secondary Captions: Sekundarni podnapisi
     Subtitle File:
       Load: "Naloži datoteko s podnapisi…"

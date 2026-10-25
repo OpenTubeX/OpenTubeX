@@ -13,16 +13,17 @@ import { isOpenTubeXUrl } from './utils'
 import { getDlnaFfmpegExecutable, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders } from './ytDlp'
 
 /**
- * Registers the Google Cast and DLNA handlers. Only a focused OpenTubeX window
+ * Registers the Google Cast, FCast and DLNA handlers. Only a focused OpenTubeX window
  * may start casting, and each window controls only its own casts.
  * @param {object} options
  * @param {import('./chromecast').ChromecastManager} options.chromecast
+ * @param {import('./fcast').FcastManager} options.fcast
  * @param {Map<number, { url: string, authorization: string }>} options.invidiousAuthorizations
  * @param {() => Promise<string | undefined>} options.getConfiguredApiServerUrl
  */
-export function setupCastIpc({ chromecast, invidiousAuthorizations, getConfiguredApiServerUrl }) {
+export function setupCastIpc({ chromecast, fcast, invidiousAuthorizations, getConfiguredApiServerUrl }) {
   /** Relays may reach a non-public address only for the user's Invidious instance or Yattee server, after native consent. */
-  const createMediaAddressResolver = async (sender, isDlna) => {
+  const createMediaAddressResolver = async (sender, protocol) => {
     let privateInstance = null
     try {
       const configuredInstance = await getConfiguredApiServerUrl()
@@ -42,9 +43,10 @@ export function setupCastIpc({ chromecast, invidiousAuthorizations, getConfigure
       privateApproval ??= (async () => {
         const t = await createMainTranslator()
         if (sender.isDestroyed()) return false
+        const titles = { dlna: t('Video.Player.DLNA.Cast'), google: t('Video.Player.Google Cast.Cast'), fcast: t('Video.Player.FCast.Cast') }
         const { response } = await dialog.showMessageBox(BrowserWindow.fromWebContents(sender), {
           type: 'question',
-          title: isDlna ? t('Video.Player.DLNA.Cast') : t('Video.Player.Google Cast.Cast'),
+          title: titles[protocol],
           message: t('Video.Player.Google Cast.Allow Private Instance', { instance: privateInstance }),
           buttons: [t('Cancel'), t('Yes')],
           defaultId: 0,
@@ -93,7 +95,7 @@ export function setupCastIpc({ chromecast, invidiousAuthorizations, getConfigure
         muxOptions = { ffmpegPath: await getDlnaFfmpegExecutable(), audioHeaders: sourceHeaders(payload.audioUrl) }
       } catch (error) { return { error: error.message, muxUnavailable: true } }
     }
-    const { resolveAddresses } = await createMediaAddressResolver(event.sender, true)
+    const { resolveAddresses } = await createMediaAddressResolver(event.sender, 'dlna')
     // Validate before the renderer requests media, so a refused source cannot start a cast
     // and a private instance's dialog cannot outlast the renderer's timeout.
     for (const sourceUrl of [payload?.mediaUrl, payload?.audioUrl]) {
@@ -151,9 +153,11 @@ export function setupCastIpc({ chromecast, invidiousAuthorizations, getConfigure
     return stopDlnaCast(event.sender.id, castId)
   })
 
-  ipcMain.handle(IpcChannels.CAST_DISCOVER, async event => {
+  // Google Cast and FCast share the casting IPC, selected by `protocol`.
+  const castManager = protocol => protocol === 'fcast' ? fcast : chromecast
+  ipcMain.handle(IpcChannels.CAST_DISCOVER, async (event, protocol) => {
     if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused()) return []
-    try { return await chromecast.discover() } catch (error) { return { error: error.message, ...(error.code ? { errorCode: error.code } : {}) } }
+    try { return await castManager(protocol).discover() } catch (error) { return { error: error.message, ...(error.code ? { errorCode: error.code } : {}) } }
   })
   const castOwners = new WeakSet()
   const castPreparations = new Map()
@@ -166,7 +170,9 @@ export function setupCastIpc({ chromecast, invidiousAuthorizations, getConfigure
       castOwners.add(event.sender)
       event.sender.once('destroyed', () => {
         castPreparations.delete(ownerId)
-        if (chromecast.active?.ownerId === ownerId) chromecast.stop(ownerId, chromecast.active.castId).catch(console.error)
+        for (const manager of [chromecast, fcast]) {
+          if (manager.active?.ownerId === ownerId) manager.stop(ownerId, manager.active.castId).catch(console.error)
+        }
       })
     }
     return { preparationId }
@@ -176,7 +182,7 @@ export function setupCastIpc({ chromecast, invidiousAuthorizations, getConfigure
       castPreparations.delete(event.sender.id)
     }
   })
-  ipcMain.handle(IpcChannels.CAST_START, async (event, payload, preparationId) => {
+  ipcMain.handle(IpcChannels.CAST_START, async (event, payload, preparationId, protocol) => {
     const ownerId = event.sender.id
     const preparation = castPreparations.get(ownerId)
     if (!isOpenTubeXUrl(event.senderFrame.url) || !preparation || preparation.preparationId !== preparationId ||
@@ -200,7 +206,8 @@ export function setupCastIpc({ chromecast, invidiousAuthorizations, getConfigure
       if (cookies !== null) headers.Cookie = cookies
       return headers
     }
-    const { privateInstance, resolveAddresses } = await createMediaAddressResolver(event.sender, false)
+    const manager = castManager(protocol)
+    const { privateInstance, resolveAddresses } = await createMediaAddressResolver(event.sender, protocol === 'fcast' ? 'fcast' : 'google')
     const fetchMedia = async (url, options) => fetchCastMedia(new URL(url).protocol === 'https:' ? https : http, url, {
       ...options, proxy: await session.defaultSession.resolveProxy(url)
     })
@@ -219,24 +226,24 @@ export function setupCastIpc({ chromecast, invidiousAuthorizations, getConfigure
         }
       }
     }
-    const result = await chromecast.start(ownerId, payload, getHeaders, resolveAddresses, fetchMedia, onProgress)
+    const result = await manager.start(ownerId, payload, getHeaders, resolveAddresses, fetchMedia, onProgress)
     if (result.castId) {
-      if (event.sender.isDestroyed()) await chromecast.stop(ownerId, result.castId)
+      if (event.sender.isDestroyed()) await manager.stop(ownerId, result.castId)
     }
     return result
   })
-  ipcMain.handle(IpcChannels.CAST_STATUS, (event, castId) => {
+  ipcMain.handle(IpcChannels.CAST_STATUS, (event, castId, protocol) => {
     if (!isOpenTubeXUrl(event.senderFrame.url) || typeof castId !== 'string') return { connected: false }
-    return chromecast.status(event.sender.id, castId)
+    return castManager(protocol).status(event.sender.id, castId)
   })
-  ipcMain.handle(IpcChannels.CAST_CONTROL, (event, castId, action, value) => {
+  ipcMain.handle(IpcChannels.CAST_CONTROL, (event, castId, action, value, protocol) => {
     if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused() || typeof castId !== 'string') {
       return { error: 'Casting requires an active OpenTubeX window', errorCode: 'CAST_NOT_AUTHORIZED' }
     }
-    return chromecast.control(event.sender.id, castId, action, value)
+    return castManager(protocol).control(event.sender.id, castId, action, value)
   })
-  ipcMain.handle(IpcChannels.CAST_STOP, (event, castId) => {
+  ipcMain.handle(IpcChannels.CAST_STOP, (event, castId, protocol) => {
     if (!isOpenTubeXUrl(event.senderFrame.url) || typeof castId !== 'string') return { connected: false }
-    return chromecast.stop(event.sender.id, castId)
+    return castManager(protocol).stop(event.sender.id, castId)
   })
 }

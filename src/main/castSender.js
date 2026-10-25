@@ -9,8 +9,9 @@ export const CAST_CONNECTION = 'urn:x-cast:com.google.cast.tp.connection'
 export const CAST_RECEIVER = 'urn:x-cast:com.google.cast.receiver'
 export const CAST_MEDIA = 'urn:x-cast:com.google.cast.media'
 
-export async function discoverCastDevices(executable) {
-  const { stdout } = await execFileAsync(executable, ['discover'], { timeout: 6000, maxBuffer: 256_000, windowsHide: true })
+/** `command` is `discover` for Google Cast or `discover-fcast` for FCast receivers. */
+export async function discoverCastDevices(executable, command = 'discover') {
+  const { stdout } = await execFileAsync(executable, [command], { timeout: 6000, maxBuffer: 256_000, windowsHide: true })
   const devices = JSON.parse(stdout)
   if (!Array.isArray(devices)) throw Object.assign(new Error('Invalid Cast discovery response'), { code: 'CAST_DISCOVERY_FAILED' })
   return devices.filter(device => typeof device.id === 'string' && device.id.length <= 256 &&

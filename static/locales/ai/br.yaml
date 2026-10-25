@@ -1679,6 +1679,8 @@ Video:
       Error: "N’eo ket bet gallet skignañ ar video"
       Error With Details: "N’eo ket bet gallet skignañ ar video: {error}"
       Untrusted Receiver: "N’eo ket fiziet e testeni ar resever. Implijit ur resever Google Cast dilesaet."
+    FCast:
+      Cast: "Kas d’ur resever FCast"
     Secondary Captions: Eil istitloù
     Subtitle File:
       Load: "Kargañ ur restr istitloù…"

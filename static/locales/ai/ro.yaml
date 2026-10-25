@@ -1704,6 +1704,8 @@ Video:
       Error: "Videoclipul nu a putut fi transmis"
       Error With Details: "Videoclipul nu a putut fi transmis: {error}"
       Untrusted Receiver: "Certificatul receptorului nu este de încredere. Folosește un receptor Google Cast autentificat."
+    FCast:
+      Cast: "Transmite către un receptor FCast"
     Secondary Captions: Subtitrări secundare
     Subtitle File:
       Load: "Încarcă fișierul de subtitrare…"

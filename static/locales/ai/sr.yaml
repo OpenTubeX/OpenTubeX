@@ -1732,6 +1732,8 @@ Video:
       Error: "Видео није могуће емитовати"
       Error With Details: "Видео није могуће емитовати: {error}"
       Untrusted Receiver: "Сертификат пријемника није поуздан. Користите аутентификован Google Cast пријемник."
+    FCast:
+      Cast: "Емитуј на FCast пријемник"
     Secondary Captions: Секундарни титлови
     Subtitle File:
       Load: "Учитај датотеку титлова…"

@@ -32,7 +32,8 @@ async function fixture() {
     ipcRenderer: { invoke: (channel, payload) => { invocations.push(payload); return handlers.get(channel)(event, payload) } }
   })
   vm.runInContext(castIpc.slice(castIpc.indexOf('  const dlnaOwners ='), castIpc.indexOf('  ipcMain.handle(IpcChannels.DLNA_RECOVER')), context)
-  const dlna = vm.runInContext(`({${preload.slice(preload.indexOf('  dlna: {'), preload.indexOf('\n  /**', preload.indexOf('  dlna: {')))}}).dlna`, context)
+  const dlnaStart = preload.indexOf('  dlna: {')
+  const dlna = vm.runInContext(`({${preload.slice(dlnaStart, preload.indexOf('\n  },\n', dlnaStart) + 4)}}).dlna`, context)
   return {
     dlna, attempts, invocations, context,
     finish() { finishValidation() },

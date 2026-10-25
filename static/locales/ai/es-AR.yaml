@@ -2038,6 +2038,8 @@ Video:
       Error: "No se pudo transmitir el video"
       Error With Details: "No se pudo transmitir el video: {error}"
       Untrusted Receiver: "El certificado del receptor no es de confianza. Usá un receptor Google Cast autenticado."
+    FCast:
+      Cast: "Transmitir a un receptor FCast"
     Secondary Captions: Subtítulos secundarios
     Subtitle File:
       Load: "Cargar archivo de subtítulos…"

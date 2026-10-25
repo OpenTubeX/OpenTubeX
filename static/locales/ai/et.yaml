@@ -1672,6 +1672,8 @@ Video:
       Error: "Video edastamine ebaõnnestus"
       Error With Details: "Video edastamine ebaõnnestus: {error}"
       Untrusted Receiver: "Vastuvõtja sertifikaati ei usaldata. Kasuta autenditud Google Casti vastuvõtjat."
+    FCast:
+      Cast: "Edasta FCasti vastuvõtjasse"
     Secondary Captions: Teised subtiitrid
     Subtitle File:
       Load: "Laadi subtiitrifail…"

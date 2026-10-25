@@ -1703,6 +1703,8 @@ Video:
       Error: "Não foi possível transmitir o vídeo"
       Error With Details: "Não foi possível transmitir o vídeo: {error}"
       Untrusted Receiver: "O certificado do recetor não é de confiança. Usa um recetor Google Cast autenticado."
+    FCast:
+      Cast: "Transmitir para um recetor FCast"
     Secondary Captions: Legendas secundárias
     Subtitle File:
       Load: "Carregar ficheiro de legendas…"

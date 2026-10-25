@@ -42,6 +42,7 @@ import packageDetails from '../../package.json'
 import { handleOpenInExternalPlayer } from './externalPlayer'
 import { stopDlnaCast } from './dlnaCast'
 import { ChromecastManager } from './chromecast'
+import { FcastManager } from './fcast'
 import { handleTwitchChatReplayPage, handleTwitchSubOnlyVod } from './twitchChat'
 import { applyTwitchPlaylistOrigin } from '../twitchPlaylistOrigin'
 import { isYtDlpStoryboardUrl, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
@@ -99,6 +100,8 @@ function getSystemAccentColor() {
 
 const castSenderPath = path.resolve(__dirname, process.env.NODE_ENV === 'development' ? '../../dist/opentubex-cast' : 'opentubex-cast') + (process.platform === 'win32' ? '.exe' : '')
 const chromecast = new ChromecastManager(castSenderPath.replace(/\.asar([\\/])/, '.asar.unpacked$1'), powerSaveBlocker)
+// The packaged Cast helper also discovers FCast receivers.
+const fcast = new FcastManager(castSenderPath.replace(/\.asar([\\/])/, '.asar.unpacked$1'), powerSaveBlocker, { appVersion: packageDetails.version })
 const brotliDecompressAsync = promisify(brotliDecompress)
 if (process.argv.includes('--version')) {
   console.log(`v${packageDetails.version} Beta`) // eslint-disable-line no-console
@@ -3032,7 +3035,7 @@ function runApp() {
   })
 
   const { loadCustomThemes, getSelectedCustomTheme } = setupCustomThemes({ updateSettingFromMain, updateThemeSource })
-  setupCastIpc({ chromecast, invidiousAuthorizations, getConfiguredApiServerUrl })
+  setupCastIpc({ chromecast, fcast, invidiousAuthorizations, getConfiguredApiServerUrl })
 
   // ************************************************* //
   // DB related IPC calls
@@ -3868,6 +3871,7 @@ function runApp() {
     isQuitting = true
     stopDlnaCast().catch(error => console.error('Failed to stop DLNA casting', error))
     chromecast.stop().catch(error => console.error('Failed to stop Google Cast', error))
+    fcast.stop().catch(error => console.error('Failed to stop FCast', error))
     backgroundSubscriptions.stop()
     if (tray) { tray.destroy(); tray = null }
   })

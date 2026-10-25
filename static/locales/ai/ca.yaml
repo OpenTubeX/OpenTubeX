@@ -2150,6 +2150,8 @@ Video:
       Error: "No s’ha pogut transmetre el vídeo"
       Error With Details: "No s’ha pogut transmetre el vídeo: {error}"
       Untrusted Receiver: "El certificat del receptor no és de confiança. Fes servir un receptor Google Cast autenticat."
+    FCast:
+      Cast: "Transmet a un receptor FCast"
     Secondary Captions: Subtítols secundaris
     Subtitle File:
       Load: "Carrega un fitxer de subtítols…"

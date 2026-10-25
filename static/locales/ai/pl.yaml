@@ -1001,6 +1001,8 @@ Video:
       Error: "Nie udało się przesłać filmu"
       Error With Details: "Nie udało się przesłać filmu: {error}"
       Untrusted Receiver: "Certyfikat odbiornika nie jest zaufany. Użyj uwierzytelnionego odbiornika Google Cast."
+    FCast:
+      Cast: "Przesyłaj do odbiornika FCast"
     Secondary Captions: Dodatkowe napisy
     Subtitle File:
       Load: "Wczytaj plik napisów…"
