@@ -75,18 +75,26 @@ test('nested resize reconciliation clamps an invalid offset without viewport gro
 const clampFunction = source.slice(source.indexOf('export function clampOverlayScrollTop('), source.indexOf('/**\n * Recalculates a nested horizontal scroll'))
 const measurementFunctions = source.slice(source.indexOf('function getMaximumOverlayScrollTop('), source.indexOf('/**\n * `v-overlay-scrollbars`'))
 
-function setupClamp({ scrollTop = 211, overflow = 426, nativeOverflow = overflow, retainedTracks = false, offsetAfterUpdate = null } = {}) {
+function setupClamp({
+  scrollTop = 211, overflow = 426, nativeOverflow = overflow, retainedTracks = false, offsetAfterUpdate = null,
+  contentTop = 20, contentHeight = 773, settledOverflow = 215
+} = {}) {
   const writes = []
   let currentOffset = scrollTop
   let currentOverflow = overflow
   let currentNativeOverflow = nativeOverflow
   const element = {
-    clientHeight: 598, offsetTop: 0, offsetParent: null,
+    clientHeight: 598, clientTop: 0, offsetTop: 0, offsetParent: null,
+    getBoundingClientRect: () => ({ top: 0 }),
     get scrollHeight() { return this.clientHeight + currentNativeOverflow },
     get scrollTop() { return currentOffset },
     set scrollTop(value) { writes.push(value); currentOffset = value }
   }
-  const content = { offsetTop: 20, offsetHeight: 773, offsetParent: element }
+  // Layout offsets round to whole pixels like Chromium's offsetTop/offsetHeight.
+  const content = {
+    offsetTop: Math.round(contentTop), offsetHeight: Math.round(contentHeight), offsetParent: element,
+    getBoundingClientRect: () => ({ bottom: contentTop + contentHeight - currentOffset })
+  }
   const scrollbars = [{ style: { display: '' } }, { style: { display: 'block' } }]
   const instance = {
     elements: () => ({
@@ -100,7 +108,7 @@ function setupClamp({ scrollTop = 211, overflow = 426, nativeOverflow = overflow
         offsetAfterUpdate = null
       }
       if (element.scrollTop === 0 && (!retainedTracks || scrollbars.every(bar => bar.style.display === 'none'))) {
-        currentOverflow = currentNativeOverflow = 215
+        currentOverflow = currentNativeOverflow = settledOverflow
       }
     },
     state: () => ({ overflowAmount: { y: currentOverflow } })
@@ -160,6 +168,15 @@ test('clamping leaves an accurate scroll range and valid offset untouched', () =
   fixture.clamp()
   assert.deepEqual(fixture.writes, [])
   assert.equal(fixture.element.scrollTop, 211)
+})
+
+test('clamping measures fractional rows instead of rounded layout offsets', () => {
+  // The last row ends at 794 CSS pixels, but its rounded offsets end at 795.
+  // Scrollbar tracks still hold the range two pixels past the real maximum.
+  const fixture = setupClamp({ scrollTop: 218, overflow: 218, contentTop: 20.5, contentHeight: 773.5, settledOverflow: 216 })
+  fixture.clamp()
+  assert.deepEqual(fixture.writes, [0, 216])
+  assert.equal(fixture.element.scrollTop, 216)
 })
 
 test('clamping tolerates fractional range differences without resetting the origin', () => {

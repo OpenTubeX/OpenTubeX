@@ -629,11 +629,25 @@ function getMaximumOverlayScrollTop(element, contentElement, viewportHeight = el
     : Number.parseFloat(getComputedStyle(contentElement).marginBlockEnd) || 0
   const contentEnd = contentElement === null
     ? element.scrollHeight
-    : offsetTopFromDocument(contentElement) - offsetTopFromDocument(element) +
-      contentElement.offsetHeight +
+    : getContentBottom(element, contentElement) +
       contentMarginBlockEnd +
       Number.parseFloat(getComputedStyle(element).paddingBottom)
   return Math.max(0, contentEnd - viewportHeight)
+}
+
+/**
+ * @param {HTMLElement} element
+ * @param {HTMLElement} contentElement
+ */
+function getContentBottom(element, contentElement) {
+  const layoutBottom = offsetTopFromDocument(contentElement) - offsetTopFromDocument(element) +
+    contentElement.offsetHeight
+  // offsetTop and offsetHeight round fractional rows to whole pixels, which can
+  // overstate the end by a pixel and hide retained overflow from the clamp. Use
+  // the rendered position unless a transformed ancestor scales it further.
+  const renderedBottom = contentElement.getBoundingClientRect().bottom -
+    element.getBoundingClientRect().top - element.clientTop + element.scrollTop
+  return Math.abs(renderedBottom - layoutBottom) < 2 ? renderedBottom : layoutBottom
 }
 
 /**
