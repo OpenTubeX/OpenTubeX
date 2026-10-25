@@ -273,18 +273,16 @@ export function isQuickSettingPaired(settings, settingIndex) {
 
 export const DEFAULT_QUICK_SETTINGS = Object.freeze([
   'baseTheme',
-  'mainColor',
   'uiScale',
-  'thumbnailSize',
   'defaultQuality',
+  'defaultPlayback',
   'playNextVideo',
   'enableSubtitlesByDefault',
   'listType',
   'playlistViewType',
   'hideRecommendedVideos',
   'hideComments',
-  'currentLocale',
-  'region',
+  'rememberHistory',
 ])
 
 const QUICK_SETTING_SECTIONS = new Map(QUICK_SETTING_DEFINITIONS.map(({ id, section }) => [id, section]))

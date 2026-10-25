@@ -6,7 +6,7 @@ async function openSettings(page) {
 }
 
 test.describe('SponsorBlock settings', () => {
-  test.use({ seed: { settings: { baseTheme: 'dark', currentLocale: 'en-US', useSponsorBlock: true, sponsorBlockEnableSubmission: true, sponsorBlockUserId: 'test-private-id', alwaysShowScrollbars: true } } })
+  test.use({ seed: { settings: { baseTheme: 'dark', currentLocale: 'en-US', useSponsorBlock: true, sponsorBlockEnableSubmission: true, sponsorBlockUserId: 'test-private-id', alwaysShowScrollbars: true, quickSettings: ['mainColor'] } } })
 
   test('masks the private user ID while preserving edits', async ({ page }) => {
     await openSettings(page)

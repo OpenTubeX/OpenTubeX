@@ -74,7 +74,7 @@ test.describe('quick-settings scroll range', { tag: '@scale' }, () => {
       await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
       await expectQuickSettingScrollRange(scroller)
     }
-    for (const id of ['rememberHistory', 'region', 'currentLocale', 'hideComments']) {
+    for (const id of ['rememberHistory', 'hideComments', 'hideRecommendedVideos', 'listType']) {
       await scrollToBottom()
       const setting = page.locator(`[data-setting-id="${id}"]`)
       await setting.getByRole('button', { name: /^Remove / }).click()

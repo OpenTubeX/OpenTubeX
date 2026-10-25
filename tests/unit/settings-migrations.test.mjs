@@ -6,6 +6,7 @@ import Datastore from '@seald-io/nedb'
 
 import { migrateStoredSettings } from '../../src/datastores/settingsMigrations.js'
 import { DEFAULT_NAVIGATION_ITEMS } from '../../src/navigationItems.js'
+import { DEFAULT_QUICK_SETTINGS } from '../../src/renderer/helpers/quickSettings.js'
 import {
   migrateLegacySettings,
   migrateStoredAiVideoSummarySetting,
@@ -377,4 +378,22 @@ test('settings migrations read every legacy key in one query', async () => {
     watchedProgressSavingMode: 'never',
     screenshotMode: 'prompt_folder',
   })
+})
+
+test('resets saved Quick Settings that still match the former defaults', async () => {
+  const formerDefaults = ['baseTheme', 'mainColor', 'uiScale', 'thumbnailSize', 'defaultQuality', 'playNextVideo',
+    'enableSubtitlesByDefault', 'listType', 'playlistViewType', 'hideRecommendedVideos', 'hideComments',
+    'currentLocale', 'region']
+  const customized = formerDefaults.slice(0, -1)
+  for (const [value, expected] of [[formerDefaults, undefined], [customized, customized]]) {
+    const settings = new Datastore()
+    await settings.insertAsync({ _id: 'quickSettings', value })
+
+    await migrateStoredSettings(settings)
+
+    assert.deepEqual((await settings.findOneAsync({ _id: 'quickSettings' }))?.value, expected)
+  }
+
+  assert.deepEqual(migrateLegacySettings({ quickSettings: formerDefaults }), { quickSettings: [...DEFAULT_QUICK_SETTINGS] })
+  assert.deepEqual(migrateLegacySettings({ quickSettings: customized }), { quickSettings: customized })
 })
