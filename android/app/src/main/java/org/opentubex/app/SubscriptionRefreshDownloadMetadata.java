@@ -181,6 +181,19 @@ final class SubscriptionRefreshDownloadMetadata {
                 collectLockup(lockup, videos, now);
                 return;
             }
+            // The channel Shorts tab lists only IDs and titles, without publication dates.
+            JSONObject shortLockup = object.optJSONObject("shortsLockupViewModel");
+            if (shortLockup != null) {
+                JSONObject endpoint = child(shortLockup, "onTap", "innertubeCommand").optJSONObject("reelWatchEndpoint");
+                String videoId = endpoint == null ? "" : endpoint.optString("videoId");
+                if (videoId.isEmpty()) return;
+                videos.put(new JSONObject()
+                    .put("videoId", videoId)
+                    .put("title", label(child(shortLockup, "overlayMetadata", "primaryText")))
+                    .put("published", 0)
+                    .put("lengthSeconds", 0));
+                return;
+            }
             JSONObject video = object.optJSONObject("videoRenderer");
             if (video == null) video = object.optJSONObject("gridVideoRenderer");
             if (video == null) video = object.optJSONObject("playlistVideoRenderer");

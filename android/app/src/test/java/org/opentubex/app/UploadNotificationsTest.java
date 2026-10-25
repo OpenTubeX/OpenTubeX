@@ -88,6 +88,25 @@ public class UploadNotificationsTest {
     }
 
     @Test
+    public void readsShortsFromTheLocalShortsTab() throws Exception {
+        JSONObject shortLockup = new JSONObject().put("shortsLockupViewModel", new JSONObject()
+            .put("entityId", "shorts-shelf-item-short1")
+            .put("onTap", new JSONObject().put("innertubeCommand", new JSONObject()
+                .put("reelWatchEndpoint", new JSONObject().put("videoId", "short1"))))
+            .put("overlayMetadata", new JSONObject()
+                .put("primaryText", new JSONObject().put("content", "A short"))
+                .put("secondaryText", new JSONObject().put("content", "15K views"))));
+        JSONObject payload = new JSONObject().put("backgroundFormat", "local").put("data", new JSONObject()
+            .put("contents", new JSONArray().put(new JSONObject().put("richItemRenderer",
+                new JSONObject().put("content", shortLockup)))));
+
+        JSONArray entries = UploadNotifications.entries("shorts", payload, NOW);
+        assertEquals(1, entries.length());
+        assertEquals("short1", entries.getJSONObject(0).getString("id"));
+        assertEquals("A short", entries.getJSONObject(0).getString("title"));
+    }
+
+    @Test
     public void marksMembersOnlyVideosFromLocalResponses() throws Exception {
         JSONObject renderer = new JSONObject().put("videoRenderer", new JSONObject()
             .put("videoId", "members1")

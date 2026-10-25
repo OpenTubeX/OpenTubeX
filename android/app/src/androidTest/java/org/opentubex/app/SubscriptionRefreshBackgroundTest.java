@@ -49,4 +49,24 @@ public class SubscriptionRefreshBackgroundTest {
             assertFalse(resultFile.exists());
         } finally { resultFile.delete(); }
     }
+
+    @Test
+    public void nativeLocalShortsRefreshFindsUploadsToNotifyAbout() throws Exception {
+        assumeTrue("true".equals(InstrumentationRegistry.getArguments().getString("backgroundRefreshNetworkProbe")));
+        String clientVersion = InstrumentationRegistry.getArguments().getString("localClientVersion");
+        assertNotNull(clientVersion);
+        String channelId = "UCSMOQeBJ2RAnuFungnQOxLg";
+        SubscriptionRefreshConfiguration.Feed feed = new SubscriptionRefreshConfiguration.Feed(
+            "background-test-" + UUID.randomUUID(), "shorts", 1800000, List.of(channelId), "", null, "Refresh test", "Cancel"
+        );
+        JSONObject client = new JSONObject().put("clientName", "WEB").put("clientVersion", clientVersion).put("hl", "en").put("gl", "US");
+        JSONObject body = new JSONObject().put("context", new JSONObject().put("client", client)).put("browseId", channelId).put("params", "EgZzaG9ydHPyBgUKA5oBAA%3D%3D");
+        feed.requests = new JSONArray().put(new JSONObject().put("format", "local")
+            .put("url", "https://www.youtube.com/youtubei/v1/browse?prettyPrint=false").put("body", body.toString()));
+
+        JSONArray entries = UploadNotifications.entries("shorts", SubscriptionRefreshHttpClient.fetch(feed, channelId), System.currentTimeMillis());
+        assertTrue(entries.length() > 0);
+        assertFalse(entries.getJSONObject(0).getString("id").isEmpty());
+        assertFalse(entries.getJSONObject(0).getString("title").isEmpty());
+    }
 }
