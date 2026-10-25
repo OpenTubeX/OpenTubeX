@@ -256,6 +256,26 @@ test('removes the stored legacy AI summary preference after replacement persiste
   assert.equal(deletedLegacySetting, true)
 })
 
+test('migrates FreeTube SponsorBlock channel exclusions to the channel whitelist', () => {
+  const excluded = JSON.stringify([
+    { name: 'UCexcluded', preferredName: 'Excluded channel', icon: 'https://example.com/icon.jpg' },
+    { name: 'UCother', preferredName: '' },
+    { name: 'UCexcluded' },
+  ])
+  assert.deepEqual(migrateLegacySettings({ sponsorBlockExcludedChannels: excluded, sponsorBlockShowExcludedChannels: false }), {
+    sponsorBlockChannelWhitelist: ['UCexcluded', 'UCother'],
+  })
+})
+
+test('prefers the current SponsorBlock channel whitelist and ignores unreadable exclusions', () => {
+  assert.deepEqual(migrateLegacySettings({
+    sponsorBlockChannelWhitelist: ['UCcurrent'],
+    sponsorBlockExcludedChannels: JSON.stringify([{ name: 'UCexcluded' }]),
+  }), { sponsorBlockChannelWhitelist: ['UCcurrent'] })
+  assert.deepEqual(migrateLegacySettings({ sponsorBlockExcludedChannels: 'not json' }), {})
+  assert.deepEqual(migrateLegacySettings({ sponsorBlockExcludedChannels: '{"name":"UCexcluded"}' }), {})
+})
+
 test('migrates navigation visibility switches to an ordered list', () => {
   assert.deepEqual(migrateLegacySettings({
     hideHome: true,
