@@ -56,7 +56,7 @@ test('Android header swipes reveal the next tab at its own scroll position', {
       const tabs = JSON.parse(JSON.stringify(store.state.tabs))
       const route = location.hash
       for (const [key, value] of Object.entries(values)) await store.dispatch('update' + key, value)
-      return { settings, tabs, route }
+      return { settings, tabs, route, scrollTop: window.scrollY }
     })
     if (await page.locator('#capacitor-phone-tab-dialog').count()) {
       await page.locator('#capacitor-phone-tab-dialog').getByRole('button', { name: 'Close', exact: true }).click()
@@ -140,6 +140,10 @@ test('Android header swipes reveal the next tab at its own scroll position', {
       store.commit('setTabsState', saved.tabs)
       store.commit('setPresentedTab', saved.tabs.presentedTabId)
       location.hash = saved.route
+      // An unchanged route does not navigate, so restore the viewport directly
+      // once any route change has rendered.
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+      window.scrollTo({ top: saved.scrollTop, behavior: 'instant' })
     }, saved)
     clearInterval(keepAlive)
     await session.detach()
