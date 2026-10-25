@@ -621,7 +621,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { inject, computed, nextTick, onBeforeUnmount, ref, shallowRef, toRaw, useTemplateRef, watch } from 'vue'
+import { inject, computed, nextTick, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ObserveVisibility as vObserveVisibility } from 'vue-observe-visibility'
 
@@ -655,31 +655,23 @@ import {
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getYoutubeCommunityPostCommentUrl, getYoutubeVideoCommentUrl } from '../../helpers/share'
 import {
-  createCommentPinSnapshot,
-  getCommentPinStorageKey,
-  getCommentReplyPinMarker,
-  hasPinnedCommentReply,
-  loadCommentPins,
-  mergePinnedCommentSnapshots,
-  saveCommentPins
-} from '../../helpers/commentPins'
-import {
   getLocalCommunityPostComments,
   getLocalComments,
   parseLocalComment,
-  parseLocalSubscriberCount,
-  translateCommentText
+  parseLocalSubscriberCount
 } from '../../helpers/api/local'
-import { normalizeYouTubeCaptionLanguageCode } from '../../helpers/player/youtubeCaptionLanguages'
 import {
   getInvidiousCommunityPostCommentReplies,
   getInvidiousCommunityPostComments,
   invidiousGetCommentReplies,
   invidiousGetComments
 } from '../../helpers/api/invidious'
+import { useCommentFilters, vFilteredCommentThreadLine } from './opentubex/useCommentFilters'
+import { useCommentPins } from './opentubex/useCommentPins'
+import { useCommentTranslation } from './opentubex/useCommentTranslation'
 
 const phonePanelHeader = inject('phonePanelHeader', null)
-const { locale, t } = useI18n()
+const { t } = useI18n()
 const relativeTimeNow = useRelativeTimeClock()
 const shortenViewCounts = computed(() => store.getters.getShortenViewCounts)
 
@@ -743,7 +735,6 @@ const props = defineProps({
 const isLoading = ref(false)
 const isLoadingMoreComments = ref(false)
 const loadingReplyIds = ref(new Set())
-const loadingTranslationIds = ref(new Set())
 const showComments = ref(false)
 const areCommentsDisabled = ref(false)
 const nextPageToken = shallowRef(null)
@@ -756,18 +747,52 @@ const commentsContentWrapper = useTemplateRef('commentsContentWrapper')
 const commentsList = useTemplateRef('commentsList')
 const commentFilterMenu = useTemplateRef('commentFilterMenu')
 const commentSearch = useTemplateRef('commentSearch')
-const commentSearchOpen = ref(false)
-const commentSearchQuery = ref('')
-const commentFilterMenuOpen = ref(false)
-const creatorCommentsOnly = ref(false)
-const timestampCommentsOnly = ref(false)
-const activeProfileId = computed(() => store.getters.getActiveProfile._id)
-const commentPinStorageKey = computed(() => {
-  return getCommentPinStorageKey(activeProfileId.value, props.id, props.isPostComments)
+const {
+  commentEntries,
+  commentPinStorageKey,
+  commentTreeHasPersonalPin,
+  isCommentPersonallyPinned,
+  personalPinActionLabel,
+  personalPinnedCommentIds,
+  reloadCommentPins,
+  sortReplyNodesByPersonalPins,
+  togglePersonalCommentPin
+} = useCommentPins({
+  getContentId: () => props.id,
+  isPostComments: () => props.isPostComments,
+  commentData,
+  onPinsChanged: clampCommentsScrollAfterRender
 })
-const initialCommentPinState = loadCommentPins(commentPinStorageKey.value)
-const personalPinnedCommentIds = ref(initialCommentPinState.commentIds)
-const personalPinnedCommentSnapshots = ref(initialCommentPinState.commentSnapshots)
+const {
+  closeCommentSearch,
+  commentFilterMenuOpen,
+  commentSearchOpen,
+  commentSearchQuery,
+  creatorCommentsOnly,
+  getCommentAuthorSearchSegments,
+  hasActiveCommentFilters,
+  loadedCommentCount,
+  matchingCommentCount,
+  normalizedCommentSearchQuery,
+  resetCommentFilters,
+  shouldShowCommentReplies,
+  shouldShowCommentReplyContinuation,
+  shouldShowCommentReplyToggle,
+  timestampCommentsOnly,
+  toggleCommentSearch,
+  toggleCreatorCommentsFilter,
+  toggleTimestampCommentsFilter,
+  updateCommentSearchQuery,
+  visibleCommentEntries
+} = useCommentFilters({
+  commentEntries,
+  commentFilterMenu,
+  commentSearch,
+  commentTreeHasPersonalPin,
+  isReplyLoading,
+  onFiltersChanged: clampCommentsScrollAfterRender,
+  sortReplyNodesByPersonalPins
+})
 let fullscreenScrollTop = 0
 let highlightedTargetGeneration = 0
 const MAX_HIGHLIGHTED_REPLY_PAGES = 20
@@ -807,245 +832,6 @@ function resetCommentsScroll() {
   }
 }
 
-const COMMENT_TIMESTAMP_PATTERN = /(?:(?:\d+):)?\d+:\d+/
-
-// Filtering re-parses every loaded comment on each keystroke; keep the plain
-// text per comment object until its HTML changes.
-const commentPlainTextCache = new WeakMap()
-
-function getCommentPlainText(comment) {
-  const text = comment.text ?? ''
-  const cacheKey = toRaw(comment)
-  const cached = commentPlainTextCache.get(cacheKey)
-  if (cached !== undefined && cached.text === text) {
-    return cached.plainText
-  }
-
-  const document = new DOMParser().parseFromString(text, 'text/html')
-  const plainText = document.body.textContent ?? ''
-  commentPlainTextCache.set(cacheKey, { text, plainText })
-  return plainText
-}
-
-function getCommentSearchText(comment) {
-  return `${comment.author ?? ''} ${getCommentPlainText(comment)}`.toLocaleLowerCase()
-}
-
-const normalizedCommentSearchQuery = computed(() => {
-  return commentSearchQuery.value.trim().toLocaleLowerCase()
-})
-
-const filteredCommentThreadLineObservers = new WeakMap()
-
-function updateFilteredCommentThreadLine(element, filtering) {
-  if (!filtering) {
-    element.style.removeProperty('--filtered-comment-thread-line-inset-block-end')
-    return
-  }
-
-  const connectors = element.querySelectorAll(
-    ':scope > .commentReplies > .commentReplyBranchRoot > .commentReplyConnector'
-  )
-  const lastConnector = connectors.item(connectors.length - 1)
-  if (!lastConnector) {
-    element.style.removeProperty('--filtered-comment-thread-line-inset-block-end')
-    return
-  }
-
-  const inset = element.getBoundingClientRect().bottom - lastConnector.getBoundingClientRect().top
-  element.style.setProperty('--filtered-comment-thread-line-inset-block-end', `${inset}px`)
-}
-
-function observeFilteredCommentThreadLine(element, filtering) {
-  const state = filteredCommentThreadLineObservers.get(element)
-  if (!state) return
-
-  if (!filtering) {
-    state.observer?.disconnect()
-    state.observer = null
-    updateFilteredCommentThreadLine(element, false)
-    return
-  }
-
-  if (!state.observer) {
-    state.observer = new ResizeObserver(() => {
-      updateFilteredCommentThreadLine(element, true)
-    })
-    state.observer.observe(element)
-  }
-  updateFilteredCommentThreadLine(element, true)
-}
-
-const vFilteredCommentThreadLine = {
-  mounted(element, binding) {
-    filteredCommentThreadLineObservers.set(element, { observer: null })
-    observeFilteredCommentThreadLine(element, binding.value)
-  },
-  updated(element, binding) {
-    observeFilteredCommentThreadLine(element, binding.value)
-  },
-  unmounted(element) {
-    filteredCommentThreadLineObservers.get(element)?.observer?.disconnect()
-    filteredCommentThreadLineObservers.delete(element)
-  }
-}
-
-const hasActiveCommentFilters = computed(() => {
-  return normalizedCommentSearchQuery.value !== '' ||
-    creatorCommentsOnly.value ||
-    timestampCommentsOnly.value
-})
-
-function commentMatchesActiveFilters(comment) {
-  if (creatorCommentsOnly.value && !comment.isOwner && !comment.hasOwnerReplied) {
-    return false
-  }
-
-  if (timestampCommentsOnly.value && !COMMENT_TIMESTAMP_PATTERN.test(getCommentPlainText(comment))) {
-    return false
-  }
-
-  return normalizedCommentSearchQuery.value === '' ||
-    getCommentSearchText(comment).includes(normalizedCommentSearchQuery.value)
-}
-
-function replyNodeHasPersonalPin(node) {
-  return isCommentPersonallyPinned(node.reply.id) || node.children.some(replyNodeHasPersonalPin)
-}
-
-function sortReplyNodesByPersonalPins(nodes) {
-  return nodes
-    .map(node => ({
-      ...node,
-      children: sortReplyNodesByPersonalPins(node.children)
-    }))
-    .sort((first, second) => {
-      return Number(replyNodeHasPersonalPin(second)) - Number(replyNodeHasPersonalPin(first))
-    })
-}
-
-function filterReplyNodes(nodes) {
-  return sortReplyNodesByPersonalPins(nodes.flatMap(node => {
-    const children = filterReplyNodes(node.children)
-    if (!commentMatchesActiveFilters(node.reply) && children.length === 0) {
-      return []
-    }
-
-    return [{ ...node, children }]
-  }))
-}
-
-function getVisibleReplyNodes(comment) {
-  const nodes = buildReplyTree(comment)
-  return hasActiveCommentFilters.value
-    ? filterReplyNodes(nodes)
-    : sortReplyNodesByPersonalPins(nodes)
-}
-
-function commentTreeHasPersonalPin(comment) {
-  return isCommentPersonallyPinned(comment.id) ||
-    hasPinnedCommentReply(personalPinnedCommentIds.value, comment.id) ||
-    comment.replies.some(commentTreeHasPersonalPin)
-}
-
-const commentEntries = computed(() => {
-  return mergePinnedCommentSnapshots(commentData.value, personalPinnedCommentSnapshots.value)
-})
-
-const visibleCommentEntries = computed(() => {
-  return commentEntries.value
-    .map(({ comment, index }) => ({
-      comment,
-      index,
-      replyNodes: getVisibleReplyNodes(comment)
-    }))
-    .filter(({ comment, replyNodes }) => {
-      return !hasActiveCommentFilters.value ||
-        commentMatchesActiveFilters(comment) ||
-        replyNodes.length > 0
-    })
-    .sort(({ comment: first }, { comment: second }) => {
-      return Number(commentTreeHasPersonalPin(second)) - Number(commentTreeHasPersonalPin(first))
-    })
-})
-
-function countLoadedComments(comment) {
-  return 1 + comment.replies.reduce((count, reply) => count + countLoadedComments(reply), 0)
-}
-
-function countMatchingComments(comment) {
-  return Number(commentMatchesActiveFilters(comment)) +
-    comment.replies.reduce((count, reply) => count + countMatchingComments(reply), 0)
-}
-
-const loadedCommentCount = computed(() => {
-  return commentEntries.value.reduce((count, { comment }) => count + countLoadedComments(comment), 0)
-})
-
-const matchingCommentCount = computed(() => {
-  if (!hasActiveCommentFilters.value) {
-    return loadedCommentCount.value
-  }
-
-  return commentEntries.value.reduce((count, { comment }) => count + countMatchingComments(comment), 0)
-})
-
-function shouldLoadFilteredCreatorReplies(comment, replyNodes) {
-  return creatorCommentsOnly.value &&
-    comment.hasOwnerReplied &&
-    replyNodes.length === 0
-}
-
-function shouldShowCommentReplyToggle(comment, replyNodes) {
-  if (comment.numReplies <= 0 || comment.showReplies) {
-    return false
-  }
-
-  return !hasActiveCommentFilters.value || shouldLoadFilteredCreatorReplies(comment, replyNodes)
-}
-
-function shouldShowCommentReplyContinuation(comment, replyNodes) {
-  const canLoadMore = isReplyLoading(comment.id) || comment.hasReplyToken
-  return canLoadMore && (
-    !hasActiveCommentFilters.value || shouldLoadFilteredCreatorReplies(comment, replyNodes)
-  )
-}
-
-function shouldShowCommentReplies(comment, replyNodes) {
-  return (replyNodes.length > 0 && (comment.showReplies || hasActiveCommentFilters.value)) ||
-    (comment.showReplies && shouldShowCommentReplyContinuation(comment, replyNodes))
-}
-
-function getCommentAuthorSearchSegments(author) {
-  const query = normalizedCommentSearchQuery.value
-  if (query === '') {
-    return [{ text: author, highlighted: false }]
-  }
-
-  const normalizedAuthor = author.toLocaleLowerCase()
-  const segments = []
-  let start = 0
-  let matchIndex = normalizedAuthor.indexOf(query)
-
-  while (matchIndex !== -1) {
-    if (matchIndex > start) {
-      segments.push({ text: author.slice(start, matchIndex), highlighted: false })
-    }
-    segments.push({
-      text: author.slice(matchIndex, matchIndex + query.length),
-      highlighted: true
-    })
-    start = matchIndex + query.length
-    matchIndex = normalizedAuthor.indexOf(query, start)
-  }
-
-  if (start < author.length) {
-    segments.push({ text: author.slice(start), highlighted: false })
-  }
-
-  return segments
-}
-
 const canUseCommentTools = computed(() => {
   return commentEntries.value.length > 0 && showComments.value && !isLoading.value
 })
@@ -1056,79 +842,6 @@ function clampCommentsScrollAfterRender() {
       clampOverlayScrollTop(commentsContentWrapper.value, commentsList.value)
     }
   })
-}
-
-function updateCommentSearchQuery(query) {
-  commentSearchQuery.value = query
-  clampCommentsScrollAfterRender()
-}
-
-function toggleCommentSearch() {
-  commentSearchOpen.value = !commentSearchOpen.value
-  commentFilterMenuOpen.value = false
-
-  if (!commentSearchOpen.value) {
-    updateCommentSearchQuery('')
-    nextTick(() => commentFilterMenu.value?.focusTrigger())
-    return
-  }
-
-  nextTick(() => commentSearch.value?.querySelector('input')?.focus())
-}
-
-function closeCommentSearch() {
-  commentSearchOpen.value = false
-  updateCommentSearchQuery('')
-  nextTick(() => commentFilterMenu.value?.focusTrigger())
-}
-
-function isCommentPersonallyPinned(commentId) {
-  return personalPinnedCommentIds.value.has(commentId)
-}
-
-function personalPinActionLabel(comment) {
-  if (isCommentPersonallyPinned(comment.id)) {
-    return t('Comments.Unpin comment by author', { author: comment.author })
-  }
-
-  return t('Comments.Pin comment by author', { author: comment.author })
-}
-
-function togglePersonalCommentPin(commentId, rootComment) {
-  const commentIds = new Set(personalPinnedCommentIds.value)
-  const isReply = commentId !== rootComment.id
-  if (commentIds.has(commentId)) {
-    commentIds.delete(commentId)
-    if (isReply) {
-      commentIds.delete(getCommentReplyPinMarker(rootComment.id, commentId))
-    }
-  } else {
-    commentIds.add(commentId)
-    if (isReply) {
-      commentIds.add(getCommentReplyPinMarker(rootComment.id, commentId))
-    }
-  }
-
-  const commentSnapshots = personalPinnedCommentSnapshots.value
-    .filter(comment => comment.id !== rootComment.id)
-  if (commentIds.has(rootComment.id) || hasPinnedCommentReply(commentIds, rootComment.id)) {
-    commentSnapshots.push(createCommentPinSnapshot(rootComment))
-  }
-
-  personalPinnedCommentIds.value = commentIds
-  personalPinnedCommentSnapshots.value = commentSnapshots
-  saveCommentPins(commentPinStorageKey.value, { commentIds, commentSnapshots })
-  clampCommentsScrollAfterRender()
-}
-
-function toggleCreatorCommentsFilter() {
-  creatorCommentsOnly.value = !creatorCommentsOnly.value
-  clampCommentsScrollAfterRender()
-}
-
-function toggleTimestampCommentsFilter() {
-  timestampCommentsOnly.value = !timestampCommentsOnly.value
-  clampCommentsScrollAfterRender()
 }
 
 function setCommentFilterMenuOpen(open) {
@@ -1144,116 +857,10 @@ function closeCommentMenus() {
 }
 
 watch(commentPinStorageKey, (contentKey) => {
-  const pinState = loadCommentPins(contentKey)
-  personalPinnedCommentIds.value = pinState.commentIds
-  personalPinnedCommentSnapshots.value = pinState.commentSnapshots
-  commentFilterMenuOpen.value = false
-  creatorCommentsOnly.value = false
-  timestampCommentsOnly.value = false
-  commentSearchOpen.value = false
-  commentSearchQuery.value = ''
+  reloadCommentPins(contentKey)
+  resetCommentFilters()
   clampCommentsScrollAfterRender()
 })
-
-function normalizeCommentAuthor(author) {
-  return String(author)
-    .replaceAll(/[\u200b-\u200f\u202a-\u202e\u2060-\u2069\ufeff]/g, '')
-    .trim()
-    .replace(/^@/, '')
-    .toLowerCase()
-}
-
-/**
- * YouTube represents replies to replies as a leading channel mention rather
- * than exposing their parent comment ID through the comments APIs.
- *
- * @param {string} html
- * @returns {{ channelId: string, handle: string, author: string } | null}
- */
-function getLeadingMention(html) {
-  const document = new DOMParser().parseFromString(html, 'text/html')
-  const firstAnchor = document.body.querySelector('a')
-
-  if (!firstAnchor) {
-    return null
-  }
-
-  const precedingContent = document.createRange()
-  precedingContent.setStart(document.body, 0)
-  precedingContent.setEndBefore(firstAnchor)
-
-  if (normalizeCommentAuthor(precedingContent.toString()) !== '') {
-    return null
-  }
-
-  const href = firstAnchor.getAttribute('href') ?? ''
-  const channelId = /\/channel\/([^/?#]+)/.exec(href)?.[1] ?? ''
-  // Mentions can link via a handle URL (`/@handle`) rather than `/channel/…`,
-  // in which case the anchor text is often the display name, not the handle
-  const handle = /\/@([^/?#]+)/.exec(href)?.[1] ?? ''
-
-  return {
-    channelId,
-    handle: normalizeCommentAuthor(handle),
-    author: normalizeCommentAuthor(firstAnchor.textContent)
-  }
-}
-
-/**
- * @param {Comment} comment
- * @param {{ channelId: string, handle: string, author: string }} mention
- */
-function commentMatchesMention(comment, mention) {
-  const channelIds = [comment.authorId, comment.authorLink].filter(Boolean)
-  const author = normalizeCommentAuthor(comment.author)
-
-  return (mention.channelId !== '' && channelIds.includes(mention.channelId)) ||
-    (mention.handle !== '' && author === mention.handle) ||
-    author === mention.author
-}
-
-/**
- * @param {Comment} comment
- */
-function buildReplyTree(comment) {
-  if (comment.dataType === 'local') {
-    return comment.replies.map((reply, index) => {
-      return {
-        reply,
-        index,
-        children: buildReplyTree(reply)
-      }
-    })
-  }
-
-  const roots = []
-  const previousNodes = []
-
-  comment.replies.forEach((reply, index) => {
-    const node = { reply, index, children: [] }
-    const mention = getLeadingMention(reply.text)
-    let parent = null
-
-    if (mention && !commentMatchesMention(comment, mention)) {
-      for (let previousIndex = previousNodes.length - 1; previousIndex >= 0; previousIndex--) {
-        if (commentMatchesMention(previousNodes[previousIndex].reply, mention)) {
-          parent = previousNodes[previousIndex]
-          break
-        }
-      }
-    }
-
-    if (parent) {
-      parent.children.push(node)
-    } else {
-      roots.push(node)
-    }
-
-    previousNodes.push(node)
-  })
-
-  return roots
-}
 
 /** @type {import('youtubei.js').YT.Comments | undefined} */
 let localCommentsInstance
@@ -1271,69 +878,15 @@ const backendFallback = computed(() => {
   return store.getters.getBackendFallback
 })
 
-const translationEnabled = computed(() => (
-  process.env.SUPPORTS_LOCAL_API && store.getters.getEnableCommentTranslations
-))
-
-const translationLanguage = computed(() => {
-  return normalizeYouTubeCaptionLanguageCode(locale.value)
-})
-
-const translationLanguageName = computed(() => {
-  const language = translationLanguage.value
-  if (!language) {
-    return locale.value
-  }
-
-  return new Intl.DisplayNames([locale.value, 'en'], { type: 'language' }).of(language) ?? language
-})
-
-const commentTranslationIgnoredLanguages = computed(() => {
-  const languages = store.getters.getCommentTranslationIgnoredLanguages
-  return Array.isArray(languages) ? languages : []
-})
-
-/**
- * @param {Comment} comment
- */
-async function toggleCommentTranslation(comment) {
-  if (comment.showTranslated && comment.translatedLanguage === translationLanguage.value) {
-    comment.showTranslated = false
-    return
-  }
-
-  const targetLanguage = translationLanguage.value
-  if (!targetLanguage || loadingTranslationIds.value.has(comment.id)) {
-    return
-  }
-
-  if (comment.translatedText && comment.translatedLanguage === targetLanguage) {
-    comment.showTranslated = true
-    return
-  }
-
-  loadingTranslationIds.value = new Set(loadingTranslationIds.value).add(comment.id)
-
-  try {
-    comment.translatedText = await translateCommentText(comment.translationText, targetLanguage)
-    comment.translatedLanguage = targetLanguage
-    comment.showTranslated = true
-  } catch (error) {
-    console.error(error)
-    showApiErrorToast(t('Comments.Comment translation failed'), error)
-  } finally {
-    const nextLoadingTranslationIds = new Set(loadingTranslationIds.value)
-    nextLoadingTranslationIds.delete(comment.id)
-    loadingTranslationIds.value = nextLoadingTranslationIds
-  }
-}
-
-/**
- * @param {Comment} comment
- */
-function restoreCommentTranslation(comment) {
-  comment.showTranslated = false
-}
+const {
+  commentTranslationIgnoredLanguages,
+  loadingTranslationIds,
+  restoreCommentTranslation,
+  toggleCommentTranslation,
+  translationEnabled,
+  translationLanguage,
+  translationLanguageName
+} = useCommentTranslation()
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideCommentLikes = computed(() => {
