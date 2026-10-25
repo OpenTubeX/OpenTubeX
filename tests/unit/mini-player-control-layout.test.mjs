@@ -5,6 +5,7 @@ import vm from 'node:vm'
 
 const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
 const resizedSource = source.slice(source.indexOf('    function resized(entries) {'), source.indexOf('    // Remeasure the control bar'))
+const layoutSource = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/opentubex/useAdaptiveControlPanelLayout.js', import.meta.url), 'utf8')
 
 for (const [active, animating] of [[true, false], [true, true], [false, true]]) {
   test(`mini-player resize preserves the inline controls with active=${active}, animating=${animating}`, () => {
@@ -40,13 +41,13 @@ test('a settled inline player still adapts its controls to the actual width', ()
 })
 
 test('swipe previews defer hidden control layout until the inline player settles', () => {
-  const sourceStart = source.indexOf('    function scheduleControlPanelLayout(')
-  const sourceEnd = source.indexOf('    function setupAdaptiveControlPanelLayout(', sourceStart)
+  const sourceStart = layoutSource.indexOf('  function scheduleControlPanelLayout(')
+  const sourceEnd = layoutSource.indexOf('  function setupAdaptiveControlPanelLayout(', sourceStart)
   let frames = 0
   let layouts = 0
   const scrollMiniPlayerDragStyle = { value: {} }
   let queued
-  const schedule = vm.runInNewContext(`${source.slice(sourceStart, sourceEnd)}\nscheduleControlPanelLayout`, {
+  const schedule = vm.runInNewContext(`${layoutSource.slice(sourceStart, sourceEnd)}\nscheduleControlPanelLayout`, {
     isActiveTab: { value: true },
     scrollMiniPlayerActive: { value: false },
     scrollMiniPlayerAnimating: { value: false },
