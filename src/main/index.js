@@ -6470,9 +6470,12 @@ function runApp() {
 
   // MacOS event
   // https://www.electronjs.org/docs/latest/api/app#event-activate-macos
-  app.on('activate', () => {
+  app.on('activate', (_event, hasVisibleWindows) => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow()
+    } else if (!hasVisibleWindows) {
+      // Windows hidden to the tray or kept for background refreshes come back from the Dock.
+      showHiddenWindows()
     }
   })
 

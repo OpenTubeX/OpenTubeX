@@ -210,6 +210,10 @@ test('closing the last window hides it while background refresh runs without a c
   await expect.poll(() => windowVisible(app)).toBe(false)
   expect(await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().length)).toBe(1)
 
+  // Clicking the macOS Dock icon brings the hidden window back.
+  await app.electronApp.evaluate(({ app }) => app.emit('activate', {}, false))
+  await expect.poll(() => windowVisible(app)).toBe(true)
+
   // An explicit tray Close still quits.
   const closed = app.electronApp.waitForEvent('close')
   await app.electronApp.evaluate(() => globalThis.testTrayMenu.items[0].submenu.items.find(item => item.label === 'Close').click())
