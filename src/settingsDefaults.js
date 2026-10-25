@@ -386,6 +386,7 @@ export function createDefaultSettings({ supportsLocalApi, isElectron }) {
     showSkipSilenceButton: false,
     showDlnaCastButton: false,
     showChromecastButton: false,
+    showFcastButton: false,
     enableSkipSilenceByDefault: false,
     useVoiceOverTranslation: false,
     voiceOverTranslationPrepareInBackground: false,

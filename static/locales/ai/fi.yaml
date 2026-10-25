@@ -772,6 +772,7 @@ Settings:
       Viewing Modes: Katselutilat
       Shorts: Shorts
       Screenshots: Kuvakaappaukset
+    Enable FCast: "Ota FCast käyttöön"
   Channel Settings:
     Channel Settings: Kanava-asetukset
     Channel Settings Description: Muista katselun aikana valitsemasi asetukset kanavakohtaisesti, jotta niitä käytetään uudelleen, kun katsot seuraavan kerran saman kanavan videota.
@@ -1713,6 +1714,8 @@ Video:
       Untrusted Receiver: "Vastaanottimen varmenteeseen ei luoteta. Käytä todennettua Google Cast -vastaanotinta."
     FCast:
       Cast: "Lähetä FCast-vastaanottimeen"
+      No Devices: "FCast-vastaanottimia ei löytynyt"
+      No Source: "Ei yhteensopivaa suoratoistoa FCastille"
     Secondary Captions: Toissijaiset tekstitykset
     Subtitle File:
       Load: "Lataa tekstitystiedosto…"

@@ -11,10 +11,28 @@
     :title="title"
     :get-player="getPlayer"
     :get-source="getSource"
-    :disabled="dlnaActive"
+    :disabled="protocolDisabled('google')"
     @close-menu="button?.hideDropdown()"
-    @busy-change="emit('busy-change', $event)"
-    @casting-change="emit('casting-change', $event)"
+    @busy-change="updateRemote('busy', 'google', $event)"
+    @casting-change="updateRemote('casting', 'google', $event)"
+    @playback-state="emit('playback-state', $event)"
+    @ended="emit('ended')"
+  />
+  <WatchChromecast
+    v-if="fcastEnabled"
+    ref="fcast"
+    protocol="fcast"
+    :formats="formats"
+    :manifest-url="manifestUrl"
+    :manifest-type="manifestType"
+    :is-live="isLive"
+    :title="title"
+    :get-player="getPlayer"
+    :get-source="getSource"
+    :disabled="protocolDisabled('fcast')"
+    @close-menu="button?.hideDropdown()"
+    @busy-change="updateRemote('busy', 'fcast', $event)"
+    @casting-change="updateRemote('casting', 'fcast', $event)"
     @playback-state="emit('playback-state', $event)"
     @ended="emit('ended')"
   />
@@ -25,19 +43,19 @@
     :title="title"
     :video-id="videoId"
     :get-player="getPlayer"
-    :disabled="googleCastActive || googleCastBusy"
+    :disabled="protocolDisabled('dlna')"
     @close-menu="button?.hideDropdown()"
-    @casting-change="emit('dlna-change', $event)"
+    @casting-change="dlnaActive = $event; emit('dlna-change', $event)"
   />
   <FtIconButton
     ref="button"
     class="castControl shaka-no-propagation"
-    :class="{ chromecastControl: googleCastEnabled, dlnaCastControl: !googleCastEnabled && dlnaEnabled }"
+    :class="{ chromecastControl: googleCastEnabled, dlnaCastControl: !googleCastEnabled && dlnaEnabled, fcastControl: !googleCastEnabled && !dlnaEnabled }"
     :title="menuTitle"
     :icon="['fas', 'cast']"
     theme="base-no-default"
     :use-shadow="false"
-    :aria-pressed="Boolean(googleCast?.castId || dlna?.castId)"
+    :aria-pressed="casting"
     :force-dropdown="true"
     :disabled="protocolDisabled(selectedProtocol)"
     dropdown-position-x="right"
@@ -63,13 +81,13 @@
           :tabindex="selectedProtocol === protocol ? 0 : -1"
           :disabled="protocolDisabled(protocol)"
           @click="selectProtocol(protocol)"
-          @keydown.left.right.prevent="selectProtocol(protocol === 'google' ? 'dlna' : 'google', true)"
+          @keydown.left.prevent="selectAdjacentProtocol(protocol, -1)"
+          @keydown.right.prevent="selectAdjacentProtocol(protocol, 1)"
           @keydown.home.prevent="selectProtocol(protocols[0], true)"
           @keydown.end.prevent="selectProtocol(protocols.at(-1), true)"
         >
           <!-- Protocol brand names are the same in every locale. -->
-          <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-          {{ protocol === 'google' ? 'Google Cast' : 'DLNA' }}
+          {{ PROTOCOL_NAMES[protocol] }}
         </button>
       </FtTabs>
     </template>
@@ -112,7 +130,7 @@
 <script setup>
 import FtTabs from '../FtTabs/FtTabs.vue'
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, ref, useId, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, reactive, ref, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import WatchChromecast from '../WatchChromecast/WatchChromecast.vue'
@@ -121,10 +139,8 @@ import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 
 const props = defineProps({
   googleCastEnabled: { type: Boolean, default: false },
+  fcastEnabled: { type: Boolean, default: false },
   dlnaEnabled: { type: Boolean, default: false },
-  googleCastActive: { type: Boolean, default: false },
-  googleCastBusy: { type: Boolean, default: false },
-  dlnaActive: { type: Boolean, default: false },
   formats: { type: Array, required: true },
   manifestUrl: { type: String, default: null },
   manifestType: { type: String, default: null },
@@ -136,19 +152,24 @@ const props = defineProps({
   getPlayer: { type: Function, required: true },
   getSource: { type: Function, required: true }
 })
-const emit = defineEmits(['dlna-change', 'busy-change', 'casting-change', 'playback-state', 'ended'])
+const emit = defineEmits(['dlna-change', 'casting-change', 'playback-state', 'ended'])
+// Protocol brand names are the same in every locale.
+const PROTOCOL_NAMES = { google: 'Google Cast', fcast: 'FCast', dlna: 'DLNA' }
 const { t } = useI18n()
 const id = useId()
 const button = useTemplateRef('button')
-const googleCast = useTemplateRef('googleCast')
-const dlna = useTemplateRef('dlna')
-const protocols = computed(() => [props.googleCastEnabled && 'google', props.dlnaEnabled && 'dlna'].filter(Boolean))
+const controllers = { google: useTemplateRef('googleCast'), fcast: useTemplateRef('fcast'), dlna: useTemplateRef('dlna') }
+const protocols = computed(() => [props.googleCastEnabled && 'google', props.fcastEnabled && 'fcast', props.dlnaEnabled && 'dlna'].filter(Boolean))
 const selectedProtocol = ref(protocols.value[0])
-const controller = computed(() => selectedProtocol.value === 'google' ? googleCast.value : dlna.value)
-const menuTitle = computed(() => protocols.value.length > 1 && !googleCast.value?.castId && !dlna.value?.castId
+const controller = computed(() => controllers[selectedProtocol.value]?.value)
+const casting = computed(() => Object.values(controllers).some(control => Boolean(control.value?.castId)))
+const menuTitle = computed(() => protocols.value.length > 1 && !casting.value
   ? t('Video.Player.Cast')
   : controller.value?.menuTitle ?? t('Video.Player.Cast'))
-const scrollPositions = { google: 0, dlna: 0 }
+const scrollPositions = { google: 0, fcast: 0, dlna: 0 }
+// A starting, casting or stopping protocol keeps the others unavailable.
+const remote = reactive({ busy: { google: false, fcast: false }, casting: { google: false, fcast: false } })
+const dlnaActive = ref(false)
 const discoveredProtocols = new Set()
 
 watch(protocols, available => {
@@ -157,8 +178,18 @@ watch(protocols, available => {
   if (!available.includes(selectedProtocol.value)) selectedProtocol.value = available[0]
 })
 
+function protocolActive(protocol) {
+  return protocol === 'dlna' ? dlnaActive.value : remote.busy[protocol] || remote.casting[protocol]
+}
+
 function protocolDisabled(protocol) {
-  return protocol === 'google' ? props.dlnaActive : props.googleCastActive || props.googleCastBusy
+  return Object.keys(PROTOCOL_NAMES).some(other => other !== protocol && protocolActive(other))
+}
+
+/** Google Cast and FCast both hand playback to the receiver, so Watch sees them as one remote session. */
+function updateRemote(kind, protocol, value) {
+  remote[kind][protocol] = value
+  if (kind === 'casting') emit('casting-change', remote.casting.google || remote.casting.fcast)
 }
 
 function refreshDevices() {
@@ -169,6 +200,15 @@ function refreshDevices() {
 function openDropdown() {
   discoveredProtocols.clear()
   refreshDevices()
+}
+
+function selectAdjacentProtocol(protocol, offset) {
+  const available = protocols.value
+  const index = available.indexOf(protocol)
+  for (let step = 1; step < available.length; step++) {
+    const next = available[(((index + offset * step) % available.length) + available.length) % available.length]
+    if (!protocolDisabled(next)) return selectProtocol(next, true)
+  }
 }
 
 async function selectProtocol(protocol, focus = false) {
@@ -189,7 +229,9 @@ function handleChoice(option) {
   button.value?.hideDropdown()
 }
 
-defineExpose({ stopCasting: resume => googleCast.value?.stopCasting(resume) })
+defineExpose({
+  stopCasting: resume => Promise.all([controllers.google.value?.stopCasting(resume), controllers.fcast.value?.stopCasting(resume)])
+})
 </script>
 
 <style scoped src="./WatchCast.css" />

@@ -718,6 +718,7 @@ Settings:
       Viewing Modes: Modos de visualización
       Shorts: Shorts
       Screenshots: Capturas de pantalla
+    Enable FCast: "Activar FCast"
   Channel Settings:
     Channel Settings: Ajustes de canales
     Channel Settings Description: Recuerda por separado los ajustes que elijas al ver cada canal para volver a aplicarlos la próxima vez que veas uno de sus vídeos.
@@ -1637,6 +1638,8 @@ Video:
       Untrusted Receiver: "El certificado del receptor no es de confianza. Usa un receptor Google Cast autenticado."
     FCast:
       Cast: "Transmitir a un receptor FCast"
+      No Devices: "No se encontraron receptores FCast"
+      No Source: "No hay un flujo compatible con FCast"
     Secondary Captions: Subtítulos secundarios
     Subtitle File:
       Load: "Cargar archivo de subtítulos…"

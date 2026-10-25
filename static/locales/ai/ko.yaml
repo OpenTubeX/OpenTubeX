@@ -935,6 +935,7 @@ Settings:
       Viewing Modes: 보기 모드
       Shorts: Shorts
       Screenshots: 스크린샷
+    Enable FCast: "FCast 활성화"
   Channel Settings:
     Channel Settings: 채널 설정
     Channel Settings Description: 채널마다 시청 중 선택한 설정을 기억하고, 다음에 해당 채널의 동영상을 시청할 때 다시 적용합니다.
@@ -2020,6 +2021,8 @@ Video:
       Untrusted Receiver: "수신기의 인증서를 신뢰할 수 없습니다. 인증된 Google Cast 수신기를 사용하세요."
     FCast:
       Cast: "FCast 수신기로 전송"
+      No Devices: "FCast 수신기를 찾을 수 없습니다"
+      No Source: "FCast와 호환되는 스트림이 없습니다"
     Secondary Captions: 보조 자막
     Subtitle File:
       Load: "자막 파일 불러오기…"

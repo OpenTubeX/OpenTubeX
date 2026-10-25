@@ -759,6 +759,7 @@ Settings:
       Viewing Modes: 表示モード
       Shorts: ショート
       Screenshots: スクリーンショット
+    Enable FCast: "FCastを有効にする"
   Channel Settings:
     Channel Settings: チャンネル設定
     Channel Settings Description: 視聴中に選んだ設定をチャンネルごとに記憶し、次回そのチャンネルの動画を見るときに再度適用します。
@@ -1672,6 +1673,8 @@ Video:
       Untrusted Receiver: "受信機の証明書は信頼されていません。認証済みの Google Cast 受信機を使用してください。"
     FCast:
       Cast: "FCast受信機にキャスト"
+      No Devices: "FCast受信機が見つかりません"
+      No Source: "FCast対応のストリームがありません"
     Secondary Captions: 第 2 字幕
     Subtitle File:
       Load: "字幕ファイルを読み込む…"

@@ -761,6 +761,7 @@ Settings:
       Viewing Modes: Moduri de vizualizare
       Shorts: Shorts
       Screenshots: Capturi de ecran
+    Enable FCast: "Activează FCast"
   Channel Settings:
     Channel Settings: Setări pentru canale
     Channel Settings Description: Rețineți separat pentru fiecare canal setările alese în timpul vizionării, pentru a fi aplicate din nou când vizionați alt videoclip al canalului.
@@ -1706,6 +1707,8 @@ Video:
       Untrusted Receiver: "Certificatul receptorului nu este de încredere. Folosește un receptor Google Cast autentificat."
     FCast:
       Cast: "Transmite către un receptor FCast"
+      No Devices: "Nu s-au găsit receptoare FCast"
+      No Source: "Nu există un flux compatibil cu FCast"
     Secondary Captions: Subtitrări secundare
     Subtitle File:
       Load: "Încarcă fișierul de subtitrare…"

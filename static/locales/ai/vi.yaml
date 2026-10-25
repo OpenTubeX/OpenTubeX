@@ -767,6 +767,7 @@ Settings:
       Viewing Modes: Chế độ xem
       Shorts: Shorts
       Screenshots: Ảnh chụp màn hình
+    Enable FCast: "Bật FCast"
   Channel Settings:
     Channel Settings: Cài đặt kênh
     Channel Settings Description: Ghi nhớ riêng các cài đặt bạn chọn khi xem từng kênh để áp dụng lại vào lần sau khi bạn xem video của kênh đó.
@@ -1705,6 +1706,8 @@ Video:
       Untrusted Receiver: "Chứng chỉ của thiết bị nhận không đáng tin cậy. Hãy sử dụng thiết bị nhận Google Cast đã được xác thực."
     FCast:
       Cast: "Truyền tới thiết bị nhận FCast"
+      No Devices: "Không tìm thấy thiết bị nhận FCast"
+      No Source: "Không có luồng tương thích với FCast"
     Secondary Captions: Phụ đề phụ
     Subtitle File:
       Load: "Tải tệp phụ đề…"

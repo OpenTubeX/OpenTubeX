@@ -758,6 +758,7 @@ Settings:
       Viewing Modes: 观看模式
       Shorts: Shorts
       Screenshots: 截图
+    Enable FCast: "启用 FCast"
   Channel Settings:
     Channel Settings: 频道设置
     Channel Settings Description: 分别记住观看各频道时选择的设置，以便下次观看该频道的视频时再次应用。
@@ -1671,6 +1672,8 @@ Video:
       Untrusted Receiver: "接收设备的证书不受信任。请使用经过身份验证的 Google Cast 接收设备。"
     FCast:
       Cast: "投放到 FCast 接收器"
+      No Devices: "未找到 FCast 接收器"
+      No Source: "没有兼容 FCast 的视频流"
     Secondary Captions: 第二字幕
     Subtitle File:
       Load: "加载字幕文件…"

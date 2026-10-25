@@ -759,6 +759,7 @@ Settings:
       Viewing Modes: Mode tampilan
       Shorts: Shorts
       Screenshots: Tangkapan layar
+    Enable FCast: "Aktifkan FCast"
   Channel Settings:
     Channel Settings: Pengaturan Saluran
     Channel Settings Description: Ingat pengaturan yang Anda pilih saat menonton untuk setiap saluran, lalu terapkan lagi saat Anda menonton video saluran tersebut berikutnya.
@@ -1684,6 +1685,8 @@ Video:
       Untrusted Receiver: "Sertifikat penerima tidak tepercaya. Gunakan penerima Google Cast yang terautentikasi."
     FCast:
       Cast: "Transmisikan ke penerima FCast"
+      No Devices: "Tidak ditemukan penerima FCast"
+      No Source: "Tidak ada aliran yang kompatibel untuk FCast"
     Secondary Captions: Teks sekunder
     Subtitle File:
       Load: "Muat file subtitel…"

@@ -790,6 +790,7 @@ Settings:
       Viewing Modes: حالت‌های نمایش
       Shorts: Shorts
       Screenshots: نماگرفت‌ها
+    Enable FCast: "فعال کردن FCast"
   Channel Settings:
     Channel Settings: تنظیمات کانال
     Channel Settings Description: تنظیمات انتخابی هنگام تماشای هر کانال را جداگانه به‌خاطر بسپار تا دفعهٔ بعد برای ویدیوهای آن دوباره اعمال شوند.
@@ -1747,6 +1748,8 @@ Video:
       Untrusted Receiver: "گواهی گیرنده قابل اعتماد نیست. از یک گیرندهٔ Google Cast احراز هویت‌شده استفاده کنید."
     FCast:
       Cast: "پخش روی گیرنده FCast"
+      No Devices: "هیچ گیرنده FCast پیدا نشد"
+      No Source: "جریان سازگاری برای FCast وجود ندارد"
     Secondary Captions: زیرنویس دوم
     Subtitle File:
       Load: "بارگذاری فایل زیرنویس…"

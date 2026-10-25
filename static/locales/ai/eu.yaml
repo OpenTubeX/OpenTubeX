@@ -759,6 +759,7 @@ Settings:
       Viewing Modes: Ikuspegi moduak
       Shorts: Shorts
       Screenshots: Pantaila-argazkiak
+    Enable FCast: "Gaitu FCast"
   Channel Settings:
     Channel Settings: Kanalen ezarpenak
     Channel Settings Description: Gogoratu kanal bakoitzerako bideoak ikustean aukeratutako ezarpenak, kanal horretako beste bideo bat ikusten duzunean berriro aplikatzeko.
@@ -1682,6 +1683,8 @@ Video:
       Untrusted Receiver: "Hartzailearen ziurtagiria ez da fidagarria. Erabili autentifikatutako Google Cast hartzaile bat."
     FCast:
       Cast: "Igorri FCast hartzaile batera"
+      No Devices: "Ez da FCast hartzailerik aurkitu"
+      No Source: "Ez dago FCast-erako korronte bateragarririk"
     Secondary Captions: Bigarren mailako azpitituluak
     Subtitle File:
       Load: "Kargatu azpititulu-fitxategia…"

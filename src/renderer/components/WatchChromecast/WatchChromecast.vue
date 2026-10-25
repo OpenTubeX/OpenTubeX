@@ -25,11 +25,13 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
 import { showToast, formatDurationAsTimestamp } from '../../helpers/utils'
-import { chromecast } from '../../helpers/player/chromecast'
+import { chromecast, fcast } from '../../helpers/player/chromecast'
 import { selectCastSource } from '../../helpers/player/castSource'
 import { getSubtitleRequestUrl, shouldUseSubtitleCookies } from '../../helpers/player/subtitleCookies'
 
+// Google Cast and FCast share this sender UI; FCast has no subtitle tracks.
 const props = defineProps({
+  protocol: { type: String, default: 'google', validator: value => ['google', 'fcast'].includes(value) },
   formats: { type: Array, required: true },
   manifestUrl: { type: String, default: null },
   manifestType: { type: String, default: null },
@@ -45,6 +47,10 @@ const emit = defineEmits(['casting-change', 'busy-change', 'playback-state', 'en
 const { t } = useI18n()
 const store = useStore()
 const route = useRoute()
+const cast = props.protocol === 'fcast' ? fcast : chromecast
+const protocolLabels = computed(() => props.protocol === 'fcast'
+  ? { cast: t('Video.Player.FCast.Cast'), noSource: t('Video.Player.FCast.No Source'), noDevices: t('Video.Player.FCast.No Devices') }
+  : { cast: t('Video.Player.Google Cast.Cast'), noSource: t('Video.Player.Google Cast.No Source'), noDevices: t('Video.Player.Google Cast.No Devices') })
 let watchPath = route.path
 const devices = ref([])
 const loading = ref(false)
@@ -54,7 +60,7 @@ watch(() => props.disabled, disabled => { if (disabled) emit('close-menu') })
 const castId = ref(null)
 const deviceName = ref('')
 const startupStage = ref(null)
-const menuTitle = computed(() => castId.value ? t('Video.Player.Google Cast.Connected', { device: deviceName.value }) : t('Video.Player.Google Cast.Cast'))
+const menuTitle = computed(() => castId.value ? t('Video.Player.Google Cast.Connected', { device: deviceName.value }) : protocolLabels.value.cast)
 const status = ref({ currentTime: 0, duration: 0, paused: false, volume: 1, muted: false, activeTrackIds: [] })
 const progressMessage = computed(() => {
   if (startupStage.value) {
@@ -104,9 +110,9 @@ const options = computed(() => {
   const items = loading.value
     ? [{ label: t('Theme Discovery.Loading'), disabled: true }]
     : !source.value
-        ? [{ label: t('Video.Player.Google Cast.No Source'), disabled: true }]
+        ? [{ label: protocolLabels.value.noSource, disabled: true }]
         : devices.value.length === 0
-          ? [{ label: t('Video.Player.Google Cast.No Devices'), disabled: true }]
+          ? [{ label: protocolLabels.value.noDevices, disabled: true }]
           : devices.value.map(device => ({ label: device.name, value: `device-${device.id}`, icon: ['fas', 'cast'], disabled: busy.value }))
   items.push({ type: 'divider' }, { label: t('Theme Discovery.Refresh'), value: 'refresh', icon: ['fas', 'sync'], disabled: loading.value || busy.value })
   return items
@@ -146,7 +152,7 @@ async function refreshDevices() {
   loading.value = true
   try {
     refreshSource().catch(reportError)
-    const result = await chromecast.discover()
+    const result = await cast.discover()
     if (disposed) return
     if (!Array.isArray(result)) throw Object.assign(new Error(result?.error ?? 'Cast discovery failed'), { code: result?.errorCode ?? (result?.error ? undefined : 'CAST_DISCOVERY_FAILED') })
     devices.value = result
@@ -180,12 +186,12 @@ async function poll() {
   const id = castId.value
   if (!id || disposed || stopPromise) return
   try {
-    const result = await chromecast.status(id)
+    const result = await cast.status(id)
     if (disposed || id !== castId.value || stopPromise) return
     if (!result.connected) {
       castId.value = null
       releaseLocalPlayer(result.currentTime ?? status.value.currentTime, false)
-      reportError(Object.assign(new Error('Cast device disconnected'), { code: 'CAST_DISCONNECTED' }))
+      reportError(Object.assign(new Error(result.error ?? 'Cast device disconnected'), { code: result.errorCode ?? 'CAST_DISCONNECTED' }))
       return
     }
     status.value = result
@@ -215,7 +221,7 @@ async function stopCasting(resume = true) {
   const previous = status.value
   stopPromise = (async () => {
     try {
-      const result = await chromecast.stop(id)
+      const result = await cast.stop(id)
       status.value = { ...previous, ...result }
       if (!disposed) emit('playback-state', status.value)
     } finally {
@@ -249,7 +255,7 @@ async function handleChoice(choice) {
         value = Math.min(1, Math.max(0, status.value.volume + (choice === 'volume-up' ? 0.1 : -0.1)))
       } else if (choice === 'mute') value = !status.value.muted
       else if (choice.startsWith('caption-')) { action = 'caption'; value = Number(choice.slice(8)) }
-      const result = await chromecast.control(castId.value, action, value)
+      const result = await cast.control(castId.value, action, value)
       if (result.error) throw Object.assign(new Error(result.error), { code: result.errorCode })
       status.value = result
       emit('playback-state', result)
@@ -258,14 +264,17 @@ async function handleChoice(choice) {
     if (!choice.startsWith('device-') || !source.value) return
     deviceName.value = devices.value.find(device => device.id === choice.slice(7))?.name ?? ''
     startupStage.value = 'preparing'
-    let captions = props.captions.filter(caption => caption.mimeType === 'text/vtt' && /^https?:\/\//i.test(caption.url))
-      .map(({ url, label, language }) => ({ url, label, language }))
-    const caption = props.subtitlesEnabled ? props.getPlayer()?.getActiveCaption() : null
+    const supportsCaptions = props.protocol === 'google'
+    let captions = supportsCaptions
+      ? props.captions.filter(caption => caption.mimeType === 'text/vtt' && /^https?:\/\//i.test(caption.url))
+          .map(({ url, label, language }) => ({ url, label, language }))
+      : []
+    const caption = supportsCaptions && props.subtitlesEnabled ? props.getPlayer()?.getActiveCaption() : null
     if (caption?.mimeType === 'text/vtt' && /^https?:\/\//i.test(caption.url) && !captions.some(item => item.url === caption.url)) {
       captions.push({ url: caption.url, label: caption.label, language: caption.language })
     }
     let player
-    const result = await chromecast.start(async () => {
+    const result = await cast.start(async () => {
       // Optional authenticated tracks would each launch an unused yt-dlp process.
       captions = captions.filter(item => item.url === caption?.url || !shouldUseSubtitleCookies(item.url, store.getters))
       const captionIndex = caption ? captions.findIndex(item => item.url === caption.url) : null
@@ -303,7 +312,7 @@ async function handleChoice(choice) {
     })
     if (result.error) throw Object.assign(new Error(result.error), { code: result.errorCode })
     if (disposed || route.path !== watchPath || props.getPlayer() !== player) {
-      await chromecast.stop(result.castId)
+      await cast.stop(result.castId)
       return
     }
     resumePlayer = null

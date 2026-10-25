@@ -772,6 +772,7 @@ Settings:
       Viewing Modes: Weergavemodi
       Shorts: Shorts
       Screenshots: Schermafbeeldingen
+    Enable FCast: "FCast inschakelen"
   Channel Settings:
     Channel Settings: Kanaalinstellingen
     Channel Settings Description: Onthoud de instellingen die je tijdens het kijken kiest afzonderlijk voor elk kanaal, zodat ze weer worden toegepast wanneer je een andere video van dat kanaal bekijkt.
@@ -1721,6 +1722,8 @@ Video:
       Untrusted Receiver: "Het certificaat van de ontvanger wordt niet vertrouwd. Gebruik een geauthenticeerde Google Cast-ontvanger."
     FCast:
       Cast: "Casten naar een FCast-ontvanger"
+      No Devices: "Geen FCast-ontvangers gevonden"
+      No Source: "Geen compatibele stream voor FCast"
     Secondary Captions: Tweede ondertiteling
     Subtitle File:
       Load: "Ondertitelbestand laden…"

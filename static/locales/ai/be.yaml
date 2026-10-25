@@ -790,6 +790,7 @@ Settings:
       Viewing Modes: Рэжымы прагляду
       Shorts: Shorts
       Screenshots: Здымкі экрана
+    Enable FCast: "Уключыць FCast"
   Channel Settings:
     Channel Settings: Налады каналаў
     Channel Settings Description: Запамінаць асобныя налады, абраныя падчас прагляду кожнага канала, і ўжываць іх пры наступным праглядзе відэа з гэтага канала.
@@ -1753,6 +1754,8 @@ Video:
       Untrusted Receiver: "Сертыфікат прыёмніка не з’яўляецца давераным. Выкарыстоўвайце аўтэнтыфікаваны прыёмнік Google Cast."
     FCast:
       Cast: "Трансляваць на прыёмнік FCast"
+      No Devices: "Прыёмнікі FCast не знойдзены"
+      No Source: "Няма сумяшчальнага патоку для FCast"
     Secondary Captions: Другія субтытры
     Subtitle File:
       Load: "Загрузіць файл субтытраў…"

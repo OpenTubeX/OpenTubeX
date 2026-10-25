@@ -758,6 +758,7 @@ Settings:
       Viewing Modes: Görüntüleme modları
       Shorts: Shorts
       Screenshots: Ekran görüntüleri
+    Enable FCast: "FCast özelliğini etkinleştir"
   Channel Settings:
     Channel Settings: Kanal Ayarları
     Channel Settings Description: İzlerken seçtiğiniz ayarları her kanal için ayrı ayrı hatırlayarak kanalın bir sonraki videosunda yeniden uygular.
@@ -1671,6 +1672,8 @@ Video:
       Untrusted Receiver: "Alıcının sertifikasına güvenilmiyor. Kimliği doğrulanmış bir Google Cast alıcısı kullanın."
     FCast:
       Cast: "FCast alıcısına yayınla"
+      No Devices: "FCast alıcısı bulunamadı"
+      No Source: "FCast için uyumlu akış yok"
     Secondary Captions: İkincil altyazılar
     Subtitle File:
       Load: "Altyazı dosyası yükle…"

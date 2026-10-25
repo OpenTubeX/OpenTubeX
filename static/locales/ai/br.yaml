@@ -759,6 +759,7 @@ Settings:
       Viewing Modes: Modoù gwelout
       Shorts: Shorts
       Screenshots: Tapadennoù skramm
+    Enable FCast: "Gweredekaat FCast"
   Channel Settings:
     Channel Settings: "Arventennoù ar chadennoù"
     Channel Settings Description: "Derc'hel soñj, evit pep chadenn, eus an arventennoù a zibabit pa sellit. Arloet e vint en-dro ar wech da-heul ma sellot ouzh unan eus he videoioù."
@@ -1681,6 +1682,8 @@ Video:
       Untrusted Receiver: "N’eo ket fiziet e testeni ar resever. Implijit ur resever Google Cast dilesaet."
     FCast:
       Cast: "Kas d’ur resever FCast"
+      No Devices: "N’eus resever FCast ebet kavet"
+      No Source: "N’eus gwazh kenglotus ebet evit FCast"
     Secondary Captions: Eil istitloù
     Subtitle File:
       Load: "Kargañ ur restr istitloù…"

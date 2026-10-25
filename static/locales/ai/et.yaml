@@ -759,6 +759,7 @@ Settings:
       Viewing Modes: Vaaterežiimid
       Shorts: Shorts
       Screenshots: Ekraanipildid
+    Enable FCast: "Luba FCast"
   Channel Settings:
     Channel Settings: Kanali seaded
     Channel Settings Description: Jäta iga kanali jaoks eraldi meelde vaatamise ajal valitud seaded, et need rakenduksid uuesti, kui vaatad järgmisel korral selle kanali videot.
@@ -1674,6 +1675,8 @@ Video:
       Untrusted Receiver: "Vastuvõtja sertifikaati ei usaldata. Kasuta autenditud Google Casti vastuvõtjat."
     FCast:
       Cast: "Edasta FCasti vastuvõtjasse"
+      No Devices: "FCasti vastuvõtjaid ei leitud"
+      No Source: "FCasti jaoks pole ühilduvat voogu"
     Secondary Captions: Teised subtiitrid
     Subtitle File:
       Load: "Laadi subtiitrifail…"

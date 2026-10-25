@@ -1003,6 +1003,7 @@ Settings:
       Viewing Modes: Modes de visualització
       Shorts: Shorts
       Screenshots: Captures de pantalla
+    Enable FCast: "Activa FCast"
   Channel Settings:
     Channel Settings: Configuració dels canals
     Channel Settings Description: Recorda per separat la configuració que trieu mentre mireu cada canal, per tornar-la a aplicar la propera vegada que mireu un dels seus vídeos.
@@ -2152,6 +2153,8 @@ Video:
       Untrusted Receiver: "El certificat del receptor no és de confiança. Fes servir un receptor Google Cast autenticat."
     FCast:
       Cast: "Transmet a un receptor FCast"
+      No Devices: "No s’han trobat receptors FCast"
+      No Source: "No hi ha cap flux compatible amb FCast"
     Secondary Captions: Subtítols secundaris
     Subtitle File:
       Load: "Carrega un fitxer de subtítols…"

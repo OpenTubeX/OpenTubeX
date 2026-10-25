@@ -759,6 +759,7 @@ Settings:
       Viewing Modes: Megtekintési módok
       Shorts: Shorts
       Screenshots: Képernyőképek
+    Enable FCast: "FCast engedélyezése"
   Channel Settings:
     Channel Settings: Csatornabeállítások
     Channel Settings Description: Csatornánként megjegyzi a videónézés közben kiválasztott beállításokat, és a csatorna következő videójánál újra alkalmazza őket.
@@ -1672,6 +1673,8 @@ Video:
       Untrusted Receiver: "A fogadó tanúsítványa nem megbízható. Használj hitelesített Google Cast fogadót."
     FCast:
       Cast: "Átküldés FCast-fogadóra"
+      No Devices: "Nem találhatók FCast-fogadók"
+      No Source: "Nincs kompatibilis adatfolyam az FCasthoz"
     Secondary Captions: Másodlagos feliratok
     Subtitle File:
       Load: "Feliratfájl betöltése…"

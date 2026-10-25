@@ -746,6 +746,7 @@ Settings:
       Viewing Modes: Viewing Modes
       Shorts: Shorts
       Screenshots: Screenshots
+    Enable FCast: "Enable FCast"
   Channel Settings:
     Channel Settings: Channel Settings
     Channel Settings Description: Remember the settings you pick while watching for each channel individually, so they are applied again the next time you watch one of its videos.
@@ -1656,6 +1657,8 @@ Video:
       Untrusted Receiver: "The receiver's certificate is not trusted. Use an authenticated Google Cast receiver."
     FCast:
       Cast: "Cast to an FCast receiver"
+      No Devices: "No FCast receivers found"
+      No Source: "No compatible stream for FCast"
     Secondary Captions: Secondary Captions
     Subtitle File:
       Load: "Load subtitle file…"
