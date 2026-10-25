@@ -7,12 +7,12 @@ const source = readFileSync(new URL('../../src/renderer/views/Watch/Watch.js', i
 function watchMethod(name) {
   const start = source.indexOf(`    ${name}`)
   const end = source.indexOf('\n    },', start)
-  return vm.runInNewContext(`({ ${source.slice(start, end)}\n} })`)
+  return vm.runInNewContext(`({ ${source.slice(start, end)}\n} })`, { navigationDownloadId: () => undefined })
 }
 const { isMusicVideo } = watchMethod('isMusicVideo: function')
 const { watchRouteForVideo: watchRouteInContext } = watchMethod('watchRouteForVideo: function')
 // Objects from the vm context have its prototypes, so compare plain copies
-const watchRouteForVideo = video => JSON.parse(JSON.stringify(watchRouteInContext(video)))
+const watchRouteForVideo = video => JSON.parse(JSON.stringify(watchRouteInContext.call({ $store: { getters: {} } }, video)))
 const { initializePlaybackRate } = watchMethod('initializePlaybackRate()')
 
 test('treats videos as music from their genre or the list hint in the route', () => {

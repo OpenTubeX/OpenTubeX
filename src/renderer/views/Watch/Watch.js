@@ -50,7 +50,7 @@ import { liveReminder, supportsLiveReminders } from '../../helpers/liveReminders
 import { DOWNLOADED_MEDIA_MIME_TYPES } from '../../../constants'
 import { isOnAiSlopList } from '../../helpers/aiSlopList'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
-import { downloadWatchRoute, isPlayableDownloadFile } from '../../helpers/downloadPlayback'
+import { downloadWatchRoute, isPlayableDownloadFile, navigationDownloadId } from '../../helpers/downloadPlayback'
 import { parseLocalVideoGames } from '../../helpers/video-games'
 import { parseChannelPreferences } from '../../helpers/channel-preferences'
 import {
@@ -5646,9 +5646,14 @@ export default defineComponent({
      * @param {{ videoId: string, isMusic?: boolean }} video
      */
     watchRouteForVideo: function (video) {
+      const downloadId = navigationDownloadId(this.$store.getters, video.videoId)
+      const query = {
+        ...(video.isMusic === true ? { musicVideo: 'true' } : {}),
+        ...(downloadId ? { downloadId } : {})
+      }
       return {
         path: `/watch/${video.videoId}`,
-        ...(video.isMusic === true ? { query: { musicVideo: 'true' } } : {})
+        ...(Object.keys(query).length > 0 ? { query } : {})
       }
     },
 

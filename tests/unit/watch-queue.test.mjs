@@ -10,6 +10,7 @@ const autoplayStart = playerSource.indexOf('    const autoplayVideos = computed(
 const autoplayEnd = playerSource.indexOf('\n    })', autoplayStart) + '\n    })'.length
 const autoplaySource = playerSource.slice(autoplayStart, autoplayEnd)
 import downloads from '../../src/renderer/store/modules/downloads.js'
+import { navigationDownloadId } from '../../src/renderer/helpers/downloadPlayback.js'
 
 import {
   default as watchQueue,
@@ -150,23 +151,35 @@ test('reorders, removes, and clears queued videos', () => {
   assert.deepEqual(state.items, [])
 })
 
-for (const route of [undefined, { path: '/watch/saved', query: { downloadId: '42' } }]) {
-  test(`queue advancement ${route ? 'preserves the downloaded file route' : 'opens online videos normally'}`, async () => {
+for (const [name, route, expected] of [
+  ['opens online videos normally', undefined, { path: '/watch/saved' }],
+  ['preserves the downloaded file route', { path: '/watch/saved', query: { downloadId: '42' } }],
+  ['opens a queued video from its download', undefined, { path: '/watch/local', query: { downloadId: '7' } }],
+]) {
+  test(`queue advancement ${name}`, async () => {
     const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
     const { playNextQueuedVideo: playNext, watchRouteWithoutTimestamp, watchRouteForVideo } = watchMethods(source, ['playNextQueuedVideo', 'watchRouteWithoutTimestamp', 'watchRouteForVideo'])
     const navigations = []
     const removed = []
+    const videoId = expected?.path.split('/').at(-1) ?? 'saved'
     const watch = {
       watchRouteWithoutTimestamp,
       watchRouteForVideo,
-      nextQueuedVideo: { videoId: 'saved', queueItemId: 1, route },
-      $store: { commit: (name, id) => removed.push([name, id]) },
+      nextQueuedVideo: { videoId, queueItemId: 1, route },
+      $store: {
+        commit: (name, id) => removed.push([name, id]),
+        getters: {
+          getEnableDownloads: true,
+          getYtDlpDownloads: { 7: { id: 7, files: [{ videoId: 'local' }] } },
+          getLocalPlaybackDownloadIds: new Map([['local', 7]]),
+        },
+      },
       tabRoute: { fullPath: '/watch/previous' },
       tabRouter: { resolve: route => ({ fullPath: route.path }), push: route => navigations.push(route) },
       t: key => key,
     }
     assert.equal(playNext.call(watch), true)
-    assert.deepEqual(JSON.parse(JSON.stringify(navigations)), [route ?? { path: '/watch/saved' }])
+    assert.deepEqual(JSON.parse(JSON.stringify(navigations)), [route ?? expected])
     assert.deepEqual(removed, [['removeVideoFromWatchQueue', 1]])
   })
 }
@@ -176,7 +189,7 @@ function watchMethods(source, names) {
     const start = source.indexOf(`    ${name}:`)
     const end = source.indexOf('\n    },', start)
     return source.slice(start, end) + '\n}'
-  }).join(',')} })`, { showToast() {}, process: { env: {} }, URL })
+  }).join(',')} })`, { showToast() {}, process: { env: {} }, URL, navigationDownloadId })
 }
 
 test('queued downloads explicitly start after loading even when general autoplay is disabled', async () => {
