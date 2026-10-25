@@ -427,19 +427,42 @@ test.describe('watch sidebar panels without recommendations', () => {
   })
 
   for (const button of ['Show transcript', 'Open Chapters']) {
-    test(`opens the panel from ${button} beside the video like every other panel`, async ({ app, page }) => {
+    test(`opens the panel from ${button} below the video in theatre mode`, async ({ app, page }) => {
       await mockPlayableWatchPage(app, page, { captionCueSettings: 'align:center' })
       await openMockedVideo(page)
 
       const layout = page.locator(`${activeTab} .videoLayout`)
       await expect(layout).toHaveClass(/noSidebar/)
+      await expect(layout).not.toHaveClass(/useTheatreMode/)
 
       await page.locator(`${activeTab} .ftVideoPlayer`).hover()
       await page.getByRole('button', { name: button, exact: true }).first().click()
       await expect(layout).not.toHaveClass(/noSidebar/)
-      await expect(layout).not.toHaveClass(/useTheatreMode/)
+      await expect(layout).toHaveClass(/useTheatreMode/)
     })
   }
+
+  test('keeps the layout chosen in the player when the panel reopens', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page, { captionCueSettings: 'align:center' })
+    await openMockedVideo(page)
+
+    const layout = page.locator(`${activeTab} .videoLayout`)
+    const transcriptButton = page.getByRole('button', { name: 'Show transcript', exact: true })
+    await transcriptButton.click()
+    await expect(layout).toHaveClass(/useTheatreMode/)
+
+    await page.locator(`${activeTab} .ftVideoPlayer`).hover()
+    await page.locator(`${activeTab} .ftVideoPlayer .theatre-button`).click()
+    await expect(layout).not.toHaveClass(/useTheatreMode/)
+
+    await page.locator(`${activeTab} .sidebarArea`)
+      .getByRole('button', { name: 'Close transcript' })
+      .click()
+    await expect(layout).toHaveClass(/noSidebar/)
+    await transcriptButton.click()
+    await expect(layout).not.toHaveClass(/noSidebar/)
+    await expect(layout).not.toHaveClass(/useTheatreMode/)
+  })
 })
 
 test('chapters stay centered through layout changes until manually scrolled', { tag: '@scale' }, async ({ app, page }) => {

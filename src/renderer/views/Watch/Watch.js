@@ -288,6 +288,7 @@ export default defineComponent({
       // because the instance is reused across same-tab navigation.
       hasBeenPresented: false,
       useTheatreMode: false,
+      theatreModeToggledManually: false,
       // Same-tab navigation keeps the current layout while its skeleton loads.
       // A newly mounted watch tab falls back to the configured default instead.
       loadingTheatreMode: null,
@@ -1376,6 +1377,15 @@ export default defineComponent({
     currentLocale: 'updateUpcomingTimestamp',
     dateFormatPreference: 'updateUpcomingTimestamp',
     timeFormatPreference: 'updateUpcomingTimestamp',
+    theatrePossible(possible, wasPossible) {
+      // With theatre as the default, the first panel opened on a page without
+      // sidebar content appears below the video instead of beside it, unless
+      // the user has chosen a layout.
+      if (possible && !wasPossible && !this.isLoading && this.theatreLayoutAvailable &&
+        !this.theatreModeToggledManually && this.defaultViewingMode === 'theatre') {
+        this.useTheatreMode = true
+      }
+    },
     isLoading(loading) {
       if (!loading) {
         // Upcoming videos without a trailer never mount a player to report a
@@ -2218,6 +2228,7 @@ export default defineComponent({
       this.$refs.player?.copyChapterTimestamp(startSeconds)
     },
     async toggleTheatreMode() {
+      this.theatreModeToggledManually = true
       const layout = this.$refs.videoLayout
       const elements = [
         layout.querySelector('.videoPlayer'),
