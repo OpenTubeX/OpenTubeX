@@ -643,11 +643,25 @@ function getContentBottom(element, contentElement) {
   const layoutBottom = offsetTopFromDocument(contentElement) - offsetTopFromDocument(element) +
     contentElement.offsetHeight
   // offsetTop and offsetHeight round fractional rows to whole pixels, which can
-  // overstate the end by a pixel and hide retained overflow from the clamp. Use
-  // the rendered position unless a transformed ancestor scales it further.
-  const renderedBottom = contentElement.getBoundingClientRect().bottom -
-    element.getBoundingClientRect().top - element.clientTop + element.scrollTop
+  // overstate the end by a pixel and hide retained overflow from the clamp.
+  // Measure the rendered position instead, removing any scale applied by a
+  // transformed ancestor such as an opening settings window.
+  const bounds = element.getBoundingClientRect()
+  const scale = bounds.height / getBorderBoxHeight(element)
+  if (!(scale > 0) || !Number.isFinite(scale)) return layoutBottom
+  const renderedBottom = (contentElement.getBoundingClientRect().bottom - bounds.top) / scale -
+    element.clientTop + element.scrollTop
   return Math.abs(renderedBottom - layoutBottom) < 2 ? renderedBottom : layoutBottom
+}
+
+/** @param {HTMLElement} element */
+function getBorderBoxHeight(element) {
+  const style = getComputedStyle(element)
+  const height = Number.parseFloat(style.height)
+  if (style.boxSizing === 'border-box') return height
+  return height +
+    Number.parseFloat(style.paddingTop) + Number.parseFloat(style.paddingBottom) +
+    Number.parseFloat(style.borderTopWidth) + Number.parseFloat(style.borderBottomWidth)
 }
 
 /**

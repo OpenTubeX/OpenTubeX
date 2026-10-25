@@ -77,7 +77,7 @@ const measurementFunctions = source.slice(source.indexOf('function getMaximumOve
 
 function setupClamp({
   scrollTop = 211, overflow = 426, nativeOverflow = overflow, retainedTracks = false, offsetAfterUpdate = null,
-  contentTop = 20, contentHeight = 773, settledOverflow = 215
+  contentTop = 20, contentHeight = 773, settledOverflow = 215, scale = 1
 } = {}) {
   const writes = []
   let currentOffset = scrollTop
@@ -85,7 +85,8 @@ function setupClamp({
   let currentNativeOverflow = nativeOverflow
   const element = {
     clientHeight: 598, clientTop: 0, offsetTop: 0, offsetParent: null,
-    getBoundingClientRect: () => ({ top: 0 }),
+    // A transformed ancestor scales rendered geometry but not layout sizes.
+    getBoundingClientRect: () => ({ top: 0, height: 598 * scale }),
     get scrollHeight() { return this.clientHeight + currentNativeOverflow },
     get scrollTop() { return currentOffset },
     set scrollTop(value) { writes.push(value); currentOffset = value }
@@ -93,7 +94,7 @@ function setupClamp({
   // Layout offsets round to whole pixels like Chromium's offsetTop/offsetHeight.
   const content = {
     offsetTop: Math.round(contentTop), offsetHeight: Math.round(contentHeight), offsetParent: element,
-    getBoundingClientRect: () => ({ bottom: contentTop + contentHeight - currentOffset })
+    getBoundingClientRect: () => ({ bottom: (contentTop + contentHeight - currentOffset) * scale })
   }
   const scrollbars = [{ style: { display: '' } }, { style: { display: 'block' } }]
   const instance = {
@@ -116,7 +117,7 @@ function setupClamp({
   const context = vm.createContext({
     document: { body: {} },
     OverlayScrollbars: () => instance,
-    getComputedStyle: target => ({ marginBlockEnd: '0', paddingBottom: target === element ? '20' : '0' }),
+    getComputedStyle: target => ({ marginBlockEnd: '0', paddingBottom: target === element ? '20' : '0', height: '598px', boxSizing: 'border-box' }),
     suspendScrollbarPosition: new WeakMap()
   })
   vm.runInContext(`${boundaryTolerance}\n${measurementFunctions}\n${clampFunction.replace('export ', '')}\nthis.clamp = clampOverlayScrollTop`, context)
@@ -177,6 +178,15 @@ test('clamping measures fractional rows instead of rounded layout offsets', () =
   fixture.clamp()
   assert.deepEqual(fixture.writes, [0, 216])
   assert.equal(fixture.element.scrollTop, 216)
+})
+
+test('clamping removes ancestor scaling from the rendered row position', () => {
+  // An opening settings window scales its contents. Measured unscaled, the
+  // valid offset at the end of the range stays put.
+  const fixture = setupClamp({ scrollTop: 215.4, overflow: 215.4, contentTop: 20, contentHeight: 773.4, scale: 0.997 })
+  fixture.clamp()
+  assert.deepEqual(fixture.writes, [])
+  assert.equal(fixture.element.scrollTop, 215.4)
 })
 
 test('clamping tolerates fractional range differences without resetting the origin', () => {
