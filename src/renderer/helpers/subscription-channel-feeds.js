@@ -366,7 +366,7 @@ export function hasInvidiousRssFeeds() {
 
 export async function getChannelShortsYattee(channel, t, errorChannels) {
   try {
-    const result = await getInvidiousChannelShorts(channel.id)
+    const result = await getInvidiousChannelShorts(channel.id, undefined, undefined, activeRefresh?.controller.signal)
     return { videos: await fillYatteeShortDates(result.videos, store.getters.getShortsCache[channel.id]?.videos, invidiousGetVideoInformation) }
   } catch (err) {
     handleSubscriptionFetchError(channel, err, getInvidiousApiErrorMessage('yattee'), {
