@@ -10,7 +10,7 @@ import { shouldHideMembersOnlyContent } from '../../src/renderer/helpers/restric
 import { getUpcomingPremiereTimestamp } from '../../src/renderer/helpers/subscription-entries.js'
 import { isOnAiSlopList } from '../../src/renderer/helpers/aiSlopList.js'
 
-const subscriptionsSource = await readFile(new URL('../../src/renderer/helpers/subscriptions.js', import.meta.url), 'utf8')
+const subscriptionsSource = await readFile(new URL('../../src/renderer/helpers/subscription-visibility.js', import.meta.url), 'utf8')
 const premiereStart = subscriptionsSource.indexOf('export function isUpcomingPremiere(')
 const premiereSource = subscriptionsSource.slice(premiereStart, subscriptionsSource.indexOf('\n}\n', premiereStart) + 2)
 const isUpcomingPremiere = compileFunction(`${premiereSource.replace('export ', '')}\nreturn isUpcomingPremiere`,

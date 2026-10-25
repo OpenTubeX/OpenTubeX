@@ -15,7 +15,7 @@ function loadParser(env) {
     enrichSubscriptionRssEntries: async entries => entries,
   })
   const start = subscriptions.indexOf('export async function parseYouTubeRSSFeed(')
-  const end = subscriptions.indexOf('\n/**', start)
+  const end = subscriptions.indexOf('\n}\n', start) + 2
   vm.runInContext(subscriptions.slice(start, end).replace('export ', ''), context)
   return context.parseYouTubeRSSFeed
 }

@@ -24,8 +24,12 @@ const { parseLocalChannelShorts, parseLocalPlaylistVideos } = createLocalFeedPar
 const networkSource = (await readFile(new URL('../../src/renderer/helpers/networkRecovery.js', import.meta.url), 'utf8'))
   .replace(/^import .* from .*\n/gm, '').replace(/^export /gm, '')
 
-const source = (await readFile(new URL('../../src/renderer/helpers/subscriptions.js', import.meta.url), 'utf8'))
+// subscriptions.js re-exports the refresh modules that it is split into.
+const source = (await Promise.all(['subscription-visibility.js', 'subscription-enrichment.js', 'subscription-refresh-state.js', 'subscription-channel-feeds.js', 'subscription-feed-refresh.js', 'subscriptions.js']
+  .map(file => readFile(new URL(`../../src/renderer/helpers/${file}`, import.meta.url), 'utf8'))))
+  .join('\n')
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
+  .replace(/^export \{[\s\S]*?\}\n/gm, '')
   .replace(/^export /gm, '')
 
 // Exercise the real refresh, fallback, cache, and notification paths with fake

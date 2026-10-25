@@ -145,7 +145,7 @@ async function setupCancellation({ deadline = Date.now() - 1000, enabled = true 
     setStoredSubscriptionTabNextAutoRefreshTimestamp: (...args) => events.push(args),
     scheduleSubscriptionTabAutoRefresh: (...args) => events.push(args),
   })
-  const subscriptions = await readFile(new URL('../../src/renderer/helpers/subscriptions.js', import.meta.url), 'utf8')
+  const subscriptions = await readFile(new URL('../../src/renderer/helpers/subscription-refresh-state.js', import.meta.url), 'utf8')
   const localCancellationStart = subscriptions.indexOf('export function cancelSubscriptionRefresh()')
   vm.runInContext(subscriptions.slice(localCancellationStart, subscriptions.indexOf('\n/**', localCancellationStart)).replace('export ', ''), context)
   const cancellationStart = subscriptions.indexOf('export function requestSubscriptionRefreshCancellation()')
