@@ -607,7 +607,7 @@ export async function getInvidiousRelatedVideos(videoId, signal) {
  *  dislikeCount: number,
  *  paid: boolean,
  *  premium: boolean,
- *  isFamilyFriendly: boolean,
+ *  isFamilyFriendly: boolean | null,
  *  allowedRegions: string[],
  *  genre: string,
  *  genreUrl: string,
@@ -695,6 +695,13 @@ export async function invidiousGetVideoInformation(videoId) {
     resource: 'videos',
     id: videoId,
   })
+
+  // Invidious reports false when YouTube omits the player microformat, which also
+  // supplies the category and allowed regions. Age-restricted videos fail outright.
+  if (video.isFamilyFriendly === false && !video.genre && video.allowedRegions?.length === 0) {
+    video.isFamilyFriendly = null
+  }
+
   video.musicMediaType = classifyInvidiousMusicMediaType(video)
   return video
 }
