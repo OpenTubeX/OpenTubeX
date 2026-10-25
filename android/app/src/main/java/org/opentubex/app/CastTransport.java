@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 /** Runs the same authenticated Cast V2 sender bundled by Electron. */
-final class CastTransport implements AutoCloseable {
+final class CastTransport implements CastConnection {
     private final Process process;
     private final OutputStreamWriter commands;
     private final Map<Integer, Pending> pending = new ConcurrentHashMap<>();
@@ -123,7 +123,7 @@ final class CastTransport implements AutoCloseable {
         return address;
     }
 
-    String localAddress() { return localAddress; }
+    @Override public String localAddress() { return localAddress; }
 
     JSObject send(String namespace, String destination, JSObject payload, boolean wait) throws Exception {
         if ("urn:x-cast:com.google.cast.media".equals(namespace)) mediaDestination = destination;
@@ -143,7 +143,7 @@ final class CastTransport implements AutoCloseable {
         finally { pending.remove(id); }
     }
 
-    void stopMedia() {
+    @Override public void stopMedia() {
         if (mediaDestination == null || mediaSessionId < 0) return;
         try { send("urn:x-cast:com.google.cast.media", mediaDestination,
             new JSObject().put("type", "STOP").put("mediaSessionId", mediaSessionId), false); }

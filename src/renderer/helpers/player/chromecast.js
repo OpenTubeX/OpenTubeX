@@ -1,59 +1,13 @@
 import { registerPlugin } from '@capacitor/core'
 import { ensureAndroidLocalNetworkAccess } from '../androidLocalNetwork.js'
 import { ChromecastSession } from '../../../chromecastSession.js'
+import { FcastSession } from '../../../fcastSession.js'
 import { rewriteCastDash, rewriteCastHls, MIN_RESOURCE_GRACE_MS, hlsResourceGrace, dashResourceGrace } from '../../../castManifestRewrite.js'
 import { playbackScreenWake } from '../playbackScreenWake.js'
 
-/** Adapt the packaged Cast V2 transport to the shared desktop session logic. */
-export function createMobileChromecast(native, screenWake = playbackScreenWake) {
-  class Sender {
-    constructor(device) {
-      this.device = device
-      this.castId = crypto.randomUUID()
-      this.listeners = new Map()
-      this.closed = false
-    }
-
-    on(event, callback) {
-      if (!this.listeners.has(event)) this.listeners.set(event, [])
-      this.listeners.get(event).push(callback)
-    }
-
-    emit(event, ...args) {
-      for (const callback of this.listeners.get(event) ?? []) callback(...args)
-    }
-
-    async connect() {
-      this.listener = await native.addListener('castEvent', event => {
-        if (event.castId !== this.castId || this.closed) return
-        if (event.event === 'closed') this.close()
-        if (event.event === 'message') this.emit('message', event.namespace, event.payload)
-      })
-      if (this.closed) { await this.listener.remove(); throw new Error('Cast device disconnected') }
-      const result = await native.connect({ deviceId: this.device.id, castId: this.castId })
-      if (this.closed) throw Object.assign(new Error('Cast device disconnected'), { code: 'CAST_DISCONNECTED' })
-      return result.address
-    }
-
-    async send(namespace, destination, payload, wait = true) {
-      if (this.closed) throw new Error('Cast device disconnected')
-      const result = await native.send({ castId: this.castId, namespace, destination, payload, wait })
-      // Process the response before the session reads status, independently of
-      // Capacitor's notification/promise delivery order.
-      if (result.type) this.emit('message', namespace, result)
-      return result
-    }
-
-    close() {
-      if (this.closed) return
-      this.closed = true
-      this.listener?.remove().catch(console.error)
-      native.disconnect({ castId: this.castId }).catch(console.error)
-      this.emit('closed')
-    }
-  }
-
-  function createMedia({ source, sender }) {
+/** The native relay streams media; manifests come back here for shared rewriting. */
+function createMobileCastMedia(native) {
+  return ({ source, sender }) => {
     const resources = new Map()
     const ids = new Map()
     let pending = []
@@ -205,20 +159,18 @@ export function createMobileChromecast(native, screenWake = playbackScreenWake) 
       close() { closed = true; listener?.remove().catch(console.error) }
     }
   }
+}
+
+function screenWakeBlocker(screenWake) {
   const blockers = new Map()
-  const manager = new ChromecastSession({
-    discover: async () => {
-      await ensureAndroidLocalNetworkAccess()
-      return (await native.discover()).devices
-    },
-    createSender: device => new Sender(device),
-    createMedia,
-    randomId: () => crypto.randomUUID(),
-    powerSaveBlocker: {
-      start() { const id = crypto.randomUUID(); blockers.set(id, screenWake.acquire()); return id },
-      stop(id) { blockers.get(id)?.(); blockers.delete(id) }
-    }
-  })
+  return {
+    start() { const id = crypto.randomUUID(); blockers.set(id, screenWake.acquire()); return id },
+    stop(id) { blockers.get(id)?.(); blockers.delete(id) }
+  }
+}
+
+/** The renderer has one owner, so expose the shared session without owner IDs. */
+function ownedSession(manager) {
   return {
     discover: () => manager.discover(),
     async start(prepare, onProgress) {
@@ -231,20 +183,147 @@ export function createMobileChromecast(native, screenWake = playbackScreenWake) 
   }
 }
 
-export const chromecast = process.env.IS_CAPACITOR && !process.env.IS_IOS
-  ? createMobileChromecast(registerPlugin('Chromecast'))
-  : process.env.IS_ELECTRON
-    ? {
-        discover: () => window.ftElectron.chromecast.discover(),
-        start: (prepare, onProgress) => window.ftElectron.chromecast.start(prepare, onProgress),
-        status: castId => window.ftElectron.chromecast.status(castId),
-        control: (castId, action, value) => window.ftElectron.chromecast.control(castId, action, value),
-        stop: castId => window.ftElectron.chromecast.stop(castId)
+/** Adapt the packaged Cast V2 transport to the shared desktop session logic. */
+export function createMobileChromecast(native, screenWake = playbackScreenWake) {
+  class Sender {
+    constructor(device) {
+      this.device = device
+      this.castId = crypto.randomUUID()
+      this.listeners = new Map()
+      this.closed = false
+    }
+
+    on(event, callback) {
+      if (!this.listeners.has(event)) this.listeners.set(event, [])
+      this.listeners.get(event).push(callback)
+    }
+
+    emit(event, ...args) {
+      for (const callback of this.listeners.get(event) ?? []) callback(...args)
+    }
+
+    async connect() {
+      this.listener = await native.addListener('castEvent', event => {
+        if (event.castId !== this.castId || this.closed) return
+        if (event.event === 'closed') this.close()
+        if (event.event === 'message') this.emit('message', event.namespace, event.payload)
+      })
+      if (this.closed) { await this.listener.remove(); throw new Error('Cast device disconnected') }
+      const result = await native.connect({ deviceId: this.device.id, castId: this.castId })
+      if (this.closed) throw Object.assign(new Error('Cast device disconnected'), { code: 'CAST_DISCONNECTED' })
+      return result.address
+    }
+
+    async send(namespace, destination, payload, wait = true) {
+      if (this.closed) throw new Error('Cast device disconnected')
+      const result = await native.send({ castId: this.castId, namespace, destination, payload, wait })
+      // Process the response before the session reads status, independently of
+      // Capacitor's notification/promise delivery order.
+      if (result.type) this.emit('message', namespace, result)
+      return result
+    }
+
+    close() {
+      if (this.closed) return
+      this.closed = true
+      this.listener?.remove().catch(console.error)
+      native.disconnect({ castId: this.castId }).catch(console.error)
+      this.emit('closed')
+    }
+  }
+
+  return ownedSession(new ChromecastSession({
+    discover: async () => {
+      await ensureAndroidLocalNetworkAccess()
+      return (await native.discover()).devices
+    },
+    createSender: device => new Sender(device),
+    createMedia: createMobileCastMedia(native),
+    randomId: () => crypto.randomUUID(),
+    powerSaveBlocker: screenWakeBlocker(screenWake)
+  }))
+}
+
+/** FCast shares the native Cast plugin, so its relay and foreground service apply too. */
+export function createMobileFcast(native, screenWake = playbackScreenWake) {
+  const disconnected = () => Object.assign(new Error('FCast receiver disconnected'), { code: 'CAST_DISCONNECTED' })
+  class Connection {
+    constructor(device, { onPacket, onClosed }) {
+      this.device = device
+      this.castId = crypto.randomUUID()
+      this.closed = false
+      this.onPacket = onPacket
+      this.onClosed = onClosed
+    }
+
+    async open() {
+      this.listener = await native.addListener('castEvent', event => {
+        if (event.castId !== this.castId || this.closed) return
+        if (event.event === 'closed') this.close()
+        if (event.event === 'packet') this.onPacket(event.opcode, event.body)
+      })
+      // close() cannot remove a listener that was still being registered.
+      if (this.closed) { await this.listener.remove(); throw this.closeError }
+      try {
+        const { address } = await native.connect({ deviceId: this.device.id, castId: this.castId, protocol: 'fcast' })
+        if (this.closed) throw this.closeError
+        return address
+      } catch (error) {
+        this.close(error)
+        throw error
       }
-    : {
-        discover: async () => [],
-        start: async () => ({ error: 'Google Cast is not supported on this platform' }),
-        status: async () => ({ connected: false }),
-        control: async () => ({ error: 'Google Cast is not supported on this platform' }),
-        stop: async () => ({ connected: false })
-      }
+    }
+
+    async send(opcode, body) {
+      if (this.closed) throw this.closeError
+      await native.sendPacket({ castId: this.castId, opcode, ...(body === undefined ? {} : { body }) })
+    }
+
+    close(error = disconnected()) {
+      if (this.closed) return
+      this.closed = true
+      this.closeError = error
+      this.listener?.remove().catch(console.error)
+      native.disconnect({ castId: this.castId }).catch(console.error)
+      this.onClosed(error)
+    }
+  }
+  return ownedSession(new FcastSession({
+    discover: async () => {
+      await ensureAndroidLocalNetworkAccess()
+      return (await native.discover({ protocol: 'fcast' })).devices
+    },
+    createConnection: (device, handlers) => new Connection(device, handlers),
+    createMedia: createMobileCastMedia(native),
+    randomId: () => crypto.randomUUID(),
+    powerSaveBlocker: screenWakeBlocker(screenWake)
+  }))
+}
+
+/** @param {'chromecast' | 'fcast'} name */
+const electronCast = name => ({
+  discover: () => window.ftElectron[name].discover(),
+  start: (prepare, onProgress) => window.ftElectron[name].start(prepare, onProgress),
+  status: castId => window.ftElectron[name].status(castId),
+  control: (castId, action, value) => window.ftElectron[name].control(castId, action, value),
+  stop: castId => window.ftElectron[name].stop(castId)
+})
+
+const unsupportedCast = {
+  discover: async () => [],
+  start: async () => ({ error: 'Casting is not supported on this platform' }),
+  status: async () => ({ connected: false }),
+  control: async () => ({ error: 'Casting is not supported on this platform' }),
+  stop: async () => ({ connected: false })
+}
+
+const androidCast = process.env.IS_CAPACITOR && !process.env.IS_IOS ? registerPlugin('Chromecast') : null
+
+export const chromecast = androidCast
+  ? createMobileChromecast(androidCast)
+  : process.env.IS_ELECTRON ? electronCast('chromecast') : unsupportedCast
+
+/** FCast needs TCP sockets, which the Electron main process or the Android plugin opens. */
+export const fcast = androidCast
+  ? createMobileFcast(androidCast)
+  : process.env.IS_ELECTRON ? electronCast('fcast') : unsupportedCast
