@@ -732,7 +732,7 @@ function handleSubscription(profile) {
     emit('subscribed')
   }
 
-  if ((isProfileDropdownEnabled.value || isGroupListEnabled.value) && props.openDropdownOnSubscribe && !isProfileDropdownOpen.value) {
+  if (isProfileDropdownEnabled.value && props.openDropdownOnSubscribe && !isProfileDropdownOpen.value) {
     toggleProfileDropdown()
   }
 }
