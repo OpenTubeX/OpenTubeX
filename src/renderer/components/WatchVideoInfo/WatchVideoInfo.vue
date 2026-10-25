@@ -646,15 +646,22 @@ let optionsLayoutFrame = null
  * @param {HTMLElement} group
  */
 function getUnwrappedGroupWidth(group) {
-  const gap = parseFloat(getComputedStyle(group).columnGap)
+  const gap = parseFloat(getComputedStyle(group).columnGap) || 0
   const items = [...group.children].filter(item => item.getClientRects().length > 0)
   const divider = getComputedStyle(group, '::before')
   const dividerWidth = divider.content === 'none'
     ? 0
-    : parseFloat(divider.inlineSize) + parseFloat(divider.marginInlineStart) + parseFloat(divider.marginInlineEnd) + gap
+    : parseFloat(divider.inlineSize) + getInlineMargins(divider) + gap
 
-  return items.reduce((width, item) => width + item.getBoundingClientRect().width, 0) +
+  return items.reduce((width, item) => width + item.getBoundingClientRect().width + getInlineMargins(getComputedStyle(item)), 0) +
     gap * Math.max(items.length - 1, 0) + dividerWidth
+}
+
+/**
+ * @param {CSSStyleDeclaration} style
+ */
+function getInlineMargins(style) {
+  return parseFloat(style.marginInlineStart) + parseFloat(style.marginInlineEnd)
 }
 
 /**

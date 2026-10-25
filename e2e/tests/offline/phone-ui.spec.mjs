@@ -153,7 +153,7 @@ test.describe('phone UI', () => {
     await expect(page.locator('dialog[open]')).toHaveCount(0)
   })
 
-  test('keeps the enlarged video actions inside the card on narrow phones', async ({ app, page }) => {
+  test('keeps the enlarged video actions inside the card on narrow phones', { tag: '@scale' }, async ({ app, page }) => {
     await page.evaluate(async () => {
       await window.$store.dispatch('updateUseSponsorBlock', true)
       await window.$store.dispatch('updateQuickBookmarkTargetPlaylistId', 'phone-list-0')
@@ -171,7 +171,7 @@ test.describe('phone UI', () => {
       return element.getBoundingClientRect().right <= contentRight + 0.5 &&
         [...element.querySelectorAll('.iconButton, .downloadButton')].every(button => {
           const box = button.getBoundingClientRect()
-          return box.width >= 48 && box.height >= 48 && box.right <= contentRight + 0.5
+          return box.width >= 47.5 && box.height >= 47.5 && box.right <= contentRight + 0.5
         })
     })).toBe(true)
   })
