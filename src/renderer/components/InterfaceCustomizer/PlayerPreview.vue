@@ -25,13 +25,13 @@
         {{ t('Settings.Interface Customizer.Example Video Title') }}
       </div>
       <span
-        v-if="paused && displayVideoPlayButton"
+        v-if="displayVideoPlayButton"
         class="previewBigPlay"
       >
-        <PreviewIcon :path="SHAKA_PREVIEW_ICONS.PLAY" />
+        <PreviewIcon :path="paused ? SHAKA_PREVIEW_ICONS.PLAY : SHAKA_PREVIEW_ICONS.PAUSE" />
       </span>
       <div
-        v-if="state === 'menu'"
+        v-if="menuOpen"
         class="previewOverflowMenu"
       >
         <span class="previewOverflowClose">
@@ -87,12 +87,14 @@
           <span class="previewSeekBarThumb" />
         </div>
         <div class="previewButtonPanel">
-          <span class="previewPill previewIconPill">
-            <PreviewIcon :path="paused ? SHAKA_PREVIEW_ICONS.PLAY : SHAKA_PREVIEW_ICONS.PAUSE" />
-          </span>
-          <span class="previewPill previewIconPill">
-            <PreviewIcon :path="SHAKA_PREVIEW_ICONS.MUTE" />
-          </span>
+          <template v-if="!IS_CAPACITOR">
+            <span class="previewPill previewIconPill">
+              <PreviewIcon :path="paused ? SHAKA_PREVIEW_ICONS.PLAY : SHAKA_PREVIEW_ICONS.PAUSE" />
+            </span>
+            <span class="previewPill previewIconPill">
+              <PreviewIcon :path="SHAKA_PREVIEW_ICONS.MUTE" />
+            </span>
+          </template>
           <span class="previewPill previewTextPill">{{ PREVIEW_TIME }}</span>
           <span class="previewSpacer" />
           <span
@@ -109,7 +111,7 @@
           </span>
           <span class="previewPill previewRightGroup">
             <span
-              v-if="enableScreenshot"
+              v-if="enableScreenshot && !compact"
               class="previewIconButton"
               data-preview-control="screenshot"
             >
@@ -129,7 +131,7 @@
               <span
                 v-else
                 class="previewIconButton"
-                :class="{ open: button.id === 'menu' && state === 'menu' }"
+                :class="{ open: button.id === 'menu' && menuOpen }"
                 :data-preview-control="button.id"
               >
                 <PreviewIcon :path="button.path" />
@@ -151,6 +153,7 @@ import store from '../../store/index'
 import { PlayerIcons, ZOOM_IN_ICON_VIEWBOX } from '../../../constants'
 import { CONTROL_BAR_BUTTON_DEFINITIONS, getPreviewMenuControlBarButtons } from '../../helpers/controlBarButtons'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { FULLSCREEN_ACTION_DEFINITIONS } from '../../helpers/fullscreenActions'
 import { getQuickPlaybackRateLabel } from '../../helpers/player/quickPlaybackRateLabel'
 import { AB_REPEAT_PREVIEW_ICON, SHAKA_PREVIEW_ICONS } from './playerPreviewIcons'
@@ -174,16 +177,22 @@ PreviewIcon.props = ['path', 'viewBox']
 
 const fullscreen = computed(() => props.state === 'fullscreen' || props.state === 'paused')
 const paused = computed(() => props.state === 'paused')
+// Like the player, narrow windows and phones use the compact controls, whose
+// menu covers the whole player, so only there it gets a preview state of its own.
+const compact = usePhoneLayout()
+const menuOpen = computed(() => props.state === 'menu' || (props.state === 'window' && !compact.value))
 
 const showPlayerControlsWhenPaused = computed(() => store.getters.getShowPlayerControlsWhenPaused)
 const showVideoTitleWhenPaused = computed(() => store.getters.getShowVideoTitleWhenPaused)
 const showFullscreenActionsWhenPaused = computed(() => store.getters.getShowFullscreenActionsWhenPaused)
-const displayVideoPlayButton = computed(() => !IS_CAPACITOR && store.getters.getDisplayVideoPlayButton)
+// The mobile player always shows its center button.
+const displayVideoPlayButton = computed(() => IS_CAPACITOR || store.getters.getDisplayVideoPlayButton)
 const enableScreenshot = computed(() => store.getters.getEnableScreenshot)
 
 // Parse and label the options like the player's quick playback speed bar.
 const quickPlaybackRates = computed(() => {
-  if (!store.getters.getUseQuickPlaybackSpeedBar) return []
+  // The compact desktop controls leave the speed bar out.
+  if (!store.getters.getUseQuickPlaybackSpeedBar || (compact.value && !IS_CAPACITOR)) return []
   let options = []
   try {
     const parsed = JSON.parse(store.getters.getQuickPlaybackSpeedBarOptions || '[]')
@@ -209,9 +218,14 @@ const CONTROL_BAR_ICONS = {
   fullWindow: PlayerIcons.OPEN_IN_FULL_FILLED,
 }
 
+// The other buttons move into the compact controls' menu.
+const COMPACT_CONTROL_BAR_BUTTONS = ['captions', 'menu', 'fullscreen', ...(IS_CAPACITOR ? ['pictureInPicture'] : [])]
+
 const controlBarButtons = computed(() => store.getters.getControlBarButtons
   // Like the player, fullscreen hides the theatre mode and full window buttons.
-  .filter(id => !fullscreen.value || (id !== 'theatreMode' && id !== 'fullWindow'))
+  .filter(id => compact.value
+    ? COMPACT_CONTROL_BAR_BUTTONS.includes(id)
+    : !fullscreen.value || (id !== 'theatreMode' && id !== 'fullWindow'))
   .map(id => ({
     id,
     path: id === 'fullscreen'
@@ -219,19 +233,21 @@ const controlBarButtons = computed(() => store.getters.getControlBarButtons
       : CONTROL_BAR_ICONS[id],
   })))
 
+function controlBarMenuItem(id) {
+  const { labelKey } = CONTROL_BAR_BUTTON_DEFINITIONS.find(button => button.id === id)
+  return {
+    id,
+    path: CONTROL_BAR_ICONS[id],
+    // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
+    label: t(labelKey),
+    value: id === 'pictureInPicture' ? '' : t('Settings.Interface Customizer.Off'),
+  }
+}
+
 // Buttons removed from the control bar move into the player menu
-const removedControlBarButtons = computed(() => {
-  const removed = getPreviewMenuControlBarButtons(store.getters.getControlBarButtons)
-  return CONTROL_BAR_BUTTON_DEFINITIONS
-    .filter(({ id }) => removed.includes(id))
-    .map(({ id, labelKey }) => ({
-      id,
-      path: CONTROL_BAR_ICONS[id],
-      // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
-      label: t(labelKey),
-      value: id === 'pictureInPicture' ? '' : t('Settings.Interface Customizer.Off'),
-    }))
-})
+const removedControlBarButtons = computed(() => (
+  getPreviewMenuControlBarButtons(store.getters.getControlBarButtons).map(controlBarMenuItem)
+))
 
 const fullscreenActions = computed(() => {
   const definitions = new Map(FULLSCREEN_ACTION_DEFINITIONS.map(action => [action.id, action]))
@@ -242,16 +258,13 @@ const fullscreenActions = computed(() => {
   }))
 })
 
-// Mirrors the desktop overflow menu of a regular video with the current settings.
+// Mirrors the overflow menu of a regular video with the current settings.
 const overflowItems = computed(() => {
   const off = t('Settings.Interface Customizer.Off')
-  const removed = removedControlBarButtons.value
-  return [
-    { id: 'playbackRate', path: SHAKA_PREVIEW_ICONS.PLAYBACK_RATE, label: t('Settings.Player Settings.Playback Speed'), value: '1x' },
-    { id: 'quality', path: SHAKA_PREVIEW_ICONS.RESOLUTION, label: t('Settings.Interface Customizer.Resolution'), value: '1080p' },
-    { id: 'sleepTimer', path: PlayerIcons.TIMER_FILLED, label: t('Video.Player.Sleep Timer.Sleep Timer'), value: off },
-    ...removed.filter(item => item.id === 'autoplay'),
-    store.getters.getEnableSeekHistory && { id: 'seekHistory', icon: ['fas', 'history'], label: t('Video.Player.Seek History.Seek History'), value: t('Video.Player.Seek History.Positions', { count: 2 }, 2) },
+  const playbackRate = { id: 'playbackRate', path: SHAKA_PREVIEW_ICONS.PLAYBACK_RATE, label: t('Settings.Player Settings.Playback Speed'), value: '1x' }
+  const quality = { id: 'quality', path: SHAKA_PREVIEW_ICONS.RESOLUTION, label: t('Settings.Interface Customizer.Resolution'), value: '1080p' }
+  const sleepTimer = { id: 'sleepTimer', path: PlayerIcons.TIMER_FILLED, label: t('Video.Player.Sleep Timer.Sleep Timer'), value: off }
+  const toggles = [
     store.getters.getShowSkipSilenceButton && !process.env.IS_IOS && { id: 'skipSilence', path: PlayerIcons.SKIP_NEXT_FILLED, label: t('Settings.Player Settings.Skip Silence'), value: off },
     store.getters.getShowMusicModeToggle && { id: 'musicMode', icon: ['fas', 'headphones'], label: t('Video.Player.Music Mode'), value: off },
     { id: 'ambientMode', path: PlayerIcons.LIGHT_MODE_FILLED, label: t('Global.Ambient Mode'), value: off },
@@ -260,6 +273,31 @@ const overflowItems = computed(() => {
     store.getters.getShowVolumeBoostToggle && !process.env.IS_IOS && { id: 'volumeBoost', icon: ['fas', 'volume-high'], label: t('Video.Player.Volume Boost.Volume Boost'), value: off },
     { id: 'loop', path: SHAKA_PREVIEW_ICONS.LOOP, label: t('Settings.Interface Customizer.Loop'), value: off },
     !store.getters.getDisableAbRepeat && { id: 'abRepeat', path: AB_REPEAT_PREVIEW_ICON.path, viewBox: AB_REPEAT_PREVIEW_ICON.viewBox, label: t('Video.Player.A-B Repeat.Set Repeat Start'), value: off },
+  ]
+  const seekHistory = store.getters.getEnableSeekHistory && { id: 'seekHistory', icon: ['fas', 'history'], label: t('Video.Player.Seek History.Seek History'), value: t('Video.Player.Seek History.Positions', { count: 2 }, 2) }
+
+  if (compact.value) {
+    return [
+      quality,
+      playbackRate,
+      sleepTimer,
+      seekHistory,
+      controlBarMenuItem('autoplay'),
+      ...toggles,
+      enableScreenshot.value && { id: 'screenshot', path: PlayerIcons.PHOTO_CAMERA_FILLED, label: t('Video.Player.Take Screenshot'), value: '' },
+      controlBarMenuItem('pictureInPicture'),
+      !IS_CAPACITOR && controlBarMenuItem('fullWindow'),
+    ].filter(Boolean)
+  }
+
+  const removed = removedControlBarButtons.value
+  return [
+    playbackRate,
+    quality,
+    sleepTimer,
+    ...removed.filter(item => item.id === 'autoplay'),
+    seekHistory,
+    ...toggles,
     ...removed.filter(item => item.id !== 'autoplay'),
   ].filter(Boolean)
 })

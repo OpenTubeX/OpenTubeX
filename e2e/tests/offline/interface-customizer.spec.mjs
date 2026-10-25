@@ -112,6 +112,10 @@ test.describe('interface customizer', () => {
     await expect(preview.locator('[data-preview-control="screenshot"]')).toHaveCount(0)
     await toggle('Enable screenshot').click()
     await expect(preview.locator('[data-preview-control="screenshot"]')).toBeVisible()
+    await expect(preview.locator('.previewBigPlay')).toHaveCount(0)
+    await toggle('Display Play Button In Video Player').click()
+    // Like the player, the center button shows with the controls, not only while paused.
+    await expect(preview.locator('.previewBigPlay')).toBeVisible()
     await page.evaluate(() => window.$store.dispatch('updateQuickPlaybackSpeedBarOptions', JSON.stringify([
       { speed: 0.5, name: '' }, { speed: 1, name: '' }, { speed: 1.5, name: 'Lecture' }, { speed: 2, name: '' },
     ])))
@@ -120,7 +124,6 @@ test.describe('interface customizer', () => {
     await expect(preview.locator('[data-preview-control="quickPlaybackSpeedBar"] .previewRate'))
       .toHaveText(['50%', 'Normal', 'Lecture', '2x'])
 
-    await customizer.getByRole('tab', { name: 'Player menu', exact: true }).click()
     await expect(preview.locator('[data-preview-overflow-item="lightsOff"]')).toHaveCount(0)
     await toggle('Show Lights Off Toggle').click()
     await expect(preview.locator('[data-preview-overflow-item="lightsOff"]')).toBeVisible()
@@ -131,6 +134,7 @@ test.describe('interface customizer', () => {
     await toggle('Show Player Controls').click()
     await toggle('Show Video Title').click()
     await expect(preview.locator('.previewControls')).toBeHidden()
+    await expect(preview.locator('.previewBigPlay')).toBeHidden()
     await expect(preview.locator('.previewTitle')).toBeHidden()
     await expect(preview.locator('.previewFullscreenActions')).toBeVisible()
     await expect.poll(() => page.evaluate(() => [
@@ -138,6 +142,58 @@ test.describe('interface customizer', () => {
       window.$store.getters.getShowLightsOffToggle,
       window.$store.getters.getShowPlayerControlsWhenPaused,
     ])).toEqual([true, true, false])
+  })
+
+  test('offers only the preview modes each tab needs', async ({ page }) => {
+    const customizer = await openInterfaceCustomizer(page, 'player')
+    const modes = () => customizer.locator('.previewModes [role="tab"]').evaluateAll(elements => (
+      elements.map(element => element.dataset.previewMode)
+    ))
+    await expect.poll(modes).toEqual(['window', 'fullscreen', 'paused'])
+    // The playing preview shows the player menu open.
+    await expect(customizer.locator('.previewOverflowMenu')).toBeVisible()
+    for (const tab of ['controlBar', 'fullscreenActions']) {
+      await customizer.locator(`[data-settings-subpage-tab="${tab}"]`).click()
+      await expect(customizer.locator('.previewModes')).toHaveCount(0)
+    }
+    await expect(customizer.locator('.previewFullscreenActions')).toBeVisible()
+  })
+
+  test('previews the compact controls and their player menu in the phone layout', { tag: '@scale' }, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 360, height: 760 })
+    await page.evaluate(async () => {
+      await window.$store.dispatch('updateEnableScreenshot', true)
+      await window.$store.dispatch('updateUseQuickPlaybackSpeedBar', true)
+    })
+    const customizer = await openInterfaceCustomizer(page, 'control bar')
+    const preview = customizer.locator('.playerPreview')
+    const modes = () => customizer.locator('.previewModes [role="tab"]').evaluateAll(elements => (
+      elements.map(element => element.dataset.previewMode)
+    ))
+    const previewIds = () => preview.locator('[data-preview-control]').evaluateAll(elements => (
+      elements.map(element => element.dataset.previewControl)
+    ))
+    const menuIds = () => preview.locator('[data-preview-overflow-item]').evaluateAll(elements => (
+      elements.map(element => element.dataset.previewOverflowItem)
+    ))
+
+    // Like the player, the compact control bar keeps captions, the menu and fullscreen.
+    await expect.poll(modes).toEqual(['window', 'menu'])
+    await expect(preview.locator('.previewOverflowMenu')).toHaveCount(0)
+    await expect.poll(previewIds).toEqual(['captions', 'menu', 'fullscreen'])
+
+    await customizer.getByRole('tab', { name: 'Player menu', exact: true }).click()
+    await expect.poll(async () => {
+      const ids = await menuIds()
+      return [...ids.slice(0, 2), ids[ids.indexOf('sleepTimer') + 1], ...ids.slice(-3)]
+    }).toEqual(['quality', 'playbackRate', 'autoplay', 'screenshot', 'pictureInPicture', 'fullWindow'])
+    await expect.poll(menuIds).not.toContain('theatreMode')
+
+    await setWindowSize(app, page, { width: 1200, height: 800 })
+    await expect.poll(modes).toEqual([])
+    // The full control bar returns, with the menu open while playing.
+    await expect(preview.locator('.previewOverflowMenu')).toBeVisible()
+    await expect.poll(previewIds).toEqual(['quickPlaybackSpeedBar', 'screenshot', 'autoplay', 'captions', 'menu', 'pictureInPicture', 'theatreMode', 'fullWindow', 'fullscreen'])
   })
 
   test('previews the fullscreen action order', async ({ page }) => {
@@ -184,7 +240,6 @@ test.describe('interface customizer', () => {
     }
     await expect.poll(previewIds).toEqual(['captions', 'menu', 'fullscreen', 'fullWindow'])
 
-    await customizer.getByRole('tab', { name: 'Player menu', exact: true }).click()
     await expect.poll(async () => {
       const ids = await menuIds()
       return [ids[ids.indexOf('sleepTimer') + 1], ...ids.slice(-2)]
@@ -282,7 +337,9 @@ test.describe('interface customizer', () => {
     })
     for (const size of [{ width: 1200, height: 800 }, { width: 420, height: 760 }]) {
       if (size.width !== 1200) await setWindowSize(app, page, size)
-      for (const mode of ['Playing', 'Player menu', 'Fullscreen', 'Paused']) {
+      // The phone layout previews the player menu separately.
+      const modes = size.width === 1200 ? ['Playing', 'Fullscreen', 'Paused'] : ['Playing', 'Player menu', 'Fullscreen', 'Paused']
+      for (const mode of modes) {
         await customizer.getByRole('tab', { name: mode, exact: true }).click()
         await expect.poll(() => customizer.locator('.previewStage').evaluate(stage => {
           const bounds = stage.getBoundingClientRect()
@@ -326,7 +383,6 @@ test.describe('interface customizer', () => {
 
   test('shows the player menu preview over the whole player in the phone layout', { tag: '@scale' }, async ({ app, page }) => {
     const customizer = await openInterfaceCustomizer(page, 'player')
-    await customizer.getByRole('tab', { name: 'Player menu', exact: true }).click()
     const close = customizer.locator('.previewOverflowClose')
     const menuCoversPlayer = () => customizer.locator('.previewPlayer').evaluate(player => {
       const bounds = player.getBoundingClientRect()
@@ -338,6 +394,7 @@ test.describe('interface customizer', () => {
 
     // Like the real player, the phone layout opens its menu over the whole player.
     await setWindowSize(app, page, { width: 360, height: 760 })
+    await customizer.getByRole('tab', { name: 'Player menu', exact: true }).click()
     await expect.poll(menuCoversPlayer).toBe(true)
     await expect(close).toBeVisible()
     await expect.poll(() => customizer.locator('.previewOverflowGrid').evaluate(grid => (
