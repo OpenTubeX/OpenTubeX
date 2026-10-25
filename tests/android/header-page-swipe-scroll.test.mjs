@@ -13,7 +13,7 @@ test('Android header swipes reveal the next tab at its own scroll position', {
   const page = context.pages()[0]
   const session = await context.newCDPSession(page)
   // CDP may have no referenced handles while Android processes touch input.
-  const keepAlive = setTimeout(() => {}, 120_000)
+  const keepAlive = setInterval(() => {}, 1_000)
   let saved
   const touch = (type, point) => session.send('Input.dispatchTouchEvent', {
     type, touchPoints: point ? [point] : [],
@@ -141,8 +141,8 @@ test('Android header swipes reveal the next tab at its own scroll position', {
       store.commit('setPresentedTab', saved.tabs.presentedTabId)
       location.hash = saved.route
     }, saved)
+    clearInterval(keepAlive)
     await session.detach()
     await browser.close()
-    clearTimeout(keepAlive)
   }
 })
