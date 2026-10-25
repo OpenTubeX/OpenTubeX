@@ -1674,6 +1674,8 @@ Video:
       Error: "Kunne ikke strømme videoen"
       Error With Details: "Kunne ikke strømme videoen: {error}"
       Untrusted Receiver: "Mottakerens sertifikat er ikke klarert. Bruk en autentisert Google Cast-mottaker."
+    FCast:
+      Cast: "Cast til en FCast-mottaker"
     Secondary Captions: Sekundær teksting
     Subtitle File:
       Load: "Last inn undertekstfil…"

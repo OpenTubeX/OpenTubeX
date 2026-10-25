@@ -2680,6 +2680,8 @@ Video:
       Error: "Could not cast the video"
       Error With Details: "Could not cast the video: {error}"
       Untrusted Receiver: "The receiver's certificate is not trusted. Use an authenticated Google Cast receiver."
+    FCast:
+      Cast: "Cast to an FCast receiver"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Remaining preroll-ad time: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Remaining SABR backoff time: {remindingTimeSeconds}s'

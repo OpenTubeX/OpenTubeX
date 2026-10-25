@@ -1687,6 +1687,8 @@ Video:
       Error: "Видеото не можа да се предаде"
       Error With Details: "Видеото не можа да се предаде: {error}"
       Untrusted Receiver: "Сертификатът на приемника не е доверен. Използвайте удостоверен приемник Google Cast."
+    FCast:
+      Cast: "Предаване към приемник FCast"
     Secondary Captions: Втори субтитри
     Subtitle File:
       Load: "Зареждане на файл със субтитри…"

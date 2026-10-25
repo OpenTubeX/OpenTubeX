@@ -1670,6 +1670,8 @@ Video:
       Error: "動画をキャストできませんでした"
       Error With Details: "動画をキャストできませんでした: {error}"
       Untrusted Receiver: "受信機の証明書は信頼されていません。認証済みの Google Cast 受信機を使用してください。"
+    FCast:
+      Cast: "FCast受信機にキャスト"
     Secondary Captions: 第 2 字幕
     Subtitle File:
       Load: "字幕ファイルを読み込む…"

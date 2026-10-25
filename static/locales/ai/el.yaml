@@ -1689,6 +1689,8 @@ Video:
       Error: "Δεν ήταν δυνατή η μετάδοση του βίντεο"
       Error With Details: "Δεν ήταν δυνατή η μετάδοση του βίντεο: {error}"
       Untrusted Receiver: "Το πιστοποιητικό του δέκτη δεν είναι έμπιστο. Χρησιμοποιήστε έναν πιστοποιημένο δέκτη Google Cast."
+    FCast:
+      Cast: "Μετάδοση σε δέκτη FCast"
     Secondary Captions: Δευτερεύοντες υπότιτλοι
     Subtitle File:
       Load: "Φόρτωση αρχείου υποτίτλων…"

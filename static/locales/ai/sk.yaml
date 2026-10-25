@@ -1670,6 +1670,8 @@ Video:
       Error: "Video sa nepodarilo preniesť"
       Error With Details: "Video sa nepodarilo preniesť: {error}"
       Untrusted Receiver: "Certifikát prijímača nie je dôveryhodný. Použite overený prijímač Google Cast."
+    FCast:
+      Cast: "Odoslať do prijímača FCast"
     Secondary Captions: Druhé titulky
     Subtitle File:
       Load: "Načítať súbor s titulkami…"

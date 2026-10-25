@@ -3,6 +3,7 @@ import { createServer, request as httpRequest } from 'node:http'
 import test from 'node:test'
 import { gzipSync } from 'node:zlib'
 import { EventEmitter } from 'node:events'
+import { networkInterfaces } from 'node:os'
 import { Readable } from 'node:stream'
 import { createCastMediaServer as createMediaServer, fetchCastMedia, MAX_CAST_SUBTITLE_BYTES, resolveCastMediaAddresses, rewriteCastDash, rewriteCastHls } from '../../src/main/castMediaServer.js'
 import { isInvidiousInstanceUrl } from '../../src/main/invidiousAuthorization.js'
@@ -1322,4 +1323,18 @@ test('checks manifest resources and redirects against the destination policy', a
   assert.equal((await fetch(segment)).status, 502)
   assert.equal((await fetch(media.register(`${instanceUrl}/redirect`, 'video/mp4'))).status, 502)
   assert.equal(privateRequests, 0)
+})
+
+test('a receiver on this computer may fetch from another local address', async t => {
+  const fetchFrom = async deviceAddress => {
+    const media = createMediaServer({ url: 'data:text/vtt;charset=utf-8,WEBVTT', contentType: 'text/vtt' }, deviceAddress, 'token')
+    media.setOrigin(await listen(media.server))
+    t.after(() => close(media.server))
+    return (await fetch(media.mediaUrl())).status
+  }
+  // The fixture connects from loopback, as the FCast desktop receiver may
+  // after OpenTubeX dialed one of this computer's other addresses.
+  const local = Object.values(networkInterfaces()).flat().find(({ family, internal }) => family === 'IPv4' && !internal)?.address
+  if (local) assert.equal(await fetchFrom(local), 200)
+  assert.equal(await fetchFrom('192.0.2.10'), 404, 'Another host must still match the receiver address')
 })

@@ -1711,6 +1711,8 @@ Video:
       Error: "Videon lähetys epäonnistui"
       Error With Details: "Videon lähetys epäonnistui: {error}"
       Untrusted Receiver: "Vastaanottimen varmenteeseen ei luoteta. Käytä todennettua Google Cast -vastaanotinta."
+    FCast:
+      Cast: "Lähetä FCast-vastaanottimeen"
     Secondary Captions: Toissijaiset tekstitykset
     Subtitle File:
       Load: "Lataa tekstitystiedosto…"

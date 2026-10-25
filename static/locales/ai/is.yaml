@@ -1692,6 +1692,8 @@ Video:
       Error: "Ekki tókst að senda myndskeiðið"
       Error With Details: "Ekki tókst að senda myndskeiðið: {error}"
       Untrusted Receiver: "Vottorði móttakarans er ekki treyst. Notaðu auðkenndan Google Cast-móttakara."
+    FCast:
+      Cast: "Senda í FCast-móttakara"
     Secondary Captions: Aukaskjátextar
     Subtitle File:
       Load: "Hlaða inn skjátextaskrá…"

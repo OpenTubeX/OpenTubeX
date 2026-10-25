@@ -1691,6 +1691,8 @@ Video:
       Error: "Methu darlledu’r fideo"
       Error With Details: "Methu darlledu’r fideo: {error}"
       Untrusted Receiver: "Nid yw tystysgrif y derbynnydd yn ddibynadwy. Defnyddiwch dderbynnydd Google Cast sydd wedi ei ddilysu."
+    FCast:
+      Cast: "Castio i dderbynnydd FCast"
     Secondary Captions: Isdeitlau eilaidd
     Subtitle File:
       Load: "Llwytho ffeil isdeitlau…"

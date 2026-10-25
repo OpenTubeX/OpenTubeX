@@ -1669,6 +1669,8 @@ Video:
       Error: "Impossibile trasmettere il video"
       Error With Details: "Impossibile trasmettere il video: {error}"
       Untrusted Receiver: "Il certificato del ricevitore non è attendibile. Usa un ricevitore Google Cast autenticato."
+    FCast:
+      Cast: "Trasmetti a un ricevitore FCast"
     Secondary Captions: Sottotitoli secondari
     Subtitle File:
       Load: "Carica file di sottotitoli…"

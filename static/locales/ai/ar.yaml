@@ -1706,6 +1706,8 @@ Video:
       Error: "تعذر بث الفيديو"
       Error With Details: "تعذر بث الفيديو: {error}"
       Untrusted Receiver: "شهادة جهاز الاستقبال غير موثوقة. استخدم جهاز استقبال Google Cast مصادقًا عليه."
+    FCast:
+      Cast: "البث إلى جهاز استقبال FCast"
     Secondary Captions: ترجمات ثانوية
     Subtitle File:
       Load: "تحميل ملف ترجمة…"

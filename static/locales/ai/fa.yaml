@@ -1745,6 +1745,8 @@ Video:
       Error: "پخش ویدیو در دستگاه ممکن نشد"
       Error With Details: "پخش ویدیو در دستگاه ممکن نشد: {error}"
       Untrusted Receiver: "گواهی گیرنده قابل اعتماد نیست. از یک گیرندهٔ Google Cast احراز هویت‌شده استفاده کنید."
+    FCast:
+      Cast: "پخش روی گیرنده FCast"
     Secondary Captions: زیرنویس دوم
     Subtitle File:
       Load: "بارگذاری فایل زیرنویس…"

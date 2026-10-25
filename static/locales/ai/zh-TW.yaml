@@ -1672,6 +1672,8 @@ Video:
       Error: "無法投放影片"
       Error With Details: "無法投放影片: {error}"
       Untrusted Receiver: "接收裝置的憑證不受信任。請使用經過身分驗證的 Google Cast 接收裝置。"
+    FCast:
+      Cast: "投放到 FCast 接收器"
     Secondary Captions: 第二字幕
     Subtitle File:
       Load: "載入字幕檔案…"

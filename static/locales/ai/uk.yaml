@@ -1706,6 +1706,8 @@ Video:
       Error: "Не вдалося транслювати відео"
       Error With Details: "Не вдалося транслювати відео: {error}"
       Untrusted Receiver: "Сертифікат приймача не є довіреним. Використовуйте автентифікований приймач Google Cast."
+    FCast:
+      Cast: "Транслювати на приймач FCast"
     Secondary Captions: Додаткові субтитри
     Subtitle File:
       Load: "Завантажити файл субтитрів…"

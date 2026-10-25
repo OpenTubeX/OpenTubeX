@@ -1716,6 +1716,8 @@ Video:
       Error: "காணொளியை ஒளிபரப்ப முடியவில்லை"
       Error With Details: "காணொளியை ஒளிபரப்ப முடியவில்லை: {error}"
       Untrusted Receiver: "பெறுநரின் சான்றிதழ் நம்பகமானது அல்ல. அங்கீகரிக்கப்பட்ட Google Cast பெறுநரைப் பயன்படுத்தவும்."
+    FCast:
+      Cast: "FCast பெறுநருக்கு ஒளிபரப்பு"
     Secondary Captions: இரண்டாம் வசனங்கள்
     Subtitle File:
       Load: "வசனக் கோப்பை ஏற்று…"

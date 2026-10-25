@@ -1738,6 +1738,8 @@ Video:
       Error: "Videoen kunne ikke castes"
       Error With Details: "Videoen kunne ikke castes: {error}"
       Untrusted Receiver: "Modtagerens certifikat er ikke betroet. Brug en godkendt Google Cast-modtager."
+    FCast:
+      Cast: "Cast til en FCast-modtager"
     Secondary Captions: Sekundære undertekster
     Subtitle File:
       Load: "Indlæs undertekstfil…"

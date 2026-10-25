@@ -1669,6 +1669,8 @@ Video:
       Error: "Video yayınlanamadı"
       Error With Details: "Video yayınlanamadı: {error}"
       Untrusted Receiver: "Alıcının sertifikasına güvenilmiyor. Kimliği doğrulanmış bir Google Cast alıcısı kullanın."
+    FCast:
+      Cast: "FCast alıcısına yayınla"
     Secondary Captions: İkincil altyazılar
     Subtitle File:
       Load: "Altyazı dosyası yükle…"

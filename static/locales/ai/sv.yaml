@@ -1684,6 +1684,8 @@ Video:
       Error: "Det gick inte att casta videon"
       Error With Details: "Det gick inte att casta videon: {error}"
       Untrusted Receiver: "Mottagarens certifikat är inte betrott. Använd en autentiserad Google Cast-mottagare."
+    FCast:
+      Cast: "Casta till en FCast-mottagare"
     Secondary Captions: Sekundära undertexter
     Subtitle File:
       Load: "Läs in undertextfil…"

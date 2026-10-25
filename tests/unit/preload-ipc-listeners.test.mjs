@@ -103,7 +103,7 @@ test('Cast start checks activation before asynchronous payload preparation and i
   const payload = { deviceId: 'tv', captions: [{ url: 'data:text/vtt;charset=utf-8,WEBVTT' }], startSeconds: 18 }
   complete(payload)
   assert.equal((await pending).castId, 'cast-1')
-  assert.deepEqual(invocations, [[IpcChannels.CAST_PREPARE], [IpcChannels.CAST_START, payload, 'grant']])
+  assert.deepEqual(invocations, [[IpcChannels.CAST_PREPARE], [IpcChannels.CAST_START, payload, 'grant', 'google']])
   assert.deepEqual(cancellations, [[IpcChannels.CAST_CANCEL_PREPARATION, 'grant']])
   assert.equal(ipcRenderer.listenerCount(IpcChannels.CAST_PROGRESS), 1)
   ipcRenderer.emit(IpcChannels.CAST_PROGRESS, {}, { preparationId: 'grant', stage: 'loading' })

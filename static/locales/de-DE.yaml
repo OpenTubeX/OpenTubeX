@@ -2335,6 +2335,8 @@ Video:
       Error: "Das Video konnte nicht übertragen werden"
       Error With Details: "Das Video konnte nicht übertragen werden: {error}"
       Untrusted Receiver: "Das Zertifikat des Empfängers ist nicht vertrauenswürdig. Verwende einen authentifizierten Google-Cast-Empfänger."
+    FCast:
+      Cast: "Auf einen FCast-Empfänger übertragen"
   IP block: YouTube hat deine IP-Adresse für die Videowiedergabe gesperrt. Bitte versuche, einen anderen VPN oder Proxy zu nutzen.
   Retry With Built-in Extraction: Erneut mit der integrierten Extraktion versuchen
   Retry With yt-dlp Extraction: Erneut mit der yt-dlp-Extraktion versuchen

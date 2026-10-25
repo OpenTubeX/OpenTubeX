@@ -17,6 +17,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/grandcat/zeroconf"
 )
 
 func TestCastErrorMessagePreservesDiagnosticsAndAuthenticationCodes(t *testing.T) {
@@ -168,5 +170,23 @@ func TestRejectsUnboundedFrames(t *testing.T) {
 			t.Fatal("expected invalid frame error")
 		}
 		left.Close()
+	}
+}
+
+func TestFcastDeviceUsesUnescapedInstanceName(t *testing.T) {
+	entry := &zeroconf.ServiceEntry{ServiceRecord: zeroconf.ServiceRecord{Instance: `Living\ Room\.TV\032\195\169`}, Port: 46899,
+		AddrIPv4: []net.IP{net.IPv4(192, 168, 1, 20)}}
+	value, ok := fcastDevice(entry)
+	if !ok || value.ID != "Living Room.TV é" || value.Name != value.ID || value.Address != "192.168.1.20" || value.Port != 46899 {
+		t.Fatalf("unexpected FCast device: %v %v", value, ok)
+	}
+	for _, invalid := range []*zeroconf.ServiceEntry{
+		{ServiceRecord: zeroconf.ServiceRecord{Instance: ""}, Port: 46899, AddrIPv4: entry.AddrIPv4},
+		{ServiceRecord: zeroconf.ServiceRecord{Instance: `TV\255`}, Port: 46899, AddrIPv4: entry.AddrIPv4},
+		{ServiceRecord: zeroconf.ServiceRecord{Instance: "TV"}, AddrIPv4: entry.AddrIPv4},
+	} {
+		if _, ok := fcastDevice(invalid); ok {
+			t.Fatalf("accepted invalid FCast entry: %v", invalid)
+		}
 	}
 }

@@ -1,5 +1,6 @@
 import { createServer } from 'node:http'
 import { isIP } from 'node:net'
+import { networkInterfaces } from 'node:os'
 import { Readable, pipeline } from 'node:stream'
 import { createBrotliDecompress, createGunzip, createInflate } from 'node:zlib'
 import { rewriteCastDash, rewriteCastHls, MAX_MANIFEST_SIZE, MAX_CAST_SUBTITLE_BYTES, MIN_RESOURCE_GRACE_MS, hlsResourceGrace, dashResourceGrace } from '../castManifestRewrite.js'
@@ -114,8 +115,12 @@ function applyHlsReloadQuery(url, query) {
   url.search = [...original.filter(part => !names.has(new URLSearchParams(part).keys().next().value)), directives.toString()].join('&')
 }
 
-/** A session-scoped endpoint; only registered resources are fetchable. */
+/** A session-scoped endpoint; only registered resources are fetchable, and only by the receiver. */
 export function createCastMediaServer(source, deviceAddress, token, getHeaders = () => ({}), isAllowedUrl = () => false, fetchMedia = fetch) {
+  // A receiver on this computer, such as the FCast desktop receiver, can fetch
+  // from any local address, for example its LAN address after we dialed Docker's.
+  const localAddresses = Object.values(networkInterfaces()).flat().map(({ address }) => address)
+  const peers = localAddresses.includes(deviceAddress) ? localAddresses : [deviceAddress]
   const resources = new Map()
   const resourceIds = new Map()
   let nextResourceId = 0
@@ -202,7 +207,7 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
       'access-control-expose-headers': 'Content-Length, Content-Range, Accept-Ranges, Date',
     }
     const match = new RegExp(`^/${token}/(\\d+)/(.*)$`).exec(request.url ?? '')
-    if (request.socket.remoteAddress?.replace(/^::ffff:/, '') !== deviceAddress || !match ||
+    if (!peers.includes(request.socket.remoteAddress?.replace(/^::ffff:/, '')) || !match ||
       !['GET', 'HEAD', 'OPTIONS'].includes(request.method)) {
       response.writeHead(404).end()
       return

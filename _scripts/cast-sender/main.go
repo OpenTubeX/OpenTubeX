@@ -1,5 +1,6 @@
 // A packaged bridge to go-chromecast. Electron owns the media session; this
-// process handles mDNS and the Cast V2 transport without a system runtime.
+// process handles mDNS for Cast and FCast, and the Cast V2 transport, without
+// a system runtime.
 package main
 
 import (
@@ -14,8 +15,10 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
+	"unicode/utf8"
 
 	"github.com/gogo/protobuf/proto"
 	"github.com/grandcat/zeroconf"
@@ -29,10 +32,12 @@ type device struct {
 	Port    int    `json:"port"`
 }
 
-func discover() error {
+// browse returns the resolved IPv4 receivers for one DNS-SD service. Media
+// relays listen on the IPv4 interface that reaches the receiver.
+func browse(service string, parse func(*zeroconf.ServiceEntry) (device, bool)) ([]device, error) {
 	resolver, err := zeroconf.NewResolver(nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -43,25 +48,16 @@ func discover() error {
 	go func() {
 		defer wg.Done()
 		for entry := range entries {
-			fields := map[string]string{}
-			for _, field := range entry.Text {
-				for i, char := range field {
-					if char == '=' {
-						fields[field[:i]] = field[i+1:]
-						break
-					}
-				}
-			}
-			capabilities, _ := strconv.Atoi(fields["ca"])
-			if fields["id"] == "" || fields["fn"] == "" || capabilities&1 == 0 || len(entry.AddrIPv4) == 0 {
+			if len(entry.AddrIPv4) == 0 {
 				continue
 			}
-			devices[fields["id"]] = device{fields["id"], fields["fn"], entry.AddrIPv4[0].String(), entry.Port}
+			if value, ok := parse(entry); ok {
+				devices[value.ID] = value
+			}
 		}
 	}()
-	if err := resolver.Browse(ctx, "_googlecast._tcp", "local.", entries); err != nil {
-		cancel()
-		return err
+	if err := resolver.Browse(ctx, service, "local.", entries); err != nil {
+		return nil, err
 	}
 	<-ctx.Done()
 	wg.Wait()
@@ -69,7 +65,61 @@ func discover() error {
 	for _, value := range devices {
 		result = append(result, value)
 	}
-	return json.NewEncoder(os.Stdout).Encode(result)
+	return result, nil
+}
+
+func googleCastDevice(entry *zeroconf.ServiceEntry) (device, bool) {
+	fields := map[string]string{}
+	for _, field := range entry.Text {
+		if key, value, ok := strings.Cut(field, "="); ok {
+			fields[key] = value
+		}
+	}
+	capabilities, _ := strconv.Atoi(fields["ca"])
+	if fields["id"] == "" || fields["fn"] == "" || capabilities&1 == 0 {
+		return device{}, false
+	}
+	return device{fields["id"], fields["fn"], entry.AddrIPv4[0].String(), entry.Port}, true
+}
+
+// FCast receivers have no TXT name; their instance label is the display name.
+func fcastDevice(entry *zeroconf.ServiceEntry) (device, bool) {
+	name := unescapeDNSLabel(entry.Instance)
+	if name == "" || !utf8.ValidString(name) || entry.Port < 1 {
+		return device{}, false
+	}
+	return device{name, name, entry.AddrIPv4[0].String(), entry.Port}, true
+}
+
+// unescapeDNSLabel reverses miekg/dns presentation escapes (\. and \DDD).
+func unescapeDNSLabel(label string) string {
+	var result []byte
+	for i := 0; i < len(label); i++ {
+		if label[i] != '\\' || i+1 >= len(label) {
+			result = append(result, label[i])
+			continue
+		}
+		if i+3 < len(label) && isDigit(label[i+1]) && isDigit(label[i+2]) && isDigit(label[i+3]) {
+			if value, err := strconv.Atoi(label[i+1 : i+4]); err == nil && value < 256 {
+				result = append(result, byte(value))
+				i += 3
+				continue
+			}
+		}
+		result = append(result, label[i+1])
+		i++
+	}
+	return string(result)
+}
+
+func isDigit(char byte) bool { return char >= '0' && char <= '9' }
+
+func discover(service string, parse func(*zeroconf.ServiceEntry) (device, bool)) error {
+	devices, err := browse(service, parse)
+	if err != nil {
+		return err
+	}
+	return json.NewEncoder(os.Stdout).Encode(devices)
 }
 
 // Frames must be written atomically: receiver heartbeats arrive independently
@@ -237,7 +287,9 @@ func castErrorMessage(err error) map[string]string {
 func main() {
 	var err error
 	if len(os.Args) == 2 && os.Args[1] == "discover" {
-		err = discover()
+		err = discover("_googlecast._tcp", googleCastDevice)
+	} else if len(os.Args) == 2 && os.Args[1] == "discover-fcast" {
+		err = discover("_fcast._tcp", fcastDevice)
 	} else if len(os.Args) == 3 {
 		port, parseErr := strconv.Atoi(os.Args[2])
 		if parseErr != nil {
@@ -246,7 +298,7 @@ func main() {
 			err = connect(os.Args[1], port)
 		}
 	} else {
-		err = fmt.Errorf("expected discover or address and port")
+		err = fmt.Errorf("expected discover, discover-fcast or address and port")
 	}
 	if err != nil {
 		_ = json.NewEncoder(os.Stdout).Encode(castErrorMessage(err))

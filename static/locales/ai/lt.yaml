@@ -2052,6 +2052,8 @@ Video:
       Error: "Nepavyko transliuoti vaizdo įrašo"
       Error With Details: "Nepavyko transliuoti vaizdo įrašo: {error}"
       Untrusted Receiver: "Imtuvo sertifikatas nėra patikimas. Naudokite autentifikuotą Google Cast imtuvą."
+    FCast:
+      Cast: "Perduoti į FCast imtuvą"
     Secondary Captions: Antriniai subtitrai
     Subtitle File:
       Load: "Įkelti subtitrų failą…"

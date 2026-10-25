@@ -1713,6 +1713,8 @@ Video:
       Error: "לא ניתן לשדר את הסרטון"
       Error With Details: "לא ניתן לשדר את הסרטון: {error}"
       Untrusted Receiver: "האישור של המקלט אינו מהימן. יש להשתמש במקלט Google Cast מאומת."
+    FCast:
+      Cast: "שידור למקלט FCast"
     Secondary Captions: כתוביות משניות
     Subtitle File:
       Load: "טעינת קובץ כתוביות…"

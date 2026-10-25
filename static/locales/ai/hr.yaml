@@ -1691,6 +1691,8 @@ Video:
       Error: "Videozapis nije moguće prenijeti"
       Error With Details: "Videozapis nije moguće prenijeti: {error}"
       Untrusted Receiver: "Certifikat prijamnika nije pouzdan. Upotrijebite autentificirani Google Cast prijamnik."
+    FCast:
+      Cast: "Emitiraj na prijamnik FCast"
     Secondary Captions: Sekundarni titlovi
     Subtitle File:
       Load: "Učitaj datoteku titlova…"

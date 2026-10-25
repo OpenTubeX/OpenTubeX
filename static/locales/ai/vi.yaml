@@ -1703,6 +1703,8 @@ Video:
       Error: "Không thể truyền video"
       Error With Details: "Không thể truyền video: {error}"
       Untrusted Receiver: "Chứng chỉ của thiết bị nhận không đáng tin cậy. Hãy sử dụng thiết bị nhận Google Cast đã được xác thực."
+    FCast:
+      Cast: "Truyền tới thiết bị nhận FCast"
     Secondary Captions: Phụ đề phụ
     Subtitle File:
       Load: "Tải tệp phụ đề…"

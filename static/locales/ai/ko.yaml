@@ -2018,6 +2018,8 @@ Video:
       Error: "동영상을 전송할 수 없습니다"
       Error With Details: "동영상을 전송할 수 없습니다: {error}"
       Untrusted Receiver: "수신기의 인증서를 신뢰할 수 없습니다. 인증된 Google Cast 수신기를 사용하세요."
+    FCast:
+      Cast: "FCast 수신기로 전송"
     Secondary Captions: 보조 자막
     Subtitle File:
       Load: "자막 파일 불러오기…"

@@ -1682,6 +1682,8 @@ Video:
       Error: "Video tidak dapat ditransmisikan"
       Error With Details: "Video tidak dapat ditransmisikan: {error}"
       Untrusted Receiver: "Sertifikat penerima tidak tepercaya. Gunakan penerima Google Cast yang terautentikasi."
+    FCast:
+      Cast: "Transmisikan ke penerima FCast"
     Secondary Captions: Teks sekunder
     Subtitle File:
       Load: "Muat file subtitel…"
