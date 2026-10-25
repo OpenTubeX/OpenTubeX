@@ -6,11 +6,14 @@ import * as coordinator from '../../src/renderer/helpers/crossTabMiniPlayer.js'
 import { computed, effectScope, reactive, ref, watch } from 'vue'
 import { scrollMiniPlayerRectToStyle } from '../../src/renderer/helpers/scrollMiniPlayer.js'
 
-// Execute the entire composable. Stub its platform/layout dependencies, while
-// retaining Vue watchers, pointer events, and the real volume timeout behavior.
-const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/opentubex/useScrollMiniPlayer.js', import.meta.url), 'utf8')
-  .replace(/^import\s[\s\S]*?from\s+['"][^'"]+['"];?\s*$/gm, '')
-  .replace(/^export /gm, '')
+// Execute the entire composable and its sibling modules. Stub its platform/layout
+// dependencies, while retaining Vue watchers, pointer events, and the real volume
+// timeout behavior.
+const source = ['scrollMiniPlayerMorph.js', 'useScrollMiniPlayerControls.js', 'useScrollMiniPlayer.js']
+  .map(file => readFileSync(new URL(`../../src/renderer/components/ft-shaka-video-player/opentubex/${file}`, import.meta.url), 'utf8')
+    .replace(/^import\s[\s\S]*?from\s+['"][^'"]+['"];?\s*$/gm, '')
+    .replace(/^export /gm, ''))
+  .join('\n')
 
 function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPlaying = true, android = false, inlineVisible = false, seekRange = null, format = 'video' } = {}) {
   t.mock.timers.enable({ apis: ['setTimeout'] })
