@@ -153,8 +153,9 @@ test.describe('description layout', () => {
     await expect(card).not.toHaveClass(/short/)
   })
 
-  test('keeps description controls below open toolbar dropdowns', async ({ app, page }) => {
-    await setWindowSize(app, page, { width: 1400, height: 1000 })
+  test('keeps description controls below open toolbar dropdowns', { tag: '@scale' }, async ({ app, page, uiScale }) => {
+    // Keep a 1400x1000 CSS viewport at every scale so the share menu stays a dropdown.
+    await setWindowSize(app, page, { width: Math.round(14 * uiScale), height: Math.round(10 * uiScale) })
     await mockUnplayableWatchPage(app, page)
     await goTo(page, 'history')
     // Invidious options widen the share menu and hiding Download moves it to the card edge,
@@ -177,7 +178,7 @@ test.describe('description layout', () => {
     await expect(dropdown).toBeVisible()
 
     for (const selector of ['.videoDescription > .descriptionStatus', '.descriptionCopyButton']) {
-      const hit = await dropdown.evaluate((menu, selector) => {
+      await expect.poll(() => dropdown.evaluate((menu, selector) => {
         const menuRect = menu.getBoundingClientRect()
         const rect = document.querySelector(selector).getBoundingClientRect()
         const left = Math.max(rect.left, menuRect.left)
@@ -188,9 +189,7 @@ test.describe('description layout', () => {
           overlaps: right - left > 2 && bottom - top > 2,
           coveredByMenu: menu.contains(document.elementFromPoint((left + right) / 2, (top + bottom) / 2))
         }
-      }, selector)
-      expect(hit.overlaps, `The share menu overlaps ${selector}`).toBe(true)
-      expect(hit.coveredByMenu, `${selector} stays below the share menu`).toBe(true)
+      }, selector), { message: `The share menu overlaps and covers ${selector}` }).toEqual({ overlaps: true, coveredByMenu: true })
     }
   })
 
