@@ -686,6 +686,9 @@ watch(() => props.playlistId, () => {
 
   if (cachedPlaylist?.id === props.playlistId) {
     loadCachedPlaylistInformation(cachedPlaylist)
+  } else if (selectedUserPlaylist.value != null) {
+    parseUserPlaylist(selectedUserPlaylist.value)
+    if (shuffleEnabled.value) shufflePlaylistItems()
   } else if (!process.env.SUPPORTS_LOCAL_API || usesInvidiousApi(backendPreference.value)) {
     getPlaylistInformationInvidious()
   } else {
