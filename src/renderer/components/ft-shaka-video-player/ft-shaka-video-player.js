@@ -37,7 +37,6 @@ import { useTabContext, useTabLifecycle } from '../../tabs/TabContext'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 import { AmbientModeButton } from './player-components/AmbientModeButton'
 import {
-  AB_REPEAT_ICON,
   AbRepeatControl,
   setAbRepeatContext,
 } from './player-components/AbRepeatControl'
@@ -80,8 +79,7 @@ import {
   repairInvidiousManifest,
   translateSponsorBlockCategory
 } from '../../helpers/player/utils'
-import { findCaptionByLocale, getPreferredCaption } from '../../../captionLanguages'
-import { getActiveCueText } from '../../helpers/player/secondary-captions'
+import { getPreferredCaption } from '../../../captionLanguages'
 import { createLocalCaption, LOCAL_CAPTION_FILE_TYPES, normalizeLocalCaptionText } from '../../helpers/player/localCaptions'
 import {
   addKeyboardShortcutToActionTitle,
@@ -98,11 +96,6 @@ import {
 } from '../../helpers/utils'
 import { isHexColor } from '../../helpers/colors'
 import { applyAnimationSpeed, getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
-import {
-  FULLSCREEN_DOCK_GAP,
-  FULLSCREEN_DOCK_OUTER_INSET,
-  toggleFullscreenDockCollapsed,
-} from '../../helpers/fullscreenDocks'
 import {
   addOverlayScrollbars,
   clampOverlayScrollTop,
@@ -136,26 +129,11 @@ import { parseChannelPreferences, removeChannelPreference } from '../../helpers/
 import { findLegacyFormatForQuality } from '../../helpers/player/legacyFormats'
 import { waitForYtDlpFormatAvailability } from '../../helpers/player/ytDlpFormatAvailability'
 import { getDashQualityFromDimensions } from '../../helpers/player/videoQuality'
-import {
-  DEFAULT_VIDEO_ZOOM,
-  formatVideoZoom,
-  getVideoFillZoom,
-  getVideoFillZoomProximity,
-  resolveVideoZoomPinch,
-  sanitizeVideoZoom,
-  stepVideoZoom,
-  VIDEO_ZOOM_LEVELS,
-} from '../../helpers/player/videoZoom'
+import { DEFAULT_VIDEO_ZOOM, formatVideoZoom, VIDEO_ZOOM_LEVELS } from '../../helpers/player/videoZoom'
 import { DEFAULT_VOLUME_BOOST, sanitizeVolumeBoost, VOLUME_BOOST_LEVELS } from '../../helpers/player/volumeBoost'
 import { shouldStartPaidPromotionTimer } from '../../helpers/player/paidPromotion'
 import { updateSponsorBlockSeekBarState } from '../../helpers/player/sponsorBlockSeekBar'
-import {
-  AbRepeatValidation,
-  formatAbRepeatTimestamp,
-  getAbRepeatBoundaryDelay,
-  isCompleteAbRepeatRange,
-  validateAbRepeatRange,
-} from '../../helpers/player/abRepeat'
+import { formatAbRepeatTimestamp } from '../../helpers/player/abRepeat'
 import {
   SEEK_HISTORY_MIN_JUMP_SECONDS,
   getSeekHistory,
@@ -171,9 +149,11 @@ import {
   getCaptionPlayerVariables,
   parseCaptionSettings,
 } from '../../helpers/player/caption-settings'
+import { AB_REPEAT_BOUNDARY_TOLERANCE_SECONDS, AB_REPEAT_VALUE_CHANGE_ICON, useAbRepeat } from './opentubex/useAbRepeat'
 import { useAdaptiveControlPanelLayout } from './opentubex/useAdaptiveControlPanelLayout'
 import { useAmbientMode } from './opentubex/useAmbientMode'
 import { useAutoPictureInPicture } from './opentubex/useAutoPictureInPicture'
+import { FULLSCREEN_DOCK_HEADER_SELECTOR, useFullscreenDocks } from './opentubex/useFullscreenDocks'
 import { createMobilePlayerAdjustments } from '../../helpers/mobilePlayerAdjustments'
 import {
   isCapacitorMobilePlayer,
@@ -182,6 +162,7 @@ import {
 import { useSeekPreviewThumbnail } from './opentubex/useSeekPreviewThumbnail'
 import { useMusicVisualizer } from './opentubex/useMusicVisualizer'
 import { useScrollMiniPlayer } from './opentubex/useScrollMiniPlayer'
+import { useSecondaryCaptions } from './opentubex/useSecondaryCaptions'
 import { useSilenceSkipping } from './opentubex/useSilenceSkipping'
 import { useSleepTimer } from './opentubex/useSleepTimer'
 import {
@@ -193,6 +174,7 @@ import {
   useSponsorBlockPlayback,
 } from './opentubex/useSponsorBlockPlayback'
 import { usePlayerAudioOutput } from './opentubex/usePlayerAudioOutput'
+import { useVideoZoom } from './opentubex/useVideoZoom'
 import { useVoiceOverTranslation } from './opentubex/useVoiceOverTranslation'
 import FtVideoAnnotations from '../FtVideoAnnotations/FtVideoAnnotations.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'
@@ -205,26 +187,10 @@ import { useRootClass } from '../../helpers/rootClasses'
 /** @typedef {import('../../helpers/sponsorblock').SponsorBlockCategory} SponsorBlockCategory */
 /** @typedef {string | { path: string, viewBox: string }} ValueChangeIcon */
 
-const AB_REPEAT_MIN_RANGE_SECONDS = 0.05
-const AB_REPEAT_BOUNDARY_TOLERANCE_SECONDS = 0.012
-const AB_REPEAT_VALUE_CHANGE_ICON = AB_REPEAT_ICON
 /** Seeks closer together than this, such as repeated arrow key presses, form one jump. */
 const SEEK_HISTORY_JUMP_WINDOW_MS = 1000
 const SABR_BACKOFF_PREVIEW_REFRESH_DELAY_MS = 150
 const FULL_WINDOW_ANIMATION_DURATION_MS = 400
-const FULLSCREEN_DOCK_PREFERRED_MIN_HEIGHT = 360
-const FULLSCREEN_DOCK_COMPACT_MIN_HEIGHT = 96
-const FULLSCREEN_DOCK_HEADER_SELECTOR = [
-  '.chapterOverlayHeader',
-  '.fullscreenMetadataHeader',
-  '.transcriptHeader',
-  '.sponsorBlockHeader',
-  '.liveChatDockHeader',
-  '.fullscreenCommentHeader',
-  '.playlistDockHeader',
-  '.queueHeader',
-  '.recommendationsDockHeader',
-].join(', ')
 
 // The UTF-8 characters "h", "t", "t", and "p".
 const HTTP_IN_HEX = 0x68747470
@@ -297,17 +263,6 @@ const shakaControlKeysToShortcuts = {
 
 /** @type {Map<string, string>} */
 const LOCALE_MAPPINGS = new Map(process.env.SHAKA_LOCALE_MAPPINGS)
-
-/**
- * The secondary caption language the user picked while its settings write is still pending.
- * The store commits the setting only after the write, but text track changes, in this player
- * or in one that replaces it, read it back right away. Shared, so a replacement player sees it too.
- * @type {string | null}
- */
-let pendingSecondaryCaptionLocale = null
-// Counts the picks, so an earlier write that settles late cannot clear a later pending pick,
-// even one of the same language. The settings store skips the commit of a superseded write.
-let secondaryCaptionLocalePicks = 0
 
 export default defineComponent({
   name: 'FtShakaVideoPlayer',
@@ -1048,82 +1003,30 @@ export default defineComponent({
         showFullscreenQueue.value || showFullscreenRecommendations.value ||
         (showChaptersOverlay.value && props.chapters.length > 0)
     })
-    const fullscreenDockLayoutOpen = ref(false)
-    let fullscreenDockLayoutFrame = null
-    /** @type {Animation | null} */
-    let fullscreenDockVideoAnimation = null
-    let fullscreenDockAnimationGeneration = 0
-
-    function cancelFullscreenDockVideoAnimation() {
-      fullscreenDockAnimationGeneration++
-      fullscreenDockVideoAnimation?.cancel()
-      fullscreenDockVideoAnimation = null
-    }
-
-    function getFullscreenDockVideoGeometry() {
-      const element = video.value
-      if (!element || !element.videoWidth || !element.videoHeight) return null
-      const bounds = element.getBoundingClientRect()
-      const fit = Math.min(bounds.width / element.videoWidth, bounds.height / element.videoHeight)
-      return {
-        width: element.videoWidth * fit,
-        x: bounds.left + bounds.width / 2,
-        y: bounds.top + bounds.height / 2,
-      }
-    }
-
-    // Commit the final layout once, then animate the fitted video on the
-    // compositor. Animating its width also reflows Shaka, captions, annotations
-    // and ResizeObservers on every frame, even when the dock only slides in.
-    watch(fullscreenDockLayoutOpen, async () => {
-      const before = getFullscreenDockVideoGeometry()
-      cancelFullscreenDockVideoAnimation()
-      const generation = fullscreenDockAnimationGeneration
-      if (!before || presentationModeChanging.value || isReducedMotionEnabled() ||
-        (!isFullscreen.value && !fullWindowEnabled.value)) return
-
-      await nextTick()
-      if (generation !== fullscreenDockAnimationGeneration || presentationModeChanging.value) return
-      const after = getFullscreenDockVideoGeometry()
-      if (!after || after.width <= 0) return
-      const scale = before.width / after.width
-      // Zoom/pan uses `transform`. Individual scale/translate keep that intact;
-      // compensate for scaling its translation around the element's centre.
-      const transform = new DOMMatrix(getComputedStyle(video.value).transform)
-      const x = before.x - after.x + transform.e * (1 - scale)
-      const y = before.y - after.y + transform.f * (1 - scale)
-      const animation = applyAnimationSpeed(video.value.animate([
-        { scale: String(scale), translate: `${x}px ${y}px` },
-        { scale: '1', translate: '0px 0px' },
-      ], { duration: 250, easing: 'ease' }))
-      fullscreenDockVideoAnimation = animation
-      animation.addEventListener('finish', () => {
-        if (fullscreenDockVideoAnimation === animation) fullscreenDockVideoAnimation = null
-      })
+    const {
+      expandCollapsedFullscreenDock,
+      fullscreenDockCanReorder,
+      fullscreenDockCanResize,
+      fullscreenDockLayoutOpen,
+      fullscreenDockOrder,
+      fullscreenDockReordering,
+      fullscreenDockResizing,
+      fullscreenDockStyle,
+      handleFullscreenDockHeaderDoubleClick,
+      handleFullscreenDockReorderPointerDown,
+      handleFullscreenDockResizeKeydown,
+      handleFullscreenDockResizePointerDown,
+      resetFullscreenDockHeights,
+    } = useFullscreenDocks({
+      container,
+      video,
+      fullscreenDockOpen,
+      isFullscreenDockOpen,
+      isFullscreen,
+      isFullWindow: () => fullWindowEnabled.value,
+      isPortraitLayout: () => portraitFullscreenDocks.value,
+      presentationModeChanging,
     })
-
-    watch(presentationModeChanging, changing => {
-      if (changing) cancelFullscreenDockVideoAnimation()
-    })
-
-    watch(fullscreenDockOpen, (open) => {
-      if (fullscreenDockLayoutFrame !== null) {
-        cancelAnimationFrame(fullscreenDockLayoutFrame)
-        fullscreenDockLayoutFrame = null
-      }
-
-      if (open) {
-        fullscreenDockLayoutOpen.value = true
-      } else {
-        // Paint the layout once after teleported dock content settles, then start the reverse transition.
-        fullscreenDockLayoutFrame = requestAnimationFrame(() => {
-          fullscreenDockLayoutFrame = requestAnimationFrame(() => {
-            fullscreenDockLayoutFrame = null
-            fullscreenDockLayoutOpen.value = false
-          })
-        })
-      }
-    }, { flush: 'post' })
     const chapterThumbnails = ref([])
     const currentChapterTitle = computed(() => {
       return props.chapters[props.currentChapterIndex]?.title ?? t('Chapters.Chapters')
@@ -1154,16 +1057,6 @@ export default defineComponent({
     }))
     const isInAnyPlaylist = computed(() => store.getters.getPlaylistVideoCounts.has(props.videoId))
 
-    const fullscreenDockOrder = reactive(['metadata', 'transcript', 'sponsorBlock', 'liveChat', 'comments', 'queue', 'playlist', 'recommendations', 'chapters'])
-    const fullscreenDockWeights = reactive(Object.fromEntries(fullscreenDockOrder.map(dock => [dock, 1])))
-    const fullscreenDockCollapsedState = Object.fromEntries(fullscreenDockOrder.map(dock => [dock, null]))
-    const fullscreenDockResizing = ref(false)
-    const fullscreenDockReordering = ref(false)
-    let resizingFullscreenDock = null
-    let resizingFullscreenDockWeightBefore = 0
-    let resizingFullscreenDockTotalWeight = 0
-    let resizingFullscreenDockBounds = null
-
     function isFullscreenDockOpen(dock) {
       switch (dock) {
         case 'metadata': return showFullscreenMetadata.value
@@ -1178,244 +1071,6 @@ export default defineComponent({
         default: return false
       }
     }
-
-    function getFullscreenOpenDocks(includeDock) {
-      const openDocks = fullscreenDockOrder.filter(isFullscreenDockOpen)
-
-      // Keep a closed dock in the slot it will enter so its transition stays
-      // horizontal while the currently open docks resize around it.
-      if (includeDock && !openDocks.includes(includeDock)) {
-        openDocks.push(includeDock)
-        openDocks.sort((a, b) => fullscreenDockOrder.indexOf(a) - fullscreenDockOrder.indexOf(b))
-      }
-
-      return openDocks
-    }
-
-    function fullscreenDockStyle(dock) {
-      if (portraitFullscreenDocks.value) return null
-      const openDocks = getFullscreenOpenDocks(dock)
-      const index = openDocks.indexOf(dock)
-      const totalWeight = openDocks.reduce((total, name) => total + fullscreenDockWeights[name], 0)
-      const weightBefore = openDocks
-        .slice(0, index)
-        .reduce((total, name) => total + fullscreenDockWeights[name], 0)
-      const weightAfter = totalWeight - weightBefore - fullscreenDockWeights[dock]
-
-      return {
-        insetBlockStart: index === 0
-          ? 'calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + 12px)'
-          : `calc((100% - var(--fullscreen-actions-footer-space, 0px)) * ${weightBefore / totalWeight} + 6px)`,
-        insetBlockEnd: index === openDocks.length - 1
-          ? 'calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + 12px + var(--fullscreen-actions-footer-space, 0px))'
-          : `calc((100% - var(--fullscreen-actions-footer-space, 0px)) * ${weightAfter / totalWeight} + var(--fullscreen-actions-footer-space, 0px) + 6px)`,
-      }
-    }
-
-    function getFullscreenDockBounds() {
-      const bounds = container.value.getBoundingClientRect()
-      const footerSpace = parseFloat(getComputedStyle(container.value).getPropertyValue('--fullscreen-actions-footer-space')) || 0
-      return { top: bounds.top, height: Math.max(1, bounds.height - footerSpace) }
-    }
-
-    function fullscreenDockCanResize(dock) {
-      if (portraitFullscreenDocks.value) return false
-      const openDocks = getFullscreenOpenDocks()
-      const index = openDocks.indexOf(dock)
-      return index >= 0 && index < openDocks.length - 1
-    }
-
-    function fullscreenDockCanReorder(dock) {
-      if (portraitFullscreenDocks.value) return false
-      const openDocks = getFullscreenOpenDocks()
-      return openDocks.length > 1 && openDocks.includes(dock)
-    }
-
-    function resetFullscreenDockHeights() {
-      for (const dock of fullscreenDockOrder) {
-        fullscreenDockWeights[dock] = 1
-        fullscreenDockCollapsedState[dock] = null
-      }
-    }
-
-    function handleFullscreenDockHeaderDoubleClick(event, dock) {
-      if (portraitFullscreenDocks.value) return
-      const target = event.target instanceof Element ? event.target : null
-      const header = target?.closest(FULLSCREEN_DOCK_HEADER_SELECTOR)
-      const interactiveTarget = target?.closest('button, a, input, select, textarea, [role="button"]')
-      if (!header || interactiveTarget || !event.currentTarget.contains(header)) {
-        return
-      }
-
-      const toggled = toggleFullscreenDockCollapsed(
-        getFullscreenOpenDocks(),
-        dock,
-        fullscreenDockWeights,
-        fullscreenDockCollapsedState,
-        getFullscreenDockBounds().height
-      )
-
-      if (toggled) {
-        event.preventDefault()
-      }
-    }
-
-    function setFullscreenDockBoundary(dock, firstWeight) {
-      const openDocks = getFullscreenOpenDocks()
-      const index = openDocks.indexOf(dock)
-      const nextDock = openDocks[index + 1]
-      if (!nextDock) {
-        return
-      }
-
-      const pairWeight = fullscreenDockWeights[dock] + fullscreenDockWeights[nextDock]
-      const totalWeight = openDocks.reduce((total, name) => total + fullscreenDockWeights[name], 0)
-      // Only enforce the comfortable minimum when every open dock can have
-      // it. Dense stacks keep the full header plus a small content sliver so
-      // dividers stay useful without clipping the header.
-      const panelChrome = FULLSCREEN_DOCK_OUTER_INSET + FULLSCREEN_DOCK_GAP / 2
-      const layoutHeight = getFullscreenDockBounds().height
-      const preferredMinimumFits = openDocks.length === 2 && layoutHeight >=
-        openDocks.length * FULLSCREEN_DOCK_PREFERRED_MIN_HEIGHT +
-        FULLSCREEN_DOCK_OUTER_INSET * 2 +
-        FULLSCREEN_DOCK_GAP * (openDocks.length - 1)
-      const minimumHeight = preferredMinimumFits
-        ? FULLSCREEN_DOCK_PREFERRED_MIN_HEIGHT
-        : FULLSCREEN_DOCK_COMPACT_MIN_HEIGHT
-      const minimumShare = minimumHeight + panelChrome
-      const minimumWeight = Math.min(
-        pairWeight / 2,
-        minimumShare / layoutHeight * totalWeight
-      )
-      const clampedWeight = Math.min(pairWeight - minimumWeight, Math.max(minimumWeight, firstWeight))
-      fullscreenDockWeights[dock] = clampedWeight
-      fullscreenDockWeights[nextDock] = pairWeight - clampedWeight
-      fullscreenDockCollapsedState[dock] = null
-      fullscreenDockCollapsedState[nextDock] = null
-    }
-
-    function handleFullscreenDockResizePointerDown(event, dock) {
-      if (event.button !== 0 || !fullscreenDockCanResize(dock)) {
-        return
-      }
-
-      const openDocks = getFullscreenOpenDocks()
-      const index = openDocks.indexOf(dock)
-      fullscreenDockResizing.value = true
-      resizingFullscreenDock = dock
-      resizingFullscreenDockWeightBefore = openDocks
-        .slice(0, index)
-        .reduce((total, name) => total + fullscreenDockWeights[name], 0)
-      resizingFullscreenDockTotalWeight = openDocks
-        .reduce((total, name) => total + fullscreenDockWeights[name], 0)
-      resizingFullscreenDockBounds = getFullscreenDockBounds()
-      window.addEventListener('pointermove', handleFullscreenDockResizePointerMove)
-      window.addEventListener('pointerup', stopFullscreenDockResize)
-      window.addEventListener('pointercancel', stopFullscreenDockResize)
-      event.preventDefault()
-    }
-
-    function handleFullscreenDockResizePointerMove(event) {
-      const pointerWeight = (event.clientY - resizingFullscreenDockBounds.top) /
-        resizingFullscreenDockBounds.height * resizingFullscreenDockTotalWeight
-      setFullscreenDockBoundary(resizingFullscreenDock, pointerWeight - resizingFullscreenDockWeightBefore)
-    }
-
-    function stopFullscreenDockResize() {
-      fullscreenDockResizing.value = false
-      resizingFullscreenDock = null
-      resizingFullscreenDockBounds = null
-      window.removeEventListener('pointermove', handleFullscreenDockResizePointerMove)
-      window.removeEventListener('pointerup', stopFullscreenDockResize)
-      window.removeEventListener('pointercancel', stopFullscreenDockResize)
-    }
-
-    onUnmounted(stopFullscreenDockResize)
-
-    function handleFullscreenDockResizeKeydown(event, dock) {
-      if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') {
-        return
-      }
-
-      const openDocks = getFullscreenOpenDocks()
-      const totalWeight = openDocks.reduce((total, name) => total + fullscreenDockWeights[name], 0)
-      const movement = (event.key === 'ArrowUp' ? -20 : 20) / getFullscreenDockBounds().height * totalWeight
-      setFullscreenDockBoundary(dock, fullscreenDockWeights[dock] + movement)
-      event.preventDefault()
-    }
-
-    let reorderingFullscreenDock = null
-    let reorderingFullscreenDockBounds = null
-
-    function handleFullscreenDockReorderPointerDown(event, dock) {
-      const target = event.target instanceof Element ? event.target : null
-      const header = target?.closest(FULLSCREEN_DOCK_HEADER_SELECTOR)
-      const interactiveTarget = target?.closest('button, a, input, select, textarea, [role="button"]')
-      if (
-        event.button !== 0 || !fullscreenDockCanReorder(dock) || !header ||
-        interactiveTarget || !event.currentTarget.contains(header)
-      ) {
-        return
-      }
-
-      fullscreenDockReordering.value = true
-      reorderingFullscreenDock = dock
-      reorderingFullscreenDockBounds = getFullscreenDockBounds()
-      window.addEventListener('pointermove', handleFullscreenDockReorderPointerMove)
-      window.addEventListener('pointerup', stopFullscreenDockReorder)
-      window.addEventListener('pointercancel', stopFullscreenDockReorder)
-      event.preventDefault()
-    }
-
-    function handleFullscreenDockReorderPointerMove(event) {
-      const openDocks = getFullscreenOpenDocks()
-      const currentIndex = openDocks.indexOf(reorderingFullscreenDock)
-      const otherDocks = openDocks.filter(dock => dock !== reorderingFullscreenDock)
-      // Hit-test against the target layout derived from the dock weights.
-      // Measuring the panels while they animate towards their new slots would
-      // force a layout pass per pointer move and oscillate around the pointer.
-      const bounds = reorderingFullscreenDockBounds
-      const totalWeight = openDocks.reduce((total, name) => total + fullscreenDockWeights[name], 0)
-      let insertionIndex = otherDocks.length
-      let weightBefore = 0
-      let otherIndex = 0
-      for (const dock of openDocks) {
-        if (dock !== reorderingFullscreenDock) {
-          const midpoint = bounds.top +
-            (weightBefore + fullscreenDockWeights[dock] / 2) / totalWeight * bounds.height
-          if (event.clientY < midpoint) {
-            insertionIndex = otherIndex
-            break
-          }
-          otherIndex++
-        }
-        weightBefore += fullscreenDockWeights[dock]
-      }
-      if (insertionIndex === currentIndex) {
-        return
-      }
-
-      const orderIndex = fullscreenDockOrder.indexOf(reorderingFullscreenDock)
-      fullscreenDockOrder.splice(orderIndex, 1)
-      if (insertionIndex === otherDocks.length) {
-        const lastOpenIndex = fullscreenDockOrder.indexOf(otherDocks.at(-1))
-        fullscreenDockOrder.splice(lastOpenIndex + 1, 0, reorderingFullscreenDock)
-      } else {
-        const nextOpenIndex = fullscreenDockOrder.indexOf(otherDocks[insertionIndex])
-        fullscreenDockOrder.splice(nextOpenIndex, 0, reorderingFullscreenDock)
-      }
-    }
-
-    function stopFullscreenDockReorder() {
-      fullscreenDockReordering.value = false
-      reorderingFullscreenDock = null
-      reorderingFullscreenDockBounds = null
-      window.removeEventListener('pointermove', handleFullscreenDockReorderPointerMove)
-      window.removeEventListener('pointerup', stopFullscreenDockReorder)
-      window.removeEventListener('pointercancel', stopFullscreenDockReorder)
-    }
-
-    onUnmounted(stopFullscreenDockReorder)
 
     function getShareTimestamp() {
       const currentTime = Math.floor(video.value?.currentTime ?? 0)
@@ -1822,42 +1477,23 @@ export default defineComponent({
     // Timing belongs to the current video, rather than the saved appearance settings.
     let captionTimingOffset = props.sabrReloadState?.captionTimingOffset ?? 0
 
-    const secondaryCaptionText = ref('')
-    const secondaryCaptionsAtTop = computed(() => captionSettings.value.anchor.startsWith('bottom'))
-    /** @type {{ url: string, label: string, language: string, mimeType: string } | null} */
-    let secondaryCaption = null
-    /** @type {import('../../helpers/player/secondary-captions').SecondaryCaptionCue[]} */
-    let secondaryCaptionCues = []
-    /** @type {AbortController | null} */
-    let secondaryCaptionAbortController = null
-    // Follows Shaka's caption area, which makes room for the visible controls and the fullscreen side dock
-    const secondaryCaptionsBox = ref({})
-    /** @type {ResizeObserver | null} */
-    let secondaryCaptionsBoxObserver = null
-    /** @type {HTMLElement | null} */
-    let observedTextContainer = null
-    onBeforeUnmount(() => {
-      secondaryCaptionAbortController?.abort()
-      secondaryCaptionsBoxObserver?.disconnect()
+    const {
+      getSecondaryCaption,
+      isShownAsMainCaption,
+      restoreSecondaryCaption,
+      secondaryCaptionsAtTop,
+      secondaryCaptionsBox,
+      secondaryCaptionText,
+      selectSecondaryCaption,
+      updateSecondaryCaptionText,
+    } = useSecondaryCaptions({
+      captionSettings,
+      container,
+      getCaptionTimingOffset: () => captionTimingOffset,
+      getPlayer: () => player,
+      props,
+      video,
     })
-
-    function observeSecondaryCaptionsBox() {
-      const textContainer = container.value?.querySelector('.shaka-text-container')
-      // Shaka replaces the container when it reloads, so follow the current one
-      if (!(textContainer instanceof HTMLElement) || textContainer === observedTextContainer) return
-
-      secondaryCaptionsBoxObserver ??= new ResizeObserver(() => {
-        if (!observedTextContainer) return
-        secondaryCaptionsBox.value = {
-          inset: `${observedTextContainer.offsetTop}px auto auto ${observedTextContainer.offsetLeft}px`,
-          inlineSize: `${observedTextContainer.offsetWidth}px`,
-          blockSize: `${observedTextContainer.offsetHeight}px`,
-        }
-      })
-      secondaryCaptionsBoxObserver.disconnect()
-      observedTextContainer = textContainer
-      secondaryCaptionsBoxObserver.observe(textContainer)
-    }
 
     function updateCaptionTiming(offset) {
       if (!Number.isFinite(offset)) return
@@ -2930,165 +2566,41 @@ export default defineComponent({
 
     watch(volumeBoost, value => playerAudioOutput.setGain('boost', value))
 
-    const enableVideoZoom = computed(() => store.getters.getEnableVideoZoom)
-    const selectedVideoZoom = computed(() => {
-      return sanitizeVideoZoom(store.getters.getTabVideoZoom(mediaTabId))
-    })
-    const videoZoomGestureZoom = ref(null)
-    const videoFillZoomProximity = ref(0)
-    const videoFillZoomSnapReady = ref(false)
-
-    const videoZoomPossible = computed(() => {
-      // Audio only playback has no video surface to crop and the shorts player
-      // deliberately lets its content overflow the container, which is what
-      // keeps a scaled video from spilling over the page for the other layouts.
-      return enableVideoZoom.value && props.format !== 'audio' && !props.shortsPlayer && !useVrMode.value
-    })
-
-    /** @type {import('vue').ComputedRef<number>} */
-    const videoZoom = computed(() => {
-      if (!videoZoomPossible.value) {
-        return DEFAULT_VIDEO_ZOOM
-      }
-
-      return videoZoomGestureZoom.value ?? selectedVideoZoom.value
-    })
-
-    /**
-     * Which part of the zoomed video is visible, as a fraction of the hidden
-     * overflow on each axis (-1 to 1). Kept relative so it survives zoom
-     * changes, and per player because the framing only matters for the video
-     * that is currently on screen.
-     */
-    const videoZoomOffset = reactive({ x: 0, y: 0 })
-
-    /** Whether a shift-drag is currently moving the zoomed video. */
-    const videoZoomPanning = ref(false)
-    const videoZoomPinching = ref(false)
-
-    /** Whether releasing the pointer would start a pan, which the cursor shows. */
-    const videoZoomPanReady = ref(false)
-
-    const videoZoomPannable = computed(() => videoZoom.value !== DEFAULT_VIDEO_ZOOM)
-
-    const videoZoomStyle = computed(() => {
-      if (!videoZoomPannable.value) {
-        return undefined
-      }
-
-      // The translation is applied in the video's own coordinate system, which
-      // the scale then magnifies, so the offset that reaches the edge of the
-      // crop shrinks as the zoom grows.
-      const limit = 50 * (videoZoom.value - 1) / videoZoom.value
-
-      return {
-        transform: `scale(${videoZoom.value}) translate(${videoZoomOffset.x * limit}%, ${videoZoomOffset.y * limit}%)`
-      }
+    const {
+      cancelVideoZoomPan,
+      changeVideoZoom,
+      endVideoZoomPan,
+      endVideoZoomPinchPointer,
+      handleVideoZoomFullscreenChange,
+      handleVideoZoomModifierKey,
+      handleVideoZoomPointerEnter,
+      handleVideoZoomPointerLeave,
+      moveVideoZoomPan,
+      moveVideoZoomPinch,
+      startVideoZoomGesture,
+      suppressVideoZoomClick,
+      updateVideoZoom,
+      videoFillZoomProximity,
+      videoFillZoomSnapReady,
+      videoZoom,
+      videoZoomGestureZoom,
+      videoZoomPanReady,
+      videoZoomPanning,
+      videoZoomPinching,
+      videoZoomPossible,
+      videoZoomStyle,
+    } = useVideoZoom({
+      container,
+      isNativeFullscreenActive: () => isNativeFullscreenActive(),
+      mediaTabId,
+      onPinchStart: () => cancelMobileFullscreenGesture(),
+      props,
+      showValueChange,
+      useVrMode,
+      video,
     })
 
-    watch(videoZoomPannable, (pannable) => {
-      if (!pannable) {
-        recenterVideoZoom()
-        videoZoomPanReady.value = false
-      }
-    })
-
-    // The zoom level belongs to this player (and therefore this tab), while the
-    // framing belongs to one specific video. A player reused for the next video
-    // keeps its zoom level but starts centered again.
-    watch(() => props.videoId, () => {
-      invalidateVideoZoomPinch()
-      recenterVideoZoom()
-      if (selectedVideoZoom.value > VIDEO_ZOOM_LEVELS.at(-1)) updateVideoZoom(VIDEO_ZOOM_LEVELS.at(-1))
-    })
-
-    function recenterVideoZoom() {
-      videoZoomOffset.x = 0
-      videoZoomOffset.y = 0
-    }
-
-    /** @param {number} value */
-    function updateVideoZoom(value) {
-      store.commit('setTabVideoZoom', {
-        tabId: mediaTabId,
-        value: sanitizeVideoZoom(value)
-      })
-    }
-
-    /** @param {number} direction `1` to zoom in, `-1` to zoom out */
-    function changeVideoZoom(direction) {
-      const newZoom = stepVideoZoom(videoZoom.value, direction)
-
-      if (newZoom !== videoZoom.value) {
-        updateVideoZoom(newZoom)
-      }
-
-      showValueChange(formatVideoZoom(newZoom), 'search')
-    }
-
-    // #region video zoom panning
-
-    /** @type {{ pointerId: number, x: number, y: number, offsetX: number, offsetY: number } | null} */
-    let videoZoomPanStart = null
-    let videoZoomPointerInside = false
-    let videoZoomSuppressClick = false
-    let videoZoomSuppressClickTimer = null
-    const videoZoomTouchPointers = new Map()
-    let videoZoomPinchStart = null
-
-    function handleVideoZoomPointerEnter(event) {
-      videoZoomPointerInside = true
-      videoZoomPanReady.value = videoZoomPannable.value && event.shiftKey
-    }
-
-    function handleVideoZoomPointerLeave() {
-      videoZoomPointerInside = false
-
-      if (!videoZoomPanStart) {
-        videoZoomPanReady.value = false
-      }
-    }
-
-    function getVideoZoomGestureGeometry() {
-      const videoElement = video.value
-      if (!videoElement) return null
-
-      const bounds = videoElement.getBoundingClientRect()
-      const transform = getComputedStyle(videoElement).transform
-      const matrix = transform === 'none' ? new DOMMatrix() : new DOMMatrix(transform)
-      const scale = Math.hypot(matrix.a, matrix.b)
-      if (bounds.width <= 0 || bounds.height <= 0 || scale <= 0) return null
-      const size = {
-        width: bounds.width / scale,
-        height: bounds.height / scale,
-      }
-      const maximumTranslation = {
-        x: size.width * (scale - 1) / 2,
-        y: size.height * (scale - 1) / 2,
-      }
-
-      return {
-        zoom: scale,
-        center: {
-          x: bounds.left + bounds.width / 2 - matrix.e,
-          y: bounds.top + bounds.height / 2 - matrix.f,
-        },
-        offset: {
-          x: maximumTranslation.x > 0
-            ? clampVideoZoomOffset(matrix.e / maximumTranslation.x)
-            : 0,
-          y: maximumTranslation.y > 0
-            ? clampVideoZoomOffset(matrix.f / maximumTranslation.y)
-            : 0,
-        },
-        size,
-      }
-    }
-
-    /** @param {KeyboardEvent} event */
-    function handleVideoZoomModifierKey(event) {
-      videoZoomPanReady.value = videoZoomPointerInside && videoZoomPannable.value && event.shiftKey
-    }
+    // #region pointer gestures
 
     // Teleporting the player releases Chromium's pointer capture. Keep the
     // active stream on window so a fast swipe can finish outside the player.
@@ -3141,78 +2653,7 @@ export default defineComponent({
         finishTemporaryPlaybackRateHold(TEMPORARY_PLAYBACK_RATE_POINTER_SOURCE)
       }
       startMobileFullscreenGesture(event)
-
-      if (
-        event.pointerType === 'touch' &&
-        videoZoomPossible.value &&
-        isVideoZoomGestureTarget(event.target)
-      ) {
-        videoZoomTouchPointers.set(event.pointerId, { x: event.clientX, y: event.clientY })
-        if (videoZoomTouchPointers.size === 2) {
-          const points = [...videoZoomTouchPointers.values()]
-          const geometry = getVideoZoomGestureGeometry()
-          if (geometry) {
-            cancelMobileFullscreenGesture()
-            const fullscreen = isNativeFullscreenActive()
-            videoZoomGestureZoom.value = geometry.zoom
-            videoZoomOffset.x = geometry.offset.x
-            videoZoomOffset.y = geometry.offset.y
-            const focal = {
-              x: (points[0].x + points[1].x) / 2 - geometry.center.x,
-              y: (points[0].y + points[1].y) / 2 - geometry.center.y,
-            }
-            videoZoomPinchStart = {
-              distance: Math.max(1, Math.hypot(points[1].x - points[0].x, points[1].y - points[0].y)),
-              zoom: geometry.zoom,
-              offset: geometry.offset,
-              focal,
-              currentFocal: focal,
-              center: geometry.center,
-              size: geometry.size,
-              videoId: props.videoId,
-              fullscreen,
-              fillZoom: fullscreen
-                ? getVideoFillZoom(
-                    { width: container.value.clientWidth, height: container.value.clientHeight },
-                    geometry.size,
-                    { width: video.value.videoWidth, height: video.value.videoHeight },
-                  )
-                : null,
-            }
-            videoFillZoomProximity.value = 0
-            videoFillZoomSnapReady.value = false
-            videoZoomPinching.value = true
-            videoZoomSuppressClick = true
-            for (const pointerId of videoZoomTouchPointers.keys()) {
-              container.value?.setPointerCapture(pointerId)
-            }
-            event.preventDefault()
-            event.stopPropagation()
-            return
-          }
-        }
-      }
-
-      if (!videoZoomPannable.value || !event.shiftKey || event.button !== 0) {
-        return
-      }
-
-      // shaka-player's controls cover the video, so the drag is claimed in the
-      // capture phase before they can turn it into a play/pause click.
-      event.preventDefault()
-      event.stopPropagation()
-
-      videoZoomPanStart = {
-        pointerId: event.pointerId,
-        x: event.clientX,
-        y: event.clientY,
-        offsetX: videoZoomOffset.x,
-        offsetY: videoZoomOffset.y,
-      }
-      videoZoomPanning.value = true
-      // Chromium still fires the click that follows a prevented pointerdown.
-      videoZoomSuppressClick = true
-      container.value?.setPointerCapture(event.pointerId)
+      startVideoZoomGesture(event)
     }
 
     /** @param {PointerEvent} event */
@@ -3222,83 +2663,9 @@ export default defineComponent({
         temporaryPlaybackRatePointerCancelled = true
         finishTemporaryPlaybackRateHold(TEMPORARY_PLAYBACK_RATE_POINTER_SOURCE)
       }
-      if (videoZoomTouchPointers.has(event.pointerId)) {
-        videoZoomTouchPointers.set(event.pointerId, { x: event.clientX, y: event.clientY })
-      }
-
-      if (videoZoomPinchStart?.invalidated) {
-        event.preventDefault()
-        event.stopPropagation()
-        return
-      }
-
-      if (videoZoomPinchStart && videoZoomTouchPointers.size >= 2) {
-        const points = [...videoZoomTouchPointers.values()]
-        const focal = {
-          x: (points[0].x + points[1].x) / 2 - videoZoomPinchStart.center.x,
-          y: (points[0].y + points[1].y) / 2 - videoZoomPinchStart.center.y,
-        }
-        const distance = Math.hypot(points[1].x - points[0].x, points[1].y - points[0].y)
-        const resolved = resolveVideoZoomPinch({
-          startZoom: videoZoomPinchStart.zoom,
-          startOffset: videoZoomPinchStart.offset,
-          startFocal: videoZoomPinchStart.focal,
-          focal,
-          scale: distance / videoZoomPinchStart.distance,
-          size: videoZoomPinchStart.size,
-          maximumZoom: Math.max(VIDEO_ZOOM_LEVELS.at(-1), videoZoomPinchStart.fillZoom ?? 0),
-        })
-        videoZoomGestureZoom.value = resolved.zoom
-        videoZoomOffset.x = resolved.offset.x
-        videoZoomOffset.y = resolved.offset.y
-        videoZoomPinchStart.currentFocal = focal
-        const movingTowardFill = videoZoomPinchStart.fillZoom !== null &&
-          Math.abs(resolved.zoom - videoZoomPinchStart.zoom) >= 0.01 &&
-          Math.abs(resolved.zoom - videoZoomPinchStart.fillZoom) <
-            Math.abs(videoZoomPinchStart.zoom - videoZoomPinchStart.fillZoom)
-        const fill = getVideoFillZoomProximity(resolved.zoom, videoZoomPinchStart.fillZoom)
-        videoFillZoomProximity.value = movingTowardFill ? fill.proximity : 0
-        videoFillZoomSnapReady.value = movingTowardFill && fill.snap
-        event.preventDefault()
-        event.stopPropagation()
-        return
-      }
-
+      if (moveVideoZoomPinch(event)) return
       if (moveMobileFullscreenGesture(event)) return
-
-      if (!videoZoomPanStart) {
-        videoZoomPanReady.value = videoZoomPointerInside && videoZoomPannable.value && event.shiftKey
-        return
-      }
-
-      if (event.pointerId !== videoZoomPanStart.pointerId) {
-        return
-      }
-
-      event.preventDefault()
-      event.stopPropagation()
-
-      const videoElement = video.value
-      if (!videoElement) {
-        return
-      }
-
-      // `offsetWidth`/`offsetHeight` are the layout size, which the zoom
-      // transform does not change, so this is the overflow the crop hides.
-      const maxX = videoElement.offsetWidth * (videoZoom.value - 1) / 2
-      const maxY = videoElement.offsetHeight * (videoZoom.value - 1) / 2
-
-      if (maxX > 0) {
-        videoZoomOffset.x = clampVideoZoomOffset(
-          videoZoomPanStart.offsetX + (event.clientX - videoZoomPanStart.x) / maxX
-        )
-      }
-
-      if (maxY > 0) {
-        videoZoomOffset.y = clampVideoZoomOffset(
-          videoZoomPanStart.offsetY + (event.clientY - videoZoomPanStart.y) / maxY
-        )
-      }
+      moveVideoZoomPan(event)
     }
 
     /** @param {PointerEvent} event */
@@ -3318,120 +2685,53 @@ export default defineComponent({
     function handleVideoZoomPointerCancel(event) {
       if (endVideoZoomPinchPointer(event, true)) return
       cancelMobileFullscreenGesture(event)
-
-      if (!endVideoZoomPan(event)) {
-        return
-      }
-
-      // A cancelled gesture never produces the click that clears this itself,
-      // so it would otherwise swallow the next unrelated click on the player.
-      videoZoomSuppressClick = false
+      cancelVideoZoomPan(event)
     }
 
-    function invalidateVideoZoomPinch() {
-      if (!videoZoomPinchStart || videoZoomPinchStart.invalidated) return
-      videoZoomPinchStart.invalidated = true
-      videoZoomOffset.x = videoZoomPinchStart.offset.x
-      videoZoomOffset.y = videoZoomPinchStart.offset.y
-      videoZoomGestureZoom.value = null
-      videoZoomPinching.value = false
-      videoFillZoomProximity.value = 0
-      videoFillZoomSnapReady.value = false
-    }
-
-    function endVideoZoomPinchPointer(event, cancelled = false) {
-      if (!videoZoomTouchPointers.has(event.pointerId)) return false
-
-      videoZoomTouchPointers.delete(event.pointerId)
-      if (!videoZoomPinchStart) return false
-
-      event.preventDefault()
-      event.stopPropagation()
-      if (container.value?.hasPointerCapture(event.pointerId)) {
-        container.value.releasePointerCapture(event.pointerId)
-      }
-
-      const stale = videoZoomPinchStart.invalidated ||
-        videoZoomPinchStart.videoId !== props.videoId ||
-        videoZoomPinchStart.fullscreen !== isNativeFullscreenActive()
-      if (stale) invalidateVideoZoomPinch()
-      const gestureZoom = videoZoomGestureZoom.value ?? videoZoomPinchStart.zoom
-      const fillZoom = videoZoomPinchStart.fillZoom
-      const finalZoom = !cancelled && videoFillZoomSnapReady.value && fillZoom !== null
-        ? fillZoom
-        : gestureZoom
-      if (!stale) {
-        if (finalZoom === fillZoom && !cancelled) recenterVideoZoom()
-        updateVideoZoom(finalZoom)
-        if (!cancelled) showValueChange(formatVideoZoom(finalZoom), 'search', false, 0, false)
-      }
-      videoZoomGestureZoom.value = null
-      videoZoomPinchStart = null
-      videoZoomPinching.value = false
-      videoFillZoomProximity.value = 0
-      videoFillZoomSnapReady.value = false
-      videoZoomTouchPointers.clear()
-      clearTimeout(videoZoomSuppressClickTimer)
-      videoZoomSuppressClickTimer = setTimeout(() => {
-        videoZoomSuppressClick = false
-        videoZoomSuppressClickTimer = null
-      }, 0)
-      return true
-    }
-
-    /**
-     * @param {PointerEvent} event
-     * @returns {boolean} whether the event ended this player's pan
-     */
-    function endVideoZoomPan(event) {
-      if (!videoZoomPanStart || event.pointerId !== videoZoomPanStart.pointerId) {
-        return false
-      }
-
-      // A cancelled pointer has already lost the capture.
-      if (container.value?.hasPointerCapture(event.pointerId)) {
-        container.value.releasePointerCapture(event.pointerId)
-      }
-
-      videoZoomPanStart = null
-      videoZoomPanning.value = false
-      videoZoomPanReady.value = videoZoomPointerInside && videoZoomPannable.value && event.shiftKey
-
-      return true
-    }
-
-    /** Swallows the click that a finished pan would otherwise leave behind. */
+    /** @param {MouseEvent} event */
     function handleVideoZoomClickCapture(event) {
       if (handleMobilePlayerSurfaceClick(event)) {
         return
       }
 
-      if (!videoZoomSuppressClick) {
-        return
-      }
-
-      videoZoomSuppressClick = false
-      clearTimeout(videoZoomSuppressClickTimer)
-      videoZoomSuppressClickTimer = null
-      event.preventDefault()
-      event.stopPropagation()
+      suppressVideoZoomClick(event)
     }
 
-    /**
-     * @param {number} value
-     * @returns {number}
-     */
-    function clampVideoZoomOffset(value) {
-      return Math.min(Math.max(value, -1), 1)
-    }
-
-    // #endregion video zoom panning
+    // #endregion pointer gestures
 
     // #region A-B repeat
 
-    const abRepeatStart = ref(null)
-    const abRepeatEnd = ref(null)
-    const abRepeatEnabled = ref(false)
+    const disableAbRepeat = computed(() => store.getters.getDisableAbRepeat)
+    const {
+      abRepeatAvailable,
+      abRepeatEnabled,
+      abRepeatEnd,
+      abRepeatStart,
+      abRepeatValidation,
+      abRepeatValidationMessage,
+      checkAbRepeatBoundary,
+      clearAbRepeat,
+      clearAbRepeatBoundarySchedule,
+      hasValidAbRepeatRange,
+      refreshAbRepeatMarkers,
+      repeatAbRangeFromStart,
+      resetAbRepeat,
+      scheduleAbRepeatBoundary,
+      setCurrentAbRepeatBoundary,
+      toggleAbRepeat,
+      updateAbRepeatDuration,
+    } = useAbRepeat({
+      addMarkers,
+      container,
+      disableAbRepeat,
+      getPlayer: () => player,
+      isLive,
+      onRepeat: () => repeatStatsTracker?.repeat(),
+      resetSeekAccumulation: () => { accumulatedSeekSeconds = 0 },
+      showValueChange,
+      t,
+      video,
+    })
     const repeatStats = reactive({ active: false, repeats: 0, seconds: 0 })
     const hideRepeatStats = computed(() => store.getters.getHideRepeatStats)
     const repeatStatsTime = computed(() => formatDurationAsTimestamp(repeatStats.seconds))
@@ -3469,328 +2769,9 @@ export default defineComponent({
       repeatStatsTracker?.destroy()
       repeatStatsLoopObserver?.disconnect()
     })
-    const abRepeatDuration = ref(Number.POSITIVE_INFINITY)
-    const disableAbRepeat = computed(() => store.getters.getDisableAbRepeat)
-    const abRepeatValidation = computed(() => validateAbRepeatRange(
-      abRepeatStart.value,
-      abRepeatEnd.value,
-      abRepeatDuration.value
-    ))
-    const abRepeatAvailable = computed(() => isCompleteAbRepeatRange(
-      abRepeatStart.value,
-      abRepeatEnd.value,
-      abRepeatDuration.value
-    ))
-    /**
-     * @param {string | null} validation
-     * @returns {string}
-     */
-    function getAbRepeatValidationMessage(validation) {
-      switch (validation) {
-        case AbRepeatValidation.END_NOT_AFTER_START:
-          return t('Video.Player.A-B Repeat.End Before Start')
-        case AbRepeatValidation.OUTSIDE_DURATION:
-          return t('Video.Player.A-B Repeat.Outside Duration')
-        default:
-          return ''
-      }
-    }
-    const abRepeatValidationMessage = computed(() => (
-      getAbRepeatValidationMessage(abRepeatValidation.value)
-    ))
-
-    let abRepeatBoundaryTimeout = null
-    let abRepeatDragCleanup = null
-
-    function clearAbRepeatBoundarySchedule() {
-      clearTimeout(abRepeatBoundaryTimeout)
-      abRepeatBoundaryTimeout = null
-    }
-
-    /**
-     * @param {'start' | 'end'} point
-     * @param {number} value
-     * @returns {number}
-     */
-    function clampAbRepeatBoundary(point, value) {
-      const seekRange = player?.seekRange()
-      const rangeStart = Number.isFinite(seekRange?.start) ? seekRange.start : 0
-      const rangeEnd = Number.isFinite(seekRange?.end) ? seekRange.end : getAbRepeatDuration()
-
-      if (point === 'start') {
-        const latestStart = abRepeatEnd.value === null
-          ? rangeEnd
-          : abRepeatEnd.value - AB_REPEAT_MIN_RANGE_SECONDS
-        return Math.min(Math.max(value, rangeStart), Math.max(rangeStart, latestStart))
-      }
-
-      const earliestEnd = abRepeatStart.value === null
-        ? rangeStart
-        : abRepeatStart.value + AB_REPEAT_MIN_RANGE_SECONDS
-      return Math.max(Math.min(value, rangeEnd), Math.min(rangeEnd, earliestEnd))
-    }
-
-    /**
-     * @param {'start' | 'end'} point
-     * @param {number} clientX
-     * @param {HTMLElement} seekBar
-     */
-    function setAbRepeatBoundaryFromPointer(point, clientX, seekBar) {
-      const bounds = seekBar.getBoundingClientRect()
-      const seekRange = player?.seekRange()
-      if (!seekRange || bounds.width <= 0) {
-        return
-      }
-
-      const position = Math.min(Math.max((clientX - bounds.left) / bounds.width, 0), 1)
-      const value = seekRange.start + position * (seekRange.end - seekRange.start)
-      setAbRepeatBoundary(point, clampAbRepeatBoundary(point, value))
-    }
-
-    /**
-     * @param {'start' | 'end'} point
-     * @param {PointerEvent} event
-     */
-    function startAbRepeatMarkerDrag(point, event) {
-      const seekBar = container.value?.querySelector('.shaka-seek-bar-container')
-      if (!(seekBar instanceof HTMLElement)) {
-        return
-      }
-
-      event.preventDefault()
-      event.stopPropagation()
-      abRepeatDragCleanup?.()
-
-      const pointerId = event.pointerId
-      let latestClientX = event.clientX
-      let updateFrame = null
-
-      const applyPendingPosition = () => {
-        updateFrame = null
-        setAbRepeatBoundaryFromPointer(point, latestClientX, seekBar)
-      }
-      const queuePosition = (clientX) => {
-        latestClientX = clientX
-        if (updateFrame === null) {
-          updateFrame = requestAnimationFrame(applyPendingPosition)
-        }
-      }
-      const handlePointerMove = (moveEvent) => {
-        if (moveEvent.pointerId !== pointerId) {
-          return
-        }
-        moveEvent.preventDefault()
-        queuePosition(moveEvent.clientX)
-      }
-      const cleanup = () => {
-        window.removeEventListener('pointermove', handlePointerMove)
-        window.removeEventListener('pointerup', handlePointerEnd)
-        window.removeEventListener('pointercancel', handlePointerEnd)
-        if (updateFrame !== null) {
-          cancelAnimationFrame(updateFrame)
-          updateFrame = null
-        }
-        container.value?.classList.remove('abRepeatDragging')
-        abRepeatDragCleanup = null
-      }
-      const handlePointerEnd = (endEvent) => {
-        if (endEvent.pointerId !== pointerId) {
-          return
-        }
-        setAbRepeatBoundaryFromPointer(point, endEvent.clientX, seekBar)
-        cleanup()
-      }
-
-      abRepeatDragCleanup = cleanup
-      container.value?.classList.add('abRepeatDragging')
-      window.addEventListener('pointermove', handlePointerMove, { passive: false })
-      window.addEventListener('pointerup', handlePointerEnd)
-      window.addEventListener('pointercancel', handlePointerEnd)
-    }
-
-    /**
-     * @param {'start' | 'end'} point
-     * @param {KeyboardEvent} event
-     */
-    function handleAbRepeatMarkerKeydown(point, event) {
-      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') {
-        return
-      }
-
-      event.preventDefault()
-      event.stopPropagation()
-      const currentValue = point === 'start' ? abRepeatStart.value : abRepeatEnd.value
-      if (currentValue === null) {
-        return
-      }
-
-      const direction = event.key === 'ArrowLeft' ? -1 : 1
-      const step = event.shiftKey ? 1 : 0.1
-      setAbRepeatBoundary(point, clampAbRepeatBoundary(point, currentValue + direction * step))
-      requestAnimationFrame(() => {
-        container.value?.querySelector(`.abRepeatMarker${point === 'start' ? 'A' : 'B'}`)?.focus()
-      })
-    }
-
-    function getAbRepeatDuration() {
-      const duration = video.value?.duration
-      return Number.isFinite(duration) && duration >= 0
-        ? duration
-        : Number.POSITIVE_INFINITY
-    }
-
-    function hasValidAbRepeatRange() {
-      return abRepeatAvailable.value
-    }
-
-    function repeatAbRangeFromStart(countRepeat = false) {
-      const videoElement = video.value
-      if (!videoElement || !hasValidAbRepeatRange()) {
-        return
-      }
-
-      clearAbRepeatBoundarySchedule()
-      if (countRepeat) repeatStatsTracker?.repeat()
-      accumulatedSeekSeconds = 0
-      videoElement.currentTime = abRepeatStart.value
-    }
-
-    function checkAbRepeatBoundary(countRepeat = true) {
-      clearAbRepeatBoundarySchedule()
-      const videoElement = video.value
-      if (!videoElement || !abRepeatEnabled.value || !hasValidAbRepeatRange()) {
-        return
-      }
-
-      if (
-        videoElement.currentTime < abRepeatStart.value - AB_REPEAT_BOUNDARY_TOLERANCE_SECONDS ||
-        videoElement.currentTime >= abRepeatEnd.value - AB_REPEAT_BOUNDARY_TOLERANCE_SECONDS
-      ) {
-        repeatAbRangeFromStart(countRepeat && !videoElement.paused && !videoElement.seeking &&
-          videoElement.currentTime >= abRepeatEnd.value - AB_REPEAT_BOUNDARY_TOLERANCE_SECONDS)
-        return
-      }
-
-      scheduleAbRepeatBoundary()
-    }
-
-    function scheduleAbRepeatBoundary() {
-      clearAbRepeatBoundarySchedule()
-
-      const videoElement = video.value
-      if (
-        !videoElement ||
-        videoElement.paused ||
-        videoElement.seeking ||
-        !abRepeatEnabled.value ||
-        !hasValidAbRepeatRange()
-      ) {
-        return
-      }
-
-      if (videoElement.currentTime < abRepeatStart.value || videoElement.currentTime >= abRepeatEnd.value) {
-        repeatAbRangeFromStart()
-        return
-      }
-
-      const delay = getAbRepeatBoundaryDelay(
-        videoElement.currentTime,
-        abRepeatEnd.value,
-        videoElement.playbackRate
-      )
-
-      abRepeatBoundaryTimeout = setTimeout(checkAbRepeatBoundary, Math.max(4, delay))
-    }
-
-    /**
-     * @param {'start' | 'end'} point
-     * @param {number | null} value
-     * @returns {string | null}
-     */
-    function setAbRepeatBoundary(point, value) {
-      if (disableAbRepeat.value) {
-        return null
-      }
-
-      const nextStart = point === 'start' ? value : abRepeatStart.value
-      const nextEnd = point === 'end' ? value : abRepeatEnd.value
-      const validation = validateAbRepeatRange(nextStart, nextEnd, abRepeatDuration.value)
-      if (validation !== null) {
-        return validation
-      }
-
-      const hadValidRange = hasValidAbRepeatRange()
-      if (point === 'start') {
-        abRepeatStart.value = value
-      } else {
-        abRepeatEnd.value = value
-      }
-
-      const validRange = hasValidAbRepeatRange()
-      if (!validRange) {
-        abRepeatEnabled.value = false
-      } else if (!hadValidRange) {
-        abRepeatEnabled.value = true
-      }
-      if (validRange && video.value) {
-        video.value.loop = false
-      }
-
-      refreshAbRepeatMarkers()
-      scheduleAbRepeatBoundary()
-      return null
-    }
-
-    /** @param {'start' | 'end'} point */
-    function setCurrentAbRepeatBoundary(point) {
-      const currentTime = video.value?.currentTime
-      if (disableAbRepeat.value || isLive.value || !Number.isFinite(currentTime)) {
-        return
-      }
-
-      const validation = setAbRepeatBoundary(point, currentTime)
-      const label = point === 'start'
-        ? t('Video.Player.A-B Repeat.Point A')
-        : t('Video.Player.A-B Repeat.Point B')
-      const message = getAbRepeatValidationMessage(validation) ||
-        `${label} ${formatAbRepeatTimestamp(currentTime)}`
-      showValueChange(message, AB_REPEAT_VALUE_CHANGE_ICON)
-    }
-
-    function toggleAbRepeat() {
-      if (disableAbRepeat.value || !hasValidAbRepeatRange()) {
-        return
-      }
-
-      abRepeatEnabled.value = !abRepeatEnabled.value
-      if (abRepeatEnabled.value && video.value) {
-        video.value.loop = false
-      }
-      refreshAbRepeatMarkers()
-      scheduleAbRepeatBoundary()
-    }
-
-    function clearAbRepeat() {
-      abRepeatDragCleanup?.()
-      abRepeatStart.value = null
-      abRepeatEnd.value = null
-      abRepeatEnabled.value = false
-      clearAbRepeatBoundarySchedule()
-      refreshAbRepeatMarkers()
-    }
-
-    function resetAbRepeat() {
-      abRepeatDuration.value = Number.POSITIVE_INFINITY
-      clearAbRepeat()
-    }
 
     function handleAbRepeatDurationChange() {
-      abRepeatDuration.value = getAbRepeatDuration()
-      if (abRepeatValidation.value !== null) {
-        abRepeatEnabled.value = false
-      }
-      refreshAbRepeatMarkers()
-      scheduleAbRepeatBoundary()
+      updateAbRepeatDuration()
       updateVideoElementGeometry()
       syncMediaSessionPosition()
     }
@@ -4467,26 +3448,6 @@ export default defineComponent({
         'shaka-play-button-container',
         'shaka-controls-container',
       ].some(className => target.classList.contains(className))
-    }
-
-    /**
-     * Pinch gestures may begin on non-interactive descendants of Shaka's
-     * surface, including the SVG inside its central play button. Menus and the
-     * bottom control panel retain their own two-finger interactions.
-     * @param {EventTarget | null} target
-     * @returns {boolean}
-     */
-    function isVideoZoomGestureTarget(target) {
-      if (target === video.value) return true
-      if (!(target instanceof Element)) return false
-
-      return target.closest('.shaka-controls-container') !== null &&
-        target.closest([
-          '.shaka-controls-button-panel',
-          '.shaka-seek-bar-container',
-          '.shaka-settings-menu',
-          '.shaka-context-menu',
-        ].join(',')) === null
     }
 
     const mobileSideSwipesEnabled = computed(() => process.env.IS_CAPACITOR && (
@@ -7511,11 +6472,11 @@ export default defineComponent({
                 const activeTrack = controls.getPlayer().getTextTracks().find(track => track.active)
                 // A translated main track leaves even a video's only original track free to show as the second one,
                 // and a remembered secondary track always needs a way to turn it off
-                return secondaryCaption !== null || (activeTrack
+                return getSecondaryCaption() !== null || (activeTrack
                   ? props.captions.some(caption => !isShownAsMainCaption(caption, activeTrack))
                   : props.captions.length > 1)
               },
-              isSelected: caption => caption === secondaryCaption,
+              isSelected: caption => caption === getSecondaryCaption(),
               select: caption => selectSecondaryCaption(caption),
             },
             {
@@ -7652,135 +6613,11 @@ export default defineComponent({
       }
     }
 
-    /**
-     * Shows a second caption track alongside the main captions, Shaka can only display one track itself.
-     * @param {{ url: string, label: string, language: string, mimeType: string } | null} caption
-     * @param {boolean} [remember] keep the language for later videos
-     * @returns {Promise<boolean>}
-     */
-    async function selectSecondaryCaption(caption, remember = true) {
-      secondaryCaptionAbortController?.abort()
-      secondaryCaptionAbortController = null
-      secondaryCaption = caption
-      secondaryCaptionCues = []
-      updateSecondaryCaptionText()
-
-      const language = caption?.language ?? ''
-      if (remember && language !== getRememberedSecondaryCaptionLocale()) {
-        const pick = ++secondaryCaptionLocalePicks
-        pendingSecondaryCaptionLocale = language
-        store.dispatch('updateSecondaryCaptionLocale', language).finally(() => {
-          if (secondaryCaptionLocalePicks === pick) {
-            pendingSecondaryCaptionLocale = null
-          }
-        })
-      }
-
-      if (!caption) {
-        return true
-      }
-
-      const abortController = new AbortController()
-      secondaryCaptionAbortController = abortController
-      const { signal } = abortController
-
-      try {
-        const response = await fetch(await getSubtitleRequestUrl(caption.url, store.getters), { signal })
-        if (!response.ok) {
-          throw new Error(`Secondary captions request failed with HTTP ${response.status}`)
-        }
-
-        const parserFactory = shaka.text.TextEngine.findParser(caption.mimeType)
-        const cues = parserFactory().parseMedia(
-          new TextEncoder().encode(await response.text()),
-          { periodStart: 0, segmentStart: 0, segmentEnd: Infinity, vttOffset: 0 },
-          caption.url,
-          []
-        )
-
-        if (signal.aborted) {
-          return false
-        }
-
-        secondaryCaptionCues = cues
-        updateSecondaryCaptionText()
-        return true
-      } catch (error) {
-        if (signal.aborted) {
-          return false
-        }
-        console.error('Failed to load secondary captions', error)
-        secondaryCaption = null
-        return false
-      } finally {
-        if (secondaryCaptionAbortController === abortController) {
-          secondaryCaptionAbortController = null
-        }
-      }
-    }
-
-    /** @returns {string} the language of the remembered secondary captions, or an empty string */
-    function getRememberedSecondaryCaptionLocale() {
-      return pendingSecondaryCaptionLocale ?? store.getters.getSecondaryCaptionLocale
-    }
-
-    /**
-     * Loads the remembered secondary captions once the main captions are shown for a video.
-     */
-    function restoreSecondaryCaption() {
-      const language = getRememberedSecondaryCaptionLocale()
-      const activeTrack = player?.getTextTracks().find(track => track.active)
-
-      if (!language || !activeTrack || player.isLive() || (secondaryCaption && props.captions.includes(secondaryCaption))) {
-        return
-      }
-
-      const caption = findCaptionByLocale(
-        props.captions.filter(caption => !isShownAsMainCaption(caption, activeTrack)),
-        language
-      )
-
-      if (caption) {
-        selectSecondaryCaption(caption, false)
-      }
-    }
-
-    /**
-     * @param {{ label: string, language: string }} caption
-     * @param {shaka.extern.Track | undefined} activeTrack
-     */
-    function isShownAsMainCaption(caption, activeTrack) {
-      return activeTrack?.language === caption.language && activeTrack.label === caption.label
-    }
-
-    function updateSecondaryCaptionText() {
-      const activeTrack = secondaryCaptionCues.length > 0 ? player?.getTextTracks().find(track => track.active) : undefined
-
-      // Only shown together with the main captions, so turning captions off hides both
-      secondaryCaptionText.value = activeTrack && !isShownAsMainCaption(secondaryCaption, activeTrack)
-        ? getActiveCueText(secondaryCaptionCues, (video.value?.currentTime ?? 0) - captionTimingOffset)
-        : ''
-
-      if (secondaryCaptionText.value) {
-        observeSecondaryCaptionsBox()
-      }
-    }
-
     function handleTextTrackChanged() {
       syncShortsCaptionsEnabled()
       restoreSecondaryCaption()
       updateSecondaryCaptionText()
     }
-
-    watch(() => props.captions, () => {
-      if (secondaryCaption && !props.captions.includes(secondaryCaption)) {
-        secondaryCaptionAbortController?.abort()
-        secondaryCaptionAbortController = null
-        secondaryCaption = null
-        secondaryCaptionCues = []
-        updateSecondaryCaptionText()
-      }
-    })
 
     function toggleCaptions() {
       const textTracks = player.getTextTracks()
@@ -8318,16 +7155,7 @@ export default defineComponent({
       }
 
       if (isNativeFullscreenActive() || fullWindowEnabled.value) {
-        const openDocks = getFullscreenOpenDocks('metadata')
-        if (open && openDocks.length === 1 && fullscreenDockCollapsedState.metadata != null) {
-          toggleFullscreenDockCollapsed(
-            openDocks,
-            'metadata',
-            fullscreenDockWeights,
-            fullscreenDockCollapsedState,
-            getFullscreenDockBounds().height
-          )
-        }
+        if (open) expandCollapsedFullscreenDock('metadata')
         setFullscreenMetadata(open)
       } else {
         restoreFullscreenMetadata = open
@@ -10532,70 +9360,6 @@ export default defineComponent({
 
     // #region seek bar markers
 
-    function clearAbRepeatMarkers() {
-      container.value?.querySelectorAll('.abRepeatMarker, .abRepeatRange').forEach(marker => marker.remove())
-    }
-
-    function refreshAbRepeatMarkers() {
-      clearAbRepeatMarkers()
-
-      const seekBarContainer = container.value?.querySelector('.shaka-seek-bar-container')
-      if (
-        disableAbRepeat.value ||
-        !seekBarContainer ||
-        !player ||
-        (abRepeatStart.value === null && abRepeatEnd.value === null)
-      ) {
-        return
-      }
-
-      const { start, end } = player.seekRange()
-      const duration = end - start
-      if (!Number.isFinite(duration) || duration <= 0) {
-        return
-      }
-
-      // The media duration can extend beyond the last seekable sample.
-      // Keep the saved boundaries visible at the nearest timeline edge.
-      const position = time => Math.min(100, Math.max(0, ((time - start) / duration) * 100))
-      const markers = []
-      if (hasValidAbRepeatRange()) {
-        const range = document.createElement('div')
-        range.className = `abRepeatRange${abRepeatEnabled.value ? '' : ' abRepeatRangeInactive'}`
-        range.style.left = `${position(abRepeatStart.value)}%`
-        range.style.width = `${position(abRepeatEnd.value) - position(abRepeatStart.value)}%`
-        markers.push(range)
-      }
-
-      markers.push(...[
-        ['A', abRepeatStart.value],
-        ['B', abRepeatEnd.value],
-      ]
-        .filter(([_point, time]) => time !== null)
-        .map(([point, time]) => {
-          const marker = document.createElement('button')
-          marker.type = 'button'
-          marker.className = `abRepeatMarker abRepeatMarker${point}${abRepeatEnabled.value ? '' : ' abRepeatMarkerInactive'}`
-          marker.style.left = `calc(${position(time)}% - 22px)`
-          marker.dataset.point = point
-          marker.ariaLabel = t('Video.Player.A-B Repeat.Adjust Point', {
-            point,
-            timestamp: formatAbRepeatTimestamp(time),
-          })
-          marker.addEventListener('pointerdown', event => startAbRepeatMarkerDrag(
-            point === 'A' ? 'start' : 'end',
-            event
-          ))
-          marker.addEventListener('keydown', event => handleAbRepeatMarkerKeydown(
-            point === 'A' ? 'start' : 'end',
-            event
-          ))
-          return marker
-        }))
-
-      addMarkers(markers)
-    }
-
     function clearSponsorBlockMarkers() {
       container.value.querySelectorAll('.sponsorBlockMarker').forEach(marker => marker.remove())
     }
@@ -10829,10 +9593,7 @@ export default defineComponent({
       const wasFullscreen = isFullscreen.value
       finishAndroidFullscreenExit(true)
       androidFullscreenHostActive.value = !!androidFullscreenHost && document.fullscreenElement === androidFullscreenHost
-      if (videoZoomPinchStart && videoZoomPinchStart.fullscreen !== fullscreen) invalidateVideoZoomPinch()
-      if (!fullscreen && selectedVideoZoom.value > VIDEO_ZOOM_LEVELS.at(-1)) {
-        updateVideoZoom(VIDEO_ZOOM_LEVELS.at(-1))
-      }
+      handleVideoZoomFullscreenChange(fullscreen)
       isFullscreen.value = fullscreen
       if (props.shortsPlayer) {
         resetShortsOverflowMenu()
@@ -11324,7 +10085,6 @@ export default defineComponent({
       clearPreRollTimer()
       cancelSponsorBlockSkipSchedule()
       clearAbRepeatBoundarySchedule()
-      abRepeatDragCleanup?.()
     })
 
     /**
@@ -11888,10 +10648,6 @@ export default defineComponent({
       player?.removeEventListener('loaded', applyCaptionTiming)
       clearTimeout(paidPromotionTimer)
       disableTwitchTsVideoGap?.()
-      if (fullscreenDockLayoutFrame !== null) {
-        cancelAnimationFrame(fullscreenDockLayoutFrame)
-      }
-      cancelFullscreenDockVideoAnimation()
       cancelPendingVolumeUserSet()
       fullWindowAnimation?.cancel()
       hasLoaded.value = false
@@ -11994,13 +10750,6 @@ export default defineComponent({
       }
 
       cleanUpCustomPlayerControls()
-
-      videoZoomTouchPointers.clear()
-      videoZoomPinchStart = null
-      videoZoomGestureZoom.value = null
-      videoFillZoomProximity.value = 0
-      videoFillZoomSnapReady.value = false
-      clearTimeout(videoZoomSuppressClickTimer)
 
       if (!shortsNavigationSuspended.value) {
         tabMediaCoordinator.setMiniPlayer(mediaTabId, false)

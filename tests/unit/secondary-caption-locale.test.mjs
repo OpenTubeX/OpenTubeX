@@ -4,9 +4,9 @@ import test from 'node:test'
 import vm from 'node:vm'
 import { findCaptionByLocale } from '../../src/captionLanguages.js'
 
-const source = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
-const start = source.indexOf('    async function selectSecondaryCaption(')
-const end = source.indexOf('    function isShownAsMainCaption(')
+const source = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/opentubex/useSecondaryCaptions.js', import.meta.url), 'utf8')
+const start = source.indexOf('  async function selectSecondaryCaption(')
+const end = source.indexOf('  function isShownAsMainCaption(')
 assert.ok(start > 0 && end > start)
 assert.ok(source.includes('\nlet pendingSecondaryCaptionLocale = null\n') && source.includes('\nlet secondaryCaptionLocalePicks = 0\n'), 'The pending choice is shared by every player instance')
 
@@ -35,7 +35,7 @@ function fixture (storedLocale) {
     store, findCaptionByLocale, AbortController, console,
     fetch: () => new Promise(() => {}),
     getSubtitleRequestUrl: async url => url,
-    player: { getTextTracks: () => [{ active: true, language: 'en', label: 'English' }], isLive: () => false },
+    getPlayer: () => ({ getTextTracks: () => [{ active: true, language: 'en', label: 'English' }], isLive: () => false }),
     props: { captions: [GERMAN] }
   })
   vm.runInContext(`
