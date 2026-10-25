@@ -7,10 +7,10 @@ import { createNetworkRecovery } from '../../src/renderer/helpers/networkRecover
 
 const source = readFileSync(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
 const start = source.indexOf('    getVideoInformationLocal: async function (')
-const end = source.indexOf('\n    async runIpBlockRecoveryScriptAndReload()', start)
+const end = source.indexOf('\n    extractExpiryDateFromStreamingUrl:', start)
 const methodsSource = source.slice(start, end)
 const currentLoadStart = source.indexOf('    isCurrentVideoLoad: function (')
-const currentLoadSource = source.slice(currentLoadStart, source.indexOf('\n    isYtDlpPlaybackRequested:', currentLoadStart))
+const currentLoadSource = source.slice(currentLoadStart, source.indexOf('\n    },', currentLoadStart) + '\n    },'.length)
 
 for (const backend of ['local', 'invidious']) {
   for (const scenario of ['reconnect', 'navigate away', 'downloaded playback']) {

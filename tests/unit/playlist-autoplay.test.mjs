@@ -75,7 +75,7 @@ function harness({ laterPageError = null, backend = 'local' } = {}) {
     setTimeout: () => 1, setInterval: () => 1, Date,
   }).handleVideoEnded
   watch.handleVideoEnded = () => ended.call(watch)
-  Object.assign(watch, vm.runInNewContext(`({${extractSourceBetweenMarkers(watchSource, '    handleUpcomingPlaylistVideosChange(videos) {', '\n    preloadUpcomingYtDlpPlaybackSources(')} })`))
+  Object.assign(watch, vm.runInNewContext(`({${extractSourceBetweenMarkers(watchSource, '    handleUpcomingPlaylistVideosChange(videos) {', '\n    async updateVideoMetadataCache()')} })`))
   const cancel = vm.runInNewContext(`({${extractSourceBetweenMarkers(watchSource, '    abortAutoplayCountdown: function (', '\n    handleRouteChange:')} })`, {
     clearTimeout() {}, clearInterval() {},
   }).abortAutoplayCountdown

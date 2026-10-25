@@ -5,7 +5,8 @@ import vm from 'node:vm'
 
 const watchSource = readFileSync(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
 const start = watchSource.indexOf('    handlePlayerError: async function (error) {')
-const end = watchSource.indexOf('\n    /**', start)
+const end = watchSource.indexOf('\n    },', start) + '\n    },'.length
+const recoverySource = readFileSync(new URL('../../src/renderer/views/Watch/opentubex/watchPlaybackRecovery.js', import.meta.url), 'utf8')
 const playerSource = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
 
 for (const message of ['Failed to fetch', 'Load failed', 'The Internet connection appears to be offline.', undefined]) {
@@ -73,9 +74,9 @@ test('offline errors do not suppress later failures from the retained player', (
 
 for (const requestedVideoId of ['current-video', 'next-video']) {
   test(`stream recovery preserves player state only for its own video: ${requestedVideoId}`, async () => {
-    const recoveryStart = watchSource.indexOf('    reloadAfterStreamErrorOnce: async function')
-    const recoveryEnd = watchSource.indexOf('\n    isAndroidTransientHttpRecoveryEnabled', recoveryStart)
-    const reload = vm.runInNewContext(`({${watchSource.slice(recoveryStart, recoveryEnd)}}).reloadAfterStreamErrorOnce`)
+    const recoveryStart = recoverySource.indexOf('  reloadAfterStreamErrorOnce: async function')
+    const recoveryEnd = recoverySource.indexOf('\n  },', recoveryStart) + '\n  },'.length
+    const reload = vm.runInNewContext(`({${recoverySource.slice(recoveryStart, recoveryEnd)}}).reloadAfterStreamErrorOnce`)
     const saved = []
     const reloads = []
     const state = { captionTimingOffset: 1.5 }

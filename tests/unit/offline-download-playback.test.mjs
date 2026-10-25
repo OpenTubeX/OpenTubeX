@@ -7,6 +7,11 @@ const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js',
 function method(name, next) {
   return source.slice(source.indexOf(`    ${name}:`), source.indexOf(`    ${next}`))
 }
+const downloadedPlaybackSource = await readFile(new URL('../../src/renderer/views/Watch/opentubex/watchDownloadedPlayback.js', import.meta.url), 'utf8')
+function downloadedPlaybackMethod(name) {
+  const start = downloadedPlaybackSource.indexOf(`\n  ${name}`) + 1
+  return downloadedPlaybackSource.slice(start, downloadedPlaybackSource.indexOf('\n  },', start) + '\n  },'.length)
+}
 
 for (const android of [false, true]) {
   for (const backend of ['Local', 'Invidious']) {
@@ -15,10 +20,10 @@ for (const android of [false, true]) {
         let requests = 0
         const pendingMetadata = () => { requests++; return new Promise(() => {}) }
         const methods = runInNewContext(`({
-          ${method('applyDownloadedPlaybackSource', 'cacheOnlinePlaybackSource')}
-          ${method('finishDownloadedPlaybackWithoutMetadata', 'onMountedDependOnLocalStateLoading()')}
+          ${downloadedPlaybackMethod('applyDownloadedPlaybackSource:')}
+          ${downloadedPlaybackMethod('finishDownloadedPlaybackWithoutMetadata:')}
           ${method('getVideoInformationLocal', 'getVideoInformationInvidious')}
-          ${method('getVideoInformationInvidious', 'async runIpBlockRecoveryScriptAndReload()')}
+          ${method('getVideoInformationInvidious', 'extractExpiryDateFromStreamingUrl:')}
         })`, {
           process: { env: { IS_CAPACITOR: android } },
           Capacitor: { convertFileSrc: path => path.replace('content:/', 'https://localhost/_capacitor_content_') },
@@ -69,8 +74,8 @@ for (const backend of ['Local', 'Invidious']) {
     const pendingMetadata = () => { requests++; metadataStarted(); return new Promise(resolve => { resolveMetadata = resolve }) }
     const methods = runInNewContext(`({
       ${method('getVideoInformationLocal', 'getVideoInformationInvidious')}
-      ${method('getVideoInformationInvidious', 'async runIpBlockRecoveryScriptAndReload()')}
-      ${source.slice(source.indexOf('    handleDownloadConnectionChange('), source.indexOf('    handleUpcomingPlaylistVideosChange('))}
+      ${method('getVideoInformationInvidious', 'extractExpiryDateFromStreamingUrl:')}
+      ${downloadedPlaybackMethod('handleDownloadConnectionChange(')}
     })`, {
       getConnectionState: () => 'online',
       initializeNetworkRecovery: () => ({ ready: Promise.resolve(true) }),
@@ -108,8 +113,8 @@ for (const backend of ['Local', 'Invidious']) {
 for (const entry of ['applyDownloadedPlaybackSource', 'finishDownloadedPlaybackWithoutMetadata']) {
   test(`${entry} falls back to the filename when stored download titles are empty`, () => {
     const methods = runInNewContext(`({
-      ${method('applyDownloadedPlaybackSource', 'cacheOnlinePlaybackSource')}
-      ${method('finishDownloadedPlaybackWithoutMetadata', 'onMountedDependOnLocalStateLoading()')}
+      ${downloadedPlaybackMethod('applyDownloadedPlaybackSource:')}
+      ${downloadedPlaybackMethod('finishDownloadedPlaybackWithoutMetadata:')}
     })`, {
       process: { env: { IS_CAPACITOR: false } },
       DOWNLOADED_MEDIA_MIME_TYPES: { mp4: 'video/mp4' },
@@ -143,7 +148,7 @@ for (const entry of ['applyDownloadedPlaybackSource', 'finishDownloadedPlaybackW
 
 for (const android of [false, true]) {
   test(`${android ? 'Android' : 'Electron'} selects the requested path among duplicate downloaded video IDs`, () => {
-    const methods = runInNewContext(`({ ${method('applyDownloadedPlaybackSource', 'cacheOnlinePlaybackSource')} })`, {
+    const methods = runInNewContext(`({ ${downloadedPlaybackMethod('applyDownloadedPlaybackSource:')} })`, {
       process: { env: { IS_CAPACITOR: android } },
       Capacitor: { convertFileSrc: path => `native:${path}` },
       DOWNLOADED_MEDIA_MIME_TYPES: { webm: 'video/webm' },

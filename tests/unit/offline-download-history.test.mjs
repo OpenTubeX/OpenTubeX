@@ -66,8 +66,9 @@ test('failed metadata loading preserves a previously known publication date', ()
 
 test('offline download metadata does not create a false metadata cache observation', async () => {
   let updates = 0
+  const start = source.indexOf('    async updateVideoMetadataCache()')
   const { updateVideoMetadataCache } = runInNewContext(`({
-    ${source.slice(source.indexOf('    async updateVideoMetadataCache()'), source.indexOf('    clearLiveReminderStartTimer()'))}
+    ${source.slice(start, source.indexOf('\n    },', start) + '\n    },'.length)}
   })`, {
     window: { ftElectron: { videoMetadataCache: { update: async () => { updates++ } } } },
   })

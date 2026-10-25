@@ -4,6 +4,7 @@ import vm from 'node:vm'
 import test from 'node:test'
 
 const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
+const downloadedPlaybackSource = await readFile(new URL('../../src/renderer/views/Watch/opentubex/watchDownloadedPlayback.js', import.meta.url), 'utf8')
 for (const method of ['getVideoInformationLocal', 'getVideoInformationInvidious']) {
   test(`${method} opens a downloaded file offline without waiting for metadata`, async () => {
     const start = source.indexOf(`    ${method}:`)
@@ -41,9 +42,9 @@ for (const method of ['getVideoInformationLocal', 'getVideoInformationInvidious'
 }
 
 test('offline download restores the matching file channel before initializing preferences', () => {
-  const start = source.indexOf('    finishDownloadedPlaybackWithoutMetadata:')
-  const end = source.indexOf('\n    },', start)
-  const finish = vm.runInNewContext(`({ ${source.slice(start, end)}\n} }).finishDownloadedPlaybackWithoutMetadata`)
+  const start = downloadedPlaybackSource.indexOf('  finishDownloadedPlaybackWithoutMetadata:')
+  const end = downloadedPlaybackSource.indexOf('\n  },', start)
+  const finish = vm.runInNewContext(`({ ${downloadedPlaybackSource.slice(start, end)}\n} }).finishDownloadedPlaybackWithoutMetadata`)
   const watch = {
     videoId: 'video', localPlaybackDownloadId: 'download',
     applyDownloadedPlaybackSource: () => ({ path: '/video.mp4', author: 'Channel', authorId: 'channel-id' }),
@@ -59,9 +60,9 @@ test('offline download restores the matching file channel before initializing pr
 
 for (const existing of [false, true]) {
   test(`older offline downloads recover channel details from ${existing ? 'loaded metadata' : 'history'}`, () => {
-    const start = source.indexOf('    finishDownloadedPlaybackWithoutMetadata:')
-    const end = source.indexOf('\n    },', start)
-    const finish = vm.runInNewContext(`({ ${source.slice(start, end)}\n} }).finishDownloadedPlaybackWithoutMetadata`)
+    const start = downloadedPlaybackSource.indexOf('  finishDownloadedPlaybackWithoutMetadata:')
+    const end = downloadedPlaybackSource.indexOf('\n  },', start)
+    const finish = vm.runInNewContext(`({ ${downloadedPlaybackSource.slice(start, end)}\n} }).finishDownloadedPlaybackWithoutMetadata`)
     const watch = {
       videoId: 'video', localPlaybackDownloadId: 'download',
       applyDownloadedPlaybackSource: () => ({ path: '/video.mp4' }),
@@ -76,9 +77,9 @@ for (const existing of [false, true]) {
 }
 
 test('disconnecting preserves loaded panels and cancels network autoplay', () => {
-  const start = source.indexOf('    handleDownloadConnectionChange({ detail }) {')
-  const end = source.indexOf('\n    handleUpcomingPlaylistVideosChange(', start)
-  const handle = vm.runInNewContext(`({ ${source.slice(start, end)} }).handleDownloadConnectionChange`)
+  const start = downloadedPlaybackSource.indexOf('  handleDownloadConnectionChange({ detail }) {')
+  const end = downloadedPlaybackSource.indexOf('\n  },', start)
+  const handle = vm.runInNewContext(`({ ${downloadedPlaybackSource.slice(start, end)}\n} }).handleDownloadConnectionChange`)
   const closed = []
   const watch = {
     isLoading: false, localFilePlayback: true,

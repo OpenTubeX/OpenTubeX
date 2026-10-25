@@ -4,7 +4,10 @@ import test from 'node:test'
 import { runInNewContext } from 'node:vm'
 
 const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
-const connectionHandler = source.slice(source.indexOf('    handleDownloadConnectionChange('), source.indexOf('    handleUpcomingPlaylistVideosChange('))
+const downloadedPlaybackSource = await readFile(new URL('../../src/renderer/views/Watch/opentubex/watchDownloadedPlayback.js', import.meta.url), 'utf8')
+const recoverySource = await readFile(new URL('../../src/renderer/views/Watch/opentubex/watchPlaybackRecovery.js', import.meta.url), 'utf8')
+const connectionHandlerStart = downloadedPlaybackSource.indexOf('  handleDownloadConnectionChange(')
+const connectionHandler = downloadedPlaybackSource.slice(connectionHandlerStart, downloadedPlaybackSource.indexOf('\n  },', connectionHandlerStart) + '\n  },'.length)
 
 for (const expression of ['createLocalDashManifest(result, true)', 'createLocalDashManifest(result)', 'createInvidiousDashManifest(result)']) {
   test(`late ${expression} does not replace downloaded audio after connection loss`, async () => {
@@ -74,7 +77,7 @@ test('a stale failed DVR manifest does not fall back to an online source', async
 for (const backend of ['Local', 'Invidious']) {
   test(`late ${backend} recovery completion does not restart downloaded playback`, async () => {
     const loaderStart = source.indexOf(`    getVideoInformation${backend}:`)
-    const loaderEnd = source.indexOf(backend === 'Local' ? '    getVideoInformationInvidious:' : '    async runIpBlockRecoveryScriptAndReload()', loaderStart)
+    const loaderEnd = source.indexOf(backend === 'Local' ? '    getVideoInformationInvidious:' : '    extractExpiryDateFromStreamingUrl:', loaderStart)
     const loader = source.slice(loaderStart, loaderEnd)
     const start = loader.lastIndexOf('const didReload = await this.runIpBlockRecoveryScriptAndReload()')
     const end = loader.indexOf('if (this.finishDownloadedPlaybackWithoutMetadata()) return', start) + 'if (this.finishDownloadedPlaybackWithoutMetadata()) return'.length
@@ -113,8 +116,9 @@ for (const backend of ['Local', 'Invidious']) {
 test('finishing an IP recovery script cannot reload a superseded offline download', async () => {
   let resolveScript
   let reloads = 0
+  const recoveryStart = recoverySource.indexOf('  async runIpBlockRecoveryScriptAndReload()')
   const { runIpBlockRecoveryScriptAndReload } = runInNewContext(`({
-    ${source.slice(source.indexOf('    async runIpBlockRecoveryScriptAndReload()'), source.indexOf('    extractExpiryDateFromStreamingUrl:'))}
+    ${recoverySource.slice(recoveryStart, recoverySource.indexOf('\n  },', recoveryStart) + '\n  },'.length)}
   })`, {
     process: { env: { IS_ELECTRON: true } },
     window: { ftElectron: {

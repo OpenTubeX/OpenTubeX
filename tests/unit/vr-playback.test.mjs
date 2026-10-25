@@ -116,8 +116,9 @@ test('ordinary videos keep the first playable DASH source', async () => {
 })
 
 const watchCode = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
-const extractionStart = watchCode.indexOf('    extractYtDlpPlaybackSource: async function (')
-const extractionEnd = watchCode.indexOf('\n    /**', extractionStart)
+const ytDlpPlaybackCode = await readFile(new URL('../../src/renderer/views/Watch/opentubex/watchYtDlpPlayback.js', import.meta.url), 'utf8')
+const extractionStart = ytDlpPlaybackCode.indexOf('  extractYtDlpPlaybackSource: async function (')
+const extractionEnd = ytDlpPlaybackCode.indexOf('\n  },', extractionStart) + '\n  },'.length
 test('a rejected supplied panorama retries the built-in VR client', async () => {
   const start = watchCode.indexOf("            if (this.vrProjection === 'MESH' && !this.isYtDlpPlaybackRequested()) {")
   const end = watchCode.indexOf("if (this.vrProjection === 'MESH' && supportsYtDlp", start)
@@ -151,7 +152,7 @@ for (const savedPanorama of [false, true]) {
       subtitlesIncluded: true, vrProjection: null, captions: [], captionTranslations: [],
       manifestSrc: 'data:application/dash+xml,<MPD/>', legacyFormats: [], expiryDate: null,
     } })
-    const extract = compileFunction(`return ({${watchCode.slice(extractionStart, extractionEnd)}}).extractYtDlpPlaybackSource`, ['getYtDlpPlaybackSource', 'MANIFEST_TYPE_HLS'])(
+    const extract = compileFunction(`return ({${ytDlpPlaybackCode.slice(extractionStart, extractionEnd)}}).extractYtDlpPlaybackSource`, ['getYtDlpPlaybackSource', 'MANIFEST_TYPE_HLS'])(
       (_id, _key, _callback, _authentication, _cachedOnly, _subtitles, preferVrHls) => load(preferVrHls), 'application/x-mpegurl'
     )
     const watch = {
@@ -174,7 +175,7 @@ for (const savedPanorama of [false, true]) {
   for (const panorama of [false, true]) {
     test(`yt-dlp preserves ${savedPanorama ? 'saved' : 'current'} native equirectangular DASH when HLS is ${panorama ? 'rejected' : 'missing'}`, async () => {
       const { load, attempts } = loader({ mesh: false, panorama, probePlayable: false })
-      const extract = compileFunction(`return ({${watchCode.slice(extractionStart, extractionEnd)}}).extractYtDlpPlaybackSource`, ['getYtDlpPlaybackSource', 'MANIFEST_TYPE_HLS'])(
+      const extract = compileFunction(`return ({${ytDlpPlaybackCode.slice(extractionStart, extractionEnd)}}).extractYtDlpPlaybackSource`, ['getYtDlpPlaybackSource', 'MANIFEST_TYPE_HLS'])(
         (_id, _key, _callback, _authentication, _cachedOnly, _subtitles, preferVrHls) => load(preferVrHls), 'application/x-mpegurl'
       )
       const watch = {

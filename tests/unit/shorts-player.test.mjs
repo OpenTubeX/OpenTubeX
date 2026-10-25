@@ -62,10 +62,10 @@ test('failed Shorts extraction is retried on the next request', async () => {
   assert.equal(await cache.get('local:one', () => Promise.resolve('ready')), 'ready')
 })
 
-const watchSource = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
-const extractionSource = watchSource.slice(
-  watchSource.indexOf('    getShortsExtractionKey('),
-  watchSource.indexOf('    async preloadShortsPlaybackWindow()')
+const shortsSource = await readFile(new URL('../../src/renderer/views/Watch/opentubex/watchShorts.js', import.meta.url), 'utf8')
+const extractionSource = shortsSource.slice(
+  shortsSource.indexOf('  getShortsExtractionKey('),
+  shortsSource.indexOf('  async preloadShortsPlaybackWindow()')
 )
 
 test('a SABR reload refreshes cached Shorts metadata with the server context', async () => {
@@ -228,9 +228,9 @@ test('an Invidious preload error is retried when the Short is opened', async () 
   assert.deepEqual(await watch.getShortsVideoInformation('short'), { ready: true })
 })
 
-const preloadSource = watchSource.slice(
-  watchSource.indexOf('    async preloadShortsPlaybackWindow()'),
-  watchSource.indexOf('    updateUpcomingTimestamp: function')
+const preloadSource = shortsSource.slice(
+  shortsSource.indexOf('  async preloadShortsPlaybackWindow()'),
+  shortsSource.indexOf('  updateShortsViewportHeight()')
 )
 
 for (const engine of ['built-in', 'yt-dlp']) {
@@ -267,9 +267,9 @@ for (const engine of ['built-in', 'yt-dlp']) {
 }
 
 test('Shorts navigation resumes a previous position and saves the current one', () => {
-  const navigationSource = watchSource.slice(
-    watchSource.indexOf('    navigateSubscriptionShort: function'),
-    watchSource.indexOf('    handleShortsWindowScroll: function')
+  const navigationSource = shortsSource.slice(
+    shortsSource.indexOf('  navigateSubscriptionShort: function'),
+    shortsSource.indexOf('  handleShortsWindowScroll: function')
   )
   const methods = vm.runInNewContext(`({${navigationSource}})`, {
     getShortThumbnailUrl: () => '',

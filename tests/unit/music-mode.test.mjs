@@ -9,8 +9,14 @@ function watchMethod(name, globals = {}) {
   const end = source.indexOf('\n    },', start)
   return vm.runInNewContext(`({ ${source.slice(start, end)}\n} })`, globals)
 }
+function opentubexMethod(file, name, globals = {}) {
+  const moduleSource = readFileSync(new URL(`../../src/renderer/views/Watch/opentubex/${file}`, import.meta.url), 'utf8')
+  const start = moduleSource.indexOf(`\n  ${name}`) + 1
+  const end = moduleSource.indexOf('\n  },', start)
+  return vm.runInNewContext(`({ ${moduleSource.slice(start, end)}\n} })`, globals)
+}
 const { startTimeSeconds } = watchMethod('startTimeSeconds:')
-const { initializePlaybackRate } = watchMethod('initializePlaybackRate()')
+const { initializePlaybackRate } = opentubexMethod('watchPlaybackPreferences.js', 'initializePlaybackRate()')
 const view = {
   isLoading: false, isLive: false, musicMode: true,
   oneTimeTimestamp: null, timestamp: null, videoLengthSeconds: 60,
@@ -37,7 +43,7 @@ test('music mode preserves explicit seeks and playback recovery positions', () =
 })
 
 test('music mode ignores cached progress when navigating between Shorts', () => {
-  const { navigateSubscriptionShort } = watchMethod('navigateSubscriptionShort:', { getShortThumbnailUrl: () => '' })
+  const { navigateSubscriptionShort } = opentubexMethod('watchShorts.js', 'navigateSubscriptionShort:', { getShortThumbnailUrl: () => '' })
   for (const musicMode of [true, false]) {
     let destination
     let savedPosition = false

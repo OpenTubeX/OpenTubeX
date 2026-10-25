@@ -4,6 +4,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 
 const source = readFileSync(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
+const preferencesSource = readFileSync(new URL('../../src/renderer/views/Watch/opentubex/watchPlaybackPreferences.js', import.meta.url), 'utf8')
 function watchMethod(name) {
   const start = source.indexOf(`    ${name}`)
   const end = source.indexOf('\n    },', start)
@@ -13,7 +14,8 @@ const { isMusicVideo } = watchMethod('isMusicVideo: function')
 const { watchRouteForVideo: watchRouteInContext } = watchMethod('watchRouteForVideo: function')
 // Objects from the vm context have its prototypes, so compare plain copies
 const watchRouteForVideo = video => JSON.parse(JSON.stringify(watchRouteInContext.call({ $store: { getters: {} } }, video)))
-const { initializePlaybackRate } = watchMethod('initializePlaybackRate()')
+const preferencesStart = preferencesSource.indexOf('\n  initializePlaybackRate()') + 1
+const { initializePlaybackRate } = vm.runInNewContext(`({ ${preferencesSource.slice(preferencesStart, preferencesSource.indexOf('\n  },', preferencesStart))}\n} })`)
 
 test('treats videos as music from their genre or the list hint in the route', () => {
   assert.equal(isMusicVideo.call({ videoGenreIsMusic: true, tabRoute: { query: {} } }), true)

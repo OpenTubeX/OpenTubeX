@@ -80,7 +80,7 @@ for (const metadataOnly of [false, true]) {
   test(`watch fallback warns once before a direct ${metadataOnly ? 'downloaded metadata' : 'playback'} request`, async () => {
     const source = readSource('views/Watch/Watch.js')
     const start = source.indexOf('    getVideoInformationInvidious:')
-    const end = source.indexOf('\n    async runIpBlockRecoveryScriptAndReload()', start)
+    const end = source.indexOf('\n    extractExpiryDateFromStreamingUrl:', start)
     const events = []
     const methods = vm.runInNewContext(`({${source.slice(start, end)}})`, {
       process: { env: { SUPPORTS_LOCAL_API: true } },
@@ -114,7 +114,7 @@ test('a Yattee server playlist fallback warns before contacting YouTube directly
 test('a Yattee server watch fallback names the Yattee server in its warning', async () => {
   const source = readSource('views/Watch/Watch.js')
   const start = source.indexOf('    getVideoInformationInvidious:')
-  const end = source.indexOf('\n    async runIpBlockRecoveryScriptAndReload()', start)
+  const end = source.indexOf('\n    extractExpiryDateFromStreamingUrl:', start)
   const events = []
   const methods = vm.runInNewContext(`({${source.slice(start, end)}})`, {
     process: { env: { SUPPORTS_LOCAL_API: true } },

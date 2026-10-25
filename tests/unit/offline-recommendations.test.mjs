@@ -4,8 +4,9 @@ import test from 'node:test'
 import { runInNewContext } from 'node:vm'
 import { downloadWatchRoute, isPlayableDownloadFile } from '../../src/renderer/helpers/downloadPlayback.js'
 
-const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
-const computed = runInNewContext(`({${source.slice(source.indexOf('    offlineDownloadSuggestions:'), source.indexOf('    hasScheduledPremiereStarted:'))}})`, {
+const source = await readFile(new URL('../../src/renderer/views/Watch/opentubex/watchDownloadedPlayback.js', import.meta.url), 'utf8')
+const suggestionsStart = source.indexOf('  offlineDownloadSuggestions:')
+const computed = runInNewContext(`({${source.slice(suggestionsStart, source.indexOf('\n}\n', suggestionsStart))}})`, {
   downloadWatchRoute, isPlayableDownloadFile, isVideoHiddenByPreferences: () => false,
 })
 
@@ -28,7 +29,8 @@ test('offline recommendations retain saved thumbnails and exclude unavailable fi
 
 for (const localFilePlayback of [false, true]) {
   test(`${localFilePlayback ? 'downloaded' : 'streamed'} playback switches recommendations on connection changes without discarding online data`, () => {
-    const { handleDownloadConnectionChange } = runInNewContext(`({${source.slice(source.indexOf('    handleDownloadConnectionChange('), source.indexOf('    handleUpcomingPlaylistVideosChange('))}})`)
+    const handlerStart = source.indexOf('  handleDownloadConnectionChange(')
+    const { handleDownloadConnectionChange } = runInNewContext(`({${source.slice(handlerStart, source.indexOf('\n  },', handlerStart) + '\n  },'.length)}})`)
     const online = [{ videoId: 'online' }]
     const offline = [{ videoId: 'saved', route: { path: '/watch/saved', query: { downloadId: '1' } } }]
     const watch = {
