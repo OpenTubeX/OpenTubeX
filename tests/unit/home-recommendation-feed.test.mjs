@@ -127,6 +127,19 @@ test('loading more appends below the shown feed and fills slots of shown videos 
   }
 })
 
+test('loading more keeps appending after the feed reaches 96 videos', async () => {
+  const { feed, stop } = createFeed({
+    candidates: Array.from({ length: 200 }, (_, index) => ({ videoId: `candidate-${index}`, authorId: `channel-${index}` })),
+  })
+  try {
+    await waitForFeed(feed)
+    for (let index = 0; index < 5; index++) await feed.loadMore()
+    assert.equal(feed.recommendations.value.length, 144)
+  } finally {
+    stop()
+  }
+})
+
 for (const [setting, value] of [
   ['getRecommendationEpoch', 'changed'],
   ['getBackendPreference', 'invidious'],

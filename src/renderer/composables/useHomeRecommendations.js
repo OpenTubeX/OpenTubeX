@@ -217,7 +217,7 @@ export function useHomeRecommendations(visible) {
     if (!append) {
       limit = 24
       candidates = []; ranked.value = []; feedId = crypto.randomUUID(); feedVersion.value++
-    } else limit = Math.min(96, limit + 24)
+    } else limit += 24
     if (!useCache) round++
     cachedCandidates = null
     const learned = await makeProfile(() => generation !== requestGeneration)
