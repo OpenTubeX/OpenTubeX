@@ -97,13 +97,13 @@ async function openCastVideo(app, page) {
 
 async function mockDlna(app) {
   await app.electronApp.evaluate(({ ipcMain }) => {
-    globalThis.dlnaTest = { starts: [], stops: [], stopRequests: 0, finishStop: null, startDelayMs: 0, holdStop: false }
+    globalThis.dlnaTest = { starts: [], stops: [], stopRequests: 0, finishStart: null, finishStop: null, holdStart: false, holdStop: false }
     for (const name of ['dlna-discover', 'dlna-start', 'dlna-stop', 'yt-dlp-get-playback-info']) ipcMain.removeHandler(name)
     ipcMain.handle('yt-dlp-get-playback-info', () => ({ formats: [] }))
     ipcMain.handle('dlna-discover', () => [{ id: 'dlna-tv', name: 'DLNA TV' }])
     ipcMain.handle('dlna-start', async (_, payload) => {
       globalThis.dlnaTest.starts.push(payload)
-      await new Promise(resolve => setTimeout(resolve, globalThis.dlnaTest.startDelayMs))
+      if (globalThis.dlnaTest.holdStart) await new Promise(resolve => { globalThis.dlnaTest.finishStart = resolve })
       return { castId: 'dlna-session', deviceName: 'DLNA TV' }
     })
     ipcMain.handle('dlna-stop', async (_, id) => {
@@ -516,10 +516,11 @@ test('casts from the current Invidious instance without a saved default', async 
 test('DLNA and Google Cast cannot start overlapping sessions', async ({ app, page }) => {
   const watch = await openCastVideo(app, page)
   await mockDlna(app)
+  // Hold each start until the menu shows it; a fixed delay can expire under load first.
   await app.electronApp.evaluate(() => {
-    globalThis.dlnaTest.startDelayMs = 1200
+    globalThis.dlnaTest.holdStart = true
     globalThis.dlnaTest.holdStop = true
-    globalThis.castTest.startDelayMs = 1200
+    globalThis.castTest.holdStart = true
   })
   await page.evaluate(() => window.$store.dispatch('updateShowDlnaCastButton', true))
   await watch.evaluate(vm => vm.$refs.player.play())
@@ -533,6 +534,7 @@ test('DLNA and Google Cast cannot start overlapping sessions', async ({ app, pag
   await expect.poll(() => app.electronApp.evaluate(() => globalThis.dlnaTest.starts.length)).toBe(1)
   await castButton.click()
   await expect(googleTab).toBeDisabled()
+  await app.electronApp.evaluate(() => globalThis.dlnaTest.finishStart())
   await expect(castButton).toHaveAttribute('aria-pressed', 'true')
   expect(await app.electronApp.evaluate(() => globalThis.castTest.starts)).toEqual([])
   await expect(googleTab).toHaveCount(0)
@@ -551,6 +553,7 @@ test('DLNA and Google Cast cannot start overlapping sessions', async ({ app, pag
   await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.starts.length)).toBe(1)
   await castButton.click()
   await expect(dlnaTab).toBeDisabled()
+  await app.electronApp.evaluate(() => globalThis.castTest.finishStart())
   await expect(castButton).toHaveAttribute('aria-pressed', 'true')
   await expect(dlnaTab).toHaveCount(0)
   await castButton.click()
