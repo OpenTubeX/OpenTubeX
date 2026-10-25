@@ -53,6 +53,7 @@ class ApkPackagingTest(unittest.TestCase):
             self.metadata["elements"].append(dict(
                 filters=[] if abi == "universal" else [dict(filterType="ABI", value=abi)],
                 versionName="0.34.0-nightly-1234", outputFile=name,
+                versionCode=246900 + apks.ABI_VERSION_CODES[abi],
             ))
             self.write_apk(name, apks.ABIS if abi == "universal" else {abi})
         self.write_metadata()
@@ -143,6 +144,14 @@ class ApkPackagingTest(unittest.TestCase):
         self.write_lite_apks()
         with self.assertRaisesRegex(ValueError, "size budget"):
             apks.prepare(self.source, self.output, lite=True, max_abi_mib=0.0001)
+
+    def test_rejects_shared_architecture_version_codes(self):
+        for element in self.metadata["elements"]:
+            element["versionCode"] = 246900
+        self.write_metadata()
+        with self.assertRaisesRegex(ValueError, "Unexpected APK version codes"):
+            apks.prepare(self.source, self.output)
+        self.assertFalse(self.output.exists())
 
     def test_rejects_incomplete_set_before_copying(self):
         self.metadata["elements"].pop()

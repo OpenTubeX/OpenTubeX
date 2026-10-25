@@ -9,9 +9,9 @@ Debug and nightly APKs use `nightly.keystore`. Its credentials are public by des
 
 CI explicitly selects the nightly identity. Local builds default to Dev even when version environment variables are set, so F-Droid and Obtainium cannot replace a local test build with a published nightly. Dev uses a cyan flask badge; Nightly keeps its amber wrench. Both include monochrome themed icons. Local debug APKs are written to `app/build/outputs/apk/debug/app-debug.apk`; nightly APKs use `app/build/outputs/apk/nightly/`.
 
-CI builds `:app:assembleNightly -PsplitApks` for nightlies and `:app:assembleRelease -PsplitApks` for official releases. F-Droid builds the nightly variant from the stable release tag to update existing nightly installations with their original app ID and key. Both shrink unused bytecode while keeping app and Capacitor runtime entry points, without optimization, obfuscation or resource shrinking. Architecture splits and removal of the unused QuickJS static archive still reduce download sizes. The builds produce standalone ARM64, ARMv7, x86, x86_64 and universal APKs. They share the version code within each build, so switching between the universal APK and a compatible architecture APK preserves update compatibility. Local debug builds produce one APK.
+CI builds `:app:assembleNightly -PsplitApks` for nightlies and `:app:assembleRelease -PsplitApks` for official releases. F-Droid builds the nightly variant from the stable release tag to update existing nightly installations with their original app ID and key. Both shrink unused bytecode while keeping app and Capacitor runtime entry points, without optimization, obfuscation or resource shrinking. Architecture splits and removal of the unused QuickJS static archive still reduce download sizes. The builds produce standalone ARM64, ARMv7, x86, x86_64 and universal APKs. Each APK has its own version code, which F-Droid requires: ten times the base code, plus 1 for ARMv7, 2 for x86, 3 for ARM64 and 4 for x86_64. The universal APK adds nothing, and devices that run both 32-bit and 64-bit code prefer the 64-bit APK. Local debug builds produce one APK.
 
-CI version codes use twice the Git commit count for nightlies and add one for stable releases. This lets stable code update a nightly built from the same commit, while the next commit's nightly can update the promoted package. These codes also exceed the previous unscaled commit counts.
+Base version codes use twice the Git commit count for nightlies and add one for stable releases. This lets stable code update a nightly built from the same commit, while the next commit's nightly can update the promoted package. Nightly CI passes the base code in `ANDROID_VERSION_CODE`. Stable releases read it from `app/version.properties`, which the Create Draft Release workflow sets in the release commit and the release workflow checks against the commit count, so F-Droid can rebuild the release from its tag. Without `ANDROID_VERSION_NAME`, the version name comes from `package.json`.
 
 Stable releases attach only production APKs to the application's GitHub release. F-Droid builds and publishes the promoted nightly APK directly in its signed repository, without creating another GitHub release.
 
@@ -54,3 +54,12 @@ APK signature fingerprints can be checked with:
 ```sh
 keytool -printcert -jarfile app-release.apk
 ```
+
+## F-Droid reproducible builds
+
+F-Droid rebuilds each stable release from its tag with `:app:assembleRelease -PsplitApks -PunsignedRelease`. If its unsigned APK matches the published one apart from the signature, F-Droid distributes the APK signed with the OpenTubeX release key. Keep the release build reproducible:
+
+- Build with the Go toolchain from `_scripts/cast-sender/go.mod`, the NDK in `app/build.gradle`, Java 21 and the pnpm version in `package.json`'s `packageManager` field.
+- Install 7-Zip. Release builds fail without it because the other packer produces different runtime archives.
+- Do not embed timestamps, absolute paths or CI-only environment variables in the web bundle or APK. The web bundle embeds the checked-out commit rather than `GITHUB_SHA`.
+- The APK must not include Google's encrypted dependency metadata block.

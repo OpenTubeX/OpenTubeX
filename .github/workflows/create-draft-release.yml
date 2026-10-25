@@ -115,12 +115,16 @@ jobs:
         writeFileSync(file, `${JSON.stringify(packageJson, null, 2)}\n`);
         EOF
 
-        git add package.json
-        if ! git diff --cached --quiet; then
-          git -c user.name='github-actions[bot]' \
-              -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
-              commit -m "chore(release): bump to $VERSION"
-        fi
+        # The release commit records its own Android version code so F-Droid
+        # can read it from the tag. Twice the commit count plus one lets stable
+        # code update a nightly built from the same commit.
+        version_code="$(( ($(git rev-list --count HEAD) + 1) * 2 + 1 ))"
+        sed -i "s/^versionCode=.*/versionCode=${version_code}/" android/app/version.properties
+
+        git add package.json android/app/version.properties
+        git -c user.name='github-actions[bot]' \
+            -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+            commit -m "chore(release): bump to $VERSION"
 
         echo "tag=v${VERSION}-beta" >> "$GITHUB_OUTPUT"
 

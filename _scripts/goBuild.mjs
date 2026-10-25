@@ -34,7 +34,10 @@ export async function buildAndroidGo(module, executable, output, ndk, abis = Obj
       },
       timeout: 180_000
     }
-    await execFileAsync('go', ['build', '-mod=readonly', '-trimpath', '-buildmode=pie', '-ldflags=-s -w',
+    // Keep the APK reproducible on F-Droid: its scanner deletes files before
+    // building, and Go's build ID hashes the NDK compiler path.
+    await execFileAsync('go', ['build', '-mod=readonly', '-trimpath', '-buildvcs=false', '-buildmode=pie',
+      '-ldflags=-s -w -buildid=',
       '-o', join(directory, executable), '.'], options)
   }
   return options

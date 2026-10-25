@@ -152,8 +152,10 @@ for (const file of ['build', 'release']) {
 test('stable releases build only production APKs and sort between nightlies by version code', async (t) => {
   const directory = await mkdtemp(join(tmpdir(), 'android-stable-promotion-'))
   t.after(() => rm(directory, { recursive: true, force: true }))
-  await mkdir(join(directory, 'android'))
+  await mkdir(join(directory, 'android/app'), { recursive: true })
   await writeFile(join(directory, 'package.json'), JSON.stringify({ version: '0.35.0' }))
+  const stableCode = 12345 * 2 + 1
+  await writeFile(join(directory, 'android/app/version.properties'), `# Base code\nversionCode=${stableCode}\n`)
   const stubs = {
     git: '#!/bin/sh\necho 12345\n',
     pnpm: '#!/bin/sh\nexit 0\n',
@@ -166,25 +168,28 @@ test('stable releases build only production APKs and sort between nightlies by v
   }
   const workflow = load(await readFile('.github/workflows/release.yml', 'utf8'))
   const build = workflow.jobs.build.steps.find(step => step.name === 'Build signed Android APKs')
-  const result = spawnSync('bash', ['-c', build.run], {
+  const runStable = () => spawnSync('bash', ['-c', build.run], {
     cwd: directory,
     env: {
       ...process.env,
       PATH: `${directory}:${process.env.PATH}`,
       ANDROID_RELEASE_KEYSTORE_BASE64: Buffer.from('fixture').toString('base64'),
       ANDROID_RELEASE_STORE_PASSWORD: 'fixture',
-      ANDROID_RELEASE_KEYSTORE: join(directory, 'android/release.keystore')
+      ANDROID_RELEASE_KEYSTORE: join(directory, 'android/release.keystore'),
+      ANDROID_VERSION_CODE: '',
+      ANDROID_VERSION_NAME: ''
     },
     encoding: 'utf8'
   })
+  const result = runStable()
   assert.equal(result.status, 0, result.stderr)
   const invocations = (await readFile(join(directory, 'gradle.log'), 'utf8')).trim().split('\n')
-  const stableCode = Number(invocations[0].split('|')[1])
   assert.equal(invocations.length, 2)
   for (const invocation of invocations) {
     assert.ok(invocation.includes(':app:assembleRelease'))
     assert.ok(!invocation.includes(':app:assembleNightly'))
-    assert.ok(invocation.endsWith(`|${stableCode}|0.35.0`))
+    // F-Droid rebuilds without these variables, so Gradle must read the same values from the source.
+    assert.ok(invocation.endsWith('||'))
   }
   assert.ok(!invocations[0].includes('-Plite'))
   assert.ok(invocations[1].includes('-Plite'))
@@ -192,6 +197,11 @@ test('stable releases build only production APKs and sort between nightlies by v
   assert.match(packaging, /apk\/release android-apks --release\n/)
   assert.match(packaging, /apk\/release android-lite-apks --release --lite/)
   assert.doesNotMatch(packaging, /apk\/nightly/)
+
+  await writeFile(join(directory, 'android/app/version.properties'), `versionCode=${stableCode - 2}\n`)
+  const stale = runStable()
+  assert.notEqual(stale.status, 0)
+  assert.match(stale.stderr, new RegExp(`must contain versionCode=${stableCode}`))
 
   const nightlyWorkflow = load(await readFile('.github/workflows/build.yml', 'utf8'))
   const nightlyBuild = nightlyWorkflow.jobs.android.steps.find(step => step.name === 'Build signed Android APKs')

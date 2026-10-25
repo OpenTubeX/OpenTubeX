@@ -10,6 +10,8 @@ import struct
 import zipfile
 
 ABIS = {"arm64-v8a", "armeabi-v7a", "x86", "x86_64"}
+# F-Droid derives each architecture's version code from the universal APK's.
+ABI_VERSION_CODES = {"universal": 0, "armeabi-v7a": 1, "x86": 2, "arm64-v8a": 3, "x86_64": 4}
 MIB = 1024 * 1024
 # Lite APKs omit the yt-dlp runtime, FFmpeg and the Rumble helper.
 LITE_ABI_MIB, LITE_UNIVERSAL_MIB = 20, 35
@@ -134,6 +136,7 @@ def prepare(source, destination, *, release=False, lite=False, max_abi_mib=None,
         raise ValueError(f"Expected package {package}, found {metadata['applicationId']}")
     apks = {}
     versions = set()
+    codes = {}
     for element in metadata["elements"]:
         filters = element["filters"]
         if not filters:
@@ -148,11 +151,15 @@ def prepare(source, destination, *, release=False, lite=False, max_abi_mib=None,
         if Path(name).name != name or not name.endswith(".apk"):
             raise ValueError(f"Invalid APK filename: {name}")
         versions.add(element["versionName"])
+        codes[abi] = element["versionCode"]
         apks[abi] = source / name
     if set(apks) != ABIS | {"universal"}:
         raise ValueError("Expected four architecture APKs and one universal APK")
     if len(versions) != 1:
         raise ValueError("APK versions do not match")
+    base = codes["universal"]
+    if base % 10 or any(codes[abi] != base + digit for abi, digit in ABI_VERSION_CODES.items()):
+        raise ValueError(f"Unexpected APK version codes: {codes}")
     version = versions.pop()
     if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+(?:-[A-Za-z0-9.-]+)?", version):
         raise ValueError(f"Invalid APK version: {version}")
