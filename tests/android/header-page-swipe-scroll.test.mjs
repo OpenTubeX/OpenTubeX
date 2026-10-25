@@ -104,10 +104,10 @@ test('Android header swipes reveal the next tab at its own scroll position', {
         const point = await pointFor('.profileTrigger')
         const width = await page.evaluate(() => document.querySelector('.app > .routerView').getBoundingClientRect().width)
         await touch('touchStart', point)
-        // Pace the moves like a finger so each drag position is painted.
+        // Paint each drag position before the next move so it is sampled.
         for (const fraction of [0.15, 0.4, 0.7]) {
           await touch('touchMove', { ...point, x: point.x - width * fraction })
-          await page.waitForTimeout(60)
+          await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
         }
         await expect(page.locator('.pageSwipeTo')).toBeVisible()
         await touch('touchEnd')
