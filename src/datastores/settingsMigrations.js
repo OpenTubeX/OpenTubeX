@@ -27,8 +27,10 @@ const FORMER_DEFAULT_QUICK_SETTINGS = Object.freeze([
 ])
 
 /**
- * Saved Quick Settings that still match the former defaults were never
- * customized, so they should follow the current defaults instead.
+ * Treats saved Quick Settings that exactly match the former defaults as never
+ * customized, so they follow the current defaults. A list deliberately reset or
+ * rearranged back to the former defaults also switches; that list is
+ * indistinguishable from one that was never changed.
  * @param {unknown} value
  */
 export function isFormerDefaultQuickSettings(value) {
