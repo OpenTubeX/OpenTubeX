@@ -95,7 +95,7 @@ public class ChromecastTest {
         Context failing = new android.content.ContextWrapper(context) {
             @Override public Object getSystemService(String name) {
                 if (Context.NSD_SERVICE.equals(name)) {
-                    assertTrue("Hold multicast reception before browsing", wifiDump().contains("OpenTubeX Cast discovery"));
+                    assertTrue("Hold multicast reception before browsing", heldMulticastLocks().contains("OpenTubeX Cast discovery"));
                     throw new IllegalStateException("NSD fixture failed");
                 }
                 return super.getSystemService(name);
@@ -103,7 +103,16 @@ public class ChromecastTest {
         };
         try { CastDiscovery.discover(failing); fail("NSD failure must propagate"); }
         catch (IllegalStateException expected) { assertEquals("NSD fixture failed", expected.getMessage()); }
-        assertFalse("Release multicast reception after failure", wifiDump().contains("OpenTubeX Cast discovery"));
+        assertFalse("Release multicast reception after failure", heldMulticastLocks().contains("OpenTubeX Cast discovery"));
+    }
+
+    // The dump also includes recent WifiService logs, which keep the tag after release.
+    private static String heldMulticastLocks() {
+        String dump = wifiDump();
+        int start = dump.indexOf("Multicast Locks held:");
+        assertTrue("dumpsys wifi lists held multicast locks", start >= 0);
+        int end = dump.indexOf("\n\n", start);
+        return dump.substring(start, end < 0 ? dump.length() : end);
     }
 
     private static String wifiDump() {
