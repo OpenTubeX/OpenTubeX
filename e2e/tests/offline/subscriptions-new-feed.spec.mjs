@@ -433,16 +433,18 @@ test.describe('new subscriptions feed', () => {
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await page.getByRole('button', { name: 'Show tabbed view' }).click()
     const tabs = page.getByRole('tablist', { name: 'New content tabs' })
+    const translations = ['Neue Videos', 'YouTube Shorts', 'Neue Livestreams', 'Neue Community-Beiträge der abonnierten Kanäle']
+    // Translate through vue-i18n so re-renders, such as new content badges
+    // arriving, keep the long labels.
+    await page.evaluate(([videos, shorts, live, posts]) => {
+      const app = document.querySelector('#app').__vue_app__
+      const i18n = app._context.provides[app.__VUE_I18N_SYMBOL__].global
+      i18n.mergeLocaleMessage(i18n.locale.value, { Global: { Videos: videos, Shorts: shorts, Live: live, Posts: posts } })
+    }, translations)
+    await expect(tabs.locator('.tabLabel > span')).toHaveText(translations)
     for (const scale of [95, 125]) {
       await app.electronApp.evaluate(({ BrowserWindow }, scale) => BrowserWindow.getAllWindows()[0].setSize(Math.round(700 * scale / 100), 900), scale)
       await page.evaluate(value => window.$store.dispatch('updateUiScale', value), scale)
-      await tabs.locator('.tabLabel').evaluateAll(labels => {
-        const translations = ['Neue Videos', 'YouTube Shorts', 'Neue Livestreams', 'Neue Community-Beiträge der abonnierten Kanäle']
-        labels.forEach((label, index) => {
-          label.dataset.label = translations[index]
-          label.querySelector('span').textContent = translations[index]
-        })
-      })
       // Reproduce the old single-row clipping before checking the responsive layout.
       await tabs.evaluate(element => { element.style.flexWrap = 'nowrap' })
       await expect.poll(() => tabs.evaluate(element => {
