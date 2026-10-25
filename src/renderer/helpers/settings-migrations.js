@@ -41,6 +41,23 @@ export async function migrateStoredAiVideoSummarySetting({
 }
 
 /**
+ * @param {unknown} value FreeTube's JSON list of excluded channel tags
+ * @returns {string[]}
+ */
+function parseExcludedChannelIds(value) {
+  let channels
+  try {
+    channels = typeof value === 'string' ? JSON.parse(value) : value
+  } catch {
+    return []
+  }
+  if (!Array.isArray(channels)) return []
+
+  const channelIds = channels.map(channel => channel?.name).filter(id => typeof id === 'string' && id !== '')
+  return [...new Set(channelIds)]
+}
+
+/**
  * Replaces setting keys that were renamed between exported settings formats.
  * Current keys take precedence when an import contains both versions.
  * @param {Record<string, unknown>} settings
@@ -121,6 +138,17 @@ export function migrateLegacySettings(settings) {
     }
     delete migratedSettings.hideAiVideoSummaries
   }
+
+  // FreeTube stores SponsorBlock channel exclusions as JSON channel tags. The
+  // whitelist holds the same channels as IDs.
+  if (Object.hasOwn(migratedSettings, 'sponsorBlockExcludedChannels')) {
+    if (!Object.hasOwn(migratedSettings, 'sponsorBlockChannelWhitelist')) {
+      const channelIds = parseExcludedChannelIds(migratedSettings.sponsorBlockExcludedChannels)
+      if (channelIds.length > 0) migratedSettings.sponsorBlockChannelWhitelist = channelIds
+    }
+    delete migratedSettings.sponsorBlockExcludedChannels
+  }
+  delete migratedSettings.sponsorBlockShowExcludedChannels
 
   // Saved channel settings are always applied now. Automatic saving only ran
   // while its former switch was on, so it stays off for switches that were off.

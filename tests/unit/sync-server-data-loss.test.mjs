@@ -15,7 +15,7 @@ import { EncryptedSyncAdapter, createEmptySyncDocument } from '../../src/rendere
 import { isPlaylistSortOrder } from '../../src/renderer/helpers/playlists.js'
 
 const source = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
-const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
+const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server-run.js', import.meta.url), 'utf8')
 const baselineMethod = storeSource.slice(storeSource.indexOf('    async persistPlaylistSyncBaseline('), storeSource.indexOf('    async persistHistorySyncBaseline('))
 function playlistBaseline(previous = {}) {
   const settings = { syncServerSnapshot: JSON.stringify({ playlists: previous }) }

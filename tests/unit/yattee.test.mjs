@@ -314,6 +314,43 @@ test('channel tab videos get the channel name from the channel page or the subsc
   assert.equal((await getInvidiousChannelShorts('UCvisited')).videos[0].author, 'Visited channel')
 })
 
+test('cancelling a subscription refresh aborts its Yattee Shorts request', async () => {
+  const read = file => readFileSync(new URL(`../../src/renderer/helpers/${file}`, import.meta.url), 'utf8')
+  const extract = (source, start, end) => {
+    const from = source.indexOf(start)
+    const to = source.indexOf(end, from)
+    assert.ok(from >= 0 && to > from, `Update the extracted range around ${start}`)
+    return source.slice(from, to).replaceAll('export ', '')
+  }
+  const invidious = read('api/invidious.js')
+  const feeds = read('subscription-channel-feeds.js')
+  const controller = new AbortController()
+  const tabSignals = []
+  const context = {
+    store: { getters: { getBackendPreference: 'yattee', getProfileList: [], getShortsCache: {} } },
+    activeRefresh: { controller },
+    getInvidiousChannelTab: async (_tab, _channelId, _continuation, _sortBy, signal) => {
+      tabSignals.push(signal)
+      return { videos: [] }
+    },
+    fillYatteeVideoAuthors,
+    fillYatteeShortDates,
+    invidiousGetVideoInformation: async () => ({}),
+    handleSubscriptionFetchError: error => { throw error },
+  }
+  const { getChannelShortsYattee } = vm.runInNewContext(
+    `${extract(invidious, 'function isYatteeBackend()', '\n/**\n * @param {string} feature')}
+    ${extract(invidious, 'export async function getInvidiousChannelShorts(', '\n/**\n * @param {string} channelId\n * @param {string | undefined} sortBy\n * @param {string | undefined | null} continuation\n */\nexport async function getInvidiousChannelLive(')}
+    ${extract(feeds, 'export async function getChannelShortsYattee(', '\nexport async function getChannelShortsInvidious(')}
+    ;({ getChannelShortsYattee })`,
+    context
+  )
+
+  await getChannelShortsYattee({ id: 'UCchannel' })
+  assert.equal(tabSignals.length, 1)
+  assert.equal(tabSignals[0], controller.signal, 'the Shorts request must use the refresh signal')
+})
+
 test('Shorts dates come from earlier refreshes and lookups of new Shorts only', async () => {
   const lookups = []
   const getVideo = async videoId => { lookups.push(videoId); return { published: 1_700_000_000 } }

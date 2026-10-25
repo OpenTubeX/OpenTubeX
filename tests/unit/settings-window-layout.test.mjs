@@ -5,6 +5,7 @@ import vm from 'node:vm'
 import { computed, ref } from 'vue'
 
 const component = await readFile(new URL('../../src/renderer/views/Settings/Settings.vue', import.meta.url), 'utf8')
+const windowBoundsSource = await readFile(new URL('../../src/renderer/views/Settings/opentubex/useSettingsWindowBounds.js', import.meta.url), 'utf8')
 
 function componentFunction(name) {
   const start = component.search(new RegExp(`(?:async )?function ${name}\\(`))
@@ -12,15 +13,24 @@ function componentFunction(name) {
   return component.slice(start, component.indexOf('\n}', start) + 2)
 }
 
+// The window bounds functions are nested one level inside their composable.
+function windowBoundsFunction(name) {
+  const start = windowBoundsSource.search(new RegExp(`(?:async )?function ${name}\\(`))
+  assert.notEqual(start, -1)
+  return windowBoundsSource.slice(start, windowBoundsSource.indexOf('\n  }\n', start) + 4)
+}
+
 // Run the real window sizing and interaction logic without the settings pages'
 // browser-only imports. Vue refs keep viewport changes reactive in this harness.
 function settingsWindow(isCapacitor, width) {
   const window = { innerWidth: width }
-  const initialState = component.slice(component.indexOf('const isMaximized ='), component.indexOf('const activeSection ='))
-  const windowState = component.slice(component.indexOf('const windowBounds ='), component.indexOf('const settingsWindowMorphing ='))
+  const windowState = windowBoundsSource.slice(
+    windowBoundsSource.indexOf('const isMaximized ='),
+    windowBoundsSource.indexOf('\n  async function toggleMaximized(')
+  )
   const functions = ['updateNarrowLayout', 'toggleMaximized', 'handleHeaderDoubleClick', 'startDragging', 'startResizing']
-    .map(componentFunction).join('\n')
-  const api = vm.runInNewContext(`${initialState}\n${windowState}\n${functions}\n;({
+    .map(windowBoundsFunction).join('\n')
+  const api = vm.runInNewContext(`${windowState}\n${functions}\n;({
     isWindowMaximized, windowStyle, updateNarrowLayout,
     toggleMaximized, handleHeaderDoubleClick, startDragging, startResizing
   })`, {
@@ -30,7 +40,6 @@ function settingsWindow(isCapacitor, width) {
     IS_CAPACITOR: isCapacitor,
     SETTINGS_DESKTOP_WIDTH_THRESHOLD: 760,
     getInitialBounds: () => ({ x: 24, y: 40, width: 720, height: 600 }),
-    t: key => key,
     cancelBoundsAnimation: () => assert.fail('Forced maximization must reject window gestures')
   })
   return {

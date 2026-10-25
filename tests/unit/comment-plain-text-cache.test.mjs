@@ -4,10 +4,10 @@ import test from 'node:test'
 import vm from 'node:vm'
 import { reactive, toRaw } from 'vue'
 
-const component = await readFile(new URL('../../src/renderer/components/CommentSection/CommentSection.vue', import.meta.url), 'utf8')
+const component = await readFile(new URL('../../src/renderer/components/CommentSection/opentubex/useCommentFilters.js', import.meta.url), 'utf8')
 const start = component.indexOf('const commentPlainTextCache = new WeakMap()')
-const end = component.indexOf('\n}\n', component.indexOf('function getCommentPlainText(', start)) + 3
-assert.ok(start !== -1 && end > start, 'getCommentPlainText should be found in CommentSection.vue')
+const end = component.indexOf('\n  }\n', component.indexOf('function getCommentPlainText(', start)) + 5
+assert.ok(start !== -1 && end > start, 'getCommentPlainText should be found in useCommentFilters.js')
 
 function createParser () {
   let parses = 0

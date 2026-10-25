@@ -373,7 +373,7 @@ test('foreground feeds fall back to local parsing if the utility process fails',
   assert.equal((await context.getLocalChannelCommunity('UCtest')).length, 0)
   Object.assign(context, { parseSubscriptionRss, enrichSubscriptionRssEntries: async entries => entries })
   const rssStart = subscriptions.indexOf('export async function parseYouTubeRSSFeed(')
-  const rssEnd = subscriptions.indexOf('\n/**', rssStart)
+  const rssEnd = subscriptions.indexOf('\n}\n', rssStart) + 2
   vm.runInContext(subscriptions.slice(rssStart, rssEnd).replace('export ', ''), context)
   const rss = '<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015"><author><name>Channel</name></author><entry><yt:videoId>video</yt:videoId><title>Video</title><published>2026-10-09T10:00:00Z</published></entry></feed>'
   assert.equal((await context.parseYouTubeRSSFeed(rss, 'UCtest')).videos.length, 1)
@@ -405,7 +405,7 @@ test('large history sync lets renderer input run before merging finishes', async
 
 test('foreground RSS parsing lets renderer input run before returning entries', async () => {
   const start = subscriptions.indexOf('export async function parseYouTubeRSSFeed(')
-  const end = subscriptions.indexOf('\n/**', start)
+  const end = subscriptions.indexOf('\n}\n', start) + 2
   const jobs = createJobs()
   const context = vm.createContext({
     process: { env: { IS_ELECTRON: true } },

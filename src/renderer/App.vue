@@ -2772,4 +2772,5 @@ function handleDragStart(event) {
 </script>
 
 <style src="./themes.css" />
+<style src="./opentubex/themes.css" />
 <style scoped src="./App.css" />

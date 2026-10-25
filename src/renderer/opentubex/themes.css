@@ -1,0 +1,690 @@
+/* Homepage palette from opentubex.github.io/src/styles/signal.css.
+   Keep these after the selectable color palettes: the brand themes supply
+   their own primary and secondary colors. */
+.openTubeXLight,
+.openTubeXDark {
+  /* Keep a pale teal tint while leaving tonal headroom for SponsorBlock markers. */
+  --seekbar-played-color: #c4d8d4;
+  --toggle-track-color: #758b87;
+  --toggle-checked-track-color: #4e9185;
+  --toggle-thumb-color: #e6f4f1;
+  --bg-glows:
+    radial-gradient(ellipse 80% 50% at 15% 10%, var(--bg-glow-teal), transparent 55%),
+    radial-gradient(ellipse 60% 45% at 90% 20%, var(--bg-glow-ink), transparent 50%),
+    radial-gradient(ellipse 70% 40% at 50% 100%, var(--bg-glow-teal-soft), transparent 55%);
+  --bg-image:
+    var(--bg-glows),
+    linear-gradient(165deg, var(--bg-gradient-start), var(--bg-color) 40%, var(--bg-gradient-end));
+  --card-bg-image:
+    var(--bg-glows),
+    linear-gradient(165deg, var(--card-bg-color), var(--card-bg-color) 40%, var(--bg-gradient-end));
+
+  /* Settings sections share the window's field instead of repeating it. */
+  --settings-section-bg-color: transparent;
+  --settings-changed-color: var(--accent-color);
+
+  /* Keep thumbs distinct from their tracks and the surrounding gradient. */
+  --toggle-checked-thumb-color: var(--toggle-thumb-color);
+  --slider-track-color: var(--tertiary-text-color);
+  --input-border-color: var(--tertiary-text-color);
+  --primary-color: #147a70;
+  --text-with-main-color: #fbfefd;
+  --title-color: var(--primary-text-color);
+  --divider-color: var(--border-color);
+  --subtle-surface-color: var(--secondary-card-bg-color);
+  --dropdown-item-hover-color: var(--side-nav-hover-color);
+  --dropdown-item-hover-text-color: var(--primary-text-color);
+  --settings-search-bar-color: var(--search-bar-color);
+  --logo-primary-color: var(--primary-text-color);
+  --logo-secondary-color: var(--primary-text-color);
+  --logo-tertiary-color: var(--accent-color);
+  --logo-pressed-color: var(--accent-color-active);
+  --logo-icon: url('../../../_icons/iconWhiteSmall.svg');
+  --logo-text: url('../../../_icons/textWhiteSmall.svg');
+}
+
+/* Resolve the color on the thread so fullscreen docks can supply their palette. */
+:is(.openTubeXLight, .openTubeXDark) .comment.commentThread {
+  --comment-thread-line-color: var(--tertiary-text-color);
+}
+
+.openTubeXLight {
+  --toggle-track-color: #b7c9c5;
+  --toggle-checked-track-color: #8cbaae;
+  --toggle-thumb-color: #17665f;
+  --bg-glow-teal: rgb(26 155 142 / 14%);
+  --bg-glow-ink: rgb(11 61 62 / 8%);
+  --bg-glow-teal-soft: rgb(26 155 142 / 10%);
+  --bg-gradient-start: #eef6f4;
+  --bg-gradient-end: #dceee9;
+  --primary-text-color: #0b3d3e;
+  --secondary-text-color: #3d5a5b;
+  --tertiary-text-color: #476263;
+  --bg-color: #e8f2f0;
+  --card-bg-color: #fbfefd;
+  --secondary-card-bg-color: #f4f9f8;
+  --side-nav-color: #f4f9f8;
+  --side-nav-hover-color: #d5e8e4;
+  --side-nav-active-color: #bfdcd6;
+  --search-bar-color: #e8f2f0;
+  --border-color: rgb(11 61 62 / 12%);
+  --primary-shadow-color: rgb(11 61 62 / 12%);
+  --primary-color-hover: #0b3d3e;
+  --primary-color-active: #1a4f50;
+  --accent-color-rgb: 17 104 95;
+  --accent-color-hover: #0b3d3e;
+  --accent-color-active: #1a4f50;
+  --accent-color-light: #d5e8e4;
+  --accent-color-visited: #3d5a5b;
+  --text-with-accent-color: #fbfefd;
+  --selection-background-color: #147a70;
+  --selection-text-color: #fbfefd;
+  --scrollbar-color: #49968a;
+  --scrollbar-color-hover: #147a70;
+  --scrollbar-color-active: #0b3d3e;
+  --favorite-icon-color: #147a70;
+}
+
+.openTubeXDark {
+  --toggle-track-color: #758b87;
+  --toggle-checked-track-color: #4e9185;
+  --toggle-thumb-color: #e6f4f1;
+  --bg-glow-teal: rgb(46 196 182 / 12%);
+  --bg-glow-ink: rgb(46 196 182 / 6%);
+  --bg-glow-teal-soft: rgb(26 155 142 / 10%);
+  --bg-gradient-start: #0e1a1c;
+  --bg-gradient-end: #0a1618;
+  --primary-text-color: #e6f4f1;
+  --secondary-text-color: #8aa3a4;
+  --tertiary-text-color: #8aa3a4;
+  --bg-color: #0b1416;
+  --card-bg-color: #142224;
+  --secondary-card-bg-color: #122022;
+  --side-nav-color: #101a1c;
+  --side-nav-hover-color: #203638;
+  --side-nav-active-color: #2a4547;
+  --search-bar-color: #122022;
+  --border-color: rgb(232 242 240 / 12%);
+  --primary-shadow-color: rgb(0 0 0 / 24%);
+  --primary-color-hover: #0f625c;
+  --primary-color-active: #0b3d3e;
+  --accent-color-rgb: 46 196 182;
+  --accent-color-hover: #68d8ce;
+  --accent-color-active: #1fb5a7;
+  --accent-color-light: #122022;
+  --accent-color-visited: #8aa3a4;
+  --text-with-accent-color: #071113;
+  --selection-background-color: #2ec4b6;
+  --selection-text-color: #071113;
+  --scrollbar-color: #549c98;
+  --scrollbar-color-hover: #2ec4b6;
+  --scrollbar-color-active: #68d8ce;
+  --favorite-icon-color: #2ec4b6;
+}
+
+
+/* Adapted palettes: https://github.com/folke/tokyonight.nvim,
+   https://github.com/rose-pine/neovim, https://github.com/rebelot/kanagawa.nvim,
+   https://github.com/ayu-theme/ayu-colors, https://github.com/joshdick/onedark.vim,
+   https://github.com/EdenEast/nightfox.nvim and https://github.com/catppuccin/palette.
+   Keep after selectable accents. Each preset owns its complete palette, with
+   text and interaction colors adjusted for contrast on every neutral surface. */
+:is(
+  .tokyoNightNight,
+  .tokyoNightStorm,
+  .tokyoNightMoon,
+  .tokyoNightDay,
+  .rosePine,
+  .rosePineMoon,
+  .rosePineDawn,
+  .kanagawaWave,
+  .kanagawaDragon,
+  .kanagawaLotus,
+  .ayuDark,
+  .ayuMirage,
+  .ayuLight,
+  .oneDark,
+  .carbonfox,
+  .catppuccinMacchiato
+) {
+  --title-color: var(--primary-text-color);
+  --tertiary-text-color: var(--secondary-text-color);
+  --border-color: var(--secondary-text-color);
+  --subtle-surface-color: var(--side-nav-active-color);
+  --secondary-card-bg-color: var(--card-bg-color);
+  --side-nav-color: var(--card-bg-color);
+  --search-bar-color: var(--bg-color);
+  --dropdown-item-hover-color: var(--side-nav-hover-color);
+  --dropdown-item-hover-text-color: var(--primary-text-color);
+  --header-button-pressed-color: var(--side-nav-active-color);
+  --scrollbar-color: var(--secondary-text-color);
+  --scrollbar-color-hover: var(--primary-color);
+  --scrollbar-color-active: var(--primary-color-active);
+  --scrollbar-text-color-hover: var(--text-with-main-color);
+  --settings-changed-color: var(--accent-color);
+  --slider-track-color: var(--secondary-text-color);
+  --input-border-color: var(--secondary-text-color);
+  --toggle-track-color: var(--secondary-text-color);
+  --toggle-checked-track-color: var(--accent-color);
+  --toggle-thumb-color: var(--bg-color);
+  --toggle-checked-thumb-color: var(--bg-color);
+  --toggle-thumb-icon-color: var(--secondary-text-color);
+  --accent-color: rgb(var(--accent-color-rgb));
+  --accent-color-light: var(--accent-color-hover);
+  --link-color: var(--accent-color);
+  --link-visited-color: var(--accent-color-visited);
+  --favorite-icon-color: var(--accent-color);
+  --destructive-color: var(--red-500);
+  --destructive-hover-color: color-mix(in srgb, var(--red-500) 88%, var(--primary-text-color));
+  --destructive-active-color: color-mix(in srgb, var(--red-500) 76%, var(--primary-text-color));
+  --destructive-text-color: var(--text-with-main-color);
+  --selection-background-color: var(--primary-color);
+  --selection-text-color: var(--text-with-main-color);
+  --header-button-hover-color: var(--side-nav-hover-color);
+  --header-button-hover-text-color: var(--primary-text-color);
+  --header-button-pressed-text-color: var(--primary-text-color);
+  --logo-icon: url('../../../_icons/iconWhiteSmall.svg');
+  --logo-text: url('../../../_icons/textWhiteSmall.svg');
+
+  /* The thumb extends beyond its track, so its edge also needs contrast
+     against the surrounding surface in both switch positions. */
+  .switch-input:not(:disabled) + .switch-label .switch-thumb {
+    outline: 2px solid var(--secondary-text-color);
+    outline-offset: -2px;
+  }
+
+  /* Tint the existing logo for the header. */
+  .topNav .logoIcon,
+  .topNav .logoText {
+    /* stylelint-disable-next-line declaration-no-important */
+    background-image: none !important;
+    background-color: var(--primary-text-color);
+    mask-repeat: no-repeat;
+    mask-position: center;
+  }
+
+  .topNav .logoIcon {
+    mask-image: var(--logo-icon);
+    mask-size: 25px;
+  }
+
+  .topNav .logoText {
+    mask-image: var(--logo-text);
+    mask-size: 100px;
+  }
+
+  .ft-input-component .ft-input::placeholder {
+    color: var(--tertiary-text-color);
+    opacity: 1;
+  }
+
+  .btn:focus-visible {
+    outline-color: currentcolor;
+  }}
+
+.tokyoNightNight {
+  --primary-text-color: #c0caf5;
+  --secondary-text-color: #a9b1d6;
+  --bg-color: #1a1b26;
+  --card-bg-color: #16161e;
+  --side-nav-hover-color: #20212b;
+  --side-nav-active-color: #272834;
+  --primary-color: #7aa2f7;
+  --primary-color-hover: #87abf8;
+  --primary-color-active: #95b5f9;
+  --text-with-main-color: #111;
+  --accent-color-rgb: 125 207 255;
+  --accent-color-hover: #8ad4ff;
+  --accent-color-active: #97d9ff;
+  --accent-color-visited: #bb9af7;
+  --text-with-accent-color: #111;
+  --red-500: #f07178;
+  --primary-shadow-color: rgb(0 0 0 / 35%);
+  --focus-ring-contrast-color: #fff;
+}
+
+.tokyoNightStorm {
+  --primary-text-color: #c0caf5;
+  --secondary-text-color: #a9b1d6;
+  --bg-color: #24283b;
+  --card-bg-color: #1f2335;
+  --side-nav-hover-color: #292d41;
+  --side-nav-active-color: #2f3448;
+  --primary-color: #7aa2f7;
+  --primary-color-hover: #87abf8;
+  --primary-color-active: #95b5f9;
+  --text-with-main-color: #111;
+  --accent-color-rgb: 125 207 255;
+  --accent-color-hover: #8ad4ff;
+  --accent-color-active: #97d9ff;
+  --accent-color-visited: #bb9af7;
+  --text-with-accent-color: #111;
+  --red-500: #f28187;
+  --primary-shadow-color: rgb(0 0 0 / 35%);
+  --focus-ring-contrast-color: #fff;
+}
+
+.tokyoNightMoon {
+  --primary-text-color: #c8d3f5;
+  --secondary-text-color: #969ec3;
+  --bg-color: #222436;
+  --card-bg-color: #1e2030;
+  --side-nav-hover-color: #282b3c;
+  --side-nav-active-color: #2f3244;
+  --primary-color: #82aaff;
+  --primary-color-hover: #8eb2ff;
+  --primary-color-active: #9bbbff;
+  --text-with-main-color: #111;
+  --accent-color-rgb: 134 225 252;
+  --accent-color-hover: #92e4fc;
+  --accent-color-active: #9ee7fd;
+  --accent-color-visited: #c099ff;
+  --text-with-accent-color: #111;
+  --red-500: #f17e84;
+  --primary-shadow-color: rgb(0 0 0 / 35%);
+  --focus-ring-contrast-color: #fff;
+}
+
+.tokyoNightDay {
+  --primary-text-color: #2b4b96;
+  --secondary-text-color: #4e5b8d;
+  --bg-color: #e1e2e7;
+  --card-bg-color: #ebecf0;
+  --side-nav-hover-color: #e0e4ed;
+  --side-nav-active-color: #d9deeb;
+  --primary-color: #225cac;
+  --primary-color-hover: #1f539b;
+  --primary-color-active: #1b4a8a;
+  --text-with-main-color: #fff;
+  --accent-color-rgb: 0 101 134;
+  --accent-color-hover: #005b79;
+  --accent-color-active: #00516b;
+  --accent-color-visited: #7541ba;
+  --text-with-accent-color: #fff;
+  --red-500: #a63639;
+  --primary-shadow-color: rgb(0 0 0 / 12%);
+  --focus-ring-contrast-color: #000;
+}
+
+.rosePine {
+  --primary-text-color: #e0def4;
+  --secondary-text-color: #a09cb6;
+  --bg-color: #191724;
+  --card-bg-color: #1f1d2e;
+  --side-nav-hover-color: #2b293a;
+  --side-nav-active-color: #323042;
+  --primary-color: #ebbcba;
+  --primary-color-hover: #edc3c1;
+  --primary-color-active: #efc9c8;
+  --text-with-main-color: #111;
+  --accent-color-rgb: 156 207 216;
+  --accent-color-hover: #a6d4dc;
+  --accent-color-active: #b0d9e0;
+  --accent-color-visited: #c4a7e7;
+  --text-with-accent-color: #111;
+  --red-500: #f17b81;
+  --primary-shadow-color: rgb(0 0 0 / 35%);
+  --focus-ring-contrast-color: #fff;
+}
+
+.rosePineMoon {
+  --primary-text-color: #e0def4;
+  --secondary-text-color: #aca9bf;
+  --bg-color: #232136;
+  --card-bg-color: #2a273f;
+  --side-nav-hover-color: #35324a;
+  --side-nav-active-color: #3c3951;
+  --primary-color: #ea9a97;
+  --primary-color-hover: #eca4a1;
+  --primary-color-active: #eeaeac;
+  --text-with-main-color: #111;
+  --accent-color-rgb: 156 207 216;
+  --accent-color-hover: #a6d4dc;
+  --accent-color-active: #b0d9e0;
+  --accent-color-visited: #c4a7e7;
+  --text-with-accent-color: #111;
+  --red-500: #f38f94;
+  --primary-shadow-color: rgb(0 0 0 / 35%);
+  --focus-ring-contrast-color: #fff;
+}
+
+.rosePineDawn {
+  --primary-text-color: #464261;
+  --secondary-text-color: #64617a;
+  --bg-color: #faf4ed;
+  --card-bg-color: #fffaf3;
+  --side-nav-hover-color: #f4efea;
+  --side-nav-active-color: #ece8e4;
+  --primary-color: #925063;
+  --primary-color-hover: #834859;
+  --primary-color-active: #75404f;
+  --text-with-main-color: #fff;
+  --accent-color-rgb: 40 105 131;
+  --accent-color-hover: #245e76;
+  --accent-color-active: #205469;
+  --accent-color-visited: #6d5d80;
+  --text-with-accent-color: #fff;
+  --red-500: #b13a3d;
+  --primary-shadow-color: rgb(0 0 0 / 12%);
+  --focus-ring-contrast-color: #000;
+}
+
+.kanagawaWave {
+  --primary-text-color: #dcd7ba;
+  --secondary-text-color: #c8c093;
+  --bg-color: #1f1f28;
+  --card-bg-color: #181820;
+  --side-nav-hover-color: #242329;
+  --side-nav-active-color: #2c2b2f;
+  --primary-color: #7e9cd8;
+  --primary-color-hover: #8ba6dc;
+  --primary-color-active: #98b0e0;
+  --text-with-main-color: #111;
+  --accent-color-rgb: 122 168 159;
+  --accent-color-hover: #87b1a9;
+  --accent-color-active: #95b9b2;
+  --accent-color-visited: #a28ec1;
+  --text-with-accent-color: #111;
+  --red-500: #f07178;
+  --primary-shadow-color: rgb(0 0 0 / 35%);
+  --focus-ring-contrast-color: #fff;
+}
+
+.kanagawaDragon {
+  --primary-text-color: #c5c9c5;
+  --secondary-text-color: #a6a69c;
+  --bg-color: #181616;
+  --card-bg-color: #12120f;
+  --side-nav-hover-color: #1d1d1a;
+  --side-nav-active-color: #242421;
+  --inactive-tab-color: #1d1d1a;
+  --primary-color: #8a9a7b;
+  --primary-color-hover: #96a488;
+  --primary-color-active: #a1ae95;
+  --text-with-main-color: #111;
+  --accent-color-rgb: 127 180 202;
+  --accent-color-hover: #8cbccf;
+  --accent-color-active: #99c3d5;
+  --accent-color-visited: #a292a3;
+  --text-with-accent-color: #111;
+  --red-500: #f07178;
+  --primary-shadow-color: rgb(0 0 0 / 35%);
+  --focus-ring-contrast-color: #fff;
+}
+
+.kanagawaLotus {
+  --primary-text-color: #545464;
+  --secondary-text-color: #656256;
+  --bg-color: #f2ecbc;
+  --card-bg-color: #faf5d5;
+  --side-nav-hover-color: #f0ebce;
+  --side-nav-active-color: #e9e5ca;
+  --primary-color: #486290;
+  --primary-color-hover: #415882;
+  --primary-color-active: #3a4e73;
+  --text-with-main-color: #fff;
+  --accent-color-rgb: 75 103 98;
+  --accent-color-hover: #445d58;
+  --accent-color-active: #3c524e;
+  --accent-color-visited: #624c83;
+  --text-with-accent-color: #fff;
+  --red-500: #ac383b;
+  --primary-shadow-color: rgb(0 0 0 / 12%);
+  --focus-ring-contrast-color: #000;
+}
+
+.ayuDark {
+  --primary-text-color: #bfbdb6;
+  --secondary-text-color: #8a909f;
+  --bg-color: #0d1017;
+  --card-bg-color: #10141c;
+  --side-nav-hover-color: #1a1e25;
+  --side-nav-active-color: #22252b;
+  --inactive-tab-color: #1a1e25;
+  --primary-color: #e6b450;
+  --primary-color-hover: #e8bc62;
+  --primary-color-active: #ebc373;
+  --text-with-main-color: #111;
+  --accent-color-rgb: 89 194 255;
+  --accent-color-hover: #6ac8ff;
+  --accent-color-active: #7aceff;
+  --accent-color-visited: #d2a6ff;
+  --text-with-accent-color: #111;
+  --red-500: #f07178;
+  --primary-shadow-color: rgb(0 0 0 / 35%);
+  --focus-ring-contrast-color: #fff;
+}
+
+.ayuMirage {
+  --primary-text-color: #cccac2;
+  --secondary-text-color: #a2a9b4;
+  --bg-color: #1f2430;
+  --card-bg-color: #242936;
+  --side-nav-hover-color: #2e333e;
+  --side-nav-active-color: #353944;
+  --primary-color: #fc6;
+  --primary-color-hover: #ffd175;
+  --primary-color-active: #ffd685;
+  --text-with-main-color: #111;
+  --accent-color-rgb: 115 208 255;
+  --accent-color-hover: #81d5ff;
+  --accent-color-active: #8fd9ff;
+  --accent-color-visited: #dfbfff;
+  --text-with-accent-color: #111;
+  --red-500: #f3898f;
+  --primary-shadow-color: rgb(0 0 0 / 35%);
+  --focus-ring-contrast-color: #fff;
+}
+
+.ayuLight {
+  --primary-text-color: #53575c;
+  --secondary-text-color: #5e6672;
+  --bg-color: #f8f9fa;
+  --card-bg-color: #fcfcfc;
+  --side-nav-hover-color: #f2f3f3;
+  --side-nav-active-color: #ececed;
+  --inactive-tab-color: #f2f3f3;
+  --primary-color: #8f590e;
+  --primary-color-hover: #81500d;
+  --primary-color-active: #72470b;
+  --text-with-main-color: #fff;
+  --accent-color-rgb: 22 108 152;
+  --accent-color-hover: #146189;
+  --accent-color-active: #12567a;
+  --accent-color-visited: #775995;
+  --text-with-accent-color: #fff;
+  --red-500: #b53c3e;
+  --primary-shadow-color: rgb(0 0 0 / 12%);
+  --focus-ring-contrast-color: #000;
+}
+
+.oneDark {
+  --primary-text-color: #b5bdca;
+  --secondary-text-color: #9ca0a8;
+  --bg-color: #282c34;
+  --card-bg-color: #21252b;
+  --side-nav-hover-color: #292d34;
+  --side-nav-active-color: #2f333a;
+  --primary-color: #61afef;
+  --primary-color-hover: #71b7f1;
+  --primary-color-active: #81bff2;
+  --text-with-main-color: #111;
+  --accent-color-rgb: 86 182 194;
+  --accent-color-hover: #67bdc8;
+  --accent-color-active: #78c5ce;
+  --accent-color-visited: #cc86e0;
+  --text-with-accent-color: #111;
+  --red-500: #f17c83;
+  --primary-shadow-color: rgb(0 0 0 / 35%);
+  --focus-ring-contrast-color: #fff;
+}
+
+.carbonfox {
+  --primary-text-color: #f2f4f8;
+  --secondary-text-color: #a3a3a3;
+  --bg-color: #161616;
+  --card-bg-color: #202020;
+  --side-nav-hover-color: #2d2d2d;
+  --side-nav-active-color: #353536;
+  --primary-color: #78a9ff;
+  --primary-color-hover: #86b2ff;
+  --primary-color-active: #93baff;
+  --text-with-main-color: #111;
+  --accent-color-rgb: 61 219 217;
+  --accent-color-hover: #50dfdd;
+  --accent-color-active: #64e2e1;
+  --accent-color-visited: #be95ff;
+  --text-with-accent-color: #111;
+  --red-500: #f28187;
+  --primary-shadow-color: rgb(0 0 0 / 35%);
+  --focus-ring-contrast-color: #fff;
+}
+
+.catppuccinMacchiato {
+  --primary-text-color: #cad3f5;
+  --secondary-text-color: #a5adcb;
+  --bg-color: #24273a;
+  --card-bg-color: #1e2030;
+  --side-nav-hover-color: #282b3c;
+  --side-nav-active-color: #2f3244;
+  --destructive-text-color: #111;
+  --red-500: #f17e84;
+  --primary-shadow-color: rgb(0 0 0 / 35%);
+  --focus-ring-contrast-color: #fff;
+}
+
+/* Material tonal palettes supply colors; these roles keep controls visible
+   against both their fill and the surrounding card. */
+.dynamicColors:is(.light, .dark, .black) {
+  --input-border-color: var(--md-sys-color-outline);
+  --input-container-color: var(--md-sys-color-surface-container-highest);
+  --slider-track-color: var(--md-sys-color-outline);
+  --toggle-track-color: var(--md-sys-color-surface-container-highest);
+  --toggle-checked-track-color: var(--md-sys-color-primary);
+  --toggle-thumb-color: var(--md-sys-color-outline);
+  --toggle-checked-thumb-color: var(--md-sys-color-on-primary);
+  --toggle-thumb-icon-color: var(--md-sys-color-surface-container-highest);
+  --settings-changed-color: var(--md-sys-color-primary);
+  --settings-section-bg-color: var(--md-sys-color-surface-container-low);
+  --inactive-tab-color: var(--md-sys-color-surface-container-high);
+
+  .settingsWindow {
+    background-color: var(--bg-color);
+    border-radius: calc(28px * var(--ui-roundness));
+  }
+
+  .settingsWindow.maximized {
+    border-radius: 0;
+  }
+
+  .settingsMenu {
+    background-color: var(--bg-color);
+  }
+
+  .settingsMenu .title {
+    border-radius: calc(28px * var(--ui-roundness));
+    padding-inline: 16px;
+  }
+
+  .settingsSection .sectionBody {
+    border-radius: calc(24px * var(--ui-roundness));
+    padding-inline: 20px;
+    padding-block: 16px;
+  }
+
+  .settingsSection + .settingsSection {
+    margin-block-start: 16px;
+  }
+
+  .btn.variant-tonal:not(.destructive, .selected),
+  .btn.variant-filled[aria-pressed='false']:not(.destructive, .selected) {
+    --button-container: var(--md-sys-color-secondary-container);
+    --button-foreground: var(--md-sys-color-on-secondary-container);
+  }
+
+  .btn.variant-elevated:not(.selected) {
+    --button-container: var(--md-sys-color-surface-container-low);
+    --button-foreground: var(--md-sys-color-primary);
+  }
+
+
+
+  /* Off switches are identified by their outline; the track stays tonal. */
+  .switch-label-text::before {
+    border-color: var(--md-sys-color-outline);
+  }
+
+  .ft-input-component .ft-input::placeholder,
+  .colorPickerPopover input::placeholder {
+    color: var(--tertiary-text-color);
+    opacity: 1;
+  }
+
+  .ft-input-component .list {
+    --scrollbar-color: var(--secondary-text-color);
+  }
+
+  /* Separate the thumb from the track, including during focus and dragging.
+     The thumb is scaled sixfold by the slider component. */
+  .pure-material-slider .input:not(:disabled)::-webkit-slider-thumb {
+    outline: 0.25px solid var(--bg-color);
+    outline-offset: 0;
+  }
+
+  .pure-material-slider .input:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+
+  .btn:focus-visible {
+    outline-color: currentcolor;
+  }
+
+  .btn:is(.variant-outlined, .variant-text):not(.destructive, .selected) {
+    --button-foreground: var(--md-sys-color-primary);
+  }
+}
+
+.textInputLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-inline-size: 0;
+}
+
+.textInputLabelText {
+  color: var(--secondary-text-color);
+  font-size: 12px;
+  font-weight: normal;
+  line-height: 16px;
+}
+
+/* A drag region swallows clicks even where another element is painted above
+   it, so everything that can float over the title bar opts out explicitly. */
+:is(
+  .prompt,
+  .mobileSheet,
+  .dropdownLayer,
+  .iconDropdown,
+  .selectDropdown,
+  .profileDropdown,
+  .colorPickerPopover,
+  .contextMenu,
+  .submenu,
+  .commandPaletteBackdrop,
+  .tabOrganizerBackdrop,
+  .tutorialOverlay,
+  .tutorialHighlight,
+  .tutorialCard,
+  .moreOptionBackdrop,
+  .sideNavBackdrop,
+  .findbar,
+  .settingsWindow,
+  .toast-holder,
+  .progress-toast-holder,
+  .connection-status-holder,
+  .fullWindow,
+  .lightsOffOverlay
+) {
+  -webkit-app-region: no-drag;
+}

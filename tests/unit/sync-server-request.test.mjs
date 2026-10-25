@@ -37,7 +37,7 @@ async function loadClient(env, version, requests, nativeRequest, browserRequest,
       return browserRequest ? browserRequest(options) : new Response('{}')
     },
   })
-  for (const file of ['api/capacitor-http.js', 'sync-server.js']) {
+  for (const file of ['api/capacitor-http.js', 'sync-server-client.js']) {
     const source = (await readFile(new URL(`../../src/renderer/helpers/${file}`, import.meta.url), 'utf8'))
       .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
       .replace(/^export \{[\s\S]*?\}\n/gm, '')

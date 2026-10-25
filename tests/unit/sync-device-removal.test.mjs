@@ -9,9 +9,9 @@ import { getOtherDeviceSessions, normalizeSyncSessionsDocument, removeSyncDevice
 
 const component = await readFile(new URL('../../src/renderer/components/SyncSettings/SyncAccountManagement.vue', import.meta.url), 'utf8')
 const revokeSource = component.slice(component.indexOf('function openRevokePrompt('), component.indexOf('\ndefineExpose'))
-const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
+const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server-device-actions.js', import.meta.url), 'utf8')
 const deleteStart = storeSource.indexOf('  deleteSyncServerSession(')
-const deleteSource = storeSource.slice(deleteStart, storeSource.indexOf('  async completeSyncServerPairing', deleteStart))
+const deleteSource = storeSource.slice(deleteStart, storeSource.indexOf('\n}\n', deleteStart) + 1)
 
 const tabSet = id => ({ sessionId: id, tabs: [{ id: `${id}-tab`, url: '/subscriptions' }] })
 

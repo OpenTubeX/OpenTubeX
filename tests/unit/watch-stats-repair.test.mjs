@@ -7,8 +7,9 @@ import { createWatchStatsHelpers } from '../helpers/sync-watch-stats.mjs'
 import { areJsonValuesEqual } from '../../src/renderer/helpers/jsonValues.js'
 
 const helpers = createWatchStatsHelpers()
-const storeSource = readFileSync(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
-const actionSource = storeSource.slice(storeSource.indexOf('  replaceSyncWatchStatsDevice('), storeSource.indexOf('  async completeSyncServerPairing('))
+const storeSource = readFileSync(new URL('../../src/renderer/store/modules/sync-server-device-actions.js', import.meta.url), 'utf8')
+const actionStart = storeSource.indexOf('  replaceSyncWatchStatsDevice(')
+const actionSource = storeSource.slice(actionStart, storeSource.indexOf('\n}\n', actionStart) + 1)
 
 async function fixture({ sourceChanged = false, localChanged = false, conflict = false, uploadFails = false, nested = false, rootChanged = false, resetChanged = false } = {}) {
   const key = Buffer.alloc(32, 1).toString('base64')

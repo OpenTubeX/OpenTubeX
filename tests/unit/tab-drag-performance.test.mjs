@@ -7,10 +7,14 @@ import { computeReorderOffsets } from '../../src/renderer/helpers/reorderOffsets
 import * as reorder from '../../src/renderer/components/TabBar/tabReorder.js'
 
 const component = readFileSync(new URL('../../src/renderer/components/TabBar/TabBar.vue', import.meta.url), 'utf8')
-const source = component.slice(
-  component.indexOf('// ===== Drag and drop state ====='),
-  component.indexOf('// ===== Vertical tab bar resizing =====')
-)
+const dragReorder = readFileSync(new URL('../../src/renderer/components/TabBar/useTabDragReorder.js', import.meta.url), 'utf8')
+// The constants and rect helper sit at module level, the drag state and
+// handlers inside the composable.
+const dragReorderBody = dragReorder.indexOf('\n}) {\n') + '\n}) {\n'.length
+const source = dragReorder.slice(
+  dragReorder.indexOf('const DRAG_THRESHOLD_PX'),
+  dragReorder.indexOf('/**\n * Pointer drag reordering')
+) + dragReorder.slice(dragReorderBody, dragReorder.indexOf('\n  return {\n', dragReorderBody))
 const scrollHandler = component.match(/function handleScroll\(\) \{[\s\S]*?\n\}/)[0]
 
 function createDragHarness({ vertical = false, rtl = false, count = 100, pinnedCount = 0, sourceIndex = 0 } = {}) {
@@ -51,7 +55,7 @@ function createDragHarness({ vertical = false, rtl = false, count = 100, pinnedC
     selectedTabIds: ref(new Set()), closeTooltipsSignal: ref(0),
     dropZoneRef: { value: container },
     buildStripItems: items => items,
-    clearTabSelection() {}, setTabSelection() {}, cancelScrollAnimation() {},
+    clearTabSelection() {}, setTabSelection() {}, setSelectionAnchor() {}, cancelScrollAnimation() {},
     performance: { now: () => now },
     isElectron: false,
     document: { body: { classList: { add() {}, remove() {} } } },

@@ -334,9 +334,9 @@ export async function getInvidiousChannelVideos(channelId, sortBy, continuation,
  * @param {string | undefined} sortBy
  * @param {string | undefined | null} continuation
  */
-export async function getInvidiousChannelShorts(channelId, sortBy, continuation) {
+export async function getInvidiousChannelShorts(channelId, sortBy, continuation, signal) {
   /** @type {{continuation: string?, videos: InvidiousVideoType[]}}  */
-  const response = await getInvidiousChannelTab('shorts', channelId, continuation, sortBy)
+  const response = await getInvidiousChannelTab('shorts', channelId, continuation, sortBy, signal)
 
   if (isYatteeBackend()) {
     fillYatteeVideoAuthors(response.videos, channelId, getYatteeChannelName(channelId))

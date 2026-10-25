@@ -34,8 +34,12 @@ function withoutImports (source) {
     .replace(/^export (?=(async )?(function|class|const))/gm, '')
 }
 
+const clientSource = await readFile(new URL('../../src/renderer/helpers/sync-server-client.js', import.meta.url), 'utf8')
 const helperSource = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
-const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
+const storeRunSource = await readFile(new URL('../../src/renderer/store/modules/sync-server-run.js', import.meta.url), 'utf8')
+// Action modules precede the store module, which spreads them into its actions.
+const storeSource = (await Promise.all(['sync-server-run.js', 'sync-server-device-actions.js', 'sync-server-account-actions.js', 'sync-server.js']
+  .map(file => readFile(new URL(`../../src/renderer/store/modules/${file}`, import.meta.url), 'utf8')))).join('\n')
 
 function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, locks, desktopTabs, connectionChanges, capacitor = false, backgroundJob = runBackgroundJob, settingsReader } = {}) {
   const connectionEvents = new EventTarget()
@@ -144,7 +148,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     },
   }
   const helper = vm.createContext({ ...common })
-  vm.runInContext(withoutImports(helperSource) + '\nglobalThis.exports = { SyncServerClient, syncSubscriptions, syncSettings, syncHistory, syncPlaylists, syncPlaylistBookmarks, syncSessions, normalizeSyncServerUrl };', helper)
+  vm.runInContext(withoutImports(clientSource) + withoutImports(helperSource) + '\nglobalThis.exports = { SyncServerClient, syncSubscriptions, syncSettings, syncHistory, syncPlaylists, syncPlaylistBookmarks, syncSessions, normalizeSyncServerUrl };', helper)
   const store = vm.createContext({ ...common, ...helper.exports, getSavedOtherDeviceSessions: () => [] })
   vm.runInContext(withoutImports(storeSource).replace('export default { state, getters, actions, mutations }', 'globalThis.exports = { state, actions, mutations }'), store)
   const context = {
@@ -356,8 +360,8 @@ test('an unchanged history baseline is not saved or broadcast again', async () =
 })
 
 test('repeated reads of the same sync snapshot parse it once and return independent copies', () => {
-  const start = storeSource.indexOf('let parsedSnapshot')
-  const parseSource = storeSource.slice(start, storeSource.indexOf('\nasync function clearUnsupportedWatchStats', start))
+  const start = storeRunSource.indexOf('let parsedSnapshot')
+  const parseSource = withoutImports(storeRunSource.slice(start, storeRunSource.indexOf('\nexport async function clearUnsupportedWatchStats', start)))
   let parses = 0
   const parseSnapshot = vm.runInNewContext(`${parseSource}\nparseSnapshot`, {
     JSON: { parse: value => { parses++; return JSON.parse(value) } },
