@@ -895,6 +895,7 @@ function movePageSwipe(event) {
         direction,
         offset: Math.max(-pointer.width, Math.min(pointer.width, distance)),
         width: pointer.width,
+        scrollTop: window.scrollY,
         settling: false
       }
     : null

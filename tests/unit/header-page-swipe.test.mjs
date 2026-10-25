@@ -19,7 +19,7 @@ function headerGesture(targetSelector = 'button') {
     store: { getters: { getTabs: [{ id: 'first', loadState: 'loaded' }, { id: 'second', loadState: 'loaded' }] } },
     findSwipeTab, shouldFinishPageSwipe,
     nextTick: async () => {}, capacitorTabService: { activateTab: async id => activations.push(id) },
-    window: { matchMedia: () => ({ matches: false }), setTimeout: fn => { timers.set(++sequence, fn); return sequence }, clearTimeout: id => timers.delete(id) },
+    window: { scrollY: 640, matchMedia: () => ({ matches: false }), setTimeout: fn => { timers.set(++sequence, fn); return sequence }, clearTimeout: id => timers.delete(id) },
     document: { documentElement: { dataset: { reducedMotion: 'reduce' } }, querySelector: () => ({ getBoundingClientRect: () => ({ width: 375 }) }) },
   })
   vm.runInContext(handlers, context)
@@ -38,6 +38,7 @@ for (const target of ['button', 'a', '[role="button"]']) {
     assert.deepEqual(captures, [], 'a tap must remain on the original control')
     context.movePageSwipe({ ...event, clientX: 150, timeStamp: 200 })
     assert.equal(swipe()?.toId, 'second')
+    assert.equal(swipe()?.scrollTop, 640, 'the incoming tab is offset from the shared document scroll')
     assert.deepEqual(captures, [1], 'capture only after horizontal dragging')
   })
 }
