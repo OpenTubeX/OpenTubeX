@@ -1420,6 +1420,7 @@ Settings:
       Do Nothing: Nichts tun
     Category Color: Kategoriefarbe
     Custom Color: Benutzerdefinierte Farbe
+    DeArrow Settings: DeArrow
     UseDeArrowTitles: DeArrow-Videotitel verwenden
     UseDeArrowThumbnails: DeArrow für Miniaturansichten verwenden
     'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)': DeArrow-Vorschaubild-API-URL

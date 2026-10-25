@@ -357,6 +357,14 @@ test.describe('settings', () => {
     const addOns = await goToSettingsSection(page, 'add-ons')
     const channels = addOns.locator('.ft-input-tags-component').filter({ hasText: 'Excluded Channels' })
     await expect(channels).toHaveCount(0)
+    // Excluded channels only affect SponsorBlock, so DeArrow alone keeps them hidden.
+    await page.evaluate(async () => {
+      const store = window.$store
+      await store.dispatch('updateUseDeArrowTitles', true)
+      await store.dispatch('updateUseDeArrowThumbnails', true)
+    })
+    await expect(addOns.getByRole('textbox', { name: /^SponsorBlock API URL/i })).toBeVisible()
+    await expect(channels).toHaveCount(0)
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
     expect(lookups).toBe(0)
 

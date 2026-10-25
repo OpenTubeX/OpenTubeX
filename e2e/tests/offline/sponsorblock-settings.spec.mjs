@@ -163,3 +163,24 @@ test.describe('SponsorBlock settings', () => {
     }))).toBe(true)
   })
 })
+
+test.describe('DeArrow settings', () => {
+  test.use({ seed: { settings: { currentLocale: 'en-US', useSponsorBlock: false, useDeArrowTitles: true, useDeArrowThumbnails: false } } })
+
+  test('shows DeArrow controls in their own Add-ons section', async ({ page }, testInfo) => {
+    const addOns = await goToSettingsSection(page, 'add-ons')
+    const sponsorBlock = addOns.locator('.settingsSection').filter({ has: page.locator('.sectionTitle', { hasText: /^SponsorBlock$/ }) })
+    const deArrow = addOns.locator('.settingsSection').filter({ has: page.locator('.sectionTitle', { hasText: /^DeArrow$/ }) })
+    for (const key of ['useDeArrowTitles', 'useDeArrowThumbnails']) {
+      await expect(deArrow.locator(`[data-setting-key="${key}"]`)).toHaveCount(1)
+      await expect(sponsorBlock.locator(`[data-setting-key="${key}"]`)).toHaveCount(0)
+    }
+    // Like the SponsorBlock API URL, this stays editable while its feature is off.
+    await expect(deArrow.getByLabel('DeArrow thumbnail API URL', { exact: true })).toBeVisible()
+    await expect(sponsorBlock.getByLabel('DeArrow thumbnail API URL', { exact: true })).toHaveCount(0)
+    // DeArrow titles are fetched from the SponsorBlock server.
+    await expect(sponsorBlock.getByLabel('SponsorBlock API URL', { exact: true })).toBeVisible()
+    await deArrow.scrollIntoViewIfNeeded()
+    await page.screenshot({ path: testInfo.outputPath('dearrow-section.png') })
+  })
+})

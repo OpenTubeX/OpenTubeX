@@ -220,6 +220,7 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     }
     if ([
       'Enable SponsorBlock Submission',
+      'Excluded Channels',
       'Notify when sponsor segment is skipped',
       'Skip notification timeout',
       'Skip Options',
@@ -234,9 +235,6 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     if (group === 'Reveal Generated User ID') {
       return useSponsorBlock && store.getters.getSponsorBlockEnableSubmission &&
         store.getters.getSponsorBlockGeneratedUserId !== ''
-    }
-    if (group === 'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)') {
-      return useDeArrowThumbnails
     }
   }
 

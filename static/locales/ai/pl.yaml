@@ -712,6 +712,7 @@ Settings:
   SponsorBlock Settings:
     Reveal Generated User ID: Pokaż wygenerowany identyfikator użytkownika
     Custom Color: Własny kolor
+    DeArrow Settings: DeArrow
   Password Dialog:
     Incorrect Password: Nieprawidłowe hasło
     Unlock: Odblokuj
