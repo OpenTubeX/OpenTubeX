@@ -23,8 +23,14 @@ export function normalizeLocalCaptionText(fileName, text) {
 
   return text
     .replaceAll(/\r\n?/g, '\n')
-    .replaceAll(/^[ \t]+$/gm, '')
-    .replaceAll(/^.*-->.*$/gm, line => line.replaceAll(/(\d+:\d{2})\.(\d+)/g, '$1,$2'))
+    .split('\n')
+    .map((line) => {
+      if (line.trim() === '') {
+        return ''
+      }
+      return line.includes('-->') ? line.replaceAll(/(\d+:\d{2})\.(\d+)/g, '$1,$2') : line
+    })
+    .join('\n')
 }
 
 /**
