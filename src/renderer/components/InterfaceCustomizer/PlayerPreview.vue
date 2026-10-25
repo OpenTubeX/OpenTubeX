@@ -25,13 +25,13 @@
         {{ t('Settings.Interface Customizer.Example Video Title') }}
       </div>
       <span
-        v-if="paused && displayVideoPlayButton"
+        v-if="displayVideoPlayButton"
         class="previewBigPlay"
       >
-        <PreviewIcon :path="SHAKA_PREVIEW_ICONS.PLAY" />
+        <PreviewIcon :path="paused ? SHAKA_PREVIEW_ICONS.PLAY : SHAKA_PREVIEW_ICONS.PAUSE" />
       </span>
       <div
-        v-if="state === 'menu'"
+        v-if="menuOpen"
         class="previewOverflowMenu"
       >
         <span class="previewOverflowClose">
@@ -129,7 +129,7 @@
               <span
                 v-else
                 class="previewIconButton"
-                :class="{ open: button.id === 'menu' && state === 'menu' }"
+                :class="{ open: button.id === 'menu' && menuOpen }"
                 :data-preview-control="button.id"
               >
                 <PreviewIcon :path="button.path" />
@@ -159,7 +159,7 @@ const props = defineProps({
   state: {
     type: String,
     default: 'window',
-    validator: value => ['window', 'menu', 'fullscreen', 'paused'].includes(value)
+    validator: value => ['window', 'fullscreen', 'paused'].includes(value)
   }
 })
 
@@ -174,6 +174,7 @@ PreviewIcon.props = ['path', 'viewBox']
 
 const fullscreen = computed(() => props.state === 'fullscreen' || props.state === 'paused')
 const paused = computed(() => props.state === 'paused')
+const menuOpen = computed(() => props.state === 'window')
 
 const showPlayerControlsWhenPaused = computed(() => store.getters.getShowPlayerControlsWhenPaused)
 const showVideoTitleWhenPaused = computed(() => store.getters.getShowVideoTitleWhenPaused)

@@ -187,12 +187,10 @@ onMounted(() => mobileNavigationLayout.addEventListener('change', handleMobileNa
 onBeforeUnmount(() => mobileNavigationLayout.removeEventListener('change', handleMobileNavigationLayoutChange))
 
 const tabs = computed(() => {
+  // The playing preview shows the player menu open.
   const playingMode = { id: 'window', icon: ['fas', 'play'], label: t('Settings.Interface Customizer.Playing') }
-  const menuMode = { id: 'menu', icon: ['fas', 'gear'], label: t('Settings.Interface Customizer.Player Menu') }
-  const fullscreenModes = [
-    { id: 'fullscreen', icon: ['fas', 'expand'], label: t('Settings.Interface Customizer.Fullscreen') },
-    { id: 'paused', icon: ['fas', 'pause'], label: t('Settings.Interface Customizer.Paused') },
-  ]
+  const fullscreenMode = { id: 'fullscreen', icon: ['fas', 'expand'], label: t('Settings.Interface Customizer.Fullscreen') }
+  const pausedMode = { id: 'paused', icon: ['fas', 'pause'], label: t('Settings.Interface Customizer.Paused') }
   return [
     {
       id: 'navigation',
@@ -218,7 +216,7 @@ const tabs = computed(() => {
       icon: ['fas', 'circle-play'],
       label: t('Settings.Interface Customizer.Player'),
       syncKey: null,
-      previewModes: [playingMode, menuMode, ...fullscreenModes],
+      previewModes: [playingMode, fullscreenMode, pausedMode],
     },
     {
       id: 'controlBar',
@@ -227,14 +225,14 @@ const tabs = computed(() => {
       // Each device keeps its own control bar, so this tab offers no sync toggle.
       syncKey: null,
       // Buttons removed from the control bar move into the player menu.
-      previewModes: [playingMode, menuMode],
+      previewModes: [playingMode],
     },
     {
       id: 'fullscreenActions',
       icon: ['fas', 'expand'],
       label: t('Settings.Fullscreen Actions.Title'),
       syncKey: 'fullscreenActions',
-      previewModes: fullscreenModes,
+      previewModes: [fullscreenMode],
     },
   ]
 })
