@@ -1,4 +1,4 @@
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { test, expect, goTo, setWindowSize } from '../../helpers/app.mjs'
 import { mockUnplayableWatchPage, watchHistoryEntry, watchViewHandle } from '../../helpers/watch.mjs'
 
 test.describe('description layout', () => {
@@ -151,6 +151,47 @@ test.describe('description layout', () => {
 
     await card.locator('.description').click({ position: { x: 10, y: 10 } })
     await expect(card).not.toHaveClass(/short/)
+  })
+
+  test('keeps description controls below open toolbar dropdowns', async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 1400, height: 1000 })
+    await mockUnplayableWatchPage(app, page)
+    await goTo(page, 'history')
+    // Invidious options widen the share menu and hiding Download moves it to the card edge,
+    // so the menu reaches the description's copy and "...more" controls.
+    await page.evaluate(async () => {
+      await window.$store.dispatch('updateBackendFallback', true)
+      await window.$store.dispatch('updateEnableDownloads', false)
+    })
+    await page.getByText(watchHistoryEntry.title, { exact: true }).click()
+    await expect(page.locator('.videoDescription').visible()).toBeVisible()
+    const view = await watchViewHandle(page)
+    await view.evaluate(component => {
+      component.videoDescription = Array(12).fill('A long description line.').join('\n')
+      component.videoDescriptionHtml = ''
+    })
+    await expect(page.locator('.videoDescription').visible()).toHaveClass(/short/)
+
+    await page.locator('.watchVideoInfo .shareButton').visible().click()
+    const dropdown = page.locator('.watchVideoInfo .iconDropdown').visible()
+    await expect(dropdown).toBeVisible()
+
+    for (const selector of ['.videoDescription > .descriptionStatus', '.descriptionCopyButton']) {
+      const hit = await dropdown.evaluate((menu, selector) => {
+        const menuRect = menu.getBoundingClientRect()
+        const rect = document.querySelector(selector).getBoundingClientRect()
+        const left = Math.max(rect.left, menuRect.left)
+        const right = Math.min(rect.right, menuRect.right)
+        const top = Math.max(rect.top, menuRect.top)
+        const bottom = Math.min(rect.bottom, menuRect.bottom)
+        return {
+          overlaps: right - left > 2 && bottom - top > 2,
+          coveredByMenu: menu.contains(document.elementFromPoint((left + right) / 2, (top + bottom) / 2))
+        }
+      }, selector)
+      expect(hit.overlaps, `The share menu overlaps ${selector}`).toBe(true)
+      expect(hit.coveredByMenu, `${selector} stays below the share menu`).toBe(true)
+    }
   })
 
   test('short descriptions fit their content with centered text and copy control', { tag: '@scale' }, async ({ app, page }, testInfo) => {

@@ -1,5 +1,8 @@
 .videoDescription {
   position: relative;
+
+  /* Keep the layered controls inside the card, below dropdowns from earlier cards. */
+  isolation: isolate;
   display: flex;
   flex-direction: column;
 }
