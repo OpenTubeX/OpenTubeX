@@ -447,6 +447,12 @@ const chatAvailable = computed(() => twitchChatTarget.value && !(twitchChatTarge
 const chaptersPanelOpen = computed(() => Boolean(source.value && chapters.value.length && showChapters.value))
 const hasSidebar = computed(() => Boolean(chatAvailable.value && chatOpen.value) || chaptersPanelOpen.value)
 const theatreTogglePossible = computed(() => windowWidth.value > 1350 && hasSidebar.value)
+// Like on the watch page, with theatre as the default, the first panel opened
+// on media without a sidebar appears below the video instead of beside it.
+watch(hasSidebar, (has, had) => {
+  if (has && !had && !loading.value && theatreTogglePossible.value &&
+    store.getters.getDefaultViewingMode === 'theatre') useTheatreMode.value = true
+})
 
 function handleChaptersOverlayChange(open) {
   showChapters.value = open
@@ -878,7 +884,7 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
     if (generation === loadGeneration) {
       loading.value = false
       // Like on the watch page, the theatre default only applies to media that
-      // loads with a sidebar, so panels opened later appear beside the video.
+      // loads with a sidebar until a panel opens.
       useTheatreMode.value &&= theatreTogglePossible.value
     }
   }

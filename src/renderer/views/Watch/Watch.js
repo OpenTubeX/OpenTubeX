@@ -1376,6 +1376,14 @@ export default defineComponent({
     currentLocale: 'updateUpcomingTimestamp',
     dateFormatPreference: 'updateUpcomingTimestamp',
     timeFormatPreference: 'updateUpcomingTimestamp',
+    theatrePossible(possible, wasPossible) {
+      // With theatre as the default, the first panel opened on a page without
+      // sidebar content appears below the video instead of beside it.
+      if (possible && !wasPossible && !this.isLoading && this.theatreLayoutAvailable &&
+        this.defaultViewingMode === 'theatre') {
+        this.useTheatreMode = true
+      }
+    },
     isLoading(loading) {
       if (!loading) {
         // Upcoming videos without a trailer never mount a player to report a
