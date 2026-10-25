@@ -467,6 +467,8 @@ test.describe('desktop quick playback speed bar', () => {
     const firstSpeed = bar.locator('[data-rate="1.25"]')
     const nextSpeed = bar.locator('[data-rate="1.5"]')
 
+    // During playback, Shaka hides the forced controls whenever it next recomputes their visibility.
+    await video.evaluate(element => element.pause())
     await page.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
     await firstSpeed.click()
     await expect(firstSpeed).toHaveClass(/is-current-rate/)
