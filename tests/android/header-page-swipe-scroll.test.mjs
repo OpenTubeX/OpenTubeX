@@ -129,24 +129,28 @@ test('Android header swipes reveal the next tab at its own scroll position', {
       }
     }
   } finally {
-    await touch('touchCancel').catch(() => {})
-    const close = page.locator('#capacitor-phone-tab-dialog').getByRole('button', { name: 'Close', exact: true })
-    if (await close.isVisible().catch(() => false)) await close.click()
-    if (saved) await page.evaluate(async saved => {
-      delete window.headerSwipeScrollSamples
-      for (const spacer of document.querySelectorAll('.swipeScrollSpacer')) spacer.remove()
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      for (const [key, value] of Object.entries(saved.settings)) await store.dispatch('update' + key, value)
-      store.commit('setTabsState', saved.tabs)
-      store.commit('setPresentedTab', saved.tabs.presentedTabId)
-      location.hash = saved.route
-      // An unchanged route does not navigate, so restore the viewport directly
-      // once any route change has rendered.
-      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
-      window.scrollTo({ top: saved.scrollTop, behavior: 'instant' })
-    }, saved)
-    clearInterval(keepAlive)
-    await session.detach()
-    await browser.close()
+    try {
+      await touch('touchCancel').catch(() => {})
+      const close = page.locator('#capacitor-phone-tab-dialog').getByRole('button', { name: 'Close', exact: true })
+      if (await close.isVisible().catch(() => false)) await close.click()
+      if (saved) await page.evaluate(async saved => {
+        delete window.headerSwipeScrollSamples
+        for (const spacer of document.querySelectorAll('.swipeScrollSpacer')) spacer.remove()
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        for (const [key, value] of Object.entries(saved.settings)) await store.dispatch('update' + key, value)
+        store.commit('setTabsState', saved.tabs)
+        store.commit('setPresentedTab', saved.tabs.presentedTabId)
+        location.hash = saved.route
+        // An unchanged route does not navigate, so restore the viewport directly
+        // once any route change has rendered.
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+        window.scrollTo({ top: saved.scrollTop, behavior: 'instant' })
+      }, saved)
+    } finally {
+      // A failed state restore must still release the timer and the browser.
+      clearInterval(keepAlive)
+      await session.detach().catch(() => {})
+      await browser.close()
+    }
   }
 })
